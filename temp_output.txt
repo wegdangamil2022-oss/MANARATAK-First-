@@ -1,0 +1,21 @@
+          </section>
+        )}
+
+        {contextualServices.length > 0 && (
+          <ContextualServicesStrip
+            services={contextualServices}
+            onOpenService={onOpenService}
+            title="خدمات قد تساعدك أثناء التقديم"
+            note="اقتراح سياقي فقط؛ لا يعني أن هذه الخدمات تابعة للجامعة أو معتمدة منها."
+          />
+        )}
+
+        <RelatedArticlesStrip articles={university.relatedArticles} onOpenArticle={onOpenArticle} />
+
+        <UniversityDecisionSections university={university} onOpenExam={onOpenExam} />
+      </div>
+    </div>
+  );
+};
+
+function UniversityDecisionSections({

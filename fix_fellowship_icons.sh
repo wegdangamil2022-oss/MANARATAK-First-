@@ -1,0 +1,8 @@
+#!/bin/bash
+sed -i 's/group-hover:bg-\[var(--mn-primary)\] transition-colors/group-hover:bg-[var(--mn-primary)] mn-dark:group-hover:bg-[var(--mn-accent)] transition-colors/g' apps/web/src/features/public-template/components/modal/FellowshipDetailView.tsx
+sed -i 's/w-1\.5 h-3\.5 bg-\[var(--mn-primary)\]/w-1.5 h-3.5 bg-[var(--mn-primary)] mn-dark:bg-[var(--mn-accent)]/g' apps/web/src/features/public-template/components/modal/FellowshipDetailView.tsx
+sed -i 's/w-1\.5 h-1\.5 rounded-full bg-\[var(--mn-primary)\]/w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] mn-dark:bg-[var(--mn-accent)]/g' apps/web/src/features/public-template/components/modal/FellowshipDetailView.tsx
+sed -i 's/hover:border-b-\[var(--mn-primary)\]/hover:border-b-[var(--mn-primary)] mn-dark:hover:border-b-[var(--mn-accent)]/g' apps/web/src/features/public-template/components/modal/FellowshipDetailView.tsx
+sed -i 's/hover:shadow-\[3px_3px_0px_var(--mn-primary)\]/hover:shadow-[3px_3px_0px_var(--mn-primary)] mn-dark:hover:shadow-[3px_3px_0px_var(--mn-accent)]/g' apps/web/src/features/public-template/components/modal/FellowshipDetailView.tsx
+sed -i 's/group-hover:bg-\[var(--mn-primary)\] group-hover:text-white/group-hover:bg-[var(--mn-primary)] group-hover:text-white mn-dark:group-hover:bg-[var(--mn-accent)] mn-dark:group-hover:text-[var(--mn-primary)]/g' apps/web/src/features/public-template/components/modal/FellowshipDetailView.tsx
+sed -i 's/bg-\[var(--mn-primary)\]\/80 group-hover:bg-\[var(--mn-primary)\]/bg-[var(--mn-primary)]\/80 mn-dark:bg-[var(--mn-accent)]\/80 group-hover:bg-[var(--mn-primary)] mn-dark:group-hover:bg-[var(--mn-accent)]/g' apps/web/src/features/public-template/components/modal/FellowshipDetailView.tsx

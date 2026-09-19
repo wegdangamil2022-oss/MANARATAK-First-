@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", "Noto Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #142B5F;
+  --color-secondary: #0E7C86;
+  --color-accent: #D6A43B;
+}
+
+@layer base {
+  html {
+    background: #FAF7F0;
+    color: #203442;
+    font-family: "Cairo", "Noto Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  body,
+  #root {
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  body {
+    background: #FAF7F0;
+    color: #203442;
+    font-family: inherit;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid #21A7B4;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .action-primary {
+    @apply inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-50;
+    background: #142B5F;
+  }
+  .action-primary:hover {
+    background: #0E7C86;
+  }
+  .action-secondary {
+    @apply inline-flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-bold transition;
+    border-color: #DDEFF2;
+    color: #203442;
+  }
+  .action-secondary:hover {
+    background: #FAF7F0;
+    border-color: #21A7B4;
+  }
+  .input {
+    @apply w-full rounded-xl border bg-white px-3 py-2.5 text-sm font-normal outline-none transition disabled:bg-slate-100;
+    border-color: #DDEFF2;
+    color: #203442;
+  }
+  .input:focus {
+    border-color: #21A7B4;
+    box-shadow: 0 0 0 3px rgb(33 167 180 / 0.12);
+  }
+}

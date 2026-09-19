@@ -1,0 +1,127 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+@theme {
+  --font-sans: "Cairo", "Noto Sans Arabic", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Cairo", "Noto Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #142B5F;
+  --color-secondary: #0E7C86;
+  --color-accent: #D6A43B;
+}
+
+:root {
+  color-scheme: light;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  background: #FAF7F0;
+  color: #203442;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #FAF7F0;
+  color: #203442;
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+:focus-visible {
+  outline-color: #21A7B4;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 17px;
+  }
+
+  input,
+  select,
+  textarea,
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  button,
+  [role='button'] {
+    min-height: 44px;
+  }
+
+  article {
+    border-radius: 1rem;
+  }
+}
+
+/* MNT-AUD-0114: CSP-safe dynamic progress and decorative presentation. */
+.mn-student-hero-pattern {
+  background-image: radial-gradient(circle at 20% 30%, var(--mn-accent) 0 2px, transparent 3px);
+}
+
+.mn-native-progress {
+  display: block;
+  appearance: none;
+  -webkit-appearance: none;
+  overflow: hidden;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--mn-surface-muted, #e2e8f0);
+}
+.mn-native-progress::-webkit-progress-bar {
+  border-radius: 9999px;
+  background: var(--mn-surface-muted, #e2e8f0);
+}
+.mn-native-progress::-webkit-progress-value { border-radius: 9999px; }
+.mn-native-progress::-moz-progress-bar { border-radius: 9999px; }
+.mn-native-progress-secondary::-webkit-progress-value { background: var(--mn-secondary, #0E7C86); }
+.mn-native-progress-secondary::-moz-progress-bar { background: var(--mn-secondary, #0E7C86); }
+.mn-native-progress-primary::-webkit-progress-value { background: var(--mn-primary, #142B5F); }
+.mn-native-progress-primary::-moz-progress-bar { background: var(--mn-primary, #142B5F); }
+.mn-native-progress-accent::-webkit-progress-value { background: var(--mn-accent, #D6A43B); }
+.mn-native-progress-accent::-moz-progress-bar { background: var(--mn-accent, #D6A43B); }
+.mn-native-progress-accent-on-dark { background: rgb(255 255 255 / 10%); }
+.mn-native-progress-accent-on-dark::-webkit-progress-bar { background: rgb(255 255 255 / 10%); }
+.mn-native-progress-accent-on-dark::-webkit-progress-value { background: var(--mn-accent, #D6A43B); }
+.mn-native-progress-accent-on-dark::-moz-progress-bar { background: var(--mn-accent, #D6A43B); }
+
+@keyframes swipeLeftMotion {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+.animate-swipe-line {
+  animation: swipeLeftMotion 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+

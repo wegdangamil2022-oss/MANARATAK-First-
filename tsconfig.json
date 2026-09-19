@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@manaratak/ui": ["./packages/ui/src/index.tsx"],
+      "@manaratak/shared": ["./packages/shared/src/index.ts"],
+      "@manaratak/types": ["./packages/types/src/index.ts"],
+      "@manaratak/domain": ["./preview/domain-ui.ts"]
+    }
+  },
+  "include": ["apps", "packages", "preview", "vite.config.ts"]
+}
