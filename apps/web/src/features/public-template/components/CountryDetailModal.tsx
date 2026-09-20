@@ -138,7 +138,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               className="bg-black/10 hover:bg-black/20 text-white border border-white/20 shadow-sm"
             />
           )}
-          <DetailBackButton onBack={onClose} mode="back" className="text-white hover:bg-white/10" />
+          <DetailBackButton onBack={onClose} mode="close" className="text-white hover:bg-white/10" />
         </div>
         
         {/* SVG background with matching vibrant 3-stop emerald gradient, subtle gold waves */}
@@ -277,14 +277,14 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                     onOpenUniversity(extendedUniversities[0].id);
                   }
                 }}
-                style={{ minHeight: 'unset', fontFamily: "'Cairo', sans-serif" }}
+                data-mn-design="45c440a9fe"
                 className="absolute left-0 top-0 h-6.5 px-2.5 sm:px-3 text-[10.5px] font-bold text-[var(--mn-link)] border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-surface-elevated)] transition-colors rounded-full flex items-center gap-1.5 justify-center whitespace-nowrap cursor-pointer hover:shadow-2xs active:scale-95"
               >
                 <span>عرض الكل</span>
                 <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-link)] shrink-0" />
               </button>
             </div>
-            <div className="grid grid-rows-2 grid-flow-col auto-cols-[80%] sm:auto-cols-[215px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="grid grid-rows-2 grid-flow-col auto-cols-[80%] sm:auto-cols-[215px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" data-mn-design="9856d4f1a6">
               {extendedUniversities.map((item) => (
                 <button
                   key={item.id}
@@ -332,7 +332,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                 <button
                   type="button"
                   onClick={() => onBrowseScholarships(country.id)}
-                  style={{ minHeight: 'unset', fontFamily: "'Cairo', sans-serif" }}
+                  data-mn-design="45c440a9fe"
                   className="absolute left-0 top-0 h-6.5 px-2.5 sm:px-3 text-[10.5px] font-bold text-[var(--mn-link)] border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-surface-elevated)] transition-colors rounded-full flex items-center gap-1.5 justify-center whitespace-nowrap cursor-pointer hover:shadow-2xs active:scale-95"
                 >
                   <span>عرض الكل</span>
@@ -340,7 +340,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                 </button>
               )}
             </div>
-            <div className="grid grid-rows-2 grid-flow-col auto-cols-[85%] sm:auto-cols-[260px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="grid grid-rows-2 grid-flow-col auto-cols-[85%] sm:auto-cols-[260px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" data-mn-design="9856d4f1a6">
               {extendedScholarships.map((item, index) => (
                 <button
                   key={item.id}
@@ -385,7 +385,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             <div className="relative mb-2">
               <SectionTitle icon={<BookOpen className="w-4 h-4" />} id="country-study" title="تخصصات بارزة للدراسة" subtitle="علاقة مشتقة من برامج الجامعات في الدولة" />
             </div>
-            <div className="grid grid-rows-2 grid-flow-col auto-cols-[85%] sm:auto-cols-[260px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="grid grid-rows-2 grid-flow-col auto-cols-[85%] sm:auto-cols-[260px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" data-mn-design="9856d4f1a6">
               {country.featuredMajors.map((item) => (
                 <button
                   key={item.id}
@@ -534,4 +534,3 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
     </div>
   );
 };
-

@@ -282,11 +282,11 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           
           {/* Inner button container with smooth Indigo-Turquoise gradient matching the top hero */}
           <div 
-            style={{ fontFamily: "'Cairo', sans-serif" }}
+            data-mn-design="543c901a7d"
             className="relative flex w-full items-center justify-between gap-3 rounded-[14px] bg-gradient-to-r from-[#142B5F] to-[#0E7C86] px-5 py-3 text-right"
           >
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 text-[13px] sm:text-[14px] font-extrabold text-white">
+              <div className="flex items-center gap-1.5 text-[13px] sm:text-[14px] mn-font-emphasis text-white">
                 <Sparkles className="h-4 w-4 animate-pulse text-[var(--mn-accent-text)]" />
                 <span>جرّب البحث الذكي</span>
               </div>

@@ -175,7 +175,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                     key={item.id}
                     onClick={() => setFilter(item.id)}
                     aria-pressed={isSelected}
-                    style={{ fontSize: '11px', fontFamily: 'Cairo, sans-serif' }}
+                    data-mn-design="28bfae757f"
                     className={`inline-flex shrink-0 h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-[11px] font-bold transition cursor-pointer border ${
                       isSelected
                         ? 'bg-[#142B5F] text-white border-[#D6A43B] shadow-sm ring-1 ring-[#D6A43B]/50'
@@ -183,7 +183,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                     }`}
                   >
                     <Icon className={`h-3.5 w-3.5 ${isSelected ? 'text-[#F3CE74]' : 'text-[var(--mn-text-muted)]'}`} />
-                    <span style={{ fontSize: '11px', fontFamily: 'Cairo, sans-serif' }}>{item.label}</span>
+                    <span data-mn-design="28bfae757f">{item.label}</span>
                   </button>
                 );
               })}
@@ -212,7 +212,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                       }}
                       className={`w-full rounded-2xl border p-3.5 text-right transition cursor-pointer relative overflow-hidden group ${
                         isUnread
-                          ? 'border-[#D6A43B]/50 bg-gradient-to-br from-[#FFFDF9] to-[#FBF7EE] dark:from-[#132347] dark:to-[#0f1c3a] shadow-xs'
+                          ? 'border-[var(--mn-accent)]/50 bg-gradient-to-br from-[#FFFDF9] to-[#FBF7EE] dark:from-[#132347] dark:to-[#0f1c3a] shadow-xs'
                           : 'border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] dark:bg-[#11203d]/60 hover:border-[#D6A43B]/40 shadow-xs'
                       }`}
                     >
@@ -233,21 +233,21 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
-                            <h4 style={{ fontFamily: 'Cairo, sans-serif' }} className="text-[13px] font-bold leading-snug text-[var(--mn-heading)] group-hover:text-[#142B5F] dark:group-hover:text-[#F3CE74] transition-colors">
+                            <h4 data-mn-design="88a8f9d359" className="text-[13px] font-bold leading-snug text-[var(--mn-heading)] group-hover:text-[#142B5F] dark:group-hover:text-[#F3CE74] transition-colors">
                               {notificationTitle(notification.title)}
                             </h4>
-                            <span style={{ fontFamily: 'Cairo, sans-serif' }} className="whitespace-nowrap text-[10px] font-semibold text-[var(--mn-text-muted)]">
+                            <span data-mn-design="88a8f9d359" className="whitespace-nowrap text-[10px] font-semibold text-[var(--mn-text-muted)]">
                               {notification.timestamp}
                             </span>
                           </div>
 
-                          <p style={{ fontFamily: 'Cairo, sans-serif' }} className="mt-1 text-[11.5px] leading-relaxed text-[var(--mn-text-muted)] dark:text-white/70">
+                          <p data-mn-design="88a8f9d359" className="mt-1 text-[11.5px] leading-relaxed text-[var(--mn-text-muted)] dark:text-white/70">
                             {notification.body}
                           </p>
 
                           {notification.actionType && (
                             <div className="mt-2.5 flex items-center justify-start">
-                              <span style={{ fontFamily: 'Cairo, sans-serif' }} className="inline-flex items-center gap-1 text-[11px] font-bold text-[#D6A43B] dark:text-[#F3CE74] group-hover:translate-x-[-2px] transition-transform">
+                              <span data-mn-design="88a8f9d359" className="inline-flex items-center gap-1 text-[11px] font-bold text-[#D6A43B] dark:text-[#F3CE74] group-hover:translate-x-[-2px] transition-transform">
                                 <span>عرض التفاصيل</span>
                                 <ChevronLeft className="h-3.5 w-3.5" />
                               </span>

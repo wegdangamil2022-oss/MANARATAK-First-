@@ -65,7 +65,6 @@ import {
   CareerOpportunityPreview,
 } from './types';
 import { INITIAL_MILESTONES, INITIAL_NOTIFICATIONS } from './data/personalPreviewData';
-import { MANARATAK_NATIVE_COURSES } from './data/mockData';
 import { Header } from './components/Header';
 import { SmartSearchBar } from './components/SmartSearchBar';
 import { HeroBanner } from './components/HeroBanner';
@@ -137,15 +136,17 @@ export default function App() {
     : careers;
 
   const directRouteHydrated = useRef(false);
+  const initialLocation = useRef({ pathname: window.location.pathname, search: window.location.search, hash: window.location.hash });
   const directRouteRequest = useRef('');
   useEffect(() => {
     if (directRouteHydrated.current) return;
-    const segments = window.location.pathname.split('/').filter(Boolean);
+    if (publicDataMode === 'prototype' && Object.values(publicLive.statuses).includes('loading')) return;
+    const segments = initialLocation.current.pathname.split('/').filter(Boolean);
     if (segments[0] === 'ar' || segments[0] === 'en') segments.shift();
     const [section = '', rawKey = ''] = segments;
     const key = decodeURIComponent(rawKey || '');
-    const params = new URLSearchParams(window.location.search);
-    const searchAnchor = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+    const params = new URLSearchParams(initialLocation.current.search);
+    const searchAnchor = decodeURIComponent(initialLocation.current.hash.replace(/^#/, ''));
     const searchTerm = params.get('match') || '';
     const matchesKey = (item: any) => [item?.slug, item?.publicId, item?.id, item?.toolKey].filter(Boolean).some((value) => String(value) === key);
     const finish = (patch: Parameters<typeof replaceNavigation>[0]) => {
@@ -166,8 +167,8 @@ export default function App() {
     let patch: Parameters<typeof replaceNavigation>[0] | null = null;
     if (!section) {
       const isStudyingStored = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('mn_is_studying_course') === 'true';
-      if (isStudyingStored) {
-        const scholarshipsCourse = MANARATAK_NATIVE_COURSES.find(c => c.id === 'c1') || MANARATAK_NATIVE_COURSES[0];
+      const scholarshipsCourse = publicDataMode === 'prototype' ? courses.find(c => c.id === 'c1') : undefined;
+      if (isStudyingStored && scholarshipsCourse) {
         patch = {
           activeTab: 'search',
           selectedCategory: 'courses',
@@ -1787,7 +1788,7 @@ export default function App() {
               selectedCourseTrack === 'native' || selectedCourseTrack === 'paid' ? (
                 <CourseTrackPreview
                   track={selectedCourseTrack}
-                  courses={selectedCourseTrack === 'native' ? courses : paidCourses}
+                  courses={selectedCourseTrack === 'native' ? courses.filter((course) => publicDataMode === 'api' || course.provider.includes('منارتك')) : paidCourses}
                   favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}
                   onToggleFavorite={(id) => handleToggleFavorite('course', id)}
                   onBack={goBack}
@@ -2134,12 +2135,35 @@ export default function App() {
                 </div>
               )
             )}
+        {activeTab === 'tracker' && (
+          publicDataMode === 'api' ? (
+            <LiveStudentWorkspacePage initialTab="JOURNEY" />
+          ) : (
+            <div className="w-full max-w-4xl lg:max-w-5xl mx-auto">
+              <LearnerProgressTracker
+                milestones={milestones}
+                onUpdateMilestone={(updated) => setMilestones((prev) => prev.map((m) => m.id === updated.id ? updated : m))}
+                onAddMilestone={(newM) => setMilestones((prev) => [newM, ...prev])}
+                onDeleteMilestone={(id) => setMilestones((prev) => prev.filter((m) => m.id !== id))}
+                allScholarships={scholarships}
+                courses={courses}
+                onOpenAiLetterForScholarship={() => openStudentTools('motivation-letter-generator')}
+                onOpenScholarshipDetails={(sch) => setSelectedScholarship(sch)}
+              />
+            </div>
+          )
+        )}
           </>
         )}
         </React.Suspense>
       </main>
 
       {/* Bottom Docked Navigation Bar (Always Visible) */}
+      {publicDataMode === 'prototype' && (
+        <p className="text-center text-xs text-[var(--mn-text-muted)] py-2" role="status">
+          وضع تجريبي محلي — بيانات غير إنتاجية
+        </p>
+      )}
       <BottomNavBar
         activeTab={activeTab}
         onTabChange={(tab) => tab === 'notifications' ? (publicDataMode === 'api' ? openSection('account') : setIsNotificationOpen(true)) : openSection(tab)}

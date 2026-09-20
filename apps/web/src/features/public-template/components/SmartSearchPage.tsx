@@ -106,7 +106,7 @@ export const SmartSearchPage: React.FC<SmartSearchPageProps> = ({
             {/* Standardized Section Title */}
             <div className="relative pb-1 mb-1 inline-block mt-0.5">
               <h1 
-                style={{ fontFamily: "'Cairo', sans-serif", fontSize: '15px' }}
+                data-mn-design="6cb7f3251f"
                 className="font-bold text-white inline-flex items-center justify-center gap-1.5"
               >
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/10 border border-[var(--mn-accent)]/60 flex items-center justify-center shrink-0 shadow-2xs">
@@ -117,7 +117,7 @@ export const SmartSearchPage: React.FC<SmartSearchPageProps> = ({
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[var(--mn-accent)] to-transparent" />
             </div>
             <p 
-              style={{ fontFamily: "'Cairo', sans-serif" }}
+              data-mn-design="543c901a7d"
               className="text-[10.5px] sm:text-[11px] text-white/90 font-medium max-w-md mx-auto"
             >
               اكتب ما تريد الوصول إليه بدل معرفة اسم المنحة أو الجامعة مسبقًا.
@@ -138,13 +138,13 @@ export const SmartSearchPage: React.FC<SmartSearchPageProps> = ({
                 onChange={(event) => setQuery(event.target.value)}
                 rows={2}
                 placeholder="مثال: أريد منحة ماجستير في الذكاء الاصطناعي في أوروبا ويفضل بدون IELTS"
-                style={{ fontFamily: "'Cairo', sans-serif", fontSize: '13px' }}
+                data-mn-design="732ac8ae41"
                 className="w-full resize-none rounded-xl px-3 py-2 leading-5 text-[var(--mn-heading)] placeholder:text-[var(--mn-text-muted)] outline-none"
               />
               <div className="flex items-center justify-end gap-2 px-1 pb-1">
                 <button 
                   type="submit" 
-                  style={{ fontFamily: "'Cairo', sans-serif", fontSize: '12px' }}
+                  data-mn-design="e874c16af7"
                   className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-[var(--mn-primary)] px-3 py-1.5 font-bold text-white cursor-pointer mn-inverse"
                 >
                   <WandSparkles className="w-3 h-3 text-[var(--mn-accent)]" />
@@ -241,4 +241,3 @@ export const SmartSearchPage: React.FC<SmartSearchPageProps> = ({
     </div>
   );
 };
-

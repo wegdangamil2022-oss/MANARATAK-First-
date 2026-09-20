@@ -287,7 +287,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
                 if (onSelectMajor) onSelectMajor(major);
               }}
               className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold transition-all active:scale-95 cursor-pointer font-['Cairo',sans-serif] shadow-2xs mn-inverse hover:mn-inverse "
-              style={{ fontSize: '10.5px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+              data-mn-design="26ecd1db9e"
             >
               <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
               <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
@@ -376,7 +376,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
                 if (onSelectMajor) onSelectMajor(major);
               }}
               className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold transition-all active:scale-95 cursor-pointer font-['Cairo',sans-serif] shadow-2xs mn-inverse hover:mn-inverse "
-              style={{ fontSize: '10.5px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+              data-mn-design="26ecd1db9e"
             >
               <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
               <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
@@ -474,7 +474,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
             if (onSelectMajor) onSelectMajor(major);
           }}
           className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2 py-1 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse shrink-0"
-          style={{ fontSize: '10.5px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+          data-mn-design="26ecd1db9e"
         >
           <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
           <ChevronLeft className="w-3 h-3 rotate-180 text-[var(--mn-accent-soft)]" />

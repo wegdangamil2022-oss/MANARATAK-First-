@@ -165,9 +165,6 @@ const StudentToolCard: React.FC<{
         </span>
         {onToggleFavorite && (
           <div
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
             className="shrink-0"
           >
             <FavoriteButton
@@ -212,7 +209,7 @@ const StudentToolCard: React.FC<{
           onOpen(tool);
         }}
         className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse shrink-0"
-        style={{ fontSize: '10.5px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+        data-mn-design="26ecd1db9e"
       >
         <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
         <ChevronLeft className="w-3 h-3 rotate-180 text-[var(--mn-accent-soft)]" />
@@ -544,7 +541,7 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث باسم الأداة أو الغرض..."
                 className="w-full py-2 pl-4 pr-10 bg-[var(--mn-primary)]/85 hover:bg-[var(--mn-primary-hover)] focus:bg-[var(--mn-primary)] border border-[var(--mn-accent)]/40 focus:border-[var(--mn-accent)] rounded-full text-[11px] font-bold text-white placeholder:text-white/80 placeholder:text-[11px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-inner transition-all text-center font-['Cairo',sans-serif] mn-inverse hover:mn-inverse focus:mn-inverse "
-                style={{ fontSize: '11px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+                data-mn-design="8bba664dec"
               />
               <Search className="w-3.5 h-3.5 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
               {searchQuery && (

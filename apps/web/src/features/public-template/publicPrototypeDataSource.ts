@@ -2,7 +2,7 @@
  * Explicit prototype-only adapter. This module is loaded dynamically only when
  * VITE_PUBLIC_TEMPLATE_DATA_MODE=prototype. Production/live composition never imports it.
  */
-import { INITIAL_SCHOLARSHIPS, MOCK_UNIVERSITIES, MOCK_COURSES, MOCK_MAJORS, MOCK_EXAMS, MOCK_COUNTRIES, GOLDEN_IMPORTED_COURSES } from './data/mockData';
+import { INITIAL_SCHOLARSHIPS, MOCK_UNIVERSITIES, MOCK_COURSES, MOCK_MAJORS, MOCK_EXAMS, MOCK_COUNTRIES, GOLDEN_IMPORTED_COURSES, MANARATAK_NATIVE_COURSES } from './data/mockData';
 import { GOLDEN_ARTICLES } from './data/articleData';
 import { PUBLIC_SERVICES } from './data/serviceData';
 import { STUDENT_TOOLS_PREVIEW } from './data/studentToolsData';
@@ -16,7 +16,7 @@ export function loadPublicPrototypeSnapshot(): PublicLiveLoadResult {
       majors: MOCK_MAJORS,
       countries: MOCK_COUNTRIES,
       exams: MOCK_EXAMS,
-      courses: MOCK_COURSES.filter((course) => course.isFree),
+      courses: [...MANARATAK_NATIVE_COURSES, ...MOCK_COURSES.filter((course) => course.isFree && !MANARATAK_NATIVE_COURSES.some((native) => native.id === course.id))],
       paidCourses: MOCK_COURSES.filter((course) => !course.isFree),
       importedCourses: GOLDEN_IMPORTED_COURSES,
       articles: GOLDEN_ARTICLES,

@@ -18,7 +18,6 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import type { Course } from '../types';
-import { MANARATAK_NATIVE_COURSES } from '../data/mockData';
 import { FavoriteButton } from './FavoriteButton';
 
 interface CourseTrackPreviewProps {
@@ -39,7 +38,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
   onToggleFavorite,
 }) => {
   const isNative = track === 'native';
-  const rawCourses = isNative ? MANARATAK_NATIVE_COURSES : courses;
+  const rawCourses = courses;
   const pageTitle = isNative ? 'دورات منارتك' : 'الدورات المدفوعة';
   const pageSubtitle = isNative
     ? 'برامج تدريبية وتأهيلية معتمدة لإتقان ملفات القبول، خطابات الدافع، وبناء السيرة الذاتية الأكاديمية'
@@ -199,7 +198,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث باسم الدورة، المدرب، المهارة..."
                 className="w-full py-2 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[11px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[11px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel"
-                style={{ fontSize: '11px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+                data-mn-design="8bba664dec"
               />
               <Search className="w-3.5 h-3.5 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
               {searchQuery && (
@@ -298,7 +297,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-primary)] shadow-xs mn-inverse'
                       : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:text-[var(--mn-heading)] mn-panel'
                   }`}
-                  style={{ fontFamily: 'Cairo, sans-serif' }}
+                  data-mn-design="88a8f9d359"
                 >
                   {cat}
                 </button>
@@ -354,7 +353,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {course.isFree ? (
-                      <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-emerald-600/90 text-white font-bold text-[8.5px]">
+                      <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-[var(--mn-learning-success-600)]/90 text-white font-bold text-[8.5px]">
                         مجانية
                       </span>
                     ) : (
@@ -428,7 +427,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       onSelectCourse(course);
                     }}
                     className="flex items-center gap-1.5 px-3 py-1 bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white rounded-xl text-[10.5px] font-bold active:scale-95 transition-all shadow-2xs mn-inverse cursor-pointer"
-                    style={{ fontSize: '10.5px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+                    data-mn-design="26ecd1db9e"
                   >
                     <PlayCircle className="w-3.5 h-3.5 text-[#E5B54F]" />
                     <span>متابعة الدورة</span>

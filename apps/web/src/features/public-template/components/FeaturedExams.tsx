@@ -231,6 +231,14 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
                 {EXAMS_LIST.map((exam, idx) => (
                   <div
                     key={`set1-${idx}`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={function (event) {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleExamClick(exam);
+                      }
+                    }}
                     onClick={() => handleExamClick(exam)}
                     className="flex flex-col items-center gap-1.5 w-16 sm:w-20 shrink-0 cursor-pointer group"
                   >
@@ -251,6 +259,14 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
                 {EXAMS_LIST.map((exam, idx) => (
                   <div
                     key={`set2-${idx}`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={function (event) {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleExamClick(exam);
+                      }
+                    }}
                     onClick={() => handleExamClick(exam)}
                     className="flex flex-col items-center gap-1.5 w-16 sm:w-20 shrink-0 cursor-pointer group"
                   >

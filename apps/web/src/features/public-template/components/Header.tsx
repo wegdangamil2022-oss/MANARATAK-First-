@@ -180,7 +180,7 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               onClick={() => onOpenSmartSearch?.(globalSearchQuery.trim())}
               className="shrink-0 rounded-[12px] bg-[var(--mn-primary)] border border-transparent px-3 text-white flex flex-row items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform cursor-pointer mn-inverse !h-[38px] !min-h-0 !max-h-[38px]"
-              style={{ height: '38px' }}
+              data-mn-design="56ab29fe6d"
               title={isRtl ? 'افتح البحث الذكي' : 'Open smart search'}
             >
               <Sparkles className="w-3.5 h-3.5 text-[var(--mn-accent)] shrink-0" />

@@ -13,6 +13,7 @@ import {
 export const INITIAL_SCHOLARSHIPS: Scholarship[] = [
   {
     id: 'csc-china',
+    countryReferenceId: 'china',
     title: 'منحة الحكومة الصينية (CSC)',
     titleEn: 'Chinese Government Scholarship',
     country: 'الصين',
@@ -101,6 +102,7 @@ export const INITIAL_SCHOLARSHIPS: Scholarship[] = [
   },
   {
     id: 'turkiye-burslari',
+    countryReferenceId: 'turkey',
     title: 'منحة الحكومة التركية (Turkiye Burslari)',
     titleEn: 'Türkiye Scholarships Program',
     country: 'تركيا',
@@ -136,6 +138,7 @@ export const INITIAL_SCHOLARSHIPS: Scholarship[] = [
   },
   {
     id: 'chevening-uk',
+    countryReferenceId: 'uk',
     title: 'منحة تشيفنينغ البريطانية',
     titleEn: 'Chevening UK Government Scholarship',
     country: 'المملكة المتحدة',
@@ -169,6 +172,7 @@ export const INITIAL_SCHOLARSHIPS: Scholarship[] = [
   },
   {
     id: 'daad-germany',
+    countryReferenceId: 'germany',
     title: 'منحة الهيئة الألمانية للتبادل الأكاديمي (DAAD)',
     titleEn: 'DAAD Scholarships Germany',
     country: 'ألمانيا',

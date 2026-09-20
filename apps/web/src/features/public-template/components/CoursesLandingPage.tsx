@@ -109,7 +109,7 @@ function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta
           <button
             type="button"
             className="w-full bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white rounded-xl py-2 px-3.5 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer shadow-2xs mn-inverse hover:mn-inverse group/btn"
-            style={{ fontSize: '11px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+            data-mn-design="8bba664dec"
           >
             <span>{cta}</span>
             <ChevronLeft className="w-3.5 h-3.5 text-white/90 group-hover/btn:-translate-x-1 transition-transform" />
@@ -207,7 +207,7 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
             </div>
 
             <div className="space-y-1 sm:space-y-1.5 flex-1 text-center sm:text-right">
-              <h1 className="text-lg sm:text-xl font-extrabold text-white leading-tight font-['Cairo',sans-serif] tracking-tight">
+              <h1 className="text-lg sm:text-xl mn-font-emphasis text-white leading-tight font-['Cairo',sans-serif] tracking-tight">
                 دليل <span className="text-[var(--mn-accent-text)]">الدورات والبرامج التدريبية</span>
               </h1>
               <p className="text-[11.5px] sm:text-[12px] leading-relaxed text-white/90 font-medium max-w-xl font-['Cairo',sans-serif]">
@@ -295,4 +295,3 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
     </div>
   );
 }
-

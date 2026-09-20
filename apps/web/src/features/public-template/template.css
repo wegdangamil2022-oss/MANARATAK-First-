@@ -177,6 +177,19 @@
    Values change by theme; components consume roles, not legacy colors.
    ======================================================== */
 .manaratak-public {
+  --mn-learning-success-500: oklch(69.6% 0.17 162.48);
+  --mn-learning-success-800: oklch(43.2% 0.095 166.913);
+  --mn-learning-success-300: oklch(84.5% 0.143 164.978);
+  --mn-learning-success-700: oklch(50.8% 0.118 165.612);
+  --mn-learning-success-400: oklch(76.5% 0.177 163.223);
+  --mn-learning-success-600: oklch(59.6% 0.145 163.225);
+  --mn-learning-resource-500: oklch(62.3% 0.214 259.815);
+  --mn-learning-resource-400: oklch(70.7% 0.165 254.624);
+  --mn-learning-success-50: oklch(97.9% 0.021 166.113);
+  --mn-learning-success-950: oklch(26.2% 0.051 172.552);
+  --mn-learning-success-900: oklch(37.8% 0.077 168.94);
+  --mn-learning-exercise-600: oklch(51.1% 0.262 276.966);
+  --mn-learning-exercise-800: oklch(39.8% 0.195 277.366);
   color-scheme: light;
   --mn-success-soft: #e3f2eb;
   --mn-success-text: #17613f;
@@ -221,6 +234,7 @@
   --mn-theme-accent-text: #785315;
   --mn-accent-text: var(--mn-theme-accent-text);
   --mn-border: #e1e5e8;
+  --mn-border-strong: var(--mn-border-brand);
   --mn-border-brand: rgb(14 124 134 / 28%);
   --mn-focus: rgb(214 164 59 / 42%);
   --mn-on-primary: #ffffff;
@@ -249,7 +263,7 @@
   --mn-info-border: #497c91;
   --mn-link: #83cbd2;
   --mn-digital-text: #83cbd2;
-  --mn-hero-secondary: #0e6470;
+  --mn-hero-secondary: #0e6370;
   --mn-section-line: var(--mn-accent);
   --mn-gold-surface: #343529;
   --mn-border-gold: rgb(242 205 120 / 38%);
@@ -712,3 +726,32 @@
 .mn-anim-14-delay-9 { animation-duration: 14s; animation-delay: -9s; }
 .mn-anim-15-delay-7 { animation-duration: 15s; animation-delay: -7s; }
 .mn-anim-16-delay-5 { animation-duration: 16s; animation-delay: -5s; }
+
+/* Imported design declarations remain in the stylesheet for strict CSP. */
+@utility mn-font-title { font-weight: 900; }
+@utility mn-font-emphasis { font-weight: 800; }
+.manaratak-public .mn-detail-section-title.mn-imported-detail-title { font-size: 13px; }
+.manaratak-public [data-mn-design="26ecd1db9e"] { font-size: 10.5px; font-weight: bold; font-family: Cairo, sans-serif; }
+.manaratak-public [data-mn-design="8bba664dec"] { font-size: 11px; font-weight: bold; font-family: Cairo, sans-serif; }
+.manaratak-public [data-mn-design="cd18739893"] { font-size: 12px; font-weight: bold; font-family: Cairo, sans-serif; }
+.manaratak-public [data-mn-design="45c440a9fe"] { min-height: unset; font-family: 'Cairo', sans-serif; }
+.manaratak-public [data-mn-design="9856d4f1a6"] { scrollbar-width: none; -ms-overflow-style: none; }
+.manaratak-public [data-mn-design="346df39503"] { font-size: 13px; font-family: 'Cairo', sans-serif; }
+.manaratak-public [data-mn-design="392c68093a"] { width: 12%; }
+.manaratak-public [data-mn-design="88a8f9d359"] { font-family: Cairo, sans-serif; }
+.manaratak-public [data-mn-design="023f1723a7"] { font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; }
+.manaratak-public [data-mn-design="543c901a7d"] { font-family: 'Cairo', sans-serif; }
+.manaratak-public [data-mn-design="56ab29fe6d"] { height: 38px; }
+.manaratak-public [data-mn-design="827f35e03a"] { font-size: 15px; }
+.manaratak-public [data-mn-design="28bfae757f"] { font-size: 11px; font-family: Cairo, sans-serif; }
+.manaratak-public [data-mn-design="98e8ac3671"] { font-size: 10.5px; font-weight: bold; }
+.manaratak-public [data-mn-design="efc9da21fc"] { font-size: 13px; font-family: Cairo, sans-serif; font-weight: bold; }
+.manaratak-public [data-mn-design="55f5605788"] { font-size: 11px; }
+.manaratak-public [data-mn-design="a050cea8a2"] { font-size: 9px; }
+.manaratak-public [data-mn-design="6cb7f3251f"] { font-family: 'Cairo', sans-serif; font-size: 15px; }
+.manaratak-public [data-mn-design="732ac8ae41"] { font-family: 'Cairo', sans-serif; font-size: 13px; }
+.manaratak-public [data-mn-design="e874c16af7"] { font-family: 'Cairo', sans-serif; font-size: 12px; }
+.manaratak-public [data-mn-design="4df103579c"] { font-size: 14px; font-family: Cairo, sans-serif; }
+.manaratak-public [data-mn-design="01abfae3c9"] { font-size: 14px; font-family: Cairo, sans-serif; color: #ffffff; }
+.manaratak-public [data-mn-design="3b7dc7a9b0"] { font-size: 12px; font-family: Cairo, sans-serif; }
+.manaratak-public [data-mn-design="8f05af8d3a"] { font-size: 18px; }

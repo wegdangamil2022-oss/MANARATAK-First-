@@ -204,7 +204,7 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث باسم التخصص، الكلية، الوظيفة..."
                 className="w-full py-2 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[11px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[11px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
-                style={{ fontSize: '11px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+                data-mn-design="8bba664dec"
               />
               <Search className="w-3.5 h-3.5 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
               {searchQuery && (

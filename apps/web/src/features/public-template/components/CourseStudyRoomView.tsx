@@ -105,7 +105,7 @@ function RequirementHeaderCard({
 
         {/* Title and Category Below: Full Horizontal Span */}
         <div className="flex flex-col text-right min-w-0 flex-1 space-y-1">
-          <h3 className="text-[13px] font-black text-white leading-snug drop-shadow-sm break-words">
+          <h3 className="text-[13px] mn-font-title text-white leading-snug drop-shadow-sm break-words">
             {title}
           </h3>
 
@@ -955,8 +955,8 @@ function GovernoratesSeatsAccordion() {
                         {gov.masterTotal} ماجستير
                       </span>
                       <span className="text-[var(--mn-border)] font-normal">|</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/20 text-[11.5px]">
-                        <Stethoscope className="w-3 h-3 shrink-0 text-emerald-700 dark:text-emerald-400" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--mn-learning-success-500)]/10 text-[var(--mn-learning-success-800)] dark:text-[var(--mn-learning-success-300)] font-bold border border-[var(--mn-learning-success-500)]/20 text-[11.5px]">
+                        <Stethoscope className="w-3 h-3 shrink-0 text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-400)]" />
                         {gov.medicineTotal} طب
                       </span>
                     </div>
@@ -980,7 +980,7 @@ function GovernoratesSeatsAccordion() {
                     
                     {/* Medical clarification note */}
                     <div className="flex items-center gap-2 text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78] bg-[#142B5F]/5 dark:bg-[#F2CD78]/5 border border-[#142B5F]/20 dark:border-[#F2CD78]/30 px-3 py-2 rounded-lg mt-1.5">
-                      <Stethoscope className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      <Stethoscope className="w-3.5 h-3.5 shrink-0 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)]" />
                       <span>
                         مقاعد الطب البشري ({gov.medicineTotal}) محسوبة أصلًا ضمن مقاعد البكالوريوس الـ ({gov.bachelorTotal})، وليست مقاعد إضافية.
                       </span>
@@ -1050,8 +1050,8 @@ function GovernoratesSeatsAccordion() {
 
                       {/* Medicine Box */}
                       <div className="p-3 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] space-y-2">
-                        <h6 className="text-[12px] font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 font-['Cairo',sans-serif]">
-                          <Stethoscope className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <h6 className="text-[12px] font-bold text-[var(--mn-learning-success-800)] dark:text-[var(--mn-learning-success-300)] flex items-center gap-1.5 font-['Cairo',sans-serif]">
+                          <Stethoscope className="w-3.5 h-3.5 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)]" />
                           توزيع الطب البشري ({gov.medicineTotal} {gov.medicineTotal === 1 ? 'مقعد' : gov.medicineTotal === 2 ? 'مقعدان' : 'مقاعد'}):
                         </h6>
                         {gov.medicineDistribution.length > 0 ? (
@@ -1059,7 +1059,7 @@ function GovernoratesSeatsAccordion() {
                             {gov.medicineDistribution.map((med, idx) => (
                               <span
                                 key={idx}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 text-[11.5px] font-bold font-['Cairo',sans-serif]"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--mn-learning-success-500)]/10 text-[var(--mn-learning-success-800)] dark:text-[var(--mn-learning-success-300)] border border-[var(--mn-learning-success-500)]/20 text-[11.5px] font-bold font-['Cairo',sans-serif]"
                               >
                                 <span>{med.country}:</span>
                                 <span className="font-mono">{med.count}</span>
@@ -1206,11 +1206,11 @@ export function CourseStudyRoomView({
       case 'video':
         return <Play className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] fill-[#D6A43B] dark:fill-[#E5B54F] rotate-180" />;
       case 'summary':
-        return <FileText className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />;
+        return <FileText className="w-3.5 h-3.5 text-[var(--mn-learning-resource-500)] dark:text-[var(--mn-learning-resource-400)]" />;
       case 'attachment':
         return <Paperclip className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />;
       case 'quiz':
-        return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />;
+        return <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-learning-success-500)] dark:text-[var(--mn-learning-success-400)]" />;
       case 'practice':
         return <BookOpen className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />;
     }
@@ -1284,7 +1284,7 @@ export function CourseStudyRoomView({
               type="button"
               onClick={() => setActiveItemId('')}
               className="flex items-center gap-1.5 text-[13px] font-bold text-white hover:text-[#D6A43B] transition-all bg-white/10 hover:bg-white/15 px-2.5 py-1 rounded-md border border-white/10 cursor-pointer font-['Cairo',sans-serif]"
-              style={{ fontSize: '13px', fontFamily: "'Cairo', sans-serif" }}
+              data-mn-design="346df39503"
             >
               <ArrowRight className="w-3.5 h-3.5 shrink-0" />
               <span className="leading-none">العودة لقائمة المحاضرات</span>
@@ -1295,8 +1295,8 @@ export function CourseStudyRoomView({
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[8.5px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 font-['Cairo',sans-serif]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--mn-learning-success-400)] animate-pulse" />
+              <span className="text-[8.5px] font-bold text-[var(--mn-learning-success-400)] bg-[var(--mn-learning-success-500)]/10 px-1.5 py-0.5 rounded border border-[var(--mn-learning-success-500)]/20 font-['Cairo',sans-serif]">
                 مكتمل: {completedLessonsInLecture}/{totalLessonsInLecture}
               </span>
             </div>
@@ -1314,13 +1314,21 @@ export function CourseStudyRoomView({
                 <button
                   type="button"
                   onClick={() => setUploadedVideoUrl('')}
-                  className="absolute top-4 left-4 bg-red-600 hover:bg-red-700 text-white font-extrabold text-[10px] px-3.5 py-1.5 rounded-full shadow-md cursor-pointer transition-all hover:scale-105 active:scale-95 z-10"
+                  className="absolute top-4 left-4 bg-red-600 hover:bg-red-700 text-white mn-font-emphasis text-[10px] px-3.5 py-1.5 rounded-full shadow-md cursor-pointer transition-all hover:scale-105 active:scale-95 z-10"
                 >
                   إزالة مقطع الفيديو المرفق
                 </button>
               </div>
             ) : (
               <div 
+                role="button"
+                tabIndex={0}
+                onKeyDown={function (event) {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute inset-0 bg-gradient-to-br from-[#142B5F] to-[#1E3B7D] flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none group"
               >
@@ -1330,7 +1338,7 @@ export function CourseStudyRoomView({
                     <Play className="w-5 h-5 text-[#142B5F] fill-[#142B5F] rotate-180 translate-x-[1px]" />
                   </div>
                 </div>
-                <h3 className="text-white text-sm sm:text-base font-black mb-1">
+                <h3 className="text-white text-sm sm:text-base mn-font-title mb-1">
                   اضغط لتشغيل video المحاضرة بالكامل
                 </h3>
                 <p className="text-white/60 text-[10.5px] max-w-sm leading-relaxed">
@@ -1593,7 +1601,7 @@ export function CourseStudyRoomView({
                 <div className="w-7 h-7 rounded-xl bg-[#0E7C86]/10 dark:bg-[#0E7C86]/20 border border-[#0E7C86]/25 flex items-center justify-center shrink-0">
                   <ArrowRightLeft className="w-4 h-4 text-[#0E7C86] dark:text-[#2DD4BF]" />
                 </div>
-                <h3 className="text-sm sm:text-base font-black text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
+                <h3 className="text-sm sm:text-base mn-font-title text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
                   علاقة القبول الجامعي بالمنحة الدراسية
                 </h3>
               </div>
@@ -1724,7 +1732,7 @@ export function CourseStudyRoomView({
                 <div className="w-7 h-7 rounded-xl bg-[#0E7C86]/10 dark:bg-[#0E7C86]/20 border border-[#0E7C86]/25 flex items-center justify-center shrink-0">
                   <Award className="w-4 h-4 text-[#0E7C86] dark:text-[#2DD4BF]" />
                 </div>
-                <h3 className="text-sm sm:text-base font-black text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
+                <h3 className="text-sm sm:text-base mn-font-title text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
                   علاقة المنح الدراسية بالقبول الجامعي
                 </h3>
               </div>
@@ -1882,7 +1890,7 @@ export function CourseStudyRoomView({
                 <div className="w-7 h-7 rounded-xl bg-[#0E7C86]/10 dark:bg-[#0E7C86]/20 border border-[#0E7C86]/25 flex items-center justify-center shrink-0">
                   <BellRing className="w-4 h-4 text-[#0E7C86] dark:text-[#2DD4BF]" />
                 </div>
-                <h3 className="text-sm sm:text-base font-black text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
+                <h3 className="text-sm sm:text-base mn-font-title text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
                   انتبه عند وصول نتيجة طلبك: ماذا تعني هذه الكلمات؟
                 </h3>
               </div>
@@ -2023,7 +2031,7 @@ export function CourseStudyRoomView({
                 <div className="w-7 h-7 rounded-xl bg-[#D6A43B]/20 border border-[#D6A43B]/40 flex items-center justify-center shrink-0">
                   <Sparkles className="w-4 h-4 text-[#D6A43B]" />
                 </div>
-                <h4 className="text-[13.5px] sm:text-[14px] font-black text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
+                <h4 className="text-[13.5px] sm:text-[14px] mn-font-title text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
                   الخلاصة الجوهرية
                 </h4>
               </div>
@@ -2044,7 +2052,7 @@ export function CourseStudyRoomView({
                 <div className="w-7 h-7 rounded-xl bg-[#0E7C86]/10 dark:bg-[#0E7C86]/20 border border-[#0E7C86]/25 flex items-center justify-center shrink-0">
                   <BookOpen className="w-4 h-4 text-[#0E7C86] dark:text-[#2DD4BF]" />
                 </div>
-                <h3 className="text-sm sm:text-base font-black text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
+                <h3 className="text-sm sm:text-base mn-font-title text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
                   تمويل المنحة الدراسية
                 </h3>
               </div>
@@ -2196,7 +2204,7 @@ export function CourseStudyRoomView({
                 <div className="w-7 h-7 rounded-xl bg-[#0E7C86]/10 dark:bg-[#0E7C86]/20 border border-[#0E7C86]/25 flex items-center justify-center shrink-0">
                   <Star className="w-4 h-4 text-[#0E7C86] dark:text-[#2DD4BF]" />
                 </div>
-                <h3 className="text-sm sm:text-base font-black text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
+                <h3 className="text-sm sm:text-base mn-font-title text-[#142B5F] dark:text-[#F0F4F8] font-['Cairo',sans-serif]">
                   أمثلة عملية واقعية
                 </h3>
               </div>
@@ -2235,7 +2243,7 @@ export function CourseStudyRoomView({
                     
                     <div className="relative z-10 flex flex-col h-full">
                       <div className="flex items-center gap-3 mb-2.5">
-                        <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F]/10 dark:bg-[#7EB6FF]/10 text-[#142B5F] dark:text-[#7EB6FF] flex items-center justify-center font-black text-[13px] border border-[#142B5F]/20">
+                        <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F]/10 dark:bg-[#7EB6FF]/10 text-[#142B5F] dark:text-[#7EB6FF] flex items-center justify-center mn-font-title text-[13px] border border-[#142B5F]/20">
                           {i + 1}
                         </div>
                         <h5 className="text-[13px] sm:text-[14px] font-bold text-[#142B5F] dark:text-[#F0F4F8] leading-snug">
@@ -2284,7 +2292,7 @@ export function CourseStudyRoomView({
                     
                     <div className="relative z-10 flex flex-col h-full">
                       <div className="flex items-center gap-3 mb-2.5">
-                        <div className="w-8 h-8 shrink-0 rounded-xl bg-[#0E7C86]/10 dark:bg-[#2DD4BF]/10 text-[#0E7C86] dark:text-[#2DD4BF] flex items-center justify-center font-black text-[13px] border border-[#0E7C86]/20">
+                        <div className="w-8 h-8 shrink-0 rounded-xl bg-[#0E7C86]/10 dark:bg-[#2DD4BF]/10 text-[#0E7C86] dark:text-[#2DD4BF] flex items-center justify-center mn-font-title text-[13px] border border-[#0E7C86]/20">
                           {i + 1}
                         </div>
                         <h5 className="text-[13px] sm:text-[14px] font-bold text-[#142B5F] dark:text-[#F0F4F8] leading-snug">
@@ -2405,12 +2413,12 @@ export function CourseStudyRoomView({
                 {/* Status Indicator */}
                 <div className={`p-2.5 rounded-lg text-[11.5px] font-bold font-['Cairo',sans-serif] flex items-center gap-2 border ${
                   checkGradYear === '2026' || checkGradYear === '2025'
-                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                    ? 'bg-[var(--mn-learning-success-500)]/10 text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] border-[var(--mn-learning-success-500)]/30'
                     : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30'
                 }`}>
                   {checkGradYear === '2026' || checkGradYear === '2025' ? (
                     <>
-                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)]" />
                       <span>أنت مؤهل! خريجو سنة {checkGradYear} هم ضمن أحدث دفعتين مقبولتين للمفاضلة العامة ✨</span>
                     </>
                   ) : (
@@ -2637,7 +2645,7 @@ export function CourseStudyRoomView({
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 py-2 text-[12px] sm:text-[13px] font-bold text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif]">
                 <div className="bg-[var(--mn-page)] px-4 py-2 rounded-lg border border-[#142B5F]/20 dark:border-[#F2CD78]/25 shadow-sm">30% من معدل الثانوية</div>
-                <span className="text-[#D6A43B] font-black text-lg">+</span>
+                <span className="text-[#D6A43B] mn-font-title text-lg">+</span>
                 <div className="bg-[var(--mn-page)] px-4 py-2 rounded-lg border border-[#142B5F]/20 dark:border-[#F2CD78]/25 shadow-sm">70% من امتحان المفاضلة</div>
               </div>
 
@@ -2730,7 +2738,7 @@ export function CourseStudyRoomView({
                   <div className="text-right flex items-center gap-3">
                     <div>
                       <span className="text-[10px] font-bold text-[var(--mn-text-muted)] block font-['Cairo',sans-serif]">النتيجة النهائية المركبة:</span>
-                      <div className="text-[18px] font-black text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif] leading-tight">
+                      <div className="text-[18px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif] leading-tight">
                         {(calcHsGrade * 0.3 + calcExamGrade * 0.7).toFixed(1)}%
                       </div>
                     </div>
@@ -2739,8 +2747,10 @@ export function CourseStudyRoomView({
                   {/* Visual Progress Ratio */}
                   <div className="w-full sm:w-48 space-y-0.5">
                     <div className="h-2.5 w-full bg-[var(--mn-page)] rounded-full overflow-hidden border border-[var(--mn-border)] flex shadow-inner">
-                      <div style={{ width: `${(calcHsGrade * 0.3).toFixed(1)}%` }} className="bg-[#142B5F] dark:bg-[#F2CD78] h-full transition-all duration-300" title="30% الثانوية" />
-                      <div style={{ width: `${(calcExamGrade * 0.7).toFixed(1)}%` }} className="bg-[#0E7C86] dark:bg-[#21A7B4] h-full transition-all duration-300" title="70% الامتحان" />
+                      <svg className="w-full h-full" viewBox="0 0 100 1" preserveAspectRatio="none" role="img" aria-label={`الثانوية ${(calcHsGrade * 0.3).toFixed(1)}% والاختبار ${(calcExamGrade * 0.7).toFixed(1)}%`}>
+                        <rect x={100 - Number((calcHsGrade * 0.3).toFixed(1))} width={(calcHsGrade * 0.3).toFixed(1)} height="1" className="fill-[#142B5F] dark:fill-[#F2CD78] transition-all duration-300"><title>30% الثانوية</title></rect>
+                        <rect x={100 - Number((calcHsGrade * 0.3).toFixed(1)) - Number((calcExamGrade * 0.7).toFixed(1))} width={(calcExamGrade * 0.7).toFixed(1)} height="1" className="fill-[#0E7C86] dark:fill-[#21A7B4] transition-all duration-300"><title>70% الامتحان</title></rect>
+                      </svg>
                     </div>
                     <div className="flex items-center justify-between text-[9.5px] text-[var(--mn-text-muted)] font-bold font-['Cairo',sans-serif]">
                       <span>ثانوية ({(calcHsGrade * 0.3).toFixed(1)}%)</span>
@@ -2819,7 +2829,7 @@ export function CourseStudyRoomView({
               <div className="absolute top-0 right-0 w-[3px] h-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86] dark:from-[#21A7B4] dark:to-[#0E7C86]"></div>
               <div className="flex items-center gap-2 pr-2">
                 <HelpCircle className="w-4 h-4 text-[#142B5F] dark:text-[#F2CD78]" />
-                <h5 className="text-[12.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                <h5 className="text-[12.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                   ماذا عن السنوات التي يوجد فيها اختبار مفاضلة؟
                 </h5>
               </div>
@@ -2835,7 +2845,7 @@ export function CourseStudyRoomView({
             <div className="relative overflow-hidden p-3.5 bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 rounded-xl space-y-1.5 shadow-2xs w-full">
               <div className="absolute top-0 right-0 w-[3px] h-full bg-gradient-to-b from-[#142B5F] to-[#0E7C86] dark:from-[#21A7B4] dark:to-[#0E7C86]"></div>
               <div className="pr-2 space-y-1">
-                <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                   الخلاصة:
                 </span>
                 <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -2850,7 +2860,7 @@ export function CourseStudyRoomView({
               <div className="pr-2 space-y-1">
                 <div className="flex items-center gap-1.5">
                   <Info className="w-4 h-4 text-[#0E7C86] dark:text-[#21A7B4] shrink-0" />
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#21A7B4] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#21A7B4] block">
                     ملاحظة:
                   </span>
                 </div>
@@ -2930,15 +2940,15 @@ export function CourseStudyRoomView({
               </span>
               <ul className="space-y-2 text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text)]">
                 <li className="flex items-start gap-2">
-                  <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black">•</span>
+                  <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title">•</span>
                   <span><strong className="text-[#142B5F] dark:text-[#F2CD78]">البكالوريوس:</strong> قد توجد مفاضلة واختبار بحسب نظام الدورة.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black">•</span>
+                  <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title">•</span>
                   <span><strong className="text-[#142B5F] dark:text-[#F2CD78]">الماجستير:</strong> لا يوجد اختبار؛ المفاضلة تكون أكاديمية، ويُعتمد عادة على معدل البكالوريوس عند فتح المنافسة العامة.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black">•</span>
+                  <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title">•</span>
                   <span><strong className="text-[#142B5F] dark:text-[#F2CD78]">الدكتوراه:</strong> لا يوجد اختبار؛ وتعتمد المفاضلة على البكالوريوس والماجستير وفق المعادلة التي تعلنها الوزارة.</span>
                 </li>
               </ul>
@@ -3157,9 +3167,9 @@ export function CourseStudyRoomView({
                     </div>
 
                     <div className="p-3 space-y-2 text-[11.5px] font-bold">
-                      <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-800 dark:text-emerald-300 space-y-1">
+                      <div className="p-3 bg-[var(--mn-learning-success-500)]/10 border border-[var(--mn-learning-success-500)]/20 rounded-lg text-[var(--mn-learning-success-800)] dark:text-[var(--mn-learning-success-300)] space-y-1">
                         <div className="flex items-center gap-1.5 font-bold">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] shrink-0" />
                           <span>جميع الوحدات داخلة في الامتحان (1 إلى 6)</span>
                         </div>
                         <p className="text-[11px] font-normal text-[var(--mn-text-muted)] pt-0.5">
@@ -4307,15 +4317,15 @@ export function CourseStudyRoomView({
                   </p>
                   <div className="bg-[var(--mn-page)] rounded-lg p-2.5 sm:p-3 border border-[var(--mn-border)] font-bold shadow-xs inline-flex flex-wrap items-center justify-center sm:justify-start gap-y-2 gap-x-1.5 w-full text-center">
                     <span className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78]">الفوز في المفاضلة</span>
-                    <span className="text-[#D6A43B] text-base mx-0.5">←</span>
+                    <ArrowLeft className="text-[#D6A43B] w-4 h-4 mx-0.5 shrink-0" aria-hidden="true" />
                     <span className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78]">الترشيح</span>
-                    <span className="text-[#D6A43B] text-base mx-0.5">←</span>
+                    <ArrowLeft className="text-[#D6A43B] w-4 h-4 mx-0.5 shrink-0" aria-hidden="true" />
                     <span className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78]">قبول الجامعة أو الدولة</span>
-                    <span className="text-[#D6A43B] text-base mx-0.5">←</span>
+                    <ArrowLeft className="text-[#D6A43B] w-4 h-4 mx-0.5 shrink-0" aria-hidden="true" />
                     <span className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78]">استكمال الإيفاد والتأشيرة</span>
-                    <span className="text-[#D6A43B] text-base mx-0.5">←</span>
+                    <ArrowLeft className="text-[#D6A43B] w-4 h-4 mx-0.5 shrink-0" aria-hidden="true" />
                     <span className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78]">السفر</span>
-                    <span className="text-[#D6A43B] text-base mx-0.5">←</span>
+                    <ArrowLeft className="text-[#D6A43B] w-4 h-4 mx-0.5 shrink-0" aria-hidden="true" />
                     <span className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78]">التسجيل والدراسة</span>
                   </div>
                 </div>
@@ -4344,7 +4354,7 @@ export function CourseStudyRoomView({
                 <BookOpen className="w-4 h-4 text-[#D6A43B]" />
               </div>
               <div>
-                <h4 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif]">
+                <h4 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif]">
                   مقدمة القسم
                 </h4>
                 <p className="text-[11.5px] font-bold text-[var(--mn-text-muted)]">
@@ -4407,7 +4417,7 @@ export function CourseStudyRoomView({
                   <div className="w-5 h-5 rounded-md bg-[#D6A43B]/15 dark:bg-[#F2CD78]/15 text-[#D6A43B] dark:text-[#F2CD78] flex items-center justify-center shrink-0">
                     <Sparkles className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[12px] font-extrabold font-['Cairo',sans-serif]">
+                  <span className="text-[12px] mn-font-emphasis font-['Cairo',sans-serif]">
                     لذلك سنقسم المتطلبات إلى ثلاث فئات:
                   </span>
                 </div>
@@ -4459,7 +4469,7 @@ export function CourseStudyRoomView({
                           <div className="w-5.5 h-5.5 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                             <IconComp className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                           </div>
-                          <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                          <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                             {cat.title}
                           </h5>
                         </div>
@@ -4471,7 +4481,7 @@ export function CourseStudyRoomView({
 
                         {/* Examples Box / Row with clean separation */}
                         <div className="mt-1 flex items-baseline gap-1.5 text-[10.5px] leading-[1.75] bg-[var(--mn-surface-muted)]/50 dark:bg-white/[0.03] border border-[var(--mn-border)]/60 rounded-md px-2.5 py-1">
-                          <span className="font-extrabold text-[#142B5F] dark:text-[#F2CD78] shrink-0">
+                          <span className="mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] shrink-0">
                             {cat.exampleLabel}
                           </span>
                           <span className="font-bold text-[var(--mn-text)] text-justify">
@@ -4490,7 +4500,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1 text-right">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة التي يجب أن تتذكرها:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -4706,7 +4716,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Info className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       ملاحظة مهمة:
                     </h5>
                   </div>
@@ -4725,12 +4735,12 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-lg bg-[#142B5F]/10 dark:bg-[#142B5F]/35 text-[#142B5F] dark:text-[#93C5FD] flex items-center justify-center shrink-0">
                       <AlertCircle className="w-4 h-4 text-[#142B5F] dark:text-[#93C5FD]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF]">
                       أهم نقطة: تطابق البيانات حرفيًا مع الجواز
                     </h5>
                   </div>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify pr-0.5">
-                    يجب أن تكون بيانات الطالب في جميع الوثائق مطابقة للجواز حرفيًا، خصوصًا الاسم باللغة الإنجليزية وتاريخ الميلاد ومكان الميلاد. فإذا كان الاسم في الجواز مثلًا <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black underline decoration-[#0E7C86]/40 underline-offset-2">AHMED</span> فلا يُكتب في طلب المنحة أو الشهادات المترجمة <span className="text-rose-600 dark:text-rose-400 font-black line-through">AHMAD</span>. اختلاف حرف واحد قد يؤدي إلى عدم تطابق البيانات ويسبب مشكلات في القبول أو التأشيرة أو تذكرة السفر.
+                    يجب أن تكون بيانات الطالب في جميع الوثائق مطابقة للجواز حرفيًا، خصوصًا الاسم باللغة الإنجليزية وتاريخ الميلاد ومكان الميلاد. فإذا كان الاسم في الجواز مثلًا <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title underline decoration-[#0E7C86]/40 underline-offset-2">AHMED</span> فلا يُكتب في طلب المنحة أو الشهادات المترجمة <span className="text-rose-600 dark:text-rose-400 mn-font-title line-through">AHMAD</span>. اختلاف حرف واحد قد يؤدي إلى عدم تطابق البيانات ويسبب مشكلات في القبول أو التأشيرة أو تذكرة السفر.
                   </p>
                 </div>
               </div>
@@ -4744,7 +4754,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Award className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       ملاحظة للطلاب اليمنيين:
                     </h5>
                   </div>
@@ -4792,7 +4802,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Info className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة مهمة جداً:
                       </h5>
                     </div>
@@ -4810,7 +4820,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Award className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         مثال توضيحي:
                       </h5>
                     </div>
@@ -4827,7 +4837,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
@@ -4875,7 +4885,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <FileText className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة مهمة:
                       </h5>
                     </div>
@@ -4893,7 +4903,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Award className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة للطلاب اليمنيين:
                       </h5>
                     </div>
@@ -4912,7 +4922,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <AlertCircle className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       ملاحظة مهمة حول مطابقة البيانات:
                     </h5>
                   </div>
@@ -4930,7 +4940,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Globe className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       لغة الشهادة:
                     </h5>
                   </div>
@@ -4938,7 +4948,7 @@ export function CourseStudyRoomView({
                     في أغلب المنح الدولية يمكن التقديم بالشهادة المترجمة إلى اللغة الإنجليزية، وهي اللغة الأكثر استخدامًا في ملفات التقديم. لذلك إذا كانت الشهادة باللغة العربية، فمن الأفضل استخراج شهادة مترجمة إلى اللغة الإنجليزية.
                   </p>
                   <div className="p-2.5 rounded-lg bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 text-[11px] font-bold text-[var(--mn-text)] leading-[1.8]">
-                    <span className="text-[#142B5F] dark:text-[#F2CD78] font-black ml-1">مثال:</span>
+                    <span className="text-[#142B5F] dark:text-[#F2CD78] mn-font-title ml-1">مثال:</span>
                     قد تُستخدم الترجمة الإنجليزية في مرحلة التقديم، ثم بعد القبول في بعض الجامعات الروسية يُطلب تجهيز ترجمة موثقة للوثائق إلى اللغة الروسية لاستكمال إجراءات التسجيل.
                   </div>
                 </div>
@@ -4950,7 +4960,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
@@ -4988,11 +4998,15 @@ export function CourseStudyRoomView({
               {showCertificateModal && (
                 <div
                   className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200"
-                  onClick={() => setShowCertificateModal(false)}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="معاينة الشهادة"
+                  tabIndex={-1}
+                  onKeyDown={function (event) { if (event.key === 'Escape') setShowCertificateModal(false); }}
+                  onClick={(event) => { if (event.target === event.currentTarget) setShowCertificateModal(false); }}
                 >
                   <div
                     className="relative w-full max-w-2xl bg-[var(--mn-surface)] rounded-2xl border border-[var(--mn-border)] shadow-2xl overflow-hidden text-right font-['Cairo',sans-serif] animate-in zoom-in-95 duration-200"
-                    onClick={(e) => e.stopPropagation()}
                   >
                     {/* Modal Header */}
                     <div className="flex items-center justify-between px-4 py-3 bg-[#142B5F] text-white border-b border-[#142B5F]/40">
@@ -5001,7 +5015,7 @@ export function CourseStudyRoomView({
                           <GraduationCap className="w-4 h-4" />
                         </div>
                         <div>
-                          <h4 className="text-[12.5px] font-extrabold text-white">
+                          <h4 className="text-[12.5px] mn-font-emphasis text-white">
                             نموذج شهادة التخرج (الثانوية العامة)
                           </h4>
                           <span className="text-[10px] text-white/70 block">
@@ -5047,7 +5061,7 @@ export function CourseStudyRoomView({
 
                         {/* Certificate Title */}
                         <div className="py-2">
-                          <h3 className="text-[16px] sm:text-[18px] font-black text-[#142B5F] dark:text-[#F2CD78] tracking-wide">
+                          <h3 className="text-[16px] sm:text-[18px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] tracking-wide">
                             شهادة إتمام المرحلة الثانوية العامة
                           </h3>
                           <p className="text-[11px] font-bold text-[var(--mn-text-muted)] font-sans" dir="ltr">
@@ -5059,10 +5073,10 @@ export function CourseStudyRoomView({
                         {/* Certificate Body Text Mockup */}
                         <div className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify bg-[var(--mn-page)]/80 p-3.5 rounded-lg border border-[var(--mn-border)] space-y-2">
                           <p>
-                            تشهد وزارة التربية والتعليم بأن الطالب/ـة: <span className="text-[#142B5F] dark:text-[#F2CD78] font-black underline">...................................................</span>
+                            تشهد وزارة التربية والتعليم بأن الطالب/ـة: <span className="text-[#142B5F] dark:text-[#F2CD78] mn-font-title underline">...................................................</span>
                           </p>
                           <p>
-                            من مواليد: <span className="font-bold">.... / .... / ........</span> الجنسية: <span className="font-bold">يمني</span> قد أتم بنجاح متطلبات شهادة الثانوية العامة (القسم العلمي / الأدبي) بمعدل عام: <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black text-[12px]">...%</span> بتقدير: <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black">ممتاز</span>.
+                            من مواليد: <span className="font-bold">.... / .... / ........</span> الجنسية: <span className="font-bold">يمني</span> قد أتم بنجاح متطلبات شهادة الثانوية العامة (القسم العلمي / الأدبي) بمعدل عام: <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title text-[12px]">...%</span> بتقدير: <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title">ممتاز</span>.
                           </p>
                         </div>
 
@@ -5072,7 +5086,7 @@ export function CourseStudyRoomView({
                             <div>مدير عام الامتحانات</div>
                             <div className="text-[10px] text-[var(--mn-text-muted)]/60">.......................</div>
                           </div>
-                          <div className="w-14 h-14 rounded-full border-2 border-dashed border-[#0E7C86]/50 flex items-center justify-center text-[#0E7C86] text-[9px] font-black rotate-[-12deg] bg-[#0E7C86]/5">
+                          <div className="w-14 h-14 rounded-full border-2 border-dashed border-[#0E7C86]/50 flex items-center justify-center text-[#0E7C86] text-[9px] mn-font-title rotate-[-12deg] bg-[#0E7C86]/5">
                             الختم الرسمي
                           </div>
                           <div className="space-y-1 text-left">
@@ -5139,7 +5153,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Award className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة للطلاب اليمنيين:
                       </h5>
                     </div>
@@ -5157,7 +5171,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <AlertCircle className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة مهمة:
                       </h5>
                     </div>
@@ -5176,7 +5190,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Globe className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       لغة كشف الدرجات:
                     </h5>
                   </div>
@@ -5192,7 +5206,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
@@ -5222,11 +5236,15 @@ export function CourseStudyRoomView({
               {showTranscriptModal && (
                 <div
                   className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200"
-                  onClick={() => setShowTranscriptModal(false)}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="معاينة كشف الدرجات"
+                  tabIndex={-1}
+                  onKeyDown={function (event) { if (event.key === 'Escape') setShowTranscriptModal(false); }}
+                  onClick={(event) => { if (event.target === event.currentTarget) setShowTranscriptModal(false); }}
                 >
                   <div
                     className="relative w-full max-w-2xl bg-[var(--mn-surface)] rounded-2xl border border-[var(--mn-border)] shadow-2xl overflow-hidden text-right font-['Cairo',sans-serif] animate-in zoom-in-95 duration-200"
-                    onClick={(e) => e.stopPropagation()}
                   >
                     {/* Modal Header */}
                     <div className="flex items-center justify-between px-4 py-3 bg-[#142B5F] text-white border-b border-[#142B5F]/40">
@@ -5235,7 +5253,7 @@ export function CourseStudyRoomView({
                           <FileText className="w-4 h-4" />
                         </div>
                         <div>
-                          <h4 className="text-[12.5px] font-extrabold text-white">
+                          <h4 className="text-[12.5px] mn-font-emphasis text-white">
                             نموذج كشف الدرجات والسجل الأكاديمي (Transcript)
                           </h4>
                           <span className="text-[10px] text-white/70 block">
@@ -5281,7 +5299,7 @@ export function CourseStudyRoomView({
 
                         {/* Transcript Title */}
                         <div className="py-2">
-                          <h3 className="text-[16px] sm:text-[18px] font-black text-[#142B5F] dark:text-[#F2CD78] tracking-wide">
+                          <h3 className="text-[16px] sm:text-[18px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] tracking-wide">
                             كشف درجات إتمام المرحلة الثانوية العامة
                           </h3>
                           <p className="text-[11px] font-bold text-[var(--mn-text-muted)] font-sans" dir="ltr">
@@ -5322,17 +5340,17 @@ export function CourseStudyRoomView({
                                 <tr key={idx} className="hover:bg-[var(--mn-surface-muted)] transition-colors">
                                   <td className="py-2 px-3 text-[var(--mn-heading)]">{row.name}</td>
                                   <td className="py-2 px-3 text-center text-[var(--mn-text-muted)] font-sans">{row.max}</td>
-                                  <td className="py-2 px-3 text-center font-sans font-black text-[#0E7C86] dark:text-[#21A7B4]">{row.score}</td>
-                                  <td className="py-2 px-3 text-center text-emerald-600 dark:text-emerald-400">{row.grade}</td>
+                                  <td className="py-2 px-3 text-center font-sans mn-font-title text-[#0E7C86] dark:text-[#21A7B4]">{row.score}</td>
+                                  <td className="py-2 px-3 text-center text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)]">{row.grade}</td>
                                 </tr>
                               ))}
                             </tbody>
-                            <tfoot className="bg-[#0E7C86]/10 font-black text-[11.5px] border-t-2 border-[#0E7C86]/30">
+                            <tfoot className="bg-[#0E7C86]/10 mn-font-title text-[11.5px] border-t-2 border-[#0E7C86]/30">
                               <tr>
                                 <td className="py-2 px-3 text-[#142B5F] dark:text-[#F2CD78]">المجموع والمعدل العام:</td>
                                 <td className="py-2 px-3 text-center font-sans">700</td>
                                 <td className="py-2 px-3 text-center font-sans text-[#0E7C86] dark:text-[#21A7B4] text-[13px]">670 (95.71%)</td>
-                                <td className="py-2 px-3 text-center text-emerald-600 dark:text-emerald-400">ممتاز مع مرتبة الشرف</td>
+                                <td className="py-2 px-3 text-center text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)]">ممتاز مع مرتبة الشرف</td>
                               </tr>
                             </tfoot>
                           </table>
@@ -5344,7 +5362,7 @@ export function CourseStudyRoomView({
                             <div>رئيس لجنة الرصد والدرجات</div>
                             <div className="text-[10px] text-[var(--mn-text-muted)]/60">.......................</div>
                           </div>
-                          <div className="w-14 h-14 rounded-full border-2 border-dashed border-[#142B5F]/50 flex items-center justify-center text-[#142B5F] dark:text-[#F2CD78] text-[9px] font-black rotate-[-12deg] bg-[#142B5F]/5">
+                          <div className="w-14 h-14 rounded-full border-2 border-dashed border-[#142B5F]/50 flex items-center justify-center text-[#142B5F] dark:text-[#F2CD78] text-[9px] mn-font-title rotate-[-12deg] bg-[#142B5F]/5">
                             ختم الكنترول
                           </div>
                           <div className="space-y-1 text-left">
@@ -5405,7 +5423,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Info className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       ملاحظة مهمة:
                     </h5>
                   </div>
@@ -5414,7 +5432,7 @@ export function CourseStudyRoomView({
                   </p>
                   <div className="pt-1 border-t border-[var(--mn-border)]/60">
                     <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify pr-0.5">
-                      <strong className="text-[#0E7C86] dark:text-[#21A7B4] font-extrabold">مثال:</strong> منحة الحكومة المجرية تطلب خطاب الدافع ضمن مستندات التقديم، بينما في بعض المنح الأخرى تكون أسئلة الدافع مدمجة داخل نموذج الطلب الإلكتروني.
+                      <strong className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-emphasis">مثال:</strong> منحة الحكومة المجرية تطلب خطاب الدافع ضمن مستندات التقديم، بينما في بعض المنح الأخرى تكون أسئلة الدافع مدمجة داخل نموذج الطلب الإلكتروني.
                     </p>
                   </div>
                 </div>
@@ -5430,7 +5448,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <FileText className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ماذا تكتب فيه؟
                       </h5>
                     </div>
@@ -5448,7 +5466,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Layers className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة مهمة: الفرق بين خطاب النية/الدافع وخطة الدراسة
                       </h5>
                     </div>
@@ -5467,7 +5485,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <AlertCircle className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       ملاحظة:
                     </h5>
                   </div>
@@ -5483,7 +5501,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -5499,7 +5517,7 @@ export function CourseStudyRoomView({
                 </div>
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                    <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                       ملاحظة:
                     </span>
                   </div>
@@ -5539,7 +5557,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <HelpCircle className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       الفرق بين خطة الدراسة وخطاب الدافع:
                     </h5>
                   </div>
@@ -5555,13 +5573,13 @@ export function CourseStudyRoomView({
                   <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                   </div>
-                  <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                  <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                     العناصر الأساسية في خطة الدراسة الناجحة:
                   </h5>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                   <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                    <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                    <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                       1. الأهداف الأكاديمية:
                     </span>
                     <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-[1.75] text-justify">
@@ -5569,7 +5587,7 @@ export function CourseStudyRoomView({
                     </p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                    <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                    <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                       2. الخطة الزمنية:
                     </span>
                     <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-[1.75] text-justify">
@@ -5577,7 +5595,7 @@ export function CourseStudyRoomView({
                     </p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                    <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                    <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                       3. الخطة بعد التخرج:
                     </span>
                     <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-[1.75] text-justify">
@@ -5593,7 +5611,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -5634,7 +5652,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <GraduationCap className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       أمثلة على منح تتطلب السيرة الذاتية ضمن ملف التقديم:
                     </h5>
                   </div>
@@ -5656,7 +5674,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <FileText className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         نوع السيرة الذاتية:
                       </h5>
                     </div>
@@ -5674,7 +5692,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#0E7C86]/10 border border-[#0E7C86]/20 flex items-center justify-center shrink-0">
                         <Languages className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         لغة السيرة الذاتية:
                       </h5>
                     </div>
@@ -5694,7 +5712,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <GradCap className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         لطلاب البكالوريوس:
                       </h5>
                     </div>
@@ -5711,7 +5729,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#0E7C86]/10 border border-[#0E7C86]/20 flex items-center justify-center shrink-0">
                         <Award className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         للدراسات العليا:
                       </h5>
                     </div>
@@ -5728,7 +5746,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة مهمة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -5743,7 +5761,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -5759,7 +5777,7 @@ export function CourseStudyRoomView({
                 </div>
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                    <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                       ملاحظة:
                     </span>
                   </div>
@@ -5804,7 +5822,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Users className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         من يكتب التوصية؟
                       </h5>
                     </div>
@@ -5822,7 +5840,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Info className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة مهمة:
                       </h5>
                     </div>
@@ -5839,7 +5857,7 @@ export function CourseStudyRoomView({
                   <GraduationCap className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -5856,7 +5874,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#0E7C86]/10 border border-[#0E7C86]/20 flex items-center justify-center shrink-0">
                       <Send className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       طريقة التقديم تختلف:
                     </h5>
                   </div>
@@ -5872,7 +5890,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -5888,7 +5906,7 @@ export function CourseStudyRoomView({
                 </div>
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                    <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                       ملاحظة:
                     </span>
                   </div>
@@ -5933,7 +5951,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <GradCap className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         إثبات أن الدراسة السابقة باللغة الإنجليزية:
                       </h5>
                     </div>
@@ -5951,7 +5969,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Globe className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         أمثلة وشروط اللغات:
                       </h5>
                     </div>
@@ -5968,7 +5986,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة مهمة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -5983,7 +6001,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6025,7 +6043,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <FileText className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       تعليمات هامة عند تعبئة الاستمارة:
                     </h5>
                   </div>
@@ -6044,7 +6062,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة مهمة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -6084,7 +6102,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <FileText className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         استمارة مخصصة (Official Form):
                       </h5>
                     </div>
@@ -6101,7 +6119,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Clock className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         صلاحية الفحص الطبي:
                       </h5>
                     </div>
@@ -6118,7 +6136,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6156,7 +6174,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Globe className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       من أمثلة الدول والمنح التي قد تطلبها:
                     </h5>
                   </div>
@@ -6176,7 +6194,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <MapPin className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         أين تُستخرج في اليمن؟
                       </h5>
                     </div>
@@ -6199,7 +6217,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#0E7C86]/10 border border-[#0E7C86]/20 flex items-center justify-center shrink-0">
                         <FileText className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         المطلوب عادةً للاستخراج:
                       </h5>
                     </div>
@@ -6218,7 +6236,7 @@ export function CourseStudyRoomView({
                     <div className="w-5 h-5 rounded-full bg-[#0E7C86]/10 border border-[#0E7C86]/20 flex items-center justify-center shrink-0">
                       <Coins className="w-3 h-3 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       التكلفة التقريبية:
                     </h5>
                   </div>
@@ -6233,7 +6251,7 @@ export function CourseStudyRoomView({
                     <div className="w-5 h-5 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Clock className="w-3 h-3 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       مدة الاستخراج:
                     </h5>
                   </div>
@@ -6248,7 +6266,7 @@ export function CourseStudyRoomView({
                     <div className="w-5 h-5 rounded-full bg-[#8C6D23]/10 border border-[#8C6D23]/20 flex items-center justify-center shrink-0">
                       <Calendar className="w-3 h-3 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       مدة الصلاحية:
                     </h5>
                   </div>
@@ -6264,7 +6282,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة مهمة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -6303,7 +6321,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Globe className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       مثال:
                     </h5>
                   </div>
@@ -6323,7 +6341,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Info className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة للطلاب اليمنيين:
                       </h5>
                     </div>
@@ -6341,7 +6359,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#0E7C86]/10 border border-[#0E7C86]/20 flex items-center justify-center shrink-0">
                         <Languages className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         لغة الشهادة:
                       </h5>
                     </div>
@@ -6358,7 +6376,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة مهمة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -6373,7 +6391,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6415,7 +6433,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <GraduationCap className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       أمثلة:
                     </h5>
                   </div>
@@ -6423,7 +6441,7 @@ export function CourseStudyRoomView({
                   <div className="space-y-2">
                     {/* SAT */}
                     <div className="p-2.5 rounded-lg bg-[#142B5F]/5 dark:bg-[#142B5F]/20 border border-[#142B5F]/10 dark:border-[#7EB6FF]/20 space-y-0.5">
-                      <span className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                      <span className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                         • SAT:
                       </span>
                       <p className="text-[11px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
@@ -6433,7 +6451,7 @@ export function CourseStudyRoomView({
 
                     {/* GRE */}
                     <div className="p-2.5 rounded-lg bg-[#142B5F]/5 dark:bg-[#142B5F]/20 border border-[#142B5F]/10 dark:border-[#7EB6FF]/20 space-y-0.5">
-                      <span className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                      <span className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                         • GRE:
                       </span>
                       <p className="text-[11px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
@@ -6443,7 +6461,7 @@ export function CourseStudyRoomView({
 
                     {/* GMAT */}
                     <div className="p-2.5 rounded-lg bg-[#142B5F]/5 dark:bg-[#142B5F]/20 border border-[#142B5F]/10 dark:border-[#7EB6FF]/20 space-y-0.5">
-                      <span className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                      <span className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                         • GMAT:
                       </span>
                       <p className="text-[11px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
@@ -6453,7 +6471,7 @@ export function CourseStudyRoomView({
 
                     {/* CSCA */}
                     <div className="p-2.5 rounded-lg bg-[#142B5F]/5 dark:bg-[#142B5F]/20 border border-[#142B5F]/10 dark:border-[#7EB6FF]/20 space-y-0.5 md:col-span-2">
-                      <span className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                      <span className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                         • CSCA:
                       </span>
                       <p className="text-[11px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6470,7 +6488,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة مهمة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -6485,7 +6503,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6522,13 +6540,13 @@ export function CourseStudyRoomView({
                   <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                     <FileText className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                   </div>
-                  <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                  <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                     الهيكل الأساسي لمقترح البحث:
                   </h5>
                 </div>
                 <div className="space-y-2 pt-1">
                   <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                    <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                    <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                       1. العنوان والمقدمة ومشكلة البحث:
                     </span>
                     <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-[1.75] text-justify">
@@ -6536,7 +6554,7 @@ export function CourseStudyRoomView({
                     </p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                    <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                    <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                       2. الأهداف وأسئلة البحث:
                     </span>
                     <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-[1.75] text-justify">
@@ -6544,7 +6562,7 @@ export function CourseStudyRoomView({
                     </p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                    <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                    <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                       3. منهجية البحث (Methodology):
                     </span>
                     <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-[1.75] text-justify">
@@ -6552,7 +6570,7 @@ export function CourseStudyRoomView({
                     </p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                    <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                    <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                       4. المراجع العلمية (References):
                     </span>
                     <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-[1.75] text-justify">
@@ -6568,7 +6586,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6594,7 +6612,7 @@ export function CourseStudyRoomView({
               {/* Main Definition & Introduction */}
               <div className="border-r-2 border-[#0E7C86] dark:border-[#21A7B4] pr-3 py-1 bg-[#0E7C86]/5 dark:bg-[#0E7C86]/10 rounded-l-lg space-y-1.5">
                 <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
-                  خطاب القبول هو وثيقة رسمية تصدرها الجامعة وتؤكد فيها أنها وافقت على قبول الطالب للدراسة في برنامج أو تخصص ودرجة علمية محددة. وقد يسمى <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black">Admission Letter</span> أو <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black">Offer Letter</span> أو <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black">Acceptance Letter</span> بحسب الجامعة.
+                  خطاب القبول هو وثيقة رسمية تصدرها الجامعة وتؤكد فيها أنها وافقت على قبول الطالب للدراسة في برنامج أو تخصص ودرجة علمية محددة. وقد يسمى <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title">Admission Letter</span> أو <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title">Offer Letter</span> أو <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title">Acceptance Letter</span> بحسب الجامعة.
                 </p>
               </div>
 
@@ -6606,7 +6624,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <HelpCircle className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       متى يكون خطاب القبول مطلوبًا؟
                     </h5>
                   </div>
@@ -6629,7 +6647,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Globe className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         مثال: منحة Chevening البريطانية
                       </h5>
                     </div>
@@ -6647,7 +6665,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Landmark className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         مثال: المنح الجامعية المباشرة
                       </h5>
                     </div>
@@ -6664,7 +6682,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ماذا يعني عندما تطلب المنحة Admission Letter؟
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -6679,7 +6697,7 @@ export function CourseStudyRoomView({
                   <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                   </div>
-                  <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                  <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                     القبول المشروط والقبول النهائي:
                   </h5>
                 </div>
@@ -6687,7 +6705,7 @@ export function CourseStudyRoomView({
                 <div className="space-y-2.5">
                   <div className="p-3 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] px-2 py-0.5 rounded font-black bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                      <span className="text-[10px] px-2 py-0.5 rounded mn-font-title bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20">
                         مشروط
                       </span>
                       <span className="text-[12px] font-bold text-[var(--mn-heading)]">القبول المشروط — Conditional Offer</span>
@@ -6699,7 +6717,7 @@ export function CourseStudyRoomView({
 
                   <div className="p-3 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] px-2 py-0.5 rounded font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                      <span className="text-[10px] px-2 py-0.5 rounded mn-font-title bg-[var(--mn-learning-success-500)]/15 text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-400)] border border-[var(--mn-learning-success-500)]/20">
                         نهائي
                       </span>
                       <span className="text-[12px] font-bold text-[var(--mn-heading)]">القبول غير المشروط — Unconditional Offer</span>
@@ -6717,7 +6735,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6756,7 +6774,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <HelpCircle className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       ماذا تثبت؟
                     </h5>
                   </div>
@@ -6788,18 +6806,18 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Globe className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       أمثلة عملية لتطبيق شهادة القيد والتخرج المتوقع
                     </h5>
                   </div>
 
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify pr-0.5">
-                    في بعض برامج منحة الحكومة الصينية، إذا كان الطالب لم يتخرج بعد، يمكنه تقديم إفادة تخرج متوقع أو <span className="text-[#0E7C86] dark:text-[#21A7B4] font-black">Pre-graduation Certificate</span> صادرة من مدرسته أو جامعته، توضح موعد تخرجه المتوقع، ثم يقدم الشهادة النهائية لاحقًا بعد صدورها. وتوضح مواد CampusChina أن بعض البرامج تقبل خطابًا رسميًا يذكر تاريخ التخرج المتوقع بدل الشهادة النهائية مؤقتًا.
+                    في بعض برامج منحة الحكومة الصينية، إذا كان الطالب لم يتخرج بعد، يمكنه تقديم إفادة تخرج متوقع أو <span className="text-[#0E7C86] dark:text-[#21A7B4] mn-font-title">Pre-graduation Certificate</span> صادرة من مدرسته أو جامعته، توضح موعد تخرجه المتوقع، ثم يقدم الشهادة النهائية لاحقًا بعد صدورها. وتوضح مواد CampusChina أن بعض البرامج تقبل خطابًا رسميًا يذكر تاريخ التخرج المتوقع بدل الشهادة النهائية مؤقتًا.
                   </p>
 
                   <div className="space-y-2.5 pt-1">
                     <div className="p-3 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                      <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                      <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                         طالب الثانوية العامة (بكالوريوس):
                       </span>
                       <p className="text-[11px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
@@ -6808,7 +6826,7 @@ export function CourseStudyRoomView({
                     </div>
 
                     <div className="p-3 rounded-xl bg-[var(--mn-surface-muted)]/70 border border-[var(--mn-border)] space-y-1">
-                      <span className="text-[11px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                      <span className="text-[11px] mn-font-title text-[#142B5F] dark:text-[#F2CD78] block">
                         خريج البكالوريوس (ماجستير):
                       </span>
                       <p className="text-[11px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
@@ -6825,7 +6843,7 @@ export function CourseStudyRoomView({
                   <AlertCircle className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-amber-900 dark:text-amber-300 block">
+                  <span className="text-[12px] mn-font-emphasis text-amber-900 dark:text-amber-300 block">
                     هل تغني عن الشهادة النهائية؟
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-amber-100/90 leading-[1.85] text-justify">
@@ -6840,7 +6858,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6882,7 +6900,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <GraduationCap className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       أمثلة على منح قد تطلب إثبات الدخل أو الوضع المالي:
                     </h5>
                   </div>
@@ -6902,7 +6920,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                         <Info className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         ملاحظة مهمة:
                       </h5>
                     </div>
@@ -6920,7 +6938,7 @@ export function CourseStudyRoomView({
                       <div className="w-6 h-6 rounded-full bg-[#0E7C86]/10 border border-[#0E7C86]/20 flex items-center justify-center shrink-0">
                         <Users className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                       </div>
-                      <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                      <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                         وثائق الوالدين:
                       </h5>
                     </div>
@@ -6937,7 +6955,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -6952,7 +6970,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة أخيرة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -6994,7 +7012,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <GraduationCap className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       أمثلة:
                     </h5>
                   </div>
@@ -7012,7 +7030,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <FileText className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       تنوّع المتطلبات بين الجامعات:
                     </h5>
                   </div>
@@ -7028,7 +7046,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة مهمة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -7043,7 +7061,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -7086,7 +7104,7 @@ export function CourseStudyRoomView({
                   <Info className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#93C5FD]" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#E0E7FF] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#E0E7FF] block">
                     ملاحظة مهمة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] dark:text-[#F0F4F8] leading-[1.85] text-justify">
@@ -7101,7 +7119,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة العملية:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -7139,7 +7157,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <HeartHandshake className="w-3.5 h-3.5 text-[#0E7C86] dark:text-[#21A7B4]" />
                     </div>
-                    <h5 className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       العمل التطوعي وخدمة المجتمع:
                     </h5>
                   </div>
@@ -7153,7 +7171,7 @@ export function CourseStudyRoomView({
                     <div className="w-6 h-6 rounded-full bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 flex items-center justify-center shrink-0">
                       <Award className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#F2CD78]" />
                     </div>
-                    <h5 className="text-[11.5px] font-extrabold text-[#142B5F] dark:text-[#F2CD78]">
+                    <h5 className="text-[11.5px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78]">
                       الدورات التدريبية والجوائز:
                     </h5>
                   </div>
@@ -7169,7 +7187,7 @@ export function CourseStudyRoomView({
                   <Lightbulb className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <span className="text-[12px] font-extrabold text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] mn-font-emphasis text-[#142B5F] dark:text-[#F2CD78] block">
                     القاعدة:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -7202,8 +7220,8 @@ export function CourseStudyRoomView({
                 }}
                 className={`flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-[10px] font-bold transition-all cursor-pointer border flex items-center justify-center gap-1.5 ${
                   activeItem.completed
-                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-300/50'
-                    : 'bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600 shadow-sm'
+                    ? 'bg-[var(--mn-learning-success-50)] dark:bg-[var(--mn-learning-success-950)]/40 text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-400)] border-[var(--mn-learning-success-300)]/50'
+                    : 'bg-[var(--mn-learning-success-500)] text-white border-[var(--mn-learning-success-500)] hover:bg-[var(--mn-learning-success-600)] shadow-sm'
                 }`}
               >
                 <Check className="w-3.5 h-3.5" />
@@ -7217,7 +7235,7 @@ export function CourseStudyRoomView({
                     setActiveItemId(nextLesson.id);
                     window.scrollTo({ top: 0, behavior: 'instant' });
                   }}
-                  className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-[#D6A43B] hover:brightness-110 text-[#142B5F] text-[10px] font-extrabold shadow-sm transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-[#D6A43B] hover:brightness-110 text-[#142B5F] text-[10px] mn-font-emphasis shadow-sm transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <span>الذهاب للدرس التالي</span>
                   <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
@@ -7288,9 +7306,9 @@ export function CourseStudyRoomView({
             <div className="flex items-center justify-between gap-2 text-xs font-bold text-white">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-white/90">نسبة التقدم:</span>
-                <span className="text-[var(--mn-accent-soft)] font-black text-xs">12% مكتمل</span>
+                <span className="text-[var(--mn-accent-soft)] mn-font-title text-xs">12% مكتمل</span>
               </div>
-              <span className="text-[10.5px] font-bold text-emerald-300 bg-emerald-900/60 border border-emerald-400/30 px-2.5 py-0.5 rounded-full">
+              <span className="text-[10.5px] font-bold text-[var(--mn-learning-success-300)] bg-[var(--mn-learning-success-900)]/60 border border-[var(--mn-learning-success-400)]/30 px-2.5 py-0.5 rounded-full">
                 المحاضرة 1 من 7
               </span>
             </div>
@@ -7299,7 +7317,7 @@ export function CourseStudyRoomView({
             <div className="w-full h-2 rounded-full bg-white/20 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-[#D6A43B] to-[#F3CE74] rounded-full transition-all duration-500 shadow-xs"
-                style={{ width: '12%' }}
+                data-mn-design="392c68093a"
               />
             </div>
 
@@ -7330,7 +7348,7 @@ export function CourseStudyRoomView({
                 <BookOpen className="w-4 h-4 text-[#D6A43B] fill-[#D6A43B]" />
               </div>
               <div className="flex flex-col">
-                <h2 className="text-sm sm:text-base font-extrabold text-[var(--mn-heading)] leading-none">
+                <h2 className="text-sm sm:text-base mn-font-emphasis text-[var(--mn-heading)] leading-none">
                   قائمة المحاضرات والدروس
                 </h2>
                 <div className="w-12 h-0.5 bg-[#D6A43B] rounded-full mt-1.5" />
@@ -7409,13 +7427,13 @@ export function CourseStudyRoomView({
                             key={item.id}
                             role="button"
                             tabIndex={0}
-                            onClick={() => setActiveItemId(item.id)}
-                            onKeyDown={(e) => {
+                            onKeyDown={function (e) {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
                                 setActiveItemId(item.id);
                               }
                             }}
+                            onClick={() => setActiveItemId(item.id)}
                             className={`flex items-start justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
                               isActive
                                 ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-primary)] shadow-xs mn-inverse'
@@ -7444,8 +7462,8 @@ export function CourseStudyRoomView({
                                 </span>
                               )}
                               {item.completed ? (
-                                <span className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center shrink-0">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                <span className="w-4 h-4 rounded-full bg-[var(--mn-learning-success-500)]/20 border border-[var(--mn-learning-success-500)]/50 flex items-center justify-center shrink-0">
+                                  <CheckCircle2 className="w-3 h-3 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)]" />
                                 </span>
                               ) : null}
                             </div>

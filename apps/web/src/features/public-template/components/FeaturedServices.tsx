@@ -13,7 +13,6 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Service } from '../types';
-import { PUBLIC_SERVICES } from '../data/serviceData';
 
 interface FeaturedServicesProps {
   services: Service[];
@@ -60,7 +59,7 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
   onSelectService,
 }) => {
   const [activeTab, setActiveTab] = useState<'student' | 'general'>('student');
-  const allServicesList = (sourceServices && sourceServices.length >= 6) ? sourceServices : PUBLIC_SERVICES;
+  const allServicesList = sourceServices;
   const services = allServicesList.filter((service) => service.audience === activeTab);
 
   return (
@@ -91,7 +90,7 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('student')}
-                style={{ fontFamily: "'Cairo', sans-serif", fontSize: '13px', fontWeight: 700 }}
+                data-mn-design="023f1723a7"
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 px-3 transition-all duration-300 whitespace-nowrap cursor-pointer ${
                   activeTab === 'student'
                     ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-md ring-1 ring-[#142B5F]/20 dark:ring-[#D6A43B]/40'
@@ -104,7 +103,7 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('general')}
-                style={{ fontFamily: "'Cairo', sans-serif", fontSize: '13px', fontWeight: 700 }}
+                data-mn-design="023f1723a7"
                 className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 px-3 transition-all duration-300 whitespace-nowrap cursor-pointer ${
                   activeTab === 'general'
                     ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-md ring-1 ring-[#142B5F]/20 dark:ring-[#D6A43B]/40'

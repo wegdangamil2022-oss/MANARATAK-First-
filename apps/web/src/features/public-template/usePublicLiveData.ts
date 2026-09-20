@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { loadPublicLiveSnapshot, type PublicLiveLoadResult, type PublicLiveLocale } from './publicLiveDataSource';
 import { resolvePublicTemplateDataMode, type PublicTemplateDataMode } from './publicScholarshipDataSource';
-import { loadPublicPrototypeSnapshot } from './publicPrototypeDataSource';
 
 declare const __MANARATAK_PROTOTYPE_DATA_ENABLED__: boolean;
 
@@ -14,26 +13,24 @@ const initial: PublicLiveLoadResult = {
 export function usePublicLiveData(value: unknown, locale: PublicLiveLocale = 'ar') {
   const requestedMode: PublicTemplateDataMode = resolvePublicTemplateDataMode(value);
   const mode: PublicTemplateDataMode = requestedMode === 'prototype' && __MANARATAK_PROTOTYPE_DATA_ENABLED__ ? 'prototype' : 'api';
-  const [result, setResult] = useState<PublicLiveLoadResult>(() => {
-    if (mode === 'prototype') {
-      return loadPublicPrototypeSnapshot();
-    }
-    return initial;
-  });
+  const [result, setResult] = useState<PublicLiveLoadResult>(initial);
   const [reloadVersion, setReloadVersion] = useState(0);
   const reload = useCallback(() => setReloadVersion((v) => v + 1), []);
 
   useEffect(() => {
     let active = true;
     if (mode === 'prototype') {
-      setResult(loadPublicPrototypeSnapshot());
+      import('./publicPrototypeDataSource').then(({ loadPublicPrototypeSnapshot }) => {
+        if (active) setResult(loadPublicPrototypeSnapshot());
+      });
       return () => { active = false; };
     }
     const isManualReload = reloadVersion > 0;
     if (isManualReload) {
       setResult(initial);
     }
-    loadPublicLiveSnapshot(locale, isManualReload).then((next) => { if (active) setResult(next); });
+    const request = isManualReload ? loadPublicLiveSnapshot(locale, true) : loadPublicLiveSnapshot(locale);
+    request.then((next) => { if (active) setResult(next); });
     return () => { active = false; };
   }, [mode, locale, reloadVersion]);
 

@@ -188,12 +188,12 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               <button
                 type="button"
                 onClick={onOpenAuth}
-                style={{ fontSize: '14px', fontFamily: 'Cairo, sans-serif' }}
+                data-mn-design="4df103579c"
                 className="w-full min-h-[38px] rounded-xl bg-gradient-to-r from-[#0d2a45] via-[#113a5f] to-[#0d2a45] hover:brightness-110 border border-[#D6A43B] hover:border-[#F3CE74] text-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md cursor-pointer py-2 px-3.5 relative overflow-hidden group"
               >
                 <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
                 <LogIn className="w-4 h-4 text-[#E5B54F] stroke-[2.2]" />
-                <span style={{ fontSize: '14px', fontFamily: 'Cairo, sans-serif', color: '#ffffff' }} className="text-white font-bold">تسجيل الدخول أو إنشاء حساب</span>
+                <span data-mn-design="01abfae3c9" className="text-white font-bold">تسجيل الدخول أو إنشاء حساب</span>
               </button>
             )}
           </div>
@@ -278,11 +278,11 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                 <button
                   type="button"
                   onClick={onOpenAuth}
-                  style={{ fontSize: '12px', fontFamily: 'Cairo, sans-serif' }}
+                  data-mn-design="3b7dc7a9b0"
                   className="mt-3.5 w-full min-h-[36px] rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
                 >
                   <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B]/60 to-transparent" />
-                  <span style={{ fontSize: '12px', fontFamily: 'Cairo, sans-serif' }}>تسجيل الدخول لإكمال ملفك الأكاديمي</span>
+                  <span data-mn-design="3b7dc7a9b0">تسجيل الدخول لإكمال ملفك الأكاديمي</span>
                   <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                 </button>
               )}
@@ -321,11 +321,11 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <button
                     type="button"
                     onClick={() => setSection('journey')}
-                    style={{ fontSize: '12px', fontFamily: 'Cairo, sans-serif' }}
+                    data-mn-design="3b7dc7a9b0"
                     className="mt-3 w-full min-h-[36px] rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
                   >
                     <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-                    <span style={{ fontSize: '12px', fontFamily: 'Cairo, sans-serif' }}>عرض الرحلة والمتابعة</span>
+                    <span data-mn-design="3b7dc7a9b0">عرض الرحلة والمتابعة</span>
                     <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                   </button>
                 )}
@@ -430,11 +430,11 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                 <button
                   type="button"
                   onClick={onOpenSmartSearch}
-                  style={{ fontSize: '12px', fontFamily: 'Cairo, sans-serif' }}
+                  data-mn-design="3b7dc7a9b0"
                   className="mt-3 inline-flex items-center justify-center gap-1.5 min-h-[34px] px-4 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold transition-all cursor-pointer shadow-2xs py-1.5 relative overflow-hidden group"
                 >
                   <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-                  <span style={{ fontSize: '12px', fontFamily: 'Cairo, sans-serif' }}>استخدم البحث الذكي الآن</span>
+                  <span data-mn-design="3b7dc7a9b0">استخدم البحث الذكي الآن</span>
                   <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                 </button>
               </div>
@@ -656,4 +656,3 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
     </section>
   );
 };
-

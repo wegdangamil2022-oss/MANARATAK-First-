@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Course } from '../types';
-import { MOCK_COURSES } from '../data/mockData';
 import { PlayCircle, ChevronLeft, BookOpen, Award, Globe2 } from 'lucide-react';
 
 interface FeaturedCoursesProps {
@@ -16,8 +15,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'external' | 'internal'>('external');
 
-  // Use provided courses or fallback to MOCK_COURSES
-  const allCourses = courses && courses.length > 0 ? courses : MOCK_COURSES;
+  const allCourses = courses;
 
   // Filter courses based on provider mapping for demonstration
   const internalCourses = allCourses.filter((c) => c.provider.includes('منارتك'));
@@ -61,7 +59,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab('external')}
-                  style={{ fontFamily: "'Cairo', sans-serif", fontSize: '13px', fontWeight: 700 }}
+                  data-mn-design="023f1723a7"
                   className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 px-3 transition-all duration-300 whitespace-nowrap cursor-pointer ${
                     activeTab === 'external'
                       ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-md ring-1 ring-[#142B5F]/20 dark:ring-[#D6A43B]/40'
@@ -74,7 +72,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab('internal')}
-                  style={{ fontFamily: "'Cairo', sans-serif", fontSize: '13px', fontWeight: 700 }}
+                  data-mn-design="023f1723a7"
                   className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 px-3 transition-all duration-300 whitespace-nowrap cursor-pointer ${
                     activeTab === 'internal'
                       ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-md ring-1 ring-[#142B5F]/20 dark:ring-[#D6A43B]/40'

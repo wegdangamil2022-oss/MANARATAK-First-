@@ -115,7 +115,7 @@ export function OwnerCourseDetail({
             <div className="flex flex-col text-right min-w-0 flex-1 pr-2">
               <h1
                 className="text-[15px] sm:text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm"
-                style={{ fontSize: '15px' }}
+                data-mn-design="827f35e03a"
               >
                 {course.title}
               </h1>
@@ -222,7 +222,7 @@ export function OwnerCourseDetail({
                 <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">
                   الرسوم
                 </span>
-                <span className="text-[9.5px] font-bold text-emerald-600 dark:text-emerald-400 leading-tight truncate mt-0.5">
+                <span className="text-[9.5px] font-bold text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] leading-tight truncate mt-0.5">
                   {course.isFree ? 'مجانية بالكامل' : 'مدفوعة'}
                 </span>
               </div>
@@ -242,7 +242,7 @@ export function OwnerCourseDetail({
               icon={BookOpen}
               title="وصف مختصر للدورة"
               level={3}
-              titleStyle={{ fontSize: '13px' }}
+              titleClassName="mn-imported-detail-title"
             />
 
             <div className="relative rounded-2xl bg-[var(--mn-page)]/70 border border-[var(--mn-border)] px-3.5 py-3 mt-1">
@@ -266,7 +266,7 @@ export function OwnerCourseDetail({
               icon={BookOpen}
               title="محاور الدورة"
               level={3}
-              titleStyle={{ fontSize: '13px' }}
+              titleClassName="mn-imported-detail-title"
             />
 
             <div className="space-y-2.5 mt-2.5">
@@ -304,7 +304,7 @@ export function OwnerCourseDetail({
               icon={GraduationCap}
               title="ماذا سيتعلم الطالب في نهاية الدورة؟"
               level={3}
-              titleStyle={{ fontSize: '13px' }}
+              titleClassName="mn-imported-detail-title"
             />
 
             <div className="relative rounded-2xl bg-[var(--mn-page)]/70 border border-[var(--mn-border)] px-3.5 py-3 mt-1">

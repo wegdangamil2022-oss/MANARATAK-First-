@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Scholarship, Service } from '../types';
-import { PUBLIC_SERVICES } from '../data/serviceData';
 import { RelatedArticlesStrip } from './RelatedArticlesStrip';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 import {
@@ -71,7 +70,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
   onOpenScholarship,
   onOpenArticle,
   onOpenService,
-  contextualServices = PUBLIC_SERVICES.slice(0, 2),
+  contextualServices = [],
   searchAnchor,
   searchTerm,
 }) => {
@@ -203,7 +202,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
             {/* Left Side (in RTL): Scholarship Title & English Subtitle */}
             <div className="flex flex-col text-right min-w-0 flex-1 pr-1.5">
-              <h1 className="text-[15px] sm:text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm" style={{ fontSize: '15px' }}>
+              <h1 className="text-[15px] sm:text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm" data-mn-design="827f35e03a">
                 {scholarship.title}
               </h1>
               <p className="text-[11px] sm:text-[11px] font-bold text-white font-['Cairo',sans-serif] mt-0.5 tracking-wider truncate">
@@ -379,7 +378,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           dir="rtl"
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
-          <DetailSectionHeader id="scholarship-about" icon={BookOpen} title="نبذة عن المنحة" level={3} titleStyle={{ fontSize: '13px' }} />
+          <DetailSectionHeader id="scholarship-about" icon={BookOpen} title="نبذة عن المنحة" level={3} titleClassName="mn-imported-detail-title" />
 
           <div className="relative rounded-2xl bg-[var(--mn-page)]/70 border border-[var(--mn-border)] px-3.5 py-3">
             <span className="absolute top-3 right-3 w-1.5 h-1.5 rotate-45 bg-[var(--mn-accent)]/75" />
@@ -439,28 +438,28 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             <button
               onClick={() => setActiveMajorTab('bachelor')}
               className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'bachelor' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-border-brand)] shadow-sm mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:bg-[var(--mn-page)] '}`}
-              style={{ fontSize: '10.5px', fontWeight: 'bold' }}
+              data-mn-design="98e8ac3671"
             >
               بكالوريوس
             </button>
             <button
               onClick={() => setActiveMajorTab('master')}
               className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'master' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-border-brand)] shadow-sm mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:bg-[var(--mn-page)] '}`}
-              style={{ fontSize: '10.5px', fontWeight: 'bold' }}
+              data-mn-design="98e8ac3671"
             >
               ماجستير
             </button>
             <button
               onClick={() => setActiveMajorTab('phd')}
               className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'phd' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-border-brand)] shadow-sm mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:bg-[var(--mn-page)] '}`}
-              style={{ fontSize: '10.5px', fontWeight: 'bold' }}
+              data-mn-design="98e8ac3671"
             >
               دكتوراه
             </button>
             <button
               onClick={() => setActiveMajorTab('fellowship')}
               className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'fellowship' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-border-brand)] shadow-sm mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:bg-[var(--mn-page)] '}`}
-              style={{ fontSize: '10.5px', fontWeight: 'bold' }}
+              data-mn-design="98e8ac3671"
             >
               الزمالات
             </button>
@@ -482,7 +481,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   type="button"
                   onClick={() => major.majorId && onOpenMajor?.(major.majorId)}
                   aria-label={major.majorId ? `فتح صفحة تخصص ${major.label}` : undefined}
-                  style={{ fontSize: '10.5px', fontWeight: 'bold' }}
+                  data-mn-design="98e8ac3671"
                   className={`inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--mn-page)] border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] text-[var(--mn-text)] text-[10.5px] font-bold rounded-lg transition-all group ${
                     major.majorId
                       ? 'hover:bg-[var(--mn-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 cursor-pointer'
@@ -507,7 +506,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 <button
                   key={major}
                   type="button"
-                  style={{ fontSize: '10.5px', fontWeight: 'bold' }}
+                  data-mn-design="98e8ac3671"
                   className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--mn-page)] border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] text-[var(--mn-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--mn-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
                 >
                   <span>{major}</span>
@@ -525,7 +524,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 <button
                   key={major}
                   type="button"
-                  style={{ fontSize: '10.5px', fontWeight: 'bold' }}
+                  data-mn-design="98e8ac3671"
                   className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--mn-page)] border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] text-[var(--mn-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--mn-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
                 >
                   <span>{major}</span>
@@ -543,7 +542,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 <button
                   key={major}
                   type="button"
-                  style={{ fontSize: '10.5px', fontWeight: 'bold' }}
+                  data-mn-design="98e8ac3671"
                   className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--mn-page)] border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] text-[var(--mn-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--mn-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
                 >
                   <span>{major}</span>
@@ -562,7 +561,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
           <DetailSectionHeader id="scholarship-universities" icon={Building2} title="الجامعات المشاركة" level={3} />
 
-            <div className="grid grid-rows-2 grid-flow-col auto-cols-[80%] sm:auto-cols-[215px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="grid grid-rows-2 grid-flow-col auto-cols-[80%] sm:auto-cols-[215px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" data-mn-design="9856d4f1a6">
               {scholarship.participatingUniversities.map((university) => (
                 <button
                   key={university.id}
@@ -933,7 +932,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             onClick={() => {
               // Share functionality placeholder
             }}
-            style={{ fontSize: '13px', fontFamily: 'Cairo, sans-serif', fontWeight: 'bold' }}
+            data-mn-design="efc9da21fc"
             className="py-2.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer bg-[var(--mn-surface)] text-[var(--mn-heading)] border border-[var(--mn-accent)]/40 hover:bg-[var(--mn-accent)]/5 hover:border-[var(--mn-accent)] flex-1 max-w-[170px] mn-panel "
           >
             <span>مشاركة المنحة</span>
@@ -942,7 +941,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
           <button
             onClick={handleSaveClick}
-            style={{ fontSize: '13px', fontFamily: 'Cairo, sans-serif', fontWeight: 'bold' }}
+            data-mn-design="efc9da21fc"
             className={`py-2.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer flex-1 max-w-[170px] ${
               isFavorite
                 ? 'bg-[var(--mn-primary)] text-[var(--mn-accent-text)] border border-[var(--mn-accent)] mn-inverse '

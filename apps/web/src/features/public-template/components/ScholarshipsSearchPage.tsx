@@ -462,7 +462,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="اكتب اسم المنحة، التخصص، أو الدولة..."
                 className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
-                style={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+                data-mn-design="cd18739893"
               />
               <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
               {searchQuery && (
@@ -496,6 +496,14 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
           <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
             {/* Tile 1: الفلترة الذكية */}
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setIsFilterOpen(true);
+                }
+              }}
               onClick={() => setIsFilterOpen(true)}
               className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel "
             >
@@ -706,7 +714,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
                         if (onSelectScholarship) onSelectScholarship(scholarship);
                       }}
                       className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse "
-                      style={{ fontSize: '10.5px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+                      data-mn-design="26ecd1db9e"
                     >
                       <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
                       <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
@@ -723,7 +731,9 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
       {isFilterOpen && (
         <>
           {/* Backdrop Blur */}
-          <div
+          <button
+            type="button"
+            aria-label="إغلاق خيارات التصفية"
             className="fixed inset-0 bg-black/55 backdrop-blur-xs z-50 transition-opacity animate-fade-in"
             onClick={() => setIsFilterOpen(false)}
           />
@@ -769,7 +779,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
                             setIsFilterOpen(false);
                           }}
                           className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md font-bold transition-colors cursor-pointer block ${isSelected ? 'bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)]' : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'}`}
-                          style={{ fontSize: '11px' }}
+                          data-mn-design="55f5605788"
                         >
                           <span className="truncate">{country.label}</span>
                           <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[var(--mn-accent)] bg-[var(--mn-accent)] text-white' : 'border-[var(--mn-border)] bg-[var(--mn-surface)]'}`}>
@@ -799,7 +809,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
                 {isMajorsExpanded && (
                   <div className="max-h-[140px] overflow-y-auto pr-1 space-y-0.5 border-r border-[var(--mn-border)] mr-1 mt-1">
                     {majorOptions.length === 0 ? (
-                      <span className="text-[9px] text-[var(--mn-text-muted)] block p-2 text-center" style={{ fontSize: '9px' }}>لا توجد تخصصات مصنفة حالياً</span>
+                      <span className="text-[9px] text-[var(--mn-text-muted)] block p-2 text-center" data-mn-design="a050cea8a2">لا توجد تخصصات مصنفة حالياً</span>
                     ) : (
                       majorOptions.map((major) => {
                         const isSelected = selectedFilter === `major:${major}`;
@@ -811,7 +821,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
                               setIsFilterOpen(false);
                             }}
                             className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md font-bold transition-colors cursor-pointer block ${isSelected ? 'bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)]' : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'}`}
-                            style={{ fontSize: '11px' }}
+                            data-mn-design="55f5605788"
                           >
                             <span className="truncate">{major}</span>
                             <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[var(--mn-accent)] bg-[var(--mn-accent)] text-white' : 'border-[var(--mn-border)] bg-[var(--mn-surface)]'}`}>
@@ -851,7 +861,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
                             setIsFilterOpen(false);
                           }}
                           className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md font-bold transition-colors cursor-pointer block ${isSelected ? 'bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)]' : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'}`}
-                          style={{ fontSize: '11px' }}
+                          data-mn-design="55f5605788"
                         >
                           <span className="truncate">فلترة بدون ايلتس او توفل</span>
                           <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[var(--mn-accent)] bg-[var(--mn-accent)] text-white' : 'border-[var(--mn-border)] bg-[var(--mn-surface)]'}`}>
@@ -875,7 +885,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
                             setIsFilterOpen(false);
                           }}
                           className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md font-bold transition-colors cursor-pointer block ${isSelected ? 'bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)]' : 'hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'}`}
-                          style={{ fontSize: '11px' }}
+                          data-mn-design="55f5605788"
                         >
                           <span className="truncate">فلترة الدراسة باللغة الإنجليزية فقط</span>
                           <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all ${isSelected ? 'border-[var(--mn-accent)] bg-[var(--mn-accent)] text-white' : 'border-[var(--mn-border)] bg-[var(--mn-surface)]'}`}>

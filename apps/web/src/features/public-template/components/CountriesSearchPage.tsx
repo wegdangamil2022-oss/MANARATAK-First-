@@ -411,7 +411,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث باسم الدولة أو القارة..."
                 className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
-                style={{ fontSize: '12px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+                data-mn-design="cd18739893"
               />
               <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
               {searchQuery && (
@@ -581,7 +581,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
                   <button
                     onClick={() => setActiveCountryModal(country)}
                     className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse "
-                    style={{ fontSize: '10.5px', fontWeight: 'bold', fontFamily: 'Cairo, sans-serif' }}
+                    data-mn-design="26ecd1db9e"
                   >
                     <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">استكشف الدولة</span>
                     <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />

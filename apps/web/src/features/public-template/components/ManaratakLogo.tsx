@@ -17,7 +17,7 @@ export const ManaratakLogo: React.FC<ManaratakLogoProps> = ({ className = '', si
       height={size}
       alt="منارتك للفرص التعليمية — MANARATAK"
       draggable={false}
-      className={`block shrink-0 select-none rounded-full object-cover ${className}`}
+      className={`block shrink-0 select-none rounded-full object-contain ${className}`}
     />
   );
 };
