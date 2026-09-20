@@ -1,0 +1,7 @@
+export enum CourseImportCompletenessState {
+  IMPORTED = 'IMPORTED',
+  INCOMPLETE = 'INCOMPLETE',
+  COMPLETE = 'COMPLETE',
+  NEEDS_REVIEW = 'NEEDS_REVIEW',
+  REJECTED = 'REJECTED'
+}

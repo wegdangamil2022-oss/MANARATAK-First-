@@ -1,0 +1,8 @@
+export enum BackgroundJobStatus {
+  CREATED = 'CREATED',
+  SCHEDULED = 'SCHEDULED',
+  STARTED = 'STARTED',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED'
+}

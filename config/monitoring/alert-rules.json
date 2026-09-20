@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "kind": "MANARATAK_OBSERVABILITY_ALERT_RULES",
+  "runtimeStatus": "PENDING_NON_BLOCKING",
+  "rules": [
+    {
+      "id": "api-5xx-rate",
+      "signal": "http.server.errors / http.server.requests",
+      "severity": "P1",
+      "window": "5m",
+      "runbook": "OBS-HTTP-ERRORS"
+    },
+    {
+      "id": "api-latency",
+      "signal": "http.server.duration_ms p95",
+      "severity": "P2",
+      "window": "10m",
+      "runbook": "OBS-HTTP-LATENCY"
+    },
+    {
+      "id": "telemetry-exporter",
+      "signal": "telemetry-exporter readiness DEGRADED/DOWN",
+      "severity": "P1",
+      "window": "5m",
+      "runbook": "OBS-EXPORTER"
+    },
+    {
+      "id": "worker-failures",
+      "signal": "worker.iterations.failed",
+      "severity": "P1",
+      "window": "10m",
+      "runbook": "OBS-WORKERS"
+    },
+    {
+      "id": "outbox-job-health",
+      "signal": "polling-workers/background-jobs readiness DOWN",
+      "severity": "P1",
+      "window": "5m",
+      "runbook": "OBS-WORKERS"
+    },
+    {
+      "id": "import-health",
+      "signal": "import-foundation readiness DOWN",
+      "severity": "P1",
+      "window": "5m",
+      "runbook": "OBS-IMPORTS"
+    },
+    {
+      "id": "finance-health",
+      "signal": "payment-gateway/background-jobs readiness DOWN",
+      "severity": "P1",
+      "window": "5m",
+      "runbook": "OBS-FINANCE"
+    },
+    {
+      "id": "notification-health",
+      "signal": "notifications readiness DOWN",
+      "severity": "P2",
+      "window": "10m",
+      "runbook": "OBS-NOTIFICATIONS"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../packages/config/tsconfig.json"
+    },
+    {
+      "path": "../../packages/infrastructure/tsconfig.json"
+    },
+    {
+      "path": "../../packages/domain/tsconfig.json"
+    },
+    {
+      "path": "../../packages/application/tsconfig.json"
+    },
+    {
+      "path": "../../packages/core/tsconfig.json"
+    }
+  ]
+}

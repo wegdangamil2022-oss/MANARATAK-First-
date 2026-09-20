@@ -1,0 +1,7 @@
+export enum LifeStatus {
+  PROVISIONED = 'PROVISIONED',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  ARCHIVED = 'ARCHIVED',
+  PURGED = 'PURGED'
+}

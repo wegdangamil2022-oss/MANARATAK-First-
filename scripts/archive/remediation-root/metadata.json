@@ -1,0 +1,6 @@
+{
+  "name": "MANARATAK 2.0 Enterprise Platform",
+  "description": "Enterprise Solution Design and Architecture Repository for the MANARATAK 2.0 Platform, including core conceptual, logical, physical, and canonical design blueprints.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

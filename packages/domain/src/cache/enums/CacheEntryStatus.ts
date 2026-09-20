@@ -1,0 +1,6 @@
+export enum CacheEntryStatus {
+  CREATED = 'CREATED',
+  EXPIRED = 'EXPIRED',
+  INVALIDATED = 'INVALIDATED',
+  REMOVED = 'REMOVED'
+}

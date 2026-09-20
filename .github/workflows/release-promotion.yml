@@ -1,0 +1,135 @@
+name: Immutable Release Promotion
+
+on:
+  workflow_run:
+    workflows: ["Enterprise CI Pipeline"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Approved source SHA for manual recovery/re-promotion
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validation:
+    if: github.repository == 'wegdangamil2022-oss/MANARATAK_FINAL' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
+    runs-on: ubuntu-latest
+    environment: validation
+    env:
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha || inputs.source_sha }}
+      SOURCE_RUN_ID: ${{ github.event.workflow_run.id || '' }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Acquire CI-produced immutable artifacts or rebuild exact manual source
+        shell: bash
+        run: |
+          if [ -n "$SOURCE_RUN_ID" ]; then
+            gh run download "$SOURCE_RUN_ID" -n "manaratak-release-artifacts-$SOURCE_SHA" -D release-artifacts
+          else
+            npm run build
+            GITHUB_SHA="$SOURCE_SHA" npm run release:artifacts
+          fi
+          npm run release:verify
+      - name: Promote exact manifest to validation
+        env:
+          MANARATAK_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
+          MANARATAK_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
+        run: npm run release:promote -- validation
+      - name: Validation smoke
+        env:
+          MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
+          MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
+        run: npm run release:smoke -- validation
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+        with:
+          name: immutable-release-${{ env.SOURCE_SHA }}
+          path: release-artifacts
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+        with:
+          name: validation-evidence-${{ env.SOURCE_SHA }}
+          path: release-evidence
+          if-no-files-found: error
+
+  staging:
+    needs: validation
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha || inputs.source_sha }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Download the exact validation artifact
+        run: gh run download "$GITHUB_RUN_ID" -n "immutable-release-$SOURCE_SHA" -D release-artifacts
+      - run: npm run release:verify
+      - env:
+          MANARATAK_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
+          MANARATAK_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
+        run: npm run release:promote -- staging
+      - env:
+          MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
+          MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
+        run: npm run release:smoke -- staging
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+        with:
+          name: staging-evidence-${{ env.SOURCE_SHA }}
+          path: release-evidence
+          if-no-files-found: error
+
+  production:
+    needs: staging
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha || inputs.source_sha }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Download the exact validation artifact
+        run: gh run download "$GITHUB_RUN_ID" -n "immutable-release-$SOURCE_SHA" -D release-artifacts
+      - run: npm run release:verify
+      - name: Recovery contract preflight
+        run: npm run recovery:source:verify
+      - name: Promote exact approved digests after production approval
+        env:
+          MANARATAK_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
+          MANARATAK_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
+        run: npm run release:promote -- production
+      - env:
+          MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
+          MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
+        run: npm run release:smoke -- production
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+        with:
+          name: production-evidence-${{ env.SOURCE_SHA }}
+          path: release-evidence
+          if-no-files-found: error

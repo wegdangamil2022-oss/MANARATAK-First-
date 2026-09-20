@@ -1,0 +1,6 @@
+export enum EventLifecycleState {
+  CREATED = 'CREATED',
+  REGISTERED = 'REGISTERED',
+  PUBLISHED = 'PUBLISHED',
+  ARCHIVED = 'ARCHIVED'
+}

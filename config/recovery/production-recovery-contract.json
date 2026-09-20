@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "kind": "MANARATAK_PRODUCTION_RECOVERY_CONTRACT",
+  "authority": "MANARATAK-2.0-Master-Blueprint",
+  "objectives": {
+    "regionalLossRpoMinutes": 5,
+    "regionalLossRtoMinutes": 60,
+    "pitrWindowDays": 30,
+    "restoreAuditCadence": "WEEKLY"
+  },
+  "postgresql": {
+    "owner": "Platform/SRE",
+    "mode": "managed-pitr-plus-daily-snapshot",
+    "encryption": "distinct-backup-kms-key",
+    "immutableCopy": "WORM separate security boundary",
+    "accessAudit": true
+  },
+  "assets": {
+    "owner": "Platform/SRE",
+    "mode": "versioned-object-storage-cross-region-copy",
+    "encryption": "distinct-backup-kms-key",
+    "immutableCopy": "WORM separate security boundary",
+    "accessAudit": true
+  },
+  "additionalDurableState": [
+    "event/outbox PostgreSQL state",
+    "release/recovery evidence",
+    "provider configuration manifests"
+  ],
+  "retention": {
+    "pitrDays": 30,
+    "dailyDays": 35,
+    "weeklyCopies": 12,
+    "deletion": "retention-expiry-only-by-backup-service-role"
+  },
+  "runtimeEvidenceStatus": "PENDING_NON_BLOCKING"
+}

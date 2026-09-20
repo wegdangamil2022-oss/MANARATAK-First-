@@ -1,0 +1,51 @@
+name: Source Architecture Guards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**/src/**'
+      - 'packages/**/src/**'
+      - 'docs/architecture/models/**'
+      - 'docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md'
+      - 'docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md'
+      - 'scripts/architecture/**'
+      - 'scripts/quality/**'
+      - 'tests/architecture/**'
+      - 'package.json'
+      - '.github/workflows/source-architecture-guards.yml'
+  pull_request:
+    paths:
+      - 'apps/**/src/**'
+      - 'packages/**/src/**'
+      - 'docs/architecture/models/**'
+      - 'docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md'
+      - 'docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md'
+      - 'scripts/architecture/**'
+      - 'scripts/quality/**'
+      - 'tests/architecture/**'
+      - 'package.json'
+      - '.github/workflows/source-architecture-guards.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-architecture-guards-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  architecture-guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
+        with:
+          node-version: 22.16.0
+      - name: Cross-phase architecture/static-security guards
+        run: node scripts/architecture/verify-source-architecture-guards.mjs
+      - name: Negative contract tests for guard behavior
+        run: node --test tests/architecture/source-architecture-guard-contracts.test.mjs
+      - name: Circular dependency and source-quality regression gate
+        run: node scripts/quality/verify-source-quality.mjs

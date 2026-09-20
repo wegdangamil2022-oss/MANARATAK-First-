@@ -1,0 +1,23 @@
+{
+  "stage": "W16",
+  "classification": "FINAL_SOURCE_CLOSURE_AND_RUNTIME_HANDOFF",
+  "official_remediation_waves": "W0_TO_W15",
+  "authoritative_source_findings": 153,
+  "new_findings": 0,
+  "final_source_gate_required": true,
+  "source_remediation_status_after_green_gate": "CLOSED",
+  "runtime_boundary": "PENDING_GOOGLE_STUDIO",
+  "runtime_sequence": ["R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7"],
+  "w16_runtime_mutations": {
+    "prisma_migration_authored": false,
+    "prisma_migration_executed": false,
+    "database_write": false,
+    "database_backfill": false,
+    "redis_activation": false,
+    "kms_activation": false,
+    "scheduler_activation": false,
+    "provider_call": false,
+    "payment_gateway_call": false,
+    "live_ai_call": false
+  }
+}

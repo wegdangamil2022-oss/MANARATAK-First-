@@ -1,0 +1,79 @@
+--- apps/web/src/features/auth/LoginPage.tsx
++++ apps/web/src/features/auth/LoginPage.tsx
+@@ -28,34 +28,40 @@
+     }
+   };
+ 
+-  const submit = (event: FormEvent) => {
++  const submit = async (event: FormEvent) => {
+     event.preventDefault();
+     const normalizedEmail = email.trim().toLowerCase();
+     if (!normalizedEmail) {
+       setMessage(isRtl ? 'الرجاء إدخال البريد الإلكتروني.' : 'Email is required.');
+       return;
+     }
+     if (!password) {
+       setMessage(isRtl ? 'الرجاء إدخال كلمة المرور.' : 'Password is required.');
+       return;
+     }
+ 
+-    // Automatically map the email to the admin role if it matches the designated admin email
+-    const finalRole = normalizedEmail === 'wegdangamil2022@gmail.com' ? 'admin' : role;
+-
+-    if (finalRole === 'admin') {
+-      if (normalizedEmail !== 'wegdangamil2022@gmail.com' || password !== 'wegdan1234@1234') {
+-        setMessage(isRtl 
+-          ? 'رمز المسؤول أو كلمة المرور غير صالحة للعرض التجريبي.'
+-          : 'Invalid admin credentials for the demo.');
+-        return;
++    try {
++      const res = await fetch('/api/v1/auth/login', {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({ email: normalizedEmail, password })
++      });
++      const result = await res.json();
++
++      if (!res.ok) {
++        setMessage(result.error?.message || (isRtl ? 'بيانات الاعتماد غير صالحة' : 'Invalid credentials'));
++        return;
+       }
+       
+-      localStorage.setItem('manaratak_demo_email', normalizedEmail);
+-      localStorage.setItem('manaratak_demo_role', 'admin');
++      const { accessToken, refreshToken } = result.data;
++      localStorage.setItem('manaratak_access_token', accessToken);
++      localStorage.setItem('manaratak_refresh_token', refreshToken);
++      localStorage.removeItem('manaratak_demo_role');
++      localStorage.removeItem('manaratak_demo_email');
+ 
+       // Detect environment to safely route the admin demo access
+       let adminUrl = import.meta.env.VITE_ADMIN_URL;
+       
+       if (!adminUrl || adminUrl === '/admin') {
+         const hostname = window.location.hostname;
+         if (hostname === 'localhost' || hostname === '127.0.0.1') {
+           adminUrl = 'http://localhost:3001';
+         } else {
+           // We are in a hosted preview environment
+           navigate('/admin');
+           return;
+         }
+       }
+       window.location.href = `${adminUrl}`;
+-      return;
+-    }
+-
+-    // Student Role
+-    localStorage.setItem('manaratak_demo_email', normalizedEmail);
+-    localStorage.setItem('manaratak_demo_role', 'student');
+-
+-    // Custom student id parsed from email
+-    const studentRef = normalizedEmail.includes('@') ? normalizedEmail.split('@')[0] : 'demo-student';
+-    navigate(`/student/${encodeURIComponent(studentRef)}`);
++    } catch (error) {
++      setMessage(isRtl ? 'حدث خطأ في النظام.' : 'System error occurred.');
++    }
+   };
+ 
+   return (

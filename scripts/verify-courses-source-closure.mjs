@@ -1,0 +1,56 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+const exists = (rel) => fs.existsSync(path.join(root, rel));
+const checks = [];
+const check = (name, condition) => checks.push({ name, passed: Boolean(condition) });
+
+const adminApp = read('apps/admin/src/App.tsx');
+const adminList = read('apps/admin/src/pages/CourseListPage.tsx');
+const adminDetail = read('apps/admin/src/pages/CourseDetailPage.tsx');
+const adminRouter = read('apps/api/src/presentation/api/router/CourseAdminRouter.ts');
+const publicRouter = read('apps/api/src/presentation/api/router/CoursePublicRouter.ts');
+const learnerRouter = read('apps/api/src/presentation/api/router/CourseLearnerRouter.ts');
+const publication = read('packages/application/src/courses/services/CoursePublicationService.ts');
+const nativeUseCases = read('packages/application/src/courses/use-cases/NativeCourseUseCases.ts');
+const publicUseCases = read('packages/application/src/courses/use-cases/PublicCourseUseCases.ts');
+const progressUseCases = read('packages/application/src/courses/use-cases/CourseProgressUseCases.ts');
+const relationshipService = read('packages/application/src/courses/services/CourseRelationshipResolutionService.ts');
+const relationshipContract = read('packages/domain/src/courses/relationships.ts');
+const relationshipRepo = read('packages/infrastructure/src/courses/PrismaCourseRelationshipRepository.ts');
+const courseRepo = read('packages/infrastructure/src/courses/PrismaCourseRepository.ts');
+const schema = read('packages/infrastructure/prisma/schema.prisma');
+const graph = read('packages/application/src/read-models/CrossDomainGraphReadService.ts');
+const publicDataSource = read('apps/web/src/features/public-template/publicLiveDataSource.ts');
+
+check('Shadow Admin course UI is removed', !exists('apps/web/src/features/admin-preview'));
+check('Official Admin owns course routes', adminApp.includes('<CourseListPage') && adminApp.includes('<CourseDetailPage'));
+check('Official Admin list reads live course API', adminList.includes('/admin/courses?') && adminList.includes('originType') && adminList.includes('accessType'));
+check('Paid is an access type, not a course origin', adminList.includes('value="PAID"') && !adminList.includes('value="PAID_COURSE"'));
+check('Official Admin detail reads curriculum and relationships', adminDetail.includes('/curriculum') && adminDetail.includes('/relationships'));
+check('External direct URL is source-owned', adminDetail.includes('readOnly={isExternalLinkedCourse}') && adminDetail.includes('editableFields'));
+check('Official Admin reviews canonical language', adminDetail.includes('/relationships/language') && adminDetail.includes('canonicalPickerApi.languages'));
+check('Official Admin reviews taxonomy and major projections', adminDetail.includes('/relationships/taxonomy/') && adminDetail.includes('/relationships/majors/'));
+check('Course admin relationship routes exist', adminRouter.includes("router.get('/:id/relationships'") && adminRouter.includes("router.post('/:id/relationships/tests'"));
+check('Enrollment policy routes exist', adminRouter.includes("router.get('/:id/enrollment-policy'") && adminRouter.includes("router.put('/:id/enrollment-policy'"));
+check('Course/test canonical relation contract exists', relationshipContract.includes('CourseInternationalTestRelationshipDto') && relationshipContract.includes('listPublishedCoursesForInternationalTest'));
+check('Course/test canonical relation persistence exists', relationshipRepo.includes('courseInternationalTestRelationship') && relationshipRepo.includes('listPublishedCoursesForInternationalTest'));
+check('Course/test model and source-only migration exist', schema.includes('model CourseInternationalTestRelationship') && exists('packages/infrastructure/prisma/migrations/20260905033000_course_international_test_relationship/migration.sql'));
+check('Cross-domain graph reads Course-owned test relations', graph.includes('listPublishedCoursesForInternationalTest(test.id'));
+check('Public API accepts international-test filter', publicRouter.includes('internationalTestId'));
+check('Publication requires canonical relationship closure', publication.includes('COURSE_PUBLICATION_CANONICAL_LANGUAGE_REQUIRED') && publication.includes('COURSE_PUBLICATION_RELATIONSHIP_REVIEW_REQUIRED'));
+check('Imported publication requires free study and certificate', publication.includes('IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED') && publication.includes('course.isStudyFree !== true') && publication.includes('course.isFreeCertificate !== true'));
+check('Public imported eligibility matches publication policy', publicUseCases.includes('CourseAccessType.FREE_STUDY_AND_CERTIFICATE') && publicUseCases.includes('course.isStudyFree === true') && publicUseCases.includes('course.isFreeCertificate === true'));
+check('Repositories apply matching public eligibility', courseRepo.includes('isStudyFree: true') && courseRepo.includes('isFreeCertificate: true') && relationshipRepo.includes('isFreeCertificate: true'));
+check('Native readiness covers language and relationships', nativeUseCases.includes("'canonical-language'") && nativeUseCases.includes("'relationship-review'"));
+check('Learner workspace is authenticated', learnerRouter.includes("router.get('/:courseId/workspace'") && learnerRouter.includes('AuthMiddleware'));
+check('Learner access requires enrollment', progressUseCases.includes('requireLearningAccessEnrollment') && progressUseCases.includes('COURSE_ENROLLMENT_REQUIRED'));
+check('Relationship semantics stay Course-owned', relationshipService.includes('proposeInternationalTestRelationship') && relationshipService.includes('approveLanguageReference'));
+check('Public template reads published courses from canonical API', publicDataSource.includes('collectCursorPages((cursor) => ApiClient.getCourses({ cursor, limit: 100 }))') && publicDataSource.includes('const mapped = rows.map(mapCourse)'));
+
+const failed = checks.filter((item) => !item.passed);
+for (const item of checks) console.log(`${item.passed ? 'PASS' : 'FAIL'} ${item.name}`);
+console.log(JSON.stringify({ suite: 'COURSES_ADMIN_SOURCE_CLOSURE', passed: checks.length - failed.length, total: checks.length, failed: failed.map((item) => item.name) }, null, 2));
+if (failed.length) process.exit(1);

@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "authority": "MNT-AUD-0030/MNT-AUD-0050",
+  "policy": "Every persisted AssetId reference must resolve through P05 before authoring/publish/use. Purge usage is derived from authoritative persistence, never from a second writable registry.",
+  "directReferences": [
+    {
+      "model": "Course",
+      "field": "thumbnailAssetId",
+      "purpose": "COURSE_THUMBNAIL",
+      "authoring": "packages/application/src/courses/use-cases/AdminCourseUseCases.ts"
+    },
+    {
+      "model": "CourseLessonAsset",
+      "field": "assetId",
+      "purpose": "COURSE_LESSON_ASSET",
+      "authoring": "packages/application/src/courses/use-cases/CourseCurriculumUseCases.ts"
+    },
+    {
+      "model": "CertificateIssuer",
+      "field": "issuerLogoAssetId",
+      "purpose": "CERTIFICATE_ISSUER_LOGO",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "CertificateTemplateVersion",
+      "field": "logoAssetId",
+      "purpose": "CERTIFICATE_TEMPLATE_LOGO",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "CertificateTemplateVersion",
+      "field": "sealAssetId",
+      "purpose": "CERTIFICATE_TEMPLATE_SEAL",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "CertificateTemplateVersion",
+      "field": "signatureAssetId",
+      "purpose": "CERTIFICATE_TEMPLATE_SIGNATURE",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "CertificateTemplateVersion",
+      "field": "designAssetId",
+      "purpose": "CERTIFICATE_TEMPLATE_DESIGN",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "Certificate",
+      "field": "certificatePdfAssetId",
+      "purpose": "CERTIFICATE_RENDERED_PDF",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "Certificate",
+      "field": "previewImageAssetId",
+      "purpose": "CERTIFICATE_RENDERED_PREVIEW",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "Certificate",
+      "field": "verificationQrAssetId",
+      "purpose": "CERTIFICATE_RENDERED_QR",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "Certificate",
+      "field": "signatureAssetId",
+      "purpose": "CERTIFICATE_RENDERED_SIGNATURE",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "University",
+      "field": "logoAssetId",
+      "purpose": "UNIVERSITY_LOGO",
+      "authoring": "packages/application/src/universities/use-cases/AdminUniversityUseCases.ts"
+    },
+    {
+      "model": "InternationalTestPreparationMaterial",
+      "field": "assetId",
+      "purpose": "INTERNATIONAL_TEST_MATERIAL",
+      "authoring": "packages/application/src/tests-platform/use-cases/InternationalTestUseCases.ts"
+    },
+    {
+      "model": "StudentWorkspace",
+      "field": "avatarAssetId",
+      "purpose": "STUDENT_AVATAR",
+      "authoring": "packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts"
+    },
+    {
+      "model": "StudentCertificateReadProjection",
+      "field": "certificatePdfAssetId",
+      "purpose": "STUDENT_CERTIFICATE_PDF",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts",
+      "derived": true
+    },
+    {
+      "model": "StudentCertificateReadProjection",
+      "field": "previewImageAssetId",
+      "purpose": "STUDENT_CERTIFICATE_PREVIEW",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts",
+      "derived": true
+    },
+    {
+      "model": "CmsContentNode",
+      "field": "featuredAssetId",
+      "purpose": "CMS_PUBLIC_MEDIA",
+      "authoring": "packages/application/src/cms/use-cases/CmsUseCases.ts"
+    },
+    {
+      "model": "CmsLocalizedContent",
+      "field": "featuredAssetId",
+      "purpose": "CMS_PUBLIC_MEDIA",
+      "authoring": "packages/application/src/cms/use-cases/CmsUseCases.ts"
+    },
+    {
+      "model": "CmsContentAttachment",
+      "field": "assetId",
+      "purpose": "CMS_PUBLIC_MEDIA",
+      "authoring": "packages/application/src/cms/use-cases/CmsUseCases.ts"
+    },
+    {
+      "model": "CmsPublishedContent",
+      "field": "featuredAssetId",
+      "purpose": "CMS_PUBLIC_MEDIA",
+      "authoring": "packages/application/src/cms/use-cases/CmsUseCases.ts",
+      "derived": true
+    },
+    {
+      "model": "ReferenceCountry",
+      "field": "flagAssetId",
+      "purpose": "REFERENCE_COUNTRY_FLAG",
+      "authoring": "packages/application/src/reference-data/use-cases/ReferenceDataUseCases.ts"
+    },
+    {
+      "model": "StudyDestinationProfile",
+      "field": "imageAssetId",
+      "purpose": "STUDY_DESTINATION_IMAGE",
+      "authoring": "packages/application/src/study-destinations/StudyDestinationUseCases.ts"
+    },
+    {
+      "model": "StudentToolDefinitionRecord",
+      "field": "iconAssetId",
+      "purpose": "STUDENT_TOOL_ICON",
+      "authoring": "packages/application/src/student-tools/use-cases/StudentToolRegistryUseCases.ts"
+    },
+    {
+      "model": "ServiceCatalogRecord",
+      "field": "thumbnailAssetId",
+      "purpose": "SERVICE_THUMBNAIL",
+      "authoring": "packages/application/src/services-platform/use-cases/AdminServiceCatalogUseCases.ts"
+    },
+    {
+      "model": "CareerEmployerRecord",
+      "field": "logoAssetId",
+      "purpose": "CAREER_EMPLOYER_LOGO",
+      "authoring": "packages/application/src/career-alumni/use-cases/CareerAdminUseCases.ts"
+    },
+    {
+      "model": "ServiceDeliveryArtifactRecord",
+      "field": "assetId",
+      "purpose": "SERVICE_DELIVERY_ARTIFACT",
+      "authoring": "packages/application/src/services-platform/use-cases/ServiceOperationsUseCases.ts"
+    },
+    {
+      "model": "CareerProfileRecord",
+      "field": "resumeAssetId",
+      "purpose": "CAREER_PROFILE_RESUME",
+      "authoring": "packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts"
+    },
+    {
+      "model": "CareerApplicationRecord",
+      "field": "cvAssetId",
+      "purpose": "CAREER_APPLICATION_CV",
+      "authoring": "packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts"
+    }
+  ],
+  "jsonReferences": [
+    {
+      "model": "CmsContentNode",
+      "field": "seoMetadata.openGraphAssetId",
+      "purpose": "CMS_PUBLIC_MEDIA",
+      "authoring": "packages/application/src/cms/use-cases/CmsUseCases.ts"
+    },
+    {
+      "model": "CmsLocalizedContent",
+      "field": "seoMetadata.openGraphAssetId",
+      "purpose": "CMS_PUBLIC_MEDIA",
+      "authoring": "packages/application/src/cms/use-cases/CmsUseCases.ts"
+    },
+    {
+      "model": "CmsPublishedContent",
+      "field": "seoMetadata.openGraphAssetId",
+      "purpose": "CMS_PUBLIC_MEDIA",
+      "authoring": "packages/application/src/cms/use-cases/CmsUseCases.ts",
+      "derived": true
+    },
+    {
+      "model": "CmsPublishedContent",
+      "field": "attachmentAssetIds",
+      "purpose": "CMS_PUBLIC_MEDIA",
+      "authoring": "packages/application/src/cms/use-cases/CmsUseCases.ts",
+      "derived": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+const r=(p)=>fs.readFileSync(p,'utf8'); const c=[]; const ok=(n,v)=>c.push([n,!!v]);
+const router=r('apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts');
+const client=r('apps/web/src/api/client.ts'); const app=r('apps/web/src/features/public-template/PublicTemplateApp.tsx');
+const intent=r('apps/web/src/features/students/postLoginIntent.ts'); const hyd=r('packages/infrastructure/src/students/StudentSavedItemHydrationGateways.ts');
+ok('current-student create/remove owner API',router.includes("'/saved-items'")&&router.includes("'/saved-items/:entityType/:entityId'"));
+ok('web create/remove methods',client.includes('createMyStudentSavedItem')&&client.includes('removeMyStudentSavedItem'));
+ok('live hydrates from Phase15 saved items',app.includes('listMyHydratedStudentSavedItems')&&app.includes('favoriteKindFromSavedType'));
+ok('live toggle calls owner API',app.includes('ApiClient.createMyStudentSavedItem')&&app.includes('ApiClient.removeMyStudentSavedItem'));
+ok('prototype localStorage remains gated',app.includes("publicDataMode !== 'prototype'")&&app.includes("manaratak_favorites_v2"));
+ok('anonymous save preserves deterministic action',intent.includes('PendingPostLoginAction')&&app.includes('preservePostLoginAction'));
+ok('post-login completes pending save',app.includes('consumePostLoginAction')&&app.includes("source: 'public-discovery-auth-handoff'"));
+ok('core public entity mappings covered',['SCHOLARSHIP','UNIVERSITY','MAJOR','COURSE','CMS_CONTENT','SERVICE'].every(x=>app.includes(x)));
+ok('course lifecycle hydration exists',hyd.includes('CourseStudentSavedItemHydrationGateway')&&hyd.includes('CourseStatus.PUBLISHED'));
+ok('no live local optimistic-only toggle',app.includes("if (publicDataMode === 'prototype')")&&app.includes('Live favorites are Phase 15 Saved Items'));
+for(const [n,v] of c) console.log(`${v?'PASS':'FAIL'} ${n}`); const f=c.filter(([,v])=>!v); console.log(`W5_0073_SOURCE=${f.length?'FAIL':'PASS'} ${c.length-f.length}/${c.length}`); if(f.length) process.exit(1);

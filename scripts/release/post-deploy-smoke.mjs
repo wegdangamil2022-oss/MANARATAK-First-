@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+const environment=process.argv[2]; const api=process.env.MANARATAK_SMOKE_API_URL; const web=process.env.MANARATAK_SMOKE_WEB_URL; if(!api||!web) throw new Error('SMOKE_URLS_REQUIRED'); for(const [name,url] of [['api',`${api.replace(/\/$/,'')}/api/v1/monitoring/readiness`],['web',web]]){const res=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(15000)}); if(res.status<200||res.status>=400) throw new Error(`SMOKE_${name.toUpperCase()}_${res.status}`);} console.log(`POST_DEPLOY_SMOKE=${environment.toUpperCase()}_PASS`);

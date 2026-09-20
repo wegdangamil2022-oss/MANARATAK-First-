@@ -472,7 +472,7 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
                       ? university.studyPrograms.topKeyMajors
                       : (university.studyPrograms.majorLinks ?? []).map((l) => l.label)
                   ).map((majorName, idx) => {
-                    const matchedLink = university.studyPrograms.majorLinks?.find(
+                    const matchedLink = university.studyPrograms!.majorLinks?.find(
                       (l) => l.label === majorName || l.programLabel === majorName
                     );
                     const majorId = matchedLink?.majorId;

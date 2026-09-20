@@ -1,0 +1,5441 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --- System & Core ---
+
+model Settings {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model ImportSourceRegistryEntry {
+  sourceId             String   @id
+  displayName          String
+  baseUrl              String
+  category             String
+  accessClassification String
+  status               String
+  rateLimitPerMinute   Int?
+  robotsPolicyUrl      String?
+  connectorId          String
+  connectorVersion     String
+  metadata             Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([status])
+  @@index([category])
+}
+
+model ScholarshipImportVerificationDecision {
+  id            String   @id
+  recordId      String
+  state         String
+  actorId       String
+  reason        String
+  evidence      Json?
+  correlationId String?
+  createdAt     DateTime @default(now())
+  record        ImportRecord @relation("ScholarshipVerificationDecisionRecord", fields: [recordId], references: [id], onDelete: Cascade)
+  @@index([recordId, createdAt])
+}
+
+model ScholarshipImportCanonicalResolutionDecision {
+  id                 String   @id
+  recordId           String
+  fieldOrRequirementKey String
+  canonicalEntityType String
+  canonicalId        String?
+  rawValue           String
+  resolutionType     String
+  actorId            String
+  reason             String?
+  correlationId      String?
+  createdAt          DateTime @default(now())
+  record             ImportRecord @relation("ScholarshipCanonicalDecisionRecord", fields: [recordId], references: [id], onDelete: Cascade)
+  @@index([recordId, createdAt])
+}
+
+// --- Settings Foundation ---
+
+model SettingDefinitionRecord {
+  id            String   @id
+  key           String   @unique
+  valueType     String
+  description   String?
+  defaultValue  Json?
+  isFeatureFlag Boolean  @default(false)
+  isDeprecated  Boolean  @default(false)
+  isSecret      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SettingAssignmentRecord {
+  id               String   @id
+  key              String
+  scopeLevel       String
+  scopeId          String
+  currentVersionId String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  versions SettingVersionRecord[]
+
+  @@unique([key, scopeLevel, scopeId])
+  @@index([key])
+  @@index([scopeLevel, scopeId])
+}
+
+model SettingVersionRecord {
+  id                  String   @id
+  assignmentId        String
+  value               Json
+  valueType           String
+  authorId            String?
+  createdAt           DateTime @default(now())
+  rollbackOfVersionId String?
+
+  assignment SettingAssignmentRecord @relation(fields: [assignmentId], references: [id])
+
+  @@index([assignmentId, createdAt])
+}
+
+// --- Import Foundation ---
+
+model ImportBatch {
+  id               String    @id @default(uuid())
+  sourceSystem     String
+  dataType         String
+  batchStatus      String
+  totalRecords     Int       @default(0)
+  processedRecords Int       @default(0)
+  failedRecords    Int       @default(0)
+  attemptCount     Int       @default(0)
+  availableAt      DateTime  @default(now())
+  claimedBy        String?
+  claimUntil       DateTime?
+  lastError        String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  records ImportRecord[]
+
+  @@index([batchStatus])
+  @@index([dataType])
+  @@index([batchStatus, dataType])
+  @@index([batchStatus, availableAt])
+  @@index([claimUntil])
+}
+
+model ImportRecord {
+  id                 String    @id @default(uuid())
+  batchId            String
+  status             String
+  rawPayload         Json
+  validationErrors   Json?
+  processingNotes    String?
+  sourceDedupKey     String?
+  promotedEntityId   String?
+  chunkIndex         Int?
+  recordOffset       Int?
+  sourceRowNumber    Int?
+  retentionExpiresAt DateTime?
+  legalHoldUntil       DateTime?
+  retentionProcessedAt DateTime?
+  retentionState       String    @default("PENDING")
+  retentionClaimUntil  DateTime?
+  retentionClaimToken  String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  batch ImportBatch @relation(fields: [batchId], references: [id])
+  scholarshipVerificationDecisions ScholarshipImportVerificationDecision[] @relation("ScholarshipVerificationDecisionRecord")
+  scholarshipCanonicalResolutionDecisions ScholarshipImportCanonicalResolutionDecision[] @relation("ScholarshipCanonicalDecisionRecord")
+
+  @@unique([batchId, sourceDedupKey])
+  @@index([retentionExpiresAt, retentionProcessedAt])
+  @@index([batchId])
+  @@index([batchId, status])
+  @@index([batchId, chunkIndex])
+  @@index([retentionExpiresAt])
+}
+
+// --- Phase 13 Learning Platform: Core Course Persistence ---
+
+model Course {
+  id                   String   @id @default(uuid())
+  publicId             String   @unique
+  slug                 String   @unique
+  canonicalName        String
+  canonicalDedupKey    String   @unique
+  displayName          String
+  accessType           String
+  originType           String
+  directCourseUrl      String
+  status               String
+  completenessStatus   String
+  version              Int      @default(1)
+
+  externalProviderId               String?
+  originalSourceTitle              String?
+  isStudyFree                      Boolean?
+  isFreeCertificate                Boolean?
+  certificateType                  String?
+  learningLanguageRaw              String?
+  learningLanguageReferenceId      String?
+  learningLanguageResolutionState  String   @default("UNRESOLVED")
+  learningLanguageResolutionMethod String?
+  learningLanguageResolvedAt       DateTime?
+  learningLanguageReviewedBy        String?
+  learningLanguageAdminReviewedRaw  String?
+  studyLevelRaw                    String?
+  studyDurationRaw                 String?
+  shortCourseTopicsRaw             String?
+
+  platformName         String?
+  providerName         String?
+  learningLanguage     String?
+  studyDuration        String?
+  certificateAvailable Boolean?
+  category             String?
+  difficultyLevel      String?
+  sourceUrl            String?
+  officialSourceUrl    String?
+  thumbnailAssetId     String?
+  sourceImportRecordId String?
+  optionalFields       Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  externalProvider           ExternalCourseProvider?        @relation(fields: [externalProviderId], references: [id], onDelete: SetNull)
+  learningLanguageReference  ReferenceLanguage?             @relation("CourseLearningLanguageReference", fields: [learningLanguageReferenceId], references: [id], onDelete: SetNull)
+  sourceIdentities           CourseSourceIdentity[]
+  importAnalyses             CourseImportAnalysis[]
+  fieldProvenance            CourseFieldProvenance[]
+  taxonomyResolutions        CourseTaxonomyResolution[]
+  academicTaxonomyLinks      CourseAcademicTaxonomyLink[]
+  majorProjections           CourseMajorProjection[]
+  internationalTestRelationships CourseInternationalTestRelationship[]
+  modules                    CourseModule[]
+  lessons                    CourseLesson[]
+  lessonAssets               CourseLessonAsset[]
+  quizzes                    CourseQuiz[]
+  questionBanks              CourseQuestionBank[]
+  questions                  CourseQuestion[]
+  enrollments                CourseEnrollment[]
+  lessonProgress             CourseLessonProgress[]
+  quizAttempts               CourseQuizAttempt[]
+  completions                CourseCompletion[]
+  versions                   CourseVersion[]
+  enrollmentPolicy           CourseEnrollmentPolicy?
+  learningPathCourses        LearningPathCourse[]
+
+  @@index([status])
+  @@index([completenessStatus])
+  @@index([accessType])
+  @@index([originType])
+  @@index([externalProviderId])
+  @@index([learningLanguageReferenceId])
+  @@index([learningLanguageResolutionState])
+  @@index([platformName])
+  @@index([sourceImportRecordId])
+  @@index([status, originType])
+  @@index([status, platformName])
+}
+
+model CourseModule {
+  id          String   @id @default(uuid())
+  courseId    String
+  title       String
+  description String?
+  position    Int
+  status      String   @default("DRAFT")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course  Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons CourseLesson[]
+  quizzes CourseQuiz[]
+
+  @@unique([courseId, position])
+  @@index([courseId, status])
+}
+
+model CourseLesson {
+  id                       String   @id @default(uuid())
+  courseId                 String
+  moduleId                 String
+  title                    String
+  summary                  String?
+  lessonType               String
+  position                 Int
+  estimatedDurationMinutes Int?
+  contentText              String?
+  status                   String   @default("DRAFT")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  course   Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module   CourseModule           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  assets   CourseLessonAsset[]
+  quizzes  CourseQuiz[]
+  progress CourseLessonProgress[]
+
+  @@unique([moduleId, position])
+  @@index([courseId, status])
+  @@index([moduleId])
+}
+
+model CourseLessonAsset {
+  id             String   @id @default(uuid())
+  courseId       String
+  lessonId       String
+  assetId        String
+  assetReference String?
+  title          String?
+  assetType      String
+  position       Int
+  isRequired     Boolean  @default(false)
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, position])
+  @@unique([lessonId, assetId])
+  @@index([courseId])
+  @@index([assetId])
+}
+
+model CourseQuiz {
+  id           String   @id @default(uuid())
+  courseId     String
+  moduleId     String?
+  lessonId     String?
+  title        String
+  instructions String?
+  position     Int
+  passingScore Int?
+  maxAttempts  Int?
+  status       String   @default("DRAFT")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  course    Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module    CourseModule?       @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  lesson    CourseLesson?       @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  questions CourseQuestion[]
+  attempts  CourseQuizAttempt[]
+
+  @@unique([courseId, position])
+  @@index([moduleId])
+  @@index([lessonId])
+  @@index([courseId, status])
+}
+
+model CourseQuestionBank {
+  id          String   @id @default(uuid())
+  courseId    String
+  title       String
+  description String?
+  status      String   @default("DRAFT")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions CourseQuestion[]
+
+  @@index([courseId, status])
+}
+
+model CourseQuestion {
+  id             String   @id @default(uuid())
+  courseId       String
+  version        Int      @default(1)
+  quizId         String?
+  questionBankId String?
+  questionType   String
+  prompt         String
+  choices        Json?
+  correctAnswer  Json?
+  explanation    String?
+  points         Int      @default(1)
+  position       Int
+  status         String   @default("DRAFT")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  course       Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quiz         CourseQuiz?         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionBank CourseQuestionBank? @relation(fields: [questionBankId], references: [id], onDelete: SetNull)
+  versions     CourseQuestionVersion[]
+
+  @@index([courseId, status])
+  @@index([quizId, position])
+  @@index([questionBankId])
+}
+
+model CourseEnrollment {
+  id                  String   @id @default(uuid())
+  courseId            String
+  studentReferenceId  String
+  status              String   @default("ACTIVE")
+  enrolledAt          DateTime @default(now())
+  completedAt         DateTime?
+  progressPercentage  Int      @default(0)
+  lastAccessedAt      DateTime?
+  metadata            Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Restrict)
+
+  @@unique([courseId, studentReferenceId])
+  @@index([studentReferenceId, status])
+}
+
+model CourseLessonProgress {
+  id                 String   @id @default(uuid())
+  courseId           String
+  lessonId           String
+  studentReferenceId String
+  status             String
+  progressPercentage Int      @default(0)
+  startedAt          DateTime?
+  completedAt        DateTime?
+  timeSpentSeconds   Int?
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  course Course       @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  lesson CourseLesson @relation(fields: [lessonId], references: [id], onDelete: Restrict)
+
+  @@unique([courseId, lessonId, studentReferenceId])
+  @@index([studentReferenceId, status])
+}
+
+model CourseQuizAttempt {
+  id                 String   @id @default(uuid())
+  courseId           String
+  quizId             String
+  studentReferenceId String
+  attemptNumber      Int
+  status             String   @default("IN_PROGRESS")
+  score              Float?
+  passed             Boolean?
+  answers            Json?
+  startedAt          DateTime @default(now())
+  submittedAt        DateTime?
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  course Course     @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  quiz   CourseQuiz @relation(fields: [quizId], references: [id], onDelete: Restrict)
+
+  @@unique([quizId, studentReferenceId, attemptNumber])
+  @@index([courseId, studentReferenceId])
+}
+
+model CourseCompletion {
+  id                     String   @id @default(uuid())
+  courseId               String
+  studentReferenceId     String
+  status                 String
+  completionSource       String
+  eligibleForCertificate Boolean  @default(false)
+  courseVersion          Int
+  completedAt            DateTime @default(now())
+  metadata               Json?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Restrict)
+
+  @@unique([courseId, studentReferenceId])
+  @@index([studentReferenceId, status])
+}
+
+model CourseVersion {
+  id            String   @id @default(uuid())
+  courseId      String
+  versionNumber Int
+  reason        String
+  snapshot      Json
+  createdBy     String?
+  createdAt     DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, versionNumber])
+  @@index([courseId, createdAt])
+}
+
+model CourseQuestionVersion {
+  id            String   @id @default(uuid())
+  questionId    String
+  versionNumber Int
+  reason        String
+  snapshot      Json
+  createdBy     String?
+  createdAt     DateTime @default(now())
+
+  question CourseQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([questionId, versionNumber])
+  @@index([questionId, createdAt])
+}
+
+model CourseEnrollmentPolicy {
+  courseId                   String   @id
+  isCapacityLimited          Boolean  @default(false)
+  maximumSeats               Int?
+  requiresApproval           Boolean  @default(false)
+  waitlistEnabled            Boolean  @default(false)
+  prerequisiteCourseIds      Json
+  eligibilityRules           Json?
+  requiresFinancialClearance Boolean  @default(false)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model LearningPath {
+  id                String   @id @default(uuid())
+  publicId          String   @unique
+  slug              String   @unique
+  title             String
+  description       String?
+  status            String   @default("DRAFT")
+  version           Int      @default(1)
+  isStrictlyOrdered Boolean  @default(false)
+  completionLogic   String   @default("ALL_REQUIRED")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  versions    LearningPathVersion[]
+  enrollments LearningPathEnrollment[]
+
+  @@index([status])
+}
+
+model LearningPathVersion {
+  id             String   @id @default(uuid())
+  learningPathId String
+  versionNumber  Int
+  status         String
+  snapshot       Json
+  createdAt      DateTime @default(now())
+
+  learningPath LearningPath         @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  courses      LearningPathCourse[]
+
+  @@unique([learningPathId, versionNumber])
+  @@index([learningPathId, status])
+}
+
+model LearningPathCourse {
+  id                     String   @id @default(uuid())
+  learningPathVersionId  String
+  courseId               String
+  position               Int
+  required               Boolean  @default(true)
+  prerequisiteCourseIds  Json
+  createdAt              DateTime @default(now())
+
+  learningPathVersion LearningPathVersion @relation(fields: [learningPathVersionId], references: [id], onDelete: Cascade)
+  course              Course              @relation(fields: [courseId], references: [id], onDelete: Restrict)
+
+  @@unique([learningPathVersionId, position])
+  @@unique([learningPathVersionId, courseId])
+  @@index([courseId])
+}
+
+model LearningPathEnrollment {
+  id                  String   @id @default(uuid())
+  learningPathId      String
+  learningPathVersion Int
+  studentReferenceId  String
+  status              String   @default("ACTIVE")
+  progressPercentage  Int      @default(0)
+  completedAt         DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  learningPath LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Restrict)
+
+  @@unique([learningPathId, studentReferenceId])
+  @@index([studentReferenceId, status])
+}
+
+// --- Phase 14 Enterprise Certificates Platform ---
+
+model CertificateIssuer {
+  id                     String   @id @default(uuid())
+  publicId               String   @unique
+  code                   String   @unique
+  name                   String
+  issuerType             String
+  status                 String   @default("ACTIVE")
+  organizationId         String?
+  universityId           String?
+  issuerLogoAssetId      String
+  signingKeyReference    String
+  accreditationAuthority String?
+  accreditationReference String?
+  metadata               Json?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  templates        CertificateTemplate[]
+  templateVersions CertificateTemplateVersion[]
+  certificates     Certificate[]
+
+  @@index([status])
+  @@index([universityId])
+}
+
+model CertificateTemplate {
+  id               String   @id @default(uuid())
+  publicId         String   @unique
+  code             String   @unique
+  name             String
+  nameAr           String
+  nameEn           String
+  status           String   @default("DRAFT")
+  issuerId         String?
+  currentVersionId String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  issuer         CertificateIssuer?         @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  versions       CertificateTemplateVersion[] @relation("CertificateTemplateVersions")
+  currentVersion CertificateTemplateVersion?  @relation("CurrentCertificateTemplateVersion", fields: [currentVersionId], references: [id], onDelete: Restrict)
+  certificates   Certificate[]
+
+  @@index([status])
+  @@index([issuerId])
+}
+
+model CertificateTemplateVersion {
+  id                   String   @id @default(uuid())
+  publicId             String   @unique
+  templateId           String
+  issuerId             String
+  versionNumber        String
+  status               String   @default("DRAFT")
+  language             String   @default("BILINGUAL")
+  layout               String   @default("LANDSCAPE")
+  accentColor          String   @default("#142B5F")
+  secondaryColor       String   @default("#D6A43B")
+  titleAr              String
+  titleEn              String
+  bodyAr               String
+  bodyEn               String
+  signatoryNameAr      String?
+  signatoryNameEn      String?
+  signatoryTitleAr     String?
+  signatoryTitleEn     String?
+  logoAssetId          String?
+  sealAssetId          String?
+  signatureAssetId     String?
+  designAssetId        String?
+  validityPolicy       String   @default("PERMANENT")
+  validityDurationDays Int?
+  renewalPeriodDays    Int?
+  renewalPolicy        String?
+  requiresRevalidation Boolean  @default(false)
+  metadata             Json?
+  createdBy            String
+  approvedBy           String?
+  approvedAt           DateTime?
+  createdAt            DateTime @default(now())
+
+  template           CertificateTemplate  @relation("CertificateTemplateVersions", fields: [templateId], references: [id], onDelete: Restrict)
+  issuer             CertificateIssuer    @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  currentForTemplate CertificateTemplate? @relation("CurrentCertificateTemplateVersion")
+  certificates       Certificate[]
+
+  @@unique([templateId, versionNumber])
+  @@index([templateId, createdAt])
+  @@index([issuerId])
+  @@index([status])
+}
+
+model Certificate {
+  id                       String   @id @default(uuid())
+  publicId                 String   @unique
+  serialNumber             String   @unique
+  verificationCode         String   @unique
+  verificationUrl          String?
+  verificationHash         String   @unique
+  status                   String   @default("ACTIVE")
+  certificateType          String   @default("COURSE")
+  studentReferenceId       String
+  recipientDisplayName     String?
+  achievementType          String?
+  achievementId            String?
+  achievementDisplayName   String?
+  sourceCompletionId       String?
+  completedAt              DateTime?
+  sourceEventId            String?  @unique
+  sourceEventType          String?
+  sourceEventVersion       String?
+  sourceEventPayloadHash   String?
+  courseId                 String?
+  courseDisplayName        String?
+  courseCompletionId       String?
+  courseCompletedAt        DateTime?
+  learningPathId           String?
+  learningPathDisplayName  String?
+  learningPathCompletionId String?
+  issuedAt                 DateTime @default(now())
+  expiresAt                DateTime?
+  validityPolicy           String   @default("PERMANENT")
+  renewalPolicy            String?
+  requiresRevalidation     Boolean  @default(false)
+  templateId               String?
+  templateVersionId        String?
+  templateVersion          String
+  issuerId                 String?
+  certificatePdfAssetId    String?
+  previewImageAssetId      String?
+  verificationQrAssetId    String?
+  signatureAssetId         String?
+  digitalSignature         String?
+  signingKeyReference      String?
+  issuerName               String?
+  issuerReferenceId        String?
+  grade                    String?
+  score                    Float?
+  skills                   Json
+  competencies             Json
+  revokedAt                DateTime?
+  revocationReason         String?
+  revokedBy                String?
+  replacesCertificateId    String?
+  replacedByCertificateId  String?
+  archivedAt               DateTime?
+  metadata                 Json?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  template             CertificateTemplate?       @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersionRecord CertificateTemplateVersion? @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+  issuer               CertificateIssuer?         @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  ledgerEntries        CertificateLedgerEntry[]
+  verificationLogs     CertificateVerificationLog[]
+  issuanceInbox        CertificateIssuanceInbox?
+  replacesCertificate  Certificate?               @relation("CertificateReplaces", fields: [replacesCertificateId], references: [id], onDelete: Restrict)
+  replacementFor       Certificate[]              @relation("CertificateReplaces")
+  replacedByCertificate Certificate?              @relation("CertificateReplacedBy", fields: [replacedByCertificateId], references: [id], onDelete: Restrict)
+  replacedSources      Certificate[]              @relation("CertificateReplacedBy")
+
+  @@index([studentReferenceId, status])
+  @@index([achievementType, sourceCompletionId])
+  @@index([courseCompletionId])
+  @@index([learningPathCompletionId])
+  @@index([courseId, studentReferenceId])
+  @@index([learningPathId, studentReferenceId])
+  @@index([templateId])
+  @@index([templateVersionId])
+  @@index([issuerId])
+  @@index([issuedAt])
+  @@index([expiresAt])
+}
+
+model CertificateIssuanceInbox {
+  eventId       String   @id
+  eventType     String
+  eventVersion  String
+  sourceDomain  String
+  payloadHash   String
+  certificateId String   @unique
+  processedAt   DateTime @default(now())
+
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Restrict)
+
+  @@index([eventType, processedAt])
+}
+
+model CertificateLedgerEntry {
+  id            String   @id @default(uuid())
+  certificateId String
+  action        String
+  actorId       String
+  reason        String?
+  payload       Json?
+  occurredAt    DateTime @default(now())
+
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Restrict)
+
+  @@index([certificateId, occurredAt])
+  @@index([action])
+}
+
+model CertificateVerificationLog {
+  id            String   @id @default(uuid())
+  certificateId String?
+  result        String
+  channel       String
+  occurredAt    DateTime @default(now())
+
+  certificate Certificate? @relation(fields: [certificateId], references: [id], onDelete: Restrict)
+
+  @@index([certificateId, occurredAt])
+  @@index([result, occurredAt])
+}
+
+model CourseTaxonomyResolution {
+  id                       String   @id @default(uuid())
+  courseId                 String
+  sourceTerm               String
+  normalizedTerm           String
+  status                   String   @default("UNRESOLVED")
+  candidateTaxonomyNodeIds Json
+  chosenTaxonomyNodeId     String?
+  matchMethod              String?
+  confidence               Float?
+  sourceImportRecordId     String?
+  reviewedBy               String?
+  reviewedAt               DateTime?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  course             Course                         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chosenTaxonomyNode AcademicTaxonomyNode?          @relation("CourseTaxonomyResolutionChosenNode", fields: [chosenTaxonomyNodeId], references: [id], onDelete: SetNull)
+  taxonomyLinks      CourseAcademicTaxonomyLink[]
+
+  @@unique([courseId, normalizedTerm])
+  @@index([courseId])
+  @@index([status])
+  @@index([chosenTaxonomyNodeId])
+}
+
+model CourseAcademicTaxonomyLink {
+  id                   String   @id @default(uuid())
+  courseId             String
+  taxonomyNodeId       String
+  sourceResolutionId   String?
+  relationshipType     String   @default("RELATED")
+  reviewState          String   @default("PROPOSED")
+  matchMethod          String
+  sourceTerm           String
+  confidence           Float?
+  sourceImportRecordId String?
+  reviewedBy           String?
+  reviewedAt           DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  course           Course                    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  taxonomyNode     AcademicTaxonomyNode      @relation(fields: [taxonomyNodeId], references: [id], onDelete: Restrict)
+  sourceResolution CourseTaxonomyResolution? @relation(fields: [sourceResolutionId], references: [id], onDelete: SetNull)
+  majorProjections CourseMajorProjection[]
+
+  @@unique([courseId, taxonomyNodeId, relationshipType])
+  @@index([courseId])
+  @@index([taxonomyNodeId])
+  @@index([reviewState])
+  @@index([sourceResolutionId])
+}
+
+model CourseMajorProjection {
+  id                                 String   @id @default(uuid())
+  projectionKey                      String   @unique
+  courseId                           String
+  majorId                            String
+  profileId                          String?
+  taxonomyNodeId                     String?
+  sourceCourseTaxonomyLinkId         String?
+  sourceMajorClassificationMappingId String?
+  sourceType                         String
+  relationshipType                   String
+  projectionState                    String   @default("PROPOSED")
+  confidence                         Float?
+  reviewedBy                         String?
+  reviewedAt                         DateTime?
+  createdAt                          DateTime @default(now())
+  updatedAt                          DateTime @updatedAt
+
+  course                           Course                       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  major                            Major                        @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  profile                          MajorLevelProfile?           @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  taxonomyNode                     AcademicTaxonomyNode?        @relation(fields: [taxonomyNodeId], references: [id], onDelete: SetNull)
+  sourceCourseTaxonomyLink         CourseAcademicTaxonomyLink? @relation(fields: [sourceCourseTaxonomyLinkId], references: [id], onDelete: SetNull)
+  sourceMajorClassificationMapping MajorClassificationMapping? @relation(fields: [sourceMajorClassificationMappingId], references: [id], onDelete: SetNull)
+
+  @@index([courseId])
+  @@index([majorId])
+  @@index([profileId])
+  @@index([taxonomyNodeId])
+  @@index([projectionState])
+  @@index([sourceCourseTaxonomyLinkId])
+  @@index([sourceMajorClassificationMappingId])
+}
+
+
+model CourseInternationalTestRelationship {
+  id                  String   @id @default(uuid())
+  courseId            String
+  internationalTestId String
+  relationshipType    String
+  reviewState         String   @default("PROPOSED")
+  sourceType          String   @default("ADMIN_AUTHORED")
+  createdBy           String?
+  reviewedBy          String?
+  reviewedAt          DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  course            Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  internationalTest InternationalTest @relation(fields: [internationalTestId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, internationalTestId, relationshipType])
+  @@index([courseId, reviewState])
+  @@index([internationalTestId, reviewState])
+}
+
+model ExternalCourseProvider {
+  id                             String   @id @default(uuid())
+  publicId                       String   @unique
+  slug                           String   @unique
+  canonicalName                  String
+  normalizedCanonicalName        String   @unique
+  displayName                    String
+  providerType                   String?
+  status                         String
+  officialWebsite                String?
+  operatingScope                 String?
+  headquartersCountryReferenceId String?
+  sourceTrustLevel               String
+  importStrategy                 String
+  directCoursePathPatterns       Json?
+  connectorKey                   String?
+  connectorVersion               String?
+  lastVerifiedAt                 DateTime?
+  createdAt                      DateTime @default(now())
+  updatedAt                      DateTime @updatedAt
+
+  headquartersCountry      ReferenceCountry?               @relation("ExternalCourseProviderHeadquartersCountry", fields: [headquartersCountryReferenceId], references: [id], onDelete: SetNull)
+  aliases                  ExternalCourseProviderAlias[]
+  allowedDomains           ExternalCourseProviderDomain[]
+  courses                  Course[]
+  sourceIdentities         CourseSourceIdentity[]
+  providerCandidateAnalyses CourseImportAnalysis[]          @relation("CourseImportAnalysisProviderCandidate")
+  resolvedProviderAnalyses CourseImportAnalysis[]           @relation("CourseImportAnalysisResolvedProvider")
+  fieldProvenance          CourseFieldProvenance[]
+
+  @@index([status])
+  @@index([headquartersCountryReferenceId])
+  @@index([importStrategy])
+}
+
+model ExternalCourseProviderAlias {
+  id              String   @id @default(uuid())
+  providerId      String
+  alias           String
+  normalizedAlias String   @unique
+  locale          String?
+  source          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider ExternalCourseProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+}
+
+model ExternalCourseProviderDomain {
+  id               String   @id @default(uuid())
+  providerId       String
+  domain           String
+  normalizedDomain String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  provider ExternalCourseProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, normalizedDomain])
+  @@index([normalizedDomain])
+}
+
+model CourseSourceIdentity {
+  id                      String   @id @default(uuid())
+  courseId                String?
+  providerId              String
+  sourceNativeKey         String
+  identityStrategy        String
+  originalTitle           String
+  normalizedOriginalTitle String
+  languageVersionKey      String   @default("")
+  currentUrl              String
+  firstSeenAt             DateTime @default(now())
+  lastSeenAt              DateTime @default(now())
+  status                  String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  course     Course?                @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  provider   ExternalCourseProvider @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  urlHistory CourseSourceUrlHistory[]
+
+  @@unique([providerId, sourceNativeKey, languageVersionKey])
+  @@index([courseId])
+  @@index([providerId])
+  @@index([status])
+}
+
+model CourseSourceUrlHistory {
+  id                     String    @id @default(uuid())
+  courseSourceIdentityId String
+  url                    String
+  normalizedUrl          String
+  isCurrent              Boolean   @default(false)
+  firstSeenAt            DateTime  @default(now())
+  lastSeenAt             DateTime  @default(now())
+  verificationState      String    @default("UNVERIFIED")
+  responseCode           Int?
+  redirectTarget         String?
+  checkedAt              DateTime?
+  changeImportRecordId   String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  sourceIdentity CourseSourceIdentity @relation(fields: [courseSourceIdentityId], references: [id], onDelete: Cascade)
+
+  @@unique([courseSourceIdentityId, normalizedUrl])
+  @@index([isCurrent])
+  @@index([verificationState])
+}
+
+model CourseImportAnalysis {
+  id                    String   @id @default(uuid())
+  importRecordId        String   @unique
+  providerCandidateId   String?
+  resolvedProviderId    String?
+  sourceNativeKey       String?
+  normalizedPayload     Json
+  eligibilityState      String
+  completenessState     String
+  matchState            String
+  matchedCourseId       String?
+  changeState           String
+  fieldDiffs            Json?
+  relationshipProposals Json?
+  requiresReview        Boolean  @default(false)
+  analyzedAt            DateTime @default(now())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  providerCandidate ExternalCourseProvider? @relation("CourseImportAnalysisProviderCandidate", fields: [providerCandidateId], references: [id], onDelete: SetNull)
+  resolvedProvider  ExternalCourseProvider? @relation("CourseImportAnalysisResolvedProvider", fields: [resolvedProviderId], references: [id], onDelete: SetNull)
+  matchedCourse     Course?                  @relation(fields: [matchedCourseId], references: [id], onDelete: SetNull)
+
+  @@index([providerCandidateId])
+  @@index([resolvedProviderId])
+  @@index([matchedCourseId])
+  @@index([changeState])
+  @@index([requiresReview])
+}
+
+model CourseFieldProvenance {
+  id                 String   @id @default(uuid())
+  courseId           String
+  fieldKey           String
+  importRecordId     String
+  sourceArtifactHash String
+  sourceRowNumber    Int?
+  providerId         String
+  sourceUrl          String?
+  valueHash          String
+  importedAt         DateTime @default(now())
+  reviewedBy         String?
+  reviewStatus       String   @default("UNREVIEWED")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  course   Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  provider ExternalCourseProvider @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+  @@unique([courseId, fieldKey, importRecordId])
+  @@index([providerId])
+  @@index([importRecordId])
+  @@index([reviewStatus])
+}
+
+// --- Enterprise Event Foundation ---
+
+model EnterpriseEventRecord {
+  id                   String   @id
+  reference            String   @unique
+  ownerReference       String
+  eventType            String
+  category             String
+  payloadMetadata      Json
+  version              String
+  metadata             Json
+  correlationReference String?
+  causationReference   String?
+  lifecycleState       String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([ownerReference])
+  @@index([eventType, lifecycleState])
+  @@index([lifecycleState])
+}
+
+// --- Durable Background Jobs ---
+
+model BackgroundJobRecord {
+  id                 String   @id
+  reference          String   @unique
+  jobType            String
+  parameters         Json
+  ownerReference     String?
+  priority           Int      @default(0)
+  runAt              DateTime?
+  cronExpression     String?
+  timeoutSeconds     Int      @default(300)
+  concurrentLimit    Int?
+  maxAttempts        Int      @default(1)
+  backoffType        String   @default("exponential")
+  status             String   @default("SCHEDULED")
+  attempt            Int      @default(0)
+  availableAt        DateTime @default(now())
+  leasedBy           String?
+  leaseToken         String?
+  leaseUntil         DateTime?
+  heartbeatAt        DateTime?
+  startedAt          DateTime?
+  lastCompletedAt    DateTime?
+  failedAt           DateTime?
+  cancelledAt        DateTime?
+  lastErrorCode      String?
+  lastErrorText      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  executions BackgroundJobExecutionRecord[]
+  deadLetter BackgroundJobDeadLetterRecord?
+
+  @@index([status, availableAt, priority])
+  @@index([leaseUntil])
+  @@index([jobType, status])
+  @@index([ownerReference])
+}
+
+model BackgroundJobExecutionRecord {
+  id           String   @id @default(uuid())
+  jobReference String
+  attempt      Int
+  workerId     String
+  leaseToken   String   @unique
+  startedAt    DateTime
+  heartbeatAt  DateTime?
+  finishedAt   DateTime?
+  outcome      String   @default("RUNNING")
+  errorCode    String?
+  errorText    String?
+  createdAt    DateTime @default(now())
+
+  job BackgroundJobRecord @relation(fields: [jobReference], references: [reference], onDelete: Cascade)
+
+  @@index([jobReference, attempt])
+  @@index([outcome, startedAt])
+  @@index([jobReference, startedAt])
+}
+
+model BackgroundJobDeadLetterRecord {
+  id           String   @id @default(uuid())
+  jobReference String   @unique
+  jobType      String
+  payload      Json
+  attempt      Int
+  errorCode    String
+  errorText    String
+  failedAt     DateTime
+  replayedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  job BackgroundJobRecord @relation(fields: [jobReference], references: [reference], onDelete: Cascade)
+
+  @@index([failedAt])
+  @@index([jobType, failedAt])
+}
+
+// --- Transactional Outbox ---
+
+model TransactionalOutboxRecord {
+  id            String    @id
+  eventType     String
+  domain        String
+  aggregateType String?
+  aggregateId   String?
+  payload       Json
+  metadata      Json
+  correlationId String?
+  causationId   String?
+  state         String    @default("PENDING")
+  attempts      Int       @default(0)
+  availableAt   DateTime  @default(now())
+  claimedBy     String?
+  claimToken    String?
+  claimUntil    DateTime?
+  processedAt   DateTime?
+  lastErrorCode String?
+  lastErrorText String?
+  lastFailedAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([state, availableAt])
+  @@index([claimUntil])
+  @@index([domain, aggregateType, aggregateId])
+  @@index([correlationId])
+}
+
+// --- Universities ---
+
+model University {
+  id                     String  @id @default(uuid())
+  publicId               String  @unique
+  slug                   String  @unique
+  canonicalName          String
+  canonicalDedupKey      String  @unique
+  displayName            String
+  country                String?
+  city                   String?
+  institutionType        String?
+  officialWebsite        String?
+  status                 String
+  completenessStatus     String
+  sourceUrl              String?
+  officialSourceUrl      String?
+  logoAssetId            String?
+  foundedYear            Int?
+  sourceImportRecordId   String?
+  optionalFields         Json?
+  countryReferenceId     String?
+  regionReferenceId      String?
+  cityReferenceId        String?
+  institutionalOwnership String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  countryReference      ReferenceCountry?                @relation(fields: [countryReferenceId], references: [id], onDelete: Restrict)
+  regionReference       AdministrativeRegion?            @relation(fields: [regionReferenceId], references: [id], onDelete: SetNull)
+  cityReference         ReferenceCity?                   @relation(fields: [cityReferenceId], references: [id], onDelete: SetNull)
+  campuses              UniversityCampus[]
+  organizationUnits     UniversityOrganizationUnit[]
+  academicPrograms      UniversityAcademicProgram[]
+  tuitionProfiles       UniversityTuitionProfile[]
+  accommodationProfiles UniversityAccommodationProfile[]
+  rankings              UniversityRanking[]
+  sourceRecords         UniversitySourceRecord[]
+  translations          UniversityTranslation[]
+  localizedTexts        UniversityLocalizedText[]
+  importChanges         UniversityImportChange[]
+  scholarshipLinks      ScholarshipUniversityLink[]
+  sponsoredScholarshipContexts ScholarshipSponsorContext[]
+
+  @@index([countryReferenceId])
+  @@index([regionReferenceId])
+  @@index([cityReferenceId])
+}
+
+model UniversityCampus {
+  id                 String                       @id @default(uuid())
+  universityId       String
+  sourceReferenceId  String?
+  name               String
+  campusType         String?
+  status             String                       @default("ACTIVE")
+  address            String?
+  countryReferenceId String?
+  regionReferenceId  String?
+  cityReferenceId    String?
+  latitude           Float?
+  longitude          Float?
+  coordinateSource   String?
+  metadata           Json?
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+  university         University                   @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  countryReference   ReferenceCountry?            @relation(fields: [countryReferenceId], references: [id], onDelete: Restrict)
+  regionReference    AdministrativeRegion?        @relation(fields: [regionReferenceId], references: [id], onDelete: SetNull)
+  cityReference      ReferenceCity?               @relation(fields: [cityReferenceId], references: [id], onDelete: SetNull)
+  organizationUnits  UniversityOrganizationUnit[]
+  programLinks       UniversityProgramCampus[]
+
+  @@unique([universityId, sourceReferenceId])
+  @@index([universityId])
+  @@index([countryReferenceId])
+  @@index([regionReferenceId])
+  @@index([cityReferenceId])
+}
+
+model UniversityOrganizationUnit {
+  id                       String                       @id @default(uuid())
+  universityId             String
+  campusId                 String?
+  parentOrganizationUnitId String?
+  sourceReferenceId        String?
+  unitType                 String
+  name                     String
+  normalizedName           String
+  status                   String                       @default("ACTIVE")
+  metadata                 Json?
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
+  university               University                   @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  campus                   UniversityCampus?            @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  parent                   UniversityOrganizationUnit?  @relation("UniversityOrganizationHierarchy", fields: [parentOrganizationUnitId], references: [id], onDelete: SetNull)
+  children                 UniversityOrganizationUnit[] @relation("UniversityOrganizationHierarchy")
+  programs                 UniversityAcademicProgram[]
+
+  @@unique([universityId, unitType, normalizedName, parentOrganizationUnitId])
+  @@index([universityId])
+  @@index([campusId])
+  @@index([parentOrganizationUnitId])
+}
+
+model UniversityAcademicProgram {
+  id                    String                                  @id @default(uuid())
+  universityId          String
+  organizationUnitId    String?
+  sourceReferenceId     String?
+  sourceProgramName     String
+  normalizedName        String
+  degreeLevelId         String?
+  majorId               String?
+  majorMappingState     String
+  status                String                                  @default("DRAFT")
+  metadata              Json?
+  createdAt             DateTime                                @default(now())
+  updatedAt             DateTime                                @updatedAt
+  university            University                              @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  organizationUnit      UniversityOrganizationUnit?             @relation(fields: [organizationUnitId], references: [id], onDelete: SetNull)
+  degreeLevel           DegreeLevel?                            @relation(fields: [degreeLevelId], references: [id], onDelete: SetNull)
+  major                 Major?                                  @relation(fields: [majorId], references: [id], onDelete: SetNull)
+  campuses              UniversityProgramCampus[]
+  admissionRequirements UniversityProgramAdmissionRequirement[]
+  scholarshipLinks      ScholarshipUniversityLink[]
+
+  @@unique([universityId, sourceReferenceId])
+  @@index([universityId])
+  @@index([organizationUnitId])
+  @@index([degreeLevelId])
+  @@index([majorId])
+  @@index([majorMappingState])
+}
+
+model UniversityProgramCampus {
+  academicProgramId String
+  campusId          String
+  createdAt         DateTime                  @default(now())
+  academicProgram   UniversityAcademicProgram @relation(fields: [academicProgramId], references: [id], onDelete: Cascade)
+  campus            UniversityCampus          @relation(fields: [campusId], references: [id], onDelete: Cascade)
+
+  @@id([academicProgramId, campusId])
+  @@index([campusId])
+}
+
+model UniversityProgramAdmissionRequirement {
+  id                  String                    @id @default(uuid())
+  academicProgramId   String
+  internationalTestId String
+  testVariantId       String?
+  testVersionId       String?
+  minimumScore        Float?
+  sectionScores       Json?
+  validityMetadata    Json?
+  restrictionMetadata Json?
+  status              String                    @default("REVIEW_REQUIRED")
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  academicProgram     UniversityAcademicProgram @relation(fields: [academicProgramId], references: [id], onDelete: Cascade)
+  internationalTest   InternationalTest         @relation(fields: [internationalTestId], references: [id], onDelete: Restrict)
+  testVariant         InternationalTestVariant? @relation(fields: [testVariantId], references: [id], onDelete: SetNull)
+  testVersion         InternationalTestVersion? @relation(fields: [testVersionId], references: [id], onDelete: SetNull)
+
+  @@unique([academicProgramId, internationalTestId, testVariantId, testVersionId])
+  @@index([internationalTestId])
+  @@index([testVariantId])
+  @@index([testVersionId])
+}
+
+model UniversityTuitionProfile {
+  id                   String             @id @default(uuid())
+  universityId         String
+  profileType          String
+  organizationUnitName String?
+  amount               Decimal?           @db.Decimal(18, 2)
+  currencyCode         String?
+  currencyReferenceId  String?
+  officialSourceUrl    String?
+  effectiveFrom        DateTime?
+  effectiveTo          DateTime?
+  metadata             Json?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  university           University         @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  currency             ReferenceCurrency? @relation("UniversityTuitionCurrency", fields: [currencyReferenceId], references: [id], onDelete: SetNull)
+
+  @@index([universityId])
+  @@index([profileType])
+  @@index([currencyReferenceId])
+}
+
+model UniversityAccommodationProfile {
+  id                            String             @id @default(uuid())
+  universityId                  String
+  accommodationAvailable        Boolean?
+  internationalEligible         Boolean?
+  typicalCost                   Decimal?           @db.Decimal(18, 2)
+  currencyCode                  String?
+  currencyReferenceId           String?
+  averageMonthlyLivingCost      Decimal?           @db.Decimal(18, 2)
+  livingCostCurrencyCode        String?
+  livingCostCurrencyReferenceId String?
+  costVariationNote             String?
+  metadata                      Json?
+  createdAt                     DateTime           @default(now())
+  updatedAt                     DateTime           @updatedAt
+  university                    University         @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  currency                      ReferenceCurrency? @relation("UniversityAccommodationCurrency", fields: [currencyReferenceId], references: [id], onDelete: SetNull)
+  livingCostCurrency            ReferenceCurrency? @relation("UniversityAccommodationLivingCostCurrency", fields: [livingCostCurrencyReferenceId], references: [id], onDelete: SetNull)
+
+  @@index([universityId])
+  @@index([currencyReferenceId])
+  @@index([livingCostCurrencyReferenceId])
+}
+
+model UniversityRanking {
+  id                String     @id @default(uuid())
+  universityId      String
+  provider          String
+  rankingYear       Int
+  rank              String
+  scope             String
+  scopeLabel        String?
+  note              String?
+  officialSourceUrl String
+  verifiedAt        DateTime
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  university        University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([universityId, provider, rankingYear, scope])
+  @@index([provider, rankingYear, scope])
+}
+
+model UniversitySourceRecord {
+  id               String                    @id @default(uuid())
+  sourceIdentityKey String                    @unique
+  universityId     String
+  importRecordId   String?
+  stage            String
+  sourceArtifactId String
+  sourceRowNumber  Int?
+  sourceHash       String
+  sourceUri        String?
+  sourceLocale     String?
+  importedAt       DateTime?
+  metadata         Json?
+  createdAt        DateTime                  @default(now())
+  university       University                @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  translations     UniversityTranslation[]   @relation("UniversityTranslationSourceRecord")
+  localizedTexts   UniversityLocalizedText[] @relation("UniversityLocalizedTextSourceRecord")
+
+  @@index([stage, sourceArtifactId, sourceRowNumber])
+  @@index([universityId])
+  @@index([sourceHash])
+}
+
+model UniversityTranslation {
+  id             String   @id @default(uuid())
+  universityId   String
+  locale         String
+  displayName    String?
+  description    String?
+  reviewStatus   String   @default("NEEDS_REVIEW")
+  sourceRecordId String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  university   University              @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  sourceRecord UniversitySourceRecord? @relation("UniversityTranslationSourceRecord", fields: [sourceRecordId], references: [id], onDelete: SetNull)
+
+  @@unique([universityId, locale])
+  @@index([locale])
+  @@index([reviewStatus])
+  @@index([sourceRecordId])
+}
+
+model UniversityLocalizedText {
+  id             String   @id @default(uuid())
+  universityId   String
+  targetType     String
+  targetId       String
+  fieldKey       String
+  locale         String
+  value          String
+  reviewStatus   String   @default("NEEDS_REVIEW")
+  sourceRecordId String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  university   University              @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  sourceRecord UniversitySourceRecord? @relation("UniversityLocalizedTextSourceRecord", fields: [sourceRecordId], references: [id], onDelete: SetNull)
+
+  @@unique([universityId, targetType, targetId, fieldKey, locale])
+  @@index([universityId, targetType, targetId])
+  @@index([locale])
+  @@index([reviewStatus])
+  @@index([sourceRecordId])
+}
+
+model UniversityImportChangeSet {
+  id               String                   @id
+  importBatchId    String?
+  sourceArtifactId String
+  stage            String
+  state            String                   @default("PLANNED")
+  approvedBy       String?
+  appliedAt        DateTime?
+  rolledBackAt     DateTime?
+  createdAt        DateTime                 @default(now())
+  changes          UniversityImportChange[]
+
+  @@index([state])
+  @@index([sourceArtifactId])
+}
+
+model UniversityImportChange {
+  id           String                    @id @default(uuid())
+  changeSetId  String
+  universityId String?
+  entityType   String
+  entityId     String
+  operation    String
+  beforeState  Json?
+  afterState   Json?
+  sequence     Int
+  createdAt    DateTime                  @default(now())
+  changeSet    UniversityImportChangeSet @relation(fields: [changeSetId], references: [id], onDelete: Cascade)
+  university   University?               @relation(fields: [universityId], references: [id], onDelete: SetNull)
+
+  @@unique([changeSetId, sequence])
+  @@index([universityId])
+  @@index([entityType, entityId])
+}
+
+// --- Scholarships ---
+
+model Scholarship {
+  id                   String    @id @default(uuid())
+  publicId             String    @unique
+  slug                 String    @unique
+  canonicalName        String
+  canonicalDedupKey    String    @unique
+  displayName          String
+  providerName         String?
+  status               String
+  completenessStatus   String
+  verificationStatus   String    @default("PENDING")
+  publicationStatus    String    @default("DRAFT")
+  amountMinorUnits     String?
+  amountCurrencyCode   String?
+  isFullyFunded        Boolean   @default(false)
+  applicationDeadline  DateTime?
+  officialWebsite      String?
+  sourceUrl            String?
+  optionalFields       Json?
+  academicYear         String?
+  cycleName            String?
+  countryReferenceId   String?
+  countrySourceLabel   String?
+  countryScope         String?
+  fundingTypeCode      String?
+  deadlineType         String?
+  applicationMethod    String?
+  applicationUrl       String?
+  officialSourceUrl    String?
+  sourceImportRecordId String?
+  sourceLocale         String?
+  lastVerifiedAt       DateTime?
+  studyLanguageReferenceId String?
+  studyLanguageSourceLabel String?
+  studyLanguageResolutionStatus String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  primaryCountry    ReferenceCountry?             @relation("ScholarshipPrimaryCountry", fields: [countryReferenceId], references: [id], onDelete: SetNull)
+  studyLanguage     ReferenceLanguage?            @relation("ScholarshipStudyLanguage", fields: [studyLanguageReferenceId], references: [id], onDelete: SetNull)
+  benefits          ScholarshipBenefit[]
+  degreeTargets     ScholarshipDegreeTarget[]
+  majorTargets      ScholarshipMajorTarget[]
+  eligibilityItems  ScholarshipEligibilityItem[]
+  requiredDocuments ScholarshipRequiredDocument[]
+  sourceEvidence    ScholarshipSourceEvidence[]
+  universityLinks   ScholarshipUniversityLink[]
+  versions          ScholarshipVersion[]
+  sponsorContext    ScholarshipSponsorContext?
+  applicationCycles ScholarshipApplicationCycle[]
+
+  @@index([countryReferenceId])
+  @@index([academicYear])
+  @@index([applicationDeadline])
+  @@index([status, completenessStatus])
+  @@index([publicationStatus])
+  @@index([verificationStatus])
+  @@index([studyLanguageReferenceId])
+}
+
+model ScholarshipBenefit {
+  id                  String   @id @default(uuid())
+  scholarshipId       String
+  benefitKey          String
+  benefitTypeCode     String
+  coverageTypeCode    String?
+  amount              Decimal? @db.Decimal(18, 2)
+  currencyReferenceId String?
+  valueText           String?
+  durationText        String?
+  frequencyCode       String?
+  isCovered           Boolean  @default(true)
+  isOptional          Boolean  @default(false)
+  displayOrder        Int      @default(0)
+  notes               String?
+  metadata            Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  scholarship Scholarship        @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  currency    ReferenceCurrency? @relation("ScholarshipBenefitCurrency", fields: [currencyReferenceId], references: [id], onDelete: SetNull)
+
+  @@unique([scholarshipId, benefitKey])
+  @@index([scholarshipId])
+  @@index([benefitTypeCode])
+  @@index([currencyReferenceId])
+}
+
+model ScholarshipDegreeTarget {
+  id               String   @id @default(uuid())
+  scholarshipId    String
+  targetKey        String
+  degreeLevelId    String?
+  sourceLabel      String?
+  resolutionStatus String   @default("PENDING")
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  scholarship Scholarship  @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  degreeLevel DegreeLevel? @relation("ScholarshipDegreeTargetDegree", fields: [degreeLevelId], references: [id], onDelete: SetNull)
+
+  @@unique([scholarshipId, targetKey])
+  @@index([scholarshipId])
+  @@index([degreeLevelId])
+  @@index([resolutionStatus])
+}
+
+model ScholarshipMajorTarget {
+  id               String   @id @default(uuid())
+  scholarshipId    String
+  targetKey        String
+  majorId          String?
+  sourceLabel      String?
+  resolutionStatus String   @default("PENDING")
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  major       Major?      @relation("ScholarshipMajorTargetMajor", fields: [majorId], references: [id], onDelete: SetNull)
+
+  @@unique([scholarshipId, targetKey])
+  @@index([scholarshipId])
+  @@index([majorId])
+  @@index([resolutionStatus])
+}
+
+model ScholarshipEligibilityItem {
+  id                  String   @id @default(uuid())
+  scholarshipId       String
+  itemKey             String
+  itemTypeCode        String
+  operatorCode        String?
+  valueText           String?
+  minimumValue        Decimal? @db.Decimal(18, 4)
+  maximumValue        Decimal? @db.Decimal(18, 4)
+  countryReferenceId  String?
+  degreeLevelId       String?
+  majorId             String?
+  internationalTestId String?
+  isRequired          Boolean  @default(true)
+  priorityOrder       Int      @default(0)
+  resolutionStatus    String   @default("PENDING")
+  metadata            Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  scholarship       Scholarship        @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  country           ReferenceCountry?  @relation("ScholarshipEligibilityCountry", fields: [countryReferenceId], references: [id], onDelete: SetNull)
+  degreeLevel       DegreeLevel?       @relation("ScholarshipEligibilityDegree", fields: [degreeLevelId], references: [id], onDelete: SetNull)
+  major             Major?             @relation("ScholarshipEligibilityMajor", fields: [majorId], references: [id], onDelete: SetNull)
+  internationalTest InternationalTest? @relation("ScholarshipEligibilityTest", fields: [internationalTestId], references: [id], onDelete: SetNull)
+
+  @@unique([scholarshipId, itemKey])
+  @@index([scholarshipId])
+  @@index([itemTypeCode])
+  @@index([countryReferenceId])
+  @@index([degreeLevelId])
+  @@index([majorId])
+  @@index([internationalTestId])
+  @@index([resolutionStatus])
+}
+
+model ScholarshipRequiredDocument {
+  id               String   @id @default(uuid())
+  scholarshipId    String
+  documentKey      String
+  documentTypeCode String?
+  displayName      String
+  description      String?
+  internationalTestId String?
+  sourceLabel      String?
+  resolutionStatus String @default("PENDING")
+  isRequired       Boolean  @default(true)
+  displayOrder     Int      @default(0)
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  internationalTest InternationalTest? @relation("ScholarshipRequiredDocumentTest", fields: [internationalTestId], references: [id], onDelete: SetNull)
+
+  @@unique([scholarshipId, documentKey])
+  @@index([scholarshipId])
+  @@index([documentTypeCode])
+  @@index([internationalTestId])
+  @@index([resolutionStatus])
+}
+
+model ScholarshipSourceEvidence {
+  id             String    @id @default(uuid())
+  scholarshipId  String
+  evidenceKey    String
+  sourceTypeCode String
+  sourceUrl      String
+  sourceName     String?
+  sourceHash     String?
+  trustLevel     String?
+  isOfficial     Boolean   @default(false)
+  importRecordId String?
+  capturedAt     DateTime  @default(now())
+  verifiedAt     DateTime?
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@unique([scholarshipId, evidenceKey])
+  @@index([scholarshipId])
+  @@index([sourceHash])
+  @@index([sourceTypeCode])
+  @@index([isOfficial])
+}
+
+model ScholarshipUniversityLink {
+  id                   String   @id @default(uuid())
+  scholarshipId        String
+  linkKey              String
+  universityId         String?
+  academicProgramId    String?
+  sourceLabel          String?
+  relationshipTypeCode String   @default("TARGET")
+  resolutionStatus     String   @default("PENDING")
+  metadata             Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  scholarship     Scholarship                @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  university      University?                @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  academicProgram UniversityAcademicProgram? @relation(fields: [academicProgramId], references: [id], onDelete: SetNull)
+
+  @@unique([scholarshipId, linkKey])
+  @@index([scholarshipId])
+  @@index([universityId])
+  @@index([academicProgramId])
+  @@index([resolutionStatus])
+}
+
+
+model ScholarshipVersion {
+  id                   String   @id @default(uuid())
+  scholarshipId        String
+  versionNumber        Int
+  status               String   @default("DRAFT")
+  sourceImportRecordId String?
+  snapshot             Json
+  changeSummary        Json?
+  createdAt            DateTime @default(now())
+  publishedAt          DateTime?
+
+  scholarship             Scholarship                    @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  applicationCycles       ScholarshipApplicationCycle[]
+  eligibilityRuleVersions ScholarshipEligibilityRuleVersion[]
+  awardPackageVersions    ScholarshipAwardPackageVersion[]
+
+  @@unique([scholarshipId, versionNumber])
+  @@index([scholarshipId, status])
+}
+
+model ScholarshipSponsorContext {
+  id            String   @id @default(uuid())
+  scholarshipId String   @unique
+  sponsorType   String   @default("CONTEXTUAL")
+  displayName   String
+  universityId  String?
+  source        String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  university  University?  @relation(fields: [universityId], references: [id], onDelete: SetNull)
+}
+
+model ScholarshipApplicationCycle {
+  id            String   @id @default(uuid())
+  scholarshipId String
+  versionId     String?
+  cycleKey      String
+  academicYear  String?
+  opensAt       DateTime?
+  closesAt      DateTime?
+  graceEndsAt   DateTime?
+  status        String   @default("DRAFT")
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  scholarship Scholarship        @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  version     ScholarshipVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+
+  @@unique([scholarshipId, cycleKey])
+  @@index([scholarshipId, status])
+}
+
+model ScholarshipEligibilityRuleVersion {
+  id                   String   @id @default(uuid())
+  scholarshipVersionId String
+  ruleKey              String
+  ruleVersionNumber    Int
+  definition           Json
+  createdAt            DateTime @default(now())
+
+  scholarshipVersion ScholarshipVersion @relation(fields: [scholarshipVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([scholarshipVersionId, ruleKey, ruleVersionNumber])
+}
+
+model ScholarshipAwardPackageVersion {
+  id                   String   @id @default(uuid())
+  scholarshipVersionId String
+  packageKey           String
+  packageVersionNumber Int
+  definition           Json
+  createdAt            DateTime @default(now())
+
+  scholarshipVersion ScholarshipVersion @relation(fields: [scholarshipVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([scholarshipVersionId, packageKey, packageVersionNumber])
+}
+
+// --- Majors ---
+
+model Major {
+  id                        String  @id @default(uuid())
+  publicId                  String  @unique
+  slug                      String  @unique
+  canonicalName             String
+  canonicalDedupKey         String  @unique
+  displayName               String
+  localizedNameAr           String?
+  localizedNameEn           String?
+  status                    String
+  completenessStatus        String
+  facultyName               String?
+  academicFieldId           String?
+  disciplineId              String?
+  currentPublishedVersionId String?
+  optionalFields            Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  academicField           AcademicTaxonomyNode?        @relation("MajorAcademicField", fields: [academicFieldId], references: [id], onDelete: SetNull)
+  discipline              AcademicTaxonomyNode?        @relation("MajorDiscipline", fields: [disciplineId], references: [id], onDelete: SetNull)
+  currentPublishedVersion MajorVersion?                @relation("CurrentPublishedMajorVersion", fields: [currentPublishedVersionId], references: [id], onDelete: SetNull)
+  versions                MajorVersion[]               @relation("MajorVersions")
+  levelProfiles           MajorLevelProfile[]
+  aliases                 MajorAlias[]
+  sourceRelationships     MajorRelationship[]          @relation("MajorRelationshipSource")
+  targetRelationships     MajorRelationship[]          @relation("MajorRelationshipTarget")
+  classificationMappings  MajorClassificationMapping[]
+  sources                 MajorSource[]
+  fellowships             FellowshipDefinition[]       @relation("FellowshipLinkedMajor")
+  universityPrograms      UniversityAcademicProgram[]
+  scholarshipTargets      ScholarshipMajorTarget[]     @relation("ScholarshipMajorTargetMajor")
+  scholarshipEligibility  ScholarshipEligibilityItem[] @relation("ScholarshipEligibilityMajor")
+  courseProjections        CourseMajorProjection[]
+
+  @@index([status])
+  @@index([completenessStatus])
+  @@index([academicFieldId])
+  @@index([disciplineId])
+  @@index([currentPublishedVersionId])
+  @@index([displayName])
+}
+
+model MajorVersion {
+  id                   String    @id @default(uuid())
+  majorId              String
+  profileId            String?
+  versionNumber        Int
+  status               String
+  sourceImportRecordId String?
+  sourceFileName       String?
+  sourceUri            String?
+  sourceHash           String?
+  importedAt           DateTime?
+  publishedAt          DateTime?
+  approvedBy           String?
+  supersededAt         DateTime?
+  changeSummary        Json?
+  rawContentBlocks     Json?
+  metadata             Json?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  major              Major                 @relation("MajorVersions", fields: [majorId], references: [id], onDelete: Cascade)
+  profile            MajorLevelProfile?    @relation("MajorProfileVersions", fields: [profileId], references: [id], onDelete: Cascade)
+  currentForMajors   Major[]               @relation("CurrentPublishedMajorVersion")
+  currentForProfiles MajorLevelProfile[]   @relation("CurrentPublishedMajorProfileVersion")
+  contentSections    MajorContentSection[]
+
+  @@unique([majorId, profileId, versionNumber])
+  @@index([majorId])
+  @@index([profileId])
+  @@index([status])
+  @@index([sourceHash])
+  @@index([sourceImportRecordId])
+}
+
+model MajorLevelProfile {
+  id                        String       @id @default(uuid())
+  majorId                   String
+  level                     String
+  degreeLevelId             String?
+  degreeLevel               DegreeLevel? @relation(fields: [degreeLevelId], references: [id], onDelete: SetNull)
+  code                      String?
+  profileType               String?
+  displayName               String?
+  localizedNameAr           String?
+  localizedNameEn           String?
+  collegeContext            String?
+  academicFieldId           String?
+  disciplineId              String?
+  currentPublishedVersionId String?
+  status                    String       @default("READY_TO_REVIEW")
+  completenessStatus        String       @default("NEEDS_REVIEW")
+  metadata                  Json?
+  createdAt                 DateTime     @default(now())
+  updatedAt                 DateTime     @updatedAt
+
+  major                   Major                        @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  academicField           AcademicTaxonomyNode?        @relation("MajorProfileAcademicField", fields: [academicFieldId], references: [id], onDelete: SetNull)
+  discipline              AcademicTaxonomyNode?        @relation("MajorProfileDiscipline", fields: [disciplineId], references: [id], onDelete: SetNull)
+  currentPublishedVersion MajorVersion?                @relation("CurrentPublishedMajorProfileVersion", fields: [currentPublishedVersionId], references: [id], onDelete: SetNull)
+  versions                MajorVersion[]               @relation("MajorProfileVersions")
+  contentSections         MajorContentSection[]
+  sourceRelationships     MajorRelationship[]          @relation("MajorProfileRelationshipSource")
+  targetRelationships     MajorRelationship[]          @relation("MajorProfileRelationshipTarget")
+  classificationMappings  MajorClassificationMapping[]
+  sources                 MajorSource[]
+  fellowships             FellowshipDefinition[]       @relation("FellowshipLinkedProfile")
+  courseProjections       CourseMajorProjection[]
+
+  @@unique([majorId, level, code])
+  @@index([majorId])
+  @@index([level])
+  @@index([status])
+  @@index([completenessStatus])
+  @@index([academicFieldId])
+  @@index([disciplineId])
+  @@index([currentPublishedVersionId])
+}
+
+model MajorContentSection {
+  id                String   @id @default(uuid())
+  profileId         String?
+  versionId         String?
+  sectionKey        String
+  title             String?
+  locale            String?
+  content           String
+  sourceSectionPath String?
+  reviewStatus      String   @default("NEEDS_REVIEW")
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  profile MajorLevelProfile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  version MajorVersion?      @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, versionId, sectionKey, locale])
+  @@index([profileId])
+  @@index([versionId])
+  @@index([sectionKey])
+  @@index([reviewStatus])
+}
+
+model MajorAlias {
+  id              String   @id @default(uuid())
+  majorId         String
+  locale          String?
+  alias           String
+  normalizedAlias String
+  aliasType       String   @default("ALIAS")
+  sourceId        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  major Major @relation(fields: [majorId], references: [id], onDelete: Cascade)
+
+  @@unique([majorId, locale, normalizedAlias, aliasType])
+  @@index([majorId])
+  @@index([normalizedAlias])
+  @@index([locale, normalizedAlias])
+  @@index([aliasType])
+}
+
+model MajorRelationship {
+  id               String   @id @default(uuid())
+  sourceMajorId    String?
+  targetMajorId    String?
+  sourceProfileId  String?
+  targetProfileId  String?
+  relationshipType String
+  confidence       Float?
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  sourceMajor   Major?             @relation("MajorRelationshipSource", fields: [sourceMajorId], references: [id], onDelete: Cascade)
+  targetMajor   Major?             @relation("MajorRelationshipTarget", fields: [targetMajorId], references: [id], onDelete: Cascade)
+  sourceProfile MajorLevelProfile? @relation("MajorProfileRelationshipSource", fields: [sourceProfileId], references: [id], onDelete: Cascade)
+  targetProfile MajorLevelProfile? @relation("MajorProfileRelationshipTarget", fields: [targetProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceMajorId, targetMajorId, sourceProfileId, targetProfileId, relationshipType])
+  @@index([sourceMajorId])
+  @@index([targetMajorId])
+  @@index([sourceProfileId])
+  @@index([targetProfileId])
+  @@index([relationshipType])
+}
+
+model MajorClassificationMapping {
+  id               String   @id @default(uuid())
+  majorId          String?
+  profileId        String?
+  taxonomyNodeId   String
+  relationshipType String
+  standardType     String?
+  standardCode     String?
+  confidence       Float?
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  major        Major?               @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  profile      MajorLevelProfile?   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  taxonomyNode      AcademicTaxonomyNode   @relation("MajorClassificationTaxonomyNode", fields: [taxonomyNodeId], references: [id], onDelete: Restrict)
+  courseProjections CourseMajorProjection[]
+
+  @@unique([majorId, profileId, taxonomyNodeId, relationshipType])
+  @@index([majorId])
+  @@index([profileId])
+  @@index([taxonomyNodeId])
+  @@index([relationshipType])
+}
+
+model MajorSource {
+  id           String    @id @default(uuid())
+  majorId      String?
+  profileId    String?
+  sourceType   String
+  sourceName   String
+  sourceLocale String?
+  sourceUri    String?
+  sourceHash   String?
+  importedAt   DateTime?
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  major   Major?             @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  profile MajorLevelProfile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([majorId])
+  @@index([profileId])
+  @@index([sourceType])
+  @@index([sourceHash])
+}
+
+model FellowshipDefinition {
+  id                 String   @id @default(uuid())
+  publicId           String   @unique
+  slug               String   @unique
+  canonicalName      String
+  canonicalDedupKey  String   @unique
+  displayName        String
+  localizedNameAr    String?
+  localizedNameEn    String?
+  fellowshipType     String
+  professionalDomain String?
+  status             String   @default("READY_TO_REVIEW")
+  completenessStatus String   @default("NEEDS_REVIEW")
+  linkedMajorId      String?
+  linkedProfileId    String?
+  optionalFields     Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  linkedMajor   Major?             @relation("FellowshipLinkedMajor", fields: [linkedMajorId], references: [id], onDelete: SetNull)
+  linkedProfile MajorLevelProfile? @relation("FellowshipLinkedProfile", fields: [linkedProfileId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([fellowshipType])
+  @@index([professionalDomain])
+  @@index([linkedMajorId])
+  @@index([linkedProfileId])
+}
+
+// --- International Tests ---
+
+model InternationalTest {
+  id                        String  @id @default(uuid())
+  publicId                  String  @unique
+  slug                      String  @unique
+  canonicalName             String
+  canonicalDedupKey         String  @unique
+  displayName               String
+  status                    String
+  completenessStatus        String
+  testCategory              String?
+  providerName              String?
+  familyId                  String?
+  providerId                String?
+  currentPublishedVersionId String?
+  optionalFields            Json?
+  sourceImportRecordId      String?
+
+  localizedNameAr               String?
+  localizedNameEn               String?
+  abbreviation                  String?
+  isPubliclyVisible             Boolean @default(false)
+  isSourceVerified              Boolean @default(false)
+  registrationRequirements      String?
+  identificationRequirements    String?
+  retakePolicy                  String?
+  cancellationReschedulingNotes String?
+  accessibilityNotes            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  family                             InternationalTestFamily?                        @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  provider                           InternationalTestProvider?                      @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  currentPublishedVersion            InternationalTestVersion?                       @relation("CurrentPublishedTestVersion", fields: [currentPublishedVersionId], references: [id], onDelete: SetNull)
+  versions                           InternationalTestVersion[]                      @relation("InternationalTestVersions")
+  variants                           InternationalTestVariant[]
+  sections                           InternationalTestSection[]
+  scoreScale                         InternationalTestScoreScale?
+  fees                               InternationalTestFeeMetadata[]
+  officialLinks                      InternationalTestOfficialLink[]
+  availability                       InternationalTestAvailability?
+  preparationMaterials               InternationalTestPreparationMaterial[]
+  evidence                           InternationalTestEvidence?
+  sessions                           InternationalTestSession[]
+  centers                            InternationalTestCenter[]
+  requirements                       InternationalTestRequirement[]
+  policies                           InternationalTestPolicy[]
+  countryRelationships               InternationalTestCountryRelationship[]
+  languageRelationships              InternationalTestLanguageRelationship[]
+  academicTaxonomyRelationships      InternationalTestAcademicTaxonomyRelationship[]
+  degreeRelationships                InternationalTestDegreeRelationship[]
+  equivalencyMappings                InternationalTestEquivalencyMapping[]
+  universityAdmissionRequirements    UniversityProgramAdmissionRequirement[]
+  scholarshipEligibilityRequirements ScholarshipEligibilityItem[]                    @relation("ScholarshipEligibilityTest")
+  scholarshipRequiredDocuments       ScholarshipRequiredDocument[]                   @relation("ScholarshipRequiredDocumentTest")
+  coursePreparationRelationships      CourseInternationalTestRelationship[]
+
+  @@index([status])
+  @@index([testCategory])
+  @@index([providerName])
+  @@index([familyId])
+  @@index([providerId])
+  @@index([currentPublishedVersionId])
+  @@index([completenessStatus])
+  @@index([status, testCategory])
+  @@index([status, completenessStatus])
+  @@index([providerName, canonicalName])
+}
+
+model InternationalTestFamily {
+  id                        String   @id @default(uuid())
+  key                       String   @unique
+  displayName               String
+  localizedNameAr           String?
+  localizedNameEn           String?
+  category                  String
+  profileType               String
+  defaultSectionModel       String
+  allowsCustomContentBlocks Boolean  @default(true)
+  description               String?
+  metadata                  Json?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  tests InternationalTest[]
+
+  @@index([category])
+  @@index([displayName])
+}
+
+model InternationalTestProvider {
+  id              String   @id @default(uuid())
+  key             String   @unique
+  displayName     String
+  localizedNameAr String?
+  localizedNameEn String?
+  providerType    String?
+  officialWebsite String?
+  countryIso2Code String?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tests InternationalTest[]
+
+  @@index([providerType])
+  @@index([countryIso2Code])
+  @@index([displayName])
+}
+
+model InternationalTestVersion {
+  id                   String    @id @default(uuid())
+  testId               String
+  versionNumber        Int
+  status               String
+  sourceImportRecordId String?
+  sourceFileName       String?
+  sourceLocale         String?
+  sourceUri            String?
+  sourceHash           String?
+  importedAt           DateTime?
+  publishedAt          DateTime?
+  approvedBy           String?
+  supersededAt         DateTime?
+  effectiveFrom        DateTime?
+  effectiveTo          DateTime?
+  changeSummary        Json?
+  rawContentBlocks     Json?
+  metadata             Json?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  test                            InternationalTest                       @relation("InternationalTestVersions", fields: [testId], references: [id], onDelete: Cascade)
+  currentForTests                 InternationalTest[]                     @relation("CurrentPublishedTestVersion")
+  deliveryModes                   InternationalTestDeliveryModeProfile[]
+  scoreScales                     InternationalTestVersionScoreScale[]
+  sessions                        InternationalTestSession[]
+  requirements                    InternationalTestRequirement[]
+  policies                        InternationalTestPolicy[]
+  contentBlocks                   InternationalTestContentBlock[]
+  universityAdmissionRequirements UniversityProgramAdmissionRequirement[]
+
+  @@unique([testId, versionNumber])
+  @@index([testId])
+  @@index([status])
+  @@index([sourceImportRecordId])
+  @@index([sourceHash])
+}
+
+model InternationalTestDeliveryModeProfile {
+  id                  String   @id @default(uuid())
+  versionId           String
+  mode                String
+  displayName         String
+  isActive            Boolean  @default(true)
+  registrationUrl     String?
+  administrationNotes String?
+  metadata            Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  version  InternationalTestVersion   @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  sessions InternationalTestSession[]
+  centers  InternationalTestCenter[]
+
+  @@unique([versionId, mode, displayName])
+  @@index([versionId])
+  @@index([mode])
+}
+
+model InternationalTestVariant {
+  id                  String  @id @default(uuid())
+  testId              String
+  variantName         String
+  deliveryMode        String
+  isActive            Boolean @default(true)
+  specificOfficialUrl String?
+  administrativeNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test                            InternationalTest                       @relation(fields: [testId], references: [id], onDelete: Cascade)
+  universityAdmissionRequirements UniversityProgramAdmissionRequirement[]
+
+  @@index([testId])
+  @@index([deliveryMode])
+}
+
+model InternationalTestSection {
+  id              String @id @default(uuid())
+  testId          String
+  sectionName     String
+  sectionType     String
+  durationMinutes Int?
+  order           Int
+  questionTypes   Json?
+  scoreMinimum    Float?
+  scoreMaximum    Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@index([testId])
+  @@index([testId, order])
+}
+
+model InternationalTestScoreScale {
+  id                           String  @id @default(uuid())
+  testId                       String  @unique
+  overallMinimum               Float
+  overallMaximum               Float
+  scoreIncrement               Float?
+  bandsOrLevels                Json?
+  passFailRules                String?
+  cefrEquivalency              String?
+  crossTestEquivalency         String?
+  resultValidityDurationMonths Int?
+  resultDeliveryTimeDays       Int?
+  scoreReportingUrl            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@index([testId])
+}
+
+model InternationalTestFeeMetadata {
+  id                   String  @id @default(uuid())
+  testId               String
+  feeType              String
+  amount               Float
+  currencyCode         String
+  currencyReferenceId  String
+  hasRegionalVariation Boolean @default(false)
+  validityWindowNotes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  currencyReference ReferenceCurrency @relation(fields: [currencyReferenceId], references: [id], onDelete: Restrict)
+
+  @@index([testId])
+  @@index([currencyCode])
+  @@index([currencyReferenceId])
+}
+
+model InternationalTestOfficialLink {
+  id          String  @id @default(uuid())
+  testId      String
+  linkType    String
+  url         String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@index([testId])
+  @@index([linkType])
+}
+
+model InternationalTestAvailability {
+  id                        String  @id @default(uuid())
+  testId                    String  @unique
+  availableCountryIds       Json
+  availableCityIds          Json?
+  onlineAvailabilityRegions Json?
+  testingWindowsNotes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@index([testId])
+}
+
+model InternationalTestPreparationMaterial {
+  id           String  @id @default(uuid())
+  testId       String
+  materialType String
+  url          String?
+  assetId      String?
+  title        String
+  description  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@index([testId])
+  @@index([assetId])
+}
+
+model InternationalTestEvidence {
+  id                      String    @id @default(uuid())
+  testId                  String    @unique
+  originalImportedName    String?
+  normalizedCanonicalName String?
+  deterministicKey        String?
+  sourceId                String?
+  sourceUrl               String?
+  contentHash             String?
+  retrievedAt             DateTime?
+  evidenceSnippet         String?
+  duplicateStatus         String?
+  conflictingFields       Json?
+  mergeSuggestions        Json?
+  sourceTrustLevel        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@index([testId])
+  @@index([deterministicKey])
+  @@index([contentHash])
+}
+
+model InternationalTestVersionScoreScale {
+  id                           String   @id @default(uuid())
+  versionId                    String
+  scaleName                    String
+  overallMinimum               Float?
+  overallMaximum               Float?
+  scoreIncrement               Float?
+  bandsOrLevels                Json?
+  passFailRules                String?
+  cefrEquivalency              String?
+  crossTestEquivalency         String?
+  resultValidityDurationMonths Int?
+  resultDeliveryTimeDays       Int?
+  scoreReportingUrl            String?
+  metadata                     Json?
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+
+  version InternationalTestVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@unique([versionId, scaleName])
+  @@index([versionId])
+}
+
+model InternationalTestSession {
+  id                   String    @id @default(uuid())
+  testId               String
+  versionId            String?
+  deliveryModeId       String?
+  sessionCode          String?
+  title                String
+  registrationOpensAt  DateTime?
+  registrationClosesAt DateTime?
+  startsAt             DateTime?
+  endsAt               DateTime?
+  timezone             String?
+  capacity             Int?
+  status               String
+  metadata             Json?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  test         InternationalTest                     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  version      InternationalTestVersion?             @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  deliveryMode InternationalTestDeliveryModeProfile? @relation(fields: [deliveryModeId], references: [id], onDelete: SetNull)
+
+  @@index([testId])
+  @@index([versionId])
+  @@index([deliveryModeId])
+  @@index([status])
+  @@index([startsAt])
+}
+
+model InternationalTestCenter {
+  id              String   @id @default(uuid())
+  testId          String
+  deliveryModeId  String?
+  centerCode      String?
+  displayName     String
+  countryIso2Code String?
+  cityName        String?
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  officialUrl     String?
+  status          String
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  test         InternationalTest                     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  deliveryMode InternationalTestDeliveryModeProfile? @relation(fields: [deliveryModeId], references: [id], onDelete: SetNull)
+
+  @@index([testId])
+  @@index([deliveryModeId])
+  @@index([countryIso2Code])
+  @@index([cityName])
+  @@index([status])
+}
+
+model InternationalTestRequirement {
+  id              String   @id @default(uuid())
+  testId          String
+  versionId       String?
+  requirementType String
+  title           String
+  description     String?
+  appliesTo       Json?
+  isMandatory     Boolean  @default(true)
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  test    InternationalTest         @relation(fields: [testId], references: [id], onDelete: Cascade)
+  version InternationalTestVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+
+  @@index([testId])
+  @@index([versionId])
+  @@index([requirementType])
+  @@index([isMandatory])
+}
+
+model InternationalTestPolicy {
+  id            String    @id @default(uuid())
+  testId        String
+  versionId     String?
+  policyType    String
+  title         String
+  description   String?
+  sourceUrl     String?
+  effectiveFrom DateTime?
+  effectiveTo   DateTime?
+  metadata      Json?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  test    InternationalTest         @relation(fields: [testId], references: [id], onDelete: Cascade)
+  version InternationalTestVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+
+  @@index([testId])
+  @@index([versionId])
+  @@index([policyType])
+  @@index([effectiveFrom])
+}
+
+model InternationalTestCountryRelationship {
+  id                   String   @id @default(uuid())
+  testId               String
+  canonicalReferenceId String?
+  countryIso2Code      String
+  relationshipType String
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  test             InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  canonicalCountry ReferenceCountry?  @relation(fields: [canonicalReferenceId], references: [id], onDelete: Restrict)
+
+  @@unique([testId, countryIso2Code, relationshipType])
+  @@unique([testId, canonicalReferenceId, relationshipType])
+  @@index([testId])
+  @@index([canonicalReferenceId])
+  @@index([countryIso2Code])
+  @@index([relationshipType])
+}
+
+model InternationalTestLanguageRelationship {
+  id                   String   @id @default(uuid())
+  testId               String
+  canonicalReferenceId String?
+  languageIsoCode      String
+  relationshipType String
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  test              InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  canonicalLanguage ReferenceLanguage? @relation(fields: [canonicalReferenceId], references: [id], onDelete: Restrict)
+
+  @@unique([testId, languageIsoCode, relationshipType])
+  @@unique([testId, canonicalReferenceId, relationshipType])
+  @@index([testId])
+  @@index([canonicalReferenceId])
+  @@index([languageIsoCode])
+  @@index([relationshipType])
+}
+
+model InternationalTestAcademicTaxonomyRelationship {
+  id               String   @id @default(uuid())
+  testId           String
+  taxonomyNodeId   String
+  relationshipType String
+  confidence       Float?
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  test         InternationalTest    @relation(fields: [testId], references: [id], onDelete: Cascade)
+  taxonomyNode AcademicTaxonomyNode @relation(fields: [taxonomyNodeId], references: [id], onDelete: Restrict)
+
+  @@unique([testId, taxonomyNodeId, relationshipType])
+  @@index([testId])
+  @@index([taxonomyNodeId])
+  @@index([relationshipType])
+}
+
+model InternationalTestDegreeRelationship {
+  id               String   @id @default(uuid())
+  testId           String
+  degreeLevelCode  String
+  relationshipType String
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  test          InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  DegreeLevel   DegreeLevel?      @relation(fields: [degreeLevelId], references: [id])
+  degreeLevelId String?
+
+  @@unique([testId, degreeLevelCode, relationshipType])
+  @@index([testId])
+  @@index([degreeLevelCode])
+  @@index([relationshipType])
+}
+
+model InternationalTestEquivalencyMapping {
+  id          String   @id @default(uuid())
+  testId      String
+  sourceScale String
+  sourceValue String
+  targetScale String
+  targetValue String
+  confidence  Float?
+  notes       String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  test InternationalTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@unique([testId, sourceScale, sourceValue, targetScale])
+  @@index([testId])
+  @@index([sourceScale])
+  @@index([targetScale])
+}
+
+model InternationalTestContentBlock {
+  id                String   @id @default(uuid())
+  versionId         String
+  blockKey          String
+  blockType         String
+  title             String?
+  locale            String?
+  content           String
+  sourceSectionPath String?
+  reviewStatus      String   @default("NEEDS_REVIEW")
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  version InternationalTestVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@unique([versionId, blockKey, locale])
+  @@index([versionId])
+  @@index([blockType])
+  @@index([reviewStatus])
+}
+
+// --- Student Workspace ---
+
+model AssetRecord {
+  id                       String    @id
+  reference                String    @unique
+  ownerId                  String
+  ownerType                String
+  lifecycleState           String
+  securityClassification   String
+  retentionCategory        String
+  retentionExpiresAt       DateTime?
+  quarantineStorageLocator String?
+  cleanStorageLocator      String?
+  checksumAlgorithm        String?
+  checksumHash             String?
+  metadata                 Json
+  versionChain             Json?
+  sanitizationMetadata     Json?
+  malwareScanStatus        Json?
+
+  legalHoldUntil       DateTime?
+  retentionProcessedAt DateTime?
+  retentionClaimUntil  DateTime?
+  retentionClaimToken  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  archivedAt DateTime?
+  deletedAt  DateTime?
+  purgedAt   DateTime?
+
+  @@index([retentionExpiresAt, retentionProcessedAt])
+  @@index([ownerId, ownerType])
+  @@index([lifecycleState])
+}
+
+model StudentWorkspace {
+  id                 String  @id @default(uuid())
+  studentReferenceId String  @unique
+  status             String
+  version            Int     @default(1)
+  displayName        String?
+  preferredLanguage  String?
+  timezone           String? @default("Asia/Aden")
+  theme              String? @default("SYSTEM")
+  avatarAssetId      String?
+  layoutPreferences  Json?
+  notificationMatrix Json?
+  privacyPreferences Json?
+  accessibilityPreferences Json?
+  metadata           Json?
+
+  lastActiveAt DateTime?
+  suspendedAt  DateTime?
+  archivedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  savedItems       StudentSavedItem[]
+  savedCollections StudentSavedCollection[]
+  applicationTrackers StudentApplicationTracker[]
+  timelineEntries  StudentTimelineEntry[]
+  recentActivity   StudentRecentActivity[]
+  recentlyViewed   StudentRecentlyViewed[]
+  searchHistory    StudentSearchHistory[]
+  snapshots        StudentWorkspaceSnapshot[]
+  notifications    StudentNotificationProjection[]
+  integrationInbox StudentWorkspaceEventInbox[]
+  learningProjections StudentLearningProjection[]
+  certificateProjections StudentCertificateReadProjection[]
+  privacyConsentDecisions StudentPrivacyConsentDecision[]
+  personalStatistics StudentPersonalStatistics?
+
+  @@index([status])
+  @@index([lastActiveAt])
+}
+
+model StudentSavedItem {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  collectionId       String?
+  entityType         String
+  entityId           String
+  entitySlug         String?
+  displayName        String?
+  notes              String?
+  metadata           Json?
+  savedAt            DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  workspace  StudentWorkspace        @relation(fields: [studentReferenceId], references: [studentReferenceId])
+  collection StudentSavedCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  @@unique([studentReferenceId, entityType, entityId])
+  @@index([studentReferenceId, savedAt])
+  @@index([collectionId])
+}
+
+model StudentApplicationTracker {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  scholarshipId      String
+  scholarshipSlug    String?
+  stage               String   @default("PREPARING_DOCUMENTS")
+  notes               String?
+  deadlineAt          DateTime?
+  status              String   @default("ACTIVE")
+  version             Int      @default(1)
+  archivedAt          DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Cascade)
+  checklist StudentApplicationChecklistItem[]
+
+  @@unique([studentReferenceId, scholarshipId])
+  @@index([studentReferenceId, status, updatedAt])
+  @@index([deadlineAt, status])
+}
+
+model StudentApplicationChecklistItem {
+  id          String   @id @default(uuid())
+  trackerId   String
+  label       String
+  completed   Boolean  @default(false)
+  position    Int
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tracker StudentApplicationTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+
+  @@unique([trackerId, position])
+  @@index([trackerId, completed])
+}
+
+model StudentSavedCollection {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  name               String
+  description        String?
+  type               String   @default("PERSONAL")
+  color              String?
+  icon               String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  workspace StudentWorkspace   @relation(fields: [studentReferenceId], references: [studentReferenceId])
+  items     StudentSavedItem[]
+
+  @@unique([studentReferenceId, name])
+  @@index([studentReferenceId, type])
+}
+
+model StudentTimelineEntry {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  eventType          String
+  title              String
+  description        String?
+  sourceDomain       String
+  sourceReferenceId  String?
+  metadata           Json?
+  occurredAt         DateTime @default(now())
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId])
+
+  @@index([studentReferenceId, occurredAt])
+  @@index([sourceDomain, sourceReferenceId])
+}
+
+model StudentRecentActivity {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  activityType       String
+  title              String
+  entityType         String?
+  entityId           String?
+  entitySlug         String?
+  metadata           Json?
+  occurredAt         DateTime @default(now())
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId])
+
+  @@index([studentReferenceId, occurredAt])
+}
+
+model StudentRecentlyViewed {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  entityType         String
+  entityId           String
+  entitySlug         String?
+  viewedAt           DateTime @default(now())
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Restrict)
+
+  @@unique([studentReferenceId, entityType, entityId])
+  @@index([studentReferenceId, viewedAt])
+}
+
+model StudentLearningProjection {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  enrollmentId       String
+  courseId           String
+  courseSlug         String
+  courseName         String
+  status             String
+  progressPercentage Int      @default(0)
+  enrolledAt         DateTime
+  lastAccessedAt     DateTime?
+  completedAt        DateTime?
+  sourceEventId      String
+  updatedAt          DateTime @updatedAt
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Restrict)
+
+  @@unique([studentReferenceId, enrollmentId])
+  @@index([studentReferenceId, status, lastAccessedAt])
+  @@index([sourceEventId])
+}
+
+model StudentCertificateReadProjection {
+  id                    String   @id @default(uuid())
+  studentReferenceId    String
+  certificateId         String
+  publicId              String
+  serialNumber          String
+  verificationCode      String
+  status                String
+  courseDisplayName     String
+  issuedAt              DateTime
+  expiresAt             DateTime?
+  certificatePdfAssetId String?
+  previewImageAssetId   String?
+  sourceEventId         String
+  updatedAt             DateTime @updatedAt
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Restrict)
+
+  @@unique([studentReferenceId, certificateId])
+  @@index([studentReferenceId, status, issuedAt])
+  @@index([sourceEventId])
+}
+
+model StudentSearchHistory {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  query              String
+  normalizedQuery    String
+  searchedAt         DateTime @default(now())
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId])
+
+  @@index([studentReferenceId, searchedAt])
+}
+
+model StudentWorkspaceSnapshot {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  label              String?
+  workspaceVersion   Int
+  configuration      Json
+  createdAt          DateTime @default(now())
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId])
+
+  @@index([studentReferenceId, createdAt])
+}
+
+model StudentNotificationProjection {
+  id                 String   @id
+  studentReferenceId String
+  category           String
+  title              String
+  message            String
+  actionUrl          String?
+  sourceEventId      String?  @unique
+  readAt             DateTime?
+  occurredAt         DateTime
+  createdAt          DateTime @default(now())
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId])
+
+  @@index([studentReferenceId, readAt, occurredAt])
+}
+
+model StudentPrivacyConsentDecision {
+  id                 String   @id @default(uuid())
+  studentReferenceId String
+  workspaceVersion   Int
+  actorId            String
+  actorType          String
+  purpose            String
+  source             String
+  beforePreferences  Json
+  afterPreferences   Json
+  changedFields      Json
+  correlationId      String?
+  decidedAt          DateTime @default(now())
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Restrict)
+
+  @@index([studentReferenceId, decidedAt])
+  @@index([actorId, decidedAt])
+}
+
+model StudentPersonalStatistics {
+  id                    String   @id @default(uuid())
+  studentReferenceId    String   @unique
+  savedItems            Int      @default(0)
+  activeCourses         Int      @default(0)
+  completedCourses      Int      @default(0)
+  averageCourseProgress Int      @default(0)
+  certificates          Int      @default(0)
+  unreadNotifications   Int      @default(0)
+  updatedAt             DateTime @updatedAt
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Restrict)
+}
+
+model StudentWorkspaceEventInbox {
+  id                 String   @id @default(uuid())
+  eventId            String   @unique
+  studentReferenceId String
+  sourceDomain       String
+  eventType          String
+  payload            Json
+  processedAt        DateTime?
+  failureCode        String?
+  receivedAt         DateTime @default(now())
+
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId])
+
+  @@index([studentReferenceId, receivedAt])
+  @@index([processedAt, receivedAt])
+}
+
+// --- Phase 16 Enterprise CMS ---
+
+model CmsContentNode {
+  id                String   @id @default(uuid())
+  publicId          String   @unique
+  slug              String
+  siteIdentifier    String   @default("MANARATAK")
+  primaryLocale     String   @default("ar")
+  contentType       String
+  status            String   @default("DRAFT")
+  title             String
+  summary           String?
+  categoryId        String?
+  categorySlug      String?
+  authorId          String
+  ownerId           String
+  version           Int      @default(1)
+  featuredAssetId   String?
+  seoMetadata       Json?
+  editorialMetadata Json?
+  metadata          Json?
+  scheduledAt       DateTime?
+  publishedAt       DateTime?
+  archivedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  category           CmsCategory?              @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  localizedPayloads  CmsLocalizedContent[]
+  publishedPayloads  CmsPublishedContent[]
+  ledger              CmsEditorialLedger[]
+  domainLinks         CmsContentDomainLink[]
+
+  @@index([status, updatedAt])
+  @@index([contentType, status])
+  @@index([categoryId, status])
+  @@index([siteIdentifier, status])
+  @@index([authorId])
+  @@index([ownerId])
+  @@unique([siteIdentifier, slug])
+}
+
+
+model CmsContentDomainLink {
+  id           String   @id @default(uuid())
+  contentId    String
+  targetType   String
+  targetId     String
+  relationType String   @default("RELATED")
+  sortOrder    Int      @default(0)
+  metadata     Json?
+  createdBy    String
+  createdAt    DateTime @default(now())
+
+  content CmsContentNode @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, targetType, targetId, relationType])
+  @@index([targetType, targetId, sortOrder])
+  @@index([contentId, sortOrder])
+}
+
+model CmsLocalizedContent {
+  id                 String   @id @default(uuid())
+  contentId          String
+  siteIdentifier     String
+  locale             String
+  localizedSlug      String
+  state              String   @default("DRAFT")
+  version            Int      @default(1)
+  title              String
+  summary            String?
+  body                String
+  readingTimeMinutes Int?
+  featuredAssetId    String?
+  seoMetadata        Json?
+  metadata           Json?
+  lastModifiedBy     String
+  scheduledAt        DateTime?
+  publishedAt        DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  content     CmsContentNode        @relation(fields: [contentId], references: [id], onDelete: Restrict)
+  tags        CmsContentTag[]
+  attachments CmsContentAttachment[]
+  reviews     CmsWorkflowReview[]
+  revisions   CmsContentRevision[]
+
+  @@unique([contentId, locale])
+  @@unique([siteIdentifier, locale, localizedSlug])
+  @@index([state, scheduledAt])
+  @@index([contentId, state])
+}
+
+model CmsCategory {
+  id                 String   @id @default(uuid())
+  slug               String   @unique
+  nameAr             String
+  nameEn             String
+  descriptionAr      String?
+  descriptionEn      String?
+  parentCategoryId   String?
+  status             String   @default("ACTIVE")
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  parent   CmsCategory?  @relation("CmsCategoryTree", fields: [parentCategoryId], references: [id], onDelete: SetNull)
+  children CmsCategory[] @relation("CmsCategoryTree")
+  contents CmsContentNode[]
+
+  @@index([status])
+  @@index([parentCategoryId])
+}
+
+model CmsTag {
+  id              String   @id @default(uuid())
+  normalizedValue String   @unique
+  labelAr         String
+  labelEn         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  contents CmsContentTag[]
+}
+
+model CmsContentTag {
+  localizedContentId String
+  tagId              String
+
+  localizedContent CmsLocalizedContent @relation(fields: [localizedContentId], references: [id], onDelete: Cascade)
+  tag              CmsTag              @relation(fields: [tagId], references: [id], onDelete: Restrict)
+
+  @@id([localizedContentId, tagId])
+  @@index([tagId])
+}
+
+model CmsContentAttachment {
+  id                 String @id @default(uuid())
+  localizedContentId String
+  assetId            String
+  role               String @default("ATTACHMENT")
+  sortOrder          Int    @default(0)
+  caption            String?
+
+  localizedContent CmsLocalizedContent @relation(fields: [localizedContentId], references: [id], onDelete: Cascade)
+
+  @@unique([localizedContentId, assetId, role])
+  @@index([assetId])
+}
+
+model CmsWorkflowReview {
+  id                 String   @id @default(uuid())
+  localizedContentId String
+  status             String   @default("PENDING")
+  requestedBy        String
+  requestedAt        DateTime @default(now())
+  reviewedBy         String?
+  reviewedAt         DateTime?
+  comments           String?
+
+  localizedContent CmsLocalizedContent @relation(fields: [localizedContentId], references: [id], onDelete: Restrict)
+
+  @@index([localizedContentId, status])
+  @@index([status, requestedAt])
+}
+
+model CmsContentRevision {
+  id                 String   @id @default(uuid())
+  localizedContentId String
+  versionNumber      Int
+  reason             String
+  payload            Json
+  capturedBy         String
+  capturedAt         DateTime @default(now())
+
+  localizedContent CmsLocalizedContent @relation(fields: [localizedContentId], references: [id], onDelete: Restrict)
+
+  @@unique([localizedContentId, versionNumber])
+  @@index([localizedContentId, capturedAt])
+}
+
+model CmsPublishedContent {
+  id                 String   @id @default(uuid())
+  contentId          String
+  publicId           String
+  siteIdentifier     String
+  locale             String
+  slug               String
+  canonicalUrl       String
+  contentType        String
+  title              String
+  summary            String?
+  body                String
+  categorySlug       String?
+  featuredAssetId    String?
+  attachmentAssetIds Json
+  tags               Json
+  seoMetadata        Json
+  versionNumber      Int
+  status             String   @default("PUBLISHED")
+  publishedAt        DateTime
+  archivedAt         DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  content CmsContentNode @relation(fields: [contentId], references: [id], onDelete: Restrict)
+
+  @@unique([contentId, locale])
+  @@unique([siteIdentifier, locale, slug])
+  @@index([siteIdentifier, locale, status, publishedAt])
+  @@index([contentType, locale, status])
+  @@index([categorySlug, locale, status])
+}
+
+model CmsEditorialLedger {
+  id         String   @id @default(uuid())
+  contentId  String
+  localizedContentId String?
+  action     String
+  actorId    String
+  payload    Json?
+  occurredAt DateTime @default(now())
+
+  content CmsContentNode @relation(fields: [contentId], references: [id], onDelete: Restrict)
+
+  @@index([contentId, occurredAt])
+  @@index([localizedContentId, occurredAt])
+  @@index([action, occurredAt])
+}
+
+model CmsRedirect {
+  id             String   @id @default(uuid())
+  siteIdentifier String
+  locale         String
+  sourcePath     String
+  destinationPath String
+  statusCode     Int      @default(301)
+  reason         String
+  contentId      String?
+  active         Boolean  @default(true)
+  createdBy      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([siteIdentifier, locale, sourcePath])
+  @@index([siteIdentifier, locale, destinationPath])
+  @@index([contentId])
+}
+
+model CmsNavigationMenu {
+  id             String   @id @default(uuid())
+  siteIdentifier String
+  locale         String
+  locationKey    String
+  status         String   @default("DRAFT")
+  version              Int       @default(1)
+  updatedBy            String
+  publishedContentHash String?
+  publishedBy          String?
+  publishedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt      DateTime @updatedAt
+  nodes          CmsNavigationNode[]
+
+  @@unique([siteIdentifier, locale, locationKey])
+  @@index([siteIdentifier, locale, status])
+}
+
+model CmsNavigationNode {
+  id              String   @id @default(uuid())
+  menuId          String
+  parentNodeId    String?
+  displayText     String
+  targetType      String
+  targetValue     String
+  sortOrder       Int      @default(0)
+  openInNewWindow Boolean  @default(false)
+  metadata        Json?
+
+  menu CmsNavigationMenu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@index([menuId, parentNodeId, sortOrder])
+}
+
+model CmsBlockSchema {
+  id              String   @id @default(uuid())
+  key             String
+  version         Int
+  nameAr          String
+  nameEn          String
+  fieldSchema     Json
+  localizedFields Json
+  assetFields     Json
+  status          String   @default("ACTIVE")
+  createdBy       String
+  createdAt       DateTime @default(now())
+
+  blocks CmsContentBlock[]
+
+  @@unique([key, version])
+  @@index([status, key])
+}
+
+model CmsContentBlock {
+  id             String   @id @default(uuid())
+  publicId       String   @unique
+  siteIdentifier String
+  locale         String
+  schemaId       String
+  name           String
+  payload        Json
+  status         String   @default("DRAFT")
+  version        Int      @default(1)
+  updatedBy      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  schema CmsBlockSchema @relation(fields: [schemaId], references: [id], onDelete: Restrict)
+
+  @@index([siteIdentifier, locale, status])
+  @@index([schemaId])
+}
+
+model CmsAnnouncement {
+  id             String   @id @default(uuid())
+  publicId       String   @unique
+  siteIdentifier String
+  locale         String
+  title          String
+  body           String
+  urgency        String
+  audience       String?
+  startsAt       DateTime
+  expiresAt      DateTime?
+  status         String   @default("DRAFT")
+  version              Int      @default(1)
+  createdBy            String
+  updatedBy            String
+  approvedBy           String?
+  publishedContentHash String?
+  publishedAt          DateTime?
+  archivedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([siteIdentifier, locale, status, startsAt, expiresAt])
+}
+
+model CmsScheduledJob {
+  id                 String   @id @default(uuid())
+  localizedContentId String
+  jobType             String
+  scheduledAt         DateTime
+  status              String   @default("PENDING")
+  attemptCount        Int      @default(0)
+  idempotencyKey      String   @unique
+  failureCode         String?
+  claimedBy           String?
+  claimedAt           DateTime?
+  leaseExpiresAt      DateTime?
+  completedAt         DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([status, scheduledAt])
+  @@index([status, leaseExpiresAt])
+  @@index([localizedContentId, jobType])
+}
+
+// --- Identity Foundation ---
+
+model IdentityRecord {
+  id     String @id
+  type   String
+  status String
+
+  // Technical Metadata
+  createdBy String
+  createdAt DateTime  @default(now())
+  updatedBy String?
+  updatedAt DateTime  @updatedAt
+  deletedBy String?
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  // Relations
+  user        UserRecord?
+  account     AccountRecord?
+  sessions    SessionRecord[]
+  credentials CredentialRecord[]
+}
+
+model CredentialRecord {
+  id           String   @id @default(uuid())
+  identityId   String
+  type         String
+  passwordHash String
+  disabled     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  identity IdentityRecord @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@index([identityId])
+}
+
+model UserRecord {
+  identityId String @id
+
+  // Profile
+  displayName       String
+  avatarUrl         String?
+  preferredLanguage String?
+  timeZone          String?
+
+  // Contact Registry
+  primaryEmail        String
+  isEmailVerified     Boolean @default(false)
+  primaryPhone        String?
+  isPhoneVerified     Boolean @default(false)
+  alternativeContacts Json?
+
+  identity IdentityRecord @relation(fields: [identityId], references: [id], onDelete: Cascade)
+}
+
+model AccountRecord {
+  identityId         String @id
+  accessState        String
+  storageQuotaBytes  Float  @default(0)
+  rateLimitMax       Int    @default(100)
+  rateLimitWindowMs  Int    @default(60000)
+  configurationFlags Json?
+
+  identity IdentityRecord @relation(fields: [identityId], references: [id], onDelete: Cascade)
+}
+
+// --- Authorization Foundation ---
+
+model RoleRecord {
+  id          String   @id
+  name        String
+  description String
+  permissions Json
+  policyIds   Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PolicyRecord {
+  id                String   @id
+  name              String
+  description       String
+  ruleType          String
+  ruleConfiguration String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model RoleAssignmentRecord {
+  id         String   @id
+  identityId String
+  roleId     String
+  assignedAt DateTime @default(now())
+
+  @@index([identityId])
+  @@index([roleId])
+}
+
+model AdminEmergencyAccessRecord {
+  id               String    @id
+  principalId      String
+  roleId           String
+  reason           String
+  changeTicket     String
+  requestedBy      String
+  approvedBy       String
+  startsAt         DateTime
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  revokedBy        String?
+  revocationReason String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([principalId, expiresAt])
+  @@index([roleId, expiresAt])
+  @@index([revokedAt, expiresAt])
+}
+
+// --- Audit Foundation ---
+
+model AuditRecord {
+  id                    String    @id
+  reference             String    @unique
+  action                String
+  category              String
+  severity              String
+  actorId               String
+  actorType             String
+  targetId              String
+  targetType            String
+  source                String
+  timestamp             DateTime
+  contextMetadata       Json
+  complianceMetadata    Json?
+  correlationReference  String?
+  traceReference        String?
+  chainReference        String?
+  retentionPeriodInDays Int?
+  retentionExpiresAt    DateTime?
+  lifecycleState        String    @default("RECORDED")
+  legalHoldUntil       DateTime?
+  retentionProcessedAt DateTime?
+  retentionClaimUntil  DateTime?
+  retentionClaimToken  String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([retentionExpiresAt, retentionProcessedAt])
+  @@index([actorId])
+  @@index([targetId])
+  @@index([action])
+  @@index([category])
+  @@index([severity])
+  @@index([correlationReference])
+  @@index([timestamp])
+}
+
+model RetentionDecisionRecord {
+  id           String   @id @default(uuid())
+  decisionKey  String
+  owner        String
+  recordId     String
+  expiresAt    DateTime
+  disposition  String
+  reason       String
+  result       String
+  terminalKey  String?  @unique
+  errorMessage String?
+  decidedAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([decisionKey])
+  @@index([owner, recordId])
+  @@index([result, decidedAt])
+}
+
+// --- Reference Data ---
+
+model ReferenceCountry {
+  id                     String                       @id @default(uuid())
+  iso2Code               String                       @unique
+  iso3Code               String                       @unique
+  name                   String
+  nameAr                 String?
+  officialName           String?
+  region                 String?
+  subregion              String?
+  defaultCurrencyCode    String?
+  defaultLanguageCode    String?
+  callingCode            String?
+  flagAssetId            String?
+  isActive               Boolean                      @default(true)
+  lifecycleState         String   @default("ACTIVE")
+  versionNumber          Int      @default(1)
+  effectiveFrom          DateTime @default(now())
+  effectiveTo            DateTime?
+  metadata               Json?
+  createdAt              DateTime                     @default(now())
+  updatedAt              DateTime                     @updatedAt
+  universities           University[]
+  universityCampuses     UniversityCampus[]
+  administrativeRegions  AdministrativeRegion[]
+  cities                  ReferenceCity[]
+  scholarships           Scholarship[]                @relation("ScholarshipPrimaryCountry")
+  scholarshipEligibility ScholarshipEligibilityItem[] @relation("ScholarshipEligibilityCountry")
+  externalCourseProviders ExternalCourseProvider[]       @relation("ExternalCourseProviderHeadquartersCountry")
+  internationalTestCountryRelationships InternationalTestCountryRelationship[]
+  serviceCatalogCountries ServiceCatalogCountryRecord[]
+  careerEmployers CareerEmployerRecord[]
+  careerJobs CareerJobPostingRecord[]
+  studyDestinationProfile StudyDestinationProfile?
+
+  @@index([region])
+  @@index([isActive])
+  @@index([name])
+}
+
+model ReferenceCurrency {
+  id                              String                           @id @default(uuid())
+  isoCode                         String                           @unique
+  numericCode                     String?
+  name                            String
+  nameAr                          String?
+  symbol                          String?
+  minorUnit                       Int?
+  isActive                        Boolean                          @default(true)
+  lifecycleState         String   @default("ACTIVE")
+  versionNumber          Int      @default(1)
+  effectiveFrom          DateTime @default(now())
+  effectiveTo            DateTime?
+  metadata                        Json?
+  createdAt                       DateTime                         @default(now())
+  updatedAt                       DateTime                         @updatedAt
+  universityTuitionProfiles       UniversityTuitionProfile[]       @relation("UniversityTuitionCurrency")
+  universityAccommodationProfiles UniversityAccommodationProfile[] @relation("UniversityAccommodationCurrency")
+  universityLivingCostProfiles    UniversityAccommodationProfile[] @relation("UniversityAccommodationLivingCostCurrency")
+  scholarshipBenefits             ScholarshipBenefit[]             @relation("ScholarshipBenefitCurrency")
+  internationalTestFees           InternationalTestFeeMetadata[]
+  studyDestinationLivingCostProfiles StudyDestinationProfile[] @relation("StudyDestinationLivingCostCurrency")
+
+  @@index([isActive])
+  @@index([name])
+}
+
+model ReferenceLanguage {
+  id         String   @id @default(uuid())
+  isoCode    String   @unique
+  name       String
+  nameAr     String?
+  nativeName String?
+  direction  String
+  isActive   Boolean  @default(true)
+  lifecycleState         String   @default("ACTIVE")
+  versionNumber          Int      @default(1)
+  effectiveFrom          DateTime @default(now())
+  effectiveTo            DateTime?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  courses    Course[] @relation("CourseLearningLanguageReference")
+  scholarships Scholarship[] @relation("ScholarshipStudyLanguage")
+  internationalTestLanguageRelationships InternationalTestLanguageRelationship[]
+  serviceCatalogLanguages ServiceCatalogLanguageRecord[]
+  studyDestinationProfiles StudyDestinationStudyLanguage[]
+
+  @@index([isActive])
+  @@index([name])
+  @@index([direction])
+}
+
+model StudyDestinationProfile {
+  id                               String   @id @default(uuid())
+  publicId                         String   @unique
+  slug                             String   @unique
+  countryReferenceId               String   @unique
+  status                           String   @default("DRAFT")
+  completenessStatus               String   @default("INCOMPLETE")
+  overviewAr                       String?
+  overviewEn                       String?
+  studySystemSummaryAr             String?
+  studySystemSummaryEn             String?
+  admissionHighlightsAr            Json?
+  admissionHighlightsEn            Json?
+  visaSummaryAr                    String?
+  visaSummaryEn                    String?
+  visaRequirementsAr               Json?
+  visaRequirementsEn               Json?
+  visaOfficialUrl                  String?
+  livingCostTier                   String?
+  averageMonthlyLivingCostMin      Decimal? @db.Decimal(18, 2)
+  averageMonthlyLivingCostMax      Decimal? @db.Decimal(18, 2)
+  livingCostCurrencyReferenceId    String?
+  costHighlightsAr                 Json?
+  costHighlightsEn                 Json?
+  studentLifeHighlightsAr          Json?
+  studentLifeHighlightsEn          Json?
+  officialLinks                    Json?
+  sourceVerificationStatus         String   @default("UNVERIFIED")
+  sourceAuditDate                  DateTime?
+  evidenceSources                  Json?
+  imageAssetId                     String?
+  isFeatured                      Boolean  @default(false)
+  publishedAt                      DateTime?
+  createdAt                        DateTime @default(now())
+  updatedAt                        DateTime @updatedAt
+  countryReference                 ReferenceCountry @relation(fields: [countryReferenceId], references: [id], onDelete: Restrict)
+  livingCostCurrency               ReferenceCurrency? @relation("StudyDestinationLivingCostCurrency", fields: [livingCostCurrencyReferenceId], references: [id], onDelete: SetNull)
+  studyLanguages                   StudyDestinationStudyLanguage[]
+
+  @@index([status, completenessStatus])
+  @@index([isFeatured, status])
+  @@index([livingCostCurrencyReferenceId])
+}
+
+model StudyDestinationStudyLanguage {
+  profileId           String
+  languageReferenceId String
+  profile             StudyDestinationProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  language            ReferenceLanguage @relation(fields: [languageReferenceId], references: [id], onDelete: Restrict)
+
+  @@id([profileId, languageReferenceId])
+  @@index([languageReferenceId])
+}
+
+model ReferenceCity {
+  id                     String                @id @default(uuid())
+  canonicalIdentityKey   String?               @unique
+  countryReferenceId     String?
+  countryIso2Code        String
+  name                   String
+  nameAr                 String?
+  region                 String?
+  timezone               String?
+  latitude               Float?
+  longitude              Float?
+  isActive               Boolean               @default(true)
+  lifecycleState         String   @default("ACTIVE")
+  versionNumber          Int      @default(1)
+  effectiveFrom          DateTime @default(now())
+  effectiveTo            DateTime?
+  metadata               Json?
+  administrativeRegionId String?
+  countryReference       ReferenceCountry?      @relation(fields: [countryReferenceId], references: [id], onDelete: Restrict)
+  administrativeRegion   AdministrativeRegion? @relation(fields: [administrativeRegionId], references: [id])
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  universities           University[]
+  universityCampuses     UniversityCampus[]
+  careerEmployers         CareerEmployerRecord[]
+  careerJobs              CareerJobPostingRecord[]
+
+  @@index([countryReferenceId])
+  @@index([countryIso2Code])
+  @@index([countryIso2Code, name])
+  @@index([region])
+  @@index([isActive])
+  @@index([timezone])
+  @@index([administrativeRegionId])
+}
+
+
+model ReferenceVersionRecord {
+  id             String   @id @default(uuid())
+  entityType     String
+  referenceId    String
+  versionNumber  Int
+  lifecycleState String
+  effectiveFrom  DateTime
+  effectiveTo    DateTime?
+  snapshot       Json
+  changeReason   String?
+  actorId        String?
+  createdAt      DateTime @default(now())
+
+  @@unique([entityType, referenceId, versionNumber])
+  @@index([entityType, referenceId, createdAt])
+}
+
+model ReferenceAliasRecord {
+  id              String   @id @default(uuid())
+  entityType      String
+  referenceId     String
+  alias           String
+  normalizedAlias String
+  locale          String?
+  aliasType       String   @default("COMMON")
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([entityType, normalizedAlias, isActive])
+  @@index([entityType, referenceId, isActive])
+}
+
+model ReferenceProviderMappingRecord {
+  id             String   @id @default(uuid())
+  entityType     String
+  referenceId    String
+  providerSystem String
+  providerId     String
+  normalizedProviderSystem String
+  normalizedProviderId     String
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([entityType, normalizedProviderSystem, normalizedProviderId])
+  @@index([entityType, referenceId, isActive])
+}
+
+model ReferenceRelationshipRecord {
+  id                 String   @id @default(uuid())
+  sourceEntityType   String
+  sourceReferenceId  String
+  relationshipType   String
+  targetEntityType   String
+  targetReferenceId  String
+  reason             String?
+  actorId            String?
+  createdAt          DateTime @default(now())
+
+  @@unique([sourceEntityType, sourceReferenceId, relationshipType])
+  @@index([targetEntityType, targetReferenceId])
+}
+
+model AdministrativeRegion {
+  id                 String             @id @default(uuid())
+  countryReferenceId String?
+  countryIso2Code    String
+  regionCode         String
+  name               String
+  nameAr             String?
+  localName          String?
+  regionType         String?
+  sourceType         String?
+  verificationStatus String?
+  metadata           Json?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  countryReference   ReferenceCountry?  @relation(fields: [countryReferenceId], references: [id], onDelete: Restrict)
+  cities             ReferenceCity[]
+  universities       University[]
+  universityCampuses UniversityCampus[]
+
+  @@unique([countryIso2Code, regionCode])
+  @@index([countryReferenceId])
+  @@index([countryIso2Code])
+  @@index([regionCode])
+}
+
+// --- Degree Level Foundation (Phase 08) ---
+model DegreeLevel {
+  id            String @id @default(uuid())
+  canonicalCode String @unique
+  nameEn        String
+  nameAr        String
+  displayRank   Int    @default(0)
+  status        String @default("ACTIVE")
+  aliases       Json?
+  metadata      Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  majorProfiles                        MajorLevelProfile[]
+  internationalTestDegreeRelationships InternationalTestDegreeRelationship[]
+  universityPrograms                   UniversityAcademicProgram[]
+  scholarshipTargets                   ScholarshipDegreeTarget[]             @relation("ScholarshipDegreeTargetDegree")
+  scholarshipEligibility               ScholarshipEligibilityItem[]          @relation("ScholarshipEligibilityDegree")
+}
+
+// --- Academic Taxonomy Foundation (Phase 08) ---
+
+model AcademicTaxonomyNode {
+  id               String   @id @default(uuid())
+  deterministicKey String   @unique
+  nodeType         String
+  canonicalCode    String
+  canonicalName    String
+  description      String?
+  status           String   @default("DRAFT")
+  standardType     String   @default("CUSTOM_NATIONAL")
+  standardCode     String?
+  localizedNames   Json?
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  parentEdges                    AcademicTaxonomyEdge[]                          @relation("AcademicTaxonomyParentNode")
+  childEdges                     AcademicTaxonomyEdge[]                          @relation("AcademicTaxonomyChildNode")
+  aliases                        AcademicTaxonomyAlias[]
+  sourceMappings                 AcademicStandardMapping[]                       @relation("AcademicStandardMappingSourceNode")
+  targetMappings                 AcademicStandardMapping[]                       @relation("AcademicStandardMappingTargetNode")
+  internationalTestRelationships InternationalTestAcademicTaxonomyRelationship[]
+  majorAcademicFieldLinks        Major[]                                         @relation("MajorAcademicField")
+  majorDisciplineLinks           Major[]                                         @relation("MajorDiscipline")
+  majorProfileAcademicFieldLinks MajorLevelProfile[]                             @relation("MajorProfileAcademicField")
+  majorProfileDisciplineLinks    MajorLevelProfile[]                             @relation("MajorProfileDiscipline")
+  majorClassificationMappings    MajorClassificationMapping[]                    @relation("MajorClassificationTaxonomyNode")
+  courseTaxonomyResolutions      CourseTaxonomyResolution[]                       @relation("CourseTaxonomyResolutionChosenNode")
+  courseTaxonomyLinks            CourseAcademicTaxonomyLink[]
+  courseMajorProjections         CourseMajorProjection[]
+
+  @@unique([nodeType, canonicalCode, standardType], name: "academicTaxonomyCanonicalKey")
+  @@index([nodeType])
+  @@index([status])
+  @@index([standardType, standardCode])
+  @@index([canonicalCode])
+  @@index([canonicalName])
+}
+
+model AcademicTaxonomyEdge {
+  id           String   @id @default(uuid())
+  parentNodeId String
+  childNodeId  String
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  parentNode AcademicTaxonomyNode @relation("AcademicTaxonomyParentNode", fields: [parentNodeId], references: [id], onDelete: Restrict)
+  childNode  AcademicTaxonomyNode @relation("AcademicTaxonomyChildNode", fields: [childNodeId], references: [id], onDelete: Restrict)
+
+  @@unique([parentNodeId, childNodeId])
+  @@index([parentNodeId])
+  @@index([childNodeId])
+  @@index([isPrimary])
+}
+
+model AcademicTaxonomyAlias {
+  id              String   @id @default(uuid())
+  nodeId          String
+  locale          String?
+  alias           String
+  normalizedAlias String
+  createdAt       DateTime @default(now())
+
+  node AcademicTaxonomyNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([nodeId, locale, normalizedAlias])
+  @@index([nodeId])
+  @@index([normalizedAlias])
+  @@index([locale, normalizedAlias])
+}
+
+model AcademicStandardMapping {
+  id             String   @id @default(uuid())
+  sourceNodeId   String
+  targetNodeId   String
+  sourceStandard String
+  targetStandard String
+  strength       String
+  confidence     Float?
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  sourceNode AcademicTaxonomyNode @relation("AcademicStandardMappingSourceNode", fields: [sourceNodeId], references: [id], onDelete: Restrict)
+  targetNode AcademicTaxonomyNode @relation("AcademicStandardMappingTargetNode", fields: [targetNodeId], references: [id], onDelete: Restrict)
+
+  @@unique([sourceNodeId, targetNodeId, sourceStandard, targetStandard])
+  @@index([sourceNodeId])
+  @@index([targetNodeId])
+  @@index([sourceStandard, targetStandard])
+  @@index([strength])
+}
+
+model SessionRecord {
+  id               String    @id @default(uuid())
+  identityId       String
+  refreshTokenHash String    @unique
+  familyId         String
+  parentSessionId  String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  rotatedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  identity      IdentityRecord   @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  parentSession SessionRecord?   @relation("SessionRotationLineage", fields: [parentSessionId], references: [id], onDelete: SetNull)
+  childSessions SessionRecord[]  @relation("SessionRotationLineage")
+
+  @@index([identityId])
+  @@index([familyId])
+  @@index([parentSessionId])
+  @@index([expiresAt])
+}
+
+// --- Phase 17: Enterprise AI Platform (provider-neutral source contracts) ---
+
+model AIRegistryRecord {
+  id               String   @id @default(uuid())
+  resourceType     String
+  key              String
+  status           String   @default("DRAFT")
+  providerKey      String?
+  capabilityKey    String?
+  consumerKey      String?
+  secretReference  String?
+  configuration    Json
+  createdBy        String
+  updatedBy        String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([resourceType, key])
+  @@index([resourceType, status])
+  @@index([providerKey])
+  @@index([capabilityKey])
+  @@index([consumerKey])
+}
+
+model AIPromptVersionRecord {
+  id            String   @id @default(uuid())
+  promptKey     String
+  version       Int
+  template      String
+  inputSchema   Json?
+  outputSchema  Json?
+  checksum      String
+  status        String   @default("DRAFT")
+  createdBy     String
+  approvedBy    String?
+  createdAt     DateTime @default(now())
+  deployments   AIPromptDeploymentRecord[]
+  capabilityBindings AICapabilityPromptBindingRecord[]
+
+  @@unique([promptKey, version])
+  @@index([promptKey, status])
+}
+
+model AIPromptDeploymentRecord {
+  id            String   @id @default(uuid())
+  promptKey     String
+  version       Int
+  environment   String   @default("PRODUCTION")
+  status        String   @default("ACTIVE")
+  deployedBy    String
+  deployedAt    DateTime @default(now())
+  retiredAt     DateTime?
+  promptVersion AIPromptVersionRecord @relation(fields: [promptKey, version], references: [promptKey, version], onDelete: Restrict)
+
+  @@index([promptKey, environment, status])
+}
+
+model AICapabilityPromptBindingRecord {
+  id            String   @id @default(uuid())
+  capabilityKey String   @unique
+  promptKey     String
+  promptVersion Int
+  boundBy       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  promptVersionRecord AIPromptVersionRecord @relation(fields: [promptKey, promptVersion], references: [promptKey, version], onDelete: Restrict)
+
+  @@index([promptKey, promptVersion])
+}
+
+model AIQuotaReservationRecord {
+  id                String   @id @default(uuid())
+  reservationKey    String   @unique
+  executionPublicId String   @unique
+  consumerKey       String
+  status            String   @default("RESERVED")
+  reservedTokens    Int
+  reservedCost      Decimal  @db.Decimal(18, 8)
+  actualTokens      Int?
+  actualCost        Decimal? @db.Decimal(18, 8)
+  currency          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([consumerKey, createdAt])
+  @@index([consumerKey, status, createdAt])
+}
+
+model AIProviderCircuitRecord {
+  key          String   @id
+  failures     Int      @default(0)
+  state        String   @default("CLOSED")
+  openedAt     DateTime?
+  probeLeaseAt DateTime?
+  updatedAt    DateTime @updatedAt
+}
+
+model AIExecutionRecord {
+  id                    String   @id @default(uuid())
+  publicId              String   @unique
+  traceId               String
+  idempotencyKeyHash    String?
+  consumerKey           String
+  capabilityKey         String
+  purpose               String
+  promptKey             String
+  promptVersion         Int?
+  providerKey           String?
+  modelKey              String?
+  status                String
+  safetyDecision        String
+  dataClassification    String   @default("INTERNAL")
+  inputPreview          String?
+  outputPreview         String?
+  inputTokens           Int      @default(0)
+  outputTokens          Int      @default(0)
+  estimatedCost         Decimal? @db.Decimal(18, 8)
+  actualCost            Decimal? @db.Decimal(18, 8)
+  currency              String?
+  errorCode             String?
+  errorMessage          String?
+  requesterReferenceId  String?
+  sourceDomain          String?
+  metadata              Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  spans                 AIExecutionSpanRecord[]
+  usageRecords          AIUsageRecord[]
+  asyncJobs             AIAsyncJobRecord[]
+
+  @@unique([consumerKey, idempotencyKeyHash])
+  @@index([traceId])
+  @@index([status, createdAt])
+  @@index([consumerKey, createdAt])
+  @@index([providerKey, modelKey, createdAt])
+}
+
+model AIAsyncJobRecord {
+  id                    String   @id @default(uuid())
+  publicId              String   @unique
+  requesterReferenceId  String
+  consumerKey           String
+  capabilityKey         String
+  status                String   @default("QUEUED")
+  payloadCiphertext     String
+  payloadIv             String
+  payloadAuthTag        String
+  payloadKeyVersion     String
+  attempts              Int      @default(0)
+  maxAttempts           Int      @default(3)
+  nextAttemptAt         DateTime?
+  lockedAt              DateTime?
+  lockedBy              String?
+  leaseExpiresAt        DateTime?
+  executionPublicId     String?
+  errorCode             String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  completedAt           DateTime?
+  execution             AIExecutionRecord? @relation(fields: [executionPublicId], references: [publicId], onDelete: Restrict)
+
+  @@index([status, nextAttemptAt, createdAt])
+  @@index([consumerKey, createdAt])
+  @@index([requesterReferenceId, createdAt])
+}
+
+model AIExecutionSpanRecord {
+  id                 String   @id @default(uuid())
+  executionPublicId  String
+  traceId            String
+  name               String
+  status             String
+  startedAt          DateTime
+  completedAt        DateTime?
+  durationMs         Int?
+  attributes         Json?
+  execution          AIExecutionRecord @relation(fields: [executionPublicId], references: [publicId], onDelete: Restrict)
+
+  @@index([executionPublicId, startedAt])
+  @@index([traceId])
+}
+
+model AIUsageRecord {
+  id                 String   @id @default(uuid())
+  executionPublicId  String
+  consumerKey        String
+  providerKey        String
+  modelKey           String
+  inputTokens        Int
+  outputTokens       Int
+  cost               Decimal  @db.Decimal(18, 8)
+  currency           String
+  priceSnapshotKey   String?
+  pricingEffectiveFrom DateTime?
+  costKind           String   @default("UNKNOWN")
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  execution          AIExecutionRecord @relation(fields: [executionPublicId], references: [publicId], onDelete: Restrict)
+
+  @@unique([executionPublicId, providerKey, modelKey])
+  @@index([consumerKey, createdAt])
+  @@index([providerKey, modelKey, createdAt])
+}
+
+model AIWorkflowVersionRecord {
+  id          String   @id @default(uuid())
+  workflowKey String
+  version     Int
+  checksum    String
+  definition  Json
+  createdBy   String
+  createdAt   DateTime @default(now())
+  @@unique([workflowKey, version])
+  @@index([workflowKey, createdAt])
+}
+
+model AIWorkflowRunRecord {
+  id               String   @id @default(uuid())
+  publicId         String   @unique
+  workflowKey      String
+  workflowVersion  Int
+  status           String
+  traceId          String
+  inputReferenceHash String
+  outputReferenceHash String?
+  currentStep      String?
+  errorMessage     String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  steps            AIWorkflowStepRunRecord[]
+
+  @@index([workflowKey, status, createdAt])
+  @@index([traceId])
+}
+
+model AIWorkflowStepRunRecord {
+  id             String   @id @default(uuid())
+  runPublicId    String
+  stepKey        String
+  executionId    String?
+  status         String
+  attempt        Int      @default(1)
+  inputReferenceHash  String?
+  outputReferenceHash String?
+  outputSnapshot  Json?
+  errorMessage   String?
+  startedAt      DateTime @default(now())
+  completedAt    DateTime?
+  run            AIWorkflowRunRecord @relation(fields: [runPublicId], references: [publicId], onDelete: Restrict)
+
+  @@unique([runPublicId, stepKey, attempt])
+  @@index([runPublicId, status])
+}
+
+model AIEvaluationRunRecord {
+  id               String   @id @default(uuid())
+  publicId         String   @unique
+  evaluationKey    String
+  status           String
+  promptVersion    Int?
+  modelKey         String?
+  targetType       String?
+  targetKey        String?
+  targetVersion    Int?
+  targetChecksum   String?
+  targetEvidence   Json?
+  passed           Int      @default(0)
+  failed           Int      @default(0)
+  safetyFailures   Int      @default(0)
+  score            Float?
+  results          Json?
+  approvedBy       String?
+  approvedAt       DateTime?
+  createdAt        DateTime @default(now())
+  completedAt      DateTime?
+
+  @@index([evaluationKey, status, createdAt])
+  @@index([targetType, targetKey, targetVersion, completedAt])
+}
+
+model AIKnowledgeSourceRecord {
+  id                 String   @id @default(uuid())
+  indexKey           String
+  sourceType         String
+  sourceReferenceId  String
+  sourceVersion      String?
+  checksum           String
+  locale             String?
+  status             String   @default("PENDING")
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([indexKey, sourceType, sourceReferenceId, checksum])
+  @@index([indexKey, status])
+}
+
+model AIEmbeddingRecord {
+  id                 String   @id @default(uuid())
+  indexKey           String
+  sourceReferenceId  String
+  chunkKey           String
+  chunkText          String
+  embeddingRef       String
+  modelKey           String
+  dimensions         Int
+  checksum           String
+  metadata           Json?
+  createdAt          DateTime @default(now())
+
+  @@unique([indexKey, sourceReferenceId, chunkKey, checksum])
+  @@index([indexKey, modelKey])
+}
+
+model AIIndexingRunRecord {
+  id                 String   @id @default(uuid())
+  publicId           String   @unique
+  indexKey           String
+  sourceReferenceId  String
+  status             String
+  chunks             Int      @default(0)
+  embeddedChunks     Int      @default(0)
+  errorMessage       String?
+  createdAt          DateTime @default(now())
+  completedAt        DateTime?
+
+  @@index([indexKey, status, createdAt])
+  @@index([sourceReferenceId])
+}
+
+model AIIncidentEventRecord {
+  id                String   @id @default(uuid())
+  incidentPublicId  String
+  action            String
+  actorReferenceId  String?
+  note               String?
+  createdAt          DateTime @default(now())
+
+  @@index([incidentPublicId, createdAt])
+}
+
+// --- Phase 18: Enterprise Student Tools ---
+model StudentToolDefinitionRecord {
+  id                      String   @id @default(uuid())
+  toolKey                 String   @unique
+  nameAr                  String
+  nameEn                  String
+  descriptionAr           String   @db.Text
+  descriptionEn           String   @db.Text
+  category                String
+  executionType           String
+  implementationPriority  String
+  desiredLaunchVisibility String
+  visibility              String
+  implementationStatus    String
+  lifecycle               String
+  availability            Json
+  featureFlags            Json
+  rateLimitPolicy         Json
+  aiCapabilityKey         String?
+  outputType              String
+  supportedLocales        Json
+  estimatedMinutes        Int
+  tags                     Json
+  iconAssetId              String?
+  owner                    String
+  launchOrder              Int
+  inputSchema              Json
+  outputSchema             Json
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  versions                 StudentToolVersionRecord[]
+  dependencies             StudentToolDependencyRecord[]
+  executions               StudentToolExecutionRecord[]
+  @@index([category, visibility, launchOrder])
+  @@index([implementationStatus, lifecycle])
+}
+
+model StudentToolVersionRecord {
+  id                  String   @id @default(uuid())
+  definitionId        String
+  semanticVersion     String
+  inputSchemaVersion  String
+  outputSchemaVersion String
+  releaseDate         DateTime
+  changeNote          String
+  status              String
+  snapshotHash        String
+  definitionSnapshot  Json
+  createdAt           DateTime @default(now())
+  definition          StudentToolDefinitionRecord @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  executions          StudentToolExecutionRecord[]
+  @@unique([definitionId, semanticVersion])
+  @@index([definitionId, status])
+}
+
+model StudentToolDependencyRecord {
+  id            String   @id @default(uuid())
+  definitionId  String
+  phase         String
+  type          String
+  required      Boolean
+  capabilityKey String?
+  description   String
+  definition    StudentToolDefinitionRecord @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  @@index([definitionId, required])
+}
+
+model StudentToolExecutionRecord {
+  id                    String   @id @default(uuid())
+  executionId           String   @unique
+  definitionId          String
+  versionId             String
+  toolVersion           String
+  status                 String
+  consumerType           String
+  studentReferenceHash   String?
+  anonymousSessionHash   String?
+  idempotencyKeyHash     String?
+  correlationId          String
+  traceId                String
+  aiExecutionReference   String?
+  dependencyStatus       Json?
+  durationMs             Int?
+  errorCode              String?
+  safeUsageMetadata      Json?
+  resultDigest           String?
+  resultCiphertext       String?  @db.Text
+  resultIv               String?
+  resultAuthTag          String?
+  resultKeyVersion       String?
+  resultExpiresAt        DateTime?
+  isTest                 Boolean  @default(false)
+  startedAt              DateTime @default(now())
+  completedAt            DateTime?
+  definition             StudentToolDefinitionRecord @relation(fields: [definitionId], references: [id], onDelete: Restrict)
+  version                StudentToolVersionRecord @relation(fields: [versionId], references: [id], onDelete: Restrict)
+  @@index([definitionId, status, startedAt])
+  @@index([resultExpiresAt])
+  @@unique([definitionId, idempotencyKeyHash])
+  @@index([correlationId])
+  @@index([traceId])
+}
+
+// --- Phase 19: Enterprise Finance & Payments (all monetary values are exact minor-unit strings) ---
+model FinanceInvoiceRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  invoiceNumber String @unique
+  correlationId String
+  // W4: legacy rows remain nullable until controlled GS19 backfill; all new writes populate both fields.
+  idempotencyKeyHash String? @unique
+  requestFingerprint String?
+  originDomain String
+  originReferenceId String
+  studentReferenceId String?
+  payerReferenceId String?
+  status String
+  currencyCode String
+  scale Int
+  totalMinorUnits String
+  dueMinorUnits String
+  lineItems Json
+  dueDate DateTime?
+  issuedAt DateTime?
+  paidAt DateTime?
+  voidedAt DateTime?
+  version Int @default(1)
+  metadata Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  payments FinancePaymentRecord[]
+  @@index([status, dueDate])
+  @@index([studentReferenceId, createdAt])
+  @@index([originDomain, originReferenceId])
+}
+
+model FinancePaymentRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  invoiceId String
+  idempotencyKeyHash String @unique
+  currencyCode String
+  scale Int
+  amountMinorUnits String
+  status String
+  paymentMethod String
+  gatewayProvider String?
+  gatewayReference String?
+  safeMaskedMetadata Json?
+  failureReason String?
+  capturedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  invoice FinanceInvoiceRecord @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  attempts FinancePaymentAttemptRecord[]
+  @@index([invoiceId, status])
+  @@unique([gatewayProvider, gatewayReference])
+}
+
+model FinancePaymentAttemptRecord {
+  id String @id @default(uuid())
+  paymentId String
+  sequence Int
+  status String
+  gatewayReference String?
+  safeFailureCode String?
+  createdAt DateTime @default(now())
+  payment FinancePaymentRecord @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  @@unique([paymentId, sequence])
+  @@index([paymentId, createdAt])
+}
+
+model FinancialAccountRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  ownerReferenceId String
+  type String
+  currencyCode String
+  scale Int
+  version Int @default(1)
+  active Boolean @default(true)
+  systemManaged Boolean @default(false)
+  createdAt DateTime @default(now())
+  entries FinancialLedgerEntryRecord[]
+  wallet FinanceWalletRecord?
+  @@unique([ownerReferenceId, type, currencyCode])
+}
+
+model FinancialTransactionRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  correlationId String
+  businessReferenceType String
+  businessReferenceId String
+  idempotencyKeyHash String @unique
+  currencyCode String
+  scale Int
+  reversalOfId String? @unique
+  createdBy String
+  createdAt DateTime @default(now())
+  entries FinancialLedgerEntryRecord[]
+  reversalOf FinancialTransactionRecord? @relation("FinancialTransactionReversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
+  reversal FinancialTransactionRecord? @relation("FinancialTransactionReversal")
+  @@index([correlationId])
+  @@index([businessReferenceType, businessReferenceId])
+}
+
+model FinancialLedgerEntryRecord {
+  id String @id @default(uuid())
+  transactionId String
+  accountId String
+  direction String
+  amountMinorUnits String
+  currencyCode String
+  scale Int
+  sequence Int
+  memo String?
+  createdAt DateTime @default(now())
+  transaction FinancialTransactionRecord @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  account FinancialAccountRecord @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  @@unique([transactionId, sequence])
+  @@index([accountId, createdAt])
+}
+
+model FinanceWalletRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  ownerReferenceId String
+  accountId String @unique
+  currencyCode String
+  scale Int
+  status String
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  holds FinanceWalletHoldRecord[]
+  account FinancialAccountRecord @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  @@index([ownerReferenceId, status])
+}
+
+model FinanceWalletHoldRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  walletId String
+  amountMinorUnits String
+  currencyCode String
+  scale Int
+  status String
+  businessReferenceId String
+  idempotencyKeyHash String @unique
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  resolvedAt DateTime?
+  wallet FinanceWalletRecord @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  @@index([walletId, status])
+}
+
+model FinanceExchangeRateRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  sourceCurrencyCode String
+  targetCurrencyCode String
+  rateNumerator String
+  rateDenominator String
+  source String
+  providerReference String?
+  approved Boolean @default(false)
+  makerId String?
+  approvalId String? @unique
+  effectiveFrom DateTime
+  effectiveTo DateTime?
+  marginBasisPoints Int @default(0)
+  createdAt DateTime @default(now())
+  @@index([sourceCurrencyCode, targetCurrencyCode, approved, effectiveFrom])
+}
+
+model FinanceTransferRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  sourceWalletId String
+  destinationReferenceId String
+  // W4: nullable only for pre-remediation rows pending GS19 reconciliation/backfill.
+  destinationCurrencyCode String?
+  sourceCurrencyCode String
+  sourceScale Int
+  sourceAmountMinorUnits String
+  targetCurrencyCode String?
+  targetScale Int?
+  targetAmountMinorUnits String?
+  rateId String?
+  feeAmountMinorUnits String?
+  feePolicyReference String?
+  bankProvider String?
+  bankProviderReference String? @unique
+  providerStatus String?
+  providerFailureCode String?
+  settlementTransactionId String? @unique
+  reversalTransactionId String? @unique
+  status String
+  makerId String
+  correlationId String
+  idempotencyKeyHash String @unique
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([status, createdAt])
+  @@index([sourceWalletId, createdAt])
+}
+
+model FinanceApprovalRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  actionType String
+  targetReferenceId String
+  amountMinorUnits String?
+  currencyCode String?
+  scale Int?
+  makerId String
+  requiredApprovals Int
+  // W4: legacy approvals are intentionally non-executable until backfilled/recreated.
+  payloadHash String?
+  policyReference String?
+  consumedAt DateTime?
+  status String
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  decisions FinanceApprovalDecisionRecord[]
+  @@index([status, createdAt])
+  @@index([targetReferenceId])
+}
+
+model FinanceApprovalDecisionRecord {
+  id String @id @default(uuid())
+  approvalId String
+  approverId String
+  decision String
+  reason String?
+  decidedAt DateTime @default(now())
+  approval FinanceApprovalRecord @relation(fields: [approvalId], references: [id], onDelete: Restrict)
+  @@unique([approvalId, approverId])
+}
+
+model FinanceRefundRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  paymentId String
+  amountMinorUnits String
+  currencyCode String
+  scale Int
+  reason String
+  status String
+  makerId String
+  approvalId String?
+  gatewayProvider String?
+  gatewayReference String?
+  failureCode String?
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([paymentId, status])
+}
+
+model FinanceDocumentRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  type String
+  invoiceId String
+  paymentId String?
+  amountMinorUnits String
+  currencyCode String
+  scale Int
+  reason String?
+  issuedBy String
+  issuedAt DateTime @default(now())
+  @@index([invoiceId, type])
+}
+
+model FinanceInstallmentPlanRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  invoiceId String @unique
+  totalMinorUnits String
+  currencyCode String
+  scale Int
+  status String
+  schedule Json
+  createdAt DateTime @default(now())
+}
+
+model FinanceCommissionRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  recipientReferenceId String
+  sourcePaymentId String
+  amountMinorUnits String
+  currencyCode String
+  scale Int
+  status String
+  policyReference String
+  // W4: legacy commission rows are reconciled in GS19 before this can become required.
+  calculationBasisPoints Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([sourcePaymentId, recipientReferenceId, policyReference])
+  @@index([recipientReferenceId, status])
+}
+
+model FinanceEstimateRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  subjectReferenceId String?
+  displayCurrencyCode String
+  scale Int
+  totalMinorUnits String
+  lines Json
+  generatedAt DateTime @default(now())
+  @@index([subjectReferenceId, generatedAt])
+}
+
+
+// --- Phase 20 Enterprise Services Platform (P8 source closure) ---
+model ServiceCatalogRecord {
+  id                         String   @id @default(uuid())
+  publicId                   String   @unique
+  slug                       String   @unique
+  canonicalName              String
+  canonicalDedupKey          String   @unique
+  displayName                String
+  status                     String
+  completenessStatus         String
+  serviceCategory            String
+  fulfillmentType            String
+  serviceDescription         String
+  serviceAvailabilityStatus  String
+  requiredInputsOrDocuments  Json
+  deliveryMode               String
+  responsibleServiceOwnerType String
+  providerName               String?
+  providerReferenceId        String?
+  estimatedDeliveryTime      String?
+  slaPolicy                  Json?
+  appointmentRequired        Boolean?
+  supportedCountryLabels     Json?
+  supportedLanguageLabels    Json?
+  servicePrerequisites       Json?
+  deliveryArtifactTypes      Json?
+  pricingReferenceId         String?
+  thumbnailAssetId           String?
+  publicDisplayMetadata      Json?
+  optionalFields             Json?
+  version                    Int      @default(1)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+  supportedCountries         ServiceCatalogCountryRecord[]
+  supportedLanguages         ServiceCatalogLanguageRecord[]
+  requests                   ServiceRequestRecord[]
+  providerLinks              ServiceProviderServiceRecord[]
+  packageItems               ServicePackageItemRecord[]
+  bookingItems               ServiceBookingItemRecord[]
+  pricingRecords             ServicePricingRecord[]
+  discounts                  ServiceDiscountRecord[]
+  promotions                 ServicePromotionRecord[]
+  availabilitySlots          ServiceAvailabilitySlotRecord[]
+  bookings                   ServiceBookingRecord[]
+  workflowDefinitions        ServiceWorkflowDefinitionRecord[]
+
+  @@unique([id, version])
+  @@index([status, serviceCategory])
+  @@index([fulfillmentType, serviceAvailabilityStatus])
+}
+
+model ServiceCatalogCountryRecord {
+  serviceId          String
+  countryReferenceId String
+  service            ServiceCatalogRecord @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  country            ReferenceCountry     @relation(fields: [countryReferenceId], references: [id], onDelete: Restrict)
+
+  @@id([serviceId, countryReferenceId])
+  @@index([countryReferenceId])
+}
+
+model ServiceCatalogLanguageRecord {
+  serviceId           String
+  languageReferenceId String
+  service              ServiceCatalogRecord @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  language             ReferenceLanguage    @relation(fields: [languageReferenceId], references: [id], onDelete: Restrict)
+
+  @@id([serviceId, languageReferenceId])
+  @@index([languageReferenceId])
+}
+
+model ServiceRequestRecord {
+  id                     String   @id @default(uuid())
+  publicId               String   @unique
+  studentReferenceId     String
+  serviceId              String
+  status                 String
+  requestParameters      Json
+  providerReferenceId    String?
+  financeInvoiceId       String?
+  financeInvoicePublicId String?
+  fulfillmentMetadata    Json?
+  completedAt            DateTime?
+  version                    Int      @default(1)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  service                ServiceCatalogRecord @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  @@unique([id, version])
+  @@index([studentReferenceId, status, updatedAt])
+  @@index([serviceId, status])
+  @@index([financeInvoiceId])
+}
+
+
+// --- Phase 20 retained owner scope (MNT-AUD-0058) ---
+model ServiceProviderRecord {
+  id                    String   @id @default(uuid())
+  publicId              String   @unique
+  displayName           String
+  status                String
+  timezone              String
+  capacity              Int
+  countryReferenceId    String?
+  qualificationMetadata Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  supportedServices     ServiceProviderServiceRecord[]
+  availabilitySlots     ServiceAvailabilitySlotRecord[]
+  bookings              ServiceBookingRecord[]
+
+  @@index([status, countryReferenceId])
+}
+
+model ServiceProviderServiceRecord {
+  providerId String
+  serviceId  String
+  provider   ServiceProviderRecord @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service    ServiceCatalogRecord  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  @@id([providerId, serviceId])
+  @@index([serviceId])
+}
+
+model ServicePackageRecord {
+  id          String   @id @default(uuid())
+  publicId    String   @unique
+  displayName String
+  status      String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  items       ServicePackageItemRecord[]
+  pricing     ServicePricingRecord[]
+  discounts   ServiceDiscountRecord[]
+  promotions  ServicePromotionRecord[]
+  bookings    ServiceBookingRecord[]
+  workflows   ServiceWorkflowDefinitionRecord[]
+
+  @@index([status, updatedAt])
+}
+
+model ServicePackageItemRecord {
+  id        String @id @default(uuid())
+  packageId String
+  serviceId String
+  sequence  Int
+  quantity  Int    @default(1)
+  required  Boolean @default(true)
+  package   ServicePackageRecord @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  service   ServiceCatalogRecord @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  bookingItems ServiceBookingItemRecord[]
+
+  @@unique([packageId, sequence])
+  @@index([serviceId])
+}
+
+model ServicePricingRecord {
+  id                   String   @id @default(uuid())
+  publicId             String   @unique
+  serviceId            String?
+  packageId            String?
+  currencyCode         String
+  scale                Int
+  amountMinorUnits     String
+  status               String
+  effectiveFrom        DateTime
+  effectiveTo          DateTime?
+  immutableFingerprint String   @unique
+  createdAt            DateTime @default(now())
+  service              ServiceCatalogRecord? @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  package              ServicePackageRecord? @relation(fields: [packageId], references: [id], onDelete: Restrict)
+
+  @@index([serviceId, status, effectiveFrom])
+  @@index([packageId, status, effectiveFrom])
+}
+
+model ServiceDiscountRecord {
+  id                    String   @id @default(uuid())
+  publicId              String   @unique
+  code                  String?  @unique
+  discountType          String
+  valueMinorUnits       String?
+  percentageBasisPoints Int?
+  currencyCode          String?
+  serviceId             String?
+  packageId             String?
+  activeFrom            DateTime
+  activeTo              DateTime?
+  maxRedemptions        Int?
+  redemptionCount       Int      @default(0)
+  createdAt             DateTime @default(now())
+  service               ServiceCatalogRecord? @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  package               ServicePackageRecord? @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  promotions            ServicePromotionRecord[]
+
+  @@index([serviceId, activeFrom, activeTo])
+  @@index([packageId, activeFrom, activeTo])
+}
+
+model ServicePromotionRecord {
+  id         String   @id @default(uuid())
+  publicId   String   @unique
+  name       String
+  status     String
+  discountId String
+  serviceId  String?
+  packageId  String?
+  activeFrom DateTime
+  activeTo   DateTime?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  discount   ServiceDiscountRecord @relation(fields: [discountId], references: [id], onDelete: Restrict)
+  service    ServiceCatalogRecord? @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  package    ServicePackageRecord? @relation(fields: [packageId], references: [id], onDelete: Restrict)
+
+  @@index([status, activeFrom, activeTo])
+  @@index([serviceId, packageId])
+}
+
+model ServiceAvailabilitySlotRecord {
+  id         String   @id @default(uuid())
+  publicId   String   @unique
+  providerId String
+  serviceId  String
+  startsAt   DateTime
+  endsAt     DateTime
+  timezone   String
+  capacity   Int
+  status     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  provider   ServiceProviderRecord @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  service    ServiceCatalogRecord  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  bookings   ServiceBookingRecord[]
+
+  @@index([providerId, startsAt, endsAt, status])
+  @@index([serviceId, startsAt, status])
+}
+
+model ServiceBookingRecord {
+  id                 String   @id @default(uuid())
+  publicId           String   @unique
+  studentReferenceId String
+  serviceId          String?
+  packageId          String?
+  providerId         String
+  slotId             String
+  status             String
+  startsAt           DateTime
+  endsAt             DateTime
+  timezone           String
+  pricingSnapshot    Json
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  service            ServiceCatalogRecord? @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  package            ServicePackageRecord? @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  provider           ServiceProviderRecord @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  slot               ServiceAvailabilitySlotRecord @relation(fields: [slotId], references: [id], onDelete: Restrict)
+  items              ServiceBookingItemRecord[]
+  workflowExecutions ServiceWorkflowExecutionRecord[]
+  deliveryArtifacts  ServiceDeliveryArtifactRecord[]
+
+  @@index([studentReferenceId, status, updatedAt])
+  @@index([providerId, slotId, status])
+}
+
+model ServiceBookingItemRecord {
+  id            String @id @default(uuid())
+  bookingId     String
+  serviceId     String
+  packageItemId String?
+  sequence      Int
+  quantity      Int
+  status        String
+  booking       ServiceBookingRecord @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  service       ServiceCatalogRecord @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  packageItem   ServicePackageItemRecord? @relation(fields: [packageItemId], references: [id], onDelete: Restrict)
+
+  @@unique([bookingId, sequence])
+  @@index([serviceId, status])
+}
+
+model ServiceWorkflowDefinitionRecord {
+  id        String   @id @default(uuid())
+  publicId  String   @unique
+  name      String
+  serviceId String?
+  packageId String?
+  status    String
+  steps     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  service   ServiceCatalogRecord? @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  package   ServicePackageRecord? @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  executions ServiceWorkflowExecutionRecord[]
+
+  @@index([serviceId, status])
+  @@index([packageId, status])
+}
+
+model ServiceWorkflowExecutionRecord {
+  id                   String   @id @default(uuid())
+  publicId             String   @unique
+  bookingId            String
+  workflowDefinitionId String
+  status               String
+  currentStepKey       String?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  failureReason        String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  booking              ServiceBookingRecord @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  workflowDefinition   ServiceWorkflowDefinitionRecord @relation(fields: [workflowDefinitionId], references: [id], onDelete: Restrict)
+  deliveryArtifacts    ServiceDeliveryArtifactRecord[]
+
+  @@index([bookingId, status])
+  @@index([workflowDefinitionId, status])
+}
+
+model ServiceDeliveryArtifactRecord {
+  id                  String   @id @default(uuid())
+  bookingId           String
+  workflowExecutionId String?
+  artifactType        String
+  assetId             String
+  deliveredBy         String
+  deliveredAt         DateTime @default(now())
+  booking             ServiceBookingRecord @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  workflowExecution   ServiceWorkflowExecutionRecord? @relation(fields: [workflowExecutionId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId, artifactType])
+  @@index([assetId])
+}
+
+
+// --- Phase 21 Career & Alumni Platform (P8 source closure) ---
+model CareerEmployerRecord {
+  id                    String   @id @default(uuid())
+  publicId              String   @unique
+  slug                  String   @unique
+  canonicalName         String
+  canonicalDedupKey     String   @unique
+  displayName           String
+  employerType          String
+  industry              String?
+  countryReferenceId    String?
+  cityReferenceId       String?
+  country               String?
+  city                  String?
+  websiteUrl            String?
+  logoAssetId           String?
+  verificationStatus    String
+  description           String?
+  metadata              Json?
+  version                    Int      @default(1)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  countryReference      ReferenceCountry? @relation(fields: [countryReferenceId], references: [id], onDelete: Restrict)
+  cityReference         ReferenceCity?    @relation(fields: [cityReferenceId], references: [id], onDelete: Restrict)
+  jobs                  CareerJobPostingRecord[]
+
+  @@unique([id, version])
+  @@index([verificationStatus, employerType])
+  @@index([countryReferenceId])
+  @@index([cityReferenceId])
+}
+
+model CareerJobPostingRecord {
+  id                    String   @id @default(uuid())
+  publicId              String   @unique
+  slug                  String   @unique
+  canonicalTitle        String
+  canonicalDedupKey     String   @unique
+  title                 String
+  opportunityType       String
+  employmentType        String
+  jobCategory           String
+  description           String
+  countryReferenceId    String
+  cityReferenceId       String?
+  country               String?
+  city                  String?
+  status                String
+  employerId            String
+  recruiterContactId    String?
+  applicationDeadline   DateTime?
+  externalPostingUrl    String?
+  salaryRange           Json?
+  requiredSkills        Json?
+  educationRequirement  String?
+  languageRequirements  Json?
+  remoteOption          Boolean  @default(false)
+  metadata              Json?
+  version                    Int      @default(1)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  employer              CareerEmployerRecord @relation(fields: [employerId], references: [id], onDelete: Restrict)
+  countryReference      ReferenceCountry      @relation(fields: [countryReferenceId], references: [id], onDelete: Restrict)
+  cityReference         ReferenceCity?        @relation(fields: [cityReferenceId], references: [id], onDelete: Restrict)
+  applications          CareerApplicationRecord[]
+
+  @@unique([id, version])
+  @@index([status, updatedAt])
+  @@index([countryReferenceId, cityReferenceId])
+  @@index([employerId, status])
+}
+
+
+// --- Phase 21 Career/Alumni owner persistence expansion (MNT-AUD-0055) ---
+model CareerProfileRecord {
+  id                 String   @id @default(uuid())
+  studentReferenceId String   @unique
+  headline           String?
+  summary            String?
+  skills             Json
+  resumeAssetId      String?
+  visibility         String
+  version            Int      @default(1)
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([visibility, updatedAt])
+  @@index([resumeAssetId])
+}
+
+model CareerApplicationRecord {
+  id                 String   @id @default(uuid())
+  publicId           String   @unique
+  jobId              String
+  studentReferenceId String
+  cvAssetId          String
+  coverLetter        String?
+  jobSnapshot        Json
+  status             String
+  submittedAt        DateTime @default(now())
+  withdrawnAt        DateTime?
+  decisionMetadata   Json?
+  version            Int      @default(1)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  job                CareerJobPostingRecord @relation(fields: [jobId], references: [id], onDelete: Restrict)
+
+  @@unique([jobId, studentReferenceId])
+  @@index([studentReferenceId, status, updatedAt])
+  @@index([jobId, status, updatedAt])
+  @@index([cvAssetId])
+}
+
+model CareerAlumniProfileRecord {
+  id                 String   @id @default(uuid())
+  studentReferenceId String   @unique
+  displayName        String
+  graduationYear     Int?
+  programReferenceId String?
+  employerName       String?
+  visibility         String
+  consentGrantedAt   DateTime?
+  consentGrantedBy   String?
+  consentSource      String?
+  consentRevokedAt   DateTime?
+  consentRevokedBy   String?
+  version            Int      @default(1)
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([visibility, updatedAt])
+  @@index([programReferenceId])
+}
+
+// --- Phase 05 Foundation Control Plane durable persistence (MNT-AUD-0049) ---
+model WorkflowControlRecord {
+  id             String   @id
+  reference      String   @unique
+  ownerReference String
+  lifecycleState String
+  version        String
+  snapshot       Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([ownerReference])
+  @@index([lifecycleState])
+}
+
+model ApiServiceControlRecord {
+  id             String   @id
+  reference      String   @unique
+  ownerReference String
+  lifecycleState String
+  version        String
+  snapshot       Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([ownerReference])
+  @@index([lifecycleState])
+}
+
+model SharedComponentControlRecord {
+  id             String   @id
+  reference      String
+  ownerReference String
+  lifecycleState String
+  version        String
+  snapshot       Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([reference, version])
+  @@index([reference])
+  @@index([ownerReference])
+  @@index([lifecycleState])
+}
+
+model WorkflowExecutionProjection {
+  workflowReference String   @id
+  executionCount    Int      @default(0)
+  lastExecutedAt    DateTime?
+  updatedAt         DateTime @updatedAt
+}
+
+model ApiServiceExposureProjection {
+  serviceReference String   @id
+  serviceId        String
+  lifecycleState   String
+  exposureIntent   Json
+  exposedAt        DateTime?
+  decommissionedAt DateTime?
+  updatedAt        DateTime @updatedAt
+}
+
+model SharedComponentRenderingProjection {
+  componentReference String   @id
+  componentId        String
+  version            String
+  lifecycleState     String
+  definition         Json
+  renderingIntent    Json
+  synchronizedAt     DateTime?
+  decommissionedAt   DateTime?
+  updatedAt          DateTime @updatedAt
+}
+
+model NotificationTemplateRecord {
+  id                String   @id
+  channels          Json
+  requiredVariables Json
+  localizations     Json
+  version           Int      @default(1)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  intents NotificationIntentRecord[]
+}
+
+model NotificationIntentRecord {
+  id                  String   @id
+  reference           String   @unique
+  templateId          String
+  recipientReference  String
+  variables           Json
+  scheduledAt         DateTime?
+  expiresAt           DateTime?
+  retryMaxRetries     Int      @default(5)
+  retryBackoffMs      Int      @default(1000)
+  state               String   @default("CREATED")
+  deliveryState       String   @default("PENDING")
+  attempts            Int      @default(0)
+  nextAttemptAt       DateTime @default(now())
+  leaseWorkerId       String?
+  leaseToken          String?
+  leaseUntil          DateTime?
+  lastErrorCode       String?
+  lastErrorMessage    String?
+  deliveredAt         DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  template NotificationTemplateRecord @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  receipts NotificationDeliveryReceipt[]
+
+  @@index([deliveryState, nextAttemptAt])
+  @@index([recipientReference, createdAt])
+}
+
+model NotificationDeliveryReceipt {
+  id                String   @id @default(uuid())
+  intentId          String
+  attempt           Int
+  status            String
+  providerMessageId String?
+  metadata          Json?
+  errorCode         String?
+  createdAt         DateTime @default(now())
+
+  intent NotificationIntentRecord @relation(fields: [intentId], references: [id], onDelete: Cascade)
+
+  @@unique([intentId, attempt])
+  @@index([status, createdAt])
+}
+
+// --- API Foundation: Canonical Command Idempotency ---
+
+model ApiIdempotencyRecord {
+  id                 String    @id @default(uuid())
+  scopeHash          String    @unique
+  principalId        String
+  method             String
+  routeKey           String
+  keyHash            String
+  requestFingerprint String
+  state              String
+  statusCode         Int?
+  responseBody       Json?
+  leaseToken         String?
+  leaseExpiresAt     DateTime?
+  expiresAt          DateTime
+  completedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([expiresAt])
+  @@index([principalId, createdAt])
+}
+
+// W4 — durable search execution history; public result pagination is cursor/keyset based.
+model ApiSearchRequestRecord {
+  id              String   @id
+  reference       String
+  scope           String
+  query           String
+  filters         Json
+  logicalOperator String
+  page            Int
+  limit           Int
+  sortField       String?
+  sortDirection   String?
+  state           String
+  totalCount      Int?
+  executionTimeMs Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([reference, createdAt])
+  @@index([scope, createdAt])
+  @@index([createdAt])
+}

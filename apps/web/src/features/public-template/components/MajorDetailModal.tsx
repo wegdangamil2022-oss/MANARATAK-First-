@@ -176,7 +176,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
   ];
 
   // Related jobs fallback
-  const relatedJobsList = major.relatedJobs || [
+  const relatedJobsList: Array<{ job: string; entry?: string; matchRate?: string; notes?: string }> = major.relatedJobs || [
     { job: 'طبيب امتياز / طبيب متدرب', matchRate: 'مباشرة', notes: 'بعد إكمال الدرجة وفق نظام الدولة' },
     { job: 'طبيب عام', matchRate: 'عالية جداً', notes: 'بعد استكمال الترخيص والمتطلبات المحلية' },
     { job: 'طبيب مقيم', matchRate: 'مباشرة', notes: 'بعد القبول في برنامج إقامة' },

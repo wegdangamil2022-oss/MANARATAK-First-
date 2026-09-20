@@ -1,8 +1,6 @@
 {
-  "name": "Remix Manaratal-Final",
-  "description": "Imported from GitHub: wegdangamil2022-oss/Manaratal-Final",
+  "name": "MANARATAK",
+  "description": "Discover trusted study opportunities, scholarships, universities, and student tools.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

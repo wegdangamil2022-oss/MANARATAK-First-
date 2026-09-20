@@ -1,0 +1,12 @@
+import { readFileSync } from 'node:fs';
+const page = readFileSync('apps/admin/src/pages/ScholarshipCatalogDetailPage.tsx', 'utf8');
+const app = readFileSync('apps/admin/src/App.tsx', 'utf8');
+const required = ['benefits', 'degreeTargets', 'majorTargets', 'eligibilityItems', 'requiredDocumentItems', 'sourceEvidence', 'universityLinks', "command('publish'", 'sourceImportRecordId'];
+for (const token of required) if (!page.includes(token)) throw new Error(`MISSING_WP12_9_TOKEN:${token}`);
+for (const forbidden of ['PrismaClient', 'prisma.', 'mockScholarship', 'fallbackScholarship', 'setTimeout(() =>']) if (page.includes(forbidden)) throw new Error(`FORBIDDEN_WP12_9_TOKEN:${forbidden}`);
+if (!app.includes("./pages/ScholarshipCatalogDetailPage")) throw new Error('WP12_9_ROUTE_NOT_BOUND');
+console.log('WP12_9_CATALOG_DETAIL_SOURCE = PASS');
+console.log('NORMALIZED_COLLECTIONS = 7');
+console.log('DIRECT_PRISMA_REFERENCES = 0');
+console.log('MOCK_FALLBACK_RECORDS = 0');
+console.log('MANUAL_PUBLISH_COMMAND = PRESENT');

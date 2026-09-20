@@ -1,0 +1,43 @@
+name: Weekly Recovery Restore Audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 2 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  restore-audit:
+    if: github.repository == 'wegdangamil2022-oss/MANARATAK_FINAL'
+    runs-on: ubuntu-latest
+    environment: recovery-audit
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Verify recovery source contract
+        run: npm run recovery:source:verify
+      - name: Verify managed-provider backup readiness export
+        env:
+          RECOVERY_POSTGRES_READINESS_JSON: ${{ secrets.RECOVERY_POSTGRES_READINESS_JSON }}
+          RECOVERY_ASSET_READINESS_JSON: ${{ secrets.RECOVERY_ASSET_READINESS_JSON }}
+        run: npm run recovery:runtime:readiness
+      - name: Execute isolated whole-platform restore drill
+        env:
+          DATABASE_URL: ${{ secrets.RECOVERY_DATABASE_URL }}
+          RECOVERY_DATABASE_BACKUP_FILE: ${{ secrets.RECOVERY_DATABASE_BACKUP_FILE }}
+          RECOVERY_ASSET_RESTORE_DIR: ${{ secrets.RECOVERY_ASSET_RESTORE_DIR }}
+          RECOVERY_ASSET_MANIFEST: ${{ secrets.RECOVERY_ASSET_MANIFEST }}
+          MANARATAK_DATABASE_INTEGRATION_ENABLED: 'true'
+        run: npm run recovery:restore:drill
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+        if: always()
+        with:
+          name: recovery-restore-audit-${{ github.sha }}
+          path: recovery-evidence
+          if-no-files-found: error

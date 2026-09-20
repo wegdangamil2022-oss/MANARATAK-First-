@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const ctx=read('apps/admin/src/security/AdminAuthorizationContext.tsx');
+const nav=read('apps/admin/src/components/AdminNavigation.tsx');
+const app=read('apps/admin/src/App.tsx');
+const checks=[];
+checks.push(['effective-permissions-context', ctx.includes('permissions: string[]') && app.includes('effectivePermissions')]);
+checks.push(['navigation-filter', nav.includes('hasPermission(item.requiredPermission)')]);
+checks.push(['review-queue-contract', nav.includes("'/review-queue'") && nav.includes("requiredPermission: 'admin:platform:manage'" )]);
+checks.push(['direct-route-guard', app.includes('<RequireAdminPermission permission=') && ctx.includes('<Navigate to="/dashboard"')]);
+checks.push(['backend-authority-preserved', ctx.includes('permissionMatches') && !ctx.includes('fetch(')]);
+let pass=0;for(const[n,ok]of checks){console.log(`${ok?'PASS':'FAIL'} ${n}`);if(ok)pass++;}console.log(`W4_ADMIN_PERMISSIONS=${pass===checks.length?'PASS':'FAIL'} ${pass}/${checks.length}`);process.exitCode=pass===checks.length?0:1;

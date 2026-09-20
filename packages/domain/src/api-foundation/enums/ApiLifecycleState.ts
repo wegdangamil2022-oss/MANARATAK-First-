@@ -1,0 +1,6 @@
+export enum ApiLifecycleState {
+  CREATED = 'CREATED',
+  ACTIVATED = 'ACTIVATED',
+  DEPRECATED = 'DEPRECATED',
+  ARCHIVED = 'ARCHIVED'
+}

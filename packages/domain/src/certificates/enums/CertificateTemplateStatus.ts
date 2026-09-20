@@ -1,0 +1,9 @@
+export enum CertificateTemplateStatus {
+  DRAFT = 'DRAFT',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  APPROVED = 'APPROVED',
+  ACTIVE = 'ACTIVE',
+  DEPRECATED = 'DEPRECATED',
+  ARCHIVED = 'ARCHIVED',
+  RETIRED = 'RETIRED',
+}

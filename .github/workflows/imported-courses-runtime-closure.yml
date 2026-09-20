@@ -1,0 +1,108 @@
+name: Imported Courses Source Closure
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'apps/api/src/app.ts'
+      - 'apps/api/src/presentation/api/router/CourseImportOperationsRouter.ts'
+      - 'apps/admin/src/**/ImportedCourse*'
+      - 'apps/admin/src/**/CourseImport*'
+      - 'packages/domain/src/courses/**'
+      - 'packages/application/src/courses/**'
+      - 'packages/application/src/import-foundation/parsers/CourseMasterArtifactParser.ts'
+      - 'packages/application/tests/courses/**'
+      - 'packages/infrastructure/src/courses/**'
+      - 'packages/infrastructure/tests/courses/**'
+      - 'packages/infrastructure/prisma/**'
+      - 'apps/web/e2e/imported-courses-runtime-closure.spec.ts'
+      - 'apps/web/playwright.config.ts'
+      - 'scripts/wp-ic-08-*'
+      - 'scripts/wp-ic-10-*'
+      - 'scripts/archive/remediation-root/test_session_manager.ts'
+      - 'tests/imported-courses/**'
+      - 'apps/api/tests/**'
+      - 'tests/translation/**'
+      - 'vitest.database.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/imported-courses-runtime-closure.yml'
+  pull_request:
+    paths:
+      - 'apps/api/src/app.ts'
+      - 'apps/api/src/presentation/api/router/CourseImportOperationsRouter.ts'
+      - 'apps/admin/src/**/ImportedCourse*'
+      - 'apps/admin/src/**/CourseImport*'
+      - 'packages/domain/src/courses/**'
+      - 'packages/application/src/courses/**'
+      - 'packages/application/src/import-foundation/parsers/CourseMasterArtifactParser.ts'
+      - 'packages/application/tests/courses/**'
+      - 'packages/infrastructure/src/courses/**'
+      - 'packages/infrastructure/tests/courses/**'
+      - 'packages/infrastructure/prisma/**'
+      - 'apps/web/e2e/imported-courses-runtime-closure.spec.ts'
+      - 'apps/web/playwright.config.ts'
+      - 'scripts/wp-ic-08-*'
+      - 'scripts/wp-ic-10-*'
+      - 'scripts/archive/remediation-root/test_session_manager.ts'
+      - 'tests/imported-courses/**'
+      - 'apps/api/tests/**'
+      - 'tests/translation/**'
+      - 'vitest.database.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/imported-courses-runtime-closure.yml'
+
+permissions:
+  contents: read
+
+env:
+  NODE_ENV: test
+  JWT_SECRET: wpic10-jwt-secret-at-least-32-characters-long
+  SESSION_SECRET: wpic10-session-secret-at-least-32-characters
+  CSRF_SECRET: wpic10-csrf-secret-at-least-32-characters-long
+  ADMIN_AUTH_MODE: strict
+  CORS_ORIGIN: http://localhost:3000
+  REDIS_URL: redis://localhost:6379
+
+jobs:
+  source-hardening:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Prisma schema validation and client generation
+        run: npm run db:source:verify
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run test:unit
+      - name: Pure Node imported-course closure tests
+        run: node --test tests/imported-courses/*.test.mjs
+      - name: Imported-course static security invariants
+        run: node scripts/wp-ic-10-runtime-closure.mjs security --repo-root . --output-dir wp-ic-10-results
+      - name: 3,663-row real-parser memory rehearsal
+        run: node scripts/wp-ic-10-runtime-closure.mjs memory --rows 3663 --max-rss-mb 1024 --max-delta-mb 512 --output-dir wp-ic-10-results
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+      - name: Persist source closure marker
+        run: |
+          printf '{"version":1,"kind":"ci-closure","gitSha":"%s","pass":true,"detail":"prisma validate/generate, typecheck, lint, build, unit, security, parser-memory, and production dependency audit passed; DB/E2E/runtime intentionally deferred to Google Studio"}\n' "$(git rev-parse HEAD)" > wp-ic-10-results/CI_CLOSURE.json
+      - name: Aggregate pre-Google-Studio status
+        run: node scripts/wp-ic-10-runtime-closure.mjs finalize --phase source --results-dir wp-ic-10-results
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+        if: always()
+        with:
+          name: wpic10-source-closure
+          path: wp-ic-10-results
+          if-no-files-found: ignore
+
+# Database integration, backup/restore, browser E2E, and runtime smoke remain
+# implemented in the repository but are intentionally not executed by this
+# pre-handoff workflow. Google Studio runs them after it supplies PostgreSQL
+# and starts the actual runtime.

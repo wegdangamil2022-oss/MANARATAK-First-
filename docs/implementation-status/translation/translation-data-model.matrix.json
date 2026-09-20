@@ -1,0 +1,422 @@
+{
+  "version": "1.0",
+  "authoringBaseSha": "0ee9c4f7ef4606a4e119c16b7a02458656967df0",
+  "supportedLocales": [
+    "ar",
+    "en"
+  ],
+  "classifications": [
+    "IDENTITY_FIELD",
+    "SOURCE_NATIVE_FIELD",
+    "LOCALIZED_FIELD",
+    "LOCALE_CHILD_RECORD",
+    "UI_ONLY",
+    "NON_TRANSLATABLE_STRUCTURED_VALUE",
+    "PROVENANCE_ONLY"
+  ],
+  "storageStrategies": [
+    "KEEP_EXISTING",
+    "EXPLICIT_LOCALIZED_FIELDS",
+    "EXISTING_LOCALIZED_JSON",
+    "EXISTING_LOCALE_CHILD_RECORD",
+    "NEW_NORMALIZED_TRANSLATION_MODEL",
+    "NEW_BOUNDED_LOCALIZED_TEXT_MODEL",
+    "SOURCE_NATIVE_ONLY",
+    "STRUCTURED_VALUE",
+    "DEFERRED_FUTURE_PHASE"
+  ],
+  "decisions": [
+    {
+      "phase": 7,
+      "domain": "ReferenceCountry",
+      "field": "id/iso2Code/iso3Code",
+      "classification": "IDENTITY_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceCountry",
+      "field": "name",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE_AS_CANONICAL_SOURCE_LABEL"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceCountry",
+      "field": "Arabic display name",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD nameAr String?"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceCountry",
+      "field": "officialName",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "SOURCE_NATIVE_ONLY",
+      "wp06Action": "NO_TRANSLATION_SCHEMA_IN_INITIAL_ROUND"
+    },
+    {
+      "phase": 7,
+      "domain": "AdministrativeRegion",
+      "field": "name/nameAr/localName",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NO_NEW_TRANSLATION_MODEL"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceCity",
+      "field": "name",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceCity",
+      "field": "Arabic display name",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD nameAr String?"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceLanguage",
+      "field": "isoCode/direction",
+      "classification": "NON_TRANSLATABLE_STRUCTURED_VALUE",
+      "strategy": "STRUCTURED_VALUE",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceLanguage",
+      "field": "name/nativeName",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceLanguage",
+      "field": "Arabic display name",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD nameAr String?"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceCurrency",
+      "field": "isoCode/numericCode/symbol/minorUnit",
+      "classification": "NON_TRANSLATABLE_STRUCTURED_VALUE",
+      "strategy": "STRUCTURED_VALUE",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceCurrency",
+      "field": "name",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE"
+    },
+    {
+      "phase": 7,
+      "domain": "ReferenceCurrency",
+      "field": "Arabic display name",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD nameAr String?"
+    },
+    {
+      "phase": 8,
+      "domain": "DegreeLevel",
+      "field": "canonicalCode/id",
+      "classification": "IDENTITY_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 8,
+      "domain": "DegreeLevel",
+      "field": "nameAr/nameEn",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 8,
+      "domain": "AcademicTaxonomyNode",
+      "field": "id/deterministicKey/canonicalCode",
+      "classification": "IDENTITY_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 8,
+      "domain": "AcademicTaxonomyNode",
+      "field": "canonicalName",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE"
+    },
+    {
+      "phase": 8,
+      "domain": "AcademicTaxonomyNode",
+      "field": "localizedNames",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "EXISTING_LOCALIZED_JSON",
+      "wp06Action": "KEEP_JSON_WITH_VALIDATED_LOCALE_KEYS"
+    },
+    {
+      "phase": 8,
+      "domain": "AcademicTaxonomyNode",
+      "field": "description",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE_SOURCE"
+    },
+    {
+      "phase": 8,
+      "domain": "AcademicTaxonomyNode",
+      "field": "localizedDescriptions",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "EXISTING_LOCALIZED_JSON",
+      "wp06Action": "ADD localizedDescriptions Json? IF PUBLIC DESCRIPTION IS EXPOSED"
+    },
+    {
+      "phase": 8,
+      "domain": "AcademicTaxonomyAlias",
+      "field": "locale/alias",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 9,
+      "domain": "InternationalTest",
+      "field": "publicId/slug/canonicalDedupKey",
+      "classification": "IDENTITY_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 9,
+      "domain": "InternationalTest",
+      "field": "canonicalName/displayName",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE_AS_SOURCE_FALLBACK"
+    },
+    {
+      "phase": 9,
+      "domain": "InternationalTest",
+      "field": "localizedNameAr/localizedNameEn",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 9,
+      "domain": "InternationalTestFamily/Provider",
+      "field": "localizedNameAr/localizedNameEn",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 9,
+      "domain": "InternationalTestContentBlock",
+      "field": "locale/title/content",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "USE_FOR_LOCALIZED_DESCRIPTIVE_CONTENT"
+    },
+    {
+      "phase": 9,
+      "domain": "InternationalTest",
+      "field": "registrationRequirements/identificationRequirements/retakePolicy/cancellationReschedulingNotes/accessibilityNotes",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "EXISTING_LOCALE_CHILD_RECORD",
+      "wp06Action": "PRESERVE_SCALARS; DEFINE STABLE CONTENT_BLOCK KEYS FOR LOCALIZED PROJECTION; NO DESTRUCTIVE DROP"
+    },
+    {
+      "phase": 9,
+      "domain": "InternationalTest structured values",
+      "field": "scores/fees/dates/codes/URLs/country-language-degree links",
+      "classification": "NON_TRANSLATABLE_STRUCTURED_VALUE",
+      "strategy": "STRUCTURED_VALUE",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 9,
+      "domain": "InternationalTestVersion",
+      "field": "source locale",
+      "classification": "PROVENANCE_ONLY",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD sourceLocale String?"
+    },
+    {
+      "phase": 10,
+      "domain": "Major",
+      "field": "publicId MJR/MAS/DOC and canonical identity",
+      "classification": "IDENTITY_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 10,
+      "domain": "Major",
+      "field": "canonicalName/displayName",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE_AS_SOURCE_FALLBACK"
+    },
+    {
+      "phase": 10,
+      "domain": "Major",
+      "field": "localizedNameAr/localizedNameEn",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD localizedNameAr String?; ADD localizedNameEn String?"
+    },
+    {
+      "phase": 10,
+      "domain": "MajorLevelProfile",
+      "field": "localizedNameAr/localizedNameEn",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 10,
+      "domain": "MajorContentSection",
+      "field": "locale/title/content",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 10,
+      "domain": "MajorAlias",
+      "field": "locale/alias",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 10,
+      "domain": "FellowshipDefinition",
+      "field": "publicId FEL/canonical identity",
+      "classification": "IDENTITY_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 10,
+      "domain": "FellowshipDefinition",
+      "field": "localizedNameAr/localizedNameEn",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD localizedNameAr String?; ADD localizedNameEn String?"
+    },
+    {
+      "phase": 10,
+      "domain": "MajorSource",
+      "field": "source locale",
+      "classification": "PROVENANCE_ONLY",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD sourceLocale String?"
+    },
+    {
+      "phase": 10,
+      "domain": "Major relations/classifications",
+      "field": "ids/codes/confidence/relationship types",
+      "classification": "NON_TRANSLATABLE_STRUCTURED_VALUE",
+      "strategy": "STRUCTURED_VALUE",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 11,
+      "domain": "University",
+      "field": "id/publicId INS/slug/canonicalDedupKey",
+      "classification": "IDENTITY_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": 11,
+      "domain": "University",
+      "field": "canonicalName/displayName",
+      "classification": "SOURCE_NATIVE_FIELD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE; DO NOT OVERWRITE WITH TRANSLATION"
+    },
+    {
+      "phase": 11,
+      "domain": "University",
+      "field": "localized top-level displayName/description",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "NEW_NORMALIZED_TRANSLATION_MODEL",
+      "wp06Action": "ADD UniversityTranslation UNIQUE(universityId, locale)"
+    },
+    {
+      "phase": 11,
+      "domain": "University child content",
+      "field": "Campus name/address; OrganizationUnit name; AcademicProgram localized display; Tuition/Accommodation notes; Ranking scopeLabel/note",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "NEW_BOUNDED_LOCALIZED_TEXT_MODEL",
+      "wp06Action": "ADD UniversityLocalizedText WITH universityId,targetType,targetId,fieldKey,locale,value,reviewStatus,sourceRecordId; UNIQUE target+field+locale"
+    },
+    {
+      "phase": 11,
+      "domain": "UniversityDto",
+      "field": "localizedNames",
+      "classification": "LOCALIZED_FIELD",
+      "strategy": "NEW_NORMALIZED_TRANSLATION_MODEL",
+      "wp06Action": "LATER PROJECT FROM UniversityTranslation; DO NOT STORE IN optionalFields"
+    },
+    {
+      "phase": 11,
+      "domain": "UniversitySourceRecord",
+      "field": "source locale",
+      "classification": "PROVENANCE_ONLY",
+      "strategy": "EXPLICIT_LOCALIZED_FIELDS",
+      "wp06Action": "ADD sourceLocale String?"
+    },
+    {
+      "phase": 11,
+      "domain": "University structured values",
+      "field": "country/region/city FKs, degreeLevelId, majorId, test ids, money/currency, dates, ranks, URLs",
+      "classification": "NON_TRANSLATABLE_STRUCTURED_VALUE",
+      "strategy": "STRUCTURED_VALUE",
+      "wp06Action": "NONE"
+    },
+    {
+      "phase": "future",
+      "domain": "Scholarship",
+      "field": "localized content",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "DEFERRED_FUTURE_PHASE",
+      "wp06Action": "DO NOT IMPLEMENT IN PHASE7_11 TRANSLATION MIGRATION"
+    },
+    {
+      "phase": "future",
+      "domain": "Courses",
+      "field": "localized content",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "DEFERRED_FUTURE_PHASE",
+      "wp06Action": "DO NOT IMPLEMENT IN PHASE7_11 TRANSLATION MIGRATION"
+    },
+    {
+      "phase": "future",
+      "domain": "CMS",
+      "field": "localized content",
+      "classification": "LOCALE_CHILD_RECORD",
+      "strategy": "KEEP_EXISTING",
+      "wp06Action": "PRESERVE EXISTING CMS LOCALIZATION CONTRACT"
+    }
+  ]
+}

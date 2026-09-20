@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const r=(p)=>fs.readFileSync(p,'utf8'); const c=[]; const ok=(n,v)=>c.push([n,!!v]);
+const repo=r('packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts');
+const router=r('apps/web/src/router/index.tsx');
+const workspace=r('apps/web/src/features/students/StudentWorkspacePage.tsx');
+ok('generated certificate quick action targets canonical student vault',repo.includes("id: 'view-certificates'")&&repo.includes("href: '/student?tab=vault#certificates'"));
+ok('canonical student web route exists',router.includes("path: 'student'")&&router.includes('<PublicTemplateApp />'));
+ok('workspace consumes vault query contract',workspace.includes("queryTab === 'vault'")&&workspace.includes("location.hash === '#certificates'"));
+ok('certificate section exposes stable anchor',workspace.includes('id="certificates"'));
+ok('certificate list remains P14/P15 hydrated',workspace.includes('dashboard.certificates.map')&&workspace.includes('certificate.verificationCode'));
+ok('certificate detail handoff targets canonical verify route',workspace.includes('/certificates/verify?code='));
+const generated=[...repo.matchAll(/href:\s*'([^']+)'/g)].map(m=>m[1]);
+const allowed=generated.every(h=>h.startsWith('/student')||h.startsWith('/scholarships')||h.startsWith('/courses'));
+ok('all generated student quick actions match canonical web route families',allowed&&generated.length>=2&&repo.includes('href: `/courses/${nextCourse.courseSlug}`'));
+for(const [n,v] of c) console.log(`${v?'PASS':'FAIL'} ${n}`); const f=c.filter(([,v])=>!v); console.log(`W5_0097_SOURCE=${f.length?'FAIL':'PASS'} ${c.length-f.length}/${c.length}`); if(f.length) process.exit(1);

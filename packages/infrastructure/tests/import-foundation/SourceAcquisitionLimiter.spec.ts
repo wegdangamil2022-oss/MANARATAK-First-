@@ -1,0 +1,8 @@
+import { describe, expect, it } from 'vitest';
+import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
+import { SourceAcquisitionLimiter } from '../../src/import-foundation/SourceAcquisitionLimiter';
+function source(id: string, minimumDelayMs = 0) { return new ImportSourceDefinition({ sourceId: id, displayName: id, baseUrl: 'https://example.com', category: SourceConnectorCategory.OFFICIAL_API, accessClassification: SourceAccessClassification.PUBLIC_ALLOWED, status: SourceStatus.ACTIVE, rateLimitPerMinute: 60, connectorId: 'official-api', connectorVersion: '2.0.0', metadata: { rateLimitPolicy: { requestsPerMinute: 60, burstLimit: 2, minimumDelayMs } } }); }
+describe('SourceAcquisitionLimiter', () => {
+  it('allows a burst of two and deterministically delays the third until a token recovers', async () => { let now = 0; const waits: number[] = []; const limiter = new SourceAcquisitionLimiter(() => now, async (ms) => { waits.push(ms); now += ms; }); const value = source('a'); await limiter.wait(value); await limiter.wait(value); await limiter.wait(value); expect(waits).toEqual([1000]); now += 1000; await limiter.wait(value); expect(waits).toEqual([1000]); });
+  it('enforces minimum delay and isolates sources', async () => { let now = 0; const waits: number[] = []; const limiter = new SourceAcquisitionLimiter(() => now, async (ms) => { waits.push(ms); now += ms; }); await limiter.wait(source('a', 500)); await limiter.wait(source('b', 500)); await limiter.wait(source('a', 500)); expect(waits).toEqual([500]); });
+});

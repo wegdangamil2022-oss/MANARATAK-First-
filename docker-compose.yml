@@ -1,0 +1,52 @@
+services:
+  # Technical guard: local dependency topology must never run as staging/production.
+  development-safety-gate:
+    image: alpine:3.20
+    profiles: ["development"]
+    environment:
+      MANARATAK_COMPOSE_ENVIRONMENT: ${MANARATAK_COMPOSE_ENVIRONMENT:?Create .env.compose with npm run compose:init}
+    command: ["sh", "-ec", "test \"$$MANARATAK_COMPOSE_ENVIRONMENT\" = development"]
+    restart: "no"
+
+  postgres:
+    image: postgres:15-alpine
+    profiles: ["development"]
+    depends_on:
+      development-safety-gate:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required in .env.compose}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in .env.compose}
+      POSTGRES_DB: ${POSTGRES_DB:-manaratak_dev}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["development"]
+    depends_on:
+      development-safety-gate:
+        condition: service_completed_successfully
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required in .env.compose}
+    command: ["sh", "-ec", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:

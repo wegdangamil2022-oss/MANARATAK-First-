@@ -1,0 +1,997 @@
+{
+  "version": 1,
+  "authority": "MNT-AUD-0083",
+  "decision": "ADR-028",
+  "migrationLedger": {
+    "required": true
+  },
+  "defaultCounterPolicy": "REQUIRED_UNCHANGED_UNLESS_DECLARED",
+  "models": {
+    "AIAsyncJobRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AICapabilityPromptBindingRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIEmbeddingRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIEvaluationRunRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIExecutionRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIExecutionSpanRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIIncidentEventRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIIndexingRunRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIKnowledgeSourceRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIPromptDeploymentRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIPromptVersionRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIProviderCircuitRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIQuotaReservationRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIRegistryRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIUsageRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIWorkflowRunRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIWorkflowStepRunRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AIWorkflowVersionRecord": {
+      "owner": "ai",
+      "required": true
+    },
+    "AcademicStandardMapping": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyAlias": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyEdge": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyNode": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AccountRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "AdminEmergencyAccessRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "AdministrativeRegion": {
+      "owner": "reference",
+      "required": true
+    },
+    "ApiIdempotencyRecord": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "ApiSearchRequestRecord": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "ApiServiceControlRecord": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "ApiServiceExposureProjection": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "AssetRecord": {
+      "owner": "assets",
+      "required": true
+    },
+    "AuditRecord": {
+      "owner": "audit",
+      "required": true
+    },
+    "BackgroundJobDeadLetterRecord": {
+      "owner": "background_jobs",
+      "required": true
+    },
+    "BackgroundJobExecutionRecord": {
+      "owner": "background_jobs",
+      "required": true
+    },
+    "BackgroundJobRecord": {
+      "owner": "background_jobs",
+      "required": true
+    },
+    "CareerAlumniProfileRecord": {
+      "owner": "career",
+      "required": true
+    },
+    "CareerApplicationRecord": {
+      "owner": "career",
+      "required": true
+    },
+    "CareerEmployerRecord": {
+      "owner": "careers",
+      "required": true
+    },
+    "CareerJobPostingRecord": {
+      "owner": "careers",
+      "required": true
+    },
+    "CareerProfileRecord": {
+      "owner": "career",
+      "required": true
+    },
+    "Certificate": {
+      "owner": "certificates",
+      "required": true
+    },
+    "CertificateIssuanceInbox": {
+      "owner": "certificates",
+      "required": true
+    },
+    "CertificateIssuer": {
+      "owner": "certificates",
+      "required": true
+    },
+    "CertificateLedgerEntry": {
+      "owner": "certificates",
+      "required": true
+    },
+    "CertificateTemplate": {
+      "owner": "certificates",
+      "required": true
+    },
+    "CertificateTemplateVersion": {
+      "owner": "certificates",
+      "required": true
+    },
+    "CertificateVerificationLog": {
+      "owner": "certificates",
+      "required": true
+    },
+    "CmsAnnouncement": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsBlockSchema": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsCategory": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsContentAttachment": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsContentBlock": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsContentDomainLink": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsContentNode": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsContentRevision": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsContentTag": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsEditorialLedger": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsLocalizedContent": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsNavigationMenu": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsNavigationNode": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsPublishedContent": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsRedirect": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsScheduledJob": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsTag": {
+      "owner": "cms",
+      "required": true
+    },
+    "CmsWorkflowReview": {
+      "owner": "cms",
+      "required": true
+    },
+    "Course": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseAcademicTaxonomyLink": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseCompletion": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseEnrollment": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseEnrollmentPolicy": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseFieldProvenance": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseImportAnalysis": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseInternationalTestRelationship": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseLesson": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseLessonAsset": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseLessonProgress": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseMajorProjection": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseModule": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseQuestion": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseQuestionBank": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseQuestionVersion": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseQuiz": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseQuizAttempt": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseSourceIdentity": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseSourceUrlHistory": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseTaxonomyResolution": {
+      "owner": "learning",
+      "required": true
+    },
+    "CourseVersion": {
+      "owner": "learning",
+      "required": true
+    },
+    "CredentialRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "DegreeLevel": {
+      "owner": "reference",
+      "required": true
+    },
+    "EnterpriseEventRecord": {
+      "owner": "events",
+      "required": true
+    },
+    "ExternalCourseProvider": {
+      "owner": "learning",
+      "required": true
+    },
+    "ExternalCourseProviderAlias": {
+      "owner": "learning",
+      "required": true
+    },
+    "ExternalCourseProviderDomain": {
+      "owner": "learning",
+      "required": true
+    },
+    "FellowshipDefinition": {
+      "owner": "majors",
+      "required": true
+    },
+    "FinanceApprovalDecisionRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceApprovalRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceCommissionRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceDocumentRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceEstimateRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceExchangeRateRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceInstallmentPlanRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceInvoiceRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinancePaymentAttemptRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinancePaymentRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceRefundRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceTransferRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceWalletHoldRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceWalletRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinancialAccountRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinancialLedgerEntryRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinancialTransactionRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "IdentityRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "ImportBatch": {
+      "owner": "import",
+      "required": true
+    },
+    "ImportRecord": {
+      "owner": "import",
+      "required": true
+    },
+    "ImportSourceRegistryEntry": {
+      "owner": "import",
+      "required": true
+    },
+    "InternationalTest": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestAcademicTaxonomyRelationship": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestAvailability": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestCenter": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestContentBlock": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestCountryRelationship": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestDegreeRelationship": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestDeliveryModeProfile": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestEquivalencyMapping": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestEvidence": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestFamily": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestFeeMetadata": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestLanguageRelationship": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestOfficialLink": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestPolicy": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestPreparationMaterial": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestProvider": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestRequirement": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestScoreScale": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestSection": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestSession": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestVariant": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestVersion": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestVersionScoreScale": {
+      "owner": "tests",
+      "required": true
+    },
+    "LearningPath": {
+      "owner": "learning",
+      "required": true
+    },
+    "LearningPathCourse": {
+      "owner": "learning",
+      "required": true
+    },
+    "LearningPathEnrollment": {
+      "owner": "learning",
+      "required": true
+    },
+    "LearningPathVersion": {
+      "owner": "learning",
+      "required": true
+    },
+    "Major": {
+      "owner": "majors",
+      "required": true
+    },
+    "MajorAlias": {
+      "owner": "majors",
+      "required": true
+    },
+    "MajorClassificationMapping": {
+      "owner": "majors",
+      "required": true
+    },
+    "MajorContentSection": {
+      "owner": "majors",
+      "required": true
+    },
+    "MajorLevelProfile": {
+      "owner": "majors",
+      "required": true
+    },
+    "MajorRelationship": {
+      "owner": "majors",
+      "required": true
+    },
+    "MajorSource": {
+      "owner": "majors",
+      "required": true
+    },
+    "MajorVersion": {
+      "owner": "majors",
+      "required": true
+    },
+    "NotificationDeliveryReceipt": {
+      "owner": "notifications",
+      "required": true
+    },
+    "NotificationIntentRecord": {
+      "owner": "notifications",
+      "required": true
+    },
+    "NotificationTemplateRecord": {
+      "owner": "notifications",
+      "required": true
+    },
+    "PolicyRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "ReferenceAliasRecord": {
+      "owner": "reference",
+      "required": true
+    },
+    "ReferenceCity": {
+      "owner": "reference",
+      "required": true
+    },
+    "ReferenceCountry": {
+      "owner": "reference",
+      "required": true
+    },
+    "ReferenceCurrency": {
+      "owner": "reference",
+      "required": true
+    },
+    "ReferenceLanguage": {
+      "owner": "reference",
+      "required": true
+    },
+    "ReferenceProviderMappingRecord": {
+      "owner": "reference",
+      "required": true
+    },
+    "ReferenceRelationshipRecord": {
+      "owner": "reference",
+      "required": true
+    },
+    "ReferenceVersionRecord": {
+      "owner": "reference",
+      "required": true
+    },
+    "RetentionDecisionRecord": {
+      "owner": "platform_retention",
+      "required": true
+    },
+    "RoleAssignmentRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "RoleRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "Scholarship": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipApplicationCycle": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipAwardPackageVersion": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipBenefit": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipDegreeTarget": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipEligibilityItem": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipEligibilityRuleVersion": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipImportCanonicalResolutionDecision": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipImportVerificationDecision": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipMajorTarget": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipRequiredDocument": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipSourceEvidence": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipSponsorContext": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipUniversityLink": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ScholarshipVersion": {
+      "owner": "scholarships",
+      "required": true
+    },
+    "ServiceAvailabilitySlotRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceBookingItemRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceBookingRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceCatalogCountryRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceCatalogLanguageRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceCatalogRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceDeliveryArtifactRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceDiscountRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServicePackageItemRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServicePackageRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServicePricingRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServicePromotionRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceProviderRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceProviderServiceRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceRequestRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceWorkflowDefinitionRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "ServiceWorkflowExecutionRecord": {
+      "owner": "services",
+      "required": true
+    },
+    "SessionRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "SettingAssignmentRecord": {
+      "owner": "settings",
+      "required": true
+    },
+    "SettingDefinitionRecord": {
+      "owner": "settings",
+      "required": true
+    },
+    "SettingVersionRecord": {
+      "owner": "settings",
+      "required": true
+    },
+    "Settings": {
+      "owner": "settings",
+      "required": true
+    },
+    "SharedComponentControlRecord": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "SharedComponentRenderingProjection": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "StudentCertificateReadProjection": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentLearningProjection": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentNotificationProjection": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentPersonalStatistics": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentPrivacyConsentDecision": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentRecentActivity": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentRecentlyViewed": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSavedCollection": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSavedItem": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentSearchHistory": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentTimelineEntry": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentToolDefinitionRecord": {
+      "owner": "student_tools",
+      "required": true
+    },
+    "StudentToolDependencyRecord": {
+      "owner": "student_tools",
+      "required": true
+    },
+    "StudentToolExecutionRecord": {
+      "owner": "student_tools",
+      "required": true
+    },
+    "StudentToolVersionRecord": {
+      "owner": "student_tools",
+      "required": true
+    },
+    "StudentWorkspace": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentWorkspaceEventInbox": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentWorkspaceSnapshot": {
+      "owner": "student",
+      "required": true
+    },
+    "StudyDestinationProfile": {
+      "owner": "reference",
+      "required": true
+    },
+    "StudyDestinationStudyLanguage": {
+      "owner": "reference",
+      "required": true
+    },
+    "TransactionalOutboxRecord": {
+      "owner": "events",
+      "required": true
+    },
+    "University": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityAcademicProgram": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityAccommodationProfile": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityCampus": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityImportChange": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityImportChangeSet": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityLocalizedText": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityOrganizationUnit": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityProgramAdmissionRequirement": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityProgramCampus": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityRanking": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversitySourceRecord": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityTranslation": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityTuitionProfile": {
+      "owner": "universities",
+      "required": true
+    },
+    "UserRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "WorkflowControlRecord": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "WorkflowExecutionProjection": {
+      "owner": "foundation_control_plane",
+      "required": true
+    },
+    "StudentApplicationTracker": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentApplicationChecklistItem": {
+      "owner": "student",
+      "required": true
+    }
+  },
+  "consistencyProbes": {
+    "invalidIndexes": {
+      "required": true,
+      "expected": 0
+    },
+    "unvalidatedConstraints": {
+      "required": true,
+      "expected": 0
+    }
+  }
+}

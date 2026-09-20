@@ -1,0 +1,140 @@
+{
+  "mode": "SOURCE_VERIFY",
+  "seedSetVersion": "2026-09-06.1",
+  "orderedSteps": [
+    {
+      "id": "reference-countries",
+      "order": 10,
+      "required": true,
+      "owner": "reference",
+      "state": "BLOCKED_SOURCE_REVIEW",
+      "script": "scripts/seed-reference-countries.ts",
+      "sourcePath": "workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx",
+      "sourceSha256": "c896d03cc49c126ee907f342341737ae1e0e1aa023fb960d76ded17dc45804b9",
+      "sourceVersion": "2026-08-07/c896d03cc49c126e",
+      "requiredReviewStatus": "REVIEWED",
+      "observedReviewStatus": "UNREVIEWED",
+      "expected": {
+        "ReferenceCountry": {
+          "exact": 194
+        }
+      },
+      "provenance": "ISO-3166/UN-M49/IANA/ITU/CLDR references declared in governed workbook"
+    },
+    {
+      "id": "reference-currencies",
+      "order": 20,
+      "required": true,
+      "owner": "reference",
+      "state": "BLOCKED_SOURCE_DATASET_MISSING",
+      "script": null,
+      "sourcePath": null,
+      "sourceSha256": null,
+      "sourceVersion": null,
+      "expected": {
+        "ReferenceCurrency": {
+          "minimum": 1
+        }
+      },
+      "provenance": "ISO-4217 authoritative dataset required"
+    },
+    {
+      "id": "reference-languages",
+      "order": 30,
+      "required": true,
+      "owner": "reference",
+      "state": "BLOCKED_SOURCE_DATASET_MISSING",
+      "script": null,
+      "sourcePath": null,
+      "sourceSha256": null,
+      "sourceVersion": null,
+      "expected": {
+        "ReferenceLanguage": {
+          "minimum": 1
+        }
+      },
+      "provenance": "ISO-639/BCP47/CLDR authoritative dataset required"
+    },
+    {
+      "id": "degree-levels",
+      "order": 40,
+      "required": true,
+      "owner": "reference",
+      "state": "READY",
+      "script": "scripts/seed-degree-levels.ts",
+      "sourcePath": "packages/application/src/degree-level/DegreeLevelSeedService.ts",
+      "sourceVersion": "degree-level-baseline-v1",
+      "expected": {
+        "DegreeLevel": {
+          "exact": 7
+        }
+      },
+      "provenance": "MANARATAK governed education reference baseline",
+      "sourceSha256": "1a5e1fade135f73d08d89a16931a7e3c554ee00d1fb49ef85040f65807df62b5"
+    },
+    {
+      "id": "academic-taxonomy-isced-f",
+      "order": 50,
+      "required": true,
+      "owner": "academic_taxonomy",
+      "state": "READY",
+      "script": "scripts/seed-taxonomy.ts",
+      "sourcePath": "packages/domain/src/academic-taxonomy/isced-f-baseline.ts",
+      "sourceVersion": "UNESCO-UIS-ISCED-F-2013",
+      "expected": {
+        "AcademicTaxonomyNode": {
+          "exact": 163
+        },
+        "AcademicTaxonomyEdge": {
+          "exact": 152
+        },
+        "AcademicTaxonomyAlias": {
+          "exact": 39
+        }
+      },
+      "provenance": "UNESCO UIS ISCED-F 2013",
+      "sourceSha256": "db396914f498c7dca5eadd93dc693ba26b799d6d0642271f2612c556463a1893"
+    },
+    {
+      "id": "external-course-providers",
+      "order": 60,
+      "required": true,
+      "owner": "learning",
+      "state": "READY",
+      "script": "scripts/seed-external-course-providers.ts",
+      "sourcePath": "packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts",
+      "sourceVersion": "course-provider-registry-v1",
+      "expected": {
+        "ExternalCourseProvider": {
+          "minimum": 18
+        }
+      },
+      "provenance": "Reviewed MANARATAK external course provider registry",
+      "sourceSha256": "279ab69f7cb5a589d946c7cdbd3d1de389bd21405b364a1ae74255526e7d73f3"
+    },
+    {
+      "id": "student-tools-registry",
+      "order": 70,
+      "required": true,
+      "owner": "student_tools",
+      "state": "READY",
+      "script": "scripts/bootstrap-phase18-student-tools.ts",
+      "sourcePath": "packages/application/src/student-tools/OfficialStudentToolRegistry.ts",
+      "sourceVersion": "phase18-official-registry-v1",
+      "expected": {
+        "StudentToolDefinitionRecord": {
+          "exact": 83
+        }
+      },
+      "provenance": "Phase 18 official student-tools registry",
+      "sourceSha256": "2a08d714ec44917fd9ad19e164a24d0accfcf6e2bd91c05a29a29e020c8957ee"
+    }
+  ],
+  "blockers": [
+    "reference-countries:BLOCKED_SOURCE_REVIEW",
+    "reference-currencies:BLOCKED_SOURCE_DATASET_MISSING",
+    "reference-languages:BLOCKED_SOURCE_DATASET_MISSING"
+  ],
+  "status": "BLOCKED",
+  "databaseWrites": 0
+}

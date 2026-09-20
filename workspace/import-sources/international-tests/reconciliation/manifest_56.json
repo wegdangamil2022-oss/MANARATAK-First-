@@ -1,0 +1,562 @@
+[
+  {
+    "file": "Cambridge_English_Qualifications_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Cambridge English Qualifications",
+    "ar": "مؤهلات كامبريدج للغة الإنجليزية",
+    "acr": "CEQ / Cambridge English",
+    "prov": "Cambridge University Press & Assessment",
+    "country": "دولي / المملكة المتحدة (UK / Global)",
+    "type": "مجموعة مؤهلات تقييم اللغة الإنجليزية (A2-C2)"
+  },
+  {
+    "file": "Duolingo_English_Test_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Duolingo English Test",
+    "ar": "اختبار دولينجو للغة الإنجليزية",
+    "acr": "DET",
+    "prov": "Duolingo, Inc.",
+    "country": "دولي / الولايات المتحدة (USA / Global)",
+    "type": "اختبار كفاءة لغوية أكاديمي إلكتروني"
+  },
+  {
+    "file": "IELTS_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "International English Language Testing System",
+    "ar": "نظام اختبار اللغة الإنجليزية الدولي (آيلتس)",
+    "acr": "IELTS",
+    "prov": "British Council, IDP IELTS, Cambridge Assessment",
+    "country": "دولي / عالمي (Global / UK / Australia)",
+    "type": "اختبار كفاءة لغوية أكاديمي وعام"
+  },
+  {
+    "file": "LanguageCert_Academic_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "LANGUAGECERT Academic",
+    "ar": "اختبار لانجويج سيرت الأكاديمي",
+    "acr": "LCA / LanguageCert",
+    "prov": "PeopleCert Qualifications Ltd / LanguageCert",
+    "country": "دولي / المملكة المتحدة (UK / Global)",
+    "type": "اختبار كفاءة لغوية أكاديمي"
+  },
+  {
+    "file": "Linguaskill_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Linguaskill",
+    "ar": "اختبار لينجواسكيل",
+    "acr": "Linguaskill",
+    "prov": "Cambridge University Press & Assessment",
+    "country": "دولي / المملكة المتحدة (UK / Global)",
+    "type": "اختبار كفاءة لغوية معياري تكيفي"
+  },
+  {
+    "file": "Michigan_English_Test_MET_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Michigan English Test",
+    "ar": "اختبار ميشيغان للغة الإنجليزية",
+    "acr": "MET",
+    "prov": "Michigan Language Assessment (Univ of Michigan & Cambridge)",
+    "country": "دولي / الولايات المتحدة (USA / Global)",
+    "type": "اختبار كفاءة لغوية للأغراض الأكاديمية والمهنية"
+  },
+  {
+    "file": "OET_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Occupational English Test",
+    "ar": "اختبار اللغة الإنجليزية المهني للقطاع الطبي",
+    "acr": "OET",
+    "prov": "Cambridge Boxhill Language Assessment (CBLA)",
+    "country": "دولي / أستراليا (Global / Australia)",
+    "type": "اختبار كفاءة لغوية مخصص للرعاية الصحية"
+  },
+  {
+    "file": "Oxford_Test_of_English_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Oxford Test of English",
+    "ar": "اختبار أكسفورد للغة الإنجليزية",
+    "acr": "OTE",
+    "prov": "Oxford University Press (University of Oxford)",
+    "country": "دولي / المملكة المتحدة (UK / Global)",
+    "type": "اختبار كفاءة لغوية شخصي معتمد"
+  },
+  {
+    "file": "PTE_Academic_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Pearson Test of English Academic",
+    "ar": "اختبار بيرسون للغة الإنجليزية الأكاديمي",
+    "acr": "PTE Academic / PTE-A",
+    "prov": "Pearson PLC",
+    "country": "دولي / المملكة المتحدة (UK / Global)",
+    "type": "اختبار كفاءة لغوية محوسب بالكامل"
+  },
+  {
+    "file": "TOEFL_iBT_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Test of English as a Foreign Language (Internet-Based Test)",
+    "ar": "اختبار التوفل عبر الإنترنت",
+    "acr": "TOEFL iBT",
+    "prov": "Educational Testing Service (ETS)",
+    "country": "دولي / الولايات المتحدة (USA / Global)",
+    "type": "اختبار كفاءة لغوية أكاديمي محوسب"
+  },
+  {
+    "file": "TOEIC_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "Test of English for International Communication",
+    "ar": "اختبار التويك للتواصل الدولي",
+    "acr": "TOEIC",
+    "prov": "Educational Testing Service (ETS)",
+    "country": "دولي / الولايات المتحدة (USA / Global)",
+    "type": "اختبار كفاءة لغوية مهنية وبيئة العمل"
+  },
+  {
+    "file": "iTEP_Academic_2026_Complete_Data_AR.md",
+    "folder": "01_English_Language_Tests_12",
+    "eng": "International Test of English Proficiency (Academic)",
+    "ar": "اختبار آيتيب الأكاديمي للغة الإنجليزية",
+    "acr": "iTEP Academic",
+    "prov": "iTEP International (Boston Educational Services)",
+    "country": "دولي / الولايات المتحدة (USA / Global)",
+    "type": "اختبار كفاءة لغوية أكاديمي إلكتروني"
+  },
+  {
+    "file": "CILS_Italian_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Certificazione di Italiano come Lingua Straniera",
+    "ar": "شهادة اللغة الإيطالية كلغة أجنبية (سيلس)",
+    "acr": "CILS",
+    "prov": "Università per Stranieri di Siena",
+    "country": "إيطاليا / دولي (Italy / Global)",
+    "type": "اختبار كفاءة لغوية رسمية في اللغة الإيطالية"
+  },
+  {
+    "file": "Celpe_Bras_Brazilian_Portuguese_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Certificado de Proficiência em Língua Portuguesa para Estrangeiros",
+    "ar": "شهادة الكفاءة في اللغة البرتغالية للأجانب (سيلبي براس)",
+    "acr": "Celpe-Bras",
+    "prov": "INEP / Ministry of Education, Brazil",
+    "country": "البرازيل / دولي (Brazil / Global)",
+    "type": "اختبار كفاءة لغوية رسمية في اللغة البرتغالية البرازيلية"
+  },
+  {
+    "file": "DELE_Spanish_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Diplomas de Español como Lengua Extranjera",
+    "ar": "دبلوم اللغة الإسبانية كلغة أجنبية (ديلي)",
+    "acr": "DELE",
+    "prov": "Instituto Cervantes / Ministry of Education, Spain",
+    "country": "إسبانيا / دولي (Spain / Global)",
+    "type": "شهادة رسمية دائمة في الكفاءة اللغوية الإسبانية"
+  },
+  {
+    "file": "DELF_DALF_French_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "DELF / DALF (Diplôme d'Études / Approfondi en Langue Française)",
+    "ar": "دبلوم الدراسات والتعمق في اللغة الفرنسية (ديلف / دالف)",
+    "acr": "DELF / DALF",
+    "prov": "France Éducation international / Ministry of Education, France",
+    "country": "فرنسا / دولي (France / Global)",
+    "type": "دبلوم وطني رسمي دائم في الكفاءة اللغوية الفرنسية"
+  },
+  {
+    "file": "HSK_Chinese_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Hanyu Shuiping Kaoshi",
+    "ar": "اختبار كفاءة اللغة الصينية (أتشتش كيه)",
+    "acr": "HSK",
+    "prov": "Chinese Testing International (CTI) / Hanban / CLEC",
+    "country": "الصين / دولي (China / Global)",
+    "type": "اختبار معياري وطني للكفاءة في اللغة الصينية"
+  },
+  {
+    "file": "JLPT_Japanese_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Japanese-Language Proficiency Test",
+    "ar": "اختبار الكفاءة في اللغة اليابانية (جيلبت)",
+    "acr": "JLPT",
+    "prov": "Japan Foundation / Japan Educational Exchanges and Services",
+    "country": "اليابان / دولي (Japan / Global)",
+    "type": "اختبار كفاءة لغوية معياري مكوّن من 5 مستويات (N1-N5)"
+  },
+  {
+    "file": "NT2_Netherlands_Dutch_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Staatsexamen Nederlands als Tweede Taal",
+    "ar": "امتحان الدولة للغة الهولندية كلغة ثانية (إن تي 2)",
+    "acr": "Staatsexamen Nt2 / NT2",
+    "prov": "College voor Toetsen en Examens (CvTE) / DUO, Netherlands",
+    "country": "هولندا (Netherlands)",
+    "type": "امتحان دولة رسمي للقبول الجامعي وسوق العمل"
+  },
+  {
+    "file": "Polish_State_Certificate_Poland_Polish_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "State Certification Examinations in Polish as a Foreign Language",
+    "ar": "شهادة الدولة الرسمية في اللغة البولندية كلغة أجنبية",
+    "acr": "Polish State Cert",
+    "prov": "State Commission for Certification of Proficiency in Polish",
+    "country": "بولندا (Poland)",
+    "type": "شهادة كفاءة لغوية رسمية حكومية"
+  },
+  {
+    "file": "TOMER_Turkey_Turkish_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "TÖMER Turkish Proficiency Exam",
+    "ar": "اختبار الكفاءة في اللغة التركية — مركز تومر",
+    "acr": "TÖMER",
+    "prov": "Ankara University TÖMER Center",
+    "country": "تركيا / دولي (Türkiye / Global)",
+    "type": "اختبار شهادة ودبلوم الكفاءة في اللغة التركية"
+  },
+  {
+    "file": "TOPIK_Korean_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Test of Proficiency in Korean",
+    "ar": "اختبار الكفاءة في اللغة الكورية (توبيك)",
+    "acr": "TOPIK",
+    "prov": "National Institute for International Education (NIIED), South Korea",
+    "country": "كوريا الجنوبية / دولي (South Korea / Global)",
+    "type": "اختبار معياري رسمي للكفاءة في اللغة الكورية"
+  },
+  {
+    "file": "TORFL_TRKI_Russian_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Test of Russian as a Foreign Language",
+    "ar": "اختبار اللغة الروسية كلغة أجنبية (تورفل / تركيا)",
+    "acr": "TORFL / TRKI",
+    "prov": "Ministry of Science and Higher Education of the Russian Federation",
+    "country": "روسيا / دولي (Russia / Global)",
+    "type": "اختبار كفاءة لغوية معياري دولة حكومي"
+  },
+  {
+    "file": "TestDaF_German_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Test Deutsch als Fremdsprache",
+    "ar": "اختبار اللغة الألمانية كلغة أجنبية (تيست داف)",
+    "acr": "TestDaF",
+    "prov": "TestDaF-Institut / g.a.t.o.s. e.V.",
+    "country": "ألمانيا / دولي (Germany / Global)",
+    "type": "اختبار كفاءة لغوية لغرض القبول الجامعي الأكاديمي"
+  },
+  {
+    "file": "UKBI_Indonesia_Indonesian_2026_Complete_Data_AR.md",
+    "folder": "02_Non_English_Language_Tests_13",
+    "eng": "Uji Kemahiran Berbahasa Indonesia",
+    "ar": "اختبار الكفاءة في اللغة الإندونيسية (يوكابي)",
+    "acr": "UKBI",
+    "prov": "Agency for Language Development and Cultivation, Ministry of Education, Indonesia",
+    "country": "إندونيسيا (Indonesia)",
+    "type": "اختبار معياري وطني للكفاءة في اللغة الإندونيسية"
+  },
+  {
+    "file": "ACT_2026_Complete_Data_AR.md",
+    "folder": "03_General_Undergraduate_Admission_Tests_4",
+    "eng": "ACT Test",
+    "ar": "اختبار أي سي تي للقبول الجامعي",
+    "acr": "ACT",
+    "prov": "ACT, Inc.",
+    "country": "الولايات المتحدة / دولي (USA / Global)",
+    "type": "اختبار قبول جامعي معياري لمرحلة البكالوريوس"
+  },
+  {
+    "file": "AP_Exams_2027_Complete_Data_AR.md",
+    "folder": "03_General_Undergraduate_Admission_Tests_4",
+    "eng": "Advanced Placement Examinations",
+    "ar": "امتحانات التسكين المتقدم (أي بي)",
+    "acr": "AP Exams",
+    "prov": "College Board",
+    "country": "الولايات المتحدة / دولي (USA / Global)",
+    "type": "امتحانات ومؤهلات أكاديمية متقدمة لمستوى الكلية"
+  },
+  {
+    "file": "CLT_Classic_Learning_Test_2026_2027_Complete_Data_AR.md",
+    "folder": "03_General_Undergraduate_Admission_Tests_4",
+    "eng": "Classic Learning Test",
+    "ar": "اختبار التعلم الكلاسيكي (سي إل تي)",
+    "acr": "CLT",
+    "prov": "Classic Learning Initiatives, LLC",
+    "country": "الولايات المتحدة / دولي (USA / Global)",
+    "type": "اختبار تقييم للقبول الجامعي بالتركيز الكلاسيكي"
+  },
+  {
+    "file": "SAT_2026_Complete_Data_AR.md",
+    "folder": "03_General_Undergraduate_Admission_Tests_4",
+    "eng": "Scholastic Assessment Test",
+    "ar": "اختبار التقييم المدرسي (سات)",
+    "acr": "SAT / Digital SAT",
+    "prov": "College Board",
+    "country": "الولايات المتحدة / دولي (USA / Global)",
+    "type": "اختبار قبول جامعي دولي معياري رقمي"
+  },
+  {
+    "file": "GMAT_Exam_2026_Complete_Data_AR.md",
+    "folder": "04_Graduate_Admission_Tests_2",
+    "eng": "Graduate Management Admission Test (Focus Edition)",
+    "ar": "اختبار قبول الإدارة للدراسات العليا (جيمات)",
+    "acr": "GMAT Focus",
+    "prov": "Graduate Management Admission Council (GMAC)",
+    "country": "دولي / الولايات المتحدة (USA / Global)",
+    "type": "اختبار قبول أكاديمي لبرامج إدارة الأعمال والتنفيذيين"
+  },
+  {
+    "file": "GRE_General_Test_2026_Complete_Data_AR.md",
+    "folder": "04_Graduate_Admission_Tests_2",
+    "eng": "Graduate Record Examinations General Test",
+    "ar": "امتحان السجل العام للدراسات العليا (جي آر إي)",
+    "acr": "GRE General",
+    "prov": "Educational Testing Service (ETS)",
+    "country": "دولي / الولايات المتحدة (USA / Global)",
+    "type": "اختبار تقييم للقبول ببرامج الماجستير والدكتوراه"
+  },
+  {
+    "file": "A_Level_UK_International_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "GCE Advanced Level (UK & International A-Level)",
+    "ar": "المستوى المتقدم الثانوي البريطاني (أي ليفل)",
+    "acr": "A-Level / IAL",
+    "prov": "Pearson Edexcel, Cambridge (CAIE), AQA, OCR",
+    "country": "المملكة المتحدة / دولي (UK / Global)",
+    "type": "مؤهل ثانوي دولي للقبول الجامعي"
+  },
+  {
+    "file": "Abitur_Germany_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "Zeugnis der Allgemeinen Hochschulreife (Abitur)",
+    "ar": "شهادة التأهيل العام للتعليم العالي (الأبيتور الألماني)",
+    "acr": "Abitur",
+    "prov": "Kultusministerkonferenz (KMK) / German Federal States",
+    "country": "ألمانيا (Germany)",
+    "type": "مؤهل الثانوية العامة والقبول الجامعي الوطني"
+  },
+  {
+    "file": "CSAT_South_Korea_2027_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "College Scholastic Ability Test (Suneung)",
+    "ar": "اختبار القدرات الأكاديمية للكلية (سونونغ الكوري)",
+    "acr": "CSAT / Suneung",
+    "prov": "Korea Institute for Curriculum and Evaluation (KICE)",
+    "country": "كوريا الجنوبية (South Korea)",
+    "type": "امتحان قبول جامعي وطني شامل"
+  },
+  {
+    "file": "CSCA_China_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "China Scholastic Competency Assessment for Foreign Students",
+    "ar": "تقييم الكفاءة الأكاديمية الصينية للطلاب الدوليين",
+    "acr": "CSCA",
+    "prov": "China Scholarship Council / Testing Authority",
+    "country": "الصين (China)",
+    "type": "اختبار تقييم القبول الأكاديمي للطلاب الأجانب في الصين"
+  },
+  {
+    "file": "CUET_India_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "Common University Entrance Test (CUET UG)",
+    "ar": "اختبار الدخول الموحد للجامعات الهندية (سي يو إي تي)",
+    "acr": "CUET UG",
+    "prov": "National Testing Agency (NTA), India",
+    "country": "الهند (India)",
+    "type": "امتحان دخول موحد للجامعات المركزية والفيدرالية"
+  },
+  {
+    "file": "EJU_Japan_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "Examination for Japanese University Admission for International Students",
+    "ar": "امتحان القبول الجامعي الياباني للطلاب الدوليين (إيجو)",
+    "acr": "EJU",
+    "prov": "Japan Student Services Organization (JASSO)",
+    "country": "اليابان (Japan)",
+    "type": "امتحان القبول الجامعي الموحد للطلاب الأجانب"
+  },
+  {
+    "file": "Gaokao_China_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "National College Entrance Examination (Gaokao)",
+    "ar": "امتحان القبول الوطني للكليات بالصين (الغاوكاو)",
+    "acr": "Gaokao",
+    "prov": "Ministry of Education of the People's Republic of China",
+    "country": "الصين (China)",
+    "type": "امتحان القبول الجامعي الوطني الشامل"
+  },
+  {
+    "file": "IB_Diploma_Programme_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "International Baccalaureate Diploma Programme",
+    "ar": "برنامج دبلوم البكالوريا الدولية (أي بي)",
+    "acr": "IBDP / IB",
+    "prov": "International Baccalaureate Organization (IBO)",
+    "country": "دولي / سويسرا (Global / Switzerland)",
+    "type": "مؤهل ثانوي دولي شامل للقبول الجامعي"
+  },
+  {
+    "file": "Matura_Multiple_European_Countries_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "Matura / Secondary School Leaving Examination",
+    "ar": "امتحان ماتورا النهائي الثانوي الأوروبي",
+    "acr": "Matura",
+    "prov": "Ministries of Education (Austria, Switzerland, Poland, Italy, etc.)",
+    "country": "دول أوروپية متعددة (Multiple European Countries)",
+    "type": "مؤهل إنهاء الثانوية العامة الأوروبي للقبول الجامعي"
+  },
+  {
+    "file": "TR_YOS_Turkiye_2026_Unified_AR_REVISED.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "Exam for Foreign Students in Türkiye (TR-YÖS)",
+    "ar": "امتحان الطلاب الأجانب الموحد في تركيا (تي آر يوس)",
+    "acr": "TR-YÖS",
+    "prov": "ÖSYM (Assessment, Selection and Placement Center), Türkiye",
+    "country": "تركيا (Türkiye)",
+    "type": "امتحان القبول الجامعي المركزي للطلاب الدوليين في تركيا"
+  },
+  {
+    "file": "YKS_Turkey_2026_Unified_AR.md",
+    "folder": "05_National_International_Admission_Tests_Qualifications_11",
+    "eng": "Yükseköğretim Kurumları Sınavı",
+    "ar": "امتحان مؤسسات التعليم العالي للطلاب الأتراك (واي كيه إيس)",
+    "acr": "YKS (TYT / AYT / YDT)",
+    "prov": "ÖSYM, Türkiye",
+    "country": "تركيا (Türkiye)",
+    "type": "امتحان القبول الجامعي الوطني العام في تركيا"
+  },
+  {
+    "file": "DAT_United_States_Dental_Admission_2026.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "Dental Admission Test",
+    "ar": "اختبار القبول لكليات طب الأسنان (دات)",
+    "acr": "DAT",
+    "prov": "American Dental Association (ADA)",
+    "country": "الولايات المتحدة / كندا (USA / Canada)",
+    "type": "اختبار قبول مترافق للتخصصات الطبية للأسنان"
+  },
+  {
+    "file": "GAMSAT_2026_Complete_Data_AR.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "Graduate Medical School Admissions Test",
+    "ar": "اختبار قبول كليات الطب للدراسات العليا (جامسات)",
+    "acr": "GAMSAT",
+    "prov": "Australian Council for Educational Research (ACER)",
+    "country": "أستراليا / المملكة المتحدة / ايرلندا (Global)",
+    "type": "اختبار قبول متخصص لبرامج الطب المتقدمة"
+  },
+  {
+    "file": "IMAT_Italy_Medicine_Admission_2026.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "International Medical Admissions Test",
+    "ar": "اختبار القبول الطبي الدولي في إيطاليا (آيمات)",
+    "acr": "IMAT",
+    "prov": "Ministry of University and Research (MUR), Italy",
+    "country": "إيطاليا (Italy)",
+    "type": "اختبار قبول متخصص لبرامج الطب والجراحة بالإنجليزية"
+  },
+  {
+    "file": "JEE_Advanced_India_2026_Unified_AR.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "Joint Entrance Examination (Advanced)",
+    "ar": "امتحان الدخول الموحد المتقدم للهندسة (جي إي إي المتقدم)",
+    "acr": "JEE (Advanced)",
+    "prov": "Indian Institutes of Technology (IITs) / Joint Admission Board",
+    "country": "الهند (India)",
+    "type": "امتحان قبول هندسي تنافسي عالي المستوى للمعاهد الهندية"
+  },
+  {
+    "file": "JEE_Main_India_2026_Unified_AR.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "Joint Entrance Examination (Main)",
+    "ar": "امتحان الدخول الموحد الرئيسي للهندسة (جي إي إي الرئيسي)",
+    "acr": "JEE (Main)",
+    "prov": "National Testing Agency (NTA), India",
+    "country": "الهند (India)",
+    "type": "امتحان قبول وطني موحد للهندسة والتكنولوجيا"
+  },
+  {
+    "file": "LNAT_2026_2027_Unified_AR.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "National Admissions Test for Law",
+    "ar": "اختبار القبول الوطني للقانون (إل إن أي تي)",
+    "acr": "LNAT",
+    "prov": "LNAT Consortium Ltd / Pearson VUE",
+    "country": "المملكة المتحدة / دولي (UK / Global)",
+    "type": "اختبار قبول متخصص لكليات Law في الجامعات المرموقة"
+  },
+  {
+    "file": "LSAT_2026_2027_Unified_AR.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "Law School Admission Test",
+    "ar": "اختبار القبول لكليات القانون (إل سات)",
+    "acr": "LSAT",
+    "prov": "Law School Admission Council (LSAC)",
+    "country": "الولايات المتحدة / كندا / دولي (USA / Global)",
+    "type": "اختبار قبول تخصصي لكليات القانون والأدلة التفكيرية"
+  },
+  {
+    "file": "MCAT_2026_Complete_Data_AR.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "Medical College Admission Test",
+    "ar": "اختبار القبول لكليات الطب (إم كات)",
+    "acr": "MCAT",
+    "prov": "Association of American Medical Colleges (AAMC)",
+    "country": "الولايات المتحدة / كندا / دولي (USA / Canada / Global)",
+    "type": "اختبار قبول طبي قياسي محوسب لمرحلة الدراسات العليا الطبية"
+  },
+  {
+    "file": "NEET_UG_India_2026_Unified_AR.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "National Eligibility cum Entrance Test (Undergraduate)",
+    "ar": "اختبار التأهيل والقبول الوطني للطب (نيت الموحد)",
+    "acr": "NEET (UG)",
+    "prov": "National Testing Agency (NTA), India",
+    "country": "الهند (India)",
+    "type": "امتحان القبول الوطني الموحد لكليات الطب وطب الأسنان"
+  },
+  {
+    "file": "UCAT_2026_Complete_Data_AR.md",
+    "folder": "06_Specialized_Admission_Tests_10",
+    "eng": "University Clinical Aptitude Test",
+    "ar": "اختبار المهارات السريرية الجامعية (يوكات)",
+    "acr": "UCAT / UCAT ANZ",
+    "prov": "UCAT Consortium / Pearson VUE",
+    "country": "المملكة المتحدة / أستراليا / دولي (UK / Australia / Global)",
+    "type": "اختبار قدرات وسلوكيات قبول للتخصصات الطبية والصحية"
+  },
+  {
+    "file": "CPA_United_States_Accounting_Licensure_2026_Unified_AR.md",
+    "folder": "07_Professional_Licensing_Certification_Tests_4",
+    "eng": "Uniform Certified Public Accountant Examination",
+    "ar": "امتحان المحاسب القانوني المعتمد الأمريكي (سي بي إيه)",
+    "acr": "CPA Exam",
+    "prov": "AICPA / NASBA / Prometric",
+    "country": "الولايات المتحدة / دولي (USA / Global)",
+    "type": "امتحان ترخيص مهني عالمي في المحاسبة والتدقيق"
+  },
+  {
+    "file": "PLAB_United_Kingdom_Medical_Licensing_2026_Unified_AR.md",
+    "folder": "07_Professional_Licensing_Certification_Tests_4",
+    "eng": "Professional and Linguistic Assessments Board test",
+    "ar": "اختبار مجلس التقييم المهني واللغوي الطبي (بلاب البريطاني)",
+    "acr": "PLAB (PLAB 1 & PLAB 2)",
+    "prov": "General Medical Council (GMC), United Kingdom",
+    "country": "المملكة المتحدة (United Kingdom)",
+    "type": "اختبار ترخيص ممارسة الطب للأطباء الخريجين الدوليين"
+  },
+  {
+    "file": "PMP_Project_Management_Professional_2026_Unified_AR.md",
+    "folder": "07_Professional_Licensing_Certification_Tests_4",
+    "eng": "Project Management Professional Certification",
+    "ar": "شهادة محترف إدارة المشاريع (بي إم بي)",
+    "acr": "PMP",
+    "prov": "Project Management Institute (PMI)",
+    "country": "دولي / الولايات المتحدة (USA / Global)",
+    "type": "شهادة واعتماد ترخيص مهني عالمي في إدارة المشاريع"
+  },
+  {
+    "file": "USMLE_United_States_Medical_Licensing_2026_Unified_AR.md",
+    "folder": "07_Professional_Licensing_Certification_Tests_4",
+    "eng": "United States Medical Licensing Examination",
+    "ar": "امتحان الترخيص الطبي في الولايات المتحدة (يوسملي)",
+    "acr": "USMLE (Step 1, Step 2 CK, Step 3)",
+    "prov": "FSMB & NBME, United States",
+    "country": "الولايات المتحدة (United States)",
+    "type": "امتحان ترخيص ممارسة الطب الوطني للأطباء"
+  }
+]

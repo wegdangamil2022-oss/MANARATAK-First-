@@ -77,7 +77,7 @@ function AdminLayout() {
   };
 
   return (
-    <BrowserRouter basename="/admin">
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div className="min-h-screen bg-[#FAF7F0] text-[#203442] flex flex-col font-sans">
         <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-[#DDEFF2] bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">

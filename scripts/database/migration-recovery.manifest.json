@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "authority": "MNT-AUD-0079",
+  "defaultPolicy": "FAIL_CLOSED",
+  "migrations": {
+    "20260806172001_init_schema": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260809161800_add_administrative_region": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260810000000_add_degree_level": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260811191618_init_session_model": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260811210000_add_credential_model": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260813000000_add_transactional_outbox": {
+      "recoveryClass": "ROLLBACK_SQL",
+      "artifact": "packages/infrastructure/prisma/migrations/20260813000000_add_transactional_outbox/rollback.sql",
+      "decision": "Reviewed reverse SQL is checked in next to the migration."
+    },
+    "20260814000100_import_worker_leases": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260814000200_add_normalized_university_platform": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260817010000_translation_phase7_11_extensions": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260820231500_normalize_scholarship_model": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260821233000_add_course_persistence": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260822010000_external_course_provider_registry": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260822011000_seed_external_course_providers": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260822040000_course_relationships": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260822050000_remove_shared_freecodecamp_youtube_domain": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260823010000_course_language_review_snapshot": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260823020000_scholarship_lifecycle_language_document_refs": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260823030000_import_source_registry": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824010000_scholarship_import_decision_record_fks": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824030000_international_test_fee_currency_reference": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824120000_phase13_native_learning_persistence": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824170000_phase17_enterprise_ai_platform": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824180000_phase18_enterprise_student_tools": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824190000_phase19_enterprise_finance_payments": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824200000_phase14_enterprise_certificates": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824200000_phase15_enterprise_student_workspace": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260824213000_phase16_enterprise_cms": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260825010000_phase15_phase16_mandatory_closure": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260825180000_w2_enterprise_event_durability": {
+      "recoveryClass": "ROLLBACK_SQL",
+      "artifact": "packages/infrastructure/prisma/migrations/20260825180000_w2_enterprise_event_durability/rollback.sql",
+      "decision": "Reviewed reverse SQL is checked in next to the migration."
+    },
+    "20260825190000_w3_reference_city_identity": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260825210000_w4_finance_safety_core": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260825220000_w5_international_test_canonical_integrity": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260825234500_w7_university_source_identity": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260826001500_w8_scholarship_architecture": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260826013000_w9_course_lifecycle": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260826024500_w10_certificate_trust_model": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260826034000_w11_student_lifecycle_consent_stats": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260826045000_w12_ai_governance_execution_safety": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260826183000_w13_student_tools_integrity": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260826194500_w14_cms_integrity": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260903190000_p7_canonical_geography_country_links": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260903210000_p8_late_domain_integrations": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260905014500_cms_domain_links_source_only": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260905033000_course_international_test_relationship": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260905043000_study_destination_profiles_source_only": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260905050000_certificate_brand_defaults": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260906194500_session_refresh_rotation_lineage": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260906204000_reference_governance_lifecycle": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260906223000_foundation_control_plane_persistence": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260906231000_phase20_service_operations_owner_scope": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260906234000_phase21_career_engagement_owner_scope": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "No safe reverse SQL is asserted; recover shared environments from pre-mutation backup or reprovision a new greenfield/disposable target."
+    },
+    "20260906235500_phase20_phase21_optimistic_concurrency": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Structural concurrency migration; recover shared environments from pre-mutation backup or reprovision a greenfield/disposable target if rollback is required."
+    },
+    "20260907001500_retention_policy_enforcement": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Retention governance migration spans Import/Audit/Asset plus evidence record; recover shared environments from pre-mutation backup or reprovision a greenfield/disposable target."
+    },
+    "20260907010000_w3_durable_background_jobs": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Background worker durability tables may contain execution/DLQ evidence after activation. rollback.sql is authorized only for disposable migration-replay targets; shared environments recover from pre-mutation backup or a forward fix."
+    },
+    "20260907011000_w3_outbox_lease_fencing": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Outbox claim-token fencing changes active delivery ownership semantics. rollback.sql is authorized only for disposable migration-replay targets; shared environments recover from pre-mutation backup or a forward fix."
+    },
+    "20260907013000_w3_notification_delivery": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Notification delivery tables may contain operational and provider delivery evidence after activation. rollback.sql is authorized only for disposable migration-replay targets; shared environments recover from a pre-mutation backup or a forward fix."
+    },
+    "20260907013000_w4_api_idempotency": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Idempotency records may contain replay and request-outcome evidence after activation; shared environments recover from a pre-mutation backup or a forward fix rather than destructive automatic rollback."
+    },
+    "20260907014000_w4_search_runtime": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Search runtime records may contain operational request evidence after activation; shared environments recover from a pre-mutation backup or a forward fix rather than destructive automatic rollback."
+    },
+    "20260907014500_w4_iam_breakglass": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Emergency-access records are security/audit evidence and must not be silently dropped by rollback; shared environments recover from a pre-mutation backup or a reviewed forward fix."
+    },
+    "20260907023000_w5_student_application_tracker": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Student application tracker/checklist records become private student-state and reminder evidence after activation; shared environments recover from pre-mutation backup or a reviewed forward fix rather than destructive rollback."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+--- packages/application/tests/academic-taxonomy/AdminAcademicTaxonomyUseCases.spec.ts
++++ packages/application/tests/academic-taxonomy/AdminAcademicTaxonomyUseCases.spec.ts
+@@ -298,4 +298,14 @@
+     expect(mockRepo.addAlias).not.toHaveBeenCalled();
+     expect(mockRepo.addMapping).not.toHaveBeenCalled();
+   });
++
++  it('removeAlias delegates to repository.removeAlias', async () => {
++    const useCases = new AdminAcademicTaxonomyUseCases(mockRepo, mockValidationService);
++    await useCases.removeAlias('alias_01');
++    expect(mockRepo.removeAlias).toHaveBeenCalledWith('alias_01');
++  });
++  it('removeMapping delegates to repository.removeMapping', async () => {
++    const useCases = new AdminAcademicTaxonomyUseCases(mockRepo, mockValidationService);
++    await useCases.removeMapping('mapping_01');
++    expect(mockRepo.removeMapping).toHaveBeenCalledWith('mapping_01');
++  });
+ });

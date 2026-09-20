@@ -1,0 +1,23 @@
+# WP1 Database Closure Register
+
+> **Operational supersession notice (2026-09-06):** Any instruction in this historical remediation artifact that requires an “Original Development Database”, a Google Studio recovery gate, or `WP1_RECOVERY_GATE` is superseded by [`docs/operations/GREENFIELD_DATABASE_PROVISIONING.md`](../../operations/GREENFIELD_DATABASE_PROVISIONING.md). This file remains historical/evidence context and is not current database-operation authority.
+
+All entries are blocked by the external Google Studio database recovery gate. No credentials or secret connection material belong in this register.
+
+| DB-dependent item | Status | Current evidence | DB mutation | Rollback requirement | Conceptual closure step | Owner |
+|---|---|---|---|---|---|---|
+| Original development database backup | BLOCKED | Database unavailable locally | NO | Prove backup readability and non-destructive restore | Produce timestamped backup and restore evidence in external runtime | Database Operations |
+| Schema snapshot | BLOCKED | Local Prisma schema is source evidence only | NO | Preserve pre-change snapshot | Export authoritative schema after backup | Database Operations |
+| Applied/pending migration status | BLOCKED | No permitted DB connection | NO | Record current migration baseline | Query authoritative migration history read-only | Database Operations |
+| Session durability verification | BLOCKED | Source implementation reviewed; DB behavior unverified | NO | Preserve session rows during verification | Verify create/revoke/expiry behavior against original development DB | Identity/Security |
+| Credential persistence verification | BLOCKED | Source-only evidence | NO | No credential data alteration during inspection | Verify persisted credential invariants using sanitized evidence | Identity/Security |
+| Admin bootstrap and RBAC verification | SOURCE_PREPARED / DB_PENDING | Read-only verifier checks persisted roles, required permissions, assignments, and active identities; missing persistence is `UNAVAILABLE`; identities are fingerprinted | NO | Snapshot assignments before any approved repair | Run protected verifier and allowed/denied matrix against Development DB | Identity/Security |
+| Audit persistence verification | BLOCKED | Prisma repository is composed; runtime persistence unverified | NO | Preserve audit rows | Exercise non-destructive audit writes in development runtime | Audit/Foundation |
+| Critical audit transaction guarantee | SEVEN_OWNERS_ADOPTED / DB_PENDING | Reference Data, International Tests, Majors, Universities, Scholarships, Roles, and Role Assignments use one transaction context for business persistence, required audit, and Outbox | YES | Transaction rollback must remove business, audit, and Outbox writes | Prove rollback against Development DB, then adopt remaining owners | Audit + owning domain |
+| Outbox model | SOURCE_PREPARED / DB_PENDING | Additive `TransactionalOutboxRecord` model defines state, attempts, availability, claims, sanitized failures, correlation, and aggregate identity | YES | Reviewed `rollback.sql`; rehearse only against restored copy | Review and apply only after backup gate | Event Foundation + Database Operations |
+| Outbox migration | SOURCE_PREPARED / DB_PENDING | Forward migration and explicit rollback artifact exist; Prisma validation passes | YES | Rehearse rollback after dispatcher shutdown | Apply only after recovery approval | Event Foundation + Database Operations |
+| Same-transaction business and Outbox write | SEVEN_OWNERS_ADOPTED / DB_PENDING | `PrismaAtomicPersistenceUnitOfWork` composes seven active owners with required audit and Outbox append; all adopted Prisma adapters reject missing transaction context | YES | Any failure must propagate through the unit of work | Prove rollback for adopted owners and continue owner adoption as domains activate | Event Foundation + owning domain |
+| Dispatcher database integration | SOURCE_PREPARED / COMPOSITION_BLOCKED | Prisma store implements claim, lease, processed, failed, retry state, and fail-closed missing-migration behavior; no eager worker composition | YES | Stop worker and preserve pending rows | Compose only after migration and delivery gateway approval | Event Foundation |
+| Outbox runtime tests | LOCAL_BEHAVIOR_PASS / DB_PENDING | 12 focused tests cover unit-of-work propagation, transaction-only append, idempotency key, retry/backoff, exhaustion, sanitization, and fail-closed persistence | TEST DATA ONLY | Restore fixture/database state after tests | Add DB concurrency/crash-recovery suite after recovery gate | QA + Event Foundation |
+
+No row above authorizes a database operation. Approval remains conditional on closing `WP-1 DATABASE RECOVERY GATE`.

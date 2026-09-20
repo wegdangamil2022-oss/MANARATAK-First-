@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "kind": "MANARATAK_SOURCE_CLOSURE_MANIFEST",
+  "runtimePolicy": "PENDING_NON_BLOCKING",
+  "gates": [
+    {
+      "id": "architecture",
+      "classification": "SOURCE",
+      "command": "npm run phase11:guards:verify"
+    },
+    {
+      "id": "architecture-di",
+      "classification": "SOURCE",
+      "command": "npm run architecture:di:verify"
+    },
+    {
+      "id": "remediation-waves",
+      "classification": "SOURCE",
+      "command": "npm run remediation:verify"
+    },
+    {
+      "id": "p7-p13-plan",
+      "classification": "SOURCE",
+      "command": "npm run closure:plan:verify && npm run phase12:plan:verify && npm run phase13:plan:verify"
+    },
+    {
+      "id": "p15",
+      "classification": "SOURCE",
+      "command": "npm run phase15:verify"
+    },
+    {
+      "id": "p16",
+      "classification": "SOURCE",
+      "command": "npm run phase16:verify"
+    },
+    {
+      "id": "p17",
+      "classification": "SOURCE",
+      "command": "npm run phase17:verify"
+    },
+    {
+      "id": "p18",
+      "classification": "SOURCE",
+      "command": "npm run phase18:verify"
+    },
+    {
+      "id": "p19",
+      "classification": "SOURCE",
+      "command": "npm run phase19:verify"
+    },
+    {
+      "id": "imports",
+      "classification": "SOURCE",
+      "command": "npm run imports:source:verify"
+    },
+    {
+      "id": "international-tests",
+      "classification": "SOURCE",
+      "command": "npm run tests:source:closure"
+    },
+    {
+      "id": "courses",
+      "classification": "SOURCE",
+      "command": "npm run courses:source:closure"
+    },
+    {
+      "id": "certificates",
+      "classification": "SOURCE",
+      "command": "npm run certificates:source:closure"
+    },
+    {
+      "id": "health",
+      "classification": "SOURCE",
+      "command": "npm run health:source:closure"
+    },
+    {
+      "id": "finance",
+      "classification": "SOURCE",
+      "command": "npm run finance:source:closure"
+    },
+    {
+      "id": "jobs",
+      "classification": "SOURCE",
+      "command": "npm run jobs:source:closure"
+    },
+    {
+      "id": "public-ui",
+      "classification": "SOURCE",
+      "command": "npm run public-ui:source:closure"
+    },
+    {
+      "id": "ai-tools",
+      "classification": "SOURCE",
+      "command": "npm run ai-tools:source:closure"
+    },
+    {
+      "id": "study-destinations",
+      "classification": "SOURCE",
+      "command": "npm run study-destinations:source:closure"
+    },
+    {
+      "id": "academic-settings",
+      "classification": "SOURCE",
+      "command": "npm run academic-settings:source:closure"
+    },
+    {
+      "id": "translation",
+      "classification": "SOURCE",
+      "command": "npm run translation:ci"
+    },
+    {
+      "id": "github-action-pins",
+      "classification": "SOURCE",
+      "command": "npm run ci:actions:verify"
+    },
+    {
+      "id": "recovery-source",
+      "classification": "SOURCE",
+      "command": "npm run recovery:source:verify"
+    },
+    {
+      "id": "w6-plan",
+      "classification": "SOURCE",
+      "command": "node scripts/verify-w6-plan-closure.mjs"
+    },
+    {
+      "id": "w7-documentation-final",
+      "classification": "SOURCE",
+      "command": "node scripts/verify-w7-plan-closure.mjs"
+    },
+    {
+      "id": "database-integration",
+      "classification": "RUNTIME",
+      "status": "PENDING_NON_BLOCKING",
+      "command": "npm run test:database"
+    },
+    {
+      "id": "browser-e2e",
+      "classification": "RUNTIME",
+      "status": "PENDING_NON_BLOCKING",
+      "command": "npm run e2e"
+    }
+  ],
+  "registeredVerifierFiles": [
+    "scripts/architecture/verify-source-architecture-guards.mjs",
+    "scripts/architecture/verify-di-reachability.mjs",
+    "scripts/ci/verify-source-closure-manifest.mjs",
+    "scripts/quality/verify-source-quality.mjs",
+    "scripts/verify-academic-settings-source-closure.mjs",
+    "scripts/verify-ai-tools-source-closure.mjs",
+    "scripts/verify-certificates-source-closure.mjs",
+    "scripts/verify-cms-source.mjs",
+    "scripts/verify-courses-source-closure.mjs",
+    "scripts/verify-finance-source-closure.mjs",
+    "scripts/verify-health-readiness-source-closure.mjs",
+    "scripts/verify-import-foundation-source.mjs",
+    "scripts/verify-international-test-source-baseline.mjs",
+    "scripts/verify-international-tests-source-closure.mjs",
+    "scripts/verify-jobs-source-closure.mjs",
+    "scripts/verify-major-source-identities.mjs",
+    "scripts/verify-normalized-scholarship-model-source.ts",
+    "scripts/verify-operational-doc-paths.mjs",
+    "scripts/verify-p13-final-source-closure.mjs",
+    "scripts/verify-phase15-source.mjs",
+    "scripts/verify-phase16-source.mjs",
+    "scripts/verify-phase17-source.mjs",
+    "scripts/verify-phase18-source.mjs",
+    "scripts/verify-phase19-source.mjs",
+    "scripts/verify-scholarship-atomic-transfer-source.ts",
+    "scripts/verify-scholarship-canonical-resolution-source.ts",
+    "scripts/verify-scholarship-catalog-detail-source.ts",
+    "scripts/verify-study-destinations-source-closure.mjs",
+    "scripts/verify-taxonomy-degree-source.mjs",
+    "scripts/verify-translation-quality-source.ts",
+    "scripts/verify-translation-schema-source.ts",
+    "scripts/verify-w0-source.mjs",
+    "scripts/verify-w1-source.mjs",
+    "scripts/verify-w10-source.mjs",
+    "scripts/verify-w11-source.mjs",
+    "scripts/verify-w12-source.mjs",
+    "scripts/verify-w13-source.mjs",
+    "scripts/verify-w14-source.mjs",
+    "scripts/verify-w15-source.mjs",
+    "scripts/verify-w2-source.mjs",
+    "scripts/verify-w3-source.mjs",
+    "scripts/verify-w4-source.mjs",
+    "scripts/verify-w5-source.mjs",
+    "scripts/verify-w6-source.mjs",
+    "scripts/verify-w7-documentation-closure.mjs",
+    "scripts/verify-w7-plan-closure.mjs",
+    "scripts/verify-w7-source.mjs",
+    "scripts/verify-w8-source.mjs",
+    "scripts/verify-w9-source.mjs",
+    "scripts/verify-wp12-8-scholarship-import-center-ui-source.mjs",
+    "scripts/verify-wp12-9-scholarship-catalog-detail-source.mjs",
+    "scripts/verify-wp9-phase10-source-freeze.mjs"
+  ],
+  "runtimePendingManifest": "docs/remediation/W7_RUNTIME_PENDING_CHECKS.md"
+}

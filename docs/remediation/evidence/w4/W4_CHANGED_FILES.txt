@@ -1,0 +1,150 @@
+apps/admin/src/App.tsx
+apps/admin/src/api/client.ts
+apps/admin/src/components/AdminNavigation.tsx
+ADDED apps/admin/src/components: AssetPicker.tsx
+apps/admin/src/i18n/ar.ts
+apps/admin/src/i18n/en.ts
+apps/admin/src/pages/AdminReviewQueuePage.tsx
+ADDED apps/admin/src/pages: AssetAdminPage.tsx
+ADDED apps/admin/src/pages: AuditCenterPage.tsx
+ADDED apps/admin/src/pages: AuthorizationAdminPage.tsx
+apps/admin/src/pages/CareerAdminPage.tsx
+apps/admin/src/pages/CertificateAdminPage.tsx
+apps/admin/src/pages/CmsAdminPage.tsx
+apps/admin/src/pages/CourseDetailPage.tsx
+apps/admin/src/pages/CourseListPage.tsx
+apps/admin/src/pages/ServicesAdminPage.tsx
+ADDED apps/admin/src/pages: StudentSupportAdminPage.tsx
+apps/admin/src/pages/StudentToolsAdminPage.tsx
+ADDED apps/admin/src/security: AdminAuthorizationContext.tsx
+apps/api/src/app.ts
+apps/api/src/infrastructure/di/container.ts
+apps/api/src/presentation/api/router/AssetPlatformRouter.ts
+apps/api/src/presentation/api/router/AuditRouter.ts
+apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts
+apps/api/src/presentation/api/router/CareerPublicRouter.ts
+apps/api/src/presentation/api/router/CourseLearnerRouter.ts
+apps/api/src/presentation/api/router/CoursePublicRouter.ts
+apps/api/src/presentation/api/router/MajorPublicRouter.ts
+apps/api/src/presentation/api/router/ScholarshipPublicRouter.ts
+apps/api/src/presentation/api/router/SearchRouter.ts
+apps/api/src/presentation/api/router/ServicePublicRouter.ts
+ADDED apps/api/src/presentation/api/router: StudentSupportAdminRouter.ts
+apps/api/src/presentation/api/router/StudentToolsPublicRouter.ts
+apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts
+apps/api/src/presentation/api/router/UniversityPublicRouter.ts
+ADDED apps/api/src/presentation: http
+ADDED apps/api/src/presentation/middleware: CanonicalIdempotencyMiddleware.ts
+ADDED apps/api/src/presentation/middleware: CanonicalProblemDetailsMiddleware.ts
+apps/api/src/presentation/middleware/GlobalExceptionHandler.ts
+apps/api/src/presentation/security/CanonicalApiCorsPolicy.ts
+apps/api/src/presentation/validation/StrictControlPlaneSchemas.ts
+apps/web/package.json
+apps/web/src/api/client.ts
+apps/web/src/features/public-template/PublicTemplateApp.tsx
+apps/web/src/features/public-template/components/ArticlesSearchPage.tsx
+ADDED apps/web/src/features/public-template/components: ComparePage.tsx
+apps/web/src/features/public-template/components/CountryDetailModal.tsx
+apps/web/src/features/public-template/components/CourseTrackPreview.tsx
+apps/web/src/features/public-template/components/CoursesList.tsx
+apps/web/src/features/public-template/components/FeaturedCourses.tsx
+apps/web/src/features/public-template/components/FeaturedUniversities.tsx
+apps/web/src/features/public-template/components/GlobalSearchPage.tsx
+ADDED apps/web/src/features/public-template/components: OwnerCourseDetail.tsx
+apps/web/src/features/public-template/components/ScholarshipsSearchPage.tsx
+apps/web/src/features/public-template/components/UniversitiesList.tsx
+apps/web/src/features/public-template/publicLiveDataSource.ts
+apps/web/src/features/public-template/publicScholarshipDataSource.ts
+apps/web/src/features/public-template/types.ts
+apps/web/src/features/public-template/usePublicNavigation.ts
+apps/web/src/features/students/StudentWorkspacePage.tsx
+apps/web/src/i18n/ar.ts
+apps/web/src/router/index.tsx
+docs/architecture/persistence/persistence-ownership.manifest.json
+docs/phases/phase-23-enterprise-administration-portal/phase-23-02-enterprise-administration-portal-structure-contracts.md
+docs/phases/phase-23-enterprise-administration-portal/phase-23-03-enterprise-administration-portal-workflows-operational-experience.md
+docs/phases/phase-24-enterprise-public-platform/phase-24-01-enterprise-public-platform-architecture-specification.md
+docs/phases/phase-24-enterprise-public-platform/phase-24-02-enterprise-public-platform-structure-contracts.md
+docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md
+ADDED docs/remediation: W4_ADMIN_ACTION_PARITY_MANIFEST.md
+ADDED docs/remediation: W4_CLOSED_2026-09-07.md
+ADDED docs/remediation: W4_EXECUTION_STATUS_2026-09-07.md
+ADDED docs/remediation: W4_PUBLIC_FACT_PROVENANCE.md
+ADDED docs/remediation/evidence: w4
+ADDED docs: standards
+package.json
+packages/application/src/asset-platform/AssetReferencePolicy.ts
+packages/application/src/audit/use-cases/ManageAuditRecordsUseCase.ts
+packages/application/src/authorization/use-cases/AssignRoleUseCase.ts
+ADDED packages/application/src/authorization/use-cases: ManageEmergencyAccessUseCase.ts
+packages/application/src/authorization/use-cases/ManageRolesUseCase.ts
+packages/application/src/career-alumni/use-cases/CareerPublicUseCases.ts
+packages/application/src/certificates/use-cases/CertificateUseCases.ts
+packages/application/src/courses/use-cases/CourseCurriculumUseCases.ts
+packages/application/src/index.ts
+packages/application/src/search/use-cases/ManageSearchUseCase.ts
+packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts
+packages/domain/src/audit/repositories/IAuditRecordRepository.ts
+ADDED packages/domain/src/authorization/repositories: IEmergencyAccessRepository.ts
+packages/domain/src/authorization/repositories/IRoleAssignmentRepository.ts
+packages/domain/src/authorization/repositories/IRoleRepository.ts
+packages/domain/src/authorization/services/AuthorizationEvaluatorService.ts
+packages/domain/src/career-alumni/entities/CareerJobPosting.ts
+packages/domain/src/courses/contracts/ICourseRepository.ts
+packages/domain/src/courses/contracts/PublicCourseFilters.ts
+packages/domain/src/foundation-contracts/import-record.ts
+packages/domain/src/foundation-contracts/search.ts
+packages/domain/src/index.ts
+packages/domain/src/majors/majors.ts
+packages/domain/src/scholarships/contracts.ts
+packages/domain/src/services-platform/index.ts
+packages/domain/src/students/index.ts
+packages/domain/src/universities/universities.ts
+ADDED packages/infrastructure/prisma/migrations: 20260907013000_w4_api_idempotency
+ADDED packages/infrastructure/prisma/migrations: 20260907014000_w4_search_runtime
+ADDED packages/infrastructure/prisma/migrations: 20260907014500_w4_iam_breakglass
+packages/infrastructure/prisma/schema.prisma
+ADDED packages/infrastructure/src/api-foundation: PrismaApiIdempotencyStore.ts
+ADDED packages/infrastructure/src/api-foundation: StableCursor.ts
+packages/infrastructure/src/asset-platform/PrismaAssetRecordRepository.ts
+packages/infrastructure/src/audit/InMemoryAuditRecordRepository.ts
+packages/infrastructure/src/audit/PrismaAuditRecordRepository.ts
+ADDED packages/infrastructure/src/authorization: InMemoryEmergencyAccessRepository.ts
+packages/infrastructure/src/authorization/InMemoryRoleAssignmentRepository.ts
+packages/infrastructure/src/authorization/InMemoryRoleRepository.ts
+ADDED packages/infrastructure/src/authorization: PrismaEmergencyAccessRepository.ts
+packages/infrastructure/src/authorization/PrismaRoleAssignmentRepository.ts
+packages/infrastructure/src/authorization/PrismaRoleRepository.ts
+packages/infrastructure/src/career-alumni/PrismaCareerRepository.ts
+packages/infrastructure/src/courses/PrismaCourseRelationshipRepository.ts
+packages/infrastructure/src/courses/PrismaCourseRepository.ts
+packages/infrastructure/src/index.ts
+packages/infrastructure/src/majors/PrismaMajorRepository.ts
+packages/infrastructure/src/scholarships/PrismaScholarshipRepository.ts
+ADDED packages/infrastructure/src: search
+packages/infrastructure/src/services-platform/PrismaServicePlatformRepository.ts
+packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts
+packages/infrastructure/src/universities/PrismaUniversityRepository.ts
+ADDED scripts/architecture: verify-api-idempotency-coverage.mjs
+scripts/database/database-baseline.manifest.json
+scripts/database/migration-recovery.manifest.json
+ADDED scripts: prerender-public-seo.mjs
+ADDED scripts: verify-arabic-semantic-copy.mjs
+ADDED scripts: verify-w4-admin-action-parity.mjs
+ADDED scripts: verify-w4-admin-permissions.mjs
+ADDED scripts: verify-w4-compare.mjs
+ADDED scripts: verify-w4-course-origin.mjs
+ADDED scripts: verify-w4-cursor-pagination.mjs
+ADDED scripts: verify-w4-plan-closure.mjs
+ADDED scripts: verify-w4-public-course-contract.mjs
+ADDED scripts: verify-w4-public-facts.mjs
+ADDED scripts: verify-w4-public-locale.mjs
+ADDED scripts: verify-w4-public-pagination-search.mjs
+ADDED scripts: verify-w4-review-queue.mjs
+ADDED scripts: verify-w4-rfc7807.mjs
+ADDED scripts: verify-w4-search-cms.mjs
+ADDED scripts: verify-w4-seo-prerender.mjs
+ADDED scripts: verify-w4-service-contract.mjs
+ADDED scripts: verify-w4-student-support.mjs
+ADDED tests/remediation: w4-admin-asset-course-control-plane.test.mjs
+ADDED tests/remediation: w4-api-idempotency.test.mjs

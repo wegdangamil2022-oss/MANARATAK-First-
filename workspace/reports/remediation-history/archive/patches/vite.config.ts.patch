@@ -1,0 +1,20 @@
+--- apps/web/vite.config.ts
++++ apps/web/vite.config.ts
+@@ -42,6 +42,16 @@
+         '@manaratak/ui': path.resolve(rootDir, 'packages/ui/src/index.tsx'),
+       },
+     },
+-    build: { sourcemap: false }, server: {
++    build: { 
++      sourcemap: false,
++      rollupOptions: {
++        output: {
++          manualChunks(id) {
++            if (id.includes('admin-preview')) {
++              return 'admin-preview-data';
++            }
++          }
++        }
++      }
++    },
++    server: {

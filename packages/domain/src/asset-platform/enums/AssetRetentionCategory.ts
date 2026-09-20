@@ -1,0 +1,6 @@
+export enum AssetRetentionCategory {
+  TEMPORARY = 'TEMPORARY',
+  PERMANENT = 'PERMANENT',
+  ARCHIVED = 'ARCHIVED',
+  SOFT_DELETED = 'SOFT_DELETED'
+}
