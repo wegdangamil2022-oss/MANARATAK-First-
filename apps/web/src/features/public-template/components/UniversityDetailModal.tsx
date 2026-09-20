@@ -468,24 +468,21 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
 
                 <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                   {(
-                    university.studyPrograms.majorLinks?.length
-                      ? university.studyPrograms.majorLinks
-                      : (university.studyPrograms.topKeyMajors ?? []).map((label) => ({ label, majorId: undefined }))
-                  ).map((major, idx) => {
-                    const { label: majorName, majorId } = major;
+                    university.studyPrograms.topKeyMajors?.length
+                      ? university.studyPrograms.topKeyMajors
+                      : (university.studyPrograms.majorLinks ?? []).map((l) => l.label)
+                  ).map((majorName, idx) => {
+                    const matchedLink = university.studyPrograms!.majorLinks?.find(
+                      (l) => l.label === majorName || l.programLabel === majorName
+                    );
+                    const majorId = matchedLink?.majorId;
 
                     return (
                       <div
                         key={majorId || `${majorName}-${idx}`}
+                        onClick={majorId ? () => onOpenMajor?.(majorId) : undefined}
                         role={majorId ? 'button' : undefined}
                         tabIndex={majorId ? 0 : undefined}
-                        onKeyDown={majorId ? function (event) {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            onOpenMajor?.(majorId);
-                          }
-                        } : undefined}
-                        onClick={majorId ? () => { if (major.majorId) onOpenMajor?.(major.majorId); } : undefined}
                         className={`bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-accent)]/30 dark:border-[var(--mn-accent)]/25 text-[var(--mn-heading)] dark:text-[var(--mn-text)] px-2.5 py-1 rounded-lg text-[10px] sm:text-[10.5px] font-bold flex items-center gap-1.5 shadow-2xs hover:border-[var(--mn-border-brand)] transition-all font-['Cairo',sans-serif] mn-panel dark:mn-panel ${
                           majorId ? 'cursor-pointer hover:text-[var(--mn-accent-text)]' : ''
                         }`}
@@ -509,9 +506,9 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-[var(--mn-learning-exercise-600)]/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-[var(--mn-learning-exercise-600)]/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
+                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-indigo-600/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-indigo-600/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
                   >
-                    <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-[var(--mn-learning-exercise-800)] text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
+                    <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-indigo-800 text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
                       <FileText className="w-2.5 h-2.5" />
                     </div>
                     <span>استكشف دليل البرامج والتخصصات الرسمي للجامعة</span>
@@ -644,7 +641,7 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
                     className="group bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] dark:hover:bg-[var(--mn-surface-muted)] rounded-xl p-2 sm:p-2.5 border border-[var(--mn-border-gold)]/50 dark:border-[var(--mn-border)] hover:border-[var(--mn-accent)] transition-all flex items-center justify-between gap-2 text-right mn-panel dark:mn-panel"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-[var(--mn-learning-success-500)]/15 text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         <Compass className="w-3.5 h-3.5" />
                       </div>
                       <div className="flex flex-col min-w-0">
@@ -739,7 +736,7 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
                 {university.tuitionFees.annualAverageTuition && (
                   <div className="rounded-xl p-3 sm:p-3.5 bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border-gold)]/60 dark:border-[var(--mn-border)] shadow-2xs flex items-center justify-between gap-2.5 mn-panel dark:mn-panel">
                     {/* الجانب الأيمن: المبلغ البارز */}
-                    <div className="text-xs sm:text-sm md:text-[15px] mn-font-emphasis text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif] tracking-tight">
+                    <div className="text-xs sm:text-sm md:text-[15px] font-extrabold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] font-['Cairo',sans-serif] tracking-tight">
                       {university.tuitionFees.annualAverageTuition}
                     </div>
 
@@ -855,9 +852,9 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
                     href={university.tuitionFees.officialTuitionUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-[var(--mn-learning-exercise-600)]/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-[var(--mn-learning-exercise-600)]/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
+                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-indigo-600/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-indigo-600/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
                   >
-                    <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-[var(--mn-learning-exercise-800)] text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
+                    <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-indigo-800 text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
                       <Landmark className="w-2.5 h-2.5" />
                     </div>
                     <span>رابط جدول الرسوم والمصروفات الدراسية الرسمي للجامعة</span>
@@ -917,7 +914,7 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
                       </div>
 
                       {scholarship.type && (
-                        <span className="rounded-full bg-[var(--mn-learning-success-500)]/10 border border-[var(--mn-learning-success-500)]/25 text-[8.5px] font-bold text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] px-1.5 py-0.5 shrink-0 whitespace-nowrap">
+                        <span className="rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[8.5px] font-bold text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 shrink-0 whitespace-nowrap">
                           {scholarship.type}
                         </span>
                       )}
@@ -1397,9 +1394,9 @@ function OfficialInfoLink({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-[var(--mn-learning-exercise-600)]/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-[var(--mn-learning-exercise-600)]/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
+        className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500/10 via-cyan-600/15 to-indigo-600/10 hover:from-teal-500/20 hover:via-cyan-600/25 hover:to-indigo-600/20 text-teal-950 border border-teal-400/50 dark:from-amber-500/15 dark:via-yellow-500/20 dark:to-amber-600/15 dark:hover:from-amber-500/25 dark:hover:via-yellow-500/30 dark:hover:to-amber-600/25 dark:text-amber-200 dark:border-amber-400/50 shadow-2xs hover:shadow-xs transition-all duration-200 text-[10px] sm:text-[10.5px] font-bold font-['Cairo',sans-serif] group text-center"
       >
-        <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-[var(--mn-learning-exercise-800)] text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
+        <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-teal-600 via-cyan-700 to-indigo-800 text-white dark:from-amber-500 dark:via-yellow-500 dark:to-amber-600 dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform font-bold">
           {icon ?? <FileText className="w-2.5 h-2.5" />}
         </div>
         <span>{label}</span>

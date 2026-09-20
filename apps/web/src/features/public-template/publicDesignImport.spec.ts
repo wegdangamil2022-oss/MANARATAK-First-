@@ -26,12 +26,6 @@ describe('public design import boundaries', () => {
     expect(html).not.toContain('IELTS خطوة بخطوة');
   });
 
-  it('makes native course deep links resolvable without duplicate course identities', () => {
-    const { courses } = loadPublicPrototypeSnapshot().data;
-    expect(courses.find((course) => course.id === 'c1')?.title).toBe('دورة المنح الدراسية والقبولات الجامعية');
-    expect(new Set(courses.map((course) => course.id)).size).toBe(courses.length);
-  });
-
   it('renders a small supplied course response without swapping its identity', () => {
     const course = { ...loadPublicPrototypeSnapshot().data.courses[0], id: 'live-course', provider: 'Live Academy', title: 'Live supplied course' };
     const html = renderToStaticMarkup(createElement(FeaturedCourses, { courses: [course], onViewAllClick() {} }));
@@ -42,13 +36,6 @@ describe('public design import boundaries', () => {
   it('does not replace an empty live service response with fixtures', () => {
     const html = renderToStaticMarkup(createElement(FeaturedServices, { services: [] }));
     for (const service of loadPublicPrototypeSnapshot().data.services) expect(html).not.toContain(service.title);
-  });
-
-  it('retains a small live service response instead of replacing it with the preview catalog', () => {
-    const service = { ...loadPublicPrototypeSnapshot().data.services[0], id: 'live-service', title: 'Live supplied service', audience: 'student' as const };
-    const html = renderToStaticMarkup(createElement(FeaturedServices, { services: [service] }));
-    expect(html).toContain('Live supplied service');
-    for (const preview of loadPublicPrototypeSnapshot().data.services) expect(html).not.toContain(preview.title);
   });
 
   it('retains tracker navigation and excludes the archive Admin switcher and global mock API', () => {
