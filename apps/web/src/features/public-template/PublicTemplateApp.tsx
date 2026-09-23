@@ -107,6 +107,8 @@ import {
   BookOpen,
   BriefcaseBusiness,
   BadgeDollarSign,
+  Lock,
+  X,
 } from 'lucide-react';
 
 export default function App() {
@@ -138,6 +140,21 @@ export default function App() {
   const directRouteHydrated = useRef(false);
   const initialLocation = useRef({ pathname: window.location.pathname, search: window.location.search, hash: window.location.hash });
   const directRouteRequest = useRef('');
+
+  // Access Restriction State
+  const [accessDeniedMessage, setAccessDeniedMessage] = useState<string | null>(null);
+
+  const triggerAccessDenied = (msg: string = 'ليس لديك صلاحية الوصول') => {
+    setAccessDeniedMessage(msg);
+  };
+
+  useEffect(() => {
+    if (!accessDeniedMessage) return;
+    const timer = setTimeout(() => {
+      setAccessDeniedMessage(null);
+    }, 3200);
+    return () => clearTimeout(timer);
+  }, [accessDeniedMessage]);
   useEffect(() => {
     if (directRouteHydrated.current) return;
     if (publicDataMode === 'prototype' && Object.values(publicLive.statuses).includes('loading')) return;
@@ -166,9 +183,12 @@ export default function App() {
 
     let patch: Parameters<typeof replaceNavigation>[0] | null = null;
     if (!section) {
-      const isStudyingStored = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('mn_is_studying_course') === 'true';
-      const scholarshipsCourse = publicDataMode === 'prototype' ? courses.find(c => c.id === 'c1') : undefined;
-      if (isStudyingStored && scholarshipsCourse) {
+      const scholarshipsCourse = courses.find(c => c.id === 'c1');
+      if (scholarshipsCourse) {
+        setIsStudyingCourse(true);
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('mn_is_studying_course', 'true');
+        }
         patch = {
           activeTab: 'search',
           selectedCategory: 'courses',
@@ -532,27 +552,26 @@ export default function App() {
     } else if (target === 'tools' || target === 'ai-tools') {
       navigate({activeTab: 'ai-tools'});
       setIsHeaderSearchVisible(false);
-    } else if (target === 'all' || target === 'search') {
-      if (target === 'search') {
-        justClickedSearchRef.current = true;
-        setIsHeaderSearchVisible(true);
-        if (activeTab !== 'home' && activeTab !== 'search') {
-          navigate({ activeTab: 'search', selectedCategory: 'all' });
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(() => {
-          const searchInput = document.getElementById('header-global-search');
-          if (searchInput) {
-            searchInput.focus();
-            (searchInput as HTMLInputElement).select();
-          }
-        }, 150);
-      } else {
-        navigate({activeTab: 'search'});
-        setIsHeaderSearchVisible(false);
+    } else if (target === 'all' || target === 'home') {
+      navigate({ activeTab: 'home', selectedCategory: 'all' });
+      setIsHeaderSearchVisible(false);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } else if (target === 'search') {
+      justClickedSearchRef.current = true;
+      setIsHeaderSearchVisible(true);
+      if (activeTab !== 'home' && activeTab !== 'search') {
+        navigate({ activeTab: 'search', selectedCategory: 'all' });
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        const searchInput = document.getElementById('header-global-search');
+        if (searchInput) {
+          searchInput.focus();
+          (searchInput as HTMLInputElement).select();
+        }
+      }, 150);
     } else {
-      navigate({activeTab: target === 'home' ? 'home' : target as TabType});
+      navigate({activeTab: target as TabType});
       setIsHeaderSearchVisible(false);
     }
   };
@@ -901,17 +920,17 @@ export default function App() {
         language={language}
         onToggleLanguage={openLanguage}
         onOpenMenu={() => setIsMenuOpen(true)}
-        onOpenNotifications={() => publicDataMode === 'api' ? openSection('account') : setIsNotificationOpen(true)}
+        onOpenNotifications={() => setIsNotificationOpen(true)}
         onOpenProfile={() => openSection('account')}
         unreadCount={unreadNotificationsCount}
         activeTab={activeTab}
-        onTabChange={openSection}
+        onTabChange={(tab) => openSection(tab)}
         selectedCategory={selectedService ? 'services' : selectedCategory}
         globalSearchQuery={globalSearchQuery}
         onGlobalSearchChange={setGlobalSearchQuery}
-        onGlobalSearchSubmit={(query) => navigate({activeTab: 'search', globalSearchQuery: query})}
-        onOpenSmartSearch={(query) => navigate({activeTab: 'search', globalSearchQuery: query, isSmartSearchOpen: true})}
-        onSelectCategory={(category) => openSection(category === 'all' ? 'home' : category)}
+        onGlobalSearchSubmit={() => openSection('search')}
+        onOpenSmartSearch={() => openSection('search')}
+        onSelectCategory={(category) => openSection(category)}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
         isSearchVisible={isHeaderSearchVisible}
@@ -927,22 +946,6 @@ export default function App() {
             </div>
           }
         >
-        {publicDataMode === 'api' && unavailableDomains.length > 0 && (
-          <div className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-5xl items-center justify-between gap-3 rounded-2xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-3 py-2 text-[11px] text-[var(--mn-danger-text)]">
-            <div className="flex min-w-0 items-center gap-2">
-              <AlertTriangle className="h-4 w-4 shrink-0" />
-              <span>تعذر تحميل بعض البيانات الحية ({unavailableDomains.join(', ')}). لم يتم استبدالها ببيانات تجريبية.</span>
-            </div>
-            <button type="button" onClick={publicLive.reload} className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-current px-2.5 py-1.5 font-bold">
-              <RefreshCw className="h-3.5 w-3.5" /> إعادة المحاولة
-            </button>
-          </div>
-        )}
-        {publicDataMode === 'api' && unavailableDomains.length === 0 && loadingDomains.length > 0 && (
-          <div className="mx-auto mt-3 w-[calc(100%-1rem)] max-w-5xl rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-text-muted)]">
-            جاري تحميل البيانات المنشورة من مصادر منارتك الحية…
-          </div>
-        )}
         {isCompareRoute ? (
           <ComparePage locale={language} onBack={goBack} />
         ) : navigation.state.auxiliaryPage ? (
@@ -1279,6 +1282,7 @@ export default function App() {
             <CourseStudyRoomView
               course={selectedCourse}
               onBack={() => setIsStudyingCourse(false)}
+              onRestrictedAction={(msg) => triggerAccessDenied(msg || 'ليس لديك صلاحية الوصول')}
             />
           ) : (
             <OwnerCourseDetail
@@ -1405,17 +1409,14 @@ export default function App() {
                   {/* Global Search + Smart Search now live persistently in the Header. */}
                   {/* Hero Banner matching Mockup */}
                   <HeroBanner
-                    onExploreClick={() => {
-                      setActiveTab('search');
-                      setSelectedCategory('scholarships');
-                    }}
-                    onOpenAiHelper={() => openStudentTools()}
+                    onExploreClick={() => openSection('search')}
+                    onOpenAiHelper={() => openSection('ai-tools')}
                   />
 
                   {/* 3. Category Icons matching Mockup */}
                   <CategoryNav
                     selectedCategory={selectedCategory}
-                    onSelectCategory={openSection}
+                    onSelectCategory={(cat) => openSection(cat)}
                   />
                 </div>
 
@@ -1431,13 +1432,10 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedScholarships
                         scholarships={scholarships}
-                        onSelectScholarship={(s) => setSelectedScholarship(s)}
+                        onSelectScholarship={setSelectedScholarship}
                         onToggleFavorite={(id) => handleToggleFavorite('scholarship', id)}
                         favoriteIds={favoriteIdsFor('scholarship')}
-                        onViewAllClick={() => {
-                          setActiveTab('search');
-                          setSelectedCategory('scholarships');
-                        }}
+                        onViewAllClick={() => openSection('scholarships')}
                       />
                     </div>
 
@@ -1445,15 +1443,8 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedMajors
                         majors={majors}
-                        onSelectMajor={(major) => {
-                          setSearchQuery(major.name);
-                          setActiveTab('search');
-                          setSelectedCategory('majors');
-                        }}
-                        onViewAllClick={() => {
-                          setActiveTab('search');
-                          setSelectedCategory('majors');
-                        }}
+                        onSelectMajor={setSelectedMajor}
+                        onViewAllClick={() => openSection('majors')}
                       />
                     </div>
 
@@ -1461,42 +1452,38 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedUniversities
                         universities={universities}
-                        onSelectUniversity={(uni) => {
-                          setSelectedUniversity(uni);
-                        }}
-                        onViewAllClick={() => {
-                          setActiveTab('search');
-                          setSelectedCategory('universities');
-                        }}
+                        onSelectUniversity={setSelectedUniversity}
+                        onViewAllClick={() => openSection('universities')}
                       />
                     </div>
 
                     {/* 4. Featured Countries */}
                     <div className="relative w-full">
                       <FeaturedCountries
-                        onSelectCountry={(countryId) => navigate({activeTab: 'search', selectedCategory: 'countries', countryNavigationName: countryId})}
-                        onViewAllClick={() => {
-                          setActiveTab('search');
+                        onSelectCountry={(country) => {
+                          setCountryNavigationName(country);
                           setSelectedCategory('countries');
+                          setActiveTab('search');
                         }}
+                        onViewAllClick={() => openSection('countries')}
                       />
                     </div>
 
                     {/* 5. AI Tools Section */}
                     <div className="relative w-full">
-                      <AIToolsBanner onOpenAiTools={openStudentTools} />
+                      <AIToolsBanner onOpenAiTools={() => openSection('ai-tools')} />
                     </div>
 
                     {/* 6. Roadmap Preview */}
                     <div className="relative w-full pb-2">
                       <RoadmapPreview
                         onNavigate={(target) => {
-                          if (target === 'smart-search') { setGlobalSearchQuery(''); setSelectedCategory('all'); setActiveTab('search'); setIsSmartSearchOpen(true); }
-                          if (target === 'scholarships') { setSearchQuery(''); setSelectedCategory('scholarships'); setActiveTab('search'); }
-                          if (target === 'exams') { setSearchQuery(''); setSelectedCategory('exams'); setActiveTab('search'); }
-                          if (target === 'tools') { openStudentTools(); }
-                          if (target === 'student') { setActiveTab('account'); }
-                          window.scrollTo({ top: 0, behavior: 'instant' });
+                          if (target === 'student') {
+                            setActiveTab('account');
+                            window.scrollTo({ top: 0, behavior: 'instant' });
+                          } else {
+                            openSection(target);
+                          }
                         }}
                       />
                     </div>
@@ -1505,11 +1492,11 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedExams
                         exams={exams}
-                        onSelectExam={setSelectedExam}
-                        onViewAllClick={() => {
-                          setActiveTab('search');
-                          setSelectedCategory('exams');
+                        onSelectExam={(exam) => {
+                          setSelectedExam(exam);
+                          window.scrollTo({ top: 0, behavior: 'instant' });
                         }}
+                        onViewAllClick={() => openSection('exams')}
                       />
                     </div>
 
@@ -1517,10 +1504,49 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedCourses
                         courses={courses}
-                        onSelectCourse={(course) => { setSelectedImportedCourse(null); setSelectedCourse(course); navigate({activeTab: 'search', selectedCategory: 'courses', selectedCourseTrack: course.accessType === 'PAID' ? 'paid' : 'native', selectedCourse: course}); }}
+                        onSelectCourse={(course) => {
+                          const isImported = course.provider?.includes('Stanford') || course.provider?.includes('Harvard') || course.provider?.includes('Google') || course.provider?.includes('عالمية');
+                          if (isImported) {
+                            const matching = importedCourses.find((ic) => ic.id === course.id || ic.slug === course.id) || {
+                              id: course.id,
+                              slug: course.id,
+                              title: course.title,
+                              titleEn: course.titleEn || course.title,
+                              provider: course.provider,
+                              instructor: course.instructor,
+                              duration: course.duration,
+                              lessonsCount: course.lessonsCount,
+                              level: course.level,
+                              isFree: course.isFree,
+                              rating: course.rating,
+                              category: course.category,
+                              url: 'https://www.coursera.org',
+                              platform: 'Coursera / edX',
+                              description: course.courseContent || course.title,
+                            } as any;
+                            setSelectedCourse(null);
+                            setSelectedImportedCourse(matching);
+                            navigate({
+                              activeTab: 'search',
+                              selectedCategory: 'courses',
+                              selectedCourseTrack: 'imported',
+                              selectedImportedCourse: matching,
+                            });
+                          } else {
+                            setSelectedImportedCourse(null);
+                            setSelectedCourse(course);
+                            navigate({
+                              activeTab: 'search',
+                              selectedCategory: 'courses',
+                              selectedCourseTrack: course.accessType === 'PAID' ? 'paid' : 'native',
+                              selectedCourse: course,
+                            });
+                          }
+                        }}
                         onViewAllClick={() => {
                           setActiveTab('search');
                           setSelectedCategory('courses');
+                          setSelectedCourseTrack(null);
                         }}
                       />
                     </div>
@@ -1528,16 +1554,12 @@ export default function App() {
                     {/* 10. Featured Articles (Magazine Style) */}
                     <div className="relative w-full">
                       <FeaturedArticles
-                  articles={articles}
-                  onSelectArticle={(id) => {
-                    const article = articles.find(item => item.id === id);
-                    if (article) setSelectedArticle(article); else openSection('articles');
-                  }}
-                        onViewAllClick={() => {
-                          setActiveTab('search');
-                          setSelectedCategory('articles');
-                          setSearchQuery('');
+                        articles={articles}
+                        onSelectArticle={(article) => {
+                          setSelectedArticle(article);
+                          window.scrollTo({ top: 0, behavior: 'instant' });
                         }}
+                        onViewAllClick={() => openSection('articles')}
                       />
                     </div>
 
@@ -1545,18 +1567,9 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedServices
                         services={services}
-                        onViewAllClick={() => {
-                          setSelectedServiceTrack(null);
-                          setSearchQuery('');
-                          setActiveTab('search');
-                          setSelectedCategory('services');
-                          window.scrollTo({ top: 0, behavior: 'instant' });
-                        }}
+                        onViewAllClick={() => openSection('services')}
                         onSelectService={(service) => {
-                          setServiceReturnTab(null);
                           setSelectedServiceTrack(service.audience);
-                          setSelectedCategory('services');
-                          setActiveTab('search');
                           setSelectedService(service);
                           window.scrollTo({ top: 0, behavior: 'instant' });
                         }}
@@ -1566,23 +1579,18 @@ export default function App() {
                     {/* 12. Featured Jobs & Internships (Placed after Services) */}
                     <div className="relative w-full pb-2">
                       <FeaturedJobs
-                        onViewAllClick={() => {
-                          setSearchQuery('');
-                          setSelectedCategory('jobs');
-                          setActiveTab('search');
-                          window.scrollTo({ top: 0, behavior: 'instant' });
-                        }}
+                        onViewAllClick={() => openSection('jobs')}
                       />
                     </div>
 
                     {/* 12. FAQ Preview */}
                     <div className="relative w-full pb-2">
-                      <FaqPreview onOpen={() => navigate({auxiliaryPage: 'faq'})} />
+                      <FaqPreview onOpen={() => navigate({ auxiliaryPage: 'faq' })} />
                     </div>
 
                     {/* 13. Contact & Branches Section */}
                     <div className="relative w-full pb-4">
-                      <ContactSection onOpen={() => navigate({auxiliaryPage: 'contact'})} />
+                      <ContactSection onOpen={() => navigate({ auxiliaryPage: 'contact' })} />
                     </div>
                   </div>
                 </div>
@@ -1785,32 +1793,53 @@ export default function App() {
               )
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'courses' ? (
-              selectedCourseTrack === 'native' || selectedCourseTrack === 'paid' ? (
-                <CourseTrackPreview
-                  track={selectedCourseTrack}
-                  courses={selectedCourseTrack === 'native' ? courses.filter((course) => publicDataMode === 'api' || course.provider.includes('منارتك')) : paidCourses}
-                  favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}
-                  onToggleFavorite={(id) => handleToggleFavorite('course', id)}
-                  onBack={goBack}
-                  onSelectCourse={(course) => { setSelectedImportedCourse(null); setSelectedCourse(course); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                />
-              ) : selectedCourseTrack === 'imported' ? (
+              selectedCourseTrack === 'imported' ? (
                 <CoursesSearchPage
                   importedCourses={importedCourses}
                   initialQuery={searchQuery}
                   initialField={courseNavigationField}
+                  favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}
+                  onToggleFavorite={(id) => handleToggleFavorite('course', id)}
+                  onBack={goBack}
                   onSelectCourse={(course) => {
                     setSelectedImportedCourse(course);
                     window.scrollTo({ top: 0, behavior: 'instant' });
                   }}
-                  onBack={goBack}
-                  favoriteIds={favoriteIdsFor('course')}
+                />
+              ) : selectedCourseTrack === 'paid' ? (
+                <CourseTrackPreview
+                  track="paid"
+                  courses={paidCourses && paidCourses.length > 0 ? paidCourses : courses.filter((c) => !c.isFree)}
+                  favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}
                   onToggleFavorite={(id) => handleToggleFavorite('course', id)}
+                  onBack={goBack}
+                  onSelectCourse={(course) => {
+                    setSelectedImportedCourse(null);
+                    setSelectedCourse(course);
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                  }}
+                />
+              ) : selectedCourseTrack === 'native' ? (
+                <CourseTrackPreview
+                  track="native"
+                  courses={courses.filter((course) => publicDataMode === 'api' || course.provider.includes('منارتك'))}
+                  favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}
+                  onToggleFavorite={(id) => handleToggleFavorite('course', id)}
+                  onBack={goBack}
+                  onSelectCourse={(course) => {
+                    setSelectedImportedCourse(null);
+                    setSelectedCourse(course);
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                  }}
                 />
               ) : (
                 <CoursesLandingPage
                   onBack={goBack}
-                  onOpenTrack={(track) => {setCourseNavigationField(''); setSearchQuery(''); setSelectedCourseTrack(track);}}
+                  onOpenTrack={(track) => {
+                    setCourseNavigationField('');
+                    setSearchQuery('');
+                    setSelectedCourseTrack(track);
+                  }}
                 />
               )
             ) : (
@@ -2101,15 +2130,16 @@ export default function App() {
                   favoritesCount={favoriteKeys.length}
                   milestones={milestones}
                   notifications={notifications}
-                  onOpenFavorites={() => { setActiveTab('favorites'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                  onOpenTracker={() => { setActiveTab('account'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
+                  onOpenFavorites={() => openSection('favorites')}
+                  onOpenTracker={() => openSection('tracker')}
                   onOpenNotifications={() => setIsNotificationOpen(true)}
-                  onOpenGlobalSearch={() => { setGlobalSearchQuery(''); setSelectedCategory('all'); setIsSmartSearchOpen(false); setActiveTab('search'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                  onOpenSmartSearch={() => { setGlobalSearchQuery(''); setSelectedCategory('all'); setActiveTab('search'); setIsSmartSearchOpen(true); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                  onOpenTools={() => { setActiveTab('ai-tools'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                  onOpenAuth={() => { setActiveTab('auth'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
+                  onOpenGlobalSearch={() => openSection('search')}
+                  onOpenSmartSearch={() => openSection('search')}
+                  onOpenTools={() => openSection('ai-tools')}
+                  onOpenAuth={() => navigate({ activeTab: 'auth' })}
                   onToggleLanguage={openLanguage}
                   onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+                  onRestrictedAction={() => triggerAccessDenied()}
                 />
               )
             )}
@@ -2131,7 +2161,10 @@ export default function App() {
                 }} />
               ) : (
                 <div className="w-full max-w-4xl lg:max-w-5xl mx-auto flex items-center justify-center min-h-[70vh]">
-                  <PrototypeAuthPage onBackToWorkspace={goBack} />
+                  <PrototypeAuthPage
+                    onBackToWorkspace={goBack}
+                    onRestrictedAction={() => triggerAccessDenied()}
+                  />
                 </div>
               )
             )}
@@ -2166,10 +2199,12 @@ export default function App() {
       )}
       <BottomNavBar
         activeTab={activeTab}
-        onTabChange={(tab) => tab === 'notifications' ? (publicDataMode === 'api' ? openSection('account') : setIsNotificationOpen(true)) : openSection(tab)}
+        onTabChange={(tab) => {
+          openSection(tab);
+        }}
         favoritesCount={favoriteKeys.length}
         unreadNotificationsCount={unreadNotificationsCount}
-        isNotificationsOpen={isNotificationOpen}
+        isNotificationsOpen={false}
       />
 
       {/* Slide-out Navigation Drawer Menu */}
@@ -2181,7 +2216,10 @@ export default function App() {
         onToggleLanguage={openLanguage}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
-        onNavigate={openSection}
+        onNavigate={(target) => {
+          openSection(target);
+          setIsMenuOpen(false);
+        }}
         unreadCount={unreadNotificationsCount}
       />
 
@@ -2211,6 +2249,30 @@ export default function App() {
         activeToast={activeToast}
         onDismissToast={() => setActiveToast(null)}
       />}
+
+      {/* Access Denied Toast Notification */}
+      {accessDeniedMessage && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="fixed bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#142B5F] text-white border-2 border-[#D6A43B] shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-300 max-w-[92vw] sm:max-w-md"
+        >
+          <div className="w-8 h-8 rounded-xl bg-[#D6A43B]/20 border border-[#D6A43B]/50 flex items-center justify-center shrink-0 text-[#E5B54F]">
+            <Lock className="w-4 h-4 text-[#E5B54F]" />
+          </div>
+          <div className="flex-1 text-xs sm:text-[13px] font-bold font-['Cairo',sans-serif] leading-tight text-white">
+            {accessDeniedMessage}
+          </div>
+          <button
+            type="button"
+            onClick={() => setAccessDeniedMessage(null)}
+            className="w-6 h-6 rounded-lg hover:bg-white/10 flex items-center justify-center text-[#E5B54F] transition-colors cursor-pointer"
+            aria-label="إغلاق التنبيه"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
     </div>
   );

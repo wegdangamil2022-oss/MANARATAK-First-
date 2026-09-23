@@ -17,7 +17,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({ courses }) => {
             <span>الدورات التدريبية والتأهيلية للمنح</span>
           </h2>
           <p className="text-[11px] text-[var(--mn-text-muted)]">
-            برامج مجانية لإتقان اللغة والخطابات الأكاديمية وبناء الملف الشخصي
+            برامج تدريبية معتمدة لإتقان اللغة والخطابات الأكاديمية وبناء الملف الشخصي
           </p>
         </div>
       </div>
@@ -37,7 +37,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({ courses }) => {
               <div className="flex-1">
                 <div className="flex items-center justify-between gap-1">
                   <span className="px-2 py-0.5 rounded-full bg-[var(--mn-surface-muted)] text-[var(--mn-heading)] font-semibold text-[9px] mn-panel ">
-                    {course.isFree ? 'مجانية بالكامل' : 'مدفوعة'}
+                    {course.isFree ? (course.category || 'تأهيل أكاديمي') : 'مدفوعة'}
                   </span>
                   <div className="flex items-center gap-1 text-[var(--mn-accent-text)] text-[10px] font-bold">
                     <Star className="w-3 h-3 fill-[var(--mn-accent-soft)]" />

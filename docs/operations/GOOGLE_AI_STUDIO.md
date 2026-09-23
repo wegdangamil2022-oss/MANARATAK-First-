@@ -1,10 +1,10 @@
 # MANARATAK Google AI Studio workspace
 
-This repository is **wegdangamil2022-oss/Manaratal-Final**, branch **main**.
+This repository is **wegdangamil2022-oss/MANARATAK-First-**, branch **main**.
 Its initial functional baseline is the complete source tree of
 MANARATAK_FINAL/fix/vercel-typescript-config-context at
 818de64b3c9b26056070812865659a84bbf61819. The former repository must not be pushed or edited.
-Manaratal-Final is now the official source repository; see [adoption record](OFFICIAL_REPOSITORY.md).
+MANARATAK-First- is now the official source repository; see [adoption record](OFFICIAL_REPOSITORY.md).
 All apps, packages, data sets, tests and architecture documents are retained.
 
 ## Install and start

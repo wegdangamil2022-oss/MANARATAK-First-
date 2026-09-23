@@ -6,22 +6,197 @@ interface FeaturedCoursesProps {
   courses: Course[];
   onSelectCourse?: (course: Course) => void;
   onViewAllClick: () => void;
+  onRestrictedCourse?: () => void;
 }
 
 export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
   courses,
   onSelectCourse,
   onViewAllClick,
+  onRestrictedCourse,
 }) => {
-  const [activeTab, setActiveTab] = useState<'external' | 'internal'>('external');
+  const [activeCourseTab, setActiveCourseTab] = useState<'global' | 'native'>('global');
 
-  const allCourses = courses;
+  // Global Platforms Courses (3 specialized courses: AI, Computer Science, Data Science / ML)
+  const globalCourses: Course[] = [
+    {
+      id: 'c-ai-intro',
+      title: 'دورة مقدمة في الذكاء الاصطناعي وتطبيقاته',
+      titleEn: 'Introduction to Artificial Intelligence',
+      provider: 'منصات عالمية • Stanford Online',
+      instructor: 'د. أندرو نج',
+      duration: '16 ساعة • 20 درساً',
+      lessonsCount: 20,
+      level: 'مبتدئ',
+      isFree: false,
+      rating: 4.9,
+      studentsCount: 34500,
+      imageUrl:
+        'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=600&q=80',
+      category: 'الذكاء الاصطناعي',
+      progressPercent: 25,
+    },
+    {
+      id: 'c-cs-intro',
+      title: 'دورة شاملة في مبادئ علوم الحاسوب والبرمجة',
+      titleEn: 'CS50: Introduction to Computer Science',
+      provider: 'منصات عالمية • Harvard University',
+      instructor: 'بروفيسور ديفيد جيه مالان',
+      duration: '24 ساعة • 28 درساً',
+      lessonsCount: 28,
+      level: 'مبتدئ ومتوسط',
+      isFree: false,
+      rating: 4.9,
+      studentsCount: 48200,
+      imageUrl:
+        'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80',
+      category: 'علوم الحاسوب',
+      progressPercent: 0,
+    },
+    {
+      id: 'c-ml-data',
+      title: 'دورة أساسيات علم البيانات وتعلم الآلة',
+      titleEn: 'Data Science & Machine Learning Fundamentals',
+      provider: 'منصات عالمية • Google Career Certificates',
+      instructor: 'فريق خبراء Google',
+      duration: '18 ساعة • 22 درساً',
+      lessonsCount: 22,
+      level: 'متوسط',
+      isFree: false,
+      rating: 4.8,
+      studentsCount: 29800,
+      imageUrl:
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
+      category: 'علم البيانات',
+      progressPercent: 0,
+    },
+  ];
 
-  // Filter courses based on provider mapping for demonstration
-  const internalCourses = allCourses.filter((c) => c.provider.includes('منارتك'));
-  const externalCourses = allCourses.filter((c) => !c.provider.includes('منارتك'));
+  // Manartech Native Courses (Programs built specifically within Manartech)
+  const nativeCourses: Course[] = [
+    {
+      id: 'c1',
+      title: 'دورة المنح الدراسية والقبولات الجامعية',
+      titleEn: 'Scholarships and University Admissions Masterclass',
+      provider: 'منصة منارتك',
+      instructor: 'أكاديمية منارتك',
+      duration: '25 ساعة • 8 وحدات',
+      lessonsCount: 8,
+      level: 'مبتدئ',
+      isFree: false,
+      rating: 4.9,
+      studentsCount: 265,
+      imageUrl:
+        'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80',
+      category: 'المنح والقبولات الجامعية',
+      progressPercent: 0,
+    },
+    {
+      id: 'c-manaratak-cv',
+      title: 'دورة إعداد السيرة الذاتية وخطاب الدافع للمنح',
+      titleEn: 'Academic CV & Motivation Letter Masterclass',
+      provider: 'أكاديمية منارتك',
+      instructor: 'خبراء منارتك',
+      duration: '6 ساعات • 10 دروس',
+      lessonsCount: 10,
+      level: 'جميع المستويات',
+      isFree: false,
+      rating: 4.9,
+      studentsCount: 15400,
+      imageUrl:
+        'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=600&q=80',
+      category: 'إعداد الملف الشخصي',
+      progressPercent: 0,
+    },
+    {
+      id: 'c5',
+      title: 'دليل المقابلات الشخصية وتأشيرة الدراسة',
+      titleEn: 'Embassy Interview & Student Visa Mastery',
+      provider: 'أكاديمية منارتك',
+      instructor: 'د. يوسف التميمي',
+      duration: '3.5 ساعة • 7 دروس',
+      lessonsCount: 7,
+      level: 'متوسط',
+      isFree: false,
+      rating: 4.9,
+      studentsCount: 11200,
+      imageUrl:
+        'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=80',
+      category: 'إعداد الملف الشخصي',
+      progressPercent: 0,
+    },
+    {
+      id: 'c-china-scholarships',
+      title: 'الدورة التدريبية للمنح الدراسية في الصين',
+      titleEn: 'Masterclass for Studying and Scholarships in China (CSC)',
+      provider: 'أكاديمية منارتك',
+      instructor: 'خبراء الدراسة في الصين',
+      duration: '18 ساعة',
+      lessonsCount: 6,
+      level: 'جميع المستويات',
+      isFree: false,
+      rating: 4.9,
+      studentsCount: 1420,
+      imageUrl:
+        'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80',
+      category: 'المنح والقبولات الجامعية',
+      progressPercent: 0,
+    },
+    {
+      id: 'c-duolingo-mastery',
+      title: 'الدورة التدريبية لاختبار الدولينجو',
+      titleEn: 'Duolingo English Test (DET) Comprehensive Preparation',
+      provider: 'أكاديمية منارتك',
+      instructor: 'مدربو اختبارات اللغة الإنجليزية',
+      duration: '14 ساعة',
+      lessonsCount: 30,
+      level: 'متوسط',
+      isFree: false,
+      rating: 4.85,
+      imageUrl:
+        'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80',
+      category: 'اختبارات اللغة والأكاديميا',
+      progressPercent: 0,
+    },
+    {
+      id: 'c-csca-exam',
+      title: 'الدورة التدريبية لاختبار CSCA',
+      titleEn: 'CSCA International Exam Preparation & Academic Strategies',
+      provider: 'أكاديمية منارتك',
+      instructor: 'هيئة التدريب التخصصي',
+      duration: '12 ساعة',
+      lessonsCount: 30,
+      level: 'متقدم',
+      isFree: false,
+      rating: 4.92,
+      imageUrl:
+        'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80',
+      category: 'اختبارات تخصصية وتأهيلية',
+      progressPercent: 0,
+    },
+    {
+      id: 'c-ai-scholarship-applications',
+      title: 'الدورة التدريبية لاستخدامات الذكاء الاصطناعي',
+      titleEn: 'AI Tools & Workflows for Academic & Scholarship Success',
+      provider: 'أكاديمية منارتك',
+      instructor: 'وحدة تقنيات الذكاء الاصطناعي الأكاديمي',
+      duration: '16 ساعة',
+      lessonsCount: 21,
+      level: 'جميع المستويات',
+      isFree: false,
+      rating: 4.95,
+      imageUrl:
+        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
+      category: 'مهارات التقنية والذكاء الاصطناعي',
+      progressPercent: 0,
+    },
+  ];
 
-  const displayCourses = (activeTab === 'external' ? externalCourses : internalCourses).slice(0, 3);
+  const currentCourses = activeCourseTab === 'global' ? globalCourses : nativeCourses;
+
+  const handleCourseClick = (course: Course) => {
+    onSelectCourse?.(course);
+  };
 
   return (
     <section
@@ -36,7 +211,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
         {/* Content Inside the Framed Section */}
         <div className="relative z-10">
           {/* Centered Section Title */}
-          <div className="text-center mb-2.5 sm:mb-3">
+          <div className="text-center mb-3 sm:mb-4">
             <div className="relative pb-1 mb-1 inline-block">
               <h3 className="text-[14.5px] sm:text-base font-bold text-[#142B5F] dark:text-[#D6A43B] inline-flex items-center justify-center gap-1.5 font-['Cairo',sans-serif]">
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
@@ -51,44 +226,37 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
             </p>
           </div>
 
-          {/* Glowing Animated Orbit Tabs Container matching FeaturedServices */}
-          <div className="mb-4 flex justify-center items-center">
-            <div className="group relative w-full max-w-[285px] shrink-0 overflow-hidden rounded-[14px] p-[2px]">
-              <div className="animate-button-orbit absolute inset-[-100%] bg-[conic-gradient(from_0deg,var(--mn-primary),var(--mn-accent),var(--mn-primary),var(--mn-accent),var(--mn-primary))]" />
-              <div className="relative flex w-full rounded-xl bg-[var(--mn-page)] p-1 mn-panel">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('external')}
-                  data-mn-design="023f1723a7"
-                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 px-3 transition-all duration-300 whitespace-nowrap cursor-pointer ${
-                    activeTab === 'external'
-                      ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-md ring-1 ring-[#142B5F]/20 dark:ring-[#D6A43B]/40'
-                      : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)]/70 hover:text-[var(--mn-heading)]'
-                  }`}
-                >
-                  <Globe2 className={`h-4 w-4 shrink-0 transition-colors ${activeTab === 'external' ? 'text-[#D6A43B] dark:text-[#142B5F]' : 'text-[var(--mn-text-muted)]'}`} />
-                  <span>منصات عالمية</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('internal')}
-                  data-mn-design="023f1723a7"
-                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 px-3 transition-all duration-300 whitespace-nowrap cursor-pointer ${
-                    activeTab === 'internal'
-                      ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-md ring-1 ring-[#142B5F]/20 dark:ring-[#D6A43B]/40'
-                      : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)]/70 hover:text-[var(--mn-heading)]'
-                  }`}
-                >
-                  <Award className={`h-4 w-4 shrink-0 transition-colors ${activeTab === 'internal' ? 'text-[#D6A43B] dark:text-[#142B5F]' : 'text-[var(--mn-text-muted)]'}`} />
-                  <span>دورات منارتك</span>
-                </button>
-              </div>
-            </div>
+          {/* Dual Tabs Switcher: منصات عالمية & دورات منارتك */}
+          <div className="flex items-center justify-center p-1 mb-3.5 max-w-xs mx-auto rounded-2xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setActiveCourseTab('global')}
+              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-['Cairo',sans-serif] ${
+                activeCourseTab === 'global'
+                  ? 'bg-[#142B5F] text-[#D6A43B] shadow-xs'
+                  : 'text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]'
+              }`}
+            >
+              <Globe2 className="w-3.5 h-3.5" />
+              <span>منصات عالمية</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveCourseTab('native')}
+              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-['Cairo',sans-serif] ${
+                activeCourseTab === 'native'
+                  ? 'bg-[#142B5F] text-[#D6A43B] shadow-xs'
+                  : 'text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]'
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>دورات منارتك</span>
+            </button>
           </div>
 
           {/* Courses List Wrapper */}
           <div className="space-y-2 w-full">
-            {displayCourses.map((course) => (
+            {currentCourses.map((course) => (
               <div
                 key={course.id}
                 role="button"
@@ -96,21 +264,26 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
                 onKeyDown={function (event) {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
-                    onSelectCourse?.(course);
+                    handleCourseClick(course);
                   }
                 }}
-                onClick={() => onSelectCourse && onSelectCourse(course)}
+                onClick={() => handleCourseClick(course)}
                 className="group relative flex items-center justify-between gap-2.5 p-2 sm:p-2.5 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/50 shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer active:scale-[0.99]"
               >
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   {/* Course Thumbnail */}
-                  <div className="relative w-14 h-12 sm:w-16 sm:h-14 rounded-lg overflow-hidden shrink-0 bg-[var(--mn-primary)] border border-[var(--mn-border)]/40 mn-inverse">
+                  <div className="relative w-14 h-12 sm:w-16 sm:h-14 rounded-lg overflow-hidden shrink-0 bg-[#142B5F] border border-[var(--mn-border)]/40 mn-inverse">
                     <img
                       src={course.imageUrl}
                       alt={course.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
                       loading="lazy"
+                      onError={(e) => {
+                        // Reliable high-tech fallback
+                        (e.target as HTMLImageElement).src =
+                          'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80';
+                      }}
                     />
                     {/* Play Icon Overlay */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -118,11 +291,14 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
                     </div>
                   </div>
 
-                  {/* Course Title Only */}
+                  {/* Course Info */}
                   <div className="min-w-0 flex-1">
                     <h4 className="font-bold text-[11px] sm:text-[12.5px] text-[var(--mn-heading)] group-hover:text-[var(--mn-accent-text)] transition-colors line-clamp-2 leading-tight font-['Cairo',sans-serif]">
                       {course.title}
                     </h4>
+                    <p className="text-[9.5px] sm:text-[10px] text-[var(--mn-text-muted)] mt-0.5 font-medium truncate font-['Cairo',sans-serif]">
+                      {course.provider}
+                    </p>
                   </div>
                 </div>
 
@@ -133,7 +309,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
               </div>
             ))}
 
-            {displayCourses.length === 0 && (
+            {currentCourses.length === 0 && (
               <div className="text-center py-6 text-sm text-[var(--mn-text-muted)]">
                 لا توجد دورات حالياً في هذا القسم.
               </div>

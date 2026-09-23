@@ -3,12 +3,19 @@ import { Mail, Lock, User, LogIn, Chrome } from 'lucide-react';
 
 interface AuthPageProps {
   onBackToWorkspace?: () => void;
+  onRestrictedAction?: () => void;
 }
 
-export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace }) => {
+export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestrictedAction }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [notice, setNotice] = useState('');
-  const explainPreview = () => setNotice('هذه معاينة فقط؛ لم تُرسل بياناتك. تسجيل الدخول واستعادة كلمة المرور سيعملان بعد ربط المصادقة.');
+  const explainPreview = () => {
+    if (onRestrictedAction) {
+      onRestrictedAction();
+      return;
+    }
+    setNotice('هذه معاينة فقط؛ لم تُرسل بياناتك. تسجيل الدخول واستعادة كلمة المرور سيعملان بعد ربط المصادقة.');
+  };
 
   return (
     <div className="w-full max-w-sm mx-auto py-8 mn-inline-gutter">

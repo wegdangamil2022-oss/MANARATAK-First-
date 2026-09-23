@@ -52,6 +52,7 @@ interface StudentWorkspacePageProps {
   onOpenAuth: () => void;
   onToggleLanguage: () => void;
   onToggleDarkMode: () => void;
+  onRestrictedAction?: () => void;
 }
 
 const kindLabels: Partial<Record<FavoriteKind, string>> = {
@@ -84,11 +85,20 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
   onOpenAuth,
   onToggleLanguage,
   onToggleDarkMode,
+  onRestrictedAction,
 }) => {
   const [section, setSection] = useState<WorkspaceSection>('hub');
   const [recommendationsEnabled, setRecommendationsEnabled] = useState(true);
   const [activityTrackingEnabled, setActivityTrackingEnabled] = useState(true);
   const [notificationPreviewEnabled, setNotificationPreviewEnabled] = useState(true);
+
+  const handleAction = (fallback?: () => void) => {
+    if (onRestrictedAction) {
+      onRestrictedAction();
+    } else if (fallback) {
+      fallback();
+    }
+  };
 
   const unreadCount = notifications.filter((item) => !item.read).length;
   const activeMilestones = milestones.filter((item) => item.progress < 100);
@@ -187,7 +197,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             {!profile && (
               <button
                 type="button"
-                onClick={onOpenAuth}
+                onClick={() => handleAction(onOpenAuth)}
                 data-mn-design="4df103579c"
                 className="w-full min-h-[38px] rounded-xl bg-gradient-to-r from-[#0d2a45] via-[#113a5f] to-[#0d2a45] hover:brightness-110 border border-[#D6A43B] hover:border-[#F3CE74] text-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md cursor-pointer py-2 px-3.5 relative overflow-hidden group"
               >
@@ -227,8 +237,8 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             {/* Quick Stat Counters */}
             <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
               {[
-                { label: 'محفوظ', value: favoritesCount, icon: Heart, action: onOpenFavorites },
-                { label: 'تنبيهات', value: unreadCount, icon: Bell, action: onOpenNotifications },
+                { label: 'محفوظ', value: favoritesCount, icon: Heart, action: () => handleAction(onOpenFavorites) },
+                { label: 'تنبيهات', value: unreadCount, icon: Bell, action: () => handleAction(onOpenNotifications) },
                 { label: 'متابعات', value: activeMilestones.length, icon: ListChecks, action: () => setSection('journey') },
                 { label: 'التقدم', value: `${journeyProgress}%`, icon: CheckCircle2, action: () => setSection('journey') },
               ].map((item) => {
@@ -277,7 +287,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               {!profile && (
                 <button
                   type="button"
-                  onClick={onOpenAuth}
+                  onClick={() => handleAction(onOpenAuth)}
                   data-mn-design="3b7dc7a9b0"
                   className="mt-3.5 w-full min-h-[36px] rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
                 >
@@ -429,7 +439,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                 </p>
                 <button
                   type="button"
-                  onClick={onOpenSmartSearch}
+                  onClick={() => handleAction(onOpenSmartSearch)}
                   data-mn-design="3b7dc7a9b0"
                   className="mt-3 inline-flex items-center justify-center gap-1.5 min-h-[34px] px-4 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold transition-all cursor-pointer shadow-2xs py-1.5 relative overflow-hidden group"
                 >
@@ -465,7 +475,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                 {savedGroups.map(([kind, count]) => (
                   <button
                     key={kind}
-                    onClick={onOpenFavorites}
+                    onClick={() => handleAction(onOpenFavorites)}
                     className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-right shadow-2xs active:scale-[0.98] transition-all mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
                   >
                     <div className="text-xl font-bold text-[var(--mn-heading)]">{count}</div>
@@ -479,7 +489,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
 
             <button
               type="button"
-              onClick={onOpenFavorites}
+              onClick={() => handleAction(onOpenFavorites)}
               className="w-full min-h-[44px] rounded-xl bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white border border-[#E5B54F]/40 font-bold text-xs sm:text-[13px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xs cursor-pointer mn-inverse"
             >
               <span>فتح كل المفضلة والمحفوظات</span>
@@ -581,7 +591,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                     </div>
                     <button
                       type="button"
-                      onClick={item.toggle}
+                      onClick={() => handleAction(item.toggle)}
                       className={`w-11 h-6 p-0.5 rounded-full transition-colors shrink-0 cursor-pointer ${item.enabled ? 'bg-[#142B5F] dark:bg-[#E5B54F]' : 'bg-slate-300 dark:bg-slate-700'}`}
                       aria-label={`تبديل ${item.title}`}
                     >
@@ -595,7 +605,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={onToggleLanguage}
+                onClick={() => handleAction(onToggleLanguage)}
                 className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-right flex items-center justify-between gap-2 mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
               >
                 <div>
@@ -628,7 +638,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <button
                     key={item.label}
                     type="button"
-                    onClick={item.action}
+                    onClick={() => handleAction(item.action)}
                     className="w-full min-h-[48px] px-4 flex items-center justify-between gap-3 text-right cursor-pointer hover:bg-[var(--mn-page)]/50 transition-colors"
                   >
                     <div className="flex items-center gap-2.5">

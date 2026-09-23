@@ -57,7 +57,7 @@ export class OtlpHttpMonitoringProvider implements IMonitoringProvider, IMetrics
 
   public startSpan(name: string, attributes: Record<string, AttributeValue> = {}): IMonitoringSpan {
     const ratio = Math.max(0, Math.min(1, this.options.traceSampleRatio ?? 1));
-    const sampled = Math.random() <= ratio;
+    const sampled = ratio > 0 && (ratio >= 1 || (randomBytes(4).readUInt32BE(0) / 0xffffffff) <= ratio);
     const traceId = randomBytes(16).toString('hex');
     const spanId = randomBytes(8).toString('hex');
     const startedAt = Date.now();

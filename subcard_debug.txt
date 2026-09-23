@@ -1,0 +1,47 @@
+{/* Example Sub-Card: هل أستطيع التقديم بشكل مستقل؟ */}
+              <div className="rounded-xl bg-[var(--mn-surface-muted)]/50 dark:bg-white/[0.02] border border-[var(--mn-border)]/80 p-3 sm:p-3.5 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-5.5 h-5.5 rounded-lg bg-[#D6A43B]/15 text-[#D6A43B] dark:text-[#F2CD78] flex items-center justify-center shrink-0">
+                    <Lightbulb className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h5 className="text-[12px] font-bold text-[#142B5F] dark:text-[#F2CD78]">
+                      هل أستطيع التقديم بشكل مستقل؟
+                    </h5>
+                    <span className="text-[10.5px] font-bold text-[var(--mn-text-muted)]">
+                      مثال: الصين ودول التبادل الثقافي
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
+                  وجود دولة ضمن منح التبادل الثقافي لا يعني أن الطالب لا يستطيع التقديم على أي منحة أخرى موجودة في هذه الدولة.
+                </p>
+                <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
+                  النقطة المهمة هي أن نفرّق بين المنحة الحكومية التي تتعاقد عليها وزارة التعليم العالي اليمنية ضمن التبادل الثقافي، وبين المنح الأخرى التي تقدمها الجامعات أو المقاطعات أو الجهات المختلفة داخل الدولة نفسها.
+                </p>
+                <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
+                  فالمنح الحكومية التي تكون مخصصة لليمن ضمن اتفاقيات التبادل الثقافي يكون التقديم عليها من خلال وزارة التعليم العالي اليمنية، ويخضع الطالب لإجراءات الوزارة، ومنها اختبار المفاضلة والترشيح بحسب ما تعلنه الوزارة لكل منحة.
+                </p>
+
+                {/* Country breakdown badges/items */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  <div className="flex items-start gap-2 bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg p-2.5 shadow-2xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#0E7C86] dark:bg-[#21A7B4] mt-1.5 shrink-0" />
+                    <p className="text-[11px] font-bold text-[var(--mn-text)] leading-[1.8]">
+                      <strong className="text-[#142B5F] dark:text-[#F2CD78]">منحة الحكومة المجرية:</strong> ضمن مسار التبادل الثقافي تتطلب الدخول في إجراءات المفاضلة والاختبار والترشيح عن طريق الوزارة، ولا يستطيع الطالب تجاوز هذا المسار والتقديم على المقعد الحكومي المخصص للتبادل الثقافي بشكل مستقل.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2 bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg p-2.5 shadow-2xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#0E7C86] dark:bg-[#21A7B4] mt-1.5 shrink-0" />
+                    <p className="text-[11px] font-bold text-[var(--mn-text)] leading-[1.8]">
+                      والأمر نفسه ينطبق على المنح الحكومية المدرجة ضمن التبادل الثقافي في دول مثل <strong className="text-[#142B5F] dark:text-[#F2CD78]">الأردن وكوبا وغيرها</strong>، بحسب الاتفاقيات والإعلانات المعتمدة في كل عام.
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
+                  لكن هذا لا يعني أن الطالب ممنوع من التقديم على منح أخرى في المجر أو الأردن أو كوبا أو غيرها. فإذا كانت هناك جامعة داخل الدولة تقدم منحتها الخاصة، أو توجد منحة إقليمية أو منحة من جهة أخرى لا ترتبط بالتبادل الثقافي، فيستطيع الطالب التقديم عليها بصورة مستقلة إذا كان مستوفيًا لشروطها.
+                </p>
+
+                

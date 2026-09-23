@@ -193,19 +193,19 @@ export function OwnerCourseDetail({
             </div>
           </div>
 
-          {/* ROW 2: الطلاب الملتحقين | الرسوم */}
+          {/* ROW 2: المستوى | الرسوم */}
           <div className="flex items-center gap-2">
-            {/* Right Card: الطلاب الملتحقين */}
+            {/* Right Card: المستوى */}
             <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-center gap-2 min-w-0 mn-panel">
               <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
-                <Users className="w-4 h-4 text-[var(--mn-accent-text)]" />
+                <GraduationCap className="w-4 h-4 text-[var(--mn-accent-text)]" />
               </div>
               <div className="flex flex-col min-w-0 text-right">
                 <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">
-                  الطلاب الملتحقين
+                  المستوى
                 </span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
-                  {course.studentsCount ? `${course.studentsCount} طالب` : '265 طالب'}
+                  {course.level || 'جميع المستويات'}
                 </span>
               </div>
             </div>
@@ -223,7 +223,7 @@ export function OwnerCourseDetail({
                   الرسوم
                 </span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] leading-tight truncate mt-0.5">
-                  {course.isFree ? 'مجانية بالكامل' : 'مدفوعة'}
+                  {course.isFree ? 'متاحة للجميع' : 'مدفوعة'}
                 </span>
               </div>
             </div>

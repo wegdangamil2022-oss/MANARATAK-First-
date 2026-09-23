@@ -12,6 +12,7 @@ import {
   Globe2,
   GraduationCap,
   Layers3,
+  Lock,
   PlayCircle,
   ShieldCheck,
   Sparkles,
@@ -29,6 +30,7 @@ type PathFeature = {
 interface CoursesLandingPageProps {
   onBack?: () => void;
   onOpenTrack?: (track: CourseTrack) => void;
+  onRestrictedTrack?: () => void;
 }
 
 interface CoursePathCardProps {
@@ -40,10 +42,11 @@ interface CoursePathCardProps {
   features: PathFeature[];
   footer?: string;
   cta: string;
+  isRestricted?: boolean;
   onClick?: () => void;
 }
 
-function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta, onClick }: CoursePathCardProps) {
+function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta, isRestricted, onClick }: CoursePathCardProps) {
   return (
     <div
       role="button"
@@ -76,6 +79,13 @@ function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta
             <h3 className="text-[15.5px] sm:text-base font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif] leading-tight group-hover:text-[var(--mn-primary)] dark:group-hover:text-[var(--mn-accent)] transition-colors">
               {title}
             </h3>
+
+            {isRestricted && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-bold text-amber-600 dark:text-[#E5B54F]">
+                <Lock className="w-2.5 h-2.5" />
+                <span>غير متاح</span>
+              </span>
+            )}
           </div>
 
           {/* Golden Line Under Title */}
@@ -120,7 +130,7 @@ function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta
   );
 }
 
-export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, onOpenTrack }) => {
+export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, onOpenTrack, onRestrictedTrack }) => {
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
@@ -256,6 +266,7 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
             title="الدورات العالمية"
             description="استكشف مئات الدورات والبرامج المعتمدة التي تجمعها لك منصة منارتك من كبرى الجامعات والمنصات التعليمية العالمية، مع توجيهك المباشر للتسجيل والدراسة من المصدر الرسمي بكل موثوقية."
             icon={Globe2}
+            isRestricted={false}
             features={[
               { label: 'منصات عالمية', icon: Layers3 },
               { label: 'شهادات معتمدة', icon: BadgeCheck },
@@ -282,6 +293,7 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
             title="الدورات المدفوعة"
             description="مسار مخصص للبرامج التدريبية الاحترافية والماستر كلاس المتقدم، يقدم لك تفاصيل شفافة لرسوم الاشتراك والمميزات الحصرية وإمكانية معاينة محاور الدورة ونبذة المدربين قبل الانضمام."
             icon={CreditCard}
+            isRestricted={false}
             features={[
               { label: 'تسعير واضح', icon: Tag },
               { label: 'مستوى متقدم', icon: Sparkles },

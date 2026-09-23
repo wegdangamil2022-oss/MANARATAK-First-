@@ -1,7 +1,7 @@
-# Official repository adoption — 2026-09-13
+# Official repository adoption
 
-The source of truth is `wegdangamil2022-oss/Manaratal-Final`, branch `main`.
-`wegdangamil2022-oss/MANARATAK_FINAL` remains unchanged as a historical reference.
+The source of truth is `wegdangamil2022-oss/MANARATAK-First-`, branch `main`.
+Predecessor repositories `wegdangamil2022-oss/MANARATAK_FINAL` and `wegdangamil2022-oss/Manaratal-Final` remain unchanged as historical references.
 
 ## Provenance
 

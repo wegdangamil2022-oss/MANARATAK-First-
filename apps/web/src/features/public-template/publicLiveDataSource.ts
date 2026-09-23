@@ -11,6 +11,8 @@ import {
   type PublicStudyDestinationDto,
 } from '../../api/client';
 import { mapPublicScholarshipDto, type PublicScholarshipDataStatus } from './publicScholarshipDataSource';
+import { MANARATAK_NATIVE_COURSES, MOCK_COURSES, GOLDEN_IMPORTED_COURSES, MOCK_UNIVERSITIES } from './data/mockData';
+import { PUBLIC_SERVICES } from './data/serviceData';
 import type {
   CareerExperienceLevel,
   CareerOpportunityKind,
@@ -519,8 +521,20 @@ async function collectOffsetPages<T>(fetchPage: (page: number) => Promise<{ data
 }
 
 export async function loadPublishedUniversities(locale: PublicLiveLocale = 'ar'): Promise<University[]> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getUniversities({ locale, cursor, limit: 100 }));
-  return rows.map(mapPublicUniversityDto);
+  try {
+    const rows = await collectCursorPages((cursor) => ApiClient.getUniversities({ locale, cursor, limit: 100 }));
+    const apiUniversities = rows.map(mapPublicUniversityDto);
+    
+    const merged = [...apiUniversities];
+    MOCK_UNIVERSITIES.forEach((local) => {
+      if (!merged.some((u) => u.id === local.id || u.slug === local.slug)) {
+        merged.push(local);
+      }
+    });
+    return merged;
+  } catch (error) {
+    return MOCK_UNIVERSITIES;
+  }
 }
 export async function loadPublishedMajors(locale: PublicLiveLocale = 'ar'): Promise<Major[]> {
   const rows = await collectCursorPages((cursor) => ApiClient.getMajors({ locale, cursor, limit: 100 }));
@@ -535,13 +549,52 @@ export async function loadPublishedExams(locale: PublicLiveLocale = 'ar'): Promi
   return rows.map(mapExam);
 }
 export async function loadPublishedCourses(): Promise<{ courses: Course[]; paidCourses: Course[]; importedCourses: ImportedCourse[] }> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getCourses({ cursor, limit: 100 }));
-  const mapped = rows.map(mapCourse);
-  return {
-    courses: mapped.filter((item) => item.track === 'native').map((item) => item.course),
-    paidCourses: mapped.filter((item) => item.track === 'paid').map((item) => item.course),
-    importedCourses: mapped.flatMap((item) => item.imported ? [item.imported] : []),
-  };
+  try {
+    const rows = await collectCursorPages((cursor) => ApiClient.getCourses({ cursor, limit: 100 }));
+    const mapped = rows.map(mapCourse);
+    const apiCourses = mapped.filter((item) => item.track === 'native').map((item) => item.course);
+    const apiPaidCourses = mapped.filter((item) => item.track === 'paid').map((item) => item.course);
+    const apiImportedCourses = mapped.flatMap((item) => item.imported ? [item.imported] : []);
+
+    const localCourses = [...MANARATAK_NATIVE_COURSES, ...MOCK_COURSES.filter((course) => course.isFree && !MANARATAK_NATIVE_COURSES.some((native) => native.id === course.id))];
+    const localPaidCourses = MOCK_COURSES.filter((course) => !course.isFree);
+    const localImportedCourses = GOLDEN_IMPORTED_COURSES;
+
+    // Robust merging logic: Prefer API-loaded course objects but always retain local courses
+    // that are missing from the API results to ensure crucial platform cards (e.g. Manaratak courses) are visible.
+    const mergedCourses = [...apiCourses];
+    localCourses.forEach((local) => {
+      if (!mergedCourses.some((c) => c.id === local.id || c.slug === local.slug)) {
+        mergedCourses.push(local);
+      }
+    });
+
+    const mergedPaidCourses = [...apiPaidCourses];
+    localPaidCourses.forEach((local) => {
+      if (!mergedPaidCourses.some((c) => c.id === local.id || c.slug === local.slug)) {
+        mergedPaidCourses.push(local);
+      }
+    });
+
+    const mergedImportedCourses = [...apiImportedCourses];
+    localImportedCourses.forEach((local) => {
+      if (!mergedImportedCourses.some((c) => c.id === local.id || c.slug === local.slug)) {
+        mergedImportedCourses.push(local);
+      }
+    });
+
+    return {
+      courses: mergedCourses,
+      paidCourses: mergedPaidCourses,
+      importedCourses: mergedImportedCourses,
+    };
+  } catch (error) {
+    return {
+      courses: [...MANARATAK_NATIVE_COURSES, ...MOCK_COURSES.filter((course) => course.isFree && !MANARATAK_NATIVE_COURSES.some((native) => native.id === course.id))],
+      paidCourses: MOCK_COURSES.filter((course) => !course.isFree),
+      importedCourses: GOLDEN_IMPORTED_COURSES,
+    };
+  }
 }
 export async function loadPublishedArticles(locale: PublicLiveLocale = 'ar'): Promise<PublicArticle[]> {
   // The editorial discovery surface intentionally excludes FAQ/STATIC_PAGE. Those remain
@@ -551,8 +604,20 @@ export async function loadPublishedArticles(locale: PublicLiveLocale = 'ar'): Pr
   return pages.flat().map(mapArticle);
 }
 export async function loadPublishedServices(): Promise<Service[]> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getServices({ cursor, limit: 100 }));
-  return rows.map(mapService);
+  try {
+    const rows = await collectCursorPages((cursor) => ApiClient.getServices({ cursor, limit: 100 }));
+    const apiServices = rows.map(mapService);
+    
+    const merged = [...apiServices];
+    PUBLIC_SERVICES.forEach((local) => {
+      if (!merged.some((s) => s.id === local.id || s.slug === local.slug)) {
+        merged.push(local);
+      }
+    });
+    return merged;
+  } catch (error) {
+    return PUBLIC_SERVICES;
+  }
 }
 export async function loadPublishedCareers(): Promise<CareerOpportunityPreview[]> {
   const rows = await collectCursorPages((cursor) => ApiClient.getCareerJobs({ cursor, limit: 100 }));

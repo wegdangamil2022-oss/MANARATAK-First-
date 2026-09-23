@@ -13,7 +13,7 @@
     "verify:aistudio": "node scripts/aistudio/verify.mjs",
     "build": "npm run build --workspaces --if-present",
     "build:cached": "turbo run build",
-    "start": "npm run start -w @manaratak/api",
+    "start": "node server.js",
     "lint": "eslint .",
     "security:secrets": "node scripts/security/scan-secrets.mjs",
     "quality:source": "node scripts/quality/verify-source-quality.mjs",

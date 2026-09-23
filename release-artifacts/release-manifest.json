@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "kind": "MANARATAK_IMMUTABLE_RELEASE",
+  "sourceSha": "SOURCE_SHA_UNAVAILABLE",
+  "nodeVersion": "v22.23.2",
+  "createdAt": "2026-09-20T20:20:41.165Z",
+  "artifacts": [
+    {
+      "unit": "api",
+      "file": "manaratak-api-SOURCE_SHA_UNAVAILABLE.tar",
+      "sha256": "b233cadbc9730adee56c62bec83e5783fa834cba837771991d057ec9672ad577",
+      "size": 20121600
+    },
+    {
+      "unit": "web",
+      "file": "manaratak-web-SOURCE_SHA_UNAVAILABLE.tar",
+      "sha256": "e48c3aa668d9d42bd1c7ede99f58e23f16590598fe6d1dbe639deb91fbb4ae0f",
+      "size": 9021440
+    },
+    {
+      "unit": "admin",
+      "file": "manaratak-admin-SOURCE_SHA_UNAVAILABLE.tar",
+      "sha256": "94f6bfc6da0f97c6651e438424916818c0e97d16175459ffe6f64685d90dda07",
+      "size": 2867200
+    }
+  ],
+  "sbom": {
+    "file": "release-sbom.cdx.json",
+    "sha256": "36023bc1ff8fde30785851f77c4097868603f395b0f523ddbcb6b1c8f4fb979e"
+  },
+  "provenance": {
+    "builder": "github-actions/Enterprise CI Pipeline",
+    "runId": null,
+    "runAttempt": null
+  }
+}

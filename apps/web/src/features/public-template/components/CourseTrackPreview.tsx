@@ -27,6 +27,7 @@ interface CourseTrackPreviewProps {
   onSelectCourse: (course: Course) => void;
   favoriteIds?: string[];
   onToggleFavorite?: (id: string) => void;
+  onRestrictedCourse?: () => void;
 }
 
 export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
@@ -36,6 +37,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
   onSelectCourse,
   favoriteIds = [],
   onToggleFavorite,
+  onRestrictedCourse,
 }) => {
   const isNative = track === 'native';
   const rawCourses = courses;
@@ -103,6 +105,10 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
     (selectedCategory !== 'الكل' ? 1 : 0) +
     (selectedLevel !== 'الكل' ? 1 : 0) +
     (searchQuery.trim() !== '' ? 1 : 0);
+
+  const handleCardClick = (course: Course) => {
+    onSelectCourse(course);
+  };
 
   return (
     <div
@@ -281,30 +287,6 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Quick Category Pills Strip */}
-        {categories.length > 2 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-1">
-            {categories.map((cat) => {
-              const active = selectedCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1 rounded-full text-[10.5px] font-bold shrink-0 transition-all cursor-pointer border ${
-                    active
-                      ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-primary)] shadow-xs mn-inverse'
-                      : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:text-[var(--mn-heading)] mn-panel'
-                  }`}
-                  data-mn-design="88a8f9d359"
-                >
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* ========================================================================= */}
@@ -320,7 +302,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
       {/* ========================================================================= */}
       {/* COURSES LIST / CARDS */}
       {/* ========================================================================= */}
-      <div className="max-w-xl mx-auto px-3 sm:px-4 mt-3 space-y-3">
+      <div className="max-w-xl mx-auto px-3 sm:px-4 mt-2.5 space-y-2.5">
         {filteredCourses.map((course) => {
           const isFavorited = favoriteIds.includes(course.id);
           return (
@@ -331,19 +313,19 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  onSelectCourse(course);
+                  handleCardClick(course);
                 }
               }}
-              onClick={() => onSelectCourse(course)}
-              className="bg-[var(--mn-surface)] rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] dark:hover:border-[#D6A43B] shadow-xs hover:shadow-md transition-all relative overflow-hidden group mn-panel text-right cursor-pointer select-none w-full block active:scale-[0.99]"
+              onClick={() => handleCardClick(course)}
+              className="bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] dark:hover:border-[#D6A43B] shadow-xs hover:shadow-md transition-all relative overflow-hidden group mn-panel text-right cursor-pointer select-none w-full block active:scale-[0.99]"
             >
               {/* Golden Top Line */}
-              <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-[#D6A43B] via-[#F3CE74] to-[#D6A43B] shadow-2xs" />
+              <div className="h-1 w-full bg-gradient-to-r from-[#D6A43B] via-[#F3CE74] to-[#D6A43B] shadow-2xs" />
 
-              <div className="p-3.5 space-y-2.5">
+              <div className="p-2.5 sm:p-3.5 space-y-2 sm:space-y-2.5">
                 {/* Header: Image & Badges & Favorite */}
-                <div className="flex items-start gap-3">
-                  <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-[var(--mn-border)] shrink-0 shadow-2xs">
+                <div className="flex items-start gap-2.5 sm:gap-3">
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-[var(--mn-border)] shrink-0 shadow-2xs">
                     <img
                       src={
                         course.imageUrl ||
@@ -352,12 +334,8 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       alt={course.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    {course.isFree ? (
-                      <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-[var(--mn-learning-success-600)]/90 text-white font-bold text-[8.5px]">
-                        مجانية
-                      </span>
-                    ) : (
-                      <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-amber-600/90 text-white font-bold text-[8.5px]">
+                    {!course.isFree && (
+                      <span className="absolute bottom-0.5 right-0.5 px-1 py-0.2 rounded bg-amber-600/90 text-white font-bold text-[7.5px] sm:text-[8px]">
                         مدفوعة
                       </span>
                     )}
@@ -365,14 +343,14 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
-                      <span className="px-2 py-0.5 rounded-full bg-[var(--mn-page)] dark:bg-white/10 text-[var(--mn-text-muted)] font-bold text-[9.5px]">
+                      <span className="px-1.5 py-0.5 rounded-md bg-[var(--mn-page)] dark:bg-white/10 text-[var(--mn-text-muted)] font-bold text-[8.5px] sm:text-[9.5px]">
                         {course.category || 'تأهيل أكاديمي'}
                       </span>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
                         {course.rating && (
-                          <div className="flex items-center gap-1 text-[var(--mn-accent-text)] text-[10.5px] font-bold">
-                            <Star className="w-3 h-3 fill-[var(--mn-accent-text)]" />
+                          <div className="flex items-center gap-0.5 sm:gap-1 text-[var(--mn-accent-text)] text-[9.5px] sm:text-[10.5px] font-bold">
+                            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-[var(--mn-accent-text)]" />
                             <span>{course.rating}</span>
                           </div>
                         )}
@@ -389,33 +367,27 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       </div>
                     </div>
 
-                    <h3 className="text-[13px] sm:text-[13.5px] font-bold text-[var(--mn-heading)] mt-1 leading-snug group-hover:text-[var(--mn-primary)] dark:group-hover:text-[#E5B54F] transition-colors">
+                    <h3 className="text-[12px] sm:text-[13.5px] font-bold text-[var(--mn-heading)] mt-0.5 sm:mt-1 leading-snug group-hover:text-[var(--mn-primary)] dark:group-hover:text-[#E5B54F] transition-colors line-clamp-2">
                       {course.title}
                     </h3>
 
-                    <p className="text-[10px] text-[var(--mn-text-muted)] font-semibold mt-0.5 truncate">
+                    <p className="text-[9.5px] sm:text-[10px] text-[var(--mn-text-muted)] font-semibold mt-0.5 truncate">
                       تقديم: {course.instructor || course.provider}
                     </p>
                   </div>
                 </div>
 
                 {/* Footer Badges & Action */}
-                <div className="flex items-center justify-between pt-2 border-t border-[var(--mn-border)]/60 text-[10.5px]">
-                  <div className="flex items-center gap-2.5 text-[var(--mn-text-muted)] font-semibold flex-wrap">
+                <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-[var(--mn-border)]/60 text-[9.5px] sm:text-[10.5px]">
+                  <div className="flex items-center gap-2 sm:gap-2.5 text-[var(--mn-text-muted)] font-semibold flex-wrap">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-[#142B5F] dark:text-[#E5B54F]" />
+                      <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#142B5F] dark:text-[#E5B54F]" />
                       <span>{course.duration || '25 ساعة'}</span>
                     </span>
                     {course.lessonsCount && (
                       <span className="flex items-center gap-1">
-                        <BookOpen className="w-3 h-3 text-[#142B5F] dark:text-[#E5B54F]" />
+                        <BookOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#142B5F] dark:text-[#E5B54F]" />
                         <span>{course.lessonsCount} محاضرات</span>
-                      </span>
-                    )}
-                    {course.studentsCount && (
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3 text-[#142B5F] dark:text-[#E5B54F]" />
-                        <span>{course.studentsCount.toLocaleString()} طالب</span>
                       </span>
                     )}
                   </div>
@@ -424,12 +396,12 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectCourse(course);
+                      handleCardClick(course);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white rounded-xl text-[10.5px] font-bold active:scale-95 transition-all shadow-2xs mn-inverse cursor-pointer"
+                    className="flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white rounded-lg sm:rounded-xl text-[9.5px] sm:text-[10.5px] font-bold active:scale-95 transition-all shadow-2xs mn-inverse cursor-pointer"
                     data-mn-design="26ecd1db9e"
                   >
-                    <PlayCircle className="w-3.5 h-3.5 text-[#E5B54F]" />
+                    <PlayCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#E5B54F]" />
                     <span>متابعة الدورة</span>
                   </button>
                 </div>

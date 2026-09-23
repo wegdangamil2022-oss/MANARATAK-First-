@@ -52,9 +52,7 @@ check('TYPO_NO_BLACK_WEIGHT',!/(font-black|font-extrabold)/.test(allPublic),'no 
 check('STYLE_NO_OLD_GREEN',!/(#044A37|#235D4E|#087A55|#E3B04B|#FBFCFB)/i.test(allPublic),'old identity removed from live public surfaces');
 check('STYLE_NO_IMPORTANT',!read(css).includes('!important'),'no new !important strategy');
 check('STYLE_NO_NONSEMANTIC_PALETTE',!/(?:blue|indigo|emerald|violet)-(?:50|100|200|300|400|500|600|700|800|900|950)/.test(allWebSrc),'no non-semantic Tailwind identity colors in apps/web/src');
-// Educational prose and downloadable course text may contain mathematical/check symbols.
-// Standalone UI icon elements must use the shared icon library.
-check('STYLE_NO_TEXT_SYMBOL_ICONS',!/<(?:span|i)\b[^>]*>\s*[❯▶►➜➡→←✓✕★◇]\s*<\//u.test(allWebSrc),'Lucide/icons instead of standalone text-symbol UI icons');
+check('STYLE_NO_TEXT_SYMBOL_ICONS',!/[❯▶►➜➡→←✓✕★◇]/u.test(allWebSrc),'Lucide/icons instead of text symbols');
 check('STYLE_NO_RANDOM_NEGATIVE_X',!/-mx-4\b/.test(allWebSrc),'no random -mx-4 public layout hacks');
 check('MOBILE_CONTAINER_9PX',contains(css,'--mn-container-mobile: 9px'),'mobile page gutter');
 check('MOBILE_GRID_TWO',contains(css,'.mn-detail-small-grid') && contains(css,'repeat(2, minmax(0, 1fr))'),'small cards 2-column mobile');
@@ -107,7 +105,7 @@ const roadmap='apps/web/src/features/public-template/components/RoadmapPreview.t
 for(const text of ['حدّد هدفك الأكاديمي','اكتشف وقارن الفرص','تحقق من الأهلية والمتطلبات','جهّز طلبك','احفظ وتابع تقدمك']) check(`ROADMAP_${checks.length}`,contains(roadmap,text),text);
 const notifications='apps/web/src/features/public-template/components/PushNotificationCenter.tsx';
 check('NOTIFY_LUCIDE',/from 'lucide-react'/.test(read(notifications)),'Lucide notifications');
-check('NOTIFY_NO_EMOJI',!/[🔥🎓⏰📚❯]/u.test(read(notifications)),'legacy notification emoji removed');
+check('NOTIFY_NO_EMOJI',!/[🔥🎓⏰📚❯]/u.test(allPublic),'legacy notification emoji removed');
 check('NOTIFY_UNREAD_GOLD',contains(notifications,'mn-accent') || contains(notifications,'mn-border-gold'),'gold unread state');
 check('NOTIFY_TOUCH_TARGETS',!/(?:h-9 w-9|w-9 h-9)[^\n]*(?:button|aria-label)/.test(read(notifications)) && contains(notifications,'h-10 w-10'),'notification actions >=40px');
 
@@ -145,7 +143,7 @@ check('DIRECT_COUNTRY_INJECT',contains(app,'countriesForView') && contains(app,'
 check('DIRECT_CAREER_INJECT',contains(app,'careersForView') && contains(app,'setDirectCareer'),'career direct record');
 
 // Router / single-admin architecture
-check('ROUTER_USES_OUTLET',/return\s*(?:<Outlet\s*\/>|\(\s*<React\.Suspense\b[^\n]*>\s*<Outlet\s*\/>\s*<\/React\.Suspense>\s*\))/u.test(read(router)),'matched public child routes render directly or through the lazy-loading boundary');
+check('ROUTER_USES_OUTLET',contains(router,'return <Outlet />'),'matched public child routes render');
 check('ROUTER_TOOL_EXECUTION',contains(router,"path: 'tools/:toolKey'") && contains(router,'element: <StudentToolPage />'),'tool execution route active');
 check('NO_SHADOW_ADMIN_DIR',!exists('apps/web/src/features/admin-preview'),'apps/admin remains the only admin UI');
 check('NO_LOCAL_ADMIN_SWITCH',notContains(router,'VITE_LOCAL_ADMIN_READ_ONLY'),'no local shadow-admin switch');

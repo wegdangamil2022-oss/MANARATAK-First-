@@ -53,22 +53,31 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="w-full min-h-[68px] sm:h-20 py-1 sm:py-0 px-3 sm:px-6 flex items-center">
           <div className="mn-header-row flex items-center justify-between gap-2 max-w-5xl mx-auto w-full">
             {/* Brand Identity & Official Logo */}
-            <div className="mn-header-brand flex items-center gap-2 sm:gap-2.5">
-              {/* Circular Logo Container */}
-              <button
-                type="button"
-                aria-label="منارتك — الرئيسية"
-                onClick={() => {
+            <div
+              onClick={() => {
+                onTabChange?.('home');
+                onSelectCategory?.('all');
+              }}
+              className="mn-header-brand flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
                   onTabChange?.('home');
                   onSelectCategory?.('all');
-                }}
-                className="w-[60px] h-[60px] sm:w-[68px] sm:h-[68px] rounded-full shrink-0 flex items-center justify-center cursor-pointer transition-transform active:scale-95 p-0 bg-transparent border-0 overflow-hidden"
+                }
+              }}
+              aria-label="منارتك — الصفحة الرئيسية"
+            >
+              {/* Circular Logo Container */}
+              <div
+                className="w-[60px] h-[60px] sm:w-[68px] sm:h-[68px] rounded-full shrink-0 flex items-center justify-center transition-transform group-active:scale-95 p-0 bg-transparent border-0 overflow-hidden"
               >
                 <ManaratakLogo size={68} className="w-full h-full rounded-full object-contain" />
-              </button>
+              </div>
 
               {/* Brand Typography */}
-              <div className="flex flex-col justify-center text-center sm:text-start">
+              <div className="flex flex-col justify-center text-center sm:text-start transition-opacity group-hover:opacity-90">
                 {/* Platform Name: MANARATAK */}
                 <span className="text-[15px] sm:text-lg font-bold leading-tight tracking-wider text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] uppercase font-sans text-center sm:text-start">
                   MANARATAK

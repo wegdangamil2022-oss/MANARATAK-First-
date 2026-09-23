@@ -145,7 +145,7 @@ export const FeaturedUniversities: React.FC<FeaturedUniversitiesProps> = ({
               onClick={onViewAllClick}
               className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >
-              <span className="text-[12px] sm:text-sm font-bold">عرض قائمة الجامعات الكاملة ({universities.length})</span>
+              <span className="text-[12px] sm:text-sm font-bold">عرض قائمة الجامعات الكاملة</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
             </button>
           </div>

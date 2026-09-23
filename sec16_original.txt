@@ -1,0 +1,88 @@
+{/* Sixteenth Header - Governorate Quotas Distribution Deep Dive */}
+          <DetailSectionHeader
+            icon={Scale}
+            title="كيف يتم توزيع حصص المحافظات؟"
+            level={3}
+            className="mb-4"
+          />
+
+          <div className="rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] shadow-sm overflow-hidden flex flex-col">
+            
+            {/* Intro text */}
+            <div className="p-4 sm:p-5 bg-[#142B5F]/5 dark:bg-[#F2CD78]/5 border-b border-[var(--mn-border)]">
+              <p className="text-[12px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78] leading-[1.85] text-justify">
+                من المهم أن تعرف أن وزارة التعليم العالي لا تقسم مقاعد كل دولة بالتساوي بين المحافظات، ولا يوجد عدد ثابت يتكرر كل عام لكل محافظة. وتوزيع الحصص يكون إجمالًا على أساس <strong className="text-[#142B5F] dark:text-[#F2CD78] font-bold">50% للمحافظات الجنوبية والشرقية</strong>، و<strong className="text-[#142B5F] dark:text-[#F2CD78] font-bold">50% لبقية المحافظات</strong>، ثم تتوزع المقاعد داخل كل مجموعة بحسب حصص المحافظات والمقاعد المتاحة خلال موسم المنح.
+              </p>
+            </div>
+
+            {/* Box 1: Balance in 2026/2027 */}
+            <div className="p-4 sm:p-5 border-b border-[var(--mn-border)] space-y-3">
+              <h5 className="flex items-center gap-2 text-[12.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif] mb-3">
+                <PieChart className="w-4 h-4 text-[#D6A43B]" />
+                تطبيق التوازن العام في دورة 2026/2027
+              </h5>
+              <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text)] leading-[1.85] text-justify">
+                وفي نتائج دورة 2026/2027 ظهر 205 مقاعد بكالوريوس؛ منها 200 مقعد لطلاب محافظات اليمن و5 مقاعد لفئة الخارج. وعند تجميع عدن ولحج وأبين وحضرموت وشبوة والضالع والمهرة وسقطرى حصلت هذه المحافظات على 101 مقعدًا، مقابل 99 مقعدًا لبقية المحافظات داخل اليمن؛ أي ما يقارب 50.5% مقابل 49.5%. وهذا يوضح عمليًا تطبيق التوازن العام بين المجموعتين في تلك الدورة.
+              </p>
+            </div>
+
+            {/* Box 2: 50/50 rule across the season */}
+            <div className="p-4 sm:p-5 border-b border-[var(--mn-border)] space-y-3">
+              <h5 className="flex items-center gap-2 text-[12.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif] mb-3">
+                <ArrowRightLeft className="w-4 h-4 text-[#D6A43B]" />
+                توزيع الموسم ككل وليس كل دولة بمفردها
+              </h5>
+              <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text)] leading-[1.85] text-justify">
+                لكن قاعدة 50/50 لا تعني أن كل دولة وحدها يجب أن توزع مقاعدها بالنصف. فقد تحصل إحدى المجموعتين على مقاعد أكثر في دولة، ثم يُعوَّض الفرق في دولة أخرى خلال نفس موسم المنح. فمثلًا في النتائج التي تم تحليلها كان توزيع الجزائر 22 مقعدًا مقابل 16، بينما في المغرب انعكس الوضع تقريبًا وأصبح 15 مقابل 21. لذلك يجب النظر إلى إجمالي الموسم وليس إلى كل دولة بمفردها.
+              </p>
+              <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text)] leading-[1.85] text-justify">
+                كذلك لا تحصل كل محافظة على العدد نفسه. فقد يكون لعدن عدد أكبر من محافظة أخرى، وقد تختلف حصة تعز أو حضرموت أو إب من سنة إلى أخرى بحسب المقاعد التي تصل إلى اليمن وكيف يتم توزيعها خلال الموسم. ولذلك لا يصح أن نقول مثلًا: «تعز لها دائمًا خمسة مقاعد طب» أو «عدن لها دائمًا عدد محدد»؛ فهذه الأعداد تتغير من دورة إلى أخرى.
+              </p>
+            </div>
+
+            {/* Box 3: Competition dynamics and practical examples */}
+            <div className="p-4 sm:p-5 border-b border-[var(--mn-border)] space-y-3">
+              <h5 className="flex items-center gap-2 text-[12.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif] mb-3">
+                <Users className="w-4 h-4 text-[#D6A43B]" />
+                كيف تتم المنافسة داخل المحافظة نفسها؟
+              </h5>
+              <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text)] leading-[1.85] text-justify">
+                وبعد تحديد حصة المحافظة تبدأ المنافسة بين طلاب المحافظة نفسها. وهنا لا يعتمد الاختيار على المعدل أو الترتيب وحده، بل على:
+              </p>
+              <div className="bg-[var(--mn-surface)] p-3 rounded-xl border border-[var(--mn-border)] text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78] leading-[1.85]">
+                ترتيب الطالب داخل محافظته <span className="text-[#D6A43B] px-1">+</span> رغباته المسجلة <span className="text-[#D6A43B] px-1">+</span> الدولة التي اختارها <span className="text-[#D6A43B] px-1">+</span> التخصص المطلوب <span className="text-[#D6A43B] px-1">+</span> عدد المقاعد المتاحة في الدولة والتخصص.
+              </div>
+
+              <div className="space-y-2 mt-3 pt-2">
+                <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text)] leading-[1.85] text-justify">
+                  <strong className="text-[#142B5F] dark:text-[#F2CD78] font-bold">مثال:</strong> إذا كان لمحافظة تعز مقعدان للطب، وكان الطالب الأول والثاني في الترتيب قد اختارا الطب، فقد يمتلئ المقعدان قبل الوصول إلى الطالب الثالث.
+                </p>
+                <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text)] leading-[1.85] text-justify">
+                  لكن إذا كان الطالب الأول اختار الهندسة، والطالب الثاني اختار الطب، والطالب الثالث اختار الطب، فقد يحصل الطالبان الثاني والثالث على مقعدي الطب.
+                </p>
+                <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text)] leading-[1.85] text-justify">
+                  <strong className="text-[#142B5F] dark:text-[#F2CD78] font-bold">ومثال آخر:</strong> قد يكون ترتيبك الرابع في محافظتك ومع ذلك تحصل على التخصص الذي تريده؛ لأن الطلاب الثلاثة الذين قبلك اختاروا دولًا أو تخصصات مختلفة. وفي المقابل قد يكون ترتيبك الثاني ولا تحصل على الطب إذا لم يكن هناك إلا مقعد واحد متاح وتم منحه للطالب الذي قبلك.
+                </p>
+                <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78] leading-[1.85] text-justify pt-1">
+                  لذلك ترتيب الطالب مهم، لكنه ليس العامل الوحيد الذي يحدد الدولة والتخصص الذي سيُرشح إليه.
+                </p>
+              </div>
+            </div>
+
+            {/* Box 4: Summary */}
+            <div className="p-4 sm:p-5 bg-[var(--mn-surface)]">
+              <div className="bg-[#142B5F]/5 dark:bg-[#F2CD78]/10 border border-[#142B5F]/20 dark:border-[#F2CD78]/30 p-3.5 sm:p-4 rounded-xl flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-[#D6A43B] shrink-0 mt-0.5" />
+                <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F2CD78] leading-[1.85] text-justify">
+                  <strong className="font-bold">الخلاصة:</strong> توزيع المقاعد يمر أولًا بتحديد حصة المحافظة ضمن التوزيع العام 50/50، ثم تُوزع هذه الحصة بين طلاب المحافظة وفق الترتيب والرغبات والدول والتخصصات والمقاعد المتاحة. كما أن عدد المقاعد وحصص المحافظات يتغير من سنة إلى أخرى، لذلك نستخدم نتائج 2026/2027 لفهم طريقة التوزيع والمنافسة، وليس باعتبار أعدادها ثابتة للسنة التالية.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="py-4" />
+          <div className="h-px bg-gradient-to-r from-transparent via-[var(--mn-border)] to-transparent w-full my-2"></div>
+          <div className="py-2" />
+
+          

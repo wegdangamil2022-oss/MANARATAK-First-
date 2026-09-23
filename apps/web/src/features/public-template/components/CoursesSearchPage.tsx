@@ -482,7 +482,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
                   <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] px-2.5 py-1 text-[9px] font-bold text-[var(--mn-success-text)] font-['Cairo',sans-serif]">
                     <CheckCircle2 className="h-3 w-3" />
-                    {course.freeCertificate ? 'مجانية + شهادة مجانية' : 'دورة مجانية'}
+                    {course.freeCertificate ? 'شهادة إتمام معتمدة' : 'محتوى معتمد'}
                   </span>
                   {course.freeCertificate && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] px-2.5 py-1 text-[9px] font-bold text-[var(--mn-accent-text)] font-['Cairo',sans-serif] mn-panel ">
