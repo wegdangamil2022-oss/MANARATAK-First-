@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { IIdentityRepository, IPasswordResetTokenRepository } from '@manaratak/domain';
 import { ISessionManager } from '@manaratak/core';
+import { assertPasswordPolicy } from './PasswordPolicy';
 
 export interface ResetPasswordInput {
   token: string;
@@ -45,17 +46,7 @@ export class ResetPasswordUseCase {
       throw error;
     }
 
-    if (!newPassword || newPassword.length < 8) {
-      const error: any = new Error('Password must be at least 8 characters long');
-      error.code = 'PASSWORD_TOO_SHORT';
-      throw error;
-    }
-
-    if (newPassword.length > 128) {
-      const error: any = new Error('Password must not exceed 128 characters');
-      error.code = 'PASSWORD_TOO_LONG';
-      throw error;
-    }
+    assertPasswordPolicy(newPassword);
 
     // 1. Hash incoming token with SHA-256
     const tokenHash = createHash('sha256').update(rawToken).digest('hex');
@@ -97,21 +88,19 @@ export class ResetPasswordUseCase {
     const prisma = this.prismaClient;
     if (prisma?.$transaction) {
       await prisma.$transaction(async (tx: any) => {
+        const consumed = await tx.passwordResetTokenRecord.updateMany({
+          where: { id: tokenRecord.id, tokenHash, consumedAt: null, expiresAt: { gt: new Date() } },
+          data: { consumedAt: now },
+        });
+        if (consumed.count !== 1) throw Object.assign(new Error('Reset token is no longer valid'), { code: 'RESET_TOKEN_ALREADY_USED' });
         // A. Update Credential
         const credDelegate = tx.credentialRecord || tx;
         if (credDelegate?.updateMany) {
-          await credDelegate.updateMany({
+          const updated = await credDelegate.updateMany({
             where: { identityId: tokenRecord.identityId, type: 'password' },
-            data: { passwordHash: newPasswordHash, disabled: false, updatedAt: now },
+            data: { passwordHash: newPasswordHash, updatedAt: now },
           });
-        }
-        // B. Consume Token
-        const tokenDelegate = tx.passwordResetTokenRecord || tx;
-        if (tokenDelegate?.update) {
-          await tokenDelegate.update({
-            where: { id: tokenRecord.id },
-            data: { consumedAt: now },
-          });
+          if (updated.count !== 1) throw new Error('PASSWORD_CREDENTIAL_MISSING_OR_DUPLICATE');
         }
         // C. Revoke Active Sessions
         const sessionDelegate = tx.sessionRecord || tx;
@@ -121,14 +110,14 @@ export class ResetPasswordUseCase {
             data: { revokedAt: now },
           });
         }
-      });
+      }, { isolationLevel: 'Serializable' });
     } else {
       // In-memory or repository fallback
       await this.tokenRepository.consume(tokenRecord.id, now);
       if (prisma?.credentialRecord?.updateMany) {
         await prisma.credentialRecord.updateMany({
           where: { identityId: tokenRecord.identityId, type: 'password' },
-          data: { passwordHash: newPasswordHash, disabled: false, updatedAt: now },
+          data: { passwordHash: newPasswordHash, updatedAt: now },
         });
       }
     }

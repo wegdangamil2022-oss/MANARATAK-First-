@@ -375,3 +375,4 @@ export * from './retention';
 export * from './career-alumni';
 
 export * from './certificates/contracts/ICertificateRenderingService';
+export * from './identity/repositories/IPasswordCredentialRepository';

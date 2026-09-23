@@ -203,3 +203,4 @@ export * from './certificates/EapCertificateArtifactStore';
 export * from './students/PrismaStudentApplicationTrackerRepository';
 
 export * from './students/ScholarshipStudentApplicationTrackerGateway';
+export * from './auth/PrismaPasswordCredentialRepository';

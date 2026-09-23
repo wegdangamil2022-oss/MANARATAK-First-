@@ -96,7 +96,7 @@ export class PrismaRoleAssignmentRepository implements ITransactionalRoleAssignm
         where: { id },
       });
     } catch (error) {
-      // Ignore if record not found
+      if ((error as { code?: string }).code !== 'P2025') throw error;
     }
   }
 }

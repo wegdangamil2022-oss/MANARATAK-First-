@@ -15,7 +15,11 @@ export class StudentWorkspaceOutboxWorker {
   ) {}
 
   public async runIdentityOnce(workerId: string): Promise<OutboxDispatchResult> {
-    return this.run(workerId, 'IDENTITY', ['IdentityCreated.v1', 'IdentityStatusChanged.v1']);
+    return this.run(workerId, 'IDENTITY', ['IdentityStatusChanged.v1']);
+  }
+
+  public async runRoleOnce(workerId: string): Promise<OutboxDispatchResult> {
+    return this.run(workerId, 'AUTHORIZATION', ['RoleAssignmentCreated']);
   }
 
   public async runLearningOnce(workerId: string): Promise<OutboxDispatchResult> {

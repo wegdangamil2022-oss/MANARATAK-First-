@@ -9,6 +9,7 @@ import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrinc
 import { authorizationRoleAssignmentSchema, authorizationRoleCreateSchema, parseStrict } from '../../validation/StrictControlPlaneSchemas.js';
 
 const KNOWN_ADMIN_PERMISSIONS = [
+  'admin:credentials:manage',
   'admin:identities:manage', 'admin:authorization:manage', 'admin:audit:manage', 'admin:assets:manage',
   'admin:imports:manage', 'admin:reference-data:manage', 'admin:academic-taxonomy:manage',
   'admin:international-tests:manage', 'admin:universities:manage', 'admin:majors:manage',

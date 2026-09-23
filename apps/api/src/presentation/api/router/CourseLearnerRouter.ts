@@ -4,15 +4,18 @@ import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@man
 import { CourseProgressUseCases, LearningPathUseCases } from '@manaratak/application';
 import { CourseProgressStatus } from '@manaratak/domain';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
+import { createStudentRoleGuard } from '../../security/StudentRoleGuard.js';
+import type { IRoleAssignmentRepository } from '@manaratak/domain';
 import { createCanonicalIdempotencyMiddleware } from '../../middleware/CanonicalIdempotencyMiddleware.js';
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 
 export class CourseLearnerRouter {
-  public static create(cradle: { courseProgressUseCases: CourseProgressUseCases; learningPathUseCases: LearningPathUseCases; tokenProvider: ITokenProvider; sessionManager: ISessionManager; principalAccessValidator: IPrincipalAccessValidator; apiIdempotencyStore: PrismaApiIdempotencyStore }): Router {
+  public static create(cradle: { roleAssignmentRepository: IRoleAssignmentRepository; courseProgressUseCases: CourseProgressUseCases; learningPathUseCases: LearningPathUseCases; tokenProvider: ITokenProvider; sessionManager: ISessionManager; principalAccessValidator: IPrincipalAccessValidator; apiIdempotencyStore: PrismaApiIdempotencyStore }): Router {
     const router = Router();
     const { courseProgressUseCases, learningPathUseCases, tokenProvider, sessionManager, principalAccessValidator, apiIdempotencyStore } = cradle;
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
     router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate());
+    router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
     router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
     const student = (req: Request) => { if (!req.authUserId) throw new Error('STUDENT_AUTHENTICATION_REQUIRED'); return req.authUserId; };
     const context = (req: Request) => ({ actorId: student(req), actorType: 'IDENTITY', correlationId: (req.headers['x-correlation-id'] as string | undefined) || (req.headers['x-request-id'] as string | undefined), source: 'student-course-api' });

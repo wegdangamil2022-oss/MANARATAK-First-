@@ -105,9 +105,11 @@ test('M4.3.1 - Password Recovery Targeted Test Suite', async (t) => {
             },
           },
           passwordResetTokenRecord: {
-            update: async ({ where, data }) => {
+            updateMany: async ({ where, data }) => {
+              const record = await tokenRepository.findByTokenHash(where.tokenHash);
+              if (!record || record.consumedAt || record.expiresAt <= new Date()) return { count: 0 };
               await tokenRepository.consume(where.id, data.consumedAt);
-              return { id: where.id, ...data };
+              return { count: 1 };
             },
           },
           sessionRecord: {

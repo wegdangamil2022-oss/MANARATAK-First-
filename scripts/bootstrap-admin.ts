@@ -102,12 +102,12 @@ async function main() {
         create: {
           identityId: targetIdentityId,
           displayName: 'Project Owner',
-          primaryEmail: bootstrapEmail,
+          primaryEmail: normalizedEmail,
           isEmailVerified: true,
           isPhoneVerified: false,
         },
         update: {
-          primaryEmail: bootstrapEmail,
+          primaryEmail: normalizedEmail,
           isEmailVerified: true,
         },
       });
@@ -203,7 +203,7 @@ async function main() {
           user: {
             create: {
               displayName: 'Project Owner',
-              primaryEmail: bootstrapEmail,
+              primaryEmail: normalizedEmail,
               isEmailVerified: true,
               isPhoneVerified: false,
             },

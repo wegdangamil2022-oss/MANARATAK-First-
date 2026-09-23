@@ -119,7 +119,7 @@ export class PrismaSessionManager implements ISessionManager {
       });
 
       return { userId: parent.identityId, sessionId: nextSessionId, familyId: parent.familyId };
-    });
+    }, { isolationLevel: 'Serializable' });
   }
 
   /** @deprecated Prefer findRefreshSession; retained for compatibility tests during migration. */

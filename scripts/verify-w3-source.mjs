@@ -236,7 +236,8 @@ check('MNT-AUD-0093 Course enrollment/progress mutations emit atomic owner event
   courseProgress.includes('atomicMutations.execute') && studentOutboxWorker.includes("['CourseEnrolled', 'CourseProgressUpdated']"));
 check('MNT-AUD-0016 Identity to StudentWorkspace bridge is idempotent on outbox identity and runtime-wired',
   studentOutboxGateway.includes('context.idempotencyKey !== entry.id') && studentOutboxGateway.includes('StudentIdentityCreated') &&
-  studentOutboxWorker.includes("['IdentityCreated.v1', 'IdentityStatusChanged.v1']") && apiServer.includes('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED'));
+  studentOutboxWorker.includes("['IdentityStatusChanged.v1']") && studentOutboxWorker.includes("['RoleAssignmentCreated']") &&
+  studentOutboxGateway.includes("role.roleId === 'student'") && apiServer.includes('runRoleOnce') && apiServer.includes('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED'));
 
 check('MNT-AUD-0017 CMS due schedules execute through a recurring durable background job',
   cmsHandler.includes('processDueSchedules') && apiServer.includes('CMS_SCHEDULED_PUBLISH_JOB_TYPE') && appConfig.includes('BACKGROUND_CMS_CRON'));

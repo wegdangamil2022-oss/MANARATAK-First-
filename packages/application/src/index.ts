@@ -200,3 +200,5 @@ export * from './retention/RetentionSweepUseCase';
 export * from './students/use-cases/StudentWorkspaceOutboxDeliveryGateway';
 export * from './students/use-cases/StudentWorkspaceOutboxWorker';
 export * from './background-jobs/handlers/NotificationDeliveryBackgroundJobHandler';
+export * from './identity/use-cases/ChangePasswordUseCase';
+export * from './identity/use-cases/DisablePasswordCredentialUseCase';

@@ -276,10 +276,13 @@ import {
   ResendVerificationUseCase,
   ForgotPasswordUseCase,
   ResetPasswordUseCase,
+  ChangePasswordUseCase,
+  DisablePasswordCredentialUseCase,
 } from '@manaratak/application';
 import {
   PrismaEmailVerificationTokenRepository,
   PrismaPasswordResetTokenRepository,
+  PrismaPasswordCredentialRepository,
   InMemoryPasswordResetTokenRepository,
   InMemoryEmailVerificationTokenRepository,
   CapturedEmailDeliveryGateway,
@@ -719,7 +722,7 @@ export function registerDependencies(
     studentWorkspaceUseCases: asFunction(({ studentWorkspaceRepository, studentWorkspaceDeliveryCache, assetReferencePolicy }) => new StudentWorkspaceUseCases(studentWorkspaceRepository, studentWorkspaceDeliveryCache, assetReferencePolicy)).scoped(),
     studentApplicationReminderGateway: asFunction(({ intentsUseCase, templatesUseCase }) => new StudentApplicationReminderNotificationGateway(intentsUseCase, templatesUseCase)).scoped(),
     studentApplicationTrackerUseCases: asFunction(({ studentApplicationTrackerRepository, studentApplicationScholarshipGateway, studentApplicationReminderGateway }) => new StudentApplicationTrackerUseCases(studentApplicationTrackerRepository, studentApplicationScholarshipGateway, studentApplicationReminderGateway)).scoped(),
-    studentWorkspaceOutboxDeliveryGateway: asFunction(({ studentWorkspaceUseCases }) => new StudentWorkspaceOutboxDeliveryGateway(studentWorkspaceUseCases)).scoped(),
+    studentWorkspaceOutboxDeliveryGateway: asFunction(({ studentWorkspaceUseCases, roleAssignmentRepository, identityRepository }) => new StudentWorkspaceOutboxDeliveryGateway(studentWorkspaceUseCases, roleAssignmentRepository, identityRepository)).scoped(),
     studentWorkspaceFanoutOutboxDeliveryGateway: asFunction(({ studentWorkspaceOutboxDeliveryGateway, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new FanoutOutboxDeliveryGateway([studentWorkspaceOutboxDeliveryGateway, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway])).scoped(),
     studentWorkspaceOutboxDispatcher: asFunction(({ transactionalOutboxStore, studentWorkspaceFanoutOutboxDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, studentWorkspaceFanoutOutboxDeliveryGateway)).scoped(),
     studentWorkspaceOutboxWorker: asFunction(({ studentWorkspaceOutboxDispatcher }) => new StudentWorkspaceOutboxWorker(studentWorkspaceOutboxDispatcher)).scoped(),
@@ -822,8 +825,8 @@ export function registerDependencies(
     // Authorization
     manageRolesUseCase: asFunction(({ roleRepository, atomicDomainMutationCoordinator }) =>
       new ManageRolesUseCase(roleRepository, atomicDomainMutationCoordinator)).scoped(),
-    assignRoleUseCase: asFunction(({ roleAssignmentRepository, atomicDomainMutationCoordinator }) =>
-      new AssignRoleUseCase(roleAssignmentRepository, atomicDomainMutationCoordinator)).scoped(),
+    assignRoleUseCase: asFunction(({ roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository }) =>
+      new AssignRoleUseCase(roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository)).scoped(),
     manageEmergencyAccessUseCase: asFunction(({ emergencyAccessRepository }) =>
       new ManageEmergencyAccessUseCase(emergencyAccessRepository)).scoped(),
     evaluateAccessUseCase: asFunction(({ authEvaluatorService }) => new EvaluateAccessUseCase(authEvaluatorService)).scoped(),
@@ -934,7 +937,7 @@ export function registerDependencies(
       const ttl = Number(readConfig<number | string>('SESSION_TTL_SECONDS') ?? 604800);
       return new PrismaSessionManager(prisma, ttl);
     }).singleton(),
-    principalAccessValidator: asFunction(({ identityRepository }) => new IdentityPrincipalAccessValidator(identityRepository)).singleton(),
+    principalAccessValidator: asFunction(({ identityRepository, passwordCredentialRepository }) => new IdentityPrincipalAccessValidator(identityRepository, passwordCredentialRepository)).singleton(),
     authService: asFunction(({ tokenProvider, sessionManager, credentialVerifier, principalAccessValidator }) => new AuthService(tokenProvider, sessionManager, principalAccessValidator, credentialVerifier)).singleton(),
     credentialVerifier: asFunction(({ prisma }) => new PrismaCredentialVerifier(prisma)).singleton(),
     emailVerificationTokenRepository: asFunction(({ prisma }) => {
@@ -971,6 +974,13 @@ export function registerDependencies(
       identityRepository, tokenRepository: passwordResetTokenRepository, sessionManager,
       passwordHasher: { hash: (pw: string) => PasswordHasher.hash(pw) }, prismaClient: prisma,
     })).singleton(),
+    passwordCredentialRepository: asFunction(({ prisma }) => new PrismaPasswordCredentialRepository(prisma)).singleton(),
+    disablePasswordCredentialUseCase: asFunction(({ passwordCredentialRepository, principalAccessValidator, authEvaluatorService }) => new DisablePasswordCredentialUseCase(
+      passwordCredentialRepository, principalAccessValidator, authEvaluatorService,
+    )).singleton(),
+    changePasswordUseCase: asFunction(({ passwordCredentialRepository, principalAccessValidator }) => new ChangePasswordUseCase(
+      passwordCredentialRepository, principalAccessValidator, PasswordHasher,
+    )).singleton(),
     authRouter: asFunction((cradle) => AuthRouter.create(cradle)).singleton(),
     authorizationAdminRouter: asFunction((cradle) => AuthorizationAdminRouter.create(cradle)).singleton(),
     authorizationRuntimeRouter: asFunction((cradle) => AuthorizationRuntimeRouter.create(cradle)).singleton(),

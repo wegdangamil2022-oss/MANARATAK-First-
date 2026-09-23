@@ -10,7 +10,7 @@ export interface ContactRegistryProps {
 
 export class ContactRegistry extends Entity<ContactRegistryProps> {
   constructor(props: ContactRegistryProps, id?: Identifier<string | number>) {
-    super(props, id);
+    super({ ...props, primaryEmail: props.primaryEmail.trim().toLowerCase() }, id);
     this.validate();
   }
 
@@ -43,7 +43,7 @@ export class ContactRegistry extends Entity<ContactRegistryProps> {
   }
 
   public updateEmail(newEmail: string): void {
-    this.props.primaryEmail = newEmail;
+    this.props.primaryEmail = newEmail.trim().toLowerCase();
     this.props.isEmailVerified = false;
     this.validate();
   }

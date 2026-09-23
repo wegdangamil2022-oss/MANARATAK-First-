@@ -111,6 +111,7 @@ async function bootstrap() {
         try {
           await observeWorkerIteration('student-workspace-outbox', async () => {
             await worker.runIdentityOnce(`${workerId}-identity`);
+            await worker.runRoleOnce(`${workerId}-role`);
             await worker.runLearningOnce(`${workerId}-learning`);
           });
           pollingWorkerRuntimeRegistry.success('student-workspace-outbox');

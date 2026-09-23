@@ -15,13 +15,14 @@ describe('PrismaCredentialVerifier', () => {
     verifier = new PrismaCredentialVerifier(mockPrisma);
   });
 
-  it('should authenticate a valid active user with correct password', async () => {
+  it('should authenticate a verified active user with correct password', async () => {
     const plainPassword = 'supersecretpassword';
     const passwordHash = await PasswordHasher.hash(plainPassword);
 
     mockPrisma.identityRecord.findUnique.mockResolvedValue({
       id: 'user-123',
-      status: 'PROVISIONED',
+      status: 'ACTIVE',
+      user: { isEmailVerified: true },
       account: {
         accessState: 'Active'
       },

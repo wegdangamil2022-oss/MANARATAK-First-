@@ -15,6 +15,7 @@ import {
   IEmailDeliveryGateway,
 } from '@manaratak/domain';
 import { Identifier, IPasswordHasher } from '@manaratak/core';
+import { assertPasswordPolicy } from './PasswordPolicy';
 
 export interface RegisterUserInput {
   displayName: string;
@@ -55,9 +56,7 @@ export class RegisterUserUseCase {
       throw new Error('A valid primary email is required');
     }
 
-    if (password.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
-    }
+    assertPasswordPolicy(password);
 
     // 1. Check for existing identity with this email
     const existing = await this.dependencies.identityRepository.findByEmail(normalizedEmail);
@@ -125,6 +124,7 @@ export class RegisterUserUseCase {
     const prisma = this.dependencies.prismaClient;
     if (prisma?.$transaction) {
       await prisma.$transaction(async (tx: any) => {
+        if (!await tx.roleRecord.findUnique({ where: { id: 'student' } })) throw new Error('STUDENT_ROLE_NOT_CONFIGURED');
         // Save identity via delegate
         const identityDelegate = tx.identityRecord || tx;
         await identityDelegate.create({
@@ -186,14 +186,21 @@ export class RegisterUserUseCase {
 
         // Assign student role if table exists
         if (tx.roleAssignmentRecord?.create) {
+          const assignmentId = randomUUID();
           await tx.roleAssignmentRecord.create({
             data: {
-              id: randomUUID(),
+              id: assignmentId,
               identityId,
               roleId: 'student',
               assignedAt: new Date(),
             },
           });
+          await tx.transactionalOutboxRecord.create({ data: {
+            id: randomUUID(), domain: 'AUTHORIZATION', eventType: 'RoleAssignmentCreated',
+            aggregateType: 'ROLE_ASSIGNMENT', aggregateId: assignmentId,
+            payload: { assignmentId, identityId, roleId: 'student' },
+            metadata: { source: 'public-registration', schemaVersion: '1.0.0' },
+          } });
         }
       });
     } else {

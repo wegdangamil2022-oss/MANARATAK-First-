@@ -4,6 +4,17 @@ import { resolveAuthenticatedDestination } from './authRouting';
 const baseIdentity = { principalId: 'identity-1', displayName: 'User' };
 
 describe('trusted post-login routing', () => {
+  it('routes the canonical Student role even when its display name is localized', () => {
+    expect(resolveAuthenticatedDestination({ ...baseIdentity, roles: ['student'], roleNames: ['طالب مسجل'] })).toEqual({ kind: 'student', path: '/student' });
+  });
+
+  it('routes Owner authority through the same administrative destination', () => {
+    expect(resolveAuthenticatedDestination({ ...baseIdentity, roleNames: ['Owner'], effectivePermissions: ['admin:*'] })).toEqual({ kind: 'admin', path: '/admin/dashboard' });
+  });
+
+  it('does not infer Student persona from a Staff role label containing student', () => {
+    expect(resolveAuthenticatedDestination({ ...baseIdentity, roleNames: ['student-support-staff'] })).toEqual({ kind: 'denied', reason: 'NO_ALLOWED_ROLE' });
+  });
   it('routes a student session to the student workspace', () => {
     expect(resolveAuthenticatedDestination({ ...baseIdentity, roleNames: ['student'], effectivePermissions: [] })).toEqual({ kind: 'student', path: '/student' });
   });

@@ -28,6 +28,12 @@ export class AuthService implements IAuthService {
     const sessionId = randomUUID();
     const tokens = await this.tokenProvider.generateTokens({ userId, sessionId });
     await this.sessionManager.createSession(userId, tokens.refreshToken, sessionId);
+    // Close a credential/lifecycle change between password verification and session creation.
+    if (!await this.principalAccessValidator.isAuthenticationAllowed(userId)
+      || !await this.credentialVerifier.verify(userId, credential)) {
+      await this.sessionManager.revokeAllSessions(userId);
+      throw new Error('Authentication not permitted');
+    }
     return tokens;
   }
 

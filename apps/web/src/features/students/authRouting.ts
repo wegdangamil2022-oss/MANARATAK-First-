@@ -19,14 +19,14 @@ export function hasAdminAuthority(permissions: string[] = []): boolean {
 }
 
 export function hasAdministrativeRole(roleNames: string[] = []): boolean {
-  const allowed = new Set(['admin', 'administrator', 'super admin', 'superadmin', 'manager', 'مدير', 'مدير النظام']);
+  const allowed = new Set(['owner', 'admin', 'administrator', 'super admin', 'superadmin', 'manager', 'مدير', 'مدير النظام']);
   return roleNames.some((role) => allowed.has(normalized(role)));
 }
 
 export function hasStudentRole(roleNames: string[] = []): boolean {
   return roleNames.some((role) => {
     const value = normalized(role);
-    return value === 'student' || value === 'learner' || value.includes('student') || value.includes('learner') || value.includes('طالب');
+    return value === 'student' || value === 'طالب';
   });
 }
 
@@ -38,6 +38,6 @@ export function resolveAuthenticatedDestination(
     const raw = (adminBaseUrl || '').trim();
     return { kind: 'admin', path: raw && raw !== '/admin' ? raw.replace(/\/$/, '') : '/admin/dashboard' };
   }
-  if (hasStudentRole(identity.roleNames)) return { kind: 'student', path: '/student' };
+  if (identity.roles?.includes('student') || hasStudentRole(identity.roleNames)) return { kind: 'student', path: '/student' };
   return { kind: 'denied', reason: 'NO_ALLOWED_ROLE' };
 }

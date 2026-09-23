@@ -1,5 +1,5 @@
 import { IPrincipalAccessValidator } from '@manaratak/core';
-import { AccountAccessState, IIdentityRepository, LifeStatus } from '@manaratak/domain';
+import { AccountAccessState, IIdentityRepository, IPasswordCredentialRepository, LifeStatus } from '@manaratak/domain';
 
 /**
  * Canonical authentication eligibility policy for human/service identities.
@@ -7,7 +7,7 @@ import { AccountAccessState, IIdentityRepository, LifeStatus } from '@manaratak/
  * denial cannot diverge between Admin and learner/control-plane boundaries.
  */
 export class IdentityPrincipalAccessValidator implements IPrincipalAccessValidator {
-  constructor(private readonly identityRepository: IIdentityRepository) {}
+  constructor(private readonly identityRepository: IIdentityRepository, private readonly credentials?: IPasswordCredentialRepository) {}
 
   public async isAuthenticationAllowed(principalId: string): Promise<boolean> {
     try {
@@ -18,6 +18,10 @@ export class IdentityPrincipalAccessValidator implements IPrincipalAccessValidat
       if (identity.status !== LifeStatus.ACTIVE) return false;
       if (identity.account.accessState !== AccountAccessState.ACTIVE) return false;
       if (identity.user && !identity.user.contactRegistry.isEmailVerified) return false;
+      if (identity.user && this.credentials) {
+        const credential = await this.credentials.find(principalId);
+        if (!credential || credential.disabled) return false;
+      }
 
       return true;
     } catch {

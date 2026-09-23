@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { adminApiClient } from './api/client';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { ScholarshipListPage } from './pages/ScholarshipListPage';
@@ -58,7 +58,8 @@ function AdminLayout() {
     verifyAdminSession().then((permissions) => {
       if (!active) return;
       setAdminPermissions(permissions ?? []);
-      setAdminAccess(permissions ? 'authorized' : 'unauthorized');
+      setAdminAccess(permissions?.length ? 'authorized' : 'unauthorized');
+      if (permissions === null) window.location.replace(unifiedLoginUrl());
     });
     return () => {
       active = false;
@@ -180,7 +181,7 @@ function AdminLayout() {
             {adminAccess === 'loading' ? (
               <div className="mx-auto mt-16 max-w-xl text-center text-sm text-[#203442]/60">{t('loading')}</div>
             ) : (
-              <AdminAccessGate onUnlock={(permissions) => { setAdminPermissions(permissions); setAdminAccess('authorized'); }} />
+              <AdminAccessGate />
             )}
           </main>
         )}
@@ -189,81 +190,20 @@ function AdminLayout() {
   );
 }
 
-function AdminAccessGate({ onUnlock }: { onUnlock: (permissions: string[]) => void }) {
+function unifiedLoginUrl() {
+  const publicBase = (import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
+  return `${publicBase}/login`;
+}
+
+function AdminAccessGate() {
   const { t } = useTranslation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError(null);
-    if (!email.trim() || !password) {
-      setError(t('admin_login_missing_credentials'));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await adminApiClient.request<{
-        data?: { authenticated?: boolean };
-      }>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
-      if (!response.data?.authenticated) throw new Error('Authentication did not establish a session.');
-
-      const permissions = await verifyAdminSession();
-      if (!permissions) {
-        clearAdminSession();
-        setError(t('admin_login_no_permission'));
-        return;
-      }
-      onUnlock(permissions);
-    } catch {
-      clearAdminSession();
-      setError(t('admin_login_verification_failed'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="mx-auto mt-16 max-w-3xl overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
-      <div className="bg-[#142B5F] p-8 text-white">
-        <p className="mb-2 text-sm font-bold uppercase tracking-wide text-[#F4D999]">{t('admin_login_access_label')}</p>
-        <h2 className="text-3xl font-bold mb-3">{t('admin_login_portal_title')}</h2>
-        <p className="text-[#DDEFF2]">{t('admin_login_portal_desc')}</p>
-      </div>
-      <form onSubmit={submit} className="p-8 space-y-4">
-        <label className="block text-sm font-medium" htmlFor="admin-email">{t('admin_login_email')}</label>
-        <input
-          id="admin-email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          type="email"
-          autoComplete="username"
-          className="w-full rounded-xl border border-[#DDEFF2] px-3 py-2 focus:border-[#21A7B4] focus:outline-none focus:ring-2 focus:ring-[#21A7B4]/15"
-        />
-        <label className="block text-sm font-medium" htmlFor="admin-password">{t('admin_login_password')}</label>
-        <input
-          id="admin-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          type="password"
-          autoComplete="current-password"
-          className="w-full rounded-xl border border-[#DDEFF2] px-3 py-2 focus:border-[#21A7B4] focus:outline-none focus:ring-2 focus:ring-[#21A7B4]/15"
-        />
-        {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">{error}</div>}
-        <button disabled={loading} type="submit" className="w-full rounded-xl bg-[#142B5F] px-4 py-2 font-bold text-white transition hover:bg-[#0E7C86] disabled:opacity-60">
-          {loading ? t('admin_login_verifying') : t('admin_login_submit')}
-        </button>
-      </form>
+    <div className="mx-auto mt-16 max-w-xl rounded-3xl border border-[#DDEFF2] bg-white p-8 text-center">
+      <p role="alert">{t('admin_login_no_permission')}</p>
+      <a href={unifiedLoginUrl()} className="mt-4 inline-block underline">{t('admin_login_submit')}</a>
     </div>
   );
 }
-
 function clearAdminSession() {
   localStorage.removeItem('manaratak_admin_access');
   localStorage.removeItem('manaratak_admin_bearer');
@@ -278,7 +218,7 @@ async function verifyAdminSession(): Promise<string[] | null> {
     const permissions = response.data?.effectivePermissions || [];
     return permissions.some((permission) => permission === '*' || permission === 'admin:*' || permission.startsWith('admin:'))
       ? permissions
-      : null;
+      : [];
   } catch {
     clearAdminSession();
     return null;

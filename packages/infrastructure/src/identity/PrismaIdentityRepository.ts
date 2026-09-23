@@ -23,7 +23,7 @@ export class PrismaIdentityRepository implements IIdentityRepository {
 
   public async findByEmail(email: string): Promise<Identity | null> {
     const record = await this.delegate.findFirst({
-      where: { user: { primaryEmail: { equals: email, mode: 'insensitive' } } },
+      where: { user: { primaryEmail: { equals: email.trim().toLowerCase(), mode: 'insensitive' } } },
       include: { user: true, account: true }
     });
     if (!record) return null;
@@ -134,7 +134,7 @@ export class PrismaIdentityRepository implements IIdentityRepository {
 
   public async isEmailUnique(email: string): Promise<boolean> {
     const existing = await this.delegate.findFirst({
-      where: { user: { primaryEmail: email } },
+      where: { user: { primaryEmail: email.trim().toLowerCase() } },
       select: { id: true }
     });
     return !existing;

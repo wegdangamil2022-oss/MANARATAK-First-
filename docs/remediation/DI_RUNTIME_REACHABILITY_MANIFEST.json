@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Final source reconciliation after W7 — 2026-09-07",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 322,
-  "reachableCount": 322,
+  "registrationCount": 333,
+  "reachableCount": 333,
   "unreachable": [],
   "registrations": [
     {
@@ -486,7 +486,6 @@
         "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
-        "certificateArtifactStore",
         "courseImportArtifactUseCase",
         "ingestAssetUseCase",
         "processAssetLifecycleUseCase"
@@ -513,7 +512,9 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "atomicDomainMutationCoordinator",
-        "roleAssignmentRepository"
+        "identityRepository",
+        "roleAssignmentRepository",
+        "roleRepository"
       ]
     },
     {
@@ -614,6 +615,7 @@
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
       ],
       "reachableThroughRegistrations": [
+        "disablePasswordCredentialUseCase",
         "evaluateAccessUseCase"
       ],
       "dependencies": [
@@ -867,7 +869,6 @@
       ],
       "dependencies": [
         "assetRecordRepository",
-        "assetStorageGateway",
         "ingestAssetUseCase",
         "processAssetLifecycleUseCase"
       ]
@@ -1004,6 +1005,18 @@
         "courseRepository",
         "identityRepository",
         "learningPathRepository"
+      ]
+    },
+    {
+      "name": "changePasswordUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "passwordCredentialRepository",
+        "principalAccessValidator"
       ]
     },
     {
@@ -1463,6 +1476,19 @@
       ]
     },
     {
+      "name": "disablePasswordCredentialUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "authEvaluatorService",
+        "passwordCredentialRepository",
+        "principalAccessValidator"
+      ]
+    },
+    {
       "name": "durableBackgroundJobQueue",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -1484,6 +1510,32 @@
         "backgroundJobHandlerRegistry",
         "backgroundWorkerRuntimeState",
         "durableBackgroundJobQueue"
+      ]
+    },
+    {
+      "name": "emailDeliveryGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "forgotPasswordUseCase",
+        "registerUserUseCase",
+        "resendVerificationUseCase"
+      ],
+      "dependencies": []
+    },
+    {
+      "name": "emailVerificationTokenRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "registerUserUseCase",
+        "resendVerificationUseCase",
+        "verifyEmailUseCase"
+      ],
+      "dependencies": [
+        "prisma"
       ]
     },
     {
@@ -1724,6 +1776,19 @@
       "dependencies": []
     },
     {
+      "name": "forgotPasswordUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "emailDeliveryGateway",
+        "identityRepository",
+        "passwordResetTokenRepository"
+      ]
+    },
+    {
       "name": "getIdentityUseCase",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -1752,15 +1817,22 @@
       "reachableThroughRegistrations": [
         "activateIdentityUseCase",
         "archiveIdentityUseCase",
+        "assignRoleUseCase",
         "certificateUseCases",
+        "forgotPasswordUseCase",
         "getIdentityUseCase",
         "listIdentitiesUseCase",
         "principalAccessValidator",
         "provisionIdentityUseCase",
         "purgeIdentityUseCase",
+        "registerUserUseCase",
+        "resendVerificationUseCase",
+        "resetPasswordUseCase",
+        "studentWorkspaceOutboxDeliveryGateway",
         "suspendIdentityUseCase",
         "updateContactUseCase",
-        "updateProfileUseCase"
+        "updateProfileUseCase",
+        "verifyEmailUseCase"
       ],
       "dependencies": [
         "prisma"
@@ -2488,6 +2560,33 @@
       ]
     },
     {
+      "name": "passwordCredentialRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "changePasswordUseCase",
+        "disablePasswordCredentialUseCase",
+        "principalAccessValidator"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "passwordResetTokenRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "forgotPasswordUseCase",
+        "resetPasswordUseCase"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
       "name": "phase10CatalogRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2541,10 +2640,13 @@
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
       ],
       "reachableThroughRegistrations": [
-        "authService"
+        "authService",
+        "changePasswordUseCase",
+        "disablePasswordCredentialUseCase"
       ],
       "dependencies": [
-        "identityRepository"
+        "identityRepository",
+        "passwordCredentialRepository"
       ]
     },
     {
@@ -2552,7 +2654,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/app.ts",
-        "apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts"
+        "apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts",
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
       ],
       "reachableThroughRegistrations": [
         "academicTaxonomyRepository",
@@ -2581,6 +2684,7 @@
         "courseRepository",
         "credentialVerifier",
         "degreeLevelRepository",
+        "emailVerificationTokenRepository",
         "emergencyAccessRepository",
         "enterpriseEventRepo",
         "eventPublishingGateway",
@@ -2599,10 +2703,14 @@
         "notificationIntentRepo",
         "notificationPrefGateway",
         "notificationTemplateRepo",
+        "passwordCredentialRepository",
+        "passwordResetTokenRepository",
         "phase10CatalogRepository",
         "policyRepository",
         "referenceDataRepository",
+        "registerUserUseCase",
         "renderingGateway",
+        "resetPasswordUseCase",
         "retentionDecisionRepository",
         "roleAssignmentRepository",
         "roleRepository",
@@ -2804,6 +2912,21 @@
       ]
     },
     {
+      "name": "registerUserUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "emailDeliveryGateway",
+        "emailVerificationTokenRepository",
+        "identityRepository",
+        "prisma",
+        "roleAssignmentRepository"
+      ]
+    },
+    {
       "name": "renderingGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2812,6 +2935,33 @@
       ],
       "dependencies": [
         "prisma"
+      ]
+    },
+    {
+      "name": "resendVerificationUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "emailDeliveryGateway",
+        "emailVerificationTokenRepository",
+        "identityRepository"
+      ]
+    },
+    {
+      "name": "resetPasswordUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "identityRepository",
+        "passwordResetTokenRepository",
+        "prisma",
+        "sessionManager"
       ]
     },
     {
@@ -2865,11 +3015,15 @@
       "name": "roleAssignmentRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/AuthRouter.ts"
+        "apps/api/src/presentation/api/router/AuthRouter.ts",
+        "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
       ],
       "reachableThroughRegistrations": [
         "assignRoleUseCase",
-        "authEvaluatorService"
+        "authEvaluatorService",
+        "registerUserUseCase",
+        "studentWorkspaceOutboxDeliveryGateway"
       ],
       "dependencies": [
         "prisma"
@@ -2882,6 +3036,7 @@
         "apps/api/src/presentation/api/router/AuthRouter.ts"
       ],
       "reachableThroughRegistrations": [
+        "assignRoleUseCase",
         "authEvaluatorService",
         "manageRolesUseCase"
       ],
@@ -3249,6 +3404,7 @@
         "archiveIdentityUseCase",
         "authService",
         "purgeIdentityUseCase",
+        "resetPasswordUseCase",
         "suspendIdentityUseCase"
       ],
       "dependencies": [
@@ -3716,6 +3872,8 @@
         "studentWorkspaceFanoutOutboxDeliveryGateway"
       ],
       "dependencies": [
+        "identityRepository",
+        "roleAssignmentRepository",
         "studentWorkspaceUseCases"
       ]
     },
@@ -3971,6 +4129,18 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
+        "identityRepository"
+      ]
+    },
+    {
+      "name": "verifyEmailUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "emailVerificationTokenRepository",
         "identityRepository"
       ]
     },

@@ -97,6 +97,8 @@
     "CourseTaxonomyResolution": "learning",
     "CourseVersion": "learning",
     "CredentialRecord": "identity",
+    "EmailVerificationTokenRecord": "identity",
+    "PasswordResetTokenRecord": "identity",
     "DegreeLevel": "reference",
     "EnterpriseEventRecord": "events",
     "ExternalCourseProvider": "learning",

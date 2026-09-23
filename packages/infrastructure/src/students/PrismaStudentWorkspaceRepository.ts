@@ -659,6 +659,14 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       }
       if (!workspace) throw new Error('STUDENT_WORKSPACE_NOT_FOUND');
 
+      if (event.eventType === 'StudentIdentityActivated' && workspace.status === StudentWorkspaceStatus.SUSPENDED) {
+        workspace = await tx.studentWorkspace.update({ where: { id: workspace.id }, data: {
+          status: StudentWorkspaceStatus.ACTIVE, suspendedAt: null, version: { increment: 1 },
+        } });
+        await this.appendOutbox(tx, workspace.id, 'StudentWorkspaceActivated',
+          { studentReferenceId: event.studentReferenceId, sourceEventId: event.eventId }, systemActor);
+      }
+
       if (event.eventType === 'StudentIdentitySuspended' || event.eventType === 'StudentIdentityArchived') {
         const nextStatus = event.eventType === 'StudentIdentitySuspended' ? StudentWorkspaceStatus.SUSPENDED : StudentWorkspaceStatus.ARCHIVED;
         if (workspace.status !== StudentWorkspaceStatus.ARCHIVED && workspace.status !== nextStatus) {
@@ -673,7 +681,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       }
 
       const inboxId = randomUUID();
-      const syncBlocked = !['StudentIdentityCreated', 'StudentIdentitySuspended', 'StudentIdentityArchived'].includes(event.eventType) &&
+      const syncBlocked = !['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'].includes(event.eventType) &&
         (workspace.status === StudentWorkspaceStatus.SUSPENDED || workspace.status === StudentWorkspaceStatus.ARCHIVED || workspace.status === StudentWorkspaceStatus.INITIALIZING);
       await tx.studentWorkspaceEventInbox.create({ data: {
         id: inboxId, eventId: event.eventId, studentReferenceId: event.studentReferenceId, sourceDomain: event.sourceDomain,
@@ -688,7 +696,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         description: event.description, sourceDomain: event.sourceDomain, sourceReferenceId: event.sourceReferenceId,
         metadata: json({ ...event.metadata, sourceEventId: event.eventId }), occurredAt: event.occurredAt,
       }});
-      if (!['StudentIdentityCreated', 'StudentIdentitySuspended', 'StudentIdentityArchived'].includes(event.eventType)) {
+      if (!['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'].includes(event.eventType)) {
         await this.projectIntegrationEvent(tx, event);
         if (event.notification) await tx.studentNotificationProjection.create({ data: {
           id: randomUUID(), studentReferenceId: event.studentReferenceId, category: event.notification.category, title: event.notification.title,

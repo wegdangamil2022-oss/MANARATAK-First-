@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@manaratak/core';
 import type { ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@manaratak/application';
@@ -8,6 +8,9 @@ import { IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from 
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { clearAuthCookies, readAccessCookie, readRefreshCookie, setAuthCookies } from '../../security/HttpOnlyAuthCookies.js';
 import { createHash } from 'node:crypto';
+import type { ChangePasswordUseCase, DisablePasswordCredentialUseCase } from '@manaratak/application';
+import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
+import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 
 export class AuthRouter {
   public static create(cradle: { 
@@ -23,10 +26,18 @@ export class AuthRouter {
     registerUserUseCase?: RegisterUserUseCase;
     verifyEmailUseCase?: VerifyEmailUseCase;
     resendVerificationUseCase?: ResendVerificationUseCase;
+    changePasswordUseCase?: ChangePasswordUseCase;
+    disablePasswordCredentialUseCase?: DisablePasswordCredentialUseCase;
   }): Router {
     const { authService, identityRepository, securityService, roleAssignmentRepository, roleRepository, tokenProvider, sessionManager, principalAccessValidator, credentialVerifier } = cradle;
     const router = Router();
     const responseFormatter = new ResponseFormatter('v1');
+    const credentialCsrfGuard = (req: Request, res: Response, next: NextFunction) => {
+      if (readAccessCookie(req) && !readRefreshCookie(req)) {
+        res.status(403).json({ error: { code: 'CSRF_SESSION_REQUIRED' } }); return;
+      }
+      return SecurityMiddlewareFactory.createCsrfGuard(securityService)(req, res, next);
+    };
 
     const emailGateway = (cradle as any).emailDeliveryGateway || new CapturedEmailDeliveryGateway();
     const passwordResetTokenRepo = (cradle as any).passwordResetTokenRepository || (cradle as any).prismaPasswordResetTokenRepository || new InMemoryPasswordResetTokenRepository();
@@ -44,6 +55,45 @@ export class AuthRouter {
       },
       prismaClient: (cradle as any).prisma,
     });
+
+    router.post('/change-password',
+      (req, res, next) => {
+        if (!tokenProvider || !sessionManager) { res.status(401).json({ message: 'Unauthorized' }); return; }
+        return new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate()(req, res, next);
+      },
+      credentialCsrfGuard,
+      async (req, res) => {
+        try {
+          const limit = await securityService.getRateLimiter().consume(`auth:change-password:${req.authUserId}`, 5, 15 * 60 * 1000);
+          if (!limit.allowed) { res.status(429).json({ error: { code: 'AUTH_RATE_LIMITED' } }); return; }
+          const input = z.object({ currentPassword: z.string().min(1).max(128), newPassword: z.string().min(8).max(128) }).strict().safeParse(req.body);
+          if (!input.success) { res.status(400).json({ error: { code: 'VALIDATION_ERROR' } }); return; }
+          if (!cradle.changePasswordUseCase) { res.status(503).json({ error: { code: 'AUTH_UNAVAILABLE' } }); return; }
+          await cradle.changePasswordUseCase.execute(req.authUserId!, input.data);
+          clearAuthCookies(res);
+          res.status(200).json(responseFormatter.success({ loginRequired: true }));
+        } catch {
+          res.status(400).json({ error: { code: 'PASSWORD_CHANGE_DENIED' } });
+        }
+      });
+
+    router.post('/credentials/:identityId/disable',
+      (req, res, next) => {
+        if (!tokenProvider || !sessionManager) { res.status(401).json({ message: 'Unauthorized' }); return; }
+        return new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate()(req, res, next);
+      },
+      credentialCsrfGuard,
+      async (req, res) => {
+        try {
+          const input = z.object({ changeId: z.string().trim().min(6) }).strict().safeParse(req.body);
+          if (!input.success) { res.status(400).json({ error: { code: 'VALIDATION_ERROR' } }); return; }
+          if (!cradle.disablePasswordCredentialUseCase) { res.status(503).json({ error: { code: 'AUTH_UNAVAILABLE' } }); return; }
+          await cradle.disablePasswordCredentialUseCase.execute(req.authUserId!, String(req.params.identityId), input.data.changeId);
+          res.status(200).json(responseFormatter.success({ disabled: true }));
+        } catch {
+          res.status(403).json({ error: { code: 'CREDENTIAL_OPERATION_DENIED' } });
+        }
+      });
 
     // Public verification contract for asymmetric access-token consumers.
     router.get('/jwks.json', (_req: Request, res: Response) => {

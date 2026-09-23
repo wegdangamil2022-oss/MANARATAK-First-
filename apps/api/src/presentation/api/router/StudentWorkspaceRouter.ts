@@ -4,12 +4,15 @@ import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@man
 import { FinancePlatformUseCases, FinanceStudentUseCases, StudentWorkspaceUseCases, StudentApplicationTrackerUseCases, StudentSavedItemHydrationService, StudentDashboardHydrationService, StudentServiceRequestUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { AssetId, AssetLifecycleState, IAssetRecordRepository, ServiceRequestStatus, StudentSavedItemType } from '@manaratak/domain';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
+import { createStudentRoleGuard } from '../../security/StudentRoleGuard.js';
+import type { IRoleAssignmentRepository } from '@manaratak/domain';
 import { createCanonicalIdempotencyMiddleware } from '../../middleware/CanonicalIdempotencyMiddleware.js';
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 
 export class StudentWorkspaceRouter {
   public static create(cradle: {
     studentWorkspaceUseCases: StudentWorkspaceUseCases;
+    roleAssignmentRepository: IRoleAssignmentRepository;
     studentApplicationTrackerUseCases: StudentApplicationTrackerUseCases;
     financeStudentUseCases: FinanceStudentUseCases;
     financePlatformUseCases: FinancePlatformUseCases;
@@ -106,6 +109,7 @@ export class StudentWorkspaceRouter {
     }).strict();
 
     router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate());
+    router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
     router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
     const ownStudent = (req: Request): string => {
       if (!req.authUserId) throw new Error('STUDENT_AUTHENTICATION_REQUIRED');
