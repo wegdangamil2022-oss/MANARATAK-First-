@@ -7,6 +7,10 @@ export type { IdentityDto, ProvisionIdentityInput, UpdateProfileInput, UpdateCon
 export { IdentityDtoMapper } from './identity/mapper';
 export { ProvisionIdentityUseCase } from './identity/ProvisionIdentityUseCase';
 export { ActivateIdentityUseCase } from './identity/ActivateIdentityUseCase';
+export { ForgotPasswordUseCase } from './identity/use-cases/ForgotPasswordUseCase';
+export type { ForgotPasswordInput, ForgotPasswordOutput, ForgotPasswordUseCaseDependencies } from './identity/use-cases/ForgotPasswordUseCase';
+export { ResetPasswordUseCase } from './identity/use-cases/ResetPasswordUseCase';
+export type { ResetPasswordInput, ResetPasswordOutput, ResetPasswordUseCaseDependencies } from './identity/use-cases/ResetPasswordUseCase';
 export { SuspendIdentityUseCase } from './identity/SuspendIdentityUseCase';
 export { ArchiveIdentityUseCase } from './identity/ArchiveIdentityUseCase';
 export { PurgeIdentityUseCase } from './identity/PurgeIdentityUseCase';

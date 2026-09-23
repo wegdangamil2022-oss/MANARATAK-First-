@@ -269,7 +269,18 @@ import {
 // Routers
 import { IdentityRouter } from '../../presentation/api/router/IdentityRouter.js';
 import { AuthRouter } from '../../presentation/api/router/AuthRouter.js';
-import { AuthService } from '@manaratak/application';
+import {
+  AuthService,
+  RegisterUserUseCase,
+  VerifyEmailUseCase,
+  ResendVerificationUseCase,
+} from '@manaratak/application';
+import {
+  PrismaEmailVerificationTokenRepository,
+  InMemoryEmailVerificationTokenRepository,
+  CapturedEmailDeliveryGateway,
+  PasswordHasher,
+} from '@manaratak/infrastructure';
 import { AuthorizationAdminRouter } from '../../presentation/api/router/AuthorizationAdminRouter.js';
 import { AuthorizationRuntimeRouter } from '../../presentation/api/router/AuthorizationRuntimeRouter.js';
 import { SettingsAdminRouter } from '../../presentation/api/router/SettingsAdminRouter.js';
@@ -922,6 +933,30 @@ export function registerDependencies(
     principalAccessValidator: asFunction(({ identityRepository }) => new IdentityPrincipalAccessValidator(identityRepository)).singleton(),
     authService: asFunction(({ tokenProvider, sessionManager, credentialVerifier, principalAccessValidator }) => new AuthService(tokenProvider, sessionManager, principalAccessValidator, credentialVerifier)).singleton(),
     credentialVerifier: asFunction(({ prisma }) => new PrismaCredentialVerifier(prisma)).singleton(),
+    emailVerificationTokenRepository: asFunction(({ prisma }) => {
+      return prisma ? new PrismaEmailVerificationTokenRepository(prisma) : new InMemoryEmailVerificationTokenRepository();
+    }).singleton(),
+    emailDeliveryGateway: asFunction(() => {
+      return new CapturedEmailDeliveryGateway();
+    }).singleton(),
+    registerUserUseCase: asFunction(({ identityRepository, emailVerificationTokenRepository, emailDeliveryGateway, roleAssignmentRepository, prisma }) => {
+      return new RegisterUserUseCase({
+        identityRepository,
+        tokenRepository: emailVerificationTokenRepository,
+        emailDeliveryGateway,
+        roleAssignmentRepository,
+        passwordHasher: {
+          hash: (pw: string) => PasswordHasher.hash(pw),
+        },
+        prismaClient: prisma,
+      });
+    }).singleton(),
+    verifyEmailUseCase: asFunction(({ identityRepository, emailVerificationTokenRepository }) => {
+      return new VerifyEmailUseCase(identityRepository, emailVerificationTokenRepository);
+    }).singleton(),
+    resendVerificationUseCase: asFunction(({ identityRepository, emailVerificationTokenRepository, emailDeliveryGateway }) => {
+      return new ResendVerificationUseCase(identityRepository, emailVerificationTokenRepository, emailDeliveryGateway);
+    }).singleton(),
     authRouter: asFunction((cradle) => AuthRouter.create(cradle)).singleton(),
     authorizationAdminRouter: asFunction((cradle) => AuthorizationAdminRouter.create(cradle)).singleton(),
     authorizationRuntimeRouter: asFunction((cradle) => AuthorizationRuntimeRouter.create(cradle)).singleton(),

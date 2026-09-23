@@ -13,10 +13,6 @@ export class ActivateIdentityUseCase implements UseCase<string, Result<IdentityD
         return ResultFactory.failure(`Identity with ID ${identityId} not found.`);
       }
 
-      if (identity.user && !identity.user.contactRegistry.isEmailVerified) {
-        identity.user.contactRegistry.verifyEmail();
-      }
-
       identity.activate();
       await this.identityRepository.save(identity);
 

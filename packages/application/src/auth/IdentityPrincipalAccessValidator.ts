@@ -14,8 +14,12 @@ export class IdentityPrincipalAccessValidator implements IPrincipalAccessValidat
       const identity = await this.identityRepository.findById(principalId);
       if (!identity) return false;
 
-      const lifecycleAllowsAuthentication = [LifeStatus.PROVISIONED, LifeStatus.ACTIVE].includes(identity.status);
-      return lifecycleAllowsAuthentication && identity.account.accessState === AccountAccessState.ACTIVE;
+      // Only ACTIVE identity with Active account and verified primary email is eligible
+      if (identity.status !== LifeStatus.ACTIVE) return false;
+      if (identity.account.accessState !== AccountAccessState.ACTIVE) return false;
+      if (identity.user && !identity.user.contactRegistry.isEmailVerified) return false;
+
+      return true;
     } catch {
       return false;
     }

@@ -12,11 +12,12 @@ export class PrismaCredentialVerifier implements ICredentialVerifier {
         return false;
       }
 
-      // 1. Identity lookup along with its credentials and account
+      // 1. Identity lookup along with its credentials, account, and user
       const identity = await this.prisma.identityRecord.findUnique({
         where: { id: userId },
         include: {
           account: true,
+          user: true,
           credentials: {
             where: {
               type: 'password',
@@ -31,8 +32,13 @@ export class PrismaCredentialVerifier implements ICredentialVerifier {
         return false;
       }
 
-      // 2. Disabled/inactive identity or account rejection
-      if (![LifeStatus.PROVISIONED, LifeStatus.ACTIVE].includes(identity.status) || !identity.account || identity.account.accessState !== AccountAccessState.ACTIVE) {
+      // 2. Disabled/inactive identity, unverified email, or inactive account rejection
+      if (
+        identity.status !== LifeStatus.ACTIVE ||
+        !identity.account ||
+        identity.account.accessState !== AccountAccessState.ACTIVE ||
+        (identity.user && !identity.user.isEmailVerified)
+      ) {
         await PasswordHasher.verifyDummy(credentialValue);
         return false;
       }

@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@manaratak/core';
 import type { ICredentialVerifier } from '@manaratak/application';
+import { ForgotPasswordUseCase, ResetPasswordUseCase } from '@manaratak/application';
+import { CapturedEmailDeliveryGateway, InMemoryPasswordResetTokenRepository, PasswordHasher } from '@manaratak/infrastructure';
 import { IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { clearAuthCookies, readAccessCookie, readRefreshCookie, setAuthCookies } from '../../security/HttpOnlyAuthCookies.js';
@@ -22,6 +24,23 @@ export class AuthRouter {
     const { authService, identityRepository, securityService, roleAssignmentRepository, roleRepository, tokenProvider, sessionManager, principalAccessValidator, credentialVerifier } = cradle;
     const router = Router();
     const responseFormatter = new ResponseFormatter('v1');
+
+    const emailGateway = (cradle as any).emailDeliveryGateway || new CapturedEmailDeliveryGateway();
+    const passwordResetTokenRepo = (cradle as any).passwordResetTokenRepository || (cradle as any).prismaPasswordResetTokenRepository || new InMemoryPasswordResetTokenRepository();
+    const forgotPasswordUseCase = (cradle as any).forgotPasswordUseCase || new ForgotPasswordUseCase({
+      identityRepository,
+      tokenRepository: passwordResetTokenRepo,
+      emailDeliveryGateway: emailGateway,
+    });
+    const resetPasswordUseCase = (cradle as any).resetPasswordUseCase || new ResetPasswordUseCase({
+      identityRepository,
+      tokenRepository: passwordResetTokenRepo,
+      sessionManager,
+      passwordHasher: {
+        hash: (pw: string) => PasswordHasher.hash(pw),
+      },
+      prismaClient: (cradle as any).prisma,
+    });
 
     // Public verification contract for asymmetric access-token consumers.
     router.get('/jwks.json', (_req: Request, res: Response) => {
@@ -257,6 +276,78 @@ export class AuthRouter {
         res.status(401).json(responseFormatter.error({
           code: 'LOGOUT_FAILED',
           message: 'Failed to revoke session'
+        }));
+      }
+    });
+
+    // 7. POST /forgot-password
+    router.post('/forgot-password', async (req: Request, res: Response) => {
+      try {
+        const schema = z.union([
+          z.object({ primaryEmail: z.string().trim().email('Invalid email address').max(255) }).strict(),
+          z.object({ email: z.string().trim().email('Invalid email address').max(255) }).strict(),
+          z.object({
+            primaryEmail: z.string().trim().email('Invalid email address').max(255).optional(),
+            email: z.string().trim().email('Invalid email address').max(255).optional(),
+          }).refine(data => !!(data.primaryEmail || data.email), {
+            message: 'Email address is required'
+          })
+        ]);
+        const parseResult = schema.safeParse(req.body);
+        if (!parseResult.success) {
+          res.status(400).json(responseFormatter.error({
+            code: 'VALIDATION_ERROR',
+            message: parseResult.error.issues[0]?.message || 'Validation failed'
+          }));
+          return;
+        }
+        const data = parseResult.data as { primaryEmail?: string; email?: string };
+        const rawEmail = (data.primaryEmail || data.email)!.trim().toLowerCase();
+        const remoteAddress = req.ip || req.socket.remoteAddress || 'unknown';
+        const rateLimit = await securityService.getRateLimiter().consume(`auth:forgot-password:${remoteAddress}`, 10, 15 * 60 * 1000);
+        if (!rateLimit.allowed) {
+          res.status(429).json(responseFormatter.error({
+            code: 'AUTH_RATE_LIMITED',
+            message: 'Too many password reset requests. Please try again later.'
+          }));
+          return;
+        }
+        const result = await forgotPasswordUseCase.execute({ primaryEmail: rawEmail });
+        res.status(200).json(responseFormatter.success({
+          message: result.message
+        }));
+      } catch (error) {
+        res.status(500).json(responseFormatter.error({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'An unexpected error occurred'
+        }));
+      }
+    });
+
+    // 8. POST /reset-password
+    router.post('/reset-password', async (req: Request, res: Response) => {
+      try {
+        const schema = z.object({
+          token: z.string().trim().min(1, 'Reset token is required'),
+          newPassword: z.string().min(8, 'Password must be at least 8 characters long').max(128),
+        }).strict();
+        const parseResult = schema.safeParse(req.body);
+        if (!parseResult.success) {
+          res.status(400).json(responseFormatter.error({
+            code: 'VALIDATION_ERROR',
+            message: parseResult.error.issues[0]?.message || 'Validation failed'
+          }));
+          return;
+        }
+        const result = await resetPasswordUseCase.execute(parseResult.data);
+        res.status(200).json(responseFormatter.success({
+          message: result.message
+        }));
+      } catch (error: any) {
+        const code = error.code || 'RESET_PASSWORD_FAILED';
+        res.status(400).json(responseFormatter.error({
+          code,
+          message: error.message || 'Password reset failed'
         }));
       }
     });

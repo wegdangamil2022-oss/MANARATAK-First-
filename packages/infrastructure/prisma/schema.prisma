@@ -3476,6 +3476,32 @@ model CredentialRecord {
   @@index([identityId])
 }
 
+model EmailVerificationTokenRecord {
+  id         String    @id @default(uuid())
+  identityId String
+  tokenHash  String    @unique
+  email      String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([identityId])
+  @@index([tokenHash])
+}
+
+model PasswordResetTokenRecord {
+  id         String    @id @default(uuid())
+  identityId String
+  tokenHash  String    @unique
+  email      String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([identityId])
+  @@index([tokenHash])
+}
+
 model UserRecord {
   identityId String @id
 
