@@ -381,7 +381,7 @@ export interface Course {
   instructor: string;
   duration: string;
   lessonsCount: number | null;
-  level: 'مبتدئ' | 'متوسط' | 'متقدم';
+  level: 'مبتدئ' | 'متوسط' | 'متقدم' | 'مبتدئ ومتوسط' | 'جميع المستويات';
   isFree: boolean;
   rating: number | null;
   studentsCount: number | null;

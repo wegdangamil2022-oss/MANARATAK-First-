@@ -1555,7 +1555,9 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedArticles
                         articles={articles}
-                        onSelectArticle={(article) => {
+                        onSelectArticle={(articleId) => {
+                          const article = articles.find((item) => item.id === articleId);
+                          if (!article) return;
                           setSelectedArticle(article);
                           window.scrollTo({ top: 0, behavior: 'instant' });
                         }}

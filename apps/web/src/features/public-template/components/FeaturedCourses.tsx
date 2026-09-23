@@ -153,6 +153,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
       level: 'متوسط',
       isFree: false,
       rating: 4.85,
+      studentsCount: null,
       imageUrl:
         'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80',
       category: 'اختبارات اللغة والأكاديميا',
@@ -169,6 +170,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
       level: 'متقدم',
       isFree: false,
       rating: 4.92,
+      studentsCount: null,
       imageUrl:
         'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80',
       category: 'اختبارات تخصصية وتأهيلية',
@@ -185,6 +187,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
       level: 'جميع المستويات',
       isFree: false,
       rating: 4.95,
+      studentsCount: null,
       imageUrl:
         'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
       category: 'مهارات التقنية والذكاء الاصطناعي',

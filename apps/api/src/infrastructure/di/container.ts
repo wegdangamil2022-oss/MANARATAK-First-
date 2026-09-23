@@ -274,9 +274,13 @@ import {
   RegisterUserUseCase,
   VerifyEmailUseCase,
   ResendVerificationUseCase,
+  ForgotPasswordUseCase,
+  ResetPasswordUseCase,
 } from '@manaratak/application';
 import {
   PrismaEmailVerificationTokenRepository,
+  PrismaPasswordResetTokenRepository,
+  InMemoryPasswordResetTokenRepository,
   InMemoryEmailVerificationTokenRepository,
   CapturedEmailDeliveryGateway,
   PasswordHasher,
@@ -957,6 +961,16 @@ export function registerDependencies(
     resendVerificationUseCase: asFunction(({ identityRepository, emailVerificationTokenRepository, emailDeliveryGateway }) => {
       return new ResendVerificationUseCase(identityRepository, emailVerificationTokenRepository, emailDeliveryGateway);
     }).singleton(),
+    passwordResetTokenRepository: asFunction(({ prisma }) => prisma
+      ? new PrismaPasswordResetTokenRepository(prisma)
+      : new InMemoryPasswordResetTokenRepository()).singleton(),
+    forgotPasswordUseCase: asFunction(({ identityRepository, passwordResetTokenRepository, emailDeliveryGateway }) => new ForgotPasswordUseCase({
+      identityRepository, tokenRepository: passwordResetTokenRepository, emailDeliveryGateway,
+    })).singleton(),
+    resetPasswordUseCase: asFunction(({ identityRepository, passwordResetTokenRepository, sessionManager, prisma }) => new ResetPasswordUseCase({
+      identityRepository, tokenRepository: passwordResetTokenRepository, sessionManager,
+      passwordHasher: { hash: (pw: string) => PasswordHasher.hash(pw) }, prismaClient: prisma,
+    })).singleton(),
     authRouter: asFunction((cradle) => AuthRouter.create(cradle)).singleton(),
     authorizationAdminRouter: asFunction((cradle) => AuthorizationAdminRouter.create(cradle)).singleton(),
     authorizationRuntimeRouter: asFunction((cradle) => AuthorizationRuntimeRouter.create(cradle)).singleton(),

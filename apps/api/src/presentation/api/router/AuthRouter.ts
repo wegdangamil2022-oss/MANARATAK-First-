@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@manaratak/core';
-import type { ICredentialVerifier } from '@manaratak/application';
+import type { ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@manaratak/application';
 import { ForgotPasswordUseCase, ResetPasswordUseCase } from '@manaratak/application';
 import { CapturedEmailDeliveryGateway, InMemoryPasswordResetTokenRepository, PasswordHasher } from '@manaratak/infrastructure';
 import { IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
@@ -20,6 +20,9 @@ export class AuthRouter {
     sessionManager?: ISessionManager;
     principalAccessValidator: IPrincipalAccessValidator;
     credentialVerifier?: ICredentialVerifier;
+    registerUserUseCase?: RegisterUserUseCase;
+    verifyEmailUseCase?: VerifyEmailUseCase;
+    resendVerificationUseCase?: ResendVerificationUseCase;
   }): Router {
     const { authService, identityRepository, securityService, roleAssignmentRepository, roleRepository, tokenProvider, sessionManager, principalAccessValidator, credentialVerifier } = cradle;
     const router = Router();
@@ -277,6 +280,67 @@ export class AuthRouter {
           code: 'LOGOUT_FAILED',
           message: 'Failed to revoke session'
         }));
+      }
+    });
+
+    router.post('/register', async (req: Request, res: Response) => {
+      const parsed = z.object({
+        displayName: z.string().trim().min(1),
+        primaryEmail: z.string().trim().email(),
+        password: z.string().min(8).max(128),
+        preferredLanguage: z.string().optional(),
+      }).strict().safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json(responseFormatter.error({ code: 'VALIDATION_ERROR', message: 'Invalid registration input' }));
+        return;
+      }
+      if (!cradle.registerUserUseCase) {
+        res.status(503).json(responseFormatter.error({ code: 'AUTH_UNAVAILABLE', message: 'Registration unavailable' }));
+        return;
+      }
+      try {
+        res.status(201).json(responseFormatter.success(await cradle.registerUserUseCase.execute(parsed.data)));
+      } catch (error: any) {
+        res.status(error.code === 'EMAIL_ALREADY_EXISTS' ? 409 : 500).json(responseFormatter.error({
+          code: error.code || 'REGISTRATION_FAILED', message: 'Registration failed',
+        }));
+      }
+    });
+
+    router.post('/verify-email', async (req: Request, res: Response) => {
+      const parsed = z.object({ token: z.string().trim().min(1) }).strict().safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json(responseFormatter.error({ code: 'VALIDATION_ERROR', message: 'Verification token is required' }));
+        return;
+      }
+      if (!cradle.verifyEmailUseCase) {
+        res.status(503).json(responseFormatter.error({ code: 'AUTH_UNAVAILABLE', message: 'Verification unavailable' }));
+        return;
+      }
+      try {
+        const result = await cradle.verifyEmailUseCase.execute(parsed.data);
+        res.status(200).json(responseFormatter.success({ ...result, verified: result.isEmailVerified }));
+      } catch (error: any) {
+        res.status(error.code ? 400 : 500).json(responseFormatter.error({
+          code: error.code || 'VERIFICATION_FAILED', message: 'Email verification failed',
+        }));
+      }
+    });
+
+    router.post('/resend-verification', async (req: Request, res: Response) => {
+      const parsed = z.object({ email: z.string().trim().email() }).strict().safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json(responseFormatter.error({ code: 'VALIDATION_ERROR', message: 'Invalid email address' }));
+        return;
+      }
+      if (!cradle.resendVerificationUseCase) {
+        res.status(503).json(responseFormatter.error({ code: 'AUTH_UNAVAILABLE', message: 'Verification unavailable' }));
+        return;
+      }
+      try {
+        res.status(200).json(responseFormatter.success(await cradle.resendVerificationUseCase.execute(parsed.data)));
+      } catch {
+        res.status(500).json(responseFormatter.error({ code: 'VERIFICATION_FAILED', message: 'Unable to resend verification' }));
       }
     });
 

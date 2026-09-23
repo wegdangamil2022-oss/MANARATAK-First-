@@ -14,7 +14,7 @@ import {
   IEmailVerificationTokenRepository,
   IEmailDeliveryGateway,
 } from '@manaratak/domain';
-import { IPasswordHasher } from '@manaratak/core';
+import { Identifier, IPasswordHasher } from '@manaratak/core';
 
 export interface RegisterUserInput {
   displayName: string;
@@ -113,7 +113,7 @@ export class RegisterUserUseCase {
       user,
       account,
       technicalMetadata,
-    });
+    }, new Identifier(identityId));
 
     // 4. Generate cryptographically secure verification token
     const rawToken = randomBytes(32).toString('hex');

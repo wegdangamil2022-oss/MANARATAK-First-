@@ -74,6 +74,7 @@ test('M4.2 — Public Registration, Email Verification & Account Lifecycle', asy
 
     const savedIdentity = await identityRepo.findById(output.identityId);
     assert.ok(savedIdentity);
+    assert.equal(savedIdentity.account.identityId, output.identityId);
     assert.equal(savedIdentity.status, LifeStatus.PROVISIONED);
     assert.equal(savedIdentity.user.contactRegistry.isEmailVerified, false);
 
