@@ -54,11 +54,6 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="mn-header-row flex items-center justify-between gap-2 max-w-5xl mx-auto w-full">
             {/* Brand Identity & Official Logo */}
             <div
-              onClick={() => {
-                onTabChange?.('home');
-                onSelectCategory?.('all');
-              }}
-              className="mn-header-brand flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group"
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
@@ -67,6 +62,11 @@ export const Header: React.FC<HeaderProps> = ({
                   onSelectCategory?.('all');
                 }
               }}
+              onClick={() => {
+                onTabChange?.('home');
+                onSelectCategory?.('all');
+              }}
+              className="mn-header-brand flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group"
               aria-label="منارتك — الصفحة الرئيسية"
             >
               {/* Circular Logo Container */}

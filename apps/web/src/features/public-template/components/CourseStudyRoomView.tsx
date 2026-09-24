@@ -1382,16 +1382,16 @@ export function CourseStudyRoomView({
           <div
             role="button"
             tabIndex={0}
-            onClick={() => {
-              setVideoLockedNotice(true);
-              triggerRestriction('ليس لديك صلاحية لتشغيل هذا الفيديو. المحتوى مخصص للمشتركين فقط.');
-            }}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 setVideoLockedNotice(true);
                 triggerRestriction('ليس لديك صلاحية لتشغيل هذا الفيديو. المحتوى مخصص للمشتركين فقط.');
               }
+            }}
+            onClick={() => {
+              setVideoLockedNotice(true);
+              triggerRestriction('ليس لديك صلاحية لتشغيل هذا الفيديو. المحتوى مخصص للمشتركين فقط.');
             }}
             className="relative w-full aspect-video rounded-none sm:rounded-2xl overflow-hidden bg-slate-950 border-y sm:border-2 border-[#142B5F] dark:border-[#D6A43B]/40 shadow-xl group select-none cursor-pointer text-right"
           >
