@@ -946,6 +946,22 @@ export default function App() {
             </div>
           }
         >
+        {publicDataMode === 'api' && unavailableDomains.length > 0 && (
+          <div className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-5xl items-center justify-between gap-3 rounded-2xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-3 py-2 text-[11px] text-[var(--mn-danger-text)]">
+            <div className="flex min-w-0 items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>تعذر تحميل بعض البيانات الحية ({unavailableDomains.join(', ')}). لم يتم استبدالها ببيانات تجريبية.</span>
+            </div>
+            <button type="button" onClick={publicLive.reload} className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-current px-2.5 py-1.5 font-bold">
+              <RefreshCw className="h-3.5 w-3.5" /> إعادة المحاولة
+            </button>
+          </div>
+        )}
+        {publicDataMode === 'api' && unavailableDomains.length === 0 && loadingDomains.length > 0 && (
+          <div className="mx-auto mt-3 w-[calc(100%-1rem)] max-w-5xl rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-text-muted)]">
+            جاري تحميل البيانات المنشورة من مصادر منارتك الحية…
+          </div>
+        )}
         {isCompareRoute ? (
           <ComparePage locale={language} onBack={goBack} />
         ) : navigation.state.auxiliaryPage ? (
