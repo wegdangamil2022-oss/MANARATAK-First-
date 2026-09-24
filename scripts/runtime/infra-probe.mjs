@@ -20,7 +20,8 @@ async function postgres(label, value) {
       (SELECT rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls FROM pg_roles WHERE rolname = current_user) AS elevated,
       has_database_privilege(current_user, current_database(), 'CREATE') AS database_create,
       has_database_privilege(current_user, current_database(), 'TEMP') AS database_temp,
-      has_schema_privilege(current_user, 'public', 'CREATE') AS schema_create`);
+      EXISTS (SELECT 1 FROM pg_namespace n WHERE n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema' AND has_schema_privilege(current_user, n.oid, 'CREATE')) AS schema_create,
+      pg_has_role(current_user, 'pg_write_all_data', 'MEMBER') AS global_write`);
     const user = identity[0];
     emit(`${label}_IDENTITY`, user?.database && user?.username ? 'PASS' : 'FAIL');
     if (user?.database && user?.username) {
@@ -32,12 +33,17 @@ async function postgres(label, value) {
     const tlsStatus = user?.tls ? 'PASS' : local && ['development', 'test'].includes(nodeEnv) ? 'LOCAL_NOT_REQUIRED' : 'FAIL';
     emit(`${label}_TLS`, tlsStatus);
     const write = await client.$queryRawUnsafe(`SELECT EXISTS (
-      SELECT 1 FROM pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
-      AND (has_table_privilege(current_user, format('%I.%I', schemaname, tablename), 'INSERT')
-      OR has_table_privilege(current_user, format('%I.%I', schemaname, tablename), 'UPDATE')
-      OR has_table_privilege(current_user, format('%I.%I', schemaname, tablename), 'DELETE'))
-    ) AS can_write`);
-    const readOnly = !user?.elevated && !user?.database_create && !user?.database_temp && !user?.schema_create && !write[0]?.can_write;
+      SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+      WHERE n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema' AND c.relkind IN ('r', 'p', 'v', 'm', 'f')
+      AND (has_table_privilege(current_user, c.oid, 'INSERT')
+      OR has_table_privilege(current_user, c.oid, 'UPDATE')
+      OR has_table_privilege(current_user, c.oid, 'DELETE'))
+    ) AS can_write, EXISTS (
+      SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+      WHERE n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema' AND c.relkind = 'S'
+      AND (has_sequence_privilege(current_user, c.oid, 'USAGE') OR has_sequence_privilege(current_user, c.oid, 'UPDATE'))
+    ) AS can_write_sequence`);
+    const readOnly = !user?.elevated && !user?.global_write && !user?.database_create && !user?.database_temp && !user?.schema_create && !write[0]?.can_write && !write[0]?.can_write_sequence;
     emit(`${label}_READ_ONLY_ROLE`, readOnly ? 'PASS' : 'FAIL');
     emit(`${label}_CONNECT`, 'PASS');
     return !!user?.database && !!user?.username && tlsStatus !== 'FAIL' && readOnly;
