@@ -30,6 +30,7 @@
     "reference:countries:dry-run": "tsx scripts/dry-run-reference-countries.ts",
     "reference:geography:dry-run": "tsx scripts/dry-run-reference-geography.ts",
     "datasets:sources:verify": "tsx scripts/import/verify-dataset-sources.ts",
+    "courses:sources:prepare": "tsx scripts/import/prepare-course-master-source.ts",
     "universities:stage1:dry-run": "tsx scripts/dry-run-university-stage1.ts",
     "universities:stage2:dry-run": "tsx scripts/dry-run-university-stage2-enrichment.ts",
     "universities:later-stage:dry-run": "tsx scripts/dry-run-university-later-stage.ts",

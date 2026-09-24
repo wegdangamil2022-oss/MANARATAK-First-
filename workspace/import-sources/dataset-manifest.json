@@ -7,7 +7,7 @@
       "format": "XLSX",
       "version": "2026-09-15",
       "recordCount": 16861,
-      "status": "STAGED_DEDUP_REVIEW_REQUIRED",
+      "status": "STAGED_SOURCE_PROJECTOR_READY_OLD_MASTER_UNRESOLVED",
       "importOrder": 1,
       "sha256": "8e92f89b4814ae40398d5b555b02a8c17eeb5db3ce247f316cf68987b99c8d88"
     },
@@ -18,18 +18,19 @@
       "format": "XLSX",
       "version": "2026-09-23",
       "recordCount": 4701,
-      "status": "STAGED_DEDUP_REVIEW_REQUIRED",
+      "status": "STAGED_SOURCE_PROJECTOR_READY_OLD_MASTER_UNRESOLVED",
       "importOrder": 2,
       "sha256": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e"
     },
     {
       "datasetId": "universities-europe-stage-3-4-2026-09-24",
+      "phase": "3_AND_4",
       "entityType": "UNIVERSITY",
       "sourcePath": "workspace/import-sources/universities/stage-3-4/MANARATAK_Europe_Universities_Stage_3_Stage_4_1530_REVIEWED_0001_1530_FINAL.md",
       "format": "MARKDOWN",
       "version": "2026-09-24",
       "recordCount": 1530,
-      "status": "STAGED_SOURCE_ADAPTER_REQUIRED",
+      "status": "STAGED_MARKDOWN_DRY_RUN_READY_SOURCE_ISSUES",
       "importOrder": 3,
       "sha256": "ce64f4283b6d46882c23aa1604d9cf45a6b1691fa15816743161b6dffe059a52"
     },
@@ -40,7 +41,7 @@
       "format": "MARKDOWN",
       "version": "3.21",
       "recordCount": 514,
-      "status": "STAGED_SCREENING_AND_ADAPTER_REQUIRED",
+      "status": "STAGED_MARKDOWN_READER_READY_SCREENING_REQUIRED",
       "importOrder": 4,
       "sha256": "bcca756349fc16873ea9758f95708c8b1d5b11a9a1c35a7b44c2b2d02854c337"
     }

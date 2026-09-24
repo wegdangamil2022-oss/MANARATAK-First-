@@ -2,10 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { CourseMasterArtifactParser } from '../../packages/application/src/courses/parsers/CourseMasterArtifactParser';
+import { readUniversityStage34Markdown } from './UniversityStage34MarkdownReader';
+import { readScholarshipMasterGuide } from './ScholarshipMasterGuideReader';
 
 type Dataset = {
   datasetId: string;
   entityType: 'COURSE' | 'UNIVERSITY' | 'SCHOLARSHIP';
+  phase?: '3_AND_4';
   sourcePath: string;
   format: 'XLSX' | 'MARKDOWN';
   version: string;
@@ -39,6 +42,7 @@ for (const dataset of manifest.datasets) {
 
   let observedCount = 0;
   let structuralErrors = 0;
+  let explicitlyImported: number | undefined;
   if (dataset.entityType === 'COURSE') {
     const parsed = await CourseMasterArtifactParser.parse({
       bytes,
@@ -48,17 +52,18 @@ for (const dataset of manifest.datasets) {
     });
     observedCount = parsed.rows.length;
     structuralErrors = parsed.issues.filter(issue => issue.severity === 'ERROR').length;
+  } else if (dataset.entityType === 'UNIVERSITY') {
+    if (dataset.phase !== '3_AND_4') throw new Error('UNIVERSITY_DATASET_PHASE_REQUIRED');
+    observedCount = readUniversityStage34Markdown(bytes.toString('utf8')).length;
   } else {
-    const text = bytes.toString('utf8');
-    const pattern = dataset.entityType === 'UNIVERSITY'
-      ? /^## \d{4} — INS-[A-Z0-9-]+/gm
-      : /^# SCH-[A-Z0-9-]+\s*[—-]/gm;
-    observedCount = [...text.matchAll(pattern)].length;
+    const records = readScholarshipMasterGuide(bytes.toString('utf8'));
+    observedCount = records.length;
+    explicitlyImported = records.filter(record => record.explicitlyImported).length;
   }
   if (observedCount !== dataset.recordCount || structuralErrors > 0) failures += 1;
   console.log(JSON.stringify({ datasetId: dataset.datasetId, sourcePath: dataset.sourcePath,
     recordCount: observedCount, expectedCount: dataset.recordCount, structuralErrors,
-    checksum: 'MATCH', status: dataset.status }));
+    explicitlyImported, checksum: 'MATCH', status: dataset.status }));
 }
 if (failures > 0) throw new Error(`Dataset source verification failed for ${failures} dataset(s)`);
 console.log(`Dataset source verification passed: ${manifest.datasets.length} artifacts`);

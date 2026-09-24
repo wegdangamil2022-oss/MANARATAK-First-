@@ -4,11 +4,12 @@ import { createHash } from 'node:crypto';
 import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@manaratak/shared';
 import { UniversityLaterStagesDryRunUseCase, type UniversityLaterStage } from '../packages/application/src/universities/use-cases/UniversityLaterStagesDryRunUseCase';
 import type { UniversalImportHandoff } from '@manaratak/domain';
+import { readUniversityStage34Markdown } from './import/UniversityStage34MarkdownReader';
 
 const stage = String(process.argv[2] ?? '').toUpperCase() as UniversityLaterStage;
 const sourcePaths = process.argv.slice(3).map(item => path.resolve(item));
 if (!['STAGE_3', 'STAGE_4', 'GLOBAL_RANKINGS'].includes(stage) || sourcePaths.length === 0) {
-  throw new Error('Usage: tsx scripts/dry-run-university-later-stage.ts STAGE_3|STAGE_4|GLOBAL_RANKINGS <xlsx> [xlsx...]');
+  throw new Error('Usage: tsx scripts/dry-run-university-later-stage.ts STAGE_3|STAGE_4|GLOBAL_RANKINGS <xlsx-or-md> [more-files...]');
 }
 
 const handoffs: UniversalImportHandoff[] = [];
@@ -16,22 +17,32 @@ const artifacts: Array<{ fileName: string; sha256: string; records: number; colu
 for (const sourcePath of sourcePaths) {
   const bytes = fs.readFileSync(sourcePath);
   const sha256 = createHash('sha256').update(bytes).digest('hex');
-  const workbook = await readXlsxWorkbook(bytes);
-  const sheetName = stage === 'STAGE_3' ? 'Stage 3' : stage === 'STAGE_4' ? 'Stage 4' : 'Rankings';
-  const sheet = workbook.sheets.get(sheetName);
-  if (!sheet) throw new Error(`${sheetName} sheet not found: ${sourcePath}`);
-  const rows = spreadsheetRowsToObjects<Record<string, unknown>>(sheet, { defaultValue: null, raw: false });
-  const columns = sheet.rawRows[0]?.length ?? 0;
+  const markdown = path.extname(sourcePath).toLowerCase() === '.md';
+  if (markdown && stage === 'GLOBAL_RANKINGS') throw new Error('University rankings require the Rankings XLSX sheet.');
   const expectedColumns = stage === 'STAGE_3' ? 18 : stage === 'STAGE_4' ? 17 : 19;
-  if (columns !== expectedColumns) throw new Error(`Expected ${expectedColumns} columns, found ${columns}: ${sourcePath}`);
-  rows.filter(row => text(row['University Reference ID'])).forEach((row, index) => {
-    const sourceRowNumber = index + 2;
+  let rows: Array<{ row: Record<string, unknown>; sourceRowNumber: number }>;
+  let columns: number;
+  if (markdown) {
+    rows = readUniversityStage34Markdown(bytes.toString('utf8')).map(item => ({ row: item.fields, sourceRowNumber: item.sourceLineNumber }));
+    columns = expectedColumns;
+  } else {
+    const workbook = await readXlsxWorkbook(bytes);
+    const sheetName = stage === 'STAGE_3' ? 'Stage 3' : stage === 'STAGE_4' ? 'Stage 4' : 'Rankings';
+    const sheet = workbook.sheets.get(sheetName);
+    if (!sheet) throw new Error(`${sheetName} sheet not found: ${sourcePath}`);
+    columns = sheet.rawRows[0]?.length ?? 0;
+    if (columns !== expectedColumns) throw new Error(`Expected ${expectedColumns} columns, found ${columns}: ${sourcePath}`);
+    rows = spreadsheetRowsToObjects<Record<string, unknown>>(sheet, { defaultValue: null, raw: false })
+      .map((row, index) => ({ row, sourceRowNumber: index + 2 }));
+  }
+  const sourceSystem = `UNIVERSITY_${stage}_${markdown ? 'MARKDOWN' : 'XLSX'}`;
+  rows.filter(item => text(item.row['University Reference ID'])).forEach(({ row, sourceRowNumber }) => {
     handoffs.push({
       handoffId: `${sha256}:${sourceRowNumber}`,
       ownerDomain: 'PHASE_11_UNIVERSITY',
-      artifact: { sourceId: `UNIVERSITY_${stage}_XLSX`, artifactId: sha256, rawArtifactReference: `${path.basename(sourcePath)}#${sourceRowNumber}` },
+      artifact: { sourceId: sourceSystem, artifactId: sha256, rawArtifactReference: `${path.basename(sourcePath)}#${sourceRowNumber}` },
       normalizedPayload: stage === 'STAGE_3' ? stage3(row) : stage === 'STAGE_4' ? stage4(row) : rankings(row),
-      provenance: { sourceSystem: `UNIVERSITY_${stage}_XLSX`, acquiredAt: new Date(), sourceRowNumber, contentHash: createHash('sha256').update(JSON.stringify(row)).digest('hex') },
+      provenance: { sourceSystem, acquiredAt: new Date(), sourceRowNumber, contentHash: createHash('sha256').update(JSON.stringify(row)).digest('hex') },
       validation: { state: 'VALID', issues: [] },
       execution: { executionId: `${stage}:${sha256}`, dryRun: true, attempt: 1, idempotencyKey: `${sha256}:${sourceRowNumber}` },
     });
