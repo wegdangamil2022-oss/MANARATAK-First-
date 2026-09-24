@@ -9297,8 +9297,7 @@ export function CourseStudyRoomView({
             {/* Progress Bar */}
             <div className="w-full h-2 rounded-full bg-white/20 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#D6A43B] to-[#F3CE74] rounded-full transition-all duration-500 shadow-xs"
-                style={{ width: '0%' }}
+                className="h-full w-0 bg-gradient-to-r from-[#D6A43B] to-[#F3CE74] rounded-full transition-all duration-500 shadow-xs"
                 data-mn-design="392c68093a"
               />
             </div>

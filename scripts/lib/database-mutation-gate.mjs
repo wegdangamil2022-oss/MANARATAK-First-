@@ -11,7 +11,7 @@ const ALLOWED_ENVIRONMENTS = new Set(['development', 'test', 'staging', 'product
 
 /**
  * Return the non-secret identity operators must confirm before a database mutation.
- * Example: postgresql://user:secret@db.internal:5432/manaratak -> db.internal:5432/manaratak
+ * Example: a PostgreSQL URL targeting db.internal:5432/manaratak returns db.internal:5432/manaratak.
  */
 export function databaseTargetIdentity(databaseUrl) {
   if (!databaseUrl || typeof databaseUrl !== 'string') {

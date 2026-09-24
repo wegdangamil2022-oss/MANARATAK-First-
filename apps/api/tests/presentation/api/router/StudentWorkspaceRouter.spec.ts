@@ -3,6 +3,7 @@ import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 import {
   type IAssetRecordRepository,
+  RoleAssignment,
   StudentSavedItemType,
   StudentWorkspaceStatus,
 } from '@manaratak/domain';
@@ -56,6 +57,21 @@ describe('StudentWorkspaceRouter', () => {
     const principalAccessValidator: IPrincipalAccessValidator = {
       isAuthenticationAllowed: vi.fn().mockResolvedValue(true),
     };
+    const roleAssignmentRepository = {
+      findById: vi.fn(),
+      save: vi.fn(),
+      findBy: vi.fn(),
+      findByIdentityId: vi.fn().mockResolvedValue([
+        new RoleAssignment({
+          id: 'student-assignment-1',
+          identityId: 'student-1',
+          roleId: 'student',
+          assignedAt: new Date(),
+        }),
+      ]),
+      listAll: vi.fn(),
+      delete: vi.fn(),
+    };
     const apiIdempotencyStore = classDouble(PrismaApiIdempotencyStore.prototype, {
       begin: vi
         .fn()
@@ -79,6 +95,7 @@ describe('StudentWorkspaceRouter', () => {
       '/student',
       StudentWorkspaceRouter.create({
         studentWorkspaceUseCases: workspaceUseCases,
+        roleAssignmentRepository,
         studentApplicationTrackerUseCases: classDouble(StudentApplicationTrackerUseCases.prototype),
         financeStudentUseCases: classDouble(FinanceStudentUseCases.prototype),
         financePlatformUseCases: classDouble(FinancePlatformUseCases.prototype),

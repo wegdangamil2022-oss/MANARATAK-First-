@@ -359,6 +359,10 @@
       "owner": "reference",
       "required": true
     },
+    "EmailVerificationTokenRecord": {
+      "owner": "identity",
+      "required": true
+    },
     "EnterpriseEventRecord": {
       "owner": "events",
       "required": true
@@ -617,6 +621,10 @@
     },
     "NotificationTemplateRecord": {
       "owner": "notifications",
+      "required": true
+    },
+    "PasswordResetTokenRecord": {
+      "owner": "identity",
       "required": true
     },
     "PolicyRecord": {

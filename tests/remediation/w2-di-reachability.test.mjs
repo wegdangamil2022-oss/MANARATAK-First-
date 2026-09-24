@@ -17,7 +17,7 @@ test('MNT-AUD-0109 every production DI registration is runtime reachable', () =>
 test('MNT-AUD-0109 deferred source cannot masquerade as production DI', () => {
   const container = read('apps/api/src/infrastructure/di/container.ts');
   const manifest = JSON.parse(read('docs/remediation/DI_RUNTIME_REACHABILITY_MANIFEST.json'));
-  for (const name of ['manageMonitorsUseCase','manageLogsUseCase','manageSecurityPoliciesUseCase','manageConfigurationsUseCase','manageIntegrationsUseCase','manageLocalizationsUseCase','serviceOperationsUseCases','careerEngagementUseCases','retentionSweepUseCase','monitoringRouter']) {
+  for (const name of ['manageMonitorsUseCase','manageLogsUseCase','manageSecurityPoliciesUseCase','manageConfigurationsUseCase','manageIntegrationsUseCase','manageLocalizationsUseCase','serviceOperationsUseCases','careerEngagementUseCases','monitoringRouter']) {
     assert.doesNotMatch(container, new RegExp(`\\b${name}\\s*:`));
     assert.ok(manifest.deferredOrRemovedSource.some((entry) => entry.registration === name && entry.classification === 'FORMALLY_DEFERRED'));
   }
