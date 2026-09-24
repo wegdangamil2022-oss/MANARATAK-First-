@@ -269,18 +269,18 @@
       "decision": "Retention governance migration spans Import/Audit/Asset plus evidence record; recover shared environments from pre-mutation backup or reprovision a greenfield/disposable target."
     },
     "20260907010000_w3_durable_background_jobs": {
-      "recoveryClass": "ROLLBACK_SQL",
-      "artifact": "packages/infrastructure/prisma/migrations/20260907010000_w3_durable_background_jobs/rollback.sql",
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Background worker durability tables may contain execution/DLQ evidence after activation. rollback.sql is authorized only for disposable migration-replay targets; shared environments recover from pre-mutation backup or a forward fix."
     },
     "20260907011000_w3_outbox_lease_fencing": {
-      "recoveryClass": "ROLLBACK_SQL",
-      "artifact": "packages/infrastructure/prisma/migrations/20260907011000_w3_outbox_lease_fencing/rollback.sql",
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Outbox claim-token fencing changes active delivery ownership semantics. rollback.sql is authorized only for disposable migration-replay targets; shared environments recover from pre-mutation backup or a forward fix."
     },
     "20260907013000_w3_notification_delivery": {
-      "recoveryClass": "ROLLBACK_SQL",
-      "artifact": "packages/infrastructure/prisma/migrations/20260907013000_w3_notification_delivery/rollback.sql",
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Notification delivery tables may contain operational and provider delivery evidence after activation. rollback.sql is authorized only for disposable migration-replay targets; shared environments recover from a pre-mutation backup or a forward fix."
     },
     "20260907013000_w4_api_idempotency": {

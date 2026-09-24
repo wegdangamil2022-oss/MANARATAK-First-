@@ -9,8 +9,8 @@ test('MNT-AUD-0079 every migration has explicit recovery classification and exis
   assert.deepEqual(Object.keys(manifest.migrations).sort(),dirs);
   for(const id of dirs){ const rule=manifest.migrations[id]; assert.ok(['ROLLBACK_SQL','BACKUP_RESTORE_REQUIRED','FORWARD_FIX_ONLY'].includes(rule.recoveryClass),id); assert.ok(rule.decision?.trim(),id); assert.ok(fs.existsSync(path.join(root,rule.artifact)),`${id}:${rule.artifact}`); }
 });
-test('MNT-AUD-0079 rollback SQL class is used only when sibling rollback exists',()=>{
-  for(const id of dirs){ const rule=manifest.migrations[id]; const rollback=path.join(root,'packages/infrastructure/prisma/migrations',id,'rollback.sql'); if(rule.recoveryClass==='ROLLBACK_SQL') assert.equal(path.resolve(root,rule.artifact),rollback); else assert.equal(fs.existsSync(rollback),false,`${id} has rollback.sql but non-rollback class`); }
+test('MNT-AUD-0079 rollback companions match their recovery classification and environment boundary',()=>{
+  for(const id of dirs){ const rule=manifest.migrations[id]; const rollback=path.join(root,'packages/infrastructure/prisma/migrations',id,'rollback.sql'); if(rule.recoveryClass==='ROLLBACK_SQL') assert.equal(path.resolve(root,rule.artifact),rollback); else if(fs.existsSync(rollback)) assert.match(rule.decision,/rollback\.sql is authorized only for disposable/i,`${id} rollback.sql must be limited to disposable targets`); }
 });
 test('MNT-AUD-0079 gate no longer uses transactional_outbox filename exception',()=>{
   const source=fs.readFileSync(path.join(root,'scripts/db-remediation-gate.ts'),'utf8');

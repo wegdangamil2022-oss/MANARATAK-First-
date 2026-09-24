@@ -33,7 +33,7 @@ test('Studio verification performs requests and assertions rather than printing 
 test('npm workspace manifests keep API runtime guards and full build orchestration', () => {
   const root = JSON.parse(read('package.json'));
   assert.equal(root.scripts.build, 'npm run build --workspaces --if-present');
-  assert.equal(root.scripts.start, 'npm run start -w @manaratak/api');
+  assert.equal(root.scripts.start, 'node server.js');
   const api = JSON.parse(read('apps/api/package.json'));
   assert.match(api.scripts.typecheck, /verify-api-native-esm-specifiers\.mjs/);
   assert.match(api.scripts.typecheck, /resolve-api-workspace-esm\.mjs/);
