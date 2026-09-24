@@ -55,12 +55,11 @@ Commands must declare the purposes they accept. A `seed` approval cannot be reus
 
 ## 4. Safe greenfield sequence
 
-Read-only steps may run before mutation approval:
+Read-only source-only steps may run before mutation approval. On an empty database, defer `db:remediation:baseline` until after reviewed schema migrations; use the M6 infrastructure probe for the first connection:
 
 ```bash
 npm run db:remediation:plan
 npm run db:remediation:status
-npm run db:remediation:baseline
 npm run db:remediation:dry-run
 npm run db:remediation:rollback-plan
 ```
@@ -103,3 +102,5 @@ A source-only review may mark a card `SOURCE_VERIFIED` or `RUNTIME_PENDING`; it 
 ## 7. Historical recovery documents
 
 Older remediation reports may retain their original recovery terminology as historical evidence. If they remain in the active documentation tree, they must carry a clear supersession notice pointing to this document. Historical wording is not operational authority.
+
+For M5 role creation and M6 read-only preflight, see [M5 source readiness and M6 probe](M5_SOURCE_READINESS_AND_M6_PROBE.md). Role creation is gated as a provision mutation; the M6 probe performs no writes.

@@ -1,0 +1,23 @@
+# M5 source readiness and M6 handoff
+
+This page describes source preparation only. Creating real services, running the read-only probe, migrations, seeds and imports remain Google AI Studio runtime steps. The Google AI Studio web preview does not need these server secrets.
+
+## Local development
+
+`npm run compose:init` creates ignored `.env.compose` and `.env.runtime.local` using random PostgreSQL and Redis passwords. On platforms that support POSIX modes they are written with mode 0600. Do not commit or print either file. `npm run compose:up` starts PostgreSQL, Redis and Mailpit on loopback ports under the development profile. Run the API with `npm run api:dev:compose`; this loads the generated runtime URLs without copying credentials. Mailpit receives verification and password reset tokens via SMTP at port 1025; its local UI is on port 8025. The generated URLs use the same credentials as Compose. `compose:up` does not run migrations, seeds or imports.
+
+`DATABASE_URL` is the application connection and may use a pooler. `DIRECT_URL` is a direct PostgreSQL connection for Prisma migrations and explicit diagnostics. Local development can use the same PostgreSQL endpoint for both. Staging and production must set both explicitly and require TLS (`sslmode=require`, `verify-ca` or `verify-full`); Redis must use `rediss://`. Do not use the example URLs as live credentials. `REDIS_NAMESPACE` isolates runtime keys. Server-only values must never use a `VITE_` prefix.
+
+Set `EMAIL_DELIVERY_PROVIDER=smtp`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM`, and optional paired `SMTP_USERNAME`/`SMTP_PASSWORD` for the development/test sandbox. `SMTP_SECURE=true` uses implicit TLS with certificate verification. Captured delivery remains an in-memory option for source tests and is forbidden in production/staging. The M6 probe only verifies mail configuration; it never sends a message.
+
+## Database roles
+
+Use a clean PostgreSQL target and a privileged operator connection in `DIRECT_URL`. `npm run db:roles:provision` is a database mutation and is **not** part of source verification. It is guarded by the shared database mutation gate. Set all existing gate variables, including `DATABASE_PROVISIONING_GATE=APPROVED`, `ALLOW_DATABASE_MUTATIONS=YES`, `DATABASE_MUTATION_PURPOSE=provision`, matching environment and target identity, plus the production change controls when applicable. The command also requires three distinct role names and passwords via `DB_PROBE_ROLE`, `DB_PROBE_PASSWORD`, `DB_MIGRATION_ROLE`, `DB_MIGRATION_PASSWORD`, `DB_APPLICATION_ROLE`, `DB_APPLICATION_PASSWORD`. Passwords must be at least 24 URL-safe characters (`A-Z`, `a-z`, `0-9`, `_`, `-`). The role names must not be the provisioning operator, `postgres`, or a reserved `pg_` role. Do not pass them on command lines or commit them. The script supplies them to `psql` on stdin and reports only success/failure.
+
+The probe role has CONNECT, schema USAGE and SELECT; it has no table write or schema CREATE grants. The migration role has schema CREATE and owns objects it creates. The application role has table DML and sequence usage, without schema CREATE. Default privileges on future migration-owned objects grant SELECT to probe and DML to application. Before approving real provisioning, review any pre-existing roles, memberships, schemas and grants; this script is intended for a fresh target and does not repair inherited privileges from old deployments. Use a separate direct connection for the migration role during M7. Keep the application account in `DATABASE_URL` for normal API runtime.
+
+## M6 read-only preflight
+
+After M5 runtime provisioning, set `DATABASE_URL` to the **probe role** connection and `DIRECT_URL` to a direct **probe role** connection. Run `npm run runtime:infra:probe` in Google AI Studio. Add `-- --direct` to connect to `DIRECT_URL` too. The command executes SELECT-only PostgreSQL queries, Redis PING and configuration checks. It never sends email or writes data. It checks current database/user, TLS, dangerous role flags, database/schema CREATE and table DML privileges. A clean, empty database is valid. It prints no credentials or raw connection errors. `M6_RUNTIME_PROBE=READY` is not proof that migrations or the application runtime are ready.
+
+For M7, review the migration SQL and change to the migration identity in `DIRECT_URL`, open the mutation gate for the approved target and purpose, apply migrations, then close the gate. For M8, use the application role in `DATABASE_URL`, Redis and test mail. No step on this page authorizes seed or imports.

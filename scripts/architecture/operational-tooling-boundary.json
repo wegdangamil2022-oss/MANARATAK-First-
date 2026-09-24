@@ -28,6 +28,7 @@
     "scripts/check_sections_count.ts",
     "scripts/check_specific_codes.ts",
     "scripts/database/verify-seed-reconciliation.ts",
+    "scripts/runtime/infra-probe.mjs",
     "scripts/db-remediation-gate.ts",
     "scripts/diagnose_relationships.ts",
     "scripts/import_asia_cities_combined.ts",

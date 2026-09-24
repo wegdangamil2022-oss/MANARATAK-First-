@@ -17,6 +17,7 @@ const envBoolean = z.preprocess((value) => {
 
 export const PRODUCTION_REQUIRED_CONFIG_KEYS = Object.freeze([
   'DATABASE_URL',
+  'DIRECT_URL',
   'REDIS_URL',
   'API_BASE_URL',
   'CORS_ORIGIN',
@@ -81,6 +82,13 @@ const WEAK_SECRET_PATTERNS = [
   'short-secret',
 ];
 
+function isLoopbackPostgres(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return ['postgresql:', 'postgres:'].includes(url.protocol) && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname.toLowerCase());
+  } catch { return false; }
+}
+
 function isWeakSecret(secret: string): boolean {
   const lower = secret.toLowerCase();
   return WEAK_SECRET_PATTERNS.some(pattern => lower.includes(pattern));
@@ -97,6 +105,7 @@ export const AppConfigSchema = z.preprocess((input) => {
       ...env,
       NODE_ENV: nodeEnv,
       DATABASE_URL: env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/manaratak_dev',
+      DIRECT_URL: env.DIRECT_URL || (env.DATABASE_URL ? (isLoopbackPostgres(env.DATABASE_URL) ? env.DATABASE_URL : undefined) : 'postgresql://postgres:postgres@localhost:5432/manaratak_dev'),
       REDIS_URL: env.REDIS_URL || 'redis://localhost:6379',
       REDIS_NAMESPACE: env.REDIS_NAMESPACE || 'manaratak:',
       JWT_ACTIVE_KEY_ID: env.JWT_ACTIVE_KEY_ID || 'dev-ephemeral',
@@ -152,6 +161,14 @@ export const AppConfigSchema = z.preprocess((input) => {
   ADMIN_WEB_URL: z.string().url().optional(),
   
   DATABASE_URL: z.string().optional(),
+  DIRECT_URL: z.string().optional(),
+  EMAIL_DELIVERY_PROVIDER: z.enum(['captured', 'smtp']).optional(),
+  SMTP_HOST: z.string().min(1).optional(),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).optional(),
+  SMTP_SECURE: envBoolean.optional(),
+  SMTP_FROM: z.string().min(3).optional(),
+  SMTP_USERNAME: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
   REDIS_URL: z.string().optional(),
   REDIS_NAMESPACE: z.string().default('manaratak:'),
   JWT_ACTIVE_KEY_ID: z.string().min(1).optional(),
@@ -215,6 +232,13 @@ export const AppConfigSchema = z.preprocess((input) => {
   ADMIN_AUTH_MODE: z.literal('strict').optional(),
 }).passthrough().superRefine((data, ctx) => {
   const isProdOrStaging = data.NODE_ENV === 'production' || data.NODE_ENV === 'staging';
+  if (!isProdOrStaging && data.DATABASE_URL && !isLoopbackPostgres(data.DATABASE_URL) && !data.DIRECT_URL) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'DIRECT_URL is required for a remote development database', path: ['DIRECT_URL'] });
+  if (data.EMAIL_DELIVERY_PROVIDER === 'smtp') {
+    if (!data.SMTP_HOST || !data.SMTP_PORT || !data.SMTP_FROM) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Test SMTP configuration is incomplete', path: ['EMAIL_DELIVERY_PROVIDER'] });
+    if (Boolean(data.SMTP_USERNAME) !== Boolean(data.SMTP_PASSWORD)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Test SMTP credentials must be supplied together', path: ['SMTP_USERNAME'] });
+    if (data.SMTP_USERNAME && !data.SMTP_SECURE) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Test SMTP authentication requires TLS', path: ['SMTP_SECURE'] });
+    if (!data.SMTP_SECURE && data.SMTP_HOST && !['localhost', '127.0.0.1', '::1', 'mailpit'].includes(data.SMTP_HOST.toLowerCase())) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Remote test SMTP requires TLS', path: ['SMTP_SECURE'] });
+  }
 
   if (isProdOrStaging) {
     // 1. DATABASE_URL
@@ -235,6 +259,13 @@ export const AppConfigSchema = z.preprocess((input) => {
       }
     }
 
+    if (!data.DIRECT_URL?.trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'DIRECT_URL is required in production/staging', path: ['DIRECT_URL'] });
+    for (const [key, value] of [['DATABASE_URL', data.DATABASE_URL], ['DIRECT_URL', data.DIRECT_URL]] as const) {
+      if (value && !/^(postgresql|postgres):\/\//i.test(value)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: `${key} must be a PostgreSQL URL`, path: [key] });
+      if (value && !/[?&]sslmode=(?:require|verify-ca|verify-full)\b/i.test(value)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: `${key} must require PostgreSQL TLS in production/staging`, path: [key] });
+    }
+    if (data.REDIS_URL && !data.REDIS_URL.startsWith('rediss://')) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'REDIS_URL must use rediss:// in production/staging', path: ['REDIS_URL'] });
+    if (data.EMAIL_DELIVERY_PROVIDER) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Test email delivery is forbidden in production/staging', path: ['EMAIL_DELIVERY_PROVIDER'] });
     // W3 provider-backed asset security and immutable import provenance are mandatory in production/staging.
     if (!data.MANARATAK_ASSET_PROVIDER_BASE_URL || !data.MANARATAK_ASSET_PROVIDER_BASE_URL.startsWith('https://')) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'MANARATAK_ASSET_PROVIDER_BASE_URL must be HTTPS in production/staging', path: ['MANARATAK_ASSET_PROVIDER_BASE_URL'] });

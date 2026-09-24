@@ -47,6 +47,21 @@ services:
       timeout: 5s
       retries: 5
 
+  mailpit:
+    image: axllent/mailpit:v1.27
+    profiles: ["development"]
+    depends_on:
+      development-safety-gate:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata:
   redisdata:

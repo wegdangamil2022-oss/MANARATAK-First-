@@ -134,6 +134,7 @@ export * from './identity/PrismaEmailVerificationTokenRepository';
 export * from './identity/InMemoryPasswordResetTokenRepository';
 export * from './identity/PrismaPasswordResetTokenRepository';
 export * from './identity/CapturedEmailDeliveryGateway';
+export * from './identity/SmtpEmailDeliveryGateway';
 export * from './identity/IdentityMapper';
 export * from './auth/PrismaSessionManager';
 export * from './auth/PasswordHasher';

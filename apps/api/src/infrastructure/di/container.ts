@@ -286,6 +286,7 @@ import {
   InMemoryPasswordResetTokenRepository,
   InMemoryEmailVerificationTokenRepository,
   CapturedEmailDeliveryGateway,
+  SmtpEmailDeliveryGateway,
   PasswordHasher,
 } from '@manaratak/infrastructure';
 import { AuthorizationAdminRouter } from '../../presentation/api/router/AuthorizationAdminRouter.js';
@@ -944,7 +945,17 @@ export function registerDependencies(
       return prisma ? new PrismaEmailVerificationTokenRepository(prisma) : new InMemoryEmailVerificationTokenRepository();
     }).singleton(),
     emailDeliveryGateway: asFunction(() => {
-      return new CapturedEmailDeliveryGateway();
+      const provider = readConfig<string>('EMAIL_DELIVERY_PROVIDER') || (effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging' ? '' : 'captured');
+      if (provider === 'captured' && effectiveEnvironment.NODE_ENV !== 'production' && effectiveEnvironment.NODE_ENV !== 'staging') return new CapturedEmailDeliveryGateway();
+      if (provider !== 'smtp' || effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging') throw new Error('Test email delivery provider is not configured for this runtime');
+      return new SmtpEmailDeliveryGateway({
+        host: readConfig<string>('SMTP_HOST') || '',
+        port: Number(readConfig<string | number>('SMTP_PORT') || 0),
+        secure: String(readConfig<string | boolean>('SMTP_SECURE') || 'false') === 'true',
+        from: readConfig<string>('SMTP_FROM') || '',
+        username: readConfig<string>('SMTP_USERNAME'),
+        password: readConfig<string>('SMTP_PASSWORD'),
+      });
     }).singleton(),
     registerUserUseCase: asFunction(({ identityRepository, emailVerificationTokenRepository, emailDeliveryGateway, roleAssignmentRepository, prisma }) => {
       return new RegisterUserUseCase({

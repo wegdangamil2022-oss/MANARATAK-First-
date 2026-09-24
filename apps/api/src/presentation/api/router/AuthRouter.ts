@@ -4,7 +4,7 @@ import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionMana
 import type { ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@manaratak/application';
 import { ForgotPasswordUseCase, ResetPasswordUseCase } from '@manaratak/application';
 import { CapturedEmailDeliveryGateway, InMemoryPasswordResetTokenRepository, PasswordHasher } from '@manaratak/infrastructure';
-import { IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
+import { IEmailDeliveryGateway, IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { clearAuthCookies, readAccessCookie, readRefreshCookie, setAuthCookies } from '../../security/HttpOnlyAuthCookies.js';
 import { createHash } from 'node:crypto';
@@ -23,6 +23,8 @@ export class AuthRouter {
     sessionManager?: ISessionManager;
     principalAccessValidator: IPrincipalAccessValidator;
     credentialVerifier?: ICredentialVerifier;
+    emailDeliveryGateway?: IEmailDeliveryGateway;
+    forgotPasswordUseCase?: ForgotPasswordUseCase;
     registerUserUseCase?: RegisterUserUseCase;
     verifyEmailUseCase?: VerifyEmailUseCase;
     resendVerificationUseCase?: ResendVerificationUseCase;
@@ -39,12 +41,14 @@ export class AuthRouter {
       return SecurityMiddlewareFactory.createCsrfGuard(securityService)(req, res, next);
     };
 
-    const emailGateway = (cradle as any).emailDeliveryGateway || new CapturedEmailDeliveryGateway();
+    const productionLike = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
+    const emailGateway = cradle.emailDeliveryGateway ?? (productionLike ? undefined : new CapturedEmailDeliveryGateway());
+    if (!cradle.forgotPasswordUseCase && !emailGateway) throw new Error('Email delivery gateway is required for production auth routes');
     const passwordResetTokenRepo = (cradle as any).passwordResetTokenRepository || (cradle as any).prismaPasswordResetTokenRepository || new InMemoryPasswordResetTokenRepository();
     const forgotPasswordUseCase = (cradle as any).forgotPasswordUseCase || new ForgotPasswordUseCase({
       identityRepository,
       tokenRepository: passwordResetTokenRepo,
-      emailDeliveryGateway: emailGateway,
+      emailDeliveryGateway: emailGateway!,
     });
     const resetPasswordUseCase = (cradle as any).resetPasswordUseCase || new ResetPasswordUseCase({
       identityRepository,

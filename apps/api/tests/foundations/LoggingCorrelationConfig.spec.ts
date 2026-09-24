@@ -269,7 +269,8 @@ describe('WP1-C Foundations — Logging, Correlation & Configuration', () => {
       const validProdEnv = {
         NODE_ENV: 'production',
         PORT: '3000',
-        DATABASE_URL: 'postgresql://prod_user:strongpass123@prod-db.cloud/manaratak',
+        DATABASE_URL: 'postgresql://prod_user:strongpass123@prod-db.cloud/manaratak?sslmode=require',
+        DIRECT_URL: 'postgresql://migration_user:strongpass123@prod-db.cloud/manaratak?sslmode=require',
         REDIS_URL: 'rediss://prod-redis.cloud:6379',
         JWT_ACTIVE_KEY_ID: 'prod-key',
         JWT_PRIVATE_KEY_PEM: '-----BEGIN ' + 'PRIVATE KEY-----\nprivate\n-----END PRIVATE KEY-----',
