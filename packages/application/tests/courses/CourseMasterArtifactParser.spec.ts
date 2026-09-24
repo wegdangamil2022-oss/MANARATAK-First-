@@ -40,6 +40,25 @@ describe('CourseMasterArtifactParser', () => {
     expect(result.security?.archiveEntryCount).toBeGreaterThan(0);
   });
 
+  it('projects the leading export index from MASTER 2 without changing course fields', async () => {
+    const bytes = await writeXlsxWorkbook([{ name: 'Courses', rows: [
+      ['index', ...HEADERS],
+      [0, 17, 'Workato Academy', 'Course A', 'https://academy.workato.com/course-a', 'Yes', 'No', 'None', 'English', 'Beginner', '1 hour', 'Automation'],
+    ] }]);
+    const result = await CourseMasterArtifactParser.parse({
+      bytes,
+      originalFilename: 'master-2.xlsx',
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      declaredByteSize: bytes.byteLength,
+    });
+    expect(result.issues.filter((issue) => issue.severity === 'ERROR')).toEqual([]);
+    expect(result.rows[0]?.row).toMatchObject({
+      sourceOrder: '17',
+      providerLabel: 'Workato Academy',
+      courseName: 'Course A',
+      directCourseUrl: 'https://academy.workato.com/course-a',
+    });
+  });
   it('accepts an exact-width row and trailing technically-empty XLSX cells', async () => {
     const bytes = await workbookBytes([[
       1, 'Saylor University', 'Course A', 'https://learn.saylor.org/course/view.php?id=1', 'Yes', 'Yes',

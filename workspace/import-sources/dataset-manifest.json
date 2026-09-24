@@ -1,0 +1,48 @@
+{
+  "datasets": [
+    {
+      "datasetId": "courses-master-1-2026-09-15",
+      "entityType": "COURSE",
+      "sourcePath": "workspace/import-sources/courses/MANARATAK_MASTER_1_RESEND_2026-09-15.xlsx",
+      "format": "XLSX",
+      "version": "2026-09-15",
+      "recordCount": 16861,
+      "status": "STAGED_DEDUP_REVIEW_REQUIRED",
+      "importOrder": 1,
+      "sha256": "8e92f89b4814ae40398d5b555b02a8c17eeb5db3ce247f316cf68987b99c8d88"
+    },
+    {
+      "datasetId": "courses-master-2-2026-09-23",
+      "entityType": "COURSE",
+      "sourcePath": "workspace/import-sources/courses/MANARATAK_Free_Courses_MASTER_2_UPDATED_2026-09-23_ATLASSIAN_161_CLOSED_130_WORKATO_162_BATCH_001_2_ADDED_21562_NOT_CLOSED.xlsx",
+      "format": "XLSX",
+      "version": "2026-09-23",
+      "recordCount": 4701,
+      "status": "STAGED_DEDUP_REVIEW_REQUIRED",
+      "importOrder": 2,
+      "sha256": "f5944476f63f13999216ebd5eb6dcfeb6bb067ce1ffb2166735bd973e5da321e"
+    },
+    {
+      "datasetId": "universities-europe-stage-3-4-2026-09-24",
+      "entityType": "UNIVERSITY",
+      "sourcePath": "workspace/import-sources/universities/stage-3-4/MANARATAK_Europe_Universities_Stage_3_Stage_4_1530_REVIEWED_0001_1530_FINAL.md",
+      "format": "MARKDOWN",
+      "version": "2026-09-24",
+      "recordCount": 1530,
+      "status": "STAGED_SOURCE_ADAPTER_REQUIRED",
+      "importOrder": 3,
+      "sha256": "ce64f4283b6d46882c23aa1604d9cf45a6b1691fa15816743161b6dffe059a52"
+    },
+    {
+      "datasetId": "scholarships-master-guide-v3.21",
+      "entityType": "SCHOLARSHIP",
+      "sourcePath": "workspace/import-sources/scholarships/MANARATAK_Scholarship_Import_Master_Guide_v3.21(1).md",
+      "format": "MARKDOWN",
+      "version": "3.21",
+      "recordCount": 514,
+      "status": "STAGED_SCREENING_AND_ADAPTER_REQUIRED",
+      "importOrder": 4,
+      "sha256": "bcca756349fc16873ea9758f95708c8b1d5b11a9a1c35a7b44c2b2d02854c337"
+    }
+  ]
+}

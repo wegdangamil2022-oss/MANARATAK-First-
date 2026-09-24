@@ -1,0 +1,5 @@
+# Scholarship master guide source
+
+`MANARATAK_Scholarship_Import_Master_Guide_v3.21(1).md` is preserved byte-for-byte as the supplied v3.21 source. SHA-256: `bcca756349fc16873ea9758f95708c8b1d5b11a9a1c35a7b44c2b2d02854c337`. It contains 514 unique `SCH-*` record sections. Of those, 349 have an `IMPORTED`-prefixed status, 5 are marked duplicate/merged, 2 review, 1 excluded, 1 control-only, and 156 lack the same explicit final-status marker. The guide also contains rules, summaries and raw-discovery queues, so 514 is a source-section count, not an importable-scholarship count.
+
+The existing scholarship manual-file importer parses JSON, NDJSON and CSV rows, not this mixed Markdown guide. A reviewed extraction and screening adapter is required before it can feed the official import handoff. No earlier scholarship source dataset is present in `workspace/import-sources`, so this source is a separate staged batch; replacement of any external earlier master is unproven. It is not a reference seed.

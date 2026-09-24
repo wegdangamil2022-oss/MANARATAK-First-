@@ -296,6 +296,7 @@ async function parseXlsx(bytes: Uint8Array): Promise<CourseMasterParseResult> {
   const security = inspectXlsxArchive(bytes);
   const workbook = await readXlsxWorkbook(bytes, {
     maxBytes: MAX_ARTIFACT_BYTES,
+    maxSheets: 64,
     maxRowsPerSheet: MAX_COURSE_ROWS + 1,
   });
 
@@ -306,8 +307,13 @@ async function parseXlsx(bytes: Uint8Array): Promise<CourseMasterParseResult> {
   const matrix = sheet.rawRows;
   if (matrix.length === 0) throw new Error('COURSE_MASTER_EMPTY_SHEET');
 
-  const headers = (matrix[0] ?? []).map(text);
-  while (headers.length > 0 && headers.at(-1) === '') headers.pop();
+  const sourceHeaders = (matrix[0] ?? []).map(text);
+  while (sourceHeaders.length > 0 && sourceHeaders.at(-1) === '') sourceHeaders.pop();
+  // MASTER 2 has a spreadsheet export index before the approved 11 course columns.
+  const hasLeadingIndex = sourceHeaders[0] === 'index'
+    && sourceHeaders.length === COURSE_MASTER_COLUMN_COUNT + 1
+    && sourceHeaders.slice(1).every((header, index) => header === IMPORTED_COURSE_MASTER_COLUMNS[index]);
+  const headers = hasLeadingIndex ? sourceHeaders.slice(1) : sourceHeaders;
   const headerResult = validateHeaders(headers);
   issues.push(...headerResult.issues);
   if (issues.some((issue) => issue.severity === 'ERROR' && issue.rowNumber === undefined)) {
@@ -326,7 +332,7 @@ async function parseXlsx(bytes: Uint8Array): Promise<CourseMasterParseResult> {
   const rows: ParsedCourseMasterRow[] = [];
   let ignoredBlankRows = 0;
   for (let index = 1; index < matrix.length; index += 1) {
-    const values = matrix[index] ?? [];
+    const values = hasLeadingIndex ? (matrix[index] ?? []).slice(1) : (matrix[index] ?? []);
     if (isBlankRow(values)) {
       ignoredBlankRows += 1;
       continue;
