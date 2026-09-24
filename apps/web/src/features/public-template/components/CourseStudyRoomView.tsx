@@ -1302,7 +1302,7 @@ export function CourseStudyRoomView({
         setHomeworkSubmitted(true);
         setHomeworkFeedback(`تحليل رائع ومكتمل للتطبيق العملي الخاص بالمحاضرة الأولى! 🌟
 لقد استوعبت الفروقات الجوهرية والعملية بدقة. تم تسجيل إنجازك الأكاديمي بنجاح وإرسال التغذية الراجعة إلى حساب الطالب الخاص بك.
-التقييم: 10/10 (درجة كاملة) ✓`);
+التقييم: 10/10 (درجة كاملة).`);
         if (activeItem) {
           activeItem.completed = true;
         }
@@ -2583,7 +2583,7 @@ export function CourseStudyRoomView({
                   <Compass className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-[13.5px] sm:text-[15px] font-black text-[#142B5F] dark:text-[#F2CD78] leading-tight">
+                  <h4 className="text-[13.5px] sm:text-[15px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-tight">
                     فهرس التنقل السريع بين الأقسام
                   </h4>
                   <p className="text-[10.5px] font-bold text-[var(--mn-text-muted)] mt-0.5">
@@ -2591,7 +2591,7 @@ export function CourseStudyRoomView({
                   </p>
                 </div>
               </div>
-              <span className="text-[10.5px] font-black px-2.5 py-1 rounded-full bg-[#142B5F]/10 dark:bg-[#7EB6FF]/15 text-[#142B5F] dark:text-[#7EB6FF] border border-[#142B5F]/20">
+              <span className="text-[10.5px] font-bold px-2.5 py-1 rounded-full bg-[#142B5F]/10 dark:bg-[#7EB6FF]/15 text-[#142B5F] dark:text-[#7EB6FF] border border-[#142B5F]/20">
                 13 قسمًا
               </span>
             </div>
@@ -3807,7 +3807,7 @@ export function CourseStudyRoomView({
                   <AlertCircle className="w-3.5 h-3.5" />
                 </div>
                 <div className="space-y-1.5 text-right flex-1">
-                  <span className="text-[12px] font-black text-[#142B5F] dark:text-[#F2CD78] block">
+                  <span className="text-[12px] font-bold text-[#142B5F] dark:text-[#F2CD78] block">
                     ملاحظة هامة حول اعتماد المقررات والمحذوفات:
                   </span>
                   <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.85] text-justify">
@@ -7866,23 +7866,23 @@ export function CourseStudyRoomView({
                     </p>
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] font-bold text-[var(--mn-text)]">
                       <li className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] shrink-0" />
                         توفير الوقت
                       </li>
                       <li className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] shrink-0" />
                         تقليل التكلفة
                       </li>
                       <li className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] shrink-0" />
                         تجنب تكرار التحاليل والأشعة
                       </li>
                       <li className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] shrink-0" />
                         تنظيم ملفك بشكل أفضل
                       </li>
                       <li className="flex items-center gap-1.5 sm:col-span-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] shrink-0" />
                         الاستعداد المبكر لمتطلبات المنح
                       </li>
                     </ul>
@@ -9012,9 +9012,9 @@ export function CourseStudyRoomView({
                   </div>
 
                   {/* Warning on Payment Channels */}
-                  <div className="p-2.5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <p className="text-[11px] font-bold text-emerald-950 dark:text-emerald-200 leading-[1.75]">
+                  <div className="p-2.5 rounded-lg bg-[var(--mn-learning-success-500)]/10 dark:bg-[var(--mn-learning-success-500)]/15 border border-[var(--mn-learning-success-500)]/25 flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] shrink-0 mt-0.5" />
+                    <p className="text-[11px] font-bold text-[var(--mn-learning-success-950)] dark:text-[var(--mn-learning-success-300)] leading-[1.75]">
                       لذلك يجب دائمًا دفع الرسوم بالطريقة والحساب الرسميين المذكورين في موقع الجامعة، وعدم التحويل إلى أي حساب شخصي أو جهة غير موثوقة.
                     </p>
                   </div>
@@ -9199,7 +9199,7 @@ export function CourseStudyRoomView({
                 onClick={() => {
                   triggerRestriction('ليس لديك صلاحية الوصول إلى هذا القسم.');
                 }}
-                className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border flex items-center justify-center gap-1.5 font-['Cairo',sans-serif] shadow-2xs bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600"
+                className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border flex items-center justify-center gap-1.5 font-['Cairo',sans-serif] shadow-2xs bg-[var(--mn-learning-success-600)] hover:bg-[var(--mn-learning-success-700)] text-white border-[var(--mn-learning-success-600)]"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>تحديد كمكتمل</span>
@@ -9379,7 +9379,7 @@ export function CourseStudyRoomView({
                             {lecture.title}
                           </h3>
                           {isCurrentLecture ? (
-                            <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-300/40 shrink-0">
+                            <span className="text-[9px] font-bold text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] bg-[var(--mn-learning-success-50)] dark:bg-[var(--mn-learning-success-950)]/60 px-1.5 py-0.2 rounded-md border border-[var(--mn-learning-success-300)]/40 shrink-0">
                               متاحة للقراءة
                             </span>
                           ) : (

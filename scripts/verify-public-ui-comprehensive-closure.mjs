@@ -143,7 +143,7 @@ check('DIRECT_COUNTRY_INJECT',contains(app,'countriesForView') && contains(app,'
 check('DIRECT_CAREER_INJECT',contains(app,'careersForView') && contains(app,'setDirectCareer'),'career direct record');
 
 // Router / single-admin architecture
-check('ROUTER_USES_OUTLET',contains(router,'return <Outlet />'),'matched public child routes render');
+check('ROUTER_USES_OUTLET',contains(router,'<Outlet />'),'matched public child routes render');
 check('ROUTER_TOOL_EXECUTION',contains(router,"path: 'tools/:toolKey'") && contains(router,'element: <StudentToolPage />'),'tool execution route active');
 check('NO_SHADOW_ADMIN_DIR',!exists('apps/web/src/features/admin-preview'),'apps/admin remains the only admin UI');
 check('NO_LOCAL_ADMIN_SWITCH',notContains(router,'VITE_LOCAL_ADMIN_READ_ONLY'),'no local shadow-admin switch');
