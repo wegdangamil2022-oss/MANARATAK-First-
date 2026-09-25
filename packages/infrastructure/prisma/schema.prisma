@@ -600,7 +600,7 @@ model CertificateIssuer {
   accreditationReference String?
   metadata               Json?
   createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  updatedAt              DateTime @default(now()) @updatedAt
 
   templates        CertificateTemplate[]
   templateVersions CertificateTemplateVersion[]
@@ -1142,7 +1142,7 @@ model BackgroundJobRecord {
 }
 
 model BackgroundJobExecutionRecord {
-  id           String   @id @default(uuid())
+  id           String   @id @default(dbgenerated("(gen_random_uuid())::text"))
   jobReference String
   attempt      Int
   workerId     String
@@ -1163,7 +1163,7 @@ model BackgroundJobExecutionRecord {
 }
 
 model BackgroundJobDeadLetterRecord {
-  id           String   @id @default(uuid())
+  id           String   @id @default(dbgenerated("(gen_random_uuid())::text"))
   jobReference String   @unique
   jobType      String
   payload      Json
@@ -3133,7 +3133,7 @@ model CmsContentDomainLink {
 model CmsLocalizedContent {
   id                 String   @id @default(uuid())
   contentId          String
-  siteIdentifier     String
+  siteIdentifier     String   @default("MANARATAK")
   locale             String
   localizedSlug      String
   state              String   @default("DRAFT")
@@ -5432,7 +5432,7 @@ model NotificationDeliveryReceipt {
 // --- API Foundation: Canonical Command Idempotency ---
 
 model ApiIdempotencyRecord {
-  id                 String    @id @default(uuid())
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   scopeHash          String    @unique
   principalId        String
   method             String
@@ -5447,7 +5447,7 @@ model ApiIdempotencyRecord {
   expiresAt          DateTime
   completedAt        DateTime?
   createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  updatedAt          DateTime  @default(now()) @updatedAt
 
   @@index([expiresAt])
   @@index([principalId, createdAt])
@@ -5469,7 +5469,7 @@ model ApiSearchRequestRecord {
   totalCount      Int?
   executionTimeMs Int?
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  updatedAt       DateTime @default(now()) @updatedAt
 
   @@index([reference, createdAt])
   @@index([scope, createdAt])
