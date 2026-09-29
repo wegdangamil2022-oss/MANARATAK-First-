@@ -6,7 +6,7 @@ export function validateFirstAdminRequest(env) {
   if (!['staging', 'production'].includes(env.NODE_ENV) || env.FIRST_ADMIN_CONFIRM !== 'PROMOTE_EXISTING_VERIFIED_IDENTITY_ONCE') {
     throw new Error('FIRST_ADMIN_EXPLICIT_CONFIRMATION_REQUIRED');
   }
-  const input = { identityId: env.FIRST_ADMIN_IDENTITY_ID, roleId: env.FIRST_ADMIN_ROLE_ID,
+  const input = { identityId: env.FIRST_ADMIN_IDENTITY_ID, verifiedEmail: env.FIRST_ADMIN_VERIFIED_EMAIL, roleId: env.FIRST_ADMIN_ROLE_ID,
     actorId: env.FIRST_ADMIN_ACTOR_ID, approverId: env.FIRST_ADMIN_APPROVER_ID, changeId: env.DATABASE_PRODUCTION_CHANGE_ID };
   if (Object.values(input).some(value => !value?.trim()) || input.actorId === input.approverId || input.changeId.length < 6) {
     throw new Error('FIRST_ADMIN_APPROVAL_REQUIRED');

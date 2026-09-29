@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { adminApiClient, getStoredAdminToken, performAdminRefresh } from './api/client';
+import { adminApiClient } from './api/client';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { ScholarshipListPage } from './pages/ScholarshipListPage';
 import { ScholarshipDetailPage } from './pages/ScholarshipCatalogDetailPage';
@@ -43,40 +43,35 @@ import { AdminAuthorizationProvider, RequireAdminPermission } from './security/A
 import { I18nProvider, useTranslation } from './i18n/I18nProvider';
 import { AdminNavigation } from './components/AdminNavigation';
 import { Languages, LockKeyhole, ArrowLeftRight, Loader2 } from 'lucide-react';
+import { firstAllowedAdminPath } from '@manaratak/shared';
 
 function AdminLayout() {
   const localReadOnly = import.meta.env.VITE_LOCAL_ADMIN_READ_ONLY === 'true';
-  const [adminAccess, setAdminAccess] = useState<'loading' | 'authorized' | 'unauthorized'>(
-    localReadOnly ? 'authorized' : 'loading',
-  );
-  const [adminPermissions, setAdminPermissions] = useState<string[]>(
-    localReadOnly ? ['*'] : []
-  );
+  const [adminAccess, setAdminAccess] = useState<'loading' | 'authorized' | 'student' | 'unauthorized' | 'error'>('loading');
+  const [adminPermissions, setAdminPermissions] = useState<string[]>([]);
   const { t, language, setLanguage } = useTranslation();
 
   const checkSession = () => {
     let active = true;
     adminApiClient.setAdminAuthStatus('LOADING');
     verifyAdminSession()
-      .then((permissions) => {
+      .then((result) => {
         if (!active) return;
-        if (permissions && permissions.length > 0) {
+        if (result.kind === 'authorized') {
           adminApiClient.setAdminAuthStatus('AUTHORIZED');
-          setAdminPermissions(permissions);
+          setAdminPermissions(result.permissions);
           setAdminAccess('authorized');
         } else {
           adminApiClient.setAdminAuthStatus('UNAUTHORIZED');
-          adminApiClient.abortAllPendingAdminRequests();
           setAdminPermissions([]);
-          setAdminAccess('unauthorized');
+          setAdminAccess(result.kind);
         }
       })
       .catch(() => {
         if (!active) return;
         adminApiClient.setAdminAuthStatus('UNAUTHORIZED');
-        adminApiClient.abortAllPendingAdminRequests();
         setAdminPermissions([]);
-        setAdminAccess('unauthorized');
+        setAdminAccess('error');
       });
     return () => {
       active = false;
@@ -84,12 +79,15 @@ function AdminLayout() {
   };
 
   useEffect(() => {
-    if (localReadOnly) {
-      adminApiClient.setAdminAuthStatus('AUTHORIZED');
-      return;
-    }
     return checkSession();
-  }, [localReadOnly]);
+  }, []);
+
+  useEffect(() => {
+    if (adminAccess === 'student') {
+      const publicBase = (import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
+      window.location.replace(`${publicBase}/student`);
+    }
+  }, [adminAccess]);
 
   const lockAdmin = async () => {
     try {
@@ -104,10 +102,12 @@ function AdminLayout() {
     }
   };
 
+  if (adminAccess === 'student') return null;
+
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div className="min-h-screen bg-slate-50 text-[#142B5F] flex flex-col font-sans">
-        <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
+        {adminAccess === 'authorized' && <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#142B5F] text-white shadow-sm overflow-hidden p-1 border border-[#21A7B4]/20 shrink-0">
               <img
@@ -161,7 +161,7 @@ function AdminLayout() {
               )}
             </div>
           )}
-        </header>
+        </header>}
         {localReadOnly && (
           <div className="border-b border-[#D6A43B]/35 bg-[#F4D999]/18 px-6 py-3 text-center text-xs font-extrabold text-[#7A5A14]">
             {t('admin_local_readonly_notice')}
@@ -174,8 +174,8 @@ function AdminLayout() {
             <AdminNavigation />
             <main className="min-w-0 flex-1 p-4 sm:p-6">
               <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<AdminDashboardPage />} />
+                <Route path="/" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/'} replace />} />
+                <Route path="/dashboard" element={<RequireAdminPermission permission="admin:platform:manage"><AdminDashboardPage /></RequireAdminPermission>} />
                 <Route path="/review-queue" element={<RequireAdminPermission permission="admin:platform:manage"><AdminReviewQueuePage /></RequireAdminPermission>} />
                 <Route path="/imports" element={<RequireAdminPermission permission="admin:imports:manage"><ImportAdminPage /></RequireAdminPermission>} />
                 <Route path="/imports/scholarships" element={<RequireAdminPermission permission="admin:imports:manage"><ScholarshipImportCenterPage /></RequireAdminPermission>} />
@@ -221,6 +221,7 @@ function AdminLayout() {
                 <Route path="/settings/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />
                 <Route path="/academic-taxonomy" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyAdminPage /></RequireAdminPermission>} />
                 <Route path="/academic-taxonomy/:nodeId" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyDetailPage /></RequireAdminPermission>} />
+                <Route path="*" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/'} replace />} />
               </Routes>
             </main>
           </div>
@@ -235,6 +236,8 @@ function AdminLayout() {
                 <div className="text-sm font-black text-[#142B5F]">{t('loading')}</div>
                 <p className="mt-1 text-xs text-slate-500">جاري التحقق من جلسة المسؤول وتجهيز الصلاحيات...</p>
               </div>
+            ) : adminAccess === 'error' ? (
+              <button type="button" onClick={checkSession} className="rounded-xl bg-white p-4 text-sm font-bold text-[#142B5F]">تعذر التحقق من الجلسة. أعد المحاولة.</button>
             ) : (
               <AdminAccessGate />
             )}
@@ -305,33 +308,16 @@ function clearAdminSession() {
   } catch {}
 }
 
-async function verifyAdminSession(): Promise<string[] | null> {
-  const storedToken = getStoredAdminToken();
-  if (!storedToken) {
-    clearAdminSession();
-    return null;
-  }
-
+async function verifyAdminSession(): Promise<{ kind: 'authorized'; permissions: string[] } | { kind: 'student' | 'unauthorized' | 'error' }> {
   try {
     const response = await adminApiClient.request<{
       data?: { effectivePermissions?: string[] };
     }>('/auth/me');
     const permissions = response.data?.effectivePermissions || [];
-    const isAuthorized = permissions.some((permission) =>
-      permission === '*' || permission === 'admin:*' || permission.startsWith('admin:')
-    );
-    if (isAuthorized) {
-      try {
-        localStorage.setItem('manaratak_admin_access', 'authorized');
-        localStorage.setItem('manaratak_admin_permissions', JSON.stringify(permissions));
-      } catch {}
-      return permissions;
-    }
-    clearAdminSession();
-    return null;
-  } catch {
-    clearAdminSession();
-    return null;
+    if (firstAllowedAdminPath(permissions)) return { kind: 'authorized', permissions };
+    return { kind: 'student' };
+  } catch (error) {
+    return { kind: String(error).includes('[401]') ? 'unauthorized' : 'error' };
   }
 }
 

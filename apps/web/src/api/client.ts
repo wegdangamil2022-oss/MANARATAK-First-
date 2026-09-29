@@ -1407,7 +1407,6 @@ function ensureCanonicalMutationHeaders(init?: RequestInit): RequestInit | undef
 
 let isRefreshing = false;
 let refreshSubscribers: ((ok: boolean) => void)[] = [];
-let memoryWebRefreshToken: string | null = null;
 let activeWebRefreshPromise: Promise<boolean> | null = null;
 let webRefreshFailedPermanently = false;
 
@@ -1427,24 +1426,7 @@ export async function apiFetch(
   const urlStr = typeof input === 'string' ? input : (input instanceof URL ? input.href : input.url);
   const isAuthRoute = urlStr.includes('/auth/login') || urlStr.includes('/auth/refresh') || urlStr.includes('/auth/logout');
 
-  const modifiedInit = ensureCanonicalMutationHeaders(init);
-  const storedToken = typeof window !== 'undefined'
-    ? (window.sessionStorage?.getItem('manaratak_access_token') ||
-       window.sessionStorage?.getItem('manaratak_admin_bearer_token') ||
-       (window.localStorage && (
-         window.localStorage.getItem('manaratak_access_token') ||
-         window.localStorage.getItem('manaratak_admin_bearer_token')
-       )) ||
-       null)
-    : null;
-  if (storedToken) {
-    const headers = new Headers(modifiedInit.headers);
-    if (!headers.has('Authorization')) {
-      headers.set('Authorization', `Bearer ${storedToken}`);
-      modifiedInit.headers = headers;
-    }
-  }
-
+  const modifiedInit = ensureCanonicalMutationHeaders(init) || {};
   const response = await csrfManager.fetchWithCsrf(input, modifiedInit);
 
   if (response.status === 401 && !isAuthRoute) {
@@ -1468,31 +1450,15 @@ export async function apiFetch(
 
     if (!activeWebRefreshPromise) {
       activeWebRefreshPromise = (async () => {
-        const refreshToken = memoryWebRefreshToken || undefined;
         try {
           const refreshRes = await csrfManager.fetchWithCsrf(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken, rememberMe: true }),
+            body: JSON.stringify({ rememberMe: true }),
             credentials: 'include',
           });
           if (refreshRes.ok) {
             const payload = await refreshRes.json().catch(() => ({}));
-            if (typeof window !== 'undefined' && payload?.data?.accessToken) {
-              try {
-                window.sessionStorage.setItem('manaratak_access_token', payload.data.accessToken);
-                window.sessionStorage.setItem('manaratak_admin_bearer_token', payload.data.accessToken);
-                window.sessionStorage.setItem('manaratak_admin_bearer', payload.data.accessToken);
-              } catch {}
-              if (window.localStorage) {
-                window.localStorage.setItem('manaratak_access_token', payload.data.accessToken);
-                window.localStorage.setItem('manaratak_admin_bearer_token', payload.data.accessToken);
-                window.localStorage.setItem('manaratak_admin_bearer', payload.data.accessToken);
-              }
-            }
-            if (payload?.data?.refreshToken) {
-              memoryWebRefreshToken = payload.data.refreshToken;
-            }
             try {
               window.localStorage?.removeItem('manaratak_refresh_token');
               window.sessionStorage?.removeItem('manaratak_refresh_token');
@@ -1514,18 +1480,7 @@ export async function apiFetch(
     activeWebRefreshPromise = null;
 
     if (refreshOk) {
-      const nextHeaders = new Headers(modifiedInit.headers);
-      const nextToken = typeof window !== 'undefined'
-        ? (window.sessionStorage?.getItem('manaratak_access_token') ||
-           window.sessionStorage?.getItem('manaratak_admin_bearer_token') ||
-           (window.localStorage && (
-             window.localStorage.getItem('manaratak_access_token') ||
-             window.localStorage.getItem('manaratak_admin_bearer_token')
-           )) ||
-           null)
-        : null;
-      if (nextToken) nextHeaders.set('Authorization', `Bearer ${nextToken}`);
-      return csrfManager.fetchWithCsrf(input, { ...modifiedInit, headers: nextHeaders });
+      return csrfManager.fetchWithCsrf(input, modifiedInit);
     } else {
       return response;
     }
@@ -2502,21 +2457,19 @@ export class ApiClient {
       err.code = body?.error?.code || body?.code;
       throw err;
     }
-    if (typeof window !== 'undefined' && body?.data?.accessToken) {
+    if (typeof window !== 'undefined') {
       try {
-        window.sessionStorage.setItem('manaratak_admin_bearer_token', body.data.accessToken);
-        window.sessionStorage.setItem('manaratak_admin_bearer', body.data.accessToken);
-        window.sessionStorage.setItem('manaratak_access_token', body.data.accessToken);
+        window.sessionStorage.removeItem('manaratak_admin_bearer_token');
+        window.sessionStorage.removeItem('manaratak_admin_bearer');
+        window.sessionStorage.removeItem('manaratak_access_token');
       } catch {}
       if (window.localStorage) {
-        window.localStorage.setItem('manaratak_admin_bearer_token', body.data.accessToken);
-        window.localStorage.setItem('manaratak_admin_bearer', body.data.accessToken);
-        window.localStorage.setItem('manaratak_access_token', body.data.accessToken);
-        window.localStorage.setItem('manaratak_admin_access', 'authorized');
+        window.localStorage.removeItem('manaratak_admin_bearer_token');
+        window.localStorage.removeItem('manaratak_admin_bearer');
+        window.localStorage.removeItem('manaratak_admin_access');
+        window.localStorage.removeItem('manaratak_admin_permissions');
+        window.localStorage.removeItem('manaratak_access_token');
       }
-    }
-    if (body?.data?.refreshToken) {
-      memoryWebRefreshToken = body.data.refreshToken;
     }
     try {
       window.localStorage?.removeItem('manaratak_refresh_token');
@@ -2591,11 +2544,15 @@ export class ApiClient {
       if (typeof window !== 'undefined') {
         try {
           sessionStorage.removeItem(STUDENT_TOOLS_SESSION_STORAGE_KEY);
+          sessionStorage.removeItem('manaratak_access_token');
+          sessionStorage.removeItem('manaratak_admin_bearer_token');
+          sessionStorage.removeItem('manaratak_admin_bearer');
           localStorage.removeItem('manaratak_access_token');
           localStorage.removeItem('manaratak_refresh_token');
           localStorage.removeItem('manaratak_admin_bearer_token');
           localStorage.removeItem('manaratak_admin_bearer');
           localStorage.removeItem('manaratak_admin_access');
+          localStorage.removeItem('manaratak_admin_permissions');
         } catch { /* storage can be restricted */ }
       }
     }

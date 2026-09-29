@@ -21,6 +21,7 @@ interface HeaderProps {
   onGlobalSearchSubmit?: (query: string) => void;
   onOpenSmartSearch?: (query: string) => void;
   isSearchVisible?: boolean;
+  adminDestination?: string | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -40,13 +41,10 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSmartSearch,
   unreadCount = 0,
   isSearchVisible = false,
+  adminDestination = null,
 }) => {
   const isRtl = language === 'ar';
-  const isAdmin = typeof window !== 'undefined' && window.localStorage && (
-    localStorage.getItem('manaratak_admin_access') === 'authorized' ||
-    !!localStorage.getItem('manaratak_admin_bearer_token') ||
-    !!localStorage.getItem('manaratak_access_token')
-  );
+  const isAdmin = !!adminDestination;
 
   return (
     <>
@@ -129,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onOpenProfile}
                 className="min-h-[36px] sm:min-h-[40px] px-2.5 sm:px-3.5 rounded-xl bg-[#142B5F] text-[#D6A43B] border border-[#D6A43B]/60 hover:bg-[#0E7C86] hover:text-white dark:bg-[#D6A43B] dark:text-[#142B5F] dark:border-[#D6A43B] dark:hover:bg-[#F2CD78] dark:hover:text-[#142B5F] font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 cursor-pointer shadow-xs"
                 aria-label={isAdmin ? 'لوحة الإدارة' : 'حساب الطالب'}
-                title={isAdmin ? 'لوحة تحكم الإدارة (المالك)' : 'حسابي ومساحة الطالب'}
+                title={isAdmin ? 'لوحة الإدارة' : 'حسابي ومساحة الطالب'}
               >
                 {isAdmin ? <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" /> : <User className="w-4 h-4 sm:w-5 sm:h-5" />}
                 <span className="hidden sm:inline font-bold">

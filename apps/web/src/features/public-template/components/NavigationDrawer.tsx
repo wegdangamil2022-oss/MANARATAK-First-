@@ -31,6 +31,7 @@ interface NavigationDrawerProps {
   unreadCount: number;
   isDarkMode?: boolean;
   onToggleDarkMode?: () => void;
+  adminDestination?: string | null;
 }
 
 export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
@@ -42,20 +43,15 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   onNavigate,
   isDarkMode = false,
   onToggleDarkMode,
+  adminDestination = null,
 }) => {
   useOverlayDialog(isOpen, onClose, 'mn-navigation-dialog');
   if (!isOpen) return null;
 
-  const isAdmin = typeof window !== 'undefined' && window.localStorage && (
-    localStorage.getItem('manaratak_admin_access') === 'authorized' ||
-    !!localStorage.getItem('manaratak_admin_bearer_token') ||
-    !!localStorage.getItem('manaratak_access_token')
-  );
-
   const menuItems = [
-    ...(isAdmin ? [{
+    ...(adminDestination ? [{
       id: 'admin',
-      label: 'لوحة الإدارة والتحكم (المالك)',
+      label: 'لوحة الإدارة والتحكم',
       icon: <ShieldCheck className="w-4 h-4 text-[#D6A43B]" />,
     }] : []),
     {

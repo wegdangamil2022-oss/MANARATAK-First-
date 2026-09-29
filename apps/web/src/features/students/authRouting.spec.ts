@@ -8,7 +8,7 @@ describe('trusted post-login routing', () => {
     expect(resolveAuthenticatedDestination({ ...baseIdentity, roles: ['student'], roleNames: ['طالب مسجل'] })).toEqual({ kind: 'student', path: '/student' });
   });
 
-  it('routes Owner authority through the same administrative destination', () => {
+  it('routes persisted Owner permission through the same administrative destination', () => {
     expect(resolveAuthenticatedDestination({ ...baseIdentity, roleNames: ['Owner'], effectivePermissions: ['admin:*'] })).toEqual({ kind: 'admin', path: '/admin/dashboard' });
   });
 
@@ -19,12 +19,12 @@ describe('trusted post-login routing', () => {
     expect(resolveAuthenticatedDestination({ ...baseIdentity, roleNames: ['student'], effectivePermissions: [] })).toEqual({ kind: 'student', path: '/student' });
   });
 
-  it.each(['admin', 'super_admin', 'manager'])('routes trusted %s role to the configured admin app', (role) => {
-    expect(resolveAuthenticatedDestination({ ...baseIdentity, roleNames: [role], effectivePermissions: [] }, 'https://admin.manaratak.test')).toEqual({ kind: 'admin', path: 'https://admin.manaratak.test' });
+  it.each(['owner', 'admin', 'super_admin', 'manager'])('does not promote the %s role label without a current permission', (role) => {
+    expect(resolveAuthenticatedDestination({ ...baseIdentity, primaryEmail: 'wegdangamil2022@gmail.com', roleNames: [role], effectivePermissions: [] })).toEqual({ kind: 'denied', reason: 'NO_ALLOWED_ROLE' });
   });
 
   it('routes server-issued admin permissions even when the role label is custom', () => {
-    expect(resolveAuthenticatedDestination({ ...baseIdentity, roleNames: ['operations'], effectivePermissions: ['admin:universities:read'] })).toEqual({ kind: 'admin', path: '/admin/dashboard' });
+    expect(resolveAuthenticatedDestination({ ...baseIdentity, roleNames: ['operations'], effectivePermissions: ['admin:universities:manage'] })).toEqual({ kind: 'admin', path: '/admin/universities' });
   });
 
   it('routes the server-issued admin wildcard permission to administration', () => {

@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   ApiClient,
   HydratedStudentSavedItemDto,
+  StudentSavedItemDto,
   MoneyAmountDto,
   StudentDashboardSummaryDto,
   StudentFinanceInvoiceDto,
@@ -787,7 +788,7 @@ function SummaryView({
   );
 
   const urgentAlerts = useMemo(() => {
-    const unread = dashboard.notifications.filter((n) => !n.read);
+    const unread = dashboard.notifications.filter((n) => !n.readAt);
     const pendingInvoices = invoices.filter((inv) => inv.status !== 'PAID');
     const upcomingDeadlines = activeMilestones.filter((m) => m.deadlineAt);
     return {
@@ -3154,7 +3155,6 @@ function VaultView({
             const displayName = owner?.displayName || item.displayName || item.entityId;
             const slug = owner?.slug || item.entitySlug || undefined;
             const available = owner ? owner.available : true;
-            const country = owner?.country;
             const targetUrl = slug
               ? buildEntityLink(item.entityType, slug)
               : item.entityType === 'STUDENT_TOOL'
@@ -3177,11 +3177,6 @@ function VaultView({
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--mn-page)] text-[var(--mn-heading)] border border-[var(--mn-border)]">
                           {arabicEntityType(item.entityType)}
                         </span>
-                        {country && (
-                          <span className="text-[10px] font-medium text-[var(--mn-text-muted)] bg-[var(--mn-page)] px-2 py-0.5 rounded-md border border-[var(--mn-border)]">
-                            {country}
-                          </span>
-                        )}
                       </div>
                     </div>
 
@@ -3211,7 +3206,7 @@ function VaultView({
 
                   {/* Saved Date */}
                   <div className="mt-2 text-[10.5px] text-[var(--mn-text-muted)]">
-                    حُفظ في: <strong>{formatDate(item.createdAt)}</strong>
+                    حُفظ في: <strong>{formatDate(item.savedAt)}</strong>
                   </div>
                 </div>
 

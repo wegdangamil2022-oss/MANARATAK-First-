@@ -85,6 +85,31 @@ describe('AuthRouter API endpoints', () => {
       expect(response.status).toBe(401);
       expect(response.body.error.code).toBe('UNAUTHORIZED');
     });
+
+    it('does not grant owner permissions from the email address alone', async () => {
+      mockIdentityRepository.findById.mockResolvedValue({
+        user: { profile: { props: { displayName: 'Owner' } }, contactRegistry: { primaryEmail: 'wegdangamil2022@gmail.com' } },
+      });
+      const response = await supertest(app).get('/api/v1/auth/me').set('Cookie', 'manaratak_access=access-token');
+      expect(response.status).toBe(200);
+      expect(response.body.data.effectivePermissions).toEqual([]);
+      expect(response.body.data.roles).toEqual([]);
+    });
+
+    it('returns administrative authority only from a persisted role assignment', async () => {
+      const roleAssignmentRepository = { findByIdentityId: vi.fn().mockResolvedValue([{ roleId: 'administrator' }]) };
+      const roleRepository = { findById: vi.fn().mockResolvedValue({ name: 'Administrator', permissions: [{ value: 'admin:*' }] }) };
+      const assignedApp = express();
+      assignedApp.use('/api/v1/auth', AuthRouter.create({
+        authService: mockAuthService, identityRepository: mockIdentityRepository, securityService: mockSecurityService,
+        tokenProvider: mockTokenProvider, sessionManager: mockSessionManager, principalAccessValidator: mockPrincipalAccessValidator,
+        roleAssignmentRepository: roleAssignmentRepository as any, roleRepository: roleRepository as any,
+      }));
+      const response = await supertest(assignedApp).get('/api/v1/auth/me').set('Cookie', 'manaratak_access=access-token');
+      expect(response.status).toBe(200);
+      expect(response.body.data.effectivePermissions).toEqual(['admin:*']);
+      expect(roleAssignmentRepository.findByIdentityId).toHaveBeenCalledWith('user-123');
+    });
   });
 
   describe('GET /api/v1/auth/csrf-token', () => {

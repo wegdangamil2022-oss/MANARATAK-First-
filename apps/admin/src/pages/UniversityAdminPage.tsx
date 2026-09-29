@@ -51,7 +51,7 @@ interface UniversityStats {
 }
 
 export function UniversityAdminPage() {
-  const { language, dir, t } = useTranslation();
+  const { language, dir } = useTranslation();
   const navigate = useNavigate();
   const isArabic = language === 'ar';
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;

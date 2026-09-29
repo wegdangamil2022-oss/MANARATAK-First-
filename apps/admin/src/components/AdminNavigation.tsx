@@ -43,7 +43,7 @@ const groups: NavigationGroup[] = [
   {
     labelKey: 'admin_nav_group_overview',
     items: [
-      { to: '/dashboard', labelKey: 'admin_nav_dashboard', icon: LayoutDashboard },
+      { to: '/dashboard', labelKey: 'admin_nav_dashboard', icon: LayoutDashboard, requiredPermission: 'admin:platform:manage' },
       { to: '/review-queue', labelKey: 'admin_nav_review', icon: ClipboardCheck, requiredPermission: 'admin:platform:manage' },
     ],
   },

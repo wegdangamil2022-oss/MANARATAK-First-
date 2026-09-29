@@ -25,18 +25,6 @@ import {
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
-const BRAND = {
-  primary: '#142B5F',
-  secondary: '#0E7C86',
-  digital: '#21A7B4',
-  gold: '#D6A43B',
-  highlight: '#F2CD78',
-  fog: '#DDEFF2',
-  ivory: '#FAF7F0',
-  text: '#203442',
-  white: '#FFFFFF',
-} as const;
-
 type LoadState = 'ready' | 'unavailable';
 type HealthState = 'UP' | 'DOWN' | 'UNKNOWN';
 
@@ -655,12 +643,6 @@ async function fetchPagedTotal(endpoint: string): Promise<number> {
   return response.total;
 }
 
-async function fetchImportRecordTotal(status?: string): Promise<number> {
-  const response = await adminApiClient.request<{ total?: number }>(`/admin/imports/records?page=1&pageSize=1${status ? `&status=${encodeURIComponent(status)}` : ''}`);
-  if (typeof response.total !== 'number') throw new Error('IMPORT_TOTAL_UNAVAILABLE');
-  return response.total;
-}
-
 function withQuery(endpoint: string, params: Record<string, string | number>): string {
   const separator = endpoint.includes('?') ? '&' : '?';
   const query = new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString();
@@ -679,12 +661,6 @@ function sumNullable(...values: Array<number | null | undefined>): number | null
 function sumValues(values: Array<number | null | undefined>): number | null {
   const available = values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
   return available.length ? available.reduce((sum, value) => sum + value, 0) : null;
-}
-
-function dateMillis(value?: string) {
-  if (!value) return 0;
-  const parsed = new Date(value).getTime();
-  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function formatTime(date: Date, isArabic: boolean) {

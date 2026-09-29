@@ -8,6 +8,8 @@ The RBAC baseline is required by:
 1. **Public Student Registration** (`RegisterUserUseCase`), which strictly requires `RoleRecord` with `id="student"`.
 2. **First Admin Bootstrap** (`ControlledFirstAdminBootstrap`), which strictly requires a pre-existing administrator role (`id="administrator"` with `permissions=["admin:*"]`).
 
+Before changing a live owner's access, run the read-only `npm run auth:owner:preflight` described in [M8 owner access handoff](M8_OWNER_ACCESS_HANDOFF.md). The bootstrap additionally requires `FIRST_ADMIN_VERIFIED_EMAIL` to match the stored, confirmed primary email of `FIRST_ADMIN_IDENTITY_ID`.
+
 ---
 
 ## 2. Scope & Canonical Role Definitions

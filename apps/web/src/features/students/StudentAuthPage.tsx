@@ -1,10 +1,9 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { ExternalLink, KeyRound, LockKeyhole, LogIn, Mail, MailCheck, RefreshCw, ShieldCheck, UserPlus, User } from 'lucide-react';
-import type { AuthDestination } from './authRouting';
-import { authenticateAccount } from './authenticateAccount';
+import { resolveAuthenticatedDestination, type AuthDestination, type TrustedSessionIdentity } from './authRouting';
 import { ApiClient } from '../../api/client';
 
-export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destination: AuthDestination) => void }) {
+export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destination: AuthDestination, identity: TrustedSessionIdentity) => void }) {
   const getInitialMode = (): 'login' | 'signup' | 'verify' => {
     if (typeof window === 'undefined') return 'login';
     if (window.location.pathname.includes('verify-email') || new URLSearchParams(window.location.search).has('token')) {
@@ -112,16 +111,14 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
         return;
       }
 
-      const normalizedEmail = email.trim().toLowerCase();
-      let destination = await authenticateAccount(email, password, import.meta.env.VITE_ADMIN_URL, rememberMe);
-      if (normalizedEmail === 'wegdangamil2022@gmail.com' && destination.kind !== 'admin') {
-        destination = { kind: 'admin', path: '/admin/dashboard' };
-      }
+      await ApiClient.login(email, password, rememberMe);
+      const identity = await ApiClient.getCurrentSessionIdentity();
+      const destination = resolveAuthenticatedDestination(identity, import.meta.env.VITE_ADMIN_URL);
       if (destination.kind === 'denied') {
         setError('تم التحقق من الحساب، لكن لا توجد مساحة مفعّلة لهذا الدور.');
         return;
       }
-      onAuthenticated(destination);
+      onAuthenticated(destination, identity);
     } catch (err: any) {
       if (mode === 'signup') {
         if (err?.status === 409 || err?.code === 'EMAIL_ALREADY_EXISTS' || err?.message?.includes('already exists') || err?.message?.includes('409') || err?.message?.includes('مسجل')) {

@@ -113,6 +113,7 @@
     "api:dev:compose": "node --env-file=.env.runtime.local --import tsx apps/api/src/server.ts",
     "runtime:infra:probe": "node scripts/runtime/infra-probe.mjs",
     "db:roles:provision": "node scripts/database/provision-roles.mjs",
+    "auth:owner:preflight": "node scripts/owner-access-preflight.mjs",
     "compose:down": "node scripts/dev/compose-safe.mjs down",
     "architecture:persistence:verify": "node scripts/architecture/verify-persistence-boundaries.mjs",
     "db:greenfield:verify": "bash scripts/database/verify-greenfield-migration-parity.sh",

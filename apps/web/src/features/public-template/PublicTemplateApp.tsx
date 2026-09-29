@@ -5,6 +5,8 @@ import { usePublicNavigation } from './usePublicNavigation';
 import { usePublicLiveData } from './usePublicLiveData';
 import { usePublicRelationshipGraph } from './usePublicRelationshipGraph';
 import { ApiClient, type StablePublicGraphIdentity } from '../../api/client';
+import { canAccessAdminPath, isAdministrativePath } from '@manaratak/shared';
+import { resolveAuthenticatedDestination } from '../students/authRouting';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { mapPublicScholarshipDto } from './publicScholarshipDataSource';
 import {
@@ -113,6 +115,17 @@ import {
 
 export default function App() {
   const { language } = useTranslation();
+  const [adminDestination, setAdminDestination] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    ApiClient.getCurrentSessionIdentity().then(identity => {
+      if (active) {
+        const destination = resolveAuthenticatedDestination(identity, import.meta.env.VITE_ADMIN_URL);
+        setAdminDestination(destination.kind === 'admin' ? destination.path : null);
+      }
+    }).catch(() => { if (active) setAdminDestination(null); });
+    return () => { active = false; };
+  }, []);
   const publicLive = usePublicLiveData(import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE, language);
   const publicDataMode = publicLive.mode;
   const { scholarships, universities, majors, countries, exams, courses, paidCourses, importedCourses, articles, services, careers, tools } = publicLive.data;
@@ -905,18 +918,14 @@ export default function App() {
     <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
       {/* App Header (Top Sticky) */}
       <Header
+        adminDestination={adminDestination}
         language={language}
         onToggleLanguage={openLanguage}
         onOpenMenu={() => setIsMenuOpen(true)}
         onOpenNotifications={() => setIsNotificationOpen(true)}
         onOpenProfile={() => {
-          const isAdmin = typeof window !== 'undefined' && window.localStorage && (
-            localStorage.getItem('manaratak_admin_access') === 'authorized' ||
-            !!localStorage.getItem('manaratak_admin_bearer_token') ||
-            !!localStorage.getItem('manaratak_access_token')
-          );
-          if (isAdmin) {
-            window.location.assign('/admin/dashboard');
+          if (adminDestination) {
+            window.location.assign(adminDestination);
             return;
           }
           openSection('account');
@@ -2100,13 +2109,16 @@ export default function App() {
             )}
 
             {activeTab === 'auth' && (
-              <LiveStudentAuthPage onAuthenticated={(destination) => {
+              <LiveStudentAuthPage onAuthenticated={(destination, identity) => {
                 const postLoginReturn = consumePostLoginReturn();
                 if (destination.kind === 'admin') {
-                  window.location.assign(postLoginReturn || destination.path);
+                  const allowedReturn = postLoginReturn && canAccessAdminPath(postLoginReturn, identity.effectivePermissions)
+                    ? postLoginReturn : null;
+                  window.location.assign(allowedReturn || destination.path);
                   return;
                 }
-                if (postLoginReturn) {
+                setAdminDestination(null);
+                if (postLoginReturn && !isAdministrativePath(postLoginReturn)) {
                   window.location.assign(postLoginReturn);
                   return;
                 }
@@ -2140,6 +2152,7 @@ export default function App() {
 
       {/* Slide-out Navigation Drawer Menu */}
       <NavigationDrawer
+        adminDestination={adminDestination}
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         userProfile={null}
@@ -2149,7 +2162,7 @@ export default function App() {
         onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
         onNavigate={(target) => {
           if (target === 'admin') {
-            window.location.assign('/admin/dashboard');
+            if (adminDestination) window.location.assign(adminDestination);
             return;
           }
           openSection(target);

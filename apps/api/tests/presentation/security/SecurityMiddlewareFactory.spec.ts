@@ -297,9 +297,11 @@ describe('SecurityMiddlewareFactory rate limiter middleware', () => {
         code: 'RATE_LIMIT_EXCEEDED',
         message: 'Too many requests, please try again later.',
       },
-      meta: {
+      meta: expect.objectContaining({
         timestamp: expect.any(String),
-      },
+        resetTime: expect.any(Number),
+        retryAfter: expect.any(Number),
+      }),
     });
   });
 

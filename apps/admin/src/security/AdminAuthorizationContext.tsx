@@ -1,5 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { firstAllowedAdminPath } from '@manaratak/shared';
 
 interface AdminAuthorizationContextValue {
   permissions: string[];
@@ -32,10 +33,10 @@ export function useAdminAuthorization() {
 }
 
 export function RequireAdminPermission({ permission, children }: { permission: string; children: React.ReactNode }) {
-  const { hasPermission } = useAdminAuthorization();
+  const { hasPermission, permissions } = useAdminAuthorization();
   const location = useLocation();
   if (!hasPermission(permission)) {
-    return <Navigate to="/dashboard" replace state={{ deniedPermission: permission, deniedPath: location.pathname }} />;
+    return <Navigate to={firstAllowedAdminPath(permissions) || '/'} replace state={{ deniedPermission: permission, deniedPath: location.pathname }} />;
   }
   return <>{children}</>;
 }

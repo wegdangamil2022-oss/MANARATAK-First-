@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
-import { Users, RefreshCw, Search, Eye, RotateCcw, X, ShieldCheck } from 'lucide-react';
+import { Users, RefreshCw, Search, Eye, RotateCcw, X } from 'lucide-react';
 
 interface StudentSupportItem {
   studentReferenceId: string;

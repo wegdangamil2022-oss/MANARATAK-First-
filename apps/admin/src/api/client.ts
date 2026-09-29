@@ -4,14 +4,6 @@ import { assertLocalReadOnlyRequestAllowed } from '../security/LocalAdminReadOnl
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api/v1';
 const csrfManager = CsrfClientManager.getInstance(API_BASE_URL);
 
-type ApiErrorPayload = {
-  error?: string | { message?: string };
-  detail?: string;
-  title?: string;
-  code?: string;
-  traceId?: string;
-};
-
 export interface AdminRequestOptions extends RequestInit {
   /** Reuse this value when retrying the same semantic command. */
   idempotencyKey?: string;
@@ -29,30 +21,8 @@ function isMutation(method?: string): boolean {
   return ['POST', 'PUT', 'PATCH'].includes((method || 'GET').toUpperCase());
 }
 
-let memoryAdminRefreshToken: string | null = (typeof window !== 'undefined' && (
-  window.localStorage?.getItem('manaratak_refresh_token') ||
-  window.sessionStorage?.getItem('manaratak_refresh_token')
-)) || null;
 let activeRefreshPromise: Promise<boolean> | null = null;
 let refreshFailedPermanently = false;
-
-export function getStoredAdminToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    return (
-      window.sessionStorage.getItem('manaratak_admin_bearer_token') ||
-      window.sessionStorage.getItem('manaratak_access_token') ||
-      (window.localStorage && (
-        window.localStorage.getItem('manaratak_admin_bearer_token') ||
-        window.localStorage.getItem('manaratak_admin_bearer') ||
-        window.localStorage.getItem('manaratak_access_token')
-      )) ||
-      null
-    );
-  } catch {
-    return null;
-  }
-}
 
 let isRefreshing = false;
 let refreshSubscribers: Array<(ok: boolean) => void> = [];
@@ -66,54 +36,21 @@ function onRefreshed(ok: boolean) {
   refreshSubscribers = [];
 }
 
-export function setStoredAdminTokens(tokens: { accessToken?: string; refreshToken?: string }): void {
-  if (typeof window === 'undefined') return;
-  refreshFailedPermanently = false;
-  if (tokens.accessToken) {
-    try {
-      window.sessionStorage.setItem('manaratak_admin_bearer_token', tokens.accessToken);
-      window.sessionStorage.setItem('manaratak_access_token', tokens.accessToken);
-    } catch {}
-    if (window.localStorage) {
-      window.localStorage.setItem('manaratak_admin_bearer_token', tokens.accessToken);
-      window.localStorage.setItem('manaratak_admin_bearer', tokens.accessToken);
-      window.localStorage.setItem('manaratak_access_token', tokens.accessToken);
-      window.localStorage.setItem('manaratak_admin_access', 'authorized');
-    }
-  }
-  if (tokens.refreshToken) {
-    memoryAdminRefreshToken = tokens.refreshToken;
-    try {
-      window.localStorage?.setItem('manaratak_refresh_token', tokens.refreshToken);
-      window.sessionStorage?.setItem('manaratak_refresh_token', tokens.refreshToken);
-    } catch {}
-  }
-}
-
 export async function performAdminRefresh(): Promise<boolean> {
   if (refreshFailedPermanently) return false;
   if (activeRefreshPromise) return activeRefreshPromise;
 
   activeRefreshPromise = (async () => {
-    const refreshToken =
-      memoryAdminRefreshToken ||
-      (typeof window !== 'undefined'
-        ? window.localStorage?.getItem('manaratak_refresh_token') ||
-          window.sessionStorage?.getItem('manaratak_refresh_token')
-        : undefined) ||
-      undefined;
-
     try {
       const res = await csrfManager.fetchWithCsrf(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken, rememberMe: true }),
+        body: JSON.stringify({ rememberMe: true }),
         credentials: 'include',
       });
       if (res.ok) {
         const payload = await res.json().catch(() => ({}));
-        if (payload?.data?.accessToken) {
-          setStoredAdminTokens(payload.data);
+        if (payload?.data?.authenticated) {
           refreshFailedPermanently = false;
           return true;
         }
@@ -202,7 +139,6 @@ const getCache = new Map<string, { data: any; expiresAt: number }>();
 let rateLimitResetTime = 0;
 
 async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = {}): Promise<T> {
-  const isReadOnly = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_LOCAL_ADMIN_READ_ONLY) === 'true';
   const isPublicAuthRoute =
     endpoint.includes('/auth/login') ||
     endpoint.includes('/auth/refresh') ||
@@ -210,7 +146,7 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
     endpoint.includes('/auth/me');
 
   // Gating: Prevent any non-auth calls if unauthenticated or while auth is loading
-  if (!isPublicAuthRoute && !isReadOnly) {
+  if (!isPublicAuthRoute) {
     if (currentAdminAuthState === 'UNAUTHORIZED') {
       throw new Error('ADMIN_AUTH_GUARD: Request blocked because admin is unauthorized.');
     }
@@ -283,11 +219,6 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
 
-  const storedToken = getStoredAdminToken();
-  if (storedToken && !headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${storedToken}`);
-  }
-
   if (isMutation(options.method) && !headers.has('Idempotency-Key')) {
     headers.set('Idempotency-Key', options.idempotencyKey || createAdminIdempotencyKey());
   }
@@ -308,8 +239,6 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
       if (refreshOk) {
         const nextHeaders = new Headers(options.headers);
         nextHeaders.set('Content-Type', 'application/json');
-        const refreshedToken = getStoredAdminToken();
-        if (refreshedToken) nextHeaders.set('Authorization', `Bearer ${refreshedToken}`);
         response = await csrfManager.fetchWithCsrf(url, {
           ...fetchOptions,
           headers: nextHeaders,
@@ -327,8 +256,6 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
       if (refreshOk) {
         const nextHeaders = new Headers(options.headers);
         nextHeaders.set('Content-Type', 'application/json');
-        const refreshedToken = getStoredAdminToken();
-        if (refreshedToken) nextHeaders.set('Authorization', `Bearer ${refreshedToken}`);
         response = await csrfManager.fetchWithCsrf(url, {
           ...fetchOptions,
           headers: nextHeaders,
@@ -380,7 +307,6 @@ export const adminApiClient = {
 
   clearSecuritySession(): void {
     csrfManager.clearToken();
-    memoryAdminRefreshToken = null;
     abortAllPendingAdminRequests();
     try {
       window.localStorage?.removeItem('manaratak_refresh_token');
