@@ -21,6 +21,30 @@ import { TRANSLATION_CONTENT_MODE, canAuthorDomainTranslations } from '@manarata
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
+function MetricCard({ icon: Icon, label, value, accent }: { icon: any; label: string; value: number | string; accent: string }) {
+  const tone = metricAccentClasses(accent);
+  return (
+    <div className="rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className={`grid h-9 w-9 place-items-center rounded-xl ${tone.icon}`}>
+          <Icon className="h-4.5 w-4.5" />
+        </div>
+        <div className={`text-2xl font-black ${tone.text}`}>{value}</div>
+      </div>
+      <div className="mt-3 text-[11px] font-black text-slate-600">{label}</div>
+    </div>
+  );
+}
+
+function metricAccentClasses(accent: string) {
+  if (accent === '#142B5F') return { icon: 'bg-[#142B5F]/10 text-[#142B5F]', text: 'text-[#142B5F]' };
+  if (accent === '#0E7C86') return { icon: 'bg-[#0E7C86]/10 text-[#0E7C86]', text: 'text-[#0E7C86]' };
+  if (accent === '#21A7B4') return { icon: 'bg-[#21A7B4]/10 text-[#21A7B4]', text: 'text-[#21A7B4]' };
+  if (accent === '#D6A43B') return { icon: 'bg-[#D6A43B]/10 text-[#D6A43B]', text: 'text-[#D6A43B]' };
+  if (accent === '#B94A48') return { icon: 'bg-[#B94A48]/10 text-[#B94A48]', text: 'text-[#B94A48]' };
+  return { icon: 'bg-[#2E7D5A]/10 text-[#2E7D5A]', text: 'text-[#2E7D5A]' };
+}
+
 type WorkspaceDomain = 'SCHOLARSHIP' | 'UNIVERSITY' | 'MAJOR' | 'INTERNATIONAL_TEST' | 'COURSE';
 type CoverageFilter = 'ALL' | 'MISSING_AR' | 'MISSING_EN' | 'COMPLETE';
 type SupportedLocale = 'ar' | 'en';
@@ -403,32 +427,41 @@ export function AdminTranslationWorkspacePage() {
       dir={dir}
      
     >
-      <header className="overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
-        <div className="h-1.5 bg-gradient-to-r from-[#142B5F] via-[#21A7B4] to-[#D6A43B]" />
-        <div className="grid gap-5 p-6 lg:grid-cols-[1fr_auto] lg:items-center">
+      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+        <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full bg-[#DDEFF2]/70 px-3 py-1 text-[11px] font-black text-[#0E7C86]">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm border border-white/15">
                 <Languages className="h-3.5 w-3.5" /> {t('translation_center_badge')}
               </span>
-              <span className="rounded-full border border-[#D6A43B]/30 bg-[#F2CD78]/20 px-3 py-1 text-[11px] font-black text-[#8A6517]">
+              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm">
                 AR + EN
               </span>
             </div>
-            <h1 className="mt-3 text-2xl font-black text-[#142B5F] sm:text-3xl">{t('translation_center_title')}</h1>
-            <p className="mt-2 max-w-4xl text-sm font-medium leading-7 text-[#203442]/70">
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{t('translation_center_title')}</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/80">
               {t('translation_center_subtitle')}
             </p>
           </div>
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#0E7C86]/20 bg-[#DDEFF2]/35 px-4 text-xs font-black text-[#0E7C86] transition hover:bg-[#DDEFF2]/70"
+            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] disabled:opacity-60"
           >
             <RefreshCw className="h-4 w-4" /> {t('refresh')}
           </button>
         </div>
-      </header>
+      </section>
+
+      {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{error}</div>}
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard label={t('translation_domain_scholarships') || "سجلات محملة"} value={stats.loaded} icon={Database} accent="#142B5F" />
+        <MetricCard label="مكتمل الترجمة (AR + EN)" value={stats.complete} icon={CheckCircle2} accent="#2E7D5A" />
+        <MetricCard label="مفقود ترجمة عربي" value={stats.missingAr} icon={Languages} accent="#D6A43B" />
+        <MetricCard label="مفقود ترجمة إنجليزي" value={stats.missingEn} icon={Sparkles} accent="#21A7B4" />
+      </div>
 
       <section className="flex flex-col gap-3 rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 gap-3">

@@ -2,10 +2,11 @@ export interface RefreshSession {
   readonly userId: string;
   readonly sessionId: string;
   readonly familyId: string;
+  readonly expiresAt?: Date;
 }
 
 export interface ISessionManager {
-  createSession(userId: string, refreshToken: string, sessionId?: string): Promise<void>;
+  createSession(userId: string, refreshToken: string, sessionId?: string, sessionTtlSeconds?: number): Promise<void>;
   revokeSession(userId: string, refreshToken: string): Promise<void>;
   revokeAllSessions(userId: string): Promise<void>;
   /** Resolve only an active, unexpired opaque refresh credential. */

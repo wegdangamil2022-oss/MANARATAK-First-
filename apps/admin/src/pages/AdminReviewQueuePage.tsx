@@ -244,18 +244,24 @@ export function AdminReviewQueuePage() {
   const loadQueue = useCallback(async (manual = false) => {
     manual ? setRefreshing(true) : setLoading(true);
 
-    const [summaryResult, itemResult, importOverviewResult] = await Promise.all([
-      loadAllDomainSummaries(),
-      loadRecentReviewItems(),
-      loadScholarshipImportOverview(),
-    ]);
+    try {
+      // Stage 1: Load domain summaries sequentially to avoid concurrency bursts
+      const summaryResult = await loadAllDomainSummaries();
+      setSummaries(summaryResult);
 
-    setSummaries(summaryResult);
-    setItems(itemResult);
-    setImportOverview(importOverviewResult);
-    setLastUpdated(new Date());
-    setLoading(false);
-    setRefreshing(false);
+      // Stage 2: Load recent actionable review candidates and import overview
+      const [itemResult, importOverviewResult] = await Promise.all([
+        loadRecentReviewItems(),
+        loadScholarshipImportOverview(),
+      ]);
+
+      setItems(itemResult);
+      setImportOverview(importOverviewResult);
+      setLastUpdated(new Date());
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -398,19 +404,18 @@ export function AdminReviewQueuePage() {
     >
       <div className="mx-auto max-w-7xl space-y-6">
         <header
-          className="relative overflow-hidden rounded-[28px] px-5 py-6 text-white shadow-lg sm:px-7 sm:py-7"
-          
+          className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] px-5 py-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:px-7 sm:py-7"
         >
-          <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -right-10 h-60 w-60 rounded-full bg-[#F2CD78]/15 blur-3xl" />
+          <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
+          <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="mb-2 flex items-center gap-2 text-xs font-extrabold text-[#F2CD78] sm:text-sm">
-                <ShieldCheck className="h-4 w-4" />
-                {tr('مركز العمل الإداري · قراءة وتجميع فقط', 'Administration work center · aggregate read-only view')}
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
+                <ShieldCheck className="h-4 w-4 text-[#21A7B4]" />
+                <span>{tr('مركز العمل الإداري · قراءة وتجميع فقط', 'Administration work center · aggregate read-only view')}</span>
               </div>
-              <h1 className="text-2xl font-black sm:text-4xl">{tr('قائمة المراجعة', 'Review Queue')}</h1>
-              <p className="mt-2 max-w-3xl text-sm font-medium leading-7 text-white/80">
+              <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{tr('قائمة المراجعة', 'Review Queue')}</h1>
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
                 {tr(
                   'تجمع إشارات المراجعة الحقيقية من مجالات منارتك، وترتبها حسب السبب والأولوية والعمر، ثم تنقلك إلى مساحة المجال الأصلية لإتمام الإجراء.',
                   'Aggregates real review signals across MANARATAK domains, prioritizes them, and hands work back to the owning domain workspace.',
@@ -419,12 +424,12 @@ export function AdminReviewQueuePage() {
             </div>
 
             <div className="flex flex-wrap items-stretch gap-3">
-              <div className="min-w-[138px] rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                <div className="text-[11px] font-bold text-white/65">{tr('مصادر متصلة', 'Connected sources')}</div>
-                <div className="mt-1 text-2xl font-black text-[#F2CD78]">{sourceConnectedCount}/{DOMAINS.length}</div>
+              <div className="min-w-[138px] rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md shadow-xs">
+                <div className="text-[11px] font-bold text-cyan-100">{tr('مصادر متصلة', 'Connected sources')}</div>
+                <div className="mt-1 text-2xl font-black text-cyan-200">{sourceConnectedCount}/{DOMAINS.length}</div>
               </div>
-              <div className="min-w-[160px] rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                <div className="text-[11px] font-bold text-white/65">{tr('آخر تحديث', 'Last refresh')}</div>
+              <div className="min-w-[160px] rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md shadow-xs">
+                <div className="text-[11px] font-bold text-cyan-100">{tr('آخر تحديث', 'Last refresh')}</div>
                 <div className="mt-1 text-sm font-black text-white">
                   {lastUpdated ? formatDateTime(lastUpdated, isArabic) : '—'}
                 </div>
@@ -433,8 +438,7 @@ export function AdminReviewQueuePage() {
                 type="button"
                 onClick={() => void loadQueue(true)}
                 disabled={loading || refreshing}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-black shadow-sm transition hover:bg-[#FAF7F0] disabled:opacity-60"
-               
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] disabled:opacity-60"
               >
                 <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
                 {tr('تحديث', 'Refresh')}
@@ -443,10 +447,10 @@ export function AdminReviewQueuePage() {
           </div>
         </header>
 
-        <section className="flex items-start gap-3 rounded-2xl border border-[#D6A43B]/30 bg-[#F2CD78]/15 p-4 text-sm leading-7 text-[#203442]">
-          <AlertTriangle className="mt-1 h-5 w-5 shrink-0 text-[#D6A43B]" />
+        <section className="flex items-start gap-3 rounded-2xl border border-[#21A7B4]/30 bg-[#DDEFF2]/40 p-4 text-sm leading-7 text-[#142B5F]">
+          <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-[#0E7C86]" />
           <div>
-            <div className="font-black">{tr('حدود قائمة المراجعة', 'Review Queue boundary')}</div>
+            <div className="font-black">{tr('حدود ومحددات قائمة المراجعة', 'Review Queue boundary')}</div>
             <p className="mt-1 text-xs font-medium leading-6 text-slate-600">
               {tr(
                 'هذه الصفحة لا تعدّل ولا تنشر ولا تحذف أي سجل. الإجراء الآمن الوحيد هنا هو فتح السجل في مساحة المجال المالكة. بذلك تبقى المنح والجامعات والتخصصات والدورات والاختبارات والخدمات وCMS هي مصدر الحقيقة الوحيد للتعديل والاعتماد.',
@@ -471,7 +475,7 @@ export function AdminReviewQueuePage() {
           </section>
         )}
 
-        <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-black text-[#142B5F]">{tr('إشارات دورة المراجعة', 'Review lifecycle signals')}</h2>
@@ -479,7 +483,7 @@ export function AdminReviewQueuePage() {
                 {tr('الأعداد مأخوذة من فلاتر المجال على الخادم، وليست محسوبة من أول صفحة سجلات.', 'Counts come from server-side domain filters, not from the first page of records.')}
               </p>
             </div>
-            <span className="rounded-full bg-[#DDEFF2]/60 px-3 py-1 text-[11px] font-bold text-[#0E7C86]">
+            <span className="rounded-full bg-teal-50 border border-teal-100 px-3 py-1 text-[11px] font-black text-[#0E7C86]">
               {tr('قد يحمل السجل أكثر من إشارة مراجعة', 'A record may carry more than one review signal')}
             </span>
           </div>
@@ -494,7 +498,7 @@ export function AdminReviewQueuePage() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.25fr_1fr]">
-          <div className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs">
             <div className="mb-4">
               <h2 className="text-lg font-black text-[#142B5F]">{tr('إشارات الجودة المتخصصة', 'Specialized quality signals')}</h2>
               <p className="mt-1 text-xs leading-6 text-slate-500">
@@ -539,21 +543,21 @@ export function AdminReviewQueuePage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-black text-[#142B5F]">{tr('قاعدة الأولوية', 'Priority policy')}</h2>
-            <div className="mt-4 space-y-3 text-xs leading-6 text-slate-600">
+          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs">
+            <h2 className="text-lg font-black text-[#142B5F]">{tr('قاعدة وتصنيف الأولوية', 'Priority policy')}</h2>
+            <div className="mt-4 space-y-2.5 text-xs leading-6 text-slate-600">
               <PriorityRule tone="critical" title={tr('حرجة', 'Critical')} text={tr('رابط معطل أو تحقق مصدر فاشل/حرج.', 'Broken link or critical source-verification signal.')} />
               <PriorityRule tone="high" title={tr('عالية', 'High')} text={tr('بيانات ناقصة، تحقق مطلوب، أو عنصر عالق أكثر من أسبوع.', 'Incomplete data, verification required, or work older than one week.')} />
               <PriorityRule tone="medium" title={tr('متوسطة', 'Medium')} text={tr('مستورد أو قيد المراجعة أو يحتاج ترجمة.', 'Imported, under review, or needing translation.')} />
               <PriorityRule tone="low" title={tr('منخفضة', 'Low')} text={tr('جاهز للنشر وينتظر قرار الاعتماد فقط.', 'Ready to publish and awaiting final approval only.')} />
-              <div className="rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/70 px-3 py-2 text-[10px] font-bold leading-5 text-slate-500">
-                {tr('سياسة SLA التشغيلية الحالية: حرجة 4 ساعات · عالية 24 ساعة · متوسطة 72 ساعة · منخفضة 7 أيام. تُحسب من آخر تحديث متاح للسجل إلى أن يضاف وقت دخول الطابور كحقل مستقل في كل مجال.', 'Current operational SLA: Critical 4h · High 24h · Medium 72h · Low 7d. It is calculated from the latest available record timestamp until every domain exposes an explicit queue-entry timestamp.')}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-[11px] font-bold leading-5 text-slate-500">
+                {tr('سياسة SLA التشغيلية: حرجة 4 ساعات · عالية 24 ساعة · متوسطة 72 ساعة · منخفضة 7 أيام.', 'Current operational SLA: Critical 4h · High 24h · Medium 72h · Low 7d.')}
               </div>
             </div>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-black text-[#142B5F]">{tr('عبء المراجعة حسب المجال', 'Review workload by domain')}</h2>
@@ -583,17 +587,16 @@ export function AdminReviewQueuePage() {
               return (
                 <article
                   key={domain.key}
-                  className={`rounded-2xl border p-4 transition ${selected ? 'border-[#0E7C86] ring-2 ring-[#21A7B4]/20' : 'border-[#DDEFF2] hover:border-[#21A7B4]/60'}`}
-                  
+                  className={`rounded-2xl border p-4 transition bg-white shadow-xs ${selected ? 'border-[#0E7C86] ring-2 ring-[#21A7B4]/20' : 'border-slate-200/90 hover:border-[#21A7B4]/60'}`}
                 >
                   <button type="button" onClick={() => setSelectedDomain(domain.key)} className="w-full text-start">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#DDEFF2]/60 text-[#0E7C86]">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 border border-teal-100 text-[#0E7C86]">
                         <Icon className="h-4 w-4" />
                       </span>
                       <AvailabilityDot state={summary.availability} tr={tr} />
                     </div>
-                    <div className="mt-3 text-sm font-black text-[#203442]">{label}</div>
+                    <div className="mt-3 text-sm font-black text-[#142B5F]">{label}</div>
                     <div className="mt-1 text-2xl font-black text-[#142B5F]">{formatNumber(signalTotal)}</div>
                     <div className="text-[10px] font-bold text-slate-400">{tr('إشارة مراجعة', 'review signals')}</div>
                   </button>
@@ -602,7 +605,7 @@ export function AdminReviewQueuePage() {
                     <div className="flex justify-between"><span>{tr('ناقص', 'Incomplete')}</span><span>{formatNumber(summary.incomplete)}</span></div>
                     <div className="flex justify-between"><span>{tr('جاهز', 'Ready')}</span><span>{formatNumber(summary.readyToPublish)}</span></div>
                   </div>
-                  <Link to={domain.path} className="mt-3 inline-flex min-h-9 w-full items-center justify-center gap-1 rounded-xl bg-[#142B5F] px-2 text-[10px] font-black text-white hover:bg-[#0E7C86]">
+                  <Link to={domain.path} className="mt-3 inline-flex min-h-9 w-full items-center justify-center gap-1 rounded-xl bg-[#0E7C86] hover:bg-[#142B5F] px-2 text-[10px] font-black text-white transition shadow-xs">
                     {tr('فتح المجال', 'Open workspace')} <ArrowIcon className="h-3 w-3" />
                   </Link>
                 </article>
@@ -611,7 +614,7 @@ export function AdminReviewQueuePage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs">
           <div className="mb-4 flex items-center gap-2 text-sm font-black text-[#142B5F]">
             <Filter className="h-4 w-4 text-[#0E7C86]" />
             {tr('تصفية قائمة الأعمال المعلقة', 'Filter pending work')}
@@ -631,7 +634,7 @@ export function AdminReviewQueuePage() {
                 key={value}
                 type="button"
                 onClick={() => setSavedView(value as SavedView)}
-                className={`rounded-full border px-3 py-2 text-[11px] font-black transition ${savedView === value ? 'border-[#0E7C86] bg-[#0E7C86] text-white' : 'border-[#DDEFF2] bg-[#FAF7F0]/70 text-[#203442] hover:border-[#21A7B4]'}`}
+                className={`rounded-full border px-3 py-1.5 text-[11px] font-black transition ${savedView === value ? 'border-[#0E7C86] bg-[#0E7C86] text-white shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#21A7B4] hover:bg-teal-50 hover:text-[#0E7C86]'}`}
               >
                 {label}
               </button>
@@ -644,7 +647,7 @@ export function AdminReviewQueuePage() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder={tr('ابحث بالعنوان أو المعرّف أو الحالة...', 'Search title, ID, or status...')}
-                className="min-h-11 w-full rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/60 pr-10 pl-3 text-xs font-bold outline-none focus:border-[#21A7B4]"
+                className="min-h-11 w-full rounded-xl border border-slate-200 bg-white pr-10 pl-3 text-xs font-bold outline-none focus:border-[#21A7B4]"
               />
             </label>
             <SelectFilter value={selectedDomain} onChange={(value) => setSelectedDomain(value as 'all' | DomainKey)} label={tr('المجال', 'Domain')} options={[
@@ -699,13 +702,13 @@ export function AdminReviewQueuePage() {
               <span className="mx-2 text-slate-300">•</span>
               {tr('القائمة أدناه قائمة تشغيلية كاملة عبر جميع صفحات المصادر المتاحة؛ الأعداد العليا تلخص العبء نفسه.', 'The list below exhausts all available source pages; the metrics above summarize the same workload.')}
             </div>
-            <button type="button" onClick={clearFilters} className="rounded-xl border border-[#DDEFF2] px-3 py-2 text-xs font-black text-[#0E7C86] hover:bg-[#DDEFF2]/40">
+            <button type="button" onClick={clearFilters} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-[#0E7C86] hover:bg-slate-50 transition">
               {tr('مسح التصفية', 'Clear filters')}
             </button>
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
+        <section className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5">
             <div>
               <h2 className="text-lg font-black text-[#142B5F]">{tr('الأعمال المعلقة', 'Pending work')}</h2>
@@ -713,7 +716,7 @@ export function AdminReviewQueuePage() {
                 {tr('مرتبة افتراضيًا حسب شدة الإشارة ثم عمر السجل حتى لا تتراكم الأعمال القديمة.', 'Default ordering prioritizes severity and then age so older work does not stagnate.')}
               </p>
             </div>
-            <span className="rounded-full bg-[#DDEFF2]/60 px-3 py-1 text-[11px] font-black text-[#0E7C86]">{formatNumber(visibleItems.length)} {tr('عنصر محمل', 'loaded items')}</span>
+            <span className="rounded-full bg-teal-50 border border-teal-100 px-3 py-1 text-[11px] font-black text-[#0E7C86]">{formatNumber(visibleItems.length)} {tr('عنصر محمل', 'loaded items')}</span>
           </div>
 
           {loading ? (
@@ -742,7 +745,7 @@ export function AdminReviewQueuePage() {
                     type="button"
                     disabled={listPage <= 1}
                     onClick={() => setListPage((current) => Math.max(1, current - 1))}
-                    className="rounded-xl border border-[#DDEFF2] px-4 py-2 text-xs font-black text-[#0E7C86] disabled:opacity-40"
+                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-black text-[#0E7C86] hover:bg-slate-50 disabled:opacity-40 transition"
                   >
                     {tr('السابق', 'Previous')}
                   </button>
@@ -753,7 +756,7 @@ export function AdminReviewQueuePage() {
                     type="button"
                     disabled={listPage >= totalListPages}
                     onClick={() => setListPage((current) => Math.min(totalListPages, current + 1))}
-                    className="rounded-xl bg-[#142B5F] px-4 py-2 text-xs font-black text-white disabled:opacity-40"
+                    className="rounded-xl bg-[#0E7C86] hover:bg-[#142B5F] px-4 py-2 text-xs font-black text-white disabled:opacity-40 transition shadow-xs"
                   >
                     {tr('التالي', 'Next')}
                   </button>
@@ -763,11 +766,11 @@ export function AdminReviewQueuePage() {
           )}
         </section>
 
-        <section className="rounded-3xl border border-[#DDEFF2] bg-[#DDEFF2]/25 p-5">
+        <section className="rounded-3xl border border-[#21A7B4]/25 bg-teal-50/40 p-5 shadow-xs">
           <div className="flex items-start gap-3">
             <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#0E7C86]" />
             <div>
-              <h2 className="font-black text-[#142B5F]">{tr('ما الذي لا تفعله هذه القائمة؟', 'What this queue intentionally does not do')}</h2>
+              <h2 className="font-black text-[#142B5F]">{tr('ضوابط الأمان وحوكمة الاعتماد', 'What this queue intentionally does not do')}</h2>
               <p className="mt-1 text-xs font-medium leading-6 text-slate-600">
                 {tr(
                   'لا يوجد «قبول الكل»، ولا نشر جماعي، ولا حذف، ولا تعديل مباشر، ولا تحويل فشل مصدر إلى نجاح. هذا متعمد لحماية دورة الاعتماد وسجل التدقيق ومنع تجاوز قواعد كل مجال.',
@@ -797,31 +800,39 @@ export function AdminReviewQueuePage() {
 
 function MetricCard({ icon: Icon, label, value, tone }: { icon: ComponentType<{ className?: string }>; label: string; value: string; tone: 'primary' | 'warning' | 'success' | 'digital' }) {
   const styles = {
-    primary: 'border-[#142B5F]/15 bg-[#142B5F]/5 text-[#142B5F]',
-    warning: 'border-[#D6A43B]/25 bg-[#F2CD78]/15 text-[#8A6517]',
-    success: 'border-[#0E7C86]/20 bg-[#0E7C86]/5 text-[#0E7C86]',
-    digital: 'border-[#21A7B4]/20 bg-[#DDEFF2]/35 text-[#167984]',
+    primary: 'border-slate-200/90 bg-white text-[#142B5F] shadow-xs',
+    warning: 'border-slate-200/90 bg-white text-[#142B5F] shadow-xs',
+    success: 'border-slate-200/90 bg-white text-[#142B5F] shadow-xs',
+    digital: 'border-slate-200/90 bg-white text-[#142B5F] shadow-xs',
+  }[tone];
+  const iconBg = {
+    primary: 'bg-teal-50 text-[#0E7C86] border border-teal-100',
+    warning: 'bg-amber-50 text-amber-600 border border-amber-100',
+    success: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+    digital: 'bg-cyan-50 text-cyan-700 border border-cyan-100',
   }[tone];
   return (
-    <div className={`rounded-2xl border p-4 ${styles}`}>
+    <div className={`rounded-2xl border p-4.5 transition hover:shadow-md ${styles}`}>
       <div className="flex items-start justify-between gap-3">
-        <div className="text-xs font-black opacity-80">{label}</div>
-        <Icon className="h-5 w-5 opacity-80" />
+        <div className="text-xs font-bold text-slate-500">{label}</div>
+        <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${iconBg}`}>
+          <Icon className="h-4 w-4" />
+        </span>
       </div>
-      <div className="mt-3 text-3xl font-black">{value}</div>
+      <div className="mt-2 text-2xl font-black text-[#142B5F]">{value}</div>
     </div>
   );
 }
 
 function QualityCard({ icon: Icon, label, value, detail, href }: { icon: ComponentType<{ className?: string }>; label: string; value: string; detail: string; href?: string }) {
   const body = (
-    <div className="rounded-2xl border border-[#DDEFF2] bg-[#FAF7F0]/45 p-4 transition hover:border-[#21A7B4]/50">
+    <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs transition hover:border-[#21A7B4] hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#DDEFF2]/70 text-[#0E7C86]"><Icon className="h-4 w-4" /></span>
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 border border-teal-100 text-[#0E7C86]"><Icon className="h-4 w-4" /></span>
         <span className="text-2xl font-black text-[#142B5F]">{value}</span>
       </div>
-      <div className="mt-3 text-xs font-black text-[#203442]">{label}</div>
-      <p className="mt-1 text-[10px] font-medium leading-5 text-slate-500">{detail}</p>
+      <div className="mt-3 text-xs font-black text-[#142B5F]">{label}</div>
+      <p className="mt-1 text-[11px] font-medium leading-5 text-slate-500">{detail}</p>
     </div>
   );
   return href ? <Link to={href}>{body}</Link> : body;
@@ -831,10 +842,10 @@ function PriorityRule({ tone, title, text }: { tone: Priority; title: string; te
   const className = {
     critical: 'bg-rose-50 text-rose-800 border-rose-200',
     high: 'bg-amber-50 text-amber-800 border-amber-200',
-    medium: 'bg-[#DDEFF2]/50 text-[#0E7C86] border-[#21A7B4]/20',
+    medium: 'bg-teal-50 text-[#0E7C86] border-teal-200',
     low: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   }[tone];
-  return <div className={`rounded-xl border px-3 py-2 ${className}`}><span className="font-black">{title}: </span>{text}</div>;
+  return <div className={`rounded-xl border px-3.5 py-2 ${className}`}><span className="font-black">{title}: </span>{text}</div>;
 }
 
 function AvailabilityDot({ state, tr }: { state: Availability; tr: (ar: string, en: string) => string }) {
@@ -850,7 +861,7 @@ function SelectFilter({ value, onChange, label, options }: { value: string; onCh
   return (
     <label className="block">
       <span className="mb-1.5 block text-[10px] font-black text-slate-500">{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11 w-full rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/60 px-3 text-xs font-bold text-[#203442] outline-none focus:border-[#21A7B4]">
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-[#142B5F] outline-none focus:border-[#21A7B4]">
         {options.map(([optionValue, optionLabel]) => <option key={optionValue} value={optionValue}>{optionLabel}</option>)}
       </select>
     </label>
@@ -863,40 +874,40 @@ function ReviewRow({ item, tr, isArabic, ArrowIcon, onPreview }: { item: ReviewI
   const domainLabel = isArabic ? domain.labelAr : domain.labelEn;
   const sla = slaInfo(item);
   return (
-    <article className="grid gap-4 p-5 transition hover:bg-[#FAF7F0]/45 lg:grid-cols-[1.55fr_0.8fr_0.8fr_auto] lg:items-center">
+    <article className="grid gap-4 p-5 transition hover:bg-slate-50/70 lg:grid-cols-[1.55fr_0.8fr_0.8fr_auto] lg:items-center">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <PriorityBadge priority={item.priority} tr={tr} />
           <SlaBadge info={sla} tr={tr} />
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#DDEFF2]/55 px-2.5 py-1 text-[10px] font-black text-[#0E7C86]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 border border-teal-100 px-2.5 py-0.5 text-[10px] font-black text-[#0E7C86]">
             <DomainIcon className="h-3 w-3" /> {domainLabel}
           </span>
           {item.reasons.map((reason) => <ReasonBadge key={reason} reason={reason} tr={tr} />)}
         </div>
-        <h3 className="mt-3 text-sm font-black leading-7 text-[#203442]">{item.title}</h3>
+        <h3 className="mt-3 text-sm font-black leading-7 text-[#142B5F]">{item.title}</h3>
         <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-bold text-slate-400">
           <span>ID: {item.id}</span>
           <span>{tr('المصدر:', 'Source:')} {sourceLabel(item.sourceKind, tr)}</span>
           {item.sourceLabel ? <span>{item.sourceLabel}</span> : null}
           {item.importBatchId ? <span>Batch: {item.importBatchId}</span> : null}
-          {item.missingFields.length > 0 ? <span className="text-amber-700">{tr('ناقص:', 'Missing:')} {item.missingFields.length}</span> : null}
+          {item.missingFields.length > 0 ? <span className="text-amber-700 font-bold">{tr('ناقص:', 'Missing:')} {item.missingFields.length}</span> : null}
         </div>
       </div>
       <div className="space-y-1 text-xs font-bold text-slate-500">
-        <div>{tr('الحالة:', 'Status:')} <span className="text-[#203442]">{formatStatus(item.status, tr)}</span></div>
-        <div>{tr('الاكتمال:', 'Completeness:')} <span className="text-[#203442]">{formatStatus(item.completenessStatus, tr)}</span></div>
-        <div>{tr('المراجع:', 'Reviewer:')} <span className="text-[#203442]">{item.reviewerLabel || tr('غير معيّن', 'Unassigned')}</span></div>
+        <div>{tr('الحالة:', 'Status:')} <span className="text-[#142B5F]">{formatStatus(item.status, tr)}</span></div>
+        <div>{tr('الاكتمال:', 'Completeness:')} <span className="text-[#142B5F]">{formatStatus(item.completenessStatus, tr)}</span></div>
+        <div>{tr('المراجع:', 'Reviewer:')} <span className="text-[#142B5F]">{item.reviewerLabel || tr('غير معيّن', 'Unassigned')}</span></div>
       </div>
       <div className="space-y-1 text-xs font-bold text-slate-500">
-        <div>{tr('آخر تحديث:', 'Updated:')} <span className="text-[#203442]">{item.updatedAt ? formatRelative(item.updatedAt, isArabic) : '—'}</span></div>
-        <div>{tr('SLA:', 'SLA:')} <span className={sla.state === 'overdue' ? 'text-rose-700' : 'text-[#203442]'}>{formatSla(sla, isArabic)}</span></div>
-        {item.deadline ? <div>{tr('الموعد:', 'Deadline:')} <span className="text-[#203442]">{formatSimpleDate(item.deadline, isArabic)}</span></div> : null}
+        <div>{tr('آخر تحديث:', 'Updated:')} <span className="text-[#142B5F]">{item.updatedAt ? formatRelative(item.updatedAt, isArabic) : '—'}</span></div>
+        <div>{tr('SLA:', 'SLA:')} <span className={sla.state === 'overdue' ? 'text-rose-700 font-black' : 'text-[#142B5F]'}>{formatSla(sla, isArabic)}</span></div>
+        {item.deadline ? <div>{tr('الموعد:', 'Deadline:')} <span className="text-[#142B5F]">{formatSimpleDate(item.deadline, isArabic)}</span></div> : null}
       </div>
       <div className="flex flex-col gap-2">
-        <button type="button" onClick={onPreview} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#0E7C86]/25 bg-[#DDEFF2]/35 px-4 text-xs font-black text-[#0E7C86] transition hover:bg-[#DDEFF2]/70">
-          <Eye className="h-4 w-4" /> {tr('معاينة', 'Preview')}
+        <button type="button" onClick={onPreview} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-black text-[#142B5F] transition hover:bg-slate-50">
+          <Eye className="h-4 w-4 text-[#0E7C86]" /> {tr('معاينة', 'Preview')}
         </button>
-        <Link to={item.href} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 text-xs font-black text-white transition hover:bg-[#0E7C86]">
+        <Link to={item.href} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0E7C86] hover:bg-[#142B5F] px-4 text-xs font-black text-white transition shadow-xs">
           {tr('فتح في المجال', 'Open workspace')} <ArrowIcon className="h-4 w-4" />
         </Link>
       </div>
@@ -920,9 +931,9 @@ function ReviewPreviewDrawer({ item, tr, isArabic, ArrowIcon, loading, error, au
   const diffFields = importDiff?.fields ?? [];
   const changedFields = diffFields.filter((field) => field.state !== 'NO_CHANGE');
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-[#142B5F]/35 backdrop-blur-[2px]" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
-      <aside className="h-full w-full max-w-2xl overflow-y-auto bg-[#FAF7F0] shadow-2xl" dir={isArabic ? 'rtl' : 'ltr'} >
-        <div className="sticky top-0 z-10 border-b border-[#DDEFF2] bg-white/95 p-5 backdrop-blur">
+    <div className="fixed inset-0 z-50 flex justify-end bg-[#142B5F]/40 backdrop-blur-xs" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
+      <aside className="h-full w-full max-w-2xl overflow-y-auto bg-slate-50 shadow-2xl" dir={isArabic ? 'rtl' : 'ltr'} >
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 p-5 backdrop-blur">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -933,7 +944,7 @@ function ReviewPreviewDrawer({ item, tr, isArabic, ArrowIcon, loading, error, au
               <h2 className="mt-3 text-xl font-black text-[#142B5F]">{item.title}</h2>
               <p className="mt-1 text-xs font-bold text-slate-500">{isArabic ? domain.labelAr : domain.labelEn} · {item.itemKind === 'import_record' ? tr('سجل استيراد', 'Import record') : tr('سجل أساسي', 'Canonical record')}</p>
             </div>
-            <button type="button" onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#DDEFF2] bg-white text-[#203442] hover:bg-[#DDEFF2]/40" aria-label={tr('إغلاق', 'Close')}><X className="h-5 w-5" /></button>
+            <button type="button" onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" aria-label={tr('إغلاق', 'Close')}><X className="h-5 w-5" /></button>
           </div>
         </div>
 
@@ -947,7 +958,7 @@ function ReviewPreviewDrawer({ item, tr, isArabic, ArrowIcon, loading, error, au
             <PreviewFact label={tr('آخر تحديث', 'Last update')} value={item.updatedAt ? formatSimpleDateTime(item.updatedAt, isArabic) : '—'} />
           </section>
 
-          <section className="rounded-2xl border border-[#DDEFF2] bg-white p-4">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
             <div className="mb-3 flex items-center gap-2"><Database className="h-4 w-4 text-[#0E7C86]" /><h3 className="font-black text-[#142B5F]">{tr('المصدر والتتبع', 'Provenance')}</h3></div>
             <div className="grid gap-3 sm:grid-cols-2">
               <PreviewFact label={tr('نوع المصدر', 'Source type')} value={sourceLabel(item.sourceKind, tr)} compact />
@@ -959,11 +970,11 @@ function ReviewPreviewDrawer({ item, tr, isArabic, ArrowIcon, loading, error, au
               <PreviewFact label={tr('حالة التحقق', 'Verification')} value={formatStatus(item.verificationStatus, tr)} compact />
               <PreviewFact label={tr('حالة الترجمة', 'Translation')} value={formatStatus(item.translationState, tr)} compact />
             </div>
-            {item.sourceUrl ? <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#21A7B4]/25 bg-[#DDEFF2]/30 px-3 py-2 text-xs font-black text-[#0E7C86] hover:bg-[#DDEFF2]/60"><ExternalLink className="h-4 w-4" />{tr('فتح المصدر الأصلي', 'Open original source')}</a> : null}
+            {item.sourceUrl ? <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#21A7B4]/25 bg-teal-50/50 px-3 py-2 text-xs font-black text-[#0E7C86] hover:bg-teal-50"><ExternalLink className="h-4 w-4" />{tr('فتح المصدر الأصلي', 'Open original source')}</a> : null}
           </section>
 
           {(item.missingFields.length > 0 || item.reviewNotes.length > 0 || item.conflictingFields.length > 0) && (
-            <section className="rounded-2xl border border-[#DDEFF2] bg-white p-4">
+            <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
               <h3 className="font-black text-[#142B5F]">{tr('تفاصيل سبب المراجعة', 'Review reason details')}</h3>
               {item.missingFields.length > 0 && <DetailList title={tr('الحقول الناقصة', 'Missing fields')} values={item.missingFields} tone="warning" />}
               {item.conflictingFields.length > 0 && <DetailList title={tr('حقول متعارضة', 'Conflicting fields')} values={item.conflictingFields} tone="danger" />}
@@ -971,13 +982,13 @@ function ReviewPreviewDrawer({ item, tr, isArabic, ArrowIcon, loading, error, au
             </section>
           )}
 
-          <section className="rounded-2xl border border-[#DDEFF2] bg-white p-4">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
             <div className="mb-3 flex items-center gap-2"><GitCompareArrows className="h-4 w-4 text-[#0E7C86]" /><h3 className="font-black text-[#142B5F]">{tr('ما الذي تغيّر؟', 'What changed?')}</h3></div>
             {loading ? <div className="flex items-center gap-2 text-xs font-bold text-slate-500"><Loader2 className="h-4 w-4 animate-spin" />{tr('تحميل المقارنة...', 'Loading diff...')}</div> : changedFields.length > 0 ? (
               <div className="space-y-2">
                 {changedFields.slice(0, 12).map((field) => (
-                  <div key={field.field} className="rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/60 p-3">
-                    <div className="mb-2 flex items-center justify-between gap-2"><span className="text-xs font-black text-[#203442]">{field.field}</span><span className={`rounded-full px-2 py-1 text-[9px] font-black ${field.state === 'CONFLICT' ? 'bg-rose-100 text-rose-800' : 'bg-cyan-50 text-cyan-800'}`}>{field.state}</span></div>
+                  <div key={field.field} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <div className="mb-2 flex items-center justify-between gap-2"><span className="text-xs font-black text-[#142B5F]">{field.field}</span><span className={`rounded-full px-2 py-0.5 text-[9px] font-black ${field.state === 'CONFLICT' ? 'bg-rose-100 text-rose-800' : 'bg-cyan-50 text-cyan-800'}`}>{field.state}</span></div>
                     <div className="grid gap-2 sm:grid-cols-2"><DiffValue label={tr('الحالي', 'Current')} value={field.currentValue} /><DiffValue label={tr('الوارد', 'Incoming')} value={field.incomingValue} /></div>
                   </div>
                 ))}
@@ -985,18 +996,18 @@ function ReviewPreviewDrawer({ item, tr, isArabic, ArrowIcon, loading, error, au
             ) : <p className="text-xs font-medium leading-6 text-slate-500">{item.sourceImportRecordId ? tr('لا توجد تغييرات قابلة للعرض، أو أن سجل الاستيراد لا يملك مقارنة مع سجل حالي.', 'No displayable changes were found, or the import record has no canonical comparison.') : tr('هذا العنصر غير مرتبط بسجل استيراد يمكن مقارنة نسخه.', 'This item is not linked to an import record that supports diffing.')}</p>}
           </section>
 
-          <section className="rounded-2xl border border-[#DDEFF2] bg-white p-4">
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
             <div className="mb-3 flex items-center gap-2"><History className="h-4 w-4 text-[#0E7C86]" /><h3 className="font-black text-[#142B5F]">{tr('سجل التدقيق', 'Audit history')}</h3></div>
             {loading ? <div className="flex items-center gap-2 text-xs font-bold text-slate-500"><Loader2 className="h-4 w-4 animate-spin" />{tr('تحميل سجل التدقيق...', 'Loading audit history...')}</div> : auditHistory.length > 0 ? (
               <div className="space-y-2">{auditHistory.map((record, index) => <AuditRow key={record.id || `${record.action}-${index}`} record={record} isArabic={isArabic} tr={tr} />)}</div>
             ) : <p className="text-xs font-medium leading-6 text-slate-500">{tr('لا توجد أحداث تدقيق متاحة لهذا الهدف، أو أن صلاحية قراءة سجل التدقيق غير متاحة للمستخدم الحالي.', 'No audit events are available for this target, or the current user lacks audit-read permission.')}</p>}
           </section>
 
-          {error && <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-bold leading-6 text-amber-800">{error}</div>}
+          {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-bold leading-6 text-rose-800">{error}</div>}
 
-          <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-[#DDEFF2] bg-[#FAF7F0]/95 py-4 backdrop-blur">
-            <Link to={item.href} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 text-xs font-black text-white hover:bg-[#0E7C86]">{tr('فتح السجل الكامل في المجال', 'Open full domain record')} <ArrowIcon className="h-4 w-4" /></Link>
-            <button type="button" onClick={onClose} className="min-h-11 rounded-xl border border-[#DDEFF2] bg-white px-4 text-xs font-black text-[#203442]">{tr('إغلاق', 'Close')}</button>
+          <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-slate-200 bg-white/95 p-4 backdrop-blur">
+            <Link to={item.href} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#0E7C86] hover:bg-[#142B5F] px-4 text-xs font-black text-white transition shadow-xs">{tr('فتح السجل الكامل في المجال', 'Open full domain record')} <ArrowIcon className="h-4 w-4" /></Link>
+            <button type="button" onClick={onClose} className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-xs font-black text-slate-700 hover:bg-slate-50 transition">{tr('إغلاق', 'Close')}</button>
           </div>
         </div>
       </aside>
@@ -1005,20 +1016,20 @@ function ReviewPreviewDrawer({ item, tr, isArabic, ArrowIcon, loading, error, au
 }
 
 function PreviewFact({ label, value, compact = false, danger = false, mono = false }: { label: string; value: string; compact?: boolean; danger?: boolean; mono?: boolean }) {
-  return <div className={`rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/55 ${compact ? 'p-3' : 'p-4'}`}><div className="text-[10px] font-black text-slate-400">{label}</div><div className={`mt-1 break-words text-xs font-black ${danger ? 'text-rose-700' : 'text-[#203442]'} ${mono ? 'font-mono' : ''}`}>{value}</div></div>;
+  return <div className={`rounded-xl border border-slate-200/90 bg-white shadow-xs ${compact ? 'p-3' : 'p-4'}`}><div className="text-[10px] font-bold text-slate-400">{label}</div><div className={`mt-1 break-words text-xs font-black ${danger ? 'text-rose-700' : 'text-[#142B5F]'} ${mono ? 'font-mono' : ''}`}>{value}</div></div>;
 }
 
 function DetailList({ title, values, tone }: { title: string; values: string[]; tone: 'warning' | 'danger' | 'neutral' }) {
-  const style = tone === 'danger' ? 'border-rose-100 bg-rose-50 text-rose-800' : tone === 'warning' ? 'border-amber-100 bg-amber-50 text-amber-800' : 'border-[#DDEFF2] bg-[#FAF7F0]/60 text-[#203442]';
-  return <div className="mt-3"><div className="mb-2 text-[10px] font-black text-slate-400">{title}</div><div className="flex flex-wrap gap-2">{values.map((value) => <span key={value} className={`rounded-lg border px-2.5 py-1 text-[10px] font-black ${style}`}>{value}</span>)}</div></div>;
+  const style = tone === 'danger' ? 'border-rose-200 bg-rose-50 text-rose-800' : tone === 'warning' ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-slate-200 bg-slate-50 text-[#142B5F]';
+  return <div className="mt-3"><div className="mb-2 text-[10px] font-bold text-slate-400">{title}</div><div className="flex flex-wrap gap-2">{values.map((value) => <span key={value} className={`rounded-lg border px-2.5 py-1 text-[10px] font-black ${style}`}>{value}</span>)}</div></div>;
 }
 
 function DiffValue({ label, value }: { label: string; value: unknown }) {
-  return <div className="rounded-lg bg-white p-2"><div className="text-[9px] font-black text-slate-400">{label}</div><div className="mt-1 break-words text-[10px] font-bold text-[#203442]">{displayValue(value)}</div></div>;
+  return <div className="rounded-lg bg-white border border-slate-100 p-2"><div className="text-[9px] font-bold text-slate-400">{label}</div><div className="mt-1 break-words text-[10px] font-black text-[#142B5F]">{displayValue(value)}</div></div>;
 }
 
 function AuditRow({ record, isArabic, tr }: { record: AuditRecordView; isArabic: boolean; tr: (ar: string, en: string) => string }) {
-  return <div className="grid gap-2 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/55 p-3 sm:grid-cols-[1fr_auto]"><div><div className="text-xs font-black text-[#203442]">{record.action || tr('عملية إدارية', 'Administrative action')}</div><div className="mt-1 text-[10px] font-bold text-slate-500">{record.actor?.actorId || tr('فاعل غير محدد', 'Unknown actor')} · {record.category || '—'}</div></div><div className="text-[10px] font-black text-slate-400">{record.timestamp ? formatSimpleDateTime(record.timestamp, isArabic) : '—'}</div></div>;
+  return <div className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-xs sm:grid-cols-[1fr_auto]"><div><div className="text-xs font-black text-[#142B5F]">{record.action || tr('عملية إدارية', 'Administrative action')}</div><div className="mt-1 text-[10px] font-bold text-slate-500">{record.actor?.actorId || tr('فاعل غير محدد', 'Unknown actor')} · {record.category || '—'}</div></div><div className="text-[10px] font-bold text-slate-400">{record.timestamp ? formatSimpleDateTime(record.timestamp, isArabic) : '—'}</div></div>;
 }
 
 function PriorityBadge({ priority, tr }: { priority: Priority; tr: (ar: string, en: string) => string }) {
@@ -1050,15 +1061,24 @@ function ReasonBadge({ reason, tr }: { reason: ReasonKey; tr: (ar: string, en: s
 }
 
 async function loadAllDomainSummaries(): Promise<Record<DomainKey, DomainSummary>> {
-  const results = await Promise.all([
-    loadScholarshipSummary(),
-    loadGenericDomainSummary('universities', '/admin/universities', { reviewStatuses: ['READY_TO_REVIEW'], supportsImported: true, supportsCompleteness: true }),
-    loadGenericDomainSummary('majors', '/admin/majors', { reviewStatuses: ['READY_TO_REVIEW'], supportsImported: true, supportsCompleteness: true, extraParams: { catalog: 'true' } }),
-    loadCourseSummary(),
-    loadGenericDomainSummary('tests', '/admin/international-tests', { reviewStatuses: ['READY_TO_REVIEW', 'NEEDS_REVIEW'], supportsImported: true, supportsCompleteness: true }),
-    loadGenericDomainSummary('services', '/admin/services', { reviewStatuses: ['READY_TO_REVIEW'], supportsImported: false, supportsCompleteness: true }),
-    loadGenericDomainSummary('cms', '/admin/cms/content', { reviewStatuses: ['IN_REVIEW'], supportsImported: false, supportsCompleteness: false }),
-  ]);
+  const loaders: Array<() => Promise<DomainSummary>> = [
+    () => loadScholarshipSummary(),
+    () => loadGenericDomainSummary('universities', '/admin/universities', { reviewStatuses: ['READY_TO_REVIEW'], supportsImported: true, supportsCompleteness: true }),
+    () => loadGenericDomainSummary('majors', '/admin/majors', { reviewStatuses: ['READY_TO_REVIEW'], supportsImported: true, supportsCompleteness: true, extraParams: { catalog: 'true' } }),
+    () => loadCourseSummary(),
+    () => loadGenericDomainSummary('tests', '/admin/international-tests', { reviewStatuses: ['READY_TO_REVIEW', 'NEEDS_REVIEW'], supportsImported: true, supportsCompleteness: true }),
+    () => loadGenericDomainSummary('services', '/admin/services', { reviewStatuses: ['READY_TO_REVIEW'], supportsImported: false, supportsCompleteness: true }),
+    () => loadGenericDomainSummary('cms', '/admin/cms/content', { reviewStatuses: ['IN_REVIEW'], supportsImported: false, supportsCompleteness: false }),
+  ];
+
+  const results: DomainSummary[] = [];
+  for (const loader of loaders) {
+    try {
+      results.push(await loader());
+    } catch {
+      // safe fallback
+    }
+  }
   return Object.fromEntries(results.map((result) => [result.key, result])) as Record<DomainKey, DomainSummary>;
 }
 
@@ -1172,19 +1192,14 @@ async function loadScholarshipImportOverview(): Promise<ScholarshipImportCenterO
 }
 
 async function loadScholarshipImportQueueItems(): Promise<ReviewItem[]> {
-  const rows: ScholarshipImportCenterRecord[] = [];
-  const pageSize = 100;
   try {
-    for (let page = 1; page <= 10000; page += 1) {
-      const response = await adminApiClient.request<ScholarshipImportCenterScan>(`/admin/scholarships/import-center/review-queue?operationalClass=REAL&page=${page}&pageSize=${pageSize}`);
-      const batch = response.data ?? [];
-      rows.push(...batch);
-      const knownTotal = response.sourceTotal ?? response.scannedRecords;
-      if (batch.length < pageSize || (typeof knownTotal === 'number' && rows.length >= knownTotal) || response.scanTruncated === false) break;
-    }
-    return rows.map(scholarshipImportRecordToReviewItem);
+    const response = await adminApiClient.request<ScholarshipImportCenterScan>(
+      '/admin/scholarships/import-center/review-queue?operationalClass=REAL&page=1&pageSize=25'
+    );
+    const batch = response.data ?? [];
+    return batch.map(scholarshipImportRecordToReviewItem);
   } catch {
-    return rows.map(scholarshipImportRecordToReviewItem);
+    return [];
   }
 }
 
@@ -1203,15 +1218,25 @@ async function loadImportDiff(item: ReviewItem): Promise<ImportDiffView | null> 
 }
 
 async function loadRecentReviewItems(): Promise<ReviewItem[]> {
-  const domainLoads = await Promise.all([
-    loadScholarshipItems(),
-    loadUniversityItems(),
-    loadMajorItems(),
-    loadCourseItems(),
-    loadTestItems(),
-    loadServiceItems(),
-    loadCmsItems(),
-  ]);
+  const loaders = [
+    loadScholarshipItems,
+    loadUniversityItems,
+    loadMajorItems,
+    loadCourseItems,
+    loadTestItems,
+    loadServiceItems,
+    loadCmsItems,
+  ];
+  const domainLoads: ReviewItem[][] = [];
+  // Staggered loading: fetch domains in controlled stages to avoid simultaneous bursts
+  for (const loader of loaders) {
+    try {
+      const items = await loader();
+      domainLoads.push(items);
+    } catch {
+      // safe fallback per domain
+    }
+  }
   return mergeReviewItems(domainLoads.flat());
 }
 
@@ -1305,26 +1330,26 @@ async function loadFromQueries(
   endpoint: string,
   queries: Array<[Record<string, string>, ReasonKey]>,
 ): Promise<ReviewItem[]> {
-  const results = await Promise.all(queries.map(async ([query, reason]) => {
-    const records = await safeListAll(endpoint, query);
-    return (records.data ?? []).map((record) => toReviewItem(domainKey, record as Record<string, any>, reason));
-  }));
-  return results.flat();
+  const items: ReviewItem[] = [];
+  for (const [query, reason] of queries) {
+    try {
+      const records = await safeListAll(endpoint, query, 15);
+      for (const record of records.data ?? []) {
+        items.push(toReviewItem(domainKey, record as Record<string, any>, reason));
+      }
+    } catch {
+      // safe fallback
+    }
+  }
+  return items;
 }
 
 
-async function safeListAll(endpoint: string, params: Record<string, string>, pageSize = 100): Promise<PaginatedResponse<Record<string, unknown>>> {
-  const data: Record<string, unknown>[] = [];
-  let total: number | undefined;
-  for (let page = 1; page <= 10000; page += 1) {
-    const response = await safeList(endpoint, { ...params, page: String(page), pageSize: String(pageSize) });
-    const batch = response.data ?? [];
-    data.push(...batch);
-    if (typeof response.total === 'number') total = response.total;
-    const totalPages = response.totalPages ?? (typeof total === 'number' ? Math.ceil(total / pageSize) : undefined);
-    if (batch.length < pageSize || (totalPages !== undefined && page >= totalPages) || (total !== undefined && data.length >= total)) break;
-  }
-  return { data, total: total ?? data.length, page: 1, pageSize: data.length, totalPages: 1 };
+async function safeListAll(endpoint: string, params: Record<string, string>, pageSize = 20): Promise<PaginatedResponse<Record<string, unknown>>> {
+  // Review queue loads the top actionable candidates for inspection rather than iterating all 10,000 historical records
+  const response = await safeList(endpoint, { ...params, page: '1', pageSize: String(pageSize) });
+  const batch = response.data ?? [];
+  return { data: batch, total: response.total ?? batch.length, page: 1, pageSize, totalPages: 1 };
 }
 
 async function safeList(endpoint: string, params: Record<string, string>): Promise<PaginatedResponse<Record<string, unknown>>> {

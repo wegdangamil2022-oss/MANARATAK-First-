@@ -35,14 +35,64 @@ export function AIGovernancePage() {
   const params = useParams<{ section?: string }>();
   const active = sections.some((item) => item.key === params.section) ? params.section as SectionKey : 'overview';
   const selected = sections.find((item) => item.key === active) ?? sections[0];
-  return <div dir="rtl" className="mx-auto max-w-[1600px] overflow-hidden rounded-[28px] border border-[#0E7C86]/15 bg-white shadow-sm">
-    <header className="relative overflow-hidden bg-gradient-to-l from-[#142B5F] via-[#142B5F] to-[#0E7C86] px-7 py-8 text-white">
-      <div className="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-end"><div><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/10 px-3 py-1 text-xs text-white/80"><BrainCircuit className="h-4 w-4" /> Phase 17 · Provider-Neutral</div><h2 className="text-3xl font-black">مركز منارتك للذكاء الاصطناعي</h2><p className="mt-2 max-w-3xl text-sm leading-7 text-white/80">حوكمة مركزية للمزوّدين والنماذج والتوجيه والموجّهات والسلامة والتكلفة والتقييم، دون تخزين أي مفاتيح سرية.</p></div><div className="rounded-2xl border border-emerald-300/20 bg-black/15 px-4 py-3 text-xs leading-6"><b>وضع التنفيذ الحالي</b><div>المزوّد غير المهيأ يظهر NOT_CONFIGURED — ولا يُعد فشلًا</div></div></div>
-    </header>
-    <div className="grid min-h-[720px] lg:grid-cols-[275px_1fr]"><aside className="border-l border-[#0E7C86]/15 bg-[#FAF7F0] p-4">{[...new Set(sections.map((item) => item.group))].map((group) => <div key={group} className="mb-5"><div className="mb-2 px-3 text-[11px] font-bold text-[#142B5F]/60">{group}</div><nav className="space-y-1">{sections.filter((item) => item.group === group).map((item) => <Link key={item.key} to={`/ai/${item.key}`} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold ${active === item.key ? 'bg-[#142B5F] text-white shadow-md' : 'text-slate-700 hover:bg-[#0E7C86]/10'}`}><span className="[&>svg]:h-4 [&>svg]:w-4">{item.icon}</span>{item.label}</Link>)}</nav></div>)}</aside>
-      <main className="min-w-0 bg-slate-50/60 p-5 lg:p-8"><div className="mb-6 flex items-center gap-3 text-slate-500"><span className="text-sm">مركز الذكاء الاصطناعي</span><ChevronLeft className="h-4 w-4" /><h3 className="font-bold text-slate-900">{selected.label}</h3></div>{active === 'overview' ? <OverviewPanel /> : active === 'executions' ? <ExecutionsPanel /> : active === 'playground' ? <PlaygroundPanel /> : active === 'workflows' ? <WorkflowsPanel /> : active === 'prompts' ? <PromptsPanel /> : <RegistryPanel resource={active as ResourceKey} title={selected.label} />}</main>
+  return (
+    <div dir="rtl" className="mx-auto max-w-[1600px] space-y-6">
+      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
+        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
+        <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
+              <BrainCircuit className="h-4 w-4 text-[#21A7B4]" />
+              <span>مركز الذكاء الاصطناعي والحوكمة · Phase 17</span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">مركز منارتك للذكاء الاصطناعي</h1>
+            <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-cyan-50/90">
+              حوكمة مركزية للمزوّدين والنماذج والتوجيه والموجّهات والسلامة والتكلفة والتقييم، دون تخزين أي مفاتيح سرية.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-xs leading-6 backdrop-blur-md shadow-xs shrink-0">
+            <div className="font-bold text-cyan-100">وضع التنفيذ الحالي</div>
+            <div className="text-white/80">المزوّد غير المهيأ يظهر NOT_CONFIGURED — ولا يُعد فشلًا</div>
+          </div>
+        </div>
+      </section>
+
+      <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
+        <div className="grid min-h-[720px] lg:grid-cols-[275px_1fr]">
+          <aside className="border-l border-slate-100 bg-slate-50/60 p-4">
+            {[...new Set(sections.map((item) => item.group))].map((group) => (
+              <div key={group} className="mb-5">
+                <div className="mb-2 px-3 text-[11px] font-bold text-[#142B5F]/70">{group}</div>
+                <nav className="space-y-1">
+                  {sections.filter((item) => item.group === group).map((item) => (
+                    <Link
+                      key={item.key}
+                      to={`/ai/${item.key}`}
+                      className={`flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold transition ${
+                        active === item.key ? 'bg-[#142B5F] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100/80 hover:text-[#0E7C86]'
+                      }`}
+                    >
+                      <span className={`[&>svg]:h-4 [&>svg]:w-4 ${active === item.key ? 'text-[#21A7B4]' : 'text-slate-400'}`}>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            ))}
+          </aside>
+          <main className="min-w-0 bg-white p-5 lg:p-8">
+            <div className="mb-6 flex items-center gap-2 text-slate-500">
+              <span className="text-xs font-bold">مركز الذكاء الاصطناعي</span>
+              <ChevronLeft className="h-3.5 w-3.5 text-slate-400" />
+              <h3 className="text-base font-black text-[#142B5F]">{selected.label}</h3>
+            </div>
+            {active === 'overview' ? <OverviewPanel /> : active === 'executions' ? <ExecutionsPanel /> : active === 'playground' ? <PlaygroundPanel /> : active === 'workflows' ? <WorkflowsPanel /> : active === 'prompts' ? <PromptsPanel /> : <RegistryPanel resource={active as ResourceKey} title={selected.label} />}
+          </main>
+        </div>
+      </div>
     </div>
-  </div>;
+  );
 }
 
 function OverviewPanel() {

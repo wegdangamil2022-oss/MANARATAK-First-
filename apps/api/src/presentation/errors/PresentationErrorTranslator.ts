@@ -3,6 +3,9 @@ import { ErrorCode, SerializedError, ApiResponse, ApiError } from '@manaratak/co
 export class PresentationErrorTranslator {
   public static translateToStatusCode(code: string): number {
     switch (code) {
+      case 'STUDENT_WORKSPACE_PROVISIONING_PENDING':
+      case 'STUDENT_WORKSPACE_INITIALIZING':
+        return 423;
       case ErrorCode.VALIDATION_ERROR:
         return 400;
       case ErrorCode.UNAUTHORIZED:

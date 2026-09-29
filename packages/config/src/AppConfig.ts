@@ -106,7 +106,7 @@ export const AppConfigSchema = z.preprocess((input) => {
       NODE_ENV: nodeEnv,
       DATABASE_URL: env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/manaratak_dev',
       DIRECT_URL: env.DIRECT_URL || (env.DATABASE_URL ? (isLoopbackPostgres(env.DATABASE_URL) ? env.DATABASE_URL : undefined) : 'postgresql://postgres:postgres@localhost:5432/manaratak_dev'),
-      REDIS_URL: env.REDIS_URL || 'redis://localhost:6379',
+      REDIS_URL: env.REDIS_URL || undefined,
       REDIS_NAMESPACE: env.REDIS_NAMESPACE || 'manaratak:',
       JWT_ACTIVE_KEY_ID: env.JWT_ACTIVE_KEY_ID || 'dev-ephemeral',
       ACCESS_TOKEN_TTL_SECONDS: env.ACCESS_TOKEN_TTL_SECONDS || 900,
@@ -175,7 +175,7 @@ export const AppConfigSchema = z.preprocess((input) => {
   JWT_PRIVATE_KEY_PEM: z.string().optional(),
   JWT_PUBLIC_KEY_PEM: z.string().optional(),
   JWT_PREVIOUS_PUBLIC_KEYS_JSON: z.string().optional(),
-  ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(60).max(900).default(900),
+  ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(60).max(30 * 24 * 60 * 60).default(900),
   SESSION_TTL_SECONDS: z.coerce.number().default(86400 * 7),
   SECURE_COOKIE: envBoolean.optional(),
   CSRF_SECRET: z.string().optional(),
@@ -317,10 +317,10 @@ export const AppConfigSchema = z.preprocess((input) => {
         path: ['JWT_PUBLIC_KEY_PEM'],
       });
     }
-    if (data.ACCESS_TOKEN_TTL_SECONDS > 900) {
+    if (data.ACCESS_TOKEN_TTL_SECONDS > 30 * 24 * 60 * 60) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'ACCESS_TOKEN_TTL_SECONDS must not exceed 900 seconds',
+        message: 'ACCESS_TOKEN_TTL_SECONDS must not exceed 30 days',
         path: ['ACCESS_TOKEN_TTL_SECONDS'],
       });
     }

@@ -167,16 +167,32 @@ export function SettingsAdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12" dir={isAr ? 'rtl' : 'ltr'}>
-      <header className="rounded-3xl border border-[#0E7C86]/15 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
+        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-black text-[#0E7C86]"><Settings2 className="h-4 w-4" /> {isAr ? 'حوكمة إعدادات المنصة' : 'Platform configuration governance'}</div>
-            <h1 className="text-3xl font-black text-[#142B5F]">{isAr ? 'الإعدادات' : 'Settings'}</h1>
-            <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-slate-500">{isAr ? 'تعريفات إعدادات ديناميكية، قيم متدرجة حسب النطاق، سجل نسخ غير قابل للتعديل، وFeature Flags. الصلاحيات والأسرار ليست مملوكة لهذا المجال.' : 'Dynamic definitions, scoped assignments, immutable version history, and feature flags. Authorization and secrets are owned by separate boundaries.'}</p>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
+              <Settings2 className="h-4 w-4 text-[#21A7B4]" />
+              <span>{isAr ? 'حوكمة إعدادات المنصة ومفاتيح الميزات' : 'Platform configuration governance'}</span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{isAr ? 'إعدادات المنصة' : 'Settings'}</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
+              {isAr
+                ? 'تعريفات إعدادات ديناميكية، قيم متدرجة حسب النطاق، سجل نسخ غير قابل للتعديل، وFeature Flags.'
+                : 'Dynamic definitions, scoped assignments, immutable version history, and feature flags.'}
+            </p>
           </div>
-          <button onClick={() => void refresh()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#0E7C86]/20 bg-[#FAF7F0] px-4 py-2.5 text-xs font-black text-[#142B5F] hover:bg-[#DDEFF2]/50"><RefreshCw className="h-4 w-4" />{isAr ? 'تحديث' : 'Refresh'}</button>
+          <button
+            onClick={() => void refresh()}
+            disabled={loading}
+            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] shrink-0"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            {isAr ? 'تحديث البيانات' : 'Refresh'}
+          </button>
         </div>
-      </header>
+      </section>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Boundary icon={<ShieldCheck />} title={isAr ? 'RBAC منفصل' : 'RBAC is separate'} text={isAr ? 'المستخدمون والأدوار والصلاحيات يملكها IAM/Authorization، وليس Settings.' : 'Users, roles and permissions belong to IAM/Authorization, not Settings.'} />

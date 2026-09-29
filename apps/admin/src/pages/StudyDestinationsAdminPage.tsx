@@ -80,6 +80,7 @@ export function StudyDestinationsAdminPage() {
   const [region, setRegion] = useState('');
   const [status, setStatus] = useState('');
   const [completeness, setCompleteness] = useState('');
+  const [cooldown, setCooldown] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -91,14 +92,35 @@ export function StudyDestinationsAdminPage() {
       if (status) params.set('status', status);
       if (completeness) params.set('completenessStatus', completeness);
       setResult(await adminApiClient.request<PageResult>(`/admin/study-destinations?${params}`));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'STUDY_DESTINATIONS_LOAD_FAILED');
+      setCooldown(null);
+    } catch (cause: any) {
+      const msg = cause instanceof Error ? cause.message : 'STUDY_DESTINATIONS_LOAD_FAILED';
+      setError(msg);
+      if (msg.includes('[429]')) {
+        const parts = msg.split('|');
+        const seconds = parts[1] ? parseInt(parts[1], 10) : 60;
+        setCooldown(seconds);
+      }
     } finally {
       setLoading(false);
     }
   }, [query, region, status, completeness]);
 
   useEffect(() => { const id = window.setTimeout(load, 220); return () => window.clearTimeout(id); }, [load]);
+
+  useEffect(() => {
+    if (cooldown === null || cooldown <= 0) return;
+    const interval = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [cooldown]);
 
   const stats = useMemo(() => {
     const rows = result.data;
@@ -120,47 +142,75 @@ export function StudyDestinationsAdminPage() {
             <h1 className="text-3xl font-black">{isAr ? 'دول الدراسة' : 'Study Destinations'}</h1>
             <p className="mt-2 max-w-3xl text-sm text-white/80">{isAr ? 'ملفات تحريرية موثقة فوق الدولة المرجعية Canonical؛ لا تُعامل كل دولة في Reference Data تلقائيًا كوجهة دراسة.' : 'Verified editorial profiles layered on canonical countries; Reference Data countries are not automatically study destinations.'}</p>
           </div>
-          <button onClick={load} className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold hover:bg-white/20"><RefreshCw className="h-4 w-4" />{isAr ? 'تحديث' : 'Refresh'}</button>
+          <button disabled={cooldown !== null && cooldown > 0} onClick={load} className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed"><RefreshCw className={`h-4 w-4 ${cooldown ? '' : 'animate-spin'}`} />{cooldown ? (isAr ? `الانتظار (${cooldown}ث)` : `Wait (${cooldown}s)`) : (isAr ? 'تحديث' : 'Refresh')}</button>
         </div>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <Metric icon={Globe2} label={isAr ? 'دول ضمن النتيجة' : 'Countries in result'} value={stats.canonical} />
-        <Metric icon={ShieldCheck} label={isAr ? 'ملفات مهيأة' : 'Configured profiles'} value={stats.configured} />
-        <Metric icon={CheckCircle2} label={isAr ? 'منشورة' : 'Published'} value={stats.published} accent />
-        <Metric icon={CheckCircle2} label={isAr ? 'جاهزة للنشر' : 'Ready to publish'} value={stats.ready} />
-        <Metric icon={FileWarning} label={isAr ? 'بدون ملف' : 'No profile'} value={stats.missing} />
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="grid gap-3 lg:grid-cols-[2fr_1fr_1fr_1fr]">
-          <label className="relative block">
-            <Search className={`absolute top-3 h-4 w-4 text-slate-400 ${isAr ? 'right-3' : 'left-3'}`} />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={isAr ? 'ابحث باسم الدولة أو ISO...' : 'Search country or ISO...'} className={`w-full rounded-xl border border-slate-200 py-2.5 text-sm outline-none focus:border-[#142B5F] focus:ring-2 focus:ring-[#142B5F]/10 ${isAr ? 'pr-10 pl-3' : 'pl-10 pr-3'}`} />
-          </label>
-          <select value={region} onChange={(e) => setRegion(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><option value="">{isAr ? 'كل المناطق' : 'All regions'}</option>{['Asia','Africa','Europe','Americas','Oceania'].map((value) => <option key={value}>{value}</option>)}</select>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><option value="">{isAr ? 'كل حالات الملف' : 'All profile states'}</option>{['NO_PROFILE','DRAFT','IN_REVIEW','PUBLISHED','ARCHIVED'].map((value) => <option value={value} key={value}>{statusLabel(value, isAr)}</option>)}</select>
-          <select value={completeness} onChange={(e) => setCompleteness(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><option value="">{isAr ? 'كل حالات الاكتمال' : 'All completeness'}</option>{['INCOMPLETE','READY_FOR_REVIEW','READY_TO_PUBLISH','COMPLETE'].map((value) => <option value={value} key={value}>{statusLabel(value, isAr)}</option>)}</select>
+      {error ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center shadow-sm max-w-2xl mx-auto">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-600 animate-bounce" />
+          <h2 className="mt-4 text-xl font-black text-red-900">
+            {error.includes('429') 
+              ? 'لقد تم تقييد الطلبات مؤقتاً (خطأ 429)' 
+              : 'فشل تحميل بيانات وجهات الدراسة'}
+          </h2>
+          <p className="mt-2 text-sm text-red-700 leading-relaxed">
+            {error.includes('429')
+              ? cooldown 
+                ? `لقد تجاوزت المنصة الحد الأقصى المسموح به من الطلبات المتزامنة لحماية الخادم. يرجى الانتظار لمدة ${cooldown} ثانية قبل إعادة المحاولة.`
+                : 'لقد تجاوزت المنصة الحد الأقصى المسموح به من الطلبات المتزامنة لحماية الخادم. يرجى الانتظار قليلاً ثم إعادة المحاولة.'
+              : error.split('|')[0]}
+          </p>
+          <button 
+            type="button"
+            disabled={cooldown !== null && cooldown > 0}
+            onClick={() => void load()} 
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-red-600 hover:bg-red-700 px-6 py-2.5 text-sm font-bold text-white transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`h-4 w-4 ${cooldown ? '' : 'animate-spin'}`} />
+            <span>{cooldown ? `إعادة المحاولة خلال ${cooldown} ثانية` : 'إعادة المحاولة'}</span>
+          </button>
         </div>
-      </section>
+      ) : (
+        <>
+          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <Metric icon={Globe2} label={isAr ? 'دول ضمن النتيجة' : 'Countries in result'} value={stats.canonical} />
+            <Metric icon={ShieldCheck} label={isAr ? 'ملفات مهيأة' : 'Configured profiles'} value={stats.configured} />
+            <Metric icon={CheckCircle2} label={isAr ? 'منشورة' : 'Published'} value={stats.published} accent />
+            <Metric icon={CheckCircle2} label={isAr ? 'جاهزة للنشر' : 'Ready to publish'} value={stats.ready} />
+            <Metric icon={FileWarning} label={isAr ? 'بدون ملف' : 'No profile'} value={stats.missing} />
+          </section>
 
-      {error && <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800"><AlertCircle className="h-5 w-5" />{error}</div>}
-      {loading ? <div className="flex min-h-56 items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-[#142B5F]" /></div> : (
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {result.data.map(({ country, profile, readiness }) => {
-            const blocking = readiness?.checks.filter((check) => check.blocking && !check.complete).length ?? 0;
-            return <article key={country.id} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[#142B5F]/30 hover:shadow-md">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-3"><div className="text-4xl">{flagEmoji(country.iso2Code)}</div><div className="min-w-0"><h2 className="truncate text-lg font-black text-slate-900">{isAr ? (country.nameAr || country.name) : country.name}</h2><p className="text-xs text-slate-500">{country.iso2Code} · {country.iso3Code} · {country.region || '-'}</p></div></div>
-                <StatusBadge value={profile?.status ?? 'NO_PROFILE'} isAr={isAr} />
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-2 text-xs"><Info label={isAr ? 'الاكتمال' : 'Completeness'} value={profile ? statusLabel(profile.completenessStatus, isAr) : '-'} /><Info label={isAr ? 'المصادر' : 'Sources'} value={profile ? statusLabel(profile.sourceVerificationStatus, isAr) : '-'} /><Info label={isAr ? 'العملة المرجعية' : 'Reference currency'} value={country.defaultCurrencyCode || '-'} /><Info label={isAr ? 'اللغة المرجعية' : 'Reference language'} value={country.defaultLanguageCode || '-'} /></div>
-              {profile && <div className={`mt-4 rounded-xl px-3 py-2 text-xs font-semibold ${blocking ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-800'}`}>{blocking ? (isAr ? `${blocking} متطلبات تمنع النشر` : `${blocking} publishing blockers`) : (isAr ? 'لا توجد موانع نشر في فحص الجاهزية' : 'No publishing blockers in readiness check')}</div>}
-              <Link to={`/study-destinations/${country.iso2Code}`} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#142B5F] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#142B5F]">{profile ? (isAr ? 'إدارة ملف الدولة' : 'Manage destination') : (isAr ? 'تهيئة ملف وجهة الدراسة' : 'Configure destination')}</Link>
-            </article>;
-          })}
-          {!result.data.length && <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center text-sm text-slate-500">{isAr ? 'لا توجد نتائج مطابقة.' : 'No matching destinations.'}</div>}
-        </section>
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="grid gap-3 lg:grid-cols-[2fr_1fr_1fr_1fr]">
+              <label className="relative block">
+                <Search className={`absolute top-3 h-4 w-4 text-slate-400 ${isAr ? 'right-3' : 'left-3'}`} />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={isAr ? 'ابحث باسم الدولة أو ISO...' : 'Search country or ISO...'} className={`w-full rounded-xl border border-slate-200 py-2.5 text-sm outline-none focus:border-[#142B5F] focus:ring-2 focus:ring-[#142B5F]/10 ${isAr ? 'pr-10 pl-3' : 'pl-10 pr-3'}`} />
+              </label>
+              <select value={region} onChange={(e) => setRegion(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><option value="">{isAr ? 'كل المناطق' : 'All regions'}</option>{['Asia','Africa','Europe','Americas','Oceania'].map((value) => <option key={value}>{value}</option>)}</select>
+              <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><option value="">{isAr ? 'كل حالات الملف' : 'All profile states'}</option>{['NO_PROFILE','DRAFT','IN_REVIEW','PUBLISHED','ARCHIVED'].map((value) => <option value={value} key={value}>{statusLabel(value, isAr)}</option>)}</select>
+              <select value={completeness} onChange={(e) => setCompleteness(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><option value="">{isAr ? 'كل حالات الاكتمال' : 'All completeness'}</option>{['INCOMPLETE','READY_FOR_REVIEW','READY_TO_PUBLISH','COMPLETE'].map((value) => <option value={value} key={value}>{statusLabel(value, isAr)}</option>)}</select>
+            </div>
+          </section>
+
+          {loading ? <div className="flex min-h-56 items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-[#142B5F]" /></div> : (
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {result.data.map(({ country, profile, readiness }) => {
+                const blocking = readiness?.checks.filter((check) => check.blocking && !check.complete).length ?? 0;
+                return <article key={country.id} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[#142B5F]/30 hover:shadow-md">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3"><div className="text-4xl">{flagEmoji(country.iso2Code)}</div><div className="min-w-0"><h2 className="truncate text-lg font-black text-slate-900">{isAr ? (country.nameAr || country.name) : country.name}</h2><p className="text-xs text-slate-500">{country.iso2Code} · {country.iso3Code} · {country.region || '-'}</p></div></div>
+                    <StatusBadge value={profile?.status ?? 'NO_PROFILE'} isAr={isAr} />
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs"><Info label={isAr ? 'الاكتمال' : 'Completeness'} value={profile ? statusLabel(profile.completenessStatus, isAr) : '-'} /><Info label={isAr ? 'المصادر' : 'Sources'} value={profile ? statusLabel(profile.sourceVerificationStatus, isAr) : '-'} /><Info label={isAr ? 'العملة المرجعية' : 'Reference currency'} value={country.defaultCurrencyCode || '-'} /><Info label={isAr ? 'اللغة المرجعية' : 'Reference language'} value={country.defaultLanguageCode || '-'} /></div>
+                  {profile && <div className={`mt-4 rounded-xl px-3 py-2 text-xs font-semibold ${blocking ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-800'}`}>{blocking ? (isAr ? `${blocking} متطلبات تمنع النشر` : `${blocking} publishing blockers`) : (isAr ? 'لا توجد موانع نشر في فحص الجاهزية' : 'No publishing blockers in readiness check')}</div>}
+                  <Link to={`/study-destinations/${country.iso2Code}`} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#142B5F] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#142B5F]">{profile ? (isAr ? 'إدارة ملف الدولة' : 'Manage destination') : (isAr ? 'تهيئة ملف وجهة الدراسة' : 'Configure destination')}</Link>
+                </article>;
+              })}
+              {!result.data.length && <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center text-sm text-slate-500">{isAr ? 'لا توجد نتائج مطابقة.' : 'No matching destinations.'}</div>}
+            </section>
+          )}
+        </>
       )}
     </div>
   );

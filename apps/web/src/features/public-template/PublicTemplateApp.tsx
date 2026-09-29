@@ -183,23 +183,13 @@ export default function App() {
 
     let patch: Parameters<typeof replaceNavigation>[0] | null = null;
     if (!section) {
-      const scholarshipsCourse = courses.find(c => c.id === 'c1');
-      if (scholarshipsCourse) {
-        setIsStudyingCourse(true);
-        if (typeof window !== 'undefined' && window.localStorage) {
-          window.localStorage.setItem('mn_is_studying_course', 'true');
-        }
-        patch = {
-          activeTab: 'search',
-          selectedCategory: 'courses',
-          selectedCourseTrack: 'native',
-          selectedCourse: scholarshipsCourse
-        };
-      } else {
-        patch = { activeTab: 'home' };
+      setIsStudyingCourse(false);
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem('mn_is_studying_course');
       }
+      patch = { activeTab: 'home' };
     }
-    else if (section === 'login') patch = { activeTab: 'auth' };
+    else if (section === 'login' || section === 'signup' || section === 'register' || section === 'verify-email') patch = { activeTab: 'auth' };
     else if (section === 'student') patch = { activeTab: 'account' };
     else if (section === 'search') patch = { activeTab: 'search', selectedCategory: 'all', globalSearchQuery: params.get('q') || '' };
     else if (section === 'scholarships') {
@@ -559,9 +549,7 @@ export default function App() {
     } else if (target === 'search') {
       justClickedSearchRef.current = true;
       setIsHeaderSearchVisible(true);
-      if (activeTab !== 'home' && activeTab !== 'search') {
-        navigate({ activeTab: 'search', selectedCategory: 'all' });
-      }
+      navigate({ activeTab: 'search', selectedCategory: 'all' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => {
         const searchInput = document.getElementById('header-global-search');
@@ -921,7 +909,18 @@ export default function App() {
         onToggleLanguage={openLanguage}
         onOpenMenu={() => setIsMenuOpen(true)}
         onOpenNotifications={() => setIsNotificationOpen(true)}
-        onOpenProfile={() => openSection('account')}
+        onOpenProfile={() => {
+          const isAdmin = typeof window !== 'undefined' && window.localStorage && (
+            localStorage.getItem('manaratak_admin_access') === 'authorized' ||
+            !!localStorage.getItem('manaratak_admin_bearer_token') ||
+            !!localStorage.getItem('manaratak_access_token')
+          );
+          if (isAdmin) {
+            window.location.assign('/admin/dashboard');
+            return;
+          }
+          openSection('account');
+        }}
         unreadCount={unreadNotificationsCount}
         activeTab={activeTab}
         onTabChange={(tab) => openSection(tab)}
@@ -929,7 +928,10 @@ export default function App() {
         globalSearchQuery={globalSearchQuery}
         onGlobalSearchChange={setGlobalSearchQuery}
         onGlobalSearchSubmit={() => openSection('search')}
-        onOpenSmartSearch={() => openSection('search')}
+        onOpenSmartSearch={(query) => {
+          setGlobalSearchQuery(query || '');
+          setIsSmartSearchOpen(true);
+        }}
         onSelectCategory={(category) => openSection(category)}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
@@ -1297,7 +1299,12 @@ export default function App() {
           isStudyingCourse ? (
             <CourseStudyRoomView
               course={selectedCourse}
-              onBack={() => setIsStudyingCourse(false)}
+              onBack={() => {
+                setIsStudyingCourse(false);
+                if (typeof window !== 'undefined' && window.localStorage) {
+                  window.localStorage.removeItem('mn_is_studying_course');
+                }
+              }}
               onRestrictedAction={(msg) => triggerAccessDenied(msg || 'ليس لديك صلاحية الوصول')}
             />
           ) : (
@@ -2059,55 +2066,7 @@ export default function App() {
 
             {/* TAB 3: FAVORITES VIEW */}
             {activeTab === 'favorites' && (
-              publicDataMode === 'api' ? (
-                <LiveStudentWorkspacePage initialTab="VAULT" />
-              ) : (
-              <FavoritesPage
-                favoriteKeys={favoriteKeys}
-                scholarships={scholarships}
-                universities={universities}
-                majors={majors}
-                countries={countriesForView}
-                importedCourses={importedCourses}
-                exams={exams}
-                articles={articles}
-                services={services}
-                tools={tools}
-                careers={careers}
-                onToggleFavorite={handleToggleFavorite}
-                onOpenScholarship={setSelectedScholarship}
-                onOpenUniversity={setSelectedUniversity}
-                onOpenMajor={setSelectedMajor}
-                onOpenCountry={(countryId) => {
-                  const country = countries.find((item) => item.id === countryId);
-                  setFavoriteLaunch({ kind: 'country', id: country?.id });
-                  setCountryNavigationName(countryId);
-                  setSelectedCategory('countries');
-                  setActiveTab('search');
-                }}
-                onOpenCourse={setSelectedImportedCourse}
-                onOpenExam={setSelectedExam}
-                onOpenArticle={setSelectedArticle}
-                onOpenService={(service) => {
-                  setServiceReturnTab('favorites');
-                  setSelectedService(service);
-                }}
-                onOpenTool={(id) => {
-                  setFavoriteLaunch({ kind: 'tool', id });
-                  setActiveTab('ai-tools');
-                  setSelectedCategory('all');
-                }}
-                onOpenCareer={(id) => {
-                  setFavoriteLaunch({ kind: 'career', id });
-                  setSelectedCategory('jobs');
-                  setActiveTab('search');
-                }}
-                onNavigateCategory={(category) => {
-                  setSelectedCategory(category);
-                  setActiveTab(category === 'tools' ? 'ai-tools' : 'search');
-                }}
-              />
-              )
+              <LiveStudentWorkspacePage initialTab="VAULT" />
             )}
 
             {/* TAB 4: SMART AI TOOLS VIEW */}
@@ -2137,72 +2096,26 @@ export default function App() {
 
             {/* TAB: STUDENT WORKSPACE / P15 LIVE API OR EXPLICIT PROTOTYPE */}
             {activeTab === 'account' && (
-              publicDataMode === 'api' ? (
-                <LiveStudentWorkspacePage />
-              ) : (
-                <PrototypeStudentWorkspacePage
-                  profile={null}
-                  language={language}
-                  isDarkMode={isDarkMode}
-                  favoriteTypeCounts={favoriteTypeCounts}
-                  favoritesCount={favoriteKeys.length}
-                  milestones={milestones}
-                  notifications={notifications}
-                  onOpenFavorites={() => openSection('favorites')}
-                  onOpenTracker={() => openSection('tracker')}
-                  onOpenNotifications={() => setIsNotificationOpen(true)}
-                  onOpenGlobalSearch={() => openSection('search')}
-                  onOpenSmartSearch={() => openSection('search')}
-                  onOpenTools={() => openSection('ai-tools')}
-                  onOpenAuth={() => navigate({ activeTab: 'auth' })}
-                  onToggleLanguage={openLanguage}
-                  onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
-                  onRestrictedAction={() => triggerAccessDenied()}
-                />
-              )
+              <LiveStudentWorkspacePage />
             )}
 
             {activeTab === 'auth' && (
-              publicDataMode === 'api' ? (
-                <LiveStudentAuthPage onAuthenticated={(destination) => {
-                  if (destination.kind === 'admin') {
-                    window.location.assign(destination.path);
-                    return;
-                  }
-                  const postLoginReturn = consumePostLoginReturn();
-                  if (postLoginReturn) {
-                    window.location.assign(postLoginReturn);
-                    return;
-                  }
-                  setActiveTab('account');
-                  window.history.replaceState({...window.history.state}, '', '/student');
-                }} />
-              ) : (
-                <div className="w-full max-w-4xl lg:max-w-5xl mx-auto flex items-center justify-center min-h-[70vh]">
-                  <PrototypeAuthPage
-                    onBackToWorkspace={goBack}
-                    onRestrictedAction={() => triggerAccessDenied()}
-                  />
-                </div>
-              )
+              <LiveStudentAuthPage onAuthenticated={(destination) => {
+                const postLoginReturn = consumePostLoginReturn();
+                if (destination.kind === 'admin') {
+                  window.location.assign(postLoginReturn || destination.path);
+                  return;
+                }
+                if (postLoginReturn) {
+                  window.location.assign(postLoginReturn);
+                  return;
+                }
+                setActiveTab('account');
+                window.history.replaceState({...window.history.state}, '', '/student');
+              }} />
             )}
         {activeTab === 'tracker' && (
-          publicDataMode === 'api' ? (
-            <LiveStudentWorkspacePage initialTab="JOURNEY" />
-          ) : (
-            <div className="w-full max-w-4xl lg:max-w-5xl mx-auto">
-              <LearnerProgressTracker
-                milestones={milestones}
-                onUpdateMilestone={(updated) => setMilestones((prev) => prev.map((m) => m.id === updated.id ? updated : m))}
-                onAddMilestone={(newM) => setMilestones((prev) => [newM, ...prev])}
-                onDeleteMilestone={(id) => setMilestones((prev) => prev.filter((m) => m.id !== id))}
-                allScholarships={scholarships}
-                courses={courses}
-                onOpenAiLetterForScholarship={() => openStudentTools('motivation-letter-generator')}
-                onOpenScholarshipDetails={(sch) => setSelectedScholarship(sch)}
-              />
-            </div>
-          )
+          <LiveStudentWorkspacePage initialTab="JOURNEY" />
         )}
           </>
         )}
@@ -2235,6 +2148,10 @@ export default function App() {
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
         onNavigate={(target) => {
+          if (target === 'admin') {
+            window.location.assign('/admin/dashboard');
+            return;
+          }
           openSection(target);
           setIsMenuOpen(false);
         }}

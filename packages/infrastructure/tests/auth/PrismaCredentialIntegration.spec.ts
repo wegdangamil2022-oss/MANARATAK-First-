@@ -51,9 +51,16 @@ describe('PrismaCredential Integration & Client Validation', () => {
         const identity = await prisma.identityRecord.create({
           data: {
             id: tempId,
-            status: 'PROVISIONED',
+            status: 'ACTIVE',
             type: 'Human',
             createdBy: 'system',
+            user: {
+              create: {
+                displayName: 'Test User',
+                primaryEmail: `${tempId}@test.local`,
+                isEmailVerified: true,
+              },
+            },
             account: {
               create: {
                 accessState: 'Active',

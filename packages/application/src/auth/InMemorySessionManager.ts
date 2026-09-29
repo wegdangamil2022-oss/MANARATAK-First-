@@ -19,7 +19,7 @@ export class InMemorySessionManager implements ISessionManager {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
-  public async createSession(userId: string, refreshToken: string, sessionId = crypto.randomUUID()): Promise<void> {
+  public async createSession(userId: string, refreshToken: string, sessionId = crypto.randomUUID(), _sessionTtlSeconds?: number): Promise<void> {
     const hash = this.hashToken(refreshToken);
     const record: MemorySessionRecord = { userId, sessionId, familyId: sessionId, refreshTokenHash: hash };
     this.sessionsById.set(sessionId, record);

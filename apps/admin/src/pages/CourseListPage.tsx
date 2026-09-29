@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
-import { ArrowRight, Filter, Loader2, Plus, X } from 'lucide-react';
+import { ArrowRight, Filter, Loader2, Plus, X, BookOpen, CheckCircle2, AlertCircle, GraduationCap } from 'lucide-react';
 import { useTranslation } from "../i18n/I18nProvider";
 
 interface Course {
@@ -14,6 +14,30 @@ interface Course {
   platformName?: string;
   learningLanguage?: string;
   updatedAt: string;
+}
+
+function MetricCard({ icon: Icon, label, value, accent }: { icon: any; label: string; value: number | string; accent: string }) {
+  const tone = metricAccentClasses(accent);
+  return (
+    <div className="rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className={`grid h-9 w-9 place-items-center rounded-xl ${tone.icon}`}>
+          <Icon className="h-4.5 w-4.5" />
+        </div>
+        <div className={`text-2xl font-black ${tone.text}`}>{value}</div>
+      </div>
+      <div className="mt-3 text-[11px] font-black text-slate-600">{label}</div>
+    </div>
+  );
+}
+
+function metricAccentClasses(accent: string) {
+  if (accent === '#142B5F') return { icon: 'bg-[#142B5F]/10 text-[#142B5F]', text: 'text-[#142B5F]' };
+  if (accent === '#0E7C86') return { icon: 'bg-[#0E7C86]/10 text-[#0E7C86]', text: 'text-[#0E7C86]' };
+  if (accent === '#21A7B4') return { icon: 'bg-[#21A7B4]/10 text-[#21A7B4]', text: 'text-[#21A7B4]' };
+  if (accent === '#D6A43B') return { icon: 'bg-[#D6A43B]/10 text-[#D6A43B]', text: 'text-[#D6A43B]' };
+  if (accent === '#B94A48') return { icon: 'bg-[#B94A48]/10 text-[#B94A48]', text: 'text-[#B94A48]' };
+  return { icon: 'bg-[#2E7D5A]/10 text-[#2E7D5A]', text: 'text-[#2E7D5A]' };
 }
 
 interface PaginatedResponse {
@@ -87,50 +111,63 @@ export function CourseListPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">{t('courses')}</h2>
-          <p className="text-sm text-gray-500 mt-1">{t('review_course_catalog_records_and_open_the_authori')}</p>
+      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+        <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm border border-white/15">
+              <BookOpen className="h-4 w-4" />
+              <span>القسم الأكاديمي · الدورات التدريبية</span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{t('courses')}</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/80">{t('review_course_catalog_records_and_open_the_authori')}</p>
+          </div>
+          <div className="flex flex-wrap gap-3 shrink-0">
+            <button type="button" onClick={() => setShowCreate(true)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#21A7B4] px-4 py-2 text-sm font-black text-white hover:bg-[#1A8D99] transition shadow-md"><Plus className="h-4 w-4" />Create native course</button>
+            <div className="relative">
+              <select value={statusFilter} onChange={resetAndSet(setStatusFilter)} className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]">
+                <option value="" className="text-slate-900">{t('all_statuses')}</option>
+                <option value="IMPORTED" className="text-slate-900">{t('imported')}</option>
+                <option value="READY_TO_REVIEW" className="text-slate-900">{t('ready_to_review')}</option>
+                <option value="READY_TO_PUBLISH" className="text-slate-900">{t('ready_to_publish')}</option>
+                <option value="PUBLISHED" className="text-slate-900">{t('published')}</option>
+                <option value="REJECTED" className="text-slate-900">{t('rejected')}</option>
+                <option value="ARCHIVED" className="text-slate-900">{t('archived')}</option>
+              </select>
+              <Filter className="absolute right-3 top-2.5 h-4 w-4 text-cyan-200 pointer-events-none" />
+            </div>
+
+            <div className="relative">
+              <select value={originFilter} onChange={resetAndSet(setOriginFilter)} className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]">
+                <option value="" className="text-slate-900">{t('all_origins')}</option>
+                <option value="NATIVE_MANARATAK_COURSE" className="text-slate-900">{t('native_manaratak')}</option>
+                <option value="EXTERNAL_LINKED_COURSE" className="text-slate-900">{t('external_linked')}</option>
+              </select>
+              <Filter className="absolute right-3 top-2.5 h-4 w-4 text-cyan-200 pointer-events-none" />
+            </div>
+
+            <div className="relative">
+              <select value={accessFilter} onChange={resetAndSet(setAccessFilter)} className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]">
+                <option value="" className="text-slate-900">{t('all_access')}</option>
+                <option value="FREE_STUDY" className="text-slate-900">{t('free_study')}</option>
+                <option value="FREE_CERTIFICATE" className="text-slate-900">{t('free_certificate')}</option>
+                <option value="FREE_STUDY_AND_CERTIFICATE" className="text-slate-900">{t('free_study_certificate')}</option>
+                <option value="PAID" className="text-slate-900">{t('paid')}</option>
+              </select>
+              <Filter className="absolute right-3 top-2.5 h-4 w-4 text-cyan-200 pointer-events-none" />
+            </div>
+          </div>
         </div>
-
-        <div className="flex flex-wrap gap-3">
-          <button type="button" onClick={() => setShowCreate(true)} className="inline-flex items-center gap-2 rounded-md bg-[#142B5F] px-4 py-2 text-sm font-bold text-white"><Plus className="h-4 w-4" />Create native course</button>
-          <div className="relative">
-            <select value={statusFilter} onChange={resetAndSet(setStatusFilter)} className="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-black">
-              <option value="">{t('all_statuses')}</option>
-              <option value="IMPORTED">{t('imported')}</option>
-              <option value="READY_TO_REVIEW">{t('ready_to_review')}</option>
-              <option value="READY_TO_PUBLISH">{t('ready_to_publish')}</option>
-              <option value="PUBLISHED">{t('published')}</option>
-              <option value="REJECTED">{t('rejected')}</option>
-              <option value="ARCHIVED">{t('archived')}</option>
-            </select>
-            <Filter className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
-          </div>
-
-          <div className="relative">
-            <select value={originFilter} onChange={resetAndSet(setOriginFilter)} className="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-black">
-              <option value="">{t('all_origins')}</option>
-              <option value="NATIVE_MANARATAK_COURSE">{t('native_manaratak')}</option>
-              <option value="EXTERNAL_LINKED_COURSE">{t('external_linked')}</option>
-            </select>
-            <Filter className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
-          </div>
-
-          <div className="relative">
-            <select value={accessFilter} onChange={resetAndSet(setAccessFilter)} className="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-black">
-              <option value="">{t('all_access')}</option>
-              <option value="FREE_STUDY">{t('free_study')}</option>
-              <option value="FREE_CERTIFICATE">{t('free_certificate')}</option>
-              <option value="FREE_STUDY_AND_CERTIFICATE">{t('free_study_certificate')}</option>
-              <option value="PAID">{t('paid')}</option>
-            </select>
-            <Filter className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-      </div>
+      </section>
 
       {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>}
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard label="إجمالي الدورات" value={data?.total ?? 0} icon={BookOpen} accent="#142B5F" />
+        <MetricCard label="منشور في الموقع" value={data?.data.filter(x => x.status === 'PUBLISHED').length ?? 0} icon={CheckCircle2} accent="#2E7D5A" />
+        <MetricCard label="دورات داخلية المنصة" value={data?.data.filter(x => x.originType === 'NATIVE_MANARATAK_COURSE').length ?? 0} icon={GraduationCap} accent="#21A7B4" />
+        <MetricCard label="دورات مدفوعة" value={data?.data.filter(x => x.accessType === 'PAID').length ?? 0} icon={AlertCircle} accent="#D6A43B" />
+      </div>
       {showCreate && (
         <form onSubmit={createNativeCourse} className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between"><div><h3 className="font-black text-[#142B5F]">Create native MANARATAK course</h3><p className="text-xs text-gray-500">Creates a DRAFT native course and opens its canonical editor.</p></div><button type="button" onClick={() => setShowCreate(false)}><X className="h-5 w-5" /></button></div>

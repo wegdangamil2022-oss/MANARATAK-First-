@@ -149,7 +149,8 @@
     "release:smoke": "node scripts/release/post-deploy-smoke.mjs",
     "recovery:runtime:readiness": "node scripts/recovery/verify-runtime-backup-readiness.mjs",
     "docs:operations:verify": "node scripts/verify-operational-doc-paths.mjs",
-    "w7:docs:verify": "node scripts/verify-w7-documentation-closure.mjs"
+    "w7:docs:verify": "node scripts/verify-w7-documentation-closure.mjs",
+    "rbac:baseline:provision": "node scripts/rbac-baseline-provision.mjs"
   },
   "dependencies": {
     "@e965/xlsx": "0.20.3",

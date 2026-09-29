@@ -2,7 +2,7 @@ import { ApiClient } from '../../api/client';
 import { resolveAuthenticatedDestination, type AuthDestination, type TrustedSessionIdentity } from './authRouting';
 
 export interface TrustedAuthClient {
-  login(email: string, password: string): Promise<unknown>;
+  login(email: string, password: string, rememberMe?: boolean): Promise<unknown>;
   getCurrentSessionIdentity(): Promise<TrustedSessionIdentity>;
 }
 
@@ -14,9 +14,10 @@ export async function authenticateAccount(
   email: string,
   password: string,
   adminBaseUrl?: string,
+  rememberMe?: boolean,
   client: TrustedAuthClient = ApiClient,
 ): Promise<AuthDestination> {
-  await client.login(email, password);
+  await client.login(email, password, rememberMe);
   const identity = await client.getCurrentSessionIdentity();
   return resolveAuthenticatedDestination(identity, adminBaseUrl);
 }

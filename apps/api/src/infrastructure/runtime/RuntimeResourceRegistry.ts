@@ -36,6 +36,11 @@ export class RuntimeResourceRegistry {
   private shuttingDown = false;
   private closed = false;
   private closePromise: Promise<void> | null = null;
+  private readonly cleanupTasks: Array<() => Promise<void> | void> = [];
+
+  public registerCleanup(task: () => Promise<void> | void): void {
+    this.cleanupTasks.push(task);
+  }
 
   public constructor(
     private readonly env: Readonly<Record<string, string | undefined>>,
@@ -94,6 +99,15 @@ export class RuntimeResourceRegistry {
     if (this.closePromise) return this.closePromise;
     this.shuttingDown = true;
     this.closePromise = (async () => {
+      for (const task of this.cleanupTasks) {
+        try {
+          await task();
+        } catch (error) {
+          this.logger?.error?.('[RuntimeResources] Cleanup task failed', error);
+        }
+      }
+      this.cleanupTasks.length = 0;
+
       const redis = this.redisClient;
       this.redisClient = null;
       if (redis) {

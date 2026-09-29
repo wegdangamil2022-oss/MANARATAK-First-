@@ -23,7 +23,7 @@ export class StudentWorkspaceOutboxWorker {
   }
 
   public async runLearningOnce(workerId: string): Promise<OutboxDispatchResult> {
-    return this.run(workerId, 'COURSES', ['CourseEnrolled', 'CourseProgressUpdated']);
+    return this.run(workerId, 'COURSES', ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted']);
   }
 
   private run(workerId: string, domain: string, eventTypes: readonly string[]): Promise<OutboxDispatchResult> {

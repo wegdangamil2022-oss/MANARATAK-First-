@@ -28,9 +28,12 @@ export function isGoogleAiStudio(env: Readonly<Record<string, string | undefined
 
 /** Frontend packages resolve from source in Vite; native Node entrypoints remain dist-based. */
 export function previewWorkspaceAliases(root: string) {
-  return Object.fromEntries(['domain', 'shared', 'types', 'ui'].map((name) => [
-    '@manaratak/' + name, path.join(root, 'packages', name, name === 'ui' ? 'src/index.tsx' : 'src/index.ts'),
-  ]));
+  return Object.fromEntries(
+    ['core', 'domain', 'shared', 'types', 'ui', 'application', 'config', 'infrastructure'].map((name) => [
+      '@manaratak/' + name,
+      path.join(root, 'packages', name, name === 'ui' ? 'src/index.tsx' : 'src/index.ts'),
+    ])
+  );
 }
 
 /** No proxy, SSR loader or backend import: every local API request fails closed. */
@@ -45,6 +48,7 @@ export function googleAiStudioPreviewPlugin(): Plugin {
           res.setHeader(name, value);
         }
         if (!/^\/api(?:\/|\?|$)/.test(req.url || '')) return next();
+        if (process.env.DATABASE_URL) return next();
         res.statusCode = 503;
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'no-store');

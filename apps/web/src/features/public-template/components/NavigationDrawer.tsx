@@ -15,6 +15,7 @@ import {
   Sun,
   ChevronLeft,
   ChevronRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { Language, UserProfile } from '../types';
 
@@ -45,7 +46,18 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   useOverlayDialog(isOpen, onClose, 'mn-navigation-dialog');
   if (!isOpen) return null;
 
+  const isAdmin = typeof window !== 'undefined' && window.localStorage && (
+    localStorage.getItem('manaratak_admin_access') === 'authorized' ||
+    !!localStorage.getItem('manaratak_admin_bearer_token') ||
+    !!localStorage.getItem('manaratak_access_token')
+  );
+
   const menuItems = [
+    ...(isAdmin ? [{
+      id: 'admin',
+      label: 'لوحة الإدارة والتحكم (المالك)',
+      icon: <ShieldCheck className="w-4 h-4 text-[#D6A43B]" />,
+    }] : []),
     {
       id: 'account',
       label: 'حسابي ومساحة الطالب',

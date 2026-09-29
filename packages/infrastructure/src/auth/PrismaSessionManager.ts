@@ -12,9 +12,10 @@ export class PrismaSessionManager implements ISessionManager {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
-  public async createSession(userId: string, refreshToken: string, sessionId = crypto.randomUUID()): Promise<void> {
+  public async createSession(userId: string, refreshToken: string, sessionId = crypto.randomUUID(), sessionTtlSeconds?: number): Promise<void> {
     const hashed = this.hashToken(refreshToken);
-    const expiresAt = new Date(Date.now() + this.sessionTtlSeconds * 1000);
+    const ttl = sessionTtlSeconds ?? this.sessionTtlSeconds;
+    const expiresAt = new Date(Date.now() + ttl * 1000);
 
     await this.prisma.sessionRecord.create({
       data: {
@@ -57,7 +58,6 @@ export class PrismaSessionManager implements ISessionManager {
   public async consumeAndRotateRefreshSession(refreshToken: string, nextRefreshToken: string, nextSessionId: string): Promise<RefreshSession | null> {
     const parentHash = this.hashToken(refreshToken);
     const nextHash = this.hashToken(nextRefreshToken);
-    const expiresAt = new Date(Date.now() + this.sessionTtlSeconds * 1000);
 
     return this.prisma.$transaction(async (tx) => {
       const now = new Date();
@@ -114,7 +114,7 @@ export class PrismaSessionManager implements ISessionManager {
           refreshTokenHash: nextHash,
           familyId: parent.familyId,
           parentSessionId: parent.id,
-          expiresAt,
+          expiresAt: parent.expiresAt,
         },
       });
 

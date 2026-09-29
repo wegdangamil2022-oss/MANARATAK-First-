@@ -224,9 +224,20 @@ export const identityContactUpdateSchema = z.object({
 export const identityListQuerySchema = z.object({
   type: z.nativeEnum(IdentityType).optional(),
   status: z.nativeEnum(LifeStatus).optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
-  offset: z.coerce.number().int().min(0).max(1_000_000).default(0),
-}).strict();
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+  offset: z.coerce.number().int().min(0).max(1_000_000).optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(100).optional(),
+  search: z.string().trim().max(240).optional(),
+}).passthrough().transform((data) => {
+  const limit = data.limit ?? data.pageSize ?? 20;
+  const offset = data.offset ?? (data.page ? (data.page - 1) * limit : 0);
+  return {
+    ...data,
+    limit,
+    offset,
+  };
+});
 
 export const toolKeyParamSchema = z.object({
   toolKey: z.string().trim().min(1).max(120).regex(/^[A-Za-z0-9._-]+$/),

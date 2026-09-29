@@ -233,26 +233,50 @@ export function FinanceAdminPage() {
   useEffect(() => { setPage(1); setSearch(''); setStatus(''); }, [tab]);
 
   return (
-    <div dir="rtl" className="font-['Cairo'] text-slate-800">
-      <section className="rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#DDEFF2] bg-[#142B5F] px-5 py-6 text-white sm:px-7">
+    <div dir="rtl" className="mx-auto max-w-7xl space-y-6 text-slate-800">
+      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
+        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-black tracking-wide text-[#D6A43B]">MANARATAK · FINANCE CONTROL PLANE</p>
-            <h1 className="mt-1 text-2xl font-black">مركز المالية والمدفوعات</h1>
-            <p className="mt-1 max-w-3xl text-sm text-emerald-50/90">Finance يملك حقيقة الفاتورة والدفع والدفتر المالي. الوصول للدورات والخدمات يُفتح فقط من تحقق خادمي من التسوية المالية.</p>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
+              <BadgeDollarSign className="h-4 w-4 text-[#21A7B4]" />
+              <span>مركز المالية والمدفوعات · FINANCE CONTROL PLANE</span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">مركز العمليات المالية والمدفوعات</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
+              Finance يملك حقيقة الفاتورة والدفع والدفتر المالي. الوصول للدورات والخدمات يُفتح فقط من تحقق خادمي من التسوية المالية.
+            </p>
           </div>
-          <button type="button" onClick={() => void load()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-[#0E7C86] px-4 text-sm font-black transition hover:bg-[#2E6E5B]">
-            <RefreshCw className="h-4 w-4" /> تحديث
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={loading}
+            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] disabled:opacity-60 shrink-0"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> تحديث البيانات
           </button>
         </div>
+      </section>
 
+      <section className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
         <div className="grid min-h-[680px] lg:grid-cols-[245px_minmax(0,1fr)]">
-          <nav aria-label="أقسام المالية" className="border-b border-[#DDEFF2] bg-[#FAF7F0] p-3 lg:border-b-0 lg:border-l">
+          <nav aria-label="أقسام المالية" className="border-b border-slate-100 bg-slate-50/60 p-3 lg:border-b-0 lg:border-l">
             <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-1">
               {tabs.map(({ id, label, icon: Icon }) => (
-                <button key={id} type="button" onClick={() => setTab(id)} aria-current={tab === id ? 'page' : undefined}
-                  className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-right text-sm font-bold transition ${tab === id ? 'bg-[#142B5F] text-white shadow-sm' : 'text-[#0E7C86] hover:bg-[#DDEFF2]'}`}>
-                  <Icon className={`h-4 w-4 ${tab === id ? 'text-[#D6A43B]' : ''}`} /> {label}
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setTab(id)}
+                  aria-current={tab === id ? 'page' : undefined}
+                  className={`flex min-h-11 w-full items-center gap-3 rounded-2xl px-3.5 text-right text-sm font-bold transition ${
+                    tab === id
+                      ? 'bg-[#142B5F] text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100/80 hover:text-[#0E7C86]'
+                  }`}
+                >
+                  <Icon className={`h-4 w-4 ${tab === id ? 'text-[#21A7B4]' : 'text-slate-400'}`} />
+                  <span>{label}</span>
                 </button>
               ))}
             </div>

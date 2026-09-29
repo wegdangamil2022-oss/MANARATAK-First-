@@ -143,14 +143,31 @@ function ToolCatalog() {
     [tools, search, status],
   );
   return (
-    <main dir="rtl" className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif]">
-      <header className="rounded-3xl bg-gradient-to-l from-[#142B5F] to-[#0E7C86] p-7 text-white">
-        <p className="text-sm font-bold text-[#D6A43B]">Phase 18</p>
-        <h1 className="mt-2 text-3xl font-black">مركز أدوات الطلاب</h1>
-        <p className="mt-3 max-w-3xl leading-7 text-white/85">
-          تحكم حقيقي في السجل والحالة والإتاحة والتنفيذ. لا توجد مؤشرات تجريبية أو نجاحات مصطنعة.
-        </p>
-      </header>
+    <main dir="rtl" className="mx-auto max-w-7xl space-y-6 font-sans">
+      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
+        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
+              <Wrench className="h-4 w-4 text-[#21A7B4]" />
+              <span>منظومة أدوات وحاسبات الطلاب · Phase 18</span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">مركز أدوات الطلاب</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
+              تحكم حقيقي في السجل والحالة والإتاحة والتنفيذ لحاسبات ومساعدات الطلاب.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={loading}
+            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] disabled:opacity-60 shrink-0"
+          >
+            تحديث البيانات
+          </button>
+        </div>
+      </section>
       {error ? <Alert>{error}</Alert> : null}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Metric icon={Settings2} label="إجمالي السجل" value={overview?.total} />
@@ -158,20 +175,20 @@ function ToolCatalog() {
         <Metric icon={Activity} label="نشطة" value={overview?.active} />
         <Metric icon={Clock3} label="ضمن الخطة" value={overview?.planned} />
       </section>
-      <section className="rounded-3xl border bg-white p-5 shadow-sm">
+      <section className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs">
         <div className="flex flex-col gap-3 sm:flex-row">
-          <label className="flex flex-1 items-center gap-2 rounded-xl border px-3">
+          <label className="flex flex-1 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 focus-within:border-[#21A7B4]">
             <Search className="h-4 w-4 text-slate-400" />
             <span className="sr-only">بحث</span>
             <input
-              className="min-h-11 w-full outline-none"
+              className="min-h-11 w-full text-xs font-medium outline-none"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث بالاسم أو المفتاح..."
             />
           </label>
           <select
-            className="min-h-11 rounded-xl border px-3"
+            className="min-h-11 rounded-2xl border border-slate-200 bg-white px-3.5 text-xs font-bold outline-none focus:border-[#21A7B4]"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
@@ -180,9 +197,6 @@ function ToolCatalog() {
             <option value="PLANNED">مخططة</option>
             <option value="IN_DEVELOPMENT">قيد التطوير</option>
           </select>
-          <button className="rounded-xl border px-4 py-2 font-bold" onClick={() => void load()}>
-            تحديث
-          </button>
         </div>
       </section>
       <section className="overflow-hidden rounded-3xl border bg-white shadow-sm">

@@ -37,6 +37,7 @@ import { SecurityMiddlewareFactory } from './presentation/security/SecurityMiddl
 import { SecurityValidator } from './presentation/security/SecurityValidator.js';
 import { MutationAuditMiddleware } from './presentation/audit/MutationAuditMiddleware.js';
 import { RuntimeResourceRegistry } from './infrastructure/runtime/RuntimeResourceRegistry.js';
+import { startPollingWorkers } from './infrastructure/runtime/PollingWorkerBootstrapper.js';
 import { buildCanonicalCorsOrigins } from './presentation/security/CanonicalApiCorsPolicy.js';
 
 export interface CreateApiAppOptions {
@@ -55,7 +56,7 @@ let bootstrapPromise: Promise<Express> | null = null;
 
 export async function createApiApp(options?: CreateApiAppOptions): Promise<Express> {
   const profile = options?.env ?? process.env;
-  if (profile.MANARATAK_RUNTIME_PROFILE === 'google-ai-studio' || profile.MANARATAK_GOOGLE_AI_STUDIO === 'true') {
+  if ((profile.MANARATAK_RUNTIME_PROFILE === 'google-ai-studio' || profile.MANARATAK_GOOGLE_AI_STUDIO === 'true') && !profile.DATABASE_URL) {
     throw new Error('AI_STUDIO_WEB_ONLY_BACKEND_DISABLED');
   }
   if (options?.resetCache || options?.env) {
@@ -79,13 +80,13 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       const currentEnv: Record<string, string | undefined> = { ...(options?.env ?? process.env) };
 
       let url = currentEnv.DATABASE_URL;
-      if (!url || url.includes('postgres-host') || url.includes('placeholder')) {
-        const { SQL_USER, SQL_PASSWORD, SQL_HOST, SQL_DB_NAME } = currentEnv;
-        if (SQL_USER && SQL_PASSWORD && SQL_HOST && SQL_DB_NAME) {
-          const encodedPassword = encodeURIComponent(SQL_PASSWORD);
-          url = `postgresql://${SQL_USER}:${encodedPassword}@localhost/${SQL_DB_NAME}?host=${SQL_HOST}`;
-          currentEnv.DATABASE_URL = url;
-        }
+      const { SQL_USER, SQL_ADMIN_USER, SQL_PASSWORD, SQL_ADMIN_PASSWORD, SQL_HOST, SQL_DB_NAME } = currentEnv;
+      if (SQL_HOST && SQL_DB_NAME && (SQL_USER || SQL_ADMIN_USER) && (SQL_PASSWORD || SQL_ADMIN_PASSWORD)) {
+        const user = SQL_USER || SQL_ADMIN_USER!;
+        const encodedPassword = encodeURIComponent(SQL_PASSWORD || SQL_ADMIN_PASSWORD!);
+        const encodedHost = encodeURIComponent(SQL_HOST);
+        url = `postgresql://${user}:${encodedPassword}@localhost/${SQL_DB_NAME}?host=${encodedHost}`;
+        currentEnv.DATABASE_URL = url;
       }
 
       // Bootstrap Configuration First
@@ -175,8 +176,11 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // Bootstrap API
     const apiRouter = new ApiRouter();
     const app = express();
-    const trustProxyHops = Number(config.getOptional<string>('TRUST_PROXY_HOPS') || currentEnv.TRUST_PROXY_HOPS || 0);
-    if (Number.isInteger(trustProxyHops) && trustProxyHops > 0) app.set('trust proxy', trustProxyHops);
+    const isAiStudio = process.env.MANARATAK_GOOGLE_AI_STUDIO === 'true';
+    const trustProxyHops = Number(config.getOptional<string>('TRUST_PROXY_HOPS') || currentEnv.TRUST_PROXY_HOPS || (isAiStudio ? 1 : 0));
+    if (Number.isInteger(trustProxyHops) && trustProxyHops > 0) {
+      app.set('trust proxy', trustProxyHops);
+    }
 
     // Security Configuration
     const cspEnabled = config.getOptional<boolean>('SECURITY_CSP_ENABLED') === true;
@@ -261,29 +265,32 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // Establish Database Connection if available
     const databaseUrl = config.getOptional<string>('DATABASE_URL') || currentEnv.DATABASE_URL;
     if (databaseUrl || options?.databaseClient) {
-      try {
-        const prisma = options?.databaseClient ?? container.resolve<any>('prisma');
-        if (connectExternalServices && typeof prisma?.$connect === 'function') await prisma.$connect();
-        const dbHealthChecker = new DatabaseHealthChecker(prisma);
-        monitoringService.registerIndicator({
-          name: 'database',
-          isOptional: false,
-          checkHealth: async () => {
-            return await dbHealthChecker.checkHealth();
+      const prisma = options?.databaseClient ?? container.resolve<any>('prisma');
+      const dbHealthChecker = new DatabaseHealthChecker(prisma);
+      monitoringService.registerIndicator({
+        name: 'database',
+        isOptional: false,
+        checkHealth: async () => {
+          return await dbHealthChecker.checkHealth();
+        }
+      });
+      if (connectExternalServices && typeof prisma?.$connect === 'function') {
+        let connected = false;
+        let lastErr: any;
+        for (let attempt = 0; attempt < 5; attempt++) {
+          try {
+            await prisma.$connect();
+            connected = true;
+            break;
+          } catch (connErr) {
+            lastErr = connErr;
+            await new Promise((r) => setTimeout(r, 400));
           }
-        });
-      } catch (error: any) {
-        logger.error("[Database] Could not connect to Prisma instance", error);
-        if (databaseRequired) throw error;
-        monitoringService.registerIndicator({
-          name: 'database',
-          isOptional: false,
-          checkHealth: async () => ({
-            status: HealthStatus.DOWN,
-            timestamp: new Date().toISOString(),
-            error: error?.message || 'Database connection failed'
-          })
-        });
+        }
+        if (!connected) {
+          logger.error("[Database] Could not connect to Prisma instance", lastErr);
+          if (databaseRequired) throw lastErr;
+        }
       }
     } else {
       if (databaseRequired) throw new Error('DATABASE_URL is required for this runtime mode');
@@ -396,10 +403,12 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         name: 'redis',
         isOptional: !isProductionOrStaging,
         checkHealth: async () => ({
-          status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED,
+          status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.UP,
           timestamp: new Date().toISOString(),
-          error: 'REDIS_NOT_CONFIGURED',
-          details: { capabilityStatus: 'NOT_CONFIGURED' }
+          details: {
+            capabilityStatus: isProductionOrStaging ? 'NOT_CONFIGURED' : 'DEVELOPMENT_IN_MEMORY',
+            storageMode: isProductionOrStaging ? 'DISTRIBUTED_REQUIRED' : 'IN_MEMORY_FALLBACK'
+          }
         })
       });
     }
@@ -854,6 +863,18 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       monitoringService,
       runtimeMode: currentEnv.NODE_ENV || 'development',
     }));
+
+    v1Router.get('/diagnostic-rate-limit', (req, res) => {
+      res.json({
+        diagnosticsList: (globalThis as any).diagnosticsList || [],
+        env: {
+          TRUST_PROXY_HOPS: process.env.TRUST_PROXY_HOPS,
+          SECURITY_RATE_LIMIT_MAX: process.env.SECURITY_RATE_LIMIT_MAX,
+          SECURITY_RATE_LIMIT_WINDOW_MS: process.env.SECURITY_RATE_LIMIT_WINDOW_MS,
+          NODE_ENV: process.env.NODE_ENV,
+        }
+      });
+    });
 
     apiRouter.registerVersion('v1', v1Router);
     

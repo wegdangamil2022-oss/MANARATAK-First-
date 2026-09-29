@@ -51,6 +51,7 @@ export * from './authorization/PrismaRoleAssignmentRepository';
 export * from './authorization/PrismaEmergencyAccessRepository';
 export * from './authorization/InMemoryEmergencyAccessRepository';
 export * from './authorization/AdminBootstrapVerifier';
+export * from './authorization/ControlledRbacBaselineProvisioner';
 
 export * from './authorization/InMemoryRoleRepository';
 export * from './authorization/InMemoryPolicyRepository';

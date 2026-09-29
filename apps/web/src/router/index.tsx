@@ -81,6 +81,18 @@ const router = createBrowserRouter([
         element: <PublicTemplateApp />,
       },
       {
+        path: 'signup',
+        element: <PublicTemplateApp />,
+      },
+      {
+        path: 'register',
+        element: <PublicTemplateApp />,
+      },
+      {
+        path: 'verify-email',
+        element: <PublicTemplateApp />,
+      },
+      {
         path: 'search',
         element: <PublicTemplateApp />,
       },
@@ -214,10 +226,17 @@ function CanonicalAdminRedirect({ legacyPath }: { legacyPath: string }) {
   const targetPath = normalizedLegacyPath.replace(/^\/admin/, '') || '/dashboard';
 
   useEffect(() => {
-    if (adminBase) window.location.replace(`${adminBase}${targetPath}`);
+    if (adminBase) {
+      window.location.replace(`${adminBase}${targetPath}`);
+    } else {
+      // For single-port Google Studio or dev environment without external admin base,
+      // we perform a full window.location replacement to /admin/ to let the Vite proxy
+      // serve the real apps/admin development server on port 3001.
+      window.location.replace(`/admin${targetPath}`);
+    }
   }, [adminBase, targetPath]);
 
-  return adminBase ? <PageLoadingFallback /> : <CanonicalAdminUnavailable />;
+  return <PageLoadingFallback />;
 }
 
 function CanonicalAdminUnavailable() {

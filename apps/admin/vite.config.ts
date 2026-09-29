@@ -45,6 +45,7 @@ export default defineConfig(({ mode }) => {
   const studio = isGoogleAiStudio({ ...loadEnv(mode, rootDir, ['MANARATAK_', 'VITE_']), ...process.env });
   assertLocalReadOnlyBuildAllowed({ mode, nodeEnv: process.env.NODE_ENV, localReadOnly: process.env.VITE_LOCAL_ADMIN_READ_ONLY });
   return {
+  base: '/admin/',
   root: __dirname,
   envDir: studio ? rootDir : __dirname,
   plugins: [frontendSecurityHeadersPlugin(), react(), tailwindcss(),
@@ -57,7 +58,7 @@ export default defineConfig(({ mode }) => {
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      ...(studio ? previewWorkspaceAliases(rootDir) : {}),
+      ...previewWorkspaceAliases(rootDir),
     },
   },
   };

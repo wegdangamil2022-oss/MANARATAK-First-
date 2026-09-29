@@ -182,48 +182,48 @@ export function AdminDashboardPage() {
   const loadDashboard = useCallback(async (manual = false) => {
     manual ? setRefreshing(true) : setLoading(true);
 
-    const [
-      usersResult,
-      universitiesResult,
-      scholarshipsResult,
-      majorsResult,
-      coursesResult,
-      testsResult,
-      careersResult,
-      cmsResult,
-      importsResult,
-      financeResult,
-      systemResult,
-    ] = await Promise.all([
-      loadUsersTotal(),
-      loadDomainStats('/admin/universities', ['READY_TO_REVIEW']),
-      loadScholarshipSummary(),
-      loadDomainStats('/admin/majors', ['READY_TO_REVIEW']),
-      loadCourseStats(),
-      loadDomainStats('/admin/international-tests', ['READY_TO_REVIEW', 'NEEDS_REVIEW']),
-      loadDomainStats('/admin/careers/jobs', ['READY_TO_REVIEW']),
-      loadDomainStats('/admin/cms/content', ['IN_REVIEW', 'READY_TO_PUBLISH']),
-      loadImportSnapshot(),
-      loadFinanceOverview(),
-      loadSystemSnapshot(),
-    ]);
+    try {
+      // Stage 1: Primary entities and imports
+      const [usersResult, scholarshipsResult, importsResult] = await Promise.all([
+        loadUsersTotal(),
+        loadScholarshipSummary(),
+        loadImportSnapshot(),
+      ]);
 
-    setSnapshot({
-      usersTotal: usersResult,
-      universities: universitiesResult,
-      scholarships: scholarshipsResult,
-      majors: majorsResult,
-      courses: coursesResult,
-      tests: testsResult,
-      careers: careersResult,
-      cms: cmsResult,
-      imports: importsResult,
-      finance: financeResult,
-      system: systemResult,
-    });
-    setLastUpdated(new Date());
-    setLoading(false);
-    setRefreshing(false);
+      // Stage 2: Core Academic Domains
+      const [universitiesResult, majorsResult, coursesResult] = await Promise.all([
+        loadDomainStats('/admin/universities', ['READY_TO_REVIEW']),
+        loadDomainStats('/admin/majors', ['READY_TO_REVIEW']),
+        loadCourseStats(),
+      ]);
+
+      // Stage 3: Auxiliary Services, Finance & System
+      const [testsResult, careersResult, cmsResult, financeResult, systemResult] = await Promise.all([
+        loadDomainStats('/admin/international-tests', ['READY_TO_REVIEW', 'NEEDS_REVIEW']),
+        loadDomainStats('/admin/careers/jobs', ['READY_TO_REVIEW']),
+        loadDomainStats('/admin/cms/content', ['IN_REVIEW', 'READY_TO_PUBLISH']),
+        loadFinanceOverview(),
+        loadSystemSnapshot(),
+      ]);
+
+      setSnapshot({
+        usersTotal: usersResult,
+        universities: universitiesResult,
+        scholarships: scholarshipsResult,
+        majors: majorsResult,
+        courses: coursesResult,
+        tests: testsResult,
+        careers: careersResult,
+        cms: cmsResult,
+        imports: importsResult,
+        finance: financeResult,
+        system: systemResult,
+      });
+      setLastUpdated(new Date());
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -294,34 +294,34 @@ export function AdminDashboardPage() {
   }, [snapshot]);
 
   const primaryMetrics = [
-    { key: 'users', label: tr('المستخدمون', 'Users'), value: snapshot.usersTotal, href: '/settings', icon: Users, accent: BRAND.primary },
-    { key: 'universities', label: t('admin_nav_universities'), value: snapshot.universities.total, href: '/universities', icon: School, accent: BRAND.secondary },
-    { key: 'scholarships', label: t('admin_nav_scholarships'), value: snapshot.scholarships?.all ?? null, href: '/scholarships', icon: GraduationCap, accent: BRAND.gold },
-    { key: 'majors', label: t('admin_nav_majors'), value: snapshot.majors.total, href: '/majors', icon: Sparkles, accent: BRAND.digital },
-    { key: 'courses', label: t('admin_nav_courses'), value: snapshot.courses.total, href: '/courses', icon: BookOpen, accent: BRAND.secondary },
-    { key: 'tests', label: t('admin_nav_tests'), value: snapshot.tests.total, href: '/international-tests', icon: TestTube2, accent: BRAND.primary },
-    { key: 'careers', label: t('admin_nav_careers'), value: snapshot.careers.total, href: '/careers', icon: BriefcaseBusiness, accent: BRAND.gold },
-    { key: 'cms', label: t('admin_nav_cms'), value: snapshot.cms.total, href: '/cms', icon: Newspaper, accent: BRAND.digital },
+    { key: 'users', label: tr('المستخدمون', 'Users'), value: snapshot.usersTotal, href: '/settings', icon: Users, accent: '#142B5F' },
+    { key: 'universities', label: t('admin_nav_universities'), value: snapshot.universities.total, href: '/universities', icon: School, accent: '#0E7C86' },
+    { key: 'scholarships', label: t('admin_nav_scholarships'), value: snapshot.scholarships?.all ?? null, href: '/scholarships', icon: GraduationCap, accent: '#059669' },
+    { key: 'majors', label: t('admin_nav_majors'), value: snapshot.majors.total, href: '/majors', icon: Sparkles, accent: '#4F46E5' },
+    { key: 'courses', label: t('admin_nav_courses'), value: snapshot.courses.total, href: '/courses', icon: BookOpen, accent: '#21A7B4' },
+    { key: 'tests', label: t('admin_nav_tests'), value: snapshot.tests.total, href: '/international-tests', icon: TestTube2, accent: '#7C3AED' },
+    { key: 'careers', label: t('admin_nav_careers'), value: snapshot.careers.total, href: '/careers', icon: BriefcaseBusiness, accent: '#D6A43B' },
+    { key: 'cms', label: t('admin_nav_cms'), value: snapshot.cms.total, href: '/cms', icon: Newspaper, accent: '#B94A48' },
   ];
 
   const unavailableCount = primaryMetrics.filter((metric) => metric.value == null).length;
 
   return (
-    <div dir={dir} className="-m-6 min-h-full bg-[#FAF7F0] p-6 text-[#203442]">
+    <div dir={dir} className="-m-4 sm:-m-6 min-h-full bg-slate-50 p-4 sm:p-6 text-slate-800 font-sans">
       <div className="mx-auto max-w-7xl space-y-6">
-      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/20 bg-gradient-to-l from-[#0E7C86] via-[#0F6678] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.15)] sm:p-8">
-        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-[#F2CD78]/20" />
-        <div className="pointer-events-none absolute -left-5 -top-20 h-48 w-48 rounded-full border border-[#F2CD78]/20" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-1 w-40 bg-[#D6A43B] sm:w-64" />
+      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
+        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
+        <div className="pointer-events-none absolute -left-5 -top-20 h-48 w-48 rounded-full border border-cyan-400/20" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
 
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
-            <div className="mb-3 flex items-center gap-2 text-xs font-extrabold tracking-wide text-[#F2CD78] sm:text-sm">
-              <Activity className="h-4 w-4" />
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
+              <Activity className="h-4 w-4 text-[#21A7B4]" />
               <span>{tr('مركز الإدارة والتشغيل', 'Administration & Operations Center')}</span>
             </div>
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl">{tr('لوحة التحكم', 'Dashboard')}</h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-[#DDEFF2]">
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{tr('لوحة التحكم', 'Dashboard')}</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
               {tr(
                 'نظرة تنفيذية على البيانات الحقيقية، قوائم المراجعة، الاستيراد، الجاهزية والعمليات الأساسية في منارتك.',
                 'An executive view of live catalog data, review queues, imports, readiness, and core MANARATAK operations.',
@@ -330,18 +330,18 @@ export function AdminDashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-stretch gap-3">
-            <div className="min-w-[150px] rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-              <div className="text-[11px] font-bold text-[#DDEFF2]">{tr('يحتاج تدخلك', 'Needs attention')}</div>
-              <div className="mt-1 text-3xl font-black text-[#F2CD78]">{formatNumber(exactAttentionTotal)}</div>
-              <div className="mt-1 text-[10px] font-semibold text-white/70">{tr('قوائم تشغيل غير متداخلة', 'Non-overlapping work queues')}</div>
+            <div className="min-w-[150px] rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md shadow-xs">
+              <div className="text-[11px] font-bold text-cyan-100">{tr('يحتاج تدخلك', 'Needs attention')}</div>
+              <div className="mt-1 text-3xl font-black text-amber-300">{formatNumber(exactAttentionTotal)}</div>
+              <div className="mt-1 text-[10px] font-semibold text-white/75">{tr('قوائم تشغيل غير متداخلة', 'Non-overlapping work queues')}</div>
             </div>
-            <div className="min-w-[150px] rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-              <div className="text-[11px] font-bold text-[#DDEFF2]">{tr('حالة النظام', 'System status')}</div>
-              <div className="mt-2 flex items-center gap-2 text-sm font-black">
+            <div className="min-w-[150px] rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md shadow-xs">
+              <div className="text-[11px] font-bold text-cyan-100">{tr('حالة النظام', 'System status')}</div>
+              <div className="mt-2 flex items-center gap-2 text-sm font-black text-white">
                 <StatusDot status={snapshot.system.api} />
                 <span>{healthLabel(snapshot.system.api, isArabic)}</span>
               </div>
-              <div className="mt-2 text-[10px] font-semibold text-white/70">
+              <div className="mt-2 text-[10px] font-semibold text-white/75">
                 {lastUpdated ? `${tr('آخر تحديث', 'Updated')}: ${formatTime(lastUpdated, isArabic)}` : tr('جارٍ التحديث', 'Updating')}
               </div>
             </div>
@@ -349,7 +349,7 @@ export function AdminDashboardPage() {
               type="button"
               onClick={() => void loadDashboard(true)}
               disabled={refreshing}
-              className="inline-flex min-h-[72px] min-w-[112px] items-center justify-center gap-2 rounded-2xl bg-[#D6A43B] px-4 text-sm font-black text-[#142B5F] shadow-sm transition hover:bg-[#F2CD78] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-[72px] min-w-[112px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               {tr('تحديث', 'Refresh')}
@@ -364,7 +364,7 @@ export function AdminDashboardPage() {
         <>
           <section>
             <SectionHeading
-              eyebrow={tr('المؤشرات الرئيسية', 'Key metrics')}
+              eyebrow={tr('المؤشارات الرئيسية', 'Key metrics')}
               title={tr('حجم المنصة الآن', 'Platform snapshot')}
               description={tr('الأرقام أدناه تُقرأ من واجهات التشغيل الفعلية، ولا تستخدم بيانات تجريبية أو أرقامًا ثابتة.', 'These values are read from live runtime APIs with no demo or hard-coded counts.')}
             />
@@ -376,13 +376,13 @@ export function AdminDashboardPage() {
           </section>
 
           <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-            <div className="overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
-              <div className="flex flex-col gap-3 border-b border-[#DDEFF2] bg-[#FAF7F0] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
+              <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-[11px] font-black uppercase tracking-wider text-[#0E7C86]">{tr('الأولوية التشغيلية', 'Operational priority')}</p>
                   <h2 className="mt-1 text-xl font-black text-[#142B5F]">{tr('يحتاج تدخلك الآن', 'Needs your attention')}</h2>
                 </div>
-                <Link to="/review-queue" className="inline-flex items-center gap-2 text-xs font-black text-[#0E7C86] hover:text-[#142B5F]">
+                <Link to="/review-queue" className="inline-flex items-center gap-2 text-xs font-bold text-[#0E7C86] hover:text-[#142B5F]">
                   {tr('فتح قائمة المراجعة', 'Open review queue')}
                   <ArrowIcon className="h-4 w-4" />
                 </Link>
@@ -397,12 +397,12 @@ export function AdminDashboardPage() {
                 ) : attentionSignals.map((signal) => {
                   const Icon = signal.icon;
                   return (
-                    <Link key={signal.key} to={signal.href} className="group flex min-h-24 items-center gap-4 border-b border-[#DDEFF2] p-4 transition hover:bg-[#DDEFF2]/35 sm:[&:nth-child(odd)]:border-l sm:ltr:[&:nth-child(odd)]:border-l-0 sm:ltr:[&:nth-child(odd)]:border-r">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FAF7F0] text-[#D6A43B] ring-1 ring-[#D6A43B]/25">
+                    <Link key={signal.key} to={signal.href} className="group flex min-h-24 items-center gap-4 border-b border-slate-100 p-4 transition hover:bg-slate-50/80 sm:[&:nth-child(odd)]:border-l sm:ltr:[&:nth-child(odd)]:border-l-0 sm:ltr:[&:nth-child(odd)]:border-r">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-200/60 shadow-2xs">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs font-bold leading-5 text-[#203442]/70">{signal.label}</div>
+                        <div className="text-xs font-bold leading-5 text-slate-600">{signal.label}</div>
                         <div className="mt-1 text-2xl font-black text-[#142B5F]">{formatNumber(signal.value)}</div>
                       </div>
                       <ArrowIcon className="h-4 w-4 shrink-0 text-[#21A7B4] transition group-hover:translate-x-[-2px] rtl:group-hover:translate-x-[2px]" />
@@ -421,7 +421,7 @@ export function AdminDashboardPage() {
               title={tr('حالة البيانات الأساسية', 'Core data status')}
               description={tr('ملخص حالات النشر والمراجعة من مصادر كل نطاق، دون إعادة حسابها من أول صفحة فقط.', 'Publication and review totals are read from each domain source rather than inferred from the first page.')}
             />
-            <div className="mt-4 overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
+            <div className="mt-4 overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
               <CatalogRow label={t('admin_nav_universities')} href="/universities" icon={<School className="h-4 w-4" />} stats={snapshot.universities} formatNumber={formatNumber} isArabic={isArabic} />
               <CatalogRow
                 label={t('admin_nav_scholarships')}
@@ -464,11 +464,11 @@ export function AdminDashboardPage() {
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
-            <div className="border-b border-[#DDEFF2] bg-[#FAF7F0] px-5 py-5">
+          <section className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
+            <div className="border-b border-slate-100 bg-slate-50/80 px-5 py-4">
               <p className="text-[11px] font-black uppercase tracking-wider text-[#0E7C86]">{tr('النتائج', 'Outcomes')}</p>
               <h2 className="mt-1 text-xl font-black text-[#142B5F]">{tr('مسار التحويلات', 'Conversion funnel')}</h2>
-              <p className="mt-1 text-xs font-medium leading-6 text-[#203442]/65">
+              <p className="mt-1 text-xs font-medium leading-6 text-slate-500">
                 {tr('يبقى المسار ظاهرًا حتى قبل بدء القياس، لكن القيم تظل فارغة بدل إدخال بيانات تجريبية.', 'The funnel remains visible before tracking begins, while values stay empty rather than using demo data.')}
               </p>
             </div>
@@ -476,9 +476,9 @@ export function AdminDashboardPage() {
               {['زيارة', 'بحث', 'فتح نتيجة', 'إجراء مستهدف', 'تحويل ناجح'].map((labelAr, index) => {
                 const labelsEn = ['Visit', 'Search', 'Open result', 'Target action', 'Successful conversion'];
                 return (
-                  <div key={labelAr} className="relative rounded-2xl border border-[#DDEFF2] bg-[#FAF7F0]/55 p-4 text-center">
+                  <div key={labelAr} className="relative rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 text-center">
                     <div className="text-2xl font-black text-[#142B5F]">—</div>
-                    <div className="mt-1 text-[11px] font-bold text-[#203442]/65">{tr(labelAr, labelsEn[index])}</div>
+                    <div className="mt-1 text-[11px] font-bold text-slate-600">{tr(labelAr, labelsEn[index])}</div>
                     {index < 4 && <ArrowIcon className="absolute -left-2 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-[#21A7B4] lg:block ltr:-right-2 ltr:left-auto" />}
                   </div>
                 );
@@ -486,22 +486,22 @@ export function AdminDashboardPage() {
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-3xl border border-[#DDEFF2] bg-white shadow-sm">
-            <div className="flex flex-col gap-2 border-b border-[#DDEFF2] bg-[#FAF7F0] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <section className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
+            <div className="flex flex-col gap-2 border-b border-slate-100 bg-slate-50/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-wider text-[#0E7C86]">{tr('التدقيق', 'Audit')}</p>
                 <h2 className="mt-1 text-xl font-black text-[#142B5F]">{tr('آخر النشاطات الإدارية', 'Recent admin activity')}</h2>
               </div>
-              <span className="w-fit rounded-full border border-[#D6A43B]/30 bg-[#F2CD78]/20 px-3 py-1 text-[10px] font-black text-[#142B5F]">
+              <span className="w-fit rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-black text-amber-700">
                 {tr('بانتظار مصدر موجز قابل للتوسع', 'Awaiting scalable summary source')}
               </span>
             </div>
             <div className="flex min-h-40 flex-col items-center justify-center gap-3 p-6 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#DDEFF2]/65 text-[#0E7C86]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-[#0E7C86] border border-teal-100">
                 <Activity className="h-5 w-5" />
               </div>
               <div className="font-black text-[#142B5F]">{tr('لا توجد نشاطات معروضة حاليًا', 'No admin activity is displayed yet')}</div>
-              <p className="max-w-2xl text-xs font-medium leading-6 text-[#203442]/60">
+              <p className="max-w-2xl text-xs font-medium leading-6 text-slate-500">
                 {tr(
                   'لن نملأ هذا القسم بأحداث تجريبية. عند توفير قراءة Audit مختصرة ومحددة الصفحات سيعرض آخر العمليات الحقيقية: من قام بها، القسم، الوقت والنتيجة.',
                   'This area will never be filled with demo events. Once a paginated audit summary is available it will show the real latest actions, actor, module, time, and result.',
@@ -510,7 +510,7 @@ export function AdminDashboardPage() {
             </div>
           </section>
 
-          <section className="flex flex-col gap-3 rounded-2xl border border-[#DDEFF2] bg-[#FAF7F0] px-5 py-4 text-xs leading-6 text-[#203442]/75 sm:flex-row sm:items-center sm:justify-between">
+          <section className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 text-xs leading-6 text-slate-600 sm:flex-row sm:items-center sm:justify-between shadow-2xs">
             <div className="flex items-start gap-2">
               <FileCheck2 className="mt-1 h-4 w-4 shrink-0 text-[#0E7C86]" />
               <span>
@@ -598,27 +598,16 @@ async function loadCourseStats(): Promise<DashboardSnapshot['courses']> {
 
 async function loadImportSnapshot(): Promise<ImportSnapshot> {
   try {
-    const [batches, all, needsReview, incomplete, failed, promoted] = await Promise.all([
-      adminApiClient.request<ImportBatch[]>('/admin/imports/batches'),
-      fetchImportRecordTotal(),
-      fetchImportRecordTotal('NEEDS_REVIEW'),
-      fetchImportRecordTotal('INCOMPLETE'),
-      fetchImportRecordTotal('FAILED'),
-      fetchImportRecordTotal('PROMOTED'),
-    ]);
-
-    const latestBatch = [...(batches || [])]
-      .filter(Boolean)
-      .sort((a, b) => dateMillis(b.createdAt ?? b.updatedAt) - dateMillis(a.createdAt ?? a.updatedAt))[0] ?? null;
-
+    const overview = await adminApiClient.request<any>('/admin/imports/overview');
+    const counts = overview.recordStatusCounts ?? {};
     return {
-      batches: batches.length,
-      records: all,
-      needsReview,
-      incomplete,
-      failed,
-      promoted,
-      latestBatch,
+      batches: typeof overview.totalBatches === 'number' ? overview.totalBatches : 0,
+      records: typeof overview.totalRecords === 'number' ? overview.totalRecords : 0,
+      needsReview: Number(counts.NEEDS_REVIEW ?? 0),
+      incomplete: Number(counts.INCOMPLETE ?? 0),
+      failed: Number(counts.FAILED ?? 0) + Number(counts.DLQ ?? 0),
+      promoted: Number(counts.PROMOTED ?? 0),
+      latestBatch: overview.latestBatch ?? null,
       state: 'ready',
     };
   } catch {
@@ -740,34 +729,35 @@ function MetricCard({
   unavailable: boolean;
   unavailableLabel: string;
 }) {
+  const styles = accentClass(accent);
   return (
-    <Link to={href} className="group relative min-h-[132px] overflow-hidden rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className={`absolute inset-x-0 top-0 h-1 ${accentClass(accent).bar}`} />
+    <Link to={href} className="group relative min-h-[132px] overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md hover:border-slate-300">
+      <div className={`absolute inset-x-0 top-0 h-1 ${styles.bar}`} />
       <div className="flex items-center justify-between gap-2">
-        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accentClass(accent).icon}`}>
+        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${styles.icon}`}>
           <Icon className="h-4 w-4" />
         </div>
-        {unavailable && <span className="rounded-full bg-[#FAF7F0] px-2 py-1 text-[9px] font-black text-[#203442]/55">{unavailableLabel}</span>}
+        {unavailable && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-500">{unavailableLabel}</span>}
       </div>
       <div className="mt-4 text-2xl font-black text-[#142B5F]">{valueLabel}</div>
-      <div className="mt-1 truncate text-[11px] font-bold text-[#203442]/65">{label}</div>
+      <div className="mt-1 truncate text-[11px] font-bold text-slate-500">{label}</div>
     </Link>
   );
 }
 
 function PendingMetricCard({ label, isArabic }: { label: string; isArabic: boolean }) {
   return (
-    <div className="min-h-[118px] rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
+    <div className="min-h-[118px] rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#DDEFF2]/60 text-[#0E7C86]">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-[#0E7C86] border border-teal-100">
           <Activity className="h-4 w-4" />
         </div>
-        <span className="rounded-full bg-[#FAF7F0] px-2 py-1 text-[9px] font-black text-[#203442]/55">
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-500">
           {isArabic ? 'غير مقاس بعد' : 'Not measured yet'}
         </span>
       </div>
       <div className="mt-4 text-2xl font-black text-[#142B5F]">—</div>
-      <div className="mt-1 text-[11px] font-bold leading-5 text-[#203442]/65">{label}</div>
+      <div className="mt-1 text-[11px] font-bold leading-5 text-slate-500">{label}</div>
     </div>
   );
 }
@@ -790,15 +780,15 @@ function CatalogRow({
   last?: boolean;
 }) {
   return (
-    <Link to={href} className={`grid gap-3 px-5 py-4 transition hover:bg-[#DDEFF2]/30 sm:grid-cols-[1.5fr_repeat(3,minmax(90px,0.55fr))_auto] sm:items-center ${last ? '' : 'border-b border-[#DDEFF2]'}`}>
+    <Link to={href} className={`grid gap-3 px-5 py-4 transition hover:bg-slate-50/80 sm:grid-cols-[1.5fr_repeat(3,minmax(90px,0.55fr))_auto] sm:items-center ${last ? '' : 'border-b border-slate-100'}`}>
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#DDEFF2]/60 text-[#0E7C86]">{icon}</div>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[#0E7C86] border border-teal-100">{icon}</div>
         <span className="truncate text-sm font-black text-[#142B5F]">{label}</span>
       </div>
       <CatalogValue label={isArabic ? 'الإجمالي' : 'Total'} value={formatNumber(stats.total)} />
       <CatalogValue label={isArabic ? 'منشور' : 'Published'} value={formatNumber(stats.published)} />
       <CatalogValue label={isArabic ? 'للمراجعة' : 'Review'} value={formatNumber(stats.review)} warning={(stats.review ?? 0) > 0} />
-      <span className={`hidden rounded-full px-2.5 py-1 text-[10px] font-black sm:inline-flex ${stats.state === 'ready' ? 'bg-[#DDEFF2]/60 text-[#0E7C86]' : 'bg-[#FAF7F0] text-[#203442]/55'}`}>
+      <span className={`hidden rounded-full px-2.5 py-1 text-[10px] font-bold sm:inline-flex ${stats.state === 'ready' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'}`}>
         {stats.state === 'ready' ? (isArabic ? 'متصل' : 'Live') : (isArabic ? 'غير متاح' : 'Unavailable')}
       </span>
     </Link>
@@ -808,8 +798,8 @@ function CatalogRow({
 function CatalogValue({ label, value, warning = false }: { label: string; value: string; warning?: boolean }) {
   return (
     <div>
-      <div className="text-[9px] font-bold text-[#203442]/45">{label}</div>
-      <div className={`mt-0.5 text-sm font-black ${warning ? 'text-[#D6A43B]' : 'text-[#203442]'}`}>{value}</div>
+      <div className="text-[9px] font-bold text-slate-400">{label}</div>
+      <div className={`mt-0.5 text-sm font-black ${warning ? 'text-amber-600' : 'text-[#142B5F]'}`}>{value}</div>
     </div>
   );
 }
@@ -821,10 +811,10 @@ function SystemHealthCard({ snapshot, isArabic }: { snapshot: SystemSnapshot; is
     { label: 'Redis / Queues', status: snapshot.redis },
   ];
   return (
-    <div className="rounded-3xl border border-[#DDEFF2] bg-[#142B5F] p-5 text-white shadow-sm">
+    <div className="rounded-3xl border border-slate-200 bg-[#142B5F] p-5 text-white shadow-xs">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-wider text-[#F2CD78]">{isArabic ? 'البنية التشغيلية' : 'Runtime'}</p>
+          <p className="text-[11px] font-black uppercase tracking-wider text-cyan-200">{isArabic ? 'البنية التشغيلية' : 'Runtime'}</p>
           <h2 className="mt-1 text-xl font-black">{isArabic ? 'صحة النظام' : 'System health'}</h2>
         </div>
         <HeartPulse className="h-6 w-6 text-[#21A7B4]" />
@@ -832,22 +822,22 @@ function SystemHealthCard({ snapshot, isArabic }: { snapshot: SystemSnapshot; is
       <div className="mt-5 space-y-2">
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
-            <span className="text-xs font-bold text-[#DDEFF2]">{row.label}</span>
-            <span className="flex items-center gap-2 text-[11px] font-black"><StatusDot status={row.status} />{healthLabel(row.status, isArabic)}</span>
+            <span className="text-xs font-bold text-cyan-100">{row.label}</span>
+            <span className="flex items-center gap-2 text-[11px] font-bold"><StatusDot status={row.status} />{healthLabel(row.status, isArabic)}</span>
           </div>
         ))}
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-xl bg-white/10 p-3 text-center">
-          <div className="text-xl font-black text-[#F2CD78]">{snapshot.blockers ?? '—'}</div>
-          <div className="mt-1 text-[10px] font-bold text-[#DDEFF2]">{isArabic ? 'معوقات الإنتاج' : 'Blockers'}</div>
+        <div className="rounded-xl bg-white/10 p-3 text-center border border-white/10">
+          <div className="text-xl font-black text-amber-300">{snapshot.blockers ?? '—'}</div>
+          <div className="mt-1 text-[10px] font-bold text-cyan-100">{isArabic ? 'معوقات الإنتاج' : 'Blockers'}</div>
         </div>
-        <div className="rounded-xl bg-white/10 p-3 text-center">
-          <div className="text-xl font-black text-[#F2CD78]">{snapshot.warnings ?? '—'}</div>
-          <div className="mt-1 text-[10px] font-bold text-[#DDEFF2]">{isArabic ? 'تحذيرات' : 'Warnings'}</div>
+        <div className="rounded-xl bg-white/10 p-3 text-center border border-white/10">
+          <div className="text-xl font-black text-amber-300">{snapshot.warnings ?? '—'}</div>
+          <div className="mt-1 text-[10px] font-bold text-cyan-100">{isArabic ? 'تحذيرات' : 'Warnings'}</div>
         </div>
       </div>
-      <Link to="/health-readiness" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#21A7B4] px-4 py-2.5 text-xs font-black text-white transition hover:bg-[#0E7C86]">
+      <Link to="/health-readiness" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#21A7B4] px-4 py-2.5 text-xs font-black text-white transition hover:bg-[#1A8D99]">
         {isArabic ? 'فتح الصحة والجاهزية' : 'Open health & readiness'}
       </Link>
     </div>
@@ -857,7 +847,7 @@ function SystemHealthCard({ snapshot, isArabic }: { snapshot: SystemSnapshot; is
 function ImportCard({ snapshot, isArabic, formatNumber }: { snapshot: ImportSnapshot; isArabic: boolean; formatNumber: (value: number | null | undefined) => string }) {
   const latestStatus = snapshot.latestBatch?.batchStatus ?? snapshot.latestBatch?.status ?? null;
   return (
-    <div className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-black uppercase tracking-wider text-[#0E7C86]">{isArabic ? 'العمليات' : 'Operations'}</p>
@@ -874,16 +864,16 @@ function ImportCard({ snapshot, isArabic, formatNumber }: { snapshot: ImportSnap
         <MiniMetric label={isArabic ? 'آخر حالة' : 'Latest'} value={latestStatus ? shortStatus(latestStatus) : '—'} />
       </div>
       {snapshot.latestBatch && (
-        <div className="mt-4 rounded-2xl bg-[#FAF7F0] px-4 py-3 text-xs leading-6 text-[#203442]/75">
+        <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-200/60 px-4 py-3 text-xs leading-6 text-slate-600">
           <span className="font-black text-[#142B5F]">{isArabic ? 'آخر دفعة:' : 'Latest batch:'}</span>{' '}
           {snapshot.latestBatch.sourceSystem || snapshot.latestBatch.dataType || snapshot.latestBatch.id || '—'}
           {(snapshot.latestBatch.createdAt || snapshot.latestBatch.updatedAt) && (
-            <span className="mx-2 text-[#203442]/35">•</span>
+            <span className="mx-2 text-slate-300">•</span>
           )}
           {snapshot.latestBatch.createdAt || snapshot.latestBatch.updatedAt ? new Date(snapshot.latestBatch.createdAt ?? snapshot.latestBatch.updatedAt ?? '').toLocaleString(isArabic ? 'ar' : 'en-US') : ''}
         </div>
       )}
-      <Link to="/imports" className="mt-4 inline-flex items-center gap-2 text-xs font-black text-[#0E7C86] hover:text-[#142B5F]">
+      <Link to="/imports" className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#0E7C86] hover:text-[#142B5F]">
         {isArabic ? 'فتح مركز الاستيراد' : 'Open import center'}
       </Link>
     </div>
@@ -892,13 +882,13 @@ function ImportCard({ snapshot, isArabic, formatNumber }: { snapshot: ImportSnap
 
 function FinanceCard({ overview, isArabic, formatNumber }: { overview: FinanceOverview | null; isArabic: boolean; formatNumber: (value: number | null | undefined) => string }) {
   return (
-    <div className="rounded-3xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-wider text-[#D6A43B]">{isArabic ? 'التشغيل التجاري' : 'Commercial operations'}</p>
+          <p className="text-[11px] font-black uppercase tracking-wider text-amber-600">{isArabic ? 'التشغيل التجاري' : 'Commercial operations'}</p>
           <h2 className="mt-1 text-xl font-black text-[#142B5F]">{isArabic ? 'المالية والمدفوعات' : 'Finance & payments'}</h2>
         </div>
-        <WalletCards className="h-6 w-6 text-[#D6A43B]" />
+        <WalletCards className="h-6 w-6 text-amber-600" />
       </div>
       {overview ? (
         <>
@@ -908,17 +898,17 @@ function FinanceCard({ overview, isArabic, formatNumber }: { overview: FinanceOv
             <MiniMetric label={isArabic ? 'اعتمادات معلقة' : 'Approvals'} value={formatNumber(overview.pendingApprovals)} warn={(overview.pendingApprovals ?? 0) > 0} />
             <MiniMetric label={isArabic ? 'المطابقة' : 'Reconciliation'} value={shortStatus(overview.reconciliationHealth)} warn={overview.reconciliationHealth !== 'HEALTHY'} />
           </div>
-          <div className="mt-4 flex items-center gap-2 rounded-2xl bg-[#DDEFF2]/45 px-4 py-3 text-xs font-bold text-[#203442]/75">
+          <div className="mt-4 flex items-center gap-2 rounded-2xl bg-teal-50 border border-teal-100 px-4 py-3 text-xs font-bold text-[#0E7C86]">
             <CheckCircle2 className="h-4 w-4 text-[#0E7C86]" />
             <span>{isArabic ? 'الملخص يُقرأ من Finance Overview الفعلي.' : 'Summary is read from the live Finance Overview endpoint.'}</span>
           </div>
         </>
       ) : (
-        <div className="mt-4 rounded-2xl bg-[#FAF7F0] p-6 text-center text-xs font-bold text-[#203442]/55">
+        <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-200/60 p-6 text-center text-xs font-bold text-slate-500">
           {isArabic ? 'مصدر المالية غير متاح لهذه الجلسة.' : 'Finance source is unavailable for this session.'}
         </div>
       )}
-      <Link to="/finance" className="mt-4 inline-flex items-center gap-2 text-xs font-black text-[#0E7C86] hover:text-[#142B5F]">
+      <Link to="/finance" className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#0E7C86] hover:text-[#142B5F]">
         {isArabic ? 'فتح الإدارة المالية' : 'Open finance'}
       </Link>
     </div>
@@ -927,9 +917,9 @@ function FinanceCard({ overview, isArabic, formatNumber }: { overview: FinanceOv
 
 function MiniMetric({ label, value, warn = false }: { label: string; value: string; warn?: boolean }) {
   return (
-    <div className="rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/65 px-3 py-3 text-center">
-      <div className={`truncate text-base font-black ${warn ? 'text-[#D6A43B]' : 'text-[#142B5F]'}`}>{value}</div>
-      <div className="mt-1 truncate text-[9px] font-bold text-[#203442]/55">{label}</div>
+    <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-3 text-center">
+      <div className={`truncate text-base font-black ${warn ? 'text-amber-600' : 'text-[#142B5F]'}`}>{value}</div>
+      <div className="mt-1 truncate text-[9px] font-bold text-slate-500">{label}</div>
     </div>
   );
 }
@@ -943,15 +933,15 @@ function DashboardSkeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="h-[132px] animate-pulse rounded-2xl border border-[#DDEFF2] bg-white p-4">
-            <div className="h-9 w-9 rounded-xl bg-[#DDEFF2]/70" />
-            <div className="mt-4 h-7 w-16 rounded bg-[#DDEFF2]/70" />
-            <div className="mt-2 h-3 w-20 rounded bg-[#DDEFF2]/45" />
+          <div key={index} className="h-[132px] animate-pulse rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="h-9 w-9 rounded-xl bg-slate-100" />
+            <div className="mt-4 h-7 w-16 rounded bg-slate-100" />
+            <div className="mt-2 h-3 w-20 rounded bg-slate-100" />
           </div>
         ))}
       </div>
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="h-80 animate-pulse rounded-3xl border border-[#DDEFF2] bg-white" />
+        <div className="h-80 animate-pulse rounded-3xl border border-slate-200 bg-white" />
         <div className="h-80 animate-pulse rounded-3xl bg-[#142B5F]/90" />
       </div>
     </div>
@@ -959,9 +949,12 @@ function DashboardSkeleton() {
 }
 
 function accentClass(accent: string) {
-  if (accent === '#0E7C86') return { bar: 'bg-[#0E7C86]', icon: 'bg-[#0E7C86]/10 text-[#0E7C86]' };
-  if (accent === '#D6A43B') return { bar: 'bg-[#D6A43B]', icon: 'bg-[#D6A43B]/10 text-[#D6A43B]' };
-  if (accent === '#21A7B4') return { bar: 'bg-[#21A7B4]', icon: 'bg-[#21A7B4]/10 text-[#21A7B4]' };
-  if (accent === '#B94A48') return { bar: 'bg-[#B94A48]', icon: 'bg-[#B94A48]/10 text-[#B94A48]' };
-  return { bar: 'bg-[#142B5F]', icon: 'bg-[#142B5F]/10 text-[#142B5F]' };
+  if (accent === '#0E7C86') return { bar: 'bg-[#0E7C86]', icon: 'bg-teal-50 text-[#0E7C86] border border-teal-100' };
+  if (accent === '#D6A43B') return { bar: 'bg-[#D6A43B]', icon: 'bg-amber-50 text-amber-600 border border-amber-100' };
+  if (accent === '#21A7B4') return { bar: 'bg-[#21A7B4]', icon: 'bg-cyan-50 text-cyan-600 border border-cyan-100' };
+  if (accent === '#059669') return { bar: 'bg-[#059669]', icon: 'bg-emerald-50 text-emerald-600 border border-emerald-100' };
+  if (accent === '#4F46E5') return { bar: 'bg-[#4F46E5]', icon: 'bg-indigo-50 text-indigo-600 border border-indigo-100' };
+  if (accent === '#7C3AED') return { bar: 'bg-[#7C3AED]', icon: 'bg-purple-50 text-purple-600 border border-purple-100' };
+  if (accent === '#B94A48') return { bar: 'bg-[#B94A48]', icon: 'bg-rose-50 text-rose-600 border border-rose-100' };
+  return { bar: 'bg-[#142B5F]', icon: 'bg-blue-50 text-[#142B5F] border border-blue-100' };
 }

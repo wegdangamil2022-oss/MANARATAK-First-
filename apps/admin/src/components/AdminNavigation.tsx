@@ -110,43 +110,85 @@ export function AdminNavigation() {
   const { t } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
 
-  return (
-    <aside className="w-full shrink-0 border-b border-[#DDEFF2] bg-white lg:w-[270px] lg:border-b-0 lg:border-e lg:min-h-[calc(100vh-73px)]">
-      <div className="sticky top-[73px] max-h-[calc(100vh-73px)] overflow-y-auto p-4">
-        <div className="mb-4 rounded-2xl border border-[#D6A43B]/25 bg-[#F4D999]/12 p-3">
-          <div className="flex items-center gap-2 text-xs font-black text-[#142B5F]">
-            <Languages className="h-4 w-4 text-[#0E7C86]" />
-            {t('admin_bilingual_control')}
-          </div>
-          <p className="mt-1 text-[10px] font-semibold leading-5 text-[#203442]/58">{t('admin_bilingual_control_help')}</p>
-        </div>
+  const allItems = groups.flatMap((group) =>
+    group.items.filter((item) => hasPermission(item.requiredPermission))
+  );
 
-        <nav aria-label={t('admin_navigation')} className="space-y-5">
-          {groups.map((group) => (
-            <section key={group.labelKey}>
-              <h2 className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.16em] text-[#203442]/38">
-                {t(group.labelKey)}
-              </h2>
-              <div className="space-y-1">
-                {group.items.filter((item) => hasPermission(item.requiredPermission)).map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      end={item.to === '/dashboard' || item.to === '/imports' || item.to === '/settings'}
-                      className={({ isActive }) => itemClass(isActive)}
-                    >
-                      <Icon className="h-4 w-4 shrink-0 text-[#0E7C86] transition group-hover:text-[#21A7B4]" />
-                      <span>{t(item.labelKey)}</span>
-                    </NavLink>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
+  return (
+    <>
+      {/* Mobile Horizontal Swipeable Navigation Bar */}
+      <div className="block lg:hidden w-full bg-white/95 backdrop-blur sticky top-[73px] z-30 border-b border-[#DDEFF2] shadow-xs">
+        <nav
+          aria-label={t('admin_navigation')}
+          className="flex flex-row items-center gap-2 overflow-x-auto no-scrollbar px-4 py-2.5 touch-pan-x snap-x scroll-smooth"
+        >
+          {allItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={`mobile-${item.to}`}
+                to={item.to}
+                end={item.to === '/dashboard' || item.to === '/imports' || item.to === '/settings'}
+                className={({ isActive }) =>
+                  `snap-start shrink-0 inline-flex min-h-10 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition whitespace-nowrap border ${
+                    isActive
+                      ? 'bg-[#142B5F] text-white border-[#142B5F] shadow-sm'
+                      : 'bg-[#FAF7F0] text-[#203442]/75 border-[#DDEFF2] hover:bg-[#DDEFF2]/40 hover:text-[#0E7C86]'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#21A7B4]' : 'text-[#0E7C86]'}`} />
+                    <span>{t(item.labelKey)}</span>
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
         </nav>
       </div>
-    </aside>
+
+      {/* Desktop Vertical Sidebar Navigation */}
+      <aside className="hidden lg:block w-[270px] shrink-0 border-e border-[#DDEFF2] bg-white min-h-[calc(100vh-73px)]">
+        <div className="sticky top-[73px] max-h-[calc(100vh-73px)] overflow-y-auto p-4">
+          <div className="mb-4 rounded-2xl border border-[#D6A43B]/25 bg-[#F4D999]/12 p-3">
+            <div className="flex items-center gap-2 text-xs font-black text-[#142B5F]">
+              <Languages className="h-4 w-4 text-[#0E7C86]" />
+              {t('admin_bilingual_control')}
+            </div>
+            <p className="mt-1 text-[10px] font-semibold leading-5 text-[#203442]/58">{t('admin_bilingual_control_help')}</p>
+          </div>
+
+          <nav aria-label={t('admin_navigation')} className="space-y-5">
+            {groups.map((group) => (
+              <section key={group.labelKey}>
+                <h2 className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.16em] text-[#203442]/38">
+                  {t(group.labelKey)}
+                </h2>
+                <div className="space-y-1">
+                  {group.items
+                    .filter((item) => hasPermission(item.requiredPermission))
+                    .map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          end={item.to === '/dashboard' || item.to === '/imports' || item.to === '/settings'}
+                          className={({ isActive }) => itemClass(isActive)}
+                        >
+                          <Icon className="h-4 w-4 shrink-0 text-[#0E7C86] transition group-hover:text-[#21A7B4]" />
+                          <span>{t(item.labelKey)}</span>
+                        </NavLink>
+                      );
+                    })}
+                </div>
+              </section>
+            ))}
+          </nav>
+        </div>
+      </aside>
+    </>
   );
 }

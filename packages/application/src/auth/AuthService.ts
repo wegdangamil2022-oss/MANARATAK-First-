@@ -20,14 +20,14 @@ export class AuthService implements IAuthService {
     private readonly credentialVerifier: ICredentialVerifier = new DenyAllCredentialVerifier(),
   ) {}
 
-  public async login(userId: string, credential?: string): Promise<AuthTokens> {
+  public async login(userId: string, credential?: string, sessionTtlSeconds?: number): Promise<AuthTokens> {
     if (!await this.principalAccessValidator.isAuthenticationAllowed(userId)) throw new Error('Authentication not permitted');
     if (!credential) throw new Error('Credential required for verification');
     if (!await this.credentialVerifier.verify(userId, credential)) throw new Error('Credential verification failed');
 
     const sessionId = randomUUID();
     const tokens = await this.tokenProvider.generateTokens({ userId, sessionId });
-    await this.sessionManager.createSession(userId, tokens.refreshToken, sessionId);
+    await this.sessionManager.createSession(userId, tokens.refreshToken, sessionId, sessionTtlSeconds);
     // Close a credential/lifecycle change between password verification and session creation.
     if (!await this.principalAccessValidator.isAuthenticationAllowed(userId)
       || !await this.credentialVerifier.verify(userId, credential)) {

@@ -213,7 +213,9 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
     return () => { active = false; };
   }, [dataStatus, initialCountryReferenceId]);
 
-  const scholarshipSource = countryScopedScholarships ?? scholarships;
+  const scholarshipSource = dataStatus === 'prototype'
+    ? scholarships.filter((s) => s.id === 'csc-china')
+    : (countryScopedScholarships ?? scholarships);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   // Extract unique countries

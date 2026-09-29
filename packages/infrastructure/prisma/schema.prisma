@@ -623,9 +623,9 @@ model CertificateTemplate {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  issuer         CertificateIssuer?         @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  issuer         CertificateIssuer?         @relation(fields: [issuerId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   versions       CertificateTemplateVersion[] @relation("CertificateTemplateVersions")
-  currentVersion CertificateTemplateVersion?  @relation("CurrentCertificateTemplateVersion", fields: [currentVersionId], references: [id], onDelete: Restrict)
+  currentVersion CertificateTemplateVersion?  @relation("CurrentCertificateTemplateVersion", fields: [currentVersionId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   certificates   Certificate[]
 
   @@index([status])
@@ -666,8 +666,8 @@ model CertificateTemplateVersion {
   approvedAt           DateTime?
   createdAt            DateTime @default(now())
 
-  template           CertificateTemplate  @relation("CertificateTemplateVersions", fields: [templateId], references: [id], onDelete: Restrict)
-  issuer             CertificateIssuer    @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  template           CertificateTemplate  @relation("CertificateTemplateVersions", fields: [templateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  issuer             CertificateIssuer    @relation(fields: [issuerId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   currentForTemplate CertificateTemplate? @relation("CurrentCertificateTemplateVersion")
   certificates       Certificate[]
 
@@ -735,15 +735,15 @@ model Certificate {
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
-  template             CertificateTemplate?       @relation(fields: [templateId], references: [id], onDelete: Restrict)
-  templateVersionRecord CertificateTemplateVersion? @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
-  issuer               CertificateIssuer?         @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  template             CertificateTemplate?       @relation(fields: [templateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  templateVersionRecord CertificateTemplateVersion? @relation(fields: [templateVersionId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  issuer               CertificateIssuer?         @relation(fields: [issuerId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   ledgerEntries        CertificateLedgerEntry[]
   verificationLogs     CertificateVerificationLog[]
   issuanceInbox        CertificateIssuanceInbox?
-  replacesCertificate  Certificate?               @relation("CertificateReplaces", fields: [replacesCertificateId], references: [id], onDelete: Restrict)
+  replacesCertificate  Certificate?               @relation("CertificateReplaces", fields: [replacesCertificateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   replacementFor       Certificate[]              @relation("CertificateReplaces")
-  replacedByCertificate Certificate?              @relation("CertificateReplacedBy", fields: [replacedByCertificateId], references: [id], onDelete: Restrict)
+  replacedByCertificate Certificate?              @relation("CertificateReplacedBy", fields: [replacedByCertificateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   replacedSources      Certificate[]              @relation("CertificateReplacedBy")
 
   @@index([studentReferenceId, status])
@@ -768,7 +768,7 @@ model CertificateIssuanceInbox {
   certificateId String   @unique
   processedAt   DateTime @default(now())
 
-  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Restrict)
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([eventType, processedAt])
 }
@@ -782,7 +782,7 @@ model CertificateLedgerEntry {
   payload       Json?
   occurredAt    DateTime @default(now())
 
-  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Restrict)
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([certificateId, occurredAt])
   @@index([action])
@@ -795,7 +795,7 @@ model CertificateVerificationLog {
   channel       String
   occurredAt    DateTime @default(now())
 
-  certificate Certificate? @relation(fields: [certificateId], references: [id], onDelete: Restrict)
+  certificate Certificate? @relation(fields: [certificateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([certificateId, occurredAt])
   @@index([result, occurredAt])
@@ -1210,6 +1210,7 @@ model TransactionalOutboxRecord {
   @@index([claimUntil])
   @@index([domain, aggregateType, aggregateId])
   @@index([correlationId])
+  @@index([claimedBy, claimToken], map: "TransactionalOutboxRecord_claimedBy_claimToken_idx")
 }
 
 // --- Universities ---
@@ -3692,6 +3693,7 @@ model ReferenceCountry {
   @@index([region])
   @@index([isActive])
   @@index([name])
+  @@index([lifecycleState], map: "ReferenceCountry_lifecycleState_idx")
 }
 
 model ReferenceCurrency {
@@ -3719,6 +3721,7 @@ model ReferenceCurrency {
 
   @@index([isActive])
   @@index([name])
+  @@index([lifecycleState], map: "ReferenceCurrency_lifecycleState_idx")
 }
 
 model ReferenceLanguage {
@@ -3745,6 +3748,7 @@ model ReferenceLanguage {
   @@index([isActive])
   @@index([name])
   @@index([direction])
+  @@index([lifecycleState], map: "ReferenceLanguage_lifecycleState_idx")
 }
 
 model StudyDestinationProfile {
@@ -3835,6 +3839,7 @@ model ReferenceCity {
   @@index([isActive])
   @@index([timezone])
   @@index([administrativeRegionId])
+  @@index([lifecycleState], map: "ReferenceCity_lifecycleState_idx")
 }
 
 
@@ -4557,7 +4562,7 @@ model FinancePaymentRecord {
   capturedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  invoice FinanceInvoiceRecord @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  invoice FinanceInvoiceRecord @relation(fields: [invoiceId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   attempts FinancePaymentAttemptRecord[]
   @@index([invoiceId, status])
   @@unique([gatewayProvider, gatewayReference])
@@ -4571,7 +4576,7 @@ model FinancePaymentAttemptRecord {
   gatewayReference String?
   safeFailureCode String?
   createdAt DateTime @default(now())
-  payment FinancePaymentRecord @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  payment FinancePaymentRecord @relation(fields: [paymentId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   @@unique([paymentId, sequence])
   @@index([paymentId, createdAt])
 }
@@ -4622,8 +4627,8 @@ model FinancialLedgerEntryRecord {
   sequence Int
   memo String?
   createdAt DateTime @default(now())
-  transaction FinancialTransactionRecord @relation(fields: [transactionId], references: [id], onDelete: Restrict)
-  account FinancialAccountRecord @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  transaction FinancialTransactionRecord @relation(fields: [transactionId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  account FinancialAccountRecord @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   @@unique([transactionId, sequence])
   @@index([accountId, createdAt])
 }
@@ -4657,7 +4662,7 @@ model FinanceWalletHoldRecord {
   expiresAt DateTime?
   createdAt DateTime @default(now())
   resolvedAt DateTime?
-  wallet FinanceWalletRecord @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  wallet FinanceWalletRecord @relation(fields: [walletId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   @@index([walletId, status])
 }
 
@@ -4733,6 +4738,7 @@ model FinanceApprovalRecord {
   decisions FinanceApprovalDecisionRecord[]
   @@index([status, createdAt])
   @@index([targetReferenceId])
+  @@index([actionType, targetReferenceId, status, consumedAt], map: "FinanceApprovalRecord_binding_idx")
 }
 
 model FinanceApprovalDecisionRecord {
@@ -4742,7 +4748,7 @@ model FinanceApprovalDecisionRecord {
   decision String
   reason String?
   decidedAt DateTime @default(now())
-  approval FinanceApprovalRecord @relation(fields: [approvalId], references: [id], onDelete: Restrict)
+  approval FinanceApprovalRecord @relation(fields: [approvalId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   @@unique([approvalId, approverId])
 }
 

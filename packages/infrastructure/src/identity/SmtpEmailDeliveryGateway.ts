@@ -3,7 +3,7 @@ import { connect as connectTls } from 'node:tls';
 import { createInterface } from 'node:readline';
 import type { IEmailDeliveryGateway, SendVerificationEmailInput, SendPasswordResetEmailInput } from '@manaratak/domain';
 
-export interface SmtpEmailConfig { host: string; port: number; secure: boolean; from: string; username?: string; password?: string; }
+export interface SmtpEmailConfig { host: string; port: number; secure: boolean; from: string; username?: string; password?: string; publicWebUrl?: string; }
 
 function safeHeader(value: string): string { return value.replace(/[\r\n]/g, ' ').trim(); }
 
@@ -20,11 +20,32 @@ export class SmtpEmailDeliveryGateway implements IEmailDeliveryGateway {
   }
 
   sendVerificationEmail(input: SendVerificationEmailInput): Promise<void> {
-    return this.deliver(input.email, 'Verify your MANARATAK email', `Hello ${input.displayName},\n\nVerification token: ${input.token}\n`);
+    const rawBaseUrl = this.config.publicWebUrl || process.env.PUBLIC_WEB_URL || process.env.APP_URL || '';
+    const baseUrl = rawBaseUrl.replace(/\/$/, '');
+    const verificationUrl = baseUrl ? `${baseUrl}/verify-email?token=${encodeURIComponent(input.token)}` : '';
+    const linkSection = verificationUrl
+      ? `\nVerification link (click to verify directly):\n${verificationUrl}\n`
+      : '';
+    const body = `Hello ${input.displayName},\n\n` +
+      `Thank you for registering with MANARATAK.\n\n` +
+      `Verification token:\n${input.token}\n` +
+      linkSection +
+      `\nYou can also verify your account by visiting the verification page and entering your token:\n` +
+      `${baseUrl ? `${baseUrl}/verify-email` : '/verify-email'}\n`;
+    return this.deliver(input.email, 'Verify your MANARATAK email', body);
   }
 
   sendPasswordResetEmail(input: SendPasswordResetEmailInput): Promise<void> {
-    return this.deliver(input.email, 'Reset your MANARATAK password', `Hello ${input.displayName},\n\nPassword reset token: ${input.token}\n`);
+    const rawBaseUrl = this.config.publicWebUrl || process.env.PUBLIC_WEB_URL || process.env.APP_URL || '';
+    const baseUrl = rawBaseUrl.replace(/\/$/, '');
+    const resetUrl = baseUrl ? `${baseUrl}/reset-password?token=${encodeURIComponent(input.token)}` : '';
+    const linkSection = resetUrl
+      ? `\nPassword reset link:\n${resetUrl}\n`
+      : '';
+    const body = `Hello ${input.displayName},\n\n` +
+      `Password reset token:\n${input.token}\n` +
+      linkSection;
+    return this.deliver(input.email, 'Reset your MANARATAK password', body);
   }
 
   private async deliver(to: string, subject: string, body: string): Promise<void> {

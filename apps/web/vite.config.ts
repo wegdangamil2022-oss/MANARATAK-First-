@@ -24,12 +24,25 @@ function disableHmrPlugin(): Plugin {
   };
 }
 
-function expressApiPlugin(): Plugin {
+function expressApiPlugin(studio = false): Plugin {
   let cachedApp: any = null;
   return {
-    name: 'express-api-plugin',
+    name: studio ? 'manaratak-studio-express-api' : 'express-api-plugin',
     configureServer(server) {
+      server.httpServer?.on('close', async () => {
+        try {
+          const workerModule = await server.ssrLoadModule(path.resolve(__dirname, '../api/src/infrastructure/workers/PollingWorkerRuntime.ts'));
+          await workerModule.stopPollingWorkers?.();
+        } catch {
+          // Ignore cleanup errors on server shutdown
+        }
+      });
       server.middlewares.use(async (req, res, next) => {
+        if (req.url === '/admin') {
+          res.writeHead(301, { Location: '/admin/' });
+          res.end();
+          return;
+        }
         if (req.url && (req.url === '/api' || req.url.startsWith('/api/') || req.url.startsWith('/api?'))) {
           const method = (req.method || 'GET').toUpperCase();
           const localReadOnly = process.env.VITE_LOCAL_ADMIN_READ_ONLY === 'true';
@@ -46,6 +59,26 @@ function expressApiPlugin(): Plugin {
             if (!cachedApp) {
               const apiModule = await server.ssrLoadModule(path.resolve(__dirname, '../api/src/app.ts'));
               cachedApp = await apiModule.createApiApp({ resetCache: false });
+              try {
+                const containerModule = await server.ssrLoadModule(path.resolve(__dirname, '../api/src/infrastructure/di/container.ts'));
+                const configModule = await server.ssrLoadModule('@manaratak/config');
+                const workerModule = await server.ssrLoadModule(path.resolve(__dirname, '../api/src/infrastructure/workers/PollingWorkerRuntime.ts'));
+                const envProvider = new configModule.EnvironmentConfigurationProvider();
+                const loader = new configModule.EnvironmentLoader([envProvider]);
+                let config;
+                if (configModule.ConfigurationRegistry.isInitialized()) {
+                  config = configModule.ConfigurationRegistry.getInstance();
+                } else {
+                  try {
+                    config = await configModule.ConfigurationRegistry.bootstrap(loader, new configModule.ZodEnvironmentValidator());
+                  } catch (bootstrapErr) {
+                    config = configModule.ConfigurationRegistry.getInstance();
+                  }
+                }
+                await workerModule.startPollingWorkers(containerModule.container, config);
+              } catch (workerErr) {
+                console.warn('[Vite Api Plugin] Could not initialize polling workers:', workerErr);
+              }
             }
             cachedApp(req, res, next);
           } catch (err) {
@@ -82,7 +115,7 @@ export default defineConfig(({ mode, command }) => {
       ...(studio ? { 'import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE': JSON.stringify(studioDataMode) } : {}),
     },
     plugins: [frontendSecurityHeadersPlugin(), react(), tailwindcss(),
-      studio ? googleAiStudioPreviewPlugin() : expressApiPlugin(), disableHmrPlugin()],
+      ...(studio ? [googleAiStudioPreviewPlugin()] : []), expressApiPlugin(studio), disableHmrPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
@@ -110,6 +143,28 @@ export default defineConfig(({ mode, command }) => {
       }
     },
     server: {
+      proxy: {
+        '/mailpit': {
+          target: 'http://127.0.0.1:8025',
+          changeOrigin: true,
+          ws: true,
+        },
+        '/admin': {
+          target: 'http://127.0.0.1:3001',
+          changeOrigin: true,
+          ws: true,
+        },
+        '/study-destinations': {
+          target: 'http://127.0.0.1:3001',
+          changeOrigin: true,
+          ws: true,
+        },
+        '/academic-taxonomy': {
+          target: 'http://127.0.0.1:3001',
+          changeOrigin: true,
+          ws: true,
+        },
+      },
       hmr: process.env.DISABLE_HMR === 'true' ? false : studio ? true : { clientPort: 443 },
       port: 3000,
       host: '0.0.0.0',

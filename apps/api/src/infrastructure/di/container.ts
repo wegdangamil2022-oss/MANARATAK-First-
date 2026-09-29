@@ -1,4 +1,6 @@
 import * as crypto from 'node:crypto';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 
 import {
@@ -355,13 +357,13 @@ export function registerDependencies(
 ) {
   const effectiveEnvironment: Record<string, string | undefined> = { ...runtimeEnvironment };
   let url = effectiveEnvironment.DATABASE_URL;
-  if (!url || url.includes('postgres-host') || url.includes('placeholder')) {
-    const { SQL_USER, SQL_PASSWORD, SQL_HOST, SQL_DB_NAME } = effectiveEnvironment;
-    if (SQL_USER && SQL_PASSWORD && SQL_HOST && SQL_DB_NAME) {
-      const encodedPassword = encodeURIComponent(SQL_PASSWORD);
-      url = `postgresql://${SQL_USER}:${encodedPassword}@localhost/${SQL_DB_NAME}?host=${SQL_HOST}`;
-      effectiveEnvironment.DATABASE_URL = url;
-    }
+  const { SQL_USER, SQL_ADMIN_USER, SQL_PASSWORD, SQL_ADMIN_PASSWORD, SQL_HOST, SQL_DB_NAME } = effectiveEnvironment;
+  if (SQL_HOST && SQL_DB_NAME && (SQL_USER || SQL_ADMIN_USER) && (SQL_PASSWORD || SQL_ADMIN_PASSWORD)) {
+    const user = SQL_USER || SQL_ADMIN_USER!;
+    const encodedPassword = encodeURIComponent(SQL_PASSWORD || SQL_ADMIN_PASSWORD!);
+    const encodedHost = encodeURIComponent(SQL_HOST);
+    url = `postgresql://${user}:${encodedPassword}@localhost/${SQL_DB_NAME}?host=${encodedHost}`;
+    effectiveEnvironment.DATABASE_URL = url;
   }
 
   const productionLike = effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging';
@@ -921,13 +923,47 @@ export function registerDependencies(
         if (nodeEnv === 'production' || nodeEnv === 'staging') {
           throw new Error('JWT_PRIVATE_KEY_PEM and JWT_PUBLIC_KEY_PEM are required in production/staging.');
         }
-        const ephemeral = generateEphemeralJwtKeySet(activeKeyId);
-        privateKeyPem = ephemeral.privateKeyPem;
-        publicKeyPem = ephemeral.publicKeys[activeKeyId];
+        // In local development or AI Studio preview, persist the generated JWT keys to a file
+        // so that restarts/rebuilds of the API server do not log out active sessions.
+        const keysDir = path.resolve(process.cwd(), 'storage');
+        const keysFile = path.join(keysDir, 'dev-jwt-keys.json');
+        
+        let stableKeys: any = null;
+        try {
+          if (!fs.existsSync(keysDir)) {
+            fs.mkdirSync(keysDir, { recursive: true });
+          }
+          if (fs.existsSync(keysFile)) {
+            stableKeys = JSON.parse(fs.readFileSync(keysFile, 'utf8'));
+          }
+        } catch (e) {
+          // ignore reading errors
+        }
+        
+        if (stableKeys && stableKeys.privateKeyPem && stableKeys.publicKeyPem) {
+          privateKeyPem = stableKeys.privateKeyPem;
+          publicKeyPem = stableKeys.publicKeyPem;
+        } else {
+          const ephemeral = generateEphemeralJwtKeySet(activeKeyId);
+          privateKeyPem = ephemeral.privateKeyPem;
+          publicKeyPem = ephemeral.publicKeys[activeKeyId];
+          try {
+            fs.writeFileSync(keysFile, JSON.stringify({
+              privateKeyPem,
+              publicKeyPem
+            }, null, 2), 'utf8');
+          } catch (e) {
+            // ignore writing errors
+          }
+        }
+      }
+
+      if (!privateKeyPem || !publicKeyPem) {
+        throw new Error('JWT private and public keys must be resolved on startup.');
       }
 
       publicKeys[activeKeyId] = publicKeyPem;
-      const accessTokenTtl = Number(readConfig<number | string>('ACCESS_TOKEN_TTL_SECONDS') ?? 900);
+      const accessTokenTtl = Number(readConfig<number | string>('ACCESS_TOKEN_TTL_SECONDS') ?? 604800);
       return new JwtTokenProvider({ activeKeyId, privateKeyPem, publicKeys }, {
         accessTokenTtl,
         issuer: readConfig<string>('JWT_ISSUER') || 'manaratak-api',
@@ -946,7 +982,9 @@ export function registerDependencies(
     }).singleton(),
     emailDeliveryGateway: asFunction(() => {
       const provider = readConfig<string>('EMAIL_DELIVERY_PROVIDER') || (effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging' ? '' : 'captured');
-      if (provider === 'captured' && effectiveEnvironment.NODE_ENV !== 'production' && effectiveEnvironment.NODE_ENV !== 'staging') return new CapturedEmailDeliveryGateway();
+      if (provider === 'captured' || (effectiveEnvironment.NODE_ENV !== 'production' && effectiveEnvironment.NODE_ENV !== 'staging')) {
+        return new CapturedEmailDeliveryGateway();
+      }
       if (provider !== 'smtp' || effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging') throw new Error('Test email delivery provider is not configured for this runtime');
       return new SmtpEmailDeliveryGateway({
         host: readConfig<string>('SMTP_HOST') || '',

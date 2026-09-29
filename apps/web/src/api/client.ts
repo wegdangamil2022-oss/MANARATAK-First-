@@ -1405,11 +1405,133 @@ function ensureCanonicalMutationHeaders(init?: RequestInit): RequestInit | undef
   return { ...init, headers };
 }
 
+let isRefreshing = false;
+let refreshSubscribers: ((ok: boolean) => void)[] = [];
+let memoryWebRefreshToken: string | null = null;
+let activeWebRefreshPromise: Promise<boolean> | null = null;
+let webRefreshFailedPermanently = false;
+
+function subscribeTokenRefresh(cb: (ok: boolean) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(ok: boolean) {
+  refreshSubscribers.forEach((cb) => cb(ok));
+  refreshSubscribers = [];
+}
+
 export async function apiFetch(
   input: string | URL | Request,
   init?: RequestInit,
 ): Promise<Response> {
-  return csrfManager.fetchWithCsrf(input, ensureCanonicalMutationHeaders(init));
+  const urlStr = typeof input === 'string' ? input : (input instanceof URL ? input.href : input.url);
+  const isAuthRoute = urlStr.includes('/auth/login') || urlStr.includes('/auth/refresh') || urlStr.includes('/auth/logout');
+
+  const modifiedInit = ensureCanonicalMutationHeaders(init);
+  const storedToken = typeof window !== 'undefined'
+    ? (window.sessionStorage?.getItem('manaratak_access_token') ||
+       window.sessionStorage?.getItem('manaratak_admin_bearer_token') ||
+       (window.localStorage && (
+         window.localStorage.getItem('manaratak_access_token') ||
+         window.localStorage.getItem('manaratak_admin_bearer_token')
+       )) ||
+       null)
+    : null;
+  if (storedToken) {
+    const headers = new Headers(modifiedInit.headers);
+    if (!headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${storedToken}`);
+      modifiedInit.headers = headers;
+    }
+  }
+
+  const response = await csrfManager.fetchWithCsrf(input, modifiedInit);
+
+  if (response.status === 401 && !isAuthRoute) {
+    if (isRefreshing) {
+      return new Promise<Response>((resolve) => {
+        subscribeTokenRefresh((ok) => {
+          if (ok) {
+            resolve(csrfManager.fetchWithCsrf(input, modifiedInit));
+          } else {
+            resolve(response);
+          }
+        });
+      });
+    }
+
+    if (webRefreshFailedPermanently) {
+      return response;
+    }
+
+    isRefreshing = true;
+
+    if (!activeWebRefreshPromise) {
+      activeWebRefreshPromise = (async () => {
+        const refreshToken = memoryWebRefreshToken || undefined;
+        try {
+          const refreshRes = await csrfManager.fetchWithCsrf(`${API_BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken, rememberMe: true }),
+            credentials: 'include',
+          });
+          if (refreshRes.ok) {
+            const payload = await refreshRes.json().catch(() => ({}));
+            if (typeof window !== 'undefined' && payload?.data?.accessToken) {
+              try {
+                window.sessionStorage.setItem('manaratak_access_token', payload.data.accessToken);
+                window.sessionStorage.setItem('manaratak_admin_bearer_token', payload.data.accessToken);
+                window.sessionStorage.setItem('manaratak_admin_bearer', payload.data.accessToken);
+              } catch {}
+              if (window.localStorage) {
+                window.localStorage.setItem('manaratak_access_token', payload.data.accessToken);
+                window.localStorage.setItem('manaratak_admin_bearer_token', payload.data.accessToken);
+                window.localStorage.setItem('manaratak_admin_bearer', payload.data.accessToken);
+              }
+            }
+            if (payload?.data?.refreshToken) {
+              memoryWebRefreshToken = payload.data.refreshToken;
+            }
+            try {
+              window.localStorage?.removeItem('manaratak_refresh_token');
+              window.sessionStorage?.removeItem('manaratak_refresh_token');
+            } catch {}
+            webRefreshFailedPermanently = false;
+            return true;
+          }
+        } catch {
+          // ignore
+        }
+        webRefreshFailedPermanently = true;
+        return false;
+      })();
+    }
+
+    const refreshOk = await activeWebRefreshPromise;
+    onRefreshed(refreshOk);
+    isRefreshing = false;
+    activeWebRefreshPromise = null;
+
+    if (refreshOk) {
+      const nextHeaders = new Headers(modifiedInit.headers);
+      const nextToken = typeof window !== 'undefined'
+        ? (window.sessionStorage?.getItem('manaratak_access_token') ||
+           window.sessionStorage?.getItem('manaratak_admin_bearer_token') ||
+           (window.localStorage && (
+             window.localStorage.getItem('manaratak_access_token') ||
+             window.localStorage.getItem('manaratak_admin_bearer_token')
+           )) ||
+           null)
+        : null;
+      if (nextToken) nextHeaders.set('Authorization', `Bearer ${nextToken}`);
+      return csrfManager.fetchWithCsrf(input, { ...modifiedInit, headers: nextHeaders });
+    } else {
+      return response;
+    }
+  }
+
+  return response;
 }
 
 const STUDENT_TOOLS_SESSION_STORAGE_KEY = 'manaratak_student_tools_session';
@@ -1471,6 +1593,8 @@ async function parseErrorMessage(res: Response, fallback: string): Promise<strin
       if (typeof errorData.error.code === 'string') return errorData.error.code;
     }
     if (typeof errorData?.message === 'string') return errorData.message;
+    if (typeof errorData?.code === 'string') return errorData.code;
+    if (typeof errorData?.detail === 'string') return errorData.detail;
   } catch {
     // Ignore parse errors
   }
@@ -2072,8 +2196,7 @@ export class ApiClient {
   static async getMyStudentDashboard(): Promise<StudentDashboardSummaryDto> {
     const res = await apiFetch(`${API_BASE_URL}/student/dashboard`, { headers: getStudentHeaders() });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || 'تعذر تحميل مساحة الطالب');
+      throw new Error(await parseErrorMessage(res, 'تعذر تحميل مساحة الطالب'));
     }
     return res.json();
   }
@@ -2365,16 +2488,91 @@ export class ApiClient {
     return this.getCurrentSessionIdentity();
   }
 
-  static async login(email: string, password: string): Promise<void> {
+  static async login(email: string, password: string, rememberMe?: boolean): Promise<void> {
     const res = await apiFetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ email: email.trim(), password }),
+      body: JSON.stringify({ email: email.trim(), password, rememberMe }),
     });
     const body = await res.json().catch(() => ({}));
     if (!res.ok || !body?.data?.authenticated) {
-      throw new Error(body?.error?.message || body?.message || 'تعذر تسجيل الدخول بهذه البيانات');
+      const msg = body?.error?.message || body?.detail || body?.message || 'تعذر تسجيل الدخول بهذه البيانات';
+      const err: any = new Error(msg);
+      err.status = res.status;
+      err.code = body?.error?.code || body?.code;
+      throw err;
     }
+    if (typeof window !== 'undefined' && body?.data?.accessToken) {
+      try {
+        window.sessionStorage.setItem('manaratak_admin_bearer_token', body.data.accessToken);
+        window.sessionStorage.setItem('manaratak_admin_bearer', body.data.accessToken);
+        window.sessionStorage.setItem('manaratak_access_token', body.data.accessToken);
+      } catch {}
+      if (window.localStorage) {
+        window.localStorage.setItem('manaratak_admin_bearer_token', body.data.accessToken);
+        window.localStorage.setItem('manaratak_admin_bearer', body.data.accessToken);
+        window.localStorage.setItem('manaratak_access_token', body.data.accessToken);
+        window.localStorage.setItem('manaratak_admin_access', 'authorized');
+      }
+    }
+    if (body?.data?.refreshToken) {
+      memoryWebRefreshToken = body.data.refreshToken;
+    }
+    try {
+      window.localStorage?.removeItem('manaratak_refresh_token');
+      window.sessionStorage?.removeItem('manaratak_refresh_token');
+    } catch {}
+  }
+
+  static async register(displayName: string, email: string, password: string): Promise<{ identityId: string; email: string }> {
+    const res = await apiFetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ displayName: displayName.trim(), primaryEmail: email.trim(), password }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = body?.error?.message || body?.detail || body?.message || 'تعذر إنشاء الحساب';
+      const err: any = new Error(msg);
+      err.status = res.status;
+      err.code = body?.error?.code || body?.code;
+      throw err;
+    }
+    return body.data;
+  }
+
+  static async verifyEmail(token: string): Promise<{ isEmailVerified: boolean; email?: string }> {
+    const res = await apiFetch(`${API_BASE_URL}/auth/verify-email`, {
+      method: 'POST',
+      headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ token: token.trim() }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = body?.error?.message || body?.detail || body?.message || 'تعذر تأكيد البريد الإلكتروني. الرمز غير صالح أو منتهي الصلاحية.';
+      const err: any = new Error(msg);
+      err.status = res.status;
+      err.code = body?.error?.code || body?.code;
+      throw err;
+    }
+    return body.data;
+  }
+
+  static async resendVerification(email: string): Promise<{ success: boolean; message?: string }> {
+    const res = await apiFetch(`${API_BASE_URL}/auth/resend-verification`, {
+      method: 'POST',
+      headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ email: email.trim() }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = body?.error?.message || body?.detail || body?.message || 'تعذر إعادة إرسال رسالة التأكيد.';
+      const err: any = new Error(msg);
+      err.status = res.status;
+      err.code = body?.error?.code || body?.code;
+      throw err;
+    }
+    return body.data;
   }
 
   static async loginStudent(email: string, password: string): Promise<void> {
@@ -2382,11 +2580,25 @@ export class ApiClient {
   }
 
   static async logoutStudent(): Promise<void> {
-    const res = await apiFetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      headers: getStudentHeaders(),
-    });
-    if (!res.ok && res.status !== 401) throw new Error('تعذر تسجيل الخروج');
+    try {
+      await apiFetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: getStudentHeaders(),
+      });
+    } catch {
+      // Ignore network errors on logout
+    } finally {
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.removeItem(STUDENT_TOOLS_SESSION_STORAGE_KEY);
+          localStorage.removeItem('manaratak_access_token');
+          localStorage.removeItem('manaratak_refresh_token');
+          localStorage.removeItem('manaratak_admin_bearer_token');
+          localStorage.removeItem('manaratak_admin_bearer');
+          localStorage.removeItem('manaratak_admin_access');
+        } catch { /* storage can be restricted */ }
+      }
+    }
   }
 
   static async listMyHydratedStudentSavedItems(): Promise<HydratedStudentSavedItemDto[]> {

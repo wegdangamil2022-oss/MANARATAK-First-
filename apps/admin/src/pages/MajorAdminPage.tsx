@@ -59,20 +59,28 @@ function statusTone(status?: string): string {
   }
 }
 
-function StatCard({ label, value, icon: Icon, tone }: { label: string; value: number; icon: typeof BookOpen; tone: string }) {
+function MetricCard({ icon: Icon, label, value, accent }: { icon: any; label: string; value: number | string; accent: string }) {
+  const tone = metricAccentClasses(accent);
   return (
-    <div className={`rounded-lg border bg-white p-4 shadow-sm ${tone}`}>
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold text-slate-500">{label}</p>
-          <p className="mt-1 text-2xl font-black text-slate-950">{value}</p>
+    <div className="rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className={`grid h-9 w-9 place-items-center rounded-xl ${tone.icon}`}>
+          <Icon className="h-4.5 w-4.5" />
         </div>
-        <span className="rounded-lg bg-slate-50 p-2">
-          <Icon className="h-5 w-5 text-slate-600" />
-        </span>
+        <div className={`text-2xl font-black ${tone.text}`}>{value}</div>
       </div>
+      <div className="mt-3 text-[11px] font-black text-slate-600">{label}</div>
     </div>
   );
+}
+
+function metricAccentClasses(accent: string) {
+  if (accent === '#142B5F') return { icon: 'bg-[#142B5F]/10 text-[#142B5F]', text: 'text-[#142B5F]' };
+  if (accent === '#0E7C86') return { icon: 'bg-[#0E7C86]/10 text-[#0E7C86]', text: 'text-[#0E7C86]' };
+  if (accent === '#21A7B4') return { icon: 'bg-[#21A7B4]/10 text-[#21A7B4]', text: 'text-[#21A7B4]' };
+  if (accent === '#D6A43B') return { icon: 'bg-[#D6A43B]/10 text-[#D6A43B]', text: 'text-[#D6A43B]' };
+  if (accent === '#B94A48') return { icon: 'bg-[#B94A48]/10 text-[#B94A48]', text: 'text-[#B94A48]' };
+  return { icon: 'bg-[#2E7D5A]/10 text-[#2E7D5A]', text: 'text-[#2E7D5A]' };
 }
 
 function Badge({ value, kind }: { value?: string | null; kind: 'status' | 'completeness' | 'neutral' }) {
@@ -152,33 +160,39 @@ export function MajorAdminPage() {
 
   return (
     <div dir="rtl" className="mx-auto max-w-7xl space-y-5">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-bold text-[#0E7C86]">المرحلة 10 · منصة التخصصات الأكاديمية</p>
-          <h2 className="mt-1 text-2xl font-black text-[#142B5F]">{t('admin_majors') || 'إدارة التخصصات'}</h2>
-          <p className="mt-1 text-sm leading-6 text-[#203442]">إدارة هوية التخصص، الدرجة، التصنيف، النسخ، والربط مع البرامج والمنح والدورات.</p>
+      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+        <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm border border-white/15">
+              <GraduationCap className="h-4 w-4" />
+              <span>القسم الأكاديمي · إدارة التخصصات</span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{t('admin_majors') || 'إدارة التخصصات'}</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/80">إدارة هوية التخصص، الدرجة، التصنيف، النسخ، والربط مع البرامج والمنح والدورات.</p>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <button type="button" onClick={() => setSearchParams({})} className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-black transition ${view === 'all' ? 'bg-[#21A7B4] text-white shadow-md hover:bg-[#1A8D99]' : 'border border-white/20 bg-white/10 text-white hover:bg-white/20'}`}>كل التخصصات</button>
+            <button type="button" onClick={() => setSearchParams({ view: 'new' })} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-black transition ${view === 'new' ? 'bg-[#21A7B4] text-white shadow-md hover:bg-[#1A8D99]' : 'border border-white/20 bg-white/10 text-white hover:bg-white/20'}`}>
+              تخصصات جديدة
+              <span className={`rounded-full px-2 py-0.5 text-[11px] ${view === 'new' ? 'bg-white/20 text-white' : 'bg-white/15 text-[#21A7B4]'}`}>{newCandidatesTotal}</span>
+            </button>
+            <Link to="/imports" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/20 shadow-xs">
+              <Filter className="h-4 w-4 text-[#21A7B4]" />مركز الاستيراد
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setSearchParams({})} className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-black ${view === 'all' ? 'bg-[#142B5F] text-white' : 'border border-[#DDEFF2] bg-white text-[#142B5F]'}`}>كل التخصصات</button>
-          <button type="button" onClick={() => setSearchParams({ view: 'new' })} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-black ${view === 'new' ? 'bg-[#0E7C86] text-white' : 'border border-[#DDEFF2] bg-white text-[#0E7C86]'}`}>
-            تخصصات جديدة
-            <span className={`rounded-full px-2 py-0.5 text-[11px] ${view === 'new' ? 'bg-white/15 text-white' : 'bg-[#DDEFF2] text-[#0E7C86]'}`}>{newCandidatesTotal}</span>
-          </button>
-          <Link to="/imports" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#DDEFF2] bg-white px-4 text-sm font-bold text-[#203442] shadow-sm">
-            <Filter className="h-4 w-4" />مركز الاستيراد
-          </Link>
-        </div>
-      </header>
+      </section>
 
       {view === 'new' ? (
         <NewMajorCandidatesPanel onTotalChange={setNewCandidatesTotal} />
       ) : (
         <>
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="كل التخصصات" value={stats.total} icon={BookOpen} tone="border-slate-200" />
-        <StatCard label="منشور في الموقع" value={stats.published} icon={CheckCircle2} tone="border-emerald-200" />
-        <StatCard label="بحاجة لمراجعة" value={stats.needsReview} icon={AlertCircle} tone="border-amber-200" />
-        <StatCard label="مكتمل البيانات" value={stats.complete} icon={GraduationCap} tone="border-blue-200" />
+        <MetricCard label="كل التخصصات" value={stats.total} icon={BookOpen} accent="#142B5F" />
+        <MetricCard label="منشور في الموقع" value={stats.published} icon={CheckCircle2} accent="#2E7D5A" />
+        <MetricCard label="بحاجة لمراجعة" value={stats.needsReview} icon={AlertCircle} accent="#D6A43B" />
+        <MetricCard label="مكتمل البيانات" value={stats.complete} icon={GraduationCap} accent="#21A7B4" />
       </section>
 
       <section className="rounded-lg border border-[#DDEFF2] bg-white p-4 shadow-sm">

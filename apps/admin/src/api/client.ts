@@ -1,7 +1,7 @@
 import { CsrfClientManager } from '@manaratak/shared';
 import { assertLocalReadOnlyRequestAllowed } from '../security/LocalAdminReadOnlyPolicy';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api/v1';
 const csrfManager = CsrfClientManager.getInstance(API_BASE_URL);
 
 type ApiErrorPayload = {
@@ -29,26 +29,326 @@ function isMutation(method?: string): boolean {
   return ['POST', 'PUT', 'PATCH'].includes((method || 'GET').toUpperCase());
 }
 
+let memoryAdminRefreshToken: string | null = (typeof window !== 'undefined' && (
+  window.localStorage?.getItem('manaratak_refresh_token') ||
+  window.sessionStorage?.getItem('manaratak_refresh_token')
+)) || null;
+let activeRefreshPromise: Promise<boolean> | null = null;
+let refreshFailedPermanently = false;
+
+export function getStoredAdminToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return (
+      window.sessionStorage.getItem('manaratak_admin_bearer_token') ||
+      window.sessionStorage.getItem('manaratak_access_token') ||
+      (window.localStorage && (
+        window.localStorage.getItem('manaratak_admin_bearer_token') ||
+        window.localStorage.getItem('manaratak_admin_bearer') ||
+        window.localStorage.getItem('manaratak_access_token')
+      )) ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
+let isRefreshing = false;
+let refreshSubscribers: Array<(ok: boolean) => void> = [];
+
+function subscribeTokenRefresh(cb: (ok: boolean) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(ok: boolean) {
+  refreshSubscribers.forEach((cb) => cb(ok));
+  refreshSubscribers = [];
+}
+
+export function setStoredAdminTokens(tokens: { accessToken?: string; refreshToken?: string }): void {
+  if (typeof window === 'undefined') return;
+  refreshFailedPermanently = false;
+  if (tokens.accessToken) {
+    try {
+      window.sessionStorage.setItem('manaratak_admin_bearer_token', tokens.accessToken);
+      window.sessionStorage.setItem('manaratak_access_token', tokens.accessToken);
+    } catch {}
+    if (window.localStorage) {
+      window.localStorage.setItem('manaratak_admin_bearer_token', tokens.accessToken);
+      window.localStorage.setItem('manaratak_admin_bearer', tokens.accessToken);
+      window.localStorage.setItem('manaratak_access_token', tokens.accessToken);
+      window.localStorage.setItem('manaratak_admin_access', 'authorized');
+    }
+  }
+  if (tokens.refreshToken) {
+    memoryAdminRefreshToken = tokens.refreshToken;
+    try {
+      window.localStorage?.setItem('manaratak_refresh_token', tokens.refreshToken);
+      window.sessionStorage?.setItem('manaratak_refresh_token', tokens.refreshToken);
+    } catch {}
+  }
+}
+
+export async function performAdminRefresh(): Promise<boolean> {
+  if (refreshFailedPermanently) return false;
+  if (activeRefreshPromise) return activeRefreshPromise;
+
+  activeRefreshPromise = (async () => {
+    const refreshToken =
+      memoryAdminRefreshToken ||
+      (typeof window !== 'undefined'
+        ? window.localStorage?.getItem('manaratak_refresh_token') ||
+          window.sessionStorage?.getItem('manaratak_refresh_token')
+        : undefined) ||
+      undefined;
+
+    try {
+      const res = await csrfManager.fetchWithCsrf(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken, rememberMe: true }),
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        if (payload?.data?.accessToken) {
+          setStoredAdminTokens(payload.data);
+          refreshFailedPermanently = false;
+          return true;
+        }
+      } else if (res.status === 401 || res.status === 403) {
+        // Only mark permanently failed if the server explicitly rejected the refresh token
+        refreshFailedPermanently = true;
+      }
+    } catch {
+      // Network or transient server restart error - do NOT permanently lock out
+    }
+    return false;
+  })();
+
+  try {
+    return await activeRefreshPromise;
+  } finally {
+    activeRefreshPromise = null;
+  }
+}
+
+export type AdminAuthState = 'LOADING' | 'AUTHORIZED' | 'UNAUTHORIZED';
+let currentAdminAuthState: AdminAuthState = 'LOADING';
+let authStateListeners: Array<(state: AdminAuthState) => void> = [];
+let globalAbortController = new AbortController();
+
+export function setAdminAuthStatus(state: AdminAuthState): void {
+  currentAdminAuthState = state;
+  authStateListeners.forEach((fn) => fn(state));
+  authStateListeners = [];
+  if (state === 'UNAUTHORIZED') {
+    abortAllPendingAdminRequests();
+  }
+}
+
+export function abortAllPendingAdminRequests(): void {
+  globalAbortController.abort();
+  globalAbortController = new AbortController();
+  inFlightRequests.clear();
+  getCache.clear();
+  while (requestQueue.length > 0) {
+    const cancel = requestQueue.shift();
+    if (cancel) cancel(new Error('REQUEST_ABORTED: Admin session invalid or aborted.'));
+  }
+  activeRequestCount = 0;
+}
+
+function waitForAdminAuth(): Promise<boolean> {
+  if (currentAdminAuthState === 'AUTHORIZED') return Promise.resolve(true);
+  if (currentAdminAuthState === 'UNAUTHORIZED') return Promise.resolve(false);
+  return new Promise<boolean>((resolve) => {
+    authStateListeners.push((state) => resolve(state === 'AUTHORIZED'));
+  });
+}
+
+const MAX_CONCURRENT_REQUESTS = 3;
+let activeRequestCount = 0;
+const requestQueue: Array<(err?: Error) => void> = [];
+
+function acquireRequestSlot(): Promise<void> {
+  if (activeRequestCount < MAX_CONCURRENT_REQUESTS) {
+    activeRequestCount++;
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolve, reject) => {
+    requestQueue.push((err?: Error) => {
+      if (err) {
+        reject(err);
+      } else {
+        activeRequestCount++;
+        resolve();
+      }
+    });
+  });
+}
+
+function releaseRequestSlot(): void {
+  activeRequestCount = Math.max(0, activeRequestCount - 1);
+  if (requestQueue.length > 0) {
+    const next = requestQueue.shift();
+    if (next) next();
+  }
+}
+
+const inFlightRequests = new Map<string, Promise<any>>();
+const getCache = new Map<string, { data: any; expiresAt: number }>();
+let rateLimitResetTime = 0;
+
 async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = {}): Promise<T> {
-  assertLocalReadOnlyRequestAllowed(options.method, import.meta.env.VITE_LOCAL_ADMIN_READ_ONLY === 'true');
+  const isReadOnly = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_LOCAL_ADMIN_READ_ONLY) === 'true';
+  const isPublicAuthRoute =
+    endpoint.includes('/auth/login') ||
+    endpoint.includes('/auth/refresh') ||
+    endpoint.includes('/auth/logout') ||
+    endpoint.includes('/auth/me');
+
+  // Gating: Prevent any non-auth calls if unauthenticated or while auth is loading
+  if (!isPublicAuthRoute && !isReadOnly) {
+    if (currentAdminAuthState === 'UNAUTHORIZED') {
+      throw new Error('ADMIN_AUTH_GUARD: Request blocked because admin is unauthorized.');
+    }
+    if (currentAdminAuthState === 'LOADING') {
+      const authorized = await waitForAdminAuth();
+      if (!authorized) {
+        throw new Error('ADMIN_AUTH_GUARD: Request blocked because admin session is not authorized.');
+      }
+    }
+  }
+
+  const method = (options.method || 'GET').toUpperCase();
+  const cacheKey = `${method}:${endpoint}`;
+
+  if (method === 'GET') {
+    if (rateLimitResetTime > Date.now()) {
+      const waitMs = rateLimitResetTime - Date.now();
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+
+    const cached = getCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data as T;
+    }
+
+    const inFlight = inFlightRequests.get(cacheKey);
+    if (inFlight) {
+      return inFlight as Promise<T>;
+    }
+  }
+
+  if (method !== 'GET') {
+    getCache.clear();
+  }
+
+  const promise = (async () => {
+    await acquireRequestSlot();
+    try {
+      const responseData = await executeRequest<T>(endpoint, options);
+      if (method === 'GET') {
+        getCache.set(cacheKey, { data: responseData, expiresAt: Date.now() + 6000 });
+      }
+      return responseData;
+    } catch (error: any) {
+      if (error?.message?.includes('[429]')) {
+        const parts = error.message.split('|');
+        const retryAfterSeconds = parts.length > 1 ? Number(parts[1]) : 2;
+        const delaySeconds = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0 ? retryAfterSeconds : 2;
+        rateLimitResetTime = Date.now() + (delaySeconds * 1000);
+      }
+      throw error;
+    } finally {
+      releaseRequestSlot();
+      if (method === 'GET') {
+        inFlightRequests.delete(cacheKey);
+      }
+    }
+  })();
+
+  if (method === 'GET') {
+    inFlightRequests.set(cacheKey, promise);
+  }
+
+  return promise;
+}
+
+async function executeRequest<T>(endpoint: string, options: AdminRequestOptions = {}): Promise<T> {
+  assertLocalReadOnlyRequestAllowed(options.method, (typeof import.meta !== 'undefined' && import.meta.env?.VITE_LOCAL_ADMIN_READ_ONLY) === 'true');
   const url = `${API_BASE_URL}${endpoint}`;
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
+
+  const storedToken = getStoredAdminToken();
+  if (storedToken && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${storedToken}`);
+  }
+
   if (isMutation(options.method) && !headers.has('Idempotency-Key')) {
     headers.set('Idempotency-Key', options.idempotencyKey || createAdminIdempotencyKey());
   }
   const { idempotencyKey: _idempotencyKey, ...fetchOptions } = options;
 
-  const response = await csrfManager.fetchWithCsrf(url, {
+  let response = await csrfManager.fetchWithCsrf(url, {
     ...fetchOptions,
+    signal: options.signal || globalAbortController.signal,
     headers,
     credentials: 'include',
   });
 
+  // Handle 401 Unauthorized with silent session refresh
+  const isAuthRoute = endpoint.includes('/auth/login') || endpoint.includes('/auth/refresh') || endpoint.includes('/auth/logout');
+  if (response.status === 401 && !isAuthRoute) {
+    if (isRefreshing) {
+      const refreshOk = await new Promise<boolean>((resolve) => subscribeTokenRefresh(resolve));
+      if (refreshOk) {
+        const nextHeaders = new Headers(options.headers);
+        nextHeaders.set('Content-Type', 'application/json');
+        const refreshedToken = getStoredAdminToken();
+        if (refreshedToken) nextHeaders.set('Authorization', `Bearer ${refreshedToken}`);
+        response = await csrfManager.fetchWithCsrf(url, {
+          ...fetchOptions,
+          headers: nextHeaders,
+          credentials: 'include',
+        });
+      } else {
+        setAdminAuthStatus('UNAUTHORIZED');
+        abortAllPendingAdminRequests();
+      }
+    } else {
+      isRefreshing = true;
+      const refreshOk = await performAdminRefresh();
+      onRefreshed(refreshOk);
+      isRefreshing = false;
+      if (refreshOk) {
+        const nextHeaders = new Headers(options.headers);
+        nextHeaders.set('Content-Type', 'application/json');
+        const refreshedToken = getStoredAdminToken();
+        if (refreshedToken) nextHeaders.set('Authorization', `Bearer ${refreshedToken}`);
+        response = await csrfManager.fetchWithCsrf(url, {
+          ...fetchOptions,
+          headers: nextHeaders,
+          credentials: 'include',
+        });
+      } else {
+        setAdminAuthStatus('UNAUTHORIZED');
+        abortAllPendingAdminRequests();
+      }
+    }
+  }
+
   if (!response.ok) {
     let errorMessage = `API Error: ${response.statusText}`;
+    let retryAfter = response.headers.get('Retry-After');
     try {
-      const errorData = (await response.json()) as ApiErrorPayload;
+      const errorData = (await response.json()) as any;
+      if (errorData?.meta?.retryAfter) {
+        retryAfter = String(errorData.meta.retryAfter);
+      }
       if (errorData.detail) {
         errorMessage = errorData.code
           ? `${errorData.detail} (${errorData.code})`
@@ -65,15 +365,27 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
     } catch {
       // ignore JSON parse error
     }
-    throw new Error(errorMessage);
+    if (response.status === 429) {
+      throw new Error(`[429] ${errorMessage || 'Too many requests'}${retryAfter ? `|${retryAfter}` : ''}`);
+    }
+    throw new Error(`[${response.status}] ${errorMessage}`);
   }
 
   return response.json() as Promise<T>;
 }
 
 export const adminApiClient = {
+  setAdminAuthStatus,
+  abortAllPendingAdminRequests,
+
   clearSecuritySession(): void {
     csrfManager.clearToken();
+    memoryAdminRefreshToken = null;
+    abortAllPendingAdminRequests();
+    try {
+      window.localStorage?.removeItem('manaratak_refresh_token');
+      window.sessionStorage?.removeItem('manaratak_refresh_token');
+    } catch {}
   },
 
   request: adminRequest,

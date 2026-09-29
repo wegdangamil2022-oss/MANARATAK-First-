@@ -87,19 +87,42 @@ export class SecurityMiddlewareFactory {
     return async (req: Request, res: Response, next: NextFunction) => {
       const ip = req.ip || req.socket?.remoteAddress || 'unknown';
       const result = await securityService.getRateLimiter().consume(ip, options.limit, options.windowMs);
-      
+
+      const diagEntry = {
+        path: req.path,
+        ip,
+        socketRemoteAddress: req.socket?.remoteAddress || 'unknown',
+        forwardedFor: req.headers['x-forwarded-for'],
+        trustProxy: req.app.get('trust proxy'),
+        limit: options.limit,
+        remaining: result.remaining,
+        allowed: result.allowed,
+        timestamp: new Date().toISOString()
+      };
+      if (!(globalThis as any).diagnosticsList) {
+        (globalThis as any).diagnosticsList = [];
+      }
+      (globalThis as any).diagnosticsList.unshift(diagEntry);
+      if ((globalThis as any).diagnosticsList.length > 50) {
+        (globalThis as any).diagnosticsList.pop();
+      }
+
       res.setHeader('X-RateLimit-Limit', options.limit);
       res.setHeader('X-RateLimit-Remaining', result.remaining);
       res.setHeader('X-RateLimit-Reset', result.resetTime);
 
       if (!result.allowed) {
+        const retryAfterSeconds = Math.max(1, Math.ceil((result.resetTime - Date.now()) / 1000));
+        res.setHeader('Retry-After', String(retryAfterSeconds));
         res.status(429).json({
           error: {
             code: 'RATE_LIMIT_EXCEEDED',
             message: 'Too many requests, please try again later.'
           },
           meta: {
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            retryAfter: retryAfterSeconds,
+            resetTime: result.resetTime
           }
         });
         return;
@@ -111,8 +134,17 @@ export class SecurityMiddlewareFactory {
 
   public static createCsrfGuard(securityService: ISecurityService, options: CsrfGuardOptions = {}) {
     const headerName = options.headerName || 'x-csrf-token';
-    const exemptPaths = options.exemptPaths || [];
-    const exemptBearerAuth = options.exemptBearerAuth ?? false;
+    const defaultExemptPaths = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/verify-email',
+      '/auth/resend-verification',
+      '/auth/forgot-password',
+      '/auth/reset-password',
+      '/auth/refresh'
+    ];
+    const exemptPaths = [...defaultExemptPaths, ...(options.exemptPaths || [])];
+    const exemptBearerAuth = options.exemptBearerAuth ?? true;
 
     return (req: Request, res: Response, next: NextFunction) => {
       const method = req.method.toUpperCase();
@@ -123,14 +155,14 @@ export class SecurityMiddlewareFactory {
         return;
       }
 
-      // Check for exempted path prefixes if provided
-      if (exemptPaths.some((p) => req.path.startsWith(p))) {
+      // Check for exempted path prefixes or inclusions
+      if (exemptPaths.some((p) => req.path.startsWith(p) || req.path.includes(p))) {
         next();
         return;
       }
 
-      // If configured, requests carrying a Bearer token in the Authorization header may be exempted
-      if (exemptBearerAuth && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      // Requests carrying a Bearer token in the Authorization header are protected against ambient browser CSRF
+      if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
         next();
         return;
       }

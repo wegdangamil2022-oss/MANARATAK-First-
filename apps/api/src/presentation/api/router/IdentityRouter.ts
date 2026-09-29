@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import { ValidationException } from '@manaratak/core';
 import { 
   ProvisionIdentityUseCase,
   ActivateIdentityUseCase,
@@ -35,8 +36,25 @@ export class IdentityRouter {
     const archiveUseCase = archiveIdentityUseCase;
     const purgeUseCase = purgeIdentityUseCase;
 
+    const safe =
+      (fn: (req: Request, res: Response) => Promise<unknown>) =>
+      async (req: Request, res: Response, next: NextFunction) => {
+        try {
+          await fn(req, res);
+        } catch (err: any) {
+          if (err instanceof ValidationException || err?.name === 'ValidationException' || err?.name === 'ZodError') {
+            res.status(400).json(responseFormatter.error({
+              code: 'VALIDATION_ERROR',
+              message: err?.message || 'Validation failed'
+            }));
+            return;
+          }
+          next(err);
+        }
+      };
+
     // 1. Provision Identity
-    router.post('/', async (req: Request, res: Response) => {
+    router.post('/', safe(async (req: Request, res: Response) => {
       const body = parseStrict(identityProvisionSchema, req.body);
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
       const result = await provisionUseCase.execute({ ...body, createdBy: req.authUserId });
@@ -66,10 +84,10 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to provision identity'
         }));
       }
-    });
+    }));
 
     // 2. Get Identity Details (Read-only, no audit)
-    router.get('/:id', async (req: Request, res: Response) => {
+    router.get('/:id', safe(async (req: Request, res: Response) => {
       const { id } = parseStrict(identityIdParamSchema, req.params);
       const result = await getIdentityUseCase.execute(id);
       if (result.isSuccess) {
@@ -80,10 +98,10 @@ export class IdentityRouter {
           message: result.error?.message || 'Identity not found'
         }));
       }
-    });
+    }));
 
     // 3. List Identities (Paged & Filtered, Read-only, no audit)
-    router.get('/', async (req: Request, res: Response) => {
+    router.get('/', safe(async (req: Request, res: Response) => {
       const query = parseStrict(identityListQuerySchema, req.query);
       const result = await listIdentitiesUseCase.execute(query);
 
@@ -95,10 +113,10 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to query identities'
         }));
       }
-    });
+    }));
 
     // 4. Activate Identity
-    router.post('/:id/activate', async (req: Request, res: Response) => {
+    router.post('/:id/activate', safe(async (req: Request, res: Response) => {
       parseStrict(emptyBodySchema, req.body ?? {});
       const { id } = parseStrict(identityIdParamSchema, req.params);
       const result = await activateUseCase.execute(id);
@@ -125,10 +143,10 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to activate identity'
         }));
       }
-    });
+    }));
 
     // 5. Suspend Identity
-    router.post('/:id/suspend', async (req: Request, res: Response) => {
+    router.post('/:id/suspend', safe(async (req: Request, res: Response) => {
       const { id } = parseStrict(identityIdParamSchema, req.params);
       const body = parseStrict(identityLifecycleReasonSchema, req.body);
       const result = await suspendUseCase.execute({ identityId: id, reason: body.reason });
@@ -156,10 +174,10 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to suspend identity'
         }));
       }
-    });
+    }));
 
     // 6. Archive Identity
-    router.post('/:id/archive', async (req: Request, res: Response) => {
+    router.post('/:id/archive', safe(async (req: Request, res: Response) => {
       const { id } = parseStrict(identityIdParamSchema, req.params);
       const body = parseStrict(identityLifecycleReasonSchema, req.body);
       const result = await archiveUseCase.execute({ identityId: id, reason: body.reason });
@@ -187,10 +205,10 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to archive identity'
         }));
       }
-    });
+    }));
 
     // 7. Purge/Delete Identity (GDPR compliant)
-    router.delete('/:id', async (req: Request, res: Response) => {
+    router.delete('/:id', safe(async (req: Request, res: Response) => {
       const { id } = parseStrict(identityIdParamSchema, req.params);
       const body = parseStrict(identityLifecycleReasonSchema, req.body);
       const result = await purgeUseCase.execute({ identityId: id, reason: body.reason });
@@ -218,10 +236,10 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to purge identity'
         }));
       }
-    });
+    }));
 
     // 8. Update Profile Details
-    router.put('/:id/profile', async (req: Request, res: Response) => {
+    router.put('/:id/profile', safe(async (req: Request, res: Response) => {
       const { id } = parseStrict(identityIdParamSchema, req.params);
       const body = parseStrict(identityProfileUpdateSchema, req.body);
       const result = await updateProfileUseCase.execute({ identityId: id, ...body });
@@ -248,10 +266,10 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to update profile'
         }));
       }
-    });
+    }));
 
     // 9. Update Contact Registry
-    router.put('/:id/contact', async (req: Request, res: Response) => {
+    router.put('/:id/contact', safe(async (req: Request, res: Response) => {
       const { id } = parseStrict(identityIdParamSchema, req.params);
       const body = parseStrict(identityContactUpdateSchema, req.body);
       const result = await updateContactUseCase.execute({ identityId: id, ...body });
@@ -278,7 +296,7 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to update contact registry'
         }));
       }
-    });
+    }));
 
     return router;
   }

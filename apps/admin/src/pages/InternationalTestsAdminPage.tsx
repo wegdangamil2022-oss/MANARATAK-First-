@@ -1,12 +1,36 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
-import { Archive, CheckCircle2, Eye, Filter, Loader2, Send } from 'lucide-react';
+import { Archive, CheckCircle2, Eye, Filter, Loader2, Send, BookOpen, AlertCircle, GraduationCap } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
 
 type InternationalTestStatus = 'IMPORTED' | 'READY_TO_REVIEW' | 'NEEDS_REVIEW' | 'INCOMPLETE' | 'READY_TO_PUBLISH' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED';
 type InternationalTestCompletenessStatus = 'INCOMPLETE' | 'COMPLETE' | 'NEEDS_REVIEW';
 type InternationalTestCategory = 'ENGLISH_LANGUAGE' | 'NON_ENGLISH_LANGUAGE' | 'GENERAL_UNDERGRADUATE_ADMISSION' | 'GRADUATE_ADMISSION' | 'NATIONAL_INTERNATIONAL_ADMISSION' | 'SPECIALIZED_ADMISSION' | 'PROFESSIONAL_LICENSING_CERTIFICATION' | 'LANGUAGE_PROFICIENCY' | 'UNDERGRAD_ADMISSION' | 'GRAD_ADMISSION' | 'PROFESSIONAL_LICENSING' | 'ACADEMIC_PLACEMENT' | 'OTHER';
+
+function MetricCard({ icon: Icon, label, value, accent }: { icon: any; label: string; value: number | string; accent: string }) {
+  const tone = metricAccentClasses(accent);
+  return (
+    <div className="rounded-2xl border border-[#DDEFF2] bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className={`grid h-9 w-9 place-items-center rounded-xl ${tone.icon}`}>
+          <Icon className="h-4.5 w-4.5" />
+        </div>
+        <div className={`text-2xl font-black ${tone.text}`}>{value}</div>
+      </div>
+      <div className="mt-3 text-[11px] font-black text-slate-600">{label}</div>
+    </div>
+  );
+}
+
+function metricAccentClasses(accent: string) {
+  if (accent === '#142B5F') return { icon: 'bg-[#142B5F]/10 text-[#142B5F]', text: 'text-[#142B5F]' };
+  if (accent === '#0E7C86') return { icon: 'bg-[#0E7C86]/10 text-[#0E7C86]', text: 'text-[#0E7C86]' };
+  if (accent === '#21A7B4') return { icon: 'bg-[#21A7B4]/10 text-[#21A7B4]', text: 'text-[#21A7B4]' };
+  if (accent === '#D6A43B') return { icon: 'bg-[#D6A43B]/10 text-[#D6A43B]', text: 'text-[#D6A43B]' };
+  if (accent === '#B94A48') return { icon: 'bg-[#B94A48]/10 text-[#B94A48]', text: 'text-[#B94A48]' };
+  return { icon: 'bg-[#2E7D5A]/10 text-[#2E7D5A]', text: 'text-[#2E7D5A]' };
+}
 
 interface InternationalTest {
   id: string;
@@ -135,49 +159,62 @@ export function InternationalTestsAdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">{t('international_tests')}</h2>
-          <p className="text-sm text-gray-500 mt-1">{t('review_imported_tests_official_registration_links_')}</p>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-black"
-            >
-              <option value="">{t('all_statuses')}</option>
-              {statuses.map((s) => (
-                <option key={s} value={s}>
-                  {getStatusLabel(s, isRtl)}
-                </option>
-              ))}
-            </select>
-            <Filter className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+        <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm border border-white/15">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>القسم الأكاديمي · الاختبارات الدولية والمقاييس</span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{t('international_tests')}</h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/80">{t('review_imported_tests_official_registration_links_')}</p>
           </div>
+          <div className="flex flex-wrap gap-3 shrink-0">
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]"
+              >
+                <option value="" className="text-slate-900">{t('all_statuses')}</option>
+                {statuses.map((s) => (
+                  <option key={s} value={s} className="text-slate-900">
+                    {getStatusLabel(s, isRtl)}
+                  </option>
+                ))}
+              </select>
+              <Filter className="absolute right-3 top-2.5 h-4 w-4 text-cyan-200 pointer-events-none" />
+            </div>
 
-          <div className="relative">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-black"
-            >
-              <option value="">{t('all_categories')}</option>
-              {testCategories.map((c) => (
-                <option key={c} value={c}>
-                  {getCategoryLabel(c, isRtl)}
-                </option>
-              ))}
-            </select>
-            <Filter className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+            <div className="relative">
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]"
+              >
+                <option value="" className="text-slate-900">{isRtl ? 'جميع التصنيفات' : 'All Categories'}</option>
+                {testCategories.map((c) => (
+                  <option key={c} value={c} className="text-slate-900">
+                    {getCategoryLabel(c, isRtl)}
+                  </option>
+                ))}
+              </select>
+              <Filter className="absolute right-3 top-2.5 h-4 w-4 text-cyan-200 pointer-events-none" />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {message && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">{message}</div>}
       {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard label={isRtl ? "إجمالي الاختبارات" : "Total Tests"} value={tests?.total ?? 0} icon={BookOpen} accent="#142B5F" />
+        <MetricCard label={isRtl ? "منشور في الموقع" : "Published Tests"} value={tests?.data.filter(x => x.status === 'PUBLISHED').length ?? 0} icon={CheckCircle2} accent="#2E7D5A" />
+        <MetricCard label={isRtl ? "قيد المراجعة" : "Under Review"} value={tests?.data.filter(x => x.status === 'READY_TO_REVIEW' || x.status === 'NEEDS_REVIEW').length ?? 0} icon={AlertCircle} accent="#D6A43B" />
+        <MetricCard label={isRtl ? "غير مكتمل" : "Incomplete"} value={tests?.data.filter(x => x.completenessStatus === 'INCOMPLETE').length ?? 0} icon={GraduationCap} accent="#B94A48" />
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">

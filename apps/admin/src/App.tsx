@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { adminApiClient } from './api/client';
+import { adminApiClient, getStoredAdminToken, performAdminRefresh } from './api/client';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { ScholarshipListPage } from './pages/ScholarshipListPage';
 import { ScholarshipDetailPage } from './pages/ScholarshipCatalogDetailPage';
@@ -42,34 +42,61 @@ import { StudentSupportAdminPage } from './pages/StudentSupportAdminPage';
 import { AdminAuthorizationProvider, RequireAdminPermission } from './security/AdminAuthorizationContext';
 import { I18nProvider, useTranslation } from './i18n/I18nProvider';
 import { AdminNavigation } from './components/AdminNavigation';
-import { Languages, LockKeyhole } from 'lucide-react';
+import { Languages, LockKeyhole, ArrowLeftRight, Loader2 } from 'lucide-react';
 
 function AdminLayout() {
   const localReadOnly = import.meta.env.VITE_LOCAL_ADMIN_READ_ONLY === 'true';
   const [adminAccess, setAdminAccess] = useState<'loading' | 'authorized' | 'unauthorized'>(
     localReadOnly ? 'authorized' : 'loading',
   );
-  const [adminPermissions, setAdminPermissions] = useState<string[]>(localReadOnly ? ['*'] : []);
+  const [adminPermissions, setAdminPermissions] = useState<string[]>(
+    localReadOnly ? ['*'] : []
+  );
   const { t, language, setLanguage } = useTranslation();
 
-  useEffect(() => {
-    if (localReadOnly) return;
+  const checkSession = () => {
     let active = true;
-    verifyAdminSession().then((permissions) => {
-      if (!active) return;
-      setAdminPermissions(permissions ?? []);
-      setAdminAccess(permissions?.length ? 'authorized' : 'unauthorized');
-      if (permissions === null) window.location.replace(unifiedLoginUrl());
-    });
+    adminApiClient.setAdminAuthStatus('LOADING');
+    verifyAdminSession()
+      .then((permissions) => {
+        if (!active) return;
+        if (permissions && permissions.length > 0) {
+          adminApiClient.setAdminAuthStatus('AUTHORIZED');
+          setAdminPermissions(permissions);
+          setAdminAccess('authorized');
+        } else {
+          adminApiClient.setAdminAuthStatus('UNAUTHORIZED');
+          adminApiClient.abortAllPendingAdminRequests();
+          setAdminPermissions([]);
+          setAdminAccess('unauthorized');
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        adminApiClient.setAdminAuthStatus('UNAUTHORIZED');
+        adminApiClient.abortAllPendingAdminRequests();
+        setAdminPermissions([]);
+        setAdminAccess('unauthorized');
+      });
     return () => {
       active = false;
     };
+  };
+
+  useEffect(() => {
+    if (localReadOnly) {
+      adminApiClient.setAdminAuthStatus('AUTHORIZED');
+      return;
+    }
+    return checkSession();
   }, [localReadOnly]);
 
   const lockAdmin = async () => {
     try {
       await adminApiClient.request('/auth/logout', { method: 'POST' });
     } finally {
+      adminApiClient.setAdminAuthStatus('UNAUTHORIZED');
+      adminApiClient.abortAllPendingAdminRequests();
       adminApiClient.clearSecuritySession();
       clearAdminSession();
       setAdminPermissions([]);
@@ -79,11 +106,26 @@ function AdminLayout() {
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <div className="min-h-screen bg-[#FAF7F0] text-[#203442] flex flex-col font-sans">
-        <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-[#DDEFF2] bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6">
+      <div className="min-h-screen bg-slate-50 text-[#142B5F] flex flex-col font-sans">
+        <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#142B5F] text-white shadow-sm">
-              <span className="text-sm font-black">M</span>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#142B5F] text-white shadow-sm overflow-hidden p-1 border border-[#21A7B4]/20 shrink-0">
+              <img
+                src="/brand/manaratak-logo.png"
+                alt="MANARATAK"
+                className="h-full w-full object-contain rounded-xl"
+                onError={(e) => {
+                  // Fallback to stylized 'M' if image not found
+                  (e.currentTarget as HTMLElement).style.display = 'none';
+                  const parent = e.currentTarget.parentElement;
+                  if (parent && !parent.querySelector('.fallback-m')) {
+                    const span = document.createElement('span');
+                    span.className = 'fallback-m text-sm font-black text-white';
+                    span.textContent = 'M';
+                    parent.appendChild(span);
+                  }
+                }}
+              />
             </div>
             <div>
               <h1 className="text-base font-black tracking-tight text-[#142B5F] sm:text-lg">{t('admin_title')}</h1>
@@ -92,19 +134,26 @@ function AdminLayout() {
           </div>
           {adminAccess === 'authorized' && (
             <div className="flex items-center gap-2">
+              <a
+                href={(import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '') || '/'}
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-[#0E7C86] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs"
+              >
+                <ArrowLeftRight className="h-4 w-4" />
+                <span className="hidden sm:inline">{language === 'ar' ? 'العودة للموقع الرئيسي' : 'Back to main site'}</span>
+              </a>
               <button
                 type="button"
                 onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/70 px-3 text-xs font-black text-[#0E7C86] transition hover:border-[#21A7B4]/55 hover:bg-[#DDEFF2]/45"
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-[#142B5F] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs"
               >
-                <Languages className="h-4 w-4" />
+                <Languages className="h-4 w-4 text-[#0E7C86]" />
                 {t('admin_lang_switch')}
               </button>
               {!localReadOnly && (
                 <button
                   type="button"
                   onClick={() => void lockAdmin()}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 text-xs font-black text-rose-700 transition hover:bg-rose-100"
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100 shadow-xs"
                 >
                   <LockKeyhole className="h-4 w-4" />
                   <span className="hidden sm:inline">{t('lock')}</span>
@@ -177,9 +226,15 @@ function AdminLayout() {
           </div>
           </AdminAuthorizationProvider>
         ) : (
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 flex items-center justify-center">
             {adminAccess === 'loading' ? (
-              <div className="mx-auto mt-16 max-w-xl text-center text-sm text-[#203442]/60">{t('loading')}</div>
+              <div className="mx-auto mt-20 max-w-md rounded-3xl border border-[#DDEFF2] bg-white p-8 text-center shadow-xs">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-[#0E7C86] mb-3">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#0E7C86]" />
+                </div>
+                <div className="text-sm font-black text-[#142B5F]">{t('loading')}</div>
+                <p className="mt-1 text-xs text-slate-500">جاري التحقق من جلسة المسؤول وتجهيز الصلاحيات...</p>
+              </div>
             ) : (
               <AdminAccessGate />
             )}
@@ -197,28 +252,83 @@ function unifiedLoginUrl() {
 
 function AdminAccessGate() {
   const { t } = useTranslation();
+  const handleLoginClick = () => {
+    try {
+      sessionStorage.setItem('manaratak_post_login_return', window.location.pathname + window.location.search);
+    } catch {}
+    window.location.href = unifiedLoginUrl();
+  };
+
   return (
-    <div className="mx-auto mt-16 max-w-xl rounded-3xl border border-[#DDEFF2] bg-white p-8 text-center">
-      <p role="alert">{t('admin_login_no_permission')}</p>
-      <a href={unifiedLoginUrl()} className="mt-4 inline-block underline">{t('admin_login_submit')}</a>
+    <div className="mx-auto mt-16 max-w-xl rounded-3xl border border-[#DDEFF2] bg-white p-8 text-center shadow-sm">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 mb-4">
+        <LockKeyhole className="h-6 w-6" />
+      </div>
+      <h3 className="text-lg font-black text-[#142B5F] mb-2">{t('admin_login_no_permission')}</h3>
+      <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+        يرجى تسجيل الدخول بحساب مسؤول للمتابعة إلى لوحة التحكم، أو إعادة التحقق في حال وجود تحديث في الخادم.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={handleLoginClick}
+          className="rounded-xl bg-[#0E7C86] hover:bg-[#0c6a73] px-6 py-2.5 text-xs font-black text-white shadow-sm transition active:scale-95 cursor-pointer"
+        >
+          {t('admin_login_submit')}
+        </button>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-5 py-2.5 text-xs font-bold text-slate-700 transition active:scale-95 cursor-pointer"
+        >
+          إعادة المحاولة
+        </button>
+      </div>
     </div>
   );
 }
+
 function clearAdminSession() {
-  localStorage.removeItem('manaratak_admin_access');
-  localStorage.removeItem('manaratak_admin_bearer');
-  localStorage.removeItem('manaratak_admin_bearer_token');
+  try {
+    sessionStorage.removeItem('manaratak_admin_bearer_token');
+    sessionStorage.removeItem('manaratak_access_token');
+    sessionStorage.removeItem('manaratak_refresh_token');
+    sessionStorage.removeItem('manaratak_admin_bearer');
+  } catch {}
+  try {
+    localStorage.removeItem('manaratak_admin_access');
+    localStorage.removeItem('manaratak_admin_bearer');
+    localStorage.removeItem('manaratak_admin_bearer_token');
+    localStorage.removeItem('manaratak_access_token');
+    localStorage.removeItem('manaratak_refresh_token');
+    localStorage.removeItem('manaratak_admin_permissions');
+  } catch {}
 }
 
 async function verifyAdminSession(): Promise<string[] | null> {
+  const storedToken = getStoredAdminToken();
+  if (!storedToken) {
+    clearAdminSession();
+    return null;
+  }
+
   try {
     const response = await adminApiClient.request<{
       data?: { effectivePermissions?: string[] };
     }>('/auth/me');
     const permissions = response.data?.effectivePermissions || [];
-    return permissions.some((permission) => permission === '*' || permission === 'admin:*' || permission.startsWith('admin:'))
-      ? permissions
-      : [];
+    const isAuthorized = permissions.some((permission) =>
+      permission === '*' || permission === 'admin:*' || permission.startsWith('admin:')
+    );
+    if (isAuthorized) {
+      try {
+        localStorage.setItem('manaratak_admin_access', 'authorized');
+        localStorage.setItem('manaratak_admin_permissions', JSON.stringify(permissions));
+      } catch {}
+      return permissions;
+    }
+    clearAdminSession();
+    return null;
   } catch {
     clearAdminSession();
     return null;

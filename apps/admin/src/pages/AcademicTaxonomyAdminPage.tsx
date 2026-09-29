@@ -268,29 +268,37 @@ export function AcademicTaxonomyAdminPage() {
   return (
     <div className={`max-w-7xl mx-auto space-y-6 pb-12 ${isAr ? 'rtl text-right' : 'ltr text-left'}`} dir={isAr ? 'rtl' : 'ltr'}>
       {/* Top Title Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-            {isAr ? 'التصنيف الأكاديمي والدرجات العلمية' : 'Academic Taxonomy & Degree Levels'}
-          </h1>
-          <p className="text-slate-500 font-medium text-sm">
-            {isAr 
-              ? 'بوابة حوكمة وإدارة شجرة التصنيف الأكاديمي، المعايير والدرجات العلمية.' 
-              : 'Governance portal for managing academic taxonomy, reference standards, and degree levels.'}
-          </p>
+      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
+        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
+              <Plus className="h-4 w-4 text-[#21A7B4]" />
+              <span>منظومة الحوكمة والتصنيف الأكاديمي</span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
+              {isAr ? 'التصنيف الأكاديمي والدرجات العلمية' : 'Academic Taxonomy & Degree Levels'}
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
+              {isAr 
+                ? 'بوابة حوكمة وإدارة شجرة التصنيف الأكاديمي، المعايير والدرجات العلمية المعتمدة.' 
+                : 'Governance portal for managing academic taxonomy, reference standards, and degree levels.'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {activeMainTab === 'taxonomy' && !localReadOnly && (
+              <button
+                onClick={() => setShowAddNodeModal(true)}
+                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99]"
+              >
+                <Plus className="h-4 w-4" />
+                {isAr ? 'إضافة عقدة تصنيف جديدة' : 'Add Taxonomy Node'}
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {activeMainTab === 'taxonomy' && !localReadOnly && (
-            <button
-              onClick={() => setShowAddNodeModal(true)}
-              className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 text-xs"
-            >
-              <Plus className="h-4 w-4" />
-              {isAr ? 'إضافة عقدة تصنيف جديدة' : 'Add Taxonomy Node'}
-            </button>
-          )}
-        </div>
-      </div>
+      </section>
 
       {/* Main Tab Switcher */}
       <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit gap-1 border border-slate-200">
