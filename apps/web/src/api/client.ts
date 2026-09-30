@@ -2569,13 +2569,19 @@ export class ApiClient {
           sessionStorage.removeItem('manaratak_access_token');
           sessionStorage.removeItem('manaratak_admin_bearer_token');
           sessionStorage.removeItem('manaratak_admin_bearer');
+        } catch { /* session storage can be restricted */ }
+        try {
           localStorage.removeItem('manaratak_access_token');
           localStorage.removeItem('manaratak_refresh_token');
           localStorage.removeItem('manaratak_admin_bearer_token');
           localStorage.removeItem('manaratak_admin_bearer');
           localStorage.removeItem('manaratak_admin_access');
           localStorage.removeItem('manaratak_admin_permissions');
-        } catch { /* storage can be restricted */ }
+          localStorage.removeItem('manaratak_favorites_v2');
+          localStorage.removeItem('manaratak_milestones');
+          localStorage.removeItem('manaratak_notifications');
+          localStorage.removeItem('manaratak_nav_state_v2');
+        } catch { /* local storage can be restricted */ }
       }
     }
   }
