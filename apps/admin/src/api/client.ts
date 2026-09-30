@@ -75,6 +75,7 @@ export type AdminAuthState = 'LOADING' | 'AUTHORIZED' | 'UNAUTHORIZED';
 let currentAdminAuthState: AdminAuthState = 'LOADING';
 let authStateListeners: Array<(state: AdminAuthState) => void> = [];
 let globalAbortController = new AbortController();
+let sessionGeneration = 0;
 
 export function setAdminAuthStatus(state: AdminAuthState): void {
   currentAdminAuthState = state;
@@ -86,6 +87,7 @@ export function setAdminAuthStatus(state: AdminAuthState): void {
 }
 
 export function abortAllPendingAdminRequests(): void {
+  sessionGeneration++;
   globalAbortController.abort();
   globalAbortController = new AbortController();
   inFlightRequests.clear();
@@ -137,6 +139,7 @@ function releaseRequestSlot(): void {
 const inFlightRequests = new Map<string, Promise<any>>();
 const getCache = new Map<string, { data: any; expiresAt: number }>();
 let rateLimitResetTime = 0;
+let lastPermissionRecheckAt = 0;
 
 async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = {}): Promise<T> {
   const isPublicAuthRoute =
@@ -160,8 +163,9 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 
   const method = (options.method || 'GET').toUpperCase();
   const cacheKey = `${method}:${endpoint}`;
+  const coalesce = method === 'GET' && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
 
-  if (method === 'GET') {
+  if (method === 'GET' && !isPublicAuthRoute) {
     if (rateLimitResetTime > Date.now()) {
       const waitMs = rateLimitResetTime - Date.now();
       await new Promise((resolve) => setTimeout(resolve, waitMs));
@@ -172,10 +176,10 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
       return cached.data as T;
     }
 
+  }
+  if (coalesce) {
     const inFlight = inFlightRequests.get(cacheKey);
-    if (inFlight) {
-      return inFlight as Promise<T>;
-    }
+    if (inFlight) return inFlight as Promise<T>;
   }
 
   if (method !== 'GET') {
@@ -184,9 +188,11 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 
   const promise = (async () => {
     await acquireRequestSlot();
+    const requestGeneration = sessionGeneration;
     try {
       const responseData = await executeRequest<T>(endpoint, options);
-      if (method === 'GET') {
+      if (!isPublicAuthRoute && requestGeneration !== sessionGeneration) throw new Error('REQUEST_ABORTED: Admin session changed.');
+      if (method === 'GET' && !isPublicAuthRoute) {
         getCache.set(cacheKey, { data: responseData, expiresAt: Date.now() + 6000 });
       }
       return responseData;
@@ -200,13 +206,13 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
       throw error;
     } finally {
       releaseRequestSlot();
-      if (method === 'GET') {
+      if (coalesce) {
         inFlightRequests.delete(cacheKey);
       }
     }
   })();
 
-  if (method === 'GET') {
+  if (coalesce) {
     inFlightRequests.set(cacheKey, promise);
   }
 
@@ -245,8 +251,10 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
           credentials: 'include',
         });
       } else {
-        setAdminAuthStatus('UNAUTHORIZED');
-        abortAllPendingAdminRequests();
+        if (!endpoint.includes('/auth/me')) {
+          setAdminAuthStatus('UNAUTHORIZED');
+          window.dispatchEvent(new Event('manaratak-admin-session-expired'));
+        }
       }
     } else {
       isRefreshing = true;
@@ -262,13 +270,19 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
           credentials: 'include',
         });
       } else {
-        setAdminAuthStatus('UNAUTHORIZED');
-        abortAllPendingAdminRequests();
+        if (!endpoint.includes('/auth/me')) {
+          setAdminAuthStatus('UNAUTHORIZED');
+          window.dispatchEvent(new Event('manaratak-admin-session-expired'));
+        }
       }
     }
   }
 
   if (!response.ok) {
+    if (response.status === 403 && endpoint.startsWith('/admin/') && Date.now() - lastPermissionRecheckAt > 1000) {
+      lastPermissionRecheckAt = Date.now();
+      window.dispatchEvent(new Event('manaratak-admin-permission-changed'));
+    }
     let errorMessage = `API Error: ${response.statusText}`;
     let retryAfter = response.headers.get('Retry-After');
     try {
@@ -298,7 +312,13 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     throw new Error(`[${response.status}] ${errorMessage}`);
   }
 
-  return response.json() as Promise<T>;
+  const payload = await response.json() as T;
+  if (endpoint.includes('/auth/login')) {
+    refreshFailedPermanently = false;
+    csrfManager.clearToken();
+    abortAllPendingAdminRequests();
+  }
+  return payload;
 }
 
 export const adminApiClient = {

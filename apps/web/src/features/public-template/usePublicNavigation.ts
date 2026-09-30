@@ -49,7 +49,11 @@ function entityKey(item: any): string {
 export function publicUrlForState(state: NavigationState): string {
   const prefix = localePrefix();
   let path = '/';
-  if (state.activeTab === 'auth') path = '/login';
+  if (state.activeTab === 'auth') {
+    const currentAuthPath = window.location.pathname.replace(/^\/(?:ar|en)(?=\/|$)/, '');
+    path = ['/signup', '/register', '/verify-email', '/forgot-password', '/reset-password'].includes(currentAuthPath)
+      ? currentAuthPath : '/login';
+  }
   else if (state.activeTab === 'account') path = '/student';
   else if (state.activeTab === 'ai-tools') path = '/tools';
   else if (state.selectedScholarship) path = `/scholarships/${entityKey(state.selectedScholarship)}`;
@@ -70,6 +74,10 @@ export function publicUrlForState(state: NavigationState): string {
     path = listPaths[state.selectedCategory] || '/search';
   }
   const params = new URLSearchParams();
+  if ((path === '/verify-email' || path === '/reset-password') && window.location.search) {
+    const token = new URLSearchParams(window.location.search).get('token');
+    if (token) params.set('token', token);
+  }
   if (path === '/search' && state.globalSearchQuery.trim()) params.set('q', state.globalSearchQuery.trim());
   if (path === '/tools' && state.activeTab === 'ai-tools' && state.nestedDetailId) params.set('detail', state.nestedDetailId);
   if (state.detailSearchTerm.trim()) params.set('match', state.detailSearchTerm.trim());
@@ -206,4 +214,3 @@ export function usePublicNavigation() {
   }, [navigate]);
   return {state, field, navigate, replace, back};
 }
-

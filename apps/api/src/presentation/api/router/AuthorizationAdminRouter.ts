@@ -1,24 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { ManageRolesUseCase, AssignRoleUseCase, ManageEmergencyAccessUseCase } from '@manaratak/application';
-import { IAuditRecordRepository, Role } from '@manaratak/domain';
+import { ManageRolesUseCase, AssignRoleUseCase, ManageEmergencyAccessUseCase, GetIdentityUseCase, ListIdentitiesUseCase } from '@manaratak/application';
+import { AuthorizationEvaluatorService, IAuditRecordRepository, LifeStatus, Role } from '@manaratak/domain';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 import type { AdminBootstrapVerifier } from '@manaratak/infrastructure';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { authorizationRoleAssignmentSchema, authorizationRoleCreateSchema, parseStrict } from '../../validation/StrictControlPlaneSchemas.js';
-
-const KNOWN_ADMIN_PERMISSIONS = [
-  'admin:credentials:manage',
-  'admin:identities:manage', 'admin:authorization:manage', 'admin:audit:manage', 'admin:assets:manage',
-  'admin:imports:manage', 'admin:reference-data:manage', 'admin:academic-taxonomy:manage',
-  'admin:international-tests:manage', 'admin:universities:manage', 'admin:majors:manage',
-  'admin:scholarships:manage', 'admin:courses:manage', 'admin:certificates:view',
-  'admin:certificates:templates:author', 'admin:certificates:templates:approve',
-  'admin:certificates:lifecycle:manage', 'admin:certificates:issuers:manage', 'admin:students:support', 'admin:students:support:mutate', 'admin:student-tools:manage',
-  'admin:cms:manage', 'admin:services:manage', 'admin:finance:manage', 'admin:careers:manage',
-  'admin:ai:manage', 'admin:settings:manage', 'admin:platform:manage',
-] as const;
+import { KNOWN_ADMIN_PERMISSIONS } from '../../security/AdminPermissionCatalog.js';
 
 function roleDto(role: Role) {
   return {
@@ -38,6 +27,11 @@ function isHighRiskRole(role: Role): boolean {
     || permissions.includes('admin:identities:manage');
 }
 
+function isNonDelegablePermission(permission: string): boolean {
+  return permission === '*' || permission === 'admin:*' || permission === 'admin:authorization:manage'
+    || permission === 'admin:identities:manage' || permission === 'admin:credentials:manage';
+}
+
 function assertMakerChecker(req: Request, actorId: string): { secondApproverId: string; changeTicket: string } {
   const secondApproverId = String(req.header('x-second-approver-id') || '').trim();
   const changeTicket = String(req.header('x-change-ticket') || '').trim();
@@ -47,15 +41,37 @@ function assertMakerChecker(req: Request, actorId: string): { secondApproverId: 
 }
 
 export class AuthorizationAdminRouter {
-  public static create({ manageRolesUseCase, assignRoleUseCase, manageEmergencyAccessUseCase, auditRecordRepo, adminBootstrapVerifier }: {
+  public static create({ manageRolesUseCase, assignRoleUseCase, manageEmergencyAccessUseCase, getIdentityUseCase, listIdentitiesUseCase, authEvaluatorService, auditRecordRepo, adminBootstrapVerifier }: {
     manageRolesUseCase: ManageRolesUseCase;
     assignRoleUseCase: AssignRoleUseCase;
     manageEmergencyAccessUseCase: ManageEmergencyAccessUseCase;
+    getIdentityUseCase?: GetIdentityUseCase;
+    listIdentitiesUseCase?: ListIdentitiesUseCase;
+    authEvaluatorService?: AuthorizationEvaluatorService;
     auditRecordRepo?: IAuditRecordRepository;
     adminBootstrapVerifier?: AdminBootstrapVerifier;
   }): Router {
     const router = Router();
     const responseFormatter = new ResponseFormatter('v1');
+    const assertDelegablePermissions = async (req: Request, actorId: string, permissions: string[]) => {
+      if (!authEvaluatorService) throw new Error('AUTHORIZATION_EVALUATOR_UNAVAILABLE');
+      for (const permission of permissions) {
+        if (isNonDelegablePermission(permission) || !KNOWN_ADMIN_PERMISSIONS.includes(permission as typeof KNOWN_ADMIN_PERMISSIONS[number])) {
+          throw new Error('NON_DELEGABLE_PERMISSION');
+        }
+        const decision = await authEvaluatorService.evaluatePermission(actorId, permission, {
+          ip: req.ip || req.socket?.remoteAddress, requestTime: new Date(), userAgent: req.headers['user-agent'],
+        });
+        if (!decision.isGranted) throw new Error('ROLE_PERMISSION_EXCEEDS_ACTOR');
+      }
+    };
+    const assertVerifiedIdentity = async (identityId: string) => {
+      if (!getIdentityUseCase) throw new Error('IDENTITY_VERIFICATION_UNAVAILABLE');
+      const result = await getIdentityUseCase.execute(identityId);
+      const identity = result.isSuccess ? result.getValue() : null;
+      if (!identity || identity.status !== LifeStatus.ACTIVE || identity.account.accessState !== 'Active'
+        || !identity.user?.contactRegistry.isEmailVerified) throw new Error('VERIFIED_ACTIVE_IDENTITY_REQUIRED');
+    };
     const mutationContext = (req: Request, extra?: Record<string, unknown>) => {
       const principal = requireAuthenticatedPrincipal(req);
       return {
@@ -76,8 +92,43 @@ export class AuthorizationAdminRouter {
       res.status(report.status === 'UNAVAILABLE' ? 503 : 200).json(responseFormatter.success(report));
     });
 
-    router.get('/permissions', (_req, res) => {
-      res.status(200).json(responseFormatter.success({ permissions: KNOWN_ADMIN_PERMISSIONS }));
+    router.get('/permissions', async (req, res, next) => {
+      try {
+        if (!authEvaluatorService) throw new Error('AUTHORIZATION_EVALUATOR_UNAVAILABLE');
+        const actor = requireAuthenticatedPrincipal(req).principalId;
+        const candidates = KNOWN_ADMIN_PERMISSIONS.filter(permission => !isNonDelegablePermission(permission));
+        const context = { ip: req.ip || req.socket?.remoteAddress, requestTime: new Date(), userAgent: req.headers['user-agent'] };
+        const decisions = await Promise.all(candidates.map(permission => authEvaluatorService.evaluatePermission(actor, permission, context)));
+        res.status(200).json(responseFormatter.success({ permissions: candidates.filter((_, index) => decisions[index].isGranted) }));
+      } catch (error) { next(error); }
+    });
+
+    router.get('/eligible-identities', async (req, res, next) => {
+      try {
+        if (!listIdentitiesUseCase) throw new Error('IDENTITY_LIST_UNAVAILABLE');
+        const query = z.object({ limit: z.coerce.number().int().min(1).max(100).default(50), offset: z.coerce.number().int().min(0).default(0) }).strict().parse(req.query);
+        const result = await listIdentitiesUseCase.execute({ status: LifeStatus.ACTIVE, ...query });
+        if (!result.isSuccess) throw new Error('IDENTITY_LIST_UNAVAILABLE');
+        const page = result.getValue();
+        res.status(200).json(responseFormatter.success({ identities: page.items.filter(item => item.user?.contactRegistry.isEmailVerified && item.account.accessState === 'Active')
+          .map(item => ({ id: item.id, displayName: item.user!.profile.displayName, primaryEmail: item.user!.contactRegistry.primaryEmail,
+            isEmailVerified: true })), total: page.total }));
+      } catch (error) { next(error); }
+    });
+
+    router.get('/assignment-audit', async (_req, res, next) => {
+      try {
+        if (!auditRecordRepo) throw new Error('AUDIT_REPOSITORY_UNAVAILABLE');
+        const actions = ['ROLE_ASSIGNED', 'ROLE_ASSIGNMENT_REVOKED'];
+        const pages = await Promise.all(actions.map(action => auditRecordRepo.queryPage({ action, limit: 100 })));
+        const events = pages.flatMap(page => page.items).map(record => ({
+          action: record.getAction().getValue(), actorId: record.getActor().getActorId(),
+          assignmentId: record.getTarget().getTargetId(), timestamp: record.getTimestamp().getValue().toISOString(),
+          identityId: record.getContextMetadata().getData().identityId,
+          roleId: record.getContextMetadata().getData().roleId,
+        })).sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, 100);
+        res.status(200).json(responseFormatter.success({ events }));
+      } catch (error) { next(error); }
     });
 
     router.get('/roles', async (_req, res, next) => {
@@ -91,6 +142,7 @@ export class AuthorizationAdminRouter {
       try {
         const body = parseStrict(authorizationRoleCreateSchema, req.body);
         const actor = requireAuthenticatedPrincipal(req).principalId;
+        await assertDelegablePermissions(req, actor, body.permissions);
         const highRisk = body.permissions.some(permission => permission === '*' || permission === 'admin:*' || permission === 'admin:authorization:manage' || permission === 'admin:identities:manage');
         const approval = highRisk ? assertMakerChecker(req, actor) : undefined;
         await manageRolesUseCase.createRole(body, mutationContext(req, approval));
@@ -122,6 +174,8 @@ export class AuthorizationAdminRouter {
         const role = await manageRolesUseCase.getRole(body.roleId);
         if (!role) throw new Error('ROLE_NOT_FOUND');
         const actor = requireAuthenticatedPrincipal(req).principalId;
+        await assertVerifiedIdentity(body.identityId);
+        await assertDelegablePermissions(req, actor, role.permissions.map(permission => permission.value));
         const approval = isHighRiskRole(role) ? assertMakerChecker(req, actor) : undefined;
         await assignRoleUseCase.execute(body, mutationContext(req, approval));
         res.status(201).json(responseFormatter.success({ assignmentId: body.id, message: 'Role assigned successfully' }));
@@ -138,6 +192,8 @@ export class AuthorizationAdminRouter {
         if (!assignment) return void res.status(404).json(responseFormatter.error({ code: 'ROLE_ASSIGNMENT_NOT_FOUND', message: 'Role assignment not found' }));
         const role = await manageRolesUseCase.getRole(assignment.roleId);
         const actor = requireAuthenticatedPrincipal(req).principalId;
+        if (!role) throw new Error('ROLE_NOT_FOUND');
+        await assertDelegablePermissions(req, actor, role.permissions.map(permission => permission.value));
         const approval = role && isHighRiskRole(role) ? assertMakerChecker(req, actor) : undefined;
         await assignRoleUseCase.revokeAssignment(req.params.id, mutationContext(req, { reason: body.reason, ...approval }));
         res.status(200).json(responseFormatter.success({ assignmentId: req.params.id, revoked: true }));
@@ -167,6 +223,10 @@ export class AuthorizationAdminRouter {
       try {
         const body = emergencyGrantSchema.parse(req.body);
         const actor = requireAuthenticatedPrincipal(req).principalId;
+        const role = await manageRolesUseCase.getRole(body.roleId);
+        if (!role) throw new Error('ROLE_NOT_FOUND');
+        await assertVerifiedIdentity(body.principalId);
+        await assertDelegablePermissions(req, actor, role.permissions.map(permission => permission.value));
         const approval = assertMakerChecker(req, actor);
         const grant = await manageEmergencyAccessUseCase.grant({ ...body, requestedBy: actor, approvedBy: approval.secondApproverId, changeTicket: approval.changeTicket });
         res.status(201).json(responseFormatter.success({ grant }));

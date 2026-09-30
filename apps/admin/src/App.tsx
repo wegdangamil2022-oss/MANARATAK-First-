@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { adminApiClient } from './api/client';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
@@ -44,10 +44,12 @@ import { I18nProvider, useTranslation } from './i18n/I18nProvider';
 import { AdminNavigation } from './components/AdminNavigation';
 import { Languages, LockKeyhole, ArrowLeftRight, Loader2 } from 'lucide-react';
 import { firstAllowedAdminPath } from '@manaratak/shared';
+import { AdminLoginPage, loginDestination } from './pages/AdminLoginPage';
 
 function AdminLayout() {
+  const isLoginRoute = /^\/admin\/login\/?$/.test(window.location.pathname);
   const localReadOnly = import.meta.env.VITE_LOCAL_ADMIN_READ_ONLY === 'true';
-  const [adminAccess, setAdminAccess] = useState<'loading' | 'authorized' | 'student' | 'unauthorized' | 'error'>('loading');
+  const [adminAccess, setAdminAccess] = useState<'loading' | 'authorized' | 'student' | 'noAdmin' | 'unauthorized' | 'error'>('loading');
   const [adminPermissions, setAdminPermissions] = useState<string[]>([]);
   const { t, language, setLanguage } = useTranslation();
 
@@ -84,10 +86,35 @@ function AdminLayout() {
 
   useEffect(() => {
     if (adminAccess === 'student') {
+      if (isLoginRoute) return;
       const publicBase = (import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
       window.location.replace(`${publicBase}/student`);
+    } else if ((adminAccess === 'unauthorized' || adminAccess === 'noAdmin') && !isLoginRoute) {
+      const returnTo = window.location.pathname + window.location.search;
+      window.location.replace(`/admin/login?returnTo=${encodeURIComponent(returnTo)}`);
+    } else if (adminAccess === 'authorized' && isLoginRoute) {
+      window.location.replace(loginDestination(adminPermissions));
     }
-  }, [adminAccess]);
+  }, [adminAccess, adminPermissions, isLoginRoute]);
+
+  useEffect(() => {
+    const onExpired = () => {
+      setAdminPermissions([]);
+      setAdminAccess('unauthorized');
+    };
+    window.addEventListener('manaratak-admin-session-expired', onExpired);
+    return () => window.removeEventListener('manaratak-admin-session-expired', onExpired);
+  }, []);
+
+  useEffect(() => {
+    const onPermissionChanged = () => {
+      adminApiClient.abortAllPendingAdminRequests();
+      setAdminAccess('loading');
+      void checkSession();
+    };
+    window.addEventListener('manaratak-admin-permission-changed', onPermissionChanged);
+    return () => window.removeEventListener('manaratak-admin-permission-changed', onPermissionChanged);
+  }, []);
 
   const lockAdmin = async () => {
     try {
@@ -102,7 +129,11 @@ function AdminLayout() {
     }
   };
 
-  if (adminAccess === 'student') return null;
+  if (isLoginRoute) {
+    if (adminAccess === 'authorized') return null;
+    return <AdminLoginPage session={{ kind: adminAccess }} verifySession={verifyAdminSession} />;
+  }
+  if (adminAccess === 'student' || adminAccess === 'unauthorized' || adminAccess === 'noAdmin') return null;
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
@@ -162,7 +193,7 @@ function AdminLayout() {
             </div>
           )}
         </header>}
-        {localReadOnly && (
+        {localReadOnly && adminAccess === 'authorized' && (
           <div className="border-b border-[#D6A43B]/35 bg-[#F4D999]/18 px-6 py-3 text-center text-xs font-extrabold text-[#7A5A14]">
             {t('admin_local_readonly_notice')}
           </div>
@@ -173,6 +204,7 @@ function AdminLayout() {
           <div className="flex flex-1 flex-col lg:flex-row">
             <AdminNavigation />
             <main className="min-w-0 flex-1 p-4 sm:p-6">
+              <AdminPermissionNotice />
               <Routes>
                 <Route path="/" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/'} replace />} />
                 <Route path="/dashboard" element={<RequireAdminPermission permission="admin:platform:manage"><AdminDashboardPage /></RequireAdminPermission>} />
@@ -238,9 +270,7 @@ function AdminLayout() {
               </div>
             ) : adminAccess === 'error' ? (
               <button type="button" onClick={checkSession} className="rounded-xl bg-white p-4 text-sm font-bold text-[#142B5F]">تعذر التحقق من الجلسة. أعد المحاولة.</button>
-            ) : (
-              <AdminAccessGate />
-            )}
+            ) : null}
           </main>
         )}
       </div>
@@ -248,47 +278,13 @@ function AdminLayout() {
   );
 }
 
-function unifiedLoginUrl() {
-  const publicBase = (import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
-  return `${publicBase}/login`;
-}
-
-function AdminAccessGate() {
-  const { t } = useTranslation();
-  const handleLoginClick = () => {
-    try {
-      sessionStorage.setItem('manaratak_post_login_return', window.location.pathname + window.location.search);
-    } catch {}
-    window.location.href = unifiedLoginUrl();
-  };
-
-  return (
-    <div className="mx-auto mt-16 max-w-xl rounded-3xl border border-[#DDEFF2] bg-white p-8 text-center shadow-sm">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 mb-4">
-        <LockKeyhole className="h-6 w-6" />
-      </div>
-      <h3 className="text-lg font-black text-[#142B5F] mb-2">{t('admin_login_no_permission')}</h3>
-      <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-        يرجى تسجيل الدخول بحساب مسؤول للمتابعة إلى لوحة التحكم، أو إعادة التحقق في حال وجود تحديث في الخادم.
-      </p>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={handleLoginClick}
-          className="rounded-xl bg-[#0E7C86] hover:bg-[#0c6a73] px-6 py-2.5 text-xs font-black text-white shadow-sm transition active:scale-95 cursor-pointer"
-        >
-          {t('admin_login_submit')}
-        </button>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-5 py-2.5 text-xs font-bold text-slate-700 transition active:scale-95 cursor-pointer"
-        >
-          إعادة المحاولة
-        </button>
-      </div>
-    </div>
-  );
+function AdminPermissionNotice() {
+  const location = useLocation();
+  const deniedPermission = (location.state as { deniedPermission?: string } | null)?.deniedPermission;
+  if (!deniedPermission) return null;
+  return <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-900">
+    لا تملك صلاحية هذا القسم. نُقلت إلى قسم متاح لحسابك.
+  </p>;
 }
 
 function clearAdminSession() {
@@ -308,14 +304,16 @@ function clearAdminSession() {
   } catch {}
 }
 
-async function verifyAdminSession(): Promise<{ kind: 'authorized'; permissions: string[] } | { kind: 'student' | 'unauthorized' | 'error' }> {
+async function verifyAdminSession(): Promise<{ kind: 'authorized'; permissions: string[] } | { kind: 'student' | 'noAdmin' | 'unauthorized' | 'error' }> {
   try {
     const response = await adminApiClient.request<{
-      data?: { effectivePermissions?: string[] };
+      data?: { effectivePermissions?: string[]; roles?: string[]; roleNames?: string[] };
     }>('/auth/me');
     const permissions = response.data?.effectivePermissions || [];
     if (firstAllowedAdminPath(permissions)) return { kind: 'authorized', permissions };
-    return { kind: 'student' };
+    const roles = response.data?.roles || [];
+    const roleNames = response.data?.roleNames || [];
+    return { kind: roles.includes('student') || roleNames.some(name => /^(student|طالب)$/i.test(name.trim())) ? 'student' : 'noAdmin' };
   } catch (error) {
     return { kind: String(error).includes('[401]') ? 'unauthorized' : 'error' };
   }

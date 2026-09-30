@@ -43,7 +43,11 @@ export function isAdministrativePath(path: string): boolean {
 export function canAccessAdminPath(path: string, permissions: readonly string[] = []): boolean {
   if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\') || path.includes('://')) return false;
   if (!isAdministrativePath(path)) return false;
-  const pathname = path.split(/[?#]/, 1)[0].replace(/^\/(?:ar\/|en\/)?admin(?=\/|$)/i, '') || '/';
+  const rawPathname = path.split(/[?#]/, 1)[0];
+  try {
+    if (new URL(path, 'https://manaratak.invalid').pathname !== rawPathname) return false;
+  } catch { return false; }
+  const pathname = rawPathname.replace(/^\/(?:ar\/|en\/)?admin(?=\/|$)/i, '') || '/';
   if (pathname === '/') return firstAllowedAdminPath(permissions) !== null;
   const match = [...ADMIN_SECTIONS]
     .sort(([a], [b]) => b.length - a.length)

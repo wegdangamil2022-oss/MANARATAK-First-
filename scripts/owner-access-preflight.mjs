@@ -38,6 +38,17 @@ export async function inspectOwnerAccess(prisma, { identityId, verifiedEmail }) 
   };
 }
 
+export function classifyPreflightFailure(error) {
+  const code = String(error?.meta?.code || error?.code || '');
+  const message = String(error?.message || '');
+  if (code === '42501' || /42501|permission denied for table/i.test(message)) {
+    const table = ['RoleRecord', 'RoleAssignmentRecord', 'IdentityRecord', 'UserRecord', 'AccountRecord', 'AuditRecord']
+      .find(name => message.includes(name)) || 'UNKNOWN';
+    return { status: 'BLOCKED_READ_PERMISSION', table, databaseWrites: 0 };
+  }
+  return { status: 'PREFLIGHT_FAILED', databaseWrites: 0 };
+}
+
 async function main() {
   const { PrismaClient } = await import('@prisma/client');
   const prisma = new PrismaClient();
@@ -52,5 +63,5 @@ async function main() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().catch(() => { console.error('OWNER_ACCESS_PREFLIGHT_FAILED'); process.exitCode = 1; });
+  main().catch(error => { console.error(JSON.stringify(classifyPreflightFailure(error))); process.exitCode = 1; });
 }

@@ -4,7 +4,8 @@ import { KeyRound, ShieldAlert, UserCheck, ShieldPlus, AlertTriangle, RefreshCw,
 
 interface RoleDto { id: string; name: string; description: string; permissions: string[]; policyIds: string[] }
 interface AssignmentDto { id: string; identityId: string; roleId: string; assignedAt: string }
-interface IdentityDto { id?: string; identityId?: string; type?: string; status?: string; displayName?: string; primaryEmail?: string }
+interface IdentityDto { id: string; displayName: string; primaryEmail: string; isEmailVerified: true }
+interface AssignmentAuditDto { action: string; actorId: string; assignmentId: string; identityId?: string; roleId?: string; timestamp: string }
 interface EmergencyGrantDto { id:string; principalId:string; roleId:string; reason:string; changeTicket:string; requestedBy:string; approvedBy:string; startsAt:string; expiresAt:string; revokedAt?:string|null }
 
 type Envelope<T> = { data?: T };
@@ -14,7 +15,10 @@ export function AuthorizationAdminPage() {
   const [assignments, setAssignments] = useState<AssignmentDto[]>([]);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [identities, setIdentities] = useState<IdentityDto[]>([]);
+  const [identityTotal, setIdentityTotal] = useState(0);
+  const [identityOffset, setIdentityOffset] = useState(0);
   const [emergencyGrants, setEmergencyGrants] = useState<EmergencyGrantDto[]>([]);
+  const [assignmentAudit, setAssignmentAudit] = useState<AssignmentAuditDto[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [roleName, setRoleName] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
@@ -32,19 +36,22 @@ export function AuthorizationAdminPage() {
     setLoading(true);
     setError(null);
     try {
-      const [roleResponse, assignmentResponse, permissionResponse, identityResponse, emergencyResponse] = await Promise.all([
+      const [roleResponse, assignmentResponse, permissionResponse, identityResponse, emergencyResponse, auditResponse] = await Promise.all([
         adminApiClient.request<Envelope<{ roles: RoleDto[] }>>('/admin/authorization/roles'),
         adminApiClient.request<Envelope<{ assignments: AssignmentDto[] }>>('/admin/authorization/assignments'),
         adminApiClient.request<Envelope<{ permissions: string[] }>>('/admin/authorization/permissions'),
-        adminApiClient.request<Envelope<any>>('/admin/identities?limit=50&offset=0'),
+        adminApiClient.request<Envelope<{ identities: IdentityDto[]; total: number }>>('/admin/authorization/eligible-identities?limit=100&offset=0'),
         adminApiClient.request<Envelope<{ grants: EmergencyGrantDto[] }>>('/admin/authorization/emergency-access?limit=100'),
+        adminApiClient.request<Envelope<{ events: AssignmentAuditDto[] }>>('/admin/authorization/assignment-audit'),
       ]);
       setRoles(roleResponse.data?.roles ?? []);
       setAssignments(assignmentResponse.data?.assignments ?? []);
       setPermissions(permissionResponse.data?.permissions ?? []);
-      const identityData = identityResponse.data;
-      setIdentities(Array.isArray(identityData) ? identityData : identityData?.items ?? identityData?.identities ?? []);
+      setIdentities(identityResponse.data?.identities ?? []);
+      setIdentityTotal(identityResponse.data?.total ?? 0);
+      setIdentityOffset(100);
       setEmergencyGrants(emergencyResponse.data?.grants ?? []);
+      setAssignmentAudit(auditResponse.data?.events ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'تعذر تحميل بيانات الهوية والصلاحيات.');
     } finally {
@@ -53,7 +60,16 @@ export function AuthorizationAdminPage() {
   };
 
   useEffect(() => { void load(); }, []);
+  const loadMoreIdentities = async () => {
+    try {
+      const response = await adminApiClient.request<Envelope<{ identities: IdentityDto[]; total: number }>>(`/admin/authorization/eligible-identities?limit=100&offset=${identityOffset}`);
+      setIdentities(previous => [...previous, ...(response.data?.identities ?? [])]);
+      setIdentityTotal(response.data?.total ?? identityTotal);
+      setIdentityOffset(identityOffset + 100);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر تحميل الحسابات الإضافية.'); }
+  };
   const roleMap = useMemo(() => new Map(roles.map(role => [role.id, role])), [roles]);
+  const delegableRoles = useMemo(() => roles.filter(role => role.permissions.every(permission => permissions.includes(permission))), [roles, permissions]);
   const approvalHeaders = () => ({
     ...(changeTicket.trim() ? { 'x-change-ticket': changeTicket.trim() } : {}),
     ...(secondApproverId.trim() ? { 'x-second-approver-id': secondApproverId.trim() } : {}),
@@ -78,6 +94,7 @@ export function AuthorizationAdminPage() {
         method: 'POST', headers: approvalHeaders(),
         body: JSON.stringify({ id: `role_assignment_${crypto.randomUUID()}`, identityId: identityId.trim(), roleId }),
       });
+      setIdentityId(''); setRoleId('');
       await load();
     } catch (e) { setError(e instanceof Error ? e.message : 'فشل تعيين الدور.'); }
   };
@@ -117,7 +134,7 @@ export function AuthorizationAdminPage() {
               <KeyRound className="h-4 w-4 text-[#21A7B4]" />
               <span>إدارة الهويات والصلاحيات · IAM & RBAC</span>
             </div>
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">الهوية والصلاحيات والوصول</h1>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">الموظفون والصلاحيات</h1>
             <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
               حوكمة الأدوار الأقل امتيازاً، تعيين الصلاحيات، مصفوفة الأذونات، وضوابط الوصول الطارئ المحكوم.
             </p>
@@ -200,21 +217,20 @@ export function AuthorizationAdminPage() {
             <UserCheck className="h-4 w-4 text-[#0E7C86]" />
             <h3 className="font-black text-[#142B5F]">تعيين دور لمستخدم / هوية</h3>
           </div>
-          <input
+          <select
             required
-            list="identity-list"
             value={identityId}
             onChange={(e) => setIdentityId(e.target.value)}
-            placeholder="معرف الهوية أو البريد (Identity ID)"
-            className="mt-4 w-full rounded-xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-[#21A7B4]"
-          />
-          <datalist id="identity-list">
-            {identities.map((item, index) => (
-              <option key={item.id ?? item.identityId ?? index} value={item.id ?? item.identityId ?? ''}>
-                {item.displayName ?? item.primaryEmail ?? item.status}
+            className="mt-4 w-full rounded-xl border border-slate-200 bg-white p-3 text-xs font-medium outline-none focus:border-[#21A7B4]"
+          >
+            <option value="">اختر حسابًا موجودًا وموثّق البريد</option>
+            {identities.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.displayName} — {item.primaryEmail}
               </option>
             ))}
-          </datalist>
+          </select>
+          {identityOffset < identityTotal && <button type="button" onClick={() => void loadMoreIdentities()} className="mt-2 text-xs font-bold text-[#0E7C86] underline">عرض حسابات موثقة إضافية</button>}
           <select
             required
             value={roleId}
@@ -222,7 +238,7 @@ export function AuthorizationAdminPage() {
             className="mt-3 w-full rounded-xl border border-slate-200 bg-white p-3 text-xs font-bold outline-none focus:border-[#21A7B4]"
           >
             <option value="">اختر الدور المطلوب</option>
-            {roles.map((role) => (
+            {delegableRoles.map((role) => (
               <option key={role.id} value={role.id}>
                 {role.name}
               </option>
@@ -307,6 +323,24 @@ export function AuthorizationAdminPage() {
         </div>
       </section>
 
+      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+        <h3 className="mb-3 font-black text-[#142B5F]">سجل منح الأدوار وإلغائها</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-start text-xs">
+            <thead><tr className="border-b border-slate-200 text-slate-600"><th className="p-3">العملية</th><th className="p-3">المنفذ</th><th className="p-3">الحساب المستهدف</th><th className="p-3">الدور</th><th className="p-3">الوقت</th></tr></thead>
+            <tbody>{assignmentAudit.map((event, index) => (
+              <tr key={`${event.assignmentId}-${event.action}-${index}`} className="border-b border-slate-100">
+                <td className="p-3">{event.action === 'ROLE_ASSIGNED' ? 'منح' : 'إلغاء'}</td>
+                <td className="p-3 font-mono">{event.actorId}</td>
+                <td className="p-3 font-mono">{event.identityId || event.assignmentId}</td>
+                <td className="p-3">{event.roleId ? roleMap.get(event.roleId)?.name ?? event.roleId : '—'}</td>
+                <td className="p-3">{new Date(event.timestamp).toLocaleString('ar')}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </section>
+
       <section className="rounded-3xl border border-amber-200 bg-amber-50/40 p-6 shadow-xs">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-600" />
@@ -328,7 +362,7 @@ export function AuthorizationAdminPage() {
             className="rounded-xl border border-amber-200 bg-white p-2.5 text-xs outline-none focus:border-amber-400"
           >
             <option value="">الدور الطارئ</option>
-            {roles.map((r) => (
+            {delegableRoles.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name}
               </option>

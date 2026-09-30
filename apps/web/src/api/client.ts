@@ -2459,6 +2459,7 @@ export class ApiClient {
     }
     if (typeof window !== 'undefined') {
       try {
+        window.sessionStorage.removeItem(STUDENT_TOOLS_SESSION_STORAGE_KEY);
         window.sessionStorage.removeItem('manaratak_admin_bearer_token');
         window.sessionStorage.removeItem('manaratak_admin_bearer');
         window.sessionStorage.removeItem('manaratak_access_token');
@@ -2471,6 +2472,8 @@ export class ApiClient {
         window.localStorage.removeItem('manaratak_access_token');
       }
     }
+    webRefreshFailedPermanently = false;
+    csrfManager.clearToken();
     try {
       window.localStorage?.removeItem('manaratak_refresh_token');
       window.sessionStorage?.removeItem('manaratak_refresh_token');
@@ -2528,6 +2531,22 @@ export class ApiClient {
     return body.data;
   }
 
+  static async requestPasswordReset(email: string): Promise<void> {
+    const res = await apiFetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ primaryEmail: email.trim() }),
+    });
+    if (!res.ok) throw new Error('تعذر طلب استعادة كلمة المرور. حاول لاحقًا.');
+  }
+
+  static async resetPassword(token: string, newPassword: string): Promise<void> {
+    const res = await apiFetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ token: token.trim(), newPassword }),
+    });
+    if (!res.ok) throw new Error('تعذر تعيين كلمة المرور. تحقق من الرابط أو اطلب رابطًا جديدًا.');
+  }
+
   static async loginStudent(email: string, password: string): Promise<void> {
     return this.login(email, password);
   }
@@ -2544,6 +2563,9 @@ export class ApiClient {
       if (typeof window !== 'undefined') {
         try {
           sessionStorage.removeItem(STUDENT_TOOLS_SESSION_STORAGE_KEY);
+          sessionStorage.removeItem('manaratak_post_login_return');
+          sessionStorage.removeItem('manaratak_post_login_action');
+          sessionStorage.removeItem('manaratak_active_identity');
           sessionStorage.removeItem('manaratak_access_token');
           sessionStorage.removeItem('manaratak_admin_bearer_token');
           sessionStorage.removeItem('manaratak_admin_bearer');

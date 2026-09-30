@@ -5,8 +5,6 @@ import { usePublicNavigation } from './usePublicNavigation';
 import { usePublicLiveData } from './usePublicLiveData';
 import { usePublicRelationshipGraph } from './usePublicRelationshipGraph';
 import { ApiClient, type StablePublicGraphIdentity } from '../../api/client';
-import { canAccessAdminPath, isAdministrativePath } from '@manaratak/shared';
-import { resolveAuthenticatedDestination } from '../students/authRouting';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { mapPublicScholarshipDto } from './publicScholarshipDataSource';
 import {
@@ -90,7 +88,7 @@ import { PushNotificationCenter } from './components/PushNotificationCenter';
 import { UniversitiesList } from './components/UniversitiesList';
 import { CoursesList } from './components/CoursesList';
 import { NavigationDrawer } from './components/NavigationDrawer';
-import { consumePostLoginAction, consumePostLoginReturn, preservePostLoginAction, preservePostLoginReturn } from '../students/postLoginIntent';
+import { consumePostLoginAction, consumePostLoginReturn, preservePostLoginAction, preservePostLoginReturn, rememberAuthenticatedIdentity } from '../students/postLoginIntent';
 import {
   Filter,
   SlidersHorizontal,
@@ -115,17 +113,6 @@ import {
 
 export default function App() {
   const { language } = useTranslation();
-  const [adminDestination, setAdminDestination] = useState<string | null>(null);
-  useEffect(() => {
-    let active = true;
-    ApiClient.getCurrentSessionIdentity().then(identity => {
-      if (active) {
-        const destination = resolveAuthenticatedDestination(identity, import.meta.env.VITE_ADMIN_URL);
-        setAdminDestination(destination.kind === 'admin' ? destination.path : null);
-      }
-    }).catch(() => { if (active) setAdminDestination(null); });
-    return () => { active = false; };
-  }, []);
   const publicLive = usePublicLiveData(import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE, language);
   const publicDataMode = publicLive.mode;
   const { scholarships, universities, majors, countries, exams, courses, paidCourses, importedCourses, articles, services, careers, tools } = publicLive.data;
@@ -202,7 +189,7 @@ export default function App() {
       }
       patch = { activeTab: 'home' };
     }
-    else if (section === 'login' || section === 'signup' || section === 'register' || section === 'verify-email') patch = { activeTab: 'auth' };
+    else if (section === 'login' || section === 'signup' || section === 'register' || section === 'verify-email' || section === 'forgot-password' || section === 'reset-password') patch = { activeTab: 'auth' };
     else if (section === 'student') patch = { activeTab: 'account' };
     else if (section === 'search') patch = { activeTab: 'search', selectedCategory: 'all', globalSearchQuery: params.get('q') || '' };
     else if (section === 'scholarships') {
@@ -918,16 +905,11 @@ export default function App() {
     <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
       {/* App Header (Top Sticky) */}
       <Header
-        adminDestination={adminDestination}
         language={language}
         onToggleLanguage={openLanguage}
         onOpenMenu={() => setIsMenuOpen(true)}
         onOpenNotifications={() => setIsNotificationOpen(true)}
         onOpenProfile={() => {
-          if (adminDestination) {
-            window.location.assign(adminDestination);
-            return;
-          }
           openSection('account');
         }}
         unreadCount={unreadNotificationsCount}
@@ -2109,16 +2091,14 @@ export default function App() {
             )}
 
             {activeTab === 'auth' && (
-              <LiveStudentAuthPage onAuthenticated={(destination, identity) => {
-                const postLoginReturn = consumePostLoginReturn();
-                if (destination.kind === 'admin') {
-                  const allowedReturn = postLoginReturn && canAccessAdminPath(postLoginReturn, identity.effectivePermissions)
-                    ? postLoginReturn : null;
-                  window.location.assign(allowedReturn || destination.path);
+              <LiveStudentAuthPage onAuthenticated={(_destination, identity) => {
+                const postLoginReturn = consumePostLoginReturn(identity.principalId);
+                const accountChanged = rememberAuthenticatedIdentity(identity.principalId);
+                if (accountChanged) {
+                  window.location.replace('/student');
                   return;
                 }
-                setAdminDestination(null);
-                if (postLoginReturn && !isAdministrativePath(postLoginReturn)) {
+                if (postLoginReturn && /^\/student(?:[/?#]|$)/.test(postLoginReturn)) {
                   window.location.assign(postLoginReturn);
                   return;
                 }
@@ -2152,7 +2132,6 @@ export default function App() {
 
       {/* Slide-out Navigation Drawer Menu */}
       <NavigationDrawer
-        adminDestination={adminDestination}
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         userProfile={null}
@@ -2161,10 +2140,6 @@ export default function App() {
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
         onNavigate={(target) => {
-          if (target === 'admin') {
-            if (adminDestination) window.location.assign(adminDestination);
-            return;
-          }
           openSection(target);
           setIsMenuOpen(false);
         }}

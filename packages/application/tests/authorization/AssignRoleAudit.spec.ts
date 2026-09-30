@@ -12,7 +12,7 @@ describe('role assignment audit boundary', () => {
       delete: async (id: string) => { records.delete(id); },
       withTransaction: () => repository,
     };
-    const definitions: Array<{ action: string; context?: { actorId: string } }> = [];
+    const definitions: Array<{ action: string; context?: { actorId: string }; auditMetadata?: Record<string, unknown> }> = [];
     const coordinator = { execute: vi.fn(async (definition, mutation) => {
       definitions.push(definition);
       return mutation({ boundaryId: 'role-transaction', transactionClient: {} });
@@ -28,5 +28,9 @@ describe('role assignment audit boundary', () => {
       ['ROLE_ASSIGNED', 'operator-1'], ['ROLE_ASSIGNMENT_REVOKED', 'operator-1'],
     ]);
     expect(coordinator.execute).toHaveBeenCalledTimes(2);
+    expect(definitions.map(item => item.auditMetadata)).toEqual([
+      { identityId: 'account-1', roleId: 'universities-editor' },
+      { identityId: 'account-1', roleId: 'universities-editor' },
+    ]);
   });
 });

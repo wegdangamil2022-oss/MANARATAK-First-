@@ -761,7 +761,7 @@ export const ar = {
   "translation_content_deferred": "ترجمة المحتوى مؤجلة",
   "translation_content_writes_blocked": "حفظ ترجمات المحتوى معطّل في مرحلة تجهيز البنية التحتية الحالية.",
   "translation_save_error": "تعذر حفظ الترجمة.",
-  "admin_nav_authorization": "الهوية والصلاحيات",
+  "admin_nav_authorization": "الموظفون والصلاحيات",
   "admin_nav_audit": "سجل التدقيق",
   "admin_nav_assets": "الأصول والملفات",
   "admin_nav_students": "دعم الطلاب",

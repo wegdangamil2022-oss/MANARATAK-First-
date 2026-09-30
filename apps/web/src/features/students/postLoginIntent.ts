@@ -1,4 +1,5 @@
 const KEY = 'manaratak_post_login_return';
+const ACCOUNT_KEY = 'manaratak_active_identity';
 
 function safeInternalPath(value: string | null | undefined): string | null {
   const path = value?.trim();
@@ -10,17 +11,36 @@ function safeInternalPath(value: string | null | undefined): string | null {
 export function preservePostLoginReturn(path: string): void {
   const safe = safeInternalPath(path);
   if (!safe) return;
-  try { sessionStorage.setItem(KEY, safe); } catch { /* storage can be unavailable */ }
+  try { sessionStorage.setItem(KEY, JSON.stringify({ path: safe, accountId: sessionStorage.getItem(ACCOUNT_KEY) })); } catch { /* storage can be unavailable */ }
 }
 
-export function consumePostLoginReturn(): string | null {
+export function consumePostLoginReturn(identityId: string): string | null {
   try {
-    const value = safeInternalPath(sessionStorage.getItem(KEY));
+    const raw = sessionStorage.getItem(KEY);
     sessionStorage.removeItem(KEY);
-    return value;
+    if (!raw) return null;
+    const pending = JSON.parse(raw) as { path?: string; accountId?: string | null };
+    if (pending.accountId && pending.accountId !== identityId) return null;
+    return safeInternalPath(pending.path);
   } catch {
+    try { sessionStorage.removeItem(KEY); } catch { /* ignore */ }
     return null;
   }
+}
+
+export function rememberAuthenticatedIdentity(identityId: string): boolean {
+  try {
+    const previous = sessionStorage.getItem(ACCOUNT_KEY);
+    const changed = Boolean(previous && previous !== identityId);
+    if (changed) {
+      sessionStorage.removeItem('manaratak_post_login_action');
+      for (const key of ['manaratak_favorites_v2', 'manaratak_milestones', 'manaratak_notifications', 'manaratak_nav_state_v2']) {
+        localStorage.removeItem(key);
+      }
+    }
+    sessionStorage.setItem(ACCOUNT_KEY, identityId);
+    return changed;
+  } catch { return false; }
 }
 
 

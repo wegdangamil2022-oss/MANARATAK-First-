@@ -1,13 +1,31 @@
-# M8 owner access handoff
+# M8: فحص المالك قبل تحديث main
 
-`/auth/me` now reports only roles and permissions assigned to the stable `IdentityRecord.id`. An email address or a browser token never grants administrative access.
+فرع الإصلاح `fix/m8-auth-routing` لا يكتمل ولا يُدمج في `main` حتى يثبت فحص المالك في بيئة Google AI Studio المتصلة بقاعدة البيانات. السكربت `npm run auth:owner:preflight` يقرأ فقط: الهوية، الحساب، البريد الموثق، الأدوار وتعييناتها، وعلامة التدقيق الخاصة بتهيئة المالك. لا يشغّل migration ولا يكتب تعيينات أو صلاحيات قاعدة البيانات.
 
-Before deploying this change against the Google AI Studio database, set `FIRST_ADMIN_IDENTITY_ID` to the existing owner's stable identity ID and `FIRST_ADMIN_VERIFIED_EMAIL` to that same account's confirmed primary email. Run `npm run auth:owner:preflight` in the connected runtime. It performs reads only and reports role IDs without printing the email or connection string.
+## خطوات التنفيذ في البيئة المتصلة
 
-- `READY`: a persisted administrative assignment exists. Keep it; deploy and confirm `/auth/me` returns its permission.
-- `NEEDS_CONTROLLED_BOOTSTRAP`: the identity and confirmed email match, but no administrative assignment exists. Ensure the canonical `administrator` role exists, then use `scripts/first-admin-bootstrap.mjs` with `FIRST_ADMIN_ROLE_ID=administrator`, distinct `FIRST_ADMIN_ACTOR_ID` and `FIRST_ADMIN_APPROVER_ID`, `FIRST_ADMIN_CONFIRM=PROMOTE_EXISTING_VERIFIED_IDENTITY_ONCE`, and all database mutation gate variables. Run the preflight again before deploying.
-- `BLOCKED_IDENTITY_MISMATCH`, `BLOCKED_REVIEW_PARTIAL_AUTHORITY`, `BLOCKED_REVIEW_OTHER_ADMIN_ASSIGNMENTS`, or `BLOCKED_REVIEW_EXISTING_BOOTSTRAP`: stop and review the identity, partial role, other administrator assignments, or prior audit. Do not guess a new identity or revoke an existing role.
+1. حدّث نسخة فرع الإصلاح في مساحة عمل منفصلة عن `main`، وتحقق من الالتزام: `git fetch origin fix/m8-auth-routing` ثم `git switch --detach FETCH_HEAD` ثم `git rev-parse HEAD`. استخدم التبعيات الموجودة في البيئة؛ لا يلزم تنزيل بيانات المشروع أو تشغيل تهيئة القاعدة لأجل هذا الفحص.
+2. سجّل الدخول إلى **الحساب المقصود نفسه** في معاينة Studio. من استجابة `GET /api/v1/auth/me` الموثّقة في أدوات الشبكة، احتفظ محليًا بقيمة `data.principalId`. لا تستخدم البريد للعثور على معرّف تخميني، ولا تعتمد على `effectivePermissions` في نسخة `main` القديمة لإثبات دور المالك؛ فقد كان فيها منح مبني على نص البريد. لا تشارك الكوكيز أو رموز الجلسة أو المعرّف في الدردشة.
+3. نفّذ الاستعلام التالي في أداة SQL الخاصة **بنفس قاعدة البيانات المتصلة** بصلاحية قراءة فقط. اربط المعامل `:authenticated_principal_id` بالقيمة من الخطوة السابقة محليًا. يجب أن يعود صف واحد، به `status = ACTIVE` و`deletedAt = NULL` و`isEmailVerified = true` و`accessState = Active`. طابق `primaryEmail` مع البريد الموثّق للحساب المقصود داخل البيئة فقط.
 
-The bootstrap transaction checks the identity ID, active account, verified primary email, active password credential, existing administrative assignments and one-time audit marker before creating a role assignment and audit entry together. The obsolete `promote-wegdan-admin.ts` script was removed because it used a hardcoded identity and bypassed the mutation gate.
+```sql
+SELECT i."id", i."status", i."deletedAt",
+       u."primaryEmail", u."isEmailVerified", a."accessState"
+FROM "IdentityRecord" AS i
+JOIN "UserRecord" AS u ON u."identityId" = i."id"
+JOIN "AccountRecord" AS a ON a."identityId" = i."id"
+WHERE i."id" = :authenticated_principal_id;
+```
 
-After deployment, verify with a real student and one-section employee account that `/auth/me` shows only persisted permissions, a student receives 403 from a protected `/api/v1/admin/*` request, and role grants and revocations produce `ROLE_ASSIGNED` and `ROLE_ASSIGNMENT_REVOKED` audit events. These checks require the connected runtime and are not performed by source tests.
+4. ضع `FIRST_ADMIN_IDENTITY_ID` مساويًا **لمعرّف الصف الذي طابق جلسة الحساب**، و`FIRST_ADMIN_VERIFIED_EMAIL` مساويًا لـ`primaryEmail` الموثّق في الصف. ضعهما في إعدادات البيئة الخاصة أو جلسة طرفية خاصة، دون طباعتهما أو إرسال بيانات اتصال القاعدة. لا تستبدل المعرّف بالبريد.
+5. نفّذ `npm run auth:owner:preflight` من جذر المستودع. خروج الأمر بالرمز `0` مع `READY` يعني وجود تعيين دور إداري محفوظ للهوية المطابقة. أي نتيجة أخرى توقف مسار الدمج. أعِد للدردشة فقط `status` و`assignmentCount` و`otherAdminAssignmentCount` بعد حجب `activeAdminRoleIds` وأي معرّفات أو بريد أو بيانات اتصال.
+
+## قراءة النتيجة
+
+- `READY`: التعيين محفوظ. تحقق بعد ذلك في معاينة الفرع من `/auth/me` وطلب إداري فعلي لحساب المالك، ومن رفض الطالب وموظف القسم الواحد على الخادم. هذا الفحص وحده لا يثبت عمل الجلسات والكوكيز داخل إطار Studio.
+- `NEEDS_CONTROLLED_BOOTSTRAP`: الهوية والبريد الموثق متطابقان، لكن تعيين المالك غائب. لا تشغّل `first-admin-bootstrap.mjs` أو تهيئة الأدوار تلقائيًا؛ يتطلب إجراء الكتابة إذنًا صريحًا منفصلًا.
+- `BLOCKED_IDENTITY_MISMATCH` أو `BLOCKED_REVIEW_PARTIAL_AUTHORITY` أو `BLOCKED_REVIEW_OTHER_ADMIN_ASSIGNMENTS` أو `BLOCKED_REVIEW_EXISTING_BOOTSTRAP`: راجع سبب التعارض والتعيينات الموجودة قبل أي تغيير، حتى لا يُحجب المالك أو يُنشأ مالك آخر.
+- `BLOCKED_READ_PERMISSION`، خصوصًا `table: RoleRecord`: مستخدم قاعدة البيانات الذي شغّل الفحص لا يستطيع قراءة الجدول المطلوب. تأكد من اتصال البيئة والهوية المستخدمة للقراءة. إذا ثبت نقص `SELECT`، اطلب من مسؤول قاعدة البيانات إصلاح صلاحية القراءة عبر المسار المعتمد ثم أعد الفحص. لا تنفذ `GRANT` أو `REVOKE` هنا. الخطأ التاريخي `42501 permission denied for table RoleRecord` لا يثبت أن الحالة الحالية ما زالت كذلك.
+- `PREFLIGHT_FAILED`: فشل آخر يحتاج فحص سجل التشغيل داخل البيئة؛ السكربت يحجب نص الخطأ كي لا يكشف بيانات اتصال.
+
+بعد `READY` والاختبارات الحية المطلوبة، راجع منح الأدوار وإلغائها في سجل `ROLE_ASSIGNED` و`ROLE_ASSIGNMENT_REVOKED`. تبقى اختبارات المصدر والمتصفح المحاكى دليلًا محليًا فقط إلى أن تكتمل هذه الخطوات.

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { inspectOwnerAccess } from '../../scripts/owner-access-preflight.mjs';
+import { inspectOwnerAccess, classifyPreflightFailure } from '../../scripts/owner-access-preflight.mjs';
 
 const identity = { id: 'stable-owner-id', status: 'ACTIVE', deletedAt: null,
   user: { primaryEmail: 'owner@example.test', isEmailVerified: true }, account: { accessState: 'Active' } };
@@ -30,4 +30,11 @@ test('preflight distinguishes a missing assignment from an earlier bootstrap nee
   const result = await inspectOwnerAccess(otherAdmin, request);
   assert.equal(result.status, 'BLOCKED_REVIEW_OTHER_ADMIN_ASSIGNMENTS');
   assert.equal(result.otherAdminAssignmentCount, 1);
+});
+
+test('permission error classification does not print database details', () => {
+  const result = classifyPreflightFailure({ code: 'P2010', meta: { code: '42501' },
+    message: 'permission denied for table RoleRecord; connection string must stay private' });
+  assert.deepEqual(result, { status: 'BLOCKED_READ_PERMISSION', table: 'RoleRecord', databaseWrites: 0 });
+  assert.doesNotMatch(JSON.stringify(result), /connection string/i);
 });

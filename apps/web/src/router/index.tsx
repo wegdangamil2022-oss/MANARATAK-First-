@@ -11,6 +11,7 @@ import { isSupportedLocale } from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { localizeLocation, resolveLegacyPublicLocale } from '../i18n/localeRouting';
 import PublicTemplateApp from '../features/public-template/PublicTemplateApp';
+import { StudentAuthPage } from '../features/students/StudentAuthPage';
 
 const CertificateVerificationPage = React.lazy(() =>
   import('../features/certificates').then((m) => ({ default: m.CertificateVerificationPage }))
@@ -31,6 +32,8 @@ const PageLoadingFallback = () => {
     </div>
   );
 };
+
+const PasswordRecoveryPage = () => <StudentAuthPage onAuthenticated={() => { window.location.assign('/student'); }} />;
 
 
 const RootLayout = () => {
@@ -91,6 +94,14 @@ const router = createBrowserRouter([
       {
         path: 'verify-email',
         element: <PublicTemplateApp />,
+      },
+      {
+        path: 'forgot-password',
+        element: <PasswordRecoveryPage />,
+      },
+      {
+        path: 'reset-password',
+        element: <PasswordRecoveryPage />,
       },
       {
         path: 'search',

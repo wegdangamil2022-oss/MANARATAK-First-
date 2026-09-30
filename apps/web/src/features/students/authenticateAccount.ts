@@ -13,11 +13,10 @@ export interface TrustedAuthClient {
 export async function authenticateAccount(
   email: string,
   password: string,
-  adminBaseUrl?: string,
   rememberMe?: boolean,
   client: TrustedAuthClient = ApiClient,
 ): Promise<AuthDestination> {
   await client.login(email, password, rememberMe);
   const identity = await client.getCurrentSessionIdentity();
-  return resolveAuthenticatedDestination(identity, adminBaseUrl);
+  return resolveAuthenticatedDestination(identity);
 }

@@ -4,13 +4,14 @@ import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionMana
 import type { ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@manaratak/application';
 import { ForgotPasswordUseCase, ResetPasswordUseCase } from '@manaratak/application';
 import { CapturedEmailDeliveryGateway, InMemoryPasswordResetTokenRepository, PasswordHasher } from '@manaratak/infrastructure';
-import { IEmailDeliveryGateway, IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
+import { AuthorizationEvaluatorService, IEmailDeliveryGateway, IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { clearAuthCookies, readAccessCookie, readRefreshCookie, setAuthCookies, readRememberMeCookie } from '../../security/HttpOnlyAuthCookies.js';
 import { createHash } from 'node:crypto';
 import type { ChangePasswordUseCase, DisablePasswordCredentialUseCase } from '@manaratak/application';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
+import { KNOWN_ADMIN_PERMISSIONS } from '../../security/AdminPermissionCatalog.js';
 
 export class AuthRouter {
   public static create(cradle: { 
@@ -19,6 +20,7 @@ export class AuthRouter {
     securityService: ISecurityService;
     roleAssignmentRepository?: IRoleAssignmentRepository;
     roleRepository?: IRoleRepository;
+    authEvaluatorService?: AuthorizationEvaluatorService;
     tokenProvider?: ITokenProvider;
     sessionManager?: ISessionManager;
     principalAccessValidator: IPrincipalAccessValidator;
@@ -214,8 +216,21 @@ export class AuthRouter {
                 const permVal = typeof permRef === 'string'
                   ? permRef
                   : ((permRef as any)?.permission || (permRef as any)?.value || String(permRef));
-                if (permVal) {
+                if (!permVal) continue;
+                if (!role.policyIds?.length) {
                   effectivePermissions.add(permVal);
+                  continue;
+                }
+                if (!cradle.authEvaluatorService) continue;
+                const prefix = permVal === '*' ? '' : permVal.endsWith(':*') ? permVal.slice(0, -1) : null;
+                const candidates = prefix === null ? [permVal] : KNOWN_ADMIN_PERMISSIONS.filter(value => value.startsWith(prefix));
+                for (const candidate of candidates) {
+                  const decision = await cradle.authEvaluatorService.evaluatePermission(principalId, candidate, {
+                    ip: req.ip || req.socket?.remoteAddress || undefined,
+                    requestTime: new Date(), userAgent: req.headers['user-agent'],
+                    correlationId: req.headers['x-correlation-id'],
+                  });
+                  if (decision.isGranted) effectivePermissions.add(candidate);
                 }
               }
             }

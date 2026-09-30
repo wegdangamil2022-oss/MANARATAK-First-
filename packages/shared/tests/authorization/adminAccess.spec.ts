@@ -16,6 +16,8 @@ describe('current admin section permissions', () => {
   });
   it('rejects unknown, external, and misleading paths', () => {
     expect(canAccessAdminPath('//evil.test/admin', ['admin:*'])).toBe(false);
+    expect(canAccessAdminPath('/admin/universities/../settings', ['admin:universities:manage'])).toBe(false);
+    expect(canAccessAdminPath('/admin/universities/%2e%2e/settings', ['admin:universities:manage'])).toBe(false);
     expect(canAccessAdminPath('/admin/unknown', ['admin:*'])).toBe(false);
     expect(canAccessAdminPath('/admin/settings/reference-data', ['admin:settings:manage'])).toBe(false);
     expect(isAdministrativePath('/en/admin/dashboard')).toBe(true);

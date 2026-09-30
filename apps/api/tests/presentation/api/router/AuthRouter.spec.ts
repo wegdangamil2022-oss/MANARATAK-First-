@@ -110,6 +110,22 @@ describe('AuthRouter API endpoints', () => {
       expect(response.body.data.effectivePermissions).toEqual(['admin:*']);
       expect(roleAssignmentRepository.findByIdentityId).toHaveBeenCalledWith('user-123');
     });
+
+    it('omits a persisted permission when its attached policy denies the current request', async () => {
+      const evaluator = { evaluatePermission: vi.fn().mockResolvedValue({ isGranted: false }) };
+      const policyApp = express();
+      policyApp.use('/api/v1/auth', AuthRouter.create({
+        authService: mockAuthService, identityRepository: mockIdentityRepository, securityService: mockSecurityService,
+        tokenProvider: mockTokenProvider, sessionManager: mockSessionManager, principalAccessValidator: mockPrincipalAccessValidator,
+        roleAssignmentRepository: { findByIdentityId: async () => [{ roleId: 'office-editor' }] } as any,
+        roleRepository: { findById: async () => ({ name: 'Office editor', permissions: [{ value: 'admin:universities:manage' }], policyIds: ['office-only'] }) } as any,
+        authEvaluatorService: evaluator as any,
+      }));
+      const response = await supertest(policyApp).get('/api/v1/auth/me').set('Cookie', 'manaratak_access=access-token');
+      expect(response.status).toBe(200);
+      expect(response.body.data.effectivePermissions).toEqual([]);
+      expect(evaluator.evaluatePermission).toHaveBeenCalledWith('user-123', 'admin:universities:manage', expect.any(Object));
+    });
   });
 
   describe('GET /api/v1/auth/csrf-token', () => {

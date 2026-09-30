@@ -15,7 +15,6 @@ import {
   Sun,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck,
 } from 'lucide-react';
 import { Language, UserProfile } from '../types';
 
@@ -31,7 +30,6 @@ interface NavigationDrawerProps {
   unreadCount: number;
   isDarkMode?: boolean;
   onToggleDarkMode?: () => void;
-  adminDestination?: string | null;
 }
 
 export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
@@ -43,17 +41,11 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   onNavigate,
   isDarkMode = false,
   onToggleDarkMode,
-  adminDestination = null,
 }) => {
   useOverlayDialog(isOpen, onClose, 'mn-navigation-dialog');
   if (!isOpen) return null;
 
   const menuItems = [
-    ...(adminDestination ? [{
-      id: 'admin',
-      label: 'لوحة الإدارة والتحكم',
-      icon: <ShieldCheck className="w-4 h-4 text-[#D6A43B]" />,
-    }] : []),
     {
       id: 'account',
       label: 'حسابي ومساحة الطالب',

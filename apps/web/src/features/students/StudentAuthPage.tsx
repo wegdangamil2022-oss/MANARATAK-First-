@@ -4,18 +4,22 @@ import { resolveAuthenticatedDestination, type AuthDestination, type TrustedSess
 import { ApiClient } from '../../api/client';
 
 export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destination: AuthDestination, identity: TrustedSessionIdentity) => void }) {
-  const getInitialMode = (): 'login' | 'signup' | 'verify' => {
+  const getInitialMode = (): 'login' | 'signup' | 'verify' | 'forgot' | 'reset' => {
     if (typeof window === 'undefined') return 'login';
+    if (window.location.pathname.includes('reset-password')) return 'reset';
+    if (window.location.pathname.includes('forgot-password')) return 'forgot';
     if (window.location.pathname.includes('verify-email') || new URLSearchParams(window.location.search).has('token')) {
       return 'verify';
     }
     return /signup|register/.test(window.location.pathname) ? 'signup' : 'login';
   };
 
-  const [mode, setMode] = useState<'login' | 'signup' | 'verify'>(getInitialMode);
+  const [mode, setMode] = useState<'login' | 'signup' | 'verify' | 'forgot' | 'reset'>(getInitialMode);
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetToken, setResetToken] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('token') || '');
   const [rememberMe, setRememberMe] = useState(false);
   const [verificationToken, setVerificationToken] = useState('');
   const [resendEmail, setResendEmail] = useState('');
@@ -29,6 +33,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
   // Auto-verify when token query parameter is present in URL
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (window.location.pathname.includes('reset-password')) return;
     const params = new URLSearchParams(window.location.search);
     const tokenParam = params.get('token');
     if (tokenParam && tokenParam.trim()) {
@@ -88,6 +93,24 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
       return;
     }
 
+    if (mode === 'forgot' || mode === 'reset') {
+      setLoading(true);
+      try {
+        if (mode === 'forgot') {
+          if (!email.trim()) throw new Error('أدخل بريدك الإلكتروني.');
+          await ApiClient.requestPasswordReset(email);
+          setSuccess('إذا كان الحساب موجودًا، ستصلك تعليمات استعادة كلمة المرور على بريده.');
+        } else {
+          if (!resetToken.trim() || password.length < 8 || password !== confirmPassword) throw new Error('تحقق من الرمز وكلمة المرور وتطابق التأكيد.');
+          await ApiClient.resetPassword(resetToken, password);
+          setPassword(''); setConfirmPassword(''); setResetToken('');
+          setSuccess('تم تغيير كلمة المرور. يمكنك تسجيل الدخول الآن.');
+        }
+      } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذرت استعادة كلمة المرور.'); }
+      finally { setLoading(false); }
+      return;
+    }
+
     if (!email.trim() || !password) {
       setError('أدخل البريد الإلكتروني وكلمة المرور.');
       return;
@@ -113,9 +136,9 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
 
       await ApiClient.login(email, password, rememberMe);
       const identity = await ApiClient.getCurrentSessionIdentity();
-      const destination = resolveAuthenticatedDestination(identity, import.meta.env.VITE_ADMIN_URL);
+      const destination = resolveAuthenticatedDestination(identity);
       if (destination.kind === 'denied') {
-        setError('تم التحقق من الحساب، لكن لا توجد مساحة مفعّلة لهذا الدور.');
+        setError('لا توجد مساحة طالب مفعّلة لهذا الحساب. إذا كنت موظفاً، استخدم بوابة دخول الإدارة.');
         return;
       }
       onAuthenticated(destination, identity);
@@ -151,7 +174,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
             <div>
               <p className="text-[11px] font-semibold text-[var(--mn-accent-text)]">بوابة حساب موحّدة وآمنة</p>
               <h1 className="text-[20px] font-bold leading-7 text-[var(--mn-heading)]">
-                {mode === 'signup' ? 'إنشاء حساب جديد في منارتك' : mode === 'verify' ? 'تأكيد البريد الإلكتروني' : 'تسجيل الدخول إلى منارتك'}
+                {mode === 'signup' ? 'إنشاء حساب جديد في منارتك' : mode === 'verify' ? 'تأكيد البريد الإلكتروني' : mode === 'forgot' ? 'استعادة كلمة المرور' : mode === 'reset' ? 'تعيين كلمة مرور جديدة' : 'تسجيل الدخول إلى منارتك'}
               </h1>
             </div>
           </div>
@@ -160,11 +183,13 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
               ? 'أنشئ حسابك للوصول إلى أدوات الطالب والخدمات الأكاديمية.'
               : mode === 'verify'
               ? 'أدخل رمز التحقق المرسل إلى بريدك أو استخدم الرابط المباشر لتفعيل الحساب.'
+              : mode === 'forgot' ? 'أدخل بريد حسابك لتصلك تعليمات الاستعادة.'
+              : mode === 'reset' ? 'أدخل الرمز وكلمة المرور الجديدة.'
               : 'يحدد الخادم مساحة الحساب وصلاحياته بعد المصادقة المعتمدة.'}
           </p>
 
           {/* Mode Switcher Tabs */}
-          <div className="mt-4 flex rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] p-1">
+          {mode !== 'forgot' && mode !== 'reset' && <div className="mt-4 flex rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] p-1">
             <button
               type="button"
               onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
@@ -186,7 +211,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
             >
               تأكيد البريد
             </button>
-          </div>
+          </div>}
 
           {/* SIGNUP FIELDS */}
           {mode === 'signup' && (
@@ -209,7 +234,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
           )}
 
           {/* LOGIN / SIGNUP EMAIL & PASSWORD */}
-          {mode !== 'verify' && (
+          {(mode === 'login' || mode === 'signup' || mode === 'forgot') && (
             <>
               <label htmlFor="account-email" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">البريد الإلكتروني</label>
               <div className="relative mt-1.5">
@@ -226,7 +251,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                 />
               </div>
 
-              <label htmlFor="account-password" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">كلمة المرور</label>
+              {mode !== 'forgot' && <><label htmlFor="account-password" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">كلمة المرور</label>
               <div className="relative mt-1.5">
                 <LockKeyhole className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-text-muted)]" />
                 <input
@@ -239,7 +264,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                   placeholder={mode === 'signup' ? '8 أحرف على الأقل' : '••••••••'}
                   className="mn-search-control w-full pr-10 pl-3 text-sm outline-none"
                 />
-              </div>
+              </div></>}
 
               {mode === 'login' && (
                 <div className="mt-4 flex items-center gap-2 select-none">
@@ -281,6 +306,15 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
             </>
           )}
 
+          {mode === 'reset' && <>
+            <label htmlFor="reset-token" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">رمز الاستعادة</label>
+            <input id="reset-token" value={resetToken} onChange={event => setResetToken(event.target.value)} required className="mn-search-control mt-1.5 w-full text-xs outline-none" />
+            <label htmlFor="reset-password" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">كلمة المرور الجديدة</label>
+            <input id="reset-password" type="password" autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} minLength={8} required className="mn-search-control mt-1.5 w-full text-xs outline-none" />
+            <label htmlFor="reset-password-confirm" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">تأكيد كلمة المرور</label>
+            <input id="reset-password-confirm" type="password" autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} minLength={8} required className="mn-search-control mt-1.5 w-full text-xs outline-none" />
+          </>}
+
           {error && <p role="alert" className="mt-4 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] p-3 text-xs font-semibold leading-5 text-[var(--mn-danger-text)]">{error}</p>}
           {success && (
             <div role="status" className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs font-medium leading-5 text-emerald-700 dark:text-emerald-300">
@@ -305,7 +339,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                   </button>
                 </div>
               )}
-              {mode === 'verify' && (
+              {(mode === 'verify' || mode === 'forgot' || mode === 'reset') && (
                 <button
                   type="button"
                   onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
@@ -323,8 +357,8 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
             disabled={loading}
             className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--mn-primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--mn-primary-hover)] disabled:opacity-60 mn-inverse"
           >
-            {mode === 'signup' ? <UserPlus className="h-4 w-4" /> : mode === 'verify' ? <MailCheck className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
-            {loading ? 'جارٍ المعالجة...' : mode === 'signup' ? 'إنشاء الحساب' : mode === 'verify' ? 'تأكيد الحساب' : 'تسجيل الدخول'}
+            {mode === 'signup' ? <UserPlus className="h-4 w-4" /> : mode === 'verify' || mode === 'forgot' ? <MailCheck className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+            {loading ? 'جارٍ المعالجة...' : mode === 'signup' ? 'إنشاء الحساب' : mode === 'verify' ? 'تأكيد الحساب' : mode === 'forgot' ? 'إرسال تعليمات الاستعادة' : mode === 'reset' ? 'تغيير كلمة المرور' : 'تسجيل الدخول'}
           </button>
 
           {/* Quick link to Mailpit Inbox */}
@@ -385,6 +419,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
               </button>
             )}
           </div>
+          {mode === 'login' && <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); }} className="mt-2 block w-full text-center text-xs font-semibold text-[var(--mn-primary)] hover:underline">نسيت كلمة المرور؟</button>}
           <p className="mt-3 text-center text-[10px] leading-4 text-[var(--mn-text-muted)]">
             طلاب ومديرو المنصة يستخدمون نفس المصادقة؛ يتم اعتماد الحساب بعد التحقق من ملكية البريد الإلكتروني.
           </p>

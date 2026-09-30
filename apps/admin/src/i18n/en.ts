@@ -761,7 +761,7 @@ export const en = {
   "translation_content_deferred": "Content translation deferred",
   "translation_content_writes_blocked": "Content translation writes are disabled in the current infrastructure-only phase.",
   "translation_save_error": "Unable to save translation.",
-  "admin_nav_authorization": "IAM & Authorization",
+  "admin_nav_authorization": "Staff & Permissions",
   "admin_nav_audit": "Audit Center",
   "admin_nav_assets": "Assets",
   "admin_nav_students": "Student Support",
