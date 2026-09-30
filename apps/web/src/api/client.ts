@@ -1454,22 +1454,24 @@ export async function apiFetch(
           const refreshRes = await csrfManager.fetchWithCsrf(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rememberMe: true }),
             credentials: 'include',
           });
           if (refreshRes.ok) {
             const payload = await refreshRes.json().catch(() => ({}));
-            try {
-              window.localStorage?.removeItem('manaratak_refresh_token');
-              window.sessionStorage?.removeItem('manaratak_refresh_token');
-            } catch {}
-            webRefreshFailedPermanently = false;
-            return true;
+            if (payload?.data?.authenticated === true) {
+              try {
+                window.localStorage?.removeItem('manaratak_refresh_token');
+                window.sessionStorage?.removeItem('manaratak_refresh_token');
+              } catch {}
+              webRefreshFailedPermanently = false;
+              return true;
+            }
+          } else if (refreshRes.status === 401 || refreshRes.status === 403) {
+            webRefreshFailedPermanently = true;
           }
         } catch {
-          // ignore
+          // A transient network failure must not disable later refresh attempts.
         }
-        webRefreshFailedPermanently = true;
         return false;
       })();
     }

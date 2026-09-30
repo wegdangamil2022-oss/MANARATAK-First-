@@ -12,6 +12,7 @@ import { useTranslation } from '../i18n/I18nProvider';
 import { localizeLocation, resolveLegacyPublicLocale } from '../i18n/localeRouting';
 import PublicTemplateApp from '../features/public-template/PublicTemplateApp';
 import { StudentAuthPage } from '../features/students/StudentAuthPage';
+import { canonicalAdminTarget } from './adminRedirect';
 
 const CertificateVerificationPage = React.lazy(() =>
   import('../features/certificates').then((m) => ({ default: m.CertificateVerificationPage }))
@@ -228,24 +229,15 @@ const router = createBrowserRouter([
 ]);
 
 function CanonicalAdminRedirect({ legacyPath }: { legacyPath: string }) {
-  const rawAdminUrl = import.meta.env.VITE_ADMIN_URL;
-  const adminBase =
-    rawAdminUrl && rawAdminUrl !== '/admin' && rawAdminUrl.startsWith('http')
-      ? rawAdminUrl.replace(/\/$/, '')
-      : null;
-  const normalizedLegacyPath = legacyPath.replace(/^\/(?:ar|en)(?=\/)/, '');
-  const targetPath = normalizedLegacyPath.replace(/^\/admin/, '') || '/dashboard';
+  const location = useLocation();
+  const target = canonicalAdminTarget(
+    `${legacyPath}${location.search}${location.hash}`,
+    import.meta.env.VITE_ADMIN_URL,
+  );
 
   useEffect(() => {
-    if (adminBase) {
-      window.location.replace(`${adminBase}${targetPath}`);
-    } else {
-      // For single-port Google Studio or dev environment without external admin base,
-      // we perform a full window.location replacement to /admin/ to let the Vite proxy
-      // serve the real apps/admin development server on port 3001.
-      window.location.replace(`/admin${targetPath}`);
-    }
-  }, [adminBase, targetPath]);
+    window.location.replace(target);
+  }, [target]);
 
   return <PageLoadingFallback />;
 }

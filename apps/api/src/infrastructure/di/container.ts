@@ -963,7 +963,7 @@ export function registerDependencies(
       }
 
       publicKeys[activeKeyId] = publicKeyPem;
-      const accessTokenTtl = Number(readConfig<number | string>('ACCESS_TOKEN_TTL_SECONDS') ?? 604800);
+      const accessTokenTtl = Number(readConfig<number | string>('ACCESS_TOKEN_TTL_SECONDS') ?? 900);
       return new JwtTokenProvider({ activeKeyId, privateKeyPem, publicKeys }, {
         accessTokenTtl,
         issuer: readConfig<string>('JWT_ISSUER') || 'manaratak-api',
@@ -982,7 +982,7 @@ export function registerDependencies(
     }).singleton(),
     emailDeliveryGateway: asFunction(() => {
       const provider = readConfig<string>('EMAIL_DELIVERY_PROVIDER') || (effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging' ? '' : 'captured');
-      if (provider === 'captured' || (effectiveEnvironment.NODE_ENV !== 'production' && effectiveEnvironment.NODE_ENV !== 'staging')) {
+      if (provider === 'captured' && effectiveEnvironment.NODE_ENV !== 'production' && effectiveEnvironment.NODE_ENV !== 'staging') {
         return new CapturedEmailDeliveryGateway();
       }
       if (provider !== 'smtp' || effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging') throw new Error('Test email delivery provider is not configured for this runtime');

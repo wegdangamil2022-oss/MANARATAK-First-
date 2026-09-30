@@ -45,7 +45,6 @@ export async function performAdminRefresh(): Promise<boolean> {
       const res = await csrfManager.fetchWithCsrf(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rememberMe: true }),
         credentials: 'include',
       });
       if (res.ok) {

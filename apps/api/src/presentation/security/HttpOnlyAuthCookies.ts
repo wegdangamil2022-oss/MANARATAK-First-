@@ -60,7 +60,7 @@ export function setAuthCookies(res: Response, tokens: AuthTokens, rememberMe?: b
   
   res.cookie(ACCESS_COOKIE_NAME, tokens.accessToken, {
     ...options,
-    maxAge: ttlMilliseconds(env.ACCESS_TOKEN_TTL_SECONDS, rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60),
+    maxAge: Math.min(ttlMilliseconds(env.ACCESS_TOKEN_TTL_SECONDS, 900), 900_000),
   });
 
   if (rememberMe) {

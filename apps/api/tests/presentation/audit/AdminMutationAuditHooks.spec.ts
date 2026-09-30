@@ -6,7 +6,7 @@ import {
   InMemoryEmergencyAccessRepository,
 } from '@manaratak/infrastructure';
 import { ManageEmergencyAccessUseCase } from '@manaratak/application';
-import { AuditRecord } from '@manaratak/domain';
+import { AuditRecord, LifeStatus } from '@manaratak/domain';
 import { AuthorizationAdminRouter } from '../../../src/presentation/api/router/AuthorizationAdminRouter';
 import { SettingsAdminRouter } from '../../../src/presentation/api/router/SettingsAdminRouter';
 import { IdentityRouter } from '../../../src/presentation/api/router/IdentityRouter';
@@ -33,9 +33,9 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
           .fn()
           .mockResolvedValue({
             id: 'role-1',
-            name: 'Admin',
-            description: 'Administrator',
-            permissions: [],
+            name: 'Universities editor',
+            description: 'Can manage universities',
+            permissions: [{ value: 'admin:universities:manage' }],
             policyIds: [],
           }),
         listRoles: vi.fn().mockResolvedValue([]),
@@ -58,6 +58,16 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
           manageEmergencyAccessUseCase: new ManageEmergencyAccessUseCase(
             new InMemoryEmergencyAccessRepository(),
           ),
+          getIdentityUseCase: {
+            execute: vi.fn().mockResolvedValue({ isSuccess: true, getValue: () => ({
+              status: LifeStatus.ACTIVE,
+              account: { accessState: 'Active' },
+              user: { contactRegistry: { isEmailVerified: true } },
+            }) }),
+          } as any,
+          authEvaluatorService: {
+            evaluatePermission: vi.fn().mockResolvedValue({ isGranted: true }),
+          } as any,
           auditRecordRepo: auditRepo,
         }),
       );
@@ -68,20 +78,20 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
         .post('/api/v1/admin/auth/roles')
         .set('x-correlation-id', 'corr-roles-1')
         .send({
-          id: 'role-super-admin',
-          name: 'SUPER_ADMIN',
-          description: 'Super administrator',
-          permissions: [],
+          id: 'role-universities-editor',
+          name: 'UNIVERSITIES_EDITOR',
+          description: 'Universities editor',
+          permissions: ['admin:universities:manage'],
           policyIds: [],
         });
 
       expect(res.status).toBe(201);
       expect(mockManageRolesUseCase.createRole).toHaveBeenCalledWith(
         {
-          id: 'role-super-admin',
-          name: 'SUPER_ADMIN',
-          description: 'Super administrator',
-          permissions: [],
+          id: 'role-universities-editor',
+          name: 'UNIVERSITIES_EDITOR',
+          description: 'Universities editor',
+          permissions: ['admin:universities:manage'],
           policyIds: [],
         },
         expect.objectContaining({

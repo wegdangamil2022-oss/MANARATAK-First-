@@ -51,11 +51,11 @@ describe('public design import boundaries', () => {
     for (const preview of loadPublicPrototypeSnapshot().data.services) expect(html).not.toContain(preview.title);
   });
 
-  it('retains tracker navigation and excludes the archive Admin switcher and global mock API', () => {
+  it('routes tracker navigation to the live student workspace and excludes the archive Admin switcher and global mock API', () => {
     const app = readFileSync(resolve('apps/web/src/features/public-template/PublicTemplateApp.tsx'), 'utf8');
     expect(app).toContain("activeTab === 'tracker'");
-    expect(app).toContain('<LearnerProgressTracker');
     expect(app).toContain('<LiveStudentWorkspacePage initialTab="JOURNEY"');
+    expect(app).not.toContain('<LearnerProgressTracker');
     expect(existsSync(resolve('preview/entry.ts'))).toBe(false);
     expect(existsSync(resolve('preview/mock-api.ts'))).toBe(false);
     expect(app).not.toContain('بيانات تجريبية •');

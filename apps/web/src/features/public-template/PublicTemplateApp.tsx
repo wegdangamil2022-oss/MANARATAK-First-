@@ -83,7 +83,6 @@ import { RoadmapPreview } from './components/RoadmapPreview';
 import { FaqPreview } from './components/FaqPreview';
 import { ContactSection } from './components/ContactSection';
 import { BottomNavBar, TabType } from './components/BottomNavBar';
-import { LearnerProgressTracker } from './components/LearnerProgressTracker';
 import { PushNotificationCenter } from './components/PushNotificationCenter';
 import { UniversitiesList } from './components/UniversitiesList';
 import { CoursesList } from './components/CoursesList';
