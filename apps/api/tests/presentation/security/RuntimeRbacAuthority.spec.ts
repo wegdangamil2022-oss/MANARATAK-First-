@@ -134,6 +134,27 @@ describe('Runtime RBAC Authority & Permission Evaluation', () => {
     });
   });
 
+  it('allows one-section staff only in the assigned section', async () => {
+    await roleRepo.save(new Role({ id: 'university-editor', name: 'University editor', description: 'Universities only',
+      permissions: [new PermissionReference('admin:universities:manage')], policyIds: [] }));
+    await assignmentRepo.save(new RoleAssignment({ id: 'assignment-universities', identityId: 'staff-1',
+      roleId: 'university-editor', assignedAt: new Date() }));
+
+    const allowed = SecurityMiddlewareFactory.createAdminPermissionGuard('admin:universities:manage', evaluatorService);
+    const denied = SecurityMiddlewareFactory.createAdminPermissionGuard('admin:platform:manage', evaluatorService);
+    const request = { authUserId: 'staff-1', headers: {} } as any;
+    const allowedResponse = createResponse();
+    const deniedResponse = createResponse();
+    const allowedNext = vi.fn();
+    const deniedNext = vi.fn();
+    await allowed(request, allowedResponse as any, allowedNext);
+    await denied(request, deniedResponse as any, deniedNext);
+    expect(allowedNext).toHaveBeenCalledOnce();
+    expect(deniedNext).not.toHaveBeenCalled();
+    expect(deniedResponse.statusCode).toBe(403);
+    expect(getResponseErrorCode(deniedResponse.payload)).toBe('ADMIN_PERMISSION_DENIED');
+  });
+
   it('DENIES access when user has NO role assignment in database', async () => {
     const guard = SecurityMiddlewareFactory.createAdminPermissionGuard(
       'admin:imports:manage',
