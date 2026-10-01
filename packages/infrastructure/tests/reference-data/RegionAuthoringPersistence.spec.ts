@@ -43,6 +43,22 @@ const lifecycle = (expectedVersion: number, toState: ReferenceLifecycleState, ex
   entityType: 'REGION' as const, referenceId: 'region-1', expectedVersion, toState, reason: 'source verified', actorId: 'verified-admin', ...extra,
 });
 describe('M10-07 typed region persistence with Prisma mocks (no database)', () => {
+  it('resolves a saved regional alias by stable ID and deduplicates rows for the same reference', async () => {
+    const f = fixture(); f.seed();
+    f.client.$queryRaw.mockImplementation(async (sql: Prisma.Sql) => {
+      expect(sql.sql).toContain('SELECT DISTINCT "referenceId"');
+      expect(sql.sql).toContain('LIMIT 2');
+      expect(sql.values).toEqual(['REGION', 'aden']);
+      return [{ referenceId: 'region-1' }];
+    });
+    expect(await f.repository.resolveRegionCandidate({ alias: 'Aden' })).toMatchObject({ record: { id: 'region-1', lifecycleState: 'ACTIVE' }, method: 'NORMALIZED_ALIAS' });
+  });
+  it('keeps an alias shared by two canonical region IDs ambiguous instead of choosing one', async () => {
+    const f = fixture();
+    f.client.$queryRaw.mockResolvedValue([{ referenceId: 'region-1' }, { referenceId: 'region-2' }] as never);
+    expect(await f.repository.resolveRegionCandidate({ alias: 'Aden' })).toBeNull();
+    expect(f.client.administrativeRegion.findUnique).not.toHaveBeenCalled();
+  });
   it('persists country ID, alias locale/type, initial version and actor; edits preserve canonical ID', async () => {
     const f = fixture(); const created = await f.repository.upsertRegion({ ...create, id: 'region-1' }, 'verified-admin');
     expect(created.aliases).toEqual(create.aliases); expect(created.countryReferenceId).toBe('country-1');

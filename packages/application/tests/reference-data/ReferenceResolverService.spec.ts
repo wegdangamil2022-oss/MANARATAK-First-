@@ -7,6 +7,7 @@ import {
   ReferenceCityDto,
   ReferenceLanguageDto,
   ReferenceCurrencyDto,
+  ReferenceLifecycleState,
 } from '@manaratak/domain';
 import { ReferenceResolverService } from '../../src/reference-data/services/ReferenceResolverService';
 
@@ -26,6 +27,10 @@ describe('ReferenceResolverService canonical contract', () => {
     countryIso2Code: 'SA',
     regionCode: 'SA-01',
     name: 'Riyadh',
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    isActive: true,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
   const city: ReferenceCityDto = {
     id: 'city-riyadh',
@@ -107,6 +112,7 @@ describe('ReferenceResolverService canonical contract', () => {
       id: 'region-riyadh',
       type: 'REGION',
       standardCode: 'SA-01',
+      active: true,
       resolutionMethod: 'EXACT_STANDARD_CODE',
     });
     await expect(resolver.resolveCity({ id: 'city-riyadh' })).resolves.toMatchObject({
@@ -115,6 +121,14 @@ describe('ReferenceResolverService canonical contract', () => {
       active: true,
       resolutionMethod: 'EXACT_ID',
     });
+  });
+
+  it.each(['DEPRECATED', 'ARCHIVED', 'SUPERSEDED', 'MERGED'] as const)('reports %s regions inactive even if the compatibility boolean is stale', async lifecycleState => {
+    vi.mocked(repository.resolveRegionCandidate).mockResolvedValue({
+      record: { ...region, lifecycleState: lifecycleState as ReferenceLifecycleState, isActive: true },
+      method: 'NORMALIZED_ALIAS',
+    });
+    await expect(resolver.resolveRegion({ alias: 'Riyadh' })).resolves.toMatchObject({ id: region.id, active: false, resolutionMethod: 'NORMALIZED_ALIAS' });
   });
 
   it('maps Language and Currency candidates and returns null when no unique candidate exists', async () => {

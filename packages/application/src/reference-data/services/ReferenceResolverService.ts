@@ -3,6 +3,7 @@ import {
   IReferenceResolutionRepository,
   IReferenceResolver,
   ReferenceLookup,
+  ReferenceLifecycleState,
 } from '@manaratak/domain';
 
 /**
@@ -32,7 +33,7 @@ export class ReferenceResolverService implements IReferenceResolver {
           id: result.record.id,
           type: 'REGION',
           standardCode: result.record.regionCode,
-          active: null,
+          active: result.record.lifecycleState === ReferenceLifecycleState.ACTIVE,
           resolutionMethod: result.method,
         }
       : null;

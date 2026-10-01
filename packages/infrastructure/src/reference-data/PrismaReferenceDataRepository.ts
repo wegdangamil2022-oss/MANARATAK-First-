@@ -252,7 +252,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (alias) {
       const normalizedAlias = this.normalizeResolutionAlias(alias);
       const rows = await this.prisma.$queryRaw<Array<{ referenceId: string }>>(Prisma.sql`
-        SELECT "referenceId"
+        SELECT DISTINCT "referenceId"
         FROM "ReferenceAliasRecord"
         WHERE "entityType" = ${entityType}
           AND "isActive" = true
