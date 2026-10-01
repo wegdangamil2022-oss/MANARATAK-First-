@@ -27,6 +27,7 @@ M0–M9 remain accepted for planning. Source implementation is complete for mana
 - Source quality PASS, zero cycles/accessibility findings. Persistence ownership PASS: 246 models and zero direct cross-context ORM writes. Existing P9 contract 97/97 and W2 84/84 PASS. New-file scoped ESLint: zero errors/warnings. Secret scan and diff whitespace PASS.
 - React checklist applied: typed state/props, labelled fields, explicit button types, request cleanup/stale result handling, permission wrapper and bounded owner API reads. Browser behavior was not tested locally.
 - Exact-head GitHub CI must pass before main merge; the PR checks provide that external evidence. Historical migrations and checksums are unchanged.
+- The initial CI head `a319b8e` failed because the generated DI reachability manifest still recorded 333 registrations. The project generator refreshed it to 335/335 reachable registrations, including the registry use case/router. The complete registered source-only closure manifest then passed locally; database/browser runtime gates stayed excluded. An initial standalone diagnostic command used a nonexistent verifier filename; the full runner invoked the real verifier and passed. No checker was weakened. The corrected head requires fresh GitHub CI.
 
 ## Connected acceptance — RUNTIME_UNTESTED
 
