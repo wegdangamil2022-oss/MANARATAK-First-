@@ -61,8 +61,8 @@ jobs:
           fi
       - name: Source quality and cycle/accessibility gate
         run: npm run quality:source
-      - name: CI runtime dependency regression contracts
-        run: node --test tests/architecture/ci-runtime-regressions.test.mjs
+      - name: CI and migration source regression contracts
+        run: node --test tests/architecture/ci-runtime-regressions.test.mjs tests/remediation/w2-migration-recovery-source.test.mjs tests/remediation/m10-recovery-gate-exit.test.mjs
       - name: Authoritative registered source-closure manifest
         env:
           DATABASE_MUTATIONS_ALLOWED: 'false'

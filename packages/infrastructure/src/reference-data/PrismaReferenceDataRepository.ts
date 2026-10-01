@@ -636,15 +636,11 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   private cityWhere(filters?: ReferenceDataFilters): Prisma.ReferenceCityWhereInput {
-    const where: {
-      isActive?: boolean;
-      countryIso2Code?: string;
-      region?: string;
-      OR?: Array<{
-        name?: { contains: string; mode: 'insensitive' };
-        timezone?: { contains: string; mode: 'insensitive' };
-      }>;
-    } = {};
+    const where: Prisma.ReferenceCityWhereInput = {};
+
+    if (filters?.administrativeRegionId) {
+      where.administrativeRegionId = filters.administrativeRegionId;
+    }
 
     if (filters?.activeOnly) {
       where.isActive = true;

@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { adminReferenceDataQuerySchema } from './ReferenceDataQueryContract.js';
+import { adminReferenceDataQuerySchema, adminCityReferenceDataQuerySchema } from './ReferenceDataQueryContract.js';
 import {
   ReferenceDataInvariantError,
   ReferenceDataNotFoundError,
@@ -190,7 +190,7 @@ export class ReferenceDataAdminRouter {
     router.get(
       '/cities',
       asyncHandler(async (req: Request, res: Response) => {
-        const filters = adminReferenceDataQuerySchema.parse(req.query);
+        const filters = adminCityReferenceDataQuerySchema.parse(req.query);
         res.json(await referenceDataUseCases.listPage('cities', filters));
       }),
     );

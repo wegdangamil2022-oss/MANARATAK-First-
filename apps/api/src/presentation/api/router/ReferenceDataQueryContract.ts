@@ -21,3 +21,12 @@ export const adminReferenceDataQuerySchema = z.object({
     return value;
   }, z.boolean().optional()),
 }).strict();
+
+// Canonical region IDs are supported only by city collections, not every reference query.
+export const cityReferenceDataQueryShape = {
+  ...referenceDataQueryShape,
+  administrativeRegionId: z.string().uuid().optional(),
+};
+export const adminCityReferenceDataQuerySchema = adminReferenceDataQuerySchema.extend({
+  administrativeRegionId: cityReferenceDataQueryShape.administrativeRegionId,
+}).strict();

@@ -10,7 +10,7 @@ const base = '/admin/reference-data';
 
 export function getReferenceDataPage<T>(collection: ReferenceDataCollection, filters: ReferenceDataFilters = {}): Promise<ReferenceDataPage<T>> {
   const params = new URLSearchParams({ page: String(filters.page ?? 1), pageSize: String(filters.pageSize ?? 50) });
-  for (const key of ['activeOnly', 'region', 'countryIso2Code', 'q'] as const) {
+  for (const key of ['activeOnly', 'region', 'countryIso2Code', 'q', 'administrativeRegionId'] as const) {
     const value = filters[key];
     if (value !== undefined) params.set(key, String(value));
   }

@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { referenceDataQueryShape } from './ReferenceDataQueryContract.js';
+import { referenceDataQueryShape, cityReferenceDataQueryShape } from './ReferenceDataQueryContract.js';
 import { LocalizedPublicUniversityUseCases, LocalizedReferenceDataQueries, ReferenceDataNotFoundError } from '@manaratak/application';
 import { IReferenceDataRepository, IUniversityRepository } from '@manaratak/domain';
 import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
@@ -13,6 +13,7 @@ export class ReferenceDataPublicRouter {
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
 
     const querySchema = z.object(referenceDataQueryShape).merge(localeQuerySchema).strict();
+    const cityQuerySchema = z.object(cityReferenceDataQueryShape).merge(localeQuerySchema).strict();
 
     router.get('/countries', asyncHandler(async (req: Request, res: Response) => {
       const { locale, ...filters } = querySchema.parse(req.query);
@@ -39,7 +40,7 @@ export class ReferenceDataPublicRouter {
       res.json({ data: await localized.listRegions(filters, locale) });
     }));
     router.get('/cities', asyncHandler(async (req: Request, res: Response) => {
-      const { locale, ...filters } = querySchema.parse(req.query);
+      const { locale, ...filters } = cityQuerySchema.parse(req.query);
       res.json({ data: await localized.listCities(filters, locale) });
     }));
 

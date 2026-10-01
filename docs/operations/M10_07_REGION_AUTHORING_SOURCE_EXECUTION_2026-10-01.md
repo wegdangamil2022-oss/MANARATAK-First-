@@ -8,7 +8,7 @@
 - M0–M9 are accepted for planning. No historical stage was audited again.
 - M10-07 source: IMPLEMENTED. Connected acceptance: RUNTIME_UNTESTED.
 - No database connection, migration execution, seed, import, deployment or Google AI Studio access occurred.
-- M10 as a whole is not closed. M10-08 and later work remain.
+- M10 as a whole is not closed. M10-08 source follow-up is recorded separately; later work remains.
 
 ## Changes and ownership
 
@@ -46,7 +46,7 @@ All historical migration SQL files are unchanged. The new migration includes ADR
 - Persistence ownership/metadata: PASS, 246/246 models, zero direct cross-context ORM mutations. W1: PASS 136/136; W2: PASS 84/84. W1's first invocation lacked bash; rerun used the existing Git bash directory.
 - Source quality: PASS, zero cycles/accessibility findings. Scoped ESLint: zero errors, 29 existing warnings. Secret scan and diff whitespace check: PASS.
 - Local Node: 24.19.0; installed Vitest: 4.1.10. The repository lock pins the patched dependency version and CI is the Node 22.16 / clean-install authority.
-- GitHub's four workflows (Enterprise CI, Security Gates, Source Architecture Guards, Imported Courses Source Closure) passed for the initial source commit `402dced`. Current-head check status is tracked on draft PR #7; an older successful run is not evidence for a later revision. The draft activation gate remains until connected verification, regardless of source CI success.
+- GitHub's four workflows (Enterprise CI, Security Gates, Source Architecture Guards, Imported Courses Source Closure) passed for source commit `63f74261e2dc6379c6fa6c39f0e92081ca603ceb`. On 2026-10-02 the user explicitly authorized merging M10-07 and M10-08 source into main to support Google AI Studio's main-only pull. This supersedes the initial draft merge hold. Connected verification and controlled migration activation are still required before using the new database fields; source CI does not close runtime acceptance.
 
 Mocks and in-memory adapters do not prove PostgreSQL trigger syntax, row-lock concurrency, real FK constraints or persisted production audit records. Live browser acceptance remains untested.
 
@@ -71,4 +71,4 @@ Retain sanitized request IDs, stable reference IDs, counts and PASS/FAIL evidenc
 
 ## Next source task
 
-M10-08: city canonical chooser scoped by country/region, stable canonical IDs and raw-label/ambiguity review. It is not claimed complete by adding the Regions tab.
+M10-08 source implementation and the activation order are recorded in `M10_08_CITY_CHOOSER_SOURCE_EXECUTION_2026-10-02.md`.
