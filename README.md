@@ -89,3 +89,5 @@ Use `.env.example` as the variable-name template. It contains no usable credenti
 ## Git Handoff Note
 
 The bundled `.git` metadata is incomplete and must not be repaired from an older MANARATAK copy. Exclude `.git` from the final handoff ZIP and initialize or attach version control independently after validating the source handoff.
+
+<!-- Codex repository write-access check: 2026-10-01. -->
