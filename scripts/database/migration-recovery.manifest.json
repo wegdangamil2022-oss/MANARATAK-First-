@@ -317,6 +317,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Historical M7 reconciliation: no reviewed reverse SQL exists. Restore the verified pre-mutation backup in shared environments, or reprovision a disposable target. Applied SQL and checksums remain immutable."
+    },
+    "20261001010000_m10_region_governance": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Unapplied source migration. After authoring starts, restoring a backup is required to preserve region lifecycle, aliases, versions and dependent relationships; no destructive reverse SQL is asserted."
     }
   }
 }

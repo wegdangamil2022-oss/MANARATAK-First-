@@ -31,6 +31,24 @@ describe('ReferenceDataAdminRouter', () => {
     return app;
   };
 
+  it('accepts a UUID region scope only for cities and rejects malformed or foreign collection filters', async () => {
+    const useCases = createUseCases(); const app = createApp(useCases);
+    const regionId = '11111111-1111-4111-8111-111111111111';
+    expect((await request(app).get(`/admin/reference-data/cities?countryIso2Code=YE&administrativeRegionId=${regionId}`)).status).toBe(200);
+    expect(useCases.listPage).toHaveBeenCalledWith('cities', { countryIso2Code: 'YE', administrativeRegionId: regionId });
+    useCases.listPage.mockClear();
+    for (const path of ['cities?administrativeRegionId=source-label', `regions?administrativeRegionId=${regionId}`, `countries?administrativeRegionId=${regionId}`]) {
+      expect((await request(app).get(`/admin/reference-data/${path}`)).status).toBe(400);
+    }
+    expect(useCases.listPage).not.toHaveBeenCalled();
+  });
+
+  it('rejects source labels in the canonical city region FK before any write', async () => {
+    const useCases = createUseCases();
+    const response = await request(createApp(useCases)).put('/admin/reference-data/cities').send({ countryIso2Code: 'YE', name: 'Aden', region: 'Original region', administrativeRegionId: 'Original region' });
+    expect(response.status).toBe(400); expect(useCases.upsertCity).not.toHaveBeenCalled();
+  });
+
   it('GET /admin/reference-data/countries preserves an explicit activeOnly=false filter', async () => {
     const useCases = createUseCases();
     useCases.listCountries.mockResolvedValue([]);

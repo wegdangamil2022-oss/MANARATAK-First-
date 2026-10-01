@@ -13,6 +13,17 @@ describe('ReferenceDataPublicRouter locale contract', () => {
     return app;
   };
 
+  it('passes canonical region scope to active public city reads without widening other collections', async () => {
+    const repository = createRepository(); repository.listCities.mockResolvedValue([]);
+    const app = createApp(repository); const regionId = '11111111-1111-4111-8111-111111111111';
+    expect((await request(app).get(`/reference-data/cities?countryIso2Code=YE&administrativeRegionId=${regionId}`)).status).toBe(200);
+    expect(repository.listCities).toHaveBeenCalledWith({ countryIso2Code: 'YE', administrativeRegionId: regionId, activeOnly: true });
+    repository.listCities.mockClear();
+    expect((await request(app).get('/reference-data/cities?administrativeRegionId=label')).status).toBe(400);
+    expect((await request(app).get(`/reference-data/languages?administrativeRegionId=${regionId}`)).status).toBe(400);
+    expect(repository.listCities).not.toHaveBeenCalled(); expect(repository.listLanguages).not.toHaveBeenCalled();
+  });
+
   it('projects reference names by locale', async () => {
     const repository = createRepository();
     repository.listCountries.mockResolvedValue([{ id: 'ye', iso2Code: 'YE', iso3Code: 'YEM', name: 'Yemen', nameAr: 'اليمن', isActive: true }]);

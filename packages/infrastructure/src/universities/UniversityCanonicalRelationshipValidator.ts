@@ -41,11 +41,11 @@ export class UniversityCanonicalRelationshipValidator {
     const region = input.regionReferenceId
       ? await this.client.administrativeRegion.findUnique({
           where: { id: input.regionReferenceId },
-          // AdministrativeRegion has no isActive/lifecycle column.
-          select: { countryIso2Code: true, countryReferenceId: true },
+          select: { countryIso2Code: true, countryReferenceId: true, lifecycleState: true },
         })
       : null;
     if (input.regionReferenceId && !region) throw new Error('UNIVERSITY_CAMPUS_REGION_NOT_FOUND');
+    if (region && region.lifecycleState !== 'ACTIVE') throw new Error('UNIVERSITY_CAMPUS_REGION_NOT_ACTIVE');
     const city = input.cityReferenceId
       ? await this.client.referenceCity.findUnique({
           where: { id: input.cityReferenceId },

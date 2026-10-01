@@ -7,6 +7,9 @@ import { FileCheck2, Loader2, Upload } from 'lucide-react';
 
 import type { ReferenceDataCollection } from '@manaratak/domain';
 import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceData';
+import { AdministrativeRegionsTab } from './AdministrativeRegionsTab';
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import { CanonicalPicker } from '../components/CanonicalPicker';
 
 function useFetchData(collection: ReferenceDataCollection) {
   const [data, setData] = useState<any[]>([]);
@@ -49,22 +52,22 @@ function ReferencePagination({ page, totalPages, setPage, loading }: {
 }
 
 export function ReferenceDataAdminPage() {
-  const [activeTab, setActiveTab] = useState<'countries' | 'currencies' | 'languages' | 'cities'>('countries');
+  const [activeTab, setActiveTab] = useState<ReferenceDataCollection>('countries');
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Reference Data</h2>
-        <p className="text-sm text-gray-500 mt-1">Foundational Settings for Countries, Currencies, Languages, and Cities.</p>
+        <p className="text-sm text-gray-500 mt-1">Foundational Settings for Countries, Currencies, Languages, Regions, and Cities.</p>
       </div>
       
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
         <div className="flex border-b border-gray-200 overflow-x-auto">
-          {['countries', 'currencies', 'languages', 'cities'].map(tab => (
+          {(['countries', 'currencies', 'languages', 'regions', 'cities'] as const).map(tab => (
             <button 
               key={tab}
               className={`px-4 py-3 text-sm font-medium capitalize whitespace-nowrap ${activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab)}
             >
               {tab}
             </button>
@@ -76,6 +79,7 @@ export function ReferenceDataAdminPage() {
           {activeTab === 'currencies' && <CurrenciesTab />}
           {activeTab === 'languages' && <LanguagesTab />}
           {activeTab === 'cities' && <CitiesTab />}
+          {activeTab === 'regions' && <AdministrativeRegionsTab />}
         </div>
       </div>
     </div>
@@ -424,15 +428,22 @@ function LanguagesTab() {
 function CitiesTab() {
   const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('cities');
   const [form, setForm] = useState({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
+  const [countryId, setCountryId] = useState<string | null>(null);
+  const [regionId, setRegionId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!countryId || !form.countryIso2Code) {
+      setSaveStatus({ loading: false, error: 'Select an active canonical country.' });
+      return;
+    }
     setSaveStatus({ loading: true });
     try {
-      await referenceDataAdminApi.saveCity({ ...form, nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null });
+      await referenceDataAdminApi.saveCity({ ...form, administrativeRegionId: regionId, nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
       setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
+      setCountryId(null); setRegionId(null);
       refetch();
     } catch (err: any) {
       setSaveStatus({ loading: false, error: err.message });
@@ -444,14 +455,15 @@ function CitiesTab() {
       <form onSubmit={handleSave} className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
         <h3 className="font-bold text-lg">Manual Upsert City</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="Country ISO2 Code" required value={form.countryIso2Code} onChange={(v: string) => setForm({...form, countryIso2Code: v})} />
+          <CanonicalPicker label="Country" value={countryId} load={() => canonicalPickerApi.countries()} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading} />
           <Input label="Name" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
           <Input label="Arabic Name (optional)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
-          <Input label="Region (optional)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
+          <CanonicalPicker label="Canonical region (optional)" value={regionId} load={() => canonicalPickerApi.regions(form.countryIso2Code || undefined)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId} />
+          <Input label="Original region label (optional)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
           <Input label="Timezone (optional)" value={form.timezone} onChange={(v: string) => setForm({...form, timezone: v})} />
         </div>
         <div className="flex items-center gap-4">
-          <button type="submit" disabled={saveStatus.loading} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
+          <button type="submit" disabled={saveStatus.loading || !countryId} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
             {saveStatus.loading ? 'Saving...' : 'Save'}
           </button>
           {saveStatus.success && <span className="text-green-600 text-sm">{saveStatus.success}</span>}
@@ -476,8 +488,8 @@ function CitiesTab() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {data.map(item => (
-                  <tr key={`${item.countryIso2Code}-${item.name}`} className="hover:bg-gray-50">
-                    <td className="p-3 font-mono">{item.countryIso2Code}</td><td className="p-3">{item.name}</td><td className="p-3">{item.region || '-'}</td><td className="p-3">{item.timezone || '-'}</td>
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="p-3 font-mono">{item.countryIso2Code}</td><td className="p-3">{item.name}</td><td className="p-3">{item.administrativeRegion?.name || item.region || '-'}</td><td className="p-3">{item.timezone || '-'}</td>
                   </tr>
                 ))}
               </tbody>

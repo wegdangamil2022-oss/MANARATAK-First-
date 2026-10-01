@@ -2,6 +2,7 @@ import type {
   ReferenceDataCollection, ReferenceDataFilters, ReferenceDataPage,
   UpsertReferenceCountryDto, UpsertReferenceCurrencyDto,
   UpsertReferenceLanguageDto, UpsertReferenceCityDto,
+  AdministrativeRegionDto, UpsertAdministrativeRegionDto, ReferenceLifecycleState, ReferenceVersionDto,
 } from '@manaratak/domain';
 import { adminApiClient, type AdminRequestOptions } from './client';
 
@@ -9,7 +10,7 @@ const base = '/admin/reference-data';
 
 export function getReferenceDataPage<T>(collection: ReferenceDataCollection, filters: ReferenceDataFilters = {}): Promise<ReferenceDataPage<T>> {
   const params = new URLSearchParams({ page: String(filters.page ?? 1), pageSize: String(filters.pageSize ?? 50) });
-  for (const key of ['activeOnly', 'region', 'countryIso2Code', 'q'] as const) {
+  for (const key of ['activeOnly', 'region', 'countryIso2Code', 'q', 'administrativeRegionId'] as const) {
     const value = filters[key];
     if (value !== undefined) params.set(key, String(value));
   }
@@ -36,6 +37,20 @@ function mutate<T>(path: string, method: 'POST' | 'PUT', body: unknown, options:
 }
 
 export const referenceDataAdminApi = {
+  getRegion(id: string) {
+    return adminApiClient.request<AdministrativeRegionDto>(base + '/regions/' + encodeURIComponent(id));
+  },
+  saveRegion({ id, expectedVersion, ...body }: UpsertAdministrativeRegionDto, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {
+    return id
+      ? mutate<AdministrativeRegionDto>('/regions/' + encodeURIComponent(id), 'PUT', { ...body, expectedVersion }, options)
+      : mutate<AdministrativeRegionDto>('/regions', 'POST', body, options);
+  },
+  regionHistory(id: string) {
+    return adminApiClient.request<{ data: ReferenceVersionDto[] }>(base + '/governance/REGION/' + encodeURIComponent(id) + '/history');
+  },
+  transitionRegion(id: string, body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string }, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {
+    return mutate<void>('/governance/REGION/' + encodeURIComponent(id) + '/lifecycle', 'POST', body, options);
+  },
   saveCountry({ iso2Code, ...body }: UpsertReferenceCountryDto, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {
     return mutate(`/countries/${encodeURIComponent(iso2Code)}`, 'PUT', body, options);
   },

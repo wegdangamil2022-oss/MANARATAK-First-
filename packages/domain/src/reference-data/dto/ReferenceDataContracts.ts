@@ -3,6 +3,7 @@ import { ReferenceAliasInput, ReferenceLifecycleState, ReferenceProviderMappingI
 export interface ReferenceDataFilters {
   activeOnly?: boolean;
   region?: string;
+  administrativeRegionId?: string;
   countryIso2Code?: string;
   q?: string;
   page?: number;
@@ -135,6 +136,25 @@ export interface AdministrativeRegionDto {
   nameAr?: string | null;
   localName?: string | null;
   regionType?: string | null;
+  lifecycleState: ReferenceLifecycleState;
+  isActive: boolean;
+  versionNumber: number;
+  effectiveFrom: Date;
+  effectiveTo?: Date | null;
+  aliases?: ReferenceAliasInput[];
+}
+
+export interface UpsertAdministrativeRegionDto {
+  /** Omit id/version to create; updates must carry both. Identity fields are immutable. */
+  id?: string;
+  expectedVersion?: number;
+  countryIso2Code: string;
+  regionCode: string;
+  name: string;
+  nameAr?: string | null;
+  localName?: string | null;
+  regionType?: string | null;
+  aliases?: ReferenceAliasInput[];
 }
 
 export interface ReferenceCityDto {

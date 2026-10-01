@@ -280,6 +280,7 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     throw new Error(`[${response.status}] ${errorMessage}`);
   }
 
+  if (response.status === 204) return undefined as T;
   const payload = await response.json() as T;
   if (endpoint.includes('/auth/login')) {
     refreshFailedPermanently = false;

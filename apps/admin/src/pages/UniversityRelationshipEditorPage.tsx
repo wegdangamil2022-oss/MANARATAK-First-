@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle2, Globe2, Plus, Save, ShieldCheck, Trash2, Undo2
 import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
+import { CanonicalCityPicker } from '../components/CanonicalCityPicker';
 
 interface CampusRow { id: string; sourceReferenceId?: string | null; name: string; }
 interface OrganizationRow { id: string; sourceReferenceId?: string | null; name: string; }
@@ -37,6 +38,8 @@ interface PublicationReadiness {
 }
 
 interface UniversityDetail {
+  country?: string | null;
+  city?: string | null;
   id: string;
   displayName: string;
   countryReferenceId?: string | null;
@@ -76,6 +79,7 @@ export function UniversityRelationshipEditorPage() {
   const load = async () => {
     const detail = await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`);
     setUniversity(detail);
+    setCountryIso2('');
     const readinessResult = await adminApiClient.request<PublicationReadiness>(`/admin/universities/${encodeURIComponent(id)}/publication-readiness`).catch(() => null);
     setReadiness(readinessResult);
     setCountryReferenceId(detail.countryReferenceId ?? null);
@@ -223,9 +227,9 @@ export function UniversityRelationshipEditorPage() {
     {message ? <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{message}</div> : null}
 
     <form onSubmit={saveLocation} className="grid gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-3">
-      <CanonicalPicker label="Country" value={countryReferenceId} onChange={(next, option) => { setCountryReferenceId(next); setCountryIso2(option?.code ?? ''); setRegionReferenceId(null); setCityReferenceId(null); }} load={() => canonicalPickerApi.countries()} reloadKey="university-country" />
-      <CanonicalPicker label="Region" value={regionReferenceId} onChange={(next) => { setRegionReferenceId(next); setCityReferenceId(null); }} load={() => canonicalPickerApi.regions(countryIso2 || undefined)} reloadKey={`university-regions:${countryIso2}`} optional disabled={!countryReferenceId} />
-      <CanonicalPicker label="City" value={cityReferenceId} onChange={(next) => setCityReferenceId(next)} load={() => canonicalPickerApi.cities(countryIso2 || undefined)} reloadKey={`university-cities:${countryIso2}`} optional disabled={!countryReferenceId} />
+      <CanonicalPicker label="Country" value={countryReferenceId} onChange={(next, option) => { setCountryReferenceId(next); setCountryIso2(option?.code ?? ''); setRegionReferenceId(null); setCityReferenceId(null); }} load={() => canonicalPickerApi.countries()} reloadKey="university-country" disabled={saving || immutable} />
+      <CanonicalPicker label="Region" value={regionReferenceId} onChange={(next) => { setRegionReferenceId(next); setCityReferenceId(null); }} load={() => canonicalPickerApi.regions(countryIso2 || undefined)} reloadKey={`university-regions:${countryIso2}`} optional disabled={saving || immutable || !countryIso2} />
+      <CanonicalCityPicker countryIso2Code={countryIso2} regionId={regionReferenceId} value={cityReferenceId} rawLabel={university.city ?? ''} onChange={setCityReferenceId} disabled={saving || immutable} />
       <div className="md:col-span-3"><button disabled={saving || immutable || !countryReferenceId} className="inline-flex items-center gap-2 rounded-lg bg-[#0E7C86] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"><Save className="h-4 w-4" /> Save canonical location</button></div>
     </form>
 

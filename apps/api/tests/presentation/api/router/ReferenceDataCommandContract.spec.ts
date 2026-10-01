@@ -27,16 +27,36 @@ function fixture() {
   const security = new SecurityService(undefined, { signingSecret: 'source-only-test-signing-secret-32-chars' });
   const session = 'test-refresh-session'; const csrf = security.generateCsrfToken(session);
   const upsertCountry = vi.fn(async (body: unknown) => body);
+  const transitionReferenceLifecycle = vi.fn();
   const app = express(); app.use(express.json());
   app.use(SecurityMiddlewareFactory.createCsrfGuard(security));
   app.use((req, _res, next) => { req.authUserId = req.header('X-Test-Principal') || 'verified-admin'; next(); });
-  app.use('/api/v1/admin/reference-data', createCanonicalIdempotencyMiddleware({ store: store as unknown as PrismaApiIdempotencyStore, requireKey: true }), ReferenceDataAdminRouter.create({ referenceDataUseCases: { upsertCountry } as any }));
+  app.use('/api/v1/admin/reference-data', createCanonicalIdempotencyMiddleware({ store: store as unknown as PrismaApiIdempotencyStore, requireKey: true }), ReferenceDataAdminRouter.create({ referenceDataUseCases: { upsertCountry, transitionReferenceLifecycle } as any }));
   const send = (name: string, key = 'country-command-1', principal = 'verified-admin') => request(app).put('/api/v1/admin/reference-data/countries/YE')
     .set('Cookie', `manaratak_refresh=${session}`).set('X-CSRF-Token', csrf).set('X-Test-Principal', principal).set('Idempotency-Key', key).send({ iso3Code: 'YEM', name });
-  return { app, send, upsertCountry, csrf, session };
+  return { app, send, upsertCountry, transitionReferenceLifecycle, csrf, session };
 }
 
 describe('ReferenceData CSRF/idempotency command contract with memory adapters', () => {
+  it('persists/replays a successful empty 204 lifecycle response without a second command', async () => {
+    const f = fixture(); const id = '913e0a15-54f3-4af1-a771-1f0bfcdd0d77';
+    const send = () => request(f.app).post('/api/v1/admin/reference-data/governance/REGION/' + id + '/lifecycle')
+      .set('Cookie', 'manaratak_refresh=' + f.session).set('X-CSRF-Token', f.csrf).set('Idempotency-Key', 'region-lifecycle-command')
+      .send({ expectedVersion: 1, toState: 'DEPRECATED', reason: 'source changed' });
+    expect((await send()).status).toBe(204);
+    const replay = await send(); expect(replay.status).toBe(204); expect(replay.text).toBe('');
+    expect(replay.headers['idempotency-replayed']).toBe('true'); expect(f.transitionReferenceLifecycle).toHaveBeenCalledOnce();
+  });
+  it('does not replay one canonical resource command on a different stable ID', async () => {
+    const f = fixture();
+    const send = (id: string) => request(f.app).post('/api/v1/admin/reference-data/governance/REGION/' + id + '/lifecycle')
+      .set('Cookie', 'manaratak_refresh=' + f.session).set('X-CSRF-Token', f.csrf).set('Idempotency-Key', 'same-semantic-region-key')
+      .send({ expectedVersion: 1, toState: 'DEPRECATED', reason: 'source changed' });
+    expect((await send('913e0a15-54f3-4af1-a771-1f0bfcdd0d77')).status).toBe(204);
+    const conflict = await send('913e0a15-54f3-4af1-a771-1f0bfcdd0d88');
+    expect(conflict.status).toBe(409); expect(conflict.body.code).toBe('IDEMPOTENCY_KEY_PAYLOAD_CONFLICT');
+    expect(f.transitionReferenceLifecycle).toHaveBeenCalledOnce();
+  });
   it('replays the same key and payload without executing a second write', async () => {
     const f = fixture(); const first = await f.send('Yemen'); const replay = await f.send('Yemen');
     expect(first.status).toBe(200); expect(replay.status).toBe(200); expect(replay.headers['idempotency-replayed']).toBe('true');

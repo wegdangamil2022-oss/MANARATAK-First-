@@ -1,13 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { adminReferenceDataQuerySchema } from './ReferenceDataQueryContract.js';
+import { adminReferenceDataQuerySchema, adminCityReferenceDataQuerySchema } from './ReferenceDataQueryContract.js';
 import {
   ReferenceDataInvariantError,
   ReferenceDataNotFoundError,
   ReferenceDataUseCases,
   ReferenceDataValidationError,
 } from '@manaratak/application';
-import { ReferenceLifecycleState, type GovernedReferenceEntityType } from '@manaratak/domain';
+import { ReferenceLifecycleState, ReferenceRegionCommandError, type GovernedReferenceEntityType } from '@manaratak/domain';
 
 export class ReferenceDataAdminRouter {
   public static create(cradle: { referenceDataUseCases: ReferenceDataUseCases }): Router {
@@ -110,14 +110,39 @@ export class ReferenceDataAdminRouter {
     const countryCodeParamSchema = z.object({ iso2Code: z.string().regex(/^[A-Z]{2}$/) }).strict();
     const isoCodeParamSchema = z.object({ isoCode: z.string().min(2).max(8) }).strict();
     const governanceParamSchema = z.object({
-      entityType: z.enum(['COUNTRY', 'CURRENCY', 'LANGUAGE', 'CITY']),
+      entityType: z.enum(['COUNTRY', 'CURRENCY', 'LANGUAGE', 'CITY', 'REGION']),
       referenceId: z.string().uuid(),
     }).strict();
     const lifecycleTransitionSchema = z.object({
       toState: z.nativeEnum(ReferenceLifecycleState).refine((state) => state !== ReferenceLifecycleState.ACTIVE),
       targetReferenceId: z.string().uuid().optional(),
       reason: z.string().min(3).max(1000),
+      expectedVersion: z.number().int().positive().optional(),
     }).strict();
+
+    const regionSchema = z.object({
+      countryIso2Code: z.string().regex(/^[A-Z]{2}$/),
+      regionCode: z.string().regex(/^[A-Z0-9][A-Z0-9-]{0,31}$/),
+      name: z.string().trim().min(1).max(300),
+      nameAr: z.string().trim().min(1).max(300).nullable().optional(),
+      localName: z.string().trim().min(1).max(300).nullable().optional(),
+      regionType: z.string().trim().min(1).max(100).nullable().optional(),
+      aliases: z.array(aliasSchema.extend({ alias: z.string().trim().min(1).max(300).regex(/[a-z0-9\u0600-\u06ff]/i) })).max(100).optional(),
+    }).strict();
+    const regionIdSchema = z.object({ id: z.string().uuid() }).strict();
+    router.get('/regions/:id', asyncHandler(async (req: Request, res: Response) => {
+      const { id } = regionIdSchema.parse(req.params);
+      res.json(await referenceDataUseCases.getRegion(id));
+    }));
+    router.post('/regions', asyncHandler(async (req: Request, res: Response) => {
+      const body = regionSchema.parse(req.body);
+      res.status(201).json(await referenceDataUseCases.upsertRegion(body, mutationContext(req)));
+    }));
+    router.put('/regions/:id', asyncHandler(async (req: Request, res: Response) => {
+      const { id } = regionIdSchema.parse(req.params);
+      const body = regionSchema.extend({ expectedVersion: z.number().int().positive() }).strict().parse(req.body);
+      res.json(await referenceDataUseCases.upsertRegion({ ...body, id }, mutationContext(req)));
+    }));
 
     router.get(
       '/countries',
@@ -165,7 +190,7 @@ export class ReferenceDataAdminRouter {
     router.get(
       '/cities',
       asyncHandler(async (req: Request, res: Response) => {
-        const filters = adminReferenceDataQuerySchema.parse(req.query);
+        const filters = adminCityReferenceDataQuerySchema.parse(req.query);
         res.json(await referenceDataUseCases.listPage('cities', filters));
       }),
     );
@@ -208,6 +233,7 @@ export class ReferenceDataAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         const { entityType, referenceId } = governanceParamSchema.parse(req.params);
         const body = lifecycleTransitionSchema.parse(req.body);
+        if (entityType === 'REGION' && body.expectedVersion === undefined) return res.status(400).json({ error: 'REGION_EXPECTED_VERSION_REQUIRED' });
         await referenceDataUseCases.transitionReferenceLifecycle(
           { entityType: entityType as GovernedReferenceEntityType, referenceId, ...body },
           mutationContext(req),
@@ -255,6 +281,9 @@ export class ReferenceDataAdminRouter {
     );
 
     router.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
+      if (err instanceof ReferenceRegionCommandError) {
+        return res.status(err.code === 'REGION_NOT_FOUND' ? 404 : 409).json({ error: err.code });
+      }
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }

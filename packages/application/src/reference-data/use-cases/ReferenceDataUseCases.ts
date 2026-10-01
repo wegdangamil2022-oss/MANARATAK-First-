@@ -16,6 +16,7 @@ import {
   ReferenceDataPage,
   ReferenceLanguageDto,
   AdministrativeRegionDto,
+  UpsertAdministrativeRegionDto,
   UpsertReferenceCityDto,
   UpsertReferenceCountryDto,
   UpsertReferenceCurrencyDto,
@@ -77,7 +78,34 @@ export class ReferenceDataUseCases {
   }
 
   public listRegions(filters: ReferenceDataFilters = {}): Promise<AdministrativeRegionDto[]> {
-    return this.repository.listRegions(filters);
+    return this.repository.listRegions({ activeOnly: true, ...filters });
+  }
+
+  public async getRegion(id: string): Promise<AdministrativeRegionDto> {
+    const region = await this.repository.getRegionById(id);
+    if (!region) throw new ReferenceDataNotFoundError('REGION', id);
+    return region;
+  }
+
+  public async upsertRegion(data: UpsertAdministrativeRegionDto, context: ReferenceDataMutationContext): Promise<AdministrativeRegionDto> {
+    if (!context.actorId) throw new ReferenceDataInvariantError('Authenticated actor is required for region authoring.');
+    if (!/^[A-Z]{2}$/.test(data.countryIso2Code) || !/^[A-Z0-9][A-Z0-9-]{0,31}$/.test(data.regionCode) || !data.name.trim() || data.name.length > 300) {
+      throw new ReferenceDataInvariantError('Canonical country, region code and name are required.');
+    }
+    if (Boolean(data.id) !== (data.expectedVersion !== undefined) || (data.expectedVersion !== undefined && (!Number.isSafeInteger(data.expectedVersion) || data.expectedVersion < 1))) {
+      throw new ReferenceDataInvariantError('Region updates require an ID and expected version.');
+    }
+    if ((data.aliases?.length ?? 0) > 100 || data.aliases?.some(alias => !/[a-z0-9\u0600-\u06ff]/i.test(alias.alias) || alias.alias.length > 300 || (alias.locale != null && (alias.locale.length < 2 || alias.locale.length > 35)))) {
+      throw new ReferenceDataInvariantError('Region aliases must contain a valid name and bounded locale.');
+    }
+    // New authoring commands must never fall back to writes without Audit/Outbox.
+    const repository = this.repository as Partial<ITransactionalReferenceDataRepository>;
+    if (!this.atomicMutationExecutor || !repository.upsertRegionInTransaction) throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const id = data.id ?? randomUUID();
+    const canonicalData = { ...data, id, name: data.name.trim() };
+    return this.atomicUpsert('REGION', id, context,
+      transaction => transaction.repository.upsertRegionInTransaction(canonicalData, context.actorId, transaction.context),
+      () => { throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED'); });
   }
 
   public async listPage(collection: ReferenceDataCollection, filters: ReferenceDataFilters = {}): Promise<ReferenceDataPage<ReferenceCountryDto | ReferenceCurrencyDto | ReferenceLanguageDto | ReferenceCityDto | AdministrativeRegionDto>> {
@@ -142,7 +170,7 @@ export class ReferenceDataUseCases {
     }
     if (data.administrativeRegionId) {
       const region = await this.repository.getRegionById(data.administrativeRegionId);
-      if (!region) {
+      if (!region || region.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
         throw new ReferenceDataNotFoundError('REGION', data.administrativeRegionId);
       }
       if (region.countryIso2Code !== country.iso2Code) {
@@ -164,12 +192,15 @@ export class ReferenceDataUseCases {
   }
 
   public async transitionReferenceLifecycle(
-    input: { entityType: GovernedReferenceEntityType; referenceId: string; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string },
+    input: { entityType: GovernedReferenceEntityType; referenceId: string; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string; expectedVersion?: number },
     context: ReferenceDataMutationContext,
   ): Promise<void> {
     if (!context.actorId) throw new ReferenceDataInvariantError('Authenticated actor is required for lifecycle transitions.');
     if (!input.reason.trim()) throw new ReferenceDataInvariantError('Lifecycle transition reason is required.');
     const command = { ...input, reason: input.reason.trim(), actorId: context.actorId };
+    if (input.entityType === 'REGION' && (!Number.isSafeInteger(input.expectedVersion) || (input.expectedVersion ?? 0) < 1 || !this.atomicMutationExecutor)) {
+      throw new ReferenceDataInvariantError('Region lifecycle requires an expected version and audited transaction.');
+    }
     if (!this.atomicMutationExecutor) {
       await this.repository.transitionReferenceLifecycle(command);
       return;
@@ -230,7 +261,7 @@ export class ReferenceDataUseCases {
     if (!this.atomicMutationExecutor) return legacyMutation();
 
     const repository = this.repository as Partial<ITransactionalReferenceDataRepository>;
-    if (!repository.upsertCountryInTransaction || !repository.upsertCurrencyInTransaction || !repository.upsertLanguageInTransaction || !repository.upsertCityInTransaction) {
+    if (entityType === 'REGION' ? !repository.upsertRegionInTransaction : (!repository.upsertCountryInTransaction || !repository.upsertCurrencyInTransaction || !repository.upsertLanguageInTransaction || !repository.upsertCityInTransaction)) {
       throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     }
 

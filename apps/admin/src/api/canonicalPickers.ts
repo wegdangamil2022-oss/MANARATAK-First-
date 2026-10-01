@@ -53,12 +53,22 @@ export const canonicalPickerApi = {
     return records.map((item) => option(item));
   },
   async regions(countryIso2Code?: string): Promise<CanonicalPickerOption[]> {
+    if (!countryIso2Code) return [];
     const records = await listAllReferenceData<Record<string, unknown>>('regions', { activeOnly: false, countryIso2Code });
     return records.map((item) => option(item, { metadata: { countryIso2Code: String(item.countryIso2Code ?? '') } }));
   },
-  async cities(countryIso2Code?: string): Promise<CanonicalPickerOption[]> {
-    const records = await listAllReferenceData<Record<string, unknown>>('cities', { activeOnly: false, countryIso2Code });
-    return records.map((item) => option(item, { metadata: { countryIso2Code: String(item.countryIso2Code ?? '') } }));
+  async cities(countryIso2Code?: string, administrativeRegionId?: string | null): Promise<CanonicalPickerOption[]> {
+    if (!countryIso2Code) return [];
+    const records = await listAllReferenceData<Record<string, unknown>>('cities', {
+      activeOnly: false, countryIso2Code, administrativeRegionId: administrativeRegionId || undefined,
+    });
+    return records.map((item) => option(item, { metadata: {
+      countryIso2Code: String(item.countryIso2Code ?? ''),
+      administrativeRegionId: typeof item.administrativeRegionId === 'string' ? item.administrativeRegionId : null,
+      rawRegionLabel: typeof item.region === 'string' ? item.region : null,
+      name: typeof item.name === 'string' ? item.name : null,
+      nameAr: typeof item.nameAr === 'string' ? item.nameAr : null,
+    } }));
   },
   async languages(query = ''): Promise<CanonicalPickerOption[]> {
     const records = await listAllReferenceData<Record<string, unknown>>('languages', { activeOnly: false, q: query.trim() || undefined });
