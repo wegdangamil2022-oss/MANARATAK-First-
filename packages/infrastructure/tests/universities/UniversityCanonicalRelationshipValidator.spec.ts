@@ -3,7 +3,7 @@ import { UniversityCanonicalRelationshipValidator, type UniversityRelationshipVa
 
 const client = () => ({
   referenceCountry: { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE' }) },
-  administrativeRegion: { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE' }) },
+  administrativeRegion: { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', lifecycleState: 'ACTIVE' }) },
   referenceCity: {
     findUnique: vi
       .fn()
@@ -23,8 +23,8 @@ describe('UniversityCanonicalRelationshipValidator', () => {
   it('validates a region with only columns supported by the generated Prisma schema', async () => {
     const c = client();
     c.administrativeRegion.findUnique.mockImplementation(async (query: any) => {
-      if ('isActive' in query.select) throw new Error('Unknown field isActive on AdministrativeRegion');
-      return { countryIso2Code: 'YE' };
+      expect(query.select).toEqual({ countryIso2Code: true, countryReferenceId: true, lifecycleState: true });
+      return { countryIso2Code: 'YE', lifecycleState: 'ACTIVE' };
     });
     await expect(validator(c).validateCampus({ countryReferenceId: 'country-1', regionReferenceId: 'region-1', cityReferenceId: 'city-1' })).resolves.toBeUndefined();
   });
@@ -33,8 +33,9 @@ describe('UniversityCanonicalRelationshipValidator', () => {
     ['UNIVERSITY_CAMPUS_COUNTRY_NOT_FOUND', 'referenceCountry', null],
     ['UNIVERSITY_CAMPUS_COUNTRY_NOT_ACTIVE', 'referenceCountry', { iso2Code: 'YE', isActive: false }],
     ['UNIVERSITY_CAMPUS_REGION_NOT_FOUND', 'administrativeRegion', null],
-    ['UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH', 'administrativeRegion', { countryIso2Code: 'SA' }],
-    ['UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH', 'administrativeRegion', { countryIso2Code: 'YE', countryReferenceId: 'foreign-country' }],
+    ['UNIVERSITY_CAMPUS_REGION_NOT_ACTIVE', 'administrativeRegion', { countryIso2Code: 'YE', lifecycleState: 'DEPRECATED' }],
+    ['UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH', 'administrativeRegion', { countryIso2Code: 'SA', lifecycleState: 'ACTIVE' }],
+    ['UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH', 'administrativeRegion', { countryIso2Code: 'YE', countryReferenceId: 'foreign-country', lifecycleState: 'ACTIVE' }],
     ['UNIVERSITY_CAMPUS_CITY_NOT_FOUND', 'referenceCity', null],
     ['UNIVERSITY_CAMPUS_CITY_NOT_ACTIVE', 'referenceCity', { countryIso2Code: 'YE', isActive: false }],
     ['UNIVERSITY_CAMPUS_CITY_COUNTRY_MISMATCH', 'referenceCity', { countryIso2Code: 'YE', countryReferenceId: 'foreign-country' }],

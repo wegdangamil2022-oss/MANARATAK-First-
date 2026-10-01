@@ -9,7 +9,8 @@ import {
   UpsertReferenceCityDto,
   ReferenceDataFilters,
   ReferenceDataCollection,
-  AdministrativeRegionDto
+  AdministrativeRegionDto,
+  UpsertAdministrativeRegionDto
 } from '../dto/ReferenceDataContracts';
 import { AtomicPersistenceContext } from '../../event-foundation/outbox/TransactionalOutbox';
 import { GovernedReferenceEntityType, ReferenceLifecycleTransitionCommand, ReferenceRelationshipDto, ReferenceVersionDto } from '../governance/ReferenceGovernance';
@@ -31,6 +32,7 @@ export interface IReferenceDataRepository {
   upsertCurrency(data: UpsertReferenceCurrencyDto): Promise<ReferenceCurrencyDto>;
   upsertLanguage(data: UpsertReferenceLanguageDto): Promise<ReferenceLanguageDto>;
   upsertCity(data: UpsertReferenceCityDto): Promise<ReferenceCityDto>;
+  upsertRegion(data: UpsertAdministrativeRegionDto, actorId: string): Promise<AdministrativeRegionDto>;
 
   getReferenceHistory(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceVersionDto[]>;
   getReferenceRelationships(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceRelationshipDto[]>;
@@ -38,6 +40,7 @@ export interface IReferenceDataRepository {
 }
 
 export interface ITransactionalReferenceDataRepository extends IReferenceDataRepository {
+  upsertRegionInTransaction(data: UpsertAdministrativeRegionDto, actorId: string, context: AtomicPersistenceContext): Promise<AdministrativeRegionDto>;
   upsertCountryInTransaction(data: UpsertReferenceCountryDto, context: AtomicPersistenceContext): Promise<ReferenceCountryDto>;
   upsertCurrencyInTransaction(data: UpsertReferenceCurrencyDto, context: AtomicPersistenceContext): Promise<ReferenceCurrencyDto>;
   upsertLanguageInTransaction(data: UpsertReferenceLanguageDto, context: AtomicPersistenceContext): Promise<ReferenceLanguageDto>;

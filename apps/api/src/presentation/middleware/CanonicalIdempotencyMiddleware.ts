@@ -61,7 +61,10 @@ export function createCanonicalIdempotencyMiddleware(input: {
     const principalId = String(resolvedPrincipal || 'ANONYMOUS');
     const routeKey = normalizedRoute(req);
     const keyHash = sha256(rawKey);
-    const requestFingerprint = sha256(`${req.method.toUpperCase()}\n${routeKey}\n${stable(req.body ?? null)}`);
+    // Keep concrete resource IDs in command identity even when the storage scope
+    // groups routes by template. A key for one region must not replay on another.
+    const resourcePath = (req.baseUrl || '') + (req.path || '');
+    const requestFingerprint = sha256(`${req.method.toUpperCase()}\n${routeKey}\n${resourcePath}\n${stable(req.body ?? null)}`);
     const scopeHash = sha256(`${principalId}\n${req.method.toUpperCase()}\n${routeKey}\n${keyHash}`);
 
     try {
@@ -100,6 +103,7 @@ export function createCanonicalIdempotencyMiddleware(input: {
       }
 
       const originalJson = res.json.bind(res);
+      const originalSend = res.send.bind(res);
       let finalized = false;
       res.json = ((body: unknown) => {
         if (finalized) return originalJson(body);
@@ -113,6 +117,17 @@ export function createCanonicalIdempotencyMiddleware(input: {
         }).then(() => originalJson(body)).catch(next);
         return res;
       }) as Response['json'];
+      res.send = ((body?: unknown) => {
+        if (res.statusCode !== 204 || finalized) return originalSend(body);
+        finalized = true;
+        void input.store.complete({
+          scopeHash: decision.scopeHash,
+          leaseToken: decision.leaseToken,
+          statusCode: 204,
+          responseBody: null,
+        }).then(() => originalSend(body)).catch(next);
+        return res;
+      }) as Response['send'];
       next();
     } catch (error) {
       next(error);

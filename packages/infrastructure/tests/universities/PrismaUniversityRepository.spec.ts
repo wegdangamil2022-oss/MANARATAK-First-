@@ -52,8 +52,8 @@ describe('PrismaUniversityRepository', () => {
   function configureGeography(regionCountry = 'YE') {
     mockPrisma.referenceCountry = { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE', isActive: true }) };
     mockPrisma.administrativeRegion = { findUnique: vi.fn(async (query) => {
-      if ('isActive' in query.select) throw new Error('Unknown AdministrativeRegion column');
-      return { countryIso2Code: regionCountry, countryReferenceId: regionCountry === 'YE' ? 'country-ye' : 'country-sa' };
+      expect(query.select).toEqual({ countryIso2Code: true, countryReferenceId: true, lifecycleState: true });
+      return { countryIso2Code: regionCountry, countryReferenceId: regionCountry === 'YE' ? 'country-ye' : 'country-sa', lifecycleState: 'ACTIVE' };
     }) };
     mockPrisma.referenceCity = { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', countryReferenceId: 'country-ye', administrativeRegionId: 'region-aden', isActive: true }) };
     const record = { id: 'uni-1', status: 'DRAFT', optionalFields: {}, countryReferenceId: 'country-ye', regionReferenceId: 'region-aden', cityReferenceId: 'city-aden' };
@@ -67,7 +67,7 @@ describe('PrismaUniversityRepository', () => {
     if (operation === 'create') await repository.create(record as any);
     else await repository.update('uni-1', { displayName: 'Updated name' });
     expect(mockPrisma.university[operation]).toHaveBeenCalledOnce();
-    expect(mockPrisma.administrativeRegion.findUnique).toHaveBeenCalledWith(expect.objectContaining({ select: { countryIso2Code: true, countryReferenceId: true } }));
+    expect(mockPrisma.administrativeRegion.findUnique).toHaveBeenCalledWith(expect.objectContaining({ select: { countryIso2Code: true, countryReferenceId: true, lifecycleState: true } }));
   });
 
   it.each(['create', 'update'] as const)('rejects cross-country geography before repository %s writes', async (operation) => {

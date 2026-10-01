@@ -7,6 +7,7 @@ import { FileCheck2, Loader2, Upload } from 'lucide-react';
 
 import type { ReferenceDataCollection } from '@manaratak/domain';
 import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceData';
+import { AdministrativeRegionsTab } from './AdministrativeRegionsTab';
 
 function useFetchData(collection: ReferenceDataCollection) {
   const [data, setData] = useState<any[]>([]);
@@ -49,22 +50,22 @@ function ReferencePagination({ page, totalPages, setPage, loading }: {
 }
 
 export function ReferenceDataAdminPage() {
-  const [activeTab, setActiveTab] = useState<'countries' | 'currencies' | 'languages' | 'cities'>('countries');
+  const [activeTab, setActiveTab] = useState<ReferenceDataCollection>('countries');
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Reference Data</h2>
-        <p className="text-sm text-gray-500 mt-1">Foundational Settings for Countries, Currencies, Languages, and Cities.</p>
+        <p className="text-sm text-gray-500 mt-1">Foundational Settings for Countries, Currencies, Languages, Regions, and Cities.</p>
       </div>
       
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
         <div className="flex border-b border-gray-200 overflow-x-auto">
-          {['countries', 'currencies', 'languages', 'cities'].map(tab => (
+          {(['countries', 'currencies', 'languages', 'regions', 'cities'] as const).map(tab => (
             <button 
               key={tab}
               className={`px-4 py-3 text-sm font-medium capitalize whitespace-nowrap ${activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab)}
             >
               {tab}
             </button>
@@ -76,6 +77,7 @@ export function ReferenceDataAdminPage() {
           {activeTab === 'currencies' && <CurrenciesTab />}
           {activeTab === 'languages' && <LanguagesTab />}
           {activeTab === 'cities' && <CitiesTab />}
+          {activeTab === 'regions' && <AdministrativeRegionsTab />}
         </div>
       </div>
     </div>
