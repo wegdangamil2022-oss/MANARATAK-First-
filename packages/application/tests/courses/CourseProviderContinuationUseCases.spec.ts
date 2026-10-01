@@ -119,6 +119,12 @@ function build(options: {
 }
 
 describe('CourseProviderContinuationUseCases', () => {
+  it('fences source-health approval against the provider snapshot used for review', async () => {
+    const built = build();
+    built.registry.register({ connectorKey: provider.connectorKey, connectorVersion: provider.connectorVersion, expectedSignature: {}, mode: 'FULL_SNAPSHOT', async fetch() { return { rows: [], observedSignature: {} }; } });
+    await built.service.approveProviderSourceHealth(provider.id);
+    expect(built.providerRepository.upsertSeedProvider).toHaveBeenCalledWith(expect.objectContaining({ expectedUpdatedAt: provider.updatedAt.toISOString(), status: 'APPROVED' }));
+  });
   it('blocks a suspiciously small full snapshot before staging', async () => {
     const { service, artifactUseCase } = build({ preflightRows: 20, canonicalTotal: 100 });
     const result = await service.preflightProviderFile(provider.id, {
@@ -228,7 +234,7 @@ describe('CourseProviderContinuationUseCases', () => {
     await expect(built.service.runRegisteredConnector(provider.id)).rejects.toBeInstanceOf(CourseProviderDriftError);
     expect(built.importAdminUseCases.stageNormalizedRows).not.toHaveBeenCalled();
     expect(built.providerRepository.upsertSeedProvider).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'NEEDS_REVIEW' }),
+      expect.objectContaining({ status: 'NEEDS_REVIEW', expectedUpdatedAt: provider.updatedAt.toISOString() }),
     );
   });
 

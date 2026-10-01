@@ -369,6 +369,7 @@ export class CourseProviderContinuationUseCases {
     }
     const connectorVersion = provider.connectorVersion;
     const updated = await this.providerRepository.upsertSeedProvider({
+      expectedUpdatedAt: provider.updatedAt.toISOString(),
       publicId: provider.publicId,
       slug: provider.slug,
       canonicalName: provider.canonicalName,
@@ -757,6 +758,7 @@ export class CourseProviderContinuationUseCases {
 
   private async markProviderNeedsReview(provider: ExternalCourseProviderDto): Promise<void> {
     await this.providerRepository.upsertSeedProvider({
+      expectedUpdatedAt: provider.updatedAt.toISOString(),
       publicId: provider.publicId,
       slug: provider.slug,
       canonicalName: provider.canonicalName,

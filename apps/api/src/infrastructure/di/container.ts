@@ -175,6 +175,7 @@ import {
   CourseImportIdentityDiffUseCase,
   CourseImportCoordinator,
   CourseImportOperationsUseCases,
+  CourseProviderRegistryUseCases,
   PublicCourseUseCases,
   CourseRelationshipQueryService,
   CourseRelationshipResolutionService,
@@ -307,6 +308,7 @@ import { ApiFoundationRouter } from '../../presentation/api/router/ApiFoundation
 import { SharedComponentRouter } from '../../presentation/api/router/SharedComponentRouter.js';
 import { ScholarshipAdminRouter } from '../../presentation/api/router/ScholarshipAdminRouter.js';
 import { ImportAdminRouter } from '../../presentation/api/router/ImportAdminRouter.js';
+import { CourseProviderRegistryRouter } from '../../presentation/api/router/CourseProviderRegistryRouter.js';
 import { CourseImportOperationsRouter } from '../../presentation/api/router/CourseImportOperationsRouter.js';
 import { ScholarshipPublicRouter } from '../../presentation/api/router/ScholarshipPublicRouter.js';
 import { UniversityAdminRouter } from '../../presentation/api/router/UniversityAdminRouter.js';
@@ -694,6 +696,7 @@ export function registerDependencies(
       new CourseImportCoordinator(courseImportTransferGateway, courseRepository, atomicDomainMutationCoordinator)).scoped(),
     importedCourseAdminUseCases: asFunction(({ importedCourseOperationsRepository, externalCourseProviderRepository, adminCourseUseCases, importedCourseLinkChecker }) =>
       new ImportedCourseAdminUseCases(importedCourseOperationsRepository, externalCourseProviderRepository, adminCourseUseCases, importedCourseLinkChecker)).scoped(),
+    courseProviderRegistryUseCases: asFunction(({ externalCourseProviderRepository, atomicAuditedOutboxMutationExecutor }) => new CourseProviderRegistryUseCases(externalCourseProviderRepository, atomicAuditedOutboxMutationExecutor)).scoped(),
     courseImportOperationsUseCases: asFunction(({ importedCourseOperationsRepository, importRepository, courseImportCoordinator, courseImportIdentityDiffUseCase }) =>
       new CourseImportOperationsUseCases(importedCourseOperationsRepository, importRepository, courseImportCoordinator, courseImportIdentityDiffUseCase)).scoped(),
     publicCourseUseCases: asFunction(({ courseRepository }) => new PublicCourseUseCases(courseRepository)).scoped(),
@@ -860,6 +863,7 @@ export function registerDependencies(
     // --- Routers ---
     scholarshipAdminRouter: asFunction((cradle) => ScholarshipAdminRouter.create(cradle)).singleton(),
     importAdminRouter: asFunction((cradle) => ImportAdminRouter.create(cradle)).singleton(),
+    courseProviderRegistryRouter: asFunction((cradle) => CourseProviderRegistryRouter.create(cradle)).singleton(),
     courseImportOperationsRouter: asFunction((cradle) => CourseImportOperationsRouter.create(cradle)).singleton(),
     scholarshipPublicRouter: asFunction((cradle) => ScholarshipPublicRouter.create(cradle)).singleton(),
     universityAdminRouter: asFunction((cradle) => UniversityAdminRouter.create(cradle)).singleton(),

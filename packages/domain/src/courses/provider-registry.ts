@@ -99,6 +99,8 @@ export interface ExternalCourseProviderAliasSeedInput {
 }
 
 export interface UpsertExternalCourseProviderSeedInput {
+  /** Required by existing provider health workflows to prevent restoring stale mappings. */
+  expectedUpdatedAt?: string;
   publicId: string;
   slug: string;
   canonicalName: string;
@@ -125,6 +127,37 @@ export interface IExternalCourseProviderRepository {
   resolveByName(name: string): Promise<ExternalCourseProviderDto | null>;
   isDomainApproved(providerId: string, urlOrDomain: string): Promise<boolean>;
   upsertSeedProvider(input: UpsertExternalCourseProviderSeedInput): Promise<ExternalCourseProviderDto>;
+}
+
+export interface CourseProviderRegistryFilters {
+  page: number;
+  pageSize: number;
+  q?: string;
+  status?: ExternalCourseProviderStatus;
+}
+
+export interface UpdateCourseProviderMappings {
+  expectedUpdatedAt: string;
+  displayName: string;
+  officialWebsite: string | null;
+  aliases: Array<{ alias: string; locale?: string }>;
+  allowedDomains: string[];
+  mappingsReviewed: true;
+  reason: string;
+  evidenceReference: string;
+}
+
+/** Administration edits existing identities only; seed identity creation is a separate capability. */
+export interface ICourseProviderRegistryRepository extends IExternalCourseProviderRepository {
+  listRegistry(filters: CourseProviderRegistryFilters): Promise<{ data: ExternalCourseProviderDto[]; total: number }>;
+  updateMappingsInTransaction(id: string, input: UpdateCourseProviderMappings, context: import('../event-foundation/outbox/TransactionalOutbox').AtomicPersistenceContext): Promise<ExternalCourseProviderDto>;
+}
+
+export class CourseProviderRegistryError extends Error {
+  constructor(public readonly code: 'PROVIDER_NOT_FOUND' | 'PROVIDER_STALE' | 'PROVIDER_READ_ONLY' | 'PROVIDER_MAPPING_INVALID' | 'PROVIDER_MAPPING_CONFLICT' | 'PROVIDER_AUDITED_TRANSACTION_REQUIRED') {
+    super(code);
+    this.name = 'CourseProviderRegistryError';
+  }
 }
 
 export const IMPORTED_COURSE_MASTER_COLUMNS = [

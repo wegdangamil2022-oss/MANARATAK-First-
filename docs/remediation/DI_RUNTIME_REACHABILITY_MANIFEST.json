@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Final source reconciliation after W7 — 2026-09-07",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 333,
-  "reachableCount": 333,
+  "registrationCount": 335,
+  "reachableCount": 335,
   "unreachable": [],
   "registrations": [
     {
@@ -523,6 +523,7 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "atomicDomainMutationCoordinator",
+        "courseProviderRegistryUseCases",
         "referenceDataUseCases"
       ],
       "dependencies": [
@@ -609,6 +610,8 @@
       "name": "authEvaluatorService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts",
+        "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
         "apps/api/src/presentation/api/router/FinanceAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
@@ -926,7 +929,8 @@
       "name": "certificateCompletionOutboxWorker",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/server.ts"
+        "apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts",
+        "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
@@ -1302,6 +1306,27 @@
       ]
     },
     {
+      "name": "courseProviderRegistryRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "courseProviderRegistryUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CourseProviderRegistryRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicAuditedOutboxMutationExecutor",
+        "externalCourseProviderRepository"
+      ]
+    },
+    {
       "name": "coursePublicRouter",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -1503,6 +1528,7 @@
       "name": "durableBackgroundWorker",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
+        "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts",
         "apps/api/src/server.ts"
       ],
       "reachableThroughRegistrations": [],
@@ -1617,6 +1643,7 @@
       "reachableThroughRegistrations": [
         "courseImportArtifactUseCase",
         "courseImportIdentityDiffUseCase",
+        "courseProviderRegistryUseCases",
         "importedCourseAdminUseCases"
       ],
       "dependencies": [
@@ -1792,6 +1819,7 @@
       "name": "getIdentityUseCase",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/IdentityRouter.ts"
       ],
       "reachableThroughRegistrations": [],
@@ -2144,6 +2172,7 @@
       "name": "listIdentitiesUseCase",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/IdentityRouter.ts"
       ],
       "reachableThroughRegistrations": [],
@@ -2515,7 +2544,8 @@
       "name": "ownerDomainOutboxWorker",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/server.ts"
+        "apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts",
+        "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
@@ -2622,7 +2652,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/app.ts",
-        "apps/api/src/server.ts"
+        "apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts",
+        "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [],
       "dependencies": []
@@ -3893,7 +3924,8 @@
       "name": "studentWorkspaceOutboxWorker",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/server.ts"
+        "apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts",
+        "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [

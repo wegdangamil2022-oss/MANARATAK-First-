@@ -820,6 +820,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/public/scholarships', lazyRouter('scholarshipPublicRouter'));
     // Static /imported must be registered before /admin/courses/:id can match "imported".
     v1Router.use('/admin/courses/imported', requireAdminPermission('admin:courses:manage'), lazyRouter('importedCourseAdminRouter'));
+    v1Router.use('/admin/courses/providers', requireAdminPermission('admin:courses:manage'), lazyRouter('courseProviderRegistryRouter'));
     v1Router.use('/admin/courses', requireAdminPermission('admin:courses:manage'), lazyRouter('courseAdminRouter'));
     v1Router.use('/public/courses', lazyRouter('coursePublicRouter'));
     v1Router.use('/public/graph', lazyRouter('crossDomainReadModelRouter'));
