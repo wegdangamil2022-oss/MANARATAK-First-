@@ -1,3 +1,4 @@
+import { CourseProviderRegistryPage } from './pages/CourseProviderRegistryPage';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { adminApiClient } from './api/client';
@@ -226,6 +227,7 @@ function AdminLayout() {
                 <Route path="/majors/:id" element={<RequireAdminPermission permission="admin:majors:manage"><MajorDetailPage /></RequireAdminPermission>} />
                 <Route path="/translations" element={<RequireAdminPermission permission="admin:cms:manage"><AdminTranslationWorkspacePage /></RequireAdminPermission>} />
                 <Route path="/courses" element={<RequireAdminPermission permission="admin:courses:manage"><CourseListPage /></RequireAdminPermission>} />
+                <Route path="/courses/providers" element={<RequireAdminPermission permission="admin:courses:manage"><CourseProviderRegistryPage /></RequireAdminPermission>} />
                 <Route path="/courses/:id" element={<RequireAdminPermission permission="admin:courses:manage"><CourseDetailPage /></RequireAdminPermission>} />
                 <Route path="/certificates" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
                 <Route path="/certificates/:id" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateDetailPage /></RequireAdminPermission>} />

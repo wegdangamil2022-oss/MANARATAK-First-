@@ -120,6 +120,7 @@ export function CourseListPage() {
               <span>القسم الأكاديمي · الدورات التدريبية</span>
             </div>
             <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{t('courses')}</h1>
+            <button type="button" onClick={() => navigate('/courses/providers')} className="mt-2 text-sm text-white underline">إدارة مزودي الدورات</button>
             <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/80">{t('review_course_catalog_records_and_open_the_authori')}</p>
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
