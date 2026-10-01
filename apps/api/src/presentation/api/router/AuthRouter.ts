@@ -323,12 +323,12 @@ export class AuthRouter {
     // 2. POST /refresh
     router.post('/refresh', async (req: Request, res: Response) => {
       try {
-        const refreshToken = readRefreshCookie(req) || req.body?.refreshToken;
+        const refreshToken = readRefreshCookie(req);
         if (!refreshToken) {
           res.status(401).json(responseFormatter.error({ code: 'INVALID_TOKEN', message: 'Session is unavailable' }));
           return;
         }
-        const rememberMe = readRememberMeCookie(req) || Boolean(req.body?.rememberMe);
+        const rememberMe = readRememberMeCookie(req);
         const tokens = await authService.refreshTokens(refreshToken);
         setAuthCookies(res, tokens, rememberMe);
         res.status(200).json(responseFormatter.success({
@@ -347,7 +347,7 @@ export class AuthRouter {
     router.post('/logout', async (req: Request, res: Response) => {
       let failed = false;
       try {
-        const refreshToken = readRefreshCookie(req) || req.body?.refreshToken;
+        const refreshToken = readRefreshCookie(req);
         if (refreshToken && authService) {
           try {
             await authService.logoutCurrentSession(refreshToken);

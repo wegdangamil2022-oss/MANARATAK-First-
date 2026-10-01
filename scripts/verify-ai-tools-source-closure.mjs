@@ -16,6 +16,7 @@ const toolGateways = read('packages/infrastructure/src/student-tools/StudentTool
 const cors = read('apps/api/src/presentation/security/CanonicalApiCorsPolicy.ts');
 const webClient = read('apps/web/src/api/client.ts');
 const webRouter = read('apps/web/src/router/index.tsx');
+const adminRedirect = read('apps/web/src/router/adminRedirect.ts');
 const publicApp = read('apps/web/src/features/public-template/PublicTemplateApp.tsx');
 const toolsPage = read('apps/web/src/features/public-template/components/AIToolsPage.tsx');
 const banner = read('apps/web/src/features/public-template/components/AIToolsBanner.tsx');
@@ -81,7 +82,7 @@ const checks = {
   university_deep_link_owner_hydration: /ApiClient\.getUniversityBySlug/.test(publicApp),
 
   canonical_ai_admin_redirect: /path: 'admin\/\*'/.test(webRouter) && /<CanonicalAdminRedirect legacyPath=\{window\.location\.pathname\}/.test(webRouter),
-  canonical_tools_admin_redirect: /path: 'admin\/\*'/.test(webRouter) && /targetPath = normalizedLegacyPath\.replace\(\/\^\\\/admin\//.test(webRouter),
+  canonical_tools_admin_redirect: webRouter.includes("path: 'admin/*'") && webRouter.includes('const target = canonicalAdminTarget(') && adminRedirect.includes('const adminPath = normalizedPath.replace('),
   duplicate_ai_admin_removed: !exists('apps/web/src/features/admin-preview/AdminAiGovernancePreviewPage.tsx'),
   ai_admin_brand_identity: /#142B5F/.test(aiAdmin) && /#0E7C86/.test(aiAdmin),
   tools_admin_brand_identity: /#142B5F/.test(toolsAdmin) && /#0E7C86/.test(toolsAdmin),

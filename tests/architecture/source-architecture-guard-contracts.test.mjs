@@ -56,6 +56,13 @@ test('blocks localStorage as P15 live state', () => {
   assert.deepEqual(kinds(collectStudentLocalStorageViolations(root)), ['p15-localstorage']);
 });
 
+test('blocks a static prototype import even if the mode switch also has a dynamic import', () => {
+  const root = fixture({
+    'apps/web/src/features/public-template/usePublicLiveData.ts': "import { load } from './publicPrototypeDataSource'; if (mode === 'prototype') import('./publicPrototypeDataSource');",
+  });
+  assert.deepEqual(kinds(collectPublicFixtureViolations(root)), ['public-prototype-mode']);
+});
+
 test('blocks Admin persistence and Application bypass imports', () => {
   const root = fixture({ 'apps/admin/src/page.tsx': "import { X } from '@manaratak/application'; import { PrismaClient } from '@prisma/client';" });
   assert.deepEqual(new Set(kinds(collectAdminBoundaryViolations(root))), new Set(['p23-application-bypass', 'p23-persistence-import']));

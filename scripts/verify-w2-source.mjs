@@ -157,7 +157,8 @@ check('MNT-AUD-0088 persistence ownership manifest covers every Prisma model',
 check('MNT-AUD-0088 source guard enforces zero cross-context mutations and approved reads',
   persistenceVerifier.includes('forbidden cross-context mutation') &&
   persistenceVerifier.includes('unapproved cross-context read') &&
-  persistenceVerifier.includes('MANARATAK_MIGRATION_OWNER'));
+  persistenceVerifier.includes('validateMigrationMetadata(entry.name, sql, manifest)') &&
+  read('scripts/architecture/migration-metadata-policy.mjs').includes('MANARATAK_MIGRATION_OWNER'));
 check('MNT-AUD-0088 Phase 02 active authority reconciles schema-isolation drift',
   phase2Boundaries.includes('ADR-028 persistence supersession') &&
   phase2Physical.includes('Canonical persistence override — ADR-028'));

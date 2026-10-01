@@ -60,7 +60,7 @@ async function bootstrap() {
       console.log(`[Bootstrap] ${signal} received; readiness is DOWN and graceful drain has started.`);
       runtimeResources?.beginShutdown();
 
-      await stopPollingWorkers();
+      const pollingDrain = stopPollingWorkers();
       backgroundWorker?.beginDrain?.();
 
       // Stop accepting new requests immediately while allowing active requests to drain.
@@ -68,7 +68,7 @@ async function bootstrap() {
       const httpDrain = new Promise<'closed' | 'error'>((resolve) => {
         server.close((error?: Error) => resolve(error ? 'error' : 'closed'));
       });
-      const workerDrain = (backgroundWorker?.drain?.() ?? Promise.resolve())
+      const workerDrain = Promise.all([pollingDrain, backgroundWorker?.drain?.() ?? Promise.resolve()])
         .then(() => 'worker-drained' as const)
         .catch(() => 'worker-error' as const);
 

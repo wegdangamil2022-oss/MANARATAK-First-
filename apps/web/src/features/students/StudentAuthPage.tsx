@@ -155,7 +155,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
         } else if (err?.status === 500 || err?.code === 'INTERNAL_SERVER_ERROR') {
           setError('حدث خطأ في الخادم أثناء معالجة الطلب. يرجى المحاولة بعد لحظات.');
         } else {
-          setError(err?.message || 'تعذر تسجيل الدخول بهذه البيانات أو لم يتم تأكيد البريد بعد. تحقق من صحة البريد وكلمة المرور.');
+          setError('تعذر تسجيل الدخول بهذه البيانات أو انتهت الجلسة. تحقق من البيانات وتأكيد البريد ثم حاول مجدداً.');
         }
       }
     } finally {
@@ -317,15 +317,15 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
 
           {error && <p role="alert" className="mt-4 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] p-3 text-xs font-semibold leading-5 text-[var(--mn-danger-text)]">{error}</p>}
           {success && (
-            <div role="status" className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs font-medium leading-5 text-emerald-700 dark:text-emerald-300">
-              <p className="font-bold text-emerald-800 dark:text-emerald-200">{success}</p>
+            <div role="status" className="mt-4 rounded-xl border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] p-3.5 text-xs font-medium leading-5 text-[var(--mn-success-text)]">
+              <p className="font-bold text-[var(--mn-success-text)]">{success}</p>
               {mode === 'signup' && (
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                   <a
                     href="/mailpit/"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--mn-success-solid)] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110"
                   >
                     <span>فتح صندوق البريد (Mailpit)</span>
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -333,7 +333,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                   <button
                     type="button"
                     onClick={() => { setMode('verify'); setError(null); }}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-600/30 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-200"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] px-3 py-1.5 text-xs font-bold text-[var(--mn-success-text)] hover:bg-[var(--mn-success-soft)]"
                   >
                     <span>إدخال رمز التحقق</span>
                   </button>
@@ -343,7 +343,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                 <button
                   type="button"
                   onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
-                  className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--mn-success-solid)] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110"
                 >
                   <LogIn className="h-3.5 w-3.5" />
                   <span>الانتقال لتسجيل الدخول</span>
@@ -397,7 +397,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
               </button>
             </div>
             {resendError && <p className="mt-2 text-[11px] font-semibold text-[var(--mn-danger-text)]">{resendError}</p>}
-            {resendMessage && <p className="mt-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">{resendMessage}</p>}
+            {resendMessage && <p className="mt-2 text-[11px] font-semibold text-[var(--mn-success-text)]">{resendMessage}</p>}
           </div>
 
           <div className="mt-4 text-center">

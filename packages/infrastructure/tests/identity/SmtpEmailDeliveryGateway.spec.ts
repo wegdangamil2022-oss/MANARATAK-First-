@@ -1,9 +1,26 @@
 import { createServer } from 'node:net';
 import { once } from 'node:events';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SmtpEmailDeliveryGateway } from '../../src/identity/SmtpEmailDeliveryGateway';
 
 describe('SmtpEmailDeliveryGateway', () => {
+  afterEach(() => vi.unstubAllEnvs());
+  it.each([undefined, 'https://public.example.test'])('uses only injected public URL configuration: %s', async (publicWebUrl) => {
+    vi.stubEnv('PUBLIC_WEB_URL', 'https://untrusted.example.test');
+    vi.stubEnv('APP_URL', 'https://other.example.test');
+    const gateway = new SmtpEmailDeliveryGateway({ host: '127.0.0.1', port: 2525, secure: false, from: 'no-reply@localhost', publicWebUrl });
+    const deliver = vi.spyOn(gateway as unknown as { deliver(to: string, subject: string, body: string): Promise<void> }, 'deliver').mockResolvedValue();
+    await gateway.sendVerificationEmail({ email: 'student@example.test', token: 'verify-token', displayName: 'Student' });
+    await gateway.sendPasswordResetEmail({ email: 'student@example.test', token: 'reset-token', displayName: 'Student' });
+    for (const [, , body] of deliver.mock.calls) expect(body).not.toMatch(/untrusted.example|other.example/);
+    if (publicWebUrl) {
+      expect(deliver.mock.calls[0][2]).toContain(`${publicWebUrl}/verify-email?token=verify-token`);
+      expect(deliver.mock.calls[1][2]).toContain(`${publicWebUrl}/reset-password?token=reset-token`);
+    } else {
+      expect(deliver.mock.calls[0][2]).not.toContain('https://');
+      expect(deliver.mock.calls[1][2]).not.toContain('https://');
+    }
+  });
   it('delivers verification and reset messages to a test SMTP server', async () => {
     const messages: string[] = [];
     const server = createServer(socket => {

@@ -1496,8 +1496,8 @@ const STUDENT_TOOLS_SESSION_STORAGE_KEY = 'manaratak_student_tools_session';
 async function studentToolFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
   const headers = new Headers(init?.headers);
   try {
-    const token = sessionStorage.getItem(STUDENT_TOOLS_SESSION_STORAGE_KEY);
-    if (token) headers.set('x-student-tools-session', token);
+    const anonymousSession = sessionStorage.getItem(STUDENT_TOOLS_SESSION_STORAGE_KEY);
+    if (anonymousSession) headers.set('x-student-tools-session', anonymousSession);
   } catch {
     // Storage may be unavailable in privacy-restricted contexts; server-side network limiting still applies.
   }

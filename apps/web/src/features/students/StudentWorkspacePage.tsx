@@ -585,7 +585,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
   return (
     <main dir="rtl" className="w-full max-w-4xl mx-auto px-3 sm:px-6 pb-28 sm:pb-16 text-right font-['Cairo',sans-serif] min-h-screen text-[var(--mn-text)]">
       {/* Main Hero Card with Golden Top Bar & Royal Gradient */}
-      <div className="relative overflow-hidden rounded-[26px] border border-[#142B5F] dark:border-[#B38018]/50 bg-gradient-to-br from-[#142B5F] via-[#112450] to-[#0c1a3b] text-white shadow-md mx-auto w-full mt-4">
+      <div className="mn-inverse relative overflow-hidden rounded-[26px] border border-[#142B5F] dark:border-[#B38018]/50 bg-gradient-to-br from-[#142B5F] via-[#112450] to-[#0c1a3b] text-white shadow-md mx-auto w-full mt-4">
         {/* Top Golden Accent Line */}
         <div className="h-1.5 w-full bg-gradient-to-r from-[#B38018] via-[#DDAA35] to-[#B38018] shadow-2xs" />
 
@@ -1505,7 +1505,7 @@ function ApplicationTrackerCard({
                   مؤرشف تنظيمياً
                 </span>
               ) : (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
                   تقديم نشط
                 </span>
               )}
@@ -1643,7 +1643,7 @@ function ApplicationTrackerCard({
                   key={item.id}
                   className={`flex items-center gap-2.5 rounded-xl p-2.5 text-xs transition-colors cursor-pointer border ${
                     item.completed
-                      ? 'bg-emerald-500/5 border-emerald-500/20 text-[var(--mn-text-muted)] line-through'
+                      ? 'bg-[var(--mn-success-soft)] border-[var(--mn-success-border)] text-[var(--mn-text-muted)] line-through'
                       : 'bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border-[var(--mn-border)] text-[var(--mn-heading)] font-medium'
                   }`}
                 >
@@ -1972,10 +1972,10 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
                             مكتملة بنجاح
                           </span>
-                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                          <span className="text-xs font-bold text-[var(--mn-success-text)]">
                             100%
                           </span>
                         </div>
@@ -1985,7 +1985,7 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
                         </h4>
 
                         <div className="mt-3 text-[10.5px] text-[var(--mn-text-muted)] flex items-center gap-1.5">
-                          <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          <Check className="w-3.5 h-3.5 text-[var(--mn-success-text)]" />
                           <span>تاريخ الإتمام: {formatDate(course.completedAt || course.lastAccessedAt)}</span>
                         </div>
                       </div>
@@ -2067,7 +2067,7 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
                         </div>
 
                         <div className="mt-4 pt-3 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between">
-                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                          <span className="text-[10px] text-[var(--mn-success-text)] font-semibold flex items-center gap-1">
                             <ShieldCheck className="w-3.5 h-3.5" />
                             <span>موثقة رقمياً</span>
                           </span>
@@ -2138,14 +2138,14 @@ function getServiceRequestStatusBadge(status: string) {
     case 'RESOLVED':
       return {
         label: 'مكتمل بنجاح',
-        className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+        className: 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]',
       };
     case 'IN_PROGRESS':
     case 'PROCESSING':
     case 'IN_REVIEW':
       return {
         label: 'قيد المراجعة والتنفيذ',
-        className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+        className: 'bg-[var(--mn-info-soft)] text-[var(--mn-info-text)] border-[var(--mn-info-border)]',
       };
     case 'ACTION_REQUIRED':
     case 'NEEDS_INPUT':
@@ -2183,7 +2183,7 @@ function getInvoiceStatusBadge(status: string) {
     case 'PAID':
       return {
         label: 'مدفوعة بالكامل',
-        className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+        className: 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]',
       };
     case 'PENDING':
     case 'ISSUED':
@@ -2195,7 +2195,7 @@ function getInvoiceStatusBadge(status: string) {
     case 'PROCESSING':
       return {
         label: 'قيد المعالجة',
-        className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+        className: 'bg-[var(--mn-info-soft)] text-[var(--mn-info-text)] border-[var(--mn-info-border)]',
       };
     case 'OVERDUE':
       return {
@@ -2552,9 +2552,9 @@ function ServiceRequestsView({
                         <span className="font-bold text-[var(--mn-heading)]">{formatDate(selected.updatedAt)}</span>
                       </div>
                       {selected.completedAt && (
-                        <div className="p-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-between">
-                          <span className="text-emerald-700 dark:text-emerald-300 font-semibold">تاريخ إتمام الخدمة:</span>
-                          <span className="font-bold text-emerald-700 dark:text-emerald-300">{formatDate(selected.completedAt)}</span>
+                        <div className="p-2.5 rounded-xl border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] flex items-center justify-between">
+                          <span className="text-[var(--mn-success-text)] font-semibold">تاريخ إتمام الخدمة:</span>
+                          <span className="font-bold text-[var(--mn-success-text)]">{formatDate(selected.completedAt)}</span>
                         </div>
                       )}
                     </div>
@@ -2629,7 +2629,7 @@ function ServiceRequestsView({
                                   <div className="font-bold text-[var(--mn-heading)]">{formatMoney(payment.amount)}</div>
                                   <div className="text-[10px] text-[var(--mn-text-muted)]">{formatDate(payment.createdAt)} · {payment.paymentMethod}</div>
                                 </div>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
                                   {payment.status === 'CAPTURED' || payment.status === 'SUCCESS' ? 'ناجحة' : payment.status}
                                 </span>
                               </div>
@@ -2767,7 +2767,7 @@ function ServiceRequestsView({
                                   <div className="font-bold text-[var(--mn-heading)]">{formatMoney(payment.amount)}</div>
                                   <div className="text-[10px] text-[var(--mn-text-muted)]">{formatDate(payment.createdAt)} · {payment.paymentMethod}</div>
                                 </div>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
                                   {payment.status === 'CAPTURED' || payment.status === 'SUCCESS' ? 'ناجحة' : payment.status}
                                 </span>
                               </div>
@@ -3495,7 +3495,7 @@ function ProfileView({
                 <div>
                   <span className="text-[11px] font-semibold text-[var(--mn-text-muted)] block">حالة الحساب الأكاديمي</span>
                   <span className="text-xs font-bold text-[#142B5F] dark:text-[#E0B244] mt-0.5 inline-flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-[var(--mn-success-text)]" />
                     {identity?.roles?.includes('student') ? 'طالب معتمد' : 'حساب نشط'}
                   </span>
                 </div>
@@ -3741,7 +3741,7 @@ function ProfileView({
             <div className="p-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)]/50">
               <span className="text-[10.5px] font-semibold text-[var(--mn-text-muted)] block">إصدار تكوين مساحة العمل</span>
               <span className="text-xs font-bold text-[var(--mn-heading)] mt-1 inline-flex items-center gap-1.5 font-mono">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[var(--mn-success-text)]" />
                 الإصدار #{dashboard.workspace.version}
               </span>
               <span className="text-[10px] text-[var(--mn-text-muted)] mt-0.5 block">

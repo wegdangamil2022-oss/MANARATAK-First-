@@ -993,6 +993,7 @@ export function registerDependencies(
         from: readConfig<string>('SMTP_FROM') || '',
         username: readConfig<string>('SMTP_USERNAME'),
         password: readConfig<string>('SMTP_PASSWORD'),
+        publicWebUrl: readConfig<string>('PUBLIC_WEB_URL'),
       });
     }).singleton(),
     registerUserUseCase: asFunction(({ identityRepository, emailVerificationTokenRepository, emailDeliveryGateway, roleAssignmentRepository, prisma }) => {

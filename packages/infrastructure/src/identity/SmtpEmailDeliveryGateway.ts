@@ -20,7 +20,7 @@ export class SmtpEmailDeliveryGateway implements IEmailDeliveryGateway {
   }
 
   sendVerificationEmail(input: SendVerificationEmailInput): Promise<void> {
-    const rawBaseUrl = this.config.publicWebUrl || process.env.PUBLIC_WEB_URL || process.env.APP_URL || '';
+    const rawBaseUrl = this.config.publicWebUrl || '';
     const baseUrl = rawBaseUrl.replace(/\/$/, '');
     const verificationUrl = baseUrl ? `${baseUrl}/verify-email?token=${encodeURIComponent(input.token)}` : '';
     const linkSection = verificationUrl
@@ -36,7 +36,7 @@ export class SmtpEmailDeliveryGateway implements IEmailDeliveryGateway {
   }
 
   sendPasswordResetEmail(input: SendPasswordResetEmailInput): Promise<void> {
-    const rawBaseUrl = this.config.publicWebUrl || process.env.PUBLIC_WEB_URL || process.env.APP_URL || '';
+    const rawBaseUrl = this.config.publicWebUrl || '';
     const baseUrl = rawBaseUrl.replace(/\/$/, '');
     const resetUrl = baseUrl ? `${baseUrl}/reset-password?token=${encodeURIComponent(input.token)}` : '';
     const linkSection = resetUrl

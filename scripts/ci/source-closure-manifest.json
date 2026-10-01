@@ -142,6 +142,7 @@
     }
   ],
   "registeredVerifierFiles": [
+    "scripts/import/verify-dataset-sources.ts",
     "scripts/architecture/verify-source-architecture-guards.mjs",
     "scripts/architecture/verify-di-reachability.mjs",
     "scripts/ci/verify-source-closure-manifest.mjs",
