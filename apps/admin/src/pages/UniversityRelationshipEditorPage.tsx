@@ -5,7 +5,6 @@ import { adminApiClient } from '../api/client';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { CanonicalCityPicker } from '../components/CanonicalCityPicker';
-import { cityLocationPayload } from '../api/citySelection';
 
 interface CampusRow { id: string; sourceReferenceId?: string | null; name: string; }
 interface OrganizationRow { id: string; sourceReferenceId?: string | null; name: string; }
@@ -102,7 +101,7 @@ export function UniversityRelationshipEditorPage() {
     setSaving(true); setError(''); setMessage('');
     try {
       const saved = await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`, {
-        method: 'PATCH', body: JSON.stringify(cityLocationPayload(countryReferenceId, regionReferenceId, cityReferenceId)),
+        method: 'PATCH', body: JSON.stringify({ countryReferenceId, regionReferenceId, cityReferenceId }),
       });
       setUniversity(saved); setMessage('Canonical university location saved through the University owner API.');
     } catch (err) { setError(err instanceof Error ? err.message : 'Unable to save location.'); }

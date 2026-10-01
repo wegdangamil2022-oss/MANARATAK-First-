@@ -13,8 +13,3 @@ export function reviewCityLabel(rawLabel: string, options: CanonicalPickerOption
     rawLabel,
   } as const;
 }
-
-export function cityLocationPayload(countryReferenceId: string, regionReferenceId: string | null, cityReferenceId: string | null) {
-  // The caller supplies chooser IDs; the owner API validates their country/region and lifecycle.
-  return { countryReferenceId, regionReferenceId, cityReferenceId };
-}

@@ -30,7 +30,7 @@ describe('M10-08 scoped city selection (source only)', () => {
     expect(first[1].metadata).toMatchObject({ administrativeRegionId: regionId, rawRegionLabel: 'Original region' });
   });
 
-  it('sends no region ID for optional country-only scope and does not send a raw label as an FK', async () => {
+  it('supports optional country-only scope and preserves raw region text separately in the city command', async () => {
     const { adminApiClient } = await import('./client'); adminApiClient.setAdminAuthStatus('AUTHORIZED');
     const { canonicalPickerApi } = await import('./canonicalPickers');
     vi.mocked(fetch).mockImplementation(async (url) => {
@@ -38,10 +38,14 @@ describe('M10-08 scoped city selection (source only)', () => {
       return Response.json({ data: [], page: 1, pageSize: 100, totalPages: 0, total: 0 });
     });
     await canonicalPickerApi.cities('YE', null);
-    const { cityLocationPayload } = await import('./citySelection');
-    const body = cityLocationPayload('country-id', 'region-id', 'city-id');
-    expect(body).toEqual({ countryReferenceId: 'country-id', regionReferenceId: 'region-id', cityReferenceId: 'city-id' });
-    expect(body).not.toHaveProperty('city'); expect(body).not.toHaveProperty('country');
+    vi.mocked(fetch).mockImplementation(async (url) => String(url).endsWith('/auth/csrf-token')
+      ? Response.json({ data: { csrfToken: 'session-csrf' } }) : Response.json({ id: 'city-id' }));
+    const { referenceDataAdminApi } = await import('./referenceData');
+    const regionId = '11111111-1111-4111-8111-111111111111';
+    await referenceDataAdminApi.saveCity({ name: 'Aden', countryIso2Code: 'YE', administrativeRegionId: regionId, region: 'Original source region' });
+    const command = vi.mocked(fetch).mock.calls.find(([, options]) => options?.method === 'PUT');
+    expect(JSON.parse(String(command?.[1]?.body))).toEqual({ name: 'Aden', countryIso2Code: 'YE', administrativeRegionId: regionId, region: 'Original source region' });
+    expect(new Headers(command?.[1]?.headers).get('X-CSRF-Token')).toBe('session-csrf');
   });
 
   it('routes identical names to explicit review and excludes inactive candidates without replacing source text', async () => {

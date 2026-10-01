@@ -27,6 +27,7 @@ Authority: revised plan v2 sections 21/28/30, M10-08, following M10-07. M0–M9 
 - TypeScript build and Vercel TypeScript context checker PASS (zero diagnostics). Admin/API/Web production builds PASS; existing bundle size warnings remain.
 - Source quality PASS (zero cycles/accessibility findings); persistence ownership PASS (246 models, zero direct cross-context mutations); scoped ESLint zero errors, 14 existing warnings; secret scan and diff whitespace check PASS.
 - Local mocks prove transport/IDs/strict validation, not a live session refresh, PostgreSQL constraints or persisted audit rows. Exact-head GitHub CI is required before merge; retain PR #7's checks as the external evidence.
+- The first CI run at `82c3284` failed the existing P9 owner-PATCH source contract because FK serialization was extracted into a helper. Serialization was restored explicitly in the owner form; the checker was unchanged. The unnecessary helper was removed and its test replaced with an actual city command transport assertion that preserves raw text separately from the FK. All other source/security workflows passed that initial head; the corrected head requires fresh CI.
 
 ## Google AI Studio activation order
 
