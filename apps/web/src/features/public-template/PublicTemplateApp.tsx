@@ -11,6 +11,7 @@ import {
   mapArticle, mapCareer, mapCountry, mapCourse, mapExam, mapPublicMajorDto, mapPublicUniversityDto, mapService,
 } from './publicLiveDataSource';
 import { PublicInfoPage } from './components/PublicInfoPage';
+import { AcademicReportsPage } from './components/AcademicReportsPage';
 import { CourseTrackPreview } from './components/CourseTrackPreview';
 import { OwnerCourseDetail } from './components/OwnerCourseDetail';
 
@@ -1413,6 +1414,8 @@ export default function App() {
               window.scrollTo({ top: 0, behavior: 'instant' });
             }}
           />
+        ) : activeTab === 'reports' ? (
+          <AcademicReportsPage locale={language} onBack={goBack} />
         ) : (
           <>
             {/* TAB 1: HOME VIEW (Exactly as in Reference Screenshot) */}

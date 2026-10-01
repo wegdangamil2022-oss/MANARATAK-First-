@@ -158,27 +158,14 @@ SOME_KEY=some_val`;
     expect(redacted).toContain('[REDACTED_SECRET]');
   });
 
-  it('rejects pre-existing staging paths', () => {
-    const symlinkTarget = path.join(tmpDir, 'real_file.txt');
-    fs.writeFileSync(symlinkTarget, 'hello');
-    expect(() => writeExclusiveSecureFile(symlinkTarget, 'content')).toThrow(/already exists/);
-  });
-
-  it('rejects symbolic links when the host permits creating them', ({ skip }) => {
+  it('rejects pre-existing staging paths and symbolic links', () => {
     const symlinkTarget = path.join(tmpDir, 'real_file.txt');
     fs.writeFileSync(symlinkTarget, 'hello');
     const linkPath = path.join(tmpDir, 'symlink.txt');
-    try {
-      fs.symlinkSync(symlinkTarget, linkPath);
-    } catch (error) {
-      if (process.platform === 'win32' && (error as NodeJS.ErrnoException).code === 'EPERM') {
-        skip();
-        return;
-      }
-      throw error;
-    }
+    fs.symlinkSync(symlinkTarget, linkPath);
 
     expect(() => assertPathNotPreExisting(linkPath)).toThrow(/is a symbolic link/);
+    expect(() => writeExclusiveSecureFile(symlinkTarget, 'content')).toThrow(/already exists/);
   });
 
   it('executes ALTER ROLE using stdin and redacts password on error', () => {

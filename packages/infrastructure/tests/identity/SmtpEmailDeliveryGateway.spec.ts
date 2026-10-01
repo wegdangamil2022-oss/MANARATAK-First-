@@ -43,8 +43,8 @@ describe('SmtpEmailDeliveryGateway', () => {
       await gateway.sendVerificationEmail({ email: 'student@example.test', token: 'verify-token', displayName: 'Student' });
       await gateway.sendPasswordResetEmail({ email: 'student@example.test', token: 'reset-token', displayName: 'Student' });
       expect(messages).toHaveLength(2);
-      expect(messages[0]).toMatch(/Verification token:\r?\nverify-token/);
-      expect(messages[1]).toMatch(/Password reset token:\r?\nreset-token/);
+      expect(messages[0]).toContain('Verification token: verify-token');
+      expect(messages[1]).toContain('Password reset token: reset-token');
     } finally {
       server.close();
     }

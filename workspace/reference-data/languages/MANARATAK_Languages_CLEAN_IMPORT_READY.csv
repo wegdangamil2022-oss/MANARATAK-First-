@@ -1,0 +1,261 @@
+isoCode,name,nameAr,nativeName,direction,languageType,isActive,lifecycleState,referenceReviewStatus,provenance,aliases,notes
+aa,Afar,الأفارية,Afar,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ab,Abkhazian,الأبخازية,Abkhazian,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+acf,Saint Lucian Creole French,كريول سانت لوسيا الفرنسية,Kwéyòl,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ae,Avestan,الأفستية,Avestan,LTR,HISTORIC,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+af,Afrikaans,الأفريقانية,Afrikaans,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ak,Akan,الأكانية,Akan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+am,Amharic,الأمهرية,አማርኛ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+an,Aragonese,الأراغونية,Aragonese,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ar,Arabic,العربية,العربية,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"ar-SA,ar-EG,ar-AE",ISO 639-1 primary canonical language
+as,Assamese,الأسامية,অসমীয়া,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ast,Asturian,الأسترية,asturianu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+av,Avaric,الأوارية,Avaric,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ay,Aymara,الأيمارا,Aymara,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+az,Azerbaijani,الأذربيجانية,azərbaycan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ba,Bashkir,الباشكيرية,башҡорт,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+bal,Baluchi,البلوشية,Baluchi,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+bci,Baoulé,الباولية,Baoulé,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+be,Belarusian,البيلاروسية,беларуская,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ber,Berber languages,الأمازيغية / البربرية,Tamaziɣt,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"zgh,tmz",ISO 639-3 national/regional canonical language
+bet,Bété,البيتي,Bété,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+bg,Bulgarian,البلغارية,български,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+bho,Bhojpuri,البهوجبورية,भोजपुरी,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+bi,Bislama,البيسلامية,Bislama,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+bik,Bikol,البيكولية,Bikol,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+bm,Bambara,البامبارا,bamanakan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+bn,Bangla,البنغالية,বাংলা,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+bo,Tibetan,التبتية,བོད་སྐད་,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+br,Breton,البريتونية,brezhoneg,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+brx,Bodo,البودو,बर’,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+bs,Bosnian,البوسنية,bosanski,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+bzd,Bribri,البريبري,Bribri,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+bzj,Belize Kriol,كريول بليز,Belize Kriol,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ca,Catalan,الكتالانية,català,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+cab,Garifuna,الغاريفونية,Garifuna,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ce,Chechen,الشيشانية,нохчийн,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ceb,Cebuano,السيبيوانية,Cebuano,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ch,Chamorro,التشامورو,Chamorro,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+chr,Cherokee,الشيروكي,ᏣᎳᎩ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+cjp,Cabécar,الكابيكار,Cabécar,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ckb,Central Kurdish,السورانية الكردية,کوردیی ناوەندی,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,ku-Arab,ISO 639-3 national/regional canonical language
+cnr,Montenegrin,الصربية (الجبل الأسود),srpski (Crna Gora),LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+co,Corsican,الكورسيكية,Corsican,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+cr,Cree,الكرى,Cree,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+cri,Sãotomense,السوتومية,Forro,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+crs,Seselwa Creole French,الفرنسية الكريولية السيشيلية,Seselwa Creole French,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+cs,Czech,التشيكية,čeština,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+cu,Church Slavic,سلافية كنسية,Church Slavic,LTR,HISTORIC,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+cv,Chuvash,التشوفاشي,чӑваш чӗлхи,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+cy,Welsh,الويلزية,Cymraeg,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+da,Danish,الدانمركية,dansk,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+dag,Dagbani,الداغباني,Dagbanli,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+de,German,الألمانية,Deutsch,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"de-DE,de-AT,de-CH",ISO 639-1 primary canonical language
+den,Dendi,الدندي,Dendi,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+doi,Dogri,الدوجرية,डोगरी,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+dv,Divehi,المالديفية,Divehi,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+dyu,Dyula,الدايلا,Dyula,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+dz,Dzongkha,دزونكا,རྫོང་ཁ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ee,Ewe,الإيوي,eʋegbe,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+el,Greek,اليونانية,Ελληνικά,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+en,English,الإنجليزية,English,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"en-US,en-GB,en-CA,en-AU",ISO 639-1 primary canonical language
+eo,Esperanto,الإسبرانتو,Esperanto,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+es,Spanish,الإسبانية,español,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"es-ES,es-419,es-MX",ISO 639-1 primary canonical language
+et,Estonian,الإستونية,eesti,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+eu,Basque,الباسكية,euskara,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+fa,Persian,الفارسية,فارسی,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ff,Fula,الفولانية,Pulaar,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+fi,Finnish,الفنلندية,suomi,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+fil,Filipino,الفلبينية,Filipino,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"tl,tagalog",ISO 639-3 national/regional canonical language
+fj,Fijian,الفيجية,Fijian,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+fo,Faroese,الفاروية,føroyskt,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+fon,Fon,الفون,Fon,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+fr,French,الفرنسية,français,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"fr-FR,fr-CA,fr-CH",ISO 639-1 primary canonical language
+fy,Western Frisian,الفريزيان,Frysk,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ga,Irish,الأيرلندية,Gaeilge,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+gbm,Garhwali,الغهروالية,गढ़वळि,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+gcl,Grenadian Creole English,كريول غرينادا الإنجليزية,Grenadian Creole,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+gd,Scottish Gaelic,الغيلية الأسكتلندية,Gàidhlig,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+gdq,Mehri,المهرية,المهرية,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+gil,Gilbertese,لغة أهل جبل طارق,Gilbertese,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+gl,Galician,الجاليكية,galego,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+gn,Guarani,الغوارانية,Guarani,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+gon,Gondi,الجندي,Gondi,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+gu,Gujarati,الغوجاراتية,ગુજરાતી,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+gv,Manx,المنكية,Gaelg,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ha,Hausa,الهوسا,Hausa,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+he,Hebrew,العبرية,עברית,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,iw,ISO 639-1 primary canonical language
+hi,Hindi,الهندية,हिन्दी,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+hil,Hiligaynon,الهيليجينون,Hiligaynon,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+hmn,Hmong,الهمونجية,Hmong,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ho,Hiri Motu,الهيري موتو,Hiri Motu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+hr,Croatian,الكرواتية,hrvatski,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ht,Haitian Creole,الكريولية الهايتية,Haitian Creole,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+hu,Hungarian,الهنغارية,magyar,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+hy,Armenian,الأرمنية,հայերեն,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+hz,Herero,الهيريرو,Herero,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ia,Interlingua,اللّغة الوسيطة,interlingua,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+id,Indonesian,الإندونيسية,Indonesia,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,in,ISO 639-1 primary canonical language
+ie,Interlingue,الإنترلينج,Interlingue,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ig,Igbo,الإيجبو,Igbo,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ii,Sichuan Yi,السيتشيون يي,ꆈꌠꉙ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ik,Inupiaq,الإينبياك,Inupiaq,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ilo,Iloko,الإيلوكو,Iloko,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+io,Ido,الإيدو,Ido,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+is,Icelandic,الأيسلندية,íslenska,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+it,Italian,الإيطالية,italiano,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+iu,Inuktitut,الإينكتيتت,Inuktitut,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ja,Japanese,اليابانية,日本語,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+jiv,Shuar,الشوار,Shuar chicham,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+jv,Javanese,الجاوية,Jawa,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,jw,ISO 639-1 primary canonical language
+ka,Georgian,الجورجية,ქართული,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+kck,Kalanga,الكالانغا,Ikalanga,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+kg,Kongo,الكونغو,Kongo,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ki,Kikuyu,الكيكيو,Gikuyu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+kik,Kikuyu,الكيكيو,Gikuyu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+kj,Kuanyama,كوانياما,Kuanyama,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+kk,Kazakh,الكازاخستانية,қазақ тілі,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+kl,Kalaallisut,الكالاليست,kalaallisut,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+km,Khmer,الخميرية,ខ្មែរ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+kmb,Kimbundu,الكيمبندو,Kimbundu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+kn,Kannada,الكانادا,ಕನ್ನಡ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ko,Korean,الكورية,한국어,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+kok,Konkani,الكونكانية,कोंकणी,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+kpe,Kpelle,الكبيل,Kpelle,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+kr,Kanuri,الكانوري,Kanuri,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+kri,Krio,الكيرو,Krio,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+kru,Kurukh,الكوروخ,Kurukh,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ks,Kashmiri,الكشميرية,کٲشُر,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ku,Kurdish,الكردية,kurdî (kurmancî),LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"kmr,ku-Latn",ISO 639-1 primary canonical language
+kv,Komi,الكومي,Komi,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+kw,Cornish,الكورنية,kernewek,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ky,Kyrgyz,القيرغيزية,кыргызча,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+la,Latin,اللاتينية,Latin,LTR,HISTORIC,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+lb,Luxembourgish,اللكسمبورغية,Lëtzebuergesch,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+lg,Ganda,الغاندا,Luganda,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+li,Limburgish,الليمبورغية,Limburgish,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ln,Lingala,اللينجالا,lingála,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+lo,Lao,اللاوية,ລາວ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+lt,Lithuanian,الليتوانية,lietuvių,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+lu,Luba-Katanga,اللوبا كاتانغا,Tshiluba,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+lus,Mizo,الميزو,Mizo,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+lv,Latvian,اللاتفية,latviešu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+mag,Magahi,الماجا,Magahi,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+man,Mandingo,الماندينغو,Mandi'nka,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+men,Mende,الميند,Mende,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+mfe,Morisyen,المورسيانية,kreol morisien,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+mg,Malagasy,الملغاشي,Malagasy,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+mh,Marshallese,المارشالية,Marshallese,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+mi,Māori,الماورية,Māori,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+mk,Macedonian,المقدونية,македонски,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ml,Malayalam,المالايالامية,മലയാളം,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+mn,Mongolian,المنغولية,монгол,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+mni,Manipuri,المانيبورية,মৈতৈলোন্,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+mnk,Mandinka,الماندينكا,Mandinka,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+mos,Mossi,الموسي,Mossi,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+mr,Marathi,الماراثية,मराठी,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ms,Malay,الماليزية,Melayu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+mt,Maltese,المالطية,Malti,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+my,Burmese,البورمية,မြန်မာ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+na,Nauru,النورو,Nauru,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+nb,Norwegian Bokmål,النرويجية بوكمال,norsk bokmål,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+nd,North Ndebele,النديبيل الشمالية,isiNdebele,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ndc,Ndau,النداو,Chindau,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ne,Nepali,النيبالية,नेपाली,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ng,Ndonga,الندونجا,Ndonga,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+nl,Dutch,الهولندية,Nederlands,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"nl-NL,nl-BE",ISO 639-1 primary canonical language
+nn,Norwegian Nynorsk,النرويجية نينورسك,norsk nynorsk,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+no,Norwegian,النرويجية,norsk,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+nr,South Ndebele,النديبيل الجنوبي,South Ndebele,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+nv,Navajo,النافاجو,Navajo,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ny,Nyanja,النيانجا,Nyanja,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+nya,Nyanja,النيانجا,Nyanja,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+oc,Occitan,الأوكسيتانية,occitan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+oj,Ojibwa,الأوجيبوا,Ojibwa,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+om,Oromo,الأورومية,Oromoo,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+or,Odia,الأورية,ଓଡ଼ିଆ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+os,Ossetic,الأوسيتيك,ирон,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+pa,Punjabi,البنجابية,ਪੰਜਾਬੀ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+pag,Pangasinan,البانجاسينان,Pangasinan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+pap,Papiamento,البابيامينتو,Papiamento,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+pau,Palauan,البالوان,Palauan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+pi,Pali,البالية,Pali,LTR,HISTORIC,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+pl,Polish,البولندية,polski,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+pov,Upper Guinea Crioulo,كريول غينيا بيساو,Kriol,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ppl,Pipil,البيبلية,Nawat,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+prs,Dari,الدارية,دری,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ps,Pashto,البشتو,پښتو,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,pus,ISO 639-1 primary canonical language
+pt,Portuguese,البرتغالية,português,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"pt-BR,pt-PT",ISO 639-1 primary canonical language
+qu,Quechua,كيشوا,Runasimi,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+raj,Rajasthani,الراجاسثانية,राजस्थानी,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+rm,Romansh,الرومانشية,rumantsch,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+rn,Rundi,الرندي,Ikirundi,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ro,Romanian,الرومانية,română,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"mo,ron,rum",ISO 639-1 primary canonical language
+rot,Rotuman,الروتومانية,Fäeag Rotuma,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ru,Russian,الروسية,русский,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+rw,Kinyarwanda,الكينيارواندا,Ikinyarwanda,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ryu,Okinawan,الأوكيناوية,ウチナーグチ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+sa,Sanskrit,السنسكريتية,संस्कृत भाषा,LTR,HISTORIC,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sat,Santali,السانتالية,ᱥᱟᱱᱛᱟᱲᱤ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+sc,Sardinian,السردينية,sardu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sd,Sindhi,السندية,سنڌي,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+se,Northern Sami,سامي الشمالية,davvisámegiella,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sg,Sango,السانجو,Sängö,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sgn,Sign Languages,لغات الإشارة,Sign Languages,LTR,SPECIAL,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"asl,nzs,bso,bzs",ISO 639-3 national/regional canonical language
+shp,Shipibo,الشيبيبو,Shipibo-Conibo,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+si,Sinhala,السنهالية,සිංහල,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sk,Slovak,السلوفاكية,slovenčina,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sl,Slovenian,السلوفانية,slovenščina,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sm,Samoan,الساموائية,Samoan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sn,Shona,الشونا,chiShona,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+so,Somali,الصومالية,Soomaali,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sq,Albanian,الألبانية,shqip,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sr,Serbian,الصربية,српски,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"sr-Cyrl,sr-Latn,sh",ISO 639-1 primary canonical language
+ss,Swati,السواتي,Swati,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+st,Southern Sotho,السوتو الجنوبية,Sesotho,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+su,Sundanese,السوندانية,Basa Sunda,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sus,Susu,السوسو,Susu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+sv,Swedish,السويدية,svenska,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+sw,Swahili,السواحلية,Kiswahili,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+swb,Comorian,القمرية,Comorian,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ta,Tamil,التاميلية,தமிழ்,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+taq,Tamasheq,التماشقية,Tamasheq,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+te,Telugu,التيلوغوية,తెలుగు,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+tem,Timne,التيمن,Timne,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+tet,Tetum,التيتم,Tetum,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+tfr,Teribe,التيريبية,Teribe,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+tg,Tajik,الطاجيكية,тоҷикӣ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+th,Thai,التايلاندية,ไทย,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ti,Tigrinya,التغرينية,ትግርኛ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+tk,Turkmen,التركمانية,türkmen dili,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+tl,Filipino,الفلبينية,Filipino,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+tn,Tswana,التسوانية,Setswana,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+to,Tongan,التونغية,lea fakatonga,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+toi,Tonga,التونغية (زامبيا),Chitonga,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+tpi,Tok Pisin,التوك بيسين,Tok Pisin,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+tr,Turkish,التركية,Türkçe,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ts,Tsonga,السونجا,Tsonga,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+tt,Tatar,التترية,татар,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+tvl,Tuvalu,التوفالو,Tuvalu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+tw,Akan,الأكانية,Akan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ty,Tahitian,التاهيتية,Tahitian,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ug,Uyghur,الأويغورية,ئۇيغۇرچە,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+uk,Ukrainian,الأوكرانية,українська,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+umb,Umbundu,الأمبندو,Umbundu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+ur,Urdu,الأوردية,اردو,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+uz,Uzbek,الأوزبكية,o‘zbek,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+ve,Venda,الفيندا,Venda,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+vi,Vietnamese,الفيتنامية,Tiếng Việt,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+vo,Volapük,لغة الفولابوك,Volapük,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+wa,Walloon,الولونية,Walloon,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+war,Waray,الواراي,Waray,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+wo,Wolof,الولوفية,Wolof,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+xh,Xhosa,الخوسا,IsiXhosa,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+xin,Xinca,الشينكا,Xinka,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+yi,Yiddish,اليديشية,ייִדיש,RTL,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,ji,ISO 639-1 primary canonical language
+yo,Yoruba,اليوروبا,Èdè Yorùbá,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+yua,Yucatec Maya,المايانية اليوكاتيكية,Màaya t'àan,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+za,Zhuang,الزهيونج,Vahcuengh,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language
+zgh,Standard Moroccan Tamazight,التمازيغية المغربية القياسية,ⵜⴰⵎⴰⵣⵉⵖⵜ,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-3 national/regional canonical language
+zh,Chinese,الصينية,中文,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,"zh-Hans,zh-Hant,zh-CN,zh-TW,zh-HK,zh-SG",ISO 639-1 primary canonical language
+zu,Zulu,الزولو,isiZulu,LTR,LIVING,true,ACTIVE,REVIEWED,ISO-639 / BCP-47 / Unicode CLDR / IANA Language Subtag Registry,,ISO 639-1 primary canonical language

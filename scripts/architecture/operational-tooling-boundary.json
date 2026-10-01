@@ -15,7 +15,6 @@
     "scripts/backfill-service-career-unicode-canonicalization.ts",
     "scripts/bootstrap-admin.ts",
     "scripts/first-admin-bootstrap.mjs",
-    "scripts/owner-access-preflight.mjs",
     "scripts/bootstrap-phase18-student-tools.ts",
     "scripts/check_all_db_details.ts",
     "scripts/check_all_levels.ts",

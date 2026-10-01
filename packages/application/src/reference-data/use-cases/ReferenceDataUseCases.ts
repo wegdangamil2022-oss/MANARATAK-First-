@@ -12,8 +12,6 @@ import {
   ReferenceCountryDto,
   ReferenceCurrencyDto,
   ReferenceDataFilters,
-  ReferenceDataCollection,
-  ReferenceDataPage,
   ReferenceLanguageDto,
   AdministrativeRegionDto,
   UpsertReferenceCityDto,
@@ -78,20 +76,6 @@ export class ReferenceDataUseCases {
 
   public listRegions(filters: ReferenceDataFilters = {}): Promise<AdministrativeRegionDto[]> {
     return this.repository.listRegions(filters);
-  }
-
-  public async listPage(collection: ReferenceDataCollection, filters: ReferenceDataFilters = {}): Promise<ReferenceDataPage<ReferenceCountryDto | ReferenceCurrencyDto | ReferenceLanguageDto | ReferenceCityDto | AdministrativeRegionDto>> {
-    const page = filters.page ?? 1;
-    const pageSize = filters.pageSize ?? 50;
-    if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 100) {
-      throw new Error('REFERENCE_DATA_PAGINATION_INVALID');
-    }
-    const normalized = { activeOnly: true, ...filters, page, pageSize };
-    const [data, total] = await Promise.all([
-      this.repository[({ countries: 'listCountries', currencies: 'listCurrencies', languages: 'listLanguages', regions: 'listRegions', cities: 'listCities' } as const)[collection]](normalized),
-      this.repository.countRecords(collection, normalized),
-    ]);
-    return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
   }
 
   public async getCountry(iso2Code: string): Promise<ReferenceCountryDto> {
