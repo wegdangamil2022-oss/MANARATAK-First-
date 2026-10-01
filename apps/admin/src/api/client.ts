@@ -24,18 +24,6 @@ function isMutation(method?: string): boolean {
 let activeRefreshPromise: Promise<boolean> | null = null;
 let refreshFailedPermanently = false;
 
-let isRefreshing = false;
-let refreshSubscribers: Array<(ok: boolean) => void> = [];
-
-function subscribeTokenRefresh(cb: (ok: boolean) => void) {
-  refreshSubscribers.push(cb);
-}
-
-function onRefreshed(ok: boolean) {
-  refreshSubscribers.forEach((cb) => cb(ok));
-  refreshSubscribers = [];
-}
-
 export async function performAdminRefresh(): Promise<boolean> {
   if (refreshFailedPermanently) return false;
   if (activeRefreshPromise) return activeRefreshPromise;
@@ -51,6 +39,8 @@ export async function performAdminRefresh(): Promise<boolean> {
         const payload = await res.json().catch(() => ({}));
         if (payload?.data?.authenticated) {
           refreshFailedPermanently = false;
+          // Refresh rotates the session cookie; the old CSRF token is session-bound.
+          csrfManager.clearToken();
           return true;
         }
       } else if (res.status === 401 || res.status === 403) {
@@ -78,6 +68,7 @@ let sessionGeneration = 0;
 
 export function setAdminAuthStatus(state: AdminAuthState): void {
   currentAdminAuthState = state;
+  if (state === 'AUTHORIZED') refreshFailedPermanently = false;
   authStateListeners.forEach((fn) => fn(state));
   authStateListeners = [];
   if (state === 'UNAUTHORIZED') {
@@ -221,6 +212,7 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 async function executeRequest<T>(endpoint: string, options: AdminRequestOptions = {}): Promise<T> {
   assertLocalReadOnlyRequestAllowed(options.method, (typeof import.meta !== 'undefined' && import.meta.env?.VITE_LOCAL_ADMIN_READ_ONLY) === 'true');
   const url = `${API_BASE_URL}${endpoint}`;
+  const requestGeneration = sessionGeneration;
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
 
@@ -229,51 +221,28 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   }
   const { idempotencyKey: _idempotencyKey, ...fetchOptions } = options;
 
-  let response = await csrfManager.fetchWithCsrf(url, {
+  const requestOptions: RequestInit = {
     ...fetchOptions,
     signal: options.signal || globalAbortController.signal,
     headers,
     credentials: 'include',
-  });
+  };
+  let response = await csrfManager.fetchWithCsrf(url, requestOptions);
 
   // Handle 401 Unauthorized with silent session refresh
   const isAuthRoute = endpoint.includes('/auth/login') || endpoint.includes('/auth/refresh') || endpoint.includes('/auth/logout');
   if (response.status === 401 && !isAuthRoute) {
-    if (isRefreshing) {
-      const refreshOk = await new Promise<boolean>((resolve) => subscribeTokenRefresh(resolve));
-      if (refreshOk) {
-        const nextHeaders = new Headers(options.headers);
-        nextHeaders.set('Content-Type', 'application/json');
-        response = await csrfManager.fetchWithCsrf(url, {
-          ...fetchOptions,
-          headers: nextHeaders,
-          credentials: 'include',
-        });
-      } else {
-        if (!endpoint.includes('/auth/me')) {
-          setAdminAuthStatus('UNAUTHORIZED');
-          window.dispatchEvent(new Event('manaratak-admin-session-expired'));
-        }
+    // One shared refresh and at most one auth retry per command. Keep the exact
+    // body, semantic idempotency key, caller headers and cancellation signal.
+    if (await performAdminRefresh()) {
+      if (requestOptions.signal?.aborted || requestGeneration !== sessionGeneration) {
+        throw new Error('REQUEST_ABORTED: Admin session changed.');
       }
-    } else {
-      isRefreshing = true;
-      const refreshOk = await performAdminRefresh();
-      onRefreshed(refreshOk);
-      isRefreshing = false;
-      if (refreshOk) {
-        const nextHeaders = new Headers(options.headers);
-        nextHeaders.set('Content-Type', 'application/json');
-        response = await csrfManager.fetchWithCsrf(url, {
-          ...fetchOptions,
-          headers: nextHeaders,
-          credentials: 'include',
-        });
-      } else {
-        if (!endpoint.includes('/auth/me')) {
-          setAdminAuthStatus('UNAUTHORIZED');
-          window.dispatchEvent(new Event('manaratak-admin-session-expired'));
-        }
-      }
+      response = await csrfManager.fetchWithCsrf(url, requestOptions);
+    }
+    if (response.status === 401 && !endpoint.includes('/auth/me')) {
+      setAdminAuthStatus('UNAUTHORIZED');
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('manaratak-admin-session-expired'));
     }
   }
 

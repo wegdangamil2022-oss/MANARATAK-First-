@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { UniversityCanonicalRelationshipValidator } from '../../src/universities/UniversityCanonicalRelationshipValidator';
+import { UniversityCanonicalRelationshipValidator, type UniversityRelationshipValidationClient } from '../../src/universities/UniversityCanonicalRelationshipValidator';
 
 const client = () => ({
   referenceCountry: { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE' }) },
@@ -18,9 +18,40 @@ const client = () => ({
 });
 
 describe('UniversityCanonicalRelationshipValidator', () => {
+  const validator = (c = client()) => new UniversityCanonicalRelationshipValidator(c as unknown as UniversityRelationshipValidationClient);
+
+  it('validates a region with only columns supported by the generated Prisma schema', async () => {
+    const c = client();
+    c.administrativeRegion.findUnique.mockImplementation(async (query: any) => {
+      if ('isActive' in query.select) throw new Error('Unknown field isActive on AdministrativeRegion');
+      return { countryIso2Code: 'YE' };
+    });
+    await expect(validator(c).validateCampus({ countryReferenceId: 'country-1', regionReferenceId: 'region-1', cityReferenceId: 'city-1' })).resolves.toBeUndefined();
+  });
+
+  it.each([
+    ['UNIVERSITY_CAMPUS_COUNTRY_NOT_FOUND', 'referenceCountry', null],
+    ['UNIVERSITY_CAMPUS_COUNTRY_NOT_ACTIVE', 'referenceCountry', { iso2Code: 'YE', isActive: false }],
+    ['UNIVERSITY_CAMPUS_REGION_NOT_FOUND', 'administrativeRegion', null],
+    ['UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH', 'administrativeRegion', { countryIso2Code: 'SA' }],
+    ['UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH', 'administrativeRegion', { countryIso2Code: 'YE', countryReferenceId: 'foreign-country' }],
+    ['UNIVERSITY_CAMPUS_CITY_NOT_FOUND', 'referenceCity', null],
+    ['UNIVERSITY_CAMPUS_CITY_NOT_ACTIVE', 'referenceCity', { countryIso2Code: 'YE', isActive: false }],
+    ['UNIVERSITY_CAMPUS_CITY_COUNTRY_MISMATCH', 'referenceCity', { countryIso2Code: 'YE', countryReferenceId: 'foreign-country' }],
+    ['UNIVERSITY_CAMPUS_CITY_REGION_MISMATCH', 'referenceCity', { countryIso2Code: 'YE', administrativeRegionId: 'foreign-region' }],
+  ] as const)('rejects missing/inactive/foreign geography without a write: %s', async (code, delegate, record) => {
+    const c = client(); c[delegate].findUnique.mockResolvedValue(record as any);
+    await expect(validator(c).validateCampus({ countryReferenceId: 'country-1', regionReferenceId: 'region-1', cityReferenceId: 'city-1' })).rejects.toThrow(code);
+  });
+
+  it('rejects inconsistent region/city countries even when no country was selected', async () => {
+    const c = client(); c.referenceCity.findUnique.mockResolvedValue({ countryIso2Code: 'SA', administrativeRegionId: 'region-1' });
+    await expect(validator(c).validateCampus({ regionReferenceId: 'region-1', cityReferenceId: 'city-1' })).rejects.toThrow('UNIVERSITY_CAMPUS_CITY_REGION_MISMATCH');
+  });
+
   it('accepts compatible geography, degree-major, and test children', async () => {
     await expect(
-      new UniversityCanonicalRelationshipValidator(client()).validate({
+      validator().validate({
         campuses: [
           {
             name: 'Main',
@@ -77,7 +108,7 @@ describe('UniversityCanonicalRelationshipValidator', () => {
     const c = client();
     alter(c);
     await expect(
-      new UniversityCanonicalRelationshipValidator(c).validate({
+      validator(c).validate({
         campuses: [
           {
             name: 'Main',

@@ -1,3 +1,4 @@
+import { listAllReferenceData } from './referenceData';
 import { adminApiClient } from './client';
 
 export type CanonicalPickerLifecycle =
@@ -30,7 +31,7 @@ function option(item: Record<string, unknown>, extras: Partial<CanonicalPickerOp
   return {
     id: String(item.id),
     label: pickLabel(item),
-    lifecycle: selectableLifecycle(item.status, item.isActive as boolean | undefined),
+    lifecycle: selectableLifecycle(item.lifecycleState ?? item.status, item.isActive as boolean | undefined),
     status: typeof item.status === 'string' ? item.status : undefined,
     publicId: typeof item.publicId === 'string' ? item.publicId : undefined,
     code: String(item.iso2Code ?? item.isoCode ?? item.canonicalCode ?? item.regionCode ?? '') || undefined,
@@ -48,34 +49,24 @@ type PageEnvelope<T> = { data: T[] };
 
 export const canonicalPickerApi = {
   async countries(query = ''): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ activeOnly: 'false' });
-    if (query.trim()) params.set('q', query.trim());
-    const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/reference-data/countries?${params}`);
-    return response.data.map((item) => option(item));
+    const records = await listAllReferenceData<Record<string, unknown>>('countries', { activeOnly: false, q: query.trim() || undefined });
+    return records.map((item) => option(item));
   },
   async regions(countryIso2Code?: string): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ activeOnly: 'false' });
-    if (countryIso2Code) params.set('countryIso2Code', countryIso2Code);
-    const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/reference-data/regions?${params}`);
-    return response.data.map((item) => option(item, { metadata: { countryIso2Code: String(item.countryIso2Code ?? '') } }));
+    const records = await listAllReferenceData<Record<string, unknown>>('regions', { activeOnly: false, countryIso2Code });
+    return records.map((item) => option(item, { metadata: { countryIso2Code: String(item.countryIso2Code ?? '') } }));
   },
   async cities(countryIso2Code?: string): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ activeOnly: 'false' });
-    if (countryIso2Code) params.set('countryIso2Code', countryIso2Code);
-    const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/reference-data/cities?${params}`);
-    return response.data.map((item) => option(item, { metadata: { countryIso2Code: String(item.countryIso2Code ?? '') } }));
+    const records = await listAllReferenceData<Record<string, unknown>>('cities', { activeOnly: false, countryIso2Code });
+    return records.map((item) => option(item, { metadata: { countryIso2Code: String(item.countryIso2Code ?? '') } }));
   },
   async languages(query = ''): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ activeOnly: 'false' });
-    if (query.trim()) params.set('q', query.trim());
-    const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/reference-data/languages?${params}`);
-    return response.data.map((item) => option(item));
+    const records = await listAllReferenceData<Record<string, unknown>>('languages', { activeOnly: false, q: query.trim() || undefined });
+    return records.map((item) => option(item));
   },
   async currencies(query = ''): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ activeOnly: 'false' });
-    if (query.trim()) params.set('q', query.trim());
-    const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/reference-data/currencies?${params}`);
-    return response.data.map((item) => option(item));
+    const records = await listAllReferenceData<Record<string, unknown>>('currencies', { activeOnly: false, q: query.trim() || undefined });
+    return records.map((item) => option(item));
   },
   async degreeLevels(): Promise<CanonicalPickerOption[]> {
     const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>('/admin/academic-taxonomy/degree-levels');

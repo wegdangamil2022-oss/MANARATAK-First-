@@ -1,40 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  CsrfClientManager,
   readXlsxWorkbook,
   spreadsheetRowsToObjects,
 } from '@manaratak/shared';
 import { FileCheck2, Loader2, Upload } from 'lucide-react';
 
-const API_BASE = '/api/v1/reference-data';
-const ADMIN_API_BASE = '/api/v1/admin/reference-data';
+import type { ReferenceDataCollection } from '@manaratak/domain';
+import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceData';
 
-function useFetchData(endpoint: string) {
+function useFetchData(collection: ReferenceDataCollection) {
   const [data, setData] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
+  const requestSequence = useRef(0);
+  const fetchData = useCallback(async () => {
+    const sequence = ++requestSequence.current;
+    setLoading(true); setError(null);
     try {
-      const separator = endpoint.includes('?') ? '&' : '?';
-      const res = await CsrfClientManager.getInstance().fetchWithCsrf(`${API_BASE}${endpoint}${separator}page=1&pageSize=50`);
-      if (!res.ok) throw new Error(`Error: ${res.statusText}`);
-      const json = await res.json();
-      setData(json.data || []);
-    } catch (err: any) {
-      setError(err.message);
+      const result = await getReferenceDataPage<any>(collection, { page, pageSize: 50 });
+      if (sequence !== requestSequence.current) return;
+      setData(result.data); setTotal(result.total); setTotalPages(result.totalPages);
+    } catch (err: unknown) {
+      if (sequence !== requestSequence.current) return;
+      setData([]); setTotal(0); setTotalPages(0);
+      setError(err instanceof Error ? err.message : 'Reference data unavailable');
     } finally {
-      setLoading(false);
+      if (sequence === requestSequence.current) setLoading(false);
     }
-  };
-
+  }, [collection, page]);
   useEffect(() => {
-    fetchData();
-  }, [endpoint]);
+    void fetchData();
+    return () => { requestSequence.current++; };
+  }, [fetchData]);
+  return { data, loading, error, refetch: fetchData, page, total, totalPages, setPage };
+}
 
-  return { data, loading, error, refetch: fetchData };
+function ReferencePagination({ page, totalPages, setPage, loading }: {
+  page: number; totalPages: number; setPage: (page: number) => void; loading: boolean;
+}) {
+  return <div className="flex items-center gap-3 mb-3">
+    <button type="button" disabled={loading || page <= 1} onClick={() => setPage(page - 1)}>Previous</button>
+    <span>Page {page} / {Math.max(1, totalPages)}</span>
+    <button type="button" disabled={loading || page >= totalPages} onClick={() => setPage(page + 1)}>Next</button>
+  </div>;
 }
 
 export function ReferenceDataAdminPage() {
@@ -87,7 +98,7 @@ function Input({ label, value, onChange, required = false }: any) {
 }
 
 function CountriesTab() {
-  const { data, loading, error, refetch } = useFetchData('/countries');
+  const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('countries');
   const [form, setForm] = useState({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' });
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
   const [preview, setPreview] = useState<any>(null);
@@ -105,13 +116,7 @@ function CountriesTab() {
       const records = spreadsheetRowsToObjects<Record<string, unknown>>(sheet, { defaultValue: null, raw: false });
       const hash = await crypto.subtle.digest('SHA-256', bytes);
       const sha256 = Array.from(new Uint8Array(hash)).map(value => value.toString(16).padStart(2, '0')).join('');
-      const response = await CsrfClientManager.getInstance().fetchWithCsrf(`${ADMIN_API_BASE}/countries/import-preview`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sourceName: file.name, sourceVersion: sha256.slice(0, 16), sha256, records }),
-      });
-      if (!response.ok) throw new Error(await response.text());
-      setPreview(await response.json());
+      setPreview(await referenceDataAdminApi.previewCountries({ sourceName: file.name, sourceVersion: sha256.slice(0, 16), sha256, records }));
       setPreviewStatus({ loading: false });
     } catch (err: any) {
       setPreviewStatus({ loading: false, error: err.message });
@@ -122,12 +127,7 @@ function CountriesTab() {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      const res = await CsrfClientManager.getInstance().fetchWithCsrf(`${ADMIN_API_BASE}/countries/${form.iso2Code}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, nameAr: form.nameAr || null, region: form.region || null })
-      });
-      if (!res.ok) throw new Error(await res.text());
+      await referenceDataAdminApi.saveCountry({ ...form, nameAr: form.nameAr || null, region: form.region || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
       setForm({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' });
       refetch();
@@ -186,9 +186,10 @@ function CountriesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Active Records ({data.length})</h3>
+          <h3 className="font-bold text-lg">Active Records ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
+        <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-gray-500">Loading...</p>}
         {error && <p className="text-red-600">{error}</p>}
         {!loading && !error && data.length === 0 && <p className="text-gray-500 text-sm">No records found.</p>}
@@ -230,11 +231,7 @@ function DerivedReferencePreview({ kind }: { kind: 'currencies' | 'languages' })
       const sheet = workbook.sheets.get('Countries');
       if (!sheet) throw new Error('The workbook must contain a Countries sheet.');
       const records = spreadsheetRowsToObjects<Record<string, unknown>>(sheet, { defaultValue: null, raw: false });
-      const response = await CsrfClientManager.getInstance().fetchWithCsrf(`${ADMIN_API_BASE}/countries/derived-reference-preview`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ records }),
-      });
-      if (!response.ok) throw new Error(await response.text());
-      setResult(await response.json());
+      setResult(await referenceDataAdminApi.previewDerivedReferences(records));
       setStatus({ loading: false });
     } catch (err: any) {
       setStatus({ loading: false, error: err.message });
@@ -277,7 +274,7 @@ function DerivedReferencePreview({ kind }: { kind: 'currencies' | 'languages' })
 }
 
 function CurrenciesTab() {
-  const { data, loading, error, refetch } = useFetchData('/currencies');
+  const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('currencies');
   const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' });
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
@@ -285,12 +282,7 @@ function CurrenciesTab() {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      const res = await CsrfClientManager.getInstance().fetchWithCsrf(`${ADMIN_API_BASE}/currencies/${form.isoCode}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, nameAr: form.nameAr || null, symbol: form.symbol || null, numericCode: form.numericCode || null })
-      });
-      if (!res.ok) throw new Error(await res.text());
+      await referenceDataAdminApi.saveCurrency({ ...form, nameAr: form.nameAr || null, symbol: form.symbol || null, numericCode: form.numericCode || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
       setForm({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' });
       refetch();
@@ -322,9 +314,10 @@ function CurrenciesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Active Records ({data.length})</h3>
+          <h3 className="font-bold text-lg">Active Records ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
+        <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-gray-500">Loading...</p>}
         {error && <p className="text-red-600">{error}</p>}
         {!loading && !error && data.length === 0 && <p className="text-gray-500 text-sm">No records found.</p>}
@@ -350,20 +343,15 @@ function CurrenciesTab() {
 }
 
 function LanguagesTab() {
-  const { data, loading, error, refetch } = useFetchData('/languages');
-  const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', nativeName: '', direction: 'LTR' });
+  const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('languages');
+  const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', nativeName: '', direction: 'LTR' as 'LTR' | 'RTL' });
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      const res = await CsrfClientManager.getInstance().fetchWithCsrf(`${ADMIN_API_BASE}/languages/${form.isoCode}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, nameAr: form.nameAr || null, nativeName: form.nativeName || null })
-      });
-      if (!res.ok) throw new Error(await res.text());
+      await referenceDataAdminApi.saveLanguage({ ...form, nameAr: form.nameAr || null, nativeName: form.nativeName || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
       setForm({ isoCode: '', name: '', nameAr: '', nativeName: '', direction: 'LTR' });
       refetch();
@@ -386,7 +374,7 @@ function LanguagesTab() {
             <label className="text-sm font-medium text-gray-700">Direction *</label>
             <select 
               value={form.direction} 
-              onChange={e => setForm({...form, direction: e.target.value})}
+              onChange={e => setForm({...form, direction: e.target.value as 'LTR' | 'RTL'})}
               className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="LTR">LTR</option>
@@ -405,9 +393,10 @@ function LanguagesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Active Records ({data.length})</h3>
+          <h3 className="font-bold text-lg">Active Records ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
+        <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-gray-500">Loading...</p>}
         {error && <p className="text-red-600">{error}</p>}
         {!loading && !error && data.length === 0 && <p className="text-gray-500 text-sm">No records found.</p>}
@@ -433,7 +422,7 @@ function LanguagesTab() {
 }
 
 function CitiesTab() {
-  const { data, loading, error, refetch } = useFetchData('/cities');
+  const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('cities');
   const [form, setForm] = useState({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
@@ -441,12 +430,7 @@ function CitiesTab() {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      const res = await CsrfClientManager.getInstance().fetchWithCsrf(`${ADMIN_API_BASE}/cities`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null })
-      });
-      if (!res.ok) throw new Error(await res.text());
+      await referenceDataAdminApi.saveCity({ ...form, nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
       setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
       refetch();
@@ -477,9 +461,10 @@ function CitiesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Active Records ({data.length})</h3>
+          <h3 className="font-bold text-lg">Active Records ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
+        <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-gray-500">Loading...</p>}
         {error && <p className="text-red-600">{error}</p>}
         {!loading && !error && data.length === 0 && <p className="text-gray-500 text-sm">No records found.</p>}

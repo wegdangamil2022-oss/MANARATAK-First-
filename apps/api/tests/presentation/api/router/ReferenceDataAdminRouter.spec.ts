@@ -14,6 +14,7 @@ describe('ReferenceDataAdminRouter', () => {
     listCountries: vi.fn(),
     listRegions: vi.fn(),
     listCities: vi.fn(),
+    listPage: vi.fn().mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 50, totalPages: 0 }),
   });
 
   const createApp = (useCases: ReturnType<typeof createUseCases>) => {
@@ -38,7 +39,22 @@ describe('ReferenceDataAdminRouter', () => {
     const res = await request(app).get('/admin/reference-data/countries?activeOnly=false&q=Egypt');
 
     expect(res.status).toBe(200);
-    expect(useCases.listCountries).toHaveBeenCalledWith({ activeOnly: false, q: 'Egypt' });
+    expect(useCases.listPage).toHaveBeenCalledWith('countries', { activeOnly: false, q: 'Egypt' });
+  });
+
+  it('returns bounded pagination metadata without changing the data envelope', async () => {
+    const useCases = createUseCases();
+    useCases.listPage.mockResolvedValue({ data: [{ id: 'language-101' }], total: 260, page: 2, pageSize: 100, totalPages: 3 });
+    const response = await request(createApp(useCases)).get('/admin/reference-data/languages?page=2&pageSize=100&activeOnly=false');
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ total: 260, page: 2, pageSize: 100, totalPages: 3, data: [{ id: 'language-101' }] });
+    expect(useCases.listPage).toHaveBeenCalledWith('languages', { page: 2, pageSize: 100, activeOnly: false });
+  });
+
+  it.each(['page=0', 'page=-1', 'page=1.5', 'pageSize=0', 'pageSize=101', 'pageSize=250', 'page=x', 'unknown=value', 'activeOnly=maybe', 'countryIso2Code=YEM', 'page=1&page=2'])('rejects unsupported or invalid queries before the owner use case: %s', async (query) => {
+    const useCases = createUseCases();
+    const response = await request(createApp(useCases)).get(`/admin/reference-data/languages?${query}`);
+    expect(response.status).toBe(400); expect(useCases.listPage).not.toHaveBeenCalled();
   });
 
   it('POST /admin/reference-data/countries/import-preview validates and delegates without applying', async () => {
@@ -97,8 +113,8 @@ describe('ReferenceDataAdminRouter', () => {
 
     expect(regions.status).toBe(200);
     expect(cities.status).toBe(200);
-    expect(useCases.listRegions).toHaveBeenCalledWith({ countryIso2Code: 'EG' });
-    expect(useCases.listCities).toHaveBeenCalledWith({ countryIso2Code: 'EG' });
+    expect(useCases.listPage).toHaveBeenCalledWith('regions', { countryIso2Code: 'EG' });
+    expect(useCases.listPage).toHaveBeenCalledWith('cities', { countryIso2Code: 'EG' });
   });
 
   it('PUT /admin/reference-data/countries/:iso2Code validates and delegates', async () => {
@@ -201,7 +217,7 @@ describe('ReferenceDataAdminRouter', () => {
 
   it('does not collapse unknown infrastructure failures into HTTP 400', async () => {
     const useCases = createUseCases();
-    useCases.listCountries.mockRejectedValue(new Error('DATABASE_UNAVAILABLE'));
+    useCases.listPage.mockRejectedValue(new Error('DATABASE_UNAVAILABLE'));
     const app = createApp(useCases);
 
     const res = await request(app).get('/admin/reference-data/countries');

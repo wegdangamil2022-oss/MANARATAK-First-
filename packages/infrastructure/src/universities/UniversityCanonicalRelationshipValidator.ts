@@ -1,7 +1,13 @@
 import { UniversityAcademicProgramAuthoringInput, UniversityNormalizedDetailsUpdate } from '@manaratak/domain';
+import type { PrismaClient } from '@prisma/client';
+
+export type UniversityRelationshipValidationClient = Pick<PrismaClient,
+  'referenceCountry' | 'administrativeRegion' | 'referenceCity' | 'degreeLevel' |
+  'major' | 'majorLevelProfile' | 'internationalTest' | 'internationalTestVariant' |
+  'internationalTestVersion' | 'universityOrganizationUnit' | 'universityCampus'>;
 
 export class UniversityCanonicalRelationshipValidator {
-  constructor(private readonly client: any) {}
+  constructor(private readonly client: UniversityRelationshipValidationClient) {}
 
   async validate(details: UniversityNormalizedDetailsUpdate): Promise<void> {
     for (const campus of details.campuses ?? []) await this.validateCampus(campus);
@@ -35,24 +41,27 @@ export class UniversityCanonicalRelationshipValidator {
     const region = input.regionReferenceId
       ? await this.client.administrativeRegion.findUnique({
           where: { id: input.regionReferenceId },
-          select: { countryIso2Code: true, isActive: true },
+          // AdministrativeRegion has no isActive/lifecycle column.
+          select: { countryIso2Code: true, countryReferenceId: true },
         })
       : null;
     if (input.regionReferenceId && !region) throw new Error('UNIVERSITY_CAMPUS_REGION_NOT_FOUND');
-    if (region?.isActive === false) throw new Error('UNIVERSITY_CAMPUS_REGION_NOT_ACTIVE');
     const city = input.cityReferenceId
       ? await this.client.referenceCity.findUnique({
           where: { id: input.cityReferenceId },
-          select: { countryIso2Code: true, administrativeRegionId: true, isActive: true },
+          select: { countryIso2Code: true, countryReferenceId: true, administrativeRegionId: true, isActive: true },
         })
       : null;
     if (input.cityReferenceId && !city) throw new Error('UNIVERSITY_CAMPUS_CITY_NOT_FOUND');
     if (city?.isActive === false) throw new Error('UNIVERSITY_CAMPUS_CITY_NOT_ACTIVE');
-    if (country && region && country.iso2Code !== region.countryIso2Code)
+    if (country && region && (country.iso2Code !== region.countryIso2Code ||
+      (region.countryReferenceId && region.countryReferenceId !== input.countryReferenceId)))
       throw new Error('UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH');
-    if (country && city && country.iso2Code !== city.countryIso2Code)
+    if (country && city && (country.iso2Code !== city.countryIso2Code ||
+      (city.countryReferenceId && city.countryReferenceId !== input.countryReferenceId)))
       throw new Error('UNIVERSITY_CAMPUS_CITY_COUNTRY_MISMATCH');
-    if (region && city && city.administrativeRegionId !== input.regionReferenceId)
+    if (region && city && (city.administrativeRegionId !== input.regionReferenceId ||
+      city.countryIso2Code !== region.countryIso2Code))
       throw new Error('UNIVERSITY_CAMPUS_CITY_REGION_MISMATCH');
   }
 

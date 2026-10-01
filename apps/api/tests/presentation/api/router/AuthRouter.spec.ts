@@ -137,6 +137,8 @@ describe('AuthRouter API endpoints', () => {
       expect(response.status).toBe(200);
       expect(response.body.data.csrfToken).toBe('signed-csrf-token');
       expect(mockSecurityService.generateCsrfToken).toHaveBeenCalledWith('test-refresh-token');
+      expect(mockTokenProvider.validateRefreshToken).toHaveBeenCalledWith('test-refresh-token');
+      expect(mockSessionManager.findRefreshSession).toHaveBeenCalledWith('test-refresh-token');
     });
 
     it('fails closed when no authenticated cookie session is available', async () => {
@@ -145,6 +147,16 @@ describe('AuthRouter API endpoints', () => {
       expect(response.status).toBe(401);
       expect(response.body.error.code).toBe('CSRF_SESSION_REQUIRED');
       expect(mockSecurityService.generateCsrfToken).not.toHaveBeenCalled();
+    });
+
+    it.each(['invalid-token', 'missing-session', 'inactive-identity'])('rejects a cookie whose server session cannot authenticate: %s', async (failure) => {
+      if (failure === 'invalid-token') mockTokenProvider.validateRefreshToken.mockRejectedValue(new Error('Expired token'));
+      if (failure === 'missing-session') mockSessionManager.findRefreshSession.mockResolvedValue(null);
+      if (failure === 'inactive-identity') mockPrincipalAccessValidator.isAuthenticationAllowed.mockResolvedValue(false);
+      const response = await supertest(app).get('/api/v1/auth/csrf-token').set('Cookie', 'manaratak_refresh=invalid-session');
+      expect(response.status).toBe(401); expect(response.body.error.code).toBe('CSRF_SESSION_REQUIRED');
+      expect(mockSecurityService.generateCsrfToken).not.toHaveBeenCalled(); expect(response.headers['x-csrf-token']).toBeUndefined();
+      if (failure === 'inactive-identity') expect(mockSessionManager.revokeAllSessions).toHaveBeenCalledWith('user-123');
     });
   });
 

@@ -1,3 +1,4 @@
+import { listAllReferenceData } from '../api/referenceData';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -79,7 +80,6 @@ const dateInput = (value?: string | null) => value ? value.slice(0, 10) : '';
 const optionLabel = (item: RefOption, isAr: boolean) => (isAr ? item.nameAr : item.name) || item.name || item.nameAr || item.code || item.isoCode || item.currencyCode || item.languageCode || item.id;
 
 function flagEmoji(code: string) { try { return String.fromCodePoint(...code.toUpperCase().split('').map((char) => 127397 + char.charCodeAt(0))); } catch { return '🌐'; } }
-function unwrapData<T>(value: any): T[] { return Array.isArray(value) ? value : Array.isArray(value?.data) ? value.data : []; }
 
 export function StudyDestinationDetailPage() {
   const { countryIso2Code = '' } = useParams();
@@ -118,10 +118,10 @@ export function StudyDestinationDetailPage() {
       const [detail, relationResult, languageResult, currencyResult] = await Promise.all([
         adminApiClient.request<Aggregate>(`/admin/study-destinations/${encodeURIComponent(iso2)}`),
         adminApiClient.request<CountryGraph>(`/admin/study-destinations/${encodeURIComponent(iso2)}/relationships?page=1&pageSize=50&locale=${isAr ? 'ar' : 'en'}`),
-        adminApiClient.request<any>('/admin/reference-data/languages?page=1&pageSize=250'),
-        adminApiClient.request<any>('/admin/reference-data/currencies?page=1&pageSize=250'),
+        listAllReferenceData<RefOption>('languages'),
+        listAllReferenceData<RefOption>('currencies'),
       ]);
-      setAggregate(detail); setGraph(relationResult); setLanguages(unwrapData<RefOption>(languageResult)); setCurrencies(unwrapData<RefOption>(currencyResult)); hydrateForm(detail.profile);
+      setAggregate(detail); setGraph(relationResult); setLanguages(languageResult); setCurrencies(currencyResult); hydrateForm(detail.profile);
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'STUDY_DESTINATION_LOAD_FAILED'); }
     finally { setLoading(false); }
   }, [hydrateForm, isAr, iso2]);

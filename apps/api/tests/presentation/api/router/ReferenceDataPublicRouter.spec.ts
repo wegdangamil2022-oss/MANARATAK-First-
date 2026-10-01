@@ -22,6 +22,12 @@ describe('ReferenceDataPublicRouter locale contract', () => {
     expect(res.body.data[0].nameAr).toBeUndefined();
   });
 
+  it.each(['pageSize=101', 'page=0', 'unknown=value', 'activeOnly=false'])('rejects query keys or values outside the public reference contract: %s', async (query) => {
+    const repository = createRepository();
+    const response = await request(createApp(repository)).get(`/reference-data/languages?${query}`);
+    expect(response.status).toBe(400); expect(repository.listLanguages).not.toHaveBeenCalled();
+  });
+
   it('lists published universities through canonical country identity', async () => {
     const repository = createRepository();
     repository.getCountry.mockResolvedValue({ id: 'country-ye', iso2Code: 'YE' });

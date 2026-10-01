@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import { referenceDataQueryShape } from './ReferenceDataQueryContract.js';
 import { LocalizedPublicUniversityUseCases, LocalizedReferenceDataQueries, ReferenceDataNotFoundError } from '@manaratak/application';
 import { IReferenceDataRepository, IUniversityRepository } from '@manaratak/domain';
 import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
@@ -11,13 +12,7 @@ export class ReferenceDataPublicRouter {
     const universities = new LocalizedPublicUniversityUseCases(cradle.universityRepository);
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
 
-    const querySchema = z.object({
-      region: z.string().optional(),
-      countryIso2Code: z.string().optional(),
-      q: z.string().optional(),
-      page: z.coerce.number().int().min(1).optional(),
-      pageSize: z.coerce.number().int().min(1).max(100).optional(),
-    }).merge(localeQuerySchema);
+    const querySchema = z.object(referenceDataQueryShape).merge(localeQuerySchema).strict();
 
     router.get('/countries', asyncHandler(async (req: Request, res: Response) => {
       const { locale, ...filters } = querySchema.parse(req.query);

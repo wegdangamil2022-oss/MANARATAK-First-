@@ -15,6 +15,7 @@ import {
   UpsertReferenceLanguageDto,
   UpsertReferenceCityDto,
   ReferenceDataFilters,
+  ReferenceDataCollection,
   AdministrativeRegionDto,
   GovernedReferenceEntityType,
   ReferenceAliasInput,
@@ -283,35 +284,11 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listCountries(filters?: ReferenceDataFilters): Promise<ReferenceCountryDto[]> {
-    const where: {
-      isActive?: boolean;
-      region?: string;
-      OR?: Array<{
-        name?: { contains: string; mode: 'insensitive' };
-        officialName?: { contains: string; mode: 'insensitive' };
-        iso2Code?: { contains: string; mode: 'insensitive' };
-        iso3Code?: { contains: string; mode: 'insensitive' };
-      }>;
-    } = {};
-
-    if (filters?.activeOnly) {
-      where.isActive = true;
-    }
-    if (filters?.region) {
-      where.region = filters.region;
-    }
-    if (filters?.q) {
-      where.OR = [
-        { name: { contains: filters.q, mode: 'insensitive' } },
-        { officialName: { contains: filters.q, mode: 'insensitive' } },
-        { iso2Code: { contains: filters.q, mode: 'insensitive' } },
-        { iso3Code: { contains: filters.q, mode: 'insensitive' } }
-      ];
-    }
+    const where = this.countryWhere(filters);
 
     const records = await this.prisma.referenceCountry.findMany({
       where,
-      orderBy: { name: 'asc' },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
       ...this.pagination(filters)
     });
 
@@ -369,31 +346,11 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listCurrencies(filters?: ReferenceDataFilters): Promise<ReferenceCurrencyDto[]> {
-    const where: {
-      isActive?: boolean;
-      OR?: Array<{
-        name?: { contains: string; mode: 'insensitive' };
-        isoCode?: { contains: string; mode: 'insensitive' };
-        symbol?: { contains: string; mode: 'insensitive' };
-        numericCode?: { contains: string; mode: 'insensitive' };
-      }>;
-    } = {};
-
-    if (filters?.activeOnly) {
-      where.isActive = true;
-    }
-    if (filters?.q) {
-      where.OR = [
-        { name: { contains: filters.q, mode: 'insensitive' } },
-        { isoCode: { contains: filters.q, mode: 'insensitive' } },
-        { symbol: { contains: filters.q, mode: 'insensitive' } },
-        { numericCode: { contains: filters.q, mode: 'insensitive' } }
-      ];
-    }
+    const where = this.currencyWhere(filters);
 
     const records = await this.prisma.referenceCurrency.findMany({
       where,
-      orderBy: { name: 'asc' },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
       ...this.pagination(filters)
     });
 
@@ -441,29 +398,11 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listLanguages(filters?: ReferenceDataFilters): Promise<ReferenceLanguageDto[]> {
-    const where: {
-      isActive?: boolean;
-      OR?: Array<{
-        name?: { contains: string; mode: 'insensitive' };
-        nativeName?: { contains: string; mode: 'insensitive' };
-        isoCode?: { contains: string; mode: 'insensitive' };
-      }>;
-    } = {};
-
-    if (filters?.activeOnly) {
-      where.isActive = true;
-    }
-    if (filters?.q) {
-      where.OR = [
-        { name: { contains: filters.q, mode: 'insensitive' } },
-        { nativeName: { contains: filters.q, mode: 'insensitive' } },
-        { isoCode: { contains: filters.q, mode: 'insensitive' } }
-      ];
-    }
+    const where = this.languageWhere(filters);
 
     const records = await this.prisma.referenceLanguage.findMany({
       where,
-      orderBy: { name: 'asc' },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
       ...this.pagination(filters)
     });
 
@@ -509,6 +448,115 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listCities(filters?: ReferenceDataFilters): Promise<ReferenceCityDto[]> {
+    const where = this.cityWhere(filters);
+
+    const records = await this.prisma.referenceCity.findMany({
+      where,
+      include: {
+        administrativeRegion: true
+      },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      ...this.pagination(filters)
+    });
+
+    return (records as unknown as DbCity[]).map(record => this.mapToCityDto(record));
+  }
+
+  public async listRegions(filters?: ReferenceDataFilters): Promise<AdministrativeRegionDto[]> {
+    const records = await this.prisma.administrativeRegion.findMany({
+      where: this.regionWhere(filters),
+      orderBy: [{ countryIso2Code: 'asc' }, { name: 'asc' }, { id: 'asc' }],
+      ...this.pagination(filters)
+    });
+    return records.map((record) => this.mapToRegionDto(record));
+  }
+
+  public async getRegionById(id: string): Promise<AdministrativeRegionDto | null> {
+    const record = await this.prisma.administrativeRegion.findUnique({ where: { id } });
+    return record ? this.mapToRegionDto(record) : null;
+  }
+
+  private countryWhere(filters?: ReferenceDataFilters): Prisma.ReferenceCountryWhereInput {
+    const where: {
+      isActive?: boolean;
+      region?: string;
+      OR?: Array<{
+        name?: { contains: string; mode: 'insensitive' };
+        officialName?: { contains: string; mode: 'insensitive' };
+        iso2Code?: { contains: string; mode: 'insensitive' };
+        iso3Code?: { contains: string; mode: 'insensitive' };
+      }>;
+    } = {};
+
+    if (filters?.activeOnly) {
+      where.isActive = true;
+    }
+    if (filters?.region) {
+      where.region = filters.region;
+    }
+    if (filters?.q) {
+      where.OR = [
+        { name: { contains: filters.q, mode: 'insensitive' } },
+        { officialName: { contains: filters.q, mode: 'insensitive' } },
+        { iso2Code: { contains: filters.q, mode: 'insensitive' } },
+        { iso3Code: { contains: filters.q, mode: 'insensitive' } }
+      ];
+    }
+
+    return where;
+  }
+
+  private currencyWhere(filters?: ReferenceDataFilters): Prisma.ReferenceCurrencyWhereInput {
+    const where: {
+      isActive?: boolean;
+      OR?: Array<{
+        name?: { contains: string; mode: 'insensitive' };
+        isoCode?: { contains: string; mode: 'insensitive' };
+        symbol?: { contains: string; mode: 'insensitive' };
+        numericCode?: { contains: string; mode: 'insensitive' };
+      }>;
+    } = {};
+
+    if (filters?.activeOnly) {
+      where.isActive = true;
+    }
+    if (filters?.q) {
+      where.OR = [
+        { name: { contains: filters.q, mode: 'insensitive' } },
+        { isoCode: { contains: filters.q, mode: 'insensitive' } },
+        { symbol: { contains: filters.q, mode: 'insensitive' } },
+        { numericCode: { contains: filters.q, mode: 'insensitive' } }
+      ];
+    }
+
+    return where;
+  }
+
+  private languageWhere(filters?: ReferenceDataFilters): Prisma.ReferenceLanguageWhereInput {
+    const where: {
+      isActive?: boolean;
+      OR?: Array<{
+        name?: { contains: string; mode: 'insensitive' };
+        nativeName?: { contains: string; mode: 'insensitive' };
+        isoCode?: { contains: string; mode: 'insensitive' };
+      }>;
+    } = {};
+
+    if (filters?.activeOnly) {
+      where.isActive = true;
+    }
+    if (filters?.q) {
+      where.OR = [
+        { name: { contains: filters.q, mode: 'insensitive' } },
+        { nativeName: { contains: filters.q, mode: 'insensitive' } },
+        { isoCode: { contains: filters.q, mode: 'insensitive' } }
+      ];
+    }
+
+    return where;
+  }
+
+  private cityWhere(filters?: ReferenceDataFilters): Prisma.ReferenceCityWhereInput {
     const where: {
       isActive?: boolean;
       countryIso2Code?: string;
@@ -535,30 +583,24 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       ];
     }
 
-    const records = await this.prisma.referenceCity.findMany({
-      where,
-      include: {
-        administrativeRegion: true
-      },
-      orderBy: { name: 'asc' },
-      ...this.pagination(filters)
-    });
-
-    return (records as unknown as DbCity[]).map(record => this.mapToCityDto(record));
+    return where;
   }
 
-  public async listRegions(filters?: ReferenceDataFilters): Promise<AdministrativeRegionDto[]> {
-    const records = await this.prisma.administrativeRegion.findMany({
-      where: filters?.countryIso2Code ? { countryIso2Code: filters.countryIso2Code } : undefined,
-      orderBy: [{ countryIso2Code: 'asc' }, { name: 'asc' }],
-      ...this.pagination(filters)
-    });
-    return records.map((record) => this.mapToRegionDto(record));
+  private regionWhere(filters?: ReferenceDataFilters): Prisma.AdministrativeRegionWhereInput {
+    return {
+      ...(filters?.countryIso2Code ? { countryIso2Code: filters.countryIso2Code } : {}),
+      ...(filters?.q ? { OR: [{ name: { contains: filters.q, mode: 'insensitive' as const } }, { regionCode: { contains: filters.q, mode: 'insensitive' as const } }] } : {}),
+    };
   }
 
-  public async getRegionById(id: string): Promise<AdministrativeRegionDto | null> {
-    const record = await this.prisma.administrativeRegion.findUnique({ where: { id } });
-    return record ? this.mapToRegionDto(record) : null;
+  public countRecords(collection: ReferenceDataCollection, filters: ReferenceDataFilters): Promise<number> {
+    switch (collection) {
+      case 'countries': return this.prisma.referenceCountry.count({ where: this.countryWhere(filters) });
+      case 'currencies': return this.prisma.referenceCurrency.count({ where: this.currencyWhere(filters) });
+      case 'languages': return this.prisma.referenceLanguage.count({ where: this.languageWhere(filters) });
+      case 'cities': return this.prisma.referenceCity.count({ where: this.cityWhere(filters) });
+      case 'regions': return this.prisma.administrativeRegion.count({ where: this.regionWhere(filters) });
+    }
   }
 
   private pagination(filters?: ReferenceDataFilters): { skip?: number; take?: number } {

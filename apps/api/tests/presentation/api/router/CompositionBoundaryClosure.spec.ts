@@ -16,6 +16,7 @@ describe('WP1-B.2 Composition Boundary Closure Regression Tests', () => {
     const csrfRes = await request(app).get('/api/v1/auth/csrf-token');
     expect(csrfRes.status).toBe(401);
     expect(csrfRes.body.code).toBe('CSRF_SESSION_REQUIRED');
+    expect(csrfRes.headers['x-csrf-token']).toBeUndefined();
 
     const livenessRes = await request(app).get('/api/v1/monitoring/health/liveness');
     expect(livenessRes.status).toBe(200);

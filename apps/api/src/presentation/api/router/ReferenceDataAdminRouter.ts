@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import { adminReferenceDataQuerySchema } from './ReferenceDataQueryContract.js';
 import {
   ReferenceDataInvariantError,
   ReferenceDataNotFoundError,
@@ -93,24 +94,6 @@ export class ReferenceDataAdminRouter {
       metadata: z.record(z.string(), z.unknown()).optional(),
     }).strict();
 
-    const explicitBooleanQuery = z.preprocess((value) => {
-      if (value === undefined) return undefined;
-      if (typeof value === 'boolean') return value;
-      if (typeof value === 'string') {
-        const normalized = value.trim().toLowerCase();
-        if (normalized === 'true' || normalized === '1') return true;
-        if (normalized === 'false' || normalized === '0') return false;
-      }
-      return value;
-    }, z.boolean().optional());
-
-    const querySchema = z.object({
-      region: z.string().optional(),
-      countryIso2Code: z.string().optional(),
-      q: z.string().optional(),
-      activeOnly: explicitBooleanQuery,
-    }).strict();
-
     const countryImportPreviewSchema = z.object({
       sourceName: z.string().min(1).max(200),
       sourceVersion: z.string().min(1).max(100),
@@ -139,8 +122,8 @@ export class ReferenceDataAdminRouter {
     router.get(
       '/countries',
       asyncHandler(async (req: Request, res: Response) => {
-        const filters = querySchema.parse(req.query);
-        res.json({ data: await referenceDataUseCases.listCountries(filters) });
+        const filters = adminReferenceDataQuerySchema.parse(req.query);
+        res.json(await referenceDataUseCases.listPage('countries', filters));
       }),
     );
 
@@ -174,16 +157,16 @@ export class ReferenceDataAdminRouter {
     router.get(
       '/regions',
       asyncHandler(async (req: Request, res: Response) => {
-        const filters = querySchema.parse(req.query);
-        res.json({ data: await referenceDataUseCases.listRegions(filters) });
+        const filters = adminReferenceDataQuerySchema.parse(req.query);
+        res.json(await referenceDataUseCases.listPage('regions', filters));
       }),
     );
 
     router.get(
       '/cities',
       asyncHandler(async (req: Request, res: Response) => {
-        const filters = querySchema.parse(req.query);
-        res.json({ data: await referenceDataUseCases.listCities(filters) });
+        const filters = adminReferenceDataQuerySchema.parse(req.query);
+        res.json(await referenceDataUseCases.listPage('cities', filters));
       }),
     );
 
@@ -191,16 +174,16 @@ export class ReferenceDataAdminRouter {
     router.get(
       '/languages',
       asyncHandler(async (req: Request, res: Response) => {
-        const filters = querySchema.parse(req.query);
-        res.json({ data: await referenceDataUseCases.listLanguages(filters) });
+        const filters = adminReferenceDataQuerySchema.parse(req.query);
+        res.json(await referenceDataUseCases.listPage('languages', filters));
       }),
     );
 
     router.get(
       '/currencies',
       asyncHandler(async (req: Request, res: Response) => {
-        const filters = querySchema.parse(req.query);
-        res.json({ data: await referenceDataUseCases.listCurrencies(filters) });
+        const filters = adminReferenceDataQuerySchema.parse(req.query);
+        res.json(await referenceDataUseCases.listPage('currencies', filters));
       }),
     );
 

@@ -367,5 +367,31 @@
     "owner": "-- MANARATAK_MIGRATION_OWNER: <domain-owner|cross_context>",
     "scope": "-- MANARATAK_MIGRATION_SCOPE: owner_only|cross_context_approved",
     "decision": "-- MANARATAK_ARCH_DECISION: ADR-028"
+  },
+  "historicalMigrationMetadataExceptions": {
+    "20260907030000_m7_batch_a2_structural_reconciliation": {
+      "sha256": "92b07dbc1401a1925e9de3fc8bdc34ddd1105521237ea599c0cd34f829abc224",
+      "owner": "cross_context",
+      "scope": "cross_context_approved",
+      "decision": "ADR-028",
+      "reason": "Historical M7 reconciliation accepted in the M0-M9 planning baseline; preserve SQL bytes. Governance metadata is recorded here without asserting live application status.",
+      "reviewReference": "M10-06 source-only policy, 2026-10-01; DB application status RUNTIME_UNTESTED"
+    },
+    "20260907033000_m7_batch_b_index_reconciliation": {
+      "sha256": "ab6fdac31b613ed3c1682a96d2d0c0da8b0ef0acb91899d7c2787ea102fd4624",
+      "owner": "cross_context",
+      "scope": "cross_context_approved",
+      "decision": "ADR-028",
+      "reason": "Historical M7 reconciliation accepted in the M0-M9 planning baseline; preserve SQL bytes. Governance metadata is recorded here without asserting live application status.",
+      "reviewReference": "M10-06 source-only policy, 2026-10-01; DB application status RUNTIME_UNTESTED"
+    },
+    "20260907040000_m7_batch_c_fk_reconciliation": {
+      "sha256": "34e948f8dee7c8403bd395a18b5387fc50cf9e4d9c1d0253f640c0f0af00b920",
+      "owner": "cross_context",
+      "scope": "cross_context_approved",
+      "decision": "ADR-028",
+      "reason": "Historical M7 reconciliation accepted in the M0-M9 planning baseline; preserve SQL bytes. Governance metadata is recorded here without asserting live application status.",
+      "reviewReference": "M10-06 source-only policy, 2026-10-01; DB application status RUNTIME_UNTESTED"
+    }
   }
 }
