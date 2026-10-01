@@ -186,7 +186,7 @@
     "@types/supertest": "^7.2.1",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
     "eslint": "^9.0.0",
@@ -201,14 +201,17 @@
     "turbo": "^2.10.7",
     "typescript": "~5.8.2",
     "vite": "^6.2.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "overrides": {
-    "qs": "6.16.0"
+    "qs": "6.16.0",
+    "js-yaml@>=4.0.0 <4.3.2": "4.3.2",
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@5": "5.0.12"
   },
   "engines": {
     "node": ">=22.16.0 <23",
