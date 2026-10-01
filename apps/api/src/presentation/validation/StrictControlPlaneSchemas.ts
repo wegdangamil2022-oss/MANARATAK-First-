@@ -229,7 +229,7 @@ export const identityListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(100).optional(),
   search: z.string().trim().max(240).optional(),
-}).passthrough().transform((data) => {
+}).strict().transform((data) => {
   const limit = data.limit ?? data.pageSize ?? 20;
   const offset = data.offset ?? (data.page ? (data.page - 1) * limit : 0);
   return {

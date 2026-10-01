@@ -9,6 +9,16 @@ export interface ReferenceDataFilters {
   pageSize?: number;
 }
 
+export type ReferenceDataCollection = 'countries' | 'currencies' | 'languages' | 'regions' | 'cities';
+
+export interface ReferenceDataPage<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface ReferenceCountryDto {
   id: string;
   iso2Code: string;

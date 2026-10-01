@@ -49,10 +49,11 @@ describe('AppConfig', () => {
     expect(config.ADMIN_AUTH_MODE).toBe('strict');
   });
 
-  it('development/test config loads with safe local service defaults', () => {
+  it('development/test config leaves Redis optional unless explicitly configured', () => {
     const config = loadAppConfig({ NODE_ENV: 'development' });
     expect(config.DATABASE_URL).toBe('postgresql://postgres:postgres@localhost:5432/manaratak_dev');
-    expect(config.REDIS_URL).toBe('redis://localhost:6379');
+    expect(config.REDIS_URL).toBeUndefined();
+    expect(loadAppConfig({ NODE_ENV: 'test', REDIS_URL: 'redis://localhost:6379' }).REDIS_URL).toBe('redis://localhost:6379');
   });
 
   it('fails in production when critical variables are missing', () => {

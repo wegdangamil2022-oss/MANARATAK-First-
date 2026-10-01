@@ -1,3 +1,5 @@
+import { clearLegacyStudentCache } from '../../api/legacyStudentCache';
+
 const KEY = 'manaratak_post_login_return';
 const ACCOUNT_KEY = 'manaratak_active_identity';
 
@@ -34,9 +36,7 @@ export function rememberAuthenticatedIdentity(identityId: string): boolean {
     const changed = Boolean(previous && previous !== identityId);
     if (changed) {
       sessionStorage.removeItem('manaratak_post_login_action');
-      for (const key of ['manaratak_favorites_v2', 'manaratak_milestones', 'manaratak_notifications', 'manaratak_nav_state_v2']) {
-        localStorage.removeItem(key);
-      }
+      clearLegacyStudentCache();
     }
     sessionStorage.setItem(ACCOUNT_KEY, identityId);
     return changed;

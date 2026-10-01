@@ -10,6 +10,18 @@
     "directPrisma": "deny-unless-explicitly-classified"
   },
   "classifiedDirectPrismaScripts": [
+    "scripts/check_outbox.ts",
+    "scripts/find-failures.ts",
+    "scripts/inspect_audit_logs.ts",
+    "scripts/inspect_db_roles.ts",
+    "scripts/inspect_db.ts",
+    "scripts/inspect_workspaces.ts",
+    "scripts/inspect-owner.ts",
+    "scripts/show-audit.ts",
+    "scripts/test-validator.ts",
+    "scripts/test-verifier.ts",
+    "scripts/rbac-baseline-provision.mjs",
+    "scripts/rotate-application-role.mjs",
     "scripts/architecture/source-architecture-guard-core.mjs",
     "scripts/audit_three_tests.ts",
     "scripts/backfill-service-career-unicode-canonicalization.ts",
@@ -79,7 +91,10 @@
     "scripts/verify-wp12-9-scholarship-catalog-detail-source.mjs",
     "scripts/verify_bachelor_integrity.ts",
     "scripts/verify_import.ts",
-    "scripts/wp-ic-08-course-seed-pilot.mjs"
+    "scripts/wp-ic-08-course-seed-pilot.mjs",
+    "scripts/seed-reference-currencies.ts",
+    "scripts/seed-reference-languages.ts",
+    "scripts/owner-access-preflight.mjs"
   ],
   "classifiedPresentationImportScripts": [
     "scripts/generate-localized-public-sitemap.ts"

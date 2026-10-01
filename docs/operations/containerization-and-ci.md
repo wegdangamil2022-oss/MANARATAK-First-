@@ -14,6 +14,7 @@ This manual describes the executable repository today. It does not claim applica
 - `development-safety-gate`
 - `postgres`
 - `redis`
+- `mailpit`
 
 There are no `api`, `web`, or `admin` Compose services and no application Dockerfiles are claimed by this manual. Application processes run through their normal npm workspace commands outside Compose.
 
@@ -48,7 +49,7 @@ A source-only PASS is not runtime certification.
 
 ## 3. Canonical CI workflow
 
-`.github/workflows/ci.yml` contains three jobs:
+`.github/workflows/ci.yml` contains four jobs:
 
 1. **Full source closure gates**
    - checkout and Node 22.16.0 setup;
@@ -63,7 +64,10 @@ A source-only PASS is not runtime certification.
 2. **Translation quality gates**
    - dependency install;
    - source translation and semantic Arabic-copy verification.
-3. **Deployment configuration**
+3. **Isolated Google AI Studio Web preview**
+   - verifies, tests and builds the isolated Web preview and checks its generated environment inventory;
+   - does not contact Google AI Studio or a database.
+4. **Deployment configuration**
    - `docker compose config` only; it validates the dependency Compose file and does not build application containers.
 
 The canonical CI does **not** claim a Playwright browser-E2E job. Browser E2E remains runtime evidence unless a dedicated executable workflow is added and verified.

@@ -271,6 +271,22 @@ describe('AuthRouter API endpoints', () => {
   });
 
   describe('POST /api/v1/auth/refresh', () => {
+    it('rejects a body token when no protected cookie exists', async () => {
+      const response = await supertest(app).post('/api/v1/auth/refresh').send({ refreshToken: 'body-token', rememberMe: true });
+      expect(response.status).toBe(401);
+      expect(mockAuthService.refreshTokens).not.toHaveBeenCalled();
+    });
+
+    it('uses the cookie token and does not let a body flag extend a session lifetime', async () => {
+      mockAuthService.refreshTokens.mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh' });
+      const response = await supertest(app).post('/api/v1/auth/refresh')
+        .set('Cookie', 'manaratak_refresh=cookie-token').send({ refreshToken: 'body-token', rememberMe: true });
+      expect(response.status).toBe(200);
+      expect(mockAuthService.refreshTokens).toHaveBeenCalledWith('cookie-token');
+      const refreshCookie = (response.headers['set-cookie'] as unknown as string[]).find(value => value.startsWith('manaratak_refresh='));
+      expect(refreshCookie).toBeDefined();
+      expect(refreshCookie).not.toContain('Max-Age');
+    });
     it('rejects refresh without the protected refresh cookie', async () => {
       const response = await supertest(app)
         .post('/api/v1/auth/refresh')
@@ -309,6 +325,11 @@ describe('AuthRouter API endpoints', () => {
   });
 
   describe('POST /api/v1/auth/logout', () => {
+    it('does not revoke a token supplied through the request body', async () => {
+      const response = await supertest(app).post('/api/v1/auth/logout').send({ refreshToken: 'body-token' });
+      expect(response.status).toBe(200);
+      expect(mockAuthService.logoutCurrentSession).not.toHaveBeenCalled();
+    });
     it('is idempotent when there is no active refresh cookie', async () => {
       const response = await supertest(app)
         .post('/api/v1/auth/logout')

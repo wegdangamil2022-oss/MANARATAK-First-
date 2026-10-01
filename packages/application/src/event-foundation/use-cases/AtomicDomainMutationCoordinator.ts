@@ -14,6 +14,7 @@ export interface AtomicDomainMutationDefinition {
   aggregateType: string;
   aggregateId: string;
   action: string;
+  auditMetadata?: Record<string, unknown>;
   context?: AtomicMutationRequestContext;
   outbox?: {
     id?: string;
@@ -46,7 +47,7 @@ export class AtomicDomainMutationCoordinator {
       targetType: definition.aggregateType,
       source,
       timestamp: now,
-      contextMetadata: { result: 'SUCCESS', atomicity: 'BUSINESS_AUDIT_OUTBOX' },
+      contextMetadata: { result: 'SUCCESS', atomicity: 'BUSINESS_AUDIT_OUTBOX', ...(definition.auditMetadata ?? {}) },
       correlationReference: correlationId,
     }, {
       id: outboxId,

@@ -36,11 +36,7 @@ export function RequireAdminPermission({ permission, children }: { permission: s
   const { hasPermission, permissions } = useAdminAuthorization();
   const location = useLocation();
   if (!hasPermission(permission)) {
-    const fallbackPath = firstAllowedAdminPath(permissions);
-    if (!fallbackPath) {
-      return <Navigate to="/dashboard" replace state={{ deniedPermission: permission, deniedPath: location.pathname }} />;
-    }
-    return <Navigate to={fallbackPath} replace state={{ deniedPermission: permission, deniedPath: location.pathname }} />;
+    return <Navigate to={firstAllowedAdminPath(permissions) || '/'} replace state={{ deniedPermission: permission, deniedPath: location.pathname }} />;
   }
   return <>{children}</>;
 }

@@ -302,6 +302,21 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Student application tracker/checklist records become private student-state and reminder evidence after activation; shared environments recover from pre-mutation backup or a reviewed forward fix rather than destructive rollback."
+    },
+    "20260907030000_m7_batch_a2_structural_reconciliation": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Historical M7 reconciliation: no reviewed reverse SQL exists. Restore the verified pre-mutation backup in shared environments, or reprovision a disposable target. Applied SQL and checksums remain immutable."
+    },
+    "20260907033000_m7_batch_b_index_reconciliation": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Historical M7 reconciliation: no reviewed reverse SQL exists. Restore the verified pre-mutation backup in shared environments, or reprovision a disposable target. Applied SQL and checksums remain immutable."
+    },
+    "20260907040000_m7_batch_c_fk_reconciliation": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Historical M7 reconciliation: no reviewed reverse SQL exists. Restore the verified pre-mutation backup in shared environments, or reprovision a disposable target. Applied SQL and checksums remain immutable."
     }
   }
 }

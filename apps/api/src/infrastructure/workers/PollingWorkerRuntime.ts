@@ -59,7 +59,8 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
         }
       })();
       inFlightTasks.add(certificateWorkerTask);
-      certificateWorkerTask.finally(() => inFlightTasks.delete(certificateWorkerTask!));
+      const task = certificateWorkerTask;
+      void task.finally(() => inFlightTasks.delete(task));
       return certificateWorkerTask;
     };
     void tick();
@@ -93,7 +94,8 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
         }
       })();
       inFlightTasks.add(studentWorkspaceOutboxTask);
-      studentWorkspaceOutboxTask.finally(() => inFlightTasks.delete(studentWorkspaceOutboxTask!));
+      const task = studentWorkspaceOutboxTask;
+      void task.finally(() => inFlightTasks.delete(task));
       return studentWorkspaceOutboxTask;
     };
     void tick();
@@ -127,7 +129,8 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
         }
       })();
       inFlightTasks.add(ownerDomainOutboxTask);
-      ownerDomainOutboxTask.finally(() => inFlightTasks.delete(ownerDomainOutboxTask!));
+      const task = ownerDomainOutboxTask;
+      void task.finally(() => inFlightTasks.delete(task));
       return ownerDomainOutboxTask;
     };
     void tick();
@@ -158,7 +161,8 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
         }
       })();
       inFlightTasks.add(backgroundWorkerTask);
-      backgroundWorkerTask.finally(() => inFlightTasks.delete(backgroundWorkerTask!));
+      const task = backgroundWorkerTask;
+      void task.finally(() => inFlightTasks.delete(task));
       return backgroundWorkerTask;
     };
     void tick();

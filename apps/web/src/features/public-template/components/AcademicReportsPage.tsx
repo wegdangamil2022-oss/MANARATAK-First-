@@ -22,11 +22,12 @@ import {
 interface AcademicReportsPageProps {
   locale: 'ar' | 'en';
   onBack: () => void;
+  dataMode?: 'prototype' | 'api';
 }
 
 type ReportTab = 'overview' | 'linkage' | 'unresolved' | 'simulator' | 'explorer';
 
-export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps) {
+export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: AcademicReportsPageProps) {
   const [activeSubTab, setActiveSubTab] = useState<ReportTab>('overview');
   const [simulatedQuery, setSimulatedQuery] = useState('');
   const [simulationResult, setSimulationResult] = useState<any>(null);
@@ -324,8 +325,23 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
 
   const currentBroadField = iscedBroadFields.find((f) => f.code === selectedBroadField);
 
+  if (dataMode !== 'prototype') {
+    return (
+      <section dir={isAr ? 'rtl' : 'ltr'} className="mn-public-container py-6 space-y-4">
+        <h1 className="text-xl font-bold text-[var(--mn-heading)]">{t('التقارير الأكاديمية', 'Academic reports')}</h1>
+        <p role="status" className="text-[var(--mn-text-muted)]">
+          {t('التقارير الأكاديمية غير متاحة حاليًا؛ لم تُربط هذه الصفحة بخدمة تقارير موثّقة.', 'Academic reports are currently unavailable; this page is not connected to a verified reporting service.')}
+        </p>
+        <button type="button" onClick={onBack} className="mn-button-secondary">{t('العودة', 'Back')}</button>
+      </section>
+    );
+  }
+
   return (
-    <section dir="rtl" className="mn-public-container py-4 sm:py-6 space-y-6 font-['Cairo',sans-serif]">
+    <section dir={isAr ? 'rtl' : 'ltr'} className="mn-public-container py-4 sm:py-6 space-y-6">
+      <p role="status" className="rounded-xl p-3 bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]">
+        {t('بيانات توضيحية للنموذج فقط، وليست نتائج قاعدة البيانات أو تقرير تدقيق فعلي.', 'Prototype sample data only, not database results or an actual audit report.')}
+      </p>
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--mn-border)]">
         <div className="flex items-center gap-3">
@@ -369,37 +385,37 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
           </div>
           <div>
             <div className="text-[10px] text-[var(--mn-text-muted)] font-bold">{t('معدل الربط الكنسي الموحد', 'Canonical Linkage Rate')}</div>
-            <div className="text-lg font-extrabold text-[var(--mn-heading)]">81.4%</div>
+            <div className="text-lg font-bold text-[var(--mn-heading)]">81.4%</div>
           </div>
         </div>
 
         <div className="mn-card p-4 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600">
+          <div className="p-2 rounded-xl bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]">
             <CheckCircle2 className="h-5 w-5" />
           </div>
           <div>
             <div className="text-[10px] text-[var(--mn-text-muted)] font-bold">{t('حالات التطابق الكنسي', 'Exact Matches')}</div>
-            <div className="text-lg font-extrabold text-[var(--mn-heading)]">2,770 {t('سجل', 'items')}</div>
+            <div className="text-lg font-bold text-[var(--mn-heading)]">2,770 {t('سجل', 'items')}</div>
           </div>
         </div>
 
         <div className="mn-card p-4 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
+          <div className="p-2 rounded-xl bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]">
             <AlertTriangle className="h-5 w-5" />
           </div>
           <div>
             <div className="text-[10px] text-[var(--mn-text-muted)] font-bold">{t('فجوات التصنيف الحقيقية', 'True Classification Gaps')}</div>
-            <div className="text-lg font-extrabold text-[var(--mn-heading)]">577 {t('سجل', 'items')}</div>
+            <div className="text-lg font-bold text-[var(--mn-heading)]">577 {t('سجل', 'items')}</div>
           </div>
         </div>
 
         <div className="mn-card p-4 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-sky-500/10 text-sky-600">
+          <div className="p-2 rounded-xl bg-[var(--mn-info-soft)] text-[var(--mn-info-text)]">
             <HelpCircle className="h-5 w-5" />
           </div>
           <div>
             <div className="text-[10px] text-[var(--mn-text-muted)] font-bold">{t('حالات بينية متداخلة', 'Interdisciplinary / Ambiguous')}</div>
-            <div className="text-lg font-extrabold text-[var(--mn-heading)]">55 {t('سجل', 'items')}</div>
+            <div className="text-lg font-bold text-[var(--mn-heading)]">55 {t('سجل', 'items')}</div>
           </div>
         </div>
       </div>
@@ -507,17 +523,14 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
                           <div className="text-[10px] text-[var(--mn-text-muted)]">{field.desc}</div>
                         </td>
                         <td className="p-2.5 text-center font-bold">{field.count}</td>
-                        <td className="p-2.5 text-center font-bold text-emerald-600">{field.matched}</td>
-                        <td className="p-2.5 text-center font-bold text-amber-600">{field.gap}</td>
+                        <td className="p-2.5 text-center font-bold text-[var(--mn-success-text)]">{field.matched}</td>
+                        <td className="p-2.5 text-center font-bold text-[var(--mn-warning-text)]">{field.gap}</td>
                         <td className="p-2.5 text-center">
                           <div className="flex items-center justify-center gap-2">
                             <span className="font-mono font-bold text-xs">{pct}%</span>
-                            <div className="w-16 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                              <div
-                                className="bg-[var(--mn-accent)] h-full mn-gold"
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
+                            <progress className="mn-native-progress mn-native-progress-accent w-16 h-1.5"
+                              value={Number(pct)} max={100}
+                              aria-label={t('نسبة ربط المجال', 'Field linkage percentage')} />
                           </div>
                         </td>
                       </tr>
@@ -549,22 +562,10 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
                         <span>{deg.label}</span>
                         <span className="font-mono">{deg.total} {t('سجل', 'items')} ({exactPct}% {t('مكتمل', 'mapped')})</span>
                       </div>
-                      <div className="flex h-3 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <div
-                          className="bg-emerald-500 h-full"
-                          style={{ width: `${(deg.exact / deg.total) * 100}%` }}
-                          title={`Exact: ${deg.exact}`}
-                        />
-                        <div
-                          className="bg-sky-400 h-full"
-                          style={{ width: `${(deg.ambiguous / deg.total) * 100}%` }}
-                          title={`Ambiguous: ${deg.ambiguous}`}
-                        />
-                        <div
-                          className="bg-amber-500 h-full"
-                          style={{ width: `${(deg.gap / deg.total) * 100}%` }}
-                          title={`Gap: ${deg.gap}`}
-                        />
+                      <div className="grid grid-cols-3 gap-1">
+                        <progress className="mn-native-progress mn-native-progress-secondary w-full h-3" value={deg.exact} max={deg.total} aria-label={t('تطابق دقيق', 'Exact matches')} />
+                        <progress className="mn-native-progress mn-native-progress-primary w-full h-3" value={deg.ambiguous} max={deg.total} aria-label={t('تطابق متداخل', 'Ambiguous matches')} />
+                        <progress className="mn-native-progress mn-native-progress-accent w-full h-3" value={deg.gap} max={deg.total} aria-label={t('غير مرتبط', 'Unmapped')} />
                       </div>
                       <div className="flex justify-between text-[10px] text-[var(--mn-text-muted)]">
                         <span>{t('تطابق:', 'Exact:')} {deg.exact}</span>
@@ -580,7 +581,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
             {/* Safety & Constraints Verification List */}
             <div className="mn-card p-5 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] space-y-4">
               <h3 className="text-sm font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-4 w-4 text-[var(--mn-success-text)]" />
                 {t('فحص قيود السلامة الأكاديمية وهيكل البيانات', 'Academic Safety & Constraints Verification')}
               </h3>
               <p className="text-xs text-[var(--mn-text-muted)]">
@@ -599,7 +600,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
                   <div key={idx} className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)] space-y-1">
                     <div className="flex justify-between font-bold">
                       <span className="text-[var(--mn-heading)]">{item.rule}</span>
-                      <span className="text-emerald-600">{item.status}</span>
+                      <span className="text-[var(--mn-success-text)]">{item.status}</span>
                     </div>
                     <p className="text-[10px] text-[var(--mn-text-muted)]">{item.desc}</p>
                   </div>
@@ -614,10 +615,10 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
       {activeSubTab === 'linkage' && (
         <div className="mn-card p-5 sm:p-6 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] space-y-4 animate-in fade-in duration-150 text-right">
           <div className="flex items-center justify-between border-b border-[var(--mn-border)] pb-3">
-            <h2 className="text-base font-extrabold text-[var(--mn-heading)]">
+            <h2 className="text-base font-bold text-[var(--mn-heading)]">
               {t('تقرير التحقق من توسيع فئة ISCED-F ووثيقة التدقيق المالي والأكاديمي', 'UNESCO ISCED-F 2013 Expansion & Linkage Audit Document')}
             </h2>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-600 rounded-lg text-[10px] font-bold">
+            <span className="px-2 py-1 bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] rounded-lg text-[10px] font-bold">
               {t('مكتمل وموثق صراحةً', 'VERIFIED & COMPLETED')}
             </span>
           </div>
@@ -630,7 +631,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
               <div><b>{t('العُقد الكنسية المستهدفة:', 'Canonical Target Nodes:')}</b> 163 {t('عقدة معتمدة', 'canonical nodes')}</div>
             </div>
 
-            <h3 className="text-sm font-extrabold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
+            <h3 className="text-sm font-bold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
               {t('1. غرض الوثيقة والخطوة 8.7-C', '1. Document Purpose & Step 8.7-C')}
             </h3>
             <p>
@@ -640,7 +641,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
               )}
             </p>
 
-            <h3 className="text-sm font-extrabold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
+            <h3 className="text-sm font-bold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
               {t('2. نتائج مصفوفة التغطية الكنسية', '2. Linkage Coverage Matrix Results')}
             </h3>
             <p>
@@ -650,7 +651,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
               )}
             </p>
 
-            <h3 className="text-sm font-extrabold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
+            <h3 className="text-sm font-bold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
               {t('3. مبررات الاعتماد والإقرار النهائي', '3. Canonical Approval & Justifications')}
             </h3>
             <ul className="list-disc list-inside space-y-1.5 pr-4 text-[11px]">
@@ -666,16 +667,16 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
       {activeSubTab === 'unresolved' && (
         <div className="mn-card p-5 sm:p-6 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] space-y-4 animate-in fade-in duration-150 text-right">
           <div className="flex items-center justify-between border-b border-[var(--mn-border)] pb-3">
-            <h2 className="text-base font-extrabold text-[var(--mn-heading)]">
+            <h2 className="text-base font-bold text-[var(--mn-heading)]">
               {t('تقرير تحليل الحالات المعلقة والفجوات الحقيقية للتصنيف (Step 8.7-D)', 'Final Unresolved Major Classification & Gaps Analysis (Step 8.7-D)')}
             </h2>
-            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-600 rounded-lg text-[10px] font-bold">
+            <span className="px-2 py-1 bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] rounded-lg text-[10px] font-bold">
               {t('معتمد وموثق صراحةً', 'STEP 8.7-D PASS')}
             </span>
           </div>
 
           <div className="text-xs text-[var(--mn-text)] space-y-4 leading-relaxed font-mono">
-            <div className="p-3 bg-amber-500/10 border-r-4 border-amber-500 rounded-lg text-amber-800 dark:text-amber-400">
+            <div className="p-3 bg-[var(--mn-warning-soft)] border-r-4 border-amber-500 rounded-lg text-amber-800 dark:text-amber-400">
               <b>{t('معالجة فجوات الحلّال (Resolver Gaps):', 'Resolver Gaps Corrected:')}</b>{' '}
               {t(
                 'تم تحديث منطق AcademicTaxonomyResolver بنجاح وبقواعد لغوية صارمة دون مطابقة ضبابية (Fuzzy Matching)، مما أدى لخفض الحالات المعلقة بشكل آمن تماماً وعزل التخصصات المشتركة.',
@@ -683,7 +684,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
               )}
             </div>
 
-            <h3 className="text-sm font-extrabold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
+            <h3 className="text-sm font-bold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
               {t('1. معالجة الثغرات والتطبيع اللغوي العربي', '1. Arabic Linguistic Normalization Gaps')}
             </h3>
             <p>
@@ -693,7 +694,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
               )}
             </p>
 
-            <h3 className="text-sm font-extrabold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
+            <h3 className="text-sm font-bold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
               {t('2. حظر التخصصات المتداخلة وعزلها (AMBIGUOUS)', '2. Interdisciplinary Ambiguities Isolated')}
             </h3>
             <p>
@@ -721,7 +722,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
               </div>
             </div>
 
-            <h3 className="text-sm font-extrabold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
+            <h3 className="text-sm font-bold text-[var(--mn-heading)] mt-4 border-r-4 border-[var(--mn-accent)] pr-2">
               {t('3. فجوات التصنيف الحقيقية لليونسكو (TRUE_TAXONOMY_GAP)', '3. Genuine UNESCO Taxonomy Gaps')}
             </h3>
             <p>
@@ -804,12 +805,12 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
                   {t('مخرجات عُقدة التدقيق الكنسي وقرار المحاكي', 'Canonical Verification Output Result')}
                 </h3>
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                     simulationResult.outcome === 'EXACT_MATCH'
-                      ? 'bg-emerald-500/10 text-emerald-600'
+                      ? 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]'
                       : simulationResult.outcome === 'AMBIGUOUS'
-                      ? 'bg-sky-500/10 text-sky-600 animate-pulse'
-                      : 'bg-amber-500/10 text-amber-600'
+                      ? 'bg-[var(--mn-info-soft)] text-[var(--mn-info-text)] animate-pulse'
+                      : 'bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]'
                   }`}
                 >
                   {simulationResult.outcome}
@@ -819,19 +820,19 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs font-mono">
                 <div className="p-3 bg-[var(--mn-surface-muted)] rounded-xl">
                   <div className="text-[10px] text-[var(--mn-text-muted)] font-bold">{t('الرمز والفرز الكنسي الرباعي', 'Canonical Detailed ISCED Code')}</div>
-                  <div className="text-sm font-extrabold text-[var(--mn-heading)] mt-1">{simulationResult.code}</div>
+                  <div className="text-sm font-bold text-[var(--mn-heading)] mt-1">{simulationResult.code}</div>
                 </div>
 
                 <div className="p-3 bg-[var(--mn-surface-muted)] rounded-xl">
                   <div className="text-[10px] text-[var(--mn-text-muted)] font-bold">{t('المجال العريض للتصنيف الرئيسي', 'Broad Classification Field')}</div>
-                  <div className="text-sm font-extrabold text-[var(--mn-heading)] mt-1">
+                  <div className="text-sm font-bold text-[var(--mn-heading)] mt-1">
                     {simulationResult.broadCode} - {simulationResult.broadTitle}
                   </div>
                 </div>
 
                 <div className="p-3 bg-[var(--mn-surface-muted)] rounded-xl">
                   <div className="text-[10px] text-[var(--mn-text-muted)] font-bold">{t('التسمية التفصيلية لليونسكو', 'UNESCO Standard Detailed Title')}</div>
-                  <div className="text-sm font-extrabold text-[var(--mn-heading)] mt-1">
+                  <div className="text-sm font-bold text-[var(--mn-heading)] mt-1">
                     {simulationResult.detailedTitle}
                   </div>
                 </div>
@@ -883,7 +884,7 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
                   <span className="font-mono font-bold text-xs text-[var(--mn-accent-text)] uppercase block tracking-wider">
                     {t('المجال العريض المحدد من قبل اليونسكو', 'Broad Field Code')} {currentBroadField.code}
                   </span>
-                  <h3 className="text-lg font-extrabold text-[var(--mn-heading)] mt-0.5">
+                  <h3 className="text-lg font-bold text-[var(--mn-heading)] mt-0.5">
                     {currentBroadField.title}
                   </h3>
                   <p className="text-xs text-[var(--mn-text-muted)] leading-relaxed mt-1">
@@ -895,15 +896,15 @@ export function AcademicReportsPage({ locale, onBack }: AcademicReportsPageProps
                 <div className="grid grid-cols-3 gap-3 text-xs">
                   <div className="p-3 rounded-xl bg-[var(--mn-surface-muted)]">
                     <span className="text-[10px] text-[var(--mn-text-muted)] font-bold">{t('إجمالي السجلات المدققة', 'Total Audited')}</span>
-                    <span className="text-sm font-extrabold text-[var(--mn-heading)] block mt-1">{currentBroadField.count}</span>
+                    <span className="text-sm font-bold text-[var(--mn-heading)] block mt-1">{currentBroadField.count}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-emerald-500/10">
-                    <span className="text-[10px] text-emerald-600 font-bold">{t('ربط دقيق (EXACT)', 'Exact Matched')}</span>
-                    <span className="text-sm font-extrabold text-emerald-600 block mt-1">{currentBroadField.matched}</span>
+                  <div className="p-3 rounded-xl bg-[var(--mn-success-soft)]">
+                    <span className="text-[10px] text-[var(--mn-success-text)] font-bold">{t('ربط دقيق (EXACT)', 'Exact Matched')}</span>
+                    <span className="text-sm font-bold text-[var(--mn-success-text)] block mt-1">{currentBroadField.matched}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-amber-500/10">
-                    <span className="text-[10px] text-amber-600 font-bold">{t('فجوة متبقية (GAP)', 'Remaining Gap')}</span>
-                    <span className="text-sm font-extrabold text-amber-600 block mt-1">{currentBroadField.gap}</span>
+                  <div className="p-3 rounded-xl bg-[var(--mn-warning-soft)]">
+                    <span className="text-[10px] text-[var(--mn-warning-text)] font-bold">{t('فجوة متبقية (GAP)', 'Remaining Gap')}</span>
+                    <span className="text-sm font-bold text-[var(--mn-warning-text)] block mt-1">{currentBroadField.gap}</span>
                   </div>
                 </div>
 

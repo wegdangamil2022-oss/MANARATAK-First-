@@ -26,7 +26,8 @@ export class AssignRoleUseCase {
     if (!this.atomicMutations) return this.roleAssignmentRepository.delete(id);
     const repository = this.roleAssignmentRepository as Partial<ITransactionalRoleAssignmentRepository>;
     if (!repository.withTransaction) throw new Error('ROLE_ASSIGNMENT_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    await this.atomicMutations.execute({ domain: 'AUTHORIZATION', aggregateType: 'ROLE_ASSIGNMENT', aggregateId: id, action: 'ROLE_ASSIGNMENT_REVOKED', context },
+    await this.atomicMutations.execute({ domain: 'AUTHORIZATION', aggregateType: 'ROLE_ASSIGNMENT', aggregateId: id, action: 'ROLE_ASSIGNMENT_REVOKED', context,
+      auditMetadata: { identityId: existing.identityId, roleId: existing.roleId } },
       transaction => repository.withTransaction!(transaction).delete(id));
   }
 
@@ -47,6 +48,7 @@ export class AssignRoleUseCase {
     const repository = this.roleAssignmentRepository as Partial<ITransactionalRoleAssignmentRepository>;
     if (!repository.withTransaction) throw new Error('ROLE_ASSIGNMENT_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     await this.atomicMutations.execute({ domain: 'AUTHORIZATION', aggregateType: 'ROLE_ASSIGNMENT', aggregateId: input.id, action: 'ROLE_ASSIGNED', context,
+      auditMetadata: { identityId: input.identityId, roleId: input.roleId },
       outbox: { eventType: 'RoleAssignmentCreated', payload: { assignmentId: input.id, identityId: input.identityId, roleId: input.roleId } } },
       transaction => repository.withTransaction!(transaction).save(assignment));
   }

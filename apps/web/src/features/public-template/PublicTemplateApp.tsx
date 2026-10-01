@@ -1415,7 +1415,7 @@ export default function App() {
             }}
           />
         ) : activeTab === 'reports' ? (
-          <AcademicReportsPage locale={language} onBack={goBack} />
+          <AcademicReportsPage locale={language} onBack={goBack} dataMode={publicDataMode} />
         ) : (
           <>
             {/* TAB 1: HOME VIEW (Exactly as in Reference Screenshot) */}

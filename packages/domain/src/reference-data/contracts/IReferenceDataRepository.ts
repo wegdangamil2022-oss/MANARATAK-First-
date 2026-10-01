@@ -8,12 +8,14 @@ import {
   UpsertReferenceLanguageDto,
   UpsertReferenceCityDto,
   ReferenceDataFilters,
+  ReferenceDataCollection,
   AdministrativeRegionDto
 } from '../dto/ReferenceDataContracts';
 import { AtomicPersistenceContext } from '../../event-foundation/outbox/TransactionalOutbox';
 import { GovernedReferenceEntityType, ReferenceLifecycleTransitionCommand, ReferenceRelationshipDto, ReferenceVersionDto } from '../governance/ReferenceGovernance';
 
 export interface IReferenceDataRepository {
+  countRecords(collection: ReferenceDataCollection, filters: ReferenceDataFilters): Promise<number>;
   listCountries(filters: ReferenceDataFilters): Promise<ReferenceCountryDto[]>;
   listCurrencies(filters: ReferenceDataFilters): Promise<ReferenceCurrencyDto[]>;
   listLanguages(filters: ReferenceDataFilters): Promise<ReferenceLanguageDto[]>;

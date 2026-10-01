@@ -46,6 +46,6 @@ jobs:
       - name: Cross-phase architecture/static-security guards
         run: node scripts/architecture/verify-source-architecture-guards.mjs
       - name: Negative contract tests for guard behavior
-        run: node --test tests/architecture/source-architecture-guard-contracts.test.mjs
+        run: node --test tests/architecture/source-architecture-guard-contracts.test.mjs tests/architecture/retired-auth-diagnostics.test.mjs
       - name: Circular dependency and source-quality regression gate
         run: node scripts/quality/verify-source-quality.mjs

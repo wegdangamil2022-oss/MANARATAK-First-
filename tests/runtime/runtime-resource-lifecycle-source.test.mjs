@@ -37,7 +37,12 @@ test('SIGTERM/SIGINT drain HTTP and close resources exactly through idempotent l
   assert.match(server, /runtimeResources\?\.beginShutdown\(\)/);
   assert.match(server, /server\.closeIdleConnections\?\.\(\)/);
   assert.match(server, /server\.close\(/);
-  assert.match(server, /certificateWorkerTask \?\? Promise\.resolve\(\)/);
+  assert.match(server, /const pollingDrain = stopPollingWorkers\(\)/);
+  assert.match(server, /Promise\.all\(\[pollingDrain, backgroundWorker\?\.drain/);
+  assert.doesNotMatch(server, /await stopPollingWorkers\(\)/);
+  const polling = read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts');
+  assert.match(polling, /clearInterval\(timer\)/);
+  assert.match(polling, /await Promise\.allSettled\(Array\.from\(inFlightTasks\)\)/);
   assert.match(server, /Promise\.race\(\[/);
   assert.match(server, /SHUTDOWN_TIMEOUT_MS/);
   assert.match(server, /server\.closeAllConnections\?\.\(\)/);
