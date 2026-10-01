@@ -27,7 +27,6 @@
     "scripts/backfill-service-career-unicode-canonicalization.ts",
     "scripts/bootstrap-admin.ts",
     "scripts/first-admin-bootstrap.mjs",
-    "scripts/owner-access-preflight.mjs",
     "scripts/bootstrap-phase18-student-tools.ts",
     "scripts/check_all_db_details.ts",
     "scripts/check_all_levels.ts",
@@ -92,7 +91,10 @@
     "scripts/verify-wp12-9-scholarship-catalog-detail-source.mjs",
     "scripts/verify_bachelor_integrity.ts",
     "scripts/verify_import.ts",
-    "scripts/wp-ic-08-course-seed-pilot.mjs"
+    "scripts/wp-ic-08-course-seed-pilot.mjs",
+    "scripts/seed-reference-currencies.ts",
+    "scripts/seed-reference-languages.ts",
+    "scripts/owner-access-preflight.mjs"
   ],
   "classifiedPresentationImportScripts": [
     "scripts/generate-localized-public-sitemap.ts"

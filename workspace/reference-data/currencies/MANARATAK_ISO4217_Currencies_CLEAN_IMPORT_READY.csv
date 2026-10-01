@@ -1,0 +1,169 @@
+isoCode,numericCode,name,nameAr,symbol,minorUnit,currencyType,isActive,lifecycleState,referenceReviewStatus,provenance,notes
+AED,784,United Arab Emirates Dirham,درهم إماراتي,د.إ,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+AFN,971,Afghan Afghani,أفغاني,؋,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ALL,008,Albanian Lek,ليك ألباني,L,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+AMD,051,Armenian Dram,درام أرميني,֏,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ANG,532,Netherlands Antillean Guilder,غيلدر أنتيلي هولندي,NAƒ,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+AOA,973,Angolan Kwanza,كوانزا أنغولي,Kz,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ARS,032,Argentine Peso,بيزو أرجنتيني,$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+AUD,036,Australian Dollar,دولار أسترالي,A$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+AWG,533,Aruban Florin,فلورن أروبي,Afl.,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+AZN,944,Azerbaijani Manat,مانات أذربيجان,₼,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BAM,977,Bosnia-Herzegovina Convertible Mark,مارك البوسنة والهرسك قابل للتحويل,KM,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BBD,052,Barbadian Dollar,دولار بربادوسي,Bds$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BDT,050,Bangladeshi Taka,تاكا بنغلاديشي,৳,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BGN,975,Bulgarian Lev,ليف بلغاري,лв,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BHD,048,Bahraini Dinar,دينار بحريني,د.ب,3,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BIF,108,Burundian Franc,فرنك بروندي,FBu,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BMD,060,Bermudan Dollar,دولار برمودي,BD$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BND,096,Brunei Dollar,دولار بروناي,B$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BOB,068,Bolivian Boliviano,بوليفيانو بوليفي,Bs.,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BRL,986,Brazilian Real,ريال برازيلي,R$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BSD,044,Bahamian Dollar,دولار باهامي,B$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BTN,064,Bhutanese Ngultrum,نولتوم بوتاني,Nu.,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BWP,072,Botswanan Pula,بولا بتسواني,P,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BYN,933,Belarusian Ruble,روبل بيلاروسي,Br,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+BZD,084,Belize Dollar,دولار بليزي,BZ$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CAD,124,Canadian Dollar,دولار كندي,CA$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CDF,976,Congolese Franc,فرنك كونغولي,FC,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CHF,756,Swiss Franc,فرنك سويسري,CHF,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CLP,152,Chilean Peso,بيزو تشيلي,CLP$,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CNY,156,Chinese Yuan,يوان صيني,CN¥,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+COP,170,Colombian Peso,بيزو كولومبي,COL$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CRC,188,Costa Rican Colón,كولن كوستاريكي,₡,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CUC,931,Cuban Convertible Peso,بيزو كوبي قابل للتحويل,CUC$,2,HISTORIC,false,DEPRECATED,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Historic/withdrawn ISO 4217 currency record preserved for auditing
+CUP,192,Cuban Peso,بيزو كوبي,₱,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CVE,132,Cape Verdean Escudo,اسكودو الرأس الأخضر,Esc,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+CZK,203,Czech Koruna,كرونة تشيكية,Kč,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+DJF,262,Djiboutian Franc,فرنك جيبوتي,Fdj,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+DKK,208,Danish Krone,كرونة دنماركية,kr,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+DOP,214,Dominican Peso,بيزو الدومنيكان,RD$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+DZD,012,Algerian Dinar,دينار جزائري,د.ج,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+EGP,818,Egyptian Pound,جنيه مصري,ج.م,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ERN,232,Eritrean Nakfa,ناكفا أريتري,Nfk,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ETB,230,Ethiopian Birr,بير أثيوبي,Br,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+EUR,978,Euro,يورو,€,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+FJD,242,Fijian Dollar,دولار فيجي,FJ$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+FKP,238,Falkland Islands Pound,جنيه جزر فوكلاند,FK£,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+GBP,826,British Pound,جنيه إسترليني,£,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+GEL,981,Georgian Lari,لارى جورجي,₾,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+GHS,936,Ghanaian Cedi,سيدي غانا,GH₵,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+GIP,292,Gibraltar Pound,جنيه جبل طارق,GI£,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+GMD,270,Gambian Dalasi,دلاسي غامبي,D,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+GNF,324,Guinean Franc,فرنك غينيا,FG,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+GTQ,320,Guatemalan Quetzal,كوتزال غواتيمالا,Q,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+GYD,328,Guyanaese Dollar,دولار غيانا,G$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+HKD,344,Hong Kong Dollar,دولار هونغ كونغ,HK$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+HNL,340,Honduran Lempira,ليمبيرا هنداروس,L,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+HRK,191,Croatian Kuna,كونا كرواتي,kn,2,HISTORIC,false,DEPRECATED,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Historic/withdrawn ISO 4217 currency record preserved for auditing
+HTG,332,Haitian Gourde,جوردى هايتي,G,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+HUF,348,Hungarian Forint,فورينت هنغاري,Ft,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+IDR,360,Indonesian Rupiah,روبية إندونيسية,Rp,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ILS,376,Israeli New Shekel,شيكل إسرائيلي جديد,₪,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+INR,356,Indian Rupee,روبية هندي,₹,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+IQD,368,Iraqi Dinar,دينار عراقي,د.ع,3,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+IRR,364,Iranian Rial,ريال إيراني,﷼,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ISK,352,Icelandic Króna,كرونة أيسلندية,kr,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+JMD,388,Jamaican Dollar,دولار جامايكي,J$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+JOD,400,Jordanian Dinar,دينار أردني,د.أ,3,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+JPY,392,Japanese Yen,ين ياباني,¥,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KES,404,Kenyan Shilling,شلن كينيي,KSh,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KGS,417,Kyrgyz Som,سوم قيرغستاني,сом,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KHR,116,Cambodian Riel,رييال كمبودي,៛,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KMF,174,Comorian Franc,فرنك جزر القمر,CF,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KPW,408,North Korean Won,وون كوريا الشمالية,₩,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KRW,410,South Korean Won,وون كوريا الجنوبية,₩,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KWD,414,Kuwaiti Dinar,دينار كويتي,د.ك,3,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KYD,136,Cayman Islands Dollar,دولار جزر كيمن,CI$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+KZT,398,Kazakhstani Tenge,تينغ كازاخستاني,₸,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+LAK,418,Laotian Kip,كيب لاوسي,₭,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+LBP,422,Lebanese Pound,جنيه لبناني,ل.ل,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+LKR,144,Sri Lankan Rupee,روبية سريلانكية,Rs,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+LRD,430,Liberian Dollar,دولار ليبيري,L$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+LSL,426,Lesotho Loti,لوتي ليسوتو,L,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+LYD,434,Libyan Dinar,دينار ليبي,د.ل,3,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MAD,504,Moroccan Dirham,درهم مغربي,د.م.,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MDL,498,Moldovan Leu,ليو مولدوفي,L,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MGA,969,Malagasy Ariary,أرياري مدغشقر,Ar,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MKD,807,Macedonian Denar,دينار مقدوني,ден,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MMK,104,Myanmar Kyat,كيات ميانمار,K,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MNT,496,Mongolian Tugrik,توغروغ منغولي,₮,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MOP,446,Macanese Pataca,باتاكا ماكاوي,MOP$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MRU,929,Mauritanian Ouguiya,أوقية موريتانية,UM,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MUR,480,Mauritian Rupee,روبية موريشيوسية,Rs,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MVR,462,Maldivian Rufiyaa,روفيه جزر المالديف,Rf,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MWK,454,Malawian Kwacha,كواشا مالاوي,MK,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MXN,484,Mexican Peso,بيزو مكسيكي,Mex$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MYR,458,Malaysian Ringgit,رينغيت ماليزي,RM,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+MZN,943,Mozambican Metical,متكال موزمبيقي,MT,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+NAD,516,Namibian Dollar,دولار ناميبي,N$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+NGN,566,Nigerian Naira,نايرا نيجيري,₦,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+NIO,558,Nicaraguan Córdoba,قرطبة نيكاراغوا,C$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+NOK,578,Norwegian Krone,كرونة نرويجية,kr,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+NPR,524,Nepalese Rupee,روبية نيبالي,Rs,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+NZD,554,New Zealand Dollar,دولار نيوزيلندي,NZ$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+OMR,512,Omani Rial,ريال عماني,ر.ع,3,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+PAB,590,Panamanian Balboa,بالبوا بنمي,B/.,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+PEN,604,Peruvian Sol,سول بيروفي,S/,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+PGK,598,Papua New Guinean Kina,كينا بابوا غينيا الجديدة,K,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+PHP,608,Philippine Peso,بيزو فلبيني,₱,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+PKR,586,Pakistani Rupee,روبية باكستاني,Rs,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+PLN,985,Polish Zloty,زلوتي بولندي,zł,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+PYG,600,Paraguayan Guarani,غواراني باراغواي,₲,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+QAR,634,Qatari Riyal,ريال قطري,ر.ق,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+RON,946,Romanian Leu,ليو روماني,lei,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+RSD,941,Serbian Dinar,دينار صربي,дин,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+RUB,643,Russian Ruble,روبل روسي,₽,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+RWF,646,Rwandan Franc,فرنك رواندي,RF,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SAR,682,Saudi Riyal,ريال سعودي,ر.س,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SBD,090,Solomon Islands Dollar,دولار جزر سليمان,SI$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SCR,690,Seychellois Rupee,روبية سيشيلية,SR,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SDG,938,Sudanese Pound,جنيه سوداني,ج.س.,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SEK,752,Swedish Krona,كرونة سويدية,kr,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SGD,702,Singapore Dollar,دولار سنغافوري,S$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SHP,654,St. Helena Pound,جنيه سانت هيلين,SH£,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SLE,925,Sierra Leonean Leone,ليون سيراليوني,Le,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SLL,694,Sierra Leonean Leone (1964—2022),ليون سيراليوني - 1964-2022,Le,2,HISTORIC,false,DEPRECATED,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Historic/withdrawn ISO 4217 currency record preserved for auditing
+SOS,706,Somali Shilling,شلن صومالي,Sh,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SRD,968,Surinamese Dollar,دولار سورينامي,Sr$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SSP,728,South Sudanese Pound,جنيه جنوب السودان,SS£,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+STN,930,São Tomé & Príncipe Dobra,دوبرا ساو تومي وبرينسيبي,Db,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SVC,222,Salvadoran Colón,كولون سلفادوري,₡,2,HISTORIC,false,DEPRECATED,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Historic/withdrawn ISO 4217 currency record preserved for auditing
+SYP,760,Syrian Pound,ليرة سورية,ل.س,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+SZL,748,Swazi Lilangeni,ليلانجيني سوازيلندي,E,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+THB,764,Thai Baht,باخت تايلاندي,฿,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+TJS,972,Tajikistani Somoni,سوموني طاجيكستاني,ЅМ,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+TMT,934,Turkmenistani Manat,مانات تركمانستان,m,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+TND,788,Tunisian Dinar,دينار تونسي,د.ت,3,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+TOP,776,Tongan Paʻanga,بانغا تونغا,T$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+TRY,949,Turkish Lira,ليرة تركية,₺,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+TTD,780,Trinidad & Tobago Dollar,دولار ترينداد وتوباغو,TT$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+TWD,901,New Taiwan Dollar,دولار تايواني,NT$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+TZS,834,Tanzanian Shilling,شلن تنزاني,TSh,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+UAH,980,Ukrainian Hryvnia,هريفنيا أوكراني,₴,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+UGX,800,Ugandan Shilling,شلن أوغندي,USh,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+USD,840,US Dollar,دولار أمريكي,$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+UYU,858,Uruguayan Peso,بيزو اوروغواي,,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+UZS,860,Uzbekistani Som,سوم أوزبكستاني,soʻm,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+VES,928,Venezuelan Bolívar,بوليفار فنزويلي,Bs.,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+VND,704,Vietnamese Dong,دونج فيتنامي,₫,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+VUV,548,Vanuatu Vatu,فاتو فانواتو,VT,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+WST,882,Samoan Tala,تالا ساموا,WS$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+XAF,950,Central African CFA Franc,فرنك وسط أفريقي,FCFA,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+XCD,951,East Caribbean Dollar,دولار شرق الكاريبي,EC$,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+XCG,532,Caribbean Guilder,غيلدر كاريبي,Cg.,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+XDR,960,Special Drawing Rights,حقوق السحب الخاصة,SDR,,SPECIAL_DRAWING_RIGHTS,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,IMF Special Drawing Rights international reserve asset
+XOF,952,West African CFA Franc,فرنك غرب أفريقي,CFA,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+XPF,953,CFP Franc,فرنك سي إف بي,CFPF,0,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+XSU,994,Sucre,XSU,Sucre,,SPECIAL,false,SPECIAL,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Special-purpose ISO 4217 non-circulating code
+YER,886,Yemeni Rial,ريال يمني,﷼,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ZAR,710,South African Rand,راند جنوب أفريقيا,R,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ZMW,967,Zambian Kwacha,كواشا زامبي,ZK,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ZWG,924,Zimbabwe Gold,ذهب زيمبابوي,ZiG,2,CURRENCY,true,ACTIVE,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,ISO 4217 official currency record
+ZWL,932,Zimbabwean Dollar (2009–2024),دولار زمبابوي 2009,Z$,2,HISTORIC,false,DEPRECATED,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Historic/withdrawn ISO 4217 currency record preserved for auditing
+XAU,959,Gold (one troy ounce),ذهب (أونصة تروي),XAU,,PRECIOUS_METAL,false,SPECIAL,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Special-purpose ISO 4217 non-circulating code
+XAG,961,Silver (one troy ounce),فضة (أونصة تروي),XAG,,PRECIOUS_METAL,false,SPECIAL,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Special-purpose ISO 4217 non-circulating code
+XPT,962,Platinum (one troy ounce),بلاتين (أونصة تروي),XPT,,PRECIOUS_METAL,false,SPECIAL,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Special-purpose ISO 4217 non-circulating code
+XPD,964,Palladium (one troy ounce),بلاديوم (أونصة تروي),XPD,,PRECIOUS_METAL,false,SPECIAL,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Special-purpose ISO 4217 non-circulating code
+XTS,963,Testing Currency Code,رمز عملة تجريبي,XTS,,TESTING,false,SPECIAL,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Special-purpose ISO 4217 non-circulating code
+XXX,999,No Currency,بدون عملة,XXX,,NO_CURRENCY,false,SPECIAL,REVIEWED,ISO-4217 / SIX Financial Information / UN CLDR,Special-purpose ISO 4217 non-circulating code

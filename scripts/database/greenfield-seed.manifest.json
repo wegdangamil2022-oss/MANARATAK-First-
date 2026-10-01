@@ -14,13 +14,13 @@
       "order": 10,
       "required": true,
       "owner": "reference",
-      "state": "BLOCKED_SOURCE_REVIEW",
+      "state": "READY",
       "script": "scripts/seed-reference-countries.ts",
       "sourcePath": "workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx",
-      "sourceSha256": "c896d03cc49c126ee907f342341737ae1e0e1aa023fb960d76ded17dc45804b9",
-      "sourceVersion": "2026-08-07/c896d03cc49c126e",
+      "sourceSha256": "f596c0b4a9bc9227f2b008f81a7f61104d95211cb75c2f73cf5edb9565ad6f75",
+      "sourceVersion": "2026-09-30/f596c0b4a9bc9227",
       "requiredReviewStatus": "REVIEWED",
-      "observedReviewStatus": "UNREVIEWED",
+      "observedReviewStatus": "REVIEWED",
       "expected": {
         "ReferenceCountry": {
           "exact": 194
@@ -33,14 +33,14 @@
       "order": 20,
       "required": true,
       "owner": "reference",
-      "state": "BLOCKED_SOURCE_DATASET_MISSING",
-      "script": null,
-      "sourcePath": null,
-      "sourceSha256": null,
-      "sourceVersion": null,
+      "state": "READY",
+      "script": "scripts/seed-reference-currencies.ts",
+      "sourcePath": "workspace/reference-data/currencies/MANARATAK_ISO4217_Currencies_CLEAN_IMPORT_READY.csv",
+      "sourceSha256": "469c05ffce2fec934ea59ab1ab468ef232e945897193371258e8b0efdd01937f",
+      "sourceVersion": "2026-09-30/469c05ffce2fec93",
       "expected": {
         "ReferenceCurrency": {
-          "minimum": 1
+          "minimum": 168
         }
       },
       "provenance": "ISO-4217 authoritative dataset required"
@@ -50,14 +50,14 @@
       "order": 30,
       "required": true,
       "owner": "reference",
-      "state": "BLOCKED_SOURCE_DATASET_MISSING",
-      "script": null,
-      "sourcePath": null,
-      "sourceSha256": null,
-      "sourceVersion": null,
+      "state": "READY",
+      "script": "scripts/seed-reference-languages.ts",
+      "sourcePath": "workspace/reference-data/languages/MANARATAK_Languages_CLEAN_IMPORT_READY.csv",
+      "sourceSha256": "f2967c5d32360049841a3d22b540416351fec42a3df5b2128d60f57d8979184c",
+      "sourceVersion": "2026-09-30/f2967c5d32",
       "expected": {
         "ReferenceLanguage": {
-          "minimum": 1
+          "minimum": 260
         }
       },
       "provenance": "ISO-639/BCP47/CLDR authoritative dataset required"

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 test('retired auth diagnostics and launchers fail before loading database or credential code', () => {
-  for (const file of ['inspect_hash_format.ts', 'show-hash-format.ts', 'simulate_full_flow.ts', 'test-resend.ts', 'verify_credentials.ts', 'run-test-resend.js', 'run-show-hash-format.js']) {
+  for (const file of ['promote-wegdan-admin.ts', 'inspect_hash_format.ts', 'show-hash-format.ts', 'simulate_full_flow.ts', 'test-resend.ts', 'verify_credentials.ts', 'run-test-resend.js', 'run-show-hash-format.js']) {
     const source = readFileSync(`scripts/${file}`, 'utf8');
     assert.doesNotMatch(source, /@prisma\/client|\bfetch\s*\(|\bspawn\s*\(|password\s*:/i);
     const result = spawnSync(process.execPath, ['--input-type=module', '--eval', source], { encoding: 'utf8', env: { PATH: process.env.PATH } });

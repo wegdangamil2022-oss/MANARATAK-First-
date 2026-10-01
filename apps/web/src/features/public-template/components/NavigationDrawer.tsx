@@ -64,6 +64,11 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
       icon: <ListChecks className="w-4 h-4 text-[var(--mn-accent-text)]" />,
     },
     {
+      id: 'reports',
+      label: 'التقارير الأكاديمية والتدقيق',
+      icon: <Layers className="w-4 h-4 text-[var(--mn-accent-text)]" />,
+    },
+    {
       id: 'ai-tools',
       label: 'أدوات منارتك',
       icon: <Sparkles className="w-4 h-4 text-[var(--mn-accent-text)]" />,

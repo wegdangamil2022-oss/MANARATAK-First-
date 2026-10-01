@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, Search, Heart, Sparkles, Bell } from 'lucide-react';
 
-export type TabType = 'home' | 'search' | 'favorites' | 'ai-tools' | 'tracker' | 'auth' | 'account' | 'more' | 'notifications';
+export type TabType = 'home' | 'search' | 'favorites' | 'ai-tools' | 'tracker' | 'auth' | 'account' | 'more' | 'notifications' | 'reports';
 
 interface BottomNavBarProps {
   activeTab: TabType;

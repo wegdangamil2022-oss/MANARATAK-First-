@@ -39,3 +39,15 @@ Source evidence is reported with the delivery commit/check results. Relevant beh
 **RUNTIME_UNTESTED:** connected database owner assignments and audit records, real browser cookie persistence inside Google AI Studio, authenticated CSRF/refresh/retry across real sessions, and production worker shutdown/telemetry under load. Test these in the authorized connected environment without sharing credentials in chat.
 
 No database connection, migration, seed, import, deployment, dependency download, or Google AI Studio access was performed for these repairs.
+
+## Integration with main f24ab4d
+
+The later Academic Reports commit reverted tested M10 pagination, typed geography validation, short token lifetime, controlled verified-owner bootstrap, role audit, migration metadata and Studio launcher contracts. These contracts and their tests are restored from the previously verified 4696774, while retaining the new report feature and reference source files.
+
+- The additional navigation facade delegates to the canonical permission catalog, rejects malformed paths and applies the most specific section permission. Staff without dashboard permission cannot loop back to the dashboard.
+- The new direct owner-promotion script is retired: no identity or email literal can grant administration outside the controlled bootstrap workflow. Its fail-closed behavior is covered by the retired-tool execution test.
+- Academic Reports uses semantic theme tokens and native progress elements compatible with the existing CSP. Static examples are labeled and restricted to prototype mode; API mode shows an unavailable report instead of claiming database statistics.
+- New currency/language seed scripts are explicitly classified after checking their hash/review and mutation gates. They were not executed.
+- W2 now checks the current governed source contracts instead of assuming historic missing datasets. Source inspection is pure and separately tested against missing files, hash mismatches, missing READY contracts and explicit blockers. The orchestrator checks approval before even requesting migration status.
+
+Local integration evidence: 413 Vitest files passed, 3 skipped; 2,163 Vitest tests passed, 7 skipped. The new report/navigation suites contribute 8 passing tests. The pure seed-inspection suite has 7 passing Node tests. TypeScript (including Vercel contexts) has zero diagnostics; Web, Admin and API production builds passed. Subsequent GitHub checks are the delivery evidence for the final commit. No connected runtime success is claimed.

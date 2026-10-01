@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Globe, HelpCircle, Mail } from 'lucide-react';
+import { ArrowRight, Globe, HelpCircle, Mail, ShieldCheck } from 'lucide-react';
 
 const questions = [
   ['كيف أجد فرصة تناسبني؟', 'ابدأ بالبحث العام أو اختر قسم المنح أو الجامعات أو التخصصات. استخدم الفلاتر ثم راجع متطلبات الفرصة ورابطها الرسمي.'],
@@ -25,7 +25,13 @@ export function PublicInfoPage({page, onBack, onServices}: {page: 'faq' | 'conta
       </section> : <section className="mn-panel rounded-2xl p-4 border border-[var(--mn-border)] bg-[var(--mn-surface)]">
         <h2 className="font-bold">قنوات التواصل والوكلاء</h2>
         <p className="mt-3 text-sm leading-7 text-[var(--mn-text-muted)]">لم تُربط بيانات التواصل والوكلاء المعتمدة بهذه النسخة بعد. لن نعرض أرقامًا أو عناوين غير مؤكدة.</p>
-        <button onClick={onServices} className="mt-4 rounded-xl px-4 py-3 bg-[var(--mn-primary)] text-white font-bold text-sm mn-inverse">استكشف خدمات منارتك</button>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button onClick={onServices} className="rounded-xl px-4 py-3 bg-[var(--mn-primary)] text-white font-bold text-sm mn-inverse">استكشف خدمات منارتك</button>
+          <a href="/admin/login" className="rounded-xl px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center gap-2 transition-colors">
+            <ShieldCheck className="w-4 h-4 text-teal-400" />
+            <span>دخول بوابة الإدارة</span>
+          </a>
+        </div>
       </section>}
     </div>
   </div>;
