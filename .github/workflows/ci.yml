@@ -83,7 +83,7 @@ jobs:
       - name: Build deterministic immutable release artifacts
         run: npm run release:artifacts && npm run release:verify
       - name: Upload immutable release artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4 immutable snapshot
         with:
           name: manaratak-release-artifacts-${{ github.sha }}
           path: release-artifacts
@@ -91,7 +91,7 @@ jobs:
       - name: Write P12 source CI evidence
         run: npm run ci:source:evidence
       - name: Upload P12 source CI evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4 immutable snapshot
         with:
           name: p12-full-source-ci-closure
           path: p12-ci-evidence/SOURCE_CI_CLOSURE.json

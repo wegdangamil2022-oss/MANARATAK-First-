@@ -95,7 +95,7 @@ jobs:
           printf '{"version":1,"kind":"ci-closure","gitSha":"%s","pass":true,"detail":"prisma validate/generate, typecheck, lint, build, unit, security, parser-memory, and production dependency audit passed; DB/E2E/runtime intentionally deferred to Google Studio"}\n' "$(git rev-parse HEAD)" > wp-ic-10-results/CI_CLOSURE.json
       - name: Aggregate pre-Google-Studio status
         run: node scripts/wp-ic-10-runtime-closure.mjs finalize --phase source --results-dir wp-ic-10-results
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4 immutable snapshot
         if: always()
         with:
           name: wpic10-source-closure

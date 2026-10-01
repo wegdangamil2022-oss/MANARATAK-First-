@@ -54,12 +54,12 @@ jobs:
           MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
           MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
         run: npm run release:smoke -- validation
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4 immutable snapshot
         with:
           name: immutable-release-${{ env.SOURCE_SHA }}
           path: release-artifacts
           if-no-files-found: error
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4 immutable snapshot
         with:
           name: validation-evidence-${{ env.SOURCE_SHA }}
           path: release-evidence
@@ -92,7 +92,7 @@ jobs:
           MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
           MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
         run: npm run release:smoke -- staging
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4 immutable snapshot
         with:
           name: staging-evidence-${{ env.SOURCE_SHA }}
           path: release-evidence
@@ -128,7 +128,7 @@ jobs:
           MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
           MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
         run: npm run release:smoke -- production
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4 immutable snapshot
         with:
           name: production-evidence-${{ env.SOURCE_SHA }}
           path: release-evidence
