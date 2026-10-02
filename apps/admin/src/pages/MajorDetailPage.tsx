@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
+import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
 import { ArrowLeft, BookOpen, CheckCircle2, ExternalLink, FileText, GitBranch, Layers3, Link2, Loader2, XCircle } from 'lucide-react';
 
 interface MajorDetail {
@@ -358,6 +359,7 @@ export function MajorDetailPage() {
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 text-lg font-black">خرائط التصنيف</h2>
+            <ReviewedGraphEditor key={major.id} ownerId={major.id} ownerStatus={major.status ?? ''} domain="MAJOR" profiles={profiles} onSaved={loadMajor} />
             <div className="grid gap-3">
               {mappings.length === 0 ? <p className="text-sm text-slate-500">لا توجد خرائط تصنيف محفوظة.</p> : mappings.map((mapping) => (
                 <div key={mapping.id ?? mapping.taxonomyNodeId} className="rounded-lg bg-slate-50 p-3">

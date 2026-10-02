@@ -11,6 +11,7 @@ export class MajorPublicRouter {
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
 
     const listQuerySchema = z.object({
+      taxonomyNodeId: z.string().uuid().optional(),
       degreeLevel: z.string().optional(),
       academicFieldOrDiscipline: z.string().optional(),
       collegeOrFaculty: z.string().optional(),

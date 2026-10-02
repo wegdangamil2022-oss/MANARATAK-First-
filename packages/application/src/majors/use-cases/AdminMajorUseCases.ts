@@ -6,6 +6,7 @@ import {
   ITransactionalNewMajorCandidateRepository,
   MajorAliasDto,
   MajorClassificationMappingDto,
+  ReviewedMajorClassificationInput,
   MajorContentSectionDto,
   MajorDeduplicationService,
   MajorCompletenessClassifier,
@@ -65,7 +66,7 @@ export class AdminMajorUseCases {
   ) {}
 
   public async listMajors(filters: MajorFilters & { catalog?: string }): Promise<PaginatedMajorResult<any>> {
-    if (this.catalogRepository && filters.catalog !== 'false') {
+    if (this.catalogRepository && filters.catalog !== 'false' && !filters.taxonomyNodeId) {
       return this.catalogRepository.listCatalog(filters);
     }
     return this.repository.list(filters);
@@ -338,6 +339,18 @@ export class AdminMajorUseCases {
     }));
   }
 
+  public async addClassificationMapping(id: string, input: ReviewedMajorClassificationInput, context?: AtomicMutationRequestContext): Promise<MajorClassificationMappingDto> {
+    this.assertMutableCanonicalMajorId(id);
+    if (!context?.actorId || !this.atomicMutations) throw new Error('MAJOR_GRAPH_AUDITED_ACTOR_REQUIRED');
+    if (!input.reason.trim() || !input.evidenceReference.trim()) throw new Error('MAJOR_GRAPH_REVIEW_EVIDENCE_REQUIRED');
+    return this.mutate('MAJOR_CLASSIFICATION_MAPPING_ADDED', id, context, repository => {
+      if (!repository.addReviewedClassificationMapping) throw new Error('MAJOR_GRAPH_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+      return repository.addReviewedClassificationMapping(id, {
+        ...input, reason: input.reason.trim(), evidenceReference: input.evidenceReference.trim(),
+      });
+    }, { taxonomyNodeId: input.taxonomyNodeId, profileId: input.profileId, relationshipType: input.relationshipType, reason: input.reason, evidenceReference: input.evidenceReference });
+  }
+
   public async markReadyToReview(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     this.assertMutableCanonicalMajorId(id);
     const existing = await this.getMajor(id);
@@ -488,11 +501,11 @@ export class AdminMajorUseCases {
     );
   }
 
-  private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined, mutation: (repository: IMajorRepository) => Promise<T>): Promise<T> {
+  private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined, mutation: (repository: IMajorRepository) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {
     if (!this.atomicMutations) return mutation(this.repository);
     const repository = this.repository as Partial<ITransactionalMajorRepository>;
     if (!repository.withTransaction) throw new Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    return this.atomicMutations.execute({ domain: 'MAJORS', aggregateType: 'MAJOR', aggregateId: id, action, context },
+    return this.atomicMutations.execute({ domain: 'MAJORS', aggregateType: 'MAJOR', aggregateId: id, action, context, auditMetadata },
       transaction => mutation(repository.withTransaction!(transaction)));
   }
 

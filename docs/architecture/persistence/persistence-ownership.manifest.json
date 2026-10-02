@@ -288,6 +288,9 @@
     "packages/infrastructure/src/authorization/": "identity"
   },
   "approvedCrossContextReadModels": {
+    "packages/infrastructure/src/majors/PrismaMajorRepository.ts": [
+      "academic_taxonomy"
+    ],
     "packages/infrastructure/src/courses/PrismaCourseImportTransferGateway.ts": [
       "import"
     ],

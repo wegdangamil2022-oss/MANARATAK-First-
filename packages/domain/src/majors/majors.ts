@@ -67,6 +67,14 @@ export interface MajorClassificationMappingDto {
   metadata?: Record<string, unknown>;
 }
 
+export interface ReviewedMajorClassificationInput {
+  taxonomyNodeId: string;
+  profileId?: string;
+  relationshipType: MajorClassificationMappingDto['relationshipType'];
+  reason: string;
+  evidenceReference: string;
+}
+
 export interface MajorRelationshipDto {
   id?: string;
   sourceMajorId?: string;
@@ -392,6 +400,7 @@ export class MajorPhaseLinkingService {
 }
 
 export interface MajorFilters {
+  taxonomyNodeId?: string;
   status?: MajorLifecycleStatus;
   completenessStatus?: MajorImportCompletenessState;
   degreeLevel?: string;
@@ -446,6 +455,8 @@ export interface TaxonomyMappedMajorDto {
 }
 
 export interface IMajorRepository {
+  /** Requires an active audited transaction; locks the owner before validating and writing. */
+  addReviewedClassificationMapping?(majorId: string, input: ReviewedMajorClassificationInput): Promise<MajorClassificationMappingDto>;
   create(data: Omit<MajorDto, 'id' | 'createdAt' | 'updatedAt'> & Partial<Pick<MajorDto, 'id' | 'createdAt' | 'updatedAt'>>): Promise<MajorDto>;
   update(id: string, updates: UpdateMajorDto): Promise<MajorDto>;
   findById(id: string): Promise<MajorDto | null>;

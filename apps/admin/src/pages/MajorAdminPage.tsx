@@ -4,6 +4,8 @@ import { adminApiClient } from '../api/client';
 import { AlertCircle, BookOpen, CheckCircle2, Eye, Filter, GraduationCap, Layers3, Loader2, Search } from 'lucide-react';
 import { useTranslation } from "../i18n/I18nProvider";
 import { NewMajorCandidatesPanel } from '../components/NewMajorCandidatesPanel';
+import { CanonicalPicker } from '../components/CanonicalPicker';
+import { canonicalPickerApi } from '../api/canonicalPickers';
 
 type MajorStatus = 'IMPORTED' | 'READY_TO_REVIEW' | 'READY_TO_PUBLISH' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED' | string;
 type MajorCompletenessStatus = 'INCOMPLETE' | 'NEEDS_REVIEW' | 'COMPLETE' | string;
@@ -107,6 +109,7 @@ export function MajorAdminPage() {
   const [completenessFilter, setCompletenessFilter] = useState('');
   const [degreeFilter, setDegreeFilter] = useState('');
   const [taxonomyIdFilter, setTaxonomyIdFilter] = useState('');
+  const [taxonomySearch, setTaxonomySearch] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
@@ -129,7 +132,7 @@ export function MajorAdminPage() {
         if (statusFilter) params.append('status', statusFilter);
         if (completenessFilter) params.append('completenessStatus', completenessFilter);
         if (degreeFilter) params.append('degreeLevel', degreeFilter);
-        if (taxonomyIdFilter) params.append('academicFieldId', taxonomyIdFilter);
+        if (taxonomyIdFilter) params.append('taxonomyNodeId', taxonomyIdFilter);
         if (search.trim()) params.append('search', search.trim());
         const response = await adminApiClient.request<PaginatedResponse>(`/admin/majors?${params.toString()}`, { signal: controller.signal });
         setData(response);
@@ -218,7 +221,10 @@ export function MajorAdminPage() {
             <option value="">كل حالات الاكتمال</option>
             {completenessOptions.map((status) => <option key={status} value={status}>{formatLabel(status)}</option>)}
           </select>
-          <input value={taxonomyIdFilter} onChange={resetAndSet(setTaxonomyIdFilter)} className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-[#21A7B4]" placeholder="المجال الأكاديمي" />
+          <div className="space-y-1">
+            <label className="block text-xs">بحث التصنيف<input value={taxonomySearch} maxLength={200} onChange={event => setTaxonomySearch(event.target.value)} className="block w-full rounded border p-2" /></label>
+            <CanonicalPicker label="فلتر التصنيف المعياري" optional value={taxonomyIdFilter} onChange={id => { setTaxonomyIdFilter(id ?? ''); setPage(1); }} load={() => canonicalPickerApi.taxonomyNodes(undefined, taxonomySearch)} reloadKey={taxonomySearch} />
+          </div>
         </div>
       </section>
 

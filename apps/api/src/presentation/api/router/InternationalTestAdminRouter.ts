@@ -201,6 +201,17 @@ export class InternationalTestAdminRouter {
     }).strict();
     const emptyMutationBody = z.object({}).strict();
 
+    const canonicalRelationshipSchema = z.object({
+      kind: z.enum(['COUNTRY', 'LANGUAGE', 'TAXONOMY', 'DEGREE']), referenceId: z.string().uuid(),
+      relationshipType: z.string().trim().min(1).max(120), reason: z.string().trim().min(1).max(2000),
+      evidenceReference: z.string().trim().min(1).max(500),
+    }).strict();
+    router.post('/:id/canonical-relationships', asyncHandler(async (req, res) => {
+      const id = z.string().uuid().parse(req.params.id);
+      await internationalTestAdminUseCases.addCanonicalRelationship(id, canonicalRelationshipSchema.parse(req.body), mutationContext(req));
+      res.status(201).json({ success: true });
+    }));
+
     router.get('/', asyncHandler(async (req: Request, res: Response) => {
       const parsed = querySchema.parse(req.query);
       const { testCategory, completenessStatus, ...filters } = parsed;

@@ -26,6 +26,7 @@ export class MajorAdminRouter {
     };
 
     const listQuerySchema = z.object({
+      taxonomyNodeId: z.string().uuid().optional(),
       status: z.nativeEnum(MajorStatus).optional(),
       completenessStatus: z.nativeEnum(MajorImportCompletenessState).optional(),
       degreeLevel: z.string().optional(),
@@ -62,6 +63,18 @@ export class MajorAdminRouter {
     const linkNewCandidateBodySchema = z.object({
       majorId: z.string().min(1),
     }).strict();
+
+    const classificationMappingSchema = z.object({
+      taxonomyNodeId: z.string().uuid(), profileId: z.string().uuid().optional(),
+      relationshipType: z.enum(['PRIMARY', 'SECONDARY', 'RELATED', 'LEGACY']),
+      reason: z.string().trim().min(1).max(2000), evidenceReference: z.string().trim().min(1).max(500),
+    }).strict();
+
+    router.post('/:id/classification-mappings', asyncHandler(async (req, res) => {
+      const id = z.string().uuid().parse(req.params.id);
+      const input = classificationMappingSchema.parse(req.body);
+      res.status(201).json(await adminMajorUseCases.addClassificationMapping(id, input, mutationContext(req)));
+    }));
 
     const updateBodySchema = z.object({
       displayName: z.string().optional(),
