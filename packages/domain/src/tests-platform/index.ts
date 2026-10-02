@@ -4,3 +4,4 @@ export * from './key';
 export * from './repository';
 export * from './validation';
 export * from './tests';
+export * from './score-policy';

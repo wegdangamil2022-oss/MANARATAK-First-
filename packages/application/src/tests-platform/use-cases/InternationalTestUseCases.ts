@@ -1,5 +1,7 @@
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 import {
+  validateInternationalTestScorePolicy,
+  validateInternationalTestSectionScore,
   IInternationalTestRepository,
   ITransactionalInternationalTestRepository,
   InternationalTestDto,
@@ -250,15 +252,16 @@ export class InternationalTestAdminUseCases {
 
   public async upsertSection(testId: string, data: UpsertInternationalTestSectionDto & { id?: string }, context?: AtomicMutationRequestContext): Promise<InternationalTestSectionDto> {
     await this.get(testId);
+    const issues = validateInternationalTestSectionScore(data);
+    if (issues.length) throw new Error(`Invalid section scores: ${issues.map(issue => issue.message).join('; ')}`);
     if (!this.repository.upsertSection) throw new Error('Repository method upsertSection not implemented');
     return this.mutate('INTERNATIONAL_TEST_SECTION_UPSERTED', testId, context, repository => repository.upsertSection!(testId, data));
   }
 
   public async upsertScoreScale(testId: string, data: UpsertInternationalTestScoreScaleDto, context?: AtomicMutationRequestContext): Promise<InternationalTestScoreScaleDto> {
     await this.get(testId);
-    if (data.overallMinimum > data.overallMaximum) {
-      throw new Error('Invalid score scale: overallMinimum cannot be greater than overallMaximum');
-    }
+    const issues = validateInternationalTestScorePolicy(data);
+    if (issues.length) throw new Error(`Invalid score scale: ${issues.map(issue => issue.message).join('; ')}`);
     if (!this.repository.upsertScoreScale) throw new Error('Repository method upsertScoreScale not implemented');
     return this.mutate('INTERNATIONAL_TEST_SCORE_SCALE_UPSERTED', testId, context, repository => repository.upsertScoreScale!(testId, data));
   }

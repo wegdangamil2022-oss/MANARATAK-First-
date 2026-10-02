@@ -5,6 +5,7 @@ import {
 import { InternationalTestDto } from './contracts';
 import { InternationalTestStatus, InternationalTestValidationSeverity } from './enums';
 import { IInternationalTestValidationService, InternationalTestValidationService } from './validation';
+import { validateInternationalTestScorePolicy, validateInternationalTestSectionScore } from './score-policy';
 
 export class InternationalTestPublicationReadinessPolicy implements PublicationReadinessPolicy<InternationalTestDto> {
   public readonly domain = 'INTERNATIONAL_TESTS';
@@ -44,6 +45,8 @@ export class InternationalTestPublicationReadinessPolicy implements PublicationR
       blockingIssues.push({ code: 'INTERNATIONAL_TEST_SOURCE_NOT_VERIFIED', message: 'Source identity must be verified before publication', field: 'isSourceVerified' });
     }
     const scoreScale = entity.scoreScale;
+    if (scoreScale) for (const issue of validateInternationalTestScorePolicy(scoreScale)) blockingIssues.push({ code: 'INTERNATIONAL_TEST_SCORE_POLICY_INVALID', ...issue });
+    for (const [index, section] of (entity.sections ?? []).entries()) for (const issue of validateInternationalTestSectionScore(section)) blockingIssues.push({ code: 'INTERNATIONAL_TEST_SECTION_SCORE_POLICY_INVALID', message: issue.message, field: `sections.${index}.${issue.field}` });
     if (!scoreScale || !Number.isFinite(scoreScale.overallMinimum) || !Number.isFinite(scoreScale.overallMaximum) || scoreScale.overallMinimum > scoreScale.overallMaximum) {
       blockingIssues.push({
         code: 'INTERNATIONAL_TEST_NORMALIZED_SCORE_SCALE_REQUIRED',
