@@ -100,6 +100,49 @@ export class InternationalTestAdminUseCases {
     return this.mutate('INTERNATIONAL_TEST_UPDATED', id, context, repository => repository.update(id, canonicalData));
   }
 
+  public async addCanonicalRelationship(id: string, input: {
+    kind: 'COUNTRY' | 'LANGUAGE' | 'TAXONOMY' | 'DEGREE'; referenceId: string;
+    relationshipType: string; reason: string; evidenceReference: string;
+  }, context?: AtomicMutationRequestContext): Promise<void> {
+    if (!this.atomicMutations || !context?.actorId) throw new Error('INTERNATIONAL_TEST_GRAPH_AUDITED_ACTOR_REQUIRED');
+    if (!input.reason.trim() || !input.evidenceReference.trim() || !input.relationshipType.trim()) throw new Error('INTERNATIONAL_TEST_GRAPH_REVIEW_REQUIRED');
+    await this.mutate('INTERNATIONAL_TEST_CANONICAL_RELATIONSHIP_ADDED', id, context, async repository => {
+      if (!repository.acquireGraphMutationLock) throw new Error('INTERNATIONAL_TEST_GRAPH_TRANSACTION_REQUIRED');
+      await repository.acquireGraphMutationLock(id, input.kind, input.referenceId);
+      const test = await repository.findById(id);
+      if (!test || test.id !== id) throw new Error('INTERNATIONAL_TEST_GRAPH_OWNER_NOT_FOUND');
+      if (['PUBLISHED', 'ARCHIVED', 'SUPERSEDED', 'REJECTED', 'MERGED'].includes(test.status)) throw new Error('INTERNATIONAL_TEST_GRAPH_OWNER_IMMUTABLE');
+      const common = { relationshipType: input.relationshipType.trim(), notes: input.reason.trim(), metadata: { source: 'ADMIN_REVIEW', evidenceReference: input.evidenceReference.trim() } };
+      const duplicate = <T extends { relationshipType: string }>(relationships: T[] | undefined, reference: (item: T) => string | undefined) => {
+        if (relationships?.some(item => reference(item) === input.referenceId && item.relationshipType === common.relationshipType)) throw new Error('INTERNATIONAL_TEST_GRAPH_DUPLICATE_RELATIONSHIP');
+      };
+      if (input.kind === 'COUNTRY' || input.kind === 'LANGUAGE') {
+        const country = input.kind === 'COUNTRY';
+        const relationships = country ? test.countryRelationships : test.languageRelationships;
+        duplicate(relationships, item => item.canonicalReferenceId);
+        const data = { canonicalReferenceId: input.referenceId, ...common };
+        const resolved = await this.canonicalRelationshipService.canonicalize(country ? { countryRelationships: [data] } : { languageRelationships: [data] });
+        if (country) {
+          if (!repository.upsertCountryRelationship) throw new Error('COUNTRY_RELATIONSHIP_WRITER_REQUIRED');
+          await repository.upsertCountryRelationship(id, resolved.countryRelationships![0]);
+        } else {
+          if (!repository.upsertLanguageRelationship) throw new Error('LANGUAGE_RELATIONSHIP_WRITER_REQUIRED');
+          await repository.upsertLanguageRelationship(id, resolved.languageRelationships![0]);
+        }
+      } else if (input.kind === 'TAXONOMY') {
+        duplicate(test.academicTaxonomyRelationships, item => item.taxonomyNodeId);
+        const resolved = await this.canonicalRelationshipService.canonicalize({ academicTaxonomyRelationships: [{ taxonomyNodeId: input.referenceId, ...common }] });
+        if (!repository.upsertAcademicTaxonomyRelationship) throw new Error('TAXONOMY_RELATIONSHIP_WRITER_REQUIRED');
+        await repository.upsertAcademicTaxonomyRelationship(id, resolved.academicTaxonomyRelationships![0]);
+      } else {
+        duplicate(test.degreeRelationships, item => item.degreeLevelId);
+        const resolved = await this.canonicalRelationshipService.canonicalize({ degreeRelationships: [{ degreeLevelId: input.referenceId, ...common }] });
+        if (!repository.upsertDegreeRelationship) throw new Error('DEGREE_RELATIONSHIP_WRITER_REQUIRED');
+        await repository.upsertDegreeRelationship(id, resolved.degreeRelationships![0]);
+      }
+    }, { kind: input.kind, referenceId: input.referenceId, relationshipType: input.relationshipType, reason: input.reason, evidenceReference: input.evidenceReference });
+  }
+
   public async upsertTest(data: UpsertInternationalTestDto, context?: AtomicMutationRequestContext): Promise<InternationalTestDto> {
     assertNoTranslationPayloadFields('INTERNATIONAL_TEST', data as unknown as Record<string, unknown>, ['localizedNameAr', 'localizedNameEn']);
     const canonicalData = { ...data, ...(await this.canonicalRelationshipService.canonicalize(data)), ...(await this.canonicalizeProvider(data)) };
@@ -340,11 +383,11 @@ export class InternationalTestAdminUseCases {
     return { providerId: provider.id, providerName: provider.displayName };
   }
 
-  private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined, mutation: (repository: IInternationalTestRepository) => Promise<T>): Promise<T> {
+  private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined, mutation: (repository: IInternationalTestRepository) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {
     if (!this.atomicMutations) return mutation(this.repository);
     const repository = this.repository as Partial<ITransactionalInternationalTestRepository>;
     if (!repository.withTransaction) throw new Error('INTERNATIONAL_TEST_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    return this.atomicMutations.execute({ domain: 'INTERNATIONAL_TESTS', aggregateType: 'INTERNATIONAL_TEST', aggregateId: id, action, context },
+    return this.atomicMutations.execute({ domain: 'INTERNATIONAL_TESTS', aggregateType: 'INTERNATIONAL_TEST', aggregateId: id, action, context, auditMetadata },
       transaction => mutation(repository.withTransaction!(transaction)));
   }
 }

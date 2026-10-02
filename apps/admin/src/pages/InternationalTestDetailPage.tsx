@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
+import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
+import { SavedTestCanonicalRelationships } from '../components/SavedTestCanonicalRelationships';
+import type { InternationalTestDto } from '@manaratak/domain';
 import {
   ArrowRight,
   ArrowLeft,
@@ -73,7 +76,7 @@ interface OfficialLink {
   description?: string;
 }
 
-interface InternationalTestDetail {
+interface InternationalTestDetail extends Pick<InternationalTestDto, 'countryRelationships' | 'languageRelationships' | 'academicTaxonomyRelationships' | 'degreeRelationships'> {
   id: string;
   publicId?: string;
   slug?: string;
@@ -315,7 +318,11 @@ export function InternationalTestDetailPage() {
           <RequirementsTab test={test} isRtl={isRtl} />
         )}
         {activeTab === 'cross_phase' && (
-          <CrossPhaseTab testId={test.id} isRtl={isRtl} />
+          <div className="space-y-4">
+            <ReviewedGraphEditor key={test.id} ownerId={test.id} ownerStatus={test.status} domain="TEST" isRtl={isRtl} onSaved={fetchDetail} />
+            <SavedTestCanonicalRelationships test={test} isRtl={isRtl} />
+            <CrossPhaseTab testId={test.id} isRtl={isRtl} />
+          </div>
         )}
         {activeTab === 'variants' && (
           <VariantsTab testId={test.id} initialVariants={test.variants || []} onRefresh={fetchDetail} isRtl={isRtl} />
