@@ -33,6 +33,8 @@
     "reference:geography:dry-run": "tsx scripts/dry-run-reference-geography.ts",
     "datasets:sources:verify": "tsx scripts/import/verify-dataset-sources.ts",
     "imports:qc:prepare": "tsx scripts/import/source-quality.ts prepare",
+    "pilot:m10:template": "tsx scripts/import/m10-pilot-evidence.ts template",
+    "pilot:m10:inspect": "tsx scripts/import/m10-pilot-evidence.ts inspect",
     "imports:qc:verify": "tsx scripts/import/source-quality.ts check",
     "imports:qc:test": "vitest run tests/import-sources/SourceQuality.spec.ts tests/import-sources/SourceQualityPreparation.spec.ts packages/application/tests/courses/CourseSourcePublicationGate.spec.ts packages/domain/tests/universities/UniversityPublicationReadinessPolicy.spec.ts",
     "courses:sources:prepare": "tsx scripts/import/prepare-course-master-source.ts",

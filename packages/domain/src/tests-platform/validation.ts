@@ -5,6 +5,7 @@ import {
   InternationalTestValidationSeverity 
 } from './enums';
 import { InternationalTestDeterministicKey } from './key';
+import { validateInternationalTestScorePolicy, validateInternationalTestSectionScore } from './score-policy';
 
 export interface InternationalTestValidationIssue {
   field: string;
@@ -41,6 +42,8 @@ export interface RawTestInput {
     scoreMinimum?: number;
     overallMaximum?: number;
     scoreMaximum?: number;
+    scoreIncrement?: number;
+    resultValidityDurationMonths?: number;
   };
   sections?: Array<{ scoreMinimum?: number; scoreMaximum?: number }>;
   fees?: Array<{ amount?: number; currencyCode?: string }> | { amount?: number; currencyCode?: string };
@@ -164,6 +167,7 @@ export class InternationalTestValidationService implements IInternationalTestVal
           severity: InternationalTestValidationSeverity.ERROR
         });
       } else {
+        for (const issue of validateInternationalTestScorePolicy({ overallMinimum: Number(min), overallMaximum: Number(max), scoreIncrement: scale.scoreIncrement === undefined ? undefined : Number(scale.scoreIncrement), resultValidityDurationMonths: scale.resultValidityDurationMonths === undefined ? undefined : Number(scale.resultValidityDurationMonths) })) issues.push({ ...issue, severity: InternationalTestValidationSeverity.ERROR });
         presentFields.push('scoreScale');
       }
     } else {
@@ -179,13 +183,7 @@ export class InternationalTestValidationService implements IInternationalTestVal
     if (Array.isArray(payload.sections)) {
       for (let i = 0; i < payload.sections.length; i++) {
         const sec = payload.sections[i];
-        if (sec && sec.scoreMinimum !== undefined && sec.scoreMaximum !== undefined && Number(sec.scoreMinimum) > Number(sec.scoreMaximum)) {
-          issues.push({
-            field: `sections[${i}].scoreMinimum`,
-            message: 'Section score minimum cannot exceed maximum',
-            severity: InternationalTestValidationSeverity.ERROR
-          });
-        }
+        if (sec) for (const issue of validateInternationalTestSectionScore({ scoreMinimum: sec.scoreMinimum === undefined ? undefined : Number(sec.scoreMinimum), scoreMaximum: sec.scoreMaximum === undefined ? undefined : Number(sec.scoreMaximum) })) issues.push({ field: `sections[${i}].${issue.field}`, message: issue.message, severity: InternationalTestValidationSeverity.ERROR });
       }
     }
 
