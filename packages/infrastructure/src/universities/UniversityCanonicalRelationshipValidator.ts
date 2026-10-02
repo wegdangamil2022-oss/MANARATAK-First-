@@ -14,13 +14,7 @@ export class UniversityCanonicalRelationshipValidator {
     for (const program of details.academicPrograms ?? []) {
       if (!program.degreeLevelId) throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_REQUIRED');
       await this.validateProgram(program.degreeLevelId, program.majorId, program.majorMappingState);
-      for (const requirement of program.admissionRequirements ?? []) {
-        await this.validateTest(
-          requirement.internationalTestId,
-          requirement.testVariantId,
-          requirement.testVersionId,
-        );
-      }
+      await this.validateAdmissionRequirements(program.admissionRequirements ?? []);
     }
   }
 
@@ -88,16 +82,25 @@ export class UniversityCanonicalRelationshipValidator {
       if (campuses.length !== campusIds.length) throw new Error('UNIVERSITY_PROGRAM_CAMPUS_NOT_FOUND');
     }
 
+    await this.validateAdmissionRequirements(input.admissionRequirements ?? []);
+  }
+
+  private async validateAdmissionRequirements(
+    requirements: NonNullable<UniversityAcademicProgramAuthoringInput['admissionRequirements']>,
+  ): Promise<void> {
     const requirementKeys = new Set<string>();
-    for (const requirement of input.admissionRequirements ?? []) {
+    for (const requirement of requirements) {
+      if (requirement.minimumScore != null && !Number.isFinite(requirement.minimumScore)) {
+        throw new Error('UNIVERSITY_ADMISSION_TEST_MINIMUM_SCORE_INVALID');
+      }
+      const key = JSON.stringify([requirement.internationalTestId, requirement.testVariantId ?? null, requirement.testVersionId ?? null]);
+      if (requirementKeys.has(key)) throw new Error('UNIVERSITY_ADMISSION_TEST_REQUIREMENT_DUPLICATE');
+      requirementKeys.add(key);
       await this.validateTest(
         requirement.internationalTestId,
         requirement.testVariantId ?? undefined,
         requirement.testVersionId ?? undefined,
       );
-      const key = [requirement.internationalTestId, requirement.testVariantId ?? '', requirement.testVersionId ?? ''].join('|');
-      if (requirementKeys.has(key)) throw new Error('UNIVERSITY_ADMISSION_TEST_REQUIREMENT_DUPLICATE');
-      requirementKeys.add(key);
     }
   }
 
@@ -112,7 +115,10 @@ export class UniversityCanonicalRelationshipValidator {
     });
     if (!degree) throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_NOT_FOUND');
     if (degree.status !== 'ACTIVE') throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_NOT_ACTIVE');
-    if (!majorId) return;
+    if (!majorId) {
+      if (mappingState === 'CANONICALLY_MAPPED') throw new Error('UNIVERSITY_PROGRAM_MAJOR_REFERENCE_REQUIRED');
+      return;
+    }
     const major = await this.client.major.findUnique({
       where: { id: majorId },
       select: { id: true, status: true },
