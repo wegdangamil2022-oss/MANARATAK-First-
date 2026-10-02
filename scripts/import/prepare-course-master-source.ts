@@ -2,14 +2,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { CourseMasterArtifactParser } from '../../packages/application/src/courses/parsers/CourseMasterArtifactParser';
 import { IMPORTED_COURSE_MASTER_COLUMNS } from '@manaratak/domain';
-import { createHash } from 'node:crypto';
-import { projectReviewedCourseSources, type CourseSourceRow } from './CourseSourceQuality';
 
+type CourseRow = Awaited<ReturnType<typeof CourseMasterArtifactParser.parse>>['rows'][number]['row'];
 type CourseSource = { datasetId: string; entityType: string; sourcePath: string; importOrder: number };
 const root = process.cwd();
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'workspace/import-sources/dataset-manifest.json'), 'utf8')) as { datasets: CourseSource[] };
 const sources = manifest.datasets.filter(item => item.entityType === 'COURSE').sort((a, b) => a.importOrder - b.importOrder);
-const input: CourseSourceRow[] = [];
+const byUrl = new Map<string, string>();
+const byName = new Map<string, string>();
+const projected: CourseRow[] = [];
+const decisions: Array<{ source: string; row: number; action: string; matches?: string }> = [];
+const key = (value: string) => value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en');
+const urlKey = (value: string) => {
+  const url = new URL(value.trim());
+  if (!['http:', 'https:'].includes(url.protocol)) throw new Error(`COURSE_DIRECT_URL_INVALID:${value}`);
+  url.hash = '';
+  return `${url.protocol}//${url.host.toLowerCase()}${url.pathname.replace(/\/$/, '')}${url.search}`;
+};
 
 for (const source of sources) {
   const absolutePath = path.resolve(root, source.sourcePath);
@@ -19,11 +28,35 @@ for (const source of sources) {
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', declaredByteSize: bytes.byteLength,
   });
   if (parsed.issues.some(issue => issue.severity === 'ERROR')) throw new Error(`COURSE_SOURCE_STRUCTURE_INVALID:${source.datasetId}`);
-  const artifactHash = createHash('sha256').update(bytes).digest('hex');
-  input.push(...parsed.rows.map(item => ({ datasetId: source.datasetId, artifactHash, sourceRowNumber: item.sourceRowNumber, row: item.row })));
+  for (const item of parsed.rows) {
+    const original = item.row;
+    const sourceRef = `${source.datasetId}#${item.sourceRowNumber}`;
+    const directUrl = urlKey(original.directCourseUrl);
+    const previousUrl = byUrl.get(directUrl);
+    if (previousUrl) {
+      decisions.push({ source: source.datasetId, row: item.sourceRowNumber, action: 'SKIP_DUPLICATE_URL', matches: previousUrl });
+      continue;
+    }
+    const row = { ...original };
+    let name = `${key(row.providerLabel)}\u0000${key(row.courseName)}`;
+    const previousName = byName.get(name);
+    if (previousName) {
+      // These two official POK URLs are distinct Italian and English editions of one titled course.
+      const isEnglishEdition = source.datasetId === 'courses-master-2-2026-09-23'
+        && item.sourceRowNumber === 2129
+        && directUrl === 'https://www.pok.polimi.it/course/view.php?id=204'
+        && key(row.languageRaw) === 'english';
+      if (!isEnglishEdition) throw new Error(`COURSE_PLATFORM_NAME_COLLISION:${sourceRef}:${previousName}`);
+      row.courseName = `${row.courseName} (English)`;
+      name = `${key(row.providerLabel)}\u0000${key(row.courseName)}`;
+      if (byName.has(name)) throw new Error(`COURSE_PLATFORM_NAME_COLLISION:${sourceRef}`);
+      decisions.push({ source: source.datasetId, row: item.sourceRowNumber, action: 'DISTINGUISH_ENGLISH_EDITION', matches: previousName });
+    }
+    byUrl.set(directUrl, sourceRef);
+    byName.set(name, sourceRef);
+    projected.push(row);
+  }
 }
-const result = projectReviewedCourseSources(input);
-const projected = result.projected.map(item => item.row);
 
 const outputIndex = process.argv.indexOf('--output');
 if (outputIndex >= 0) {
@@ -45,5 +78,6 @@ if (outputIndex >= 0) {
   fs.writeFileSync(path.resolve(outputPath), csvBytes);
 }
 console.log(JSON.stringify({ mode: outputIndex >= 0 ? 'SOURCE_CSV_WRITTEN' : 'SOURCE_CHECK',
-  inputRows: result.inputRows, projectedRows: projected.length, distinctUrls: result.distinctUrls,
-  decisions: result.decisions, missingHistory: result.missingHistory, databaseWrites: 0 }, null, 2));
+  inputRows: projected.length + decisions.filter(item => item.action === 'SKIP_DUPLICATE_URL').length,
+  projectedRows: projected.length, distinctUrls: byUrl.size, distinctPlatformNames: byName.size,
+  decisions, databaseWrites: 0 }, null, 2));

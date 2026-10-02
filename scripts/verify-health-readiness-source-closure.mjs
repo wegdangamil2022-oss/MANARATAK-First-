@@ -45,7 +45,7 @@ check('production Redis is registered required by composition', app.includes("na
 check('required Redis regression exists in workspace tests', tests.includes('returns DOWN when Redis is explicitly required even though its indicator name is redis'));
 try {
   const { spawnSync } = await import('node:child_process');
-  const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/runtime/monitoring-required-dependency-runtime.test.mjs')], { cwd: root, encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--test', path.join(root, 'tests/runtime/monitoring-required-dependency-runtime.test.mjs')], { cwd: root, encoding: 'utf8' });
   check('required dependency runtime semantics execute', result.status === 0 && /# fail 0/.test(`${result.stdout || ''}\n${result.stderr || ''}`));
 } catch {
   check('required dependency runtime semantics execute', false);

@@ -3916,11 +3916,6 @@ model AdministrativeRegion {
   nameAr             String?
   localName          String?
   regionType         String?
-  isActive           Boolean            @default(true)
-  lifecycleState     String             @default("ACTIVE")
-  versionNumber      Int                @default(1)
-  effectiveFrom      DateTime           @default(now())
-  effectiveTo        DateTime?
   sourceType         String?
   verificationStatus String?
   metadata           Json?
@@ -3935,7 +3930,6 @@ model AdministrativeRegion {
   @@index([countryReferenceId])
   @@index([countryIso2Code])
   @@index([regionCode])
-  @@index([lifecycleState])
 }
 
 // --- Degree Level Foundation (Phase 08) ---

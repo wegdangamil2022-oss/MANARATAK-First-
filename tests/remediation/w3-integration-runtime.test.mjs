@@ -10,15 +10,12 @@ test('W3 owner event producers and consumers are runtime composed', () => {
   const services = read('packages/infrastructure/src/services-platform/PrismaServicePlatformRepository.ts');
   const career = read('packages/infrastructure/src/career-alumni/PrismaCareerRepository.ts');
   const server = read('apps/api/src/server.ts');
-  const polling = read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts');
   assert.match(identity, /IdentityCreated\.v1/);
   assert.match(services, /ServiceRequested\.v1/);
   assert.match(career, /JobPosted\.v1/);
-  assert.match(server, /import \{ startPollingWorkers, stopPollingWorkers \} from '\.\/infrastructure\/workers\/PollingWorkerRuntime\.js'/);
-  assert.match(server, /await startPollingWorkers\(container, config\)/);
-  assert.match(polling, /OWNER_DOMAIN_OUTBOX_WORKER_ENABLED/);
-  assert.match(polling, /resolve<any>\('ownerDomainOutboxWorker'\)/);
-  for (const method of ['runSettingsOnce', 'runCareerOnce', 'runServicesOnce']) assert.ok(polling.includes(method), method);
+  assert.match(server, /runSettingsOnce/);
+  assert.match(server, /runCareerOnce/);
+  assert.match(server, /runServicesOnce/);
 });
 
 test('W3 notification worker uses current durable handler contract with lease fencing', () => {

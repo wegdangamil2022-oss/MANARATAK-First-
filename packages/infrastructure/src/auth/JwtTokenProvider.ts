@@ -17,7 +17,7 @@ export interface JsonWebKeySet {
   readonly keys: readonly Record<string, unknown>[];
 }
 
-const ACCESS_TOKEN_MAX_TTL_SECONDS = 15 * 60;
+const ACCESS_TOKEN_MAX_TTL_SECONDS = 30 * 24 * 60 * 60; // Up to 30 days for persistent sessions
 const REFRESH_TOKEN_BYTES = 32;
 const REFRESH_TOKEN_PREFIX = 'mrt_';
 const REFRESH_TOKEN_PATTERN = /^mrt_[A-Za-z0-9_-]{43}$/;

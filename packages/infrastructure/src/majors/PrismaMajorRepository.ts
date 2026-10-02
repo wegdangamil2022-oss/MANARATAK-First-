@@ -5,7 +5,6 @@ import {
   AtomicPersistenceContext,
   MajorAliasDto,
   MajorClassificationMappingDto,
-  ReviewedMajorClassificationInput,
   MajorContentSectionDto,
   MajorDto,
   MajorFilters,
@@ -57,7 +56,6 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly legacyOptionalFieldFiltersEnabled = false,
-    private readonly transactionBound = false,
   ) {}
 
   withTransaction(context: AtomicPersistenceContext): IMajorRepository {
@@ -66,7 +64,6 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     return new PrismaMajorRepository(
       transactionClient as unknown as PrismaClient,
       this.legacyOptionalFieldFiltersEnabled,
-      true,
     );
   }
 
@@ -231,7 +228,6 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     }
 
     const and: Prisma.MajorWhereInput[] = [];
-    if (filters.taxonomyNodeId) and.push(this.taxonomyGraphFilter(filters.taxonomyNodeId));
     if (filters.degreeLevel) {
       and.push(this.withLegacyOptionalFallback(
         { levelProfiles: { some: { degreeLevel: { is: { canonicalCode: filters.degreeLevel.toUpperCase() as any } } } } },
@@ -280,7 +276,6 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   async listPublished(filters: PublicMajorFilters): Promise<PaginatedMajorResult<MajorDto>> {
     const where: Prisma.MajorWhereInput = { status: MajorStatus.PUBLISHED };
     const and: Prisma.MajorWhereInput[] = [];
-    if (filters.taxonomyNodeId) and.push(this.taxonomyGraphFilter(filters.taxonomyNodeId));
     if (filters.degreeLevel) and.push(this.withLegacyOptionalFallback(
       { levelProfiles: { some: { degreeLevel: { is: { canonicalCode: filters.degreeLevel.toUpperCase() as any } } } } },
       { optionalFields: { path: ['degreeLevel'], equals: filters.degreeLevel } },
@@ -598,36 +593,6 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     return { count: result.count };
   }
 
-  async addReviewedClassificationMapping(majorId: string, input: ReviewedMajorClassificationInput): Promise<MajorClassificationMappingDto> {
-    if (!this.transactionBound) throw new Error('MAJOR_GRAPH_TRANSACTION_REQUIRED');
-    if (!input.reason.trim() || !input.evidenceReference.trim()) throw new Error('MAJOR_GRAPH_REVIEW_EVIDENCE_REQUIRED');
-    await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "Major" WHERE "id" = ${majorId} FOR UPDATE`);
-    const owner = await this.prisma.major.findUnique({ where: { id: majorId }, select: { id: true, status: true } });
-    if (!owner) throw new Error('MAJOR_GRAPH_OWNER_NOT_FOUND');
-    if (['PUBLISHED', 'ARCHIVED', 'REJECTED', 'SUPERSEDED', 'MERGED'].includes(owner.status)) throw new Error('MAJOR_GRAPH_OWNER_IMMUTABLE');
-    if (input.profileId) {
-      await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "MajorLevelProfile" WHERE "id" = ${input.profileId} FOR SHARE`);
-      const profile = await this.prisma.majorLevelProfile.findUnique({ where: { id: input.profileId }, select: { majorId: true, status: true } });
-      if (!profile || profile.majorId !== majorId) throw new Error('MAJOR_GRAPH_FOREIGN_PROFILE_OWNER');
-      if (['PUBLISHED', 'ARCHIVED', 'REJECTED', 'SUPERSEDED', 'MERGED'].includes(profile.status)) throw new Error('MAJOR_GRAPH_OWNER_IMMUTABLE');
-    }
-    await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "AcademicTaxonomyNode" WHERE "id" = ${input.taxonomyNodeId} FOR SHARE`);
-    const node = await this.prisma.academicTaxonomyNode.findUnique({ where: { id: input.taxonomyNodeId }, select: { id: true, status: true, standardType: true, standardCode: true } });
-    if (!node || node.status !== 'ACTIVE') throw new Error('MAJOR_CANONICAL_TAXONOMY_REFERENCE_NOT_ACTIVE');
-    const mappingOwner = { majorId, profileId: input.profileId ?? null };
-    // Imported profile mappings can carry both owners, while older rows can
-    // carry only profileId. Profile identity has the same meaning in either form.
-    const duplicateOwner = input.profileId ? { profileId: input.profileId } : { majorId, profileId: null };
-    const duplicate = await this.prisma.majorClassificationMapping.findFirst({ where: { ...duplicateOwner, taxonomyNodeId: node.id, relationshipType: input.relationshipType } });
-    if (duplicate) throw new Error('MAJOR_GRAPH_DUPLICATE_MAPPING');
-    const record = await this.prisma.majorClassificationMapping.create({ data: {
-      ...mappingOwner, taxonomyNodeId: node.id, relationshipType: input.relationshipType,
-      standardType: node.standardType, standardCode: node.standardCode,
-      notes: input.reason.trim(), metadata: { source: 'ADMIN_REVIEW', evidenceReference: input.evidenceReference.trim() },
-    } });
-    return this.mapClassificationMappingToDto(record);
-  }
-
   async listClassificationMappings(idOrProfileId: string): Promise<MajorClassificationMappingDto[]> {
     const majorId = await this.resolveMajorId(idOrProfileId);
     const records = await this.prisma.majorClassificationMapping.findMany({
@@ -719,17 +684,6 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     legacy: Prisma.MajorWhereInput,
   ): Prisma.MajorWhereInput {
     return this.legacyOptionalFieldFiltersEnabled ? { OR: [canonical, legacy] } : canonical;
-  }
-
-  private taxonomyGraphFilter(taxonomyNodeId: string): Prisma.MajorWhereInput {
-    return { OR: [
-      { academicFieldId: taxonomyNodeId }, { disciplineId: taxonomyNodeId },
-      { classificationMappings: { some: { taxonomyNodeId } } },
-      { levelProfiles: { some: { OR: [
-        { academicFieldId: taxonomyNodeId }, { disciplineId: taxonomyNodeId },
-        { classificationMappings: { some: { taxonomyNodeId } } },
-      ] } } },
-    ] };
   }
 
   private assertHasOwner(majorId: string | undefined, profileId: string | undefined, subject: string): void {

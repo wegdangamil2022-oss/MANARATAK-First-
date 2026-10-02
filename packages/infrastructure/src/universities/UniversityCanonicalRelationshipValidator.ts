@@ -1,20 +1,20 @@
 import { UniversityAcademicProgramAuthoringInput, UniversityNormalizedDetailsUpdate } from '@manaratak/domain';
-import type { PrismaClient } from '@prisma/client';
-
-export type UniversityRelationshipValidationClient = Pick<PrismaClient,
-  'referenceCountry' | 'administrativeRegion' | 'referenceCity' | 'degreeLevel' |
-  'major' | 'majorLevelProfile' | 'internationalTest' | 'internationalTestVariant' |
-  'internationalTestVersion' | 'universityOrganizationUnit' | 'universityCampus'>;
 
 export class UniversityCanonicalRelationshipValidator {
-  constructor(private readonly client: UniversityRelationshipValidationClient) {}
+  constructor(private readonly client: any) {}
 
   async validate(details: UniversityNormalizedDetailsUpdate): Promise<void> {
     for (const campus of details.campuses ?? []) await this.validateCampus(campus);
     for (const program of details.academicPrograms ?? []) {
       if (!program.degreeLevelId) throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_REQUIRED');
       await this.validateProgram(program.degreeLevelId, program.majorId, program.majorMappingState);
-      await this.validateAdmissionRequirements(program.admissionRequirements ?? []);
+      for (const requirement of program.admissionRequirements ?? []) {
+        await this.validateTest(
+          requirement.internationalTestId,
+          requirement.testVariantId,
+          requirement.testVersionId,
+        );
+      }
     }
   }
 
@@ -35,27 +35,24 @@ export class UniversityCanonicalRelationshipValidator {
     const region = input.regionReferenceId
       ? await this.client.administrativeRegion.findUnique({
           where: { id: input.regionReferenceId },
-          select: { countryIso2Code: true, countryReferenceId: true, lifecycleState: true },
+          select: { countryIso2Code: true, isActive: true },
         })
       : null;
     if (input.regionReferenceId && !region) throw new Error('UNIVERSITY_CAMPUS_REGION_NOT_FOUND');
-    if (region && region.lifecycleState !== 'ACTIVE') throw new Error('UNIVERSITY_CAMPUS_REGION_NOT_ACTIVE');
+    if (region?.isActive === false) throw new Error('UNIVERSITY_CAMPUS_REGION_NOT_ACTIVE');
     const city = input.cityReferenceId
       ? await this.client.referenceCity.findUnique({
           where: { id: input.cityReferenceId },
-          select: { countryIso2Code: true, countryReferenceId: true, administrativeRegionId: true, isActive: true },
+          select: { countryIso2Code: true, administrativeRegionId: true, isActive: true },
         })
       : null;
     if (input.cityReferenceId && !city) throw new Error('UNIVERSITY_CAMPUS_CITY_NOT_FOUND');
     if (city?.isActive === false) throw new Error('UNIVERSITY_CAMPUS_CITY_NOT_ACTIVE');
-    if (country && region && (country.iso2Code !== region.countryIso2Code ||
-      (region.countryReferenceId && region.countryReferenceId !== input.countryReferenceId)))
+    if (country && region && country.iso2Code !== region.countryIso2Code)
       throw new Error('UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH');
-    if (country && city && (country.iso2Code !== city.countryIso2Code ||
-      (city.countryReferenceId && city.countryReferenceId !== input.countryReferenceId)))
+    if (country && city && country.iso2Code !== city.countryIso2Code)
       throw new Error('UNIVERSITY_CAMPUS_CITY_COUNTRY_MISMATCH');
-    if (region && city && (city.administrativeRegionId !== input.regionReferenceId ||
-      city.countryIso2Code !== region.countryIso2Code))
+    if (region && city && city.administrativeRegionId !== input.regionReferenceId)
       throw new Error('UNIVERSITY_CAMPUS_CITY_REGION_MISMATCH');
   }
 
@@ -82,25 +79,16 @@ export class UniversityCanonicalRelationshipValidator {
       if (campuses.length !== campusIds.length) throw new Error('UNIVERSITY_PROGRAM_CAMPUS_NOT_FOUND');
     }
 
-    await this.validateAdmissionRequirements(input.admissionRequirements ?? []);
-  }
-
-  private async validateAdmissionRequirements(
-    requirements: NonNullable<UniversityAcademicProgramAuthoringInput['admissionRequirements']>,
-  ): Promise<void> {
     const requirementKeys = new Set<string>();
-    for (const requirement of requirements) {
-      if (requirement.minimumScore != null && !Number.isFinite(requirement.minimumScore)) {
-        throw new Error('UNIVERSITY_ADMISSION_TEST_MINIMUM_SCORE_INVALID');
-      }
-      const key = JSON.stringify([requirement.internationalTestId, requirement.testVariantId ?? null, requirement.testVersionId ?? null]);
-      if (requirementKeys.has(key)) throw new Error('UNIVERSITY_ADMISSION_TEST_REQUIREMENT_DUPLICATE');
-      requirementKeys.add(key);
+    for (const requirement of input.admissionRequirements ?? []) {
       await this.validateTest(
         requirement.internationalTestId,
         requirement.testVariantId ?? undefined,
         requirement.testVersionId ?? undefined,
       );
+      const key = [requirement.internationalTestId, requirement.testVariantId ?? '', requirement.testVersionId ?? ''].join('|');
+      if (requirementKeys.has(key)) throw new Error('UNIVERSITY_ADMISSION_TEST_REQUIREMENT_DUPLICATE');
+      requirementKeys.add(key);
     }
   }
 
@@ -115,10 +103,7 @@ export class UniversityCanonicalRelationshipValidator {
     });
     if (!degree) throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_NOT_FOUND');
     if (degree.status !== 'ACTIVE') throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_NOT_ACTIVE');
-    if (!majorId) {
-      if (mappingState === 'CANONICALLY_MAPPED') throw new Error('UNIVERSITY_PROGRAM_MAJOR_REFERENCE_REQUIRED');
-      return;
-    }
+    if (!majorId) return;
     const major = await this.client.major.findUnique({
       where: { id: majorId },
       select: { id: true, status: true },

@@ -142,7 +142,7 @@ check('FIN-ADM-011 idempotency conflict 409 mapping', files.adminRouter.includes
 check('FIN-UX-001 official navy', files.admin.includes('#142B5F'));
 check('FIN-UX-002 official teal', files.admin.includes('#0E7C86'));
 check('FIN-UX-003 official gold', files.admin.includes('#D6A43B'));
-check('FIN-UX-004 Cairo', read('apps/admin/src/index.css').includes('font-family: "Cairo"') && read('apps/admin/src/main.tsx').includes("'./index.css'"));
+check('FIN-UX-004 Cairo', files.admin.includes("font-['Cairo']"));
 check('FIN-UX-005 RTL', files.admin.includes('dir="rtl"'));
 check('FIN-UX-006 semantic red danger', files.admin.includes('bg-red-50'));
 check('FIN-UX-007 semantic amber warning', files.admin.includes('bg-amber-50'));

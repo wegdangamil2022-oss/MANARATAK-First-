@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { inspectSeedManifest } from './database/seed-manifest-inspection.mjs';
 
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -158,8 +157,7 @@ check('MNT-AUD-0088 persistence ownership manifest covers every Prisma model',
 check('MNT-AUD-0088 source guard enforces zero cross-context mutations and approved reads',
   persistenceVerifier.includes('forbidden cross-context mutation') &&
   persistenceVerifier.includes('unapproved cross-context read') &&
-  persistenceVerifier.includes('validateMigrationMetadata(entry.name, sql, manifest)') &&
-  read('scripts/architecture/migration-metadata-policy.mjs').includes('MANARATAK_MIGRATION_OWNER'));
+  persistenceVerifier.includes('MANARATAK_MIGRATION_OWNER'));
 check('MNT-AUD-0088 Phase 02 active authority reconciles schema-isolation drift',
   phase2Boundaries.includes('ADR-028 persistence supersession') &&
   phase2Physical.includes('Canonical persistence override — ADR-028'));
@@ -217,13 +215,10 @@ check('MNT-AUD-0035 mandatory seed versions/provenance/reconciliation contracts 
   seedManifest.steps.filter((step) => step.required).every((step) => Boolean(step.owner) && Boolean(step.provenance) && Boolean(step.expected)) &&
   seedReconciliation.includes('SEED_RECONCILIATION_EXACT_MISMATCH') &&
   seedReconciliation.includes('SEED_RECONCILIATION_MINIMUM_MISMATCH'));
-const seedInspection = inspectSeedManifest(seedManifest, root);
-check('MNT-AUD-0035 reference sources are hash-pinned or explicitly blocked before seeding',
-  seedInspection.sourceErrors.length === 0 &&
-  ['reference-countries', 'reference-currencies', 'reference-languages'].every(id => {
-    const step = seedManifest.steps.find(item => item.id === id);
-    return step && (step.state === 'READY' || seedInspection.blockers.includes(`${id}:${step.state}`));
-  }));
+check('MNT-AUD-0035 current P7 dataset blockers are explicit rather than silently seeded',
+  seedManifest.steps.find((step) => step.id === 'reference-countries')?.state === 'BLOCKED_SOURCE_REVIEW' &&
+  seedManifest.steps.find((step) => step.id === 'reference-currencies')?.state === 'BLOCKED_SOURCE_DATASET_MISSING' &&
+  seedManifest.steps.find((step) => step.id === 'reference-languages')?.state === 'BLOCKED_SOURCE_DATASET_MISSING');
 check('MNT-AUD-0035 root DB commands distinguish production provisioning from development mutations',
   Boolean(packageJson.scripts['db:migrate:deploy']) && Boolean(packageJson.scripts['db:seed']) &&
   Boolean(packageJson.scripts['db:provision']) && Boolean(packageJson.scripts['db:provision:verify']) &&

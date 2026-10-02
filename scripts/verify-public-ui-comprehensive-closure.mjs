@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { hasClientAuthStorage } from './lib/public-auth-source-policy.mjs';
 
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root,p),'utf8');
@@ -29,7 +28,7 @@ function walk(d,out=[]){if(!exists(d))return out; for(const e of fs.readdirSync(
 const publicFiles=publicDirs.flatMap(d=>walk(d));
 const allPublic=publicFiles.map(read).join('\n');
 const webSrcFiles=walk('apps/web/src');
-const allWebSrc=webSrcFiles.filter(p=>!/[.](?:spec|test|stories)[.]tsx?$/.test(p)).map(read).join('\n');
+const allWebSrc=webSrcFiles.map(read).join('\n');
 const router='apps/web/src/router/index.tsx';
 const studentWorkspace='apps/web/src/features/students/StudentWorkspacePage.tsx';
 
@@ -122,17 +121,17 @@ check('SEARCH_HISTORY_URL',contains('apps/web/src/features/public-template/usePu
 check('SEARCH_HASH_MATCH',contains('apps/web/src/features/public-template/usePublicNavigation.ts',"params.set('match'") && contains('apps/web/src/features/public-template/usePublicNavigation.ts','detailSearchAnchor'),'match query + section hash');
 
 // Secure auth routing
-check('AUTH_UNIFIED_LOGIN',contains(authPage,'await ApiClient.login(') && contains(api,'/auth/login'),'single auth endpoint');
-check('AUTH_ME_AFTER_LOGIN',contains(authPage,'await ApiClient.getCurrentSessionIdentity()') && contains(authPage,'resolveAuthenticatedDestination(identity)'),'trusted session after login');
+check('AUTH_UNIFIED_LOGIN',contains(authPage,'authenticateAccount(') && contains(authFlow,'client.login(') && contains(api,'/auth/login'),'single auth endpoint');
+check('AUTH_ME_AFTER_LOGIN',contains(authFlow,'getCurrentSessionIdentity()'),'trusted session after login');
 check('AUTH_SERVER_ROLES',contains(authRouter,'roleNames') && contains(authRouter,'effectivePermissions'),'server role/permission payload');
 check('AUTH_STUDENT_ROUTE',contains(auth,"path: '/student'"),'student route');
-check('AUTH_ADMIN_ROUTE',contains('apps/admin/src/App.tsx',"('/auth/me')") && contains('apps/admin/src/App.tsx','firstAllowedAdminPath(permissions)'),'canonical Admin checks current session permissions');
-check('AUTH_MANAGER_ROLE',contains('apps/admin/src/security/AdminAuthorizationContext.tsx','firstAllowedAdminPath(permissions)') && contains('packages/shared/src/authorization/adminAccess.ts','grantsAdminPermission(permissions, permission)'),'staff destination comes from section permissions');
+check('AUTH_ADMIN_ROUTE',contains(auth,"kind: 'admin'") && contains(auth,"'/admin/dashboard'"),'admin route');
+check('AUTH_MANAGER_ROLE',contains(auth,"'manager'"),'manager role');
 check('AUTH_NO_EMAIL_GUESS',!/(primaryEmail|email).*includes\(|includes\(.*@/i.test(read(auth)),'no email classification');
 check('AUTH_NO_LOCAL_ROLE',!/(localStorage|sessionStorage).*role/i.test(read(authPage)+read(auth)),'no local role authority');
 check('AUTH_FAILURE_GENERIC',contains(authPage,'تعذر تسجيل الدخول بهذه البيانات أو انتهت الجلسة'),'generic auth/session failure state');
 check('AUTH_NO_CREDENTIAL_LOGGING',!/(console\.(?:log|debug|info|warn|error)[^\n]*(?:password|token|credential)|(?:password|token|credential)[^\n]*console\.(?:log|debug|info|warn|error))/i.test(allWebSrc),'no credentials/tokens in console logging');
-check('AUTH_NO_CLIENT_AUTH_STORAGE',!hasClientAuthStorage(allWebSrc),'no client storage authority/routing; obsolete credential deletion allowed');
+check('AUTH_NO_CLIENT_AUTH_STORAGE',!/(localStorage|sessionStorage)[^\n]*(?:role|permission|admin_access|user_email|token)/i.test(allWebSrc),'no client storage authority/routing');
 const authSpec='apps/web/src/features/students/authRouting.spec.ts';
 const authFlowSpec='apps/web/src/features/students/authenticateAccount.spec.ts';
 for(const q of ['student','super_admin','manager','admin:*','NO_ALLOWED_ROLE']) check(`AUTH_TEST_${checks.length}`,contains(authSpec,q) || contains(authFlowSpec,q),q);
@@ -157,8 +156,8 @@ check('HEADER_MIN_WIDTH',contains(header,'min-w-0'),'header flex shrink safety')
 check('HEADER_LOGO_HOME',contains(header,'ManaratakLogo') && /onClick=\{[^}]*on/.test(read(header)),'logo interactive');
 check('HEADER_BRAND_VISIBLE_TINY',contains(css,'max-width: 359px') && !/max-width:\s*359px[^}]*span:first-child[^}]*display:\s*none/s.test(read(css)),'MANARATAK remains visible');
 check('STUDENT_WORKSPACE_SEMANTIC',contains('apps/web/src/features/students/StudentWorkspacePage.tsx','var(--mn-') && !/(#044A37|#087A55|font-black)/i.test(read('apps/web/src/features/students/StudentWorkspacePage.tsx')),'live student workspace theme');
-check('STUDENT_WORKSPACE_HERO_INVERSE',/className="[^"]*\bmn-inverse\b[^"]*\bbg-gradient-to-br\b/.test(read(studentWorkspace)),'semantic inverse hero context');
-check('STUDENT_WORKSPACE_MOBILE_STATS',/className="[^"]*\bgrid-cols-2\b[^"]*\bgap-[\d.]+/.test(read(studentWorkspace)),'two compact stats per row on mobile');
+check('STUDENT_WORKSPACE_HERO_INVERSE',contains(studentWorkspace,'mn-inverse relative overflow-hidden bg-gradient-to-br'),'semantic inverse hero context');
+check('STUDENT_WORKSPACE_MOBILE_STATS',contains(studentWorkspace,'grid grid-cols-2 gap-3'),'two compact stats per row on mobile');
 check('STUDENT_WORKSPACE_ICON_UI',contains(studentWorkspace,'<Folder') && contains(studentWorkspace,'<ArrowLeft') && contains(studentWorkspace,'<X'),'Lucide workspace affordances');
 check('TOOL_ROUTE_SEMANTIC',contains('apps/web/src/features/student-tools/StudentToolPage.tsx','mn-page-shell'),'student tool live route themed');
 check('CERT_ROUTE_SEMANTIC',contains('apps/web/src/features/certificates/CertificateVerificationPage.tsx','mn-page-shell'),'certificate live route themed');

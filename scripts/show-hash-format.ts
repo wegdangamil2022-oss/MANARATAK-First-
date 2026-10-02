@@ -1,2 +1,37 @@
-// Retired unsafe one-off diagnostic. See docs/operations/CI_REGRESSION_FIX_2026-10-01.md.
-throw new Error("LEGACY_DIAGNOSTIC_DISABLED: Use authenticated application routes or owner-access-preflight; this diagnostic must not expose credentials or mutate live auth state.");
+import { PrismaClient } from '@prisma/client';
+
+async function main() {
+  const prisma = new PrismaClient();
+  try {
+    const email = 'wegdangamil2022@gmail.com';
+    const user = await prisma.userRecord.findUnique({
+      where: { primaryEmail: email },
+      include: {
+        identity: {
+          include: {
+            credentials: true
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      console.log('User not found');
+      return;
+    }
+
+    const cred = user.identity.credentials.find(c => c.type === 'password');
+    if (!cred) {
+      console.log('No password credential found');
+      return;
+    }
+
+    console.log('[Diagnostic] Hash Format:', cred.passwordHash);
+  } catch (err: any) {
+    console.error('Error:', err);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+main();

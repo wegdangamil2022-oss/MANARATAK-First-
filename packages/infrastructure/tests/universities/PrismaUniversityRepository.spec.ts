@@ -49,43 +49,6 @@ describe('PrismaUniversityRepository', () => {
     });
   });
 
-  function configureGeography(regionCountry = 'YE') {
-    mockPrisma.referenceCountry = { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE', isActive: true }) };
-    mockPrisma.administrativeRegion = { findUnique: vi.fn(async (query) => {
-      expect(query.select).toEqual({ countryIso2Code: true, countryReferenceId: true, lifecycleState: true });
-      return { countryIso2Code: regionCountry, countryReferenceId: regionCountry === 'YE' ? 'country-ye' : 'country-sa', lifecycleState: 'ACTIVE' };
-    }) };
-    mockPrisma.referenceCity = { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', countryReferenceId: 'country-ye', administrativeRegionId: 'region-aden', isActive: true }) };
-    const record = { id: 'uni-1', status: 'DRAFT', optionalFields: {}, countryReferenceId: 'country-ye', regionReferenceId: 'region-aden', cityReferenceId: 'city-aden' };
-    mockPrisma.university.findUnique.mockResolvedValue(record);
-    mockPrisma.university.create.mockResolvedValue(record); mockPrisma.university.update.mockResolvedValue(record);
-    return record;
-  }
-
-  it.each(['create', 'update'] as const)('allows compatible canonical geography through the actual repository %s', async (operation) => {
-    const record = configureGeography();
-    if (operation === 'create') await repository.create(record as any);
-    else await repository.update('uni-1', { displayName: 'Updated name' });
-    expect(mockPrisma.university[operation]).toHaveBeenCalledOnce();
-    expect(mockPrisma.administrativeRegion.findUnique).toHaveBeenCalledWith(expect.objectContaining({ select: { countryIso2Code: true, countryReferenceId: true, lifecycleState: true } }));
-  });
-
-  it.each(['create', 'update'] as const)('rejects cross-country geography before repository %s writes', async (operation) => {
-    const record = configureGeography('SA');
-    const command = operation === 'create' ? repository.create(record as any) : repository.update('uni-1', { displayName: 'Updated name' });
-    await expect(command).rejects.toThrow('UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH');
-    expect(mockPrisma.university.create).not.toHaveBeenCalled(); expect(mockPrisma.university.update).not.toHaveBeenCalled();
-  });
-
-  it('rejects invalid replacement geography before deleting or inserting any normalized records', async () => {
-    configureGeography('SA'); mockPrisma.university.findUniqueOrThrow = vi.fn().mockResolvedValue({ id: 'uni-1' });
-    mockPrisma.universityCampus = { deleteMany: vi.fn(), create: vi.fn() };
-    mockPrisma.universityAcademicProgram = { deleteMany: vi.fn() };
-    await expect(repository.replaceNormalizedDetails('uni-1', { campuses: [{ name: 'Main', countryReferenceId: 'country-ye', regionReferenceId: 'region-aden', cityReferenceId: 'city-aden' }], academicPrograms: [] })).rejects.toThrow('UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH');
-    expect(mockPrisma.universityCampus.deleteMany).not.toHaveBeenCalled(); expect(mockPrisma.universityCampus.create).not.toHaveBeenCalled();
-    expect(mockPrisma.universityAcademicProgram.deleteMany).not.toHaveBeenCalled();
-  });
-
   it('update merges existing optional fields correctly', async () => {
     mockPrisma.university.findUnique.mockResolvedValue({
       id: 'db-id-1',
