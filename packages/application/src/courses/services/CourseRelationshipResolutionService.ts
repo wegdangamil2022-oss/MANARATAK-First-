@@ -11,6 +11,7 @@ import {
   CourseRelationshipReviewReadModel,
   ICourseRelationshipRepository,
 } from '@manaratak/domain';
+import { courseSourceRelationshipReviewRequired } from './CourseSourceRelationshipReadiness';
 
 const TOPIC_SEPARATOR = /\s*(?:•|\||;|\n)\s*/g;
 
@@ -142,11 +143,12 @@ export class CourseRelationshipResolutionService {
     if (!courseId.trim()) throw new Error('COURSE_ID_REQUIRED');
     const source = await this.repository.getRelationshipSource(courseId);
     if (!source) throw new Error(`COURSE_NOT_FOUND:${courseId}`);
-    const [taxonomyLinks, majorProjections, internationalTestRelationships, geography] = await Promise.all([
+    const [taxonomyLinks, majorProjections, internationalTestRelationships, geography, taxonomyResolutions] = await Promise.all([
       this.repository.listTaxonomyLinks(courseId),
       this.repository.listMajorProjections(courseId),
       this.repository.listInternationalTestRelationships(courseId),
       this.repository.getGeographySemantics(courseId),
+      this.repository.listTaxonomyResolutions(courseId),
     ]);
     const approvedTaxonomyLinks = taxonomyLinks.filter((item) => item.reviewState === 'APPROVED').length;
     const approvedMajorProjections = majorProjections.filter((item) => item.projectionState === 'APPROVED').length;
@@ -154,7 +156,7 @@ export class CourseRelationshipResolutionService {
     const languageCanonical = source.learningLanguageRaw?.trim()
       ? source.learningLanguageResolutionState === 'RESOLVED' && Boolean(source.learningLanguageReferenceId)
       : true;
-    const reviewRequired = !languageCanonical
+    const reviewRequired = !languageCanonical || courseSourceRelationshipReviewRequired(source.shortCourseTopicsRaw, taxonomyLinks, taxonomyResolutions)
       || taxonomyLinks.some((item) => item.reviewState === 'PROPOSED' || item.reviewState === 'REVIEW_REQUIRED')
       || majorProjections.some((item) => item.projectionState === 'PROPOSED' || item.projectionState === 'REVIEW_REQUIRED')
       || internationalTestRelationships.some((item) => item.reviewState === 'PROPOSED');
@@ -173,6 +175,7 @@ export class CourseRelationshipResolutionService {
         externalProviderId: source.externalProviderId,
       },
       taxonomyLinks,
+      taxonomyResolutions,
       majorProjections,
       internationalTestRelationships,
       geography: geography ?? {

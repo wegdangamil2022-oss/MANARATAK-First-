@@ -26,6 +26,8 @@ export class UniversityPublicationReadinessPolicy implements PublicationReadines
     if (entity.completenessStatus !== UniversityImportCompletenessState.COMPLETE) blockingIssues.push(issue('UNIVERSITY_INCOMPLETE', 'completenessStatus', 'University completeness must be COMPLETE.'));
     if (!entity.publicId?.startsWith('INS-')) blockingIssues.push(issue('UNIVERSITY_SOURCE_IDENTITY_MISSING', 'publicId', 'Permanent INS-* source identity is required.'));
     if (!entity.countryReferenceId) blockingIssues.push(issue('UNIVERSITY_CANONICAL_COUNTRY_REFERENCE_MISSING', 'countryReferenceId', 'Canonical country reference is required; country text alone is insufficient.'));
+    if (entity.city?.trim() && !entity.cityReferenceId) blockingIssues.push(issue('UNIVERSITY_CANONICAL_CITY_REFERENCE_MISSING', 'cityReferenceId', 'A supplied city label must have a reviewed canonical city before publication. Drafts may retain a pending raw label.'));
+    if (entity.metadata?.sourceGeographyReviewState && entity.metadata.sourceGeographyReviewState !== 'RESOLVED') blockingIssues.push(issue('UNIVERSITY_SOURCE_GEOGRAPHY_REVIEW_REQUIRED', 'metadata.sourceGeographyReviewState', 'Pending geography source decisions block publication.'));
 
     publicPrograms.forEach((program, index) => {
       if (!program.degreeLevelId) blockingIssues.push(issue('UNIVERSITY_PROGRAM_DEGREE_REFERENCE_MISSING', `academicPrograms.${index}.degreeLevelId`, 'ACTIVE Academic Program requires canonical DegreeLevel ID before publication.'));

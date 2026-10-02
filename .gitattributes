@@ -1,0 +1,7 @@
+# Source provenance and derived review queues are bound to exact bytes.
+# Do not rewrite line endings during checkout/add on another operating system.
+workspace/import-sources/** -text
+workspace/reference-data/cities/** -text
+workspace/reference-data/languages/*.csv -text
+packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts -text
+packages/domain/src/academic-taxonomy/isced-f-baseline.ts -text

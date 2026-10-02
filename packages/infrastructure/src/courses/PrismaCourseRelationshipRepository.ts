@@ -275,6 +275,11 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
     return records.map((record: any) => this.mapTaxonomyLink(record));
   }
 
+  public async listTaxonomyResolutions(courseId: string): Promise<CourseTaxonomyResolutionDto[]> {
+    const records = await this.prisma.courseTaxonomyResolution.findMany({ where: { courseId }, orderBy: { normalizedTerm: 'asc' } });
+    return records.map(record => this.mapResolution(record));
+  }
+
   public async reviewTaxonomyLink(input: {
     courseId: string;
     linkId: string;

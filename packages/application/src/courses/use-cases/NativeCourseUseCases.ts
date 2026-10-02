@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CoursePublicationService } from '../services/CoursePublicationService';
+import { courseSourceRelationshipReviewRequired } from '../services/CourseSourceRelationshipReadiness';
 import {
   AssetId,
   AssetLifecycleState,
@@ -90,13 +91,14 @@ export class NativeCourseUseCases {
       : {};
     const minimumProgress = Number(completionCriteria.minimumProgress ?? 100);
     const completionPolicyValid = minimumProgress === 100;
-    const [taxonomyLinks, majorProjections, testRelationships, enrollmentPolicy] = await Promise.all([
+    const [taxonomyLinks, majorProjections, testRelationships, enrollmentPolicy, taxonomyResolutions] = await Promise.all([
       this.relationshipRepository ? this.relationshipRepository.listTaxonomyLinks(courseId) : Promise.resolve([]),
       this.relationshipRepository ? this.relationshipRepository.listMajorProjections(courseId) : Promise.resolve([]),
       this.relationshipRepository ? this.relationshipRepository.listInternationalTestRelationships(courseId) : Promise.resolve([]),
       this.enrollmentPolicyRepository ? this.enrollmentPolicyRepository.getPolicy(courseId) : Promise.resolve(null),
+      this.relationshipRepository ? this.relationshipRepository.listTaxonomyResolutions(courseId) : Promise.resolve([]),
     ]);
-    const relationshipReviewOpen = taxonomyLinks.some((item) => ['PROPOSED', 'REVIEW_REQUIRED'].includes(item.reviewState))
+    const relationshipReviewOpen = courseSourceRelationshipReviewRequired(course.shortCourseTopicsRaw, taxonomyLinks, taxonomyResolutions) || taxonomyLinks.some((item) => ['PROPOSED', 'REVIEW_REQUIRED'].includes(item.reviewState))
       || majorProjections.some((item) => ['PROPOSED', 'REVIEW_REQUIRED'].includes(item.projectionState))
       || testRelationships.some((item) => item.reviewState === 'PROPOSED');
     const approvedTaxonomyLinks = taxonomyLinks.filter((item) => item.reviewState === 'APPROVED');

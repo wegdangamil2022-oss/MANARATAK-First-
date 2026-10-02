@@ -63,6 +63,7 @@ describe('NativeCourseUseCases', () => {
       getCurriculumSnapshot: vi.fn(),
     };
     const relationships = {
+      listTaxonomyResolutions: vi.fn().mockResolvedValue([]),
       listTaxonomyLinks: vi.fn().mockResolvedValue([{ id: 'tax-link-1', courseId: 'course-1', taxonomyNodeId: 'tax-ai', relationshipType: 'PRIMARY', reviewState: 'APPROVED' }]),
       listMajorProjections: vi.fn().mockResolvedValue([]),
       listInternationalTestRelationships: vi.fn().mockResolvedValue([]),
