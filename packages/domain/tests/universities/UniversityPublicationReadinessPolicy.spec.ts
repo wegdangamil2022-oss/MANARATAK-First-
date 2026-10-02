@@ -3,6 +3,13 @@ import { UniversityPublicationReadinessPolicy } from '../../src/universities/Uni
 import { UniversityImportCompletenessState, UniversityStatus } from '../../src/universities/universities';
 
 describe('UniversityPublicationReadinessPolicy normalized program mappings', () => {
+  it('blocks raw city labels and pending geography decisions from public promotion', () => {
+    const base = { id: 'uni', publicId: 'INS-YEM-0001', slug: 'uni', canonicalName: 'University', canonicalDedupKey: 'uni', displayName: 'University', countryReferenceId: 'country-ye', city: 'City', status: UniversityStatus.READY_TO_PUBLISH, completenessStatus: UniversityImportCompletenessState.COMPLETE };
+    const policy = new UniversityPublicationReadinessPolicy();
+    expect(policy.evaluate(base).blockingIssues.map(issue => issue.code)).toContain('UNIVERSITY_CANONICAL_CITY_REFERENCE_MISSING');
+    expect(policy.evaluate({ ...base, cityReferenceId: 'city-ye', metadata: { sourceGeographyReviewState: 'AMBIGUOUS' } }).blockingIssues.map(issue => issue.code)).toContain('UNIVERSITY_SOURCE_GEOGRAPHY_REVIEW_REQUIRED');
+    expect(policy.evaluate({ ...base, cityReferenceId: 'city-ye', metadata: { sourceGeographyReviewState: 'RESOLVED' } }).blockingIssues).toEqual([]);
+  });
   it('blocks a CANONICALLY_MAPPED program whose canonical IDs are missing regardless of legacy status', () => {
     const result = new UniversityPublicationReadinessPolicy().evaluate({
       id: 'uni-1', publicId: 'INS-YEM-0001', slug: 'uni', canonicalName: 'University', canonicalDedupKey: 'uni', displayName: 'University',

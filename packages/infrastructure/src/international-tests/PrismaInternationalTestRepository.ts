@@ -107,14 +107,22 @@ interface InternationalTestTransactionContext extends AtomicPersistenceContext {
 }
 
 export class PrismaInternationalTestRepository implements ITransactionalInternationalTestRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
 
   withTransaction(context: AtomicPersistenceContext): IInternationalTestRepository {
     const transactionClient = (context as Partial<InternationalTestTransactionContext>)
       .transactionClient;
     if (!context.boundaryId || !transactionClient)
       throw new Error('INTERNATIONAL_TEST_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
-    return new PrismaInternationalTestRepository(transactionClient as unknown as PrismaClient);
+    return new PrismaInternationalTestRepository(transactionClient as unknown as PrismaClient, true);
+  }
+
+  async acquireGraphMutationLock(testId: string, kind: 'COUNTRY' | 'LANGUAGE' | 'TAXONOMY' | 'DEGREE', referenceId: string): Promise<void> {
+    if (!this.transactionBound) throw new Error('INTERNATIONAL_TEST_GRAPH_TRANSACTION_REQUIRED');
+    await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "InternationalTest" WHERE "id" = ${testId} FOR UPDATE`);
+    const tables = { COUNTRY: 'ReferenceCountry', LANGUAGE: 'ReferenceLanguage', TAXONOMY: 'AcademicTaxonomyNode', DEGREE: 'DegreeLevel' } as const;
+    if (!Object.hasOwn(tables, kind)) throw new Error('INTERNATIONAL_TEST_GRAPH_REFERENCE_KIND_INVALID');
+    await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM ${Prisma.raw('"' + tables[kind] + '"')} WHERE "id" = ${referenceId} FOR SHARE`);
   }
 
   // --- Legacy & Core Methods ---

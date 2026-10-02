@@ -15,10 +15,12 @@ test('readiness consumes normalized AppConfig and worker uses ConfigurationRegis
   const readiness = read('packages/config/src/ProductionReadinessValidator.ts');
   const app = read('apps/api/src/app.ts');
   const server = read('apps/api/src/server.ts');
+  const workers = read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts');
   assert.match(readiness, /loadAppConfig\(process\.env\)/);
   assert.match(app, /ProductionReadinessValidator\.validate\(normalizedRuntimeConfig\)/);
   assert.doesNotMatch(server, /process\.env\.CERTIFICATE_COMPLETION_WORKER_/);
-  assert.match(server, /config\.getOptional<boolean>\('CERTIFICATE_COMPLETION_WORKER_ENABLED'\)/);
+  assert.match(server, /startPollingWorkers\(container, config\)/);
+  assert.match(workers, /config\.getOptional<boolean>\('CERTIFICATE_COMPLETION_WORKER_ENABLED'\)/);
 });
 
 test('production environment templates declare managed Redis and startup-blocking controls', () => {

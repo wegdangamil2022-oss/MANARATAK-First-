@@ -40,6 +40,13 @@ describe('JwtTokenProvider infrastructure adapter', () => {
     expect(() => new JwtTokenProvider(generateEphemeralJwtKeySet(), { accessTokenTtl: 901 })).toThrow(/900/);
   });
 
+  it('defaults issued access tokens to 15 minutes', async () => {
+    const provider = new JwtTokenProvider(generateEphemeralJwtKeySet());
+    const { accessToken } = await provider.generateTokens({ userId: 'user-123' });
+    const payload = JSON.parse(Buffer.from(accessToken.split('.')[1], 'base64url').toString('utf8'));
+    expect(payload.exp - payload.iat).toBe(900);
+  });
+
   it('publishes only public key material through JWKS', () => {
     const provider = createProvider('rotation-key');
     const jwks = provider.getJwks();
