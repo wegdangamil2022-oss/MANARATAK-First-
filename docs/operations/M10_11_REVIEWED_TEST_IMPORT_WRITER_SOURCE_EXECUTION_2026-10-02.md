@@ -95,6 +95,9 @@ No schema, historical migration SQL/checksum, seed or DI registration is changed
 - Tests: application contract, shared fixture, infrastructure writer and
   `tests/import/reviewed-test-import-source.spec.ts`.
 - This execution record.
+- Generated environment inventory/example: regenerated with the existing
+  `scripts/aistudio/environment.mjs --write` after adding the CLI approval fields.
+  These contain variable names and commented placeholders, no environment values.
 
 ## Executed verification
 
@@ -116,6 +119,10 @@ No schema, historical migration SQL/checksum, seed or DI registration is changed
   authorization evaluator and atomic audit/outbox adapters. They simulate
   transaction rollback; they cannot prove PostgreSQL SQL syntax, locks,
   isolation, constraints, real permissions/receipts or consumer processing.
+- Initial CI head `54c7f86` detected a stale generated environment inventory.
+  Its isolated preview build/tests passed; the inventory was regenerated with
+  the existing generator and its `--check` passed. The corrected head requires
+  fresh GitHub CI; no validator or security requirement was weakened.
 
 ## Connected operator procedure — RUNTIME_UNTESTED
 
