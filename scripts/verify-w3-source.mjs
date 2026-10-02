@@ -14,6 +14,7 @@ const backgroundGateway = read('packages/infrastructure/src/background-jobs/Pris
 const backgroundRouter = read('apps/api/src/presentation/api/router/BackgroundJobRouter.ts');
 const apiContainer = read('apps/api/src/infrastructure/di/container.ts');
 const apiServer = read('apps/api/src/server.ts');
+const pollingRuntime = read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts');
 const apiApp = read('apps/api/src/app.ts');
 const appConfig = read('packages/config/src/AppConfig.ts');
 const retentionHandler = read('packages/application/src/background-jobs/handlers/RetentionBackgroundJobHandler.ts');
@@ -107,8 +108,8 @@ check('MNT-AUD-0007 production DI composes Prisma persistence, generic worker an
   apiContainer.includes('durableBackgroundWorker:') && apiContainer.includes('retentionBackgroundJobHandler:') &&
   retentionHandler.includes('platform.retention.sweep'));
 check('MNT-AUD-0007 server lifecycle registers recurring Retention, polls durable worker and drains on shutdown',
-  apiServer.includes("stableReference: 'system.retention.sweep'") && apiServer.includes('backgroundWorker.runOnce') &&
-  apiServer.includes('BACKGROUND_WORKER_HEARTBEAT_MS') && apiServer.includes('backgroundWorker?.drain?.()'));
+  apiServer.includes("stableReference: 'system.retention.sweep'") && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('backgroundWorker.runOnce') &&
+  apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('BACKGROUND_WORKER_HEARTBEAT_MS') && apiServer.includes('backgroundWorker?.drain?.()'));
 check('MNT-AUD-0007 production configuration/readiness fail closed when worker durability is unavailable',
   appConfig.includes("'BACKGROUND_WORKER_ENABLED'") && appConfig.includes('BACKGROUND_WORKER_HEARTBEAT_MS') &&
   apiApp.includes("'background-jobs'") && apiApp.includes('getOperationalSnapshot') && apiApp.includes('HealthStatus.DOWN'));
@@ -226,18 +227,18 @@ check('MNT-AUD-0080 owner event documentation rejects the historical UserRegiste
 
 check('MNT-AUD-0060 P20 Services mutations publish atomic versioned owner events and have an autonomous outbox runtime caller',
   servicesRepo.includes('atomicEvent') && servicesRepo.includes('ServiceCatalogCreated.v1') && servicesRepo.includes('ServiceRequested.v1') &&
-  ownerOutboxWorker.includes("runServicesOnce") && apiServer.includes('OWNER_DOMAIN_OUTBOX_WORKER_ENABLED') && apiServer.includes('runServicesOnce'));
+  ownerOutboxWorker.includes("runServicesOnce") && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('OWNER_DOMAIN_OUTBOX_WORKER_ENABLED') && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('runServicesOnce'));
 check('MNT-AUD-0089 P21 Career employer/job lifecycle publishes atomic events including JobPosted/JobClosed',
   careerRepo.includes('atomicEvent') && careerRepo.includes('CareerEmployerCreated.v1') && careerRepo.includes('JobPosted.v1') && careerRepo.includes('JobClosed.v1') &&
   ownerOutboxWorker.includes('runCareerOnce'));
 
 check('MNT-AUD-0093 Course enrollment/progress mutations emit atomic owner events consumed by P15',
   courseProgress.includes('COURSE_ENROLLED_EVENT_TYPE') && courseProgress.includes('COURSE_PROGRESS_UPDATED_EVENT_TYPE') &&
-  courseProgress.includes('atomicMutations.execute') && studentOutboxWorker.includes("['CourseEnrolled', 'CourseProgressUpdated']"));
+  courseProgress.includes('atomicMutations.execute') && studentOutboxWorker.includes("['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted']"));
 check('MNT-AUD-0016 Identity to StudentWorkspace bridge is idempotent on outbox identity and runtime-wired',
   studentOutboxGateway.includes('context.idempotencyKey !== entry.id') && studentOutboxGateway.includes('StudentIdentityCreated') &&
   studentOutboxWorker.includes("['IdentityStatusChanged.v1']") && studentOutboxWorker.includes("['RoleAssignmentCreated']") &&
-  studentOutboxGateway.includes("role.roleId === 'student'") && apiServer.includes('runRoleOnce') && apiServer.includes('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED'));
+  studentOutboxGateway.includes("role.roleId === 'student'") && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('runRoleOnce') && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED'));
 
 check('MNT-AUD-0017 CMS due schedules execute through a recurring durable background job',
   cmsHandler.includes('processDueSchedules') && apiServer.includes('CMS_SCHEDULED_PUBLISH_JOB_TYPE') && appConfig.includes('BACKGROUND_CMS_CRON'));

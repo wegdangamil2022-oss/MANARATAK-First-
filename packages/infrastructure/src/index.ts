@@ -18,6 +18,7 @@ export * from './majors/PrismaNewMajorCandidateRepository';
 export * from './majors/PrismaFellowshipDefinitionRepository';
 export * from './majors/Phase10CatalogRepository';
 export * from './international-tests/PrismaInternationalTestRepository';
+export * from './international-tests/PrismaInternationalTestImportChangeGateway';
 export * from './import-foundation/PrismaImportRepository';
 export * from './import-foundation/InMemoryImportQueueGateway';
 export * from './import-foundation/PrismaImportQueueGateway';

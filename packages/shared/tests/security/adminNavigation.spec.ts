@@ -7,6 +7,13 @@ import {
 } from '../../src/security/adminNavigation';
 
 describe('admin navigation security authority', () => {
+  it('rejects malformed paths and checks specific settings permissions before parent routes', () => {
+    for (const path of ['//evil.example/dashboard', '/dashboard/../finance', '/admin/settings/../finance', '/admin\\dashboard']) {
+      expect(canAccessAdminPath(path, ['admin:*'])).toBe(false);
+    }
+    expect(canAccessAdminPath('/admin/settings/reference-data', ['admin:settings:manage'])).toBe(false);
+    expect(canAccessAdminPath('/admin/settings/reference-data', ['admin:reference-data:manage'])).toBe(true);
+  });
   it('correctly matches wildcard and exact permissions', () => {
     expect(checkPermission(['*'], 'admin:platform:manage')).toBe(true);
     expect(checkPermission(['admin:*'], 'admin:platform:manage')).toBe(true);

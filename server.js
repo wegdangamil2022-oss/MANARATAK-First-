@@ -16,6 +16,24 @@ const candidates = [
 ];
 
 const distPath = candidates.find(p => fs.existsSync(p)) || candidates[0];
+const adminDistPath = path.resolve(__dirname, 'apps/admin/dist');
+
+// The Admin app has a separate Vite base and must be served before the Web SPA fallback.
+if (fs.existsSync(path.join(adminDistPath, 'index.html'))) {
+  app.use('/admin', express.static(adminDistPath, { maxAge: '1h' }));
+  app.get('/admin/*', (_req, res) => {
+    res.sendFile(path.join(adminDistPath, 'index.html'));
+  });
+} else {
+  app.get(['/admin', '/admin/*'], (_req, res) => {
+    res.status(503).send('Admin assets are not built.');
+  });
+}
+
+// API routes require the API service or a reverse proxy, not the Web index page.
+app.use('/api', (_req, res) => {
+  res.status(503).json({ error: 'API_SERVICE_UNAVAILABLE' });
+});
 
 // Serve static assets with cache headers
 if (fs.existsSync(distPath)) {

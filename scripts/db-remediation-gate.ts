@@ -18,7 +18,7 @@ const migrationInventory = () => fs.readdirSync(migrationsPath, { withFileTypes:
     return {
       id: entry.name,
       migrationSha256: fs.existsSync(migration) ? sha256(migration) : null,
-      rollback: fs.existsSync(rollback) ? { path: path.relative(root, rollback), sha256: sha256(rollback) } : null,
+      rollback: fs.existsSync(rollback) ? { path: path.relative(root, rollback).replaceAll('\\', '/'), sha256: sha256(rollback) } : null,
     };
   });
 
@@ -41,7 +41,7 @@ if (mode === 'plan' || mode === 'migration-dry-run' || mode === 'rollback-plan')
     if (recovery.issues.length > 0) process.exitCode = 1;
   }
   console.log(JSON.stringify(output, null, 2));
-  process.exit(0);
+  process.exit(process.exitCode ?? 0);
 }
 
 if (mode === 'status') {

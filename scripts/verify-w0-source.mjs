@@ -151,7 +151,7 @@ try {
 }
 
 try {
-  const mutationGateTests = execFileSync(process.execPath, ['--test', path.join(root, 'tests/operations/database-mutation-gate.test.mjs')], { encoding: 'utf8' });
+  const mutationGateTests = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/operations/database-mutation-gate.test.mjs')], { encoding: 'utf8' });
   check('greenfield_mutation_gate_tests_execute', /# fail 0/.test(mutationGateTests));
 } catch (error) {
   check('greenfield_mutation_gate_tests_execute', false, error.stdout || error.stderr || String(error));

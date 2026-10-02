@@ -91,7 +91,7 @@ describe('PrismaReferenceDataRepository', () => {
             { iso3Code: { contains: 'Egy', mode: 'insensitive' } }
           ]
         },
-        orderBy: { name: 'asc' }
+        orderBy: [{ name: 'asc' }, { id: 'asc' }]
       });
 
       expect(result).toEqual([
@@ -258,7 +258,7 @@ describe('PrismaReferenceDataRepository', () => {
             { numericCode: { contains: 'USD', mode: 'insensitive' } }
           ]
         },
-        orderBy: { name: 'asc' }
+        orderBy: [{ name: 'asc' }, { id: 'asc' }]
       });
 
       expect(result).toEqual([
@@ -382,7 +382,7 @@ describe('PrismaReferenceDataRepository', () => {
             { isoCode: { contains: 'ar', mode: 'insensitive' } }
           ]
         },
-        orderBy: { name: 'asc' }
+        orderBy: [{ name: 'asc' }, { id: 'asc' }]
       });
 
       expect(result).toEqual([
@@ -521,7 +521,7 @@ describe('PrismaReferenceDataRepository', () => {
           ],
         },
         include: { administrativeRegion: true },
-        orderBy: { name: 'asc' },
+        orderBy: [{ name: 'asc' }, { id: 'asc' }],
       });
       expect(result[0]).toMatchObject({
         id: 'city-1',

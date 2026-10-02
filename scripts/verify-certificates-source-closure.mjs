@@ -29,6 +29,7 @@ const files = {
   envRoot: read('.env.example'),
   appConfig: read('packages/config/src/AppConfig.ts'),
   apiServer: read('apps/api/src/server.ts'),
+  pollingRuntime: read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts'),
   apiApp: read('apps/api/src/app.ts'),
   phase14Runbook: read('docs/implementation-status/MANARATAK-2.0-Phase14-Source-Closure-and-Google-Studio-Runbook.md'),
 };
@@ -136,7 +137,7 @@ check('CERT-LIFE-012', all(files.repo,['ARTIFACTS_ATTACHED','CertificateArtifact
 check('CERT-LIFE-013', files.trust.includes('runtimeReadiness()'), 'Trust policy exposes non-secret runtime readiness signals.');
 check('CERT-WORKER-001', all(files.appConfig,['CERTIFICATE_COMPLETION_WORKER_ENABLED must be true in production/staging','CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS']), 'Certificate completion worker is explicit and mandatory in production configuration.');
 check('CERT-WORKER-002', files.envApi.includes('CERTIFICATE_COMPLETION_WORKER_ENABLED=true') && files.envRoot.includes('CERTIFICATE_COMPLETION_WORKER_ENABLED=true'), 'Certificate worker flags are documented in both canonical env examples.');
-check('CERT-WORKER-003', files.apiServer.includes("pollingWorkerRuntimeRegistry.success('certificate-completion')") && files.apiApp.includes("name: 'polling-workers'") && files.apiApp.includes('lastSuccessLagMs'), 'Certificate worker state/success/failure/lag are health-visible.');
+check('CERT-WORKER-003', files.apiServer.includes("startPollingWorkers(") && files.pollingRuntime.includes("pollingWorkerRuntimeRegistry.success('certificate-completion')") && files.apiApp.includes("name: 'polling-workers'") && files.apiApp.includes('lastSuccessLagMs'), 'Certificate worker state/success/failure/lag are health-visible.');
 check('CERT-WORKER-004', files.phase14Runbook.includes('W3 certificate completion worker reconciliation'), 'Google Studio/runtime runbook documents the W3 worker contract.');
 
 // DB/migration source-only contract.
