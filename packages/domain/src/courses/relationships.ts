@@ -250,6 +250,7 @@ export interface CourseRelationshipReviewReadModel {
     | 'externalProviderId'
   >;
   taxonomyLinks: CourseAcademicTaxonomyLinkDto[];
+  taxonomyResolutions: CourseTaxonomyResolutionDto[];
   majorProjections: CourseMajorProjectionDto[];
   internationalTestRelationships: CourseInternationalTestRelationshipDto[];
   geography: CourseGeographySemanticsDto;
@@ -283,6 +284,7 @@ export interface ICourseRelationshipRepository {
   getRelationshipSource(courseId: string): Promise<CourseRelationshipSourceDto | null>;
 
   resolveTaxonomyCandidates(normalizedTerm: string): Promise<CourseTaxonomyCandidateDto[]>;
+  listTaxonomyResolutions(courseId: string): Promise<CourseTaxonomyResolutionDto[]>;
   upsertTaxonomyResolution(input: {
     courseId: string;
     sourceTerm: string;

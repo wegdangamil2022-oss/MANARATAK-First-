@@ -4,6 +4,11 @@
   "runtimePolicy": "PENDING_NON_BLOCKING",
   "gates": [
     {
+      "id": "m10-source-qc",
+      "classification": "SOURCE",
+      "command": "npm run build -w @manaratak/application && npm run imports:qc:verify && npm run imports:qc:test"
+    },
+    {
       "id": "architecture",
       "classification": "SOURCE",
       "command": "npm run phase11:guards:verify"

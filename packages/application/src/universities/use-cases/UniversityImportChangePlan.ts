@@ -1,4 +1,5 @@
 import type { UniversalImportHandoff } from '@manaratak/domain';
+import { inspectUniversitySourceStage } from './UniversitySourceQuality';
 
 export type UniversityImportStage = 'STAGE_1' | 'STAGE_2' | 'STAGE_3' | 'STAGE_4' | 'GLOBAL_RANKINGS';
 export type UniversityChangeOperation = 'CREATE' | 'UPDATE' | 'UPSERT_CHILD';
@@ -36,10 +37,16 @@ export class UniversityImportChangePlanner {
     if (sourceArtifactIds.size !== 1) validationIssues.push({ code: 'ONE_ARTIFACT_PER_CHANGE_SET_REQUIRED', path: 'artifact.artifactId', message: 'A change set must belong to one immutable source artifact.' });
     const sourceArtifactId = [...sourceArtifactIds][0] ?? 'missing-artifact';
     const seen = new Set<string>();
+    if (stage === 'STAGE_3' || stage === 'STAGE_4') {
+      for (const result of await inspectUniversitySourceStage(stage, handoffs)) {
+        for (const issue of result.validationIssues) validationIssues.push({ ...issue, path: `${result.sourceReferenceId}:${issue.path ?? stage}` });
+      }
+    }
 
     for (const handoff of handoffs) {
       if (!handoff.execution.dryRun) validationIssues.push({ code: 'DRY_RUN_REQUIRED', path: handoff.handoffId, message: 'Planning cannot accept a writable handoff.' });
       const payload = handoff.normalizedPayload as Record<string, unknown>;
+      if (handoff.validation.state !== 'VALID') validationIssues.push({ code: 'SOURCE_HANDOFF_QUARANTINED', path: handoff.handoffId, message: 'An invalid or pending handoff cannot become an executable change set.' });
       const sourceReferenceId = String(payload.sourceReferenceId ?? payload.universityRefId ?? '');
       if (!/^INS-[A-Z0-9]+(?:-[A-Z0-9]+)+$/.test(sourceReferenceId)) validationIssues.push({ code: 'INVALID_SOURCE_REFERENCE_ID', path: handoff.handoffId, message: 'Permanent INS-* identity is required.' });
       if (seen.has(sourceReferenceId)) validationIssues.push({ code: 'DUPLICATE_SOURCE_REFERENCE_IN_BATCH', path: handoff.handoffId, message: 'The same university occurs more than once.' });

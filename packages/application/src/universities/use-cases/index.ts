@@ -6,3 +6,5 @@ export * from './UniversityLaterStagesDryRunUseCase';
 export * from './AdminUniversityUseCases';
 export * from './PublicUniversityUseCases';
 export * from './LocalizedPublicUniversityUseCases';
+export * from './UniversitySourceQuality';
+export * from './UniversityCitySourceQueue';

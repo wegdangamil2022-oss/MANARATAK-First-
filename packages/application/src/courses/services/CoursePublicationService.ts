@@ -11,6 +11,7 @@ import {
   ITransactionalCourseRepository,
 } from '@manaratak/domain';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { courseSourceRelationshipReviewRequired } from './CourseSourceRelationshipReadiness';
 
 const VERIFIED_LINK_STATES = new Set(['VERIFIED_DIRECT', 'REDIRECTED_VALID']);
 
@@ -29,19 +30,21 @@ export class CoursePublicationService {
     }
 
     if (this.relationshipRepository) {
-      const [source, taxonomyLinks, majorProjections, testRelationships] = await Promise.all([
+      const [source, taxonomyLinks, majorProjections, testRelationships, taxonomyResolutions] = await Promise.all([
         this.relationshipRepository.getRelationshipSource(course.id),
         this.relationshipRepository.listTaxonomyLinks(course.id),
         this.relationshipRepository.listMajorProjections(course.id),
         this.relationshipRepository.listInternationalTestRelationships(course.id),
+        this.relationshipRepository.listTaxonomyResolutions(course.id),
       ]);
       const rawLanguage = source?.learningLanguageRaw?.trim() || course.learningLanguage?.trim();
-      if (rawLanguage && !source?.learningLanguageReferenceId) {
+      if (rawLanguage && (!source?.learningLanguageReferenceId || source.learningLanguageResolutionState !== 'RESOLVED')) {
         throw new Error('COURSE_PUBLICATION_CANONICAL_LANGUAGE_REQUIRED');
       }
       if (source?.shortCourseTopicsRaw?.trim() && !taxonomyLinks.some((item) => item.reviewState === 'APPROVED')) {
         throw new Error('COURSE_PUBLICATION_APPROVED_TAXONOMY_REQUIRED');
       }
+      if (courseSourceRelationshipReviewRequired(source?.shortCourseTopicsRaw ?? course.shortCourseTopicsRaw, taxonomyLinks, taxonomyResolutions)) throw new Error('COURSE_PUBLICATION_SOURCE_TERM_REVIEW_REQUIRED');
       if (taxonomyLinks.some((item) => item.reviewState === 'PROPOSED' || item.reviewState === 'REVIEW_REQUIRED')
         || majorProjections.some((item) => item.projectionState === 'PROPOSED' || item.projectionState === 'REVIEW_REQUIRED')
         || testRelationships.some((item) => item.reviewState === 'PROPOSED')) {
@@ -50,6 +53,7 @@ export class CoursePublicationService {
     }
 
     if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE) return;
+    if (!this.relationshipRepository) throw new Error('IMPORTED_COURSE_RELATIONSHIP_EVIDENCE_NOT_CONFIGURED');
     if (!this.importedOperations) throw new Error('IMPORTED_COURSE_PUBLICATION_EVIDENCE_NOT_CONFIGURED');
 
     if (

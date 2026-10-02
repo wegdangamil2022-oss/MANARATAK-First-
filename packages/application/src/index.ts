@@ -202,3 +202,4 @@ export * from './students/use-cases/StudentWorkspaceOutboxWorker';
 export * from './background-jobs/handlers/NotificationDeliveryBackgroundJobHandler';
 export * from './identity/use-cases/ChangePasswordUseCase';
 export * from './identity/use-cases/DisablePasswordCredentialUseCase';
+export * from './import-foundation/services/CanonicalSourceReview';

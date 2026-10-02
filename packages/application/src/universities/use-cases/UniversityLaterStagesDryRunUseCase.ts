@@ -67,10 +67,13 @@ function validateStage3(payload: UniversityStage3Payload, issues: Array<{ code: 
   for (const scholarship of payload.internationalScholarships) if (!scholarship.name || !isHttpUrl(scholarship.officialUrl)) issues.push(issue('INVALID_SCHOLARSHIP_REFERENCE', 'internationalScholarships', 'Scholarship requires a name and official URL.'));
 }
 function validateStage4(payload: UniversityStage4Payload, issues: Array<{ code: string; path?: string; message: string }>) {
-  for (const [key, value] of Object.entries(payload)) if ((key.toLowerCase().includes('fee') || key.toLowerCase().includes('cost')) && typeof value === 'number' && value < 0) issues.push(issue('NEGATIVE_AMOUNT', key, 'Financial amounts cannot be negative.'));
+  for (const [key, value] of Object.entries(payload)) if ((key.toLowerCase().includes('fee') || key.toLowerCase().includes('cost')) && typeof value === 'number') {
+    if (!Number.isFinite(value)) issues.push(issue('NON_FINITE_AMOUNT', key, 'Financial amounts must be finite.'));
+    else if (value < 0) issues.push(issue('NEGATIVE_AMOUNT', key, 'Financial amounts cannot be negative.'));
+  }
   checkUrls(payload, ['officialTuitionFeeUrl','officialRequiredDocumentsUrl'], issues);
   if (payload.accommodationAvailable === false && (payload.internationalStudentsEligibleForAccommodation !== undefined || payload.typicalAccommodationCost !== undefined || payload.accommodationCurrency)) issues.push(issue('ACCOMMODATION_DETAILS_NOT_APPLICABLE', 'accommodationAvailable', 'Accommodation details must be blank when unavailable.'));
-  for (const item of payload.engineeringUndergraduateFees) if (!item.faculty || item.amount < 0) issues.push(issue('INVALID_ENGINEERING_FEE', 'engineeringUndergraduateFees', 'Each fee requires a faculty and non-negative amount.'));
+  for (const item of payload.engineeringUndergraduateFees) if (!item.faculty || !Number.isFinite(item.amount) || item.amount < 0) issues.push(issue('INVALID_ENGINEERING_FEE', 'engineeringUndergraduateFees', 'Each fee requires a faculty and finite non-negative amount.'));
 }
 function validateRankings(payload: UniversityGlobalRankingsPayload, issues: Array<{ code: string; path?: string; message: string }>) {
   const providers = new Set<string>();

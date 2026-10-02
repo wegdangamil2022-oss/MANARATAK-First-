@@ -143,6 +143,9 @@ class FakeRelationshipRepository implements ICourseRelationshipRepository {
       link.courseId === courseId && (!reviewState || link.reviewState === reviewState)
     );
   }
+  async listTaxonomyResolutions(courseId: string) {
+    return this.resolutions.filter(row => row.courseId === courseId);
+  }
 
   async reviewTaxonomyLink(input: any) {
     const link = this.links.find((item) => item.id === input.linkId && item.courseId === input.courseId);
