@@ -9,6 +9,8 @@ npm run imports:qc:verify
 npm run imports:qc:test
 ```
 
+On a clean checkout, first run `npm run build -w @manaratak/application` to compile its referenced Core/Domain/Shared packages. This is a local TypeScript build, with no DB connection. CI does this before invoking the read-only verifier; the verifier itself never builds or rewrites artifacts.
+
 `verify` reads source artifacts and compares byte-for-byte derived outputs; it never changes files or opens a DB connection. `npm run imports:qc:prepare` intentionally regenerates only this directory's derived outputs for code review. Do not use it to discard a stale-output failure without reviewing the changed source/policy. It never changes upstream workbooks/Markdown or any DB record.
 
 ## Files

@@ -6,7 +6,7 @@
     {
       "id": "m10-source-qc",
       "classification": "SOURCE",
-      "command": "npm run imports:qc:verify && npm run imports:qc:test"
+      "command": "npm run build -w @manaratak/application && npm run imports:qc:verify && npm run imports:qc:test"
     },
     {
       "id": "architecture",
