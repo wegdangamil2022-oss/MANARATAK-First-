@@ -68,7 +68,7 @@ forbidMatch(modelBody('UniversityCampus'), /UniversityTranslationSourceRecord|Un
 requireMatch(modelBody('UniversityTranslation'), /@@unique\(\[universityId,\s*locale\]\)/, 'UniversityTranslation uniqueness missing');
 requireMatch(
   modelBody('UniversityLocalizedText'),
-  /@@unique\(\[universityId,\s*targetType,\s*targetId,\s*fieldKey,\s*locale\]\)/,
+  /@@unique\(\[universityId,\s*targetType,\s*targetId,\s*fieldKey,\s*locale\],\s*map:\s*"UniversityLocalizedText_identity_key"\)/,
   'UniversityLocalizedText uniqueness missing',
 );
 requireMatch(modelBody('University'), /\bpublicId\s+String\s+@unique/, 'University.publicId protected identity missing');

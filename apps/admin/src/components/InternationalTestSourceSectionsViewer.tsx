@@ -8,11 +8,9 @@ import {
   CheckCircle2,
   Clock,
   Search,
-  Hash,
   Database,
   Layers,
   Code2,
-  Eye,
   Info
 } from 'lucide-react';
 import { adminApiClient } from '../api/client';
