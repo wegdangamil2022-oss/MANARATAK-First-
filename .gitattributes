@@ -5,3 +5,5 @@ workspace/reference-data/cities/** -text
 workspace/reference-data/languages/*.csv -text
 packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts -text
 packages/domain/src/academic-taxonomy/isced-f-baseline.ts -text
+# Preserve verified upstream dependency snapshots byte-for-byte.
+vendor/awilix-core/** -text whitespace=cr-at-eol

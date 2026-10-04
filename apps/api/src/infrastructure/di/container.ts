@@ -11,7 +11,7 @@ import {
   ImportRetryPolicy
 } from '@manaratak/domain';
 
-import { createContainer, InjectionMode, asClass, asValue, asFunction } from 'awilix';
+import { createContainer, InjectionMode, asClass, asValue, asFunction } from '@manaratak-vendor/awilix-core';
 import { Router } from 'express';
 import { ConfigurationRegistry } from '@manaratak/config';
 import { RuntimeResourceRegistry } from '../runtime/RuntimeResourceRegistry.js';

@@ -1,0 +1,70 @@
+{
+  "upstream": {
+    "name": "awilix",
+    "version": "10.0.2",
+    "tarball": "https://registry.npmjs.org/awilix/-/awilix-10.0.2.tgz",
+    "integrity": "sha512-hFatb7eZFdtiWjjmGRSm/K/uxZpmcBlM+YoeMB3VpOPXk3xa6+7zctg3LRbUzoimom5bwGrePF0jXReO6b4zNQ==",
+    "sha1": "f5de09966d8c6b2bee51afa9bd3348e5836c359f",
+    "repository": "https://github.com/jeffijoe/awilix"
+  },
+  "runtimeModification": "None. Both runtime files are byte-identical official standalone builds.",
+  "declarationModification": "The unsupported listModules value export is omitted from types/awilix.d.ts.",
+  "files": {
+    "index.mjs": {
+      "upstreamFile": "lib/awilix.browser.js",
+      "sha256": "438aa0b1f148912d383497d59247e190068d810d587713e2dd28f7faeb1d897e"
+    },
+    "index.cjs": {
+      "upstreamFile": "lib/awilix.umd.js",
+      "sha256": "81346ae4b72f3bea4cc418840fb887fbd7a86072757f5f17618ae38b169e55ff"
+    },
+    "LICENSE.md": {
+      "upstreamFile": "LICENSE.md",
+      "sha256": "a373748aa83749a7e02c498463c26a1b0f0cf85d97dced1c778414f1e7e8bcd5"
+    },
+    "types/awilix.d.ts": {
+      "upstreamFile": "lib/awilix.d.ts",
+      "sha256": "8def495651f4f5f5d4cdbe698a4683f3d39b07e5b3e397cdf402589746b77125"
+    },
+    "types/container.d.ts": {
+      "upstreamFile": "lib/container.d.ts",
+      "sha256": "241e23429ed16e8eb1ee3ebee63f219944d86ce47d647e3c524ac2b373755e0b"
+    },
+    "types/errors.d.ts": {
+      "upstreamFile": "lib/errors.d.ts",
+      "sha256": "05980f4cbc6655b5ad7d5abe0b53b42ed5faca1833a82acb5fe0d71ba9743717"
+    },
+    "types/function-tokenizer.d.ts": {
+      "upstreamFile": "lib/function-tokenizer.d.ts",
+      "sha256": "1047db4d4529e948aa4ae94384e5926fc6d106652471a327e187cb663b0b76a4"
+    },
+    "types/injection-mode.d.ts": {
+      "upstreamFile": "lib/injection-mode.d.ts",
+      "sha256": "7e89fa384c41f80fd9b14fcc43a2d55656af850762069c97e9fb0f25534a11a4"
+    },
+    "types/lifetime.d.ts": {
+      "upstreamFile": "lib/lifetime.d.ts",
+      "sha256": "bfd776cb68aa40c33b27686ff583c2d769effa1cb7e7b5592ddf353221fcf89f"
+    },
+    "types/list-modules.d.ts": {
+      "upstreamFile": "lib/list-modules.d.ts",
+      "sha256": "8735c8b508a86d9424cfd25ba1a5dcf17d4fb7765e3e7e76004a456d8d98c065"
+    },
+    "types/load-modules.d.ts": {
+      "upstreamFile": "lib/load-modules.d.ts",
+      "sha256": "7ae61a794ac2a36d03bdab8708c4f0782a80b0d17aee4754f5dc3620b2243716"
+    },
+    "types/param-parser.d.ts": {
+      "upstreamFile": "lib/param-parser.d.ts",
+      "sha256": "b305ad27fa770f741f6e64ae315a095e88ddd424bc717ac639b2a704018cba2c"
+    },
+    "types/resolvers.d.ts": {
+      "upstreamFile": "lib/resolvers.d.ts",
+      "sha256": "df016f23d711902559f0f3a1c45573e906320ce7d53a6df3297a792f58813c89"
+    },
+    "types/utils.d.ts": {
+      "upstreamFile": "lib/utils.d.ts",
+      "sha256": "0bc872acdb7f144df4c27c12b2aa3df3b69bafb4131a74d5cf1f94404b9aa703"
+    }
+  }
+}

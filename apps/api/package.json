@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx src/server.ts",
     "typecheck": "node ../../scripts/verify-api-native-esm-specifiers.mjs && tsc -b && node ../../scripts/resolve-api-workspace-esm.mjs",
-    "build": "npm run typecheck && node ../../scripts/report-api-preview-configuration.mjs && esbuild src/server.ts --bundle --platform=node --format=cjs --external:uuid --external:@prisma/client --external:bcrypt --external:jsonwebtoken --external:awilix --external:cors --external:express --external:helmet --sourcemap --outfile=dist/server.cjs",
+    "build": "npm run typecheck && node ../../scripts/report-api-preview-configuration.mjs && esbuild src/server.ts --bundle --platform=node --format=cjs --external:uuid --external:@prisma/client --external:bcrypt --external:jsonwebtoken --external:cors --external:express --external:helmet --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "runtime:verify": "node ../../scripts/verify-vercel-api-handler.mjs",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
@@ -21,14 +21,14 @@
     "@manaratak/infrastructure": "*",
     "@opentelemetry/api": "^1.9.1",
     "@prisma/client": "^5.22.0",
-    "awilix": "^10.0.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "pino": "^10.3.1",
     "superagent": "^9.0.2",
     "supertest": "^7.2.2",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@manaratak-vendor/awilix-core": "file:../../vendor/awilix-core"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

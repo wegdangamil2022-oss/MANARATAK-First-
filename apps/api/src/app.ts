@@ -1,4 +1,4 @@
-import * as awilix from 'awilix';
+import * as awilix from '@manaratak-vendor/awilix-core';
 import { createVercelHttpHandler } from './infrastructure/runtime/VercelHttpHandler.js';
 import { createPreviewAvailabilityApp, isProvisioningPreview } from './infrastructure/runtime/PreviewAvailabilityApp.js';
 import express, { Router, Express, Request, Response } from 'express';

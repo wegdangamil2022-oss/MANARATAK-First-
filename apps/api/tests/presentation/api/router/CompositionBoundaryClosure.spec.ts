@@ -61,7 +61,7 @@ describe('WP1-B.2 Composition Boundary Closure Regression Tests', () => {
     });
 
     // Register a temporary mock lazy router in Awilix container
-    const { asValue } = await import('awilix');
+    const { asValue } = await import('@manaratak-vendor/awilix-core');
     container.register({ mockTestRouter: asValue(dummyRouter) });
 
     const app = await createApiApp();

@@ -1,4 +1,4 @@
-import type { AwilixContainer } from 'awilix';
+import type { AwilixContainer } from '@manaratak-vendor/awilix-core';
 import type { IConfigurationService } from '@manaratak/core';
 
 export interface PollingWorkerHandle {

@@ -1,0 +1,29 @@
+{
+  "name": "@manaratak-vendor/awilix-core",
+  "version": "10.0.2",
+  "private": true,
+  "description": "Pinned official Awilix standalone container builds without filesystem module discovery",
+  "license": "MIT",
+  "type": "module",
+  "main": "./index.cjs",
+  "module": "./index.mjs",
+  "types": "./types/awilix.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/awilix.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    }
+  },
+  "files": [
+    "index.mjs",
+    "index.cjs",
+    "types",
+    "LICENSE.md",
+    "README.md",
+    "provenance.json"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

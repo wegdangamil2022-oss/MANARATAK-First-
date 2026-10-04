@@ -1,4 +1,4 @@
-import type { AwilixContainer } from 'awilix';
+import type { AwilixContainer } from '@manaratak-vendor/awilix-core';
 import type { IConfigurationService, IMonitoringService } from '@manaratak/core';
 import type { RuntimeResourceRegistry } from './RuntimeResourceRegistry.js';
 
