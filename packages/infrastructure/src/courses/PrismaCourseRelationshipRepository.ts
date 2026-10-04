@@ -133,14 +133,6 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
     });
   }
 
-  public async listTaxonomyResolutions(courseId: string): Promise<CourseTaxonomyResolutionDto[]> {
-    const records = await this.prisma.courseTaxonomyResolution.findMany({
-      where: { courseId },
-      orderBy: [{ createdAt: 'asc' }],
-    });
-    return records.map((record) => this.mapResolution(record));
-  }
-
   public async upsertTaxonomyResolution(input: {
     courseId: string;
     sourceTerm: string;
@@ -281,6 +273,11 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       orderBy: [{ reviewState: 'asc' }, { createdAt: 'asc' }],
     });
     return records.map((record: any) => this.mapTaxonomyLink(record));
+  }
+
+  public async listTaxonomyResolutions(courseId: string): Promise<CourseTaxonomyResolutionDto[]> {
+    const records = await this.prisma.courseTaxonomyResolution.findMany({ where: { courseId }, orderBy: { normalizedTerm: 'asc' } });
+    return records.map(record => this.mapResolution(record));
   }
 
   public async reviewTaxonomyLink(input: {

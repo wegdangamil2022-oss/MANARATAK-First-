@@ -31,7 +31,7 @@ function checkAdminHttpReady(port = 3001) {
   return new Promise((resolve) => {
     const req = http.get(`http://127.0.0.1:${port}/admin/`, { timeout: 1000 }, (res) => {
       res.resume();
-      resolve(true);
+      resolve(res.statusCode === 200);
     });
     req.on('error', () => resolve(false));
     req.on('timeout', () => {

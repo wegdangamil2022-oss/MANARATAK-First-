@@ -30,6 +30,7 @@ import { InternationalTestStatus } from './enums';
 import { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 
 export interface IInternationalTestRepository {
+  acquireSourceReviewLock?(testId: string): Promise<void>;
   acquireGraphMutationLock?(testId: string, kind: 'COUNTRY' | 'LANGUAGE' | 'TAXONOMY' | 'DEGREE', referenceId: string): Promise<void>;
   // Legacy / current application compatibility methods
   findById(id: string): Promise<InternationalTestDto | null>;

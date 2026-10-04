@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InternationalTestAdminUseCases } from '../../src/tests-platform/use-cases/InternationalTestUseCases';
+import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { 
   InternationalTestCategory, 
   InternationalTestCompletenessStatus, 
@@ -481,6 +482,37 @@ describe('InternationalTestAdminUseCases', () => {
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
+    it('rejects a version returned with a foreign owner', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([{ ...validVersion, testId: 'other-test' }]);
+      await expect(useCases.reviewSourceNames('test-1', {
+        versionId: 'ver-1', sourceHash: 'a'.repeat(64), localizedNameAr: 'الآيلتس', localizedNameEn: 'IELTS',
+        reviewReason: 'Reviewed', evidenceReference: 'sources/ielts.md',
+      })).rejects.toThrow(/does not belong/);
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects a name changed between the initial read and the transaction lock', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+      const transactionRepository = {
+        ...mockRepository,
+        acquireSourceReviewLock: vi.fn().mockResolvedValue(undefined),
+        findById: vi.fn().mockResolvedValue({ ...parentTest, localizedNameAr: 'اسم معدّل' }),
+      };
+      mockRepository.withTransaction = vi.fn().mockReturnValue(transactionRepository);
+      const coordinator = new AtomicDomainMutationCoordinator({
+        execute: vi.fn(async (_audit, _outbox, mutation) => mutation({ boundaryId: 'test-boundary' })),
+      } as never);
+      const atomicUseCases = new InternationalTestAdminUseCases(mockRepository, undefined, undefined, undefined, undefined, undefined, coordinator);
+      await expect(atomicUseCases.reviewSourceNames('test-1', {
+        versionId: 'ver-1', sourceHash: 'a'.repeat(64), localizedNameAr: 'الآيلتس', localizedNameEn: 'IELTS',
+        reviewReason: 'Reviewed', evidenceReference: 'sources/ielts.md',
+      }, { actorId: 'reviewer' })).rejects.toThrow('CONFLICTING_LOCALIZED_NAME_MODIFICATION');
+      expect(transactionRepository.acquireSourceReviewLock).toHaveBeenCalledWith('test-1');
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
     it('rejects conflicting modification when expectedCurrent does not match', async () => {
       mockRepository.findById.mockResolvedValue({
         ...parentTest,
@@ -580,6 +612,47 @@ describe('InternationalTestAdminUseCases', () => {
         correctionReason: 'Official update',
         evidenceReference: 'sources/sat.md'
       })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+    });
+
+    it.each(['ARCHIVED', 'REJECTED'])('rejects identity changes on a %s test', async status => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest, status });
+      await expect(useCases.correctDraftCanonicalIdentity('test-sat', {
+        versionId: 'ver-sat-1', sourceHash: 'b'.repeat(64), newCanonicalName: 'SAT',
+        correctionReason: 'Reviewed', evidenceReference: 'sources/sat.md',
+      })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('treats an explicitly expected null canonical name as a conflict', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+      await expect(useCases.correctDraftCanonicalIdentity('test-sat', {
+        versionId: 'ver-sat-1', sourceHash: 'b'.repeat(64), expectedCurrentCanonicalName: null,
+        newCanonicalName: 'SAT', correctionReason: 'Reviewed', evidenceReference: 'sources/sat.md',
+      })).rejects.toThrow('CONFLICTING_CANONICAL_NAME_MODIFICATION');
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('rechecks publication after acquiring the transaction lock', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+      mockRepository.findByDedupKey.mockResolvedValue(null);
+      const transactionRepository = {
+        ...mockRepository,
+        acquireSourceReviewLock: vi.fn().mockResolvedValue(undefined),
+        findById: vi.fn().mockResolvedValue({ ...parentTest, status: 'PUBLISHED' }),
+      };
+      mockRepository.withTransaction = vi.fn().mockReturnValue(transactionRepository);
+      const coordinator = new AtomicDomainMutationCoordinator({
+        execute: vi.fn(async (_audit, _outbox, mutation) => mutation({ boundaryId: 'test-boundary' })),
+      } as never);
+      const atomicUseCases = new InternationalTestAdminUseCases(mockRepository, undefined, undefined, undefined, undefined, undefined, coordinator);
+      await expect(atomicUseCases.correctDraftCanonicalIdentity('test-sat', {
+        versionId: 'ver-sat-1', sourceHash: 'b'.repeat(64), newCanonicalName: 'SAT',
+        correctionReason: 'Reviewed', evidenceReference: 'sources/sat.md',
+      }, { actorId: 'reviewer' })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+      expect(transactionRepository.acquireSourceReviewLock).toHaveBeenCalledWith('test-sat');
+      expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('rejects if expected current canonical name does not match', async () => {

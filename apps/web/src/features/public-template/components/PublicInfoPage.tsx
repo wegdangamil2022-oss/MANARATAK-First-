@@ -27,7 +27,7 @@ export function PublicInfoPage({page, onBack, onServices}: {page: 'faq' | 'conta
         <p className="mt-3 text-sm leading-7 text-[var(--mn-text-muted)]">لم تُربط بيانات التواصل والوكلاء المعتمدة بهذه النسخة بعد. لن نعرض أرقامًا أو عناوين غير مؤكدة.</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <button onClick={onServices} className="rounded-xl px-4 py-3 bg-[var(--mn-primary)] text-white font-bold text-sm mn-inverse">استكشف خدمات منارتك</button>
-          <a href="/admin/login" onClick={(e) => { e.preventDefault(); window.location.assign('/admin/login'); }} className="rounded-xl px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center gap-2 transition-colors">
+          <a href="/admin/login" className="rounded-xl px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center gap-2 transition-colors">
             <ShieldCheck className="w-4 h-4 text-teal-400" />
             <span>دخول بوابة الإدارة</span>
           </a>

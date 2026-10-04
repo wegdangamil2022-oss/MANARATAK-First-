@@ -608,91 +608,48 @@ async function main() {
   } catch (error: any) {
     console.error('\n!!! ERROR OCCURRED IN TEST RUN !!!');
     console.error(error);
+    process.exitCode = 1;
   } finally {
     // ==========================================
     // STEP 7: CLEANUP & TEARDOWN (OFFICIAL LIFECYCLE)
     // ==========================================
     console.log('\n=== RUNNING DATA CLEANUP (OFFICIAL LIFECYCLE TRANSITIONS) ===');
     try {
+      const retire = async (kind: 'CITY' | 'REGION', id: string, target: 'DEPRECATED' | 'ARCHIVED') => {
+        const current = kind === 'CITY'
+          ? await prisma.referenceCity.findUnique({ where: { id } })
+          : await prisma.administrativeRegion.findUnique({ where: { id } });
+        if (!current) throw new Error(`Cleanup record missing: ${kind}/${id}`);
+        if (current.lifecycleState === target || current.lifecycleState === 'ARCHIVED') return;
+        const response = await fetch(`${BASE_URL}/admin/reference-data/governance/${kind}/${id}/lifecycle`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', Cookie: authCookies,
+            'X-CSRF-Token': csrfToken,
+            'Idempotency-Key': `idem-key-cleanup-${kind}-${id}-${target}-${TEST_SUFFIX}`,
+          },
+          body: JSON.stringify({ toState: target, reason: 'Cleanup: Retiring test data.', expectedVersion: current.versionNumber }),
+        });
+        if (!response.ok) throw new Error(`Cleanup rejected for ${kind}/${id}: HTTP ${response.status}`);
+        const saved = kind === 'CITY'
+          ? await prisma.referenceCity.findUnique({ where: { id } })
+          : await prisma.administrativeRegion.findUnique({ where: { id } });
+        if (saved?.lifecycleState !== target) throw new Error(`Cleanup state mismatch for ${kind}/${id}`);
+        console.log(`[Cleanup] ${kind}/${id} verified ${target}.`);
+      };
       if (cityId) {
-        console.log(`[Cleanup] Deprecating/Archiving test city: ${cityId}`);
-        const cityData = await prisma.referenceCity.findUnique({ where: { id: cityId } });
-        if (cityData) {
-          // Deprecate city
-          await fetch(`${BASE_URL}/admin/reference-data/governance/CITY/${cityId}/lifecycle`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cookie': authCookies,
-              'X-CSRF-Token': csrfToken,
-              'Idempotency-Key': `idem-key-cleanup-deprecate-city-${TEST_SUFFIX}`,
-            },
-            body: JSON.stringify({ toState: 'DEPRECATED', reason: 'Cleanup: Deprecating test city.', expectedVersion: cityData.versionNumber }),
-          });
-          // Archive city (dependent relation is cleared)
-          await fetch(`${BASE_URL}/admin/reference-data/governance/CITY/${cityId}/lifecycle`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cookie': authCookies,
-              'X-CSRF-Token': csrfToken,
-              'Idempotency-Key': `idem-key-cleanup-archive-city-${TEST_SUFFIX}`,
-            },
-            body: JSON.stringify({ toState: 'ARCHIVED', reason: 'Cleanup: Archiving test city.', expectedVersion: cityData.versionNumber + 1 }),
-          });
-          console.log('[Cleanup] Test city successfully archived.');
-        }
+        await retire('CITY', cityId, 'DEPRECATED');
+        await retire('CITY', cityId, 'ARCHIVED');
       }
-
-      if (regionAId) {
-        console.log(`[Cleanup] Archiving Region A now that city is archived: ${regionAId}`);
-        const regA = await prisma.administrativeRegion.findUnique({ where: { id: regionAId } });
-        if (regA && regA.lifecycleState !== 'ARCHIVED') {
-          await fetch(`${BASE_URL}/admin/reference-data/governance/REGION/${regionAId}/lifecycle`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cookie': authCookies,
-              'X-CSRF-Token': csrfToken,
-              'Idempotency-Key': `idem-key-cleanup-archive-region-a-${TEST_SUFFIX}`,
-            },
-            body: JSON.stringify({ toState: 'ARCHIVED', reason: 'Cleanup: Archiving Region A.', expectedVersion: regA.versionNumber }),
-          });
-          console.log('[Cleanup] Region A successfully archived.');
-        }
-      }
-
+      // Archiving a city retains its FK; Region A must remain DEPRECATED.
+      if (regionAId) await retire('REGION', regionAId, 'DEPRECATED');
       if (regionBId) {
-        console.log(`[Cleanup] Retiring Region B: ${regionBId}`);
-        const regB = await prisma.administrativeRegion.findUnique({ where: { id: regionBId } });
-        if (regB) {
-          // Deprecate Region B
-          await fetch(`${BASE_URL}/admin/reference-data/governance/REGION/${regionBId}/lifecycle`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cookie': authCookies,
-              'X-CSRF-Token': csrfToken,
-              'Idempotency-Key': `idem-key-cleanup-deprecate-region-b-${TEST_SUFFIX}`,
-            },
-            body: JSON.stringify({ toState: 'DEPRECATED', reason: 'Cleanup: Deprecating Region B.', expectedVersion: regB.versionNumber }),
-          });
-          // Archive Region B
-          await fetch(`${BASE_URL}/admin/reference-data/governance/REGION/${regionBId}/lifecycle`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cookie': authCookies,
-              'X-CSRF-Token': csrfToken,
-              'Idempotency-Key': `idem-key-cleanup-archive-region-b-${TEST_SUFFIX}`,
-            },
-            body: JSON.stringify({ toState: 'ARCHIVED', reason: 'Cleanup: Archiving Region B.', expectedVersion: regB.versionNumber + 1 }),
-          });
-          console.log('[Cleanup] Region B successfully archived.');
-        }
+        await retire('REGION', regionBId, 'DEPRECATED');
+        await retire('REGION', regionBId, 'ARCHIVED');
       }
     } catch (cleanError: any) {
       console.warn('[Cleanup Warning] Error during data retirement:', cleanError.message);
+      process.exitCode = 1;
     }
 
     await prisma.$disconnect();
@@ -712,4 +669,4 @@ async function main() {
   console.log('====================================================\n');
 }
 
-main().catch(console.error);
+main().catch(error => { console.error(error); process.exitCode = 1; });

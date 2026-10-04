@@ -238,7 +238,7 @@ export class InternationalTestAdminUseCases {
     const test = await this.get(id);
     const versions = await this.listImportVersions(id);
     const version = versions.find(v => v.id === input.versionId);
-    if (!version) {
+    if (!version || version.testId !== id) {
       throw new Error(`Import version ${input.versionId} does not belong to test ${id}`);
     }
     if (!version.sourceHash || version.sourceHash !== input.sourceHash) {
@@ -279,6 +279,15 @@ export class InternationalTestAdminUseCases {
       id,
       context,
       async (repository) => {
+        const current = await this.lockSourceReviewOwner(repository, id);
+        const currentVersions = await repository.listImportVersions?.(id);
+        if (!currentVersions?.some(v => v.id === input.versionId && v.testId === id && v.sourceHash === input.sourceHash)) {
+          throw new Error('TEST_IMPORT_SOURCE_HASH_MISMATCH');
+        }
+        if ((current.localizedNameAr ?? null) !== (test.localizedNameAr ?? null)
+          || (current.localizedNameEn ?? null) !== (test.localizedNameEn ?? null)) {
+          throw new Error('CONFLICTING_LOCALIZED_NAME_MODIFICATION');
+        }
         return repository.update(id, {
           localizedNameAr: nameAr,
           localizedNameEn: nameEn,
@@ -301,13 +310,13 @@ export class InternationalTestAdminUseCases {
     context?: AtomicMutationRequestContext
   ): Promise<InternationalTestDto> {
     const test = await this.get(id);
-    if (test.status === InternationalTestStatus.PUBLISHED || (test as any).currentPublishedVersionId != null) {
+    if ([InternationalTestStatus.PUBLISHED, InternationalTestStatus.ARCHIVED, InternationalTestStatus.REJECTED].includes(test.status) || test.currentPublishedVersionId != null) {
       throw new Error('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
     }
 
     const versions = await this.listImportVersions(id);
     const version = versions.find(v => v.id === input.versionId);
-    if (!version) {
+    if (!version || version.testId !== id) {
       throw new Error(`Import version ${input.versionId} does not belong to test ${id}`);
     }
     if (!version.sourceHash || version.sourceHash !== input.sourceHash) {
@@ -329,8 +338,7 @@ export class InternationalTestAdminUseCases {
 
     if (
       input.expectedCurrentCanonicalName !== undefined &&
-      input.expectedCurrentCanonicalName !== null &&
-      test.canonicalName !== input.expectedCurrentCanonicalName.trim()
+      (test.canonicalName ?? null) !== (input.expectedCurrentCanonicalName?.trim() ?? null)
     ) {
       throw new Error('CONFLICTING_CANONICAL_NAME_MODIFICATION');
     }
@@ -360,6 +368,19 @@ export class InternationalTestAdminUseCases {
       id,
       context,
       async (repository) => {
+        const current = await this.lockSourceReviewOwner(repository, id);
+        if ([InternationalTestStatus.PUBLISHED, InternationalTestStatus.ARCHIVED, InternationalTestStatus.REJECTED].includes(current.status) || current.currentPublishedVersionId != null) {
+          throw new Error('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+        }
+        if (current.canonicalName !== test.canonicalName || current.providerName !== test.providerName) {
+          throw new Error('CONFLICTING_CANONICAL_NAME_MODIFICATION');
+        }
+        const currentVersions = await repository.listImportVersions?.(id);
+        if (!currentVersions?.some(v => v.id === input.versionId && v.testId === id && v.sourceHash === input.sourceHash)) {
+          throw new Error('TEST_IMPORT_SOURCE_HASH_MISMATCH');
+        }
+        const collision = await repository.findByDedupKey(newDedupKey);
+        if (collision && collision.id !== id) throw new Error('INTERNATIONAL_TEST_CANONICAL_IDENTITY_COLLISION');
         return repository.update(id, {
           canonicalName: newCanonical,
           displayName: newDisplayName,
@@ -534,6 +555,14 @@ export class InternationalTestAdminUseCases {
     const provider = await this.repository.findProviderById(data.providerId);
     if (!provider) throw new Error(`International test provider with id ${data.providerId} not found`);
     return { providerId: provider.id, providerName: provider.displayName };
+  }
+
+  private async lockSourceReviewOwner(repository: IInternationalTestRepository, id: string): Promise<InternationalTestDto> {
+    if (this.atomicMutations && !repository.acquireSourceReviewLock) throw new Error('INTERNATIONAL_TEST_SOURCE_REVIEW_TRANSACTION_REQUIRED');
+    await repository.acquireSourceReviewLock?.(id);
+    const current = await repository.findById(id);
+    if (!current) throw new Error(`International test with id ${id} not found`);
+    return current;
   }
 
   private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined, mutation: (repository: IInternationalTestRepository) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {

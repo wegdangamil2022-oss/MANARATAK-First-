@@ -76,7 +76,7 @@ check('MNT-AUD-0071 schema has session lineage', /familyId\s+String/.test(sessio
 check('MNT-AUD-0071 migration authored', exists('packages/infrastructure/prisma/migrations/20260906194500_session_refresh_rotation_lineage/migration.sql'));
 
 try {
-  const authSourceTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/auth-token-remediation-source.test.mjs')], { encoding: 'utf8' });
+  const authSourceTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/auth-token-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0105/0071 native source contract tests execute', /# fail 0/.test(authSourceTest));
 } catch (error) {
   check('MNT-AUD-0105/0071 native source contract tests execute', false);
@@ -97,7 +97,7 @@ check('MNT-AUD-0062 legacy AI route uses strict control-plane wrapper', app.incl
 check('MNT-AUD-0062 canonical AI operator route inherits /admin boundary', app.includes("v1Router.use('/admin/ai/operator', requireAdminPermission('admin:ai:manage'), lazyRouter('aiGatewayRouter'))"));
 
 try {
-  const lifecycleSourceTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/auth-lifecycle-remediation-source.test.mjs')], { encoding: 'utf8' });
+  const lifecycleSourceTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/auth-lifecycle-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0076/0065/0062 native source contract tests execute', /# fail 0/.test(lifecycleSourceTest));
 } catch (error) {
   check('MNT-AUD-0076/0065/0062 native source contract tests execute', false);
@@ -117,7 +117,7 @@ check('MNT-AUD-0106 authorization mutation context requires authenticated princi
 check('MNT-AUD-0084 Admin mutation policy defaults to audited', mutationAudit.includes("return 'STANDARD_AUDIT_REQUIRED';") && mutationAudit.includes("'/admin/cms'") && mutationAudit.includes("'/admin/finance'") && mutationAudit.includes("'/admin/services'"));
 
 try {
-  const auditSourceTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/audit-integrity-remediation-source.test.mjs')], { encoding: 'utf8' });
+  const auditSourceTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/audit-integrity-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0110/0106/0084 native source contract tests execute', /# fail 0/.test(auditSourceTest));
 } catch (error) {
   check('MNT-AUD-0110/0106/0084 native source contract tests execute', false);
@@ -152,7 +152,7 @@ check('MNT-AUD-0111 active Phase 4 baseline rebaselined', read('docs/phases/phas
 
 
 try {
-  const strictValidationTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/strict-edge-validation-remediation-source.test.mjs')], { encoding: 'utf8' });
+  const strictValidationTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/strict-edge-validation-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0111 native source contract tests execute', /# fail 0/.test(strictValidationTest));
 } catch (error) {
   check('MNT-AUD-0111 native source contract tests execute', false);
@@ -172,7 +172,7 @@ check('MNT-AUD-0114 inline-style remediation is explicitly registered', exists('
 check('MNT-AUD-0114 Web/Admin inline style inventory is zero', Number(webInlineStyleCount) === 0 && Number(adminInlineStyleCount) === 0);
 
 try {
-  const frontendSecurityTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/frontend-security-headers-source.test.mjs')], { encoding: 'utf8' });
+  const frontendSecurityTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/frontend-security-headers-source.test.mjs'), path.join(root, 'tests/security/public-auth-source-policy.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0101/0114 native source contract tests execute', /# fail 0/.test(frontendSecurityTest));
 } catch (error) {
   check('MNT-AUD-0101/0114 native source contract tests execute', false);
@@ -186,7 +186,7 @@ check('MNT-AUD-0043 canonical production config inventory exists', appConfig.inc
 check('MNT-AUD-0043 Redis is required in both environment templates', !/REDIS[^\n]*OPTIONAL|in-memory rate limiting/i.test(envExample + '\n' + apiEnvExample));
 check('MNT-AUD-0043 startup-blocking vars are mirrored in both environment templates', ['JWT_ISSUER','JWT_AUDIENCE','SECURE_COOKIE','TRUST_PROXY_HOPS','PUBLIC_WEB_URL','ADMIN_WEB_URL','SECURITY_CSP_ENABLED','CERTIFICATE_COMPLETION_WORKER_ENABLED','CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS'].every(key => new RegExp(`^${key}=`, 'm').test(envExample) && new RegExp(`^${key}=`, 'm').test(apiEnvExample)));
 check('MNT-AUD-0043 readiness consumes normalized runtime contract', readiness.includes('loadAppConfig(process.env)') && app.includes('ProductionReadinessValidator.validate(normalizedRuntimeConfig)'));
-check('MNT-AUD-0043 certificate worker consumes typed config', apiServer.includes("config.getOptional<boolean>('CERTIFICATE_COMPLETION_WORKER_ENABLED')") && !apiServer.includes('process.env.CERTIFICATE_COMPLETION_WORKER_'));
+check('MNT-AUD-0043 certificate worker consumes typed config', apiServer.includes('startPollingWorkers(container, config)') && read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts').includes("config.getOptional<boolean>('CERTIFICATE_COMPLETION_WORKER_ENABLED')") && !read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts').includes('process.env.CERTIFICATE_COMPLETION_WORKER_'));
 check('MNT-AUD-0115 truthiness boolean coercion removed', !appConfig.includes('z.coerce.boolean()') && appConfig.includes("normalized === 'false' || normalized === '0'") && appConfig.includes("normalized === 'true' || normalized === '1'"));
 check('MNT-AUD-0115 registered with closure evidence', envContractDoc.includes('MNT-AUD-0115') && envContractDoc.includes('SOURCE_VERIFIED / RUNTIME_PENDING'));
 
@@ -197,7 +197,7 @@ try {
   check('MNT-AUD-0043 mechanical environment-contract verifier executes', false);
 }
 try {
-  const envSourceTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/config/production-environment-contract-source.test.mjs')], { encoding: 'utf8' });
+  const envSourceTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/config/production-environment-contract-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0043/0115 native source contract tests execute', /# fail 0/.test(envSourceTest));
 } catch (error) {
   check('MNT-AUD-0043/0115 native source contract tests execute', false);
@@ -210,16 +210,16 @@ check('MNT-AUD-0040 one canonical Prisma constructor remains', runtimeRegistry.i
 check('MNT-AUD-0040 one canonical Redis client is injected across runtime', runtimeRegistry.includes('RedisClientFactory.createClient') && !container.includes('RedisClientFactory.createClient') && app.includes("container.resolve<any>('redisClient')"));
 check('MNT-AUD-0040 DI uses process-owned resource registry', container.includes('runtimeResourceRegistry: asValue(runtimeResources)') && app.includes('registerDependencies(currentEnv, config, runtimeResources)'));
 check('MNT-AUD-0040 readiness goes down before shutdown', app.includes("name: 'runtime-lifecycle'") && app.includes('RUNTIME_SHUTTING_DOWN') && apiServerLifecycle.includes('runtimeResources?.beginShutdown()'));
-check('MNT-AUD-0040 SIGTERM/SIGINT graceful shutdown drains work and closes shared resources', apiServerLifecycle.includes("process.once('SIGTERM'") && apiServerLifecycle.includes("process.once('SIGINT'") && apiServerLifecycle.includes('server.closeIdleConnections?.()') && apiServerLifecycle.includes('server.close(') && apiServerLifecycle.includes('certificateWorkerTask ?? Promise.resolve()') && apiServerLifecycle.includes('Promise.race([') && apiServerLifecycle.includes('server.closeAllConnections?.()') && apiServerLifecycle.includes('runtimeResources?.closeAll()') && runtimeRegistry.includes('await prisma.$disconnect()') && runtimeRegistry.includes('await redis.quit()'));
+check('MNT-AUD-0040 SIGTERM/SIGINT graceful shutdown drains work and closes shared resources', apiServerLifecycle.includes("process.once('SIGTERM'") && apiServerLifecycle.includes("process.once('SIGINT'") && apiServerLifecycle.includes('server.closeIdleConnections?.()') && apiServerLifecycle.includes('server.close(') && apiServerLifecycle.includes('Promise.all([pollingDrain, backgroundWorker?.drain?.()') && apiServerLifecycle.includes('const pollingDrain = stopPollingWorkers()') && apiServerLifecycle.includes('Promise.race([') && apiServerLifecycle.includes('server.closeAllConnections?.()') && apiServerLifecycle.includes('runtimeResources?.closeAll()') && runtimeRegistry.includes('await prisma.$disconnect()') && runtimeRegistry.includes('await redis.quit()'));
 check('MNT-AUD-0040 lifecycle runbook exists', exists('docs/operations/RUNTIME_RESOURCE_LIFECYCLE.md'));
 try {
-  const lifecycleTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/runtime/runtime-resource-lifecycle-source.test.mjs')], { encoding: 'utf8' });
+  const lifecycleTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/runtime/runtime-resource-lifecycle-source.test.mjs'), path.join(root, 'tests/runtime/runtime-shutdown-drain-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0040 native lifecycle source tests execute', /# fail 0/.test(lifecycleTest));
 } catch (error) {
   check('MNT-AUD-0040 native lifecycle source tests execute', false);
 }
 try {
-  const lifecycleRuntimeTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/runtime/runtime-resource-lifecycle-runtime.test.mjs')], { encoding: 'utf8' });
+  const lifecycleRuntimeTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/runtime/runtime-resource-lifecycle-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0040 runtime lifecycle behavior executes', /# fail 0/.test(lifecycleRuntimeTest));
 } catch {
   check('MNT-AUD-0040 runtime lifecycle behavior executes', false);
@@ -230,7 +230,7 @@ check('MNT-AUD-0063 readiness respects explicit indicator criticality', monitori
 check('MNT-AUD-0063 production Redis is required in composition', app.includes("name: 'redis'") && app.includes('isOptional: !isProductionOrStaging'));
 check('MNT-AUD-0063 health closure report is rebaselined', read('docs/HEALTH_READINESS_FINAL_CLOSURE_2026-09-05.md').includes('MNT-AUD-0063'));
 try {
-  const monitoringRuntimeTest = execFileSync(process.execPath, ['--test', path.join(root, 'tests/runtime/monitoring-required-dependency-runtime.test.mjs')], { encoding: 'utf8' });
+  const monitoringRuntimeTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/runtime/monitoring-required-dependency-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0063 required dependency runtime semantics execute', /# fail 0/.test(monitoringRuntimeTest));
 } catch {
   check('MNT-AUD-0063 required dependency runtime semantics execute', false);
@@ -244,7 +244,7 @@ const credentialVerifier = read('packages/infrastructure/src/auth/PrismaCredenti
 check('MNT-AUD-0072 password KDF is asynchronous', passwordHasher.includes("import { scrypt") && !passwordHasher.includes('scryptSync') && passwordHasher.includes('private static derive(') && passwordHasher.includes('scrypt(password, salt, keyLength, params'));
 check('MNT-AUD-0072 unknown-account path executes dummy KDF', authRouter.includes('credentialVerifier?.verifyDummy?.(password)') && credentialVerifier.includes('public async verifyDummy(credentialValue'));
 try {
-  const loginKdfRuntime = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/login-kdf-remediation-runtime.test.mjs')], { encoding: 'utf8' });
+  const loginKdfRuntime = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/login-kdf-remediation-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0072 async/dummy KDF runtime tests execute', /# fail 0/.test(loginKdfRuntime));
 } catch {
   check('MNT-AUD-0072 async/dummy KDF runtime tests execute', false);
@@ -258,7 +258,7 @@ check('MNT-AUD-0102 API injects active CSRF_SECRET', app.includes("signingSecret
 check('MNT-AUD-0102 unused SESSION_SECRET readiness claim removed', !appConfig.includes("'SESSION_SECRET'") && !readiness.includes('session_secret') && !/^SESSION_SECRET=/m.test(envExample));
 check('MNT-AUD-0102 CSRF secret remains production-blocking', appConfig.includes("'CSRF_SECRET'") && readiness.includes('auth.csrf_secret_weak'));
 try {
-  const csrfRuntime = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/cookie-csrf-contract-runtime.test.mjs')], { encoding: 'utf8' });
+  const csrfRuntime = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/cookie-csrf-contract-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0102 cookie/CSRF runtime contract tests execute', /# fail 0/.test(csrfRuntime));
 } catch {
   check('MNT-AUD-0102 cookie/CSRF runtime contract tests execute', false);
@@ -269,7 +269,7 @@ check('MNT-AUD-0103 canonical CORS header contract includes mutation/correlation
 check('MNT-AUD-0103 security middleware consumes canonical CORS contract', middleware.includes('CANONICAL_API_REQUEST_HEADERS') && middleware.includes('CANONICAL_API_EXPOSED_HEADERS'));
 check('MNT-AUD-0103 public and Admin origins compose into CORS policy', app.includes('buildCanonicalCorsOrigins') && app.includes('publicWebUrl:') && app.includes('adminWebUrl:'));
 try {
-  const corsRuntime = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/cors-contract-runtime.test.mjs')], { encoding: 'utf8' });
+  const corsRuntime = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/cors-contract-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0103 CORS contract runtime tests execute', /# fail 0/.test(corsRuntime));
 } catch {
   check('MNT-AUD-0103 CORS contract runtime tests execute', false);
@@ -283,7 +283,7 @@ check('MNT-AUD-0104 Redis requires authentication', compose.includes('--requirep
 check('MNT-AUD-0104 compose is development-profile gated', (compose.match(/profiles: \["development"\]/g) || []).length >= 3 && compose.includes('development-safety-gate'));
 check('MNT-AUD-0104 wrapper rejects production/staging', composeWrapper.includes("runtime === 'production'") && composeWrapper.includes("runtime === 'staging'") && exists('.env.compose.example'));
 try {
-  const composeSource = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/local-compose-safety-source.test.mjs')], { encoding: 'utf8' });
+  const composeSource = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/local-compose-safety-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0104 local compose safety tests execute', /# fail 0/.test(composeSource));
 } catch {
   check('MNT-AUD-0104 local compose safety tests execute', false);
@@ -295,7 +295,7 @@ check('MNT-AUD-0067 canonical Admin client blocks unsafe methods before network'
 check('MNT-AUD-0067 Admin Vite bridge returns 423 for unsafe preview writes', adminVite.includes('localAdminReadOnlyGuardPlugin') && adminVite.includes('res.statusCode = 423'));
 check('MNT-AUD-0067 production/staging builds reject auth-bypass flag', adminVite.includes('assertLocalReadOnlyBuildAllowed') && adminReadOnlyPolicy.includes('forbidden in production/staging builds'));
 try {
-  const adminReadOnlyRuntime = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/local-admin-readonly-runtime.test.mjs')], { encoding: 'utf8' });
+  const adminReadOnlyRuntime = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/local-admin-readonly-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0067 local Admin read-only runtime tests execute', /# fail 0/.test(adminReadOnlyRuntime));
 } catch {
   check('MNT-AUD-0067 local Admin read-only runtime tests execute', false);
@@ -305,10 +305,10 @@ const publicDataModePolicy = read('apps/web/src/config/PublicDataModePolicy.ts')
 const publicLiveData = read('apps/web/src/features/public-template/usePublicLiveData.ts');
 const publicTemplateApp = read('apps/web/src/features/public-template/PublicTemplateApp.tsx');
 check('MNT-AUD-0070 production/staging builds reject prototype mode', publicDataModePolicy.includes('VITE_PUBLIC_TEMPLATE_DATA_MODE=prototype is forbidden in production/staging builds') && webVite.includes('assertPublicBuildDataMode'));
-check('MNT-AUD-0070 production bundle has compile-time prototype capability gate', webVite.includes('__MANARATAK_PROTOTYPE_DATA_ENABLED__') && publicLiveData.includes('requestedMode === \'prototype\' && __MANARATAK_PROTOTYPE_DATA_ENABLED__'));
+check('MNT-AUD-0070 production bundle has compile-time prototype capability gate', webVite.includes('__MANARATAK_PROTOTYPE_DATA_ENABLED__') && publicLiveData.includes('typeof __MANARATAK_PROTOTYPE_DATA_ENABLED__') && publicLiveData.includes('!__MANARATAK_PROTOTYPE_DATA_ENABLED__') && publicLiveData.includes("isProd ? 'api' : requestedMode"));
 check('MNT-AUD-0070 prototype mode has unmistakable visible indicator', publicTemplateApp.includes('وضع تجريبي محلي') && publicTemplateApp.includes('غير إنتاجية'));
 try {
-  const prototypeRuntime = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/public-prototype-build-guard-runtime.test.mjs')], { encoding: 'utf8' });
+  const prototypeRuntime = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/public-prototype-build-guard-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0070 public prototype build-guard tests execute', /# fail 0/.test(prototypeRuntime));
 } catch {
   check('MNT-AUD-0070 public prototype build-guard tests execute', false);
@@ -326,13 +326,13 @@ check('MNT-AUD-0113 local limiter is restricted to non-production', container.in
 check('MNT-AUD-0113 quota-store failure is fail-closed with stable 503', studentToolGateways.includes('STUDENT_TOOL_QUOTA_STORE_UNAVAILABLE') && studentToolsPublicRouter.includes("code.includes('QUOTA_STORE_UNAVAILABLE')") && studentToolsPublicRouter.includes('? 503') && studentToolsAdminRouterSource.includes("code.includes('QUOTA_STORE_UNAVAILABLE') ? 503"));
 check('MNT-AUD-0113 quota capability is a required production health indicator', app.includes("name: 'student-tools-quota'") && app.includes('STUDENT_TOOL_QUOTA_STORE_NOT_DISTRIBUTED'));
 try {
-  const studentQuotaSource = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/student-tools-distributed-quota-source.test.mjs')], { encoding: 'utf8' });
+  const studentQuotaSource = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/student-tools-distributed-quota-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0113 distributed quota source tests execute', /# fail 0/.test(studentQuotaSource));
 } catch {
   check('MNT-AUD-0113 distributed quota source tests execute', false);
 }
 try {
-  const studentQuotaRuntime = execFileSync(process.execPath, ['--test', path.join(root, 'tests/security/student-tools-distributed-quota-runtime.test.mjs')], { encoding: 'utf8' });
+  const studentQuotaRuntime = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/student-tools-distributed-quota-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0113 two-instance shared-store runtime tests execute', /# fail 0/.test(studentQuotaRuntime));
 } catch {
   check('MNT-AUD-0113 two-instance shared-store runtime tests execute', false);

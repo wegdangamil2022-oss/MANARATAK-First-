@@ -23,6 +23,7 @@ Thumbs.db
 .vite/
 playwright-report/
 test-results/
+storage/dev-jwt-keys.json
 tmp/
 temp/
 *.zip
