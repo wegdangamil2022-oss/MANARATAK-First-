@@ -47,11 +47,12 @@ test('IAM schema declares uniqueness and restrictive security relations without 
   }
   assert.match(model('SessionRecord'), /refreshTokenHash\s+String\s+@unique/);
 });
-test('Admin application delegates login to the unified public surface and retains permission gating', () => {
+test('Admin application verifies the system session and retains permission gating', () => {
   const app = fs.readFileSync('apps/admin/src/App.tsx', 'utf8');
-  assert.match(app, /window\.location\.replace\(unifiedLoginUrl\(\)\)/);
+  assert.match(app, /verifyAdminSession\(\)/);
+  assert.match(app, /<AdminLoginPage session=\{sessionArg\} verifySession=\{verifyAdminSession\}/);
   assert.match(app, /\/auth\/me/);
   assert.doesNotMatch(app, /\/auth\/login|type="password"/);
-  assert.match(app, /permissions\.some/);
+  assert.match(app, /firstAllowedAdminPath\(permissions\)/);
   assert.match(app, /RequireAdminPermission/);
 });

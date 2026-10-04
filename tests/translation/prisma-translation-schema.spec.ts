@@ -76,7 +76,7 @@ describe('TR-WP06 translation Prisma source', () => {
     expect(localizedText).toMatch(/\blocale\s+String/);
     expect(localizedText).toMatch(/\bvalue\s+String/);
     expect(localizedText).toMatch(
-      /@@unique\(\[universityId,\s*targetType,\s*targetId,\s*fieldKey,\s*locale\]\)/,
+      /@@unique\(\[universityId,\s*targetType,\s*targetId,\s*fieldKey,\s*locale\],\s*map:\s*"UniversityLocalizedText_identity_key"\)/,
     );
   });
 

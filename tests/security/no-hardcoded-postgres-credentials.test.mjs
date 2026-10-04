@@ -14,6 +14,8 @@ function walk(directory) {
     if (entry.isDirectory()) {
       return excludedDirectories.has(entry.name) ? [] : walk(path.join(directory, entry.name));
     }
+    // Co-located unit fixtures are test sources, like the excluded tests directories.
+    if (/\.(spec|test)\.[cm]?[jt]sx?$/.test(entry.name)) return [];
     return textualExtensions.has(path.extname(entry.name)) ? [path.join(directory, entry.name)] : [];
   });
 }

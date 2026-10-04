@@ -8,6 +8,9 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      // These use node:test and must run under Node so assertion failures fail CI.
+      '**/*.test.mjs',
+      '**/*.test.cjs',
       'work/**',
       'wp-ic-10-results/**',
       'wp12-11-evidence/**',

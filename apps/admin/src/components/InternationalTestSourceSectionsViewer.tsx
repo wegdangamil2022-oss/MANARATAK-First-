@@ -385,6 +385,13 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
           filteredSections.map((section, idx) => {
             const isExpanded = !!expandedSections[section.blockKey];
             const sectionNum = extractSectionNumber(section.blockKey, section.title, idx + 1);
+            const toggle = () => toggleSection(section.blockKey);
+            const onHeaderKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggle();
+              }
+            };
 
             return (
               <div
@@ -393,7 +400,11 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
               >
                 {/* Section Header */}
                 <div
-                  onClick={() => toggleSection(section.blockKey)}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  onClick={toggle}
+                  onKeyDown={onHeaderKeyDown}
                   className="p-4 bg-white hover:bg-gray-50/80 cursor-pointer flex items-center justify-between gap-3 select-none"
                 >
                   <div className="flex items-center gap-3 flex-wrap flex-1">

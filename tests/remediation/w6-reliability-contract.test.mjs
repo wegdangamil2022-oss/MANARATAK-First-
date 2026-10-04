@@ -20,7 +20,9 @@ test('production monitoring is provider-backed and covers HTTP plus workers',()=
   const middleware=read('apps/api/src/presentation/monitoring/MonitoringMiddleware.ts');
   for(const marker of ['http.server.requests','http.server.duration_ms','http.server.inflight','startSpan']) assert.ok(middleware.includes(marker));
   const server=read('apps/api/src/server.ts');
-  for(const marker of ['worker.iterations','worker.iteration.duration_ms','observeWorkerIteration']) assert.ok(server.includes(marker));
+  assert.match(server, /await startPollingWorkers\(container, config\)/);
+  const workers=read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts');
+  for(const marker of ['worker.iterations','worker.iteration.duration_ms','observeWorkerIteration']) assert.ok(workers.includes(marker),marker);
   const config=read('packages/config/src/AppConfig.ts'); assert.ok(config.includes('OTEL_EXPORTER_OTLP_ENDPOINT'));
   assert.ok(read('docs/operations/OBSERVABILITY_RUNBOOK.md').includes('PENDING_NON_BLOCKING'));
 });

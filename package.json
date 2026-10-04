@@ -21,9 +21,9 @@
     "w0:verify": "node scripts/verify-w0-source.mjs",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules dist",
-    "test": "vitest run --config vitest.config.ts",
+    "test": "npm run test:unit",
     "test:cached": "turbo run test",
-    "test:unit": "vitest run --config vitest.config.ts",
+    "test:unit": "vitest run --config vitest.config.ts && npm run test:node",
     "test:database": "vitest run --config vitest.database.config.ts",
     "db:generate": "prisma generate --schema=packages/infrastructure/prisma/schema.prisma",
     "db:studio": "prisma studio --schema=packages/infrastructure/prisma/schema.prisma",
@@ -158,7 +158,8 @@
     "docs:operations:verify": "node scripts/verify-operational-doc-paths.mjs",
     "w7:docs:verify": "node scripts/verify-w7-documentation-closure.mjs",
     "rbac:baseline:provision": "node scripts/rbac-baseline-provision.mjs",
-    "auth:owner:preflight": "node scripts/owner-access-preflight.mjs"
+    "auth:owner:preflight": "node scripts/owner-access-preflight.mjs",
+    "test:node": "node scripts/testing/run-node-unit-tests.mjs"
   },
   "dependencies": {
     "@e965/xlsx": "0.20.3",
@@ -205,7 +206,6 @@
     "tsx": "^4.21.0",
     "turbo": "^2.10.7",
     "typescript": "~5.8.2",
-    "vite": "^6.2.3",
     "vitest": "^4.1.11"
   },
   "workspaces": [

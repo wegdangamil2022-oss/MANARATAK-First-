@@ -140,7 +140,7 @@ export function redactSecret(text, secret) {
   if (secret && typeof secret === 'string' && secret.length > 0) {
     result = result.replaceAll(secret, '[REDACTED_SECRET]');
   }
-  // Also redact any embedded credentials in database URLs (postgres://user:pass@host)
+  // Also redact any embedded credentials in database URLs.
   result = result.replace(/([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)([^:@\s]+):([^@\s]+)@/g, '$1$2:[REDACTED_SECRET]@');
   return result;
 }
