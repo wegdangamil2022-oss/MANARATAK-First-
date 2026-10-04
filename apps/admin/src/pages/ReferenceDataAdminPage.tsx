@@ -44,32 +44,52 @@ function useFetchData(collection: ReferenceDataCollection) {
 function ReferencePagination({ page, totalPages, setPage, loading }: {
   page: number; totalPages: number; setPage: (page: number) => void; loading: boolean;
 }) {
-  return <div className="flex items-center gap-3 mb-3">
-    <button type="button" disabled={loading || page <= 1} onClick={() => setPage(page - 1)}>Previous</button>
-    <span>Page {page} / {Math.max(1, totalPages)}</span>
-    <button type="button" disabled={loading || page >= totalPages} onClick={() => setPage(page + 1)}>Next</button>
+  return <div dir="rtl" className="flex items-center gap-3 mb-3">
+    <button type="button" className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-black text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 transition" disabled={loading || page <= 1} onClick={() => setPage(page - 1)}>السابق</button>
+    <span className="text-xs font-black text-slate-600">الصفحة {page} / {Math.max(1, totalPages)}</span>
+    <button type="button" className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-black text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 transition" disabled={loading || page >= totalPages} onClick={() => setPage(page + 1)}>التالي</button>
   </div>;
 }
 
 export function ReferenceDataAdminPage() {
   const [activeTab, setActiveTab] = useState<ReferenceDataCollection>('countries');
 
+  const tabLabels: Record<string, string> = {
+    countries: 'الدول المعتمدة',
+    currencies: 'العملات المتداولة',
+    languages: 'اللغات المدعومة',
+    regions: 'المناطق الإدارية والولايات',
+    cities: 'المدن والمناطق المحلية'
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Reference Data</h2>
-        <p className="text-sm text-gray-500 mt-1">Foundational Settings for Countries, Currencies, Languages, Regions, and Cities.</p>
+    <div dir="rtl" className="max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center gap-4 bg-gradient-to-r from-indigo-50/50 to-teal-50/40 p-5 rounded-3xl border border-slate-100">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-2xl font-black text-slate-900">البيانات المرجعية والمؤسسية</h2>
+          <p className="text-sm text-slate-500 mt-1 font-medium">الإعدادات المرجعية الأساسية لبيانات الدول، العملات، اللغات، الولايات، والمناطق والمدن المحلية لتسهيل عمليات الاستيراد والقبول.</p>
+        </div>
       </div>
       
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div className="flex border-b border-gray-200 overflow-x-auto">
+      <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
+        <div className="flex border-b border-slate-100 bg-slate-50/60 overflow-x-auto p-2 gap-2">
           {(['countries', 'currencies', 'languages', 'regions', 'cities'] as const).map(tab => (
             <button 
               key={tab}
-              className={`px-4 py-3 text-sm font-medium capitalize whitespace-nowrap ${activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-5 py-2.5 text-sm font-black rounded-xl transition-all duration-200 whitespace-nowrap ${
+                activeTab === tab 
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/15' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
               onClick={() => setActiveTab(tab)}
             >
-              {tab}
+              {tabLabels[tab] || tab}
             </button>
           ))}
         </div>
@@ -435,13 +455,13 @@ function CitiesTab() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!countryId || !form.countryIso2Code) {
-      setSaveStatus({ loading: false, error: 'Select an active canonical country.' });
+      setSaveStatus({ loading: false, error: 'الرجاء تحديد دولة معتمدة نشطة أولاً.' });
       return;
     }
     setSaveStatus({ loading: true });
     try {
       await referenceDataAdminApi.saveCity({ ...form, administrativeRegionId: regionId, nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null });
-      setSaveStatus({ loading: false, success: 'Saved successfully' });
+      setSaveStatus({ loading: false, success: 'تم حفظ المدينة المحددة بنجاح!' });
       setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
       setCountryId(null); setRegionId(null);
       refetch();
@@ -451,45 +471,56 @@ function CitiesTab() {
   };
 
   return (
-    <div className="space-y-8">
-      <form onSubmit={handleSave} className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-        <h3 className="font-bold text-lg">Manual Upsert City</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CanonicalPicker label="Country" value={countryId} load={() => canonicalPickerApi.countries()} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading} />
-          <Input label="Name" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
-          <Input label="Arabic Name (optional)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
-          <CanonicalPicker label="Canonical region (optional)" value={regionId} load={() => canonicalPickerApi.regions(form.countryIso2Code || undefined)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId} />
-          <Input label="Original region label (optional)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
-          <Input label="Timezone (optional)" value={form.timezone} onChange={(v: string) => setForm({...form, timezone: v})} />
+    <div dir="rtl" className="space-y-8">
+      <form onSubmit={handleSave} className="bg-gradient-to-br from-indigo-50/40 via-white to-teal-50/30 p-6 rounded-3xl border border-indigo-100/80 space-y-5 shadow-xs">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-[#0E7C86]"></div>
+          <h3 className="font-black text-lg text-slate-800">إضافة أو تحديث مدينة يدوياً</h3>
         </div>
-        <div className="flex items-center gap-4">
-          <button type="submit" disabled={saveStatus.loading || !countryId} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
-            {saveStatus.loading ? 'Saving...' : 'Save'}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <CanonicalPicker label="الدولة المعتمدة" value={countryId} load={() => canonicalPickerApi.countries()} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading} />
+          <Input label="الاسم بالإنجليزية" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
+          <Input label="الاسم باللغة العربية (اختياري)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
+          <CanonicalPicker label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={() => canonicalPickerApi.regions(form.countryIso2Code || undefined)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId} />
+          <Input label="تسمية المنطقة الإدارية الأصلية (اختياري)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
+          <Input label="المنطقة الزمنية (مثل Asia/Riyadh - اختياري)" value={form.timezone} onChange={(v: string) => setForm({...form, timezone: v})} />
+        </div>
+        <div className="flex items-center gap-4 pt-2">
+          <button type="submit" disabled={saveStatus.loading || !countryId} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-indigo-700 disabled:opacity-50 transition shadow-md shadow-indigo-600/15">
+            {saveStatus.loading ? 'جارٍ الحفظ الآن...' : 'حفظ بيانات المدينة'}
           </button>
-          {saveStatus.success && <span className="text-green-600 text-sm">{saveStatus.success}</span>}
-          {saveStatus.error && <span className="text-red-600 text-sm">{saveStatus.error}</span>}
+          {saveStatus.success && <span className="text-green-600 text-sm font-bold">{saveStatus.success}</span>}
+          {saveStatus.error && <span className="text-red-600 text-sm font-bold">{saveStatus.error}</span>}
         </div>
       </form>
 
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Active Records ({total})</h3>
-          <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <h3 className="font-black text-lg text-slate-800">السجلات والمدن النشطة ({total})</h3>
+          <button onClick={refetch} className="text-sm font-black text-indigo-600 hover:text-indigo-800 transition">تحديث القائمة</button>
         </div>
         <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
-        {loading && <p className="text-gray-500">Loading...</p>}
-        {error && <p className="text-red-600">{error}</p>}
-        {!loading && !error && data.length === 0 && <p className="text-gray-500 text-sm">No records found.</p>}
+        {loading && <p className="text-slate-500 font-bold">جارٍ تحميل قائمة المدن والمسافات المتاحة…</p>}
+        {error && <p className="text-red-600 font-bold">{error}</p>}
+        {!loading && !error && data.length === 0 && <p className="text-slate-500 text-sm">لا توجد سجلات مدن مضافة حالياً.</p>}
         {data.length > 0 && (
-          <div className="overflow-x-auto border border-gray-200 rounded-lg">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-gray-700">
-                <tr><th className="p-3">Country</th><th className="p-3">City Name</th><th className="p-3">Region</th><th className="p-3">Timezone</th></tr>
+          <div className="overflow-hidden border border-slate-200/80 rounded-2xl shadow-xs">
+            <table className="w-full text-right text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-black">
+                <tr>
+                  <th className="p-3 text-right">رمز الدولة</th>
+                  <th className="p-3 text-right">اسم المدينة</th>
+                  <th className="p-3 text-right">المنطقة الإدارية</th>
+                  <th className="p-3 text-right">المنطقة الزمنية</th>
+                </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-slate-100">
                 {data.map(item => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="p-3 font-mono">{item.countryIso2Code}</td><td className="p-3">{item.name}</td><td className="p-3">{item.administrativeRegion?.name || item.region || '-'}</td><td className="p-3">{item.timezone || '-'}</td>
+                  <tr key={item.id} className="hover:bg-indigo-50/20 transition duration-150">
+                    <td className="p-3 font-mono text-slate-600">{item.countryIso2Code}</td>
+                    <td className="p-3 font-bold text-slate-800">{item.nameAr || item.name}</td>
+                    <td className="p-3 text-slate-600">{item.administrativeRegion?.nameAr || item.administrativeRegion?.name || item.region || '-'}</td>
+                    <td className="p-3 font-mono text-slate-500 text-xs">{item.timezone || '-'}</td>
                   </tr>
                 ))}
               </tbody>
