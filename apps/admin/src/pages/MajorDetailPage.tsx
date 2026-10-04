@@ -102,7 +102,7 @@ const tabs: Array<{ id: DetailTab; label: string; icon: typeof BookOpen }> = [
   { id: 'versions', label: 'النسخ والمصادر', icon: Link2 },
 ];
 
-const PUBLIC_WEB_BASE_URL = (import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
+const PUBLIC_WEB_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
 
 function formatLabel(value?: string | null): string {
   if (!value) return 'غير محدد';

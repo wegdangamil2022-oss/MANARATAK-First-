@@ -2,8 +2,78 @@ import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { execSync, spawn } from 'node:child_process';
+import net from 'node:net';
+import http from 'node:http';
 import { build, createServer, loadEnv } from 'vite';
 import { applyStudioRuntimeDefaults } from './runtime-defaults.mjs';
+
+function checkPortInUse(port) {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    socket.setTimeout(400);
+    socket.once('connect', () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.once('timeout', () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.once('error', () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.connect(port, '127.0.0.1');
+  });
+}
+
+function checkAdminHttpReady(port = 3001) {
+  return new Promise((resolve) => {
+    const req = http.get(`http://127.0.0.1:${port}/admin/`, { timeout: 1000 }, (res) => {
+      res.resume();
+      resolve(true);
+    });
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
+
+async function terminateChild(proc, timeoutMs = 5000) {
+  if (!proc || proc.exitCode !== null) return;
+  try {
+    proc.kill('SIGTERM');
+  } catch {}
+  const deadline = Date.now() + timeoutMs;
+  while (proc.exitCode === null && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  if (proc.exitCode === null) {
+    try {
+      proc.kill('SIGKILL');
+    } catch {}
+  }
+}
+
+async function waitForAdminReady(procState, timeoutMs = 25000) {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    if (procState.exited || procState.error) {
+      const detail = procState.error
+        ? procState.error.message
+        : `exited prematurely with code ${procState.exitCode ?? 'null'}, signal ${procState.exitSignal ?? 'none'}`;
+      throw new Error(`Admin process terminated during startup: ${detail}`);
+    }
+    const isReady = await checkAdminHttpReady(3001);
+    if (isReady) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  throw new Error(`Admin service on port 3001 did not become ready within ${timeoutMs}ms.`);
+}
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const [app = 'web', command = 'dev', ...args] = process.argv.slice(2);
@@ -115,17 +185,67 @@ if (command === 'build') {
   });
   await server.listen();
   server.printUrls();
+  let adminProc = null;
   if (app === 'web') {
+    const adminPortBusy = await checkPortInUse(3001);
+    if (adminPortBusy) {
+      console.error('[run.mjs] Error: Port 3001 is already in use by an existing process. Existing process was left untouched.');
+      await server.close();
+      process.exit(1);
+    }
+
     console.log('[run.mjs] Spawning background admin dev server on port 3001...');
-    const adminProc = spawn('node', ['scripts/aistudio/run.mjs', 'admin', 'dev'], {
-      detached: true,
-      stdio: 'ignore',
-      cwd: root
+    const adminScript = fileURLToPath(import.meta.url);
+    const procState = {
+      exited: false,
+      exitCode: null,
+      exitSignal: null,
+      error: null,
+    };
+
+    adminProc = spawn(process.execPath, [adminScript, 'admin', 'dev'], {
+      stdio: 'inherit',
+      cwd: root,
+      env: process.env,
     });
-    adminProc.unref();
+
+    adminProc.on('error', (err) => {
+      procState.error = err;
+    });
+    adminProc.on('exit', (code, signal) => {
+      procState.exited = true;
+      procState.exitCode = code;
+      procState.exitSignal = signal;
+    });
+
+    try {
+      await waitForAdminReady(procState, 25000);
+    } catch (err) {
+      console.error('[run.mjs] Admin startup failed:', err.message);
+      await terminateChild(adminProc, 5000);
+      await server.close();
+      process.exit(1);
+    }
   }
+
   console.log('AI_STUDIO_WEB_ONLY: frontend preview ready.');
+
+  let isClosing = false;
+  const gracefulShutdown = async (exitCode = 0) => {
+    if (isClosing) return;
+    isClosing = true;
+    if (adminProc) {
+      await terminateChild(adminProc, 5000);
+    }
+    try {
+      await server.close();
+    } catch {}
+    process.exit(exitCode);
+  };
+
   for (const signal of ['SIGINT', 'SIGTERM']) {
-    process.once(signal, async () => { await server.close(); process.exit(0); });
+    process.once(signal, async () => {
+      await gracefulShutdown(0);
+    });
   }
 }

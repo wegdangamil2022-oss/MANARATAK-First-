@@ -31,6 +31,9 @@ import {
   InternationalTestImportDraftResultDto,
   InternationalTestVersionDto,
   InternationalTestProviderDto,
+  ReviewInternationalTestSourceNamesDto,
+  CorrectDraftInternationalTestCanonicalIdentityDto,
+  InternationalTestDeduplicationService,
   InternationalTestSourceTrustLevel,
   InternationalTestPublicationReadinessPolicy,
   PublicationReadinessEngine,
@@ -229,6 +232,153 @@ export class InternationalTestAdminUseCases {
     if (!trusted) throw new Error('TRUSTED_SOURCE_EVIDENCE_REQUIRED');
     await this.mutate('INTERNATIONAL_TEST_SOURCE_VERIFIED', id, context, repository =>
       repository.update(id, { isSourceVerified: true }).then(() => undefined));
+  }
+
+  public async reviewSourceNames(id: string, input: ReviewInternationalTestSourceNamesDto, context?: AtomicMutationRequestContext): Promise<InternationalTestDto> {
+    const test = await this.get(id);
+    const versions = await this.listImportVersions(id);
+    const version = versions.find(v => v.id === input.versionId);
+    if (!version) {
+      throw new Error(`Import version ${input.versionId} does not belong to test ${id}`);
+    }
+    if (!version.sourceHash || version.sourceHash !== input.sourceHash) {
+      throw new Error('TEST_IMPORT_SOURCE_HASH_MISMATCH');
+    }
+    if (!input.reviewReason?.trim()) {
+      throw new Error('REVIEW_REASON_REQUIRED');
+    }
+    if (!input.evidenceReference?.trim()) {
+      throw new Error('EVIDENCE_REFERENCE_REQUIRED');
+    }
+    const nameAr = input.localizedNameAr?.trim();
+    const nameEn = input.localizedNameEn?.trim();
+    if (!nameAr || !nameEn) {
+      throw new Error('LOCALIZED_NAMES_REQUIRED');
+    }
+
+    if (input.expectedCurrentLocalizedNameAr !== undefined && (test.localizedNameAr ?? null) !== (input.expectedCurrentLocalizedNameAr ?? null)) {
+      throw new Error('CONFLICTING_LOCALIZED_NAME_AR_MODIFICATION');
+    }
+    if (input.expectedCurrentLocalizedNameEn !== undefined && (test.localizedNameEn ?? null) !== (input.expectedCurrentLocalizedNameEn ?? null)) {
+      throw new Error('CONFLICTING_LOCALIZED_NAME_EN_MODIFICATION');
+    }
+
+    if (test.localizedNameAr && test.localizedNameAr !== nameAr && input.expectedCurrentLocalizedNameAr === undefined) {
+      throw new Error('CONFLICTING_LOCALIZED_NAME_AR_ALREADY_SET');
+    }
+    if (test.localizedNameEn && test.localizedNameEn !== nameEn && input.expectedCurrentLocalizedNameEn === undefined) {
+      throw new Error('CONFLICTING_LOCALIZED_NAME_EN_ALREADY_SET');
+    }
+
+    if (test.localizedNameAr === nameAr && test.localizedNameEn === nameEn) {
+      return test;
+    }
+
+    return this.mutate(
+      'INTERNATIONAL_TEST_SOURCE_NAMES_REVIEWED',
+      id,
+      context,
+      async (repository) => {
+        return repository.update(id, {
+          localizedNameAr: nameAr,
+          localizedNameEn: nameEn,
+        });
+      },
+      {
+        versionId: input.versionId,
+        sourceHash: input.sourceHash,
+        localizedNameAr: nameAr,
+        localizedNameEn: nameEn,
+        reviewReason: input.reviewReason.trim(),
+        evidenceReference: input.evidenceReference.trim(),
+      }
+    );
+  }
+
+  public async correctDraftCanonicalIdentity(
+    id: string,
+    input: CorrectDraftInternationalTestCanonicalIdentityDto,
+    context?: AtomicMutationRequestContext
+  ): Promise<InternationalTestDto> {
+    const test = await this.get(id);
+    if (test.status === InternationalTestStatus.PUBLISHED || (test as any).currentPublishedVersionId != null) {
+      throw new Error('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+    }
+
+    const versions = await this.listImportVersions(id);
+    const version = versions.find(v => v.id === input.versionId);
+    if (!version) {
+      throw new Error(`Import version ${input.versionId} does not belong to test ${id}`);
+    }
+    if (!version.sourceHash || version.sourceHash !== input.sourceHash) {
+      throw new Error('TEST_IMPORT_SOURCE_HASH_MISMATCH');
+    }
+
+    if (!input.correctionReason?.trim()) {
+      throw new Error('CORRECTION_REASON_REQUIRED');
+    }
+    if (!input.evidenceReference?.trim()) {
+      throw new Error('EVIDENCE_REFERENCE_REQUIRED');
+    }
+
+    const newCanonical = input.newCanonicalName?.trim();
+    if (!newCanonical) {
+      throw new Error('CANONICAL_NAME_REQUIRED');
+    }
+    const newDisplayName = input.newDisplayName?.trim() || newCanonical;
+
+    if (
+      input.expectedCurrentCanonicalName !== undefined &&
+      input.expectedCurrentCanonicalName !== null &&
+      test.canonicalName !== input.expectedCurrentCanonicalName.trim()
+    ) {
+      throw new Error('CONFLICTING_CANONICAL_NAME_MODIFICATION');
+    }
+
+    const newDedupKey = InternationalTestDeduplicationService.generateKey({
+      canonicalName: newCanonical,
+      providerName: test.providerName
+    });
+
+    if (this.repository.findByDedupKey) {
+      const existingCollision = await this.repository.findByDedupKey(newDedupKey);
+      if (existingCollision && existingCollision.id !== id) {
+        throw new Error('INTERNATIONAL_TEST_CANONICAL_IDENTITY_COLLISION');
+      }
+    }
+
+    if (
+      test.canonicalName === newCanonical &&
+      test.displayName === newDisplayName &&
+      test.canonicalDedupKey === newDedupKey
+    ) {
+      return test;
+    }
+
+    return this.mutate(
+      'INTERNATIONAL_TEST_DRAFT_CANONICAL_IDENTITY_CORRECTED',
+      id,
+      context,
+      async (repository) => {
+        return repository.update(id, {
+          canonicalName: newCanonical,
+          displayName: newDisplayName,
+          canonicalDedupKey: newDedupKey,
+        });
+      },
+      {
+        previousCanonicalName: test.canonicalName,
+        newCanonicalName: newCanonical,
+        previousDisplayName: test.displayName,
+        newDisplayName,
+        previousCanonicalDedupKey: test.canonicalDedupKey,
+        newCanonicalDedupKey: newDedupKey,
+        correctionReason: input.correctionReason.trim(),
+        evidenceReference: input.evidenceReference.trim(),
+        versionId: input.versionId,
+        sourceHash: input.sourceHash,
+      }
+    );
   }
 
   // Child profile delegates

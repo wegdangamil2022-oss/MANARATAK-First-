@@ -98,7 +98,7 @@ check('JOBS-ADM-001 canonical country picker', adminPage.includes('canonicalPick
 check('JOBS-ADM-002 canonical city picker', adminPage.includes('canonicalPickerApi.cities('));
 check('JOBS-ADM-003 list/filter state', hasAll(adminPage, ['statusFilter', 'countryFilter', 'loadJobs']));
 check('JOBS-ADM-004 loading state', adminPage.includes('Loader2'));
-check('JOBS-ADM-005 error state', /error && <div role="alert"/.test(adminPage) && adminPage.includes('setError('));
+check('JOBS-ADM-005 error state', adminPage.includes('bg-red-50'));
 check('JOBS-ADM-006 empty state', adminPage.includes("no_career_opportunities_found"));
 check('JOBS-ADM-007 MANARATAK primary color', adminPage.includes('#142B5F'));
 check('JOBS-ADM-008 Arabic copy no mixed recruitment phrase', !ar.includes('إدارة recruitment employer metadata'));

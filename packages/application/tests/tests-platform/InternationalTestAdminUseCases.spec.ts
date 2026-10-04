@@ -36,7 +36,8 @@ describe('InternationalTestAdminUseCases', () => {
       listPreparationMaterials: vi.fn(),
       upsertPreparationMaterial: vi.fn(),
       listEvidence: vi.fn(),
-      addEvidence: vi.fn()
+      addEvidence: vi.fn(),
+      listImportVersions: vi.fn()
     };
 
     const referenceResolver: IReferenceResolver = {
@@ -401,6 +402,234 @@ describe('InternationalTestAdminUseCases', () => {
       await useCases.listEvidence('test-1');
 
       expect(mockRepository.updateStatus).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('reviewSourceNames', () => {
+    const parentTest = {
+      id: 'test-1',
+      canonicalName: 'IELTS Academic',
+      localizedNameAr: null,
+      localizedNameEn: null
+    };
+
+    const validVersion = {
+      id: 'ver-1',
+      testId: 'test-1',
+      versionNumber: 1,
+      sourceHash: 'a'.repeat(64),
+      status: 'DRAFT'
+    };
+
+    it('successfully updates localized names when version and source hash match', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+      mockRepository.update.mockResolvedValue({
+        ...parentTest,
+        localizedNameAr: 'اختبار الآيلتس',
+        localizedNameEn: 'IELTS'
+      });
+
+      const result = await useCases.reviewSourceNames('test-1', {
+        versionId: 'ver-1',
+        sourceHash: 'a'.repeat(64),
+        localizedNameAr: 'اختبار الآيلتس',
+        localizedNameEn: 'IELTS',
+        reviewReason: 'Verified from official candidate guide',
+        evidenceReference: 'workspace/sources/ielts.md'
+      });
+
+      expect(mockRepository.update).toHaveBeenCalledWith('test-1', {
+        localizedNameAr: 'اختبار الآيلتس',
+        localizedNameEn: 'IELTS'
+      });
+      expect(result.localizedNameAr).toBe('اختبار الآيلتس');
+      expect(result.localizedNameEn).toBe('IELTS');
+    });
+
+    it('rejects version belonging to another test or not found', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([
+        { ...validVersion, id: 'ver-other' }
+      ]);
+
+      await expect(useCases.reviewSourceNames('test-1', {
+        versionId: 'ver-unknown',
+        sourceHash: 'a'.repeat(64),
+        localizedNameAr: 'اختبار الآيلتس',
+        localizedNameEn: 'IELTS',
+        reviewReason: 'Official update',
+        evidenceReference: 'sources/ielts.md'
+      })).rejects.toThrow(/does not belong to test/);
+
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects when source hash does not match version', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+
+      await expect(useCases.reviewSourceNames('test-1', {
+        versionId: 'ver-1',
+        sourceHash: 'b'.repeat(64),
+        localizedNameAr: 'اختبار الآيلتس',
+        localizedNameEn: 'IELTS',
+        reviewReason: 'Official update',
+        evidenceReference: 'sources/ielts.md'
+      })).rejects.toThrow('TEST_IMPORT_SOURCE_HASH_MISMATCH');
+
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects conflicting modification when expectedCurrent does not match', async () => {
+      mockRepository.findById.mockResolvedValue({
+        ...parentTest,
+        localizedNameAr: 'اسم قديم'
+      });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+
+      await expect(useCases.reviewSourceNames('test-1', {
+        versionId: 'ver-1',
+        sourceHash: 'a'.repeat(64),
+        localizedNameAr: 'اختبار الآيلتس',
+        localizedNameEn: 'IELTS',
+        reviewReason: 'Official update',
+        evidenceReference: 'sources/ielts.md',
+        expectedCurrentLocalizedNameAr: 'اسم مختلف'
+      })).rejects.toThrow('CONFLICTING_LOCALIZED_NAME_AR_MODIFICATION');
+
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('is idempotent on replay when names already match requested', async () => {
+      mockRepository.findById.mockResolvedValue({
+        ...parentTest,
+        localizedNameAr: 'اختبار الآيلتس',
+        localizedNameEn: 'IELTS'
+      });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+
+      const result = await useCases.reviewSourceNames('test-1', {
+        versionId: 'ver-1',
+        sourceHash: 'a'.repeat(64),
+        localizedNameAr: 'اختبار الآيلتس',
+        localizedNameEn: 'IELTS',
+        reviewReason: 'Replay request',
+        evidenceReference: 'sources/ielts.md'
+      });
+
+      expect(result.localizedNameAr).toBe('اختبار الآيلتس');
+      expect(result.localizedNameEn).toBe('IELTS');
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('correctDraftCanonicalIdentity', () => {
+    const parentTest = {
+      id: 'test-sat',
+      canonicalName: 'SAT Suite of Assessments (Scholastic Assessment Test)',
+      canonicalDedupKey: 'sat suite of assessments (scholastic assessment test)|college board',
+      displayName: 'SAT Suite of Assessments (Scholastic Assessment Test)',
+      providerName: 'College Board',
+      status: 'READY_TO_REVIEW'
+    };
+
+    const validVersion = {
+      id: 'ver-sat-1',
+      testId: 'test-sat',
+      versionNumber: 1,
+      sourceHash: 'b'.repeat(64),
+      status: 'DRAFT'
+    };
+
+    it('successfully corrects draft canonical identity and updates dedup key', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+      mockRepository.findByDedupKey.mockResolvedValue(null);
+      mockRepository.update.mockResolvedValue({
+        ...parentTest,
+        canonicalName: 'SAT',
+        displayName: 'SAT',
+        canonicalDedupKey: 'sat|college board'
+      });
+
+      const result = await useCases.correctDraftCanonicalIdentity('test-sat', {
+        versionId: 'ver-sat-1',
+        sourceHash: 'b'.repeat(64),
+        expectedCurrentCanonicalName: 'SAT Suite of Assessments (Scholastic Assessment Test)',
+        newCanonicalName: 'SAT',
+        correctionReason: 'Official SAT source correction',
+        evidenceReference: 'sources/sat.md'
+      });
+
+      expect(mockRepository.update).toHaveBeenCalledWith('test-sat', {
+        canonicalName: 'SAT',
+        displayName: 'SAT',
+        canonicalDedupKey: 'sat|college board'
+      });
+      expect(result.canonicalName).toBe('SAT');
+    });
+
+    it('rejects correction if test is published', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest, status: 'PUBLISHED' });
+
+      await expect(useCases.correctDraftCanonicalIdentity('test-sat', {
+        versionId: 'ver-sat-1',
+        sourceHash: 'b'.repeat(64),
+        newCanonicalName: 'SAT',
+        correctionReason: 'Official update',
+        evidenceReference: 'sources/sat.md'
+      })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+    });
+
+    it('rejects if expected current canonical name does not match', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+
+      await expect(useCases.correctDraftCanonicalIdentity('test-sat', {
+        versionId: 'ver-sat-1',
+        sourceHash: 'b'.repeat(64),
+        expectedCurrentCanonicalName: 'Different Name',
+        newCanonicalName: 'SAT',
+        correctionReason: 'Official update',
+        evidenceReference: 'sources/sat.md'
+      })).rejects.toThrow('CONFLICTING_CANONICAL_NAME_MODIFICATION');
+    });
+
+    it('rejects if identity collision occurs with another test', async () => {
+      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+      mockRepository.findByDedupKey.mockResolvedValue({ id: 'another-test-id' });
+
+      await expect(useCases.correctDraftCanonicalIdentity('test-sat', {
+        versionId: 'ver-sat-1',
+        sourceHash: 'b'.repeat(64),
+        newCanonicalName: 'SAT',
+        correctionReason: 'Official update',
+        evidenceReference: 'sources/sat.md'
+      })).rejects.toThrow('INTERNATIONAL_TEST_CANONICAL_IDENTITY_COLLISION');
+    });
+
+    it('is idempotent on replay when canonical name and dedup key already match', async () => {
+      mockRepository.findById.mockResolvedValue({
+        ...parentTest,
+        canonicalName: 'SAT',
+        displayName: 'SAT',
+        canonicalDedupKey: 'sat|college board'
+      });
+      mockRepository.listImportVersions.mockResolvedValue([validVersion]);
+      mockRepository.findByDedupKey.mockResolvedValue({ id: 'test-sat' });
+
+      const result = await useCases.correctDraftCanonicalIdentity('test-sat', {
+        versionId: 'ver-sat-1',
+        sourceHash: 'b'.repeat(64),
+        newCanonicalName: 'SAT',
+        correctionReason: 'Replay request',
+        evidenceReference: 'sources/sat.md'
+      });
+
+      expect(result.canonicalName).toBe('SAT');
+      expect(mockRepository.update).not.toHaveBeenCalled();
     });
   });
 });

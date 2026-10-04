@@ -62,7 +62,7 @@ model ScholarshipImportCanonicalResolutionDecision {
   correlationId      String?
   createdAt          DateTime @default(now())
   record             ImportRecord @relation("ScholarshipCanonicalDecisionRecord", fields: [recordId], references: [id], onDelete: Cascade)
-  @@index([recordId, createdAt])
+  @@index([recordId, createdAt], map: "ScholarshipImportCanonicalResolutionDecision_recordId_createdAt")
 }
 
 // --- Settings Foundation ---
@@ -848,7 +848,7 @@ model CourseAcademicTaxonomyLink {
   sourceResolution CourseTaxonomyResolution? @relation(fields: [sourceResolutionId], references: [id], onDelete: SetNull)
   majorProjections CourseMajorProjection[]
 
-  @@unique([courseId, taxonomyNodeId, relationshipType])
+  @@unique([courseId, taxonomyNodeId, relationshipType], map: "CourseAcademicTaxonomyLink_courseId_taxonomyNodeId_relationship")
   @@index([courseId])
   @@index([taxonomyNodeId])
   @@index([reviewState])
@@ -906,9 +906,9 @@ model CourseInternationalTestRelationship {
   course            Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
   internationalTest InternationalTest @relation(fields: [internationalTestId], references: [id], onDelete: Cascade)
 
-  @@unique([courseId, internationalTestId, relationshipType])
+  @@unique([courseId, internationalTestId, relationshipType], map: "CourseInternationalTestRelationship_courseId_internationalTestI")
   @@index([courseId, reviewState])
-  @@index([internationalTestId, reviewState])
+  @@index([internationalTestId, reviewState], map: "CourseInternationalTestRelationship_internationalTestId_reviewS")
 }
 
 model ExternalCourseProvider {
@@ -995,7 +995,7 @@ model CourseSourceIdentity {
   provider   ExternalCourseProvider @relation(fields: [providerId], references: [id], onDelete: Restrict)
   urlHistory CourseSourceUrlHistory[]
 
-  @@unique([providerId, sourceNativeKey, languageVersionKey])
+  @@unique([providerId, sourceNativeKey, languageVersionKey], map: "CourseSourceIdentity_providerId_sourceNativeKey_languageVersion")
   @@index([courseId])
   @@index([providerId])
   @@index([status])
@@ -1309,14 +1309,14 @@ model UniversityOrganizationUnit {
   updatedAt                DateTime                     @updatedAt
   university               University                   @relation(fields: [universityId], references: [id], onDelete: Cascade)
   campus                   UniversityCampus?            @relation(fields: [campusId], references: [id], onDelete: SetNull)
-  parent                   UniversityOrganizationUnit?  @relation("UniversityOrganizationHierarchy", fields: [parentOrganizationUnitId], references: [id], onDelete: SetNull)
+  parent                   UniversityOrganizationUnit?  @relation("UniversityOrganizationHierarchy", fields: [parentOrganizationUnitId], references: [id], onDelete: SetNull, map: "UniversityOrganizationUnit_parent_fkey")
   children                 UniversityOrganizationUnit[] @relation("UniversityOrganizationHierarchy")
   programs                 UniversityAcademicProgram[]
 
-  @@unique([universityId, unitType, normalizedName, parentOrganizationUnitId])
+  @@unique([universityId, unitType, normalizedName, parentOrganizationUnitId], map: "UniversityOrganizationUnit_identity_key")
   @@index([universityId])
   @@index([campusId])
-  @@index([parentOrganizationUnitId])
+  @@index([parentOrganizationUnitId], map: "UniversityOrganizationUnit_parent_idx")
 }
 
 model UniversityAcademicProgram {
@@ -1353,8 +1353,8 @@ model UniversityProgramCampus {
   academicProgramId String
   campusId          String
   createdAt         DateTime                  @default(now())
-  academicProgram   UniversityAcademicProgram @relation(fields: [academicProgramId], references: [id], onDelete: Cascade)
-  campus            UniversityCampus          @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  academicProgram   UniversityAcademicProgram @relation(fields: [academicProgramId], references: [id], onDelete: Cascade, map: "UniversityProgramCampus_program_fkey")
+  campus            UniversityCampus          @relation(fields: [campusId], references: [id], onDelete: Cascade, map: "UniversityProgramCampus_campus_fkey")
 
   @@id([academicProgramId, campusId])
   @@index([campusId])
@@ -1373,15 +1373,15 @@ model UniversityProgramAdmissionRequirement {
   status              String                    @default("REVIEW_REQUIRED")
   createdAt           DateTime                  @default(now())
   updatedAt           DateTime                  @updatedAt
-  academicProgram     UniversityAcademicProgram @relation(fields: [academicProgramId], references: [id], onDelete: Cascade)
-  internationalTest   InternationalTest         @relation(fields: [internationalTestId], references: [id], onDelete: Restrict)
-  testVariant         InternationalTestVariant? @relation(fields: [testVariantId], references: [id], onDelete: SetNull)
-  testVersion         InternationalTestVersion? @relation(fields: [testVersionId], references: [id], onDelete: SetNull)
+  academicProgram     UniversityAcademicProgram @relation(fields: [academicProgramId], references: [id], onDelete: Cascade, map: "UniversityProgramAdmissionRequirement_program_fkey")
+  internationalTest   InternationalTest         @relation(fields: [internationalTestId], references: [id], onDelete: Restrict, map: "UniversityProgramAdmissionRequirement_test_fkey")
+  testVariant         InternationalTestVariant? @relation(fields: [testVariantId], references: [id], onDelete: SetNull, map: "UniversityProgramAdmissionRequirement_variant_fkey")
+  testVersion         InternationalTestVersion? @relation(fields: [testVersionId], references: [id], onDelete: SetNull, map: "UniversityProgramAdmissionRequirement_version_fkey")
 
-  @@unique([academicProgramId, internationalTestId, testVariantId, testVersionId])
-  @@index([internationalTestId])
-  @@index([testVariantId])
-  @@index([testVersionId])
+  @@unique([academicProgramId, internationalTestId, testVariantId, testVersionId], map: "UniversityProgramAdmissionRequirement_identity_key")
+  @@index([internationalTestId], map: "UniversityProgramAdmissionRequirement_test_idx")
+  @@index([testVariantId], map: "UniversityProgramAdmissionRequirement_variant_idx")
+  @@index([testVersionId], map: "UniversityProgramAdmissionRequirement_version_idx")
 }
 
 model UniversityTuitionProfile {
@@ -1423,11 +1423,11 @@ model UniversityAccommodationProfile {
   updatedAt                     DateTime           @updatedAt
   university                    University         @relation(fields: [universityId], references: [id], onDelete: Cascade)
   currency                      ReferenceCurrency? @relation("UniversityAccommodationCurrency", fields: [currencyReferenceId], references: [id], onDelete: SetNull)
-  livingCostCurrency            ReferenceCurrency? @relation("UniversityAccommodationLivingCostCurrency", fields: [livingCostCurrencyReferenceId], references: [id], onDelete: SetNull)
+  livingCostCurrency            ReferenceCurrency? @relation("UniversityAccommodationLivingCostCurrency", fields: [livingCostCurrencyReferenceId], references: [id], onDelete: SetNull, map: "UniversityAccommodationProfile_livingCostCurrencyReferenceId_fk")
 
   @@index([universityId])
   @@index([currencyReferenceId])
-  @@index([livingCostCurrencyReferenceId])
+  @@index([livingCostCurrencyReferenceId], map: "UniversityAccommodationProfile_livingCostCurrencyReferenceId_id")
 }
 
 model UniversityRanking {
@@ -1445,8 +1445,8 @@ model UniversityRanking {
   updatedAt         DateTime   @updatedAt
   university        University @relation(fields: [universityId], references: [id], onDelete: Cascade)
 
-  @@unique([universityId, provider, rankingYear, scope])
-  @@index([provider, rankingYear, scope])
+  @@unique([universityId, provider, rankingYear, scope], map: "UniversityRanking_identity_key")
+  @@index([provider, rankingYear, scope], map: "UniversityRanking_provider_year_scope_idx")
 }
 
 model UniversitySourceRecord {
@@ -1467,7 +1467,7 @@ model UniversitySourceRecord {
   translations     UniversityTranslation[]   @relation("UniversityTranslationSourceRecord")
   localizedTexts   UniversityLocalizedText[] @relation("UniversityLocalizedTextSourceRecord")
 
-  @@index([stage, sourceArtifactId, sourceRowNumber])
+  @@index([stage, sourceArtifactId, sourceRowNumber], map: "UniversitySourceRecord_stage_sourceArtifactId_sourceRowNumber_i")
   @@index([universityId])
   @@index([sourceHash])
 }
@@ -1510,8 +1510,8 @@ model UniversityLocalizedText {
   university   University              @relation(fields: [universityId], references: [id], onDelete: Cascade)
   sourceRecord UniversitySourceRecord? @relation("UniversityLocalizedTextSourceRecord", fields: [sourceRecordId], references: [id], onDelete: SetNull)
 
-  @@unique([universityId, targetType, targetId, fieldKey, locale])
-  @@index([universityId, targetType, targetId])
+  @@unique([universityId, targetType, targetId, fieldKey, locale], map: "UniversityLocalizedText_identity_key")
+  @@index([universityId, targetType, targetId], map: "UniversityLocalizedText_target_idx")
   @@index([locale])
   @@index([reviewStatus])
   @@index([sourceRecordId])
@@ -1549,7 +1549,7 @@ model UniversityImportChange {
 
   @@unique([changeSetId, sequence])
   @@index([universityId])
-  @@index([entityType, entityId])
+  @@index([entityType, entityId], map: "UniversityImportChange_entity_idx")
 }
 
 // --- Scholarships ---
@@ -1862,7 +1862,7 @@ model ScholarshipEligibilityRuleVersion {
 
   scholarshipVersion ScholarshipVersion @relation(fields: [scholarshipVersionId], references: [id], onDelete: Cascade)
 
-  @@unique([scholarshipVersionId, ruleKey, ruleVersionNumber])
+  @@unique([scholarshipVersionId, ruleKey, ruleVersionNumber], map: "ScholarshipEligibilityRuleVersion_scholarshipVersionId_ruleKey_")
 }
 
 model ScholarshipAwardPackageVersion {
@@ -1875,7 +1875,7 @@ model ScholarshipAwardPackageVersion {
 
   scholarshipVersion ScholarshipVersion @relation(fields: [scholarshipVersionId], references: [id], onDelete: Cascade)
 
-  @@unique([scholarshipVersionId, packageKey, packageVersionNumber])
+  @@unique([scholarshipVersionId, packageKey, packageVersionNumber], map: "ScholarshipAwardPackageVersion_scholarshipVersionId_packageKey_")
 }
 
 // --- Majors ---
@@ -2620,7 +2620,7 @@ model InternationalTestCountryRelationship {
   canonicalCountry ReferenceCountry?  @relation(fields: [canonicalReferenceId], references: [id], onDelete: Restrict)
 
   @@unique([testId, countryIso2Code, relationshipType])
-  @@unique([testId, canonicalReferenceId, relationshipType])
+  @@unique([testId, canonicalReferenceId, relationshipType], map: "InternationalTestCountryRelationship_testId_canonicalReferenceI")
   @@index([testId])
   @@index([canonicalReferenceId])
   @@index([countryIso2Code])
@@ -2642,7 +2642,7 @@ model InternationalTestLanguageRelationship {
   canonicalLanguage ReferenceLanguage? @relation(fields: [canonicalReferenceId], references: [id], onDelete: Restrict)
 
   @@unique([testId, languageIsoCode, relationshipType])
-  @@unique([testId, canonicalReferenceId, relationshipType])
+  @@unique([testId, canonicalReferenceId, relationshipType], map: "InternationalTestLanguageRelationship_testId_canonicalReference")
   @@index([testId])
   @@index([canonicalReferenceId])
   @@index([languageIsoCode])
@@ -2847,7 +2847,7 @@ model StudentApplicationTracker {
   checklist StudentApplicationChecklistItem[]
 
   @@unique([studentReferenceId, scholarshipId])
-  @@index([studentReferenceId, status, updatedAt])
+  @@index([studentReferenceId, status, updatedAt], map: "StudentApplicationTracker_studentReferenceId_status_updatedAt_i")
   @@index([deadlineAt, status])
 }
 
@@ -2928,7 +2928,7 @@ model StudentRecentlyViewed {
 
   workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Restrict)
 
-  @@unique([studentReferenceId, entityType, entityId])
+  @@unique([studentReferenceId, entityType, entityId], map: "StudentRecentlyViewed_studentReferenceId_entityType_entityId_ke")
   @@index([studentReferenceId, viewedAt])
 }
 
@@ -2950,7 +2950,7 @@ model StudentLearningProjection {
   workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Restrict)
 
   @@unique([studentReferenceId, enrollmentId])
-  @@index([studentReferenceId, status, lastAccessedAt])
+  @@index([studentReferenceId, status, lastAccessedAt], map: "StudentLearningProjection_studentReferenceId_status_lastAccesse")
   @@index([sourceEventId])
 }
 
@@ -2972,8 +2972,8 @@ model StudentCertificateReadProjection {
 
   workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Restrict)
 
-  @@unique([studentReferenceId, certificateId])
-  @@index([studentReferenceId, status, issuedAt])
+  @@unique([studentReferenceId, certificateId], map: "StudentCertificateReadProjection_studentReferenceId_certificate")
+  @@index([studentReferenceId, status, issuedAt], map: "StudentCertificateReadProjection_studentReferenceId_status_issu")
   @@index([sourceEventId])
 }
 
@@ -3016,7 +3016,7 @@ model StudentNotificationProjection {
 
   workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId])
 
-  @@index([studentReferenceId, readAt, occurredAt])
+  @@index([studentReferenceId, readAt, occurredAt], map: "StudentNotificationProjection_studentReferenceId_readAt_occurre")
 }
 
 model StudentPrivacyConsentDecision {
@@ -3126,7 +3126,7 @@ model CmsContentDomainLink {
 
   content CmsContentNode @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
-  @@unique([contentId, targetType, targetId, relationType])
+  @@unique([contentId, targetType, targetId, relationType], map: "CmsContentDomainLink_contentId_targetType_targetId_relationType")
   @@index([targetType, targetId, sortOrder])
   @@index([contentId, sortOrder])
 }
@@ -3280,7 +3280,7 @@ model CmsPublishedContent {
 
   @@unique([contentId, locale])
   @@unique([siteIdentifier, locale, slug])
-  @@index([siteIdentifier, locale, status, publishedAt])
+  @@index([siteIdentifier, locale, status, publishedAt], map: "CmsPublishedContent_siteIdentifier_locale_status_publishedAt_id")
   @@index([contentType, locale, status])
   @@index([categorySlug, locale, status])
 }
@@ -3416,7 +3416,7 @@ model CmsAnnouncement {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  @@index([siteIdentifier, locale, status, startsAt, expiresAt])
+  @@index([siteIdentifier, locale, status, startsAt, expiresAt], map: "CmsAnnouncement_siteIdentifier_locale_status_startsAt_expiresAt")
 }
 
 model CmsScheduledJob {
@@ -3888,8 +3888,8 @@ model ReferenceProviderMappingRecord {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  @@unique([entityType, normalizedProviderSystem, normalizedProviderId])
-  @@index([entityType, referenceId, isActive])
+  @@unique([entityType, normalizedProviderSystem, normalizedProviderId], map: "ReferenceProviderMappingRecord_entityType_normalizedProviderSys")
+  @@index([entityType, referenceId, isActive], map: "ReferenceProviderMappingRecord_entityType_referenceId_isActive_")
 }
 
 model ReferenceRelationshipRecord {
@@ -3903,8 +3903,8 @@ model ReferenceRelationshipRecord {
   actorId            String?
   createdAt          DateTime @default(now())
 
-  @@unique([sourceEntityType, sourceReferenceId, relationshipType])
-  @@index([targetEntityType, targetReferenceId])
+  @@unique([sourceEntityType, sourceReferenceId, relationshipType], map: "ReferenceRelationshipRecord_sourceEntityType_sourceReferenceId_")
+  @@index([targetEntityType, targetReferenceId], map: "ReferenceRelationshipRecord_targetEntityType_targetReferenceId_")
 }
 
 model AdministrativeRegion {
@@ -4351,7 +4351,7 @@ model AIEvaluationRunRecord {
   completedAt      DateTime?
 
   @@index([evaluationKey, status, createdAt])
-  @@index([targetType, targetKey, targetVersion, completedAt])
+  @@index([targetType, targetKey, targetVersion, completedAt], map: "AIEvaluationRunRecord_targetType_targetKey_targetVersion_comple")
 }
 
 model AIKnowledgeSourceRecord {
@@ -4367,7 +4367,7 @@ model AIKnowledgeSourceRecord {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  @@unique([indexKey, sourceType, sourceReferenceId, checksum])
+  @@unique([indexKey, sourceType, sourceReferenceId, checksum], map: "AIKnowledgeSourceRecord_indexKey_sourceType_sourceReferenceId_c")
   @@index([indexKey, status])
 }
 
@@ -4384,7 +4384,7 @@ model AIEmbeddingRecord {
   metadata           Json?
   createdAt          DateTime @default(now())
 
-  @@unique([indexKey, sourceReferenceId, chunkKey, checksum])
+  @@unique([indexKey, sourceReferenceId, chunkKey, checksum], map: "AIEmbeddingRecord_indexKey_sourceReferenceId_chunkKey_checksum_")
   @@index([indexKey, modelKey])
 }
 
@@ -4583,7 +4583,7 @@ model FinancePaymentAttemptRecord {
   safeFailureCode String?
   createdAt DateTime @default(now())
   payment FinancePaymentRecord @relation(fields: [paymentId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  @@unique([paymentId, sequence])
+  @@unique([paymentId, sequence], map: "FinancePaymentAttemptRecord_payment_sequence_key")
   @@index([paymentId, createdAt])
 }
 
@@ -4600,7 +4600,7 @@ model FinancialAccountRecord {
   createdAt DateTime @default(now())
   entries FinancialLedgerEntryRecord[]
   wallet FinanceWalletRecord?
-  @@unique([ownerReferenceId, type, currencyCode])
+  @@unique([ownerReferenceId, type, currencyCode], map: "FinancialAccountRecord_owner_type_currency_key")
 }
 
 model FinancialTransactionRecord {
@@ -4619,7 +4619,7 @@ model FinancialTransactionRecord {
   reversalOf FinancialTransactionRecord? @relation("FinancialTransactionReversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
   reversal FinancialTransactionRecord? @relation("FinancialTransactionReversal")
   @@index([correlationId])
-  @@index([businessReferenceType, businessReferenceId])
+  @@index([businessReferenceType, businessReferenceId], map: "FinancialTransactionRecord_businessReference_idx")
 }
 
 model FinancialLedgerEntryRecord {
@@ -4635,7 +4635,7 @@ model FinancialLedgerEntryRecord {
   createdAt DateTime @default(now())
   transaction FinancialTransactionRecord @relation(fields: [transactionId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   account FinancialAccountRecord @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  @@unique([transactionId, sequence])
+  @@unique([transactionId, sequence], map: "FinancialLedgerEntryRecord_transaction_sequence_key")
   @@index([accountId, createdAt])
 }
 
@@ -4688,7 +4688,7 @@ model FinanceExchangeRateRecord {
   effectiveTo DateTime?
   marginBasisPoints Int @default(0)
   createdAt DateTime @default(now())
-  @@index([sourceCurrencyCode, targetCurrencyCode, approved, effectiveFrom])
+  @@index([sourceCurrencyCode, targetCurrencyCode, approved, effectiveFrom], map: "FinanceExchangeRateRecord_pair_effective_idx")
 }
 
 model FinanceTransferRecord {
@@ -4755,7 +4755,7 @@ model FinanceApprovalDecisionRecord {
   reason String?
   decidedAt DateTime @default(now())
   approval FinanceApprovalRecord @relation(fields: [approvalId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  @@unique([approvalId, approverId])
+  @@unique([approvalId, approverId], map: "FinanceApprovalDecisionRecord_approval_checker_key")
 }
 
 model FinanceRefundRecord {
@@ -4818,7 +4818,7 @@ model FinanceCommissionRecord {
   calculationBasisPoints Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@unique([sourcePaymentId, recipientReferenceId, policyReference])
+  @@unique([sourcePaymentId, recipientReferenceId, policyReference], map: "FinanceCommissionRecord_source_recipient_policy_key")
   @@index([recipientReferenceId, status])
 }
 
@@ -5072,7 +5072,7 @@ model ServiceAvailabilitySlotRecord {
   service    ServiceCatalogRecord  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   bookings   ServiceBookingRecord[]
 
-  @@index([providerId, startsAt, endsAt, status])
+  @@index([providerId, startsAt, endsAt, status], map: "ServiceAvailabilitySlotRecord_providerId_startsAt_endsAt_status")
   @@index([serviceId, startsAt, status])
 }
 

@@ -14,7 +14,7 @@ function add(name, source) {
   if (!variables.has(name)) variables.set(name, new Set());
   variables.get(name).add(source);
 }
-const files = execFileSync('git', ['ls-files', '-z', '--cached'], { cwd: root, encoding: 'utf8' }).split('\0');
+const files = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root, encoding: 'utf8' }).split('\0');
 for (const file of new Set(files)) {
   if (!file || file.startsWith('docs/') || file.startsWith('workspace/') ||
       file.startsWith('scripts/aistudio/') || file === '.env.aistudio.example') continue;

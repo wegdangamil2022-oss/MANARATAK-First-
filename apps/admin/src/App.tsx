@@ -1,6 +1,6 @@
 import { CourseProviderRegistryPage } from './pages/CourseProviderRegistryPage';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
 import { adminApiClient } from './api/client';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { ScholarshipListPage } from './pages/ScholarshipListPage';
@@ -130,14 +130,63 @@ function AdminLayout() {
     }
   };
 
-  if (isLoginRoute) {
-    if (adminAccess === 'authorized') return null;
-    return <AdminLoginPage session={{ kind: adminAccess }} verifySession={verifyAdminSession} />;
+  const adminBasename = (import.meta.env.BASE_URL || '/admin').replace(/\/+$/, '') || '/admin';
+
+  if (isLoginRoute && adminAccess === 'authorized') {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6" dir="rtl">
+        <div className="mx-auto max-w-md rounded-3xl border border-[#DDEFF2] bg-white p-8 text-center shadow-xs">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-[#0E7C86] mb-3">
+            <Loader2 className="h-6 w-6 animate-spin text-[#0E7C86]" />
+          </div>
+          <div className="text-sm font-black text-[#142B5F]">جاري الانتقال إلى لوحة التحكم...</div>
+        </div>
+      </div>
+    );
   }
-  if (adminAccess === 'student' || adminAccess === 'unauthorized' || adminAccess === 'noAdmin') return null;
+
+  if (isLoginRoute || adminAccess === 'unauthorized' || adminAccess === 'noAdmin' || adminAccess === 'student') {
+    const sessionArg = adminAccess === 'authorized'
+      ? { kind: 'authorized' as const, permissions: adminPermissions }
+      : adminAccess === 'loading'
+        ? { kind: 'loading' as const }
+        : { kind: adminAccess as 'unauthorized' | 'noAdmin' | 'student' | 'error' };
+    return <AdminLoginPage session={sessionArg} verifySession={verifyAdminSession} />;
+  }
+
+  if (adminAccess === 'loading') {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6" dir="rtl">
+        <div className="mx-auto max-w-md rounded-3xl border border-[#DDEFF2] bg-white p-8 text-center shadow-xs">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-[#0E7C86] mb-3">
+            <Loader2 className="h-6 w-6 animate-spin text-[#0E7C86]" />
+          </div>
+          <div className="text-sm font-black text-[#142B5F]">{t('loading')}</div>
+          <p className="mt-1 text-xs text-slate-500">جاري التحقق من جلسة المسؤول وتجهيز الصلاحيات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (adminAccess === 'error') {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6" dir="rtl">
+        <div className="mx-auto max-w-md rounded-3xl border border-red-200 bg-white p-8 text-center shadow-xs">
+          <div className="text-sm font-black text-[#142B5F] mb-3">تعذر التحقق من جلسة المسؤول</div>
+          <button
+            type="button"
+            onClick={checkSession}
+            className="rounded-xl bg-[#0E7C86] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#0c6b74] transition cursor-pointer"
+          >
+            إعادة المحاولة
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter basename={adminBasename}>
       <div className="min-h-screen bg-slate-50 text-[#142B5F] flex flex-col font-sans">
         {adminAccess === 'authorized' && <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">
@@ -207,7 +256,7 @@ function AdminLayout() {
             <main className="min-w-0 flex-1 p-4 sm:p-6">
               <AdminPermissionNotice />
               <Routes>
-                <Route path="/" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/'} replace />} />
+                <Route path="/" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/dashboard'} replace />} />
                 <Route path="/dashboard" element={<RequireAdminPermission permission="admin:platform:manage"><AdminDashboardPage /></RequireAdminPermission>} />
                 <Route path="/review-queue" element={<RequireAdminPermission permission="admin:platform:manage"><AdminReviewQueuePage /></RequireAdminPermission>} />
                 <Route path="/imports" element={<RequireAdminPermission permission="admin:imports:manage"><ImportAdminPage /></RequireAdminPermission>} />
@@ -255,7 +304,7 @@ function AdminLayout() {
                 <Route path="/settings/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />
                 <Route path="/academic-taxonomy" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyAdminPage /></RequireAdminPermission>} />
                 <Route path="/academic-taxonomy/:nodeId" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyDetailPage /></RequireAdminPermission>} />
-                <Route path="*" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/'} replace />} />
+                <Route path="*" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/dashboard'} replace />} />
               </Routes>
             </main>
           </div>
@@ -321,10 +370,69 @@ async function verifyAdminSession(): Promise<{ kind: 'authorized'; permissions: 
   }
 }
 
+interface ErrorBoundaryProps {
+  children: ReactNode;
+}
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class AdminErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('[AdminErrorBoundary] Uncaught error in Admin component:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div dir="rtl" className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-[#142B5F]">
+          <div className="w-full max-w-md rounded-3xl border border-red-200 bg-white p-7 shadow-sm text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+              <span className="text-xl font-bold">!</span>
+            </div>
+            <h1 className="text-xl font-black text-slate-800">حدث خطأ أثناء تحميل لوحة الإدارة</h1>
+            <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+              {this.state.error?.message || 'تعذر عرض الصفحة المطلوبة بسبب خطأ غير متوقع.'}
+            </p>
+            <div className="mt-5 flex gap-3 justify-center">
+              <button
+                type="button"
+                onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
+                className="rounded-xl bg-[#0E7C86] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#0c6b74] transition cursor-pointer"
+              >
+                إعادة المحاولة
+              </button>
+              <a
+                href="/admin/login"
+                className="rounded-xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+              >
+                تسجيل الدخول
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
-    <I18nProvider>
-      <AdminLayout />
-    </I18nProvider>
+    <AdminErrorBoundary>
+      <I18nProvider>
+        <AdminLayout />
+      </I18nProvider>
+    </AdminErrorBoundary>
   );
 }

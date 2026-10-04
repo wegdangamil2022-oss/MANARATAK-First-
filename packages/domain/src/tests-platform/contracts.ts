@@ -235,6 +235,27 @@ export interface InternationalTestImportDraftResultDto {
   needsReviewSectionCount: number;
 }
 
+export interface ReviewInternationalTestSourceNamesDto {
+  versionId: string;
+  sourceHash: string;
+  localizedNameAr: string;
+  localizedNameEn: string;
+  reviewReason: string;
+  evidenceReference: string;
+  expectedCurrentLocalizedNameAr?: string | null;
+  expectedCurrentLocalizedNameEn?: string | null;
+}
+
+export interface CorrectDraftInternationalTestCanonicalIdentityDto {
+  versionId: string;
+  sourceHash: string;
+  expectedCurrentCanonicalName?: string | null;
+  newCanonicalName: string;
+  newDisplayName?: string | null;
+  correctionReason: string;
+  evidenceReference: string;
+}
+
 export interface InternationalTestDeliveryModeProfileDto {
   id: string;
   versionId: string;

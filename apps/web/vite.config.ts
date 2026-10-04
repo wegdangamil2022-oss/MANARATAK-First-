@@ -16,7 +16,7 @@ function disableHmrPlugin(): Plugin {
       order: 'post',
       handler(html) {
         if (process.env.DISABLE_HMR === 'true') {
-          return html.replace(/<script type="module" src="\/@vite\/client"><\/script>/g, '');
+          return html.replace(/<script type="module" src="(?:\/admin)?\/@vite\/client"><\/script>/g, '');
         }
         return html;
       }
@@ -98,6 +98,7 @@ export default defineConfig(({ mode, command }) => {
   const rootDir = path.resolve(__dirname, '../..');
   const studioEnv = { ...loadEnv(mode, rootDir, ['MANARATAK_', 'VITE_']), ...process.env };
   const studio = isGoogleAiStudio(studioEnv);
+  const disableHmr = process.env.DISABLE_HMR === 'true';
   process.env.PRISMA_TELEMETRY_DISABLED = '1';
   assertPublicBuildDataMode({ mode, nodeEnv: process.env.NODE_ENV, dataMode: process.env.VITE_PUBLIC_TEMPLATE_DATA_MODE });
   const studioTemplatePreview = studio && command === 'serve' && prototypeCapabilityEnabled(process.env.NODE_ENV || mode);
@@ -152,20 +153,44 @@ export default defineConfig(({ mode, command }) => {
         '/admin': {
           target: 'http://127.0.0.1:3001',
           changeOrigin: true,
-          ws: true,
+          ws: !disableHmr,
+          configure: (proxy) => {
+            proxy.on('error', (_err, _req, res) => {
+              if (res && 'writeHead' in res && !res.headersSent) {
+                res.writeHead(502, { 'Content-Type': 'text/plain' });
+                res.end('Admin Service Unavailable');
+              }
+            });
+          },
         },
         '/study-destinations': {
           target: 'http://127.0.0.1:3001',
           changeOrigin: true,
-          ws: true,
+          ws: !disableHmr,
+          configure: (proxy) => {
+            proxy.on('error', (_err, _req, res) => {
+              if (res && 'writeHead' in res && !res.headersSent) {
+                res.writeHead(502, { 'Content-Type': 'text/plain' });
+                res.end('Service Unavailable');
+              }
+            });
+          },
         },
         '/academic-taxonomy': {
           target: 'http://127.0.0.1:3001',
           changeOrigin: true,
-          ws: true,
+          ws: !disableHmr,
+          configure: (proxy) => {
+            proxy.on('error', (_err, _req, res) => {
+              if (res && 'writeHead' in res && !res.headersSent) {
+                res.writeHead(502, { 'Content-Type': 'text/plain' });
+                res.end('Service Unavailable');
+              }
+            });
+          },
         },
       },
-      hmr: process.env.DISABLE_HMR === 'true' ? false : studio ? true : { clientPort: 443 },
+      hmr: disableHmr ? false : studio ? true : { clientPort: 443 },
       port: 3000,
       host: '0.0.0.0',
       watch: {

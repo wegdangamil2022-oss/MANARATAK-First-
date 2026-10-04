@@ -18,7 +18,7 @@ export function AdminLoginPage({ session, verifySession }: { session: DisplaySes
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [studentSession, setStudentSession] = useState(session.kind === 'student');
-  const publicBase = (import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
+  const publicBase = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

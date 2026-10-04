@@ -57,7 +57,7 @@ check('P13-DASHBOARD protected routes use hydration service',(read(router).match
 check('P13-SAVED hydrated endpoint',has(router,"'/saved-items/hydrated'")&&has(router,'studentSavedItemHydrationService.listHydrated'));
 check('P13-WEB hydrated saved items client/UI',has(apiClient,'listMyHydratedStudentSavedItems')&&has(webStudent,'hydratedSavedItems')&&has(webStudent,'owner?.displayName'));
 check('P13-WEB real auth client',has(apiClient,'loginStudent')&&has(apiClient,'logoutStudent')&&has(apiClient,'getCurrentStudentIdentity'));
-check('P13-WEB live student auth component',has(webAuth,'await ApiClient.login(')&&has(webAuth,'await ApiClient.getCurrentSessionIdentity()')&&has(webAuth,'resolveAuthenticatedDestination(identity)'));
+check('P13-WEB live student auth component',has(webAuth,'authenticateAccount')&&has(webAuthenticate,'client.login')&&has(webAuthenticate,'client.getCurrentSessionIdentity'));
 check('P13-WEB live logout',has(webStudent,'ApiClient.logoutStudent')&&has(webStudent,"window.location.assign('/')"));
 check('P13-WEB live account uses live workspace',has(publicApp,"publicDataMode === 'api'")&&has(publicApp,'<LiveStudentWorkspacePage />')&&has(publicApp,'<LiveStudentAuthPage'));
 check('P13-WEB prototype workspace explicit only',has(publicApp,'PrototypeStudentWorkspacePage')&&has(publicApp,'PrototypeAuthPage'));

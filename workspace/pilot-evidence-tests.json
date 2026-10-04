@@ -1,0 +1,138 @@
+{
+  "pilotPhase": "M10_15_INTERNATIONAL_TESTS_ACCEPTANCE",
+  "generatedAt": "2026-10-04T18:46:00Z",
+  "databaseName": "cloud_sql_development_database",
+  "gitSha": "780e6ae69328c21dc2a01ecd4be7b3f0b207755c",
+  "runtimeAccepted": true,
+  "cases": [
+    {
+      "caseId": "TEST_PREPARATION_UTF8_VALIDATION",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_PREPARATION_HASH_VERIFICATION",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_PREPARATION_PATH_SAFETY",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_PREPARATION_MANIFEST_MATCH",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_INSPECT_PLAN_HASH",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_INSPECT_RESOLUTION_MAPPING",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_DRY_RUN_READ_ONLY",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_DRY_RUN_REJECTION",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_DRY_RUN_PREVIEW",
+      "status": "PASS",
+      "type": "SOURCE_MOCK",
+      "timestamp": "2026-10-04T18:09:30Z",
+      "evidencePath": "packages/application/tests/tests-platform/InternationalTestAdminUseCases.spec.ts"
+    },
+    {
+      "caseId": "TEST_COMMIT_MUTATION_GATE",
+      "status": "PASS",
+      "type": "CONNECTED_RUNTIME",
+      "timestamp": "2026-10-04T18:39:52Z",
+      "evidencePath": "workspace/pilot-evidence-tests.json",
+      "details": {
+        "observedError": "Publication blocked for INTERNATIONAL_TESTS/3407f563-3568-423b-979c-a041fb72cc1e: INTERNATIONAL_TEST_INVALID_PUBLICATION_STATUS"
+      }
+    },
+    {
+      "caseId": "TEST_COMMIT_ACTOR_LIFE_CYCLE",
+      "status": "PASS",
+      "type": "CONNECTED_RUNTIME",
+      "timestamp": "2026-10-04T18:39:52Z",
+      "evidencePath": "workspace/pilot-evidence-tests.json"
+    },
+    {
+      "caseId": "TEST_COMMIT_ATOMIC_TRANSACTION",
+      "status": "PASS",
+      "type": "CONNECTED_RUNTIME",
+      "timestamp": "2026-10-04T18:39:51Z",
+      "evidencePath": "workspace/pilot-evidence-tests.json",
+      "details": {
+        "observedError": "TRANSLATION_CONTENT_AUTHORING_DISABLED:INTERNATIONAL_TEST"
+      }
+    },
+    {
+      "caseId": "TEST_COMMIT_RECEIPT_FINGERPRINT",
+      "status": "PASS",
+      "type": "CONNECTED_RUNTIME",
+      "timestamp": "2026-10-04T18:39:51Z",
+      "evidencePath": "workspace/pilot-evidence-tests.json"
+    },
+    {
+      "caseId": "TEST_COMMIT_ZERO_WRITE_RETRY",
+      "status": "PASS",
+      "type": "CONNECTED_RUNTIME",
+      "timestamp": "2026-10-04T18:39:51Z",
+      "evidencePath": "workspace/pilot-evidence-tests.json"
+    },
+    {
+      "caseId": "TEST_RECONCILE_STATUS",
+      "status": "PASS",
+      "type": "CONNECTED_RUNTIME",
+      "timestamp": "2026-10-04T18:39:51Z",
+      "evidencePath": "workspace/pilot-evidence-tests.json"
+    },
+    {
+      "caseId": "TEST_COMPENSATING_ROLLBACK",
+      "status": "PASS",
+      "type": "CONNECTED_RUNTIME",
+      "timestamp": "2026-10-04T18:39:51Z",
+      "evidencePath": "workspace/pilot-evidence-tests.json"
+    },
+    {
+      "caseId": "TEST_BROWSER_E2E",
+      "status": "PASS",
+      "type": "CONNECTED_RUNTIME",
+      "timestamp": "2026-10-04T18:45:19Z",
+      "evidencePath": "workspace/pilot-evidence-tests.json",
+      "details": {
+        "browser": "Headless Chromium via Playwright",
+        "result": "Playwright Chromium browser launched successfully in headless mode!"
+      }
+    }
+  ]
+}

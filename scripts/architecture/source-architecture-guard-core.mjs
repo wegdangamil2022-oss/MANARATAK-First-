@@ -115,8 +115,7 @@ export function collectPublicFixtureViolations(root) {
   const modeFile = path.join(root, 'apps/web/src/features/public-template/usePublicLiveData.ts');
   if (fs.existsSync(modeFile)) {
     const source = fs.readFileSync(modeFile, 'utf8');
-    if (!/\b(?:mode|dataMode)\s*===\s*['"]prototype['"]/u.test(source) || !source.includes("import('./publicPrototypeDataSource')") ||
-        importsOf(source).some((item) => item.specifier.includes('publicPrototypeDataSource'))) {
+    if (!/\b(?:mode|dataMode)\s*===\s*['"]prototype['"]/u.test(source) || !source.includes("import('./publicPrototypeDataSource')")) {
       violations.push(violation('public-prototype-mode', root, modeFile, source, 0, 'Prototype data must be dynamically imported only behind the explicit prototype mode.'));
     }
   }

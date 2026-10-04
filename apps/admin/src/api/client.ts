@@ -416,6 +416,17 @@ export const adminApiClient = {
     });
   },
 
+  getInternationalTestImportVersions<T = unknown>(testId: string) {
+    return adminRequest<T>(`/admin/international-tests/${testId}/import-versions`);
+  },
+
+  reviewInternationalTestSourceNames<T = unknown>(testId: string, payload: unknown) {
+    return adminRequest<T>(`/admin/international-tests/${testId}/review-source-names`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
   archiveInternationalTest(testId: string) {
     return adminRequest<unknown>(`/admin/international-tests/${testId}/archive`, {
       method: 'POST',

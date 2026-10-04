@@ -24,9 +24,31 @@ const dictionaries = {
   en,
 };
 
+const safeGetItem = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    try {
+      return window.localStorage?.getItem(key) || null;
+    } catch {
+      return null;
+    }
+  }
+};
+
+const safeSetItem = (key: string, value: string): void => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    try {
+      window.localStorage?.setItem(key, value);
+    } catch {}
+  }
+};
+
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<SupportedLocale>(() => {
-    const saved = localStorage.getItem('manaratak_admin_lang');
+    const saved = safeGetItem('manaratak_admin_lang');
     if (isSupportedLocale(saved)) {
       return saved;
     }
@@ -35,7 +57,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setLanguage = (lang: SupportedLocale) => {
     setLanguageState(lang);
-    localStorage.setItem('manaratak_admin_lang', lang);
+    safeSetItem('manaratak_admin_lang', lang);
   };
 
   const dir = getLocaleDirection(language);
@@ -59,7 +81,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useTranslation = () => {
   const context = useContext(I18nContext);
   if (context === undefined) {
-    const savedLang = localStorage.getItem('manaratak_admin_lang') || localStorage.getItem('manaratak_lang');
+    const savedLang = safeGetItem('manaratak_admin_lang') || safeGetItem('manaratak_lang');
     const language = isSupportedLocale(savedLang) ? savedLang : DEFAULT_LOCALE;
     const dict = dictionaries[language] || dictionaries.ar;
     return {

@@ -15,7 +15,7 @@ function disableHmrPlugin(): Plugin {
     enforce: 'post',
     transformIndexHtml(html) {
       if (process.env.DISABLE_HMR === 'true') {
-        return html.replace(/<script type="module" src="\/@vite\/client"><\/script>/, '');
+        return html.replace(/<script type="module" src="(?:\/admin)?\/@vite\/client"><\/script>/g, '');
       }
       return html;
     }
@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => {
   const rootDir = path.resolve(__dirname, '../..');
   const studio = isGoogleAiStudio({ ...loadEnv(mode, rootDir, ['MANARATAK_', 'VITE_']), ...process.env });
   assertLocalReadOnlyBuildAllowed({ mode, nodeEnv: process.env.NODE_ENV, localReadOnly: process.env.VITE_LOCAL_ADMIN_READ_ONLY });
+  const disableHmr = process.env.DISABLE_HMR === 'true';
   return {
   base: '/admin/',
   root: __dirname,
@@ -51,7 +52,7 @@ export default defineConfig(({ mode }) => {
   plugins: [frontendSecurityHeadersPlugin(), react(), tailwindcss(),
     ...(studio ? [googleAiStudioPreviewPlugin()] : []), localAdminReadOnlyGuardPlugin(), disableHmrPlugin()],
   server: {
-    hmr: process.env.DISABLE_HMR === 'true' ? false : studio ? true : { clientPort: 443 },
+    hmr: disableHmr ? false : studio ? true : { clientPort: 443 },
     host: '0.0.0.0',
     port: 3001,
   },

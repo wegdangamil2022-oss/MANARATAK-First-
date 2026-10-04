@@ -201,6 +201,27 @@ export class InternationalTestAdminRouter {
     }).strict();
     const emptyMutationBody = z.object({}).strict();
 
+    const reviewSourceNamesSchema = z.object({
+      versionId: z.string().uuid(),
+      sourceHash: z.string().regex(/^[a-f0-9]{64}$/),
+      localizedNameAr: z.string().trim().min(1).max(300),
+      localizedNameEn: z.string().trim().min(1).max(300),
+      reviewReason: z.string().trim().min(1).max(2000),
+      evidenceReference: z.string().trim().min(1).max(500),
+      expectedCurrentLocalizedNameAr: z.string().trim().min(1).max(300).nullable().optional(),
+      expectedCurrentLocalizedNameEn: z.string().trim().min(1).max(300).nullable().optional(),
+    }).strict();
+
+    const correctDraftCanonicalIdentitySchema = z.object({
+      versionId: z.string().uuid(),
+      sourceHash: z.string().regex(/^[a-f0-9]{64}$/),
+      expectedCurrentCanonicalName: z.string().trim().min(1).max(300).nullable().optional(),
+      newCanonicalName: z.string().trim().min(1).max(300),
+      newDisplayName: z.string().trim().min(1).max(300).nullable().optional(),
+      correctionReason: z.string().trim().min(1).max(2000),
+      evidenceReference: z.string().trim().min(1).max(500),
+    }).strict();
+
     const canonicalRelationshipSchema = z.object({
       kind: z.enum(['COUNTRY', 'LANGUAGE', 'TAXONOMY', 'DEGREE']), referenceId: z.string().uuid(),
       relationshipType: z.string().trim().min(1).max(120), reason: z.string().trim().min(1).max(2000),
@@ -264,6 +285,18 @@ export class InternationalTestAdminRouter {
       emptyMutationBody.parse(req.body ?? {});
       await internationalTestAdminUseCases.verifySource(req.params.id, mutationContext(req));
       res.json({ success: true });
+    }));
+
+    router.post('/:id/review-source-names', asyncHandler(async (req: Request, res: Response) => {
+      const parsed = reviewSourceNamesSchema.parse(req.body);
+      const updated = await internationalTestAdminUseCases.reviewSourceNames(req.params.id, parsed, mutationContext(req));
+      res.json(updated);
+    }));
+
+    router.post('/:id/correct-draft-canonical-identity', asyncHandler(async (req: Request, res: Response) => {
+      const parsed = correctDraftCanonicalIdentitySchema.parse(req.body);
+      const updated = await internationalTestAdminUseCases.correctDraftCanonicalIdentity(req.params.id, parsed, mutationContext(req));
+      res.json(updated);
     }));
 
     router.get('/:id', asyncHandler(async (req: Request, res: Response) => {

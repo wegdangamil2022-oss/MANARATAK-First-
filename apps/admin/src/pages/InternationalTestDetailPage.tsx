@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
 import { SavedTestCanonicalRelationships } from '../components/SavedTestCanonicalRelationships';
+import { InternationalTestSourceSectionsViewer } from '../components/InternationalTestSourceSectionsViewer';
 import type { InternationalTestDto } from '@manaratak/domain';
 import {
   ArrowRight,
@@ -110,6 +111,7 @@ interface InternationalTestDetail extends Pick<InternationalTestDto, 'countryRel
 
 type TabType =
   | 'description'
+  | 'source_sections'
   | 'variants'
   | 'sections'
   | 'scoring'
@@ -152,6 +154,7 @@ export function InternationalTestDetailPage() {
 
   const tabs: { id: TabType; labelAr: string; labelEn: string }[] = [
     { id: 'description', labelAr: 'الوصف والاستخدامات', labelEn: 'Description & Use Cases' },
+    { id: 'source_sections', labelAr: 'أقسام ملف المصدر', labelEn: 'Source File Sections' },
     { id: 'variants', labelAr: 'النسخ وطريقة التقديم', labelEn: 'Versions & Delivery' },
     { id: 'sections', labelAr: 'أقسام الاختبار', labelEn: 'Test Sections' },
     { id: 'scoring', labelAr: 'نظام الدرجات والمعادلات', labelEn: 'Score Scale & Equivalencies' },
@@ -313,6 +316,9 @@ export function InternationalTestDetailPage() {
       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
         {activeTab === 'description' && (
           <DescriptionTab test={test} onRefresh={fetchDetail} isRtl={isRtl} />
+        )}
+        {activeTab === 'source_sections' && (
+          <InternationalTestSourceSectionsViewer testId={test.id} isRtl={isRtl} onNamesReviewed={fetchDetail} />
         )}
         {activeTab === 'requirements' && (
           <RequirementsTab test={test} isRtl={isRtl} />

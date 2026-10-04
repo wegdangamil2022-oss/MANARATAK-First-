@@ -30,7 +30,8 @@ describe('InternationalTestAdminRouter', () => {
     listProviders: vi.fn(),
     upsertProvider: vi.fn(),
     checkPublicationReadiness: vi.fn(),
-    verifySource: vi.fn()
+    verifySource: vi.fn(),
+    reviewSourceNames: vi.fn()
   });
 
   const createApp = (useCases: any) => {
@@ -273,5 +274,52 @@ describe('InternationalTestAdminRouter', () => {
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ error: 'Invalid score scale: overallMinimum cannot be greater than overallMaximum' });
+  });
+
+  it('POST /admin/international-tests/:id/review-source-names succeeds and calls use case', async () => {
+    const useCases = createMockUseCases();
+    const updatedTest = { id: 'test-1', localizedNameAr: 'اختبار الآيلتس', localizedNameEn: 'IELTS' };
+    useCases.reviewSourceNames.mockResolvedValue(updatedTest);
+    const app = createApp(useCases);
+
+    const payload = {
+      versionId: '11111111-1111-4111-8111-111111111111',
+      sourceHash: 'a'.repeat(64),
+      localizedNameAr: 'اختبار الآيلتس',
+      localizedNameEn: 'IELTS',
+      reviewReason: 'Verified from candidate guide',
+      evidenceReference: 'workspace/sources/ielts.md'
+    };
+
+    const res = await request(app)
+      .post('/admin/international-tests/test-1/review-source-names')
+      .send(payload);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(updatedTest);
+    expect(useCases.reviewSourceNames).toHaveBeenCalledWith(
+      'test-1',
+      payload,
+      expect.objectContaining({ actorId: 'admin-X', source: 'admin-international-tests-api' })
+    );
+  });
+
+  it('POST /admin/international-tests/:id/review-source-names rejects invalid payload with 400', async () => {
+    const useCases = createMockUseCases();
+    const app = createApp(useCases);
+
+    const invalidPayload = {
+      versionId: 'not-a-uuid',
+      sourceHash: 'short',
+      localizedNameAr: '',
+      localizedNameEn: ''
+    };
+
+    const res = await request(app)
+      .post('/admin/international-tests/test-1/review-source-names')
+      .send(invalidPayload);
+
+    expect(res.status).toBe(400);
+    expect(useCases.reviewSourceNames).not.toHaveBeenCalled();
   });
 });
