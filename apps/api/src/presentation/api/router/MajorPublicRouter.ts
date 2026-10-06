@@ -25,10 +25,29 @@ export class MajorPublicRouter {
     }));
 
     router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
+      const degreeLevel = typeof req.query.level === 'string'
+        ? req.query.level
+        : typeof req.query.degreeLevel === 'string'
+        ? req.query.degreeLevel
+        : undefined;
+      const profileCode = typeof req.query.code === 'string' ? req.query.code : undefined;
       try {
-        res.json(await localized.getMajor(req.params.slug, parseRequestLocale(req.query)));
+        res.json(await localized.getMajor(req.params.slug, parseRequestLocale(req.query), { degreeLevel, profileCode }));
       } catch (err: any) {
-        if (err.message === 'Major not found') return res.status(404).json({ error: 'Not found' });
+        if (err.message === 'Major not found' || err.message === 'Major level profile not published') {
+          return res.status(404).json({ error: 'Not found' });
+        }
+        throw err;
+      }
+    }));
+
+    router.get('/:slug/:level', asyncHandler(async (req: Request, res: Response) => {
+      try {
+        res.json(await localized.getMajor(req.params.slug, parseRequestLocale(req.query), { degreeLevel: req.params.level }));
+      } catch (err: any) {
+        if (err.message === 'Major not found' || err.message === 'Major level profile not published') {
+          return res.status(404).json({ error: 'Not found' });
+        }
         throw err;
       }
     }));

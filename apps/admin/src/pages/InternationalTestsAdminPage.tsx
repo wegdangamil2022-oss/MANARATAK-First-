@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { AlertCircle,Archive,BookOpen,CheckCircle2,Eye,Filter,GraduationCap,Loader2,Send } from 'lucide-react';
+import { useEffect,useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
-import { Archive, CheckCircle2, Eye, Filter, Loader2, Send, BookOpen, AlertCircle, GraduationCap } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
 
 type InternationalTestStatus = 'IMPORTED' | 'READY_TO_REVIEW' | 'NEEDS_REVIEW' | 'INCOMPLETE' | 'READY_TO_PUBLISH' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED';
@@ -38,6 +38,8 @@ interface InternationalTest {
   slug?: string;
   displayName?: string;
   canonicalName: string;
+  localizedNameAr?: string | null;
+  localizedNameEn?: string | null;
   testCode?: string | null;
   abbreviation?: string | null;
   testCategory: InternationalTestCategory;
@@ -61,12 +63,32 @@ interface InternationalTest {
   updatedAt?: string;
 }
 
+export function getTestDisplayTitle(test: Partial<InternationalTest>, isRtl: boolean): string {
+  if (isRtl) {
+    return (
+      test.localizedNameAr?.trim() ||
+      test.displayName?.trim() ||
+      test.canonicalName?.trim() ||
+      test.localizedNameEn?.trim() ||
+      ''
+    );
+  }
+  return (
+    test.localizedNameEn?.trim() ||
+    test.displayName?.trim() ||
+    test.canonicalName?.trim() ||
+    test.localizedNameAr?.trim() ||
+    ''
+  );
+}
+
 interface InternationalTestListResponse {
   data: InternationalTest[];
   total: number;
   page: number;
-  pageSize: number;
-  totalPages: number;
+  pageSize?: number;
+  limit?: number;
+  totalPages?: number;
 }
 
 const testCategories: InternationalTestCategory[] = [
@@ -100,30 +122,41 @@ export function InternationalTestsAdminPage() {
   const isRtl = language === 'ar';
 
   const [tests, setTests] = useState<InternationalTestListResponse | null>(null);
-  const [selectedTest, setSelectedTest] = useState<InternationalTest | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [archiveConfirmTest, setArchiveConfirmTest] = useState<InternationalTest | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
   const loadTests = async (signal?: AbortSignal) => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ page: '1', pageSize: '20' });
-      if (statusFilter) params.append('status', statusFilter);
-      if (categoryFilter) params.append('testCategory', categoryFilter);
+      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+      const cleanStatus = statusFilter.trim();
+      if (cleanStatus && cleanStatus.toLowerCase() !== 'all') {
+        params.append('status', cleanStatus);
+      }
+      const cleanCategory = categoryFilter.trim();
+      if (cleanCategory && cleanCategory.toLowerCase() !== 'all') {
+        params.append('testCategory', cleanCategory);
+      }
+      if (searchQuery.trim()) {
+        params.append('searchQuery', searchQuery.trim());
+      }
       
       const response = await adminApiClient.request<InternationalTestListResponse>(
         `/admin/international-tests?${params.toString()}`,
         { signal }
       );
       setTests(response);
-      if (selectedTest) {
-        setSelectedTest((response.data || []).find((item) => item.id === selectedTest.id) || null);
-      }
     } catch (err: any) {
       if (err?.name === 'AbortError') return;
       setError(err.message || (isRtl ? 'تعذر تحميل الاختبارات الدولية.' : 'Unable to load international tests.'));
@@ -136,9 +169,9 @@ export function InternationalTestsAdminPage() {
     const controller = new AbortController();
     void loadTests(controller.signal);
     return () => controller.abort();
-  }, [statusFilter, categoryFilter]);
+  }, [statusFilter, categoryFilter, searchQuery, page, pageSize]);
 
-  const transitionTest = async (id: string, action: 'mark-publishable' | 'publish' | 'archive') => {
+  const transitionTest = async (id: string, action: 'mark-publishable' | 'publish' | 'unpublish' | 'archive') => {
     setSaving(true);
     setError(null);
     setMessage(null);
@@ -154,6 +187,7 @@ export function InternationalTestsAdminPage() {
       setError(err.message || (isRtl ? 'تعذر تحديث حالة الاختبار الدولي.' : 'Unable to update international test lifecycle.'));
     } finally {
       setSaving(false);
+      setArchiveConfirmTest(null);
     }
   };
 
@@ -170,11 +204,27 @@ export function InternationalTestsAdminPage() {
             <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{t('international_tests')}</h1>
             <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/80">{t('review_imported_tests_official_registration_links_')}</p>
           </div>
-          <div className="flex flex-wrap gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+                placeholder={isRtl ? 'بحث باسم الاختبار أو المزود...' : 'Search test or provider...'}
+                className="bg-white/10 border border-white/20 rounded-xl py-2 px-3 text-sm focus:outline-none text-white placeholder-white/60 focus:ring-1 focus:ring-[#21A7B4] w-48 sm:w-60"
+              />
+            </div>
+
             <div className="relative">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
                 className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]"
               >
                 <option value="" className="text-slate-900">{t('all_statuses')}</option>
@@ -190,7 +240,10 @@ export function InternationalTestsAdminPage() {
             <div className="relative">
               <select
                 value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+                onChange={(e) => {
+                  setCategoryFilter(e.target.value);
+                  setPage(1);
+                }}
                 className="appearance-none bg-white/10 border border-white/20 rounded-xl py-2 pl-3 pr-10 text-sm focus:outline-none text-white focus:ring-1 focus:ring-[#21A7B4]"
               >
                 <option value="" className="text-slate-900">{isRtl ? 'جميع التصنيفات' : 'All Categories'}</option>
@@ -216,245 +269,396 @@ export function InternationalTestsAdminPage() {
         <MetricCard label={isRtl ? "غير مكتمل" : "Incomplete"} value={tests?.data.filter(x => x.completenessStatus === 'INCOMPLETE').length ?? 0} icon={GraduationCap} accent="#B94A48" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          {loading && !tests ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      <div className="bg-white border border-[#DDEFF2] rounded-2xl shadow-sm overflow-hidden">
+        <div className="border-b border-slate-100 bg-[#FAF7F0]/40 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-base font-black text-[#142B5F]">
+              {isRtl ? 'قائمة الاختبارات الدولية المعتمدة' : 'International Tests Directory'}
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {isRtl ? 'إدارة حالات النشر، اكتمال المعايير، وتفاصيل الاختبارات والمزودين' : 'Manage lifecycle status, dataset completeness, and test provider details'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setViewMode('cards')}
+                className={`px-3 py-1 rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white text-[#142B5F] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                {isRtl ? 'بطاقات' : 'Cards'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`px-3 py-1 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white text-[#142B5F] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                {isRtl ? 'جدول' : 'Table'}
+              </button>
             </div>
-          ) : !tests || tests.data.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">{t('no_international_tests_found')}</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-right rtl:text-right ltr:text-left">
-                <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs">
-                  <tr>
-                    <th className="px-6 py-3">{t('test')}</th>
-                    <th className="px-6 py-3">{t('provider')}</th>
-                    <th className="px-6 py-3">{t('status')}</th>
-                    <th className="px-6 py-3">{t('completeness')}</th>
-                    <th className="px-6 py-3 text-center">{isRtl ? 'التفاصيل' : 'Details'}</th>
-                    <th className="px-6 py-3 text-left rtl:text-left ltr:text-right">{t('actions')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {tests.data.map((test) => {
-                    const testName = test.displayName || test.canonicalName;
-                    return (
-                      <tr
-                        key={test.id}
-                        className={`hover:bg-gray-50 ${selectedTest?.id === test.id ? 'bg-blue-50/50' : ''}`}
-                      >
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => setSelectedTest(test)}
-                            className="font-semibold text-gray-900 hover:text-blue-700 text-right rtl:text-right ltr:text-left block"
-                          >
-                            {testName}
-                          </button>
-                          <div className="text-xs text-gray-500 mt-0.5">
-                            {getCategoryLabel(test.testCategory, isRtl)}{' '}
-                            {test.abbreviation ? `(${test.abbreviation})` : test.testCode ? `- ${test.testCode}` : ''}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600 font-medium">{test.providerName}</td>
-                        <td className="px-6 py-4">
-                          <StatusBadge status={test.status} isRtl={isRtl} />
-                        </td>
-                        <td className="px-6 py-4">
-                          <CompletenessBadge status={test.completenessStatus} isRtl={isRtl} />
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <Link
-                            to={`/international-tests/${test.id}`}
-                            className="inline-flex items-center gap-1 text-xs bg-gray-100 hover:bg-black hover:text-white text-gray-800 font-medium px-2.5 py-1.5 rounded-md transition-colors"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            {isRtl ? 'فتح التفاصيل' : 'Open Details'}
-                          </Link>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              disabled={saving || test.completenessStatus === 'INCOMPLETE'}
-                              onClick={() => transitionTest(test.id, 'mark-publishable')}
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg disabled:opacity-30"
-                              title={t('mark_publishable')}
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                            </button>
-                            <button
-                              disabled={saving || test.status !== 'READY_TO_PUBLISH'}
-                              onClick={() => transitionTest(test.id, 'publish')}
-                              className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg disabled:opacity-30"
-                              title={t('publish')}
-                            >
-                              <Send className="h-4 w-4" />
-                            </button>
-                            <button
-                              disabled={saving}
-                              onClick={() => transitionTest(test.id, 'archive')}
-                              className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-30"
-                              title={t('archive')}
-                            >
-                              <Archive className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="text-xs font-bold text-[#0E7C86] bg-[#DDEFF2]/50 px-3 py-1.5 rounded-xl">
+              {isRtl ? `العدد الإجمالي: ${tests?.total ?? 0}` : `Total: ${tests?.total ?? 0}`}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Selected Test Overview Sidebar */}
-        <aside className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 h-fit space-y-5">
-          <h3 className="text-lg font-bold text-gray-900 border-b pb-3">{t('review_details')}</h3>
-          {!selectedTest ? (
-            <p className="text-sm text-gray-500">{t('select_an_imported_test_to_review_official_links_f')}</p>
-          ) : (
-            <div className="space-y-4 text-sm">
-              <div>
-                <h4 className="font-bold text-gray-900 text-base">
-                  {selectedTest.displayName || selectedTest.canonicalName}
-                </h4>
-                <p className="text-gray-500 text-xs font-mono">{selectedTest.canonicalName}</p>
-              </div>
-
-              <div className="pt-2 pb-2">
-                <Link
-                  to={`/international-tests/${selectedTest.id}`}
-                  className="w-full flex items-center justify-center gap-2 bg-black text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors"
+        {loading && !tests ? (
+          <div className="flex flex-col justify-center items-center h-64 gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-[#0E7C86]" />
+            <span className="text-xs font-bold text-slate-500">{isRtl ? 'جاري تحميل الاختبارات...' : 'Loading tests...'}</span>
+          </div>
+        ) : !tests || tests.data.length === 0 ? (
+          <div className="p-16 text-center text-slate-500 font-medium">{t('no_international_tests_found')}</div>
+        ) : viewMode === 'cards' ? (
+          <div className="p-6 space-y-5">
+            {tests.data.map((test) => {
+              const displayTitle = getTestDisplayTitle(test, isRtl);
+              return (
+                <div
+                  key={test.id}
+                  className="rounded-2xl border border-[#DDEFF2] bg-white p-6 shadow-xs hover:border-[#0E7C86]/60 hover:shadow-md transition-all duration-200 flex flex-col xl:flex-row xl:items-center justify-between gap-6"
                 >
-                  <Eye className="h-4 w-4" />
-                  {isRtl ? 'فتح صفحة التفاصيل الكاملة' : 'Open Full Detail Page'}
-                </Link>
-              </div>
+                  {/* Left / Right: Info Area */}
+                  <div className="flex-1 min-w-0 space-y-2.5">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <Link
+                        to={`/international-tests/${test.id}`}
+                        className="text-xl font-black text-[#142B5F] hover:text-[#0E7C86] transition-colors tracking-tight"
+                      >
+                        {displayTitle}
+                      </Link>
+                      {test.abbreviation && (
+                        <span className="font-mono text-xs font-black text-[#0E7C86] bg-[#DDEFF2]/80 px-2.5 py-1 rounded-xl border border-[#DDEFF2]">
+                          {test.abbreviation}
+                        </span>
+                      )}
+                    </div>
 
-              <dl className="space-y-3 divide-y divide-gray-100 pt-1">
-                <DetailRow label={t('provider')} value={selectedTest.providerName} />
-                <DetailRow label={isRtl ? 'مقياس الدرجات' : 'Score Scale'} value={formatScoreScale(selectedTest, isRtl)} />
-                <DetailRow label={isRtl ? 'مدة الصلاحية' : 'Validity'} value={formatValidity(selectedTest, isRtl)} />
-                <DetailRow label={isRtl ? 'الرسوم التقريبية' : 'Fee'} value={formatFee(selectedTest, isRtl)} />
-                <DetailRow label={isRtl ? 'التحقق من المصدر' : 'Source Verification'} value={formatSourceVerification(selectedTest, isRtl)} />
-                <DetailRow
-                  label={t('accepted_for')}
-                  value={selectedTest.acceptedFor && selectedTest.acceptedFor.length > 0 ? selectedTest.acceptedFor.join(', ') : (isRtl ? 'غير متوفر' : 'Unavailable')}
-                />
-                <DetailRow
-                  label={t('countries')}
-                  value={(selectedTest.availableCountries || []).join(', ') || (isRtl ? 'غير متوفر' : 'Unavailable')}
-                />
-                <DetailRow
-                  label={t('test_centers')}
-                  value={(selectedTest.testCenters || []).join(', ') || (isRtl ? 'غير متوفر' : 'Unavailable')}
-                />
-                <DetailRow
-                  label={t('source_import_record')}
-                  value={selectedTest.sourceImportRecordId || (isRtl ? 'غير متوفر' : 'Unavailable')}
-                />
-              </dl>
+                    <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2.5 font-medium">
+                      <span className="inline-block bg-[#FAF7F0] text-slate-700 border border-slate-200/60 px-2.5 py-1 rounded-lg font-semibold text-[11px]">
+                        {getCategoryLabel(test.testCategory, isRtl)}
+                      </span>
+                      {test.abbreviation && (
+                        <span className="text-slate-500 font-bold">— {test.abbreviation}</span>
+                      )}
+                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-600 font-semibold">{isRtl ? `المزود: ${test.providerName}` : `Provider: ${test.providerName}`}</span>
+                      {test.testCode && !test.abbreviation && (
+                        <span className="font-mono text-[11px] text-slate-400">({test.testCode})</span>
+                      )}
+                    </div>
 
-              {selectedTest.officialRegistrationUrl ? (
-                <a
-                  href={selectedTest.officialRegistrationUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block text-center bg-gray-100 text-gray-800 font-medium rounded-lg px-4 py-2 hover:bg-gray-200 transition-colors text-xs"
-                >
-                  {t('open_official_registration')}
-                </a>
-              ) : (
-                <p className="text-xs text-gray-400 text-center italic">{isRtl ? 'رابط التسجيل غير متوفر' : 'Registration URL unavailable'}</p>
-              )}
+                    <div className="flex items-center gap-2 pt-1">
+                      <StatusBadge status={test.status} isRtl={isRtl} />
+                      <CompletenessBadge status={test.completenessStatus} isRtl={isRtl} />
+                    </div>
+                  </div>
 
-              <p className="text-xs text-gray-500 pt-2 border-t">
-                {t('phase_23_controls_review_actions_only_test_identit')}
-              </p>
+                  {/* Middle / Center: Lifecycle Actions in Words */}
+                  <div className="flex flex-wrap items-center justify-center gap-2.5 shrink-0 py-2.5 px-4 bg-slate-50/80 border border-slate-100 rounded-2xl xl:self-center">
+                    {test.status === 'READY_TO_PUBLISH' ? (
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => transitionTest(test.id, 'publish')}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition disabled:opacity-50 cursor-pointer"
+                        title={isRtl ? 'نشر الاختبار' : 'Publish Test'}
+                      >
+                        <Send className="h-4 w-4" />
+                        <span>{isRtl ? 'نشر الاختبار' : 'Publish Test'}</span>
+                      </button>
+                    ) : test.status === 'PUBLISHED' ? (
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                          <span>{isRtl ? 'منشور رسمياً' : 'Published'}</span>
+                        </span>
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() => transitionTest(test.id, 'unpublish')}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                          title={isRtl ? 'إلغاء النشر وإعادة الاختبار لحالة غير منشورة' : 'Unpublish test'}
+                        >
+                          <span>{isRtl ? 'إلغاء النشر' : 'Unpublish'}</span>
+                        </button>
+                      </div>
+                    ) : test.completenessStatus !== 'INCOMPLETE' ? (
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => transitionTest(test.id, 'mark-publishable')}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                        title={isRtl ? 'تحديد كجاهز للنشر' : 'Mark Ready to Publish'}
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-sky-600" />
+                        <span>{isRtl ? 'تجهيز للنشر' : 'Mark Ready'}</span>
+                      </button>
+                    ) : null}
+
+                    {test.status !== 'ARCHIVED' ? (
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => setArchiveConfirmTest(test)}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-slate-700 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 text-xs font-bold transition disabled:opacity-40 cursor-pointer"
+                        title={isRtl ? 'أرشفة الاختبار' : 'Archive Test'}
+                      >
+                        <Archive className="h-4 w-4 text-slate-500" />
+                        <span>{isRtl ? 'أرشفة الاختبار' : 'Archive Test'}</span>
+                      </button>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 font-bold px-3 py-1.5 bg-slate-100 rounded-xl">
+                        <Archive className="h-3.5 w-3.5 text-slate-400" />
+                        <span>{isRtl ? 'مؤرشف' : 'Archived'}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* End / Last: Open Details Button */}
+                  <div className="flex items-center xl:justify-end shrink-0">
+                    <Link
+                      to={`/international-tests/${test.id}`}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] text-white text-xs font-black transition shadow-xs w-full xl:w-auto"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span>{isRtl ? 'فتح التفاصيل' : 'Open Details'}</span>
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-right rtl:text-right ltr:text-left">
+              <thead className="bg-[#FAF7F0]/80 border-b border-[#DDEFF2] text-slate-600 text-xs font-black">
+                <tr>
+                  <th className="px-6 py-4">{t('test')}</th>
+                  <th className="px-6 py-4">{t('provider')}</th>
+                  <th className="px-5 py-4 text-center">{t('status')}</th>
+                  <th className="px-5 py-4 text-center">{t('completeness')}</th>
+                  <th className="px-6 py-4 text-center">{isRtl ? 'إجراءات دورة الحياة' : 'Lifecycle Actions'}</th>
+                  <th className="px-6 py-4 text-center">{isRtl ? 'التفاصيل' : 'Details'}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {tests.data.map((test) => {
+                  const displayTitle = getTestDisplayTitle(test, isRtl);
+                  return (
+                    <tr
+                      key={test.id}
+                      className="hover:bg-[#FAF7F0]/40 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <Link
+                          to={`/international-tests/${test.id}`}
+                          className="font-bold text-[#142B5F] hover:text-[#0E7C86] text-sm block transition-colors"
+                        >
+                          {displayTitle}
+                        </Link>
+                        <div className="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
+                          <span className="inline-block bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium text-[11px]">
+                            {getCategoryLabel(test.testCategory, isRtl)}
+                          </span>
+                          {test.abbreviation && (
+                            <span className="font-mono text-[11px] font-bold text-[#0E7C86]">
+                              — {test.abbreviation}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700 font-medium text-xs max-w-[220px]">
+                        {test.providerName}
+                      </td>
+                      <td className="px-5 py-4 text-center whitespace-nowrap">
+                        <StatusBadge status={test.status} isRtl={isRtl} />
+                      </td>
+                      <td className="px-5 py-4 text-center whitespace-nowrap">
+                        <CompletenessBadge status={test.completenessStatus} isRtl={isRtl} />
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center justify-center gap-2">
+                          {test.status === 'READY_TO_PUBLISH' ? (
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => transitionTest(test.id, 'publish')}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition disabled:opacity-50 cursor-pointer"
+                              title={isRtl ? 'نشر الاختبار' : 'Publish'}
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                              <span>{isRtl ? 'نشر' : 'Publish'}</span>
+                            </button>
+                          ) : test.status === 'PUBLISHED' ? (
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => transitionTest(test.id, 'unpublish')}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                              title={isRtl ? 'إلغاء النشر' : 'Unpublish'}
+                            >
+                              <span>{isRtl ? 'إلغاء النشر' : 'Unpublish'}</span>
+                            </button>
+                          ) : test.completenessStatus !== 'INCOMPLETE' ? (
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => transitionTest(test.id, 'mark-publishable')}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                              title={isRtl ? 'تجهيز للنشر' : 'Mark Ready'}
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5 text-sky-600" />
+                              <span>{isRtl ? 'تجهيز للنشر' : 'Mark Ready'}</span>
+                            </button>
+                          ) : null}
+
+                          {test.status !== 'ARCHIVED' ? (
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => setArchiveConfirmTest(test)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 text-xs font-medium transition disabled:opacity-40 cursor-pointer"
+                              title={isRtl ? 'أرشفة' : 'Archive'}
+                            >
+                              <Archive className="h-3.5 w-3.5" />
+                              <span>{isRtl ? 'أرشفة' : 'Archive'}</span>
+                            </button>
+                          ) : (
+                            <span className="text-xs text-slate-400 font-medium px-2 py-1">
+                              {isRtl ? 'مؤرشف' : 'Archived'}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap">
+                        <Link
+                          to={`/international-tests/${test.id}`}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] text-white text-xs font-bold transition shadow-xs"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          <span>{isRtl ? 'فتح التفاصيل' : 'Open Details'}</span>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pagination bar */}
+        {tests && tests.total > 0 && (
+          <div className="border-t border-slate-100 bg-[#FAF7F0]/40 px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
+            <div>
+              {isRtl
+                ? `عرض ${(page - 1) * pageSize + 1} - ${Math.min(page * pageSize, tests.total)} من إجمالي ${tests.total} اختبار`
+                : `Showing ${(page - 1) * pageSize + 1} - ${Math.min(page * pageSize, tests.total)} of ${tests.total} tests`}
             </div>
-          )}
-        </aside>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition"
+              >
+                {isRtl ? 'السابق' : 'Previous'}
+              </button>
+              <span className="px-2 font-bold text-[#142B5F]">
+                {page} / {Math.max(1, Math.ceil(tests.total / pageSize))}
+              </span>
+              <button
+                type="button"
+                disabled={page >= Math.ceil(tests.total / pageSize)}
+                onClick={() => setPage((p) => p + 1)}
+                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition"
+              >
+                {isRtl ? 'التالي' : 'Next'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Archive Confirmation Dialog */}
+      {archiveConfirmTest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center gap-3 text-amber-600">
+              <Archive className="h-6 w-6 shrink-0" />
+              <h3 className="text-lg font-black text-[#142B5F]">
+                {isRtl ? 'تأكيد أرشفة الاختبار' : 'Confirm Archive'}
+              </h3>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              {isRtl
+                ? `هل أنت متأكد من أرشفة «${getTestDisplayTitle(archiveConfirmTest, true)}»؟ سيتم حفظ السجل وبياناته بالكامل دون حذف، ولن يظهر في القوائم النشطة.`
+                : `Are you sure you want to archive "${getTestDisplayTitle(archiveConfirmTest, false)}"? The record and all its data will be preserved without deletion.`}
+            </p>
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => setArchiveConfirmTest(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer transition"
+              >
+                {isRtl ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => transitionTest(archiveConfirmTest.id, 'archive')}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold cursor-pointer transition shadow-xs disabled:opacity-50"
+              >
+                {saving ? (isRtl ? 'جارٍ الأرشفة...' : 'Archiving...') : (isRtl ? 'تأكيد الأرشفة' : 'Confirm Archive')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function StatusBadge({ status, isRtl }: { status: InternationalTestStatus; isRtl: boolean }) {
   const label = getStatusLabel(status, isRtl);
-  const className =
+  const config =
     status === 'PUBLISHED'
-      ? 'bg-green-100 text-green-700'
+      ? { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/80', dot: 'bg-emerald-500' }
       : status === 'READY_TO_PUBLISH'
-      ? 'bg-blue-100 text-blue-700'
+      ? { badge: 'bg-sky-50 text-sky-700 border-sky-200/80', dot: 'bg-sky-500' }
       : status === 'ARCHIVED'
-      ? 'bg-gray-100 text-gray-600'
-      : status === 'READY_TO_REVIEW'
-      ? 'bg-amber-100 text-amber-800'
-      : 'bg-yellow-100 text-yellow-700';
-  return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${className}`}>{label}</span>;
+      ? { badge: 'bg-slate-100 text-slate-600 border-slate-200', dot: 'bg-slate-400' }
+      : status === 'READY_TO_REVIEW' || status === 'NEEDS_REVIEW'
+      ? { badge: 'bg-amber-50 text-amber-800 border-amber-200/80', dot: 'bg-amber-500' }
+      : status === 'REJECTED' || status === 'INCOMPLETE'
+      ? { badge: 'bg-rose-50 text-rose-700 border-rose-200/80', dot: 'bg-rose-500' }
+      : { badge: 'bg-slate-100 text-slate-700 border-slate-200', dot: 'bg-slate-400' };
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border ${config.badge}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} />
+      <span>{label}</span>
+    </span>
+  );
 }
 
 function CompletenessBadge({ status, isRtl }: { status?: InternationalTestCompletenessStatus | null; isRtl: boolean }) {
   const label = getCompletenessLabel(status, isRtl);
-  const className =
+  const config =
     status === 'COMPLETE'
-      ? 'bg-green-100 text-green-700'
+      ? { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/80', dot: 'bg-emerald-500' }
       : status === 'NEEDS_REVIEW'
-      ? 'bg-amber-100 text-amber-800'
-      : 'bg-red-100 text-red-700';
-  return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${className}`}>{label}</span>;
-}
+      ? { badge: 'bg-amber-50 text-amber-800 border-amber-200/80', dot: 'bg-amber-500' }
+      : { badge: 'bg-rose-50 text-rose-700 border-rose-200/80', dot: 'bg-rose-500' };
 
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="pt-2 first:pt-0">
-      <dt className="text-gray-500 text-xs font-medium">{label}</dt>
-      <dd className="font-semibold text-gray-900 text-sm mt-0.5">{value}</dd>
-    </div>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border ${config.badge}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} />
+      <span>{label}</span>
+    </span>
   );
-}
-
-function formatScoreScale(test: InternationalTest, isRtl: boolean): string {
-  if (typeof test.scoreScale === 'string' && test.scoreScale.trim() !== '') {
-    return test.scoreScale;
-  }
-  if (test.scoreScale && typeof test.scoreScale === 'object') {
-    if (test.scoreScale.overallMinimum !== undefined && test.scoreScale.overallMaximum !== undefined) {
-      return `${test.scoreScale.overallMinimum} - ${test.scoreScale.overallMaximum}`;
-    }
-  }
-  return isRtl ? 'غير متوفر' : 'Unavailable';
-}
-
-function formatValidity(test: InternationalTest, isRtl: boolean): string {
-  const months = test.validityPeriodMonths ?? test.scoreScale?.resultValidityDurationMonths;
-  if (months !== undefined && months !== null) {
-    return `${months} ${isRtl ? 'شهر' : 'months'}`;
-  }
-  return isRtl ? 'غير متوفر' : 'Unavailable';
-}
-
-function formatFee(test: InternationalTest, isRtl: boolean): string {
-  if (test.fees && test.fees.length > 0) {
-    const primaryFee = test.fees[0];
-    return `${primaryFee.amount} ${primaryFee.currencyCode}`;
-  }
-  if (test.currencyCode && test.feeAmountMinorUnits) {
-    const scale = test.feeScale ?? 2;
-    const amount = Number(test.feeAmountMinorUnits) / Math.pow(10, scale);
-    return `${amount} ${test.currencyCode}`;
-  }
-  return isRtl ? 'غير متوفر' : 'Unavailable';
-}
-
-function formatSourceVerification(test: InternationalTest, isRtl: boolean): string {
-  if (test.isSourceVerified === true) {
-    return isRtl ? 'تم التحقق' : 'Verified';
-  }
-  return isRtl ? 'لم يتم التحقق' : 'Unverified';
 }
 
 function getStatusLabel(status: InternationalTestStatus, isRtl: boolean): string {
@@ -498,12 +702,14 @@ function getCompletenessLabel(status: InternationalTestCompletenessStatus | null
   return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
-function getCategoryLabel(category: InternationalTestCategory, isRtl: boolean): string {
+function getCategoryLabel(category: any, isRtl: boolean): string {
+  if (!category) return isRtl ? 'عام' : 'General';
   if (isRtl) {
     switch (category) {
-      case 'ENGLISH_LANGUAGE': return 'لغة إنجليزية';
+      case 'ENGLISH_LANGUAGE':
+      case 'LANGUAGE_PROFICIENCY': return 'لغة إنجليزية';
       case 'NON_ENGLISH_LANGUAGE': return 'لغة غير إنجليزية';
-      case 'LANGUAGE_PROFICIENCY': return 'إجادة لغة';
+      case 'STANDARDIZED_ADMISSION':
       case 'GENERAL_UNDERGRADUATE_ADMISSION':
       case 'UNDERGRAD_ADMISSION': return 'قبول جامعي عام';
       case 'GRADUATE_ADMISSION':
@@ -518,7 +724,7 @@ function getCategoryLabel(category: InternationalTestCategory, isRtl: boolean): 
         return category;
     }
   }
-  return category.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase());
+  return String(category).replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
 function getActionLabel(action: string, isRtl: boolean): string {
@@ -528,6 +734,8 @@ function getActionLabel(action: string, isRtl: boolean): string {
         return 'تحديد كجاهز للنشر';
       case 'publish':
         return 'نشر';
+      case 'unpublish':
+        return 'إلغاء النشر';
       case 'archive':
         return 'أرشفة';
       default:

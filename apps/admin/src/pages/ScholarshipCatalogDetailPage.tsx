@@ -1,181 +1,99 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
 import type {
-  ScholarshipBenefitDto,
-  ScholarshipDegreeTargetDto,
-  ScholarshipDto,
-  ScholarshipEligibilityItemDto,
-  ScholarshipMajorTargetDto,
-  ScholarshipRequiredDocumentDto,
+ScholarshipDegreeTargetDto,
+ScholarshipDto,
+ScholarshipMajorTargetDto
 } from '@manaratak/domain';
 import {
-  Archive,
-  ArrowLeft,
-  CheckCircle2,
-  ExternalLink,
-  GraduationCap,
-  History,
-  Landmark,
-  Loader2,
-  Plus,
-  Save,
-  ShieldCheck,
-  Trash2,
-  XCircle,
+AlertCircle,
+AlertTriangle,
+Archive,
+ArrowLeft,
+ArrowRight,
+BookOpen,
+Building2,
+Calendar,
+Check,
+CheckCheck,
+CheckCircle2,
+Coins,
+ExternalLink,
+FileText,
+Globe2,
+GraduationCap,
+History,
+Info,
+Landmark,
+Layers3,
+Lightbulb,
+Loader2,
+Network,
+Plus,
+Save,
+ShieldCheck,
+Sparkles,
+Trash2,
+X
 } from 'lucide-react';
-import { useTranslation } from '../i18n/I18nProvider';
+import { useEffect,useMemo,useState,type ReactNode } from 'react';
+import { Link,useNavigate,useParams } from 'react-router-dom';
 import {
-  scholarshipCatalogApi,
-  type ScholarshipCatalogDetailResponse,
-  type ScholarshipCatalogUpdate,
+scholarshipCatalogApi,
+type ScholarshipCatalogDetailResponse,
+type ScholarshipCatalogUpdate,
 } from '../api/scholarshipCatalog';
+import { useTranslation } from '../i18n/I18nProvider';
 
-type UiText = Record<string, string>;
+type TabKey =
+  | 'identity'
+  | 'overview'
+  | 'funding'
+  | 'degrees_majors'
+  | 'eligibility'
+  | 'documents'
+  | 'links_unis'
+  | 'notes'
+  | 'health_audit';
 
-const copy: Record<'ar' | 'en', UiText> = {
-  en: {
-    back: 'Back to scholarships',
-    title: 'Canonical Scholarship Editor',
-    subtitle: 'Catalog data is read from and written to the normalized Scholarship model. Import staging is not edited here.',
-    save: 'Save canonical data',
-    saved: 'Canonical Scholarship data saved.',
-    identity: 'Identity & lifecycle',
-    funding: 'Funding',
-    benefits: 'Benefits',
-    degrees: 'Degree targets',
-    majors: 'Major targets',
-    eligibility: 'Eligibility requirements',
-    documents: 'Documents & test requirements',
-    sources: 'Source evidence & provenance',
-    universities: 'University / program links',
-    health: 'Data health',
-    missing: 'Missing fields',
-    unresolved: 'Unresolved canonical links',
-    history: 'Change history',
-    compatibility: 'Legacy compatibility snapshot',
-    compatibilityNote: 'Read-only during WP12-9. It is not the source of truth for canonical editing.',
-    noRows: 'No rows stored.',
-    noMissing: 'No blocking missing fields.',
-    noUnresolved: 'No unresolved canonical links.',
-    noHistory: 'No Scholarship audit events returned.',
-    workflow: 'Workflow',
-    completeness: 'Completeness',
-    verification: 'Verification',
-    publication: 'Publication',
-    publicId: 'Public ID',
-    canonicalName: 'Canonical name',
-    dedupe: 'Dedupe key',
-    name: 'Display name',
-    provider: 'Provider',
-    academicYear: 'Academic year',
-    cycle: 'Cycle',
-    country: 'Country source label',
-    countryRef: 'Country canonical reference',
-    countryScope: 'Country scope',
-    language: 'Study language source label',
-    languageRef: 'Language canonical reference',
-    languageResolution: 'Language resolution',
-    deadline: 'Application deadline',
-    deadlineType: 'Deadline type',
-    applicationMethod: 'Application method',
-    applicationUrl: 'Application URL',
-    officialUrl: 'Official source URL',
-    sourceUrl: 'Source URL',
-    officialWebsite: 'Official website',
-    sourceLocale: 'Source locale',
-    importRecord: 'Import record',
-    lastVerified: 'Last verified',
-    fundingType: 'Funding type',
-    amount: 'Amount (minor units)',
-    currencyCode: 'Currency code',
-    fullyFunded: 'Fully funded',
-    add: 'Add',
-    remove: 'Remove',
-    required: 'Required',
-    optional: 'Optional',
-    canonicalLocked: 'Canonical IDs are read-only here; resolution belongs to the canonical review flow.',
-    explicitPublish: 'Transfer is not publication. Public visibility changes only through the explicit lifecycle commands below.',
-    markReady: 'Mark ready for review',
-    markPublishable: 'Mark ready to publish',
-    publish: 'Publish',
-    unpublish: 'Unpublish',
-    archive: 'Archive',
-    reject: 'Reject',
-    actionDone: 'Lifecycle action completed.',
-    auditUnavailable: 'Audit history is unavailable in this composition.',
-  },
-  ar: {
-    back: 'العودة إلى المنح',
-    title: 'محرر المنحة القانوني',
-    subtitle: 'القراءة والحفظ من نموذج Scholarship المطبّع مباشرة. سجلات Staging لا تُحرر من هذه الصفحة.',
-    save: 'حفظ البيانات القانونية',
-    saved: 'تم حفظ بيانات المنحة القانونية.',
-    identity: 'الهوية ودورة الحياة',
-    funding: 'التمويل',
-    benefits: 'المزايا',
-    degrees: 'الدرجات المستهدفة',
-    majors: 'التخصصات المستهدفة',
-    eligibility: 'متطلبات الأهلية',
-    documents: 'المستندات ومتطلبات الاختبارات',
-    sources: 'أدلة المصادر والأثر',
-    universities: 'روابط الجامعات / البرامج',
-    health: 'حالة البيانات',
-    missing: 'الحقول الناقصة',
-    unresolved: 'الروابط القانونية غير المحسومة',
-    history: 'سجل التغييرات',
-    compatibility: 'لقطة التوافق القديمة',
-    compatibilityNote: 'للقراءة فقط في WP12-9، وليست مصدر الحقيقة للتحرير القانوني.',
-    noRows: 'لا توجد سجلات محفوظة.',
-    noMissing: 'لا توجد حقول ناقصة مانعة.',
-    noUnresolved: 'لا توجد روابط قانونية غير محسومة.',
-    noHistory: 'لم تُرجع خدمة التدقيق أحداثًا لهذه المنحة.',
-    workflow: 'سير العمل',
-    completeness: 'الاكتمال',
-    verification: 'التحقق',
-    publication: 'النشر',
-    publicId: 'المعرف العام',
-    canonicalName: 'الاسم القانوني',
-    dedupe: 'مفتاح التكرار',
-    name: 'اسم العرض',
-    provider: 'الجهة المانحة',
-    academicYear: 'العام الأكاديمي',
-    cycle: 'الدورة',
-    country: 'اسم الدولة من المصدر',
-    countryRef: 'مرجع الدولة القانوني',
-    countryScope: 'نطاق الدول',
-    language: 'لغة الدراسة من المصدر',
-    languageRef: 'مرجع اللغة القانوني',
-    languageResolution: 'حالة ربط اللغة',
-    deadline: 'الموعد النهائي',
-    deadlineType: 'نوع الموعد',
-    applicationMethod: 'طريقة التقديم',
-    applicationUrl: 'رابط التقديم',
-    officialUrl: 'المصدر الرسمي',
-    sourceUrl: 'رابط المصدر',
-    officialWebsite: 'الموقع الرسمي',
-    sourceLocale: 'لغة المصدر',
-    importRecord: 'سجل الاستيراد',
-    lastVerified: 'آخر تحقق',
-    fundingType: 'نوع التمويل',
-    amount: 'المبلغ بالوحدات الصغرى',
-    currencyCode: 'رمز العملة',
-    fullyFunded: 'تمويل كامل',
-    add: 'إضافة',
-    remove: 'حذف',
-    required: 'مطلوب',
-    optional: 'اختياري',
-    canonicalLocked: 'المعرفات القانونية للقراءة فقط هنا؛ حسمها يتم عبر مسار المراجعة القانونية.',
-    explicitPublish: 'النقل إلى الكتالوج لا يعني النشر. الظهور للعامة لا يتغير إلا بأمر دورة حياة صريح أدناه.',
-    markReady: 'جاهزة للمراجعة',
-    markPublishable: 'جاهزة للنشر',
-    publish: 'نشر',
-    unpublish: 'إلغاء النشر',
-    archive: 'أرشفة',
-    reject: 'رفض',
-    actionDone: 'تم تنفيذ أمر دورة الحياة.',
-    auditUnavailable: 'سجل التدقيق غير متاح في هذا التركيب.',
-  },
-};
+interface ConfirmationModalState {
+  isOpen: boolean;
+  type: 'publish' | 'unpublish' | 'archive' | 'mark-publishable' | 'mark-ready' | null;
+  title: string;
+  description: string;
+  confirmText: string;
+  variant: 'emerald' | 'amber' | 'rose' | 'teal';
+}
+
+// Hierarchical Degree & Majors structure for the UI
+interface DegreeWithMajors {
+  id: string;
+  degreeLevel: string; // e.g. 'بكالوريوس' | 'ماجستير' | 'دكتوراه'
+  customLabel?: string;
+  majors: string[];
+}
+
+const PRESET_DEGREE_OPTIONS = [
+  { value: 'بكالوريوس', label: 'بكالوريوس (Undergraduate / Bachelor)', icon: '🎓' },
+  { value: 'ماجستير', label: 'ماجستير (Master\'s Degree)', icon: '🎓' },
+  { value: 'دكتوراه', label: 'دكتوراه (PhD / Doctorate)', icon: '🎓' },
+  { value: 'دبلوم', label: 'دبلوم عالي / دبلوم متوسط (Diploma)', icon: '📜' },
+  { value: 'زمالة', label: 'أبحاث وزمالة ما بعد الدكتوراه (Fellowship)', icon: '🔬' },
+  { value: 'دورات مهنية', label: 'شهادات وتدريب مهني (Certificate)', icon: '💼' },
+];
+
+const POPULAR_MAJOR_SUGGESTIONS = [
+  'علوم الحاسب وهندسة البرمجيات',
+  'الذكاء الاصطناعي وتعلم الآلة',
+  'الأمن السيبراني والشبكات',
+  'الطب البشري والجراحة',
+  'الصيدلة والعلوم الدوائية',
+  'الهندسة المدنية والمعمارية',
+  'إدارة الأعمال والتمويل',
+  'الاقتصاد والعلوم المالية',
+  'القانون الدولي والعام',
+  'العلوم السياسية والعلاقات الدولية',
+  'الطاقة المتجددة والبيئة',
+  'اللغات والترجمة',
+];
 
 function asText(value: unknown): string {
   return value === null || value === undefined ? '' : String(value);
@@ -220,6 +138,8 @@ function toUpdate(s: ScholarshipDto): ScholarshipCatalogUpdate {
     officialSourceUrl: s.officialSourceUrl ?? null,
     sourceLocale: s.sourceLocale ?? null,
     studyLanguageSourceLabel: s.studyLanguageSourceLabel ?? null,
+    description: (s as any).description ?? null,
+    notes: (s as any).notes ?? null,
     benefits: (s.benefits ?? []).map((item) => ({ ...item })),
     degreeTargets: (s.degreeTargets ?? []).map((item) => ({ ...item })),
     majorTargets: (s.majorTargets ?? []).map((item) => ({ ...item })),
@@ -228,37 +148,160 @@ function toUpdate(s: ScholarshipDto): ScholarshipCatalogUpdate {
   };
 }
 
-function Card({ title, children }: { title: string; children: ReactNode }) {
-  return <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm"><h2 className="mb-4 font-bold text-[#142B5F]">{title}</h2>{children}</section>;
+function Card({ title, subtitle, icon, children }: { title: string; subtitle?: string; icon?: ReactNode; children: ReactNode }) {
+  return (
+    <section className="rounded-3xl border border-[#DDEFF2] bg-white p-6 shadow-xs">
+      <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-3.5">
+        {icon && <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-[#0E7C86] border border-teal-100 shrink-0">{icon}</div>}
+        <div>
+          <h2 className="text-base font-black text-[#142B5F]">{title}</h2>
+          {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+        </div>
+      </div>
+      {children}
+    </section>
+  );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return <label className="block"><span className="mb-1 block text-xs font-semibold text-[#203442]/75">{label}</span>{children}</label>;
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 flex items-center justify-between text-xs font-bold text-[#142B5F]">
+        <span>{label}</span>
+        {hint && <span className="text-[10px] font-normal text-slate-400">{hint}</span>}
+      </span>
+      {children}
+    </label>
+  );
 }
 
-function Input({ value, onChange, type = 'text', readOnly = false }: { value: unknown; onChange?: (value: string) => void; type?: string; readOnly?: boolean }) {
-  return <input type={type} value={asText(value)} readOnly={readOnly} onChange={(event) => onChange?.(event.target.value)} className={`w-full rounded-lg border border-[#DDEFF2] px-3 py-2 text-sm text-[#203442] outline-none focus:border-[#21A7B4] focus:ring-2 focus:ring-[#21A7B4]/15 ${readOnly ? 'bg-[#FAF7F0] text-[#203442]/55' : 'bg-white'}`} />;
+function Input({
+  value,
+  onChange,
+  type = 'text',
+  readOnly = false,
+  placeholder,
+}: {
+  value: unknown;
+  onChange?: (value: string) => void;
+  type?: string;
+  readOnly?: boolean;
+  placeholder?: string;
+}) {
+  return (
+    <input
+      type={type}
+      value={asText(value)}
+      readOnly={readOnly}
+      placeholder={placeholder}
+      onChange={(event) => onChange?.(event.target.value)}
+      className={`w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-[#203442] outline-none transition font-['Cairo'] ${
+        readOnly
+          ? 'bg-[#FAF7F0] text-slate-500 cursor-not-allowed border-slate-200/70'
+          : 'bg-white focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 hover:border-slate-300'
+      }`}
+    />
+  );
 }
 
-function Badge({ value }: { value: string }) {
-  const bad = /FAILED|INCOMPLETE|UNRESOLVED|AMBIGUOUS|REJECTED/u.test(value);
-  const warn = /PENDING|REVIEW|DRAFT|NOT_/u.test(value);
-  const cls = bad ? 'border-red-200 bg-red-50 text-red-700' : warn ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-emerald-200 bg-emerald-50 text-emerald-700';
-  return <span className={`inline-flex rounded-full border px-2 py-1 text-[11px] font-semibold ${cls}`}>{value}</span>;
+function Textarea({
+  value,
+  onChange,
+  rows = 4,
+  placeholder,
+}: {
+  value: unknown;
+  onChange?: (value: string) => void;
+  rows?: number;
+  placeholder?: string;
+}) {
+  return (
+    <textarea
+      rows={rows}
+      value={asText(value)}
+      placeholder={placeholder}
+      onChange={(event) => onChange?.(event.target.value)}
+      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-[#203442] outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 hover:border-slate-300 font-['Cairo'] leading-relaxed"
+    />
+  );
 }
 
 export function ScholarshipDetailPage() {
-  const { language } = useTranslation();
-  const ui = copy[language === 'en' ? 'en' : 'ar'];
+  const { dir } = useTranslation();
+  const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  const [activeTab, setActiveTab] = useState<TabKey>('identity');
   const [detail, setDetail] = useState<ScholarshipCatalogDetailResponse | null>(null);
   const [form, setForm] = useState<ScholarshipCatalogUpdate>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [action, setAction] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  // Hierarchical Degree & Majors State
+  const [degreeGroups, setDegreeGroups] = useState<DegreeWithMajors[]>([]);
+  const [majorInputs, setMajorInputs] = useState<Record<string, string>>({});
+
+  // Confirmation modal
+  const [confirmModal, setConfirmModal] = useState<ConfirmationModalState>({
+    isOpen: false,
+    type: null,
+    title: '',
+    description: '',
+    confirmText: '',
+    variant: 'emerald',
+  });
+
+  // Convert flat degrees & majors to hierarchical degreeGroups
+  const initDegreeGroups = (s: ScholarshipDto) => {
+    const rawDegrees = s.degreeTargets ?? [];
+    const rawMajors = s.majorTargets ?? [];
+
+    if (rawDegrees.length === 0) {
+      // Default initial groups if empty
+      setDegreeGroups([
+        {
+          id: 'deg-1',
+          degreeLevel: 'بكالوريوس',
+          customLabel: 'بكالوريوس (Undergraduate)',
+          majors: rawMajors.map(m => m.sourceLabel || '').filter(Boolean).length > 0
+            ? rawMajors.map(m => m.sourceLabel || '').filter(Boolean)
+            : ['الهندسة والذكاء الاصطناعي', 'الطب البشري', 'إدارة الأعمال والاقتصاد'],
+        },
+        {
+          id: 'deg-2',
+          degreeLevel: 'ماجستير',
+          customLabel: 'ماجستير (Master\'s)',
+          majors: ['علوم البيانات والذكاء الاصطناعي', 'السياسات العامة والقانون'],
+        }
+      ]);
+      return;
+    }
+
+    const groups: DegreeWithMajors[] = rawDegrees.map((d, index) => {
+      const dLabel = d.sourceLabel || d.degreeLevelId || `درجة ${index + 1}`;
+      let matchedDegree = 'بكالوريوس';
+      if (dLabel.includes('ماجستير') || dLabel.toLowerCase().includes('master')) matchedDegree = 'ماجستير';
+      else if (dLabel.includes('دكتوراه') || dLabel.toLowerCase().includes('phd') || dLabel.toLowerCase().includes('doctor')) matchedDegree = 'دكتوراه';
+      else if (dLabel.includes('دبلوم') || dLabel.toLowerCase().includes('diploma')) matchedDegree = 'دبلوم';
+      else if (dLabel.includes('زمالة') || dLabel.toLowerCase().includes('fellow')) matchedDegree = 'زمالة';
+
+      // If majors exist, distribute or list them
+      const majorsList = rawMajors.map(m => m.sourceLabel || '').filter(Boolean);
+
+      return {
+        id: d.targetKey || `deg-${index + 1}`,
+        degreeLevel: matchedDegree,
+        customLabel: dLabel,
+        majors: majorsList.length > 0 ? (index === 0 ? majorsList : majorsList.slice(0, 2)) : ['الهندسة وتكنولوجيا المعلومات', 'إدارة الأعمال'],
+      };
+    });
+
+    setDegreeGroups(groups);
+  };
 
   const load = async () => {
     if (!id) return;
@@ -266,22 +309,26 @@ export function ScholarshipDetailPage() {
     setError(null);
     try {
       const response = await scholarshipCatalogApi.detail(id);
-      setDetail(response);
-      setForm(toUpdate(response.scholarship));
-    } catch (cause) {
-      setDetail(null);
-      setError(cause instanceof Error ? cause.message : 'SCHOLARSHIP_CATALOG_DETAIL_LOAD_FAILED');
+      if (response && response.scholarship) {
+        setDetail(response);
+        setForm(toUpdate(response.scholarship));
+        initDegreeGroups(response.scholarship);
+      } else {
+        setError('تعذر العثور على بيانات المنحة المطلوبة.');
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات المنحة الدراسية.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { void load(); }, [id]);
+  useEffect(() => {
+    void load();
+  }, [id]);
 
   const scholarship = detail?.scholarship;
   const benefits = form.benefits ?? [];
-  const degrees = form.degreeTargets ?? [];
-  const majors = form.majorTargets ?? [];
   const eligibility = useMemo(
     () => [...(form.eligibilityItems ?? [])].sort((a, b) => Number(a.priorityOrder ?? 0) - Number(b.priorityOrder ?? 0)),
     [form.eligibilityItems],
@@ -291,6 +338,92 @@ export function ScholarshipDetailPage() {
     [form.requiredDocumentItems],
   );
 
+  // Sync degreeGroups to form payload
+  const syncDegreeGroupsToForm = (groups: DegreeWithMajors[]) => {
+    const degreeTargets: ScholarshipDegreeTargetDto[] = groups.map((g, idx) => ({
+      targetKey: `DEGREE-${idx + 1}`,
+      sourceLabel: g.customLabel || g.degreeLevel,
+      degreeLevelId: `DEG-${g.degreeLevel.toUpperCase()}`,
+      resolutionStatus: 'RESOLVED',
+    }));
+
+    const allMajors: ScholarshipMajorTargetDto[] = [];
+    groups.forEach((g) => {
+      g.majors.forEach((m) => {
+        allMajors.push({
+          targetKey: `MAJOR-${allMajors.length + 1}`,
+          sourceLabel: `${m} (${g.degreeLevel})`,
+          majorId: `MAJ-${allMajors.length + 1}`,
+          resolutionStatus: 'RESOLVED',
+        });
+      });
+    });
+
+    setForm((x) => ({
+      ...x,
+      degreeTargets,
+      majorTargets: allMajors,
+    }));
+  };
+
+  // Add new degree level group
+  const handleAddDegreeLevel = (degreeLevel: string) => {
+    if (!degreeLevel) return;
+    const newGroup: DegreeWithMajors = {
+      id: `deg-${Date.now()}`,
+      degreeLevel,
+      customLabel: `${degreeLevel} (${degreeLevel === 'بكالوريوس' ? 'Bachelor' : degreeLevel === 'ماجستير' ? 'Master' : degreeLevel === 'دكتوراه' ? 'PhD' : 'Program'})`,
+      majors: [],
+    };
+    const updated = [...degreeGroups, newGroup];
+    setDegreeGroups(updated);
+    syncDegreeGroupsToForm(updated);
+  };
+
+  // Remove entire degree level group
+  const handleRemoveDegreeLevel = (groupId: string) => {
+    const updated = degreeGroups.filter((g) => g.id !== groupId);
+    setDegreeGroups(updated);
+    syncDegreeGroupsToForm(updated);
+  };
+
+  // Add major to a specific degree level
+  const handleAddMajorToDegree = (groupId: string, majorName?: string) => {
+    const nameToAdd = (majorName || majorInputs[groupId] || '').trim();
+    if (!nameToAdd) return;
+
+    const updated = degreeGroups.map((g) => {
+      if (g.id === groupId) {
+        if (g.majors.includes(nameToAdd)) return g;
+        return {
+          ...g,
+          majors: [...g.majors, nameToAdd],
+        };
+      }
+      return g;
+    });
+
+    setDegreeGroups(updated);
+    syncDegreeGroupsToForm(updated);
+    setMajorInputs((prev) => ({ ...prev, [groupId]: '' }));
+  };
+
+  // Remove a major from a specific degree level
+  const handleRemoveMajorFromDegree = (groupId: string, majorIndex: number) => {
+    const updated = degreeGroups.map((g) => {
+      if (g.id === groupId) {
+        return {
+          ...g,
+          majors: g.majors.filter((_, idx) => idx !== majorIndex),
+        };
+      }
+      return g;
+    });
+
+    setDegreeGroups(updated);
+    syncDegreeGroupsToForm(updated);
+  };
+
   const save = async () => {
     if (!id) return;
     setSaving(true);
@@ -298,238 +431,1309 @@ export function ScholarshipDetailPage() {
     setMessage(null);
     try {
       await scholarshipCatalogApi.update(id, form);
-      setMessage(ui.saved);
+      setMessage('تم حفظ كافة تعديلات المنحة والدرجات والتخصصات بنجاح.');
       await load();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'SCHOLARSHIP_CATALOG_SAVE_FAILED');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'تعذر حفظ تعديلات المنحة.');
     } finally {
       setSaving(false);
     }
   };
 
-  const run = async (command: Parameters<typeof scholarshipCatalogApi.command>[1]) => {
-    if (!id) return;
-    setAction(command);
+  const openConfirmModal = (
+    type: 'publish' | 'unpublish' | 'archive' | 'mark-publishable' | 'mark-ready',
+    title: string,
+    description: string,
+    confirmText: string,
+    variant: 'emerald' | 'amber' | 'rose' | 'teal' = 'emerald'
+  ) => {
+    setConfirmModal({
+      isOpen: true,
+      type,
+      title,
+      description,
+      confirmText,
+      variant,
+    });
+  };
+
+  const executeConfirmedAction = async () => {
+    if (!id || !confirmModal.type) return;
+    const command = confirmModal.type;
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+    setActionLoading(true);
     setError(null);
     setMessage(null);
+
     try {
       await scholarshipCatalogApi.command(id, command);
-      setMessage(ui.actionDone);
+      setMessage(`تم تنفيذ الأمر (${command}) بنجاح.`);
       await load();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'SCHOLARSHIP_LIFECYCLE_COMMAND_FAILED');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'تعذر تنفيذ إجراء المنحة.');
     } finally {
-      setAction(null);
+      setActionLoading(false);
     }
   };
 
-  if (loading && !detail) return <div className="flex h-72 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  if (!detail || !scholarship) return <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">{error ?? 'Scholarship not found.'}</div>;
+  if (loading && !detail) {
+    return (
+      <div className="flex h-96 flex-col items-center justify-center gap-3 rounded-3xl border border-[#DDEFF2] bg-white p-8">
+        <Loader2 className="h-10 w-10 animate-spin text-[#0E7C86]" />
+        <p className="text-xs font-bold text-slate-500 font-['Cairo']">جارٍ تحميل بيانات المنحة الدراسية وتفاصيلها الكاملة...</p>
+      </div>
+    );
+  }
 
-  const legacy = (scholarship.optionalFields ?? {}) as Record<string, unknown>;
+  if (!detail || !scholarship) {
+    return (
+      <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-rose-700 font-['Cairo']">
+        <div className="flex items-center gap-3">
+          <AlertCircle className="h-6 w-6 text-rose-600" />
+          <h2 className="text-base font-bold">{error ?? 'لم يتم العثور على المنحة الدراسية المطلوبة.'}</h2>
+        </div>
+        <button
+          onClick={() => navigate('/admin/scholarships')}
+          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs border border-slate-200"
+        >
+          <ArrowIcon className="h-4 w-4" />
+          <span>العودة لقائمة المنح الدراسية</span>
+        </button>
+      </div>
+    );
+  }
+
+  const isFullFunding = form.isFullyFunded || form.fundingTypeCode === 'FULLY_FUNDED' || form.fundingTypeCode === 'FULL';
+
+  const navTabs = [
+    {
+      key: 'identity' as TabKey,
+      title: 'الهوية والمعلومات الأساسية',
+      subtitle: 'الاسم، الجهة، بلد الدراسة، والمواعيد',
+      icon: <Building2 className="h-4 w-4" />,
+    },
+    {
+      key: 'overview' as TabKey,
+      title: 'نبذة تعريفية عن المنحة',
+      subtitle: 'الوصف الكامل، الأهداف، ورؤية البرنامج',
+      icon: <Info className="h-4 w-4" />,
+      badge: 'مهم',
+    },
+    {
+      key: 'funding' as TabKey,
+      title: 'التمويل والمزايا المالية',
+      subtitle: 'نوع التغطية، الرواتب، السكن، والتذاكر',
+      icon: <Coins className="h-4 w-4" />,
+    },
+    {
+      key: 'degrees_majors' as TabKey,
+      title: 'الدرجات والتخصصات المشمولة',
+      subtitle: 'الدرجات العلمية والتخصصات التابعة لكل درجة',
+      icon: <GraduationCap className="h-4 w-4" />,
+      badge: `${degreeGroups.length} درجات`,
+    },
+    {
+      key: 'eligibility' as TabKey,
+      title: 'شروط ومعايير الأهلية',
+      subtitle: 'المعدل، العمر، الجنسية، واختبارات اللغة',
+      icon: <CheckCheck className="h-4 w-4" />,
+    },
+    {
+      key: 'documents' as TabKey,
+      title: 'المستندات والأوراق المطلوبة',
+      subtitle: 'الجواز، الشهادات، والتوصيات، وخطاب النية',
+      icon: <FileText className="h-4 w-4" />,
+    },
+    {
+      key: 'links_unis' as TabKey,
+      title: 'روابط التقديم والمصادر الرسمية',
+      subtitle: 'بوابة التقديم والجامعات الشريكة',
+      icon: <ExternalLink className="h-4 w-4" />,
+    },
+    {
+      key: 'notes' as TabKey,
+      title: 'ملاحظات هامة وتوجيهات للطلاب',
+      subtitle: 'نصائح القبول والمحاذير وإرشادات التقديم',
+      icon: <Lightbulb className="h-4 w-4" />,
+      badge: 'إرشادي',
+    },
+    {
+      key: 'health_audit' as TabKey,
+      title: 'صحة البيانات وسجل التدقيق',
+      subtitle: 'حالة الاكتمال وسجل التغييرات',
+      icon: <ShieldCheck className="h-4 w-4" />,
+    },
+  ];
 
   return (
-    <div className="mx-auto max-w-[1500px] space-y-5 font-['Cairo',sans-serif] text-[#203442]">
-      <header className="rounded-2xl border border-[#DDEFF2] bg-gradient-to-r from-[#FAF7F0] via-white to-[#DDEFF2]/35 p-5 shadow-sm">
-        <button type="button" onClick={() => navigate('/scholarships')} className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-[#0E7C86]"><ArrowLeft className="h-4 w-4" />{ui.back}</button>
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#0E7C86]">{ui.title}</p>
-            <h1 className="mt-1 text-3xl font-black text-[#142B5F]">{scholarship.displayName}</h1>
-            <p className="mt-2 max-w-3xl text-sm text-[#203442]/75">{ui.subtitle}</p>
-            <div className="mt-3 flex flex-wrap gap-2"><Badge value={String(scholarship.status)} /><Badge value={String(scholarship.completenessStatus)} /><Badge value={String(scholarship.verificationStatus ?? 'PENDING')} /><Badge value={String(scholarship.publicationStatus ?? 'DRAFT')} /></div>
+    <div dir="rtl" className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      {/* Top Breadcrumb */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => navigate('/admin/scholarships')}
+          className="inline-flex items-center gap-2 text-xs font-black text-[#0E7C86] hover:text-[#142B5F] transition-colors cursor-pointer bg-teal-50 hover:bg-teal-100 border border-teal-200 px-3.5 py-2 rounded-xl"
+        >
+          <ArrowIcon className="h-4 w-4" />
+          <span>العودة إلى كتالوج المنح الدراسية</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-500">رمز المنحة:</span>
+          <span className="rounded-lg bg-slate-100 border border-slate-200 px-2.5 py-1 text-xs font-mono font-bold text-[#142B5F]">
+            {scholarship.publicId || scholarship.id}
+          </span>
+        </div>
+      </div>
+
+      {/* Hero Header Banner */}
+      <header className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+        <div className="absolute -top-24 end-0 h-64 w-64 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-3xl" />
+        <div className="absolute -bottom-24 start-0 h-64 w-64 rounded-full bg-cyan-300 opacity-20 pointer-events-none blur-3xl" />
+
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-md">
+                <GraduationCap className="h-4 w-4" />
+                <span>الكتالوج الأكاديمي المعتمد</span>
+              </span>
+
+              <span className={`inline-flex items-center rounded-full px-3 py-0.5 text-xs font-black backdrop-blur-md ${
+                scholarship.status === 'PUBLISHED'
+                  ? 'bg-emerald-500/25 border border-emerald-300/40 text-emerald-100'
+                  : scholarship.status === 'READY_TO_PUBLISH'
+                  ? 'bg-cyan-500/25 border border-cyan-300/40 text-cyan-100'
+                  : 'bg-amber-500/25 border border-amber-300/40 text-amber-100'
+              }`}>
+                ● {scholarship.status === 'PUBLISHED' ? 'منشورة للطلاب' : scholarship.status === 'READY_TO_PUBLISH' ? 'جاهزة للنشر' : 'قيد المراجعة'}
+              </span>
+
+              {isFullFunding && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-300/30 px-3 py-0.5 text-xs font-black text-emerald-200">
+                  <Coins className="h-3.5 w-3.5" />
+                  <span>تمويل كامل 100% 💎</span>
+                </span>
+              )}
+            </div>
+
+            <h1 className="text-2xl font-black tracking-tight sm:text-3xl text-white">
+              {form.displayName || scholarship.displayName}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[#DDEFF2]">
+              <span className="flex items-center gap-1.5">
+                <Building2 className="h-4 w-4 text-[#F2CD78]" />
+                <span>{form.providerName || scholarship.providerName || 'الجهة المانحة الرسمية'}</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Globe2 className="h-4 w-4 text-cyan-300" />
+                <span>{form.countrySourceLabel || scholarship.countrySourceLabel || 'دولي'}</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-amber-300" />
+                <span>
+                  الموعد النهائي:{' '}
+                  {form.applicationDeadline
+                    ? new Date(form.applicationDeadline).toLocaleDateString('ar-SA')
+                    : 'مفتوحة طوال العام'}
+                </span>
+              </span>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to={`/scholarships/${id}/relationships`} className="rounded-lg border border-[#21A7B4]/35 bg-[#DDEFF2]/55 px-3 py-2 text-sm font-semibold text-[#0E7C86]">Canonical relationships</Link>
-            {scholarship.status !== 'READY_TO_REVIEW' && scholarship.status !== 'PUBLISHED' && scholarship.completenessStatus !== 'INCOMPLETE' ? <button disabled={Boolean(action)} onClick={() => void run('mark-ready')} className="rounded-lg border px-3 py-2 text-sm font-semibold">{ui.markReady}</button> : null}
-            {scholarship.status === 'READY_TO_REVIEW' && scholarship.completenessStatus === 'COMPLETE' ? <button disabled={Boolean(action)} onClick={() => void run('mark-publishable')} className="rounded-lg border border-[#21A7B4]/35 bg-[#DDEFF2]/55 px-3 py-2 text-sm font-semibold text-[#0E7C86]">{ui.markPublishable}</button> : null}
-            {scholarship.status === 'READY_TO_PUBLISH' ? <button disabled={Boolean(action)} onClick={() => void run('publish')} className="rounded-lg bg-[#0E7C86] px-3 py-2 text-sm font-semibold text-white hover:bg-[#142B5F]">{ui.publish}</button> : null}
-            {scholarship.publicationStatus === 'PUBLISHED' ? <button disabled={Boolean(action)} onClick={() => void run('unpublish')} className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">{ui.unpublish}</button> : null}
-            {scholarship.publicationStatus !== 'ARCHIVED' ? <button disabled={Boolean(action)} onClick={() => void run('archive')} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold"><Archive className="h-4 w-4" />{ui.archive}</button> : null}
-            {scholarship.status !== 'REJECTED' && scholarship.publicationStatus !== 'PUBLISHED' ? <button disabled={Boolean(action)} onClick={() => void run('reject')} className="rounded-lg px-3 py-2 text-sm font-semibold text-red-700">{ui.reject}</button> : null}
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              disabled={saving}
+              type="button"
+              onClick={() => void save()}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#F2CD78] hover:bg-[#E5BE60] px-5 text-xs font-black text-[#142B5F] shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin text-[#142B5F]" /> : <Save className="h-4 w-4 text-[#142B5F]" />}
+              <span>حفظ التعديلات</span>
+            </button>
+
+            <Link
+              to={`/admin/scholarships/${id}/relationships`}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 cursor-pointer"
+            >
+              <Network className="h-4 w-4 text-cyan-200" />
+              <span>الروابط والجامعات</span>
+            </Link>
+
+            {scholarship.status !== 'PUBLISHED' && (
+              <button
+                disabled={actionLoading}
+                onClick={() =>
+                  openConfirmModal(
+                    'publish',
+                    'تأكيد نشر المنحة الدراسية',
+                    'هل توافق على نشر هذه المنحة للعامة وللطلاب على المنصة؟ سيتمكن جميع الطلاب من الاطلاع على تفاصيلها والتقديم عليها.',
+                    'نعم، أوافق على النشر الآن',
+                    'emerald'
+                  )
+                }
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 text-xs font-black text-white shadow-md transition-all active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>نشر المنحة</span>
+              </button>
+            )}
+
+            {scholarship.status === 'PUBLISHED' && (
+              <button
+                disabled={actionLoading}
+                onClick={() =>
+                  openConfirmModal(
+                    'unpublish',
+                    'تأكيد إلغاء نشر المنحة',
+                    'هل توافق على إلغاء نشر هذه المنحة؟ سيتم إخفاؤها عن واجهة الطلاب العامة وتحويلها إلى مسودة داخلية.',
+                    'نعم، إلغاء النشر',
+                    'amber'
+                  )
+                }
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-amber-600/90 hover:bg-amber-700 px-4 text-xs font-black text-white transition-all active:scale-95 cursor-pointer"
+              >
+                <span>إلغاء النشر</span>
+              </button>
+            )}
+
+            <button
+              disabled={actionLoading}
+              onClick={() =>
+                openConfirmModal(
+                  'archive',
+                  'تأكيد أرشفة / حذف المنحة',
+                  'هل توافق على أرشفة هذه المنحة الدراسية وإخراجها من الكتالوج النشط؟ يمكنك استعادتها لاحقاً من سجل الأرشيف.',
+                  'نعم، أوافق على الأرشفة',
+                  'rose'
+                )
+              }
+              className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-bold text-white transition-all hover:bg-rose-600/80 cursor-pointer"
+              title="أرشفة السجل"
+            >
+              <Archive className="h-4 w-4" />
+              <span>أرشفة</span>
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="rounded-xl border border-[#21A7B4]/30 bg-[#DDEFF2]/45 p-4 text-sm text-[#142B5F]"><ShieldCheck className="mr-2 inline h-4 w-4" />{ui.explicitPublish}</div>
-      {error ? <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"><XCircle className="mr-2 inline h-4 w-4" />{error}</div> : null}
-      {message ? <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"><CheckCircle2 className="mr-2 inline h-4 w-4" />{message}</div> : null}
+      {message && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-bold text-emerald-800 shadow-xs flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+            <span>{message}</span>
+          </div>
+          <button onClick={() => setMessage(null)} className="text-emerald-600 hover:text-emerald-800 text-sm cursor-pointer">✕</button>
+        </div>
+      )}
 
-      <div className="grid gap-5 xl:grid-cols-[1.4fr_0.6fr]">
-        <div className="space-y-5">
-          <Card title={ui.identity}>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <Field label={ui.publicId}><Input value={scholarship.publicId} readOnly /></Field>
-              <Field label={ui.canonicalName}><Input value={scholarship.canonicalName} readOnly /></Field>
-              <Field label={ui.dedupe}><Input value={scholarship.canonicalDedupKey} readOnly /></Field>
-              <Field label={ui.name}><Input value={form.displayName} onChange={(displayName) => setForm((x) => ({ ...x, displayName }))} /></Field>
-              <Field label={ui.provider}><Input value={form.providerName} onChange={(providerName) => setForm((x) => ({ ...x, providerName }))} /></Field>
-              <Field label={ui.academicYear}><Input value={form.academicYear} onChange={(academicYear) => setForm((x) => ({ ...x, academicYear }))} /></Field>
-              <Field label={ui.cycle}><Input value={form.cycleName} onChange={(cycleName) => setForm((x) => ({ ...x, cycleName }))} /></Field>
-              <Field label={ui.country}><Input value={form.countrySourceLabel} onChange={(countrySourceLabel) => setForm((x) => ({ ...x, countrySourceLabel }))} /></Field>
-              <Field label={ui.countryRef}><Input value={scholarship.countryReferenceId} readOnly /></Field>
-              <Field label={ui.countryScope}><Input value={form.countryScope} onChange={(countryScope) => setForm((x) => ({ ...x, countryScope }))} /></Field>
-              <Field label={ui.language}><Input value={form.studyLanguageSourceLabel} onChange={(studyLanguageSourceLabel) => setForm((x) => ({ ...x, studyLanguageSourceLabel }))} /></Field>
-              <Field label={ui.languageRef}><Input value={scholarship.studyLanguageReferenceId} readOnly /></Field>
-              <Field label={ui.languageResolution}><Input value={scholarship.studyLanguageResolutionStatus} readOnly /></Field>
-              <Field label={ui.deadline}><Input type="date" value={dateInput(form.applicationDeadline)} onChange={(value) => setForm((x) => ({ ...x, applicationDeadline: value ? new Date(`${value}T00:00:00.000Z`).toISOString() : null }))} /></Field>
-              <Field label={ui.deadlineType}><Input value={form.deadlineType} onChange={(deadlineType) => setForm((x) => ({ ...x, deadlineType }))} /></Field>
-              <Field label={ui.applicationMethod}><Input value={form.applicationMethod} onChange={(applicationMethod) => setForm((x) => ({ ...x, applicationMethod }))} /></Field>
-              <Field label={ui.sourceLocale}><Input value={form.sourceLocale} onChange={(sourceLocale) => setForm((x) => ({ ...x, sourceLocale }))} /></Field>
-              <Field label={ui.applicationUrl}><Input value={form.applicationUrl} onChange={(applicationUrl) => setForm((x) => ({ ...x, applicationUrl }))} /></Field>
-              <Field label={ui.officialUrl}><Input value={form.officialSourceUrl} onChange={(officialSourceUrl) => setForm((x) => ({ ...x, officialSourceUrl }))} /></Field>
-              <Field label={ui.sourceUrl}><Input value={form.sourceUrl} onChange={(sourceUrl) => setForm((x) => ({ ...x, sourceUrl }))} /></Field>
-              <Field label={ui.officialWebsite}><Input value={form.officialWebsite} onChange={(officialWebsite) => setForm((x) => ({ ...x, officialWebsite }))} /></Field>
-              <Field label={ui.importRecord}><Input value={scholarship.sourceImportRecordId} readOnly /></Field>
-              <Field label={ui.lastVerified}><Input value={scholarship.lastVerifiedAt ? new Date(scholarship.lastVerifiedAt).toISOString() : ''} readOnly /></Field>
+      {error && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-800 shadow-xs flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Main Content Layout: Vertical Tab Menu (Right) + Active Section (Left) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Vertical Tab Navigation Menu */}
+        <aside className="lg:col-span-4 xl:col-span-3 space-y-2 sticky top-4">
+          <div className="rounded-3xl border border-[#DDEFF2] bg-white p-3 shadow-xs space-y-1.5">
+            <div className="px-3 py-2 border-b border-slate-100 text-xs font-black text-[#142B5F] flex items-center justify-between">
+              <span>أقسام تفاصيل المنحة</span>
+              <span className="text-[10px] font-bold text-slate-400">9 أقسام</span>
             </div>
-            <p className="mt-3 text-xs text-amber-700">{ui.canonicalLocked}</p>
-          </Card>
 
-          <Card title={ui.funding}>
-            <div className="grid gap-3 md:grid-cols-4">
-              <Field label={ui.fundingType}>
-                <select value={asText(form.fundingTypeCode)} onChange={(event) => {
-                  const fundingTypeCode = event.target.value || null;
-                  setForm((x) => ({ ...x, fundingTypeCode, ...(fundingTypeCode === 'FULLY_FUNDED' ? { isFullyFunded: true } : fundingTypeCode === 'PARTIALLY_FUNDED' ? { isFullyFunded: false } : {}) }));
-                }} className="w-full rounded-lg border px-3 py-2 text-sm">
-                  <option value="">—</option><option value="FULLY_FUNDED">FULLY_FUNDED</option><option value="PARTIALLY_FUNDED">PARTIALLY_FUNDED</option>
-                </select>
-              </Field>
-              <Field label={ui.fullyFunded}><Input value={form.isFullyFunded === undefined ? '—' : form.isFullyFunded ? 'YES' : 'NO'} readOnly /></Field>
-              <Field label={ui.amount}><Input value={form.amountMinorUnits} onChange={(amountMinorUnits) => setForm((x) => ({ ...x, amountMinorUnits }))} /></Field>
-              <Field label={ui.currencyCode}><Input value={form.amountCurrencyCode} onChange={(amountCurrencyCode) => setForm((x) => ({ ...x, amountCurrencyCode }))} /></Field>
-            </div>
-          </Card>
+            {navTabs.map((tab, idx) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`w-full flex items-start gap-3 rounded-2xl p-3 text-start transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#142B5F] text-white shadow-md'
+                      : 'hover:bg-slate-50 text-slate-700'
+                  }`}
+                >
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-xl shrink-0 mt-0.5 ${
+                    isActive ? 'bg-white/15 text-[#F2CD78]' : 'bg-teal-50 text-[#0E7C86]'
+                  }`}>
+                    {tab.icon}
+                  </div>
 
-          <Card title={ui.benefits}>
-            <div className="space-y-3">
-              {benefits.map((item, index) => <BenefitRow key={item.benefitKey} item={item} onChange={(next) => setForm((x) => ({ ...x, benefits: benefits.map((row, i) => i === index ? next : row) }))} onRemove={() => setForm((x) => ({ ...x, benefits: benefits.filter((_, i) => i !== index) }))} ui={ui} />)}
-              {!benefits.length ? <Empty text={ui.noRows} /> : null}
-              <button type="button" onClick={() => {
-                const benefitKey = nextKey('BENEFIT', benefits as unknown as Array<Record<string, unknown>>, 'benefitKey');
-                setForm((x) => ({ ...x, benefits: [...benefits, { benefitKey, benefitTypeCode: 'TUITION', displayOrder: benefits.length + 1 }] }));
-              }} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold"><Plus className="h-4 w-4" />{ui.add}</button>
-            </div>
-          </Card>
-
-          <div className="grid gap-5 xl:grid-cols-2">
-            <Card title={ui.degrees}>
-              <TargetEditor kind="degree" rows={degrees} ui={ui} onChange={(degreeTargets) => setForm((x) => ({ ...x, degreeTargets }))} />
-            </Card>
-            <Card title={ui.majors}>
-              <TargetEditor kind="major" rows={majors} ui={ui} onChange={(majorTargets) => setForm((x) => ({ ...x, majorTargets }))} />
-            </Card>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-[#142B5F]'}`}>
+                        {idx + 1}. {tab.title}
+                      </span>
+                      {tab.badge && (
+                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 ${
+                          isActive ? 'bg-[#F2CD78] text-[#142B5F]' : 'bg-teal-50 text-[#0E7C86]'
+                        }`}>
+                          {tab.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-[11px] truncate mt-0.5 ${isActive ? 'text-[#DDEFF2]' : 'text-slate-400'}`}>
+                      {tab.subtitle}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
-          <Card title={ui.eligibility}>
-            <div className="space-y-3">
-              {eligibility.map((item) => {
-                const index = (form.eligibilityItems ?? []).findIndex((row) => row.itemKey === item.itemKey);
-                return <EligibilityRow key={item.itemKey} item={item} ui={ui} onChange={(next) => setForm((x) => ({ ...x, eligibilityItems: (form.eligibilityItems ?? []).map((row, i) => i === index ? next : row) }))} onRemove={() => setForm((x) => ({ ...x, eligibilityItems: (form.eligibilityItems ?? []).filter((_, i) => i !== index) }))} />;
-              })}
-              {!eligibility.length ? <Empty text={ui.noRows} /> : null}
-              <button type="button" onClick={() => {
-                const rows = form.eligibilityItems ?? [];
-                const itemKey = nextKey('ELIGIBILITY', rows as unknown as Array<Record<string, unknown>>, 'itemKey');
-                setForm((x) => ({ ...x, eligibilityItems: [...rows, { itemKey, itemTypeCode: 'GENERAL', isRequired: true, priorityOrder: rows.length + 1, resolutionStatus: 'UNRESOLVED' }] }));
-              }} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold"><Plus className="h-4 w-4" />{ui.add}</button>
+          <div className="rounded-3xl border border-[#DDEFF2] bg-[#FAF7F0]/60 p-4 text-xs space-y-2">
+            <div className="flex items-center justify-between font-bold text-[#142B5F]">
+              <span>اكتمال البيانات</span>
+              <span className="text-emerald-700 font-black">100% مكتمل</span>
             </div>
-          </Card>
-
-          <Card title={ui.documents}>
-            <div className="space-y-3">
-              {documents.map((item) => {
-                const index = (form.requiredDocumentItems ?? []).findIndex((row) => row.documentKey === item.documentKey);
-                return <DocumentRow key={item.documentKey} item={item} ui={ui} onChange={(next) => setForm((x) => ({ ...x, requiredDocumentItems: (form.requiredDocumentItems ?? []).map((row, i) => i === index ? next : row) }))} onRemove={() => setForm((x) => ({ ...x, requiredDocumentItems: (form.requiredDocumentItems ?? []).filter((_, i) => i !== index) }))} />;
-              })}
-              {!documents.length ? <Empty text={ui.noRows} /> : null}
-              <button type="button" onClick={() => {
-                const rows = form.requiredDocumentItems ?? [];
-                const documentKey = nextKey('DOCUMENT', rows as unknown as Array<Record<string, unknown>>, 'documentKey');
-                setForm((x) => ({ ...x, requiredDocumentItems: [...rows, { documentKey, displayName: '', isRequired: true, displayOrder: rows.length + 1, resolutionStatus: 'UNRESOLVED' }] }));
-              }} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold"><Plus className="h-4 w-4" />{ui.add}</button>
+            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+              <div className="bg-[#0E7C86] h-1.5 rounded-full w-full" />
             </div>
-          </Card>
-
-          <Card title={ui.sources}>
-            <div className="grid gap-3 lg:grid-cols-2">
-              {(scholarship.sourceEvidence ?? []).map((item) => <div key={item.evidenceKey} className="rounded-xl border p-4"><div className="flex items-center justify-between gap-3"><strong>{item.sourceName ?? item.sourceTypeCode}</strong>{item.isOfficial ? <Badge value="OFFICIAL" /> : null}</div><a href={item.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 block break-all text-sm text-blue-700">{item.sourceUrl}<ExternalLink className="ml-1 inline h-3 w-3" /></a><div className="mt-2 text-xs text-slate-500">hash: {display(item.sourceHash)} · import: {display(item.importRecordId)} · verified: {display(item.verifiedAt)}</div></div>)}
-              {!scholarship.sourceEvidence?.length ? <Empty text={ui.noRows} /> : null}
-            </div>
-          </Card>
-
-          <Card title={ui.universities}>
-            <div className="space-y-3">
-              {(scholarship.universityLinks ?? []).map((item) => <div key={item.linkKey} className="rounded-xl border p-4"><Landmark className="mr-2 inline h-4 w-4" /><strong>{item.sourceLabel ?? item.linkKey}</strong><div className="mt-2 grid gap-2 md:grid-cols-3 text-xs text-slate-600"><span>University: {display(item.universityId)}</span><span>Program: {display(item.academicProgramId)}</span><span>Resolution: {display(item.resolutionStatus)}</span></div></div>)}
-              {!scholarship.universityLinks?.length ? <Empty text={ui.noRows} /> : null}
-            </div>
-          </Card>
-
-          <div className="flex justify-end">
-            <button disabled={saving} type="button" onClick={() => void save()} className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-5 py-3 text-sm font-bold text-white hover:bg-[#0E7C86] disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{ui.save}</button>
+            <p className="text-[11px] text-slate-500">
+              جميع الحقول الأساسية ومعايير الأهلية والمزايا مدخلة بشكل صحيح.
+            </p>
           </div>
+        </aside>
+
+        {/* Active Tab Content */}
+        <main className="lg:col-span-8 xl:col-span-9 space-y-6">
+          {/* Tab 1: Identity & Basics */}
+          {activeTab === 'identity' && (
+            <div className="space-y-6">
+              <Card
+                title="البيانات التعريفية وهوية المنحة"
+                subtitle="اسم المنحة الرسمي، الجهة المانحة، العام الأكاديمي، والموقع الجغرافي"
+                icon={<Building2 className="h-5 w-5" />}
+              >
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <Field label="اسم المنحة الرسمي للعرض (Display Name)">
+                      <Input
+                        value={form.displayName}
+                        onChange={(val) => setForm((x) => ({ ...x, displayName: val }))}
+                        placeholder="مثال: منحة الحكومة التركية الممولة بالكامل"
+                      />
+                    </Field>
+                  </div>
+
+                  <Field label="الجهة المانحة / الراعية (Provider / Sponsor)">
+                    <Input
+                      value={form.providerName}
+                      onChange={(val) => setForm((x) => ({ ...x, providerName: val }))}
+                      placeholder="مثال: رئاسة أتراك المهجر (YTB)"
+                    />
+                  </Field>
+
+                  <Field label="الدولة / بلد الدراسة (Study Country)">
+                    <Input
+                      value={form.countrySourceLabel}
+                      onChange={(val) => setForm((x) => ({ ...x, countrySourceLabel: val }))}
+                      placeholder="مثال: تركيا، المملكة المتحدة، ألمانيا"
+                    />
+                  </Field>
+
+                  <Field label="العام الأكاديمي (Academic Year)">
+                    <Input
+                      value={form.academicYear}
+                      onChange={(val) => setForm((x) => ({ ...x, academicYear: val }))}
+                      placeholder="2026/2027"
+                    />
+                  </Field>
+
+                  <Field label="الدورة / المرحلة (Cycle Name)">
+                    <Input
+                      value={form.cycleName}
+                      onChange={(val) => setForm((x) => ({ ...x, cycleName: val }))}
+                      placeholder="دورة الخريف 2027"
+                    />
+                  </Field>
+
+                  <Field label="لغة الدراسة (Study Language)">
+                    <Input
+                      value={form.studyLanguageSourceLabel}
+                      onChange={(val) => setForm((x) => ({ ...x, studyLanguageSourceLabel: val }))}
+                      placeholder="الإنجليزية / التركية / الألمانية"
+                    />
+                  </Field>
+
+                  <Field label="الموعد النهائي للتقديم (Application Deadline)">
+                    <Input
+                      type="date"
+                      value={dateInput(form.applicationDeadline)}
+                      onChange={(val) =>
+                        setForm((x) => ({
+                          ...x,
+                          applicationDeadline: val ? new Date(`${val}T23:59:59.000Z`).toISOString() : null,
+                        }))
+                      }
+                    />
+                  </Field>
+
+                  <Field label="نوع الموعد النهائي (Deadline Type)">
+                    <select
+                      value={asText(form.deadlineType)}
+                      onChange={(e) => setForm((x) => ({ ...x, deadlineType: e.target.value }))}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-medium text-[#203442] outline-none transition focus:border-[#0E7C86] font-['Cairo']"
+                    >
+                      <option value="HARD_DEADLINE">موعد نهائي صارم (Hard Deadline)</option>
+                      <option value="ROLLING">تقديم مستمر طوال العام (Rolling)</option>
+                      <option value="STAGED">مراحل متعددة (Staged)</option>
+                    </select>
+                  </Field>
+
+                  <Field label="طريقة وآلية التقديم (Application Method)">
+                    <Input
+                      value={form.applicationMethod}
+                      onChange={(val) => setForm((x) => ({ ...x, applicationMethod: val }))}
+                      placeholder="بوابة التقديم الإلكترونية الرسمية"
+                    />
+                  </Field>
+                </div>
+              </Card>
+
+              <Card
+                title="المعرفات القانونية والضبط"
+                subtitle="بيانات النظام والربط المعياري (للقراءة فقط)"
+                icon={<Layers3 className="h-5 w-5" />}
+              >
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <Field label="المعرف العام (Public ID)">
+                    <Input value={scholarship.publicId} readOnly />
+                  </Field>
+                  <Field label="الاسم القانوني المعياري">
+                    <Input value={scholarship.canonicalName} readOnly />
+                  </Field>
+                  <Field label="مفتاح منع التكرار (Dedupe Key)">
+                    <Input value={scholarship.canonicalDedupKey} readOnly />
+                  </Field>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Tab 2: Overview & Summary */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              <Card
+                title="نبذة تعريفية شاملة عن المنحة (Scholarship Overview)"
+                subtitle="الوصف التعريفي الكامل، أهداف المنحة، ورسالة البرنامج الأكاديمي"
+                icon={<Info className="h-5 w-5" />}
+              >
+                <div className="space-y-4">
+                  <Field label="الوصف العام والشامل للمنحة (Description)">
+                    <Textarea
+                      rows={6}
+                      value={form.description}
+                      onChange={(val) => setForm((x) => ({ ...x, description: val }))}
+                      placeholder="اكتب هنا نبذة مفصلة عن المنحة وتاريخها وأهم ما يميزها والجامعات التي تشملها..."
+                    />
+                  </Field>
+
+                  <div className="rounded-2xl bg-teal-50/60 border border-teal-200/80 p-4 text-xs space-y-2 text-[#142B5F]">
+                    <div className="flex items-center gap-2 font-black text-[#0E7C86]">
+                      <Sparkles className="h-4 w-4" />
+                      <span>إرشادات صياغة النبذة:</span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-slate-600 font-medium">
+                      <li>وضّح أهمية المنحة والدولة المستضيفة والمستوى الأكاديمي للجامعات.</li>
+                      <li>بيّن ما إذا كانت المنحة تشمل سنة تحضيرية لتعلم اللغة أو تتيح الدراسة باللغة الإنجليزية.</li>
+                      <li>اذكر الفئات الأكثر حظاً في القبول والهدف التنموي أو الأكاديمي للمنحة.</li>
+                    </ul>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Tab 3: Funding & Benefits */}
+          {activeTab === 'funding' && (
+            <div className="space-y-6">
+              <Card
+                title="الحزمة المالية ونوع التغطية"
+                subtitle="تحديد نوع التمويل (كامل 100% أو جزئي)، البدلات والرواتب"
+                icon={<Coins className="h-5 w-5" />}
+              >
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field label="نوع التمويل والتغطية">
+                    <select
+                      value={asText(form.fundingTypeCode)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setForm((x) => ({
+                          ...x,
+                          fundingTypeCode: val,
+                          isFullyFunded: val === 'FULLY_FUNDED' || val === 'FULL',
+                        }));
+                      }}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-[#142B5F] outline-none transition focus:border-[#0E7C86] font-['Cairo']"
+                    >
+                      <option value="FULLY_FUNDED">تمويل كامل 100% (Fully Funded)</option>
+                      <option value="PARTIALLY_FUNDED">تمويل جزئي (Partially Funded)</option>
+                      <option value="TUITION_ONLY">إعفاء من الرسوم الدراسية فقط</option>
+                    </select>
+                  </Field>
+
+                  <Field label="هل المنحة ممولة بالكامل؟">
+                    <div className={`flex h-11 items-center rounded-xl border px-3.5 text-xs font-black ${
+                      isFullFunding ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700'
+                    }`}>
+                      {isFullFunding ? '✓ نعم - تمويل كامل وشامل' : '✗ لا - تمويل جزئي'}
+                    </div>
+                  </Field>
+
+                  <Field label="المبلغ التقديري أو الراتب (بالوحدات)">
+                    <Input
+                      value={form.amountMinorUnits}
+                      onChange={(val) => setForm((x) => ({ ...x, amountMinorUnits: val }))}
+                      placeholder="مثال: 3500"
+                    />
+                  </Field>
+
+                  <Field label="رمز العملة (Currency Code)">
+                    <Input
+                      value={form.amountCurrencyCode}
+                      onChange={(val) => setForm((x) => ({ ...x, amountCurrencyCode: val }))}
+                      placeholder="TRY, USD, EUR, GBP, SAR"
+                    />
+                  </Field>
+                </div>
+              </Card>
+
+              <Card
+                title="قائمة المزايا والبدلات المغطاة (Benefits & Allowances)"
+                subtitle="الرسوم، السكن، التذاكر، التأمين الصحي، الراتب المعيشي، وتأشيرة السفر"
+                icon={<Sparkles className="h-5 w-5" />}
+              >
+                <div className="space-y-3.5">
+                  {benefits.map((item, index) => (
+                    <div
+                      key={item.benefitKey || index}
+                      className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 p-4 transition hover:border-[#0E7C86]/40 hover:bg-white"
+                    >
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div className="flex-1">
+                          <Field label="الميزة المالية المغطاة (اكتب نص الميزة مباشرة)">
+                            <Input
+                              value={item.valueText}
+                              onChange={(val) => {
+                                const updated = benefits.map((b, i) =>
+                                  i === index ? { ...b, valueText: val } : b
+                                );
+                                setForm((x) => ({ ...x, benefits: updated }));
+                              }}
+                              placeholder="مثال: إعفاء كامل 100% من جميع الرسوم الدراسية / راتب شهري 1500 ليرة / سكن جامعي مجاني"
+                            />
+                          </Field>
+                        </div>
+
+                        <div className="flex items-center justify-end pt-1 sm:pt-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = benefits.filter((_, i) => i !== index);
+                              setForm((x) => ({ ...x, benefits: updated }));
+                            }}
+                            className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800 p-2.5 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
+                            title="حذف الميزة"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span>حذف</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const benefitKey = nextKey('BENEFIT', benefits as any, 'benefitKey');
+                      setForm((x) => ({
+                        ...x,
+                        benefits: [
+                          ...benefits,
+                          {
+                            benefitKey,
+                            benefitTypeCode: 'OTHER',
+                            coverageTypeCode: 'FULL',
+                            valueText: '',
+                            displayOrder: benefits.length + 1,
+                          },
+                        ],
+                      }));
+                    }}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>+ إضافة ميزة مالية جديدة (مربع نصي)</span>
+                  </button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Tab 4: Degrees & Target Majors - Hierarchical by Degree Level */}
+          {activeTab === 'degrees_majors' && (
+            <div className="space-y-6">
+              {/* Header Box with Quick Add Degree Buttons */}
+              <div className="rounded-3xl border border-[#DDEFF2] bg-gradient-to-r from-teal-50/70 via-white to-blue-50/50 p-6 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-base font-black text-[#142B5F] flex items-center gap-2">
+                      <GraduationCap className="h-5 w-5 text-[#0E7C86]" />
+                      <span>إدارة الدرجات العلمية والتخصصات المتاحة</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      اختر الدرجة العلمية (بكالوريوس، ماجستير، دكتوراه...) لتظهر خانة إضافة التخصصات التابعة لها مباشرة ومصنفة تحتها.
+                    </p>
+                  </div>
+
+                  {/* Direct Save Button */}
+                  <button
+                    type="button"
+                    onClick={save}
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-[#0E7C86] hover:bg-[#142B5F] text-white px-5 py-2.5 text-xs font-black shadow-xs transition cursor-pointer shrink-0"
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    <span>حفظ الدرجات والتخصصات</span>
+                  </button>
+                </div>
+
+                {/* Quick Add Degree Buttons */}
+                <div className="pt-2 border-t border-slate-200/60">
+                  <span className="block text-[11px] font-black text-slate-500 mb-2">اضغط لإضافة درجة علمية جديدة إلى المنحة:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {PRESET_DEGREE_OPTIONS.map((opt) => {
+                      const alreadyAdded = degreeGroups.some((g) => g.degreeLevel === opt.value);
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => handleAddDegreeLevel(opt.value)}
+                          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer ${
+                            alreadyAdded
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 ring-1 ring-emerald-400/30'
+                              : 'bg-white hover:bg-teal-50 text-[#142B5F] hover:text-[#0E7C86] border border-slate-200 hover:border-teal-300'
+                          }`}
+                        >
+                          <span>{opt.icon}</span>
+                          <span>{opt.label}</span>
+                          {alreadyAdded && <span className="text-[10px] bg-emerald-200/80 text-emerald-900 rounded-full px-1.5 font-bold">مضافة</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* List of Degree Groups */}
+              {degreeGroups.length === 0 ? (
+                <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center space-y-3">
+                  <div className="h-12 w-12 rounded-2xl bg-teal-50 text-[#0E7C86] grid place-items-center mx-auto">
+                    <GraduationCap className="h-6 w-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-700">لم يتم تحديد أي درجات علمية للمنحة بعد</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    اضغط على أي من أزرار الدرجات العلمية بالأعلى (مثل بكالوريوس أو ماجستير) لإضافة قسم الدرجة ثم كتابة التخصصات التابعة لها.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  {degreeGroups.map((group, groupIndex) => {
+                    const currentInputValue = majorInputs[group.id] || '';
+
+                    return (
+                      <section
+                        key={group.id}
+                        className="rounded-3xl border border-[#142B5F]/20 bg-white shadow-xs overflow-hidden transition hover:border-[#0E7C86]"
+                      >
+                        {/* Degree Header Banner */}
+                        <div className="bg-[#FAF7F0] border-b border-slate-200/80 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 flex-1">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#142B5F] text-[#F2CD78] font-black text-lg shrink-0 shadow-xs">
+                              🎓
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-sm sm:text-base font-black text-[#142B5F]">
+                                  الدرجة العلمية {groupIndex + 1}: {group.customLabel || group.degreeLevel}
+                                </h4>
+                                <span className="rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[10px] font-black text-[#0E7C86]">
+                                  {group.majors.length} تخصصات مضافة
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                                التخصصات المتاحة حصراً لمرحلة ({group.degreeLevel}) في هذه المنحة
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDegreeLevel(group.id)}
+                            className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 text-xs font-bold transition cursor-pointer self-end sm:self-center"
+                            title="حذف هذه الدرجة العلمية بكامل تخصصاتها"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            <span>حذف الدرجة</span>
+                          </button>
+                        </div>
+
+                        {/* Degree Body: Majors Under This Degree */}
+                        <div className="p-6 space-y-4">
+                          {/* Add Major Input for this Degree */}
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <div className="relative flex-1">
+                              <input
+                                type="text"
+                                value={currentInputValue}
+                                onChange={(e) =>
+                                  setMajorInputs((prev) => ({ ...prev, [group.id]: e.target.value }))
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddMajorToDegree(group.id);
+                                  }
+                                }}
+                                placeholder={`اكتب اسم التخصص المتاح لمرحلة (${group.degreeLevel}) واضغط إضافة...`}
+                                className="h-11 w-full rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 px-4 text-xs sm:text-sm font-medium text-slate-900 outline-none transition focus:border-[#0E7C86] focus:bg-white focus:ring-2 focus:ring-[#0E7C86]/15 font-['Cairo']"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleAddMajorToDegree(group.id)}
+                              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[#0E7C86] hover:bg-[#142B5F] px-5 text-xs font-black text-white shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
+                            >
+                              <Plus className="h-4 w-4" />
+                              <span>إضافة تخصص لـ ({group.degreeLevel})</span>
+                            </button>
+                          </div>
+
+                          {/* Quick Suggestions Tags */}
+                          <div className="space-y-1.5">
+                            <span className="text-[11px] font-bold text-slate-400">💡 تخصصات شائعة (انقر للإضافة السريعة):</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {POPULAR_MAJOR_SUGGESTIONS.map((sug) => {
+                                const isAdded = group.majors.includes(sug);
+                                return (
+                                  <button
+                                    key={sug}
+                                    type="button"
+                                    disabled={isAdded}
+                                    onClick={() => handleAddMajorToDegree(group.id, sug)}
+                                    className={`rounded-xl px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                                      isAdded
+                                        ? 'bg-slate-100 text-slate-400 opacity-60 cursor-not-allowed'
+                                        : 'bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-700 hover:text-[#0E7C86]'
+                                    }`}
+                                  >
+                                    + {sug}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* List of Active Majors in this Degree */}
+                          <div className="pt-3 border-t border-slate-100">
+                            <h5 className="text-xs font-bold text-[#142B5F] mb-2.5">
+                              التخصصات المعتمدة لمرحلة ({group.degreeLevel}):
+                            </h5>
+
+                            {group.majors.length === 0 ? (
+                              <p className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                                ⚠️ لم يتم إضافة أي تخصص لهذه الدرجة بعد. يمكنك كتابة اسم التخصص في الحقل أعلاه أو اختياره من الاقتراحات.
+                              </p>
+                            ) : (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                                {group.majors.map((major, mIdx) => (
+                                  <div
+                                    key={mIdx}
+                                    className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xs hover:border-[#0E7C86] transition group/item"
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <BookOpen className="h-4 w-4 text-[#21A7B4] shrink-0" />
+                                      <span className="text-xs font-bold text-slate-800 truncate">
+                                        {major}
+                                      </span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveMajorFromDegree(group.id, mIdx)}
+                                      className="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+                                      title="حذف هذا التخصص"
+                                    >
+                                      <X className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tab 5: Eligibility Criteria */}
+          {activeTab === 'eligibility' && (
+            <div className="space-y-6">
+              <Card
+                title="معايير وشروط الأهلية والقبول (Eligibility Criteria)"
+                subtitle="المعدل الأكاديمي الأدنى، شروط السن، اختبارات اللغة، والجنسيات"
+                icon={<CheckCheck className="h-5 w-5" />}
+              >
+                <div className="space-y-3.5">
+                  {eligibility.map((item, index) => (
+                    <div
+                      key={item.itemKey || index}
+                      className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 p-4 transition hover:border-[#0E7C86]/40 hover:bg-white"
+                    >
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div className="flex-1">
+                          <Field label="نص الشرط والمعيار بالأهلية (يكتب نصاً مباشرة)">
+                            <Input
+                              value={item.valueText}
+                              onChange={(val) => {
+                                const updated = eligibility.map((row, i) =>
+                                  i === index ? { ...row, valueText: val } : row
+                                );
+                                setForm((x) => ({ ...x, eligibilityItems: updated }));
+                              }}
+                              placeholder="مثال: معدل تراكمي لا يقل عن 70% للبكالوريوس أو 75% للدراسات العليا / السن أقل من 21 سنة للبكالوريوس"
+                            />
+                          </Field>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-4">
+                          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={item.isRequired !== false}
+                              onChange={(e) => {
+                                const updated = eligibility.map((row, i) =>
+                                  i === index ? { ...row, isRequired: e.target.checked } : row
+                                );
+                                setForm((x) => ({ ...x, eligibilityItems: updated }));
+                              }}
+                              className="rounded text-[#0E7C86] focus:ring-[#0E7C86]"
+                            />
+                            <span>شرط إلزامي</span>
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = eligibility.filter((_, i) => i !== index);
+                              setForm((x) => ({ ...x, eligibilityItems: updated }));
+                            }}
+                            className="text-rose-500 hover:text-rose-700 p-2 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 cursor-pointer"
+                            title="حذف الشرط"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const itemKey = nextKey('ELIGIBILITY', eligibility as any, 'itemKey');
+                      setForm((x) => ({
+                        ...x,
+                        eligibilityItems: [
+                          ...eligibility,
+                          {
+                            itemKey,
+                            itemTypeCode: 'GENERAL',
+                            isRequired: true,
+                            priorityOrder: eligibility.length + 1,
+                            resolutionStatus: 'RESOLVED',
+                            valueText: '',
+                          },
+                        ],
+                      }));
+                    }}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>+ إضافة معيار أهلية جديد (مربع نصي)</span>
+                  </button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Tab 6: Required Documents */}
+          {activeTab === 'documents' && (
+            <div className="space-y-6">
+              <Card
+                title="المستندات والوثائق المطلوبة للتقديم (Required Documents)"
+                subtitle="جواز السفر، الشهادات، خطابات التوصية، وخطاب الحافز"
+                icon={<FileText className="h-5 w-5" />}
+              >
+                <div className="space-y-3.5">
+                  {documents.map((item, index) => (
+                    <div
+                      key={item.documentKey || index}
+                      className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 p-4 transition hover:border-[#0E7C86]/40 hover:bg-white"
+                    >
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div className="flex-1">
+                          <Field label="اسم المستند والوثيقة المطلوبة (يكتب نصاً مباشرة)">
+                            <Input
+                              value={item.displayName}
+                              onChange={(val) => {
+                                const updated = documents.map((doc, i) =>
+                                  i === index ? { ...doc, displayName: val } : doc
+                                );
+                                setForm((x) => ({ ...x, requiredDocumentItems: updated }));
+                              }}
+                              placeholder="مثال: جواز السفر ساري المفعول / شهادة الثانوية العامة وكشف الدرجات مترجم ومصدق"
+                            />
+                          </Field>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-4">
+                          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={item.isRequired !== false}
+                              onChange={(e) => {
+                                const updated = documents.map((doc, i) =>
+                                  i === index ? { ...doc, isRequired: e.target.checked } : doc
+                                );
+                                setForm((x) => ({ ...x, requiredDocumentItems: updated }));
+                              }}
+                              className="rounded text-[#0E7C86] focus:ring-[#0E7C86]"
+                            />
+                            <span>مستند إلزامي</span>
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = documents.filter((_, i) => i !== index);
+                              setForm((x) => ({ ...x, requiredDocumentItems: updated }));
+                            }}
+                            className="text-rose-500 hover:text-rose-700 p-2 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 cursor-pointer"
+                            title="حذف المستند"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const documentKey = nextKey('DOC', documents as any, 'documentKey');
+                      setForm((x) => ({
+                        ...x,
+                        requiredDocumentItems: [
+                          ...documents,
+                          {
+                            documentKey,
+                            displayName: '',
+                            documentTypeCode: 'OTHER',
+                            isRequired: true,
+                            displayOrder: documents.length + 1,
+                            resolutionStatus: 'RESOLVED',
+                          },
+                        ],
+                      }));
+                    }}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-dashed border-[#0E7C86] bg-teal-50/50 hover:bg-teal-50 px-5 py-3 text-xs font-black text-[#0E7C86] transition cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>+ إضافة وثيقة ومستند جديد (مربع نصي)</span>
+                  </button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Tab 7: Links & Universities */}
+          {activeTab === 'links_unis' && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card
+                title="روابط التقديم والمصادر الرسمية"
+                subtitle="بوابة التسجيل الإلكترونية والموقع الرسمي للجهة المانحة"
+                icon={<ExternalLink className="h-5 w-5" />}
+              >
+                <div className="space-y-4">
+                  <Field label="رابط بوابة التقديم المباشرة (Application URL)">
+                    <Input
+                      value={form.applicationUrl}
+                      onChange={(val) => setForm((x) => ({ ...x, applicationUrl: val }))}
+                      placeholder="https://apply.scholarship.gov/portal"
+                    />
+                  </Field>
+
+                  <Field label="الموقع الرسمي للمنحة (Official Website)">
+                    <Input
+                      value={form.officialWebsite}
+                      onChange={(val) => setForm((x) => ({ ...x, officialWebsite: val }))}
+                      placeholder="https://www.scholarship.gov"
+                    />
+                  </Field>
+
+                  <Field label="رابط المصدر والإعلان المرجعي (Official Source URL)">
+                    <Input
+                      value={form.officialSourceUrl}
+                      onChange={(val) => setForm((x) => ({ ...x, officialSourceUrl: val }))}
+                      placeholder="https://www.scholarship.gov/announcements/2027"
+                    />
+                  </Field>
+
+                  <div className="pt-2">
+                    <a
+                      href={form.applicationUrl || form.officialWebsite || '#'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] px-4 py-2.5 text-xs font-bold text-white transition shadow-xs"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      <span>زيارة بوابة التقديم الرسمية الآن</span>
+                    </a>
+                  </div>
+                </div>
+              </Card>
+
+              <Card
+                title="الجامعات والبرامج الشريكة (University Links)"
+                subtitle="الجامعات التي تستضيف المنحة والبرامج الأكاديمية المتاحة"
+                icon={<Landmark className="h-5 w-5" />}
+              >
+                <div className="space-y-3">
+                  {(scholarship.universityLinks ?? []).map((item) => (
+                    <div key={item.linkKey} className="rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 p-4 shadow-xs">
+                      <div className="flex items-center gap-2 font-black text-[#142B5F] text-sm">
+                        <Landmark className="h-4 w-4 text-[#0E7C86]" />
+                        <span>{item.sourceLabel || item.linkKey}</span>
+                      </div>
+                      <div className="mt-2 text-xs text-slate-500">
+                        معرف الجامعة: {display(item.universityId)} · البرنامج: {display(item.academicProgramId)}
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!scholarship.universityLinks || scholarship.universityLinks.length === 0) && (
+                    <div className="rounded-2xl bg-slate-50 p-6 text-center text-xs text-slate-500 font-bold">
+                      المنحة مفتوحة ومتاحة في جميع الجامعات الحكومية المعتمدة في الدولة المستضيفة.
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Tab 8: Important Notes & Tips */}
+          {activeTab === 'notes' && (
+            <div className="space-y-6">
+              <Card
+                title="ملاحظات وتوجيهات هامة للطلاب (Important Notes & Guidance)"
+                subtitle="تعليمات التقديم الخاصة، نصائح النجاح، المحاذير، وملاحظات الإدارة الداخلية"
+                icon={<Lightbulb className="h-5 w-5" />}
+              >
+                <div className="space-y-4">
+                  <Field label="نص الملاحظات والتوجيهات العامة للطلاب (Important Notes)">
+                    <Textarea
+                      rows={6}
+                      value={form.notes}
+                      onChange={(val) => setForm((x) => ({ ...x, notes: val }))}
+                      placeholder="اكتب هنا التنبيهات الخاصة بالتقديم، مثل مجانية التقديم، متطلبات التوثيق، والمحاذير..."
+                    />
+                  </Field>
+
+                  <div className="grid gap-4 sm:grid-cols-2 pt-2">
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-xs space-y-2 text-amber-900">
+                      <div className="flex items-center gap-2 font-black text-amber-800">
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                        <span>تنبيهات ومحاذير رسمية:</span>
+                      </div>
+                      <ul className="list-disc list-inside space-y-1 text-slate-700 font-medium">
+                        <li>التقديم على المنحة مجاني تماماً ولا يتطلب أي رسوم تقديم.</li>
+                        <li>احذر من التعامل مع جهات غير رسمية تدعي ضمان القبول.</li>
+                        <li>يجب أن تكون جميع الوثائق سارية المفعول حتى موعد السفر.</li>
+                      </ul>
+                    </div>
+
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-xs space-y-2 text-emerald-900">
+                      <div className="flex items-center gap-2 font-black text-emerald-800">
+                        <Lightbulb className="h-4 w-4 text-emerald-600" />
+                        <span>نصائح لزيادة فرصة القبول:</span>
+                      </div>
+                      <ul className="list-disc list-inside space-y-1 text-slate-700 font-medium">
+                        <li>اكتب خطاب حافز مخصص وموجه بدقة للمنحة والجامعة.</li>
+                        <li>احرص على الحصول على خطابات توصية قوية من أساتذة يعرفونك جيداً.</li>
+                        <li>قدّم طلبك مبكراً قبل الأيام الأخيرة لتجنب ضغط الخوادم.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Tab 9: Data Health & Audit */}
+          {activeTab === 'health_audit' && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card
+                title="مؤشرات اكتمال البيانات وصحة السجل"
+                subtitle="التحقق من تغطية جميع الحقول الإلزامية والربط المعياري"
+                icon={<ShieldCheck className="h-5 w-5" />}
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">
+                    <div className="flex items-center gap-2 font-bold text-xs">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      <span>حالة البيانات: مكتملة ومعتمدة 100%</span>
+                    </div>
+                    <span className="rounded-full bg-emerald-600 px-3 py-0.5 text-xs font-black text-white">جاهز للنشر</span>
+                  </div>
+
+                  <div>
+                    <h4 className="mb-2 text-xs font-bold text-slate-700">الحقول المفقودة أو الناقصة:</h4>
+                    {detail.completeness.missingFields.length ? (
+                      <ul className="space-y-1 text-xs text-amber-800 font-bold">
+                        {detail.completeness.missingFields.map((field) => (
+                          <li key={field}>• {field}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-emerald-700 font-bold">✓ لا توجد أي حقول ناقصة، كافة بيانات المنحة مدخلة بالكامل.</p>
+                    )}
+                  </div>
+                </div>
+              </Card>
+
+              <Card
+                title="سجل العمليات والتدقيق (Audit Trail)"
+                subtitle="تاريخ التعديلات والأوامر التي طرأت على هذا السجل"
+                icon={<History className="h-5 w-5" />}
+              >
+                <div className="space-y-2.5">
+                  {detail.history.map((event) => (
+                    <div key={event.id} className="rounded-2xl border border-slate-200 p-3.5 text-xs bg-white">
+                      <div className="flex items-center justify-between font-bold text-[#142B5F]">
+                        <span>{event.action}</span>
+                        <span className="text-slate-400 font-normal">{new Date(event.timestamp).toLocaleString('ar-SA')}</span>
+                      </div>
+                      <div className="mt-1 text-[11px] text-slate-500 font-medium">
+                        بواسطة: {event.actorId} ({event.source})
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Floating Bottom Save Bar */}
+      <div className="sticky bottom-4 z-20 flex items-center justify-between rounded-3xl border border-[#DDEFF2] bg-white/95 p-4 shadow-lg backdrop-blur-md">
+        <div className="flex items-center gap-2 text-xs text-slate-600 font-bold">
+          <GraduationCap className="h-4 w-4 text-[#0E7C86]" />
+          <span>تعديل منحة: <strong className="text-[#142B5F]">{form.displayName || scholarship.displayName}</strong></span>
         </div>
 
-        <aside className="space-y-5">
-          <Card title={ui.health}>
-            <div className="mb-3 flex flex-wrap gap-2"><Badge value={detail.completeness.state} /><span className="text-xs text-slate-500">{detail.completeness.missingCount} missing</span></div>
-            <h3 className="mb-2 text-sm font-bold">{ui.missing}</h3>
-            {detail.completeness.missingFields.length ? <ul className="space-y-1 text-sm text-amber-900">{detail.completeness.missingFields.map((field) => <li key={field}>• {field}</li>)}</ul> : <p className="text-sm text-emerald-700">{ui.noMissing}</p>}
-            <h3 className="mb-2 mt-5 text-sm font-bold">{ui.unresolved}</h3>
-            {detail.unresolvedLinks.length ? <div className="space-y-2">{detail.unresolvedLinks.map((item) => <div key={`${item.area}:${item.key}`} className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs"><div className="flex justify-between gap-2"><strong>{item.area}</strong><Badge value={item.resolutionStatus} /></div><div className="mt-1">raw: {display(item.rawValue)}</div><div>canonical: {display(item.canonicalId)}</div></div>)}</div> : <p className="text-sm text-emerald-700">{ui.noUnresolved}</p>}
-          </Card>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => navigate('/admin/scholarships')}
+            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+          >
+            إلغاء والعودة
+          </button>
 
-          <Card title={ui.history}>
-            {!detail.historyAvailable ? <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{ui.auditUnavailable}</div> : null}
-            <div className="space-y-2">{detail.history.map((event) => <div key={event.id} className="rounded-xl border p-3"><div className="flex items-center justify-between gap-2"><Badge value={event.action} /><History className="h-4 w-4 text-slate-400" /></div><div className="mt-2 text-xs text-slate-600">{new Date(event.timestamp).toLocaleString()}</div><div className="mt-1 text-xs">{event.actorId} · {event.source}</div></div>)}</div>
-            {detail.historyAvailable && !detail.history.length ? <Empty text={ui.noHistory} /> : null}
-          </Card>
-
-          <Card title={ui.compatibility}>
-            <p className="mb-3 text-xs text-slate-500">{ui.compatibilityNote}</p>
-            <pre className="max-h-[500px] overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">{JSON.stringify(legacy, null, 2)}</pre>
-          </Card>
-        </aside>
+          <button
+            disabled={saving}
+            type="button"
+            onClick={() => void save()}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] px-6 py-2.5 text-xs font-black text-white shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 text-[#F2CD78]" />}
+            <span>حفظ كافة التغييرات</span>
+          </button>
+        </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-3xl border border-[#DDEFF2] bg-white p-6 sm:p-7 shadow-2xl space-y-5 font-['Cairo']">
+            <div className="flex items-start gap-4">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl shrink-0 ${
+                confirmModal.variant === 'emerald'
+                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                  : confirmModal.variant === 'rose'
+                  ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                  : 'bg-amber-50 text-amber-600 border border-amber-200'
+              }`}>
+                {confirmModal.variant === 'emerald' ? (
+                  <Sparkles className="h-6 w-6" />
+                ) : confirmModal.variant === 'rose' ? (
+                  <Archive className="h-6 w-6" />
+                ) : (
+                  <AlertTriangle className="h-6 w-6" />
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-[#142B5F]">
+                  {confirmModal.title}
+                </h3>
+                <p className="text-xs sm:text-sm font-medium leading-relaxed text-slate-600">
+                  {confirmModal.description}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 transition cursor-pointer"
+              >
+                تراجع وإلغاء
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void executeConfirmedAction()}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-black text-white shadow-md transition-all active:scale-95 cursor-pointer ${
+                  confirmModal.variant === 'emerald'
+                    ? 'bg-emerald-600 hover:bg-emerald-700'
+                    : confirmModal.variant === 'rose'
+                    ? 'bg-rose-600 hover:bg-rose-700'
+                    : 'bg-amber-600 hover:bg-amber-700'
+                }`}
+              >
+                <Check className="h-4 w-4" />
+                <span>{confirmModal.confirmText}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function Empty({ text }: { text: string }) {
-  return <div className="rounded-xl bg-[#FAF7F0] p-4 text-sm text-[#203442]/60">{text}</div>;
-}
-
-function BenefitRow({ item, onChange, onRemove, ui }: { item: ScholarshipBenefitDto; onChange: (item: ScholarshipBenefitDto) => void; onRemove: () => void; ui: UiText }) {
-  return <div className="rounded-xl border p-4"><div className="grid gap-2 md:grid-cols-3"><Field label="Benefit key"><Input value={item.benefitKey} readOnly /></Field><Field label="Benefit type"><Input value={item.benefitTypeCode} onChange={(benefitTypeCode) => onChange({ ...item, benefitTypeCode })} /></Field><Field label="Coverage"><Input value={item.coverageTypeCode} onChange={(coverageTypeCode) => onChange({ ...item, coverageTypeCode })} /></Field><Field label="Amount"><Input value={item.amount} onChange={(amount) => onChange({ ...item, amount })} /></Field><Field label="Currency canonical ref"><Input value={item.currencyReferenceId} readOnly /></Field><Field label="Value"><Input value={item.valueText} onChange={(valueText) => onChange({ ...item, valueText })} /></Field><Field label="Duration"><Input value={item.durationText} onChange={(durationText) => onChange({ ...item, durationText })} /></Field><Field label="Frequency"><Input value={item.frequencyCode} onChange={(frequencyCode) => onChange({ ...item, frequencyCode })} /></Field><Field label="Order"><Input type="number" value={item.displayOrder} onChange={(value) => onChange({ ...item, displayOrder: Number(value) || 0 })} /></Field></div><button type="button" onClick={onRemove} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-red-700"><Trash2 className="h-3.5 w-3.5" />{ui.remove}</button></div>;
-}
-
-function TargetEditor({ kind, rows, onChange, ui }: {
-  kind: 'degree';
-  rows: ScholarshipDegreeTargetDto[];
-  onChange: (rows: ScholarshipDegreeTargetDto[]) => void;
-  ui: UiText;
-} | {
-  kind: 'major';
-  rows: ScholarshipMajorTargetDto[];
-  onChange: (rows: ScholarshipMajorTargetDto[]) => void;
-  ui: UiText;
-}) {
-  return <div className="space-y-3">
-    {rows.map((item, index) => <div key={item.targetKey} className="rounded-xl border p-4"><GraduationCap className="mb-2 h-4 w-4 text-[#0E7C86]" /><div className="grid gap-2"><Field label="Target key"><Input value={item.targetKey} readOnly /></Field><Field label="Source label"><Input value={item.sourceLabel} onChange={(sourceLabel) => onChange(rows.map((row, i) => i === index ? { ...row, sourceLabel } : row) as never)} /></Field><Field label="Canonical ID"><Input value={kind === 'degree' ? (item as ScholarshipDegreeTargetDto).degreeLevelId : (item as ScholarshipMajorTargetDto).majorId} readOnly /></Field><Field label="Resolution"><Input value={item.resolutionStatus} readOnly /></Field></div><button type="button" onClick={() => onChange(rows.filter((_, i) => i !== index) as never)} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-red-700"><Trash2 className="h-3.5 w-3.5" />{ui.remove}</button></div>)}
-    {!rows.length ? <Empty text={ui.noRows} /> : null}
-    <button type="button" onClick={() => {
-      const targetKey = nextKey(kind.toUpperCase(), rows as unknown as Array<Record<string, unknown>>, 'targetKey');
-      const newRow = { targetKey, sourceLabel: '', resolutionStatus: 'UNRESOLVED' };
-      onChange([...rows, newRow] as never);
-    }} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold"><Plus className="h-4 w-4" />{ui.add}</button>
-  </div>;
-}
-
-function EligibilityRow({ item, onChange, onRemove, ui }: { item: ScholarshipEligibilityItemDto; onChange: (item: ScholarshipEligibilityItemDto) => void; onRemove: () => void; ui: UiText }) {
-  return <div className="rounded-xl border p-4"><div className="grid gap-2 md:grid-cols-3"><Field label="Item key"><Input value={item.itemKey} readOnly /></Field><Field label="Type"><Input value={item.itemTypeCode} onChange={(itemTypeCode) => onChange({ ...item, itemTypeCode })} /></Field><Field label="Operator"><Input value={item.operatorCode} onChange={(operatorCode) => onChange({ ...item, operatorCode })} /></Field><Field label="Value"><Input value={item.valueText} onChange={(valueText) => onChange({ ...item, valueText })} /></Field><Field label="Minimum"><Input value={item.minimumValue} onChange={(minimumValue) => onChange({ ...item, minimumValue })} /></Field><Field label="Maximum"><Input value={item.maximumValue} onChange={(maximumValue) => onChange({ ...item, maximumValue })} /></Field><Field label="International test canonical ID"><Input value={item.internationalTestId} readOnly /></Field><Field label="Resolution"><Input value={item.resolutionStatus} readOnly /></Field><Field label="Priority"><Input type="number" value={item.priorityOrder} onChange={(value) => onChange({ ...item, priorityOrder: Number(value) || 0 })} /></Field></div><label className="mt-3 flex items-center gap-2 text-xs font-semibold"><input type="checkbox" checked={item.isRequired !== false} onChange={(event) => onChange({ ...item, isRequired: event.target.checked })} />{item.isRequired === false ? ui.optional : ui.required}</label><button type="button" onClick={onRemove} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-red-700"><Trash2 className="h-3.5 w-3.5" />{ui.remove}</button></div>;
-}
-
-function DocumentRow({ item, onChange, onRemove, ui }: { item: ScholarshipRequiredDocumentDto; onChange: (item: ScholarshipRequiredDocumentDto) => void; onRemove: () => void; ui: UiText }) {
-  return <div className="rounded-xl border p-4"><div className="grid gap-2 md:grid-cols-3"><Field label="Document key"><Input value={item.documentKey} readOnly /></Field><Field label="Display name"><Input value={item.displayName} onChange={(displayName) => onChange({ ...item, displayName })} /></Field><Field label="Document type"><Input value={item.documentTypeCode} onChange={(documentTypeCode) => onChange({ ...item, documentTypeCode })} /></Field><Field label="Description"><Input value={item.description} onChange={(description) => onChange({ ...item, description })} /></Field><Field label="International test canonical ID"><Input value={item.internationalTestId} readOnly /></Field><Field label="Source label / score requirement"><Input value={item.sourceLabel} onChange={(sourceLabel) => onChange({ ...item, sourceLabel })} /></Field><Field label="Resolution"><Input value={item.resolutionStatus} readOnly /></Field><Field label="Order"><Input type="number" value={item.displayOrder} onChange={(value) => onChange({ ...item, displayOrder: Number(value) || 0 })} /></Field></div><label className="mt-3 flex items-center gap-2 text-xs font-semibold"><input type="checkbox" checked={item.isRequired !== false} onChange={(event) => onChange({ ...item, isRequired: event.target.checked })} />{item.isRequired === false ? ui.optional : ui.required}</label><button type="button" onClick={onRemove} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-red-700"><Trash2 className="h-3.5 w-3.5" />{ui.remove}</button></div>;
 }

@@ -62,6 +62,8 @@ export interface ScholarshipCatalogUpdate {
   officialSourceUrl?: string | null;
   sourceLocale?: string | null;
   studyLanguageSourceLabel?: string | null;
+  description?: string | null;
+  notes?: string | null;
 
   benefits?: ScholarshipBenefitDto[];
   degreeTargets?: ScholarshipDegreeTargetDto[];

@@ -1,24 +1,32 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { adminApiClient } from '../api/client';
-import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
-import { SavedTestCanonicalRelationships } from '../components/SavedTestCanonicalRelationships';
-import { InternationalTestSourceSectionsViewer } from '../components/InternationalTestSourceSectionsViewer';
 import type { InternationalTestDto } from '@manaratak/domain';
 import {
-  ArrowRight,
-  ArrowLeft,
-  CheckCircle2,
-  ExternalLink,
-  FileText,
-  AlertCircle,
-  Loader2,
-  ShieldCheck,
-  Eye,
-  Info,
-  Plus,
-  Save
+AlertCircle,
+Archive,
+ArrowLeft,
+ArrowRight,
+BookOpen,
+CheckCircle2,
+ChevronDown,
+Clock,
+ExternalLink,
+Eye,
+History,
+Info,
+Loader2,
+Network,
+Plus,
+RotateCcw,
+Save,
+Send,
+ShieldCheck,
+X
 } from 'lucide-react';
+import { useEffect,useState } from 'react';
+import { Link,useParams } from 'react-router-dom';
+import { adminApiClient } from '../api/client';
+import { InternationalTestSourceSectionsViewer } from '../components/InternationalTestSourceSectionsViewer';
+import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
+import { SavedTestCanonicalRelationships } from '../components/SavedTestCanonicalRelationships';
 import { useTranslation } from '../i18n/I18nProvider';
 
 type InternationalTestStatus = 'IMPORTED' | 'READY_TO_REVIEW' | 'NEEDS_REVIEW' | 'INCOMPLETE' | 'READY_TO_PUBLISH' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED';
@@ -110,19 +118,27 @@ interface InternationalTestDetail extends Pick<InternationalTestDto, 'countryRel
 }
 
 type TabType =
-  | 'description'
-  | 'source_sections'
-  | 'variants'
-  | 'sections'
-  | 'scoring'
-  | 'fees'
-  | 'requirements'
-  | 'availability'
-  | 'official_links'
-  | 'prep_materials'
-  | 'cross_phase'
-  | 'evidence'
-  | 'readiness';
+  | 'details'
+  | 'relationships'
+  | 'readiness'
+  | 'sources_history';
+
+function formatDetailDateTime(dateStr?: string | null, isRtl = true): string {
+  if (!dateStr) return isRtl ? 'الآن' : 'Just now';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleString(isRtl ? 'ar-SA' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return dateStr;
+  }
+}
 
 export function InternationalTestDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -130,7 +146,16 @@ export function InternationalTestDetailPage() {
   const [test, setTest] = useState<InternationalTestDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>('description');
+  const [activeTab, setActiveTab] = useState<TabType>('details');
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const isRtl = language === 'ar';
 
@@ -141,6 +166,9 @@ export function InternationalTestDetailPage() {
     try {
       const data = await adminApiClient.getInternationalTest<InternationalTestDetail>(id);
       setTest(data);
+      if (!lastSavedAt && data?.updatedAt) {
+        setLastSavedAt(data.updatedAt);
+      }
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر تحميل تفاصيل الاختبار الدولي' : 'Failed to load international test details.'));
     } finally {
@@ -152,26 +180,220 @@ export function InternationalTestDetailPage() {
     fetchDetail();
   }, [id]);
 
-  const tabs: { id: TabType; labelAr: string; labelEn: string }[] = [
-    { id: 'description', labelAr: 'الوصف والاستخدامات', labelEn: 'Description & Use Cases' },
-    { id: 'source_sections', labelAr: 'أقسام ملف المصدر', labelEn: 'Source File Sections' },
-    { id: 'variants', labelAr: 'النسخ وطريقة التقديم', labelEn: 'Versions & Delivery' },
-    { id: 'sections', labelAr: 'أقسام الاختبار', labelEn: 'Test Sections' },
-    { id: 'scoring', labelAr: 'نظام الدرجات والمعادلات', labelEn: 'Score Scale & Equivalencies' },
-    { id: 'fees', labelAr: 'الرسوم والسياسات المالية', labelEn: 'Fees & Financial Policies' },
-    { id: 'requirements', labelAr: 'المتطلبات والسياسات', labelEn: 'Requirements & Policies' },
-    { id: 'availability', labelAr: 'التوفر ومراكز الاختبار', labelEn: 'Availability & Centers' },
-    { id: 'official_links', labelAr: 'الروابط الرسمية والتحقق', labelEn: 'Official Links & Verification' },
-    { id: 'prep_materials', labelAr: 'مواد التحضير والأصول', labelEn: 'Preparation Materials & Assets' },
-    { id: 'cross_phase', labelAr: 'الربط بالمراحل الأخرى', labelEn: 'Cross-Phase References' },
-    { id: 'evidence', labelAr: 'الاستيراد والأدلة والمراجعة', labelEn: 'Import, Evidence & Review' },
-    { id: 'readiness', labelAr: 'النقص والجاهزية', labelEn: 'Missing Data & Readiness' }
+  const tabs: { id: TabType; labelAr: string; labelEn: string; icon: any }[] = [
+    { id: 'details', labelAr: 'تفاصيل الاختبار', labelEn: 'Test Details', icon: BookOpen },
+    { id: 'relationships', labelAr: 'الربط والعلاقات', labelEn: 'Links & Relationships', icon: Network },
+    { id: 'readiness', labelAr: 'الجاهزية والنشر', labelEn: 'Readiness & Publishing', icon: ShieldCheck },
+    { id: 'sources_history', labelAr: 'المصادر وسجل التعديلات', labelEn: 'Sources & History', icon: History }
   ];
+
+  const handlePublish = async () => {
+    if (!test) return;
+    setActionLoading(true);
+    setActionMessage(null);
+    setActionError(null);
+    try {
+      await adminApiClient.publishInternationalTest(test.id);
+      setActionMessage(
+        isRtl
+          ? test.status === 'PUBLISHED' ? 'تم نشر التحديث بنجاح!' : 'تم نشر الاختبار بنجاح!'
+          : test.status === 'PUBLISHED' ? 'Update published successfully!' : 'Test published successfully!'
+      );
+      setLastSavedAt(new Date().toISOString());
+      setHasUnsavedChanges(false);
+      await fetchDetail();
+    } catch (err: any) {
+      setActionError(err.message || (isRtl ? 'تعذر نشر الاختبار. يرجى مراجعة معوقات النشر في تبويب الجاهزية.' : 'Unable to publish test. Please check readiness blockers.'));
+      setActiveTab('readiness');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!test) return;
+    setActionLoading(true);
+    setActionMessage(null);
+    setActionError(null);
+    setShowMoreMenu(false);
+    try {
+      await adminApiClient.unpublishInternationalTest(test.id);
+      setActionMessage(isRtl ? 'تم إلغاء النشر بنجاح وإعادة الاختبار لحالة المسودة.' : 'Test unpublished successfully.');
+      setLastSavedAt(new Date().toISOString());
+      await fetchDetail();
+    } catch (err: any) {
+      setActionError(err.message || (isRtl ? 'تعذر إلغاء نشر الاختبار.' : 'Unable to unpublish test.'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleArchive = async () => {
+    if (!test) return;
+    setActionLoading(true);
+    setActionMessage(null);
+    setActionError(null);
+    setShowArchiveModal(false);
+    setShowMoreMenu(false);
+    try {
+      await adminApiClient.archiveInternationalTest(test.id);
+      setActionMessage(isRtl ? 'تمت أرشفة السجل بنجاح مع الحفاظ على كافة البيانات والأدلة دون حذف.' : 'Test archived successfully. Record preserved without deletion.');
+      setLastSavedAt(new Date().toISOString());
+      await fetchDetail();
+    } catch (err: any) {
+      setActionError(err.message || (isRtl ? 'تعذر أرشفة الاختبار.' : 'Unable to archive test.'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!test) return;
+    setActionMessage(isRtl ? 'كل التعديلات محفوظة بالفعل.' : 'All changes are already saved.');
+    setLastSavedAt(new Date().toISOString());
+    setHasUnsavedChanges(false);
+  };
+
+  const renderEmbeddedForm = (sectionNum: number, sectionTitle: string, _blockKey: string) => {
+    if (!test) return null;
+    const tTitle = (sectionTitle || '').toLowerCase();
+
+    // Section 1/2: Overview / Description
+    if (sectionNum === 1 || sectionNum === 2 || tTitle.includes('معلومات') || tTitle.includes('نبذة')) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#142B5F]">
+              {isRtl ? 'تحرير بيانات الوصف والاستخدامات الأساسية' : 'Edit Basic Description & Uses'}
+            </span>
+          </div>
+          <DescriptionTab test={test} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    // Section 4: Variants & Delivery Modes
+    if (sectionNum === 4 || tTitle.includes('عائلة') || tTitle.includes('نسخ') || tTitle.includes('variant')) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#142B5F]">
+              {isRtl ? 'النسخ الرسمية وطرق التقديم القابلة للتحرير' : 'Editable Official Variants & Delivery Modes'}
+            </span>
+          </div>
+          <VariantsTab testId={test.id} initialVariants={test.variants || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    // Section 5: Delivery & Availability & Centers
+    if (sectionNum === 5 || tTitle.includes('تقديم') || tTitle.includes('توفر') || tTitle.includes('مراكز') || tTitle.includes('availability')) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#142B5F]">
+              {isRtl ? 'الدول ومراكز الاختبار ونوافذ التقديم القابلة للتحرير' : 'Editable Countries, Centers & Testing Windows'}
+            </span>
+          </div>
+          <AvailabilityTab testId={test.id} initialAvailability={test.availability} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    // Section 6 or 7: Test Skills & Operational Sections
+    if (sectionNum === 6 || sectionNum === 7 || tTitle.includes('أقسام') || tTitle.includes('مهارات') || tTitle.includes('skills')) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200 bg-slate-50/60 -mx-5 -mb-5 p-5 rounded-b-xl">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="px-2.5 py-1 rounded-lg bg-[#142B5F] text-white text-xs font-black">
+              {isRtl ? 'المهارات والوحدات التشغيلية للاختبار' : 'Operational Skills & Sections'}
+            </span>
+            <span className="text-xs text-slate-500 font-medium">
+              {isRtl ? '(ميّز بينها وبين الأقسام التحريرية للملف أعلاه)' : '(Distinguished from editorial file sections above)'}
+            </span>
+          </div>
+          <SectionsTab testId={test.id} initialSections={test.sections || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    // Section 8 or 9 or 10: Scoring Scales & Equivalencies
+    if ((sectionNum === 8 || sectionNum === 9 || sectionNum === 10) && (tTitle.includes('درجات') || tTitle.includes('score') || tTitle.includes('cefr'))) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#142B5F]">
+              {isRtl ? 'نظام الدرجات والسلالم والمعادلات القابل للتحرير' : 'Editable Score Scales & Equivalencies'}
+            </span>
+          </div>
+          <ScoringTab testId={test.id} initialScoreScale={test.scoreScale} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    // Section 11 or 14: Registration & Policies
+    if ((sectionNum === 11 || sectionNum === 14) || tTitle.includes('تسجيل') || tTitle.includes('أهلية') || tTitle.includes('متطلبات')) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#142B5F]">
+              {isRtl ? 'متطلبات التسجيل والهوية والسياسات' : 'Registration & Policy Requirements'}
+            </span>
+          </div>
+          <RequirementsTab test={test} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    // Section 12 or 15: Fees & Financial Policies
+    if ((sectionNum === 12 || sectionNum === 15) || tTitle.includes('رسوم') || tTitle.includes('مالية') || tTitle.includes('fees')) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#142B5F]">
+              {isRtl ? 'الرسوم والعملات والسياسات المالية' : 'Fees & Financial Policies'}
+            </span>
+          </div>
+          <FeesTab testId={test.id} initialFees={test.fees || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    // Section 15 or 18: Preparation Materials
+    if ((sectionNum === 15 || sectionNum === 18) && (tTitle.includes('تحضير') || tTitle.includes('prep') || tTitle.includes('مصادر'))) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#142B5F]">
+              {isRtl ? 'مواد التحضير والأدلة الرسمية' : 'Preparation Materials & Guides'}
+            </span>
+          </div>
+          <PreparationMaterialsTab testId={test.id} initialMaterials={test.preparationMaterials || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    // Section 16 or 19: Official Links
+    if ((sectionNum === 16 || sectionNum === 19) || tTitle.includes('روابط') || tTitle.includes('وسائط') || tTitle.includes('links')) {
+      return (
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#142B5F]">
+              {isRtl ? 'الروابط الرسمية المعتمدة' : 'Official Verified Links'}
+            </span>
+          </div>
+          <OfficialLinksTab testId={test.id} initialLinks={test.officialLinks || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#0E7C86]" />
       </div>
     );
   }
@@ -181,7 +403,7 @@ export function InternationalTestDetailPage() {
       <div className="max-w-4xl mx-auto space-y-4">
         <Link
           to="/international-tests"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-black font-medium"
+          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-[#142B5F] font-medium"
         >
           {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
           {isRtl ? 'العودة إلى الاختبارات الدولية' : 'Back to International Tests'}
@@ -194,178 +416,448 @@ export function InternationalTestDetailPage() {
     );
   }
 
-  const isPublished = test.status === 'PUBLISHED' && test.isPubliclyVisible === true;
+  const primaryTitle = isRtl
+    ? test.localizedNameAr?.trim() || test.displayName?.trim() || test.canonicalName
+    : test.localizedNameEn?.trim() || test.displayName?.trim() || test.canonicalName;
+  const secondaryTitle = isRtl
+    ? test.localizedNameEn?.trim() || test.canonicalName
+    : test.localizedNameAr?.trim() || test.canonicalName;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Navigation Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
-        <div>
-          <Link
-            to="/international-tests"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-black font-medium mb-2"
-          >
-            {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
-            {isRtl ? 'العودة إلى الاختبارات الدولية' : 'Back to International Tests'}
-          </Link>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {test.displayName || test.canonicalName}
-            </h1>
-            {test.abbreviation && (
-              <span className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-md font-mono font-semibold">
-                {test.abbreviation}
-              </span>
-            )}
-            <StatusBadge status={test.status} />
-            {test.completenessStatus && <CompletenessBadge status={test.completenessStatus} />}
+      {/* Top Breadcrumb */}
+      <div>
+        <Link
+          to="/international-tests"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#142B5F] transition"
+        >
+          {isRtl ? <ArrowRight className="h-3.5 w-3.5" /> : <ArrowLeft className="h-3.5 w-3.5" />}
+          <span>{isRtl ? 'العودة إلى قائمة الاختبارات الدولية' : 'Back to International Tests'}</span>
+        </Link>
+      </div>
+
+      {/* Alerts */}
+      {actionMessage && (
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{actionMessage}</span>
           </div>
-          <p className="text-sm text-gray-500 mt-1">
-            {test.providerName} • {getCategoryLabel(test.testCategory)}
-          </p>
+          <button onClick={() => setActionMessage(null)} className="text-emerald-600 hover:text-emerald-900 cursor-pointer">
+            <X className="w-4 h-4" />
+          </button>
         </div>
+      )}
+      {actionError && (
+        <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-bold flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>{actionError}</span>
+          </div>
+          <button onClick={() => setActionError(null)} className="text-rose-600 hover:text-rose-900 cursor-pointer">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
-        <div className="flex items-center gap-3">
-          {/* Public Link Rule */}
-          {isPublished ? (
-            <a
-              href={`/international-tests/${test.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
+      {/* Header Card with Navy and Teal Gradient */}
+      <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
+        <div className="absolute -top-24 end-0 h-64 w-64 rounded-full bg-[#F2CD78] opacity-15 pointer-events-none blur-2xl" />
+        <div className="absolute -bottom-24 start-0 h-64 w-64 rounded-full bg-cyan-300 opacity-10 pointer-events-none blur-2xl" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          {/* Title & Metadata */}
+          <div className="space-y-4 flex-1 min-w-0">
+            {/* Academic Kicker */}
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm border border-white/15">
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>{getCategoryLabel(test.testCategory, isRtl)} · {test.providerName}</span>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-xs">
+                {primaryTitle}
+              </h1>
+              {test.abbreviation && (
+                <span className="font-mono text-xs font-black text-[#142B5F] bg-[#F2CD78] px-3 py-1 rounded-xl shadow-xs">
+                  {test.abbreviation}
+                </span>
+              )}
+              {secondaryTitle &&
+                secondaryTitle !== primaryTitle &&
+                secondaryTitle.toLowerCase() !== test.abbreviation?.toLowerCase() && (
+                  <span className="text-xs font-bold text-white/70">
+                    ({secondaryTitle})
+                  </span>
+              )}
+            </div>
+
+            {/* Badges Row: Status, Completeness, Visibility */}
+            <div className="flex flex-wrap items-center gap-2.5 text-xs">
+              <StatusBadge status={test.status} isHeader={true} />
+              {test.completenessStatus && <CompletenessBadge status={test.completenessStatus} isHeader={true} />}
+              {test.isSourceVerified && (
+                <span className="inline-flex items-center gap-1 bg-white/15 backdrop-blur-sm text-emerald-200 border border-white/20 px-2.5 py-1 rounded-xl text-xs font-bold">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>{isRtl ? 'مصدر معتمد' : 'Verified Source'}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Save Status & Last Saved Time */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+              {hasUnsavedChanges ? (
+                <span className="text-amber-200 font-bold flex items-center gap-1.5 bg-amber-500/20 border border-amber-300/30 px-2.5 py-1 rounded-xl backdrop-blur-sm">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{isRtl ? 'توجد تعديلات غير محفوظة' : 'Unsaved modifications'}</span>
+                </span>
+              ) : (
+                <span className="text-emerald-200 font-bold flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-300/30 px-2.5 py-1 rounded-xl backdrop-blur-sm">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>{isRtl ? 'كل التعديلات محفوظة' : 'All modifications saved'}</span>
+                </span>
+              )}
+              <span className="text-white/40">•</span>
+              <span className="text-white/80 font-medium">
+                <Clock className="w-3.5 h-3.5 inline ml-1 rtl:ml-1 ltr:mr-1 text-white/60" />
+                {isRtl ? 'آخر حفظ:' : 'Last saved:'} {formatDetailDateTime(lastSavedAt, isRtl)}
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons Toolbar */}
+          <div className="relative z-10 flex flex-wrap items-center gap-2.5 shrink-0 self-start lg:self-center">
+            {/* Save Button */}
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={handleSaveChanges}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-xs font-bold backdrop-blur-sm transition shadow-xs cursor-pointer disabled:opacity-50"
+              title={isRtl ? 'حفظ التعديلات' : 'Save Changes'}
             >
-              <ExternalLink className="h-4 w-4" />
-              {isRtl ? 'فتح الصفحة العامة' : 'Open Public Page'}
-            </a>
-          ) : (
-            <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-md font-medium">
-              {isRtl ? 'سيظهر رابط الصفحة العامة بعد النشر فقط' : 'Public page link will appear after publication only'}
-            </span>
-          )}
+              <Save className="w-4 h-4 text-[#F2CD78]" />
+              <span>{isRtl ? 'حفظ التعديلات' : 'Save Changes'}</span>
+            </button>
 
-          {/* Import Route Link Rule */}
-          <Link
-            to="/imports/international-tests"
-            className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-200"
-          >
-            <FileText className="h-4 w-4" />
-            {isRtl ? 'سجلات الاستيراد' : 'Import Records'}
-          </Link>
-        </div>
-      </div>
+            {/* Public Admin Preview Button */}
+            <button
+              type="button"
+              onClick={() => setShowPreviewModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-xs font-bold backdrop-blur-sm transition shadow-xs cursor-pointer"
+              title={isRtl ? 'معاينة إدارية للصفحة العامة' : 'Admin Preview Public Page'}
+            >
+              <Eye className="w-4 h-4 text-cyan-200" />
+              <span>{isRtl ? 'معاينة الصفحة العامة' : 'Preview Page'}</span>
+            </button>
 
-      {/* Primary Detail Header Info */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-        <div>
-          <dt className="text-gray-500 font-medium">{isRtl ? 'الاسم المعياري' : 'Canonical Name'}</dt>
-          <dd className="font-semibold text-gray-900 mt-0.5">{test.canonicalName}</dd>
-        </div>
-        <div>
-          <dt className="text-gray-500 font-medium">{isRtl ? 'المزود' : 'Provider'}</dt>
-          <dd className="font-semibold text-gray-900 mt-0.5">{test.providerName}</dd>
-        </div>
-        <div>
-          <dt className="text-gray-500 font-medium">{isRtl ? 'التحقق من المصدر' : 'Source Verification'}</dt>
-          <dd className="mt-0.5">
-            {test.isSourceVerified ? (
-              <span className="inline-flex items-center gap-1 text-green-700 font-medium">
-                <ShieldCheck className="h-4 w-4" /> {isRtl ? 'تم التحقق' : 'Verified'}
+            {/* Publish / Publish Update Button */}
+            <button
+              type="button"
+              disabled={actionLoading}
+              onClick={handlePublish}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black transition shadow-md cursor-pointer disabled:opacity-50"
+              title={isRtl ? 'نشر الاختبار' : 'Publish Test'}
+            >
+              {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              <span>
+                {test.status === 'PUBLISHED'
+                  ? (isRtl ? 'نشر التحديث' : 'Publish Update')
+                  : (isRtl ? 'نشر الاختبار' : 'Publish Test')}
               </span>
-            ) : (
-              <span className="text-gray-500 font-medium">{isRtl ? 'لم يتم التحقق' : 'Unverified'}</span>
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-gray-500 font-medium">{isRtl ? 'الظهور للعامة' : 'Public Visibility'}</dt>
-          <dd className="mt-0.5">
-            {test.isPubliclyVisible ? (
-              <span className="inline-flex items-center gap-1 text-blue-700 font-medium">
-                <Eye className="h-4 w-4" /> {isRtl ? 'ظاهر للعامة' : 'Visible'}
-              </span>
-            ) : (
-              <span className="text-gray-500 font-medium">{isRtl ? 'مخفي' : 'Hidden'}</span>
-            )}
-          </dd>
-        </div>
-      </div>
+            </button>
 
-      {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 overflow-x-auto">
+            {/* More Menu (Dropdown) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowMoreMenu(!showMoreMenu)}
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-xs font-bold backdrop-blur-sm transition shadow-xs cursor-pointer"
+                title={isRtl ? 'المزيد من الإجراءات' : 'More actions'}
+              >
+                <span>{isRtl ? 'المزيد' : 'More'}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-white/70" />
+              </button>
+
+              {showMoreMenu && (
+                <div className="absolute right-0 rtl:right-0 ltr:left-0 top-full mt-2 w-48 rounded-2xl bg-white border border-slate-200 shadow-xl py-2 z-30 space-y-1">
+                  {test.status === 'PUBLISHED' && (
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={handleUnpublish}
+                      className="w-full text-right rtl:text-right ltr:text-left px-4 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50 flex items-center gap-2 transition cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-600" />
+                      <span>{isRtl ? 'إلغاء النشر' : 'Unpublish Test'}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    onClick={() => { setShowMoreMenu(false); setShowArchiveModal(true); }}
+                    className="w-full text-right rtl:text-right ltr:text-left px-4 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer"
+                  >
+                    <Archive className="w-3.5 h-3.5 text-rose-600" />
+                    <span>{isRtl ? 'أرشفة الاختبار' : 'Archive Test'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Four Primary Tabs Navigation */}
+      <div className="border-b border-slate-200 overflow-x-auto">
         <nav className="flex space-x-2 sm:space-x-4 rtl:space-x-reverse min-w-max pb-1">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
+            const TabIcon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-2.5 px-3.5 text-sm font-medium rounded-lg transition-colors ${
+                className={`flex items-center gap-2 py-3 px-4 text-xs font-black rounded-xl transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-black text-white'
-                    : 'text-gray-600 hover:text-black hover:bg-gray-100'
+                    ? 'bg-[#142B5F] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-[#142B5F] hover:bg-slate-100'
                 }`}
               >
-                {isRtl ? tab.labelAr : tab.labelEn}
+                <TabIcon className={`w-4 h-4 ${isActive ? 'text-[#21A7B4]' : 'text-slate-400'}`} />
+                <span>{isRtl ? tab.labelAr : tab.labelEn}</span>
               </button>
             );
           })}
         </nav>
       </div>
 
-      {/* Tab Content */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-        {activeTab === 'description' && (
-          <DescriptionTab test={test} onRefresh={fetchDetail} isRtl={isRtl} />
-        )}
-        {activeTab === 'source_sections' && (
-          <InternationalTestSourceSectionsViewer testId={test.id} isRtl={isRtl} onNamesReviewed={fetchDetail} />
-        )}
-        {activeTab === 'requirements' && (
-          <RequirementsTab test={test} isRtl={isRtl} />
-        )}
-        {activeTab === 'cross_phase' && (
-          <div className="space-y-4">
-            <ReviewedGraphEditor key={test.id} ownerId={test.id} ownerStatus={test.status} domain="TEST" isRtl={isRtl} onSaved={fetchDetail} />
-            <SavedTestCanonicalRelationships test={test} isRtl={isRtl} />
-            <CrossPhaseTab testId={test.id} isRtl={isRtl} />
+      {/* Tab Content Panels */}
+      <div className="bg-white border border-[#DDEFF2] rounded-3xl p-6 sm:p-8 shadow-sm">
+        {/* TAB 1: تفاصيل الاختبار (Source Sections + In-Context Structured Forms) */}
+        {activeTab === 'details' && (
+          <div className="space-y-6">
+            <InternationalTestSourceSectionsViewer
+              testId={test.id}
+              isRtl={isRtl}
+              onNamesReviewed={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }}
+              renderEmbeddedForm={renderEmbeddedForm}
+            />
           </div>
         )}
-        {activeTab === 'variants' && (
-          <VariantsTab testId={test.id} initialVariants={test.variants || []} onRefresh={fetchDetail} isRtl={isRtl} />
+
+        {/* TAB 2: الربط والعلاقات (Canonical Graph + Cross Phase Links) */}
+        {activeTab === 'relationships' && (
+          <div className="space-y-8">
+            <div className="bg-[#FAF7F0] border border-[#DDEFF2] rounded-2xl p-5">
+              <h3 className="text-base font-black text-[#142B5F] mb-1">
+                {isRtl ? 'العلاقات المعيارية المعتمدة' : 'Canonical Domain Relationships'}
+              </h3>
+              <p className="text-xs text-slate-500">
+                {isRtl ? 'ربط الاختبار بالدول، اللغات، العقد التصنيفية والدرجات العلمية الرسمية' : 'Link test to countries, languages, taxonomy nodes and degree levels using verified IDs'}
+              </p>
+            </div>
+            <ReviewedGraphEditor
+              key={test.id}
+              ownerId={test.id}
+              ownerStatus={test.status}
+              domain="TEST"
+              isRtl={isRtl}
+              onSaved={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }}
+            />
+            <SavedTestCanonicalRelationships test={test} isRtl={isRtl} />
+            <div className="border-t border-slate-200 pt-6">
+              <h3 className="text-base font-black text-[#142B5F] mb-3">
+                {isRtl ? 'الربط الأكاديمي بالمراحل والبرامج والمنح' : 'Cross-Phase Academic Relationships'}
+              </h3>
+              <CrossPhaseTab testId={test.id} isRtl={isRtl} />
+            </div>
+          </div>
         )}
 
-        {activeTab === 'sections' && (
-          <SectionsTab testId={test.id} initialSections={test.sections || []} onRefresh={fetchDetail} isRtl={isRtl} />
-        )}
-
-        {activeTab === 'scoring' && (
-          <ScoringTab testId={test.id} initialScoreScale={test.scoreScale} onRefresh={fetchDetail} isRtl={isRtl} />
-        )}
-
-        {activeTab === 'fees' && (
-          <FeesTab testId={test.id} initialFees={test.fees || []} onRefresh={fetchDetail} isRtl={isRtl} />
-        )}
-
-        {activeTab === 'official_links' && (
-          <OfficialLinksTab testId={test.id} initialLinks={test.officialLinks || []} onRefresh={fetchDetail} isRtl={isRtl} />
-        )}
-
-        {activeTab === 'availability' && (
-          <AvailabilityTab testId={test.id} initialAvailability={test.availability} onRefresh={fetchDetail} isRtl={isRtl} />
-        )}
-
-        {activeTab === 'prep_materials' && (
-          <PreparationMaterialsTab testId={test.id} initialMaterials={test.preparationMaterials || []} onRefresh={fetchDetail} isRtl={isRtl} />
-        )}
-
-        {activeTab === 'evidence' && (
-          <EvidenceTab testId={test.id} initialEvidence={test.importEvidence} onRefresh={fetchDetail} isRtl={isRtl} />
-        )}
-
+        {/* TAB 3: الجاهزية والنشر (Readiness Report & Blockers) */}
         {activeTab === 'readiness' && (
-          <ReadinessTab test={test} onRefresh={fetchDetail} isRtl={isRtl} />
+          <ReadinessTab
+            test={test}
+            onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }}
+            isRtl={isRtl}
+          />
+        )}
+
+        {/* TAB 4: المصادر وسجل التعديلات (Audit, Evidence, Raw Source & Versions) */}
+        {activeTab === 'sources_history' && (
+          <EvidenceTab
+            testId={test.id}
+            initialEvidence={test.importEvidence}
+            onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }}
+            isRtl={isRtl}
+          />
         )}
       </div>
+
+      {/* Admin Public Preview Modal */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 space-y-6">
+            {/* Warning Banner */}
+            <div className="bg-gradient-to-r from-amber-600 via-[#0E7C86] to-[#142B5F] p-4 text-white text-xs font-bold flex items-center justify-between sticky top-0 z-10 shadow-sm">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 shrink-0" />
+                <span>
+                  {isRtl
+                    ? 'معاينة إدارية قبل النشر · هذه المسودة خاصة بالمسؤولين فقط وليست متاحة للعامة'
+                    : 'Administrative Preview · This draft is private to administrators and not visible to the public'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPreviewModal(false)}
+                className="p-1 rounded-lg hover:bg-white/20 transition cursor-pointer text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 sm:p-8 space-y-6">
+              {/* Preview Hero */}
+              <div className="rounded-2xl border border-[#DDEFF2] bg-gradient-to-l from-[#142B5F] to-[#0E7C86] p-6 text-white shadow-md">
+                <div className="flex flex-wrap items-center gap-2.5 text-xs text-cyan-200 mb-2 font-bold">
+                  <span>{getCategoryLabel(test.testCategory, isRtl)}</span>
+                  <span>•</span>
+                  <span>{test.providerName}</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-white">
+                  {primaryTitle}
+                </h1>
+                {test.abbreviation && (
+                  <p className="mt-1 text-sm text-white/80 font-bold font-mono">
+                    {test.abbreviation}
+                  </p>
+                )}
+              </div>
+
+              {/* Preview Overview */}
+              <div className="space-y-2">
+                <h2 className="text-lg font-black text-[#142B5F]">
+                  {isRtl ? 'نبذة عن الاختبار والاستخدامات' : 'Test Overview & Purpose'}
+                </h2>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  {test.description || (isRtl ? 'اختبار دولي معتمد لقياس الكفاءة والجاهزية الأكاديمية والمهنية.' : 'Accredited international test measuring academic and professional readiness.')}
+                </p>
+              </div>
+
+              {/* Preview Sections */}
+              {test.sections && test.sections.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-lg font-black text-[#142B5F]">
+                    {isRtl ? 'بنية وأقسام ومهارات الاختبار' : 'Test Structure, Skills & Sections'}
+                  </h2>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {test.sections.map((sec, idx) => (
+                      <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-1">
+                        <div className="font-bold text-[#142B5F] text-sm">{sec.sectionName}</div>
+                        <div className="text-slate-500">
+                          {sec.durationMinutes ? `${sec.durationMinutes} دقيقة` : ''} {sec.sectionType ? `· ${sec.sectionType}` : ''}
+                        </div>
+                        {sec.questionTypes && sec.questionTypes.length > 0 && (
+                          <div className="text-[11px] text-slate-400">
+                            {isRtl ? 'أنواع الأسئلة: ' : 'Question types: '} {sec.questionTypes.join('، ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Preview Scoring */}
+              {test.scoreScale && (
+                <div className="space-y-2 bg-[#FAF7F0] p-5 rounded-2xl border border-amber-200/60">
+                  <h2 className="text-base font-black text-[#142B5F]">
+                    {isRtl ? 'نظام الدرجات والتقييم' : 'Scoring System'}
+                  </h2>
+                  <div className="text-xs text-slate-700 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div><span className="text-slate-500">{isRtl ? 'الحد الأدنى: ' : 'Min: '}</span><span className="font-bold">{test.scoreScale.overallMinimum}</span></div>
+                    <div><span className="text-slate-500">{isRtl ? 'الحد الأقصى: ' : 'Max: '}</span><span className="font-bold">{test.scoreScale.overallMaximum}</span></div>
+                    {test.scoreScale.cefrEquivalency && (
+                      <div><span className="text-slate-500">CEFR: </span><span className="font-bold">{test.scoreScale.cefrEquivalency}</span></div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Preview Requirements & Fees */}
+              <div className="grid sm:grid-cols-2 gap-4 text-xs">
+                {test.registrationRequirements && (
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <div className="font-bold text-[#142B5F]">{isRtl ? 'متطلبات التسجيل' : 'Registration Requirements'}</div>
+                    <p className="text-slate-600 leading-relaxed">{test.registrationRequirements}</p>
+                  </div>
+                )}
+                {test.fees && test.fees.length > 0 && (
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <div className="font-bold text-[#142B5F]">{isRtl ? 'رسوم الاختبار' : 'Test Fees'}</div>
+                    <div className="space-y-1.5 pt-1">
+                      {test.fees.map((fee, idx) => (
+                        <div key={idx} className="flex justify-between text-slate-700 font-medium">
+                          <span>{fee.feeType || (isRtl ? 'رسوم التسجيل' : 'Registration')}</span>
+                          <span className="font-bold text-[#0E7C86]">{fee.amount} {fee.currencyCode}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Modal Action */}
+              <div className="flex justify-end pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setShowPreviewModal(false)}
+                  className="px-5 py-2.5 rounded-xl bg-[#142B5F] text-white text-xs font-bold hover:bg-[#0E7C86] transition cursor-pointer"
+                >
+                  {isRtl ? 'إغلاق المعاينة' : 'Close Preview'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Archive Confirmation Dialog */}
+      {showArchiveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-4 border border-slate-200">
+            <div className="flex items-center gap-3 text-amber-600">
+              <Archive className="h-6 w-6 shrink-0" />
+              <h3 className="text-lg font-black text-[#142B5F]">
+                {isRtl ? 'تأكيد أرشفة الاختبار الدولي' : 'Confirm Archive Test'}
+              </h3>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              {isRtl
+                ? `هل أنت متأكد من أرشفة «${primaryTitle}»؟ سيتم حفظ السجل وجميع أقسامه وأدلته وعلاقاته بالكامل دون حذف، ولن يظهر في القوائم النشطة للعامة.`
+                : `Are you sure you want to archive "${primaryTitle}"? The record and all its data and evidence will be preserved without deletion.`}
+            </p>
+            <div className="flex items-center justify-end gap-3 pt-3">
+              <button
+                type="button"
+                onClick={() => setShowArchiveModal(false)}
+                className="px-4 py-2 rounded-xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50 text-xs transition cursor-pointer"
+              >
+                {isRtl ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                disabled={actionLoading}
+                onClick={handleArchive}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold cursor-pointer transition shadow-xs disabled:opacity-50"
+              >
+                {actionLoading ? (isRtl ? 'جارٍ الأرشفة...' : 'Archiving...') : (isRtl ? 'تأكيد الأرشفة' : 'Confirm Archive')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1337,30 +1829,58 @@ function PolicySection({ title, content, fallback }: { title: string; content?: 
   );
 }
 
-function StatusBadge({ status }: { status: InternationalTestStatus }) {
+function StatusBadge({ status, isHeader = false }: { status: InternationalTestStatus; isHeader?: boolean }) {
   const label = getStatusLabel(status);
+  if (isHeader) {
+    const config =
+      status === 'PUBLISHED'
+        ? 'bg-emerald-500/20 text-emerald-200 border-emerald-300/40'
+        : status === 'READY_TO_PUBLISH'
+        ? 'bg-sky-500/20 text-sky-200 border-sky-300/40'
+        : status === 'ARCHIVED'
+        ? 'bg-white/10 text-slate-300 border-white/20'
+        : 'bg-amber-500/20 text-amber-200 border-amber-300/40';
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border backdrop-blur-sm ${config}`}>
+        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+        <span>{label}</span>
+      </span>
+    );
+  }
   const className =
     status === 'PUBLISHED'
-      ? 'bg-green-100 text-green-700'
+      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
       : status === 'READY_TO_PUBLISH'
-      ? 'bg-blue-100 text-blue-700'
+      ? 'bg-sky-50 text-sky-700 border border-sky-200'
       : status === 'ARCHIVED'
-      ? 'bg-gray-100 text-gray-600'
-      : status === 'READY_TO_REVIEW'
-      ? 'bg-amber-100 text-amber-800'
-      : 'bg-yellow-100 text-yellow-700';
-  return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${className}`}>{label}</span>;
+      ? 'bg-slate-100 text-slate-600 border border-slate-200'
+      : 'bg-amber-50 text-amber-800 border border-amber-200';
+  return <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${className}`}>{label}</span>;
 }
 
-function CompletenessBadge({ status }: { status: InternationalTestCompletenessStatus }) {
+function CompletenessBadge({ status, isHeader = false }: { status: InternationalTestCompletenessStatus; isHeader?: boolean }) {
   const label = getCompletenessLabel(status);
+  if (isHeader) {
+    const config =
+      status === 'COMPLETE'
+        ? 'bg-emerald-500/20 text-emerald-200 border-emerald-300/40'
+        : status === 'NEEDS_REVIEW'
+        ? 'bg-amber-500/20 text-amber-200 border-amber-300/40'
+        : 'bg-rose-500/20 text-rose-200 border-rose-300/40';
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border backdrop-blur-sm ${config}`}>
+        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+        <span>{label}</span>
+      </span>
+    );
+  }
   const className =
     status === 'COMPLETE'
-      ? 'bg-green-100 text-green-700'
+      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
       : status === 'NEEDS_REVIEW'
-      ? 'bg-amber-100 text-amber-800'
-      : 'bg-red-100 text-red-700';
-  return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${className}`}>{label}</span>;
+      ? 'bg-amber-50 text-amber-800 border border-amber-200'
+      : 'bg-rose-50 text-rose-700 border border-rose-200';
+  return <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${className}`}>{label}</span>;
 }
 
 function getStatusLabel(status: InternationalTestStatus): string {
@@ -1398,7 +1918,25 @@ function getCompletenessLabel(status?: InternationalTestCompletenessStatus | nul
   }
 }
 
-function getCategoryLabel(category: InternationalTestCategory): string {
+function getCategoryLabel(category: InternationalTestCategory, isRtl = true): string {
+  if (!isRtl) {
+    switch (category) {
+      case 'ENGLISH_LANGUAGE': return 'English language';
+      case 'NON_ENGLISH_LANGUAGE': return 'Other language';
+      case 'LANGUAGE_PROFICIENCY': return 'Language proficiency';
+      case 'GENERAL_UNDERGRADUATE_ADMISSION':
+      case 'UNDERGRAD_ADMISSION': return 'Undergraduate admission';
+      case 'GRADUATE_ADMISSION':
+      case 'GRAD_ADMISSION': return 'Graduate admission';
+      case 'NATIONAL_INTERNATIONAL_ADMISSION': return 'National or international admission';
+      case 'SPECIALIZED_ADMISSION': return 'Specialized admission';
+      case 'PROFESSIONAL_LICENSING_CERTIFICATION':
+      case 'PROFESSIONAL_LICENSING': return 'Professional licensing';
+      case 'ACADEMIC_PLACEMENT': return 'Academic placement';
+      case 'OTHER': return 'Other';
+      default: return category;
+    }
+  }
   switch (category) {
     case 'ENGLISH_LANGUAGE': return 'لغة إنجليزية';
     case 'NON_ENGLISH_LANGUAGE': return 'لغة غير إنجليزية';

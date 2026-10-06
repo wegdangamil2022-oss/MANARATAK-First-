@@ -20,19 +20,44 @@ export class PublicMajorUseCases {
     };
   }
 
-  public async getMajor(slug: string): Promise<PublicMajorDto> {
+  public async getMajor(slug: string, options?: { degreeLevel?: string; profileCode?: string }): Promise<PublicMajorDto> {
     const major = await this.repository.findBySlug(slug);
 
     if (!major || major.status !== MajorStatus.PUBLISHED) {
       throw new Error('Major not found');
     }
 
-    const publicMajor = this.mapToPublicDto(major);
+    const profiles = major.profiles ?? [];
+    let targetProfile = options?.profileCode
+      ? profiles.find((p) => p.code === options.profileCode)
+      : options?.degreeLevel
+      ? profiles.find((p) => p.level?.toUpperCase() === options.degreeLevel?.toUpperCase())
+      : undefined;
+
+    if (targetProfile && targetProfile.status !== MajorStatus.PUBLISHED) {
+      throw new Error('Major level profile not published');
+    }
+
+    let publicMajor = this.mapToPublicDto(major);
+    if (targetProfile) {
+      publicMajor = {
+        ...publicMajor,
+        displayName: targetProfile.displayName || publicMajor.displayName,
+        localizedNameAr: targetProfile.localizedNameAr || publicMajor.localizedNameAr,
+        localizedNameEn: targetProfile.localizedNameEn || publicMajor.localizedNameEn,
+        degreeLevel: targetProfile.level,
+        classificationCode: targetProfile.code || publicMajor.classificationCode,
+      };
+    }
+
     if (!this.repository.listContentSections) {
       return publicMajor;
     }
 
-    const sections = await this.repository.listContentSections(major.id);
+    const sections = await this.repository.listContentSections(major.id, {
+      profileId: targetProfile?.id,
+      publishedOnly: true,
+    });
     return {
       ...publicMajor,
       contentSections: sections.map((section) => ({

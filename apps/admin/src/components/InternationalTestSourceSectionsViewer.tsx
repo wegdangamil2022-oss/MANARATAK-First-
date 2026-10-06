@@ -57,9 +57,10 @@ interface Props {
   testId: string;
   isRtl?: boolean;
   onNamesReviewed?: () => void;
+  renderEmbeddedForm?: (sectionNum: number, sectionTitle: string, blockKey: string) => React.ReactNode;
 }
 
-export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId, isRtl = true, onNamesReviewed }) => {
+export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId, isRtl = true, onNamesReviewed, renderEmbeddedForm }) => {
   const [versions, setVersions] = useState<ImportVersion[]>([]);
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -428,8 +429,9 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
 
                 {/* Section Content Body */}
                 {isExpanded && (
-                  <div className="p-5 border-t border-gray-100 bg-white">
+                  <div className="p-5 border-t border-gray-100 bg-white space-y-6">
                     <SafeMarkdownView content={section.content} className="prose prose-sm max-w-none text-gray-800" />
+                    {renderEmbeddedForm && renderEmbeddedForm(sectionNum, section.title || '', section.blockKey)}
                   </div>
                 )}
               </div>

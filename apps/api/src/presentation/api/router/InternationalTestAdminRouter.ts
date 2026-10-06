@@ -26,14 +26,58 @@ export class InternationalTestAdminRouter {
       };
     };
 
+    const cleanOptionalEnum = <T extends Record<string, string>>(enumObj: T) =>
+      z.preprocess((val) => {
+        if (Array.isArray(val)) {
+          const cleaned = val
+            .map((v) => (typeof v === 'string' ? v.trim() : ''))
+            .filter((v) => v && v.toLowerCase() !== 'all');
+          return cleaned.length > 0 ? (cleaned.length === 1 ? cleaned[0] : cleaned) : undefined;
+        }
+        if (typeof val === 'string') {
+          const trimmed = val.trim();
+          if (!trimmed || trimmed.toLowerCase() === 'all') return undefined;
+          return trimmed;
+        }
+        return val;
+      }, z.union([z.nativeEnum(enumObj), z.array(z.nativeEnum(enumObj))]).optional());
+
+    const cleanOptionalString = () =>
+      z.preprocess((val) => {
+        if (typeof val === 'string') {
+          const trimmed = val.trim();
+          if (!trimmed || trimmed.toLowerCase() === 'all') return undefined;
+          return trimmed;
+        }
+        return val;
+      }, z.string().optional());
+
     const querySchema = z.object({
-      status: z.nativeEnum(InternationalTestStatus).optional(),
-      completenessStatus: z.nativeEnum(InternationalTestCompletenessStatus).optional(),
-      testCategory: z.nativeEnum(InternationalTestCategory).optional(),
-      providerName: z.string().optional(),
-      countryIso2Code: z.string().length(2).transform(value => value.toUpperCase()).optional(),
-      page: z.string().optional().transform((value) => value ? parseInt(value, 10) : 1),
-      pageSize: z.string().optional().transform((value) => value ? Math.min(Math.max(parseInt(value, 10), 1), 100) : 20)
+      status: cleanOptionalEnum(InternationalTestStatus),
+      completenessStatus: cleanOptionalEnum(InternationalTestCompletenessStatus),
+      testCategory: cleanOptionalEnum(InternationalTestCategory),
+      providerName: cleanOptionalString(),
+      countryIso2Code: z.preprocess((val) => {
+        if (typeof val === 'string') {
+          const trimmed = val.trim();
+          if (!trimmed || trimmed.toLowerCase() === 'all') return undefined;
+          return trimmed.toUpperCase();
+        }
+        return val;
+      }, z.string().length(2).optional()),
+      searchQuery: cleanOptionalString(),
+      q: cleanOptionalString(),
+      search: cleanOptionalString(),
+      page: z.preprocess((val) => {
+        if (typeof val === 'string' && val.trim() !== '') return parseInt(val, 10);
+        if (typeof val === 'number') return val;
+        return 1;
+      }, z.number().int().min(1).default(1)),
+      pageSize: z.preprocess((val) => {
+        if (typeof val === 'string' && val.trim() !== '') return Math.min(Math.max(parseInt(val, 10), 1), 100);
+        if (typeof val === 'number') return Math.min(Math.max(val, 1), 100);
+        return 20;
+      }, z.number().int().min(1).max(100).default(20)),
     }).strict();
 
     const referenceRelationshipSchema = z.object({
@@ -235,9 +279,11 @@ export class InternationalTestAdminRouter {
 
     router.get('/', asyncHandler(async (req: Request, res: Response) => {
       const parsed = querySchema.parse(req.query);
-      const { testCategory, completenessStatus, ...filters } = parsed;
+      const { testCategory, completenessStatus, searchQuery, q, search, ...filters } = parsed;
+      const combinedSearch = searchQuery || q || search;
       res.json(await internationalTestAdminUseCases.list({
         ...filters,
+        ...(combinedSearch ? { searchQuery: combinedSearch } : {}),
         ...(completenessStatus ? { completenessStatus } : {}),
         ...(testCategory ? { category: testCategory } : {}),
       }));
@@ -322,6 +368,12 @@ export class InternationalTestAdminRouter {
     router.post('/:id/publish', asyncHandler(async (req: Request, res: Response) => {
       emptyMutationBody.parse(req.body ?? {});
       await internationalTestAdminUseCases.publish(req.params.id, mutationContext(req));
+      res.json({ success: true });
+    }));
+
+    router.post('/:id/unpublish', asyncHandler(async (req: Request, res: Response) => {
+      emptyMutationBody.parse(req.body ?? {});
+      await internationalTestAdminUseCases.unpublish(req.params.id, mutationContext(req));
       res.json({ success: true });
     }));
 

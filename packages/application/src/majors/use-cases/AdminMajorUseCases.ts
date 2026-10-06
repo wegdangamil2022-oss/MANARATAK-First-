@@ -252,10 +252,10 @@ export class AdminMajorUseCases {
     return major;
   }
 
-  public async listVersions(id: string): Promise<MajorVersionDto[]> {
+  public async listVersions(id: string, options?: { profileId?: string }): Promise<MajorVersionDto[]> {
     if (id.startsWith('cat-')) return [];
     await this.getMajor(id);
-    return this.repository.listVersions ? this.repository.listVersions(id) : [];
+    return this.repository.listVersions ? this.repository.listVersions(id, options) : [];
   }
 
   public async listLevelProfiles(id: string): Promise<MajorLevelProfileDto[]> {
@@ -267,12 +267,71 @@ export class AdminMajorUseCases {
     return this.repository.listLevelProfiles ? this.repository.listLevelProfiles(id) : [];
   }
 
-  public async listContentSections(id: string): Promise<MajorContentSectionDto[]> {
+  public async listContentSections(
+    id: string,
+    options?: { profileId?: string; versionId?: string },
+  ): Promise<MajorContentSectionDto[]> {
     if (id.startsWith('cat-') && this.catalogRepository?.getCatalogContentSections) return this.catalogRepository.getCatalogContentSections(id) as MajorContentSectionDto[];
     const major = await this.repository.findById(id);
     if (!major && this.catalogRepository?.getCatalogContentSections) return this.catalogRepository.getCatalogContentSections(id) as MajorContentSectionDto[];
     await this.getMajor(id);
-    return this.repository.listContentSections ? this.repository.listContentSections(id) : [];
+    return this.repository.listContentSections ? this.repository.listContentSections(id, options) : [];
+  }
+
+  public async updateContentSections(
+    id: string,
+    input: {
+      profileId?: string;
+      versionId?: string;
+      sections: Array<{ id?: string; sectionKey: string; title?: string; content: string; reviewStatus?: string }>;
+    },
+    context?: AtomicMutationRequestContext,
+  ): Promise<{ success: boolean; profileId: string; versionId: string; count: number; data: MajorContentSectionDto[] }> {
+    this.assertMutableCanonicalMajorId(id);
+    if (!context?.actorId || !this.atomicMutations) throw new Error('MAJOR_CONTENT_AUDITED_ACTOR_REQUIRED');
+    const major = await this.getMajor(id);
+    if (major.status === MajorStatus.PUBLISHED || major.status === MajorStatus.ARCHIVED) {
+      throw new Error('MAJOR_PUBLISHED_STRUCTURE_IMMUTABLE');
+    }
+    const profiles = this.repository.listLevelProfiles ? await this.repository.listLevelProfiles(major.id) : [];
+
+    let targetProfile = input.profileId
+      ? profiles.find(p => p.id === input.profileId || p.code === input.profileId)
+      : undefined;
+
+    if (!targetProfile && !input.profileId && profiles.length === 1) {
+      targetProfile = profiles[0];
+    }
+    if (!targetProfile || !targetProfile.id) {
+      throw new Error('TARGET_MAJOR_PROFILE_REQUIRED');
+    }
+
+    let targetVersionId = input.versionId;
+    if (!targetVersionId) {
+      const versions = this.repository.listVersions ? await this.repository.listVersions(major.id, { profileId: targetProfile.id }) : [];
+      const profileVersions = versions
+        .filter(v => v.profileId === targetProfile.id)
+        .sort((a, b) => b.versionNumber - a.versionNumber);
+      targetVersionId = profileVersions[0]?.id;
+    }
+    if (!targetVersionId) {
+      throw new Error('NO_WORKING_VERSION_FOUND_FOR_PROFILE');
+    }
+
+    const profileId = targetProfile.id;
+    const versionId = targetVersionId;
+    const result = await this.mutate('MAJOR_CONTENT_SECTIONS_UPDATED', major.id, context, repository => {
+      if (!repository.updateContentSections) throw new Error('CONTENT_SECTION_UPDATE_NOT_SUPPORTED');
+      return repository.updateContentSections(profileId, versionId, input.sections);
+    }, { profileId, versionId, sectionCount: input.sections.length });
+
+    return {
+      success: true,
+      profileId,
+      versionId,
+      count: result.count,
+      data: result.sections,
+    };
   }
 
   public async listAliases(id: string): Promise<MajorAliasDto[]> {

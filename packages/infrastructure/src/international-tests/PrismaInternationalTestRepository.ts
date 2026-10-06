@@ -539,8 +539,11 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     const where: any = {};
     if (filters?.status) {
       if (Array.isArray(filters.status)) {
-        where.status = { in: filters.status };
-      } else {
+        const cleaned = filters.status.filter((s) => s && String(s).toLowerCase() !== 'all');
+        if (cleaned.length > 0) {
+          where.status = { in: cleaned };
+        }
+      } else if (typeof filters.status === 'string' && filters.status.trim() !== '' && filters.status.toLowerCase() !== 'all') {
         where.status = filters.status;
       }
     }
@@ -548,8 +551,11 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     const categories = filters?.category || filters?.testCategory;
     if (categories) {
       if (Array.isArray(categories)) {
-        where.testCategory = { in: categories };
-      } else {
+        const cleaned = categories.filter((c) => c && String(c).toLowerCase() !== 'all');
+        if (cleaned.length > 0) {
+          where.testCategory = { in: cleaned };
+        }
+      } else if (typeof categories === 'string' && categories.trim() !== '' && categories.toLowerCase() !== 'all') {
         where.testCategory = categories;
       }
     }

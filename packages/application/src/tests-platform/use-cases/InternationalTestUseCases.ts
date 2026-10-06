@@ -192,6 +192,13 @@ export class InternationalTestAdminUseCases {
     });
   }
 
+  public async unpublish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+    await this.get(id);
+    await this.mutate('INTERNATIONAL_TEST_UNPUBLISHED', id, context, async repository => {
+      await repository.update(id, { status: InternationalTestStatus.READY_TO_PUBLISH, isPubliclyVisible: false });
+    });
+  }
+
   public async archive(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     await this.get(id);
     await this.mutate('INTERNATIONAL_TEST_ARCHIVED', id, context, async repository => {

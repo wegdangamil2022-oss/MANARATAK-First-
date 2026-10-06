@@ -176,7 +176,10 @@ export class MajorAdminRouter {
     router.get(
       '/:id/versions',
       asyncHandler(async (req: Request, res: Response) => {
-        const versions = await adminMajorUseCases.listVersions(req.params.id);
+        const profileId = typeof req.query.profileId === 'string' ? req.query.profileId : undefined;
+        const versions = profileId
+          ? await adminMajorUseCases.listVersions(req.params.id, { profileId })
+          : await adminMajorUseCases.listVersions(req.params.id);
         res.json({ data: versions });
       }),
     );
@@ -189,11 +192,52 @@ export class MajorAdminRouter {
       }),
     );
 
+    const updateContentSectionsBodySchema = z.object({
+      profileId: z.string().optional(),
+      versionId: z.string().optional(),
+      sections: z.array(
+        z.object({
+          id: z.string().optional(),
+          sectionKey: z.string().min(1),
+          title: z.string().nullable().optional(),
+          content: z.string(),
+          reviewStatus: z.string().optional(),
+        }),
+      ),
+    });
+
     router.get(
       '/:id/content-sections',
       asyncHandler(async (req: Request, res: Response) => {
-        const sections = await adminMajorUseCases.listContentSections(req.params.id);
+        const profileId = typeof req.query.profileId === 'string' ? req.query.profileId : undefined;
+        const versionId = typeof req.query.versionId === 'string' ? req.query.versionId : undefined;
+        const sections = profileId || versionId
+          ? await adminMajorUseCases.listContentSections(req.params.id, { profileId, versionId })
+          : await adminMajorUseCases.listContentSections(req.params.id);
         res.json({ data: sections });
+      }),
+    );
+
+    router.put(
+      '/:id/content-sections',
+      asyncHandler(async (req: Request, res: Response) => {
+        const body = updateContentSectionsBodySchema.parse(req.body);
+        const result = await adminMajorUseCases.updateContentSections(
+          req.params.id,
+          {
+            profileId: body.profileId,
+            versionId: body.versionId,
+            sections: body.sections.map(s => ({
+              id: s.id,
+              sectionKey: s.sectionKey,
+              title: s.title ?? undefined,
+              content: s.content,
+              reviewStatus: s.reviewStatus,
+            })),
+          },
+          mutationContext(req),
+        );
+        res.status(200).json(result);
       }),
     );
 

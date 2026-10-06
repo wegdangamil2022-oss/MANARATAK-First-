@@ -5,7 +5,6 @@ import {
   AtomicPersistenceContext,
   MajorAliasDto,
   MajorClassificationMappingDto,
-  ReviewedMajorClassificationInput,
   MajorContentSectionDto,
   MajorDto,
   MajorFilters,
@@ -23,6 +22,7 @@ import {
   AcademicTaxonomyNodeDto,
   DegreeLevelDto,
   TaxonomyMappedMajorDto,
+  ReviewedMajorClassificationInput,
 } from '@manaratak/domain';
 
 import { queryStableCursorPage } from '../api-foundation/StableCursor';
@@ -76,8 +76,13 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       include: MAJOR_INCLUDE
     });
     if (!record) {
-      const profile = await this.prisma.majorLevelProfile.findUnique({
-        where: { id },
+      const profile = await this.prisma.majorLevelProfile.findFirst({
+        where: {
+          OR: [
+            { id },
+            { code: id },
+          ]
+        },
         select: { majorId: true }
       });
       if (profile) {
@@ -86,6 +91,12 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
           include: MAJOR_INCLUDE
         });
       }
+    }
+    if (!record) {
+      record = await this.prisma.major.findUnique({
+        where: { publicId: id },
+        include: MAJOR_INCLUDE
+      });
     }
     return record ? this.mapToDto(record) : null;
   }
@@ -335,10 +346,21 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   }
 
   async acquireVersionAllocationLock(majorId: string): Promise<void> {
-    await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${majorId}, 0))::text AS lock_result`;
+    await this.prisma.$queryRaw`
+      SELECT pg_advisory_xact_lock(hashtextextended(${majorId}, 0))::text AS lock_result
+    `;
   }
 
-  async listVersions(idOrProfileId: string): Promise<MajorVersionDto[]> {
+  async listVersions(idOrProfileId: string, options?: { profileId?: string }): Promise<MajorVersionDto[]> {
+    const resolvedProfile = await this.resolveProfile(idOrProfileId, options?.profileId);
+    if (options?.profileId && !resolvedProfile) return [];
+    if (options?.profileId && resolvedProfile) {
+      const records = await this.prisma.majorVersion.findMany({
+        where: { profileId: resolvedProfile.id },
+        orderBy: [{ versionNumber: 'desc' }, { createdAt: 'desc' }],
+      });
+      return records.map((record) => this.mapVersionToDto(record));
+    }
     const majorId = await this.resolveMajorId(idOrProfileId);
     const records = await this.prisma.majorVersion.findMany({
       where: { majorId },
@@ -474,19 +496,153 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     return { count: result.count };
   }
 
-  async listContentSections(idOrProfileId: string): Promise<MajorContentSectionDto[]> {
-    const majorId = await this.resolveMajorId(idOrProfileId);
-    const records = await this.prisma.majorContentSection.findMany({
-      where: {
-        OR: [
-          { profile: { majorId } },
-          { version: { majorId } },
-        ],
-      },
-      orderBy: [{ profileId: 'asc' }, { sectionKey: 'asc' }, { createdAt: 'asc' }],
+  async listContentSections(
+    idOrProfileId: string,
+    options?: { profileId?: string; versionId?: string; publishedOnly?: boolean }
+  ): Promise<MajorContentSectionDto[]> {
+    const resolvedProfile = await this.resolveProfile(idOrProfileId, options?.profileId);
+
+    if (resolvedProfile) {
+      const profileId = resolvedProfile.id;
+      let targetVersionId = options?.versionId;
+      if (options?.publishedOnly && (!resolvedProfile.currentPublishedVersionId ||
+        (targetVersionId && targetVersionId !== resolvedProfile.currentPublishedVersionId))) return [];
+
+      if (!targetVersionId) {
+        if (options?.publishedOnly) {
+          if (!resolvedProfile.currentPublishedVersionId) {
+            // Draft not published: do not leak drafts on public pages
+            return [];
+          }
+          targetVersionId = resolvedProfile.currentPublishedVersionId;
+        } else {
+          // Admin view: fetch latest working version for THIS profile
+          const latestVersion = await this.prisma.majorVersion.findFirst({
+            where: { profileId },
+            orderBy: [{ versionNumber: 'desc' }, { createdAt: 'desc' }],
+            select: { id: true }
+          });
+          targetVersionId = latestVersion?.id;
+        }
+      }
+
+      if (targetVersionId) {
+        const records = await this.prisma.majorContentSection.findMany({
+          where: {
+            profileId,
+            versionId: targetVersionId,
+          },
+          orderBy: [{ sectionKey: 'asc' }, { createdAt: 'asc' }],
+        });
+        return records.map((record) => this.mapContentSectionToDto(record));
+      }
+
+      const records = await this.prisma.majorContentSection.findMany({
+        where: { profileId },
+        orderBy: [{ sectionKey: 'asc' }, { createdAt: 'asc' }],
+      });
+      return records.map((record) => this.mapContentSectionToDto(record));
+    }
+
+    return [];
+  }
+
+  async updateContentSections(
+    profileId: string,
+    versionId: string,
+    sections: Array<{ id?: string; sectionKey: string; title?: string; content: string; reviewStatus?: string }>
+  ): Promise<{ count: number; sections: MajorContentSectionDto[] }> {
+    if (!this.transactionBound) throw new Error('MAJOR_CONTENT_TRANSACTION_REQUIRED');
+    const version = await this.prisma.majorVersion.findUnique({
+      where: { id: versionId },
+      include: { profile: true }
+    });
+    if (!version) {
+      throw new Error(`Version with id ${versionId} not found`);
+    }
+    if (version.profileId !== profileId || version.profile?.majorId !== version.majorId) {
+      throw new Error('MAJOR_CONTENT_FOREIGN_VERSION');
+    }
+    if (version.publishedAt || ['PUBLISHED', 'ARCHIVED', 'SUPERSEDED'].includes(version.status)
+      || ['PUBLISHED', 'ARCHIVED'].includes(version.profile.status)) {
+      throw new Error('MAJOR_CONTENT_PUBLISHED_VERSION_IMMUTABLE');
+    }
+    const sectionKeys = new Set<string>();
+    for (const sec of sections) {
+      if (!sec.sectionKey.trim() || sectionKeys.has(sec.sectionKey)) throw new Error('MAJOR_CONTENT_DUPLICATE_OR_EMPTY_SECTION_KEY');
+      if (sec.reviewStatus && !['NEEDS_REVIEW', 'COMPLETE', 'INCOMPLETE'].includes(sec.reviewStatus)) {
+        throw new Error('MAJOR_CONTENT_INVALID_REVIEW_STATUS');
+      }
+      sectionKeys.add(sec.sectionKey);
+      if (sec.id) {
+        const existing = await this.prisma.majorContentSection.findUnique({
+          where: { id: sec.id },
+          select: { profileId: true, versionId: true, sectionKey: true },
+        });
+        if (!existing || existing.profileId !== profileId || existing.versionId !== versionId || existing.sectionKey !== sec.sectionKey) {
+          throw new Error('MAJOR_CONTENT_FOREIGN_SECTION');
+        }
+      }
+    }
+
+    for (const sec of sections) {
+      if (sec.id) {
+        await this.prisma.majorContentSection.update({
+          where: { id: sec.id },
+          data: {
+            title: sec.title,
+            content: sec.content,
+            reviewStatus: sec.reviewStatus || 'NEEDS_REVIEW',
+            updatedAt: new Date(),
+          }
+        });
+      } else {
+        await this.prisma.majorContentSection.upsert({
+          where: {
+            profileId_versionId_sectionKey_locale: {
+              profileId,
+              versionId,
+              sectionKey: sec.sectionKey,
+              locale: 'ar',
+            }
+          },
+          update: {
+            title: sec.title,
+            content: sec.content,
+            reviewStatus: sec.reviewStatus || 'NEEDS_REVIEW',
+            updatedAt: new Date(),
+          },
+          create: {
+            profileId,
+            versionId,
+            sectionKey: sec.sectionKey,
+            title: sec.title,
+            content: sec.content,
+            locale: 'ar',
+            reviewStatus: sec.reviewStatus || 'NEEDS_REVIEW',
+          }
+        });
+      }
+    }
+
+    await this.prisma.majorVersion.update({
+      where: { id: versionId },
+      data: { updatedAt: new Date() }
+    });
+    await this.prisma.majorLevelProfile.update({
+      where: { id: profileId },
+      data: { updatedAt: new Date() }
     });
 
-    return records.map((record) => this.mapContentSectionToDto(record));
+    const updated = await this.prisma.majorContentSection.findMany({
+      where: { profileId, versionId },
+      orderBy: [{ sectionKey: 'asc' }],
+    });
+
+    return {
+      count: sections.length,
+      sections: updated.map(s => this.mapContentSectionToDto(s))
+    };
   }
 
   async createAliases(data: Array<Omit<MajorAliasDto, 'id'>>): Promise<{ count: number }> {
@@ -615,8 +771,6 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     const node = await this.prisma.academicTaxonomyNode.findUnique({ where: { id: input.taxonomyNodeId }, select: { id: true, status: true, standardType: true, standardCode: true } });
     if (!node || node.status !== 'ACTIVE') throw new Error('MAJOR_CANONICAL_TAXONOMY_REFERENCE_NOT_ACTIVE');
     const mappingOwner = { majorId, profileId: input.profileId ?? null };
-    // Imported profile mappings can carry both owners, while older rows can
-    // carry only profileId. Profile identity has the same meaning in either form.
     const duplicateOwner = input.profileId ? { profileId: input.profileId } : { majorId, profileId: null };
     const duplicate = await this.prisma.majorClassificationMapping.findFirst({ where: { ...duplicateOwner, taxonomyNodeId: node.id, relationshipType: input.relationshipType } });
     if (duplicate) throw new Error('MAJOR_GRAPH_DUPLICATE_MAPPING');
@@ -677,14 +831,65 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     if (majorCount > 0) {
       return id;
     }
-    const profile = await this.prisma.majorLevelProfile.findUnique({
-      where: { id },
+    const profile = await this.prisma.majorLevelProfile.findFirst({
+      where: {
+        OR: [
+          { id },
+          { code: id },
+        ]
+      },
       select: { majorId: true }
     });
     if (profile) {
       return profile.majorId;
     }
+    const majorByPublicId = await this.prisma.major.findUnique({
+      where: { publicId: id },
+      select: { id: true }
+    });
+    if (majorByPublicId) {
+      return majorByPublicId.id;
+    }
     return id;
+  }
+
+  private async resolveProfile(idOrProfileId: string, optionsProfileId?: string): Promise<{ id: string; majorId: string; level: string; code: string | null; currentPublishedVersionId: string | null } | null> {
+    if (optionsProfileId) {
+      const majorId = await this.resolveMajorId(idOrProfileId);
+      const p = await this.prisma.majorLevelProfile.findFirst({
+        where: {
+          majorId,
+          OR: [
+            { id: optionsProfileId },
+            { code: optionsProfileId },
+          ]
+        },
+        select: { id: true, majorId: true, level: true, code: true, currentPublishedVersionId: true }
+      });
+      return p;
+    }
+
+    const directProfile = await this.prisma.majorLevelProfile.findFirst({
+      where: {
+        OR: [
+          { id: idOrProfileId },
+          { code: idOrProfileId },
+        ]
+      },
+      select: { id: true, majorId: true, level: true, code: true, currentPublishedVersionId: true }
+    });
+    if (directProfile) return directProfile;
+
+    const majorId = await this.resolveMajorId(idOrProfileId);
+    const profiles = await this.prisma.majorLevelProfile.findMany({
+      where: { majorId },
+      orderBy: [{ level: 'asc' }, { createdAt: 'desc' }],
+      select: { id: true, majorId: true, level: true, code: true, currentPublishedVersionId: true }
+    });
+    if (profiles.length > 0) {
+      return profiles[0];
+    }
+    return null;
   }
 
   private mapToDto(record: any): MajorDto {

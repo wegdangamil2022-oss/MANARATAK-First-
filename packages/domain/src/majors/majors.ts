@@ -471,12 +471,13 @@ export interface IMajorRepository {
   createVersion?(data: Omit<MajorVersionDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<MajorVersionDto>;
   /** Serializes version-number allocation for one Major inside the active transaction. */
   acquireVersionAllocationLock?(majorId: string): Promise<void>;
-  listVersions?(majorId: string): Promise<MajorVersionDto[]>;
+  listVersions?(majorId: string, options?: { profileId?: string }): Promise<MajorVersionDto[]>;
   createLevelProfile?(data: Omit<MajorLevelProfileDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<MajorLevelProfileDto>;
   findLevelProfile?(majorId: string, level: MajorLevel, code?: string): Promise<MajorLevelProfileDto | null>;
   listLevelProfiles?(majorId: string): Promise<MajorLevelProfileDto[]>;
   createContentSections?(data: Array<Omit<MajorContentSectionDto, 'id'>>): Promise<{ count: number }>;
-  listContentSections?(majorId: string): Promise<MajorContentSectionDto[]>;
+  listContentSections?(majorId: string, options?: { profileId?: string; versionId?: string; publishedOnly?: boolean }): Promise<MajorContentSectionDto[]>;
+  updateContentSections?(profileId: string, versionId: string, sections: Array<{ id?: string; sectionKey: string; title?: string; content: string; reviewStatus?: string }>): Promise<{ count: number; sections: MajorContentSectionDto[] }>;
   createAliases?(data: Array<Omit<MajorAliasDto, 'id'>>): Promise<{ count: number }>;
   listAliases?(majorId: string): Promise<MajorAliasDto[]>;
   createRelationships?(data: Array<Omit<MajorRelationshipDto, 'id'>>): Promise<{ count: number }>;

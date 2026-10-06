@@ -306,7 +306,17 @@ export const adminApiClient = {
   request: adminRequest,
 
   listInternationalTests(params?: Record<string, string>) {
-    const searchParams = new URLSearchParams(params);
+    const searchParams = new URLSearchParams();
+    if (params) {
+      for (const [key, val] of Object.entries(params)) {
+        if (val !== undefined && val !== null) {
+          const str = String(val).trim();
+          if (!str) continue;
+          if ((key === 'status' || key === 'testCategory') && str.toLowerCase() === 'all') continue;
+          searchParams.append(key, str);
+        }
+      }
+    }
     const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
     return adminRequest<unknown>(`/admin/international-tests${query}`);
   },
@@ -412,6 +422,12 @@ export const adminApiClient = {
 
   publishInternationalTest(testId: string) {
     return adminRequest<unknown>(`/admin/international-tests/${testId}/publish`, {
+      method: 'POST',
+    });
+  },
+
+  unpublishInternationalTest(testId: string) {
+    return adminRequest<unknown>(`/admin/international-tests/${testId}/unpublish`, {
       method: 'POST',
     });
   },
