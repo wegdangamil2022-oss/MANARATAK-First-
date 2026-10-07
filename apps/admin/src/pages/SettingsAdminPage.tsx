@@ -1,7 +1,18 @@
-import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Database, History, KeyRound, Loader2, Plus, RefreshCw, Save, Settings2, ShieldCheck, SlidersHorizontal } from 'lucide-react';
-import { adminApiClient } from '../api/client';
+import {
+  Database,
+  History,
+  KeyRound,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Save,
+  Settings2,
+  ShieldCheck,
+  SlidersHorizontal,
+} from 'lucide-react';
+import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
 type ValueType = 'String' | 'Number' | 'Boolean' | 'Json';
@@ -38,7 +49,7 @@ interface Assignment {
 }
 
 function safeId(prefix: string) {
-  return `${prefix}-${crypto.randomUUID()}`;
+  return `${prefix}-${createAdminIdempotencyKey()}`;
 }
 
 function displayValue(value: unknown): string {
@@ -58,111 +69,355 @@ export function SettingsAdminPage() {
   const [activeTab, setActiveTab] = useState<'definitions' | 'assignments'>('definitions');
   const [selectedHistory, setSelectedHistory] = useState<Assignment | null>(null);
 
-  const [definitionForm, setDefinitionForm] = useState({ key: '', valueType: 'String' as ValueType, description: '', defaultValue: '', isFeatureFlag: false, isSecret: false });
-  const [assignmentForm, setAssignmentForm] = useState({ key: '', level: 'GLOBAL' as ScopeLevel, scopeId: '', value: '' });
+  const [definitionForm, setDefinitionForm] = useState({
+    key: '',
+    valueType: 'String' as ValueType,
+    description: '',
+    defaultValue: '',
+    isFeatureFlag: false,
+    isSecret: false,
+  });
+  const [assignmentForm, setAssignmentForm] = useState({
+    key: '',
+    level: 'GLOBAL' as ScopeLevel,
+    scopeId: '',
+    value: '',
+  });
+
+  const [notice, setNotice] = useState('');
+  const [loadErrors, setLoadErrors] = useState<string[]>([]);
+  const [ready, setReady] = useState(false);
+  const [search, setSearch] = useState('');
+  const [classification, setClassification] = useState('ALL');
+  const [scopeFilter, setScopeFilter] = useState('ALL');
+  const generation = useRef(0);
+  const busy = useRef(false);
+  const refreshing = useRef(false);
+  const commands = useRef(
+    new Map<
+      string,
+      { key: string; definitionId: string; assignmentId: string; versionId: string }
+    >(),
+  );
+  const historyPanel = useRef<HTMLDivElement>(null);
 
   const refresh = async () => {
+    const request = ++generation.current;
+    refreshing.current = true;
     setLoading(true);
-    setError(null);
-    try {
-      const [definitionRes, assignmentRes] = await Promise.all([
-        adminApiClient.request<{ data: { definitions: Definition[] } }>('/admin/settings/definitions'),
-        adminApiClient.request<{ data: { assignments: Assignment[] } }>('/admin/settings/assignments'),
-      ]);
-      setDefinitions(definitionRes.data.definitions ?? []);
-      setAssignments(assignmentRes.data.assignments ?? []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : (isAr ? 'تعذر تحميل الإعدادات.' : 'Unable to load settings.'));
-    } finally {
-      setLoading(false);
+    setReady(false);
+    const results = await Promise.allSettled([
+      adminApiClient.request<{ data: { definitions: Definition[] } }>(
+        '/admin/settings/definitions',
+        { cache: 'no-store' },
+      ),
+      adminApiClient.request<{ data: { assignments: Assignment[] } }>(
+        '/admin/settings/assignments',
+        { cache: 'no-store' },
+      ),
+    ]);
+    if (request !== generation.current) return;
+    const failures: string[] = [];
+    const [definitionResult, assignmentResult] = results;
+    if (
+      definitionResult.status === 'fulfilled' &&
+      Array.isArray(definitionResult.value.data?.definitions)
+    )
+      setDefinitions(definitionResult.value.data.definitions);
+    else {
+      setDefinitions([]);
+      failures.push(
+        `${isAr ? 'التعريفات' : 'Definitions'}: ${definitionResult.status === 'rejected' ? errorText(definitionResult.reason) : 'Invalid response'}`,
+      );
     }
+    if (
+      assignmentResult.status === 'fulfilled' &&
+      Array.isArray(assignmentResult.value.data?.assignments)
+    ) {
+      const values = assignmentResult.value.data.assignments;
+      setAssignments(values);
+      setSelectedHistory((previous) =>
+        previous ? (values.find((item) => item.id === previous.id) ?? null) : null,
+      );
+    } else {
+      setAssignments([]);
+      setSelectedHistory(null);
+      failures.push(
+        `${isAr ? 'القيم' : 'Values'}: ${assignmentResult.status === 'rejected' ? errorText(assignmentResult.reason) : 'Invalid response'}`,
+      );
+    }
+    setLoadErrors(failures);
+    setReady(!failures.length);
+    setLoading(false);
+    refreshing.current = false;
   };
 
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    void refresh();
+    return () => {
+      generation.current += 1;
+      refreshing.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!selectedHistory) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    historyPanel.current?.focus();
+    const handler = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !busy.current) setSelectedHistory(null);
+      if (event.key !== 'Tab') return;
+      const controls = historyPanel.current?.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
+      );
+      if (!controls?.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || document.activeElement === historyPanel.current)
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === last || document.activeElement === historyPanel.current)
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handler);
+      previousFocus?.focus();
+    };
+  }, [selectedHistory?.id]);
 
-  const selectedDefinition = useMemo(() => definitions.find((item) => item.key === assignmentForm.key), [definitions, assignmentForm.key]);
-  const writableDefinitions = useMemo(() => definitions.filter((item) => !item.isSecret && !item.isDeprecated), [definitions]);
+  const matched = (key: string, other = '') =>
+    `${key} ${other}`.toLowerCase().includes(search.trim().toLowerCase());
+  const filteredDefinitions = definitions.filter(
+    (item) =>
+      matched(item.key, item.description) &&
+      (classification === 'ALL' ||
+        (classification === 'SECRET'
+          ? item.isSecret
+          : classification === 'DEPRECATED'
+            ? item.isDeprecated
+            : classification === 'FLAG'
+              ? item.isFeatureFlag
+              : !item.isFeatureFlag && !item.isSecret && !item.isDeprecated)),
+  );
+  const filteredAssignments = assignments.filter(
+    (item) =>
+      matched(item.key, `${item.scopeId || ''} ${item.level}`) &&
+      (scopeFilter === 'ALL' || item.level === scopeFilter),
+  );
+  const canRestore = (key: string) =>
+    ready && definitions.some((item) => item.key === key && !item.isSecret && !item.isDeprecated);
+  const selectedAssignment = assignments.find(
+    (item) =>
+      item.key === assignmentForm.key &&
+      item.level === assignmentForm.level &&
+      (item.scopeId || '') ===
+        (assignmentForm.level === 'GLOBAL' ? '' : assignmentForm.scopeId.trim()),
+  );
+  const editAssignment = (item: Assignment) => {
+    if (busy.current) return;
+    if (
+      assignmentForm.value &&
+      !window.confirm(
+        isAr
+          ? 'استبدال الإدخال غير المحفوظ بالقيمة المختارة؟'
+          : 'Replace the unsaved input with this value?',
+      )
+    )
+      return;
+    setAssignmentForm({
+      key: item.key,
+      level: item.level,
+      scopeId: item.scopeId || '',
+      value:
+        typeof item.currentValue === 'string'
+          ? item.currentValue
+          : JSON.stringify(item.currentValue),
+    });
+    setActiveTab('assignments');
+    setNotice(
+      isAr
+        ? 'تم تحميل القيمة الحالية للتحرير؛ اضغط حفظ لإنشاء نسخة جديدة.'
+        : 'Current value loaded for editing; save to create a new version.',
+    );
+  };
+  const selectedDefinition = useMemo(
+    () => definitions.find((item) => item.key === assignmentForm.key),
+    [definitions, assignmentForm.key],
+  );
+  const writableDefinitions = useMemo(
+    () => definitions.filter((item) => !item.isSecret && !item.isDeprecated),
+    [definitions],
+  );
 
   const parseValue = (type: ValueType, raw: string): unknown => {
     if (type === 'String') return raw;
     if (type === 'Number') {
+      if (!raw.trim()) throw new Error(isAr ? 'أدخل قيمة رقمية.' : 'Enter a numeric value.');
       const value = Number(raw);
-      if (!Number.isFinite(value)) throw new Error(isAr ? 'القيمة الرقمية غير صالحة.' : 'Invalid numeric value.');
+      if (!Number.isFinite(value))
+        throw new Error(isAr ? 'القيمة الرقمية غير صالحة.' : 'Invalid numeric value.');
       return value;
     }
-    if (type === 'Boolean') return raw === 'true';
-    const parsed = JSON.parse(raw || '{}');
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error(isAr ? 'قيمة JSON يجب أن تكون كائنًا.' : 'JSON value must be an object.');
+    if (type === 'Boolean') {
+      if (raw !== 'true' && raw !== 'false')
+        throw new Error(isAr ? 'اختر true أو false.' : 'Choose true or false.');
+      return raw === 'true';
+    }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+      throw new Error(isAr ? 'قيمة JSON يجب أن تكون كائنًا.' : 'JSON value must be an object.');
     return parsed;
   };
 
-  const createDefinition = async (event: FormEvent) => {
-    event.preventDefault();
+  const saveCommand = async (
+    operation: 'definition' | 'assignment' | 'rollback',
+    payload: Record<string, unknown>,
+    complete: () => void,
+  ) => {
+    if (busy.current || refreshing.current || !ready) return;
+    const signature = JSON.stringify([operation, payload]);
+    let command = commands.current.get(signature);
+    if (!command) {
+      command = {
+        key: createAdminIdempotencyKey(),
+        definitionId: safeId('setting-def'),
+        assignmentId: safeId('setting-assignment'),
+        versionId: safeId('setting-version'),
+      };
+      commands.current.set(signature, command);
+    }
+    busy.current = true;
     setSaving(true);
     setError(null);
+    setNotice('');
     try {
-      const defaultValue = definitionForm.isSecret || definitionForm.defaultValue === ''
-        ? undefined
-        : parseValue(definitionForm.valueType, definitionForm.defaultValue);
-      await adminApiClient.request('/admin/settings/definitions', {
+      const body = {
+        ...payload,
+        ...(operation === 'definition'
+          ? { id: command.definitionId }
+          : operation === 'assignment'
+            ? {
+                assignmentId: selectedAssignment?.id ?? command.assignmentId,
+                versionId: command.versionId,
+              }
+            : { newVersionId: command.versionId }),
+      };
+      const endpoint =
+        operation === 'definition'
+          ? '/admin/settings/definitions'
+          : operation === 'assignment'
+            ? '/admin/settings/assignments'
+            : '/admin/settings/assignments/rollback';
+      await adminApiClient.request(endpoint, {
         method: 'POST',
-        body: JSON.stringify({
-          id: safeId('setting-def'),
+        idempotencyKey: command.key,
+        body: JSON.stringify(body),
+      });
+      commands.current.delete(signature);
+      complete();
+      setNotice(
+        isAr
+          ? 'تم الحفظ؛ أُعيد طلب القيم من الخادم.'
+          : 'Saved; current values were requested again from the server.',
+      );
+      await refresh();
+    } catch (cause) {
+      setError(errorText(cause));
+    } finally {
+      busy.current = false;
+      setSaving(false);
+    }
+  };
+  const createDefinition = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      if (!/^[a-zA-Z0-9_\-.]+$/.test(definitionForm.key.trim()))
+        throw new Error(isAr ? 'مفتاح الإعداد غير صالح.' : 'Invalid setting key.');
+      const defaultValue =
+        definitionForm.isSecret || definitionForm.defaultValue === ''
+          ? undefined
+          : parseValue(definitionForm.valueType, definitionForm.defaultValue);
+      await saveCommand(
+        'definition',
+        {
           key: definitionForm.key.trim(),
           valueType: definitionForm.valueType,
           description: definitionForm.description.trim() || undefined,
           defaultValue,
           isFeatureFlag: definitionForm.isFeatureFlag,
           isSecret: definitionForm.isSecret,
-        }),
-      });
-      setDefinitionForm({ key: '', valueType: 'String', description: '', defaultValue: '', isFeatureFlag: false, isSecret: false });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : (isAr ? 'فشل إنشاء تعريف الإعداد.' : 'Failed to create setting definition.'));
-    } finally { setSaving(false); }
+        },
+        () =>
+          setDefinitionForm({
+            key: '',
+            valueType: 'String',
+            description: '',
+            defaultValue: '',
+            isFeatureFlag: false,
+            isSecret: false,
+          }),
+      );
+    } catch (cause) {
+      setError(errorText(cause));
+    }
   };
-
   const assignValue = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selectedDefinition) return;
-    setSaving(true);
-    setError(null);
+    if (!selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated)
+      return;
     try {
-      await adminApiClient.request('/admin/settings/assignments', {
-        method: 'POST',
-        body: JSON.stringify({
-          assignmentId: safeId('setting-assignment'),
+      if (assignmentForm.level !== 'GLOBAL' && !assignmentForm.scopeId.trim())
+        throw new Error(isAr ? 'أدخل معرّف النطاق.' : 'Enter the scope identifier.');
+      await saveCommand(
+        'assignment',
+        {
           key: selectedDefinition.key,
           level: assignmentForm.level,
           scopeId: assignmentForm.level === 'GLOBAL' ? undefined : assignmentForm.scopeId.trim(),
-          versionId: safeId('setting-version'),
           value: parseValue(selectedDefinition.valueType, assignmentForm.value),
           type: selectedDefinition.valueType,
-        }),
-      });
-      setAssignmentForm((current) => ({ ...current, value: '' }));
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : (isAr ? 'فشل حفظ قيمة الإعداد.' : 'Failed to save setting value.'));
-    } finally { setSaving(false); }
+          expectedCurrentVersionId: selectedAssignment?.currentVersionId ?? null,
+        },
+        () => setAssignmentForm((current) => ({ ...current, value: '' })),
+      );
+    } catch (cause) {
+      setError(errorText(cause));
+    }
   };
-
   const rollback = async (assignment: Assignment, version: Version) => {
-    if (version.id === assignment.currentVersionId) return;
-    if (!window.confirm(isAr ? 'إنشاء نسخة جديدة مبنية على هذه النسخة التاريخية؟' : 'Create a new version from this historical version?')) return;
-    setSaving(true);
-    setError(null);
-    try {
-      await adminApiClient.request('/admin/settings/assignments/rollback', {
-        method: 'POST',
-        body: JSON.stringify({ assignmentId: assignment.id, previousVersionId: version.id, newVersionId: safeId('setting-version') }),
-      });
-      await refresh();
-      setSelectedHistory(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : (isAr ? 'فشل التراجع.' : 'Rollback failed.'));
-    } finally { setSaving(false); }
+    if (busy.current || !canRestore(assignment.key) || version.id === assignment.currentVersionId)
+      return;
+    if (
+      !window.confirm(
+        isAr
+          ? 'إنشاء نسخة جديدة مبنية على هذه النسخة التاريخية؟'
+          : 'Create a new version from this historical version?',
+      )
+    )
+      return;
+    await saveCommand(
+      'rollback',
+      {
+        assignmentId: assignment.id,
+        previousVersionId: version.id,
+        expectedCurrentVersionId: assignment.currentVersionId,
+      },
+      () => setSelectedHistory(null),
+    );
   };
 
   return (
@@ -174,9 +429,15 @@ export function SettingsAdminPage() {
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
               <Settings2 className="h-4 w-4 text-[#21A7B4]" />
-              <span>{isAr ? 'حوكمة إعدادات المنصة ومفاتيح الميزات' : 'Platform configuration governance'}</span>
+              <span>
+                {isAr
+                  ? 'حوكمة إعدادات المنصة ومفاتيح الميزات'
+                  : 'Platform configuration governance'}
+              </span>
             </div>
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">{isAr ? 'إعدادات المنصة' : 'Settings'}</h1>
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
+              {isAr ? 'إعدادات المنصة' : 'Settings'}
+            </h1>
             <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
               {isAr
                 ? 'تعريفات إعدادات ديناميكية، قيم متدرجة حسب النطاق، سجل نسخ غير قابل للتعديل، وFeature Flags.'
@@ -184,8 +445,12 @@ export function SettingsAdminPage() {
             </p>
           </div>
           <button
-            onClick={() => void refresh()}
-            disabled={loading}
+            onClick={() => {
+              setError(null);
+              setNotice('');
+              void refresh();
+            }}
+            disabled={loading || saving}
             className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] shrink-0"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -195,68 +460,607 @@ export function SettingsAdminPage() {
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Boundary icon={<ShieldCheck />} title={isAr ? 'RBAC منفصل' : 'RBAC is separate'} text={isAr ? 'المستخدمون والأدوار والصلاحيات يملكها IAM/Authorization، وليس Settings.' : 'Users, roles and permissions belong to IAM/Authorization, not Settings.'} />
-        <Boundary icon={<KeyRound />} title={isAr ? 'لا أسرار في قاعدة الإعدادات' : 'No secrets in Settings DB'} text={isAr ? 'API Keys وكلمات المرور والشهادات تُحقن من Secret Provider/Environment فقط.' : 'API keys, passwords and certificates come only from the approved secret provider/environment.'} />
-        <Link to="/settings/reference-data" className="rounded-2xl border border-[#D6A43B]/30 bg-[#D6A43B]/10 p-5 transition hover:border-[#D6A43B]/60">
-          <Database className="h-6 w-6 text-[#142B5F]" /><h2 className="mt-3 font-black text-[#142B5F]">{isAr ? 'البيانات المرجعية' : 'Reference Data'}</h2><p className="mt-1 text-xs font-semibold leading-6 text-slate-500">{isAr ? 'الدول والعملات واللغات والمدن تبقى في Reference Data، وليست إعدادات نصية.' : 'Countries, currencies, languages and cities remain owned by Reference Data.'}</p>
+        <Boundary
+          icon={<ShieldCheck />}
+          title={isAr ? 'RBAC منفصل' : 'RBAC is separate'}
+          text={
+            isAr
+              ? 'المستخدمون والأدوار والصلاحيات يملكها IAM/Authorization، وليس Settings.'
+              : 'Users, roles and permissions belong to IAM/Authorization, not Settings.'
+          }
+        />
+        <Boundary
+          icon={<KeyRound />}
+          title={isAr ? 'لا أسرار في قاعدة الإعدادات' : 'No secrets in Settings DB'}
+          text={
+            isAr
+              ? 'API Keys وكلمات المرور والشهادات تُحقن من Secret Provider/Environment فقط.'
+              : 'API keys, passwords and certificates come only from the approved secret provider/environment.'
+          }
+        />
+        <Link
+          to="/settings/reference-data"
+          className="rounded-2xl border border-[#D6A43B]/30 bg-[#D6A43B]/10 p-5 transition hover:border-[#D6A43B]/60"
+        >
+          <Database className="h-6 w-6 text-[#142B5F]" />
+          <h2 className="mt-3 font-black text-[#142B5F]">
+            {isAr ? 'البيانات المرجعية' : 'Reference Data'}
+          </h2>
+          <p className="mt-1 text-xs font-semibold leading-6 text-slate-500">
+            {isAr
+              ? 'الدول والعملات واللغات والمدن تبقى في Reference Data، وليست إعدادات نصية.'
+              : 'Countries, currencies, languages and cities remain owned by Reference Data.'}
+          </p>
         </Link>
       </div>
 
-      {error ? <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div> : null}
+      {notice && (
+        <div
+          role="status"
+          className="rounded-2xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800"
+        >
+          {notice}
+        </div>
+      )}
+      {loadErrors.length > 0 && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
+        >
+          <p>
+            {isAr
+              ? 'تعذر تحميل بعض المصادر؛ لا تعني القائمة الفارغة عدم وجود إعدادات.'
+              : 'Some sources could not be loaded; an empty list does not prove there are no settings.'}
+          </p>
+          <ul>
+            {loadErrors.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {error ? (
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700"
+        >
+          {error}
+        </div>
+      ) : null}
 
       <div className="flex w-fit gap-1 rounded-2xl border border-[#0E7C86]/10 bg-[#DDEFF2]/35 p-1.5">
-        <Tab active={activeTab === 'definitions'} onClick={() => setActiveTab('definitions')}>{isAr ? 'التعريفات' : 'Definitions'}</Tab>
-        <Tab active={activeTab === 'assignments'} onClick={() => setActiveTab('assignments')}>{isAr ? 'القيم وسجل النسخ' : 'Values & History'}</Tab>
+        <Tab active={activeTab === 'definitions'} onClick={() => setActiveTab('definitions')}>
+          {isAr ? 'التعريفات' : 'Definitions'}
+        </Tab>
+        <Tab active={activeTab === 'assignments'} onClick={() => setActiveTab('assignments')}>
+          {isAr ? 'القيم وسجل النسخ' : 'Values & History'}
+        </Tab>
       </div>
 
-      {loading ? <div className="flex min-h-52 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#0E7C86]" /></div> : activeTab === 'definitions' ? (
+      <section className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-3">
+        <Field
+          label={isAr ? 'بحث المفتاح والوصف ومعرف النطاق' : 'Search key, description and scope'}
+        >
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="input"
+          />
+        </Field>
+        <Field label={isAr ? 'تصنيف التعريفات' : 'Definition class'}>
+          <select
+            value={classification}
+            onChange={(event) => setClassification(event.target.value)}
+            className="input"
+          >
+            <option value="ALL">{isAr ? 'الكل' : 'All'}</option>
+            <option value="SETTING">{isAr ? 'إعدادات عادية' : 'Settings'}</option>
+            <option value="FLAG">Feature Flags</option>
+            <option value="SECRET">{isAr ? 'مراجع الأسرار' : 'Secret references'}</option>
+            <option value="DEPRECATED">{isAr ? 'متوقفة' : 'Deprecated'}</option>
+          </select>
+        </Field>
+        <Field label={isAr ? 'نطاق القيم' : 'Value scope'}>
+          <select
+            value={scopeFilter}
+            onChange={(event) => setScopeFilter(event.target.value)}
+            className="input"
+          >
+            <option value="ALL">{isAr ? 'كل النطاقات' : 'All scopes'}</option>
+            {['GLOBAL', 'DOMAIN', 'TENANT', 'IDENTITY'].map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </section>
+      {loading ? (
+        <div className="flex min-h-52 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[#0E7C86]" />
+        </div>
+      ) : activeTab === 'definitions' ? (
         <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-100 px-5 py-4"><h2 className="font-black text-[#142B5F]">{isAr ? 'تعريفات الإعدادات' : 'Setting Definitions'}</h2><p className="mt-1 text-xs font-semibold text-slate-500">{definitions.length} {isAr ? 'تعريفًا مسجلًا' : 'registered definitions'}</p></div>
-            {definitions.length === 0 ? <Empty text={isAr ? 'لا توجد تعريفات إعدادات بعد.' : 'No setting definitions yet.'} /> : <div className="overflow-x-auto"><table className="w-full text-xs"><thead className="bg-slate-50 text-slate-600"><tr><Th>{isAr ? 'المفتاح' : 'Key'}</Th><Th>{isAr ? 'النوع' : 'Type'}</Th><Th>{isAr ? 'التصنيف' : 'Classification'}</Th><Th>{isAr ? 'القيمة الافتراضية' : 'Default'}</Th></tr></thead><tbody className="divide-y divide-slate-100">{definitions.map((item) => <tr key={item.id}><Td mono>{item.key}</Td><Td>{item.valueType}</Td><Td><span className={`rounded-lg border px-2 py-1 font-black ${item.isSecret ? 'border-amber-200 bg-amber-50 text-amber-800' : item.isFeatureFlag ? 'border-[#0E7C86]/20 bg-[#DDEFF2]/50 text-[#142B5F]' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>{item.isSecret ? (isAr ? 'مرجع سر خارجي' : 'External secret ref') : item.isFeatureFlag ? 'Feature Flag' : (isAr ? 'إعداد' : 'Setting')}</span></Td><Td mono>{item.isSecret ? '••••••••' : displayValue(item.defaultValue)}</Td></tr>)}</tbody></table></div>}
+            <div className="border-b border-slate-100 px-5 py-4">
+              <h2 className="font-black text-[#142B5F]">
+                {isAr ? 'تعريفات الإعدادات' : 'Setting Definitions'}
+              </h2>
+              <p className="mt-1 text-xs font-semibold text-slate-500">
+                {filteredDefinitions.length} / {definitions.length}{' '}
+                {isAr ? 'تعريفًا مسجلًا' : 'registered definitions'}
+              </p>
+            </div>
+            {filteredDefinitions.length === 0 ? (
+              <Empty
+                text={
+                  isAr
+                    ? 'لا توجد تعريفات مطابقة ضمن البيانات المحمّلة.'
+                    : 'No matching definitions in loaded data.'
+                }
+              />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                      <Th>{isAr ? 'المفتاح' : 'Key'}</Th>
+                      <Th>{isAr ? 'النوع' : 'Type'}</Th>
+                      <Th>{isAr ? 'التصنيف' : 'Classification'}</Th>
+                      <Th>{isAr ? 'القيمة الافتراضية' : 'Default'}</Th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredDefinitions.map((item) => (
+                      <tr key={item.id}>
+                        <Td mono>{item.key}</Td>
+                        <Td>{item.valueType}</Td>
+                        <Td>
+                          <span
+                            className={`rounded-lg border px-2 py-1 font-black ${item.isSecret ? 'border-amber-200 bg-amber-50 text-amber-800' : item.isFeatureFlag ? 'border-[#0E7C86]/20 bg-[#DDEFF2]/50 text-[#142B5F]' : 'border-slate-200 bg-slate-50 text-slate-600'}`}
+                          >
+                            {item.isSecret
+                              ? isAr
+                                ? 'مرجع سر خارجي'
+                                : 'External secret ref'
+                              : item.isFeatureFlag
+                                ? 'Feature Flag'
+                                : isAr
+                                  ? 'إعداد'
+                                  : 'Setting'}
+                          </span>
+                        </Td>
+                        <Td mono>{item.isSecret ? '••••••••' : displayValue(item.defaultValue)}</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
 
-          <form onSubmit={createDefinition} className="h-fit rounded-2xl border border-[#0E7C86]/15 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2 font-black text-[#142B5F]"><Plus className="h-4 w-4" />{isAr ? 'تعريف إعداد' : 'Create Definition'}</div>
-            <div className="mt-4 space-y-4">
-              <Field label={isAr ? 'المفتاح namespaced' : 'Namespaced key'}><input required value={definitionForm.key} onChange={(e) => setDefinitionForm((f) => ({ ...f, key: e.target.value }))} placeholder="platform.feature.enabled" className="input" dir="ltr" /></Field>
-              <Field label={isAr ? 'نوع القيمة' : 'Value type'}><select value={definitionForm.valueType} onChange={(e) => setDefinitionForm((f) => ({ ...f, valueType: e.target.value as ValueType, defaultValue: '' }))} className="input"><option>String</option><option>Number</option><option>Boolean</option><option>Json</option></select></Field>
-              <Field label={isAr ? 'الوصف' : 'Description'}><textarea value={definitionForm.description} onChange={(e) => setDefinitionForm((f) => ({ ...f, description: e.target.value }))} rows={2} className="input" /></Field>
-              {!definitionForm.isSecret ? <Field label={isAr ? 'القيمة الافتراضية (اختيارية)' : 'Default value (optional)'}>{definitionForm.valueType === 'Boolean' ? <select value={definitionForm.defaultValue} onChange={(e) => setDefinitionForm((f) => ({ ...f, defaultValue: e.target.value }))} className="input"><option value="">—</option><option value="true">true</option><option value="false">false</option></select> : <textarea value={definitionForm.defaultValue} onChange={(e) => setDefinitionForm((f) => ({ ...f, defaultValue: e.target.value }))} rows={definitionForm.valueType === 'Json' ? 4 : 1} className="input font-mono text-xs" dir="ltr" />}</Field> : null}
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700"><input type="checkbox" checked={definitionForm.isFeatureFlag} onChange={(e) => setDefinitionForm((f) => ({ ...f, isFeatureFlag: e.target.checked }))} /> Feature Flag</label>
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700"><input type="checkbox" checked={definitionForm.isSecret} onChange={(e) => setDefinitionForm((f) => ({ ...f, isSecret: e.target.checked, defaultValue: '' }))} /> {isAr ? 'تعريف حساس — القيمة من Secret Provider فقط' : 'Sensitive definition — value comes only from Secret Provider'}</label>
-              <button disabled={saving} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"><Save className="h-4 w-4" />{isAr ? 'حفظ التعريف' : 'Save Definition'}</button>
+          <form
+            onSubmit={createDefinition}
+            className="h-fit rounded-2xl border border-[#0E7C86]/15 bg-white p-5 shadow-sm"
+          >
+            <div className="flex items-center gap-2 font-black text-[#142B5F]">
+              <Plus className="h-4 w-4" />
+              {isAr ? 'تعريف إعداد' : 'Create Definition'}
             </div>
+            <fieldset
+              disabled={saving || !ready}
+              className="mt-4 min-w-0 space-y-4 disabled:opacity-60"
+            >
+              <Field label={isAr ? 'المفتاح namespaced' : 'Namespaced key'}>
+                <input
+                  required
+                  maxLength={240}
+                  value={definitionForm.key}
+                  onChange={(e) => setDefinitionForm((f) => ({ ...f, key: e.target.value }))}
+                  placeholder="platform.feature.enabled"
+                  className="input"
+                  dir="ltr"
+                />
+              </Field>
+              <Field label={isAr ? 'نوع القيمة' : 'Value type'}>
+                <select
+                  disabled={definitionForm.isFeatureFlag}
+                  value={definitionForm.valueType}
+                  onChange={(e) =>
+                    setDefinitionForm((f) => ({
+                      ...f,
+                      valueType: e.target.value as ValueType,
+                      defaultValue: '',
+                    }))
+                  }
+                  className="input"
+                >
+                  <option>String</option>
+                  <option>Number</option>
+                  <option>Boolean</option>
+                  <option>Json</option>
+                </select>
+              </Field>
+              <Field label={isAr ? 'الوصف' : 'Description'}>
+                <textarea
+                  maxLength={2000}
+                  value={definitionForm.description}
+                  onChange={(e) =>
+                    setDefinitionForm((f) => ({ ...f, description: e.target.value }))
+                  }
+                  rows={2}
+                  className="input"
+                />
+              </Field>
+              {!definitionForm.isSecret ? (
+                <Field label={isAr ? 'القيمة الافتراضية (اختيارية)' : 'Default value (optional)'}>
+                  {definitionForm.valueType === 'Boolean' ? (
+                    <select
+                      value={definitionForm.defaultValue}
+                      onChange={(e) =>
+                        setDefinitionForm((f) => ({ ...f, defaultValue: e.target.value }))
+                      }
+                      className="input"
+                    >
+                      <option value="">—</option>
+                      <option value="true">true</option>
+                      <option value="false">false</option>
+                    </select>
+                  ) : (
+                    <textarea
+                      value={definitionForm.defaultValue}
+                      onChange={(e) =>
+                        setDefinitionForm((f) => ({ ...f, defaultValue: e.target.value }))
+                      }
+                      rows={definitionForm.valueType === 'Json' ? 4 : 1}
+                      className="input font-mono text-xs"
+                      dir="ltr"
+                    />
+                  )}
+                </Field>
+              ) : null}
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={definitionForm.isFeatureFlag}
+                  onChange={(e) =>
+                    setDefinitionForm((f) => ({
+                      ...f,
+                      isFeatureFlag: e.target.checked,
+                      ...(e.target.checked
+                        ? { valueType: 'Boolean', defaultValue: '', isSecret: false }
+                        : {}),
+                    }))
+                  }
+                />{' '}
+                Feature Flag
+              </label>
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={definitionForm.isSecret}
+                  onChange={(e) =>
+                    setDefinitionForm((f) => ({
+                      ...f,
+                      isSecret: e.target.checked,
+                      isFeatureFlag: false,
+                      defaultValue: '',
+                    }))
+                  }
+                />{' '}
+                {isAr
+                  ? 'تعريف حساس — القيمة من Secret Provider فقط'
+                  : 'Sensitive definition — value comes only from Secret Provider'}
+              </label>
+              <button
+                disabled={saving}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" />
+                {isAr ? 'حفظ التعريف' : 'Save Definition'}
+              </button>
+            </fieldset>
           </form>
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-100 px-5 py-4"><h2 className="font-black text-[#142B5F]">{isAr ? 'القيم الفعلية حسب النطاق' : 'Scoped Effective Values'}</h2></div>
-            {assignments.length === 0 ? <Empty text={isAr ? 'لا توجد قيم مخصصة بعد؛ ستستخدم التعريفات قيمها الافتراضية.' : 'No scoped assignments yet; definitions fall back to defaults.'} /> : <div className="overflow-x-auto"><table className="w-full text-xs"><thead className="bg-slate-50 text-slate-600"><tr><Th>{isAr ? 'المفتاح' : 'Key'}</Th><Th>{isAr ? 'النطاق' : 'Scope'}</Th><Th>{isAr ? 'القيمة الحالية' : 'Current Value'}</Th><Th>{isAr ? 'النسخ' : 'Versions'}</Th></tr></thead><tbody className="divide-y divide-slate-100">{assignments.map((item) => <tr key={item.id}><Td mono>{item.key}</Td><Td>{item.level}{item.scopeId ? <span className="block max-w-44 truncate text-[10px] text-slate-400" dir="ltr">{item.scopeId}</span> : null}</Td><Td mono>{displayValue(item.currentValue)}</Td><Td><button onClick={() => setSelectedHistory(item)} className="inline-flex items-center gap-1 rounded-lg border border-[#0E7C86]/20 px-2.5 py-1.5 font-black text-[#142B5F] hover:bg-[#DDEFF2]/40"><History className="h-3.5 w-3.5" />{item.versions.length}</button></Td></tr>)}</tbody></table></div>}
+            <div className="border-b border-slate-100 px-5 py-4">
+              <h2 className="font-black text-[#142B5F]">
+                {isAr ? 'القيم المحفوظة حسب النطاق' : 'Stored Scoped Values'}
+              </h2>
+            </div>
+            {filteredAssignments.length === 0 ? (
+              <Empty
+                text={
+                  isAr
+                    ? 'لا توجد قيم مطابقة ضمن البيانات المحمّلة.'
+                    : 'No matching values in loaded data.'
+                }
+              />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                      <Th>{isAr ? 'المفتاح' : 'Key'}</Th>
+                      <Th>{isAr ? 'النطاق' : 'Scope'}</Th>
+                      <Th>{isAr ? 'القيمة الحالية' : 'Current Value'}</Th>
+                      <Th>{isAr ? 'النسخ' : 'Versions'}</Th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredAssignments.map((item) => (
+                      <tr key={item.id}>
+                        <Td mono>{item.key}</Td>
+                        <Td>
+                          {item.level}
+                          {item.scopeId ? (
+                            <span
+                              className="block max-w-44 truncate text-[10px] text-slate-400"
+                              dir="ltr"
+                            >
+                              {item.scopeId}
+                            </span>
+                          ) : null}
+                        </Td>
+                        <Td mono>{displayValue(item.currentValue)}</Td>
+                        <Td>
+                          <button
+                            type="button"
+                            disabled={saving}
+                            onClick={() => setSelectedHistory(item)}
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#0E7C86]/20 px-2.5 py-1.5 font-black text-[#142B5F] hover:bg-[#DDEFF2]/40"
+                          >
+                            <History className="h-3.5 w-3.5" />
+                            {item.versions.length}
+                          </button>
+                          {canRestore(item.key) && (
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => editAssignment(item)}
+                              className="ms-2 rounded-lg border px-2.5 py-1.5 font-bold text-[#0E7C86]"
+                            >
+                              {isAr ? 'تعديل القيمة' : 'Edit value'}
+                            </button>
+                          )}
+                        </Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
 
-          <form onSubmit={assignValue} className="h-fit rounded-2xl border border-[#0E7C86]/15 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2 font-black text-[#142B5F]"><SlidersHorizontal className="h-4 w-4" />{isAr ? 'تعيين قيمة' : 'Assign Value'}</div>
-            <div className="mt-4 space-y-4">
-              <Field label={isAr ? 'التعريف' : 'Definition'}><select required value={assignmentForm.key} onChange={(e) => setAssignmentForm((f) => ({ ...f, key: e.target.value, value: '' }))} className="input"><option value="">—</option>{writableDefinitions.map((item) => <option key={item.id} value={item.key}>{item.key}</option>)}</select></Field>
-              <Field label={isAr ? 'النطاق' : 'Scope'}><select value={assignmentForm.level} onChange={(e) => setAssignmentForm((f) => ({ ...f, level: e.target.value as ScopeLevel, scopeId: '' }))} className="input"><option>GLOBAL</option><option>DOMAIN</option><option>TENANT</option><option>IDENTITY</option></select></Field>
-              {assignmentForm.level !== 'GLOBAL' ? <Field label={isAr ? 'معرّف النطاق' : 'Scope ID'}><input required value={assignmentForm.scopeId} onChange={(e) => setAssignmentForm((f) => ({ ...f, scopeId: e.target.value }))} className="input" dir="ltr" /></Field> : null}
-              {selectedDefinition ? <Field label={`${isAr ? 'القيمة' : 'Value'} · ${selectedDefinition.valueType}`}>{selectedDefinition.valueType === 'Boolean' ? <select value={assignmentForm.value} onChange={(e) => setAssignmentForm((f) => ({ ...f, value: e.target.value }))} className="input" required><option value="">—</option><option value="true">true</option><option value="false">false</option></select> : <textarea required value={assignmentForm.value} onChange={(e) => setAssignmentForm((f) => ({ ...f, value: e.target.value }))} rows={selectedDefinition.valueType === 'Json' ? 5 : 2} className="input font-mono text-xs" dir="ltr" />}</Field> : null}
-              <button disabled={saving || !selectedDefinition} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"><Save className="h-4 w-4" />{isAr ? 'إنشاء نسخة جديدة' : 'Create New Version'}</button>
+          <form
+            onSubmit={assignValue}
+            className="h-fit rounded-2xl border border-[#0E7C86]/15 bg-white p-5 shadow-sm"
+          >
+            <div className="flex items-center gap-2 font-black text-[#142B5F]">
+              <SlidersHorizontal className="h-4 w-4" />
+              {isAr ? 'تعيين قيمة' : 'Assign Value'}
             </div>
+            <fieldset
+              disabled={saving || !ready}
+              className="mt-4 min-w-0 space-y-4 disabled:opacity-60"
+            >
+              <Field label={isAr ? 'التعريف' : 'Definition'}>
+                <select
+                  required
+                  value={assignmentForm.key}
+                  onChange={(e) =>
+                    setAssignmentForm((f) => ({ ...f, key: e.target.value, value: '' }))
+                  }
+                  className="input"
+                >
+                  <option value="">—</option>
+                  {writableDefinitions.map((item) => (
+                    <option key={item.id} value={item.key}>
+                      {item.key}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={isAr ? 'النطاق' : 'Scope'}>
+                <select
+                  value={assignmentForm.level}
+                  onChange={(e) =>
+                    setAssignmentForm((f) => ({
+                      ...f,
+                      level: e.target.value as ScopeLevel,
+                      scopeId: '',
+                    }))
+                  }
+                  className="input"
+                >
+                  <option>GLOBAL</option>
+                  <option>DOMAIN</option>
+                  <option>TENANT</option>
+                  <option>IDENTITY</option>
+                </select>
+              </Field>
+              {assignmentForm.level !== 'GLOBAL' ? (
+                <Field label={isAr ? 'معرّف النطاق' : 'Scope ID'}>
+                  <input
+                    required
+                    maxLength={240}
+                    value={assignmentForm.scopeId}
+                    onChange={(e) => setAssignmentForm((f) => ({ ...f, scopeId: e.target.value }))}
+                    className="input"
+                    dir="ltr"
+                  />
+                </Field>
+              ) : null}
+              {selectedDefinition ? (
+                <Field label={`${isAr ? 'القيمة' : 'Value'} · ${selectedDefinition.valueType}`}>
+                  {selectedDefinition.valueType === 'Boolean' ? (
+                    <select
+                      value={assignmentForm.value}
+                      onChange={(e) => setAssignmentForm((f) => ({ ...f, value: e.target.value }))}
+                      className="input"
+                      required
+                    >
+                      <option value="">—</option>
+                      <option value="true">true</option>
+                      <option value="false">false</option>
+                    </select>
+                  ) : (
+                    <textarea
+                      required
+                      value={assignmentForm.value}
+                      onChange={(e) => setAssignmentForm((f) => ({ ...f, value: e.target.value }))}
+                      rows={selectedDefinition.valueType === 'Json' ? 5 : 2}
+                      className="input font-mono text-xs"
+                      dir="ltr"
+                    />
+                  )}
+                </Field>
+              ) : null}
+              <button
+                disabled={saving || !selectedDefinition}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" />
+                {isAr ? 'إنشاء نسخة جديدة' : 'Create New Version'}
+              </button>
+            </fieldset>
           </form>
         </div>
       )}
 
-      {selectedHistory ? <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4" onMouseDown={() => setSelectedHistory(null)}><div className="max-h-[85vh] w-full max-w-3xl overflow-auto rounded-3xl bg-white p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><h2 className="text-xl font-black text-[#142B5F]">{selectedHistory.key}</h2><p className="mt-1 text-xs font-semibold text-slate-500">{selectedHistory.level} {selectedHistory.scopeId ?? ''}</p></div><button onClick={() => setSelectedHistory(null)} className="rounded-xl border px-3 py-2 text-xs font-black">{isAr ? 'إغلاق' : 'Close'}</button></div><div className="mt-5 space-y-3">{[...selectedHistory.versions].reverse().map((version) => <div key={version.id} className="rounded-2xl border border-slate-200 p-4"><div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div><div className="font-mono text-[11px] font-bold text-slate-500">{version.id}</div><div className="mt-1 break-all font-mono text-xs font-bold text-slate-900">{displayValue(version.value)}</div><div className="mt-2 text-[10px] font-semibold text-slate-400">{new Date(version.createdAt).toLocaleString()} · {version.authorId ?? 'SYSTEM'}{version.rollbackOfVersionId ? ` · rollback of ${version.rollbackOfVersionId}` : ''}</div></div>{version.id === selectedHistory.currentVersionId ? <span className="rounded-lg bg-green-50 px-2 py-1 text-[10px] font-black text-green-700">{isAr ? 'الحالية' : 'CURRENT'}</span> : <button disabled={saving} onClick={() => void rollback(selectedHistory, version)} className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800 hover:bg-amber-100">{isAr ? 'استعادة كنسخة جديدة' : 'Restore as new version'}</button>}</div></div>)}</div></div></div> : null}
+      {selectedHistory ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+          onMouseDown={() => {
+            if (!busy.current) setSelectedHistory(null);
+          }}
+        >
+          <div
+            ref={historyPanel}
+            role="dialog"
+            aria-modal="true"
+            aria-label={selectedHistory.key}
+            tabIndex={-1}
+            className="max-h-[85vh] w-full max-w-3xl overflow-auto rounded-3xl bg-white p-6 shadow-2xl"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-black text-[#142B5F]">{selectedHistory.key}</h2>
+                <p className="mt-1 text-xs font-semibold text-slate-500">
+                  {selectedHistory.level} {selectedHistory.scopeId ?? ''}
+                </p>
+              </div>
+              <button
+                disabled={saving}
+                onClick={() => setSelectedHistory(null)}
+                className="rounded-xl border px-3 py-2 text-xs font-black"
+              >
+                {isAr ? 'إغلاق' : 'Close'}
+              </button>
+            </div>
+            <div className="mt-5 space-y-3">
+              {[...selectedHistory.versions]
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
+                    b.id.localeCompare(a.id),
+                )
+                .map((version) => (
+                  <div key={version.id} className="rounded-2xl border border-slate-200 p-4">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <div className="font-mono text-[11px] font-bold text-slate-500">
+                          {version.id}
+                        </div>
+                        <div className="mt-1 break-all font-mono text-xs font-bold text-slate-900">
+                          {displayValue(version.value)}
+                        </div>
+                        <div className="mt-2 text-[10px] font-semibold text-slate-400">
+                          {new Date(version.createdAt).toLocaleString(isAr ? 'ar-YE' : 'en-GB', {
+                            timeZone: 'Asia/Aden',
+                          })}{' '}
+                          · {version.authorId ?? 'SYSTEM'}
+                          {version.rollbackOfVersionId
+                            ? ` · rollback of ${version.rollbackOfVersionId}`
+                            : ''}
+                        </div>
+                      </div>
+                      {version.id === selectedHistory.currentVersionId ? (
+                        <span className="rounded-lg bg-green-50 px-2 py-1 text-[10px] font-black text-green-700">
+                          {isAr ? 'الحالية' : 'CURRENT'}
+                        </span>
+                      ) : (
+                        <button
+                          disabled={saving || !canRestore(selectedHistory.key)}
+                          onClick={() => void rollback(selectedHistory, version)}
+                          className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800 hover:bg-amber-100"
+                        >
+                          {isAr ? 'استعادة كنسخة جديدة' : 'Restore as new version'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function Boundary({ icon, title, text }: { icon: ReactNode; title: string; text: string }) { return <div className="rounded-2xl border border-[#0E7C86]/15 bg-white p-5"><div className="text-[#0E7C86]">{icon}</div><h2 className="mt-3 font-black text-[#142B5F]">{title}</h2><p className="mt-1 text-xs font-semibold leading-6 text-slate-500">{text}</p></div>; }
-function Tab({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) { return <button onClick={onClick} className={`rounded-xl px-5 py-2.5 text-xs font-black transition ${active ? 'bg-white text-[#142B5F] shadow-sm' : 'text-[#0E7C86]/70 hover:text-[#142B5F]'}`}>{children}</button>; }
-function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="block"><span className="mb-1.5 block text-[11px] font-black text-slate-600">{label}</span>{children}</label>; }
-function Empty({ text }: { text: string }) { return <div className="p-12 text-center text-xs font-bold text-slate-400">{text}</div>; }
-function Th({ children }: { children: ReactNode }) { return <th className="px-5 py-3 text-start font-black">{children}</th>; }
-function Td({ children, mono = false }: { children: ReactNode; mono?: boolean }) { return <td className={`px-5 py-4 font-semibold text-slate-700 ${mono ? 'font-mono text-[11px]' : ''}`}>{children}</td>; }
+function errorText(cause: unknown): string {
+  return cause instanceof Error ? cause.message : 'Unable to complete the settings operation.';
+}
+
+function Boundary({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
+  return (
+    <div className="rounded-2xl border border-[#0E7C86]/15 bg-white p-5">
+      <div className="text-[#0E7C86]">{icon}</div>
+      <h2 className="mt-3 font-black text-[#142B5F]">{title}</h2>
+      <p className="mt-1 text-xs font-semibold leading-6 text-slate-500">{text}</p>
+    </div>
+  );
+}
+function Tab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-xl px-5 py-2.5 text-xs font-black transition ${active ? 'bg-white text-[#142B5F] shadow-sm' : 'text-[#0E7C86]/70 hover:text-[#142B5F]'}`}
+    >
+      {children}
+    </button>
+  );
+}
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-[11px] font-black text-slate-600">{label}</span>
+      {children}
+    </label>
+  );
+}
+function Empty({ text }: { text: string }) {
+  return <div className="p-12 text-center text-xs font-bold text-slate-400">{text}</div>;
+}
+function Th({ children }: { children: ReactNode }) {
+  return <th className="px-5 py-3 text-start font-black">{children}</th>;
+}
+function Td({ children, mono = false }: { children: ReactNode; mono?: boolean }) {
+  return (
+    <td className={`px-5 py-4 font-semibold text-slate-700 ${mono ? 'font-mono text-[11px]' : ''}`}>
+      {children}
+    </td>
+  );
+}

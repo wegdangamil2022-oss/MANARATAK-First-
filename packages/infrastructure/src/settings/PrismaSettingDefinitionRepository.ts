@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import {
+  AtomicPersistenceContext,
   ISettingDefinitionRepository,
   SettingDefinition,
   NamespacedKey,
@@ -35,7 +36,13 @@ export interface SettingsPrismaClient {
 }
 
 export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly transactional = false) {}
+
+  withTransaction(context: AtomicPersistenceContext): ISettingDefinitionRepository {
+    const tx = (context as AtomicPersistenceContext & { transactionClient?: Prisma.TransactionClient }).transactionClient;
+    if (!context.boundaryId || !tx) throw new Error('SETTINGS_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return new PrismaSettingDefinitionRepository(tx as unknown as PrismaClient, true);
+  }
 
   private get client(): SettingsPrismaClient {
     return this.prisma as unknown as SettingsPrismaClient;
@@ -73,13 +80,17 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
     const data = {
       valueType: definition.valueType,
       description: definition.description || null,
-      defaultValue: definition.defaultValue !== undefined ? definition.defaultValue : null,
+      defaultValue: definition.defaultValue === undefined || definition.defaultValue === null ? Prisma.DbNull : definition.defaultValue as Prisma.InputJsonValue,
       isFeatureFlag: definition.isFeatureFlag,
       isDeprecated: definition.isDeprecated,
       isSecret: definition.isSecret
     };
     const events = [...definition.domainEvents];
-    const persist = async (client: any) => {
+    const persist = async (client: Prisma.TransactionClient) => {
+      await client.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`setting-definition:${keyStr}`}, 0))::text AS lock_result`;
+      if (events.some(event => event.constructor.name === 'SettingDefinitionCreatedEvent') && await client.settingDefinitionRecord.findUnique({ where: { key: keyStr } })) {
+        throw new Error(`Setting definition for key ${keyStr} already exists.`);
+      }
       await client.settingDefinitionRecord.upsert({
         where: { key: keyStr },
         update: data,
@@ -99,11 +110,12 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
         }
       }
     };
-    if (events.length) {
-      await this.prisma.$transaction(async tx => persist(tx));
+    if (events.length || this.transactional) {
+      if (this.transactional) await persist(this.prisma);
+      else await this.prisma.$transaction(persist);
       definition.clearEvents();
     } else {
-      await persist(this.prisma as any);
+      await this.prisma.$transaction(persist);
     }
   }
 

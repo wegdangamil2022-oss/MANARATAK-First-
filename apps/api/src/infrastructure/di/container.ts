@@ -840,7 +840,7 @@ export function registerDependencies(
     adminBootstrapVerifier: asFunction(({ prisma }) => new AdminBootstrapVerifier(prisma)).scoped(),
 
     // Settings
-    manageSettingsUseCase: asFunction(({ settingDefinitionRepo, settingAssignmentRepo, configurationValidationService }) => new ManageSettingsUseCase(settingDefinitionRepo, settingAssignmentRepo, configurationValidationService)).scoped(),
+    manageSettingsUseCase: asFunction(({ settingDefinitionRepo, settingAssignmentRepo, configurationValidationService, atomicDomainMutationCoordinator }) => new ManageSettingsUseCase(settingDefinitionRepo, settingAssignmentRepo, configurationValidationService, atomicDomainMutationCoordinator)).scoped(),
     resolveConfigurationUseCase: asFunction(({ configurationResolutionService }) => new ResolveConfigurationUseCase(configurationResolutionService)).scoped(),
 
     // Files

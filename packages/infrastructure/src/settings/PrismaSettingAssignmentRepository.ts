@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import {
+  AtomicPersistenceContext,
   ISettingAssignmentRepository,
   SettingAssignment,
   SettingVersion,
@@ -61,7 +62,13 @@ export interface SettingsAssignmentPrismaClient {
 }
 
 export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly transactional = false) {}
+
+  withTransaction(context: AtomicPersistenceContext): ISettingAssignmentRepository {
+    const tx = (context as AtomicPersistenceContext & { transactionClient?: Prisma.TransactionClient }).transactionClient;
+    if (!context.boundaryId || !tx) throw new Error('SETTINGS_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return new PrismaSettingAssignmentRepository(tx as unknown as PrismaClient, true);
+  }
 
   private get client(): SettingsAssignmentPrismaClient {
     return this.prisma as unknown as SettingsAssignmentPrismaClient;
@@ -142,7 +149,9 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
     const currentVersion = assignment.getCurrentVersion();
     const events = [...assignment.domainEvents];
 
-    await this.prisma.$transaction(async (tx) => {
+    const persist = async (tx: Prisma.TransactionClient) => {
+      const lockKey = `setting:${keyStr}:${scopeLevel}:${scopeId}`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))::text AS lock_result`;
       const client = tx as unknown as SettingsAssignmentPrismaClient;
       const existingByKey = await client.settingAssignmentRecord.findUnique({
         where: {
@@ -173,6 +182,10 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
         throw new Error(
           `Setting assignment id ${assignment.id} already belongs to another key or scope and cannot be reused.`
         );
+      }
+
+      if (existingByKey && !assignment.getVersions().some(version => version.id === existingByKey.currentVersionId)) {
+        throw new Error('SETTINGS_VERSION_CONFLICT: Reload the current value before saving.');
       }
 
       const versionsToCreate: Array<{
@@ -273,7 +286,9 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
           }});
         }
       }
-    });
+    };
+    if (this.transactional) await persist(this.prisma);
+    else await this.prisma.$transaction(persist);
     if (events.length) assignment.clearEvents();
   }
 }
