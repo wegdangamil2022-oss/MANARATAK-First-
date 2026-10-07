@@ -16,5 +16,5 @@ export function DomainImportCenterPage() {
   if (domainKey === 'scholarships') return <Navigate to="/imports/scholarships" replace />;
   const domain = DOMAIN_ROUTE_MAP[domainKey.toLowerCase()];
   if (!domain) return <Navigate to="/imports" replace />;
-  return <ImportAdminPage fixedDomain={domain} />;
+  return <ImportAdminPage key={domain} fixedDomain={domain} />;
 }

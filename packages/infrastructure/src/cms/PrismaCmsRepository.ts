@@ -169,6 +169,7 @@ export class PrismaCmsRepository implements ICmsRepository {
               { summary: { contains: q, mode: 'insensitive' } },
               { slug: { contains: q, mode: 'insensitive' } },
               { publicId: { contains: q, mode: 'insensitive' } },
+              { localizedPayloads: { some: { OR: [{ title: { contains: q, mode: 'insensitive' } }, { summary: { contains: q, mode: 'insensitive' } }, { localizedSlug: { contains: q, mode: 'insensitive' } }] } } },
             ],
           }
         : {}),
@@ -176,14 +177,18 @@ export class PrismaCmsRepository implements ICmsRepository {
     const [rows, total] = await Promise.all([
       this.db.cmsContentNode.findMany({
         where,
-        orderBy: { updatedAt: 'desc' },
+        include: { localizedPayloads: { select: { locale: true, title: true, summary: true } } },
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
       this.db.cmsContentNode.count({ where }),
     ]);
     return {
-      data: rows.map((row: any) => this.content(row)),
+      data: rows.map((row: any) => {
+        const primary = row.localizedPayloads.find((entry: { locale: string }) => entry.locale === row.primaryLocale);
+        return this.content({ ...row, title: primary?.title ?? row.title, summary: primary?.summary ?? row.summary });
+      }),
       total,
       page,
       pageSize,
@@ -646,7 +651,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     const [rows, total] = await Promise.all([
       this.db.cmsPublishedContent.findMany({
         where,
-        orderBy: { publishedAt: 'desc' },
+        orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

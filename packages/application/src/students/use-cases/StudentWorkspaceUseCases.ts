@@ -67,6 +67,14 @@ export class StudentWorkspaceUseCases {
     return summary;
   }
 
+  public async markNotificationRead(studentReferenceId: string, notificationId: string): Promise<void> {
+    this.ensureStudentReference(studentReferenceId);
+    await this.requireReadableWorkspace(studentReferenceId);
+    if (!notificationId.trim()) throw new Error('STUDENT_NOTIFICATION_ID_REQUIRED');
+    if (!this.repository.markNotificationRead) throw new Error('STUDENT_NOTIFICATION_READ_UNAVAILABLE');
+    await this.mutate(studentReferenceId, 'notification-read', () => this.repository.markNotificationRead!(studentReferenceId, notificationId));
+  }
+
   public async updatePrivacyConsent(data: UpdateStudentPrivacyConsentDto): Promise<StudentPrivacyConsentDecisionDto> {
     this.ensureStudentReference(data.studentReferenceId);
     if (data.actorType && data.actorType !== 'USER') throw new Error('STUDENT_PRIVACY_CONSENT_ACTOR_INVALID');

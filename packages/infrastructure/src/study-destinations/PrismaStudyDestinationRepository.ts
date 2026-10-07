@@ -15,40 +15,61 @@ import {
   StudyDestinationVerificationStatus,
 } from '@manaratak/domain';
 
-const array = <T>(value: unknown): T[] => Array.isArray(value) ? value as T[] : [];
-const iso = (value: unknown): string | null => value instanceof Date ? value.toISOString() : typeof value === 'string' ? value : null;
-const num = (value: unknown): number | null => value === null || value === undefined ? null : Number(value);
+const array = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
+const iso = (value: unknown): string | null =>
+  value instanceof Date ? value.toISOString() : typeof value === 'string' ? value : null;
+const num = (value: unknown): number | null =>
+  value === null || value === undefined ? null : Number(value);
 
 export class PrismaStudyDestinationRepository implements IStudyDestinationRepository {
   public constructor(private readonly prisma: PrismaClient) {}
 
-  private get profiles(): any { return (this.prisma as any).studyDestinationProfile; }
-  private get studyLanguages(): any { return (this.prisma as any).studyDestinationStudyLanguage; }
+  private get profiles(): any {
+    return (this.prisma as any).studyDestinationProfile;
+  }
 
   public async findById(id: string): Promise<StudyDestinationProfileDto | null> {
-    const row = await this.profiles.findUnique({ where: { id }, include: { studyLanguages: true } });
+    const row = await this.profiles.findUnique({
+      where: { id },
+      include: { studyLanguages: true },
+    });
     return row ? this.map(row) : null;
   }
 
   public async findBySlug(slug: string): Promise<StudyDestinationProfileDto | null> {
-    const row = await this.profiles.findUnique({ where: { slug }, include: { studyLanguages: true } });
+    const row = await this.profiles.findUnique({
+      where: { slug },
+      include: { studyLanguages: true },
+    });
     return row ? this.map(row) : null;
   }
 
-  public async findByCountryReferenceId(countryReferenceId: string): Promise<StudyDestinationProfileDto | null> {
-    const row = await this.profiles.findUnique({ where: { countryReferenceId }, include: { studyLanguages: true } });
+  public async findByCountryReferenceId(
+    countryReferenceId: string,
+  ): Promise<StudyDestinationProfileDto | null> {
+    const row = await this.profiles.findUnique({
+      where: { countryReferenceId },
+      include: { studyLanguages: true },
+    });
     return row ? this.map(row) : null;
   }
 
-  public async list(filters: StudyDestinationFilters): Promise<PaginatedStudyDestinationResult<StudyDestinationProfileDto>> {
+  public async list(
+    filters: StudyDestinationFilters,
+  ): Promise<PaginatedStudyDestinationResult<StudyDestinationProfileDto>> {
     return this.listInternal(filters, false);
   }
 
-  public async listPublished(filters: Omit<StudyDestinationFilters, 'status' | 'completenessStatus'>): Promise<PaginatedStudyDestinationResult<StudyDestinationProfileDto>> {
+  public async listPublished(
+    filters: Omit<StudyDestinationFilters, 'status' | 'completenessStatus'>,
+  ): Promise<PaginatedStudyDestinationResult<StudyDestinationProfileDto>> {
     return this.listInternal({ ...filters, status: StudyDestinationStatus.PUBLISHED }, true);
   }
 
-  private async listInternal(filters: StudyDestinationFilters, publishedOnly: boolean): Promise<PaginatedStudyDestinationResult<StudyDestinationProfileDto>> {
+  private async listInternal(
+    filters: StudyDestinationFilters,
+    publishedOnly: boolean,
+  ): Promise<PaginatedStudyDestinationResult<StudyDestinationProfileDto>> {
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 30));
     const where: any = {
@@ -63,7 +84,7 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
       this.profiles.findMany({
         where,
         include: { studyLanguages: true },
-        orderBy: [{ isFeatured: 'desc' }, { updatedAt: 'desc' }],
+        orderBy: [{ isFeatured: 'desc' }, { updatedAt: 'desc' }, { id: 'asc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
@@ -78,7 +99,9 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
     };
   }
 
-  public async create(data: StudyDestinationRepositoryCreateInput): Promise<StudyDestinationProfileDto> {
+  public async create(
+    data: StudyDestinationRepositoryCreateInput,
+  ): Promise<StudyDestinationProfileDto> {
     const { studyLanguageReferenceIds = [], ...profile } = data;
     const row = await this.profiles.create({
       data: {
@@ -88,42 +111,71 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
         countryReferenceId: data.countryReferenceId,
         status: data.status,
         completenessStatus: data.completenessStatus,
-        studyLanguages: studyLanguageReferenceIds.length ? {
-          create: [...new Set(studyLanguageReferenceIds)].map((languageReferenceId) => ({ languageReferenceId })),
-        } : undefined,
+        studyLanguages: studyLanguageReferenceIds.length
+          ? {
+              create: [...new Set(studyLanguageReferenceIds)].map((languageReferenceId) => ({
+                languageReferenceId,
+              })),
+            }
+          : undefined,
       },
       include: { studyLanguages: true },
     });
     return this.map(row);
   }
 
-  public async update(id: string, data: StudyDestinationRepositoryUpdateInput): Promise<StudyDestinationProfileDto> {
+  public async update(
+    id: string,
+    data: StudyDestinationRepositoryUpdateInput,
+    expectedUpdatedAt?: string,
+  ): Promise<StudyDestinationProfileDto> {
     const { studyLanguageReferenceIds, ...profile } = data;
-    await this.profiles.update({ where: { id }, data: this.persistence(profile) });
-    if (studyLanguageReferenceIds !== undefined) {
-      await this.studyLanguages.deleteMany({ where: { profileId: id } });
-      const unique = [...new Set(studyLanguageReferenceIds)];
-      if (unique.length) {
-        await this.studyLanguages.createMany({ data: unique.map((languageReferenceId) => ({ profileId: id, languageReferenceId })) });
+    return this.prisma.$transaction(async (tx) => {
+      if (expectedUpdatedAt) {
+        const result = await tx.studyDestinationProfile.updateMany({
+          where: { id, updatedAt: new Date(expectedUpdatedAt) },
+          data: this.persistence(profile),
+        });
+        if (result.count !== 1) throw new Error('STUDY_DESTINATION_VERSION_CONFLICT');
+      } else
+        await tx.studyDestinationProfile.update({ where: { id }, data: this.persistence(profile) });
+      if (studyLanguageReferenceIds !== undefined) {
+        await tx.studyDestinationStudyLanguage.deleteMany({ where: { profileId: id } });
+        const unique = [...new Set(studyLanguageReferenceIds)];
+        if (unique.length)
+          await tx.studyDestinationStudyLanguage.createMany({
+            data: unique.map((languageReferenceId) => ({ profileId: id, languageReferenceId })),
+          });
       }
-    }
-    const row = await this.profiles.findUnique({ where: { id }, include: { studyLanguages: true } });
-    if (!row) throw new Error('STUDY_DESTINATION_NOT_FOUND');
-    return this.map(row);
+      const row = await tx.studyDestinationProfile.findUnique({
+        where: { id },
+        include: { studyLanguages: true },
+      });
+      if (!row) throw new Error('STUDY_DESTINATION_NOT_FOUND');
+      return this.map(row);
+    });
   }
 
   private persistence(data: Record<string, unknown>): Record<string, unknown> {
     const result: Record<string, unknown> = { ...data };
     const jsonFields = [
-      'admissionHighlightsAr', 'admissionHighlightsEn', 'visaRequirementsAr', 'visaRequirementsEn',
-      'costHighlightsAr', 'costHighlightsEn', 'studentLifeHighlightsAr', 'studentLifeHighlightsEn',
-      'officialLinks', 'evidenceSources',
+      'admissionHighlightsAr',
+      'admissionHighlightsEn',
+      'visaRequirementsAr',
+      'visaRequirementsEn',
+      'costHighlightsAr',
+      'costHighlightsEn',
+      'studentLifeHighlightsAr',
+      'studentLifeHighlightsEn',
+      'officialLinks',
+      'evidenceSources',
     ];
     for (const key of jsonFields) {
       if (result[key] === undefined) continue;
       result[key] = result[key] ?? [];
     }
-    if (typeof result.sourceAuditDate === 'string') result.sourceAuditDate = new Date(result.sourceAuditDate);
+    if (typeof result.sourceAuditDate === 'string')
+      result.sourceAuditDate = new Date(result.sourceAuditDate);
     if (typeof result.publishedAt === 'string') result.publishedAt = new Date(result.publishedAt);
     return result;
   }
@@ -160,7 +212,9 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
       sourceAuditDate: iso(row.sourceAuditDate),
       evidenceSources: array<StudyDestinationEvidenceSource>(row.evidenceSources),
       imageAssetId: row.imageAssetId,
-      studyLanguageReferenceIds: (row.studyLanguages ?? []).map((item: any) => item.languageReferenceId),
+      studyLanguageReferenceIds: (row.studyLanguages ?? []).map(
+        (item: any) => item.languageReferenceId,
+      ),
       isFeatured: Boolean(row.isFeatured),
       publishedAt: iso(row.publishedAt),
       createdAt: iso(row.createdAt) ?? new Date(0).toISOString(),

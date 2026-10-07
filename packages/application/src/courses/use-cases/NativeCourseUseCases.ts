@@ -112,7 +112,7 @@ export class NativeCourseUseCases {
       (item) => item.status !== CourseContentStatus.ARCHIVED,
     );
     const lessons = curriculum.lessons.filter(
-      (item) => item.status !== CourseContentStatus.ARCHIVED,
+      (item) => item.status !== CourseContentStatus.ARCHIVED && modules.some(module=>module.id===item.moduleId),
     );
     const lessonAssets = new Map<string, number>();
     for (const asset of curriculum.assets) {
@@ -126,7 +126,7 @@ export class NativeCourseUseCases {
     const incompleteLessons = lessons.filter((lesson) => {
       const hasText = Boolean(lesson.contentText?.trim());
       const hasAsset = (lessonAssets.get(lesson.id) ?? 0) > 0;
-      const hasQuiz = lessonQuizzes.has(lesson.id) || lesson.lessonType === CourseLessonType.QUIZ;
+      const hasQuiz = lessonQuizzes.has(lesson.id);
       return !hasText && !hasAsset && !hasQuiz;
     });
     const invalidAssets = curriculum.assets.filter(

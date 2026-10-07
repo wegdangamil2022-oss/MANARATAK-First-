@@ -62,6 +62,17 @@ export class CourseProgressUseCases {
     return enrollment;
   }
 
+  public async resolveLearningAsset(courseId: string, lessonId: string, assetReferenceId: string, studentReferenceId: string): Promise<string> {
+    await this.ensureTrackableCourse(courseId);
+    await this.requireLearningAccessEnrollment(courseId, studentReferenceId);
+    const curriculum = await this.curriculumRepository.getCurriculumSnapshot(courseId);
+    const lesson = curriculum.lessons.find(row => row.id === lessonId && row.status !== CourseContentStatus.ARCHIVED);
+    const module = lesson && curriculum.modules.find(row => row.id === lesson.moduleId && row.status !== CourseContentStatus.ARCHIVED);
+    const asset = curriculum.assets.find(row => row.id === assetReferenceId && row.lessonId === lessonId);
+    if (!lesson || !module || !asset) throw new Error('COURSE_LEARNING_ASSET_NOT_FOUND');
+    return asset.assetId;
+  }
+
   public async getLearningWorkspace(courseId: string, studentReferenceId: string): Promise<CourseLearnerWorkspaceDto> {
     await this.ensureTrackableCourse(courseId);
     await this.requireLearningAccessEnrollment(courseId, studentReferenceId);

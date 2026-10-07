@@ -29,6 +29,9 @@ type MajorCompletenessStatus = 'INCOMPLETE' | 'NEEDS_REVIEW' | 'COMPLETE' | stri
 interface Major {
   id: string;
   publicId?: string;
+  profileId?: string;
+  nameAr?: string;
+  nameEn?: string;
   slug?: string;
   displayName: string;
   degreeLevel?: string;
@@ -178,12 +181,15 @@ export function MajorAdminPage() {
         if (taxonomyIdFilter) params.append('taxonomyNodeId', taxonomyIdFilter);
         if (search.trim()) params.append('search', search.trim());
         const response = await adminApiClient.request<PaginatedResponse>(`/admin/majors?${params.toString()}`, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        if (response.total > 0 && page > response.totalPages) { setPage(Math.max(1, response.totalPages)); return; }
         setData(response);
       } catch (err: unknown) {
+        if (controller.signal.aborted) return;
         if (err instanceof DOMException && err.name === 'AbortError') return;
         setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات التخصصات الأكاديمية.');
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
@@ -453,7 +459,7 @@ export function MajorAdminPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {visibleMajors.map((major) => (
                   <article
-                    key={major.id}
+                    key={major.profileId || major.id}
                     className="group relative flex flex-col justify-between rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-xs transition-all duration-200 hover:border-[#21A7B4]/60 hover:shadow-md hover:-translate-y-0.5"
                   >
                     {/* Card Top: Badges & Identifiers */}
@@ -481,13 +487,14 @@ export function MajorAdminPage() {
                       {/* Major Name (Arabic / Display Name) */}
                       <div className="mt-3.5">
                         <Link
-                          to={`/majors/${major.id}`}
+                          to={`/majors/${major.id}${major.profileId ? `?profileId=${major.profileId}` : ''}`}
                           className="block text-base sm:text-lg font-black text-[#142B5F] group-hover:text-[#0E7C86] transition-colors leading-snug line-clamp-2"
                         >
-                          {major.displayName}
+                          {major.nameAr || major.displayName}
                         </Link>
                       </div>
 
+                      {major.nameEn && <p dir="ltr" className="mt-1 text-xs text-slate-500 text-right">{major.nameEn}</p>}
                       {/* Details: College & Discipline */}
                       <div className="mt-3 space-y-1.5 text-xs text-slate-600">
                         {major.collegeOrFaculty && (
@@ -525,7 +532,7 @@ export function MajorAdminPage() {
                       </span>
 
                       <Link
-                        to={`/majors/${major.id}`}
+                        to={`/majors/${major.id}${major.profileId ? `?profileId=${major.profileId}` : ''}`}
                         className="inline-flex items-center gap-1.5 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] text-white px-3.5 py-2 text-xs font-bold transition shadow-xs cursor-pointer group-hover:shadow-sm"
                       >
                         <Eye className="h-3.5 w-3.5" />

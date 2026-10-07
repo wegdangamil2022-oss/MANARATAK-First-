@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate as useRouterNavigate } from 'react-router-dom';
 import './template.css';
 import {readStored, writeStored, readStoredArray} from './storage';
 import { usePublicNavigation } from './usePublicNavigation';
@@ -112,6 +113,7 @@ import {
 } from 'lucide-react';
 
 export default function App() {
+  const routerNavigate = useRouterNavigate();
   const { language } = useTranslation();
   const publicLive = usePublicLiveData(import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE, language);
   const publicDataMode = publicLive.mode;
@@ -121,6 +123,12 @@ export default function App() {
   const loadingDomains = Object.entries(publicLive.statuses).filter(([, status]) => status === 'loading').map(([domain]) => domain);
   const navigation = usePublicNavigation();
   const { back: goBack, navigate, replace: replaceNavigation } = navigation;
+  function openStudentAccount(tab: string, requestId?: string) {
+    const query = new URLSearchParams({tab});
+    if (requestId) query.set('requestId', requestId);
+    routerNavigate(`/${language}/student?${query}`);
+    navigate({activeTab: 'account'});
+  }
   // UI States
   const [activeTab, setActiveTab] = navigation.field('activeTab');
   const [selectedCategory, setSelectedCategory] = navigation.field('selectedCategory');
@@ -136,6 +144,19 @@ export default function App() {
   const careersForView = directCareer && !careers.some((item) => item.id === directCareer.id || item.slug === directCareer.slug)
     ? [directCareer, ...careers]
     : careers;
+
+  useEffect(() => {
+    if (publicDataMode !== 'api' || !directCountry?.slug) return;
+    let active = true;
+    const refresh = async () => {
+      if (document.visibilityState === 'hidden') return;
+      try { const country = mapCountry(await ApiClient.getStudyDestinationBySlug(directCountry.slug!), language); if (active) setDirectCountry(country); }
+      catch (cause) { if (active && cause instanceof Error && cause.message === 'Study destination not found') setDirectCountry(null); }
+    };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => { active = false; window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
+  }, [publicDataMode, directCountry?.slug, language]);
 
   const directRouteHydrated = useRef(false);
   const initialLocation = useRef({ pathname: window.location.pathname, search: window.location.search, hash: window.location.hash });
@@ -194,29 +215,30 @@ export default function App() {
     else if (section === 'search') patch = { activeTab: 'search', selectedCategory: 'all', globalSearchQuery: params.get('q') || '' };
     else if (section === 'scholarships') {
       const selected = key ? scholarships.find(matchesKey) || null : null;
-      if (key && !selected && publicDataMode === 'api') {
+      if (key && publicDataMode === 'api') {
         fetchOnce(`scholarships:${key}`, async () => finish({ activeTab: 'search', selectedCategory: 'scholarships', selectedScholarship: mapPublicScholarshipDto(await ApiClient.getScholarshipBySlug(key)) }));
         return;
       }
       patch = { activeTab: 'search', selectedCategory: 'scholarships', selectedScholarship: selected };
     } else if (section === 'universities') {
       const selected = key ? universities.find(matchesKey) || null : null;
-      if (key && !selected && publicDataMode === 'api') {
+      if (key && publicDataMode === 'api') {
         fetchOnce(`universities:${key}`, async () => finish({ activeTab: 'search', selectedCategory: 'universities', selectedUniversity: mapPublicUniversityDto(await ApiClient.getUniversityBySlug(key)) }));
         return;
       }
       patch = { activeTab: 'search', selectedCategory: 'universities', selectedUniversity: selected };
     } else if (section === 'majors') {
       const selected = key ? majors.find(matchesKey) || null : null;
-      if (key && !selected && publicDataMode === 'api') {
-        fetchOnce(`majors:${key}`, async () => finish({ activeTab: 'search', selectedCategory: 'majors', selectedMajor: mapPublicMajorDto(await ApiClient.getMajorBySlug(key)) }));
+      if (key && publicDataMode === 'api') {
+        const level = segments[2] || params.get('level') || undefined;
+        fetchOnce(`majors:${key}:${level || ''}`, async () => finish({ activeTab: 'search', selectedCategory: 'majors', selectedMajor: mapPublicMajorDto(await ApiClient.getMajorBySlug(key, undefined, level)) }));
         return;
       }
       patch = { activeTab: 'search', selectedCategory: 'majors', selectedMajor: selected };
     } else if (section === 'courses') {
       const ownerSelected = key ? [...courses, ...paidCourses].find(matchesKey) || null : null;
       const importedSelected = key ? importedCourses.find(matchesKey) || null : null;
-      if (key && !ownerSelected && !importedSelected && publicDataMode === 'api') {
+      if (key && publicDataMode === 'api') {
         fetchOnce(`courses:${key}`, async () => {
           const mapped = mapCourse(await ApiClient.getCourseBySlug(key));
           finish(mapped.track === 'imported'
@@ -232,7 +254,7 @@ export default function App() {
       } else {
         patch = { activeTab: 'search', selectedCategory: 'courses', selectedCourseTrack: null };
       }
-    } else if (section === 'articles') {
+    } else if (['articles', 'news', 'study-guides', 'checklists', 'faqs', 'pages', 'landing'].includes(section)) {
       const selected = key ? articles.find(matchesKey) || null : null;
       if (key && !selected && publicDataMode === 'api') {
         fetchOnce(`articles:${key}`, async () => finish({ activeTab: 'search', selectedCategory: 'articles', selectedArticle: mapArticle(await ApiClient.getCmsContentBySlug(key, language)) }));
@@ -373,14 +395,52 @@ export default function App() {
   // Modal Dialogs
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
+  const [liveUnreadNotifications, setLiveUnreadNotifications] = useState(0);
   const [selectedScholarship, setSelectedScholarship] = navigation.field('selectedScholarship');
-  const [selectedMajor, setSelectedMajor] = navigation.field('selectedMajor');
+  const [selectedMajor, setSelectedMajorState] = navigation.field('selectedMajor');
+  const majorDetailRequest = useRef(0);
+  const setSelectedMajor = (item: Major | null) => {
+    const request = ++majorDetailRequest.current;
+    setSelectedMajorState(item);
+    if (item?.slug && publicDataMode === 'api' && !item.contentSections?.length) {
+      void ApiClient.getMajorBySlug(item.slug, undefined, item.degreeLevelName).then(dto => {
+        if (request === majorDetailRequest.current) setSelectedMajorState(mapPublicMajorDto(dto));
+      }).catch(() => { if (request === majorDetailRequest.current) setSelectedMajorState(null); });
+    }
+  };
   const [selectedUniversity, setSelectedUniversity] = navigation.field('selectedUniversity');
   const [selectedExam, setSelectedExam] = navigation.field('selectedExam');
   const [selectedCourse, setSelectedCourse] = navigation.field('selectedCourse');
   const [selectedImportedCourse, setSelectedImportedCourse] = navigation.field('selectedImportedCourse');
   const [selectedArticle, setSelectedArticle] = navigation.field('selectedArticle');
+  useEffect(() => {
+    if (publicDataMode !== 'api' || !selectedArticle) return;
+    let active = true;
+    const refreshArticle = async () => {
+      if (document.visibilityState === 'hidden') return;
+      try {
+        const current = mapArticle(await ApiClient.getCmsContentBySlug(selectedArticle.slug, language));
+        if (active) setSelectedArticle(current);
+      } catch (reason) {
+        if (active && reason instanceof Error && reason.message === 'CMS content not found') {
+          setSelectedArticle(null);
+          setAccessDeniedMessage('هذه المادة لم تعد منشورة للعامة.');
+        }
+      }
+    };
+    window.addEventListener('focus', refreshArticle);
+    document.addEventListener('visibilitychange', refreshArticle);
+    return () => { active = false; window.removeEventListener('focus', refreshArticle); document.removeEventListener('visibilitychange', refreshArticle); };
+  }, [publicDataMode, selectedArticle?.slug, language]);
   const [selectedService, setSelectedService] = navigation.field('selectedService');
+  useEffect(() => {
+    if (publicDataMode !== 'api' || !selectedService || !['ready', 'empty'].includes(publicLive.statuses.services)) return;
+    const current = services.find(service => service.id === selectedService.id || service.publicId === selectedService.publicId);
+    if (!current) {
+      setSelectedService(null);
+      setAccessDeniedMessage('هذه الخدمة لم تعد منشورة للعامة.');
+    } else if (JSON.stringify(current) !== JSON.stringify(selectedService)) setSelectedService(current);
+  }, [publicDataMode, services, publicLive.statuses.services, selectedService?.id]);
   const [serviceReturnTab, setServiceReturnTab] = navigation.field('serviceReturnTab');
   const [favoriteLaunch, setFavoriteLaunch] = navigation.field('favoriteLaunch');
   const [countryNavigationName, setCountryNavigationName] = navigation.field('countryNavigationName');
@@ -402,7 +462,7 @@ export default function App() {
   const [activeToast, setActiveToast] = useState<PushNotificationItem | null>(null);
 
   const activeCountryIdentity = navigation.state.nestedDetailId || countryNavigationName || '';
-  const activeCountryForGraph = countries.find((country) =>
+  const activeCountryForGraph = countriesForView.find((country) =>
     country.id === activeCountryIdentity ||
     country.publicId === activeCountryIdentity ||
     country.slug === activeCountryIdentity ||
@@ -531,6 +591,10 @@ export default function App() {
   const openSection = (target: string) => {
     setIsMenuOpen(false);
     setIsNotificationOpen(false);
+    if (publicDataMode === 'api' && target === 'notifications') {
+      openStudentAccount('notifications');
+      return;
+    }
     if (publicDataMode === 'api' && ['favorites', 'tracker', 'notifications'].includes(target)) {
       navigate({ activeTab: target === 'tracker' ? 'tracker' : target === 'favorites' ? 'favorites' : 'account' });
       setIsHeaderSearchVisible(false);
@@ -585,6 +649,16 @@ export default function App() {
 
   // Sync Dark Mode Class to HTML and Body
   useEffect(() => {
+    const applyPreferences = (event: Event) => {
+      const preferences = (event as CustomEvent<{theme?: string; unreadNotifications?: number}>).detail;
+      const theme = preferences?.theme;
+      if (typeof preferences?.unreadNotifications === 'number') setLiveUnreadNotifications(preferences.unreadNotifications);
+      if (theme === 'DARK' || theme === 'LIGHT' || theme === 'SYSTEM') setIsDarkMode(theme === 'DARK' || (theme === 'SYSTEM' && Boolean(window.matchMedia?.('(prefers-color-scheme: dark)').matches)));
+    };
+    window.addEventListener('manaratak-student-preferences', applyPreferences);
+    return () => window.removeEventListener('manaratak-student-preferences', applyPreferences);
+  }, []);
+  useEffect(() => {
     writeStored('manaratak_dark_mode', String(isDarkMode));
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -619,6 +693,11 @@ export default function App() {
           return kind ? [makeFavoriteKey(kind, savedItem.entityId)] : [];
         });
         setFavoriteKeys([...new Set(keys)]);
+        try {
+          const account = await ApiClient.getMyStudentDashboard();
+          if (!cancelled && account.capabilityStatus?.notifications !== 'DEGRADED') setLiveUnreadNotifications(account.statistics.unreadNotifications);
+          if (!cancelled) window.dispatchEvent(new CustomEvent('manaratak-student-preferences', { detail: { theme: account.workspace.theme } }));
+        } catch { /* Account cards retain their own retry path. */ }
         const pending = consumePostLoginAction();
         if (pending?.kind === 'SAVE_FAVORITE') {
           await ApiClient.createMyStudentSavedItem({ entityType: pending.entityType, entityId: pending.entityId, entitySlug: pending.entitySlug ?? pending.entityId, metadata: { source: 'public-discovery-auth-handoff' } });
@@ -765,12 +844,12 @@ export default function App() {
 
   const liveSavedItemType = (kind: FavoriteKind): string | null => ({
     scholarship: 'SCHOLARSHIP', university: 'UNIVERSITY', major: 'MAJOR', course: 'COURSE',
-    article: 'CMS_CONTENT', service: 'SERVICE', tool: 'STUDENT_TOOL',
+    article: 'CMS_CONTENT', service: 'SERVICE', tool: 'STUDENT_TOOL', exam:'INTERNATIONAL_TEST',
   } as Partial<Record<FavoriteKind, string>>)[kind] ?? null;
 
   const favoriteKindFromSavedType = (entityType: string): FavoriteKind | null => ({
     SCHOLARSHIP: 'scholarship', UNIVERSITY: 'university', MAJOR: 'major', COURSE: 'course',
-    CMS_CONTENT: 'article', SERVICE: 'service', STUDENT_TOOL: 'tool',
+    CMS_CONTENT: 'article', SERVICE: 'service', STUDENT_TOOL: 'tool', INTERNATIONAL_TEST:'exam',
   } as Record<string, FavoriteKind>)[entityType] ?? null;
 
   const favoriteIdsFor = (kind: FavoriteKind): string[] => {
@@ -865,10 +944,10 @@ export default function App() {
     }
     try {
       const created = await ApiClient.createMyStudentServiceRequest({ serviceId: service.id, requestParameters });
-      window.history.replaceState({...window.history.state}, '', `/student?tab=services&requestId=${encodeURIComponent(created.id)}`);
-      setActiveTab('account');
+      setSelectedService(null);
+      openStudentAccount('services', created.id);
     } catch (error) {
-      triggerInstantPush({ title: 'تعذر إنشاء طلب الخدمة', body: error instanceof Error ? error.message : 'حاول مرة أخرى.', type: 'system' });
+      throw error;
     }
   };
 
@@ -892,7 +971,7 @@ export default function App() {
     return matchesSearch && matchesCountry && matchesDegree && matchesFunding && matchesIelts;
   });
 
-  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+  const unreadNotificationsCount = publicDataMode === 'api' ? liveUnreadNotifications : notifications.filter((n) => !n.read).length;
   const favoriteTypeCounts = favoriteKeys.reduce<Partial<Record<FavoriteKind, number>>>((counts, key) => {
     const kind = key.split(':', 1)[0] as FavoriteKind;
     counts[kind] = (counts[kind] || 0) + 1;
@@ -908,7 +987,7 @@ export default function App() {
         language={language}
         onToggleLanguage={openLanguage}
         onOpenMenu={() => setIsMenuOpen(true)}
-        onOpenNotifications={() => setIsNotificationOpen(true)}
+        onOpenNotifications={() => publicDataMode === 'api' ? openStudentAccount('notifications') : setIsNotificationOpen(true)}
         onOpenProfile={() => {
           openSection('account');
         }}
@@ -2100,7 +2179,7 @@ export default function App() {
                   window.location.replace('/student');
                   return;
                 }
-                if (postLoginReturn && /^\/student(?:[/?#]|$)/.test(postLoginReturn)) {
+                if (postLoginReturn && /^(?:\/student(?:[/?#]|$)|\/(?:ar\/|en\/)?tools\/[A-Za-z0-9._-]+(?:[?#]|$))/.test(postLoginReturn)) {
                   window.location.assign(postLoginReturn);
                   return;
                 }

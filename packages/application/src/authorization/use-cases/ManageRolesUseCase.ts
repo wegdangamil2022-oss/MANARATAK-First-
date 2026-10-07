@@ -1,29 +1,62 @@
-import { 
-  IRoleRepository, 
+import {
+  IRoleRepository,
   ITransactionalRoleRepository,
-  Role, 
-  PermissionReference 
+  Role,
+  PermissionReference,
 } from '@manaratak/domain';
 import { CreateRoleInput } from '../dtos/AuthorizationDtos';
-import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import {
+  AtomicDomainMutationCoordinator,
+  AtomicMutationRequestContext,
+} from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 
 export class ManageRolesUseCase {
-  constructor(private readonly roleRepository: IRoleRepository, private readonly atomicMutations?: AtomicDomainMutationCoordinator) {}
+  constructor(
+    private readonly roleRepository: IRoleRepository,
+    private readonly atomicMutations?: AtomicDomainMutationCoordinator,
+  ) {}
 
-  public async createRole(input: CreateRoleInput, context?: AtomicMutationRequestContext): Promise<void> {
+  public async createRole(
+    input: CreateRoleInput,
+    context?: AtomicMutationRequestContext,
+  ): Promise<void> {
+    const existing = await this.roleRepository.findById(input.id);
+    if (existing) {
+      const sameList = (left: string[], right: string[]) =>
+        JSON.stringify([...left].sort()) === JSON.stringify([...right].sort());
+      if (
+        existing.name === input.name &&
+        existing.description === input.description &&
+        sameList(
+          existing.permissions.map((permission) => permission.value),
+          input.permissions,
+        ) &&
+        sameList(existing.policyIds, input.policyIds)
+      )
+        return;
+      throw new Error('ROLE_ID_ALREADY_EXISTS');
+    }
     const role = new Role({
       id: input.id,
       name: input.name,
       description: input.description,
-      permissions: input.permissions.map(p => new PermissionReference(p)),
-      policyIds: input.policyIds
+      permissions: input.permissions.map((p) => new PermissionReference(p)),
+      policyIds: input.policyIds,
     });
 
     if (!this.atomicMutations) return this.roleRepository.save(role);
     const repository = this.roleRepository as Partial<ITransactionalRoleRepository>;
     if (!repository.withTransaction) throw new Error('ROLE_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    await this.atomicMutations.execute({ domain: 'AUTHORIZATION', aggregateType: 'ROLE', aggregateId: input.id, action: 'ROLE_CREATED', context },
-      transaction => repository.withTransaction!(transaction).save(role));
+    await this.atomicMutations.execute(
+      {
+        domain: 'AUTHORIZATION',
+        aggregateType: 'ROLE',
+        aggregateId: input.id,
+        action: 'ROLE_CREATED',
+        context,
+      },
+      (transaction) => repository.withTransaction!(transaction).save(role),
+    );
   }
 
   public async getRole(id: string): Promise<Role | null> {

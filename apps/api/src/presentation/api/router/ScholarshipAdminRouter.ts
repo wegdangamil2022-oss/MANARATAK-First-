@@ -96,9 +96,16 @@ export class ScholarshipAdminRouter {
       };
     };
 
+    const allAsUndefined = (value: unknown) => typeof value === 'string' && ['', 'all', 'الكل'].includes(value.trim().toLowerCase()) ? undefined : value;
     const listQuerySchema = z.object({
-      status: z.nativeEnum(ScholarshipStatus).optional(),
-      completenessStatus: z.nativeEnum(ScholarshipCompletenessState).optional(),
+      countryLabel: z.string().trim().min(1).optional(),
+      degreeLabel: z.string().trim().min(1).optional(),
+      majorLabel: z.string().trim().min(1).optional(),
+      languageLabel: z.string().trim().min(1).optional(),
+      fundingType: z.enum(['FULL', 'PARTIAL']).optional(),
+      deadlineStatus: z.enum(['OPEN', 'CLOSING_SOON', 'CLOSED', 'OPEN_ALL_YEAR']).optional(),
+      status: z.preprocess(allAsUndefined, z.nativeEnum(ScholarshipStatus).optional()),
+      completenessStatus: z.preprocess(allAsUndefined, z.nativeEnum(ScholarshipCompletenessState).optional()),
       countryReferenceId: z.string().min(1).optional(),
       studyLanguageReferenceId: z.string().min(1).optional(),
       currencyReferenceId: z.string().min(1).optional(),
@@ -115,14 +122,8 @@ export class ScholarshipAdminRouter {
       deadlineTo: z.string().datetime().transform((value) => new Date(value)).optional(),
       sourceType: z.string().min(1).optional(),
       query: z.string().trim().min(1).max(200).optional(),
-      page: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 1)),
-      pageSize: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 20)),
+      page: z.coerce.number().int().min(1).default(1),
+      pageSize: z.coerce.number().int().min(1).max(100).default(24),
     }).strict();
 
     const legacyScholarshipImportSchema = z.object({
@@ -325,6 +326,8 @@ export class ScholarshipAdminRouter {
       officialSourceUrl: nullableText,
       sourceLocale: nullableText,
       studyLanguageSourceLabel: nullableText,
+      description: nullableText,
+      notes: nullableText,
       benefits: z.array(benefitSchema).optional(),
       degreeTargets: z.array(degreeTargetSchema).optional(),
       majorTargets: z.array(majorTargetSchema).optional(),

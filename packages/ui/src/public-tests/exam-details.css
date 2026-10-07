@@ -1,0 +1,25 @@
+/* Scoped defaults also apply when this public view is embedded in admin. */
+.mn-exam-details {
+  --mn-page: #faf7f0; --mn-primary: #142b5f; --mn-hero-secondary: #0e7c86;
+  --mn-heading: #142b5f; --mn-text: #203442; --mn-text-muted: #526473;
+  --mn-surface: #fff; --mn-border: #dde7ed; --mn-border-brand: #0e7c86;
+  --mn-accent: #d6a43b; --mn-accent-soft: #f2cd78; --mn-accent-text: #92701f;
+  --mn-on-dark-muted: #e4edf2; --mn-border-gold: #e5c988; --mn-gold-surface: #fff8e6;
+}
+.dark .mn-exam-details { --mn-page: #09152f; --mn-surface: #14243e; --mn-heading: #f2cd78; --mn-text: #e4edf2; --mn-text-muted: #b7c8d7; --mn-border: #334b57; --mn-accent-text: #f2cd78; --mn-gold-surface: #243149; }
+.mn-exam-details header { --mn-accent-text: #f2cd78; --mn-text-muted: #e4edf2; }
+.mn-exam-details .mn-exam-gutter { padding-inline: 16px; }
+.mn-exam-details .mn-exam-snap-row { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
+.mn-exam-details .mn-exam-snap-row > * { flex-shrink: 0; }
+.mn-exam-details .mn-exam-section-header { gap: 4px; margin-bottom: 11px; text-align: center; }
+.mn-exam-details .mn-exam-section-icon { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; color: #0e7c86; background: #0e7c8614; border: 1px solid #0e7c8638; }
+.mn-exam-details .mn-exam-section-title { position: relative; margin: 0; padding-bottom: 10px; color: var(--mn-heading); font-size: 14px; font-weight: 700; line-height: 1.65; }
+.mn-exam-details .mn-exam-section-title::after { content: ''; position: absolute; inset-inline: 10%; bottom: 0; height: 2px; background: linear-gradient(90deg, transparent, #21a7b4, transparent); }
+.mn-exam-details .mn-exam-close { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #ffffff60; background: #ffffff15; color: white; font-size: 22px; cursor: pointer; }
+@media (min-width: 640px) { .mn-exam-details .mn-exam-section-title { font-size: 16px; } }
+
+.mn-exam-details { --mn-exam-theme-heading: #142b5f; --mn-exam-theme-text: #203442; --mn-exam-theme-muted: #526473; --mn-exam-theme-accent: #92701f; }
+.dark .mn-exam-details { --mn-exam-theme-heading: #f2cd78; --mn-exam-theme-text: #e4edf2; --mn-exam-theme-muted: #b7c8d7; --mn-exam-theme-accent: #f2cd78; }
+.mn-exam-details .mn-exam-panel { --mn-heading: var(--mn-exam-theme-heading); --mn-text: var(--mn-exam-theme-text); --mn-text-muted: var(--mn-exam-theme-muted); --mn-accent-text: var(--mn-exam-theme-accent); }
+.mn-exam-details .mn-exam-inverse { --mn-heading: #fff; --mn-text: #fff; --mn-text-muted: #ddeff2; --mn-accent-text: #f2cd78; }
+.mn-exam-details .mn-exam-gold { --mn-heading: #142b5f; --mn-text: #142b5f; --mn-text-muted: #203442; --mn-accent-text: #142b5f; }

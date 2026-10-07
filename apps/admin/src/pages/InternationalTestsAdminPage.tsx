@@ -1,5 +1,5 @@
 import { AlertCircle,Archive,BookOpen,CheckCircle2,Eye,Filter,GraduationCap,Loader2,Send } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -111,6 +111,7 @@ const statuses: InternationalTestStatus[] = [
   'IMPORTED',
   'READY_TO_REVIEW',
   'NEEDS_REVIEW',
+  'INCOMPLETE',
   'READY_TO_PUBLISH',
   'PUBLISHED',
   'REJECTED',
@@ -135,7 +136,10 @@ export function InternationalTestsAdminPage() {
   const pageSize = 20;
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
+  const requestSequence = useRef(0);
+
   const loadTests = async (signal?: AbortSignal) => {
+    const requestId = ++requestSequence.current;
     setLoading(true);
     setError(null);
     try {
@@ -156,12 +160,17 @@ export function InternationalTestsAdminPage() {
         `/admin/international-tests?${params.toString()}`,
         { signal }
       );
+      if (signal?.aborted || requestId !== requestSequence.current) return;
+      if (response.total > 0 && response.data.length === 0 && page > 1) {
+        setPage(Math.max(1, Math.ceil(response.total / pageSize)));
+        return;
+      }
       setTests(response);
     } catch (err: any) {
-      if (err?.name === 'AbortError') return;
+      if (signal?.aborted || requestId !== requestSequence.current || err?.name === 'AbortError') return;
       setError(err.message || (isRtl ? 'تعذر تحميل الاختبارات الدولية.' : 'Unable to load international tests.'));
     } finally {
-      setLoading(false);
+      if (!signal?.aborted && requestId === requestSequence.current) setLoading(false);
     }
   };
 

@@ -48,6 +48,7 @@ export class CertificateStudentDashboardReadGateway implements IStudentCertifica
       publicId: row.publicId,
       serialNumber: row.serialNumber,
       verificationCode: row.verificationCode,
+      verificationUrl: row.verificationUrl,
       status: row.status,
       courseDisplayName: row.achievementDisplayName,
       issuedAt: row.issuedAt,

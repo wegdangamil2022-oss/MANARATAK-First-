@@ -114,6 +114,7 @@ export interface NotificationDeliveryCandidate {
   channels: readonly string[];
   attempt: number;
   maxAttempts: number;
+  retryBackoffMs?: number;
   leaseToken: string;
   leaseUntil: Date;
 }
@@ -130,7 +131,7 @@ export interface INotificationIntentRepository {
   cancel(id: string): Promise<void>;
 }
 export interface INotificationTemplateRepository {
-  save(template: NotificationTemplate): Promise<void>;
+  save(template: NotificationTemplate, options?: { createOnly?: boolean }): Promise<void>;
   findById(id: TemplateId): Promise<NotificationTemplate | null>;
   list(limit?: number): Promise<NotificationTemplateSummary[]>;
 }

@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @source './';
+@source "../../../../../packages/ui/src";
 
 /* Header: preserve 40px touch targets while keeping the 320px layout inside the viewport. */
 @media (max-width: 639px) {
@@ -755,3 +756,11 @@
 .manaratak-public [data-mn-design="01abfae3c9"] { font-size: 14px; font-family: Cairo, sans-serif; color: #ffffff; }
 .manaratak-public [data-mn-design="3b7dc7a9b0"] { font-size: 12px; font-family: Cairo, sans-serif; }
 .manaratak-public [data-mn-design="8f05af8d3a"] { font-size: 18px; }
+
+.cms-rich-text h2, .cms-rich-text h3, .cms-rich-text h4 { font-weight: 800; color: var(--mn-heading); margin: 1em 0 .5em; }
+.cms-rich-text p { margin: .6em 0; }
+.cms-rich-text ul, .cms-rich-text ol { padding-inline-start: 1.6em; margin: .6em 0; }
+.cms-rich-text ul { list-style: disc; }
+.cms-rich-text ol { list-style: decimal; }
+.cms-rich-text a { color: var(--mn-accent-text); text-decoration: underline; }
+.cms-rich-text blockquote { border-inline-start: 3px solid var(--mn-accent); padding-inline-start: 1em; }

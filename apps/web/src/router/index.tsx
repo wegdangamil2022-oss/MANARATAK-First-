@@ -141,6 +141,10 @@ const router = createBrowserRouter([
         element: <PublicTemplateApp />,
       },
       {
+        path: 'majors/:slug/:level',
+        element: <PublicTemplateApp />,
+      },
+      {
         path: 'majors/:slug',
         element: <PublicTemplateApp />,
       },
@@ -160,6 +164,12 @@ const router = createBrowserRouter([
         path: 'articles/:slug',
         element: <PublicTemplateApp />,
       },
+      { path: 'news/:slug', element: <PublicTemplateApp /> },
+      { path: 'study-guides/:slug', element: <PublicTemplateApp /> },
+      { path: 'checklists/:slug', element: <PublicTemplateApp /> },
+      { path: 'faqs/:slug', element: <PublicTemplateApp /> },
+      { path: 'pages/:slug', element: <PublicTemplateApp /> },
+      { path: 'landing/:slug', element: <PublicTemplateApp /> },
       {
         path: 'content/:slug',
         element: <PublicTemplateApp />,

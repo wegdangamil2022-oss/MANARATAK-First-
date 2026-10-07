@@ -49,9 +49,9 @@ export class PublicScholarshipUseCases {
       ...publicData
     } = scholarship;
 
-    // Canonical fields always win. Legacy optionalFields and alternate-language payloads
-    // are never spread into one public page response. Only the requested display locale is projected.
-    return { ...publicData, displayName } as PublicScholarshipDto;
+    // Canonical fields always win; optionalFields are not spread into the response.
+    // Keep localized names for bilingual cards while projecting the requested display locale.
+    return { ...publicData, displayName, localizedNames } as PublicScholarshipDto;
   }
 
   private localeValues(value: unknown): Partial<Record<SupportedLocale, string>> {

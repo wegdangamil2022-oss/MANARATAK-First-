@@ -21,7 +21,9 @@ Send,
 ShieldCheck,
 X
 } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ExamDetails, mapInternationalTestToExam } from '@manaratak/ui';
+import { TestEditorSaveContext, useTestEditorForm, type TestEditorEntry } from '../components/TestEditorSaveRegistry';
 import { Link,useParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { InternationalTestSourceSectionsViewer } from '../components/InternationalTestSourceSectionsViewer';
@@ -140,6 +142,20 @@ function formatDetailDateTime(dateStr?: string | null, isRtl = true): string {
   }
 }
 
+function testEditorGroup(title: string): string | undefined {
+  const text = title.toLowerCase();
+  if (/معلومات.*أساسية|معلومات.*الأساسية|نبذة|overview|basic information/.test(text)) return 'overview';
+  if (/عائلة|نسخ|variant/.test(text)) return 'variants';
+  if (/طرق التقديم|طريقة التقديم|التوفر|مراكز|availability/.test(text)) return 'availability';
+  if (/بنية|أقسام|الأقسام|مهارات|skills|structure/.test(text)) return 'sections';
+  if (/نظام الدرجات|تفسير الدرجات|cefr|score scale|scoring/.test(text)) return 'scoring';
+  if (/تسجيل|أهلية|الهوية|إعادة الاختبار|تسهيلات|registration|retake/.test(text)) return 'requirements';
+  if (/رسوم|مالية|fees/.test(text)) return 'fees';
+  if (/تحضير|preparation/.test(text)) return 'preparation';
+  if (/روابط|وسائط|المصادر|links|sources/.test(text)) return 'links';
+  return undefined;
+}
+
 export function InternationalTestDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { language } = useTranslation();
@@ -158,26 +174,43 @@ export function InternationalTestDetailPage() {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const isRtl = language === 'ar';
+  const editors = useRef(new Map<string, TestEditorEntry>());
+  const saveRegistry = useMemo(() => ({
+    entries: editors.current,
+    changed: () => setHasUnsavedChanges([...editors.current.values()].some(entry => entry.dirty)),
+  }), []);
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => { if (hasUnsavedChanges) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [hasUnsavedChanges]);
 
-  const fetchDetail = async () => {
+  const savingBatch = useRef(false);
+  const detailRequest = useRef(0);
+  const fetchDetail = async (force = false) => {
+    if (savingBatch.current && !force) return;
     if (!id) return;
-    setLoading(true);
+    const requestId = ++detailRequest.current;
+    if (!test) setLoading(true);
     setError(null);
     try {
       const data = await adminApiClient.getInternationalTest<InternationalTestDetail>(id);
+      if (requestId !== detailRequest.current) return;
       setTest(data);
-      if (!lastSavedAt && data?.updatedAt) {
+      if (data?.updatedAt) {
         setLastSavedAt(data.updatedAt);
       }
     } catch (err: any) {
+      if (requestId !== detailRequest.current) return;
       setError(err.message || (isRtl ? 'تعذر تحميل تفاصيل الاختبار الدولي' : 'Failed to load international test details.'));
     } finally {
-      setLoading(false);
+      if (requestId === detailRequest.current) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDetail();
+    setLoading(true);
+    void fetchDetail();
   }, [id]);
 
   const tabs: { id: TabType; labelAr: string; labelEn: string; icon: any }[] = [
@@ -188,7 +221,9 @@ export function InternationalTestDetailPage() {
   ];
 
   const handlePublish = async () => {
-    if (!test) return;
+    if (!test || test.status === 'PUBLISHED') return;
+    if (hasUnsavedChanges && !(await handleSaveChanges())) return;
+    if (!window.confirm(isRtl ? 'هل تريد نشر الاختبار المحفوظ في الصفحة العامة؟' : 'Publish the saved test on the public site?')) return;
     setActionLoading(true);
     setActionMessage(null);
     setActionError(null);
@@ -196,8 +231,8 @@ export function InternationalTestDetailPage() {
       await adminApiClient.publishInternationalTest(test.id);
       setActionMessage(
         isRtl
-          ? test.status === 'PUBLISHED' ? 'تم نشر التحديث بنجاح!' : 'تم نشر الاختبار بنجاح!'
-          : test.status === 'PUBLISHED' ? 'Update published successfully!' : 'Test published successfully!'
+          ? 'تم نشر الاختبار بنجاح!'
+          : 'Test published successfully!'
       );
       setLastSavedAt(new Date().toISOString());
       setHasUnsavedChanges(false);
@@ -218,7 +253,7 @@ export function InternationalTestDetailPage() {
     setShowMoreMenu(false);
     try {
       await adminApiClient.unpublishInternationalTest(test.id);
-      setActionMessage(isRtl ? 'تم إلغاء النشر بنجاح وإعادة الاختبار لحالة المسودة.' : 'Test unpublished successfully.');
+      setActionMessage(isRtl ? 'تم إلغاء النشر وإعادة الاختبار إلى جاهز للنشر.' : 'Test unpublished successfully.');
       setLastSavedAt(new Date().toISOString());
       await fetchDetail();
     } catch (err: any) {
@@ -247,19 +282,44 @@ export function InternationalTestDetailPage() {
     }
   };
 
-  const handleSaveChanges = async () => {
-    if (!test) return;
-    setActionMessage(isRtl ? 'كل التعديلات محفوظة بالفعل.' : 'All changes are already saved.');
-    setLastSavedAt(new Date().toISOString());
-    setHasUnsavedChanges(false);
+  const handleSaveChanges = async (): Promise<boolean> => {
+    const pending = [...editors.current.values()].filter(entry => entry.dirty);
+    if (!pending.length) {
+      setActionMessage(isRtl ? 'لا توجد تعديلات غير محفوظة.' : 'No unsaved changes.');
+      return true;
+    }
+    setActionLoading(true);
+    setActionError(null);
+    setActionMessage(null);
+    try {
+      savingBatch.current = true;
+      for (const entry of pending) {
+        if (!(await entry.save())) {
+          setActionError(isRtl ? 'تعذر حفظ أحد النماذج. راجع الحقول ورسالة الخطأ؛ لم يتم النشر.' : 'A form could not be saved. Check its validation errors; nothing was published.');
+          return false;
+        }
+      }
+      if ([...editors.current.values()].some(entry => entry.dirty)) {
+        setActionError(isRtl ? 'تغيّرت بعض الحقول أثناء الحفظ. احفظها مرة أخرى قبل النشر.' : 'Some fields changed during saving. Save again before publishing.');
+        return false;
+      }
+      await fetchDetail(true);
+      setActionMessage(isRtl ? 'تم حفظ التعديلات وإعادة تحميل البيانات المحفوظة.' : 'Changes saved and reloaded.');
+      return true;
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Save failed');
+      return false;
+    } finally { savingBatch.current = false; setActionLoading(false); }
   };
 
-  const renderEmbeddedForm = (sectionNum: number, sectionTitle: string, _blockKey: string) => {
+  const switchTab = (tab: TabType) => { setActiveTab(tab); };
+
+  const renderEmbeddedForm = (_sectionNum: number, sectionTitle: string, _blockKey: string) => {
     if (!test) return null;
-    const tTitle = (sectionTitle || '').toLowerCase();
+    const group = testEditorGroup(sectionTitle);
 
     // Section 1/2: Overview / Description
-    if (sectionNum === 1 || sectionNum === 2 || tTitle.includes('معلومات') || tTitle.includes('نبذة')) {
+    if (group === 'overview') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="mb-3 flex items-center justify-between">
@@ -267,13 +327,13 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'تحرير بيانات الوصف والاستخدامات الأساسية' : 'Edit Basic Description & Uses'}
             </span>
           </div>
-          <DescriptionTab test={test} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+          <DescriptionTab test={test} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
 
     // Section 4: Variants & Delivery Modes
-    if (sectionNum === 4 || tTitle.includes('عائلة') || tTitle.includes('نسخ') || tTitle.includes('variant')) {
+    if (group === 'variants') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="mb-3 flex items-center justify-between">
@@ -281,13 +341,13 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'النسخ الرسمية وطرق التقديم القابلة للتحرير' : 'Editable Official Variants & Delivery Modes'}
             </span>
           </div>
-          <VariantsTab testId={test.id} initialVariants={test.variants || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+          <VariantsTab testId={test.id} initialVariants={test.variants || []} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
 
     // Section 5: Delivery & Availability & Centers
-    if (sectionNum === 5 || tTitle.includes('تقديم') || tTitle.includes('توفر') || tTitle.includes('مراكز') || tTitle.includes('availability')) {
+    if (group === 'availability') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="mb-3 flex items-center justify-between">
@@ -295,13 +355,13 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'الدول ومراكز الاختبار ونوافذ التقديم القابلة للتحرير' : 'Editable Countries, Centers & Testing Windows'}
             </span>
           </div>
-          <AvailabilityTab testId={test.id} initialAvailability={test.availability} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+          <AvailabilityTab testId={test.id} initialAvailability={test.availability} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
 
     // Section 6 or 7: Test Skills & Operational Sections
-    if (sectionNum === 6 || sectionNum === 7 || tTitle.includes('أقسام') || tTitle.includes('مهارات') || tTitle.includes('skills')) {
+    if (group === 'sections') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200 bg-slate-50/60 -mx-5 -mb-5 p-5 rounded-b-xl">
           <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -312,13 +372,13 @@ export function InternationalTestDetailPage() {
               {isRtl ? '(ميّز بينها وبين الأقسام التحريرية للملف أعلاه)' : '(Distinguished from editorial file sections above)'}
             </span>
           </div>
-          <SectionsTab testId={test.id} initialSections={test.sections || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+          <SectionsTab testId={test.id} initialSections={test.sections || []} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
 
     // Section 8 or 9 or 10: Scoring Scales & Equivalencies
-    if ((sectionNum === 8 || sectionNum === 9 || sectionNum === 10) && (tTitle.includes('درجات') || tTitle.includes('score') || tTitle.includes('cefr'))) {
+    if (group === 'scoring') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="mb-3 flex items-center justify-between">
@@ -326,13 +386,13 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'نظام الدرجات والسلالم والمعادلات القابل للتحرير' : 'Editable Score Scales & Equivalencies'}
             </span>
           </div>
-          <ScoringTab testId={test.id} initialScoreScale={test.scoreScale} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+          <ScoringTab testId={test.id} initialScoreScale={test.scoreScale} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
 
     // Section 11 or 14: Registration & Policies
-    if ((sectionNum === 11 || sectionNum === 14) || tTitle.includes('تسجيل') || tTitle.includes('أهلية') || tTitle.includes('متطلبات')) {
+    if (group === 'requirements') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="mb-3 flex items-center justify-between">
@@ -340,13 +400,13 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'متطلبات التسجيل والهوية والسياسات' : 'Registration & Policy Requirements'}
             </span>
           </div>
-          <RequirementsTab test={test} isRtl={isRtl} />
+          <RequirementsTab test={test} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
 
     // Section 12 or 15: Fees & Financial Policies
-    if ((sectionNum === 12 || sectionNum === 15) || tTitle.includes('رسوم') || tTitle.includes('مالية') || tTitle.includes('fees')) {
+    if (group === 'fees') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="mb-3 flex items-center justify-between">
@@ -354,13 +414,13 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'الرسوم والعملات والسياسات المالية' : 'Fees & Financial Policies'}
             </span>
           </div>
-          <FeesTab testId={test.id} initialFees={test.fees || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+          <FeesTab testId={test.id} initialFees={test.fees || []} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
 
     // Section 15 or 18: Preparation Materials
-    if ((sectionNum === 15 || sectionNum === 18) && (tTitle.includes('تحضير') || tTitle.includes('prep') || tTitle.includes('مصادر'))) {
+    if (group === 'preparation') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="mb-3 flex items-center justify-between">
@@ -368,13 +428,13 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'مواد التحضير والأدلة الرسمية' : 'Preparation Materials & Guides'}
             </span>
           </div>
-          <PreparationMaterialsTab testId={test.id} initialMaterials={test.preparationMaterials || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+          <PreparationMaterialsTab testId={test.id} initialMaterials={test.preparationMaterials || []} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
 
     // Section 16 or 19: Official Links
-    if ((sectionNum === 16 || sectionNum === 19) || tTitle.includes('روابط') || tTitle.includes('وسائط') || tTitle.includes('links')) {
+    if (group === 'links') {
       return (
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="mb-3 flex items-center justify-between">
@@ -382,7 +442,7 @@ export function InternationalTestDetailPage() {
               {isRtl ? 'الروابط الرسمية المعتمدة' : 'Official Verified Links'}
             </span>
           </div>
-          <OfficialLinksTab testId={test.id} initialLinks={test.officialLinks || []} onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }} isRtl={isRtl} />
+          <OfficialLinksTab testId={test.id} initialLinks={test.officialLinks || []} onRefresh={fetchDetail} isRtl={isRtl} />
         </div>
       );
     }
@@ -424,6 +484,7 @@ export function InternationalTestDetailPage() {
     : test.localizedNameAr?.trim() || test.canonicalName;
 
   return (
+    <TestEditorSaveContext.Provider value={saveRegistry}>
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Top Breadcrumb */}
       <div>
@@ -553,7 +614,7 @@ export function InternationalTestDetailPage() {
             {/* Publish / Publish Update Button */}
             <button
               type="button"
-              disabled={actionLoading}
+              disabled={actionLoading || test.status === 'PUBLISHED'}
               onClick={handlePublish}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black transition shadow-md cursor-pointer disabled:opacity-50"
               title={isRtl ? 'نشر الاختبار' : 'Publish Test'}
@@ -561,10 +622,17 @@ export function InternationalTestDetailPage() {
               {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               <span>
                 {test.status === 'PUBLISHED'
-                  ? (isRtl ? 'نشر التحديث' : 'Publish Update')
+                  ? (isRtl ? 'منشور' : 'Published')
                   : (isRtl ? 'نشر الاختبار' : 'Publish Test')}
               </span>
             </button>
+
+            {test.status === 'PUBLISHED' && test.slug && (
+              <a href={`${(import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '')}/international-tests/${encodeURIComponent(test.slug)}`}
+                target="_blank" rel="noopener noreferrer" className="rounded-xl border border-white/25 px-3 py-2.5 text-xs font-bold text-white">
+                {isRtl ? 'فتح الصفحة المنشورة' : 'Open published page'}
+              </a>
+            )}
 
             {/* More Menu (Dropdown) */}
             <div className="relative">
@@ -616,7 +684,7 @@ export function InternationalTestDetailPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => switchTab(tab.id)}
                 className={`flex items-center gap-2 py-3 px-4 text-xs font-black rounded-xl transition-all cursor-pointer ${
                   isActive
                     ? 'bg-[#142B5F] text-white shadow-xs'
@@ -634,14 +702,30 @@ export function InternationalTestDetailPage() {
       {/* Tab Content Panels */}
       <div className="bg-white border border-[#DDEFF2] rounded-3xl p-6 sm:p-8 shadow-sm">
         {/* TAB 1: تفاصيل الاختبار (Source Sections + In-Context Structured Forms) */}
-        {activeTab === 'details' && (
+        {(
+          <div hidden={activeTab !== 'details'}>
           <div className="space-y-6">
             <InternationalTestSourceSectionsViewer
               testId={test.id}
               isRtl={isRtl}
-              onNamesReviewed={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }}
+              onNamesReviewed={fetchDetail}
               renderEmbeddedForm={renderEmbeddedForm}
+              editorGroup={testEditorGroup}
+              fallbackEditors={<div className="space-y-5">
+                {['معلومات الاختبار الأساسية', 'عائلة الاختبار والنسخ', 'طرق التقديم والتوفر', 'بنية الاختبار والأقسام', 'نظام الدرجات', 'التسجيل والأهلية والهوية', 'الرسوم', 'التحضير', 'المصادر والروابط'].map(title => (
+                  <section key={title} className="rounded-xl border border-slate-200 p-4">
+                    <h3 className="font-bold text-[#142B5F]">{title}</h3>
+                    {renderEmbeddedForm(0, title, title)}
+                  </section>
+                ))}
+              </div>}
+              canChangeVersion={() => {
+                if (!hasUnsavedChanges) return true;
+                setActionError(isRtl ? 'احفظ التعديلات قبل تغيير نسخة المصدر.' : 'Save changes before switching source versions.');
+                return false;
+              }}
             />
+          </div>
           </div>
         )}
 
@@ -678,147 +762,33 @@ export function InternationalTestDetailPage() {
         {activeTab === 'readiness' && (
           <ReadinessTab
             test={test}
-            onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }}
+            onRefresh={fetchDetail}
+            onPublish={handlePublish}
             isRtl={isRtl}
           />
         )}
 
         {/* TAB 4: المصادر وسجل التعديلات (Audit, Evidence, Raw Source & Versions) */}
-        {activeTab === 'sources_history' && (
+        {(
+          <div hidden={activeTab !== 'sources_history'}>
           <EvidenceTab
             testId={test.id}
             initialEvidence={test.importEvidence}
-            onRefresh={() => { setLastSavedAt(new Date().toISOString()); fetchDetail(); }}
+            onRefresh={fetchDetail}
             isRtl={isRtl}
           />
+          </div>
         )}
       </div>
 
-      {/* Admin Public Preview Modal */}
       {showPreviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 space-y-6">
-            {/* Warning Banner */}
-            <div className="bg-gradient-to-r from-amber-600 via-[#0E7C86] to-[#142B5F] p-4 text-white text-xs font-bold flex items-center justify-between sticky top-0 z-10 shadow-sm">
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 shrink-0" />
-                <span>
-                  {isRtl
-                    ? 'معاينة إدارية قبل النشر · هذه المسودة خاصة بالمسؤولين فقط وليست متاحة للعامة'
-                    : 'Administrative Preview · This draft is private to administrators and not visible to the public'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowPreviewModal(false)}
-                className="p-1 rounded-lg hover:bg-white/20 transition cursor-pointer text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        <div className="fixed inset-0 z-50 bg-black/60 p-3 sm:p-6" role="dialog" aria-modal="true" aria-label="معاينة الاختبار العامة">
+          <div className="mx-auto max-w-3xl max-h-full overflow-y-auto rounded-2xl shadow-2xl">
+            <div className="bg-[#0E7C86] px-4 py-3 text-white text-xs font-bold">
+              معاينة البيانات المحفوظة بنفس تصميم الصفحة العامة؛ لا تعني نشر المسودة.
+              {hasUnsavedChanges && <span className="block mt-1">احفظ التعديلات أولاً لتظهر في المعاينة.</span>}
             </div>
-
-            <div className="p-6 sm:p-8 space-y-6">
-              {/* Preview Hero */}
-              <div className="rounded-2xl border border-[#DDEFF2] bg-gradient-to-l from-[#142B5F] to-[#0E7C86] p-6 text-white shadow-md">
-                <div className="flex flex-wrap items-center gap-2.5 text-xs text-cyan-200 mb-2 font-bold">
-                  <span>{getCategoryLabel(test.testCategory, isRtl)}</span>
-                  <span>•</span>
-                  <span>{test.providerName}</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white">
-                  {primaryTitle}
-                </h1>
-                {test.abbreviation && (
-                  <p className="mt-1 text-sm text-white/80 font-bold font-mono">
-                    {test.abbreviation}
-                  </p>
-                )}
-              </div>
-
-              {/* Preview Overview */}
-              <div className="space-y-2">
-                <h2 className="text-lg font-black text-[#142B5F]">
-                  {isRtl ? 'نبذة عن الاختبار والاستخدامات' : 'Test Overview & Purpose'}
-                </h2>
-                <p className="text-sm text-slate-700 leading-relaxed">
-                  {test.description || (isRtl ? 'اختبار دولي معتمد لقياس الكفاءة والجاهزية الأكاديمية والمهنية.' : 'Accredited international test measuring academic and professional readiness.')}
-                </p>
-              </div>
-
-              {/* Preview Sections */}
-              {test.sections && test.sections.length > 0 && (
-                <div className="space-y-3">
-                  <h2 className="text-lg font-black text-[#142B5F]">
-                    {isRtl ? 'بنية وأقسام ومهارات الاختبار' : 'Test Structure, Skills & Sections'}
-                  </h2>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {test.sections.map((sec, idx) => (
-                      <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-1">
-                        <div className="font-bold text-[#142B5F] text-sm">{sec.sectionName}</div>
-                        <div className="text-slate-500">
-                          {sec.durationMinutes ? `${sec.durationMinutes} دقيقة` : ''} {sec.sectionType ? `· ${sec.sectionType}` : ''}
-                        </div>
-                        {sec.questionTypes && sec.questionTypes.length > 0 && (
-                          <div className="text-[11px] text-slate-400">
-                            {isRtl ? 'أنواع الأسئلة: ' : 'Question types: '} {sec.questionTypes.join('، ')}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Preview Scoring */}
-              {test.scoreScale && (
-                <div className="space-y-2 bg-[#FAF7F0] p-5 rounded-2xl border border-amber-200/60">
-                  <h2 className="text-base font-black text-[#142B5F]">
-                    {isRtl ? 'نظام الدرجات والتقييم' : 'Scoring System'}
-                  </h2>
-                  <div className="text-xs text-slate-700 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div><span className="text-slate-500">{isRtl ? 'الحد الأدنى: ' : 'Min: '}</span><span className="font-bold">{test.scoreScale.overallMinimum}</span></div>
-                    <div><span className="text-slate-500">{isRtl ? 'الحد الأقصى: ' : 'Max: '}</span><span className="font-bold">{test.scoreScale.overallMaximum}</span></div>
-                    {test.scoreScale.cefrEquivalency && (
-                      <div><span className="text-slate-500">CEFR: </span><span className="font-bold">{test.scoreScale.cefrEquivalency}</span></div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Preview Requirements & Fees */}
-              <div className="grid sm:grid-cols-2 gap-4 text-xs">
-                {test.registrationRequirements && (
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
-                    <div className="font-bold text-[#142B5F]">{isRtl ? 'متطلبات التسجيل' : 'Registration Requirements'}</div>
-                    <p className="text-slate-600 leading-relaxed">{test.registrationRequirements}</p>
-                  </div>
-                )}
-                {test.fees && test.fees.length > 0 && (
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
-                    <div className="font-bold text-[#142B5F]">{isRtl ? 'رسوم الاختبار' : 'Test Fees'}</div>
-                    <div className="space-y-1.5 pt-1">
-                      {test.fees.map((fee, idx) => (
-                        <div key={idx} className="flex justify-between text-slate-700 font-medium">
-                          <span>{fee.feeType || (isRtl ? 'رسوم التسجيل' : 'Registration')}</span>
-                          <span className="font-bold text-[#0E7C86]">{fee.amount} {fee.currencyCode}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Footer Modal Action */}
-              <div className="flex justify-end pt-4 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setShowPreviewModal(false)}
-                  className="px-5 py-2.5 rounded-xl bg-[#142B5F] text-white text-xs font-bold hover:bg-[#0E7C86] transition cursor-pointer"
-                >
-                  {isRtl ? 'إغلاق المعاينة' : 'Close Preview'}
-                </button>
-              </div>
-            </div>
+            <ExamDetails exam={mapInternationalTestToExam(test)} onClose={() => setShowPreviewModal(false)} />
           </div>
         </div>
       )}
@@ -859,6 +829,7 @@ export function InternationalTestDetailPage() {
         </div>
       )}
     </div>
+    </TestEditorSaveContext.Provider>
   );
 }
 
@@ -877,6 +848,7 @@ function VariantsTab({
   isRtl: boolean;
 }) {
   const [variants, setVariants] = useState<Variant[]>(initialVariants);
+  useEffect(() => { setVariants(initialVariants); }, [initialVariants]);
   const [loading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -917,12 +889,16 @@ function VariantsTab({
         administrativeNotes: ''
       });
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر حفظ النسخة.' : 'Failed to save variant.'));
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const editorForm = useTestEditorForm(handleSubmit);
 
   return (
     <div className="space-y-6">
@@ -973,7 +949,7 @@ function VariantsTab({
       </div>
 
       {/* Add Variant Form */}
-      <form onSubmit={handleSubmit} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
+      <form {...editorForm} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
         <h4 className="font-bold text-gray-900 text-sm border-b pb-2 flex items-center gap-1.5">
           <Plus className="h-4 w-4" />
           {isRtl ? 'إضافة أو تحديث نسخة' : 'Add or Update Variant'}
@@ -1067,6 +1043,7 @@ function SectionsTab({
   isRtl: boolean;
 }) {
   const [sections, setSections] = useState<Section[]>(initialSections);
+  useEffect(() => { setSections(initialSections); }, [initialSections]);
   const [loading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1124,12 +1101,16 @@ function SectionsTab({
       });
       setQuestionTypesInput('');
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر حفظ القسم.' : 'Failed to save section.'));
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const editorForm = useTestEditorForm(handleSubmit);
 
   return (
     <div className="space-y-6">
@@ -1180,7 +1161,7 @@ function SectionsTab({
       </div>
 
       {/* Add Section Form */}
-      <form onSubmit={handleSubmit} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
+      <form {...editorForm} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
         <h4 className="font-bold text-gray-900 text-sm border-b pb-2 flex items-center gap-1.5">
           <Plus className="h-4 w-4" />
           {isRtl ? 'إضافة قسم جديد' : 'Add New Section'}
@@ -1305,8 +1286,8 @@ function ScoringTab({
     passFailRules: initialScoreScale?.passFailRules ?? '',
     cefrEquivalency: initialScoreScale?.cefrEquivalency ?? '',
     crossTestEquivalency: initialScoreScale?.crossTestEquivalency ?? '',
-    resultValidityDurationMonths: initialScoreScale?.resultValidityDurationMonths ?? 24,
-    resultDeliveryTimeDays: initialScoreScale?.resultDeliveryTimeDays ?? 13,
+    resultValidityDurationMonths: initialScoreScale?.resultValidityDurationMonths ?? undefined,
+    resultDeliveryTimeDays: initialScoreScale?.resultDeliveryTimeDays ?? undefined,
     scoreReportingUrl: initialScoreScale?.scoreReportingUrl ?? ''
   });
 
@@ -1337,12 +1318,16 @@ function ScoringTab({
       await adminApiClient.upsertInternationalTestScoreScale(testId, payload);
       setSuccess(isRtl ? 'تم حفظ نظام ومقياس الدرجات بنجاح.' : 'Score scale saved successfully.');
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر حفظ نظام الدرجات.' : 'Failed to save score scale.'));
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const editorForm = useTestEditorForm(handleSubmit);
 
   return (
     <div className="space-y-6">
@@ -1353,7 +1338,7 @@ function ScoringTab({
       {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
       {success && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">{success}</div>}
 
-      <form onSubmit={handleSubmit} className="space-y-6 text-sm">
+      <form {...editorForm} className="space-y-6 text-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-gray-700 font-medium mb-1">{isRtl ? 'الحد الأدنى الكلي (Minimum)' : 'Overall Minimum'} *</label>
@@ -1393,7 +1378,7 @@ function ScoringTab({
             <input
               type="number"
               value={form.resultValidityDurationMonths ?? ''}
-              onChange={(e) => setForm({ ...form, resultValidityDurationMonths: parseInt(e.target.value, 10) || 0 })}
+              onChange={(e) => setForm({ ...form, resultValidityDurationMonths: e.target.value === '' ? undefined : Number(e.target.value) })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black"
             />
           </div>
@@ -1403,7 +1388,7 @@ function ScoringTab({
             <input
               type="number"
               value={form.resultDeliveryTimeDays ?? ''}
-              onChange={(e) => setForm({ ...form, resultDeliveryTimeDays: parseInt(e.target.value, 10) || 0 })}
+              onChange={(e) => setForm({ ...form, resultDeliveryTimeDays: e.target.value === '' ? undefined : Number(e.target.value) })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black"
             />
           </div>
@@ -1530,12 +1515,16 @@ function FeesTab({
         validityWindowNotes: ''
       });
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر حفظ بيانات الرسوم.' : 'Failed to save fee metadata.'));
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const editorForm = useTestEditorForm(handleSubmit);
 
   return (
     <div className="space-y-6">
@@ -1584,7 +1573,7 @@ function FeesTab({
       </div>
 
       {/* Add Fee Form */}
-      <form onSubmit={handleSubmit} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
+      <form {...editorForm} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
         <h4 className="font-bold text-gray-900 text-sm border-b pb-2 flex items-center gap-1.5">
           <Plus className="h-4 w-4" />
           {isRtl ? 'إضافة أو تعديل رسوم' : 'Add or Update Fee'}
@@ -1710,12 +1699,16 @@ function OfficialLinksTab({
         description: ''
       });
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر حفظ الرابط الرسمي.' : 'Failed to save official link.'));
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const editorForm = useTestEditorForm(handleSubmit);
 
   return (
     <div className="space-y-6">
@@ -1751,7 +1744,7 @@ function OfficialLinksTab({
       </div>
 
       {/* Add Link Form */}
-      <form onSubmit={handleSubmit} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
+      <form {...editorForm} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
         <h4 className="font-bold text-gray-900 text-sm border-b pb-2 flex items-center gap-1.5">
           <Plus className="h-4 w-4" />
           {isRtl ? 'إضافة رابط رسمي جديد' : 'Add New Official Link'}
@@ -1816,15 +1809,6 @@ function DetailField({ label, value }: { label: string; value: React.ReactNode }
     <div>
       <dt className="text-gray-500 text-xs uppercase tracking-wider font-medium">{label}</dt>
       <dd className="text-gray-900 font-semibold mt-1">{value}</dd>
-    </div>
-  );
-}
-
-function PolicySection({ title, content, fallback }: { title: string; content?: string | null; fallback: string }) {
-  return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-      <h5 className="font-bold text-gray-800 mb-1">{title}</h5>
-      <p className="text-gray-700 whitespace-pre-line leading-relaxed">{content || fallback}</p>
     </div>
   );
 }
@@ -2106,12 +2090,16 @@ function AvailabilityTab({
       await adminApiClient.upsertInternationalTestAvailability(testId, payload);
       setSuccess(isRtl ? 'تم حفظ بيانات التوفر بنجاح.' : 'Availability saved successfully.');
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر حفظ بيانات التوفر.' : 'Failed to save availability.'));
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const editorForm = useTestEditorForm(handleSubmit);
 
   const countries = parseArray(availability?.availableCountryIds);
   const cities = parseArray(availability?.availableCityIds);
@@ -2195,7 +2183,7 @@ function AvailabilityTab({
       </div>
 
       {/* Add / Update Availability Form */}
-      <form onSubmit={handleSubmit} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
+      <form {...editorForm} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
         <h4 className="font-bold text-gray-900 text-sm border-b pb-2 flex items-center gap-1.5">
           <Plus className="h-4 w-4" />
           {isRtl ? 'تحديث بيانات التوفر' : 'Update Availability Data'}
@@ -2334,12 +2322,16 @@ function PreparationMaterialsTab({
         description: ''
       });
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر حفظ مادة التحضير.' : 'Failed to save preparation material.'));
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const editorForm = useTestEditorForm(handleSubmit);
 
   return (
     <div className="space-y-6">
@@ -2400,7 +2392,7 @@ function PreparationMaterialsTab({
       </div>
 
       {/* Add Material Form */}
-      <form onSubmit={handleSubmit} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
+      <form {...editorForm} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
         <h4 className="font-bold text-gray-900 text-sm border-b pb-2 flex items-center gap-1.5">
           <Plus className="h-4 w-4" />
           {isRtl ? 'إضافة مادة تحضير جديدة' : 'Add New Preparation Material'}
@@ -2529,12 +2521,16 @@ function EvidenceTab({
         sourceTrustLevel: 'AUTHORITATIVE'
       });
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر إدراج الدليل.' : 'Failed to record evidence.'));
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const editorForm = useTestEditorForm(handleSubmit);
 
   return (
     <div className="space-y-6">
@@ -2641,7 +2637,7 @@ function EvidenceTab({
       </div>
 
       {/* Add Evidence Form */}
-      <form onSubmit={handleSubmit} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
+      <form {...editorForm} className="border border-gray-200 rounded-xl p-5 bg-white space-y-4 shadow-sm">
         <h4 className="font-bold text-gray-900 text-sm border-b pb-2 flex items-center gap-1.5">
           <Plus className="h-4 w-4" />
           {isRtl ? 'إدراج دليل جديد' : 'Add New Evidence'}
@@ -2723,10 +2719,12 @@ function EvidenceTab({
 function ReadinessTab({
   test,
   onRefresh,
+  onPublish,
   isRtl
 }: {
   test: InternationalTestDetail;
   onRefresh: () => void;
+  onPublish: () => Promise<void>;
   isRtl: boolean;
 }) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -2777,22 +2775,9 @@ function ReadinessTab({
   };
 
   const handlePublish = async () => {
-    setError(null);
-    setSuccess(null);
-    setActionLoading('publish');
     setConfirmModal(null);
-    try {
-      await adminApiClient.publishInternationalTest(test.id);
-      setSuccess(isRtl ? 'تم نشر الاختبار الدولي بنجاح، وظهر الرابط العام.' : 'International test published successfully.');
-      onRefresh();
-    } catch (err: any) {
-      setError(
-        err.message ||
-          (isRtl ? 'لا يمكن النشر قبل اكتمال البيانات' : 'Cannot publish before data completeness.')
-      );
-    } finally {
-      setActionLoading(null);
-    }
+    await onPublish();
+    await loadReadiness();
   };
 
   const handleArchive = async () => {
@@ -3055,10 +3040,14 @@ function DescriptionTab({ test, onRefresh, isRtl }: { test: InternationalTestDet
       });
       setSuccess(isRtl ? 'تم حفظ الملف الأساسي وربطه بالمزود المعياري.' : 'Core profile and canonical provider saved.');
       await onRefresh();
+      return true;
     } catch (err: any) {
       setError(err.message || (isRtl ? 'تعذر حفظ الملف الأساسي.' : 'Failed to save core profile.'));
+      return false;
     } finally { setSaving(false); }
   };
+
+  const editorForm = useTestEditorForm(saveProfile);
 
   const createProvider = async () => {
     setSaving(true); setError(null); setSuccess(null);
@@ -3097,7 +3086,7 @@ function DescriptionTab({ test, onRefresh, isRtl }: { test: InternationalTestDet
         <DetailField label={isRtl ? 'الاسم بالإنجليزية' : 'Localized Name EN'} value={test.localizedNameEn || (isRtl ? 'غير متوفر' : 'N/A')} />
       </div>
 
-      <form onSubmit={saveProfile} className="border rounded-xl p-5 space-y-4">
+      <form {...editorForm} className="border rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
             <label className="block font-medium text-gray-700 mb-1">{isRtl ? 'المزود المعياري' : 'Canonical Provider'}</label>
@@ -3141,23 +3130,33 @@ function DescriptionTab({ test, onRefresh, isRtl }: { test: InternationalTestDet
 // ----------------------------------------------------------------------
 // REQUIREMENTS TAB
 // ----------------------------------------------------------------------
-function RequirementsTab({ test, isRtl }: { test: any; isRtl: boolean }) {
-  return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-bold text-gray-900 border-b pb-3">
-        {isRtl ? 'المتطلبات والسياسات' : 'Requirements & Policies'}
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-        <PolicySection title={isRtl ? 'متطلبات التسجيل' : 'Registration Requirements'} content={test.registrationRequirements} fallback={isRtl ? 'غير متوفر' : 'Pending'} />
-        <PolicySection title={isRtl ? 'متطلبات الهوية' : 'Identification Requirements'} content={test.identificationRequirements} fallback={isRtl ? 'غير متوفر' : 'Pending'} />
-        <PolicySection title={isRtl ? 'قيود العمر' : 'Age Rules'} content={null} fallback={isRtl ? 'غير متوفر حالياً' : 'Pending'} />
-        <PolicySection title={isRtl ? 'سياسة إعادة الاختبار' : 'Retake Policy'} content={test.retakePolicy} fallback={isRtl ? 'غير متوفر' : 'Pending'} />
-        <PolicySection title={isRtl ? 'ملاحظات الإلغاء وتغيير الموعد' : 'Cancellation & Rescheduling Notes'} content={test.cancellationReschedulingNotes} fallback={isRtl ? 'غير متوفر' : 'Pending'} />
-        <PolicySection title={isRtl ? 'تسهيلات ذوي الاحتياجات' : 'Accessibility Notes'} content={test.accessibilityNotes} fallback={isRtl ? 'غير متوفر' : 'Pending'} />
-        <PolicySection title={isRtl ? 'شروط يوم الاختبار' : 'Test Day Requirements'} content={null} fallback={isRtl ? 'غير متوفر حالياً' : 'Pending'} />
-      </div>
-    </div>
-  );
+function RequirementsTab({ test, onRefresh, isRtl }: { test: InternationalTestDetail; onRefresh: () => Promise<void>; isRtl: boolean }) {
+  const keys = ['registrationRequirements', 'identificationRequirements', 'retakePolicy', 'cancellationReschedulingNotes', 'accessibilityNotes'] as const;
+  const labels = ['متطلبات التسجيل', 'متطلبات الهوية', 'سياسة إعادة الاختبار', 'الإلغاء وتغيير الموعد', 'التسهيلات'];
+  const initial = () => Object.fromEntries(keys.map(key => [key, test[key] || ''])) as Record<typeof keys[number], string>;
+  const [form, setForm] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => { setForm(initial()); }, [test.id]);
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault(); setSaving(true); setError(null);
+    try {
+      await adminApiClient.updateInternationalTest(test.id, form);
+      await onRefresh();
+      return true;
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'تعذر الحفظ'); return false; }
+    finally { setSaving(false); }
+  };
+  const editorForm = useTestEditorForm(submit);
+  return <form {...editorForm} className="space-y-4">
+    <h3 className="font-bold text-[#142B5F]">{isRtl ? 'المتطلبات والسياسات' : 'Requirements & policies'}</h3>
+    {error && <p role="alert" className="text-red-700">{error}</p>}
+    {keys.map((key, index) => <label key={key} className="block text-xs font-bold text-[#142B5F]">
+      {isRtl ? labels[index] : key}
+      <textarea value={form[key]} onChange={event => setForm({ ...form, [key]: event.target.value })} rows={3} className="block mt-2 w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-normal" />
+    </label>)}
+    <button type="submit" disabled={saving} className="rounded-xl bg-[#0E7C86] px-4 py-2 text-white text-xs font-bold">{saving ? 'جارٍ الحفظ...' : 'حفظ السياسات'}</button>
+  </form>;
 }
 
 // ----------------------------------------------------------------------

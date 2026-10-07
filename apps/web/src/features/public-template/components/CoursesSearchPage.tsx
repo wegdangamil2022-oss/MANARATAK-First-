@@ -42,98 +42,15 @@ const FREE_COURSE_OPTIONS: Array<{ value: FreeCourseMode; label: string }> = [
   { value: 'free-only', label: 'دورة مجانية فقط' },
 ];
 
-// Latest imported-course Master (2026-08-30): 31 active source platforms / universities.
-const IMPORTED_PLATFORM_OPTIONS = [
-  'Microsoft Learn',
-  'Salesforce Trailhead',
-  'The Open University — OpenLearn',
-  'freeCodeCamp',
-  'Simplilearn SkillUp',
-  'FAO eLearning Academy',
-  'Thai MOOC',
-  'Elsevier Researcher Academy',
-  'IBM SkillsBuild',
-  'HubSpot Academy',
-  'Saylor University',
-  'NextGenU',
-  'K-MOOC',
-  'openHPI — Hasso Plattner Institute',
-  'MaharaTech — ITI',
-  'FUN MOOC — France Université Numérique',
-  'Global Health Learning Center',
-  'Semrush Academy',
-  'Cisco Networking Academy',
-  'Moodle Academy',
-  'JMOOC',
-  'WIPO Academy',
-  'UNDP Learning for Nature',
-  'HP LIFE',
-  'MongoDB University',
-  'Google Skillshop',
-  'MathWorks — MATLAB Academy Onramps',
-  'University of Helsinki — MOOC.fi',
-  'AWS Skill Builder',
-  'Harvard University — CS50',
-  'UN CC:e-Learn',
-] as const;
-
-// Public-facing discipline taxonomy already used by imported-course administration.
-const COURSE_FIELD_OPTIONS = [
-  'الذكاء الاصطناعي وتعلّم الآلة',
-  'البرمجة وتطوير البرمجيات',
-  'تطوير الويب',
-  'الحوسبة السحابية وDevOps',
-  'الأمن السيبراني والشبكات',
-  'البيانات وقواعد البيانات',
-  'الأعمال والإدارة',
-  'التسويق والمبيعات',
-  'المالية والمحاسبة',
-  'الصحة والطب',
-  'الزراعة والغذاء',
-  'البيئة والاستدامة',
-  'التعليم والتدريب',
-  'اللغات',
-  'الهندسة والعلوم',
-  'القانون والسياسة والمجتمع',
-  'الفنون والعلوم الإنسانية',
-  'التنمية والعمل الإنساني',
-  'المهارات المهنية والتطوير الوظيفي',
-  'أخرى',
-] as const;
-
-const LANGUAGE_OPTIONS = [
-  'الإنجليزية',
-  'العربية',
-  'الفرنسية',
-  'الإسبانية',
-  'الألمانية',
-  'الصينية',
-  'اليابانية',
-  'الكورية',
-  'التايلاندية',
-  'الروسية',
-  'البرتغالية',
-  'التركية',
-  'متعددة اللغات',
-  'غير محددة رسميًا',
-] as const;
-
-const LEVEL_OPTIONS = ['مبتدئ', 'متوسط', 'متقدم', 'جميع المستويات', 'غير محدد رسميًا'] as const;
-
-const CERTIFICATE_OPTIONS = [
-  'شهادة إتمام',
-  'شهادة رقمية',
-  'شارة رقمية',
-  'إفادة مشاركة',
-  'اعتماد / شهادة مهنية',
-  'بدون شهادة مجانية',
-] as const;
-
 export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, onSelectCourse, importedCourses = [], initialQuery = '', initialField = '', favoriteIds = [], onToggleFavorite }) => {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const normalizedInitialField = COURSE_FIELD_OPTIONS.includes(initialField as (typeof COURSE_FIELD_OPTIONS)[number])
-    ? initialField
-    : 'all';
+  const normalizedInitialField = initialField.trim() || 'all';
+  const distinct = (values: string[]) => [...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));
+  const IMPORTED_PLATFORM_OPTIONS = distinct(importedCourses.map(c=>c.platform ?? c.provider));
+  const COURSE_FIELD_OPTIONS = distinct(importedCourses.flatMap(c=>[c.field,...(c.relatedMajors ?? []).map(m=>m.name)]));
+  const LANGUAGE_OPTIONS = distinct(importedCourses.map(c=>c.language));
+  const LEVEL_OPTIONS = distinct(importedCourses.map(c=>c.level));
+  const CERTIFICATE_OPTIONS = distinct(importedCourses.map(c=>c.certificateType).concat('بدون شهادة مجانية'));
 
   useEffect(() => {
     setSearchQuery(initialQuery);
@@ -181,28 +98,22 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
 
     return importedCourses.filter((course) => {
       if (query) {
-        const searchable = [course.title, course.provider, course.field, course.language, course.level]
+        const searchable = [course.title, course.provider, course.platform, course.field, course.language, course.level, ...(course.relatedMajors ?? []).map(m=>m.name)]
           .join(' ')
           .toLowerCase();
         if (!searchable.includes(query)) return false;
       }
 
-      if (freeCourseMode === 'free-with-certificate' && !course.freeCertificate) return false;
-      if (freeCourseMode === 'free-only' && course.freeCertificate) return false;
-      if (selectedPlatform !== 'all' && course.provider !== selectedPlatform) return false;
-      if (selectedField !== 'all' && course.field !== selectedField) return false;
+      if (freeCourseMode === 'free-with-certificate' && (!course.studyFree || !course.freeCertificate)) return false;
+      if (freeCourseMode === 'free-only' && (!course.studyFree || course.freeCertificate)) return false;
+      if (selectedPlatform !== 'all' && (course.platform ?? course.provider) !== selectedPlatform) return false;
+      if (selectedField !== 'all' && course.field !== selectedField && !(course.relatedMajors ?? []).some(m=>m.name===selectedField)) return false;
       if (selectedLanguage !== 'all' && course.language !== selectedLanguage) return false;
       if (selectedLevel !== 'all' && course.level !== selectedLevel) return false;
 
       if (selectedCertificate !== 'all') {
         const certificate = course.certificateType;
-        const matchesCertificate =
-          (selectedCertificate === 'شهادة إتمام' && certificate.includes('إتمام')) ||
-          (selectedCertificate === 'شهادة رقمية' && certificate.includes('شهادة رقمية')) ||
-          (selectedCertificate === 'شارة رقمية' && certificate.includes('شارة رقمية')) ||
-          (selectedCertificate === 'إفادة مشاركة' && certificate.includes('إفادة')) ||
-          (selectedCertificate === 'اعتماد / شهادة مهنية' && (certificate.includes('اعتماد') || certificate.includes('مهنية'))) ||
-          (selectedCertificate === 'بدون شهادة مجانية' && !course.freeCertificate);
+        const matchesCertificate = selectedCertificate === 'بدون شهادة مجانية' ? !course.freeCertificate : certificate === selectedCertificate;
         if (!matchesCertificate) return false;
       }
 
@@ -384,9 +295,9 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
             <div className="grid grid-cols-2 gap-2">
               <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
                 <BookOpen className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedField === 'all' ? 'المجال' : selectedField}</span>
+                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedField === 'all' ? 'المجال أو التخصص' : selectedField}</span>
                 <select value={selectedField} onChange={(event) => setSelectedField(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  <option value="all">كل المجالات</option>
+                  <option value="all">كل المجالات والتخصصات</option>
                   {COURSE_FIELD_OPTIONS.map((field) => <option key={field} value={field}>{field}</option>)}
                 </select>
               </label>

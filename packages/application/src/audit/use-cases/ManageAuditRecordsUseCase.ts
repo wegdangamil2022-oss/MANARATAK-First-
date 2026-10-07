@@ -1,4 +1,9 @@
-import { AuditRecord, IAuditRecordRepository, AuditRecordQuerySpecification } from '@manaratak/domain';
+import {
+  AuditRecord,
+  IAuditRecordRepository,
+  AuditRecordQuerySpecification,
+  AuditRecordPageQuery,
+} from '@manaratak/domain';
 import { AuditRecordQueryDto } from '../dtos/AuditDtos';
 
 /**
@@ -8,11 +13,19 @@ import { AuditRecordQueryDto } from '../dtos/AuditDtos';
 export class ManageAuditRecordsUseCase {
   constructor(private readonly auditRepository: IAuditRecordRepository) {}
 
-  public async queryAuditPage(dto: AuditRecordQueryDto & { limit?: number; cursor?: { timestamp: Date; id: string } | null }) {
+  public async queryAuditPage(dto: AuditRecordPageQuery) {
     return this.auditRepository.queryPage(dto);
   }
 
-  public async verifyIntegrity() { return this.auditRepository.verifyIntegrity(); }
+  public async verifyIntegrity() {
+    return this.auditRepository.verifyIntegrity();
+  }
+
+  public async getAuditRecord(id: string): Promise<AuditRecord | null> {
+    if (!this.auditRepository.findByIdOrReference)
+      throw new Error('AUDIT_RECORD_LOOKUP_UNAVAILABLE');
+    return this.auditRepository.findByIdOrReference(id);
+  }
 
   public async queryAuditRecords(dto: AuditRecordQueryDto): Promise<AuditRecord[]> {
     const spec = new AuditRecordQuerySpecification({

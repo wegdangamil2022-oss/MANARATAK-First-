@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
-import { CourseProgressUseCases, LearningPathUseCases } from '@manaratak/application';
+import { CourseProgressUseCases, LearningPathUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { CourseProgressStatus } from '@manaratak/domain';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
 import { createStudentRoleGuard } from '../../security/StudentRoleGuard.js';
@@ -10,7 +10,7 @@ import { createCanonicalIdempotencyMiddleware } from '../../middleware/Canonical
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 
 export class CourseLearnerRouter {
-  public static create(cradle: { roleAssignmentRepository: IRoleAssignmentRepository; courseProgressUseCases: CourseProgressUseCases; learningPathUseCases: LearningPathUseCases; tokenProvider: ITokenProvider; sessionManager: ISessionManager; principalAccessValidator: IPrincipalAccessValidator; apiIdempotencyStore: PrismaApiIdempotencyStore }): Router {
+  public static create(cradle: { processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase; roleAssignmentRepository: IRoleAssignmentRepository; courseProgressUseCases: CourseProgressUseCases; learningPathUseCases: LearningPathUseCases; tokenProvider: ITokenProvider; sessionManager: ISessionManager; principalAccessValidator: IPrincipalAccessValidator; apiIdempotencyStore: PrismaApiIdempotencyStore }): Router {
     const router = Router();
     const { courseProgressUseCases, learningPathUseCases, tokenProvider, sessionManager, principalAccessValidator, apiIdempotencyStore } = cradle;
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -27,6 +27,10 @@ export class CourseLearnerRouter {
     router.get('/learning-paths/:pathId/available-courses', asyncHandler(async (req: Request, res: Response) => res.json({ data: await learningPathUseCases.availableCourses(req.params.pathId, student(req)) })));
     router.post('/learning-paths/:pathId/progress/refresh', asyncHandler(async (req: Request, res: Response) => res.json(await learningPathUseCases.refreshProgress(req.params.pathId, student(req), context(req)))));
 
+    router.post('/:courseId/lessons/:lessonId/assets/:assetReferenceId/delivery-grant', asyncHandler(async (req: Request, res: Response) => {
+      const assetId = await courseProgressUseCases.resolveLearningAsset(req.params.courseId, req.params.lessonId, req.params.assetReferenceId, student(req));
+      res.json(await cradle.processAssetLifecycleUseCase.requestDeliveryGrant({assetId, expiresInSeconds:300}));
+    }));
     router.post('/:courseId/enroll', asyncHandler(async (req: Request, res: Response) => res.status(201).json(await courseProgressUseCases.enroll(req.params.courseId, student(req)))));
     router.get('/:courseId/workspace', asyncHandler(async (req: Request, res: Response) => res.json(await courseProgressUseCases.getLearningWorkspace(req.params.courseId, student(req)))));
     router.get('/:courseId/progress', asyncHandler(async (req: Request, res: Response) => res.json(await courseProgressUseCases.getProgress(req.params.courseId, student(req)))));

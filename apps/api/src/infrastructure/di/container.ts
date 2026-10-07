@@ -70,6 +70,7 @@ import {
   CmsStudentSavedItemHydrationGateway,
   ServiceStudentSavedItemHydrationGateway,
   CourseStudentSavedItemHydrationGateway,
+  InternationalTestStudentSavedItemHydrationGateway,
   CourseStudentDashboardReadGateway,
   CertificateStudentDashboardReadGateway,
   PrismaServicePlatformRepository,
@@ -599,7 +600,7 @@ export function registerDependencies(
     settingDefinitionRepo: asFunction(({ prisma }) => new PrismaSettingDefinitionRepository(prisma)).singleton(),
     settingAssignmentRepo: asFunction(({ prisma }) => new PrismaSettingAssignmentRepository(prisma)).singleton(),
     fileRepo: asFunction(() => createUnavailableCapability('fileRecordPersistence')).singleton(),
-    notificationIntentRepo: asFunction(({ prisma }) => new PrismaNotificationIntentRepository(prisma)).singleton(),
+    notificationIntentRepo: asFunction(({ prisma, studentWorkspaceDeliveryCache }) => new PrismaNotificationIntentRepository(prisma, studentWorkspaceDeliveryCache)).singleton(),
     notificationDeliveryRepo: asFunction(({ notificationIntentRepo }) => notificationIntentRepo).singleton(),
     notificationTemplateRepo: asFunction(({ prisma }) => new PrismaNotificationTemplateRepository(prisma)).singleton(),
     auditRecordRepo: asFunction(({ prisma }) => new PrismaAuditRecordRepository(prisma)).singleton(),
@@ -632,8 +633,7 @@ export function registerDependencies(
     notificationPrefGateway: asFunction(({ prisma }) => new PrismaStudentNotificationPreferenceGateway(prisma)).singleton(),
     notificationDeliveryGateway: asFunction(() => {
       const options = notificationProviderOptions();
-      if (!options) return createUnavailableCapability('notificationDeliveryProvider');
-      return new ProviderNotificationDeliveryGateway(options);
+      return new ProviderNotificationDeliveryGateway(options ?? undefined);
     }).singleton(),
     searchEngineGateway: asFunction(({ prisma }) => new PrismaPublicSearchEngineGateway(prisma)).singleton(),
     cacheExecutionGateway: asFunction(() => createUnavailableCapability('cacheExecution')).singleton(),
@@ -699,7 +699,7 @@ export function registerDependencies(
     courseProviderRegistryUseCases: asFunction(({ externalCourseProviderRepository, atomicAuditedOutboxMutationExecutor }) => new CourseProviderRegistryUseCases(externalCourseProviderRepository, atomicAuditedOutboxMutationExecutor)).scoped(),
     courseImportOperationsUseCases: asFunction(({ importedCourseOperationsRepository, importRepository, courseImportCoordinator, courseImportIdentityDiffUseCase }) =>
       new CourseImportOperationsUseCases(importedCourseOperationsRepository, importRepository, courseImportCoordinator, courseImportIdentityDiffUseCase)).scoped(),
-    publicCourseUseCases: asFunction(({ courseRepository }) => new PublicCourseUseCases(courseRepository)).scoped(),
+    publicCourseUseCases: asFunction(({ courseRepository, courseCurriculumRepository }) => new PublicCourseUseCases(courseRepository, courseCurriculumRepository)).scoped(),
     courseRelationshipQueryService: asFunction(({ courseRelationshipRepository }) => new CourseRelationshipQueryService(courseRelationshipRepository)).scoped(),
     courseRelationshipResolutionService: asFunction(({ courseRelationshipRepository }) => new CourseRelationshipResolutionService(courseRelationshipRepository)).scoped(),
     crossDomainGraphReadService: asFunction(({ majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository }) =>
@@ -743,10 +743,11 @@ export function registerDependencies(
     cmsStudentSavedItemHydrationGateway: asFunction(({ cmsRepository }) => new CmsStudentSavedItemHydrationGateway(cmsRepository)).scoped(),
     serviceStudentSavedItemHydrationGateway: asFunction(({ serviceCatalogRepository }) => new ServiceStudentSavedItemHydrationGateway(serviceCatalogRepository)).scoped(),
     courseStudentSavedItemHydrationGateway: asFunction(({ courseRepository }) => new CourseStudentSavedItemHydrationGateway(courseRepository)).scoped(),
-    studentSavedItemHydrationService: asFunction(({ studentWorkspaceRepository, majorStudentSavedItemHydrationGateway, universityStudentSavedItemHydrationGateway, scholarshipStudentSavedItemHydrationGateway, cmsStudentSavedItemHydrationGateway, serviceStudentSavedItemHydrationGateway, courseStudentSavedItemHydrationGateway }) => new StudentSavedItemHydrationService(studentWorkspaceRepository, [majorStudentSavedItemHydrationGateway, universityStudentSavedItemHydrationGateway, scholarshipStudentSavedItemHydrationGateway, cmsStudentSavedItemHydrationGateway, serviceStudentSavedItemHydrationGateway, courseStudentSavedItemHydrationGateway])).scoped(),
+    internationalTestStudentSavedItemHydrationGateway: asFunction(({internationalTestRepository})=>new InternationalTestStudentSavedItemHydrationGateway(internationalTestRepository)).scoped(),
+    studentSavedItemHydrationService: asFunction(({ studentWorkspaceRepository, internationalTestStudentSavedItemHydrationGateway, majorStudentSavedItemHydrationGateway, universityStudentSavedItemHydrationGateway, scholarshipStudentSavedItemHydrationGateway, cmsStudentSavedItemHydrationGateway, serviceStudentSavedItemHydrationGateway, courseStudentSavedItemHydrationGateway }) => new StudentSavedItemHydrationService(studentWorkspaceRepository, [internationalTestStudentSavedItemHydrationGateway, majorStudentSavedItemHydrationGateway, universityStudentSavedItemHydrationGateway, scholarshipStudentSavedItemHydrationGateway, cmsStudentSavedItemHydrationGateway, serviceStudentSavedItemHydrationGateway, courseStudentSavedItemHydrationGateway])).scoped(),
     courseStudentDashboardReadGateway: asFunction(({ courseProgressRepository, courseRepository }) => new CourseStudentDashboardReadGateway(courseProgressRepository, courseRepository)).scoped(),
     certificateStudentDashboardReadGateway: asFunction(({ certificateReadModelService }) => new CertificateStudentDashboardReadGateway(certificateReadModelService)).scoped(),
-    studentDashboardHydrationService: asFunction(({ studentWorkspaceUseCases, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway }) => new StudentDashboardHydrationService(studentWorkspaceUseCases, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway)).scoped(),
+    studentDashboardHydrationService: asFunction(({ studentWorkspaceUseCases, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway, studentServiceRequestUseCases }) => new StudentDashboardHydrationService(studentWorkspaceUseCases, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway, studentServiceRequestUseCases)).scoped(),
     adminCmsUseCases: asFunction(({ cmsRepository, cmsDeliveryCache, assetReferencePolicy }) => new AdminCmsUseCases(cmsRepository, cmsDeliveryCache, assetReferencePolicy)).scoped(),
     publicCmsUseCases: asFunction(({ cmsRepository, cmsDeliveryCache }) => new PublicCmsUseCases(cmsRepository, cmsDeliveryCache)).scoped(),
     studentToolRegistryUseCases: asFunction(({ studentToolRegistryRepository, studentToolActivationReadinessService, studentToolHealthService, studentToolDependencyHealthGateway, assetReferencePolicy }) => new StudentToolRegistryUseCases(studentToolRegistryRepository, studentToolActivationReadinessService, studentToolHealthService, studentToolDependencyHealthGateway, assetReferencePolicy)).scoped(),
@@ -833,8 +834,8 @@ export function registerDependencies(
       new ManageRolesUseCase(roleRepository, atomicDomainMutationCoordinator)).scoped(),
     assignRoleUseCase: asFunction(({ roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository }) =>
       new AssignRoleUseCase(roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository)).scoped(),
-    manageEmergencyAccessUseCase: asFunction(({ emergencyAccessRepository }) =>
-      new ManageEmergencyAccessUseCase(emergencyAccessRepository)).scoped(),
+    manageEmergencyAccessUseCase: asFunction(({ emergencyAccessRepository, atomicDomainMutationCoordinator }) =>
+      new ManageEmergencyAccessUseCase(emergencyAccessRepository, atomicDomainMutationCoordinator)).scoped(),
     evaluateAccessUseCase: asFunction(({ authEvaluatorService }) => new EvaluateAccessUseCase(authEvaluatorService)).scoped(),
     adminBootstrapVerifier: asFunction(({ prisma }) => new AdminBootstrapVerifier(prisma)).scoped(),
 

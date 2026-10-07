@@ -560,6 +560,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       isActive?: boolean;
       region?: string;
       OR?: Array<{
+        nameAr?: { contains: string; mode: 'insensitive' };
         name?: { contains: string; mode: 'insensitive' };
         officialName?: { contains: string; mode: 'insensitive' };
         iso2Code?: { contains: string; mode: 'insensitive' };
@@ -576,6 +577,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (filters?.q) {
       where.OR = [
         { name: { contains: filters.q, mode: 'insensitive' } },
+        { nameAr: { contains: filters.q, mode: 'insensitive' } },
         { officialName: { contains: filters.q, mode: 'insensitive' } },
         { iso2Code: { contains: filters.q, mode: 'insensitive' } },
         { iso3Code: { contains: filters.q, mode: 'insensitive' } }

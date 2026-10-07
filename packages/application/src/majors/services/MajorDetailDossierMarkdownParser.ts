@@ -133,9 +133,14 @@ export class MajorDetailDossierMarkdownParser {
       sourceClassificationSystem: 'MANARATAK_PHASE_10_DETAIL_DOSSIER',
       classificationCode: code,
       sourceImportMode: 'DETAIL_DOSSIER',
-      contentBlocks: record.sections
-        .map((section, index) => this.toContentBlock(section, index))
-        .filter((section): section is MajorDetailContentBlock => Boolean(section)),
+      contentBlocks: (() => {
+        let sourceMainTitle: string | undefined;
+        return record.sections.map((section, index) => {
+          if (section.level === 2) sourceMainTitle = section.title;
+          const block = this.toContentBlock(section, index);
+          return block ? { ...block, sourceMainTitle } : undefined;
+        }).filter((section): section is MajorDetailContentBlock & { sourceMainTitle: string | undefined } => Boolean(section));
+      })(),
       metadata: {
         catalogKind,
         detailStatus: 'DRAFT_NEEDS_REVIEW',

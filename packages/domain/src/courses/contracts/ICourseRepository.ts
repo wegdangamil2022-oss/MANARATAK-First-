@@ -7,6 +7,14 @@ import { CreateCourseDto, CourseDto } from '../entities/Course';
 import { PublicCourseFilters } from './PublicCourseFilters';
 
 export interface CourseFilters {
+  search?: string;
+  externalProviderId?: string;
+  majorId?: string;
+  category?: string;
+  learningLanguage?: string;
+  difficultyLevel?: string;
+  isFreeCertificate?: boolean;
+
   status?: CourseStatus;
   completenessStatus?: CourseImportCompletenessState;
   accessType?: CourseAccessType;

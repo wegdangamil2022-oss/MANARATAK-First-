@@ -149,11 +149,12 @@ export interface UniversityAcademicProgramAuthoringInput {
 
 export interface UniversityNormalizedDetailsUpdate {
   campuses?: Array<{
+    id?: string;
     sourceReferenceId?: string;
     name: string;
-    campusType?: string;
+    campusType?: string | null;
     status?: string;
-    address?: string;
+    address?: string | null;
     countryReferenceId?: string;
     regionReferenceId?: string;
     cityReferenceId?: string;
@@ -163,6 +164,7 @@ export interface UniversityNormalizedDetailsUpdate {
     metadata?: Record<string, unknown>;
   }>;
   organizationUnits?: Array<{
+    id?: string;
     sourceReferenceId?: string;
     campusSourceReferenceId?: string;
     parentSourceReferenceId?: string;
@@ -193,35 +195,38 @@ export interface UniversityNormalizedDetailsUpdate {
     }>;
   }>;
   tuitionProfiles?: Array<{
+    id?: string;
     profileType: string;
-    organizationUnitName?: string;
-    amount?: number;
-    currencyCode?: string;
+    organizationUnitName?: string | null;
+    amount?: number | null;
+    currencyCode?: string | null;
     currencyReferenceId?: string;
-    officialSourceUrl?: string;
-    effectiveFrom?: Date;
-    effectiveTo?: Date;
+    officialSourceUrl?: string | null;
+    effectiveFrom?: Date | null;
+    effectiveTo?: Date | null;
     metadata?: Record<string, unknown>;
   }>;
   accommodationProfiles?: Array<{
-    accommodationAvailable?: boolean;
-    internationalEligible?: boolean;
-    typicalCost?: number;
-    currencyCode?: string;
+    id?: string;
+    accommodationAvailable?: boolean | null;
+    internationalEligible?: boolean | null;
+    typicalCost?: number | null;
+    currencyCode?: string | null;
     currencyReferenceId?: string;
-    averageMonthlyLivingCost?: number;
-    livingCostCurrencyCode?: string;
+    averageMonthlyLivingCost?: number | null;
+    livingCostCurrencyCode?: string | null;
     livingCostCurrencyReferenceId?: string;
-    costVariationNote?: string;
+    costVariationNote?: string | null;
     metadata?: Record<string, unknown>;
   }>;
   rankings?: Array<{
+    id?: string;
     provider: 'QS' | 'THE' | 'ARWU';
     rankingYear: number;
     rank: string;
     scope: string;
-    scopeLabel?: string;
-    note?: string;
+    scopeLabel?: string | null;
+    note?: string | null;
     officialSourceUrl: string;
     verifiedAt: Date;
   }>;
@@ -483,6 +488,7 @@ export class UniversityDeduplicationService {
 
 
 export interface UniversityProgramAdmissionRequirementReadDto {
+  internationalTest?: { displayName: string; canonicalName: string; slug: string; status: string };
   id: string;
   academicProgramId: string;
   internationalTestId: string;
@@ -496,6 +502,7 @@ export interface UniversityProgramAdmissionRequirementReadDto {
 }
 
 export interface UniversityAcademicProgramReadDto {
+  degreeLevel?: { canonicalCode: string; nameAr?: string | null; nameEn?: string | null } | null;
   id: string;
   universityId: string;
   organizationUnitId?: string | null;

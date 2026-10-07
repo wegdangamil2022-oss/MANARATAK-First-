@@ -71,7 +71,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     const [rows, total] = await Promise.all([
       this.db.financeInvoiceRecord.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
@@ -88,7 +88,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
   async listPaymentsForInvoice(invoiceId: string): Promise<FinancePaymentDto[]> {
     const rows = await this.db.financePaymentRecord.findMany({
       where: { invoiceId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
     return rows.map((row: any) => this.payment(row));
   }
@@ -106,6 +106,8 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         OR: [
           { publicId: { contains: search, mode: 'insensitive' } },
           { gatewayReference: { contains: search, mode: 'insensitive' } },
+          { gatewayProvider: { contains: search, mode: 'insensitive' } },
+          { invoiceId: { contains: search, mode: 'insensitive' } },
           { failureReason: { contains: search, mode: 'insensitive' } },
         ],
       }),
@@ -113,7 +115,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     const [rows, total] = await Promise.all([
       this.db.financePaymentRecord.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
@@ -1038,7 +1040,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     const rows = await this.db.financeApprovalRecord.findMany({
       where: status ? { status } : {},
       include: { decisions: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
     return rows.map((row: any) => this.approval(row));
   }
@@ -1381,11 +1383,11 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     const [invoiceRows, walletRows] = await Promise.all([
       this.db.financeInvoiceRecord.findMany({
         where: { studentReferenceId },
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       }),
       this.db.financeWalletRecord.findMany({
         where: { ownerReferenceId: studentReferenceId },
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       }),
     ]);
     const wallets = await Promise.all(
@@ -1396,7 +1398,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     );
     const transfers = await this.db.financeTransferRecord.findMany({
       where: { sourceWalletId: { in: walletRows.map((wallet: any) => wallet.id) } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
     return {
       studentReferenceId,

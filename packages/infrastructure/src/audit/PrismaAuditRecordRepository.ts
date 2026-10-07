@@ -231,6 +231,7 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
       ...(input.category ? { category: input.category } : {}),
       ...(input.severity ? { severity: input.severity } : {}),
       ...(input.correlationId ? { correlationReference: input.correlationId } : {}),
+      ...(input.from || input.until ? { timestamp: { ...(input.from ? { gte: input.from } : {}), ...(input.until ? { lte: input.until } : {}) } } : {}),
       ...(input.cursor ? { OR: [
         { timestamp: { lt: input.cursor.timestamp } },
         { timestamp: input.cursor.timestamp, id: { lt: input.cursor.id } },
@@ -246,6 +247,12 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
     const items = selected.map((row: AuditRecordRow) => this.mapToDomain(row));
     const last = selected.at(-1);
     return { items, hasMore, nextCursor: hasMore && last ? { timestamp: new Date(last.timestamp), id: String(last.id) } : null };
+  }
+
+  async findByIdOrReference(id: string): Promise<AuditRecord | null> {
+    const row = await this.client.auditRecord.findUnique({ where: { id } })
+      ?? await this.client.auditRecord.findUnique({ where: { reference: id } });
+    return row ? this.mapToDomain(row) : null;
   }
 
   async verifyIntegrity(): Promise<AuditIntegrityReport> {

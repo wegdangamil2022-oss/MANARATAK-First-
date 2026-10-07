@@ -8,6 +8,7 @@ import {
   MajorContentSectionDto,
   MajorDto,
   MajorFilters,
+  MajorImportCompletenessState,
   MajorLevel,
   MajorLevelProfileDto,
   MajorLifecycleStatus,
@@ -200,11 +201,40 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   }
 
   async updateStatus(id: string, status: MajorLifecycleStatus): Promise<void> {
-    const resolvedId = await this.resolveMajorId(id);
-    await this.prisma.major.update({
-      where: { id: resolvedId },
-      data: { status }
-    });
+    if (!this.transactionBound) throw new Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const majorId = await this.resolveMajorId(id);
+    await this.acquireVersionAllocationLock(majorId);
+    const profiles = await this.prisma.majorLevelProfile.findMany({ where: { majorId } });
+    const profile = profiles.find(item => item.id === id || item.code === id)
+      ?? (profiles.length === 1 ? profiles[0] : undefined);
+    if (profiles.length && !profile) throw new Error('TARGET_MAJOR_PROFILE_REQUIRED');
+    if (profile) {
+      let versionId: string | null = null;
+      if (status === MajorStatus.PUBLISHED) {
+        if (profile.status !== MajorStatus.READY_TO_PUBLISH) throw new Error('MAJOR_INVALID_PUBLICATION_STATUS');
+        const version = await this.prisma.majorVersion.findFirst({
+          where: { majorId, profileId: profile.id, status: { notIn: ['ARCHIVED', 'SUPERSEDED'] } },
+          orderBy: { versionNumber: 'desc' },
+        });
+        if (!version || !await this.prisma.majorContentSection.count({ where: { profileId: profile.id, versionId: version.id } })) {
+          throw new Error('MAJOR_PUBLICATION_CONTENT_MISSING');
+        }
+        const unreviewed = await this.prisma.majorContentSection.count({ where: {
+          profileId: profile.id, versionId: version.id, reviewStatus: { notIn: ['APPROVED', 'PUBLISHED'] },
+        } });
+        if (unreviewed) throw new Error('MAJOR_PUBLICATION_CONTENT_REVIEW_REQUIRED');
+        versionId = version.id;
+        await this.prisma.majorVersion.update({ where: { id: version.id }, data: { status: 'PUBLISHED', publishedAt: new Date() } });
+      }
+      await this.prisma.majorLevelProfile.update({ where: { id: profile.id }, data: { status, currentPublishedVersionId: versionId } });
+      const published = await this.prisma.majorLevelProfile.findFirst({ where: { majorId, status: MajorStatus.PUBLISHED, currentPublishedVersionId: { not: null } } });
+      await this.prisma.major.update({ where: { id: majorId }, data: {
+        status: published ? MajorStatus.PUBLISHED : status,
+        currentPublishedVersionId: published?.currentPublishedVersionId ?? null,
+      } });
+      return;
+    }
+    await this.prisma.major.update({ where: { id: majorId }, data: { status } });
   }
 
   async updateImportLink(id: string, sourceImportRecordId: string): Promise<void> {
@@ -228,14 +258,20 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     const pageSize = Math.min(100, Math.max(1, filters.pageSize || 50));
     
     const where: Prisma.MajorWhereInput = {};
-    if (filters.status) where.status = filters.status;
-    if (filters.completenessStatus) where.completenessStatus = filters.completenessStatus;
+
     if (filters.academicFieldId) where.academicFieldId = filters.academicFieldId;
     if (filters.disciplineId) where.disciplineId = filters.disciplineId;
     if (filters.search) {
       where.OR = [
         { displayName: { contains: filters.search, mode: 'insensitive' } },
         { canonicalName: { contains: filters.search, mode: 'insensitive' } },
+        { localizedNameAr: { contains: filters.search, mode: 'insensitive' } },
+        { localizedNameEn: { contains: filters.search, mode: 'insensitive' } },
+        { levelProfiles: { some: { OR: [
+          { localizedNameAr: { contains: filters.search, mode: 'insensitive' } },
+          { localizedNameEn: { contains: filters.search, mode: 'insensitive' } },
+          { code: { contains: filters.search, mode: 'insensitive' } },
+        ] } } },
         { slug: { contains: filters.search, mode: 'insensitive' } },
         { facultyName: { contains: filters.search, mode: 'insensitive' } },
       ];
@@ -243,12 +279,6 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
 
     const and: Prisma.MajorWhereInput[] = [];
     if (filters.taxonomyNodeId) and.push(this.taxonomyGraphFilter(filters.taxonomyNodeId));
-    if (filters.degreeLevel) {
-      and.push(this.withLegacyOptionalFallback(
-        { levelProfiles: { some: { degreeLevel: { is: { canonicalCode: filters.degreeLevel.toUpperCase() as any } } } } },
-        { optionalFields: { path: ['degreeLevel'], equals: filters.degreeLevel } },
-      ));
-    }
     if (filters.academicFieldOrDiscipline) {
       and.push(this.withLegacyOptionalFallback(
         {
@@ -268,34 +298,46 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     }
     if (and.length > 0) where.AND = and;
     
-    const [data, total] = await Promise.all([
-      this.prisma.major.findMany({
-        where,
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        orderBy: { createdAt: 'desc' },
-        include: MAJOR_INCLUDE,
-      }),
-      this.prisma.major.count({ where })
-    ]);
-    
-    return {
-      data: data.map((record) => this.mapToDto(record)),
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize)
+    const profileWhere: Prisma.MajorLevelProfileWhereInput = {
+      major: { is: where },
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.completenessStatus ? { completenessStatus: filters.completenessStatus } : {}),
+      ...(filters.degreeLevel ? { level: filters.degreeLevel.toUpperCase() } : {}),
     };
+    const legacyWhere: Prisma.MajorWhereInput = { ...where, levelProfiles: { none: {} },
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.completenessStatus ? { completenessStatus: filters.completenessStatus } : {}),
+    };
+    if (filters.degreeLevel) legacyWhere.AND = [...and, { optionalFields: { path: ['degreeLevel'], equals: filters.degreeLevel } }];
+    const [data, profileTotal, legacy, legacyTotal] = await Promise.all([
+      this.prisma.majorLevelProfile.findMany({
+        where: profileWhere, take: page * pageSize,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        include: { major: { include: MAJOR_INCLUDE } },
+      }),
+      this.prisma.majorLevelProfile.count({ where: profileWhere }),
+      this.prisma.major.findMany({ where: legacyWhere, take: page * pageSize, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], include: MAJOR_INCLUDE }),
+      this.prisma.major.count({ where: legacyWhere }),
+    ]);
+    const total = profileTotal + legacyTotal;
+    const rows = data.map(record => ({ ...this.mapToDto(record.major),
+        profileId: record.id, createdAt: record.createdAt, updatedAt: record.updatedAt, status: record.status as MajorLifecycleStatus,
+        completenessStatus: record.completenessStatus as MajorImportCompletenessState,
+        degreeLevel: record.level, classificationCode: record.code ?? undefined,
+        publicId: record.code || record.major.publicId,
+        displayName: record.localizedNameAr || record.displayName || record.major.localizedNameAr || record.major.displayName,
+        nameAr: record.localizedNameAr || record.major.localizedNameAr,
+        nameEn: record.localizedNameEn || record.major.localizedNameEn || record.major.canonicalName,
+      }));
+    const merged = [...rows, ...legacy.map(record => ({ ...this.mapToDto(record), createdAt: record.createdAt, profileId: undefined, nameAr: record.localizedNameAr, nameEn: record.localizedNameEn || record.canonicalName }))]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() || (b.profileId || b.id).localeCompare(a.profileId || a.id));
+    return { data: merged.slice((page - 1) * pageSize, page * pageSize), total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
   }
 
   async listPublished(filters: PublicMajorFilters): Promise<PaginatedMajorResult<MajorDto>> {
-    const where: Prisma.MajorWhereInput = { status: MajorStatus.PUBLISHED };
+    const where: Prisma.MajorWhereInput = {};
     const and: Prisma.MajorWhereInput[] = [];
     if (filters.taxonomyNodeId) and.push(this.taxonomyGraphFilter(filters.taxonomyNodeId));
-    if (filters.degreeLevel) and.push(this.withLegacyOptionalFallback(
-      { levelProfiles: { some: { degreeLevel: { is: { canonicalCode: filters.degreeLevel.toUpperCase() as any } } } } },
-      { optionalFields: { path: ['degreeLevel'], equals: filters.degreeLevel } },
-    ));
     if (filters.academicFieldOrDiscipline) and.push(this.withLegacyOptionalFallback(
       { OR: [
         { academicField: { is: { canonicalName: { contains: filters.academicFieldOrDiscipline, mode: 'insensitive' } } } },
@@ -315,9 +357,27 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       { slug: { contains: filters.search, mode: 'insensitive' } },
     ];
     if (and.length) where.AND = and;
+    const profileWhere: Prisma.MajorLevelProfileWhereInput = {
+      status: MajorStatus.PUBLISHED, currentPublishedVersionId: { not: null }, major: { is: where },
+      ...(filters.degreeLevel ? { level: filters.degreeLevel.toUpperCase() } : {}),
+    };
     return queryStableCursorPage({
-      delegate: this.prisma.major as any, where, include: MAJOR_INCLUDE,
-      cursor: filters.cursor, limit: filters.limit, map: (record: any) => this.mapToDto(record),
+      delegate: this.prisma.majorLevelProfile as any, where: profileWhere,
+      include: { major: { include: MAJOR_INCLUDE } },
+      cursor: filters.cursor, limit: filters.limit,
+      map: (record: any) => {
+        const major = this.mapToDto(record.major);
+        const profile = major.profiles?.find(item => item.id === record.id);
+        return { ...major, profiles: profile ? [profile] : [],
+          publicId: record.code || major.publicId, degreeLevel: record.level,
+          currentPublishedVersionId: record.currentPublishedVersionId,
+          displayName: record.localizedNameAr || record.displayName || major.localizedNameAr || major.displayName,
+          localizedNameAr: record.localizedNameAr || major.localizedNameAr,
+          localizedNameEn: record.localizedNameEn || major.localizedNameEn,
+          classificationCode: record.code || major.classificationCode,
+          optionalFields: { ...major.optionalFields, degreeLevel: record.level, classificationCode: record.code },
+        };
+      },
     });
   }
 

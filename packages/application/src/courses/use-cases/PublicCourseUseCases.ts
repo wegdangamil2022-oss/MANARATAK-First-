@@ -4,6 +4,8 @@ import {
   CourseOriginType,
   CourseStatus,
   ICourseRepository,
+  ICourseCurriculumRepository,
+  CourseContentStatus,
   PaginatedCourseResult,
   PublicCourseDto,
   PublicCourseFilters
@@ -19,7 +21,7 @@ type LocalizableCourseSummary = {
 export class PublicCourseUseCases {
   private readonly localeProjection = new ApplicationLocaleProjectionService();
 
-  constructor(private readonly repository: ICourseRepository) {}
+  constructor(private readonly repository: ICourseRepository, private readonly curriculumRepository?: ICourseCurriculumRepository) {}
 
   public async listCourses(
     filters: PublicCourseFilters,
@@ -43,7 +45,15 @@ export class PublicCourseUseCases {
       throw new Error('Course not found');
     }
 
-    return this.mapToPublicDto(course, locale);
+    const result = this.mapToPublicDto(course, locale);
+    if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE && this.curriculumRepository) {
+      const curriculum = await this.curriculumRepository.getCurriculumSnapshot(course.id);
+      const modules = curriculum.modules.filter(module=>module.status !== CourseContentStatus.ARCHIVED).sort((a,b)=>a.position-b.position);
+      result.curriculumModules = modules.map(module=>({title:module.title,description:module.description ?? ''}));
+      const moduleIds = new Set(modules.map(module=>module.id));
+      result.lessonsCount = curriculum.lessons.filter(lesson=>lesson.status!==CourseContentStatus.ARCHIVED && moduleIds.has(lesson.moduleId)).length;
+    }
+    return result;
   }
 
   public localizeRelationshipPage<T extends LocalizableCourseSummary>(
@@ -73,6 +83,8 @@ export class PublicCourseUseCases {
       slug: course.slug,
       displayName: this.resolveDisplayName(course.displayName, optional.localizedNames, locale),
       canonicalName: course.canonicalName,
+      titleEn: typeof optional.titleEn === "string" ? optional.titleEn : undefined,
+      relatedMajors: course.relatedMajors ?? [],
       accessType: course.accessType,
       originType: course.originType,
       directCourseUrl: course.directCourseUrl,
@@ -91,6 +103,10 @@ export class PublicCourseUseCases {
       sourceUrl: course.sourceUrl ?? null,
       officialSourceUrl: course.officialSourceUrl ?? null,
       thumbnailAssetId: course.thumbnailAssetId ?? null,
+      shortCourseTopicsRaw: course.shortCourseTopicsRaw ?? null,
+      studyLevelRaw: course.studyLevelRaw ?? null,
+      studyDurationRaw: course.studyDurationRaw ?? null,
+      learningLanguageRaw: course.learningLanguageRaw ?? null,
       ...optionalPublic,
       updatedAt: course.updatedAt,
     };
@@ -117,7 +133,7 @@ export class PublicCourseUseCases {
 
   private pickOptionalPublicFields(optional: Record<string, unknown>): Partial<PublicCourseDto> {
     const allowed = [
-      'courseContent', 'acquiredSkills',
+      'courseContent', 'acquiredSkills', 'description', 'instructor', 'prerequisites', 'targetAudience', 'learningOutcomes', 'relatedMajorsOrFields',
     ] as const;
     const result: Record<string, unknown> = {};
     for (const key of allowed) if (optional[key] !== undefined) result[key] = optional[key];

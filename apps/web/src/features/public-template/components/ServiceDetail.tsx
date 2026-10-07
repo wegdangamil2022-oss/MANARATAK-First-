@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   AlertCircle,
   ArrowLeft,
@@ -44,6 +44,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({ service, onBack, o
   const [requestParameters, setRequestParameters] = useState<Record<string, string>>({});
   const [requestError, setRequestError] = useState<string | null>(null);
   const [requesting, setRequesting] = useState(false);
+  const requestPending = useRef(false);
   const isStudent = service.audience === 'student';
 
   return (
@@ -248,20 +249,21 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({ service, onBack, o
 
         <button
           type="button"
-          disabled={requesting}
+          disabled={requesting || service.requestable === false}
           onClick={async () => {
+            if (requestPending.current || service.requestable === false) return;
             if (!onRequestService) { setShowRequestNotice(true); return; }
             const missing = service.requestContextFields.find((field) => !requestParameters[field]?.trim());
             if (missing) { setRequestError(`أكمل الحقل المطلوب: ${missing}`); return; }
-            setRequestError(null); setRequesting(true);
+            requestPending.current = true; setRequestError(null); setRequesting(true);
             try { await onRequestService(Object.fromEntries(Object.entries(requestParameters).map(([key, value]) => [key, value.trim()]))); }
             catch (cause) { setRequestError(cause instanceof Error ? cause.message : 'تعذر إرسال الطلب'); }
-            finally { setRequesting(false); }
+            finally { requestPending.current = false; setRequesting(false); }
           }}
           className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-l from-[var(--mn-primary)] to-[var(--mn-hero-secondary)] px-4 text-[11px] font-bold text-white shadow-md transition active:scale-[0.99] disabled:opacity-60 mn-inverse "
         >
           <Sparkles className="h-4 w-4 text-[var(--mn-accent-text)]" />
-          {requesting ? 'جارٍ إنشاء الطلب...' : 'اطلب الخدمة'}
+          {requesting ? 'جارٍ إنشاء الطلب...' : service.requestable === false ? 'استقبال الطلبات غير متاح حالياً' : 'اطلب الخدمة'}
         </button>
         {requestError && <p role="alert" className="mt-3 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] p-3 text-sm leading-6 text-[var(--mn-danger-text)]">{requestError}</p>}
         {showRequestNotice && !onRequestService && <p role="status" className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 text-sm leading-6 text-[var(--mn-text-muted)]">هذه معاينة prototype فقط؛ لا يتم إنشاء طلب حقيقي في وضع المعاينة.</p>}
@@ -269,4 +271,3 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({ service, onBack, o
     </div>
   );
 };
-

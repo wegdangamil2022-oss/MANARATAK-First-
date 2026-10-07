@@ -72,6 +72,16 @@ export class AuthorizationAdminRouter {
       if (!identity || identity.status !== LifeStatus.ACTIVE || identity.account.accessState !== 'Active'
         || !identity.user?.contactRegistry.isEmailVerified) throw new Error('VERIFIED_ACTIVE_IDENTITY_REQUIRED');
     };
+    const verifyMakerChecker = async (req: Request, actorId: string) => {
+      const approval = assertMakerChecker(req, actorId);
+      await assertVerifiedIdentity(approval.secondApproverId);
+      if (!authEvaluatorService) throw new Error('AUTHORIZATION_EVALUATOR_UNAVAILABLE');
+      const decision = await authEvaluatorService.evaluatePermission(approval.secondApproverId, 'admin:authorization:manage', {
+        ip: req.ip || req.socket?.remoteAddress, requestTime: new Date(), userAgent: req.headers['user-agent'],
+      });
+      if (!decision.isGranted) throw new Error('SECOND_APPROVER_AUTHORIZATION_REQUIRED');
+      return approval;
+    };
     const mutationContext = (req: Request, extra?: Record<string, unknown>) => {
       const principal = requireAuthenticatedPrincipal(req);
       return {
@@ -110,9 +120,11 @@ export class AuthorizationAdminRouter {
         const result = await listIdentitiesUseCase.execute({ status: LifeStatus.ACTIVE, ...query });
         if (!result.isSuccess) throw new Error('IDENTITY_LIST_UNAVAILABLE');
         const page = result.getValue();
+        // Offset refers to scanned active identities, before eligibility filtering.
+        const nextOffset = Math.min(page.total, query.offset + page.items.length);
         res.status(200).json(responseFormatter.success({ identities: page.items.filter(item => item.user?.contactRegistry.isEmailVerified && item.account.accessState === 'Active')
           .map(item => ({ id: item.id, displayName: item.user!.profile.displayName, primaryEmail: item.user!.contactRegistry.primaryEmail,
-            isEmailVerified: true })), total: page.total }));
+            isEmailVerified: true })), total: page.total, nextOffset, scannedCount: page.items.length, hasMore: nextOffset < page.total }));
       } catch (error) { next(error); }
     });
 
@@ -141,10 +153,13 @@ export class AuthorizationAdminRouter {
     router.post('/roles', async (req: Request, res: Response) => {
       try {
         const body = parseStrict(authorizationRoleCreateSchema, req.body);
+        if (!body.permissions.length) throw new Error('ROLE_PERMISSIONS_REQUIRED');
+        if (new Set(body.permissions).size !== body.permissions.length) throw new Error('ROLE_DUPLICATE_PERMISSION');
+        if (body.policyIds.length) throw new Error('ROLE_POLICY_ASSIGNMENT_NOT_SUPPORTED');
         const actor = requireAuthenticatedPrincipal(req).principalId;
         await assertDelegablePermissions(req, actor, body.permissions);
         const highRisk = body.permissions.some(permission => permission === '*' || permission === 'admin:*' || permission === 'admin:authorization:manage' || permission === 'admin:identities:manage');
-        const approval = highRisk ? assertMakerChecker(req, actor) : undefined;
+        const approval = highRisk ? await verifyMakerChecker(req, actor) : undefined;
         await manageRolesUseCase.createRole(body, mutationContext(req, approval));
         res.status(201).json(responseFormatter.success({ roleId: body.id, message: 'Role created successfully' }));
       } catch (error: any) {
@@ -176,7 +191,7 @@ export class AuthorizationAdminRouter {
         const actor = requireAuthenticatedPrincipal(req).principalId;
         await assertVerifiedIdentity(body.identityId);
         await assertDelegablePermissions(req, actor, role.permissions.map(permission => permission.value));
-        const approval = isHighRiskRole(role) ? assertMakerChecker(req, actor) : undefined;
+        const approval = isHighRiskRole(role) ? await verifyMakerChecker(req, actor) : undefined;
         await assignRoleUseCase.execute(body, mutationContext(req, approval));
         res.status(201).json(responseFormatter.success({ assignmentId: body.id, message: 'Role assigned successfully' }));
       } catch (error: any) {
@@ -194,7 +209,7 @@ export class AuthorizationAdminRouter {
         const actor = requireAuthenticatedPrincipal(req).principalId;
         if (!role) throw new Error('ROLE_NOT_FOUND');
         await assertDelegablePermissions(req, actor, role.permissions.map(permission => permission.value));
-        const approval = role && isHighRiskRole(role) ? assertMakerChecker(req, actor) : undefined;
+        const approval = isHighRiskRole(role) ? await verifyMakerChecker(req, actor) : undefined;
         await assignRoleUseCase.revokeAssignment(req.params.id, mutationContext(req, { reason: body.reason, ...approval }));
         res.status(200).json(responseFormatter.success({ assignmentId: req.params.id, revoked: true }));
       } catch (error: any) {
@@ -227,8 +242,8 @@ export class AuthorizationAdminRouter {
         if (!role) throw new Error('ROLE_NOT_FOUND');
         await assertVerifiedIdentity(body.principalId);
         await assertDelegablePermissions(req, actor, role.permissions.map(permission => permission.value));
-        const approval = assertMakerChecker(req, actor);
-        const grant = await manageEmergencyAccessUseCase.grant({ ...body, requestedBy: actor, approvedBy: approval.secondApproverId, changeTicket: approval.changeTicket });
+        const approval = await verifyMakerChecker(req, actor);
+        const grant = await manageEmergencyAccessUseCase.grant({ ...body, requestedBy: actor, approvedBy: approval.secondApproverId, changeTicket: approval.changeTicket }, mutationContext(req));
         res.status(201).json(responseFormatter.success({ grant }));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'GRANT_BREAK_GLASS_ACCESS', category: 'AUTHORIZATION', targetType: 'EMERGENCY_ACCESS', targetId: req.body?.principalId, result: 'FAILURE', error });
@@ -240,7 +255,7 @@ export class AuthorizationAdminRouter {
       try {
         const body = emergencyRevokeSchema.parse(req.body);
         const actor = requireAuthenticatedPrincipal(req).principalId;
-        const grant = await manageEmergencyAccessUseCase.revoke(req.params.id, actor, body.reason);
+        const grant = await manageEmergencyAccessUseCase.revoke(req.params.id, actor, body.reason, mutationContext(req));
         res.status(200).json(responseFormatter.success({ grant }));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'REVOKE_BREAK_GLASS_ACCESS', category: 'AUTHORIZATION', targetType: 'EMERGENCY_ACCESS', targetId: req.params.id, result: 'FAILURE', error });

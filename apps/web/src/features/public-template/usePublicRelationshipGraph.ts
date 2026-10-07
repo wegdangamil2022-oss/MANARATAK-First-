@@ -36,42 +36,47 @@ export function usePublicRelationshipGraph(
 
   useEffect(() => {
     let active = true;
+    let generation = 0;
     if (mode !== 'api') {
       setState({ loading: false });
       return () => { active = false; };
     }
 
     const load = async () => {
+      const request = ++generation;
       setState({ loading: true });
       try {
         if (selected.majorSlug) {
           const major = await ApiClient.getMajorGraph(selected.majorSlug, 1, 24);
-          if (active) setState({ major, loading: false });
+          if (active && request === generation) setState({ major, loading: false });
           return;
         }
         if (selected.universitySlug) {
           const university = await ApiClient.getUniversityGraph(selected.universitySlug, 1, 24);
-          if (active) setState({ university, loading: false });
+          if (active && request === generation) setState({ university, loading: false });
           return;
         }
         if (selected.scholarshipSlug) {
           const scholarship = await ApiClient.getScholarshipGraph(selected.scholarshipSlug);
-          if (active) setState({ scholarship, loading: false });
+          if (active && request === generation) setState({ scholarship, loading: false });
           return;
         }
         if (selected.countryIso2Code) {
           const country = await ApiClient.getCountryGraph(selected.countryIso2Code, 1, 24);
-          if (active) setState({ country, loading: false });
+          if (active && request === generation) setState({ country, loading: false });
           return;
         }
-        if (active) setState({ loading: false });
+        if (active && request === generation) setState({ loading: false });
       } catch (error) {
-        if (active) setState({ loading: false, error: error instanceof Error ? error.message : 'PUBLIC_GRAPH_UNAVAILABLE' });
+        if (active && request === generation) setState({ loading: false, error: error instanceof Error ? error.message : 'PUBLIC_GRAPH_UNAVAILABLE' });
       }
     };
 
     void load();
-    return () => { active = false; };
+    const refresh = () => { if (document.visibilityState !== 'hidden' && selected.countryIso2Code) void load(); };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => { active = false; window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
   }, [mode, selected.majorSlug, selected.universitySlug, selected.scholarshipSlug, selected.countryIso2Code]);
 
   const majorView = useMemo<MajorPublicRelationshipGraph | undefined>(() => {

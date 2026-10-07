@@ -36,6 +36,7 @@ export function rememberAuthenticatedIdentity(identityId: string): boolean {
     const changed = Boolean(previous && previous !== identityId);
     if (changed) {
       sessionStorage.removeItem('manaratak_post_login_action');
+      sessionStorage.removeItem('manaratak_student_tools_session');
       clearLegacyStudentCache();
     }
     sessionStorage.setItem(ACCOUNT_KEY, identityId);

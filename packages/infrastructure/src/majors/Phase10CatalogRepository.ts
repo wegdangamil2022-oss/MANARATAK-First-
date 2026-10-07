@@ -114,6 +114,67 @@ export class Phase10CatalogRepository {
     const supplemental = await this.loadSupplementalCatalogItems(new Set(rawCatalog.map(item => item.code)));
     let filtered = [...rawCatalog, ...supplemental];
 
+    const catalogCodes = filtered.map(item => item.code);
+    let dbProfiles: any[] = [];
+    if (catalogCodes.length > 0) {
+      try {
+        dbProfiles = await this.prisma.majorLevelProfile.findMany({
+          where: { code: { in: catalogCodes } },
+
+          select: {
+            id: true,
+            majorId: true,
+            code: true,
+            status: true,
+            completenessStatus: true,
+            displayName: true,
+            localizedNameAr: true,
+            localizedNameEn: true,
+            metadata: true,
+            updatedAt: true,
+          },
+        });
+      } catch (err) {
+        if (this.options.productionLike === true) throw err;
+        console.warn(
+          'Major catalog DB enrichment unavailable; returning source-only summaries',
+          err,
+        );
+      }
+    }
+
+    const dbMap = new Map(
+      dbProfiles.filter((profile) => profile.code).map((profile) => [profile.code, profile]),
+    );
+    filtered = filtered.map((item) => {
+      const dbProfile = dbMap.get(item.code);
+      if (!dbProfile) return { ...item, hasDbDetails: false };
+      const metadata = (dbProfile.metadata as Record<string, unknown>) || {};
+      return {
+        ...item,
+        id: dbProfile.majorId,
+        profileId: dbProfile.id,
+        displayName: dbProfile.localizedNameAr || dbProfile.displayName || item.displayName,
+        nameAr: dbProfile.localizedNameAr || item.nameAr,
+        nameEn: dbProfile.localizedNameEn || item.nameEn,
+        status: dbProfile.status || item.status,
+        completenessStatus: dbProfile.completenessStatus || item.completenessStatus,
+        sectionCount:
+          typeof metadata.contentBlockCount === 'number'
+            ? metadata.contentBlockCount
+            : item.sectionCount,
+        sourceType:
+          typeof metadata.sourceImportMode === 'string'
+            ? metadata.sourceImportMode
+            : item.sourceType,
+        hasDbDetails: true,
+        updatedAt: dbProfile.updatedAt
+          ? new Date(dbProfile.updatedAt).toISOString().split('T')[0]
+          : item.updatedAt,
+      };
+    });
+
+
     if (filters.degreeLevel) {
       const targetDeg = filters.degreeLevel.toUpperCase();
       filtered = filtered.filter((item) => {
@@ -175,66 +236,8 @@ export class Phase10CatalogRepository {
           }
         : item;
     });
-    const pageCodes = sourcePage.map((item) => item.code);
 
-    let dbProfiles: any[] = [];
-    if (pageCodes.length > 0) {
-      try {
-        dbProfiles = await this.prisma.majorLevelProfile.findMany({
-          where: { code: { in: pageCodes } },
-          take: pageSize,
-          select: {
-            id: true,
-            majorId: true,
-            code: true,
-            status: true,
-            completenessStatus: true,
-            displayName: true,
-            localizedNameAr: true,
-            localizedNameEn: true,
-            metadata: true,
-            updatedAt: true,
-          },
-        });
-      } catch (err) {
-        if (this.options.productionLike === true) throw err;
-        console.warn(
-          'Major catalog DB enrichment unavailable; returning source-only summaries',
-          err,
-        );
-      }
-    }
-
-    const dbMap = new Map(
-      dbProfiles.filter((profile) => profile.code).map((profile) => [profile.code, profile]),
-    );
-    const data = sourcePage.map((item) => {
-      const dbProfile = dbMap.get(item.code);
-      if (!dbProfile) return { ...item, hasDbDetails: false };
-      const metadata = (dbProfile.metadata as Record<string, unknown>) || {};
-      return {
-        ...item,
-        id: dbProfile.majorId,
-        profileId: dbProfile.id,
-        displayName: dbProfile.displayName || dbProfile.localizedNameAr || item.displayName,
-        nameAr: dbProfile.localizedNameAr || item.nameAr,
-        nameEn: dbProfile.localizedNameEn || item.nameEn,
-        status: dbProfile.status || item.status,
-        completenessStatus: dbProfile.completenessStatus || item.completenessStatus,
-        sectionCount:
-          typeof metadata.contentBlockCount === 'number'
-            ? metadata.contentBlockCount
-            : item.sectionCount,
-        sourceType:
-          typeof metadata.sourceImportMode === 'string'
-            ? metadata.sourceImportMode
-            : item.sourceType,
-        hasDbDetails: true,
-        updatedAt: dbProfile.updatedAt
-          ? new Date(dbProfile.updatedAt).toISOString().split('T')[0]
-          : item.updatedAt,
-      };
-    });
+    const data = sourcePage;
 
     return {
       data,
@@ -257,7 +260,7 @@ export class Phase10CatalogRepository {
   private async loadSupplementalCatalogItems(catalogCodes: Set<string>): Promise<CatalogItemDto[]> {
     try {
       const profiles = await this.prisma.majorLevelProfile.findMany({
-        where: { code: { not: null }, major: { is: { status: { not: 'ARCHIVED' } } } },
+        where: { code: { not: null } },
         include: {
           major: {
             select: {
@@ -277,7 +280,7 @@ export class Phase10CatalogRepository {
         orderBy: { createdAt: 'desc' },
       });
 
-      return profiles
+      const supplemental = profiles
         .filter(profile => Boolean(profile.code) && !catalogCodes.has(profile.code as string))
         .map(profile => {
           const optional = profile.major.optionalFields && typeof profile.major.optionalFields === 'object' && !Array.isArray(profile.major.optionalFields)
@@ -307,6 +310,17 @@ export class Phase10CatalogRepository {
             hasDbDetails: true,
           };
         });
+      const legacy = await this.prisma.major.findMany({ where: { levelProfiles: { none: {} } }, orderBy: { createdAt: 'desc' } });
+      return [...supplemental, ...legacy.filter(major => !catalogCodes.has(major.publicId)).map(major => {
+        const optional = major.optionalFields && typeof major.optionalFields === 'object' && !Array.isArray(major.optionalFields) ? major.optionalFields as Record<string, unknown> : {};
+        return { id: major.id, code: major.publicId, displayName: major.localizedNameAr || major.displayName,
+          nameAr: major.localizedNameAr || undefined, nameEn: major.localizedNameEn || major.canonicalName,
+          degreeLevel: typeof optional.degreeLevel === 'string' ? optional.degreeLevel : '',
+          catalogKind: typeof optional.degreeLevel === 'string' ? optional.degreeLevel : '',
+          targetDomain: 'MAJORS', status: major.status, completenessStatus: major.completenessStatus,
+          hasDbDetails: true, updatedAt: major.updatedAt.toISOString().split('T')[0],
+        };
+      })];
     } catch (error) {
       if (this.options.productionLike === true) throw error;
       console.warn('Supplemental Major catalog projection unavailable', error);

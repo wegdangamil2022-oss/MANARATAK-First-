@@ -90,12 +90,18 @@ export class InMemoryAuditRecordRepository implements IAuditRecordRepository {
       if (input.category && record.getCategory().getValue() !== input.category) return false;
       if (input.severity && record.getSeverity().getValue() !== input.severity) return false;
       if (input.correlationId && record.getCorrelationReference()?.getValue() !== input.correlationId) return false;
+      if (input.from && timestamp < input.from) return false;
+      if (input.until && timestamp > input.until) return false;
       if (input.cursor && !(timestamp < input.cursor.timestamp || (timestamp.getTime() === input.cursor.timestamp.getTime() && record.getId().getValue() < input.cursor.id))) return false;
       return true;
     });
     rows.sort((a,b) => b.getTimestamp().getValue().getTime() - a.getTimestamp().getValue().getTime() || b.getId().getValue().localeCompare(a.getId().getValue()));
     const hasMore = rows.length > limit; rows = rows.slice(0, limit); const last = rows.at(-1);
     return { items: rows, hasMore, nextCursor: hasMore && last ? { timestamp: last.getTimestamp().getValue(), id: last.getId().getValue() } : null };
+  }
+
+  async findByIdOrReference(id: string): Promise<AuditRecord | null> {
+    return this.records.get(id) ?? [...this.records.values()].find(record => record.getReference().getValue() === id) ?? null;
   }
 
   async verifyIntegrity(): Promise<AuditIntegrityReport> {

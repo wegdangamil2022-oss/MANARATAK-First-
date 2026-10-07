@@ -1,3 +1,4 @@
+import type { PublicUniversityDto } from '../../api/client';
 export type Language = 'ar' | 'en';
 
 export type CategoryType =
@@ -34,6 +35,7 @@ export interface ScholarshipExamRef {
 }
 
 export interface Scholarship {
+  publishedData?: import('../../api/client').PublicScholarshipDto;
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;
@@ -116,6 +118,8 @@ export interface CountryDestination {
   timezones?: string[];
   studySystemSummary?: string;
   admissionHighlights?: string[];
+  visaSummary?: string;
+  sourceAuditDate?: string;
   visaHighlights?: string[];
   costHighlights?: Array<{ label: string; value: string }>;
   studentLifeHighlights?: string[];
@@ -232,6 +236,7 @@ export interface UniversityInternationalAdmissions {
 }
 
 export interface University {
+  publishedData?: PublicUniversityDto;
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;
@@ -285,6 +290,7 @@ export interface ImportedCourse {
   ownerId?: string;
   title: string;
   provider: string;
+  platform?: string;
   field: string;
   language: string;
   level: string;
@@ -362,6 +368,7 @@ export interface Service {
   faqs: ServiceFaq[];
   cancellationPolicy: string;
   availabilityNote?: string;
+  requestable?: boolean;
   requestContextFields: string[];
   contextualLinks: ServiceContextLink[];
 }
@@ -381,7 +388,7 @@ export interface Course {
   instructor: string;
   duration: string;
   lessonsCount: number | null;
-  level: 'مبتدئ' | 'متوسط' | 'متقدم' | 'مبتدئ ومتوسط' | 'جميع المستويات';
+  level: 'مبتدئ' | 'متوسط' | 'متقدم' | 'مبتدئ ومتوسط' | 'جميع المستويات' | 'غير محدد رسميًا';
   isFree: boolean;
   rating: number | null;
   studentsCount: number | null;
@@ -389,6 +396,10 @@ export interface Course {
   category: string;
   directCourseUrl?: string;
   courseContent?: string;
+  description?: string;
+  prerequisites?: string[];
+  targetAudience?: string[];
+  certificateAvailable?: boolean;
   acquiredSkills?: string[];
   courseModules?: { title: string; description: string }[];
   learningOutcomes?: string;
@@ -396,6 +407,7 @@ export interface Course {
 }
 
 export interface Major {
+  contentSections?: Array<{ sectionKey?: string; title?: string; content?: string; metadata?: Record<string, unknown> }>;
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;
@@ -515,7 +527,9 @@ export interface PublicArticle {
   slug: string;
   titleAr: string;
   titleEn: string;
-  contentType: 'STUDY_GUIDE' | 'ARTICLE' | 'NEWS' | 'CHECKLIST' | 'FAQ' | 'STATIC_PAGE';
+  contentType: 'STUDY_GUIDE' | 'ARTICLE' | 'NEWS' | 'CHECKLIST' | 'FAQ' | 'STATIC_PAGE' | 'LANDING_PAGE';
+  body?: string;
+  canonicalUrl?: string;
   contentTypeLabelAr: string;
   categoryAr: string;
   author: string;

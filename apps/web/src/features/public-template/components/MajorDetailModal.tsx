@@ -1,4 +1,5 @@
 import React from 'react';
+import { PublishedMajorSections } from './PublishedMajorSections';
 import {
   ArrowLeft,
   X,
@@ -240,7 +241,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
     if (isFellowship) return 'برنامج تدريب سريري متقدم • زمالة';
     if (isDoctorate) return 'برنامج دراسات عليا • دكتوراه';
     if (isMaster) return 'برنامج دراسات عليا • ماجستير';
-    return 'برنامج بكالوريوس طبي';
+    return major.contentSections ? 'برنامج بكالوريوس' : 'برنامج بكالوريوس طبي';
   };
 
   return (
@@ -313,7 +314,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             {/* Right Side: Glowing Gold Graduation Badge + Arrow + Title & Tag */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-[var(--mn-accent)] flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(214,164,59,0.5)] bg-gradient-to-br from-[var(--mn-primary)] to-[var(--mn-primary)] shrink-0">
-                {isFellowship ? (
+                {major.contentSections ? (
+        <PublishedMajorSections sections={major.contentSections} level={major.degreeLevelName} />
+      ) : isFellowship ? (
                   <HeartPulse className="w-6 h-6 text-[var(--mn-danger-text)] drop-shadow-[0_0_4px_rgba(214,164,59,0.7)]" />
                 ) : isDoctorate || isMaster ? (
                   <Microscope className="w-6 h-6 text-[var(--mn-accent-soft)] drop-shadow-[0_0_4px_rgba(214,164,59,0.7)]" />
@@ -360,6 +363,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                 <h1 className="text-sm sm:text-base font-bold text-white leading-snug truncate drop-shadow-md">
                   {major.name}
                 </h1>
+                <p dir="ltr" className="text-[10px] text-white/85 text-right">{major.nameEn}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="text-[9.5px] sm:text-[10px] font-bold text-white px-1.5 py-0.5 rounded bg-white/15 backdrop-blur-xs border border-white/25">
                     {getDegreeTag()}
@@ -372,7 +376,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
       </div>
 
       {/* If Fellowship, render dedicated 17-section FellowshipDetailView */}
-      {isFellowship ? (
+      {major.contentSections ? (
+        <PublishedMajorSections sections={major.contentSections} level={major.degreeLevelName} />
+      ) : isFellowship ? (
         <FellowshipDetailView major={major} onOpenMajor={onOpenMajor} />
       ) : (
         /* MAIN CONTENT WRAPPER (Bordered full-width cards touching side edges) */

@@ -391,7 +391,7 @@ const ToolDetailView: React.FC<{
         {tool.availability === 'متاحة الآن' ? (
           <>
             <p className="mt-1 text-[9px] sm:text-[10px] leading-5 text-[var(--mn-text-muted)] font-medium">
-              التنفيذ يتم عبر سجل Phase 18 والـ API الرسمي؛ نتيجة الذكاء الاصطناعي لا تمنح صلاحيات ولا تغيّر بيانات المجالات المالكة تلقائيًا.
+              أدخل بياناتك وشغّل الأداة. النتائج إرشادية، ويمكنك حفظها في حسابك باختيارك.
             </p>
             <Link to={`/tools/${encodeURIComponent(tool.toolKey)}`} className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--mn-primary)] px-5 py-2 text-xs font-bold text-white hover:opacity-90 mn-inverse">
               فتح الأداة
@@ -423,7 +423,7 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
   const [localDetail, setLocalDetail] = useState<StudentToolPreview | null>(() =>
     initialSelectedId ? tools.find((item) => item.id === initialSelectedId) || null : null,
   );
-  const selectedTool = detailId !== undefined ? (tools.find(item => item.id === detailId) || (tools.find(item => item.id === initialSelectedId)) || null) : localDetail;
+  const selectedTool = detailId !== undefined ? (tools.find(item => item.id === detailId) || (tools.find(item => item.id === initialSelectedId)) || null) : (localDetail ? tools.find(item => item.id === localDetail.id) ?? null : null);
   const setSelectedTool = (value: StudentToolPreview | null) => onDetailChange ? onDetailChange(value?.id || '') : setLocalDetail(value);
 
 
@@ -612,7 +612,7 @@ export const AIToolsPage: React.FC<AIToolsPageProps> = ({
             <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">الأدوات المتاحة ({filteredTools.length})</span>
             <p className="mt-0.5 text-[9px] sm:text-[10px] text-[var(--mn-text-muted)] font-medium">البيانات المعروضة تأتي من كتالوج الأدوات المنشور في منارتك.</p>
           </div>
-          <span className="text-[9px] sm:text-[10px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">Phase 18</span>
+          <span className="text-[9px] sm:text-[10px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">أدوات الطالب</span>
         </div>
 
         <div className="flex flex-col gap-2.5 sm:gap-3">

@@ -28,8 +28,8 @@ export class UniversityAdminRouter {
     };
 
     const listQuerySchema = z.object({
-      status: z.nativeEnum(UniversityStatus).optional(),
-      completenessStatus: z.nativeEnum(UniversityImportCompletenessState).optional(),
+      status: z.preprocess(value => value === '' || value === 'all' || value === 'الكل' ? undefined : value, z.nativeEnum(UniversityStatus).optional()),
+      completenessStatus: z.preprocess(value => value === '' || value === 'all' || value === 'الكل' ? undefined : value, z.nativeEnum(UniversityImportCompletenessState).optional()),
       countryReferenceId: z.string().min(1).optional(),
       regionReferenceId: z.string().min(1).optional(),
       cityReferenceId: z.string().min(1).optional(),
@@ -49,9 +49,10 @@ export class UniversityAdminRouter {
 
     const updateBodySchema = z.object({
       displayName: z.string().optional(),
-      officialWebsite: z.string().url().optional(),
+      officialWebsite: z.union([z.string().url(), z.literal('')]).optional(),
       country: z.string().optional(),
       institutionType: z.string().optional(),
+      institutionalOwnership: z.string().nullable().optional(),
       sourceUrl: z.union([z.string().url(), z.literal('')]).optional(),
       officialSourceUrl: z.union([z.string().url(), z.literal('')]).optional(),
       city: z.string().nullable().optional(),
@@ -64,10 +65,14 @@ export class UniversityAdminRouter {
       accreditations: z.array(z.record(z.string(), z.unknown())).optional(),
       description: z.string().optional(),
       languagesOfInstruction: z.array(z.string()).optional(),
-      contactEmail: z.string().email().optional(),
+      contactEmail: z.union([z.string().email(), z.literal('')]).optional(),
       contactPhone: z.string().optional(),
       socialLinks: z.record(z.string(), z.string().url()).optional(),
       metadata: z.record(z.string(), z.unknown()).optional(),
+      generalRequiredDocuments: z.array(z.string()).optional(),
+      additionalGraduateRequirements: z.array(z.string()).optional(),
+      officialRequiredDocumentsUrl: z.union([z.string().url(), z.literal('')]).optional(),
+      internationalAdmissions: z.record(z.string(), z.unknown()).optional(),
     });
 
     const translationLocaleSchema = z.enum(['ar', 'en']);
@@ -111,11 +116,12 @@ export class UniversityAdminRouter {
         campuses: z
           .array(
             z.object({
+              id: z.string().min(1).optional(),
               sourceReferenceId: z.string().optional(),
               name: z.string().trim().min(1),
-              campusType: z.string().optional(),
+              campusType: z.string().nullable().optional(),
               status: z.string().optional(),
-              address: z.string().optional(),
+              address: z.string().nullable().optional(),
               countryReferenceId: z.string().optional(),
               regionReferenceId: z.string().optional(),
               cityReferenceId: z.string().optional(),
@@ -129,6 +135,7 @@ export class UniversityAdminRouter {
         organizationUnits: z
           .array(
             z.object({
+              id: z.string().min(1).optional(),
               sourceReferenceId: z.string().optional(),
               campusSourceReferenceId: z.string().optional(),
               parentSourceReferenceId: z.string().optional(),
@@ -171,13 +178,14 @@ export class UniversityAdminRouter {
         tuitionProfiles: z
           .array(
             z.object({
+              id: z.string().min(1).optional(),
               profileType: z.string().min(1),
-              organizationUnitName: z.string().optional(),
-              amount: z.number().nonnegative().optional(),
-              currencyCode: z.string().optional(),
-              officialSourceUrl: z.string().url().optional(),
-              effectiveFrom: z.coerce.date().optional(),
-              effectiveTo: z.coerce.date().optional(),
+              organizationUnitName: z.string().nullable().optional(),
+              amount: z.number().nonnegative().nullable().optional(),
+              currencyCode: z.string().nullable().optional(),
+              officialSourceUrl: z.string().url().nullable().optional(),
+              effectiveFrom: z.coerce.date().nullable().optional(),
+              effectiveTo: z.coerce.date().nullable().optional(),
               metadata: z.record(z.string(), z.unknown()).optional(),
             }),
           )
@@ -185,13 +193,14 @@ export class UniversityAdminRouter {
         accommodationProfiles: z
           .array(
             z.object({
-              accommodationAvailable: z.boolean().optional(),
-              internationalEligible: z.boolean().optional(),
-              typicalCost: z.number().nonnegative().optional(),
-              currencyCode: z.string().optional(),
-              averageMonthlyLivingCost: z.number().nonnegative().optional(),
-              livingCostCurrencyCode: z.string().optional(),
-              costVariationNote: z.string().optional(),
+              id: z.string().min(1).optional(),
+              accommodationAvailable: z.boolean().nullable().optional(),
+              internationalEligible: z.boolean().nullable().optional(),
+              typicalCost: z.number().nonnegative().nullable().optional(),
+              currencyCode: z.string().nullable().optional(),
+              averageMonthlyLivingCost: z.number().nonnegative().nullable().optional(),
+              livingCostCurrencyCode: z.string().nullable().optional(),
+              costVariationNote: z.string().nullable().optional(),
               metadata: z.record(z.string(), z.unknown()).optional(),
             }),
           )
@@ -199,12 +208,13 @@ export class UniversityAdminRouter {
         rankings: z
           .array(
             z.object({
+              id: z.string().min(1).optional(),
               provider: z.enum(['QS', 'THE', 'ARWU']),
               rankingYear: z.number().int().min(2000).max(2100),
               rank: z.string().min(1),
               scope: z.string().min(1),
-              scopeLabel: z.string().optional(),
-              note: z.string().optional(),
+              scopeLabel: z.string().nullable().optional(),
+              note: z.string().nullable().optional(),
               officialSourceUrl: z.string().url(),
               verifiedAt: z.coerce.date(),
             }),
@@ -281,12 +291,16 @@ export class UniversityAdminRouter {
         if (updates.contactPhone !== undefined) optionalFields.contactPhone = updates.contactPhone;
         if (updates.socialLinks !== undefined) optionalFields.socialLinks = updates.socialLinks;
         if (updates.metadata !== undefined) optionalFields.metadata = updates.metadata;
+        for (const key of ['generalRequiredDocuments', 'additionalGraduateRequirements', 'officialRequiredDocumentsUrl', 'internationalAdmissions'] as const) {
+          if (updates[key] !== undefined) optionalFields[key] = updates[key];
+        }
 
         const dataToUpdate: UpdateUniversityDto = {
           displayName: updates.displayName,
           officialWebsite: updates.officialWebsite,
           country: updates.country,
           institutionType: updates.institutionType,
+          institutionalOwnership: updates.institutionalOwnership,
           sourceUrl: updates.sourceUrl === '' ? null : updates.sourceUrl,
           officialSourceUrl: updates.officialSourceUrl === '' ? null : updates.officialSourceUrl,
           city: updates.city,

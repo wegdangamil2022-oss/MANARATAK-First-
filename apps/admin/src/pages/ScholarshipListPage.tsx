@@ -23,8 +23,9 @@ SearchCheck,
 Sparkles,
 Table as TableIcon
 } from 'lucide-react';
-import { useEffect,useMemo,useState } from 'react';
+import { useEffect,useMemo,useRef,useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
+import { canonicalPickerApi, type CanonicalPickerOption } from '../api/canonicalPickers';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
@@ -34,6 +35,7 @@ interface Scholarship {
   slug?: string;
   displayName: string;
   canonicalName?: string;
+  localizedNames?: Record<string, string>;
   status: string;
   completenessStatus: string;
   sponsorName?: string;
@@ -105,6 +107,7 @@ export function ScholarshipListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [completenessFilter, setCompletenessFilter] = useState('');
+  const [countryOptions, setCountryOptions] = useState<CanonicalPickerOption[]>([]);
   const [countryFilter, setCountryFilter] = useState('');
   const [fundingFilter, setFundingFilter] = useState('');
   const [degreeFilter, setDegreeFilter] = useState('');
@@ -138,7 +141,9 @@ export function ScholarshipListPage() {
     }
   };
 
+  const listRequest = useRef(0);
   const fetchScholarships = async () => {
+    const request = ++listRequest.current;
     setLoading(true);
     setError(null);
     try {
@@ -146,29 +151,33 @@ export function ScholarshipListPage() {
       if (statusFilter) params.append('status', statusFilter);
       if (completenessFilter) params.append('completenessStatus', completenessFilter);
       if (searchTerm.trim()) params.append('query', searchTerm.trim());
+      const selectedCountry = countryOptions.find(item => item.id === countryFilter);
+      if (selectedCountry) params.set('countryReferenceId', selectedCountry.id);
+      for (const [key, value] of Object.entries({ countryLabel: selectedCountry?.label || countryFilter, fundingType: fundingFilter, degreeLabel: degreeFilter, majorLabel: majorFilter, languageLabel: languageFilter, deadlineStatus: deadlineFilter })) if (value) params.set(key, value);
 
       const res = await adminApiClient.request<PaginatedResponse>(`/admin/scholarships?${params.toString()}`);
+      if (request !== listRequest.current) return;
+      if (res.total > 0 && page > res.totalPages) { setPage(Math.max(1, res.totalPages)); return; }
       setData(res ?? { data: [], total: 0, page: 1, pageSize: 24, totalPages: 0 });
-    } catch {
-      setData({
-        data: [],
-        total: 0,
-        page: 1,
-        pageSize: 24,
-        totalPages: 0,
-      });
+    } catch (err) {
+      if (request !== listRequest.current) return;
+      setError(err instanceof Error ? err.message : 'تعذر تحميل المنح الدراسية.');
     } finally {
-      setLoading(false);
+      if (request === listRequest.current) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchSummary();
+    let active = true;
+    void canonicalPickerApi.countries().then(options => { if (active) setCountryOptions(options); }).catch(() => undefined);
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
     fetchScholarships();
-  }, [page, statusFilter, completenessFilter, searchTerm]);
+    return () => { listRequest.current += 1; };
+  }, [page, statusFilter, completenessFilter, searchTerm, countryFilter, fundingFilter, degreeFilter, majorFilter, languageFilter, deadlineFilter]);
 
   const handleRefresh = () => {
     fetchSummary();
@@ -184,84 +193,8 @@ export function ScholarshipListPage() {
     setPage(1);
   };
 
-  // Multi-dimensional filtering
-  const filteredItems = useMemo(() => {
-    if (!data?.data) return [];
-    let list = data.data;
-
-    if (searchTerm.trim()) {
-      const q = searchTerm.trim().toLowerCase();
-      list = list.filter(item =>
-        (item.displayName && item.displayName.toLowerCase().includes(q)) ||
-        (item.sponsorName && item.sponsorName.toLowerCase().includes(q)) ||
-        (item.providerName && item.providerName.toLowerCase().includes(q)) ||
-        (item.studyCountry && item.studyCountry.toLowerCase().includes(q)) ||
-        (item.countrySourceLabel && item.countrySourceLabel.toLowerCase().includes(q)) ||
-        (item.publicId && item.publicId.toLowerCase().includes(q))
-      );
-    }
-
-    if (countryFilter) {
-      list = list.filter(item =>
-        (item.studyCountry && item.studyCountry.toLowerCase().includes(countryFilter.toLowerCase())) ||
-        (item.countrySourceLabel && item.countrySourceLabel.toLowerCase().includes(countryFilter.toLowerCase()))
-      );
-    }
-
-    if (fundingFilter) {
-      if (fundingFilter === 'FULL') {
-        list = list.filter(item => item.isFullyFunded || item.fundingTypeCode === 'FULL' || item.fundingTypeCode === 'FULLY_FUNDED');
-      } else if (fundingFilter === 'PARTIAL') {
-        list = list.filter(item => !item.isFullyFunded && item.fundingTypeCode !== 'FULL' && item.fundingTypeCode !== 'FULLY_FUNDED');
-      }
-    }
-
-    if (degreeFilter) {
-      list = list.filter(item => {
-        const dNames = (item.degreeTargets || []).map(d => (d.degreeLevelName || d.sourceLabel || '').toLowerCase());
-        return dNames.some(d => d.includes(degreeFilter.toLowerCase()));
-      });
-    }
-
-    if (majorFilter) {
-      list = list.filter(item => {
-        const mNames = (item.majorTargets || []).map(m => (m.majorName || m.sourceLabel || '').toLowerCase());
-        return mNames.some(m => m.includes(majorFilter.toLowerCase()));
-      });
-    }
-
-    if (languageFilter) {
-      list = list.filter(item => {
-        const lang = (item.studyLanguage || '').toLowerCase();
-        return lang.includes(languageFilter.toLowerCase());
-      });
-    }
-
-    if (deadlineFilter) {
-      const now = new Date();
-      list = list.filter(item => {
-        if (!item.applicationDeadline) {
-          return deadlineFilter === 'OPEN_ALL_YEAR';
-        }
-        const dDate = new Date(item.applicationDeadline);
-        if (deadlineFilter === 'OPEN') {
-          return dDate >= now;
-        } else if (deadlineFilter === 'CLOSING_SOON') {
-          const diffDays = (dDate.getTime() - now.getTime()) / (1000 * 3600 * 24);
-          return diffDays >= 0 && diffDays <= 45;
-        } else if (deadlineFilter === 'CLOSED') {
-          return dDate < now;
-        }
-        return true;
-      });
-    }
-
-    if (statusFilter) {
-      list = list.filter(item => item.status === statusFilter);
-    }
-
-    return list;
-  }, [data?.data, searchTerm, countryFilter, fundingFilter, degreeFilter, majorFilter, languageFilter, deadlineFilter, statusFilter]);
+  // Filtering happens before pagination in the owner API.
+  const filteredItems = data?.data ?? [];
 
   const availableCountries = useMemo(() => {
     if (!data?.data) return [];
@@ -533,25 +466,12 @@ export function ScholarshipListPage() {
               </label>
               <select
                 value={countryFilter}
-                onChange={(e) => setCountryFilter(e.target.value)}
+                onChange={(e) => { setCountryFilter(e.target.value); setPage(1); }}
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">جميع الدول والوجهات</option>
-                <option value="تركيا">🇹🇷 تركيا</option>
-                <option value="المملكة المتحدة">🇬🇧 المملكة المتحدة</option>
-                <option value="ألمانيا">🇩🇪 ألمانيا</option>
-                <option value="المملكة العربية السعودية">🇸🇦 المملكة العربية السعودية</option>
-                <option value="الولايات المتحدة">🇺🇸 الولايات المتحدة</option>
-                <option value="كندا">🇨🇦 كندا</option>
-                <option value="فرنسا">🇫🇷 فرنسا</option>
-                <option value="اليابان">🇯🇵 اليابان</option>
-                <option value="أستراليا">🇦🇺 أستراليا</option>
-                <option value="ماليزيا">🇲🇾 ماليزيا</option>
-                <option value="قطر">🇶🇦 قطر</option>
-                <option value="الإمارات">🇦🇪 الإمارات</option>
-                {availableCountries.filter(c => !['تركيا', 'المملكة المتحدة', 'ألمانيا', 'المملكة العربية السعودية', 'الولايات المتحدة'].includes(c)).map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
+                {countryOptions.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+                {availableCountries.filter(label => !countryOptions.some(item => item.label === label)).map(label => <option key={label} value={label}>{label}</option>)}
               </select>
             </div>
 
@@ -562,7 +482,7 @@ export function ScholarshipListPage() {
               </label>
               <select
                 value={fundingFilter}
-                onChange={(e) => setFundingFilter(e.target.value)}
+                onChange={(e) => { setFundingFilter(e.target.value); setPage(1); }}
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">كل أنواع التمويل</option>
@@ -578,7 +498,7 @@ export function ScholarshipListPage() {
               </label>
               <select
                 value={majorFilter}
-                onChange={(e) => setMajorFilter(e.target.value)}
+                onChange={(e) => { setMajorFilter(e.target.value); setPage(1); }}
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">جميع التخصصات</option>
@@ -600,7 +520,7 @@ export function ScholarshipListPage() {
               </label>
               <select
                 value={degreeFilter}
-                onChange={(e) => setDegreeFilter(e.target.value)}
+                onChange={(e) => { setDegreeFilter(e.target.value); setPage(1); }}
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">جميع الدرجات العلمية</option>
@@ -617,7 +537,7 @@ export function ScholarshipListPage() {
               </label>
               <select
                 value={languageFilter}
-                onChange={(e) => setLanguageFilter(e.target.value)}
+                onChange={(e) => { setLanguageFilter(e.target.value); setPage(1); }}
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">جميع لغات الدراسة</option>
@@ -636,7 +556,7 @@ export function ScholarshipListPage() {
               </label>
               <select
                 value={deadlineFilter}
-                onChange={(e) => setDeadlineFilter(e.target.value)}
+                onChange={(e) => { setDeadlineFilter(e.target.value); setPage(1); }}
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">كل المواعيد</option>
@@ -749,10 +669,11 @@ export function ScholarshipListPage() {
                           to={`/admin/scholarships/${item.id}`}
                           className="text-base sm:text-lg font-black text-[#142B5F] group-hover:text-[#0E7C86] font-['Cairo',sans-serif] leading-snug transition-colors line-clamp-1"
                         >
-                          {item.displayName}
+                          {item.localizedNames?.ar || item.displayName}
                         </Link>
                       </div>
 
+                      <p dir="ltr" className="text-xs text-slate-500 text-right">{item.localizedNames?.en || item.canonicalName}</p>
                       <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 font-['Cairo',sans-serif] truncate w-full mt-1">
                         <Building2 className="w-3.5 h-3.5 text-[#0E7C86] shrink-0" />
                         <span className="truncate">{item.providerName || item.sponsorName || item.canonicalName || 'جهة مانحة معتمدة'}</span>
@@ -840,7 +761,7 @@ export function ScholarshipListPage() {
                 {filteredItems.map((item) => (
                   <tr key={item.id} className="transition-colors hover:bg-slate-50/70">
                     <td className="px-6 py-4">
-                      <div className="font-black text-[#142B5F] text-sm">{item.displayName}</div>
+                      <div className="font-black text-[#142B5F] text-sm">{item.localizedNames?.ar || item.displayName}</div>
                       <div className="mt-1 truncate max-w-xs text-xs font-bold text-slate-500">
                         {item.providerName || item.sponsorName || tr('جهة مانحة معتمدة', 'Accredited Sponsor')}
                       </div>

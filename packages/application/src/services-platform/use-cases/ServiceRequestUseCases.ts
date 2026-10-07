@@ -7,6 +7,7 @@ import {
   ServiceRequestDto,
   ServiceRequestFilters,
   ServiceRequestStatus,
+  ServiceAvailabilityStatus,
   ServiceStatus,
 } from '@manaratak/domain';
 
@@ -21,8 +22,15 @@ export class StudentServiceRequestUseCases {
     serviceId: string;
     requestParameters?: Record<string, unknown>;
   }): Promise<ServiceRequestDto> {
-    const service = await this.catalog.findById(input.serviceId);
-    if (!service || service.status !== ServiceStatus.PUBLISHED) throw new Error('SERVICE_NOT_AVAILABLE');
+    const service =
+      (await this.catalog.findById(input.serviceId)) ??
+      (await this.catalog.findBySlug(input.serviceId));
+    if (
+      !service ||
+      service.status !== ServiceStatus.PUBLISHED ||
+      service.serviceAvailabilityStatus !== ServiceAvailabilityStatus.AVAILABLE
+    )
+      throw new Error('SERVICE_NOT_AVAILABLE');
     return this.requests.createRequest({
       publicId: `svc_req_${randomUUID()}`,
       studentReferenceId: input.studentReferenceId,
@@ -32,13 +40,19 @@ export class StudentServiceRequestUseCases {
     });
   }
 
-  async listMyRequests(studentReferenceId: string, filters: Omit<ServiceRequestFilters, 'studentReferenceId'> = {}): Promise<PaginatedServiceRequestResult> {
+  async listMyRequests(
+    studentReferenceId: string,
+    filters: Omit<ServiceRequestFilters, 'studentReferenceId'> = {},
+  ): Promise<PaginatedServiceRequestResult> {
     return this.requests.listRequests({ ...filters, studentReferenceId });
   }
 
   async getMyRequest(studentReferenceId: string, requestId: string): Promise<ServiceRequestDto> {
-    const request = await this.requests.findRequestById(requestId);
-    if (!request || request.studentReferenceId !== studentReferenceId) throw new Error('SERVICE_REQUEST_NOT_FOUND');
+    const request =
+      (await this.requests.findRequestById(requestId)) ??
+      (await this.requests.findRequestByPublicId(requestId));
+    if (!request || request.studentReferenceId !== studentReferenceId)
+      throw new Error('SERVICE_REQUEST_NOT_FOUND');
     return request;
   }
 }
@@ -57,19 +71,33 @@ export class AdminServiceFulfillmentUseCases {
   async getRequest(reference: string): Promise<ServiceRequestDto> {
     const normalized = reference.trim();
     if (!normalized) throw new Error('SERVICE_REQUEST_REFERENCE_REQUIRED');
-    const request = await this.requests.findRequestById(normalized) ?? await this.requests.findRequestByPublicId(normalized);
+    const request =
+      (await this.requests.findRequestById(normalized)) ??
+      (await this.requests.findRequestByPublicId(normalized));
     if (!request) throw new Error('SERVICE_REQUEST_NOT_FOUND');
     return request;
   }
 
-  async transitionRequest(id: string, status: ServiceRequestStatus, expectedVersion: number, fulfillmentMetadata?: Record<string, unknown> | null) {
+  async transitionRequest(
+    id: string,
+    status: ServiceRequestStatus,
+    expectedVersion: number,
+    fulfillmentMetadata?: Record<string, unknown> | null,
+  ) {
     this.assertExpectedVersion(expectedVersion);
     const request = await this.requireRequest(id);
     if (request.version !== expectedVersion) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
     this.assertTransition(request.status, status);
 
-    const resumesFulfillment = [ServiceRequestStatus.IN_PROGRESS, ServiceRequestStatus.COMPLETED].includes(status);
-    if (resumesFulfillment && request.status === ServiceRequestStatus.AWAITING_PAYMENT && !request.financeInvoiceId)
+    const resumesFulfillment = [
+      ServiceRequestStatus.IN_PROGRESS,
+      ServiceRequestStatus.COMPLETED,
+    ].includes(status);
+    if (
+      resumesFulfillment &&
+      request.status === ServiceRequestStatus.AWAITING_PAYMENT &&
+      !request.financeInvoiceId
+    )
       throw new Error('SERVICE_FINANCE_INVOICE_REQUIRED');
     if (resumesFulfillment && request.financeInvoiceId) {
       const clearance = await this.finance.getInvoiceClearance(request.financeInvoiceId);
@@ -103,7 +131,8 @@ export class AdminServiceFulfillmentUseCases {
   }) {
     this.assertExpectedVersion(input.expectedVersion);
     const request = await this.requireRequest(input.requestId);
-    if (request.version !== input.expectedVersion) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
+    if (request.version !== input.expectedVersion)
+      throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
     if (request.financeInvoiceId) throw new Error('SERVICE_REQUEST_INVOICE_ALREADY_LINKED');
     if ([ServiceRequestStatus.CANCELLED, ServiceRequestStatus.COMPLETED].includes(request.status))
       throw new Error('SERVICE_REQUEST_NOT_INVOICEABLE');
@@ -120,11 +149,17 @@ export class AdminServiceFulfillmentUseCases {
       scale: input.scale,
       actorId: input.actorId,
     });
-    return this.requests.linkFinanceInvoice(request.id, invoice.id, invoice.publicId, input.expectedVersion);
+    return this.requests.linkFinanceInvoice(
+      request.id,
+      invoice.id,
+      invoice.publicId,
+      input.expectedVersion,
+    );
   }
 
   private assertExpectedVersion(expectedVersion: number): void {
-    if (!Number.isInteger(expectedVersion) || expectedVersion < 1) throw new Error('SERVICE_REQUEST_EXPECTED_VERSION_REQUIRED');
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 1)
+      throw new Error('SERVICE_REQUEST_EXPECTED_VERSION_REQUIRED');
   }
 
   private async requireRequest(id: string) {
@@ -135,13 +170,29 @@ export class AdminServiceFulfillmentUseCases {
 
   private assertTransition(from: ServiceRequestStatus, to: ServiceRequestStatus) {
     const allowed: Record<ServiceRequestStatus, ServiceRequestStatus[]> = {
-      [ServiceRequestStatus.REQUESTED]: [ServiceRequestStatus.ACCEPTED, ServiceRequestStatus.CANCELLED],
-      [ServiceRequestStatus.ACCEPTED]: [ServiceRequestStatus.IN_PROGRESS, ServiceRequestStatus.AWAITING_PAYMENT, ServiceRequestStatus.CANCELLED],
-      [ServiceRequestStatus.IN_PROGRESS]: [ServiceRequestStatus.AWAITING_PAYMENT, ServiceRequestStatus.COMPLETED, ServiceRequestStatus.CANCELLED],
-      [ServiceRequestStatus.AWAITING_PAYMENT]: [ServiceRequestStatus.IN_PROGRESS, ServiceRequestStatus.COMPLETED, ServiceRequestStatus.CANCELLED],
+      [ServiceRequestStatus.REQUESTED]: [
+        ServiceRequestStatus.ACCEPTED,
+        ServiceRequestStatus.CANCELLED,
+      ],
+      [ServiceRequestStatus.ACCEPTED]: [
+        ServiceRequestStatus.IN_PROGRESS,
+        ServiceRequestStatus.AWAITING_PAYMENT,
+        ServiceRequestStatus.CANCELLED,
+      ],
+      [ServiceRequestStatus.IN_PROGRESS]: [
+        ServiceRequestStatus.AWAITING_PAYMENT,
+        ServiceRequestStatus.COMPLETED,
+        ServiceRequestStatus.CANCELLED,
+      ],
+      [ServiceRequestStatus.AWAITING_PAYMENT]: [
+        ServiceRequestStatus.IN_PROGRESS,
+        ServiceRequestStatus.COMPLETED,
+        ServiceRequestStatus.CANCELLED,
+      ],
       [ServiceRequestStatus.COMPLETED]: [],
       [ServiceRequestStatus.CANCELLED]: [],
     };
-    if (!allowed[from]?.includes(to)) throw new Error(`INVALID_SERVICE_REQUEST_TRANSITION:${from}->${to}`);
+    if (!allowed[from]?.includes(to))
+      throw new Error(`INVALID_SERVICE_REQUEST_TRANSITION:${from}->${to}`);
   }
 }

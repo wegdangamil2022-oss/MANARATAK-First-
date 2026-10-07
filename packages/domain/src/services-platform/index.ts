@@ -94,6 +94,7 @@ export type UpdateServiceCatalogItemDto = Partial<Omit<CreateServiceCatalogItemD
 export type ServiceCatalogRepositoryUpdateDto = UpdateServiceCatalogItemDto & { canonicalName?: string; canonicalDedupKey?: string };
 
 export interface ServiceCatalogFilters {
+  search?: string;
   status?: ServiceStatus;
   completenessStatus?: ServiceCompletenessStatus;
   serviceCategory?: ServiceCategory;
@@ -148,6 +149,7 @@ export interface CreateServiceRequestDto {
 }
 
 export interface ServiceRequestFilters {
+  search?: string;
   studentReferenceId?: string;
   serviceId?: string;
   status?: ServiceRequestStatus;

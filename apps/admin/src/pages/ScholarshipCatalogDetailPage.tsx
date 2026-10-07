@@ -34,7 +34,7 @@ Sparkles,
 Trash2,
 X
 } from 'lucide-react';
-import { useEffect,useMemo,useState,type ReactNode } from 'react';
+import { useEffect,useMemo,useRef,useState,type ReactNode } from 'react';
 import { Link,useNavigate,useParams } from 'react-router-dom';
 import {
 scholarshipCatalogApi,
@@ -138,8 +138,8 @@ function toUpdate(s: ScholarshipDto): ScholarshipCatalogUpdate {
     officialSourceUrl: s.officialSourceUrl ?? null,
     sourceLocale: s.sourceLocale ?? null,
     studyLanguageSourceLabel: s.studyLanguageSourceLabel ?? null,
-    description: (s as any).description ?? null,
-    notes: (s as any).notes ?? null,
+    description: s.description ?? null,
+    notes: s.notes ?? null,
     benefits: (s.benefits ?? []).map((item) => ({ ...item })),
     degreeTargets: (s.degreeTargets ?? []).map((item) => ({ ...item })),
     majorTargets: (s.majorTargets ?? []).map((item) => ({ ...item })),
@@ -260,71 +260,60 @@ export function ScholarshipDetailPage() {
     const rawDegrees = s.degreeTargets ?? [];
     const rawMajors = s.majorTargets ?? [];
 
-    if (rawDegrees.length === 0) {
-      // Default initial groups if empty
-      setDegreeGroups([
-        {
-          id: 'deg-1',
-          degreeLevel: 'بكالوريوس',
-          customLabel: 'بكالوريوس (Undergraduate)',
-          majors: rawMajors.map(m => m.sourceLabel || '').filter(Boolean).length > 0
-            ? rawMajors.map(m => m.sourceLabel || '').filter(Boolean)
-            : ['الهندسة والذكاء الاصطناعي', 'الطب البشري', 'إدارة الأعمال والاقتصاد'],
-        },
-        {
-          id: 'deg-2',
-          degreeLevel: 'ماجستير',
-          customLabel: 'ماجستير (Master\'s)',
-          majors: ['علوم البيانات والذكاء الاصطناعي', 'السياسات العامة والقانون'],
-        }
-      ]);
-      return;
-    }
+    if (rawDegrees.length === 0) { setDegreeGroups([]); return; }
 
     const groups: DegreeWithMajors[] = rawDegrees.map((d, index) => {
-      const dLabel = d.sourceLabel || d.degreeLevelId || `درجة ${index + 1}`;
-      let matchedDegree = 'بكالوريوس';
+      const dLabel = d.sourceLabel || d.degreeLevel?.nameAr || d.degreeLevel?.nameEn || d.degreeLevelId || `درجة ${index + 1}`;
+      let matchedDegree = dLabel;
+      if (/بكالوريوس|bachelor|undergraduate/i.test(dLabel)) matchedDegree = 'بكالوريوس';
       if (dLabel.includes('ماجستير') || dLabel.toLowerCase().includes('master')) matchedDegree = 'ماجستير';
       else if (dLabel.includes('دكتوراه') || dLabel.toLowerCase().includes('phd') || dLabel.toLowerCase().includes('doctor')) matchedDegree = 'دكتوراه';
       else if (dLabel.includes('دبلوم') || dLabel.toLowerCase().includes('diploma')) matchedDegree = 'دبلوم';
       else if (dLabel.includes('زمالة') || dLabel.toLowerCase().includes('fellow')) matchedDegree = 'زمالة';
 
       // If majors exist, distribute or list them
-      const majorsList = rawMajors.map(m => m.sourceLabel || '').filter(Boolean);
+      const majorsList = rawMajors.filter(m => m.metadata?.degreeTargetKey === d.targetKey).map(m => m.sourceLabel || '').filter(Boolean);
 
       return {
         id: d.targetKey || `deg-${index + 1}`,
         degreeLevel: matchedDegree,
         customLabel: dLabel,
-        majors: majorsList.length > 0 ? (index === 0 ? majorsList : majorsList.slice(0, 2)) : ['الهندسة وتكنولوجيا المعلومات', 'إدارة الأعمال'],
+        majors: majorsList,
       };
     });
 
     setDegreeGroups(groups);
   };
 
+  const savedForm = useRef('');
+  const loadRequest = useRef(0);
   const load = async () => {
+    const request = ++loadRequest.current;
     if (!id) return;
     setLoading(true);
     setError(null);
     try {
       const response = await scholarshipCatalogApi.detail(id);
+      if (request !== loadRequest.current) return;
       if (response && response.scholarship) {
         setDetail(response);
-        setForm(toUpdate(response.scholarship));
+        const nextForm = toUpdate(response.scholarship);
+        savedForm.current = JSON.stringify(nextForm);
+        setForm(nextForm);
         initDegreeGroups(response.scholarship);
       } else {
         setError('تعذر العثور على بيانات المنحة المطلوبة.');
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات المنحة الدراسية.');
+      if (request === loadRequest.current) setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات المنحة الدراسية.');
     } finally {
-      setLoading(false);
+      if (request === loadRequest.current) setLoading(false);
     }
   };
 
   useEffect(() => {
     void load();
+    return () => { loadRequest.current += 1; };
   }, [id]);
 
   const scholarship = detail?.scholarship;
@@ -340,30 +329,26 @@ export function ScholarshipDetailPage() {
 
   // Sync degreeGroups to form payload
   const syncDegreeGroupsToForm = (groups: DegreeWithMajors[]) => {
-    const degreeTargets: ScholarshipDegreeTargetDto[] = groups.map((g, idx) => ({
-      targetKey: `DEGREE-${idx + 1}`,
-      sourceLabel: g.customLabel || g.degreeLevel,
-      degreeLevelId: `DEG-${g.degreeLevel.toUpperCase()}`,
-      resolutionStatus: 'RESOLVED',
-    }));
-
-    const allMajors: ScholarshipMajorTargetDto[] = [];
-    groups.forEach((g) => {
-      g.majors.forEach((m) => {
-        allMajors.push({
-          targetKey: `MAJOR-${allMajors.length + 1}`,
-          sourceLabel: `${m} (${g.degreeLevel})`,
-          majorId: `MAJ-${allMajors.length + 1}`,
-          resolutionStatus: 'RESOLVED',
-        });
-      });
+    const existingDegrees = form.degreeTargets ?? [];
+    const existingMajors = form.majorTargets ?? [];
+    const degreeTargets: ScholarshipDegreeTargetDto[] = groups.map(g => {
+      const existing = existingDegrees.find(item => item.targetKey === g.id);
+      return { ...existing, targetKey: g.id, sourceLabel: g.customLabel || g.degreeLevel,
+        degreeLevelId: existing?.degreeLevelId ?? null,
+        resolutionStatus: existing?.degreeLevelId ? existing.resolutionStatus : 'UNRESOLVED',
+      };
     });
-
-    setForm((x) => ({
-      ...x,
-      degreeTargets,
-      majorTargets: allMajors,
+    // Keep ungrouped canonical targets intact; a label is never a canonical identifier.
+    const allMajors: ScholarshipMajorTargetDto[] = existingMajors.filter(item => !item.metadata?.degreeTargetKey);
+    groups.forEach(g => g.majors.forEach(label => {
+      const existing = existingMajors.find(item => item.metadata?.degreeTargetKey === g.id && item.sourceLabel === label);
+      allMajors.push({ ...existing, targetKey: existing?.targetKey || `major-${crypto.randomUUID()}`,
+        sourceLabel: label, majorId: existing?.majorId ?? null,
+        resolutionStatus: existing?.majorId ? existing.resolutionStatus : 'UNRESOLVED',
+        metadata: { ...existing?.metadata, degreeTargetKey: g.id },
+      });
     }));
+    setForm(x => ({ ...x, degreeTargets, majorTargets: allMajors }));
   };
 
   // Add new degree level group
@@ -466,6 +451,7 @@ export function ScholarshipDetailPage() {
     setMessage(null);
 
     try {
+      if (['publish', 'mark-publishable', 'mark-ready'].includes(command) && JSON.stringify(form) !== savedForm.current) throw new Error('احفظ التعديلات قبل تغيير حالة النشر.');
       await scholarshipCatalogApi.command(id, command);
       setMessage(`تم تنفيذ الأمر (${command}) بنجاح.`);
       await load();
@@ -618,7 +604,7 @@ export function ScholarshipDetailPage() {
             </div>
 
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl text-white">
-              {form.displayName || scholarship.displayName}
+              {form.displayName || scholarship.localizedNames?.ar || scholarship.displayName}
             </h1>
 
             <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[#DDEFF2]">
@@ -802,7 +788,9 @@ export function ScholarshipDetailPage() {
         </aside>
 
         {/* Active Tab Content */}
-        <main className="lg:col-span-8 xl:col-span-9 space-y-6">
+        <main className="lg:col-span-8 xl:col-span-9 space-y-6"><fieldset disabled={saving || actionLoading} className="contents">
+          <p className="rounded-xl bg-teal-50 p-3 text-xs">الدرجات والتخصصات الجديدة تُحفظ للمراجعة. استخدم «إدارة العلاقات» لاختيار المراجع الفعلية؛ الروابط القائمة محفوظة دون تغيير.</p>
+          {(form.majorTargets ?? []).filter(item => !item.metadata?.degreeTargetKey).length > 0 && <div className="rounded-xl border p-3 text-xs"><p className="mb-2 font-bold">التخصصات المشتركة المحفوظة للمنحة</p>{(form.majorTargets ?? []).filter(item => !item.metadata?.degreeTargetKey).map(item => <span key={item.targetKey} className="inline-block m-1 rounded-lg bg-slate-50 px-2 py-1">{item.sourceLabel || item.targetKey}</span>)}</div>}
           {/* Tab 1: Identity & Basics */}
           {activeTab === 'identity' && (
             <div className="space-y-6">
@@ -1645,14 +1633,14 @@ export function ScholarshipDetailPage() {
               </Card>
             </div>
           )}
-        </main>
+        </fieldset></main>
       </div>
 
       {/* Floating Bottom Save Bar */}
       <div className="sticky bottom-4 z-20 flex items-center justify-between rounded-3xl border border-[#DDEFF2] bg-white/95 p-4 shadow-lg backdrop-blur-md">
         <div className="flex items-center gap-2 text-xs text-slate-600 font-bold">
           <GraduationCap className="h-4 w-4 text-[#0E7C86]" />
-          <span>تعديل منحة: <strong className="text-[#142B5F]">{form.displayName || scholarship.displayName}</strong></span>
+          <span>تعديل منحة: <strong className="text-[#142B5F]">{form.displayName || scholarship.localizedNames?.ar || scholarship.displayName}</strong></span>
         </div>
 
         <div className="flex items-center gap-2.5">

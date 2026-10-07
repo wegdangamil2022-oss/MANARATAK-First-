@@ -41,6 +41,7 @@ export interface CreateCourseDto {
 }
 
 export interface CourseDto extends CreateCourseDto {
+  relatedMajors?: Array<{id:string;name:string}>;
   id: string;
   /** Canonical P7 ReferenceLanguage relation; owner-reviewed, not a generic write field. */
   learningLanguageReferenceId?: string;

@@ -93,11 +93,11 @@ export class PrismaImportRepository {
 
     if (this.prisma) {
       const where: any = {};
-      if (filters?.dataType) where.dataType = filters.dataType;
+      if (filters?.dataType) where.dataType = importDomainFilter(filters.dataType);
 
       const batches = await this.prisma.importBatch.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         take: limit,
       });
       return batches;
@@ -105,9 +105,14 @@ export class PrismaImportRepository {
 
     let list = Array.from(this.inMemoryBatches.values());
     if (filters?.dataType) {
-      list = list.filter((b) => b.dataType === filters.dataType);
+      list = list.filter((b) => matchesImportDomain(b.dataType, filters.dataType));
     }
-    return list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return list
+      .sort(
+        (a, b) =>
+          b.createdAt.getTime() - a.createdAt.getTime() || String(b.id).localeCompare(String(a.id)),
+      )
+      .slice(0, limit);
   }
 
   async getOverview(filters?: { dataType?: string }): Promise<any> {
@@ -123,8 +128,12 @@ export class PrismaImportRepository {
     const recordReviewStatuses = ['NEEDS_REVIEW', 'INCOMPLETE', 'READY_FOR_REVIEW'];
     const recordFailedStatuses = ['FAILED', 'DLQ'];
     const recordTransferredStatuses = ['PROMOTED'];
-    const batchWhere: any = filters?.dataType ? { dataType: filters.dataType } : {};
-    const recordWhere: any = filters?.dataType ? { batch: { dataType: filters.dataType } } : {};
+    const batchWhere: any = filters?.dataType
+      ? { dataType: importDomainFilter(filters.dataType) }
+      : {};
+    const recordWhere: any = filters?.dataType
+      ? { batch: { dataType: importDomainFilter(filters.dataType) } }
+      : {};
 
     if (this.prisma) {
       const [
@@ -235,7 +244,8 @@ export class PrismaImportRepository {
     }
 
     let batches = Array.from(this.inMemoryBatches.values());
-    if (filters?.dataType) batches = batches.filter((batch) => batch.dataType === filters.dataType);
+    if (filters?.dataType)
+      batches = batches.filter((batch) => matchesImportDomain(batch.dataType, filters.dataType));
     const allowedBatchIds = new Set(batches.map((batch) => batch.id));
     let records = Array.from(this.inMemoryRecords.values()).filter((record) =>
       allowedBatchIds.has(record.batchId),
@@ -310,7 +320,9 @@ export class PrismaImportRepository {
       'PROCESSING',
     ];
     const staleBefore = new Date(Date.now() - 15 * 60 * 1000);
-    const whereDomain: any = filters?.dataType ? { dataType: filters.dataType } : {};
+    const whereDomain: any = filters?.dataType
+      ? { dataType: importDomainFilter(filters.dataType) }
+      : {};
 
     if (this.prisma) {
       const [
@@ -418,7 +430,8 @@ export class PrismaImportRepository {
     }
 
     let batches = Array.from(this.inMemoryBatches.values());
-    if (filters?.dataType) batches = batches.filter((batch) => batch.dataType === filters.dataType);
+    if (filters?.dataType)
+      batches = batches.filter((batch) => matchesImportDomain(batch.dataType, filters.dataType));
     const highFailure = batches.filter(
       (batch) =>
         Number(batch.totalRecords ?? 0) > 0 &&
@@ -465,7 +478,7 @@ export class PrismaImportRepository {
     if (this.prisma) {
       const where: any = { status: { in: ['FAILED', 'DLQ'] } };
       if (filters?.batchId) where.batchId = filters.batchId;
-      if (filters?.dataType) where.batch = { dataType: filters.dataType };
+      if (filters?.dataType) where.batch = { dataType: importDomainFilter(filters.dataType) };
 
       const [total, failed, dlq, rows] = await Promise.all([
         this.prisma.importRecord.count({ where }),
@@ -473,7 +486,7 @@ export class PrismaImportRepository {
         this.prisma.importRecord.count({ where: { ...where, status: 'DLQ' } }),
         this.prisma.importRecord.findMany({
           where,
-          orderBy: { createdAt: 'desc' },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
           take: limit,
           include: { batch: true },
         }),
@@ -493,8 +506,8 @@ export class PrismaImportRepository {
     );
     if (filters?.batchId) rows = rows.filter((record) => record.batchId === filters.batchId);
     if (filters?.dataType)
-      rows = rows.filter(
-        (record) => this.inMemoryBatches.get(record.batchId)?.dataType === filters.dataType,
+      rows = rows.filter((record) =>
+        matchesImportDomain(this.inMemoryBatches.get(record.batchId)?.dataType, filters.dataType),
       );
     rows.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     const failed = rows.filter((record) => record.status === 'FAILED').length;
@@ -641,7 +654,7 @@ export class PrismaImportRepository {
       if (filters?.batchId) where.batchId = filters.batchId;
       if (filters?.status) where.status = filters.status;
       if (filters?.dataType) {
-        where.batch = { dataType: filters.dataType };
+        where.batch = { dataType: importDomainFilter(filters.dataType) };
       }
 
       const [data, total] = await Promise.all([
@@ -649,7 +662,7 @@ export class PrismaImportRepository {
           where,
           skip: (page - 1) * pageSize,
           take: pageSize,
-          orderBy: { createdAt: 'desc' },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
           include: { batch: true },
         }),
         this.prisma.importRecord.count({ where }),
@@ -667,10 +680,15 @@ export class PrismaImportRepository {
     if (filters?.dataType) {
       records = records.filter((r) => {
         const batch = this.inMemoryBatches.get(r.batchId);
-        return batch && batch.dataType === filters.dataType;
+        return batch && matchesImportDomain(batch.dataType, filters.dataType);
       });
     }
 
+    records.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
+        String(b.id).localeCompare(String(a.id)),
+    );
     const total = records.length;
     const rawData = records.slice((page - 1) * pageSize, page * pageSize);
     const data = rawData.map((r) => ({
@@ -802,4 +820,17 @@ export class PrismaImportRepository {
     }
     return null;
   }
+}
+
+// Read legacy test batches together with their canonical domain; never rewrite historical provenance.
+function importDomainFilter(value: string): string | { in: string[] } {
+  return value === 'TESTS' || value === 'INTERNATIONAL_TESTS'
+    ? { in: ['TESTS', 'INTERNATIONAL_TESTS'] }
+    : value;
+}
+function matchesImportDomain(actual: string | undefined, requested: string | undefined): boolean {
+  if (!requested) return true;
+  return requested === 'TESTS' || requested === 'INTERNATIONAL_TESTS'
+    ? actual === 'TESTS' || actual === 'INTERNATIONAL_TESTS'
+    : actual === requested;
 }

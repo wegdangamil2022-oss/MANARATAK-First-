@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useMemo, useState } from 'react';
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Award, BookOpen, CheckCircle2, Loader2, LockKeyhole, PlayCircle } from 'lucide-react';
 import {
@@ -10,7 +10,9 @@ import {
 import { preservePostLoginReturn } from '../students/postLoginIntent';
 
 function currentProgress(workspace: CourseLearnerWorkspaceDto | null, lessonId: string): number {
-  return workspace?.progress.lessons.find((row) => row.lessonId === lessonId)?.progressPercentage ?? 0;
+  return (
+    workspace?.progress.lessons.find((row) => row.lessonId === lessonId)?.progressPercentage ?? 0
+  );
 }
 
 export function CourseLearnerPage() {
@@ -23,6 +25,24 @@ export function CourseLearnerPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeAttempt, setActiveAttempt] = useState<StudentCourseQuizAttemptDto | null>(null);
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
+  const assetRequest = useRef(0);
+  const [media, setMedia] = useState<{
+    url: string;
+    type: 'video' | 'audio' | 'image';
+    title: string;
+  } | null>(null);
+  useEffect(
+    () => () => {
+      if (media) URL.revokeObjectURL(media.url);
+    },
+    [media],
+  );
+  useEffect(() => {
+    setMedia(null);
+    return () => {
+      ++assetRequest.current;
+    };
+  }, [courseId]);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
 
   const loginPath = `/${locale}/login`;
@@ -49,7 +69,9 @@ export function CourseLearnerPage() {
     }
   }
 
-  useEffect(() => { void load(); }, [courseId]);
+  useEffect(() => {
+    void load();
+  }, [courseId]);
 
   const questionsByQuiz = useMemo(() => {
     const grouped = new Map<string, CourseLearnerQuestionDto[]>();
@@ -61,119 +83,396 @@ export function CourseLearnerPage() {
   }, [workspace]);
 
   async function enroll() {
-    setBusy(true); setError(null);
+    setBusy(true);
+    setError(null);
     try {
       await ApiClient.enrollStudentCourse(courseId);
       await load();
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'COURSE_ENROLLMENT_FAILED';
       if (message.includes('STUDENT_AUTHENTICATION_REQUIRED')) {
-        preservePostLoginReturn(returnPath); setAuthRequired(true);
+        preservePostLoginReturn(returnPath);
+        setAuthRequired(true);
       } else setError(message);
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function completeLesson(lessonId: string) {
-    setBusy(true); setError(null);
+    setBusy(true);
+    setError(null);
     try {
       await ApiClient.markStudentCourseLessonComplete(courseId, lessonId);
       await load();
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'LESSON_PROGRESS_FAILED'); }
-    finally { setBusy(false); }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'LESSON_PROGRESS_FAILED');
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function startQuiz(quizId: string) {
-    setBusy(true); setError(null); setAnswers({});
+    setBusy(true);
+    setError(null);
+    setAnswers({});
     try {
       const attempt = await ApiClient.startStudentCourseQuiz(courseId, quizId);
-      setActiveAttempt(attempt); setActiveQuizId(quizId);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'QUIZ_ATTEMPT_FAILED'); }
-    finally { setBusy(false); }
+      setActiveAttempt(attempt);
+      setActiveQuizId(quizId);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'QUIZ_ATTEMPT_FAILED');
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function submitQuiz(event: FormEvent) {
     event.preventDefault();
     if (!activeAttempt) return;
-    setBusy(true); setError(null);
+    setBusy(true);
+    setError(null);
     try {
       await ApiClient.submitStudentCourseQuiz(courseId, activeAttempt.id, answers);
-      setActiveAttempt(null); setActiveQuizId(null); setAnswers({});
+      setActiveAttempt(null);
+      setActiveQuizId(null);
+      setAnswers({});
       await load();
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'QUIZ_SUBMISSION_FAILED'); }
-    finally { setBusy(false); }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'QUIZ_SUBMISSION_FAILED');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function openLessonAsset(lessonId: string, assetReferenceId: string, title: string) {
+    setBusy(true);
+    setError(null);
+    const request = ++assetRequest.current;
+    try {
+      const grant = await ApiClient.getStudentCourseAssetDeliveryGrant(
+        courseId,
+        lessonId,
+        assetReferenceId,
+      );
+      if (!/^https?:\/\//i.test(grant.url)) throw new Error('رابط المحتوى غير صالح.');
+      const response = await fetch(grant.url, { headers: grant.headers });
+      if (!response.ok) throw new Error('تعذر تحميل محتوى الدرس.');
+      const blob = await response.blob();
+      if (request !== assetRequest.current) return;
+      const assetUrl = URL.createObjectURL(blob);
+      const type = blob.type.startsWith('video/')
+        ? 'video'
+        : blob.type.startsWith('audio/')
+          ? 'audio'
+          : blob.type.startsWith('image/')
+            ? 'image'
+            : null;
+      if (type) {
+        setMedia({ url: assetUrl, type, title });
+        return;
+      }
+      const link = document.createElement('a');
+      link.href = assetUrl;
+      link.download = `${title || 'course-content'}${blob.type === 'application/pdf' ? '.pdf' : ''}`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(assetUrl), 60000);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'تعذر فتح محتوى الدرس');
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function completeCourse() {
-    setBusy(true); setError(null);
-    try { await ApiClient.completeStudentCourse(courseId); await load(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : 'COURSE_COMPLETION_FAILED'); }
-    finally { setBusy(false); }
+    setBusy(true);
+    setError(null);
+    try {
+      await ApiClient.completeStudentCourse(courseId);
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'COURSE_COMPLETION_FAILED');
+    } finally {
+      setBusy(false);
+    }
   }
 
-  if (loading) return <div className="mn-page-shell grid min-h-[50vh] place-items-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
-  if (authRequired) return (
-    <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
-      <LockKeyhole className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
-      <h1 className="mt-4 text-xl font-bold">سجّل الدخول لمتابعة التعلم</h1>
-      <p className="mt-2 text-sm text-[var(--mn-text-muted)]">سيتم الاحتفاظ بمسار هذه الدورة والعودة إليه بعد تسجيل الدخول.</p>
-      <Link to={loginPath} onClick={() => preservePostLoginReturn(returnPath)} className="mt-6 inline-flex rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white">تسجيل الدخول</Link>
-    </main>
-  );
+  if (loading)
+    return (
+      <div className="mn-page-shell grid min-h-[50vh] place-items-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  if (authRequired)
+    return (
+      <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
+        <LockKeyhole className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
+        <h1 className="mt-4 text-xl font-bold">سجّل الدخول لمتابعة التعلم</h1>
+        <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
+          سيتم الاحتفاظ بمسار هذه الدورة والعودة إليه بعد تسجيل الدخول.
+        </p>
+        <Link
+          to={loginPath}
+          onClick={() => preservePostLoginReturn(returnPath)}
+          className="mt-6 inline-flex rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white"
+        >
+          تسجيل الدخول
+        </Link>
+      </main>
+    );
 
-  if (!workspace) return (
-    <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
-      <BookOpen className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
-      <h1 className="mt-4 text-xl font-bold">ابدأ هذه الدورة على منارتك</h1>
-      <p className="mt-2 text-sm text-[var(--mn-text-muted)]">التسجيل والتقدم والاختبارات تُدار من نظام التعلم الداخلي.</p>
-      {error && <p role="alert" className="mt-4 text-sm text-[var(--mn-danger-text)]">{error}</p>}
-      <button disabled={busy} onClick={() => void enroll()} className="mt-6 rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-60">{busy ? 'جارٍ التسجيل...' : 'التسجيل في الدورة'}</button>
-    </main>
-  );
+  if (!workspace)
+    return (
+      <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
+        <BookOpen className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
+        <h1 className="mt-4 text-xl font-bold">ابدأ هذه الدورة على منارتك</h1>
+        <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
+          التسجيل والتقدم والاختبارات تُدار من نظام التعلم الداخلي.
+        </p>
+        {error && (
+          <p role="alert" className="mt-4 text-sm text-[var(--mn-danger-text)]">
+            {error}
+          </p>
+        )}
+        <button
+          disabled={busy}
+          onClick={() => void enroll()}
+          className="mt-6 rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-60"
+        >
+          {busy ? 'جارٍ التسجيل...' : 'التسجيل في الدورة'}
+        </button>
+      </main>
+    );
 
   const progress = workspace.progress.enrollment.progressPercentage;
   return (
     <main dir="rtl" className="mn-page-shell mx-auto max-w-4xl space-y-5 py-8">
       <section className="mn-card rounded-3xl p-5 sm:p-7">
         <div className="flex items-center justify-between gap-4">
-          <div><p className="text-xs font-semibold text-[var(--mn-secondary)]">مساحة التعلم</p><h1 className="mt-1 text-2xl font-bold">دورة منارتك</h1></div>
-          <span className="rounded-full bg-[var(--mn-gold-surface)] px-3 py-1 text-sm font-bold">{progress}%</span>
+          <div>
+            <p className="text-xs font-semibold text-[var(--mn-secondary)]">مساحة التعلم</p>
+            <h1 className="mt-1 text-2xl font-bold">دورة منارتك</h1>
+          </div>
+          <span className="rounded-full bg-[var(--mn-gold-surface)] px-3 py-1 text-sm font-bold">
+            {progress}%
+          </span>
         </div>
         <progress className="mn-native-progress mt-4 h-2 w-full" value={progress} max={100} />
       </section>
 
-      {workspace.curriculum.modules.sort((a,b) => a.position-b.position).map((module) => {
-        const lessons = workspace.curriculum.lessons.filter((lesson) => lesson.moduleId === module.id).sort((a,b) => a.position-b.position);
-        const quizzes = workspace.curriculum.quizzes.filter((quiz) => quiz.moduleId === module.id).sort((a,b) => a.position-b.position);
-        return <section key={module.id} className="mn-card rounded-3xl p-5 sm:p-6">
-          <h2 className="text-lg font-bold">{module.title}</h2>
-          {module.description && <p className="mt-2 text-sm text-[var(--mn-text-muted)]">{module.description}</p>}
-          <div className="mt-4 space-y-3">
-            {lessons.map((lesson) => {
-              const done = currentProgress(workspace, lesson.id) >= 100;
-              return <article key={lesson.id} className="rounded-2xl border border-[var(--mn-border)] p-4">
-                <div className="flex items-start justify-between gap-3"><div><h3 className="font-bold">{lesson.title}</h3>{lesson.summary && <p className="mt-1 text-sm text-[var(--mn-text-muted)]">{lesson.summary}</p>}</div>{done ? <CheckCircle2 className="h-5 w-5 text-[var(--mn-success-text)]" /> : <PlayCircle className="h-5 w-5 text-[var(--mn-secondary)]" />}</div>
-                {lesson.contentText && <div className="mt-3 whitespace-pre-wrap text-sm leading-7">{lesson.contentText}</div>}
-                {!done && <button disabled={busy} onClick={() => void completeLesson(lesson.id)} className="mt-4 rounded-xl border border-[var(--mn-border)] px-4 py-2 text-sm font-bold disabled:opacity-60">تحديد الدرس كمكتمل</button>}
-              </article>;
-            })}
-            {quizzes.map((quiz) => <article key={quiz.id} className="rounded-2xl border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] p-4">
-              <div className="flex items-center justify-between gap-3"><div><h3 className="font-bold">{quiz.title}</h3>{quiz.instructions && <p className="mt-1 text-sm">{quiz.instructions}</p>}</div><Award className="h-5 w-5" /></div>
-              {activeQuizId !== quiz.id ? <button disabled={busy} onClick={() => void startQuiz(quiz.id)} className="mt-4 rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60">بدء الاختبار</button> : (
-                <form onSubmit={submitQuiz} className="mt-4 space-y-4">
-                  {(questionsByQuiz.get(quiz.id) ?? []).map((question) => {
-                    const choices = Array.isArray(question.choices) ? question.choices : [];
-                    return <fieldset key={question.id} className="rounded-xl bg-[var(--mn-surface)] p-3"><legend className="font-bold">{question.prompt}</legend>{choices.length ? choices.map((choice, index) => <label key={index} className="mt-2 flex gap-2 text-sm"><input type="radio" name={question.id} required onChange={() => setAnswers((value) => ({...value, [question.id]: choice}))}/><span>{String(typeof choice === 'object' && choice && 'label' in choice ? (choice as any).label : choice)}</span></label>) : <input className="mn-search-control mt-2 w-full" required onChange={(event) => setAnswers((value) => ({...value, [question.id]: event.target.value}))}/>}</fieldset>;
-                  })}
-                  <button disabled={busy} type="submit" className="rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60">إرسال الإجابات</button>
-                </form>
+      {[...workspace.curriculum.modules]
+        .sort((a, b) => a.position - b.position)
+        .map((module) => {
+          const lessons = workspace.curriculum.lessons
+            .filter((lesson) => lesson.moduleId === module.id)
+            .sort((a, b) => a.position - b.position);
+          const quizzes = workspace.curriculum.quizzes
+            .filter((quiz) => quiz.moduleId === module.id)
+            .sort((a, b) => a.position - b.position);
+          return (
+            <section key={module.id} className="mn-card rounded-3xl p-5 sm:p-6">
+              <h2 className="text-lg font-bold">{module.title}</h2>
+              {module.description && (
+                <p className="mt-2 text-sm text-[var(--mn-text-muted)]">{module.description}</p>
               )}
-            </article>)}
-          </div>
-        </section>;
-      })}
+              <div className="mt-4 space-y-3">
+                {lessons.map((lesson) => {
+                  const done = currentProgress(workspace, lesson.id) >= 100;
+                  return (
+                    <article
+                      key={lesson.id}
+                      className="rounded-2xl border border-[var(--mn-border)] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="font-bold">{lesson.title}</h3>
+                          {lesson.summary && (
+                            <p className="mt-1 text-sm text-[var(--mn-text-muted)]">
+                              {lesson.summary}
+                            </p>
+                          )}
+                        </div>
+                        {done ? (
+                          <CheckCircle2 className="h-5 w-5 text-[var(--mn-success-text)]" />
+                        ) : (
+                          <PlayCircle className="h-5 w-5 text-[var(--mn-secondary)]" />
+                        )}
+                      </div>
+                      {lesson.contentText && (
+                        <div className="mt-3 whitespace-pre-wrap text-sm leading-7">
+                          {lesson.contentText}
+                        </div>
+                      )}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {workspace.curriculum.assets
+                          .filter((asset) => asset.lessonId === lesson.id)
+                          .map((asset) => (
+                            <button
+                              key={asset.id}
+                              disabled={busy}
+                              onClick={() =>
+                                void openLessonAsset(
+                                  lesson.id,
+                                  asset.id,
+                                  asset.title || lesson.title,
+                                )
+                              }
+                              className="rounded-xl border px-3 py-2 text-sm font-bold"
+                            >
+                              {asset.title || asset.assetType}
+                            </button>
+                          ))}
+                      </div>
+                      {!done && (
+                        <button
+                          disabled={busy}
+                          onClick={() => void completeLesson(lesson.id)}
+                          className="mt-4 rounded-xl border border-[var(--mn-border)] px-4 py-2 text-sm font-bold disabled:opacity-60"
+                        >
+                          تحديد الدرس كمكتمل
+                        </button>
+                      )}
+                    </article>
+                  );
+                })}
+                {quizzes.map((quiz) => (
+                  <article
+                    key={quiz.id}
+                    className="rounded-2xl border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] p-4"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h3 className="font-bold">{quiz.title}</h3>
+                        {quiz.instructions && <p className="mt-1 text-sm">{quiz.instructions}</p>}
+                      </div>
+                      <Award className="h-5 w-5" />
+                    </div>
+                    {activeQuizId !== quiz.id ? (
+                      <button
+                        disabled={busy}
+                        onClick={() => void startQuiz(quiz.id)}
+                        className="mt-4 rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                      >
+                        بدء الاختبار
+                      </button>
+                    ) : (
+                      <form onSubmit={submitQuiz} className="mt-4 space-y-4">
+                        {(questionsByQuiz.get(quiz.id) ?? []).map((question) => {
+                          const choices =
+                            question.questionType === 'TRUE_FALSE'
+                              ? [true, false]
+                              : Array.isArray(question.choices)
+                                ? question.choices
+                                : [];
+                          return (
+                            <fieldset
+                              key={question.id}
+                              className="rounded-xl bg-[var(--mn-surface)] p-3"
+                            >
+                              <legend className="font-bold">{question.prompt}</legend>
+                              {choices.length ? (
+                                choices.map((choice, index) => (
+                                  <label key={index} className="mt-2 flex gap-2 text-sm">
+                                    <input
+                                      type="radio"
+                                      name={question.id}
+                                      required
+                                      onChange={() =>
+                                        setAnswers((value) => ({ ...value, [question.id]: choice }))
+                                      }
+                                    />
+                                    <span>
+                                      {String(
+                                        typeof choice === 'object' && choice && 'label' in choice
+                                          ? (choice as { label: unknown }).label
+                                          : typeof choice === 'boolean'
+                                            ? choice
+                                              ? 'صحيح'
+                                              : 'خطأ'
+                                            : choice,
+                                      )}
+                                    </span>
+                                  </label>
+                                ))
+                              ) : (
+                                <input
+                                  className="mn-search-control mt-2 w-full"
+                                  required
+                                  onChange={(event) =>
+                                    setAnswers((value) => ({
+                                      ...value,
+                                      [question.id]: event.target.value,
+                                    }))
+                                  }
+                                />
+                              )}
+                            </fieldset>
+                          );
+                        })}
+                        <button
+                          disabled={busy}
+                          type="submit"
+                          className="rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                        >
+                          إرسال الإجابات
+                        </button>
+                      </form>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </section>
+          );
+        })}
 
-      {error && <p role="alert" className="rounded-xl bg-[var(--mn-danger-soft)] p-4 text-sm text-[var(--mn-danger-text)]">{error}</p>}
-      <section className="text-center"><button disabled={busy || progress < 100} onClick={() => void completeCourse()} className="rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-50">إنهاء الدورة والتحقق من الاستحقاق</button></section>
+      {media && (
+        <section className="rounded-2xl border bg-[var(--mn-surface)] p-4">
+          <div className="flex justify-between gap-3">
+            <h2 className="font-bold">{media.title}</h2>
+            <button onClick={() => setMedia(null)}>إغلاق المحتوى</button>
+          </div>
+          {media.type === 'video' ? (
+            <video src={media.url} controls className="mt-3 w-full max-h-[70vh]" />
+          ) : media.type === 'audio' ? (
+            <audio src={media.url} controls className="mt-3 w-full" />
+          ) : (
+            <img src={media.url} alt={media.title} className="mt-3 max-h-[70vh] mx-auto" />
+          )}
+        </section>
+      )}
+      {error && (
+        <p
+          role="alert"
+          className="rounded-xl bg-[var(--mn-danger-soft)] p-4 text-sm text-[var(--mn-danger-text)]"
+        >
+          {error}
+        </p>
+      )}
+      {workspace.progress.completion && (
+        <section className="mn-card rounded-2xl p-5 text-center">
+          <h2 className="font-bold">اكتملت الدورة</h2>
+          <p className="mt-2 text-sm">
+            {workspace.progress.completion.eligibleForCertificate
+              ? 'تُجهز شهادة منارتك بعد التحقق من الاستحقاق. ستظهر في حسابك عند اكتمال الإصدار.'
+              : 'لم يسجل النظام استحقاق شهادة لهذه الدورة.'}
+          </p>
+          <Link
+            to={`/${locale}/student?tab=LEARNING#certificates`}
+            className="mt-3 inline-block text-[var(--mn-secondary)] underline"
+          >
+            عرض شهاداتي في حساب الطالب
+          </Link>
+        </section>
+      )}
+      <section className="text-center">
+        <button
+          disabled={busy || progress < 100 || !!workspace.progress.completion}
+          onClick={() => void completeCourse()}
+          className="rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-50"
+        >
+          إنهاء الدورة والتحقق من الاستحقاق
+        </button>
+      </section>
     </main>
   );
 }

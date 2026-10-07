@@ -54,6 +54,7 @@ export class PublicUniversityUseCases {
     return {
       ...sanitizeUniversityOptionalFields(optionalFields),
       ...publicData,
+      localizedNames: Object.fromEntries((translations ?? []).filter(translation => ['APPROVED', 'PUBLISHED'].includes(translation.reviewStatus ?? '') && translation.displayName).map(translation => [translation.locale, translation.displayName as string])),
       campuses: activeOnly(university.campuses),
       organizationUnits: activeOnly(university.organizationUnits),
       academicPrograms: (university.academicPrograms ?? [])

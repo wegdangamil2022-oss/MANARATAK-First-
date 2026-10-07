@@ -1,7 +1,11 @@
-import type { PrismaClient } from '@prisma/client';
-import type { EmergencyAccessGrantRecord, IEmergencyAccessRepository } from '@manaratak/domain';
+import type { AdminEmergencyAccessRecord, Prisma, PrismaClient } from '@prisma/client';
+import type {
+  AtomicPersistenceContext,
+  EmergencyAccessGrantRecord,
+  IEmergencyAccessRepository,
+} from '@manaratak/domain';
 
-function map(row: any): EmergencyAccessGrantRecord {
+function map(row: AdminEmergencyAccessRecord): EmergencyAccessGrantRecord {
   return {
     id: row.id,
     principalId: row.principalId,
@@ -20,14 +24,30 @@ function map(row: any): EmergencyAccessGrantRecord {
 }
 
 export class PrismaEmergencyAccessRepository implements IEmergencyAccessRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly transactional = false,
+  ) {}
 
-  async list(input: { principalId?: string; activeOnly?: boolean; limit?: number } = {}): Promise<EmergencyAccessGrantRecord[]> {
+  withTransaction(context: AtomicPersistenceContext): IEmergencyAccessRepository {
+    const transactionClient = (
+      context as AtomicPersistenceContext & { transactionClient?: Prisma.TransactionClient }
+    ).transactionClient;
+    if (!context.boundaryId || !transactionClient)
+      throw new Error('EMERGENCY_ACCESS_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return new PrismaEmergencyAccessRepository(transactionClient as unknown as PrismaClient, true);
+  }
+
+  async list(
+    input: { principalId?: string; activeOnly?: boolean; limit?: number } = {},
+  ): Promise<EmergencyAccessGrantRecord[]> {
     const now = new Date();
-    const rows = await (this.prisma as any).adminEmergencyAccessRecord.findMany({
+    const rows = await this.prisma.adminEmergencyAccessRecord.findMany({
       where: {
         ...(input.principalId ? { principalId: input.principalId } : {}),
-        ...(input.activeOnly ? { revokedAt: null, startsAt: { lte: now }, expiresAt: { gt: now } } : {}),
+        ...(input.activeOnly
+          ? { revokedAt: null, startsAt: { lte: now }, expiresAt: { gt: now } }
+          : {}),
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: Math.min(200, Math.max(1, input.limit ?? 100)),
@@ -36,15 +56,23 @@ export class PrismaEmergencyAccessRepository implements IEmergencyAccessReposito
   }
 
   async listActiveRoleIds(principalId: string, at = new Date()): Promise<string[]> {
-    const rows = await (this.prisma as any).adminEmergencyAccessRecord.findMany({
+    const rows = await this.prisma.adminEmergencyAccessRecord.findMany({
       where: { principalId, revokedAt: null, startsAt: { lte: at }, expiresAt: { gt: at } },
       select: { roleId: true },
     });
-    return Array.from(new Set(rows.map((row: any) => String(row.roleId))));
+    return Array.from(new Set(rows.map((row) => row.roleId)));
   }
 
-  async grant(input: Omit<EmergencyAccessGrantRecord, 'createdAt' | 'revokedAt' | 'revokedBy' | 'revocationReason'>): Promise<EmergencyAccessGrantRecord> {
-    const row = await (this.prisma as any).$transaction(async (tx: any) => {
+  async grant(
+    input: Omit<
+      EmergencyAccessGrantRecord,
+      'createdAt' | 'revokedAt' | 'revokedBy' | 'revocationReason'
+    >,
+  ): Promise<EmergencyAccessGrantRecord> {
+    const persist = async (tx: Prisma.TransactionClient) => {
+      // Serialise overlapping grants even when joining an existing audit/outbox transaction.
+      const lockKey = `emergency-access:${input.principalId}:${input.roleId}`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))::text AS lock_result`;
       const role = await tx.roleRecord.findUnique({ where: { id: input.roleId } });
       if (!role) throw new Error('EMERGENCY_ACCESS_ROLE_NOT_FOUND');
       const overlapping = await tx.adminEmergencyAccessRecord.findFirst({
@@ -58,18 +86,27 @@ export class PrismaEmergencyAccessRepository implements IEmergencyAccessReposito
       });
       if (overlapping) throw new Error('EMERGENCY_ACCESS_OVERLAPPING_GRANT');
       return tx.adminEmergencyAccessRecord.create({ data: input });
-    }, { isolationLevel: 'Serializable' });
+    };
+    const row = this.transactional
+      ? await persist(this.prisma)
+      : await this.prisma.$transaction(persist, { isolationLevel: 'Serializable' });
     return map(row);
   }
 
-  async revoke(input: { id: string; revokedBy: string; reason: string }): Promise<EmergencyAccessGrantRecord> {
+  async revoke(input: {
+    id: string;
+    revokedBy: string;
+    reason: string;
+  }): Promise<EmergencyAccessGrantRecord> {
     const now = new Date();
-    const updated = await (this.prisma as any).adminEmergencyAccessRecord.updateMany({
-      where: { id: input.id, revokedAt: null },
+    const updated = await this.prisma.adminEmergencyAccessRecord.updateMany({
+      where: { id: input.id, revokedAt: null, expiresAt: { gt: now } },
       data: { revokedAt: now, revokedBy: input.revokedBy, revocationReason: input.reason },
     });
     if (updated.count !== 1) throw new Error('EMERGENCY_ACCESS_NOT_ACTIVE');
-    const row = await (this.prisma as any).adminEmergencyAccessRecord.findUnique({ where: { id: input.id } });
+    const row = await this.prisma.adminEmergencyAccessRecord.findUnique({
+      where: { id: input.id },
+    });
     if (!row) throw new Error('EMERGENCY_ACCESS_NOT_FOUND');
     return map(row);
   }

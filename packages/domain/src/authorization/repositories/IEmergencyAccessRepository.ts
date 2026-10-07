@@ -1,3 +1,5 @@
+import type { AtomicPersistenceContext } from '../../event-foundation/outbox/TransactionalOutbox';
+
 export interface EmergencyAccessGrantRecord {
   id: string;
   principalId: string;
@@ -15,8 +17,22 @@ export interface EmergencyAccessGrantRecord {
 }
 
 export interface IEmergencyAccessRepository {
-  list(input?: { principalId?: string; activeOnly?: boolean; limit?: number }): Promise<EmergencyAccessGrantRecord[]>;
+  withTransaction?(context: AtomicPersistenceContext): IEmergencyAccessRepository;
+  list(input?: {
+    principalId?: string;
+    activeOnly?: boolean;
+    limit?: number;
+  }): Promise<EmergencyAccessGrantRecord[]>;
   listActiveRoleIds(principalId: string, at?: Date): Promise<string[]>;
-  grant(input: Omit<EmergencyAccessGrantRecord, 'createdAt' | 'revokedAt' | 'revokedBy' | 'revocationReason'>): Promise<EmergencyAccessGrantRecord>;
-  revoke(input: { id: string; revokedBy: string; reason: string }): Promise<EmergencyAccessGrantRecord>;
+  grant(
+    input: Omit<
+      EmergencyAccessGrantRecord,
+      'createdAt' | 'revokedAt' | 'revokedBy' | 'revocationReason'
+    >,
+  ): Promise<EmergencyAccessGrantRecord>;
+  revoke(input: {
+    id: string;
+    revokedBy: string;
+    reason: string;
+  }): Promise<EmergencyAccessGrantRecord>;
 }

@@ -29,13 +29,20 @@ export class CourseAdminRouter {
     });
 
     const listQuerySchema = z.object({
-      status: z.nativeEnum(CourseStatus).optional(),
+      status: z.preprocess(v => v === '' || v === 'all' ? undefined : v, z.nativeEnum(CourseStatus).optional()),
       completenessStatus: z.nativeEnum(CourseImportCompletenessState).optional(),
       accessType: z.nativeEnum(CourseAccessType).optional(),
       originType: z.nativeEnum(CourseOriginType).optional(),
       platformName: z.string().optional(),
-      page: z.string().optional().transform((val) => val ? parseInt(val, 10) : 1),
-      pageSize: z.string().optional().transform((val) => val ? parseInt(val, 10) : 20),
+      search: z.string().trim().max(200).optional(),
+      externalProviderId: z.string().trim().min(1).optional(),
+      majorId: z.string().trim().min(1).optional(),
+      category: z.string().trim().optional(),
+      learningLanguage: z.string().trim().optional(),
+      difficultyLevel: z.string().trim().optional(),
+      isFreeCertificate: z.enum(['true', 'false']).transform(v => v === 'true').optional(),
+      page: z.coerce.number().int().min(1).default(1),
+      pageSize: z.coerce.number().int().min(1).max(100).default(20),
     });
 
     const updateBodySchema = z.object({

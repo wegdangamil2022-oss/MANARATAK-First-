@@ -28,6 +28,19 @@ export interface PublicCourseDto {
   officialSourceUrl?: string | null;
   thumbnailAssetId?: string | null;
 
+  description?: string;
+  instructor?: string;
+  prerequisites?: string[];
+  targetAudience?: string[];
+  learningOutcomes?: string[];
+  titleEn?: string;
+  relatedMajors?: Array<{id:string;name:string}>;
+  curriculumModules?: Array<{title:string;description:string}>;
+  lessonsCount?: number;
+  shortCourseTopicsRaw?: string | null;
+  studyLevelRaw?: string | null;
+  studyDurationRaw?: string | null;
+  learningLanguageRaw?: string | null;
   courseContent?: string;
   relatedMajorsOrFields?: string | string[];
   acquiredSkills?: string[];

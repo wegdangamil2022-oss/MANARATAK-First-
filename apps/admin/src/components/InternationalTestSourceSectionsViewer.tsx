@@ -57,10 +57,13 @@ interface Props {
   testId: string;
   isRtl?: boolean;
   onNamesReviewed?: () => void;
+  fallbackEditors?: React.ReactNode;
+  canChangeVersion?: () => boolean;
+  editorGroup?: (title: string) => string | undefined;
   renderEmbeddedForm?: (sectionNum: number, sectionTitle: string, blockKey: string) => React.ReactNode;
 }
 
-export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId, isRtl = true, onNamesReviewed, renderEmbeddedForm }) => {
+export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId, isRtl = true, onNamesReviewed, renderEmbeddedForm, canChangeVersion, editorGroup, fallbackEditors }) => {
   const [versions, setVersions] = useState<ImportVersion[]>([]);
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -181,6 +184,7 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
 
   if (versions.length === 0) {
     return (
+      <div className="space-y-6">
       <div className="p-10 text-center bg-gray-50 border border-gray-200 rounded-xl space-y-3">
         <Layers className="w-12 h-12 text-gray-400 mx-auto" />
         <h4 className="text-base font-bold text-gray-800">
@@ -191,6 +195,8 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
             ? 'تظهر هنا أقسام ملفات المصدر (كالـ Markdown المعتمد) تلقائياً عند إنشاء مسودة استيراد أو تطبيق حزمة استيراد المراجع.'
             : 'Source file sections (such as unified Markdown drafts) will appear here once an import draft is created.'}
         </p>
+      </div>
+      {fallbackEditors}
       </div>
     );
   }
@@ -230,7 +236,7 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
                 </label>
                 <select
                   value={selectedVersionId || ''}
-                  onChange={(e) => setSelectedVersionId(e.target.value)}
+                  onChange={(e) => { if (!canChangeVersion || canChangeVersion()) setSelectedVersionId(e.target.value); }}
                   className="text-xs border border-gray-300 rounded-lg px-3 py-1.5 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   {versions.map((v) => (
@@ -376,12 +382,15 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
 
       {/* Ordered Sections List */}
       <div className="space-y-4">
-        {filteredSections.length === 0 ? (
+        {filteredSections.length === 0 && (
           <div className="p-8 bg-white border border-gray-200 rounded-xl text-center text-sm text-gray-500">
             {isRtl ? 'لا توجد أقسام تطابق البحث الحالي.' : 'No sections match the current query.'}
           </div>
-        ) : (
-          filteredSections.map((section, idx) => {
+        )}
+        {(
+          sectionBlocks.map((section, idx) => {
+            const group = editorGroup?.(section.title || '');
+            const showEditor = !editorGroup || (group && sectionBlocks.find(block => editorGroup(block.title || '') === group)?.blockKey === section.blockKey);
             const isExpanded = !!expandedSections[section.blockKey];
             const sectionNum = extractSectionNumber(section.blockKey, section.title, idx + 1);
             const toggle = () => toggleSection(section.blockKey);
@@ -395,6 +404,7 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
             return (
               <div
                 key={section.blockKey || idx}
+                hidden={!filteredSections.includes(section)}
                 className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition-all duration-200 hover:border-gray-300"
               >
                 {/* Section Header */}
@@ -428,10 +438,10 @@ export const InternationalTestSourceSectionsViewer: React.FC<Props> = ({ testId,
                 </div>
 
                 {/* Section Content Body */}
-                {isExpanded && (
-                  <div className="p-5 border-t border-gray-100 bg-white space-y-6">
+                {(
+                  <div hidden={!isExpanded} className="p-5 border-t border-gray-100 bg-white space-y-6">
                     <SafeMarkdownView content={section.content} className="prose prose-sm max-w-none text-gray-800" />
-                    {renderEmbeddedForm && renderEmbeddedForm(sectionNum, section.title || '', section.blockKey)}
+                    {showEditor && renderEmbeddedForm && renderEmbeddedForm(sectionNum, section.title || '', section.blockKey)}
                   </div>
                 )}
               </div>

@@ -1,5 +1,6 @@
 @import "../public/fonts/cairo.css";
 @import "tailwindcss";
+@source "../../../packages/ui/src";
 
 @theme {
   --font-sans: "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -96,3 +97,11 @@ textarea {
     box-shadow: 0 0 0 3px rgb(33 167 180 / 0.12);
   }
 }
+
+.cms-rich-text h2, .cms-rich-text h3, .cms-rich-text h4 { font-weight: 800; color: #142B5F; margin: 1em 0 .5em; }
+.cms-rich-text p { margin: .6em 0; }
+.cms-rich-text ul, .cms-rich-text ol { padding-inline-start: 1.6em; margin: .6em 0; }
+.cms-rich-text ul { list-style: disc; }
+.cms-rich-text ol { list-style: decimal; }
+.cms-rich-text a { color: #0E7C86; text-decoration: underline; }
+.cms-rich-text blockquote { border-inline-start: 3px solid #0E7C86; padding-inline-start: 1em; }

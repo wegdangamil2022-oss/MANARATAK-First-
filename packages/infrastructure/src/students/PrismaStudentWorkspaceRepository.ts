@@ -80,14 +80,15 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     const cursorUpdatedAt = split > 0 ? decoded.slice(0, split) : '';
     const cursorId = split > 0 ? decoded.slice(split + 1) : '';
     const query = input.query?.trim().slice(0, 120);
+    if (input.cursor && (!/^[A-Za-z0-9_-]+$/.test(input.cursor) || !cursorId || !cursorUpdatedAt || Number.isNaN(Date.parse(cursorUpdatedAt)))) throw new Error('STUDENT_SUPPORT_CURSOR_INVALID');
+    const baseWhere = {
+      ...(input.status ? {status:input.status} : {}),
+      ...(query ? {OR:[{studentReferenceId:{contains:query,mode:'insensitive'}},{displayName:{contains:query,mode:'insensitive'}}]} : {}),
+    };
+    const total = await this.db.studentWorkspace.count({where:baseWhere});
     const rows = await this.db.studentWorkspace.findMany({
       where: {
-        ...(input.status ? { status: input.status } : {}),
-        ...(query ? { studentReferenceId: { startsWith: query, mode: 'insensitive' } } : {}),
-        ...(cursorUpdatedAt && cursorId ? { OR: [
-          { updatedAt: { lt: new Date(cursorUpdatedAt) } },
-          { updatedAt: new Date(cursorUpdatedAt), id: { lt: cursorId } },
-        ] } : {}),
+        AND:[baseWhere,...(cursorUpdatedAt && cursorId ? [{OR:[{updatedAt:{lt:new Date(cursorUpdatedAt)}},{updatedAt:new Date(cursorUpdatedAt),id:{lt:cursorId}}]}] : [])],
       },
       orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
       take: limit + 1,
@@ -97,7 +98,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     const selected = rows.slice(0, limit);
     const items = selected.map((row: any) => ({ studentReferenceId: row.studentReferenceId, status: row.status, version: row.version, displayName: row.displayName, preferredLanguage: row.preferredLanguage, timezone: row.timezone, lastActiveAt: row.lastActiveAt, updatedAt: row.updatedAt }));
     const last = selected[selected.length - 1];
-    return { items, hasMore, nextCursor: hasMore && last ? Buffer.from(`${new Date(last.updatedAt).toISOString()}|${last.id}`, 'utf8').toString('base64url') : null };
+    return { items, total, hasMore, nextCursor: hasMore && last ? Buffer.from(`${new Date(last.updatedAt).toISOString()}|${last.id}`, 'utf8').toString('base64url') : null };
   }
 
   public async getSupportWorkspaceDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto | null> {
@@ -113,31 +114,38 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       this.db.studentWorkspaceEventInbox.findMany({
         where: { studentReferenceId },
         orderBy: { receivedAt: 'desc' },
-        take: 50,
-        select: { processedAt: true, failureCode: true, receivedAt: true },
+        take: 1,
+        select: { receivedAt: true },
       }),
       this.db.studentPrivacyConsentDecision.findFirst({
         where: { studentReferenceId },
         orderBy: { decidedAt: 'desc' },
         select: { decidedAt: true },
       }),
-      this.db.studentLearningProjection.count({ where: { studentReferenceId, status: { in: ['ENROLLED', 'IN_PROGRESS'] } } }),
+      this.db.studentLearningProjection.count({ where: { studentReferenceId, status: { in: ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'] } } }),
       this.db.studentCertificateReadProjection.count({ where: { studentReferenceId } }),
       this.db.studentNotificationProjection.count({ where: { studentReferenceId, readAt: null } }),
     ]);
-    const pendingEventCount = inbox.filter((event: any) => !event.processedAt && !event.failureCode).length;
-    const failed = inbox.filter((event: any) => Boolean(event.failureCode));
+    const [pendingEventCount, failedEventCount, lastFailure, savedGroups, activeApplicationCount] = await Promise.all([
+      this.db.studentWorkspaceEventInbox.count({where:{studentReferenceId,processedAt:null,failureCode:null}}),
+      this.db.studentWorkspaceEventInbox.count({where:{studentReferenceId,processedAt:null,failureCode:{not:null}}}),
+      this.db.studentWorkspaceEventInbox.findFirst({where:{studentReferenceId,processedAt:null,failureCode:{not:null}},orderBy:{receivedAt:'desc'},select:{failureCode:true}}),
+      this.db.studentSavedItem.groupBy({by:['entityType'],where:{studentReferenceId},_count:{_all:true}}),
+      this.db.studentApplicationTracker.count({where:{studentReferenceId,status:'ACTIVE'}}),
+    ]);
     return {
       ...row,
       provisioningHealth: {
-        state: failed.length > 0 ? 'FAILED' : pendingEventCount > 0 || row.status === StudentWorkspaceStatus.INITIALIZING ? 'PENDING' : 'HEALTHY',
+        state: failedEventCount > 0 ? 'FAILED' : pendingEventCount > 0 || row.status === StudentWorkspaceStatus.INITIALIZING ? 'PENDING' : 'HEALTHY',
         pendingEventCount,
-        failedEventCount: failed.length,
+        failedEventCount,
         lastEventAt: inbox[0]?.receivedAt ?? null,
-        lastFailureCode: failed[0]?.failureCode ?? null,
+        lastFailureCode: lastFailure?.failureCode ?? null,
       },
       consentAudit: { hasDecision: Boolean(lastConsent), lastDecidedAt: lastConsent?.decidedAt ?? null },
       linkedSummaries: { activeCourseCount, certificateCount, unreadNotificationCount },
+      savedSummary: savedGroups.map((group:{entityType:string;_count:{_all:number}})=>({entityType:group.entityType,count:group._count._all})),
+      activeApplicationCount,
     };
   }
 
@@ -698,13 +706,23 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       }});
       if (!['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'].includes(event.eventType)) {
         await this.projectIntegrationEvent(tx, event);
-        if (event.notification) await tx.studentNotificationProjection.create({ data: {
+        if (event.notification) await tx.studentNotificationProjection.upsert({ where: { sourceEventId: event.eventId }, create: {
           id: randomUUID(), studentReferenceId: event.studentReferenceId, category: event.notification.category, title: event.notification.title,
           message: event.notification.message, actionUrl: event.notification.actionUrl, sourceEventId: event.eventId, occurredAt: event.occurredAt,
-        }});
+        }, update: { category: event.notification.category, title: event.notification.title, message: event.notification.message, actionUrl: event.notification.actionUrl } });
         await this.refreshPersonalStatistics(tx, event.studentReferenceId);
       }
       return true;
+    });
+  }
+
+  public async markNotificationRead(studentReferenceId: string, notificationId: string): Promise<void> {
+    await this.db.$transaction(async (tx: any) => {
+      await this.requireWritable(tx, studentReferenceId);
+      const notification = await tx.studentNotificationProjection.findFirst({ where: { id: notificationId, studentReferenceId } });
+      if (!notification) throw new Error('STUDENT_NOTIFICATION_NOT_FOUND');
+      await tx.studentNotificationProjection.updateMany({ where: { id: notificationId, studentReferenceId, readAt: null }, data: { readAt: new Date() } });
+      await this.refreshPersonalStatistics(tx, studentReferenceId);
     });
   }
 

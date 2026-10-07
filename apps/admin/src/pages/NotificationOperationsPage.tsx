@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bell, RefreshCw, RotateCcw, TriangleAlert } from 'lucide-react';
-import { adminApiClient } from '../api/client';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Bell, RefreshCw, RotateCcw, TriangleAlert, Plus, Search, X } from 'lucide-react';
+import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 
 type TemplateSummary = {
   id: string;
@@ -9,7 +9,6 @@ type TemplateSummary = {
   localizations: string[];
   updatedAt?: string;
 };
-
 type IntentSummary = {
   id: string;
   reference: string;
@@ -24,219 +23,754 @@ type IntentSummary = {
   createdAt?: string;
   updatedAt?: string;
 };
-
 type ListResponse<T> = { items: T[] };
+const deliveryStates: Record<string, string> = {
+  PENDING: 'قيد الانتظار',
+  PROCESSING: 'جارٍ المعالجة',
+  DELIVERED: 'تم التسليم',
+  FAILED: 'فشل التسليم',
+  DEAD_LETTER: 'الفشل النهائي',
+  SUPPRESSED: 'موقوف بتفضيلات الطالب',
+  CANCELLED: 'ملغي',
+  EXPIRED: 'انتهت صلاحيته',
+};
+const pageSize = 25;
+const blankDraft = () => ({
+  id: createAdminIdempotencyKey(),
+  templateId: '',
+  recipientReference: '',
+  variables: {} as Record<string, string>,
+  scheduledAt: '',
+  expiresAt: '',
+});
+const dateLabel = (value?: string | null) => {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('ar');
+};
 
 export function NotificationOperationsPage() {
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [intents, setIntents] = useState<IntentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retrying, setRetrying] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [limit, setLimit] = useState(200);
+  const [search, setSearch] = useState('');
+  const [stateFilter, setStateFilter] = useState('ALL');
+  const [templateFilter, setTemplateFilter] = useState('ALL');
+  const [page, setPage] = useState(1);
+  const [draft, setDraft] = useState<ReturnType<typeof blankDraft> | null>(null);
+  const [templateId, setTemplateId] = useState('');
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const generation = useRef(0);
+  const mutationBusy = useRef(false);
+  const alive = useRef(true);
+  const creationKey = useRef<string | null>(null);
+  const [draftLocked, setDraftLocked] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [templateResponse, intentResponse] = await Promise.all([
-        adminApiClient.request<ListResponse<TemplateSummary>>('/notifications/templates?limit=200'),
-        adminApiClient.request<ListResponse<IntentSummary>>('/notifications/intents?limit=200'),
+  const load = useCallback(
+    async (preserveNotice = false) => {
+      const request = ++generation.current;
+      setLoading(true);
+      setError(null);
+      if (!preserveNotice) setNotice(null);
+      const results = await Promise.allSettled([
+        adminApiClient.request<ListResponse<TemplateSummary>>('/notifications/templates?limit=500'),
+        adminApiClient.request<ListResponse<IntentSummary>>(
+          `/notifications/intents?limit=${limit}`,
+        ),
       ]);
-      setTemplates(templateResponse.items ?? []);
-      setIntents(intentResponse.items ?? []);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر تحميل عمليات الإشعارات');
-    } finally {
+      if (!alive.current || request !== generation.current) return false;
+      const errors: string[] = [];
+      if (results[0].status === 'fulfilled') setTemplates(results[0].value.items ?? []);
+      else {
+        setTemplates([]);
+        errors.push('تعذر تحميل القوالب');
+      }
+      if (results[1].status === 'fulfilled') setIntents(results[1].value.items ?? []);
+      else {
+        setIntents([]);
+        errors.push('تعذر تحميل سجل الإشعارات');
+      }
+      setError(errors.length ? errors.join('؛ ') : null);
       setLoading(false);
-    }
-  }, []);
+      return !errors.length;
+    },
+    [limit],
+  );
 
-  useEffect(() => { void load(); }, [load]);
-
-  const counts = useMemo(() => {
-    const byState = new Map<string, number>();
-    for (const intent of intents) byState.set(intent.deliveryState, (byState.get(intent.deliveryState) ?? 0) + 1);
-    return {
-      total: intents.length,
-      delivered: byState.get('DELIVERED') ?? 0,
-      failed: (byState.get('FAILED') ?? 0) + (byState.get('DEAD_LETTER') ?? 0),
-      pending: (byState.get('PENDING') ?? 0) + (byState.get('PROCESSING') ?? 0),
-      suppressed: byState.get('SUPPRESSED') ?? 0,
+  useEffect(() => {
+    alive.current = true;
+    void load();
+    return () => {
+      alive.current = false;
+      ++generation.current;
     };
-  }, [intents]);
+  }, [load]);
+  useEffect(() => {
+    const unload = (event: BeforeUnloadEvent) => {
+      if (draft || showTemplateForm) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', unload);
+    return () => window.removeEventListener('beforeunload', unload);
+  }, [draft, showTemplateForm]);
 
-  const retry = async (id: string) => {
-    setRetrying(id);
+  const filtered = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    return intents.filter(
+      (intent) =>
+        (stateFilter === 'ALL' || intent.deliveryState === stateFilter) &&
+        (templateFilter === 'ALL' || intent.templateId === templateFilter) &&
+        (!query ||
+          [
+            intent.id,
+            intent.reference,
+            intent.templateId,
+            intent.recipientReference,
+            intent.lastErrorCode,
+          ].some((value) => value?.toLocaleLowerCase().includes(query))),
+    );
+  }, [intents, search, stateFilter, templateFilter]);
+  const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  useEffect(() => setPage((current) => Math.min(current, pages)), [pages]);
+  const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const counts = useMemo(
+    () => ({
+      total: intents.length,
+      delivered: intents.filter((item) => item.deliveryState === 'DELIVERED').length,
+      pending: intents.filter((item) => ['PENDING', 'PROCESSING'].includes(item.deliveryState))
+        .length,
+      failed: intents.filter((item) => ['FAILED', 'DEAD_LETTER'].includes(item.deliveryState))
+        .length,
+      suppressed: intents.filter((item) => item.deliveryState === 'SUPPRESSED').length,
+    }),
+    [intents],
+  );
+  const currentTemplate = templates.find((template) => template.id === draft?.templateId);
+  const requiredVariables = [
+    ...new Set([
+      ...(currentTemplate?.requiredVariables ?? []),
+      ...(currentTemplate?.channels.includes('IN_APP') ? ['title', 'message'] : []),
+    ]),
+  ];
+
+  const mutate = async (
+    key: string,
+    operation: () => Promise<unknown>,
+    message: string,
+    afterWrite?: () => void,
+  ) => {
+    if (mutationBusy.current) return;
+    mutationBusy.current = true;
+    setBusy(key);
     setError(null);
+    setNotice(null);
     try {
-      await adminApiClient.request(`/notifications/intents/${encodeURIComponent(id)}/retry`, { method: 'POST' });
-      await load();
+      await operation();
+      if (!alive.current) return;
+      afterWrite?.();
+      setNotice(message);
+      const reloaded = await load(true);
+      if (!reloaded && alive.current)
+        setError('نجح الطلب، لكن تعذرت إعادة قراءة البيانات. حدّث السجل قبل إعادة المحاولة.');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر إعادة محاولة الإشعار');
+      if (alive.current) setError(cause instanceof Error ? cause.message : 'تعذر تنفيذ العملية');
     } finally {
-      setRetrying(null);
+      mutationBusy.current = false;
+      if (alive.current) setBusy(null);
     }
   };
 
-  const deliveryStateLabel = (state: string) => {
-    switch (state) {
-      case 'DELIVERED': return 'تم التسليم';
-      case 'PENDING': return 'قيد الانتظار';
-      case 'PROCESSING': return 'جارٍ المعالجة';
-      case 'FAILED': return 'فشل التسليم';
-      case 'DEAD_LETTER': return 'قائمة الفشل النهائي (DLQ)';
-      case 'SUPPRESSED': return 'مكبوت بالتفضيلات';
-      default: return state;
+  const retry = (intent: IntentSummary) => {
+    if (mutationBusy.current || !window.confirm(`إعادة محاولة تسليم الإشعار ${intent.reference}؟`))
+      return;
+    void mutate(
+      intent.id,
+      () =>
+        adminApiClient.request(`/notifications/intents/${encodeURIComponent(intent.id)}/retry`, {
+          method: 'POST',
+          body: '{}',
+        }),
+      'تم قبول إعادة المحاولة. التسليم يتم بواسطة عامل الإشعارات، وليس فور الضغط.',
+    );
+  };
+  const cancel = (intent: IntentSummary) => {
+    if (mutationBusy.current || !window.confirm(`إلغاء الإشعار ${intent.reference} قبل تسليمه؟`))
+      return;
+    void mutate(
+      intent.id,
+      () =>
+        adminApiClient.request(`/notifications/intents/${encodeURIComponent(intent.id)}/cancel`, {
+          method: 'POST',
+          body: '{}',
+        }),
+      'تم إلغاء الإشعار.',
+    );
+  };
+  const closeDraft = () => {
+    if (mutationBusy.current || !window.confirm('ترك مسودة الإشعار؟')) return;
+    setDraft(null);
+    setDraftLocked(false);
+    creationKey.current = null;
+  };
+  const createIntent = () => {
+    if (!draft || !currentTemplate || mutationBusy.current) return;
+    if (
+      !draft.recipientReference.trim() ||
+      requiredVariables.some((name) => !draft.variables[name]?.trim())
+    ) {
+      setError('أدخل معرّف المستلم وجميع المتغيرات المطلوبة.');
+      return;
     }
+    const scheduledAt = draft.scheduledAt ? new Date(draft.scheduledAt) : null;
+    const expiresAt = draft.expiresAt ? new Date(draft.expiresAt) : null;
+    if (
+      (scheduledAt && Number.isNaN(scheduledAt.getTime())) ||
+      (expiresAt && (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now())) ||
+      (scheduledAt && expiresAt && scheduledAt >= expiresAt)
+    ) {
+      setError('راجع موعد الجدولة وانتهاء الصلاحية.');
+      return;
+    }
+    const actionUrl = draft.variables.actionUrl?.trim();
+    if (
+      actionUrl &&
+      (!actionUrl.startsWith('/') ||
+        actionUrl.startsWith('//') ||
+        /[\\\u0000-\u001f]/.test(actionUrl))
+    ) {
+      setError('رابط التفاصيل يجب أن يكون مساراً داخلياً صالحاً.');
+      return;
+    }
+    if (
+      !window.confirm(
+        'حفظ الإشعار في قائمة الإرسال للمستلم المحدد؟ قد يتم تسليمه عند تشغيل العامل.',
+      )
+    )
+      return;
+    creationKey.current ??= createAdminIdempotencyKey();
+    setDraftLocked(true);
+    const variables = Object.fromEntries(
+      Object.entries(draft.variables).map(([name, value]) => [name, value.trim()]),
+    );
+    void mutate(
+      'create-intent',
+      () =>
+        adminApiClient.request('/notifications/intents', {
+          method: 'POST',
+          idempotencyKey: creationKey.current!,
+          body: JSON.stringify({
+            id: draft.id,
+            reference: `admin:${draft.id}`,
+            templateId: draft.templateId,
+            recipientReference: draft.recipientReference.trim(),
+            variables,
+            ...(scheduledAt ? { scheduledAt: scheduledAt.toISOString() } : {}),
+            ...(expiresAt ? { expiresAt: expiresAt.toISOString() } : {}),
+          }),
+        }),
+      'تم حفظ الإشعار في قائمة الإرسال. هذا لا يعني تسليمه بعد.',
+      () => {
+        setDraft(null);
+        setDraftLocked(false);
+        creationKey.current = null;
+      },
+    );
+  };
+  const createTemplate = () => {
+    const id = templateId.trim();
+    if (!id || mutationBusy.current) return;
+    if (templates.some((template) => template.id === id) || id.startsWith('system.')) {
+      setError('استخدم معرّف قالب جديداً؛ لا تستبدل القوالب القائمة أو النظامية.');
+      return;
+    }
+    void mutate(
+      'create-template',
+      () =>
+        adminApiClient.request('/notifications/templates', {
+          method: 'POST',
+          body: JSON.stringify({
+            id,
+            channels: ['IN_APP'],
+            requiredVariables: ['title', 'message'],
+            localizations: ['ar', 'en'],
+          }),
+        }),
+      'تم حفظ قالب إشعار الطالب داخل الموقع.',
+      () => {
+        setShowTemplateForm(false);
+        setTemplateId('');
+      },
+    );
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
-      <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
-        <div className="pointer-events-none absolute -left-16 -top-28 h-64 w-64 rounded-full border border-cyan-400/20" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-1.5 w-48 bg-gradient-to-r from-transparent via-[#21A7B4] to-[#0E7C86] sm:w-80" />
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
-              <Bell className="h-4 w-4 text-[#21A7B4]" />
-              <span>مركز العمليات والتنبيهات · P05 / P23</span>
-            </div>
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">عمليات الإشعارات</h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-cyan-50/90">
-              قوالب الإرسال، حالة التسليم، الإخفاقات وإعادة المحاولة التلقائية من المسار المحكوم.
-            </p>
-          </div>
+    <main dir="rtl" className="mx-auto max-w-7xl space-y-5">
+      <header className="rounded-3xl bg-gradient-to-l from-[#142B5F] to-[#0E7C86] p-6 text-white">
+        <h1 className="flex items-center gap-2 text-3xl font-black">
+          <Bell /> إدارة الإشعارات
+        </h1>
+        <p className="mt-3 text-sm leading-7">
+          قوالب الإرسال، إشعارات الطالب، الجدولة وحالة التسليم.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
           <button
-            type="button"
+            className="rounded-xl bg-white/15 px-4 py-2 text-sm font-bold disabled:opacity-50"
+            disabled={loading || Boolean(busy)}
             onClick={() => void load()}
-            disabled={loading}
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#21A7B4] px-5 text-sm font-black text-white shadow-md transition hover:bg-[#1A8D99] disabled:opacity-60 shrink-0"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> تحديث البيانات
+            <RefreshCw className="inline h-4 w-4" /> تحديث
+          </button>
+          <button
+            className="rounded-xl bg-teal-500 px-4 py-2 text-sm font-bold disabled:opacity-50"
+            disabled={loading || Boolean(busy) || Boolean(draft) || !templates.length}
+            onClick={() => {
+              setDraft(blankDraft());
+              setDraftLocked(false);
+              creationKey.current = null;
+            }}
+          >
+            <Plus className="inline h-4 w-4" /> إنشاء إشعار
+          </button>
+          <button
+            className="rounded-xl bg-white/15 px-4 py-2 text-sm font-bold disabled:opacity-50"
+            disabled={loading || Boolean(busy)}
+            onClick={() => setShowTemplateForm(true)}
+          >
+            قالب إشعار داخل الموقع
           </button>
         </div>
-      </section>
-
+      </header>
       {error && (
-        <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700 shadow-xs">
+        <div
+          role="alert"
+          className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
           <TriangleAlert className="h-4 w-4 shrink-0" />
-          <span>{error}</span>
+          {error}
         </div>
       )}
-
+      {notice && (
+        <div
+          role="status"
+          className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800"
+        >
+          {notice}
+        </div>
+      )}
+      <p className="rounded-xl bg-slate-50 p-4 text-xs leading-6 text-slate-600">
+        الأرقام والفلاتر تخص أحدث {limit} سجل محمّل؛ التحديث يدوي. إشعارات داخل الموقع تظهر في حساب
+        الطالب بعد تسليمها بواسطة العامل. البريد وPush يتطلبان مزوّد إرسال مهيأ.
+      </p>
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <Metric label="إجمالي النوايا" value={counts.total} />
-        <Metric label="تم التسليم بنجاح" value={counts.delivered} />
-        <Metric label="قيد الانتظار والمعالجة" value={counts.pending} />
-        <Metric label="مكبوت بالتفضيلات" value={counts.suppressed} />
-        <Metric label="فشل / قائمة DLQ" value={counts.failed} alert={counts.failed > 0} />
+        <Metric label="السجلات المحمّلة" value={counts.total} />
+        <Metric label="تم التسليم" value={counts.delivered} />
+        <Metric label="انتظار / معالجة" value={counts.pending} />
+        <Metric label="موقوف بالتفضيلات" value={counts.suppressed} />
+        <Metric label="فشل / فشل نهائي" value={counts.failed} alert={counts.failed > 0} />
       </section>
-
-      <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-          <h2 className="text-base font-black text-[#142B5F]">قوالب الإشعارات ({templates.length})</h2>
-          <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-[#0E7C86]">نشطة ومعدة مسبقاً</span>
-        </div>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-start text-xs">
-            <thead className="bg-slate-50/80 text-slate-500 font-bold">
+      {showTemplateForm && (
+        <form
+          className="space-y-3 rounded-2xl border bg-white p-5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            createTemplate();
+          }}
+        >
+          <fieldset disabled={Boolean(busy) || loading} className="space-y-3">
+            <h2 className="font-bold text-[#142B5F]">قالب جديد لإشعار داخل حساب الطالب</h2>
+            <p className="text-xs text-slate-500">
+              قناة IN_APP، العربية والإنجليزية، مع عنوان ورسالة يُحددان عند إنشاء الإشعار.
+            </p>
+            <label className="block text-sm">
+              معرّف القالب
+              <input
+                required
+                maxLength={120}
+                value={templateId}
+                onChange={(event) => setTemplateId(event.target.value)}
+                className="mt-1 w-full rounded-xl border p-3"
+                placeholder="admin.student-message.v1"
+                dir="ltr"
+              />
+            </label>
+            <button className="rounded-xl bg-[#142B5F] px-4 py-2 text-white">حفظ القالب</button>
+            <button
+              type="button"
+              className="mr-2 rounded-xl border px-4 py-2"
+              onClick={() => {
+                if (!templateId || window.confirm('ترك مسودة القالب؟')) setShowTemplateForm(false);
+              }}
+            >
+              إلغاء
+            </button>
+          </fieldset>
+        </form>
+      )}
+      {draft && (
+        <form
+          className="space-y-3 rounded-2xl border bg-white p-5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            createIntent();
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-[#142B5F]">إنشاء إشعار للمستلم</h2>
+            <button
+              type="button"
+              disabled={Boolean(busy)}
+              aria-label="إغلاق المسودة"
+              onClick={closeDraft}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <fieldset
+            disabled={Boolean(busy) || loading || draftLocked}
+            className="grid gap-3 sm:grid-cols-2"
+          >
+            <label className="text-sm">
+              القالب
+              <select
+                required
+                value={draft.templateId}
+                onChange={(event) =>
+                  setDraft({ ...draft, templateId: event.target.value, variables: {} })
+                }
+                className="mt-1 w-full rounded-xl border p-3"
+              >
+                <option value="">اختر القالب</option>
+                {templates.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.id} ({template.channels.join(', ')})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm">
+              معرّف حساب المستلم
+              <input
+                required
+                maxLength={120}
+                dir="ltr"
+                value={draft.recipientReference}
+                onChange={(event) => setDraft({ ...draft, recipientReference: event.target.value })}
+                className="mt-1 w-full rounded-xl border p-3"
+              />
+              <span className="text-xs text-slate-500">
+                استخدم معرّف الحساب الفعلي من إدارة الطلاب، وليس الاسم أو البريد.
+              </span>
+            </label>
+            {requiredVariables.map((name) => (
+              <label key={name} className="text-sm">
+                {name === 'title' ? 'عنوان الإشعار' : name === 'message' ? 'نص الإشعار' : name}
+                <textarea
+                  required
+                  maxLength={10000}
+                  rows={name === 'message' ? 3 : 1}
+                  value={draft.variables[name] ?? ''}
+                  onChange={(event) =>
+                    setDraft({
+                      ...draft,
+                      variables: { ...draft.variables, [name]: event.target.value },
+                    })
+                  }
+                  className="mt-1 w-full rounded-xl border p-3"
+                />
+              </label>
+            ))}
+            {currentTemplate?.channels.includes('IN_APP') &&
+              !requiredVariables.includes('actionUrl') && (
+                <label className="text-sm">
+                  رابط تفاصيل داخلي (اختياري)
+                  <input
+                    dir="ltr"
+                    maxLength={1000}
+                    placeholder="/student"
+                    value={draft.variables.actionUrl ?? ''}
+                    onChange={(event) =>
+                      setDraft({
+                        ...draft,
+                        variables: { ...draft.variables, actionUrl: event.target.value },
+                      })
+                    }
+                    className="mt-1 w-full rounded-xl border p-3"
+                  />
+                </label>
+              )}
+            <label className="text-sm">
+              الجدولة (وقت الجهاز، اختياري)
+              <input
+                type="datetime-local"
+                value={draft.scheduledAt}
+                onChange={(event) => setDraft({ ...draft, scheduledAt: event.target.value })}
+                className="mt-1 w-full rounded-xl border p-3"
+              />
+            </label>
+            <label className="text-sm">
+              انتهاء الصلاحية (اختياري)
+              <input
+                type="datetime-local"
+                value={draft.expiresAt}
+                onChange={(event) => setDraft({ ...draft, expiresAt: event.target.value })}
+                className="mt-1 w-full rounded-xl border p-3"
+              />
+            </label>
+          </fieldset>
+          {draftLocked && (
+            <p className="text-xs text-amber-800">
+              المسودة مقفلة بعد محاولة الإرسال. أعد المحاولة بنفس البيانات؛ لإنشاء طلب مختلف اترك
+              المسودة وافتح طلباً جديداً.
+            </p>
+          )}
+          <button
+            disabled={Boolean(busy) || loading || !currentTemplate}
+            className="rounded-xl bg-[#142B5F] px-4 py-2 font-bold text-white disabled:opacity-50"
+          >
+            {busy === 'create-intent'
+              ? 'جارٍ الحفظ…'
+              : draftLocked
+                ? 'إعادة محاولة الحفظ نفسه'
+                : 'حفظ في قائمة الإرسال'}
+          </button>
+        </form>
+      )}
+      <section className="rounded-2xl border bg-white p-5">
+        <h2 className="mb-3 font-bold text-[#142B5F]">القوالب المحمّلة ({templates.length})</h2>
+        <p className="mb-3 text-xs text-slate-500">
+          وجود القالب لا يثبت جاهزية مزوّد الإرسال الخارجي. تظهر حتى 500 قالب.
+        </p>
+        <div className="overflow-auto">
+          <table className="w-full min-w-[600px] text-right text-xs">
+            <thead>
               <tr>
-                <th className="p-3 text-start rounded-r-xl">المعرف</th>
-                <th className="p-3 text-start">القنوات</th>
-                <th className="p-3 text-start">المتغيرات المطلوبة</th>
-                <th className="p-3 text-start rounded-l-xl">اللغات المتوفرة</th>
+                {['المعرّف', 'القنوات', 'المتغيرات المطلوبة', 'اللغات'].map((label) => (
+                  <th key={label} className="p-3">
+                    {label}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {templates.map((template) => (
-                <tr key={template.id} className="hover:bg-slate-50/50 transition">
-                  <td className="p-3 font-black text-[#142B5F]">{template.id}</td>
-                  <td className="p-3 font-semibold text-slate-600">{template.channels.join(', ') || '—'}</td>
-                  <td className="p-3 font-mono text-[11px] text-slate-500">{template.requiredVariables.join(', ') || '—'}</td>
-                  <td className="p-3 font-bold text-[#0E7C86]">{template.localizations.join(', ') || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-          <h2 className="text-base font-black text-[#142B5F]">سجل وحالة التسليم</h2>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">تحديث لحظي</span>
-        </div>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[900px] text-start text-xs">
-            <thead className="bg-slate-50/80 text-slate-500 font-bold">
-              <tr>
-                <th className="p-3 text-start rounded-r-xl">المرجع</th>
-                <th className="p-3 text-start">القالب</th>
-                <th className="p-3 text-start">حالة التسليم</th>
-                <th className="p-3 text-start">المحاولات</th>
-                <th className="p-3 text-start">رمز الخطأ</th>
-                <th className="p-3 text-start rounded-l-xl">الإجراء</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {intents.length === 0 ? (
+            <tbody>
+              {loading ? (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-400 font-bold">لا توجد سجلات إشعارات حالياً</td>
+                  <td colSpan={4} className="p-5 text-center">
+                    جارٍ التحميل…
+                  </td>
+                </tr>
+              ) : !templates.length ? (
+                <tr>
+                  <td colSpan={4} className="p-5 text-center">
+                    لا توجد قوالب محمّلة.
+                  </td>
                 </tr>
               ) : (
-                intents.map((intent) => {
-                  const retryable = intent.state === 'CREATED' && ['FAILED', 'DEAD_LETTER'].includes(intent.deliveryState);
-                  const isDelivered = intent.deliveryState === 'DELIVERED';
-                  const isFailed = ['FAILED', 'DEAD_LETTER'].includes(intent.deliveryState);
-                  return (
-                    <tr key={intent.id} className="hover:bg-slate-50/50 transition">
-                      <td className="p-3 font-bold text-[#142B5F]">{intent.reference}</td>
-                      <td className="p-3 font-semibold text-slate-600">{intent.templateId}</td>
-                      <td className="p-3">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-black ${
-                          isDelivered
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : isFailed
-                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                            : 'bg-amber-50 text-amber-700 border border-amber-200'
-                        }`}>
-                          {deliveryStateLabel(intent.deliveryState)}
-                        </span>
-                      </td>
-                      <td className="p-3 font-bold text-slate-700">{intent.attempts}</td>
-                      <td className="p-3 text-rose-700 font-mono text-[11px]">{intent.lastErrorCode ?? '—'}</td>
-                      <td className="p-3">
-                        {retryable ? (
-                          <button
-                            type="button"
-                            disabled={retrying === intent.id}
-                            onClick={() => void retry(intent.id)}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-[#21A7B4] bg-teal-50 px-3 py-1.5 font-black text-[#0E7C86] hover:bg-[#21A7B4] hover:text-white transition disabled:opacity-50"
-                          >
-                            <RotateCcw className={`h-3.5 w-3.5 ${retrying === intent.id ? 'animate-spin' : ''}`} />
-                            إعادة المحاولة
-                          </button>
-                        ) : (
-                          <span className="text-slate-400">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
+                templates.map((template) => (
+                  <tr key={template.id} className="border-t">
+                    <td className="p-3 font-bold">{template.id}</td>
+                    <td className="p-3">{template.channels.join(', ')}</td>
+                    <td className="p-3">{template.requiredVariables.join(', ') || '—'}</td>
+                    <td className="p-3">{template.localizations.join(', ')}</td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
       </section>
-    </div>
+      <section className="rounded-2xl border bg-white p-5">
+        <h2 className="mb-4 font-bold text-[#142B5F]">سجل التسليم</h2>
+        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="relative">
+            <Search className="absolute right-3 top-3 h-4 w-4 text-slate-400" />
+            <input
+              aria-label="بحث الإشعارات"
+              className="w-full rounded-xl border p-3 pr-9 text-xs"
+              placeholder="مرجع، قالب، مستلم، رمز خطأ"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(1);
+              }}
+            />
+          </label>
+          <select
+            aria-label="حالة التسليم"
+            className="rounded-xl border p-3 text-xs"
+            value={stateFilter}
+            onChange={(event) => {
+              setStateFilter(event.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="ALL">جميع الحالات</option>
+            {Object.entries(deliveryStates).map(([state, label]) => (
+              <option key={state} value={state}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="قالب الإشعار"
+            className="rounded-xl border p-3 text-xs"
+            value={templateFilter}
+            onChange={(event) => {
+              setTemplateFilter(event.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="ALL">كل القوالب</option>
+            {[
+              ...new Set([
+                ...templates.map((item) => item.id),
+                ...intents.map((item) => item.templateId),
+              ]),
+            ].map((id) => (
+              <option key={id} value={id}>
+                {id}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="عدد السجلات المحمّلة"
+            disabled={Boolean(busy) || loading}
+            className="rounded-xl border p-3 text-xs"
+            value={limit}
+            onChange={(event) => {
+              setLimit(Number(event.target.value));
+              setPage(1);
+            }}
+          >
+            {[100, 200, 500].map((size) => (
+              <option key={size} value={size}>
+                أحدث {size} سجل
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="overflow-auto">
+          <table className="w-full min-w-[1100px] text-right text-xs">
+            <thead>
+              <tr>
+                {[
+                  'المرجع / القالب',
+                  'المستلم',
+                  'الحالة',
+                  'المحاولات',
+                  'الموعد التالي',
+                  'وقت التسليم',
+                  'رمز الخطأ',
+                  'الإجراء',
+                ].map((label) => (
+                  <th key={label} className="p-3">
+                    {label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center">
+                    جارٍ تحميل السجل…
+                  </td>
+                </tr>
+              ) : !rows.length ? (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center">
+                    لا توجد سجلات مطابقة ضمن القائمة المحمّلة.
+                  </td>
+                </tr>
+              ) : (
+                rows.map((intent) => (
+                  <tr key={intent.id} className="border-t">
+                    <td className="p-3">
+                      <div className="font-bold text-[#142B5F]">{intent.reference}</div>
+                      <div className="mt-1 text-slate-500">{intent.templateId}</div>
+                    </td>
+                    <td className="p-3 font-mono">{intent.recipientReference}</td>
+                    <td className="p-3">
+                      {deliveryStates[intent.deliveryState] ?? intent.deliveryState}
+                    </td>
+                    <td className="p-3">{intent.attempts}</td>
+                    <td className="p-3">{dateLabel(intent.nextAttemptAt)}</td>
+                    <td className="p-3">{dateLabel(intent.deliveredAt)}</td>
+                    <td className="p-3 text-red-700">{intent.lastErrorCode ?? '—'}</td>
+                    <td className="space-y-2 p-3">
+                      {intent.state === 'CREATED' &&
+                        ['FAILED', 'DEAD_LETTER'].includes(intent.deliveryState) && (
+                          <button
+                            disabled={Boolean(busy) || loading}
+                            className="flex items-center gap-1 rounded-lg border px-3 py-2 font-bold text-teal-800 disabled:opacity-50"
+                            onClick={() => retry(intent)}
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            إعادة المحاولة
+                          </button>
+                        )}
+                      {intent.state === 'CREATED' &&
+                        ['PENDING', 'FAILED', 'DEAD_LETTER'].includes(intent.deliveryState) && (
+                          <button
+                            disabled={Boolean(busy) || loading}
+                            className="rounded-lg border px-3 py-2 text-red-700 disabled:opacity-50"
+                            onClick={() => cancel(intent)}
+                          >
+                            إلغاء الإشعار
+                          </button>
+                        )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 flex items-center justify-between text-xs">
+          <button
+            disabled={loading || page <= 1}
+            className="rounded-lg border px-3 py-2 disabled:opacity-40"
+            onClick={() => setPage((value) => value - 1)}
+          >
+            السابق
+          </button>
+          <span>
+            {filtered.length} نتيجة · الصفحة {page} من {pages}
+          </span>
+          <button
+            disabled={loading || page >= pages}
+            className="rounded-lg border px-3 py-2 disabled:opacity-40"
+            onClick={() => setPage((value) => value + 1)}
+          >
+            التالي
+          </button>
+        </div>
+      </section>
+    </main>
   );
 }
-
-function Metric({ label, value, alert = false }: { label: string; value: number; alert?: boolean }) {
+function Metric({
+  label,
+  value,
+  alert = false,
+}: {
+  label: string;
+  value: number;
+  alert?: boolean;
+}) {
   return (
-    <div className={`rounded-2xl border bg-white p-4 shadow-xs transition hover:shadow-md ${alert ? 'border-red-200 bg-red-50/30' : 'border-slate-200/90'}`}>
-      <div className="text-[11px] font-bold text-slate-500">{label}</div>
-      <div className={`mt-2 text-2xl font-black ${alert ? 'text-red-700' : 'text-[#142B5F]'}`}>{value}</div>
+    <div
+      className={`rounded-2xl border bg-white p-4 ${alert ? 'border-red-200' : 'border-slate-200'}`}
+    >
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className={`mt-2 text-2xl font-black ${alert ? 'text-red-700' : 'text-[#142B5F]'}`}>
+        {value}
+      </div>
     </div>
   );
 }

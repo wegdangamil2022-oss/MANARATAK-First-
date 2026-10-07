@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
-import { FinancePlatformUseCases, FinanceStudentUseCases, StudentWorkspaceUseCases, StudentApplicationTrackerUseCases, StudentSavedItemHydrationService, StudentDashboardHydrationService, StudentServiceRequestUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
+import { FinancePlatformUseCases, FinanceStudentUseCases, StudentWorkspaceUseCases, StudentApplicationTrackerUseCases, StudentSavedItemHydrationService, StudentDashboardHydrationService, StudentServiceRequestUseCases, ProcessAssetLifecycleUseCase, CertificateReadModelService } from '@manaratak/application';
 import { AssetId, AssetLifecycleState, IAssetRecordRepository, ServiceRequestStatus, StudentSavedItemType } from '@manaratak/domain';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
 import { createStudentRoleGuard } from '../../security/StudentRoleGuard.js';
@@ -11,6 +11,7 @@ import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 
 export class StudentWorkspaceRouter {
   public static create(cradle: {
+    certificateReadModelService: CertificateReadModelService;
     studentWorkspaceUseCases: StudentWorkspaceUseCases;
     roleAssignmentRepository: IRoleAssignmentRepository;
     studentApplicationTrackerUseCases: StudentApplicationTrackerUseCases;
@@ -154,6 +155,18 @@ export class StudentWorkspaceRouter {
         res.json(result);
       }),
     );
+    router.post('/certificates/:certificateId/artifacts/:kind/delivery-grant', asyncHandler(async (req: Request, res: Response) => {
+      const ownerId = ownStudent(req);
+      const kind = z.enum(['pdf', 'preview']).parse(req.params.kind);
+      const certificates = await cradle.certificateReadModelService.listForStudent(ownerId);
+      const certificate = certificates.find(row => row.certificateId === req.params.certificateId);
+      const assetId = kind === 'pdf' ? certificate?.certificatePdfAssetId : certificate?.previewImageAssetId;
+      if (!certificate || !assetId) return void res.status(404).json({error:'CERTIFICATE_ARTIFACT_NOT_FOUND'});
+      const asset = await assetRecordRepository.findById(new AssetId(assetId));
+      if (!asset || asset.owner.ownerType !== 'Certificate' || asset.owner.ownerId !== certificate.certificateId) return void res.status(404).json({error:'CERTIFICATE_ARTIFACT_NOT_FOUND'});
+      res.json(await processAssetLifecycleUseCase.requestDeliveryGrant({assetId,expiresInSeconds:300}));
+    }));
+
     router.post(
       '/assets/:assetId/delivery-grant',
       asyncHandler(async (req: Request, res: Response) => {
@@ -208,6 +221,12 @@ export class StudentWorkspaceRouter {
         res.json(await studentDashboardHydrationService.getDashboard(ownStudent(req)));
       }),
     );
+    router.post('/notifications/:notificationId/read', asyncHandler(async (req: Request, res: Response) => {
+      z.object({}).strict().parse(req.body ?? {});
+      const notificationId = z.string().trim().min(1).max(200).parse(req.params.notificationId);
+      await studentWorkspaceUseCases.markNotificationRead(ownStudent(req), notificationId);
+      res.json({ success: true });
+    }));
     router.get(
       '/collections',
       asyncHandler(async (req: Request, res: Response) => {
@@ -554,7 +573,8 @@ export class StudentWorkspaceRouter {
     router.get(
       '/:studentReferenceId/finance/invoices',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await financeStudentUseCases.listStudentInvoices(ownStudentPath(req)));
+        const pagination = z.object({ page: z.coerce.number().int().positive().optional(), pageSize: z.coerce.number().int().positive().max(100).optional() }).parse(req.query);
+        res.json(await financeStudentUseCases.listStudentInvoices(ownStudentPath(req), pagination));
       }),
     );
 

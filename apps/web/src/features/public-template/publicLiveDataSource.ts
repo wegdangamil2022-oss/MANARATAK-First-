@@ -1,3 +1,4 @@
+import { mapInternationalTestToExam } from '@manaratak/ui';
 import {
   ApiClient,
   type PublicCareerJobDto,
@@ -24,6 +25,7 @@ import type {
   Major,
   PublicArticle,
   Service,
+  Scholarship,
   StudentToolCategory,
   StudentToolExecutionLabel,
   StudentToolPreview,
@@ -107,7 +109,7 @@ function rankFromUniversity(dto: PublicUniversityDto): number | null {
   const rankings = Array.isArray(dto.rankings) ? dto.rankings : [];
   for (const raw of rankings) {
     const rank = asRecord(raw).rank;
-    const numeric = Number(String(rank ?? '').replace(/[^0-9]/g, ''));
+    const numeric = /^\d+$/.test(String(rank ?? '').trim()) ? Number(rank) : NaN;
     if (Number.isFinite(numeric) && numeric > 0) return numeric;
   }
   return null;
@@ -121,10 +123,11 @@ export function mapPublicUniversityDto(dto: PublicUniversityDto): University {
     .map((program) => ({
       label: firstString(program.sourceProgramName, 'برنامج أكاديمي'),
       majorId: String(program.majorId),
-      degreeLabel: firstString(program.degreeLevelId),
+      degreeLabel: firstString(asRecord(program.degreeLevel).nameAr, firstString(asRecord(program.degreeLevel).nameEn)),
       programLabel: firstString(program.sourceProgramName),
     }));
   return {
+    publishedData: dto,
     id: dto.slug,
     ownerId: dto.publicId,
     publicId: dto.publicId,
@@ -132,9 +135,10 @@ export function mapPublicUniversityDto(dto: PublicUniversityDto): University {
     countryReferenceId: dto.countryReferenceId,
     regionReferenceId: dto.regionReferenceId,
     cityReferenceId: dto.cityReferenceId,
-    name: dto.displayName,
-    nameEn: dto.canonicalName,
+    name: dto.localizedNames?.ar || dto.displayName,
+    nameEn: dto.localizedNames?.en || dto.canonicalName,
     type: dto.institutionType,
+    ownership: dto.institutionalOwnership ?? undefined,
     country: dto.country ?? '',
     city: dto.city ?? undefined,
     foundationYear: dto.foundedYear ?? undefined,
@@ -172,12 +176,13 @@ export function mapPublicMajorDto(dto: PublicMajorDto): Major {
   const sectionText = (dto.contentSections ?? []).map((section) => section.content).filter(Boolean).join('\n');
   const description = dto.description ?? dto.studentFriendlySummary ?? sectionText;
   return {
-    id: dto.slug,
+    id: `${dto.slug}/${(dto.degreeLevel || '').toLowerCase()}`,
     ownerId: dto.publicId,
     publicId: dto.publicId,
     slug: dto.slug,
-    name: dto.displayName,
-    nameEn: dto.canonicalName,
+    name: dto.localizedNameAr || dto.localizedNames?.ar || dto.displayName,
+    nameEn: dto.localizedNameEn || dto.localizedNames?.en || dto.canonicalName,
+    contentSections: dto.contentSections,
     category: dto.academicFieldOrDiscipline ?? dto.collegeOrFaculty ?? 'تخصص أكاديمي',
     degreeLevels: degreeLevels(dto.degreeLevel),
     degreeLevelName: dto.degreeLevel,
@@ -205,8 +210,8 @@ export function classifyCourseTrack(dto: Pick<PublicCourseDto, 'originType' | 'a
 }
 
 export function mapCourse(dto: PublicCourseDto): { course: Course; imported: ImportedCourse | null; track: PublicCourseTrack } {
-  const levelRaw = (dto.difficultyLevel ?? '').toLowerCase();
-  const level: Course['level'] = /advanced|متقدم/.test(levelRaw) ? 'متقدم' : /intermediate|متوسط/.test(levelRaw) ? 'متوسط' : 'مبتدئ';
+  const levelRaw = (dto.difficultyLevel ?? dto.studyLevelRaw ?? '').toLowerCase();
+  const level: Course['level'] = /advanced|متقدم/.test(levelRaw) ? 'متقدم' : /intermediate|متوسط/.test(levelRaw) ? 'متوسط' : /beginner|مبتدئ/.test(levelRaw) ? 'مبتدئ' : /all|جميع/.test(levelRaw) ? 'جميع المستويات' : 'غير محدد رسميًا';
   const provider = dto.providerName ?? dto.platformName ?? 'منارتك';
   const track = classifyCourseTrack(dto);
   const course: Course = {
@@ -217,19 +222,25 @@ export function mapCourse(dto: PublicCourseDto): { course: Course; imported: Imp
     originType: dto.originType,
     accessType: dto.accessType,
     title: dto.displayName,
-    titleEn: dto.canonicalName,
+    titleEn: dto.titleEn ?? dto.canonicalName,
     provider,
-    instructor: provider,
-    duration: dto.studyDuration ?? '',
-    lessonsCount: null,
+    instructor: dto.instructor ?? provider,
+    duration: dto.studyDuration ?? dto.studyDurationRaw ?? '',
+    lessonsCount: dto.lessonsCount ?? null,
     level,
-    isFree: dto.accessType !== 'PAID',
+    isFree: dto.originType === 'EXTERNAL_LINKED_COURSE' ? dto.isStudyFree === true : ['FREE_STUDY', 'FREE_STUDY_AND_CERTIFICATE'].includes(dto.accessType),
     rating: null,
     studentsCount: null,
     imageUrl: '',
     category: dto.category ?? 'تعلم',
     directCourseUrl: dto.directCourseUrl,
     courseContent: dto.courseContent,
+    description: dto.description,
+    prerequisites: dto.prerequisites,
+    targetAudience: dto.targetAudience,
+    certificateAvailable: dto.certificateAvailable === true,
+    learningOutcomes: dto.learningOutcomes?.join("\n"),
+    courseModules: dto.curriculumModules,
     acquiredSkills: dto.acquiredSkills ?? [],
   };
   // Native/paid owner courses are never re-shaped into the imported-course provenance model.
@@ -240,14 +251,16 @@ export function mapCourse(dto: PublicCourseDto): { course: Course; imported: Imp
     slug: dto.slug,
     title: dto.displayName,
     provider,
+    platform: dto.platformName ?? provider,
+    relatedMajors: dto.relatedMajors,
     field: dto.category ?? splitText(dto.relatedMajorsOrFields)[0] ?? '',
-    language: dto.learningLanguage ?? '',
+    language: dto.learningLanguage ?? dto.learningLanguageRaw ?? '',
     level,
-    duration: dto.studyDuration ?? '',
-    studyFree: dto.accessType !== 'PAID',
-    freeCertificate: Boolean(dto.certificateAvailable),
-    certificateType: dto.certificateAvailable ? (dto.certificateType ?? 'Completion Certificate') : '',
-    topics: splitText(dto.courseContent),
+    duration: dto.studyDuration ?? dto.studyDurationRaw ?? '',
+    studyFree: dto.isStudyFree === true,
+    freeCertificate: dto.isFreeCertificate === true,
+    certificateType: dto.certificateType ?? (dto.isFreeCertificate === true ? 'نوع الشهادة غير محدد' : ''),
+    topics: splitText(dto.shortCourseTopicsRaw ?? dto.courseContent),
     directCourseUrl: dto.directCourseUrl,
   } : null;
   return { course, imported, track };
@@ -263,9 +276,10 @@ export function mapCountry(dto: PublicStudyDestinationDto, locale: PublicLiveLoc
     ? { LOW: 'منخفضة', MODERATE: 'متوسطة', HIGH: 'مرتفعة', VERY_HIGH: 'مرتفعة جدًا' }
     : { LOW: 'Low', MODERATE: 'Moderate', HIGH: 'High', VERY_HIGH: 'Very high' };
   const studyLanguages = dto.studyLanguages.map((item) => isAr ? (item.nameAr || item.name) : item.name).filter(Boolean);
-  const officialLinks = dto.officialLinks.map((link) => ({
+  const officialLinks: NonNullable<CountryDestination['officialLinks']> = dto.officialLinks.map((link) => ({
     label: isAr ? link.labelAr : (link.labelEn || link.labelAr),
     url: link.url,
+    note: isAr ? link.noteAr : (link.noteEn || link.noteAr),
   }));
   if (dto.visaOfficialUrl && !officialLinks.some((link) => link.url === dto.visaOfficialUrl)) {
     officialLinks.unshift({ label: isAr ? 'المصدر الرسمي للتأشيرة' : 'Official visa source', url: dto.visaOfficialUrl });
@@ -292,7 +306,9 @@ export function mapCountry(dto: PublicStudyDestinationDto, locale: PublicLiveLoc
       ? `${costMin.toLocaleString()}–${costMax.toLocaleString()} ${currencyCode}`.trim()
       : '',
     languageOfStudy: studyLanguages,
-    visaEase: isAr ? 'متطلبات موثقة' : 'Verified requirements',
+    visaSummary: (isAr ? dto.visaSummaryAr : dto.visaSummaryEn) ?? dto.visaSummaryAr ?? dto.visaSummaryEn ?? undefined,
+    sourceAuditDate: dto.sourceAuditDate ?? undefined,
+    visaEase: dto.sourceVerificationStatus === 'VERIFIED' ? (isAr ? 'المصادر موثقة' : 'Sources verified') : (isAr ? 'راجع الجهة الرسمية' : 'Check official sources'),
     iso2Code: country.iso2Code,
     iso3Code: country.iso3Code,
     subregion: country.subregion ?? undefined,
@@ -302,50 +318,14 @@ export function mapCountry(dto: PublicStudyDestinationDto, locale: PublicLiveLoc
     studySystemSummary: (isAr ? dto.studySystemSummaryAr : dto.studySystemSummaryEn) ?? dto.studySystemSummaryAr ?? dto.studySystemSummaryEn ?? undefined,
     admissionHighlights: isAr ? dto.admissionHighlightsAr : (dto.admissionHighlightsEn.length ? dto.admissionHighlightsEn : dto.admissionHighlightsAr),
     visaHighlights: isAr ? dto.visaRequirementsAr : (dto.visaRequirementsEn.length ? dto.visaRequirementsEn : dto.visaRequirementsAr),
-    costHighlights: isAr ? dto.costHighlightsAr : (dto.costHighlightsEn.length ? dto.costHighlightsEn : dto.costHighlightsAr),
-    studentLifeHighlights: isAr ? dto.studentLifeHighlightsAr : (dto.studentLifeHighlightsEn.length ? dto.studentLifeHighlightsEn : dto.studentLifeHighlightsAr),
+    costHighlights: isAr ? (dto.costHighlightsAr.length ? dto.costHighlightsAr : dto.costHighlightsEn) : (dto.costHighlightsEn.length ? dto.costHighlightsEn : dto.costHighlightsAr),
+    studentLifeHighlights: isAr ? (dto.studentLifeHighlightsAr.length ? dto.studentLifeHighlightsAr : dto.studentLifeHighlightsEn) : (dto.studentLifeHighlightsEn.length ? dto.studentLifeHighlightsEn : dto.studentLifeHighlightsAr),
     officialLinks,
   };
 }
 
 export function mapExam(dto: PublicInternationalTestDto): Exam {
-  const score = dto.scoreScale;
-  const variants = dto.variants?.filter((variant) => variant.isActive).map((variant) => ({
-    name: variant.variantName,
-    meta: variant.deliveryMode,
-    note: variant.administrativeNotes,
-  })) ?? [];
-  return {
-    id: dto.slug,
-    ownerId: dto.id,
-    publicId: dto.publicId,
-    slug: dto.slug,
-    name: dto.displayName,
-    nameEn: dto.canonicalName,
-    category: dto.testCategory,
-    description: firstString(dto.registrationRequirements),
-    tags: [dto.abbreviation, dto.testCode, dto.providerName].filter((value): value is string => Boolean(value)),
-    providerName: dto.providerName,
-    testCode: dto.testCode,
-    scoreRange: score ? `${score.overallMinimum}–${score.overallMaximum}` : undefined,
-    validity: score?.resultValidityDurationMonths ? `${score.resultValidityDurationMonths} شهر` : undefined,
-    status: dto.status,
-    variants,
-    sections: dto.sections?.map((section) => ({
-      name: section.sectionName,
-      duration: section.durationMinutes ? `${section.durationMinutes} دقيقة` : undefined,
-      score: section.scoreMinimum !== undefined && section.scoreMaximum !== undefined ? `${section.scoreMinimum}–${section.scoreMaximum}` : undefined,
-      meta: section.sectionType,
-    })) ?? [],
-    registrationRequirements: splitText(dto.registrationRequirements),
-    retakeNotes: splitText(dto.retakePolicy),
-    relatedCountries: dto.countryRelationships?.map((relationship) => ({
-      id: relationship.canonicalReferenceId,
-      name: relationship.referenceCode ?? relationship.notes ?? relationship.canonicalReferenceId,
-      meta: relationship.relationshipType,
-    })) ?? [],
-    officialLinks: dto.officialLinks?.map((link) => ({ label: link.description ?? link.linkType, url: link.url })) ?? [],
-  };
+  return mapInternationalTestToExam(dto);
 }
 
 function stripHtml(value: string): string {
@@ -355,7 +335,7 @@ function stripHtml(value: string): string {
 export function mapArticle(dto: PublicCmsContentDto): PublicArticle {
   const plain = stripHtml(dto.body);
   const kind = dto.contentType.toUpperCase();
-  const supportedTypes: PublicArticle['contentType'][] = ['ARTICLE', 'NEWS', 'STUDY_GUIDE', 'CHECKLIST', 'FAQ', 'STATIC_PAGE'];
+  const supportedTypes: PublicArticle['contentType'][] = ['ARTICLE', 'NEWS', 'STUDY_GUIDE', 'CHECKLIST', 'FAQ', 'STATIC_PAGE', 'LANDING_PAGE'];
   if (!supportedTypes.includes(kind as PublicArticle['contentType'])) throw new Error(`CMS_CONTENT_TYPE_UNSUPPORTED:${dto.contentType}`);
   const contentType = kind as PublicArticle['contentType'];
   return {
@@ -365,8 +345,10 @@ export function mapArticle(dto: PublicCmsContentDto): PublicArticle {
     slug: dto.slug,
     titleAr: dto.title,
     titleEn: dto.title,
+    body: dto.body,
+    canonicalUrl: dto.canonicalUrl,
     contentType,
-    contentTypeLabelAr: contentType === 'NEWS' ? 'خبر' : contentType === 'STUDY_GUIDE' ? 'دليل دراسي' : contentType === 'CHECKLIST' ? 'قائمة تحقق' : contentType === 'FAQ' ? 'أسئلة شائعة' : contentType === 'STATIC_PAGE' ? 'صفحة ثابتة' : 'مقال',
+    contentTypeLabelAr: contentType === 'NEWS' ? 'خبر' : contentType === 'STUDY_GUIDE' ? 'دليل دراسي' : contentType === 'CHECKLIST' ? 'قائمة تحقق' : contentType === 'FAQ' ? 'أسئلة شائعة' : contentType === 'STATIC_PAGE' ? 'صفحة ثابتة' : contentType === 'LANDING_PAGE' ? 'صفحة هبوط' : 'مقال',
     categoryAr: dto.categorySlug ?? 'محتوى',
     author: 'منارتك',
     updatedAt: dto.publishedAt,
@@ -389,19 +371,21 @@ export function mapService(dto: PublicServiceCatalogItemDto): Service {
     supportedLanguageReferenceIds: dto.supportedLanguageReferenceIds ?? [],
     title: dto.displayName,
     audience,
-    category: dto.serviceCategory,
+    category: ({ STUDENT_SERVICES: 'خدمات الطلاب', DOCUMENT_SERVICES: 'خدمات المستندات', VISA_SERVICES: 'خدمات التأشيرات', TRAVEL_SERVICES: 'خدمات السفر', ACADEMIC_SERVICES: 'خدمات أكاديمية', PROFESSIONAL_SERVICES: 'خدمات مهنية', ENTERPRISE_SERVICES: 'خدمات المؤسسات' } as Record<string,string>)[dto.serviceCategory] || dto.serviceCategory,
+    requestable: dto.serviceAvailabilityStatus === 'AVAILABLE',
     badge: firstString(metadata.badge, audience === 'student' ? 'خدمة طلابية' : 'خدمة عامة'),
     shortDescription: dto.serviceDescription,
     description: dto.serviceDescription,
     priceLabel: firstString(metadata.priceLabel, dto.pricingReferenceId ? 'راجع تفاصيل التسعير' : 'يحدد حسب الطلب'),
     turnaround: dto.estimatedDeliveryTime ?? '',
-    deliveryMode: dto.deliveryMode,
+    deliveryMode: ({ ONLINE: 'عبر الإنترنت', IN_PERSON: 'حضوري', HYBRID: 'مدمج' } as Record<string,string>)[dto.deliveryMode] || dto.deliveryMode,
     includes: recordStringArray(metadata, 'includes'),
     excludes: recordStringArray(metadata, 'excludes'),
     requirements: dto.requiredInputsOrDocuments ?? [],
-    faqs: [],
+    faqs: Array.isArray(metadata.faqs) ? metadata.faqs.flatMap(value => { const row = asRecord(value); return typeof row.question === 'string' && typeof row.answer === 'string' ? [{ question: row.question, answer: row.answer }] : []; }) : [],
+    packages: Array.isArray(metadata.packages) ? metadata.packages.flatMap(value => { const row = asRecord(value); return typeof row.name === 'string' && typeof row.price === 'string' && typeof row.description === 'string' ? [{ name: row.name, price: row.price, description: row.description }] : []; }) : [],
     cancellationPolicy: firstString(metadata.cancellationPolicy),
-    availabilityNote: dto.serviceAvailabilityStatus,
+    availabilityNote: ({ AVAILABLE: 'الخدمة متاحة لاستقبال الطلبات', UNAVAILABLE: 'الخدمة غير متاحة حالياً', PAUSED: 'استقبال الطلبات متوقف مؤقتاً' } as Record<string,string>)[dto.serviceAvailabilityStatus] || dto.serviceAvailabilityStatus,
     requestContextFields: dto.servicePrerequisites ?? [],
     contextualLinks: [],
   };
@@ -415,8 +399,8 @@ const toolCategoryMap: Record<string, StudentToolCategory> = {
   FINANCIAL_PLANNING: 'التخطيط المالي', DOCUMENT_VERIFICATION: 'التحقق من الوثائق', GUIDANCE: 'الإرشاد والتوجيه',
 };
 function mapTool(dto: PublicStudentToolDto, locale: PublicLiveLocale): StudentToolPreview {
-  const executionLabel: StudentToolExecutionLabel = /AI|MODEL|PROMPT/i.test(dto.executionType) ? 'أداة ذكية' : /CALC/i.test(dto.executionType) ? 'حسابية' : /HYBRID/i.test(dto.executionType) ? 'هجينة' : 'بيانات ومقارنة';
-  const active = dto.implementationStatus === 'IMPLEMENTED' && dto.visibility === 'ACTIVE' && dto.availability.publicEnabled;
+  const executionLabel: StudentToolExecutionLabel = /AI|MODEL|PROMPT/i.test(dto.executionType) ? 'أداة ذكية' : (/CALC/i.test(dto.executionType) || dto.category === 'ACADEMIC_CALCULATORS') ? 'حسابية' : /HYBRID/i.test(dto.executionType) ? 'هجينة' : 'بيانات ومقارنة';
+  const active = dto.implementationStatus === 'IMPLEMENTED' && dto.visibility === 'ACTIVE' && dto.lifecycle === 'ACTIVE' && dto.availability.publicEnabled && !dto.availability.adminOnly && !dto.availability.maintenanceMode && dto.featureFlags.globallyEnabled && !dto.featureFlags.maintenanceMode;
   return {
     id: dto.toolKey,
     ownerId: dto.id,
@@ -432,7 +416,7 @@ function mapTool(dto: PublicStudentToolDto, locale: PublicLiveLocale): StudentTo
     purpose: locale === 'en' ? (dto.descriptionEn ?? dto.descriptionAr) : dto.descriptionAr,
     howItWorks: [
       'تُراجع المدخلات على الخادم قبل التنفيذ.',
-      dto.executionType === 'AI_DELEGATED' ? 'يُرسل الطلب إلى Phase 17 عبر Capability محكومة، دون اختيار نموذج من الواجهة.' : dto.executionType === 'HYBRID' ? 'تُجمع البيانات من المجال المالك أولًا، ثم يُستخدم الذكاء الاصطناعي بصورة إرشادية عند توفره.' : 'يُنفذ المنطق المحدد دون نموذج ذكاء اصطناعي.',
+      dto.executionType === 'AI_DELEGATED' ? 'تُنشأ المسودة بالذكاء الاصطناعي اعتمادًا على المعلومات التي أدخلتها.' : dto.executionType === 'HYBRID' ? 'تُجمع البيانات من المجال المالك أولًا، ثم يُستخدم الذكاء الاصطناعي بصورة إرشادية عند توفره.' : 'يُنفذ المنطق المحدد دون نموذج ذكاء اصطناعي.',
       'لا تُحفظ النتيجة في حساب الطالب إلا بطلب حفظ صريح.',
     ],
     inputs: (dto.inputSchema?.fields ?? []).map((field) => `${field.labelAr}${field.required ? ' *' : ''}`),
@@ -566,6 +550,76 @@ export async function loadPublishedTools(locale: PublicLiveLocale = 'ar'): Promi
 const snapshotCache = new Map<string, { result: PublicLiveLoadResult; timestamp: number }>();
 const inFlightSnapshots = new Map<string, Promise<PublicLiveLoadResult>>();
 const SNAPSHOT_CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes cache
+
+export async function refreshPublishedTools(locale: PublicLiveLocale): Promise<StudentToolPreview[]> {
+  const tools = await loadPublishedTools(locale);
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, tools }, statuses: { ...cached.result.statuses, tools: tools.length ? 'ready' : 'empty' } };
+  return tools;
+}
+
+export async function refreshPublishedCountries(locale: PublicLiveLocale): Promise<CountryDestination[]> {
+  const countries = await loadPublishedCountries(locale);
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, countries }, statuses: { ...cached.result.statuses, countries: countries.length ? 'ready' : 'empty' } };
+  return countries;
+}
+
+export async function refreshPublishedArticles(locale: PublicLiveLocale): Promise<PublicArticle[]> {
+  const articles = await loadPublishedArticles(locale);
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, articles }, statuses: { ...cached.result.statuses, articles: articles.length ? 'ready' : 'empty' } };
+  return articles;
+}
+
+export async function refreshPublishedServices(locale: PublicLiveLocale): Promise<Service[]> {
+  const services = await loadPublishedServices();
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, services }, statuses: { ...cached.result.statuses, services: services.length ? 'ready' : 'empty' } };
+  return services;
+}
+
+export async function refreshPublishedCourses(locale: PublicLiveLocale) {
+  const courses = await loadPublishedCourses();
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  const status = courses.courses.length || courses.importedCourses.length || courses.paidCourses.length ? 'ready' as const : 'empty' as const;
+  if (cached) cached.result = {...cached.result, data:{...cached.result.data,...courses},statuses:{...cached.result.statuses,courses:status}};
+  return courses;
+}
+
+export async function refreshPublishedUniversities(locale: PublicLiveLocale): Promise<University[]> {
+  const universities = await loadPublishedUniversities(locale);
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, universities }, statuses: { ...cached.result.statuses, universities: universities.length ? 'ready' : 'empty' } };
+  return universities;
+}
+
+export async function refreshPublishedScholarships(locale: PublicLiveLocale): Promise<Scholarship[]> {
+  const rows = await collectCursorPages(cursor => ApiClient.getScholarships({ cursor, limit: 100 }, locale));
+  const scholarships = rows.map(dto => mapPublicScholarshipDto(dto));
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, scholarships },
+    statuses: { ...cached.result.statuses, scholarships: scholarships.length ? 'ready' : 'empty' } };
+  return scholarships;
+}
+
+export async function refreshPublishedMajors(locale: PublicLiveLocale): Promise<Major[]> {
+  const majors = await loadPublishedMajors(locale);
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, majors },
+    statuses: { ...cached.result.statuses, majors: majors.length ? 'ready' : 'empty' } };
+  return majors;
+}
+
+export async function refreshPublishedExams(locale: PublicLiveLocale): Promise<Exam[]> {
+  const exams = await loadPublishedExams(locale);
+  const cached = snapshotCache.get(`snapshot_${locale}`);
+  if (cached) {
+    cached.result = { ...cached.result, data: { ...cached.result.data, exams },
+      statuses: { ...cached.result.statuses, exams: exams.length ? 'ready' : 'empty' } };
+  }
+  return exams;
+}
 
 export async function loadPublicLiveSnapshot(locale: PublicLiveLocale = 'ar', forceRefresh = false): Promise<PublicLiveLoadResult> {
   const cacheKey = `snapshot_${locale}`;

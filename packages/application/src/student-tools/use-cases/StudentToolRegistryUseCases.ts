@@ -1,4 +1,7 @@
-import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
+import {
+  AssetReferencePolicy,
+  assertAssetReferenceUsable,
+} from '../../asset-platform/AssetReferencePolicy';
 import {
   IStudentToolRegistryRepository,
   IStudentToolDependencyHealthGateway,
@@ -32,7 +35,20 @@ export class StudentToolRegistryUseCases {
   }
   async listPublicTools(filters: StudentToolFilters = {}) {
     const tools = await this.repository.listPublic(filters);
-    return tools.filter(StudentToolPublicAccessPolicy.isDiscoverable);
+    const search = filters.search?.trim().toLowerCase();
+    return tools.filter(
+      (tool) =>
+        StudentToolPublicAccessPolicy.isDiscoverable(tool) &&
+        (!filters.visibility || tool.visibility === filters.visibility) &&
+        (!filters.implementationStatus ||
+          tool.implementationStatus === filters.implementationStatus) &&
+        (!filters.lifecycle || tool.lifecycle === filters.lifecycle) &&
+        (!filters.executionType || tool.executionType === filters.executionType) &&
+        (!search ||
+          `${tool.nameAr} ${tool.nameEn} ${tool.toolKey} ${tool.descriptionAr} ${tool.descriptionEn}`
+            .toLowerCase()
+            .includes(search)),
+    );
   }
   findTool(toolKey: string) {
     return this.repository.findByKey(toolKey);
@@ -65,14 +81,27 @@ export class StudentToolRegistryUseCases {
   }
   async update(toolKey: string, patch: Record<string, unknown>, actorReferenceId: string) {
     if (typeof patch.iconAssetId === 'string' || patch.iconAssetId === null) {
-      await assertAssetReferenceUsable(this.assetReferences, patch.iconAssetId as string | null, { purpose: 'STUDENT_TOOL_ICON' });
+      await assertAssetReferenceUsable(this.assetReferences, patch.iconAssetId as string | null, {
+        purpose: 'STUDENT_TOOL_ICON',
+      });
     }
     if (['toolKey', 'id', 'createdAt'].some((key) => key in patch))
       throw new Error('IMMUTABLE_TOOL_IDENTITY');
     const current = await this.repository.findByKey(toolKey);
     if (!current) throw new Error('TOOL_NOT_FOUND');
-    const versionedFields = ['availability', 'rateLimitPolicy', 'aiCapabilityKey', 'executionType', 'outputType', 'supportedLocales', 'inputSchema', 'outputSchema', 'dependencies'];
-    if (versionedFields.some((field) => field in patch)) throw new Error('TOOL_VERSION_INCREMENT_REQUIRED');
+    const versionedFields = [
+      'availability',
+      'rateLimitPolicy',
+      'aiCapabilityKey',
+      'executionType',
+      'outputType',
+      'supportedLocales',
+      'inputSchema',
+      'outputSchema',
+      'dependencies',
+    ];
+    if (versionedFields.some((field) => field in patch))
+      throw new Error('TOOL_VERSION_INCREMENT_REQUIRED');
     const availability = patch.availability as StudentToolDefinition['availability'] | undefined;
     const featureFlags = patch.featureFlags as StudentToolDefinition['featureFlags'] | undefined;
     if (availability?.adminOnly && availability.publicEnabled)
@@ -97,10 +126,21 @@ export class StudentToolRegistryUseCases {
   ) {
     const current = await this.repository.findByKey(toolKey);
     if (!current) throw new Error('TOOL_NOT_FOUND');
-    if (!/^\d+\.\d+\.\d+$/.test(version.semanticVersion)) throw new Error('INVALID_TOOL_SEMANTIC_VERSION');
+    if (!/^\d+\.\d+\.\d+$/.test(version.semanticVersion))
+      throw new Error('INVALID_TOOL_SEMANTIC_VERSION');
     if (compareSemver(version.semanticVersion, current.currentVersion.semanticVersion) <= 0)
       throw new Error('TOOL_VERSION_MUST_INCREMENT');
     if (!version.changeNote.trim()) throw new Error('TOOL_VERSION_CHANGE_NOTE_REQUIRED');
+    const availability = patch.availability ?? current.availability;
+    if (availability.adminOnly && availability.publicEnabled)
+      throw new Error('CONFLICTING_AVAILABILITY_FLAGS');
+    if (availability.anonymousEnabled && !availability.publicEnabled)
+      throw new Error('CONFLICTING_AVAILABILITY_FLAGS');
+    if (
+      current.implementationStatus !== StudentToolImplementationStatus.IMPLEMENTED &&
+      availability.publicEnabled
+    )
+      throw new Error('TOOL_NOT_IMPLEMENTED');
     const next: StudentToolDefinition = {
       ...current,
       ...patch,

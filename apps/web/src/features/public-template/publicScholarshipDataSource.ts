@@ -47,7 +47,7 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
   const legacyFields = toTextList(dto.eligibleMajorsOrFields);
   const canonicalUniversityLinks = (dto.universityLinks ?? []).filter((link) => Boolean(link.universityId));
   const canonicalMajorTargets = (dto.majorTargets ?? []).filter((target) => Boolean(target.majorId));
-  const canonicalDegrees = (dto.degreeTargets ?? []).flatMap((target) => normalizeDegreeLevels(target.sourceLabel ?? target.degreeLevelId ?? ''));
+  const canonicalDegrees = (dto.degreeTargets ?? []).flatMap((target) => normalizeDegreeLevels(target.degreeLevel?.canonicalCode ?? target.sourceLabel ?? ''));
   const legacyDegrees = normalizeDegreeLevels(dto.degreeLevel ?? '');
   const deadline = dto.applicationDeadline ?? '';
   const deadlineDate = deadline ? new Date(deadline) : null;
@@ -55,13 +55,13 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
   const requirements = (dto.requiredDocumentItems ?? []).map((item) => item.displayName).filter(Boolean);
   const eligibility = (dto.eligibilityItems ?? []).map((item) => item.valueText).filter((item): item is string => Boolean(item));
   const requiredTests = (dto.eligibilityItems ?? []).filter((item) => Boolean(item.internationalTestId));
-  const benefitLabels = (dto.benefits ?? []).map((item) => item.valueText ?? item.benefitTypeCode).filter(Boolean);
+  const benefitLabels = (dto.benefits ?? []).filter(item => item.isCovered !== false).map((item) => item.valueText ?? item.benefitTypeCode).filter(Boolean);
   const participatingUniversities = canonicalUniversityLinks.map((link) => ({
     id: link.universityId as string,
     name: link.sourceLabel ?? 'جامعة مرتبطة',
     nameEn: link.sourceLabel ?? 'Linked university',
   }));
-  const universityLabel = participatingUniversities[0]?.name ?? legacyUniversities[0] ?? dto.sponsorName ?? '';
+  const universityLabel = participatingUniversities[0]?.name ?? legacyUniversities[0] ?? dto.providerName ?? dto.sponsorName ?? '';
   const fields = canonicalMajorTargets.map((target) => target.sourceLabel ?? target.majorId ?? '').filter(Boolean);
 
   return {
@@ -69,15 +69,16 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
     publicId: dto.publicId,
     slug: dto.slug,
     countryReferenceId: dto.countryReferenceId,
-    title: dto.displayName,
-    titleEn: dto.canonicalName,
+    title: dto.localizedNames?.ar || dto.displayName,
+    publishedData: dto,
+    titleEn: dto.localizedNames?.en || dto.canonicalName,
     country: dto.studyCountry ?? dto.countrySourceLabel ?? '',
     countryEn: dto.studyCountry ?? dto.countrySourceLabel ?? '',
     countryFlag: '',
     university: universityLabel,
     universityEn: universityLabel,
     degreeLevel: [...new Set([...canonicalDegrees, ...legacyDegrees])],
-    fundingType: dto.fundingCoverage ?? dto.fundingTypeCode ?? 'تمويل',
+    fundingType: dto.isFullyFunded || ['FULL', 'FULLY_FUNDED'].includes(dto.fundingTypeCode || '') ? 'تمويل كامل' : ['PARTIAL', 'PARTIALLY_FUNDED'].includes(dto.fundingTypeCode || '') ? 'تمويل جزئي' : dto.fundingCoverage || dto.fundingTypeCode || 'غير محدد',
     financialCoverage: benefitLabels.length ? benefitLabels : toTextList(dto.coverageDetails),
     deadline,
     daysLeft: daysUntil(deadline, now),
@@ -86,10 +87,10 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
     imageUrl: '',
     field: (fields.length ? fields : legacyFields).join('، '),
     requirements: requirements.length ? [...requirements, ...eligibility] : (eligibility.length ? eligibility : toTextList(dto.eligibilityCriteria)),
-    description: dto.coverageDetails || dto.eligibilityCriteria || '',
+    description: dto.description || dto.coverageDetails || dto.eligibilityCriteria || '',
     applicationUrl: dto.applicationLink ?? dto.applicationUrl ?? dto.officialSourceUrl ?? '',
     withoutIelts: null,
-    status: isClosed ? 'مغلقة' : 'مفتوحة الآن',
+    status: deadlineDate && !Number.isNaN(deadlineDate.getTime()) ? (isClosed ? 'مغلقة' : 'مفتوحة الآن') : dto.deadlineType === 'OPEN_ALL_YEAR' ? 'مفتوحة الآن' : undefined,
     participatingUniversities,
     requiredExams: requiredTests.map((item) => ({
       id: item.internationalTestId as string,

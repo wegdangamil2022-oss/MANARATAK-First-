@@ -290,9 +290,6 @@ export class AdminMajorUseCases {
     this.assertMutableCanonicalMajorId(id);
     if (!context?.actorId || !this.atomicMutations) throw new Error('MAJOR_CONTENT_AUDITED_ACTOR_REQUIRED');
     const major = await this.getMajor(id);
-    if (major.status === MajorStatus.PUBLISHED || major.status === MajorStatus.ARCHIVED) {
-      throw new Error('MAJOR_PUBLISHED_STRUCTURE_IMMUTABLE');
-    }
     const profiles = this.repository.listLevelProfiles ? await this.repository.listLevelProfiles(major.id) : [];
 
     let targetProfile = input.profileId
@@ -306,6 +303,7 @@ export class AdminMajorUseCases {
       throw new Error('TARGET_MAJOR_PROFILE_REQUIRED');
     }
 
+    if (targetProfile.status === MajorStatus.PUBLISHED || targetProfile.status === MajorStatus.ARCHIVED) throw new Error('MAJOR_PUBLISHED_STRUCTURE_IMMUTABLE');
     let targetVersionId = input.versionId;
     if (!targetVersionId) {
       const versions = this.repository.listVersions ? await this.repository.listVersions(major.id, { profileId: targetProfile.id }) : [];
@@ -412,7 +410,7 @@ export class AdminMajorUseCases {
 
   public async markReadyToReview(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     this.assertMutableCanonicalMajorId(id);
-    const existing = await this.getMajor(id);
+    const existing = await this.getPublicationTarget(id);
     if (existing.completenessStatus === MajorImportCompletenessState.INCOMPLETE) {
       throw new Error('Cannot mark INCOMPLETE major as READY_TO_REVIEW');
     }
@@ -423,29 +421,34 @@ export class AdminMajorUseCases {
 
   public async markReadyToPublish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     this.assertMutableCanonicalMajorId(id);
-    const existing = await this.getMajor(id);
+    const existing = await this.getPublicationTarget(id);
     await this.assertPublicationReady(id, { ...existing, status: MajorStatus.READY_TO_PUBLISH });
     await this.mutate('MAJOR_MARKED_READY_TO_PUBLISH', id, context, repository => repository.updateStatus(id, MajorStatus.READY_TO_PUBLISH));
   }
 
   public async checkPublicationReadiness(id: string): Promise<PublicationReadinessResult> {
-    const existing = await this.getMajor(id);
+    const existing = await this.getPublicationTarget(id);
     return this.evaluatePublicationReadiness(id, { ...existing, status: MajorStatus.READY_TO_PUBLISH });
   }
 
   public async publish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     this.assertMutableCanonicalMajorId(id);
-    const existing = await this.getMajor(id);
+    const existing = await this.getPublicationTarget(id);
     if (existing.status !== MajorStatus.READY_TO_PUBLISH) {
       throw new Error('MAJOR_INVALID_PUBLICATION_STATUS');
     }
     await this.assertPublicationReady(id, existing);
-    await this.mutate('MAJOR_PUBLISHED', id, context, repository => repository.updateStatus(id, MajorStatus.PUBLISHED));
+    await this.mutate('MAJOR_PUBLISHED', id, context, async repository => {
+      await repository.acquireVersionAllocationLock?.(existing.id);
+      const current = await this.getPublicationTarget(id, repository);
+      await this.assertPublicationReady(id, current);
+      await repository.updateStatus(id, MajorStatus.PUBLISHED);
+    });
   }
 
   public async unpublish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     this.assertMutableCanonicalMajorId(id);
-    const existing = await this.getMajor(id);
+    const existing = await this.getPublicationTarget(id);
     if (existing.status !== MajorStatus.PUBLISHED) {
       throw new Error('Cannot unpublish a major that is not PUBLISHED');
     }
@@ -454,7 +457,7 @@ export class AdminMajorUseCases {
 
   public async reject(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     this.assertMutableCanonicalMajorId(id);
-    const existing = await this.getMajor(id);
+    const existing = await this.getPublicationTarget(id);
     if (existing.status === MajorStatus.PUBLISHED) {
       throw new Error('Cannot reject a PUBLISHED major. Unpublish first.');
     }
@@ -463,7 +466,7 @@ export class AdminMajorUseCases {
 
   public async archive(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     this.assertMutableCanonicalMajorId(id);
-    const existing = await this.getMajor(id);
+    const existing = await this.getPublicationTarget(id);
     if (existing.status === MajorStatus.PUBLISHED) {
       throw new Error('Cannot archive a PUBLISHED major. Unpublish first.');
     }
@@ -566,6 +569,23 @@ export class AdminMajorUseCases {
     if (!repository.withTransaction) throw new Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     return this.atomicMutations.execute({ domain: 'MAJORS', aggregateType: 'MAJOR', aggregateId: id, action, context, auditMetadata },
       transaction => mutation(repository.withTransaction!(transaction)));
+  }
+
+  private async getPublicationTarget(id: string, repository: IMajorRepository = this.repository): Promise<MajorDto> {
+    const major = await repository.findById(id);
+    if (!major) throw new Error('Major not found');
+    const profiles = major.profiles ?? [];
+    const profile = profiles.find(item => item.id === id || item.code === id)
+      ?? (profiles.length === 1 ? profiles[0] : undefined);
+    if (profiles.length && !profile) throw new Error('TARGET_MAJOR_PROFILE_REQUIRED');
+    if (!profile) return major;
+    return { ...major, status: profile.status ?? major.status,
+      completenessStatus: profile.completenessStatus ?? major.completenessStatus,
+      academicFieldId: profile.academicFieldId ?? null,
+      disciplineId: profile.disciplineId ?? null,
+      profiles: [profile],
+      classificationMappings: major.classificationMappings?.filter(mapping => mapping.profileId === profile.id),
+    };
   }
 
   private async evaluatePublicationReadiness(id: string, major: MajorDto): Promise<PublicationReadinessResult> {

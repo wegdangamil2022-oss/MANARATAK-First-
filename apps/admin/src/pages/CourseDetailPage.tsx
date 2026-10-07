@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
-import { ArrowLeft, CheckCircle2, FileQuestion, Layers, Loader2, Plus, Save, XCircle } from 'lucide-react';
-import { useTranslation } from "../i18n/I18nProvider";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  FileQuestion,
+  Layers,
+  Loader2,
+  Plus,
+  Save,
+  XCircle,
+} from 'lucide-react';
+import { useTranslation } from '../i18n/I18nProvider';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { AssetPicker } from '../components/AssetPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -21,7 +30,16 @@ interface CourseDetail {
   studyDuration?: string;
   certificateAvailable?: boolean;
   category?: string;
+  thumbnailAssetId?: string;
+  optionalFields?: Record<string, unknown>;
   difficultyLevel?: string;
+  courseContent?: string;
+  description?: string;
+  instructor?: string;
+  learningOutcomes?: string[];
+  prerequisites?: string[];
+  targetAudience?: string[];
+  acquiredSkills?: string[];
 }
 
 interface CourseModule {
@@ -39,6 +57,7 @@ interface CourseLesson {
   summary?: string | null;
   lessonType: string;
   position: number;
+  contentText?: string | null;
   estimatedDurationMinutes?: number | null;
   status: string;
 }
@@ -71,8 +90,6 @@ interface CourseQuestion {
   points: number;
 }
 
-
-
 interface CourseRelationshipReview {
   courseId: string;
   source: {
@@ -81,9 +98,25 @@ interface CourseRelationshipReview {
     learningLanguageReferenceId?: string | null;
     learningLanguageResolutionState: string;
   };
-  taxonomyLinks: Array<{ id: string; taxonomyNodeId: string; sourceTerm: string; relationshipType: string; reviewState: string }>;
-  majorProjections: Array<{ id: string; majorId: string; relationshipType: string; projectionState: string }>;
-  closure: { languageCanonical: boolean; approvedTaxonomyLinks: number; approvedMajorProjections: number; reviewRequired: boolean };
+  taxonomyLinks: Array<{
+    id: string;
+    taxonomyNodeId: string;
+    sourceTerm: string;
+    relationshipType: string;
+    reviewState: string;
+  }>;
+  majorProjections: Array<{
+    id: string;
+    majorId: string;
+    relationshipType: string;
+    projectionState: string;
+  }>;
+  closure: {
+    languageCanonical: boolean;
+    approvedTaxonomyLinks: number;
+    approvedMajorProjections: number;
+    reviewRequired: boolean;
+  };
 }
 
 interface CurriculumSnapshot {
@@ -96,7 +129,7 @@ interface CurriculumSnapshot {
 }
 
 export function CourseDetailPage() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<CourseDetail | null>(null);
@@ -108,12 +141,57 @@ export function CourseDetailPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Partial<CourseDetail>>({});
+  const [readiness, setReadiness] = useState<{
+    ready: boolean;
+    percentage: number;
+    checks: Array<{ key: string; label: string; state: string; message?: string }>;
+  } | null>(null);
+  const [financialClearance, setFinancialClearance] = useState(false);
+  const [policyData, setPolicyData] = useState<Record<string, unknown> | null>(null);
+  const [savedForm, setSavedForm] = useState('');
+  const [editingLesson, setEditingLesson] = useState<CourseLesson | null>(null);
   const [moduleDraft, setModuleDraft] = useState({ title: '', description: '', position: 1 });
-  const [lessonDraft, setLessonDraft] = useState({ moduleId: '', title: '', lessonType: 'VIDEO', position: 1, estimatedDurationMinutes: '' });
-  const [assetDraft, setAssetDraft] = useState({ lessonId: '', assetId: '', assetType: 'VIDEO', title: '', position: 1 });
-  const courseAssetMimePrefix: Record<string, string | undefined> = { VIDEO: 'video/', IMAGE: 'image/', PDF: 'application/pdf', DOCUMENT: 'application/', AUDIO: 'audio/', SUBTITLE: 'text/', OTHER: undefined };
-  const [quizDraft, setQuizDraft] = useState({ moduleId: '', lessonId: '', title: '', position: 1, passingScore: '70' });
-  const [questionDraft, setQuestionDraft] = useState({ quizId: '', questionType: 'MULTIPLE_CHOICE', prompt: '', choices: '["Option A","Option B"]', correctAnswer: '"Option A"', position: 1, points: 1 });
+  const [lessonDraft, setLessonDraft] = useState({
+    moduleId: '',
+    title: '',
+    lessonType: 'VIDEO',
+    position: 1,
+    estimatedDurationMinutes: '',
+    summary: '',
+    contentText: '',
+  });
+  const [assetDraft, setAssetDraft] = useState({
+    lessonId: '',
+    assetId: '',
+    assetType: 'VIDEO',
+    title: '',
+    position: 1,
+  });
+  const courseAssetMimePrefix: Record<string, string | undefined> = {
+    VIDEO: 'video/',
+    IMAGE: 'image/',
+    PDF: 'application/pdf',
+    DOCUMENT: 'application/',
+    AUDIO: 'audio/',
+    SUBTITLE: 'text/',
+    OTHER: undefined,
+  };
+  const [quizDraft, setQuizDraft] = useState({
+    moduleId: '',
+    lessonId: '',
+    title: '',
+    position: 1,
+    passingScore: '70',
+  });
+  const [questionDraft, setQuestionDraft] = useState({
+    quizId: '',
+    questionType: 'MULTIPLE_CHOICE',
+    prompt: '',
+    choices: '["Option A","Option B"]',
+    correctAnswer: '"Option A"',
+    position: 1,
+    points: 1,
+  });
 
   const isExternalLinkedCourse = course?.originType === 'EXTERNAL_LINKED_COURSE';
 
@@ -151,11 +229,28 @@ export function CourseDetailPage() {
     setError(null);
     try {
       const courseResponse = await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`);
+      const optional = courseResponse.optionalFields ?? {};
+      for (const key of ['description', 'courseContent', 'instructor'] as const)
+        if (typeof optional[key] === 'string') courseResponse[key] = optional[key];
+      for (const key of [
+        'learningOutcomes',
+        'acquiredSkills',
+        'prerequisites',
+        'targetAudience',
+      ] as const)
+        if (Array.isArray(optional[key]))
+          courseResponse[key] = optional[key].filter(
+            (value): value is string => typeof value === 'string',
+          );
       setCourse(courseResponse);
-      const relationshipResponse = await adminApiClient.request<CourseRelationshipReview>(`/admin/courses/${id}/relationships`);
-      setRelationships(relationshipResponse);
-      setFormData({
+      adminApiClient
+        .request<CourseRelationshipReview>(`/admin/courses/${id}/relationships`)
+        .then(setRelationships)
+        .catch(() => setRelationships(null));
+      const editable = {
         displayName: courseResponse.displayName,
+        accessType: courseResponse.accessType,
+        thumbnailAssetId: courseResponse.thumbnailAssetId,
         directCourseUrl: courseResponse.directCourseUrl,
         platformName: courseResponse.platformName || '',
         providerName: courseResponse.providerName || '',
@@ -164,11 +259,33 @@ export function CourseDetailPage() {
         category: courseResponse.category || '',
         difficultyLevel: courseResponse.difficultyLevel || '',
         certificateAvailable: courseResponse.certificateAvailable ?? false,
-      });
+        courseContent: courseResponse.courseContent ?? '',
+        description: courseResponse.description ?? '',
+        instructor: courseResponse.instructor ?? '',
+        learningOutcomes: courseResponse.learningOutcomes ?? [],
+        acquiredSkills: courseResponse.acquiredSkills ?? [],
+        prerequisites: courseResponse.prerequisites ?? [],
+        targetAudience: courseResponse.targetAudience ?? [],
+      };
+      setFormData(editable);
+      setSavedForm(JSON.stringify(editable));
 
       if (courseResponse.originType !== 'EXTERNAL_LINKED_COURSE') {
-        const curriculumResponse = await adminApiClient.request<CurriculumSnapshot>(`/admin/courses/${id}/curriculum`);
+        const curriculumResponse = await adminApiClient.request<CurriculumSnapshot>(
+          `/admin/courses/${id}/curriculum`,
+        );
         setSnapshot(curriculumResponse);
+        adminApiClient
+          .request<typeof readiness>(`/admin/courses/${id}/readiness`)
+          .then(setReadiness)
+          .catch(() => setReadiness(null));
+        adminApiClient
+          .request<Record<string, unknown> | null>(`/admin/courses/${id}/enrollment-policy`)
+          .then((policy) => {
+            setPolicyData(policy);
+            setFinancialClearance(policy?.requiresFinancialClearance === true);
+          })
+          .catch(() => setPolicyData(null));
         setModuleDraft((value) => ({ ...value, position: curriculumResponse.modules.length + 1 }));
       } else {
         setSnapshot(null);
@@ -186,7 +303,9 @@ export function CourseDetailPage() {
 
   const refreshCurriculum = async () => {
     if (!id || isExternalLinkedCourse) return;
-    const curriculumResponse = await adminApiClient.request<CurriculumSnapshot>(`/admin/courses/${id}/curriculum`);
+    const curriculumResponse = await adminApiClient.request<CurriculumSnapshot>(
+      `/admin/courses/${id}/curriculum`,
+    );
     setSnapshot(curriculumResponse);
   };
 
@@ -197,11 +316,12 @@ export function CourseDetailPage() {
     setSuccessMsg(null);
     try {
       const { directCourseUrl: _sourceOwnedUrl, ...editableFields } = formData;
-      const updated = await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`, {
+      await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(isExternalLinkedCourse ? editableFields : formData),
       });
-      setCourse(updated);
+      setCourse(await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`));
+      setSavedForm(JSON.stringify(formData));
       setSuccessMsg('Course metadata saved.');
     } catch (err: any) {
       setError(err.message);
@@ -212,15 +332,61 @@ export function CourseDetailPage() {
 
   const handleAction = async (endpoint: string, actionName: string) => {
     if (!id) return;
+    if (
+      JSON.stringify(formData) !== savedForm ||
+      editingLesson ||
+      moduleDraft.title ||
+      lessonDraft.title ||
+      assetDraft.assetId ||
+      quizDraft.title ||
+      questionDraft.prompt ||
+      financialClearance !== (policyData?.requiresFinancialClearance === true)
+    ) {
+      setError('احفظ تعديلات البيانات والمحتوى وسياسة التسجيل قبل تغيير حالة النشر.');
+      return;
+    }
+    setSaving(true);
     setError(null);
     setSuccessMsg(null);
     try {
       await adminApiClient.request(`/admin/courses/${id}/${endpoint}`, { method: 'POST' });
       setSuccessMsg(`Successfully executed: ${actionName}`);
-      fetchCourse();
+      await fetchCourse();
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const mutateCurriculum = async (operation: () => Promise<void>) => {
+    if (saving) return;
+    setSaving(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      await operation();
+      setSuccessMsg('تم الحفظ وإعادة تحميل المحتوى من الخادم.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'تعذر حفظ المحتوى.');
+    } finally {
+      setSaving(false);
+    }
+  };
+  const saveLesson = async () => {
+    if (!id || !editingLesson) return;
+    await adminApiClient.request(`/admin/courses/${id}/lessons/${editingLesson.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        title: editingLesson.title,
+        summary: editingLesson.summary,
+        contentText: editingLesson.contentText,
+        lessonType: editingLesson.lessonType,
+        estimatedDurationMinutes: editingLesson.estimatedDurationMinutes,
+      }),
+    });
+    await refreshCurriculum();
+    setEditingLesson(null);
   };
 
   const createModule = async () => {
@@ -239,10 +405,20 @@ export function CourseDetailPage() {
       method: 'POST',
       body: JSON.stringify({
         ...lessonDraft,
-        estimatedDurationMinutes: lessonDraft.estimatedDurationMinutes ? Number(lessonDraft.estimatedDurationMinutes) : undefined,
+        estimatedDurationMinutes: lessonDraft.estimatedDurationMinutes
+          ? Number(lessonDraft.estimatedDurationMinutes)
+          : undefined,
       }),
     });
-    setLessonDraft({ moduleId: lessonDraft.moduleId, title: '', lessonType: 'VIDEO', position: lessonDraft.position + 1, estimatedDurationMinutes: '' });
+    setLessonDraft({
+      moduleId: lessonDraft.moduleId,
+      title: '',
+      lessonType: 'VIDEO',
+      position: lessonDraft.position + 1,
+      estimatedDurationMinutes: '',
+      summary: '',
+      contentText: '',
+    });
     await refreshCurriculum();
   };
 
@@ -252,7 +428,13 @@ export function CourseDetailPage() {
       method: 'POST',
       body: JSON.stringify(assetDraft),
     });
-    setAssetDraft({ lessonId: assetDraft.lessonId, assetId: '', assetType: 'VIDEO', title: '', position: assetDraft.position + 1 });
+    setAssetDraft({
+      lessonId: assetDraft.lessonId,
+      assetId: '',
+      assetType: 'VIDEO',
+      title: '',
+      position: assetDraft.position + 1,
+    });
     await refreshCurriculum();
   };
 
@@ -267,14 +449,22 @@ export function CourseDetailPage() {
         passingScore: quizDraft.passingScore ? Number(quizDraft.passingScore) : undefined,
       }),
     });
-    setQuizDraft({ moduleId: quizDraft.moduleId, lessonId: quizDraft.lessonId, title: '', position: quizDraft.position + 1, passingScore: '70' });
+    setQuizDraft({
+      moduleId: quizDraft.moduleId,
+      lessonId: quizDraft.lessonId,
+      title: '',
+      position: quizDraft.position + 1,
+      passingScore: '70',
+    });
     await refreshCurriculum();
   };
 
   const createQuestion = async () => {
     if (!id || !questionDraft.quizId) return;
     const choices = questionDraft.choices ? JSON.parse(questionDraft.choices) : undefined;
-    const correctAnswer = questionDraft.correctAnswer ? JSON.parse(questionDraft.correctAnswer) : undefined;
+    const correctAnswer = questionDraft.correctAnswer
+      ? JSON.parse(questionDraft.correctAnswer)
+      : undefined;
     await adminApiClient.request(`/admin/courses/${id}/questions`, {
       method: 'POST',
       body: JSON.stringify({
@@ -287,51 +477,81 @@ export function CourseDetailPage() {
     await refreshCurriculum();
   };
 
-
   const refreshRelationships = async () => {
     if (!id) return;
-    setRelationships(await adminApiClient.request<CourseRelationshipReview>(`/admin/courses/${id}/relationships`));
+    setRelationships(
+      await adminApiClient.request<CourseRelationshipReview>(`/admin/courses/${id}/relationships`),
+    );
   };
 
   const analyzeRelationships = async () => {
     if (!id) return;
-    setSaving(true); setError(null); setSuccessMsg(null);
+    if (saving) return;
+    setSaving(true);
+    setError(null);
+    setSuccessMsg(null);
     try {
-      await adminApiClient.request(`/admin/courses/${id}/relationships/analyze`, { method: 'POST' });
+      await adminApiClient.request(`/admin/courses/${id}/relationships/analyze`, {
+        method: 'POST',
+      });
       await refreshRelationships();
       setSuccessMsg('Course relationship analysis completed; proposals are ready for review.');
-    } catch (err: any) { setError(err.message); } finally { setSaving(false); }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const approveLanguage = async (languageReferenceId: string | null) => {
     if (!id || !languageReferenceId) return;
-    setSaving(true); setError(null);
+    setSaving(true);
+    setError(null);
     try {
-      await adminApiClient.request(`/admin/courses/${id}/relationships/language`, { method: 'POST', body: JSON.stringify({ languageReferenceId }) });
+      await adminApiClient.request(`/admin/courses/${id}/relationships/language`, {
+        method: 'POST',
+        body: JSON.stringify({ languageReferenceId }),
+      });
       await refreshRelationships();
-    } catch (err: any) { setError(err.message); } finally { setSaving(false); }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const reviewTaxonomy = async (linkId: string, decision: 'approve' | 'reject') => {
     if (!id) return;
-    await adminApiClient.request(`/admin/courses/${id}/relationships/taxonomy/${linkId}/${decision}`, { method: 'POST' });
+    await adminApiClient.request(
+      `/admin/courses/${id}/relationships/taxonomy/${linkId}/${decision}`,
+      { method: 'POST' },
+    );
     await refreshRelationships();
   };
 
   const projectMajors = async () => {
     if (!id) return;
-    await adminApiClient.request(`/admin/courses/${id}/relationships/majors/project`, { method: 'POST' });
+    await adminApiClient.request(`/admin/courses/${id}/relationships/majors/project`, {
+      method: 'POST',
+    });
     await refreshRelationships();
   };
 
   const reviewMajorProjection = async (projectionId: string, decision: 'approve' | 'reject') => {
     if (!id) return;
-    await adminApiClient.request(`/admin/courses/${id}/relationships/majors/${projectionId}/${decision}`, { method: 'POST' });
+    await adminApiClient.request(
+      `/admin/courses/${id}/relationships/majors/${projectionId}/${decision}`,
+      { method: 'POST' },
+    );
     await refreshRelationships();
   };
 
   if (loading && !course) {
-    return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin text-gray-400" /></div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
   }
 
   if (!course) {
@@ -341,18 +561,104 @@ export function CourseDetailPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <button onClick={() => navigate('/courses')} className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900">
-          <ArrowLeft className="mr-1 h-4 w-4" /> {t('back_to_courses')}</button>
+        <button
+          onClick={() => navigate('/courses')}
+          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900"
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" /> {t('back_to_courses')}
+        </button>
         <div className="flex flex-wrap gap-2">
-          {course.status !== 'READY_TO_REVIEW' && course.status !== 'PUBLISHED' && <button onClick={() => handleAction('mark-ready', 'Mark Ready')} className="px-3 py-1.5 text-sm font-medium bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50">{t('mark_ready')}</button>}
-          {course.completenessStatus === 'COMPLETE' && course.status === 'READY_TO_REVIEW' && <button onClick={() => handleAction('mark-publishable', 'Ready to Publish')} className="px-3 py-1.5 text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded shadow-sm hover:bg-blue-100">{t('ready_to_publish')}</button>}
-          {course.status === 'READY_TO_PUBLISH' && <button onClick={() => handleAction('publish', 'Publish')} className="px-3 py-1.5 text-sm font-medium bg-green-600 text-white rounded shadow-sm hover:bg-green-700">{t('publish')}</button>}
-          {course.status === 'PUBLISHED' && <button onClick={() => handleAction('unpublish', 'Unpublish')} className="px-3 py-1.5 text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 rounded shadow-sm hover:bg-yellow-200">{t('unpublish')}</button>}
+          {course.status !== 'READY_TO_REVIEW' && course.status !== 'PUBLISHED' && (
+            <button
+              disabled={saving}
+              onClick={() => handleAction('mark-ready', 'Mark Ready')}
+              className="px-3 py-1.5 text-sm font-medium bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50"
+            >
+              {t('mark_ready')}
+            </button>
+          )}
+          {course.completenessStatus === 'COMPLETE' && course.status === 'READY_TO_REVIEW' && (
+            <button
+              disabled={saving}
+              onClick={() => handleAction('mark-publishable', 'Ready to Publish')}
+              className="px-3 py-1.5 text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded shadow-sm hover:bg-blue-100"
+            >
+              {t('ready_to_publish')}
+            </button>
+          )}
+          {course.status === 'READY_TO_PUBLISH' && (
+            <button
+              disabled={saving}
+              onClick={() => handleAction('publish', 'Publish')}
+              className="px-3 py-1.5 text-sm font-medium bg-green-600 text-white rounded shadow-sm hover:bg-green-700"
+            >
+              {t('publish')}
+            </button>
+          )}
+          {course.status === 'PUBLISHED' && (
+            <button
+              disabled={saving}
+              onClick={() => handleAction('unpublish', 'Unpublish')}
+              className="px-3 py-1.5 text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 rounded shadow-sm hover:bg-yellow-200"
+            >
+              {t('unpublish')}
+            </button>
+          )}
         </div>
       </div>
 
-      {error && <div className="p-4 bg-red-50 flex items-start gap-3 rounded text-red-800 text-sm border border-red-200"><XCircle className="h-5 w-5 shrink-0" /> <p>{error}</p></div>}
-      {successMsg && <div className="p-4 bg-green-50 flex items-start gap-3 rounded text-green-800 text-sm border border-green-200"><CheckCircle2 className="h-5 w-5 shrink-0" /> <p>{successMsg}</p></div>}
+      {course.status === 'PUBLISHED' && (
+        <p className="rounded-xl bg-amber-50 p-3 text-amber-900" dir="rtl">
+          لتحرير البيانات أو الدروس، ألغِ النشر أولاً ثم احفظ التعديلات وأعد النشر.
+        </p>
+      )}
+      {editingLesson && (
+        <section className="rounded-2xl border bg-white p-5 space-y-3" dir="rtl">
+          <h3 className="font-black text-[#142B5F]">تعديل الدرس</h3>
+          <input
+            disabled={saving || course?.status === 'PUBLISHED'}
+            value={editingLesson.title}
+            onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })}
+            className="w-full rounded border p-2"
+          />
+          <textarea
+            disabled={saving || course?.status === 'PUBLISHED'}
+            rows={2}
+            placeholder="ملخص الدرس"
+            value={editingLesson.summary ?? ''}
+            onChange={(e) => setEditingLesson({ ...editingLesson, summary: e.target.value })}
+            className="w-full rounded border p-2"
+          />
+          <textarea
+            disabled={saving || course?.status === 'PUBLISHED'}
+            rows={10}
+            placeholder="المحتوى"
+            value={editingLesson.contentText ?? ''}
+            onChange={(e) => setEditingLesson({ ...editingLesson, contentText: e.target.value })}
+            className="w-full rounded border p-2"
+          />
+          <button
+            disabled={saving || !editingLesson.title.trim()}
+            onClick={() => void mutateCurriculum(saveLesson)}
+            className="rounded bg-[#0E7C86] text-white px-4 py-2"
+          >
+            حفظ الدرس
+          </button>
+          <button disabled={saving} onClick={() => setEditingLesson(null)} className="mx-3">
+            إلغاء
+          </button>
+        </section>
+      )}
+      {error && (
+        <div className="p-4 bg-red-50 flex items-start gap-3 rounded text-red-800 text-sm border border-red-200">
+          <XCircle className="h-5 w-5 shrink-0" /> <p>{error}</p>
+        </div>
+      )}
+      {successMsg && (
+        <div className="p-4 bg-green-50 flex items-start gap-3 rounded text-green-800 text-sm border border-green-200">
+          <CheckCircle2 className="h-5 w-5 shrink-0" /> <p>{successMsg}</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section className="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
@@ -367,31 +673,237 @@ export function CourseDetailPage() {
 
           <div className="space-y-3">
             <label className="block text-xs font-medium text-gray-700">{t('course_name')}</label>
-            <input value={formData.displayName || ''} onChange={(event) => setFormData({ ...formData, displayName: event.target.value })} className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm" />
+            <input
+              disabled={saving || course?.status === 'PUBLISHED'}
+              value={formData.displayName || ''}
+              onChange={(event) => setFormData({ ...formData, displayName: event.target.value })}
+              className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm"
+            />
             <label className="block text-xs font-medium text-gray-700">{t('direct_url')}</label>
             <input
               value={formData.directCourseUrl || ''}
               readOnly={isExternalLinkedCourse}
-              onChange={(event) => setFormData({ ...formData, directCourseUrl: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, directCourseUrl: event.target.value })
+              }
               className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm read-only:bg-gray-50 read-only:text-gray-500"
             />
-            {isExternalLinkedCourse && <p className="text-xs text-gray-500">Source-owned URL; update it through the controlled import workflow.</p>}
-            <label className="block text-xs font-medium text-gray-700">{t('learning_language')}</label>
-            <input value={formData.learningLanguage || ''} onChange={(event) => setFormData({ ...formData, learningLanguage: event.target.value })} className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm" />
+            {isExternalLinkedCourse && (
+              <p className="text-xs text-gray-500">
+                Source-owned URL; update it through the controlled import workflow.
+              </p>
+            )}
+            <label className="block text-xs font-medium text-gray-700">
+              {t('learning_language')}
+            </label>
+            <input
+              disabled={saving || course?.status === 'PUBLISHED'}
+              value={formData.learningLanguage || ''}
+              onChange={(event) =>
+                setFormData({ ...formData, learningLanguage: event.target.value })
+              }
+              className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm"
+            />
             <label className="block text-xs font-medium text-gray-700">{t('duration')}</label>
-            <input value={formData.studyDuration || ''} onChange={(event) => setFormData({ ...formData, studyDuration: event.target.value })} className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm" />
+            <input
+              disabled={saving || course?.status === 'PUBLISHED'}
+              value={formData.studyDuration || ''}
+              onChange={(event) => setFormData({ ...formData, studyDuration: event.target.value })}
+              className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm"
+            />
             <label className="block text-xs font-medium text-gray-700">{t('category')}</label>
-            <input value={formData.category || ''} onChange={(event) => setFormData({ ...formData, category: event.target.value })} className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm" />
-            <button onClick={handleSaveCourse} disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {t('save_metadata')}</button>
+            <input
+              disabled={saving || course?.status === 'PUBLISHED'}
+              value={formData.category || ''}
+              onChange={(event) => setFormData({ ...formData, category: event.target.value })}
+              className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm"
+            />
+            {!isExternalLinkedCourse && (
+              <div className="space-y-3" dir="rtl">
+                <label className="block text-xs font-medium">المستوى</label>
+                <select
+                  disabled={saving || course.status === 'PUBLISHED'}
+                  value={formData.difficultyLevel ?? ''}
+                  onChange={(e) => setFormData({ ...formData, difficultyLevel: e.target.value })}
+                  className="w-full rounded border p-2"
+                >
+                  <option value="">اختر المستوى</option>
+                  <option value="BEGINNER">مبتدئ</option>
+                  <option value="INTERMEDIATE">متوسط</option>
+                  <option value="ADVANCED">متقدم</option>
+                  <option value="ALL_LEVELS">جميع المستويات</option>
+                </select>
+                <label className="block text-xs font-medium">إتاحة الدراسة والشهادة</label>
+                <select
+                  disabled={saving || course.status === 'PUBLISHED'}
+                  value={formData.accessType}
+                  onChange={(e) => setFormData({ ...formData, accessType: e.target.value })}
+                  className="w-full rounded border p-2"
+                >
+                  <option value="FREE_STUDY">دراسة مجانية</option>
+                  <option value="FREE_STUDY_AND_CERTIFICATE">دراسة وشهادة مجانيتان</option>
+                  <option value="FREE_CERTIFICATE">شهادة مجانية</option>
+                  <option value="PAID">دورة مدفوعة</option>
+                </select>
+                <fieldset disabled={saving || course.status === 'PUBLISHED'}>
+                  <AssetPicker
+                    label="صورة غلاف الدورة"
+                    purpose="COURSE_THUMBNAIL"
+                    mimeTypePrefix="image/"
+                    value={formData.thumbnailAssetId}
+                    onChange={(assetId) => setFormData({ ...formData, thumbnailAssetId: assetId })}
+                  />
+                </fieldset>
+                <label className="block text-xs font-medium">نبذة الدورة</label>
+                <textarea
+                  disabled={saving || course?.status === 'PUBLISHED'}
+                  rows={3}
+                  value={formData.description ?? ''}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full rounded border p-2"
+                />
+                <label className="block text-xs font-medium">تفاصيل المنهج المعروضة للطلاب</label>
+                <textarea
+                  disabled={saving || course?.status === 'PUBLISHED'}
+                  rows={6}
+                  value={formData.courseContent ?? ''}
+                  onChange={(e) => setFormData({ ...formData, courseContent: e.target.value })}
+                  className="w-full rounded border p-2"
+                />
+                {[
+                  { key: 'prerequisites' as const, label: 'متطلبات الالتحاق (كل عنصر في سطر)' },
+                  { key: 'targetAudience' as const, label: 'الفئات المستهدفة (كل عنصر في سطر)' },
+                ].map((field) => (
+                  <label key={field.key} className="block text-xs font-medium">
+                    {field.label}
+                    <textarea
+                      disabled={saving || course.status === 'PUBLISHED'}
+                      value={(formData[field.key] ?? []).join('\n')}
+                      onChange={(event) =>
+                        setFormData({ ...formData, [field.key]: event.target.value.split('\n') })
+                      }
+                      className="w-full rounded border p-2 mt-2"
+                    />
+                  </label>
+                ))}
+                <label className="block text-xs font-medium">المدرب</label>
+                <input
+                  disabled={saving || course?.status === 'PUBLISHED'}
+                  value={formData.instructor ?? ''}
+                  onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
+                  className="w-full rounded border p-2"
+                />
+                <label className="block text-xs font-medium">مخرجات التعلم (كل عنصر في سطر)</label>
+                <textarea
+                  disabled={saving || course?.status === 'PUBLISHED'}
+                  value={(formData.learningOutcomes ?? []).join('\n')}
+                  onChange={(e) =>
+                    setFormData({ ...formData, learningOutcomes: e.target.value.split('\n') })
+                  }
+                  className="w-full rounded border p-2"
+                />
+                <label className="block text-xs font-medium">المهارات (كل عنصر في سطر)</label>
+                <textarea
+                  disabled={saving || course?.status === 'PUBLISHED'}
+                  value={(formData.acquiredSkills ?? []).join('\n')}
+                  onChange={(e) =>
+                    setFormData({ ...formData, acquiredSkills: e.target.value.split('\n') })
+                  }
+                  className="w-full rounded border p-2"
+                />
+                <label className="flex gap-2">
+                  <input
+                    type="checkbox"
+                    disabled={saving || course.status === 'PUBLISHED'}
+                    checked={formData.certificateAvailable ?? false}
+                    onChange={(e) =>
+                      setFormData({ ...formData, certificateAvailable: e.target.checked })
+                    }
+                  />
+                  تتيح الدورة شهادة منارتك بعد استيفاء متطلبات الإتمام
+                </label>
+              </div>
+            )}
+            <button
+              onClick={handleSaveCourse}
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{' '}
+              {t('save_metadata')}
+            </button>
           </div>
         </section>
 
         <section className="lg:col-span-2 space-y-6">
+          {!isExternalLinkedCourse && (
+            <section className="rounded-xl border bg-white p-5 space-y-3" dir="rtl">
+              <h3 className="font-bold text-[#142B5F]">جاهزية الدورة وسياسة التسجيل</h3>
+              <button
+                disabled={saving}
+                className="text-[#0E7C86] font-bold"
+                onClick={() =>
+                  void mutateCurriculum(async () => {
+                    setReadiness(await adminApiClient.request(`/admin/courses/${id}/readiness`));
+                  })
+                }
+              >
+                تحديث فحص الجاهزية
+              </button>
+              {readiness && (
+                <div>
+                  <p>{readiness.ready ? 'جاهزة للنشر' : `الاكتمال ${readiness.percentage}%`}</p>
+                  <ul>
+                    {readiness.checks
+                      .filter((check) => check.state === 'INCOMPLETE')
+                      .map((check) => (
+                        <li key={check.key} className="text-sm text-amber-800">
+                          {check.label}: {check.message}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              )}
+              <label className="flex gap-2">
+                <input
+                  type="checkbox"
+                  disabled={saving}
+                  checked={financialClearance}
+                  onChange={(e) => setFinancialClearance(e.target.checked)}
+                />
+                يتطلب التسجيل استيفاء الدفع في النظام المالي
+              </label>
+              <button
+                disabled={saving}
+                className="rounded bg-[#0E7C86] text-white px-4 py-2"
+                onClick={() =>
+                  void mutateCurriculum(async () => {
+                    const saved = await adminApiClient.request<Record<string, unknown>>(
+                      `/admin/courses/${id}/enrollment-policy`,
+                      {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                          ...policyData,
+                          requiresFinancialClearance: financialClearance,
+                        }),
+                      },
+                    );
+                    setPolicyData(saved);
+                    setFinancialClearance(saved.requiresFinancialClearance === true);
+                  })
+                }
+              >
+                حفظ سياسة التسجيل
+              </button>
+            </section>
+          )}
+
           {isExternalLinkedCourse ? (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
               <h3 className="font-semibold text-amber-900">{t('external_linked_course')}</h3>
-              <p className="text-sm text-amber-800 mt-2">{t('this_course_redirects_learners_to_an_external_prov')}</p>
+              <p className="text-sm text-amber-800 mt-2">
+                {t('this_course_redirects_learners_to_an_external_prov')}
+              </p>
             </div>
           ) : (
             <>
@@ -401,29 +913,73 @@ export function CourseDetailPage() {
                   <h3 className="font-semibold">{t('curriculum_builder')}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                  <input placeholder={t('module_title')} value={moduleDraft.title} onChange={(event) => setModuleDraft({ ...moduleDraft, title: event.target.value })} className="md:col-span-2 rounded border border-gray-300 px-3 py-2 text-sm" />
-                  <input placeholder={t('description')} value={moduleDraft.description} onChange={(event) => setModuleDraft({ ...moduleDraft, description: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm" />
-                  <button onClick={createModule} disabled={!moduleDraft.title} className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"><Plus className="h-4 w-4" /> {t('add_module')}</button>
+                  <input
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    placeholder={t('module_title')}
+                    value={moduleDraft.title}
+                    onChange={(event) =>
+                      setModuleDraft({ ...moduleDraft, title: event.target.value })
+                    }
+                    className="md:col-span-2 rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <input
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    placeholder={t('description')}
+                    value={moduleDraft.description}
+                    onChange={(event) =>
+                      setModuleDraft({ ...moduleDraft, description: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    onClick={() => void mutateCurriculum(createModule)}
+                    disabled={saving || !moduleDraft.title}
+                    className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" /> {t('add_module')}
+                  </button>
                 </div>
 
                 <div className="space-y-4">
                   {(snapshot?.modules || []).map((module) => (
-                    <div key={module.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div
+                      key={module.id}
+                      className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+                    >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-medium">{module.position}. {module.title}</h4>
+                          <h4 className="font-medium">
+                            {module.position}. {module.title}
+                          </h4>
                           <p className="text-xs text-gray-500">{module.status}</p>
                         </div>
                       </div>
                       <div className="mt-3 space-y-2">
                         {(lessonsByModule[module.id] || []).map((lesson) => (
-                          <div key={lesson.id} className="bg-white border border-gray-200 rounded px-3 py-2">
+                          <div
+                            key={lesson.id}
+                            className="bg-white border border-gray-200 rounded px-3 py-2"
+                          >
                             <div className="flex items-center justify-between text-sm">
-                              <span>{lesson.position}. {lesson.title}</span>
+                              <span>
+                                {lesson.position}. {lesson.title}
+                              </span>
                               <span className="text-xs text-gray-500">{lesson.lessonType}</span>
+                              <button
+                                disabled={saving}
+                                onClick={() => setEditingLesson({ ...lesson })}
+                                className="text-[#0E7C86] font-bold"
+                              >
+                                تعديل المحتوى
+                              </button>
                             </div>
                             {(assetsByLesson[lesson.id] || []).length > 0 && (
-                              <div className="mt-2 text-xs text-gray-500">{t('assets')}{(assetsByLesson[lesson.id] || []).map((asset) => asset.assetId).join(', ')}</div>
+                              <div className="mt-2 text-xs text-gray-500">
+                                {t('assets')}
+                                {(assetsByLesson[lesson.id] || [])
+                                  .map((asset) => asset.assetId)
+                                  .join(', ')}
+                              </div>
                             )}
                           </div>
                         ))}
@@ -436,31 +992,109 @@ export function CourseDetailPage() {
               <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
                 <h3 className="font-semibold mb-4">{t('add_lesson')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                  <select value={lessonDraft.moduleId} onChange={(event) => setLessonDraft({ ...lessonDraft, moduleId: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm">
+                  <select
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    value={lessonDraft.moduleId}
+                    onChange={(event) =>
+                      setLessonDraft({ ...lessonDraft, moduleId: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  >
                     <option value="">{t('choose_module')}</option>
-                    {snapshot?.modules.map((module) => <option key={module.id} value={module.id}>{module.title}</option>)}
+                    {snapshot?.modules.map((module) => (
+                      <option key={module.id} value={module.id}>
+                        {module.title}
+                      </option>
+                    ))}
                   </select>
-                  <input placeholder={t('lesson_title')} value={lessonDraft.title} onChange={(event) => setLessonDraft({ ...lessonDraft, title: event.target.value })} className="md:col-span-2 rounded border border-gray-300 px-3 py-2 text-sm" />
-                  <select value={lessonDraft.lessonType} onChange={(event) => setLessonDraft({ ...lessonDraft, lessonType: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm">
+                  <input
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    placeholder={t('lesson_title')}
+                    value={lessonDraft.title}
+                    onChange={(event) =>
+                      setLessonDraft({ ...lessonDraft, title: event.target.value })
+                    }
+                    className="md:col-span-2 rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <select
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    value={lessonDraft.lessonType}
+                    onChange={(event) =>
+                      setLessonDraft({ ...lessonDraft, lessonType: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  >
                     <option value="VIDEO">{t('video')}</option>
                     <option value="ARTICLE">{t('article')}</option>
                     <option value="FILE">{t('file')}</option>
                     <option value="QUIZ">{t('quiz')}</option>
                     <option value="MIXED">{t('mixed')}</option>
                   </select>
-                  <button onClick={createLesson} disabled={!lessonDraft.moduleId || !lessonDraft.title} className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"><Plus className="h-4 w-4" /> {t('add_lesson_1')}</button>
+                  <textarea
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    rows={2}
+                    placeholder="ملخص الدرس"
+                    value={lessonDraft.summary}
+                    onChange={(event) =>
+                      setLessonDraft({ ...lessonDraft, summary: event.target.value })
+                    }
+                    className="w-full rounded border p-3 text-sm mb-2"
+                  />
+                  <textarea
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    rows={8}
+                    placeholder="محتوى الدرس الذي يظهر للطلاب"
+                    value={lessonDraft.contentText}
+                    onChange={(event) =>
+                      setLessonDraft({ ...lessonDraft, contentText: event.target.value })
+                    }
+                    className="w-full rounded border p-3 text-sm mb-2"
+                  />
+                  <button
+                    onClick={() => void mutateCurriculum(createLesson)}
+                    disabled={!lessonDraft.moduleId || !lessonDraft.title}
+                    className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" /> {t('add_lesson_1')}
+                  </button>
                 </div>
               </div>
 
               <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
                 <h3 className="font-semibold mb-4">{t('attach_lesson_asset')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                  <select value={assetDraft.lessonId} onChange={(event) => setAssetDraft({ ...assetDraft, lessonId: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm">
+                  <select
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    value={assetDraft.lessonId}
+                    onChange={(event) =>
+                      setAssetDraft({ ...assetDraft, lessonId: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  >
                     <option value="">{t('choose_lesson')}</option>
-                    {snapshot?.lessons.map((lesson) => <option key={lesson.id} value={lesson.id}>{lesson.title}</option>)}
+                    {snapshot?.lessons.map((lesson) => (
+                      <option key={lesson.id} value={lesson.id}>
+                        {lesson.title}
+                      </option>
+                    ))}
                   </select>
-                  <div className="md:col-span-2"><AssetPicker label={t('eap_assetid')} purpose={`COURSE_LESSON_MEDIA:${assetDraft.assetType}`} mimeTypePrefix={courseAssetMimePrefix[assetDraft.assetType]} value={assetDraft.assetId} onChange={(assetId) => setAssetDraft({ ...assetDraft, assetId })} /></div>
-                  <select value={assetDraft.assetType} onChange={(event) => setAssetDraft({ ...assetDraft, assetType: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm">
+                  <div className="md:col-span-2">
+                    <AssetPicker
+                      label={t('eap_assetid')}
+                      purpose={`COURSE_LESSON_MEDIA:${assetDraft.assetType}`}
+                      mimeTypePrefix={courseAssetMimePrefix[assetDraft.assetType]}
+                      value={assetDraft.assetId}
+                      onChange={(assetId) => setAssetDraft({ ...assetDraft, assetId })}
+                    />
+                  </div>
+                  <select
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    value={assetDraft.assetType}
+                    onChange={(event) =>
+                      setAssetDraft({ ...assetDraft, assetType: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  >
                     <option value="VIDEO">{t('video')}</option>
                     <option value="IMAGE">{t('image')}</option>
                     <option value="PDF">{t('pdf')}</option>
@@ -468,9 +1102,17 @@ export function CourseDetailPage() {
                     <option value="AUDIO">{t('audio')}</option>
                     <option value="SUBTITLE">{t('subtitle')}</option>
                   </select>
-                  <button onClick={attachAsset} disabled={!assetDraft.lessonId || !assetDraft.assetId} className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"><Plus className="h-4 w-4" /> {t('attach')}</button>
+                  <button
+                    onClick={() => void mutateCurriculum(attachAsset)}
+                    disabled={!assetDraft.lessonId || !assetDraft.assetId}
+                    className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" /> {t('attach')}
+                  </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">{t('only_phase_05_eap_handles_are_accepted_raw_urls_ar')}</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  {t('only_phase_05_eap_handles_are_accepted_raw_urls_ar')}
+                </p>
               </div>
 
               <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
@@ -479,28 +1121,91 @@ export function CourseDetailPage() {
                   <h3 className="font-semibold">{t('assessments')}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
-                  <input placeholder={t('quiz_title')} value={quizDraft.title} onChange={(event) => setQuizDraft({ ...quizDraft, title: event.target.value })} className="md:col-span-2 rounded border border-gray-300 px-3 py-2 text-sm" />
-                  <select value={quizDraft.moduleId} onChange={(event) => setQuizDraft({ ...quizDraft, moduleId: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm">
+                  <input
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    placeholder={t('quiz_title')}
+                    value={quizDraft.title}
+                    onChange={(event) => setQuizDraft({ ...quizDraft, title: event.target.value })}
+                    className="md:col-span-2 rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <select
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    value={quizDraft.moduleId}
+                    onChange={(event) =>
+                      setQuizDraft({ ...quizDraft, moduleId: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  >
                     <option value="">{t('course_level_quiz')}</option>
-                    {snapshot?.modules.map((module) => <option key={module.id} value={module.id}>{module.title}</option>)}
+                    {snapshot?.modules.map((module) => (
+                      <option key={module.id} value={module.id}>
+                        {module.title}
+                      </option>
+                    ))}
                   </select>
-                  <input placeholder={t('passing')} value={quizDraft.passingScore} onChange={(event) => setQuizDraft({ ...quizDraft, passingScore: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm" />
-                  <button onClick={createQuiz} disabled={!quizDraft.title} className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"><Plus className="h-4 w-4" /> {t('add_quiz')}</button>
+                  <input
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    placeholder={t('passing')}
+                    value={quizDraft.passingScore}
+                    onChange={(event) =>
+                      setQuizDraft({ ...quizDraft, passingScore: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    onClick={() => void mutateCurriculum(createQuiz)}
+                    disabled={saving || !quizDraft.title}
+                    className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" /> {t('add_quiz')}
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-                  <select value={questionDraft.quizId} onChange={(event) => setQuestionDraft({ ...questionDraft, quizId: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm">
+                  <select
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    value={questionDraft.quizId}
+                    onChange={(event) =>
+                      setQuestionDraft({ ...questionDraft, quizId: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  >
                     <option value="">{t('choose_quiz')}</option>
-                    {snapshot?.quizzes.map((quiz) => <option key={quiz.id} value={quiz.id}>{quiz.title}</option>)}
+                    {snapshot?.quizzes.map((quiz) => (
+                      <option key={quiz.id} value={quiz.id}>
+                        {quiz.title}
+                      </option>
+                    ))}
                   </select>
-                  <input placeholder={t('question_prompt')} value={questionDraft.prompt} onChange={(event) => setQuestionDraft({ ...questionDraft, prompt: event.target.value })} className="md:col-span-3 rounded border border-gray-300 px-3 py-2 text-sm" />
-                  <select value={questionDraft.questionType} onChange={(event) => setQuestionDraft({ ...questionDraft, questionType: event.target.value })} className="rounded border border-gray-300 px-3 py-2 text-sm">
+                  <input
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    placeholder={t('question_prompt')}
+                    value={questionDraft.prompt}
+                    onChange={(event) =>
+                      setQuestionDraft({ ...questionDraft, prompt: event.target.value })
+                    }
+                    className="md:col-span-3 rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+                  <select
+                    disabled={saving || course?.status === 'PUBLISHED'}
+                    value={questionDraft.questionType}
+                    onChange={(event) =>
+                      setQuestionDraft({ ...questionDraft, questionType: event.target.value })
+                    }
+                    className="rounded border border-gray-300 px-3 py-2 text-sm"
+                  >
                     <option value="MULTIPLE_CHOICE">{t('multiple_choice')}</option>
                     <option value="TRUE_FALSE">{t('true_false')}</option>
                     <option value="SHORT_ANSWER">{t('short_answer')}</option>
                     <option value="ESSAY">{t('essay')}</option>
                   </select>
-                  <button onClick={createQuestion} disabled={!questionDraft.quizId || !questionDraft.prompt} className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"><Plus className="h-4 w-4" /> {t('add_question')}</button>
+                  <button
+                    onClick={() => void mutateCurriculum(createQuestion)}
+                    disabled={saving || !questionDraft.quizId || !questionDraft.prompt}
+                    className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded text-sm disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" /> {t('add_question')}
+                  </button>
                 </div>
 
                 <div className="mt-4 space-y-3">
@@ -508,8 +1213,14 @@ export function CourseDetailPage() {
                     <div key={quiz.id} className="border border-gray-200 rounded p-3">
                       <div className="text-sm font-medium">{quiz.title}</div>
                       <div className="mt-2 text-xs text-gray-600 space-y-1">
-                        {(questionsByQuiz[quiz.id] || []).map((question) => <div key={question.id}>{question.position}. {question.prompt}</div>)}
-                        {(questionsByQuiz[quiz.id] || []).length === 0 && <div>{t('no_questions_yet')}</div>}
+                        {(questionsByQuiz[quiz.id] || []).map((question) => (
+                          <div key={question.id}>
+                            {question.position}. {question.prompt}
+                          </div>
+                        ))}
+                        {(questionsByQuiz[quiz.id] || []).length === 0 && (
+                          <div>{t('no_questions_yet')}</div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -522,15 +1233,129 @@ export function CourseDetailPage() {
 
       <section className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><h3 className="font-semibold">Canonical course relationships</h3><p className="text-xs text-gray-500">P13 relationship owner API · analyze, review and publish canonical IDs without direct DB writes.</p></div>
-          <div className="flex gap-2"><button onClick={analyzeRelationships} disabled={saving} className="rounded border px-3 py-2 text-xs font-semibold">Analyze source terms</button><button onClick={projectMajors} disabled={saving || !relationships?.taxonomyLinks.some((item) => item.reviewState === 'APPROVED')} className="rounded border px-3 py-2 text-xs font-semibold disabled:opacity-50">Project majors</button></div>
+          <div>
+            <h3 className="font-semibold">Canonical course relationships</h3>
+            <p className="text-xs text-gray-500">
+              P13 relationship owner API · analyze, review and publish canonical IDs without direct
+              DB writes.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={analyzeRelationships}
+              disabled={saving}
+              className="rounded border px-3 py-2 text-xs font-semibold"
+            >
+              Analyze source terms
+            </button>
+            <button
+              onClick={projectMajors}
+              disabled={
+                saving ||
+                !relationships?.taxonomyLinks.some((item) => item.reviewState === 'APPROVED')
+              }
+              className="rounded border px-3 py-2 text-xs font-semibold disabled:opacity-50"
+            >
+              Project majors
+            </button>
+          </div>
         </div>
-        {relationships ? <>
-          <div className="grid gap-3 md:grid-cols-4 text-xs"><div className="rounded bg-gray-50 p-3">Language: <strong>{relationships.source.learningLanguageResolutionState}</strong></div><div className="rounded bg-gray-50 p-3">Approved taxonomy: <strong>{relationships.closure.approvedTaxonomyLinks}</strong></div><div className="rounded bg-gray-50 p-3">Approved majors: <strong>{relationships.closure.approvedMajorProjections}</strong></div><div className={`rounded p-3 ${relationships.closure.reviewRequired ? 'bg-amber-50 text-amber-800' : 'bg-green-50 text-green-800'}`}>{relationships.closure.reviewRequired ? 'Review required' : 'Relationships closed'}</div></div>
-          <CanonicalPicker label={`Canonical learning language${relationships.source.learningLanguageRaw ? ` · source: ${relationships.source.learningLanguageRaw}` : ''}`} value={relationships.source.learningLanguageReferenceId} onChange={(next) => approveLanguage(next)} load={() => canonicalPickerApi.languages()} reloadKey="course-languages" optional />
-          <div className="space-y-2"><h4 className="text-sm font-semibold">Taxonomy proposals</h4>{relationships.taxonomyLinks.map((link) => <div key={link.id} className="flex flex-wrap items-center justify-between gap-2 rounded border p-3 text-xs"><span><strong>{link.sourceTerm}</strong> → {link.taxonomyNodeId} · {link.relationshipType} · {link.reviewState}</span><div className="flex gap-2"><button disabled={link.reviewState === 'APPROVED'} onClick={() => reviewTaxonomy(link.id, 'approve')} className="text-green-700 disabled:opacity-40">Approve</button><button disabled={link.reviewState === 'REJECTED'} onClick={() => reviewTaxonomy(link.id, 'reject')} className="text-red-700 disabled:opacity-40">Reject</button></div></div>)}{relationships.taxonomyLinks.length === 0 ? <p className="text-xs text-gray-500">No taxonomy proposals. Run analysis first.</p> : null}</div>
-          <div className="space-y-2"><h4 className="text-sm font-semibold">Major projections</h4>{relationships.majorProjections.map((projection) => <div key={projection.id} className="flex flex-wrap items-center justify-between gap-2 rounded border p-3 text-xs"><span>Major {projection.majorId} · {projection.relationshipType} · {projection.projectionState}</span><div className="flex gap-2"><button disabled={projection.projectionState === 'APPROVED'} onClick={() => reviewMajorProjection(projection.id, 'approve')} className="text-green-700 disabled:opacity-40">Approve</button><button disabled={projection.projectionState === 'REJECTED'} onClick={() => reviewMajorProjection(projection.id, 'reject')} className="text-red-700 disabled:opacity-40">Reject</button></div></div>)}{relationships.majorProjections.length === 0 ? <p className="text-xs text-gray-500">No major projections yet.</p> : null}</div>
-        </> : <p className="text-xs text-gray-500">Relationship review model unavailable.</p>}
+        {relationships ? (
+          <>
+            <div className="grid gap-3 md:grid-cols-4 text-xs">
+              <div className="rounded bg-gray-50 p-3">
+                Language: <strong>{relationships.source.learningLanguageResolutionState}</strong>
+              </div>
+              <div className="rounded bg-gray-50 p-3">
+                Approved taxonomy: <strong>{relationships.closure.approvedTaxonomyLinks}</strong>
+              </div>
+              <div className="rounded bg-gray-50 p-3">
+                Approved majors: <strong>{relationships.closure.approvedMajorProjections}</strong>
+              </div>
+              <div
+                className={`rounded p-3 ${relationships.closure.reviewRequired ? 'bg-amber-50 text-amber-800' : 'bg-green-50 text-green-800'}`}
+              >
+                {relationships.closure.reviewRequired ? 'Review required' : 'Relationships closed'}
+              </div>
+            </div>
+            <CanonicalPicker
+              label={`Canonical learning language${relationships.source.learningLanguageRaw ? ` · source: ${relationships.source.learningLanguageRaw}` : ''}`}
+              value={relationships.source.learningLanguageReferenceId}
+              onChange={(next) => approveLanguage(next)}
+              load={() => canonicalPickerApi.languages()}
+              reloadKey="course-languages"
+              optional
+            />
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold">Taxonomy proposals</h4>
+              {relationships.taxonomyLinks.map((link) => (
+                <div
+                  key={link.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded border p-3 text-xs"
+                >
+                  <span>
+                    <strong>{link.sourceTerm}</strong> → {link.taxonomyNodeId} ·{' '}
+                    {link.relationshipType} · {link.reviewState}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={link.reviewState === 'APPROVED'}
+                      onClick={() => reviewTaxonomy(link.id, 'approve')}
+                      className="text-green-700 disabled:opacity-40"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      disabled={link.reviewState === 'REJECTED'}
+                      onClick={() => reviewTaxonomy(link.id, 'reject')}
+                      className="text-red-700 disabled:opacity-40"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {relationships.taxonomyLinks.length === 0 ? (
+                <p className="text-xs text-gray-500">No taxonomy proposals. Run analysis first.</p>
+              ) : null}
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold">Major projections</h4>
+              {relationships.majorProjections.map((projection) => (
+                <div
+                  key={projection.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded border p-3 text-xs"
+                >
+                  <span>
+                    Major {projection.majorId} · {projection.relationshipType} ·{' '}
+                    {projection.projectionState}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={projection.projectionState === 'APPROVED'}
+                      onClick={() => reviewMajorProjection(projection.id, 'approve')}
+                      className="text-green-700 disabled:opacity-40"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      disabled={projection.projectionState === 'REJECTED'}
+                      onClick={() => reviewMajorProjection(projection.id, 'reject')}
+                      className="text-red-700 disabled:opacity-40"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {relationships.majorProjections.length === 0 ? (
+                <p className="text-xs text-gray-500">No major projections yet.</p>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <p className="text-xs text-gray-500">Relationship review model unavailable.</p>
+        )}
       </section>
     </div>
   );

@@ -31,7 +31,7 @@ export class LocalizedPublicMajorUseCases {
     options?: { degreeLevel?: string; profileCode?: string },
   ): Promise<PublicMajorDto> {
     const major = await this.repository.findBySlug(slug);
-    if (!major || major.status !== MajorStatus.PUBLISHED) {
+    if (!major) {
       throw new Error('Major not found');
     }
 
@@ -40,9 +40,12 @@ export class LocalizedPublicMajorUseCases {
       ? profiles.find((p) => p.code === options.profileCode)
       : options?.degreeLevel
       ? profiles.find((p) => p.level?.toUpperCase() === options.degreeLevel?.toUpperCase())
-      : undefined;
+      : profiles.find(p => p.status === MajorStatus.PUBLISHED && p.currentPublishedVersionId);
 
-    if (targetProfile && targetProfile.status !== MajorStatus.PUBLISHED) {
+    if ((options?.profileCode || options?.degreeLevel || profiles.length > 0) && !targetProfile) throw new Error('Major level profile not published');
+    if (!profiles.length && major.status !== MajorStatus.PUBLISHED) throw new Error('Major not found');
+
+    if (targetProfile && (targetProfile.status !== MajorStatus.PUBLISHED || !targetProfile.currentPublishedVersionId)) {
       throw new Error('Major level profile not published');
     }
 
@@ -53,17 +56,18 @@ export class LocalizedPublicMajorUseCases {
         })
       : [];
 
-    let projected = this.projection.projectMajor(major, sections, locale);
-    if (targetProfile) {
-      projected = {
-        ...projected,
-        displayName: targetProfile.displayName || projected.displayName,
-        localizedNameAr: targetProfile.localizedNameAr || projected.localizedNameAr,
-        localizedNameEn: targetProfile.localizedNameEn || projected.localizedNameEn,
-        degreeLevel: targetProfile.level,
-        classificationCode: targetProfile.code || projected.classificationCode,
-      };
-    }
+    const scopedMajor = targetProfile ? {
+      ...major, profiles: [targetProfile], publicId: targetProfile.code || major.publicId,
+      degreeLevel: targetProfile.level, classificationCode: targetProfile.code || major.classificationCode,
+      currentPublishedVersionId: targetProfile.currentPublishedVersionId,
+      displayName: targetProfile.displayName || major.displayName,
+      localizedNameAr: targetProfile.localizedNameAr || major.localizedNameAr,
+      localizedNameEn: targetProfile.localizedNameEn || major.localizedNameEn,
+      optionalFields: { ...major.optionalFields, degreeLevel: targetProfile.level,
+        classificationCode: targetProfile.code || major.classificationCode },
+    } : major;
+    const projected = this.projection.projectMajor(scopedMajor, sections, locale);
+
     return projected;
   }
 }

@@ -44,6 +44,7 @@ import {
   Globe2,
   Zap,
 } from 'lucide-react';
+import { PublishedUniversityDetails } from './PublishedUniversityDetails';
 import { Service, University } from '../types';
 import { RelatedArticlesStrip } from './RelatedArticlesStrip';
 import { ContextualServicesStrip } from './ContextualServicesStrip';
@@ -225,6 +226,7 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
 
       {/* 2. استكمال باقي الصفحة (الأقسام الـ 11) */}
       <div className="mn-detail-content mn-detail-content-narrow pt-6 pb-24 flex flex-col gap-6">
+        {university.publishedData ? <PublishedUniversityDetails university={university} onOpenMajor={onOpenMajor} onOpenExam={onOpenExam}/> : <>
         {/* القسم الأول: نبذة عن الجامعة */}
         <div
           className="mn-detail-full-bleed relative bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 dark:border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/50 dark:shadow-none overflow-hidden mn-panel dark:mn-panel "
@@ -1052,6 +1054,7 @@ export const UniversityDetailModal: React.FC<UniversityDetailModalProps> = ({
             </div>
           </section>
         )}
+        </>}
       </div>
     </div>
   );

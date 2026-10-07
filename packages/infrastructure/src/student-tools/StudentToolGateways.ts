@@ -37,9 +37,7 @@ export class Phase17StudentToolsAIConsumerGateway implements IEnterpriseAIConsum
           dataClassification: request.dataClassification,
         },
         dataClassification:
-          request.dataClassification === 'PRIVATE_STUDENT_DATA'
-            ? 'STUDENT_PRIVATE'
-            : 'PUBLIC',
+          request.dataClassification === 'PRIVATE_STUDENT_DATA' ? 'STUDENT_PRIVATE' : 'PUBLIC',
         idempotencyKey: request.idempotencyKey,
         structuredOutputSchema: request.outputSchema,
       });
@@ -82,7 +80,9 @@ export class Phase17StudentToolsAIConsumerGateway implements IEnterpriseAIConsum
 
 export class Phase15StudentContextGateway implements IStudentContextGateway {
   constructor(private readonly repository: IStudentWorkspaceRepository) {}
-  async getMinimalContext(studentReference: string): ReturnType<IStudentContextGateway['getMinimalContext']> {
+  async getMinimalContext(
+    studentReference: string,
+  ): ReturnType<IStudentContextGateway['getMinimalContext']> {
     const workspace = await this.repository.findWorkspace(studentReference);
     if (!workspace) return null;
     const metadata = workspace.metadata ?? {};
@@ -92,7 +92,8 @@ export class Phase15StudentContextGateway implements IStudentContextGateway {
     const preferred = workspace.preferredLanguage?.toLowerCase();
     return {
       preferredLocale: preferred === 'ar' || preferred === 'en' ? preferred : undefined,
-      educationalLevel: typeof metadata.educationalLevel === 'string' ? metadata.educationalLevel : undefined,
+      educationalLevel:
+        typeof metadata.educationalLevel === 'string' ? metadata.educationalLevel : undefined,
       targetDegree: typeof metadata.targetDegree === 'string' ? metadata.targetDegree : undefined,
       interests,
     };
@@ -107,7 +108,11 @@ export class Phase15StudentToolSaveGateway implements IStudentToolSaveGateway {
       entityType: StudentSavedItemType.STUDENT_TOOL,
       entityId: input.executionId,
       entitySlug: input.toolKey,
-      metadata: { sourceDomain: 'PHASE_18', resultReference: input.resultReference, privateResult: input.result },
+      metadata: {
+        sourceDomain: 'PHASE_18',
+        resultReference: input.resultReference,
+        privateResult: input.result,
+      },
     });
     return { savedReference: saved.id };
   }
@@ -119,10 +124,7 @@ export class CanonicalUniversityComparisonGateway implements IUniversityComparis
     const canonical = this.repository.findPublishedByPublicIds
       ? await this.repository.findPublishedByPublicIds(publicIds)
       : await this.findAcrossPublishedPages(publicIds);
-    const selected = new Map(
-      canonical
-        .map((item) => [item.publicId, item]),
-    );
+    const selected = new Map(canonical.map((item) => [item.publicId, item]));
     const available: UniversityComparisonItem[] = publicIds.flatMap((id) => {
       const item = selected.get(id);
       return item
@@ -146,7 +148,10 @@ export class CanonicalUniversityComparisonGateway implements IUniversityComparis
     return { available, unavailableIds: publicIds.filter((id) => !selected.has(id)) };
   }
   private async findAcrossPublishedPages(publicIds: string[]) {
-    const found = new Map<string, Awaited<ReturnType<IUniversityRepository['listPublished']>>['data'][number]>();
+    const found = new Map<
+      string,
+      Awaited<ReturnType<IUniversityRepository['listPublished']>>['data'][number]
+    >();
     let cursor: string | undefined;
     let hasMore = true;
     do {
@@ -186,7 +191,13 @@ export class CanonicalScholarshipRecommendationGateway implements IScholarshipRe
         studyLanguageReferenceId: languageReferenceId,
       });
       for (const item of items) {
-        if (filters.fundingPreference === 'FULL' && !item.isFullyFunded) continue;
+        if (
+          filters.fundingPreference === 'FULL' &&
+          !(item.isFullyFunded === true || item.fundingTypeCode === 'FULLY_FUNDED')
+        )
+          continue;
+        if (filters.fundingPreference === 'PARTIAL' && item.fundingTypeCode !== 'PARTIALLY_FUNDED')
+          continue;
         unique.set(item.publicId, {
           publicId: item.publicId,
           slug: item.slug,
@@ -206,15 +217,14 @@ export class CanonicalScholarshipRecommendationGateway implements IScholarshipRe
     return [...unique.values()];
   }
 
-  private async listAllPublished(
-    filters: Parameters<IScholarshipRepository['listPublished']>[0],
-  ) {
+  private async listAllPublished(filters: Parameters<IScholarshipRepository['listPublished']>[0]) {
     const data: Awaited<ReturnType<IScholarshipRepository['listPublished']>>['data'] = [];
     let cursor: string | undefined;
     let hasMore = true;
     let scannedPages = 0;
     do {
-      if (++scannedPages > 500) throw new Error('SCHOLARSHIP_RECOMMENDATION_CANDIDATE_SCAN_LIMIT_EXCEEDED');
+      if (++scannedPages > 500)
+        throw new Error('SCHOLARSHIP_RECOMMENDATION_CANDIDATE_SCAN_LIMIT_EXCEEDED');
       const result = await this.repository.listPublished({ ...filters, cursor, limit: 100 });
       data.push(...result.data);
       cursor = result.nextCursor ?? undefined;
@@ -244,14 +254,16 @@ export class CanonicalScholarshipRecommendationGateway implements IScholarshipRe
     const byId = await this.degreeLevels.getDegreeLevelById(raw);
     if (byId?.status === 'ACTIVE') return byId.id;
     const byCode = await this.degreeLevels.getDegreeLevelByCode(raw.toUpperCase());
-    if (!byCode || byCode.status !== 'ACTIVE') throw new Error(`SCHOLARSHIP_DEGREE_REFERENCE_NOT_ACTIVE:${value}`);
+    if (!byCode || byCode.status !== 'ACTIVE')
+      throw new Error(`SCHOLARSHIP_DEGREE_REFERENCE_NOT_ACTIVE:${value}`);
     return byCode.id;
   }
 }
 
 function referenceLookup(value: string) {
   const trimmed = value.trim();
-  if (/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(trimmed) || trimmed.startsWith('mem-')) return { id: trimmed };
+  if (/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(trimmed) || trimmed.startsWith('mem-'))
+    return { id: trimmed };
   if (/^[A-Za-z]{2,3}$/.test(trimmed)) return { standardCode: trimmed.toUpperCase() };
   return { alias: trimmed };
 }
@@ -269,9 +281,7 @@ export class StudentToolRateLimitGateway implements IStudentToolRateLimitGateway
   }
 }
 
-export class EnterpriseStudentToolDependencyHealthGateway
-  implements IStudentToolDependencyHealthGateway
-{
+export class EnterpriseStudentToolDependencyHealthGateway implements IStudentToolDependencyHealthGateway {
   constructor(
     private readonly aiExecution: AIExecutionOrchestrator,
     private readonly universities: IUniversityRepository,

@@ -58,10 +58,10 @@ export function publicUrlForState(state: NavigationState): string {
   else if (state.activeTab === 'ai-tools') path = '/tools';
   else if (state.selectedScholarship) path = `/scholarships/${entityKey(state.selectedScholarship)}`;
   else if (state.selectedUniversity) path = `/universities/${entityKey(state.selectedUniversity)}`;
-  else if (state.selectedMajor) path = `/majors/${entityKey(state.selectedMajor)}`;
+  else if (state.selectedMajor) path = `/majors/${entityKey(state.selectedMajor)}${state.selectedMajor.slug && state.selectedMajor.degreeLevelName ? `/${state.selectedMajor.degreeLevelName.toLowerCase()}` : ''}`;
   else if (state.selectedCourse) path = `/courses/${entityKey(state.selectedCourse)}`;
   else if (state.selectedImportedCourse) path = `/courses/${entityKey(state.selectedImportedCourse)}`;
-  else if (state.selectedArticle) path = `/articles/${entityKey(state.selectedArticle)}`;
+  else if (state.selectedArticle) path = `/${({ NEWS: 'news', STUDY_GUIDE: 'study-guides', CHECKLIST: 'checklists', FAQ: 'faqs', STATIC_PAGE: 'pages', LANDING_PAGE: 'landing' } as Record<string, string>)[state.selectedArticle.contentType] ?? 'articles'}/${entityKey(state.selectedArticle)}`;
   else if (state.selectedService) path = `/services/${entityKey(state.selectedService)}`;
   else if (state.selectedExam) path = `/international-tests/${entityKey(state.selectedExam)}`;
   else if (state.selectedCategory === 'countries' && state.nestedDetailId) path = `/countries/${encodeURIComponent(state.nestedDetailId)}`;
@@ -74,6 +74,10 @@ export function publicUrlForState(state: NavigationState): string {
     path = listPaths[state.selectedCategory] || '/search';
   }
   const params = new URLSearchParams();
+  if (path === '/student' && /\/(?:student)\/?$/.test(window.location.pathname)) {
+    const account = new URLSearchParams(window.location.search);
+    for (const key of ['tab', 'requestId']) { const value = account.get(key); if (value) params.set(key, value); }
+  }
   if ((path === '/verify-email' || path === '/reset-password') && window.location.search) {
     const token = new URLSearchParams(window.location.search).get('token');
     if (token) params.set('token', token);

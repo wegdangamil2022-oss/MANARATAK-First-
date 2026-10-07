@@ -587,6 +587,9 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
       const query = search.trim();
       where.OR = [
         { canonicalName: { contains: query, mode: 'insensitive' } },
+        { localizedNameAr: { contains: query, mode: 'insensitive' } },
+        { localizedNameEn: { contains: query, mode: 'insensitive' } },
+        { abbreviation: { contains: query, mode: 'insensitive' } },
         { providerName: { contains: query, mode: 'insensitive' } },
         { displayName: { contains: query, mode: 'insensitive' } },
         { slug: { contains: query, mode: 'insensitive' } },

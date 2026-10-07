@@ -153,7 +153,8 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 
   const method = (options.method || 'GET').toUpperCase();
   const cacheKey = `${method}:${endpoint}`;
-  const coalesce = method === 'GET' && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
+  const freshRead = options.cache === 'no-store' || options.cache === 'reload';
+  const coalesce = method === 'GET' && !freshRead && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
 
   if (method === 'GET' && !isPublicAuthRoute) {
     if (rateLimitResetTime > Date.now()) {
@@ -161,7 +162,8 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
       await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
 
-    const cached = getCache.get(cacheKey);
+    if (freshRead) getCache.delete(cacheKey);
+    const cached = freshRead ? undefined : getCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.data as T;
     }
@@ -182,7 +184,7 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
     try {
       const responseData = await executeRequest<T>(endpoint, options);
       if (!isPublicAuthRoute && requestGeneration !== sessionGeneration) throw new Error('REQUEST_ABORTED: Admin session changed.');
-      if (method === 'GET' && !isPublicAuthRoute) {
+      if (method === 'GET' && !isPublicAuthRoute && !freshRead) {
         getCache.set(cacheKey, { data: responseData, expiresAt: Date.now() + 6000 });
       }
       return responseData;

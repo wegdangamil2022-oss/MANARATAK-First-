@@ -20,6 +20,7 @@ interface CourseTransactionContext extends AtomicPersistenceContext {
 }
 
 interface CourseRecord {
+  majorProjections?: Array<{major:{id:string;displayName:string}}> ;
   id: string;
   publicId: string;
   slug: string;
@@ -283,7 +284,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   public async findBySlug(slug: string): Promise<CourseDto | null> {
-    const record = await this.prisma.course.findUnique({ where: { slug } });
+    const record = await this.prisma.course.findUnique({ where: { slug },include: {majorProjections:{where:{projectionState:"APPROVED",major:{status:"PUBLISHED"}},select:{major:{select:{id:true,displayName:true}}}}} });
     return record ? this.mapToDto(record) : null;
   }
 
@@ -315,8 +316,26 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     if (filters.completenessStatus) where.completenessStatus = filters.completenessStatus;
     if (filters.accessType) where.accessType = filters.accessType;
     if (filters.originType) where.originType = filters.originType;
-    if (filters.platformName) where.platformName = filters.platformName;
+    if (filters.platformName) where.platformName = {contains:filters.platformName,mode:"insensitive"};
 
+    if (filters.externalProviderId) where.externalProviderId = filters.externalProviderId;
+    if (filters.category) where.category = { contains: filters.category, mode: 'insensitive' };
+    if (filters.learningLanguage) where.learningLanguage = { contains: filters.learningLanguage, mode: 'insensitive' };
+    if (filters.difficultyLevel) where.difficultyLevel = { contains: filters.difficultyLevel, mode: 'insensitive' };
+    if (filters.isFreeCertificate !== undefined) where.OR = [
+      { originType: 'EXTERNAL_LINKED_COURSE', isFreeCertificate: filters.isFreeCertificate },
+      filters.isFreeCertificate
+        ? { originType: 'NATIVE_MANARATAK_COURSE', certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } }
+        : { originType: 'NATIVE_MANARATAK_COURSE', NOT: { certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } } },
+    ];
+    if (filters.majorId) where.majorProjections = { some: { majorId: filters.majorId, projectionState: 'APPROVED' } };
+    if (filters.search) where.AND = [{ OR: [
+      { displayName: { contains: filters.search, mode: 'insensitive' } },
+      { canonicalName: { contains: filters.search, mode: 'insensitive' } },
+      { publicId: { contains: filters.search, mode: 'insensitive' } },
+      { platformName: { contains: filters.search, mode: 'insensitive' } },
+      { providerName: { contains: filters.search, mode: 'insensitive' } },
+    ] }];
     return this.listPage(where, page, pageSize);
   }
 
@@ -339,12 +358,13 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
 
     if (filters.accessType) where.accessType = filters.accessType;
     if (filters.originType) where.originType = filters.originType;
-    if (filters.platformName) where.platformName = filters.platformName;
+    if (filters.platformName) where.platformName = {contains:filters.platformName,mode:"insensitive"};
     if (filters.category) where.category = filters.category;
     if (filters.learningLanguage) where.learningLanguage = filters.learningLanguage;
 
     return queryStableCursorPage({
       delegate: this.prisma.course as any, where, cursor: filters.cursor, limit: filters.limit,
+      include: {majorProjections:{where:{projectionState:"APPROVED",major:{status:"PUBLISHED"}},select:{major:{select:{id:true,displayName:true}}}}},
       map: (record: any) => this.mapToDto(record),
     });
   }
@@ -403,6 +423,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   private mapToDto(record: CourseRecord): CourseDto {
     return {
       id: record.id,
+      relatedMajors: [...new Map((record.majorProjections ?? []).map(row=>[row.major.id,{id:row.major.id,name:row.major.displayName}])).values()],
       publicId: record.publicId,
       slug: record.slug,
       canonicalName: record.canonicalName,

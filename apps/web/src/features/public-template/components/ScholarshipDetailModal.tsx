@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PublishedScholarshipDetails } from './PublishedScholarshipDetails';
 import { Scholarship, Service } from '../types';
 import { RelatedArticlesStrip } from './RelatedArticlesStrip';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
@@ -213,7 +214,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
         </div>
       </div>
 
-      {/* MAIN CONTENT WRAPPER */}
+      {scholarship.publishedData ? <PublishedScholarshipDetails scholarship={scholarship} onOpenUniversity={onOpenUniversity} onOpenExam={onOpenExam} /> : (
       <div className="px-1.5 sm:px-2 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3">
         {/* 2. DONOR AUTHORITY CARD (Clean Distinctive Accent Line on Top Border) */}
         <div
@@ -956,6 +957,12 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
         </div>
       </div>
 
+      )}
+      {scholarship.publishedData && <div className="px-3 py-4 flex justify-center">
+        <button type="button" onClick={handleSaveClick} className="flex items-center gap-2 rounded-2xl bg-[var(--mn-primary)] px-5 py-3 text-xs font-bold text-white">
+          <Bookmark className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />{isFavorite ? 'تم الحفظ' : 'حفظ المنحة'}
+        </button>
+      </div>}
       {/* Save Notification Toast */}
       {saveToast && (
         <div className="fixed bottom-6 inset-x-4 max-w-xs mx-auto bg-[var(--mn-primary)] text-white px-4 py-2 rounded-full shadow-2xl z-50 flex items-center justify-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-bottom-2 mn-inverse ">

@@ -120,7 +120,7 @@ export function OwnerCourseDetail({
                 {course.title}
               </h1>
               <p className="text-[11px] font-bold text-white/90 font-['Cairo',sans-serif] mt-0.5 tracking-wider truncate">
-                {course.titleEn || 'Scholarships and University Admissions Masterclass'}
+                {course.titleEn || (course.ownerId ? '' : 'Scholarships and University Admissions Masterclass')}
               </p>
             </div>
           </div>
@@ -169,7 +169,7 @@ export function OwnerCourseDetail({
                   المدة الإجمالية
                 </span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
-                  {course.duration || '25 ساعة'}
+                  {course.duration || (course.ownerId ? 'غير محددة' : '25 ساعة')}
                 </span>
               </div>
             </div>
@@ -187,7 +187,7 @@ export function OwnerCourseDetail({
                   المحاضرات
                 </span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
-                  {course.lessonsCount ? `${course.lessonsCount} محاضرات` : '8 محاضرات'}
+                  {course.lessonsCount ? `${course.lessonsCount} محاضرات` : (course.ownerId ? 'راجع منهج الدورة' : '8 محاضرات')}
                 </span>
               </div>
             </div>
@@ -230,6 +230,9 @@ export function OwnerCourseDetail({
           </div>
         </div>
 
+        {course.description && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir="rtl"><DetailSectionHeader id="course-description-header" icon={BookOpen} title="نبذة الدورة" level={3} titleClassName="mn-imported-detail-title"/><p className="mt-3 text-xs leading-7 whitespace-pre-wrap">{course.description}</p></section>}
+        {[{title:'متطلبات الالتحاق',items:course.prerequisites},{title:'الفئات المستهدفة',items:course.targetAudience}].map(section=>section.items?.length ? <section key={section.title} className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir="rtl"><h3 className="mn-imported-detail-title">{section.title}</h3><ul className="mt-3 space-y-2 text-xs">{section.items.map((item,index)=><li key={index}>{item}</li>)}</ul></section>:null)}
+        {course.ownerId && <p className="text-xs font-bold text-[var(--mn-secondary)]">{course.certificateAvailable?'تتيح الدورة شهادة منارتك بعد استيفاء متطلبات الإتمام.':'لا توجد شهادة مفعّلة لهذه الدورة.'}</p>}
         {/* 4. BRIEF COURSE DESCRIPTION (وصف مختصر للدورة) */}
         {course.courseContent && (
           <div
@@ -240,7 +243,7 @@ export function OwnerCourseDetail({
             <DetailSectionHeader
               id="course-content-header"
               icon={BookOpen}
-              title="وصف مختصر للدورة"
+              title="محتوى الدورة"
               level={3}
               titleClassName="mn-imported-detail-title"
             />
@@ -316,6 +319,7 @@ export function OwnerCourseDetail({
           </div>
         )}
 
+        {course.acquiredSkills && course.acquiredSkills.length > 0 && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir="rtl"><DetailSectionHeader id="course-skills-header" icon={BookOpen} title="المهارات المكتسبة" level={3} titleClassName="mn-imported-detail-title"/><ul className="mt-3 space-y-2 text-xs">{course.acquiredSkills.map((skill,index)=><li key={index}>{skill}</li>)}</ul></section>}
         {/* 7. ACTION CTA BUTTON */}
         <div className="pt-2">
           {onStartStudy ? (

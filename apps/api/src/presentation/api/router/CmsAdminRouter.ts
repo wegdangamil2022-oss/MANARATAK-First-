@@ -34,7 +34,7 @@ export class CmsAdminRouter {
       return req.authUserId;
     };
     const querySchema = z.object({
-      status: z.nativeEnum(CmsContentStatus).optional(),
+      status: z.preprocess(value => value === '' || value === 'ALL' || value === 'all' ? undefined : value, z.nativeEnum(CmsContentStatus).optional()),
       contentType: z.nativeEnum(CmsContentType).optional(),
       categorySlug: slug.optional(),
       tag: z.string().optional(),

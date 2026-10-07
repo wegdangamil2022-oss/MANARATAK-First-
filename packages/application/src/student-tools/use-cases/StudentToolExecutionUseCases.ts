@@ -42,6 +42,13 @@ export class StudentToolExecutionUseCases {
       StudentToolPublicAccessPolicy.assertDiscoverable(tool);
     }
     if (!this.handlers.has(toolKey)) throw new Error('TOOL_NOT_IMPLEMENTED');
+    const locale = request.locale ?? 'ar';
+    if (
+      !tool.supportedLocales.includes(locale) ||
+      (tool.availability.allowedLocales.length > 0 &&
+        !tool.availability.allowedLocales.includes(locale))
+    )
+      throw new Error('TOOL_LOCALE_NOT_ALLOWED');
     if (
       request.consumerType === 'ANONYMOUS' &&
       (!tool.availability.anonymousEnabled || !tool.featureFlags.anonymousEnabled)
@@ -108,10 +115,13 @@ export class StudentToolExecutionUseCases {
     }
 
     const dependencyEntries = await Promise.all(
-      tool.dependencies.map(async (dependency) => [
-        `${dependency.phase}:${dependency.capabilityKey ?? dependency.type}`,
-        await this.dependencyHealth.status(dependency),
-      ] as const),
+      tool.dependencies.map(
+        async (dependency) =>
+          [
+            `${dependency.phase}:${dependency.capabilityKey ?? dependency.type}`,
+            await this.dependencyHealth.status(dependency),
+          ] as const,
+      ),
     );
     const dependencyStatus = Object.fromEntries(dependencyEntries);
     const unavailableRequired = tool.dependencies.find((dependency) => {

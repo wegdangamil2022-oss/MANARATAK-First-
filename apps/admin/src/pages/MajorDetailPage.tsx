@@ -280,19 +280,32 @@ function groupSectionsByCanonicalDefinitions(
 
   const unassigned: MajorContentSection[] = [];
 
-  for (const s of rawSections) {
-    let matched = false;
-    for (const g of groups) {
-      const def = defs.find(d => d.number === g.number);
-      if (def && def.matcher(s.sectionKey, s.title)) {
-        g.blocks.push(s);
-        matched = true;
-        break;
+  const normalizeTitle = (value: string) => value.replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/[\u064B-\u065F؟?]/g, '').replace(/^\d+[.)-]?\s*/, '').trim();
+  let parentNumber: number | undefined;
+  for (const section of rawSections) {
+    const title = normalizeTitle(section.title || '');
+    const parentTitle = typeof section.metadata?.sourceMainTitle === 'string'
+      ? normalizeTitle(section.metadata.sourceMainTitle) : undefined;
+    let number = defs.find(def => normalizeTitle(def.title) === (parentTitle || title))?.number;
+    if (!number && (section.metadata?.sourceLevel === 3 || section.metadata?.sourceLevel === 4)) {
+      if (normLevel === 'MASTER' || normLevel === 'MASTERS') {
+        if (/تخصصات بكالوريوس|تخصصات قريبة|تخصصات قد تحتاج/.test(title)) number = 4;
+        else if (/المقررات|مناهج البحث|الجانب العملي/.test(title)) number = 6;
+        else if (/الدكتوراه المرتبطة|الزمالات او الاعتمادات/.test(title)) number = 12;
+      } else if (normLevel === 'DOCTORATE' || normLevel === 'PHD') {
+        if (/تخصصات الماجستير|تخصصات قريبة|الدخول المباشر|الخبرة او الترخيص/.test(title)) number = 4;
+        else if (/المعرفة النظرية|مناهج البحث|الاخلاقيات والنزاهة/.test(title)) number = 6;
+      } else {
+        if (/المواد|الجانب العملي/.test(title)) number = 3;
+        else if (/تخصصات الماجستير المرتبطة/.test(title)) number = 8;
       }
+      number ??= parentNumber;
     }
-    if (!matched) {
-      unassigned.push(s);
-    }
+    if (!number && section.metadata?.sourceLevel === undefined) number = defs.find(def => def.matcher(section.sectionKey, section.title))?.number;
+    if (number) {
+      groups.find(group => group.number === number)?.blocks.push(section);
+      parentNumber = number;
+    } else unassigned.push(section);
   }
 
   return { groups, unassigned };
@@ -710,7 +723,9 @@ export function MajorDetailPage() {
     setConfirmModal((prev) => ({ ...prev, isOpen: false }));
 
     try {
-      await adminApiClient.request(`/admin/majors/${major.id}/${action}`, { method: 'POST' });
+      if (dirtyBlockKeys.size > 0) throw new Error('احفظ تعديلات المحتوى قبل تغيير حالة النشر.');
+      const targetId = activeProfile?.id || major.id;
+      await adminApiClient.request(`/admin/majors/${targetId}/${action}`, { method: 'POST' });
 
       setSuccess(successMessage);
       await loadMajorAndProfiles();

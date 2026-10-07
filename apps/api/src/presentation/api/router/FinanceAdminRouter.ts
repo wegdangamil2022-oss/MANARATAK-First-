@@ -5,8 +5,18 @@ import {
   FinanceCommandIdentity,
   FinancePlatformUseCases,
 } from '@manaratak/application';
-import { AuthorizationEvaluatorService, InvoiceStatus, PaymentStatus, TransferStatus } from '@manaratak/domain';
+import {
+  AuthorizationEvaluatorService,
+  InvoiceStatus,
+  PaymentStatus,
+  TransferStatus,
+} from '@manaratak/domain';
 import { ForbiddenException } from '@manaratak/core';
+
+const allAsUndefined = (value: unknown) =>
+  typeof value === 'string' && ['', 'all', 'الكل'].includes(value.trim().toLowerCase())
+    ? undefined
+    : value;
 
 const moneySchema = z.object({
   amountMinorUnits: z.string().regex(/^-?\d+$/),
@@ -59,7 +69,7 @@ export class FinanceAdminRouter {
     };
 
     const listQuerySchema = z.object({
-      status: z.nativeEnum(InvoiceStatus).optional(),
+      status: z.preprocess(allAsUndefined, z.nativeEnum(InvoiceStatus).optional()),
       originDomain: z.string().optional(),
       originReferenceId: z.string().optional(),
       studentReferenceId: z.string().optional(),
@@ -96,6 +106,9 @@ export class FinanceAdminRouter {
       '/invoices/:id/issue',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:invoice:manage');
+        z.object({})
+          .strict()
+          .parse(req.body ?? {});
         res.json(await financePlatformUseCases.issueInvoice(req.params.id, identity(req)));
       }),
     );
@@ -151,6 +164,9 @@ export class FinanceAdminRouter {
       '/invoices/:id/void',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:invoice:manage');
+        z.object({})
+          .strict()
+          .parse(req.body ?? {});
         res.json(await financePlatformUseCases.voidInvoice(req.params.id, identity(req)));
       }),
     );
@@ -158,14 +174,16 @@ export class FinanceAdminRouter {
     router.get(
       '/payments',
       asyncHandler(async (req: Request, res: Response) => {
-        const filters = z.object({
-          status: z.nativeEnum(PaymentStatus).optional(),
-          invoiceId: z.string().trim().min(1).optional(),
-          gatewayProvider: z.string().trim().min(1).optional(),
-          search: z.string().trim().min(1).max(120).optional(),
-          page: z.coerce.number().int().min(1).default(1),
-          pageSize: z.coerce.number().int().min(1).max(50).default(20),
-        }).parse(req.query);
+        const filters = z
+          .object({
+            status: z.preprocess(allAsUndefined, z.nativeEnum(PaymentStatus).optional()),
+            invoiceId: z.string().trim().min(1).optional(),
+            gatewayProvider: z.string().trim().min(1).optional(),
+            search: z.string().trim().min(1).max(120).optional(),
+            page: z.coerce.number().int().min(1).default(1),
+            pageSize: z.coerce.number().int().min(1).max(50).default(20),
+          })
+          .parse(req.query);
         res.json(await financeAdminUseCases.listPayments(filters));
       }),
     );
@@ -235,9 +253,15 @@ export class FinanceAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:ledger:reverse');
         const body = z.object({ approvalId: z.string().min(1) }).parse(req.body);
-        res.status(201).json(
-          await financePlatformUseCases.reverseLedger(req.params.id, body.approvalId, identity(req)),
-        );
+        res
+          .status(201)
+          .json(
+            await financePlatformUseCases.reverseLedger(
+              req.params.id,
+              body.approvalId,
+              identity(req),
+            ),
+          );
       }),
     );
     router.post(
@@ -335,10 +359,19 @@ export class FinanceAdminRouter {
             approvalId: z.string().min(1).optional(),
           })
           .parse(req.body);
-        const executionStatuses = new Set(['APPROVED', 'PROCESSING', 'SETTLED', 'COMPLETED', 'FAILED', 'REVERSED']);
+        const executionStatuses = new Set([
+          'APPROVED',
+          'PROCESSING',
+          'SETTLED',
+          'COMPLETED',
+          'FAILED',
+          'REVERSED',
+        ]);
         await requireFinancePermission(
           req,
-          executionStatuses.has(body.status) ? 'admin:finance:transfer:execute' : 'admin:finance:transfer:manage',
+          executionStatuses.has(body.status)
+            ? 'admin:finance:transfer:execute'
+            : 'admin:finance:transfer:manage',
         );
         res.json(
           await financePlatformUseCases.transitionTransfer(
@@ -360,15 +393,22 @@ export class FinanceAdminRouter {
       '/exchange-rates/refresh',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:fx:refresh');
-        const body = z.object({
-          sourceCurrencyCode: z.string().regex(/^[A-Z]{3}$/),
-          targetCurrencyCode: z.string().regex(/^[A-Z]{3}$/),
-        }).strict().parse(req.body);
-        res.status(201).json(await financePlatformUseCases.refreshAutomaticExchangeRate(
-          body.sourceCurrencyCode,
-          body.targetCurrencyCode,
-          identity(req),
-        ));
+        const body = z
+          .object({
+            sourceCurrencyCode: z.string().regex(/^[A-Z]{3}$/),
+            targetCurrencyCode: z.string().regex(/^[A-Z]{3}$/),
+          })
+          .strict()
+          .parse(req.body);
+        res
+          .status(201)
+          .json(
+            await financePlatformUseCases.refreshAutomaticExchangeRate(
+              body.sourceCurrencyCode,
+              body.targetCurrencyCode,
+              identity(req),
+            ),
+          );
       }),
     );
     router.post(
@@ -470,7 +510,9 @@ export class FinanceAdminRouter {
         const body = z
           .object({ paymentId: z.string().min(1), amount: moneySchema, reason: z.string().min(3) })
           .parse(req.body);
-        res.status(201).json(await financePlatformUseCases.createRefund(body, identity(req, body.reason)));
+        res
+          .status(201)
+          .json(await financePlatformUseCases.createRefund(body, identity(req, body.reason)));
       }),
     );
     router.post(
@@ -478,7 +520,13 @@ export class FinanceAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:refund:execute');
         const body = z.object({ approvalId: z.string().min(1) }).parse(req.body);
-        res.json(await financePlatformUseCases.processRefund(req.params.id, body.approvalId, identity(req)));
+        res.json(
+          await financePlatformUseCases.processRefund(
+            req.params.id,
+            body.approvalId,
+            identity(req),
+          ),
+        );
       }),
     );
     router.get(

@@ -30,6 +30,8 @@ type AdminScholarshipFilters = ScholarshipFilters & {
 import { queryStableCursorPage } from '../api-foundation/StableCursor';
 
 const LEGACY_COMPATIBILITY_KEYS = [
+  'description',
+  'notes',
   'fundingCoverage',
   'coverageDetails',
   'eligibleMajorsOrFields',
@@ -61,8 +63,8 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
 
   private readonly normalizedInclude = {
-    benefits: true,
-    degreeTargets: true,
+    benefits: { include: { currency: { select: { isoCode: true, nameAr: true, name: true } } } },
+    degreeTargets: { include: { degreeLevel: { select: { canonicalCode: true, nameEn: true, nameAr: true } } } },
     majorTargets: true,
     eligibilityItems: true,
     requiredDocuments: true,
@@ -344,10 +346,58 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     if (filters.translationState === 'TRANSLATED') where.sourceLocale = { in: ['ar', 'ar-SA'] };
     if (filters.deadlineFrom || filters.deadlineTo) where.applicationDeadline = { gte: filters.deadlineFrom, lte: filters.deadlineTo };
     if (filters.sourceType) constraints.push({ sourceEvidence: { some: { sourceTypeCode: { equals: filters.sourceType, mode: 'insensitive' } } } });
+    if (filters.countryLabel) {
+      delete where.countryReferenceId;
+      constraints.push({ OR: [
+      ...(filters.countryReferenceId ? [{ countryReferenceId: filters.countryReferenceId }] : []),
+      { countrySourceLabel: { contains: filters.countryLabel, mode: 'insensitive' } },
+      { optionalFields: { path: ['studyCountry'], string_contains: filters.countryLabel } },
+    ] });
+    }
+    if (filters.languageLabel) {
+      const aliases: Record<string, string[]> = { 'الإنجليزية': ['الإنجليزية', 'English'], 'العربية': ['العربية', 'Arabic'], 'التركية': ['التركية', 'Turkish'], 'الألمانية': ['الألمانية', 'German'], 'الفرنسية': ['الفرنسية', 'French'] };
+      const matches: Prisma.ScholarshipWhereInput[] = [];
+      for (const label of aliases[filters.languageLabel] || [filters.languageLabel]) matches.push(
+        { studyLanguageSourceLabel: { contains: label, mode: 'insensitive' } },
+        { studyLanguage: { is: { OR: [{ name: { contains: label, mode: 'insensitive' } }, { nameAr: { contains: label, mode: 'insensitive' } }] } } },
+        { optionalFields: { path: ['studyLanguage'], string_contains: label } },
+      );
+      constraints.push({ OR: matches });
+    }
+    if (filters.majorLabel) constraints.push({ OR: [
+      { majorTargets: { some: { sourceLabel: { contains: filters.majorLabel, mode: 'insensitive' } } } },
+      { majorTargets: { some: { major: { is: { OR: [
+        { displayName: { contains: filters.majorLabel, mode: 'insensitive' } },
+        { localizedNameAr: { contains: filters.majorLabel, mode: 'insensitive' } },
+      ] } } } } },
+    ] });
+    if (filters.degreeLabel) {
+      const aliases: Record<string, string[]> = { 'بكالوريوس': ['بكالوريوس', 'bachelor', 'undergraduate'], 'ماجستير': ['ماجستير', 'master'], 'دكتوراه': ['دكتوراه', 'doctorate', 'phd'], 'زمالة': ['زمالة', 'fellowship'] };
+      const matches: Prisma.ScholarshipWhereInput[] = [];
+      for (const label of aliases[filters.degreeLabel] || [filters.degreeLabel]) matches.push(
+        { degreeTargets: { some: { sourceLabel: { contains: label, mode: 'insensitive' } } } },
+        { degreeTargets: { some: { degreeLevel: { is: { OR: [{ nameEn: { contains: label, mode: 'insensitive' } }, { nameAr: { contains: label, mode: 'insensitive' } }] } } } } },
+        { optionalFields: { path: ['degreeLevel'], string_contains: label } },
+      );
+      constraints.push({ OR: matches });
+    }
+    if (filters.fundingType === 'FULL') constraints.push({ OR: [{ isFullyFunded: true }, { fundingTypeCode: { in: ['FULL', 'FULLY_FUNDED'] } }] });
+    if (filters.fundingType === 'PARTIAL') constraints.push({ fundingTypeCode: { in: ['PARTIAL', 'PARTIALLY_FUNDED'] } });
+    if (filters.deadlineStatus) {
+      const now = new Date();
+      if (filters.deadlineStatus === 'OPEN') constraints.push({ OR: [{ applicationDeadline: { gte: now } }, { deadlineType: 'OPEN_ALL_YEAR' }] });
+      if (filters.deadlineStatus === 'CLOSED') constraints.push({ applicationDeadline: { lt: now } });
+      if (filters.deadlineStatus === 'CLOSING_SOON') constraints.push({ applicationDeadline: { gte: now, lte: new Date(now.getTime() + 45 * 86400000) } });
+      if (filters.deadlineStatus === 'OPEN_ALL_YEAR') constraints.push({ deadlineType: 'OPEN_ALL_YEAR' });
+    }
     if (filters.query) constraints.push({ OR: [
       { displayName: { contains: filters.query, mode: 'insensitive' } },
       { canonicalName: { contains: filters.query, mode: 'insensitive' } },
       { providerName: { contains: filters.query, mode: 'insensitive' } },
+      { publicId: { contains: filters.query, mode: 'insensitive' } },
+      { countrySourceLabel: { contains: filters.query, mode: 'insensitive' } },
+      { optionalFields: { path: ['localizedNames', 'ar'], string_contains: filters.query } },
+      { optionalFields: { path: ['localizedNames', 'en'], string_contains: filters.query } },
     ] });
     if (constraints.length) where.AND = constraints;
 
@@ -578,6 +628,8 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     delete copy.scholarshipId;
     delete copy.createdAt;
     delete copy.updatedAt;
+    delete copy.currency;
+    delete copy.degreeLevel;
     return copy;
   }
 }

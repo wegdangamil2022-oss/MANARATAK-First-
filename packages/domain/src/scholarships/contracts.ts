@@ -50,6 +50,7 @@ export interface ScholarshipBenefitDto {
 }
 
 export interface ScholarshipDegreeTargetDto {
+  degreeLevel?: { canonicalCode: string; nameEn: string; nameAr: string };
   id?: string;
   scholarshipId?: string;
   targetKey: string;
@@ -144,6 +145,8 @@ export interface ScholarshipUniversityLinkDto {
 }
 
 export interface CreateScholarshipDto {
+  description?: string | null;
+  notes?: string | null;
   publicId: string;
   slug: string;
   canonicalName: string;
@@ -262,6 +265,12 @@ export type ScholarshipRepositoryUpdateDto = UpdateScholarshipDto & {
 };
 
 export interface ScholarshipFilters {
+  countryLabel?: string;
+  degreeLabel?: string;
+  majorLabel?: string;
+  languageLabel?: string;
+  fundingType?: 'FULL' | 'PARTIAL';
+  deadlineStatus?: 'OPEN' | 'CLOSING_SOON' | 'CLOSED' | 'OPEN_ALL_YEAR';
   status?: ScholarshipStatus;
   completenessStatus?: ScholarshipCompletenessState;
   countryReferenceId?: string;

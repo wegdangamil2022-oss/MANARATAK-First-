@@ -1,4 +1,7 @@
-import { AssetReferencePolicy, assertAssetReferenceUsable } from '../asset-platform/AssetReferencePolicy';
+import {
+  AssetReferencePolicy,
+  assertAssetReferenceUsable,
+} from '../asset-platform/AssetReferencePolicy';
 import {
   IReferenceDataRepository,
   IReferenceResolutionRepository,
@@ -58,16 +61,37 @@ export class StudyDestinationUseCases {
     private readonly assetReferences?: AssetReferencePolicy,
   ) {}
 
-  public async listAdmin(filters: AdminStudyDestinationListFilters = {}): Promise<PaginatedStudyDestinationResult<AdminStudyDestinationListItem>> {
-    const countries = await this.referenceData.listCountries({ activeOnly: true, q: filters.q, region: filters.region });
-    const items = await Promise.all(countries.map(async (country) => {
-      const profile = await this.repository.findByCountryReferenceId(country.id);
-      return { country, profile, readiness: profile ? this.publishingPolicy.evaluate(profile) : null };
-    }));
+  public async listAdmin(
+    filters: AdminStudyDestinationListFilters = {},
+  ): Promise<PaginatedStudyDestinationResult<AdminStudyDestinationListItem>> {
+    const countries = await this.referenceData.listCountries({
+      activeOnly: true,
+      q: filters.q,
+      region: filters.region,
+    });
+    const items = await Promise.all(
+      countries.map(async (country) => {
+        const profile = await this.repository.findByCountryReferenceId(country.id);
+        return {
+          country,
+          profile,
+          readiness: profile ? this.publishingPolicy.evaluate(profile) : null,
+        };
+      }),
+    );
     const filtered = items.filter((item) => {
       if (filters.status === 'NO_PROFILE' && item.profile) return false;
-      if (filters.status && filters.status !== 'NO_PROFILE' && item.profile?.status !== filters.status) return false;
-      if (filters.completenessStatus && item.profile?.completenessStatus !== filters.completenessStatus) return false;
+      if (
+        filters.status &&
+        filters.status !== 'NO_PROFILE' &&
+        item.profile?.status !== filters.status
+      )
+        return false;
+      if (
+        filters.completenessStatus &&
+        item.profile?.completenessStatus !== filters.completenessStatus
+      )
+        return false;
       return true;
     });
     const page = Math.max(1, filters.page ?? 1);
@@ -88,11 +112,19 @@ export class StudyDestinationUseCases {
     return this.aggregate(country, profile);
   }
 
-  public async upsertProfile(iso2Code: string, input: StudyDestinationProfileInput): Promise<StudyDestinationAggregateDto> {
-    await assertAssetReferenceUsable(this.assetReferences, input.imageAssetId, { purpose: 'STUDY_DESTINATION_IMAGE' });
+  public async upsertProfile(
+    iso2Code: string,
+    input: StudyDestinationProfileInput,
+    expectedUpdatedAt?: string,
+  ): Promise<StudyDestinationAggregateDto> {
+    await assertAssetReferenceUsable(this.assetReferences, input.imageAssetId, {
+      purpose: 'STUDY_DESTINATION_IMAGE',
+    });
     const country = await this.requireCountry(iso2Code);
     const normalized = await this.normalizeAndValidateInput(input);
     const existing = await this.repository.findByCountryReferenceId(country.id);
+    if (expectedUpdatedAt && (!existing || existing.updatedAt !== expectedUpdatedAt))
+      throw new Error('STUDY_DESTINATION_VERSION_CONFLICT');
     let saved: StudyDestinationProfileDto;
     if (!existing) {
       saved = await this.repository.create({
@@ -104,23 +136,36 @@ export class StudyDestinationUseCases {
         completenessStatus: StudyDestinationCompletenessStatus.INCOMPLETE,
       });
     } else {
+      await this.normalizeAndValidateInput({ ...existing, ...normalized });
       const sourceSensitiveChanged = this.hasSourceSensitiveChange(existing, normalized);
       const provisional = {
         ...existing,
         ...normalized,
-        ...(sourceSensitiveChanged ? { sourceVerificationStatus: StudyDestinationVerificationStatus.UNVERIFIED } : {}),
+        ...(sourceSensitiveChanged
+          ? { sourceVerificationStatus: StudyDestinationVerificationStatus.UNVERIFIED }
+          : {}),
       } as StudyDestinationProfileDto;
       const readiness = this.publishingPolicy.evaluate(provisional);
-      const mustLeavePublishedState = existing.status === StudyDestinationStatus.PUBLISHED && sourceSensitiveChanged;
-      saved = await this.repository.update(existing.id, {
-        ...normalized,
-        ...(sourceSensitiveChanged ? { sourceVerificationStatus: StudyDestinationVerificationStatus.UNVERIFIED } : {}),
-        ...(mustLeavePublishedState ? { status: StudyDestinationStatus.DRAFT, publishedAt: null } : {}),
-        completenessStatus: mustLeavePublishedState ? readiness.completenessStatus
-          : existing.status === StudyDestinationStatus.PUBLISHED
-            ? StudyDestinationCompletenessStatus.COMPLETE
-            : readiness.completenessStatus,
-      });
+      const mustLeavePublishedState =
+        existing.status === StudyDestinationStatus.PUBLISHED && sourceSensitiveChanged;
+      saved = await this.repository.update(
+        existing.id,
+        {
+          ...normalized,
+          ...(sourceSensitiveChanged
+            ? { sourceVerificationStatus: StudyDestinationVerificationStatus.UNVERIFIED }
+            : {}),
+          ...(mustLeavePublishedState
+            ? { status: StudyDestinationStatus.DRAFT, publishedAt: null }
+            : {}),
+          completenessStatus: mustLeavePublishedState
+            ? readiness.completenessStatus
+            : existing.status === StudyDestinationStatus.PUBLISHED
+              ? StudyDestinationCompletenessStatus.COMPLETE
+              : readiness.completenessStatus,
+        },
+        existing.updatedAt,
+      );
     }
     return this.aggregate(country, saved);
   }
@@ -128,79 +173,137 @@ export class StudyDestinationUseCases {
   public async submitForReview(iso2Code: string): Promise<StudyDestinationAggregateDto> {
     const country = await this.requireCountry(iso2Code);
     const profile = await this.requireProfile(country.id);
+    if (profile.status === StudyDestinationStatus.PUBLISHED)
+      throw new Error('STUDY_DESTINATION_ARCHIVE_BEFORE_REVIEW');
     const readiness = this.publishingPolicy.evaluate(profile);
     if (!readiness.readyForReview) throw new Error('STUDY_DESTINATION_NOT_READY_FOR_REVIEW');
-    const saved = await this.repository.update(profile.id, {
-      status: StudyDestinationStatus.IN_REVIEW,
-      completenessStatus: readiness.readyForPublish
-        ? StudyDestinationCompletenessStatus.READY_TO_PUBLISH
-        : StudyDestinationCompletenessStatus.READY_FOR_REVIEW,
-    });
+    const saved = await this.repository.update(
+      profile.id,
+      {
+        status: StudyDestinationStatus.IN_REVIEW,
+        completenessStatus: readiness.readyForPublish
+          ? StudyDestinationCompletenessStatus.READY_TO_PUBLISH
+          : StudyDestinationCompletenessStatus.READY_FOR_REVIEW,
+      },
+      profile.updatedAt,
+    );
     return this.aggregate(country, saved);
   }
 
   public async verifySources(iso2Code: string): Promise<StudyDestinationAggregateDto> {
     const country = await this.requireCountry(iso2Code);
     const profile = await this.requireProfile(country.id);
-    if (!profile.evidenceSources.length || !profile.sourceAuditDate) throw new Error('STUDY_DESTINATION_EVIDENCE_REQUIRED');
+    if (!profile.evidenceSources.length || !profile.sourceAuditDate)
+      throw new Error('STUDY_DESTINATION_EVIDENCE_REQUIRED');
     profile.evidenceSources.forEach((source) => this.assertUrl(source.url, 'INVALID_EVIDENCE_URL'));
     const verifiedAt = new Date().toISOString();
-    const saved = await this.repository.update(profile.id, {
+    const verified = {
+      ...profile,
       sourceVerificationStatus: StudyDestinationVerificationStatus.VERIFIED,
-      evidenceSources: profile.evidenceSources.map((source) => ({ ...source, verifiedAt: source.verifiedAt ?? verifiedAt })),
-    });
-    const readiness = this.publishingPolicy.evaluate(saved);
-    const final = await this.repository.update(saved.id, {
-      completenessStatus: readiness.completenessStatus,
-    });
+      evidenceSources: profile.evidenceSources.map((source) => ({
+        ...source,
+        verifiedAt: source.verifiedAt ?? verifiedAt,
+      })),
+    };
+    const readiness = this.publishingPolicy.evaluate(verified);
+    const final = await this.repository.update(
+      profile.id,
+      {
+        sourceVerificationStatus: verified.sourceVerificationStatus,
+        evidenceSources: verified.evidenceSources,
+        completenessStatus:
+          profile.status === StudyDestinationStatus.PUBLISHED
+            ? StudyDestinationCompletenessStatus.COMPLETE
+            : readiness.completenessStatus,
+      },
+      profile.updatedAt,
+    );
     return this.aggregate(country, final);
   }
 
   public async publish(iso2Code: string): Promise<StudyDestinationAggregateDto> {
     const country = await this.requireCountry(iso2Code);
     const profile = await this.requireProfile(country.id);
-    if (profile.status !== StudyDestinationStatus.IN_REVIEW) throw new Error('STUDY_DESTINATION_REVIEW_REQUIRED');
+    await this.normalizeAndValidateInput(profile);
+    if (profile.status !== StudyDestinationStatus.IN_REVIEW)
+      throw new Error('STUDY_DESTINATION_REVIEW_REQUIRED');
     const readiness = this.publishingPolicy.evaluate(profile);
     if (!readiness.readyForPublish) throw new Error('STUDY_DESTINATION_NOT_READY_TO_PUBLISH');
-    const saved = await this.repository.update(profile.id, {
-      status: StudyDestinationStatus.PUBLISHED,
-      completenessStatus: StudyDestinationCompletenessStatus.COMPLETE,
-      publishedAt: new Date().toISOString(),
-    });
+    const saved = await this.repository.update(
+      profile.id,
+      {
+        status: StudyDestinationStatus.PUBLISHED,
+        completenessStatus: StudyDestinationCompletenessStatus.COMPLETE,
+        publishedAt: new Date().toISOString(),
+      },
+      profile.updatedAt,
+    );
     return this.aggregate(country, saved);
   }
 
   public async archive(iso2Code: string): Promise<StudyDestinationAggregateDto> {
     const country = await this.requireCountry(iso2Code);
     const profile = await this.requireProfile(country.id);
-    const saved = await this.repository.update(profile.id, { status: StudyDestinationStatus.ARCHIVED, publishedAt: null });
+    const saved = await this.repository.update(
+      profile.id,
+      { status: StudyDestinationStatus.ARCHIVED, publishedAt: null },
+      profile.updatedAt,
+    );
     return this.aggregate(country, saved);
   }
 
-  public async listPublic(filters: Omit<StudyDestinationFilters, 'status' | 'completenessStatus'> = {}): Promise<PaginatedStudyDestinationResult<PublicStudyDestinationDto>> {
+  public async listPublic(
+    filters: Omit<StudyDestinationFilters, 'status' | 'completenessStatus'> = {},
+  ): Promise<PaginatedStudyDestinationResult<PublicStudyDestinationDto>> {
     const result = await this.repository.listPublished(filters);
-    const data = (await Promise.all(result.data.map(async (profile) => {
-      const match = await this.referenceResolution.resolveCountryCandidate({ id: profile.countryReferenceId });
-      if (!match?.record?.isActive) return null;
-      return this.publicDto(match.record, profile);
-    }))).filter((item): item is PublicStudyDestinationDto => Boolean(item));
+    const data = (
+      await Promise.all(
+        result.data.map(async (profile) => {
+          const match = await this.referenceResolution.resolveCountryCandidate({
+            id: profile.countryReferenceId,
+          });
+          if (!match?.record?.isActive) return null;
+          return this.publicDto(match.record, profile);
+        }),
+      )
+    ).filter((item): item is PublicStudyDestinationDto => Boolean(item));
     return { ...result, data };
   }
 
   public async getPublicBySlug(slug: string): Promise<PublicStudyDestinationDto> {
     const profile = await this.repository.findBySlug(slug.trim().toLowerCase());
-    if (!profile || profile.status !== StudyDestinationStatus.PUBLISHED) throw new Error('STUDY_DESTINATION_NOT_FOUND');
-    const match = await this.referenceResolution.resolveCountryCandidate({ id: profile.countryReferenceId });
+    if (!profile || profile.status !== StudyDestinationStatus.PUBLISHED)
+      throw new Error('STUDY_DESTINATION_NOT_FOUND');
+    const match = await this.referenceResolution.resolveCountryCandidate({
+      id: profile.countryReferenceId,
+    });
     if (!match?.record?.isActive) throw new Error('STUDY_DESTINATION_NOT_FOUND');
     return this.publicDto(match.record, profile);
   }
 
-  private async aggregate(country: ReferenceCountryDto, profile: StudyDestinationProfileDto | null): Promise<StudyDestinationAggregateDto> {
-    if (!profile) return { country, profile: null, studyLanguages: [], livingCostCurrency: null, readiness: null };
+  private async aggregate(
+    country: ReferenceCountryDto,
+    profile: StudyDestinationProfileDto | null,
+  ): Promise<StudyDestinationAggregateDto> {
+    if (!profile)
+      return {
+        country,
+        profile: null,
+        studyLanguages: [],
+        livingCostCurrency: null,
+        readiness: null,
+      };
     const [studyLanguages, livingCostCurrency] = await Promise.all([
-      Promise.all(profile.studyLanguageReferenceIds.map(async (id) => (await this.referenceResolution.resolveLanguageCandidate({ id }))?.record ?? null)),
+      Promise.all(
+        profile.studyLanguageReferenceIds.map(
+          async (id) =>
+            (await this.referenceResolution.resolveLanguageCandidate({ id }))?.record ?? null,
+        ),
+      ),
       profile.livingCostCurrencyReferenceId
-        ? this.referenceResolution.resolveCurrencyCandidate({ id: profile.livingCostCurrencyReferenceId }).then((match) => match?.record ?? null)
+        ? this.referenceResolution
+            .resolveCurrencyCandidate({ id: profile.livingCostCurrencyReferenceId })
+            .then((match) => match?.record ?? null)
         : Promise.resolve(null),
     ]);
     return {
@@ -212,9 +315,17 @@ export class StudyDestinationUseCases {
     };
   }
 
-  private async publicDto(country: ReferenceCountryDto, profile: StudyDestinationProfileDto): Promise<PublicStudyDestinationDto> {
+  private async publicDto(
+    country: ReferenceCountryDto,
+    profile: StudyDestinationProfileDto,
+  ): Promise<PublicStudyDestinationDto> {
     const aggregate = await this.aggregate(country, profile);
-    return { ...profile, country, studyLanguages: aggregate.studyLanguages, livingCostCurrency: aggregate.livingCostCurrency };
+    return {
+      ...profile,
+      country,
+      studyLanguages: aggregate.studyLanguages,
+      livingCostCurrency: aggregate.livingCostCurrency,
+    };
   }
 
   private async requireCountry(iso2Code: string): Promise<ReferenceCountryDto> {
@@ -229,7 +340,9 @@ export class StudyDestinationUseCases {
     return profile;
   }
 
-  private async normalizeAndValidateInput(input: StudyDestinationProfileInput): Promise<StudyDestinationProfileInput> {
+  private async normalizeAndValidateInput(
+    input: StudyDestinationProfileInput,
+  ): Promise<StudyDestinationProfileInput> {
     const normalized: StudyDestinationProfileInput = {
       ...input,
       overviewAr: input.overviewAr?.trim() || null,
@@ -244,30 +357,66 @@ export class StudyDestinationUseCases {
       visaRequirementsEn: normalizeTextArray(input.visaRequirementsEn),
       studentLifeHighlightsAr: normalizeTextArray(input.studentLifeHighlightsAr),
       studentLifeHighlightsEn: normalizeTextArray(input.studentLifeHighlightsEn),
-      studyLanguageReferenceIds: input.studyLanguageReferenceIds ? [...new Set(input.studyLanguageReferenceIds.filter(Boolean))] : undefined,
-      officialLinks: input.officialLinks?.map((link) => ({ ...link, labelAr: link.labelAr.trim(), labelEn: link.labelEn?.trim(), url: link.url.trim() })),
-      evidenceSources: input.evidenceSources?.map((source) => ({ ...source, label: source.label.trim(), url: source.url.trim() })),
+      studyLanguageReferenceIds: input.studyLanguageReferenceIds
+        ? [...new Set(input.studyLanguageReferenceIds.filter(Boolean))]
+        : undefined,
+      officialLinks: input.officialLinks?.map((link) => ({
+        ...link,
+        labelAr: link.labelAr.trim(),
+        labelEn: link.labelEn?.trim(),
+        url: link.url.trim(),
+      })),
+      evidenceSources: input.evidenceSources?.map((source) => ({
+        ...source,
+        label: source.label.trim(),
+        url: source.url.trim(),
+      })),
     };
+
+    // Omitted fields are partial updates, not requests to erase stored content.
+    for (const key of Object.keys(normalized) as Array<keyof StudyDestinationProfileInput>) {
+      if (!(key in input) || input[key] === undefined) delete normalized[key];
+    }
 
     // Verification is an explicit workflow transition, never an editor-authored field.
     delete normalized.sourceVerificationStatus;
 
     if (normalized.visaOfficialUrl) this.assertUrl(normalized.visaOfficialUrl, 'INVALID_VISA_URL');
-    normalized.officialLinks?.forEach((link) => this.assertUrl(link.url, 'INVALID_OFFICIAL_LINK_URL'));
-    normalized.evidenceSources?.forEach((source) => this.assertUrl(source.url, 'INVALID_EVIDENCE_URL'));
+    normalized.officialLinks?.forEach((link) =>
+      this.assertUrl(link.url, 'INVALID_OFFICIAL_LINK_URL'),
+    );
+    normalized.evidenceSources?.forEach((source) =>
+      this.assertUrl(source.url, 'INVALID_EVIDENCE_URL'),
+    );
 
-    if (normalized.averageMonthlyLivingCostMin !== undefined && normalized.averageMonthlyLivingCostMin !== null && normalized.averageMonthlyLivingCostMin < 0) {
+    if (
+      normalized.averageMonthlyLivingCostMin !== undefined &&
+      normalized.averageMonthlyLivingCostMin !== null &&
+      (!Number.isFinite(normalized.averageMonthlyLivingCostMin) ||
+        normalized.averageMonthlyLivingCostMin < 0)
+    ) {
       throw new Error('INVALID_LIVING_COST_MINIMUM');
     }
-    if (normalized.averageMonthlyLivingCostMax !== undefined && normalized.averageMonthlyLivingCostMax !== null && normalized.averageMonthlyLivingCostMax < 0) {
+    if (
+      normalized.averageMonthlyLivingCostMax !== undefined &&
+      normalized.averageMonthlyLivingCostMax !== null &&
+      (!Number.isFinite(normalized.averageMonthlyLivingCostMax) ||
+        normalized.averageMonthlyLivingCostMax < 0)
+    ) {
       throw new Error('INVALID_LIVING_COST_MAXIMUM');
     }
-    if (typeof normalized.averageMonthlyLivingCostMin === 'number' && typeof normalized.averageMonthlyLivingCostMax === 'number' && normalized.averageMonthlyLivingCostMax < normalized.averageMonthlyLivingCostMin) {
+    if (
+      typeof normalized.averageMonthlyLivingCostMin === 'number' &&
+      typeof normalized.averageMonthlyLivingCostMax === 'number' &&
+      normalized.averageMonthlyLivingCostMax < normalized.averageMonthlyLivingCostMin
+    ) {
       throw new Error('INVALID_LIVING_COST_RANGE');
     }
 
     if (normalized.livingCostCurrencyReferenceId) {
-      const match = await this.referenceResolution.resolveCurrencyCandidate({ id: normalized.livingCostCurrencyReferenceId });
+      const match = await this.referenceResolution.resolveCurrencyCandidate({
+        id: normalized.livingCostCurrencyReferenceId,
+      });
       if (!match?.record?.isActive) throw new Error('INVALID_LIVING_COST_CURRENCY_REFERENCE');
     }
     if (normalized.studyLanguageReferenceIds) {
@@ -279,18 +428,42 @@ export class StudyDestinationUseCases {
     return normalized;
   }
 
-  private hasSourceSensitiveChange(existing: StudyDestinationProfileDto, input: StudyDestinationProfileInput): boolean {
+  private hasSourceSensitiveChange(
+    existing: StudyDestinationProfileDto,
+    input: StudyDestinationProfileInput,
+  ): boolean {
     const keys: Array<keyof StudyDestinationProfileInput> = [
-      'overviewAr', 'overviewEn', 'studySystemSummaryAr', 'studySystemSummaryEn',
-      'admissionHighlightsAr', 'admissionHighlightsEn', 'visaSummaryAr', 'visaSummaryEn',
-      'visaRequirementsAr', 'visaRequirementsEn', 'visaOfficialUrl', 'livingCostTier',
-      'averageMonthlyLivingCostMin', 'averageMonthlyLivingCostMax', 'livingCostCurrencyReferenceId',
-      'costHighlightsAr', 'costHighlightsEn', 'studentLifeHighlightsAr', 'studentLifeHighlightsEn',
-      'officialLinks', 'sourceAuditDate', 'evidenceSources', 'studyLanguageReferenceIds',
+      'overviewAr',
+      'overviewEn',
+      'studySystemSummaryAr',
+      'studySystemSummaryEn',
+      'admissionHighlightsAr',
+      'admissionHighlightsEn',
+      'visaSummaryAr',
+      'visaSummaryEn',
+      'visaRequirementsAr',
+      'visaRequirementsEn',
+      'visaOfficialUrl',
+      'livingCostTier',
+      'averageMonthlyLivingCostMin',
+      'averageMonthlyLivingCostMax',
+      'livingCostCurrencyReferenceId',
+      'costHighlightsAr',
+      'costHighlightsEn',
+      'studentLifeHighlightsAr',
+      'studentLifeHighlightsEn',
+      'officialLinks',
+      'sourceAuditDate',
+      'evidenceSources',
+      'studyLanguageReferenceIds',
     ];
     return keys.some((key) => {
       if (!(key in input)) return false;
-      return JSON.stringify(existing[key as keyof StudyDestinationProfileDto] ?? null) !== JSON.stringify(input[key] ?? null);
+      if (key === 'studyLanguageReferenceIds') return JSON.stringify([...existing.studyLanguageReferenceIds].sort()) !== JSON.stringify([...(input.studyLanguageReferenceIds ?? [])].sort());
+      return (
+        JSON.stringify(existing[key as keyof StudyDestinationProfileDto] ?? null) !==
+        JSON.stringify(input[key] ?? null)
+      );
     });
   }
 

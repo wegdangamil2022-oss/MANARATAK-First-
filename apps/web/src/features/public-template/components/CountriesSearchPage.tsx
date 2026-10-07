@@ -162,7 +162,8 @@ const CountryFlagImage: React.FC<{
 };
 
 export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
-  detailId, onDetailChange,
+  detailId,
+  onDetailChange,
   countries,
   onBack,
   onSelectCountryScholarships,
@@ -182,17 +183,27 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   const [selectedContinent, setSelectedContinent] = useState('الكل');
   const [selectedCountryName, setSelectedCountryName] = useState('الكل');
   const [localDetail, setLocalDetail] = useState<CountryDestination | null>(null);
-  const activeCountryModal = detailId !== undefined ? (countries.find(item => item.id === detailId || item.publicId === detailId || item.slug === detailId || item.iso2Code === detailId.toUpperCase()) || null) : localDetail;
-  const setActiveCountryModal = (value: CountryDestination | null) => onDetailChange ? onDetailChange(value?.id || '') : setLocalDetail(value);
-
+  const activeCountryModal =
+    detailId !== undefined
+      ? countries.find(
+          (item) =>
+            item.id === detailId ||
+            item.publicId === detailId ||
+            item.slug === detailId ||
+            item.iso2Code === detailId.toUpperCase(),
+        ) || null
+      : localDetail;
+  const setActiveCountryModal = (value: CountryDestination | null) =>
+    onDetailChange ? onDetailChange(value?.id || '') : setLocalDetail(value);
 
   useEffect(() => {
     if (detailId || !initialCountryIdentity) return;
-    const target = countries.find((country) =>
-      country.id === initialCountryIdentity ||
-      country.publicId === initialCountryIdentity ||
-      country.slug === initialCountryIdentity ||
-      country.iso2Code === initialCountryIdentity.toUpperCase(),
+    const target = countries.find(
+      (country) =>
+        country.id === initialCountryIdentity ||
+        country.publicId === initialCountryIdentity ||
+        country.slug === initialCountryIdentity ||
+        country.iso2Code === initialCountryIdentity.toUpperCase(),
     );
     if (!target) return;
     setSelectedCountryName(target.name);
@@ -279,6 +290,13 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
               meta: 'تخصص Canonical مرتبط عبر برامج جامعات الدولة',
             }))
           : activeCountryModal.featuredMajors,
+        relatedArticles: graphMatchesActiveCountry
+          ? relationshipGraph!.relationships.editorialContent.map((item) => ({
+              id: item.slug,
+              title: item.title,
+              typeLabel: item.contentType,
+            }))
+          : activeCountryModal.relatedArticles,
         requiredExams: graphMatchesActiveCountry
           ? relationshipGraph!.relationships.internationalTests.data.map((item) => ({
               id: item.slug || item.publicId || item.ownerId,
@@ -298,7 +316,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         searchTerm={searchTerm}
         isFavorite={favoriteIds.includes(detailCountry.id)}
         onToggleFavorite={onToggleFavorite}
-        onClose={() => onDetailChange ? onBack() : setActiveCountryModal(null)}
+        onClose={() => (onDetailChange ? onBack() : setActiveCountryModal(null))}
         onOpenUniversity={onOpenUniversity}
         onOpenScholarship={onOpenScholarship}
         onOpenMajor={onOpenMajor}
@@ -382,7 +400,10 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         <div className="max-w-md sm:max-w-xl mx-auto text-center relative z-10 space-y-2 pt-1">
           {/* Top 4-pointed Gold Sparkle Star */}
           <div className="flex justify-center">
-            <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
+            <Sparkles
+              className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]"
+              aria-hidden="true"
+            />
           </div>
 
           {/* Main Title */}
@@ -441,54 +462,54 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         {/* FLOATING FILTER TILES (القارة • الدولة) WITH GOLDEN BORDER & COMPACT SIZE  */}
         {/* ========================================================================= */}
         <div className="max-w-lg mx-auto mn-inline-gutter mt-2.5 relative z-20 pb-0">
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          {/* Tile 1: القارة */}
-          <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-            <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-[13px] font-['Cairo',sans-serif] w-full">
-              <Globe2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="truncate">
-                {selectedContinent === 'الكل' ? 'القارة' : selectedContinent}
-              </span>
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            {/* Tile 1: القارة */}
+            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
+              <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-[13px] font-['Cairo',sans-serif] w-full">
+                <Globe2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
+                <span className="truncate">
+                  {selectedContinent === 'الكل' ? 'القارة' : selectedContinent}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
+              <select
+                value={selectedContinent}
+                onChange={(e) => setSelectedContinent(e.target.value)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                title="اختر القارة"
+              >
+                {continents.map((c) => (
+                  <option key={c} value={c}>
+                    {c === 'الكل' ? 'جميع القارات' : c}
+                  </option>
+                ))}
+              </select>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
-            <select
-              value={selectedContinent}
-              onChange={(e) => setSelectedContinent(e.target.value)}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              title="اختر القارة"
-            >
-              {continents.map((c) => (
-                <option key={c} value={c}>
-                  {c === 'الكل' ? 'جميع القارات' : c}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          {/* Tile 2: الدولة */}
-          <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
-            <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-[13px] font-['Cairo',sans-serif] w-full">
-              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="truncate">
-                {selectedCountryName === 'الكل' ? 'الدولة' : selectedCountryName}
-              </span>
+            {/* Tile 2: الدولة */}
+            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
+              <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-[13px] font-['Cairo',sans-serif] w-full">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
+                <span className="truncate">
+                  {selectedCountryName === 'الكل' ? 'الدولة' : selectedCountryName}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
+              <select
+                value={selectedCountryName}
+                onChange={(e) => setSelectedCountryName(e.target.value)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                title="اختر الدولة"
+              >
+                {countryNames.map((cnt) => (
+                  <option key={cnt} value={cnt}>
+                    {cnt === 'الكل' ? 'جميع الدول' : cnt}
+                  </option>
+                ))}
+              </select>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
-            <select
-              value={selectedCountryName}
-              onChange={(e) => setSelectedCountryName(e.target.value)}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              title="اختر الدولة"
-            >
-              {countryNames.map((cnt) => (
-                <option key={cnt} value={cnt}>
-                  {cnt === 'الكل' ? 'جميع الدول' : cnt}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Gold Divider Ribbon Line Connecting Hero Directly to Content */}
@@ -583,7 +604,9 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
                     className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse "
                     data-mn-design="26ecd1db9e"
                   >
-                    <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">استكشف الدولة</span>
+                    <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">
+                      استكشف الدولة
+                    </span>
                     <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
                   </button>
                 </div>

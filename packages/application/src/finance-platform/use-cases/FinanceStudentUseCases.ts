@@ -11,12 +11,13 @@ export class FinanceStudentUseCases {
 
   public async listStudentInvoices(
     studentReferenceId: string,
+    pagination: { page?: number; pageSize?: number } = {},
   ): Promise<PaginatedFinanceResult<FinanceInvoiceDto>> {
     this.ensureStudentReference(studentReferenceId);
     return this.repository.listInvoices({
       studentReferenceId,
-      page: 1,
-      pageSize: 50,
+      page: Math.max(1, Math.trunc(pagination.page ?? 1)),
+      pageSize: Math.min(100, Math.max(1, Math.trunc(pagination.pageSize ?? 50))),
     });
   }
 

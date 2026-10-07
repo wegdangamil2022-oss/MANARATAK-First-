@@ -23,7 +23,7 @@ export class PublicMajorUseCases {
   public async getMajor(slug: string, options?: { degreeLevel?: string; profileCode?: string }): Promise<PublicMajorDto> {
     const major = await this.repository.findBySlug(slug);
 
-    if (!major || major.status !== MajorStatus.PUBLISHED) {
+    if (!major) {
       throw new Error('Major not found');
     }
 
@@ -32,9 +32,12 @@ export class PublicMajorUseCases {
       ? profiles.find((p) => p.code === options.profileCode)
       : options?.degreeLevel
       ? profiles.find((p) => p.level?.toUpperCase() === options.degreeLevel?.toUpperCase())
-      : undefined;
+      : profiles.find(p => p.status === MajorStatus.PUBLISHED && p.currentPublishedVersionId);
 
-    if (targetProfile && targetProfile.status !== MajorStatus.PUBLISHED) {
+    if ((options?.profileCode || options?.degreeLevel || profiles.length > 0) && !targetProfile) throw new Error('Major level profile not published');
+    if (!profiles.length && major.status !== MajorStatus.PUBLISHED) throw new Error('Major not found');
+
+    if (targetProfile && (targetProfile.status !== MajorStatus.PUBLISHED || !targetProfile.currentPublishedVersionId)) {
       throw new Error('Major level profile not published');
     }
 
@@ -42,6 +45,9 @@ export class PublicMajorUseCases {
     if (targetProfile) {
       publicMajor = {
         ...publicMajor,
+        publicId: targetProfile.code || publicMajor.publicId,
+        profiles: [targetProfile],
+        currentPublishedVersionId: targetProfile.currentPublishedVersionId,
         displayName: targetProfile.displayName || publicMajor.displayName,
         localizedNameAr: targetProfile.localizedNameAr || publicMajor.localizedNameAr,
         localizedNameEn: targetProfile.localizedNameEn || publicMajor.localizedNameEn,

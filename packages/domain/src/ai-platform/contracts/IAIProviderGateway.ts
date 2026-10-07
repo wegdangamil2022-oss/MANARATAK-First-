@@ -1,4 +1,9 @@
-import { AICapabilityKind, AIExecutionRequestDto, AIExecutionResultDto, AIProviderOperationalStatus } from '../entities';
+import {
+  AICapabilityKind,
+  AIExecutionRequestDto,
+  AIExecutionResultDto,
+  AIProviderOperationalStatus,
+} from '../entities';
 
 export interface AIProviderInvocation {
   model: string;
@@ -37,6 +42,7 @@ export interface AIProviderAdapter {
   readonly key: string;
   readonly capabilities: AICapabilityKind[];
   status(): AIProviderOperationalStatus;
+  configuration?(): { secretReference: string; baseUrl: string };
   invoke(request: AIProviderInvocation): Promise<AIProviderInvocationResult>;
   embed?(request: AIEmbeddingInvocation): Promise<AIEmbeddingInvocationResult>;
 }

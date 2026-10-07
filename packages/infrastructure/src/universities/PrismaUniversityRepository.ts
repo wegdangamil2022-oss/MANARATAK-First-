@@ -27,7 +27,7 @@ import { queryStableCursorPage } from '../api-foundation/StableCursor';
 const universityDetails = {
   campuses: true,
   organizationUnits: true,
-  academicPrograms: { include: { campuses: true, admissionRequirements: true } },
+  academicPrograms: { include: { campuses: true, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true } } } } } },
   tuitionProfiles: true,
   accommodationProfiles: true,
   rankings: true,
@@ -251,6 +251,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
 
     const where: Prisma.UniversityWhereInput = {};
     if (filters.status) where.status = filters.status;
+    if (filters.completenessStatus) where.completenessStatus = filters.completenessStatus;
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
     else if (filters.country && this.legacyCountryTextFiltersEnabled) where.country = filters.country;
     if (filters.regionReferenceId) where.regionReferenceId = filters.regionReferenceId;
@@ -279,6 +280,9 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         { canonicalName: { contains: filters.search, mode: 'insensitive' } },
         { slug: { contains: filters.search, mode: 'insensitive' } },
         { city: { contains: filters.search, mode: 'insensitive' } },
+        { country: { contains: filters.search, mode: 'insensitive' } },
+        { publicId: { contains: filters.search, mode: 'insensitive' } },
+        { translations: { some: { displayName: { contains: filters.search, mode: 'insensitive' } } } },
       ];
     }
 
@@ -287,7 +291,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         include: universityDetails,
       }),
       this.prisma.university.count({ where }),
@@ -652,24 +656,24 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   ): Promise<UniversityDto> {
     await this.prisma.university.findUniqueOrThrow({ where: { id }, select: { id: true } });
     await new UniversityCanonicalRelationshipValidator(this.prisma).validate(details);
-    if (details.campuses !== undefined && details.academicPrograms === undefined) {
+    if (details.campuses !== undefined && !details.campuses.every(row => row.id) && details.academicPrograms === undefined) {
       throw new Error('UNIVERSITY_PROGRAMS_REQUIRED_WHEN_REPLACING_CAMPUSES');
     }
-    if (details.organizationUnits !== undefined && details.academicPrograms === undefined) {
+    if (details.organizationUnits !== undefined && !details.organizationUnits.every(row => row.id) && details.academicPrograms === undefined) {
       throw new Error('UNIVERSITY_PROGRAMS_REQUIRED_WHEN_REPLACING_ORGANIZATION_UNITS');
     }
 
     if (details.academicPrograms !== undefined)
       await this.prisma.universityAcademicProgram.deleteMany({ where: { universityId: id } });
-    if (details.organizationUnits !== undefined)
+    if (details.organizationUnits !== undefined && !details.organizationUnits.some(row => row.id))
       await this.prisma.universityOrganizationUnit.deleteMany({ where: { universityId: id } });
-    if (details.campuses !== undefined)
+    if (details.campuses !== undefined && !details.campuses.some(row => row.id))
       await this.prisma.universityCampus.deleteMany({ where: { universityId: id } });
-    if (details.tuitionProfiles !== undefined)
+    if (details.tuitionProfiles !== undefined && !details.tuitionProfiles.some(row => row.id))
       await this.prisma.universityTuitionProfile.deleteMany({ where: { universityId: id } });
-    if (details.accommodationProfiles !== undefined)
+    if (details.accommodationProfiles !== undefined && !details.accommodationProfiles.some(row => row.id))
       await this.prisma.universityAccommodationProfile.deleteMany({ where: { universityId: id } });
-    if (details.rankings !== undefined)
+    if (details.rankings !== undefined && !details.rankings.some(row => row.id))
       await this.prisma.universityRanking.deleteMany({ where: { universityId: id } });
 
     const retainedCampuses =
@@ -687,8 +691,9 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         .map((campus) => [campus.sourceReferenceId, campus.id]),
     );
     for (const campus of details.campuses ?? []) {
-      const created = await this.prisma.universityCampus.create({
-        data: {
+      const { id: rowId } = campus;
+      if (rowId && !(await this.prisma.universityCampus.findFirst({ where: { id: rowId, universityId: id }, select: { id: true } }))) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
+      const data = {
           universityId: id,
           sourceReferenceId: campus.sourceReferenceId,
           name: campus.name,
@@ -702,8 +707,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           longitude: campus.longitude,
           coordinateSource: campus.coordinateSource,
           metadata: campus.metadata as Prisma.InputJsonObject | undefined,
-        },
-      });
+        };
+      const created = rowId
+        ? await this.prisma.universityCampus.update({ where: { id: rowId }, data })
+        : await this.prisma.universityCampus.create({ data });
       if (campus.sourceReferenceId) campusIds.set(campus.sourceReferenceId, created.id);
     }
 
@@ -727,8 +734,9 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         : undefined;
       if (unit.campusSourceReferenceId && !campusId)
         throw new Error(`UNIVERSITY_CAMPUS_REFERENCE_NOT_FOUND:${unit.campusSourceReferenceId}`);
-      const created = await this.prisma.universityOrganizationUnit.create({
-        data: {
+      const { id: rowId } = unit;
+      if (rowId && !(await this.prisma.universityOrganizationUnit.findFirst({ where: { id: rowId, universityId: id }, select: { id: true } }))) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
+      const data = {
           universityId: id,
           sourceReferenceId: unit.sourceReferenceId,
           campusId,
@@ -737,8 +745,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           normalizedName: unit.name.trim().toLocaleLowerCase(),
           status: unit.status ?? 'ACTIVE',
           metadata: unit.metadata as Prisma.InputJsonObject | undefined,
-        },
-      });
+        };
+      const created = rowId
+        ? await this.prisma.universityOrganizationUnit.update({ where: { id: rowId }, data })
+        : await this.prisma.universityOrganizationUnit.create({ data });
       if (unit.sourceReferenceId) unitIds.set(unit.sourceReferenceId, created.id);
     }
     for (const unit of details.organizationUnits ?? []) {
@@ -797,9 +807,15 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       }
     }
 
+    for (const row of details.tuitionProfiles ?? []) {
+      if (!row.id) continue;
+      if (!(await this.prisma.universityTuitionProfile.findFirst({ where: { id: row.id, universityId: id }, select: { id: true } }))) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
+      const { id: rowId, ...fields } = row;
+      await this.prisma.universityTuitionProfile.update({ where: { id: rowId }, data: { ...fields, metadata: fields.metadata as Prisma.InputJsonObject | undefined } });
+    }
     if (details.tuitionProfiles?.length)
       await this.prisma.universityTuitionProfile.createMany({
-        data: details.tuitionProfiles.map(
+        data: details.tuitionProfiles.filter(row => !row.id).map(
           (item) =>
             ({
               universityId: id,
@@ -815,17 +831,29 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
             }) as Prisma.UniversityTuitionProfileUncheckedCreateInput,
         ),
       });
+    for (const row of details.accommodationProfiles ?? []) {
+      if (!row.id) continue;
+      if (!(await this.prisma.universityAccommodationProfile.findFirst({ where: { id: row.id, universityId: id }, select: { id: true } }))) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
+      const { id: rowId, ...fields } = row;
+      await this.prisma.universityAccommodationProfile.update({ where: { id: rowId }, data: { ...fields, metadata: fields.metadata as Prisma.InputJsonObject | undefined } });
+    }
     if (details.accommodationProfiles?.length)
       await this.prisma.universityAccommodationProfile.createMany({
-        data: details.accommodationProfiles.map((item) => ({
+        data: details.accommodationProfiles.filter(row => !row.id).map((item) => ({
           universityId: id,
           ...item,
           metadata: item.metadata as Prisma.InputJsonObject | undefined,
         })),
       });
+    for (const row of details.rankings ?? []) {
+      if (!row.id) continue;
+      if (!(await this.prisma.universityRanking.findFirst({ where: { id: row.id, universityId: id }, select: { id: true } }))) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
+      const { id: rowId, ...fields } = row;
+      await this.prisma.universityRanking.update({ where: { id: rowId }, data: { ...fields } });
+    }
     if (details.rankings?.length)
       await this.prisma.universityRanking.createMany({
-        data: details.rankings.map((item) => ({ universityId: id, ...item })),
+        data: details.rankings.filter(row => !row.id).map((item) => ({ universityId: id, ...item })),
       });
 
     const updated = await this.prisma.university.findUniqueOrThrow({
@@ -854,6 +882,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         sourceProgramName: program.sourceProgramName,
         normalizedName: program.normalizedName,
         degreeLevelId: program.degreeLevelId,
+        degreeLevel: program.degreeLevel,
         majorId: program.majorId,
         majorMappingState: program.majorMappingState,
         status: program.status,
@@ -862,6 +891,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           id: requirement.id,
           academicProgramId: requirement.academicProgramId,
           internationalTestId: requirement.internationalTestId,
+          internationalTest: requirement.internationalTest,
           testVariantId: requirement.testVariantId,
           testVersionId: requirement.testVersionId,
           minimumScore: requirement.minimumScore,

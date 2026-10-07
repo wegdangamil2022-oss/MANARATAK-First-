@@ -190,6 +190,7 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     const page = Math.max(filters.page ?? 1, 1);
     const pageSize = Math.min(Math.max(filters.pageSize ?? 20, 1), 100);
     const where: any = {
+      ...(filters.search?.trim() ? { OR: ['displayName', 'publicId', 'slug', 'providerName'].map(field => ({ [field]: { contains: filters.search!.trim(), mode: 'insensitive' } })) } : {}),
       status: publishedOnly ? ServiceStatus.PUBLISHED : filters.status,
       completenessStatus: filters.completenessStatus,
       serviceCategory: filters.serviceCategory,
@@ -201,7 +202,7 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     };
     Object.keys(where).forEach((key) => where[key] === undefined && delete where[key]);
     const [rows, total] = await Promise.all([
-      this.catalog().findMany({ where, include: this.catalogInclude(), orderBy: { updatedAt: 'desc' }, skip: (page - 1) * pageSize, take: pageSize }),
+      this.catalog().findMany({ where, include: this.catalogInclude(), orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }], skip: (page - 1) * pageSize, take: pageSize }),
       this.catalog().count({ where }),
     ]);
     return { data: rows.map((row: any) => this.mapCatalog(row)), total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
@@ -225,13 +226,14 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     const page = Math.max(filters.page ?? 1, 1);
     const pageSize = Math.min(Math.max(filters.pageSize ?? 20, 1), 100);
     const where: any = {
+      ...(filters.search?.trim() ? { OR: ['publicId', 'studentReferenceId', 'serviceId'].map(field => ({ [field]: { contains: filters.search!.trim(), mode: 'insensitive' } })) } : {}),
       studentReferenceId: filters.studentReferenceId,
       serviceId: filters.serviceId,
       status: filters.status,
     };
     Object.keys(where).forEach((key) => where[key] === undefined && delete where[key]);
     const [rows, total] = await Promise.all([
-      this.requests().findMany({ where, orderBy: { updatedAt: 'desc' }, skip: (page - 1) * pageSize, take: pageSize }),
+      this.requests().findMany({ where, orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }], skip: (page - 1) * pageSize, take: pageSize }),
       this.requests().count({ where }),
     ]);
     return { data: rows.map((row: any) => this.mapRequest(row)), total, page, pageSize, totalPages: Math.ceil(total / pageSize) };

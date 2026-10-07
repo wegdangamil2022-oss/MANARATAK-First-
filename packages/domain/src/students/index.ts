@@ -13,6 +13,7 @@ export enum StudentSavedItemType {
   CERTIFICATE = 'CERTIFICATE',
   STUDENT_TOOL = 'STUDENT_TOOL',
   CMS_CONTENT = 'CMS_CONTENT',
+  INTERNATIONAL_TEST = 'INTERNATIONAL_TEST',
   SERVICE = 'SERVICE',
 }
 
@@ -221,6 +222,7 @@ export interface StudentCourseProgressDto {
 }
 
 export interface StudentCertificateProjectionDto {
+  verificationUrl?: string;
   id: string;
   publicId: string;
   serialNumber: string;
@@ -313,12 +315,21 @@ export interface StudentSupportWorkspaceSummaryDto {
 }
 
 export interface StudentSupportWorkspacePageDto {
+  total?: number;
   items: StudentSupportWorkspaceSummaryDto[];
   nextCursor: string | null;
   hasMore: boolean;
 }
 
 export interface StudentSupportWorkspaceDetailDto extends StudentSupportWorkspaceSummaryDto {
+  savedSummary?: Array<{entityType:string;count:number}>;
+  activeApplicationCount?: number;
+  serviceRequestCount?: number | null;
+  recentServiceRequests?: Array<{id:string;publicId:string;status:string;createdAt:Date|string;updatedAt:Date|string}>;
+  ownerReadStatus?: {learning:'AVAILABLE'|'DEGRADED';certificates:'AVAILABLE'|'DEGRADED';services:'AVAILABLE'|'DEGRADED'};
+  learning?: StudentCourseProgressDto[];
+  certificates?: Array<Pick<StudentCertificateProjectionDto,'id'|'publicId'|'serialNumber'|'verificationCode'|'status'|'courseDisplayName'|'issuedAt'|'expiresAt'>>;
+
   provisioningHealth: {
     state: 'HEALTHY' | 'PENDING' | 'FAILED';
     pendingEventCount: number;
@@ -376,6 +387,7 @@ export interface IStudentApplicationReminderGateway {
 }
 
 export interface IStudentWorkspaceRepository {
+  markNotificationRead?(studentReferenceId: string, notificationId: string): Promise<void>;
   findWorkspace(studentReferenceId: string): Promise<StudentWorkspaceDto | null>;
   listSupportWorkspaces(input: { query?: string; status?: StudentWorkspaceStatus; limit?: number; cursor?: string }): Promise<StudentSupportWorkspacePageDto>;
   getSupportWorkspaceDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto | null>;

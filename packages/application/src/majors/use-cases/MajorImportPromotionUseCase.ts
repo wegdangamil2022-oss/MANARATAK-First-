@@ -570,6 +570,7 @@ export class MajorImportPromotionUseCase {
       reviewStatus: 'NEEDS_REVIEW',
       metadata: {
         sourceLevel: block.level,
+        sourceMainTitle: typeof block.sourceMainTitle === 'string' ? block.sourceMainTitle : undefined,
         sourceReviewStatus: block.reviewStatus,
         localeResolution: this.resolveContentLocale(block) ? 'SOURCE_DECLARED' : 'UNKNOWN_REVIEW_REQUIRED',
       },

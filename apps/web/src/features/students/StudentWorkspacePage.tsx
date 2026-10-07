@@ -1,4 +1,8 @@
-import React, { FormEvent, useEffect, useMemo, useState } from 'react';
+import { StudentToolResultView } from '../student-tools/StudentToolResultView';
+import { StudentCertificateActions } from '../certificates/StudentCertificateActions';
+import { StudentNotificationsView, studentNotificationLink } from './StudentNotificationsView';
+import './student-workspace.css';
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Award, Bell, BookOpen, Bookmark, CheckCircle2, ClipboardList, Compass, Folder, Heart, Home, LockKeyhole, RefreshCw, Route, Settings2, Star, X, User, ListChecks, GraduationCap, CalendarClock, Sparkles, Clock3, Languages, Moon, Sun, LogIn, ShieldCheck, ChevronLeft, History as HistoryIcon, Archive, Trash2, ExternalLink, ChevronDown, ChevronUp, FileText, Check, AlertTriangle, CreditCard, Receipt, Info, LogOut, Shield, RotateCcw, Save, Eye } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -15,7 +19,7 @@ import {
   StudentServiceRequestDto,
 } from '../../api/client';
 
-export type CanonicalWorkspaceTab = 'SUMMARY' | 'OPPORTUNITIES' | 'LEARNING' | 'VAULT' | 'SERVICES' | 'PROFILE';
+export type CanonicalWorkspaceTab = 'SUMMARY' | 'OPPORTUNITIES' | 'LEARNING' | 'VAULT' | 'SERVICES' | 'NOTIFICATIONS' | 'PROFILE';
 export type LegacyWorkspaceTab = 'HOME' | 'JOURNEY' | 'SETTINGS';
 export type WorkspaceTab = CanonicalWorkspaceTab | LegacyWorkspaceTab;
 
@@ -33,6 +37,7 @@ const tabs: Array<{ id: Exclude<CanonicalWorkspaceTab, 'PROFILE'>; label: string
   { id: 'LEARNING', label: 'تعلمي', icon: BookOpen },
   { id: 'VAULT', label: 'محفوظاتي', icon: Heart },
   { id: 'SERVICES', label: 'طلباتي', icon: ClipboardList },
+  { id: 'NOTIFICATIONS', label: 'إشعاراتي', icon: Bell },
 ];
 
 function resolveTabFromQuery(queryTab: string | null): CanonicalWorkspaceTab | null {
@@ -43,6 +48,7 @@ function resolveTabFromQuery(queryTab: string | null): CanonicalWorkspaceTab | n
   if (normalized === 'learning' || normalized === 'courses') return 'LEARNING';
   if (normalized === 'vault' || normalized === 'saved') return 'VAULT';
   if (normalized === 'services' || normalized === 'requests') return 'SERVICES';
+  if (normalized === 'notifications') return 'NOTIFICATIONS';
   if (normalized === 'profile' || normalized === 'settings') return 'PROFILE';
   return null;
 }
@@ -71,13 +77,48 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
   const [hydratedSavedItems, setHydratedSavedItems] = useState<HydratedStudentSavedItemDto[]>([]);
   const [applicationTrackers, setApplicationTrackers] = useState<StudentApplicationTrackerDto[]>([]);
   const [serviceRequests, setServiceRequests] = useState<StudentServiceRequestDto[]>([]);
+  const [sectionFailures, setSectionFailures] = useState<string[]>([]);
+  const [profileDirty, setProfileDirty] = useState(false);
+  const [serviceStatus, setServiceStatus] = useState('');
+  const [servicePage, setServicePage] = useState(1);
+  const [serviceTotal, setServiceTotal] = useState(0);
+  const [serviceHasMore, setServiceHasMore] = useState(false);
+  const [serviceLoading, setServiceLoading] = useState(false);
+  const [serviceError, setServiceError] = useState<string | null>(null);
+  const serviceSequence = useRef(0);
+  const [invoicePage, setInvoicePage] = useState(1);
+  const [invoiceTotal, setInvoiceTotal] = useState(0);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
+  const invoiceSequence = useRef(0);
+  const mutationPending = useRef(false);
   const [selectedServiceRequest, setSelectedServiceRequest] = useState<StudentServiceRequestDto | null>(null);
   const [requestedServiceNotFound, setRequestedServiceNotFound] = useState(false);
   const [requestedNotFoundId, setRequestedNotFoundId] = useState<string | null>(null);
   const [identity, setIdentity] = useState<{ principalId: string; displayName: string; primaryEmail?: string; roles?: string[]; roleNames?: string[] } | null>(null);
 
+  useEffect(() => {
+    if (!dashboard) return;
+    window.dispatchEvent(new CustomEvent('manaratak-student-preferences', { detail: { theme: dashboard.workspace.theme, unreadNotifications: dashboard.capabilityStatus?.notifications === 'DEGRADED' ? undefined : dashboard.statistics.unreadNotifications } }));
+  }, [dashboard?.workspace.theme, dashboard?.statistics.unreadNotifications, dashboard?.capabilityStatus?.notifications]);
+
+  useEffect(() => {
+    if (tab !== 'LEARNING' || !studentReferenceId) return;
+    let active = true; let latest = 0;
+    const refreshCertificates = async () => {
+      if (document.visibilityState === 'hidden') return;
+      const request = ++latest;
+      try { const next = await ApiClient.getMyStudentDashboard(); if (active && request === latest) setDashboard(next); } catch { /* Preserve the loaded account during transient failures. */ }
+    };
+    window.addEventListener('focus', refreshCertificates);
+    document.addEventListener('visibilitychange', refreshCertificates);
+    return () => {active=false;window.removeEventListener('focus',refreshCertificates);document.removeEventListener('visibilitychange',refreshCertificates);};
+  }, [tab, studentReferenceId]);
+
   // Synchronize Tab with URL query param and browser history (back/forward & refresh support)
   const handleTabChange = (nextTab: CanonicalWorkspaceTab, push = true) => {
+    if (tab === 'PROFILE' && nextTab !== 'PROFILE' && profileDirty && !window.confirm('لديك تعديلات غير محفوظة. مغادرة الملف دون حفظ؟')) return;
+    if (nextTab !== 'PROFILE') setProfileDirty(false);
     setTab(nextTab);
     const searchParams = new URLSearchParams(location.search);
     const tabParam = nextTab.toLowerCase();
@@ -92,6 +133,53 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
       }
     }
   };
+
+  useEffect(() => {
+    if (!profileDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [profileDirty]);
+
+  useEffect(() => {
+    if (tab !== 'SERVICES' || !studentReferenceId || loading) return;
+    const request = ++serviceSequence.current;
+    setServiceLoading(true); setServiceError(null);
+    ApiClient.listMyStudentServiceRequests({ status: serviceStatus || undefined })
+      .then(page => {
+        if (request !== serviceSequence.current) return;
+        setSectionFailures(items => items.filter(item => item !== 'طلبات الخدمات'));
+        setServiceRequests(page.data); setServicePage(page.page); setServiceTotal(page.total); setServiceHasMore(page.page < page.totalPages);
+      }).catch(cause => { if (request === serviceSequence.current) setServiceError(cause instanceof Error ? cause.message : 'تعذر تحميل الطلبات.'); })
+      .finally(() => { if (request === serviceSequence.current) setServiceLoading(false); });
+    return () => { ++serviceSequence.current; };
+  }, [tab, serviceStatus, studentReferenceId, loading]);
+
+  async function loadMoreServices() {
+    if (serviceLoading || !serviceHasMore) return;
+    const request = ++serviceSequence.current;
+    setServiceLoading(true); setServiceError(null);
+    try {
+      const page = await ApiClient.listMyStudentServiceRequests({ page: servicePage + 1, status: serviceStatus || undefined });
+      if (request !== serviceSequence.current) return;
+      setServiceRequests(items => [...new Map([...items, ...page.data].map(item => [item.id, item])).values()]);
+      setServicePage(page.page); setServiceTotal(page.total); setServiceHasMore(page.page < page.totalPages);
+    } catch (cause) { if (request === serviceSequence.current) setServiceError(cause instanceof Error ? cause.message : 'تعذر تحميل المزيد.'); }
+    finally { if (request === serviceSequence.current) setServiceLoading(false); }
+  }
+
+  async function loadMoreInvoices() {
+    if (!studentReferenceId || invoiceLoading || invoices.length >= invoiceTotal) return;
+    const request = ++invoiceSequence.current;
+    setInvoiceLoading(true); setInvoiceError(null);
+    try {
+      const page = await ApiClient.getStudentInvoices(studentReferenceId, { page: invoicePage + 1 });
+      if (request !== invoiceSequence.current) return;
+      setInvoices(items => [...new Map([...items, ...page.data].map(item => [item.id, item])).values()]);
+      setInvoicePage(page.page ?? invoicePage + 1); setInvoiceTotal(page.total);
+    } catch (cause) { if (request === invoiceSequence.current) setInvoiceError(cause instanceof Error ? cause.message : 'تعذر تحميل الفواتير.'); }
+    finally { if (request === invoiceSequence.current) setInvoiceLoading(false); }
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -114,11 +202,12 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
   useEffect(() => {
     const requestedId = new URLSearchParams(location.search).get('requestId');
     if (!requestedId) {
+      setSelectedServiceRequest(null);
       setRequestedServiceNotFound(false);
       setRequestedNotFoundId(null);
       return;
     }
-    if (loading) return;
+    if (loading || !studentReferenceId) return;
 
     const matched = serviceRequests.find((item) => item.id === requestedId || item.publicId === requestedId);
     if (matched) {
@@ -146,16 +235,19 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
         active = false;
       };
     }
-  }, [location.search, serviceRequests, loading]);
+  }, [location.search, serviceRequests, loading, studentReferenceId]);
 
   useEffect(() => {
     let active = true;
+    let identityLoaded = false;
     async function loadWorkspace() {
       setLoading(true);
       setError(null);
+      ++invoiceSequence.current;
       try {
         const identity = await ApiClient.getCurrentStudentIdentity();
         if (!active) return;
+        identityLoaded = true;
         setIdentity(identity);
         setStudentReferenceId(identity.principalId);
         const [dashboardResult, invoiceResult, snapshotResult, hydratedSavedResult, trackerResult, serviceRequestResult] = await Promise.allSettled([
@@ -170,11 +262,23 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
         if (dashboardResult.status === 'rejected') throw dashboardResult.reason;
         setDashboard(dashboardResult.value);
         setInvoices(invoiceResult.status === 'fulfilled' ? invoiceResult.value.data : []);
+        setInvoicePage(invoiceResult.status === 'fulfilled' ? invoiceResult.value.page ?? 1 : 1);
+        setInvoiceTotal(invoiceResult.status === 'fulfilled' ? invoiceResult.value.total : 0);
+        setSectionFailures([
+          ...(invoiceResult.status === 'rejected' ? ['الفواتير'] : []),
+          ...(snapshotResult.status === 'rejected' ? ['نسخ الإعدادات'] : []),
+          ...(hydratedSavedResult.status === 'rejected' ? ['تفاصيل المحفوظات'] : []),
+          ...(trackerResult.status === 'rejected' ? ['ملفات التقديم'] : []),
+          ...(serviceRequestResult.status === 'rejected' ? ['طلبات الخدمات'] : []),
+        ]);
         setSnapshots(snapshotResult.status === 'fulfilled' ? snapshotResult.value : []);
         setHydratedSavedItems(hydratedSavedResult.status === 'fulfilled' ? hydratedSavedResult.value : []);
         setApplicationTrackers(trackerResult.status === 'fulfilled' ? trackerResult.value : []);
         const loadedRequests = serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.data : [];
         setServiceRequests(loadedRequests);
+        setServicePage(serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.page : 1);
+        setServiceTotal(serviceRequestResult.status === 'fulfilled' ? serviceRequestResult.value.total : 0);
+        setServiceHasMore(serviceRequestResult.status === 'fulfilled' && serviceRequestResult.value.page < serviceRequestResult.value.totalPages);
 
         const currentRequestedId = new URLSearchParams(window.location.search).get('requestId');
         if (currentRequestedId) {
@@ -186,10 +290,12 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
           } else {
             try {
               const fetched = await ApiClient.getMyStudentServiceRequest(currentRequestedId);
+              if (!active) return;
               setSelectedServiceRequest(fetched);
               setRequestedServiceNotFound(false);
               setRequestedNotFoundId(null);
             } catch {
+              if (!active) return;
               setSelectedServiceRequest(null);
               setRequestedServiceNotFound(true);
               setRequestedNotFoundId(currentRequestedId);
@@ -198,9 +304,10 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
         }
       } catch (cause) {
         if (active) {
+          if (!identityLoaded) { setDashboard(null); setIdentity(null); setStudentReferenceId(null); }
           const msg = cause instanceof Error ? cause.message : 'تعذر تحميل مساحة الطالب';
           setError(msg);
-          if (msg.includes('PROVISIONING_PENDING') || msg.includes('INITIALIZING') || msg.includes('423')) {
+          if (msg.includes('PROVISIONING_PENDING') || msg.includes('INITIALIZING')) {
             // Auto retry in background while outbox event is being processed
             window.setTimeout(() => {
               if (active) setRetryKey((v) => v + 1);
@@ -240,55 +347,64 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
     }
   }
 
+  async function applicationError(cause: unknown, fallback: string) {
+    const message = cause instanceof Error ? cause.message : fallback;
+    setError(message.includes('VERSION_CONFLICT') ? 'تغيّر ملف التقديم في جلسة أخرى. حدّثنا بياناته؛ راجع التعديل وأعد الحفظ.' : message);
+    if (message.includes('VERSION_CONFLICT')) {
+      try { setApplicationTrackers(await ApiClient.listMyStudentApplicationTrackers()); }
+      catch { setError('تعذر تحديث ملف التقديم بعد تعارض الإصدارات. أعد تحميل الحساب قبل الحفظ.'); }
+    }
+  }
+
   async function updateApplicationStage(tracker: StudentApplicationTrackerDto, stage: string) {
-    setSaving(true); setError(null);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try {
       const updated = await ApiClient.updateMyStudentApplicationTracker(tracker.id, { expectedVersion: tracker.version, stage });
       setApplicationTrackers((items) => items.map((item) => item.id === tracker.id ? { ...updated, owner: item.owner } : item));
       setNotice('تم تحديث مرحلة التقديم وحفظها في مساحة الطالب.');
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر تحديث مرحلة التقديم'); }
-    finally { setSaving(false); }
+    } catch (cause) { await applicationError(cause, 'تعذر تحديث مرحلة التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function toggleApplicationChecklist(tracker: StudentApplicationTrackerDto, itemId: string, completed: boolean) {
-    setSaving(true); setError(null);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try {
       const updated = await ApiClient.updateMyStudentApplicationChecklistItem(tracker.id, itemId, completed, tracker.version);
       setApplicationTrackers((items) => items.map((item) => item.id === tracker.id ? { ...updated, owner: item.owner } : item));
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر تحديث قائمة التقديم'); }
-    finally { setSaving(false); }
+    } catch (cause) { await applicationError(cause, 'تعذر تحديث قائمة التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function archiveApplicationTracker(tracker: StudentApplicationTrackerDto) {
-    setSaving(true); setError(null);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try {
       const updated = await ApiClient.archiveMyStudentApplicationTracker(tracker.id, tracker.version);
       setApplicationTrackers((items) => items.map((item) => item.id === tracker.id ? { ...updated, owner: item.owner } : item));
       setNotice('تمت أرشفة ملف التقديم وإلغاء التذكير المرتبط به.');
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر أرشفة ملف التقديم'); }
-    finally { setSaving(false); }
+    } catch (cause) { await applicationError(cause, 'تعذر أرشفة ملف التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function updateApplicationNotes(tracker: StudentApplicationTrackerDto, notes: string) {
-    setSaving(true); setError(null);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try {
       const updated = await ApiClient.updateMyStudentApplicationTracker(tracker.id, { expectedVersion: tracker.version, notes });
       setApplicationTrackers((items) => items.map((item) => item.id === tracker.id ? { ...updated, owner: item.owner } : item));
       setNotice('تم حفظ ملاحظات ملف التقديم.');
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر حفظ ملاحظات ملف التقديم'); }
-    finally { setSaving(false); }
+    } catch (cause) { await applicationError(cause, 'تعذر حفظ ملاحظات ملف التقديم'); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function removeApplicationTracker(tracker: StudentApplicationTrackerDto) {
     if (!window.confirm('إزالة ملف التقديم من مساحة الطالب؟')) return;
-    setSaving(true); setError(null);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true); setError(null);
     try { await ApiClient.removeMyStudentApplicationTracker(tracker.id); setApplicationTrackers((items) => items.filter((item) => item.id !== tracker.id)); }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر إزالة ملف التقديم'); }
-    finally { setSaving(false); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function openServiceRequest(requestId: string) {
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     setError(null);
     try {
       const match = serviceRequests.find((r) => r.id === requestId || r.publicId === requestId);
@@ -312,17 +428,19 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
       setRequestedServiceNotFound(true);
       setRequestedNotFoundId(requestId);
     } finally {
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function savePreferences(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!dashboard || !studentReferenceId) return;
+    if (!dashboard || !studentReferenceId || mutationPending.current) return;
     const form = new FormData(event.currentTarget);
+    mutationPending.current = true;
     setSaving(true);
     setNotice(null);
     setError(null);
+    let preferencesSaved = false;
     try {
       const workspace = await ApiClient.updateMyStudentWorkspace({
         expectedVersion: dashboard.workspace.version,
@@ -346,28 +464,30 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
           highContrast: form.get('highContrast') === 'on',
         },
       });
-      await ApiClient.updateMyStudentPrivacyConsent({
-        expectedVersion: workspace.version,
-        purpose: 'تحديث تفضيلات الخصوصية من مساحة الطالب',
-        privacyPreferences: {
+      preferencesSaved = true;
+      const privacyPreferences = {
           retainSearchHistory: form.get('retainSearchHistory') === 'on',
           allowPersonalization: form.get('allowPersonalization') === 'on',
           allowProductAnalytics: form.get('allowProductAnalytics') === 'on',
           publicProfileEnabled: false,
-        },
-      });
+      };
+      const privacyChanged = Object.entries(privacyPreferences).some(([key, value]) => dashboard.workspace.privacyPreferences?.[key] !== value);
+      if (privacyChanged) await ApiClient.updateMyStudentPrivacyConsent({ expectedVersion: workspace.version, purpose: 'تحديث تفضيلات الخصوصية من مساحة الطالب', privacyPreferences });
       setDashboard(await ApiClient.getMyStudentDashboard());
+      setProfileDirty(false);
+      window.dispatchEvent(new CustomEvent('manaratak-student-preferences', { detail: { theme: workspace.theme } }));
       setNotice('حُفظت تفضيلاتك بأمان على جميع أجهزتك.');
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'تعذر حفظ الإعدادات';
       setNotice(null);
-      setError(message.includes('VERSION_CONFLICT')
+      setError(preferencesSaved ? `حُفظت بيانات الملف، لكن لم تكتمل مزامنة الخصوصية أو إعادة تحميل الحساب: ${message}. أعد تحميل الإعدادات قبل المحاولة مجدداً.` : message.includes('VERSION_CONFLICT')
         ? 'تغيّرت الإعدادات في جلسة أخرى. تم تحديث البيانات؛ راجع اختياراتك ثم احفظ مجددًا.'
         : message);
-      if (message.includes('VERSION_CONFLICT')) {
+      if (preferencesSaved || message.includes('VERSION_CONFLICT')) {
         try { setDashboard(await ApiClient.getMyStudentDashboard()); } catch { setRetryKey((value) => value + 1); }
       }
     } finally {
+      mutationPending.current = false;
       setSaving(false);
     }
   }
@@ -375,10 +495,11 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
   async function createCollection(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!studentReferenceId) return;
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const name = String(form.get('collectionName') || '').trim();
     if (!name) return;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.createMyStudentCollection({
         name,
@@ -387,40 +508,40 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
       });
       const refreshed = await ApiClient.getMyStudentDashboard();
       setDashboard(refreshed);
-      event.currentTarget.reset();
+      formElement.reset();
       setNotice('أُنشئت المجموعة الجديدة.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر إنشاء المجموعة');
     } finally {
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function renameCollection(collectionId: string, currentName: string) {
     const name = window.prompt('الاسم الجديد للمجموعة', currentName)?.trim();
     if (!name || name === currentName) return;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.updateMyStudentCollection(collectionId, { name });
       setDashboard(await ApiClient.getMyStudentDashboard());
       setNotice('تم تحديث اسم المجموعة.');
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر تعديل المجموعة'); }
-    finally { setSaving(false); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function deleteCollection(collectionId: string, name: string) {
     if (!window.confirm(`حذف مجموعة «${name}»؟ ستنتقل العناصر إلى المفضلة.`)) return;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.deleteMyStudentCollection(collectionId);
       setDashboard(await ApiClient.getMyStudentDashboard());
       setNotice('حُذفت المجموعة ونُقلت عناصرها بأمان إلى المفضلة.');
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر حذف المجموعة'); }
-    finally { setSaving(false); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function moveSavedItem(itemId: string, collectionId: string | null) {
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.moveMyStudentSavedItem(itemId, collectionId);
       const [refreshedDashboard, refreshedHydration] = await Promise.all([
@@ -431,13 +552,13 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
       setHydratedSavedItems(refreshedHydration);
       setNotice('تم نقل العنصر إلى المجموعة المختارة.');
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر نقل العنصر'); }
-    finally { setSaving(false); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function removeSavedItem(item: StudentSavedItemDto) {
     const itemName = item.displayName || 'هذا العنصر';
     if (!window.confirm(`هل أنت متأكد من إزالة «${itemName}» من المحفوظات؟`)) return;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     setError(null);
     try {
       await ApiClient.removeMyStudentSavedItem(item.entityType, item.entityId);
@@ -451,13 +572,13 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر إزالة العنصر من المحفوظات');
     } finally {
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function createSnapshot() {
     if (!studentReferenceId) return;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.createMyStudentWorkspaceSnapshot('نسخة إعداداتي');
       setSnapshots(await ApiClient.listMyStudentWorkspaceSnapshots());
@@ -465,47 +586,51 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر حفظ النسخة');
     } finally {
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function restoreSnapshot(snapshotId: string) {
     if (!dashboard) return;
-    setSaving(true);
+    if (!window.confirm('استعادة نسخة الإعدادات واستبدال اختياراتك الحالية؟')) return;
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       const workspace = await ApiClient.restoreMyStudentWorkspaceSnapshot(snapshotId, dashboard.workspace.version);
       setDashboard((current) => current ? { ...current, workspace } : current);
+      setProfileDirty(false);
       setNotice('تمت استعادة نسخة الإعدادات مع التحقق من تعارض الإصدارات.');
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر استعادة النسخة'); }
-    finally { setSaving(false); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function resetLayout() {
     if (!dashboard) return;
-    setSaving(true);
+    if (!window.confirm(profileDirty ? 'إعادة ترتيب اللوحة؟ ستفقد تعديلات الملف غير المحفوظة.' : 'إعادة ترتيب لوحة حسابك إلى الترتيب الافتراضي؟')) return;
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       const workspace = await ApiClient.resetMyStudentDashboardLayout(dashboard.workspace.version);
       setDashboard((current) => current ? { ...current, workspace } : current);
+      setProfileDirty(false);
       setNotice('أُعيد تخطيط اللوحة إلى الإعدادات الآمنة.');
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'تعذر إعادة التخطيط'); }
-    finally { setSaving(false); }
+    finally { mutationPending.current = false; setSaving(false); }
   }
 
   async function clearSearchHistory() {
     if (!studentReferenceId) return;
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     try {
       await ApiClient.clearMyStudentSearchHistory();
       setNotice('مُسح سجل البحث الشخصي.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر مسح سجل البحث');
     } finally {
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   async function logout() {
-    setSaving(true);
+    if (mutationPending.current) return; mutationPending.current = true; setSaving(true);
     setError(null);
     try {
       await ApiClient.logoutStudent();
@@ -513,14 +638,14 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر تسجيل الخروج');
     } finally {
-      setSaving(false);
+      mutationPending.current = false; setSaving(false);
     }
   }
 
   if (loading) return <WorkspaceSkeleton />;
 
   if (error && !dashboard) {
-    const isProvisioning = error.includes('PROVISIONING_PENDING') || error.includes('INITIALIZING') || error.includes('423');
+    const isProvisioning = error.includes('PROVISIONING_PENDING') || error.includes('INITIALIZING');
     if (isProvisioning) {
       return (
         <main dir="rtl" className="mn-page-shell py-24 text-center">
@@ -583,7 +708,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
   const accessibility = (workspace.accessibilityPreferences || {}) as Record<string, unknown>;
 
   return (
-    <main dir="rtl" className="w-full max-w-4xl mx-auto px-3 sm:px-6 pb-28 sm:pb-16 text-right font-['Cairo',sans-serif] min-h-screen text-[var(--mn-text)]">
+    <main dir="rtl" data-text-scale={String(accessibility.textScale || 'DEFAULT')} data-reduce-motion={String(Boolean(accessibility.reduceMotion))} data-high-contrast={String(Boolean(accessibility.highContrast))} className="mn-student-workspace w-full max-w-4xl mx-auto px-3 sm:px-6 pb-28 sm:pb-16 text-right font-['Cairo',sans-serif] min-h-screen text-[var(--mn-text)]">
       {/* Main Hero Card with Golden Top Bar & Royal Gradient */}
       <div className="mn-inverse relative overflow-hidden rounded-[26px] border border-[#142B5F] dark:border-[#B38018]/50 bg-gradient-to-br from-[#142B5F] via-[#112450] to-[#0c1a3b] text-white shadow-md mx-auto w-full mt-4">
         {/* Top Golden Accent Line */}
@@ -636,7 +761,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
                 </div>
               ) : (
                 <span className="text-[11px] text-white/80 bg-white/10 px-2.5 py-1 rounded-xl font-medium">
-                  {identity?.roles?.includes('student') ? 'طالب معتمد' : 'حساب نشط'}
+                  {arabicStatus(workspace.status)}
                 </span>
               )}
               <button
@@ -654,13 +779,15 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
       </div>
 
       {/* Navigation Tabs Bar - 5 main tabs: ملخصي | فرصي | تعلمي | محفوظاتي | طلباتي */}
-      <div className="w-full max-w-4xl mx-auto mt-3.5 p-1 sm:p-1.5 rounded-2xl bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 shadow-sm grid grid-cols-5 gap-1 sm:gap-1.5 mn-panel">
+      <div role="navigation" aria-label="أقسام حساب الطالب" className="w-full max-w-4xl mx-auto mt-3.5 p-1 sm:p-1.5 rounded-2xl bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 shadow-sm grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-1.5 mn-panel">
         {tabs.map((item) => {
           const Icon = item.icon;
           const active = tab === item.id;
           return (
             <button
               key={item.id}
+              type="button"
+              aria-current={active ? 'page' : undefined}
               onClick={() => handleTabChange(item.id)}
               className={`min-w-0 rounded-xl px-1 sm:px-1.5 py-2 flex flex-col items-center gap-1 transition-all cursor-pointer ${
                 active
@@ -678,6 +805,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
       <div className="w-full max-w-4xl mx-auto mt-5 space-y-5">
         {error && <Alert tone="error" message={error} onClose={() => setError(null)} />}
         {notice && <Alert tone="success" message={notice} onClose={() => setNotice(null)} />}
+        {sectionFailures.length > 0 && <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">تعذر تحميل: {sectionFailures.join('، ')}. <button type="button" onClick={() => setRetryKey(value => value + 1)} className="font-bold underline">إعادة التحميل</button></div>}
         {dashboard.partialFailures.length > 0 && (
           <Alert
             tone="warning"
@@ -696,7 +824,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
             applicationTrackers={applicationTrackers}
           />
         )}
-        {tab === 'OPPORTUNITIES' && (
+        {tab === 'OPPORTUNITIES' && !sectionFailures.includes('ملفات التقديم') && (
           <OpportunitiesView
             dashboard={dashboard}
             trackers={applicationTrackers}
@@ -713,6 +841,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
             dashboard={dashboard}
           />
         )}
+        {tab === 'NOTIFICATIONS' && <StudentNotificationsView items={dashboard.notifications} available={dashboard.capabilityStatus?.notifications !== 'DEGRADED'} onRefresh={() => setRetryKey(value => value + 1)} />}
         {tab === 'VAULT' && (
           <VaultView
             dashboard={dashboard}
@@ -726,6 +855,17 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
           />
         )}
         {tab === 'SERVICES' && (
+          <div className="space-y-4">
+          <div className="mn-panel flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--mn-border)] p-4">
+            <label className="text-xs font-bold">حالة الطلب <select value={serviceStatus} onChange={event => setServiceStatus(event.target.value)} className="mr-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 text-[var(--mn-text)]">
+              <option value="">الكل</option>{['REQUESTED','ACCEPTED','IN_PROGRESS','AWAITING_PAYMENT','COMPLETED','CANCELLED'].map(status => <option key={status} value={status}>{getServiceRequestStatusBadge(status).label}</option>)}
+            </select></label>
+            <span className="text-xs text-[var(--mn-text-muted)]">{serviceLoading ? 'جارٍ تحميل الطلبات…' : `${serviceRequests.length} من ${serviceTotal} طلب`}</span>
+          </div>
+          {serviceError && <div className="space-y-2"><Alert tone="error" message={serviceError} /><button type="button" onClick={() => setRetryKey(value => value + 1)} className="text-sm font-bold text-[var(--mn-primary)] underline">إعادة تحميل الطلبات</button></div>}
+          {invoiceError && <Alert tone="error" message={invoiceError} />}
+          {serviceError && !sectionFailures.includes('الفواتير') && <InvoicePanel invoices={invoices} paymentsByInvoice={paymentsByInvoice} onToggle={toggleInvoicePayments} />}
+          {!serviceLoading && !serviceError && (
           <ServiceRequestsView
             requests={serviceRequests}
             selected={selectedServiceRequest}
@@ -736,9 +876,16 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
             paymentsByInvoice={paymentsByInvoice}
             onTogglePayments={toggleInvoicePayments}
           />
+          )}
+          {serviceHasMore && <button type="button" disabled={serviceLoading} onClick={() => void loadMoreServices()} className="rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{serviceLoading ? 'جارٍ التحميل…' : 'تحميل طلبات إضافية'}</button>}
+          {invoices.length < invoiceTotal && <button type="button" disabled={invoiceLoading} onClick={() => void loadMoreInvoices()} className="mr-2 rounded-xl border border-[var(--mn-border)] px-4 py-2 text-sm disabled:opacity-50">{invoiceLoading ? 'جارٍ تحميل الفواتير…' : `تحميل فواتير إضافية (${invoices.length} من ${invoiceTotal})`}</button>}
+          </div>
         )}
         {tab === 'PROFILE' && (
           <ProfileView
+            key={workspace.version}
+            onDirtyChange={setProfileDirty}
+            dirty={profileDirty}
             dashboard={dashboard}
             identity={identity}
             onLogout={() => void logout()}
@@ -783,13 +930,13 @@ function SummaryView({
   );
 
   const activeCourse = useMemo(
-    () => dashboard.courseEnrollments.find((item) => item.status !== 'COMPLETED') || dashboard.courseEnrollments[0] || null,
+    () => dashboard.courseEnrollments.find((item) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(item.status)) || dashboard.courseEnrollments[0] || null,
     [dashboard.courseEnrollments],
   );
 
   const urgentAlerts = useMemo(() => {
     const unread = dashboard.notifications.filter((n) => !n.readAt);
-    const pendingInvoices = invoices.filter((inv) => inv.status !== 'PAID');
+    const pendingInvoices = invoices.filter((inv) => ['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'].includes(inv.status));
     const upcomingDeadlines = activeMilestones.filter((m) => m.deadlineAt);
     return {
       unread,
@@ -824,7 +971,7 @@ function SummaryView({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setTab('PROFILE')}
+                  onClick={() => setTab('NOTIFICATIONS')}
                   className="shrink-0 text-[10px] font-bold text-[var(--mn-primary)] hover:underline cursor-pointer"
                 >
                   عرض
@@ -1728,9 +1875,10 @@ function ApplicationTrackerCard({
 
 function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) {
   const [filter, setFilter] = useState<'ALL' | 'IN_PROGRESS' | 'COMPLETED' | 'CERTIFICATES'>('ALL');
+  const otherCourses = dashboard.courseEnrollments.filter(course => !['ACTIVE', 'ENROLLED', 'IN_PROGRESS', 'COMPLETED'].includes(course.status));
 
   const inProgressCourses = useMemo(
-    () => dashboard.courseEnrollments.filter((c) => c.status !== 'COMPLETED'),
+    () => dashboard.courseEnrollments.filter((c) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(c.status)),
     [dashboard.courseEnrollments],
   );
 
@@ -1745,6 +1893,8 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
 
   return (
     <div className="space-y-5">
+      {dashboard.capabilityStatus?.learning === 'DEGRADED' && <Alert tone="warning" message="تعذر تحميل الدورات حالياً؛ القائمة الحالية لا تعني عدم وجود تسجيلات." />}
+      {dashboard.capabilityStatus?.certificates === 'DEGRADED' && <Alert tone="warning" message="تعذر تحميل الشهادات حالياً. أعد تحديث الحساب." />}
       {/* 1. Header Banner & Quick Learning Stats */}
       <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -2007,6 +2157,7 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
             </div>
           )}
 
+          {filter === 'ALL' && otherCourses.length > 0 && <section className="space-y-3"><h3 className="text-sm font-bold text-[var(--mn-heading)]">تسجيلات معلقة أو سابقة</h3><div className="grid gap-3 sm:grid-cols-2">{otherCourses.map(course => <CourseCard key={course.enrollmentId} course={course} />)}</div></section>}
           {/* Section 3: Certificates & Achievements */}
           {(filter === 'ALL' || filter === 'CERTIFICATES') && (
             <div id="certificates" className="space-y-3 scroll-mt-6">
@@ -2027,15 +2178,15 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
               {certificates.length === 0 ? (
                 <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
                   <Award className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-                  <h4 className="font-bold text-sm text-[var(--mn-heading)]">لا توجد شهادات صادرة بعد</h4>
+                  <h4 className="font-bold text-sm text-[var(--mn-heading)]">{dashboard.capabilityStatus?.certificates === 'DEGRADED' ? 'الشهادات غير متاحة مؤقتاً' : 'لا توجد شهادات صادرة بعد'}</h4>
                   <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
-                    تُصدر الشهادات المعتمدة تلقائيًا فور إتمام جميع متطلبات واختبارات الدورة التدريبية.
+                    تظهر شهادة منارتك للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.
                   </p>
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {certificates.map((cert) => {
-                    const verifyCode = cert.verificationCode || cert.serialNumber || cert.publicId;
+                    const verifyCode = cert.verificationCode;
                     return (
                       <div
                         key={cert.id || cert.publicId}
@@ -2048,7 +2199,7 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
                                 <Award className="w-4 h-4 text-[#E5B54F]" />
                               </div>
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D6A43B]/15 text-[#B38018] dark:text-[#E5B54F] border border-[#D6A43B]/30">
-                                {cert.status === 'ACTIVE' ? 'شهادة معتمدة' : arabicStatus(cert.status)}
+                                {cert.status === 'ACTIVE' && (!cert.expiresAt || new Date(cert.expiresAt) > new Date()) ? 'شهادة صادرة' : cert.status === 'ACTIVE' ? 'منتهية الصلاحية' : arabicStatus(cert.status)}
                               </span>
                             </div>
                             <span className="text-[10px] font-mono text-[var(--mn-text-muted)]">
@@ -2066,10 +2217,11 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
                           </div>
                         </div>
 
+                        <StudentCertificateActions certificate={cert}/>
                         <div className="mt-4 pt-3 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between">
                           <span className="text-[10px] text-[var(--mn-success-text)] font-semibold flex items-center gap-1">
                             <ShieldCheck className="w-3.5 h-3.5" />
-                            <span>موثقة رقمياً</span>
+                            <span>سجل شهادة منارتك</span>
                           </span>
                           {verifyCode && (
                             <Link
@@ -2133,6 +2285,9 @@ function formatParameterValue(value: unknown): string {
 function getServiceRequestStatusBadge(status: string) {
   const normalized = status.toUpperCase();
   switch (normalized) {
+    case 'REQUESTED': return { label: 'طلب جديد', className: 'bg-amber-500/10 text-amber-700 border-amber-500/20' };
+    case 'ACCEPTED': return { label: 'مقبول', className: 'bg-teal-500/10 text-teal-700 border-teal-500/20' };
+    case 'AWAITING_PAYMENT': return { label: 'بانتظار الدفع', className: 'bg-amber-500/10 text-amber-700 border-amber-500/20' };
     case 'COMPLETED':
     case 'FULFILLED':
     case 'RESOLVED':
@@ -2264,9 +2419,10 @@ function ServiceRequestsView({
   onTogglePayments: (invoiceId: string) => void;
 }) {
   const [activeTab, setActiveTab] = useState<'REQUESTS' | 'INVOICES'>('REQUESTS');
+  useEffect(() => { if (selected) setActiveTab('REQUESTS'); }, [selected?.id]);
 
   const pendingCount = useMemo(
-    () => requests.filter((r) => r.status === 'PENDING' || r.status === 'SUBMITTED' || r.status === 'IN_PROGRESS' || r.status === 'PROCESSING').length,
+    () => requests.filter((r) => ['REQUESTED', 'ACCEPTED', 'IN_PROGRESS', 'AWAITING_PAYMENT'].includes(r.status)).length,
     [requests],
   );
 
@@ -2314,7 +2470,7 @@ function ServiceRequestsView({
               className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel cursor-pointer hover:border-[#D6A43B]/40 transition-colors"
             >
               <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{requests.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">إجمالي الطلبات</div>
+              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">الطلبات المعروضة</div>
             </button>
             <button
               type="button"
@@ -2330,7 +2486,7 @@ function ServiceRequestsView({
               className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel cursor-pointer hover:border-[#D6A43B]/40 transition-colors"
             >
               <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{invoices.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">الفواتير والمدفوعات</div>
+              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">الفواتير المعروضة</div>
             </button>
           </div>
         )}
@@ -2816,6 +2972,7 @@ function VaultView({
 
   const savedItems = dashboard.savedItems;
   const collections = dashboard.collections;
+  useEffect(() => { if (collectionFilter !== 'ALL' && collectionFilter !== 'UNCOLLECTED' && !collections.some(collection => collection.id === collectionFilter)) setCollectionFilter('ALL'); }, [collections, collectionFilter]);
 
   const filteredItems = useMemo(() => {
     return savedItems.filter((item) => {
@@ -2854,6 +3011,10 @@ function VaultView({
     { id: 'UNIVERSITY', label: 'الجامعات' },
     { id: 'MAJOR', label: 'التخصصات' },
     { id: 'COURSE', label: 'الدورات' },
+    {id:'INTERNATIONAL_TEST',label:'الاختبارات'},
+    {id:'CMS_CONTENT',label:'المقالات والمحتوى'},
+    {id:'SERVICE',label:'الخدمات'},
+    {id:'STUDENT_TOOL',label:'أدوات الطالب'},
   ];
 
   function getEntityIcon(type: string) {
@@ -3152,10 +3313,11 @@ function VaultView({
         <div className="grid gap-3 sm:grid-cols-2">
           {filteredItems.map((item) => {
             const owner = hydratedBySavedItemId.get(item.id);
-            const displayName = owner?.displayName || item.displayName || item.entityId;
+            const toolTitles: Record<string, string> = { 'gpa-calculator': 'حاسبة المعدل التراكمي', 'university-comparison': 'مقارنة الجامعات', 'motivation-letter-generator': 'خطاب الدافع', 'scholarship-recommendation': 'توصية المنح' };
+            const displayName = owner?.displayName || item.displayName || (item.entityType === 'STUDENT_TOOL' ? toolTitles[item.entitySlug ?? ''] : undefined) || item.entityId;
             const slug = owner?.slug || item.entitySlug || undefined;
-            const available = owner ? owner.available : true;
-            const targetUrl = slug
+            const available = owner ? owner.available : null;
+            const targetUrl = available === false ? null : slug
               ? buildEntityLink(item.entityType, slug)
               : item.entityType === 'STUDENT_TOOL'
                 ? '/tools'
@@ -3197,13 +3359,17 @@ function VaultView({
                   </h3>
 
                   {/* Unavailability Notice */}
-                  {!available && (
+                  {!available && item.entityType !== 'STUDENT_TOOL' && (
                     <div className="mt-2 rounded-lg bg-[var(--mn-warning-soft)] p-2 text-[10.5px] font-medium text-[var(--mn-warning-text)] flex items-center gap-1.5">
                       <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                      <span>غير معروض حاليًا لدى المصدر؛ وسجلك محفوظ.</span>
+                      <span>{available === false ? 'غير معروض حاليًا لدى المصدر؛ وسجلك محفوظ.' : 'تعذر تأكيد حالة المصدر حالياً؛ وسجلك محفوظ.'}</span>
                     </div>
                   )}
 
+                  {item.entityType === 'STUDENT_TOOL' && item.metadata?.privateResult != null && <details className="mt-3 rounded-xl border border-[var(--mn-border)] p-3">
+                    <summary className="cursor-pointer text-sm font-bold text-[var(--mn-secondary)]">عرض النتيجة المحفوظة</summary>
+                    <div className="mt-4 min-w-0"><StudentToolResultView value={item.metadata.privateResult} /></div>
+                  </details>}
                   {/* Saved Date */}
                   <div className="mt-2 text-[10.5px] text-[var(--mn-text-muted)]">
                     حُفظ في: <strong>{formatDate(item.savedAt)}</strong>
@@ -3274,8 +3440,10 @@ function StudentAvatarAssetPicker({ currentAssetId }: { currentAssetId: string |
   useEffect(() => {
     let active = true;
     let cleanupUrl: string | null = null;
+    setPreviewUrl(null); setError(null);
 
     if (!selected) {
+      setLoadingPreview(false);
       setPreviewUrl(null);
       return;
     }
@@ -3338,6 +3506,7 @@ function StudentAvatarAssetPicker({ currentAssetId }: { currentAssetId: string |
             className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-xs sm:text-sm font-medium text-[var(--mn-text)] outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20 transition-all"
           >
             <option value="">بدون صورة رمزية (الأيقونة الافتراضية)</option>
+            {selected && !assets.some(asset => asset.id === selected) && <option value={selected}>الصورة الحالية</option>}
             {assets.map((asset) => (
               <option key={asset.id} value={asset.id}>
                 {asset.metadata?.originalFilename || asset.reference || `صورة (${asset.id.slice(0, 8)})`}
@@ -3369,7 +3538,11 @@ function ProfileView({
   onResetLayout,
   onClearSearch,
   onBack,
+  onDirtyChange,
+  dirty,
 }: {
+  onDirtyChange: (dirty: boolean) => void;
+  dirty: boolean;
   dashboard: StudentDashboardSummaryDto;
   identity: { principalId: string; displayName: string; primaryEmail?: string; roles?: string[]; roleNames?: string[] } | null;
   onLogout: () => void;
@@ -3395,7 +3568,9 @@ function ProfileView({
   }
 
   return (
-    <form onSubmit={onSave} className="space-y-6">
+    <form onSubmit={onSave} onChange={() => onDirtyChange(true)} className="space-y-6">
+      <fieldset disabled={saving} className="space-y-6 min-w-0 border-0 p-0">
+      {dirty && <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">لديك تعديلات غير محفوظة.</p>}
       {/* Top Banner with Nile & Gold Identity */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#142B5F] via-[#1A387A] to-[#142B5F] p-4 sm:p-6 text-white shadow-md border border-[#B38018]/30">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -3466,7 +3641,7 @@ function ProfileView({
                 className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--mn-text)] outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20 transition-all font-medium"
               />
               <p className="mt-1 text-[11px] text-[var(--mn-text-muted)]">
-                الاسم الذي يظهر في شهاداتك ومشاركاتك وملفات التقديم.
+                الاسم الظاهر في مساحة حسابك؛ الشهادات الصادرة تحتفظ ببيانات إصدارها.
               </p>
             </div>
 
@@ -3496,11 +3671,11 @@ function ProfileView({
                   <span className="text-[11px] font-semibold text-[var(--mn-text-muted)] block">حالة الحساب الأكاديمي</span>
                   <span className="text-xs font-bold text-[#142B5F] dark:text-[#E0B244] mt-0.5 inline-flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-[var(--mn-success-text)]" />
-                    {identity?.roles?.includes('student') ? 'طالب معتمد' : 'حساب نشط'}
+                    {arabicStatus(dashboard.workspace.status)}
                   </span>
                 </div>
                 <span className="text-[10px] text-[var(--mn-text-muted)] bg-[var(--mn-page)] px-2 py-0.5 rounded-md border border-[var(--mn-border)]">
-                  موثّق
+                  حساب طالب
                 </span>
               </div>
             </div>
@@ -3545,10 +3720,11 @@ function ProfileView({
                 defaultValue={dashboard.workspace.timezone || 'Asia/Aden'}
                 className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] px-3 py-2.5 text-xs sm:text-sm text-[var(--mn-text)] font-medium outline-none focus:border-[#B38018] focus:ring-2 focus:ring-[#B38018]/20"
               >
+                {dashboard.workspace.timezone && !['Asia/Aden','Asia/Riyadh','Asia/Dubai','Africa/Cairo','UTC'].includes(dashboard.workspace.timezone) && <option value={dashboard.workspace.timezone}>{dashboard.workspace.timezone}</option>}
                 <option value="Asia/Aden">عدن (GMT+3)</option>
                 <option value="Asia/Riyadh">الرياض (GMT+3)</option>
                 <option value="Asia/Dubai">دبي (GMT+4)</option>
-                <option value="Africa/Cairo">القاهرة (GMT+2)</option>
+                <option value="Africa/Cairo">القاهرة (حسب التوقيت المحلي)</option>
                 <option value="UTC">التوقيت العالمي الموحد (UTC)</option>
               </select>
             </div>
@@ -3837,6 +4013,7 @@ function ProfileView({
           )}
         </button>
       </div>
+    </fieldset>
     </form>
   );
 }
@@ -3909,13 +4086,13 @@ function CourseCard({
 }) {
   return (
     <Link
-      to={`../student/courses/${encodeURIComponent(course.courseId)}`}
+      to={['ACTIVE', 'COMPLETED', 'ENROLLED', 'IN_PROGRESS'].includes(course.status) ? `../student/courses/${encodeURIComponent(course.courseId)}` : `/courses/${encodeURIComponent(course.courseSlug || course.courseId)}`}
       className={`group block rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 hover:border-[var(--mn-border-gold)] hover:shadow-sm ${wide ? 'sm:p-5' : ''}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <span className="text-xs font-semibold text-[var(--mn-secondary)]">
-            {course.status === 'COMPLETED' ? 'مكتملة' : 'قيد التعلم'}
+            {['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(course.status) ? 'قيد التعلم' : arabicStatus(course.status)}
           </span>
           <h3 className="mt-1 truncate font-bold">{course.courseName}</h3>
         </div>
@@ -4161,7 +4338,7 @@ function formatMoney(amount: MoneyAmountDto): string {
 }
 function formatDate(value?: string | null): string {
   return value
-    ? new Date(value).toLocaleDateString('ar', { year: 'numeric', month: 'short', day: 'numeric' })
+    ? (Number.isNaN(new Date(value).getTime()) ? '—' : new Date(value).toLocaleDateString('ar', { year: 'numeric', month: 'short', day: 'numeric' }))
     : '—';
 }
 function arabicStatus(value: string): string {
@@ -4174,6 +4351,7 @@ function arabicStatus(value: string): string {
         ACTIVE: 'نشطة',
         COMPLETED: 'مكتملة',
         REVOKED: 'ملغاة',
+        SUSPENDED: 'معلّقة', ARCHIVED: 'مؤرشفة', INITIALIZING: 'قيد التهيئة', EXPIRED: 'منتهية الصلاحية', WAITLISTED: 'قائمة الانتظار', CANCELLED: 'ملغاة', ENROLLED: 'مسجل', IN_PROGRESS: 'قيد التعلم', ISSUED: 'صادرة', PARTIALLY_PAID: 'مدفوعة جزئياً', OVERDUE: 'متأخرة', DRAFT: 'مسودة',
       } as Record<string, string>
     )[value] || value
   );
@@ -4188,6 +4366,7 @@ function arabicEntityType(value: string): string {
         MAJOR: 'تخصص',
         CERTIFICATE: 'شهادة',
         STUDENT_TOOL: 'أداة طالب',
+        INTERNATIONAL_TEST:'اختبار دولي',CMS_CONTENT:'محتوى',SERVICE:'خدمة',
       } as Record<string, string>
     )[value] || value
   );
@@ -4200,10 +4379,11 @@ function buildEntityLink(type: string, slug: string): string {
       MAJOR: 'majors',
       COURSE: 'courses',
       STUDENT_TOOL: 'tools',
+      INTERNATIONAL_TEST:'exams',CMS_CONTENT:'articles',SERVICE:'services',
     } as Record<string, string>
   )[type];
   return base
-    ? (slug ? `/${base}/${slug}` : `/${base}`)
+    ? (studentNotificationLink(slug ? `/${base}/${slug}` : `/${base}`) ?? '/')
     : type === 'CERTIFICATE'
       ? `/certificates/verify?code=${encodeURIComponent(slug)}`
       : '/';

@@ -179,6 +179,8 @@ export class ApplicationLocaleProjectionService {
       ...publicData,
       displayName,
       description,
+      localizedNames: Object.fromEntries(translations.filter(translation => translation.displayName).map(translation => [translation.locale, translation.displayName as string])),
+      admissionRequirements: this.publicActiveUniversityChildren(university.admissionRequirements),
       campuses: this.projectUniversityChildren(
         this.publicActiveUniversityChildren(university.campuses),
         'CAMPUS',
@@ -263,6 +265,8 @@ export class ApplicationLocaleProjectionService {
       ...(optionalFields ?? {}),
       ...publicData,
       displayName,
+      localizedNameAr: major.localizedNameAr,
+      localizedNameEn: major.localizedNameEn,
     } as PublicMajorDto;
 
     return {

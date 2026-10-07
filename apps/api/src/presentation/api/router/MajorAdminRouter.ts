@@ -25,11 +25,12 @@ export class MajorAdminRouter {
       };
     };
 
+    const allAsUndefined = (value: unknown) => typeof value === 'string' && ['', 'all', 'الكل'].includes(value.trim().toLowerCase()) ? undefined : value;
     const listQuerySchema = z.object({
       taxonomyNodeId: z.string().uuid().optional(),
-      status: z.nativeEnum(MajorStatus).optional(),
-      completenessStatus: z.nativeEnum(MajorImportCompletenessState).optional(),
-      degreeLevel: z.string().optional(),
+      status: z.preprocess(allAsUndefined, z.nativeEnum(MajorStatus).optional()),
+      completenessStatus: z.preprocess(allAsUndefined, z.nativeEnum(MajorImportCompletenessState).optional()),
+      degreeLevel: z.preprocess(allAsUndefined, z.string().optional()),
       academicFieldOrDiscipline: z.string().optional(),
       collegeOrFaculty: z.string().optional(),
       academicFieldId: z.string().optional(),

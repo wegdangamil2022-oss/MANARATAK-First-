@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { 
@@ -75,6 +75,7 @@ export function UniversityAdminPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [completenessFilter, setCompletenessFilter] = useState('');
   const [page, setPage] = useState(1);
+  const listRequest = useRef(0);
   const [cooldown, setCooldown] = useState<number | null>(null);
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat(isArabic ? 'ar' : 'en-US'), [isArabic]);
@@ -106,19 +107,24 @@ export function UniversityAdminPage() {
   };
 
   const fetchUniversities = async () => {
+    const request = ++listRequest.current;
     setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams({ page: page.toString(), pageSize: '20' });
+      if (searchTerm.trim()) params.set('search', searchTerm.trim());
       if (statusFilter) params.append('status', statusFilter);
       if (completenessFilter) params.append('completenessStatus', completenessFilter);
       if (countryReferenceId) params.append('countryReferenceId', countryReferenceId);
 
       const response = await adminApiClient.request<PaginatedResponse>(`/admin/universities?${params.toString()}`);
+      if (request !== listRequest.current) return;
+      if (response.total > 0 && page > Math.ceil(response.total / 20)) { setPage(Math.ceil(response.total / 20)); return; }
       setData(response);
       setCooldown(null);
-    } catch (err: any) {
-      const msg = err.message || tr('تعذر تحميل بيانات الجامعات.', 'Unable to load universities.');
+    } catch (err: unknown) {
+      if (request !== listRequest.current) return;
+      const msg = (err instanceof Error ? err.message : '') || tr('تعذر تحميل بيانات الجامعات.', 'Unable to load universities.');
       setError(msg);
       if (msg.includes('[429]')) {
         const parts = msg.split('|');
@@ -126,7 +132,7 @@ export function UniversityAdminPage() {
         setCooldown(seconds);
       }
     } finally {
-      setLoading(false);
+      if (request === listRequest.current) setLoading(false);
     }
   };
 
@@ -136,7 +142,7 @@ export function UniversityAdminPage() {
 
   useEffect(() => {
     fetchUniversities();
-  }, [page, statusFilter, completenessFilter, countryReferenceId]);
+  }, [page, statusFilter, completenessFilter, countryReferenceId, searchTerm]);
 
   useEffect(() => {
     if (cooldown === null || cooldown <= 0) return;
@@ -387,7 +393,7 @@ export function UniversityAdminPage() {
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
               placeholder={tr('البحث باسم الجامعة، الدولة، أو المدينة...', 'Search by university, country, or city...')}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 py-2.5 pr-10 pl-4 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#0E7C86] focus:bg-white focus:ring-2 focus:ring-[#0E7C86]/20"
             />
