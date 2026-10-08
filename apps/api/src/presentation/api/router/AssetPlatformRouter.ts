@@ -3,7 +3,8 @@ import { z } from 'zod';
 import {
   AssetSecurityClassification,
   AssetRetentionCategory,
-  IAuditRecordRepository
+  IAuditRecordRepository,
+  IAssetUsageRegistryGateway
 } from '@manaratak/domain';
 import {
   IngestAssetUseCase,
@@ -17,13 +18,14 @@ export interface AssetPlatformRouterCradle {
   ingestAssetUseCase: IngestAssetUseCase;
   processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase;
   auditRecordRepo?: IAuditRecordRepository;
+  assetUsageRegistryGateway?: IAssetUsageRegistryGateway;
   assetRecordRepository?: { queryAdmin(input: any): Promise<{ items: any[]; nextCursor: string | null; hasMore: boolean }>; findById(id: any): Promise<any> };
 }
 
 export class AssetPlatformRouter {
   public static create(cradle: AssetPlatformRouterCradle): Router {
     const router = Router();
-    const { ingestAssetUseCase, processAssetLifecycleUseCase, auditRecordRepo, assetRecordRepository } = cradle;
+    const { ingestAssetUseCase, processAssetLifecycleUseCase, auditRecordRepo, assetRecordRepository, assetUsageRegistryGateway } = cradle;
 
     const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
       (req: Request, res: Response, next: NextFunction) => {
@@ -103,6 +105,25 @@ export class AssetPlatformRouter {
       const query = assetListQuerySchema.parse(req.query);
       const result = await assetRecordRepository.queryAdmin(query);
       res.status(200).json(result);
+    }));
+
+    // Lifecycle impact readout for admins before archive/delete/purge.
+    // Derived usages are resolved centrally; never treat a missing delegate as zero usages.
+    router.get('/:assetId/usages', asyncHandler(async (req: Request, res: Response) => {
+      if (!assetRecordRepository || !assetUsageRegistryGateway?.findUsages) {
+        res.status(503).json({ error: 'ASSET_USAGE_REGISTRY_UNAVAILABLE' });
+        return;
+      }
+      const { AssetId } = await import('@manaratak/domain');
+      const assetId = new AssetId(req.params.assetId);
+      const asset = await assetRecordRepository.findById(assetId);
+      if (!asset) { res.status(404).json({ error: 'ASSET_NOT_FOUND' }); return; }
+      const usages = await assetUsageRegistryGateway.findUsages(assetId);
+      res.status(200).json({
+        assetId: assetId.value,
+        inUse: usages.length > 0,
+        usages: usages.map((usage) => ({ consumer: usage.consumer, field: usage.field })),
+      });
     }));
 
     router.get('/:assetId', asyncHandler(async (req: Request, res: Response) => {

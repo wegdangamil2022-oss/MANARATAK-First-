@@ -26,6 +26,27 @@ export function AssetAdminPage() {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [usagePreview, setUsagePreview] = useState<{
+    assetId: string; inUse: boolean; usages: Array<{ consumer: string; field: string }>;
+  } | null>(null);
+  const [usageLoadingId, setUsageLoadingId] = useState<string | null>(null);
+
+  const inspectUsages = async (assetId: string) => {
+    if (usageLoadingId) return;
+    setUsageLoadingId(assetId);
+    setError(null);
+    try {
+      const result = await adminApiClient.request<{
+        assetId: string; inUse: boolean; usages: Array<{ consumer: string; field: string }>;
+      }>(`/admin/assets/${encodeURIComponent(assetId)}/usages`, { cache: 'no-store' });
+      setUsagePreview(result);
+    } catch (cause) {
+      setUsagePreview(null);
+      setError(cause instanceof Error ? cause.message : 'تعذر فحص استخدامات الأصل');
+    } finally {
+      setUsageLoadingId(null);
+    }
+  };
   const [filters, setFilters] = useState({
     q: '',
     lifecycleState: '',
@@ -158,6 +179,22 @@ export function AssetAdminPage() {
         </button>
       </form>
 
+      {usagePreview && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 text-xs" aria-live="polite">
+          <div className="font-bold text-[#142B5F]">تأثير الإجراءات على الأصل: {usagePreview.assetId}</div>
+          <p className="mt-2">{usagePreview.inUse
+            ? `مرتبط بـ ${usagePreview.usages.length} موضع استخدام — تُمنع عمليات الإزالة أثناء الارتباط.`
+            : 'لم يجد سجل الاستخدام ارتباطًا حاليًا. يجب إعادة الفحص عند تنفيذ أي إجراء.'}</p>
+          <ul className="mt-2 list-inside list-disc">
+            {usagePreview.usages.map((usage, index) => (
+              <li key={index}>{usage.consumer} — {usage.field}</li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => setUsagePreview(null)}
+            className="mt-2 rounded-lg border px-3 py-1">إغلاق التفاصيل</button>
+        </section>
+      )}
+
       <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
         <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4">
           <h2 className="text-base font-black text-[#142B5F]">سجل الأصول والملفات ({items.length})</h2>
@@ -172,12 +209,13 @@ export function AssetAdminPage() {
                 <th className="p-3.5 text-start">دورة الحياة</th>
                 <th className="p-3.5 text-start">تصنيف الأمان</th>
                 <th className="p-3.5 text-start">سياسة الاحتفاظ</th>
+                <th className="p-3.5 text-start">تأثير الاستخدام</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400 font-bold">
+                  <td colSpan={7} className="p-8 text-center text-slate-400 font-bold">
                     لا توجد أصول أو ملفات مطابقة للبحث.
                   </td>
                 </tr>
@@ -206,6 +244,13 @@ export function AssetAdminPage() {
                       </span>
                     </td>
                     <td className="p-3.5 text-slate-600 font-medium">{a.retentionCategory}</td>
+                    <td className="p-3.5">
+                      <button type="button" disabled={usageLoadingId !== null}
+                        onClick={() => void inspectUsages(a.id)}
+                        className="rounded-lg border px-3 py-1 text-xs disabled:opacity-50">
+                        {usageLoadingId === a.id ? 'جاري الفحص…' : 'عرض الارتباطات'}
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}

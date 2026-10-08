@@ -76,3 +76,9 @@ npm run ci:source:contracts
 - `apps/api/tests/presentation/api/router/AssetReuseRouter.spec.ts`: verifies IAM permission denial, server-enforced `reuseOnly` scope, sanitized projection, no destructive routes, rejection of confidential assets, required audit fail-closed and short-lived grant.
 - `packages/infrastructure/tests/asset-platform/PrismaAssetReuseQuery.spec.ts`: ensures Prisma predicates actually include state=ACTIVE, classification in PUBLIC/INTERNAL, CLEAN locator, scan success and verified upload.
 - Runtime tests still not executed; source-only assertions do not establish IAM migration or production safety.
+
+## Patch E — Asset usage impact inventory
+
+- أضيف `GET /admin/assets/:assetId/usages` ضمن مسار `admin:assets:manage` القائم ويستخدم `IAssetUsageRegistryGateway.findUsages` الحقيقي، 404 لملف غير موجود و503 عند غياب registry، ولا يفترض أن الغياب يعني صفر ارتباطات.
+- أضيف لصفحة `AssetAdminPage` زر عرض الارتباطات وملخص تأثير للإجراء قبل أي حذف أو أرشفة؛ لا توجد في هذه الدفعة أزرار حذف جديدة أو عمليات تدميرية.
+- هذا **قراءة فقط**؛ التحقق الفعلي عند mutation يبقى داخل `ProcessAssetLifecycleUseCase.assertNotInUse`. لا يدّعي هذا حل السباقات concurrent أو إثبات coverage كل relation بالبيانات الفعلية.
