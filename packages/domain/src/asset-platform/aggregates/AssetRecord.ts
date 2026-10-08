@@ -257,10 +257,31 @@ export class AssetRecord {
     this.events.push(new AssetDeletedEvent(this.props.id));
   }
 
+  private assertVerifiedCleanEvidence(): void {
+    if (this.props.locator.storageZone !== AssetStorageZone.CLEAN ||
+      this.props.uploadVerification?.signatureVerified !== true ||
+      this.props.malwareScan?.status !== 'PASSED' ||
+      this.props.uploadVerification.locator !== this.props.malwareScan.locator ||
+      !this.props.sanitization?.sanitizedAt ||
+      !this.props.checksum ||
+      this.props.checksum.hash !== this.props.uploadVerification.checksumSha256.toLowerCase()) {
+      throw new Error('ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED');
+    }
+  }
+
+  public assertCanDeliver(): void {
+    if (this.props.state !== AssetLifecycleState.ACTIVE ||
+      this.props.locator.storageZone !== AssetStorageZone.CLEAN) {
+      throw new Error('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET');
+    }
+    this.assertVerifiedCleanEvidence();
+  }
+
   public restore(): void {
     if (this.props.state !== AssetLifecycleState.DELETED) {
       throw new Error('Can only restore from DELETED state');
     }
+    this.assertVerifiedCleanEvidence();
     this.props.state = AssetLifecycleState.ACTIVE;
     this.props.retention = new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT, this.props.retention.expiresAt);
     this.events.push(new AssetRestoredEvent(this.props.id));
