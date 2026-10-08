@@ -250,4 +250,34 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
     expect(() => record.assertCanActivate()).toThrow('ASSET_MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED');
   });
 
+  it('does not restore deleted quarantined objects into ACTIVE', () => {
+    const record = new AssetRecord({
+      id: new AssetId('asset-untrusted-restore'),
+      reference: new AssetReference('ref-untrusted-restore'),
+      locator: new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'document.pdf'),
+      metadata: new AssetMetadata('document.pdf', 'application/pdf', 'pdf', 42),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      owner: new AssetOwnerReference('owner-1', 'STUDENT'),
+      classification: AssetSecurityClassification.INTERNAL,
+      state: AssetLifecycleState.QUARANTINED,
+    });
+    record.softDelete();
+    expect(() => record.restore()).toThrow('ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED');
+    expect(record.state).toBe(AssetLifecycleState.DELETED);
+  });
+
+  it('rejects forged ACTIVE and CLEAN metadata without trusted upload and malware evidence', () => {
+    const record = new AssetRecord({
+      id: new AssetId('asset-forged-clean'),
+      reference: new AssetReference('ref-forged-clean'),
+      locator: new AssetStorageLocator(AssetStorageZone.CLEAN, 'clean', 'document.pdf'),
+      metadata: new AssetMetadata('document.pdf', 'application/pdf', 'pdf', 42),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      owner: new AssetOwnerReference('owner-1', 'STUDENT'),
+      classification: AssetSecurityClassification.INTERNAL,
+      state: AssetLifecycleState.ACTIVE,
+    });
+    expect(() => record.assertCanDeliver()).toThrow('ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED');
+  });
+
 });
