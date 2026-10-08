@@ -74,7 +74,7 @@ export class AssetValidator {
     if (input.expiresAt != null) {
       const value = input.expiresAt;
       const validFormat = value instanceof Date ||
-        (typeof value === 'string' && /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,3})?(?:Z|[+-][0-9]{2}:[0-9]{2})$/.test(value));
+        (typeof value === 'string' && /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,3})?(?:Z|[+-][0-9]{2}:[0-9]{2})$/.test(value));
       const millis = value instanceof Date ? value.getTime()
         : typeof value === 'string' ? Date.parse(value) : Number.NaN;
       if (!validFormat || !Number.isFinite(millis)) {
