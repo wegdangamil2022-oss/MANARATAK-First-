@@ -63,6 +63,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run db:generate
+      - name: Build workspace project references needed by Vitest
+        run: npx --no-install tsc -b packages/core packages/domain packages/shared packages/application packages/infrastructure --pretty false
       - name: Asset domain, application, infrastructure and API contracts
         run: >-
           npx --no-install vitest run --config vitest.config.ts

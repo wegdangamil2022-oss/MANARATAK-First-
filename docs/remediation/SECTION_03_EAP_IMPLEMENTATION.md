@@ -94,3 +94,10 @@ npm run ci:source:contracts
 - `permissions: contents: read` فقط؛ لا أسرار أو نشر أو Database URL أو migrations. `npm run db:generate` يولد Prisma Client محليًا داخل runner ولا يطبّق schema على أي قاعدة بيانات.
 - وظيفتان مستقلتان: `typecheck` على مراجع المشروع؛ و`eap-tests` على domain/application/infrastructure/API اختبارات القسم.
 - **لا تعتبر الإضافة دليل نجاح حتى تظهر نتائج فعلية مكتملة من GitHub Actions.** CI السابقة كانت مقيّدة بــ main/develop، ولهذا لم تظهر تشغيلات تلقائية على فرع العمل.
+
+## CI run 37859104913 — discovered blockers and remediation
+
+- فشلت وظيفة EAP tests أولًا لأن workspace packages تحتاج build قبل Vitest لحل entry `@manaratak/domain`؛ أضيف الآن بناء TypeScript لمشاريع core/domain/shared/application/infrastructure داخل test job.
+- نجح `npm ci` و`db:generate` في runner.
+- اختباران في `AssetValidator.spec.ts` كشفا أن التحقق من MIME نفذ قبل فحص path traversal/null byte؛ عُدّل validator ليمنع المسارات والـNUL أولًا، مع بقاء منع executable وMIME mismatch.
+- هذه **نتائج سلبية حقيقية** وليست CI PASS. أُضيفت التعديلات لإعادة التشغيل على commit أحدث.

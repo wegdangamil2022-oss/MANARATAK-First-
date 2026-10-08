@@ -38,6 +38,11 @@ export class AssetValidator {
       throw new Error(`File size exceeds maximum limit: ${input.byteSize} bytes`);
     }
 
+    // Reject traversal/absolute paths and NUL bytes before extension/MIME comparisons,
+    // preserving the stronger security diagnostics on malicious filenames.
+    this.validatePath(input.originalFilename, 'originalFilename');
+    if (input.pathKey) this.validatePath(input.pathKey, 'pathKey');
+
     const ext = input.fileExtension.toLowerCase();
     if (!this.ALLOWED_EXTENSIONS.has(ext)) {
       throw new Error(`Unsupported file extension: ${input.fileExtension}`);
@@ -55,10 +60,6 @@ export class AssetValidator {
       throw new Error('ASSET_DECLARED_EXTENSION_MIME_MISMATCH');
     }
 
-    this.validatePath(input.originalFilename, 'originalFilename');
-    if (input.pathKey) {
-      this.validatePath(input.pathKey, 'pathKey');
-    }
   }
 
   public static validatePath(pathStr: string, fieldName: string): void {
