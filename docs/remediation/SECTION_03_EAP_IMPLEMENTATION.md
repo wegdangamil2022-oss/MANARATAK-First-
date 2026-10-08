@@ -101,3 +101,10 @@ npm run ci:source:contracts
 - نجح `npm ci` و`db:generate` في runner.
 - اختباران في `AssetValidator.spec.ts` كشفا أن التحقق من MIME نفذ قبل فحص path traversal/null byte؛ عُدّل validator ليمنع المسارات والـNUL أولًا، مع بقاء منع executable وMIME mismatch.
 - هذه **نتائج سلبية حقيقية** وليست CI PASS. أُضيفت التعديلات لإعادة التشغيل على commit أحدث.
+
+## CI run 37859221618 — 52 passing tests + missing workspace dependency
+
+- TypeScript source pipeline: **PASS**، وتم توليد Prisma Client بنجاح.
+- EAP targeted Vitest: 11/12 test files loaded, 52/52 executed tests passed; test file `AssetReuseRouter.spec.ts` failed to import before executing because `@manaratak/config` (transitive import of `SecurityMiddlewareFactory`) was not built by targeted tsc -b list.
+- الإصلاح لخطوة EAP tests: استبدال بناء مجموعة Workspaces محدودة بـ`npm run typecheck` على كامل TypeScript project references قبل Vitest، لا تعديل API logic ولا schema.
+- **عدم الإعلان عن نجاح EAP tests قبل إنجاز rerun**.
