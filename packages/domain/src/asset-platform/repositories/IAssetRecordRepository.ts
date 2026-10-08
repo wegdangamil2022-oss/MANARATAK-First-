@@ -9,5 +9,5 @@ export interface IAssetRecordRepository {
   findByReference(reference: AssetReference): Promise<AssetRecord | null>;
   findByOwner(owner: AssetOwnerReference): Promise<AssetRecord[]>;
   /** Fail-closed check for legal holds, active retention claims and expiry before irreversible purge. */
-  assertPurgeAllowed?(id: AssetId, at: Date): Promise<void>;
+  assertPurgeAllowed?(id: AssetId, at: Date, retentionClaimToken?: string): Promise<void>;
 }

@@ -12,6 +12,7 @@ function fixture(overrides: Record<string, unknown> | null = {}) {
     retentionExpiresAt: earlier,
     legalHoldUntil: null,
     retentionClaimUntil: null,
+    retentionClaimToken: null,
     ...overrides,
   };
   const findUnique = vi.fn(async (_query: unknown) => row);
@@ -30,6 +31,7 @@ describe('EAP irreversible purge retention and legal hold preflight', () => {
         retentionExpiresAt: true,
         legalHoldUntil: true,
         retentionClaimUntil: true,
+        retentionClaimToken: true,
       },
     });
   });
@@ -51,4 +53,18 @@ describe('EAP irreversible purge retention and legal hold preflight', () => {
     await expect(fixture().repo.assertPurgeAllowed(new AssetId('asset-1'), new Date('invalid')))
       .rejects.toThrow('ASSET_PURGE_CLOCK_INVALID');
   });
+  it('permits only the owner of an unexpired retention worker lease', async () => {
+    const token = '11111111-1111-4111-8111-111111111111';
+    const f = fixture({ retentionClaimUntil: later, retentionClaimToken: token });
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed))
+      .rejects.toThrow('ASSET_PURGE_RETENTION_CLAIM_ACTIVE');
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed,
+      '22222222-2222-4222-8222-222222222222'))
+      .rejects.toThrow('ASSET_PURGE_RETENTION_CLAIM_NOT_OWNED');
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed, token))
+      .resolves.toBeUndefined();
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), later, token))
+      .rejects.toThrow('ASSET_PURGE_RETENTION_CLAIM_NOT_OWNED');
+  });
+
 });

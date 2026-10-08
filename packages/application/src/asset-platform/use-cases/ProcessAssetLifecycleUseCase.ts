@@ -222,7 +222,7 @@ export class ProcessAssetLifecycleUseCase {
     if (!this.assetRepository.assertPurgeAllowed) {
       throw new Error('ASSET_PURGE_RETENTION_GUARD_NOT_CONFIGURED');
     }
-    await this.assetRepository.assertPurgeAllowed(id, new Date());
+    await this.assetRepository.assertPurgeAllowed(id, new Date(), dto.retentionClaimToken);
 
     record.purge();
     await this.storageGateway.delete(record.locator);

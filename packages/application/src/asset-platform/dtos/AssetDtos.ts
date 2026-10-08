@@ -96,6 +96,8 @@ export interface RestoreAssetDto {
 
 export interface PurgeAssetDto {
   assetId: string;
+  /** Internal retention worker lease only. API routes must never forward user-supplied tokens. */
+  retentionClaimToken?: string;
 }
 
 export interface AssetRecordDto {

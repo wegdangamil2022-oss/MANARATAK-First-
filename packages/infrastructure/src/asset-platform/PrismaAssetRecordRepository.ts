@@ -88,7 +88,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     });
   }
 
-  async assertPurgeAllowed(id: AssetId, at: Date): Promise<void> {
+  async assertPurgeAllowed(id: AssetId, at: Date, retentionClaimToken?: string): Promise<void> {
     if (!Number.isFinite(at.getTime())) throw new Error('ASSET_PURGE_CLOCK_INVALID');
     const row = await this.prisma.assetRecord.findUnique({
       where: { id: id.value },
@@ -97,6 +97,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         retentionExpiresAt: true,
         legalHoldUntil: true,
         retentionClaimUntil: true,
+        retentionClaimToken: true,
       },
     });
     if (!row) throw new Error('ASSET_PURGE_NOT_FOUND');
@@ -112,7 +113,15 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         row.legalHoldUntil.getTime() > at.getTime())) {
       throw new Error('ASSET_PURGE_LEGAL_HOLD_ACTIVE');
     }
-    if (row.retentionClaimUntil && (!Number.isFinite(row.retentionClaimUntil.getTime()) ||
+    if (retentionClaimToken !== undefined) {
+      if (typeof retentionClaimToken !== 'string' ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(retentionClaimToken) ||
+          row.retentionClaimToken !== retentionClaimToken ||
+          !row.retentionClaimUntil || !Number.isFinite(row.retentionClaimUntil.getTime()) ||
+          row.retentionClaimUntil.getTime() <= at.getTime()) {
+        throw new Error('ASSET_PURGE_RETENTION_CLAIM_NOT_OWNED');
+      }
+    } else if (row.retentionClaimUntil && (!Number.isFinite(row.retentionClaimUntil.getTime()) ||
         row.retentionClaimUntil.getTime() > at.getTime())) {
       throw new Error('ASSET_PURGE_RETENTION_CLAIM_ACTIVE');
     }

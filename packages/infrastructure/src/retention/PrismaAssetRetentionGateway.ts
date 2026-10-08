@@ -13,14 +13,27 @@ export class PrismaAssetRetentionGateway implements IRetentionOwnerGateway {
   async applyDecision(candidate: RetentionCandidate, decision: RetentionDecision): Promise<'APPLIED'|'SKIPPED'> {
     if (![RetentionDisposition.ARCHIVE, RetentionDisposition.PURGE].includes(decision.disposition)) return 'SKIPPED';
     const token=randomUUID(); const claimUntil=new Date(decision.decidedAt.getTime()+5*60_000);
-    const claimed=await (this.prisma as any).assetRecord.updateMany({where:{id:candidate.recordId,retentionProcessedAt:null,OR:[{retentionClaimUntil:null},{retentionClaimUntil:{lte:decision.decidedAt}}]},data:{retentionClaimToken:token,retentionClaimUntil:claimUntil}});
+    const isPurge = decision.disposition === RetentionDisposition.PURGE;
+    const claimed = await (this.prisma as any).assetRecord.updateMany({
+      where: {
+        id: candidate.recordId,
+        retentionExpiresAt: { lte: decision.decidedAt },
+        retentionProcessedAt: null,
+        lifecycleState: { not: 'PURGED' },
+        AND: [
+          { OR: [{ retentionClaimUntil: null }, { retentionClaimUntil: { lte: decision.decidedAt } }] },
+          ...(isPurge ? [{ OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: decision.decidedAt } }] }] : []),
+        ],
+      },
+      data: { retentionClaimToken: token, retentionClaimUntil: claimUntil },
+    });
     if(claimed.count!==1)return 'SKIPPED';
     try {
       if (decision.disposition === RetentionDisposition.ARCHIVE) {
         if (candidate.lifecycleState !== 'ARCHIVED') await this.lifecycle.archiveAsset({assetId:candidate.recordId});
       } else {
         if (candidate.lifecycleState !== 'DELETED') await this.lifecycle.softDeleteAsset({assetId:candidate.recordId});
-        await this.lifecycle.purgeAsset({assetId:candidate.recordId});
+        await this.lifecycle.purgeAsset({assetId:candidate.recordId, retentionClaimToken:token});
       }
       const updated=await (this.prisma as any).assetRecord.updateMany({where:{id:candidate.recordId,retentionProcessedAt:null,retentionClaimToken:token},data:{retentionProcessedAt:decision.decidedAt,retentionClaimToken:null,retentionClaimUntil:null}});
       return updated.count===1?'APPLIED':'SKIPPED';

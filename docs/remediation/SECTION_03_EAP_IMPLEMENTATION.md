@@ -145,3 +145,12 @@ npm run ci:source:contracts
 - `TEMPORARY` requires explicit expiry. All specified expirations must be timezone-qualified ISO timestamps or valid Dates, and must be in the future. Invalid, ambiguous or elapsed input fails before generating a provider locator or saving a record.
 - Regression tests cover forbidden input categories, missing/invalid/past temporary expiry. Existing purge happy-path test advances its isolated fake clock beyond an initially future, valid expiry.
 - These rules cover request validation only. Actual retention workers, hold-vs-usage races and DB/provider reconciliation remain runtime pending.
+
+## Patch I — Retention worker compatibility + claim ownership
+
+- Review found that `PrismaAssetRetentionGateway.applyDecision` first acquires `retentionClaimToken/retentionClaimUntil` before invoking `purgeAsset`. An unconditional "active claim" guard would block the **legitimate worker itself**. Fixed the integration rather than weakening retention safety.
+- `PurgeAssetDto` now accepts an internal-only `retentionClaimToken`. Retention worker forwards the exact DB-created UUID; API routes still build the DTO only from the asset path and accept no user-supplied token.
+- Prisma purge preflight demands an active, unexpired lease with an **exact matching token** when the worker supplies one; callers with no token remain blocked by any active lease. Stale/wrong tokens fail closed.
+- Worker now rechecks due expiration and no legal hold in the DB `updateMany` claim predicate for purge; a concurrently applied hold prevents the claim.
+- Added mock regression tests for lease ownership, mismatching/expired tokens and worker claim acquisition.
+- Still open: the lease expiration may occur while a provider delete is in progress, DB↔storage transactions remain non-atomic, and real PostgreSQL and provider integration are pending. This is not CLOSED.
