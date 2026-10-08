@@ -3,7 +3,7 @@ import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAsse
 
 describe('EAP Admin pagination and filter integrity', () => {
   it('combines the search predicate and keyset cursor with AND', async () => {
-    const findMany = vi.fn(async () => []);
+    const findMany = vi.fn(async (_args?: unknown) => []);
     const repo = new PrismaAssetRecordRepository({ assetRecord: { findMany } } as any);
     const cursor = Buffer.from('2026-10-01T00:00:00.000Z|asset-99', 'utf8').toString('base64url');
     await repo.queryAdmin({ q: 'scholarship', cursor, limit: 10 });
@@ -18,7 +18,7 @@ describe('EAP Admin pagination and filter integrity', () => {
   });
 
   it('rejects malformed or noncanonical cursors before querying the database', async () => {
-    const findMany = vi.fn(async () => []);
+    const findMany = vi.fn(async (_args?: unknown) => []);
     const repo = new PrismaAssetRecordRepository({ assetRecord: { findMany } } as any);
     await expect(repo.queryAdmin({ cursor: '!not-base64!' })).rejects.toThrow('ASSET_CURSOR_INVALID');
     await expect(repo.queryAdmin({ cursor: Buffer.from('junk|asset-id').toString('base64url') }))

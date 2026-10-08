@@ -153,7 +153,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       const decoded = Buffer.from(input.cursor, 'base64url').toString('utf8');
       if (Buffer.from(decoded, 'utf8').toString('base64url') !== input.cursor) throw new Error('ASSET_CURSOR_INVALID');
       const pieces = decoded.split('|');
-      if (pieces.length !== 2 || !pieces[1] || !/^\\d{4}-\\d{2}-\\d{2}T/.test(pieces[0]) ||
+      if (pieces.length !== 2 || !pieces[1] || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}T/.test(pieces[0]) ||
         !Number.isFinite(Date.parse(pieces[0])) || new Date(pieces[0]).toISOString() !== pieces[0]) {
         throw new Error('ASSET_CURSOR_INVALID');
       }
