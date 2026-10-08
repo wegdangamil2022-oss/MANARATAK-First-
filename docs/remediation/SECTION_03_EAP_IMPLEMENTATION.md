@@ -138,3 +138,10 @@ npm run ci:source:contracts
 - `PrismaAssetRecordRepository` checks DB-owned `lifecycleState=DELETED`, explicitly expired `retentionExpiresAt`, absence of a live `legalHoldUntil`, and absence of an active `retentionClaimUntil`. Null retention expiry is indefinite; never interpreted as safe to purge.
 - Verification happens **before** external `storageGateway.delete`; in-memory tests cover indefinite retention and missing guard. Existing purge happy-path fixture now has explicit elapsed expiry.
 - **Unresolved:** this check is *not atomic* with external deletion, nor with concurrent legal hold/usage insertion. Requires DB serialization/CAS claims, provider reconciliation and real PostgreSQL integration before P0 acceptance. No schema migration or production data updates.
+
+## Patch J — Retention input validation before persistence
+
+- Upload/ingest now rejects lifecycle-derived categories `ARCHIVED` and `SOFT_DELETED` supplied by clients; only `PERMANENT` and `TEMPORARY` are valid on creation.
+- `TEMPORARY` requires explicit expiry. All specified expirations must be timezone-qualified ISO timestamps or valid Dates, and must be in the future. Invalid, ambiguous or elapsed input fails before generating a provider locator or saving a record.
+- Regression tests cover forbidden input categories, missing/invalid/past temporary expiry. Existing purge happy-path test advances its isolated fake clock beyond an initially future, valid expiry.
+- These rules cover request validation only. Actual retention workers, hold-vs-usage races and DB/provider reconciliation remain runtime pending.

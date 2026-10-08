@@ -270,7 +270,8 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     await ingestUseCase.requestUploadLocator({
       assetId: 'asset-in-use',
       assetReference: 'ref-in-use',
-      expiresAt: new Date(Date.now() - 60_000).toISOString(),
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      retentionCategory: AssetRetentionCategory.TEMPORARY,
       ownerId: 'user-77',
       ownerType: 'STUDENT',
       originalFilename: 'transcript.pdf',
@@ -296,10 +297,15 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     // Unregister usage
     await usageRegistry.unregisterUsage(new AssetId('asset-in-use'), 'urn:student:123');
 
-    // Now purge succeeds
-    await expect(
-      lifecycleUseCase.purgeAsset({ assetId: 'asset-in-use' })
-    ).resolves.toBeUndefined();
+    // Once the time-limited retention window has actually elapsed, purge is allowed.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(Date.now() + 120_000));
+    try {
+      await expect(lifecycleUseCase.purgeAsset({ assetId: 'asset-in-use' }))
+        .resolves.toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
 
     const purged = await repo.findById(new AssetId('asset-in-use'));
     expect(purged?.state).toBe(AssetLifecycleState.PURGED);
