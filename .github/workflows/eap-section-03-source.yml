@@ -50,6 +50,8 @@ jobs:
       - run: npm run db:generate
       - name: TypeScript project references
         run: npm run typecheck
+      - name: Repository source quality
+        run: npm run quality:source
 
   eap-tests:
     name: EAP targeted source regression tests

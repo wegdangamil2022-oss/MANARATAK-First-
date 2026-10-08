@@ -124,3 +124,10 @@ npm run ci:source:contracts
 - محوّل HTTP يطلب `expectedSha256` ويرفض ردود المزود التي تفتقر إلى `verifiedSourceSha256` المطابق؛ المحوّلات القديمة تتوقف بأمان، ولا يسمح بالتراجع الصامت إلى النقل غير المشروط.
 - اختبار مزود HTTP يثبت رفض الدليل المفقود، واختبار التخزين المحلي يتحقق من الرفض قبل نقل البايتات المتغيرة.
 - **تحذير:** لا يثبت ترديد الـhash أن المزود طبّق مقارنة ذرية؛ يجب اعتماد العقد واختباره ضد المزود الفعلي مع object version/ETag وCAS. فحص التخزين المحلي قبل rename غير ذري ويخص التطوير فقط.
+
+## Follow-up — CLI and CI validation evidence
+
+- CI run `37859835231`: `tsc -b` PASSED; 62/63 EAP tests passed and one Prisma mock test was stale after new mandatory post-sanitizer evidence. Fixed mock to add `confirmSanitizedObject` and `passSanitizedMalwareScan` before saving.
+- Added fail-closed delivery/restore for legacy ACTIVE/CLEAN records without signed malware/upload evidence, and a use-case test confirming no delivery provider call.
+- Extended isolated CI typecheck job with `quality:source` (source-only checks; no DB mutation, deployment or production data).
+- **Still pending:** atomic provider checksum enforcement and failure reconciliation, resource usage locking/transactional constraints, full integration/browser/DB tests and role provisioning. Section 03 remains NOT CLOSED.

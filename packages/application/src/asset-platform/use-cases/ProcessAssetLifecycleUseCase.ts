@@ -5,8 +5,6 @@ import {
   IAssetMalwareScannerGateway,
   IAssetSanitizationGateway,
   AssetId,
-  AssetStorageZone,
-  AssetLifecycleState
 } from '@manaratak/domain';
 
 import {

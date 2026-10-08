@@ -14,6 +14,9 @@ import {
   AssetSecurityClassification,
   AssetLifecycleState,
   AssetSanitizationMetadata,
+  AssetMetadata,
+  AssetRetentionMetadata,
+  AssetRetentionCategory,
   MalwareScanResult,
   SanitizationResult
 } from '@manaratak/domain';
@@ -389,6 +392,24 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     await expect(lifecycleUseCase.activateAsset({ assetId: 'asset-late-rewrite' }))
       .rejects.toThrow('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
     expect(move).not.toHaveBeenCalled();
+  });
+
+  it('does not call the storage provider for an ACTIVE/CLEAN record missing trust evidence', async () => {
+    const unverified = new AssetRecord({
+      id: new AssetId('asset-forged-clean'),
+      reference: new AssetReference('ref-forged-clean'),
+      locator: new AssetStorageLocator(AssetStorageZone.CLEAN, 'clean', 'image.png'),
+      metadata: new AssetMetadata('image.png', 'image/png', 'png', 42),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      owner: new AssetOwnerReference('owner', 'STUDENT'),
+      classification: AssetSecurityClassification.PUBLIC,
+      state: AssetLifecycleState.ACTIVE,
+    });
+    await repo.save(unverified);
+    const grant = vi.spyOn(storageGateway, 'generateDeliveryGrant');
+    await expect(lifecycleUseCase.requestDeliveryGrant({ assetId: 'asset-forged-clean' }))
+      .rejects.toThrow('ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED');
+    expect(grant).not.toHaveBeenCalled();
   });
 
 });
