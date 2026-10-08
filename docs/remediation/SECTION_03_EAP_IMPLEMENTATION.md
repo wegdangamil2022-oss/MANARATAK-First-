@@ -117,3 +117,10 @@ npm run ci:source:contracts
 - Post-sanitize actual object byte size updates `AssetMetadata.byteSize` to avoid trusting original upload byte size as the clean output size.
 - Added domain and application regression tests for new locator, modified bytes, post-sanitizer infection and tampered content.
 - **Important limitations:** verification before move is not an atomic provider compare-and-swap; without object version/ETag fencing and storage provider implementation, there remains a TOCTOU window. Real storage, concurrency and durability tests remain mandatory. No database schema changes or production operations.
+
+## Patch H — Digest-fenced CLEAN promotion
+
+- يمرر `activateAsset` الـSHA-256 المثبت للملف بعد التعقيم إلى `moveToCleanZone`، ولا يكتفي بالموافقة على الحالة فقط.
+- محوّل HTTP يطلب `expectedSha256` ويرفض ردود المزود التي تفتقر إلى `verifiedSourceSha256` المطابق؛ المحوّلات القديمة تتوقف بأمان، ولا يسمح بالتراجع الصامت إلى النقل غير المشروط.
+- اختبار مزود HTTP يثبت رفض الدليل المفقود، واختبار التخزين المحلي يتحقق من الرفض قبل نقل البايتات المتغيرة.
+- **تحذير:** لا يثبت ترديد الـhash أن المزود طبّق مقارنة ذرية؛ يجب اعتماد العقد واختباره ضد المزود الفعلي مع object version/ETag وCAS. فحص التخزين المحلي قبل rename غير ذري ويخص التطوير فقط.

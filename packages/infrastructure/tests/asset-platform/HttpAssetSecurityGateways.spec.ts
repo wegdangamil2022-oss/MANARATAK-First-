@@ -158,4 +158,26 @@ describe('W3 MNT-AUD-0011 production asset provider adapters', () => {
     }).verifyUploadedObject(locator, request)).resolves.toMatchObject({ byteSize: 50, signatureVerified: true });
   });
 
+  it('requires an echoed source digest on provider promotion into CLEAN', async () => {
+    const source = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'sanitized/asset.pdf');
+    const sha256 = 'd'.repeat(64);
+    const gateway = new HttpAssetStorageGateway(options((async (_url: RequestInfo | URL, init?: RequestInit) => {
+      const payload = JSON.parse(String(init?.body ?? '{}'));
+      expect(payload.expectedSha256).toBe(sha256);
+      return jsonResponse({
+        locator: { storageZone: 'CLEAN', bucketName: 'c', pathKey: 'clean/asset.pdf' },
+        verifiedSourceSha256: sha256,
+      });
+    }) as any));
+    await expect(gateway.moveToCleanZone(source)).rejects.toThrow('ASSET_CLEAN_PROMOTION_CHECKSUM_REQUIRED');
+    await expect(gateway.moveToCleanZone(source, sha256)).resolves.toMatchObject({
+      storageZone: AssetStorageZone.CLEAN,
+    });
+    const legacy = new HttpAssetStorageGateway(options((async () => jsonResponse({
+      locator: { storageZone: 'CLEAN', bucketName: 'c', pathKey: 'clean/asset.pdf' },
+    })) as any));
+    await expect(legacy.moveToCleanZone(source, sha256))
+      .rejects.toThrow('ASSET_PROVIDER_ATOMIC_PROMOTION_PROOF_REQUIRED');
+  });
+
 });

@@ -110,4 +110,21 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
       expect(true).toBe(true);
     });
   });
+  describe('local checksum fence', () => {
+    it('refuses a changed quarantine payload before promotion', async () => {
+      const root = await mkdtemp(path.join(tmpdir(), 'manaratak-asset-digest-'));
+      try {
+        await mkdir(path.join(root, 'test-bucket', 'uploads'), { recursive: true });
+        await writeFile(path.join(root, 'test-bucket', 'uploads', 'entry.pdf'), 'changed-bytes');
+        const gateway = new LocalAssetStorageGateway('test-bucket', root);
+        const source = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'test-bucket', 'uploads/entry.pdf');
+        await expect(gateway.moveToCleanZone(source, 'a'.repeat(64)))
+          .rejects.toThrow('ASSET_CLEAN_PROMOTION_CHECKSUM_MISMATCH');
+        expect(await gateway.read(source, 100)).toHaveLength('changed-bytes'.length);
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
+    });
+  });
+
 });
