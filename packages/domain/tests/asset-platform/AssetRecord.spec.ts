@@ -222,7 +222,16 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
   });
 
   it('invalidates old scan evidence after sanitizer rewrites or relocates the object', () => {
-    const { record } = createInitialAsset();
+    const record = new AssetRecord({
+      id: new AssetId('asset-reset-evidence'),
+      reference: new AssetReference('ref-reset-evidence'),
+      locator: new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'file.png'),
+      metadata: new AssetMetadata('file.png', 'application/pdf', 'png', 1024),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      owner: new AssetOwnerReference('owner-1', 'STUDENT'),
+      classification: AssetSecurityClassification.INTERNAL,
+      state: AssetLifecycleState.QUARANTINED,
+    });
     record.assignQuarantineLocator(new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'file.png'));
     record.confirmUploadedObject({
       locator: record.locator.value, byteSize: 1024, verifiedMimeType: 'application/pdf',
