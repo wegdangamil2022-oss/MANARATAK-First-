@@ -87,3 +87,10 @@ npm run ci:source:contracts
 
 - `AssetPicker` يستعمل `queryGeneration` لحجب نتائج صفحات جرى طلبها قبل تغيير الفلتر أو البحث؛ يمنع أن تؤدي استجابات الشبكة الخارجة عن الترتيب لخلط assets من استعلامين.
 - بقاء `AssetReferencePolicy` لدى الدومين هو السلطة النهائية عند الحفظ؛ client-side selection audit مجرد طبقة تحكم قبل تعديل اختيار النموذج، وليس دليلًا كافيًا لنقل المرجع إلى domain storage.
+
+## Source verification pipeline scoped to Section 03
+
+- أضيفت `.github/workflows/eap-section-03-source.yml` على فرع الإصلاحات فقط حتى يمكن فحص TypeScript وVitest دون الدمج في main.
+- `permissions: contents: read` فقط؛ لا أسرار أو نشر أو Database URL أو migrations. `npm run db:generate` يولد Prisma Client محليًا داخل runner ولا يطبّق schema على أي قاعدة بيانات.
+- وظيفتان مستقلتان: `typecheck` على مراجع المشروع؛ و`eap-tests` على domain/application/infrastructure/API اختبارات القسم.
+- **لا تعتبر الإضافة دليل نجاح حتى تظهر نتائج فعلية مكتملة من GitHub Actions.** CI السابقة كانت مقيّدة بــ main/develop، ولهذا لم تظهر تشغيلات تلقائية على فرع العمل.
