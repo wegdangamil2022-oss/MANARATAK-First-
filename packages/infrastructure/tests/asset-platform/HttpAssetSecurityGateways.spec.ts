@@ -162,7 +162,7 @@ describe('W3 MNT-AUD-0011 production asset provider adapters', () => {
     const source = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'sanitized/asset.pdf');
     const sha256 = 'd'.repeat(64);
     const gateway = new HttpAssetStorageGateway(options((async (_url: RequestInfo | URL, init?: RequestInit) => {
-      const payload = JSON.parse(String(init?.body ?? '{}'));
+      const payload = JSON.parse(new TextDecoder().decode(init?.body as Uint8Array));
       expect(payload.expectedSha256).toBe(sha256);
       return jsonResponse({
         locator: { storageZone: 'CLEAN', bucketName: 'c', pathKey: 'clean/asset.pdf' },
