@@ -166,7 +166,7 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     const response = await this.client.json<{ locator: LocatorWire; verifiedSourceSha256?: string }>('POST', '/v1/assets/move-to-clean', payload, {
       idempotencyKey: operationIdempotencyKey('move-to-clean', payload),
     });
-    if (response.verifiedSourceSha256?.toLowerCase() !== payload.expectedSha256) throw new Error('ASSET_PROVIDER_ATOMIC_PROMOTION_PROOF_REQUIRED');
+    if (typeof response.verifiedSourceSha256 !== 'string' || response.verifiedSourceSha256.toLowerCase() !== payload.expectedSha256) throw new Error('ASSET_PROVIDER_ATOMIC_PROMOTION_PROOF_REQUIRED');
     const locator = parseLocator(response.locator);
     if (locator.storageZone !== AssetStorageZone.CLEAN) throw new Error('ASSET_PROVIDER_CLEAN_LOCATOR_REQUIRED');
     return locator;
