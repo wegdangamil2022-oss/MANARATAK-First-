@@ -68,7 +68,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         sanitizedAt: asset.sanitization.sanitizedAt?.toISOString(),
         sanitizerNotes: asset.sanitization.sanitizerNotes
       } as any : null,
-      malwareScanStatus: null as any,
+      malwareScanStatus: asset.malwareScan ? { ...asset.malwareScan } as any : null as any,
     };
 
     const prismaClient = this.prisma as unknown as {
@@ -146,8 +146,19 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     cursor?: string;
   }): Promise<{ items: any[]; nextCursor: string | null; hasMore: boolean }> {
     const limit = Math.min(100, Math.max(1, Math.trunc(input.limit ?? 30)));
-    const decodedCursor = input.cursor ? Buffer.from(input.cursor, 'base64url').toString('utf8') : null;
-    const [cursorCreatedAt, cursorId] = decodedCursor?.split('|') ?? [];
+    let cursorCreatedAt: string | undefined;
+    let cursorId: string | undefined;
+    if (input.cursor) {
+      if (!/^[A-Za-z0-9_-]{1,2048}$/.test(input.cursor)) throw new Error('ASSET_CURSOR_INVALID');
+      const decoded = Buffer.from(input.cursor, 'base64url').toString('utf8');
+      if (Buffer.from(decoded, 'utf8').toString('base64url') !== input.cursor) throw new Error('ASSET_CURSOR_INVALID');
+      const pieces = decoded.split('|');
+      if (pieces.length !== 2 || !pieces[1] || !/^\\d{4}-\\d{2}-\\d{2}T/.test(pieces[0]) ||
+        !Number.isFinite(Date.parse(pieces[0])) || new Date(pieces[0]).toISOString() !== pieces[0]) {
+        throw new Error('ASSET_CURSOR_INVALID');
+      }
+      [cursorCreatedAt, cursorId] = pieces;
+    }
     const where: any = {
       ...(input.lifecycleState ? { lifecycleState: input.lifecycleState } : {}),
       ...(input.ownerType ? { ownerType: input.ownerType } : {}),
@@ -158,19 +169,19 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         ...(input.createdFrom ? { gte: new Date(input.createdFrom) } : {}),
         ...(input.createdTo ? { lte: new Date(input.createdTo) } : {}),
       } } : {}),
-      ...(input.q ? { OR: [
-        { id: { contains: input.q, mode: 'insensitive' } },
-        { reference: { contains: input.q, mode: 'insensitive' } },
-        { ownerId: { contains: input.q, mode: 'insensitive' } },
-        { metadata: { path: ['originalFilename'], string_contains: input.q } },
-      ] } : {}),
-      ...(cursorCreatedAt && cursorId ? {
-        OR: [
-          { createdAt: { lt: new Date(cursorCreatedAt) } },
-          { createdAt: new Date(cursorCreatedAt), id: { lt: cursorId } },
-        ],
-      } : {}),
     };
+    const andFilters: any[] = [];
+    if (input.q) andFilters.push({ OR: [
+      { id: { contains: input.q, mode: 'insensitive' } },
+      { reference: { contains: input.q, mode: 'insensitive' } },
+      { ownerId: { contains: input.q, mode: 'insensitive' } },
+      { metadata: { path: ['originalFilename'], string_contains: input.q } },
+    ] });
+    if (cursorCreatedAt && cursorId) andFilters.push({ OR: [
+      { createdAt: { lt: new Date(cursorCreatedAt) } },
+      { createdAt: new Date(cursorCreatedAt), id: { lt: cursorId } },
+    ] });
+    if (andFilters.length) where.AND = andFilters;
     const rows = await (this.prisma as any).assetRecord.findMany({
       where,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
@@ -226,6 +237,13 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       );
     }
 
+    const scan = row.malwareScanStatus as Record<string, unknown> | null;
+    const malwareScan = scan && (scan.status === 'PASSED' || scan.status === 'FAILED') &&
+      typeof scan.scannedAt === 'string' && Number.isFinite(Date.parse(scan.scannedAt)) &&
+      typeof scan.locator === 'string' && scan.locator.length > 0
+      ? { status: scan.status as 'PASSED' | 'FAILED', scannedAt: scan.scannedAt, locator: scan.locator }
+      : undefined;
+
     return new AssetRecord({
       id: new AssetId(row.id),
       reference: new AssetReference(row.reference),
@@ -240,6 +258,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       state: row.lifecycleState as AssetLifecycleState,
       checksum: row.checksumAlgorithm && row.checksumHash ? new AssetChecksum(row.checksumAlgorithm, row.checksumHash) : undefined,
       sanitization,
+      malwareScan,
       versionChain: undefined // We are skipping complex versionChain reconstruction for now as it's not strictly required in full unless requested
     });
   }

@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   AssetDeliveryGrant,
   AssetSanitizationMetadata,
@@ -86,10 +86,11 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     this.client = new SignedProviderHttpClient(options);
   }
 
-  async generateUploadLocator(zone: AssetStorageZone = AssetStorageZone.QUARANTINE): Promise<AssetStorageLocator> {
+  async generateUploadLocator(zone: AssetStorageZone = AssetStorageZone.QUARANTINE, assetId?: string): Promise<AssetStorageLocator> {
     const payload = { storageZone: zone };
+    const operationIdentity = assetId?.trim() || randomUUID();
     const response = await this.client.json<{ locator: LocatorWire }>('POST', '/v1/assets/locators', payload, {
-      idempotencyKey: operationIdempotencyKey('locator', payload),
+      idempotencyKey: operationIdempotencyKey('locator', { ...payload, assetId: operationIdentity }),
     });
     const locator = parseLocator(response.locator);
     if (locator.storageZone !== zone) throw new Error('ASSET_PROVIDER_LOCATOR_ZONE_MISMATCH');
@@ -107,8 +108,9 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
       mimeType: request.mimeType,
       byteSize: request.byteSize,
     };
+    const operationIdentity = request.assetId?.trim() || randomUUID();
     const response = await this.client.json<UploadGrantWire>('POST', '/v1/assets/upload-grants', payload, {
-      idempotencyKey: operationIdempotencyKey('upload-grant', payload),
+      idempotencyKey: operationIdempotencyKey('upload-grant', { ...payload, assetId: operationIdentity }),
     });
     const locator = parseLocator(response.locator);
     if (locator.storageZone !== zone) throw new Error('ASSET_PROVIDER_LOCATOR_ZONE_MISMATCH');

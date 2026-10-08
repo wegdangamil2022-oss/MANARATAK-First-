@@ -138,4 +138,13 @@ describe('AssetValidator', () => {
       });
     }).toThrow('Null byte detected');
   });
+  it('rejects executable uploads and contradictory extension/MIME metadata by default', () => {
+    expect(() => AssetValidator.validate({
+      originalFilename: 'run.exe', mimeType: 'application/x-msdownload', fileExtension: 'exe', byteSize: 123,
+    })).toThrow('Unsupported file extension');
+    expect(() => AssetValidator.validate({
+      originalFilename: 'document.pdf', mimeType: 'image/png', fileExtension: 'pdf', byteSize: 123,
+    })).toThrow('ASSET_DECLARED_EXTENSION_MIME_MISMATCH');
+  });
+
 });

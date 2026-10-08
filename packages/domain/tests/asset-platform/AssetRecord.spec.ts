@@ -73,6 +73,7 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
 
       record.startValidation();
       expect(record.state).toBe(AssetLifecycleState.VALIDATING);
+      record.passMalwareScan();
 
       record.startSanitizing();
       expect(record.state).toBe(AssetLifecycleState.SANITIZING);
@@ -115,6 +116,9 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       const { record } = createInitialAsset();
       record.assignQuarantineLocator(new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q-bucket', 'doc.pdf'));
       record.startValidation();
+      record.passMalwareScan();
+      record.startSanitizing();
+      record.completeSanitization(new AssetSanitizationMetadata(true, new Date(), 'Verified sanitized output'));
       record.activate(new AssetStorageLocator(AssetStorageZone.CLEAN, 'clean-bucket', 'doc.pdf'));
 
       expect(record.state).toBe(AssetLifecycleState.ACTIVE);
@@ -153,4 +157,22 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       expect(events.some((e) => e instanceof AssetRestoredEvent)).toBe(true);
     });
   });
+  it('rejects promotion without a persisted scan and sanitization decision', () => {
+    const id = new AssetId('asset-no-evidence');
+    const record = new AssetRecord({
+      id, reference: new AssetReference('ref-no-evidence'),
+      locator: new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'test.pdf'),
+      metadata: new AssetMetadata('test.pdf', 'application/pdf', 'pdf', 123),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      owner: new AssetOwnerReference('owner-1', 'STUDENT'),
+      classification: AssetSecurityClassification.INTERNAL,
+      state: AssetLifecycleState.QUARANTINED,
+    });
+    expect(() => record.assertCanActivate()).toThrow('Cannot activate asset in');
+    record.startValidation();
+    expect(() => record.startSanitizing()).toThrow('ASSET_MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED');
+    expect(() => record.activate(new AssetStorageLocator(AssetStorageZone.CLEAN, 'c', 'test.pdf')))
+      .toThrow('Cannot activate asset in');
+  });
+
 });

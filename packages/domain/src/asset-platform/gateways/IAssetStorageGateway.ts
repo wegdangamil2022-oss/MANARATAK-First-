@@ -2,6 +2,7 @@ import { AssetStorageLocator } from '../value-objects/AssetStorageLocator';
 import { AssetStorageZone } from '../enums/AssetStorageZone';
 
 export interface AssetUploadGrantRequest {
+  assetId?: string;
   originalFilename: string;
   mimeType: string;
   byteSize: number;
@@ -22,7 +23,7 @@ export interface AssetDeliveryGrant {
 }
 
 export interface IAssetStorageGateway {
-  generateUploadLocator(zone?: AssetStorageZone): Promise<AssetStorageLocator>;
+  generateUploadLocator(zone?: AssetStorageZone, assetId?: string): Promise<AssetStorageLocator>;
   generateUploadGrant?(zone: AssetStorageZone, request: AssetUploadGrantRequest): Promise<AssetUploadGrant>;
   generateDeliveryGrant?(locator: AssetStorageLocator, expiresInSeconds: number): Promise<AssetDeliveryGrant>;
   moveToCleanZone(quarantineLocator: AssetStorageLocator): Promise<AssetStorageLocator>;

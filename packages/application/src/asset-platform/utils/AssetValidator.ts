@@ -5,8 +5,7 @@ export class AssetValidator {
     'image/png',
     'text/csv',
     'application/json',
-    'text/plain',
-    'application/x-msdownload'
+    'text/plain'
   ]);
 
   private static readonly ALLOWED_EXTENSIONS = new Set([
@@ -16,8 +15,7 @@ export class AssetValidator {
     'png',
     'csv',
     'json',
-    'txt',
-    'exe'
+    'txt'
   ]);
 
   private static readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -48,6 +46,13 @@ export class AssetValidator {
     const mime = input.mimeType.toLowerCase();
     if (!this.ALLOWED_MIME_TYPES.has(mime)) {
       throw new Error(`Unsupported mime type: ${input.mimeType}`);
+    }
+    const extensionMime: Record<string, string> = {
+      pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+      csv: 'text/csv', json: 'application/json', txt: 'text/plain',
+    };
+    if (extensionMime[ext] !== mime || !input.originalFilename.toLowerCase().endsWith(`.${ext}`)) {
+      throw new Error('ASSET_DECLARED_EXTENSION_MIME_MISMATCH');
     }
 
     this.validatePath(input.originalFilename, 'originalFilename');

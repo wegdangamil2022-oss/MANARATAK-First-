@@ -96,6 +96,8 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
+    // Never move unverified/failed content into CLEAN before the domain gate.
+    record.assertCanActivate();
     const cleanLocator = await this.storageGateway.moveToCleanZone(record.locator);
     record.activate(cleanLocator);
     await this.assetRepository.save(record);
@@ -121,6 +123,16 @@ export class ProcessAssetLifecycleUseCase {
     };
   }
 
+  private async assertNotInUse(id: AssetId, operation: 'archive' | 'soft delete' | 'purge'): Promise<void> {
+    // Errors from the registry propagate: an unavailable usage check must not authorize destruction.
+    const usages = this.usageRegistry.findUsages ? await this.usageRegistry.findUsages(id) : null;
+    const inUse = usages ? usages.length > 0 : await this.usageRegistry.isAssetInUse(id);
+    if (inUse) {
+      const detail = usages?.length ? ` (${usages.map((usage) => `${usage.consumer}.${usage.field}`).join(', ')})` : '';
+      throw new Error(`Cannot ${operation} asset ${id.value} because it is currently in use${detail}`);
+    }
+  }
+
   public async archiveAsset(dto: ArchiveAssetDto): Promise<AssetRecordDto> {
     const id = new AssetId(dto.assetId);
     const record = await this.assetRepository.findById(id);
@@ -128,6 +140,7 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
+    await this.assertNotInUse(id, 'archive');
     record.archive();
     await this.storageGateway.archive(record.locator);
     await this.assetRepository.save(record);
@@ -141,6 +154,7 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
+    await this.assertNotInUse(id, 'soft delete');
     record.softDelete();
     await this.assetRepository.save(record);
     return AssetRecordMapper.toDto(record);
@@ -166,16 +180,7 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
-    const usages = this.usageRegistry.findUsages
-      ? await this.usageRegistry.findUsages(id)
-      : null;
-    const inUse = usages ? usages.length > 0 : await this.usageRegistry.isAssetInUse(id);
-    if (inUse) {
-      const detail = usages?.length
-        ? ` (${usages.map((usage) => `${usage.consumer}.${usage.field}`).join(', ')})`
-        : '';
-      throw new Error(`Cannot purge asset ${dto.assetId} because it is currently in use${detail}`);
-    }
+    await this.assertNotInUse(id, 'purge');
 
     record.purge();
     await this.storageGateway.delete(record.locator);

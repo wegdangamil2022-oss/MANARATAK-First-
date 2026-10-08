@@ -38,13 +38,14 @@ export class IngestAssetUseCase {
     const reference = new AssetReference(input.assetReference);
     const uploadGrant = this.storageGateway.generateUploadGrant
       ? await this.storageGateway.generateUploadGrant(AssetStorageZone.QUARANTINE, {
+          assetId: id.value,
           originalFilename: input.originalFilename,
           mimeType: input.mimeType,
           byteSize: input.byteSize,
         })
       : undefined;
     const quarantineLocator = uploadGrant?.locator
-      ?? await this.storageGateway.generateUploadLocator(AssetStorageZone.QUARANTINE);
+      ?? await this.storageGateway.generateUploadLocator(AssetStorageZone.QUARANTINE, id.value);
 
     const record = new AssetRecord({
       id,
@@ -95,7 +96,7 @@ export class IngestAssetUseCase {
     }
 
     const reference = new AssetReference(input.assetReference);
-    const initialLocator = await this.storageGateway.generateUploadLocator(AssetStorageZone.QUARANTINE);
+    const initialLocator = await this.storageGateway.generateUploadLocator(AssetStorageZone.QUARANTINE, id.value);
 
     const record = new AssetRecord({
       id,

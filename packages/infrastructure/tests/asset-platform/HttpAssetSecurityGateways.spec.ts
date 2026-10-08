@@ -114,4 +114,28 @@ describe('W3 MNT-AUD-0011 production asset provider adapters', () => {
       300,
     )).resolves.toMatchObject({ url: expect.stringContaining('https://cdn.example.test/download') });
   });
+  it('binds locator and upload-grant idempotency to asset identity, not just shared metadata', async () => {
+    const keys: string[] = [];
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      keys.push(new Headers(init?.headers).get('idempotency-key') ?? '');
+      return jsonResponse({
+        locator: { storageZone: 'QUARANTINE', bucketName: 'q', pathKey: 'uploads/a.pdf' },
+        uploadUrl: 'https://object.example.test/upload', method: 'PUT',
+        expiresAt: new Date(Date.now() + 300_000).toISOString(),
+      });
+    });
+    const gateway = new HttpAssetStorageGateway(options(fetchMock as any));
+    await gateway.generateUploadLocator(AssetStorageZone.QUARANTINE, 'asset-a');
+    await gateway.generateUploadLocator(AssetStorageZone.QUARANTINE, 'asset-b');
+    await gateway.generateUploadLocator(AssetStorageZone.QUARANTINE, 'asset-a');
+    expect(keys[0]).not.toBe(keys[1]);
+    expect(keys[0]).toBe(keys[2]);
+    const base = { originalFilename: 'same.pdf', mimeType: 'application/pdf', byteSize: 200 };
+    await gateway.generateUploadGrant(AssetStorageZone.QUARANTINE, { ...base, assetId: 'asset-a' });
+    await gateway.generateUploadGrant(AssetStorageZone.QUARANTINE, { ...base, assetId: 'asset-b' });
+    await gateway.generateUploadGrant(AssetStorageZone.QUARANTINE, { ...base, assetId: 'asset-a' });
+    expect(keys[3]).not.toBe(keys[4]);
+    expect(keys[3]).toBe(keys[5]);
+  });
+
 });

@@ -33,6 +33,7 @@ export interface AssetRecordProps {
   checksum?: AssetChecksum;
   versionChain?: AssetVersionChain;
   sanitization?: AssetSanitizationMetadata;
+  malwareScan?: { status: 'PASSED' | 'FAILED'; scannedAt: string; locator: string };
 }
 
 export class AssetRecord {
@@ -55,6 +56,7 @@ export class AssetRecord {
   get checksum(): AssetChecksum | undefined { return this.props.checksum; }
   get versionChain(): AssetVersionChain | undefined { return this.props.versionChain; }
   get sanitization(): AssetSanitizationMetadata | undefined { return this.props.sanitization; }
+  get malwareScan(): AssetRecordProps['malwareScan'] { return this.props.malwareScan; }
 
   public getUncommittedEvents(): unknown[] {
     return this.events;
@@ -69,6 +71,9 @@ export class AssetRecord {
       throw new Error('Storage locator must be in QUARANTINE zone when quarantining');
     }
     this.props.locator = locator;
+    this.props.malwareScan = undefined;
+    this.props.sanitization = undefined;
+    this.props.checksum = undefined;
     this.props.state = AssetLifecycleState.QUARANTINED;
     this.events.push(new AssetQuarantinedEvent(this.props.id));
   }
@@ -77,6 +82,7 @@ export class AssetRecord {
     if (this.props.state !== AssetLifecycleState.QUARANTINED && this.props.state !== AssetLifecycleState.INITIATED) {
       throw new Error('Can only start validation from INITIATED or QUARANTINED state');
     }
+    this.props.malwareScan = undefined;
     this.props.state = AssetLifecycleState.VALIDATING;
   }
 
@@ -85,16 +91,24 @@ export class AssetRecord {
       throw new Error('Cannot mark active asset as malware scan failed');
     }
     this.props.state = AssetLifecycleState.MALWARE_SCAN_FAILED;
+    this.props.malwareScan = { status: 'FAILED', scannedAt: new Date().toISOString(), locator: this.props.locator.value };
     this.events.push(new AssetMalwareScanFailedEvent(this.props.id, reason));
   }
 
   public passMalwareScan(): void {
+    if (this.props.state !== AssetLifecycleState.VALIDATING || this.props.locator.storageZone !== AssetStorageZone.QUARANTINE) {
+      throw new Error('ASSET_MALWARE_SCAN_INVALID_STATE');
+    }
+    this.props.malwareScan = { status: 'PASSED', scannedAt: new Date().toISOString(), locator: this.props.locator.value };
     this.events.push(new AssetMalwareScanSucceededEvent(this.props.id));
   }
 
   public startSanitizing(): void {
-    if (this.props.state !== AssetLifecycleState.VALIDATING && this.props.state !== AssetLifecycleState.QUARANTINED) {
-      throw new Error('Can only start sanitization from QUARANTINED or VALIDATING state');
+    if (this.props.state !== AssetLifecycleState.VALIDATING) {
+      throw new Error('Can only start sanitization from VALIDATING state');
+    }
+    if (this.props.malwareScan?.status !== 'PASSED' || this.props.malwareScan.locator !== this.props.locator.value) {
+      throw new Error('ASSET_MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED');
     }
     this.props.state = AssetLifecycleState.SANITIZING;
   }
@@ -113,17 +127,27 @@ export class AssetRecord {
     this.events.push(new AssetSanitizedEvent(this.props.id));
   }
 
-  public activate(cleanLocator: AssetStorageLocator, checksum?: AssetChecksum): void {
+  public assertCanActivate(): void {
     if (this.props.state === AssetLifecycleState.MALWARE_SCAN_FAILED) {
       throw new Error('Cannot activate asset that failed malware scanning');
     }
-    if (
-      this.props.state !== AssetLifecycleState.SANITIZING &&
-      this.props.state !== AssetLifecycleState.VALIDATING &&
-      this.props.state !== AssetLifecycleState.QUARANTINED
-    ) {
+    if (this.props.state !== AssetLifecycleState.SANITIZING) {
       throw new Error(`Cannot activate asset in ${this.props.state} state`);
     }
+    if (this.props.malwareScan?.status !== 'PASSED' ||
+      !Number.isFinite(Date.parse(this.props.malwareScan.scannedAt)) ||
+      this.props.malwareScan.locator.length === 0 ||
+      !this.props.sanitization ||
+      !this.props.sanitization.sanitizedAt) {
+      throw new Error('ASSET_MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED');
+    }
+    if (this.props.locator.storageZone !== AssetStorageZone.QUARANTINE) {
+      throw new Error('ASSET_QUARANTINE_REQUIRED_FOR_ACTIVATION');
+    }
+  }
+
+  public activate(cleanLocator: AssetStorageLocator, checksum?: AssetChecksum): void {
+    this.assertCanActivate();
     if (cleanLocator.storageZone !== AssetStorageZone.CLEAN) {
       throw new Error('Clean locator must be in CLEAN storage zone');
     }

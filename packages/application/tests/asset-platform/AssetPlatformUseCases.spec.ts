@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   IAssetRecordRepository,
   IAssetStorageGateway,
@@ -169,9 +169,9 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
       assetReference: 'ref-infected',
       ownerId: 'user-77',
       ownerType: 'STUDENT',
-      originalFilename: 'virus.exe',
-      mimeType: 'application/x-msdownload',
-      fileExtension: 'exe',
+      originalFilename: 'virus.pdf',
+      mimeType: 'application/pdf',
+      fileExtension: 'pdf',
       byteSize: 10000,
       classification: AssetSecurityClassification.RESTRICTED
     });
@@ -274,4 +274,37 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     const purged = await repo.findById(new AssetId('asset-in-use'));
     expect(purged?.state).toBe(AssetLifecycleState.PURGED);
   });
+  it('does not call moveToCleanZone for quarantined or malware-failed assets', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-preflight', assetReference: 'ref-preflight', ownerId: 'owner',
+      ownerType: 'STUDENT', originalFilename: 'a.pdf', mimeType: 'application/pdf',
+      fileExtension: 'pdf', byteSize: 10, classification: AssetSecurityClassification.INTERNAL,
+    });
+    const move = vi.spyOn(storageGateway, 'moveToCleanZone');
+    await expect(lifecycleUseCase.activateAsset({ assetId: 'asset-preflight' })).rejects.toThrow();
+    expect(move).not.toHaveBeenCalled();
+    malwareScanner.shouldFail = true;
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-preflight' });
+    await expect(lifecycleUseCase.activateAsset({ assetId: 'asset-preflight' }))
+      .rejects.toThrow('Cannot activate asset that failed malware scanning');
+    expect(move).not.toHaveBeenCalled();
+  });
+
+  it('does not archive or soft-delete active assets referenced by another owner', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-referenced', assetReference: 'ref-referenced', ownerId: 'owner',
+      ownerType: 'STUDENT', originalFilename: 'a.pdf', mimeType: 'application/pdf',
+      fileExtension: 'pdf', byteSize: 10, classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-referenced' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-referenced' });
+    await lifecycleUseCase.activateAsset({ assetId: 'asset-referenced' });
+    await usageRegistry.registerUsage(new AssetId('asset-referenced'), 'urn:course:lesson');
+    await expect(lifecycleUseCase.archiveAsset({ assetId: 'asset-referenced' }))
+      .rejects.toThrow('Cannot archive asset');
+    await expect(lifecycleUseCase.softDeleteAsset({ assetId: 'asset-referenced' }))
+      .rejects.toThrow('Cannot soft delete asset');
+    expect((await repo.findById(new AssetId('asset-referenced')))?.state).toBe(AssetLifecycleState.ACTIVE);
+  });
+
 });
