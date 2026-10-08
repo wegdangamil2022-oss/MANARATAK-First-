@@ -154,3 +154,10 @@ npm run ci:source:contracts
 - Worker now rechecks due expiration and no legal hold in the DB `updateMany` claim predicate for purge; a concurrently applied hold prevents the claim.
 - Added mock regression tests for lease ownership, mismatching/expired tokens and worker claim acquisition.
 - Still open: the lease expiration may occur while a provider delete is in progress, DB↔storage transactions remain non-atomic, and real PostgreSQL and provider integration are pending. This is not CLOSED.
+
+## Patch E — Machine-verifiable asset consumer inventory
+
+- Schema inspection found 29 persistent asset reference fields: 28 direct `String` references and one CMS `attachmentAssetIds` JSON array, all represented in the derived usage registry.
+- A source-level Vitest guard parses the Prisma schema and central `PrismaAssetUsageRegistryGateway`; new/missing/stale direct reference mappings fail CI. Explicit checks cover CMS JSON attachments and SEO `openGraphAssetId` paths.
+- This is schema-source evidence only; runtime database completeness, nonstandard JSON metadata and concurrent writes remain unverified.
+- Previous completed CI run: `37861733848`: TypeScript/quality passed, 82/82 target tests passed.
