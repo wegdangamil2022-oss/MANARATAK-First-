@@ -71,6 +71,14 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       expect(record.state).toBe(AssetLifecycleState.QUARANTINED);
       expect(record.locator.value).toBe('quarantine://quarantine-bucket/quarantine/ast-001.pdf');
 
+      record.confirmUploadedObject({
+        locator: record.locator.value,
+        byteSize: record.metadata.byteSize,
+        verifiedMimeType: record.metadata.mimeType,
+        checksumSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        verifiedAt: new Date().toISOString(),
+        signatureVerified: true,
+      });
       record.startValidation();
       expect(record.state).toBe(AssetLifecycleState.VALIDATING);
       record.passMalwareScan();
@@ -98,6 +106,14 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
     it('prevents activation when malware scan fails', () => {
       const { record } = createInitialAsset();
       record.assignQuarantineLocator(new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q-bucket', 'file.exe'));
+      record.confirmUploadedObject({
+        locator: record.locator.value,
+        byteSize: record.metadata.byteSize,
+        verifiedMimeType: record.metadata.mimeType,
+        checksumSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        verifiedAt: new Date().toISOString(),
+        signatureVerified: true,
+      });
       record.startValidation();
 
       record.failMalwareScan('EICAR test signature detected');
@@ -115,6 +131,14 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
     it('handles archive, soft delete, restore, and purge rules correctly', () => {
       const { record } = createInitialAsset();
       record.assignQuarantineLocator(new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q-bucket', 'doc.pdf'));
+      record.confirmUploadedObject({
+        locator: record.locator.value,
+        byteSize: record.metadata.byteSize,
+        verifiedMimeType: record.metadata.mimeType,
+        checksumSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        verifiedAt: new Date().toISOString(),
+        signatureVerified: true,
+      });
       record.startValidation();
       record.passMalwareScan();
       record.startSanitizing();

@@ -68,7 +68,9 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         sanitizedAt: asset.sanitization.sanitizedAt?.toISOString(),
         sanitizerNotes: asset.sanitization.sanitizerNotes
       } as any : null,
-      malwareScanStatus: asset.malwareScan ? { ...asset.malwareScan } as any : null as any,
+      malwareScanStatus: asset.malwareScan || asset.uploadVerification
+        ? { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null } as any
+        : null as any,
     };
 
     const prismaClient = this.prisma as unknown as {
@@ -244,6 +246,21 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       ? { status: scan.status as 'PASSED' | 'FAILED', scannedAt: scan.scannedAt, locator: scan.locator }
       : undefined;
 
+    const uploadObj = scan?.uploadVerification as Record<string, unknown> | undefined;
+    const uploadVerification = uploadObj && uploadObj.signatureVerified === true &&
+      typeof uploadObj.locator === 'string' && typeof uploadObj.byteSize === 'number' &&
+      typeof uploadObj.verifiedMimeType === 'string' &&
+      typeof uploadObj.checksumSha256 === 'string' &&
+      typeof uploadObj.verifiedAt === 'string'
+      ? {
+          locator: uploadObj.locator,
+          byteSize: uploadObj.byteSize,
+          verifiedMimeType: uploadObj.verifiedMimeType,
+          checksumSha256: uploadObj.checksumSha256,
+          verifiedAt: uploadObj.verifiedAt,
+          signatureVerified: true as const,
+        } : undefined;
+
     return new AssetRecord({
       id: new AssetId(row.id),
       reference: new AssetReference(row.reference),
@@ -259,6 +276,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       checksum: row.checksumAlgorithm && row.checksumHash ? new AssetChecksum(row.checksumAlgorithm, row.checksumHash) : undefined,
       sanitization,
       malwareScan,
+      uploadVerification,
       versionChain: undefined // We are skipping complex versionChain reconstruction for now as it's not strictly required in full unless requested
     });
   }

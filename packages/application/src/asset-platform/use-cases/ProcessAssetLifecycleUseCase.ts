@@ -40,6 +40,14 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
+    if (!this.storageGateway.verifyUploadedObject) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+    }
+    const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+      expectedByteSize: record.metadata.byteSize,
+      declaredMimeType: record.metadata.mimeType,
+    });
+    record.confirmUploadedObject({ ...verified, locator: record.locator.value });
     record.startValidation();
 
     if (!this.malwareScannerGateway) {

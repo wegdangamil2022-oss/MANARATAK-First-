@@ -6,6 +6,8 @@ import {
   AssetStorageZone,
   AssetUploadGrant,
   AssetUploadGrantRequest,
+  AssetUploadVerificationRequest,
+  VerifiedAssetUpload,
   IAssetMalwareScannerGateway,
   IAssetSanitizationGateway,
   IAssetStorageGateway,
@@ -122,6 +124,24 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
       headers: sanitizeHeaders(response.headers),
       expiresAt: parseGrantExpiry(response.expiresAt, 900),
     };
+  }
+
+  async verifyUploadedObject(locator: AssetStorageLocator, request: AssetUploadVerificationRequest): Promise<VerifiedAssetUpload> {
+    if (locator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_UPLOAD_VERIFICATION_QUARANTINE_REQUIRED');
+    const result = await this.client.json<VerifiedAssetUpload>('POST', '/v1/assets/verify-upload', {
+      locator: locatorPayload(locator),
+      expectedByteSize: request.expectedByteSize,
+      declaredMimeType: request.declaredMimeType,
+    });
+    if (!result || result.signatureVerified !== true ||
+      !Number.isSafeInteger(result.byteSize) || result.byteSize <= 0 ||
+      typeof result.verifiedMimeType !== 'string' ||
+      !/^[a-f0-9]{64}$/i.test(result.checksumSha256) ||
+      typeof result.verifiedAt !== 'string' || !Number.isFinite(Date.parse(result.verifiedAt)) ||
+      result.byteSize !== request.expectedByteSize || result.verifiedMimeType !== request.declaredMimeType) {
+      throw new Error('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    }
+    return { ...result, checksumSha256: result.checksumSha256.toLowerCase() };
   }
 
   async generateDeliveryGrant(locator: AssetStorageLocator, expiresInSeconds: number): Promise<AssetDeliveryGrant> {

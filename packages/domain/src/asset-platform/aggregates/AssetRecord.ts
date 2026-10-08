@@ -21,6 +21,15 @@ import { AssetArchivedEvent } from '../events/AssetArchivedEvent';
 import { AssetDeletedEvent } from '../events/AssetDeletedEvent';
 import { AssetRestoredEvent } from '../events/AssetRestoredEvent';
 
+export interface AssetUploadEvidence {
+  locator: string;
+  byteSize: number;
+  verifiedMimeType: string;
+  checksumSha256: string;
+  verifiedAt: string;
+  signatureVerified: boolean;
+}
+
 export interface AssetRecordProps {
   id: AssetId;
   reference: AssetReference;
@@ -34,6 +43,7 @@ export interface AssetRecordProps {
   versionChain?: AssetVersionChain;
   sanitization?: AssetSanitizationMetadata;
   malwareScan?: { status: 'PASSED' | 'FAILED'; scannedAt: string; locator: string };
+  uploadVerification?: AssetUploadEvidence;
 }
 
 export class AssetRecord {
@@ -57,6 +67,7 @@ export class AssetRecord {
   get versionChain(): AssetVersionChain | undefined { return this.props.versionChain; }
   get sanitization(): AssetSanitizationMetadata | undefined { return this.props.sanitization; }
   get malwareScan(): AssetRecordProps['malwareScan'] { return this.props.malwareScan; }
+  get uploadVerification(): AssetRecordProps['uploadVerification'] { return this.props.uploadVerification; }
 
   public getUncommittedEvents(): unknown[] {
     return this.events;
@@ -72,15 +83,38 @@ export class AssetRecord {
     }
     this.props.locator = locator;
     this.props.malwareScan = undefined;
+    this.props.uploadVerification = undefined;
     this.props.sanitization = undefined;
     this.props.checksum = undefined;
     this.props.state = AssetLifecycleState.QUARANTINED;
     this.events.push(new AssetQuarantinedEvent(this.props.id));
   }
 
+  public confirmUploadedObject(evidence: AssetUploadEvidence): void {
+    if (this.props.state !== AssetLifecycleState.QUARANTINED ||
+      this.props.locator.storageZone !== AssetStorageZone.QUARANTINE) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_INVALID_STATE');
+    }
+    if (evidence.locator !== this.props.locator.value ||
+      evidence.signatureVerified !== true ||
+      evidence.byteSize !== this.props.metadata.byteSize ||
+      evidence.verifiedMimeType !== this.props.metadata.mimeType ||
+      !/^[a-f0-9]{64}$/i.test(evidence.checksumSha256) ||
+      !Number.isFinite(Date.parse(evidence.verifiedAt))) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_FAILED');
+    }
+    this.props.uploadVerification = { ...evidence };
+    this.props.checksum = new AssetChecksum('sha256', evidence.checksumSha256.toLowerCase());
+  }
+
   public startValidation(): void {
     if (this.props.state !== AssetLifecycleState.QUARANTINED && this.props.state !== AssetLifecycleState.INITIATED) {
       throw new Error('Can only start validation from INITIATED or QUARANTINED state');
+    }
+    if (!this.props.uploadVerification || this.props.uploadVerification.locator !== this.props.locator.value ||
+      this.props.uploadVerification.signatureVerified !== true ||
+      this.props.checksum?.hash !== this.props.uploadVerification.checksumSha256.toLowerCase()) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_REQUIRED');
     }
     this.props.malwareScan = undefined;
     this.props.state = AssetLifecycleState.VALIDATING;
@@ -134,7 +168,10 @@ export class AssetRecord {
     if (this.props.state !== AssetLifecycleState.SANITIZING) {
       throw new Error(`Cannot activate asset in ${this.props.state} state`);
     }
-    if (this.props.malwareScan?.status !== 'PASSED' ||
+    if (this.props.uploadVerification?.signatureVerified !== true ||
+      this.props.uploadVerification.locator !== this.props.malwareScan?.locator ||
+      this.props.uploadVerification.checksumSha256.toLowerCase() !== this.props.checksum?.hash ||
+      this.props.malwareScan?.status !== 'PASSED' ||
       !Number.isFinite(Date.parse(this.props.malwareScan.scannedAt)) ||
       this.props.malwareScan.locator.length === 0 ||
       !this.props.sanitization ||

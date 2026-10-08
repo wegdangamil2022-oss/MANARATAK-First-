@@ -1,10 +1,12 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile, rename, rm, stat } from 'fs/promises';
 import * as path from 'path';
 import {
   IAssetStorageGateway,
   AssetStorageLocator,
-  AssetStorageZone
+  AssetStorageZone,
+  AssetUploadVerificationRequest,
+  VerifiedAssetUpload
 } from '@manaratak/domain';
 
 export class LocalAssetStorageGateway implements IAssetStorageGateway {
@@ -22,6 +24,34 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
     const targetZone = zone || AssetStorageZone.QUARANTINE;
     const pathKey = `uploads/${randomUUID()}`;
     return new AssetStorageLocator(targetZone, this.localBucketName, pathKey);
+  }
+
+  async verifyUploadedObject(locator: AssetStorageLocator, request: AssetUploadVerificationRequest): Promise<VerifiedAssetUpload> {
+    if (locator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_UPLOAD_VERIFICATION_QUARANTINE_REQUIRED');
+    const content = await this.read(locator, 10 * 1024 * 1024);
+    const bytes = Buffer.from(content);
+    const prefix = bytes.subarray(0, 8);
+    const declared = request.declaredMimeType;
+    const text = ['text/plain', 'text/csv', 'application/json'].includes(declared);
+    let matches = false;
+    if (declared === 'application/pdf') matches = bytes.subarray(0, 5).equals(Buffer.from('%PDF-'));
+    else if (declared === 'image/png') matches = prefix.equals(Buffer.from([137,80,78,71,13,10,26,10]));
+    else if (declared === 'image/jpeg') matches = bytes.length >= 4 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+    else if (text) {
+      try {
+        const decoded = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        matches = !decoded.includes('\0');
+        if (declared === 'application/json' && matches) JSON.parse(decoded);
+      } catch { matches = false; }
+    }
+    if (!matches || bytes.length !== request.expectedByteSize) throw new Error('ASSET_UPLOAD_VERIFICATION_FAILED');
+    return {
+      byteSize: bytes.length,
+      verifiedMimeType: declared,
+      checksumSha256: createHash('sha256').update(bytes).digest('hex'),
+      verifiedAt: new Date().toISOString(),
+      signatureVerified: true,
+    };
   }
 
   async moveToCleanZone(quarantineLocator: AssetStorageLocator): Promise<AssetStorageLocator> {

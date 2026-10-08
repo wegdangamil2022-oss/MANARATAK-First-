@@ -59,6 +59,18 @@ class FakeAssetStorageGateway implements IAssetStorageGateway {
     return new AssetStorageLocator(targetZone, 'test-bucket', `uploads/${Date.now()}-file.tmp`);
   }
 
+  public verifyFails = false;
+  async verifyUploadedObject(_locator: AssetStorageLocator, request: { expectedByteSize: number; declaredMimeType: string }) {
+    if (this.verifyFails) throw new Error('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    return {
+      byteSize: request.expectedByteSize,
+      verifiedMimeType: request.declaredMimeType,
+      checksumSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      verifiedAt: new Date().toISOString(),
+      signatureVerified: true,
+    };
+  }
+
   async moveToCleanZone(quarantineLocator: AssetStorageLocator): Promise<AssetStorageLocator> {
     return new AssetStorageLocator(AssetStorageZone.CLEAN, 'clean-bucket', `clean/${quarantineLocator.pathKey}`);
   }
@@ -305,6 +317,22 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     await expect(lifecycleUseCase.softDeleteAsset({ assetId: 'asset-referenced' }))
       .rejects.toThrow('Cannot soft delete asset');
     expect((await repo.findById(new AssetId('asset-referenced')))?.state).toBe(AssetLifecycleState.ACTIVE);
+  });
+
+  it('fails closed when uploaded binary verification rejects the content, before scanner runs', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-unverified', assetReference: 'ref-unverified',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'file.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 100,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    storageGateway.verifyFails = true;
+    const scan = vi.spyOn(malwareScanner, 'scan');
+    await expect(lifecycleUseCase.validateAsset({ assetId: 'asset-unverified' }))
+      .rejects.toThrow('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    expect(scan).not.toHaveBeenCalled();
+    expect((await repo.findById(new AssetId('asset-unverified')))?.state)
+      .toBe(AssetLifecycleState.QUARANTINED);
   });
 
 });

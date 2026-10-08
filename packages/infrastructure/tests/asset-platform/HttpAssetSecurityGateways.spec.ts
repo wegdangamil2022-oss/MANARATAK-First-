@@ -138,4 +138,24 @@ describe('W3 MNT-AUD-0011 production asset provider adapters', () => {
     expect(keys[3]).toBe(keys[5]);
   });
 
+  it('rejects forged provider verification and accepts only observed signed content metadata', async () => {
+    const locator = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'uploads/a.pdf');
+    const request = { expectedByteSize: 50, declaredMimeType: 'application/pdf' };
+    const provider = (result: unknown) => new HttpAssetStorageGateway(options(
+      (async () => jsonResponse(result)) as any,
+    ));
+    await expect(provider({
+      byteSize: 50, verifiedMimeType: 'application/pdf', signatureVerified: false,
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(),
+    }).verifyUploadedObject(locator, request)).rejects.toThrow('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    await expect(provider({
+      byteSize: 51, verifiedMimeType: 'application/pdf', signatureVerified: true,
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(),
+    }).verifyUploadedObject(locator, request)).rejects.toThrow('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    await expect(provider({
+      byteSize: 50, verifiedMimeType: 'application/pdf', signatureVerified: true,
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(),
+    }).verifyUploadedObject(locator, request)).resolves.toMatchObject({ byteSize: 50, signatureVerified: true });
+  });
+
 });

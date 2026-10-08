@@ -36,3 +36,14 @@ npm run ci:source:contracts
 ```
 
 بعد تجهيز Worktree مطابق لــ HEAD، يجب تشغيلها داخل بيئة معزولة وتسجيل المخرجات الحقيقية، ثم التحقق من Provider وPostgreSQL وBrowser وفق §03.11–03.16 قبل أي CLOSED.
+
+## الدفعة التالية — Upload verification gate قبل Malware Scan
+
+- تمت إضافة `verifyUploadedObject` في عقد `IAssetStorageGateway` بنتيجة authoritative: actual size، verified MIME، SHA-256 ووقت التحقق و`signatureVerified`.
+- `validateAsset()` يفشل مغلقًا عندما لا يملك storage gateway عملية تحقق، أو لا تثبت نتيجة المحتوى. لا يتم استدعاء Malware Scanner قبل هذا الفحص.
+- `AssetRecord.confirmUploadedObject()` يربط evidence بالـlocator والحجم والنوع المعلن وchecksum؛ و`startValidation()` و`assertCanActivate()` يتحققان من evidence.
+- الأدلة تُحفظ وتُعاد قراءتها داخل JSON `malwareScanStatus` الموجود مسبقًا، بلا تعديل schema ولا تشغيل migration.
+- HTTP provider: contract جديد `POST /v1/assets/verify-upload` يتطلب تنفيذًا فعليًا لدى المزود، ويفشل مغلقًا حتى توفره. لا يمكن اعتبار التحقق cryptographic proof بدون attestation/version من provider.
+- Local development: content signature محدود لــPDF/PNG/JPEG وUTF-8 text/JSON/CSV مع الحجم وchecksum؛ ويحتاج tests بملفات تجريبية فعلية.
+- **الحالة: PARTIAL** لـ03/P0-01/03/05. مصدر الملف لم يعد يُرقّى قبل نتيجة التحقق، لكن `requestUploadLocator` ما يزال يسجل `QUARANTINED` قبل finalization؛ لا توجد بعد route منفصلة ولا CAS/object-version fencing تمنع الكتابة المتأخرة إلى object. هذه عقود مفتوحة ومانعة لـCLOSED.
+- إضافات Unit tests للمسار السلبي. **لم يتم تشغيلها أو TypeScript أو CI** لعدم توفر checkout مع الاعتماديات؛ يلزم إثبات الفحوص قبل الدمج والإطلاق.
