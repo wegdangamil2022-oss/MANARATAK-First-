@@ -92,7 +92,11 @@ export class AssetPlatformRouter {
       q: z.string().trim().min(1).max(240).optional(),
       limit: z.coerce.number().int().min(1).max(100).optional(),
       cursor: z.string().trim().min(1).max(2048).optional(),
-    }).strict();
+    }).strict().superRefine((query, ctx) => {
+      if (query.createdFrom && query.createdTo && new Date(query.createdFrom).getTime() > new Date(query.createdTo).getTime()) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['createdTo'], message: 'createdTo must not precede createdFrom' });
+      }
+    });
 
     router.get('/', asyncHandler(async (req: Request, res: Response) => {
       if (!assetRecordRepository?.queryAdmin) throw new Error('ASSET_ADMIN_READ_MODEL_UNAVAILABLE');
@@ -468,12 +472,37 @@ export class AssetPlatformRouter {
       }
     }));
 
-    // Router error handler for Zod and Use Case errors
-    router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    // Safe RFC 9457 Problem Details: do not return raw provider/database/SQL error messages.
+    router.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
+      const respond = (status: number, title: string, code: string, detail?: string) =>
+        res.status(status).type('application/problem+json').json({
+          type: 'about:blank',
+          title,
+          status,
+          code,
+          ...(detail ? { detail } : {}),
+          instance: req.path,
+        });
+
       if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: 'Validation Error', details: err.issues });
+        const detail = err.issues.map((issue) => `${issue.path.join('.') || 'request'}: ${issue.message}`).join('; ');
+        return respond(400, 'Invalid asset request', 'ASSET_REQUEST_INVALID', detail);
       }
-      return res.status(400).json({ error: err.message || 'An error occurred' });
+      const message = err instanceof Error ? err.message : '';
+      if (message === 'ASSET_CURSOR_INVALID') return respond(400, 'Invalid asset cursor', message);
+      if (message === 'ASSET_ADMIN_READ_MODEL_UNAVAILABLE' ||
+        message === 'ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED' ||
+        message === 'ASSET_MALWARE_SCANNING_NOT_CONFIGURED' ||
+        message === 'ASSET_SANITIZATION_NOT_CONFIGURED') {
+        return respond(503, 'Asset service temporarily unavailable', message);
+      }
+      if (message.startsWith('Asset not found:')) return respond(404, 'Asset not found', 'ASSET_NOT_FOUND');
+      if (message.startsWith('ASSET_PROVIDER_')) return respond(502, 'Asset storage provider rejected the request', 'ASSET_PROVIDER_ERROR');
+      if (/^ASSET_(UPLOAD_VERIFICATION_FAILED|UPLOAD_VERIFICATION_REQUIRED|UPLOAD_VERIFICATION_INVALID_STATE|MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED|MALWARE_SCAN_INVALID_STATE|QUARANTINE_REQUIRED_FOR_ACTIVATION)$/.test(message) ||
+        /^Cannot (activate|archive|soft delete|purge|mark)/i.test(message)) {
+        return respond(409, 'Asset state or dependency conflict', 'ASSET_STATE_CONFLICT');
+      }
+      return respond(500, 'Asset operation failed', 'ASSET_INTERNAL_ERROR');
     });
 
     return router;

@@ -54,3 +54,10 @@ npm run ci:source:contracts
 - أضيف اختبار LocalStorage بملف PDF تجريبي داخل دليل مؤقت مع تنظيفه، لا يمس المستخدم أو الإنتاج.
 - أضيف اختبار Prisma Mock roundtrip يتأكد من حفظ upload+malware evidence وإعادة قراءتها من JSON. **هذا Mock، لا يثبت معاملة PostgreSQL أو سلامة provider.**
 - الحالة ما زالت **NOT CLOSED** وCI غير مشغّل في بيئة العمل الحالية.
+
+## PATCH G — Safe API errors and date-range validation (source only)
+
+- أضيف Zod cross-field guard يمنع `createdTo < createdFrom`.
+- استُبدل الرد العام `400 + err.message` باستجابات `application/problem+json`: أخطاء إدخال 400، غياب صلاحية خدمة 503، مزود التخزين 502، حالة تعارض 409، الأخطاء المجهولة 500، دون تسريب تفاصيل SQL أو أسرار.
+- أُضيف اختبار مصدر بواسطة `supertest` لحالات التاريخ، cursor، 503، وإخفاء استثناء داخلي.
+- **التحقق التشغيلي ما يزال غير منفذ**؛ اختبارات المصدر وCI مطلوبة، ويظل 03/P1-05 و03/P1-06 جزئيين لغياب التحقق من كامل المسارات.
