@@ -61,3 +61,12 @@ npm run ci:source:contracts
 - استُبدل الرد العام `400 + err.message` باستجابات `application/problem+json`: أخطاء إدخال 400، غياب صلاحية خدمة 503، مزود التخزين 502، حالة تعارض 409، الأخطاء المجهولة 500، دون تسريب تفاصيل SQL أو أسرار.
 - أُضيف اختبار مصدر بواسطة `supertest` لحالات التاريخ، cursor، 503، وإخفاء استثناء داخلي.
 - **التحقق التشغيلي ما يزال غير منفذ**؛ اختبارات المصدر وCI مطلوبة، ويظل 03/P1-05 و03/P1-06 جزئيين لغياب التحقق من كامل المسارات.
+
+## Patch D — Least-privilege Asset Reuse (source implementation; NOT CLOSED)
+
+- **New permission:** `admin:assets:reuse` in central permission catalog (standard/delegable). No implicit assignment to Course/StudyDestination roles; IAM owner must approve and provision it. `admin:assets:manage` retains the full lifecycle surface.
+- **New server router:** `/admin/asset-reuse` under existing /admin auth, idempotency and mutation audit, and explicit reuse permission guard. Only GET list, GET individual safe reference, POST selection-audit and POST short-lived delivery-grant; NO delete/purge/lifecycle/upload.
+- **Read model:** repository uses a fixed `reuseOnly` predicate for ACTIVE, CLEAN, PUBLIC/INTERNAL, and existing `malwareScanStatus` PASSED + uploadVerification.signatureVerified. Query filters are server-owned and cannot be overwritten by client parameters. Page projection excludes locators/owner ID/sensitive metadata.
+- **Specific item check:** `isAssetReusable` performs cross-check of active/clean/classification, scan/upload locator linkage and stored checksum before selection/preview.
+- **Picker UI:** server-side debounced search, cursor pagination/load more, pinned selection fetch, and audit-before-onChange instead of optimistic selection. Preview operates only via independent reuse boundary.
+- **Remaining risks:** IAM role grants awaiting explicit approval, no runtime role/supertest/browser evidence. Domain writes still must enforce AssetReferencePolicy. No binary object immutability/version fencing. No production migration executed. This is partial P0-06/P1-06/P1-07 evidence.

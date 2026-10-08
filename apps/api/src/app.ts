@@ -30,6 +30,7 @@ import { canonicalProblemDetailsMiddleware } from './presentation/middleware/Can
 import { createCanonicalIdempotencyMiddleware } from './presentation/middleware/CanonicalIdempotencyMiddleware.js';
 import { OptionalAuthMiddleware } from './presentation/middleware/OptionalAuthMiddleware.js';
 import { ApiRouter } from './presentation/api/router/ApiRouter.js';
+import { AssetReuseRouter } from './presentation/api/router/AssetReuseRouter.js';
 import { ResponseFormatter } from './presentation/api/response/ResponseFormatter.js';
 import { MonitoringRouter } from './presentation/api/router/MonitoringRouter.js';
 import { MonitoringMiddleware } from './presentation/monitoring/MonitoringMiddleware.js';
@@ -766,6 +767,12 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // Static course-import operations MUST be mounted before the generic /admin/imports router.
     v1Router.use('/admin/imports/courses', requireAdminPermission('admin:imports:manage'), container.resolve<Router>('courseImportOperationsRouter'));
     v1Router.use('/admin/imports', requireAdminPermission('admin:imports:manage'), container.resolve<Router>('importAdminRouter'));
+    // Deliberately distinct from /admin/assets: users with reuse rights never receive lifecycle/purge routes.
+    v1Router.use('/admin/asset-reuse', requireAdminPermission('admin:assets:reuse'), AssetReuseRouter.create({
+      assetRecordRepository: container.resolve('assetRecordRepository'),
+      processAssetLifecycleUseCase: container.resolve('processAssetLifecycleUseCase'),
+      auditRecordRepo: auditRecordRepository,
+    }));
     v1Router.use('/admin/assets', requireAdminPermission('admin:assets:manage'), container.resolve<Router>('assetPlatformRouter'));
 
     // Phase 7: Reference Data & Academic Taxonomy

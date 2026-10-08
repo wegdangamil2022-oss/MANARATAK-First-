@@ -146,6 +146,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     q?: string;
     limit?: number;
     cursor?: string;
+    reuseOnly?: boolean;
   }): Promise<{ items: any[]; nextCursor: string | null; hasMore: boolean }> {
     const limit = Math.min(100, Math.max(1, Math.trunc(input.limit ?? 30)));
     let cursorCreatedAt: string | undefined;
@@ -165,7 +166,11 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       ...(input.lifecycleState ? { lifecycleState: input.lifecycleState } : {}),
       ...(input.ownerType ? { ownerType: input.ownerType } : {}),
       ...(input.ownerId ? { ownerId: input.ownerId } : {}),
-      ...(input.securityClassification ? { securityClassification: input.securityClassification } : {}),
+      ...(input.reuseOnly
+        ? { lifecycleState: AssetLifecycleState.ACTIVE, securityClassification: { in: [
+          AssetSecurityClassification.PUBLIC, AssetSecurityClassification.INTERNAL,
+        ] }, cleanStorageLocator: { not: null } }
+        : input.securityClassification ? { securityClassification: input.securityClassification } : {}),
       ...(input.mimeTypePrefix ? { metadata: { path: ['mimeType'], string_starts_with: input.mimeTypePrefix } } : {}),
       ...((input.createdFrom || input.createdTo) ? { createdAt: {
         ...(input.createdFrom ? { gte: new Date(input.createdFrom) } : {}),
@@ -173,6 +178,10 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       } } : {}),
     };
     const andFilters: any[] = [];
+    if (input.reuseOnly) andFilters.push(
+      { malwareScanStatus: { path: ['status'], equals: 'PASSED' } },
+      { malwareScanStatus: { path: ['uploadVerification', 'signatureVerified'], equals: true } },
+    );
     if (input.q) andFilters.push({ OR: [
       { id: { contains: input.q, mode: 'insensitive' } },
       { reference: { contains: input.q, mode: 'insensitive' } },

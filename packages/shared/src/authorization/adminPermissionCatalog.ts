@@ -48,6 +48,17 @@ export const ADMIN_PERMISSION_CATALOG = [
     delegable: true,
   },
   {
+    key: 'admin:assets:reuse',
+    domain: 'assets',
+    action: 'reuse',
+    labelAr: 'اختيار ومعاينة — الأصول القابلة لإعادة الاستخدام',
+    labelEn: 'Select and preview — Reusable assets',
+    descriptionAr: 'البحث عن الأصول النشطة العامة أو الداخلية واختيارها ومعاينتها دون صلاحيات إدارة دورة الحياة أو الحذف.',
+    descriptionEn: 'Search, select, and preview reusable active public/internal assets without lifecycle or deletion authority.',
+    risk: 'STANDARD',
+    delegable: true,
+  },
+  {
     key: 'admin:assets:manage',
     domain: 'assets',
     action: 'manage',

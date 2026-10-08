@@ -5,16 +5,18 @@ interface AssetOption {
   id: string;
   reference: string;
   lifecycleState?: string;
-  metadata?: { originalFilename?: string; mimeType?: string };
+  metadata?: { originalFilename?: string; mimeType?: string; byteSize?: number };
+}
+interface AssetPage {
+  items: AssetOption[];
+  nextCursor: string | null;
+  hasMore: boolean;
 }
 interface DeliveryGrant { url: string; headers?: Record<string, string>; expiresAt: string }
+const BASE = '/admin/asset-reuse';
 
 export function AssetPicker({
-  value,
-  onChange,
-  mimeTypePrefix,
-  label = 'Asset',
-  purpose,
+  value, onChange, mimeTypePrefix, label = 'Asset', purpose,
 }: {
   value?: string;
   onChange: (id: string) => void;
@@ -23,34 +25,87 @@ export function AssetPicker({
   purpose: string;
 }) {
   const [assets, setAssets] = useState<AssetOption[]>([]);
+  const [search, setSearch] = useState('');
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [selecting, setSelecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewing, setPreviewing] = useState(false);
 
   useEffect(() => {
-    const p = new URLSearchParams({ lifecycleState: 'ACTIVE', limit: '100' });
-    if (mimeTypePrefix) p.set('mimeTypePrefix', mimeTypePrefix);
-    adminApiClient.request<{ items: AssetOption[] }>(`/admin/assets?${p}`)
-      .then((r) => setAssets(r.items.filter((asset) => !asset.lifecycleState || asset.lifecycleState === 'ACTIVE')))
-      .catch((e) => setError(e instanceof Error ? e.message : 'Asset picker unavailable'));
-  }, [mimeTypePrefix]);
+    let cancelled = false;
+    setAssets([]);
+    setCursor(null);
+    setHasMore(false);
+    setLoading(true);
+    setError(null);
+    const delay = window.setTimeout(() => {
+      const query = new URLSearchParams({ limit: '30' });
+      if (mimeTypePrefix) query.set('mimeTypePrefix', mimeTypePrefix);
+      if (search.trim()) query.set('q', search.trim());
+      adminApiClient.request<AssetPage>(`${BASE}?${query}`, { cache: 'no-store' })
+        .then((page) => {
+          if (cancelled) return;
+          setAssets(page.items);
+          setCursor(page.nextCursor);
+          setHasMore(page.hasMore);
+        })
+        .catch((cause) => {
+          if (!cancelled) setError(cause instanceof Error ? cause.message : 'تعذر تحميل الأصول');
+        })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    }, 250);
+    return () => { cancelled = true; window.clearTimeout(delay); };
+  }, [mimeTypePrefix, search]);
+
+  useEffect(() => {
+    if (!value || assets.some((asset) => asset.id === value)) return;
+    let cancelled = false;
+    adminApiClient.request<AssetOption>(`${BASE}/${encodeURIComponent(value)}`, { cache: 'no-store' })
+      .then((asset) => setAssets((prev) => cancelled || prev.some((item) => item.id === asset.id) ? prev : [asset, ...prev]))
+      .catch(() => { /* Do not trust deleted or unauthorized stored references. */ });
+    return () => { cancelled = true; };
+  }, [value, assets]);
+
+  async function loadMore() {
+    if (loading || !hasMore || !cursor) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const query = new URLSearchParams({ limit: '30', cursor });
+      if (mimeTypePrefix) query.set('mimeTypePrefix', mimeTypePrefix);
+      if (search.trim()) query.set('q', search.trim());
+      const page = await adminApiClient.request<AssetPage>(`${BASE}?${query}`, { cache: 'no-store' });
+      setAssets((prev) => [...prev, ...page.items.filter((asset) => !prev.some((old) => old.id === asset.id))]);
+      setCursor(page.nextCursor);
+      setHasMore(page.hasMore);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'تعذر تحميل المزيد من الأصول');
+    } finally { setLoading(false); }
+  }
 
   async function select(id: string) {
-    onChange(id);
-    if (!id) return;
+    if (!id) { onChange(''); return; }
+    if (selecting) return;
+    setSelecting(true);
+    setError(null);
     try {
-      await adminApiClient.request(`/admin/assets/${encodeURIComponent(id)}/selection-audit`, {
+      // The server authorizes reuse and records the selection before changing the form state.
+      await adminApiClient.request(`${BASE}/${encodeURIComponent(id)}/selection-audit`, {
         method: 'POST', body: JSON.stringify({ purpose }),
       });
+      onChange(id);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذر تسجيل اختيار الأصل');
-    }
+    } finally { setSelecting(false); }
   }
 
   async function preview() {
     if (!value) return;
     setPreviewing(true); setError(null);
     try {
-      const grant = await adminApiClient.request<DeliveryGrant>(`/admin/assets/${encodeURIComponent(value)}/delivery-grant`, {
+      const grant = await adminApiClient.request<DeliveryGrant>(`${BASE}/${encodeURIComponent(value)}/delivery-grant`, {
         method: 'POST', body: JSON.stringify({ expiresInSeconds: 300 }),
       });
       if (grant.headers && Object.keys(grant.headers).length > 0) {
@@ -69,12 +124,24 @@ export function AssetPicker({
 
   return <div className="block text-sm">
     <label className="block"><span className="font-bold">{label}</span>
-      <select value={value ?? ''} onChange={(e) => void select(e.target.value)} className="mt-1 w-full rounded-xl border p-2">
+      <input value={search} onChange={(e) => setSearch(e.target.value)} maxLength={160}
+        placeholder="ابحث عن اسم الملف" className="mt-1 w-full rounded-xl border p-2" />
+      <select value={value ?? ''} disabled={selecting}
+        onChange={(e) => void select(e.target.value)} className="mt-1 w-full rounded-xl border p-2">
         <option value="">No asset</option>
-        {assets.map((a) => <option key={a.id} value={a.id}>{a.metadata?.originalFilename ?? a.reference} · {a.metadata?.mimeType ?? ''}</option>)}
+        {assets.map((asset) => <option key={asset.id} value={asset.id}>
+          {asset.metadata?.originalFilename ?? asset.reference} · {asset.metadata?.mimeType ?? ''} · {asset.metadata?.byteSize ?? 0} B
+        </option>)}
       </select>
     </label>
-    {value ? <button type="button" disabled={previewing} onClick={() => void preview()} className="mt-2 rounded-lg border px-3 py-1.5 text-xs font-bold disabled:opacity-50">{previewing ? 'جاري إنشاء رابط آمن…' : 'معاينة مؤقتة آمنة'}</button> : null}
+    {hasMore ? <button type="button" disabled={loading} onClick={() => void loadMore()}
+      className="mt-2 rounded-lg border px-3 py-1.5 text-xs disabled:opacity-50">
+      {loading ? 'جاري التحميل…' : 'تحميل المزيد'}
+    </button> : null}
+    {value ? <button type="button" disabled={previewing} onClick={() => void preview()}
+      className="mt-2 rounded-lg border px-3 py-1.5 text-xs font-bold disabled:opacity-50">
+      {previewing ? 'جاري إنشاء رابط آمن…' : 'معاينة مؤقتة آمنة'}
+    </button> : null}
     {error ? <span className="mt-1 block text-xs text-red-600">{error}</span> : null}
   </div>;
 }
