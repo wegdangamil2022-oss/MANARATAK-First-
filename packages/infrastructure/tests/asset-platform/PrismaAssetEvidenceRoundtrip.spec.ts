@@ -9,10 +9,13 @@ import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAsse
 describe('EAP persisted upload and malware evidence', () => {
   it('round-trips observed upload evidence and scanner result through existing Prisma JSON column', async () => {
     let stored: any = null;
-    const upsert = vi.fn(async (args: any) => { stored = args.create; return stored; });
+    const create = vi.fn(async (args: any) => {
+      stored = { ...args.data, updatedAt: new Date('2026-10-09T00:00:00.000Z') };
+      return stored;
+    });
     const findUnique = vi.fn(async () => stored);
     const repository = new PrismaAssetRecordRepository({
-      assetRecord: { upsert, findUnique },
+      assetRecord: { create, findUnique },
     } as any);
     const record = new AssetRecord({
       id: new AssetId('asset-evidence-1'),

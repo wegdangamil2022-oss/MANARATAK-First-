@@ -33,9 +33,12 @@ interface AssetRecordRow {
   versionChain: unknown | null;
   sanitizationMetadata: unknown | null;
   malwareScanStatus: unknown | null;
+  updatedAt: Date;
 }
 
 export class PrismaAssetRecordRepository implements IAssetRecordRepository {
+  /** Repository-local revision captures enforce conditional writes without a schema migration. */
+  private readonly loadedSnapshots = new WeakMap<AssetRecord, { updatedAt: Date; lifecycleState: string }>();
   constructor(private readonly prisma: PrismaClient) {}
 
   async save(asset: AssetRecord): Promise<void> {
@@ -73,19 +76,33 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         : null as any,
     };
 
-    const prismaClient = this.prisma as unknown as {
-      assetRecord: {
-        upsert: (args: any) => Promise<any>,
-        findUnique: (args: any) => Promise<any>,
-        findMany: (args: any) => Promise<any>
+    const delegate = (this.prisma as any).assetRecord;
+    const captured = this.loadedSnapshots.get(asset);
+    if (!captured) {
+      // New entities must never overwrite an existing record via upsert.
+      const created = await delegate.create({ data });
+      if (created?.updatedAt instanceof Date) {
+        this.loadedSnapshots.set(asset, { updatedAt: created.updatedAt, lifecycleState: asset.state });
       }
-    };
+      return;
+    }
 
-    await prismaClient.assetRecord.upsert({
-      where: { id: asset.id.value },
-      update: data,
-      create: data
+    // Conditional state+timestamp CAS rejects stale lifecycle commands without altering schema.
+    const mutation: Record<string, unknown> = { ...data };
+    delete mutation.id;
+    delete mutation.reference;
+    const updated = await delegate.updateMany({
+      where: {
+        id: asset.id.value,
+        updatedAt: captured.updatedAt,
+        lifecycleState: captured.lifecycleState,
+      },
+      data: mutation,
     });
+    if (!updated || updated.count !== 1) {
+      throw new Error('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    }
+    // Snapshot deliberately stays stale: another mutation must rehydrate the aggregate.
   }
 
   async assertPurgeAllowed(id: AssetId, at: Date, retentionClaimToken?: string): Promise<void> {
@@ -309,7 +326,11 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
           signatureVerified: true as const,
         } : undefined;
 
-    return new AssetRecord({
+    if (!(row.updatedAt instanceof Date) || !Number.isFinite(row.updatedAt.getTime())) {
+      throw new Error('ASSET_RECORD_REVISION_MISSING');
+    }
+
+    const asset = new AssetRecord({
       id: new AssetId(row.id),
       reference: new AssetReference(row.reference),
       locator,
@@ -325,7 +346,12 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       sanitization,
       malwareScan,
       uploadVerification,
-      versionChain: undefined // We are skipping complex versionChain reconstruction for now as it's not strictly required in full unless requested
+      versionChain: undefined // Existing scope excludes full versionChain reconstruction.
     });
+    this.loadedSnapshots.set(asset, {
+      updatedAt: row.updatedAt,
+      lifecycleState: row.lifecycleState,
+    });
+    return asset;
   }
 }

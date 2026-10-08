@@ -161,3 +161,10 @@ npm run ci:source:contracts
 - A source-level Vitest guard parses the Prisma schema and central `PrismaAssetUsageRegistryGateway`; new/missing/stale direct reference mappings fail CI. Explicit checks cover CMS JSON attachments and SEO `openGraphAssetId` paths.
 - This is schema-source evidence only; runtime database completeness, nonstandard JSON metadata and concurrent writes remain unverified.
 - Previous completed CI run: `37861733848`: TypeScript/quality passed, 82/82 target tests passed.
+
+## Patch C — Revision-gated Prisma asset record writes (source-level CAS)
+
+- Replaced `assetRecord.upsert()` for application EAP saves: fresh aggregates use `create()` (concurrent duplicate IDs cannot overwrite existing assets); aggregates loaded from Prisma carry a repository-local `WeakMap` snapshot of `updatedAt` + original `lifecycleState`.
+- Updates now use conditional `updateMany({ where: { id, updatedAt: captured, lifecycleState: captured } })`; count != 1 fails as `ASSET_RECORD_CONCURRENT_MODIFICATION` and must be retried only after rehydration.
+- Existing `AssetRecord.updatedAt` column is reused; **no Prisma migration/schema change**. A second update to the same in-memory snapshot intentionally fails; fresh reads are required.
+- This provides source-level optimistic compare-and-swap **at DB save time**. It does **not** protect provider side effects performed *before* CAS, and timestamp granularity/DB isolation must be tested under real concurrency. Provider reconciliation, durable transition journal/outbox, and real PostgreSQL tests remain open.
