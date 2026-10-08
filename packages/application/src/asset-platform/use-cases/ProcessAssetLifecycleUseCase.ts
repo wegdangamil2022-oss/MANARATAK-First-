@@ -218,6 +218,12 @@ export class ProcessAssetLifecycleUseCase {
 
     await this.assertNotInUse(id, 'purge');
 
+    // Deletion is irreversible: never interpret an absent repository guard as permission.
+    if (!this.assetRepository.assertPurgeAllowed) {
+      throw new Error('ASSET_PURGE_RETENTION_GUARD_NOT_CONFIGURED');
+    }
+    await this.assetRepository.assertPurgeAllowed(id, new Date());
+
     record.purge();
     await this.storageGateway.delete(record.locator);
     await this.assetRepository.save(record);

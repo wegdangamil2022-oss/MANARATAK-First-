@@ -131,3 +131,10 @@ npm run ci:source:contracts
 - Added fail-closed delivery/restore for legacy ACTIVE/CLEAN records without signed malware/upload evidence, and a use-case test confirming no delivery provider call.
 - Extended isolated CI typecheck job with `quality:source` (source-only checks; no DB mutation, deployment or production data).
 - **Still pending:** atomic provider checksum enforcement and failure reconciliation, resource usage locking/transactional constraints, full integration/browser/DB tests and role provisioning. Section 03 remains NOT CLOSED.
+
+## Patch I — Fail-closed retention/legal-hold purge preflight (source, not atomic)
+
+- Added `IAssetRecordRepository.assertPurgeAllowed(id, at)` optional capability; the purge use case refuses irreversible deletion if the capability is unavailable.
+- `PrismaAssetRecordRepository` checks DB-owned `lifecycleState=DELETED`, explicitly expired `retentionExpiresAt`, absence of a live `legalHoldUntil`, and absence of an active `retentionClaimUntil`. Null retention expiry is indefinite; never interpreted as safe to purge.
+- Verification happens **before** external `storageGateway.delete`; in-memory tests cover indefinite retention and missing guard. Existing purge happy-path fixture now has explicit elapsed expiry.
+- **Unresolved:** this check is *not atomic* with external deletion, nor with concurrent legal hold/usage insertion. Requires DB serialization/CAS claims, provider reconciliation and real PostgreSQL integration before P0 acceptance. No schema migration or production data updates.

@@ -88,6 +88,36 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     });
   }
 
+  async assertPurgeAllowed(id: AssetId, at: Date): Promise<void> {
+    if (!Number.isFinite(at.getTime())) throw new Error('ASSET_PURGE_CLOCK_INVALID');
+    const row = await this.prisma.assetRecord.findUnique({
+      where: { id: id.value },
+      select: {
+        lifecycleState: true,
+        retentionExpiresAt: true,
+        legalHoldUntil: true,
+        retentionClaimUntil: true,
+      },
+    });
+    if (!row) throw new Error('ASSET_PURGE_NOT_FOUND');
+    if (row.lifecycleState !== AssetLifecycleState.DELETED) {
+      throw new Error('ASSET_PURGE_SOFT_DELETE_REQUIRED');
+    }
+    // A missing expiration is an indefinite hold, not evidence that deletion is allowed.
+    if (!row.retentionExpiresAt || !Number.isFinite(row.retentionExpiresAt.getTime()) ||
+        row.retentionExpiresAt.getTime() > at.getTime()) {
+      throw new Error('ASSET_PURGE_RETENTION_NOT_EXPIRED');
+    }
+    if (row.legalHoldUntil && (!Number.isFinite(row.legalHoldUntil.getTime()) ||
+        row.legalHoldUntil.getTime() > at.getTime())) {
+      throw new Error('ASSET_PURGE_LEGAL_HOLD_ACTIVE');
+    }
+    if (row.retentionClaimUntil && (!Number.isFinite(row.retentionClaimUntil.getTime()) ||
+        row.retentionClaimUntil.getTime() > at.getTime())) {
+      throw new Error('ASSET_PURGE_RETENTION_CLAIM_ACTIVE');
+    }
+  }
+
   async findById(id: AssetId): Promise<AssetRecord | null> {
     const prismaClient = this.prisma as unknown as {
       assetRecord: {

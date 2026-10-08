@@ -45,6 +45,16 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
     return null;
   }
 
+  async assertPurgeAllowed(id: AssetId, at: Date): Promise<void> {
+    const record = this.store.get(id.value);
+    if (!record || record.state !== AssetLifecycleState.DELETED) {
+      throw new Error('ASSET_PURGE_SOFT_DELETE_REQUIRED');
+    }
+    if (!record.retention.expiresAt || record.retention.expiresAt.getTime() > at.getTime()) {
+      throw new Error('ASSET_PURGE_RETENTION_NOT_EXPIRED');
+    }
+  }
+
   async findByOwner(owner: AssetOwnerReference): Promise<AssetRecord[]> {
     const result: AssetRecord[] = [];
     for (const asset of this.store.values()) {
@@ -260,6 +270,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     await ingestUseCase.requestUploadLocator({
       assetId: 'asset-in-use',
       assetReference: 'ref-in-use',
+      expiresAt: new Date(Date.now() - 60_000).toISOString(),
       ownerId: 'user-77',
       ownerType: 'STUDENT',
       originalFilename: 'transcript.pdf',
@@ -410,6 +421,36 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     await expect(lifecycleUseCase.requestDeliveryGrant({ assetId: 'asset-forged-clean' }))
       .rejects.toThrow('ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED');
     expect(grant).not.toHaveBeenCalled();
+  });
+
+  it('refuses irreversible purge with indefinite retention before contacting the storage provider', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-permanent',
+      assetReference: 'ref-permanent', ownerId: 'owner', ownerType: 'STUDENT',
+      originalFilename: 'legal.pdf', mimeType: 'application/pdf', fileExtension: 'pdf',
+      byteSize: 20, classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-permanent' });
+    const remove = vi.spyOn(storageGateway, 'delete');
+    await expect(lifecycleUseCase.purgeAsset({ assetId: 'asset-permanent' }))
+      .rejects.toThrow('ASSET_PURGE_RETENTION_NOT_EXPIRED');
+    expect(remove).not.toHaveBeenCalled();
+    expect((await repo.findById(new AssetId('asset-permanent')))?.state).toBe(AssetLifecycleState.DELETED);
+  });
+
+  it('fails closed when repository purge retention guard is unavailable', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-missing-guard', assetReference: 'ref-missing-guard',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'draft.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 20,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-missing-guard' });
+    (repo as any).assertPurgeAllowed = undefined;
+    const remove = vi.spyOn(storageGateway, 'delete');
+    await expect(lifecycleUseCase.purgeAsset({ assetId: 'asset-missing-guard' }))
+      .rejects.toThrow('ASSET_PURGE_RETENTION_GUARD_NOT_CONFIGURED');
+    expect(remove).not.toHaveBeenCalled();
   });
 
 });
