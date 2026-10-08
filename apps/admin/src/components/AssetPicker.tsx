@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 
 interface AssetOption {
@@ -32,9 +32,11 @@ export function AssetPicker({
   const [selecting, setSelecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewing, setPreviewing] = useState(false);
+  const queryGeneration = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
+    const generation = ++queryGeneration.current;
     setAssets([]);
     setCursor(null);
     setHasMore(false);
@@ -46,15 +48,15 @@ export function AssetPicker({
       if (search.trim()) query.set('q', search.trim());
       adminApiClient.request<AssetPage>(`${BASE}?${query}`, { cache: 'no-store' })
         .then((page) => {
-          if (cancelled) return;
+          if (cancelled || generation !== queryGeneration.current) return;
           setAssets(page.items);
           setCursor(page.nextCursor);
           setHasMore(page.hasMore);
         })
         .catch((cause) => {
-          if (!cancelled) setError(cause instanceof Error ? cause.message : 'تعذر تحميل الأصول');
+          if (!cancelled && generation === queryGeneration.current) setError(cause instanceof Error ? cause.message : 'تعذر تحميل الأصول');
         })
-        .finally(() => { if (!cancelled) setLoading(false); });
+        .finally(() => { if (!cancelled && generation === queryGeneration.current) setLoading(false); });
     }, 250);
     return () => { cancelled = true; window.clearTimeout(delay); };
   }, [mimeTypePrefix, search]);
@@ -70,6 +72,7 @@ export function AssetPicker({
 
   async function loadMore() {
     if (loading || !hasMore || !cursor) return;
+    const generation = queryGeneration.current;
     setLoading(true);
     setError(null);
     try {
@@ -77,12 +80,15 @@ export function AssetPicker({
       if (mimeTypePrefix) query.set('mimeTypePrefix', mimeTypePrefix);
       if (search.trim()) query.set('q', search.trim());
       const page = await adminApiClient.request<AssetPage>(`${BASE}?${query}`, { cache: 'no-store' });
+      if (generation !== queryGeneration.current) return;
       setAssets((prev) => [...prev, ...page.items.filter((asset) => !prev.some((old) => old.id === asset.id))]);
       setCursor(page.nextCursor);
       setHasMore(page.hasMore);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر تحميل المزيد من الأصول');
-    } finally { setLoading(false); }
+      if (generation === queryGeneration.current) setError(cause instanceof Error ? cause.message : 'تعذر تحميل المزيد من الأصول');
+    } finally {
+      if (generation === queryGeneration.current) setLoading(false);
+    }
   }
 
   async function select(id: string) {

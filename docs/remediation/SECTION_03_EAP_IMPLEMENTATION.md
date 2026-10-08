@@ -82,3 +82,8 @@ npm run ci:source:contracts
 - أضيف `GET /admin/assets/:assetId/usages` ضمن مسار `admin:assets:manage` القائم ويستخدم `IAssetUsageRegistryGateway.findUsages` الحقيقي، 404 لملف غير موجود و503 عند غياب registry، ولا يفترض أن الغياب يعني صفر ارتباطات.
 - أضيف لصفحة `AssetAdminPage` زر عرض الارتباطات وملخص تأثير للإجراء قبل أي حذف أو أرشفة؛ لا توجد في هذه الدفعة أزرار حذف جديدة أو عمليات تدميرية.
 - هذا **قراءة فقط**؛ التحقق الفعلي عند mutation يبقى داخل `ProcessAssetLifecycleUseCase.assertNotInUse`. لا يدّعي هذا حل السباقات concurrent أو إثبات coverage كل relation بالبيانات الفعلية.
+
+## واجهة اختيار الأصول — منع خلط نتائج البحث
+
+- `AssetPicker` يستعمل `queryGeneration` لحجب نتائج صفحات جرى طلبها قبل تغيير الفلتر أو البحث؛ يمنع أن تؤدي استجابات الشبكة الخارجة عن الترتيب لخلط assets من استعلامين.
+- بقاء `AssetReferencePolicy` لدى الدومين هو السلطة النهائية عند الحفظ؛ client-side selection audit مجرد طبقة تحكم قبل تعديل اختيار النموذج، وليس دليلًا كافيًا لنقل المرجع إلى domain storage.
