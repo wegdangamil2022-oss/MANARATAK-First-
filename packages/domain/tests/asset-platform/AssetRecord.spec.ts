@@ -193,6 +193,15 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       state: AssetLifecycleState.QUARANTINED,
     });
     expect(() => record.assertCanActivate()).toThrow('Cannot activate asset in');
+    expect(() => record.startValidation()).toThrow('ASSET_UPLOAD_VERIFICATION_REQUIRED');
+    record.confirmUploadedObject({
+      locator: record.locator.value,
+      byteSize: 123,
+      verifiedMimeType: 'application/pdf',
+      checksumSha256: 'a'.repeat(64),
+      verifiedAt: new Date().toISOString(),
+      signatureVerified: true,
+    });
     record.startValidation();
     expect(() => record.startSanitizing()).toThrow('ASSET_MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED');
     expect(() => record.activate(new AssetStorageLocator(AssetStorageZone.CLEAN, 'c', 'test.pdf')))

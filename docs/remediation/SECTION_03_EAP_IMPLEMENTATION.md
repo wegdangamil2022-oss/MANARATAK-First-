@@ -47,3 +47,10 @@ npm run ci:source:contracts
 - Local development: content signature محدود لــPDF/PNG/JPEG وUTF-8 text/JSON/CSV مع الحجم وchecksum؛ ويحتاج tests بملفات تجريبية فعلية.
 - **الحالة: PARTIAL** لـ03/P0-01/03/05. مصدر الملف لم يعد يُرقّى قبل نتيجة التحقق، لكن `requestUploadLocator` ما يزال يسجل `QUARANTINED` قبل finalization؛ لا توجد بعد route منفصلة ولا CAS/object-version fencing تمنع الكتابة المتأخرة إلى object. هذه عقود مفتوحة ومانعة لـCLOSED.
 - إضافات Unit tests للمسار السلبي. **لم يتم تشغيلها أو TypeScript أو CI** لعدم توفر checkout مع الاعتماديات؛ يلزم إثبات الفحوص قبل الدمج والإطلاق.
+
+## متابعة التحقق المصدرّي بعد الدفعة
+
+- أُصلح اختبار سلبي كان يتوقع أن يبدأ VALIDATING دون upload evidence؛ أصبح يختبر fail-closed قبل evidence ثم غياب scanner evidence بعد نجاح التحقق.
+- أضيف اختبار LocalStorage بملف PDF تجريبي داخل دليل مؤقت مع تنظيفه، لا يمس المستخدم أو الإنتاج.
+- أضيف اختبار Prisma Mock roundtrip يتأكد من حفظ upload+malware evidence وإعادة قراءتها من JSON. **هذا Mock، لا يثبت معاملة PostgreSQL أو سلامة provider.**
+- الحالة ما زالت **NOT CLOSED** وCI غير مشغّل في بيئة العمل الحالية.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mkdtemp, mkdir, writeFile } from 'fs/promises';
+import { mkdtemp, mkdir, writeFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import * as path from 'path';
 import {
@@ -23,6 +23,31 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
       expect(locator.storageZone).toBe(AssetStorageZone.QUARANTINE);
       expect(locator.bucketName).toBe('test-bucket');
       expect(locator.pathKey).toMatch(/^uploads\//);
+    });
+
+    it('verifies real bytes in the local quarantine file and rejects mismatched declared metadata', async () => {
+      const root = await mkdtemp(path.join(tmpdir(), 'manaratak-asset-verification-'));
+      try {
+        await mkdir(path.join(root, 'test-bucket', 'uploads'), { recursive: true });
+        const bytes = Buffer.from('%PDF-1.7\\nminimal fixture', 'utf8');
+        await writeFile(path.join(root, 'test-bucket', 'uploads', 'sample.pdf'), bytes);
+        const gateway = new LocalAssetStorageGateway('test-bucket', root);
+        const locator = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'test-bucket', 'uploads/sample.pdf');
+        const result = await gateway.verifyUploadedObject(locator, {
+          expectedByteSize: bytes.length, declaredMimeType: 'application/pdf',
+        });
+        expect(result.byteSize).toBe(bytes.length);
+        expect(result.verifiedMimeType).toBe('application/pdf');
+        expect(result.checksumSha256).toMatch(/^[a-f0-9]{64}$/);
+        await expect(gateway.verifyUploadedObject(locator, {
+          expectedByteSize: bytes.length + 1, declaredMimeType: 'application/pdf',
+        })).rejects.toThrow('ASSET_UPLOAD_VERIFICATION_FAILED');
+        await expect(gateway.verifyUploadedObject(locator, {
+          expectedByteSize: bytes.length, declaredMimeType: 'image/png',
+        })).rejects.toThrow('ASSET_UPLOAD_VERIFICATION_FAILED');
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
     });
 
     it('moves locator from quarantine to clean zone', async () => {
