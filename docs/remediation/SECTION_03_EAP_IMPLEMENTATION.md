@@ -108,3 +108,12 @@ npm run ci:source:contracts
 - EAP targeted Vitest: 11/12 test files loaded, 52/52 executed tests passed; test file `AssetReuseRouter.spec.ts` failed to import before executing because `@manaratak/config` (transitive import of `SecurityMiddlewareFactory`) was not built by targeted tsc -b list.
 - الإصلاح لخطوة EAP tests: استبدال بناء مجموعة Workspaces محدودة بـ`npm run typecheck` على كامل TypeScript project references قبل Vitest، لا تعديل API logic ولا schema.
 - **عدم الإعلان عن نجاح EAP tests قبل إنجاز rerun**.
+
+## Patch H — Sanitizer output provenance and double-check (source gate)
+
+- EAP sanitizer output now **invalidates prior upload verification, scanner result and checksum**, including in-place sanitization.
+- Resulting QUARANTINE object is re-verified by storage provider (actual MIME/size/SHA-256), rescanned for malware, and re-verified after the scanner. A detected threat blocks activation and persists `MALWARE_SCAN_FAILED`.
+- `activateAsset` checks current quarantine digest against the recorded post-sanitization digest **before** external move-to-clean. Stale evidence or changed bytes fail closed.
+- Post-sanitize actual object byte size updates `AssetMetadata.byteSize` to avoid trusting original upload byte size as the clean output size.
+- Added domain and application regression tests for new locator, modified bytes, post-sanitizer infection and tampered content.
+- **Important limitations:** verification before move is not an atomic provider compare-and-swap; without object version/ETag fencing and storage provider implementation, there remains a TOCTOU window. Real storage, concurrency and durability tests remain mandatory. No database schema changes or production operations.

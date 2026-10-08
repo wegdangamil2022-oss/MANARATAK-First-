@@ -158,7 +158,49 @@ export class AssetRecord {
       this.props.locator = sanitizedLocator;
     }
     this.props.sanitization = sanitization;
+    // Sanitizers may rewrite bytes even while preserving the locator; prior scan/digest is stale.
+    this.props.uploadVerification = undefined;
+    this.props.malwareScan = undefined;
+    this.props.checksum = undefined;
     this.events.push(new AssetSanitizedEvent(this.props.id));
+  }
+
+  public confirmSanitizedObject(evidence: AssetUploadEvidence): void {
+    if (this.props.state !== AssetLifecycleState.SANITIZING ||
+      !this.props.sanitization ||
+      this.props.locator.storageZone !== AssetStorageZone.QUARANTINE) {
+      throw new Error('ASSET_SANITIZED_UPLOAD_INVALID_STATE');
+    }
+    if (evidence.locator !== this.props.locator.value ||
+      evidence.signatureVerified !== true ||
+      !Number.isSafeInteger(evidence.byteSize) || evidence.byteSize <= 0 ||
+      evidence.verifiedMimeType !== this.props.metadata.mimeType ||
+      !/^[a-f0-9]{64}$/i.test(evidence.checksumSha256) ||
+      !Number.isFinite(Date.parse(evidence.verifiedAt))) {
+      throw new Error('ASSET_SANITIZED_UPLOAD_VERIFICATION_FAILED');
+    }
+    this.props.uploadVerification = { ...evidence, checksumSha256: evidence.checksumSha256.toLowerCase() };
+    this.props.checksum = new AssetChecksum('sha256', evidence.checksumSha256.toLowerCase());
+    this.props.metadata = new AssetMetadata(
+      this.props.metadata.originalFilename, this.props.metadata.mimeType,
+      this.props.metadata.fileExtension, evidence.byteSize,
+      this.props.metadata.width, this.props.metadata.height,
+      this.props.metadata.duration, this.props.metadata.extraMetadata,
+    );
+  }
+
+  public passSanitizedMalwareScan(): void {
+    if (this.props.state !== AssetLifecycleState.SANITIZING ||
+      !this.props.sanitization ||
+      !this.props.uploadVerification ||
+      this.props.uploadVerification.locator !== this.props.locator.value ||
+      this.props.checksum?.hash !== this.props.uploadVerification.checksumSha256) {
+      throw new Error('ASSET_SANITIZED_MALWARE_SCAN_INVALID_STATE');
+    }
+    this.props.malwareScan = {
+      status: 'PASSED', scannedAt: new Date().toISOString(), locator: this.props.locator.value,
+    };
+    this.events.push(new AssetMalwareScanSucceededEvent(this.props.id));
   }
 
   public assertCanActivate(): void {
@@ -170,6 +212,7 @@ export class AssetRecord {
     }
     if (this.props.uploadVerification?.signatureVerified !== true ||
       this.props.uploadVerification.locator !== this.props.malwareScan?.locator ||
+      this.props.uploadVerification.locator !== this.props.locator.value ||
       this.props.uploadVerification.checksumSha256.toLowerCase() !== this.props.checksum?.hash ||
       this.props.malwareScan?.status !== 'PASSED' ||
       !Number.isFinite(Date.parse(this.props.malwareScan.scannedAt)) ||

@@ -88,6 +88,13 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
 
       record.completeSanitization(new AssetSanitizationMetadata(true, new Date(), 'EXIF metadata stripped'));
       expect(record.sanitization?.exifStripped).toBe(true);
+      expect(() => record.assertCanActivate()).toThrow('ASSET_MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED');
+      record.confirmSanitizedObject({
+        locator: record.locator.value, byteSize: record.metadata.byteSize,
+        verifiedMimeType: record.metadata.mimeType, checksumSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        verifiedAt: new Date().toISOString(), signatureVerified: true,
+      });
+      record.passSanitizedMalwareScan();
 
       const cleanLocator = new AssetStorageLocator(AssetStorageZone.CLEAN, 'clean-bucket', 'assets/ast-001.pdf');
       const checksum = new AssetChecksum('sha256', 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
@@ -143,6 +150,12 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       record.passMalwareScan();
       record.startSanitizing();
       record.completeSanitization(new AssetSanitizationMetadata(true, new Date(), 'Verified sanitized output'));
+      record.confirmSanitizedObject({
+        locator: record.locator.value, byteSize: record.metadata.byteSize,
+        verifiedMimeType: record.metadata.mimeType, checksumSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        verifiedAt: new Date().toISOString(), signatureVerified: true,
+      });
+      record.passSanitizedMalwareScan();
       record.activate(new AssetStorageLocator(AssetStorageZone.CLEAN, 'clean-bucket', 'doc.pdf'));
 
       expect(record.state).toBe(AssetLifecycleState.ACTIVE);
@@ -206,6 +219,26 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
     expect(() => record.startSanitizing()).toThrow('ASSET_MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED');
     expect(() => record.activate(new AssetStorageLocator(AssetStorageZone.CLEAN, 'c', 'test.pdf')))
       .toThrow('Cannot activate asset in');
+  });
+
+  it('invalidates old scan evidence after sanitizer rewrites or relocates the object', () => {
+    const { record } = createInitialAsset();
+    record.assignQuarantineLocator(new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'file.png'));
+    record.confirmUploadedObject({
+      locator: record.locator.value, byteSize: 1024, verifiedMimeType: 'application/pdf',
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(), signatureVerified: true,
+    });
+    record.startValidation();
+    record.passMalwareScan();
+    record.startSanitizing();
+    record.completeSanitization(
+      new AssetSanitizationMetadata(true, new Date(), 'rewritten'),
+      new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'sanitized/file.png'),
+    );
+    expect(record.uploadVerification).toBeUndefined();
+    expect(record.malwareScan).toBeUndefined();
+    expect(record.checksum).toBeUndefined();
+    expect(() => record.assertCanActivate()).toThrow('ASSET_MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED');
   });
 
 });

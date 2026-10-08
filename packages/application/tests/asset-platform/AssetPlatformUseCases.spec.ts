@@ -60,12 +60,16 @@ class FakeAssetStorageGateway implements IAssetStorageGateway {
   }
 
   public verifyFails = false;
-  async verifyUploadedObject(_locator: AssetStorageLocator, request: { expectedByteSize: number; declaredMimeType: string }) {
+  public verificationHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+  public sanitizedByteSize?: number;
+  async verifyUploadedObject(locator: AssetStorageLocator, request: { expectedByteSize?: number; declaredMimeType: string }) {
     if (this.verifyFails) throw new Error('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    const byteSize = locator.pathKey.includes('sanitized/') && this.sanitizedByteSize
+      ? this.sanitizedByteSize : request.expectedByteSize ?? 50;
     return {
-      byteSize: request.expectedByteSize,
+      byteSize,
       verifiedMimeType: request.declaredMimeType,
-      checksumSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      checksumSha256: this.verificationHash,
       verifiedAt: new Date().toISOString(),
       signatureVerified: true,
     };
@@ -333,6 +337,58 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     expect(scan).not.toHaveBeenCalled();
     expect((await repo.findById(new AssetId('asset-unverified')))?.state)
       .toBe(AssetLifecycleState.QUARANTINED);
+  });
+
+  it('re-verifies and rescans sanitized output, using its updated locator and actual byte size', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-sanitized-evidence', assetReference: 'ref-sanitized-evidence', ownerId: 'owner',
+      ownerType: 'STUDENT', originalFilename: 'picture.png', mimeType: 'image/png',
+      fileExtension: 'png', byteSize: 1000, classification: AssetSecurityClassification.PUBLIC,
+    });
+    storageGateway.sanitizedByteSize = 800;
+    const scan = vi.spyOn(malwareScanner, 'scan');
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-sanitized-evidence' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-sanitized-evidence' });
+    const record = await repo.findById(new AssetId('asset-sanitized-evidence'));
+    expect(record?.metadata.byteSize).toBe(800);
+    expect(record?.uploadVerification?.locator).toBe(record?.locator.value);
+    expect(record?.malwareScan?.locator).toBe(record?.locator.value);
+    expect(scan).toHaveBeenCalledTimes(2);
+    expect(scan.mock.calls[1]?.[0].pathKey).toContain('sanitized/');
+    await expect(lifecycleUseCase.activateAsset({ assetId: 'asset-sanitized-evidence' })).resolves.toMatchObject({
+      state: AssetLifecycleState.ACTIVE,
+    });
+  });
+
+  it('rejects a sanitized object that becomes infected, without promoting it', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-infected-post-san', assetReference: 'ref-infected-post-san', ownerId: 'owner',
+      ownerType: 'STUDENT', originalFilename: 'document.pdf', mimeType: 'application/pdf',
+      fileExtension: 'pdf', byteSize: 1000, classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-infected-post-san' });
+    malwareScanner.shouldFail = true;
+    const result = await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-infected-post-san' });
+    expect(result.state).toBe(AssetLifecycleState.MALWARE_SCAN_FAILED);
+    const move = vi.spyOn(storageGateway, 'moveToCleanZone');
+    await expect(lifecycleUseCase.activateAsset({ assetId: 'asset-infected-post-san' }))
+      .rejects.toThrow('Cannot activate asset that failed malware scanning');
+    expect(move).not.toHaveBeenCalled();
+  });
+
+  it('rejects content rewritten after post-sanitization scan, before CLEAN move', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-late-rewrite', assetReference: 'ref-late-rewrite', ownerId: 'owner',
+      ownerType: 'STUDENT', originalFilename: 'document.pdf', mimeType: 'application/pdf',
+      fileExtension: 'pdf', byteSize: 600, classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-late-rewrite' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-late-rewrite' });
+    storageGateway.verificationHash = 'f'.repeat(64);
+    const move = vi.spyOn(storageGateway, 'moveToCleanZone');
+    await expect(lifecycleUseCase.activateAsset({ assetId: 'asset-late-rewrite' }))
+      .rejects.toThrow('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
+    expect(move).not.toHaveBeenCalled();
   });
 
 });

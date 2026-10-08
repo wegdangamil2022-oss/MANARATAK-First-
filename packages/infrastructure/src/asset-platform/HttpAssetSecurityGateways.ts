@@ -138,7 +138,8 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
       typeof result.verifiedMimeType !== 'string' ||
       !/^[a-f0-9]{64}$/i.test(result.checksumSha256) ||
       typeof result.verifiedAt !== 'string' || !Number.isFinite(Date.parse(result.verifiedAt)) ||
-      result.byteSize !== request.expectedByteSize || result.verifiedMimeType !== request.declaredMimeType) {
+      (request.expectedByteSize !== undefined && result.byteSize !== request.expectedByteSize) ||
+      result.verifiedMimeType !== request.declaredMimeType) {
       throw new Error('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
     }
     return { ...result, checksumSha256: result.checksumSha256.toLowerCase() };

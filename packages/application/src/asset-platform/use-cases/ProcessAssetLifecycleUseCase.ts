@@ -85,14 +85,36 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
-    record.startSanitizing();
-
     if (!this.sanitizationGateway) {
       throw new Error('ASSET_SANITIZATION_NOT_CONFIGURED');
     }
+    if (!this.storageGateway.verifyUploadedObject) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+    }
+    if (!this.malwareScannerGateway) {
+      throw new Error('ASSET_MALWARE_SCANNING_NOT_CONFIGURED');
+    }
+    record.startSanitizing();
     const result = await this.sanitizationGateway.sanitize(record.locator);
     record.completeSanitization(result.metadata, result.sanitizedLocator);
-
+    const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+      declaredMimeType: record.metadata.mimeType,
+    });
+    record.confirmSanitizedObject({ ...verified, locator: record.locator.value });
+    const rescanned = await this.malwareScannerGateway.scan(record.locator);
+    if (!rescanned.clean) {
+      record.failMalwareScan(rescanned.threatsFound?.join(', ') || 'Threat in sanitized output');
+      await this.assetRepository.save(record);
+      return AssetRecordMapper.toDto(record);
+    }
+    // A sanitizer or scanner must not silently change bytes during post-scan verification.
+    const observed = await this.storageGateway.verifyUploadedObject(record.locator, {
+      declaredMimeType: record.metadata.mimeType, expectedByteSize: verified.byteSize,
+    });
+    if (observed.checksumSha256.toLowerCase() !== verified.checksumSha256.toLowerCase()) {
+      throw new Error('ASSET_SANITIZED_CONTENT_CHANGED_DURING_SCAN');
+    }
+    record.passSanitizedMalwareScan();
     await this.assetRepository.save(record);
     return AssetRecordMapper.toDto(record);
   }
@@ -104,8 +126,18 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
-    // Never move unverified/failed content into CLEAN before the domain gate.
+    // Never promote content merely because the *previous* quarantined bytes passed.
     record.assertCanActivate();
+    if (!this.storageGateway.verifyUploadedObject) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+    }
+    const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+      declaredMimeType: record.metadata.mimeType,
+      expectedByteSize: record.uploadVerification?.byteSize,
+    });
+    if (verified.checksumSha256.toLowerCase() !== record.checksum?.hash) {
+      throw new Error('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
+    }
     const cleanLocator = await this.storageGateway.moveToCleanZone(record.locator);
     record.activate(cleanLocator);
     await this.assetRepository.save(record);

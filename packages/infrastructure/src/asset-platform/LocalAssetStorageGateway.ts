@@ -44,7 +44,7 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
         if (declared === 'application/json' && matches) JSON.parse(decoded);
       } catch { matches = false; }
     }
-    if (!matches || bytes.length !== request.expectedByteSize) throw new Error('ASSET_UPLOAD_VERIFICATION_FAILED');
+    if (!matches || (request.expectedByteSize !== undefined && bytes.length !== request.expectedByteSize)) throw new Error('ASSET_UPLOAD_VERIFICATION_FAILED');
     return {
       byteSize: bytes.length,
       verifiedMimeType: declared,

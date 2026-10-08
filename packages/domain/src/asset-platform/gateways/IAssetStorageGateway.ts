@@ -32,7 +32,7 @@ export interface VerifiedAssetUpload {
 }
 
 export interface AssetUploadVerificationRequest {
-  expectedByteSize: number;
+  expectedByteSize?: number;
   declaredMimeType: string;
 }
 
