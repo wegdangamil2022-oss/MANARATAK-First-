@@ -769,8 +769,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/admin/imports', requireAdminPermission('admin:imports:manage'), container.resolve<Router>('importAdminRouter'));
     // Deliberately distinct from /admin/assets: users with reuse rights never receive lifecycle/purge routes.
     v1Router.use('/admin/asset-reuse', requireAdminPermission('admin:assets:reuse'), AssetReuseRouter.create({
-      assetRecordRepository: container.resolve('assetRecordRepository'),
-      processAssetLifecycleUseCase: container.resolve('processAssetLifecycleUseCase'),
+      assetRecordRepository: container.resolve<any>('assetRecordRepository'),
+      processAssetLifecycleUseCase: container.resolve<any>('processAssetLifecycleUseCase'),
       auditRecordRepo: auditRecordRepository,
     }));
     v1Router.use('/admin/assets', requireAdminPermission('admin:assets:manage'), container.resolve<Router>('assetPlatformRouter'));

@@ -70,3 +70,9 @@ npm run ci:source:contracts
 - **Specific item check:** `isAssetReusable` performs cross-check of active/clean/classification, scan/upload locator linkage and stored checksum before selection/preview.
 - **Picker UI:** server-side debounced search, cursor pagination/load more, pinned selection fetch, and audit-before-onChange instead of optimistic selection. Preview operates only via independent reuse boundary.
 - **Remaining risks:** IAM role grants awaiting explicit approval, no runtime role/supertest/browser evidence. Domain writes still must enforce AssetReferencePolicy. No binary object immutability/version fencing. No production migration executed. This is partial P0-06/P1-06/P1-07 evidence.
+
+## Patch D — Regression/security contract tests (pending execution)
+
+- `apps/api/tests/presentation/api/router/AssetReuseRouter.spec.ts`: verifies IAM permission denial, server-enforced `reuseOnly` scope, sanitized projection, no destructive routes, rejection of confidential assets, required audit fail-closed and short-lived grant.
+- `packages/infrastructure/tests/asset-platform/PrismaAssetReuseQuery.spec.ts`: ensures Prisma predicates actually include state=ACTIVE, classification in PUBLIC/INTERNAL, CLEAN locator, scan success and verified upload.
+- Runtime tests still not executed; source-only assertions do not establish IAM migration or production safety.
