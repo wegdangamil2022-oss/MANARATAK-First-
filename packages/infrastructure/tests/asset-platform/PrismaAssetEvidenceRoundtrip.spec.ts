@@ -32,6 +32,11 @@ describe('EAP persisted upload and malware evidence', () => {
     record.passMalwareScan();
     record.startSanitizing();
     record.completeSanitization(new AssetSanitizationMetadata(true, new Date(), 'sanitized'));
+    record.confirmSanitizedObject({
+      locator: record.locator.value, byteSize: 42, verifiedMimeType: 'application/pdf',
+      checksumSha256: 'b'.repeat(64), verifiedAt: new Date().toISOString(), signatureVerified: true,
+    });
+    record.passSanitizedMalwareScan();
     await repository.save(record);
     expect(stored.malwareScanStatus).toMatchObject({
       status: 'PASSED', uploadVerification: { checksumSha256: 'b'.repeat(64), byteSize: 42 },
