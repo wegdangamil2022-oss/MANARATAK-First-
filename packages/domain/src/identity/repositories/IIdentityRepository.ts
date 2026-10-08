@@ -7,6 +7,12 @@ export interface ListIdentitiesCriteria {
   status?: LifeStatus;
   limit?: number;
   offset?: number;
+  cursor?: string;
+  accessState?: string;
+  roleId?: string;
+  adminAccess?: boolean;
+  search?: string;
+  verified?: boolean;
 }
 
 export interface IIdentityRepository {

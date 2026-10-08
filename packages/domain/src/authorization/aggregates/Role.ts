@@ -6,6 +6,9 @@ export interface RoleProps {
   description: string;
   permissions: PermissionReference[];
   policyIds: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  revision?: string;
 }
 
 export class Role {
@@ -16,6 +19,15 @@ export class Role {
   get description(): string { return this.props.description; }
   get permissions(): PermissionReference[] { return this.props.permissions; }
   get policyIds(): string[] { return this.props.policyIds; }
+  get createdAt() {
+    return this.props.createdAt;
+  }
+  get updatedAt() {
+    return this.props.updatedAt;
+  }
+  get revision(): string | undefined {
+    return this.props.revision;
+  }
 
   addPermission(permission: PermissionReference): void {
     if (!this.props.permissions.some(p => p.equals(permission))) {

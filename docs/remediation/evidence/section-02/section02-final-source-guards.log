@@ -1,0 +1,17 @@
+✔ inventory discovers mounted mutations and refuses an unreviewed added route (77.090794ms)
+✔ inventory detects changed permissions/classification and removed routes (12.134938ms)
+✔ renamed Router variables cannot silently hide new mutations (7.158725ms)
+✔ unresolved mounts and dynamic route paths fail closed (13.320591ms)
+✔ global audit boundary must follow auth and idempotency and precede mounts (6.254114ms)
+✔ new collisions between owner routers require a separate explicit review (5.620823ms)
+✔ MNT-AUD-0110 audit HTTP surface is read-only and persistence is append-only (1.149011ms)
+✔ MNT-AUD-0106 authenticated Admin actor is server-owned and required (1.588273ms)
+✔ MNT-AUD-0084 all Admin mutations are audited by default (0.323646ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 569.465551

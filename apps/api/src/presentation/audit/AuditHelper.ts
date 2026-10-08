@@ -1,20 +1,7 @@
 import { Request } from 'express';
 import { randomUUID } from 'crypto';
-import {
-  IAuditRecordRepository,
-  AuditRecord,
-  AuditId,
-  AuditReference,
-  AuditAction,
-  AuditCategory,
-  AuditSeverity,
-  ActorReference,
-  TargetReference,
-  SourceReference,
-  AuditTimestamp,
-  ContextMetadata,
-  CorrelationReference
-} from '@manaratak/domain';
+import { IAuditRecordRepository } from '@manaratak/domain';
+import { createAuditRecordFromDto } from '@manaratak/application';
 import { getAuthenticatedPrincipal } from '../security/AuthenticatedPrincipal.js';
 
 export interface AuditRecordParams {
@@ -62,17 +49,20 @@ export class AuditHelper {
         req.body?.identityId ||
         'N/A';
 
-      const source = req.ip || req.socket?.remoteAddress || 'api-router';
+      // Source is the logical origin, not the caller's network address.
+      const source = (req.originalUrl || req.path).split('?')[0].includes('/auth/')
+        ? 'auth-api' : 'admin-api';
       const correlationId =
         (req.headers['x-correlation-id'] as string) ||
         (req.headers['x-request-id'] as string);
       const severity = params.severity || (params.result === 'SUCCESS' ? 'INFO' : 'ERROR');
 
       const safeMetadata: Record<string, any> = {
+        ...(params.metadata || {}),
         result: params.result,
-        path: req.originalUrl || req.path,
+        path: (req.originalUrl || req.path).split('?')[0].slice(0, 2048),
         method: req.method,
-        ...(params.metadata || {})
+        requestIp: String(req.ip || req.socket?.remoteAddress || '').slice(0, 80),
       };
 
       if (params.error) {
@@ -85,20 +75,13 @@ export class AuditHelper {
         };
       }
 
-      const record = AuditRecord.create(
-        AuditId.create(randomUUID()),
-        AuditReference.create(`AUD-${Date.now()}-${randomUUID()}`),
-        AuditAction.create(params.action),
-        AuditCategory.create(params.category),
-        AuditSeverity.create(severity),
-        ActorReference.create(actorId, actorType),
-        TargetReference.create(targetId, params.targetType),
-        SourceReference.create(source),
-        AuditTimestamp.create(new Date()),
-        ContextMetadata.create(safeMetadata),
-        undefined,
-        correlationId ? CorrelationReference.create(correlationId) : undefined
-      );
+      const record = createAuditRecordFromDto({
+        id: randomUUID(), reference: `AUD-${Date.now()}-${randomUUID()}`,
+        action: params.action, category: params.category, severity,
+        actorId, actorType, targetId, targetType: params.targetType,
+        source, timestamp: new Date(), contextMetadata: safeMetadata,
+        correlationReference: correlationId,
+      });
 
       await repo.save(record);
     } catch (err) {

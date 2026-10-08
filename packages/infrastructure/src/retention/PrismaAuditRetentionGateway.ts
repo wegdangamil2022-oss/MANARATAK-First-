@@ -12,11 +12,15 @@ export class PrismaAuditRetentionGateway implements IRetentionOwnerGateway {
   }
   async applyDecision(candidate: RetentionCandidate, decision: RetentionDecision): Promise<'APPLIED'|'SKIPPED'> {
     if (decision.disposition !== RetentionDisposition.ARCHIVE) throw new Error('AUDIT_RETENTION_DISPOSITION_UNSUPPORTED');
+    if (candidate.owner !== RetentionOwner.AUDIT || decision.owner !== RetentionOwner.AUDIT || candidate.recordId !== decision.recordId || candidate.expiresAt.getTime() !== decision.expiresAt.getTime()) throw new Error('AUDIT_RETENTION_OWNER_MISMATCH');
+    if (candidate.expiresAt > decision.decidedAt || (candidate.legalHoldUntil && candidate.legalHoldUntil > decision.decidedAt)) return 'SKIPPED';
+    const holdCondition = { OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: decision.decidedAt } }] };
     const token=randomUUID(); const claimUntil=new Date(decision.decidedAt.getTime()+5*60_000);
-    const claimed=await (this.prisma as any).auditRecord.updateMany({where:{id:candidate.recordId,retentionProcessedAt:null,retentionExpiresAt:candidate.expiresAt,OR:[{retentionClaimUntil:null},{retentionClaimUntil:{lte:decision.decidedAt}}]},data:{retentionClaimToken:token,retentionClaimUntil:claimUntil}});
+    const claimed=await (this.prisma as any).auditRecord.updateMany({where:{id:candidate.recordId,retentionProcessedAt:null,retentionExpiresAt:candidate.expiresAt,AND:[holdCondition],OR:[{retentionClaimUntil:null},{retentionClaimUntil:{lte:decision.decidedAt}}]},data:{retentionClaimToken:token,retentionClaimUntil:claimUntil}});
     if(claimed.count!==1)return 'SKIPPED';
     try {
-      const updated=await (this.prisma as any).auditRecord.updateMany({where:{id:candidate.recordId,retentionProcessedAt:null,retentionClaimToken:token},data:{lifecycleState:'ARCHIVED',retentionProcessedAt:decision.decidedAt,retentionClaimToken:null,retentionClaimUntil:null}});
+      const updated=await (this.prisma as any).auditRecord.updateMany({where:{id:candidate.recordId,retentionProcessedAt:null,retentionClaimToken:token,retentionExpiresAt:candidate.expiresAt,AND:[holdCondition]},data:{lifecycleState:'ARCHIVED',retentionProcessedAt:decision.decidedAt,retentionClaimToken:null,retentionClaimUntil:null}});
+      if (updated.count !== 1) await (this.prisma as any).auditRecord.updateMany({where:{id:candidate.recordId,retentionClaimToken:token},data:{retentionClaimToken:null,retentionClaimUntil:null}});
       return updated.count===1?'APPLIED':'SKIPPED';
     } catch(error) {
       await (this.prisma as any).auditRecord.updateMany({where:{id:candidate.recordId,retentionClaimToken:token},data:{retentionClaimToken:null,retentionClaimUntil:null}}); throw error;

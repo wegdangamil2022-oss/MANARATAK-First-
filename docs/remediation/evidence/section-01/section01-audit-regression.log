@@ -1,0 +1,65 @@
+
+ RUN  v4.1.11 /workspace/manaratak-audit-main
+
+ ❯ apps/api/tests/presentation/audit/AdminMutationAuditHooks.spec.ts (11 tests | 3 failed) 134ms
+       × POST /definitions creates audit record 13ms
+       × POST /assignments/rollback creates audit record 8ms
+       × primary operation succeeds even if auditRepo.save fails 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/api/tests/presentation/audit/AdminMutationAuditHooks.spec.ts > Phase 05 Slice 2: Admin Mutation Audit Hooks > SettingsAdminRouter Audit Hooks > POST /definitions creates audit record
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ apps/api/tests/presentation/audit/AdminMutationAuditHooks.spec.ts:171:30
+    169|       expect(res.status).toBe(201);
+    170|       const records = getRecords();
+    171|       expect(records.length).toBe(1);
+       |                              ^
+    172|       expect(records[0].getAction().getValue()).toBe('CREATE_SETTING_D…
+    173|       expect(records[0].getTarget().getTargetType()).toBe('SETTING_DEF…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  apps/api/tests/presentation/audit/AdminMutationAuditHooks.spec.ts > Phase 05 Slice 2: Admin Mutation Audit Hooks > SettingsAdminRouter Audit Hooks > POST /assignments/rollback creates audit record
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ apps/api/tests/presentation/audit/AdminMutationAuditHooks.spec.ts:185:30
+    183|       expect(res.status).toBe(200);
+    184|       const records = getRecords();
+    185|       expect(records.length).toBe(1);
+       |                              ^
+    186|       expect(records[0].getAction().getValue()).toBe('ROLLBACK_SETTING…
+    187|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  apps/api/tests/presentation/audit/AdminMutationAuditHooks.spec.ts > Phase 05 Slice 2: Admin Mutation Audit Hooks > Non-blocking Audit Behavior & Secret Redaction > primary operation succeeds even if auditRepo.save fails
+AssertionError: expected "vi.fn()" to be called at least once
+ ❯ apps/api/tests/presentation/audit/AdminMutationAuditHooks.spec.ts:386:32
+    384|       expect(res.status).toBe(201);
+    385|       expect(mockManageSettingsUseCase.createDefinition).toHaveBeenCal…
+    386|       expect(failingRepo.save).toHaveBeenCalled();
+       |                                ^
+    387|     });
+    388|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  3 failed | 24 passed (27)
+   Start at  21:40:37
+   Duration  10.03s (transform 3.68s, setup 0ms, import 8.72s, tests 186ms, environment 0ms)

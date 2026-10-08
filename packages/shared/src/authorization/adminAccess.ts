@@ -19,6 +19,7 @@ export const ADMIN_SECTIONS = [
   ['/ai', 'admin:ai:manage'],
   ['/student-tools', 'admin:student-tools:manage'],
   ['/academic-taxonomy', 'admin:academic-taxonomy:manage'],
+  ['/identities', 'admin:identities:manage'],
   ['/authorization', 'admin:authorization:manage'],
   ['/audit', 'admin:audit:manage'],
   ['/assets', 'admin:assets:manage'],
@@ -33,7 +34,9 @@ export function grantsAdminPermission(permissions: readonly string[] = [], requi
 }
 
 export function firstAllowedAdminPath(permissions: readonly string[] = []): string | null {
-  return ADMIN_SECTIONS.find(([, permission]) => grantsAdminPermission(permissions, permission))?.[0] ?? null;
+  return (
+    ADMIN_SECTIONS.find(([, permission]) => grantsAdminPermission(permissions, permission))?.[0] ?? null
+  );
 }
 
 export function isAdministrativePath(path: string): boolean {

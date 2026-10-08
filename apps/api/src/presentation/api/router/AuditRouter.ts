@@ -1,7 +1,8 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { AuditRecord } from '@manaratak/domain';
 import { ManageAuditRecordsUseCase } from '@manaratak/application';
+import { problemDetails } from '../../http/ProblemDetails.js';
 
 const querySchema = z
   .object({
@@ -11,6 +12,16 @@ const querySchema = z
     category: z.string().trim().min(1).max(240).optional(),
     severity: z.string().trim().min(1).max(80).optional(),
     correlationId: z.string().trim().min(1).max(240).optional(),
+    reference: z.string().trim().min(1).max(240).optional(),
+    traceId: z.string().trim().min(1).max(240).optional(),
+    actorType: z.string().trim().min(1).max(80).optional(),
+    targetType: z.string().trim().min(1).max(80).optional(),
+    source: z.string().trim().min(1).max(240).optional(),
+    lifecycleState: z.enum(['RECORDED', 'ARCHIVED']).optional(),
+    result: z.enum(['SUCCESS', 'FAILURE', 'INTENT', 'UNKNOWN']).optional(),
+    complianceTag: z.string().trim().min(1).max(80).optional(),
+    method: z.enum(['POST', 'PUT', 'PATCH', 'DELETE']).optional(),
+    path: z.string().trim().min(1).max(2048).optional(),
     from: z.string().datetime({ offset: true }).optional(),
     until: z.string().datetime({ offset: true }).optional(),
     limit: z.coerce.number().int().min(1).max(100).default(50),
@@ -34,12 +45,21 @@ function decodeCursor(cursor?: string): [string, string] | null {
   return [value.timestamp, value.id];
 }
 function dto(record: AuditRecord) {
+  const metadata = record.getContextMetadata().getData();
+  const isIntent = record.getAction().getValue() === 'MUTATION_INTENT_RECORDED' || metadata.auditEvent === 'MUTATION_INTENT';
+  const result = isIntent ? 'INTENT'
+    : metadata.result === 'SUCCESS' || metadata.result === 'FAILURE' ? metadata.result : 'UNKNOWN';
+  const evidenceLevel = isIntent ? 'INTENT_OBSERVED'
+    : metadata.atomicity === 'BUSINESS_AUDIT_OUTBOX' ? 'ATOMIC_BUSINESS_AUDIT_RECORDED'
+    : metadata.auditEvent === 'MUTATION_OUTCOME' ? 'HTTP_OUTCOME_OBSERVED' : 'EVENT_OBSERVED';
   return {
     id: record.getId().getValue(),
     reference: record.getReference().getValue(),
     action: record.getAction().getValue(),
     category: record.getCategory().getValue(),
     severity: record.getSeverity().getValue(),
+    result,
+    evidenceLevel,
     actor: { actorId: record.getActor().getActorId(), actorType: record.getActor().getActorType() },
     target: {
       targetId: record.getTarget().getTargetId(),
@@ -90,6 +110,7 @@ export class AuditRouter {
         const query = querySchema.parse(req.query);
         const cursor = decodeCursor(query.cursor);
         const page = await manageAuditRecordsUseCase.queryAuditPage({
+          ...query,
           actorId: query.actorId,
           targetId: query.targetId,
           action: query.action,
@@ -115,11 +136,17 @@ export class AuditRouter {
       }
     });
 
-    router.get('/integrity', async (_req, res, next) => {
+    router.get('/integrity', async (req, res, next) => {
       try {
-        const report = await manageAuditRecordsUseCase.verifyIntegrity();
+        const query = querySchema.pick({ from: true, until: true, limit: true, cursor: true }).parse(req.query);
+        const cursor = decodeCursor(query.cursor);
+        const report = await manageAuditRecordsUseCase.verifyIntegrity({
+          ...dateRange(query), limit: query.limit,
+          cursor: cursor ? { timestamp: new Date(cursor[0]), id: cursor[1] } : null,
+        });
         // A failed integrity check is a valid report, separate from transport failure.
-        res.status(200).json(report);
+        res.status(200).json({ ...report, nextCursor: report.nextCursor
+          ? encodeCursor(report.nextCursor.timestamp.toISOString(), report.nextCursor.id) : null });
       } catch (error) {
         next(error);
       }
@@ -144,6 +171,10 @@ export class AuditRouter {
           `attachment; filename="manaratak-audit-export.${query.format}"`,
         );
         if (query.format === 'csv') {
+          res.setHeader('X-Audit-Export-Scope', 'BOUNDED_PAGE');
+          res.setHeader('X-Audit-Export-Count', String(items.length));
+          res.setHeader('X-Audit-Has-More', String(page.hasMore));
+          if (page.nextCursor) res.setHeader('X-Audit-Next-Cursor', encodeCursor(page.nextCursor.timestamp.toISOString(), page.nextCursor.id));
           const esc = (value: unknown) => {
             const raw = String(value ?? '');
             const safe = /^[\s]*[=+\-@]/.test(raw) || /^[\t\r]/.test(raw) ? `'${raw}` : raw;
@@ -158,6 +189,9 @@ export class AuditRouter {
               'targetType',
               'targetId',
               'correlationReference',
+              'reference',
+              'result',
+              'evidenceLevel',
             ],
             ...items.map((item) => [
               item.timestamp,
@@ -167,6 +201,9 @@ export class AuditRouter {
               item.target.targetType,
               item.target.targetId,
               item.correlationReference ?? '',
+              item.reference,
+              item.result,
+              item.evidenceLevel,
             ]),
           ];
           return void res
@@ -204,6 +241,13 @@ export class AuditRouter {
       }
     });
 
+    router.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
+      if (!(error instanceof z.ZodError)) return next(error);
+      return res.status(400).type('application/problem+json').json(problemDetails({
+        status: 400, code: 'VALIDATION_ERROR', detail: 'The audit query is invalid.',
+        traceId: req.header('x-correlation-id') || 'unknown', instance: req.originalUrl,
+      }));
+    });
     return router;
   }
 }

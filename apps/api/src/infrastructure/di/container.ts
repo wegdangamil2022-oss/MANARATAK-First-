@@ -2,7 +2,6 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-
 import {
   HierarchyValidationService,
   AcademicTaxonomyValidationService,
@@ -144,6 +143,7 @@ import {
   ListIdentitiesUseCase,
   IdentityPrincipalAccessValidator,
   ManageRolesUseCase,
+  ManagePoliciesUseCase,
   AssignRoleUseCase,
   ManageEmergencyAccessUseCase,
   EvaluateAccessUseCase,
@@ -592,9 +592,15 @@ export function registerDependencies(
       new AcademicTaxonomyValidationService(hierarchyValidationService)).singleton(),
     configurationResolutionService: asFunction(({ settingDefinitionRepo, settingAssignmentRepo }) => new ConfigurationResolutionService(settingDefinitionRepo, settingAssignmentRepo)).singleton(),
 
-    identityRepository: asFunction((cradle: any) => isPrisma ? new PrismaIdentityRepository(cradle.prisma) : new InMemoryIdentityRepository()).singleton(),
+    identityRepository: asFunction((cradle: any) =>
+      isPrisma
+        ? new PrismaIdentityRepository(cradle.prisma)
+        : new InMemoryIdentityRepository(cradle.roleRepository, cradle.roleAssignmentRepository),
+    ).singleton(),
     roleRepository: asFunction(({ prisma }) => isPrisma ? new PrismaRoleRepository(prisma) : new InMemoryRoleRepository()).singleton(),
-    policyRepository: asFunction(({ prisma }) => isPrisma ? new PrismaPolicyRepository(prisma) : new InMemoryPolicyRepository()).singleton(),
+    policyRepository: asFunction(({ prisma, roleRepository }) =>
+      isPrisma ? new PrismaPolicyRepository(prisma) : new InMemoryPolicyRepository(roleRepository),
+    ).singleton(),
     roleAssignmentRepository: asFunction(({ prisma }) => isPrisma ? new PrismaRoleAssignmentRepository(prisma) : new InMemoryRoleAssignmentRepository()).singleton(),
     emergencyAccessRepository: asFunction(({ prisma }) => isPrisma ? new PrismaEmergencyAccessRepository(prisma) : new InMemoryEmergencyAccessRepository()).singleton(),
     settingDefinitionRepo: asFunction(({ prisma }) => new PrismaSettingDefinitionRepository(prisma)).singleton(),
@@ -626,7 +632,6 @@ export function registerDependencies(
     workflowRepo: asFunction(({ prisma }) => new PrismaWorkflowRepository(prisma)).singleton(),
     apiServiceRepo: asFunction(({ prisma }) => new PrismaApiServiceRepository(prisma)).singleton(),
     sharedComponentRepo: asFunction(({ prisma }) => new PrismaSharedComponentRepository(prisma)).singleton(),
-    
 
     // --- Gateways & Providers ---
     storageGateway: asFunction(() => createUnavailableCapability('fileStorage')).singleton(),
@@ -827,9 +832,21 @@ export function registerDependencies(
     updateProfileUseCase: asFunction(({ identityRepository }) => new UpdateProfileUseCase(identityRepository)).scoped(),
     updateContactUseCase: asFunction(({ identityRepository }) => new UpdateContactUseCase(identityRepository)).scoped(),
     getIdentityUseCase: asFunction(({ identityRepository }) => new GetIdentityUseCase(identityRepository)).scoped(),
-    listIdentitiesUseCase: asFunction(({ identityRepository }) => new ListIdentitiesUseCase(identityRepository)).scoped(),
+    listIdentitiesUseCase: asFunction(
+      ({ identityRepository, roleRepository, roleAssignmentRepository, auditRecordRepo }) =>
+        new ListIdentitiesUseCase(
+          identityRepository,
+          roleRepository,
+          roleAssignmentRepository,
+          auditRecordRepo,
+        ),
+    ).scoped(),
 
     // Authorization
+    managePoliciesUseCase: asFunction(
+      ({ policyRepository, atomicDomainMutationCoordinator }) =>
+        new ManagePoliciesUseCase(policyRepository, atomicDomainMutationCoordinator),
+    ).scoped(),
     manageRolesUseCase: asFunction(({ roleRepository, atomicDomainMutationCoordinator }) =>
       new ManageRolesUseCase(roleRepository, atomicDomainMutationCoordinator)).scoped(),
     assignRoleUseCase: asFunction(({ roleAssignmentRepository, atomicDomainMutationCoordinator, identityRepository, roleRepository }) =>
@@ -859,7 +876,6 @@ export function registerDependencies(
     manageWorkflowsUseCase: asFunction(({ workflowRepo, workflowExecutionGateway }) => new ManageWorkflowsUseCase(workflowRepo, workflowExecutionGateway)).scoped(),
     manageApiServicesUseCase: asFunction(({ apiServiceRepo, apiExposureGateway }) => new ManageApiServicesUseCase(apiServiceRepo, apiExposureGateway)).scoped(),
     manageSharedComponentsUseCase: asFunction(({ sharedComponentRepo, renderingGateway }) => new ManageSharedComponentsUseCase(sharedComponentRepo, renderingGateway)).scoped(),
-    
 
     // --- Routers ---
     scholarshipAdminRouter: asFunction((cradle) => ScholarshipAdminRouter.create(cradle)).singleton(),

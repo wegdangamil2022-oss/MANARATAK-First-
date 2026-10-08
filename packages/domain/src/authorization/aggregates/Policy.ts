@@ -1,4 +1,5 @@
 export interface PolicyProps {
+  revision?: string;
   id: string;
   name: string;
   description: string;
@@ -9,6 +10,9 @@ export interface PolicyProps {
 export class Policy {
   constructor(private readonly props: PolicyProps) {}
 
+  get revision(): string | undefined {
+    return this.props.revision;
+  }
   get id(): string { return this.props.id; }
   get name(): string { return this.props.name; }
   get description(): string { return this.props.description; }

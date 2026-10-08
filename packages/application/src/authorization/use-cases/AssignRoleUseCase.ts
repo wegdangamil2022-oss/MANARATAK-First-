@@ -12,6 +12,11 @@ export class AssignRoleUseCase {
   constructor(private readonly roleAssignmentRepository: IRoleAssignmentRepository, private readonly atomicMutations: AtomicDomainMutationCoordinator | undefined,
     private readonly identities: IIdentityRepository, private readonly roles: IRoleRepository) {}
 
+  public page(input: { limit: number; cursor?: string; roleId?: string; search?: string }) {
+    if (!this.roleAssignmentRepository.queryPage)
+      throw new Error('AUTHORIZATION_PAGINATION_UNAVAILABLE');
+    return this.roleAssignmentRepository.queryPage(input);
+  }
   public async listAssignments(): Promise<RoleAssignment[]> {
     return this.roleAssignmentRepository.listAll();
   }
@@ -26,17 +31,36 @@ export class AssignRoleUseCase {
     if (!this.atomicMutations) return this.roleAssignmentRepository.delete(id);
     const repository = this.roleAssignmentRepository as Partial<ITransactionalRoleAssignmentRepository>;
     if (!repository.withTransaction) throw new Error('ROLE_ASSIGNMENT_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    await this.atomicMutations.execute({ domain: 'AUTHORIZATION', aggregateType: 'ROLE_ASSIGNMENT', aggregateId: id, action: 'ROLE_ASSIGNMENT_REVOKED', context,
-      auditMetadata: { identityId: existing.identityId, roleId: existing.roleId } },
-      transaction => repository.withTransaction!(transaction).delete(id));
+    await this.atomicMutations.execute(
+      {
+        domain: 'AUTHORIZATION',
+        aggregateType: 'ROLE_ASSIGNMENT',
+        aggregateId: id,
+        action: 'ROLE_ASSIGNMENT_REVOKED',
+        context,
+        auditMetadata: {
+          ...(
+            context as
+              (AtomicMutationRequestContext & { metadata?: Record<string, unknown> }) | undefined
+          )?.metadata,
+          identityId: existing.identityId,
+          roleId: existing.roleId,
+        },
+      },
+      transaction => repository.withTransaction!(transaction).delete(id),
+    );
   }
 
-  public async execute(input: AssignRoleInput, context?: AtomicMutationRequestContext): Promise<void> {
-    if (!await this.identities.findById(input.identityId)) throw new Error('IDENTITY_NOT_FOUND');
-    if (!await this.roles.findById(input.roleId)) throw new Error('ROLE_NOT_FOUND');
+  public async execute(
+    input: AssignRoleInput,
+    context?: AtomicMutationRequestContext,
+  ): Promise<{ assignmentId: string; replayed: boolean }> {
+    if (!(await this.identities.findById(input.identityId))) throw new Error('IDENTITY_NOT_FOUND');
+    if (!(await this.roles.findById(input.roleId))) throw new Error('ROLE_NOT_FOUND');
     const existing = await this.roleAssignmentRepository.findById(input.id);
     if (existing && (existing.identityId !== input.identityId || existing.roleId !== input.roleId)) throw new Error('ROLE_ASSIGNMENT_IMMUTABLE');
-    if ((await this.roleAssignmentRepository.findByIdentityId(input.identityId)).some(item => item.roleId === input.roleId)) return;
+    const assigned = (await this.roleAssignmentRepository.findByIdentityId(input.identityId)).find(item => item.roleId === input.roleId);
+    if (assigned) return { assignmentId: assigned.id, replayed: true };
     const assignment = new RoleAssignment({
       id: input.id,
       identityId: input.identityId,
@@ -44,12 +68,31 @@ export class AssignRoleUseCase {
       assignedAt: new Date()
     });
 
-    if (!this.atomicMutations) return this.roleAssignmentRepository.save(assignment);
+    if (!this.atomicMutations) {
+      await this.roleAssignmentRepository.save(assignment);
+      return { assignmentId: assignment.id, replayed: false };
+    }
     const repository = this.roleAssignmentRepository as Partial<ITransactionalRoleAssignmentRepository>;
     if (!repository.withTransaction) throw new Error('ROLE_ASSIGNMENT_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    await this.atomicMutations.execute({ domain: 'AUTHORIZATION', aggregateType: 'ROLE_ASSIGNMENT', aggregateId: input.id, action: 'ROLE_ASSIGNED', context,
-      auditMetadata: { identityId: input.identityId, roleId: input.roleId },
-      outbox: { eventType: 'RoleAssignmentCreated', payload: { assignmentId: input.id, identityId: input.identityId, roleId: input.roleId } } },
-      transaction => repository.withTransaction!(transaction).save(assignment));
+    await this.atomicMutations.execute(
+      {
+        domain: 'AUTHORIZATION',
+        aggregateType: 'ROLE_ASSIGNMENT',
+        aggregateId: input.id,
+        action: 'ROLE_ASSIGNED',
+        context,
+        auditMetadata: {
+          ...(
+            context as
+              (AtomicMutationRequestContext & { metadata?: Record<string, unknown> }) | undefined
+          )?.metadata,
+          identityId: input.identityId,
+          roleId: input.roleId,
+        },
+        outbox: { eventType: 'RoleAssignmentCreated', payload: { assignmentId: input.id, identityId: input.identityId, roleId: input.roleId } },
+      },
+      transaction => repository.withTransaction!(transaction).save(assignment),
+    );
+    return { assignmentId: assignment.id, replayed: false };
   }
 }

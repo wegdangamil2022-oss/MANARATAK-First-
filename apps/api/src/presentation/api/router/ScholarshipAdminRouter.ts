@@ -721,13 +721,14 @@ export class ScholarshipAdminRouter {
       '/:id/catalog-detail',
       asyncHandler(async (req: Request, res: Response) => {
         const detail = await adminScholarshipUseCases.getScholarshipCatalogDetail(req.params.id);
-        const historyRecords = manageAuditRecordsUseCase
-          ? await manageAuditRecordsUseCase.queryAuditRecords({
+        const historyPage = manageAuditRecordsUseCase
+          ? await manageAuditRecordsUseCase.queryAuditPage({
               targetId: req.params.id,
               category: 'SCHOLARSHIPS_MUTATION',
+              limit: 50,
             })
-          : [];
-        const history = historyRecords
+          : { items: [], hasMore: false };
+        const history = historyPage.items
           .map((record) => ({
             id: record.getId().getValue(),
             action: record.getAction().getValue(),
@@ -738,7 +739,8 @@ export class ScholarshipAdminRouter {
             correlationReference: record.getCorrelationReference()?.getValue(),
           }))
           .sort((left, right) => Date.parse(right.timestamp) - Date.parse(left.timestamp));
-        res.json({ ...detail, history, historyAvailable: Boolean(manageAuditRecordsUseCase) });
+        res.json({ ...detail, history, historyAvailable: Boolean(manageAuditRecordsUseCase),
+          historyHasMore: historyPage.hasMore, historyLimit: 50 });
       }),
     );
 

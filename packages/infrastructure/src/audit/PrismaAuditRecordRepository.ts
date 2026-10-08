@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { ISpecification } from '@manaratak/core';
 import {
   ITransactionalAuditRecordRepository,
@@ -22,7 +22,8 @@ import {
   AuditLifecycleState,
   AuditRecordPageQuery,
   AuditRecordPage,
-  AuditIntegrityReport
+  AuditIntegrityReport,
+  AuditIntegrityQuery
 } from '@manaratak/domain';
 import { AuditSecretSanitizer } from './AuditSecretSanitizer';
 import type { PrismaAtomicPersistenceContext } from '../event-foundation/PrismaTransactionalOutboxStore';
@@ -225,11 +226,31 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
   async queryPage(input: AuditRecordPageQuery): Promise<AuditRecordPage> {
     const limit = Math.min(100, Math.max(1, Math.trunc(input.limit ?? 50)));
     const where: any = {
+      ...(input.subjectIdentityId
+        ? {
+            AND: [
+              {
+                OR: [
+                  { targetId: { in: [input.subjectIdentityId, ...(input.subjectRoleIds ?? [])] } },
+                  { contextMetadata: { path: ['identityId'], equals: input.subjectIdentityId } },
+                  { contextMetadata: { path: ['principalId'], equals: input.subjectIdentityId } },
+                ],
+              },
+            ],
+          }
+        : {}),
       ...(input.actorId ? { actorId: input.actorId } : {}),
       ...(input.targetId ? { targetId: input.targetId } : {}),
       ...(input.action ? { action: input.action } : {}),
       ...(input.category ? { category: input.category } : {}),
       ...(input.severity ? { severity: input.severity } : {}),
+      ...(input.reference ? { reference: input.reference } : {}),
+      ...(input.traceId ? { traceReference: input.traceId } : {}),
+      ...(input.actorType ? { actorType: input.actorType } : {}),
+      ...(input.targetType ? { targetType: input.targetType } : {}),
+      ...(input.source ? { source: input.source } : {}),
+      ...(input.lifecycleState ? { lifecycleState: input.lifecycleState } : {}),
+      ...(input.complianceTag ? { complianceMetadata: { array_contains: [input.complianceTag] } } : {}),
       ...(input.correlationId ? { correlationReference: input.correlationId } : {}),
       ...(input.from || input.until ? { timestamp: { ...(input.from ? { gte: input.from } : {}), ...(input.until ? { lte: input.until } : {}) } } : {}),
       ...(input.cursor ? { OR: [
@@ -237,6 +258,34 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
         { timestamp: input.cursor.timestamp, id: { lt: input.cursor.id } },
       ] } : {}),
     };
+    const conditions = [...(where.AND ?? [])];
+    if (input.method) conditions.push({ contextMetadata: { path: ['method'], equals: input.method } });
+    if (input.path) conditions.push({ contextMetadata: { path: ['path'], equals: input.path } });
+    const intent = { OR: [
+      { action: 'MUTATION_INTENT_RECORDED' },
+      { contextMetadata: { path: ['auditEvent'], equals: 'MUTATION_INTENT' } },
+    ] };
+    // Include absent JSON auditEvent explicitly; JSON null must not accidentally
+    // exclude older business records from non-intent searches.
+    const nonIntent = { AND: [
+      { action: { not: 'MUTATION_INTENT_RECORDED' } },
+      { OR: [
+        { contextMetadata: { path: ['auditEvent'], equals: Prisma.AnyNull } },
+        { contextMetadata: { path: ['auditEvent'], not: 'MUTATION_INTENT' } },
+      ] },
+    ] };
+    if (input.result === 'INTENT') conditions.push(intent);
+    else if (input.result) {
+      conditions.push(nonIntent);
+      conditions.push(input.result === 'UNKNOWN' ? { OR: [
+        { contextMetadata: { path: ['result'], equals: Prisma.AnyNull } },
+        { AND: [
+          { contextMetadata: { path: ['result'], not: 'SUCCESS' } },
+          { contextMetadata: { path: ['result'], not: 'FAILURE' } },
+        ] },
+      ] } : { contextMetadata: { path: ['result'], equals: input.result } });
+    }
+    if (conditions.length) where.AND = conditions;
     const rows = await (this.prisma as any).auditRecord.findMany({
       where: Object.keys(where).length ? where : undefined,
       orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
@@ -250,29 +299,59 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
   }
 
   async findByIdOrReference(id: string): Promise<AuditRecord | null> {
-    const row = await this.client.auditRecord.findUnique({ where: { id } })
-      ?? await this.client.auditRecord.findUnique({ where: { reference: id } });
+    const row =
+      (await this.client.auditRecord.findUnique({ where: { id } })) ??
+      (await this.client.auditRecord.findUnique({ where: { reference: id } }));
     return row ? this.mapToDomain(row) : null;
   }
 
-  async verifyIntegrity(): Promise<AuditIntegrityReport> {
-    const rows = await (this.prisma as any).auditRecord.findMany({
+  async verifyIntegrity(input: AuditIntegrityQuery = {}): Promise<AuditIntegrityReport> {
+    const limit = Math.min(100, Math.max(1, Math.trunc(input.limit ?? 100)));
+    const rows = await this.prisma.auditRecord.findMany({
+      where: {
+        ...(input.from || input.until ? { timestamp: {
+          ...(input.from ? { gte: input.from } : {}),
+          ...(input.until ? { lte: input.until } : {}),
+        } } : {}),
+        ...(input.cursor ? { OR: [
+          { timestamp: { lt: input.cursor.timestamp } },
+          { timestamp: input.cursor.timestamp, id: { lt: input.cursor.id } },
+        ] } : {}),
+      },
       select: { id: true, reference: true, chainReference: true, timestamp: true },
-      orderBy: [{ timestamp: 'asc' }, { id: 'asc' }],
+      orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
     });
-    const references = new Map<string, Date>(rows.map((row: any): [string, Date] => [String(row.reference), new Date(row.timestamp)]));
-    const now = Date.now() + 5 * 60_000;
+    const selected = rows.slice(0, limit);
+    // Resolve only references needed by this bounded page, including predecessors
+    // outside the selected date window. Never load the complete ledger.
+    const required = [...new Set(selected.flatMap(row => row.chainReference ? [row.chainReference] : []))];
+    const predecessors = required.length ? await this.prisma.auditRecord.findMany({
+      where: { reference: { in: required } },
+      select: { reference: true, timestamp: true },
+      take: limit,
+    }) : [];
+    const references = new Map(predecessors.map(row => [row.reference, row.timestamp]));
+    const checkedAt = new Date();
     const brokenChainReferences: string[] = [];
     const futureTimestamps: string[] = [];
-    for (const row of rows) {
-      const timestamp = new Date(row.timestamp);
-      if (timestamp.getTime() > now) futureTimestamps.push(String(row.reference));
+    for (const row of selected) {
+      if (row.timestamp.getTime() > checkedAt.getTime() + 5 * 60_000) futureTimestamps.push(row.reference);
       if (row.chainReference) {
-        const previous = references.get(String(row.chainReference));
-        if (!previous || previous.getTime() > timestamp.getTime()) brokenChainReferences.push(String(row.reference));
+        const previous = references.get(row.chainReference);
+        if (row.chainReference === row.reference || !previous || previous > row.timestamp) brokenChainReferences.push(row.reference);
       }
     }
-    return { status: brokenChainReferences.length === 0 && futureTimestamps.length === 0 ? 'PASS' : 'FAIL', checkedRecords: rows.length, brokenChainReferences, futureTimestamps };
+    const last = selected.at(-1);
+    const hasMore = rows.length > limit;
+    return {
+      status: brokenChainReferences.length === 0 && futureTimestamps.length === 0 ? 'PASS' : 'FAIL',
+      checkedRecords: selected.length, brokenChainReferences, futureTimestamps,
+      scope: 'REFERENCE_LINKAGE_AND_TIMESTAMPS', cryptographicVerification: false,
+      checkedAt: checkedAt.toISOString(), maxRecords: limit, hasMore,
+      nextCursor: hasMore && last ? { timestamp: last.timestamp, id: last.id } : null,
+      range: { from: last?.timestamp ?? null, until: selected[0]?.timestamp ?? null },
+    };
   }
 
   async findBy(specification: ISpecification<AuditRecord>): Promise<AuditRecord[]> {

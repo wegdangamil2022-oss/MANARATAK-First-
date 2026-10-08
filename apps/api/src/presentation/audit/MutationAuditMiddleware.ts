@@ -46,6 +46,8 @@ export class MutationAuditPolicy {
     if (!path.includes('/admin/')) return 'NO_AUDIT_REQUIRED';
 
     if (this.ADMIN_EXEMPTIONS.some(pattern => pattern.test(path))) return 'NO_AUDIT_REQUIRED';
+    // This owner route modifies private student state, rather than draft metadata.
+    if (/\/admin\/students\/support\/[^/]+\/reset-layout\/?$/.test(path)) return 'CRITICAL_AUDIT_REQUIRED';
     if (this.CRITICAL_ADMIN_AREAS.some(prefix => path.includes(prefix))) return 'CRITICAL_AUDIT_REQUIRED';
     if (this.HIGH_RISK_ACTIONS.some(fragment => path.includes(fragment))) return 'CRITICAL_AUDIT_REQUIRED';
 

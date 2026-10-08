@@ -3,6 +3,12 @@ import { ISpecification } from '@manaratak/core';
 import { AtomicPersistenceContext } from '../../event-foundation/outbox/TransactionalOutbox';
 
 export interface IRoleAssignmentRepository {
+  queryPage?(input: {
+    limit: number;
+    cursor?: string;
+    roleId?: string;
+    search?: string;
+  }): Promise<{ items: RoleAssignment[]; nextCursor: string | null }>;
   findById(id: string): Promise<RoleAssignment | null>;
   save(assignment: RoleAssignment): Promise<void>;
   findBy(specification: ISpecification<RoleAssignment>): Promise<RoleAssignment[]>;

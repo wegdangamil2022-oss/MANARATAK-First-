@@ -26,6 +26,9 @@ export type { ListIdentitiesInput, ListIdentitiesOutput } from './identity/ListI
 // Authorization Application layer exports
 export * from './authorization/dtos/AuthorizationDtos';
 export * from './authorization/use-cases/ManageRolesUseCase';
+export * from './authorization/use-cases/ManagePoliciesUseCase';
+export * from './audit/use-cases/AuditRetentionPolicyResolver';
+export * from './audit/use-cases/AuditRecordFactory';
 export * from './authorization/use-cases/AssignRoleUseCase';
 export * from './authorization/use-cases/EvaluateAccessUseCase';
 export * from './authorization/use-cases/ManageEmergencyAccessUseCase';

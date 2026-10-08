@@ -20,8 +20,14 @@ describe('role assignment audit boundary', () => {
     const operation = new AssignRoleUseCase(repository as any, coordinator as any,
       { findById: async () => ({}) } as any, { findById: async () => ({}) } as any);
     const context = { actorId: 'operator-1', actorType: 'IDENTITY', source: 'admin-authorization-api' };
-    await operation.execute({ id: 'assignment-1', identityId: 'account-1', roleId: 'universities-editor' }, context);
+    const granted = await operation.execute({ id: 'assignment-1', identityId: 'account-1', roleId: 'universities-editor' }, context);
+    expect(granted).toEqual({ assignmentId: 'assignment-1', replayed: false });
     expect(records.has('assignment-1')).toBe(true);
+    const replayed = await operation.execute({ id: 'retry-id', identityId: 'account-1', roleId: 'universities-editor' }, context);
+    expect(replayed).toEqual({ assignmentId: 'assignment-1', replayed: true });
+    expect(records.size).toBe(1);
+    expect(coordinator.execute).toHaveBeenCalledTimes(1);
+    await expect(operation.execute({ id: 'assignment-1', identityId: 'account-2', roleId: 'universities-editor' }, context)).rejects.toThrow('ROLE_ASSIGNMENT_IMMUTABLE');
     await operation.revokeAssignment('assignment-1', context);
     expect(records.has('assignment-1')).toBe(false);
     expect(definitions.map(item => [item.action, item.context?.actorId])).toEqual([

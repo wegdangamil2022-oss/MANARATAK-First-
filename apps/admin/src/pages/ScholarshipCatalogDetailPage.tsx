@@ -42,6 +42,7 @@ type ScholarshipCatalogDetailResponse,
 type ScholarshipCatalogUpdate,
 } from '../api/scholarshipCatalog';
 import { useTranslation } from '../i18n/I18nProvider';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 
 type TabKey =
   | 'identity'
@@ -227,7 +228,8 @@ function Textarea({
 }
 
 export function ScholarshipDetailPage() {
-  const { dir } = useTranslation();
+  const { dir, t } = useTranslation();
+  const { hasPermission } = useAdminAuthorization();
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -1617,6 +1619,8 @@ export function ScholarshipDetailPage() {
                 subtitle="تاريخ التعديلات والأوامر التي طرأت على هذا السجل"
                 icon={<History className="h-5 w-5" />}
               >
+                {detail.historyLimit && <p className="mb-3 text-xs text-slate-500">{t('audit_history_bounded').replace('{0}', String(detail.historyLimit))}</p>}
+                {detail.historyHasMore && hasPermission('admin:audit:manage') && <Link className="mb-3 block text-xs underline" to={`/audit?${new URLSearchParams({ targetId: scholarship.id, category: 'SCHOLARSHIPS_MUTATION' })}`}>{t('audit_open_full_history')}</Link>}
                 <div className="space-y-2.5">
                   {detail.history.map((event) => (
                     <div key={event.id} className="rounded-2xl border border-slate-200 p-3.5 text-xs bg-white">

@@ -5,8 +5,10 @@ import {
   TargetReference, TraceReference,
 } from '@manaratak/domain';
 import { CreateAuditRecordDto } from '../dtos/AuditDtos';
+import { AuditRetentionPolicyResolver } from './AuditRetentionPolicyResolver';
 
-export function createAuditRecordFromDto(dto: CreateAuditRecordDto): AuditRecord {
+export function createAuditRecordFromDto(dto: CreateAuditRecordDto, resolver = new AuditRetentionPolicyResolver()): AuditRecord {
+  const retention = resolver.resolve(dto);
   return AuditRecord.create(
     AuditId.create(dto.id),
     AuditReference.create(dto.reference),
@@ -17,11 +19,13 @@ export function createAuditRecordFromDto(dto: CreateAuditRecordDto): AuditRecord
     TargetReference.create(dto.targetId, dto.targetType),
     SourceReference.create(dto.source),
     AuditTimestamp.create(dto.timestamp),
-    ContextMetadata.create(dto.contextMetadata),
+    ContextMetadata.create({ ...dto.contextMetadata, auditRetention: {
+      retentionClass: retention.retentionClass, status: retention.status,
+    } }),
     dto.regulatoryTags ? ComplianceMetadata.create(dto.regulatoryTags) : undefined,
     dto.correlationReference ? CorrelationReference.create(dto.correlationReference) : undefined,
     dto.traceReference ? TraceReference.create(dto.traceReference) : undefined,
     dto.chainReference ? AuditChainReference.create(AuditReference.create(dto.chainReference)) : undefined,
-    dto.retentionPeriodInDays !== undefined ? AuditRetentionMetadata.create(dto.retentionPeriodInDays, dto.timestamp) : undefined,
+    retention.retentionPeriodInDays !== undefined ? AuditRetentionMetadata.create(retention.retentionPeriodInDays, dto.timestamp) : undefined,
   );
 }

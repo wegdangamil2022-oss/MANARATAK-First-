@@ -2,6 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { canAccessAdminPath, firstAllowedAdminPath, isAdministrativePath } from '../../src/authorization/adminAccess';
 
 describe('current admin section permissions', () => {
+  it('admits identity-only employees without granting role or credential management', () => {
+    const permissions = ['admin:identities:manage'];
+    expect(firstAllowedAdminPath(permissions)).toBe('/identities');
+    expect(canAccessAdminPath('/admin/identities', permissions)).toBe(true);
+    expect(canAccessAdminPath('/admin/authorization', permissions)).toBe(false);
+    expect(canAccessAdminPath('/admin/dashboard', permissions)).toBe(false);
+    expect(canAccessAdminPath('/admin/identities', ['admin:authorization:manage'])).toBe(false);
+    expect(canAccessAdminPath('/admin/identities', [])).toBe(false);
+  });
   it('routes a single-section employee to the first permitted section', () => {
     const permissions = ['admin:universities:manage'];
     expect(firstAllowedAdminPath(permissions)).toBe('/universities');
