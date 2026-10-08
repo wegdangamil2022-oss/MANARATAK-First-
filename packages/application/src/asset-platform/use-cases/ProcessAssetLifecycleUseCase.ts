@@ -148,9 +148,7 @@ export class ProcessAssetLifecycleUseCase {
     const id = new AssetId(dto.assetId);
     const record = await this.assetRepository.findById(id);
     if (!record) throw new Error(`Asset not found: ${dto.assetId}`);
-    if (record.state !== AssetLifecycleState.ACTIVE || record.locator.storageZone !== AssetStorageZone.CLEAN) {
-      throw new Error('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET');
-    }
+    record.assertCanDeliver();
     if (!this.storageGateway.generateDeliveryGrant) {
       throw new Error('ASSET_SECURE_DELIVERY_NOT_CONFIGURED');
     }
