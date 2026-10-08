@@ -54,8 +54,12 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
     };
   }
 
-  async moveToCleanZone(quarantineLocator: AssetStorageLocator): Promise<AssetStorageLocator> {
+  async moveToCleanZone(quarantineLocator: AssetStorageLocator, expectedSha256?: string): Promise<AssetStorageLocator> {
     if (quarantineLocator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_STORAGE_QUARANTINE_LOCATOR_REQUIRED');
+    if (expectedSha256) {
+      const actualSha256 = createHash('sha256').update(await readFile(this.resolveLocator(quarantineLocator))).digest('hex');
+      if (!/^[a-f0-9]{64}$/i.test(expectedSha256) || actualSha256 !== expectedSha256.toLowerCase()) throw new Error('ASSET_CLEAN_PROMOTION_CHECKSUM_MISMATCH');
+    }
     const cleanPathKey = quarantineLocator.pathKey.replace(/^uploads\//, 'clean/');
     const cleanLocator = new AssetStorageLocator(AssetStorageZone.CLEAN, this.localBucketName, cleanPathKey);
     const source = this.resolveLocator(quarantineLocator);

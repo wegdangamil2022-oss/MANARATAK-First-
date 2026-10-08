@@ -159,12 +159,14 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     };
   }
 
-  async moveToCleanZone(quarantineLocator: AssetStorageLocator): Promise<AssetStorageLocator> {
+  async moveToCleanZone(quarantineLocator: AssetStorageLocator, expectedSha256?: string): Promise<AssetStorageLocator> {
     if (quarantineLocator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_STORAGE_QUARANTINE_LOCATOR_REQUIRED');
-    const payload = { locator: locatorPayload(quarantineLocator) };
-    const response = await this.client.json<{ locator: LocatorWire }>('POST', '/v1/assets/move-to-clean', payload, {
+    if (!expectedSha256 || !/^[a-f0-9]{64}$/i.test(expectedSha256)) throw new Error('ASSET_CLEAN_PROMOTION_CHECKSUM_REQUIRED');
+    const payload = { locator: locatorPayload(quarantineLocator), expectedSha256: expectedSha256.toLowerCase() };
+    const response = await this.client.json<{ locator: LocatorWire; verifiedSourceSha256?: string }>('POST', '/v1/assets/move-to-clean', payload, {
       idempotencyKey: operationIdempotencyKey('move-to-clean', payload),
     });
+    if (response.verifiedSourceSha256?.toLowerCase() !== payload.expectedSha256) throw new Error('ASSET_PROVIDER_ATOMIC_PROMOTION_PROOF_REQUIRED');
     const locator = parseLocator(response.locator);
     if (locator.storageZone !== AssetStorageZone.CLEAN) throw new Error('ASSET_PROVIDER_CLEAN_LOCATOR_REQUIRED');
     return locator;

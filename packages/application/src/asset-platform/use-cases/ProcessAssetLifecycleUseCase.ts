@@ -138,7 +138,7 @@ export class ProcessAssetLifecycleUseCase {
     if (verified.checksumSha256.toLowerCase() !== record.checksum?.hash) {
       throw new Error('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
     }
-    const cleanLocator = await this.storageGateway.moveToCleanZone(record.locator);
+    const cleanLocator = await this.storageGateway.moveToCleanZone(record.locator, record.checksum!.hash);
     record.activate(cleanLocator);
     await this.assetRepository.save(record);
     return AssetRecordMapper.toDto(record);
