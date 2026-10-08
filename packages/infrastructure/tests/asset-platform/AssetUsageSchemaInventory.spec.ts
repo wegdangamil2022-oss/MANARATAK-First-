@@ -13,7 +13,7 @@ function assetFields(): AssetField[] {
   const models = [...schema.matchAll(/model\s+(\w+)\s*\{([\s\S]*?)^\}/gm)];
   for (const model of models) {
     for (const line of model[2].split('\n')) {
-      const match = line.trim().match(/^(\w*AssetIds?)\s+(String\??|Json\??)(?:\s|$)/);
+      const match = line.trim().match(/^(\w*AssetIds?|assetId)\s+(String\??|Json\??)(?:\s|$)/);
       if (match) references.push({ model: model[1], field: match[1], type: match[2] });
     }
   }
