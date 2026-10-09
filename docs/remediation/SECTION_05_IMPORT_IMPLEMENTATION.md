@@ -4,6 +4,28 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 15 — legacy terminal-result truth and CSV reserved-metadata correction (2026-10-09)
+
+**Verified source:** `562d9f4a5a440e65ef5889cb147ef3bff96d3dbb` (legacy terminal transition guards), `5b7adbfe87c91df342366dbb5acca7fe0c2d1556` (CSV parser trust-boundary fix), `2c3e278426a02be44c84fbfb5f44970cd596366b` (correct CSV test fixtures). [Import Section 05 CI 37985366169](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37985366169) **SUCCESS** — 159/159 targeted Vitest tests in 22 files, TypeScript, source-quality gate and existing 321-handler/320-endpoint Admin audit source verification PASS.
+
+- **Legacy result honesty:** `ProcessImportJobUseCase` no longer returns `success: true` if `markJobCompleted` rejects the state change. It throws `IMPORT_LEGACY_QUEUE_STATE_LOST` and does not attempt a second failure/DLQ transition in that situation. If `markJobFailed` loses its compare-and-swap, it refuses to create stale DLQ evidence.
+- **IMP-P0-005 trust boundary / P1 inline reliability:** `InlineDataParser` no longer injects importer-owned `_sourceRowNumber` into *untrusted CSV payloads*. `stageNormalizedRows` remains the only source of importer-owned row provenance, minted **after** rejecting client-provided `_sourceRowNumber`, `_phase6*` and related reserved fields. A normal CSV import now passes without weakening malicious-header rejection. JSON and NDJSON user-supplied reserved keys remain prohibited.
+- **Regression truth:** Re-enabled the previously absent legacy ProcessImportJob test suite in focused CI and added refused-completion/refused-failure, ordinary CSV ingestion, and forged CSV header cases. The first newly expanded CI exposed the existing CSV self-injection bug and stale prior expectations; fixes were committed and the **final** CI reverified green.
+- **Scope:** This corrects the small inline CSV path and compatibility job outcomes, not the generic EAP-backed streaming large-file pipeline. It neither implements owner-side transactional inbox receipts nor automatic owner reconciliation.
+
+---
+
+## Batch 14 — fence legacy DLQ and checkpoint writes against active leases (2026-10-09)
+
+**Verified source:** `3ad2257b21fa3791cf93fefa13446025c534558c`; [Import Section 05 CI 37984836204](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37984836204) **SUCCESS** — 149/149 focused tests across 21 files, TypeScript, source quality, and Admin audit source gate PASS.
+
+- **IMP-P0-003/004 legacy bypass closed:** Durable non-worker `recordCheckpoint` now updates batch progress only when the batch is unclaimed and in an allowed nonterminal state, inside the **same Prisma transaction** as its checkpoint insert. A stale or claimed job fails with `IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT` and cannot leave a checkpoint record.
+- **Legacy DLQ safety:** Durable `moveToDeadLetter` now requires an existing unclaimed `QUEUED` or `FAILED_PERMANENT` batch; it conditionally transitions status and inserts redacted failure evidence in a single transaction. It refuses to erase a live claim or overwrite an already-terminal/pending-stop job. No fabricated missing-batch record is allowed.
+- **Development-only parity:** In-memory gateway enforces matching ownership/status guards for both operations and refuses synthetic missing-batch DLQ evidence. Focused regressions cover invalid attempts, active claims, successful allowed writes, and checkpoint/DLQ write ordering.
+- **Limit:** These are source-level CAS/transaction regressions using mocks and development-only gateway; multi-process PostgreSQL contention and crash recovery remain POST-28.
+
+---
+
 ## Batch 13 — optimistic concurrency for source governance status updates (2026-10-09)
 
 **Verified source:** `506da4304ec8bd0c33b86a739d8faf557d16b478`; [Import Section 05 CI 37984179607](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37984179607) **SUCCESS** — 148/148 focused tests in 21 files, TypeScript, source quality and unchanged 321-handler/320-endpoint Admin mutation-audit source gate PASS.
