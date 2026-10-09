@@ -26,6 +26,7 @@ type ImportRepository = {
   getOverview?(filters?: { dataType?: string }): Promise<any>;
   getOperationalInsights?(filters?: { dataType?: string }): Promise<any>;
   getErrorReport?(filters?: { dataType?: string; batchId?: string; limit?: number }): Promise<any>;
+  listHandoffReconciliation?(filters: { batchId: string; page: number; pageSize: number }): Promise<any>;
 };
 
 export interface StageImportRowsInput {
@@ -466,6 +467,22 @@ export class ImportAdminUseCases {
     normalized.page = this.boundedNumber(normalized.page, 1, 1, Number.MAX_SAFE_INTEGER);
     normalized.pageSize = this.boundedNumber(normalized.pageSize, 50, 1, 100);
     return this.importRepository.listRecords(normalized);
+  }
+
+  /**
+   * Strictly read-only: a MANUAL_RECONCILIATION_REQUIRED handoff must never
+   * become an automatic retry without a verified owning-domain receipt.
+   */
+  async getHandoffReconciliation(input: { batchId: string; page?: number; pageSize?: number }) {
+    if (!input.batchId?.trim() || input.batchId.length > 180)
+      throw new Error('IMPORT_RECONCILIATION_BATCH_INVALID');
+    if (!this.importRepository.listHandoffReconciliation)
+      throw new Error('IMPORT_RECONCILIATION_READER_UNAVAILABLE');
+    return this.importRepository.listHandoffReconciliation({
+      batchId: input.batchId,
+      page: this.boundedNumber(input.page, 1, 1, Number.MAX_SAFE_INTEGER),
+      pageSize: this.boundedNumber(input.pageSize, 50, 1, 100),
+    });
   }
 
   async getQueueJobStatus(batchId: string) {
