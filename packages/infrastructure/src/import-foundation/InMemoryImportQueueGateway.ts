@@ -128,9 +128,18 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
     return true;
   }
 
-  async recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint): Promise<void> {
+  async recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint, lease?: ImportJobLease): Promise<void> {
     const job = this.jobs.get(batchId);
     if (!job) throw new Error(`Import job with batchId '${batchId}' not found`);
+    if (checkpoint.toJSON().batchId !== batchId) throw new Error('IMPORT_CHECKPOINT_BATCH_MISMATCH');
+    if (lease) {
+      const current = this.leases.get(batchId);
+      if (!current || job.status !== ImportJobStatus.RUNNING ||
+          current.workerId !== lease.workerId || current.attempt !== lease.attempt ||
+          current.claimUntil.getTime() !== lease.claimUntil.getTime() ||
+          current.claimUntil.getTime() < Date.now())
+        throw new Error('IMPORT_WORKER_LEASE_LOST');
+    }
 
     job.checkpoint = checkpoint.toJSON();
     job.processedRecords = checkpoint.processedRecords;
