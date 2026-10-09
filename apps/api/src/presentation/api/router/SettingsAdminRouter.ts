@@ -34,6 +34,14 @@ export class SettingsAdminRouter {
     });
     const identifier = z.string().trim().min(1).max(240);
 
+    const validationRulesSchema = z.object({
+      min: z.number().finite().optional(), max: z.number().finite().optional(),
+      integer: z.boolean().optional(),
+      minLength: z.number().int().min(0).max(100000).optional(),
+      maxLength: z.number().int().min(0).max(100000).optional(),
+      allowedValues: z.array(z.union([z.string(), z.number().finite(), z.boolean()])).min(1).max(50).optional(),
+    }).strict();
+
     const createDefinitionSchema = z
       .object({
         id: identifier,
@@ -41,6 +49,7 @@ export class SettingsAdminRouter {
         valueType: z.nativeEnum(ValueType),
         description: z.string().max(2000).optional(),
         defaultValue: z.unknown().optional(),
+        validationRules: validationRulesSchema.optional(),
         isFeatureFlag: z.boolean().optional(),
         isSecret: z.boolean().optional(),
       })
