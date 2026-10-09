@@ -9,11 +9,12 @@ This register is an evidence map, not an authorization to deploy or to mark runt
 - Local event artifacts are explicitly non-dispatched; see docs/operations/ASSET_LIFECYCLE_RECOVERY.md. Production outbox adoption remains a future consumer contract, not an implemented feature.
 - Typed operational envelopes reuse existing EAP-owned JSON. No new schema, migration, production DB or external provider write was executed locally.
 - Pending activation blocks deletion/evidence changes. Terminal HTTP errors start a fresh explicit HTTP attempt; ambiguous network/in-progress retries retain their key. The durable operation ID remains stable.
+- CI proof: [run 37875453856](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37875453856) SUCCESS at source commit `3be1ab7`; 190 source + 11 isolated PostgreSQL tests. Evidence-only follow-up does not modify source.
 - Verdict: **NOT CLOSED / NO-GO**, pending provider, operational, usage race and remaining workspace acceptance gates.
 
 ## Gate status
-- SOURCE: partial verification. Latest known source CI before this register: run 37867695630, commit eca47ba2d40c876612a0d6741ecb50c320a92f54.
-- DISPOSABLE_DB: ten PostgreSQL integration tests previously passed in that run. No production DB was contacted.
+- SOURCE: scoped verification SUCCESS at run 37875453856 / `3be1ab760bb346d6d1cf8c19b32f81c5c3572761`: 190 source tests and TypeScript/quality/guards PASS. Remaining workspace/owner contracts are not inferred complete.
+- DISPOSABLE_DB: eleven PostgreSQL integration tests PASS in that run, including persisted activation intent recovery. Provider calls are mocked; no production DB was contacted.
 - PROVIDER_SANDBOX: PENDING. Atomic object-version promotion, real upload grant, MIME/magic bytes, scanner, sanitizer, archive/restore/delete idempotency and failure injections require external provider evidence.
 - BROWSER_E2E: PENDING. Upload-to-reuse workflow, lifecycle, permissions, Arabic/English and empty/error states not validated end to end.
 - OPERATIONS: PENDING. Durable cross-system saga/reconciliation, alerting on compensation failure, expired lease heartbeat, real CDN expiry/cache, legal hold races and realistic pagination data.

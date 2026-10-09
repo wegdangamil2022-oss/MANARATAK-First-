@@ -14,6 +14,8 @@ ACTIVE and COMPLETED are written together by the existing revision/state CAS. If
 
 This is a durable activation intent and retry path, **not** an automatic scheduled reconciler or an atomic provider/DB transaction. Provider idempotency expiry, immutable version fencing, stalled operations, operational monitoring, sandbox fault injection and cross-process durability still need runtime evidence. Local adapter is development-only and is not a claim of atomic object-store security.
 
+Deployment must drain older EAP mutator replicas before enabling this journal behavior: earlier versions do not retain/enforce the new operational envelope. No mixed-version rolling-deployment safety is asserted. Historical pre-journal split-brain records still need operator/provider investigation; this change does not infer or backfill a lost promotion result.
+
 ## Retention restoration
 
 Archive/soft-delete preserve the original PERMANENT/TEMPORARY category and explicit expiry in a typed `retentionBeforeLifecycle` snapshot within the existing EAP-owned metadata envelope. Restore keeps that category and expiry, rather than replacing TEMPORARY with PERMANENT. An expired/invalid policy, TEMPORARY without expiry, or a historical deleted record with no trustworthy original policy fails closed before storage restoration. No dates or durations are inferred and no historical data is backfilled.
