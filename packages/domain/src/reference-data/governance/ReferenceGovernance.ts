@@ -84,3 +84,22 @@ export function assertReferenceLifecycleTransition(
 export function lifecycleIsActive(state: ReferenceLifecycleState): boolean {
   return state === ReferenceLifecycleState.ACTIVE;
 }
+
+/** Owner-only governance read model: actual active aliases/mappings, never guessed. */
+export interface ReferenceGovernanceDetails {
+  entityType: GovernedReferenceEntityType;
+  referenceId: string;
+  aliases: ReferenceAliasInput[];
+  providerMappings: ReferenceProviderMappingInput[];
+  ambiguousAliases: Array<{ alias: string; conflictingReferenceIds: string[] }>;
+}
+
+/** Source-observed city quality counters; no inferred completeness percentage. */
+export interface ReferenceCityQualityCounters {
+  countryIso2Code: string;
+  total: number;
+  active: number;
+  withoutAdministrativeRegion: number;
+  withoutTimezone: number;
+  withoutCanonicalIdentity: number;
+}

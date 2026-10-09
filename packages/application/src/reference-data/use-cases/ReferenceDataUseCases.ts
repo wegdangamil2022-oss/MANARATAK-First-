@@ -25,6 +25,8 @@ import {
   ReferenceLifecycleState,
   ReferenceRelationshipDto,
   ReferenceVersionDto,
+  ReferenceGovernanceDetails,
+  ReferenceCityQualityCounters,
   referenceCityScopeKey
 } from '@manaratak/domain';
 import { AtomicAuditedOutboxMutationExecutor } from '../../event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
@@ -210,6 +212,24 @@ export class ReferenceDataUseCases {
     const canonicalData: UpsertReferenceCityDto = { ...data, countryReferenceId: country.id };
     const identity = referenceCityScopeKey(canonicalData);
     return this.atomicUpsert('CITY', identity, context, transaction => transaction.repository.upsertCityInTransaction(canonicalData, transaction.context, context?.actorId, context?.correlationId), () => this.repository.upsertCity(canonicalData));
+  }
+
+
+  public getReferenceGovernanceDetails(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceGovernanceDetails> {
+    const owner = this.repository as IReferenceDataRepository & {
+      getReferenceGovernanceDetails?: (type: GovernedReferenceEntityType, id: string) => Promise<ReferenceGovernanceDetails>
+    };
+    if (!owner.getReferenceGovernanceDetails) throw new Error('REFERENCE_GOVERNANCE_OWNER_READ_UNAVAILABLE');
+    return owner.getReferenceGovernanceDetails(entityType, referenceId);
+  }
+
+  public getCityQualityCounters(countryIso2Code: string): Promise<ReferenceCityQualityCounters> {
+    if (!/^[A-Z]{2}$/.test(countryIso2Code)) throw new ReferenceDataInvariantError('Invalid ISO-3166 country code');
+    const owner = this.repository as IReferenceDataRepository & {
+      getCityQualityCounters?: (country: string) => Promise<ReferenceCityQualityCounters>
+    };
+    if (!owner.getCityQualityCounters) throw new Error('REFERENCE_GOVERNANCE_OWNER_READ_UNAVAILABLE');
+    return owner.getCityQualityCounters(countryIso2Code);
   }
 
   public getReferenceHistory(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceVersionDto[]> {

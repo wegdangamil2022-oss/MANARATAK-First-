@@ -26,6 +26,8 @@ import {
   ReferenceProviderMappingInput,
   ReferenceRelationshipDto,
   ReferenceVersionDto,
+  ReferenceGovernanceDetails,
+  ReferenceCityQualityCounters,
   assertReferenceLifecycleTransition,
   lifecycleIsActive,
   normalizeReferenceIdentityToken,
@@ -886,6 +888,68 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     });
     const governance = await this.finalizeGovernedUpsert('CITY', record.id, data, data.aliases, data.providerMappings, false);
     return this.mapToCityDto({ ...(record as unknown as DbCity), ...governance });
+  }
+
+
+  /** Owner-backed, active-only alias and provider mapping inspection. */
+  public async getReferenceGovernanceDetails(
+    entityType: GovernedReferenceEntityType, referenceId: string,
+  ): Promise<ReferenceGovernanceDetails> {
+    const [aliases, mappings] = await Promise.all([
+      this.prisma.referenceAliasRecord.findMany({
+        where: { entityType, referenceId, isActive: true },
+        orderBy: [{ normalizedAlias: 'asc' }, { id: 'asc' }],
+        select: { alias: true, normalizedAlias: true, locale: true, aliasType: true },
+        take: 101,
+      }),
+      this.prisma.referenceProviderMappingRecord.findMany({
+        where: { entityType, referenceId, isActive: true },
+        orderBy: [{ normalizedProviderSystem: 'asc' }, { normalizedProviderId: 'asc' }],
+        select: { providerSystem: true, providerId: true },
+        take: 101,
+      }),
+    ]);
+    if (aliases.length > 100 || mappings.length > 100) {
+      throw new Error('REFERENCE_GOVERNANCE_DETAILS_LIMIT_EXCEEDED');
+    }
+    // Ambiguity is evaluated across active alias rows; never arbitrarily pick a winner.
+    const uniqueNormalized = Array.from(new Set(aliases.map(a => a.normalizedAlias)));
+    const ambiguousAliases: ReferenceGovernanceDetails['ambiguousAliases'] = [];
+    for (const normalizedAlias of uniqueNormalized) {
+      const matches = await this.prisma.referenceAliasRecord.findMany({
+        where: { entityType, normalizedAlias, isActive: true,
+          NOT: { referenceId } },
+        select: { referenceId: true },
+        take: 21,
+      });
+      if (matches.length) {
+        ambiguousAliases.push({
+          alias: aliases.find(a => a.normalizedAlias === normalizedAlias)!.alias,
+          conflictingReferenceIds: Array.from(new Set(matches.map(a => a.referenceId))),
+        });
+      }
+    }
+    return {
+      entityType,
+      referenceId,
+      aliases: aliases.map(a => ({ alias: a.alias, locale: a.locale, aliasType: a.aliasType as ReferenceAliasInput['aliasType'] })),
+      providerMappings: mappings,
+      ambiguousAliases,
+    };
+  }
+
+  /** Numeric counters from the P7 owner schema, scoped to exactly one country. */
+  public async getCityQualityCounters(countryIso2Code: string): Promise<ReferenceCityQualityCounters> {
+    const where = { countryIso2Code };
+    const [total, active, withoutAdministrativeRegion, withoutTimezone, withoutCanonicalIdentity] = await Promise.all([
+      this.prisma.referenceCity.count({ where }),
+      this.prisma.referenceCity.count({ where: { ...where, lifecycleState: 'ACTIVE' } }),
+      this.prisma.referenceCity.count({ where: { ...where, administrativeRegionId: null } }),
+      this.prisma.referenceCity.count({ where: { ...where, timezone: null } }),
+      this.prisma.referenceCity.count({ where: { ...where, canonicalIdentityKey: null } }),
+    ]);
+    return { countryIso2Code, total, active,
+      withoutAdministrativeRegion, withoutTimezone, withoutCanonicalIdentity };
   }
 
   public async getReferenceHistory(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceVersionDto[]> {

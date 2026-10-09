@@ -120,7 +120,7 @@ export class ReferenceDataAdminRouter {
     const isoCodeParamSchema = z.object({ isoCode: z.string().min(2).max(8) }).strict();
     const governanceParamSchema = z.object({
       entityType: z.enum(['COUNTRY', 'CURRENCY', 'LANGUAGE', 'CITY', 'REGION']),
-      referenceId: z.string().uuid(),
+      referenceId: z.string().min(1).max(191),
     }).strict();
     const lifecycleTransitionSchema = z.object({
       toState: z.nativeEnum(ReferenceLifecycleState).refine((state) => state !== ReferenceLifecycleState.ACTIVE),
@@ -153,6 +153,10 @@ export class ReferenceDataAdminRouter {
       res.json(await referenceDataUseCases.upsertRegion({ ...body, id }, mutationContext(req)));
     }));
 
+    router.get('/quality/cities/:countryIso2Code', asyncHandler(async (req: Request, res: Response) => {
+      const { iso2Code } = countryCodeParamSchema.parse({ iso2Code: req.params.countryIso2Code });
+      res.json({ data: await referenceDataUseCases.getCityQualityCounters(iso2Code), source: 'P7_OWNER_COUNTS', asOf: new Date().toISOString() });
+    }));
     router.get('/quality', asyncHandler(async (_req: Request, res: Response) => {
       res.json({ data: await referenceDataUseCases.getQualitySnapshot(), source: 'P7_OWNER_COUNTS',
         asOf: new Date().toISOString(), coverageEvidence: 'unknown' });
@@ -223,6 +227,14 @@ export class ReferenceDataAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         const filters = adminReferenceDataQuerySchema.parse(req.query);
         res.json(await referenceDataUseCases.listPage('currencies', filters));
+      }),
+    );
+
+    router.get(
+      '/governance/:entityType/:referenceId/details',
+      asyncHandler(async (req: Request, res: Response) => {
+        const { entityType, referenceId } = governanceParamSchema.parse(req.params);
+        res.json({ data: await referenceDataUseCases.getReferenceGovernanceDetails(entityType, referenceId) });
       }),
     );
 
@@ -324,6 +336,7 @@ export class ReferenceDataAdminRouter {
         'REFERENCE_CITY_LEGACY_IDENTITY_REVIEW_REQUIRED',
         'REFERENCE_CITY_LEGACY_IDENTITY_AMBIGUOUS',
         'REFERENCE_PROVIDER_MAPPING_REASSIGNMENT_REQUIRES_RECONCILIATION',
+        'REFERENCE_GOVERNANCE_DETAILS_LIMIT_EXCEEDED',
         'REFERENCE_REPLACEMENT_RELATIONSHIP_CYCLE',
         'REFERENCE_LIFECYCLE_TARGET_NOT_ACTIVE',
         'REFERENCE_LIFECYCLE_TARGET_COUNTRY_MISMATCH',
