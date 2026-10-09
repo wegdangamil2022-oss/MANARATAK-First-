@@ -536,6 +536,7 @@ export class ImportAdminUseCases {
     const pageSize = 100;
     let processedRecords = 0;
     let failedRecords = 0;
+    let reviewRequiredRecords = 0;
     let recordOffset = 0;
     // A checkpoint is a compact cursor, not a full list of all accepted rows.
     // Keep only the most recent keys for diagnostics; the counts and offset
@@ -581,7 +582,10 @@ export class ImportAdminUseCases {
               rawPayload: { ...rawPayload, _phase6HandoffState: 'MANUAL_RECONCILIATION_REQUIRED' },
               processingNotes: 'Owner dispatch outcome uncertain; reconcile before replay.',
             }, getActiveLease());
-            processedRecords++;
+            // A review-required delivery is a terminal non-successful work
+            // item, not a successful owning-domain acceptance.
+            failedRecords++;
+            reviewRequiredRecords++;
             continue;
           }
           if (!this.hasHandoffConsumer(envelope.ownerDomain)) {
@@ -593,8 +597,8 @@ export class ImportAdminUseCases {
               },
               processingNotes: 'Phase 06 staging completed; owning-domain handoff integration is not registered yet.',
             }, getActiveLease());
-            processedRecords++;
-            rememberAcceptedKey(record.sourceDedupKey);
+            failedRecords++;
+            reviewRequiredRecords++;
             continue;
           }
 
@@ -619,6 +623,11 @@ export class ImportAdminUseCases {
           rememberAcceptedKey(record.sourceDedupKey);
         } else if (record.status === ImportRecordStatus.INCOMPLETE) {
           failedRecords++;
+        } else if (record.status === ImportRecordStatus.NEEDS_REVIEW) {
+          // A previously staged review cannot silently disappear from
+          // completion accounting during a crash recovery/replay.
+          failedRecords++;
+          reviewRequiredRecords++;
         }
       }
 
@@ -646,7 +655,8 @@ export class ImportAdminUseCases {
         acceptedRecordKeys,
         updatedAt: new Date(),
         metadata: { workerId: lease.workerId, attempt: lease.attempt,
-          acceptedRecordKeyCount, retainedAcceptedKeyLimit: 32, cursorMode: 'RECENT_KEYS' },
+          acceptedRecordKeyCount, retainedAcceptedKeyLimit: 32, cursorMode: 'RECENT_KEYS',
+          reviewRequiredRecords, nonSuccessfulWorkIncludesReview: true },
       }),
       getActiveLease(),
     );

@@ -178,6 +178,12 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(stored.rawPayload._phase6HandoffEnvelope).toBeTruthy();
     expect(stored.rawPayload._phase6HandoffState).toBe('AWAITING_DOMAIN_INTEGRATION');
     expect(stored.rawPayload._domainHandoff).toBeUndefined();
+    const status = await queue.getJobStatus('batch-durable-1');
+    expect(status).toMatchObject({ status: 'PARTIALLY_COMPLETED',
+      processedRecords: 0, failedRecords: 1 });
+    expect(status?.checkpoint).toEqual(expect.objectContaining({
+      metadata: expect.objectContaining({ reviewRequiredRecords: 1 }),
+    }));
   });
 
   it('refuses subsequent handoffs and record acknowledgement after cancellation during an owner call', async () => {
@@ -282,6 +288,10 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(repo.records.get('rec-crash')?.rawPayload._phase6HandoffState).toBe('DISPATCH_IN_FLIGHT');
     await queue.replayJob({ batchId: 'batch-durable-1', fromCheckpoint: false });
     expect(await useCase.processNextQueuedBatch('replay-worker')).toBe('COMPLETED');
+    expect((await queue.getJobStatus('batch-durable-1'))?.status).toBe('PARTIALLY_COMPLETED');
+    expect((await queue.getJobStatus('batch-durable-1'))?.checkpoint)
+      .toEqual(expect.objectContaining({ failedRecords: 1,
+        metadata: expect.objectContaining({ reviewRequiredRecords: 1 }) }));
     expect(accept).toHaveBeenCalledTimes(1);
     const stored = repo.records.get('rec-crash');
     expect(stored.status).toBe('NEEDS_REVIEW');
@@ -330,10 +340,40 @@ describe('W2 Phase 6 durable worker integration', () => {
     }));
     const useCase = new ImportAdminUseCases(repo as any, queue, empty, worker);
     expect(await useCase.processNextQueuedBatch('offline-consumer-worker')).toBe('COMPLETED');
+    expect((await queue.getJobStatus('batch-durable-1'))?.status).toBe('PARTIALLY_COMPLETED');
     const record = repo.records.get('rec-uncertain');
     expect(record.status).toBe('NEEDS_REVIEW');
     expect(record.rawPayload._phase6HandoffState).toBe('MANUAL_RECONCILIATION_REQUIRED');
     expect(record.rawPayload._phase6HandoffEnvelope).toBeTruthy();
+  });
+
+
+  it('counts preexisting NEEDS_REVIEW work as non-successful without re-dispatching an owner', async () => {
+    const repo = statefulImportRepository();
+    await repo.createBatch({ sourceSystem: 'TEST_SOURCE', dataType: 'GENERIC',
+      batchStatus: 'CREATED', totalRecords: 1, processedRecords: 0, failedRecords: 0 });
+    await repo.bulkCreateRecords([{
+      id: 'rec-review', batchId: 'batch-durable-1', status: 'NEEDS_REVIEW',
+      sourceDedupKey: 'review-key', rawPayload: { title: 'Requires inspection' },
+    }]);
+    const queue = new InMemoryImportQueueGateway();
+    await queue.enqueueImportJob({ batchId: 'batch-durable-1',
+      targetDomain: 'GENERIC' as any, sourceSystem: 'TEST_SOURCE' });
+    const accept = vi.fn(async () => ({ accepted: true }));
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 2, dlqAfterAttempts: 2, backoffStrategy: 'fixed',
+      initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    const useCase = new ImportAdminUseCases(repo as any, queue,
+      new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } }), worker);
+    await expect(useCase.processNextQueuedBatch('review-worker')).resolves.toBe('COMPLETED');
+    expect(accept).not.toHaveBeenCalled();
+    const status = await queue.getJobStatus('batch-durable-1');
+    expect(status).toMatchObject({ status: 'PARTIALLY_COMPLETED',
+      processedRecords: 0, failedRecords: 1 });
+    expect(status?.checkpoint).toEqual(expect.objectContaining({
+      recordOffset: 1, metadata: expect.objectContaining({ reviewRequiredRecords: 1 }),
+    }));
   });
 
   it('prefetches existing source identities once per chunk and avoids per-row repository probes', async () => {
