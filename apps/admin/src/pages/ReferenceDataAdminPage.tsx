@@ -10,6 +10,7 @@ import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceDat
 import { AdministrativeRegionsTab } from './AdministrativeRegionsTab';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
+import { ReferenceGovernanceButton, CityCountryQuality } from '../components/ReferenceGovernancePanel';
 
 /** Bounded owner-API query state, shareable as URL parameters. */
 function readP7Url() {
@@ -335,7 +336,7 @@ function CountriesTab() {
                       setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
                       setForm({ iso2Code: item.iso2Code, iso3Code: item.iso3Code, name: item.name, nameAr: item.nameAr ?? '', region: item.region ?? '' });
                       setSaveStatus({ loading: false });
-                    }}>تحرير / Edit</button></td>
+                    }}>تحرير / Edit</button> <ReferenceGovernanceButton entityType="COUNTRY" record={item} onChanged={refetch} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -474,7 +475,7 @@ function CurrenciesTab() {
                       setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
                       setForm({ isoCode: item.isoCode, name: item.name, nameAr: item.nameAr ?? '', symbol: item.symbol ?? '', numericCode: item.numericCode ?? '' });
                       setSaveStatus({ loading: false });
-                    }}>تحرير / Edit</button></td>
+                    }}>تحرير / Edit</button> <ReferenceGovernanceButton entityType="CURRENCY" record={item} onChanged={refetch} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -564,7 +565,7 @@ function LanguagesTab() {
                       setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
                       setForm({ isoCode: item.isoCode, name: item.name, nameAr: item.nameAr ?? '', nativeName: item.nativeName ?? '', direction: item.direction });
                       setSaveStatus({ loading: false });
-                    }}>تحرير / Edit</button></td>
+                    }}>تحرير / Edit</button> <ReferenceGovernanceButton entityType="LANGUAGE" record={item} onChanged={refetch} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -635,6 +636,7 @@ function CitiesTab() {
           <button onClick={refetch} className="text-sm font-black text-indigo-600 hover:text-indigo-800 transition">تحديث القائمة</button>
         </div>
         <ReferenceFilters {...queryState} />
+        <CityCountryQuality countryIso2Code={queryState.country} />
         <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-slate-500 font-bold">جارٍ تحميل قائمة المدن والمسافات المتاحة…</p>}
         {error && <p className="text-red-600 font-bold">{error}</p>}
@@ -666,7 +668,7 @@ function CitiesTab() {
                       setCountryId(item.countryReferenceId ?? null);
                       setRegionId(item.administrativeRegionId ?? null);
                       setSaveStatus({ loading: false });
-                    }}>تحرير / Edit</button></td>
+                    }}>تحرير / Edit</button> <ReferenceGovernanceButton entityType="CITY" record={item} onChanged={refetch} /></td>
                   </tr>
                 ))}
               </tbody>
