@@ -1,0 +1,5 @@
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T02:05:39.5465417Z  Test Files  20 passed | 1 skipped (21)
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T02:05:39.5466905Z       Tests  184 passed | 10 skipped (194)
+EAP all source and disposable PostgreSQL verification	Audit inventory and security regression guards	2026-10-09T02:05:40.9271639Z ADMIN_MUTATION_AUDIT_COVERAGE=PASS; handlers=319; uniqueEndpoints=318; owner validation/atomic adoption requires separate evidence
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T02:05:47.1926494Z  Test Files  1 passed (1)
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T02:05:47.1927586Z       Tests  10 passed (10)

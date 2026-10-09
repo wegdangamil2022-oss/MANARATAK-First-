@@ -18,6 +18,7 @@ This register is an evidence map, not an authorization to deploy or to mark runt
 - Newly fixed: proof rechecks include signature/MIME/size/date; manual scan failure cannot resurrect deleted/purged assets; safe lifecycle actions mounted with usage confirmation; HTTP coordinates hidden; inventory guard understands inline router dependencies and tracks three reviewed asset additions.
 - Source blockers remain: durable activation reconciliation/journal, event/outbox integration or approved non-contract ADR, usage-vs-lifecycle concurrent serialization, restoration of original retention policy. Provider and operations gates above remain open.
 - Optional rights and renditions tasks FGA-03-001/002 remain PROPOSED_ENHANCEMENT, not CLOSED.
+- Current CI run [37872775726](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37872775726) at `6e60a15702ae3e0eec7246ed6d6f32a3f6ad7c53`: **SUCCESS**, 184 source tests + 10 disposable PostgreSQL tests; TypeScript/quality/audit guards PASS. The evidence-only follow-up changes no source. Global source contract failures remain separate.
 - Verdict remains **NOT CLOSED / NO-GO**. See task-by-task current review in SECTION_03_EAP_IMPLEMENTATION.md and evidence/section-03/README.md.
 
 ## Completion criteria to check, never infer from source-only PASS
