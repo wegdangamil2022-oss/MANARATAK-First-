@@ -40,9 +40,6 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
   }
 
   public validateBatch(batch: ReferenceDataSeedBatch): ReferenceDataSeedBatch {
-    let validRecords = 0;
-    let invalidRecords = 0;
-
     const validatedRecords: ReferenceDataSeedRecord[] = batch.records.map(record => {
       let report;
       switch (record.entityType) {
@@ -68,12 +65,6 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
           break;
         default:
           throw new Error(`Unsupported entityType: ${(record as any).entityType}`);
-      }
-
-      if (report.canBeImported) {
-        validRecords++;
-      } else {
-        invalidRecords++;
       }
 
       return {
@@ -107,8 +98,8 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
         },
       };
     });
-    validRecords = uniqueRecords.filter(rec => rec.validationReport?.canBeImported).length;
-    invalidRecords = uniqueRecords.length - validRecords;
+    const validRecords = uniqueRecords.filter(rec => rec.validationReport?.canBeImported).length;
+    const invalidRecords = uniqueRecords.length - validRecords;
     return {
       ...batch,
       status: ReferenceDataSeedStatus.VALIDATED,

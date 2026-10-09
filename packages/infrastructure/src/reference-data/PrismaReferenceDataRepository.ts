@@ -1171,6 +1171,16 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       throw new Error('REFERENCE_MAPPING_ACTIVE_OWNERS_REQUIRED');
     const source = owners.find(row => row.id === sourceId)!;
     const target = owners.find(row => row.id === targetId)!;
+    // CITY provider identity is country-scoped. Never reassign an external
+    // city key across national boundaries by an ordinary reconciliation.
+    if (command.entityType === 'CITY') {
+      const locationRows = await this.prisma.$queryRaw<Array<{ id: string; countryIso2Code: string }>>(Prisma.sql`
+        SELECT "id", "countryIso2Code" FROM "ReferenceCity"
+        WHERE "id" IN (${sourceId}, ${targetId}) ORDER BY "id"
+      `);
+      if (locationRows.length !== 2 || locationRows[0].countryIso2Code !== locationRows[1].countryIso2Code)
+        throw new Error('REFERENCE_MAPPING_CITY_COUNTRY_SCOPE_MISMATCH');
+    }
     const mappings = await this.prisma.$queryRaw<Array<{ id: string; referenceId: string; isActive: boolean }>>(Prisma.sql`
       SELECT "id", "referenceId", "isActive" FROM "ReferenceProviderMappingRecord"
       WHERE "entityType" = ${command.entityType}
