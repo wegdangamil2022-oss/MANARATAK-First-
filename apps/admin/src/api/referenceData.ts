@@ -3,6 +3,7 @@ import type {
   UpsertReferenceCountryDto, UpsertReferenceCurrencyDto,
   UpsertReferenceLanguageDto, UpsertReferenceCityDto,
   AdministrativeRegionDto, UpsertAdministrativeRegionDto, ReferenceLifecycleState, ReferenceVersionDto,
+  ReferenceGovernanceDetails, ReferenceRelationshipDto, ReferenceCityQualityCounters, GovernedReferenceEntityType,
 } from '@manaratak/domain';
 import { adminApiClient, type AdminRequestOptions } from './client';
 
@@ -39,6 +40,31 @@ function mutate<T>(path: string, method: 'POST' | 'PUT', body: unknown, options:
 export const referenceDataAdminApi = {
   qualitySnapshot() {
     return adminApiClient.request<{ data: Array<{ collection: ReferenceDataCollection; total: number; active: number; nonActive: number; aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown' }>; asOf: string }>(base + '/quality');
+  },
+  governanceDetails(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<{ data: ReferenceGovernanceDetails }>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/details'
+    );
+  },
+  governanceHistory(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<{ data: ReferenceVersionDto[] }>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/history'
+    );
+  },
+  governanceRelationships(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<{ data: ReferenceRelationshipDto[] }>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/relationships'
+    );
+  },
+  cityQuality(countryIso2Code: string) {
+    return adminApiClient.request<{ data: ReferenceCityQualityCounters; asOf: string }>(
+      base + '/quality/cities/' + encodeURIComponent(countryIso2Code)
+    );
+  },
+  transitionReference(entityType: GovernedReferenceEntityType, referenceId: string,
+    body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string }) {
+    return mutate<void>('/governance/' + encodeURIComponent(entityType) + '/' +
+      encodeURIComponent(referenceId) + '/lifecycle', 'POST', body);
   },
   getRegion(id: string) {
     return adminApiClient.request<AdministrativeRegionDto>(base + '/regions/' + encodeURIComponent(id));
