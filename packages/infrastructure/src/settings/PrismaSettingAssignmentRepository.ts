@@ -389,7 +389,7 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
           if (value.newVersionId) payload.newVersionId = value.newVersionId;
           await outbox.create({ data: {
             id: randomUUID(), eventType, domain: 'SETTINGS', aggregateType: 'SettingAssignment', aggregateId: assignment.id,
-            payload, metadata: { schemaVersion: 1, ownerDomain: 'SETTINGS' }, correlationId: metadata?.correlationId ?? randomUUID(), state: 'PENDING', attempts: 0,
+            payload, metadata: { schemaVersion: 1, ownerDomain: 'SETTINGS', settingsEventRole: 'OWNER_DOMAIN_EVENT' }, correlationId: metadata?.correlationId ?? randomUUID(), state: 'PENDING', attempts: 0,
             availableAt: new Date(), createdAt: value.dateTimeOccurred ?? new Date(),
           }});
         }
