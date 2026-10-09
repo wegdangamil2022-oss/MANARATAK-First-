@@ -117,7 +117,7 @@ export class ReferenceDataAdminRouter {
       toState: z.nativeEnum(ReferenceLifecycleState).refine((state) => state !== ReferenceLifecycleState.ACTIVE),
       targetReferenceId: z.string().uuid().optional(),
       reason: z.string().min(3).max(1000),
-      expectedVersion: z.number().int().positive().optional(),
+      expectedVersion: z.number().int().positive(),
     }).strict();
 
     const regionSchema = z.object({
@@ -233,7 +233,6 @@ export class ReferenceDataAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         const { entityType, referenceId } = governanceParamSchema.parse(req.params);
         const body = lifecycleTransitionSchema.parse(req.body);
-        if (entityType === 'REGION' && body.expectedVersion === undefined) return res.status(400).json({ error: 'REGION_EXPECTED_VERSION_REQUIRED' });
         await referenceDataUseCases.transitionReferenceLifecycle(
           { entityType: entityType as GovernedReferenceEntityType, referenceId, ...body },
           mutationContext(req),

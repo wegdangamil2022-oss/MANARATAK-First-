@@ -548,7 +548,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       lifecycleState: command.toState, isActive: false, versionNumber: { increment: 1 }, effectiveFrom: now, effectiveTo: now,
     } });
     const detail = await this.getRegionById(record.id);
-    await this.appendVersionRecord('REGION', record.id, record.versionNumber, command.toState, now, now, { ...record, aliases: detail?.aliases ?? [] }, command.reason, command.actorId);
+    await this.appendVersionRecord('REGION', record.id, record.versionNumber, command.toState, now, null, { ...record, aliases: detail?.aliases ?? [] }, command.reason, command.actorId);
   }
 
   private countryWhere(filters?: ReferenceDataFilters): Prisma.ReferenceCountryWhereInput {
@@ -847,6 +847,8 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
   public async transitionReferenceLifecycle(command: ReferenceLifecycleTransitionCommand): Promise<void> {
     if (command.entityType === 'REGION') return this.transitionRegion(command);
+    if (!this.inTransaction || !command.actorId || !Number.isSafeInteger(command.expectedVersion) || (command.expectedVersion ?? 0) < 1) throw new Error('REFERENCE_LIFECYCLE_TRANSACTION_AND_EXPECTED_VERSION_REQUIRED');
+    if (command.targetReferenceId && !['MERGED', 'SUPERSEDED'].includes(command.toState)) throw new Error('REFERENCE_LIFECYCLE_TARGET_NOT_ALLOWED');
     if (command.targetReferenceId && command.targetReferenceId === command.referenceId) {
       throw new Error('REFERENCE_LIFECYCLE_SELF_TARGET_FORBIDDEN');
     }
@@ -855,17 +857,19 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       id: string; lifecycleState: string; versionNumber: number; effectiveFrom: Date; effectiveTo: Date | null; snapshot: unknown;
     }>>(Prisma.sql`
       SELECT "id", "lifecycleState", "versionNumber", "effectiveFrom", "effectiveTo", to_jsonb(t) AS "snapshot"
-      FROM ${table} t WHERE "id" = ${command.referenceId} LIMIT 1
+      FROM ${table} t WHERE "id" = ${command.referenceId} LIMIT 1 FOR UPDATE
     `);
     if (currentRows.length !== 1) throw new Error('REFERENCE_LIFECYCLE_REFERENCE_NOT_FOUND');
+    if (currentRows[0].versionNumber !== command.expectedVersion) throw new Error('REFERENCE_VERSION_CONFLICT');
     const from = currentRows[0].lifecycleState as ReferenceLifecycleState;
     assertReferenceLifecycleTransition(from, command.toState, command.targetReferenceId);
 
     if (command.targetReferenceId) {
-      const targetRows = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
-        SELECT "id" FROM ${table} WHERE "id" = ${command.targetReferenceId} LIMIT 1
+      const targetRows = await this.prisma.$queryRaw<Array<{ id: string; lifecycleState: string; countryIso2Code?: string }>>(Prisma.sql`
+        SELECT "id", "lifecycleState", ${command.entityType === 'CITY' ? Prisma.raw('"countryIso2Code"') : Prisma.raw('NULL::text AS "countryIso2Code"')} FROM ${table} WHERE "id" = ${command.targetReferenceId} LIMIT 1 FOR SHARE
       `);
-      if (targetRows.length !== 1) throw new Error('REFERENCE_LIFECYCLE_TARGET_NOT_FOUND');
+      if (targetRows.length !== 1 || targetRows[0].lifecycleState !== 'ACTIVE') throw new Error('REFERENCE_LIFECYCLE_TARGET_NOT_ACTIVE');
+      if (command.entityType === 'CITY' && targetRows[0].countryIso2Code !== (currentRows[0].snapshot as Record<string, unknown>).countryIso2Code) throw new Error('REFERENCE_LIFECYCLE_TARGET_COUNTRY_MISMATCH');
     }
 
     const now = new Date();
@@ -878,10 +882,11 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
           "effectiveFrom" = ${now},
           "effectiveTo" = ${lifecycleIsActive(command.toState) ? null : now},
           "updatedAt" = ${now}
-      WHERE "id" = ${command.referenceId}
-      RETURNING to_jsonb(t) AS "snapshot"
+      WHERE "id" = ${command.referenceId} AND "versionNumber" = ${command.expectedVersion}
+       RETURNING to_jsonb(t) AS "snapshot"
     `);
 
+    if (updated.length !== 1) throw new Error('REFERENCE_VERSION_CONFLICT');
     if (command.targetReferenceId) {
       const relationshipType = command.toState === ReferenceLifecycleState.MERGED ? 'MERGED_INTO' : 'SUPERSEDED_BY';
       await this.prisma.$executeRaw(Prisma.sql`
@@ -898,7 +903,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       nextVersion,
       command.toState,
       now,
-      lifecycleIsActive(command.toState) ? null : now,
+      null,
       (updated[0]?.snapshot ?? {}) as Record<string, unknown>,
       command.reason,
       command.actorId,

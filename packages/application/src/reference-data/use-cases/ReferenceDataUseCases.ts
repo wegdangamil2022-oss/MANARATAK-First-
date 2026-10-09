@@ -198,12 +198,8 @@ export class ReferenceDataUseCases {
     if (!context.actorId) throw new ReferenceDataInvariantError('Authenticated actor is required for lifecycle transitions.');
     if (!input.reason.trim()) throw new ReferenceDataInvariantError('Lifecycle transition reason is required.');
     const command = { ...input, reason: input.reason.trim(), actorId: context.actorId };
-    if (input.entityType === 'REGION' && (!Number.isSafeInteger(input.expectedVersion) || (input.expectedVersion ?? 0) < 1 || !this.atomicMutationExecutor)) {
-      throw new ReferenceDataInvariantError('Region lifecycle requires an expected version and audited transaction.');
-    }
-    if (!this.atomicMutationExecutor) {
-      await this.repository.transitionReferenceLifecycle(command);
-      return;
+    if (!Number.isSafeInteger(input.expectedVersion) || (input.expectedVersion ?? 0) < 1 || !this.atomicMutationExecutor) {
+      throw new ReferenceDataInvariantError('Lifecycle requires an expected version and audited transaction.');
     }
     const repository = this.repository as Partial<ITransactionalReferenceDataRepository>;
     if (!repository.transitionReferenceLifecycleInTransaction) {
