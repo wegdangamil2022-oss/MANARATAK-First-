@@ -105,12 +105,13 @@ export function AssetAdminPage() {
     try {
       setError(null);
       const p = new URLSearchParams({ limit: '50' });
-      Object.entries(filters).forEach(([k, v]) => {
+      Object.entries(selected).forEach(([k, v]) => {
         if (!v.trim()) return;
         p.set(k, k === 'createdFrom' || k === 'createdTo' ? new Date(v).toISOString() : v.trim());
       });
       if (!reset && cursor) p.set('cursor', cursor);
-      const r = await adminApiClient.request<AssetPage>(`/admin/assets?${p}`);
+      const r = await adminApiClient.request<AssetPage>(`/admin/assets?${p}`, { cache: 'no-store' });
+      if (generation !== generationRef.current) return;
       setItems((prev) => (reset ? r.items : [...prev, ...r.items]));
       setCursor(r.nextCursor);
       setHasMore(r.hasMore);
