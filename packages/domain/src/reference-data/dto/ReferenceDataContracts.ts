@@ -45,6 +45,10 @@ export interface ReferenceCountryDto {
 }
 
 export interface UpsertReferenceCountryDto {
+  /** Stable canonical record ID when editing; omit on create. */
+  id?: string;
+  /** Required on existing-record edits; enforced with a row-locked CAS. */
+  expectedVersion?: number;
   iso2Code: string;
   iso3Code: string;
   name: string;
@@ -83,6 +87,10 @@ export interface ReferenceCurrencyDto {
 }
 
 export interface UpsertReferenceCurrencyDto {
+  /** Stable canonical record ID when editing; omit on create. */
+  id?: string;
+  /** Required on existing-record edits; enforced with a row-locked CAS. */
+  expectedVersion?: number;
   isoCode: string;
   numericCode?: string | null;
   name: string;
@@ -115,6 +123,10 @@ export interface ReferenceLanguageDto {
 }
 
 export interface UpsertReferenceLanguageDto {
+  /** Stable canonical record ID when editing; omit on create. */
+  id?: string;
+  /** Required on existing-record edits; enforced with a row-locked CAS. */
+  expectedVersion?: number;
   isoCode: string;
   name: string;
   nameAr?: string | null;
@@ -181,6 +193,10 @@ export interface ReferenceCityDto {
 }
 
 export interface UpsertReferenceCityDto {
+  /** Stable canonical record ID when editing; omit on create. */
+  id?: string;
+  /** Required on existing-record edits; enforced with a row-locked CAS. */
+  expectedVersion?: number;
   /** Internal canonical P7 identity; callers normally supply countryIso2Code and the application layer resolves this. */
   countryReferenceId?: string | null;
   countryIso2Code: string;

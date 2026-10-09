@@ -45,6 +45,8 @@ export class ReferenceDataAdminRouter {
     };
 
     const countrySchema = z.object({
+      id: z.string().uuid().optional(),
+      expectedVersion: z.number().int().positive().optional(),
       iso2Code: z.string().regex(/^[A-Z]{2}$/),
       iso3Code: z.string().regex(/^[A-Z]{3}$/),
       name: z.string().min(1),
@@ -61,6 +63,8 @@ export class ReferenceDataAdminRouter {
     }).strict();
 
     const currencySchema = z.object({
+      id: z.string().uuid().optional(),
+      expectedVersion: z.number().int().positive().optional(),
       isoCode: z.string().regex(/^[A-Z]{3}$/),
       numericCode: z.string().regex(/^\d{3}$/).nullable().optional(),
       name: z.string().min(1),
@@ -72,6 +76,8 @@ export class ReferenceDataAdminRouter {
     }).strict();
 
     const languageSchema = z.object({
+      id: z.string().uuid().optional(),
+      expectedVersion: z.number().int().positive().optional(),
       isoCode: z.string().regex(/^[a-z]{2,8}(-[a-z0-9]+)*$/),
       name: z.string().min(1),
       nameAr: z.string().min(1).nullable().optional(),
@@ -82,6 +88,8 @@ export class ReferenceDataAdminRouter {
     }).strict();
 
     const citySchema = z.object({
+      id: z.string().uuid().optional(),
+      expectedVersion: z.number().int().positive().optional(),
       countryIso2Code: z.string().regex(/^[A-Z]{2}$/),
       name: z.string().min(1),
       nameAr: z.string().min(1).nullable().optional(),

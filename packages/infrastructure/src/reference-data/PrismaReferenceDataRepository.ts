@@ -295,10 +295,17 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   public async upsertCountry(data: UpsertReferenceCountryDto): Promise<ReferenceCountryDto> {
     this.rejectLegacyLifecycleMutation(data.isActive);
     const existing = await this.prisma.referenceCountry.findUnique({ where: { iso2Code: data.iso2Code } });
-    if (existing) await this.assertGovernedRecordEditable('COUNTRY', existing.id);
-    const record = await this.prisma.referenceCountry.upsert({
-      where: { iso2Code: data.iso2Code },
-      update: {
+    if (existing) {
+      if (data.id && data.id !== existing.id) throw new Error('REFERENCE_EDIT_IDENTITY_MISMATCH');
+      await this.lockAndCheckExpectedVersion('COUNTRY', existing.id, data.expectedVersion);
+      await this.assertGovernedRecordEditable('COUNTRY', existing.id);
+    } else if (data.id || data.expectedVersion !== undefined) {
+      throw new Error('REFERENCE_EDIT_TARGET_NOT_FOUND');
+    }
+    const record = existing
+      ? await this.prisma.referenceCountry.update({
+          where: { id: existing.id },
+          data: {
         iso3Code: data.iso3Code,
         name: data.name,
         nameAr: data.nameAr,
@@ -310,8 +317,10 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         callingCode: data.callingCode,
         flagAssetId: data.flagAssetId,
         metadata: data.metadata as any
-      },
-      create: {
+          },
+        })
+      : await this.prisma.referenceCountry.create({
+          data: {
         iso2Code: data.iso2Code,
         iso3Code: data.iso3Code,
         name: data.name,
@@ -325,8 +334,8 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         flagAssetId: data.flagAssetId,
         isActive: true,
         metadata: data.metadata as any
-      }
-    });
+          },
+        });
     const governance = await this.finalizeGovernedUpsert('COUNTRY', record.id, data, data.aliases, data.providerMappings, Boolean(existing));
     return this.mapToCountryDto({ ...(record as unknown as DbCountry), ...governance });
   }
@@ -357,18 +366,27 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   public async upsertCurrency(data: UpsertReferenceCurrencyDto): Promise<ReferenceCurrencyDto> {
     this.rejectLegacyLifecycleMutation(data.isActive);
     const existing = await this.prisma.referenceCurrency.findUnique({ where: { isoCode: data.isoCode } });
-    if (existing) await this.assertGovernedRecordEditable('CURRENCY', existing.id);
-    const record = await this.prisma.referenceCurrency.upsert({
-      where: { isoCode: data.isoCode },
-      update: {
+    if (existing) {
+      if (data.id && data.id !== existing.id) throw new Error('REFERENCE_EDIT_IDENTITY_MISMATCH');
+      await this.lockAndCheckExpectedVersion('CURRENCY', existing.id, data.expectedVersion);
+      await this.assertGovernedRecordEditable('CURRENCY', existing.id);
+    } else if (data.id || data.expectedVersion !== undefined) {
+      throw new Error('REFERENCE_EDIT_TARGET_NOT_FOUND');
+    }
+    const record = existing
+      ? await this.prisma.referenceCurrency.update({
+          where: { id: existing.id },
+          data: {
         numericCode: data.numericCode,
         name: data.name,
         nameAr: data.nameAr,
         symbol: data.symbol,
         minorUnit: data.minorUnit,
         metadata: data.metadata as any
-      },
-      create: {
+          },
+        })
+      : await this.prisma.referenceCurrency.create({
+          data: {
         isoCode: data.isoCode,
         numericCode: data.numericCode,
         name: data.name,
@@ -377,8 +395,8 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         minorUnit: data.minorUnit,
         isActive: true,
         metadata: data.metadata as any
-      }
-    });
+          },
+        });
     const governance = await this.finalizeGovernedUpsert('CURRENCY', record.id, data, data.aliases, data.providerMappings, Boolean(existing));
     return this.mapToCurrencyDto({ ...(record as unknown as DbCurrency), ...governance });
   }
@@ -409,17 +427,26 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   public async upsertLanguage(data: UpsertReferenceLanguageDto): Promise<ReferenceLanguageDto> {
     this.rejectLegacyLifecycleMutation(data.isActive);
     const existing = await this.prisma.referenceLanguage.findUnique({ where: { isoCode: data.isoCode } });
-    if (existing) await this.assertGovernedRecordEditable('LANGUAGE', existing.id);
-    const record = await this.prisma.referenceLanguage.upsert({
-      where: { isoCode: data.isoCode },
-      update: {
+    if (existing) {
+      if (data.id && data.id !== existing.id) throw new Error('REFERENCE_EDIT_IDENTITY_MISMATCH');
+      await this.lockAndCheckExpectedVersion('LANGUAGE', existing.id, data.expectedVersion);
+      await this.assertGovernedRecordEditable('LANGUAGE', existing.id);
+    } else if (data.id || data.expectedVersion !== undefined) {
+      throw new Error('REFERENCE_EDIT_TARGET_NOT_FOUND');
+    }
+    const record = existing
+      ? await this.prisma.referenceLanguage.update({
+          where: { id: existing.id },
+          data: {
         name: data.name,
         nameAr: data.nameAr,
         nativeName: data.nativeName,
         direction: data.direction,
         metadata: data.metadata as any
-      },
-      create: {
+          },
+        })
+      : await this.prisma.referenceLanguage.create({
+          data: {
         isoCode: data.isoCode,
         name: data.name,
         nameAr: data.nameAr,
@@ -427,8 +454,8 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         direction: data.direction,
         isActive: true,
         metadata: data.metadata as any
-      }
-    });
+          },
+        });
     const governance = await this.finalizeGovernedUpsert('LANGUAGE', record.id, data, data.aliases, data.providerMappings, Boolean(existing));
     return this.mapToLanguageDto({ ...(record as unknown as DbLanguage), ...governance });
   }
@@ -723,6 +750,30 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       throw new Error('REFERENCE_CITY_CANONICAL_COUNTRY_MISMATCH');
     }
     const canonicalIdentityKey = this.cityCanonicalIdentityKey(data);
+    if (data.id || data.expectedVersion !== undefined) {
+      if (!data.id) throw new Error('REFERENCE_CITY_EDIT_ID_REQUIRED');
+      await this.lockAndCheckExpectedVersion('CITY', data.id, data.expectedVersion);
+      const current = await this.prisma.referenceCity.findUnique({
+        where: { id: data.id }, include: { administrativeRegion: true },
+      });
+      if (!current || current.countryIso2Code !== data.countryIso2Code ||
+          current.countryReferenceId !== canonicalCountry.id)
+        throw new Error('REFERENCE_CITY_EDIT_COUNTRY_IMMUTABLE');
+      if ((current.administrativeRegionId ?? null) !== (data.administrativeRegionId ?? null) ||
+          normalizeReferenceIdentityToken(current.region ?? '') !== normalizeReferenceIdentityToken(data.region ?? ''))
+        throw new Error('REFERENCE_CITY_EDIT_REGION_IMMUTABLE');
+      const occupant = await this.prisma.referenceCity.findUnique({ where: { canonicalIdentityKey }, select: { id: true } });
+      if (occupant && occupant.id !== data.id) throw new Error('REFERENCE_CITY_IDENTITY_COLLISION_REVIEW_REQUIRED');
+      await this.assertGovernedRecordEditable('CITY', data.id);
+      const record = await this.prisma.referenceCity.update({
+        where: { id: data.id },
+        data: { canonicalIdentityKey, name: data.name, nameAr: data.nameAr, timezone: data.timezone,
+          latitude: data.latitude, longitude: data.longitude, metadata: data.metadata as any },
+        include: { administrativeRegion: true },
+      });
+      const governance = await this.finalizeGovernedUpsert('CITY', record.id, data, data.aliases, data.providerMappings, true);
+      return this.mapToCityDto({ ...(record as unknown as DbCity), ...governance });
+    }
     const updateData = {
       countryReferenceId: canonicalCountry.id,
       name: data.name,
@@ -749,6 +800,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       }
     }
     if (keyed) {
+      if (this.mutationActorId) throw new Error('REFERENCE_CITY_EXISTING_EDIT_ID_AND_VERSION_REQUIRED');
       await this.assertGovernedRecordEditable('CITY', keyed.id);
       const record = await this.prisma.referenceCity.update({
         where: { id: keyed.id },
@@ -785,6 +837,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     }
 
     if (legacyMatches.length === 1) {
+      if (this.mutationActorId) throw new Error('REFERENCE_CITY_LEGACY_IDENTITY_REVIEW_REQUIRED');
       await this.assertGovernedRecordEditable('CITY', legacyMatches[0].id);
       try {
         const record = await this.prisma.referenceCity.update({
@@ -804,6 +857,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
           include: { administrativeRegion: true },
         });
         if (!winner) throw error;
+        if (this.mutationActorId) throw new Error('REFERENCE_CITY_EXISTING_EDIT_ID_AND_VERSION_REQUIRED');
         await this.assertGovernedRecordEditable('CITY', winner.id);
         const record = await this.prisma.referenceCity.update({
           where: { id: winner.id },
@@ -927,6 +981,17 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       command.reason,
       command.actorId,
     );
+  }
+
+  private async lockAndCheckExpectedVersion(entityType: GovernedReferenceEntityType, referenceId: string, expectedVersion?: number): Promise<void> {
+    if (!this.inTransaction || !Number.isSafeInteger(expectedVersion) || (expectedVersion ?? 0) < 1)
+      throw new Error('REFERENCE_EDIT_TRANSACTION_AND_EXPECTED_VERSION_REQUIRED');
+    const table = this.referenceTable(entityType);
+    const records = await this.prisma.$queryRaw<Array<{ versionNumber: number }>>(Prisma.sql`
+      SELECT "versionNumber" FROM ${table} WHERE "id" = ${referenceId} FOR UPDATE
+    `);
+    if (records.length !== 1) throw new Error('REFERENCE_EDIT_TARGET_NOT_FOUND');
+    if (records[0].versionNumber !== expectedVersion) throw new Error('REFERENCE_VERSION_CONFLICT');
   }
 
   private async assertGovernedRecordEditable(entityType: GovernedReferenceEntityType, referenceId: string): Promise<void> {
