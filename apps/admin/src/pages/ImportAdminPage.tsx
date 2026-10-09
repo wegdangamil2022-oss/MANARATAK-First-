@@ -328,6 +328,7 @@ const ACTIVE_BATCH_STATUSES = new Set([
   'CREATED',
   'QUEUED',
   'RUNNING',
+  'PAUSING',
   'PAUSED',
   'RESUMING',
   'CANCELLING',
@@ -934,9 +935,21 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           reason ? { reason } : action === 'replay' ? { fromCheckpoint: true } : {},
         ),
       });
+      let pendingStop = false;
+      if (action === 'pause' || action === 'cancel') {
+        // The command may have been accepted while a domain call is still running.
+        // Never claim that cancellation or pause has finished before owner exit.
+        const latest = await adminApiClient.request<{ status: string }>(
+          `/admin/imports/queue/jobs/${encodeURIComponent(batch.id)}`,
+        );
+        pendingStop = latest.status === 'PAUSING' || latest.status === 'CANCELLING';
+      }
       setNotice({
-        tone: 'success',
-        content: txt('تم تنفيذ الإجراء على الدفعة بنجاح.', 'Batch action completed successfully.'),
+        tone: pendingStop ? 'warning' : 'success',
+        content: pendingStop
+          ? txt('تم تسجيل الطلب؛ لا تزال المهمة تنتظر تأكيد توقف العامل.',
+            'Stop requested; the job is awaiting worker acknowledgement.')
+          : txt('تم تنفيذ الإجراء على الدفعة بنجاح.', 'Batch action completed successfully.'),
       });
       await refreshAll(false);
     } catch (error) {
