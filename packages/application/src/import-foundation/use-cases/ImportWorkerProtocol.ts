@@ -10,6 +10,7 @@ export interface ImportWorkerFailure {
 export type ImportWorkerProcessor = (
   lease: ImportJobLease,
   heartbeat: () => Promise<void>,
+  getActiveLease: () => ImportJobLease,
 ) => Promise<void>;
 
 export class ImportWorkerProtocol {
@@ -39,7 +40,7 @@ export class ImportWorkerProtocol {
     };
 
     try {
-      await process(activeLease, heartbeat);
+      await process(activeLease, heartbeat, () => activeLease);
       if (!(await this.queue.completeClaimedJob(activeLease)))
         throw new Error('IMPORT_WORKER_LEASE_LOST');
       return 'COMPLETED';
