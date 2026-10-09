@@ -196,3 +196,10 @@ npm run ci:source:contracts
 - A repeat purge of a `PURGED` asset is forbidden without a live, matching retention worker lease; the normal admin endpoint does not forward claim tokens.
 - Added mock regression tests for CAS failure vs provider delete, provider outage/lease retry, persisted PURGED guard and worker sweep visibility.
 - **Limitations:** deletion is intentionally asynchronous with respect to DB persistence after an error; a PURGED record may temporarily retain object bytes. Provider delete must be idempotent. Worker scheduling/availability and real PostgreSQL crash-recovery and concurrent legal hold tests still require integration validation; archive/restore/move-to-clean cross-system reconciliation remains open. No database migration or production data changes.
+
+## Patch J — Disposable PostgreSQL integration CI (not production)
+
+- Dedicated `eap-postgres` CI job runs `postgres:16` inside GitHub Actions on constant localhost-only `manaratak_eap_ci_test`; no secrets and no production connections.
+- Job builds project references, runs `prisma db push` **only** against the fresh ephemeral test DB, then executes `PrismaAssetPostgres.database.spec.ts` behind the repository's existing `destructiveDatabaseTestsEnabled` guard and an extra EAP-specific flag/URL check.
+- Three real-db regressions: two concurrent lifecycle writes with shared revision, retention/legal-hold/worker-lease enforcement, and PURGED-persisted-before-provider-delete with lease-protected retry.
+- Database integration results are **PENDING CI** until this workflow runs; no database mutation was attempted against user-owned infrastructure.

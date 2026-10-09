@@ -77,3 +77,47 @@ jobs:
           apps/api/tests/presentation/api/router/AssetUsageImpact.spec.ts
           apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts
           apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts
+
+  eap-postgres:
+    name: EAP disposable PostgreSQL concurrency and purge reconciliation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: eap_ci
+          POSTGRES_PASSWORD: eap_ci_disposable_only
+          POSTGRES_DB: manaratak_eap_ci_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eap_ci -d manaratak_eap_ci_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      # These are *constant localhost disposable* test credentials, not a linked or production database.
+      DATABASE_URL: postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public
+      DIRECT_URL: postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public
+      DATABASE_MUTATIONS_ALLOWED: 'true'
+      RUN_DATABASE_INTEGRATION_TESTS: 'true'
+      EAP_EPHEMERAL_DB_TESTS: 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      - name: Build TypeScript project references
+        run: npm run typecheck
+      - name: Create schema on disposable localhost PostgreSQL only
+        run: npx --no-install prisma db push --schema=packages/infrastructure/prisma/schema.prisma --skip-generate
+      - name: Run EAP PostgreSQL real-CAS and purge-recovery tests
+        run: >-
+          npx --no-install vitest run --config vitest.config.ts
+          packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts
