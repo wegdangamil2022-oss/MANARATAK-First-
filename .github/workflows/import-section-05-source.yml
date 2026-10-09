@@ -13,6 +13,7 @@ on:
       - 'packages/domain/tests/import-foundation/**'
       - 'apps/api/src/presentation/api/router/ImportAdminRouter.ts'
       - 'apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts'
+      - 'apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts'
       - 'apps/admin/src/pages/ImportAdminPage.tsx'
       - '.github/workflows/import-section-05-source.yml'
   workflow_dispatch:
@@ -43,6 +44,8 @@ jobs:
           packages/infrastructure/tests/import-foundation/PrismaImportQueueGateway.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaImportWorkerStats.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaImportRecordLease.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportHandoffReconciliation.spec.ts
+          apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaImportErrorReport.spec.ts
           packages/application/tests/import-foundation/ImportWorkerProtocol.spec.ts
           packages/application/tests/import-foundation/ImportSourceIdentity.spec.ts
