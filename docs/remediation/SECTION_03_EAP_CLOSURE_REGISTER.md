@@ -1,5 +1,12 @@
 # Section 03 — EAP closure register
 
+## Verified durable restore barrier CI
+
+Source `af1b031fc320ad0c59e2a46cf88824e3997d19e3`: [CI 37943487206](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37943487206) SUCCESS: 285 source tests and 34 disposable PostgreSQL tests. New DB cases confirm expired/crashed intent blocks takeover and purge, exact owned renewal plus verified completion, uncertain provider failure holds without compensation/retry, pre-provider cancellation and fresh restore. Retention excludes pending rows while eligible rows remain discoverable. Earlier local stale select assertion is corrected in this matching all-source CI. Source/DB scopes are distinct; overlapping local scopes are not added.
+
+Target migrations/provider verification remain unapplied/deferred. Durable restoration safety is implemented; automatic provider reconciliation and already in-flight archive/legacy provider operations remain separate open obligations. Whole-section NOT CLOSED / NO-GO. This follow-up is evidence only.
+
+
 ## Continuation — durable restore safety barrier (2026-10-09)
 
 Original 03/P1-12/P1-13/P1-01/P1-02. Restore now persists a typed PREPARED operation and exact lease before effects, persists RESTORING before contacting storage, verifies bytes, renews the exact owned lease and commits ACTIVE/COMPLETED together. The existing operational JSON is used; no canonical relation, new table or backfill is introduced. Pending operations block Domain delivery/lifecycle and are rehydrated/validated strictly.
