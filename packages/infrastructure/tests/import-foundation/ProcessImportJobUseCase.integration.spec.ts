@@ -142,7 +142,7 @@ describe('ProcessImportJobUseCase', () => {
     vi.spyOn(queueGateway, 'markJobCompleted').mockResolvedValueOnce(false);
     const failed = vi.spyOn(queueGateway, 'markJobFailed');
     const dlq = vi.spyOn(queueGateway, 'moveToDeadLetter');
-    await expect(processUseCase.execute({ batchId, dataText: 'title,code\\nExample,E1' }))
+    await expect(processUseCase.execute({ batchId, dataText: 'title,code\nExample,E1' }))
       .rejects.toThrow('IMPORT_LEGACY_QUEUE_STATE_LOST');
     expect(failed).not.toHaveBeenCalled();
     expect(dlq).not.toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe('ProcessImportJobUseCase', () => {
 
   it('stages ordinary CSV without fabricating a reserved source-row marker', async () => {
     const result = await importAdminUseCases.importData({
-      dataText: 'id,name\\nU1,University One',
+      dataText: 'id,name\nU1,University One',
       sourceSystem: 'ADMIN_CONSOLE',
       dataType: 'UNIVERSITIES',
     });
@@ -177,7 +177,7 @@ describe('ProcessImportJobUseCase', () => {
 
   it('still rejects a CSV header that attempts to inject an importer-owned marker', async () => {
     await expect(importAdminUseCases.importData({
-      dataText: '_sourceRowNumber,name\\n900,Injected',
+      dataText: '_sourceRowNumber,name\n900,Injected',
       sourceSystem: 'ADMIN_CONSOLE',
       dataType: 'UNIVERSITIES',
     })).rejects.toThrow('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
