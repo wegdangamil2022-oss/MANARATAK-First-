@@ -222,10 +222,54 @@ function Input({ label, value, onChange, required = false, disabled = false }: a
   );
 }
 
+/** Code is persisted for Country defaults but options are server-owned canonical
+ * records. Do not grant selection to inactive or arbitrary typed free text.
+ */
+function ActiveReferenceCodeChooser({ label, type, value, onChange }: {
+  label: string; type: 'CURRENCY' | 'LANGUAGE'; value: string;
+  onChange: (code: string) => void;
+}) {
+  const [q, setQ] = useState('');
+  const [options, setOptions] = useState<Awaited<ReturnType<typeof canonicalPickerApi.currencies>>>([]);
+  const [pending, setPending] = useState(false);
+  const [failure, setFailure] = useState('');
+  useEffect(() => {
+    if (q.trim().length < 2) { setOptions([]); setPending(false); return; }
+    let alive = true;
+    const handle = setTimeout(() => {
+      setPending(true);
+      const load = type === 'CURRENCY' ? canonicalPickerApi.currencies : canonicalPickerApi.languages;
+      load(q.trim()).then(items => {
+        if (alive) { setOptions(items.filter(item => item.lifecycle === 'ACTIVE')); setFailure(''); }
+      }).catch((err: unknown) => {
+        if (alive) { setOptions([]); setFailure(err instanceof Error ? err.message : 'تعذر البحث'); }
+      }).finally(() => { if (alive) setPending(false); });
+    }, 250);
+    return () => { alive = false; clearTimeout(handle); };
+  }, [type, q]);
+  return <div className="space-y-2">
+    <label className="text-sm font-medium text-gray-700">{label}
+      <span className="text-xs font-mono ms-2">{value || 'Not selected'}</span>
+      <input className="w-full border rounded px-3 py-2 text-sm mt-1" value={q}
+        placeholder="Search canonical references by code/name…"
+        onChange={e => setQ(e.target.value)} />
+    </label>
+    {pending && <p className="text-xs">جاري البحث…</p>}
+    {failure && <p role="alert" className="text-red-700 text-xs">{failure}</p>}
+    <div className="flex flex-wrap gap-2 max-h-36 overflow-auto">
+      {options.map(item => <button key={item.id} type="button" className="border rounded px-2 py-1 text-xs"
+        disabled={!item.code} onClick={() => { onChange(item.code || ''); setQ(''); setOptions([]); }}>
+        {item.code} — {item.label}</button>)}
+      {value && <button type="button" onClick={() => { onChange(''); setQ(''); setOptions([]); }}
+        className="text-red-700 underline text-xs">Clear</button>}
+    </div>
+  </div>;
+}
+
 function CountriesTab() {
   const queryState = useFetchData('countries');
   const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
-  const [form, setForm] = useState({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' });
+  const [form, setForm] = useState({ iso2Code: '', iso3Code: '', name: '', nameAr: '', officialName: '', region: '', subregion: '', defaultCurrencyCode: '', defaultLanguageCode: '', callingCode: '' });
   const [editing, setEditing] = useState<{ id: string; expectedVersion: number; lifecycleState: string } | null>(null);
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
   const [preview, setPreview] = useState<any>(null);
@@ -254,9 +298,14 @@ function CountriesTab() {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      await referenceDataAdminApi.saveCountry({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), nameAr: form.nameAr || null, region: form.region || null });
+      await referenceDataAdminApi.saveCountry({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}),
+        nameAr: form.nameAr || null, officialName: form.officialName || null,
+        region: form.region || null, subregion: form.subregion || null,
+        defaultCurrencyCode: form.defaultCurrencyCode || null,
+        defaultLanguageCode: form.defaultLanguageCode || null,
+        callingCode: form.callingCode || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
-      setForm({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' });
+      setForm({ iso2Code: '', iso3Code: '', name: '', nameAr: '', officialName: '', region: '', subregion: '', defaultCurrencyCode: '', defaultLanguageCode: '', callingCode: '' });
       setEditing(null);
       refetch();
     } catch (err: any) {
@@ -302,7 +351,14 @@ function CountriesTab() {
           <Input label="ISO3 Code" required disabled={Boolean(editing)} value={form.iso3Code} onChange={(v: string) => setForm({...form, iso3Code: v})} />
           <Input label="Name" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
           <Input label="Arabic Name (optional)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
+          <Input label="Official country name (optional)" value={form.officialName} onChange={(v: string) => setForm({...form, officialName: v})} />
           <Input label="Region (optional)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
+          <Input label="Subregion (optional)" value={form.subregion} onChange={(v: string) => setForm({...form, subregion: v})} />
+          <Input label="Calling code (optional)" value={form.callingCode} onChange={(v: string) => setForm({...form, callingCode: v})} />
+          <ActiveReferenceCodeChooser label="Default currency (active ISO4217)" type="CURRENCY"
+            value={form.defaultCurrencyCode} onChange={code => setForm(prev => ({ ...prev, defaultCurrencyCode: code }))} />
+          <ActiveReferenceCodeChooser label="Default language (active ISO639)" type="LANGUAGE"
+            value={form.defaultLanguageCode} onChange={code => setForm(prev => ({ ...prev, defaultLanguageCode: code }))} />
         </div>
         <div className="flex items-center gap-4">
           <button type="submit" disabled={saveStatus.loading || (Boolean(editing) && editing?.lifecycleState !== 'ACTIVE')} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
@@ -310,7 +366,7 @@ function CountriesTab() {
           </button>
           {saveStatus.success && <span className="text-green-600 text-sm">{saveStatus.success}</span>}
           {saveStatus.error && <span className="text-red-600 text-sm">{saveStatus.error}</span>}
-          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' }); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
+          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ iso2Code: '', iso3Code: '', name: '', nameAr: '', officialName: '', region: '', subregion: '', defaultCurrencyCode: '', defaultLanguageCode: '', callingCode: '' }); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
         </div>
       </form>
 
@@ -336,7 +392,12 @@ function CountriesTab() {
                     <td className="p-3 font-mono">{item.iso2Code}</td><td className="p-3 font-mono">{item.iso3Code}</td><td className="p-3">{item.name}</td><td className="p-3">{item.region || '-'}</td><td className="p-3">{item.lifecycleState}</td>
                     <td className="p-3"><button type="button" className="text-indigo-600 underline" onClick={() => {
                       setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
-                      setForm({ iso2Code: item.iso2Code, iso3Code: item.iso3Code, name: item.name, nameAr: item.nameAr ?? '', region: item.region ?? '' });
+                      setForm({ iso2Code: item.iso2Code, iso3Code: item.iso3Code, name: item.name,
+                         nameAr: item.nameAr ?? '', officialName: item.officialName ?? '',
+                         region: item.region ?? '', subregion: item.subregion ?? '',
+                         callingCode: item.callingCode ?? '',
+                         defaultCurrencyCode: item.defaultCurrencyCode ?? '',
+                         defaultLanguageCode: item.defaultLanguageCode ?? '' });
                       setSaveStatus({ loading: false });
                     }}>تحرير / Edit</button> <ReferenceGovernanceButton entityType="COUNTRY" record={item} onChanged={refetch} /></td>
                   </tr>
