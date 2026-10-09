@@ -277,6 +277,15 @@ export class ImportAdminUseCases {
       for (let offset = 0; offset < input.rows.length; offset += chunkSize) {
         const chunk = input.rows.slice(offset, offset + chunkSize);
         const records: Array<Record<string, unknown>> = [];
+        // One bounded source-identity lookup per chunk instead of one SQL read
+        // for each imported row. Atomic insert remains the final concurrency gate.
+        const previouslyPersisted = this.importRepository.findExistingSourceDedupKeys
+          ? new Set(await this.importRepository.findExistingSourceDedupKeys(
+              chunk.map(payload => ImportSourceIdentity.create({
+                sourceSystem: input.sourceSystem, ownerDomain: input.ownerDomain, payload,
+              }).sourceDedupKey),
+            ))
+          : null;
 
         for (let index = 0; index < chunk.length; index++) {
           const payload = chunk[index];
@@ -294,9 +303,11 @@ export class ImportAdminUseCases {
             ownerDomain: input.ownerDomain,
             payload,
           });
-          const alreadyPersisted = this.importRepository.findBySourceDedupKey
-            ? await this.importRepository.findBySourceDedupKey(identity.sourceDedupKey)
-            : null;
+          const alreadyPersisted = previouslyPersisted
+            ? previouslyPersisted.has(identity.sourceDedupKey)
+            : this.importRepository.findBySourceDedupKey
+              ? Boolean(await this.importRepository.findBySourceDedupKey(identity.sourceDedupKey))
+              : false;
           if (seenDedupKeys.has(identity.sourceDedupKey) || alreadyPersisted) {
             skippedDuplicates++;
             continue;
