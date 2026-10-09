@@ -18,6 +18,7 @@ on:
       - 'apps/api/src/presentation/api/router/Settings*'
       - 'apps/api/tests/presentation/api/router/Settings*'
       - 'apps/admin/src/pages/SettingsAdminPage.tsx'
+      - 'apps/admin/src/pages/settingsAssignmentGovernance*'
       - 'apps/admin/src/components/SettingsResolutionInspector.tsx'
       - 'tests/remediation/section04-settings-authority.test.mjs'
       - 'tests/remediation/section04-settings-ownership-plan.test.mjs'
@@ -53,6 +54,7 @@ jobs:
           npx --no-install vitest run --config vitest.config.ts
           packages/domain/tests/settings
           packages/application/tests/settings
+          apps/admin/src/pages/settingsAssignmentGovernance.spec.ts
           packages/infrastructure/tests/settings
           packages/application/tests/audit/SettingsAtomicAuditBoundary.spec.ts
           apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts
