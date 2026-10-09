@@ -409,4 +409,17 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     await expect(repository.assertRestoreLeaseOwned(record)).rejects.toThrow('ASSET_RESTORE_LEASE_LOST');
   });
 
+  it('discovers only old persisted pending activation intents for recovery', async () => {
+    const id = DB_PREFIX + randomUUID();
+    const operationId = randomUUID();
+    await repository.save(newAsset(id, AssetLifecycleState.SANITIZING));
+    await prisma.assetRecord.update({ where: { id }, data: { updatedAt: new Date('2026-01-01'),
+      malwareScanStatus: { activationOperation: { phase: 'PREPARED', operationId } },
+    } });
+    expect(await repository.findPendingActivations(new Date('2026-01-02'), 5)).toContainEqual({ assetId: id, operationId });
+    expect(await repository.findPendingActivations(new Date('2025-12-31'), 5)).toEqual([]);
+    await prisma.assetRecord.update({ where: { id }, data: { lifecycleState: 'ACTIVE' } });
+    expect(await repository.findPendingActivations(new Date('2099-01-01'), 5)).toEqual([]);
+  });
+
 });

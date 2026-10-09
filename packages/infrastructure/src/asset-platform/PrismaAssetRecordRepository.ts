@@ -410,6 +410,26 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     };
   }
 
+  async findPendingActivations(before: Date, limit: number): Promise<Array<{ assetId: string; operationId: string }>> {
+    if (!Number.isFinite(before.getTime()) || !Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new Error('ASSET_ACTIVATION_RECOVERY_QUERY_INVALID');
+    }
+    const rows = await this.prisma.assetRecord.findMany({
+      where: { lifecycleState: AssetLifecycleState.SANITIZING, updatedAt: { lte: before },
+        malwareScanStatus: { path: ['activationOperation', 'phase'], equals: 'PREPARED' } },
+      orderBy: [{ updatedAt: 'asc' }, { id: 'asc' }], take: limit,
+      select: { id: true, malwareScanStatus: true },
+    });
+    return rows.map(row => {
+      const scan = row.malwareScanStatus as { activationOperation?: { operationId?: unknown } } | null;
+      const operationId = scan?.activationOperation?.operationId;
+      if (typeof operationId !== 'string' || !/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(operationId)) {
+        throw new Error('ASSET_ACTIVATION_OPERATION_INVALID');
+      }
+      return { assetId: row.id, operationId };
+    });
+  }
+
   async findAdminDetails(id: AssetId) {
     const row = await this.prisma.assetRecord.findUnique({ where: { id: id.value } });
     if (!row) return null;

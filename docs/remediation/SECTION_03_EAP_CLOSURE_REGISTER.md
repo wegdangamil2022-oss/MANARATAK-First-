@@ -1,5 +1,12 @@
 # Section 03 — EAP closure register
 
+## Current continuation — bounded durable activation recovery
+
+03/P1-13 now has an EAP-owned discovery/use-case/handler connected to the existing durable worker and opt-in recurring bootstrap. Disabled by default and enforced during execution, including old queued jobs. Source tests: 43 focused PASS (3.04s), TypeScript/quality PASS, five worker/lease guards PASS; matching new CI pending. Details and non-atomic audit/provider limitations: `docs/operations/ASSET_LIFECYCLE_RECOVERY.md`.
+
+Older statements that automatic activation recovery source is entirely absent are superseded by this bounded implementation. No runtime enablement is claimed. Consumer/lifecycle serialization, provider fencing, restoration-compensation recovery and outstanding workspace/provider acceptance still prevent whole-section CLOSED/GO.
+
+
 ## Final verified status for this broad operation — 2026-10-09
 
 **Verdict: NOT CLOSED / NO-GO.** Workspace/version preservation and restore-ownership mitigation are implemented and tested; whole-section acceptance remains incomplete.

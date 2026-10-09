@@ -240,6 +240,7 @@ import {
   AdminAcademicTaxonomyUseCases,
   RetentionSweepUseCase,
   RetentionBackgroundJobHandler,
+  RecoverAssetActivationsUseCase, AssetActivationRecoveryBackgroundJobHandler,
   CmsScheduledPublishingBackgroundJobHandler,
   ImportQueueBackgroundJobHandler,
   AIAsyncBackgroundJobHandler,
@@ -806,13 +807,18 @@ export function registerDependencies(
     assetRetentionGateway: asFunction(({ prisma, processAssetLifecycleUseCase }) => isPrisma ? new PrismaAssetRetentionGateway(prisma, processAssetLifecycleUseCase) : createUnavailableCapability('assetRetentionGateway')).scoped(),
     retentionSweepUseCase: asFunction(({ importRetentionGateway, auditRetentionGateway, assetRetentionGateway, retentionDecisionRepository }) =>
       new RetentionSweepUseCase([importRetentionGateway, auditRetentionGateway, assetRetentionGateway], retentionDecisionRepository)).scoped(),
+    recoverAssetActivationsUseCase: asFunction(({ assetRecordRepository, processAssetLifecycleUseCase, auditRecordRepo }) =>
+      new RecoverAssetActivationsUseCase(assetRecordRepository, processAssetLifecycleUseCase, auditRecordRepo)).scoped(),
+    assetActivationRecoveryBackgroundJobHandler: asFunction(({ recoverAssetActivationsUseCase }) =>
+      new AssetActivationRecoveryBackgroundJobHandler(recoverAssetActivationsUseCase, readConfig<boolean>('ASSET_ACTIVATION_RECOVERY_ENABLED') === true)).scoped(),
     retentionBackgroundJobHandler: asFunction(({ retentionSweepUseCase }) => new RetentionBackgroundJobHandler(retentionSweepUseCase)).scoped(),
     cmsScheduledPublishingBackgroundJobHandler: asFunction(({ adminCmsUseCases }) => new CmsScheduledPublishingBackgroundJobHandler(adminCmsUseCases)).scoped(),
     importQueueBackgroundJobHandler: asFunction(({ importAdminUseCases }) => new ImportQueueBackgroundJobHandler(importAdminUseCases)).scoped(),
     aiAsyncBackgroundJobHandler: asFunction(({ aiExecutionUseCases }) => new AIAsyncBackgroundJobHandler(aiExecutionUseCases)).scoped(),
     financeReconciliationBackgroundJobHandler: asFunction(({ financePlatformUseCases }) => new FinanceReconciliationBackgroundJobHandler(financePlatformUseCases)).scoped(),
     notificationDeliveryBackgroundJobHandler: asFunction(({ notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway }) => new NotificationDeliveryBackgroundJobHandler(notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway)).scoped(),
-    backgroundJobHandlerRegistry: asFunction(({ retentionBackgroundJobHandler, cmsScheduledPublishingBackgroundJobHandler, importQueueBackgroundJobHandler, aiAsyncBackgroundJobHandler, financeReconciliationBackgroundJobHandler, notificationDeliveryBackgroundJobHandler }) => new BackgroundJobHandlerRegistry([
+    backgroundJobHandlerRegistry: asFunction(({ assetActivationRecoveryBackgroundJobHandler, retentionBackgroundJobHandler, cmsScheduledPublishingBackgroundJobHandler, importQueueBackgroundJobHandler, aiAsyncBackgroundJobHandler, financeReconciliationBackgroundJobHandler, notificationDeliveryBackgroundJobHandler }) => new BackgroundJobHandlerRegistry([
+      assetActivationRecoveryBackgroundJobHandler,
       retentionBackgroundJobHandler,
       cmsScheduledPublishingBackgroundJobHandler,
       importQueueBackgroundJobHandler,

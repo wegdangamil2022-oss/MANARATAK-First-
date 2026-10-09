@@ -206,3 +206,5 @@ export * from './background-jobs/handlers/NotificationDeliveryBackgroundJobHandl
 export * from './identity/use-cases/ChangePasswordUseCase';
 export * from './identity/use-cases/DisablePasswordCredentialUseCase';
 export * from './import-foundation/services/CanonicalSourceReview';
+
+export * from './background-jobs/handlers/AssetActivationRecoveryBackgroundJobHandler';

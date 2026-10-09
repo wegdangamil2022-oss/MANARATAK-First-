@@ -1,7 +1,7 @@
 import { createApiApp } from './app.js';
 import { container } from './infrastructure/di/container.js';
 import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ZodEnvironmentValidator } from '@manaratak/config';
-import { RETENTION_SWEEP_JOB_TYPE, CMS_SCHEDULED_PUBLISH_JOB_TYPE, IMPORT_QUEUE_SWEEP_JOB_TYPE, AI_ASYNC_SWEEP_JOB_TYPE, FINANCE_RECONCILIATION_JOB_TYPE, NOTIFICATION_DELIVERY_JOB_TYPE } from '@manaratak/application';
+import { ASSET_ACTIVATION_RECOVERY_JOB_TYPE, RETENTION_SWEEP_JOB_TYPE, CMS_SCHEDULED_PUBLISH_JOB_TYPE, IMPORT_QUEUE_SWEEP_JOB_TYPE, AI_ASYNC_SWEEP_JOB_TYPE, FINANCE_RECONCILIATION_JOB_TYPE, NOTIFICATION_DELIVERY_JOB_TYPE } from '@manaratak/application';
 import { startPollingWorkers, stopPollingWorkers } from './infrastructure/workers/PollingWorkerRuntime.js';
 
 const SHUTDOWN_TIMEOUT_MS = 15_000;
@@ -19,6 +19,12 @@ async function bootstrap() {
   const backgroundWorker = backgroundWorkerEnabled ? container.resolve<any>('durableBackgroundWorker') : null;
   if (backgroundWorkerEnabled) {
     const manager = container.resolve<any>('manageBackgroundJobsUseCase');
+    if (config.getOptional<boolean>('ASSET_ACTIVATION_RECOVERY_ENABLED') === true) {
+      await manager.ensureRecurringJob({ stableReference: 'system.assets.activation-recovery',
+        jobType: ASSET_ACTIVATION_RECOVERY_JOB_TYPE, parameters: { limit: 25, minimumAgeSeconds: 300 },
+        cronExpression: config.get<string>('ASSET_ACTIVATION_RECOVERY_CRON'), priority: 90,
+        timeoutSeconds: 300, maxAttempts: 5, backoffType: 'exponential', ownerReference: 'assets:activation-recovery' });
+    }
     await manager.ensureRecurringJob({
       stableReference: 'system.retention.sweep',
       jobType: RETENTION_SWEEP_JOB_TYPE,

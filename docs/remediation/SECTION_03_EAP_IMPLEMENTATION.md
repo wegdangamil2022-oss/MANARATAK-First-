@@ -1,5 +1,15 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## Continuation — 03/P1-13 durable activation recovery worker (2026-10-09)
+
+- Added bounded pending-intent discovery in the EAP repository and RecoverAssetActivationsUseCase, registered handler `assets.activation.recovery` in the existing durable background worker. Existing activation intent/digest/CAS owner path is reused; no new activation is inferred from QUARANTINED/DELETED/ACTIVE rows.
+- Added optional disabled-by-default source configuration and recurring-job bootstrap. Explicit enablement requires the durable worker and a schedule. Execution itself checks enablement so older persisted schedules cannot perform recovery after disabling. No runtime config, seed or real DB/provider write performed.
+- Added system Audit INTENT before provider work and outcome afterward with the existing factory/retention resolver. Audit unavailable fails before effects; completed state plus failed outcome audit stays a failed job, not a claimed atomic transaction. Queue diagnostics use safe constant error codes.
+- Tests cover cancellation, invalid payload/limits, stale identity/state, audit failure before/after effects, safe diagnostics, real worker registry dispatch and disabled persisted jobs. Prisma query regression checks bounded discovery; one new disposable PG case checks age/state exclusion.
+- Local incremental TypeScript PASS; 43 focused tests in three files PASS in 3.04s; five existing durable-worker/lease guards PASS; selected lint 0 errors/38 warnings; quality 0 cycles/a11y PASS. Matching pushed CI pending at source commit creation. Existing source/CI counts overlap and are not added.
+- P1-13 remains PARTIALLY_IMPLEMENTED: automatic activation retry source is wired but not enabled or verified with a real provider; restore compensation journal, asset lease heartbeat/provider fencing and fleet/audit-receipt reconciliation remain incomplete. Section NOT CLOSED / NO-GO.
+
+
 ## Cumulative corrections to earlier task snapshot
 
 The Arabic table further below is an earlier snapshot and is preserved for review history. Current deltas supersede these statements:

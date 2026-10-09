@@ -13,6 +13,11 @@ on:
       - 'docs/remediation/evidence/section-02/admin-mutation-audit-inventory.json'
       - 'apps/admin/src/pages/AssetAdminPage.tsx'
       - 'apps/api/src/app.ts'
+      - 'apps/api/src/server.ts'
+      - 'apps/api/src/infrastructure/di/container.ts'
+      - 'packages/config/src/AppConfig.ts'
+      - 'packages/config/tests/AppConfig.spec.ts'
+      - 'packages/application/src/background-jobs/handlers/AssetActivationRecoveryBackgroundJobHandler.ts'
       - 'apps/api/src/presentation/api/router/Asset*'
       - 'apps/api/tests/presentation/api/router/Asset*'
       - 'packages/application/src/asset-platform/**'
@@ -91,6 +96,7 @@ jobs:
           apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts
           apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts
           apps/admin/src/components/AssetLifecycleActions.spec.tsx
+          packages/config/tests/AppConfig.spec.ts
       - name: Legacy provider transport security checks
         run: node --test tests/remediation/w3-asset-provider.test.mjs
       - name: Audit inventory and security regression guards

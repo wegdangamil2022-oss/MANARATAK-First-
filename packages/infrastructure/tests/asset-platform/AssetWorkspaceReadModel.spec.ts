@@ -87,4 +87,18 @@ describe('EAP workspace read model and version preservation', () => {
     await repository.queryAdmin({ fileFamily });
     expect((findMany.mock.calls[0][0] as any).where.AND[0].metadata.string_starts_with).toBe(fileFamily.toLowerCase() + '/');
   });
+  it('bounds recovery discovery by pending phase, state and age without exposing locators', async () => {
+    const operationId = '11111111-1111-4111-8111-111111111111';
+    const findMany = vi.fn(async (_input: unknown) => [{ id: 'a', malwareScanStatus: { activationOperation: { operationId } } }]);
+    const repository = new PrismaAssetRecordRepository({ assetRecord: { findMany } } as any);
+    const before = new Date('2026-01-01');
+    expect(await repository.findPendingActivations(before, 5)).toEqual([{ assetId: 'a', operationId }]);
+    expect(findMany.mock.calls[0][0]).toMatchObject({
+      take: 5, select: { id: true, malwareScanStatus: true },
+      where: { lifecycleState: 'SANITIZING', updatedAt: { lte: before }, malwareScanStatus: { path: ['activationOperation', 'phase'], equals: 'PREPARED' } },
+    });
+    await expect(repository.findPendingActivations(before, 101)).rejects.toThrow('QUERY_INVALID');
+    expect(findMany).toHaveBeenCalledTimes(1);
+  });
+
 });
