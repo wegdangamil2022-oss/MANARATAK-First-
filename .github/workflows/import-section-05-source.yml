@@ -47,6 +47,7 @@ jobs:
           packages/infrastructure/tests/import-foundation/PrismaImportHandoffReconciliation.spec.ts
           apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaImportErrorReport.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportStrandedStopInsights.spec.ts
           packages/application/tests/import-foundation/ImportWorkerProtocol.spec.ts
           packages/application/tests/import-foundation/ImportSourceIdentity.spec.ts
           packages/application/tests/import-foundation/ImportHandoffDispatcher.spec.ts
