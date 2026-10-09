@@ -43,7 +43,7 @@ describe('Settings owner atomic audit boundary', () => {
     }
     expect(definitions.save).not.toHaveBeenCalled();
     expect(auditRepository.saveInTransaction).toHaveBeenCalledWith(expect.anything(), context);
-    if (failure !== 'audit') expect(outbox.appendInTransaction).toHaveBeenCalledWith(expect.objectContaining({ correlationId: 'operation-1' }), context);
+    if (failure !== 'audit') expect(outbox.appendInTransaction).toHaveBeenCalledWith(expect.objectContaining({ correlationId: 'operation-1', metadata: expect.objectContaining({ settingsEventRole: 'CONTROL_PLANE_MUTATION' }) }), context);
     else expect(outbox.appendInTransaction).not.toHaveBeenCalled();
   });
   it.each(['none', 'audit', 'outbox'])('clear override commits history only with business/audit/outbox: %s', async failure => {
@@ -76,7 +76,7 @@ describe('Settings owner atomic audit boundary', () => {
     expect(record.action.getValue()).toBe('CLEAR_SETTING_OVERRIDE');
     expect(record.correlationReference.getValue()).toBe('request-clear');
     expect(record.contextMetadata.getData()).toMatchObject({ changeReason: 'Use approved default', previousVersionId: 'v1', newVersionId: 'clear' });
-    if (failure !== 'audit') expect(outbox.appendInTransaction).toHaveBeenCalledWith(expect.objectContaining({ correlationId: 'request-clear' }), tx);
+    if (failure !== 'audit') expect(outbox.appendInTransaction).toHaveBeenCalledWith(expect.objectContaining({ correlationId: 'request-clear', metadata: expect.objectContaining({ settingsEventRole: 'CONTROL_PLANE_MUTATION' }) }), tx);
   });
 
 });
