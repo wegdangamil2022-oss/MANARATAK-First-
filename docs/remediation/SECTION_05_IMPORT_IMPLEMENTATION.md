@@ -4,6 +4,28 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 11 — legacy finalization lease fencing and zero-work completion accuracy (2026-10-09)
+
+**Verified source commit:** `842155796b3cb2eae2f40ebda7b71b16689cbb2e`; [focused CI 37982879053](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37982879053) **SUCCESS** — 142/142 tests across 20 Vitest files, TypeScript, source-quality gate, and existing 321-handler/320-endpoint Admin audit coverage **PASS**. No live PostgreSQL, migrations, provider network use, production deployment or merge.
+
+- **Legacy lease bypass closed:** Compatibility `markJobCompleted` and `markJobFailed` methods of the durable Prisma gateway are now conditional on an unclaimed job (`claimedBy IS NULL AND claimUntil IS NULL`). They cannot overwrite a live claimed worker's RUNNING status or bypass the lease/attempt/generation checks of `completeClaimedJob` and `failClaimedJob`. DEVELOPMENT_ONLY in-memory gateway additionally refuses either legacy finalization while worker lease metadata or a live lease exists. A legacy unclaimed completion also selects PARTIALLY_COMPLETED when its persisted failed-row count is positive.
+- **IMP-P0-006 progress edge:** An empty completed durable batch — for example where all received source rows deduplicated and zero work items were persisted — now reports 100% completion; an empty QUEUED batch still reports 0%. The staged total is already the accepted work-item count, not the original raw-row count.
+- **Regression verification:** Source tests deny stale legacy finalization, preserve claimed worker completion, verify conditional unclaimed terminal-status decisions, redact sensitive failure reasons and distinguish zero-work terminal versus queued progress.
+- **Scope limits:** The legacy non-lease processing API is still a distinct compatibility path and is not claimed to have full worker crash recovery. No authoritative owner receipt/inbox or manual evidence-backed reconciliation resolution has been implemented; avoid any implication of complete Section 05 closure.
+
+---
+
+## Batch 10 — preserve partial completion and queue outcome consistency (2026-10-09)
+
+**Verified source commit:** `4d00f3e830ec833e97226cb300c3c11d74875704`; [focused CI 37982592191](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37982592191) **SUCCESS**.
+
+- **IMP-P1-007:** Durable `completeClaimedJob` now uses a conditional persisted-counter decision with the active lease fence in the same PostgreSQL UPDATE: `failedRecords > 0` leads to `PARTIALLY_COMPLETED`, `failedRecords = 0` to `COMPLETED`; if neither compare-and-swap succeeds, the old worker may not finalize. The DEVELOPMENT_ONLY gateway reflects the same branching.
+- **Direct/non-worker staging:** The terminal batch status is likewise PARTIALLY_COMPLETED for structurally invalid persisted records, instead of always claiming full completion.
+- **Source regressions:** Invalid-row durable and direct import cases, successful full completion, persisted failed-row finalization, and stale-lease failure to finalize either terminal status.
+- **Scope:** This covers counted failed rows, not unresolved owning-domain review/pending receipt semantics. A verified, owner-specific atomic receipt and manual reconciliation are still mandatory P0 work. The older progress/legacy and remaining Section 05 issues stay open as documented in the canonical plan.
+
+---
+
 ## Batch 9 — fail-closed owning-domain handoff effect classification (2026-10-09)
 
 **Verified source:** code commit `d30721fdb4c4c274f34cdbc9122dad2b9fd8ac17`; [focused CI 37981616458](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37981616458) **SUCCESS** — 135/135 tests across 20 Vitest files, TypeScript, source quality and existing 321-handler/320-endpoint Admin audit source gate PASS. An earlier intermediate TypeScript failure exposed the previously omitted translation preparation implementation; it was classified and reverified. No live database, schema migration, external provider, E2E, merge or production deploy was performed.
