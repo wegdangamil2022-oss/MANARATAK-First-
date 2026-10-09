@@ -322,7 +322,7 @@ export class ImportAdminUseCases {
               : status;
 
           records.push({
-            id: `rec-${uuidv4().substring(0, 8)}`,
+            id: `rec-${uuidv4()}`,
             batchId: batch.id,
             status: persistedStatus,
             rawPayload: {
