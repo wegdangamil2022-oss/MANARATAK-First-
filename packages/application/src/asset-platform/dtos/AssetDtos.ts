@@ -51,6 +51,10 @@ export interface RegisterQuarantinedAssetDto {
   expiresAt?: string | Date;
 }
 
+export interface FinalizeAssetUploadDto {
+  assetId: string;
+}
+
 export interface ValidateAssetDto {
   assetId: string;
 }

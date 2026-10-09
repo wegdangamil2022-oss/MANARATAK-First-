@@ -200,6 +200,37 @@ export class AssetPlatformRouter {
       }
     }));
 
+    // POST /:assetId/finalize-upload — uploaded bytes must be verified and recorded before scanning.
+    router.post('/:assetId/finalize-upload', asyncHandler(async (req: Request, res: Response) => {
+      emptyMutationBodySchema.parse(req.body ?? {});
+      const assetId = req.params.assetId;
+      if (/^https?:\/\//i.test(assetId.trim())) {
+        res.status(400).json({ error: 'ASSET_HANDLE_REQUIRED' });
+        return;
+      }
+      try {
+        const result = await processAssetLifecycleUseCase.finalizeUploadedAsset({ assetId });
+        await AuditHelper.recordMutation(auditRecordRepo, req, {
+          action: 'FINALIZE_ASSET_UPLOAD',
+          category: 'ASSET_PLATFORM',
+          targetType: 'ASSET',
+          targetId: assetId,
+          result: 'SUCCESS',
+        });
+        res.status(200).json(result);
+      } catch (error: any) {
+        await AuditHelper.recordMutation(auditRecordRepo, req, {
+          action: 'FINALIZE_ASSET_UPLOAD',
+          category: 'ASSET_PLATFORM',
+          targetType: 'ASSET',
+          targetId: assetId,
+          result: 'FAILURE',
+          error,
+        });
+        throw error;
+      }
+    }));
+
     // POST /:assetId/validate
     router.post('/:assetId/validate', asyncHandler(async (req: Request, res: Response) => {
       emptyMutationBodySchema.parse(req.body ?? {});

@@ -168,3 +168,11 @@ npm run ci:source:contracts
 - Updates now use conditional `updateMany({ where: { id, updatedAt: captured, lifecycleState: captured } })`; count != 1 fails as `ASSET_RECORD_CONCURRENT_MODIFICATION` and must be retried only after rehydration.
 - Existing `AssetRecord.updatedAt` column is reused; **no Prisma migration/schema change**. A second update to the same in-memory snapshot intentionally fails; fresh reads are required.
 - This provides source-level optimistic compare-and-swap **at DB save time**. It does **not** protect provider side effects performed *before* CAS, and timestamp granularity/DB isolation must be tested under real concurrency. Provider reconciliation, durable transition journal/outbox, and real PostgreSQL tests remain open.
+
+## Patch B — Explicit upload finalization before malware scanner
+
+- Added explicit application/API `POST /admin/assets/:assetId/finalize-upload` step. It obtains provider-observed size, MIME, digest and evidence for a quarantined upload, then persists this through revision-gated repository save.
+- `validateAsset` rejects uploads without **persisted** finalization evidence (`ASSET_UPLOAD_FINALIZATION_REQUIRED`) and re-verifies observed bytes/checksum before invoking scanner. It rejects files modified after finalization (`ASSET_UPLOAD_CHANGED_AFTER_FINALIZATION`).
+- Added audit records for successful/failed finalizations and negative regression tests (no scan pre-finalization, tampered digest, provider unavailable).
+- **Remaining P0 limitations:** direct-upload grant has no provider-native immutable object version/ETag acknowledgment; finalization and scan are not one atomic provider operation, and existing integrators must call finalize before validate. Finalization is distinct from the initial `QUARANTINED` metadata state; quarantine is not proof of completed upload.
+- This entry reflects source changes only pending CI. No DB migration or production actions performed.

@@ -9,6 +9,7 @@ import {
 
 import {
   ValidateAssetDto,
+  FinalizeAssetUploadDto,
   MarkAssetMalwareScanFailedDto,
   SanitizeAssetDto,
   ActivateAssetDto,
@@ -31,6 +32,27 @@ export class ProcessAssetLifecycleUseCase {
     private readonly sanitizationGateway?: IAssetSanitizationGateway
   ) {}
 
+  /**
+   * Marks a direct-to-quarantine upload as complete only after provider-owned verification.
+   * Recording the verification precedes malware scanning and is revision-gated by the repository.
+   */
+  public async finalizeUploadedAsset(dto: FinalizeAssetUploadDto): Promise<AssetRecordDto> {
+    const id = new AssetId(dto.assetId);
+    const record = await this.assetRepository.findById(id);
+    if (!record) throw new Error(`Asset not found: ${dto.assetId}`);
+    if (!this.storageGateway.verifyUploadedObject) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+    }
+    // Domain rejects repeat finalization outside QUARANTINED and mismatched provider observations.
+    const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+      expectedByteSize: record.metadata.byteSize,
+      declaredMimeType: record.metadata.mimeType,
+    });
+    record.confirmUploadedObject({ ...verified, locator: record.locator.value });
+    await this.assetRepository.save(record);
+    return AssetRecordMapper.toDto(record);
+  }
+
   public async validateAsset(dto: ValidateAssetDto): Promise<AssetRecordDto> {
     const id = new AssetId(dto.assetId);
     const record = await this.assetRepository.findById(id);
@@ -38,14 +60,25 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
+    if (!record.uploadVerification ||
+      record.uploadVerification.locator !== record.locator.value ||
+      record.uploadVerification.signatureVerified !== true ||
+      record.checksum?.hash !== record.uploadVerification.checksumSha256.toLowerCase()) {
+      throw new Error('ASSET_UPLOAD_FINALIZATION_REQUIRED');
+    }
     if (!this.storageGateway.verifyUploadedObject) {
       throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
     }
+    // A completed upload is not immutable merely because it has finalization evidence.
+    // Reobserve the bytes immediately before scanning and reject overwrite attempts.
     const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
-      expectedByteSize: record.metadata.byteSize,
-      declaredMimeType: record.metadata.mimeType,
+      expectedByteSize: record.uploadVerification.byteSize,
+      declaredMimeType: record.uploadVerification.verifiedMimeType,
     });
-    record.confirmUploadedObject({ ...verified, locator: record.locator.value });
+    if (verified.signatureVerified !== true ||
+        verified.checksumSha256.toLowerCase() !== record.uploadVerification.checksumSha256.toLowerCase()) {
+      throw new Error('ASSET_UPLOAD_CHANGED_AFTER_FINALIZATION');
+    }
     record.startValidation();
 
     if (!this.malwareScannerGateway) {

@@ -206,6 +206,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     });
 
     malwareScanner.shouldFail = true;
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-infected' });
     const validated = await lifecycleUseCase.validateAsset({ assetId: 'asset-infected' });
 
     expect(validated.state).toBe(AssetLifecycleState.MALWARE_SCAN_FAILED);
@@ -231,6 +232,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     });
 
     // Validate
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-clean' });
     await lifecycleUseCase.validateAsset({ assetId: 'asset-clean' });
 
     // Sanitize
@@ -257,6 +259,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     });
     await expect(lifecycleUseCase.requestDeliveryGrant({ assetId: 'asset-delivery' }))
       .rejects.toThrow('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET');
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-delivery' });
     await lifecycleUseCase.validateAsset({ assetId: 'asset-delivery' });
     const sanitized = await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-delivery' });
     expect(sanitized.storageLocator).toContain('sanitized/');
@@ -280,6 +283,8 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
       byteSize: 4000,
       classification: AssetSecurityClassification.CONFIDENTIAL
     });
+
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-in-use' });
 
     await lifecycleUseCase.validateAsset({ assetId: 'asset-in-use' });
     await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-in-use' });
@@ -320,6 +325,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     await expect(lifecycleUseCase.activateAsset({ assetId: 'asset-preflight' })).rejects.toThrow();
     expect(move).not.toHaveBeenCalled();
     malwareScanner.shouldFail = true;
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-preflight' });
     await lifecycleUseCase.validateAsset({ assetId: 'asset-preflight' });
     await expect(lifecycleUseCase.activateAsset({ assetId: 'asset-preflight' }))
       .rejects.toThrow('Cannot activate asset that failed malware scanning');
@@ -332,6 +338,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
       ownerType: 'STUDENT', originalFilename: 'a.pdf', mimeType: 'application/pdf',
       fileExtension: 'pdf', byteSize: 10, classification: AssetSecurityClassification.INTERNAL,
     });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-referenced' });
     await lifecycleUseCase.validateAsset({ assetId: 'asset-referenced' });
     await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-referenced' });
     await lifecycleUseCase.activateAsset({ assetId: 'asset-referenced' });
@@ -352,8 +359,10 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     });
     storageGateway.verifyFails = true;
     const scan = vi.spyOn(malwareScanner, 'scan');
-    await expect(lifecycleUseCase.validateAsset({ assetId: 'asset-unverified' }))
+    await expect(lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-unverified' }))
       .rejects.toThrow('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    await expect(lifecycleUseCase.validateAsset({ assetId: 'asset-unverified' }))
+      .rejects.toThrow('ASSET_UPLOAD_FINALIZATION_REQUIRED');
     expect(scan).not.toHaveBeenCalled();
     expect((await repo.findById(new AssetId('asset-unverified')))?.state)
       .toBe(AssetLifecycleState.QUARANTINED);
@@ -367,6 +376,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     });
     storageGateway.sanitizedByteSize = 800;
     const scan = vi.spyOn(malwareScanner, 'scan');
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-sanitized-evidence' });
     await lifecycleUseCase.validateAsset({ assetId: 'asset-sanitized-evidence' });
     await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-sanitized-evidence' });
     const record = await repo.findById(new AssetId('asset-sanitized-evidence'));
@@ -386,6 +396,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
       ownerType: 'STUDENT', originalFilename: 'document.pdf', mimeType: 'application/pdf',
       fileExtension: 'pdf', byteSize: 1000, classification: AssetSecurityClassification.INTERNAL,
     });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-infected-post-san' });
     await lifecycleUseCase.validateAsset({ assetId: 'asset-infected-post-san' });
     malwareScanner.shouldFail = true;
     const result = await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-infected-post-san' });
@@ -402,6 +413,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
       ownerType: 'STUDENT', originalFilename: 'document.pdf', mimeType: 'application/pdf',
       fileExtension: 'pdf', byteSize: 600, classification: AssetSecurityClassification.INTERNAL,
     });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-late-rewrite' });
     await lifecycleUseCase.validateAsset({ assetId: 'asset-late-rewrite' });
     await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-late-rewrite' });
     storageGateway.verificationHash = 'f'.repeat(64);
@@ -457,6 +469,43 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     await expect(lifecycleUseCase.purgeAsset({ assetId: 'asset-missing-guard' }))
       .rejects.toThrow('ASSET_PURGE_RETENTION_GUARD_NOT_CONFIGURED');
     expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('does not scan a file until upload finalization evidence has been persisted', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-not-finalized', assetReference: 'ref-not-finalized',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'pending.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 100,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    const scanner = vi.spyOn(malwareScanner, 'scan');
+    await expect(lifecycleUseCase.validateAsset({ assetId: 'asset-not-finalized' }))
+      .rejects.toThrow('ASSET_UPLOAD_FINALIZATION_REQUIRED');
+    expect(scanner).not.toHaveBeenCalled();
+
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-not-finalized' });
+    const record = await repo.findById(new AssetId('asset-not-finalized'));
+    expect(record?.uploadVerification?.signatureVerified).toBe(true);
+    expect(record?.checksum?.hash).toBe(record?.uploadVerification?.checksumSha256);
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-not-finalized' });
+    expect(scanner).toHaveBeenCalledTimes(1);
+  });
+
+  it('detects an overwritten object after finalization without calling the malware scanner', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-changed-before-scan', assetReference: 'ref-changed-before-scan',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'pending.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 100,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-changed-before-scan' });
+    storageGateway.verificationHash = 'f'.repeat(64);
+    const scan = vi.spyOn(malwareScanner, 'scan');
+    await expect(lifecycleUseCase.validateAsset({ assetId: 'asset-changed-before-scan' }))
+      .rejects.toThrow('ASSET_UPLOAD_CHANGED_AFTER_FINALIZATION');
+    expect(scan).not.toHaveBeenCalled();
+    expect((await repo.findById(new AssetId('asset-changed-before-scan')))?.state)
+      .toBe(AssetLifecycleState.QUARANTINED);
   });
 
 });
