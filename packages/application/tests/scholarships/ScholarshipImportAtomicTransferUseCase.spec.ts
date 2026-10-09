@@ -65,6 +65,7 @@ function setup(existing: ScholarshipDto | null = null) {
   };
 
   const importGateway: IScholarshipImportAtomicGateway = {
+    async assertReviewLease() {},
     async listBatches() { return [batch]; },
     async listRecords() { return { data: [record], total: 1, page: 1, pageSize: 50 }; },
     async getRecordById(id) { return id === record.id ? record : null; },

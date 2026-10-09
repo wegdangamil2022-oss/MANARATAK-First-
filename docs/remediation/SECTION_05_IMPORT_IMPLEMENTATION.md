@@ -2,7 +2,13 @@
 
 **Source branch:** `codex/section-01-iam-rbac`
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
-**Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
+**Status:** `IMPLEMENTATION_COMPLETE — VERIFICATION / RUNTIME ACCEPTANCE PENDING` for supported generic paths and existing owner transfers. See [final disposition](evidence/section-05/session-05/README.md). Historical entries below describe their respective commits, not current acceptance. No production release is asserted.
+
+## Batch 20 — final implementation closeout under the no-repeat rule (2026-10-09)
+
+Mandatory owner-command transaction/assignment/record locks now protect Scholarship review/transfer and Course transfer receipt equivalents. Course retries require the matching stored receipt and preserve its timestamp. JSON artifact/source streaming is registered and exposed in Admin. Default Import API v2 uses the canonical platform response formatter, stable errors and correlation; explicit v1 compatibility remains. Central review displays durable assignments. Worker failures get one-year retention; bounded batch history exposes recorded evidence and marks missing historical stage durations unknown.
+
+**No verification commands were run or repeated.** New regression source and the final [finding/activation ledger](evidence/section-05/session-05/README.md) are committed, with `[skip ci]` to avoid automatic repetition. Previous test PASS belongs to `b08ac5a`, not this closeout. Implementation closeout is distinct from final verification and runtime/production acceptance.
 
 ## Batch 18 — Session 3/3: staging recovery, source operations and safe review tools (2026-10-09)
 

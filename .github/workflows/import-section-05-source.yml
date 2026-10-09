@@ -55,6 +55,8 @@ jobs:
           packages/infrastructure/tests/import-foundation/ImportSessionThree.spec.ts
           packages/infrastructure/tests/import-foundation/VerifiedArtifactImport.spec.ts
           packages/application/tests/import-foundation/CsvImportStreamParser.spec.ts
+          packages/application/tests/import-foundation/JsonImportStreamParser.spec.ts
+          packages/infrastructure/tests/import-foundation/ImportOwnerCommand.spec.ts
           packages/application/tests/import-foundation/NdjsonImportStreamParser.spec.ts
           packages/application/tests/import-foundation/ImportParserRegistry.spec.ts
           packages/infrastructure/tests/asset-platform/HttpAssetSecurityGateways.spec.ts

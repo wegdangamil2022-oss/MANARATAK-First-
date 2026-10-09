@@ -164,6 +164,7 @@ export * from './ai-platform';
 export * from './import-foundation/parsers/IImportStreamParser';
 export * from './import-foundation/parsers/ImportParserRegistry';
 export * from './import-foundation/parsers/NdjsonImportStreamParser';
+export * from './import-foundation/parsers/JsonImportStreamParser';
 export * from './import-foundation/parsers/CsvImportStreamParser';
 export * from './import-foundation/contracts/ISourceRegistryGateway';
 export * from './import-foundation/contracts/ISourceConnector';

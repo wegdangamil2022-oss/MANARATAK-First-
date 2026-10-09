@@ -59,7 +59,7 @@ export class ImportSourceControlUseCases {
       executionBlocker, networkTestPerformed: false, testKind: 'CONFIGURATION_ONLY', updatedAt: source.updatedAt };
   }
 
-  async run(sourceId: string, input: { expectedUpdatedAt: string; ownerDomain: string; format: 'csv' | 'ndjson'; reason: string; mappingProfileId?: string; useApprovedFallback?: boolean },
+  async run(sourceId: string, input: { expectedUpdatedAt: string; ownerDomain: string; format: 'csv' | 'ndjson' | 'json'; reason: string; mappingProfileId?: string; useApprovedFallback?: boolean },
     context: AtomicMutationRequestContext) {
     if (!context.actorId?.trim() || !input.reason?.trim() || input.reason.length > 1000) throw new Error('IMPORT_SOURCE_REVIEW_REQUIRED');
     if (!this.runtime) throw new Error('IMPORT_SOURCE_RUN_UNAVAILABLE');

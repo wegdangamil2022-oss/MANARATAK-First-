@@ -97,6 +97,7 @@ class FakeGateway implements CourseImportTransferGateway {
   urlChanges: any[] = [];
   failOnProvenance = false;
 
+  async assertReviewLease(_recordId: string, _actorId: string): Promise<void> {}
   withTransaction(): CourseImportTransferGateway { return this; }
   async getRecordById(id: string) { return id === this.record.id ? { ...this.record } : null; }
   async getBatchById(id: string) { return id === this.batch.id ? { ...this.batch } : null; }

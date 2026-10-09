@@ -58,7 +58,8 @@ export class ScholarshipAdminRouter {
       atomicImportGateway &&
       scholarshipRepository &&
       atomicDomainMutationCoordinator &&
-      typeof atomicImportGateway.withTransaction === 'function'
+      typeof atomicImportGateway.withTransaction === 'function' &&
+      typeof atomicImportGateway.assertReviewLease === 'function'
         ? new ScholarshipImportAtomicTransferUseCase(
             atomicImportGateway as IScholarshipImportAtomicGateway,
             scholarshipRepository,

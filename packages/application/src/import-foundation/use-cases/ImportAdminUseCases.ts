@@ -25,6 +25,7 @@ type ImportRepository = {
   updateRecord?(id: string, updates: Record<string, unknown>, lease?: ImportJobLease): Promise<any>;
   updateBatchStats(id: string, data: Record<string, unknown>, lease?: ImportJobLease): Promise<any>;
   getBatchById?(id: string): Promise<any | null>;
+  getTimeline?(batchId: string): Promise<unknown>;
   listBatches(filters?: Record<string, unknown>): Promise<any[]>;
   listRecords(filters?: Record<string, unknown>): Promise<any>;
   findBySourceDedupKey?(sourceDedupKey: string): Promise<any | null>;
@@ -225,6 +226,11 @@ export class ImportAdminUseCases {
         .slice(0, 8),
       generatedAt: new Date(),
     };
+  }
+
+  async getTimeline(batchId: string): Promise<unknown> {
+    if (!this.importRepository.getTimeline) throw new Error('IMPORT_TIMELINE_UNAVAILABLE');
+    return this.importRepository.getTimeline(batchId);
   }
 
   async getErrorReport(filters?: { dataType?: string; batchId?: string; limit?: number }) {

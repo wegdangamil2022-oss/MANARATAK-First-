@@ -1,3 +1,4 @@
+import { lockImportOwnerCommand } from './ImportReviewLeaseGuard';
 import { PrismaClient } from '@prisma/client';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { createHash } from 'node:crypto';
@@ -16,6 +17,7 @@ export class PrismaImportRepository {
   constructor(
     private readonly prisma?: PrismaClient,
     mode: 'DURABLE' | 'DEVELOPMENT_ONLY' = 'DURABLE',
+    private readonly transactionBound = false,
   ) {
     if (mode === 'DURABLE' && !prisma) {
       throw new Error('Durable import persistence is unavailable: PrismaClient is required.');
@@ -33,7 +35,12 @@ export class PrismaImportRepository {
     if (!context.boundaryId || !transactionClient) {
       throw new Error('IMPORT_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
     }
-    return new PrismaImportRepository(transactionClient);
+    return new PrismaImportRepository(transactionClient, 'DURABLE', true);
+  }
+
+  async assertReviewLease(recordId: string, actorId: string): Promise<void> {
+    if (!this.prisma || !this.transactionBound) throw new Error('IMPORT_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    await lockImportOwnerCommand(this.prisma, recordId, actorId);
   }
 
   async createBatch(data: {
@@ -618,6 +625,24 @@ export class PrismaImportRepository {
     };
   }
 
+  async getTimeline(batchId: string): Promise<unknown> {
+    const batch = await this.getBatchById(batchId);
+    if (!batch) throw new Error('IMPORT_BATCH_NOT_FOUND');
+    const rows = this.prisma ? await this.prisma.importRecord.findMany({
+      where: { batchId, status: { in: ['CHECKPOINT', 'WORKER_FAILURE'] } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 51,
+      select: { id: true, batchId: true, status: true, rawPayload: true, processingNotes: true, createdAt: true },
+    }) : [...this.inMemoryRecords.values()].filter(row => row.batchId === batchId &&
+      ['CHECKPOINT', 'WORKER_FAILURE'].includes(row.status)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 51);
+    const observed = rows.slice(0, 50).map(row => row.status === 'WORKER_FAILURE' ? {
+      kind: 'WORKER_FAILURE', ...this.safeWorkerFailure(row),
+    } : { kind: 'CHECKPOINT', eventId: row.id, createdAt: row.createdAt });
+    return { batchId, currentStatus: batch.batchStatus, createdAt: batch.createdAt,
+      stagingCompletedAt: batch.stagingCompletedAt ?? null, lastObservedAt: batch.updatedAt,
+      stageDurationsKnown: false, // Existing storage has no complete historical stage timing.
+      events: observed, truncated: rows.length > 50, historyComplete: false };
+  }
+
   private safeWorkerFailure(row: {
     id: string; batchId: string; rawPayload: unknown; processingNotes?: string | null;
     createdAt: Date; batch?: { dataType?: string; sourceSystem?: string } | null;
@@ -637,6 +662,7 @@ export class PrismaImportRepository {
         .replace(/(password|token|secret|authorization|api[_-]?key|access[_-]?key)\s*[=:]\s*\S+/gi, '$1=[REDACTED]')
         .slice(0, 1000),
       createdAt: row.createdAt,
+      recommendedAction: payload.retryable === true ? 'REVIEW_CAUSE_THEN_RETRY' : 'REVIEW_EVIDENCE_BEFORE_REPLAY',
     };
   }
 

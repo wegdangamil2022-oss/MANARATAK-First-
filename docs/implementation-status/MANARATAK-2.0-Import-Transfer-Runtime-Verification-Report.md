@@ -4,7 +4,7 @@
 >
 > **Current verified source boundary:** `apps/api/src/presentation/api/router/ImportAdminRouter.ts` deliberately returns **HTTP 422 / PHASE6_DOMAIN_PROMOTION_DISABLED** for `POST /admin/imports/records/:id/transfer`, `POST /admin/imports/records/:id/promote`, `POST /admin/imports/batches/:id/promote` and associated legacy transfer operations. Universal Import Foundation stages and hands off records; every owning domain controls its own semantic review, canonical writes and publication lifecycle. Handoff **does not** mean published.
 >
-> **Current reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05, and `docs/remediation/SECTION_05_IMPORT_IMPLEMENTATION.md`. Follow those references for current source gaps, conservative owner-receipt safety and the post-28 runtime test deferrals. Section 05 remains **IN PROGRESS**, not production closed.
+> **Current reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05, and `docs/remediation/SECTION_05_IMPORT_IMPLEMENTATION.md`. Follow those references for current source gaps, conservative owner-receipt safety and the post-28 runtime test deferrals. See the [current implementation closeout](../remediation/evidence/section-05/session-05/README.md); verification/runtime acceptance remains pending, and production is not closed.
 
 ---
 

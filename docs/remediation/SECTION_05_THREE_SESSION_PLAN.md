@@ -60,3 +60,7 @@ See [Session 3 ledger and every original finding](evidence/section-05/session-03
 ## Additional session after the three-session allocation
 
 The user subsequently authorized implementing the remaining operational areas in one further session. Batch 19 adds actual source, persistence, API and Admin paths; its [disposition/evidence](evidence/section-05/session-04/README.md) supersedes the earlier "not implemented" descriptions for those delivered paths while retaining explicit owner/runtime/history limitations. This is an additional implementation session, not a retroactive assertion that the three-session target succeeded.
+
+## Final user working rule and implementation closeout
+
+The user subsequently required no repeated checks, including after fixing an observed failure. The [final ledger](evidence/section-05/session-05/README.md) records implementation closeout for supported paths and existing owner transfers, without running any verification command. This supersedes earlier current-source statuses for those paths; it does not turn deferred checks into PASS or claim production acceptance. CI is skipped for this closeout commit to honor that rule.

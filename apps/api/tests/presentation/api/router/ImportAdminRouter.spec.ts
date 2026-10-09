@@ -44,6 +44,8 @@ describe('ImportAdminRouter', () => {
   const createApp = (useCases: any) => {
     const app = express();
     app.use(express.json());
+    // Historical assertions exercise the explicitly retained v1 contract.
+    app.use((req, _res, next) => { req.headers['x-import-envelope-version'] ??= '1'; next(); });
     app.use('/admin/imports', ImportAdminRouter.create({
       importAdminUseCases: useCases,
       majorImportStagingUseCase: useCases,
@@ -235,6 +237,8 @@ describe('verified artifact and source authoring boundaries', () => {
       preflight: vi.fn(async () => ({ validRows: 1 })), stage: vi.fn(async () => ({ batchId: 'batch-1', status: 'QUEUED' })) };
     const sources = { save: vi.fn(async () => ({ sourceId: 's', status: 'DISABLED' })) };
     const app = express(); app.use(express.json());
+    // Historical assertions exercise the explicitly retained v1 contract.
+    app.use((req, _res, next) => { req.headers['x-import-envelope-version'] ??= '1'; next(); });
     if (authenticated) app.use((req, _res, next) => { req.authUserId = 'server-admin'; next(); });
     app.use('/admin/imports', ImportAdminRouter.create({ importAdminUseCases: {} as any, majorImportStagingUseCase: {} as any,
       assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any,
@@ -274,6 +278,8 @@ describe('source run and status HTTP contracts', () => {
       changeStatus: vi.fn(async () => ({ sourceId: 's', status: 'DISABLED' })),
       testConfiguration: vi.fn(async () => ({ networkTestPerformed: false })) };
     const app = express(); app.use(express.json());
+    // Historical assertions exercise the explicitly retained v1 contract.
+    app.use((req, _res, next) => { req.headers['x-import-envelope-version'] ??= '1'; next(); });
     app.use((req, _res, next) => { req.authUserId = 'server-admin'; next(); });
     app.use('/admin/imports', ImportAdminRouter.create({ importAdminUseCases: {} as any, majorImportStagingUseCase: {} as any,
       assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any,
@@ -306,6 +312,8 @@ describe('governed import HTTP commands', () => {
       reconcile: vi.fn(async () => ({ ownerInvoked: false })), saveProfile: vi.fn(async () => ({ id: 'profile' })),
       decideDrift: vi.fn(async () => ({})), fallback: vi.fn(async () => ({})), recover: vi.fn(async () => ({})), retention: vi.fn(async () => ({})) };
     const app = express(); app.use(express.json());
+    // Historical assertions exercise the explicitly retained v1 contract.
+    app.use((req, _res, next) => { req.headers['x-import-envelope-version'] ??= '1'; next(); });
     if (authenticated) app.use((req, _res, next) => { req.authUserId = 'server-admin'; next(); });
     app.use('/admin/imports', ImportAdminRouter.create({ importAdminUseCases: {} as any, majorImportStagingUseCase: {} as any,
       assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any,
@@ -338,5 +346,21 @@ describe('governed import HTTP commands', () => {
     const { app, governance } = setup(); governance.claim.mockRejectedValueOnce(new Error('database host private.internal secret-password'));
     const result = await request(app).post('/admin/imports/records/r/claim').send({ expectedVersion: 1, reason });
     expect(result.body.error).toBe('IMPORT_REQUEST_FAILED'); expect(JSON.stringify(result.body)).not.toContain('private.internal');
+  });
+});
+
+describe('canonical import response contract', () => {
+  it('wraps success and errors with bounded correlation and stable codes', async () => {
+    const app = express(); app.use(express.json());
+    app.use('/admin/imports', ImportAdminRouter.create({ importAdminUseCases: { getTimeline: async () => ({ batchId: 'b', historyComplete: false }) } as any,
+      assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any }));
+    const success = await request(app).get('/admin/imports/batches/b/timeline').set('X-Correlation-Id', 'test-1');
+    expect(success.body.data).toEqual({ batchId: 'b', historyComplete: false });
+    expect(success.body.meta.requestId).toBe('test-1');
+    expect(success.headers['x-import-envelope-version']).toBe('2');
+    const error = await request(app).post('/admin/imports/records/r/transfer');
+    expect(error.status).toBe(422);
+    expect(error.body.error.code).toBe('PHASE6_DOMAIN_PROMOTION_DISABLED');
+    expect(error.body.data).toBeNull();
   });
 });

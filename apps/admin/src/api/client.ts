@@ -217,6 +217,7 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   const requestGeneration = sessionGeneration;
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
+  if (/^\/admin\/imports(?:\/|\?|$)/.test(endpoint)) headers.set('X-Import-Envelope-Version', '2');
 
   if (isMutation(options.method) && !headers.has('Idempotency-Key')) {
     headers.set('Idempotency-Key', options.idempotencyKey || createAdminIdempotencyKey());
@@ -283,7 +284,10 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   }
 
   if (response.status === 204) return undefined as T;
-  const payload = await response.json() as T;
+  const wirePayload: unknown = await response.json();
+  const payload = response.headers.get('X-Import-Envelope-Version') === '2' &&
+    wirePayload && typeof wirePayload === 'object' && 'data' in wirePayload
+    ? (wirePayload as { data: T }).data : wirePayload as T;
   if (endpoint.includes('/auth/login')) {
     refreshFailedPermanently = false;
     csrfManager.clearToken();

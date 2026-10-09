@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import { ResponseFormatter } from '../response/ResponseFormatter';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { readFile } from 'fs/promises';
@@ -51,6 +53,28 @@ export class ImportAdminRouter {
     };
   }): Router {
     const router = Router();
+    // Versioned canonical contract; explicit v1 compatibility for existing automation.
+    router.use((req: Request, res: Response, next: NextFunction) => {
+      const formatter = new ResponseFormatter('import-v2');
+      const supplied = req.headers['x-correlation-id'];
+      const requestId = typeof supplied === 'string' && /^[A-Za-z0-9._:-]{1,128}$/.test(supplied) ? supplied : randomUUID();
+      res.setHeader('X-Correlation-Id', requestId);
+      const canonical = req.headers['x-import-envelope-version'] !== '1';
+      if (canonical) res.setHeader('X-Import-Envelope-Version', '2');
+      const send = res.json.bind(res);
+      res.json = ((payload: unknown) => {
+        if (!canonical) return send(payload);
+        if (res.statusCode < 400) return send(formatter.success(payload, requestId));
+        const body = payload && typeof payload === 'object' ? payload as Record<string, unknown> : {};
+        const candidate = body.code ?? body.error;
+        const code = typeof candidate === 'string' && /^(IMPORT|SOURCE|PHASE6|AUTHENTICATED)_[A-Z0-9_]{1,128}$/.test(candidate)
+          ? candidate : body.error === 'Validation Error' ? 'IMPORT_VALIDATION_FAILED' : `IMPORT_HTTP_${res.statusCode}`;
+        const retryable = typeof body.retryable === 'boolean' ? body.retryable : [429, 503].includes(res.statusCode);
+        return send(formatter.error({ code, message: code, traceId: requestId,
+          details: { retryable, ...(body.details ? { validation: body.details } : {}) } }, requestId));
+      }) as Response['json'];
+      next();
+    });
     const {
       importAdminUseCases,
       majorImportStagingUseCase,
@@ -74,7 +98,7 @@ export class ImportAdminRouter {
     const actor = (req: Request) => requireAuthenticatedPrincipal(req);
     const artifactBody = z.object({ assetId: z.string().trim().min(1).max(120),
       ownerDomain: z.nativeEnum(ImportTargetDomain), expectedSha256: z.string().regex(/^[a-f0-9]{64}$/i),
-      format: z.enum(['csv', 'ndjson']), mappingProfileId: z.string().uuid().optional() }).strict();
+      format: z.enum(['csv', 'ndjson', 'json']), mappingProfileId: z.string().uuid().optional() }).strict();
     router.get('/artifacts/capabilities', asyncHandler(async (_req, res) => {
       if (!cradle.importArtifactUseCase) return res.status(503).json({ error: 'IMPORT_ARTIFACT_UNAVAILABLE' });
       return res.json(cradle.importArtifactUseCase.capabilities());
@@ -103,6 +127,8 @@ export class ImportAdminRouter {
       source: 'admin-import-governance', correlationId: req.headers['x-correlation-id'] as string | undefined });
     const reasonField = z.string().trim().min(3).max(1000);
     const governanceId = z.string().trim().min(1).max(180);
+    router.get('/batches/:id/timeline', asyncHandler(async (req, res) =>
+      res.json(await importAdminUseCases.getTimeline(governanceId.parse(req.params.id)))));
     const mappingDefinition = z.object({ fields: z.array(z.object({ target: z.string().min(1).max(120),
       aliases: z.array(z.string().min(1).max(240)).min(1).max(20), type: z.enum(['string','number','boolean']),
       required: z.boolean() }).strict()).min(1).max(100) }).strict();
@@ -190,7 +216,7 @@ export class ImportAdminRouter {
       if (!cradle.importSourceControlUseCases) return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
       const principal = actor(req);
       const input = z.object({ expectedUpdatedAt: z.string().datetime(), ownerDomain: z.nativeEnum(ImportTargetDomain),
-        format: z.enum(['csv', 'ndjson']), reason: z.string().trim().min(3).max(1000),
+        format: z.enum(['csv', 'ndjson', 'json']), reason: z.string().trim().min(3).max(1000),
         mappingProfileId: z.string().uuid().optional(), useApprovedFallback: z.boolean().optional() }).strict().parse(req.body);
       const result = await cradle.importSourceControlUseCases.run(sourceIdentifier.parse(req.params.sourceId), input,
         { actorId: principal.principalId, actorType: principal.actorType, source: 'admin-import-source-run' });
@@ -924,7 +950,7 @@ export class ImportAdminRouter {
     );
 
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-      if (err instanceof Error && /^(IMPORT_GOVERNANCE_UNAVAILABLE|SOURCE_DISTRIBUTED_BUDGET_BUSY)$/.test(err.message))
+      if (err instanceof Error && /^(IMPORT_GOVERNANCE_UNAVAILABLE|IMPORT_TIMELINE_UNAVAILABLE|SOURCE_DISTRIBUTED_BUDGET_BUSY)$/.test(err.message))
         return res.status(503).json({ error: err.message, code: err.message, retryable: true });
       if (err instanceof Error && /^(IMPORT_[A-Z0-9_]*(CONFLICT|EVIDENCE_REQUIRED|REVIEW_REQUIRED|NOT_READY)|IMPORT_RECEIPT_NOT_FOUND)$/.test(err.message))
         return res.status(409).json({ error: err.message, code: err.message, retryable: false });

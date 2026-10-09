@@ -1,6 +1,6 @@
 import { ImportGovernanceUseCases } from '@manaratak/application';
 import { sweepOrphanImportSpools, PrismaImportGovernanceGateway, PrismaImportScreeningReceiptStore, PrismaImportSourceObservationGateway, PrismaSourceAcquisitionLimiter, SignedSourceAccessAuthority } from '@manaratak/infrastructure';
-import { ImportArtifactUseCase, ImportSourceControlUseCases, ImportParserRegistry, CsvImportStreamParser, NdjsonImportStreamParser } from '@manaratak/application';
+import { ImportArtifactUseCase, ImportSourceControlUseCases, ImportParserRegistry, CsvImportStreamParser, NdjsonImportStreamParser, JsonImportStreamParser } from '@manaratak/application';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -594,7 +594,7 @@ export function registerDependencies(
       new AcquireImportSourceUseCase(sourceConnectorRegistry, importRawSnapshotStore, sourceAcquisitionLimiter, undefined, importSourceObservationGateway)).scoped(),
     importParserRegistry: asFunction(() => {
       const registry = new ImportParserRegistry();
-      registry.register(new CsvImportStreamParser()); registry.register(new NdjsonImportStreamParser());
+      registry.register(new CsvImportStreamParser()); registry.register(new NdjsonImportStreamParser()); registry.register(new JsonImportStreamParser());
       return registry;
     }).singleton(),
     verifiedImportArtifactGateway: asFunction(({ assetStorageGateway }) => new VerifiedImportArtifactGateway(assetStorageGateway)).singleton(),

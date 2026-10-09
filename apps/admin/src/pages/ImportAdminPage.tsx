@@ -3275,11 +3275,11 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
   ownerDomain: Exclude<DomainKey, 'ALL'>; isArabic: boolean; onStaged: (batchId: string) => Promise<void>;
 }) {
   const [assetId, setAssetId] = useState('');
-  const [format, setFormat] = useState<'csv' | 'ndjson'>('csv');
+  const [format, setFormat] = useState<'csv' | 'ndjson' | 'json'>('csv');
   const [domain, setDomain] = useState(ownerDomain);
   const [mappingProfileId, setMappingProfileId] = useState('');
   const [proof, setProof] = useState<{ assetId: string; expectedSha256: string; ownerDomain: string; mappingProfileId?: string;
-    format: 'csv' | 'ndjson'; validRows: number; invalidRows: number } | null>(null);
+    format: 'csv' | 'ndjson' | 'json'; validRows: number; invalidRows: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const inFlight = useRef(false);
@@ -3327,8 +3327,8 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
       <AssetPicker value={assetId} purpose="IMPORT_ARTIFACT" label={isArabic ? 'الملف' : 'File'}
         onChange={id => { clear(); setAssetId(id); }} />
       <label>{isArabic ? 'التنسيق' : 'Format'} <select value={format} onChange={event => {
-        clear(); setFormat(event.target.value as 'csv' | 'ndjson');
-      }}><option value="csv">CSV</option><option value="ndjson">NDJSON</option></select></label>
+        clear(); setFormat(event.target.value as 'csv' | 'ndjson' | 'json');
+      }}><option value="csv">CSV</option><option value="ndjson">NDJSON</option><option value="json">JSON</option></select></label>
       <label>{isArabic ? 'القسم المالك' : 'Owner domain'} <select value={domain} onChange={event => {
         clear(); setDomain(event.target.value as Exclude<DomainKey, 'ALL'>);
       }}>{DOMAIN_CONFIG.map(item =>
@@ -3359,7 +3359,7 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [probe, setProbe] = useState<{ executionAllowed: boolean; executionBlocker: string | null } | null>(null);
-  const [format, setFormat] = useState<'csv' | 'ndjson'>('csv');
+  const [format, setFormat] = useState<'csv' | 'ndjson' | 'json'>('csv');
   const [domain, setDomain] = useState('SCHOLARSHIPS');
   const [mappingProfileId, setMappingProfileId] = useState('');
   const [useApprovedFallback, setUseApprovedFallback] = useState(false);
@@ -3435,7 +3435,7 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
         const result = await adminApiClient.request<{ executionAllowed: boolean; executionBlocker: string | null }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}/test`, { method: 'POST', body: '{}' });
         if (mounted.current) setProbe(result);
       })} className="rounded border p-2">{isArabic ? 'فحص الإعدادات دون جلب' : 'Test configuration without fetching'}</button>
-      <label>{isArabic ? 'تنسيق البيانات' : 'Data format'} <select value={format} onChange={event => setFormat(event.target.value as 'csv' | 'ndjson')}><option value="csv">CSV</option><option value="ndjson">NDJSON</option></select></label>
+      <label>{isArabic ? 'تنسيق البيانات' : 'Data format'} <select value={format} onChange={event => setFormat(event.target.value as 'csv' | 'ndjson' | 'json')}><option value="csv">CSV</option><option value="ndjson">NDJSON</option><option value="json">JSON</option></select></label>
       <label>{isArabic ? 'القسم المستلم' : 'Receiving domain'} <select value={domain} onChange={event => setDomain(event.target.value)}>{DOMAIN_CONFIG.map(value => <option key={value.key} value={value.key}>{isArabic ? value.ar : value.en}</option>)}</select></label>
       <MappingProfilePicker sourceId={draft.sourceId} domain={domain} value={mappingProfileId} onChange={setMappingProfileId} isArabic={isArabic} />
       <label><input type="checkbox" checked={useApprovedFallback} onChange={event => { setUseApprovedFallback(event.target.checked); setMappingProfileId(''); }} />{isArabic ? 'استخدام البديل المعتمد لهذا التشغيل' : 'Use approved fallback for this run'}</label>
@@ -3622,6 +3622,7 @@ function ImportGovernancePanel({ records, batches, sources, isArabic }: { record
       })}>{isArabic ? 'تسوية التسليم من الإيصال المحفوظ' : 'Reconcile delivery from saved receipt'}</button>
       <ul>{queue.map(item => <li key={item.recordId}><button type="button" onClick={() => setRecordId(item.recordId)}>{item.recordId}</button> · {item.assigneeId} · {new Date(item.dueAt).toLocaleString()} · {item.state} · <a href={`/imports/${item.ownerDomain.toLowerCase()}?recordId=${encodeURIComponent(item.recordId)}`}>{isArabic ? 'فتح مساحة القسم' : 'Open owner workspace'}</a></li>)}</ul>
       <label>{isArabic ? 'الدفعة' : 'Batch'} <select value={batchId} onChange={event => { setBatchId(event.target.value); setCounts(null); }}><option value="">—</option>{batches.map(item => <option key={item.id} value={item.id}>{item.id}</option>)}</select></label>
+      <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/timeline`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض سجل التشغيل' : 'Show execution history'}</button>
       <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/counters`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض العدادات' : 'Show counters'}</button>
       {(['QUEUE','REJECT'] as const).map(decision => <button key={decision} type="button" disabled={batch?.batchStatus !== 'CREATED' || !batch.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
         await adminApiClient.request(`/admin/imports/batches/${encodeURIComponent(batchId)}/recover`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: batch?.updatedAt, decision, reason }) });

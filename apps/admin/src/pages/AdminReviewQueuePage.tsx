@@ -662,6 +662,8 @@ export function AdminReviewQueuePage() {
           </section>
         )}
 
+        <ImportAssignmentQueue isArabic={isArabic} />
+
         <Link to="/imports#review-assignments" className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold">
           {tr('تعيينات مراجعي الاستيراد وحجز المراجعة', 'Import reviewer assignments and claims')}
         </Link>
@@ -2921,4 +2923,35 @@ function formatRelative(value: string, isArabic: boolean): string {
   if (hours < 24) return isArabic ? `منذ ${hours} ساعة` : `${hours}h ago`;
   const days = Math.round(hours / 24);
   return isArabic ? `منذ ${days} يوم` : `${days}d ago`;
+}
+
+
+type ImportAssignmentSummary = { recordId: string; ownerDomain: string; assigneeId: string; dueAt: string; state: string; claimUntil?: string | null };
+function ImportAssignmentQueue({ isArabic }: { isArabic: boolean }) {
+  const [page, setPage] = useState(1);
+  const [result, setResult] = useState<{ data: ImportAssignmentSummary[]; total: number } | null>(null);
+  const [error, setError] = useState(false);
+  const [refresh, setRefresh] = useState(0);
+  useEffect(() => {
+    const abort = new AbortController();
+    setResult(null); setError(false);
+    adminApiClient.request<{ data: ImportAssignmentSummary[]; total: number }>(`/admin/imports/review-queue?page=${page}`, { signal: abort.signal })
+      .then(value => { if (!abort.signal.aborted) setResult(value); })
+      .catch(() => { if (!abort.signal.aborted) setError(true); });
+    return () => abort.abort();
+  }, [page, refresh]);
+  return <section className="rounded-xl border border-slate-200 bg-white p-4" aria-label={isArabic ? 'تعيينات مراجعة الاستيراد' : 'Import review assignments'}>
+    <div className="flex items-center justify-between gap-3"><h2 className="font-bold">{isArabic ? 'تعيينات مراجعة الاستيراد' : 'Import review assignments'}</h2>
+      <button type="button" onClick={() => setRefresh(value => value + 1)}>{isArabic ? 'تحديث' : 'Refresh'}</button></div>
+    {error ? <p role="alert">{isArabic ? 'تعذر تحميل التعيينات أو لا تتوفر الصلاحية.' : 'Assignments unavailable or permission missing.'}</p> : !result ?
+      <p role="status">{isArabic ? 'جار التحميل…' : 'Loading…'}</p> : <>
+      {!result.data.length && <p>{isArabic ? 'لا توجد تعيينات في هذه الصفحة.' : 'No assignments on this page.'}</p>}
+      <ul className="space-y-2">{result.data.map(item => <li key={item.recordId} className="border-b py-2">
+        <Link to="/imports#review-assignments">{item.ownerDomain} · {item.recordId}</Link>
+        <p>{item.assigneeId} · {item.state} · {new Date(item.dueAt).toLocaleString(isArabic ? 'ar' : 'en')}</p>
+      </li>)}</ul>
+      <div className="flex gap-3"><button type="button" disabled={page === 1} onClick={() => setPage(value => value - 1)}>{isArabic ? 'السابق' : 'Previous'}</button>
+        <span>{page}</span><button type="button" disabled={page >= 1000 || page * 50 >= result.total} onClick={() => setPage(value => value + 1)}>{isArabic ? 'التالي' : 'Next'}</button></div>
+    </>}
+  </section>;
 }

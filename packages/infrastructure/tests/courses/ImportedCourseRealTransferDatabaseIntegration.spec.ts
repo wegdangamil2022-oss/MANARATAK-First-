@@ -31,7 +31,7 @@ const headers = ['No.', 'Platform / University', 'Course Name', 'Direct Course U
 
 class FailingProvenanceGateway extends PrismaCourseImportTransferGateway {
   public override withTransaction(context: AtomicPersistenceContext): FailingProvenanceGateway {
-    return new FailingProvenanceGateway((context as AtomicPersistenceContext & { transactionClient: PrismaClient }).transactionClient);
+    return new FailingProvenanceGateway((context as AtomicPersistenceContext & { transactionClient: PrismaClient }).transactionClient, undefined, true);
   }
   public override async writeFieldProvenance(): Promise<void> {
     throw new Error('WPIC10R1_TEST_PROVENANCE_FAILURE');

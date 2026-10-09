@@ -6,7 +6,7 @@ import { ImportParserRegistry } from '../parsers/ImportParserRegistry';
 import { ImportParseError, ParsedImportRow } from '@manaratak/domain';
 
 export interface ImportArtifactInput {
-  assetId: string; ownerDomain: string; expectedSha256: string; format: 'csv' | 'ndjson'; mappingProfileId?: string;
+  assetId: string; ownerDomain: string; expectedSha256: string; format: 'csv' | 'ndjson' | 'json'; mappingProfileId?: string;
 }
 export class ImportArtifactUseCase {
   constructor(private readonly assets: AssetReferencePolicy, private readonly bytes: IVerifiedImportArtifactGateway,

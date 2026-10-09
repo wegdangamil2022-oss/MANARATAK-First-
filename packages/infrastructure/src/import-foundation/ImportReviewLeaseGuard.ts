@@ -8,3 +8,10 @@ export async function assertImportReviewLease(tx: Prisma.TransactionClient, reco
   if (assignment.state !== 'CLAIMED' || assignment.assigneeId !== actorId || assignment.claimedBy !== actorId ||
       !assignment.claimUntil || assignment.claimUntil <= new Date()) throw new Error('IMPORT_REVIEW_LEASE_REQUIRED');
 }
+
+/** Serialize the owner receipt and canonical side effect before reading either. */
+export async function lockImportOwnerCommand(tx: Prisma.TransactionClient, recordId: string, actorId: string) {
+  if (!actorId?.trim()) throw new Error('IMPORT_ACTOR_REQUIRED');
+  await assertImportReviewLease(tx, recordId, actorId);
+  await tx.$queryRaw`SELECT "id" FROM "ImportRecord" WHERE "id" = ${recordId} FOR UPDATE`;
+}

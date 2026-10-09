@@ -305,6 +305,8 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
         data: {
           batchId: command.lease.batchId,
           status: 'WORKER_FAILURE',
+          retentionExpiresAt: new Date(now.getTime() + 365 * 86400_000),
+          retentionState: 'IMPORT_WORKER_FAILURE',
           rawPayload: {
             stage: 'BATCH_WORKER',
             errorCode: command.errorCode && /^[A-Z][A-Z0-9_]{0,127}$/.test(command.errorCode)
