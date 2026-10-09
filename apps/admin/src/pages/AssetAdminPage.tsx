@@ -90,7 +90,17 @@ export function AssetAdminPage() {
     createdTo: '',
   });
 
-  const load = async (reset = true) => {
+  const [appliedFilters, setAppliedFilters] = useState(filters);
+  const appliedRef = useRef(filters);
+  const requestGeneration = useRef(0);
+  const inFlightPage = useRef(false);
+  const pendingFilters = (Object.keys(filters) as Array<keyof typeof filters>)
+    .some((key) => filters[key] !== appliedFilters[key]);
+
+  const load = async (reset = true, queryFilters = appliedRef.current) => {
+    if (!reset && (inFlightPage.current || !cursor || !hasMore || pendingFilters)) return;
+    const generation = ++requestGeneration.current;
+    if (!reset) inFlightPage.current = true;
     setLoading(true);
     try {
       setError(null);
