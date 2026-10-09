@@ -843,8 +843,24 @@ export class PrismaImportRepository {
       failedRecords?: number;
       batchStatus?: string;
     },
+    lease?: { batchId: string; workerId: string; attempt: number; claimUntil: Date },
   ): Promise<any> {
     if (this.prisma) {
+      if (lease) {
+        if (lease.batchId !== batchId || stats.batchStatus !== undefined)
+          throw new Error('IMPORT_WORKER_LEASE_LOST');
+        const now = new Date();
+        const result = await this.prisma.importBatch.updateMany({
+          where: {
+            id: batchId, batchStatus: 'RUNNING', claimedBy: lease.workerId,
+            attemptCount: lease.attempt,
+            claimUntil: { equals: lease.claimUntil, gte: now },
+          },
+          data: { processedRecords: stats.processedRecords, failedRecords: stats.failedRecords },
+        });
+        if (result.count !== 1) throw new Error('IMPORT_WORKER_LEASE_LOST');
+        return result;
+      }
       const batch = await this.prisma.importBatch.update({
         where: { id: batchId },
         data: {
