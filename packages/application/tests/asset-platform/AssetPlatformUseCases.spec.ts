@@ -169,7 +169,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     );
   });
 
-  it('upload locator request creates quarantined asset record', async () => {
+  it('upload locator request stays INITIATED until authoritative finalization', async () => {
     const input: RequestAssetUploadLocatorDto = {
       assetId: 'asset-001',
       assetReference: 'ref-001',
@@ -186,11 +186,11 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
 
     expect(result.assetId).toBe('asset-001');
     expect(result.storageZone).toBe(AssetStorageZone.QUARANTINE);
-    expect(result.lifecycleState).toBe(AssetLifecycleState.QUARANTINED);
+    expect(result.lifecycleState).toBe(AssetLifecycleState.INITIATED);
 
     const saved = await repo.findById(new AssetId('asset-001'));
     expect(saved).not.toBeNull();
-    expect(saved?.state).toBe(AssetLifecycleState.QUARANTINED);
+    expect(saved?.state).toBe(AssetLifecycleState.INITIATED);
   });
 
   it('malware failure prevents activation', async () => {
@@ -366,7 +366,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
       .rejects.toThrow('ASSET_UPLOAD_FINALIZATION_REQUIRED');
     expect(scan).not.toHaveBeenCalled();
     expect((await repo.findById(new AssetId('asset-unverified')))?.state)
-      .toBe(AssetLifecycleState.QUARANTINED);
+      .toBe(AssetLifecycleState.INITIATED);
   });
 
   it('re-verifies and rescans sanitized output, using its updated locator and actual byte size', async () => {
@@ -486,6 +486,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
 
     await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-not-finalized' });
     const record = await repo.findById(new AssetId('asset-not-finalized'));
+    expect(record?.state).toBe(AssetLifecycleState.QUARANTINED);
     expect(record?.uploadVerification?.signatureVerified).toBe(true);
     expect(record?.checksum?.hash).toBe(record?.uploadVerification?.checksumSha256);
     await lifecycleUseCase.validateAsset({ assetId: 'asset-not-finalized' });

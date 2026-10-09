@@ -81,18 +81,22 @@ export class AssetRecord {
     if (locator.storageZone !== AssetStorageZone.QUARANTINE) {
       throw new Error('Storage locator must be in QUARANTINE zone when quarantining');
     }
+    if ((this.props.state !== AssetLifecycleState.INITIATED &&
+         this.props.state !== AssetLifecycleState.QUARANTINED) ||
+        this.props.uploadVerification || this.props.malwareScan ||
+        this.props.sanitization || this.props.checksum) {
+      throw new Error('ASSET_UPLOAD_LOCATOR_ASSIGNMENT_INVALID_STATE');
+    }
     this.props.locator = locator;
-    this.props.malwareScan = undefined;
-    this.props.uploadVerification = undefined;
-    this.props.sanitization = undefined;
-    this.props.checksum = undefined;
-    this.props.state = AssetLifecycleState.QUARANTINED;
-    this.events.push(new AssetQuarantinedEvent(this.props.id));
+    // Allocating a quarantine locator is not evidence that an upload has completed.
+    this.props.state = AssetLifecycleState.INITIATED;
   }
 
   public confirmUploadedObject(evidence: AssetUploadEvidence): void {
-    if (this.props.state !== AssetLifecycleState.QUARANTINED ||
-      this.props.locator.storageZone !== AssetStorageZone.QUARANTINE) {
+    // Accept legacy unverified QUARANTINED records, but new uploads stay INITIATED until proof.
+    if ((this.props.state !== AssetLifecycleState.INITIATED &&
+         this.props.state !== AssetLifecycleState.QUARANTINED) ||
+        this.props.locator.storageZone !== AssetStorageZone.QUARANTINE) {
       throw new Error('ASSET_UPLOAD_VERIFICATION_INVALID_STATE');
     }
     if (evidence.locator !== this.props.locator.value ||
@@ -103,13 +107,16 @@ export class AssetRecord {
       !Number.isFinite(Date.parse(evidence.verifiedAt))) {
       throw new Error('ASSET_UPLOAD_VERIFICATION_FAILED');
     }
+    const firstConfirmed = this.props.state === AssetLifecycleState.INITIATED;
     this.props.uploadVerification = { ...evidence };
     this.props.checksum = new AssetChecksum('sha256', evidence.checksumSha256.toLowerCase());
+    this.props.state = AssetLifecycleState.QUARANTINED;
+    if (firstConfirmed) this.events.push(new AssetQuarantinedEvent(this.props.id));
   }
 
   public startValidation(): void {
-    if (this.props.state !== AssetLifecycleState.QUARANTINED && this.props.state !== AssetLifecycleState.INITIATED) {
-      throw new Error('Can only start validation from INITIATED or QUARANTINED state');
+    if (this.props.state !== AssetLifecycleState.QUARANTINED) {
+      throw new Error('Can only start validation from QUARANTINED state');
     }
     if (!this.props.uploadVerification || this.props.uploadVerification.locator !== this.props.locator.value ||
       this.props.uploadVerification.signatureVerified !== true ||

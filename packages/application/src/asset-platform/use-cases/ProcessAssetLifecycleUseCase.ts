@@ -44,7 +44,7 @@ export class ProcessAssetLifecycleUseCase {
     if (!this.storageGateway.verifyUploadedObject) {
       throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
     }
-    // Domain rejects repeat finalization outside QUARANTINED and mismatched provider observations.
+    // Domain accepts INITIATED (and legacy unverified QUARANTINED) only after provider proof.
     const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
       expectedByteSize: record.metadata.byteSize,
       declaredMimeType: record.metadata.mimeType,

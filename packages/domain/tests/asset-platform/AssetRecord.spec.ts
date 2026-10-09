@@ -68,7 +68,8 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
 
       const quarantineLocator = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'quarantine-bucket', 'quarantine/ast-001.pdf');
       record.assignQuarantineLocator(quarantineLocator);
-      expect(record.state).toBe(AssetLifecycleState.QUARANTINED);
+      expect(record.state).toBe(AssetLifecycleState.INITIATED);
+      expect(record.getUncommittedEvents()).not.toContainEqual(expect.any(AssetQuarantinedEvent));
       expect(record.locator.value).toBe('quarantine://quarantine-bucket/quarantine/ast-001.pdf');
 
       record.confirmUploadedObject({
@@ -79,6 +80,7 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
         verifiedAt: new Date().toISOString(),
         signatureVerified: true,
       });
+      expect(record.state).toBe(AssetLifecycleState.QUARANTINED);
       record.startValidation();
       expect(record.state).toBe(AssetLifecycleState.VALIDATING);
       record.passMalwareScan();
@@ -278,6 +280,33 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       state: AssetLifecycleState.ACTIVE,
     });
     expect(() => record.assertCanDeliver()).toThrow('ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED');
+  });
+
+  it('does not emit quarantine events or scan until actual upload bytes are confirmed', () => {
+    const asset = new AssetRecord({
+      id: new AssetId('asset-init-event'),
+      reference: new AssetReference('ref-init-event'),
+      locator: new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'uploads/pending.pdf'),
+      metadata: new AssetMetadata('pending.pdf', 'application/pdf', 'pdf', 100),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      owner: new AssetOwnerReference('owner', 'STUDENT'),
+      classification: AssetSecurityClassification.INTERNAL,
+      state: AssetLifecycleState.INITIATED,
+    });
+    const pendingLocator = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'uploads/pending.pdf');
+    asset.assignQuarantineLocator(pendingLocator);
+    expect(asset.state).toBe(AssetLifecycleState.INITIATED);
+    expect(asset.getUncommittedEvents()).toHaveLength(0);
+    expect(() => asset.startValidation()).toThrow('Can only start validation from QUARANTINED state');
+    asset.confirmUploadedObject({
+      locator: pendingLocator.value, byteSize: 100, verifiedMimeType: 'application/pdf',
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(),
+      signatureVerified: true,
+    });
+    expect(asset.state).toBe(AssetLifecycleState.QUARANTINED);
+    expect(asset.getUncommittedEvents().filter((evt) => evt instanceof AssetQuarantinedEvent)).toHaveLength(1);
+    expect(() => asset.assignQuarantineLocator(pendingLocator))
+      .toThrow('ASSET_UPLOAD_LOCATOR_ASSIGNMENT_INVALID_STATE');
   });
 
 });

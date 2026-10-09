@@ -226,3 +226,11 @@ npm run ci:source:contracts
 - Extended unit assertions for strictly increasing revision and real disposable PostgreSQL regression with two concurrent writes of identical lifecycle state, requiring exactly one success.
 - No schema migration or production data updates. Time-based versioning still requires benchmarking under real DB clocks/precision and heavier concurrent loads; a dedicated integer revision would be preferable during an approved migration.
 - CI outcome for this commit pending.
+
+## Patch B — Honest pending-upload lifecycle state
+
+- Allocating a QUARANTINE locator/grant now stores `lifecycleState=INITIATED`, not `QUARANTINED`. The latter is reserved for provider-verified, persisted uploaded bytes after explicit `finalize-upload`.
+- Moved `AssetQuarantinedEvent` to the first successful finalization, so listeners are not notified that an object has arrived merely when a locator was allocated.
+- `startValidation` now requires `QUARANTINED`; unverified `INITIATED` objects cannot scan or activate, and reassigning an already verified locator is forbidden.
+- Legacy pre-change unverified `QUARANTINED` rows may still finalize after provider verification, allowing non-disruptive migration without changing Prisma schema.
+- Updated domain/application regressions for INITIATED-before-finalize and emitted event-after-proof; no production DB migration or data updates. CI pending.
