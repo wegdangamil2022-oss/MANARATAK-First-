@@ -52,7 +52,7 @@ describe('ReferenceDataPublicRouter locale contract', () => {
 
   it('lists published universities through canonical country identity', async () => {
     const repository = createRepository();
-    repository.getCountry.mockResolvedValue({ id: 'country-ye', iso2Code: 'YE' });
+    repository.getCountry.mockResolvedValue({ id: 'country-ye', iso2Code: 'YE', lifecycleState: 'ACTIVE', isActive: true });
     const universityRepository = { listPublished: vi.fn().mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 }) };
     const res = await request(createApp(repository, universityRepository)).get('/reference-data/countries/ye/universities');
     expect(res.status).toBe(200);
