@@ -6,7 +6,8 @@ import {
   SettingDefinition,
   NamespacedKey,
   ValueType,
-  SettingDefinitionPageQuery
+  SettingDefinitionPageQuery,
+  SettingValidationRules
 } from '@manaratak/domain';
 
 export interface SettingDefinitionRecordRow {
@@ -15,6 +16,7 @@ export interface SettingDefinitionRecordRow {
   valueType: string;
   description: string | null;
   defaultValue: unknown | null;
+  validationRules?: unknown | null;
   isFeatureFlag: boolean;
   isDeprecated: boolean;
   isSecret: boolean;
@@ -57,6 +59,7 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
       valueType: row.valueType as ValueType,
       description: row.description || undefined,
       defaultValue: row.defaultValue,
+      validationRules: row.validationRules == null ? undefined : row.validationRules as SettingValidationRules,
       isFeatureFlag: row.isFeatureFlag,
       isDeprecated: row.isDeprecated,
       isSecret: row.isSecret
@@ -105,6 +108,7 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
       valueType: definition.valueType,
       description: definition.description || null,
       defaultValue: definition.defaultValue === undefined || definition.defaultValue === null ? Prisma.DbNull : definition.defaultValue as Prisma.InputJsonValue,
+      validationRules: definition.validationRules === undefined ? Prisma.DbNull : definition.validationRules as Prisma.InputJsonValue,
       isFeatureFlag: definition.isFeatureFlag,
       isDeprecated: definition.isDeprecated,
       isSecret: definition.isSecret
