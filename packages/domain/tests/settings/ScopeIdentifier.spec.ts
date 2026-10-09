@@ -35,4 +35,8 @@ describe('ScopeIdentifier', () => {
   it('requires scopeId for non-GLOBAL scopes', () => {
     expect(() => new ScopeIdentifier('TENANT')).toThrow('ScopeId is required for scope level TENANT');
   });
+  it.each(['some-id', 'GLOBAL', '', '   '])('rejects an explicit GLOBAL scopeId %j inside the Domain', scopeId => {
+    expect(() => new ScopeIdentifier('GLOBAL', scopeId)).toThrow('SETTINGS_GLOBAL_SCOPE_ID_FORBIDDEN');
+  });
+
 });

@@ -33,7 +33,7 @@ export class NumberValue extends SettingValueData<number> {
 
   constructor(value: number) {
     super();
-    if (typeof value !== 'number' || Number.isNaN(value)) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
       throw new Error('Value must be a valid number for NumberValue.');
     }
     this.value = value;

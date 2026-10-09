@@ -146,4 +146,17 @@ describe('ManageSettingsUseCase', () => {
     expect(assignment?.getCurrentVersion().id).toBe('v3');
     expect(assignment?.getCurrentVersion().value.getValue()).toBe('dark');
   });
+  it('rejects feature flags without an explicit default before persisting anything', async () => {
+    await expect(useCase.createDefinition({ id: 'flag', key: 'feature.safe', valueType: ValueType.Boolean,
+      isFeatureFlag: true })).rejects.toThrow('SETTINGS_FEATURE_FLAG_BOOLEAN_DEFAULT_REQUIRED');
+    expect(await defRepo.findByKey(new NamespacedKey('feature.safe'))).toBeNull();
+  });
+  it('rejects a hidden GLOBAL identifier before writing a version', async () => {
+    await useCase.createDefinition({ id: 'def', key: 'feature.safe', valueType: ValueType.Boolean, defaultValue: false });
+    await expect(useCase.assignValue({ assignmentId: 'hidden', key: 'feature.safe', level: 'GLOBAL',
+      scopeId: 'hidden-id', versionId: 'v1', value: true, type: ValueType.Boolean }))
+      .rejects.toThrow('SETTINGS_GLOBAL_SCOPE_ID_FORBIDDEN');
+    expect(await assignRepo.findByScopeAndKey(new ScopeIdentifier('GLOBAL'), new NamespacedKey('feature.safe'))).toBeNull();
+  });
+
 });

@@ -45,7 +45,8 @@ describe('SettingsAdminRouter', () => {
 
     expect(res.status).toBe(201);
     expect(mockManageSettingsUseCase.createDefinition).toHaveBeenCalledWith(
-      expect.objectContaining(payload)
+      expect.objectContaining(payload),
+      expect.objectContaining({ actorId: 'admin-settings-1', source: 'admin-settings-api' })
     );
   });
 
@@ -82,7 +83,8 @@ describe('SettingsAdminRouter', () => {
 
     expect(res.status).toBe(201);
     expect(mockManageSettingsUseCase.assignValue).toHaveBeenCalledWith(
-      expect.objectContaining({ ...payload, authorId: 'admin-settings-1' })
+      expect.objectContaining({ ...payload, authorId: 'admin-settings-1' }),
+      expect.objectContaining({ actorId: 'admin-settings-1', source: 'admin-settings-api' })
     );
   });
 
@@ -99,7 +101,15 @@ describe('SettingsAdminRouter', () => {
 
     expect(res.status).toBe(200);
     expect(mockManageSettingsUseCase.rollbackValue).toHaveBeenCalledWith(
-      expect.objectContaining({ ...payload, authorId: 'admin-settings-1' })
+      expect.objectContaining({ ...payload, authorId: 'admin-settings-1' }),
+      expect.objectContaining({ actorId: 'admin-settings-1', source: 'admin-settings-api' })
     );
   });
+  it.each([undefined, null, 'false', 0])('rejects a flag without a Boolean default %j before the use case', async defaultValue => {
+    const res = await request(app).post('/api/v1/admin/settings/definitions').send({ id: 'flag', key: 'feature.safe',
+      valueType: 'Boolean', isFeatureFlag: true, defaultValue });
+    expect(res.status).toBe(400);
+    expect(mockManageSettingsUseCase.createDefinition).not.toHaveBeenCalled();
+  });
+
 });

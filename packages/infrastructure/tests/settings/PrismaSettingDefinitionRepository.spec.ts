@@ -8,6 +8,8 @@ describe('PrismaSettingDefinitionRepository', () => {
 
   beforeEach(() => {
     mockPrisma = {
+      $queryRaw: vi.fn(async () => []),
+      $transaction: vi.fn(async (callback: (tx: any) => Promise<unknown>) => callback(mockPrisma)),
       settingDefinitionRecord: {
         findUnique: vi.fn(),
         findMany: vi.fn(),
@@ -46,6 +48,7 @@ describe('PrismaSettingDefinitionRepository', () => {
 
     if (definition) {
       await repository.save(definition);
+      expect(mockPrisma.$queryRaw).toHaveBeenCalled();
       expect(mockPrisma.settingDefinitionRecord.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { key: 'test.key' },

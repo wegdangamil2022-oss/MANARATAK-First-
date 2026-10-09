@@ -44,7 +44,11 @@ export class SettingsAdminRouter {
         isFeatureFlag: z.boolean().optional(),
         isSecret: z.boolean().optional(),
       })
-      .strict();
+      .strict().superRefine((value, ctx) => {
+        if (value.isFeatureFlag && (value.valueType !== ValueType.Boolean || value.isSecret || typeof value.defaultValue !== 'boolean')) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['defaultValue'], message: 'Feature flags require an explicit non-secret Boolean default.' });
+        }
+      });
 
     const assignValueSchema = z
       .object({

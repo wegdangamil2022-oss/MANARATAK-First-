@@ -9,7 +9,7 @@ describe('SettingsRuntimeRouter', () => {
 
   beforeEach(() => {
     mockResolveConfigurationUseCase = {
-      resolveSetting: vi.fn()
+      resolveSetting: vi.fn(), inspectSetting: vi.fn()
     };
 
     app = express();
@@ -46,8 +46,30 @@ describe('SettingsRuntimeRouter', () => {
     const res = await request(app)
       .get('/api/v1/runtime/settings/resolve/test.key');
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(503);
     expect(res.body.error.code).toBe('RESOLUTION_ERROR');
-    expect(res.body.error.message).toBe('Resolution failed');
+    expect(res.body.error.message).toBe('Settings resolution is unavailable.');
   });
+  it('returns typed winning source metadata with private no-store caching', async () => {
+    const data = { status: 'RESOLVED', key: 'feature.test', value: false, valueType: 'Boolean',
+      sourceScope: 'GLOBAL', versionId: 'v1', usedDefault: false, chain: [] };
+    mockResolveConfigurationUseCase.inspectSetting.mockResolvedValue(data);
+    const res = await request(app).get('/api/v1/runtime/settings/inspect/feature.test?domainId=courses');
+    expect(res.status).toBe(200); expect(res.body.data).toEqual(data);
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect(mockResolveConfigurationUseCase.inspectSetting).toHaveBeenCalledWith('feature.test', { domainId: 'courses' });
+  });
+  it('rejects unknown/unbounded diagnostic contexts before reading repositories', async () => {
+    for (const query of [{ allowSecrets: 'true' }, { domainId: 'a'.repeat(121) }, { identityId: ' ' }]) {
+      const res = await request(app).get('/api/v1/runtime/settings/inspect/feature.test').query(query);
+      expect(res.status).toBe(400);
+    }
+    expect(mockResolveConfigurationUseCase.inspectSetting).not.toHaveBeenCalled();
+  });
+  it('does not leak raw repository errors from the inspector', async () => {
+    mockResolveConfigurationUseCase.inspectSetting.mockRejectedValue(new Error('SELECT secret FROM host=private-db'));
+    const res = await request(app).get('/api/v1/runtime/settings/inspect/feature.test');
+    expect(res.status).toBe(503); expect(JSON.stringify(res.body)).not.toContain('private-db');
+  });
+
 });

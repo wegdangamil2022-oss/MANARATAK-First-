@@ -1,0 +1,7 @@
+SOURCE_ARCH_GUARD_NAME_BASED_RELATION=3
+SOURCE_ARCH_GUARD_OPERATIONAL_PRISMA_UNCLASSIFIED=1
+SOURCE_ARCHITECTURE_GUARD=FAIL 4
+FAIL name-based-relation apps/admin/src/pages/ScholarshipCatalogDetailPage.tsx:346 :: Relationship resolution must use canonical IDs, never equality on display name/label/title.
+FAIL name-based-relation apps/admin/src/pages/ScholarshipListPage.tsx:474 :: Relationship resolution must use canonical IDs, never equality on display name/label/title.
+FAIL name-based-relation apps/web/src/features/public-template/components/CoursesSearchPage.tsx:110 :: Relationship resolution must use canonical IDs, never equality on display name/label/title.
+FAIL operational-prisma-unclassified scripts/ci/install-eap-reference-guards.mjs:3 :: Direct Prisma use in scripts/** must be explicitly classified in the operational tooling policy.

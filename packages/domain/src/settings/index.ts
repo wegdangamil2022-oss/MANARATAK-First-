@@ -16,3 +16,4 @@ export * from './services/ConfigurationResolutionService';
 export * from './repositories/ISettingDefinitionRepository';
 export * from './repositories/ISettingAssignmentRepository';
 
+export * from './services/IResolvedSettingsReader';

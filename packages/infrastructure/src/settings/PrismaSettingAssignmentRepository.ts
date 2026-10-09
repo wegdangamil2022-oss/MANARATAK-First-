@@ -104,10 +104,14 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
     const [currentVersion] = versions.splice(currentIndex, 1);
     versions.push(currentVersion);
 
+    // GLOBAL is a storage uniqueness sentinel, never a Domain scope identifier.
+    if (row.scopeLevel === 'GLOBAL' && row.scopeId !== 'GLOBAL') {
+      throw new Error('SETTINGS_GLOBAL_STORAGE_SCOPE_INVALID');
+    }
     return new SettingAssignment({
       id: row.id,
       key: new NamespacedKey(row.key),
-      scope: new ScopeIdentifier(row.scopeLevel, row.scopeId || undefined),
+      scope: new ScopeIdentifier(row.scopeLevel, row.scopeLevel === 'GLOBAL' ? undefined : row.scopeId || undefined),
       versions
     }, false);
   }

@@ -1,0 +1,52 @@
+name: Settings Section 04 Source Verification
+on:
+  push:
+    branches:
+      - codex/section-01-iam-rbac
+    paths:
+      - 'packages/domain/src/settings/**'
+      - 'packages/domain/tests/settings/**'
+      - 'packages/application/src/settings/**'
+      - 'packages/application/tests/settings/**'
+      - 'packages/application/tests/audit/SettingsAtomicAuditBoundary.spec.ts'
+      - 'packages/infrastructure/src/settings/**'
+      - 'packages/infrastructure/tests/settings/**'
+      - 'apps/api/src/presentation/api/router/Settings*'
+      - 'apps/api/tests/presentation/api/router/Settings*'
+      - 'apps/admin/src/pages/SettingsAdminPage.tsx'
+      - 'apps/admin/src/components/SettingsResolutionInspector.tsx'
+      - 'tests/remediation/section04-settings-authority.test.mjs'
+      - 'scripts/verify-academic-settings-source-closure.mjs'
+      - '.github/workflows/settings-section-04-source.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  settings-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Source quality
+        run: npm run quality:source
+      - name: Settings invariants, effective resolution, persistence and API contracts
+        run: >-
+          npx --no-install vitest run --config vitest.config.ts
+          packages/domain/tests/settings
+          packages/application/tests/settings
+          packages/infrastructure/tests/settings
+          packages/application/tests/audit/SettingsAtomicAuditBoundary.spec.ts
+          apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts
+          apps/api/tests/presentation/api/router/SettingsRuntimeRouter.spec.ts
+          apps/api/tests/infrastructure/di/W1Composition.spec.ts
+      - name: Authority and permission guards
+        run: node --test tests/remediation/section04-settings-authority.test.mjs
+      - name: Existing audit coverage
+        run: npm run audit:coverage:verify

@@ -8,6 +8,7 @@ describe('PrismaSettingAssignmentRepository', () => {
 
   beforeEach(() => {
     mockPrisma = {
+      $queryRaw: vi.fn(async () => []),
       $transaction: vi.fn(async (callback: (tx: any) => Promise<unknown>) => callback(mockPrisma)),
       settingAssignmentRecord: {
         findUnique: vi.fn(),
@@ -71,6 +72,7 @@ describe('PrismaSettingAssignmentRepository', () => {
 
     if (assignment) {
       await repository.save(assignment);
+      expect(mockPrisma.$queryRaw).toHaveBeenCalled();
       expect(mockPrisma.settingAssignmentRecord.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { key_scopeLevel_scopeId: { key: 'test.key', scopeLevel: 'TENANT', scopeId: 'tenant-123' } },
@@ -199,4 +201,16 @@ describe('PrismaSettingAssignmentRepository', () => {
     expect(assignments).toHaveLength(1);
     expect(assignments[0].id).toBe('assign-1');
   });
+  it('normalizes only the actual GLOBAL storage sentinel, rejecting hidden global identifiers', async () => {
+    const row = { id: 'global', key: 'test.key', scopeLevel: 'GLOBAL', scopeId: 'GLOBAL', currentVersionId: 'v1',
+      versions: [{ id: 'v1', valueType: 'String', value: 'value', createdAt: new Date() }] };
+    mockPrisma.settingAssignmentRecord.findUnique.mockResolvedValue(row);
+    const value = await repository.findByScopeAndKey(new ScopeIdentifier('GLOBAL'), new NamespacedKey('test.key'));
+    expect(value?.scope.getScopeId()).toBeUndefined();
+    expect(value?.getCurrentVersion().id).toBe('v1');
+    mockPrisma.settingAssignmentRecord.findUnique.mockResolvedValue({ ...row, scopeId: 'hidden-id' });
+    await expect(repository.findByScopeAndKey(new ScopeIdentifier('GLOBAL'), new NamespacedKey('test.key')))
+      .rejects.toThrow('SETTINGS_GLOBAL_STORAGE_SCOPE_INVALID');
+  });
+
 });

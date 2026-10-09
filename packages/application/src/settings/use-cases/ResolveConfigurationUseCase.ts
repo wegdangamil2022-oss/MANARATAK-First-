@@ -1,14 +1,14 @@
-import { ConfigurationResolutionContext, ConfigurationResolutionService, NamespacedKey, ResolutionOptions } from '@manaratak/domain';
+import { ConfigurationResolutionContext, IResolvedSettingsReader, ResolvedSetting, ResolutionOptions } from '@manaratak/domain';
 
 export class ResolveConfigurationUseCase {
-  constructor(private resolutionService: ConfigurationResolutionService) {}
+  constructor(private readonly resolutionService: IResolvedSettingsReader) {}
 
-  public async resolveSetting(
-    keyStr: string,
-    context: ConfigurationResolutionContext = {},
-    options?: ResolutionOptions
-  ): Promise<unknown> {
-    const key = new NamespacedKey(keyStr);
-    return this.resolutionService.resolve(key, context, options);
+  public async inspectSetting(key: string, context: ConfigurationResolutionContext = {}): Promise<ResolvedSetting> {
+    return this.resolutionService.readSetting(key, context);
+  }
+
+  public async resolveSetting(key: string, context: ConfigurationResolutionContext = {}, _options?: ResolutionOptions): Promise<unknown> {
+    const result = await this.inspectSetting(key, context);
+    return result.status === 'RESOLVED' ? result.value : null;
   }
 }

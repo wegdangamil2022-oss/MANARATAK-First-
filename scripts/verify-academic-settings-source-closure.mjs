@@ -20,6 +20,7 @@ const settingsAssignmentRepo = read('packages/infrastructure/src/settings/Prisma
 const settingsUseCase = read('packages/application/src/settings/use-cases/ManageSettingsUseCase.ts');
 const settingsAdminRouter = read('apps/api/src/presentation/api/router/SettingsAdminRouter.ts');
 const settingsRuntimeRouter = read('apps/api/src/presentation/api/router/SettingsRuntimeRouter.ts');
+const settingsReader = read('packages/domain/src/settings/services/IResolvedSettingsReader.ts');
 const settingsAdminPage = read('apps/admin/src/pages/SettingsAdminPage.tsx');
 const settingsLegacyPreviewPath = 'apps/web/src/features/admin-preview/AdminSettingsPreviewPage.tsx';
 const settingsLegacyPreview = exists(settingsLegacyPreviewPath) ? read(settingsLegacyPreviewPath) : '';
@@ -84,16 +85,16 @@ const checks = {
   settings_repo_historical_pointer_guard: /rollback must create a new immutable version/.test(settingsAssignmentRepo),
   settings_repo_no_historical_update: !/settingVersionRecord\.upsert/.test(settingsAssignmentRepo),
   settings_repo_persists_rollback_lineage: /rollbackOfVersionId/.test(settingsAssignmentRepo),
-  settings_resolution_explicit_context: /identityId\?: string/.test(settingsResolution) && /tenantId\?: string/.test(settingsResolution) && /domainId\?: string/.test(settingsResolution),
-  settings_resolution_precedence_identity_first: settingsResolution.indexOf('identityAssignment') < settingsResolution.indexOf('tenantAssignment'),
-  settings_resolution_precedence_tenant_before_domain: settingsResolution.indexOf('tenantAssignment') < settingsResolution.indexOf('domainAssignment'),
-  settings_resolution_global_fallback: /ScopeLevel\.GLOBAL/.test(settingsResolution) && /definition\.defaultValue \?\? null/.test(settingsResolution),
-  settings_resolution_never_returns_db_secret: /options\?\.allowSecrets \? null : '\*\*\*\*\*\*\*\*'/.test(settingsResolution),
+  settings_resolution_explicit_context: /identityId\?: string/.test(settingsReader) && /tenantId\?: string/.test(settingsReader) && /domainId\?: string/.test(settingsReader),
+  settings_resolution_precedence_identity_first: settingsResolution.indexOf('ScopeLevel.IDENTITY, context.identityId') >= 0 && settingsResolution.indexOf('ScopeLevel.IDENTITY, context.identityId') < settingsResolution.indexOf('ScopeLevel.TENANT, context.tenantId'),
+  settings_resolution_precedence_tenant_before_domain: settingsResolution.indexOf('ScopeLevel.TENANT, context.tenantId') >= 0 && settingsResolution.indexOf('ScopeLevel.TENANT, context.tenantId') < settingsResolution.indexOf('ScopeLevel.DOMAIN, context.domainId'),
+  settings_resolution_global_fallback: /ScopeLevel\.GLOBAL/.test(settingsResolution) && /scope: 'DEFAULT', status: 'VALUE', value: definition\.defaultValue/.test(settingsResolution),
+  settings_resolution_never_returns_db_secret: /definition\.isSecret.*status: 'SECRET_UNAVAILABLE'/.test(settingsResolution) && !settingsResolution.includes("'********'"),
   settings_runtime_no_organization_alias: !/organizationId|scopeId/.test(settingsRuntimeRouter),
   settings_runtime_explicit_scope_query: /identityId/.test(settingsRuntimeRouter) && /tenantId/.test(settingsRuntimeRouter) && /domainId/.test(settingsRuntimeRouter),
-  settings_admin_read_definitions: /router\.get\('\/definitions'/.test(settingsAdminRouter),
-  settings_admin_read_assignments: /router\.get\('\/assignments'/.test(settingsAdminRouter),
-  settings_admin_actor_required: /AUTHENTICATED_ADMIN_ACTOR_REQUIRED/.test(settingsAdminRouter),
+  settings_admin_read_definitions: /router\.get\(\s*'\/definitions'/.test(settingsAdminRouter),
+  settings_admin_read_assignments: /router\.get\(\s*'\/assignments'/.test(settingsAdminRouter),
+  settings_admin_actor_required: /requireAuthenticatedPrincipal/.test(settingsAdminRouter),
   settings_admin_server_author: /authorId: actor\(req\)/.test(settingsAdminRouter),
   settings_admin_scope_validation: /scopeId is required/.test(settingsAdminRouter) && /scopeId must be omitted for GLOBAL/.test(settingsAdminRouter),
   settings_admin_mutations_audited: /CREATE_SETTING_DEFINITION/.test(settingsAdminRouter) && /ASSIGN_SETTING_VALUE/.test(settingsAdminRouter) && /ROLLBACK_SETTING_VALUE/.test(settingsAdminRouter),

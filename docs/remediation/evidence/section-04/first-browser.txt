@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "scope": "CHROMIUM_UI_WITH_INTERCEPTED_API_ONLY",
+  "testContext": "CSP bypass; dev HMR disabled; no actual API/database/provider calls",
+  "checks": [
+    "explicit false default and no empty feature default",
+    "effective source/value display",
+    "changed context invalidates result",
+    "secret unavailable without value/mask",
+    "no page exceptions"
+  ],
+  "calls": [
+    "/api/v1/auth/me",
+    "/api/v1/admin/settings/definitions",
+    "/api/v1/admin/settings/assignments",
+    "/api/v1/admin/settings/definitions",
+    "/api/v1/admin/settings/assignments",
+    "/api/v1/settings/inspect/feature.safe",
+    "/api/v1/settings/inspect/provider.secret?domainId=courses"
+  ]
+}

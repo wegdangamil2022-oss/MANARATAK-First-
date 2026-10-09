@@ -1,3 +1,4 @@
+import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -459,6 +460,8 @@ export function SettingsAdminPage() {
         </div>
       </section>
 
+      <SettingsResolutionInspector definitions={definitions} isAr={isAr} />
+
       <div className="grid gap-4 md:grid-cols-3">
         <Boundary
           icon={<ShieldCheck />}
@@ -621,8 +624,8 @@ export function SettingsAdminPage() {
                           >
                             {item.isSecret
                               ? isAr
-                                ? 'مرجع سر خارجي'
-                                : 'External secret ref'
+                                ? 'متطلب سر — الربط غير مثبت'
+                                : 'Secret requirement — binding unverified'
                               : item.isFeatureFlag
                                 ? 'Feature Flag'
                                 : isAr
@@ -693,7 +696,7 @@ export function SettingsAdminPage() {
                 />
               </Field>
               {!definitionForm.isSecret ? (
-                <Field label={isAr ? 'القيمة الافتراضية (اختيارية)' : 'Default value (optional)'}>
+                <Field label={definitionForm.isFeatureFlag ? (isAr ? 'القيمة الافتراضية للميزة (إلزامية)' : 'Flag default (required)') : (isAr ? 'القيمة الافتراضية (اختيارية)' : 'Default value (optional)')}>
                   {definitionForm.valueType === 'Boolean' ? (
                     <select
                       value={definitionForm.defaultValue}
@@ -702,7 +705,7 @@ export function SettingsAdminPage() {
                       }
                       className="input"
                     >
-                      <option value="">—</option>
+                      {!definitionForm.isFeatureFlag && <option value="">—</option>}
                       <option value="true">true</option>
                       <option value="false">false</option>
                     </select>
@@ -728,7 +731,7 @@ export function SettingsAdminPage() {
                       ...f,
                       isFeatureFlag: e.target.checked,
                       ...(e.target.checked
-                        ? { valueType: 'Boolean', defaultValue: '', isSecret: false }
+                        ? { valueType: 'Boolean', defaultValue: 'false', isSecret: false }
                         : {}),
                     }))
                   }
@@ -902,7 +905,7 @@ export function SettingsAdminPage() {
                       className="input"
                       required
                     >
-                      <option value="">—</option>
+                      {!definitionForm.isFeatureFlag && <option value="">—</option>}
                       <option value="true">true</option>
                       <option value="false">false</option>
                     </select>

@@ -1,4 +1,5 @@
 import { NamespacedKey } from '../value-objects/NamespacedKey';
+import { StringValue, NumberValue, BooleanValue, JsonValue } from '../value-objects/SettingValueData';
 import { ValueType } from '../enums/ValueType';
 import { IDomainEvent } from '@manaratak/core';
 import { SettingDefinitionCreatedEvent } from '../events/SettingDefinitionCreatedEvent';
@@ -39,6 +40,19 @@ export class SettingDefinition {
 
     if ((props.isSecret ?? false) && props.defaultValue !== undefined && props.defaultValue !== null) {
       throw new Error('Secret setting definitions cannot persist a default value. Use the approved runtime secret provider.');
+    }
+
+    if (!Object.values(ValueType).includes(props.valueType)) throw new Error('SETTINGS_VALUE_TYPE_INVALID');
+    if (props.isFeatureFlag && (props.valueType !== ValueType.Boolean || props.isSecret || typeof props.defaultValue !== 'boolean')) {
+      throw new Error('SETTINGS_FEATURE_FLAG_BOOLEAN_DEFAULT_REQUIRED');
+    }
+    if (!props.isSecret && props.defaultValue !== undefined && props.defaultValue !== null) {
+      switch (props.valueType) {
+        case ValueType.String: new StringValue(props.defaultValue as string); break;
+        case ValueType.Number: new NumberValue(props.defaultValue as number); break;
+        case ValueType.Boolean: new BooleanValue(props.defaultValue as boolean); break;
+        case ValueType.Json: new JsonValue(props.defaultValue as Record<string, unknown>); break;
+      }
     }
 
     this.id = props.id.trim();
