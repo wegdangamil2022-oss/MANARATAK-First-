@@ -30,8 +30,8 @@ export abstract class BaseSourceConnector implements ISourceConnector {
   }
 
   async acquire(source: ImportSourceDefinition, request: SourceAcquisitionRequest = {}): Promise<SourceAcquisitionResult> {
-    SourceAccessExecutionPolicy.assertAllowed(source, this.category);
     if (!this.supports(source)) throw new Error(`SOURCE_CONNECTOR_UNSUPPORTED:${source.sourceId}`);
+    SourceAccessExecutionPolicy.assertAllowed(source, this.category);
     if (!this.transport) throw new Error(`SOURCE_CONNECTOR_NOT_ENABLED:${this.connectorId}`);
     const response = await this.transport.get(source, { ...request, targetUrl: request.targetUrl ?? source.baseUrl });
     if (response.statusCode < 200 || response.statusCode >= 300) throw new Error(`SOURCE_HTTP_${response.statusCode}`);
