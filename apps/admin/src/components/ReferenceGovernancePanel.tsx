@@ -10,13 +10,14 @@ import type {
   ReferenceRelationshipDto,
   ReferenceDependencyImpact,
 } from '@manaratak/domain';
+import { ReferenceLifecycleState } from '@manaratak/domain';
 import { referenceDataAdminApi } from '../api/referenceData';
 
 type GovernedRow = {
   id: string;
   versionNumber: number;
   lifecycleState: string;
-  name?: string;
+  name: string;
   [key: string]: any;
 };
 
@@ -161,7 +162,7 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
     setSaving(true); setError(null);
     try {
       await referenceDataAdminApi.transitionReference(entityType, record.id, {
-        expectedVersion: record.versionNumber, toState: 'DEPRECATED' as any, reason: reason.trim(),
+        expectedVersion: record.versionNumber, toState: ReferenceLifecycleState.DEPRECATED, reason: reason.trim(),
       });
       onChanged();
     } catch (err: unknown) {

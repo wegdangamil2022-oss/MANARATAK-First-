@@ -14,7 +14,7 @@ import {
   ReferenceDataValidationSeverity
 } from '../validation/ReferenceDataValidationTypes';
 import { IReferenceDataValidationService } from '../contracts/IReferenceDataValidationService';
-import { referenceCityScopeKey } from '../governance/ReferenceIdentityNormalization';
+import { normalizeReferenceIdentityToken, referenceCityScopeKey } from '../governance/ReferenceIdentityNormalization';
 
 export class ReferenceDataValidationService implements IReferenceDataValidationService {
   public validateCountry(
@@ -334,6 +334,15 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
       });
     }
 
+    if (name && !normalizeReferenceIdentityToken(name)) {
+      issues.push({
+        fieldName: 'name',
+        code: 'INVALID_CITY_IDENTITY_TOKEN',
+        message: 'City identity name must contain at least one Unicode letter or number',
+        severity: ReferenceDataValidationSeverity.ERROR,
+      });
+    }
+
     if (input.latitude !== undefined && input.latitude !== null) {
       const lat = input.latitude;
       if (typeof lat !== 'number' || isNaN(lat) || lat < -90 || lat > 90) {
@@ -387,7 +396,7 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
 
     return {
       entityType: 'CITY',
-      deterministicKey: /^[A-Z]{2}$/.test(countryIso2Code) && name ? referenceCityScopeKey(input) : '',
+      deterministicKey: /^[A-Z]{2}$/.test(countryIso2Code) && normalizeReferenceIdentityToken(name) ? referenceCityScopeKey(input) : '',
       requiredFields,
       presentFields,
       missingFields,

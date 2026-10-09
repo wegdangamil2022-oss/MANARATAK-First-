@@ -30,6 +30,14 @@ describe('P6 -> P7 screening consumer', () => {
     expect(result.state).toBe('NEEDS_OWNER_REVIEW');
     expect(result.issues[0].code).toBe('P7_EXPLICIT_REFERENCE_TYPE_REQUIRED');
   });
+  it('rejects punctuation-only city names without retry loops', async () => {
+    const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, {
+      countryIso2Code: 'YE', name: '!!!',
+    }));
+    expect(result.state).toBe('INVALID');
+    expect(result.issues.some(i => i.code === 'INVALID_CITY_IDENTITY_TOKEN')).toBe(true);
+    expect(result.canonicalWrites).toBe(0);
+  });
   it('reports invalid owner data without canonical writes', async () => {
     const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, {
       countryIso2Code: 'Y', name: 'broken',
