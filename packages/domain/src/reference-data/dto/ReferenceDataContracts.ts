@@ -2,6 +2,7 @@ import { ReferenceAliasInput, ReferenceLifecycleState, ReferenceProviderMappingI
 
 export interface ReferenceDataFilters {
   activeOnly?: boolean;
+  nonActiveOnly?: boolean;
   region?: string;
   administrativeRegionId?: string;
   countryIso2Code?: string;

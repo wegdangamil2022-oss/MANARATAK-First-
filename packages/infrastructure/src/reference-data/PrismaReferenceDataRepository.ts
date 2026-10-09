@@ -618,6 +618,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       where.isActive = true;
       Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
+    if (filters?.nonActiveOnly) {
+      Object.assign(where, { NOT: { lifecycleState: 'ACTIVE' } });
+    }
     if (filters?.region) {
       where.region = filters.region;
     }
@@ -649,6 +652,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       where.isActive = true;
       Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
+    if (filters?.nonActiveOnly) {
+      Object.assign(where, { NOT: { lifecycleState: 'ACTIVE' } });
+    }
     if (filters?.q) {
       where.OR = [
         { name: { contains: filters.q, mode: 'insensitive' } },
@@ -675,6 +681,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       where.isActive = true;
       Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
+    if (filters?.nonActiveOnly) {
+      Object.assign(where, { NOT: { lifecycleState: 'ACTIVE' } });
+    }
     if (filters?.q) {
       where.OR = [
         { name: { contains: filters.q, mode: 'insensitive' } },
@@ -696,6 +705,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (filters?.activeOnly) {
       where.isActive = true;
       Object.assign(where, { lifecycleState: 'ACTIVE' });
+    }
+    if (filters?.nonActiveOnly) {
+      Object.assign(where, { NOT: { lifecycleState: 'ACTIVE' } });
     }
     if (filters?.countryIso2Code) {
       where.countryIso2Code = filters.countryIso2Code;

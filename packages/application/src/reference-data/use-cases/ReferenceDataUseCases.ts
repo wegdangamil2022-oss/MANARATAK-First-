@@ -136,6 +136,7 @@ export class ReferenceDataUseCases {
     if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 100) {
       throw new Error('REFERENCE_DATA_PAGINATION_INVALID');
     }
+    if (filters.activeOnly && filters.nonActiveOnly) throw new Error('REFERENCE_DATA_FILTER_CONFLICT');
     const normalized = { activeOnly: true, ...filters, page, pageSize };
     const [data, total] = await Promise.all([
       this.repository[({ countries: 'listCountries', currencies: 'listCurrencies', languages: 'listLanguages', regions: 'listRegions', cities: 'listCities' } as const)[collection]](normalized),

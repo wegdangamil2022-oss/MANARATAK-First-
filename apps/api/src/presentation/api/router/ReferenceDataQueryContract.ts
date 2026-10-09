@@ -20,6 +20,15 @@ export const adminReferenceDataQuerySchema = z.object({
     }
     return value;
   }, z.boolean().optional()),
+  nonActiveOnly: z.preprocess((value) => {
+      if (value === undefined || typeof value === 'boolean') return value;
+      if (typeof value === 'string') {
+        if (['true', '1'].includes(value.trim().toLowerCase())) return true;
+        if (['false', '0'].includes(value.trim().toLowerCase())) return false;
+      }
+      return value;
+    }, z.boolean().optional()),
+  
 }).strict();
 
 // Canonical region IDs are supported only by city collections, not every reference query.

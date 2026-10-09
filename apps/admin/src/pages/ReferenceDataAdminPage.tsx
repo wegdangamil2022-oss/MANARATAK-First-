@@ -19,7 +19,8 @@ function readP7Url() {
   return {
     page: Number.isSafeInteger(rawPage) && rawPage > 0 ? rawPage : 1,
     q: params.get('p7Q') ?? '',
-    status: params.get('p7Status') === 'all' ? 'all' as const : 'active' as const,
+    status: params.get('p7Status') === 'all' ? 'all' as const :
+      params.get('p7Status') === 'nonactive' ? 'nonactive' as const : 'active' as const,
     country: params.get('p7Country') ?? '',
   };
 }
@@ -29,7 +30,7 @@ function useFetchData(collection: ReferenceDataCollection) {
   const [data, setData] = useState<any[]>([]);
   const [page, setPage] = useState(initial.page);
   const [q, setQ] = useState(initial.q);
-  const [status, setStatus] = useState<'active' | 'all'>(initial.status);
+  const [status, setStatus] = useState<'active' | 'all' | 'nonactive'>(initial.status);
   const [country, setCountry] = useState(initial.country);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -39,7 +40,7 @@ function useFetchData(collection: ReferenceDataCollection) {
   const deferredQ = React.useDeferredValue(q);
   const supportsCountry = collection === 'cities' || collection === 'regions';
   const updateQ = (next: string) => { setQ(next); setPage(1); };
-  const updateStatus = (next: 'active' | 'all') => { setStatus(next); setPage(1); };
+  const updateStatus = (next: 'active' | 'all' | 'nonactive') => { setStatus(next); setPage(1); };
   const updateCountry = (next: string) => { setCountry(next.toUpperCase()); setPage(1); };
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -54,7 +55,7 @@ function useFetchData(collection: ReferenceDataCollection) {
     const sequence = ++requestSequence.current;
     setLoading(true); setError(null);
     try {
-      const filters: ReferenceDataFilters = { page, pageSize: 50, q: deferredQ || undefined, activeOnly: status === 'active' };
+      const filters: ReferenceDataFilters = { page, pageSize: 50, q: deferredQ || undefined, activeOnly: status === 'active', nonActiveOnly: status === 'nonactive' };
       if (supportsCountry && country) filters.countryIso2Code = country;
       const result = await getReferenceDataPage<any>(collection, filters);
       if (sequence !== requestSequence.current) return;
@@ -82,9 +83,10 @@ function ReferenceFilters({ q, setQ, status, setStatus, country, setCountry, sup
       <input className="border rounded-lg px-3 py-2 text-sm" aria-label="بحث البيانات المرجعية" value={q} onChange={e => setQ(e.target.value)} placeholder="الاسم أو الرمز" />
     </label>
     <label className="flex flex-col gap-1 text-xs font-bold">الحالة / Status
-      <select className="border rounded-lg px-3 py-2 text-sm" value={status} onChange={e => setStatus(e.target.value as 'active' | 'all')}>
+      <select className="border rounded-lg px-3 py-2 text-sm" value={status} onChange={e => setStatus(e.target.value as 'active' | 'all' | 'nonactive')}>
         <option value="active">النشطة فقط / Active</option>
         <option value="all">جميع الحالات / All</option>
+        <option value="nonactive">غير النشطة فقط / Non-active</option>
       </select>
     </label>
     {supportsCountry && <label className="flex flex-col gap-1 text-xs font-bold">رمز الدولة / ISO2
@@ -128,7 +130,7 @@ export function ReferenceDataAdminPage() {
   }, []);
   const drillDown = (collection: ReferenceDataCollection, nonActiveOnly = false) => {
     const url = new URL(window.location.href);
-    url.searchParams.set('p7Status', nonActiveOnly ? 'all' : 'active');
+    url.searchParams.set('p7Status', nonActiveOnly ? 'nonactive' : 'active');
     url.searchParams.set('p7Page', '1');
     url.searchParams.delete('p7Q');
     window.history.replaceState(window.history.state, '', url.toString());
