@@ -1,5 +1,20 @@
 # Section 03 — EAP closure register
 
+## Verified resolution — link versus delete race (2026-10-09)
+
+**Race defect: FIXED AND VERIFIED in source and disposable PostgreSQL.** Source `0345ddc3ffc5ae0737c40dda77db61779c20a363`: [CI 37936012373](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37936012373) SUCCESS: 276 source tests plus 30 disposable PostgreSQL tests. Fourteen new PostgreSQL cases passed in 445ms; both real lock orderings, all destructive actions, JSON references, unlinking, identity protection, precheck-to-save provider prevention and snapshot isolation rejection passed. The existing 16 DB cases also passed with the new triggers installed. Counts overlap local tests and are not added.
+
+| Current gate | Result |
+| --- | --- |
+| 03/P0-07 consumer/lifecycle concurrency | Implementation and real-DB regression verified; all registered references are protected when migration is installed. Earlier statements that serialization source is absent are superseded. Existing application usage check/UI confirmation retained. |
+| 03/P1-11 registry | Canonical owner data remains the source of truth, with schema/inventory/trigger coverage checks; no central registry or new data table. Broader architecture/performance reconciliation remains partial. |
+| Target environment installation | PENDING: migration not applied to real DB. API fails startup if connected DB lacks complete guards. Deployment must drain old processes and apply reviewed schema before restarting. |
+| Real provider verification | DEFERRED_BY_USER, not passed; user plans a later environment. |
+| Other section acceptance | Restore compensation journal/provider fencing/heartbeat, remaining workspace functions and global readiness checks remain open. Provider verification deferral alone does not close those source obligations. |
+
+Whole-section status remains NOT CLOSED / NO-GO. This evidence closes the identified concurrency defect in the implementation; it does not falsely close every section task or claim protection is deployed. Evidence-only follow-up changes no tested code. No real database/provider write, main merge or production configuration change. Original attachment remains unchanged.
+
+
 ## Continuation — canonical link versus lifecycle serialization (2026-10-09)
 
 Original scope 03/P0-07, P1-11 and P1-12. Added a schema-only migration for existing tables: owner INSERT/reference-column UPDATE locks newly added canonical AssetRecord IDs FOR SHARE until the owner transaction commits; absent/non-ACTIVE IDs reject the owner write. All 28 direct fields, CMS published attachment array and three SEO references are covered. No central registry/table, backfill or data-ownership transfer.
