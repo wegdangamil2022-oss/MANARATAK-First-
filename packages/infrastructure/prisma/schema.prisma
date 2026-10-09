@@ -73,6 +73,7 @@ model SettingDefinitionRecord {
   valueType     String
   description   String?
   defaultValue  Json?
+  validationRules Json?
   isFeatureFlag Boolean  @default(false)
   isDeprecated  Boolean  @default(false)
   isSecret      Boolean  @default(false)
