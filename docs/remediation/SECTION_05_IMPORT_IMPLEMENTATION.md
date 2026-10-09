@@ -6,7 +6,7 @@
 
 ## Batch 9 — fail-closed owning-domain handoff effect classification (2026-10-09)
 
-**Source changes pushed to `codex/section-01-iam-rbac`.**
+**Verified source:** code commit `d30721fdb4c4c274f34cdbc9122dad2b9fd8ac17`; [focused CI 37981616458](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37981616458) **SUCCESS** — 135/135 tests across 20 Vitest files, TypeScript, source quality and existing 321-handler/320-endpoint Admin audit source gate PASS. An earlier intermediate TypeScript failure exposed the previously omitted translation preparation implementation; it was classified and reverified. No live database, schema migration, external provider, E2E, merge or production deploy was performed.
 
 - **IMP-P0-005 proactive control:** The public `IImportHandoffConsumer` contract now declares a mandatory `effectMode: SCREENING_ONLY | CANONICAL_MUTATION`. The generic `ImportHandoffDispatcher` refuses to register any consumer with missing, unknown or `CANONICAL_MUTATION` mode, returning `IMPORT_OWNER_TRANSACTIONAL_RECEIPT_REQUIRED:<domain>` **before** any handoff invocation. This prevents silently adding an owning-domain mutating adapter without a domain-owned, transactionally committed inbox/receipt and independent idempotency evidence.
 - **Registered consumers classified:** University, Scholarship, International Test and Translation handoff-preparation services explicitly declare `SCREENING_ONLY`. Inspection of each `accept` method confirms they compute candidates and perform read-only canonical lookup/screening; they do not publish/merge/write canonical records. Translation was identified by the broad TypeScript gate, even though it is not currently part of the import dispatcher registration in the API container.
