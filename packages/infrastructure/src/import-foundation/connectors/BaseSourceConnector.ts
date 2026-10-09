@@ -4,7 +4,8 @@ import {
   ConnectorSignature, 
   SourceConnectorCategory,
   SourceStatus,
-  SourceAccessClassification
+  SourceAccessClassification,
+  SourceAccessExecutionPolicy
 } from '@manaratak/domain';
 
 export abstract class BaseSourceConnector implements ISourceConnector {
@@ -29,6 +30,7 @@ export abstract class BaseSourceConnector implements ISourceConnector {
   }
 
   async acquire(source: ImportSourceDefinition, request: SourceAcquisitionRequest = {}): Promise<SourceAcquisitionResult> {
+    SourceAccessExecutionPolicy.assertAllowed(source, this.category);
     if (!this.supports(source)) throw new Error(`SOURCE_CONNECTOR_UNSUPPORTED:${source.sourceId}`);
     if (!this.transport) throw new Error(`SOURCE_CONNECTOR_NOT_ENABLED:${this.connectorId}`);
     const response = await this.transport.get(source, { ...request, targetUrl: request.targetUrl ?? source.baseUrl });
