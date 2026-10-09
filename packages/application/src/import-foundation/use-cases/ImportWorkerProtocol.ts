@@ -45,6 +45,10 @@ export class ImportWorkerProtocol {
         throw new Error('IMPORT_WORKER_LEASE_LOST');
       return 'COMPLETED';
     } catch (error: unknown) {
+      // A pause/cancel is only final once the in-flight owner call has returned.
+      // Never acknowledge while process() can still make side effects.
+      const acknowledged = await this.queue.acknowledgeStoppedJob(activeLease);
+      if (acknowledged) throw new Error('IMPORT_WORKER_LEASE_LOST');
       const failure = this.failureFrom(error);
       const result = await this.queue.failClaimedJob({
         lease: activeLease,
