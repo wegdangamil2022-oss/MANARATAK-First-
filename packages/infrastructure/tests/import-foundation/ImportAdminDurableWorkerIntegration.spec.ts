@@ -327,4 +327,23 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(record.rawPayload._phase6HandoffEnvelope).toBeTruthy();
   });
 
+  it('prefetches existing source identities once per chunk and avoids per-row repository probes', async () => {
+    const repo = statefulImportRepository();
+    const batchLookup = vi.fn(async (keys: string[]) => [keys[0]]);
+    const singleLookup = vi.fn(async () => { throw new Error('Unexpected per-row source lookup'); });
+    const accelerated = { ...repo, findExistingSourceDedupKeys: batchLookup,
+      findBySourceDedupKey: singleLookup };
+    const useCase = new ImportAdminUseCases(accelerated as any);
+    const result = await useCase.stageNormalizedRows({
+      ownerDomain: 'GENERIC', sourceSystem: 'TEST_SOURCE',
+      rows: [{ title: 'Old' }, { title: 'New' }],
+    });
+    expect(batchLookup).toHaveBeenCalledTimes(1);
+    expect(batchLookup.mock.calls[0][0]).toHaveLength(2);
+    expect(singleLookup).not.toHaveBeenCalled();
+    expect(result.summary.skippedDuplicates).toBe(1);
+    expect(result.summary.stagedRecords).toBe(1);
+    expect(repo.records.size).toBe(1);
+  });
+
 });
