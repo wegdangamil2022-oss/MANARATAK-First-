@@ -176,3 +176,9 @@ npm run ci:source:contracts
 - Added audit records for successful/failed finalizations and negative regression tests (no scan pre-finalization, tampered digest, provider unavailable).
 - **Remaining P0 limitations:** direct-upload grant has no provider-native immutable object version/ETag acknowledgment; finalization and scan are not one atomic provider operation, and existing integrators must call finalize before validate. Finalization is distinct from the initial `QUARANTINED` metadata state; quarantine is not proof of completed upload.
 - This entry reflects source changes only pending CI. No DB migration or production actions performed.
+
+## API finalization contract tests
+
+- Added `AssetFinalizationContract.spec.ts` for the canonical `POST /admin/assets/:assetId/finalize-upload` action: server-owned verification (empty request body), safe 400 on client-supplied proof, 409 on missing/stale finalization, and sanitized provider failures.
+- EAP router Problem Details now classifies `ASSET_UPLOAD_FINALIZATION_REQUIRED`, `ASSET_UPLOAD_CHANGED_AFTER_FINALIZATION` and optimistic-save conflicts as 409 rather than 500.
+- **No external proof is accepted from the browser**; the backend still requires provider observation before saving upload evidence.
