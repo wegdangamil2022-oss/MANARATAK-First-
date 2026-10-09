@@ -6,6 +6,10 @@
 
 ## Batch 2 — replay-uncertainty safety and bounded source lookups (2026-10-09)
 
+**Verified batch 2:** Source code commit `f87d51052d661db4af794f4b2c12fe94c434b20d`: [Import Section 05 CI 37973057659](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37973057659) **SUCCESS** — **72 focused Vitest tests in 10 files**, TypeScript, source-quality, and existing 321-handler/320-endpoint Admin audit coverage all PASS. Earlier intermediate runs failed on a previous cancellation assertion and an incorrect synthetic retry expectation; both were repaired before this final source run. No live DB or provider integration was tested.
+
+
+
 - **IMP-P0-005 interim safety boundary:** The durable worker now records `_phase6HandoffState: DISPATCH_IN_FLIGHT` on the import record *before* invoking an owner handoff consumer. Once an owner call has begun, a worker crash, cancellation during the call, failed ImportRecord acknowledgment or expired lease leaves the marker intact. Later attempts **do not automatically call the owner again**. Instead they retain the original handoff envelope, mark the record `NEEDS_REVIEW`, and persist `MANUAL_RECONCILIATION_REQUIRED`. An unavailable consumer cannot downgrade an uncertain receipt into `AWAITING_DOMAIN_INTEGRATION` or cause a later accidental replay.
 - **Trust boundary:** Incoming normalized data cannot inject private `_phase6*`, `_domainHandoff`, `_sourceRowNumber` or `_payloadFingerprint` keys; requests fail before a batch is created. The worker mints its own initial `PENDING_HANDOFF` state and durable envelope.
 - **Verified semantics of currently registered owners:** University, Scholarship and International Test handoff adapters only screen/prepare draft candidates; they do **not** autonomously write or publish canonical domain records. This protects current paths, but it is **not a durable owning-domain inbox**. A future mutating consumer must implement its own transactional idempotency/receipt before automatic replay can be enabled.
@@ -36,5 +40,5 @@
 ### Verification ledger
 
 - First focused source CI run: [37971218068](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37971218068) **SUCCESS**, 65 focused tests over 9 files, TypeScript, source quality and existing audit coverage PASS.
-- Subsequent intermediate CI failures revealed a direct-record TypeScript nullability mismatch and an incorrect test assumption that a structurally valid record awaiting owner integration should count as failed. Both were corrected in later source commits. Only a **final green source CI at the final code commit** can be cited for the new atomic dedup and counters. Until that verification is observed the section remains IN PROGRESS.
+- Subsequent intermediate CI failures revealed a direct-record TypeScript nullability mismatch and an incorrect test assumption that a structurally valid record awaiting owner integration should count as failed. Both were corrected in later source commits. Final green source verification is now documented for batches 1–2 above. Section 05 remains **IN PROGRESS** because the owner-transactional receipt and other P0/P1 fixes are not complete.
 - No deployment, merge, database mutation, migration application or production runtime test has been performed.
