@@ -293,4 +293,38 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(repo.createBatch).not.toHaveBeenCalled();
   });
 
+  it('never rewrites uncertain owner receipts as safe-to-dispatch when a consumer is offline', async () => {
+    const repo = statefulImportRepository();
+    await repo.createBatch({ sourceSystem: 'TEST_SOURCE', dataType: 'GENERIC',
+      batchStatus: 'CREATED', totalRecords: 1, processedRecords: 0, failedRecords: 0 });
+    await repo.bulkCreateRecords([{
+      id: 'rec-uncertain', batchId: 'batch-durable-1', status: 'COMPLETE',
+      sourceDedupKey: 'receipt-key',
+      rawPayload: {
+        _phase6HandoffState: 'DISPATCH_IN_FLIGHT',
+        _phase6HandoffEnvelope: {
+          handoffId: 'handoff:receipt-key', ownerDomain: 'GENERIC',
+          artifact: { sourceId: 'TEST_SOURCE' }, normalizedPayload: { id: 'record' },
+          provenance: { sourceSystem: 'TEST_SOURCE', sourceRowNumber: 1, contentHash: 'hash' },
+          validation: { state: 'VALID', issues: [] },
+          execution: { executionId: 'batch-durable-1', dryRun: false, attempt: 1, idempotencyKey: 'receipt-key' },
+        },
+      },
+    }]);
+    const queue = new InMemoryImportQueueGateway();
+    await queue.enqueueImportJob({ batchId: 'batch-durable-1',
+      targetDomain: 'GENERIC' as any, sourceSystem: 'TEST_SOURCE' });
+    const empty = new ImportHandoffDispatcher({});
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    const useCase = new ImportAdminUseCases(repo as any, queue, empty, worker);
+    expect(await useCase.processNextQueuedBatch('offline-consumer-worker')).toBe('COMPLETED');
+    const record = repo.records.get('rec-uncertain');
+    expect(record.status).toBe('NEEDS_REVIEW');
+    expect(record.rawPayload._phase6HandoffState).toBe('MANUAL_RECONCILIATION_REQUIRED');
+    expect(record.rawPayload._phase6HandoffEnvelope).toBeTruthy();
+  });
+
 });
