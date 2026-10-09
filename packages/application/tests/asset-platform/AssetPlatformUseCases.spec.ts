@@ -35,7 +35,25 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
   }
 
   async findById(id: AssetId): Promise<AssetRecord | null> {
-    return this.store.get(id.value) || null;
+    const stored = this.store.get(id.value);
+    if (!stored) return null;
+    // Emulate Prisma rehydration: mutating an aggregate cannot alter a persisted
+    // record until save() commits it. Returning the same object masks failed CAS.
+    return new AssetRecord({
+      id: stored.id,
+      reference: stored.reference,
+      locator: stored.locator,
+      metadata: stored.metadata,
+      retention: stored.retention,
+      owner: stored.owner,
+      classification: stored.classification,
+      state: stored.state,
+      checksum: stored.checksum,
+      sanitization: stored.sanitization,
+      malwareScan: stored.malwareScan ? { ...stored.malwareScan } : undefined,
+      uploadVerification: stored.uploadVerification ? { ...stored.uploadVerification } : undefined,
+      versionChain: stored.versionChain,
+    });
   }
 
   async findByReference(reference: AssetReference): Promise<AssetRecord | null> {
