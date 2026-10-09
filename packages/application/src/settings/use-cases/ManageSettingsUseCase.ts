@@ -17,6 +17,7 @@ import {
   JsonValue,
   ValueType,
   SettingValueData,
+  SettingValidationRules,
 } from '@manaratak/domain';
 import {
   CreateSettingDefinitionInput,
@@ -36,6 +37,7 @@ export interface SettingDefinitionAdminView {
   valueType: ValueType;
   description?: string;
   defaultValue?: unknown;
+  validationRules?: SettingValidationRules;
   isFeatureFlag: boolean;
   isDeprecated: boolean;
   isSecret: boolean;
@@ -83,6 +85,7 @@ export class ManageSettingsUseCase {
       valueType: definition.valueType,
       description: definition.description,
       defaultValue: definition.isSecret ? undefined : definition.defaultValue,
+      validationRules: definition.validationRules,
       isFeatureFlag: definition.isFeatureFlag,
       isDeprecated: definition.isDeprecated,
       isSecret: definition.isSecret,
@@ -165,7 +168,7 @@ export class ManageSettingsUseCase {
   private definitionView(definition: SettingDefinition): SettingDefinitionAdminView {
     return { id: definition.id, key: definition.key.getValue(), revision: definition.revision,
       valueType: definition.valueType, description: definition.description,
-      defaultValue: definition.isSecret ? undefined : definition.defaultValue, isFeatureFlag: definition.isFeatureFlag,
+      defaultValue: definition.isSecret ? undefined : definition.defaultValue, validationRules: definition.validationRules, isFeatureFlag: definition.isFeatureFlag,
       isSecret: definition.isSecret, isDeprecated: definition.isDeprecated };
   }
 
@@ -237,6 +240,7 @@ export class ManageSettingsUseCase {
         valueType: input.valueType,
         description: input.description,
         defaultValue: input.defaultValue,
+        validationRules: input.validationRules,
         isFeatureFlag: input.isFeatureFlag || false,
         isDeprecated: false,
         isSecret: input.isSecret || false,
