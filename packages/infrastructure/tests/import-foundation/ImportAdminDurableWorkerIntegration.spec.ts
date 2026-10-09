@@ -54,7 +54,7 @@ describe('W2 Phase 6 durable worker integration', () => {
     const repo = statefulImportRepository();
     const queue = new InMemoryImportQueueGateway();
     const accept = vi.fn(async (handoff: any) => ({ accepted: true, handoffId: handoff.handoffId }));
-    const dispatcher = new ImportHandoffDispatcher({ GENERIC: { accept } as any });
+    const dispatcher = new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } });
     const retryPolicy = ImportRetryPolicy.create({
       maxAttempts: 3,
       dlqAfterAttempts: 3,
@@ -125,7 +125,7 @@ describe('W2 Phase 6 durable worker integration', () => {
     const queue = new InMemoryImportQueueGateway();
     await queue.enqueueImportJob({ batchId: 'batch-durable-1', targetDomain: 'GENERIC' as any, sourceSystem: 'TEST_SOURCE' });
     const accept = vi.fn(async () => ({ accepted: true }));
-    const dispatcher = new ImportHandoffDispatcher({ GENERIC: { accept } as any });
+    const dispatcher = new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } });
     const worker = new ImportWorkerProtocol(
       queue,
       ImportRetryPolicy.create({
@@ -202,7 +202,7 @@ describe('W2 Phase 6 durable worker integration', () => {
       await queue.cancelJob({ batchId: 'batch-durable-1', reason: 'Admin cancelled processing' });
       return { accepted: true };
     });
-    const dispatcher = new ImportHandoffDispatcher({ GENERIC: { accept } as any });
+    const dispatcher = new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } });
     const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
       maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed', initialDelayMs: 10,
       maxDelayMs: 10, retryableErrorCodes: [],
@@ -242,7 +242,7 @@ describe('W2 Phase 6 durable worker integration', () => {
       maxDelayMs: 10, retryableErrorCodes: [],
     }));
     const useCase = new ImportAdminUseCases(repo as any, queue,
-      new ImportHandoffDispatcher({ GENERIC: { accept } as any }), worker);
+      new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } }), worker);
     await expect(useCase.processNextQueuedBatch('paused-worker')).rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
     expect(accept).not.toHaveBeenCalled();
     expect(repo.updateRecord).not.toHaveBeenCalled();
@@ -272,7 +272,7 @@ describe('W2 Phase 6 durable worker integration', () => {
     await queue.enqueueImportJob({ batchId: 'batch-durable-1', targetDomain: 'GENERIC' as any, sourceSystem: 'TEST_SOURCE' });
     const accept = vi.fn(async () => ({ accepted: true }));
     const useCase = new ImportAdminUseCases(repo as any, queue,
-      new ImportHandoffDispatcher({ GENERIC: { accept } as any }),
+      new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } }),
       new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
         maxAttempts: 2, dlqAfterAttempts: 2, backoffStrategy: 'fixed',
         initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
@@ -364,7 +364,7 @@ describe('W2 Phase 6 durable worker integration', () => {
       initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
     }));
     const useCase = new ImportAdminUseCases(repo as any, queue,
-      new ImportHandoffDispatcher({ GENERIC: { accept } as any }), worker);
+      new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } }), worker);
     const result = await useCase.stageNormalizedRows({
       ownerDomain: 'GENERIC', sourceSystem: 'TEST_SOURCE',
       rows: Array.from({ length: 75 }, (_, index) => ({
