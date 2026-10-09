@@ -18,6 +18,8 @@ export interface IImportQueueGateway {
   pauseJob(command: PauseImportJobCommand): Promise<boolean>;
   resumeJob(command: ResumeImportJobCommand): Promise<boolean>;
   cancelJob(command: CancelImportJobCommand): Promise<boolean>;
+  /** Called only once the claimed worker has stopped issuing owner side effects. */
+  acknowledgeStoppedJob(lease: ImportJobLease): Promise<'PAUSED' | 'CANCELLED' | null>;
   replayJob(command: ReplayImportJobCommand): Promise<boolean>;
   recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint, lease?: ImportJobLease): Promise<void>;
   moveToDeadLetter(dto: DeadLetterImportRecordDto): Promise<void>;
