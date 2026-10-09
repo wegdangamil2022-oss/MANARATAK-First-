@@ -30,7 +30,7 @@ export class PrismaAssetRetentionGateway implements IRetentionOwnerGateway {
     if(claimed.count!==1)return 'SKIPPED';
     try {
       if (decision.disposition === RetentionDisposition.ARCHIVE) {
-        if (candidate.lifecycleState !== 'ARCHIVED') await this.lifecycle.archiveAsset({assetId:candidate.recordId});
+        await this.lifecycle.archiveAsset({assetId:candidate.recordId});
       } else {
         if (candidate.lifecycleState !== 'PURGED') {
           if (candidate.lifecycleState !== 'DELETED') await this.lifecycle.softDeleteAsset({assetId:candidate.recordId});
