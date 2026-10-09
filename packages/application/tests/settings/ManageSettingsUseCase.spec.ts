@@ -109,8 +109,8 @@ describe('ManageSettingsUseCase', () => {
     await useCase.assignValue({
       assignmentId: 'assign-2',
       key: 'ui.theme',
-      level: 'TENANT',
-      scopeId: 'tenant-99',
+      level: 'DOMAIN',
+      scopeId: 'courses',
       versionId: 'v1',
       value: 'dark',
       type: ValueType.String,
@@ -120,8 +120,8 @@ describe('ManageSettingsUseCase', () => {
     await useCase.assignValue({
       assignmentId: 'assign-2',
       key: 'ui.theme',
-      level: 'TENANT',
-      scopeId: 'tenant-99',
+      level: 'DOMAIN',
+      scopeId: 'courses',
       versionId: 'v2',
       value: 'twilight',
       type: ValueType.String,
@@ -129,7 +129,7 @@ describe('ManageSettingsUseCase', () => {
     });
 
     await expect(useCase.assignValue({
-      assignmentId: 'assign-2', key: 'ui.theme', level: 'TENANT', scopeId: 'tenant-99', versionId: 'v2', value: 'overwrite', type: ValueType.String, authorId: 'admin-3'
+      assignmentId: 'assign-2', key: 'ui.theme', level: 'DOMAIN', scopeId: 'courses', versionId: 'v2', value: 'overwrite', type: ValueType.String, authorId: 'admin-3'
     })).rejects.toThrow(/already exists/);
 
     await useCase.rollbackValue({
@@ -140,7 +140,7 @@ describe('ManageSettingsUseCase', () => {
       authorId: 'admin-1',
     });
 
-    const scope = new ScopeIdentifier('TENANT', 'tenant-99');
+    const scope = new ScopeIdentifier('DOMAIN', 'courses');
     const key = new NamespacedKey('ui.theme');
     const assignment = await assignRepo.findByScopeAndKey(scope, key);
 
