@@ -1,5 +1,14 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## Continuation — 03/P1-02 retention and checksum facets (2026-10-09)
+
+- Canonical retention selector and PRESENT/MISSING checksum selector now flow from Admin draft/applied filters through strict API validation to the existing EAP read model. Filters compose with MIME, search and cursor through AND; reuseOnly security restrictions remain intact.
+- PRESENT requires non-null, non-empty algorithm and hash. MISSING includes partial evidence. Neither implies verified content or permission to deliver. No schema, retention policy, lifecycle mutation, seed or production data change.
+- Targeted validation: TypeScript build for Admin/API/infrastructure PASS; 46 tests in three API/query/reuse files PASS (8.94s); selected source lint 0 errors / 49 warnings. API rejects unknown and repeated facet values before repository access. Repository tests assert predicate composition with search/cursor; database and browser execution for these new facets remain unverified.
+- P1-02 remains PARTIALLY_IMPLEMENTED: processing/security, in-use, file-family and owner presets remain open; no task/section CLOSED or production GO.
+- Evidence: `evidence/section-03/facets-{types,tests,lint}.log`. Original review file preserved unchanged.
+
+
 ## أحدث متابعة — التعافي وسياسة الاستعادة (2026-10-09)
 
 تستكمل هذه الدفعة `12f05da` وتحافظ على جميع المعرفات والملاحظات السابقة. هذا الحكم الأحدث يحدّث الأجزاء المنفذة أدناه، ولا يحوّل الأقسام السابقة إلى CLOSED.

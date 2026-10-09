@@ -413,4 +413,25 @@ describe('AssetPlatformRouter', () => {
       expect(res.headers['x-admin-required-permission']).toBe('admin:assets:manage');
     });
   });
+  it('GET /assets validates canonical facets before calling the read model', async () => {
+    const queryAdmin = vi.fn(async () => ({ items: [], hasMore: false, nextCursor: null }));
+    const app = express();
+    app.use('/assets', AssetPlatformRouter.create({
+      ingestAssetUseCase: createMockIngestUseCase() as any,
+      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+      assetRecordRepository: { queryAdmin, findById: vi.fn() },
+    }));
+    const result = await request(app).get('/assets').query({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', q: 'pdf' });
+    expect(result.status).toBe(200);
+    expect(queryAdmin).toHaveBeenCalledWith({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', q: 'pdf' });
+    queryAdmin.mockClear();
+    for (const query of [
+      { checksumPresence: 'false' }, { checksumPresence: ['PRESENT', 'MISSING'] },
+      { retentionCategory: 'unknown' }, { checksumPresence: 'VERIFIED' },
+    ]) {
+      expect((await request(app).get('/assets').query(query)).status).toBe(400);
+    }
+    expect(queryAdmin).not.toHaveBeenCalled();
+  });
+
 });

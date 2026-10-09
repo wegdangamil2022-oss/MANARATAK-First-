@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { AssetLifecycleActions, type AssetActionSnapshot } from '../components/AssetLifecycleActions';
-import { AssetLifecycleState, AssetSecurityClassification } from '@manaratak/domain';
+import { AssetLifecycleState, AssetSecurityClassification, AssetRetentionCategory } from '@manaratak/domain';
 import { AssetUploadWizard } from '../components/AssetUploadWizard';
 import { FolderGit2, RefreshCw, Filter, FileText } from 'lucide-react';
 
@@ -114,6 +114,8 @@ export function AssetAdminPage() {
     ownerType: '',
     ownerId: '',
     mimeTypePrefix: '',
+    retentionCategory: '',
+    checksumPresence: '',
     createdFrom: '',
     createdTo: '',
   });
@@ -228,6 +230,19 @@ export function AssetAdminPage() {
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
           <option value="">تصنيف الأمان — الكل</option>
           {Object.values(AssetSecurityClassification).map(value => <option key={value} value={value}>{value}</option>)}
+        </select>
+        <select aria-label="سياسة الاحتفاظ" value={filters.retentionCategory}
+          onChange={(e) => setFilters((v) => ({ ...v, retentionCategory: e.target.value }))}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+          <option value="">سياسة الاحتفاظ — الكل</option>
+          {Object.values(AssetRetentionCategory).map(value => <option key={value} value={value}>{value}</option>)}
+        </select>
+        <select aria-label="وجود بصمة المحتوى" value={filters.checksumPresence}
+          onChange={(e) => setFilters((v) => ({ ...v, checksumPresence: e.target.value }))}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+          <option value="">بصمة المحتوى — الكل</option>
+          <option value="PRESENT">مسجلة — لا تعني اكتمال التحقق</option>
+          <option value="MISSING">غير مكتملة أو غير مسجلة</option>
         </select>
         <input
           value={filters.mimeTypePrefix}

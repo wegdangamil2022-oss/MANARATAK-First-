@@ -280,6 +280,8 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     ownerId?: string;
     securityClassification?: string;
     mimeTypePrefix?: string;
+    retentionCategory?: AssetRetentionCategory;
+    checksumPresence?: 'PRESENT' | 'MISSING';
     createdFrom?: string;
     createdTo?: string;
     q?: string;
@@ -317,6 +319,16 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       } } : {}),
     };
     const andFilters: any[] = [];
+    if (input.retentionCategory) andFilters.push({ retentionCategory: input.retentionCategory });
+    // Presence describes persisted evidence only; it does not assert verification or delivery readiness.
+    if (input.checksumPresence === 'PRESENT') andFilters.push({ AND: [
+      { checksumAlgorithm: { not: null } }, { checksumAlgorithm: { not: '' } },
+      { checksumHash: { not: null } }, { checksumHash: { not: '' } },
+    ] });
+    if (input.checksumPresence === 'MISSING') andFilters.push({ OR: [
+      { checksumAlgorithm: null }, { checksumAlgorithm: '' },
+      { checksumHash: null }, { checksumHash: '' },
+    ] });
     if (input.reuseOnly) andFilters.push(
       { malwareScanStatus: { path: ['status'], equals: 'PASSED' } },
       { malwareScanStatus: { path: ['uploadVerification', 'signatureVerified'], equals: true } },

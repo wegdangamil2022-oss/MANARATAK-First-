@@ -1,5 +1,10 @@
 # Section 03 — EAP closure register
 
+## Latest bounded batch — 03/P1-02 facets
+
+Retention/checksum selectors wired UI → validated API → EAP query. Scoped local checks: 46 tests PASS, TypeScript PASS, lint 0 errors / 49 warnings. No new real-DB/browser/provider acceptance claim. Source CI evidence below belongs to the preceding recovery commit; it is not evidence for this new batch. P1-02 PARTIALLY_IMPLEMENTED; section NOT CLOSED.
+
+
 Canonical tasks: MANARATAK_ADMIN_REVIEW_CODEX.md §03.10–03.17.
 This register is an evidence map, not an authorization to deploy or to mark runtime PASS.
 

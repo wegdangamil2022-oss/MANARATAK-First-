@@ -95,6 +95,8 @@ export class AssetPlatformRouter {
       ownerId: z.string().trim().min(1).max(240).optional(),
       securityClassification: z.nativeEnum(AssetSecurityClassification).optional(),
       mimeTypePrefix: z.string().trim().min(1).max(120).optional(),
+      retentionCategory: z.nativeEnum(AssetRetentionCategory).optional(),
+      checksumPresence: z.enum(['PRESENT', 'MISSING']).optional(),
       createdFrom: z.string().datetime().optional(),
       createdTo: z.string().datetime().optional(),
       q: z.string().trim().min(1).max(240).optional(),
