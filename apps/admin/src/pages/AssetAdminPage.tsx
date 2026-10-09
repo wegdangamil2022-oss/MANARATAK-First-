@@ -126,7 +126,7 @@ export function AssetAdminPage() {
     } catch (e) {
       if (generation === generationRef.current) setError(e instanceof Error ? e.message : 'تعذر تحميل الأصول والملفات.');
     } finally {
-      setLoading(false);
+      if (generation === generationRef.current) { pagingRef.current = false; setLoading(false); }
     }
   };
 
