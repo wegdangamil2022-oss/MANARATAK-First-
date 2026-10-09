@@ -215,22 +215,32 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
   }
 
   async completeClaimedJob(lease: ImportJobLease, now = new Date()): Promise<boolean> {
-    const updated = await this.prisma.importBatch.updateMany({
-      where: {
+    // Select terminal status from persisted counters in the same conditional
+    // write as the claimed worker's lease fence. A separate read would race
+    // with a concurrent checkpoint and risk a false full completion.
+    for (const [failurePredicate, status] of [
+      [{ gt: 0 }, ImportJobStatus.PARTIALLY_COMPLETED],
+      [0, ImportJobStatus.COMPLETED],
+    ] as const) {
+      const updated = await this.prisma.importBatch.updateMany({
+        where: {
         id: lease.batchId,
         batchStatus: ImportJobStatus.RUNNING,
         claimedBy: lease.workerId,
         attemptCount: lease.attempt,
         claimUntil: { equals: lease.claimUntil, gte: now },
-      },
-      data: {
-        batchStatus: ImportJobStatus.COMPLETED,
-        claimedBy: null,
-        claimUntil: null,
-        lastError: null,
-      },
-    });
-    return updated.count === 1;
+          failedRecords: failurePredicate,
+        },
+        data: {
+          batchStatus: status,
+          claimedBy: null,
+          claimUntil: null,
+          lastError: null,
+        },
+      });
+      if (updated.count === 1) return true;
+    }
+    return false;
   }
 
   async failClaimedJob(

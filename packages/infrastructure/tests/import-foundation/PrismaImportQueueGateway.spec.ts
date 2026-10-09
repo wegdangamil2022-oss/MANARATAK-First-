@@ -211,6 +211,54 @@ describe('PrismaImportQueueGateway', () => {
     expect(await gateway.failClaimedJob({ lease, now, reason: 'Stale', retryPolicy: policy })).toBe('LEASE_LOST');
   });
 
+
+  it('atomically records PARTIALLY_COMPLETED when the claimed batch has failed rows', async () => {
+    const prisma = mockPrisma();
+    const now = new Date('2026-10-09T16:00:00.000Z');
+    const lease = { batchId: 'partial-1', workerId: 'worker-1', attempt: 2,
+      claimUntil: new Date(now.getTime() + 20_000) };
+    prisma.importBatch.updateMany.mockImplementation(async ({ where }: any) => ({
+      count: typeof where.failedRecords === 'object' && where.failedRecords.gt === 0 ? 1 : 0,
+    }));
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    expect(await gateway.completeClaimedJob(lease, now)).toBe(true);
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledTimes(1);
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: lease.batchId, batchStatus: ImportJobStatus.RUNNING,
+        claimedBy: lease.workerId, attemptCount: lease.attempt,
+        claimUntil: { equals: lease.claimUntil, gte: now },
+        failedRecords: { gt: 0 },
+      },
+      data: { batchStatus: ImportJobStatus.PARTIALLY_COMPLETED,
+        claimedBy: null, claimUntil: null, lastError: null },
+    });
+  });
+
+  it('only records COMPLETED for an active clean claimed batch; stale leases cannot finalize either status', async () => {
+    const prisma = mockPrisma();
+    const now = new Date('2026-10-09T16:00:00.000Z');
+    const lease = { batchId: 'clean-1', workerId: 'worker-1', attempt: 3,
+      claimUntil: new Date(now.getTime() + 20_000) };
+    prisma.importBatch.updateMany.mockImplementation(async ({ where }: any) => ({
+      count: where.failedRecords === 0 ? 1 : 0,
+    }));
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    expect(await gateway.completeClaimedJob(lease, now)).toBe(true);
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledTimes(2);
+    expect(prisma.importBatch.updateMany).toHaveBeenLastCalledWith({
+      where: {
+        id: lease.batchId, batchStatus: ImportJobStatus.RUNNING,
+        claimedBy: lease.workerId, attemptCount: lease.attempt,
+        claimUntil: { equals: lease.claimUntil, gte: now }, failedRecords: 0,
+      },
+      data: { batchStatus: ImportJobStatus.COMPLETED,
+        claimedBy: null, claimUntil: null, lastError: null },
+    });
+    prisma.importBatch.updateMany.mockResolvedValue({ count: 0 });
+    expect(await gateway.completeClaimedJob(lease, now)).toBe(false);
+  });
+
   it('fresh replay clears checkpoint and stale lease control state atomically', async () => {
     const tx = {
       importBatch: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },

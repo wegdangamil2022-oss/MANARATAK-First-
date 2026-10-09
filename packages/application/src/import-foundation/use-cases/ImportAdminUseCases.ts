@@ -416,7 +416,9 @@ export class ImportAdminUseCases {
         totalRecords: stagedRecords,
         processedRecords: durableWorkerPath ? 0 : processedRecords,
         failedRecords: durableWorkerPath ? 0 : failedRecords,
-        batchStatus: durableWorkerPath ? ImportJobStatus.CREATED : ImportJobStatus.COMPLETED,
+        batchStatus: durableWorkerPath
+          ? ImportJobStatus.CREATED
+          : failedRecords > 0 ? ImportJobStatus.PARTIALLY_COMPLETED : ImportJobStatus.COMPLETED,
       });
 
       if (durableWorkerPath) {

@@ -211,7 +211,9 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
   async markJobCompleted(batchId: string): Promise<boolean> {
     const job = this.jobs.get(batchId);
     if (!job || job.status !== ImportJobStatus.RUNNING) return false;
-    job.status = ImportJobStatus.COMPLETED;
+    job.status = job.failedRecords > 0
+      ? ImportJobStatus.PARTIALLY_COMPLETED
+      : ImportJobStatus.COMPLETED;
     job.progress = 100;
     job.updatedAt = new Date();
     job.claimedBy = undefined;
@@ -309,7 +311,9 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
     ) {
       return false;
     }
-    job.status = ImportJobStatus.COMPLETED;
+    job.status = job.failedRecords > 0
+      ? ImportJobStatus.PARTIALLY_COMPLETED
+      : ImportJobStatus.COMPLETED;
     job.progress = 100;
     job.claimedBy = undefined;
     job.claimUntil = undefined;

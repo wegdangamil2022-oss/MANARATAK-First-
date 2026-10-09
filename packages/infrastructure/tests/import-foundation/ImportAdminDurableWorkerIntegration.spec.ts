@@ -355,6 +355,46 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(repo.records.size).toBe(1);
   });
 
+
+  it('marks a durable batch with invalid persisted work as PARTIALLY_COMPLETED, not COMPLETED', async () => {
+    const repo = statefulImportRepository();
+    const queue = new InMemoryImportQueueGateway();
+    const accept = vi.fn(async () => ({ screened: true }));
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    const useCase = new ImportAdminUseCases(repo as any, queue,
+      new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } }), worker);
+    const result = await useCase.stageNormalizedRows({
+      ownerDomain: 'GENERIC', sourceSystem: 'PARTIAL_TEST',
+      rows: [{ sourceId: 'valid-1' }, {}],
+    });
+    expect(result.summary).toMatchObject({
+      totalRecords: 2, stagedRecords: 2, processedRecords: 1, failedRecords: 1,
+    });
+    expect(accept).toHaveBeenCalledTimes(1);
+    const status = await queue.getJobStatus('batch-durable-1');
+    expect(status).toMatchObject({ status: 'PARTIALLY_COMPLETED',
+      processedRecords: 1, failedRecords: 1, progress: 100 });
+    expect(status?.checkpoint).toEqual(expect.objectContaining({
+      processedRecords: 1, failedRecords: 1, recordOffset: 2,
+    }));
+  });
+
+  it('marks a non-worker import containing invalid rows as PARTIALLY_COMPLETED', async () => {
+    const repo = statefulImportRepository();
+    const useCase = new ImportAdminUseCases(repo as any);
+    const result = await useCase.stageNormalizedRows({
+      ownerDomain: 'GENERIC', sourceSystem: 'PARTIAL_TEST',
+      rows: [{ sourceId: 'valid-1' }, {}],
+    });
+    expect(result.batch.batchStatus).toBe('PARTIALLY_COMPLETED');
+    expect(result.summary).toMatchObject({
+      totalRecords: 2, stagedRecords: 2, processedRecords: 1, failedRecords: 1,
+    });
+  });
+
   it('writes bounded recent accepted source keys rather than an unbounded checkpoint payload', async () => {
     const repo = statefulImportRepository();
     const queue = new InMemoryImportQueueGateway();
