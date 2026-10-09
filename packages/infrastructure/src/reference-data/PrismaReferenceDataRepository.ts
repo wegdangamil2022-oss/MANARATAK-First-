@@ -29,6 +29,7 @@ import {
   ReferenceGovernanceDetails,
   ReferenceCityQualityCounters,
   ReferenceDependencyImpact,
+  ReferenceProviderMappingReassignmentCommand,
   assertReferenceLifecycleTransition,
   lifecycleIsActive,
   normalizeReferenceIdentityToken,
@@ -1125,6 +1126,102 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       command.reason,
       command.actorId,
     );
+  }
+
+
+  /** Atomic mapping owner transfer. The existing version records double as an
+   * append-only, per-source durable replay receipt; there is no owner change
+   * through replaceProviderMappings/ON CONFLICT.
+   */
+  public async reassignProviderMapping(command: ReferenceProviderMappingReassignmentCommand): Promise<void> {
+    if (!this.inTransaction) throw new Error('REFERENCE_MAPPING_ATOMIC_TRANSACTION_REQUIRED');
+    if (command.fromReferenceId === command.toReferenceId) throw new Error('REFERENCE_MAPPING_SELF_TRANSFER');
+    if (!command.actorId || !command.reason.trim() || !command.reconciliationId) throw new Error('REFERENCE_MAPPING_REVIEW_CONTEXT_REQUIRED');
+    const table = this.referenceTable(command.entityType);
+    const sourceId = command.fromReferenceId;
+    const targetId = command.toReferenceId;
+    const providerSystem = command.providerSystem.trim().toLowerCase();
+    const providerId = command.providerId.trim().toLowerCase();
+
+    // Consistent row-lock ordering avoids deadlocks in crossing ownership moves.
+    const owners = await this.prisma.$queryRaw<Array<{ id: string; lifecycleState: string; versionNumber: number }>>(Prisma.sql`
+      SELECT "id", "lifecycleState", "versionNumber" FROM ${table}
+      WHERE "id" IN (${sourceId}, ${targetId}) ORDER BY "id" FOR UPDATE
+    `);
+    if (owners.length !== 2 || owners.some(row => row.lifecycleState !== 'ACTIVE'))
+      throw new Error('REFERENCE_MAPPING_ACTIVE_OWNERS_REQUIRED');
+    const source = owners.find(row => row.id === sourceId)!;
+    const target = owners.find(row => row.id === targetId)!;
+    const mappings = await this.prisma.$queryRaw<Array<{ id: string; referenceId: string; isActive: boolean }>>(Prisma.sql`
+      SELECT "id", "referenceId", "isActive" FROM "ReferenceProviderMappingRecord"
+      WHERE "entityType" = ${command.entityType}
+        AND "normalizedProviderSystem" = ${providerSystem}
+        AND "normalizedProviderId" = ${providerId}
+      LIMIT 1 FOR UPDATE
+    `);
+    if (mappings.length !== 1) throw new Error('REFERENCE_MAPPING_SOURCE_NOT_FOUND');
+    const mapping = mappings[0];
+
+    // Replay detection is inside the same owner row lock and is checked BEFORE
+    // expectedVersion, as a successful transfer increments both versions.
+    const prior = await this.prisma.$queryRaw<Array<{ snapshot: unknown }>>(Prisma.sql`
+      SELECT "snapshot" FROM "ReferenceVersionRecord"
+      WHERE "entityType" = ${command.entityType} AND "referenceId" = ${sourceId}
+        AND "snapshot" ->> 'providerMappingReconciliationId' = ${command.reconciliationId}
+      LIMIT 1
+    `);
+    if (prior.length) {
+      const receipt = prior[0].snapshot as Record<string, unknown>;
+      if (receipt.fromReferenceId !== sourceId || receipt.toReferenceId !== targetId ||
+          receipt.providerSystem !== providerSystem || receipt.providerId !== providerId ||
+          receipt.reason !== command.reason.trim()) {
+        throw new Error('REFERENCE_MAPPING_RECONCILIATION_ID_CONFLICT');
+      }
+      if (mapping.referenceId !== targetId || !mapping.isActive)
+        throw new Error('REFERENCE_MAPPING_REPLAY_TARGET_CHANGED');
+      // Sentinel rolls back the retry before the audit/outbox executor appends.
+      throw new Error('REFERENCE_MAPPING_RECONCILIATION_ALREADY_APPLIED');
+    }
+    if (!mapping.isActive || mapping.referenceId !== sourceId)
+      throw new Error('REFERENCE_MAPPING_SOURCE_OWNERSHIP_CHANGED');
+    if (source.versionNumber !== command.fromExpectedVersion ||
+        target.versionNumber !== command.toExpectedVersion)
+      throw new Error('REFERENCE_VERSION_CONFLICT');
+
+    const now = new Date();
+    const changed = await this.prisma.$executeRaw(Prisma.sql`
+      UPDATE "ReferenceProviderMappingRecord"
+      SET "referenceId" = ${targetId}, "updatedAt" = ${now}
+      WHERE "id" = ${mapping.id} AND "referenceId" = ${sourceId} AND "isActive" = true
+    `);
+    if (changed !== 1) throw new Error('REFERENCE_MAPPING_SOURCE_OWNERSHIP_CHANGED');
+
+    for (const row of [source, target]) {
+      const updated = await this.prisma.$queryRaw<Array<{ snapshot: unknown }>>(Prisma.sql`
+        UPDATE ${table} t
+        SET "versionNumber" = "versionNumber" + 1,
+            "effectiveFrom" = ${now}, "effectiveTo" = NULL, "updatedAt" = ${now}
+        WHERE "id" = ${row.id} AND "versionNumber" = ${row.versionNumber}
+        RETURNING to_jsonb(t) AS "snapshot"
+      `);
+      if (updated.length !== 1) throw new Error('REFERENCE_VERSION_CONFLICT');
+      await this.appendVersionRecord(
+        command.entityType, row.id, row.versionNumber + 1,
+        ReferenceLifecycleState.ACTIVE, now, null,
+        {
+          ...(updated[0].snapshot as Record<string, unknown>),
+          providerMappingReconciliationId: command.reconciliationId,
+          fromReferenceId: sourceId, toReferenceId: targetId,
+          providerSystem, providerId, reason: command.reason.trim(),
+        },
+        row.id === sourceId ? 'PROVIDER_MAPPING_REASSIGNED_FROM' : 'PROVIDER_MAPPING_REASSIGNED_TO',
+        command.actorId,
+      );
+    }
+  }
+
+  public reassignProviderMappingInTransaction(command: ReferenceProviderMappingReassignmentCommand, context: AtomicPersistenceContext): Promise<void> {
+    return this.transactionRepository(context).reassignProviderMapping(command);
   }
 
   private async lockAndCheckExpectedVersion(entityType: GovernedReferenceEntityType, referenceId: string, expectedVersion?: number): Promise<void> {

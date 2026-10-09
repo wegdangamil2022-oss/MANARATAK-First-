@@ -118,3 +118,18 @@ export interface ReferenceDependencyImpact {
   unobservedConsumers: 'unknown';
   terminalSafe: false;
 }
+
+/** Deliberate operator action; never an implicit provider-mapping upsert. */
+export interface ReferenceProviderMappingReassignmentCommand {
+  entityType: Exclude<GovernedReferenceEntityType, 'REGION'>;
+  fromReferenceId: string;
+  toReferenceId: string;
+  providerSystem: string;
+  providerId: string;
+  fromExpectedVersion: number;
+  toExpectedVersion: number;
+  reason: string;
+  /** Unique operator request ID; replay must not append new audit/outbox events. */
+  reconciliationId: string;
+  actorId: string;
+}

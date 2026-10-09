@@ -1,5 +1,5 @@
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import {
   IReferenceDataRepository,
   ITransactionalReferenceDataRepository,
@@ -28,6 +28,7 @@ import {
   ReferenceGovernanceDetails,
   ReferenceCityQualityCounters,
   ReferenceDependencyImpact,
+  ReferenceProviderMappingReassignmentCommand,
   referenceCityScopeKey
 } from '@manaratak/domain';
 import { AtomicAuditedOutboxMutationExecutor } from '../../event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
@@ -247,6 +248,69 @@ export class ReferenceDataUseCases {
 
   public getReferenceRelationships(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceRelationshipDto[]> {
     return this.repository.getReferenceRelationships(entityType, referenceId);
+  }
+
+
+  /** Explicit audited ownership change; other mapping updates cannot reassign. */
+  public async reassignProviderMapping(
+    input: Omit<ReferenceProviderMappingReassignmentCommand, 'actorId'>,
+    context: ReferenceDataMutationContext,
+  ): Promise<'APPLIED' | 'ALREADY_APPLIED'> {
+    if (!context.actorId || !this.atomicMutationExecutor) throw new Error('REFERENCE_MAPPING_AUDIT_REQUIRED');
+    if (!['COUNTRY', 'CURRENCY', 'LANGUAGE', 'CITY'].includes(input.entityType) ||
+        !input.fromReferenceId || !input.toReferenceId || input.fromReferenceId === input.toReferenceId ||
+        !input.providerSystem.trim() || !input.providerId.trim() || input.reason.trim().length < 3 ||
+        !Number.isSafeInteger(input.fromExpectedVersion) || input.fromExpectedVersion < 1 ||
+        !Number.isSafeInteger(input.toExpectedVersion) || input.toExpectedVersion < 1 ||
+        !/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(input.reconciliationId)) {
+      throw new ReferenceDataInvariantError('Invalid explicit provider mapping transfer request.');
+    }
+    const repository = this.repository as IReferenceDataRepository & {
+      reassignProviderMappingInTransaction?: (
+        command: ReferenceProviderMappingReassignmentCommand,
+        context: import('@manaratak/domain').AtomicPersistenceContext,
+      ) => Promise<void>;
+    };
+    if (!repository.reassignProviderMappingInTransaction) throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const command: ReferenceProviderMappingReassignmentCommand = {
+      ...input, actorId: context.actorId, reason: input.reason.trim(),
+    };
+    // Stable IDs make simultaneous replay of a request fail in the same atomic
+    // boundary rather than emitting multiple governance events.
+    const stableId = (prefix: string) => {
+      const hash = createHash('sha256').update(prefix + ':' + input.reconciliationId).digest('hex').slice(0, 32);
+      return [hash.slice(0, 8), hash.slice(8, 12), hash.slice(12, 16), hash.slice(16, 20), hash.slice(20)].join('-');
+    };
+    const auditId = stableId('P7_MAPPING_AUDIT');
+    const outboxId = stableId('P7_MAPPING_OUTBOX');
+    const now = new Date();
+    try {
+      await this.atomicMutationExecutor.execute(
+        {
+          id: auditId, reference: 'AUD-' + auditId, action: 'REFERENCE_PROVIDER_MAPPING_REASSIGNED',
+          category: 'REFERENCE_DATA_GOVERNANCE', severity: 'INFO',
+          actorId: context.actorId, actorType: context.actorType || 'IDENTITY',
+          targetId: input.fromReferenceId, targetType: 'REFERENCE_' + input.entityType,
+          source: context.source || 'admin-reference-data-api', timestamp: now,
+          contextMetadata: { ...input, reason: command.reason },
+          correlationReference: context.correlationId,
+        },
+        {
+          id: outboxId, eventType: 'REFERENCE_PROVIDER_MAPPING_REASSIGNED', domain: 'REFERENCE_DATA',
+          aggregate: { domain: 'REFERENCE_DATA', aggregateType: input.entityType, aggregateId: input.fromReferenceId },
+          payload: { ...input, reason: command.reason },
+          metadata: { actorId: context.actorId, reconciliationId: input.reconciliationId, atomicity: 'BUSINESS_AUDIT_OUTBOX' },
+          correlationId: context.correlationId, createdAt: now, availableAt: now,
+          state: OutboxProcessingState.PENDING, attempts: 0,
+        },
+        atomicContext => repository.reassignProviderMappingInTransaction!(command, atomicContext),
+      );
+      return 'APPLIED';
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === 'REFERENCE_MAPPING_RECONCILIATION_ALREADY_APPLIED')
+        return 'ALREADY_APPLIED';
+      throw err;
+    }
   }
 
   public async transitionReferenceLifecycle(

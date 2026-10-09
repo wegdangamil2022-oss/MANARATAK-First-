@@ -122,6 +122,17 @@ export class ReferenceDataAdminRouter {
       entityType: z.enum(['COUNTRY', 'CURRENCY', 'LANGUAGE', 'CITY', 'REGION']),
       referenceId: z.string().min(1).max(191),
     }).strict();
+    const mappingReconciliationSchema = z.object({
+      entityType: z.enum(['COUNTRY', 'CURRENCY', 'LANGUAGE', 'CITY']),
+      fromReferenceId: z.string().min(1).max(191),
+      toReferenceId: z.string().min(1).max(191),
+      fromExpectedVersion: z.number().int().positive(),
+      toExpectedVersion: z.number().int().positive(),
+      providerSystem: z.string().trim().min(1).max(100),
+      providerId: z.string().trim().min(1).max(200),
+      reason: z.string().trim().min(3).max(1000),
+      reconciliationId: z.string().uuid(),
+    }).strict();
     const lifecycleTransitionSchema = z.object({
       toState: z.nativeEnum(ReferenceLifecycleState).refine((state) => state !== ReferenceLifecycleState.ACTIVE),
       targetReferenceId: z.string().uuid().optional(),
@@ -229,6 +240,12 @@ export class ReferenceDataAdminRouter {
         res.json(await referenceDataUseCases.listPage('currencies', filters));
       }),
     );
+
+    router.post('/governance/provider-mappings/reassign', asyncHandler(async (req: Request, res: Response) => {
+      const body = mappingReconciliationSchema.parse(req.body);
+      const outcome = await referenceDataUseCases.reassignProviderMapping(body, mutationContext(req));
+      res.json({ outcome, reconciliationId: body.reconciliationId });
+    }));
 
     router.get(
       '/governance/:entityType/:referenceId/impact',
@@ -344,6 +361,11 @@ export class ReferenceDataAdminRouter {
         'REFERENCE_CITY_LEGACY_IDENTITY_REVIEW_REQUIRED',
         'REFERENCE_CITY_LEGACY_IDENTITY_AMBIGUOUS',
         'REFERENCE_PROVIDER_MAPPING_REASSIGNMENT_REQUIRES_RECONCILIATION',
+        'REFERENCE_MAPPING_RECONCILIATION_ID_CONFLICT',
+        'REFERENCE_MAPPING_REPLAY_TARGET_CHANGED',
+        'REFERENCE_MAPPING_SOURCE_OWNERSHIP_CHANGED',
+        'REFERENCE_MAPPING_SOURCE_NOT_FOUND',
+        'REFERENCE_MAPPING_ACTIVE_OWNERS_REQUIRED',
         'REFERENCE_GOVERNANCE_DETAILS_LIMIT_EXCEEDED',
         'REFERENCE_REPLACEMENT_RELATIONSHIP_CYCLE',
         'REFERENCE_LIFECYCLE_TARGET_NOT_ACTIVE',
