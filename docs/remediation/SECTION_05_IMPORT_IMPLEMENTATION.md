@@ -4,6 +4,18 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 8 — stranded stop diagnostics without unsafe finalization (2026-10-09)
+
+**Verified source:** code commit `96641b0369324033820b9cd153b47c09f4176394`; [Section 05 focused CI 37980637012](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37980637012) **SUCCESS** — 126/126 tests across 19 files, TypeScript, source quality, and unchanged 321-handler/320-endpoint Admin audit coverage PASS.
+
+- **IMP-P0-003/004 recovery visibility:** `getOperationalInsights` now treats `PAUSING` and `CANCELLING` as active, unfinished states. Returns separate `pendingStopBatches` (all pending stops) and `strandedStopBatches` (pending stops unchanged for more than 15 minutes **and** with expired/missing `claimUntil`). `stuckBatches` and `recentProblemBatches` include these stranded stops. Database queries are constrained by persisted status, `updatedAt`, and `claimUntil`, with equivalent development-only and fallback handling. No query or operator view changes the job state.
+- **Safety-first escalation:** A stranded stop is flagged `requiresOwnerVerification: true`, not automatically acknowledged, replayed, resumed, cancelled or force-finished. Lease expiry by itself **does not prove** that an external owner call did not complete.
+- **Admin Portal:** Operations diagnostics distinguishes **pending worker acknowledgements** from **stranded stop claims requiring owner verification** (Arabic and English), including a specific marker in the recent-problem table. These states stay outside the queue's replayable terminal statuses. No unsafe operator override was added.
+- **Regression tests:** mock Prisma tests verify bounded, filterable status/expiry predicates and absence of any database mutation; development-only tests distinguish a truly stranded stop from active or recently requested stops. The tests are included in the focused CI.
+- **Still open:** authoritative owning-domain transactional inbox/receipt; safe, owner-verifiable manual reconciliation/resolution and audit; full owner stop/crash behavioral validation against real PostgreSQL after Section 28. This batch addresses **visibility and triage**, not automatic recovery or exactly-once owner integration. Status remains `IN PROGRESS — SOURCE FIXES REQUIRED`.
+
+---
+
 ## Batch 7 — cooperative worker-confirmed pause and cancellation (2026-10-09)
 
 **Verified source:** code commit `edf1b518309c64e401bff84ded1d32ab78508de4`; [Import Section 05 focused CI 37979853893](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37979853893) **SUCCESS** — 124/124 focused Vitest tests across 18 files, TypeScript, source-quality and existing 321-handler/320-endpoint Admin audit gate PASS. Earlier intermediate CI runs failed on old immediate-cancellation test assumptions and mocked CAS branches, which were corrected before this verified source commit.
