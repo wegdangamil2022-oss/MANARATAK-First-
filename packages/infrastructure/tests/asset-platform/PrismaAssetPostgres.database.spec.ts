@@ -152,4 +152,23 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       .toBe(AssetLifecycleState.ARCHIVED);
   });
 
+  it('fences concurrent same-state metadata saves even when updates occur within one millisecond', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(newAsset(id));
+    const first = (await repository.findById(new AssetId(id)))!;
+    const second = (await repository.findById(new AssetId(id)))!;
+    expect(first.state).toBe(AssetLifecycleState.QUARANTINED);
+    expect(second.state).toBe(AssetLifecycleState.QUARANTINED);
+    // Deliberately keep both aggregate states unchanged to exercise only updatedAt CAS.
+    const results = await Promise.allSettled([
+      repository.save(first),
+      repository.save(second),
+    ]);
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    const failure = results.find((result) => result.status === 'rejected') as PromiseRejectedResult;
+    expect(String(failure.reason)).toContain('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
+      .toBe(AssetLifecycleState.QUARANTINED);
+  });
+
 });

@@ -91,6 +91,14 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     const mutation: Record<string, unknown> = { ...data };
     delete mutation.id;
     delete mutation.reference;
+    // Prisma @updatedAt is millisecond-resolution. Updating an unchanged lifecycle
+    // state in the same millisecond must still advance the compare-and-swap token.
+    // An explicit monotonic timestamp fences concurrent finalization/evidence writes.
+    const nextRevision = new Date(Math.max(Date.now(), captured.updatedAt.getTime() + 1));
+    if (!Number.isFinite(nextRevision.getTime())) {
+      throw new Error('ASSET_RECORD_REVISION_OVERFLOW');
+    }
+    mutation.updatedAt = nextRevision;
     const updated = await delegate.updateMany({
       where: {
         id: asset.id.value,

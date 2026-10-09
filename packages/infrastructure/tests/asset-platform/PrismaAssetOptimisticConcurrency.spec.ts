@@ -38,6 +38,8 @@ describe('EAP optimistic lifecycle update contract', () => {
       id: 'asset-cas', updatedAt: revision, lifecycleState: 'QUARANTINED',
     });
     expect(args.data.lifecycleState).toBe('DELETED');
+    expect(args.data.updatedAt).toBeInstanceOf(Date);
+    expect(args.data.updatedAt.getTime()).toBeGreaterThan(revision.getTime());
     expect(args.data.id).toBeUndefined();
     expect(args.data.reference).toBeUndefined();
     expect(create).not.toHaveBeenCalled();

@@ -218,3 +218,11 @@ npm run ci:source:contracts
 - Repaired pre-existing W3 static provider checks to match the checksum-fenced `moveToCleanZone(record.locator, record.checksum!.hash)` call. CI runs W3 legacy transport/security tests alongside EAP target tests to prevent silent drift.
 - Updated `docs/operations/ASSET_PROVIDER_RUNTIME.md` with actual provider `verify-upload` endpoint, server-owned finalization, SHA-256 constrained promotion, provider idempotency, and unverified external CAS/ETag obligations.
 - Automatic archive reconciliation and real external provider test remain required; pending CI verification on this commit.
+
+## Patch C — Monotonic timestamp fencing for same-state concurrent writes
+
+- Found an important CAS gap: two writes in the same millisecond that both keep `lifecycleState` unchanged could reuse the same `@updatedAt` value, allowing overwrites despite the `updatedAt + state` predicate.
+- `PrismaAssetRecordRepository.save` now explicitly sets `updatedAt` to the later of current clock time and **captured revision + 1ms**. Each successful conditional update therefore advances the DB revision even when lifecycle state does not change.
+- Extended unit assertions for strictly increasing revision and real disposable PostgreSQL regression with two concurrent writes of identical lifecycle state, requiring exactly one success.
+- No schema migration or production data updates. Time-based versioning still requires benchmarking under real DB clocks/precision and heavier concurrent loads; a dedicated integer revision would be preferable during an approved migration.
+- CI outcome for this commit pending.
