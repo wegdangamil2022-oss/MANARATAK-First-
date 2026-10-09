@@ -561,7 +561,7 @@ export class PrismaImportRepository {
       retryable: batch.batchStatus === 'FAILED_RETRYABLE',
       attempt: batch.attemptCount ?? 0,
       message: (batch.lastError ?? '')
-        .replace(/(password|token|secret|authorization)\\s*[=:]\\s*\\S+/gi, '$1=[REDACTED]')
+        .replace(/(password|token|secret|authorization|api[_-]?key|access[_-]?key)\s*[=:]\s*\S+/gi, '$1=[REDACTED]')
         .slice(0, 1000),
       updatedAt: batch.updatedAt ?? null,
     };
