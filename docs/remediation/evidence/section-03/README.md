@@ -48,3 +48,11 @@ node_modules/.bin/vitest run packages/domain/tests/asset-platform packages/appli
 ```
 
 **Recovery CI verified:** [run 37875453856](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37875453856), source commit `3be1ab760bb346d6d1cf8c19b32f81c5c3572761`, completed SUCCESS: **190 source tests + 11 disposable PostgreSQL tests**. The source job includes three usage API tests in addition to the local selection. TypeScript, source quality and audit inventory/security guards passed. See `recovery-ci.json` and `recovery-ci-summary.txt`. Provider operations remain mocked in the PostgreSQL tests; these prove DB persistence/recovery semantics, not real object-store atomicity. The evidence-only follow-up changes no tested code.
+
+## Broad workspace + restore-ownership operation, final proof
+
+Matching source `1c4b92c`, [CI 37924185138](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37924185138) SUCCESS: **211 source +14 disposable PostgreSQL tests**. See `workspace-final-ci.json` and `workspace-final-ci-summary.txt`.
+
+`workspace-tests.log`: earlier workspace slice, 209 PASS /13 DB skipped, 32.35s. `restore-delta-tests.log`: later overlapping 49 focused application/error tests PASS, 8.28s. Do not add these counts together. `workspace-types.log`: incremental Admin/API/infrastructure PASS. `workspace-lint.log`: final six-source-file selection 0 errors/53 warnings; previous implementation narrative retains earlier four-file 51-warning scope. `workspace-quality.log`: 0 cycles/a11y PASS; `workspace-guards.log`: 13 source/transport guards PASS; `workspace-coverage.log`: 319 handlers/318 endpoints PASS. `workspace-browser.log`: real Chromium/Admin with intercepted HTTP only; governance/history, workspace facets/cursor/reset, failed reset and retry PASS. No real API/DB/provider browser E2E; dev HMR disabled/test-only CSP bypass, server stopped afterward.
+
+The two version/facet PostgreSQL cases passed at workspace `2632dde` (209+13); the final restore-ownership DB regression passed on `1c4b92c` (211+14). Provider operations are mocked. Section remains NOT CLOSED for the explicit source/runtime gates in the closure register. Evidence-only final update changes no tested source.

@@ -1,5 +1,22 @@
 # Section 03 — EAP closure register
 
+## Final verified status for this broad operation — 2026-10-09
+
+**Verdict: NOT CLOSED / NO-GO.** Workspace/version preservation and restore-ownership mitigation are implemented and tested; whole-section acceptance remains incomplete.
+
+Matching source SHA `1c4b92ce714d3cb0dcb8cf403a9d6d648e31ff3b`: [CI 37924185138](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37924185138) **SUCCESS**, 211 source tests plus 14 disposable PostgreSQL tests. TypeScript, quality and security/audit checks passed in this scoped workflow. No overlapping local/CI test counts are summed. The subsequent evidence-only commit modifies no application/test source. Original review attachment hash remains `9de7c781eb82cd490fc85386267d7e9e3fe2b2028803f9ecd0351531e2cd11fc`.
+
+| Gate | Verified current result | What prevents whole-section closure |
+| --- | --- | --- |
+| Workspace/data source | Version-history preservation, supported governance/detail/owner/copy, scan/family/processing facets, failed-reset cursor handling implemented; intercepted-API Chromium passed. | Global in-use/unused facet, complete owner workflows and actual browser/API/provider acceptance remain incomplete. |
+| DB concurrency | 14 PostgreSQL tests PASS, including new chain persistence, facet composition, expired/ACTIVE restore-lease rejection. | P0-07/P1-11 consumer insertion vs lifecycle mutation is not serialized across owners. |
+| Recovery | Durable manual activation retry; restore rejects compensation on known lost/unknown ownership. | P1-12/13 heartbeat/provider fencing, automatic reconciliation/monitoring and durable compensation journal remain absent; lease check is not atomic with provider archive. |
+| Provider runtime | No safe sandbox/credentials configured in this managed environment; no external provider write performed. | P0-01/03/05 immutable version binding, real upload/scanner/sanitizer, idempotency/cache/fault-injection proofs remain pending. |
+| Global source CI | Prior three unrelated name-based relationship violations were not changed or rerun in this scoped operation. | Dedicated EAP CI success does not clear the repository-wide gate. |
+
+No schema migration, seed, reset, retention sweep, backfill, production DB/object-store write, main merge or deployment. No original task falsely marked CLOSED. Existing snapshots below are retained history and apply to their stated commits, not this final source SHA.
+
+
 ## Verified workspace CI and restore-delta checks
 
 [Workspace CI 37923765109](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37923765109) SUCCESS at `2632dde`: 209 source tests plus 13 disposable PostgreSQL tests. The two new DB cases for version preservation and facet composition passed. Restore ownership delta was added afterward: TypeScript PASS, 49 focused application/error tests PASS (8.28s). Latest expanded source lint covers six files: 0 errors /53 warnings. No overlapping counts added together. Matching delta CI remains pending until independently observed.

@@ -1,0 +1,6 @@
+SUCCESS; run 37924185138; source 1c4b92ce714d3cb0dcb8cf403a9d6d648e31ff3b
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T11:32:30.2405563Z  Test Files  21 passed | 1 skipped (22)
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T11:32:30.2406886Z       Tests  211 passed | 14 skipped (225)
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T11:32:38.2594931Z  Test Files  1 passed (1)
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T11:32:38.2595884Z       Tests  14 passed (14)
+PostgreSQL service is disposable localhost; provider calls mocked. No global CI or provider E2E claim.
