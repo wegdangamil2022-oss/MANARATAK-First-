@@ -1,5 +1,12 @@
 # Section 03 — EAP closure register
 
+## Verified recovery-worker continuation
+
+[CI run 37930553854](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37930553854) SUCCESS at source `333ef99c5ad287f400e805217936a86300b19fd2`: **240 source/config tests and 15 disposable PostgreSQL tests PASS**. The new age/state pending-intent discovery DB case passed. Full TypeScript graph, quality and scoped security/audit checks passed. See `worker-ci.json` and `worker-ci-summary.txt`; the evidence-only follow-up modifies no tested code. Source count includes config tests newly included in EAP workflow and overlaps earlier local/CI suites.
+
+Recovery worker is wired and opt-in, **not enabled**. No source runtime flags/secrets or production DB/provider objects were changed. Five existing worker/lease guards and 43 targeted local tests passed; local duration 3.04s. Audit outcomes remain non-atomic; provider object-version fencing, asset lease/restore-compensation recovery, cross-owner usage serialization and actual runtime/provider gates still block CLOSED/GO.
+
+
 ## Current continuation — bounded durable activation recovery
 
 03/P1-13 now has an EAP-owned discovery/use-case/handler connected to the existing durable worker and opt-in recurring bootstrap. Disabled by default and enforced during execution, including old queued jobs. Source tests: 43 focused PASS (3.04s), TypeScript/quality PASS, five worker/lease guards PASS; matching new CI pending. Details and non-atomic audit/provider limitations: `docs/operations/ASSET_LIFECYCLE_RECOVERY.md`.
