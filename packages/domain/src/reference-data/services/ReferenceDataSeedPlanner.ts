@@ -114,11 +114,11 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
   }
 
   public markReadyToApply(batch: ReferenceDataSeedBatch): ReferenceDataSeedBatch {
-    if (batch.records.length === 0) {
-      throw new Error('Empty seed batches cannot be approved for apply');
-    }
     if (batch.status === ReferenceDataSeedStatus.DRAFT) {
       throw new Error('Batch must be validated before marking ready to apply');
+    }
+    if (batch.records.length === 0) {
+      throw new Error('Empty seed batches cannot be approved for apply');
     }
 
     if (!batch.validationSummary || batch.validationSummary.invalidRecords > 0) {

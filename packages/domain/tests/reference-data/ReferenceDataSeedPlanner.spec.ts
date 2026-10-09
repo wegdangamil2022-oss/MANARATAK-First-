@@ -109,7 +109,7 @@ describe('ReferenceDataSeedPlanner', () => {
     expect(validated.records[2].deterministicKey).toBe('ar');
     expect(validated.records[2].validationReport?.canBeImported).toBe(true);
 
-    expect(validated.records[3].deterministicKey).toBe('EG:Cairo');
+    expect(validated.records[3].deterministicKey).toBe('EG|cairo|~');
     expect(validated.records[3].validationReport?.canBeImported).toBe(true);
   });
 
