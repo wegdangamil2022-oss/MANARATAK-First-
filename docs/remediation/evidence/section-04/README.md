@@ -1,3 +1,7 @@
+Batch 3: `read-projections-*` records summary/lazy-history tests, browser reproduction, and verifier limits. Local 102 tests/14 files PASS with overlapping final 10-test projection delta; TS/quality/three permission guards/audit PASS. Focused lint 0 errors/9 warnings. Browser intercepted API only. Source CI pending; entire Section 04 remains open.
+
+Batch 2 source `233c0ac`: [CI 37954207122](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37954207122) SUCCESS, 86 tests/12 files, TS/quality/authority/audit PASS. Matching evidence `governance-ci.*` supersedes pending statements below. No actual database/provider acceptance.
+
 # Section 04 Settings evidence
 
 Batch 2: `governance-*` captures definition/clear/rollback/reasons/correlation checks. Local 85 tests +13 overlapping API delta tests, TypeScript/quality/12 Node guards/audit PASS; isolated Chromium PASS. No actual target migration, DB concurrency or live API/provider acceptance. Matching CI pending.

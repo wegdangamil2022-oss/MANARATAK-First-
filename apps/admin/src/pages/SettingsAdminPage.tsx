@@ -51,6 +51,7 @@ interface Assignment {
   currentValue: unknown;
   isOverrideCleared?: boolean;
   versions: Version[];
+  versionCount?: number;
 }
 
 function safeId(prefix: string) {
@@ -73,6 +74,43 @@ export function SettingsAdminPage() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'definitions' | 'assignments'>('definitions');
   const [selectedHistory, setSelectedHistory] = useState<Assignment | null>(null);
+  const [historyVersions, setHistoryVersions] = useState<Version[]>([]);
+  const [historyCursor, setHistoryCursor] = useState<string | undefined>();
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
+  const historyGeneration = useRef(0);
+  const historyBusy = useRef(false);
+
+  const loadHistory = async (assignment: Assignment, cursor?: string) => {
+    if (historyBusy.current) return;
+    historyBusy.current = true;
+    const request = ++historyGeneration.current;
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const query = new URLSearchParams({ expectedCurrentVersionId: assignment.currentVersionId, limit: '50' });
+      if (cursor) query.set('cursor', cursor);
+      const result = await adminApiClient.request<{ data: { versions: Version[]; nextCursor?: string } }>(
+        `/admin/settings/assignments/${encodeURIComponent(assignment.id)}/history?${query}`, { cache: 'no-store' });
+      if (request !== historyGeneration.current) return;
+      if (!Array.isArray(result.data?.versions)) throw new Error('Invalid history response');
+      setHistoryVersions(previous => cursor ? [...new Map([...previous, ...result.data.versions].map(version => [version.id, version])).values()] : result.data.versions);
+      setHistoryCursor(result.data.nextCursor);
+    } catch (cause) {
+      if (request === historyGeneration.current) setHistoryError(errorText(cause));
+    } finally {
+      if (request === historyGeneration.current) { setHistoryLoading(false); historyBusy.current = false; }
+    }
+  };
+
+  useEffect(() => {
+    setHistoryVersions([]);
+    setHistoryCursor(undefined);
+    setHistoryError('');
+    historyBusy.current = false;
+    if (selectedHistory) void loadHistory(selectedHistory);
+    return () => { historyGeneration.current += 1; historyBusy.current = false; };
+  }, [selectedHistory?.id, selectedHistory?.currentVersionId]);
 
   const [definitionForm, setDefinitionForm] = useState({
     key: '',
@@ -865,7 +903,7 @@ export function SettingsAdminPage() {
                             className="inline-flex items-center gap-1 rounded-lg border border-[#0E7C86]/20 px-2.5 py-1.5 font-black text-[#142B5F] hover:bg-[#DDEFF2]/40"
                           >
                             <History className="h-3.5 w-3.5" />
-                            {item.versions.length}
+                            {item.versionCount ?? item.versions.length}
                           </button>
                           {canRestore(item.key) && !item.isOverrideCleared && <button type="button" disabled={saving}
                             onClick={() => void clearOverride(item)} className="ms-2 rounded border px-2 py-1">
@@ -1022,7 +1060,12 @@ export function SettingsAdminPage() {
               </button>
             </div>
             <div className="mt-5 space-y-3">
-              {[...selectedHistory.versions]
+              {historyError && <div role="alert" className="text-red-700">{historyError}
+                <button type="button" disabled={historyLoading} onClick={() => void loadHistory(selectedHistory, historyCursor)} className="ms-2 rounded border px-2 py-1">{isAr ? 'إعادة المحاولة' : 'Retry'}</button>
+              </div>}
+              {historyLoading && <p role="status">{isAr ? 'تحميل السجل…' : 'Loading history…'}</p>}
+              {!historyLoading && !historyError && historyVersions.length === 0 && <p>{isAr ? 'لا توجد نسخ في هذه الصفحة.' : 'No versions on this page.'}</p>}
+              {[...historyVersions]
                 .sort(
                   (a, b) =>
                     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
@@ -1065,6 +1108,7 @@ export function SettingsAdminPage() {
                     </div>
                   </div>
                 ))}
+              {historyCursor && !historyError && <button type="button" disabled={historyLoading} onClick={() => void loadHistory(selectedHistory, historyCursor)} className="rounded border px-3 py-2">{isAr ? 'تحميل نسخ أقدم' : 'Load older versions'}</button>}
             </div>
           </div>
         </div>

@@ -148,6 +148,54 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
     return this.prisma.settingAssignmentRecord.count({ where: { key: key.getValue() } });
   }
 
+  async readSummaries(filters: { key?: string; level?: string; scopeId?: string }) {
+    const records = await this.prisma.settingAssignmentRecord.findMany({
+      where: { key: filters.key, scopeLevel: filters.level, scopeId: filters.scopeId },
+      include: { _count: { select: { versions: true } } },
+      orderBy: [{ key: 'asc' }, { scopeLevel: 'asc' }, { scopeId: 'asc' }],
+    });
+    const currentRows = await this.prisma.settingVersionRecord.findMany({
+      where: { id: { in: records.map(row => row.currentVersionId) } },
+    });
+    const current = new Map(currentRows.map(row => [row.id, row]));
+    return records.map(row => {
+      const version = current.get(row.currentVersionId);
+      if (!version || version.assignmentId !== row.id) throw new Error('SETTINGS_CURRENT_VERSION_INVALID');
+      if (row.scopeLevel === 'GLOBAL' && row.scopeId !== 'GLOBAL') throw new Error('SETTINGS_GLOBAL_STORAGE_SCOPE_INVALID');
+      // This is a read projection, never a writable aggregate with partial history.
+      const scope = new ScopeIdentifier(row.scopeLevel, row.scopeLevel === 'GLOBAL' ? undefined : row.scopeId || undefined);
+      const currentVersion = new SettingVersion(version.id, this.createValueData(version.valueType, version.value),
+        version.createdAt, version.authorId ?? undefined, version.rollbackOfVersionId ?? undefined,
+        version.operation as 'SET' | 'CLEAR_OVERRIDE', version.changeReason ?? undefined);
+      return { id: row.id, key: row.key, scope, currentVersion, versionCount: row._count.versions };
+    });
+  }
+
+  async readHistory(id: string, expectedCurrentVersionId: string, limit: number, cursor?: string) {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('Invalid history page size');
+    const assignment = await this.prisma.settingAssignmentRecord.findUnique({ where: { id } });
+    if (!assignment) throw new Error('Setting assignment not found');
+    if (assignment.currentVersionId !== expectedCurrentVersionId) throw new Error('SETTINGS_ASSIGNMENT_CONFLICT');
+    const current = await this.prisma.settingVersionRecord.findUnique({ where: { id: assignment.currentVersionId } });
+    if (!current || current.assignmentId !== id) throw new Error('SETTINGS_DURABLE_CURRENT_VERSION_INVALID');
+    const anchor = cursor ? await this.prisma.settingVersionRecord.findUnique({ where: { id: cursor } }) : null;
+    if (cursor && (!anchor || anchor.assignmentId !== id)) throw new Error('SETTINGS_HISTORY_CURSOR_INVALID');
+    const rows = await this.prisma.settingVersionRecord.findMany({
+      where: { assignmentId: id, ...(anchor ? { OR: [
+        { createdAt: { lt: anchor.createdAt } },
+        { createdAt: anchor.createdAt, id: { lt: anchor.id } },
+      ] } : {}) },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit + 1,
+    });
+    const after = await this.prisma.settingAssignmentRecord.findUnique({ where: { id } });
+    if (!after || after.currentVersionId !== expectedCurrentVersionId) throw new Error('SETTINGS_ASSIGNMENT_CONFLICT');
+    const page = rows.slice(0, limit);
+    return { key: assignment.key, nextCursor: rows.length > limit ? page.at(-1)?.id : undefined,
+      versions: page.map(row => new SettingVersion(row.id, this.createValueData(row.valueType, row.value),
+        row.createdAt, row.authorId ?? undefined, row.rollbackOfVersionId ?? undefined,
+        row.operation as 'SET' | 'CLEAR_OVERRIDE', row.changeReason ?? undefined)) };
+  }
+
   async findBy(spec: { isSatisfiedBy: (assignment: SettingAssignment) => boolean }): Promise<SettingAssignment[]> {
     // Note: Due to lack of query specifications, we fetch all. 
     // In a real implementation we would map the spec to prisma query.

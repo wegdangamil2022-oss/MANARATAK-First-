@@ -17,3 +17,12 @@ test('diagnostic settings reads retain existing control-plane permission protect
   assert.match(router, /router\.get\('\/inspect\/:key'/);
   assert.doesNotMatch(router, /router\.(post|put|patch|delete)\(/);
 });
+
+
+test('summary and lazy history remain under the existing admin Settings permission', () => {
+  const app = read('apps/api/src/app.ts');
+  assert(app.includes("v1Router.use('/admin/settings', requireAdminPermission('admin:settings:manage'), lazyRouter('settingsAdminRouter'))"));
+  const router = read('apps/api/src/presentation/api/router/SettingsAdminRouter.ts');
+  assert.match(router, /router\.get\('\/assignments\/:id\/history'/);
+  assert.match(router, /listAssignmentSummaries\(filters\)/);
+});

@@ -1,3 +1,20 @@
+## Batch 3 — 04.21 Patch F: summary projections and bounded lazy history — 2026-10-09
+
+Status remains IN PROGRESS / NOT CLOSED. The original reference and identifiers are unchanged. This source batch addresses the history-loading component of Patch F; it does **not** close server-side list pagination/search, canonical scope selection, actual dynamic-consumer wiring, event-delivery semantics or the source/runtime ownership-FK obligation.
+
+- GET assignments now uses a separate read projection: SQL key/level/scope filters, version counts and only current version rows. It no longer hydrates every historical version or invokes the generic in-memory findBy specification. Current pointer ownership and GLOBAL storage sentinel are checked. Read projections never expose a writable aggregate with partial history.
+- GET `/admin/settings/assignments/:id/history` is lazy, no-store, limit 1–100 (default 50), timestamp/id keyset order with one extra row for continuation. A cursor must belong to the requested assignment. The expected current-version pointer is checked before and after the page read; corrupt pointer ownership fails closed. A changed pointer returns 409, rather than making a stale restore appear valid. This is diagnostic optimistic checking, not an atomic multi-query snapshot.
+- Application redaction applies before API serialization for secrets and missing definitions, including reasons; no stored secret value becomes browser data. Exact assignment lookup and complete immutable write histories remain unchanged.
+- Admin displays version counts from summaries and fetches history only when its dialog opens. Loading/error/empty/retry/older-page states are explicit. Generation checks prevent a closed/replaced dialog receiving an old response; page results deduplicate IDs. Existing revision, reason, trusted actor, inheritance and idempotency protections remain intact.
+
+Local verification: 102 tests across 14 files PASS, followed by the overlapping 10 projection tests after the final projection hydration adjustment; do not add those counts. TypeScript/source quality PASS; focused lint 0 errors/9 warnings; three authority/permission guards PASS; unchanged mutation audit coverage PASS (321 handlers/320 endpoints). Chromium intercepted-API flow PASS: no history request with initial list, truthful count, two history pages/cursor, clear/inherit and definition deprecation protections. No actual database/provider/live API acceptance is claimed. Matching CI will be recorded after pushing this source.
+
+Remaining Patch F limits are explicit: definition list and assignment summary row cohort remain unbounded, UI search/scope controls still filter loaded records, definition lookup still happens once per distinct assignment key, and the legacy Application list method remains for compatibility. This batch eliminates eager history but does not label the entire list problem solved. Next bounded-list work must include exact selected-scope lookup before writes: an assignment absent from the loaded page cannot be treated as absent from the database. Four pre-existing global architecture findings remain open; the combined source verifier is still 78/79, no waiver. No source migration was applied, no original repair-file change, no production GO.
+
+## Verified batch 2 CI — 2026-10-09
+
+Source `233c0accca886e38486fa680be248b60c24f0f45`: [CI 37954207122](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37954207122) SUCCESS: **86 tests across 12 files**, TypeScript/source quality, authority guards and existing audit coverage PASS. Evidence: `governance-ci.json` and `governance-ci-summary.txt`. This observed result supersedes the historical pending statements below. Source-only proof; no target migration, database concurrency, event-delivery or provider acceptance inferred.
+
 # Section 04 — Settings verification and implementation
 
 ## Batch 2 — governed definition metadata and clear/inherit history (2026-10-09)

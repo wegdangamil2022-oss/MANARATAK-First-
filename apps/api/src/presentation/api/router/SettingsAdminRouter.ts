@@ -111,10 +111,20 @@ export class SettingsAdminRouter {
       '/assignments',
       asyncHandler(async (req: Request, res: Response) => {
         const filters = listAssignmentsSchema.parse(req.query);
-        const assignments = await manageSettingsUseCase.listAssignments(filters);
+        res.setHeader('Cache-Control', 'no-store');
+        const assignments = await manageSettingsUseCase.listAssignmentSummaries(filters);
         res.status(200).json(responseFormatter.success({ assignments }));
       }),
     );
+
+    router.get('/assignments/:id/history', asyncHandler(async (req, res) => {
+      const id = identifier.parse(req.params.id);
+      const query = z.object({ expectedCurrentVersionId: identifier,
+        limit: z.coerce.number().int().min(1).max(100).default(50), cursor: identifier.optional() }).strict().parse(req.query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.assignmentHistory(
+        id, query.expectedCurrentVersionId, query.limit, query.cursor)));
+    }));
 
     const updateDefinitionSchema = z.object({ key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/),
       expectedRevision: z.string().datetime(), description: z.string().max(2000).optional(),
@@ -252,7 +262,7 @@ export class SettingsAdminRouter {
       }
       const message = err?.message || 'Settings operation failed';
       const conflict =
-        /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|SETTINGS_DEFINITION_CONFLICT|SETTINGS_OVERRIDE_ALREADY_CLEARED|SETTINGS_DEFINITION_NOT_WRITABLE|already belongs/i.test(message);
+        /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|SETTINGS_ASSIGNMENT_CONFLICT|SETTINGS_DEFINITION_CONFLICT|SETTINGS_OVERRIDE_ALREADY_CLEARED|SETTINGS_DEFINITION_NOT_WRITABLE|already belongs/i.test(message);
       const known = /^SETTINGS_[A-Z_]+/.exec(message)?.[0];
       const missing = /_NOT_FOUND$/.test(known ?? '') || /not found/i.test(message);
       const unavailable = /SETTINGS_(ATOMIC|IMPACT|DURABLE)/.test(known ?? '');

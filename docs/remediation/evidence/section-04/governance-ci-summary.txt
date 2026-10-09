@@ -1,0 +1,6 @@
+settings-source	Source quality	2026-10-09T15:47:15.3315135Z SOURCE_QUALITY_GATE=PASS
+settings-source	Settings invariants, effective resolution, persistence and API contracts	2026-10-09T15:47:20.1175934Z [2m Test Files [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+settings-source	Settings invariants, effective resolution, persistence and API contracts	2026-10-09T15:47:20.1176630Z [2m      Tests [22m [1m[32m86 passed[39m[22m[90m (86)[39m
+settings-source	Authority and permission guards	2026-10-09T15:47:20.2450162Z # pass 2
+settings-source	Authority and permission guards	2026-10-09T15:47:20.2450359Z # fail 0
+settings-source	Existing audit coverage	2026-10-09T15:47:20.8983528Z ADMIN_MUTATION_AUDIT_COVERAGE=PASS; handlers=321; uniqueEndpoints=320; owner validation/atomic adoption requires separate evidence

@@ -13,8 +13,8 @@ describe('SettingsAdminRouter', () => {
       assignValue: vi.fn(),
       rollbackValue: vi.fn(),
       listDefinitions: vi.fn().mockResolvedValue([]),
-      listAssignments: vi.fn().mockResolvedValue([]),
-      clearOverride: vi.fn(), updateDefinition: vi.fn(), definitionImpact: vi.fn()
+      listAssignmentSummaries: vi.fn().mockResolvedValue([]),
+      assignmentHistory: vi.fn(), clearOverride: vi.fn(), updateDefinition: vi.fn(), definitionImpact: vi.fn()
     };
 
     app = express();
@@ -150,6 +150,31 @@ describe('SettingsAdminRouter', () => {
     const res = await request(app).post('/api/v1/admin/settings/assignments/clear').send({ assignmentId: 'missing',
       expectedCurrentVersionId: 'v1', newVersionId: 'clear', changeReason: 'Use inherited policy' });
     expect(res.status).toBe(404); expect(res.body.error.code).toBe('SETTINGS_NOT_FOUND');
+  });
+
+  it('bounds lazy history and rejects unknown or oversized query fields', async () => {
+    mockManageSettingsUseCase.assignmentHistory.mockResolvedValue({ versions: [], nextCursor: 'v2' });
+    const url = '/api/v1/admin/settings/assignments/a/history';
+    const valid = await request(app).get(url).query({ expectedCurrentVersionId: 'v3', limit: '20', cursor: 'v2' });
+    expect(valid.status).toBe(200); expect(valid.headers['cache-control']).toBe('no-store');
+    expect(mockManageSettingsUseCase.assignmentHistory).toHaveBeenCalledWith('a', 'v3', 20, 'v2');
+    expect((await request(app).get(url).query({ expectedCurrentVersionId: 'v3', limit: '101' })).status).toBe(400);
+    expect((await request(app).get(url).query({ expectedCurrentVersionId: 'v3', allowSecrets: 'true' })).status).toBe(400);
+    expect((await request(app).get(url)).status).toBe(400);
+    expect(mockManageSettingsUseCase.assignmentHistory).toHaveBeenCalledTimes(1);
+  });
+  it('returns a reload conflict for a history page whose current version changed', async () => {
+    mockManageSettingsUseCase.assignmentHistory.mockRejectedValue(new Error('SETTINGS_ASSIGNMENT_CONFLICT'));
+    const result = await request(app).get('/api/v1/admin/settings/assignments/a/history').query({ expectedCurrentVersionId: 'v3' });
+    expect(result.status).toBe(409); expect(result.body.error.code).toBe('SETTINGS_CONFLICT');
+  });
+
+  it('lists summary projections with SQL filters rather than requesting full history', async () => {
+    mockManageSettingsUseCase.listAssignmentSummaries.mockResolvedValue([{ id: 'a', versions: [], versionCount: 500 }]);
+    const result = await request(app).get('/api/v1/admin/settings/assignments').query({ key: 'site.title', level: 'DOMAIN', scopeId: 'courses' });
+    expect(result.status).toBe(200); expect(result.headers['cache-control']).toBe('no-store');
+    expect(mockManageSettingsUseCase.listAssignmentSummaries).toHaveBeenCalledWith({ key: 'site.title', level: 'DOMAIN', scopeId: 'courses' });
+    expect(result.body.data.assignments[0]).toMatchObject({ versions: [], versionCount: 500 });
   });
 
 });

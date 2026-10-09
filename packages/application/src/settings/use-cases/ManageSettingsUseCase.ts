@@ -60,6 +60,7 @@ export interface SettingAssignmentAdminView {
   currentValue: unknown;
   isOverrideCleared: boolean;
   versions: SettingVersionAdminView[];
+  versionCount?: number;
 }
 
 export class ManageSettingsUseCase {
@@ -139,6 +140,35 @@ export class ManageSettingsUseCase {
         a.level.localeCompare(b.level) ||
         (a.scopeId ?? '').localeCompare(b.scopeId ?? ''),
     );
+  }
+
+  public async listAssignmentSummaries(filters: { key?: string; level?: ScopeLevel; scopeId?: string } = {}) {
+    if (!this.assignmentRepo.readSummaries) throw new Error('Settings summary reader unavailable');
+    const summaries = await this.assignmentRepo.readSummaries(filters);
+    const definitions = new Map<string, SettingDefinition | null>();
+    const views: SettingAssignmentAdminView[] = [];
+    for (const row of summaries) {
+      if (!definitions.has(row.key)) definitions.set(row.key, await this.definitionRepo.findByKey(new NamespacedKey(row.key)));
+      const definition = definitions.get(row.key);
+      const redact = !definition || definition.isSecret;
+      views.push({ id: row.id, key: row.key, level: row.scope.getLevel(), scopeId: row.scope.getScopeId(),
+        currentVersionId: row.currentVersion.id, isOverrideCleared: row.currentVersion.operation === 'CLEAR_OVERRIDE',
+        currentValue: redact ? '********' : row.currentVersion.operation === 'CLEAR_OVERRIDE' ? null : row.currentVersion.value.getValue(),
+        versionCount: row.versionCount, versions: [] });
+    }
+    return views;
+  }
+
+  public async assignmentHistory(id: string, expectedCurrentVersionId: string, limit = 50, cursor?: string) {
+    if (!this.assignmentRepo.readHistory) throw new Error('Settings history reader unavailable');
+    const page = await this.assignmentRepo.readHistory(id, expectedCurrentVersionId, limit, cursor);
+    const definition = await this.definitionRepo.findByKey(new NamespacedKey(page.key));
+    const redact = !definition || definition.isSecret;
+    return { nextCursor: page.nextCursor, versions: page.versions.map(version => ({
+      id: version.id, value: redact ? '********' : version.value.getValue(), valueType: version.value.type,
+      createdAt: version.createdAt, authorId: version.authorId, rollbackOfVersionId: version.rollbackOfVersionId,
+      operation: version.operation, changeReason: redact ? undefined : version.changeReason,
+    })) };
   }
 
   public async createDefinition(
