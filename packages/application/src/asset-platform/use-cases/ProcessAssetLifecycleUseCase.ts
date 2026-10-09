@@ -160,30 +160,58 @@ export class ProcessAssetLifecycleUseCase {
 
   public async activateAsset(dto: ActivateAssetDto): Promise<AssetRecordDto> {
     const id = new AssetId(dto.assetId);
-    const record = await this.assetRepository.findById(id);
-    if (!record) {
-      throw new Error(`Asset not found: ${dto.assetId}`);
+    let record = await this.assetRepository.findById(id);
+    if (!record) throw new Error(`Asset not found: ${dto.assetId}`);
+    // A lost HTTP response after a committed activation is safe to retry.
+    if (record.state === AssetLifecycleState.ACTIVE && record.activationOperation?.phase === 'COMPLETED') {
+      record.assertCanDeliver();
+      return AssetRecordMapper.toDto(record);
     }
-
-    // Never promote content merely because the *previous* quarantined bytes passed.
     record.assertCanActivate();
-    if (!this.storageGateway.verifyUploadedObject) {
-      throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+    if (!record.activationOperation) {
+      if (!this.storageGateway.verifyUploadedObject) throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+      const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+        declaredMimeType: record.metadata.mimeType, expectedByteSize: record.uploadVerification?.byteSize,
+      });
+      if (verified.signatureVerified !== true || verified.byteSize !== record.uploadVerification?.byteSize ||
+          verified.verifiedMimeType !== record.metadata.mimeType || !Number.isFinite(Date.parse(verified.verifiedAt)) ||
+          verified.checksumSha256.toLowerCase() !== record.checksum?.hash) {
+        throw new Error('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
+      }
+      record.prepareActivation(globalThis.crypto.randomUUID());
+      // Commit the intent before provider movement. A rejected CAS never moves bytes.
+      await this.assetRepository.save(record);
+      const operationId = record.activationOperation!.operationId;
+      record = await this.assetRepository.findById(id);
+      if (!record || record.activationOperation?.operationId !== operationId) {
+        throw new Error('ASSET_ACTIVATION_OPERATION_INVALID');
+      }
+      if (record.state === AssetLifecycleState.ACTIVE && record.activationOperation.phase === 'COMPLETED') {
+        record.assertCanDeliver();
+        return AssetRecordMapper.toDto(record);
+      }
     }
-    const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
-      declaredMimeType: record.metadata.mimeType,
-      expectedByteSize: record.uploadVerification?.byteSize,
-    });
-    if (verified.signatureVerified !== true ||
-        verified.byteSize !== record.uploadVerification?.byteSize ||
-        verified.verifiedMimeType !== record.metadata.mimeType ||
-        !Number.isFinite(Date.parse(verified.verifiedAt)) ||
-        verified.checksumSha256.toLowerCase() !== record.checksum?.hash) {
-      throw new Error('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
-    }
+    record.assertActivationOperation();
+    const operationId = record.activationOperation!.operationId;
+    // Retry the same source+digest key even if source bytes already moved. The provider
+    // must durably replay its original digest-bound result; it must never publish twice.
     const cleanLocator = await this.storageGateway.moveToCleanZone(record.locator, record.checksum!.hash);
     record.activate(cleanLocator);
-    await this.assetRepository.save(record);
+    try {
+      await this.assetRepository.save(record);
+    } catch (error) {
+      // A competing retry may have committed the same promotion. Never compensate by
+      // deleting/archiving a CLEAN object another successful command is already using.
+      const committed = await this.assetRepository.findById(id);
+      if (committed?.state === AssetLifecycleState.ACTIVE &&
+          committed.activationOperation?.operationId === operationId &&
+          committed.activationOperation.phase === 'COMPLETED' &&
+          committed.checksum?.hash === record.checksum?.hash && committed.locator.value === cleanLocator.value) {
+        committed.assertCanDeliver();
+        return AssetRecordMapper.toDto(committed);
+      }
+      throw error;
+    }
     return AssetRecordMapper.toDto(record);
   }
 

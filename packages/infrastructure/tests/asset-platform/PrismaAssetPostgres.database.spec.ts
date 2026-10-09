@@ -212,6 +212,7 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
       classification: AssetSecurityClassification.INTERNAL,
       state: AssetLifecycleState.DELETED,
+      retentionBeforeLifecycle: { category: AssetRetentionCategory.PERMANENT, expiresAt: null },
       checksum: new AssetChecksum('sha256', 'a'.repeat(64)),
       sanitization: new AssetSanitizationMetadata(true, new Date(), 'verified sanitized bytes'),
       malwareScan: {
@@ -224,6 +225,52 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       },
     });
   }
+
+  it('durably rehydrates PREPARED promotion after post-move persistence failure, then completes the same operation', async () => {
+    const id = DB_PREFIX + randomUUID();
+    const quarantine = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'isolated-bucket', 'uploads/' + id + '.pdf');
+    const record = new AssetRecord({
+      id: new AssetId(id), reference: new AssetReference('ref-' + id),
+      owner: new AssetOwnerReference('db-test-user', 'STUDENT'), locator: quarantine,
+      metadata: new AssetMetadata('test.pdf', 'application/pdf', 'pdf', 64),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      classification: AssetSecurityClassification.INTERNAL, state: AssetLifecycleState.SANITIZING,
+      checksum: new AssetChecksum('sha256', 'a'.repeat(64)),
+      sanitization: new AssetSanitizationMetadata(true, new Date()),
+      malwareScan: { status: 'PASSED', scannedAt: new Date().toISOString(), locator: quarantine.value },
+      uploadVerification: { locator: quarantine.value, byteSize: 64, verifiedMimeType: 'application/pdf',
+        checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(), signatureVerified: true },
+    });
+    await repository.save(record);
+    const originalSave = repository.save.bind(repository);
+    let writes = 0;
+    const save = vi.spyOn(repository, 'save').mockImplementation(async value => {
+      if (++writes === 2) throw new Error('SIMULATED_POST_MOVE_WRITE_FAILURE');
+      await originalSave(value);
+    });
+    const verifyUploadedObject = vi.fn(async () => ({ byteSize: 64, verifiedMimeType: 'application/pdf',
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(), signatureVerified: true }));
+    const moveToCleanZone = vi.fn(async () => {
+      const row = (await prisma.assetRecord.findUnique({ where: { id } }))!;
+      expect(row.lifecycleState).toBe(AssetLifecycleState.SANITIZING);
+      expect((row.malwareScanStatus as any).activationOperation.phase).toBe('PREPARED');
+      return new AssetStorageLocator(AssetStorageZone.CLEAN, 'isolated-bucket', 'clean/' + id + '.pdf');
+    });
+    const useCase = new ProcessAssetLifecycleUseCase(repository, { verifyUploadedObject, moveToCleanZone } as any, {} as any);
+    try {
+      await expect(useCase.activateAsset({ assetId: id })).rejects.toThrow('SIMULATED_POST_MOVE_WRITE_FAILURE');
+      const pending = (await repository.findById(new AssetId(id)))!;
+      expect(pending.activationOperation?.phase).toBe('PREPARED');
+      expect(() => pending.softDelete()).toThrow('ASSET_ACTIVATION_RECOVERY_PENDING');
+      await useCase.activateAsset({ assetId: id });
+      const done = (await repository.findById(new AssetId(id)))!;
+      expect(done.state).toBe(AssetLifecycleState.ACTIVE);
+      expect(done.activationOperation?.phase).toBe('COMPLETED');
+      expect(done.activationOperation?.operationId).toBe(pending.activationOperation?.operationId);
+      expect(verifyUploadedObject).toHaveBeenCalledTimes(1);
+      expect(moveToCleanZone.mock.calls[1]).toEqual(moveToCleanZone.mock.calls[0]);
+    } finally { save.mockRestore(); }
+  });
 
   it('does not commit ACTIVE before provider has proven restored CLEAN bytes', async () => {
     const id = DB_PREFIX + randomUUID();

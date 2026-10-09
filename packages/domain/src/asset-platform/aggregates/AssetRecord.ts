@@ -30,6 +30,19 @@ export interface AssetUploadEvidence {
   signatureVerified: boolean;
 }
 
+export interface AssetActivationOperation {
+  version: 1;
+  operationId: string;
+  phase: 'PREPARED' | 'COMPLETED';
+  sourceLocator: string;
+  expectedSha256: string;
+  preparedAt: string;
+  completedAt?: string;
+}
+export interface AssetRetentionSnapshot {
+  category: AssetRetentionCategory.PERMANENT | AssetRetentionCategory.TEMPORARY;
+  expiresAt: string | null;
+}
 export interface AssetRecordProps {
   id: AssetId;
   reference: AssetReference;
@@ -44,6 +57,8 @@ export interface AssetRecordProps {
   sanitization?: AssetSanitizationMetadata;
   malwareScan?: { status: 'PASSED' | 'FAILED'; scannedAt: string; locator: string };
   uploadVerification?: AssetUploadEvidence;
+  activationOperation?: AssetActivationOperation;
+  retentionBeforeLifecycle?: AssetRetentionSnapshot;
 }
 
 export class AssetRecord {
@@ -68,7 +83,10 @@ export class AssetRecord {
   get sanitization(): AssetSanitizationMetadata | undefined { return this.props.sanitization; }
   get malwareScan(): AssetRecordProps['malwareScan'] { return this.props.malwareScan; }
   get uploadVerification(): AssetRecordProps['uploadVerification'] { return this.props.uploadVerification; }
+  get activationOperation(): AssetActivationOperation | undefined { return this.props.activationOperation ? { ...this.props.activationOperation } : undefined; }
+  get retentionBeforeLifecycle(): AssetRetentionSnapshot | undefined { return this.props.retentionBeforeLifecycle ? { ...this.props.retentionBeforeLifecycle } : undefined; }
 
+  /** Local transition artifacts only; no published integration/outbox contract. See EAP lifecycle ADR. */
   public getUncommittedEvents(): unknown[] {
     return this.events;
   }
@@ -128,6 +146,7 @@ export class AssetRecord {
   }
 
   public failMalwareScan(reason: string = 'Malware detected'): void {
+    this.assertNoPendingActivation();
     if (this.props.state === AssetLifecycleState.ACTIVE) {
       throw new Error('Cannot mark active asset as malware scan failed');
     }
@@ -158,6 +177,7 @@ export class AssetRecord {
   }
 
   public completeSanitization(sanitization: AssetSanitizationMetadata, sanitizedLocator?: AssetStorageLocator): void {
+    this.assertNoPendingActivation();
     if (this.props.state !== AssetLifecycleState.SANITIZING) {
       throw new Error('Can only complete sanitization from SANITIZING state');
     }
@@ -176,6 +196,7 @@ export class AssetRecord {
   }
 
   public confirmSanitizedObject(evidence: AssetUploadEvidence): void {
+    this.assertNoPendingActivation();
     if (this.props.state !== AssetLifecycleState.SANITIZING ||
       !this.props.sanitization ||
       this.props.locator.storageZone !== AssetStorageZone.QUARANTINE) {
@@ -200,6 +221,7 @@ export class AssetRecord {
   }
 
   public passSanitizedMalwareScan(): void {
+    this.assertNoPendingActivation();
     if (this.props.state !== AssetLifecycleState.SANITIZING ||
       !this.props.sanitization ||
       !this.props.uploadVerification ||
@@ -236,6 +258,43 @@ export class AssetRecord {
     }
   }
 
+  private assertNoPendingActivation(): void {
+    if (this.props.activationOperation?.phase === 'PREPARED') throw new Error('ASSET_ACTIVATION_RECOVERY_PENDING');
+  }
+
+  public prepareActivation(operationId: string): void {
+    this.assertCanActivate();
+    if (this.props.activationOperation) {
+      this.assertActivationOperation();
+      return;
+    }
+    if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(operationId)) throw new Error('ASSET_ACTIVATION_OPERATION_INVALID');
+    this.props.activationOperation = {
+      version: 1, operationId, phase: 'PREPARED', sourceLocator: this.props.locator.value,
+      expectedSha256: this.props.checksum!.hash, preparedAt: new Date().toISOString(),
+    };
+  }
+
+  public assertActivationOperation(): void {
+    const operation = this.props.activationOperation;
+    if (!operation || operation.version !== 1 || operation.phase !== 'PREPARED' ||
+        !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(operation.operationId) ||
+        operation.sourceLocator !== this.props.locator.value ||
+        operation.expectedSha256 !== this.props.checksum?.hash ||
+        !Number.isFinite(Date.parse(operation.preparedAt))) {
+      throw new Error('ASSET_ACTIVATION_OPERATION_INVALID');
+    }
+    this.assertCanActivate();
+  }
+
+  private preserveRetentionPolicy(): void {
+    if (this.props.retentionBeforeLifecycle) return;
+    const category = this.props.retention.category;
+    if (category === AssetRetentionCategory.PERMANENT || category === AssetRetentionCategory.TEMPORARY) {
+      this.props.retentionBeforeLifecycle = { category, expiresAt: this.props.retention.expiresAt?.toISOString() ?? null };
+    }
+  }
+
   public activate(cleanLocator: AssetStorageLocator, checksum?: AssetChecksum): void {
     this.assertCanActivate();
     if (cleanLocator.storageZone !== AssetStorageZone.CLEAN) {
@@ -246,6 +305,9 @@ export class AssetRecord {
       this.props.checksum = checksum;
     }
     this.props.state = AssetLifecycleState.ACTIVE;
+    if (this.props.activationOperation) {
+      this.props.activationOperation = { ...this.props.activationOperation, phase: 'COMPLETED', completedAt: new Date().toISOString() };
+    }
     this.events.push(new AssetActivatedEvent(this.props.id));
   }
 
@@ -253,15 +315,18 @@ export class AssetRecord {
     if (this.props.state !== AssetLifecycleState.ACTIVE) {
       throw new Error('Can only archive from ACTIVE state');
     }
+    this.preserveRetentionPolicy();
     this.props.state = AssetLifecycleState.ARCHIVED;
     this.props.retention = new AssetRetentionMetadata(AssetRetentionCategory.ARCHIVED, this.props.retention.expiresAt);
     this.events.push(new AssetArchivedEvent(this.props.id));
   }
 
   public softDelete(): void {
+    this.assertNoPendingActivation();
     if (this.props.state === AssetLifecycleState.DELETED || this.props.state === AssetLifecycleState.PURGED) {
       throw new Error('Asset is already deleted or purged');
     }
+    this.preserveRetentionPolicy();
     this.props.state = AssetLifecycleState.DELETED;
     this.props.retention = new AssetRetentionMetadata(AssetRetentionCategory.SOFT_DELETED, this.props.retention.expiresAt);
     this.events.push(new AssetDeletedEvent(this.props.id));
@@ -292,8 +357,17 @@ export class AssetRecord {
       throw new Error('Can only restore from DELETED state');
     }
     this.assertVerifiedCleanEvidence();
+    const policy = this.props.retentionBeforeLifecycle;
+    if (!policy || ![AssetRetentionCategory.PERMANENT, AssetRetentionCategory.TEMPORARY].includes(policy.category)) {
+      throw new Error('ASSET_RESTORE_RETENTION_POLICY_UNKNOWN');
+    }
+    const expiry = policy.expiresAt === null ? null : new Date(policy.expiresAt);
+    if ((policy.category === AssetRetentionCategory.TEMPORARY && !expiry) ||
+        (expiry && (!Number.isFinite(expiry.getTime()) || expiry.getTime() <= Date.now()))) {
+      throw new Error('ASSET_RESTORE_RETENTION_POLICY_EXPIRED');
+    }
     this.props.state = AssetLifecycleState.ACTIVE;
-    this.props.retention = new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT, this.props.retention.expiresAt);
+    this.props.retention = new AssetRetentionMetadata(policy.category, expiry);
     this.events.push(new AssetRestoredEvent(this.props.id));
   }
 

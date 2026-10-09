@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import { mkdtemp, mkdir, writeFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
@@ -125,6 +126,23 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
         await rm(root, { recursive: true, force: true });
       }
     });
+  });
+
+  it('replays a completed local promotion by verifying existing CLEAN bytes, including sanitized paths', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-promotion-retry-'));
+    try {
+      await mkdir(path.join(root, 'bucket', 'sanitized', 'uploads'), { recursive: true });
+      const bytes = '%PDF-1.7 sanitized';
+      await writeFile(path.join(root, 'bucket', 'sanitized', 'uploads', 'a.pdf'), bytes);
+      const gateway = new LocalAssetStorageGateway('bucket', root);
+      const source = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'bucket', 'sanitized/uploads/a.pdf');
+      const digest = createHash('sha256').update(bytes).digest('hex');
+      const clean = await gateway.moveToCleanZone(source, digest);
+      expect(clean.pathKey).toBe('clean/sanitized/uploads/a.pdf');
+      await expect(gateway.moveToCleanZone(source, digest)).resolves.toEqual(clean);
+      await expect(gateway.moveToCleanZone(source, 'b'.repeat(64))).rejects.toThrow('ASSET_CLEAN_PROMOTION_CHECKSUM_MISMATCH');
+      expect(Buffer.from(await gateway.read(clean, 100)).toString()).toBe(bytes);
+    } finally { await rm(root, { recursive: true, force: true }); }
   });
 
   it('handles archive and restore retries and restoration of never-archived files safely', async () => {

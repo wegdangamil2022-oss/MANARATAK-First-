@@ -124,6 +124,36 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       expect(record.getUncommittedEvents()).toHaveLength(0);
     });
 
+    it('preserves TEMPORARY policy across soft-delete/restore and refuses elapsed or missing policy', () => {
+      const base = createInitialAsset();
+      const expiresAt = new Date(Date.now() + 60_000);
+      const source = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'b', 'uploads/test.pdf');
+      const props = {
+        id: base.id, reference: base.reference, owner: base.owner,
+        locator: new AssetStorageLocator(AssetStorageZone.CLEAN, 'b', 'clean/test.pdf'),
+        metadata: base.metadata, classification: AssetSecurityClassification.INTERNAL,
+        state: AssetLifecycleState.ACTIVE,
+        retention: new AssetRetentionMetadata(AssetRetentionCategory.TEMPORARY, expiresAt),
+        checksum: new AssetChecksum('sha256', 'a'.repeat(64)),
+        sanitization: new AssetSanitizationMetadata(true, new Date()),
+        malwareScan: { status: 'PASSED' as const, scannedAt: new Date().toISOString(), locator: source.value },
+        uploadVerification: { locator: source.value, byteSize: base.metadata.byteSize, verifiedMimeType: 'application/pdf',
+          checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(), signatureVerified: true },
+      };
+      const record = new AssetRecord({ ...props });
+      record.softDelete();
+      expect(record.retentionBeforeLifecycle).toEqual({ category: 'TEMPORARY', expiresAt: expiresAt.toISOString() });
+      record.restore();
+      expect(record.retention.category).toBe(AssetRetentionCategory.TEMPORARY);
+      expect(record.retention.expiresAt?.getTime()).toBe(expiresAt.getTime());
+      const legacy = new AssetRecord({ ...props, state: AssetLifecycleState.DELETED });
+      expect(() => legacy.restore()).toThrow('ASSET_RESTORE_RETENTION_POLICY_UNKNOWN');
+      const elapsed = new AssetRecord({ ...props, state: AssetLifecycleState.DELETED,
+        retentionBeforeLifecycle: { category: AssetRetentionCategory.TEMPORARY, expiresAt: new Date(Date.now()-1).toISOString() } });
+      expect(() => elapsed.restore()).toThrow('ASSET_RESTORE_RETENTION_POLICY_EXPIRED');
+      expect(elapsed.state).toBe(AssetLifecycleState.DELETED);
+    });
+
     it('prevents activation when malware scan fails', () => {
       const { record } = createInitialAsset();
       record.assignQuarantineLocator(new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q-bucket', 'file.exe'));

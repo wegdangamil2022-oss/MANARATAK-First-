@@ -56,16 +56,38 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
 
   async moveToCleanZone(quarantineLocator: AssetStorageLocator, expectedSha256?: string): Promise<AssetStorageLocator> {
     if (quarantineLocator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_STORAGE_QUARANTINE_LOCATOR_REQUIRED');
-    if (expectedSha256) {
-      const actualSha256 = createHash('sha256').update(await readFile(this.resolveLocator(quarantineLocator))).digest('hex');
-      if (!/^[a-f0-9]{64}$/i.test(expectedSha256) || actualSha256 !== expectedSha256.toLowerCase()) throw new Error('ASSET_CLEAN_PROMOTION_CHECKSUM_MISMATCH');
-    }
-    const cleanPathKey = quarantineLocator.pathKey.replace(/^uploads\//, 'clean/');
+    const cleanPathKey = 'clean/' + quarantineLocator.pathKey.replace(/^uploads\//, '');
     const cleanLocator = new AssetStorageLocator(AssetStorageZone.CLEAN, this.localBucketName, cleanPathKey);
     const source = this.resolveLocator(quarantineLocator);
     const destination = this.resolveLocator(cleanLocator);
+    const digest = async (filename: string) => createHash('sha256').update(await readFile(filename)).digest('hex');
+    const exists = async (filename: string) => {
+      try { const info = await stat(filename); if (!info.isFile()) throw new Error('ASSET_STORAGE_LOCATOR_NOT_FILE'); return true; }
+      catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false; throw error; }
+    };
+    const checkRecovered = async () => {
+      if (!expectedSha256 || !/^[a-f0-9]{64}$/i.test(expectedSha256) ||
+          await digest(destination) !== expectedSha256.toLowerCase()) {
+        throw new Error('ASSET_CLEAN_PROMOTION_CHECKSUM_MISMATCH');
+      }
+    };
+    const [sourceExists, destinationExists] = await Promise.all([exists(source), exists(destination)]);
+    if (sourceExists && destinationExists) throw new Error('ASSET_STORAGE_AMBIGUOUS_DUPLICATE_COPIES');
+    if (!sourceExists) {
+      if (!destinationExists) throw new Error('ASSET_STORAGE_OBJECT_MISSING');
+      await checkRecovered();
+      return cleanLocator;
+    }
+    if (expectedSha256 && (!/^[a-f0-9]{64}$/i.test(expectedSha256) ||
+        await digest(source) !== expectedSha256.toLowerCase())) {
+      throw new Error('ASSET_CLEAN_PROMOTION_CHECKSUM_MISMATCH');
+    }
     await mkdir(path.dirname(destination), { recursive: true });
-    await rename(source, destination);
+    try { await rename(source, destination); }
+    catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT' || await exists(source) || !await exists(destination)) throw error;
+      await checkRecovered(); // Concurrent retry may have completed the same move.
+    }
     return cleanLocator;
   }
 

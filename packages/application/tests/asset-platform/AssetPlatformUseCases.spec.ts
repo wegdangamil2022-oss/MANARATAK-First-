@@ -69,6 +69,8 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
       malwareScan: stored.malwareScan ? { ...stored.malwareScan } : undefined,
       uploadVerification: stored.uploadVerification ? { ...stored.uploadVerification } : undefined,
       versionChain: stored.versionChain,
+      activationOperation: stored.activationOperation,
+      retentionBeforeLifecycle: stored.retentionBeforeLifecycle,
     });
   }
 
@@ -381,6 +383,57 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     const move = vi.spyOn(storageGateway, 'moveToCleanZone');
     await expect(lifecycleUseCase.activateAsset({ assetId })).rejects.toThrow('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
     expect(move).not.toHaveBeenCalled();
+  });
+
+  it('persists activation intent before moving and resumes after post-move DB failure', async () => {
+    const assetId = 'activation-recovery';
+    await ingestUseCase.requestUploadLocator({ assetId, assetReference: 'activation-recovery-ref',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'a.pdf', mimeType: 'application/pdf',
+      fileExtension: 'pdf', byteSize: 12, classification: AssetSecurityClassification.INTERNAL });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId });
+    await lifecycleUseCase.validateAsset({ assetId });
+    await lifecycleUseCase.sanitizeAsset({ assetId });
+    const originalSave = repo.save.bind(repo);
+    let saves = 0;
+    vi.spyOn(repo, 'save').mockImplementation(async record => {
+      if (++saves === 2) throw new Error('DB_WRITE_UNAVAILABLE');
+      return originalSave(record);
+    });
+    const move = vi.spyOn(storageGateway, 'moveToCleanZone');
+    const verify = vi.spyOn(storageGateway, 'verifyUploadedObject');
+    await expect(lifecycleUseCase.activateAsset({ assetId })).rejects.toThrow('DB_WRITE_UNAVAILABLE');
+    const pending = (await repo.findById(new AssetId(assetId)))!;
+    expect(pending.state).toBe(AssetLifecycleState.SANITIZING);
+    expect(pending.activationOperation?.phase).toBe('PREPARED');
+    expect(() => pending.softDelete()).toThrow('ASSET_ACTIVATION_RECOVERY_PENDING');
+    expect(() => pending.failMalwareScan('manual')).toThrow('ASSET_ACTIVATION_RECOVERY_PENDING');
+    expect(() => pending.assertCanDeliver()).toThrow();
+    verify.mockRejectedValue(new Error('SOURCE_ALREADY_MOVED'));
+    const recovered = await lifecycleUseCase.activateAsset({ assetId });
+    expect(recovered).toMatchObject({ state: 'ACTIVE', activationOperation: { phase: 'COMPLETED', operationId: pending.activationOperation?.operationId } });
+    expect(recovered.activationOperation).not.toHaveProperty('sourceLocator');
+    expect(verify).toHaveBeenCalledTimes(1);
+    expect(move.mock.calls[1]).toEqual(move.mock.calls[0]);
+    const done = (await repo.findById(new AssetId(assetId)))!;
+    expect(done.activationOperation?.operationId).toBe(pending.activationOperation?.operationId);
+    expect(done.activationOperation?.phase).toBe('COMPLETED');
+    await lifecycleUseCase.activateAsset({ assetId }); // lost response retry does not move again
+    expect(move).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not move bytes when saving activation intent loses its revision CAS', async () => {
+    const assetId = 'activation-intent-conflict';
+    await ingestUseCase.requestUploadLocator({ assetId, assetReference: 'activation-conflict-ref',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'a.pdf', mimeType: 'application/pdf',
+      fileExtension: 'pdf', byteSize: 12, classification: AssetSecurityClassification.INTERNAL });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId });
+    await lifecycleUseCase.validateAsset({ assetId });
+    await lifecycleUseCase.sanitizeAsset({ assetId });
+    vi.spyOn(repo, 'save').mockRejectedValueOnce(new Error('ASSET_RECORD_CONCURRENT_MODIFICATION'));
+    const move = vi.spyOn(storageGateway, 'moveToCleanZone');
+    await expect(lifecycleUseCase.activateAsset({ assetId })).rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    expect(move).not.toHaveBeenCalled();
+    expect((await repo.findById(new AssetId(assetId)))?.activationOperation).toBeUndefined();
   });
 
   it('does not call moveToCleanZone for quarantined or malware-failed assets', async () => {

@@ -3,6 +3,14 @@
 Canonical tasks: MANARATAK_ADMIN_REVIEW_CODEX.md §03.10–03.17.
 This register is an evidence map, not an authorization to deploy or to mark runtime PASS.
 
+## Latest recovery continuation (supersedes older source-blocker snapshots below)
+- PREPARED activation intent now persists before any provider movement; recovery is source+digest idempotent and COMPLETE/ACTIVE is CAS-persisted. Manual recovery exists; no automatic reconciler is claimed.
+- Retention policy is preserved for new archive/delete transitions; unknown/expired historical policies fail restore before external effects. No backfill/default duration.
+- Local event artifacts are explicitly non-dispatched; see docs/operations/ASSET_LIFECYCLE_RECOVERY.md. Production outbox adoption remains a future consumer contract, not an implemented feature.
+- Typed operational envelopes reuse existing EAP-owned JSON. No new schema, migration, production DB or external provider write was executed locally.
+- Pending activation blocks deletion/evidence changes. Terminal HTTP errors start a fresh explicit HTTP attempt; ambiguous network/in-progress retries retain their key. The durable operation ID remains stable.
+- Verdict: **NOT CLOSED / NO-GO**, pending provider, operational, usage race and remaining workspace acceptance gates.
+
 ## Gate status
 - SOURCE: partial verification. Latest known source CI before this register: run 37867695630, commit eca47ba2d40c876612a0d6741ecb50c320a92f54.
 - DISPOSABLE_DB: ten PostgreSQL integration tests previously passed in that run. No production DB was contacted.

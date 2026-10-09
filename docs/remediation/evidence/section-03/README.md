@@ -28,3 +28,21 @@ git diff --check
 ```
 
 No local DB migration/reset/seed/sweep or external object-store operation was executed. The existing branch CI uses its disposable PostgreSQL service; it is not a production connection. Provider/browser/operational gates and unresolved source durability contracts still block CLOSED/GO.
+
+## Activation recovery and retention continuation (based on 12f05da)
+
+- `recovery-tests.log`: **187 passed /19 files**, 11 disposable DB tests intentionally skipped locally. Scope is EAP domain/application/infrastructure, lifecycle/error/finalization/reuse API contracts and Admin action contract; it differs from the earlier 220-test selection and overlaps it.
+- `recovery-typecheck.log`: project graph PASS, exit 0; compilation completed before the final test run.
+- `recovery-quality.log`: zero cycles/a11y findings, PASS.
+- `recovery-lint.log`: selected six source files, 0 errors/48 warnings (existing repository/router typing). No whole-repository lint claim.
+- `recovery-guards.log`: 13 Node source/transport/audit guards PASS. `recovery-coverage.log`: PASS, 319 handlers/318 endpoints.
+- `recovery-contracts.log`: same three global name-based relationship violations; coverage guard passes, later pipeline stages did not run.
+- A new disposable PostgreSQL test checks persisted PREPARED intent, failed post-move save, rehydration and completion under the same operation ID. It must pass on the pushed commit's CI before any real-DB claim for this continuation.
+- Existing historical source/CI/browser evidence is preserved; no browser/provider runtime test was run for this recovery continuation. No migration/schema change/backfill, external provider write, retention sweep or production DB mutation was executed locally.
+- See [current contract](../../../operations/ASSET_LIFECYCLE_RECOVERY.md). Events are local non-dispatched artifacts; no production outbox/notification functionality is claimed.
+
+Final test command (after `tsc -b`):
+
+```bash
+node_modules/.bin/vitest run packages/domain/tests/asset-platform packages/application/tests/asset-platform packages/infrastructure/tests/asset-platform apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts apps/api/tests/presentation/api/router/AssetReuseRouter.spec.ts apps/admin/src/components/AssetLifecycleActions.spec.tsx
+```

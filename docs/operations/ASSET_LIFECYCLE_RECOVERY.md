@@ -1,0 +1,27 @@
+# EAP lifecycle recovery and event contract
+
+This document implements the clarification required by remediation section 03/P1-13, P1-14 and P1-10. It records current owner behavior; it does not authorize production rollout or declare provider acceptance.
+
+## Activation intent
+
+`AssetRecord.activationOperation` is a typed, versioned EAP-owned operational intent, persisted in the existing `malwareScanStatus` JSON envelope beside upload/scan evidence. It is not a canonical relation, external event ledger, client metadata, or general queue. Asset identity remains the existing relational record ID; storage coordinates stay private to EAP. No schema migration/backfill is required.
+
+Before moving bytes, the application validates all recorded scan/sanitization/upload evidence, independently re-observes the quarantine object, and CAS-persists PREPARED with operation ID, source locator and SHA-256. Failed intent persistence performs no provider move. The application rehydrates the saved intent before proceeding.
+
+The provider promotion must be digest-fenced and durably idempotent by source locator + digest. A retry of a PREPARED operation may find that the original source no longer exists; it repeats the same promotion operation and expects the provider's original verified CLEAN result. It must not allocate a new object or accept a different digest. HTTP adapters retain the same semantic provider idempotency key. Existing CLEAN local-development bytes are rehashed before retry acceptance; sanitized path keys now move to a separate clean path.
+
+ACTIVE and COMPLETED are written together by the existing revision/state CAS. If a competing retry committed the same operation, a losing writer only accepts the already-persisted matching ACTIVE object. It never deletes or archives another successful retry's object. A genuine DB failure leaves persisted PREPARED and delivery denied. The management activation command is the bounded/manual recovery entry point. Soft deletion, mutation of scan evidence and sanitizer completion are blocked while the intent is pending; stale pre-intent commands also lose the revision CAS.
+
+This is a durable activation intent and retry path, **not** an automatic scheduled reconciler or an atomic provider/DB transaction. Provider idempotency expiry, immutable version fencing, stalled operations, operational monitoring, sandbox fault injection and cross-process durability still need runtime evidence. Local adapter is development-only and is not a claim of atomic object-store security.
+
+## Retention restoration
+
+Archive/soft-delete preserve the original PERMANENT/TEMPORARY category and explicit expiry in a typed `retentionBeforeLifecycle` snapshot within the existing EAP-owned metadata envelope. Restore keeps that category and expiry, rather than replacing TEMPORARY with PERMANENT. An expired/invalid policy, TEMPORARY without expiry, or a historical deleted record with no trustworthy original policy fails closed before storage restoration. No dates or durations are inferred and no historical data is backfilled.
+
+A legacy asset whose policy is unknown needs an owner-reviewed retention decision before restoration can be enabled. This document does not authorize rewriting historical policies or automatic retention sweeps. The archive retry and purge tombstone/worker paths continue to use their existing contracts; the generic terminal-SKIPPED governance issue remains separate.
+
+## Current event contract
+
+The AssetRecord event classes are **local, non-dispatched transition artifacts**, not published integration contracts. Source search found definitions/exports/aggregate generation and tests, but no EAP application/infrastructure consumer or dispatch/outbox call for these classes. `getUncommittedEvents()` does not publish anything. HTTP business audit is a separate mechanism and is not an outbox substitute.
+
+Consumers must not rely on these events for notifications, publication, billing, processing jobs, or usage-registry consistency. No dispatch or notification was added in this change. If a consumer requires lifecycle integration events, the EAP owner must define versioned envelopes and persist them transactionally with the state transition through the platform outbox, with consumer idempotency and acceptance tests. That is a separate implementation gate; the existing local artifacts must never be advertised as delivered production events.

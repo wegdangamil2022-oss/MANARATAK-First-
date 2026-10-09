@@ -8,6 +8,7 @@ export interface AssetActionSnapshot {
     uploadConfirmed: boolean;
     malwareStatus: 'PASSED' | 'FAILED' | null;
     sanitized: boolean;
+    activationPhase?: 'PREPARED' | 'COMPLETED' | null;
   };
 }
 type Action = 'finalize-upload' | 'validate' | 'sanitize' | 'activate' | 'archive' | 'delete' | 'restore';
@@ -21,13 +22,20 @@ export function availableAssetActions(asset: AssetActionSnapshot): Action[] {
     case 'INITIATED': return ['finalize-upload', 'delete'];
     case 'QUARANTINED': return [evidence?.uploadConfirmed ? 'validate' : 'finalize-upload', 'delete'];
     case 'VALIDATING': return evidence?.malwareStatus === 'PASSED' ? ['sanitize', 'delete'] : ['delete'];
-    case 'SANITIZING': return evidence?.uploadConfirmed && evidence.malwareStatus === 'PASSED' && evidence.sanitized ? ['activate', 'delete'] : ['delete'];
+    case 'SANITIZING': if (evidence?.activationPhase === 'PREPARED') return ['activate'];
+      return evidence?.uploadConfirmed && evidence.malwareStatus === 'PASSED' && evidence.sanitized ? ['activate', 'delete'] : ['delete'];
     case 'ACTIVE': return ['archive', 'delete'];
     case 'ARCHIVED': return ['archive', 'delete']; // Retry interrupted provider archival; never imply restore is supported here.
     case 'MALWARE_SCAN_FAILED': return ['delete'];
     case 'DELETED': return ['restore'];
     default: return [];
   }
+}
+export function shouldStartNewAssetAttempt(error: unknown): boolean {
+  // Canonical middleware durably caches terminal HTTP failures. A new explicit
+  // recovery attempt gets a fresh HTTP key; ambiguous transport retries keep it.
+  return error instanceof Error && /^\[[45]\d{2}\]/.test(error.message) &&
+    !error.message.includes('IDEMPOTENCY_REQUEST_IN_PROGRESS');
 }
 export async function executeAssetAction(assetId: string, action: Action, key: string) {
   return adminApiClient.request(`/admin/assets/${encodeURIComponent(assetId)}${action === 'delete' ? '' : '/' + action}`, {
@@ -50,7 +58,11 @@ export function AssetLifecycleActions({ asset, onChanged }: { asset: AssetAction
       retryKeys.current.delete(action);
       setConfirmation(null);
       await onChanged();
-    } catch { setError('تعذر إتمام الإجراء أو تحديث حالته. حدّث التفاصيل قبل إعادة المحاولة؛ قد يكون الإجراء محفوظًا.'); }
+    } catch (failure) {
+      if (shouldStartNewAssetAttempt(failure)) retryKeys.current.delete(action);
+      setError('تعذر إتمام الإجراء أو تحديث حالته. حدّث التفاصيل قبل إعادة المحاولة؛ قد يكون الإجراء محفوظًا.');
+      try { await onChanged(); } catch { /* Keep the command failure visible if refresh also fails. */ }
+    }
     finally { running.current = false; setBusy(false); }
   }
   async function prepare(action: Action) {

@@ -40,12 +40,15 @@ describe('EAP persisted upload and malware evidence', () => {
       checksumSha256: 'b'.repeat(64), verifiedAt: new Date().toISOString(), signatureVerified: true,
     });
     record.passSanitizedMalwareScan();
+    record.prepareActivation(globalThis.crypto.randomUUID());
     await repository.save(record);
     expect(stored.malwareScanStatus).toMatchObject({
       status: 'PASSED', uploadVerification: { checksumSha256: 'b'.repeat(64), byteSize: 42 },
     });
 
     const restored = await repository.findById(new AssetId('asset-evidence-1'));
+    expect(restored?.activationOperation).toEqual(record.activationOperation);
+    expect(() => restored?.softDelete()).toThrow('ASSET_ACTIVATION_RECOVERY_PENDING');
     expect(restored?.uploadVerification?.verifiedMimeType).toBe('application/pdf');
     expect(restored?.malwareScan?.status).toBe('PASSED');
     expect(() => restored?.assertCanActivate()).not.toThrow();

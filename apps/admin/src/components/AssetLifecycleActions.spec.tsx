@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { availableAssetActions, executeAssetAction } from './AssetLifecycleActions';
+import { availableAssetActions, executeAssetAction, shouldStartNewAssetAttempt } from './AssetLifecycleActions';
 import { adminApiClient } from '../api/client';
 vi.mock('../api/client', () => ({ adminApiClient: { request: vi.fn() }, createAdminIdempotencyKey: () => 'isolated-key' }));
 describe('asset action contract', () => {
@@ -13,9 +13,19 @@ describe('asset action contract', () => {
     expect(availableAssetActions({ id: 'a', lifecycleState: 'SANITIZING',
       securityEvidence: { uploadConfirmed: true, malwareStatus: 'PASSED', sanitized: true } })).toContain('activate');
   });
+  it('allows only recovery while a persisted promotion is pending', () => {
+    expect(availableAssetActions({ id: 'a', lifecycleState: 'SANITIZING',
+      securityEvidence: { uploadConfirmed: true, malwareStatus: 'PASSED', sanitized: true, activationPhase: 'PREPARED' } })).toEqual(['activate']);
+  });
   it('does not offer unsupported archived restore or irreversible purge', () => {
     expect(availableAssetActions({ id: 'a', lifecycleState: 'ARCHIVED' })).toEqual(['archive', 'delete']);
     expect(availableAssetActions({ id: 'a', lifecycleState: 'PURGED' })).toEqual([]);
+  });
+  it('starts a new HTTP attempt after a cached terminal failure, preserving keys for ambiguous or in-progress requests', () => {
+    expect(shouldStartNewAssetAttempt(new Error('[500] Asset operation failed'))).toBe(true);
+    expect(shouldStartNewAssetAttempt(new Error('[409] Asset state conflict'))).toBe(true);
+    expect(shouldStartNewAssetAttempt(new Error('Failed to fetch'))).toBe(false);
+    expect(shouldStartNewAssetAttempt(new Error('[409] processing (IDEMPOTENCY_REQUEST_IN_PROGRESS)'))).toBe(false);
   });
   it('encodes the handle and forwards only an empty server-verified command with retry key', async () => {
     await executeAssetAction('a/b', 'activate', 'same-operation');

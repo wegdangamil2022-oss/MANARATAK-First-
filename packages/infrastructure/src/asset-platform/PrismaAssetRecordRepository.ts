@@ -14,7 +14,9 @@ import {
   AssetChecksum,
   AssetSanitizationMetadata,
   AssetStorageZone,
-  AssetRetentionCategory
+  AssetRetentionCategory,
+  AssetActivationOperation,
+  AssetRetentionSnapshot
 } from '@manaratak/domain';
 
 interface AssetRecordRow {
@@ -65,6 +67,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         width: asset.metadata.width,
         height: asset.metadata.height,
         duration: asset.metadata.duration,
+        lifecycleRetention: asset.retentionBeforeLifecycle,
         extraMetadata: asset.metadata.extraMetadata
       } as any,
       versionChain: asset.versionChain ? (asset.versionChain as any) : null,
@@ -73,8 +76,8 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         sanitizedAt: asset.sanitization.sanitizedAt?.toISOString(),
         sanitizerNotes: asset.sanitization.sanitizerNotes
       } as any : null,
-      malwareScanStatus: asset.malwareScan || asset.uploadVerification
-        ? { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null } as any
+      malwareScanStatus: asset.malwareScan || asset.uploadVerification || asset.activationOperation
+        ? { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null, activationOperation: asset.activationOperation ?? null } as any
         : null as any,
     };
 
@@ -426,6 +429,9 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       sanitization,
       malwareScan,
       uploadVerification,
+      // Operational EAP-owned JSON, never a client-provided canonical relation.
+      activationOperation: scan?.activationOperation == null ? undefined : scan.activationOperation as unknown as AssetActivationOperation,
+      retentionBeforeLifecycle: metadataObj.lifecycleRetention == null ? undefined : metadataObj.lifecycleRetention as AssetRetentionSnapshot,
       versionChain: undefined // Existing scope excludes full versionChain reconstruction.
     });
     this.loadedSnapshots.set(asset, {

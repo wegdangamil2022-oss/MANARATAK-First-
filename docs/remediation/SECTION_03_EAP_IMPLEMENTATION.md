@@ -1,5 +1,28 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## أحدث متابعة — التعافي وسياسة الاستعادة (2026-10-09)
+
+تستكمل هذه الدفعة `12f05da` وتحافظ على جميع المعرفات والملاحظات السابقة. هذا الحكم الأحدث يحدّث الأجزاء المنفذة أدناه، ولا يحوّل الأقسام السابقة إلى CLOSED.
+
+| المهمة | التنفيذ المتحقق منه في المصدر | الحد المتبقي |
+| --- | --- | --- |
+| P0-02 / P1-13 | PREPARED intent محفوظ بـCAS قبل provider promotion؛ COMPLETED وACTIVE معًا. إعادة المحاولة تستعمل نفس source+digest ونفس operation identity؛ خطأ حفظ بعد move يبقي intent ولا يسمح delivery. لا provider call إذا فشل حفظ النية. | automatic reconciliation/monitoring، تعويض restore الفاشل، وضمان provider durable replay/immutable version ما زالت مفتوحة. |
+| P1-12 | stale mutations تفقد CAS بعد حفظ النية؛ Aggregate يمنع الحذف وتغيير scan/sanitization أثناء PREPARED. منافس أكمل نفس التفعيل يُقرأ كنجاح مطابق بدل أرشفة الملف الذي صار مستخدمًا. | provider multi-replica/races خارج DB وسباق إضافة usage يحتاجان تحققًا/عقدًا مشتركًا. |
+| P1-10 | حفظ PERMANENT/TEMPORARY والـexpiry الأصليين قبل archive/delete داخل typed owner snapshot؛ restore لا يحوّل TEMPORARY إلى PERMANENT. سياسة مجهولة/منتهية/غير صالحة تفشل قبل storage restore. | لا backfill ولا تخمين لسياسة تاريخية؛ السجلات القديمة المجهولة تحتاج قرار owner موثق. |
+| P1-14 | البحث في المصدر أثبت أن events تُولد محليًا ولا dispatch/outbox أو consumer لها في EAP. وُثّق العقد المحلي غير المنشور صراحةً، وأشير إليه في getUncommittedEvents. لا notifications وهمية. | أي تبنٍ كـintegration contract يحتاج transactional outbox وتصميم owner واختبارات جديدة؛ لا ادعاء أنه نُفّذ. |
+| P1-01 / P1-08 | phase آمنة في detail، منع delete أثناء pending recovery، واستثناءات recovery/retention تعاد 409 آمنًا. عند HTTP failure نهائي تستخدم محاولة التعافي الصريحة مفتاح HTTP جديدًا؛ network/in-progress retry يحتفظ بالمفتاح. | facets/translation/full workspace والـbrowser/provider acceptance لا تزال كما في السجل السابق. |
+| P1-16 | Local promotion يتحقق من existing CLEAN digest عند retry؛ sanitized paths انتقلت إلى clean/ بدل البقاء في نفس المسار الفيزيائي. | local dev فقط؛ ليس دليل provider atomic object version، ولا يعطل Noop scanner security. |
+
+تفاصيل العقد في [ASSET_LIFECYCLE_RECOVERY.md](../operations/ASSET_LIFECYCLE_RECOVERY.md). النية التشغيلية تحفظ داخل `malwareScanStatus.activationOperation` الموجود؛ سياسة الاستعادة داخل `metadata.lifecycleRetention`. كلاهما typed EAP-owned envelope، ليس علاقات مرجعية جديدة أو JSON مرسلًا من العميل. AssetId والـownership يبقيان في الأعمدة الأصلية. لا schema/migration ولا تشغيل sweep أو تعديل سجلات تاريخية.
+
+الـoperation ID الخادمي يظهر في projection آمنة وفي Audit نجاح التفعيل دون source locator؛ idempotency مزود HTTP بقي مشتقًا من source+digest. فشل حفظ نتيجة بعد provider move لا يطلق compensation مدمّرًا على أصل ربما أكمله منافس. استدعاء التفعيل مرة أخرى هو مسار recovery اليدوي الحالي؛ لا worker آلي مخترع.
+
+الاختبارات الجديدة تشمل DB-failure-after-move، intent-CAS rejection، reload of PREPARED، نفس operation ID عند retry، منع mutations أثناء recovery، retry بعد فقد استجابة النجاح، local digest recovery، والحفاظ على TEMPORARY ورفض سياسة قديمة مجهولة/منتهية. اختبار PostgreSQL جديد للنية المحفوظة يعمل داخل CI disposable فقط؛ لا يُحتسب PASS محليًا عند skip.
+
+**NOT CLOSED / NO-GO**: تقدّم المصدر موثق؛ provider sandbox، التشغيل، بقية workspace capabilities، وسباقات usage/restore تبقى مفتوحة. لا نجاح test أو CI محدود يغلق هذه الاعتماديات.
+
+---
+
 ## التحقق الحالي — متابعة 2026-10-09
 
 **هذا القسم يحدّث الحكم الحالي؛ الفقرات اللاحقة سجل تاريخي للدفعات ولا تعني أن عبارة «لم تُشغّل الاختبارات» ما زالت تنطبق.** استؤنف العمل من `1482556`، لا من main أو snapshot قديم. ملف الخطة المعتمد لم يتغير.
