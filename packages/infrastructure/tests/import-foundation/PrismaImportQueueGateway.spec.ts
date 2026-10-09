@@ -124,6 +124,61 @@ describe('PrismaImportQueueGateway', () => {
     );
   });
 
+  it('requires a claimed worker acknowledgement before a RUNNING cancellation reaches CANCELLED', async () => {
+    const prisma = mockPrisma();
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    const lease = {
+      batchId: 'batch-running', workerId: 'worker-in-flight', attempt: 4,
+      claimUntil: new Date(Date.now() + 60_000),
+    };
+    expect(await gateway.cancelJob({ batchId: lease.batchId, reason: 'Operator request' })).toBe(true);
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledWith({
+      where: { id: lease.batchId,
+        batchStatus: { in: [ImportJobStatus.RUNNING, ImportJobStatus.PAUSING] } },
+      data: { batchStatus: ImportJobStatus.CANCELLING,
+        lastError: 'Operator request' },
+    });
+    expect(prisma.importBatch.updateMany).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ batchStatus: ImportJobStatus.CANCELLED }),
+      }),
+    );
+    prisma.importBatch.updateMany.mockResolvedValueOnce({ count: 0 })
+      .mockResolvedValueOnce({ count: 1 });
+    expect(await gateway.acknowledgeStoppedJob(lease)).toBe('CANCELLED');
+    expect(prisma.importBatch.updateMany).toHaveBeenLastCalledWith({
+      where: {
+        id: lease.batchId, batchStatus: ImportJobStatus.CANCELLING,
+        claimedBy: lease.workerId, attemptCount: lease.attempt,
+        claimUntil: { equals: lease.claimUntil },
+      },
+      data: { batchStatus: ImportJobStatus.CANCELLED, claimedBy: null, claimUntil: null },
+    });
+  });
+
+  it('uses worker-acknowledged PAUSING and allows escalation to pending CANCELLING', async () => {
+    const prisma = mockPrisma();
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    const lease = { batchId: 'batch-running', workerId: 'worker-1',
+      attempt: 2, claimUntil: new Date(Date.now() + 10_000) };
+    prisma.importBatch.updateMany.mockResolvedValueOnce({ count: 0 })
+      .mockResolvedValueOnce({ count: 1 });
+    expect(await gateway.pauseJob({ batchId: lease.batchId })).toBe(true);
+    expect(prisma.importBatch.updateMany).toHaveBeenLastCalledWith({
+      where: { id: lease.batchId, batchStatus: { in: [ImportJobStatus.RUNNING] } },
+      data: { batchStatus: ImportJobStatus.PAUSING },
+    });
+    prisma.importBatch.updateMany.mockResolvedValueOnce({ count: 0 })
+      .mockResolvedValueOnce({ count: 1 });
+    expect(await gateway.acknowledgeStoppedJob(lease)).toBe('PAUSED');
+    expect(prisma.importBatch.updateMany).toHaveBeenLastCalledWith({
+      where: { id: lease.batchId, batchStatus: ImportJobStatus.PAUSING,
+        claimedBy: lease.workerId, attemptCount: lease.attempt,
+        claimUntil: { equals: lease.claimUntil } },
+      data: { batchStatus: ImportJobStatus.PAUSED, claimedBy: null, claimUntil: null },
+    });
+  });
+
   it('conditions every claimed-lease mutation on attempt number and the exact lease expiry generation', async () => {
     const prisma = mockPrisma();
     const gateway = new PrismaImportQueueGateway(prisma as any);
