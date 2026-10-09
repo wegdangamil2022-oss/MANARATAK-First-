@@ -1,3 +1,9 @@
+## Section 04 source closeout evidence — 2026-10-09
+
+**`CODE_CLOSED — RUNTIME_DEFERRED` under revised 2026-10-09 plan.** Source `fd03e8e0ccb86262ab249aa3c6a9742d501b4288`: [CI 37970330591](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37970330591) **SUCCESS** — 131 focused tests/18 Vitest files; 1 separate ownership SQL/Prisma source consistency test; TypeScript, schema validate, source quality, 3 permission/authority guards, and unchanged 321-handler/320-endpoint audit coverage PASS. Domain key choices come from published shared permissions catalog; IAM canonical ID existence checked at Application mutation boundary. TENANT is read-only. Generic and owner outbox events have separate semantic role metadata with correlated requests, not falsely deduplicated. No migration, actual DB, live provider, browser E2E, runtime consumer, merge, or release acceptance was executed. Product-only FGA-04-001/002 not claimed implemented. Runtime/production **NO-GO** until the Post-28 checklist is completed.
+
+---
+
 ## Verified batch 7 CI — 2026-10-09
 
 [CI 37967217243](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37967217243), source `70b083e636608e0fb33d8dffd2a20c12e359fce7` — **SUCCESS**: 127 tests/18 files, schema validation, migration source/ownership check, TypeScript, source quality, three authority/permission guards and unchanged 321-handler audit coverage. Adds immutable typed definition rules/default/assignment constraints and Admin API mandatory version preconditions. The rule-column migration is source-only; no DB execution. Earlier test-file corruption and missing CAS fixture checks were corrected before the final run. Remaining canonical DOMAIN/IDENTITY owner selector means source status remains `PARTIAL — FIXES_REQUIRED` under the simplified October 9 closure policy. Runtime E2E/consumer/DB acceptance postponed to after Section 28.
