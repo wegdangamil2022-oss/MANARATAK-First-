@@ -20,6 +20,7 @@ on:
       - 'apps/admin/src/pages/SettingsAdminPage.tsx'
       - 'apps/admin/src/pages/settingsAssignmentGovernance*'
       - 'apps/admin/src/components/SettingsResolutionInspector.tsx'
+      - 'apps/admin/src/components/SettingsIdentityScopePicker.tsx'
       - 'tests/remediation/section04-settings-authority.test.mjs'
       - 'tests/remediation/section04-settings-ownership-plan.test.mjs'
       - 'scripts/verify-academic-settings-source-closure.mjs'
