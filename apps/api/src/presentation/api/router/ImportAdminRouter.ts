@@ -291,11 +291,18 @@ export class ImportAdminRouter {
         if (!sourceRegistryGateway)
           return res.status(503).json({ error: 'IMPORT_SOURCE_REGISTRY_UNAVAILABLE' });
         const { status, reason } = sourceStatusUpdateSchema.parse(req.body);
-        const updated = await sourceRegistryGateway.updateSourceStatus(
-          req.params.sourceId,
-          status,
-          reason,
-        );
+        let updated: boolean;
+        try {
+          updated = await sourceRegistryGateway.updateSourceStatus(
+            req.params.sourceId,
+            status,
+            reason,
+          );
+        } catch (error) {
+          if (error instanceof Error && error.message === 'IMPORT_SOURCE_STATUS_CONFLICT')
+            return res.status(409).json({ error: 'IMPORT_SOURCE_STATUS_CONFLICT' });
+          throw error;
+        }
         if (!updated) return res.status(404).json({ error: 'IMPORT_SOURCE_NOT_FOUND' });
         const source = await sourceRegistryGateway.getSource(req.params.sourceId);
         res.json({ data: source });
