@@ -391,6 +391,20 @@ describe('InMemoryImportQueueGateway', () => {
   });
 });
 
+
+  it('rejects legacy completion/failure against a claimed worker but allows the leased worker to complete', async () => {
+    const gateway = new InMemoryImportQueueGateway();
+    const batchId = 'legacy-lease-guard';
+    await gateway.enqueueImportJob({ batchId, targetDomain: ImportTargetDomain.Generic, sourceSystem: 'TEST' });
+    const lease = await gateway.claimNextJob({ workerId: 'owner', leaseDurationMs: 30_000 });
+    expect(lease).not.toBeNull();
+    expect(await gateway.markJobCompleted(batchId)).toBe(false);
+    expect(await gateway.markJobFailed(batchId, 'premature failure')).toBe(false);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.RUNNING);
+    expect(await gateway.completeClaimedJob(lease!)).toBe(true);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.COMPLETED);
+  });
+
 describe('InMemoryImportQueueGateway lease recovery hardening', () => {
   it('fences a prior attempt even when a replacement worker reuses the same worker ID', async () => {
     const gateway = new InMemoryImportQueueGateway();

@@ -259,6 +259,59 @@ describe('PrismaImportQueueGateway', () => {
     expect(await gateway.completeClaimedJob(lease, now)).toBe(false);
   });
 
+
+  it('prevents legacy completion/failure from overriding a claimed worker lease', async () => {
+    const prisma = mockPrisma();
+    prisma.importBatch.updateMany.mockResolvedValue({ count: 0 });
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    expect(await gateway.markJobCompleted('claimed-job')).toBe(false);
+    expect(await gateway.markJobFailed('claimed-job', 'token=private')).toBe(false);
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledTimes(3);
+    for (const [call] of prisma.importBatch.updateMany.mock.calls) {
+      expect(call.where).toMatchObject({
+        id: 'claimed-job', claimedBy: null, claimUntil: null,
+      });
+    }
+    expect(prisma.importBatch.updateMany).toHaveBeenLastCalledWith({
+      where: {
+        id: 'claimed-job',
+        batchStatus: { in: [ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE] },
+        claimedBy: null, claimUntil: null,
+      },
+      data: { batchStatus: ImportJobStatus.FAILED_PERMANENT,
+        lastError: 'token=[REDACTED]' },
+    });
+    prisma.importBatch.updateMany.mockImplementation(async ({ where }: any) => ({
+      count: where.failedRecords === 0 ? 1 : 0,
+    }));
+    expect(await gateway.markJobCompleted('unclaimed-job')).toBe(true);
+    expect(prisma.importBatch.updateMany).toHaveBeenLastCalledWith({
+      where: {
+        id: 'unclaimed-job', batchStatus: ImportJobStatus.RUNNING,
+        claimedBy: null, claimUntil: null, failedRecords: 0,
+      },
+      data: { batchStatus: ImportJobStatus.COMPLETED, lastError: null },
+    });
+  });
+
+  it('reports 100% only for completed batches with zero work items, not queued empty batches', async () => {
+    const prisma = mockPrisma();
+    prisma.importRecord.findFirst.mockResolvedValue(null);
+    prisma.importBatch.findUnique.mockResolvedValue({
+      id: 'all-duplicates', batchStatus: ImportJobStatus.COMPLETED,
+      totalRecords: 0, processedRecords: 0, failedRecords: 0,
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    expect((await gateway.getJobStatus('all-duplicates'))?.progress).toBe(100);
+    prisma.importBatch.findUnique.mockResolvedValue({
+      id: 'not-run', batchStatus: ImportJobStatus.QUEUED,
+      totalRecords: 0, processedRecords: 0, failedRecords: 0,
+      createdAt: new Date(), updatedAt: new Date(),
+    });
+    expect((await gateway.getJobStatus('not-run'))?.progress).toBe(0);
+  });
+
   it('fresh replay clears checkpoint and stale lease control state atomically', async () => {
     const tx = {
       importBatch: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },

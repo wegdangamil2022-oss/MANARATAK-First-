@@ -58,7 +58,9 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
       progress:
         batch.totalRecords > 0
           ? Math.min(100, Math.round((completed / batch.totalRecords) * 100))
-          : 0,
+          // All input rows may already be imported elsewhere and deduplicated,
+          // leaving a valid completed batch with zero persisted work items.
+          : batch.batchStatus === ImportJobStatus.COMPLETED ? 100 : 0,
       processedRecords: batch.processedRecords,
       failedRecords: batch.failedRecords,
       totalRecords: batch.totalRecords,
@@ -134,21 +136,39 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
     );
   }
 
-  markJobCompleted(batchId: string): Promise<boolean> {
-    return this.transition(batchId, [ImportJobStatus.RUNNING], ImportJobStatus.COMPLETED, {
-      claimedBy: null,
-      claimUntil: null,
-      lastError: null,
-    });
+  async markJobCompleted(batchId: string): Promise<boolean> {
+    // Compatibility/unclaimed job path only. A legacy caller must never steal
+    // a live claimed lease or override worker-confirmed completion.
+    for (const [failedRecords, status] of [
+      [{ gt: 0 }, ImportJobStatus.PARTIALLY_COMPLETED],
+      [0, ImportJobStatus.COMPLETED],
+    ] as const) {
+      const updated = await this.prisma.importBatch.updateMany({
+        where: {
+          id: batchId, batchStatus: ImportJobStatus.RUNNING,
+          claimedBy: null, claimUntil: null, failedRecords,
+        },
+        data: { batchStatus: status, lastError: null },
+      });
+      if (updated.count === 1) return true;
+    }
+    return false;
   }
 
-  markJobFailed(batchId: string, reason: string): Promise<boolean> {
-    return this.transition(
-      batchId,
-      [ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE],
-      ImportJobStatus.FAILED_PERMANENT,
-      { claimedBy: null, claimUntil: null, lastError: this.sanitize(reason) },
-    );
+  async markJobFailed(batchId: string, reason: string): Promise<boolean> {
+    const updated = await this.prisma.importBatch.updateMany({
+      where: {
+        id: batchId,
+        batchStatus: { in: [ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE] },
+        claimedBy: null,
+        claimUntil: null,
+      },
+      data: {
+        batchStatus: ImportJobStatus.FAILED_PERMANENT,
+        lastError: this.sanitize(reason),
+      },
+    });
+    return updated.count === 1;
   }
 
   async claimNextJob(command: ClaimImportJobCommand): Promise<ImportJobLease | null> {

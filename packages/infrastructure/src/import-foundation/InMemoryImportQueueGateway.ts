@@ -210,7 +210,8 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
 
   async markJobCompleted(batchId: string): Promise<boolean> {
     const job = this.jobs.get(batchId);
-    if (!job || job.status !== ImportJobStatus.RUNNING) return false;
+    if (!job || job.status !== ImportJobStatus.RUNNING ||
+        job.claimedBy || job.claimUntil || this.leases.has(batchId)) return false;
     job.status = job.failedRecords > 0
       ? ImportJobStatus.PARTIALLY_COMPLETED
       : ImportJobStatus.COMPLETED;
@@ -224,7 +225,8 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
 
   async markJobFailed(batchId: string, reason: string): Promise<boolean> {
     const job = this.jobs.get(batchId);
-    if (!job || ![ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE].includes(job.status)) {
+    if (!job || ![ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE].includes(job.status) ||
+        job.claimedBy || job.claimUntil || this.leases.has(batchId)) {
       return false;
     }
     job.status = ImportJobStatus.FAILED_PERMANENT;
