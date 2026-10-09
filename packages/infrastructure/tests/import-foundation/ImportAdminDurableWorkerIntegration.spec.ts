@@ -346,4 +346,36 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(repo.records.size).toBe(1);
   });
 
+  it('writes bounded recent accepted source keys rather than an unbounded checkpoint payload', async () => {
+    const repo = statefulImportRepository();
+    const queue = new InMemoryImportQueueGateway();
+    const accept = vi.fn(async () => ({ staged: true }));
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    const useCase = new ImportAdminUseCases(repo as any, queue,
+      new ImportHandoffDispatcher({ GENERIC: { accept } as any }), worker);
+    const result = await useCase.stageNormalizedRows({
+      ownerDomain: 'GENERIC', sourceSystem: 'TEST_SOURCE',
+      rows: Array.from({ length: 75 }, (_, index) => ({
+        sourceId: `row-${index}`, content: `Unique row ${index}`,
+      })),
+    });
+    expect(result.summary.stagedRecords).toBe(75);
+    expect(accept).toHaveBeenCalledTimes(75);
+    const status = await queue.getJobStatus('batch-durable-1');
+    expect(status?.status).toBe('COMPLETED');
+    expect(status?.checkpoint).toEqual(expect.objectContaining({
+      recordOffset: 75, processedRecords: 75,
+      metadata: expect.objectContaining({
+        acceptedRecordKeyCount: 75, retainedAcceptedKeyLimit: 32,
+        cursorMode: 'RECENT_KEYS',
+      }),
+    }));
+    const recent = (status?.checkpoint as { acceptedRecordKeys?: string[] }).acceptedRecordKeys;
+    expect(recent).toHaveLength(32);
+    expect(recent).toEqual([...repo.records.values()].slice(-32).map(record => record.sourceDedupKey));
+  });
+
 });
