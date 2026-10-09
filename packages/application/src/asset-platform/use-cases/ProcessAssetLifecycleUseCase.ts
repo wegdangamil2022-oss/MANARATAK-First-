@@ -255,10 +255,20 @@ export class ProcessAssetLifecycleUseCase {
     if (!this.assetRepository.assertPurgeAllowed) {
       throw new Error('ASSET_PURGE_RETENTION_GUARD_NOT_CONFIGURED');
     }
-    await this.assetRepository.assertPurgeAllowed(id, new Date(), dto.retentionClaimToken);
+    const retryingStoredPurge = record.state === 'PURGED';
+    if (retryingStoredPurge && !dto.retentionClaimToken) {
+      throw new Error('ASSET_PURGE_CLEANUP_LEASE_REQUIRED');
+    }
+    await this.assetRepository.assertPurgeAllowed(id, new Date(), dto.retentionClaimToken, retryingStoredPurge);
 
-    record.purge();
+    if (!retryingStoredPurge) {
+      record.purge();
+      // Durable record state MUST be committed before irreversible provider deletion.
+      // If this CAS fails, the external object remains untouched.
+      await this.assetRepository.save(record);
+    }
+    // If provider deletion fails, persisted PURGED + retentionProcessedAt=NULL
+    // is a retryable tombstone for the retention worker. Repeated delete must be idempotent.
     await this.storageGateway.delete(record.locator);
-    await this.assetRepository.save(record);
   }
 }

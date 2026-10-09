@@ -67,4 +67,22 @@ describe('EAP irreversible purge retention and legal hold preflight', () => {
       .rejects.toThrow('ASSET_PURGE_RETENTION_CLAIM_NOT_OWNED');
   });
 
+  it('requires an active, matching retention claim to retry a persisted PURGED cleanup', async () => {
+    const token = '11111111-1111-4111-8111-111111111111';
+    const f = fixture({
+      lifecycleState: 'PURGED',
+      retentionClaimUntil: later,
+      retentionClaimToken: token,
+    });
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed))
+      .rejects.toThrow('ASSET_PURGE_SOFT_DELETE_REQUIRED');
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed, token, true))
+      .resolves.toBeUndefined();
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed, undefined, true))
+      .rejects.toThrow('ASSET_PURGE_SOFT_DELETE_REQUIRED');
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed,
+      '22222222-2222-4222-8222-222222222222', true))
+      .rejects.toThrow('ASSET_PURGE_RETENTION_CLAIM_NOT_OWNED');
+  });
+
 });

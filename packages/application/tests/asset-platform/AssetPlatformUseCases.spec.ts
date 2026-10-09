@@ -45,9 +45,10 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
     return null;
   }
 
-  async assertPurgeAllowed(id: AssetId, at: Date): Promise<void> {
+  async assertPurgeAllowed(id: AssetId, at: Date, token?: string, retryPurgedCleanup = false): Promise<void> {
     const record = this.store.get(id.value);
-    if (!record || record.state !== AssetLifecycleState.DELETED) {
+    if (!record || (record.state !== AssetLifecycleState.DELETED &&
+        !(record.state === AssetLifecycleState.PURGED && retryPurgedCleanup && !!token))) {
       throw new Error('ASSET_PURGE_SOFT_DELETE_REQUIRED');
     }
     if (!record.retention.expiresAt || record.retention.expiresAt.getTime() > at.getTime()) {
@@ -506,6 +507,64 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     expect(scan).not.toHaveBeenCalled();
     expect((await repo.findById(new AssetId('asset-changed-before-scan')))?.state)
       .toBe(AssetLifecycleState.QUARANTINED);
+  });
+
+  it('does not erase bytes if persisting PURGED fails its optimistic save', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-cas-protection', assetReference: 'ref-cas-protection',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'draft.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 55,
+      classification: AssetSecurityClassification.INTERNAL,
+      retentionCategory: AssetRetentionCategory.TEMPORARY,
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-cas-protection' });
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(Date.now() + 120_000));
+    try {
+      const deleteBlob = vi.spyOn(storageGateway, 'delete');
+      const save = vi.spyOn(repo, 'save').mockRejectedValueOnce(
+        new Error('ASSET_RECORD_CONCURRENT_MODIFICATION'),
+      );
+      await expect(lifecycleUseCase.purgeAsset({ assetId: 'asset-cas-protection' }))
+        .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
+      expect(deleteBlob).not.toHaveBeenCalled();
+      save.mockRestore();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('retains a durable PURGED tombstone and permits worker-leased cleanup retry', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-reconcile-purge', assetReference: 'ref-reconcile-purge',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'draft.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 55,
+      classification: AssetSecurityClassification.INTERNAL,
+      retentionCategory: AssetRetentionCategory.TEMPORARY,
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-reconcile-purge' });
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(Date.now() + 120_000));
+    try {
+      const deleteBlob = vi.spyOn(storageGateway, 'delete')
+        .mockRejectedValueOnce(new Error('ASSET_PROVIDER_TEMPORARY_UNAVAILABLE'));
+      await expect(lifecycleUseCase.purgeAsset({ assetId: 'asset-reconcile-purge' }))
+        .rejects.toThrow('ASSET_PROVIDER_TEMPORARY_UNAVAILABLE');
+      expect((await repo.findById(new AssetId('asset-reconcile-purge')))?.state)
+        .toBe(AssetLifecycleState.PURGED);
+      await expect(lifecycleUseCase.purgeAsset({ assetId: 'asset-reconcile-purge' }))
+        .rejects.toThrow('ASSET_PURGE_CLEANUP_LEASE_REQUIRED');
+      expect(deleteBlob).toHaveBeenCalledTimes(1);
+      await lifecycleUseCase.purgeAsset({
+        assetId: 'asset-reconcile-purge',
+        retentionClaimToken: '11111111-1111-4111-8111-111111111111',
+      });
+      expect(deleteBlob).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
 });

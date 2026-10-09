@@ -105,7 +105,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     // Snapshot deliberately stays stale: another mutation must rehydrate the aggregate.
   }
 
-  async assertPurgeAllowed(id: AssetId, at: Date, retentionClaimToken?: string): Promise<void> {
+  async assertPurgeAllowed(id: AssetId, at: Date, retentionClaimToken?: string, retryPurgedCleanup = false): Promise<void> {
     if (!Number.isFinite(at.getTime())) throw new Error('ASSET_PURGE_CLOCK_INVALID');
     const row = await this.prisma.assetRecord.findUnique({
       where: { id: id.value },
@@ -118,7 +118,10 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       },
     });
     if (!row) throw new Error('ASSET_PURGE_NOT_FOUND');
-    if (row.lifecycleState !== AssetLifecycleState.DELETED) {
+    // A terminal PURGED record is a durable, read-inaccessible cleanup intent.
+    // Only a correctly leased retention worker can retry its outstanding storage deletion.
+    if (row.lifecycleState !== AssetLifecycleState.DELETED &&
+        !(retryPurgedCleanup && retentionClaimToken && row.lifecycleState === AssetLifecycleState.PURGED)) {
       throw new Error('ASSET_PURGE_SOFT_DELETE_REQUIRED');
     }
     // A missing expiration is an indefinite hold, not evidence that deletion is allowed.
@@ -129,6 +132,9 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     if (row.legalHoldUntil && (!Number.isFinite(row.legalHoldUntil.getTime()) ||
         row.legalHoldUntil.getTime() > at.getTime())) {
       throw new Error('ASSET_PURGE_LEGAL_HOLD_ACTIVE');
+    }
+    if (retryPurgedCleanup && !retentionClaimToken) {
+      throw new Error('ASSET_PURGE_CLEANUP_LEASE_REQUIRED');
     }
     if (retentionClaimToken !== undefined) {
       if (typeof retentionClaimToken !== 'string' ||

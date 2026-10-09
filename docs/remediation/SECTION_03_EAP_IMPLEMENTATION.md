@@ -188,3 +188,11 @@ npm run ci:source:contracts
 - Added an on-demand detail panel to the existing `AssetAdminPage` using the management-guarded `GET /admin/assets/:assetId` route.
 - Displays identity, owner, lifecycle state, security classification, retention/expiry, MIME/size and SHA-256; action to check usage dependencies. The panel does **not** expose storage locators, raw upload URLs, private attachments or destructive controls.
 - Remaining operational UI scope: real upload wizard, secure managed preview, tested recovery/timeline, and browser integration. Source TypeScript/quality will be checked on the next CI run.
+
+## Patch J — Durable PURGED tombstone and retryable external deletion
+
+- **Changed irreversible order**: EAP now conditionally persists `PURGED` via the existing revision/state CAS **before** calling provider `delete`. If CAS fails, the bytes are not deleted.
+- `PURGED` is a durable *access-disabled cleanup intent* even if the external deletion fails. The existing retention worker now discovers expired `PURGED` records with `retentionProcessedAt=NULL` and retries provider cleanup under a fresh retention claim token, then marks processed only after successful deletion.
+- A repeat purge of a `PURGED` asset is forbidden without a live, matching retention worker lease; the normal admin endpoint does not forward claim tokens.
+- Added mock regression tests for CAS failure vs provider delete, provider outage/lease retry, persisted PURGED guard and worker sweep visibility.
+- **Limitations:** deletion is intentionally asynchronous with respect to DB persistence after an error; a PURGED record may temporarily retain object bytes. Provider delete must be idempotent. Worker scheduling/availability and real PostgreSQL crash-recovery and concurrent legal hold tests still require integration validation; archive/restore/move-to-clean cross-system reconciliation remains open. No database migration or production data changes.
