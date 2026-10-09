@@ -13,12 +13,14 @@ on:
       - 'packages/infrastructure/tests/settings/**'
       - 'packages/infrastructure/prisma/schema.prisma'
       - 'packages/infrastructure/prisma/migrations/20261009040000_settings_override_history/**'
+      - 'packages/infrastructure/prisma/migrations/20261009050000_settings_current_version_ownership/**'
       - 'docs/remediation/evidence/section-02/admin-mutation-audit-inventory.json'
       - 'apps/api/src/presentation/api/router/Settings*'
       - 'apps/api/tests/presentation/api/router/Settings*'
       - 'apps/admin/src/pages/SettingsAdminPage.tsx'
       - 'apps/admin/src/components/SettingsResolutionInspector.tsx'
       - 'tests/remediation/section04-settings-authority.test.mjs'
+      - 'tests/remediation/section04-settings-ownership-plan.test.mjs'
       - 'scripts/verify-academic-settings-source-closure.mjs'
       - '.github/workflows/settings-section-04-source.yml'
   workflow_dispatch:
@@ -35,6 +37,13 @@ jobs:
           node-version: 22.16.0
           cache: npm
       - run: npm ci
+      - name: Settings schema source validation (no database connection)
+        env:
+          DATABASE_URL: postgresql://source_only:source_only@127.0.0.1:1/source_only
+          DIRECT_URL: postgresql://source_only:source_only@127.0.0.1:1/source_only
+        run: npx --no-install prisma validate --schema packages/infrastructure/prisma/schema.prisma
+      - name: Ownership constraint source consistency (no database execution)
+        run: node --test tests/remediation/section04-settings-ownership-plan.test.mjs
       - name: TypeScript
         run: npm run typecheck
       - name: Source quality

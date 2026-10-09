@@ -89,8 +89,12 @@ model SettingAssignmentRecord {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  versions SettingVersionRecord[]
+  versions SettingVersionRecord[] @relation("SettingAssignmentHistory")
+  // SQL plan makes this circular pointer FK DEFERRABLE INITIALLY DEFERRED.
+  // Prisma cannot express deferrability; preserve the reviewed migration SQL.
+  currentVersion SettingVersionRecord @relation("SettingCurrentVersion", fields: [id, currentVersionId], references: [assignmentId, id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([id, currentVersionId])
   @@unique([key, scopeLevel, scopeId])
   @@index([key])
   @@index([scopeLevel, scopeId])
@@ -107,8 +111,10 @@ model SettingVersionRecord {
   operation           String   @default("SET")
   changeReason        String?
 
-  assignment SettingAssignmentRecord @relation(fields: [assignmentId], references: [id])
+  assignment SettingAssignmentRecord @relation("SettingAssignmentHistory", fields: [assignmentId], references: [id])
+  currentForAssignment SettingAssignmentRecord? @relation("SettingCurrentVersion")
 
+  @@unique([assignmentId, id])
   @@index([assignmentId, createdAt])
 }
 

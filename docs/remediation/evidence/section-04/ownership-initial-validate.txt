@@ -1,0 +1,14 @@
+Prisma schema loaded from packages/infrastructure/prisma/schema.prisma
+Error: Prisma schema validation - (get-config wasm)
+Error code: P1012
+error: Environment variable not found: DIRECT_URL.
+  -->  packages/infrastructure/prisma/schema.prisma:4
+   | 
+ 3 |   url       = env("DATABASE_URL")
+ 4 |   directUrl = env("DIRECT_URL")
+   | 
+
+Validation Error Count: 1
+[Context: getConfig]
+
+Prisma CLI Version : 5.22.0
