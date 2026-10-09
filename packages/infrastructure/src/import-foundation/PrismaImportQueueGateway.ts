@@ -73,17 +73,15 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
     };
   }
 
-  pauseJob(command: PauseImportJobCommand): Promise<boolean> {
-    return this.transition(
-      command.batchId,
-      [ImportJobStatus.QUEUED, ImportJobStatus.RUNNING],
-      ImportJobStatus.PAUSED,
-      {
-        claimedBy: null,
-        claimUntil: null,
-        ...(command.reason ? { lastError: this.sanitize(command.reason) } : {}),
-      },
-    );
+  async pauseJob(command: PauseImportJobCommand): Promise<boolean> {
+    const note = command.reason ? { lastError: this.sanitize(command.reason) } : {};
+    // A queued job has no executing worker and can stop immediately.
+    if (await this.transition(command.batchId, [ImportJobStatus.QUEUED],
+      ImportJobStatus.PAUSED, { claimedBy: null, claimUntil: null, ...note })) return true;
+    // A running owner call cannot be interrupted safely. Retain its lease and
+    // show PAUSING until that exact worker acknowledges after the call returns.
+    return this.transition(command.batchId, [ImportJobStatus.RUNNING],
+      ImportJobStatus.PAUSING, note);
   }
 
   resumeJob(command: ResumeImportJobCommand): Promise<boolean> {
@@ -95,23 +93,37 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
     );
   }
 
-  cancelJob(command: CancelImportJobCommand): Promise<boolean> {
-    return this.transition(
-      command.batchId,
-      [
-        ImportJobStatus.QUEUED,
-        ImportJobStatus.RUNNING,
-        ImportJobStatus.PAUSED,
-        ImportJobStatus.RESUMING,
-        ImportJobStatus.CANCELLING,
-      ],
-      ImportJobStatus.CANCELLED,
-      {
-        claimedBy: null,
-        claimUntil: null,
-        ...(command.reason ? { lastError: this.sanitize(command.reason) } : {}),
-      },
-    );
+  async cancelJob(command: CancelImportJobCommand): Promise<boolean> {
+    const note = command.reason ? { lastError: this.sanitize(command.reason) } : {};
+    if (await this.transition(command.batchId, [
+      ImportJobStatus.QUEUED, ImportJobStatus.PAUSED, ImportJobStatus.RESUMING,
+    ], ImportJobStatus.CANCELLED, {
+      claimedBy: null, claimUntil: null, ...note,
+    })) return true;
+    return this.transition(command.batchId, [
+      ImportJobStatus.RUNNING, ImportJobStatus.PAUSING,
+    ], ImportJobStatus.CANCELLING, note);
+  }
+
+  async acknowledgeStoppedJob(lease: ImportJobLease): Promise<'PAUSED' | 'CANCELLED' | null> {
+    // A worker may acknowledge after its lease expires; no other worker can
+    // reclaim PAUSING/CANCELLING. Exact attempt + generation still fence old workers.
+    for (const [pending, final] of [
+      [ImportJobStatus.CANCELLING, ImportJobStatus.CANCELLED],
+      [ImportJobStatus.PAUSING, ImportJobStatus.PAUSED],
+    ] as const) {
+      const result = await this.prisma.importBatch.updateMany({
+        where: {
+          id: lease.batchId, batchStatus: pending,
+          claimedBy: lease.workerId, attemptCount: lease.attempt,
+          claimUntil: { equals: lease.claimUntil },
+        },
+        data: { batchStatus: final, claimedBy: null, claimUntil: null },
+      });
+      if (result.count === 1)
+        return final === ImportJobStatus.PAUSED ? 'PAUSED' : 'CANCELLED';
+    }
+    return null;
   }
 
   markJobRunning(batchId: string): Promise<boolean> {
