@@ -203,7 +203,7 @@ export function ReferenceDataAdminPage() {
   );
 }
 
-function Input({ label, value, onChange, required = false }: any) {
+function Input({ label, value, onChange, required = false, disabled = false }: any) {
   return (
     <div className="flex flex-col gap-1">
       <label className="text-sm font-medium text-gray-700">{label} {required && '*'}</label>
@@ -212,7 +212,8 @@ function Input({ label, value, onChange, required = false }: any) {
         value={value} 
         onChange={e => onChange(e.target.value)}
         required={required}
-        className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        disabled={disabled}
+        className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
       />
     </div>
   );
@@ -222,6 +223,7 @@ function CountriesTab() {
   const queryState = useFetchData('countries');
   const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
   const [form, setForm] = useState({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' });
+  const [editing, setEditing] = useState<{ id: string; expectedVersion: number; lifecycleState: string } | null>(null);
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
   const [preview, setPreview] = useState<any>(null);
   const [previewStatus, setPreviewStatus] = useState<{ loading: boolean; error?: string }>({ loading: false });
@@ -249,9 +251,10 @@ function CountriesTab() {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      await referenceDataAdminApi.saveCountry({ ...form, nameAr: form.nameAr || null, region: form.region || null });
+      await referenceDataAdminApi.saveCountry({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), nameAr: form.nameAr || null, region: form.region || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
       setForm({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' });
+      setEditing(null);
       refetch();
     } catch (err: any) {
       setSaveStatus({ loading: false, error: err.message });
@@ -289,20 +292,22 @@ function CountriesTab() {
         )}
       </section>
       <form onSubmit={handleSave} className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-        <h3 className="font-bold text-lg">Manual Upsert Country</h3>
+        <h3 className="font-bold text-lg">{editing ? 'تحرير الدولة المحددة / Edit country' : 'إضافة دولة / Add country'}</h3>
+        {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="ISO2 Code" required value={form.iso2Code} onChange={(v: string) => setForm({...form, iso2Code: v})} />
-          <Input label="ISO3 Code" required value={form.iso3Code} onChange={(v: string) => setForm({...form, iso3Code: v})} />
+          <Input label="ISO2 Code" required disabled={Boolean(editing)} value={form.iso2Code} onChange={(v: string) => setForm({...form, iso2Code: v})} />
+          <Input label="ISO3 Code" required disabled={Boolean(editing)} value={form.iso3Code} onChange={(v: string) => setForm({...form, iso3Code: v})} />
           <Input label="Name" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
           <Input label="Arabic Name (optional)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
           <Input label="Region (optional)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
         </div>
         <div className="flex items-center gap-4">
-          <button type="submit" disabled={saveStatus.loading} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
+          <button type="submit" disabled={saveStatus.loading || (Boolean(editing) && editing?.lifecycleState !== 'ACTIVE')} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
             {saveStatus.loading ? 'Saving...' : 'Save'}
           </button>
           {saveStatus.success && <span className="text-green-600 text-sm">{saveStatus.success}</span>}
           {saveStatus.error && <span className="text-red-600 text-sm">{saveStatus.error}</span>}
+          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' }); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
         </div>
       </form>
 
@@ -320,12 +325,17 @@ function CountriesTab() {
           <div className="overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-700">
-                <tr><th className="p-3">ISO2</th><th className="p-3">ISO3</th><th className="p-3">Name</th><th className="p-3">Region</th><th className="p-3">Status</th></tr>
+                <tr><th className="p-3">ISO2</th><th className="p-3">ISO3</th><th className="p-3">Name</th><th className="p-3">Region</th><th className="p-3">Status</th><th className="p-3">Actions</th></tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {data.map(item => (
                   <tr key={item.iso2Code} className="hover:bg-gray-50">
                     <td className="p-3 font-mono">{item.iso2Code}</td><td className="p-3 font-mono">{item.iso3Code}</td><td className="p-3">{item.name}</td><td className="p-3">{item.region || '-'}</td><td className="p-3">{item.lifecycleState}</td>
+                    <td className="p-3"><button type="button" className="text-indigo-600 underline" onClick={() => {
+                      setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
+                      setForm({ iso2Code: item.iso2Code, iso3Code: item.iso3Code, name: item.name, nameAr: item.nameAr ?? '', region: item.region ?? '' });
+                      setSaveStatus({ loading: false });
+                    }}>تحرير / Edit</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -400,15 +410,17 @@ function CurrenciesTab() {
   const queryState = useFetchData('currencies');
   const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
   const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' });
+  const [editing, setEditing] = useState<{ id: string; expectedVersion: number; lifecycleState: string } | null>(null);
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      await referenceDataAdminApi.saveCurrency({ ...form, nameAr: form.nameAr || null, symbol: form.symbol || null, numericCode: form.numericCode || null });
+      await referenceDataAdminApi.saveCurrency({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), nameAr: form.nameAr || null, symbol: form.symbol || null, numericCode: form.numericCode || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
       setForm({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' });
+      setEditing(null);
       refetch();
     } catch (err: any) {
       setSaveStatus({ loading: false, error: err.message });
@@ -419,20 +431,22 @@ function CurrenciesTab() {
     <div className="space-y-8">
       <DerivedReferencePreview kind="currencies" />
       <form onSubmit={handleSave} className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-        <h3 className="font-bold text-lg">Manual Upsert Currency</h3>
+        <h3 className="font-bold text-lg">{editing ? 'تحرير العملة المحددة / Edit currency' : 'إضافة عملة / Add currency'}</h3>
+        {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="ISO Code" required value={form.isoCode} onChange={(v: string) => setForm({...form, isoCode: v})} />
+          <Input label="ISO Code" required disabled={Boolean(editing)} value={form.isoCode} onChange={(v: string) => setForm({...form, isoCode: v})} />
           <Input label="Name" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
           <Input label="Arabic Name (optional)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
           <Input label="Symbol (optional)" value={form.symbol} onChange={(v: string) => setForm({...form, symbol: v})} />
           <Input label="Numeric Code (optional)" value={form.numericCode} onChange={(v: string) => setForm({...form, numericCode: v})} />
         </div>
         <div className="flex items-center gap-4">
-          <button type="submit" disabled={saveStatus.loading} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
+          <button type="submit" disabled={saveStatus.loading || (Boolean(editing) && editing?.lifecycleState !== 'ACTIVE')} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
             {saveStatus.loading ? 'Saving...' : 'Save'}
           </button>
           {saveStatus.success && <span className="text-green-600 text-sm">{saveStatus.success}</span>}
           {saveStatus.error && <span className="text-red-600 text-sm">{saveStatus.error}</span>}
+          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' }); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
         </div>
       </form>
 
@@ -450,12 +464,17 @@ function CurrenciesTab() {
           <div className="overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-700">
-                <tr><th className="p-3">ISO Code</th><th className="p-3">Name</th><th className="p-3">Symbol</th><th className="p-3">Numeric</th><th className="p-3">Status</th></tr>
+                <tr><th className="p-3">ISO Code</th><th className="p-3">Name</th><th className="p-3">Symbol</th><th className="p-3">Numeric</th><th className="p-3">Status</th><th className="p-3">Actions</th></tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {data.map(item => (
                   <tr key={item.isoCode} className="hover:bg-gray-50">
                     <td className="p-3 font-mono">{item.isoCode}</td><td className="p-3">{item.name}</td><td className="p-3">{item.symbol || '-'}</td><td className="p-3">{item.numericCode || '-'}</td><td className="p-3">{item.lifecycleState}</td>
+                    <td className="p-3"><button type="button" className="text-indigo-600 underline" onClick={() => {
+                      setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
+                      setForm({ isoCode: item.isoCode, name: item.name, nameAr: item.nameAr ?? '', symbol: item.symbol ?? '', numericCode: item.numericCode ?? '' });
+                      setSaveStatus({ loading: false });
+                    }}>تحرير / Edit</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -471,15 +490,17 @@ function LanguagesTab() {
   const queryState = useFetchData('languages');
   const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
   const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', nativeName: '', direction: 'LTR' as 'LTR' | 'RTL' });
+  const [editing, setEditing] = useState<{ id: string; expectedVersion: number; lifecycleState: string } | null>(null);
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      await referenceDataAdminApi.saveLanguage({ ...form, nameAr: form.nameAr || null, nativeName: form.nativeName || null });
+      await referenceDataAdminApi.saveLanguage({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), nameAr: form.nameAr || null, nativeName: form.nativeName || null });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
       setForm({ isoCode: '', name: '', nameAr: '', nativeName: '', direction: 'LTR' });
+      setEditing(null);
       refetch();
     } catch (err: any) {
       setSaveStatus({ loading: false, error: err.message });
@@ -490,9 +511,10 @@ function LanguagesTab() {
     <div className="space-y-8">
       <DerivedReferencePreview kind="languages" />
       <form onSubmit={handleSave} className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-        <h3 className="font-bold text-lg">Manual Upsert Language</h3>
+        <h3 className="font-bold text-lg">{editing ? 'تحرير اللغة المحددة / Edit language' : 'إضافة لغة / Add language'}</h3>
+        {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="ISO Code" required value={form.isoCode} onChange={(v: string) => setForm({...form, isoCode: v})} />
+          <Input label="ISO Code" required disabled={Boolean(editing)} value={form.isoCode} onChange={(v: string) => setForm({...form, isoCode: v})} />
           <Input label="Name" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
           <Input label="Arabic Name (optional)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
           <Input label="Native Name (optional)" value={form.nativeName} onChange={(v: string) => setForm({...form, nativeName: v})} />
@@ -509,11 +531,12 @@ function LanguagesTab() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <button type="submit" disabled={saveStatus.loading} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
+          <button type="submit" disabled={saveStatus.loading || (Boolean(editing) && editing?.lifecycleState !== 'ACTIVE')} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
             {saveStatus.loading ? 'Saving...' : 'Save'}
           </button>
           {saveStatus.success && <span className="text-green-600 text-sm">{saveStatus.success}</span>}
           {saveStatus.error && <span className="text-red-600 text-sm">{saveStatus.error}</span>}
+          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ isoCode: '', name: '', nameAr: '', nativeName: '', direction: 'LTR' }); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
         </div>
       </form>
 
@@ -531,12 +554,17 @@ function LanguagesTab() {
           <div className="overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-700">
-                <tr><th className="p-3">ISO Code</th><th className="p-3">Name</th><th className="p-3">Native</th><th className="p-3">Dir</th><th className="p-3">Status</th></tr>
+                <tr><th className="p-3">ISO Code</th><th className="p-3">Name</th><th className="p-3">Native</th><th className="p-3">Dir</th><th className="p-3">Status</th><th className="p-3">Actions</th></tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {data.map(item => (
                   <tr key={item.isoCode} className="hover:bg-gray-50">
                     <td className="p-3 font-mono">{item.isoCode}</td><td className="p-3">{item.name}</td><td className="p-3">{item.nativeName || '-'}</td><td className="p-3">{item.direction}</td><td className="p-3">{item.lifecycleState}</td>
+                    <td className="p-3"><button type="button" className="text-indigo-600 underline" onClick={() => {
+                      setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
+                      setForm({ isoCode: item.isoCode, name: item.name, nameAr: item.nameAr ?? '', nativeName: item.nativeName ?? '', direction: item.direction });
+                      setSaveStatus({ loading: false });
+                    }}>تحرير / Edit</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -552,6 +580,7 @@ function CitiesTab() {
   const queryState = useFetchData('cities');
   const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
   const [form, setForm] = useState({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
+  const [editing, setEditing] = useState<{ id: string; expectedVersion: number; lifecycleState: string } | null>(null);
   const [countryId, setCountryId] = useState<string | null>(null);
   const [regionId, setRegionId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
@@ -564,10 +593,10 @@ function CitiesTab() {
     }
     setSaveStatus({ loading: true });
     try {
-      await referenceDataAdminApi.saveCity({ ...form, administrativeRegionId: regionId, nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null });
+      await referenceDataAdminApi.saveCity({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), administrativeRegionId: regionId, nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null });
       setSaveStatus({ loading: false, success: 'تم حفظ المدينة المحددة بنجاح!' });
       setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
-      setCountryId(null); setRegionId(null);
+      setCountryId(null); setRegionId(null); setEditing(null);
       refetch();
     } catch (err: any) {
       setSaveStatus({ loading: false, error: err.message });
@@ -579,22 +608,24 @@ function CitiesTab() {
       <form onSubmit={handleSave} className="bg-gradient-to-br from-indigo-50/40 via-white to-teal-50/30 p-6 rounded-3xl border border-indigo-100/80 space-y-5 shadow-xs">
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-[#0E7C86]"></div>
-          <h3 className="font-black text-lg text-slate-800">إضافة أو تحديث مدينة يدوياً</h3>
+          <h3 className="font-black text-lg text-slate-800">{editing ? 'تحرير المدينة المحددة' : 'إضافة مدينة جديدة'}</h3>
+          {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <CanonicalPicker label="الدولة المعتمدة" value={countryId} load={() => canonicalPickerApi.countries()} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading} />
+          <CanonicalPicker label="الدولة المعتمدة" value={countryId} load={() => canonicalPickerApi.countries()} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading || Boolean(editing)} />
           <Input label="الاسم بالإنجليزية" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
           <Input label="الاسم باللغة العربية (اختياري)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
-          <CanonicalPicker label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={() => canonicalPickerApi.regions(form.countryIso2Code || undefined)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId} />
+          <CanonicalPicker label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={() => canonicalPickerApi.regions(form.countryIso2Code || undefined)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId || Boolean(editing)} />
           <Input label="تسمية المنطقة الإدارية الأصلية (اختياري)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
           <Input label="المنطقة الزمنية (مثل Asia/Riyadh - اختياري)" value={form.timezone} onChange={(v: string) => setForm({...form, timezone: v})} />
         </div>
         <div className="flex items-center gap-4 pt-2">
-          <button type="submit" disabled={saveStatus.loading || !countryId} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-indigo-700 disabled:opacity-50 transition shadow-md shadow-indigo-600/15">
+          <button type="submit" disabled={saveStatus.loading || !countryId || (Boolean(editing) && editing?.lifecycleState !== 'ACTIVE')} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-indigo-700 disabled:opacity-50 transition shadow-md shadow-indigo-600/15">
             {saveStatus.loading ? 'جارٍ الحفظ الآن...' : 'حفظ بيانات المدينة'}
           </button>
           {saveStatus.success && <span className="text-green-600 text-sm font-bold">{saveStatus.success}</span>}
           {saveStatus.error && <span className="text-red-600 text-sm font-bold">{saveStatus.error}</span>}
+          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' }); setCountryId(null); setRegionId(null); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
         </div>
       </form>
 
@@ -618,6 +649,7 @@ function CitiesTab() {
                   <th className="p-3 text-right">المنطقة الإدارية</th>
                   <th className="p-3 text-right">المنطقة الزمنية</th>
                   <th className="p-3 text-right">حالة السجل</th>
+                  <th className="p-3 text-right">إجراء</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -628,6 +660,13 @@ function CitiesTab() {
                     <td className="p-3 text-slate-600">{item.administrativeRegion?.nameAr || item.administrativeRegion?.name || item.region || '-'}</td>
                     <td className="p-3 font-mono text-slate-500 text-xs">{item.timezone || '-'}</td>
                     <td className="p-3 text-xs">{item.lifecycleState}</td>
+                    <td className="p-3"><button type="button" className="text-indigo-600 underline" onClick={() => {
+                      setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
+                      setForm({ countryIso2Code: item.countryIso2Code, name: item.name, nameAr: item.nameAr ?? '', region: item.region ?? '', timezone: item.timezone ?? '' });
+                      setCountryId(item.countryReferenceId ?? null);
+                      setRegionId(item.administrativeRegionId ?? null);
+                      setSaveStatus({ loading: false });
+                    }}>تحرير / Edit</button></td>
                   </tr>
                 ))}
               </tbody>
