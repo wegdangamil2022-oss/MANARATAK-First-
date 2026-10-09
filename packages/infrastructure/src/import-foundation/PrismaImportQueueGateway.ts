@@ -364,29 +364,61 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
       });
       return;
     }
-    // Non-worker administrative/legacy checkpoint writers are unchanged.
-    await this.prisma.$transaction([
-      this.prisma.importRecord.create({
+    // A legacy checkpoint without a lease must never override a claimed
+    // worker's counters. Check the unclaimed batch *in the same transaction*
+    // as the checkpoint insert, so a failed fence cannot leave evidence.
+    await this.prisma.$transaction(async tx => {
+      const updated = await tx.importBatch.updateMany({
+        where: {
+          id: batchId,
+          claimedBy: null,
+          claimUntil: null,
+          batchStatus: { in: [
+            ImportJobStatus.CREATED,
+            ImportJobStatus.QUEUED,
+            ImportJobStatus.RESUMING,
+            ImportJobStatus.RUNNING,
+            ImportJobStatus.PAUSED,
+            ImportJobStatus.FAILED_RETRYABLE,
+          ] },
+        },
+        data: {
+          processedRecords: checkpoint.processedRecords,
+          failedRecords: checkpoint.failedRecords,
+        },
+      });
+      if (updated.count !== 1) throw new Error('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
+      await tx.importRecord.create({
         data: {
           batchId,
           status: 'CHECKPOINT',
           rawPayload: value as any,
           processingNotes: 'Durable import checkpoint',
         },
-      }),
-      this.prisma.importBatch.update({
-        where: { id: batchId },
-        data: {
-          processedRecords: checkpoint.processedRecords,
-          failedRecords: checkpoint.failedRecords,
-        },
-      }),
-    ]);
+      });
+    });
   }
 
   async moveToDeadLetter(dto: DeadLetterImportRecordDto): Promise<void> {
-    await this.prisma.$transaction([
-      this.prisma.importRecord.create({
+    // This is the legacy/manual DLQ path, NOT the worker's fenced
+    // failClaimedJob. Never permit a late compatibility call to erase an
+    // active worker claim, a pending stop, or a finished batch's result.
+    await this.prisma.$transaction(async tx => {
+      const updated = await tx.importBatch.updateMany({
+        where: {
+          id: dto.batchId,
+          batchStatus: { in: [ImportJobStatus.QUEUED, ImportJobStatus.FAILED_PERMANENT] },
+          claimedBy: null,
+          claimUntil: null,
+        },
+        data: {
+          batchStatus: ImportJobStatus.DLQ,
+          failedRecords: { increment: 1 },
+          lastError: this.sanitize(dto.reason),
+        },
+      });
+      if (updated.count !== 1) throw new Error('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+      await tx.importRecord.create({
         data: {
           id: dto.recordId,
           batchId: dto.batchId,
@@ -398,18 +430,8 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
           },
           processingNotes: this.sanitize(dto.reason),
         },
-      }),
-      this.prisma.importBatch.update({
-        where: { id: dto.batchId },
-        data: {
-          batchStatus: ImportJobStatus.DLQ,
-          failedRecords: { increment: 1 },
-          claimedBy: null,
-          claimUntil: null,
-          lastError: this.sanitize(dto.reason),
-        },
-      }),
-    ]);
+      });
+    });
   }
 
   private reclaimableWhere(now: Date, batchId?: string): Record<string, unknown> {

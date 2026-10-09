@@ -149,6 +149,11 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
     const job = this.jobs.get(batchId);
     if (!job) throw new Error(`Import job with batchId '${batchId}' not found`);
     if (checkpoint.toJSON().batchId !== batchId) throw new Error('IMPORT_CHECKPOINT_BATCH_MISMATCH');
+    if (!lease && (job.claimedBy || job.claimUntil || this.leases.has(batchId) ||
+        ![ImportJobStatus.CREATED, ImportJobStatus.QUEUED, ImportJobStatus.RESUMING,
+          ImportJobStatus.RUNNING, ImportJobStatus.PAUSED, ImportJobStatus.FAILED_RETRYABLE]
+          .includes(job.status)))
+      throw new Error('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
     if (lease) {
       const current = this.leases.get(batchId);
       if (!current || job.status !== ImportJobStatus.RUNNING ||
@@ -171,31 +176,20 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
   }
 
   async moveToDeadLetter(dto: DeadLetterImportRecordDto): Promise<void> {
+    const job = this.jobs.get(dto.batchId);
+    if (!job ||
+        ![ImportJobStatus.QUEUED, ImportJobStatus.FAILED_PERMANENT].includes(job.status) ||
+        job.claimedBy || job.claimUntil || this.leases.has(dto.batchId))
+      throw new Error('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    // Validate before appending evidence. An invalid call must not create a
+    // synthetic job, retain a DLQ record, or erase a live worker lease.
     const records = this.deadLetters.get(dto.batchId) ?? [];
     records.push({ ...dto });
     this.deadLetters.set(dto.batchId, records);
-
-    const job = this.jobs.get(dto.batchId);
-    const now = new Date();
-    if (job) {
-      job.status = ImportJobStatus.DLQ;
-      job.lastError = dto.reason;
-      job.updatedAt = now;
-      job.claimedBy = undefined;
-      job.claimUntil = undefined;
-      this.leases.delete(dto.batchId);
-    } else {
-      this.jobs.set(dto.batchId, {
-        batchId: dto.batchId,
-        status: ImportJobStatus.DLQ,
-        progress: 0,
-        processedRecords: 0,
-        failedRecords: 1,
-        createdAt: now,
-        updatedAt: now,
-        lastError: dto.reason,
-      });
-    }
+    job.status = ImportJobStatus.DLQ;
+    job.lastError = dto.reason;
+    job.updatedAt = new Date();
+    job.failedRecords += 1;
   }
 
   async markJobRunning(batchId: string): Promise<boolean> {

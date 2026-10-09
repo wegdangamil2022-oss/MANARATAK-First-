@@ -192,6 +192,35 @@ describe('InMemoryImportQueueGateway', () => {
     expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLED);
   });
 
+
+  it('rejects legacy progress and DLQ mutation while a claimed worker is active', async () => {
+    const batchId = 'batch-claim-legacy-write-guard';
+    await gateway.enqueueImportJob({
+      batchId,
+      targetDomain: ImportTargetDomain.Generic,
+      sourceSystem: 'TEST',
+    });
+    const lease = await gateway.claimNextJob({ batchId, workerId: 'owner-worker', leaseDurationMs: 60_000 });
+    const checkpoint = ImportCheckpoint.create({
+      batchId, stage: 'VALIDATE', chunkIndex: 0, recordOffset: 1,
+      processedRecords: 1, failedRecords: 0, acceptedRecordKeys: [], updatedAt: new Date(),
+    });
+    await expect(gateway.recordCheckpoint(batchId, checkpoint))
+      .rejects.toThrow('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
+    await expect(gateway.moveToDeadLetter({
+      batchId, failedAt: new Date(), reason: 'late compatibility failure',
+    })).rejects.toThrow('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    expect(gateway.getDeadLetters(batchId)).toHaveLength(0);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.RUNNING);
+    expect(await gateway.completeClaimedJob(lease!)).toBe(true);
+    await expect(gateway.recordCheckpoint(batchId, checkpoint))
+      .rejects.toThrow('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
+    await expect(gateway.moveToDeadLetter({
+      batchId, failedAt: new Date(), reason: 'already completed',
+    })).rejects.toThrow('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.COMPLETED);
+  });
+
   it('throws when recording checkpoint for non-existent job', async () => {
     const checkpoint = ImportCheckpoint.create({
       batchId: 'unknown-batch',
@@ -236,19 +265,15 @@ describe('InMemoryImportQueueGateway', () => {
     expect(dlqRecords[0].errorCode).toBe('INVALID_FORMAT');
   });
 
-  it('creates minimal job snapshot when moving non-existent batch item to DLQ', async () => {
+  it('refuses creating a synthetic DLQ batch when the source batch does not exist', async () => {
     const batchId = 'unregistered-batch-dlq';
-
-    await gateway.moveToDeadLetter({
+    await expect(gateway.moveToDeadLetter({
       batchId,
       failedAt: new Date(),
       reason: 'Fatal parsing failure',
-    });
-
-    const status = await gateway.getJobStatus(batchId);
-    expect(status?.status).toBe(ImportJobStatus.DLQ);
-    expect(status?.failedRecords).toBe(1);
-    expect(status?.lastError).toBe('Fatal parsing failure');
+    })).rejects.toThrow('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    expect(await gateway.getJobStatus(batchId)).toBeNull();
+    expect(gateway.getDeadLetters(batchId)).toHaveLength(0);
   });
 
   it('replays job from terminal status, respecting fromCheckpoint option', async () => {

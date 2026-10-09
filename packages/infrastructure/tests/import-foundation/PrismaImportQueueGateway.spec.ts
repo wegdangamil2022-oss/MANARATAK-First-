@@ -15,15 +15,34 @@ describe('PrismaImportQueueGateway', () => {
     });
   });
 
-  it('persists checkpoint and counters in one Prisma transaction', async () => {
+  it('persists legacy checkpoint only after an unclaimed batch CAS inside the same transaction', async () => {
     const prisma = mockPrisma();
+    const tx = {
+      importBatch: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+      importRecord: { create: vi.fn().mockResolvedValue({}) },
+    };
+    prisma.$transaction.mockImplementation(async (callback: any) => callback(tx));
     const gateway = new PrismaImportQueueGateway(prisma as any);
     const checkpoint = ImportCheckpoint.create({ batchId: 'batch-1', stage: 'VALIDATE', chunkIndex: 2, recordOffset: 1000, processedRecords: 995, failedRecords: 5, acceptedRecordKeys: ['key-1'], updatedAt: new Date('2026-08-13T00:00:00Z') });
 
     await gateway.recordCheckpoint('batch-1', checkpoint);
-    expect(prisma.importRecord.create).toHaveBeenCalledWith({ data: expect.objectContaining({ batchId: 'batch-1', status: 'CHECKPOINT' }) });
-    expect(prisma.importBatch.update).toHaveBeenCalledWith({ where: { id: 'batch-1' }, data: { processedRecords: 995, failedRecords: 5 } });
+    expect(tx.importBatch.updateMany).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        id: 'batch-1', claimedBy: null, claimUntil: null,
+        batchStatus: { in: expect.arrayContaining([ImportJobStatus.QUEUED, ImportJobStatus.RUNNING]) },
+      }),
+      data: { processedRecords: 995, failedRecords: 5 },
+    });
+    expect(tx.importRecord.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ batchId: 'batch-1', status: 'CHECKPOINT' }),
+    });
     expect(prisma.$transaction).toHaveBeenCalledOnce();
+
+    tx.importBatch.updateMany.mockResolvedValue({ count: 0 });
+    tx.importRecord.create.mockClear();
+    await expect(gateway.recordCheckpoint('batch-1', checkpoint))
+      .rejects.toThrow('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
+    expect(tx.importRecord.create).not.toHaveBeenCalled();
   });
 
   it('atomically refuses a stale worker checkpoint without creating any checkpoint record', async () => {
@@ -58,16 +77,35 @@ describe('PrismaImportQueueGateway', () => {
       .rejects.toThrow('IMPORT_CHECKPOINT_BATCH_MISMATCH');
   });
 
-  it('persists sanitized dead-letter evidence and DLQ state atomically', async () => {
+  it('atomically denies legacy DLQ against claimed workers and retains redacted evidence for allowed batches', async () => {
     const prisma = mockPrisma();
+    const tx = {
+      importBatch: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      importRecord: { create: vi.fn().mockResolvedValue({}) },
+    };
+    prisma.$transaction.mockImplementation(async (callback: any) => callback(tx));
     const gateway = new PrismaImportQueueGateway(prisma as any);
-
-    await gateway.moveToDeadLetter({ batchId: 'batch-1', failedAt: new Date(), reason: 'token=secret-value failed' });
-    const record = prisma.importRecord.create.mock.calls[0][0].data;
+    const failure = { batchId: 'batch-1', failedAt: new Date(), reason: 'token=secret-value failed' };
+    await expect(gateway.moveToDeadLetter(failure))
+      .rejects.toThrow('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    expect(tx.importRecord.create).not.toHaveBeenCalled();
+    expect(tx.importBatch.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: 'batch-1',
+        batchStatus: { in: [ImportJobStatus.QUEUED, ImportJobStatus.FAILED_PERMANENT] },
+        claimedBy: null, claimUntil: null,
+      },
+      data: {
+        batchStatus: ImportJobStatus.DLQ, failedRecords: { increment: 1 },
+        lastError: 'token=[REDACTED] failed',
+      },
+    });
+    tx.importBatch.updateMany.mockResolvedValue({ count: 1 });
+    await gateway.moveToDeadLetter(failure);
+    const record = tx.importRecord.create.mock.calls[0][0].data;
     expect(record.processingNotes).toContain('token=[REDACTED]');
     expect(record.processingNotes).not.toContain('secret-value');
-    expect(prisma.importBatch.update).toHaveBeenCalledWith({ where: { id: 'batch-1' }, data: expect.objectContaining({ batchStatus: ImportJobStatus.DLQ, failedRecords: { increment: 1 }, claimedBy: null, claimUntil: null }) });
-    expect(prisma.$transaction).toHaveBeenCalledOnce();
+    expect(prisma.$transaction).toHaveBeenCalledTimes(2);
   });
 
   it('reports persisted job status with the latest durable checkpoint', async () => {
