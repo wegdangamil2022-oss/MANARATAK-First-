@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { type CanonicalPickerOption, canonicalOptionIsSelectable } from '../api/canonicalPickers';
 
-type Loader = () => Promise<CanonicalPickerOption[]>;
+type Loader = (query?: string) => Promise<CanonicalPickerOption[]>;
 
 export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'default', optional = false, disabled = false }: {
   label: string;
@@ -17,12 +17,13 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   const [options, setOptions] = useState<CanonicalPickerOption[]>([]);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     let active = true;
     setState('loading');
     setError('');
-    loaderRef.current().then((items) => {
+    const timer = setTimeout(() => loaderRef.current(search.trim()).then((items) => {
       if (!active) return;
       setOptions(items);
       setState('ready');
@@ -30,9 +31,9 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       if (!active) return;
       setError(err instanceof Error ? err.message : 'Canonical options unavailable');
       setState('error');
-    });
-    return () => { active = false; };
-  }, [reloadKey]);
+    }), 200);
+    return () => { active = false; clearTimeout(timer); };
+  }, [reloadKey, search]);
 
   const selected = useMemo(() => options.find((item) => item.id === value), [options, value]);
   const selectedBlocked = selected && !canonicalOptionIsSelectable(selected);
@@ -40,6 +41,10 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
 
   return <label className="block space-y-1 text-xs font-medium text-slate-700">
     <span>{label}</span>
+    <input type="search" aria-label={`Search ${label}`} value={search}
+      disabled={disabled} onChange={event => setSearch(event.target.value)}
+      placeholder="Search owner records (up to 50 results)"
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
     <select
       value={value ?? ''}
       disabled={disabled || state !== 'ready'}
@@ -52,12 +57,13 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:bg-slate-50"
     >
       <option value="">{optional ? '— None —' : state === 'loading' ? 'Loading…' : '— Select canonical record —'}</option>
+      {missing && <option value={value ?? ''} disabled>Current selection (outside bounded results): {value}</option>}
       {options.map((item) => <option key={item.id} value={item.id} disabled={!canonicalOptionIsSelectable(item)}>
         {item.label}{item.code ? ` · ${item.code}` : ''} · {item.lifecycle}
       </option>)}
     </select>
     {state === 'error' ? <span className="text-red-600">{error}</span> : null}
-    {missing ? <span className="text-red-600">Canonical ID not found in owner API: {value}</span> : null}
+    {missing ? <span className="text-amber-700">Current ID is not in this bounded page. Search to verify; no relationship has been changed.</span> : null}
     {selectedBlocked ? <span className="text-amber-700">Existing relation is {selected.lifecycle}; choose an ACTIVE/PUBLISHED replacement before saving.</span> : null}
   </label>;
 }
@@ -73,14 +79,21 @@ export function CanonicalMultiPicker({ label, values, onChange, load, reloadKey 
   loaderRef.current = load;
   const [options, setOptions] = useState<CanonicalPickerOption[]>([]);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
   useEffect(() => {
     let active = true;
     setError('');
-    loaderRef.current().then((items) => active && setOptions(items)).catch((err: unknown) => active && setError(err instanceof Error ? err.message : 'Canonical options unavailable'));
-    return () => { active = false; };
-  }, [reloadKey]);
+    const timer = setTimeout(() => loaderRef.current(search.trim())
+      .then(items => { if (active) setOptions(items); })
+      .catch((err: unknown) => { if (active) setError(err instanceof Error ? err.message : 'Canonical options unavailable'); }), 200);
+    return () => { active = false; clearTimeout(timer); };
+  }, [reloadKey, search]);
   return <fieldset className="space-y-2 rounded-lg border border-slate-200 p-3">
     <legend className="px-1 text-xs font-semibold text-slate-700">{label}</legend>
+    <input type="search" aria-label={`Search ${label}`} value={search}
+      onChange={event => setSearch(event.target.value)} placeholder="Search owner records (up to 50)"
+      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+    <span className="text-xs text-slate-500">Selected IDs: {values.length}; search does not remove existing selections.</span>
     <div className="max-h-44 space-y-1 overflow-auto">
       {options.map((item) => {
         const blocked = !canonicalOptionIsSelectable(item);

@@ -612,10 +612,10 @@ function CitiesTab() {
           {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <CanonicalPicker label="الدولة المعتمدة" value={countryId} load={() => canonicalPickerApi.countries()} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading || Boolean(editing)} />
+          <CanonicalPicker label="الدولة المعتمدة" value={countryId} load={(query) => canonicalPickerApi.countries(query)} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading || Boolean(editing)} />
           <Input label="الاسم بالإنجليزية" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
           <Input label="الاسم باللغة العربية (اختياري)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
-          <CanonicalPicker label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={() => canonicalPickerApi.regions(form.countryIso2Code || undefined)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId || Boolean(editing)} />
+          <CanonicalPicker label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={(query) => canonicalPickerApi.regions(form.countryIso2Code || undefined, query)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId || Boolean(editing)} />
           <Input label="تسمية المنطقة الإدارية الأصلية (اختياري)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
           <Input label="المنطقة الزمنية (مثل Asia/Riyadh - اختياري)" value={form.timezone} onChange={(v: string) => setForm({...form, timezone: v})} />
         </div>
