@@ -18,6 +18,8 @@ import {
   ValueType,
   SettingValueData,
   SettingValidationRules,
+  IIdentityRepository,
+  LifeStatus,
 } from '@manaratak/domain';
 import {
   CreateSettingDefinitionInput,
@@ -74,6 +76,7 @@ export class ManageSettingsUseCase {
     private assignmentRepo: ISettingAssignmentRepository,
     private validationService: ConfigurationValidationService,
     private readonly atomicMutations?: AtomicDomainMutationCoordinator,
+    private readonly identityRepository?: Pick<IIdentityRepository, 'findById'>,
   ) {}
 
   public async listDefinitions(): Promise<SettingDefinitionAdminView[]> {
@@ -309,7 +312,7 @@ export class ManageSettingsUseCase {
 
     const changeReason = this.changeReason(input.changeReason, definition.isFeatureFlag);
     const scope = new ScopeIdentifier(input.level, input.scopeId);
-    this.assertAdminWritableScope(scope);
+    await this.assertAdminWritableScope(scope);
     const valueData = this.createValueData(input.type, input.value);
 
     this.validationService.validate(definition, valueData);
@@ -353,7 +356,7 @@ export class ManageSettingsUseCase {
     if (!assignment) {
       throw new Error('Assignment not found');
     }
-    this.assertAdminWritableScope(assignment.scope);
+    await this.assertAdminWritableScope(assignment.scope);
 
     const definition = await this.definitionRepo.findByKey(assignment.key);
     if (!definition || definition.isDeprecated)
@@ -383,10 +386,15 @@ export class ManageSettingsUseCase {
     });
   }
 
-  private assertAdminWritableScope(scope: ScopeIdentifier): void {
-    // The historical TENANT resolution chain remains readable. No canonical tenant
-    // registry/owner has been approved, so no new Admin mutations are allowed.
+  private async assertAdminWritableScope(scope: ScopeIdentifier): Promise<void> {
+    // Historical overrides remain readable. Neither TENANT nor DOMAIN currently has
+    // an approved canonical owner selector, so Admin cannot write guessed IDs.
     if (scope.getLevel() === ScopeLevel.TENANT) throw new Error('SETTINGS_TENANT_SCOPE_UNAPPROVED');
+    if (scope.getLevel() === ScopeLevel.DOMAIN) throw new Error('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
+    if (scope.getLevel() !== ScopeLevel.IDENTITY) return;
+    if (!this.identityRepository) throw new Error('SETTINGS_IDENTITY_SCOPE_VALIDATOR_UNAVAILABLE');
+    const identity = await this.identityRepository.findById(scope.getScopeId()!);
+    if (!identity || identity.status === LifeStatus.PURGED) throw new Error('SETTINGS_IDENTITY_SCOPE_NOT_FOUND');
   }
 
   private changeReason(value: string | undefined, required: boolean): string | undefined {
@@ -432,7 +440,7 @@ export class ManageSettingsUseCase {
     const changeReason = this.changeReason(input.changeReason, true)!;
     const assignment = await this.findAssignment(input.assignmentId);
     if (!assignment) throw new Error('SETTINGS_ASSIGNMENT_NOT_FOUND');
-    this.assertAdminWritableScope(assignment.scope);
+    await this.assertAdminWritableScope(assignment.scope);
     if (assignment.getCurrentVersion().id !== input.expectedCurrentVersionId) throw new Error('SETTINGS_VERSION_CONFLICT');
     const definition = await this.definitionRepo.findByKey(assignment.key);
     if (!definition || definition.isDeprecated || definition.isSecret) throw new Error('SETTINGS_DEFINITION_NOT_WRITABLE');
