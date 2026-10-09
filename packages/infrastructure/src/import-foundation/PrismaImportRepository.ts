@@ -550,7 +550,9 @@ export class PrismaImportRepository {
     if (record.sourceDedupKey) {
       // All keyed writes must participate in the same global check/insert lock.
       // Do not expose an unguarded single-record bypass for concurrent batches.
-      const result = await this.bulkCreateRecords([{ ...record, sourceDedupKey: record.sourceDedupKey }]);
+      const result = await this.bulkCreateRecords([{ ...record, sourceDedupKey: record.sourceDedupKey,
+        processingNotes: record.processingNotes ?? undefined,
+        promotedEntityId: record.promotedEntityId ?? undefined }]);
       if (result.count !== 1) throw new Error('IMPORT_SOURCE_DEDUP_ALREADY_CLAIMED');
       return this.prisma
         ? this.prisma.importRecord.findUniqueOrThrow({ where: { id: record.id } })
