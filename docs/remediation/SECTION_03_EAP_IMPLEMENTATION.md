@@ -182,3 +182,9 @@ npm run ci:source:contracts
 - Added `AssetFinalizationContract.spec.ts` for the canonical `POST /admin/assets/:assetId/finalize-upload` action: server-owned verification (empty request body), safe 400 on client-supplied proof, 409 on missing/stale finalization, and sanitized provider failures.
 - EAP router Problem Details now classifies `ASSET_UPLOAD_FINALIZATION_REQUIRED`, `ASSET_UPLOAD_CHANGED_AFTER_FINALIZATION` and optimistic-save conflicts as 409 rather than 500.
 - **No external proof is accepted from the browser**; the backend still requires provider observation before saving upload evidence.
+
+## Patch F — Asset Center read-only detail panel
+
+- Added an on-demand detail panel to the existing `AssetAdminPage` using the management-guarded `GET /admin/assets/:assetId` route.
+- Displays identity, owner, lifecycle state, security classification, retention/expiry, MIME/size and SHA-256; action to check usage dependencies. The panel does **not** expose storage locators, raw upload URLs, private attachments or destructive controls.
+- Remaining operational UI scope: real upload wizard, secure managed preview, tested recovery/timeline, and browser integration. Source TypeScript/quality will be checked on the next CI run.

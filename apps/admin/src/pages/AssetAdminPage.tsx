@@ -20,6 +20,19 @@ interface AssetPage {
   nextCursor: string | null;
 }
 
+interface AssetDetails {
+  id: string;
+  reference: string;
+  ownerId: string;
+  ownerType: string;
+  lifecycleState: string;
+  securityClassification: string;
+  retentionCategory: string;
+  retentionExpiresAt?: string | null;
+  metadata: { originalFilename: string; mimeType: string; fileExtension: string; byteSize: number };
+  checksum?: { algorithm: string; hash: string } | null;
+}
+
 export function AssetAdminPage() {
   const [items, setItems] = useState<AssetDto[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -30,6 +43,25 @@ export function AssetAdminPage() {
     assetId: string; inUse: boolean; usages: Array<{ consumer: string; field: string }>;
   } | null>(null);
   const [usageLoadingId, setUsageLoadingId] = useState<string | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
+  const [detailsLoadingId, setDetailsLoadingId] = useState<string | null>(null);
+
+  const inspectDetails = async (assetId: string) => {
+    if (detailsLoadingId) return;
+    setDetailsLoadingId(assetId);
+    setError(null);
+    try {
+      const details = await adminApiClient.request<AssetDetails>(
+        `/admin/assets/${encodeURIComponent(assetId)}`, { cache: 'no-store' },
+      );
+      setSelectedAsset(details);
+    } catch (cause) {
+      setSelectedAsset(null);
+      setError(cause instanceof Error ? cause.message : 'تعذر تحميل تفاصيل الأصل');
+    } finally {
+      setDetailsLoadingId(null);
+    }
+  };
 
   const inspectUsages = async (assetId: string) => {
     if (usageLoadingId) return;
@@ -179,6 +211,42 @@ export function AssetAdminPage() {
         </button>
       </form>
 
+      {selectedAsset && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 text-xs shadow-xs" aria-live="polite">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-black text-[#142B5F]">
+              تفاصيل الأصل: {selectedAsset.metadata.originalFilename}
+            </h2>
+            <button type="button" onClick={() => setSelectedAsset(null)}
+              className="rounded-lg border px-3 py-1.5">إغلاق</button>
+          </div>
+          <dl className="mt-4 grid gap-3 md:grid-cols-3">
+            <div><dt className="text-slate-500">المعرف</dt><dd className="mt-1 break-all font-mono">{selectedAsset.id}</dd></div>
+            <div><dt className="text-slate-500">المرجع</dt><dd className="mt-1 break-all font-mono">{selectedAsset.reference}</dd></div>
+            <div><dt className="text-slate-500">المالك</dt><dd className="mt-1">{selectedAsset.ownerType}: {selectedAsset.ownerId}</dd></div>
+            <div><dt className="text-slate-500">الحالة</dt><dd className="mt-1 font-bold">{selectedAsset.lifecycleState}</dd></div>
+            <div><dt className="text-slate-500">تصنيف الأمان</dt><dd className="mt-1">{selectedAsset.securityClassification}</dd></div>
+            <div><dt className="text-slate-500">الاحتفاظ</dt><dd className="mt-1">{selectedAsset.retentionCategory}</dd></div>
+            <div><dt className="text-slate-500">تاريخ انتهاء الاحتفاظ</dt><dd className="mt-1">{selectedAsset.retentionExpiresAt || 'غير محدد'}</dd></div>
+            <div><dt className="text-slate-500">نوع الملف</dt><dd className="mt-1">{selectedAsset.metadata.mimeType}</dd></div>
+            <div><dt className="text-slate-500">الحجم</dt><dd className="mt-1">{selectedAsset.metadata.byteSize.toLocaleString()} بايت</dd></div>
+          </dl>
+          {selectedAsset.checksum && (
+            <div className="mt-4 rounded-lg bg-slate-50 p-3">
+              <div className="font-bold">بصمة المحتوى — {selectedAsset.checksum.algorithm}</div>
+              <code dir="ltr" className="mt-1 block break-all text-[11px]">{selectedAsset.checksum.hash}</code>
+            </div>
+          )}
+          <p className="mt-3 text-slate-500">
+            هذه بيانات وصفية فقط؛ لا تُعرض روابط تخزين مباشرة. تحقق من ارتباطات الأصل قبل أي عملية مؤثرة.
+          </p>
+          <button type="button" onClick={() => void inspectUsages(selectedAsset.id)}
+            disabled={usageLoadingId !== null} className="mt-3 rounded-lg border px-3 py-1.5 disabled:opacity-50">
+            عرض استخدامات هذا الأصل
+          </button>
+        </section>
+      )}
+
       {usagePreview && (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 text-xs" aria-live="polite">
           <div className="font-bold text-[#142B5F]">تأثير الإجراءات على الأصل: {usagePreview.assetId}</div>
@@ -210,12 +278,13 @@ export function AssetAdminPage() {
                 <th className="p-3.5 text-start">تصنيف الأمان</th>
                 <th className="p-3.5 text-start">سياسة الاحتفاظ</th>
                 <th className="p-3.5 text-start">تأثير الاستخدام</th>
+                <th className="p-3.5 text-start">التفاصيل</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400 font-bold">
+                  <td colSpan={8} className="p-8 text-center text-slate-400 font-bold">
                     لا توجد أصول أو ملفات مطابقة للبحث.
                   </td>
                 </tr>
@@ -249,6 +318,13 @@ export function AssetAdminPage() {
                         onClick={() => void inspectUsages(a.id)}
                         className="rounded-lg border px-3 py-1 text-xs disabled:opacity-50">
                         {usageLoadingId === a.id ? 'جاري الفحص…' : 'عرض الارتباطات'}
+                      </button>
+                    </td>
+                    <td className="p-3.5">
+                      <button type="button" disabled={detailsLoadingId !== null}
+                        onClick={() => void inspectDetails(a.id)}
+                        className="rounded-lg border px-3 py-1 text-xs disabled:opacity-50">
+                        {detailsLoadingId === a.id ? 'جاري التحميل…' : 'عرض التفاصيل'}
                       </button>
                     </td>
                   </tr>
