@@ -54,15 +54,15 @@ export function mapCountrySourceRecord(source: CountrySourceRecord): UpsertRefer
     iso2Code: countryText(source.iso_alpha2)?.toUpperCase() ?? '',
     iso3Code: countryText(source.iso_alpha3)?.toUpperCase() ?? '',
     name: countryText(source.name_en) ?? '',
+    nameAr: countryText(source.name_ar) ?? null,
     officialName: countryText(source.official_name_en) ?? null,
     region: countryText(source.continent) ?? countryText(source.region) ?? null,
     subregion: countryText(source.subregion) ?? null,
     defaultCurrencyCode: countryText(source.default_currency)?.toUpperCase() ?? null,
     defaultLanguageCode: countryText(source.default_language)?.toLowerCase() ?? null,
     callingCode: countryText(source.calling_code) ?? null,
-    isActive: reviewStatus !== 'INACTIVE',
+    // Source review statuses are metadata only; never mutate canonical lifecycle from a spreadsheet.
     metadata: {
-      nameAr: countryText(source.name_ar),
       officialNameAr: countryText(source.official_name_ar),
       localName: countryText(source.local_name),
       isoNumeric: countryText(source.iso_numeric),
