@@ -50,15 +50,27 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
         issues: [{ code: 'P7_EXPLICIT_REFERENCE_TYPE_REQUIRED',
           message: 'Supply referenceMetadata.referenceEntityType; P7 will not guess from field shapes.' }] };
     }
-    const batch = this.planner.prepareSeedBatch({
-      seedBatchId: handoff.handoffId,
-      sourceName: handoff.provenance.sourceSystem,
-      sourceVersion: handoff.referenceMetadata?.sourceVersion || 'UNVERIFIED',
-      entityType,
-      records: [{ ...handoff.normalizedPayload }],
-    });
-    const report = batch.records[0]?.validationReport;
-    if (!report) throw new Error('P7_IMPORT_SCREENING_REPORT_REQUIRED');
+    let report: ReturnType<ReferenceDataImportHandoffService['prepareSeedBatch']>['records'][number]['validationReport'];
+    try {
+      const batch = this.planner.prepareSeedBatch({
+        seedBatchId: handoff.handoffId,
+        sourceName: handoff.provenance.sourceSystem,
+        sourceVersion: handoff.referenceMetadata?.sourceVersion || 'UNVERIFIED',
+        entityType,
+        records: [{ ...handoff.normalizedPayload }],
+      });
+      report = batch.records[0]?.validationReport;
+    } catch {
+      // Untrusted P6 field types can be numbers, arrays or malformed objects.
+      // A bad source row must be INVALID, not a retrying exception or mutation.
+      return {
+        ...decision, state: 'INVALID',
+        issues: [{ code: 'P7_IMPORT_SOURCE_SHAPE_INVALID',
+          message: 'Malformed reference-data source fields require manual correction.' }],
+      };
+    }
+    if (!report) return { ...decision, state: 'INVALID',
+      issues: [{ code: 'P7_IMPORT_SCREENING_REPORT_REQUIRED', message: 'Validation evidence unavailable' }] };
     const issues = report.issues
       .filter(issue => issue.severity === 'ERROR')
       .map(issue => ({ code: issue.code, message: issue.message }));

@@ -38,6 +38,14 @@ describe('P6 -> P7 screening consumer', () => {
     expect(result.issues.some(i => i.code === 'INVALID_CITY_IDENTITY_TOKEN')).toBe(true);
     expect(result.canonicalWrites).toBe(0);
   });
+  it('quarantines non-string or malformed P6 field shapes rather than retrying a TypeError', async () => {
+    const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, {
+      countryIso2Code: 123, name: ['unexpected', 'array'],
+    }));
+    expect(result.state).toBe('INVALID');
+    expect(result.canonicalWrites).toBe(0);
+    expect(result.issues[0].code).toBe('P7_IMPORT_SOURCE_SHAPE_INVALID');
+  });
   it('reports invalid owner data without canonical writes', async () => {
     const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, {
       countryIso2Code: 'Y', name: 'broken',
