@@ -305,6 +305,7 @@ export class ManageSettingsUseCase {
 
     const changeReason = this.changeReason(input.changeReason, definition.isFeatureFlag);
     const scope = new ScopeIdentifier(input.level, input.scopeId);
+    this.assertAdminWritableScope(scope);
     const valueData = this.createValueData(input.type, input.value);
 
     this.validationService.validate(definition, valueData);
@@ -348,6 +349,7 @@ export class ManageSettingsUseCase {
     if (!assignment) {
       throw new Error('Assignment not found');
     }
+    this.assertAdminWritableScope(assignment.scope);
 
     const definition = await this.definitionRepo.findByKey(assignment.key);
     if (!definition || definition.isDeprecated)
@@ -375,6 +377,12 @@ export class ManageSettingsUseCase {
       newVersionId: input.newVersionId,
       changeReason,
     });
+  }
+
+  private assertAdminWritableScope(scope: ScopeIdentifier): void {
+    // The historical TENANT resolution chain remains readable. No canonical tenant
+    // registry/owner has been approved, so no new Admin mutations are allowed.
+    if (scope.getLevel() === ScopeLevel.TENANT) throw new Error('SETTINGS_TENANT_SCOPE_UNAPPROVED');
   }
 
   private changeReason(value: string | undefined, required: boolean): string | undefined {
@@ -420,6 +428,7 @@ export class ManageSettingsUseCase {
     const changeReason = this.changeReason(input.changeReason, true)!;
     const assignment = await this.findAssignment(input.assignmentId);
     if (!assignment) throw new Error('SETTINGS_ASSIGNMENT_NOT_FOUND');
+    this.assertAdminWritableScope(assignment.scope);
     if (assignment.getCurrentVersion().id !== input.expectedCurrentVersionId) throw new Error('SETTINGS_VERSION_CONFLICT');
     const definition = await this.definitionRepo.findByKey(assignment.key);
     if (!definition || definition.isDeprecated || definition.isSecret) throw new Error('SETTINGS_DEFINITION_NOT_WRITABLE');
