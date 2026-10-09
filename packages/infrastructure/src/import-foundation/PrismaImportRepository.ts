@@ -849,23 +849,45 @@ export class PrismaImportRepository {
       processingNotes?: string;
       rawPayload?: unknown;
     },
+    lease?: { batchId: string; workerId: string; attempt: number; claimUntil: Date },
   ): Promise<any> {
+    const data = {
+      status: updates.status,
+      validationErrors: toOptionalPrismaJson(updates.validationErrors),
+      promotedEntityId: updates.promotedEntityId,
+      processingNotes: updates.processingNotes,
+      rawPayload: toOptionalPrismaJson(updates.rawPayload),
+    };
     if (this.prisma) {
-      const record = await this.prisma.importRecord.update({
-        where: { id },
-        data: {
-          status: updates.status,
-          validationErrors: toOptionalPrismaJson(updates.validationErrors),
-          promotedEntityId: updates.promotedEntityId,
-          processingNotes: updates.processingNotes,
-          rawPayload: toOptionalPrismaJson(updates.rawPayload),
-        },
-      });
-      return record;
+      if (lease) {
+        // Lock the owning batch row and update the record within ONE transaction.
+        // Admin pause/cancel and worker claim transfers update the same batch row;
+        // they cannot slip between a separate heartbeat and an unfenced record write.
+        return this.prisma.$transaction(async tx => {
+          const guarded = await tx.importBatch.updateMany({
+            where: {
+              id: lease.batchId, batchStatus: 'RUNNING',
+              claimedBy: lease.workerId, attemptCount: lease.attempt,
+              claimUntil: { equals: lease.claimUntil, gte: new Date() },
+            },
+            data: { claimedBy: lease.workerId },
+          });
+          if (guarded.count !== 1) throw new Error('IMPORT_WORKER_LEASE_LOST');
+          const changed = await tx.importRecord.updateMany({
+            where: { id, batchId: lease.batchId },
+            data,
+          });
+          if (changed.count !== 1) throw new Error('IMPORT_RECORD_BATCH_MISMATCH');
+          return changed;
+        });
+      }
+      return this.prisma.importRecord.update({ where: { id }, data });
     }
 
     const existing = this.inMemoryRecords.get(id);
     if (existing) {
+      if (lease && existing.batchId !== lease.batchId)
+        throw new Error('IMPORT_RECORD_BATCH_MISMATCH');
       const updated = {
         ...existing,
         ...updates,
@@ -874,6 +896,7 @@ export class PrismaImportRepository {
       this.inMemoryRecords.set(id, updated);
       return updated;
     }
+    if (lease) throw new Error('IMPORT_RECORD_BATCH_MISMATCH');
     return null;
   }
 
