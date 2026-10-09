@@ -270,4 +270,54 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       .toBe(AssetLifecycleState.DELETED);
   });
 
+  it('restore claim blocks an already-hydrated purge and any new retention purge', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(deletedCleanAsset(id));
+    await prisma.assetRecord.update({
+      where: { id },
+      data: { retentionExpiresAt: new Date(Date.now() - 60_000) },
+    });
+    const stalePurge = (await repository.findById(new AssetId(id)))!;
+    const restorer = (await repository.findById(new AssetId(id)))!;
+    restorer.restore();
+    await repository.acquireRestoreLease(restorer);
+    const claimed = await prisma.assetRecord.findUnique({ where: { id } });
+    expect(claimed?.retentionClaimToken).toMatch(/^[0-9a-f-]{36}$/);
+    expect(claimed?.lifecycleState).toBe(AssetLifecycleState.DELETED);
+    await expect(repository.assertPurgeAllowed(new AssetId(id), new Date()))
+      .rejects.toThrow('ASSET_PURGE_RETENTION_CLAIM_ACTIVE');
+    stalePurge.purge();
+    await expect(repository.save(stalePurge))
+      .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    const another = (await repository.findById(new AssetId(id)))!;
+    another.restore();
+    await expect(repository.acquireRestoreLease(another))
+      .rejects.toThrow('ASSET_RESTORE_LEASE_CONFLICT');
+    await repository.save(restorer);
+    const active = await prisma.assetRecord.findUnique({ where: { id } });
+    expect(active?.lifecycleState).toBe(AssetLifecycleState.ACTIVE);
+    expect(active?.retentionClaimToken).toBeNull();
+    expect(active?.retentionClaimUntil).toBeNull();
+  });
+
+  it('restore cannot publish ACTIVE when its lease expires or is replaced', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(deletedCleanAsset(id));
+    const restorer = (await repository.findById(new AssetId(id)))!;
+    restorer.restore();
+    await repository.acquireRestoreLease(restorer);
+    await prisma.assetRecord.update({
+      where: { id },
+      data: { retentionClaimUntil: new Date(Date.now() - 1_000) },
+    });
+    await expect(repository.save(restorer))
+      .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
+      .toBe(AssetLifecycleState.DELETED);
+    await repository.releaseRestoreLease(restorer);
+    const unlocked = await prisma.assetRecord.findUnique({ where: { id } });
+    expect(unlocked?.retentionClaimToken).toBeNull();
+    expect(unlocked?.retentionClaimUntil).toBeNull();
+  });
+
 });
