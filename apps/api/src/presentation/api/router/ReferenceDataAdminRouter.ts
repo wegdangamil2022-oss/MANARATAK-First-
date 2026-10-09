@@ -308,6 +308,34 @@ export class ReferenceDataAdminRouter {
       if (err instanceof ReferenceDataInvariantError) {
         return res.status(422).json({ error: err.code, message: err.message });
       }
+      // Fail closed but keep optimistic conflicts actionable in admin UI.
+      const governedConflicts = new Set([
+        'REFERENCE_VERSION_CONFLICT',
+        'REFERENCE_EDIT_TARGET_NOT_FOUND',
+        'REFERENCE_EDIT_IDENTITY_MISMATCH',
+        'REFERENCE_EDIT_TRANSACTION_AND_EXPECTED_VERSION_REQUIRED',
+        'REFERENCE_CITY_EDIT_ID_REQUIRED',
+        'REFERENCE_CITY_EDIT_COUNTRY_IMMUTABLE',
+        'REFERENCE_CITY_EDIT_REGION_IMMUTABLE',
+        'REFERENCE_CITY_IDENTITY_COLLISION_REVIEW_REQUIRED',
+        'REFERENCE_CITY_EXISTING_EDIT_ID_AND_VERSION_REQUIRED',
+        'REFERENCE_CITY_IDENTITY_RECONCILIATION_REQUIRED',
+        'REFERENCE_CITY_LEGACY_IDENTITY_REVIEW_REQUIRED',
+        'REFERENCE_CITY_LEGACY_IDENTITY_AMBIGUOUS',
+        'REFERENCE_PROVIDER_MAPPING_REASSIGNMENT_REQUIRES_RECONCILIATION',
+        'REFERENCE_REPLACEMENT_RELATIONSHIP_CYCLE',
+        'REFERENCE_LIFECYCLE_TARGET_NOT_ACTIVE',
+        'REFERENCE_LIFECYCLE_TARGET_COUNTRY_MISMATCH',
+        'REFERENCE_LIFECYCLE_REPLACEMENT_CYCLE',
+        'REFERENCE_LIFECYCLE_TARGET_NOT_ALLOWED',
+        'REFERENCE_LIFECYCLE_TRANSACTION_AND_EXPECTED_VERSION_REQUIRED',
+      ]);
+      if (err instanceof Error && governedConflicts.has(err.message)) {
+        return res.status(409).json({ error: err.message, refreshRequired: true });
+      }
+      if (err instanceof Error && err.message === 'REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED') {
+        return res.status(503).json({ error: 'REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED' });
+      }
       return next(err);
     });
 
