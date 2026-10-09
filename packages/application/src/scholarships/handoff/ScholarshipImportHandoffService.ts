@@ -26,6 +26,8 @@ const ALLOWED_OWNER_DOMAINS = new Set(['SCHOLARSHIP', 'SCHOLARSHIPS']);
 export class ScholarshipImportHandoffService
   implements IImportHandoffConsumer<ScholarshipImportStagingCandidate>
 {
+  readonly effectMode = 'SCREENING_ONLY' as const;
+
   constructor(
     private readonly screening?: IScholarshipHandoffCanonicalScreening,
     private readonly duplicateLookup?: IScholarshipHandoffDuplicateLookup,
