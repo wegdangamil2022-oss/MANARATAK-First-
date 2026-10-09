@@ -1,0 +1,72 @@
+
+import type { IImportHandoffConsumer, UniversalImportHandoff } from '@manaratak/domain';
+import { ReferenceDataImportHandoffService } from './ReferenceDataImportHandoffService';
+
+export interface P7ScreeningDecision {
+  ownerDomain: 'REFERENCE_DATA';
+  effect: 'SCREENING_ONLY';
+  state: 'NEEDS_OWNER_REVIEW' | 'INVALID';
+  handoffId: string;
+  entityType: 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY' | null;
+  sourceArtifactId: string | null;
+  sourceContentHash: string | null;
+  deterministicKey: string | null;
+  issues: Array<{ code: string; message: string }>;
+  /** Preview is NOT approval; no canonical mutation has occurred. */
+  canonicalWrites: 0;
+}
+
+/**
+ * P6 -> P7 SCREENING-ONLY integration. Receipt durability is provided by the
+ * generic ImportScreeningReceiptStore in the dispatcher (if configured).
+ * The consumer must never call SeedApply or a canonical repository upsert.
+ */
+export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffConsumer<P7ScreeningDecision> {
+  public readonly effectMode = 'SCREENING_ONLY' as const;
+  constructor(private readonly planner = new ReferenceDataImportHandoffService()) {}
+
+  public async accept(handoff: UniversalImportHandoff): Promise<P7ScreeningDecision> {
+    if (handoff.ownerDomain.trim().toUpperCase() !== 'REFERENCE_DATA') {
+      throw new Error('P7_IMPORT_WRONG_OWNER_DOMAIN');
+    }
+    const givenType = handoff.referenceMetadata?.referenceEntityType ?? null;
+    const entityType: P7ScreeningDecision['entityType'] =
+      givenType === 'COUNTRY' || givenType === 'CURRENCY' || givenType === 'LANGUAGE' || givenType === 'CITY'
+        ? givenType : null;
+    const decision: P7ScreeningDecision = {
+      ownerDomain: 'REFERENCE_DATA', effect: 'SCREENING_ONLY',
+      handoffId: handoff.handoffId, entityType,
+      sourceArtifactId: handoff.artifact.artifactId ?? null,
+      sourceContentHash: handoff.provenance.contentHash ?? null,
+      deterministicKey: null, issues: [], canonicalWrites: 0,
+      state: 'NEEDS_OWNER_REVIEW',
+    };
+    if (handoff.validation.state === 'INVALID') {
+      return { ...decision, state: 'INVALID',
+        issues: handoff.validation.issues.map(issue => ({ code: issue.code, message: issue.message })) };
+    }
+    if (!entityType) {
+      return { ...decision, state: 'NEEDS_OWNER_REVIEW',
+        issues: [{ code: 'P7_EXPLICIT_REFERENCE_TYPE_REQUIRED',
+          message: 'Supply referenceMetadata.referenceEntityType; P7 will not guess from field shapes.' }] };
+    }
+    const batch = this.planner.prepareSeedBatch({
+      seedBatchId: handoff.handoffId,
+      sourceName: handoff.provenance.sourceSystem,
+      sourceVersion: handoff.referenceMetadata?.sourceVersion || 'UNVERIFIED',
+      entityType,
+      records: [{ ...handoff.normalizedPayload }],
+    });
+    const report = batch.records[0]?.validationReport;
+    if (!report) throw new Error('P7_IMPORT_SCREENING_REPORT_REQUIRED');
+    const issues = report.issues
+      .filter(issue => issue.severity === 'ERROR')
+      .map(issue => ({ code: issue.code, message: issue.message }));
+    return {
+      ...decision,
+      deterministicKey: report.deterministicKey || null,
+      state: report.canBeImported ? 'NEEDS_OWNER_REVIEW' : 'INVALID',
+      issues,
+    };
+  }
+}

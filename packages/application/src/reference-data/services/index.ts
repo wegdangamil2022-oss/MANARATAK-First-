@@ -4,3 +4,4 @@ export * from './ReferenceResolverService';
 export * from './CountryImportPreviewService';
 export * from './CountryDerivedReferencePreviewService';
 export * from './GeographySourcePreviewService';
+export * from './ReferenceDataScreeningHandoffConsumer';

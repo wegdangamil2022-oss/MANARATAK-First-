@@ -167,6 +167,7 @@ import {
   ScholarshipImportHandoffService,
   ScholarshipRepositoryDuplicateLookup,
   ImportHandoffDispatcher,
+  ReferenceDataScreeningHandoffConsumer,
   AdminUniversityUseCases,
   UniversityImportHandoffService,
   InternationalTestImportHandoffService,
@@ -535,13 +536,14 @@ export function registerDependencies(
     canonicalMajorReferenceService: asFunction(({ academicTaxonomyRepository, degreeLevelRepository }) =>
       new CanonicalMajorReferenceService(academicTaxonomyRepository, degreeLevelRepository)).scoped(),
     degreeLevelUseCases: asFunction(({ degreeLevelRepository }) => new DegreeLevelUseCases(degreeLevelRepository)).scoped(),
-    importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
+    importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, referenceDataScreeningHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
       SCHOLARSHIPS: scholarshipImportHandoffConsumer,
       SCHOLARSHIP: scholarshipImportHandoffConsumer,
       UNIVERSITIES: universityImportHandoffConsumer,
       UNIVERSITY: universityImportHandoffConsumer,
       TESTS: internationalTestImportHandoffConsumer,
       INTERNATIONAL_TESTS: internationalTestImportHandoffConsumer,
+      REFERENCE_DATA: referenceDataScreeningHandoffConsumer,
     }, importScreeningReceiptStore)).scoped(),
     importQueueGateway: asFunction(({ prisma }) => isPrisma
       ? new PrismaImportQueueGateway(prisma)
@@ -723,6 +725,7 @@ export function registerDependencies(
       new UniversityImportHandoffService(universityRepository)).scoped(),
     internationalTestImportHandoffConsumer: asFunction(({ internationalTestRepository }) =>
       new InternationalTestImportHandoffService(internationalTestRepository)).scoped(),
+    referenceDataScreeningHandoffConsumer: asFunction(() => new ReferenceDataScreeningHandoffConsumer()).scoped(),
     adminMajorUseCases: asFunction(({ majorRepository, phase10CatalogRepository, atomicDomainMutationCoordinator, canonicalMajorReferenceService, newMajorCandidateRepository }) =>
       new AdminMajorUseCases(majorRepository, phase10CatalogRepository, undefined, undefined, atomicDomainMutationCoordinator, canonicalMajorReferenceService, newMajorCandidateRepository)).scoped(),
     coursePublicationService: asFunction(({ courseRepository, importedCourseOperationsRepository, atomicDomainMutationCoordinator, courseRelationshipRepository }) =>
