@@ -357,6 +357,21 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
       }
     }
 
+    if (input.timezone) {
+      // Runtime ICU supplies a bounded canonical IANA candidate set. This is
+      // validation, NOT proof that a complete IANA snapshot is bundled.
+      const zones = typeof Intl.supportedValuesOf === 'function'
+        ? Intl.supportedValuesOf('timeZone')
+        : [];
+      if (!zones.includes(input.timezone)) {
+        issues.push({
+          fieldName: 'timezone',
+          code: 'NON_CANONICAL_IANA_TIMEZONE',
+          message: 'timezone must be a canonical IANA region name supported by the runtime ICU snapshot',
+          severity: ReferenceDataValidationSeverity.ERROR
+        });
+      }
+    }
     if (!input.timezone) {
       issues.push({
         fieldName: 'timezone',

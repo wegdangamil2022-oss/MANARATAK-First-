@@ -149,6 +149,17 @@ export class ReferenceDataUseCases {
   public async upsertCountry(data: UpsertReferenceCountryDto, context?: ReferenceDataMutationContext): Promise<ReferenceCountryDto> {
     await assertAssetReferenceUsable(this.assetReferences, data.flagAssetId, { purpose: 'REFERENCE_COUNTRY_FLAG' });
     this.assertCanonicalValidation('COUNTRY', this.validationService.validateCountry(data).issues);
+    // Code fields are authoritative links, never free-form labels.
+    if (data.defaultCurrencyCode) {
+      const currency = await this.repository.getCurrency(data.defaultCurrencyCode);
+      if (!currency || currency.lifecycleState !== ReferenceLifecycleState.ACTIVE)
+        throw new ReferenceDataNotFoundError('ACTIVE_CURRENCY', data.defaultCurrencyCode);
+    }
+    if (data.defaultLanguageCode) {
+      const language = await this.repository.getLanguage(data.defaultLanguageCode);
+      if (!language || language.lifecycleState !== ReferenceLifecycleState.ACTIVE)
+        throw new ReferenceDataNotFoundError('ACTIVE_LANGUAGE', data.defaultLanguageCode);
+    }
     return this.atomicUpsert('COUNTRY', data.iso2Code, context, transaction => transaction.repository.upsertCountryInTransaction(data, transaction.context, context?.actorId, context?.correlationId), () => this.repository.upsertCountry(data));
   }
 
