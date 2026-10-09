@@ -186,6 +186,9 @@ describe('InMemoryImportQueueGateway', () => {
     await gateway.cancelJob({ batchId, reason: 'No further writes' });
     await expect(gateway.recordCheckpoint(batchId, checkpoint, lease!))
       .rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    // Still cancelling until the in-flight worker actually acknowledges exit.
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLING);
+    expect(await gateway.acknowledgeStoppedJob(lease!)).toBe('CANCELLED');
     expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLED);
   });
 
