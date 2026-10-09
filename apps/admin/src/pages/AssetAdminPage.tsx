@@ -63,6 +63,28 @@ export function AssetAdminPage() {
     }
   };
 
+  const previewAsset = async (assetId: string, mimeType: string) => {
+    if (!['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(mimeType)) {
+      setError('المعاينة متاحة فقط لملفات PDF والصور المتحقق منها.');
+      return;
+    }
+    setError(null);
+    try {
+      const grant = await adminApiClient.request<{ url: string; headers?: Record<string, string> }>(
+        `/admin/assets/${encodeURIComponent(assetId)}/delivery-grant`,
+        { method: 'POST', body: JSON.stringify({ expiresInSeconds: 120 }) },
+      );
+      if (grant.headers && Object.keys(grant.headers).length > 0) {
+        throw new Error('ASSET_PREVIEW_REQUIRES_SECURE_PROXY');
+      }
+      const link = new URL(grant.url);
+      if (!['https:', 'http:'].includes(link.protocol)) throw new Error('ASSET_PREVIEW_URL_INVALID');
+      window.open(link.toString(), '_blank', 'noopener,noreferrer');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'تعذرت معاينة الملف');
+    }
+  };
+
   const inspectUsages = async (assetId: string) => {
     if (usageLoadingId) return;
     setUsageLoadingId(assetId);
