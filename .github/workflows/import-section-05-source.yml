@@ -6,13 +6,14 @@ on:
     paths:
       - 'packages/application/src/import-foundation/**'
       - 'packages/application/tests/import-foundation/**'
+      - 'packages/application/src/translation-import/TranslationImportPreparationService.ts'
+      - 'packages/application/tests/translation-import/TranslationImportPreparationService.spec.ts'
       - 'packages/infrastructure/src/import-foundation/**'
       - 'packages/infrastructure/tests/import-foundation/**'
       - 'packages/domain/src/import-foundation/**'
       - 'packages/domain/src/index.ts'
       - 'packages/domain/tests/import-foundation/**'
       - 'apps/api/src/presentation/api/router/ImportAdminRouter.ts'
-      - 'apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts'
       - 'apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts'
       - 'apps/admin/src/pages/ImportAdminPage.tsx'
       - '.github/workflows/import-section-05-source.yml'
@@ -51,6 +52,7 @@ jobs:
           packages/application/tests/import-foundation/ImportWorkerProtocol.spec.ts
           packages/application/tests/import-foundation/ImportSourceIdentity.spec.ts
           packages/application/tests/import-foundation/ImportHandoffDispatcher.spec.ts
+          packages/application/tests/translation-import/TranslationImportPreparationService.spec.ts
           packages/infrastructure/tests/import-foundation/SourceNetworkSecurityPolicy.spec.ts
           packages/infrastructure/tests/import-foundation/NodeSafeSourceHttpTransport.spec.ts
           packages/infrastructure/tests/import-foundation/connectors/SourceConnectors.spec.ts
