@@ -1937,6 +1937,14 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         )}
       </section>
 
+      {selectedBatchId && (
+        <HandoffReconciliationPanel
+          key={selectedBatchId}
+          batchId={selectedBatchId}
+          isArabic={isArabic}
+        />
+      )}
+
       <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -2852,6 +2860,116 @@ function TagBadge({ children }: { children: ReactNode }) {
     <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-[9px] font-black text-slate-600">
       {children}
     </span>
+  );
+}
+
+type HandoffReviewRow = {
+  recordId: string;
+  batchId: string;
+  recordStatus: string;
+  handoffState: string;
+  handoffId: string | null;
+  ownerDomain: string | null;
+  manualVerificationRequired: boolean;
+  updatedAt: string | null;
+};
+type HandoffReviewResponse = {
+  data: HandoffReviewRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+/**
+ * Strictly read-only review panel. No retry, release, merge, or publication
+ * capability is exposed while the owning-domain receipt is still uncertain.
+ */
+function HandoffReconciliationPanel({ batchId, isArabic }: { batchId: string; isArabic: boolean }) {
+  const [page, setPage] = useState(1);
+  const [result, setResult] = useState<HandoffReviewResponse | null>(null);
+  const [state, setState] = useState<LoadState>('loading');
+  useEffect(() => {
+    let cancelled = false;
+    setState('loading');
+    void adminApiClient.request<HandoffReviewResponse>(
+      `/admin/imports/queue/jobs/${encodeURIComponent(batchId)}/handoffs/reconciliation?page=${page}&pageSize=20`,
+    ).then(response => {
+      if (cancelled) return;
+      setResult(response);
+      setState('ready');
+    }).catch(() => {
+      if (cancelled) return;
+      setResult(null);
+      setState('unavailable');
+    });
+    return () => { cancelled = true; };
+  }, [batchId, page]);
+
+  const pages = Math.max(1, Math.ceil((result?.total ?? 0) / 20));
+  return (
+    <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+      <div className="mb-3 flex items-center gap-2">
+        <ShieldCheck className="h-5 w-5 text-[#0E7C86]" />
+        <h2 className="text-sm font-black">
+          {isArabic ? 'مراجعة تسليم البيانات للقسم المالك' : 'Owner handoff reconciliation'}
+        </h2>
+      </div>
+      <p className="mb-4 text-xs font-semibold leading-6 text-slate-600">
+        {isArabic
+          ? 'عرض معلومات التتبع دون المحتوى المستورد. التسليم غير المؤكد يحتاج إثباتًا من القسم المالك، ولا تجوز إعادة إرساله تلقائيًا.'
+          : 'Tracking information only, not source content. Uncertain deliveries require owning-domain verification and must never be replayed automatically.'}
+      </p>
+      {state === 'loading' ? (
+        <LoadingBlock label={isArabic ? 'جاري تحميل سجلات المراجعة...' : 'Loading handoff review...'} />
+      ) : state === 'unavailable' ? (
+        <EmptyBlock icon={AlertTriangle}
+          title={isArabic ? 'تعذر تحميل قائمة المراجعة' : 'Handoff review unavailable'}
+          detail={isArabic ? 'راجع صلاحيات واجهة الاستيراد أو سجل التشغيل.' : 'Check the import API and operational logs.'} />
+      ) : !result?.data.length ? (
+        <p className="text-xs font-semibold text-slate-500">
+          {isArabic ? 'لا توجد عمليات تسليم معلّقة في الدفعة المحددة.' : 'No pending handoff reviews for this batch.'}
+        </p>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {result.data.map(row => (
+              <div key={row.recordId}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 p-3 text-xs">
+                <div className="min-w-0">
+                  <div className="break-all font-mono text-[10px] font-bold">{row.recordId}</div>
+                  <div className="mt-1 text-[10px] text-slate-500">
+                    {row.ownerDomain ?? '—'} · {row.handoffState}
+                  </div>
+                </div>
+                <span className="font-bold text-amber-800">
+                  {row.manualVerificationRequired
+                    ? (isArabic ? 'يتطلب التحقق من القسم المالك' : 'Owner verification required')
+                    : (isArabic ? 'بانتظار ربط القسم المالك' : 'Awaiting owner integration')}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center justify-between text-[11px] font-bold">
+            <span>{isArabic ? 'إجمالي السجلات للمراجعة' : 'Review records'}: {result.total}</span>
+            <div className="flex items-center gap-2">
+              <button type="button" disabled={page <= 1}
+                onClick={() => setPage(value => Math.max(1, value - 1))}
+                className="rounded-lg border px-2 py-1 disabled:opacity-40"
+                aria-label={isArabic ? 'الصفحة السابقة' : 'Previous page'}>
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span>{page} / {pages}</span>
+              <button type="button" disabled={page >= pages}
+                onClick={() => setPage(value => value + 1)}
+                className="rounded-lg border px-2 py-1 disabled:opacity-40"
+                aria-label={isArabic ? 'الصفحة التالية' : 'Next page'}>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </section>
   );
 }
 
