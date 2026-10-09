@@ -365,8 +365,10 @@ export class ImportAdminUseCases {
               stagedRecords++;
             }
           }
-          processedRecords += accepted.filter(record => record.status === ImportRecordStatus.COMPLETE).length;
-          failedRecords += accepted.filter(record => record.status !== ImportRecordStatus.COMPLETE).length;
+          // NEEDS_REVIEW may mean an otherwise valid record awaits an owner
+          // integration. Count structural validity, not handoff readiness.
+          processedRecords += accepted.filter(record => !record.validationErrors).length;
+          failedRecords += accepted.filter(record => Boolean(record.validationErrors)).length;
           if (recordsToReturn.length < 100) {
             recordsToReturn.push(...accepted.slice(0, 100 - recordsToReturn.length));
           }
