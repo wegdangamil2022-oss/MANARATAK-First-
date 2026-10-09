@@ -132,6 +132,36 @@ describe('ProcessImportJobUseCase', () => {
     expect(finalStatus?.lastError).toBe('Failed to parse CSV records');
   });
 
+
+  it('does not claim success when the queue rejects the legacy completion CAS', async () => {
+    const batchId = 'batch-stale-completion';
+    await queueGateway.enqueueImportJob({
+      batchId, targetDomain: ImportTargetDomain.UNIVERSITIES, sourceSystem: 'ADMIN_CONSOLE',
+    });
+    vi.spyOn(importAdminUseCases, 'importData').mockResolvedValueOnce({ imported: 1 } as any);
+    vi.spyOn(queueGateway, 'markJobCompleted').mockResolvedValueOnce(false);
+    const failed = vi.spyOn(queueGateway, 'markJobFailed');
+    const dlq = vi.spyOn(queueGateway, 'moveToDeadLetter');
+    await expect(processUseCase.execute({ batchId, dataText: 'title,code\\nExample,E1' }))
+      .rejects.toThrow('IMPORT_LEGACY_QUEUE_STATE_LOST');
+    expect(failed).not.toHaveBeenCalled();
+    expect(dlq).not.toHaveBeenCalled();
+  });
+
+  it('refuses DLQ evidence if a concurrent state change defeated the legacy failure CAS', async () => {
+    const batchId = 'batch-stale-failure';
+    await queueGateway.enqueueImportJob({
+      batchId, targetDomain: ImportTargetDomain.UNIVERSITIES, sourceSystem: 'ADMIN_CONSOLE',
+    });
+    vi.spyOn(importAdminUseCases, 'importData').mockRejectedValueOnce(new Error('Import failed'));
+    vi.spyOn(queueGateway, 'markJobFailed').mockResolvedValueOnce(false);
+    const dlq = vi.spyOn(queueGateway, 'moveToDeadLetter');
+    await expect(processUseCase.execute({ batchId, dataText: 'bad' }))
+      .rejects.toThrow('IMPORT_LEGACY_QUEUE_STATE_LOST');
+    expect(dlq).not.toHaveBeenCalled();
+    expect(queueGateway.getDeadLetters(batchId)).toHaveLength(0);
+  });
+
   it('does not alter synchronous importData execution', async () => {
     const directResult = await importAdminUseCases.importData({
       dataText: 'title,code\nDirect Uni,DU1',

@@ -38,6 +38,7 @@ jobs:
       - name: Focused import identities, queue, lease, handoff and SSRF regressions
         run: >-
           npx --no-install vitest run --config vitest.config.ts
+          packages/infrastructure/tests/import-foundation/ProcessImportJobUseCase.integration.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaSourceRegistryGateway.spec.ts
           packages/infrastructure/tests/import-foundation/ImportIdentifierSafety.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaImportSourceDedup.spec.ts

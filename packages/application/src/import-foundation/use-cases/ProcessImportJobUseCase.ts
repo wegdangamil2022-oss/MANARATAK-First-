@@ -49,17 +49,25 @@ export class ProcessImportJobUseCase {
         dataType
       });
 
-      await this.importQueueGateway.markJobCompleted(batchId);
+      // The legacy queue may have been paused, cancelled or superseded while
+      // importData was working. A rejected terminal CAS is never success.
+      if (!(await this.importQueueGateway.markJobCompleted(batchId)))
+        throw new Error('IMPORT_LEGACY_QUEUE_STATE_LOST');
 
       return {
         success: true,
         batchId,
         importResult
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === 'IMPORT_LEGACY_QUEUE_STATE_LOST')
+        throw err;
       const errorMessage = err instanceof Error ? err.message : String(err);
-      
-      await this.importQueueGateway.markJobFailed(batchId, errorMessage);
+
+      // Never write DLQ evidence after a failed terminal transition. Another
+      // worker (or a stop request) may now own this batch.
+      if (!(await this.importQueueGateway.markJobFailed(batchId, errorMessage)))
+        throw new Error('IMPORT_LEGACY_QUEUE_STATE_LOST');
 
       await this.importQueueGateway.moveToDeadLetter({
         batchId,
