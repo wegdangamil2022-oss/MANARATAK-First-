@@ -1,3 +1,7 @@
+## Verified batch 4 CI — 2026-10-09
+
+Source `5059c90ed19f54acfee9e4663345a5fbd670c127`: [CI 37958283325](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37958283325) SUCCESS: **115 tests across 16 files**, TypeScript/source quality, three authority/permission guards and unchanged audit coverage PASS. Evidence: `pages-ci.json` / `pages-ci-summary.txt`. Matching CI supersedes the pending notes below; local/CI counts overlap. Bounded list/search/exact-editor read-path source checks pass. Section 04 remains IN PROGRESS with the original dependencies below; no actual target database/provider/runtime acceptance or global architecture closure is inferred.
+
 Batch 4: `pages-*` records bounded list/search/context tests and browser reproductions. Local 115 tests/16 files PASS; overlapping final API assertions, TS/quality/permission/audit PASS. Focused lint 0 errors/11 warnings. The initial browser pagination race is recorded then corrected; final Chromium and clear/history/deprecation regression PASS, intercepted API only. Matching CI pending; Section 04 remains open.
 
 ## Verified batch 3 CI — 2026-10-09
