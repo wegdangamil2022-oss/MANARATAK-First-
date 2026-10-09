@@ -372,7 +372,7 @@ function CountriesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : 'All records'} ({total})</h3>
+          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : status === 'nonactive' ? 'Non-active records' : 'All records'} ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
         <ReferenceFilters {...queryState} />
@@ -473,7 +473,7 @@ function DerivedReferencePreview({ kind }: { kind: 'currencies' | 'languages' })
 function CurrenciesTab() {
   const queryState = useFetchData('currencies');
   const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
-  const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' });
+  const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '', minorUnit: '' });
   const [editing, setEditing] = useState<{ id: string; expectedVersion: number; lifecycleState: string } | null>(null);
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
@@ -481,9 +481,11 @@ function CurrenciesTab() {
     e.preventDefault();
     setSaveStatus({ loading: true });
     try {
-      await referenceDataAdminApi.saveCurrency({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), nameAr: form.nameAr || null, symbol: form.symbol || null, numericCode: form.numericCode || null });
+      await referenceDataAdminApi.saveCurrency({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), nameAr: form.nameAr || null, symbol: form.symbol || null,
+        numericCode: form.numericCode || null,
+        minorUnit: form.minorUnit === '' ? null : Number(form.minorUnit) });
       setSaveStatus({ loading: false, success: 'Saved successfully' });
-      setForm({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' });
+      setForm({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '', minorUnit: '' });
       setEditing(null);
       refetch();
     } catch (err: any) {
@@ -503,6 +505,10 @@ function CurrenciesTab() {
           <Input label="Arabic Name (optional)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
           <Input label="Symbol (optional)" value={form.symbol} onChange={(v: string) => setForm({...form, symbol: v})} />
           <Input label="Numeric Code (optional)" value={form.numericCode} onChange={(v: string) => setForm({...form, numericCode: v})} />
+          <label className="flex flex-col gap-1 text-sm">عدد الخانات العشرية / ISO minor unit (0–4)
+            <input type="number" min={0} max={4} step={1} value={form.minorUnit} className="border rounded px-3 py-2"
+              onChange={e => setForm({ ...form, minorUnit: e.target.value })} />
+          </label>
         </div>
         <div className="flex items-center gap-4">
           <button type="submit" disabled={saveStatus.loading || (Boolean(editing) && editing?.lifecycleState !== 'ACTIVE')} className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 disabled:opacity-50">
@@ -510,13 +516,13 @@ function CurrenciesTab() {
           </button>
           {saveStatus.success && <span className="text-green-600 text-sm">{saveStatus.success}</span>}
           {saveStatus.error && <span className="text-red-600 text-sm">{saveStatus.error}</span>}
-          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' }); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
+          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '', minorUnit: '' }); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
         </div>
       </form>
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : 'All records'} ({total})</h3>
+          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : status === 'nonactive' ? 'Non-active records' : 'All records'} ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
         <ReferenceFilters {...queryState} />
@@ -536,7 +542,9 @@ function CurrenciesTab() {
                     <td className="p-3 font-mono">{item.isoCode}</td><td className="p-3">{item.name}</td><td className="p-3">{item.symbol || '-'}</td><td className="p-3">{item.numericCode || '-'}</td><td className="p-3">{item.lifecycleState}</td>
                     <td className="p-3"><button type="button" className="text-indigo-600 underline" onClick={() => {
                       setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
-                      setForm({ isoCode: item.isoCode, name: item.name, nameAr: item.nameAr ?? '', symbol: item.symbol ?? '', numericCode: item.numericCode ?? '' });
+                      setForm({ isoCode: item.isoCode, name: item.name, nameAr: item.nameAr ?? '',
+                         symbol: item.symbol ?? '', numericCode: item.numericCode ?? '',
+                         minorUnit: item.minorUnit == null ? '' : String(item.minorUnit) });
                       setSaveStatus({ loading: false });
                     }}>تحرير / Edit</button> <ReferenceGovernanceButton entityType="CURRENCY" record={item} onChanged={refetch} /></td>
                   </tr>
@@ -606,7 +614,7 @@ function LanguagesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : 'All records'} ({total})</h3>
+          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : status === 'nonactive' ? 'Non-active records' : 'All records'} ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
         <ReferenceFilters {...queryState} />
@@ -643,7 +651,7 @@ function LanguagesTab() {
 function CitiesTab() {
   const queryState = useFetchData('cities');
   const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
-  const [form, setForm] = useState({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
+  const [form, setForm] = useState({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '', latitude: '', longitude: '' });
   const [editing, setEditing] = useState<{ id: string; expectedVersion: number; lifecycleState: string } | null>(null);
   const [countryId, setCountryId] = useState<string | null>(null);
   const [regionId, setRegionId] = useState<string | null>(null);
@@ -657,9 +665,12 @@ function CitiesTab() {
     }
     setSaveStatus({ loading: true });
     try {
-      await referenceDataAdminApi.saveCity({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), administrativeRegionId: regionId, nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null });
+      await referenceDataAdminApi.saveCity({ ...form, ...(editing ? { id: editing.id, expectedVersion: editing.expectedVersion } : {}), administrativeRegionId: regionId,
+        nameAr: form.nameAr || null, region: form.region || null, timezone: form.timezone || null,
+        latitude: form.latitude.trim() === '' ? null : Number(form.latitude),
+        longitude: form.longitude.trim() === '' ? null : Number(form.longitude) });
       setSaveStatus({ loading: false, success: 'تم حفظ المدينة المحددة بنجاح!' });
-      setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
+      setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '', latitude: '', longitude: '' });
       setCountryId(null); setRegionId(null); setEditing(null);
       refetch();
     } catch (err: any) {
@@ -682,6 +693,14 @@ function CitiesTab() {
           <CanonicalPicker label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={(query) => canonicalPickerApi.regions(form.countryIso2Code || undefined, query)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId || Boolean(editing)} />
           <Input label="تسمية المنطقة الإدارية الأصلية (اختياري)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
           <Input label="المنطقة الزمنية (مثل Asia/Riyadh - اختياري)" value={form.timezone} onChange={(v: string) => setForm({...form, timezone: v})} />
+          <label className="flex flex-col gap-1 text-sm">Latitude (−90 … 90)
+            <input type="number" min={-90} max={90} step="any" value={form.latitude} className="border rounded px-3 py-2"
+              onChange={e => setForm({ ...form, latitude: e.target.value })} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">Longitude (−180 … 180)
+            <input type="number" min={-180} max={180} step="any" value={form.longitude} className="border rounded px-3 py-2"
+              onChange={e => setForm({ ...form, longitude: e.target.value })} />
+          </label>
         </div>
         <div className="flex items-center gap-4 pt-2">
           <button type="submit" disabled={saveStatus.loading || !countryId || (Boolean(editing) && editing?.lifecycleState !== 'ACTIVE')} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-indigo-700 disabled:opacity-50 transition shadow-md shadow-indigo-600/15">
@@ -689,13 +708,13 @@ function CitiesTab() {
           </button>
           {saveStatus.success && <span className="text-green-600 text-sm font-bold">{saveStatus.success}</span>}
           {saveStatus.error && <span className="text-red-600 text-sm font-bold">{saveStatus.error}</span>}
-          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' }); setCountryId(null); setRegionId(null); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
+          {editing && <button type="button" onClick={() => { setEditing(null); setForm({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '', latitude: '', longitude: '' }); setCountryId(null); setRegionId(null); setSaveStatus({ loading: false }); }}>إلغاء التحرير / Cancel</button>}
         </div>
       </form>
 
       <div className="space-y-4">
         <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
-          <h3 className="font-black text-lg text-slate-800">{status === 'active' ? 'المدن النشطة' : 'جميع حالات المدن'} ({total})</h3>
+          <h3 className="font-black text-lg text-slate-800">{status === 'active' ? 'المدن النشطة' : status === 'nonactive' ? 'المدن غير النشطة' : 'جميع حالات المدن'} ({total})</h3>
           <button onClick={refetch} className="text-sm font-black text-indigo-600 hover:text-indigo-800 transition">تحديث القائمة</button>
         </div>
         <ReferenceFilters {...queryState} />
@@ -727,7 +746,10 @@ function CitiesTab() {
                     <td className="p-3 text-xs">{item.lifecycleState}</td>
                     <td className="p-3"><button type="button" className="text-indigo-600 underline" onClick={() => {
                       setEditing({ id: item.id, expectedVersion: item.versionNumber, lifecycleState: item.lifecycleState });
-                      setForm({ countryIso2Code: item.countryIso2Code, name: item.name, nameAr: item.nameAr ?? '', region: item.region ?? '', timezone: item.timezone ?? '' });
+                      setForm({ countryIso2Code: item.countryIso2Code, name: item.name, nameAr: item.nameAr ?? '',
+                         region: item.region ?? '', timezone: item.timezone ?? '',
+                         latitude: item.latitude == null ? '' : String(item.latitude),
+                         longitude: item.longitude == null ? '' : String(item.longitude) });
                       setCountryId(item.countryReferenceId ?? null);
                       setRegionId(item.administrativeRegionId ?? null);
                       setSaveStatus({ loading: false });
