@@ -142,6 +142,14 @@ export function AssetAdminPage() {
     void load(true, next);
   };
 
+  const resetFilters = () => {
+    const empty = Object.fromEntries(Object.keys(filters).map((key) => [key, ''])) as typeof filters;
+    setFilters(empty);
+    setAppliedFilters(empty);
+    appliedRef.current = empty;
+    void load(true, empty);
+  };
+
   return (
     <div dir="rtl" className="mx-auto max-w-7xl space-y-6">
       <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
