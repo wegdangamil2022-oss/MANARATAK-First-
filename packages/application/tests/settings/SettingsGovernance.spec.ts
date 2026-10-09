@@ -33,7 +33,7 @@ async function assign(f: ReturnType<typeof fixture>, level: string, scopeId?: st
 }
 
 describe('Settings override and definition governance', () => {
-  it.each([['GLOBAL', undefined, 'DEFAULT'], ['IDENTITY', 'student', 'DOMAIN']] as const)
+  it.each([['GLOBAL', undefined, 'DEFAULT'], ['DOMAIN', 'courses', 'GLOBAL'], ['IDENTITY', 'student', 'DOMAIN']] as const)
   ('clearing %s exposes %s inheritance and preserves immutable history', async (level, scopeId, winner) => {
     const f = fixture(); await createFlag(f);
     if (level !== 'GLOBAL') await assign(f, 'GLOBAL');
@@ -126,19 +126,19 @@ describe('Settings override and definition governance', () => {
   });
 
 
-  it('keeps existing DOMAIN overrides readable but rejects new writes, clear and rollback', async () => {
+  it('keeps unknown legacy DOMAIN overrides readable but rejects unrecognized scope mutations', async () => {
     const f = fixture(); await createFlag(f);
     const legacy = new SettingAssignment({ id: 'legacy-domain', key: new NamespacedKey('feature.safe'),
-      scope: new ScopeIdentifier(ScopeLevel.DOMAIN, 'courses'),
+      scope: new ScopeIdentifier(ScopeLevel.DOMAIN, 'unknown-domain'),
       versions: [new SettingVersion('old', new BooleanValue(true), new Date(), 'admin')] });
     f.assignments.set(legacy.id, legacy);
-    await expect(assign(f, 'DOMAIN', 'courses')).rejects.toThrow('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
+    await expect(assign(f, 'DOMAIN', 'unknown-domain')).rejects.toThrow('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
     await expect(f.useCase.clearOverride({ assignmentId: legacy.id, expectedCurrentVersionId: 'old',
       newVersionId: 'clear', changeReason: 'Return to inheritance' })).rejects.toThrow('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
     await expect(f.useCase.rollbackValue({ assignmentId: legacy.id, previousVersionId: 'old', newVersionId: 'rollback',
       changeReason: 'Restore reviewed setting' })).rejects.toThrow('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
     expect(f.assignments.get(legacy.id)?.getVersions()).toHaveLength(1);
-    await expect(f.resolver.readSetting('feature.safe', { domainId: 'courses' }))
+    await expect(f.resolver.readSetting('feature.safe', { domainId: 'unknown-domain' }))
       .resolves.toMatchObject({ value: true, sourceScope: 'DOMAIN' });
   });
 
