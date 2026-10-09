@@ -36,6 +36,7 @@ jobs:
         run: >-
           npx --no-install vitest run --config vitest.config.ts
           packages/infrastructure/tests/import-foundation/ImportIdentifierSafety.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportSourceDedup.spec.ts
           packages/infrastructure/tests/import-foundation/ImportAdminDurableWorkerIntegration.spec.ts
           packages/infrastructure/tests/import-foundation/InMemoryImportQueueGateway.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaImportQueueGateway.spec.ts
