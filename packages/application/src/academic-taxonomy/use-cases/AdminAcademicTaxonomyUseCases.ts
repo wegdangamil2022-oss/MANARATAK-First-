@@ -1,5 +1,7 @@
 import {
   IAcademicTaxonomyRepository,
+  AcademicStandardType,
+  normalizeAcademicTaxonomyAlias,
   IAcademicTaxonomyValidationService,
   AcademicTaxonomyValidationService,
   AcademicTaxonomyCompletenessReport,
@@ -69,6 +71,21 @@ export class AdminAcademicTaxonomyUseCases {
     return { node, report };
   }
 
+  public async editNode(nodeId: string, data: UpsertAcademicTaxonomyNodeDto, expectedUpdatedAt: string) {
+    const current = await this.repository.getNode(nodeId);
+    if (!current) throw new Error('TAXONOMY_NODE_NOT_FOUND');
+    if (data.nodeType !== current.nodeType || data.canonicalCode !== current.canonicalCode ||
+        (data.standardType ?? AcademicStandardType.CUSTOM_NATIONAL) !==
+        (current.standardType ?? AcademicStandardType.CUSTOM_NATIONAL)) throw new Error('TAXONOMY_IDENTITY_IMMUTABLE');
+    if (!Number.isFinite(Date.parse(expectedUpdatedAt)) || current.updatedAt.toISOString() !== expectedUpdatedAt)
+      throw new Error('TAXONOMY_NODE_VERSION_CONFLICT');
+    const report = this.validateNode(data);
+    this.assertNoErrors(report.issues, 'Node validation failed');
+    if (!this.repository.updateNode) throw new Error('TAXONOMY_GOVERNED_EDIT_UNAVAILABLE');
+    const node = await this.repository.updateNode(nodeId, data, expectedUpdatedAt);
+    return { node, report };
+  }
+
   public async addEdge(data: UpsertAcademicTaxonomyEdgeDto): Promise<AcademicTaxonomyEdgeDto> {
     return this.repository.executeSerializable(async (transactionRepository) => {
       const existingNodes = await transactionRepository.listNodes();
@@ -101,7 +118,7 @@ export class AdminAcademicTaxonomyUseCases {
   }
 
   public async addAlias(data: UpsertAcademicTaxonomyAliasDto): Promise<AcademicTaxonomyAliasDto> {
-    const normalizedAlias = data.alias.trim().toLowerCase().replace(/\s+/g, ' ');
+    const normalizedAlias = normalizeAcademicTaxonomyAlias(data.alias);
     const existingAliases = await this.repository.listAliasesByNormalizedAlias(normalizedAlias);
 
     const issues = this.validationService.validateAlias({

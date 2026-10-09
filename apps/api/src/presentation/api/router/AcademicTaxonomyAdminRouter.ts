@@ -102,6 +102,12 @@ export class AcademicTaxonomyAdminRouter {
       const result = await mutate(req, { action: 'UPSERT_ACADEMIC_TAXONOMY_NODE', targetType: 'ACADEMIC_TAXONOMY_NODE', targetId: data.canonicalCode, metadata: { nodeType: data.nodeType, status: data.status, standardType: data.standardType } }, () => adminAcademicTaxonomyUseCases.upsertNode(data as any));
       res.json(result);
     }));
+    router.put('/nodes/:nodeId', asyncHandler(async (req: Request, res: Response) => {
+      const { expectedUpdatedAt, ...data } = upsertNodeSchema.extend({ expectedUpdatedAt: z.string().datetime() }).strict().parse(req.body);
+      const result = await mutate(req, { action: 'UPDATE_ACADEMIC_TAXONOMY_NODE', targetType: 'ACADEMIC_TAXONOMY_NODE', targetId: req.params.nodeId },
+        () => adminAcademicTaxonomyUseCases.editNode(req.params.nodeId, data as any, expectedUpdatedAt));
+      res.json(result);
+    }));
     router.post('/edges', asyncHandler(async (req: Request, res: Response) => {
       const data = upsertEdgeSchema.parse(req.body);
       const edge = await mutate(req, { action: 'ADD_ACADEMIC_TAXONOMY_EDGE', targetType: 'ACADEMIC_TAXONOMY_EDGE', targetId: `${data.parentNodeId}:${data.childNodeId}` }, () => adminAcademicTaxonomyUseCases.addEdge(data));
@@ -159,6 +165,9 @@ export class AcademicTaxonomyAdminRouter {
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      if (err?.message === 'TAXONOMY_NODE_VERSION_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });
+      if (err?.message === 'TAXONOMY_NODE_NOT_FOUND') return res.status(404).json({ error: err.message });
+      if (err?.message === 'TAXONOMY_GOVERNED_EDIT_UNAVAILABLE') return res.status(503).json({ error: err.message });
       if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation Error', details: err.issues });
       res.status(400).json({ error: err.message || 'An error occurred' });
     });

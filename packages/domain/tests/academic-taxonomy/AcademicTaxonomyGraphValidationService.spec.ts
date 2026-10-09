@@ -180,7 +180,7 @@ describe('AcademicTaxonomyValidationService - Graph & Relations Validation', () 
       );
     });
 
-    it('emits WARNING only when child already has another primary parent and new edge isPrimary is true', () => {
+    it('emits ERROR when child already has another primary parent and new edge isPrimary is true', () => {
       const existingEdges = [{ parentNodeId: 'node_A', childNodeId: 'node_C', isPrimary: true }];
 
       const issues = service.validateEdge({
@@ -190,13 +190,13 @@ describe('AcademicTaxonomyValidationService - Graph & Relations Validation', () 
       });
 
       const errors = issues.filter((i) => i.severity === AcademicTaxonomyValidationSeverity.ERROR);
-      expect(errors).toHaveLength(0);
+      expect(errors).toHaveLength(1);
 
       expect(issues).toContainEqual(
         expect.objectContaining({
           fieldName: 'isPrimary',
           code: 'MULTIPLE_PRIMARY_PARENTS',
-          severity: AcademicTaxonomyValidationSeverity.WARNING,
+          severity: AcademicTaxonomyValidationSeverity.ERROR,
         })
       );
     });

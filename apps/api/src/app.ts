@@ -791,7 +791,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     }));
     v1Router.use('/admin/assets', requireAdminPermission('admin:assets:manage'), container.resolve<Router>('assetPlatformRouter'));
 
-    // Phase 7: Reference Data & Academic Taxonomy
+    // P7 Reference Data and P8 Academic Taxonomy
     v1Router.use('/admin/reference-data', requireAdminPermission('admin:reference-data:manage'), container.resolve<Router>('referenceDataAdminRouter'));
     v1Router.use('/reference-data', container.resolve<Router>('referenceDataPublicRouter'));
     // Study Destinations are an editorial/domain profile layered on canonical country references.
@@ -801,7 +801,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/admin/academic-taxonomy', requireAdminPermission('admin:academic-taxonomy:manage'), container.resolve<Router>('academicTaxonomyAdminRouter'));
     v1Router.use('/academic-taxonomy', container.resolve<Router>('academicTaxonomyPublicRouter'));
 
-    // Phase 8: International Tests
+    // P9 International Tests
     v1Router.use('/admin/international-tests', requireAdminPermission('admin:international-tests:manage'), container.resolve<Router>('internationalTestAdminRouter'));
     v1Router.use('/public/international-tests', container.resolve<Router>('internationalTestPublicRouter'));
 

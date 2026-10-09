@@ -28,6 +28,9 @@ export interface IAcademicTaxonomyRepository {
   }): Promise<AcademicTaxonomyNodeDto | null>;
   upsertNode(data: UpsertAcademicTaxonomyNodeDto): Promise<AcademicTaxonomyNodeDto>;
 
+  /** Optional only for compatibility adapters; governed edit fails closed when unavailable. */
+  updateNode?(nodeId: string, data: UpsertAcademicTaxonomyNodeDto, expectedUpdatedAt: string): Promise<AcademicTaxonomyNodeDto>;
+
   // Hierarchy methods
   listEdges(): Promise<AcademicTaxonomyEdgeDto[]>;
   findEdgeByNodes(parentNodeId: string, childNodeId: string): Promise<AcademicTaxonomyEdgeDto | null>;

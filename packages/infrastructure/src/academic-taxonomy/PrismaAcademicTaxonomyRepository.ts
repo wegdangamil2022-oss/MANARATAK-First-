@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   IAcademicTaxonomyRepository,
+  normalizeAcademicTaxonomyAlias,
   AcademicTaxonomyNodeDto,
   UpsertAcademicTaxonomyNodeDto,
   AcademicTaxonomyEdgeDto,
@@ -148,6 +149,30 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
     return this.toNodeDto(record);
   }
 
+  async updateNode(nodeId: string, data: UpsertAcademicTaxonomyNodeDto, expectedUpdatedAt: string): Promise<AcademicTaxonomyNodeDto> {
+    const revision = new Date(expectedUpdatedAt);
+    if (!Number.isFinite(revision.getTime())) throw new Error('TAXONOMY_NODE_VERSION_CONFLICT');
+    return this.executeSerializable(async repository => {
+      const tx = repository as PrismaAcademicTaxonomyRepository;
+      const current = await tx.getNode(nodeId);
+      if (!current) throw new Error('TAXONOMY_NODE_NOT_FOUND');
+      if (current.nodeType !== data.nodeType || current.canonicalCode !== data.canonicalCode ||
+          (current.standardType ?? AcademicStandardType.CUSTOM_NATIONAL) !==
+          (data.standardType ?? AcademicStandardType.CUSTOM_NATIONAL)) throw new Error('TAXONOMY_IDENTITY_IMMUTABLE');
+      const won = await tx.prisma.academicTaxonomyNode.updateMany({
+        where: { id: nodeId, updatedAt: revision },
+        data: { canonicalName: data.canonicalName, description: data.description ?? null,
+          status: data.status ?? current.status, standardCode: data.standardCode ?? null,
+          localizedNames: data.localizedNames as Prisma.InputJsonValue | undefined,
+          metadata: data.metadata as Prisma.InputJsonValue | undefined },
+      });
+      if (won.count !== 1) throw new Error('TAXONOMY_NODE_VERSION_CONFLICT');
+      const updated = await tx.getNode(nodeId);
+      if (!updated) throw new Error('TAXONOMY_NODE_NOT_FOUND');
+      return updated;
+    });
+  }
+
   // --- Hierarchy Methods (P8E-2) ---
   async listEdges(): Promise<AcademicTaxonomyEdgeDto[]> {
     const edges = await this.prisma.academicTaxonomyEdge.findMany();
@@ -282,7 +307,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
   }
 
   private normalizeAlias(value: string): string {
-    return value.trim().toLowerCase().replace(/\s+/g, ' ');
+    return normalizeAcademicTaxonomyAlias(value);
   }
 
   private toAliasDto(record: any): AcademicTaxonomyAliasDto {

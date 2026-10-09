@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import {
   AcademicTaxonomyDeterministicKey,
+  type AcademicTaxonomyCompletenessReport,
   iscedFBaselineEdges,
   iscedFBaselineNodes,
 } from '@manaratak/domain';
@@ -25,6 +26,7 @@ import {
 } from 'lucide-react';
 
 interface AcademicTaxonomyNode {
+  updatedAt?: string;
   nodeId: string;
   nodeType: string;
   standardType?: string;
@@ -72,15 +74,7 @@ interface MappedMajorDto {
   };
 }
 
-interface ValidationReport {
-  isValid: boolean;
-  issues: Array<{
-    code: string;
-    message: string;
-    severity: 'INFO' | 'WARNING' | 'ERROR';
-    details?: any;
-  }>;
-}
+type ValidationReport = AcademicTaxonomyCompletenessReport;
 
 export function AcademicTaxonomyDetailPage() {
   const { nodeId } = useParams<{ nodeId: string }>();
@@ -95,6 +89,12 @@ export function AcademicTaxonomyDetailPage() {
   const [mappings, setMappings] = useState<MappingDto[]>([]);
   const [mappedMajors, setMappedMajors] = useState<MappedMajorDto[]>([]);
   const [allNodes, setAllNodes] = useState<AcademicTaxonomyNode[]>([]);
+  const [pickerQuery, setPickerQuery] = useState('');
+  const [pickerPage, setPickerPage] = useState(1);
+  const [pickerType, setPickerType] = useState('');
+  const [pickerStandard, setPickerStandard] = useState('');
+  const [pickerLoading, setPickerLoading] = useState(false);
+  const [pickerError, setPickerError] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,6 +145,24 @@ export function AcademicTaxonomyDetailPage() {
   const [runningValidation, setRunningValidation] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (localReadOnly || (!showAddEdgeModal && !showAddMappingModal)) return;
+    const abort = new AbortController();
+    setAllNodes([]); setPickerError(false); setPickerLoading(true);
+    setSelectedEdgeNodeId(''); setMappingFormData(value => ({ ...value, targetNodeId: '' }));
+    const timer = setTimeout(() => {
+      const query = new URLSearchParams({ page: String(pickerPage), pageSize: '25' });
+      if (pickerQuery.trim()) query.set('q', pickerQuery.trim());
+      if (pickerType) query.set('nodeType', pickerType);
+      if (pickerStandard) query.set('standardType', pickerStandard);
+      adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(`/admin/academic-taxonomy/nodes?${query}`, { signal: abort.signal })
+        .then(value => { if (!abort.signal.aborted) setAllNodes(value.data); })
+        .catch(() => { if (!abort.signal.aborted) setPickerError(true); })
+        .finally(() => { if (!abort.signal.aborted) setPickerLoading(false); });
+    }, 200);
+    return () => { clearTimeout(timer); abort.abort(); };
+  }, [localReadOnly, showAddEdgeModal, showAddMappingModal, pickerQuery, pickerPage, pickerType, pickerStandard]);
+
   const fetchDetails = async () => {
     setLoading(true);
     setError(null);
@@ -181,18 +199,16 @@ export function AcademicTaxonomyDetailPage() {
         adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(`${basePath}/nodes/${nodeId}/children`),
         adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(`${basePath}/nodes/${nodeId}/parents`),
       ]);
-      const [aliasesRes, mappingsRes, majorsRes, allNodesRes] = localReadOnly
+      const [aliasesRes, mappingsRes, majorsRes] = localReadOnly
         ? [
             { data: [] as AliasDto[] },
             { data: [] as MappingDto[] },
             { data: [] as MappedMajorDto[] },
-            { data: [] as AcademicTaxonomyNode[] },
           ]
         : await Promise.all([
             adminApiClient.request<{ data: AliasDto[] }>(`${basePath}/nodes/${nodeId}/aliases`),
             adminApiClient.request<{ data: MappingDto[] }>(`${basePath}/nodes/${nodeId}/mappings`),
             adminApiClient.request<{ data: MappedMajorDto[] }>(`${basePath}/nodes/${nodeId}/mapped-majors`),
-            adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(`${basePath}/nodes?page=1&pageSize=100`),
           ]);
 
       setNode(nodeRes);
@@ -201,7 +217,6 @@ export function AcademicTaxonomyDetailPage() {
       setAliases(aliasesRes.data || []);
       setMappings(mappingsRes.data || []);
       setMappedMajors(majorsRes.data || []);
-      setAllNodes(allNodesRes.data || []);
 
       // Pre-populate edit form
       setNodeFormData({
@@ -263,6 +278,11 @@ export function AcademicTaxonomyDetailPage() {
     if (!node) return;
     setSavingNode(true);
     setNodeFormError(null);
+    if (!node.updatedAt) {
+      setSavingNode(false);
+      setNodeFormError(isAr ? 'أعد تحميل العقدة للحصول على نسخة التعديل.' : 'Reload the node to obtain its edit version.');
+      return;
+    }
 
     const localizedNames: Record<string, string> = {};
     if (nodeFormData.nameAr) localizedNames.ar = nodeFormData.nameAr;
@@ -275,12 +295,13 @@ export function AcademicTaxonomyDetailPage() {
         canonicalName: nodeFormData.canonicalName.trim(),
         description: nodeFormData.description.trim() || undefined,
         status: nodeFormData.status,
-        standardType: nodeFormData.standardType || undefined,
+        standardType: node.standardType || 'CUSTOM_NATIONAL',
+        expectedUpdatedAt: node.updatedAt,
         standardCode: nodeFormData.standardCode.trim() || undefined,
         localizedNames: Object.keys(localizedNames).length > 0 ? localizedNames : undefined,
       };
 
-      await adminApiClient.request('/admin/academic-taxonomy/nodes', {
+      await adminApiClient.request(`/admin/academic-taxonomy/nodes/${encodeURIComponent(node.nodeId)}`, {
         method: 'PUT',
         body: JSON.stringify(payload),
       });
@@ -289,7 +310,9 @@ export function AcademicTaxonomyDetailPage() {
       fetchDetails();
     } catch (err: any) {
       console.error(err);
-      setNodeFormError(err.message || (isAr ? 'تعذر تحديث العقدة الأكاديمية.' : 'Unable to update academic node.'));
+      setNodeFormError(String(err.message).includes('409')
+        ? (isAr ? 'تغيّرت العقدة أثناء التعديل. احفظ مدخلاتك ثم أعد تحميلها للمقارنة.' : 'The node changed while editing. Keep your inputs and reload to compare.')
+        : err.message || (isAr ? 'تعذر تحديث العقدة الأكاديمية.' : 'Unable to update academic node.'));
     } finally {
       setSavingNode(false);
     }
@@ -504,6 +527,23 @@ export function AcademicTaxonomyDetailPage() {
 
   // Filter nodes that are not the current node to prevent self-loop edges
   const potentialEdgeNodes = allNodes.filter(n => n.nodeId !== node.nodeId);
+  const pickerControls = <div className="space-y-2">
+    <label className="block text-xs">{isAr ? 'بحث عن عقدة' : 'Search nodes'}
+      <input value={pickerQuery} maxLength={200} onChange={event => { setPickerQuery(event.target.value); setPickerPage(1); }} className="w-full border rounded p-2" /></label>
+    <label className="block text-xs">{isAr ? 'نوع العقدة' : 'Node type'}
+      <select value={pickerType} onChange={event => { setPickerType(event.target.value); setPickerPage(1); }}>
+        <option value="">{isAr ? 'الكل' : 'All'}</option>{['ACADEMIC_FIELD','DISCIPLINE','PROGRAM_AREA','SPECIALIZATION_CATEGORY','STANDARD_CLASSIFICATION'].map(value => <option key={value}>{value}</option>)}
+      </select></label>
+    <label className="block text-xs">{isAr ? 'المعيار' : 'Standard'}
+      <select value={pickerStandard} onChange={event => { setPickerStandard(event.target.value); setPickerPage(1); }}>
+        <option value="">{isAr ? 'الكل' : 'All'}</option>{['ISCED','CIP','CUSTOM_NATIONAL'].map(value => <option key={value}>{value}</option>)}
+      </select></label>
+    {pickerError && <p role="alert">{isAr ? 'تعذر تحميل العقد.' : 'Nodes unavailable.'}</p>}
+    {pickerLoading && <p role="status">{isAr ? 'جار البحث…' : 'Searching…'}</p>}
+    <div className="flex gap-3"><button type="button" disabled={pickerPage === 1 || pickerLoading} onClick={() => setPickerPage(value => value - 1)}>{isAr ? 'السابق' : 'Previous'}</button>
+      <span>{pickerPage}</span><button type="button" disabled={allNodes.length < 25 || pickerLoading} onClick={() => setPickerPage(value => value + 1)}>{isAr ? 'التالي' : 'Next'}</button></div>
+  </div>;
+
 
   return (
     <div className={`max-w-5xl mx-auto space-y-6 pb-12 px-4 ${isAr ? 'rtl text-right' : 'ltr text-left'}`} dir={isAr ? 'rtl' : 'ltr'}>
@@ -958,27 +998,27 @@ export function AcademicTaxonomyDetailPage() {
             {!validationReport && !runningValidation && (
               <div className="text-slate-500 text-xs bg-slate-50 p-6 rounded-xl border border-dashed text-center">
                 {isAr 
-                  ? 'انقر على الزر بالأعلى لتشغيل فحص النزاهة والتحقق من صحة العقدة الأكاديمية (مثل كود ISCED، العلاقات المزدوجة، وغيرها).' 
-                  : 'Click the button above to run real-time schema validation (including ISCED compliance, circular dependency checks, and metadata integrity).'}
+                  ? 'هذا الفحص يتحقق من حقول العقدة واكتمالها. فحص دورات العلاقات يتم عند إضافة العلاقة.' 
+                  : 'Validate node fields and completeness. Relationship cycles are checked when adding an edge.'}
               </div>
             )}
 
             {validationReport && (
               <div className="space-y-4">
                 <div className={`p-4 rounded-2xl flex items-center gap-3 border ${
-                  validationReport.isValid 
+                  validationReport.isComplete 
                     ? 'bg-green-50/50 text-green-900 border-green-200' 
                     : 'bg-red-50/50 text-red-900 border-red-200'
                 }`}>
-                  {validationReport.isValid ? (
+                  {validationReport.isComplete ? (
                     <CheckCircle className="h-6 w-6 text-green-600 shrink-0" />
                   ) : (
                     <XCircle className="h-6 w-6 text-red-600 shrink-0" />
                   )}
                   <div>
                     <h4 className="font-bold text-xs">
-                      {isAr ? 'حالة التقييم:' : 'Check Status:'}{' '}
-                      {validationReport.isValid ? (isAr ? 'سليم ومتوافق' : 'PASSED') : (isAr ? 'يوجد ثغرات أو تحذيرات' : 'ISSUES DETECTED')}
+                      {isAr ? 'اكتمال العقدة:' : 'Node completeness:'}{' '}
+                      {validationReport.isComplete ? (isAr ? 'سليم ومتوافق' : 'PASSED') : (isAr ? 'يوجد ثغرات أو تحذيرات' : 'ISSUES DETECTED')}
                     </h4>
                     <p className="text-[10px] text-slate-500 font-medium">
                       {isAr 
@@ -988,6 +1028,7 @@ export function AcademicTaxonomyDetailPage() {
                   </div>
                 </div>
 
+                <p className="text-xs">{validationReport.canBeReviewed ? (isAr ? 'جاهزة للمراجعة' : 'Can be reviewed') : (isAr ? 'غير جاهزة للمراجعة' : 'Cannot be reviewed')}</p>
                 {validationReport.issues.length > 0 && (
                   <div className="border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden">
                     {validationReport.issues.map((issue, idx) => (
@@ -1116,7 +1157,8 @@ export function AcademicTaxonomyDetailPage() {
                   <select
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
                     value={nodeFormData.standardType}
-                    onChange={(e) => setNodeFormData(d => ({ ...d, standardType: e.target.value }))}
+                    disabled
+                    aria-label={isAr ? 'نوع المعيار ثابت' : 'Immutable standard type'}
                   >
                     <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
                     <option value="ISCED">ISCED</option>
@@ -1207,6 +1249,7 @@ export function AcademicTaxonomyDetailPage() {
             </div>
 
             <form onSubmit={handleAddEdgeSubmit} className="p-6 space-y-4">
+              {pickerControls}
               {edgeError && (
                 <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
                   {edgeError}
@@ -1284,6 +1327,7 @@ export function AcademicTaxonomyDetailPage() {
             </div>
 
             <form onSubmit={handleAddMappingSubmit} className="p-6 space-y-4">
+              {pickerControls}
               {mappingError && (
                 <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
                   {mappingError}

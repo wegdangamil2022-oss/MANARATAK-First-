@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-07
+
+ ❯ packages/domain/tests/academic-taxonomy/AcademicTaxonomyGraphValidationService.spec.ts (23 tests | 1 failed) 19ms
+       × emits ERROR when child already has another primary parent and new edge isPrimary is true 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/domain/tests/academic-taxonomy/AcademicTaxonomyGraphValidationService.spec.ts > AcademicTaxonomyValidationService - Graph & Relations Validation > validateEdge > emits ERROR when child already has another primary parent and new edge isPrimary is true
+AssertionError: expected [ { fieldName: 'isPrimary', …(3) } ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ packages/domain/tests/academic-taxonomy/AcademicTaxonomyGraphValidationService.spec.ts:193:22
+    191|
+    192|       const errors = issues.filter((i) => i.severity === AcademicTaxon…
+    193|       expect(errors).toHaveLength(0);
+       |                      ^
+    194|
+    195|       expect(issues).toContainEqual(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 80 passed (81)
+   Start at  22:45:10
+   Duration  5.83s (transform 1.58s, setup 0ms, import 4.55s, tests 239ms, environment 1ms)
+
