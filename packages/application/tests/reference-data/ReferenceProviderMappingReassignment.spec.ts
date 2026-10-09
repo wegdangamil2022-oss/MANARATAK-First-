@@ -19,7 +19,7 @@ describe('P7 provider mapping reconciliation command', () => {
 
   it('uses the same atomic business+audit+outbox transaction for an owner transfer', async () => {
     const issued: Array<{ audit: any; outbox: any }> = [];
-    const inTx = vi.fn(async () => undefined);
+    const inTx = vi.fn(async (_command: unknown, _context: unknown) => undefined);
     const executor = {
       execute: vi.fn(async (audit: any, outbox: any, mutation: (ctx: any) => Promise<void>) => {
         await mutation({ boundaryId: 'transaction-1' });

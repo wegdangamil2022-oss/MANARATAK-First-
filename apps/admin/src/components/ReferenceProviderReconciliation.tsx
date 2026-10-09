@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReferenceDataCollection, ReferenceProviderMappingInput } from '@manaratak/domain';
 import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceData';
 
