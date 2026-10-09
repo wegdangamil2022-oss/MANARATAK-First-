@@ -728,6 +728,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   private regionWhere(filters?: ReferenceDataFilters): Prisma.AdministrativeRegionWhereInput {
     return {
       ...(filters?.activeOnly ? { lifecycleState: 'ACTIVE', countryReference: { lifecycleState: 'ACTIVE' } } : {}),
+      ...(filters?.nonActiveOnly ? { NOT: { lifecycleState: 'ACTIVE' } } : {}),
       ...(filters?.countryIso2Code ? { countryIso2Code: filters.countryIso2Code } : {}),
       ...(filters?.q ? { OR: [{ name: { contains: filters.q, mode: 'insensitive' as const } }, { regionCode: { contains: filters.q, mode: 'insensitive' as const } }] } : {}),
     };

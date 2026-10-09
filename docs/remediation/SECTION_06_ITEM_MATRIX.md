@@ -30,8 +30,8 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 | 06.22 | 22 Import canonical city identity | SOURCE_IMPLEMENTED_UNVERIFIED | Seed staging uses validator scoped Unicode CITY key; all duplicate-key rows invalidated. |
 | 06.23 | 23 Intentionally incomplete migration | DB_DEFERRED | No database migration applied, per instruction |
 | 06.24 | 24 Scalable canonical pickers | PARTIAL | canonicalPickers.ts; CanonicalPicker.tsx — first bounded page + search; callsites still need review |
-| 06.25 | 25 Admin server query filters | PARTIAL | ReferenceDataAdminPage.tsx URL p7Q,p7Status,p7Country,p7Page; not all facets |
-| 06.26 | 26 Active label/status UI | SOURCE_IMPLEMENTED | ReferenceDataAdminPage.tsx status field and all/active label |
+| 06.25 | 25 Admin server query filters | PARTIAL | Four owner tabs URL p7Q,p7Status(active/all/nonactive),p7Country,p7Page; region advanced facets still pending |
+| 06.26 | 26 Active label/status UI | SOURCE_IMPLEMENTED_UNVERIFIED | ReferenceDataAdminPage.tsx active/all/nonactive, filtered count owner read and URL persistence |
 | 06.27 | 27 Generic governance admin workflow | PARTIAL | Four admin owner tabs expose alias/mapping editing, version history, relationships, DEPRECATED, version conflict; terminal impact remains incomplete. |
 | 06.28 | 28 Dependency impact before lifecycle | PARTIAL | Owner FK impact count with PARTIAL and unknown non-FK consumers; UI exposes known counts but does not certify terminal safety. |
 | 06.29 | 29 Zero Upward Dependency | PARTIAL | No upward references newly imported into domain P7 |
