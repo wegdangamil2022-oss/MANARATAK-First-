@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import {
   ISettingDefinitionRepository,
   SettingDefinitionPageQuery,
@@ -70,7 +71,13 @@ export interface SettingAssignmentAdminView {
   isWritable?: boolean;
 }
 
+const availableDomainScopes = [...new Set(ADMIN_PERMISSION_CATALOG.map(item => item.domain))].sort();
+const permittedDomainScopes = new Set<string>(availableDomainScopes);
+
 export class ManageSettingsUseCase {
+  /** Finite, reviewed platform-domain keys; no arbitrary admin-entered domain IDs. */
+  public domainScopeOptions(): string[] { return [...availableDomainScopes]; }
+
   constructor(
     private definitionRepo: ISettingDefinitionRepository,
     private assignmentRepo: ISettingAssignmentRepository,
@@ -388,10 +395,13 @@ export class ManageSettingsUseCase {
   }
 
   private async assertAdminWritableScope(scope: ScopeIdentifier): Promise<void> {
-    // Historical overrides remain readable. Neither TENANT nor DOMAIN currently has
-    // an approved canonical owner selector, so Admin cannot write guessed IDs.
+    // Tenant remains a legacy read-only scope. DOMAIN IDs must match the existing
+    // published platform-domain names, not arbitrary Admin strings.
     if (scope.getLevel() === ScopeLevel.TENANT) throw new Error('SETTINGS_TENANT_SCOPE_UNAPPROVED');
-    if (scope.getLevel() === ScopeLevel.DOMAIN) throw new Error('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
+    if (scope.getLevel() === ScopeLevel.DOMAIN) {
+      if (!permittedDomainScopes.has(scope.getScopeId()!)) throw new Error('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
+      return;
+    }
     if (scope.getLevel() !== ScopeLevel.IDENTITY) return;
     if (!this.identityRepository) throw new Error('SETTINGS_IDENTITY_SCOPE_VALIDATOR_UNAVAILABLE');
     const identity = await this.identityRepository.findById(scope.getScopeId()!);
