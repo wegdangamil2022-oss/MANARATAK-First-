@@ -480,7 +480,12 @@ export class PrismaImportRepository {
       if (filters?.batchId) where.batchId = filters.batchId;
       if (filters?.dataType) where.batch = { dataType: importDomainFilter(filters.dataType) };
 
-      const [total, failed, dlq, rows] = await Promise.all([
+      const batchWhere: Record<string, unknown> = {
+        batchStatus: { in: ['DLQ', 'FAILED_PERMANENT', 'FAILED_RETRYABLE'] },
+        ...(filters?.batchId ? { id: filters.batchId } : {}),
+        ...(filters?.dataType ? { dataType: importDomainFilter(filters.dataType) } : {}),
+      };
+      const [total, failed, dlq, rows, batchFailureTotal, batchFailureRows] = await Promise.all([
         this.prisma.importRecord.count({ where }),
         this.prisma.importRecord.count({ where: { ...where, status: 'FAILED' } }),
         this.prisma.importRecord.count({ where: { ...where, status: 'DLQ' } }),
@@ -490,13 +495,21 @@ export class PrismaImportRepository {
           take: limit,
           include: { batch: true },
         }),
+        this.prisma.importBatch.count({ where: batchWhere }),
+        this.prisma.importBatch.findMany({
+          where: batchWhere,
+          orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+          take: limit,
+          select: { id: true, sourceSystem: true, dataType: true,
+            batchStatus: true, lastError: true, attemptCount: true, updatedAt: true },
+        }),
       ]);
       return {
-        total,
-        failed,
-        dlq,
-        rows,
+        total, failed, dlq, rows,
         truncated: total > rows.length,
+        batchFailureTotal,
+        batchFailures: batchFailureRows.map((batch) => this.safeBatchFailure(batch)),
+        truncatedBatchFailures: batchFailureTotal > batchFailureRows.length,
         generatedAt: new Date(),
       };
     }
@@ -515,13 +528,42 @@ export class PrismaImportRepository {
     const data = rows
       .slice(0, limit)
       .map((record) => ({ ...record, batch: this.inMemoryBatches.get(record.batchId) ?? null }));
+    const batchFailures = [...this.inMemoryBatches.values()]
+      .filter(batch => ['DLQ', 'FAILED_PERMANENT', 'FAILED_RETRYABLE'].includes(String(batch.batchStatus)))
+      .filter(batch => !filters?.batchId || batch.id === filters.batchId)
+      .filter(batch => !filters?.dataType || matchesImportDomain(batch.dataType, filters.dataType))
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
     return {
       total: rows.length,
       failed,
       dlq,
       rows: data,
       truncated: rows.length > data.length,
+      batchFailureTotal: batchFailures.length,
+      batchFailures: batchFailures.slice(0, limit).map(batch => this.safeBatchFailure(batch)),
+      truncatedBatchFailures: batchFailures.length > limit,
       generatedAt: new Date(),
+    };
+  }
+
+  private safeBatchFailure(batch: {
+    id: string; sourceSystem?: string | null; dataType?: string | null;
+    batchStatus: string; lastError?: string | null;
+    attemptCount?: number | null; updatedAt?: Date | null;
+  }) {
+    return {
+      batchId: batch.id,
+      domain: batch.dataType ?? '',
+      sourceSystem: batch.sourceSystem ?? '',
+      status: batch.batchStatus,
+      stage: 'BATCH_WORKER',
+      errorCode: null,
+      retryable: batch.batchStatus === 'FAILED_RETRYABLE',
+      attempt: batch.attemptCount ?? 0,
+      message: (batch.lastError ?? '')
+        .replace(/(password|token|secret|authorization)\\s*[=:]\\s*\\S+/gi, '$1=[REDACTED]')
+        .slice(0, 1000),
+      updatedAt: batch.updatedAt ?? null,
     };
   }
 
