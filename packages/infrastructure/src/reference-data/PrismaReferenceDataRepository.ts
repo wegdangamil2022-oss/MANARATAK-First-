@@ -870,18 +870,19 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       }
     }
 
-    // New W3 identities use the database unique key directly. Prisma upsert
-    // closes the previous findFirst -> create race for canonical city writes.
-    const record = await this.prisma.referenceCity.upsert({
-      where: { canonicalIdentityKey },
-      update: updateData,
-      create: {
+    // Create only: concurrent creation of an existing canonical identity
+    // must raise a reviewable collision, never silently update a different UUID.
+    const record = await this.prisma.referenceCity.create({
+      data: {
         canonicalIdentityKey,
         countryIso2Code: data.countryIso2Code,
         ...updateData,
         isActive: true,
       },
       include: { administrativeRegion: true },
+    }).catch((error: unknown) => {
+      if (this.isUniqueConstraintViolation(error)) throw new Error('REFERENCE_CITY_IDENTITY_COLLISION_REVIEW_REQUIRED');
+      throw error;
     });
     const governance = await this.finalizeGovernedUpsert('CITY', record.id, data, data.aliases, data.providerMappings, false);
     return this.mapToCityDto({ ...(record as unknown as DbCity), ...governance });

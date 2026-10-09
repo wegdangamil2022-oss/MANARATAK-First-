@@ -387,7 +387,7 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
 
     return {
       entityType: 'CITY',
-      deterministicKey: countryIso2Code && name ? referenceCityScopeKey(input) : '',
+      deterministicKey: /^[A-Z]{2}$/.test(countryIso2Code) && name ? referenceCityScopeKey(input) : '',
       requiredFields,
       presentFields,
       missingFields,
