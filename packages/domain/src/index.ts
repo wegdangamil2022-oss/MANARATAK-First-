@@ -372,6 +372,7 @@ export * from './services-platform';
 
 export * from './study-destinations';
 export * from './reference-data/governance/ReferenceGovernance';
+export * from './reference-data/governance/ReferenceIdentityNormalization';
 export * from './retention';
 export * from './career-alumni';
 

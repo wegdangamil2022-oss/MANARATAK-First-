@@ -27,7 +27,8 @@ import {
   ReferenceRelationshipDto,
   ReferenceVersionDto,
   assertReferenceLifecycleTransition,
-  lifecycleIsActive
+  lifecycleIsActive,
+  normalizeReferenceIdentityToken
 } from '@manaratak/domain';
 
 interface DbCountry {
@@ -269,12 +270,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   private normalizeResolutionAlias(value: string): string {
-    return value
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\u0600-\u06ff]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return normalizeReferenceIdentityToken(value);
   }
 
   public async listCountries(filters?: ReferenceDataFilters): Promise<ReferenceCountryDto[]> {
@@ -570,6 +566,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
     if (filters?.activeOnly) {
       where.isActive = true;
+      Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
     if (filters?.region) {
       where.region = filters.region;
@@ -600,6 +597,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
     if (filters?.activeOnly) {
       where.isActive = true;
+      Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
     if (filters?.q) {
       where.OR = [
@@ -625,6 +623,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
     if (filters?.activeOnly) {
       where.isActive = true;
+      Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
     if (filters?.q) {
       where.OR = [
@@ -646,6 +645,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
     if (filters?.activeOnly) {
       where.isActive = true;
+      Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
     if (filters?.countryIso2Code) {
       where.countryIso2Code = filters.countryIso2Code;
@@ -721,6 +721,15 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       where: { canonicalIdentityKey },
       include: { administrativeRegion: true },
     });
+    // Old W3 keys were ASCII/Arabic only. Never silently create another UUID
+    // when a previously keyed record may represent this same scoped city.
+    if (!keyed) {
+      const legacyKey = this.legacyCityCanonicalIdentityKey(data);
+      if (legacyKey !== canonicalIdentityKey) {
+        const legacy = await this.prisma.referenceCity.findUnique({ where: { canonicalIdentityKey: legacyKey }, select: { id: true } });
+        if (legacy) throw new Error('REFERENCE_CITY_IDENTITY_RECONCILIATION_REQUIRED');
+      }
+    }
     if (keyed) {
       await this.assertGovernedRecordEditable('CITY', keyed.id);
       const record = await this.prisma.referenceCity.update({
@@ -989,15 +998,17 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       const system = mapping.providerSystem.trim();
       const providerId = mapping.providerId.trim();
       if (!system || !providerId) throw new Error('REFERENCE_PROVIDER_MAPPING_INVALID');
-      await this.prisma.$executeRaw(Prisma.sql`
+      const affected = await this.prisma.$executeRaw(Prisma.sql`
         INSERT INTO "ReferenceProviderMappingRecord"
           ("id", "entityType", "referenceId", "providerSystem", "providerId", "normalizedProviderSystem", "normalizedProviderId", "isActive", "createdAt", "updatedAt")
         VALUES
           (${randomUUID()}, ${entityType}, ${referenceId}, ${system}, ${providerId}, ${system.toLowerCase()}, ${providerId.toLowerCase()}, true, NOW(), NOW())
         ON CONFLICT ("entityType", "normalizedProviderSystem", "normalizedProviderId")
-        DO UPDATE SET "referenceId" = EXCLUDED."referenceId", "providerSystem" = EXCLUDED."providerSystem",
-                      "providerId" = EXCLUDED."providerId", "isActive" = true, "updatedAt" = NOW()
+        DO UPDATE SET "providerSystem" = EXCLUDED."providerSystem", "providerId" = EXCLUDED."providerId",
+                      "isActive" = true, "updatedAt" = NOW()
+        WHERE "ReferenceProviderMappingRecord"."referenceId" = EXCLUDED."referenceId"
       `);
+      if (affected !== 1) throw new Error('REFERENCE_PROVIDER_MAPPING_REASSIGNMENT_REQUIRES_RECONCILIATION');
     }
   }
 
@@ -1012,6 +1023,13 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     changeReason: string | null,
     actorId: string | null,
   ): Promise<void> {
+    // Version periods are [effectiveFrom, effectiveTo). Close the predecessor
+    // in this same transaction before inserting the successor.
+    await this.prisma.$executeRaw(Prisma.sql`
+      UPDATE "ReferenceVersionRecord" SET "effectiveTo" = ${effectiveFrom}
+      WHERE "entityType" = ${entityType} AND "referenceId" = ${referenceId}
+        AND "effectiveTo" IS NULL AND "versionNumber" < ${versionNumber}
+    `);
     await this.prisma.$executeRaw(Prisma.sql`
       INSERT INTO "ReferenceVersionRecord"
         ("id", "entityType", "referenceId", "versionNumber", "lifecycleState", "effectiveFrom", "effectiveTo", "snapshot", "changeReason", "actorId", "createdAt")
@@ -1026,27 +1044,29 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
 
   private cityCanonicalIdentityKey(data: UpsertReferenceCityDto): string {
-    const normalize = (value: string | null | undefined) =>
-      (value ?? '')
-        .normalize('NFKC')
-        .trim()
-        .toLocaleLowerCase('en-US')
-        .replace(/[^a-z0-9\u0600-\u06ff]+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+    const normalizedName = normalizeReferenceIdentityToken(data.name);
+    if (!normalizedName) throw new Error('REFERENCE_CITY_NAME_EMPTY_AFTER_NORMALIZATION');
+    const regionName = normalizeReferenceIdentityToken(data.region ?? '');
     const regionIdentity = data.administrativeRegionId
       ? `id:${data.administrativeRegionId.trim().toLowerCase()}`
-      : normalize(data.region)
-        ? `text:${normalize(data.region)}`
-        : '~';
-    const canonicalIdentity = [
-      data.countryIso2Code.trim().toUpperCase(),
-      normalize(data.name),
-      regionIdentity,
-    ].join('|');
-    return createHash('sha256').update(canonicalIdentity, 'utf8').digest('hex');
+      : regionName ? `text:${regionName}` : '~';
+    return createHash('sha256').update([
+      data.countryIso2Code.trim().toUpperCase(), normalizedName, regionIdentity,
+    ].join('|'), 'utf8').digest('hex');
   }
 
+  /** Compatibility probe only; never write the legacy identity for new rows. */
+  private legacyCityCanonicalIdentityKey(data: UpsertReferenceCityDto): string {
+    const legacy = (value: string | null | undefined) =>
+      (value ?? '').normalize('NFKC').trim().toLocaleLowerCase('en-US')
+        .replace(/[^a-z0-9\u0600-\u06ff]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const regionIdentity = data.administrativeRegionId
+      ? `id:${data.administrativeRegionId.trim().toLowerCase()}`
+      : legacy(data.region) ? `text:${legacy(data.region)}` : '~';
+    return createHash('sha256').update([
+      data.countryIso2Code.trim().toUpperCase(), legacy(data.name), regionIdentity,
+    ].join('|'), 'utf8').digest('hex');
+  }
 
   public upsertCityInTransaction(data: UpsertReferenceCityDto, context: AtomicPersistenceContext): Promise<ReferenceCityDto> {
     return this.transactionRepository(context).upsertCity(data);

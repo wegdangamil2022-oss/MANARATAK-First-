@@ -21,7 +21,7 @@ export class LocalizedReferenceDataQueries {
     filters: ReferenceDataFilters = {},
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<ReferenceCountryDto[]> {
-    const records = await this.repository.listCountries({ activeOnly: true, ...filters });
+    const records = await this.repository.listCountries({ ...filters, activeOnly: true });
     return records.map((record) => this.projection.projectReferenceCountry(record, locale));
   }
 
@@ -29,7 +29,7 @@ export class LocalizedReferenceDataQueries {
     filters: ReferenceDataFilters = {},
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<ReferenceCurrencyDto[]> {
-    const records = await this.repository.listCurrencies({ activeOnly: true, ...filters });
+    const records = await this.repository.listCurrencies({ ...filters, activeOnly: true });
     return records.map((record) => this.projection.projectReferenceCurrency(record, locale));
   }
 
@@ -37,7 +37,7 @@ export class LocalizedReferenceDataQueries {
     filters: ReferenceDataFilters = {},
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<ReferenceLanguageDto[]> {
-    const records = await this.repository.listLanguages({ activeOnly: true, ...filters });
+    const records = await this.repository.listLanguages({ ...filters, activeOnly: true });
     return records.map((record) => this.projection.projectReferenceLanguage(record, locale));
   }
 
@@ -45,7 +45,7 @@ export class LocalizedReferenceDataQueries {
     filters: ReferenceDataFilters = {},
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<ReferenceCityDto[]> {
-    const records = await this.repository.listCities({ activeOnly: true, ...filters });
+    const records = await this.repository.listCities({ ...filters, activeOnly: true });
     return records.map((record) => this.projection.projectReferenceCity(record, locale));
   }
 
@@ -53,7 +53,7 @@ export class LocalizedReferenceDataQueries {
     filters: ReferenceDataFilters = {},
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<AdministrativeRegionDto[]> {
-    const records = await this.repository.listRegions(filters);
+    const records = await this.repository.listRegions({ ...filters, activeOnly: true });
     return records.map((record) => this.projection.projectAdministrativeRegion(record, locale));
   }
 
@@ -62,7 +62,7 @@ export class LocalizedReferenceDataQueries {
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<ReferenceCountryDto> {
     const record = await this.repository.getCountry(iso2Code);
-    if (!record || !record.isActive) throw new ReferenceDataNotFoundError('COUNTRY', iso2Code);
+    if (!record || !record.isActive || record.lifecycleState !== 'ACTIVE') throw new ReferenceDataNotFoundError('COUNTRY', iso2Code);
     return this.projection.projectReferenceCountry(record, locale);
   }
 
@@ -71,7 +71,7 @@ export class LocalizedReferenceDataQueries {
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<ReferenceCurrencyDto> {
     const record = await this.repository.getCurrency(isoCode);
-    if (!record || !record.isActive) throw new ReferenceDataNotFoundError('CURRENCY', isoCode);
+    if (!record || !record.isActive || record.lifecycleState !== 'ACTIVE') throw new ReferenceDataNotFoundError('CURRENCY', isoCode);
     return this.projection.projectReferenceCurrency(record, locale);
   }
 
@@ -80,7 +80,7 @@ export class LocalizedReferenceDataQueries {
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<ReferenceLanguageDto> {
     const record = await this.repository.getLanguage(isoCode);
-    if (!record || !record.isActive) throw new ReferenceDataNotFoundError('LANGUAGE', isoCode);
+    if (!record || !record.isActive || record.lifecycleState !== 'ACTIVE') throw new ReferenceDataNotFoundError('LANGUAGE', isoCode);
     return this.projection.projectReferenceLanguage(record, locale);
   }
 }

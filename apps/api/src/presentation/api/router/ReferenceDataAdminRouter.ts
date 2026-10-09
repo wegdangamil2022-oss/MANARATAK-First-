@@ -127,7 +127,7 @@ export class ReferenceDataAdminRouter {
       nameAr: z.string().trim().min(1).max(300).nullable().optional(),
       localName: z.string().trim().min(1).max(300).nullable().optional(),
       regionType: z.string().trim().min(1).max(100).nullable().optional(),
-      aliases: z.array(aliasSchema.extend({ alias: z.string().trim().min(1).max(300).regex(/[a-z0-9\u0600-\u06ff]/i) })).max(100).optional(),
+      aliases: z.array(aliasSchema.extend({ alias: z.string().trim().min(1).max(300).regex(/[\p{L}\p{N}]/u) })).max(100).optional(),
     }).strict();
     const regionIdSchema = z.object({ id: z.string().uuid() }).strict();
     router.get('/regions/:id', asyncHandler(async (req: Request, res: Response) => {

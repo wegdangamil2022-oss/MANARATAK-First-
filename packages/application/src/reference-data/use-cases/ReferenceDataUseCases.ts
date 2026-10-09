@@ -95,7 +95,7 @@ export class ReferenceDataUseCases {
     if (Boolean(data.id) !== (data.expectedVersion !== undefined) || (data.expectedVersion !== undefined && (!Number.isSafeInteger(data.expectedVersion) || data.expectedVersion < 1))) {
       throw new ReferenceDataInvariantError('Region updates require an ID and expected version.');
     }
-    if ((data.aliases?.length ?? 0) > 100 || data.aliases?.some(alias => !/[a-z0-9\u0600-\u06ff]/i.test(alias.alias) || alias.alias.length > 300 || (alias.locale != null && (alias.locale.length < 2 || alias.locale.length > 35)))) {
+    if ((data.aliases?.length ?? 0) > 100 || data.aliases?.some(alias => !/[\p{L}\p{N}]/u.test(alias.alias) || alias.alias.length > 300 || (alias.locale != null && (alias.locale.length < 2 || alias.locale.length > 35)))) {
       throw new ReferenceDataInvariantError('Region aliases must contain a valid name and bounded locale.');
     }
     // New authoring commands must never fall back to writes without Audit/Outbox.
