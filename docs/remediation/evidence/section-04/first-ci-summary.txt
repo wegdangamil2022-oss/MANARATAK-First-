@@ -1,0 +1,5 @@
+settings-source	Source quality	2026-10-09T15:25:13.6752938Z SOURCE_QUALITY_GATE=PASS
+settings-source	Settings invariants, effective resolution, persistence and API contracts	2026-10-09T15:25:18.5914351Z  Test Files  11 passed (11)
+settings-source	Settings invariants, effective resolution, persistence and API contracts	2026-10-09T15:25:18.5915015Z       Tests  67 passed (67)
+settings-source	Authority and permission guards	2026-10-09T15:25:18.7292225Z # pass 2
+settings-source	Existing audit coverage	2026-10-09T15:25:19.3723054Z ADMIN_MUTATION_AUDIT_COVERAGE=PASS; handlers=319; uniqueEndpoints=318; owner validation/atomic adoption requires separate evidence

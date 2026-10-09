@@ -1,3 +1,5 @@
 # Section 04 Settings evidence
 
+Source `83a335e`: [CI 37951460806](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37951460806) SUCCESS, 67 tests/11 files, TypeScript/quality/2 authority guards/audit PASS. `first-ci.json` and `first-ci-summary.txt` record matching CI; supersedes the pending statement below. Section IN PROGRESS, no actual DB/runtime proof or global architecture waiver.
+
 First batch: local 67 tests PASS, TypeScript/quality/authority/audit guards PASS, lint 0 errors/11 warnings. Browser scope is intercepted API only, test CSP bypass/dev HMR disabled; `first-browser.cjs` expects local Admin on 127.0.0.1:3094. No actual DB/provider mutations or runtime consumer proof. Initial failures/stale fixtures preserved in `first-baseline-tests.txt`. Combined legacy verifier is 78/79 due to the pre-existing global architecture guard; no global closure inferred. Matching CI pending.

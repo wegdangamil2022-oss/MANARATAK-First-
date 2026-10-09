@@ -1,5 +1,11 @@
 # Section 04 — Settings verification and implementation
 
+## Verified batch 1 CI — 2026-10-09
+
+Source `83a335ea91375ba275115eeae888edb9ae30a566`: [CI 37951460806](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37951460806) SUCCESS: **67 tests across 11 files**, TypeScript/source quality PASS, two authority/permission guards PASS, unchanged audit inventory PASS. Matching CI supersedes the pending statement in the historical batch notes below. Local tests overlap CI and are not added. This follow-up contains documentation/evidence only.
+
+Section 04 remains IN PROGRESS / NOT CLOSED. No actual database/provider/configuration mutation, production rollout, new approved dynamic consumer or global architecture-closure result is claimed. Next dependent work is governed definition lifecycle/reasons and Clear Override with immutable history/concurrency, followed by bounded server lists/lazy history and audit/correlation reconciliation; the original patch register below retains all open obligations. Four global architecture findings remain separately documented. Original attachment remains unchanged.
+
 Status: IN PROGRESS / NOT CLOSED. Reference: original `MANARATAK_ADMIN_REVIEW_CODEX.md`, section 04, fully read including 04.FG. Original attachment preserved; no parallel replacement plan. Work branch: `codex/section-01-iam-rbac`; initial source `2fc7feafc1b5393e59ad4b07a2db041d169db9dc`. Fetched latest main on 2026-10-09: `bac768e7fcd76e5702697760669449b39b0e2cca`, equal to the historical reference at this check; this equality was verified, not assumed. The original uses eight named patches in 04.21 and two FGA IDs, not invented numbered P0/P1 task IDs.
 
 ## Batch 1 — 04.21 Patch A/B/C/E, 04.8/10/11/12/13 (partial patch coverage)
