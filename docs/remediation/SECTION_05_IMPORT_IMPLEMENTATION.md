@@ -4,6 +4,14 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 5 — batch-level DLQ truth and safe Admin error export (2026-10-09)
+
+**Source change pending final focused CI acceptance:** the `PrismaImportRepository.getErrorReport` query now includes bounded, status-filtered `ImportBatch` failures (`FAILED_RETRYABLE`, `FAILED_PERMANENT`, `DLQ`) **in addition to** per-record `FAILED`/`DLQ` entries. Explicit fields `batchFailureTotal`, `batchFailures`, `truncatedBatchFailures` avoid conflating the record count with failed batches. Failure summaries include `batchId`, owner-domain, source, batch status, stage `BATCH_WORKER`, retryability, stored attempt count and a limited/redacted message; absent DB error codes and correlation are **not invented**. Both durable and development-only repository branches apply filters and limits.
+
+The Admin export now includes failure rows for batches even when there are no failed record rows, with an empty `recordId` rather than a fabricated row ID. It flags truncated results separately and preserves the existing per-record CSV contract. The regression suite includes the precise `DLQ batch / zero failing records` case and ensures stored authorization-value text does not leak. This is **partial IMP-P1-008 remediation**: comprehensive structured failure codes/correlation and transactional worker failure evidence still require dedicated owner-aware persistence design. No database migration or runtime provider test was executed.
+
+---
+
 ## Batch 4 — source-access enforcement and bounded checkpoints (2026-10-09)
 
 **Status: source changes pushed; last focused CI on final code commit must be used as acceptance evidence.** No change to source governance production state, database, protected tokens, merge or deployment.
