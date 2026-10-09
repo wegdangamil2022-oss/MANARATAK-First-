@@ -78,3 +78,7 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 ## DB/runtime specifically deferred (not counted as implementation closure)
 
 No runtime DB queries or authoritative live inventory; no migrations/seeds/backfill, browser E2E or provider/pressure tests. The report's 3,549 university rows are a *previously unresolved source queue*, not all university rows or a DB measurement.
+
+### Source check results
+
+Two focused checks passed: Unicode normalization 10 multilingual cases, and four fail-closed legacy import entrypoints. The aggregated source-contract and large-file integrity checks were attempted once each but interrupted by connector limits/truncated content; neither was rerun and neither is a PASS. TypeScript build, Vitest and runtime checks were not executed. See `SECTION_06_CHECK_LOG.md`.
