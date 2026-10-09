@@ -296,9 +296,11 @@ export function SettingsAdminPage() {
 
   const filteredDefinitions = definitions;
   const filteredAssignments = assignments;
-  const canRestore = (assignment: Assignment) => ready && assignment.isWritable === true;
+  // TENANT has no approved canonical owner/selector. Preserve historical reads,
+  // but block new Admin edits and lifecycle mutations until its authority is decided.
+  const canRestore = (assignment: Assignment) => ready && assignment.isWritable === true && assignment.level !== 'TENANT';
   const editAssignment = (item: Assignment) => {
-    if (busy.current) return;
+    if (busy.current || item.level === 'TENANT') return;
     if (
       assignmentForm.value &&
       !window.confirm(
@@ -450,7 +452,7 @@ export function SettingsAdminPage() {
   };
   const assignValue = async (event: FormEvent) => {
     event.preventDefault();
-    if (!contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated)
+    if (!contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated || assignmentForm.level === 'TENANT')
       return;
     try {
       if (assignmentForm.level !== 'GLOBAL' && !assignmentForm.scopeId.trim())
@@ -663,7 +665,7 @@ export function SettingsAdminPage() {
             <option value="ALL">{isAr ? 'الكل' : 'All'}</option>
             <option value="SETTING">{isAr ? 'إعدادات عادية' : 'Settings'}</option>
             <option value="FLAG">Feature Flags</option>
-            <option value="SECRET">{isAr ? 'مراجع الأسرار' : 'Secret references'}</option>
+            <option value="SECRET">{isAr ? 'متطلبات الأسرار' : 'Secret requirements'}</option>
             <option value="DEPRECATED">{isAr ? 'متوقفة' : 'Deprecated'}</option>
           </select>
         </Field>
@@ -993,9 +995,14 @@ export function SettingsAdminPage() {
                 >
                   <option>GLOBAL</option>
                   <option>DOMAIN</option>
-                  <option>TENANT</option>
+                  <option value="TENANT" disabled>{isAr ? 'TENANT — غير معتمد للتعديل' : 'TENANT — legacy read-only'}</option>
                   <option>IDENTITY</option>
                 </select>
+                <p className="text-xs text-slate-500">
+                  {isAr
+                    ? 'نطاق TENANT غير معتمد لإنشاء أو تعديل القيم؛ تبقى سجلاته القديمة قابلة للعرض فقط حتى تحديد الجهة المالكة.'
+                    : 'TENANT is not approved for new Admin values or edits; existing records remain visible until an authoritative owner is established.'}
+                </p>
               </Field>
               {assignmentForm.level !== 'GLOBAL' ? (
                 <Field label={isAr ? 'معرّف النطاق' : 'Scope ID'}>
@@ -1044,7 +1051,7 @@ export function SettingsAdminPage() {
                   onChange={event => setAssignmentForm(form => ({ ...form, changeReason: event.target.value }))} className="input" />
               </Field>
               <button
-                disabled={saving || !contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated}
+                disabled={saving || !contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated || assignmentForm.level === 'TENANT'}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
