@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ImportCheckpoint, ImportJobStatus } from '@manaratak/domain';
+import { ImportCheckpoint, ImportJobStatus, ImportRetryPolicy } from '@manaratak/domain';
 import { PrismaImportQueueGateway } from '../../src/import-foundation/PrismaImportQueueGateway';
 
 describe('PrismaImportQueueGateway', () => {
@@ -87,9 +87,38 @@ describe('PrismaImportQueueGateway', () => {
     await expect(gateway.completeClaimedJob(lease, now)).resolves.toBe(false);
     expect(prisma.importBatch.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ claimUntil: { gte: now } }),
+        where: expect.objectContaining({ attemptCount: lease.attempt, claimUntil: { equals: lease.claimUntil, gte: now } }),
       }),
     );
+  });
+
+  it('conditions every claimed-lease mutation on attempt number and the exact lease expiry generation', async () => {
+    const prisma = mockPrisma();
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    const now = new Date('2026-09-01T10:00:00.000Z');
+    const lease = {
+      batchId: 'batch-1', workerId: 'worker-shared', attempt: 5,
+      claimUntil: new Date(now.getTime() + 1000),
+    };
+    const predicate = {
+      id: lease.batchId, batchStatus: ImportJobStatus.RUNNING,
+      claimedBy: lease.workerId, attemptCount: lease.attempt,
+      claimUntil: { equals: lease.claimUntil, gte: now },
+    };
+    expect(await gateway.heartbeat(lease, 1000, now)).toMatchObject({ attempt: 5 });
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: predicate }));
+    expect(await gateway.completeClaimedJob(lease, now)).toBe(true);
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: predicate }));
+    const policy = ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 100, maxDelayMs: 100, retryableErrorCodes: [],
+    });
+    expect(await gateway.failClaimedJob({ lease, now, reason: 'Failed', retryPolicy: policy })).toBe('DLQ');
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: predicate }));
+    prisma.importBatch.updateMany.mockResolvedValue({ count: 0 });
+    expect(await gateway.heartbeat(lease, 1000, now)).toBeNull();
+    expect(await gateway.completeClaimedJob(lease, now)).toBe(false);
+    expect(await gateway.failClaimedJob({ lease, now, reason: 'Stale', retryPolicy: policy })).toBe('LEASE_LOST');
   });
 
   it('fresh replay clears checkpoint and stale lease control state atomically', async () => {
