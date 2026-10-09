@@ -30,6 +30,7 @@ export interface PinnedSourceResponse {
   rawBytes: Uint8Array;
   etag?: string;
   lastModified?: string;
+  retryAfter?: string;
 }
 
 export interface IPinnedSourceRequestExecutor {
@@ -64,6 +65,14 @@ export class NodePinnedSourceRequestExecutor implements IPinnedSourceRequestExec
             }
           });
 
+          const failResponse = (error: Error) => {
+            if (settled) return;
+            settled = true;
+            req.destroy();
+            reject(error);
+          };
+          res.on('aborted', () => failResponse(new Error('SOURCE_RESPONSE_ABORTED')));
+          res.on('error', failResponse);
           res.on('end', () => {
             if (!settled) {
               settled = true;
@@ -74,6 +83,7 @@ export class NodePinnedSourceRequestExecutor implements IPinnedSourceRequestExec
                 rawBytes: Buffer.concat(chunks),
                 etag: res.headers.etag,
                 lastModified: res.headers['last-modified'],
+                retryAfter: res.headers['retry-after'],
               });
             }
           });
@@ -149,6 +159,7 @@ export class NodeSafeSourceHttpTransport implements ISafeSourceHttpTransport {
         fetchedAt: new Date(),
         etag: response.etag,
         lastModified: response.lastModified,
+        retryAfterMs: this.retryAfterMs(response.retryAfter),
       };
     }
 
@@ -167,5 +178,14 @@ export class NodeSafeSourceHttpTransport implements ISafeSourceHttpTransport {
       throw new Error(errorCode);
     }
     return Math.min(value, hardMax);
+  }
+
+  private retryAfterMs(value: string | undefined): number | undefined {
+    if (!value || value.length > 128) return undefined;
+    const text = value.trim();
+    const milliseconds = /^\d+$/.test(text)
+      ? Number(text) * 1000
+      : Date.parse(text) - Date.now();
+    return Number.isFinite(milliseconds) && milliseconds >= 0 ? milliseconds : undefined;
   }
 }

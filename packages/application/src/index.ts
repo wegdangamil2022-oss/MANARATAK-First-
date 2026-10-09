@@ -167,6 +167,7 @@ export * from './import-foundation/parsers/NdjsonImportStreamParser';
 export * from './import-foundation/parsers/CsvImportStreamParser';
 export * from './import-foundation/contracts/ISourceRegistryGateway';
 export * from './import-foundation/contracts/ISourceConnector';
+export * from './import-foundation/contracts/SourceHttpError';
 export * from './import-foundation/contracts/IImportRawSnapshotStore';
 export * from './import-foundation/services/SourceConnectorRegistry';
 export * from './import-foundation/use-cases/AcquireImportSourceUseCase';

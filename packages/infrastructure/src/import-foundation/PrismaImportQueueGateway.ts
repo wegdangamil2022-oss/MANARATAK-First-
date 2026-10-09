@@ -277,26 +277,48 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
       policy.backoffStrategy === 'exponential' ? Math.max(0, command.lease.attempt - 1) : 0;
     const delay = Math.min(policy.maxDelayMs, policy.initialDelayMs * Math.pow(2, exponent));
 
-    const updated = await this.prisma.importBatch.updateMany({
-      where: {
-        id: command.lease.batchId,
-        batchStatus: ImportJobStatus.RUNNING,
-        claimedBy: command.lease.workerId,
-        attemptCount: command.lease.attempt,
-        claimUntil: { equals: command.lease.claimUntil, gte: now },
-      },
-      data: {
-        batchStatus: nextStatus,
-        availableAt: new Date(
-          now.getTime() + (nextStatus === ImportJobStatus.FAILED_RETRYABLE ? delay : 0),
-        ),
-        claimedBy: null,
-        claimUntil: null,
-        lastError: this.sanitize(command.reason),
-      },
+    return this.prisma.$transaction(async tx => {
+      const updated = await tx.importBatch.updateMany({
+        where: {
+          id: command.lease.batchId,
+          batchStatus: ImportJobStatus.RUNNING,
+          claimedBy: command.lease.workerId,
+          attemptCount: command.lease.attempt,
+          claimUntil: { equals: command.lease.claimUntil, gte: now },
+        },
+        data: {
+          batchStatus: nextStatus,
+          availableAt: new Date(
+            now.getTime() + (nextStatus === ImportJobStatus.FAILED_RETRYABLE ? delay : 0),
+          ),
+          claimedBy: null,
+          claimUntil: null,
+          lastError: this.sanitize(command.reason),
+        },
+      });
+      if (updated.count !== 1) return 'LEASE_LOST';
+      // Failure evidence must commit with the fenced terminal/retry transition.
+      // A crash cannot leave a DLQ batch without its cause, or a stale worker
+      // manufacture failure records after losing ownership. No imported payload
+      // or provider response is copied into operational evidence.
+      await tx.importRecord.create({
+        data: {
+          batchId: command.lease.batchId,
+          status: 'WORKER_FAILURE',
+          rawPayload: {
+            stage: 'BATCH_WORKER',
+            errorCode: command.errorCode && /^[A-Z][A-Z0-9_]{0,127}$/.test(command.errorCode)
+              ? command.errorCode : null,
+            attempt: command.lease.attempt,
+            retryable: retryable && !exhausted,
+            failedAt: now.toISOString(),
+            outcome: nextStatus,
+          },
+          processingNotes: this.sanitize(command.reason),
+        },
+      });
+      return nextStatus === ImportJobStatus.FAILED_RETRYABLE ? 'RETRY_SCHEDULED' : 'DLQ';
     });
-    if (updated.count !== 1) return 'LEASE_LOST';
-    return nextStatus === ImportJobStatus.FAILED_RETRYABLE ? 'RETRY_SCHEDULED' : 'DLQ';
   }
 
   async replayJob(command: ReplayImportJobCommand): Promise<boolean> {

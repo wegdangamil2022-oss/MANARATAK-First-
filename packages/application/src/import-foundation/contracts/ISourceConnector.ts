@@ -8,7 +8,7 @@ export interface SourceAcquisitionResult {
   rawBytes: Uint8Array; fetchedAt: Date; etag?: string; lastModified?: string;
   metadata?: Record<string, string | number | boolean | null>;
 }
-export interface SafeSourceHttpResponse { requestedUrl: string; finalUrl: string; statusCode: number; contentType?: string; rawBytes: Uint8Array; fetchedAt: Date; etag?: string; lastModified?: string; }
+export interface SafeSourceHttpResponse { requestedUrl: string; finalUrl: string; statusCode: number; contentType?: string; rawBytes: Uint8Array; fetchedAt: Date; etag?: string; lastModified?: string; retryAfterMs?: number; }
 export interface ISafeSourceHttpTransport { get(source: ImportSourceDefinition, request: SourceAcquisitionRequest): Promise<SafeSourceHttpResponse>; }
 
 export interface ISourceConnector {

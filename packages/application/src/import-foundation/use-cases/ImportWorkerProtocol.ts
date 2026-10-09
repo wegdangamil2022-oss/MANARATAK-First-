@@ -66,7 +66,9 @@ export class ImportWorkerProtocol {
       const value = error as { message?: unknown; code?: unknown };
       return {
         reason: typeof value.message === 'string' ? value.message : 'Import worker failed',
-        errorCode: typeof value.code === 'string' ? value.code : undefined,
+        errorCode: typeof value.code === 'string' ? value.code
+          : typeof value.message === 'string' && /^IMPORT_[A-Z0-9_]+$/.test(value.message)
+            ? value.message : undefined,
       };
     }
     return { reason: typeof error === 'string' ? error : 'Import worker failed' };

@@ -50,4 +50,37 @@ describe('Phase 6 batch and record failure evidence', () => {
     });
     expect(result.batchFailures[0].errorCode).toBeNull(); // Never invent an error code.
   });
+  it('projects structured worker failure events independently from source-record counts', async () => {
+    const now = new Date();
+    const prisma = {
+      importRecord: {
+        count: vi.fn(async ({ where }: any) => where.status === 'WORKER_FAILURE' ? 1 : 0),
+        findMany: vi.fn(async ({ where }: any) => where.status === 'WORKER_FAILURE' ? [{
+          id: 'event-1', batchId: 'batch-1', createdAt: now,
+          processingNotes: 'secret=private-value failed',
+          rawPayload: { stage: 'BATCH_WORKER', errorCode: 'TRANSIENT', attempt: 2,
+            retryable: true, outcome: 'FAILED_RETRYABLE', hiddenPayload: 'must-not-leak' },
+          batch: { dataType: 'COURSES', sourceSystem: 'PROVIDER' },
+        }] : []),
+      }, importBatch: { count: vi.fn().mockResolvedValue(0), findMany: vi.fn().mockResolvedValue([]) },
+    };
+    const report = await new PrismaImportRepository(prisma as any).getErrorReport({ batchId: 'batch-1' });
+    expect(report).toMatchObject({ total: 0, failed: 0, dlq: 0, rows: [], workerFailureTotal: 1,
+      workerFailures: [expect.objectContaining({ eventId: 'event-1', errorCode: 'TRANSIENT', attempt: 2, retryable: true })] });
+    expect(JSON.stringify(report)).not.toContain('private-value');
+    expect(JSON.stringify(report)).not.toContain('must-not-leak');
+  });
+
+  it('excludes checkpoint and failure evidence in worker pagination at the database query', async () => {
+    const prisma = { importRecord: { count: vi.fn().mockResolvedValue(205), findMany: vi.fn().mockResolvedValue([]) } };
+    await new PrismaImportRepository(prisma as any).listRecords({ batchId: 'batch-1', page: 2, pageSize: 100, workItemsOnly: true });
+    expect(prisma.importRecord.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { batchId: 'batch-1', AND: [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'] } }] },
+      skip: 100, take: 100,
+    }));
+    expect(prisma.importRecord.count).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ AND: [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'] } }] }),
+    }));
+  });
+
 });

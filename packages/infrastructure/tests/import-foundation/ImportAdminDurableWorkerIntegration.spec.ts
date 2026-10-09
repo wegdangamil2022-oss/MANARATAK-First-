@@ -435,6 +435,58 @@ describe('W2 Phase 6 durable worker integration', () => {
     });
   });
 
+  it('processes 205 unique work rows exactly once despite checkpoint inserts between pages', async () => {
+    const repo = statefulImportRepository();
+    repo.listRecords.mockImplementation(async ({ batchId, page = 1, pageSize = 100, workItemsOnly }: any) => {
+      const all = [...repo.records.values()].filter(row => row.batchId === batchId);
+      const evidence = all.filter(row => row.status === 'CHECKPOINT');
+      const work = all.filter(row => row.status !== 'CHECKPOINT');
+      const data = workItemsOnly ? work : [...evidence, ...work];
+      return { data: data.slice((page - 1) * pageSize, page * pageSize), total: data.length, page, pageSize };
+    });
+    const queue = new InMemoryImportQueueGateway();
+    const originalStats = repo.updateBatchStats.getMockImplementation()!;
+    let checkpointCount = 0;
+    repo.updateBatchStats.mockImplementation(async (batchId: string, updates: any) => {
+      const result = await originalStats(batchId, updates);
+      if (updates.processedRecords > 0) {
+        // Simulate diagnostic records entering storage between work-page reads.
+        const id = `checkpoint-${++checkpointCount}`;
+        repo.records.set(id, { id, batchId, status: 'CHECKPOINT', rawPayload: {} });
+      }
+      return result;
+    });
+    const delivered: string[] = [];
+    const accept = vi.fn(async (handoff: any) => { delivered.push(handoff.normalizedPayload.sourceId); return { screened: true }; });
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    const useCase = new ImportAdminUseCases(repo as any, queue,
+      new ImportHandoffDispatcher({ GENERIC: { effectMode: 'SCREENING_ONLY', accept } }), worker);
+    await useCase.stageNormalizedRows({ ownerDomain: 'GENERIC', sourceSystem: 'TEST_SOURCE',
+      rows: Array.from({ length: 205 }, (_, i) => ({ sourceId: `work-${i}` })),
+    });
+    expect(delivered).toHaveLength(205); expect(new Set(delivered).size).toBe(205);
+    expect(checkpointCount).toBe(3);
+    expect((await queue.getJobStatus('batch-durable-1'))?.processedRecords).toBe(205);
+  });
+
+  it('deduplicates a repeated source row across staging chunks using persisted identity', async () => {
+    const repo = statefulImportRepository();
+    const queue = new InMemoryImportQueueGateway();
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    const useCase = new ImportAdminUseCases(repo as any, queue, new ImportHandoffDispatcher({}), worker);
+    const rows = Array.from({ length: 500 }, (_, i) => ({ sourceId: `row-${i}` }));
+    rows.push(rows[0]);
+    const result = await useCase.stageNormalizedRows({ ownerDomain: 'GENERIC', sourceSystem: 'TEST_SOURCE', rows });
+    expect(result.summary).toMatchObject({ stagedRecords: 500, skippedDuplicates: 1 });
+    expect(repo.records.size).toBe(500);
+  });
+
   it('writes bounded recent accepted source keys rather than an unbounded checkpoint payload', async () => {
     const repo = statefulImportRepository();
     const queue = new InMemoryImportQueueGateway();

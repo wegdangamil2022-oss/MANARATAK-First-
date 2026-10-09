@@ -230,6 +230,12 @@ type ErrorReport = {
     stage: string; errorCode: string | null; retryable: boolean;
     attempt: number; message: string; updatedAt: string | null;
   }>;
+  workerFailures?: Array<{
+    eventId: string; batchId: string; domain: string; sourceSystem: string;
+    stage: string; errorCode: string | null; attempt: number | null;
+    retryable: boolean; outcome: string | null; message: string; createdAt: string;
+  }>;
+  truncatedWorkerFailures?: boolean;
   truncatedBatchFailures?: boolean;
   generatedAt?: string;
 };
@@ -1024,7 +1030,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       const report = await adminApiClient.request<ErrorReport>(
         `/admin/imports/error-report?${params}`,
       );
-      if ((!Array.isArray(report.rows) || report.rows.length === 0) && !report.batchFailures?.length) {
+      if ((!Array.isArray(report.rows) || report.rows.length === 0) && !report.batchFailures?.length && !report.workerFailures?.length) {
         setNotice({
           tone: 'warning',
           content: txt(
@@ -1073,7 +1079,14 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         failure.message,
         failure.updatedAt ?? '',
       ]);
-      const csv = [headers, ...rows, ...batchFailureRows].map((row) => row.map(csvCell).join(',')).join('\n');
+      const workerFailureRows = (report.workerFailures ?? []).map(failure => [
+        '', failure.batchId, normalizeDomain(failure.domain), failure.sourceSystem,
+        failure.outcome ?? 'WORKER_FAILURE', '',
+        [failure.errorCode ?? '', failure.stage, `attempt=${failure.attempt ?? 'UNKNOWN'}`,
+          `event=${failure.eventId}`].filter(Boolean).join(' | '),
+        failure.message, failure.createdAt,
+      ]);
+      const csv = [headers, ...rows, ...batchFailureRows, ...workerFailureRows].map((row) => row.map(csvCell).join(',')).join('\n');
       const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' });
       const href = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1083,12 +1096,12 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       link.click();
       link.remove();
       URL.revokeObjectURL(href);
-      if (report.truncated || report.truncatedBatchFailures) {
+      if (report.truncated || report.truncatedBatchFailures || report.truncatedWorkerFailures) {
         setNotice({
           tone: 'warning',
           content: txt(
-            'التقرير يتضمن أول 1000 نتيجة لكل نوع (السجلات والدفعات). استخدم تصفية المجال أو الدفعة للحصول على بقية النتائج.',
-            'Report includes up to 1000 results per category (records and batches). Filter by domain or batch for additional results.',
+            'التقرير يتضمن أول 1000 نتيجة لكل نوع (السجلات والدفعات وأحداث فشل العامل). استخدم تصفية المجال أو الدفعة للحصول على بقية النتائج.',
+            'Report includes up to 1000 results per category (records, batches and worker failures). Filter by domain or batch for additional results.',
           ),
         });
       }

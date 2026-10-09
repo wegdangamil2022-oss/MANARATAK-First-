@@ -4,6 +4,24 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 16 — three-session closure campaign, Session 1/3 (2026-10-09)
+
+**Direction:** prioritize source fixes; defer slow verification. Full remaining scope and Session 2/3 allocation: [three-session source plan](SECTION_05_THREE_SESSION_PLAN.md). Section remains **IN PROGRESS — SOURCE FIXES REQUIRED**.
+
+- **IMP-P1-008, atomic failure evidence:** claimed worker retry/DLQ transition and a `WORKER_FAILURE` event now commit in one Prisma transaction behind the exact lease CAS. Failed evidence persistence rolls back the transition; a stale worker creates no event. Events include bounded error code (or explicit null), stage, attempt, retryability, timestamp and outcome, with redacted reason and no copied source payload/provider response. No row counters are incremented for a failure event. Error reports/export show bounded projected events separately from failed input rows and batch summaries, including independent truncation.
+- **Worker pagination / progress:** checkpoints and failure events no longer participate in work-item pages. Both database list/count use the same work predicate. Admin default record lists and overview/source-row denominators exclude checkpoints and worker failure events. Multi-page regression covers 205 unique source rows while diagnostic records are inserted between page reads.
+- **IMP-P1-009/010 memory:** stage dedup retains only the current 500-row chunk's keys; previously committed chunks use persisted source identity and the existing atomic repository dedup path. Cross-chunk duplicate regression covers a repeated first row after 500 inputs. This does not implement streaming acquisition; callers still supply an array in this legacy path.
+- **IMP-P1-017 retry:** pinned HTTP transport preserves Retry-After seconds/date advice; connectors expose typed HTTP failure without response-body secrets. Acquisition waits with bounded exponential delay and rechecks the limiter on each attempt. Cooldowns over 30 seconds propagate the original failure instead of retrying too early or blocking an API request indefinitely. Only exact transient codes trigger retries. Aborted/errored response streams reject rather than hanging or yielding partial bytes. Conditional HTTP/304 reuse remains for Session 2/3.
+- **IMP-P1-018 local limiter correction:** concurrent waits serialize per upstream origin, including different source IDs targeting that origin. Validate finite bounded budget/burst/spacing, recheck tokens after waking, bound pending requests/state, reject overlong synchronous waits and reclaim only idle buckets. This remains explicitly process-local; it does **not** close the distributed production requirement or redirected/alternate target-origin accounting.
+- **Retry policy safety:** reject nonfinite/fractional/out-of-bounds attempts/delays, unsupported backoff and malformed retry code lists; defensively copy classifications to prevent mutation through constructor input or serialization.
+
+**Verification:** **187/187 focused tests in 24 files PASS (15.35 seconds)**; root TypeScript, source quality, Admin mutation audit inventory (321 handlers / 320 endpoints), secret scan and scoped lint (0 errors) PASS. Logs: [Session 1 evidence](evidence/section-05/session-01/README.md). The W2 verifier's two obsolete P6 lease checks now verify exact expiry generation plus nonexpiration; both PASS. General W2 remains 82/84 on two inherited asset/migration findings, and persistence guard retains 18 inherited metadata violations across six preexisting Section 03/04 migrations. Both were reproduced independently at baseline `63b600e`; no new migration or cross-owner mutation was added. Do not report these broad gates as green.
+
+
+**Deferred / limits:** no DB connection, migration application, provider request, browser E2E, load run or production deployment. Owner transactional receipt and authorized reconciliation remain open source work. Live transactions/races and all integration/load/recovery evidence remain post-28, as directed. No source requirement is waived merely to meet the three-session target.
+
+---
+
 ## Batch 15 — legacy terminal-result truth and CSV reserved-metadata correction (2026-10-09)
 
 **Verified source:** `562d9f4a5a440e65ef5889cb147ef3bff96d3dbb` (legacy terminal transition guards), `5b7adbfe87c91df342366dbb5acca7fe0c2d1556` (CSV parser trust-boundary fix), `2c3e278426a02be44c84fbfb5f44970cd596366b` (correct CSV test fixtures). [Import Section 05 CI 37985366169](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37985366169) **SUCCESS** — 159/159 targeted Vitest tests in 22 files, TypeScript, source-quality gate and existing 321-handler/320-endpoint Admin audit source verification PASS.

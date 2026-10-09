@@ -286,13 +286,13 @@ export class ImportAdminUseCases {
     let failedRecords = 0;
     let stagedRecords = 0;
     let skippedDuplicates = 0;
-    const seenDedupKeys = new Set<string>();
     const recordsToReturn: any[] = [];
     const chunkSize = 500;
 
     try {
       for (let offset = 0; offset < input.rows.length; offset += chunkSize) {
         const chunk = input.rows.slice(offset, offset + chunkSize);
+        const seenDedupKeys = new Set<string>();
         const records: Array<Record<string, unknown>> = [];
         // One bounded source-identity lookup per chunk instead of one SQL read
         // for each imported row. Atomic insert remains the final concurrency gate.
@@ -555,12 +555,13 @@ export class ImportAdminUseCases {
         batchId: lease.batchId,
         page,
         pageSize,
+        workItemsOnly: true,
       });
       const records = Array.isArray(result) ? result : result?.data ?? [];
       const total = Array.isArray(result) ? records.length : result?.total ?? records.length;
 
       for (const record of records) {
-        if (record.status === 'CHECKPOINT' || record.status === 'DLQ') continue;
+        if (['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'].includes(record.status)) continue;
         // A pause/cancel/worker takeover invalidates the durable lease. Fence before any
         // record mutation or owner handoff, not just between 100-record pages.
         await heartbeat();

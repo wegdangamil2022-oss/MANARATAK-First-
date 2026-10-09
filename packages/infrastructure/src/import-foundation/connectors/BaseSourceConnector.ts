@@ -1,4 +1,5 @@
 import type { ISafeSourceHttpTransport, ISourceConnector, SourceAcquisitionRequest, SourceAcquisitionResult } from '@manaratak/application';
+import { SourceHttpError } from '@manaratak/application';
 import { 
   ImportSourceDefinition, 
   ConnectorSignature, 
@@ -34,7 +35,7 @@ export abstract class BaseSourceConnector implements ISourceConnector {
     SourceAccessExecutionPolicy.assertAllowed(source, this.category);
     if (!this.transport) throw new Error(`SOURCE_CONNECTOR_NOT_ENABLED:${this.connectorId}`);
     const response = await this.transport.get(source, { ...request, targetUrl: request.targetUrl ?? source.baseUrl });
-    if (response.statusCode < 200 || response.statusCode >= 300) throw new Error(`SOURCE_HTTP_${response.statusCode}`);
+    if (response.statusCode < 200 || response.statusCode >= 300) throw new SourceHttpError(response.statusCode, response.retryAfterMs);
     return { sourceId: source.sourceId, connectorId: this.connectorId, connectorVersion: this.connectorVersion, requestedUrl: response.requestedUrl, finalUrl: response.finalUrl, statusCode: response.statusCode, contentType: response.contentType, contentLength: response.rawBytes.byteLength, rawBytes: response.rawBytes, fetchedAt: response.fetchedAt, etag: response.etag, lastModified: response.lastModified };
   }
 }

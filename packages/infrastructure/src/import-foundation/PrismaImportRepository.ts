@@ -132,9 +132,10 @@ export class PrismaImportRepository {
     const batchWhere: any = filters?.dataType
       ? { dataType: importDomainFilter(filters.dataType) }
       : {};
-    const recordWhere: any = filters?.dataType
-      ? { batch: { dataType: importDomainFilter(filters.dataType) } }
-      : {};
+    const recordWhere: any = {
+      status: { notIn: ['CHECKPOINT', 'WORKER_FAILURE'] },
+      ...(filters?.dataType ? { batch: { dataType: importDomainFilter(filters.dataType) } } : {}),
+    };
 
     if (this.prisma) {
       const [
@@ -191,7 +192,7 @@ export class PrismaImportRepository {
       const byDomainEntries = await Promise.all(
         batchDomainGroups.map(async (row: any) => {
           const dataType = row.dataType;
-          const domainRecordWhere = { batch: { dataType } };
+          const domainRecordWhere = { batch: { dataType }, status: { notIn: ['CHECKPOINT', 'WORKER_FAILURE'] } };
           const [records, active, review, failed, transferred, statusGroups] = await Promise.all([
             this.prisma!.importRecord.count({ where: domainRecordWhere }),
             this.prisma!.importBatch.count({
@@ -249,7 +250,7 @@ export class PrismaImportRepository {
       batches = batches.filter((batch) => matchesImportDomain(batch.dataType, filters.dataType));
     const allowedBatchIds = new Set(batches.map((batch) => batch.id));
     let records = Array.from(this.inMemoryRecords.values()).filter((record) =>
-      allowedBatchIds.has(record.batchId),
+      allowedBatchIds.has(record.batchId) && !['CHECKPOINT', 'WORKER_FAILURE'].includes(record.status),
     );
 
     const countBy = (items: any[], key: string) =>
@@ -531,7 +532,7 @@ export class PrismaImportRepository {
         ...(filters?.batchId ? { id: filters.batchId } : {}),
         ...(filters?.dataType ? { dataType: importDomainFilter(filters.dataType) } : {}),
       };
-      const [total, failed, dlq, rows, batchFailureTotal, batchFailureRows] = await Promise.all([
+      const [total, failed, dlq, rows, batchFailureTotal, batchFailureRows, workerFailureTotal, workerFailureRows] = await Promise.all([
         this.prisma.importRecord.count({ where }),
         this.prisma.importRecord.count({ where: { ...where, status: 'FAILED' } }),
         this.prisma.importRecord.count({ where: { ...where, status: 'DLQ' } }),
@@ -549,9 +550,19 @@ export class PrismaImportRepository {
           select: { id: true, sourceSystem: true, dataType: true,
             batchStatus: true, lastError: true, attemptCount: true, updatedAt: true },
         }),
+        this.prisma.importRecord.count({ where: { ...where, status: 'WORKER_FAILURE' } }),
+        this.prisma.importRecord.findMany({
+          where: { ...where, status: 'WORKER_FAILURE' },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit,
+          select: { id: true, batchId: true, rawPayload: true, processingNotes: true,
+            createdAt: true, batch: { select: { dataType: true, sourceSystem: true } } },
+        }),
       ]);
       return {
         total, failed, dlq, rows,
+        workerFailureTotal,
+        workerFailures: workerFailureRows.map(row => this.safeWorkerFailure(row)),
+        truncatedWorkerFailures: workerFailureTotal > workerFailureRows.length,
         truncated: total > rows.length,
         batchFailureTotal,
         batchFailures: batchFailureRows.map((batch) => this.safeBatchFailure(batch)),
@@ -560,6 +571,11 @@ export class PrismaImportRepository {
       };
     }
 
+    const workerFailures = [...this.inMemoryRecords.values()]
+      .filter(record => record.status === 'WORKER_FAILURE')
+      .filter(record => !filters?.batchId || record.batchId === filters.batchId)
+      .filter(record => !filters?.dataType || matchesImportDomain(this.inMemoryBatches.get(record.batchId)?.dataType, filters.dataType))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     let rows = Array.from(this.inMemoryRecords.values()).filter((record) =>
       ['FAILED', 'DLQ'].includes(String(record.status)),
     );
@@ -580,6 +596,11 @@ export class PrismaImportRepository {
       .filter(batch => !filters?.dataType || matchesImportDomain(batch.dataType, filters.dataType))
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
     return {
+      workerFailureTotal: workerFailures.length,
+      workerFailures: workerFailures.slice(0, limit).map(row => this.safeWorkerFailure({
+        ...row, batch: this.inMemoryBatches.get(row.batchId),
+      })),
+      truncatedWorkerFailures: workerFailures.length > limit,
       total: rows.length,
       failed,
       dlq,
@@ -589,6 +610,28 @@ export class PrismaImportRepository {
       batchFailures: batchFailures.slice(0, limit).map(batch => this.safeBatchFailure(batch)),
       truncatedBatchFailures: batchFailures.length > limit,
       generatedAt: new Date(),
+    };
+  }
+
+  private safeWorkerFailure(row: {
+    id: string; batchId: string; rawPayload: unknown; processingNotes?: string | null;
+    createdAt: Date; batch?: { dataType?: string; sourceSystem?: string } | null;
+  }) {
+    const payload = row.rawPayload && typeof row.rawPayload === 'object' && !Array.isArray(row.rawPayload)
+      ? row.rawPayload as Record<string, unknown> : {};
+    return {
+      eventId: row.id, batchId: row.batchId,
+      domain: row.batch?.dataType ?? '', sourceSystem: row.batch?.sourceSystem ?? '',
+      stage: 'BATCH_WORKER',
+      errorCode: typeof payload.errorCode === 'string' && /^[A-Z][A-Z0-9_]{0,127}$/.test(payload.errorCode)
+        ? payload.errorCode : null,
+      attempt: Number.isSafeInteger(payload.attempt) ? payload.attempt : null,
+      retryable: payload.retryable === true,
+      outcome: ['DLQ', 'FAILED_RETRYABLE'].includes(String(payload.outcome)) ? payload.outcome : null,
+      message: (row.processingNotes ?? '')
+        .replace(/(password|token|secret|authorization|api[_-]?key|access[_-]?key)\s*[=:]\s*\S+/gi, '$1=[REDACTED]')
+        .slice(0, 1000),
+      createdAt: row.createdAt,
     };
   }
 
@@ -774,6 +817,7 @@ export class PrismaImportRepository {
     dataType?: string;
     page?: number;
     pageSize?: number;
+    workItemsOnly?: boolean;
   }): Promise<{ data: any[]; total: number; page: number; pageSize: number }> {
     const DEFAULT_PAGE = 1;
     const DEFAULT_PAGE_SIZE = 50;
@@ -787,9 +831,13 @@ export class PrismaImportRepository {
     if (pageSize > MAX_PAGE_SIZE) pageSize = MAX_PAGE_SIZE;
 
     if (this.prisma) {
-      const where: any = {};
+      const where: any = filters?.status ? {} : { status: { notIn: ['CHECKPOINT', 'WORKER_FAILURE'] } };
       if (filters?.batchId) where.batchId = filters.batchId;
       if (filters?.status) where.status = filters.status;
+      if (filters?.workItemsOnly) {
+        delete where.status;
+        where.AND = [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'] } }];
+      }
       if (filters?.dataType) {
         where.batch = { dataType: importDomainFilter(filters.dataType) };
       }
@@ -808,6 +856,8 @@ export class PrismaImportRepository {
     }
 
     let records = Array.from(this.inMemoryRecords.values());
+    if (!filters?.status) records = records.filter(r => !['CHECKPOINT', 'WORKER_FAILURE'].includes(r.status));
+    if (filters?.workItemsOnly) records = records.filter(r => !['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'].includes(r.status));
     if (filters?.batchId) {
       records = records.filter((r) => r.batchId === filters.batchId);
     }

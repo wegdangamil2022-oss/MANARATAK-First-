@@ -108,6 +108,44 @@ describe('PrismaImportQueueGateway', () => {
     expect(prisma.$transaction).toHaveBeenCalledTimes(2);
   });
 
+  it('rolls back a claimed failure transition when evidence persistence fails, and denies stale evidence', async () => {
+    const now = new Date('2026-10-09T16:00:00Z');
+    const lease = { batchId: 'batch-failure', workerId: 'w1', attempt: 2,
+      claimUntil: new Date(now.getTime() + 30000) };
+    const retryPolicy = ImportRetryPolicy.create({ maxAttempts: 3, dlqAfterAttempts: 3,
+      backoffStrategy: 'fixed', initialDelayMs: 100, maxDelayMs: 100, retryableErrorCodes: ['TRANSIENT'] });
+    let status = 'RUNNING';
+    let stale = false;
+    const create = vi.fn().mockRejectedValueOnce(new Error('EVIDENCE_UNAVAILABLE')).mockResolvedValue({});
+    const prisma = {
+      $transaction: vi.fn(async (callback: any) => {
+        const before = status;
+        try {
+          return await callback({
+            importBatch: { updateMany: async ({ data }: any) => {
+              if (stale) return { count: 0 };
+              status = data.batchStatus; return { count: 1 };
+            } }, importRecord: { create },
+          });
+        } catch (error) { status = before; throw error; }
+      }),
+    };
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    const command = { lease, now, reason: 'token=private-value upstream failure', errorCode: 'TRANSIENT', retryPolicy };
+    await expect(gateway.failClaimedJob(command)).rejects.toThrow('EVIDENCE_UNAVAILABLE');
+    expect(status).toBe('RUNNING');
+    await expect(gateway.failClaimedJob(command)).resolves.toBe('RETRY_SCHEDULED');
+    const evidence = create.mock.calls[1][0].data;
+    expect(evidence).toMatchObject({ status: 'WORKER_FAILURE', rawPayload: {
+      stage: 'BATCH_WORKER', errorCode: 'TRANSIENT', attempt: 2,
+      retryable: true, failedAt: now.toISOString(), outcome: 'FAILED_RETRYABLE',
+    } });
+    expect(JSON.stringify(evidence)).not.toContain('private-value');
+    stale = true; create.mockClear();
+    await expect(gateway.failClaimedJob(command)).resolves.toBe('LEASE_LOST');
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('reports persisted job status with the latest durable checkpoint', async () => {
     const prisma = mockPrisma();
     prisma.importBatch.findUnique.mockResolvedValue({ id: 'batch-1', batchStatus: 'RUNNING', totalRecords: 100, processedRecords: 40, failedRecords: 10, createdAt: new Date(), updatedAt: new Date() });
@@ -381,5 +419,5 @@ describe('PrismaImportQueueGateway', () => {
 function mockPrisma() {
   const importBatch = { updateMany: vi.fn().mockResolvedValue({ count: 1 }), findUnique: vi.fn(), update: vi.fn().mockReturnValue(Promise.resolve({})) };
   const importRecord = { create: vi.fn().mockReturnValue(Promise.resolve({})), findFirst: vi.fn() };
-  return { importBatch, importRecord, $transaction: vi.fn().mockResolvedValue([]) };
+  return { importBatch, importRecord, $transaction: vi.fn(async (callback: any) => callback({ importBatch, importRecord })) };
 }

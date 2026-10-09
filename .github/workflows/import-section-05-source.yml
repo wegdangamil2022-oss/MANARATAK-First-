@@ -60,5 +60,7 @@ jobs:
           packages/infrastructure/tests/import-foundation/connectors/SourceConnectors.spec.ts
           packages/application/tests/import-foundation/AcquireImportSourceUseCase.spec.ts
           packages/domain/tests/import-foundation/value-objects/SourceAccessExecutionPolicy.spec.ts
+          packages/domain/tests/import-foundation/ImportRetryPolicySafety.spec.ts
+          packages/infrastructure/tests/import-foundation/SourceAcquisitionLimiter.spec.ts
       - name: Existing admin audit coverage
         run: npm run audit:coverage:verify
