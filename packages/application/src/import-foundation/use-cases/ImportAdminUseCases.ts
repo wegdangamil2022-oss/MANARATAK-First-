@@ -280,9 +280,6 @@ export class ImportAdminUseCases {
               ? ImportRecordStatus.COMPLETE
               : ImportRecordStatus.INCOMPLETE;
 
-          if (status === ImportRecordStatus.COMPLETE) processedRecords++;
-          else failedRecords++;
-
           const identity = ImportSourceIdentity.create({
             sourceSystem: input.sourceSystem,
             ownerDomain: input.ownerDomain,
@@ -296,6 +293,10 @@ export class ImportAdminUseCases {
             continue;
           }
           seenDedupKeys.add(identity.sourceDedupKey);
+          // Counters must describe the rows persisted for processing, not
+          // input duplicates which never enter the durable worker.
+          if (status === ImportRecordStatus.COMPLETE) processedRecords++;
+          else failedRecords++;
 
           const validationState = !validObject
             ? 'INVALID'
@@ -363,7 +364,7 @@ export class ImportAdminUseCases {
       }
 
       const finalizedBatch = await this.importRepository.updateBatchStats(batch.id, {
-        totalRecords: input.rows.length,
+        totalRecords: stagedRecords,
         processedRecords: durableWorkerPath ? 0 : processedRecords,
         failedRecords: durableWorkerPath ? 0 : failedRecords,
         batchStatus: durableWorkerPath ? ImportJobStatus.CREATED : ImportJobStatus.COMPLETED,
@@ -406,7 +407,7 @@ export class ImportAdminUseCases {
       // If the durable queue already owns the batch, it is authoritative for retry/DLQ state.
       if (!durableWorkerPath) {
         await this.importRepository.updateBatchStats(batch.id, {
-          totalRecords: input.rows.length,
+          totalRecords: stagedRecords,
           processedRecords,
           failedRecords,
           batchStatus: 'FAILED',
