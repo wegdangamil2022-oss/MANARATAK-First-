@@ -1,3 +1,20 @@
+## Batch 6 — 04.21 Patch D: unowned TENANT administration boundary — 2026-10-09
+
+Baseline: the latest Library plan `MANARATAK_ADMIN_REVIEW_CODEX(20261008-171649).md` (same substantive review as `MANARATAK_ADMIN_REVIEW_CODEX.md`). This increment follows the original 04.10/04.21 Patch D; no plan IDs or original findings were changed. **Section 04 remains IN PROGRESS / NOT CLOSED.**
+
+The source confirms that TENANT still exists in the Settings precedence chain, but no approved canonical tenant registry/identifier, owner or operational selection policy is established. No new Tenant Platform or cross-domain foreign key was invented. The correct conservative Admin state is **legacy read-only**, not removal of existing values or changing the resolver precedence.
+
+- The Admin Settings assignment editor now marks TENANT unavailable for new selection; server-provided historical TENANT assignments stay visible in list, filters and history. Edit/clear/rollback actions are blocked on TENANT items, with a shared pure guard and focused Vitest cases. A second guard rejects attempting to submit TENANT via the form. Existing GLOBAL/DOMAIN/IDENTITY UI flows and legacy TENANT reads are retained.
+- `ManageSettingsUseCase` now rejects TENANT at the Application mutation boundary for assign/update, clear and rollback via `SETTINGS_TENANT_SCOPE_UNAPPROVED`. This applies even if a caller bypasses the Admin UI; the existing router recognizes known `SETTINGS_*` policy failures without disclosing stored values. It does not change Domain rehydration, historical immutable versions, or the read-only resolution chain.
+- The Application regression test builds an existing legacy TENANT assignment and asserts all three mutation entrypoints reject without adding versions, while typed resolution still yields its historical scoped value. The UI guard test checks TENANT denial and retained normal-scope behavior. No production or target database/provider mutation was performed.
+- Corrected Admin SECRET filter label from “secret references” to “secret requirements”; the Settings model does not persist or prove external secret-provider bindings.
+
+Verification: committed targeted source and regression tests; matching `Settings Section 04 Source Verification` CI is requested on the branch. Any result must be recorded from an observed run, not inferred from source. No local workspace/browser/DB runtime acceptance is claimed by this batch.
+
+**Still open:** canonical DOMAIN selector and IAM-owned IDENTITY lookup (with authorization-safe API contracts); authoritative TENANT decision (this patch freezes Admin writes but does not settle identity semantics); non-type definition constraints; approved live consumer integration, configuration authority runtime acceptance, semantic outbox delivery/replay; FGA-04-001 atomic change-set preview and FGA-04-002 approved cross-key dependencies; target PostgreSQL constraint verification; source/UX/runtime full re-review; four independent global architecture findings. No production GO, DB migration execution, section closure, or next-section handoff.
+
+---
+
 ## Verified batch 5 CI — 2026-10-09
 
 Source `42efcf290d83fdd81221605f7247353b42fcce88`: [CI 37959986025](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37959986025) SUCCESS: **115 tests across 16 files**, plus one separate ORM/SQL source-plan consistency test; schema validation, TypeScript/source quality, three authority/permission guards and unchanged audit coverage PASS. Evidence: `ownership-ci.json` / `ownership-ci-summary.txt`. Observed CI supersedes pending notes below; local and CI counts overlap. Action pins PASS (39 references). Global architecture recheck still reports exactly the four pre-existing findings (`ownership-architecture.txt`), no waiver. Patch H design is SOURCE_PLAN_READY / RUNTIME_PENDING; no DB mutation/constraint application or runtime commit/concurrency proof. Section 04 remains IN PROGRESS.
