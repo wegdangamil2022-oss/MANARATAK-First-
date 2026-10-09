@@ -4,6 +4,18 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 9 — fail-closed owning-domain handoff effect classification (2026-10-09)
+
+**Source changes pushed to `codex/section-01-iam-rbac`.**
+
+- **IMP-P0-005 proactive control:** The public `IImportHandoffConsumer` contract now declares a mandatory `effectMode: SCREENING_ONLY | CANONICAL_MUTATION`. The generic `ImportHandoffDispatcher` refuses to register any consumer with missing, unknown or `CANONICAL_MUTATION` mode, returning `IMPORT_OWNER_TRANSACTIONAL_RECEIPT_REQUIRED:<domain>` **before** any handoff invocation. This prevents silently adding an owning-domain mutating adapter without a domain-owned, transactionally committed inbox/receipt and independent idempotency evidence.
+- **Registered consumers classified:** University, Scholarship, International Test and Translation handoff-preparation services explicitly declare `SCREENING_ONLY`. Inspection of each `accept` method confirms they compute candidates and perform read-only canonical lookup/screening; they do not publish/merge/write canonical records. Translation was identified by the broad TypeScript gate, even though it is not currently part of the import dispatcher registration in the API container.
+- **Registration integrity:** The dispatcher snapshots validated consumers and binds the inspected `accept` function. Mutating the original registry or replacing its method after construction does not turn a previously validated screening registration into an arbitrary new call.
+- **Regression tests:** Missing mode, explicit canonical mutation, missing accept callback, safe screening dispatch, foreign-domain non-dispatch, and hostile post-registration replacement. Focused CI additionally includes the translation preparation suite and watches its source path.
+- **Important scope limit:** `SCREENING_ONLY` is a declared, reviewable source contract, not a runtime proof that arbitrary third-party code is free of side effects. There is **no implemented owner-side transactional receipt** yet; the generic dispatcher intentionally admits **no canonical-mutating consumers**. The importer-side uncertainty marker still prevents automatic owner replay after unknown outcomes. Do **not** mark IMP-P0-005 or Section 05 fully resolved until dedicated owner-domain inbox/receipt + reconciliation write permissions and source tests exist. The Post-28 runtime tests are still deferred.
+
+---
+
 ## Batch 8 — stranded stop diagnostics without unsafe finalization (2026-10-09)
 
 **Verified source:** code commit `96641b0369324033820b9cd153b47c09f4176394`; [Section 05 focused CI 37980637012](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37980637012) **SUCCESS** — 126/126 tests across 19 files, TypeScript, source quality, and unchanged 321-handler/320-endpoint Admin audit coverage PASS.
