@@ -27,6 +27,7 @@ import {
   ReferenceVersionDto,
   ReferenceGovernanceDetails,
   ReferenceCityQualityCounters,
+  ReferenceDependencyImpact,
   referenceCityScopeKey
 } from '@manaratak/domain';
 import { AtomicAuditedOutboxMutationExecutor } from '../../event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
@@ -221,6 +222,14 @@ export class ReferenceDataUseCases {
     };
     if (!owner.getReferenceGovernanceDetails) throw new Error('REFERENCE_GOVERNANCE_OWNER_READ_UNAVAILABLE');
     return owner.getReferenceGovernanceDetails(entityType, referenceId);
+  }
+
+  public getReferenceDependencyImpact(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceDependencyImpact> {
+    const owner = this.repository as IReferenceDataRepository & {
+      getReferenceDependencyImpact?: (type: GovernedReferenceEntityType, id: string) => Promise<ReferenceDependencyImpact>
+    };
+    if (!owner.getReferenceDependencyImpact) throw new Error('REFERENCE_USAGE_OWNER_READ_UNAVAILABLE');
+    return owner.getReferenceDependencyImpact(entityType, referenceId);
   }
 
   public getCityQualityCounters(countryIso2Code: string): Promise<ReferenceCityQualityCounters> {

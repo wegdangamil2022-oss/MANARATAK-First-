@@ -3,7 +3,7 @@ import type {
   UpsertReferenceCountryDto, UpsertReferenceCurrencyDto,
   UpsertReferenceLanguageDto, UpsertReferenceCityDto,
   AdministrativeRegionDto, UpsertAdministrativeRegionDto, ReferenceLifecycleState, ReferenceVersionDto,
-  ReferenceGovernanceDetails, ReferenceRelationshipDto, ReferenceCityQualityCounters, GovernedReferenceEntityType,
+  ReferenceGovernanceDetails, ReferenceRelationshipDto, ReferenceCityQualityCounters, GovernedReferenceEntityType, ReferenceDependencyImpact,
 } from '@manaratak/domain';
 import { adminApiClient, type AdminRequestOptions } from './client';
 
@@ -40,6 +40,11 @@ function mutate<T>(path: string, method: 'POST' | 'PUT', body: unknown, options:
 export const referenceDataAdminApi = {
   qualitySnapshot() {
     return adminApiClient.request<{ data: Array<{ collection: ReferenceDataCollection; total: number; active: number; nonActive: number; aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown' }>; asOf: string }>(base + '/quality');
+  },
+  governanceImpact(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<{ data: ReferenceDependencyImpact }>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/impact'
+    );
   },
   governanceDetails(entityType: GovernedReferenceEntityType, referenceId: string) {
     return adminApiClient.request<{ data: ReferenceGovernanceDetails }>(

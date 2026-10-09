@@ -103,3 +103,18 @@ export interface ReferenceCityQualityCounters {
   withoutTimezone: number;
   withoutCanonicalIdentity: number;
 }
+
+/**
+ * Generic dependency read model. Known counts are derived from FK-backed owner
+ * relations in infrastructure only; this intentionally never imports business
+ * services into P7. PARTIAL means terminal lifecycle cannot be auto-approved.
+ */
+export interface ReferenceDependencyImpact {
+  entityType: GovernedReferenceEntityType;
+  referenceId: string;
+  knownRelationCounts: Record<string, number>;
+  knownTotal: number;
+  coverage: 'PARTIAL';
+  unobservedConsumers: 'unknown';
+  terminalSafe: false;
+}

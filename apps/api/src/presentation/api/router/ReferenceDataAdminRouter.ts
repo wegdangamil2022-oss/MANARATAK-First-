@@ -231,6 +231,14 @@ export class ReferenceDataAdminRouter {
     );
 
     router.get(
+      '/governance/:entityType/:referenceId/impact',
+      asyncHandler(async (req: Request, res: Response) => {
+        const { entityType, referenceId } = governanceParamSchema.parse(req.params);
+        res.json({ data: await referenceDataUseCases.getReferenceDependencyImpact(entityType, referenceId) });
+      }),
+    );
+
+    router.get(
       '/governance/:entityType/:referenceId/details',
       asyncHandler(async (req: Request, res: Response) => {
         const { entityType, referenceId } = governanceParamSchema.parse(req.params);

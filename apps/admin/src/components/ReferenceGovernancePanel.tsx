@@ -8,6 +8,7 @@ import type {
   ReferenceGovernanceDetails,
   ReferenceVersionDto,
   ReferenceRelationshipDto,
+  ReferenceDependencyImpact,
 } from '@manaratak/domain';
 import { referenceDataAdminApi } from '../api/referenceData';
 
@@ -55,6 +56,7 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
   const [details, setDetails] = useState<ReferenceGovernanceDetails | null>(null);
   const [history, setHistory] = useState<ReferenceVersionDto[]>([]);
   const [relationships, setRelationships] = useState<ReferenceRelationshipDto[]>([]);
+  const [impact, setImpact] = useState<ReferenceDependencyImpact | null>(null);
   const [aliases, setAliases] = useState<ReferenceAliasInput[]>([]);
   const [mappings, setMappings] = useState<ReferenceProviderMappingInput[]>([]);
   const [reason, setReason] = useState('');
@@ -65,13 +67,15 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
       referenceDataAdminApi.governanceDetails(entityType, record.id),
       referenceDataAdminApi.governanceHistory(entityType, record.id),
       referenceDataAdminApi.governanceRelationships(entityType, record.id),
-    ]).then(([d, h, r]) => {
+      referenceDataAdminApi.governanceImpact(entityType, record.id),
+    ]).then(([d, h, r, i]) => {
       if (!live) return;
       setDetails(d.data);
       setAliases(d.data.aliases.map(alias => ({ ...alias })));
       setMappings(d.data.providerMappings.map(mapping => ({ ...mapping })));
       setHistory(h.data);
       setRelationships(r.data);
+      setImpact(i.data);
     }).catch((err: unknown) => {
       if (live) setError(err instanceof Error ? err.message : 'تعذر تحميل سجل الحوكمة');
     }).finally(() => { if (live) setLoading(false); });
@@ -227,8 +231,13 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
           </section>
           <section className="border-t pt-4 space-y-2">
             <h4 className="font-bold">دورة حياة السجل</h4>
-            <p className="text-xs text-amber-800">تأثير السجل على الجامعات والمنح والدورات والاختبارات: غير معروف.
-              الأرشفة والدمج والاستبدال غير متاحة من هذه الشاشة حتى تتوفر معاينة اعتماديات موثوقة.</p>
+            {impact && <div className="border border-slate-200 rounded-xl p-3 text-xs space-y-2">
+              <p className="font-bold">الروابط الموثقة من قاعدة البيانات: {impact.knownTotal} (تغطية جزئية فقط)</p>
+              <div className="flex gap-2 flex-wrap">{Object.entries(impact.knownRelationCounts).map(([relation, count]) =>
+                <span className="border rounded-lg px-2 py-1" key={relation}>{relation}: {count}</span>)}</div>
+            </div>}
+            <p className="text-xs text-amber-800">الاعتماديات غير المباشرة أو غير المربوطة بـFK: unknown.
+              الأرشفة والدمج والاستبدال محظورة من هذه الشاشة حتى استكمال تغطية الاستهلاك وموافقات الحوكمة.</p>
             {record.lifecycleState === 'ACTIVE' && <div className="flex gap-2 items-center flex-wrap">
               <input value={reason} onChange={e => setReason(e.target.value)}
                 className="border rounded-lg p-2 flex-1" placeholder="سبب إيقاف الاختيار الجديد (مطلوب)" />

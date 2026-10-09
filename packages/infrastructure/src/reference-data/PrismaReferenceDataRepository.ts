@@ -28,6 +28,7 @@ import {
   ReferenceVersionDto,
   ReferenceGovernanceDetails,
   ReferenceCityQualityCounters,
+  ReferenceDependencyImpact,
   assertReferenceLifecycleTransition,
   lifecycleIsActive,
   normalizeReferenceIdentityToken,
@@ -939,6 +940,67 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   /** Numeric counters from the P7 owner schema, scoped to exactly one country. */
+
+  /** No upward application dependencies: only this Prisma owner projection knows
+   * about direct FK-backed relation counts. Non-FK consumers stay UNKNOWN. */
+  public async getReferenceDependencyImpact(
+    entityType: GovernedReferenceEntityType, referenceId: string,
+  ): Promise<ReferenceDependencyImpact> {
+    let knownRelationCounts: Record<string, number> | undefined;
+    switch (entityType) {
+      case 'COUNTRY': {
+        const row = await this.prisma.referenceCountry.findUnique({ where: { id: referenceId }, select: {
+          _count: { select: {
+            universities: true, universityCampuses: true, administrativeRegions: true,
+            cities: true, scholarships: true, scholarshipEligibility: true,
+            externalCourseProviders: true, internationalTestCountryRelationships: true,
+            serviceCatalogCountries: true, careerEmployers: true, careerJobs: true,
+          } },
+        } });
+        knownRelationCounts = row?._count; break;
+      }
+      case 'CURRENCY': {
+        const row = await this.prisma.referenceCurrency.findUnique({ where: { id: referenceId }, select: {
+          _count: { select: {
+            universityTuitionProfiles: true, universityAccommodationProfiles: true,
+            universityLivingCostProfiles: true, scholarshipBenefits: true,
+            internationalTestFees: true, studyDestinationLivingCostProfiles: true,
+          } },
+        } });
+        knownRelationCounts = row?._count; break;
+      }
+      case 'LANGUAGE': {
+        const row = await this.prisma.referenceLanguage.findUnique({ where: { id: referenceId }, select: {
+          _count: { select: {
+            courses: true, scholarships: true, internationalTestLanguageRelationships: true,
+            serviceCatalogLanguages: true, studyDestinationProfiles: true,
+          } },
+        } });
+        knownRelationCounts = row?._count; break;
+      }
+      case 'CITY': {
+        const row = await this.prisma.referenceCity.findUnique({ where: { id: referenceId }, select: {
+          _count: { select: {
+            universities: true, universityCampuses: true, careerEmployers: true, careerJobs: true,
+          } },
+        } });
+        knownRelationCounts = row?._count; break;
+      }
+      case 'REGION': {
+        const row = await this.prisma.administrativeRegion.findUnique({ where: { id: referenceId }, select: {
+          _count: { select: { cities: true, universities: true, universityCampuses: true } },
+        } });
+        knownRelationCounts = row?._count; break;
+      }
+    }
+    if (!knownRelationCounts) throw new Error('REFERENCE_USAGE_TARGET_NOT_FOUND');
+    return {
+      entityType, referenceId, knownRelationCounts,
+      knownTotal: Object.values(knownRelationCounts).reduce((sum, n) => sum + n, 0),
+      coverage: 'PARTIAL', unobservedConsumers: 'unknown', terminalSafe: false,
+    };
+  }
+
   public async getCityQualityCounters(countryIso2Code: string): Promise<ReferenceCityQualityCounters> {
     const where = { countryIso2Code };
     const [total, active, withoutAdministrativeRegion, withoutTimezone, withoutCanonicalIdentity] = await Promise.all([
