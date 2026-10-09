@@ -3,12 +3,13 @@ import { SettingDefinition } from '../../src/settings/entities/SettingDefinition
 import { NamespacedKey } from '../../src/settings/value-objects/NamespacedKey';
 import { NumberValue, StringValue } from '../../src/settings/value-objects/SettingValueData';
 import { ValueType } from '../../src/settings/enums/ValueType';
+import { SettingValidationRules } from '../../src/settings/value-objects/SettingValidationRules';
 import { ConfigurationValidationService } from '../../src/settings/services/ConfigurationValidationService';
 
 function numberDefinition(rules: Record<string, unknown>, defaultValue: unknown = 10) {
   return new SettingDefinition({ id: 'number', key: new NamespacedKey('upload.max_files'),
     valueType: ValueType.Number, defaultValue,
-    validationRules: rules }, false);
+    validationRules: rules as unknown as SettingValidationRules }, false);
 }
 
 describe('Settings bounded definition constraint enforcement', () => {
