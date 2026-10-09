@@ -1,3 +1,7 @@
+## Verified batch 6 CI — 2026-10-09
+
+Source `d0c33039d34137c419457d9758368f32304f99f8`: [CI 37963510128](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37963510128) **SUCCESS**: 121 tests/17 Vitest files, independent ownership-source test, Prisma source validation, TypeScript, source quality, three authority guards and unchanged 321-handler/320-endpoint audit coverage PASS. The old TENANT-write fixture was corrected to an approved DOMAIN scenario; new tests assert TENANT mutations fail at the Application/HTTP boundary without losing historical resolution. No database/provider/browser runtime verification or Section 04 closure is claimed.
+
 ## Verified batch 5 CI — 2026-10-09
 
 Source `42efcf290d83fdd81221605f7247353b42fcce88`: [CI 37959986025](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37959986025) SUCCESS: **115 tests across 16 files**, plus one separate ORM/SQL source-plan consistency test; schema validation, TypeScript/source quality, three authority/permission guards and unchanged audit coverage PASS. Evidence: `ownership-ci.json` / `ownership-ci-summary.txt`. Observed CI supersedes pending notes below; local and CI counts overlap. Action pins PASS (39 references). Global architecture recheck still reports exactly the four pre-existing findings (`ownership-architecture.txt`), no waiver. Patch H design is SOURCE_PLAN_READY / RUNTIME_PENDING; no DB mutation/constraint application or runtime commit/concurrency proof. Section 04 remains IN PROGRESS.
