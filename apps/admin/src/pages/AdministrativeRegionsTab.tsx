@@ -11,7 +11,17 @@ const aliasTypes = ['COMMON', 'HISTORIC', 'PROVIDER', 'TRANSLITERATION', 'OTHER'
 const message = (error: unknown) => error instanceof Error ? error.message : 'تعذّر تنفيذ الطلب';
 
 export function AdministrativeRegionsTab() {
-  const [filters, setFilters] = useState({ country: '', q: '', page: 1 });
+  const [filters, setFilters] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedPage = Number(params.get('p7Page') ?? '1');
+    const rawStatus = params.get('p7Status');
+    return {
+      country: params.get('p7Country') ?? '',
+      q: params.get('p7Q') ?? '',
+      page: Number.isSafeInteger(requestedPage) && requestedPage > 0 && requestedPage <= 1000000 ? requestedPage : 1,
+      status: (rawStatus === 'active' || rawStatus === 'nonactive' ? rawStatus : 'all') as 'active' | 'all' | 'nonactive',
+    };
+  });
   const [page, setPage] = useState<ReferenceDataPage<AdministrativeRegionDto>>({ data: [], page: 1, pageSize: 50, total: 0, totalPages: 0 });
   const [reload, setReload] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -31,6 +41,17 @@ export function AdministrativeRegionsTab() {
   const detailSequence = useRef(0);
 
   useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('p7Page', String(filters.page));
+    url.searchParams.set('p7Status', filters.status);
+    if (filters.country) url.searchParams.set('p7Country', filters.country);
+    else url.searchParams.delete('p7Country');
+    if (filters.q) url.searchParams.set('p7Q', filters.q);
+    else url.searchParams.delete('p7Q');
+    window.history.replaceState(window.history.state, '', url.toString());
+  }, [filters]);
+
+  useEffect(() => {
     let current = true;
     if (filters.country && !/^[A-Z]{2}$/.test(filters.country)) {
       setLoading(false); setListError('أدخل رمز الدولة من حرفين.');
@@ -39,7 +60,9 @@ export function AdministrativeRegionsTab() {
     }
     setLoading(true); setListError('');
     getReferenceDataPage<AdministrativeRegionDto>('regions', {
-      activeOnly: false, countryIso2Code: filters.country || undefined, q: filters.q || undefined, page: filters.page, pageSize: 50,
+      activeOnly: filters.status === 'active',
+      nonActiveOnly: filters.status === 'nonactive',
+      countryIso2Code: filters.country || undefined, q: filters.q || undefined, page: filters.page, pageSize: 50,
     }).then(result => { if (current) setPage(result); })
       .catch(err => { if (current) { setPage({ data: [], page: filters.page, pageSize: 50, total: 0, totalPages: 0 }); setListError(message(err)); } })
       .finally(() => { if (current) setLoading(false); });
@@ -112,6 +135,14 @@ export function AdministrativeRegionsTab() {
     <div className="flex flex-wrap gap-3">
       <label>رمز الدولة للبحث<input aria-label="رمز الدولة للبحث" maxLength={2} value={filters.country} onChange={event => setFilters({ ...filters, country: event.target.value.toUpperCase(), page: 1 })} className="border rounded p-2" /></label>
       <label>البحث<input value={filters.q} onChange={event => setFilters({ ...filters, q: event.target.value, page: 1 })} className="border rounded p-2" /></label>
+      <label>حالة المنطقة
+        <select className="border rounded p-2" value={filters.status}
+          onChange={event => setFilters({ ...filters, status: event.target.value as 'active' | 'all' | 'nonactive', page: 1 })}>
+          <option value="active">النشطة فقط</option>
+          <option value="all">جميع الحالات</option>
+          <option value="nonactive">غير النشطة فقط</option>
+        </select>
+      </label>
       <button type="button" disabled={busy} onClick={reset}>منطقة جديدة</button>
       <button type="button" disabled={loading} onClick={() => setReload(value => value + 1)}>تحديث القائمة</button>
     </div>
