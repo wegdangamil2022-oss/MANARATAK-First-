@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
+import { AssetUploadWizard } from '../components/AssetUploadWizard';
 import { FolderGit2, RefreshCw, Filter, FileText } from 'lucide-react';
 
 interface AssetDto {
