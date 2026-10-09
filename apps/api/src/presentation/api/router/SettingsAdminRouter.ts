@@ -91,31 +91,35 @@ export class SettingsAdminRouter {
       })
       .strict();
 
-    const listAssignmentsSchema = z
-      .object({
-        key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/).optional(),
-        level: z.nativeEnum(ScopeLevel).optional(),
-        scopeId: identifier.optional(),
-      })
-      .strict();
+    const pageFields = { q: z.string().trim().min(1).max(200).optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(50), cursor: identifier.optional() };
+    const listAssignmentsSchema = z.object({ ...pageFields,
+      key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/).optional(), level: z.nativeEnum(ScopeLevel).optional(), scopeId: identifier.optional() }).strict();
+    const listDefinitionsSchema = z.object({ ...pageFields,
+      cursor: identifier.regex(/^[a-zA-Z0-9_\-.]+$/).optional(),
+      classification: z.enum(['ALL', 'SETTING', 'FLAG', 'SECRET', 'DEPRECATED']).default('ALL') }).strict();
 
-    router.get(
-      '/definitions',
-      asyncHandler(async (_req: Request, res: Response) => {
-        const definitions = await manageSettingsUseCase.listDefinitions();
-        res.status(200).json(responseFormatter.success({ definitions }));
-      }),
-    );
-
-    router.get(
-      '/assignments',
-      asyncHandler(async (req: Request, res: Response) => {
-        const filters = listAssignmentsSchema.parse(req.query);
-        res.setHeader('Cache-Control', 'no-store');
-        const assignments = await manageSettingsUseCase.listAssignmentSummaries(filters);
-        res.status(200).json(responseFormatter.success({ assignments }));
-      }),
-    );
+    router.get('/definitions', asyncHandler(async (req, res) => {
+      const query = listDefinitionsSchema.parse(req.query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.definitionPage(query)));
+    }));
+    router.get('/assignments', asyncHandler(async (req, res) => {
+      const query = listAssignmentsSchema.parse(req.query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.assignmentPage(query)));
+    }));
+    router.get('/assignments/context', asyncHandler(async (req, res) => {
+      const query = z.object({ key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/),
+        level: z.nativeEnum(ScopeLevel), scopeId: identifier.optional() }).strict().superRefine((value, ctx) => {
+          if (value.level === ScopeLevel.GLOBAL && value.scopeId !== undefined)
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['scopeId'], message: 'GLOBAL must omit scopeId' });
+          if (value.level !== ScopeLevel.GLOBAL && !value.scopeId)
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['scopeId'], message: 'scopeId required for this scope' });
+        }).parse(req.query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.assignmentContext(query.key, query.level, query.scopeId)));
+    }));
 
     router.get('/assignments/:id/history', asyncHandler(async (req, res) => {
       const id = identifier.parse(req.params.id);

@@ -41,11 +41,9 @@ export function SettingsResolutionInspector({ definitions, isAr }: {
   return <section className="rounded-2xl border bg-white p-5 space-y-3" aria-label={isAr ? 'القيمة الفعالة للإعداد' : 'Effective setting'}>
     <h2 className="font-bold">{isAr ? 'القيمة الفعالة ومصدرها' : 'Effective value and source'}</h2>
     <form onSubmit={event => void inspect(event)} className="grid gap-3 md:grid-cols-4">
-      <select aria-label={isAr ? 'مفتاح الإعداد للتحقق' : 'Setting to inspect'} value={key}
-        onChange={event => { invalidate(); setKey(event.target.value); }} className="input" required>
-        <option value="">{isAr ? 'اختر إعدادًا' : 'Choose a setting'}</option>
-        {definitions.map(definition => <option key={definition.key} value={definition.key}>{definition.key}</option>)}
-      </select>
+      <input aria-label={isAr ? 'مفتاح الإعداد للتحقق' : 'Setting to inspect'} list="settings-inspector-keys" value={key}
+        onChange={event => { invalidate(); setKey(event.target.value); }} className="input" required maxLength={200} />
+      <datalist id="settings-inspector-keys">{definitions.map(definition => <option key={definition.key} value={definition.key} />)}</datalist>
       <input aria-label={isAr ? 'نطاق المجال للتحقق' : 'Domain context'} placeholder={isAr ? 'المجال (اختياري)' : 'Domain (optional)'}
         value={domainId} maxLength={120} onChange={event => { invalidate(); setDomainId(event.target.value); }} className="input" />
       <input aria-label={isAr ? 'هوية المستخدم للتحقق' : 'Identity context'} placeholder={isAr ? 'هوية المستخدم (اختيارية)' : 'Identity (optional)'}

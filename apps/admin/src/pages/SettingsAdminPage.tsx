@@ -52,6 +52,7 @@ interface Assignment {
   isOverrideCleared?: boolean;
   versions: Version[];
   versionCount?: number;
+  isWritable?: boolean;
 }
 
 function safeId(prefix: string) {
@@ -134,6 +135,46 @@ export function SettingsAdminPage() {
   const [search, setSearch] = useState('');
   const [classification, setClassification] = useState('ALL');
   const [scopeFilter, setScopeFilter] = useState('ALL');
+  const [appliedSearch, setAppliedSearch] = useState('');
+  const [definitionCursors, setDefinitionCursors] = useState<string[]>([]);
+  const [assignmentCursors, setAssignmentCursors] = useState<string[]>([]);
+  const [definitionNext, setDefinitionNext] = useState<string | undefined>();
+  const [assignmentNext, setAssignmentNext] = useState<string | undefined>();
+  const [contextEpoch, setContextEpoch] = useState(0);
+  const [contextState, setContextState] = useState<{ signature: string; definition: Definition; assignment: Assignment | null } | null>(null);
+  const [contextError, setContextError] = useState('');
+  const contextGeneration = useRef(0);
+  const editingVersion = useRef<{ signature: string; version: string } | null>(null);
+  const contextSignature = JSON.stringify([assignmentForm.key.trim(), assignmentForm.level, assignmentForm.level === 'GLOBAL' ? '' : assignmentForm.scopeId.trim()]);
+  const selectedDefinition = contextState?.signature === contextSignature ? contextState.definition : undefined;
+  const selectedAssignment = contextState?.signature === contextSignature ? contextState.assignment : undefined;
+  const contextReady = contextState?.signature === contextSignature;
+
+  useEffect(() => {
+    if (search.trim() === appliedSearch) return;
+    const timer = window.setTimeout(() => { setAppliedSearch(search.trim()); setDefinitionCursors([]); setAssignmentCursors([]); }, 250);
+    return () => window.clearTimeout(timer);
+  }, [search, appliedSearch]);
+  useEffect(() => {
+    const request = ++contextGeneration.current;
+    setContextState(null); setContextError('');
+    const [key, level, rawScopeId] = JSON.parse(contextSignature) as [string, ScopeLevel, string];
+    const scopeId = level === 'GLOBAL' ? undefined : rawScopeId;
+    if (!key || !/^[a-zA-Z0-9_\-.]+$/.test(key) || (level !== 'GLOBAL' && !scopeId)) return;
+    const timer = window.setTimeout(() => {
+      const query = new URLSearchParams({ key, level });
+      if (scopeId) query.set('scopeId', scopeId);
+      void adminApiClient.request<{ data: { definition: Definition; assignment: Assignment | null } }>(
+        `/admin/settings/assignments/context?${query}`, { cache: 'no-store' }).then(result => {
+          if (request !== contextGeneration.current) return;
+          if (!result.data?.definition || !('assignment' in result.data)) throw new Error('Invalid context response');
+          if (editingVersion.current?.signature === contextSignature && editingVersion.current.version !== result.data.assignment?.currentVersionId)
+            throw new Error('SETTINGS_EDITOR_VERSION_CHANGED');
+          setContextState({ signature: contextSignature, ...result.data });
+        }).catch(cause => { if (request === contextGeneration.current) setContextError(errorText(cause)); });
+    }, 250);
+    return () => { window.clearTimeout(timer); contextGeneration.current += 1; };
+  }, [contextSignature, contextEpoch]);
   const generation = useRef(0);
   const busy = useRef(false);
   const refreshing = useRef(false);
@@ -150,13 +191,19 @@ export function SettingsAdminPage() {
     refreshing.current = true;
     setLoading(true);
     setReady(false);
+    const definitionQuery = new URLSearchParams({ limit: '50', classification });
+    const assignmentQuery = new URLSearchParams({ limit: '50' });
+    if (appliedSearch) { definitionQuery.set('q', appliedSearch); assignmentQuery.set('q', appliedSearch); }
+    if (scopeFilter !== 'ALL') assignmentQuery.set('level', scopeFilter);
+    if (definitionCursors.length) definitionQuery.set('cursor', definitionCursors.at(-1)!);
+    if (assignmentCursors.length) assignmentQuery.set('cursor', assignmentCursors.at(-1)!);
     const results = await Promise.allSettled([
-      adminApiClient.request<{ data: { definitions: Definition[] } }>(
-        '/admin/settings/definitions',
+      adminApiClient.request<{ data: { definitions: Definition[]; nextCursor?: string } }>(
+        `/admin/settings/definitions?${definitionQuery}`,
         { cache: 'no-store' },
       ),
-      adminApiClient.request<{ data: { assignments: Assignment[] } }>(
-        '/admin/settings/assignments',
+      adminApiClient.request<{ data: { assignments: Assignment[]; nextCursor?: string } }>(
+        `/admin/settings/assignments?${assignmentQuery}`,
         { cache: 'no-store' },
       ),
     ]);
@@ -166,9 +213,11 @@ export function SettingsAdminPage() {
     if (
       definitionResult.status === 'fulfilled' &&
       Array.isArray(definitionResult.value.data?.definitions)
-    )
+    ) {
       setDefinitions(definitionResult.value.data.definitions);
-    else {
+      setDefinitionNext(definitionResult.value.data.nextCursor);
+    } else {
+      setDefinitionNext(undefined);
       setDefinitions([]);
       failures.push(
         `${isAr ? 'التعريفات' : 'Definitions'}: ${definitionResult.status === 'rejected' ? errorText(definitionResult.reason) : 'Invalid response'}`,
@@ -180,11 +229,13 @@ export function SettingsAdminPage() {
     ) {
       const values = assignmentResult.value.data.assignments;
       setAssignments(values);
+      setAssignmentNext(assignmentResult.value.data.nextCursor);
       setSelectedHistory((previous) =>
         previous ? (values.find((item) => item.id === previous.id) ?? null) : null,
       );
     } else {
       setAssignments([]);
+      setAssignmentNext(undefined);
       setSelectedHistory(null);
       failures.push(
         `${isAr ? 'القيم' : 'Values'}: ${assignmentResult.status === 'rejected' ? errorText(assignmentResult.reason) : 'Invalid response'}`,
@@ -202,7 +253,7 @@ export function SettingsAdminPage() {
       generation.current += 1;
       refreshing.current = false;
     };
-  }, []);
+  }, [appliedSearch, classification, scopeFilter, definitionCursors, assignmentCursors]);
   useEffect(() => {
     if (!selectedHistory) return;
     const previousFocus = document.activeElement as HTMLElement | null;
@@ -243,34 +294,9 @@ export function SettingsAdminPage() {
     };
   }, [selectedHistory?.id]);
 
-  const matched = (key: string, other = '') =>
-    `${key} ${other}`.toLowerCase().includes(search.trim().toLowerCase());
-  const filteredDefinitions = definitions.filter(
-    (item) =>
-      matched(item.key, item.description) &&
-      (classification === 'ALL' ||
-        (classification === 'SECRET'
-          ? item.isSecret
-          : classification === 'DEPRECATED'
-            ? item.isDeprecated
-            : classification === 'FLAG'
-              ? item.isFeatureFlag
-              : !item.isFeatureFlag && !item.isSecret && !item.isDeprecated)),
-  );
-  const filteredAssignments = assignments.filter(
-    (item) =>
-      matched(item.key, `${item.scopeId || ''} ${item.level}`) &&
-      (scopeFilter === 'ALL' || item.level === scopeFilter),
-  );
-  const canRestore = (key: string) =>
-    ready && definitions.some((item) => item.key === key && !item.isSecret && !item.isDeprecated);
-  const selectedAssignment = assignments.find(
-    (item) =>
-      item.key === assignmentForm.key &&
-      item.level === assignmentForm.level &&
-      (item.scopeId || '') ===
-        (assignmentForm.level === 'GLOBAL' ? '' : assignmentForm.scopeId.trim()),
-  );
+  const filteredDefinitions = definitions;
+  const filteredAssignments = assignments;
+  const canRestore = (assignment: Assignment) => ready && assignment.isWritable === true;
   const editAssignment = (item: Assignment) => {
     if (busy.current) return;
     if (
@@ -282,6 +308,9 @@ export function SettingsAdminPage() {
       )
     )
       return;
+    setContextState(null);
+    setContextEpoch(current => current + 1);
+    editingVersion.current = { signature: JSON.stringify([item.key, item.level, item.scopeId || '']), version: item.currentVersionId };
     setAssignmentForm({
       key: item.key,
       level: item.level,
@@ -299,10 +328,6 @@ export function SettingsAdminPage() {
         : 'Current value loaded for editing; save to create a new version.',
     );
   };
-  const selectedDefinition = useMemo(
-    () => definitions.find((item) => item.key === assignmentForm.key),
-    [definitions, assignmentForm.key],
-  );
   const writableDefinitions = useMemo(
     () => definitions.filter((item) => !item.isSecret && !item.isDeprecated),
     [definitions],
@@ -381,6 +406,7 @@ export function SettingsAdminPage() {
           ? 'تم الحفظ؛ أُعيد طلب القيم من الخادم.'
           : 'Saved; current values were requested again from the server.',
       );
+      if (operation === 'assignment') { editingVersion.current = null; setContextState(null); setContextEpoch(current => current + 1); }
       await refresh();
     } catch (cause) {
       setError(errorText(cause));
@@ -424,7 +450,7 @@ export function SettingsAdminPage() {
   };
   const assignValue = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated)
+    if (!contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated)
       return;
     try {
       if (assignmentForm.level !== 'GLOBAL' && !assignmentForm.scopeId.trim())
@@ -447,7 +473,7 @@ export function SettingsAdminPage() {
     }
   };
   const rollback = async (assignment: Assignment, version: Version) => {
-    if (busy.current || !canRestore(assignment.key) || version.id === assignment.currentVersionId)
+    if (busy.current || !canRestore(assignment) || version.id === assignment.currentVersionId)
       return;
     if (
       !window.confirm(
@@ -472,7 +498,7 @@ export function SettingsAdminPage() {
   };
 
   const clearOverride = async (assignment: Assignment) => {
-    if (busy.current || assignment.isOverrideCleared || !canRestore(assignment.key)) return;
+    if (busy.current || assignment.isOverrideCleared || !canRestore(assignment)) return;
     const changeReason = window.prompt(isAr ? 'سبب العودة للوراثة (3 أحرف على الأقل)' : 'Inheritance reason (at least 3 characters)')?.trim();
     if (!changeReason || changeReason.length < 3) return;
     await saveCommand('clear', { assignmentId: assignment.id, expectedCurrentVersionId: assignment.currentVersionId,
@@ -631,7 +657,7 @@ export function SettingsAdminPage() {
         <Field label={isAr ? 'تصنيف التعريفات' : 'Definition class'}>
           <select
             value={classification}
-            onChange={(event) => setClassification(event.target.value)}
+            onChange={(event) => { setClassification(event.target.value); setDefinitionCursors([]); }}
             className="input"
           >
             <option value="ALL">{isAr ? 'الكل' : 'All'}</option>
@@ -644,7 +670,7 @@ export function SettingsAdminPage() {
         <Field label={isAr ? 'نطاق القيم' : 'Value scope'}>
           <select
             value={scopeFilter}
-            onChange={(event) => setScopeFilter(event.target.value)}
+            onChange={(event) => { setScopeFilter(event.target.value); setAssignmentCursors([]); }}
             className="input"
           >
             <option value="ALL">{isAr ? 'كل النطاقات' : 'All scopes'}</option>
@@ -656,6 +682,15 @@ export function SettingsAdminPage() {
           </select>
         </Field>
       </section>
+      <div className="flex items-center gap-3" aria-label={isAr ? 'تصفح صفحات الإعدادات' : 'Settings pagination'}>
+        <button type="button" disabled={loading || saving || search.trim() !== appliedSearch || !(activeTab === 'definitions' ? definitionCursors.length : assignmentCursors.length)}
+          onClick={() => activeTab === 'definitions' ? setDefinitionCursors(previous => previous.slice(0, -1)) : setAssignmentCursors(previous => previous.slice(0, -1))}
+          className="rounded border px-3 py-2 disabled:opacity-50">{isAr ? 'الصفحة السابقة' : 'Previous page'}</button>
+        <span>{isAr ? 'الصفحة' : 'Page'} {(activeTab === 'definitions' ? definitionCursors.length : assignmentCursors.length) + 1}</span>
+        <button type="button" disabled={loading || saving || search.trim() !== appliedSearch || !(activeTab === 'definitions' ? definitionNext : assignmentNext)}
+          onClick={() => activeTab === 'definitions' ? definitionNext && setDefinitionCursors(previous => [...previous, definitionNext]) : assignmentNext && setAssignmentCursors(previous => [...previous, assignmentNext])}
+          className="rounded border px-3 py-2 disabled:opacity-50">{isAr ? 'الصفحة التالية' : 'Next page'}</button>
+      </div>
       {loading ? (
         <div className="flex min-h-52 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-[#0E7C86]" />
@@ -668,8 +703,7 @@ export function SettingsAdminPage() {
                 {isAr ? 'تعريفات الإعدادات' : 'Setting Definitions'}
               </h2>
               <p className="mt-1 text-xs font-semibold text-slate-500">
-                {filteredDefinitions.length} / {definitions.length}{' '}
-                {isAr ? 'تعريفًا مسجلًا' : 'registered definitions'}
+                {definitions.length} {isAr ? 'تعريفًا في الصفحة الحالية' : 'definitions on this page'}
               </p>
             </div>
             {filteredDefinitions.length === 0 ? (
@@ -905,10 +939,10 @@ export function SettingsAdminPage() {
                             <History className="h-3.5 w-3.5" />
                             {item.versionCount ?? item.versions.length}
                           </button>
-                          {canRestore(item.key) && !item.isOverrideCleared && <button type="button" disabled={saving}
+                          {canRestore(item) && !item.isOverrideCleared && <button type="button" disabled={saving}
                             onClick={() => void clearOverride(item)} className="ms-2 rounded border px-2 py-1">
                             {isAr ? 'إلغاء القيمة والوراثة' : 'Clear override / inherit'}</button>}
-                          {canRestore(item.key) && (
+                          {canRestore(item) && (
                             <button
                               type="button"
                               disabled={saving}
@@ -940,21 +974,10 @@ export function SettingsAdminPage() {
               className="mt-4 min-w-0 space-y-4 disabled:opacity-60"
             >
               <Field label={isAr ? 'التعريف' : 'Definition'}>
-                <select
-                  required
-                  value={assignmentForm.key}
-                  onChange={(e) =>
-                    setAssignmentForm((f) => ({ ...f, key: e.target.value, value: '' }))
-                  }
-                  className="input"
-                >
-                  <option value="">—</option>
-                  {writableDefinitions.map((item) => (
-                    <option key={item.id} value={item.key}>
-                      {item.key}
-                    </option>
-                  ))}
-                </select>
+                <input required list="settings-definition-options" value={assignmentForm.key} maxLength={200}
+                  onChange={event => { editingVersion.current = null; setAssignmentForm(form => ({ ...form, key: event.target.value, value: '' })); }} className="input" dir="ltr" />
+                <datalist id="settings-definition-options">{writableDefinitions.map(item => <option key={item.id} value={item.key} />)}</datalist>
+                <p className="text-xs text-slate-500">{isAr ? 'اختر أو أدخل مفتاح تعريف موجود؛ يُتحقق من التعريف والنطاق مباشرة.' : 'Choose or enter an existing key; definition and scope are checked directly.'}</p>
               </Field>
               <Field label={isAr ? 'النطاق' : 'Scope'}>
                 <select
@@ -986,6 +1009,10 @@ export function SettingsAdminPage() {
                   />
                 </Field>
               ) : null}
+              {contextError && <div role="alert" className="text-red-700">{contextError === 'SETTINGS_EDITOR_VERSION_CHANGED' ? (isAr ? 'تغيّرت النسخة؛ أعد تحميل القيمة قبل تعديلها.' : 'Version changed; reload the value before editing.') : contextError}
+                <button type="button" onClick={() => { editingVersion.current = null; setAssignmentForm(form => ({ ...form, value: '' })); setContextState(null); setContextEpoch(current => current + 1); }} className="ms-2 rounded border px-2 py-1">{isAr ? 'إعادة التحقق ومسح الإدخال' : 'Recheck and clear input'}</button>
+              </div>}
+              {assignmentForm.key && !contextReady && !contextError && <p role="status">{isAr ? 'بانتظار التحقق من التعريف والنطاق…' : 'Waiting for definition and scope verification…'}</p>}
               {selectedDefinition ? (
                 <Field label={`${isAr ? 'القيمة' : 'Value'} · ${selectedDefinition.valueType}`}>
                   {selectedDefinition.valueType === 'Boolean' ? (
@@ -1017,7 +1044,7 @@ export function SettingsAdminPage() {
                   onChange={event => setAssignmentForm(form => ({ ...form, changeReason: event.target.value }))} className="input" />
               </Field>
               <button
-                disabled={saving || !selectedDefinition}
+                disabled={saving || !contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
@@ -1098,7 +1125,7 @@ export function SettingsAdminPage() {
                         </span>
                       ) : (
                         <button
-                          disabled={saving || !canRestore(selectedHistory.key)}
+                          disabled={saving || !canRestore(selectedHistory)}
                           onClick={() => void rollback(selectedHistory, version)}
                           className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800 hover:bg-amber-100"
                         >

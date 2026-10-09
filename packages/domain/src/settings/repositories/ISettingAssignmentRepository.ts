@@ -12,7 +12,11 @@ export interface SettingAssignmentSummary {
   versionCount: number;
 }
 
+export interface SettingAssignmentPageQuery {
+  key?: string; level?: string; scopeId?: string; q?: string; limit: number; cursor?: string;
+}
 export interface ISettingAssignmentRepository {
+  readSummaryPage?(query: SettingAssignmentPageQuery): Promise<{ items: SettingAssignmentSummary[]; nextCursor?: string }>;
   readSummaries?(filters: { key?: string; level?: string; scopeId?: string }): Promise<SettingAssignmentSummary[]>;
   readHistory?(id: string, expectedCurrentVersionId: string, limit: number, cursor?: string): Promise<{
     key: string; versions: SettingVersion[]; nextCursor?: string;

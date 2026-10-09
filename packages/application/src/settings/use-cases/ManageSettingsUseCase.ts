@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import {
   ISettingDefinitionRepository,
+  SettingDefinitionPageQuery,
+  SettingAssignmentPageQuery,
   ISettingAssignmentRepository,
   ConfigurationValidationService,
   SettingDefinition,
@@ -61,6 +63,7 @@ export interface SettingAssignmentAdminView {
   isOverrideCleared: boolean;
   versions: SettingVersionAdminView[];
   versionCount?: number;
+  isWritable?: boolean;
 }
 
 export class ManageSettingsUseCase {
@@ -157,6 +160,43 @@ export class ManageSettingsUseCase {
         versionCount: row.versionCount, versions: [] });
     }
     return views;
+  }
+
+  private definitionView(definition: SettingDefinition): SettingDefinitionAdminView {
+    return { id: definition.id, key: definition.key.getValue(), revision: definition.revision,
+      valueType: definition.valueType, description: definition.description,
+      defaultValue: definition.isSecret ? undefined : definition.defaultValue, isFeatureFlag: definition.isFeatureFlag,
+      isSecret: definition.isSecret, isDeprecated: definition.isDeprecated };
+  }
+
+  public async definitionPage(query: SettingDefinitionPageQuery) {
+    if (!this.definitionRepo.findPage) throw new Error('SETTINGS_DURABLE_PAGE_READER_UNAVAILABLE');
+    const page = await this.definitionRepo.findPage(query);
+    return { definitions: page.items.map(item => this.definitionView(item)), nextCursor: page.nextCursor };
+  }
+
+  public async assignmentPage(query: SettingAssignmentPageQuery) {
+    if (!this.assignmentRepo.readSummaryPage || !this.definitionRepo.findByKeys) throw new Error('SETTINGS_DURABLE_PAGE_READER_UNAVAILABLE');
+    const page = await this.assignmentRepo.readSummaryPage(query);
+    const definitions = new Map((await this.definitionRepo.findByKeys([...new Set(page.items.map(item => item.key))])).map(item => [item.key.getValue(), item]));
+    const assignments = page.items.map(row => {
+      const definition = definitions.get(row.key);
+      const redact = !definition || definition.isSecret;
+      return { id: row.id, key: row.key, level: row.scope.getLevel(), scopeId: row.scope.getScopeId(),
+        currentVersionId: row.currentVersion.id, isOverrideCleared: row.currentVersion.operation === 'CLEAR_OVERRIDE',
+        currentValue: redact ? '********' : row.currentVersion.operation === 'CLEAR_OVERRIDE' ? null : row.currentVersion.value.getValue(),
+        versionCount: row.versionCount, versions: [], isWritable: !!definition && !definition.isSecret && !definition.isDeprecated };
+    });
+    return { assignments, nextCursor: page.nextCursor };
+  }
+
+  public async assignmentContext(key: string, level: ScopeLevel, scopeId?: string) {
+    const scope = new ScopeIdentifier(level, scopeId);
+    const definition = await this.definitionRepo.findByKey(new NamespacedKey(key));
+    if (!definition) throw new Error('SETTINGS_DEFINITION_NOT_FOUND');
+    // Unique key/scope lookup is independent of the currently displayed page/filter.
+    const page = await this.assignmentPage({ key, level, scopeId: scope.getScopeId() ?? 'GLOBAL', limit: 1 });
+    return { definition: this.definitionView(definition), assignment: page.assignments[0] ?? null };
   }
 
   public async assignmentHistory(id: string, expectedCurrentVersionId: string, limit = 50, cursor?: string) {

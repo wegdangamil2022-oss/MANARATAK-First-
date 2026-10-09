@@ -12,8 +12,8 @@ describe('SettingsAdminRouter', () => {
       createDefinition: vi.fn(),
       assignValue: vi.fn(),
       rollbackValue: vi.fn(),
-      listDefinitions: vi.fn().mockResolvedValue([]),
-      listAssignmentSummaries: vi.fn().mockResolvedValue([]),
+      definitionPage: vi.fn().mockResolvedValue({ definitions: [] }),
+      assignmentPage: vi.fn().mockResolvedValue({ assignments: [] }), assignmentContext: vi.fn(),
       assignmentHistory: vi.fn(), clearOverride: vi.fn(), updateDefinition: vi.fn(), definitionImpact: vi.fn()
     };
 
@@ -26,7 +26,7 @@ describe('SettingsAdminRouter', () => {
   });
 
   it('GET /definitions should return sanitized definitions', async () => {
-    mockManageSettingsUseCase.listDefinitions.mockResolvedValue([{ id: 'd1', key: 'feature.test', valueType: 'Boolean', isFeatureFlag: true, isDeprecated: false, isSecret: false }]);
+    mockManageSettingsUseCase.definitionPage.mockResolvedValue({ definitions: [{ id: 'd1', key: 'feature.test', valueType: 'Boolean', isFeatureFlag: true, isDeprecated: false, isSecret: false }] });
     const res = await request(app).get('/api/v1/admin/settings/definitions');
     expect(res.status).toBe(200);
     expect(res.body.data.definitions).toHaveLength(1);
@@ -170,11 +170,31 @@ describe('SettingsAdminRouter', () => {
   });
 
   it('lists summary projections with SQL filters rather than requesting full history', async () => {
-    mockManageSettingsUseCase.listAssignmentSummaries.mockResolvedValue([{ id: 'a', versions: [], versionCount: 500 }]);
+    mockManageSettingsUseCase.assignmentPage.mockResolvedValue({ assignments: [{ id: 'a', versions: [], versionCount: 500 }] });
     const result = await request(app).get('/api/v1/admin/settings/assignments').query({ key: 'site.title', level: 'DOMAIN', scopeId: 'courses' });
     expect(result.status).toBe(200); expect(result.headers['cache-control']).toBe('no-store');
-    expect(mockManageSettingsUseCase.listAssignmentSummaries).toHaveBeenCalledWith({ key: 'site.title', level: 'DOMAIN', scopeId: 'courses' });
+    expect(mockManageSettingsUseCase.assignmentPage).toHaveBeenCalledWith({ key: 'site.title', level: 'DOMAIN', scopeId: 'courses', limit: 50 });
     expect(result.body.data.assignments[0]).toMatchObject({ versions: [], versionCount: 500 });
+  });
+
+  it('validates page/search/classification bounds and forwards continuations', async () => {
+    const response = await request(app).get('/api/v1/admin/settings/definitions').query({ q: ' title ', classification: 'FLAG', limit: '2', cursor: 'feature.previous' });
+    expect(response.status).toBe(200);
+    expect(mockManageSettingsUseCase.definitionPage).toHaveBeenLastCalledWith({ q: 'title', classification: 'FLAG', limit: 2, cursor: 'feature.previous' });
+    for (const query of [{ limit: '101' }, { limit: '-1' }, { classification: 'bogus' }, { q: 'x'.repeat(201) }, { allowSecrets: 'true' }])
+      expect((await request(app).get('/api/v1/admin/settings/definitions').query(query)).status).toBe(400);
+    expect((await request(app).get('/api/v1/admin/settings/assignments').query({ limit: '1000' })).status).toBe(400);
+  });
+  it('uses an exact scope context lookup independent of list cursor and rejects extra query fields', async () => {
+    mockManageSettingsUseCase.assignmentContext.mockResolvedValue({ definition: { key: 'site.title' }, assignment: { id: 'off-page', currentVersionId: 'v7' } });
+    const url = '/api/v1/admin/settings/assignments/context';
+    const response = await request(app).get(url).query({ key: 'site.title', level: 'DOMAIN', scopeId: 'courses' });
+    expect(response.status).toBe(200); expect(response.body.data.assignment.id).toBe('off-page');
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(mockManageSettingsUseCase.assignmentContext).toHaveBeenCalledWith('site.title', 'DOMAIN', 'courses');
+    expect((await request(app).get(url).query({ key: 'site.title', level: 'GLOBAL', cursor: 'hidden' })).status).toBe(400);
+    expect((await request(app).get(url).query({ key: 'site.title', level: 'GLOBAL', scopeId: 'forbidden' })).status).toBe(400);
+    expect((await request(app).get(url).query({ key: 'site.title', level: 'DOMAIN' })).status).toBe(400);
   });
 
 });

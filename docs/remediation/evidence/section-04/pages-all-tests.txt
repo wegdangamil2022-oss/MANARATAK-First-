@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /workspace/manaratak-audit-main
+
+
+ Test Files  16 passed (16)
+      Tests  115 passed (115)
+   Start at  16:15:26
+   Duration  25.32s (transform 7.93s, setup 0ms, import 19.66s, tests 1.14s, environment 5ms)
+

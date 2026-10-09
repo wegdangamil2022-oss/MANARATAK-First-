@@ -1,3 +1,5 @@
+Batch 4: `pages-*` records bounded list/search/context tests and browser reproductions. Local 115 tests/16 files PASS; overlapping final API assertions, TS/quality/permission/audit PASS. Focused lint 0 errors/11 warnings. The initial browser pagination race is recorded then corrected; final Chromium and clear/history/deprecation regression PASS, intercepted API only. Matching CI pending; Section 04 remains open.
+
 ## Verified batch 3 CI — 2026-10-09
 
 Source `5a9eae3a0b0f201439cab2a4c7880cd027dc4a9e`: [CI 37956260401](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37956260401) SUCCESS: **102 tests across 14 files**, TypeScript/source quality, three authority/permission guards and unchanged audit coverage PASS. Evidence: `read-projections-ci.json` / `read-projections-ci-summary.txt`. This observed result supersedes the pending notes below. Local and CI counts overlap. No actual target DB, provider, runtime delivery or complete section acceptance is inferred. Section 04 remains IN PROGRESS; bounded row-list/search and other original dependencies are explicitly open.

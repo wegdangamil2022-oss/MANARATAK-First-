@@ -5,7 +5,8 @@ import {
   ISettingDefinitionRepository,
   SettingDefinition,
   NamespacedKey,
-  ValueType
+  ValueType,
+  SettingDefinitionPageQuery
 } from '@manaratak/domain';
 
 export interface SettingDefinitionRecordRow {
@@ -74,6 +75,28 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
     return records
       .map((record) => this.mapToDomain(record))
       .sort((a, b) => a.key.getValue().localeCompare(b.key.getValue()));
+  }
+
+  async findPage(query: SettingDefinitionPageQuery) {
+    if (!Number.isInteger(query.limit) || query.limit < 1 || query.limit > 100) throw new Error('SETTINGS_PAGE_LIMIT_INVALID');
+    const classification = query.classification ?? 'ALL';
+    const classFilter = classification === 'SECRET' ? { isSecret: true }
+      : classification === 'FLAG' ? { isFeatureFlag: true }
+      : classification === 'DEPRECATED' ? { isDeprecated: true }
+      : classification === 'SETTING' ? { isSecret: false, isFeatureFlag: false, isDeprecated: false } : {};
+    const rows = await this.prisma.settingDefinitionRecord.findMany({
+      where: { ...classFilter, ...(query.cursor ? { key: { gt: query.cursor } } : {}),
+        ...(query.q ? { OR: [{ key: { contains: query.q, mode: 'insensitive' } }, { description: { contains: query.q, mode: 'insensitive' } }] } : {}) },
+      orderBy: { key: 'asc' }, take: query.limit + 1,
+    });
+    const items = rows.slice(0, query.limit);
+    return { items: items.map(row => this.mapToDomain(row)), nextCursor: rows.length > query.limit ? items.at(-1)?.key : undefined };
+  }
+
+  async findByKeys(keys: string[]) {
+    if (keys.length > 100) throw new Error('SETTINGS_PAGE_LIMIT_INVALID');
+    const rows = await this.prisma.settingDefinitionRecord.findMany({ where: { key: { in: keys } } });
+    return rows.map(row => this.mapToDomain(row));
   }
 
   async save(definition: SettingDefinition, metadata?: { correlationId: string }): Promise<void> {

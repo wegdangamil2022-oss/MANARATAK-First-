@@ -3,6 +3,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
   ISettingAssignmentRepository,
+  SettingAssignmentPageQuery,
   SettingAssignment,
   SettingVersion,
   NamespacedKey,
@@ -169,6 +170,30 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
         version.operation as 'SET' | 'CLEAR_OVERRIDE', version.changeReason ?? undefined);
       return { id: row.id, key: row.key, scope, currentVersion, versionCount: row._count.versions };
     });
+  }
+
+  async readSummaryPage(query: SettingAssignmentPageQuery) {
+    if (!Number.isInteger(query.limit) || query.limit < 1 || query.limit > 100) throw new Error('SETTINGS_PAGE_LIMIT_INVALID');
+    const rows = await this.prisma.settingAssignmentRecord.findMany({
+      where: { key: query.key, scopeLevel: query.level, scopeId: query.scopeId,
+        ...(query.cursor ? { id: { gt: query.cursor } } : {}),
+        ...(query.q ? { OR: [{ key: { contains: query.q, mode: 'insensitive' } }, { scopeId: { contains: query.q, mode: 'insensitive' } }] } : {}) },
+      include: { _count: { select: { versions: true } } }, orderBy: { id: 'asc' }, take: query.limit + 1,
+    });
+    const page = rows.slice(0, query.limit);
+    const versions = await this.prisma.settingVersionRecord.findMany({ where: { id: { in: page.map(row => row.currentVersionId) } } });
+    const byId = new Map(versions.map(row => [row.id, row]));
+    const items = page.map(row => {
+      const current = byId.get(row.currentVersionId);
+      if (!current || current.assignmentId !== row.id) throw new Error('SETTINGS_DURABLE_CURRENT_VERSION_INVALID');
+      if (row.scopeLevel === 'GLOBAL' && row.scopeId !== 'GLOBAL') throw new Error('SETTINGS_GLOBAL_STORAGE_SCOPE_INVALID');
+      return { id: row.id, key: row.key,
+        scope: new ScopeIdentifier(row.scopeLevel, row.scopeLevel === 'GLOBAL' ? undefined : row.scopeId || undefined),
+        currentVersion: new SettingVersion(current.id, this.createValueData(current.valueType, current.value), current.createdAt,
+          current.authorId ?? undefined, current.rollbackOfVersionId ?? undefined, current.operation as 'SET' | 'CLEAR_OVERRIDE', current.changeReason ?? undefined),
+        versionCount: row._count.versions };
+    });
+    return { items, nextCursor: rows.length > query.limit ? page.at(-1)?.id : undefined };
   }
 
   async readHistory(id: string, expectedCurrentVersionId: string, limit: number, cursor?: string) {

@@ -24,5 +24,5 @@ test('summary and lazy history remain under the existing admin Settings permissi
   assert(app.includes("v1Router.use('/admin/settings', requireAdminPermission('admin:settings:manage'), lazyRouter('settingsAdminRouter'))"));
   const router = read('apps/api/src/presentation/api/router/SettingsAdminRouter.ts');
   assert.match(router, /router\.get\('\/assignments\/:id\/history'/);
-  assert.match(router, /listAssignmentSummaries\(filters\)/);
+  assert.match(router, /assignmentPage\(query\)/);
 });
