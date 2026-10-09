@@ -17,6 +17,11 @@ export interface CanonicalReference {
   standardCode?: string;
   active: boolean | null;
   resolutionMethod?: ReferenceResolutionMethod;
+  /** Historical identity is retained; consumers explicitly decide whether to follow. */
+  replacement?: {
+    relationshipType: 'SUPERSEDED_BY' | 'MERGED_INTO';
+    targetReferenceId: string;
+  };
 }
 
 export interface IReferenceResolver {

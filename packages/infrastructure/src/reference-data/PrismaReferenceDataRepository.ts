@@ -905,6 +905,22 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     }));
   }
 
+  public async getReplacement(entityType: GovernedReferenceEntityType, referenceId: string): Promise<{
+    relationshipType: 'SUPERSEDED_BY' | 'MERGED_INTO'; targetReferenceId: string;
+  } | null> {
+    const found = await this.prisma.referenceRelationshipRecord.findMany({
+      where: {
+        sourceEntityType: entityType, targetEntityType: entityType, sourceReferenceId: referenceId,
+        relationshipType: { in: ['SUPERSEDED_BY', 'MERGED_INTO'] },
+      },
+      select: { relationshipType: true, targetReferenceId: true }, take: 2,
+    });
+    if (found.length > 1) throw new Error('REFERENCE_REPLACEMENT_AMBIGUOUS');
+    return found.length === 1
+      ? { relationshipType: found[0].relationshipType as 'SUPERSEDED_BY' | 'MERGED_INTO', targetReferenceId: found[0].targetReferenceId }
+      : null;
+  }
+
   public async getReferenceRelationships(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceRelationshipDto[]> {
     const rows = await this.prisma.$queryRaw<Array<ReferenceRelationshipDto & { relationshipType: string }>>(Prisma.sql`
       SELECT "id", "sourceEntityType", "sourceReferenceId", "relationshipType", "targetEntityType",
