@@ -1,4 +1,5 @@
 import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
+import { canEditSettingsAssignment, canEditSettingsScope } from './settingsAssignmentGovernance';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -298,9 +299,9 @@ export function SettingsAdminPage() {
   const filteredAssignments = assignments;
   // TENANT has no approved canonical owner/selector. Preserve historical reads,
   // but block new Admin edits and lifecycle mutations until its authority is decided.
-  const canRestore = (assignment: Assignment) => ready && assignment.isWritable === true && assignment.level !== 'TENANT';
+  const canRestore = (assignment: Assignment) => canEditSettingsAssignment(assignment.level, assignment.isWritable, ready);
   const editAssignment = (item: Assignment) => {
-    if (busy.current || item.level === 'TENANT') return;
+    if (busy.current || !canEditSettingsScope(item.level)) return;
     if (
       assignmentForm.value &&
       !window.confirm(
@@ -452,7 +453,7 @@ export function SettingsAdminPage() {
   };
   const assignValue = async (event: FormEvent) => {
     event.preventDefault();
-    if (!contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated || assignmentForm.level === 'TENANT')
+    if (!contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated || !canEditSettingsScope(assignmentForm.level))
       return;
     try {
       if (assignmentForm.level !== 'GLOBAL' && !assignmentForm.scopeId.trim())
@@ -1051,7 +1052,7 @@ export function SettingsAdminPage() {
                   onChange={event => setAssignmentForm(form => ({ ...form, changeReason: event.target.value }))} className="input" />
               </Field>
               <button
-                disabled={saving || !contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated || assignmentForm.level === 'TENANT'}
+                disabled={saving || !contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated || !canEditSettingsScope(assignmentForm.level)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
