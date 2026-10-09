@@ -180,6 +180,8 @@ type ImportResult = {
 
 type OperationalInsights = {
   stuckBatches: number;
+  pendingStopBatches?: number;
+  strandedStopBatches?: number;
   highFailureBatches: number;
   retryableBatches: number;
   pausedBatches: number;
@@ -187,7 +189,7 @@ type OperationalInsights = {
   dlqBatches: number;
   oldestActiveBatch?: ImportBatch | null;
   recentProblemBatches?: Array<
-    ImportBatch & { stuck?: boolean; highFailureRate?: boolean; failureRate?: number }
+    ImportBatch & { stuck?: boolean; pendingStop?: boolean; requiresOwnerVerification?: boolean; highFailureRate?: boolean; failureRate?: number }
   >;
   thresholds?: { stuckAfterMinutes?: number; highFailureRate?: number };
   generatedAt?: string;
@@ -1226,6 +1228,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       </section>
 
       {((operations?.stuckBatches ?? 0) > 0 ||
+        (operations?.strandedStopBatches ?? 0) > 0 ||
         (operations?.highFailureBatches ?? 0) > 0 ||
         failedJobs > 0 ||
         dlqRecords > 0 ||
@@ -1237,8 +1240,8 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               value={operations?.stuckBatches ?? 0}
               title={txt('دفعات عالقة', 'Stuck batches')}
               detail={txt(
-                'RUNNING/PROCESSING بلا تقدم لأكثر من 15 دقيقة.',
-                'RUNNING/PROCESSING with no progress for more than 15 minutes.',
+                'دفعات بلا تقدم أو طلبات إيقاف عالقة تحتاج تحققًا من القسم المالك.',
+                'Stalled processing or stranded stop requests requiring owner verification.',
               )}
             />
           )}
@@ -1408,10 +1411,18 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           />
         ) : (
           <>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
               <MiniStat
                 label={txt('عالقة >15د', 'Stuck >15m')}
                 value={operations?.stuckBatches ?? 0}
+              />
+              <MiniStat
+                label={txt('بانتظار إقرار التوقف', 'Pending stop ack')}
+                value={operations?.pendingStopBatches ?? 0}
+              />
+              <MiniStat
+                label={txt('توقف عالق - تحقق يدوي', 'Stranded stop - verify')}
+                value={operations?.strandedStopBatches ?? 0}
               />
               <MiniStat
                 label={txt('فشل >10%', 'Failure >10%')}
@@ -1462,6 +1473,8 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                         <td className="p-3 font-black">
                           {Math.round(Number(batch.failureRate ?? 0) * 100)}%
                           {batch.stuck ? ` · ${txt('عالقة', 'stuck')}` : ''}
+                          {batch.requiresOwnerVerification
+                            ? ` · ${txt('تحقق من القسم المالك مطلوب', 'owner verification required')}` : ''}
                         </td>
                         <td className="p-3 font-bold text-slate-500">
                           {formatDate(batch.updatedAt, isArabic)}
