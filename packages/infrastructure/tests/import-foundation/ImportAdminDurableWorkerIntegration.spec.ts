@@ -171,4 +171,72 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(stored.rawPayload._domainHandoff).toBeUndefined();
   });
 
+  it('refuses subsequent handoffs and record acknowledgement after cancellation during an owner call', async () => {
+    const repo = statefulImportRepository();
+    await repo.createBatch({ sourceSystem: 'TEST_SOURCE', dataType: 'GENERIC',
+      batchStatus: 'CREATED', totalRecords: 2, processedRecords: 0, failedRecords: 0 });
+    const rawEnvelope = (id: string) => ({
+      handoffId: `handoff:${id}`, ownerDomain: 'GENERIC',
+      artifact: { sourceId: 'TEST_SOURCE' },
+      normalizedPayload: { id },
+      provenance: { sourceSystem: 'TEST_SOURCE', sourceRowNumber: 1, contentHash: id },
+      validation: { state: 'VALID', issues: [] },
+      execution: { executionId: 'batch-durable-1', dryRun: false, attempt: 1, idempotencyKey: id },
+    });
+    await repo.bulkCreateRecords(['a', 'b'].map(id => ({
+      id: `rec-${id}`, batchId: 'batch-durable-1', status: 'COMPLETE',
+      sourceDedupKey: id, rawPayload: { _phase6HandoffEnvelope: rawEnvelope(id) },
+    })));
+    const queue = new InMemoryImportQueueGateway();
+    await queue.enqueueImportJob({ batchId: 'batch-durable-1', targetDomain: 'GENERIC' as any, sourceSystem: 'TEST_SOURCE' });
+    const accept = vi.fn(async () => {
+      await queue.cancelJob({ batchId: 'batch-durable-1', reason: 'Admin cancelled processing' });
+      return { accepted: true };
+    });
+    const dispatcher = new ImportHandoffDispatcher({ GENERIC: { accept } as any });
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed', initialDelayMs: 10,
+      maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    const useCase = new ImportAdminUseCases(repo as any, queue, dispatcher, worker);
+    await expect(useCase.processNextQueuedBatch('cancelled-worker')).rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    expect(accept).toHaveBeenCalledTimes(1);
+    expect(repo.updateRecord).not.toHaveBeenCalled();
+    expect(repo.updateBatchStats).not.toHaveBeenCalled();
+    expect((await queue.getJobStatus('batch-durable-1'))?.status).toBe('CANCELLED');
+  });
+
+  it('refuses the first owner side effect when a PAUSE revokes its claimed lease', async () => {
+    const repo = statefulImportRepository();
+    await repo.createBatch({ sourceSystem: 'TEST_SOURCE', dataType: 'GENERIC',
+      batchStatus: 'CREATED', totalRecords: 1, processedRecords: 0, failedRecords: 0 });
+    await repo.bulkCreateRecords([{
+      id: 'rec-a', batchId: 'batch-durable-1', status: 'COMPLETE', sourceDedupKey: 'a',
+      rawPayload: { _phase6HandoffEnvelope: {
+        handoffId: 'handoff:a', ownerDomain: 'GENERIC', artifact: { sourceId: 'TEST_SOURCE' },
+        normalizedPayload: { id: 'a' },
+        provenance: { sourceSystem: 'TEST_SOURCE', sourceRowNumber: 1, contentHash: 'sha256:a' },
+        validation: { state: 'VALID', issues: [] },
+        execution: { executionId: 'batch-durable-1', dryRun: false, attempt: 1, idempotencyKey: 'a' },
+      } },
+    }]);
+    const queue = new InMemoryImportQueueGateway();
+    await queue.enqueueImportJob({ batchId: 'batch-durable-1', targetDomain: 'GENERIC' as any, sourceSystem: 'TEST_SOURCE' });
+    vi.spyOn(queue, 'heartbeat').mockImplementationOnce(async () => {
+      await queue.pauseJob({ batchId: 'batch-durable-1', reason: 'Paused by admin' });
+      return null;
+    });
+    const accept = vi.fn(async () => ({ accepted: true }));
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed', initialDelayMs: 10,
+      maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    const useCase = new ImportAdminUseCases(repo as any, queue,
+      new ImportHandoffDispatcher({ GENERIC: { accept } as any }), worker);
+    await expect(useCase.processNextQueuedBatch('paused-worker')).rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    expect(accept).not.toHaveBeenCalled();
+    expect(repo.updateRecord).not.toHaveBeenCalled();
+    expect((await queue.getJobStatus('batch-durable-1'))?.status).toBe('PAUSED');
+  });
+
 });
