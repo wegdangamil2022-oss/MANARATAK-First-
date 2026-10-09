@@ -248,3 +248,9 @@ npm run ci:source:contracts
 - DB stays DELETED while provider restore + verification runs. If checksum verification or revision-gated persistence fails, the application attempts to archive the object back; any failed compensation reports explicit `ASSET_RESTORE_COMPENSATION_FAILED`.
 - Added source regression tests for successful restoration, tampering, CAS failure, compensation failure, missing verification capability, real local bytes and invalid HTTP provider proof.
 - **Not yet fully safe under concurrent purge**: provider archive compensation and deletion can race, and no durable recovery journal exists for failed compensation. Provider verify-clean and archive must be implemented, backed by object-version fencing and tested in a real sandbox. Source and disposable PostgreSQL CI pending.
+
+## Patch K — Real PostgreSQL restore safety regressions
+
+- Added two disposable PostgreSQL tests: ACTIVE state is not persisted until independent CLEAN verification finishes, and an intervening DB revision change triggers compensation while keeping the row DELETED.
+- Updated application in-memory test repository to return independent rehydrated aggregates, matching Prisma semantics; direct object aliases had falsely shown a successful state transition after simulated save failure.
+- Clean provider verification remains external and best-effort archive compensation requires operational alert/reconciliation on failure. CI status pending.

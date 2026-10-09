@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { beforeAll, afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AssetId, AssetRecord, AssetReference, AssetOwnerReference, AssetStorageLocator,
-  AssetMetadata, AssetRetentionMetadata, AssetRetentionCategory,
+  AssetMetadata, AssetChecksum, AssetSanitizationMetadata, AssetRetentionMetadata, AssetRetentionCategory,
   AssetSecurityClassification, AssetLifecycleState, AssetStorageZone,
 } from '@manaratak/domain';
 import { ProcessAssetLifecycleUseCase } from '@manaratak/application';
@@ -195,6 +195,79 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     const rehydrated = (await repository.findById(new AssetId(id)))!;
     expect(rehydrated.uploadVerification?.signatureVerified).toBe(true);
     expect(rehydrated.state).toBe(AssetLifecycleState.QUARANTINED);
+  });
+
+  function deletedCleanAsset(id: string): AssetRecord {
+    const quarantine = new AssetStorageLocator(
+      AssetStorageZone.QUARANTINE, 'isolated-bucket', 'uploads/' + id + '.pdf',
+    );
+    return new AssetRecord({
+      id: new AssetId(id),
+      reference: new AssetReference('ref-' + id),
+      owner: new AssetOwnerReference('db-test-user', 'STUDENT'),
+      locator: new AssetStorageLocator(
+        AssetStorageZone.CLEAN, 'isolated-bucket', 'clean/' + id + '.pdf',
+      ),
+      metadata: new AssetMetadata('test.pdf', 'application/pdf', 'pdf', 64),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      classification: AssetSecurityClassification.INTERNAL,
+      state: AssetLifecycleState.DELETED,
+      checksum: new AssetChecksum('sha256', 'a'.repeat(64)),
+      sanitization: new AssetSanitizationMetadata(true, new Date(), 'verified sanitized bytes'),
+      malwareScan: {
+        status: 'PASSED', scannedAt: new Date().toISOString(), locator: quarantine.value,
+      },
+      uploadVerification: {
+        locator: quarantine.value, byteSize: 64,
+        verifiedMimeType: 'application/pdf', checksumSha256: 'a'.repeat(64),
+        verifiedAt: new Date().toISOString(), signatureVerified: true,
+      },
+    });
+  }
+
+  it('does not commit ACTIVE before provider has proven restored CLEAN bytes', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(deletedCleanAsset(id));
+    const restore = vi.fn(async () => undefined);
+    const verifyRestoredObject = vi.fn(async () => {
+      expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
+        .toBe(AssetLifecycleState.DELETED);
+    });
+    const archive = vi.fn(async () => undefined);
+    const useCase = new ProcessAssetLifecycleUseCase(repository, {
+      restore, archive, verifyRestoredObject,
+    } as any, {} as any);
+    await useCase.restoreAsset({ assetId: id });
+    expect(restore).toHaveBeenCalledOnce();
+    expect(verifyRestoredObject).toHaveBeenCalledOnce();
+    expect(archive).not.toHaveBeenCalled();
+    expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
+      .toBe(AssetLifecycleState.ACTIVE);
+  });
+
+  it('retains DELETED and compensates if a concurrent transaction invalidates restore CAS', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(deletedCleanAsset(id));
+    const restore = vi.fn(async () => undefined);
+    const archive = vi.fn(async () => undefined);
+    const verifyRestoredObject = vi.fn(async () => {
+      const current = (await prisma.assetRecord.findUnique({ where: { id } }))!;
+      expect(current.lifecycleState).toBe(AssetLifecycleState.DELETED);
+      await prisma.assetRecord.update({
+        where: { id },
+        data: { updatedAt: new Date(current.updatedAt.getTime() + 1_000) },
+      });
+    });
+    const useCase = new ProcessAssetLifecycleUseCase(repository, {
+      restore, archive, verifyRestoredObject,
+    } as any, {} as any);
+    await expect(useCase.restoreAsset({ assetId: id }))
+      .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    expect(restore).toHaveBeenCalledOnce();
+    expect(verifyRestoredObject).toHaveBeenCalledOnce();
+    expect(archive).toHaveBeenCalledOnce();
+    expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
+      .toBe(AssetLifecycleState.DELETED);
   });
 
 });
