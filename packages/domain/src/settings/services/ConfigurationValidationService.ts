@@ -1,5 +1,6 @@
 import { SettingDefinition } from '../entities/SettingDefinition';
 import { SettingValueData } from '../value-objects/SettingValueData';
+import { validateSettingRuleValue } from '../value-objects/SettingValidationRules';
 
 export class ConfigurationValidationService {
   public validate(definition: SettingDefinition, value: SettingValueData): void {
@@ -12,5 +13,6 @@ export class ConfigurationValidationService {
     if (definition.valueType !== value.type) {
       throw new Error(`Type mismatch for setting '${definition.key.getValue()}'. Expected type '${definition.valueType}' but got '${value.type}'.`);
     }
+    validateSettingRuleValue(definition.valueType, value.getValue(), definition.validationRules);
   }
 }
