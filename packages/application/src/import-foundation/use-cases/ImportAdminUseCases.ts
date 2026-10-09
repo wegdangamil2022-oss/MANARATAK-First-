@@ -15,7 +15,7 @@ import { ImportWorkerProtocol } from './ImportWorkerProtocol';
 type ImportRepository = {
   createBatch(data: Record<string, unknown>): Promise<any>;
   createRecord(data: Record<string, unknown>): Promise<any>;
-  bulkCreateRecords?(records: Array<Record<string, unknown>>): Promise<{ count: number }>;
+  bulkCreateRecords?(records: Array<Record<string, unknown>>): Promise<{ count: number; acceptedRecordIds?: string[] }>;
   updateRecord?(id: string, updates: Record<string, unknown>): Promise<any>;
   updateBatchStats(id: string, data: Record<string, unknown>): Promise<any>;
   getBatchById?(id: string): Promise<any | null>;
@@ -295,9 +295,6 @@ export class ImportAdminUseCases {
           seenDedupKeys.add(identity.sourceDedupKey);
           // Counters must describe the rows persisted for processing, not
           // input duplicates which never enter the durable worker.
-          if (status === ImportRecordStatus.COMPLETE) processedRecords++;
-          else failedRecords++;
-
           const validationState = !validObject
             ? 'INVALID'
             : issues.length
@@ -348,17 +345,30 @@ export class ImportAdminUseCases {
         }
 
         if (records.length > 0) {
+          let accepted: Array<Record<string, unknown>> = records;
           if (this.importRepository.bulkCreateRecords) {
             const created = await this.importRepository.bulkCreateRecords(records);
+            if (created.acceptedRecordIds) {
+              const acceptedIds = new Set(created.acceptedRecordIds);
+              accepted = records.filter(record => acceptedIds.has(String(record.id)));
+            } else if (created.count !== records.length) {
+              // Without exact accepted IDs the caller cannot safely report or dispatch
+              // a partial commit. Fail closed rather than inventing successful records.
+              throw new Error('IMPORT_BULK_ACCEPTANCE_IDS_REQUIRED');
+            }
+            if (accepted.length !== created.count) throw new Error('IMPORT_BULK_ACCEPTANCE_COUNT_MISMATCH');
             stagedRecords += created.count;
+            skippedDuplicates += records.length - created.count;
           } else {
             for (const record of records) {
               await this.importRepository.createRecord(record);
               stagedRecords++;
             }
           }
+          processedRecords += accepted.filter(record => record.status === ImportRecordStatus.COMPLETE).length;
+          failedRecords += accepted.filter(record => record.status !== ImportRecordStatus.COMPLETE).length;
           if (recordsToReturn.length < 100) {
-            recordsToReturn.push(...records.slice(0, 100 - recordsToReturn.length));
+            recordsToReturn.push(...accepted.slice(0, 100 - recordsToReturn.length));
           }
         }
       }
