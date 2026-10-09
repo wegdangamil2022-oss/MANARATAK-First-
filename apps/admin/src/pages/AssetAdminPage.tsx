@@ -360,7 +360,8 @@ export function AssetAdminPage() {
       {hasMore && (
         <div className="text-center pt-2">
           <button
-            onClick={() => void load(false)}
+            disabled={loading || hasUnappliedFilters}
+            onClick={() => void load(false, appliedRef.current)}
             className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 text-xs font-black text-[#142B5F] hover:bg-slate-50 transition shadow-xs"
           >
             تحميل المزيد من الأصول
