@@ -1,3 +1,7 @@
+## Verified batch 6 CI — 2026-10-09
+
+Source `d0c33039d34137c419457d9758368f32304f99f8`: [Settings Section 04 Source Verification — run 37963510128](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37963510128) **SUCCESS**. **121 tests across 17 Vitest files PASS**, plus separate ownership-source test; Prisma source validation, TypeScript, source quality, three Settings authority/permission checks, and unchanged Admin audit coverage (321 mutation handlers/320 unique endpoints) PASS. This run includes the new Admin scope guard and Application/API TENANT rejection regressions. Earlier intermediate runs failed because a legacy test assumed TENANT writes; that fixture now exercises approved DOMAIN instead, and a distinct test asserts retained TENANT reads with denied writes. Counts overlap across test runs; do not add them. **No database, runtime provider, live UI or production acceptance is inferred. Section 04 remains IN PROGRESS / NOT CLOSED.**
+
 ## Batch 6 — 04.21 Patch D: unowned TENANT administration boundary — 2026-10-09
 
 Baseline: the latest Library plan `MANARATAK_ADMIN_REVIEW_CODEX(20261008-171649).md` (same substantive review as `MANARATAK_ADMIN_REVIEW_CODEX.md`). This increment follows the original 04.10/04.21 Patch D; no plan IDs or original findings were changed. **Section 04 remains IN PROGRESS / NOT CLOSED.**
