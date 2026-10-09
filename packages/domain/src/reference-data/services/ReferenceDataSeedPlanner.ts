@@ -6,6 +6,7 @@ import {
 import { IReferenceDataSeedPlanner } from '../contracts/IReferenceDataSeedPlanner';
 import { IReferenceDataValidationService } from '../contracts/IReferenceDataValidationService';
 import { ReferenceDataValidationService } from './ReferenceDataValidationService';
+import { ReferenceDataValidationSeverity } from '../validation/ReferenceDataValidationTypes';
 import {
   ReferenceCountryDto,
   UpsertReferenceCountryDto,
@@ -82,13 +83,39 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
       };
     });
 
+    // Reject *all* occurrences of a staged duplicate, not merely whichever
+    // row happens to appear after the first. City keys include region scope.
+    const occurrences = new Map<string, number>();
+    for (const rec of validatedRecords) {
+      if (!rec.deterministicKey || !rec.validationReport?.canBeImported) continue;
+      const key = rec.entityType + '|' + rec.deterministicKey;
+      occurrences.set(key, (occurrences.get(key) ?? 0) + 1);
+    }
+    const uniqueRecords = validatedRecords.map(rec => {
+      const key = rec.entityType + '|' + (rec.deterministicKey ?? '');
+      if (!rec.deterministicKey || (occurrences.get(key) ?? 0) < 2 || !rec.validationReport) return rec;
+      return {
+        ...rec,
+        validationReport: {
+          ...rec.validationReport,
+          canBeImported: false,
+          issues: [...rec.validationReport.issues, {
+            code: 'DUPLICATE_CANONICAL_IDENTITY_IN_BATCH',
+            message: 'Several source records resolve to the same canonical identity; manual review is required',
+            severity: ReferenceDataValidationSeverity.ERROR,
+          }],
+        },
+      };
+    });
+    validRecords = uniqueRecords.filter(rec => rec.validationReport?.canBeImported).length;
+    invalidRecords = uniqueRecords.length - validRecords;
     return {
       ...batch,
       status: ReferenceDataSeedStatus.VALIDATED,
-      records: validatedRecords,
+      records: uniqueRecords,
       validatedAt: new Date(),
       validationSummary: {
-        totalRecords: validatedRecords.length,
+        totalRecords: uniqueRecords.length,
         validRecords,
         invalidRecords
       }
@@ -96,6 +123,9 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
   }
 
   public markReadyToApply(batch: ReferenceDataSeedBatch): ReferenceDataSeedBatch {
+    if (batch.records.length === 0) {
+      throw new Error('Empty seed batches cannot be approved for apply');
+    }
     if (batch.status === ReferenceDataSeedStatus.DRAFT) {
       throw new Error('Batch must be validated before marking ready to apply');
     }

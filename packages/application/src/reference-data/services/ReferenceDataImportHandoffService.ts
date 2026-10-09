@@ -9,8 +9,7 @@ import {
   UpsertReferenceCountryDto,
   UpsertReferenceCurrencyDto,
   UpsertReferenceLanguageDto,
-  UpsertReferenceCityDto,
-  referenceCityScopeKey
+  UpsertReferenceCityDto
 } from '@manaratak/domain';
 
 export interface ReferenceDataImportHandoffCommand {
@@ -33,51 +32,12 @@ export class ReferenceDataImportHandoffService {
   ) {}
 
   public prepareSeedBatch(command: ReferenceDataImportHandoffCommand): ReferenceDataSeedBatch {
-    const seedRecords: ReferenceDataSeedRecord[] = command.records.map((rawRecord) => {
-      const record = rawRecord as Record<string, unknown>;
-      let deterministicKey: string | undefined;
-
-      switch (command.entityType) {
-        case 'COUNTRY':
-          if (record.iso2Code) {
-            deterministicKey = String(record.iso2Code).trim();
-          }
-          break;
-        case 'CURRENCY':
-        case 'LANGUAGE':
-          if (record.isoCode) {
-            deterministicKey = String(record.isoCode).trim();
-          }
-          break;
-        case 'CITY':
-          if (record.countryIso2Code && record.name) {
-            // Same scoped canonical identity as validator/repository; never key by bare country:name.
-            deterministicKey = referenceCityScopeKey({
-              countryIso2Code: String(record.countryIso2Code),
-              name: String(record.name),
-              administrativeRegionId: typeof record.administrativeRegionId === 'string' ? record.administrativeRegionId : null,
-              region: typeof record.region === 'string' ? record.region : null,
-            });
-          }
-          break;
-      }
-
-      const payload = ({ ...rawRecord } as unknown) as
-        | ReferenceCountryDto
-        | UpsertReferenceCountryDto
-        | ReferenceCurrencyDto
-        | UpsertReferenceCurrencyDto
-        | ReferenceLanguageDto
-        | UpsertReferenceLanguageDto
-        | ReferenceCityDto
-        | UpsertReferenceCityDto;
-
-      return {
-        entityType: command.entityType,
-        deterministicKey,
-        payload
-      };
-    });
+    // Staging does not invent identity keys: the domain validator is the
+    // single owner of code/name/region normalization and collision policy.
+    const seedRecords: ReferenceDataSeedRecord[] = command.records.map(rawRecord => ({
+      entityType: command.entityType,
+      payload: { ...rawRecord } as ReferenceDataSeedRecord['payload'],
+    }));
 
     const draftBatch = this.seedPlanner.createBatch({
       seedBatchId: command.seedBatchId,
@@ -88,10 +48,8 @@ export class ReferenceDataImportHandoffService {
 
     const validatedBatch = this.seedPlanner.validateBatch(draftBatch);
 
-    if (validatedBatch.validationSummary && validatedBatch.validationSummary.invalidRecords === 0) {
-      return this.seedPlanner.markReadyToApply(validatedBatch);
-    }
-
+    // VALIDATED does NOT equal reviewed/approved. No auto-ready or auto-apply.
+    // P7's durable operator approval gate remains mandatory and fail-closed.
     return validatedBatch;
   }
 }
