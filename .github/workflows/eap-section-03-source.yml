@@ -76,3 +76,4 @@ jobs:
           apps/api/tests/presentation/api/router/AssetReuseRouter.spec.ts
           apps/api/tests/presentation/api/router/AssetUsageImpact.spec.ts
           apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts
+          apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts
