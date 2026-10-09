@@ -278,7 +278,7 @@ export class SettingsAdminRouter {
         /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|SETTINGS_ASSIGNMENT_CONFLICT|SETTINGS_DEFINITION_CONFLICT|SETTINGS_OVERRIDE_ALREADY_CLEARED|SETTINGS_DEFINITION_NOT_WRITABLE|already belongs/i.test(message);
       const known = /^SETTINGS_[A-Z_]+/.exec(message)?.[0];
       const missing = /_NOT_FOUND$/.test(known ?? '') || /not found/i.test(message);
-      const unavailable = /SETTINGS_(ATOMIC|IMPACT|DURABLE)/.test(known ?? '');
+      const unavailable = /SETTINGS_(ATOMIC|IMPACT|DURABLE|IDENTITY_SCOPE_VALIDATOR)/.test(known ?? '');
       const rejected = known || /already exists|cannot be mutated|already belongs|Secret |Feature flags|deprecated|not found|Type mismatch|Value must/.test(message);
       res
         .status(conflict ? 409 : missing ? 404 : unavailable ? 503 : !rejected ? 503 : 400)
