@@ -26,6 +26,38 @@ describe('PrismaImportQueueGateway', () => {
     expect(prisma.$transaction).toHaveBeenCalledOnce();
   });
 
+  it('atomically refuses a stale worker checkpoint without creating any checkpoint record', async () => {
+    const prisma = mockPrisma();
+    const tx = {
+      importBatch: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      importRecord: { create: vi.fn().mockResolvedValue({}) },
+    };
+    prisma.$transaction.mockImplementation(async (callback: any) => callback(tx));
+    const gateway = new PrismaImportQueueGateway(prisma as any);
+    const now = new Date();
+    const lease = { batchId: 'batch-1', workerId: 'worker-1',
+      attempt: 3, claimUntil: new Date(now.getTime() + 60_000) };
+    const checkpoint = ImportCheckpoint.create({ batchId: 'batch-1', stage: 'VALIDATE',
+      chunkIndex: 0, recordOffset: 2, processedRecords: 2, failedRecords: 0,
+      acceptedRecordKeys: [], updatedAt: now });
+    await expect(gateway.recordCheckpoint('batch-1', checkpoint, lease))
+      .rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    expect(tx.importRecord.create).not.toHaveBeenCalled();
+    expect(tx.importBatch.updateMany).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        id: lease.batchId, batchStatus: ImportJobStatus.RUNNING,
+        claimedBy: lease.workerId, attemptCount: lease.attempt,
+        claimUntil: expect.objectContaining({ equals: lease.claimUntil }),
+      }),
+      data: { processedRecords: 2, failedRecords: 0 },
+    });
+    tx.importBatch.updateMany.mockResolvedValue({ count: 1 });
+    await expect(gateway.recordCheckpoint('batch-1', checkpoint, lease)).resolves.toBeUndefined();
+    expect(tx.importRecord.create).toHaveBeenCalledOnce();
+    await expect(gateway.recordCheckpoint('another-batch', checkpoint, lease))
+      .rejects.toThrow('IMPORT_CHECKPOINT_BATCH_MISMATCH');
+  });
+
   it('persists sanitized dead-letter evidence and DLQ state atomically', async () => {
     const prisma = mockPrisma();
     const gateway = new PrismaImportQueueGateway(prisma as any);
