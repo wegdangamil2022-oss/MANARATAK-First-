@@ -288,13 +288,14 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error('ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED');
     }
     if (!this.assetRepository.acquireRestoreLease ||
-        !this.assetRepository.releaseRestoreLease) {
+        !this.assetRepository.releaseRestoreLease || !this.assetRepository.assertRestoreLeaseOwned) {
       throw new Error('ASSET_RESTORE_LEASE_NOT_CONFIGURED');
     }
     // Serialize restore with retention/purge before any provider side effect.
     await this.assetRepository.acquireRestoreLease(record);
     let providerRestoreAttempted = false;
     try {
+      await this.assetRepository.assertRestoreLeaseOwned(record);
       providerRestoreAttempted = true;
       await this.storageGateway.restore(record.locator);
       await this.storageGateway.verifyRestoredObject(record.locator, {
@@ -308,6 +309,15 @@ export class ProcessAssetLifecycleUseCase {
     } catch (error) {
       let compensationError: unknown;
       if (providerRestoreAttempted) {
+        // A slow restore may lose its lease to a successful retry/purge. Never
+        // archive a competitor's object on the basis of our stale snapshot.
+        try {
+          await this.assetRepository.assertRestoreLeaseOwned(record);
+        } catch (leaseError) {
+          throw new Error('ASSET_RESTORE_RECOVERY_REQUIRED', {
+            cause: { restoreFailure: error, leaseFailure: leaseError },
+          });
+        }
         try {
           await this.storageGateway.archive(record.locator);
         } catch (failure) {

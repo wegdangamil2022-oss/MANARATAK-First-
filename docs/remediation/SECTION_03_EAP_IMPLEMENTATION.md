@@ -1,5 +1,25 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## Cumulative corrections to earlier task snapshot
+
+The Arabic table further below is an earlier snapshot and is preserved for review history. Current deltas supersede these statements:
+
+- P1-01 now includes legal-hold view, persisted version history, metadata/timestamps, latest processing proof timeline and copy/supported owner navigation. Full AR/EN, owner flows and real preview/provider E2E remain unverified.
+- P1-02 now includes retention/checksum, malware result, file family and processing queues. In-use/unused global facet and owner presets remain open.
+- P1-10 restore preserves original policy; it no longer unconditionally restores PERMANENT. Historical unknown/expired policy fails closed. No retention-duration policy inferred.
+- P0-02/P1-13 now have durable manual activation intent/retry. Automatic reconciliation, monitoring and durable compensation recovery remain open.
+- P1-12 now additionally checks restore lease ownership before compensation; provider fencing/expiry-during-call and heartbeat remain open.
+- P1-14 has a documented local non-dispatched event contract; no outbox was added and no delivered integration event is claimed.
+- Workspace CI `2632dde` PASS: 209 source +13 disposable DB tests. Subsequent restore delta: 49 focused tests PASS in 8.28s and TypeScript PASS; its final matching CI is pending. Expanded six-source-file lint: 0 errors/53 warnings.
+
+No section/task CLOSED or production GO is inferred from these deltas.
+
+
+## Additional same-operation safety fix — 03/P1-12 and P1-13
+
+Restore now verifies the exact live DB-owned lease before provider restoration and before compensating a failed operation. Known lost ownership (expiry, replaced token, competing ACTIVE commit) or unavailable DB prevents archive/release by a stale attempt and reports safe ASSET_RESTORE_RECOVERY_REQUIRED. One application regression covers lost ownership after failed save; a disposable PostgreSQL case covers expired/ACTIVE ownership rejection. Provider atomic fencing, heartbeat and durable compensation recovery remain OPEN: this point-in-time check is a mitigation, not a closed concurrency guarantee.
+
+
 ## Broad workspace and version-preservation continuation — 2026-10-09
 
 Scope: original 03/P1-01, P1-02, P1-03, P1-08, P1-10, P1-15 and §03.10 Patch I. Prior findings and IDs are retained below; no separate replacement plan.

@@ -1,5 +1,15 @@
 # Section 03 — EAP closure register
 
+## Verified workspace CI and restore-delta checks
+
+[Workspace CI 37923765109](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37923765109) SUCCESS at `2632dde`: 209 source tests plus 13 disposable PostgreSQL tests. The two new DB cases for version preservation and facet composition passed. Restore ownership delta was added afterward: TypeScript PASS, 49 focused application/error tests PASS (8.28s). Latest expanded source lint covers six files: 0 errors /53 warnings. No overlapping counts added together. Matching delta CI remains pending until independently observed.
+
+
+## Restore delta in broad batch — P1-12/P1-13
+
+Blind compensation archive after a lost restore lease is replaced by a fail-closed ownership check. Expired/replaced lease or competing ACTIVE state blocks compensation and returns a safe recovery-needed result. External archive remains non-atomic with the lease check; heartbeat/provider fencing and durable recovery remain open. Source/DB CI on the matching final commit required; previous workspace CI does not validate this delta.
+
+
 ## Current broad-batch status — 2026-10-09
 
 - SOURCE WORKSPACE: P1-01 detail governance/metadata/versions/copy and supported owner links, P1-02 security/family/processing queues, P1-03 stale reset prevention implemented; history-loss defect fixed by strict persisted-chain reconstruction.

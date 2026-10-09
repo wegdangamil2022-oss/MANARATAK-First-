@@ -177,6 +177,18 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     this.ownedRestoreLeases.set(asset, token);
   }
 
+  async assertRestoreLeaseOwned(asset: AssetRecord): Promise<void> {
+    const token = this.ownedRestoreLeases.get(asset);
+    if (!token) throw new Error('ASSET_RESTORE_LEASE_LOST');
+    const row = await this.prisma.assetRecord.findUnique({
+      where: { id: asset.id.value },
+      select: { lifecycleState: true, retentionClaimToken: true, retentionClaimUntil: true },
+    });
+    if (!row || row.lifecycleState !== AssetLifecycleState.DELETED || row.retentionClaimToken !== token ||
+        !row.retentionClaimUntil || !Number.isFinite(row.retentionClaimUntil.getTime()) ||
+        row.retentionClaimUntil.getTime() <= Date.now()) throw new Error('ASSET_RESTORE_LEASE_LOST');
+  }
+
   async releaseRestoreLease(asset: AssetRecord): Promise<void> {
     const token = this.ownedRestoreLeases.get(asset);
     if (!token) return;

@@ -38,6 +38,12 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
     this.restoreLeases.add(asset.id.value);
   }
 
+  async assertRestoreLeaseOwned(asset: AssetRecord): Promise<void> {
+    if (!this.restoreLeases.has(asset.id.value) || this.store.get(asset.id.value)?.state !== AssetLifecycleState.DELETED) {
+      throw new Error('ASSET_RESTORE_LEASE_LOST');
+    }
+  }
+
   async releaseRestoreLease(asset: AssetRecord): Promise<void> {
     this.restoreLeases.delete(asset.id.value);
   }
@@ -842,6 +848,27 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     expect(restore).not.toHaveBeenCalled();
     expect((await repo.findById(new AssetId('asset-restore-lease-busy')))?.state)
       .toBe(AssetLifecycleState.DELETED);
+  });
+
+  it('does not archive restored bytes when lease ownership becomes unknown after a DB failure', async () => {
+    const id = 'asset-lost-compensation-lease';
+    await ingestUseCase.requestUploadLocator({
+      assetId: id, assetReference: 'ref-' + id, ownerId: 'owner', ownerType: 'STUDENT',
+      originalFilename: 'file.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 125,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: id });
+    await lifecycleUseCase.validateAsset({ assetId: id });
+    await lifecycleUseCase.sanitizeAsset({ assetId: id });
+    await lifecycleUseCase.activateAsset({ assetId: id });
+    await lifecycleUseCase.softDeleteAsset({ assetId: id });
+    const archive = vi.spyOn(storageGateway, 'archive');
+    const release = vi.spyOn(repo, 'releaseRestoreLease');
+    vi.spyOn(repo, 'save').mockRejectedValueOnce(new Error('ASSET_RECORD_CONCURRENT_MODIFICATION'));
+    vi.spyOn(repo, 'assertRestoreLeaseOwned').mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('ASSET_RESTORE_LEASE_LOST'));
+    await expect(lifecycleUseCase.restoreAsset({ assetId: id })).rejects.toThrow('ASSET_RESTORE_RECOVERY_REQUIRED');
+    expect(archive).not.toHaveBeenCalled();
+    expect(release).not.toHaveBeenCalled();
   });
 
 });

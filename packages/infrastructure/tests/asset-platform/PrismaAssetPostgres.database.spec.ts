@@ -396,4 +396,17 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     expect((await repository.queryAdmin({ q: id, fileFamily: 'PDF', cursor, malwareStatus: 'PASSED' })).items.map(item => item.id)).toEqual([id]);
   });
 
+  it('rejects compensation authorization after restore lease expiry or a competing ACTIVE commit', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(deletedCleanAsset(id));
+    const record = (await repository.findById(new AssetId(id)))!;
+    record.restore();
+    await repository.acquireRestoreLease(record);
+    await repository.assertRestoreLeaseOwned(record);
+    await prisma.assetRecord.update({ where: { id }, data: { retentionClaimUntil: new Date(Date.now() - 1000) } });
+    await expect(repository.assertRestoreLeaseOwned(record)).rejects.toThrow('ASSET_RESTORE_LEASE_LOST');
+    await prisma.assetRecord.update({ where: { id }, data: { lifecycleState: 'ACTIVE', retentionClaimUntil: new Date(Date.now() + 60_000) } });
+    await expect(repository.assertRestoreLeaseOwned(record)).rejects.toThrow('ASSET_RESTORE_LEASE_LOST');
+  });
+
 });

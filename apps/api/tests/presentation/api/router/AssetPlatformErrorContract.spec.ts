@@ -115,4 +115,12 @@ describe('EAP API boundary: query validation and safe Problem Details', () => {
     }
   });
 
+  it('reports restore recovery requirement without exposing internal lease/provider failures', async () => {
+    const f = fixture(new Error('ASSET_RESTORE_RECOVERY_REQUIRED', { cause: new Error('secret-provider-path') }));
+    const response = await request(f.app).get('/admin/assets');
+    expect(response.status).toBe(503);
+    expect(response.body.code).toBe('ASSET_RESTORE_RECOVERY_REQUIRED');
+    expect(JSON.stringify(response.body)).not.toContain('secret-provider-path');
+  });
+
 });

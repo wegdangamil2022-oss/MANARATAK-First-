@@ -9,6 +9,8 @@ export interface IAssetRecordRepository {
   acquireRestoreLease?(asset: AssetRecord): Promise<void>;
   /** Release a failed restore's lease only if still owned; never clear another worker's claim. */
   releaseRestoreLease?(asset: AssetRecord): Promise<void>;
+  /** Fail closed unless the exact restore lease is still live and DB state remains DELETED. */
+  assertRestoreLeaseOwned?(asset: AssetRecord): Promise<void>;
   findById(id: AssetId): Promise<AssetRecord | null>;
   findByReference(reference: AssetReference): Promise<AssetRecord | null>;
   findByOwner(owner: AssetOwnerReference): Promise<AssetRecord[]>;
