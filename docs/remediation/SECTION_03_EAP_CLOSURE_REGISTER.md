@@ -1,5 +1,13 @@
 # Section 03 — EAP closure register
 
+## Verified archive barrier CI — 2026-10-09
+
+Source `d40cd0cba3ad52cacd7f446f395786e0c6a223f1`: [CI 37945629798](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37945629798) SUCCESS: **291 source tests and 37 disposable PostgreSQL tests**. The source run skips the 37 database cases, which pass in the separate database run; counts are not duplicated. All three reference/restore/archive guard migrations were installed only in the guarded disposable CI database. Evidence: `evidence/section-03/archive-journal-ci.json` and `archive-journal-ci-summary.txt`.
+
+New archive regressions verify a persisted in-flight intent excludes competing lifecycle commands and raw database deletion; provider uncertainty survives restart and blocks retention/takeover; legacy archives do not trigger guessed provider replay. Completed archive is idempotent and allows the later verified deletion/restoration flow. Matching CI supersedes the earlier pending-CI statement below.
+
+The link/delete race and new archive/restore serialization are implemented and verified in isolated tests. **Whole section remains NOT CLOSED / NO-GO:** target installation and legacy-operation quiescence are pending; real-provider acceptance is DEFERRED_BY_USER; provider-authoritative recovery of uncertain operations, remaining workspace/owner workflow acceptance and global readiness still require evidence. No target database/provider writes or main merge occurred. This follow-up changes documentation and evidence only.
+
 ## Continuation — archive/restoration provider-call exclusion (2026-10-09)
 
 Original 03/P1-12/P1-13/P1-01/P1-02. Archive now commits ARCHIVED plus a typed RUNNING intent before its sole provider call. Only the originating repository context can finish the exact operation using CAS; completion makes the existing archive response idempotent without a second provider call. Provider/commit uncertainty preserves RECOVERY_REQUIRED, or RUNNING when the failure marker itself cannot commit. Blind provider retries for uncertain archives are removed.

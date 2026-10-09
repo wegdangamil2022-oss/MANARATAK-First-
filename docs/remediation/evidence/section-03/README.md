@@ -1,5 +1,7 @@
 # Section 03 continuation evidence — 2026-10-09
 
+Archive barrier source `d40cd0c`: CI 37945629798 SUCCESS, 291 source + 37 separate disposable PostgreSQL tests. Metadata and selected uncolored count/installation log lines: `archive-journal-ci.json`, `archive-journal-ci-summary.txt`. Target migration/provider acceptance and full-section closure remain pending.
+
 Work resumed from `148255694ab115383736ff2d97397719f8f9f3a1` on `codex/section-01-iam-rbac`. The original remediation attachment remains unchanged (SHA256 `9de7c781eb82cd490fc85386267d7e9e3fe2b2028803f9ecd0351531e2cd11fc`).
 
 - `tests-final.log`: 220 passed, 23 files; 10 disposable database tests intentionally skipped locally. Includes EAP, API lifecycle/reuse/finalization, Admin command, IAM catalog/control-plane and Audit query regressions. The last upload-confirmation UI guard is covered again in `final-delta-tests.log`; do not add overlapping counts.
