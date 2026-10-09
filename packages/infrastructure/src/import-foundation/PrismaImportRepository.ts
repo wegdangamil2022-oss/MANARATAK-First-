@@ -120,6 +120,7 @@ export class PrismaImportRepository {
       'CREATED',
       'QUEUED',
       'RUNNING',
+      'PAUSING',
       'PAUSED',
       'RESUMING',
       'CANCELLING',
@@ -314,12 +315,24 @@ export class PrismaImportRepository {
       'CREATED',
       'QUEUED',
       'RUNNING',
+      'PAUSING',
       'PAUSED',
       'RESUMING',
       'CANCELLING',
       'PROCESSING',
     ];
-    const staleBefore = new Date(Date.now() - 15 * 60 * 1000);
+    const now = new Date();
+    const staleBefore = new Date(now.getTime() - 15 * 60 * 1000);
+    const pendingStopWhere = {
+      batchStatus: { in: ['PAUSING', 'CANCELLING'] },
+    };
+    // An expired stop claim is for operator verification, NEVER auto-completion:
+    // the remote owner call could still be in flight after the lease expires.
+    const strandedStopWhere = {
+      ...pendingStopWhere,
+      updatedAt: { lt: staleBefore },
+      OR: [{ claimUntil: { lt: now } }, { claimUntil: null }],
+    };
     const whereDomain: any = filters?.dataType
       ? { dataType: importDomainFilter(filters.dataType) }
       : {};
@@ -327,6 +340,8 @@ export class PrismaImportRepository {
     if (this.prisma) {
       const [
         stuckBatches,
+        pendingStopBatches,
+        strandedStopBatches,
         retryableBatches,
         pausedBatches,
         queuedBatches,
@@ -342,6 +357,8 @@ export class PrismaImportRepository {
             updatedAt: { lt: staleBefore },
           },
         }),
+        this.prisma.importBatch.count({ where: { ...whereDomain, ...pendingStopWhere } }),
+        this.prisma.importBatch.count({ where: { ...whereDomain, ...strandedStopWhere } }),
         this.prisma.importBatch.count({
           where: { ...whereDomain, batchStatus: 'FAILED_RETRYABLE' },
         }),
@@ -377,6 +394,7 @@ export class PrismaImportRepository {
               { batchStatus: { in: ['FAILED_RETRYABLE', 'FAILED_PERMANENT', 'DLQ', 'PAUSED'] } },
               { failedRecords: { gt: 0 } },
               { batchStatus: { in: ['RUNNING', 'PROCESSING'] }, updatedAt: { lt: staleBefore } },
+              strandedStopWhere,
             ],
           },
           orderBy: { updatedAt: 'desc' },
@@ -396,9 +414,19 @@ export class PrismaImportRepository {
       const recentProblemBatches = recentProblemCandidates
         .map((batch: any) => ({
           ...batch,
-          stuck:
+          stuck: (
             ['RUNNING', 'PROCESSING'].includes(String(batch.batchStatus)) &&
-            new Date(batch.updatedAt).getTime() < staleBefore.getTime(),
+            new Date(batch.updatedAt).getTime() < staleBefore.getTime()
+          ) || (
+            ['PAUSING', 'CANCELLING'].includes(String(batch.batchStatus)) &&
+            new Date(batch.updatedAt).getTime() < staleBefore.getTime() &&
+            (!batch.claimUntil || new Date(batch.claimUntil).getTime() < now.getTime())
+          ),
+          pendingStop: ['PAUSING', 'CANCELLING'].includes(String(batch.batchStatus)),
+          requiresOwnerVerification:
+            ['PAUSING', 'CANCELLING'].includes(String(batch.batchStatus)) &&
+            new Date(batch.updatedAt).getTime() < staleBefore.getTime() &&
+            (!batch.claimUntil || new Date(batch.claimUntil).getTime() < now.getTime()),
           highFailureRate: highFailureIds.has(batch.id),
           failureRate:
             Number(batch.totalRecords ?? 0) > 0
@@ -416,7 +444,9 @@ export class PrismaImportRepository {
         .slice(0, 8);
 
       return {
-        stuckBatches,
+        stuckBatches: stuckBatches + strandedStopBatches,
+        pendingStopBatches,
+        strandedStopBatches,
         highFailureBatches: highFailureIds.size,
         retryableBatches,
         pausedBatches,
@@ -437,13 +467,20 @@ export class PrismaImportRepository {
         Number(batch.totalRecords ?? 0) > 0 &&
         Number(batch.failedRecords ?? 0) / Number(batch.totalRecords) > 0.1,
     );
-    const stuck = batches.filter(
-      (batch) =>
-        ['RUNNING', 'PROCESSING'].includes(String(batch.batchStatus)) &&
-        new Date(batch.updatedAt ?? batch.createdAt).getTime() < staleBefore.getTime(),
+    const pendingStops = batches.filter(batch =>
+      ['PAUSING', 'CANCELLING'].includes(String(batch.batchStatus)));
+    const strandedStops = pendingStops.filter(batch =>
+      new Date(batch.updatedAt ?? batch.createdAt).getTime() < staleBefore.getTime() &&
+      (!batch.claimUntil || new Date(batch.claimUntil).getTime() < now.getTime()));
+    const stuck = batches.filter(batch =>
+      ['RUNNING', 'PROCESSING'].includes(String(batch.batchStatus)) &&
+      new Date(batch.updatedAt ?? batch.createdAt).getTime() < staleBefore.getTime()
     );
+    const stuckOrStranded = [...stuck, ...strandedStops];
     return {
-      stuckBatches: stuck.length,
+      stuckBatches: stuckOrStranded.length,
+      pendingStopBatches: pendingStops.length,
+      strandedStopBatches: strandedStops.length,
       highFailureBatches: highFailure.length,
       retryableBatches: batches.filter((batch) => batch.batchStatus === 'FAILED_RETRYABLE').length,
       pausedBatches: batches.filter((batch) => batch.batchStatus === 'PAUSED').length,
@@ -459,7 +496,16 @@ export class PrismaImportRepository {
               new Date(a.updatedAt ?? a.createdAt).getTime() -
               new Date(b.updatedAt ?? b.createdAt).getTime(),
           )[0] ?? null,
-      recentProblemBatches: [...stuck, ...highFailure]
+      recentProblemBatches: [...stuckOrStranded, ...highFailure]
+        .map(batch => ({
+          ...batch,
+          stuck: stuckOrStranded.some(candidate => candidate.id === batch.id),
+          pendingStop: pendingStops.some(candidate => candidate.id === batch.id),
+          requiresOwnerVerification: strandedStops.some(candidate => candidate.id === batch.id),
+          highFailureRate: highFailure.some(candidate => candidate.id === batch.id),
+          failureRate: Number(batch.totalRecords ?? 0) > 0
+            ? Number(batch.failedRecords ?? 0) / Number(batch.totalRecords) : 0,
+        }))
         .filter(
           (batch, index, all) => all.findIndex((candidate) => candidate.id === batch.id) === index,
         )
