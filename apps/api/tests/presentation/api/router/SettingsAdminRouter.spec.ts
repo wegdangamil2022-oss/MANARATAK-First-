@@ -167,6 +167,17 @@ describe('SettingsAdminRouter', () => {
     expect(JSON.stringify(failed.body)).not.toContain('private-db');
   });
 
+  it('fails closed with 503 if IAM identity ownership validation is not available', async () => {
+    mockManageSettingsUseCase.assignValue.mockRejectedValueOnce(new Error('SETTINGS_IDENTITY_SCOPE_VALIDATOR_UNAVAILABLE'));
+    const result = await request(app).post('/api/v1/admin/settings/assignments').send({
+      assignmentId: 'a', key: 'feature.safe', level: 'IDENTITY', scopeId: 'identity-1',
+      versionId: 'v1', expectedCurrentVersionId: null, value: true, type: 'Boolean',
+    });
+    expect(result.status).toBe(503);
+    expect(result.body.error.code).toBe('SETTINGS_UNAVAILABLE');
+    expect(JSON.stringify(result.body)).not.toContain('identity-1');
+  });
+
   it('reports missing assignments without exposing repository details', async () => {
     mockManageSettingsUseCase.clearOverride.mockRejectedValue(new Error('SETTINGS_ASSIGNMENT_NOT_FOUND'));
     const res = await request(app).post('/api/v1/admin/settings/assignments/clear').send({ assignmentId: 'missing',
