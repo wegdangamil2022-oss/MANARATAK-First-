@@ -567,6 +567,12 @@ export class PrismaImportRepository {
     return record;
   }
 
+  /**
+   * Global technical-source dedup is serialized across processes using PostgreSQL
+   * transaction-scoped advisory locks. Lock order is deterministic; the read and
+   * insert share the SAME transaction, closing the cross-batch TOCTOU window.
+   * Historical ImportRecord rows remain the durable source-identity evidence.
+   */
   async bulkCreateRecords(
     records: Array<{
       batchId: string;
@@ -582,53 +588,84 @@ export class PrismaImportRepository {
       retentionExpiresAt?: Date;
       id?: string;
     }>,
-  ): Promise<{ count: number }> {
+  ): Promise<{ count: number; acceptedRecordIds: string[] }> {
     const recordsWithIds = records.map((record) => ({
       ...record,
       id: record.id ?? `rec-${uuidv4()}`,
     }));
+    const keys = [...new Set(recordsWithIds.map(item => item.sourceDedupKey).filter(
+      (key): key is string => typeof key === 'string' && key.length > 0,
+    ))].sort();
 
     if (this.prisma) {
-      const created = await this.prisma.importRecord.createMany({
-        data: recordsWithIds.map((r) => ({
-          id: r.id,
-          batchId: r.batchId,
-          status: r.status,
-          rawPayload: toRequiredPrismaJson(r.rawPayload),
-          validationErrors: toNullablePrismaJson(r.validationErrors),
-          processingNotes: r.processingNotes || null,
-          sourceDedupKey: r.sourceDedupKey || null,
-          promotedEntityId: r.promotedEntityId || null,
-          chunkIndex: r.chunkIndex ?? null,
-          recordOffset: r.recordOffset ?? null,
-          sourceRowNumber: r.sourceRowNumber ?? null,
-          retentionExpiresAt: r.retentionExpiresAt ?? null,
-        })),
-      });
-      return { count: created.count };
+      const persist = async (client: PrismaClient) => {
+        // Always acquire source-key locks in sorted order to avoid lock inversion.
+        // hash collisions merely serialize unrelated keys; full keys are compared.
+        for (const key of keys) {
+          await client.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`phase6-source:${key}`}, 0))::text AS lock_result`;
+        }
+        const existing = keys.length
+          ? await client.importRecord.findMany({
+              where: { sourceDedupKey: { in: keys } },
+              select: { sourceDedupKey: true },
+            })
+          : [];
+        const seen = new Set(existing.map(row => row.sourceDedupKey).filter(Boolean));
+        const accepted = recordsWithIds.filter(record => {
+          const key = record.sourceDedupKey;
+          if (!key) return true;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        if (!accepted.length) return { count: 0, acceptedRecordIds: [] };
+        const created = await client.importRecord.createMany({
+          data: accepted.map(r => ({
+            id: r.id,
+            batchId: r.batchId,
+            status: r.status,
+            rawPayload: toRequiredPrismaJson(r.rawPayload),
+            validationErrors: toNullablePrismaJson(r.validationErrors),
+            processingNotes: r.processingNotes || null,
+            sourceDedupKey: r.sourceDedupKey || null,
+            promotedEntityId: r.promotedEntityId || null,
+            chunkIndex: r.chunkIndex ?? null,
+            recordOffset: r.recordOffset ?? null,
+            sourceRowNumber: r.sourceRowNumber ?? null,
+            retentionExpiresAt: r.retentionExpiresAt ?? null,
+          })),
+        });
+        return { count: created.count, acceptedRecordIds: accepted.map(record => record.id) };
+      };
+      // The repository participates in an existing transaction if one is supplied.
+      // In the normal staging path it owns the entire advisory lock+read+insert unit.
+      if (typeof this.prisma.$transaction === 'function') {
+        return this.prisma.$transaction(transaction => persist(transaction as unknown as PrismaClient));
+      }
+      throw new Error('IMPORT_ATOMIC_SOURCE_DEDUP_TRANSACTION_REQUIRED');
     }
 
-    for (const r of recordsWithIds) {
-      const id = r.id!;
+    // Development-only repository: JS synchronous critical section, not a
+    // distributed locking implementation; production must use PostgreSQL.
+    const existingKeys = new Set([...this.inMemoryRecords.values()]
+      .map(item => item.sourceDedupKey).filter(Boolean));
+    const acceptedRecordIds: string[] = [];
+    for (const record of recordsWithIds) {
+      if (record.sourceDedupKey && existingKeys.has(record.sourceDedupKey)) continue;
+      if (record.sourceDedupKey) existingKeys.add(record.sourceDedupKey);
+      const id = record.id;
       this.inMemoryRecords.set(id, {
-        id,
-        batchId: r.batchId,
-        status: r.status,
-        rawPayload: r.rawPayload,
-        validationErrors: r.validationErrors || null,
-        processingNotes: r.processingNotes || null,
-        sourceDedupKey: r.sourceDedupKey || null,
-        promotedEntityId: r.promotedEntityId || null,
-        chunkIndex: r.chunkIndex ?? null,
-        recordOffset: r.recordOffset ?? null,
-        sourceRowNumber: r.sourceRowNumber ?? null,
-        retentionExpiresAt: r.retentionExpiresAt ?? null,
+        ...record,
+        validationErrors: record.validationErrors || null,
+        processingNotes: record.processingNotes || null,
+        sourceDedupKey: record.sourceDedupKey || null,
+        promotedEntityId: record.promotedEntityId || null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      acceptedRecordIds.push(id);
     }
-
-    return { count: records.length };
+    return { count: acceptedRecordIds.length, acceptedRecordIds };
   }
 
   async listRecords(filters?: {
