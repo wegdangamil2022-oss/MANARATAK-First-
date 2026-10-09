@@ -146,8 +146,8 @@ describe('PrismaImportQueueGateway', () => {
     expect(prisma.importBatch.updateMany.mock.calls[0][0].where.batchStatus).toEqual({
       in: [ImportJobStatus.QUEUED, ImportJobStatus.PAUSED, ImportJobStatus.RESUMING],
     });
-    prisma.importBatch.updateMany.mockResolvedValueOnce({ count: 0 })
-      .mockResolvedValueOnce({ count: 1 });
+    // The exact CANCELLING claim matches; no PAUSING branch is reachable.
+    prisma.importBatch.updateMany.mockResolvedValueOnce({ count: 1 });
     expect(await gateway.acknowledgeStoppedJob(lease)).toBe('CANCELLED');
     expect(prisma.importBatch.updateMany).toHaveBeenLastCalledWith({
       where: {
