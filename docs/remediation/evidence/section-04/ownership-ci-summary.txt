@@ -1,0 +1,10 @@
+settings-source	Settings schema source validation (no database connection)	2026-10-09T16:34:02.5819307Z The schema at packages/infrastructure/prisma/schema.prisma is valid 🚀
+settings-source	Ownership constraint source consistency (no database execution)	2026-10-09T16:34:03.5040614Z ok 1 - reviewed deferred ownership plan matches the ORM composite relation; no database execution
+settings-source	Ownership constraint source consistency (no database execution)	2026-10-09T16:34:03.5120592Z # pass 1
+settings-source	Ownership constraint source consistency (no database execution)	2026-10-09T16:34:03.5122236Z # fail 0
+settings-source	Source quality	2026-10-09T16:34:55.4238208Z SOURCE_QUALITY_GATE=PASS
+settings-source	Settings invariants, effective resolution, persistence and API contracts	2026-10-09T16:35:03.2568894Z [2m Test Files [22m [1m[32m16 passed[39m[22m[90m (16)[39m
+settings-source	Settings invariants, effective resolution, persistence and API contracts	2026-10-09T16:35:03.2570619Z [2m      Tests [22m [1m[32m115 passed[39m[22m[90m (115)[39m
+settings-source	Authority and permission guards	2026-10-09T16:35:03.4303747Z # pass 3
+settings-source	Authority and permission guards	2026-10-09T16:35:03.4304251Z # fail 0
+settings-source	Existing audit coverage	2026-10-09T16:35:04.3483155Z ADMIN_MUTATION_AUDIT_COVERAGE=PASS; handlers=321; uniqueEndpoints=320; owner validation/atomic adoption requires separate evidence

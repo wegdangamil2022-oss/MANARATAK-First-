@@ -1,3 +1,7 @@
+## Verified batch 5 CI — 2026-10-09
+
+Source `42efcf290d83fdd81221605f7247353b42fcce88`: [CI 37959986025](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37959986025) SUCCESS: **115 tests across 16 files**, plus one separate ORM/SQL source-plan consistency test; schema validation, TypeScript/source quality, three authority/permission guards and unchanged audit coverage PASS. Evidence: `ownership-ci.json` / `ownership-ci-summary.txt`. Observed CI supersedes pending notes below; local and CI counts overlap. Action pins PASS (39 references). Global architecture recheck still reports exactly the four pre-existing findings (`ownership-architecture.txt`), no waiver. Patch H design is SOURCE_PLAN_READY / RUNTIME_PENDING; no DB mutation/constraint application or runtime commit/concurrency proof. Section 04 remains IN PROGRESS.
+
 ## Batch 5 — 04.21 Patch H: current-version ownership SOURCE PLAN — 2026-10-09
 
 Section 04 remains IN PROGRESS. Original Patch H explicitly requests a **source-only constraint/migration design**, with no DB mutation. This batch implements that design; its state is SOURCE_PLAN_READY / RUNTIME_PENDING, never CLOSED or enforced on a target.

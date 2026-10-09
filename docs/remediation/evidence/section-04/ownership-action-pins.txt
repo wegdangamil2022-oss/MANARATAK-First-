@@ -1,0 +1,5 @@
+
+> manaratak-2.0-monorepo@0.0.0 ci:actions:verify
+> node scripts/security/verify-github-action-pins.mjs
+
+GITHUB_ACTION_PIN_GATE=PASS refs=39
