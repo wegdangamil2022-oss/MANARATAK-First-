@@ -50,7 +50,7 @@ test('MNT-AUD-0011 lifecycle source makes sanitizer output canonical and forbids
   const lifecycle = read('packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase.ts');
   const router = read('apps/api/src/presentation/api/router/AssetPlatformRouter.ts');
   assert.match(lifecycle, /completeSanitization\(result\.metadata, result\.sanitizedLocator\)/);
-  assert.match(lifecycle, /storageGateway\.moveToCleanZone\(record\.locator\)/);
+  assert.match(lifecycle, /storageGateway\.moveToCleanZone\(record\.locator,\s*record\.checksum!\.hash\)/);
   assert.doesNotMatch(lifecycle, /dto\.cleanBucketName|dto\.cleanPathKey/);
   assert.match(router, /const activateAssetSchema = z\.object\(\{\}\)\.strict\(\)/);
   assert.match(router, /const sanitizeAssetSchema = z\.object\(\{\}\)\.strict\(\)/);

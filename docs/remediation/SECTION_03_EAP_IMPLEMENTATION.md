@@ -211,3 +211,10 @@ npm run ci:source:contracts
 - Development-only local adapter archive and restore operations are idempotent when the destination already contains the only copy, permit restoration of a soft-deleted asset that was never archived, and reject ambiguous source-plus-archive duplicates rather than overwriting data.
 - Added negative app + real filesystem regression tests for CAS-failed archive, provider-failed archive with manual retry, no-archive restore, duplicate-copy ambiguity.
 - **Remaining:** an automatic archive reconciliation worker and real provider idempotency/SLA; DB-and-provider split brain across activate/restore is still open. Source CI pending.
+
+## Patch K — Archive recovery verification and provider contract alignment
+
+- Added disposable PostgreSQL regression for `ARCHIVED` being committed **before** failing external archive, followed by idempotent recovery through a second archive request.
+- Repaired pre-existing W3 static provider checks to match the checksum-fenced `moveToCleanZone(record.locator, record.checksum!.hash)` call. CI runs W3 legacy transport/security tests alongside EAP target tests to prevent silent drift.
+- Updated `docs/operations/ASSET_PROVIDER_RUNTIME.md` with actual provider `verify-upload` endpoint, server-owned finalization, SHA-256 constrained promotion, provider idempotency, and unverified external CAS/ETag obligations.
+- Automatic archive reconciliation and real external provider test remain required; pending CI verification on this commit.

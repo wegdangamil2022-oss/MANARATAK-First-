@@ -132,4 +132,24 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
       .toBe(AssetLifecycleState.PURGED);
   });
+  it('stores ARCHIVED in PostgreSQL before provider archival and recovers by retry', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(newAsset(id, AssetLifecycleState.ACTIVE));
+    const archiveProvider = vi.fn()
+      .mockRejectedValueOnce(new Error('ASSET_PROVIDER_ARCHIVE_UNAVAILABLE'))
+      .mockResolvedValue(undefined);
+    const useCase = new ProcessAssetLifecycleUseCase(
+      repository, { archive: archiveProvider } as any,
+      { findUsages: async () => [] } as any,
+    );
+    await expect(useCase.archiveAsset({ assetId: id }))
+      .rejects.toThrow('ASSET_PROVIDER_ARCHIVE_UNAVAILABLE');
+    expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
+      .toBe(AssetLifecycleState.ARCHIVED);
+    await useCase.archiveAsset({ assetId: id });
+    expect(archiveProvider).toHaveBeenCalledTimes(2);
+    expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
+      .toBe(AssetLifecycleState.ARCHIVED);
+  });
+
 });

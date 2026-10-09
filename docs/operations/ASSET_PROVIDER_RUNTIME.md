@@ -40,8 +40,9 @@ All paths are relative to the configured base path.
 
 - `POST v1/assets/locators`
 - `POST v1/assets/upload-grants`
+- `POST v1/assets/verify-upload` (server-owned observed bytes; never client-supplied proof)
 - `POST v1/assets/delivery-grants`
-- `POST v1/assets/move-to-clean`
+- `POST v1/assets/move-to-clean` (conditional source digest; `expectedSha256` request and matching `verifiedSourceSha256` acknowledgment)
 - `POST v1/assets/read`
 - `POST v1/assets/archive`
 - `POST v1/assets/restore`
@@ -50,6 +51,14 @@ All paths are relative to the configured base path.
 - `POST v1/assets/sanitize`
 
 Upload grants must target `QUARANTINE`. Delivery grants are accepted only for `ACTIVE` assets whose canonical locator is in `CLEAN`. Grant URLs must be HTTPS and short-lived. Credential-bearing response headers such as `Authorization`/cookies are rejected by the API boundary.
+
+## Finalization and atomic promotion requirements
+
+1. Quarantine upload grants do **not** imply the binary was uploaded. API `POST /admin/assets/:assetId/finalize-upload` calls provider `verify-upload` to confirm the actual file size, MIME/signature and SHA-256 before persisting evidence.
+2. Validation and malware scanning reject non-finalized objects. Before scan, the provider re-verifies bytes against persisted SHA-256; sanitization output is verified and rescanned independently.
+3. Promotion from QUARANTINE to CLEAN sends `expectedSha256`. The provider must compare the immutable source object version/digest **atomically** with promotion and return `verifiedSourceSha256`. An echo without atomic enforcement is insufficient.
+4. On source-CAS rejection, the provider must not publish content. Provider-side immutable version or ETag fencing and post-move reconciliation remain **external runtime acceptance obligations**; HTTP adapter checks alone do not prove them.
+5. Provider `archive`, `restore` and `delete` must be idempotent for retries. Archive domain state is committed before provider operation; failed provider archives must remain retryable and non-deliverable.
 
 ## Lifecycle security rules
 

@@ -158,7 +158,7 @@ check('MNT-AUD-0011 production/staging DI composes configured provider adapters 
   apiContainer.includes('createAssetMalwareScannerGatewayForRuntime(assetProviderRuntimeEnvironment)') && apiContainer.includes('createAssetSanitizationGatewayForRuntime(assetProviderRuntimeEnvironment)'));
 check('MNT-AUD-0011 sanitizer output becomes canonical quarantine locator before provider-owned activation',
   assetLifecycle.includes('completeSanitization(result.metadata, result.sanitizedLocator)') &&
-  assetLifecycle.includes('storageGateway.moveToCleanZone(record.locator)') && !assetLifecycle.includes('dto.cleanBucketName') && !assetLifecycle.includes('dto.cleanPathKey'));
+  assetLifecycle.includes('storageGateway.moveToCleanZone(record.locator, record.checksum!.hash)') && !assetLifecycle.includes('dto.cleanBucketName') && !assetLifecycle.includes('dto.cleanPathKey'));
 check('MNT-AUD-0011 client cannot forge sanitizer metadata or clean storage locator and secure delivery route exists',
   assetRouter.includes('const sanitizeAssetSchema = z.object({}).strict()') && assetRouter.includes('const activateAssetSchema = z.object({}).strict()') &&
   assetRouter.includes("router.post('/:assetId/delivery-grant'") && assetLifecycle.includes('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET'));

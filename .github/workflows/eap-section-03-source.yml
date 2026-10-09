@@ -18,6 +18,9 @@ on:
       - 'packages/infrastructure/tests/asset-platform/**'
       - 'packages/shared/src/authorization/adminPermissionCatalog.ts'
       - 'docs/remediation/SECTION_03_EAP_IMPLEMENTATION.md'
+      - 'docs/operations/ASSET_PROVIDER_RUNTIME.md'
+      - 'scripts/verify-w3-source.mjs'
+      - 'tests/remediation/w3-asset-provider.test.mjs'
       - '.github/workflows/eap-section-03-source.yml'
   workflow_dispatch:
 
@@ -77,6 +80,8 @@ jobs:
           apps/api/tests/presentation/api/router/AssetUsageImpact.spec.ts
           apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts
           apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts
+      - name: Legacy provider transport security checks
+        run: node --test tests/remediation/w3-asset-provider.test.mjs
 
   eap-postgres:
     name: EAP disposable PostgreSQL concurrency and purge reconciliation
