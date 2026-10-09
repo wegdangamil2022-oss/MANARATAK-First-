@@ -481,6 +481,9 @@ export class ImportAdminUseCases {
 
       for (const record of records) {
         if (record.status === 'CHECKPOINT' || record.status === 'DLQ') continue;
+        // A pause/cancel/worker takeover invalidates the durable lease. Fence before any
+        // record mutation or owner handoff, not just between 100-record pages.
+        await heartbeat();
         recordOffset++;
         const rawPayload = this.asRecord(record.rawPayload);
         const envelopeValue = rawPayload._phase6HandoffEnvelope;
@@ -504,6 +507,9 @@ export class ImportAdminUseCases {
           }
 
           const handoffResult = await this.handoffDispatcher.dispatch(envelope as any);
+          // If cancelled during a slow owner call, never acknowledge its record
+          // under an invalid worker lease. Owner consumers must also deduplicate retries.
+          await heartbeat();
           const nextPayload: Record<string, unknown> = { ...rawPayload };
           delete nextPayload._phase6HandoffEnvelope;
           nextPayload._phase6HandoffState = 'DISPATCHED';
@@ -521,6 +527,7 @@ export class ImportAdminUseCases {
         }
       }
 
+      await heartbeat();
       await this.importRepository.updateBatchStats(lease.batchId, {
         processedRecords,
         failedRecords,
@@ -531,6 +538,7 @@ export class ImportAdminUseCases {
       page++;
     }
 
+    await heartbeat();
     await this.importQueueGateway.recordCheckpoint(
       lease.batchId,
       ImportCheckpoint.create({
