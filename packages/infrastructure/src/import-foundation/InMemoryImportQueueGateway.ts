@@ -255,6 +255,8 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
       !current ||
       !job ||
       current.workerId !== lease.workerId ||
+      current.attempt !== lease.attempt ||
+      current.claimUntil.getTime() !== lease.claimUntil.getTime() ||
       current.claimUntil < now ||
       job.status !== ImportJobStatus.RUNNING
     ) {
@@ -274,6 +276,8 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
       !current ||
       !job ||
       current.workerId !== lease.workerId ||
+      current.attempt !== lease.attempt ||
+      current.claimUntil.getTime() !== lease.claimUntil.getTime() ||
       current.claimUntil < now ||
       job.status !== ImportJobStatus.RUNNING
     ) {
@@ -299,6 +303,8 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
       !current ||
       !job ||
       current.workerId !== command.lease.workerId ||
+      current.attempt !== command.lease.attempt ||
+      current.claimUntil.getTime() !== command.lease.claimUntil.getTime() ||
       current.claimUntil < now ||
       job.status !== ImportJobStatus.RUNNING
     ) {
