@@ -31,6 +31,9 @@ on:
       - 'docs/operations/ASSET_PROVIDER_RUNTIME.md'
       - 'scripts/verify-w3-source.mjs'
       - 'tests/remediation/w3-asset-provider.test.mjs'
+      - 'tests/remediation/w2-asset-reference-integrity.test.mjs'
+      - 'tests/remediation/w4-admin-asset-course-control-plane.test.mjs'
+      - 'tests/remediation/w2-services-career-owner-scope.test.mjs'
       - '.github/workflows/eap-section-03-source.yml'
   workflow_dispatch:
 
@@ -97,6 +100,8 @@ jobs:
           apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts
           apps/admin/src/components/AssetLifecycleActions.spec.tsx
           packages/config/tests/AppConfig.spec.ts
+      - name: Owner reference integrity and control-plane regressions
+        run: node --test tests/remediation/w2-asset-reference-integrity.test.mjs tests/remediation/w4-admin-asset-course-control-plane.test.mjs tests/remediation/w2-services-career-owner-scope.test.mjs
       - name: Legacy provider transport security checks
         run: node --test tests/remediation/w3-asset-provider.test.mjs
       - name: Audit inventory and security regression guards

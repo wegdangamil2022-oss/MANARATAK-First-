@@ -338,7 +338,14 @@ export class AssetRecord {
       this.props.malwareScan?.status !== 'PASSED' ||
       this.props.uploadVerification.locator !== this.props.malwareScan.locator ||
       !this.props.sanitization?.sanitizedAt ||
-      !this.props.checksum ||
+      !Number.isFinite(this.props.sanitization.sanitizedAt.getTime()) ||
+      !Number.isFinite(Date.parse(this.props.uploadVerification.verifiedAt)) ||
+      !Number.isFinite(Date.parse(this.props.malwareScan.scannedAt)) ||
+      !Number.isSafeInteger(this.props.metadata.byteSize) || this.props.metadata.byteSize <= 0 ||
+      this.props.uploadVerification.byteSize !== this.props.metadata.byteSize ||
+      this.props.uploadVerification.verifiedMimeType !== this.props.metadata.mimeType ||
+      !this.props.checksum || this.props.checksum.algorithm.toLowerCase() !== 'sha256' ||
+      !/^[a-f0-9]{64}$/i.test(this.props.uploadVerification.checksumSha256) ||
       this.props.checksum.hash !== this.props.uploadVerification.checksumSha256.toLowerCase()) {
       throw new Error('ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED');
     }

@@ -50,7 +50,7 @@ test('MNT-AUD-0030 runtime policy rejects missing/state/classification/owner vio
   );
   const repo = { findById: async (id) => records.get(id.value) ?? null };
   const records = new Map([
-    ['active', { state: 'ACTIVE', classification: 'PUBLIC', owner: { ownerId: 'owner-1', ownerType: 'USER' } }],
+    ['active', { assertCanDeliver() {}, state: 'ACTIVE', classification: 'PUBLIC', owner: { ownerId: 'owner-1', ownerType: 'USER' } }],
     ['quarantined', { state: 'QUARANTINED', classification: 'PUBLIC', owner: { ownerId: 'owner-1', ownerType: 'USER' } }],
     ['restricted', { state: 'ACTIVE', classification: 'RESTRICTED', owner: { ownerId: 'owner-1', ownerType: 'USER' } }],
     ['other-owner', { state: 'ACTIVE', classification: 'PUBLIC', owner: { ownerId: 'owner-2', ownerType: 'USER' } }],

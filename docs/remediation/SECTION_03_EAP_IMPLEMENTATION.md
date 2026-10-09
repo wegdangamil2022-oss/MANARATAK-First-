@@ -1,5 +1,16 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## Continuation — owner reference trust gate (2026-10-09)
+
+Scope: original 03/P0-01 clean trust, P0-06 governed reuse and P0-07/P1-11 owner-reference integrity. Confirmed source gap: AssetReferencePolicy accepted persisted ACTIVE plus owner/classification/MIME without Domain upload/scan/sanitization proof. It now invokes AssetRecord.assertCanDeliver before returning a reference; explicit state allowlists cannot bypass trust.
+
+The shared Domain gate additionally requires valid proof dates, positive safe-integer metadata size matching observed upload, matching MIME, SHA-256 algorithm and a 64-hex digest. No historical metadata or proof is backfilled; unsupported/untrusted records fail closed. Existing owner checks and Domain ownership remain unchanged.
+
+Twelve real-aggregate application regressions cover valid evidence, missing/mismatched evidence, invalid dates/digest, lifecycle override, and the real Course update use case refusing a repository write. Fifteen isolated Node owner/control-plane guards pass; valid mocks expose the trust method only to isolate their other checks. Two stale source assertions now track the dedicated server-governed reuse route and whitespace-insensitive native-course POST, without weakening endpoint/state requirements. CI now includes these guards.
+
+Incremental TypeScript PASS; focused 60 tests PASS (7.92s); selected source lint 0 errors; quality PASS (0 cycles/a11y). Complete scoped source suite: 252 PASS /15 disposable DB cases intentionally skipped locally (48.33s). Matching pushed CI pending. Evidence files: owner-trust-*. This check-before-write is not transactional serialization: consumer insertion versus archive/delete/purge, provider fencing/lease heartbeat, restore compensation recovery and real provider acceptance remain open. Section NOT CLOSED / NO-GO.
+
+
 ## Continuation — 03/P1-13 durable activation recovery worker (2026-10-09)
 
 - Added bounded pending-intent discovery in the EAP repository and RecoverAssetActivationsUseCase, registered handler `assets.activation.recovery` in the existing durable background worker. Existing activation intent/digest/CAS owner path is reused; no new activation is inferred from QUARANTINED/DELETED/ACTIVE rows.

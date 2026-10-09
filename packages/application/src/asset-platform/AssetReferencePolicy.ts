@@ -59,6 +59,13 @@ export class AssetReferencePolicy {
       if (!allowed) throw new Error(`${options.purpose}_ASSET_MIME_NOT_ALLOWED:${asset.metadata.mimeType}`);
     }
 
+    // Persisted ACTIVE is not proof of safe bytes. Owner writes use the same
+    // Domain trust gate as delivery, even when an allowedStates override is supplied.
+    try {
+      asset.assertCanDeliver();
+    } catch {
+      throw new Error(`${options.purpose}_ASSET_TRUST_EVIDENCE_REQUIRED`);
+    }
     return asset;
   }
 
