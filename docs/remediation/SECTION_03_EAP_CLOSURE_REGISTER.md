@@ -1,5 +1,18 @@
 # Section 03 — EAP closure register
 
+## Current closure decision — fast verification, 2026-10-09
+
+**NOT CLOSED / NO-GO.** Request to close reviewed against existing acceptance criteria; fast tests pass but remaining functionality and cross-system safety are not proven complete.
+
+- Tested application source: `ac3624c29610fd4969bc013432ae9c7757838e80`. Local TypeScript Admin/API/infrastructure PASS; 193 EAP source tests PASS (36.70s), 11 database tests skipped locally; 13 security/audit/provider-transport guards PASS (1.36s).
+- [CI run 37921628504](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37921628504) independently SUCCESS on that SHA: 193 source tests plus 11 disposable PostgreSQL tests PASS. Counts overlap local tests; do not add them.
+- Real Chromium/Admin UI with intercepted API PASS: lifecycle flow, usage denial/confirmation, draft filters, pagination deduplication, retention/checksum facets carried with cursor, reset removes filters/cursor. Test-only CSP bypass and disabled HMR retained; no provider or actual API/DB/browser end-to-end claim.
+- P1-02 facet slice verified locally; full task remains PARTIALLY_IMPLEMENTED (processing/security, in-use, family and owner presets). No original task marked CLOSED merely from scoped tests.
+- Closure blockers: P0-01/03/05 real immutable object/scan/upload evidence; P0-07/P1-11 usage-vs-lifecycle serialization; P1-12/13 lease-expiry fencing, automated reconciliation and monitoring; P1-01/02/06 remaining workspace and owner end-to-end acceptance. Local events P1-14 have an explicit non-dispatched contract, not an implemented integration outbox.
+- No production DB/provider writes, migration, seed, reset, purge, main merge or deployment. Dev server stopped after browser check.
+- Current evidence: `quick-tests.log`, `quick-guards.log`, `quick-browser.log`, `quick-ci-summary.txt` beside prior scoped evidence. These supersede the current source/browser gate snapshot below only; remaining gates remain PENDING.
+
+
 ## Latest bounded batch — 03/P1-02 facets
 
 Retention/checksum selectors wired UI → validated API → EAP query. Scoped local checks: 46 tests PASS, TypeScript PASS, lint 0 errors / 49 warnings. No new real-DB/browser/provider acceptance claim. Source CI evidence below belongs to the preceding recovery commit; it is not evidence for this new batch. P1-02 PARTIALLY_IMPLEMENTED; section NOT CLOSED.

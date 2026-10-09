@@ -54,13 +54,25 @@ try {
  // Pending filter changes must block reuse of the old cursor.
  await page.getByPlaceholder('بحث بالمعرف / الاسم / المالك / الملف').fill('different-query');
  assert.equal(await page.getByRole('button',{name:'تحميل المزيد من الأصول'}).isDisabled(),true);
+ await page.getByRole('combobox', {name:'سياسة الاحتفاظ',exact:true}).selectOption('TEMPORARY');
+ await page.getByRole('combobox', {name:'وجود بصمة المحتوى',exact:true}).selectOption('MISSING');
  await page.getByRole('button',{name:'تصفية وتطبيق البحث'}).click();
  await page.getByRole('button',{name:'تحميل المزيد من الأصول'}).waitFor({state:'visible'});
+ const nextPage = page.waitForResponse(response => new URL(response.url()).searchParams.has('cursor'));
  await page.getByRole('button',{name:'تحميل المزيد من الأصول'}).click();
+ await nextPage;
  await page.waitForFunction(()=>document.querySelectorAll('tbody tr').length===1);
  assert.ok(calls.some(c=>c.query.includes('q=different-query')&&c.query.includes('cursor=isolated-cursor')));
+ const pagedQuery = new URLSearchParams(calls.find(c=>c.query.includes('cursor=isolated-cursor')).query);
+ assert.equal(pagedQuery.get('retentionCategory'),'TEMPORARY');
+ assert.equal(pagedQuery.get('checksumPresence'),'MISSING');
  assert.equal(await page.locator('tbody tr').count(),1);
+ const resetResponse = page.waitForResponse(response => {const url=new URL(response.url()); return url.pathname.endsWith('/admin/assets') && !url.searchParams.has('retentionCategory') && !url.searchParams.has('checksumPresence') && !url.searchParams.has('cursor') && !url.searchParams.has('q');});
+ await page.getByRole('button',{name:'إعادة ضبط',exact:true}).click();
+ await resetResponse;
+ assert.equal(await page.getByRole('combobox', {name:'سياسة الاحتفاظ',exact:true}).inputValue(),'');
+ assert.equal(await page.getByRole('combobox', {name:'وجود بصمة المحتوى',exact:true}).inputValue(),'');
  assert.equal(await page.getByRole('button',{name:/purge|حذف نهائي/i}).count(),0);
  assert.deepEqual(errors,[]);
- console.log(JSON.stringify({status:'PASS', scope:'CHROMIUM_UI_WITH_INTERCEPTED_API_ONLY',checks:['security-dependent actions','scan/sanitize/activate request contracts','in-use archive denied','usage confirmation before archive','draft filters block pagination','applied query retained with cursor','duplicate rows eliminated','no page exceptions'],calls},null,2));
+ console.log(JSON.stringify({status:'PASS', scope:'CHROMIUM_UI_WITH_INTERCEPTED_API_ONLY',checks:['security-dependent actions','scan/sanitize/activate request contracts','in-use archive denied','usage confirmation before archive','draft filters block pagination','applied query retained with cursor','duplicate rows eliminated','canonical facets retained with cursor','reset removes facets and cursor','no page exceptions'],calls},null,2));
 } catch(error) { console.error(JSON.stringify({ errors, calls, text: (await page.locator('body').innerText()).slice(0,2500) }, null, 2)); throw error; } finally { await browser.close(); }

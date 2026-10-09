@@ -1,5 +1,10 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## Fast verification and closure review — 2026-10-09
+
+Source `ac3624c`: 193 scoped EAP tests PASS in 36.70s, TypeScript PASS, 13 security guards PASS. CI run 37921628504 SUCCESS with 193 source + 11 disposable PostgreSQL tests. Updated Chromium test confirms retention/checksum selectors survive applied pagination and reset clears both/cursor. HTTP remains intercepted; no real provider proof. See current closure register for unresolved task IDs. Verdict remains NOT CLOSED; no production GO or invented task closure.
+
+
 ## Continuation — 03/P1-02 retention and checksum facets (2026-10-09)
 
 - Canonical retention selector and PRESENT/MISSING checksum selector now flow from Admin draft/applied filters through strict API validation to the existing EAP read model. Filters compose with MIME, search and cursor through AND; reuseOnly security restrictions remain intact.
