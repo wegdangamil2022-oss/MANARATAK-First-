@@ -135,6 +135,7 @@ describe('ManageSettingsUseCase', () => {
     await useCase.rollbackValue({
       assignmentId: 'assign-2',
       previousVersionId: 'v1',
+      changeReason: 'Restore reviewed prior theme',
       newVersionId: 'v3',
       authorId: 'admin-1',
     });

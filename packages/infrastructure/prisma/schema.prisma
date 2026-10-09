@@ -104,6 +104,8 @@ model SettingVersionRecord {
   authorId            String?
   createdAt           DateTime @default(now())
   rollbackOfVersionId String?
+  operation           String   @default("SET")
+  changeReason        String?
 
   assignment SettingAssignmentRecord @relation(fields: [assignmentId], references: [id])
 

@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "scope": "CHROMIUM_UI_WITH_INTERCEPTED_API_ONLY",
+  "testContext": "CSP bypass; HMR disabled; no actual API/DB/provider",
+  "checks": [
+    "clear creates a new version with prior revision and reason",
+    "history preserved and inheritance displayed",
+    "definition impact precedes confirmed deprecation",
+    "definition revision/reason retained",
+    "both commands use idempotency and server actor",
+    "no page exceptions"
+  ],
+  "commands": [
+    {
+      "path": "/api/v1/admin/settings/assignments/clear",
+      "body": {
+        "assignmentId": "assignment",
+        "expectedCurrentVersionId": "v1",
+        "changeReason": "Reviewed policy change",
+        "newVersionId": "setting-version-8f7f678f-391e-49cb-adb2-8d8bb70cb0d4"
+      }
+    },
+    {
+      "path": "/api/v1/admin/settings/definitions/update",
+      "body": {
+        "key": "feature.safe",
+        "expectedRevision": "2026-10-09T00:00:00.000Z",
+        "isDeprecated": true,
+        "changeReason": "Reviewed policy change"
+      }
+    }
+  ]
+}

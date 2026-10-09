@@ -28,6 +28,7 @@ interface Definition {
   isFeatureFlag: boolean;
   isDeprecated: boolean;
   isSecret: boolean;
+  revision?: string;
 }
 
 interface Version {
@@ -37,6 +38,8 @@ interface Version {
   authorId?: string;
   createdAt: string;
   rollbackOfVersionId?: string;
+  operation?: 'SET' | 'CLEAR_OVERRIDE';
+  changeReason?: string;
 }
 
 interface Assignment {
@@ -46,6 +49,7 @@ interface Assignment {
   scopeId?: string;
   currentVersionId: string;
   currentValue: unknown;
+  isOverrideCleared?: boolean;
   versions: Version[];
 }
 
@@ -83,6 +87,7 @@ export function SettingsAdminPage() {
     level: 'GLOBAL' as ScopeLevel,
     scopeId: '',
     value: '',
+    changeReason: '',
   });
 
   const [notice, setNotice] = useState('');
@@ -243,6 +248,7 @@ export function SettingsAdminPage() {
       key: item.key,
       level: item.level,
       scopeId: item.scopeId || '',
+      changeReason: '',
       value:
         typeof item.currentValue === 'string'
           ? item.currentValue
@@ -285,7 +291,7 @@ export function SettingsAdminPage() {
   };
 
   const saveCommand = async (
-    operation: 'definition' | 'assignment' | 'rollback',
+    operation: 'definition' | 'assignment' | 'rollback' | 'clear' | 'definition-update',
     payload: Record<string, unknown>,
     complete: () => void,
   ) => {
@@ -315,14 +321,16 @@ export function SettingsAdminPage() {
                 assignmentId: selectedAssignment?.id ?? command.assignmentId,
                 versionId: command.versionId,
               }
-            : { newVersionId: command.versionId }),
+            : operation === 'definition-update' ? {} : { newVersionId: command.versionId }),
       };
       const endpoint =
         operation === 'definition'
           ? '/admin/settings/definitions'
           : operation === 'assignment'
             ? '/admin/settings/assignments'
-            : '/admin/settings/assignments/rollback';
+            : operation === 'clear' ? '/admin/settings/assignments/clear'
+              : operation === 'definition-update' ? '/admin/settings/definitions/update'
+              : '/admin/settings/assignments/rollback';
       await adminApiClient.request(endpoint, {
         method: 'POST',
         idempotencyKey: command.key,
@@ -392,8 +400,9 @@ export function SettingsAdminPage() {
           value: parseValue(selectedDefinition.valueType, assignmentForm.value),
           type: selectedDefinition.valueType,
           expectedCurrentVersionId: selectedAssignment?.currentVersionId ?? null,
+          changeReason: assignmentForm.changeReason.trim() || undefined,
         },
-        () => setAssignmentForm((current) => ({ ...current, value: '' })),
+        () => setAssignmentForm((current) => ({ ...current, value: '', changeReason: '' })),
       );
     } catch (cause) {
       setError(errorText(cause));
@@ -410,15 +419,46 @@ export function SettingsAdminPage() {
       )
     )
       return;
+    const changeReason = window.prompt(isAr ? 'سبب الرجوع (3 أحرف على الأقل)' : 'Rollback reason (at least 3 characters)')?.trim();
+    if (!changeReason || changeReason.length < 3) return;
     await saveCommand(
       'rollback',
       {
         assignmentId: assignment.id,
         previousVersionId: version.id,
+        changeReason,
         expectedCurrentVersionId: assignment.currentVersionId,
       },
       () => setSelectedHistory(null),
     );
+  };
+
+  const clearOverride = async (assignment: Assignment) => {
+    if (busy.current || assignment.isOverrideCleared || !canRestore(assignment.key)) return;
+    const changeReason = window.prompt(isAr ? 'سبب العودة للوراثة (3 أحرف على الأقل)' : 'Inheritance reason (at least 3 characters)')?.trim();
+    if (!changeReason || changeReason.length < 3) return;
+    await saveCommand('clear', { assignmentId: assignment.id, expectedCurrentVersionId: assignment.currentVersionId,
+      changeReason }, () => setSelectedHistory(null));
+  };
+  const updateDefinition = async (definition: Definition, deprecate: boolean) => {
+    if (busy.current || !definition.revision) return;
+    try {
+      let description: string | undefined;
+      if (deprecate) {
+        const impact = await adminApiClient.request<{ data: { assignmentCount: number } }>(
+          `/admin/settings/definitions/${encodeURIComponent(definition.key)}/impact`, { cache: 'no-store' });
+        if (!window.confirm(isAr ? `سيوقف هذا التعريف عن الحل والتعيين. توجد ${impact.data.assignmentCount} تعيينات؛ سيُحفظ التاريخ. موافق؟`
+          : `This disables resolution and new writes. ${impact.data.assignmentCount} assignments retain their history. Continue?`)) return;
+      } else {
+        const value = window.prompt(isAr ? 'الوصف الجديد' : 'New description', definition.description ?? '');
+        if (value === null) return;
+        description = value;
+      }
+      const changeReason = window.prompt(isAr ? 'سبب التغيير (3 أحرف على الأقل)' : 'Change reason (at least 3 characters)')?.trim();
+      if (!changeReason || changeReason.length < 3) return;
+      await saveCommand('definition-update', { key: definition.key, expectedRevision: definition.revision,
+        ...(deprecate ? { isDeprecated: true } : { description }), changeReason }, () => {});
+    } catch (cause) { setError(errorText(cause)); }
   };
 
   return (
@@ -611,6 +651,7 @@ export function SettingsAdminPage() {
                       <Th>{isAr ? 'النوع' : 'Type'}</Th>
                       <Th>{isAr ? 'التصنيف' : 'Classification'}</Th>
                       <Th>{isAr ? 'القيمة الافتراضية' : 'Default'}</Th>
+                      <Th>{isAr ? 'الحالة والإجراءات' : 'Status and actions'}</Th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -634,6 +675,14 @@ export function SettingsAdminPage() {
                           </span>
                         </Td>
                         <Td mono>{item.isSecret ? '••••••••' : displayValue(item.defaultValue)}</Td>
+                        <Td>
+                          <span>{item.isDeprecated ? (isAr ? 'متوقف' : 'Deprecated') : (isAr ? 'فعال' : 'Active')}</span>
+                          <p className="text-slate-500">{item.description}</p>
+                          <button type="button" disabled={saving || !item.revision} onClick={() => void updateDefinition(item, false)}
+                            className="ms-2 rounded border px-2 py-1">{isAr ? 'تعديل الوصف' : 'Edit description'}</button>
+                          {!item.isDeprecated && <button type="button" disabled={saving || !item.revision} onClick={() => void updateDefinition(item, true)}
+                            className="ms-2 rounded border px-2 py-1">{isAr ? 'إيقاف التعريف' : 'Deprecate definition'}</button>}
+                        </Td>
                       </tr>
                     ))}
                   </tbody>
@@ -807,7 +856,7 @@ export function SettingsAdminPage() {
                             </span>
                           ) : null}
                         </Td>
-                        <Td mono>{displayValue(item.currentValue)}</Td>
+                        <Td mono>{item.isOverrideCleared ? (isAr ? 'وراثة — دون قيمة محلية' : 'Inheriting — no local value') : displayValue(item.currentValue)}</Td>
                         <Td>
                           <button
                             type="button"
@@ -818,6 +867,9 @@ export function SettingsAdminPage() {
                             <History className="h-3.5 w-3.5" />
                             {item.versions.length}
                           </button>
+                          {canRestore(item.key) && !item.isOverrideCleared && <button type="button" disabled={saving}
+                            onClick={() => void clearOverride(item)} className="ms-2 rounded border px-2 py-1">
+                            {isAr ? 'إلغاء القيمة والوراثة' : 'Clear override / inherit'}</button>}
                           {canRestore(item.key) && (
                             <button
                               type="button"
@@ -905,7 +957,7 @@ export function SettingsAdminPage() {
                       className="input"
                       required
                     >
-                      {!definitionForm.isFeatureFlag && <option value="">—</option>}
+                      <option value="">—</option>
                       <option value="true">true</option>
                       <option value="false">false</option>
                     </select>
@@ -921,6 +973,11 @@ export function SettingsAdminPage() {
                   )}
                 </Field>
               ) : null}
+              <Field label={isAr ? 'سبب التغيير' : 'Change reason'}>
+                <input value={assignmentForm.changeReason} maxLength={1000} minLength={3}
+                  required={selectedDefinition?.isFeatureFlag}
+                  onChange={event => setAssignmentForm(form => ({ ...form, changeReason: event.target.value }))} className="input" />
+              </Field>
               <button
                 disabled={saving || !selectedDefinition}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"
@@ -979,7 +1036,8 @@ export function SettingsAdminPage() {
                           {version.id}
                         </div>
                         <div className="mt-1 break-all font-mono text-xs font-bold text-slate-900">
-                          {displayValue(version.value)}
+                          {version.operation === 'CLEAR_OVERRIDE' ? (isAr ? 'إلغاء Override والعودة للوراثة' : 'Override cleared; inheritance restored') : displayValue(version.value)}
+                          {version.changeReason && <p className="mt-1 text-slate-600">{version.changeReason}</p>}
                         </div>
                         <div className="mt-2 text-[10px] font-semibold text-slate-400">
                           {new Date(version.createdAt).toLocaleString(isAr ? 'ar-YE' : 'en-GB', {

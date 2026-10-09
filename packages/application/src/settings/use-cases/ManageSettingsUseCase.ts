@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   ISettingDefinitionRepository,
   ISettingAssignmentRepository,
@@ -19,6 +20,8 @@ import {
   CreateSettingDefinitionInput,
   AssignSettingValueInput,
   RollbackSettingValueInput,
+  UpdateSettingDefinitionInput,
+  ClearSettingOverrideInput,
 } from '../dtos/SettingsDtos';
 import {
   AtomicDomainMutationCoordinator,
@@ -34,6 +37,7 @@ export interface SettingDefinitionAdminView {
   isFeatureFlag: boolean;
   isDeprecated: boolean;
   isSecret: boolean;
+  revision?: string;
 }
 
 export interface SettingVersionAdminView {
@@ -43,6 +47,8 @@ export interface SettingVersionAdminView {
   authorId?: string;
   createdAt: Date;
   rollbackOfVersionId?: string;
+  operation: 'SET' | 'CLEAR_OVERRIDE';
+  changeReason?: string;
 }
 
 export interface SettingAssignmentAdminView {
@@ -52,6 +58,7 @@ export interface SettingAssignmentAdminView {
   scopeId?: string;
   currentVersionId: string;
   currentValue: unknown;
+  isOverrideCleared: boolean;
   versions: SettingVersionAdminView[];
 }
 
@@ -67,6 +74,7 @@ export class ManageSettingsUseCase {
     const definitions = await this.definitionRepo.findAll();
     return definitions.map((definition) => ({
       id: definition.id,
+      revision: definition.revision,
       key: definition.key.getValue(),
       valueType: definition.valueType,
       description: definition.description,
@@ -109,6 +117,8 @@ export class ManageSettingsUseCase {
         authorId: version.authorId,
         createdAt: version.createdAt,
         rollbackOfVersionId: version.rollbackOfVersionId,
+        operation: version.operation,
+        changeReason: redact ? undefined : version.changeReason,
       }));
       const currentVersion = assignment.getCurrentVersion();
       views.push({
@@ -117,7 +127,8 @@ export class ManageSettingsUseCase {
         level: assignment.scope.getLevel(),
         scopeId: assignment.scope.getScopeId(),
         currentVersionId: currentVersion.id,
-        currentValue: redact ? '********' : currentVersion.value.getValue(),
+        currentValue: redact ? '********' : assignment.isOverrideCleared ? null : currentVersion.value.getValue(),
+        isOverrideCleared: assignment.isOverrideCleared,
         versions,
       });
     }
@@ -163,7 +174,8 @@ export class ManageSettingsUseCase {
       true,
     );
 
-    if (!this.atomicMutations) return this.definitionRepo.save(definition);
+    const correlationId = context?.correlationId ?? randomUUID();
+    if (!this.atomicMutations) return this.definitionRepo.save(definition, { correlationId });
     if (!this.definitionRepo.withTransaction || !context?.actorId)
       throw new Error('SETTINGS_ATOMIC_CONTEXT_REQUIRED');
     await this.atomicMutations.execute(
@@ -172,7 +184,7 @@ export class ManageSettingsUseCase {
         aggregateType: 'SETTING_DEFINITION',
         aggregateId: definition.id,
         action: 'CREATE_SETTING_DEFINITION',
-        context,
+        context: { ...context!, correlationId },
         auditMetadata: {
           key: input.key,
           valueType: input.valueType,
@@ -180,7 +192,7 @@ export class ManageSettingsUseCase {
           isFeatureFlag: input.isFeatureFlag,
         },
       },
-      (transaction) => this.definitionRepo.withTransaction!(transaction).save(definition),
+      (transaction) => this.definitionRepo.withTransaction!(transaction).save(definition, { correlationId }),
     );
   }
 
@@ -221,6 +233,7 @@ export class ManageSettingsUseCase {
       );
     }
 
+    const changeReason = this.changeReason(input.changeReason, definition.isFeatureFlag);
     const scope = new ScopeIdentifier(input.level, input.scopeId);
     const valueData = this.createValueData(input.type, input.value);
 
@@ -233,9 +246,9 @@ export class ManageSettingsUseCase {
     )
       throw new Error('SETTINGS_VERSION_CONFLICT: Reload the current value before saving.');
     if (assignment) {
-      assignment.updateValue(input.versionId, valueData, input.authorId);
+      assignment.updateValue(input.versionId, valueData, input.authorId, changeReason);
     } else {
-      const version = new SettingVersion(input.versionId, valueData, new Date(), input.authorId);
+      const version = new SettingVersion(input.versionId, valueData, new Date(), input.authorId, undefined, 'SET', changeReason);
       assignment = new SettingAssignment(
         {
           id: input.assignmentId,
@@ -252,6 +265,7 @@ export class ManageSettingsUseCase {
       level: input.level,
       scopeId: input.scopeId,
       versionId: input.versionId,
+      changeReason,
     });
   }
 
@@ -259,10 +273,7 @@ export class ManageSettingsUseCase {
     input: RollbackSettingValueInput & { expectedCurrentVersionId?: string },
     context?: AtomicMutationRequestContext,
   ): Promise<string> {
-    const assignments = await this.assignmentRepo.findBy({
-      isSatisfiedBy: (a: SettingAssignment) => a.id === input.assignmentId,
-    });
-    const assignment = assignments[0];
+    const assignment = await this.findAssignment(input.assignmentId);
 
     if (!assignment) {
       throw new Error('Assignment not found');
@@ -287,11 +298,65 @@ export class ManageSettingsUseCase {
     if (!previous) throw new Error('Previous version not found');
     this.validationService.validate(definition, previous.value);
 
-    assignment.rollbackTo(input.previousVersionId, input.newVersionId, input.authorId);
+    const changeReason = this.changeReason(input.changeReason, true)!;
+    assignment.rollbackTo(input.previousVersionId, input.newVersionId, input.authorId, changeReason);
     return this.persistAssignment(assignment, 'ROLLBACK_SETTING_VALUE', context, {
       previousVersionId: input.previousVersionId,
       newVersionId: input.newVersionId,
+      changeReason,
     });
+  }
+
+  private changeReason(value: string | undefined, required: boolean): string | undefined {
+    const normalized = value?.trim();
+    if (!normalized && !required) return undefined;
+    if (!normalized || normalized.length < 3 || normalized.length > 1000 || /[\u0000-\u001f\u007f]/.test(normalized))
+      throw new Error('SETTINGS_CHANGE_REASON_REQUIRED');
+    return normalized;
+  }
+
+  private async findAssignment(id: string): Promise<SettingAssignment | null> {
+    if (this.assignmentRepo.findById) return this.assignmentRepo.findById(id);
+    // Compatibility for non-production in-memory repositories only.
+    return (await this.assignmentRepo.findBy({ isSatisfiedBy: item => item.id === id }))[0] ?? null;
+  }
+
+  public async definitionImpact(keyString: string): Promise<{ assignmentCount: number }> {
+    const key = new NamespacedKey(keyString);
+    if (!await this.definitionRepo.findByKey(key)) throw new Error('SETTINGS_DEFINITION_NOT_FOUND');
+    if (!this.assignmentRepo.countByKey) throw new Error('SETTINGS_IMPACT_READ_MODEL_REQUIRED');
+    return { assignmentCount: await this.assignmentRepo.countByKey(key) };
+  }
+
+  public async updateDefinition(input: UpdateSettingDefinitionInput, context?: AtomicMutationRequestContext): Promise<void> {
+    const definition = await this.definitionRepo.findByKey(new NamespacedKey(input.key));
+    if (!definition) throw new Error('SETTINGS_DEFINITION_NOT_FOUND');
+    if (!definition.revision || definition.revision !== input.expectedRevision) throw new Error('SETTINGS_DEFINITION_CONFLICT');
+    const changeReason = this.changeReason(input.changeReason, true)!;
+    if (input.description !== undefined && input.description.length > 2000) throw new Error('SETTINGS_DESCRIPTION_INVALID');
+    if (input.isDeprecated !== undefined && input.isDeprecated !== true) throw new Error('SETTINGS_DEFINITION_REACTIVATION_UNAVAILABLE');
+    const impact = input.isDeprecated ? await this.definitionImpact(input.key) : undefined;
+    const updated = definition.amendMetadata({ description: input.description?.trim(), isDeprecated: input.isDeprecated });
+    const correlationId = context?.correlationId ?? randomUUID();
+    if (!this.atomicMutations) return this.definitionRepo.save(updated, { correlationId });
+    if (!this.definitionRepo.withTransaction || !context?.actorId) throw new Error('SETTINGS_ATOMIC_CONTEXT_REQUIRED');
+    await this.atomicMutations.execute({ domain: 'SETTINGS', aggregateType: 'SETTING_DEFINITION', aggregateId: definition.id,
+      action: 'UPDATE_SETTING_DEFINITION', context: { ...context!, correlationId },
+      auditMetadata: { key: input.key, previousRevision: definition.revision, isDeprecated: updated.isDeprecated, changeReason, impact } },
+      transaction => this.definitionRepo.withTransaction!(transaction).save(updated, { correlationId }));
+  }
+
+  public async clearOverride(input: ClearSettingOverrideInput, context?: AtomicMutationRequestContext): Promise<string> {
+    const changeReason = this.changeReason(input.changeReason, true)!;
+    const assignment = await this.findAssignment(input.assignmentId);
+    if (!assignment) throw new Error('SETTINGS_ASSIGNMENT_NOT_FOUND');
+    if (assignment.getCurrentVersion().id !== input.expectedCurrentVersionId) throw new Error('SETTINGS_VERSION_CONFLICT');
+    const definition = await this.definitionRepo.findByKey(assignment.key);
+    if (!definition || definition.isDeprecated || definition.isSecret) throw new Error('SETTINGS_DEFINITION_NOT_WRITABLE');
+    assignment.clearOverride(input.newVersionId, input.authorId, changeReason);
+    return this.persistAssignment(assignment, 'CLEAR_SETTING_OVERRIDE', context, { key: assignment.key.getValue(),
+      level: assignment.scope.getLevel(), scopeId: assignment.scope.getScopeId(),
+      previousVersionId: input.expectedCurrentVersionId, newVersionId: input.newVersionId, changeReason });
   }
 
   private async persistAssignment(
@@ -300,7 +365,8 @@ export class ManageSettingsUseCase {
     context: AtomicMutationRequestContext | undefined,
     metadata: Record<string, unknown>,
   ): Promise<string> {
-    if (!this.atomicMutations) await this.assignmentRepo.save(assignment);
+    const correlationId = context?.correlationId ?? randomUUID();
+    if (!this.atomicMutations) await this.assignmentRepo.save(assignment, { correlationId });
     else {
       if (!this.assignmentRepo.withTransaction || !context?.actorId)
         throw new Error('SETTINGS_ATOMIC_CONTEXT_REQUIRED');
@@ -310,10 +376,10 @@ export class ManageSettingsUseCase {
           aggregateType: 'SETTING_ASSIGNMENT',
           aggregateId: assignment.id,
           action,
-          context,
+          context: { ...context!, correlationId },
           auditMetadata: { ...metadata, assignmentId: assignment.id },
         },
-        (transaction) => this.assignmentRepo.withTransaction!(transaction).save(assignment),
+        (transaction) => this.assignmentRepo.withTransaction!(transaction).save(assignment, { correlationId }),
       );
     }
     return assignment.id;

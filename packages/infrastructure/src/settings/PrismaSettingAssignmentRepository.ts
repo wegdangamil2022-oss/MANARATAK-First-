@@ -12,7 +12,9 @@ import {
   StringValue,
   NumberValue,
   BooleanValue,
-  JsonValue
+  JsonValue,
+  SettingDefinition,
+  ConfigurationValidationService
 } from '@manaratak/domain';
 
 export interface SettingVersionRecordRow {
@@ -23,6 +25,8 @@ export interface SettingVersionRecordRow {
   authorId: string | null;
   createdAt: Date;
   rollbackOfVersionId: string | null;
+  operation?: string;
+  changeReason?: string | null;
 }
 
 export interface SettingAssignmentRecordRow {
@@ -92,6 +96,8 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
         vRow.createdAt,
         vRow.authorId || undefined,
         vRow.rollbackOfVersionId || undefined,
+        (vRow.operation ?? 'SET') as 'SET' | 'CLEAR_OVERRIDE',
+        vRow.changeReason ?? undefined,
       );
     });
     
@@ -133,6 +139,15 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
     return record ? this.mapToDomain(record) : null;
   }
 
+  async findById(id: string): Promise<SettingAssignment | null> {
+    const row = await this.prisma.settingAssignmentRecord.findUnique({ where: { id }, include: { versions: true } });
+    return row ? this.mapToDomain(row) : null;
+  }
+
+  async countByKey(key: NamespacedKey): Promise<number> {
+    return this.prisma.settingAssignmentRecord.count({ where: { key: key.getValue() } });
+  }
+
   async findBy(spec: { isSatisfiedBy: (assignment: SettingAssignment) => boolean }): Promise<SettingAssignment[]> {
     // Note: Due to lack of query specifications, we fetch all. 
     // In a real implementation we would map the spec to prisma query.
@@ -146,7 +161,7 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
     return assignments.filter(assignment => spec.isSatisfiedBy(assignment));
   }
 
-  async save(assignment: SettingAssignment): Promise<void> {
+  async save(assignment: SettingAssignment, metadata?: { correlationId: string }): Promise<void> {
     const keyStr = assignment.key.getValue();
     const scopeLevel = assignment.scope.getLevel();
     const scopeId = assignment.scope.getScopeId() || 'GLOBAL';
@@ -154,6 +169,15 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
     const events = [...assignment.domainEvents];
 
     const persist = async (tx: Prisma.TransactionClient) => {
+      // All Settings writers acquire definition before assignment, so deprecation
+      // and a value write cannot pass independent prechecks and race to commit.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`setting-definition:${keyStr}`}, 0))::text AS lock_result`;
+      const record = await tx.settingDefinitionRecord.findUnique({ where: { key: keyStr } });
+      if (!record || record.isDeprecated || record.isSecret) throw new Error('SETTINGS_DEFINITION_NOT_WRITABLE');
+      const definition = new SettingDefinition({ id: record.id, key: new NamespacedKey(record.key),
+        valueType: record.valueType as ValueType, defaultValue: record.defaultValue,
+        isFeatureFlag: record.isFeatureFlag, isSecret: record.isSecret, isDeprecated: record.isDeprecated });
+      new ConfigurationValidationService().validate(definition, currentVersion.value);
       const lockKey = `setting:${keyStr}:${scopeLevel}:${scopeId}`;
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))::text AS lock_result`;
       const client = tx as unknown as SettingsAssignmentPrismaClient;
@@ -199,6 +223,8 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
         valueType: string;
         authorId: string | null;
         rollbackOfVersionId: string | null;
+        operation: 'SET' | 'CLEAR_OVERRIDE';
+        changeReason: string | null;
       }> = [];
 
       // Preflight the entire immutable history before changing the assignment pointer.
@@ -216,6 +242,8 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
             persisted.valueType !== version.value.type ||
             persisted.authorId !== authorId ||
             persisted.rollbackOfVersionId !== rollbackOfVersionId ||
+            (persisted.operation ?? 'SET') !== version.operation ||
+            (persisted.changeReason ?? null) !== (version.changeReason ?? null) ||
             !sameValue
           ) {
             throw new Error(`Setting version ${version.id} already exists and cannot be mutated or reassigned.`);
@@ -230,6 +258,8 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
           valueType: version.value.type,
           authorId,
           rollbackOfVersionId,
+          operation: version.operation,
+          changeReason: version.changeReason ?? null,
         });
       }
 
@@ -276,16 +306,17 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
             SettingValueAssignedEvent: 'SettingValueAssigned.v1',
             SettingValueUpdatedEvent: 'SettingValueUpdated.v1',
             SettingValueRolledBackEvent: 'SettingValueRolledBack.v1',
+            SettingOverrideClearedEvent: 'SettingOverrideCleared.v1',
           };
           const eventType = map[name];
           if (!eventType) throw new Error(`SETTINGS_DOMAIN_EVENT_NOT_MAPPED:${String(name || 'UNKNOWN')}`);
-          const payload: Record<string, unknown> = { assignmentId: assignment.id, key: keyStr, scopeLevel, scopeId };
+          const payload: Record<string, unknown> = { assignmentId: assignment.id, key: keyStr, scopeLevel, scopeId, operation: currentVersion.operation, ...(currentVersion.changeReason ? { changeReason: currentVersion.changeReason } : {}) };
           if (value.versionId) payload.versionId = value.versionId;
           if (value.previousVersionId) payload.previousVersionId = value.previousVersionId;
           if (value.newVersionId) payload.newVersionId = value.newVersionId;
           await outbox.create({ data: {
             id: randomUUID(), eventType, domain: 'SETTINGS', aggregateType: 'SettingAssignment', aggregateId: assignment.id,
-            payload, metadata: { schemaVersion: 1, ownerDomain: 'SETTINGS' }, correlationId: randomUUID(), state: 'PENDING', attempts: 0,
+            payload, metadata: { schemaVersion: 1, ownerDomain: 'SETTINGS' }, correlationId: metadata?.correlationId ?? randomUUID(), state: 'PENDING', attempts: 0,
             availableAt: new Date(), createdAt: value.dateTimeOccurred ?? new Date(),
           }});
         }

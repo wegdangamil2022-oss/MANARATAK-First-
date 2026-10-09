@@ -26,7 +26,7 @@ export interface PrismaSettingDefinitionDelegate {
   findMany(args?: { where?: unknown }): Promise<SettingDefinitionRecordRow[]>;
   upsert(args: {
     where: { key: string };
-    update: Omit<SettingDefinitionRecordRow, 'createdAt' | 'updatedAt' | 'id' | 'key'>;
+    update: Omit<SettingDefinitionRecordRow, 'createdAt' | 'updatedAt' | 'id' | 'key'> & { updatedAt?: Date };
     create: Omit<SettingDefinitionRecordRow, 'createdAt' | 'updatedAt'>;
   }): Promise<SettingDefinitionRecordRow>;
 }
@@ -51,6 +51,7 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
   private mapToDomain(row: SettingDefinitionRecordRow): SettingDefinition {
     return new SettingDefinition({
       id: row.id,
+      revision: row.updatedAt.toISOString(),
       key: new NamespacedKey(row.key),
       valueType: row.valueType as ValueType,
       description: row.description || undefined,
@@ -75,7 +76,7 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
       .sort((a, b) => a.key.getValue().localeCompare(b.key.getValue()));
   }
 
-  async save(definition: SettingDefinition): Promise<void> {
+  async save(definition: SettingDefinition, metadata?: { correlationId: string }): Promise<void> {
     const keyStr = definition.key.getValue();
     const data = {
       valueType: definition.valueType,
@@ -88,12 +89,17 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
     const events = [...definition.domainEvents];
     const persist = async (client: Prisma.TransactionClient) => {
       await client.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`setting-definition:${keyStr}`}, 0))::text AS lock_result`;
-      if (events.some(event => event.constructor.name === 'SettingDefinitionCreatedEvent') && await client.settingDefinitionRecord.findUnique({ where: { key: keyStr } })) {
+      const existing = await client.settingDefinitionRecord.findUnique({ where: { key: keyStr } });
+      if (events.some(event => event.constructor.name === 'SettingDefinitionCreatedEvent') && existing) {
         throw new Error(`Setting definition for key ${keyStr} already exists.`);
       }
+      if (existing && (existing.id !== definition.id || existing.updatedAt.toISOString() !== definition.revision)) {
+        throw new Error('SETTINGS_DEFINITION_CONFLICT');
+      }
+      const updatedAt = new Date(Math.max(Date.now(), existing ? existing.updatedAt.getTime() + 1 : 0));
       await client.settingDefinitionRecord.upsert({
         where: { key: keyStr },
-        update: data,
+        update: { ...data, updatedAt },
         create: { id: definition.id, key: keyStr, ...data }
       });
       if (events.length) {
@@ -104,7 +110,7 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
           if (!eventType) throw new Error(`SETTINGS_DOMAIN_EVENT_NOT_MAPPED:${String(name || 'UNKNOWN')}`);
           await client.transactionalOutboxRecord.create({ data: {
             id: randomUUID(), eventType, domain: 'SETTINGS', aggregateType: 'SettingDefinition', aggregateId: definition.id,
-            payload: { definitionId: definition.id, key: keyStr }, metadata: { schemaVersion: 1, ownerDomain: 'SETTINGS' }, correlationId: randomUUID(),
+            payload: { definitionId: definition.id, key: keyStr }, metadata: { schemaVersion: 1, ownerDomain: 'SETTINGS' }, correlationId: metadata?.correlationId ?? randomUUID(),
             state: 'PENDING', attempts: 0, availableAt: new Date(), createdAt: (event as any).dateTimeOccurred ?? new Date(),
           }});
         }

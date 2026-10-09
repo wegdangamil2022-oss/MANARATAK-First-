@@ -17,3 +17,4 @@ export * from './repositories/ISettingDefinitionRepository';
 export * from './repositories/ISettingAssignmentRepository';
 
 export * from './services/IResolvedSettingsReader';
+export * from './events/SettingOverrideClearedEvent';

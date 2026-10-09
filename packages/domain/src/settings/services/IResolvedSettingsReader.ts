@@ -9,7 +9,7 @@ export interface ConfigurationResolutionContext {
 export interface SettingResolutionStep {
   scope: ScopeLevel | 'DEFAULT';
   scopeId?: string;
-  status: 'NOT_APPLICABLE' | 'NO_OVERRIDE' | 'VALUE';
+  status: 'NOT_APPLICABLE' | 'NO_OVERRIDE' | 'INHERITED' | 'VALUE';
   versionId?: string;
   value?: unknown;
   winner?: boolean;

@@ -4733,6 +4733,22 @@
     },
     {
       "method": "POST",
+      "path": "/admin/settings/assignments/clear",
+      "owner": "SettingsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:settings:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/settings/assignments/rollback",
       "owner": "SettingsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -4750,6 +4766,22 @@
     {
       "method": "POST",
       "path": "/admin/settings/definitions",
+      "owner": "SettingsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:settings:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/settings/definitions/update",
       "owner": "SettingsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [

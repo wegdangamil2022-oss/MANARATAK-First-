@@ -6,5 +6,5 @@ export interface ISettingDefinitionRepository {
   withTransaction?(context: AtomicPersistenceContext): ISettingDefinitionRepository;
   findByKey(key: NamespacedKey): Promise<SettingDefinition | null>;
   findAll(): Promise<SettingDefinition[]>;
-  save(definition: SettingDefinition): Promise<void>;
+  save(definition: SettingDefinition, metadata?: { correlationId: string }): Promise<void>;
 }

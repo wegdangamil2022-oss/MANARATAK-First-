@@ -19,6 +19,7 @@ export interface AssignSettingValueInput {
   value: unknown;
   type: ValueType;
   authorId?: string;
+  changeReason?: string;
 }
 
 export interface RollbackSettingValueInput {
@@ -26,6 +27,22 @@ export interface RollbackSettingValueInput {
   previousVersionId: string;
   newVersionId: string;
   authorId?: string;
+  changeReason?: string;
 }
 
 
+
+export interface UpdateSettingDefinitionInput {
+  key: string;
+  expectedRevision: string;
+  description?: string;
+  isDeprecated?: true;
+  changeReason: string;
+}
+export interface ClearSettingOverrideInput {
+  assignmentId: string;
+  expectedCurrentVersionId: string;
+  newVersionId: string;
+  authorId?: string;
+  changeReason: string;
+}

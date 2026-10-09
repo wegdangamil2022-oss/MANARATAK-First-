@@ -1,3 +1,4 @@
+import { SettingOverrideClearedEvent } from '../events/SettingOverrideClearedEvent';
 import { NamespacedKey } from '../value-objects/NamespacedKey';
 import { ScopeIdentifier } from '../value-objects/ScopeIdentifier';
 import { SettingValueData } from '../value-objects/SettingValueData';
@@ -71,25 +72,37 @@ export class SettingAssignment {
     return [...this.versions];
   }
 
-  public updateValue(versionId: string, valueData: SettingValueData, authorId?: string): SettingVersion {
+  public updateValue(versionId: string, valueData: SettingValueData, authorId?: string, changeReason?: string): SettingVersion {
     this.assertVersionIdAvailable(versionId);
-    const newVersion = new SettingVersion(versionId, valueData, new Date(), authorId);
+    const newVersion = new SettingVersion(versionId, valueData, new Date(), authorId, undefined, 'SET', changeReason);
     this.versions.push(newVersion);
     this.addDomainEvent(new SettingValueUpdatedEvent(this.id, this.key.toString(), this.scope, versionId));
     return newVersion;
   }
 
-  public rollbackTo(previousVersionId: string, newVersionId: string, authorId?: string): SettingVersion {
+  public rollbackTo(previousVersionId: string, newVersionId: string, authorId?: string, changeReason?: string): SettingVersion {
     this.assertVersionIdAvailable(newVersionId);
     const targetVersion = this.versions.find((v) => v.id === previousVersionId);
     if (!targetVersion) {
       throw new Error(`Version ${previousVersionId} not found in assignment version history.`);
     }
 
-    const rolledBackVersion = new SettingVersion(newVersionId, targetVersion.value, new Date(), authorId, previousVersionId);
+    const rolledBackVersion = new SettingVersion(newVersionId, targetVersion.value, new Date(), authorId, previousVersionId, targetVersion.operation, changeReason);
     this.versions.push(rolledBackVersion);
     this.addDomainEvent(new SettingValueRolledBackEvent(this.id, previousVersionId, newVersionId));
     return rolledBackVersion;
+  }
+
+  public get isOverrideCleared(): boolean { return this.getCurrentVersion().operation === 'CLEAR_OVERRIDE'; }
+
+  public clearOverride(versionId: string, authorId: string | undefined, changeReason: string): SettingVersion {
+    this.assertVersionIdAvailable(versionId);
+    if (this.isOverrideCleared) throw new Error('SETTINGS_OVERRIDE_ALREADY_CLEARED');
+    const version = new SettingVersion(versionId, this.getCurrentVersion().value, new Date(), authorId,
+      undefined, 'CLEAR_OVERRIDE', changeReason);
+    this.versions.push(version);
+    this.addDomainEvent(new SettingOverrideClearedEvent(this.id, this.key.getValue(), versionId));
+    return version;
   }
 
   private assertVersionIdAvailable(versionId: string): void {

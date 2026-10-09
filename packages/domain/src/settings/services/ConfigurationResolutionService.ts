@@ -38,6 +38,9 @@ export class ConfigurationResolutionService implements IResolvedSettingsReader {
       const assignment = await this.assignmentRepo.findByScopeAndKey(new ScopeIdentifier(level, scopeId), key);
       if (!assignment) { chain.push({ scope: level, scopeId, status: 'NO_OVERRIDE' }); continue; }
       const version = assignment.getCurrentVersion();
+      if (assignment.isOverrideCleared) {
+        chain.push({ scope: level, scopeId, status: 'INHERITED', versionId: version.id }); continue;
+      }
       validation.validate(definition, version.value);
       chain.push({ scope: level, scopeId, status: 'VALUE', versionId: version.id, value: version.value.getValue() });
     }

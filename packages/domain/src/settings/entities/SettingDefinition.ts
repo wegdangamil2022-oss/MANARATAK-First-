@@ -1,3 +1,4 @@
+import { SettingDefinitionUpdatedEvent } from '../events/SettingDefinitionUpdatedEvent';
 import { NamespacedKey } from '../value-objects/NamespacedKey';
 import { StringValue, NumberValue, BooleanValue, JsonValue } from '../value-objects/SettingValueData';
 import { ValueType } from '../enums/ValueType';
@@ -13,6 +14,7 @@ export interface SettingDefinitionProps {
   isFeatureFlag?: boolean;
   isDeprecated?: boolean;
   isSecret?: boolean;
+  revision?: string;
 }
 
 export class SettingDefinition {
@@ -24,6 +26,7 @@ export class SettingDefinition {
   public readonly isFeatureFlag: boolean;
   public readonly isDeprecated: boolean;
   public readonly isSecret: boolean;
+  public readonly revision?: string;
 
   private _domainEvents: IDomainEvent[] = [];
 
@@ -55,6 +58,7 @@ export class SettingDefinition {
       }
     }
 
+    this.revision = props.revision;
     this.id = props.id.trim();
     this.key = props.key;
     this.valueType = props.valueType;
@@ -67,6 +71,17 @@ export class SettingDefinition {
     if (isNew) {
       this.addDomainEvent(new SettingDefinitionCreatedEvent(this.id, this.key.toString()));
     }
+  }
+
+  public amendMetadata(changes: { description?: string; isDeprecated?: true }): SettingDefinition {
+    if (changes.isDeprecated !== undefined && changes.isDeprecated !== true) throw new Error('SETTINGS_DEFINITION_REACTIVATION_UNAVAILABLE');
+    if (changes.description !== undefined && changes.description.length > 2000) throw new Error('SETTINGS_DESCRIPTION_INVALID');
+    const updated = new SettingDefinition({ id: this.id, key: this.key, valueType: this.valueType,
+      description: changes.description ?? this.description, defaultValue: this.defaultValue,
+      isFeatureFlag: this.isFeatureFlag, isSecret: this.isSecret,
+      isDeprecated: changes.isDeprecated ?? this.isDeprecated, revision: this.revision });
+    updated.addDomainEvent(new SettingDefinitionUpdatedEvent(this.id, this.key.getValue()));
+    return updated;
   }
 
   get domainEvents(): IDomainEvent[] {

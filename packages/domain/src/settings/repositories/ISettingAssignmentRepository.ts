@@ -6,8 +6,10 @@ import { SettingAssignment } from '../entities/SettingAssignment';
 export interface ISettingAssignmentRepository {
   withTransaction?(context: AtomicPersistenceContext): ISettingAssignmentRepository;
   findByScopeAndKey(scope: ScopeIdentifier, key: NamespacedKey): Promise<SettingAssignment | null>;
+  findById?(id: string): Promise<SettingAssignment | null>;
+  countByKey?(key: NamespacedKey): Promise<number>;
   findBy(spec: {
     isSatisfiedBy: (assignment: SettingAssignment) => boolean;
   }): Promise<SettingAssignment[]>;
-  save(assignment: SettingAssignment): Promise<void>;
+  save(assignment: SettingAssignment, metadata?: { correlationId: string }): Promise<void>;
 }

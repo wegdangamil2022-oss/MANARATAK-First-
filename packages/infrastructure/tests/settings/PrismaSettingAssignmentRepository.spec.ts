@@ -10,6 +10,7 @@ describe('PrismaSettingAssignmentRepository', () => {
     mockPrisma = {
       $queryRaw: vi.fn(async () => []),
       $transaction: vi.fn(async (callback: (tx: any) => Promise<unknown>) => callback(mockPrisma)),
+      settingDefinitionRecord: { findUnique: vi.fn(async ({ where: { key } }: any) => ({ id: 'definition', key, valueType: 'String', defaultValue: null, isFeatureFlag: false, isSecret: false, isDeprecated: false })) },
       settingAssignmentRecord: {
         findUnique: vi.fn(),
         findMany: vi.fn(),
@@ -211,6 +212,49 @@ describe('PrismaSettingAssignmentRepository', () => {
     mockPrisma.settingAssignmentRecord.findUnique.mockResolvedValue({ ...row, scopeId: 'hidden-id' });
     await expect(repository.findByScopeAndKey(new ScopeIdentifier('GLOBAL'), new NamespacedKey('test.key')))
       .rejects.toThrow('SETTINGS_GLOBAL_STORAGE_SCOPE_INVALID');
+  });
+
+  it('rechecks deprecated definitions inside the shared definition lock before any assignment write', async () => {
+    const assignment = new SettingAssignment({ id: 'write', key: new NamespacedKey('test.key'),
+      scope: new ScopeIdentifier('GLOBAL'), versions: [new SettingVersion('new', new StringValue('value'))] });
+    mockPrisma.settingDefinitionRecord.findUnique.mockResolvedValue({ id: 'definition', key: 'test.key', valueType: 'String', isDeprecated: true });
+    await expect(repository.save(assignment)).rejects.toThrow('SETTINGS_DEFINITION_NOT_WRITABLE');
+    expect(mockPrisma.$queryRaw.mock.calls[0][1]).toBe('setting-definition:test.key');
+    expect(mockPrisma.settingAssignmentRecord.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.settingAssignmentRecord.upsert).not.toHaveBeenCalled();
+  });
+  it('rejects changing a persisted CLEAR marker into SET under the same immutable version ID', async () => {
+    const assignment = new SettingAssignment({ id: 'assignment', key: new NamespacedKey('test.key'),
+      scope: new ScopeIdentifier('GLOBAL'), versions: [new SettingVersion('v1', new StringValue('value'))] });
+    mockPrisma.settingAssignmentRecord.findUnique.mockResolvedValue({ id: 'assignment', key: 'test.key',
+      scopeLevel: 'GLOBAL', scopeId: 'GLOBAL', currentVersionId: 'v1' });
+    mockPrisma.settingVersionRecord.findUnique.mockResolvedValue({ id: 'v1', assignmentId: 'assignment',
+      valueType: 'String', value: 'value', authorId: null, rollbackOfVersionId: null,
+      operation: 'CLEAR_OVERRIDE', changeReason: 'Use inherited policy' });
+    await expect(repository.save(assignment)).rejects.toThrow(/cannot be mutated or reassigned/);
+    expect(mockPrisma.settingAssignmentRecord.upsert).not.toHaveBeenCalled();
+    expect(mockPrisma.settingVersionRecord.create).not.toHaveBeenCalled();
+    expect(mockPrisma.$queryRaw.mock.calls.map((call: any[]) => call[1])).toEqual([
+      'setting-definition:test.key', 'setting:test.key:GLOBAL:GLOBAL',
+    ]);
+  });
+  it('persists an inheritance version and owner event with the request correlation', async () => {
+    const now = new Date();
+    const row = { id: 'assignment', key: 'test.key', scopeLevel: 'GLOBAL', scopeId: 'GLOBAL', currentVersionId: 'v1',
+      versions: [{ id: 'v1', assignmentId: 'assignment', valueType: 'String', value: 'value', authorId: 'admin',
+        rollbackOfVersionId: null, createdAt: now }] };
+    mockPrisma.settingAssignmentRecord.findUnique.mockResolvedValue(row);
+    const assignment = (await repository.findByScopeAndKey(new ScopeIdentifier('GLOBAL'), new NamespacedKey('test.key')))!;
+    assignment.clearOverride('clear', 'admin', 'Return to inherited policy');
+    mockPrisma.settingVersionRecord.findUnique.mockImplementation(async ({ where: { id } }: any) => id === 'v1' ? row.versions[0] : null);
+    mockPrisma.transactionalOutboxRecord = { create: vi.fn() };
+    await repository.save(assignment, { correlationId: 'request-123' });
+    expect(mockPrisma.settingVersionRecord.create).toHaveBeenCalledWith({ data: expect.objectContaining({ id: 'clear',
+      operation: 'CLEAR_OVERRIDE', changeReason: 'Return to inherited policy', value: 'value' }) });
+    expect(mockPrisma.transactionalOutboxRecord.create).toHaveBeenCalledWith({ data: expect.objectContaining({
+      eventType: 'SettingOverrideCleared.v1', correlationId: 'request-123', payload: expect.objectContaining({ operation: 'CLEAR_OVERRIDE' }),
+    }) });
+    expect(assignment.domainEvents).toHaveLength(0);
   });
 
 });

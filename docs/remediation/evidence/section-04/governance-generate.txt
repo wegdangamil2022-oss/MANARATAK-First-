@@ -1,0 +1,11 @@
+
+> manaratak-2.0-monorepo@0.0.0 db:generate
+> prisma generate --schema=packages/infrastructure/prisma/schema.prisma
+
+Prisma schema loaded from packages/infrastructure/prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 3.73s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate

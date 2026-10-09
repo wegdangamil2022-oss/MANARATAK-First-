@@ -50,6 +50,7 @@ export class SettingsAdminRouter {
         }
       });
 
+    const changeReason = z.string().trim().min(3).max(1000).regex(/^[^\u0000-\u001f\u007f]*$/);
     const assignValueSchema = z
       .object({
         assignmentId: identifier,
@@ -60,6 +61,7 @@ export class SettingsAdminRouter {
         value: z.unknown(),
         type: z.nativeEnum(ValueType),
         expectedCurrentVersionId: identifier.nullable().optional(),
+        changeReason: changeReason.optional(),
       })
       .strict()
       .superRefine((value, ctx) => {
@@ -83,6 +85,7 @@ export class SettingsAdminRouter {
       .object({
         assignmentId: identifier,
         previousVersionId: identifier,
+        changeReason,
         newVersionId: identifier,
         expectedCurrentVersionId: identifier.optional(),
       })
@@ -112,6 +115,41 @@ export class SettingsAdminRouter {
         res.status(200).json(responseFormatter.success({ assignments }));
       }),
     );
+
+    const updateDefinitionSchema = z.object({ key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/),
+      expectedRevision: z.string().datetime(), description: z.string().max(2000).optional(),
+      isDeprecated: z.literal(true).optional(), changeReason }).strict().refine(
+        value => value.description !== undefined || value.isDeprecated === true, 'No metadata change supplied');
+    const clearOverrideSchema = z.object({ assignmentId: identifier, newVersionId: identifier,
+      expectedCurrentVersionId: identifier, changeReason }).strict();
+
+    router.get('/definitions/:key/impact', asyncHandler(async (req, res) => {
+      const key = identifier.regex(/^[a-zA-Z0-9_\-.]+$/).parse(req.params.key);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.definitionImpact(key)));
+    }));
+    router.post('/definitions/update', asyncHandler(async (req, res) => {
+      try {
+        const input = updateDefinitionSchema.parse(req.body);
+        await manageSettingsUseCase.updateDefinition(input, context(req));
+        res.json(responseFormatter.success({ message: 'Setting definition updated' }));
+      } catch (error) {
+        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'UPDATE_SETTING_DEFINITION', category: 'SETTINGS',
+          targetType: 'SETTING_DEFINITION', targetId: req.body?.key, result: 'FAILURE', error });
+        throw error;
+      }
+    }));
+    router.post('/assignments/clear', asyncHandler(async (req, res) => {
+      try {
+        const input = clearOverrideSchema.parse(req.body);
+        const assignmentId = await manageSettingsUseCase.clearOverride({ ...input, authorId: actor(req) }, context(req));
+        res.json(responseFormatter.success({ assignmentId, versionId: input.newVersionId, message: 'Override cleared; inheritance restored' }));
+      } catch (error) {
+        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'CLEAR_SETTING_OVERRIDE', category: 'SETTINGS',
+          targetType: 'SETTING_ASSIGNMENT', targetId: req.body?.assignmentId, result: 'FAILURE', error });
+        throw error;
+      }
+    }));
 
     router.post(
       '/definitions',
@@ -214,13 +252,17 @@ export class SettingsAdminRouter {
       }
       const message = err?.message || 'Settings operation failed';
       const conflict =
-        /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|already belongs/i.test(message);
+        /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|SETTINGS_DEFINITION_CONFLICT|SETTINGS_OVERRIDE_ALREADY_CLEARED|SETTINGS_DEFINITION_NOT_WRITABLE|already belongs/i.test(message);
+      const known = /^SETTINGS_[A-Z_]+/.exec(message)?.[0];
+      const missing = /_NOT_FOUND$/.test(known ?? '') || /not found/i.test(message);
+      const unavailable = /SETTINGS_(ATOMIC|IMPACT|DURABLE)/.test(known ?? '');
+      const rejected = known || /already exists|cannot be mutated|already belongs|Secret |Feature flags|deprecated|not found|Type mismatch|Value must/.test(message);
       res
-        .status(conflict ? 409 : 400)
+        .status(conflict ? 409 : missing ? 404 : unavailable ? 503 : !rejected ? 503 : 400)
         .json(
           responseFormatter.error({
-            code: conflict ? 'SETTINGS_CONFLICT' : 'SETTINGS_OPERATION_REJECTED',
-            message,
+            code: conflict ? 'SETTINGS_CONFLICT' : missing ? 'SETTINGS_NOT_FOUND' : unavailable || !rejected ? 'SETTINGS_UNAVAILABLE' : 'SETTINGS_OPERATION_REJECTED',
+            message: conflict ? 'Settings changed; reload before retrying.' : !rejected || unavailable ? 'Settings operation unavailable.' : known ?? 'Settings operation rejected.',
           }),
         );
     });

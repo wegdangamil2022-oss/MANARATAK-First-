@@ -13,7 +13,8 @@ describe('SettingsAdminRouter', () => {
       assignValue: vi.fn(),
       rollbackValue: vi.fn(),
       listDefinitions: vi.fn().mockResolvedValue([]),
-      listAssignments: vi.fn().mockResolvedValue([])
+      listAssignments: vi.fn().mockResolvedValue([]),
+      clearOverride: vi.fn(), updateDefinition: vi.fn(), definitionImpact: vi.fn()
     };
 
     app = express();
@@ -92,6 +93,7 @@ describe('SettingsAdminRouter', () => {
     const payload = {
       assignmentId: 'assign-1',
       previousVersionId: 'v-1',
+      changeReason: 'Restore reviewed previous value',
       newVersionId: 'v-2'
     };
 
@@ -110,6 +112,44 @@ describe('SettingsAdminRouter', () => {
       valueType: 'Boolean', isFeatureFlag: true, defaultValue });
     expect(res.status).toBe(400);
     expect(mockManageSettingsUseCase.createDefinition).not.toHaveBeenCalled();
+  });
+
+  it('clear requires a reason/revision and uses the trusted actor, not a submitted identity', async () => {
+    const body = { assignmentId: 'assignment', newVersionId: 'clear', expectedCurrentVersionId: 'v1', changeReason: 'Use inherited policy' };
+    mockManageSettingsUseCase.clearOverride.mockResolvedValue('assignment');
+    expect((await request(app).post('/api/v1/admin/settings/assignments/clear').send(body)).status).toBe(200);
+    expect(mockManageSettingsUseCase.clearOverride).toHaveBeenCalledWith({ ...body, authorId: 'admin-settings-1' }, expect.objectContaining({ actorId: 'admin-settings-1' }));
+    mockManageSettingsUseCase.clearOverride.mockClear();
+    for (const invalid of [{ ...body, changeReason: undefined }, { ...body, expectedCurrentVersionId: undefined }, { ...body, authorId: 'forged' }]) {
+      expect((await request(app).post('/api/v1/admin/settings/assignments/clear').send(invalid)).status).toBe(400);
+    }
+    expect(mockManageSettingsUseCase.clearOverride).not.toHaveBeenCalled();
+  });
+  it('updates metadata with a revision/reason and refuses type/secret/reactivation changes', async () => {
+    const body = { key: 'feature.safe', expectedRevision: '2026-10-09T00:00:00.000Z', isDeprecated: true, changeReason: 'Retire approved feature' };
+    expect((await request(app).post('/api/v1/admin/settings/definitions/update').send(body)).status).toBe(200);
+    expect(mockManageSettingsUseCase.updateDefinition).toHaveBeenCalledWith(body, expect.objectContaining({ actorId: 'admin-settings-1' }));
+    mockManageSettingsUseCase.updateDefinition.mockClear();
+    for (const invalid of [{ ...body, valueType: 'String' }, { ...body, isDeprecated: false }, { ...body, changeReason: '' }, { ...body, isSecret: true }]) {
+      expect((await request(app).post('/api/v1/admin/settings/definitions/update').send(invalid)).status).toBe(400);
+    }
+    expect(mockManageSettingsUseCase.updateDefinition).not.toHaveBeenCalled();
+  });
+  it('maps a stale definition revision to conflict and hides unexpected database errors', async () => {
+    const body = { key: 'feature.safe', expectedRevision: '2026-10-09T00:00:00.000Z', description: 'new', changeReason: 'Clarify description' };
+    mockManageSettingsUseCase.updateDefinition.mockRejectedValueOnce(new Error('SETTINGS_DEFINITION_CONFLICT'));
+    expect((await request(app).post('/api/v1/admin/settings/definitions/update').send(body)).status).toBe(409);
+    mockManageSettingsUseCase.updateDefinition.mockRejectedValueOnce(new Error('SELECT password FROM private-db'));
+    const failed = await request(app).post('/api/v1/admin/settings/definitions/update').send(body);
+    expect(failed.status).toBe(503); expect(failed.body.error.code).toBe('SETTINGS_UNAVAILABLE');
+    expect(JSON.stringify(failed.body)).not.toContain('private-db');
+  });
+
+  it('reports missing assignments without exposing repository details', async () => {
+    mockManageSettingsUseCase.clearOverride.mockRejectedValue(new Error('SETTINGS_ASSIGNMENT_NOT_FOUND'));
+    const res = await request(app).post('/api/v1/admin/settings/assignments/clear').send({ assignmentId: 'missing',
+      expectedCurrentVersionId: 'v1', newVersionId: 'clear', changeReason: 'Use inherited policy' });
+    expect(res.status).toBe(404); expect(res.body.error.code).toBe('SETTINGS_NOT_FOUND');
   });
 
 });
