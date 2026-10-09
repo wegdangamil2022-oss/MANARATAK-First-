@@ -100,7 +100,7 @@ export function AssetAdminPage() {
   const load = async (reset = true, selected = appliedRef.current) => {
     if (!reset && (pagingRef.current || pendingFilters || !cursor || !hasMore)) return;
     const generation = ++generationRef.current;
-    if (!reset) pagingRef.current = true;
+    pagingRef.current = !reset;
     setLoading(true);
     try {
       setError(null);
