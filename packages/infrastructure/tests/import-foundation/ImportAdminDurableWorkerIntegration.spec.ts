@@ -77,6 +77,13 @@ describe('W2 Phase 6 durable worker integration', () => {
     const stored = [...repo.records.values()][0];
     expect(stored.rawPayload._phase6HandoffEnvelope).toBeUndefined();
     expect(stored.rawPayload._phase6HandoffState).toBe('DISPATCHED');
+    // Both the write-ahead intent and the ack are protected by the active lease.
+    expect(repo.updateRecord).toHaveBeenCalledTimes(2);
+    expect(repo.updateRecord.mock.calls.every(call =>
+      call[2]?.batchId === 'batch-durable-1' &&
+      call[2]?.attempt === 1 &&
+      call[2]?.workerId,
+    )).toBe(true);
     expect(stored.rawPayload._domainHandoff).toEqual(expect.objectContaining({ accepted: true }));
     const queueStatus = await queue.getJobStatus('batch-durable-1');
     expect(queueStatus?.status).toBe('COMPLETED');
