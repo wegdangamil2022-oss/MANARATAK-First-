@@ -97,6 +97,7 @@ export class AssetPlatformRouter {
       mimeTypePrefix: z.string().trim().min(1).max(120).optional(),
       retentionCategory: z.nativeEnum(AssetRetentionCategory).optional(),
       checksumPresence: z.enum(['PRESENT', 'MISSING']).optional(),
+      usageStatus: z.enum(['IN_USE', 'UNUSED']).optional(),
       malwareStatus: z.enum(['PASSED', 'FAILED']).optional(),
       fileFamily: z.enum(['IMAGE', 'VIDEO', 'AUDIO', 'PDF']).optional(),
       processingQueue: z.enum(['AWAITING_UPLOAD', 'QUARANTINE', 'PROCESSING', 'FAILED', 'ACTIVATION_RECOVERY', 'RESTORE_RECOVERY', 'ARCHIVE_RECOVERY']).optional(),

@@ -121,6 +121,7 @@ export function AssetAdminPage() {
     mimeTypePrefix: '',
     retentionCategory: '',
     checksumPresence: '',
+    usageStatus: '',
     malwareStatus: '',
     fileFamily: '',
     processingQueue: '',
@@ -260,6 +261,12 @@ export function AssetAdminPage() {
           <option value="PRESENT">مسجلة — لا تعني اكتمال التحقق</option>
           <option value="MISSING">غير مكتملة أو غير مسجلة</option>
         </select>
+        <select aria-label="حالة الاستخدام" value={filters.usageStatus}
+          onChange={e => setFilters(v => ({ ...v, usageStatus: e.target.value }))}
+          className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
+          <option value="">حالة الاستخدام — الكل</option>
+          <option value="IN_USE">مرتبط بسجلات المنصة</option><option value="UNUSED">غير مرتبط حاليًا</option>
+        </select>
         <select aria-label="نتيجة فحص الملف" value={filters.malwareStatus}
           onChange={e => setFilters(v => ({ ...v, malwareStatus: e.target.value }))}
           className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
@@ -287,12 +294,17 @@ export function AssetAdminPage() {
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
         />
         <input
+          aria-label="نوع المالك" list="asset-owner-types"
           value={filters.ownerType}
           onChange={(e) => setFilters((v) => ({ ...v, ownerType: e.target.value }))}
           placeholder="نوع المالك (Owner Type)"
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
         />
-        <input
+        <datalist id="asset-owner-types">
+          <option value="COURSE">الدورات</option><option value="UNIVERSITY">الجامعات</option>
+          <option value="STUDENT">الطلاب</option>
+        </datalist>
+        <input aria-label="معرف المالك"
           value={filters.ownerId}
           onChange={(e) => setFilters((v) => ({ ...v, ownerId: e.target.value }))}
           placeholder="معرف المالك (Owner ID)"
@@ -321,6 +333,9 @@ export function AssetAdminPage() {
         <button type="button" onClick={resetFilters} className="rounded-xl border px-4 py-2 text-xs">إعادة ضبط</button>
       </form>
 
+      {appliedFilters.usageStatus && <p role="status" className="text-xs text-slate-600">
+        الاستخدام يُفحص من سجلات المنصة وقت التحميل؛ يُعاد التحقق عند أي إجراء مؤثر.
+      </p>}
       <AssetUploadWizard onUploaded={() => void load(true, appliedRef.current)} />
       {selectedAsset && (
         <section className="rounded-2xl border border-slate-200 bg-white p-5 text-xs shadow-xs" aria-live="polite">
@@ -354,6 +369,12 @@ export function AssetAdminPage() {
           <p className="mt-3 text-slate-500">
             هذه بيانات وصفية فقط؛ لا تُعرض روابط تخزين مباشرة. تحقق من ارتباطات الأصل قبل أي عملية مؤثرة.
           </p>
+          <button type="button" className="mt-3 rounded-lg border px-3 py-1.5"
+            onClick={() => {
+              const next = { ...appliedRef.current, ownerId: selectedAsset.ownerId, ownerType: selectedAsset.ownerType };
+              setFilters(next); setAppliedFilters(next); appliedRef.current = next;
+              void load(true, next);
+            }}>عرض أصول هذا المالك</button>
           <AssetGovernancePanel key={selectedAsset.id} asset={selectedAsset} />
           <AssetLifecycleActions key={selectedAsset.id + ':' + selectedAsset.lifecycleState}
             asset={selectedAsset} onChanged={async () => {
@@ -391,7 +412,7 @@ export function AssetAdminPage() {
 
       <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
         <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4">
-          <h2 className="text-base font-black text-[#142B5F]">سجل الأصول والملفات ({items.length})</h2>
+          <h2 className="text-base font-black text-[#142B5F]">الأصول المحمّلة ({items.length})</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-start text-xs">
@@ -411,7 +432,7 @@ export function AssetAdminPage() {
               {items.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-400 font-bold">
-                    {loading ? 'جاري التحميل…' : error ? 'تعذر تحميل النتائج؛ أعد المحاولة.' : 'لا توجد أصول أو ملفات مطابقة للبحث.'}
+                    {loading ? 'جاري التحميل…' : error ? 'تعذر تحميل النتائج؛ أعد المحاولة.' : hasMore ? 'لا توجد نتائج في هذه الدفعة؛ حمّل المزيد لمتابعة البحث.' : 'لا توجد أصول مطابقة في نهاية البحث.'}
                   </td>
                 </tr>
               ) : (

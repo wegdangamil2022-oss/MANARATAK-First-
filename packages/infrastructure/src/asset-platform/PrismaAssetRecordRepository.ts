@@ -1,3 +1,4 @@
+import { findUsedAssetIds } from './AssetUsageBatchQuery';
 import { randomUUID } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
 import {
@@ -385,6 +386,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     mimeTypePrefix?: string;
     retentionCategory?: AssetRetentionCategory;
     checksumPresence?: 'PRESENT' | 'MISSING';
+    usageStatus?: 'IN_USE' | 'UNUSED';
     malwareStatus?: 'PASSED' | 'FAILED';
     fileFamily?: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'PDF';
     processingQueue?: 'AWAITING_UPLOAD' | 'QUARANTINE' | 'PROCESSING' | 'FAILED' | 'ACTIVATION_RECOVERY' | 'RESTORE_RECOVERY' | 'ARCHIVE_RECOVERY';
@@ -489,7 +491,13 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         return false;
       }
     }) : scannedPage;
-    const items = trustedPage.map((row: any) => ({
+    // Resolve all canonical owner references in one bounded query, never per asset.
+    // Empty filtered pages retain the scanned cursor and may have more matches later.
+    const usedIds = input.usageStatus
+      ? await findUsedAssetIds(this.prisma, trustedPage.map((row: AssetRecordRow) => row.id)) : null;
+    const visiblePage = usedIds ? trustedPage.filter((row: AssetRecordRow) =>
+      input.usageStatus === 'IN_USE' ? usedIds.has(row.id) : !usedIds.has(row.id)) : trustedPage;
+    const items = visiblePage.map((row: any) => ({
       id: row.id, reference: row.reference, ownerId: row.ownerId, ownerType: row.ownerType,
       lifecycleState: row.lifecycleState, securityClassification: row.securityClassification,
       retentionCategory: row.retentionCategory, retentionExpiresAt: row.retentionExpiresAt,

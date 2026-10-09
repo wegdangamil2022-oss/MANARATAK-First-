@@ -49,4 +49,24 @@ describe('EAP Admin pagination and filter integrity', () => {
     expect(query.where.AND[3].OR).toBeDefined();
   });
 
+  it.each(['IN_USE', 'UNUSED'] as const)('resolves %s from one batch without stranding later pages', async usageStatus => {
+    const rows = ['newer', 'older'].map(id => ({ id, createdAt: new Date('2026-10-09T00:00:00Z'), metadata: {} }));
+    const findMany = vi.fn(async () => rows);
+    const $queryRaw = vi.fn(async () => usageStatus === 'IN_USE' ? [] : [{ id: 'newer' }]);
+    const repo = new PrismaAssetRecordRepository({ assetRecord: { findMany }, $queryRaw } as any);
+    const result = await repo.queryAdmin({ usageStatus, limit: 1, ownerType: 'STUDENT', q: 'proof' });
+    expect(result.items).toEqual([]);
+    expect(result.hasMore).toBe(true);
+    expect(Buffer.from(result.nextCursor!, 'base64url').toString()).toBe('2026-10-09T00:00:00.000Z|newer');
+    expect($queryRaw).toHaveBeenCalledTimes(1);
+    expect(($queryRaw.mock.calls[0] as any)[0].values).toEqual(['newer']);
+    expect((findMany.mock.calls[0] as any)[0].where.ownerType).toBe('STUDENT');
+  });
+  it('propagates unavailable usage evidence rather than returning unused assets', async () => {
+    const repo = new PrismaAssetRecordRepository({ assetRecord: { findMany: async () => [
+      { id: 'asset', createdAt: new Date(), metadata: {} },
+    ] }, $queryRaw: async () => { throw new Error('DATABASE_UNAVAILABLE'); } } as any);
+    await expect(repo.queryAdmin({ usageStatus: 'UNUSED' })).rejects.toThrow('DATABASE_UNAVAILABLE');
+  });
+
 });

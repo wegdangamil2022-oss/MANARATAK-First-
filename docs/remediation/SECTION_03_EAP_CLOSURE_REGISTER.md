@@ -1,5 +1,53 @@
 # Section 03 — EAP closure register
 
+## Final source-work round — accepted scope and remaining gates (2026-10-09)
+
+The user requested this as the last section-03 work round and accepted carrying minor leftovers forward. The **work round**, rather than every original acceptance gate, will be closed after matching CI succeeds. Original task IDs and historical findings are retained. No missing runtime evidence is relabeled PASS and no production GO is issued.
+
+### Final functional slice
+
+Original P1-01/P1-02: added validated `usageStatus=IN_USE|UNUSED` from Admin through API to the EAP read model. Each scanned page resolves all 21 canonical owner tables, 28 direct fields, CMS attachment arrays and three SEO fields in one parameterized read-only query using the existing schema-checked inventory. At most 100 asset IDs are inspected per request; no unrestricted ID materialization, per-asset owner query, central ownership registry or new schema. Query failure propagates instead of classifying records as unused.
+
+Keyset continuation advances past scanned rows even when none satisfy usage status, including with owner/search/security/date filters. Admin explicitly offers continuation through empty batches; loaded counts are not presented as total counts. Usage is a read-time snapshot, never authorization to delete. Existing transactional destructive guards remain authoritative. Added owner-type suggestions for established COURSE/UNIVERSITY/STUDENT types and an action to filter by the selected asset's exact owner; unknown owner values remain supported. Owner mutation authority and navigation permissions are unchanged.
+
+Local checks: TypeScript PASS; 66 focused tests PASS (7.57s); lint 0 errors/60 warnings; source quality PASS; 15 owner/control-plane guards PASS. Two actual-PostgreSQL tests added for empty-page continuation/owner composition and CMS JSON references. Matching CI must verify these database cases. No new browser/provider end-to-end result is claimed.
+
+### Current original-task disposition (supersedes historical snapshots)
+
+| Original ID | Source result and carried acceptance |
+| --- | --- |
+| 03/P0-01 | Persisted security proof and Domain gates implemented; actual scanner attestation/immutable provider version acceptance deferred. |
+| 03/P0-02 | Pre-provider activation gate and durable activation journal/recovery worker implemented; cross-provider durability/fencing acceptance deferred. |
+| 03/P0-03 | INITIATED/finalization/evidence contract implemented; actual grants/object immutability acceptance deferred. |
+| 03/P0-04 | Semantic provider idempotency implemented/tested; cross-replica provider durability deferred. |
+| 03/P0-05 | Signature/MIME/hash/size/date checks and executable rejection implemented; actual provider verification deferred. |
+| 03/P0-06 | Separate reuse permission plus authoritative owner validation implemented; deployed roles and complete editor/public E2E deferred. |
+| 03/P0-07 | Canonical owner-versus-lifecycle lock serialization implemented and verified in disposable PG; target installation pending. |
+| 03/P1-01 | Upload/list/detail/governance/versions/usage/state actions/preview/owner filtering implemented; full live-provider workflow and complete translation acceptance carried forward. |
+| 03/P1-02 | Existing state/security/retention/checksum/scan/family/processing facets supplemented by bounded canonical usage facet and owner suggestions; scale/performance benchmarking deferred. |
+| 03/P1-03 | Draft/applied filters, stale-response protection, cursor reset/dedup implemented; historical isolated-browser evidence retained. |
+| 03/P1-04 | AND composition and deterministic keyset pagination implemented; realistic production-scale benchmarking deferred. |
+| 03/P1-05 | Canonical cursor validation and safe HTTP errors implemented/tested. |
+| 03/P1-06 | Bounded async picker and Domain trust gates implemented; complete owner-specific browser/API/provider E2E deferred. |
+| 03/P1-07 | Audited selection and owner revalidation implemented; selection remains separate from owner write authority. |
+| 03/P1-08 | Safe mapped errors verified; exhaustive typed error refactoring is a minor carried improvement. |
+| 03/P1-09 | Existing allocation/DTO semantics documented and guarded; no invented verify-existing-object capability. |
+| 03/P1-10 | Original retention snapshot preserved/restored with fail-closed legacy policy; unknown policy remains an explicit dependency, no guessed durations/backfill. |
+| 03/P1-11 | Schema-derived owner inventory, serialization and bounded usage query implemented; central registry not required for correctness. Broader architecture approval and scale evidence carried. |
+| 03/P1-12 | CAS, leases and durable archive/restore takeover barriers implemented and PG-tested; target installation/provider fencing acceptance deferred. |
+| 03/P1-13 | Activation intent/worker, purge tombstones, durable archive/restore uncertainty holds implemented; provider-authoritative resolution of unknown outcomes remains a material operational gate, not a minor cosmetic item. |
+| 03/P1-14 | Local non-dispatched event contract documented; no fabricated published events/outbox. Future integration dispatch requires owner acceptance. |
+| 03/P1-15 | Safe handles/DTO projections and provider-coordinate privacy implemented/tested. |
+| 03/P1-16 | Upload wizard and fail-closed adapter configuration implemented; actual development/provider acceptance deferred. |
+| FGA-03-001 | PROPOSED_ENHANCEMENT: rights/license governance remains optional/unimplemented, no licensing assertion. |
+| FGA-03-002 | PROPOSED_ENHANCEMENT: actual renditions/pipeline remain optional/unimplemented, no fabricated variants. |
+
+### Explicit handoff and closure boundary
+
+After successful matching CI the round is `SOURCE_WORK_ROUND_CLOSED_WITH_DOCUMENTED_EXCEPTIONS`. This is an administrative end to this section's current work, **not** all original tasks CLOSED, full section acceptance, deployment completion or production GO.
+
+Material gates stay visible: apply reviewed reference/restore/archive migrations to the target only in a separately authorized rollout with old processes drained and legacy provider operations quiescent; verify real provider grants/security/fencing/cache/durability; resolve uncertain operations from authoritative provider evidence before a separately reviewed repair; verify deployed owner/public/browser workflows and global release gates. Real-provider verification remains DEFERRED_BY_USER for a later environment. Minor/optional work carried: complete translation, typed error refactoring, production-scale tuning, rights/renditions/media-processing/OCR capabilities. Pending recovery operations remain fail-closed, never auto-cleared merely to end the work round.
+
 ## Verified archive barrier CI — 2026-10-09
 
 Source `d40cd0cba3ad52cacd7f446f395786e0c6a223f1`: [CI 37945629798](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37945629798) SUCCESS: **291 source tests and 37 disposable PostgreSQL tests**. The source run skips the 37 database cases, which pass in the separate database run; counts are not duplicated. All three reference/restore/archive guard migrations were installed only in the guarded disposable CI database. Evidence: `evidence/section-03/archive-journal-ci.json` and `archive-journal-ci-summary.txt`.

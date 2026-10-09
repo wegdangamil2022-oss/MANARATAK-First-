@@ -438,13 +438,14 @@ describe('AssetPlatformRouter', () => {
       processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
       assetRecordRepository: { queryAdmin, findById: vi.fn() },
     }));
-    const result = await request(app).get('/assets').query({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', q: 'pdf' });
+    const result = await request(app).get('/assets').query({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', usageStatus: 'UNUSED', q: 'pdf' });
     expect(result.status).toBe(200);
-    expect(queryAdmin).toHaveBeenCalledWith({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', q: 'pdf' });
+    expect(queryAdmin).toHaveBeenCalledWith({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', usageStatus: 'UNUSED', q: 'pdf' });
     queryAdmin.mockClear();
     for (const query of [
       { checksumPresence: 'false' }, { checksumPresence: ['PRESENT', 'MISSING'] },
       { retentionCategory: 'unknown' }, { checksumPresence: 'VERIFIED' },
+      { usageStatus: 'ALL' }, { usageStatus: ['IN_USE', 'UNUSED'] },
     ]) {
       expect((await request(app).get('/assets').query(query)).status).toBe(400);
     }

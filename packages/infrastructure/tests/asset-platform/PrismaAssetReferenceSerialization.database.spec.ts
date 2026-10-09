@@ -1,3 +1,4 @@
+import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { beforeAll, afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -148,4 +149,28 @@ disposable('EAP canonical owner/lifecycle serialization on disposable PostgreSQL
       .rejects.toThrow('ASSET_REFERENCE_ISOLATION_UNSUPPORTED');
     expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState).toBe('ACTIVE');
   });
+  it('usage facets cross empty keyset pages and compose with owner filters against actual owner data', async () => {
+    const used = await createAsset(); const unused = await createAsset();
+    await prisma.assetRecord.update({ where: { id: unused }, data: { createdAt: new Date('2026-10-09T02:00:00Z') } });
+    await prisma.assetRecord.update({ where: { id: used }, data: { createdAt: new Date('2026-10-09T01:00:00Z') } });
+    await prisma.studentWorkspace.create({ data: { id: prefix + randomUUID(), studentReferenceId: prefix + randomUUID(), status: 'ACTIVE', avatarAssetId: used } });
+    const repo = new PrismaAssetRecordRepository(prisma);
+    const first = await repo.queryAdmin({ ownerId: prefix, usageStatus: 'IN_USE', limit: 1 });
+    expect(first.items).toEqual([]); expect(first.hasMore).toBe(true);
+    const second = await repo.queryAdmin({ ownerId: prefix, usageStatus: 'IN_USE', limit: 1, cursor: first.nextCursor! });
+    expect(second.items.map(row => row.id)).toEqual([used]); expect(second.hasMore).toBe(false);
+    const notUsed = await repo.queryAdmin({ ownerId: prefix, usageStatus: 'UNUSED', limit: 100 });
+    expect(notUsed.items.map(row => row.id)).toEqual([unused]);
+  });
+  it('batch usage detects JSON attachments and SEO references without a separate owner registry', async () => {
+    const attachment = await createAsset(); const seo = await createAsset(); const unused = await createAsset();
+    const node = await prisma.cmsContentNode.create({ data: { id: prefix + randomUUID(), publicId: prefix + randomUUID(), slug: prefix + randomUUID(), contentType: 'PAGE', title: 'test', authorId: prefix, ownerId: prefix, seoMetadata: { openGraphAssetId: seo } } });
+    await prisma.cmsPublishedContent.create({ data: { id: prefix + randomUUID(), contentId: node.id, publicId: prefix + randomUUID(), siteIdentifier: 'MANARATAK', locale: 'ar', slug: prefix + randomUUID(), canonicalUrl: '/test', contentType: 'PAGE', title: 'test', body: '', attachmentAssetIds: [attachment], tags: [], seoMetadata: {}, versionNumber: 1, publishedAt: new Date() } });
+    const repo = new PrismaAssetRecordRepository(prisma);
+    const linked = await repo.queryAdmin({ ownerId: prefix, usageStatus: 'IN_USE' });
+    expect(linked.items.map(row => row.id).sort()).toEqual([attachment, seo].sort());
+    const unlinked = await repo.queryAdmin({ ownerId: prefix, usageStatus: 'UNUSED' });
+    expect(unlinked.items.map(row => row.id)).toEqual([unused]);
+  });
+
 });
