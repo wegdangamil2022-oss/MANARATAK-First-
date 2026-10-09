@@ -4,6 +4,17 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 3 — worker lease-generation fencing and atomic progress safeguards (2026-10-09)
+
+**Verified source:** `188212e1a762d5e8814b16d2f35d0a4323ab8171` — [Import Section 05 focused CI 37974943148](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37974943148): **SUCCESS**, 77 focused Vitest tests / 11 files; TypeScript, source quality and existing 321-handler/320-endpoint audit source gate PASS. Earlier intermediate red CI results were from fixtures using a queue eligibility date older than job availability; the tests were repaired, and the final commit passed.
+
+- **IMP-P0-003: same-worker stale claim fencing.** Prisma queue `heartbeat`, `completeClaimedJob` and `failClaimedJob` now require the stored `attemptCount` and **exact renewed `claimUntil` generation** in addition to status, claimant identity and non-expiration. An older attempt cannot alter a replacement claim just because the worker identifier is reused. In-memory gateway checks attempt/generation identically, with targeted negative and positive regressions.
+- **IMP-P0-003: claimed Checkpoint atomicity.** The worker protocol now supplies the currently renewed lease to `processClaimedBatch`. The durable worker's `recordCheckpoint` uses a single Prisma transaction that conditionally updates batch progress by active attempt/lease and inserts the checkpoint **only if the update wins**. Stale/paused/cancelled claims produce `IMPORT_WORKER_LEASE_LOST` without a checkpoint record. Development-only memory gateway validates the claimed lease before a worker checkpoint. Non-worker compatibility usage remains a separate source interface and is **not** claimed to be a fully owner-transactional write boundary.
+- **IMP-P0-003: per-page stats fencing.** The durable Prisma import repository's worker `updateBatchStats` path now performs a guarded `updateMany` for the current claim generation and never blindly overwrites a resumed/abandoned job's counters. Stale progress returns `IMPORT_WORKER_LEASE_LOST`; ordinary staging lifecycle stats continue to use the legacy non-worker path. Focused source test verifies conditional where-clause and failure behavior.
+- **No schema migration applied, DB process started, release or merge performed.** Cross-process PostgreSQL race/lease timing remains a POST-28 runtime proof requirement. The owner-consumer transactional inbox/receipt and manual reconciliation release flow remain P0 source gaps; Section 05 is **`IN PROGRESS — SOURCE FIXES REQUIRED`**, not closed.
+
+---
+
 ## Batch 2 — replay-uncertainty safety and bounded source lookups (2026-10-09)
 
 **Verified batch 2:** Source code commit `f87d51052d661db4af794f4b2c12fe94c434b20d`: [Import Section 05 CI 37973057659](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37973057659) **SUCCESS** — **72 focused Vitest tests in 10 files**, TypeScript, source-quality, and existing 321-handler/320-endpoint Admin audit coverage all PASS. Earlier intermediate runs failed on a previous cancellation assertion and an incorrect synthetic retry expectation; both were repaired before this final source run. No live DB or provider integration was tested.
