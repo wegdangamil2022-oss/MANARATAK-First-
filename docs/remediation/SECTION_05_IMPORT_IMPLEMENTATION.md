@@ -4,6 +4,18 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 7 — cooperative worker-confirmed pause and cancellation (2026-10-09)
+
+**Source changes pushed; final workflow acceptance recorded when the matching code SHA succeeds.**
+
+- **IMP-P0-003/004 — stop acknowledgement semantics:** queued jobs still transition directly to `PAUSED`/`CANCELLED`; an actively claimed `RUNNING` job now transitions to `PAUSING`/`CANCELLING`, **retains its exact worker lease**, and must not be reported as final while an in-flight owner call may still be executing. A PAUSING job may be escalated to CANCELLING. A PAUSING job cannot be resumed before the existing worker acknowledges; no new worker may claim pending-stop states.
+- **IMP-P0-003/004 — claimed worker acknowledgement:** new `acknowledgeStoppedJob(lease)` requires the current worker identity, attempt, and exact lease-generation expiry, transitions `PAUSING → PAUSED` or `CANCELLING → CANCELLED`, and clears the claim. This is checked with conditional Prisma `updateMany` in durable mode and equivalent checks in DEVELOPMENT_ONLY mode. The worker invokes acknowledgement **only after its processing callback has unwound**, whether it failed a heartbeat or its completion raced with a pending stop. Do not claim this forcibly aborts already executing owner calls.
+- **Admin truthfulness:** `PAUSING` appears as a distinct status, `PAUSING` may be cancelled, and `CANCELLING` cannot be cancelled repeatedly. After a pause/cancel command Admin fetches the persisted current state; while the worker still needs to acknowledge, it reports a **pending request**, not an already-completed action. Both Arabic and English status notices are updated.
+- **Regression focus:** queued immediate stop, claimed stop pending, stale-lease acknowledgement denial, resumability only after PAUSED, cancellation escalation, and a deferred worker owner-like callback showing the job remains PAUSING/CANCELLING until processing exits. Existing checkpoint/cancel tests were adapted to the new accurate stop semantics.
+- **Remaining operational boundary:** a worker crash can leave the batch in PAUSING/CANCELLING indefinitely. No arbitrary timeout is allowed to mark such a batch safely terminal while an external owner call's result is unknown; a separate, audited owner-verified recovery/reconciliation policy remains required before production. Likewise **owner-transactional inbox/receipt** remains unimplemented. No database migration, real database test, external provider call, merge or deployment occurred. Section 05 remains `IN PROGRESS — SOURCE FIXES REQUIRED`.
+
+---
+
 ## Batch 6 — atomic owner-handoff record fencing and safe reconciliation visibility (2026-10-09)
 
 **Implemented source changes (same working branch):**
