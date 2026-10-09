@@ -99,6 +99,7 @@ describe('PrismaSettingDefinitionRepository', () => {
     expect(update.updatedAt.getTime()).toBeGreaterThan(record.updatedAt.getTime());
     expect(mockPrisma.transactionalOutboxRecord.create).toHaveBeenCalledWith({ data: expect.objectContaining({
       eventType: 'SettingDefinitionUpdated.v1', correlationId: 'request-123', aggregateId: 'definition',
+      metadata: expect.objectContaining({ settingsEventRole: 'OWNER_DOMAIN_EVENT', ownerDomain: 'SETTINGS' }),
     }) });
   });
 
