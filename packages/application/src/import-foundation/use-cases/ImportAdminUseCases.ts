@@ -502,7 +502,17 @@ export class ImportAdminUseCases {
     let processedRecords = 0;
     let failedRecords = 0;
     let recordOffset = 0;
+    // A checkpoint is a compact cursor, not a full list of all accepted rows.
+    // Keep only the most recent keys for diagnostics; the counts and offset
+    // remain authoritative even for multi-million-row imports.
     const acceptedRecordKeys: string[] = [];
+    let acceptedRecordKeyCount = 0;
+    const rememberAcceptedKey = (key: unknown) => {
+      if (typeof key !== 'string' || !key) return;
+      acceptedRecordKeyCount++;
+      acceptedRecordKeys.push(key.slice(0, 512));
+      if (acceptedRecordKeys.length > 32) acceptedRecordKeys.shift();
+    };
 
     while (true) {
       const result = await this.importRepository.listRecords({
@@ -549,7 +559,7 @@ export class ImportAdminUseCases {
               processingNotes: 'Phase 06 staging completed; owning-domain handoff integration is not registered yet.',
             });
             processedRecords++;
-            if (typeof record.sourceDedupKey === 'string') acceptedRecordKeys.push(record.sourceDedupKey);
+            rememberAcceptedKey(record.sourceDedupKey);
             continue;
           }
 
@@ -571,7 +581,7 @@ export class ImportAdminUseCases {
 
         if (record.status === ImportRecordStatus.COMPLETE) {
           processedRecords++;
-          if (typeof record.sourceDedupKey === 'string') acceptedRecordKeys.push(record.sourceDedupKey);
+          rememberAcceptedKey(record.sourceDedupKey);
         } else if (record.status === ImportRecordStatus.INCOMPLETE) {
           failedRecords++;
         }
@@ -600,7 +610,8 @@ export class ImportAdminUseCases {
         failedRecords,
         acceptedRecordKeys,
         updatedAt: new Date(),
-        metadata: { workerId: lease.workerId, attempt: lease.attempt },
+        metadata: { workerId: lease.workerId, attempt: lease.attempt,
+          acceptedRecordKeyCount, retainedAcceptedKeyLimit: 32, cursorMode: 'RECENT_KEYS' },
       }),
       getActiveLease(),
     );
