@@ -149,17 +149,17 @@ export class ReferenceDataUseCases {
   public async upsertCountry(data: UpsertReferenceCountryDto, context?: ReferenceDataMutationContext): Promise<ReferenceCountryDto> {
     await assertAssetReferenceUsable(this.assetReferences, data.flagAssetId, { purpose: 'REFERENCE_COUNTRY_FLAG' });
     this.assertCanonicalValidation('COUNTRY', this.validationService.validateCountry(data).issues);
-    return this.atomicUpsert('COUNTRY', data.iso2Code, context, transaction => transaction.repository.upsertCountryInTransaction(data, transaction.context), () => this.repository.upsertCountry(data));
+    return this.atomicUpsert('COUNTRY', data.iso2Code, context, transaction => transaction.repository.upsertCountryInTransaction(data, transaction.context, context?.actorId, context?.correlationId), () => this.repository.upsertCountry(data));
   }
 
   public async upsertCurrency(data: UpsertReferenceCurrencyDto, context?: ReferenceDataMutationContext): Promise<ReferenceCurrencyDto> {
     this.assertCanonicalValidation('CURRENCY', this.validationService.validateCurrency(data).issues);
-    return this.atomicUpsert('CURRENCY', data.isoCode, context, transaction => transaction.repository.upsertCurrencyInTransaction(data, transaction.context), () => this.repository.upsertCurrency(data));
+    return this.atomicUpsert('CURRENCY', data.isoCode, context, transaction => transaction.repository.upsertCurrencyInTransaction(data, transaction.context, context?.actorId, context?.correlationId), () => this.repository.upsertCurrency(data));
   }
 
   public async upsertLanguage(data: UpsertReferenceLanguageDto, context?: ReferenceDataMutationContext): Promise<ReferenceLanguageDto> {
     this.assertCanonicalValidation('LANGUAGE', this.validationService.validateLanguage(data).issues);
-    return this.atomicUpsert('LANGUAGE', data.isoCode, context, transaction => transaction.repository.upsertLanguageInTransaction(data, transaction.context), () => this.repository.upsertLanguage(data));
+    return this.atomicUpsert('LANGUAGE', data.isoCode, context, transaction => transaction.repository.upsertLanguageInTransaction(data, transaction.context, context?.actorId, context?.correlationId), () => this.repository.upsertLanguage(data));
   }
 
   public async upsertCity(data: UpsertReferenceCityDto, context?: ReferenceDataMutationContext): Promise<ReferenceCityDto> {
@@ -180,7 +180,7 @@ export class ReferenceDataUseCases {
     if (!country.id) throw new ReferenceDataInvariantError('Canonical country ID is required for city persistence.');
     const canonicalData: UpsertReferenceCityDto = { ...data, countryReferenceId: country.id };
     const identity = `${data.countryIso2Code}:${data.name}:${data.region ?? ''}`;
-    return this.atomicUpsert('CITY', identity, context, transaction => transaction.repository.upsertCityInTransaction(canonicalData, transaction.context), () => this.repository.upsertCity(canonicalData));
+    return this.atomicUpsert('CITY', identity, context, transaction => transaction.repository.upsertCityInTransaction(canonicalData, transaction.context, context?.actorId, context?.correlationId), () => this.repository.upsertCity(canonicalData));
   }
 
   public getReferenceHistory(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceVersionDto[]> {

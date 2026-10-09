@@ -60,6 +60,5 @@
     "INVALID_SOURCE_RECORD": 1
   },
   "conflictingCityIdentityScopes": 8,
-  "timezoneMissingRows": 0,
   "provenance": "Every case retains university sourceKey, source hash and candidate catalog source path,line,blobSha when matched."
 }

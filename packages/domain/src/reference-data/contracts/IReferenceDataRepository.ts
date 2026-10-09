@@ -41,9 +41,9 @@ export interface IReferenceDataRepository {
 
 export interface ITransactionalReferenceDataRepository extends IReferenceDataRepository {
   upsertRegionInTransaction(data: UpsertAdministrativeRegionDto, actorId: string, context: AtomicPersistenceContext): Promise<AdministrativeRegionDto>;
-  upsertCountryInTransaction(data: UpsertReferenceCountryDto, context: AtomicPersistenceContext): Promise<ReferenceCountryDto>;
-  upsertCurrencyInTransaction(data: UpsertReferenceCurrencyDto, context: AtomicPersistenceContext): Promise<ReferenceCurrencyDto>;
-  upsertLanguageInTransaction(data: UpsertReferenceLanguageDto, context: AtomicPersistenceContext): Promise<ReferenceLanguageDto>;
-  upsertCityInTransaction(data: UpsertReferenceCityDto, context: AtomicPersistenceContext): Promise<ReferenceCityDto>;
+  upsertCountryInTransaction(data: UpsertReferenceCountryDto, context: AtomicPersistenceContext, actorId?: string, correlationId?: string): Promise<ReferenceCountryDto>;
+  upsertCurrencyInTransaction(data: UpsertReferenceCurrencyDto, context: AtomicPersistenceContext, actorId?: string, correlationId?: string): Promise<ReferenceCurrencyDto>;
+  upsertLanguageInTransaction(data: UpsertReferenceLanguageDto, context: AtomicPersistenceContext, actorId?: string, correlationId?: string): Promise<ReferenceLanguageDto>;
+  upsertCityInTransaction(data: UpsertReferenceCityDto, context: AtomicPersistenceContext, actorId?: string, correlationId?: string): Promise<ReferenceCityDto>;
   transitionReferenceLifecycleInTransaction(command: ReferenceLifecycleTransitionCommand, context: AtomicPersistenceContext): Promise<void>;
 }
