@@ -7,6 +7,23 @@ const source = new ImportSourceDefinition({ sourceId: 's', displayName: 'S', bas
 class FakeExecutor implements IPinnedSourceRequestExecutor { calls: PinnedSourceRequest[] = []; constructor(private readonly responses: Array<PinnedSourceResponse | Error>) {} async execute(request: PinnedSourceRequest) { this.calls.push(request); const value = this.responses.shift(); if (value instanceof Error) throw value; if (!value) throw new Error('NO_FIXTURE'); return value; } }
 const policy = (address = '93.184.216.34') => new SourceNetworkSecurityPolicy({ resolve: async (hostname) => hostname === 'private.example' ? ['127.0.0.1'] : [address] }); const redirect = (location?: string): PinnedSourceResponse => ({ statusCode: 302, location, rawBytes: new Uint8Array() }); const ok: PinnedSourceResponse = { statusCode: 200, rawBytes: new Uint8Array([1]) };
 describe('NodeSafeSourceHttpTransport offline behavior', () => {
+  it('blocks restricted sources even if a caller invokes raw transport without connector selection', async () => {
+    for (const [classification, reason] of [
+      [SourceAccessClassification.MANUAL_ONLY, 'SOURCE_MANUAL_ONLY_NETWORK_FORBIDDEN'],
+      [SourceAccessClassification.AUTHORIZED_ACCOUNT, 'SOURCE_AUTHORIZED_ACCOUNT_CAPABILITY_REQUIRED'],
+      [SourceAccessClassification.DATA_AGREEMENT, 'SOURCE_DATA_AGREEMENT_APPROVAL_REQUIRED'],
+      [SourceAccessClassification.PUBLIC_ROBOTS_RESTRICTED, 'SOURCE_ROBOTS_POLICY_DECISION_REQUIRED'],
+    ] as const) {
+      const executor = new FakeExecutor([ok]);
+      const restricted = new ImportSourceDefinition({
+        ...source, accessClassification: classification,
+        metadata: { approved: true, ...source.metadata },
+      });
+      await expect(new NodeSafeSourceHttpTransport(policy(), executor).get(restricted, {}))
+        .rejects.toThrow(reason);
+      expect(executor.calls).toHaveLength(0);
+    }
+  });
   it('follows same-scope redirects and pins the validated address', async () => { const executor = new FakeExecutor([redirect('/catalog/final'), ok]); const result = await new NodeSafeSourceHttpTransport(policy(), executor).get(source, {}); expect(result.finalUrl).toBe('https://safe.example/catalog/final'); expect(executor.calls.map((call) => call.pinnedAddress)).toEqual(['93.184.216.34','93.184.216.34']); });
   it('rejects redirect outside the allowed origin', async () => { await expect(new NodeSafeSourceHttpTransport(policy(), new FakeExecutor([redirect('https://evil.example/catalog/a')])).get(source, {})).rejects.toThrow('SOURCE_URL_OUT_OF_SCOPE'); });
   it('rejects redirect resolving to loopback', async () => { const scoped = new ImportSourceDefinition({ ...source, metadata: { allowedUrlScope: { allowedOrigins: ['https://safe.example','https://private.example'], allowedPathPrefixes: ['/catalog/'] } } }); await expect(new NodeSafeSourceHttpTransport(policy(), new FakeExecutor([redirect('https://private.example/catalog/a')])).get(scoped, {})).rejects.toThrow('SOURCE_ADDRESS_BLOCKED'); });
