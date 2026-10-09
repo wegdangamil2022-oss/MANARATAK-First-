@@ -7,7 +7,7 @@ User direction (2026-10-09): finish Section 05 source fixes in three sessions. P
 | Session | Scope | Status |
 | --- | --- | --- |
 | 1 | Atomic structured worker failure evidence; stable work-item pagination; bounded staging dedup memory; retry backoff/Retry-After; concurrent local upstream limiter; retry policy validation | Implemented; targeted source verification recorded in the implementation log |
-| 2 | Complete owner receipt/reconciliation source contracts and authorized resolution; EAP-backed artifact/streaming entry point and truthful format capabilities; source control-plane authoring and execution authorization | Pending |
+| 2 | EAP-backed artifact streaming, truthful capabilities, Admin artifact flow and atomic generic source create/detail/edit | Implemented and locally verified; owner receipt/resolution and full source execution workflows remain open |
 | 3 | Remaining source governance/compliance integrations, conditional acquisition, distributed production limiter, drift/fallback decisions; retention/provenance/API contracts; Admin operations and FGA features; final source closure reconciliation | Pending |
 
 The second and third sessions must inspect the actual source against every original finding. Do not treat a deny-default guard or an interface alone as a completed functional feature. Do not call the section closed merely because three sessions elapsed.
@@ -48,3 +48,7 @@ Final Session 3 output must give a source-backed disposition for every row, comm
 ## Inherited repository gates to track separately
 
 Session 1 reproduced the baseline W2 asset purge/migration-authority failures and 18 migration metadata violations in six already committed Section 03/04 migrations. Preserve historical SQL/checksums. These are separately recorded repository-wide blockers; no production readiness or blanket full-repository PASS is implied by Section 05's focused tests. See `evidence/section-05/session-01/README.md` for baseline/current evidence.
+
+## Session 2 disposition
+
+Implemented artifact acquisition/staging and generic source authoring are documented in Batch 17 and [Session 2 evidence](evidence/section-05/session-02/README.md). Original findings are not blanket closed: IMP-P0-005 owner receipts/resolution and IMP-P1-014 test/run/control UI remain source work for Session 3. New staging crash recovery, safe dedup reservation cleanup, finalization/enqueue repair, temporary spool orphan retention/concurrent disk budget and CSV byte offsets also need explicit disposition. Session 3 must reconcile these with every row above before any source closure claim. Current section status remains IN PROGRESS.

@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, readFile, rename, rm, stat } from 'fs/promises';
+import { mkdir, open, readFile, rename, rm, stat } from 'fs/promises';
 import * as path from 'path';
 import {
   IAssetStorageGateway,
@@ -89,6 +89,26 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
       await checkRecovered(); // Concurrent retry may have completed the same move.
     }
     return cleanLocator;
+  }
+
+  async *openRead(locator: AssetStorageLocator, maxBytes: number): AsyncIterable<Uint8Array> {
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > 64 * 1024 * 1024)
+      throw new Error('ASSET_READ_MAX_BYTES_INVALID');
+    const handle = await open(this.resolveLocator(locator), 'r');
+    try {
+      const info = await handle.stat();
+      if (!info.isFile()) throw new Error('ASSET_STORAGE_LOCATOR_NOT_FILE');
+      if (info.size > maxBytes) throw new Error('ASSET_READ_SIZE_LIMIT_EXCEEDED');
+      const stream = handle.createReadStream({ highWaterMark: 64 * 1024, autoClose: false });
+      let total = 0;
+      try {
+        for await (const chunk of stream) {
+          total += chunk.length;
+          if (total > maxBytes) throw new Error('ASSET_READ_SIZE_LIMIT_EXCEEDED');
+          yield new Uint8Array(chunk);
+        }
+      } finally { stream.destroy(); }
+    } finally { await handle.close(); }
   }
 
   async read(locator: AssetStorageLocator, maxBytes: number): Promise<Uint8Array> {

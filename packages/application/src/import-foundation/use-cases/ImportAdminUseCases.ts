@@ -1,5 +1,7 @@
 import {
   ImportCheckpoint,
+  ImportParseError,
+  ParsedImportRow,
   ImportJobStatus,
   ImportRecordStatus,
   ImportTargetDomain,
@@ -13,6 +15,8 @@ import { ImportHandoffDispatcher } from '../services/ImportHandoffDispatcher';
 import { ImportWorkerProtocol } from './ImportWorkerProtocol';
 
 type ImportRepository = {
+  finalizeStagedStream?(batchId: string, count: number): Promise<void>;
+  rejectStagedStream?(batchId: string): Promise<void>;
   createBatch(data: Record<string, unknown>): Promise<any>;
   createRecord(data: Record<string, unknown>): Promise<any>;
   bulkCreateRecords?(records: Array<Record<string, unknown>>): Promise<{ count: number; acceptedRecordIds?: string[] }>;
@@ -252,6 +256,9 @@ export class ImportAdminUseCases {
           ownerDomain: resolvedDomain,
           stagingReady: true,
           handoffReady,
+          handoffEffectMode: handoffReady ? 'SCREENING_ONLY' : null,
+          canonicalMutationReady: false,
+          transactionalOwnerReceiptReady: false,
           integrationMode: handoffReady ? 'DOMAIN_HANDOFF_READY' : 'STAGING_ONLY',
           semanticPromotionOwner: 'OWNING_DOMAIN',
         };
@@ -464,6 +471,76 @@ export class ImportAdminUseCases {
           batchStatus: 'FAILED',
         });
       }
+      throw error;
+    }
+  }
+
+  /** Stage bounded chunks without invoking any owner. Only a fully parsed artifact becomes claimable. */
+  async stageNormalizedStream(input: Omit<StageImportRowsInput, 'rows' | 'validationIssues'> & {
+    rows: AsyncIterable<ParsedImportRow | ImportParseError>;
+  }) {
+    const repository = this.importRepository;
+    if (!this.importQueueGateway || !this.importWorkerProtocol || !repository.bulkCreateRecords ||
+        !repository.finalizeStagedStream || !repository.rejectStagedStream)
+      throw new Error('IMPORT_STREAM_DURABLE_COMPOSITION_REQUIRED');
+    const ownerDomain = this.resolveOwnerDomain(input.ownerDomain);
+    const batch = await repository.createBatch({ sourceSystem: input.sourceSystem, dataType: ownerDomain,
+      batchStatus: ImportJobStatus.CREATED, totalRecords: 0, processedRecords: 0, failedRecords: 0 });
+    const envelopeInput: StageImportRowsInput = { ...input, ownerDomain, rows: [] };
+    let received = 0; let staged = 0; let skipped = 0; let invalid = 0;
+    let chunk: Array<Record<string, unknown>> = [];
+    let seen = new Set<string>();
+    const flush = async () => {
+      if (!chunk.length) return;
+      const result = await repository.bulkCreateRecords!(chunk);
+      if (!result.acceptedRecordIds || result.acceptedRecordIds.length !== result.count)
+        throw new Error('IMPORT_BULK_ACCEPTANCE_IDS_REQUIRED');
+      const accepted = new Set(result.acceptedRecordIds);
+      if (accepted.size !== result.count || [...accepted].some(id => !chunk.some(record => record.id === id)))
+        throw new Error('IMPORT_BULK_ACCEPTANCE_COUNT_MISMATCH');
+      staged += result.count; skipped += chunk.length - result.count;
+      invalid += chunk.filter(row => accepted.has(String(row.id)) && row.status === 'STAGING_INVALID').length;
+      chunk = []; seen = new Set();
+    };
+    try {
+      for await (const item of input.rows) {
+        if (++received > 100_000) throw new Error('IMPORT_ARTIFACT_ROW_LIMIT');
+        if (item instanceof ImportParseError && !item.recoverable) throw new Error(item.code);
+        const payload = item instanceof ParsedImportRow ? item.raw : {};
+        if (Object.keys(payload).some(key => key.startsWith('_phase6') ||
+            ['__proto__', 'constructor', 'prototype', '_domainHandoff', '_sourceRowNumber', '_payloadFingerprint'].includes(key)))
+          throw new Error('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
+        if (Buffer.byteLength(JSON.stringify(payload), 'utf8') > 1024 * 1024) throw new Error('IMPORT_ROW_SIZE_LIMIT');
+        const rowNumber = item.sourceRowNumber ?? received;
+        const issues = item instanceof ImportParseError ? [{ code: item.code, severity: 'ERROR' }] : [];
+        const identity = ImportSourceIdentity.create({ sourceSystem: input.sourceSystem, ownerDomain,
+          payload: item instanceof ImportParseError ? { parseError: item.code, parseErrorSourceRow: rowNumber } : payload });
+        if (seen.has(identity.sourceDedupKey)) { skipped++; continue; }
+        seen.add(identity.sourceDedupKey);
+        const envelope = item instanceof ParsedImportRow
+          ? this.buildHandoffEnvelope(envelopeInput, batch.id, rowNumber, identity, payload, [], 'VALID') : undefined;
+        chunk.push({ id: `rec-${uuidv4()}`, batchId: batch.id,
+          status: issues.length ? 'STAGING_INVALID' : 'STAGING_PENDING',
+          rawPayload: { ...payload, _sourceRowNumber: rowNumber, _payloadFingerprint: identity.payloadFingerprint,
+            ...(envelope ? { _phase6HandoffEnvelope: envelope, _phase6HandoffState: 'PENDING_HANDOFF' } : {}) },
+          sourceDedupKey: identity.sourceDedupKey, sourceRowNumber: rowNumber,
+          chunkIndex: Math.floor((received - 1) / 500), recordOffset: item.recordOffset,
+          validationErrors: issues.length ? issues : null,
+        });
+        if (chunk.length >= 500) await flush();
+      }
+      await flush();
+      if (!received) throw new Error('IMPORT_ARTIFACT_EMPTY');
+      await repository.finalizeStagedStream(batch.id, staged);
+      await this.importQueueGateway.enqueueImportJob({ batchId: batch.id, targetDomain: this.toTargetDomain(ownerDomain),
+        sourceSystem: input.sourceSystem, metadata: { stagingMode: 'VERIFIED_ARTIFACT_STREAM' } });
+      const status = await this.importQueueGateway.getJobStatus(batch.id);
+      if (!status || status.status === ImportJobStatus.CREATED) throw new Error('IMPORT_STREAM_QUEUE_NOT_ACCEPTED');
+      return { batchId: batch.id, status: status.status, summary: {
+        receivedRecords: received, stagedRecords: staged, skippedDuplicates: skipped, invalidRecords: invalid,
+      } };
+    } catch (error) {
+      await repository.rejectStagedStream(batch.id);
       throw error;
     }
   }

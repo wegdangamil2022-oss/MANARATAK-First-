@@ -48,6 +48,7 @@ import {
   Wrench,
   X,
 } from 'lucide-react';
+import { AssetPicker } from '../components/AssetPicker';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
@@ -2275,6 +2276,11 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </div>
       </section>
 
+      <VerifiedArtifactPanel key={fixedDomain ?? 'SCHOLARSHIPS'} ownerDomain={fixedDomain ?? 'SCHOLARSHIPS'}
+        isArabic={isArabic} onStaged={async batchId => {
+          setSelectedBatchId(batchId);
+          await refreshAll(false);
+        }} />
       {showImportModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1730]/70 p-3 backdrop-blur-sm"
@@ -3254,4 +3260,77 @@ function formatDate(value: string | undefined | null, isArabic: boolean) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(date);
+}
+
+
+function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
+  ownerDomain: Exclude<DomainKey, 'ALL'>; isArabic: boolean; onStaged: (batchId: string) => Promise<void>;
+}) {
+  const [assetId, setAssetId] = useState('');
+  const [format, setFormat] = useState<'csv' | 'ndjson'>('csv');
+  const [domain, setDomain] = useState(ownerDomain);
+  const [proof, setProof] = useState<{ assetId: string; expectedSha256: string; ownerDomain: string;
+    format: 'csv' | 'ndjson'; validRows: number; invalidRows: number } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const inFlight = useRef(false);
+  const generation = useRef(0);
+  useEffect(() => () => { generation.current++; }, []);
+  const clear = () => { generation.current++; setProof(null); setMessage(''); };
+  const execute = async (stage: boolean) => {
+    if (inFlight.current || !assetId || (stage && !proof)) return;
+    const requestGeneration = generation.current;
+    inFlight.current = true; setBusy(true); setMessage('');
+    try {
+      if (stage && proof) {
+        const { validRows: _valid, invalidRows: _invalid, ...body } = proof;
+        const result = await adminApiClient.request<{ batchId: string; status: string }>('/admin/imports/artifacts',
+          { method: 'POST', body: JSON.stringify(body) });
+        if (requestGeneration !== generation.current) return;
+        setProof(null);
+        setMessage(isArabic ? `تم تجهيز الدفعة: ${result.status}` : `Batch staged: ${result.status}`);
+        await onStaged(result.batchId);
+      } else {
+        const evidence = await adminApiClient.request<{ expectedSha256: string }>('/admin/imports/artifacts/inspect',
+          { method: 'POST', body: JSON.stringify({ assetId }) });
+        const body = { assetId, expectedSha256: evidence.expectedSha256, ownerDomain: domain, format };
+        const result = await adminApiClient.request<{ validRows: number; invalidRows: number }>('/admin/imports/artifacts/preflight',
+          { method: 'POST', body: JSON.stringify(body) });
+        if (requestGeneration === generation.current) setProof({ ...body, validRows: result.validRows, invalidRows: result.invalidRows });
+      }
+    } catch {
+      if (requestGeneration === generation.current) {
+        setProof(null);
+        setMessage(isArabic ? 'تعذر إتمام الطلب. تحقق من ملكية الملف واعتماده وصحة التنسيق، ثم أعد الفحص.'
+          : 'Request failed. Check file ownership, approval and format, then preflight again.');
+      }
+    } finally {
+      inFlight.current = false;
+      if (requestGeneration === generation.current) setBusy(false);
+    }
+  };
+  return <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
+    <h2 className="font-black">{isArabic ? 'استيراد ملف معتمد' : 'Import an approved file'}</h2>
+    <p className="text-sm">{isArabic ? 'اختر ملف CSV أو NDJSON من أصولك المعتمدة، وافحصه قبل التجهيز. القبول والنشر يقررهما القسم المالك.'
+      : 'Select your approved CSV or NDJSON asset and preflight before staging. The owner decides acceptance and publication.'}</p>
+    <fieldset disabled={busy} className="space-y-3">
+      <AssetPicker value={assetId} purpose="IMPORT_ARTIFACT" label={isArabic ? 'الملف' : 'File'}
+        onChange={id => { clear(); setAssetId(id); }} />
+      <label>{isArabic ? 'التنسيق' : 'Format'} <select value={format} onChange={event => {
+        clear(); setFormat(event.target.value as 'csv' | 'ndjson');
+      }}><option value="csv">CSV</option><option value="ndjson">NDJSON</option></select></label>
+      <label>{isArabic ? 'القسم المالك' : 'Owner domain'} <select value={domain} onChange={event => {
+        clear(); setDomain(event.target.value as Exclude<DomainKey, 'ALL'>);
+      }}>{DOMAIN_CONFIG.map(item =>
+        <option key={item.key} value={item.key}>{isArabic ? item.ar : item.en}</option>)}</select></label>
+      <button type="button" disabled={!assetId || busy} onClick={() => void execute(false)}
+        className="rounded-lg border px-4 py-2">{isArabic ? 'فحص الملف' : 'Preflight file'}</button>
+      <button type="button" disabled={!proof || busy} onClick={() => void execute(true)}
+        className="rounded-lg border px-4 py-2">{isArabic ? 'تجهيز الدفعة' : 'Stage batch'}</button>
+    </fieldset>
+    {busy && <p role="status">{isArabic ? 'جارٍ معالجة الملف…' : 'Processing file…'}</p>}
+    {proof && <p role="status">{isArabic ? 'نتيجة فحص التنسيق' : 'Format preflight'}: {proof.validRows} / {proof.invalidRows}
+      {' '}{isArabic ? '(صحيحة / تحتاج مراجعة)' : '(valid / review needed)'}</p>}
+    {message && <p role="status">{message}</p>}
+  </section>;
 }

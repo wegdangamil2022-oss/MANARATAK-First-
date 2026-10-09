@@ -26,7 +26,7 @@ export class NdjsonImportStreamParser implements IImportStreamParser {
     const chunkSize = context.chunkSize || 1000;
     let recordOffset = 0;
 
-    const decoder = new TextDecoder('utf-8');
+    const decoder = new TextDecoder('utf-8', { fatal: true });
 
     for await (const chunk of input as AsyncIterable<Uint8Array>) {
       const text = typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true });
@@ -34,6 +34,7 @@ export class NdjsonImportStreamParser implements IImportStreamParser {
 
       let newlineIndex;
       while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+        if (Buffer.byteLength(buffer.slice(0, newlineIndex), 'utf8') > 1024 * 1024) throw new Error('IMPORT_ROW_SIZE_LIMIT');
         const line = buffer.slice(0, newlineIndex);
         buffer = buffer.slice(newlineIndex + 1);
         
@@ -48,6 +49,7 @@ export class NdjsonImportStreamParser implements IImportStreamParser {
 
         yield this.processLine(trimmed, sourceRowNumber, currentOffset, context.batchId, chunkSize);
       }
+      if (Buffer.byteLength(buffer, 'utf8') > 1024 * 1024) throw new Error('IMPORT_ROW_SIZE_LIMIT');
     }
 
     buffer += decoder.decode();

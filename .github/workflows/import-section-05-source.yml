@@ -11,6 +11,11 @@ on:
       - 'packages/infrastructure/src/import-foundation/**'
       - 'packages/infrastructure/tests/import-foundation/**'
       - 'packages/domain/src/import-foundation/**'
+      - 'packages/domain/src/asset-platform/gateways/IAssetStorageGateway.ts'
+      - 'packages/infrastructure/src/asset-platform/**'
+      - 'packages/infrastructure/src/provider-http/**'
+      - 'packages/infrastructure/tests/asset-platform/HttpAssetSecurityGateways.spec.ts'
+      - 'apps/api/src/infrastructure/di/container.ts'
       - 'packages/domain/src/index.ts'
       - 'packages/domain/tests/import-foundation/**'
       - 'apps/api/src/presentation/api/router/ImportAdminRouter.ts'
@@ -38,6 +43,11 @@ jobs:
       - name: Focused import identities, queue, lease, handoff and SSRF regressions
         run: >-
           npx --no-install vitest run --config vitest.config.ts
+          packages/infrastructure/tests/import-foundation/VerifiedArtifactImport.spec.ts
+          packages/application/tests/import-foundation/CsvImportStreamParser.spec.ts
+          packages/application/tests/import-foundation/NdjsonImportStreamParser.spec.ts
+          packages/application/tests/import-foundation/ImportParserRegistry.spec.ts
+          packages/infrastructure/tests/asset-platform/HttpAssetSecurityGateways.spec.ts
           packages/infrastructure/tests/import-foundation/ProcessImportJobUseCase.integration.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaSourceRegistryGateway.spec.ts
           packages/infrastructure/tests/import-foundation/ImportIdentifierSafety.spec.ts

@@ -1,3 +1,4 @@
+import { ImportArtifactUseCase, ImportSourceControlUseCases, ImportParserRegistry, CsvImportStreamParser, NdjsonImportStreamParser } from '@manaratak/application';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -126,7 +127,7 @@ import {
   PrismaAcademicTaxonomyRepository,
   DegreeLevelRepository,
   PrismaScholarshipCanonicalLookupGateway,
-  NodeSafeSourceHttpTransport, SourceAcquisitionLimiter,
+  VerifiedImportArtifactGateway, NodeSafeSourceHttpTransport, SourceAcquisitionLimiter,
   StaticHtmlSourceConnector, SitemapSourceConnector, OfficialFeedSourceConnector, OfficialApiSourceConnector, ManualUploadSourceConnector, InMemorySourceRegistryGateway, PrismaSourceRegistryGateway, PrismaScholarshipImportVerificationDecisionPort, PrismaScholarshipImportCanonicalResolutionDecisionPort, InMemoryScholarshipImportVerificationDecisionPort, InMemoryScholarshipImportCanonicalResolutionDecisionPort
 , PrismaSessionManager, PrismaCredentialVerifier, PrismaAIPlatformRepository, createDefaultAIProviderRegistry, EnvironmentAIAsyncPayloadProtector, JwtTokenProvider, generateEphemeralJwtKeySet, PrismaNotificationIntentRepository, PrismaNotificationTemplateRepository, PrismaStudentNotificationPreferenceGateway, ProviderNotificationDeliveryGateway} from '@manaratak/infrastructure';
 
@@ -569,6 +570,16 @@ export function registerDependencies(
     sourceAcquisitionLimiter: asFunction(() => new SourceAcquisitionLimiter()).singleton(),
     acquireImportSourceUseCase: asFunction(({ sourceConnectorRegistry, importRawSnapshotStore, sourceAcquisitionLimiter }) =>
       new AcquireImportSourceUseCase(sourceConnectorRegistry, importRawSnapshotStore, sourceAcquisitionLimiter)).scoped(),
+    importParserRegistry: asFunction(() => {
+      const registry = new ImportParserRegistry();
+      registry.register(new CsvImportStreamParser()); registry.register(new NdjsonImportStreamParser());
+      return registry;
+    }).singleton(),
+    verifiedImportArtifactGateway: asFunction(({ assetStorageGateway }) => new VerifiedImportArtifactGateway(assetStorageGateway)).singleton(),
+    importArtifactUseCase: asFunction(({ assetReferencePolicy, verifiedImportArtifactGateway, importParserRegistry, importAdminUseCases }) =>
+      new ImportArtifactUseCase(assetReferencePolicy, verifiedImportArtifactGateway, importParserRegistry, importAdminUseCases)).scoped(),
+    importSourceControlUseCases: asFunction(({ sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator }) =>
+      new ImportSourceControlUseCases(sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator)).scoped(),
     sourceRegistryGateway: asFunction(({ prisma }) => isPrisma ? new PrismaSourceRegistryGateway(prisma) : new InMemorySourceRegistryGateway()).singleton(),
     scholarshipSourceRegistryService: asFunction(({ sourceRegistryGateway }) => new ScholarshipSourceRegistryService(sourceRegistryGateway)).singleton(),
     scholarshipAcquisitionPlanner: asFunction(({ scholarshipSourceRegistryService }) => new ScholarshipAcquisitionPlanner(scholarshipSourceRegistryService)).singleton(),

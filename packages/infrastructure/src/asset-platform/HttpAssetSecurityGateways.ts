@@ -172,6 +172,12 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     return locator;
   }
 
+  async *openRead(locator: AssetStorageLocator, maxBytes: number): AsyncIterable<Uint8Array> {
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > 64 * 1024 * 1024)
+      throw new Error('ASSET_READ_MAX_BYTES_INVALID');
+    yield* this.client.streamBytes('POST', '/v1/assets/read', { locator: locatorPayload(locator), maxBytes }, maxBytes);
+  }
+
   async read(locator: AssetStorageLocator, maxBytes: number): Promise<Uint8Array> {
     if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > 64 * 1024 * 1024) throw new Error('ASSET_READ_MAX_BYTES_INVALID');
     const data = await this.client.bytes('POST', '/v1/assets/read', { locator: locatorPayload(locator), maxBytes });

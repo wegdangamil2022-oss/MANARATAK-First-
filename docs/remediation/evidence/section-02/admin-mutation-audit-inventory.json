@@ -5162,6 +5162,86 @@
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
       "source": "apps/api/src/presentation/api/router/UniversityAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/imports/artifacts",
+      "owner": "ImportAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:imports:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/imports/artifacts/inspect",
+      "owner": "ImportAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:imports:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/imports/artifacts/preflight",
+      "owner": "ImportAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:imports:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/imports/sources",
+      "owner": "ImportAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:imports:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/imports/sources/:sourceId",
+      "owner": "ImportAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:imports:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
     }
   ],
   "knownRouteCollisions": [

@@ -43,6 +43,7 @@ export interface IAssetStorageGateway {
   verifyUploadedObject?(locator: AssetStorageLocator, request: AssetUploadVerificationRequest): Promise<VerifiedAssetUpload>;
   /** With expectedSha256, promotion MUST durably replay the same source+digest result on retry, even after source removal. */
   moveToCleanZone(quarantineLocator: AssetStorageLocator, expectedSha256?: string): Promise<AssetStorageLocator>;
+  openRead?(locator: AssetStorageLocator, maxBytes: number): AsyncIterable<Uint8Array>;
   read?(locator: AssetStorageLocator, maxBytes: number): Promise<Uint8Array>;
   archive(locator: AssetStorageLocator): Promise<void>;
   restore(locator: AssetStorageLocator): Promise<void>;

@@ -21,8 +21,10 @@ export class CsvImportStreamParser implements IImportStreamParser {
     input: AsyncIterable<Uint8Array> | NodeJS.ReadableStream,
     context: ImportStreamParserContext
   ): AsyncIterable<ParsedImportRow | ImportParseError> {
-    const decoder = new TextDecoder('utf-8');
+    const decoder = new TextDecoder('utf-8', { fatal: true });
     let inQuotes = false;
+    let closedQuote = false;
+    let rowBytes = 0;
     let currentCell = '';
     let currentRow: string[] = [];
     let headers: string[] | null = null;
@@ -32,8 +34,9 @@ export class CsvImportStreamParser implements IImportStreamParser {
     let buffer = '';
     
     const processRow = function* (): Generator<ParsedImportRow | ImportParseError> {
+      rowBytes = 0;
+      closedQuote = false;
       if (currentRow.length === 0 && currentCell === '') return;
-      
       currentRow.push(currentCell);
       currentCell = '';
       
@@ -46,7 +49,12 @@ export class CsvImportStreamParser implements IImportStreamParser {
       const chunkIndex = Math.floor((sourceRowNumber - 1) / chunkSize);
 
       if (!headers) {
-        headers = [...currentRow];
+        headers = currentRow.map(value => value.trim());
+        if (headers.some(value => ['__proto__', 'prototype', 'constructor', '_domainHandoff',
+            '_sourceRowNumber', '_payloadFingerprint'].includes(value) || value.startsWith('_phase6')))
+          throw new Error('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
+        if (headers.length > 256 || headers.some(value => !value || value.length > 240) ||
+            new Set(headers).size !== headers.length) throw new Error('CSV_HEADERS_INVALID');
       } else {
         if (currentRow.length !== headers.length) {
           yield new ImportParseError({
@@ -59,7 +67,7 @@ export class CsvImportStreamParser implements IImportStreamParser {
             rawFragment: currentRow.join(',').slice(0, 500)
           });
         } else {
-          const raw: Record<string, unknown> = {};
+          const raw: Record<string, unknown> = Object.create(null);
           for (let j = 0; j < headers.length; j++) {
             raw[headers[j]] = currentRow[j];
           }
@@ -81,6 +89,8 @@ export class CsvImportStreamParser implements IImportStreamParser {
       
       let i = 0;
       while (i < buffer.length) {
+        rowBytes += Buffer.byteLength(buffer[i], 'utf8');
+        if (rowBytes > 1024 * 1024 || currentRow.length > 256) throw new Error('IMPORT_ROW_SIZE_LIMIT');
         const char = buffer[i];
         
         if (inQuotes && char === '"') {
@@ -90,11 +100,13 @@ export class CsvImportStreamParser implements IImportStreamParser {
           const nextChar = buffer[i + 1];
           if (nextChar === '"') {
             currentCell += '"';
+            if (++rowBytes > 1024 * 1024) throw new Error('IMPORT_ROW_SIZE_LIMIT');
             i += 2;
             recordOffset += 2;
             continue;
           } else {
             inQuotes = false;
+            closedQuote = true;
             i++;
             recordOffset++;
             continue;
@@ -107,6 +119,7 @@ export class CsvImportStreamParser implements IImportStreamParser {
           }
           const nextChar = buffer[i + 1];
           if (nextChar === '\n') {
+             if (++rowBytes > 1024 * 1024) throw new Error('IMPORT_ROW_SIZE_LIMIT');
              yield* processRow();
              i += 2;
              recordOffset += 2;
@@ -121,9 +134,12 @@ export class CsvImportStreamParser implements IImportStreamParser {
         if (inQuotes) {
           currentCell += char;
         } else {
+          if (closedQuote && char !== ',' && char !== '\n' && char !== '\r') throw new Error('CSV_TRAILING_QUOTED_CONTENT');
           if (char === '"') {
+            if (currentCell !== '') throw new Error('CSV_UNEXPECTED_QUOTE');
             inQuotes = true;
           } else if (char === ',') {
+            closedQuote = false;
             currentRow.push(currentCell);
             currentCell = '';
           } else if (char === '\n') {
@@ -144,11 +160,14 @@ export class CsvImportStreamParser implements IImportStreamParser {
 
     let i = 0;
     while (i < buffer.length) {
+        rowBytes += Buffer.byteLength(buffer[i], 'utf8');
+        if (rowBytes > 1024 * 1024 || currentRow.length > 256) throw new Error('IMPORT_ROW_SIZE_LIMIT');
         const char = buffer[i];
         
         if (inQuotes && char === '"') {
           if (i + 1 >= buffer.length) {
             inQuotes = false;
+            closedQuote = true;
             i++;
             recordOffset++;
             continue;
@@ -156,11 +175,13 @@ export class CsvImportStreamParser implements IImportStreamParser {
           const nextChar = buffer[i + 1];
           if (nextChar === '"') {
             currentCell += '"';
+            if (++rowBytes > 1024 * 1024) throw new Error('IMPORT_ROW_SIZE_LIMIT');
             i += 2;
             recordOffset += 2;
             continue;
           } else {
             inQuotes = false;
+            closedQuote = true;
             i++;
             recordOffset++;
             continue;
@@ -176,6 +197,7 @@ export class CsvImportStreamParser implements IImportStreamParser {
           }
           const nextChar = buffer[i + 1];
           if (nextChar === '\n') {
+             if (++rowBytes > 1024 * 1024) throw new Error('IMPORT_ROW_SIZE_LIMIT');
              yield* processRow();
              i += 2;
              recordOffset += 2;
@@ -190,9 +212,12 @@ export class CsvImportStreamParser implements IImportStreamParser {
         if (inQuotes) {
           currentCell += char;
         } else {
+          if (closedQuote && char !== ',' && char !== '\n' && char !== '\r') throw new Error('CSV_TRAILING_QUOTED_CONTENT');
           if (char === '"') {
+            if (currentCell !== '') throw new Error('CSV_UNEXPECTED_QUOTE');
             inQuotes = true;
           } else if (char === ',') {
+            closedQuote = false;
             currentRow.push(currentCell);
             currentCell = '';
           } else if (char === '\n') {

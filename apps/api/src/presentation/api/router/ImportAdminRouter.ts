@@ -1,9 +1,12 @@
+import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { readFile } from 'fs/promises';
 import * as path from 'path';
 import { z } from 'zod';
 import {
   CourseImportArtifactUseCase,
+  ImportArtifactUseCase,
+  ImportSourceControlUseCases,
   ImportAdminUseCases,
   MajorImportStagingUseCase,
   type ISourceRegistryGateway,
@@ -14,11 +17,15 @@ import {
   IExternalCourseProviderRepository,
   ImportTargetDomain,
   SourceStatus,
+  SourceAccessClassification,
+  SourceConnectorCategory,
 } from '@manaratak/domain';
 
 export class ImportAdminRouter {
   public static create(cradle: {
     importAdminUseCases: ImportAdminUseCases;
+    importArtifactUseCase?: ImportArtifactUseCase;
+    importSourceControlUseCases?: ImportSourceControlUseCases;
     majorImportStagingUseCase: MajorImportStagingUseCase;
     assetRecordRepository: IAssetRecordRepository;
     assetStorageGateway: IAssetStorageGateway;
@@ -62,6 +69,71 @@ export class ImportAdminRouter {
         Promise.resolve(fn(req, res, next)).catch(next);
       };
 
+    const actor = (req: Request) => requireAuthenticatedPrincipal(req);
+    const artifactBody = z.object({ assetId: z.string().trim().min(1).max(120),
+      ownerDomain: z.nativeEnum(ImportTargetDomain), expectedSha256: z.string().regex(/^[a-f0-9]{64}$/i),
+      format: z.enum(['csv', 'ndjson']) }).strict();
+    router.get('/artifacts/capabilities', asyncHandler(async (_req, res) => {
+      if (!cradle.importArtifactUseCase) return res.status(503).json({ error: 'IMPORT_ARTIFACT_UNAVAILABLE' });
+      return res.json(cradle.importArtifactUseCase.capabilities());
+    }));
+    router.post('/artifacts/inspect', asyncHandler(async (req, res) => {
+      if (!cradle.importArtifactUseCase) return res.status(503).json({ error: 'IMPORT_ARTIFACT_UNAVAILABLE' });
+      const body = z.object({ assetId: z.string().trim().min(1).max(120) }).strict().parse(req.body);
+      return res.json(await cradle.importArtifactUseCase.inspect(body.assetId, actor(req).principalId));
+    }));
+    router.post('/artifacts/preflight', asyncHandler(async (req, res) => {
+      if (!cradle.importArtifactUseCase) return res.status(503).json({ error: 'IMPORT_ARTIFACT_UNAVAILABLE' });
+      return res.json(await cradle.importArtifactUseCase.preflight(artifactBody.parse(req.body), actor(req).principalId));
+    }));
+    router.post('/artifacts', asyncHandler(async (req, res) => {
+      if (!cradle.importArtifactUseCase) return res.status(503).json({ error: 'IMPORT_ARTIFACT_UNAVAILABLE' });
+      const result = await cradle.importArtifactUseCase.stage(artifactBody.parse(req.body), actor(req).principalId);
+      res.setHeader('Location', `/api/v1/admin/imports/queue/jobs/${encodeURIComponent(result.batchId)}`);
+      return res.status(202).json(result);
+    }));
+
+    const sourceIdentifier = z.string().regex(/^[a-zA-Z0-9_-]{1,120}$/);
+    const sourceFields = { sourceId: sourceIdentifier, displayName: z.string().trim().min(1).max(240),
+      baseUrl: z.string().url().max(2000), category: z.nativeEnum(SourceConnectorCategory),
+      accessClassification: z.nativeEnum(SourceAccessClassification), connectorId: z.string().min(1).max(120),
+      connectorVersion: z.string().min(1).max(120), rateLimitPerMinute: z.number().int().min(1).max(60000),
+      robotsPolicyUrl: z.string().url().max(2000).optional(), allowedPathPrefixes: z.array(z.string().min(1).max(500)).max(20),
+      reason: z.string().trim().min(3).max(1000) };
+    router.get('/sources/connectors', asyncHandler(async (_req, res) => {
+      if (!cradle.importSourceControlUseCases) return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
+      return res.json({ data: cradle.importSourceControlUseCases.capabilities() });
+    }));
+    router.get('/sources/:sourceId', asyncHandler(async (req, res) => {
+      if (!cradle.importSourceControlUseCases) return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
+      const source = await cradle.importSourceControlUseCases.get(sourceIdentifier.parse(req.params.sourceId));
+      if (!source) return res.status(404).json({ error: 'IMPORT_SOURCE_NOT_FOUND' });
+      return res.json({ data: source });
+    }));
+    const saveSource = async (req: Request, res: Response, update: boolean) => {
+      if (!cradle.importSourceControlUseCases) return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
+      const body = z.object({ ...sourceFields,
+        ...(update ? { expectedUpdatedAt: z.string().datetime() } : {}) }).strict().parse(req.body);
+      if (update && sourceIdentifier.parse(req.params.sourceId) !== body.sourceId)
+        return res.status(400).json({ error: 'IMPORT_SOURCE_ID_MISMATCH' });
+      const { reason, ...definition } = body;
+      const principal = actor(req);
+      try {
+        const source = await cradle.importSourceControlUseCases.save(definition,
+          update ? String((body as { expectedUpdatedAt?: string }).expectedUpdatedAt) : null, reason,
+          { actorId: principal.principalId, actorType: principal.actorType, source: 'admin-import-source-api' });
+        return res.status(update ? 200 : 201).json({ data: source });
+      } catch (error) {
+        if (error instanceof Error && error.message === 'IMPORT_SOURCE_STATUS_CONFLICT')
+          return res.status(409).json({ error: error.message });
+        if (error instanceof Error && error.message === 'IMPORT_SOURCE_OWNER_WORKSPACE_REQUIRED')
+          return res.status(403).json({ error: error.message });
+        throw error;
+      }
+    };
+    router.post('/sources', asyncHandler(async (req, res) => saveSource(req, res, false)));
+    router.put('/sources/:sourceId', asyncHandler(async (req, res) => saveSource(req, res, true)));
+
     const INLINE_IMPORT_MAX_LENGTH = 90 * 1024; // 90KB max string length
     const DEFAULT_PAGE = 1;
     const DEFAULT_PAGE_SIZE = 50;
@@ -94,7 +166,7 @@ export class ImportAdminRouter {
           .min(1, 'Import text or CSV content is required')
           .refine(
             (value) => Buffer.byteLength(value, 'utf8') <= INLINE_IMPORT_MAX_LENGTH,
-            'Import payload is too large. Large imports must use the future artifact/EAP import flow. Inline dataText is only for small/manual imports.',
+            'Import payload is too large. Large imports must use /admin/imports/artifacts with a verified EAP asset. Inline dataText is only for small/manual imports.',
           ),
         sourceSystem: z.string().trim().min(1).max(120).optional(),
         dataType: z
@@ -767,6 +839,8 @@ export class ImportAdminRouter {
     );
 
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      if (err instanceof Error && err.message === 'AUTHENTICATED_PRINCIPAL_REQUIRED')
+        return res.status(401).json({ error: err.message });
       if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT')
         return res.status(404).json({ error: 'IMPORT_SOURCE_FILE_NOT_FOUND' });
       if (err instanceof z.ZodError) {

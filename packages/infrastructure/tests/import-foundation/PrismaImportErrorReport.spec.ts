@@ -75,11 +75,11 @@ describe('Phase 6 batch and record failure evidence', () => {
     const prisma = { importRecord: { count: vi.fn().mockResolvedValue(205), findMany: vi.fn().mockResolvedValue([]) } };
     await new PrismaImportRepository(prisma as any).listRecords({ batchId: 'batch-1', page: 2, pageSize: 100, workItemsOnly: true });
     expect(prisma.importRecord.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { batchId: 'batch-1', AND: [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'] } }] },
+      where: { batchId: 'batch-1', AND: [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE', 'STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED'] } }] },
       skip: 100, take: 100,
     }));
     expect(prisma.importRecord.count).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({ AND: [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'] } }] }),
+      where: expect.objectContaining({ AND: [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE', 'STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED'] } }] }),
     }));
   });
 

@@ -333,7 +333,10 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
 
     return this.prisma.$transaction(async (client) => {
       const updated = await client.importBatch.updateMany({
-        where: { id: command.batchId, batchStatus: { in: terminalStatuses } },
+        where: { id: command.batchId, batchStatus: { in: terminalStatuses },
+          records: { none: { status: { in: ['STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED'] } } },
+          OR: [{ lastError: null }, { lastError: { not: 'IMPORT_ARTIFACT_STAGING_REJECTED' } }],
+        },
         data: {
           batchStatus: ImportJobStatus.QUEUED,
           availableAt: now,
@@ -459,6 +462,7 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
   private reclaimableWhere(now: Date, batchId?: string): Record<string, unknown> {
     return {
       ...(batchId ? { id: batchId } : {}),
+      records: { none: { status: { in: ['STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED'] } } },
       OR: [
         {
           batchStatus: { in: [ImportJobStatus.QUEUED, ImportJobStatus.FAILED_RETRYABLE] },

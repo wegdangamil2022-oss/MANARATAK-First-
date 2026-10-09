@@ -6,6 +6,8 @@ import {
 } from '@manaratak/domain';
 
 export interface ISourceRegistryGateway {
+  withTransaction?(context: import('@manaratak/domain').AtomicPersistenceContext): ISourceRegistryGateway;
+  replaceSource?(source: ImportSourceDefinition, expectedUpdatedAt: Date): Promise<void>;
   registerSource(source: ImportSourceDefinition): Promise<void>;
   
   getSource(sourceId: string): Promise<ImportSourceDefinition | null>;

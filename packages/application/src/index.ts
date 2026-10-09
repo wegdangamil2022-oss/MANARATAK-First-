@@ -209,3 +209,7 @@ export * from './identity/use-cases/DisablePasswordCredentialUseCase';
 export * from './import-foundation/services/CanonicalSourceReview';
 
 export * from './background-jobs/handlers/AssetActivationRecoveryBackgroundJobHandler';
+
+export * from './import-foundation/contracts/IVerifiedImportArtifactGateway';
+export * from './import-foundation/use-cases/ImportArtifactUseCase';
+export * from './import-foundation/use-cases/ImportSourceControlUseCases';

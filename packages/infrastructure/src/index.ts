@@ -209,3 +209,5 @@ export * from './students/ScholarshipStudentApplicationTrackerGateway';
 export * from './auth/PrismaPasswordCredentialRepository';
 
 export * from './asset-platform/AssetReferenceIntegrityReadiness';
+
+export * from './import-foundation/VerifiedImportArtifactGateway';

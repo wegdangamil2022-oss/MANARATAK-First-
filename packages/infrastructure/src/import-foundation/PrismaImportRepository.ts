@@ -749,7 +749,7 @@ export class PrismaImportRepository {
         }
         const existing = keys.length
           ? await client.importRecord.findMany({
-              where: { sourceDedupKey: { in: keys } },
+              where: { sourceDedupKey: { in: keys }, status: { not: 'STAGING_REJECTED' } },
               select: { sourceDedupKey: true },
             })
           : [];
@@ -791,7 +791,7 @@ export class PrismaImportRepository {
     // Development-only repository: JS synchronous critical section, not a
     // distributed locking implementation; production must use PostgreSQL.
     const existingKeys = new Set([...this.inMemoryRecords.values()]
-      .map(item => item.sourceDedupKey).filter(Boolean));
+      .filter(item => item.status !== 'STAGING_REJECTED').map(item => item.sourceDedupKey).filter(Boolean));
     const acceptedRecordIds: string[] = [];
     for (const record of recordsWithIds) {
       if (record.sourceDedupKey && existingKeys.has(record.sourceDedupKey)) continue;
@@ -836,7 +836,7 @@ export class PrismaImportRepository {
       if (filters?.status) where.status = filters.status;
       if (filters?.workItemsOnly) {
         delete where.status;
-        where.AND = [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'] } }];
+        where.AND = [{ status: { notIn: ['CHECKPOINT', 'DLQ', 'WORKER_FAILURE', 'STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED'] } }];
       }
       if (filters?.dataType) {
         where.batch = { dataType: importDomainFilter(filters.dataType) };
@@ -857,7 +857,7 @@ export class PrismaImportRepository {
 
     let records = Array.from(this.inMemoryRecords.values());
     if (!filters?.status) records = records.filter(r => !['CHECKPOINT', 'WORKER_FAILURE'].includes(r.status));
-    if (filters?.workItemsOnly) records = records.filter(r => !['CHECKPOINT', 'DLQ', 'WORKER_FAILURE'].includes(r.status));
+    if (filters?.workItemsOnly) records = records.filter(r => !['CHECKPOINT', 'DLQ', 'WORKER_FAILURE', 'STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED'].includes(r.status));
     if (filters?.batchId) {
       records = records.filter((r) => r.batchId === filters.batchId);
     }
@@ -967,13 +967,41 @@ export class PrismaImportRepository {
     return this.inMemoryRecords.get(id) || null;
   }
 
+  async finalizeStagedStream(batchId: string, count: number): Promise<void> {
+    if (!this.prisma) throw new Error('IMPORT_STREAM_DURABLE_COMPOSITION_REQUIRED');
+    await this.prisma.$transaction(async tx => {
+      const batch = await tx.importBatch.updateMany({
+        where: { id: batchId, batchStatus: 'CREATED', claimedBy: null, claimUntil: null },
+        data: { totalRecords: count, processedRecords: 0, failedRecords: 0 },
+      });
+      if (batch.count !== 1) throw new Error('IMPORT_STREAM_STATE_CONFLICT');
+      const valid = await tx.importRecord.updateMany({ where: { batchId, status: 'STAGING_PENDING' }, data: { status: 'COMPLETE' } });
+      const invalid = await tx.importRecord.updateMany({ where: { batchId, status: 'STAGING_INVALID' }, data: { status: 'INCOMPLETE' } });
+      if (valid.count + invalid.count !== count) throw new Error('IMPORT_STREAM_ACCEPTANCE_COUNT_MISMATCH');
+    });
+  }
+
+  async rejectStagedStream(batchId: string): Promise<void> {
+    if (!this.prisma) throw new Error('IMPORT_STREAM_DURABLE_COMPOSITION_REQUIRED');
+    await this.prisma.$transaction(async tx => {
+      const updated = await tx.importBatch.updateMany({
+        where: { id: batchId, batchStatus: 'CREATED', claimedBy: null, claimUntil: null },
+        data: { batchStatus: 'FAILED_PERMANENT', lastError: 'IMPORT_ARTIFACT_STAGING_REJECTED' },
+      });
+      // If queue ownership already changed, never overwrite its result.
+      if (!updated.count) return;
+      await tx.importRecord.updateMany({ where: { batchId, promotedEntityId: null,
+        status: { in: ['STAGING_PENDING', 'STAGING_INVALID', 'COMPLETE', 'INCOMPLETE'] } }, data: { status: 'STAGING_REJECTED' } });
+    });
+  }
+
   async findExistingSourceDedupKeys(sourceDedupKeys: string[]): Promise<string[]> {
     const keys = Array.from(new Set(sourceDedupKeys.filter(Boolean)));
     if (keys.length === 0) return [];
 
     if (this.prisma) {
       const rows = await this.prisma.importRecord.findMany({
-        where: { sourceDedupKey: { in: keys } },
+        where: { sourceDedupKey: { in: keys }, status: { not: 'STAGING_REJECTED' } },
         select: { sourceDedupKey: true },
       });
       return Array.from(new Set(rows.map((row: any) => row.sourceDedupKey).filter(Boolean)));
@@ -982,7 +1010,7 @@ export class PrismaImportRepository {
     const requested = new Set(keys);
     const found = new Set<string>();
     for (const record of this.inMemoryRecords.values()) {
-      if (record.sourceDedupKey && requested.has(record.sourceDedupKey))
+      if (record.status !== 'STAGING_REJECTED' && record.sourceDedupKey && requested.has(record.sourceDedupKey))
         found.add(record.sourceDedupKey);
     }
     return Array.from(found);
@@ -990,7 +1018,7 @@ export class PrismaImportRepository {
 
   async findBySourceDedupKey(sourceDedupKey: string, batchId?: string): Promise<any | null> {
     if (this.prisma) {
-      const where: any = { sourceDedupKey };
+      const where: any = { sourceDedupKey, status: { not: 'STAGING_REJECTED' } };
       if (batchId) {
         where.batchId = batchId;
       }
@@ -999,7 +1027,7 @@ export class PrismaImportRepository {
     }
 
     for (const record of this.inMemoryRecords.values()) {
-      if (record.sourceDedupKey === sourceDedupKey) {
+      if (record.sourceDedupKey === sourceDedupKey && record.status !== 'STAGING_REJECTED') {
         if (batchId && record.batchId !== batchId) {
           continue;
         }

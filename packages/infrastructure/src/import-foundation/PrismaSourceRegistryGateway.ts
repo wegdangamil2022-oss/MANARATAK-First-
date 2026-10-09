@@ -1,10 +1,22 @@
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient, Prisma } from '@prisma/client';
 import type { ISourceRegistryGateway } from '@manaratak/application';
 import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
 
 export class PrismaSourceRegistryGateway implements ISourceRegistryGateway {
   public readonly persistenceClassification = 'DURABLE' as const;
   constructor(private readonly prisma: PrismaClient) {}
+  withTransaction(context: import('@manaratak/domain').AtomicPersistenceContext): ISourceRegistryGateway {
+    const tx = (context as unknown as { transactionClient?: Prisma.TransactionClient }).transactionClient;
+    if (!context.boundaryId || !tx) throw new Error('IMPORT_SOURCE_TRANSACTION_REQUIRED');
+    return new PrismaSourceRegistryGateway(tx as unknown as PrismaClient);
+  }
+  async replaceSource(source: ImportSourceDefinition, expectedUpdatedAt: Date): Promise<void> {
+    if (typeof this.prisma.$transaction === 'function') throw new Error('IMPORT_SOURCE_TRANSACTION_REQUIRED');
+    const updated = await this.prisma.importSourceRegistryEntry.updateMany({
+      where: { sourceId: source.sourceId, updatedAt: expectedUpdatedAt }, data: this.toData(source),
+    });
+    if (updated.count !== 1) throw new Error('IMPORT_SOURCE_STATUS_CONFLICT');
+  }
   async registerSource(source: ImportSourceDefinition): Promise<void> {
     await this.prisma.importSourceRegistryEntry.create({ data: this.toData(source) });
   }
@@ -52,5 +64,5 @@ export class PrismaSourceRegistryGateway implements ISourceRegistryGateway {
     return true;
   }
   private toData(source: ImportSourceDefinition) { return { sourceId: source.sourceId, displayName: source.displayName, baseUrl: source.baseUrl, category: source.category, accessClassification: source.accessClassification, status: source.status, rateLimitPerMinute: source.rateLimitPerMinute, robotsPolicyUrl: source.robotsPolicyUrl, connectorId: source.connectorId, connectorVersion: source.connectorVersion, metadata: source.metadata as object | undefined }; }
-  private fromRow(row: { sourceId: string; displayName: string; baseUrl: string; category: string; accessClassification: string; status: string; rateLimitPerMinute: number | null; robotsPolicyUrl: string | null; connectorId: string; connectorVersion: string; metadata: unknown }): ImportSourceDefinition { return new ImportSourceDefinition({ sourceId: row.sourceId, displayName: row.displayName, baseUrl: row.baseUrl, category: row.category as SourceConnectorCategory, accessClassification: row.accessClassification as SourceAccessClassification, status: row.status as SourceStatus, rateLimitPerMinute: row.rateLimitPerMinute ?? undefined, robotsPolicyUrl: row.robotsPolicyUrl ?? undefined, connectorId: row.connectorId, connectorVersion: row.connectorVersion, metadata: row.metadata as Record<string, unknown> | undefined }); }
+  private fromRow(row: { sourceId: string; displayName: string; baseUrl: string; category: string; accessClassification: string; status: string; rateLimitPerMinute: number | null; robotsPolicyUrl: string | null; connectorId: string; connectorVersion: string; metadata: unknown; updatedAt?: Date }): ImportSourceDefinition { return new ImportSourceDefinition({ sourceId: row.sourceId, updatedAt: row.updatedAt, displayName: row.displayName, baseUrl: row.baseUrl, category: row.category as SourceConnectorCategory, accessClassification: row.accessClassification as SourceAccessClassification, status: row.status as SourceStatus, rateLimitPerMinute: row.rateLimitPerMinute ?? undefined, robotsPolicyUrl: row.robotsPolicyUrl ?? undefined, connectorId: row.connectorId, connectorVersion: row.connectorVersion, metadata: row.metadata as Record<string, unknown> | undefined }); }
 }

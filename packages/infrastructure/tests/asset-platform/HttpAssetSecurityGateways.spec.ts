@@ -203,3 +203,28 @@ describe('W3 MNT-AUD-0011 production asset provider adapters', () => {
   });
 
 });
+
+describe('bounded signed provider streaming', () => {
+  it('enforces actual streamed bytes and cancels a provider without content-length', async () => {
+    const cancel = vi.fn();
+    const fetchMock = vi.fn(async (_url: any, init: any) => {
+      expect(init.redirect).toBe('error');
+      expect(new Headers(init.headers).get('x-manaratak-signature')).toMatch(/^[a-f0-9]{64}$/);
+      return new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(5)); }, cancel }));
+    });
+    const client = new SignedProviderHttpClient({ ...options(fetchMock as any), maxResponseBytes: 4 });
+    await expect(client.streamBytes('POST', '/v1/assets/read', {})[Symbol.asyncIterator]().next()).rejects.toThrow('RESPONSE_TOO_LARGE');
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+  it('cancels the native response when its consumer stops early', async () => {
+    const cancel = vi.fn();
+    const fetchMock = async () => new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array([1])); }, cancel }));
+    const client = new SignedProviderHttpClient(options(fetchMock as any));
+    for await (const chunk of client.streamBytes('GET', '/v1/read')) { expect(chunk[0]).toBe(1); break; }
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+  it('rejects a truncated provider response', async () => {
+    const client = new SignedProviderHttpClient(options((async () => new Response('abc', { headers: { 'content-length': '5' } })) as any));
+    await expect(client.bytes('GET', '/v1/read')).rejects.toThrow('LENGTH_MISMATCH');
+  });
+});

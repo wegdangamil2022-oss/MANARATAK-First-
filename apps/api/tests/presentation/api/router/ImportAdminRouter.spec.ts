@@ -228,3 +228,42 @@ describe('ImportAdminRouter', () => {
   });
 
 });
+
+describe('verified artifact and source authoring boundaries', () => {
+  function setup(authenticated = true) {
+    const artifacts = { inspect: vi.fn(async () => ({ assetId: 'a', expectedSha256: '1'.repeat(64) })),
+      preflight: vi.fn(async () => ({ validRows: 1 })), stage: vi.fn(async () => ({ batchId: 'batch-1', status: 'QUEUED' })) };
+    const sources = { save: vi.fn(async () => ({ sourceId: 's', status: 'DISABLED' })) };
+    const app = express(); app.use(express.json());
+    if (authenticated) app.use((req, _res, next) => { req.authUserId = 'server-admin'; next(); });
+    app.use('/admin/imports', ImportAdminRouter.create({ importAdminUseCases: {} as any, majorImportStagingUseCase: {} as any,
+      assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any,
+      importArtifactUseCase: artifacts as any, importSourceControlUseCases: sources as any }));
+    app.use((error: any, _req: any, res: any, _next: any) => res.status(error.message === 'AUTHENTICATED_PRINCIPAL_REQUIRED' ? 401 : 400).json({ error: error.message }));
+    return { app, artifacts, sources };
+  }
+  const body = { assetId: 'a', expectedSha256: '1'.repeat(64), format: 'csv', ownerDomain: 'GENERIC' };
+  it('uses the authenticated actor and returns a queued 202 with job location', async () => {
+    const { app, artifacts } = setup(); const response = await request(app).post('/admin/imports/artifacts').send(body);
+    expect(response.status).toBe(202); expect(response.headers.location).toContain('/queue/jobs/batch-1');
+    expect(artifacts.stage).toHaveBeenCalledWith(body, 'server-admin');
+  });
+  it('denies unauthenticated reads/staging and caller identity/locator injection', async () => {
+    const unauthenticated = setup(false);
+    expect((await request(unauthenticated.app).post('/admin/imports/artifacts').send(body)).status).toBe(401);
+    expect(unauthenticated.artifacts.stage).not.toHaveBeenCalled();
+    const { app, artifacts } = setup();
+    expect((await request(app).post('/admin/imports/artifacts').send({ ...body, actorId: 'forged' })).status).toBe(400);
+    expect((await request(app).post('/admin/imports/artifacts/inspect').send({ assetId: 'a', locator: '/etc/passwd' })).status).toBe(400);
+    expect(artifacts.stage).not.toHaveBeenCalled(); expect(artifacts.inspect).not.toHaveBeenCalled();
+  });
+  it('rejects unsupported advertised formats and forged official source metadata', async () => {
+    const { app, artifacts, sources } = setup();
+    expect((await request(app).post('/admin/imports/artifacts').send({ ...body, format: 'xlsx' })).status).toBe(400);
+    const source = { sourceId: 's', displayName: 'source', baseUrl: 'https://example.org/', category: 'OFFICIAL_API',
+      accessClassification: 'PUBLIC_ALLOWED', connectorId: 'api', connectorVersion: '1', rateLimitPerMinute: 20,
+      allowedPathPrefixes: ['/'], reason: 'reviewed', metadata: { robotsApproved: true } };
+    expect((await request(app).post('/admin/imports/sources').send(source)).status).toBe(400);
+    expect(sources.save).not.toHaveBeenCalled(); expect(artifacts.stage).not.toHaveBeenCalled();
+  });
+});
