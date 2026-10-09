@@ -83,3 +83,9 @@ Source verification is not provider verification. Runtime closure still requires
 - redacted logs containing no signing secret, object credentials or presigned query material.
 
 Until those tests are executed against a real configured provider, `MNT-AUD-0011` must remain `SOURCE_VERIFIED / PROVIDER_RUNTIME_PENDING` rather than production-closed.
+
+## Restore integrity and compensation (source contract)
+
+- Before a DELETED asset becomes ACTIVE, the server calls provider `restore` and then **POST `v1/assets/verify-clean`**, requiring provider-observed digest, byte count, MIME and timestamp. The provider must independently rehash actual restored CLEAN bytes, not merely echo caller evidence. The source adapter rejects missing/contradictory proof.
+- The DB remains DELETED during provider restoration and verification. On verification or DB CAS failure, the application attempts `archive` compensation; if that fails, `ASSET_RESTORE_COMPENSATION_FAILED` is surfaced and requires manual reconciliation.
+- This compensation is **best effort**, not a cross-provider atomic transaction. Race-safe purge-vs-restore locking, immutable object versions and independent provider sandbox integration remain P0 acceptance dependencies.

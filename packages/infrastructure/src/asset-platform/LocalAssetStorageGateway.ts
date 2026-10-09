@@ -94,6 +94,22 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
     return new Uint8Array(data);
   }
 
+  async verifyRestoredObject(locator: AssetStorageLocator, request: {
+    expectedSha256: string; expectedByteSize: number; declaredMimeType: string;
+  }): Promise<void> {
+    if (locator.storageZone !== AssetStorageZone.CLEAN ||
+        !/^[a-f0-9]{64}$/i.test(request.expectedSha256) ||
+        !Number.isSafeInteger(request.expectedByteSize) || request.expectedByteSize <= 0) {
+      throw new Error('ASSET_RESTORE_EVIDENCE_INVALID');
+    }
+    const bytes = await this.read(locator, 10 * 1024 * 1024);
+    const actual = createHash('sha256').update(bytes).digest('hex');
+    if (bytes.byteLength !== request.expectedByteSize ||
+        actual !== request.expectedSha256.toLowerCase()) {
+      throw new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+    }
+  }
+
   async archive(locator: AssetStorageLocator): Promise<void> {
     await this.moveIdempotently(this.resolveLocator(locator), this.archivePath(locator));
   }

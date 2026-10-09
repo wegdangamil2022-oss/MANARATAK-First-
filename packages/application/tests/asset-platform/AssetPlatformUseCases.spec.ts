@@ -103,6 +103,13 @@ class FakeAssetStorageGateway implements IAssetStorageGateway {
 
   async archive(locator: AssetStorageLocator): Promise<void> {}
   async restore(locator: AssetStorageLocator): Promise<void> {}
+  async verifyRestoredObject(locator: AssetStorageLocator, request: {
+    expectedSha256: string; expectedByteSize: number; declaredMimeType: string;
+  }): Promise<void> {
+    if (this.verificationHash !== request.expectedSha256 || !request.declaredMimeType) {
+      throw new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+    }
+  }
   async delete(locator: AssetStorageLocator): Promise<void> {}
 }
 
@@ -609,6 +616,97 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     await expect(lifecycleUseCase.archiveAsset({ assetId: 'asset-archive-cas' }))
       .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
     expect(archive).not.toHaveBeenCalled();
+  });
+
+  it('restores verified CLEAN bytes before changing DELETED to ACTIVE', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-restore-verify', assetReference: 'ref-restore-verify',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'file.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 125,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-restore-verify' });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-restore-verify' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-restore-verify' });
+    await lifecycleUseCase.activateAsset({ assetId: 'asset-restore-verify' });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-restore-verify' });
+    const verified = vi.spyOn(storageGateway, 'verifyRestoredObject');
+    const returned = await lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-verify' });
+    expect(returned.state).toBe(AssetLifecycleState.ACTIVE);
+    expect(verified).toHaveBeenCalledWith(expect.objectContaining({
+      storageZone: AssetStorageZone.CLEAN,
+    }), expect.objectContaining({
+      expectedSha256: storageGateway.verificationHash,
+    }));
+  });
+
+  it('re-archives on invalid restored digest and leaves DB DELETED', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-restore-tamper', assetReference: 'ref-restore-tamper',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'file.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 125,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-restore-tamper' });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-restore-tamper' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-restore-tamper' });
+    await lifecycleUseCase.activateAsset({ assetId: 'asset-restore-tamper' });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-restore-tamper' });
+    vi.spyOn(storageGateway, 'verifyRestoredObject')
+      .mockRejectedValueOnce(new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED'));
+    const archive = vi.spyOn(storageGateway, 'archive');
+    await expect(lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-tamper' }))
+      .rejects.toThrow('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+    expect(archive).toHaveBeenCalledTimes(1);
+    expect((await repo.findById(new AssetId('asset-restore-tamper')))?.state)
+      .toBe(AssetLifecycleState.DELETED);
+  });
+
+  it('compensates a failed restore database save and explicitly reports compensation failure', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-restore-cas', assetReference: 'ref-restore-cas',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'file.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 125,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-restore-cas' });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-restore-cas' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-restore-cas' });
+    await lifecycleUseCase.activateAsset({ assetId: 'asset-restore-cas' });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-restore-cas' });
+    const save = vi.spyOn(repo, 'save').mockRejectedValueOnce(
+      new Error('ASSET_RECORD_CONCURRENT_MODIFICATION'));
+    const archive = vi.spyOn(storageGateway, 'archive');
+    await expect(lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-cas' }))
+      .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    expect(archive).toHaveBeenCalledTimes(1);
+    expect((await repo.findById(new AssetId('asset-restore-cas')))?.state)
+      .toBe(AssetLifecycleState.DELETED);
+    save.mockRestore();
+    archive.mockRejectedValueOnce(new Error('ASSET_PROVIDER_ARCHIVE_UNAVAILABLE'));
+    vi.spyOn(storageGateway, 'verifyRestoredObject')
+      .mockRejectedValueOnce(new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED'));
+    await expect(lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-cas' }))
+      .rejects.toThrow('ASSET_RESTORE_COMPENSATION_FAILED');
+  });
+
+  it('refuses to start restore if clean-byte verification capability is unavailable', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-restore-missing-gateway', assetReference: 'ref-restore-missing-gateway',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'file.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 125,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-restore-missing-gateway' });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-restore-missing-gateway' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-restore-missing-gateway' });
+    await lifecycleUseCase.activateAsset({ assetId: 'asset-restore-missing-gateway' });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-restore-missing-gateway' });
+    (storageGateway as any).verifyRestoredObject = undefined;
+    const restore = vi.spyOn(storageGateway, 'restore');
+    await expect(lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-missing-gateway' }))
+      .rejects.toThrow('ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED');
+    expect(restore).not.toHaveBeenCalled();
   });
 
 });

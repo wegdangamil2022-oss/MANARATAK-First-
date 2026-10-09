@@ -45,5 +45,11 @@ export interface IAssetStorageGateway {
   read?(locator: AssetStorageLocator, maxBytes: number): Promise<Uint8Array>;
   archive(locator: AssetStorageLocator): Promise<void>;
   restore(locator: AssetStorageLocator): Promise<void>;
+  /** Re-observe actual CLEAN bytes after restoration, before making an asset ACTIVE. */
+  verifyRestoredObject?(locator: AssetStorageLocator, request: {
+    expectedSha256: string;
+    expectedByteSize: number;
+    declaredMimeType: string;
+  }): Promise<void>;
   delete(locator: AssetStorageLocator): Promise<void>;
 }

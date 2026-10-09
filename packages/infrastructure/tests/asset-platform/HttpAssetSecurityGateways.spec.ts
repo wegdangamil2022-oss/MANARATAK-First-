@@ -180,4 +180,26 @@ describe('W3 MNT-AUD-0011 production asset provider adapters', () => {
       .rejects.toThrow('ASSET_PROVIDER_ATOMIC_PROMOTION_PROOF_REQUIRED');
   });
 
+  it('requires authoritative clean-byte proof before restored objects can be delivered', async () => {
+    const locator = new AssetStorageLocator(AssetStorageZone.CLEAN, 'clean-bucket', 'clean/restored.pdf');
+    const sha = 'a'.repeat(64);
+    const request = { expectedSha256: sha, expectedByteSize: 125, declaredMimeType: 'application/pdf' };
+    const healthy = new HttpAssetStorageGateway(options((async (_url: RequestInfo | URL, init?: RequestInit) => {
+      const body = JSON.parse(new TextDecoder().decode(init?.body as Uint8Array));
+      expect(body.expectedSha256).toBe(sha);
+      expect(body.locator.storageZone).toBe('CLEAN');
+      return jsonResponse({
+        verifiedSha256: sha, verifiedByteSize: 125, verifiedMimeType: 'application/pdf',
+        verifiedAt: new Date().toISOString(), signatureVerified: true,
+      });
+    }) as any));
+    await expect(healthy.verifyRestoredObject(locator, request)).resolves.toBeUndefined();
+    const untrusted = new HttpAssetStorageGateway(options((async () => jsonResponse({
+      verifiedSha256: sha, verifiedByteSize: 125, verifiedMimeType: 'application/pdf',
+      verifiedAt: new Date().toISOString(),
+    })) as any));
+    await expect(untrusted.verifyRestoredObject(locator, request))
+      .rejects.toThrow('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+  });
+
 });

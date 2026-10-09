@@ -244,8 +244,31 @@ export class ProcessAssetLifecycleUseCase {
     }
 
     record.restore();
+    if (!this.storageGateway.verifyRestoredObject ||
+        !record.checksum || !record.metadata.byteSize) {
+      throw new Error('ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED');
+    }
+    // Keep DB in DELETED while the provider restores and verifies the actual CLEAN bytes.
     await this.storageGateway.restore(record.locator);
-    await this.assetRepository.save(record);
+    try {
+      await this.storageGateway.verifyRestoredObject(record.locator, {
+        expectedSha256: record.checksum.hash,
+        expectedByteSize: record.metadata.byteSize,
+        declaredMimeType: record.metadata.mimeType,
+      });
+      await this.assetRepository.save(record);
+    } catch (error) {
+      // Revert the physical restore on digest mismatch, DB CAS conflict or DB outage.
+      // The record stays DELETED; a failed compensation demands operational repair.
+      try {
+        await this.storageGateway.archive(record.locator);
+      } catch (compensationError) {
+        throw new Error('ASSET_RESTORE_COMPENSATION_FAILED', {
+          cause: { restoreFailure: error, compensationFailure: compensationError },
+        });
+      }
+      throw error;
+    }
     return AssetRecordMapper.toDto(record);
   }
 

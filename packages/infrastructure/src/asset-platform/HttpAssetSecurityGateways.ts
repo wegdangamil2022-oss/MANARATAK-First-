@@ -189,6 +189,32 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     await this.client.json<void>('POST', '/v1/assets/restore', payload, { idempotencyKey: operationIdempotencyKey('restore', payload) });
   }
 
+  async verifyRestoredObject(locator: AssetStorageLocator, request: {
+    expectedSha256: string; expectedByteSize: number; declaredMimeType: string;
+  }): Promise<void> {
+    if (locator.storageZone !== AssetStorageZone.CLEAN) throw new Error('ASSET_RESTORE_CLEAN_LOCATOR_REQUIRED');
+    if (!/^[a-f0-9]{64}$/i.test(request.expectedSha256) ||
+        !Number.isSafeInteger(request.expectedByteSize) || request.expectedByteSize <= 0 ||
+        !request.declaredMimeType) throw new Error('ASSET_RESTORE_EVIDENCE_INVALID');
+    const payload = {
+      locator: locatorPayload(locator), expectedSha256: request.expectedSha256.toLowerCase(),
+      expectedByteSize: request.expectedByteSize, declaredMimeType: request.declaredMimeType,
+    };
+    const verified = await this.client.json<{
+      verifiedSha256?: string; verifiedByteSize?: number; verifiedMimeType?: string;
+      verifiedAt?: string; signatureVerified?: boolean;
+    }>('POST', '/v1/assets/verify-clean', payload);
+    if (!verified || verified.signatureVerified !== true ||
+        typeof verified.verifiedSha256 !== 'string' ||
+        verified.verifiedSha256.toLowerCase() !== payload.expectedSha256 ||
+        verified.verifiedByteSize !== request.expectedByteSize ||
+        verified.verifiedMimeType !== request.declaredMimeType ||
+        typeof verified.verifiedAt !== 'string' ||
+        !Number.isFinite(Date.parse(verified.verifiedAt))) {
+      throw new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+    }
+  }
+
   async delete(locator: AssetStorageLocator): Promise<void> {
     const payload = { locator: locatorPayload(locator) };
     await this.client.json<void>('DELETE', '/v1/assets', payload, { idempotencyKey: operationIdempotencyKey('delete', payload) });

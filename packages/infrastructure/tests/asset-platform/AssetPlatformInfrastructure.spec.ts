@@ -163,4 +163,26 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
     }
   });
 
+  it('verifies restored CLEAN bytes by size and SHA-256 and fails for tampered copies', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-clean-restore-proof-'));
+    try {
+      await mkdir(path.join(root, 'bucket', 'clean'), { recursive: true });
+      const filename = path.join(root, 'bucket', 'clean', 'recovered.pdf');
+      const bytes = Buffer.from('%PDF-1.7 restored immutable content');
+      await writeFile(filename, bytes);
+      const gateway = new LocalAssetStorageGateway('bucket', root);
+      const locator = new AssetStorageLocator(AssetStorageZone.CLEAN, 'bucket', 'clean/recovered.pdf');
+      const sha256 = (await import('node:crypto')).createHash('sha256').update(bytes).digest('hex');
+      const input = { expectedSha256: sha256, expectedByteSize: bytes.length, declaredMimeType: 'application/pdf' };
+      await expect(gateway.verifyRestoredObject(locator, input)).resolves.toBeUndefined();
+      await expect(gateway.verifyRestoredObject(locator, { ...input, expectedSha256: 'a'.repeat(64) }))
+        .rejects.toThrow('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+      await writeFile(filename, Buffer.from('%PDF-1.7 altered'));
+      await expect(gateway.verifyRestoredObject(locator, input))
+        .rejects.toThrow('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
 });

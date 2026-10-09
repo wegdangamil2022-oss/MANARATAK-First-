@@ -240,3 +240,11 @@ npm run ci:source:contracts
 - Emitting `AssetQuarantinedEvent` now depends on absence of prior upload verification, including legacy unfinalized QUARANTINED records, not only whether the pre-confirmation state is INITIATED.
 - Added real disposable PostgreSQL integration verifying a newly allocated INITIATED record has no checksum, then finalization persists QUARANTINED and associated proof/digest and rehydrates correctly.
 - Existing historical rows can finalize without a breaking schema migration, and event subscribers receive one verified-quarantine transition.
+
+## Patch K — Restore verification and best-effort compensation
+
+- Restore now fails closed if storage cannot verify actual restored CLEAN bytes, rejecting the previous implicit assumption that historic malware/upload evidence proves present-day bytes.
+- Added `verifyRestoredObject` to storage gateway: HTTP provider `POST /v1/assets/verify-clean` requires independently reported SHA-256, byte length, MIME and timestamp; local development adapter recomputes the actual hash from bytes.
+- DB stays DELETED while provider restore + verification runs. If checksum verification or revision-gated persistence fails, the application attempts to archive the object back; any failed compensation reports explicit `ASSET_RESTORE_COMPENSATION_FAILED`.
+- Added source regression tests for successful restoration, tampering, CAS failure, compensation failure, missing verification capability, real local bytes and invalid HTTP provider proof.
+- **Not yet fully safe under concurrent purge**: provider archive compensation and deletion can race, and no durable recovery journal exists for failed compensation. Provider verify-clean and archive must be implemented, backed by object-version fencing and tested in a real sandbox. Source and disposable PostgreSQL CI pending.
