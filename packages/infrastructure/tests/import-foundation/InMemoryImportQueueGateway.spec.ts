@@ -351,7 +351,7 @@ describe('InMemoryImportQueueGateway lease recovery hardening', () => {
     const gateway = new InMemoryImportQueueGateway();
     const batchId = 'batch-same-worker';
     await gateway.enqueueImportJob({ batchId, targetDomain: ImportTargetDomain.Generic, sourceSystem: 'TEST' });
-    const start = new Date('2026-09-01T09:00:00.000Z');
+    const start = new Date(Date.now() + 1_000);
     const first = await gateway.claimNextJob({ workerId: 'worker-shared', leaseDurationMs: 1000, now: start });
     expect(first?.attempt).toBe(1);
     const second = await gateway.claimNextJob({
