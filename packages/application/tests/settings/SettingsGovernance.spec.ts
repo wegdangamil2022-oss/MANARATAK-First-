@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BooleanValue, ConfigurationResolutionService, ConfigurationValidationService, NamespacedKey, ScopeLevel,
-  ScopeIdentifier, SettingAssignment, SettingDefinition, SettingVersion, ValueType } from '@manaratak/domain';
+  ScopeIdentifier, SettingAssignment, SettingDefinition, SettingVersion, ValueType, LifeStatus } from '@manaratak/domain';
 import { ManageSettingsUseCase } from '../../src/settings/use-cases/ManageSettingsUseCase';
 
 function fixture() {
@@ -19,7 +19,8 @@ function fixture() {
     findBy: async (spec: { isSatisfiedBy(item: SettingAssignment): boolean }) => [...assignments.values()].filter(spec.isSatisfiedBy).map(clone),
     save: async (item: SettingAssignment) => { assignments.set(item.id, clone(item)); },
   };
-  return { definitions, assignments, useCase: new ManageSettingsUseCase(definitionRepo, assignmentRepo, new ConfigurationValidationService()),
+  return { definitions, assignments, useCase: new ManageSettingsUseCase(definitionRepo, assignmentRepo, new ConfigurationValidationService(), undefined,
+      { findById: async (id: string) => id === 'student' ? ({ status: LifeStatus.ACTIVE } as never) : null }),
     resolver: new ConfigurationResolutionService(definitionRepo, assignmentRepo) };
 }
 
@@ -32,11 +33,14 @@ async function assign(f: ReturnType<typeof fixture>, level: string, scopeId?: st
 }
 
 describe('Settings override and definition governance', () => {
-  it.each([['GLOBAL', undefined, 'DEFAULT'], ['DOMAIN', 'courses', 'GLOBAL'], ['IDENTITY', 'student', 'DOMAIN']] as const)
+  it.each([['GLOBAL', undefined, 'DEFAULT'], ['IDENTITY', 'student', 'DOMAIN']] as const)
   ('clearing %s exposes %s inheritance and preserves immutable history', async (level, scopeId, winner) => {
     const f = fixture(); await createFlag(f);
     if (level !== 'GLOBAL') await assign(f, 'GLOBAL');
-    if (level === 'IDENTITY') await assign(f, 'DOMAIN', 'courses');
+    if (level === 'IDENTITY') f.assignments.set('DOMAIN', new SettingAssignment({
+      id: 'DOMAIN', key: new NamespacedKey('feature.safe'), scope: new ScopeIdentifier('DOMAIN', 'courses'),
+      versions: [new SettingVersion('DOMAIN-v1', new BooleanValue(true), new Date('2026-10-09T00:00:00Z'), 'admin')],
+    }));
     await assign(f, level, scopeId);
     await f.useCase.clearOverride({ assignmentId: level, expectedCurrentVersionId: `${level}-v1`, newVersionId: `${level}-v2`,
       authorId: 'admin', changeReason: 'Return to approved inherited policy' });
@@ -119,6 +123,49 @@ describe('Settings override and definition governance', () => {
     expect(f.assignments.get('legacy-tenant')?.getVersions()).toHaveLength(1);
     await expect(f.resolver.readSetting('feature.safe', { tenantId: 'legacy-tenant' }))
       .resolves.toMatchObject({ status: 'RESOLVED', value: true, sourceScope: 'TENANT' });
+  });
+
+
+  it('keeps existing DOMAIN overrides readable but rejects new writes, clear and rollback', async () => {
+    const f = fixture(); await createFlag(f);
+    const legacy = new SettingAssignment({ id: 'legacy-domain', key: new NamespacedKey('feature.safe'),
+      scope: new ScopeIdentifier(ScopeLevel.DOMAIN, 'courses'),
+      versions: [new SettingVersion('old', new BooleanValue(true), new Date(), 'admin')] });
+    f.assignments.set(legacy.id, legacy);
+    await expect(assign(f, 'DOMAIN', 'courses')).rejects.toThrow('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
+    await expect(f.useCase.clearOverride({ assignmentId: legacy.id, expectedCurrentVersionId: 'old',
+      newVersionId: 'clear', changeReason: 'Return to inheritance' })).rejects.toThrow('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
+    await expect(f.useCase.rollbackValue({ assignmentId: legacy.id, previousVersionId: 'old', newVersionId: 'rollback',
+      changeReason: 'Restore reviewed setting' })).rejects.toThrow('SETTINGS_DOMAIN_SCOPE_UNAPPROVED');
+    expect(f.assignments.get(legacy.id)?.getVersions()).toHaveLength(1);
+    await expect(f.resolver.readSetting('feature.safe', { domainId: 'courses' }))
+      .resolves.toMatchObject({ value: true, sourceScope: 'DOMAIN' });
+  });
+
+  it('validates identity IDs with the canonical IAM owner before writing', async () => {
+    const f = fixture(); await createFlag(f);
+    await expect(assign(f, 'IDENTITY', 'missing')).rejects.toThrow('SETTINGS_IDENTITY_SCOPE_NOT_FOUND');
+    expect(f.assignments.size).toBe(0);
+    await assign(f, 'IDENTITY', 'student');
+    expect(f.assignments.get('IDENTITY')?.getCurrentVersion().id).toBe('IDENTITY-v1');
+    await f.useCase.clearOverride({ assignmentId: 'IDENTITY', expectedCurrentVersionId: 'IDENTITY-v1',
+      newVersionId: 'clear', changeReason: 'Restore inherited setting' });
+    expect(f.assignments.get('IDENTITY')?.isOverrideCleared).toBe(true);
+  });
+
+  it('fails closed when the IAM owner lookup is unavailable or returns a purged identity', async () => {
+    const f = fixture(); await createFlag(f);
+    const idRepo = { findById: async () => ({ status: LifeStatus.PURGED } as never) };
+    const purged = new ManageSettingsUseCase({ findByKey: async () => f.definitions.get('feature.safe') ?? null } as never,
+      { findByScopeAndKey: async () => null } as never, new ConfigurationValidationService(), undefined, idRepo);
+    await expect(purged.assignValue({ assignmentId: 'a', key: 'feature.safe', level: 'IDENTITY',
+      scopeId: 'student', versionId: 'v1', type: ValueType.Boolean, value: true,
+      changeReason: 'Reviewed policy change' })).rejects.toThrow('SETTINGS_IDENTITY_SCOPE_NOT_FOUND');
+    const unavailable = new ManageSettingsUseCase({ findByKey: async () => f.definitions.get('feature.safe') ?? null } as never,
+      {} as never, new ConfigurationValidationService());
+    await expect(unavailable.assignValue({ assignmentId: 'a', key: 'feature.safe', level: 'IDENTITY',
+      scopeId: 'student', versionId: 'v1', type: ValueType.Boolean, value: true,
+      changeReason: 'Reviewed policy change' })).rejects.toThrow('SETTINGS_IDENTITY_SCOPE_VALIDATOR_UNAVAILABLE');
   });
 
 });
