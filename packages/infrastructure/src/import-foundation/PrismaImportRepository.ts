@@ -790,6 +790,79 @@ export class PrismaImportRepository {
     return { data, total, page, pageSize };
   }
 
+  /**
+   * Read-only owner-handoff reconciliation queue.
+   *
+   * Never return raw imported payloads, credentials, validation content, or
+   * generic processing notes in this operational surface. A reconciliation
+   * decision MUST be made by the owning domain; this reader cannot release,
+   * retry, or publish any import record.
+   */
+  async listHandoffReconciliation(input: {
+    batchId: string; page?: number; pageSize?: number;
+  }): Promise<{ data: Array<Record<string, unknown>>; total: number; page: number; pageSize: number }> {
+    if (!input.batchId?.trim()) throw new Error('IMPORT_RECONCILIATION_BATCH_REQUIRED');
+    const page = Number.isSafeInteger(input.page) && (input.page ?? 0) > 0 ? input.page! : 1;
+    const pageSize = Number.isSafeInteger(input.pageSize) && (input.pageSize ?? 0) > 0
+      ? Math.min(input.pageSize!, 100) : 50;
+    const states = [
+      'DISPATCH_IN_FLIGHT',
+      'MANUAL_RECONCILIATION_REQUIRED',
+      'AWAITING_DOMAIN_INTEGRATION',
+    ] as const;
+    let rows: any[];
+    let total: number;
+    if (this.prisma) {
+      // PostgreSQL Prisma JSON-path predicate keeps scans bounded and indexable
+      // without materializing an entire import batch in Node memory.
+      const where = {
+        batchId: input.batchId,
+        OR: states.map(state => ({
+          rawPayload: { path: ['_phase6HandoffState'], equals: state },
+        })),
+      };
+      [rows, total] = await Promise.all([
+        this.prisma.importRecord.findMany({
+          where, skip: (page - 1) * pageSize, take: pageSize,
+          orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+          select: { id: true, batchId: true, status: true, rawPayload: true, updatedAt: true },
+        }),
+        this.prisma.importRecord.count({ where }),
+      ]);
+    } else {
+      const matches = [...this.inMemoryRecords.values()]
+        .filter(record => record.batchId === input.batchId)
+        .filter(record => {
+          const raw = record.rawPayload;
+          return raw && typeof raw === 'object' && !Array.isArray(raw) &&
+            states.includes(raw._phase6HandoffState);
+        })
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          || String(b.id).localeCompare(String(a.id)));
+      total = matches.length;
+      rows = matches.slice((page - 1) * pageSize, page * pageSize);
+    }
+    const data = rows.map(record => {
+      const raw = record.rawPayload && typeof record.rawPayload === 'object'
+        && !Array.isArray(record.rawPayload) ? record.rawPayload : {};
+      const envelope = raw._phase6HandoffEnvelope &&
+        typeof raw._phase6HandoffEnvelope === 'object' &&
+        !Array.isArray(raw._phase6HandoffEnvelope)
+        ? raw._phase6HandoffEnvelope : {};
+      return {
+        recordId: record.id, batchId: record.batchId,
+        recordStatus: record.status,
+        handoffState: typeof raw._phase6HandoffState === 'string'
+          ? raw._phase6HandoffState : 'UNKNOWN',
+        handoffId: typeof envelope.handoffId === 'string' ? envelope.handoffId : null,
+        ownerDomain: typeof envelope.ownerDomain === 'string' ? envelope.ownerDomain : null,
+        manualVerificationRequired: raw._phase6HandoffState !== 'AWAITING_DOMAIN_INTEGRATION',
+        updatedAt: record.updatedAt,
+      };
+    });
+    return { data, total, page, pageSize };
+  }
+
   async getRecordById(id: string): Promise<any | null> {
     if (this.prisma) {
       return this.prisma.importRecord.findUnique({ where: { id } });
