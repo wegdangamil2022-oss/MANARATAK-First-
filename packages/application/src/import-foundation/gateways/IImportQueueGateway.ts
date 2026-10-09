@@ -19,7 +19,7 @@ export interface IImportQueueGateway {
   resumeJob(command: ResumeImportJobCommand): Promise<boolean>;
   cancelJob(command: CancelImportJobCommand): Promise<boolean>;
   replayJob(command: ReplayImportJobCommand): Promise<boolean>;
-  recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint): Promise<void>;
+  recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint, lease?: ImportJobLease): Promise<void>;
   moveToDeadLetter(dto: DeadLetterImportRecordDto): Promise<void>;
   markJobRunning(batchId: string): Promise<boolean>;
   markJobCompleted(batchId: string): Promise<boolean>;
