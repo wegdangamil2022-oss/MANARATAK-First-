@@ -29,9 +29,25 @@ import {
 
 class InMemoryAssetRecordRepository implements IAssetRecordRepository {
   private store = new Map<string, AssetRecord>();
+  private restoreLeases = new Set<string>();
+
+  async acquireRestoreLease(asset: AssetRecord): Promise<void> {
+    const stored = this.store.get(asset.id.value);
+    if (!stored || stored.state !== AssetLifecycleState.DELETED ||
+        this.restoreLeases.has(asset.id.value)) throw new Error('ASSET_RESTORE_LEASE_CONFLICT');
+    this.restoreLeases.add(asset.id.value);
+  }
+
+  async releaseRestoreLease(asset: AssetRecord): Promise<void> {
+    this.restoreLeases.delete(asset.id.value);
+  }
 
   async save(asset: AssetRecord): Promise<void> {
+    const old = this.store.get(asset.id.value);
+    if (old?.state === AssetLifecycleState.DELETED && asset.state === AssetLifecycleState.ACTIVE &&
+        !this.restoreLeases.has(asset.id.value)) throw new Error('ASSET_RESTORE_LEASE_REQUIRED');
     this.store.set(asset.id.value, asset);
+    if (asset.state === AssetLifecycleState.ACTIVE) this.restoreLeases.delete(asset.id.value);
   }
 
   async findById(id: AssetId): Promise<AssetRecord | null> {

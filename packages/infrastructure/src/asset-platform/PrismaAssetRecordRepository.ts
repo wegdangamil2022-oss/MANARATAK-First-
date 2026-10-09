@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
 import {
   IAssetRecordRepository,
@@ -39,6 +40,7 @@ interface AssetRecordRow {
 export class PrismaAssetRecordRepository implements IAssetRecordRepository {
   /** Repository-local revision captures enforce conditional writes without a schema migration. */
   private readonly loadedSnapshots = new WeakMap<AssetRecord, { updatedAt: Date; lifecycleState: string }>();
+  private readonly ownedRestoreLeases = new WeakMap<AssetRecord, string>();
   constructor(private readonly prisma: PrismaClient) {}
 
   async save(asset: AssetRecord): Promise<void> {
@@ -99,18 +101,82 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       throw new Error('ASSET_RECORD_REVISION_OVERFLOW');
     }
     mutation.updatedAt = nextRevision;
+    const restoreToken = this.ownedRestoreLeases.get(asset);
+    if (captured.lifecycleState === AssetLifecycleState.DELETED &&
+        asset.state === AssetLifecycleState.ACTIVE && !restoreToken) {
+      throw new Error('ASSET_RESTORE_LEASE_REQUIRED');
+    }
     const updated = await delegate.updateMany({
       where: {
         id: asset.id.value,
         updatedAt: captured.updatedAt,
         lifecycleState: captured.lifecycleState,
+        ...(restoreToken ? {
+          retentionClaimToken: restoreToken,
+          retentionClaimUntil: { gt: new Date() },
+        } : {}),
       },
-      data: mutation,
+      data: {
+        ...mutation,
+        ...(restoreToken ? { retentionClaimToken: null, retentionClaimUntil: null } : {}),
+      },
     });
     if (!updated || updated.count !== 1) {
       throw new Error('ASSET_RECORD_CONCURRENT_MODIFICATION');
     }
+    if (restoreToken) this.ownedRestoreLeases.delete(asset);
     // Snapshot deliberately stays stale: another mutation must rehydrate the aggregate.
+  }
+
+  async acquireRestoreLease(asset: AssetRecord): Promise<void> {
+    const captured = this.loadedSnapshots.get(asset);
+    if (!captured || captured.lifecycleState !== AssetLifecycleState.DELETED ||
+        asset.state !== AssetLifecycleState.ACTIVE || this.ownedRestoreLeases.has(asset)) {
+      throw new Error('ASSET_RESTORE_LEASE_INVALID_STATE');
+    }
+    const now = new Date();
+    const token = randomUUID();
+    const nextRevision = new Date(Math.max(now.getTime(), captured.updatedAt.getTime() + 1));
+    const leaseUntil = new Date(now.getTime() + 10 * 60_000);
+    const acquired = await this.prisma.assetRecord.updateMany({
+      where: {
+        id: asset.id.value,
+        lifecycleState: AssetLifecycleState.DELETED,
+        updatedAt: captured.updatedAt,
+        OR: [
+          { retentionClaimUntil: null },
+          { retentionClaimUntil: { lte: now } },
+        ],
+      },
+      data: {
+        retentionClaimToken: token,
+        retentionClaimUntil: leaseUntil,
+        updatedAt: nextRevision,
+      },
+    });
+    if (acquired.count !== 1) throw new Error('ASSET_RESTORE_LEASE_CONFLICT');
+    this.loadedSnapshots.set(asset, {
+      updatedAt: nextRevision, lifecycleState: AssetLifecycleState.DELETED,
+    });
+    this.ownedRestoreLeases.set(asset, token);
+  }
+
+  async releaseRestoreLease(asset: AssetRecord): Promise<void> {
+    const token = this.ownedRestoreLeases.get(asset);
+    if (!token) return;
+    const released = await this.prisma.assetRecord.updateMany({
+      where: {
+        id: asset.id.value,
+        lifecycleState: AssetLifecycleState.DELETED,
+        retentionClaimToken: token,
+      },
+      data: {
+        retentionClaimToken: null,
+        retentionClaimUntil: null,
+      },
+    });
+    if (released.count !== 1) throw new Error('ASSET_RESTORE_LEASE_RELEASE_FAILED');
+    this.ownedRestoreLeases.delete(asset);
   }
 
   async assertPurgeAllowed(id: AssetId, at: Date, retentionClaimToken?: string, retryPurgedCleanup = false): Promise<void> {

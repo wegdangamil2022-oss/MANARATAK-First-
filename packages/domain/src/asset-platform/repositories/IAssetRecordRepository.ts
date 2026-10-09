@@ -5,6 +5,10 @@ import { AssetOwnerReference } from '../value-objects/AssetOwnerReference';
 
 export interface IAssetRecordRepository {
   save(asset: AssetRecord): Promise<void>;
+  /** Reserve DELETED state before external restore, fencing both retention claims and stale purges. */
+  acquireRestoreLease?(asset: AssetRecord): Promise<void>;
+  /** Release a failed restore's lease only if still owned; never clear another worker's claim. */
+  releaseRestoreLease?(asset: AssetRecord): Promise<void>;
   findById(id: AssetId): Promise<AssetRecord | null>;
   findByReference(reference: AssetReference): Promise<AssetRecord | null>;
   findByOwner(owner: AssetOwnerReference): Promise<AssetRecord[]>;

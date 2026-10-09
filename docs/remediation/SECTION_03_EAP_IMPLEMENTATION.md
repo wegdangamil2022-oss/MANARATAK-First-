@@ -260,3 +260,11 @@ npm run ci:source:contracts
 - `ASSET_RESTORE_CONTENT_VERIFICATION_FAILED` and malformed restore evidence are returned as sanitized 409 state conflicts.
 - Missing CLEAN verification capability and failed archive compensation return sanitized 503, preserving an actionable failure code without exposing provider details.
 - API contract regression tests cover each branch; latest run pending on combined updates.
+
+## Patch L — DB-backed restore lease fences concurrent retention and purge
+
+- Acquire a unique 10-minute RESTORE lease using existing `AssetRecord.retentionClaimToken/Until` **before** any provider restore; the conditional `updateMany` checks DELETED, prior revision and absence of a live claim. Lease acquisition also bumps `updatedAt` monotonically, so purge commands hydrated earlier cannot later commit a stale PURGED transition.
+- `PrismaAssetRecordRepository.save` now refuses DELETED→ACTIVE without its owned lease. It atomically compares the claim token and unexpired lease while committing ACTIVE and clearing claim fields; overwritten/expired leases fail closed.
+- On failed restore/verify/CAS, the use case attempts archive compensation and releases only its own lease. A failed compensation or lease release is explicitly surfaced; the provider restore itself is included in the compensation boundary to cover partial failures.
+- This avoids the earlier purge-vs-restore preflight race *within a live lease*. **Still open:** a stalled provider action exceeding 10 minutes can lose its lease; production should add heartbeat/operation journal and provider-side immutable version fencing before declaring fully safe.
+- No Prisma migration or production database mutation; pending CI integration tests.

@@ -248,23 +248,47 @@ export class ProcessAssetLifecycleUseCase {
         !record.checksum || !record.metadata.byteSize) {
       throw new Error('ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED');
     }
-    // Keep DB in DELETED while the provider restores and verifies the actual CLEAN bytes.
-    await this.storageGateway.restore(record.locator);
+    if (!this.assetRepository.acquireRestoreLease ||
+        !this.assetRepository.releaseRestoreLease) {
+      throw new Error('ASSET_RESTORE_LEASE_NOT_CONFIGURED');
+    }
+    // Serialize restore with retention/purge before any provider side effect.
+    await this.assetRepository.acquireRestoreLease(record);
+    let providerRestoreAttempted = false;
     try {
+      providerRestoreAttempted = true;
+      await this.storageGateway.restore(record.locator);
       await this.storageGateway.verifyRestoredObject(record.locator, {
         expectedSha256: record.checksum.hash,
         expectedByteSize: record.metadata.byteSize,
         declaredMimeType: record.metadata.mimeType,
       });
+      // Repository commits ACTIVE and removes the exact owned lease atomically.
+      // Expired or replaced leases make the state CAS fail.
       await this.assetRepository.save(record);
     } catch (error) {
-      // Revert the physical restore on digest mismatch, DB CAS conflict or DB outage.
-      // The record stays DELETED; a failed compensation demands operational repair.
+      let compensationError: unknown;
+      if (providerRestoreAttempted) {
+        try {
+          await this.storageGateway.archive(record.locator);
+        } catch (failure) {
+          compensationError = failure;
+        }
+      }
+      let releaseError: unknown;
       try {
-        await this.storageGateway.archive(record.locator);
-      } catch (compensationError) {
+        await this.assetRepository.releaseRestoreLease(record);
+      } catch (failure) {
+        releaseError = failure;
+      }
+      if (compensationError) {
         throw new Error('ASSET_RESTORE_COMPENSATION_FAILED', {
-          cause: { restoreFailure: error, compensationFailure: compensationError },
+          cause: { restoreFailure: error, compensationFailure: compensationError, leaseReleaseFailure: releaseError },
+        });
+      }
+      if (releaseError) {
+        throw new Error('ASSET_RESTORE_LEASE_RELEASE_FAILED', {
+          cause: { restoreFailure: error, leaseReleaseFailure: releaseError },
         });
       }
       throw error;
