@@ -44,11 +44,11 @@ export class InlineDataParser {
            throw new Error(`CSV Parse Error: ${result.message}`);
         }
         if (result instanceof ParsedImportRow) {
-           // Emulate the old behavior that included _sourceRowNumber on the object
-           rawRows.push({
-             ...result.raw,
-             _sourceRowNumber: result.sourceRowNumber - 1, // original had 1 for row 1 (excluding header)
-           });
+          // Parsed source fields are untrusted input. Row provenance is minted
+          // only by stageNormalizedRows after reserved-key validation; adding
+          // _sourceRowNumber here would cause every ordinary CSV import to
+          // fail its own private-metadata trust boundary.
+          rawRows.push({ ...result.raw });
         }
       }
     }
