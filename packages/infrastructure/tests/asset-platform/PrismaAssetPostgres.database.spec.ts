@@ -52,7 +52,8 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     const rows = await prisma.assetRecord.findMany({ where: { id: { startsWith: DB_PREFIX } }, select: { id: true, malwareScanStatus: true } });
     const ids = rows.filter(row => {
       const restore = (row.malwareScanStatus as any)?.restoreOperation;
-      return !restore || ['COMPLETED', 'CANCELLED'].includes(restore.phase);
+      const archive = (row.malwareScanStatus as any)?.archiveOperation;
+      return (!restore || ['COMPLETED', 'CANCELLED'].includes(restore.phase)) && (!archive || archive.phase === 'COMPLETED');
     }).map(row => row.id);
     await prisma.assetRecord.deleteMany({ where: { id: { in: ids } } });
   }
@@ -139,7 +140,7 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
       .toBe(AssetLifecycleState.PURGED);
   });
-  it('stores ARCHIVED in PostgreSQL before provider archival and recovers by retry', async () => {
+  it('stores archive uncertainty and blocks a fresh provider retry', async () => {
     const id = DB_PREFIX + randomUUID();
     await repository.save(newAsset(id, AssetLifecycleState.ACTIVE));
     const archiveProvider = vi.fn()
@@ -150,11 +151,11 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       { findUsages: async () => [] } as any,
     );
     await expect(useCase.archiveAsset({ assetId: id }))
-      .rejects.toThrow('ASSET_PROVIDER_ARCHIVE_UNAVAILABLE');
+      .rejects.toThrow('ASSET_ARCHIVE_RECOVERY_REQUIRED');
     expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
       .toBe(AssetLifecycleState.ARCHIVED);
-    await useCase.archiveAsset({ assetId: id });
-    expect(archiveProvider).toHaveBeenCalledTimes(2);
+    await expect(useCase.archiveAsset({ assetId: id })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+    expect(archiveProvider).toHaveBeenCalledTimes(1);
     expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
       .toBe(AssetLifecycleState.ARCHIVED);
   });
@@ -503,6 +504,56 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     await repository.acquireRestoreLease(cancelled); await repository.markRestoreProviderStarted(cancelled);
     await repository.save(cancelled);
     expect((await repository.findById(new AssetId(id)))?.restoreOperation?.phase).toBe('COMPLETED');
+  });
+
+  it('blocks delete, restore and a second archive while the first provider archive is in flight', async () => {
+    const id = DB_PREFIX + randomUUID(); const initial = deletedCleanAsset(id); initial.restore(); await repository.save(initial);
+    let started!: () => void; let finish!: () => void;
+    const startedPromise = new Promise<void>(resolve => { started = resolve; });
+    const finishPromise = new Promise<void>(resolve => { finish = resolve; });
+    const archive = vi.fn(async () => { started(); await finishPromise; });
+    const restore = vi.fn(async () => {});
+    const useCase = new ProcessAssetLifecycleUseCase(repository, { archive, restore, verifyRestoredObject: vi.fn(async () => {}) } as any, { findUsages: async () => [] } as any);
+    const archival = useCase.archiveAsset({ assetId: id });
+    await Promise.race([startedPromise, archival]);
+    try {
+      const pending = (await repository.findById(new AssetId(id)))!;
+      expect(pending.archiveOperation?.phase).toBe('RUNNING');
+      await expect(prisma.$executeRaw`UPDATE "AssetRecord" SET "malwareScanStatus" = "malwareScanStatus" #- '{archiveOperation,phase}' WHERE "id" = ${id}`).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+      await expect(useCase.softDeleteAsset({ assetId: id })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+      await expect(useCase.restoreAsset({ assetId: id })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+      await expect(useCase.archiveAsset({ assetId: id })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+      await expect(prisma.assetRecord.update({ where: { id }, data: { lifecycleState: 'DELETED' } })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+      await expect(prisma.assetRecord.delete({ where: { id } })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+      expect(archive).toHaveBeenCalledOnce(); expect(restore).not.toHaveBeenCalled();
+    } finally { finish(); }
+    await archival;
+    expect((await repository.findById(new AssetId(id)))?.archiveOperation?.phase).toBe('COMPLETED');
+    await useCase.archiveAsset({ assetId: id }); expect(archive).toHaveBeenCalledOnce();
+    await useCase.softDeleteAsset({ assetId: id }); await useCase.restoreAsset({ assetId: id });
+    expect(restore).toHaveBeenCalledOnce();
+    expect((await repository.findById(new AssetId(id)))?.state).toBe('ACTIVE');
+  });
+  it('preserves an archive recovery barrier across restart and excludes it from retention', async () => {
+    const id = DB_PREFIX + randomUUID(); const initial = deletedCleanAsset(id); initial.restore(); await repository.save(initial);
+    const archive = vi.fn(async () => { throw new Error('SIMULATED_ARCHIVE_TIMEOUT'); });
+    const useCase = new ProcessAssetLifecycleUseCase(repository, { archive } as any, { findUsages: async () => [] } as any);
+    await expect(useCase.archiveAsset({ assetId: id })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_REQUIRED');
+    const restarted = new PrismaAssetRecordRepository(prisma);
+    const pending = (await restarted.findById(new AssetId(id)))!;
+    expect(pending.archiveOperation?.phase).toBe('RECOVERY_REQUIRED');
+    expect(() => pending.softDelete()).toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+    await prisma.$executeRaw`UPDATE "AssetRecord" SET "retentionExpiresAt" = ${new Date(Date.now() - 60000)} WHERE "id" = ${id}`;
+    await expect(prisma.assetRecord.update({ where: { id }, data: { retentionClaimToken: randomUUID(), retentionClaimUntil: new Date(Date.now() + 60000) } })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+    const retention = new PrismaAssetRetentionGateway(prisma, {} as any);
+    expect((await retention.listDue(new Date(), 100)).map(row => row.recordId)).not.toContain(id);
+  });
+  it('requires verification for a legacy ARCHIVED record before another provider archive', async () => {
+    const id = DB_PREFIX + randomUUID(); await repository.save(newAsset(id, AssetLifecycleState.ARCHIVED));
+    const archive = vi.fn();
+    const useCase = new ProcessAssetLifecycleUseCase(repository, { archive } as any, { findUsages: async () => [] } as any);
+    await expect(useCase.archiveAsset({ assetId: id })).rejects.toThrow('ASSET_ARCHIVE_LEGACY_VERIFICATION_REQUIRED');
+    expect(archive).not.toHaveBeenCalled();
   });
 
 });

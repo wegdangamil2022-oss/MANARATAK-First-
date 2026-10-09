@@ -250,15 +250,25 @@ export class ProcessAssetLifecycleUseCase {
     }
 
     await this.assertNotInUse(id, 'archive');
-    if (record.state !== AssetLifecycleState.ARCHIVED) {
-      record.archive();
-      // Persist the access-denying ARCHIVED state before requesting an external move.
-      // A failed CAS cannot leave storage archived while the DB still reports ACTIVE.
-      await this.assetRepository.save(record);
+    if (record.archiveOperation?.phase === 'COMPLETED' && record.state === AssetLifecycleState.ARCHIVED) return AssetRecordMapper.toDto(record);
+    if (record.archiveOperation && record.archiveOperation.phase !== 'COMPLETED') throw new Error('ASSET_ARCHIVE_RECOVERY_PENDING');
+    if (record.state === AssetLifecycleState.ARCHIVED) throw new Error('ASSET_ARCHIVE_LEGACY_VERIFICATION_REQUIRED');
+    if (!this.assetRepository.completeArchiveOperation || !this.assetRepository.markArchiveRecoveryRequired) throw new Error('ASSET_ARCHIVE_JOURNAL_NOT_CONFIGURED');
+    record.archive();
+    const preparedAt = new Date().toISOString();
+    record.recordArchiveOperation({ version: 1, operationId: globalThis.crypto.randomUUID(), phase: 'RUNNING',
+      sourceLocator: record.locator.value, preparedAt, updatedAt: preparedAt });
+    // ARCHIVED plus a non-expiring intent commits before the sole provider call.
+    await this.assetRepository.save(record);
+    try {
+      await this.storageGateway.archive(record.locator);
+      await this.assetRepository.completeArchiveOperation(record);
+    } catch (error) {
+      let journalFailure: unknown;
+      try { await this.assetRepository.markArchiveRecoveryRequired(record); }
+      catch (failure) { journalFailure = failure; }
+      throw new Error('ASSET_ARCHIVE_RECOVERY_REQUIRED', { cause: { archiveFailure: error, journalFailure } });
     }
-    // If provider archive fails, the stored ARCHIVED record remains inaccessible.
-    // A repeated archive request will retry this idempotent provider operation.
-    await this.storageGateway.archive(record.locator);
     return AssetRecordMapper.toDto(record);
   }
 

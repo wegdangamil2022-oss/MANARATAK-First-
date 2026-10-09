@@ -99,7 +99,7 @@ export class AssetPlatformRouter {
       checksumPresence: z.enum(['PRESENT', 'MISSING']).optional(),
       malwareStatus: z.enum(['PASSED', 'FAILED']).optional(),
       fileFamily: z.enum(['IMAGE', 'VIDEO', 'AUDIO', 'PDF']).optional(),
-      processingQueue: z.enum(['AWAITING_UPLOAD', 'QUARANTINE', 'PROCESSING', 'FAILED', 'ACTIVATION_RECOVERY', 'RESTORE_RECOVERY']).optional(),
+      processingQueue: z.enum(['AWAITING_UPLOAD', 'QUARANTINE', 'PROCESSING', 'FAILED', 'ACTIVATION_RECOVERY', 'RESTORE_RECOVERY', 'ARCHIVE_RECOVERY']).optional(),
       createdFrom: z.string().datetime().optional(),
       createdTo: z.string().datetime().optional(),
       q: z.string().trim().min(1).max(240).optional(),
@@ -149,6 +149,8 @@ export class AssetPlatformRouter {
           versionNumber: version.versionNumber, createdAt: version.createdAt,
           checksum: version.checksum ? { algorithm: version.checksum.algorithm, hash: version.checksum.hash } : null,
         })) ?? [],
+        archiveOperation: asset.archiveOperation ? { operationId: asset.archiveOperation.operationId,
+          phase: asset.archiveOperation.phase, preparedAt: asset.archiveOperation.preparedAt, updatedAt: asset.archiveOperation.updatedAt } : null,
         restoreOperation: asset.restoreOperation ? { operationId: asset.restoreOperation.operationId,
           phase: asset.restoreOperation.phase, preparedAt: asset.restoreOperation.preparedAt, updatedAt: asset.restoreOperation.updatedAt } : null,
         activationOperation: asset.activationOperation ? { operationId: asset.activationOperation.operationId,
@@ -171,6 +173,7 @@ export class AssetPlatformRouter {
           scannedAt: asset.malwareScan?.scannedAt ?? null,
           activationPhase: asset.activationOperation?.phase ?? null,
           restorePhase: asset.restoreOperation?.phase ?? null,
+          archivePhase: asset.archiveOperation?.phase ?? null,
           sanitized: Boolean(asset.sanitization?.sanitizedAt),
           sanitizedAt: asset.sanitization?.sanitizedAt ?? null,
         },
@@ -583,6 +586,9 @@ export class AssetPlatformRouter {
         message === 'ASSET_VERSION_HISTORY_INVALID' ||
         message === 'ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED' ||
         message === 'ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED' ||
+        message === 'ASSET_ARCHIVE_JOURNAL_NOT_CONFIGURED' ||
+        message === 'ASSET_ARCHIVE_RECOVERY_REQUIRED' ||
+        message === 'ASSET_ARCHIVE_LEGACY_VERIFICATION_REQUIRED' ||
         message === 'ASSET_RESTORE_COMPENSATION_FAILED' ||
         message === 'ASSET_RESTORE_RECOVERY_REQUIRED' ||
         message === 'ASSET_RESTORE_LEASE_NOT_CONFIGURED' ||
@@ -599,7 +605,7 @@ export class AssetPlatformRouter {
       if (message.startsWith('Asset with id ') && message.endsWith(' already exists')) return respond(409, 'Asset already exists', 'ASSET_ALREADY_EXISTS');
       if (message.startsWith('Asset not found:')) return respond(404, 'Asset not found', 'ASSET_NOT_FOUND');
       if (message.startsWith('ASSET_PROVIDER_')) return respond(502, 'Asset storage provider rejected the request', 'ASSET_PROVIDER_ERROR');
-      if (/^ASSET_(RESTORE_RECOVERY_PENDING|RESTORE_OPERATION_INVALID|REFERENCE_IN_USE|REFERENCE_ISOLATION_UNSUPPORTED|ACTIVATION_RECOVERY_PENDING|ACTIVATION_OPERATION_INVALID|RESTORE_RETENTION_POLICY_UNKNOWN|RESTORE_RETENTION_POLICY_EXPIRED|QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION|SANITIZED_CONTENT_CHANGED_DURING_SCAN|DELIVERY_TRUST_EVIDENCE_REQUIRED|DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET|UPLOAD_FINALIZATION_REQUIRED|UPLOAD_CHANGED_AFTER_FINALIZATION|RESTORE_CONTENT_VERIFICATION_FAILED|RESTORE_CLEAN_LOCATOR_REQUIRED|RESTORE_EVIDENCE_INVALID|RESTORE_LEASE_CONFLICT|RESTORE_LEASE_LOST|RESTORE_LEASE_REQUIRED|RESTORE_LEASE_INVALID_STATE|UPLOAD_VERIFICATION_FAILED|UPLOAD_VERIFICATION_REQUIRED|UPLOAD_VERIFICATION_INVALID_STATE|RECORD_CONCURRENT_MODIFICATION|PURGE_RETENTION_NOT_EXPIRED|PURGE_LEGAL_HOLD_ACTIVE|PURGE_RETENTION_CLAIM_ACTIVE|PURGE_RETENTION_CLAIM_NOT_OWNED|MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED|MALWARE_SCAN_INVALID_STATE|QUARANTINE_REQUIRED_FOR_ACTIVATION)$/.test(message) ||
+      if (/^ASSET_(ARCHIVE_RECOVERY_PENDING|ARCHIVE_OPERATION_INVALID|RESTORE_RECOVERY_PENDING|RESTORE_OPERATION_INVALID|REFERENCE_IN_USE|REFERENCE_ISOLATION_UNSUPPORTED|ACTIVATION_RECOVERY_PENDING|ACTIVATION_OPERATION_INVALID|RESTORE_RETENTION_POLICY_UNKNOWN|RESTORE_RETENTION_POLICY_EXPIRED|QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION|SANITIZED_CONTENT_CHANGED_DURING_SCAN|DELIVERY_TRUST_EVIDENCE_REQUIRED|DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET|UPLOAD_FINALIZATION_REQUIRED|UPLOAD_CHANGED_AFTER_FINALIZATION|RESTORE_CONTENT_VERIFICATION_FAILED|RESTORE_CLEAN_LOCATOR_REQUIRED|RESTORE_EVIDENCE_INVALID|RESTORE_LEASE_CONFLICT|RESTORE_LEASE_LOST|RESTORE_LEASE_REQUIRED|RESTORE_LEASE_INVALID_STATE|UPLOAD_VERIFICATION_FAILED|UPLOAD_VERIFICATION_REQUIRED|UPLOAD_VERIFICATION_INVALID_STATE|RECORD_CONCURRENT_MODIFICATION|PURGE_RETENTION_NOT_EXPIRED|PURGE_LEGAL_HOLD_ACTIVE|PURGE_RETENTION_CLAIM_ACTIVE|PURGE_RETENTION_CLAIM_NOT_OWNED|MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED|MALWARE_SCAN_INVALID_STATE|QUARANTINE_REQUIRED_FOR_ACTIVATION)$/.test(message) ||
         /^Cannot (activate|archive|soft delete|purge|mark)/i.test(message)) {
         return respond(409, 'Asset state or dependency conflict', 'ASSET_STATE_CONFLICT');
       }

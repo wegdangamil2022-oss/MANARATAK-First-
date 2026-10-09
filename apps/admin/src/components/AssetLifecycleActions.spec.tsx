@@ -3,6 +3,11 @@ import { availableAssetActions, executeAssetAction, shouldStartNewAssetAttempt }
 import { adminApiClient } from '../api/client';
 vi.mock('../api/client', () => ({ adminApiClient: { request: vi.fn() }, createAdminIdempotencyKey: () => 'isolated-key' }));
 describe('asset action contract', () => {
+  it.each(['RUNNING', 'RECOVERY_REQUIRED'] as const)('suppresses competing archive lifecycle actions (%s)', phase => {
+    expect(availableAssetActions({ id: 'pending-archive', lifecycleState: 'ARCHIVED', securityEvidence: {
+      uploadConfirmed: true, malwareStatus: 'PASSED', sanitized: true, archivePhase: phase,
+    } })).toEqual([]);
+  });
   it.each(['INITIATED', 'QUARANTINED', 'MALWARE_SCAN_FAILED', 'DELETED', 'PURGED', 'UNKNOWN'])('never offers promotion for %s', lifecycleState => {
     expect(availableAssetActions({ id: 'a', lifecycleState })).not.toContain('activate');
   });

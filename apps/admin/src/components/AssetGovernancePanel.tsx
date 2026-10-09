@@ -15,6 +15,7 @@ export interface AssetGovernanceSnapshot extends AssetActionSnapshot {
   securityEvidence?: NonNullable<AssetActionSnapshot['securityEvidence']> & {
     uploadVerifiedAt?: string | null; scannedAt?: string | null; sanitizedAt?: string | null;
   };
+  archiveOperation?: { operationId: string; phase: string; preparedAt: string; updatedAt: string } | null;
   restoreOperation?: { operationId: string; phase: string; preparedAt: string; updatedAt: string } | null;
   activationOperation?: {
     operationId: string; phase: string; preparedAt: string; completedAt: string | null;
@@ -70,6 +71,10 @@ export function AssetGovernancePanel({ asset }: { asset: AssetGovernanceSnapshot
         ? (asset.governance.legalHoldUntil ? readableDate(asset.governance.legalHoldUntil) : 'لا يوجد حجز مؤرخ مسجل')
         : 'تعذر تحديد حالة الحجز'}</dd></div>
     </dl>
+    {asset.archiveOperation && asset.archiveOperation.phase !== 'COMPLETED' && <p role="status">
+      أرشفة غير محسومة؛ يلزم التحقق من حالتها قبل حذف الملف أو استعادته
+      {' · '}{readableDate(asset.archiveOperation.updatedAt)}
+    </p>}
     {asset.restoreOperation && <p role="status">
       {['COMPLETED', 'CANCELLED'].includes(asset.restoreOperation.phase)
         ? 'انتهت محاولة الاستعادة' : 'استعادة غير محسومة؛ يلزم التحقق من حالتها قبل أي عملية أخرى على الملف'}

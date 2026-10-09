@@ -39,13 +39,17 @@ describe('EAP API boundary: query validation and safe Problem Details', () => {
   });
 
   it.each(['ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION', 'ASSET_SANITIZED_CONTENT_CHANGED_DURING_SCAN',
-    'ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED', 'ASSET_REFERENCE_IN_USE', 'ASSET_REFERENCE_ISOLATION_UNSUPPORTED', 'ASSET_RESTORE_RECOVERY_PENDING', 'ASSET_RESTORE_OPERATION_INVALID'])('maps security conflict %s to safe 409', async code => {
+    'ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED', 'ASSET_REFERENCE_IN_USE', 'ASSET_REFERENCE_ISOLATION_UNSUPPORTED', 'ASSET_RESTORE_RECOVERY_PENDING', 'ASSET_RESTORE_OPERATION_INVALID', 'ASSET_ARCHIVE_RECOVERY_PENDING', 'ASSET_ARCHIVE_OPERATION_INVALID'])('maps security conflict %s to safe 409', async code => {
     const f = fixture(new Error(code));
     const response = await request(f.app).get('/admin/assets');
     expect(response.status).toBe(409);
     expect(response.body.code).toBe('ASSET_STATE_CONFLICT');
   });
 
+  it.each(['ASSET_ARCHIVE_RECOVERY_REQUIRED', 'ASSET_ARCHIVE_LEGACY_VERIFICATION_REQUIRED'])('returns safe archive reconciliation status for %s', async code => {
+    const f = fixture(new Error(code)); const response = await request(f.app).get('/admin/assets');
+    expect(response.status).toBe(503); expect(response.body.code).toBe(code);
+  });
   it('rejects invalid cursor with safe 400 rather than internal error', async () => {
     const f = fixture(new Error('ASSET_CURSOR_INVALID'));
     const response = await request(f.app).get('/admin/assets?cursor=invalid');

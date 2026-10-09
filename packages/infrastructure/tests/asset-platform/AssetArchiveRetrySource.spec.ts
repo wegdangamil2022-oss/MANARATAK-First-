@@ -1,7 +1,8 @@
 import { expect, it, vi } from 'vitest';
 import { RetentionDisposition } from '@manaratak/domain';
 import { PrismaAssetRetentionGateway } from '../../src/retention/PrismaAssetRetentionGateway';
-it('retries an ARCHIVED asset after provider failure', async () => {
+// Isolates retention claim/retry handling, not EAP permission to retry an uncertain provider write.
+it('can retry retention orchestration when its lifecycle adapter permits a later attempt', async () => {
   const updateMany = vi.fn(async () => ({ count: 1 }));
   const archiveAsset = vi.fn().mockRejectedValueOnce(new Error('PROVIDER_FAILURE')).mockResolvedValue(undefined);
   const handler = new PrismaAssetRetentionGateway({ assetRecord: { updateMany } } as any, { archiveAsset } as any);

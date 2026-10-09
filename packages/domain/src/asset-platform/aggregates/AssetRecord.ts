@@ -39,6 +39,14 @@ export interface AssetActivationOperation {
   preparedAt: string;
   completedAt?: string;
 }
+export interface AssetArchiveOperation {
+  version: 1;
+  operationId: string;
+  phase: 'RUNNING' | 'RECOVERY_REQUIRED' | 'COMPLETED';
+  sourceLocator: string;
+  preparedAt: string;
+  updatedAt: string;
+}
 export interface AssetRestoreOperation {
   version: 1;
   operationId: string;
@@ -70,6 +78,7 @@ export interface AssetRecordProps {
   uploadVerification?: AssetUploadEvidence;
   activationOperation?: AssetActivationOperation;
   restoreOperation?: AssetRestoreOperation;
+  archiveOperation?: AssetArchiveOperation;
   retentionBeforeLifecycle?: AssetRetentionSnapshot;
 }
 
@@ -77,6 +86,7 @@ export class AssetRecord {
   private events: unknown[] = [];
 
   constructor(private props: AssetRecordProps, isNew: boolean = false) {
+    if (props.archiveOperation) this.recordArchiveOperation(props.archiveOperation);
     if (props.restoreOperation) this.recordRestoreOperation(props.restoreOperation);
     if (isNew) {
       this.props.state = AssetLifecycleState.INITIATED;
@@ -97,6 +107,19 @@ export class AssetRecord {
   get malwareScan(): AssetRecordProps['malwareScan'] { return this.props.malwareScan; }
   get uploadVerification(): AssetRecordProps['uploadVerification'] { return this.props.uploadVerification; }
   get activationOperation(): AssetActivationOperation | undefined { return this.props.activationOperation ? { ...this.props.activationOperation } : undefined; }
+  get archiveOperation(): AssetArchiveOperation | undefined { return this.props.archiveOperation ? { ...this.props.archiveOperation } : undefined; }
+  public recordArchiveOperation(operation: AssetArchiveOperation): void {
+    if (operation.version !== 1 || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(operation.operationId) ||
+      !['RUNNING', 'RECOVERY_REQUIRED', 'COMPLETED'].includes(operation.phase) ||
+      !/^(clean|quarantine):\/\//.test(operation.sourceLocator) ||
+      (operation.phase !== 'COMPLETED' && operation.sourceLocator !== this.props.locator.value) ||
+      !Number.isFinite(Date.parse(operation.preparedAt)) || !Number.isFinite(Date.parse(operation.updatedAt))) throw new Error('ASSET_ARCHIVE_OPERATION_INVALID');
+    this.props.archiveOperation = { ...operation };
+  }
+  private assertNoPendingArchive(): void {
+    if (this.props.archiveOperation && this.props.archiveOperation.phase !== 'COMPLETED') throw new Error('ASSET_ARCHIVE_RECOVERY_PENDING');
+  }
+
   get restoreOperation(): AssetRestoreOperation | undefined { return this.props.restoreOperation ? { ...this.props.restoreOperation } : undefined; }
 
   public recordRestoreOperation(operation: AssetRestoreOperation): void {
@@ -183,6 +206,7 @@ export class AssetRecord {
   public failMalwareScan(reason: string = 'Malware detected'): void {
     this.assertNoPendingActivation();
     this.assertNoPendingRestore();
+    this.assertNoPendingArchive();
     if (this.props.state === AssetLifecycleState.ACTIVE) {
       throw new Error('Cannot mark active asset as malware scan failed');
     }
@@ -215,6 +239,7 @@ export class AssetRecord {
   public completeSanitization(sanitization: AssetSanitizationMetadata, sanitizedLocator?: AssetStorageLocator): void {
     this.assertNoPendingActivation();
     this.assertNoPendingRestore();
+    this.assertNoPendingArchive();
     if (this.props.state !== AssetLifecycleState.SANITIZING) {
       throw new Error('Can only complete sanitization from SANITIZING state');
     }
@@ -235,6 +260,7 @@ export class AssetRecord {
   public confirmSanitizedObject(evidence: AssetUploadEvidence): void {
     this.assertNoPendingActivation();
     this.assertNoPendingRestore();
+    this.assertNoPendingArchive();
     if (this.props.state !== AssetLifecycleState.SANITIZING ||
       !this.props.sanitization ||
       this.props.locator.storageZone !== AssetStorageZone.QUARANTINE) {
@@ -261,6 +287,7 @@ export class AssetRecord {
   public passSanitizedMalwareScan(): void {
     this.assertNoPendingActivation();
     this.assertNoPendingRestore();
+    this.assertNoPendingArchive();
     if (this.props.state !== AssetLifecycleState.SANITIZING ||
       !this.props.sanitization ||
       !this.props.uploadVerification ||
@@ -363,6 +390,7 @@ export class AssetRecord {
   public softDelete(): void {
     this.assertNoPendingActivation();
     this.assertNoPendingRestore();
+    this.assertNoPendingArchive();
     if (this.props.state === AssetLifecycleState.DELETED || this.props.state === AssetLifecycleState.PURGED) {
       throw new Error('Asset is already deleted or purged');
     }
@@ -393,6 +421,7 @@ export class AssetRecord {
 
   public assertCanDeliver(): void {
     this.assertNoPendingRestore();
+    this.assertNoPendingArchive();
     if (this.props.state !== AssetLifecycleState.ACTIVE ||
       this.props.locator.storageZone !== AssetStorageZone.CLEAN) {
       throw new Error('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET');
@@ -402,6 +431,7 @@ export class AssetRecord {
 
   public restore(): void {
     this.assertNoPendingRestore();
+    this.assertNoPendingArchive();
     if (this.props.state !== AssetLifecycleState.DELETED) {
       throw new Error('Can only restore from DELETED state');
     }

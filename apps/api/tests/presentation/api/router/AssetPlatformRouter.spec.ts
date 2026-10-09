@@ -10,12 +10,13 @@ describe('AssetPlatformRouter', () => {
       sourceLocator: 'clean://private/recovery-path.pdf', expectedSha256: 'private-proof-hash', expectedByteSize: 64 };
     const asset = { id: { value: 'pending' }, reference: { value: 'ref-pending' }, owner: { ownerId: 'owner', ownerType: 'STUDENT' },
       state: 'DELETED', classification: 'INTERNAL', retention: { category: 'SOFT_DELETED' },
-      metadata: { originalFilename: 'test.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 }, restoreOperation: operation };
+      metadata: { originalFilename: 'test.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 }, restoreOperation: operation, archiveOperation: { ...operation, phase: 'RECOVERY_REQUIRED' } };
     const app = express();
     app.use('/assets', AssetPlatformRouter.create({ ingestAssetUseCase: {} as any, processAssetLifecycleUseCase: {} as any,
       assetRecordRepository: { findAdminDetails: vi.fn(async () => ({ asset, governance: {} })) } as any }));
     const response = await request(app).get('/assets/pending');
     expect(response.status).toBe(200); expect(response.body.securityEvidence.restorePhase).toBe('RECOVERY_REQUIRED');
+    expect(response.body.securityEvidence.archivePhase).toBe('RECOVERY_REQUIRED');
     expect(response.body.restoreOperation).toEqual({ operationId: operation.operationId, phase: operation.phase,
       preparedAt: operation.preparedAt, updatedAt: operation.updatedAt });
     expect(JSON.stringify(response.body)).not.toContain(operation.sourceLocator);

@@ -31,6 +31,14 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
   private store = new Map<string, AssetRecord>();
   private restoreLeases = new Set<string>();
 
+  async completeArchiveOperation(asset: AssetRecord): Promise<void> {
+    asset.recordArchiveOperation({ ...asset.archiveOperation!, phase: 'COMPLETED' });
+    this.store.get(asset.id.value)!.recordArchiveOperation(asset.archiveOperation!);
+  }
+  async markArchiveRecoveryRequired(asset: AssetRecord): Promise<void> {
+    asset.recordArchiveOperation({ ...asset.archiveOperation!, phase: 'RECOVERY_REQUIRED' });
+    this.store.get(asset.id.value)!.recordArchiveOperation(asset.archiveOperation!);
+  }
   async acquireRestoreLease(asset: AssetRecord): Promise<void> {
     const stored = this.store.get(asset.id.value);
     if (!stored || stored.state !== AssetLifecycleState.DELETED ||
@@ -96,6 +104,7 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
       versionChain: stored.versionChain,
       activationOperation: stored.activationOperation,
       restoreOperation: stored.restoreOperation,
+      archiveOperation: stored.archiveOperation,
       retentionBeforeLifecycle: stored.retentionBeforeLifecycle,
     });
   }
@@ -714,7 +723,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     }
   });
 
-  it('persists ARCHIVED before provider archive and retries storage failure without re-saving', async () => {
+  it('holds uncertain archive and rejects retries before another provider effect', async () => {
     await ingestUseCase.requestUploadLocator({
       assetId: 'asset-archive-retry', assetReference: 'ref-archive-retry',
       ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'memo.pdf',
@@ -728,14 +737,14 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     const provider = vi.spyOn(storageGateway, 'archive')
       .mockRejectedValueOnce(new Error('ASSET_PROVIDER_ARCHIVE_UNAVAILABLE'));
     await expect(lifecycleUseCase.archiveAsset({ assetId: 'asset-archive-retry' }))
-      .rejects.toThrow('ASSET_PROVIDER_ARCHIVE_UNAVAILABLE');
+      .rejects.toThrow('ASSET_ARCHIVE_RECOVERY_REQUIRED');
     const persisted = await repo.findById(new AssetId('asset-archive-retry'));
     expect(persisted?.state).toBe(AssetLifecycleState.ARCHIVED);
     await expect(lifecycleUseCase.requestDeliveryGrant({ assetId: 'asset-archive-retry' }))
-      .rejects.toThrow('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET');
+      .rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
     const save = vi.spyOn(repo, 'save');
-    await lifecycleUseCase.archiveAsset({ assetId: 'asset-archive-retry' });
-    expect(provider).toHaveBeenCalledTimes(2);
+    await expect(lifecycleUseCase.archiveAsset({ assetId: 'asset-archive-retry' })).rejects.toThrow('ASSET_ARCHIVE_RECOVERY_PENDING');
+    expect(provider).toHaveBeenCalledTimes(1);
     expect(save).not.toHaveBeenCalled();
   });
 

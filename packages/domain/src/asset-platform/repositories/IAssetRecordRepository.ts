@@ -5,6 +5,8 @@ import { AssetOwnerReference } from '../value-objects/AssetOwnerReference';
 
 export interface IAssetRecordRepository {
   save(asset: AssetRecord): Promise<void>;
+  completeArchiveOperation?(asset: AssetRecord): Promise<void>;
+  markArchiveRecoveryRequired?(asset: AssetRecord): Promise<void>;
   /** Bounded EAP-owned recovery read; never infers a new activation request. */
   findPendingActivations?(before: Date, limit: number): Promise<Array<{ assetId: string; operationId: string }>>;
   /** Reserve DELETED state before external restore, fencing both retention claims and stale purges. */

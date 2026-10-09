@@ -1,5 +1,18 @@
 # Section 03 — EAP closure register
 
+## Continuation — archive/restoration provider-call exclusion (2026-10-09)
+
+Original 03/P1-12/P1-13/P1-01/P1-02. Archive now commits ARCHIVED plus a typed RUNNING intent before its sole provider call. Only the originating repository context can finish the exact operation using CAS; completion makes the existing archive response idempotent without a second provider call. Provider/commit uncertainty preserves RECOVERY_REQUIRED, or RUNNING when the failure marker itself cannot commit. Blind provider retries for uncertain archives are removed.
+
+A DB barrier rejects logical/physical delete, identity change and retention claim replacement while the archive is RUNNING/RECOVERY_REQUIRED. Domain guards prevent a new archive, deletion or restoration during that operation. The completed archive can then be logically deleted and restored through the previously verified durable restore flow. A legacy ARCHIVED record without an intent does not trigger another provider archive automatically; its provider state needs verification. No historical intent is fabricated.
+
+Canonical references, scan/upload proof, activation intent, restore journal and version history are preserved across the new archive writes. Existing operational JSON only; no new table/owner store or automatic provider-reconciliation endpoint. Admin receives safe phase/time projection, an ARCHIVE_RECOVERY queue and suppression of conflicting controls. Retention omits pending archive intents, with the DB trigger independently enforcing exclusion. Startup verifies the extra guard. Mutation permissions and owner authority are unchanged.
+
+Local TypeScript PASS, 142 focused tests PASS (18.20s), lint 0 errors/45 warnings, source quality PASS, 15 owner guards PASS. Added three guarded PG cases: actual in-flight provider archive blocks competing commands/raw delete, verified archive completion permits later restore, crash/uncertainty survives restart and retention, and legacy archive avoids a guessed provider replay. Existing archive-failure expectations now require recovery holds; the isolated retention-adapter retry test is explicitly not a claim that uncertain provider writes may be retried. Matching CI pending.
+
+This protects new protocol operations; it cannot retroactively fence legacy provider requests already in flight. Target rollout still requires draining processes, provider quiescence and reviewed migration application; none occurred here. Real provider acceptance remains DEFERRED_BY_USER. Other workspace/global gates are not silently closed.
+
+
 ## Verified durable restore barrier CI
 
 Source `af1b031fc320ad0c59e2a46cf88824e3997d19e3`: [CI 37943487206](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37943487206) SUCCESS: 285 source tests and 34 disposable PostgreSQL tests. New DB cases confirm expired/crashed intent blocks takeover and purge, exact owned renewal plus verified completion, uncertain provider failure holds without compensation/retry, pre-provider cancellation and fresh restore. Retention excludes pending rows while eligible rows remain discoverable. Earlier local stale select assertion is corrected in this matching all-source CI. Source/DB scopes are distinct; overlapping local scopes are not added.
