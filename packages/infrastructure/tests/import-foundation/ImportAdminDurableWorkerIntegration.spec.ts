@@ -258,7 +258,7 @@ describe('W2 Phase 6 durable worker integration', () => {
     }]);
     const originalUpdate = repo.updateRecord.getMockImplementation()!;
     repo.updateRecord.mockImplementationOnce(originalUpdate)
-      .mockImplementationOnce(async () => { throw new Error('IMPORT_ACK_FAILED'); });
+      .mockImplementationOnce(async () => { throw Object.assign(new Error('IMPORT_ACK_FAILED'), { code: 'PERMANENT' }); });
     const queue = new InMemoryImportQueueGateway();
     await queue.enqueueImportJob({ batchId: 'batch-durable-1', targetDomain: 'GENERIC' as any, sourceSystem: 'TEST_SOURCE' });
     const accept = vi.fn(async () => ({ accepted: true }));
