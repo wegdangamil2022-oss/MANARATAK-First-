@@ -140,11 +140,12 @@ describe('PrismaImportQueueGateway', () => {
       data: { batchStatus: ImportJobStatus.CANCELLING,
         lastError: 'Operator request' },
     });
-    expect(prisma.importBatch.updateMany).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ batchStatus: ImportJobStatus.CANCELLED }),
-      }),
-    );
+    // The immediate CANCELLED conditional write was attempted against QUEUED/
+    // PAUSED only (count=0). Only the RUNNING -> CANCELLING write succeeded.
+    expect(prisma.importBatch.updateMany).toHaveBeenCalledTimes(2);
+    expect(prisma.importBatch.updateMany.mock.calls[0][0].where.batchStatus).toEqual({
+      in: [ImportJobStatus.QUEUED, ImportJobStatus.PAUSED, ImportJobStatus.RESUMING],
+    });
     prisma.importBatch.updateMany.mockResolvedValueOnce({ count: 0 })
       .mockResolvedValueOnce({ count: 1 });
     expect(await gateway.acknowledgeStoppedJob(lease)).toBe('CANCELLED');
