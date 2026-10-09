@@ -3,6 +3,7 @@ export * from './enums/ValueType';
 export * from './value-objects/NamespacedKey';
 export * from './value-objects/ScopeIdentifier';
 export * from './value-objects/SettingValueData';
+export * from './value-objects/SettingValidationRules';
 export * from './value-objects/SettingVersion';
 export * from './entities/SettingDefinition';
 export * from './entities/SettingAssignment';
