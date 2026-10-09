@@ -5,25 +5,57 @@ import {
 } from '@manaratak/shared';
 import { FileCheck2, Loader2, Upload } from 'lucide-react';
 
-import type { ReferenceDataCollection } from '@manaratak/domain';
+import type { ReferenceDataCollection, ReferenceDataFilters } from '@manaratak/domain';
 import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceData';
 import { AdministrativeRegionsTab } from './AdministrativeRegionsTab';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 
+/** Bounded owner-API query state, shareable as URL parameters. */
+function readP7Url() {
+  const params = new URLSearchParams(window.location.search);
+  const rawPage = Number(params.get('p7Page') ?? '1');
+  return {
+    page: Number.isSafeInteger(rawPage) && rawPage > 0 ? rawPage : 1,
+    q: params.get('p7Q') ?? '',
+    status: params.get('p7Status') === 'all' ? 'all' as const : 'active' as const,
+    country: params.get('p7Country') ?? '',
+  };
+}
+
 function useFetchData(collection: ReferenceDataCollection) {
+  const initial = useRef(readP7Url()).current;
   const [data, setData] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(initial.page);
+  const [q, setQ] = useState(initial.q);
+  const [status, setStatus] = useState<'active' | 'all'>(initial.status);
+  const [country, setCountry] = useState(initial.country);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestSequence = useRef(0);
+  const deferredQ = React.useDeferredValue(q);
+  const supportsCountry = collection === 'cities' || collection === 'regions';
+  const updateQ = (next: string) => { setQ(next); setPage(1); };
+  const updateStatus = (next: 'active' | 'all') => { setStatus(next); setPage(1); };
+  const updateCountry = (next: string) => { setCountry(next.toUpperCase()); setPage(1); };
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('p7Page', String(page));
+    if (q) url.searchParams.set('p7Q', q); else url.searchParams.delete('p7Q');
+    url.searchParams.set('p7Status', status);
+    if (supportsCountry && country) url.searchParams.set('p7Country', country);
+    else url.searchParams.delete('p7Country');
+    window.history.replaceState(window.history.state, '', url.toString());
+  }, [page, q, status, country, supportsCountry]);
   const fetchData = useCallback(async () => {
     const sequence = ++requestSequence.current;
     setLoading(true); setError(null);
     try {
-      const result = await getReferenceDataPage<any>(collection, { page, pageSize: 50 });
+      const filters: ReferenceDataFilters = { page, pageSize: 50, q: deferredQ || undefined, activeOnly: status === 'active' };
+      if (supportsCountry && country) filters.countryIso2Code = country;
+      const result = await getReferenceDataPage<any>(collection, filters);
       if (sequence !== requestSequence.current) return;
       setData(result.data); setTotal(result.total); setTotalPages(result.totalPages);
     } catch (err: unknown) {
@@ -33,12 +65,31 @@ function useFetchData(collection: ReferenceDataCollection) {
     } finally {
       if (sequence === requestSequence.current) setLoading(false);
     }
-  }, [collection, page]);
+  }, [collection, page, deferredQ, status, country, supportsCountry]);
   useEffect(() => {
     void fetchData();
     return () => { requestSequence.current++; };
   }, [fetchData]);
-  return { data, loading, error, refetch: fetchData, page, total, totalPages, setPage };
+  return { data, loading, error, refetch: fetchData, page, total, totalPages, setPage,
+    q, setQ: updateQ, status, setStatus: updateStatus, country, setCountry: updateCountry, supportsCountry };
+}
+
+function ReferenceFilters({ q, setQ, status, setStatus, country, setCountry, supportsCountry }: Pick<ReturnType<typeof useFetchData>,
+  'q' | 'setQ' | 'status' | 'setStatus' | 'country' | 'setCountry' | 'supportsCountry'>) {
+  return <div className="flex flex-wrap gap-3 mb-4 items-end" dir="rtl">
+    <label className="flex flex-col gap-1 text-xs font-bold">بحث / Search
+      <input className="border rounded-lg px-3 py-2 text-sm" aria-label="بحث البيانات المرجعية" value={q} onChange={e => setQ(e.target.value)} placeholder="الاسم أو الرمز" />
+    </label>
+    <label className="flex flex-col gap-1 text-xs font-bold">الحالة / Status
+      <select className="border rounded-lg px-3 py-2 text-sm" value={status} onChange={e => setStatus(e.target.value as 'active' | 'all')}>
+        <option value="active">النشطة فقط / Active</option>
+        <option value="all">جميع الحالات / All</option>
+      </select>
+    </label>
+    {supportsCountry && <label className="flex flex-col gap-1 text-xs font-bold">رمز الدولة / ISO2
+      <input className="border rounded-lg px-3 py-2 text-sm w-24" value={country} maxLength={2} onChange={e => setCountry(e.target.value)} placeholder="YE" />
+    </label>}
+  </div>;
 }
 
 function ReferencePagination({ page, totalPages, setPage, loading }: {
@@ -52,7 +103,18 @@ function ReferencePagination({ page, totalPages, setPage, loading }: {
 }
 
 export function ReferenceDataAdminPage() {
-  const [activeTab, setActiveTab] = useState<ReferenceDataCollection>('countries');
+  const tabValues: ReferenceDataCollection[] = ['countries', 'currencies', 'languages', 'regions', 'cities'];
+  const [activeTab, setActiveTab] = useState<ReferenceDataCollection>(() => {
+    const value = new URLSearchParams(window.location.search).get('p7Tab');
+    return tabValues.includes(value as ReferenceDataCollection) ? value as ReferenceDataCollection : 'countries';
+  });
+  const selectTab = (tab: ReferenceDataCollection) => {
+    setActiveTab(tab);
+    const url = new URL(window.location.href);
+    url.searchParams.set('p7Tab', tab);
+    url.searchParams.set('p7Page', '1');
+    window.history.replaceState(window.history.state, '', url.toString());
+  };
 
   const tabLabels: Record<string, string> = {
     countries: 'الدول المعتمدة',
@@ -87,7 +149,7 @@ export function ReferenceDataAdminPage() {
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/15' 
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => selectTab(tab)}
             >
               {tabLabels[tab] || tab}
             </button>
@@ -122,7 +184,8 @@ function Input({ label, value, onChange, required = false }: any) {
 }
 
 function CountriesTab() {
-  const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('countries');
+  const queryState = useFetchData('countries');
+  const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
   const [form, setForm] = useState({ iso2Code: '', iso3Code: '', name: '', nameAr: '', region: '' });
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
   const [preview, setPreview] = useState<any>(null);
@@ -210,9 +273,10 @@ function CountriesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Active Records ({total})</h3>
+          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : 'All records'} ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
+        <ReferenceFilters {...queryState} />
         <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-gray-500">Loading...</p>}
         {error && <p className="text-red-600">{error}</p>}
@@ -298,7 +362,8 @@ function DerivedReferencePreview({ kind }: { kind: 'currencies' | 'languages' })
 }
 
 function CurrenciesTab() {
-  const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('currencies');
+  const queryState = useFetchData('currencies');
+  const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
   const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', symbol: '', numericCode: '' });
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
@@ -338,9 +403,10 @@ function CurrenciesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Active Records ({total})</h3>
+          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : 'All records'} ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
+        <ReferenceFilters {...queryState} />
         <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-gray-500">Loading...</p>}
         {error && <p className="text-red-600">{error}</p>}
@@ -367,7 +433,8 @@ function CurrenciesTab() {
 }
 
 function LanguagesTab() {
-  const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('languages');
+  const queryState = useFetchData('languages');
+  const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
   const [form, setForm] = useState({ isoCode: '', name: '', nameAr: '', nativeName: '', direction: 'LTR' as 'LTR' | 'RTL' });
   const [saveStatus, setSaveStatus] = useState<{loading: boolean, error?: string, success?: string}>({ loading: false });
 
@@ -417,9 +484,10 @@ function LanguagesTab() {
 
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Active Records ({total})</h3>
+          <h3 className="font-bold text-lg">{status === 'active' ? 'Active records' : 'All records'} ({total})</h3>
           <button onClick={refetch} className="text-sm text-blue-600 hover:underline">Refresh</button>
         </div>
+        <ReferenceFilters {...queryState} />
         <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-gray-500">Loading...</p>}
         {error && <p className="text-red-600">{error}</p>}
@@ -446,7 +514,8 @@ function LanguagesTab() {
 }
 
 function CitiesTab() {
-  const { data, loading, error, refetch, page, total, totalPages, setPage } = useFetchData('cities');
+  const queryState = useFetchData('cities');
+  const { data, loading, error, refetch, page, total, totalPages, setPage, status } = queryState;
   const [form, setForm] = useState({ countryIso2Code: '', name: '', nameAr: '', region: '', timezone: '' });
   const [countryId, setCountryId] = useState<string | null>(null);
   const [regionId, setRegionId] = useState<string | null>(null);
@@ -496,9 +565,10 @@ function CitiesTab() {
 
       <div className="space-y-4">
         <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
-          <h3 className="font-black text-lg text-slate-800">السجلات والمدن النشطة ({total})</h3>
+          <h3 className="font-black text-lg text-slate-800">{status === 'active' ? 'المدن النشطة' : 'جميع حالات المدن'} ({total})</h3>
           <button onClick={refetch} className="text-sm font-black text-indigo-600 hover:text-indigo-800 transition">تحديث القائمة</button>
         </div>
+        <ReferenceFilters {...queryState} />
         <ReferencePagination page={page} totalPages={totalPages} setPage={setPage} loading={loading} />
         {loading && <p className="text-slate-500 font-bold">جارٍ تحميل قائمة المدن والمسافات المتاحة…</p>}
         {error && <p className="text-red-600 font-bold">{error}</p>}
