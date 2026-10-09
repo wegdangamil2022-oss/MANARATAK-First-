@@ -40,6 +40,7 @@ jobs:
           packages/infrastructure/tests/import-foundation/ImportAdminDurableWorkerIntegration.spec.ts
           packages/infrastructure/tests/import-foundation/InMemoryImportQueueGateway.spec.ts
           packages/infrastructure/tests/import-foundation/PrismaImportQueueGateway.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportWorkerStats.spec.ts
           packages/application/tests/import-foundation/ImportWorkerProtocol.spec.ts
           packages/application/tests/import-foundation/ImportSourceIdentity.spec.ts
           packages/application/tests/import-foundation/ImportHandoffDispatcher.spec.ts
