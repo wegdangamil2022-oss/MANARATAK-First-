@@ -201,7 +201,8 @@ describe('W2 Phase 6 durable worker integration', () => {
     const useCase = new ImportAdminUseCases(repo as any, queue, dispatcher, worker);
     await expect(useCase.processNextQueuedBatch('cancelled-worker')).rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
     expect(accept).toHaveBeenCalledTimes(1);
-    expect(repo.updateRecord).not.toHaveBeenCalled();
+    expect(repo.updateRecord).toHaveBeenCalledTimes(1);
+    expect(repo.records.get('rec-a')?.rawPayload._phase6HandoffState).toBe('DISPATCH_IN_FLIGHT');
     expect(repo.updateBatchStats).not.toHaveBeenCalled();
     expect((await queue.getJobStatus('batch-durable-1'))?.status).toBe('CANCELLED');
   });
@@ -237,6 +238,59 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(accept).not.toHaveBeenCalled();
     expect(repo.updateRecord).not.toHaveBeenCalled();
     expect((await queue.getJobStatus('batch-durable-1'))?.status).toBe('PAUSED');
+  });
+
+  it('refuses duplicate owner dispatch after ack failure and persists manual reconciliation on replay', async () => {
+    const repo = statefulImportRepository();
+    await repo.createBatch({ sourceSystem: 'TEST_SOURCE', dataType: 'GENERIC',
+      batchStatus: 'CREATED', totalRecords: 1, processedRecords: 0, failedRecords: 0 });
+    await repo.bulkCreateRecords([{ id: 'rec-crash', batchId: 'batch-durable-1',
+      status: 'COMPLETE', sourceDedupKey: 'key-crash', rawPayload: {
+        _phase6HandoffState: 'PENDING_HANDOFF',
+        _phase6HandoffEnvelope: {
+          handoffId: 'handoff:key-crash', ownerDomain: 'GENERIC',
+          artifact: { sourceId: 'TEST_SOURCE' }, normalizedPayload: { id: 'row' },
+          provenance: { sourceSystem: 'TEST_SOURCE', sourceRowNumber: 1, contentHash: 'hash' },
+          validation: { state: 'VALID', issues: [] },
+          execution: { executionId: 'batch-durable-1', dryRun: false, attempt: 1, idempotencyKey: 'key-crash' },
+        },
+      },
+    }]);
+    const originalUpdate = repo.updateRecord.getMockImplementation()!;
+    repo.updateRecord.mockImplementationOnce(originalUpdate)
+      .mockImplementationOnce(async () => { throw new Error('IMPORT_ACK_FAILED'); });
+    const queue = new InMemoryImportQueueGateway();
+    await queue.enqueueImportJob({ batchId: 'batch-durable-1', targetDomain: 'GENERIC' as any, sourceSystem: 'TEST_SOURCE' });
+    const accept = vi.fn(async () => ({ accepted: true }));
+    const useCase = new ImportAdminUseCases(repo as any, queue,
+      new ImportHandoffDispatcher({ GENERIC: { accept } as any }),
+      new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+        maxAttempts: 2, dlqAfterAttempts: 2, backoffStrategy: 'fixed',
+        initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
+      })));
+    expect(await useCase.processNextQueuedBatch('first-worker')).toBe('DLQ');
+    expect(accept).toHaveBeenCalledTimes(1);
+    expect(repo.records.get('rec-crash')?.rawPayload._phase6HandoffState).toBe('DISPATCH_IN_FLIGHT');
+    await queue.replayJob({ batchId: 'batch-durable-1', fromCheckpoint: false });
+    expect(await useCase.processNextQueuedBatch('replay-worker')).toBe('COMPLETED');
+    expect(accept).toHaveBeenCalledTimes(1);
+    const stored = repo.records.get('rec-crash');
+    expect(stored.status).toBe('NEEDS_REVIEW');
+    expect(stored.rawPayload._phase6HandoffState).toBe('MANUAL_RECONCILIATION_REQUIRED');
+    expect(stored.rawPayload._phase6HandoffEnvelope).toBeTruthy();
+  });
+
+  it('rejects client-forged private handoff markers before creating an import batch', async () => {
+    const repo = statefulImportRepository();
+    const useCase = new ImportAdminUseCases(repo as any);
+    for (const reserved of ['_phase6HandoffEnvelope', '_phase6HandoffState',
+      '_sourceRowNumber', '_domainHandoff', '_payloadFingerprint']) {
+      await expect(useCase.stageNormalizedRows({
+        ownerDomain: 'GENERIC', sourceSystem: 'SOURCE',
+        rows: [{ title: 'University', [reserved]: { forged: true } }],
+      })).rejects.toThrow('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
+    }
+    expect(repo.createBatch).not.toHaveBeenCalled();
   });
 
 });
