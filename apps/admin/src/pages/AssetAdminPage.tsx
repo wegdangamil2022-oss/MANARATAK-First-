@@ -297,6 +297,12 @@ export function AssetAdminPage() {
             disabled={usageLoadingId !== null} className="mt-3 rounded-lg border px-3 py-1.5 disabled:opacity-50">
             عرض استخدامات هذا الأصل
           </button>
+          <button type="button"
+            disabled={selectedAsset.lifecycleState !== 'ACTIVE'}
+            onClick={() => void previewAsset(selectedAsset.id, selectedAsset.metadata.mimeType)}
+            className="mt-3 mr-2 rounded-lg border px-3 py-1.5 disabled:opacity-50">
+            معاينة آمنة للملف
+          </button>
         </section>
       )}
 
