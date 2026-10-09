@@ -52,4 +52,26 @@ describe('EAP API boundary: query validation and safe Problem Details', () => {
     expect(JSON.stringify(response.body)).not.toContain('hidden123');
     expect(JSON.stringify(response.body)).not.toContain('production users');
   });
+  it('returns a safe 409 when restored content does not match the trusted checksum', async () => {
+    const f = fixture(new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED'));
+    const response = await request(f.app).get('/admin/assets');
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('ASSET_STATE_CONFLICT');
+  });
+
+  it('returns 503 when restored-byte verification capability is not configured', async () => {
+    const f = fixture(new Error('ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED'));
+    const response = await request(f.app).get('/admin/assets');
+    expect(response.status).toBe(503);
+    expect(response.body.code).toBe('ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED');
+  });
+
+  it('returns safe 503 requiring repair when post-restore compensation also fails', async () => {
+    const f = fixture(new Error('ASSET_RESTORE_COMPENSATION_FAILED'));
+    const response = await request(f.app).get('/admin/assets');
+    expect(response.status).toBe(503);
+    expect(response.body.code).toBe('ASSET_RESTORE_COMPENSATION_FAILED');
+    expect(JSON.stringify(response.body)).not.toContain('provider locator');
+  });
+
 });

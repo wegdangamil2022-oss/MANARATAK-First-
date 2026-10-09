@@ -254,3 +254,9 @@ npm run ci:source:contracts
 - Added two disposable PostgreSQL tests: ACTIVE state is not persisted until independent CLEAN verification finishes, and an intervening DB revision change triggers compensation while keeping the row DELETED.
 - Updated application in-memory test repository to return independent rehydrated aggregates, matching Prisma semantics; direct object aliases had falsely shown a successful state transition after simulated save failure.
 - Clean provider verification remains external and best-effort archive compensation requires operational alert/reconciliation on failure. CI status pending.
+
+## Restore API failure semantics
+
+- `ASSET_RESTORE_CONTENT_VERIFICATION_FAILED` and malformed restore evidence are returned as sanitized 409 state conflicts.
+- Missing CLEAN verification capability and failed archive compensation return sanitized 503, preserving an actionable failure code without exposing provider details.
+- API contract regression tests cover each branch; latest run pending on combined updates.
