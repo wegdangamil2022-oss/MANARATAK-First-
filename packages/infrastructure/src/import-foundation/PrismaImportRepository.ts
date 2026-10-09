@@ -480,7 +480,7 @@ export class PrismaImportRepository {
       if (filters?.batchId) where.batchId = filters.batchId;
       if (filters?.dataType) where.batch = { dataType: importDomainFilter(filters.dataType) };
 
-      const batchWhere: Record<string, unknown> = {
+      const batchWhere = {
         batchStatus: { in: ['DLQ', 'FAILED_PERMANENT', 'FAILED_RETRYABLE'] },
         ...(filters?.batchId ? { id: filters.batchId } : {}),
         ...(filters?.dataType ? { dataType: importDomainFilter(filters.dataType) } : {}),
