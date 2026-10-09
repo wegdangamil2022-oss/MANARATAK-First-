@@ -6,7 +6,7 @@
 export type SettingsAdminScope = 'GLOBAL' | 'DOMAIN' | 'TENANT' | 'IDENTITY';
 
 export function canEditSettingsScope(level: SettingsAdminScope): boolean {
-  return level === 'GLOBAL' || level === 'IDENTITY';
+  return level !== 'TENANT';
 }
 
 export function canEditSettingsAssignment(
