@@ -262,6 +262,7 @@ export class ManageSettingsUseCase {
         aggregateId: definition.id,
         action: 'CREATE_SETTING_DEFINITION',
         context: { ...context!, correlationId },
+        outbox: { metadata: { settingsEventRole: 'CONTROL_PLANE_MUTATION', schemaVersion: 1 } },
         auditMetadata: {
           key: input.key,
           valueType: input.valueType,
@@ -432,6 +433,7 @@ export class ManageSettingsUseCase {
     if (!this.definitionRepo.withTransaction || !context?.actorId) throw new Error('SETTINGS_ATOMIC_CONTEXT_REQUIRED');
     await this.atomicMutations.execute({ domain: 'SETTINGS', aggregateType: 'SETTING_DEFINITION', aggregateId: definition.id,
       action: 'UPDATE_SETTING_DEFINITION', context: { ...context!, correlationId },
+      outbox: { metadata: { settingsEventRole: 'CONTROL_PLANE_MUTATION', schemaVersion: 1 } },
       auditMetadata: { key: input.key, previousRevision: definition.revision, isDeprecated: updated.isDeprecated, changeReason, impact } },
       transaction => this.definitionRepo.withTransaction!(transaction).save(updated, { correlationId }));
   }
@@ -468,6 +470,7 @@ export class ManageSettingsUseCase {
           aggregateId: assignment.id,
           action,
           context: { ...context!, correlationId },
+          outbox: { metadata: { settingsEventRole: 'CONTROL_PLANE_MUTATION', schemaVersion: 1 } },
           auditMetadata: { ...metadata, assignmentId: assignment.id },
         },
         (transaction) => this.assignmentRepo.withTransaction!(transaction).save(assignment, { correlationId }),
