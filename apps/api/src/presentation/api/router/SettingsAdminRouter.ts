@@ -69,7 +69,7 @@ export class SettingsAdminRouter {
         versionId: identifier,
         value: z.unknown(),
         type: z.nativeEnum(ValueType),
-        expectedCurrentVersionId: identifier.nullable().optional(),
+        expectedCurrentVersionId: identifier.nullable(),
         changeReason: changeReason.optional(),
       })
       .strict()
@@ -96,7 +96,7 @@ export class SettingsAdminRouter {
         previousVersionId: identifier,
         changeReason,
         newVersionId: identifier,
-        expectedCurrentVersionId: identifier.optional(),
+        expectedCurrentVersionId: identifier,
       })
       .strict();
 
