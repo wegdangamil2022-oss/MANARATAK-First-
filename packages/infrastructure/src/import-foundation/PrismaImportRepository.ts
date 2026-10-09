@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
+import { createHash } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import {
   toNullablePrismaJson,
@@ -65,6 +66,8 @@ export class PrismaImportRepository {
           totalRecords: batch.totalRecords,
           processedRecords: batch.processedRecords,
           failedRecords: batch.failedRecords,
+          ...(batch.batchStatus === 'STAGING' ? { claimedBy: 'ARTIFACT_STAGING',
+            claimUntil: new Date(Date.now() + 300_000) } : {}),
         },
       });
       return created;
@@ -117,6 +120,7 @@ export class PrismaImportRepository {
 
   async getOverview(filters?: { dataType?: string }): Promise<any> {
     const activeBatchStatuses = [
+      'STAGING',
       'CREATED',
       'QUEUED',
       'RUNNING',
@@ -313,6 +317,7 @@ export class PrismaImportRepository {
 
   async getOperationalInsights(filters?: { dataType?: string }): Promise<any> {
     const activeStatuses = [
+      'STAGING',
       'CREATED',
       'QUEUED',
       'RUNNING',
@@ -747,12 +752,25 @@ export class PrismaImportRepository {
         for (const key of keys) {
           await client.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`phase6-source:${key}`}, 0))::text AS lock_result`;
         }
+        // Renew the staging lease and lock its batch before inserting any chunk.
+        // An expired/recovered parser cannot resurrect dedup reservations.
+        const stagingBatches = [...new Set(recordsWithIds.filter(row =>
+          ['STAGING_PENDING', 'STAGING_INVALID'].includes(row.status)).map(row => row.batchId))].sort();
+        for (const batchId of stagingBatches) {
+          const updated = await client.importBatch.updateMany({ where: { id: batchId, batchStatus: 'STAGING',
+            claimedBy: 'ARTIFACT_STAGING', claimUntil: { gt: new Date() } },
+            data: { claimUntil: new Date(Date.now() + 300_000) } });
+          if (updated.count !== 1) throw new Error('IMPORT_STAGING_LEASE_LOST');
+        }
         const existing = keys.length
           ? await client.importRecord.findMany({
               where: { sourceDedupKey: { in: keys }, status: { not: 'STAGING_REJECTED' } },
-              select: { sourceDedupKey: true },
+              select: { sourceDedupKey: true, batchId: true, status: true },
             })
           : [];
+        if (existing.some(row => ['STAGING_PENDING', 'STAGING_INVALID'].includes(row.status) &&
+            recordsWithIds.some(input => input.sourceDedupKey === row.sourceDedupKey && input.batchId !== row.batchId)))
+          throw new Error('IMPORT_SOURCE_STAGING_BUSY');
         const seen = new Set(existing.map(row => row.sourceDedupKey).filter(Boolean));
         const accepted = recordsWithIds.filter(record => {
           const key = record.sourceDedupKey;
@@ -967,12 +985,119 @@ export class PrismaImportRepository {
     return this.inMemoryRecords.get(id) || null;
   }
 
+  /** Bounded read-only comparison; no imported payload is selected or returned. */
+  async compareBatches(leftId: string, rightId: string, page = 1,
+    versions?: { leftUpdatedAt: string; rightUpdatedAt: string; leftRecordVersion?: string; rightRecordVersion?: string }) {
+    if (!this.prisma) throw new Error('IMPORT_BATCH_DIFF_DURABLE_REQUIRED');
+    if (leftId === rightId || !Number.isSafeInteger(page) || page < 1 || page > 50) throw new Error('IMPORT_BATCH_DIFF_INPUT_INVALID');
+    return this.prisma.$transaction(async tx => {
+      const batches = await tx.importBatch.findMany({ where: { id: { in: [leftId, rightId] } },
+        select: { id: true, sourceSystem: true, dataType: true, updatedAt: true, batchStatus: true } });
+      const left = batches.find(batch => batch.id === leftId); const right = batches.find(batch => batch.id === rightId);
+      if (!left || !right) throw new Error('IMPORT_BATCH_NOT_FOUND');
+      if (versions && (left.updatedAt.toISOString() !== versions.leftUpdatedAt || right.updatedAt.toISOString() !== versions.rightUpdatedAt))
+        throw new Error('IMPORT_BATCH_DIFF_VERSION_CONFLICT');
+      if (left.sourceSystem !== right.sourceSystem || left.dataType !== right.dataType) throw new Error('IMPORT_BATCH_DIFF_SCOPE_MISMATCH');
+      type Row = { id: string; sourceDedupKey: string | null; promotedEntityId?: string | null; updatedAt?: Date; fingerprint: string | null };
+      const read = (id: string) => tx.$queryRaw<Row[]>`
+        SELECT "id", "updatedAt", CASE WHEN length("sourceDedupKey") <= 512 THEN "sourceDedupKey" ELSE NULL END AS "sourceDedupKey",
+        CASE WHEN length("promotedEntityId") <= 512 THEN "promotedEntityId" ELSE NULL END AS "promotedEntityId",
+        CASE WHEN "rawPayload"->>'_payloadFingerprint' ~ '^[a-f0-9]{64}$'
+          THEN "rawPayload"->>'_payloadFingerprint' ELSE NULL END AS "fingerprint"
+        FROM "ImportRecord" WHERE "batchId" = ${id}
+        AND "status" NOT IN ('CHECKPOINT', 'DLQ', 'WORKER_FAILURE', 'STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED')
+        ORDER BY "id" ASC LIMIT 5001`;
+      const leftRows = await read(leftId); const rightRows = await read(rightId);
+      if (leftRows.length > 5000 || rightRows.length > 5000) throw new Error('IMPORT_BATCH_DIFF_LIMIT_EXCEEDED');
+      const leftRecordVersion = createHash('sha256').update(JSON.stringify(leftRows)).digest('hex');
+      const rightRecordVersion = createHash('sha256').update(JSON.stringify(rightRows)).digest('hex');
+      if (versions && ((versions.leftRecordVersion && versions.leftRecordVersion !== leftRecordVersion) ||
+          (versions.rightRecordVersion && versions.rightRecordVersion !== rightRecordVersion)))
+        throw new Error('IMPORT_BATCH_DIFF_VERSION_CONFLICT');
+      if ([...leftRows, ...rightRows].some(row => !row.sourceDedupKey && !row.promotedEntityId)) throw new Error('IMPORT_BATCH_DIFF_IDENTITY_REQUIRED');
+      const externalKey = (row: Row) => {
+        if (!row.sourceDedupKey) return `owner:${row.promotedEntityId}`;
+        const key = row.sourceDedupKey;
+        const base = key.replace(/\|sha256:[a-f0-9]{64}$/, '');
+        return base.endsWith('|payload') ? key : base;
+      };
+      const ownerLinks = new Map<string, string>();
+      for (const row of [...leftRows, ...rightRows]) {
+        if (!row.promotedEntityId) continue;
+        const key = externalKey(row); const prior = ownerLinks.get(key);
+        if (prior && prior !== row.promotedEntityId) throw new Error('IMPORT_BATCH_DIFF_OWNER_CONFLICT');
+        ownerLinks.set(key, row.promotedEntityId);
+      }
+      const identity = (row: Row) => {
+        const key = externalKey(row); const owner = row.promotedEntityId ?? ownerLinks.get(key);
+        return owner ? `owner:${owner}` : key;
+      };
+      const before = new Map(leftRows.map(row => [identity(row), row]));
+      const after = new Map(rightRows.map(row => [identity(row), row]));
+      if (before.size !== leftRows.length || after.size !== rightRows.length) throw new Error('IMPORT_BATCH_DIFF_IDENTITY_AMBIGUOUS');
+      const counters = { added: 0, missingFromComparison: 0, changed: 0, unchanged: 0, unknown: 0 };
+      const differences: Array<{ identityHash: string; beforeRecordId: string | null; afterRecordId: string | null;
+        outcome: 'ADDED' | 'MISSING_FROM_COMPARISON' | 'CHANGED' | 'UNKNOWN' }> = [];
+      for (const key of [...new Set([...before.keys(), ...after.keys()])].sort()) {
+        const a = before.get(key); const b = after.get(key);
+        let outcome: 'ADDED' | 'MISSING_FROM_COMPARISON' | 'CHANGED' | 'UNKNOWN';
+        if (!a) { counters.added++; outcome = 'ADDED'; }
+        else if (!b) { counters.missingFromComparison++; outcome = 'MISSING_FROM_COMPARISON'; }
+        else if (!a.fingerprint || !b.fingerprint) { counters.unknown++; outcome = 'UNKNOWN'; }
+        else if (a.fingerprint !== b.fingerprint) { counters.changed++; outcome = 'CHANGED'; }
+        else { counters.unchanged++; continue; }
+        differences.push({ identityHash: createHash('sha256').update(key).digest('hex'),
+          beforeRecordId: a?.id ?? null, afterRecordId: b?.id ?? null, outcome });
+      }
+      return { left, right, counters, rows: differences.slice((page - 1) * 200, page * 200),
+        page, pageSize: 200, totalDifferences: differences.length, maxRowsPerBatch: 5000,
+        nextCursor: page * 200 < differences.length ? Buffer.from(JSON.stringify({
+          leftId, rightId, leftUpdatedAt: left.updatedAt.toISOString(), rightUpdatedAt: right.updatedAt.toISOString(),
+          leftRecordVersion, rightRecordVersion, page: page + 1 })).toString('base64url') : null,
+        leftRecordVersion, rightRecordVersion, comparisonAlgorithm: 'EXTERNAL_OR_RESOLVED_OWNER_ID_V1',
+        readOnly: true, canonicalDeletion: false, missingRowsMeaning: 'OBSERVATION_ONLY',
+        comparisonScope: 'PERSISTED_ACCEPTED_ROWS_NOT_COMPLETE_SOURCE_SNAPSHOT' };
+    }, { isolationLevel: 'RepeatableRead' });
+  }
+
+  /** Bounded recovery of expired artifact staging; never time out an owner handoff. */
+  async recoverStaleStaging(): Promise<number> {
+    if (!this.prisma) throw new Error('IMPORT_STREAM_DURABLE_COMPOSITION_REQUIRED');
+    const now = new Date();
+    const candidates = await this.prisma.importBatch.findMany({
+      where: { OR: [
+        { batchStatus: 'STAGING', claimedBy: 'ARTIFACT_STAGING', claimUntil: { lte: now } },
+        // Compatibility with interrupted Session 2 streams. Ordinary CREATED jobs are excluded.
+        { batchStatus: 'CREATED', claimedBy: null, claimUntil: null,
+          updatedAt: { lte: new Date(now.getTime() - 300_000) },
+          records: { some: { status: { in: ['STAGING_PENDING', 'STAGING_INVALID'] } } } },
+      ] }, select: { id: true, batchStatus: true, updatedAt: true, claimUntil: true },
+      orderBy: { updatedAt: 'asc' }, take: 20,
+    });
+    let recovered = 0;
+    for (const candidate of candidates) {
+      recovered += await this.prisma.$transaction(async tx => {
+        const won = await tx.importBatch.updateMany({ where: { id: candidate.id,
+          batchStatus: candidate.batchStatus, updatedAt: candidate.updatedAt, claimUntil: candidate.claimUntil },
+          data: { batchStatus: 'FAILED_PERMANENT', claimedBy: null, claimUntil: null,
+            lastError: 'IMPORT_ARTIFACT_STAGING_REJECTED' } });
+        if (won.count !== 1) return 0;
+        await tx.importRecord.updateMany({ where: { batchId: candidate.id, promotedEntityId: null,
+          status: { in: ['STAGING_PENDING', 'STAGING_INVALID'] } }, data: { status: 'STAGING_REJECTED' } });
+        return 1;
+      });
+    }
+    return recovered;
+  }
+
   async finalizeStagedStream(batchId: string, count: number): Promise<void> {
     if (!this.prisma) throw new Error('IMPORT_STREAM_DURABLE_COMPOSITION_REQUIRED');
     await this.prisma.$transaction(async tx => {
       const batch = await tx.importBatch.updateMany({
-        where: { id: batchId, batchStatus: 'CREATED', claimedBy: null, claimUntil: null },
-        data: { totalRecords: count, processedRecords: 0, failedRecords: 0 },
+        where: { id: batchId, batchStatus: 'STAGING', claimedBy: 'ARTIFACT_STAGING', claimUntil: { gt: new Date() } },
+        // Queue visibility and all promoted rows commit together.
+        data: { batchStatus: 'QUEUED', availableAt: new Date(), claimedBy: null, claimUntil: null,
+          totalRecords: count, processedRecords: 0, failedRecords: 0 },
       });
       if (batch.count !== 1) throw new Error('IMPORT_STREAM_STATE_CONFLICT');
       const valid = await tx.importRecord.updateMany({ where: { batchId, status: 'STAGING_PENDING' }, data: { status: 'COMPLETE' } });
@@ -985,8 +1110,8 @@ export class PrismaImportRepository {
     if (!this.prisma) throw new Error('IMPORT_STREAM_DURABLE_COMPOSITION_REQUIRED');
     await this.prisma.$transaction(async tx => {
       const updated = await tx.importBatch.updateMany({
-        where: { id: batchId, batchStatus: 'CREATED', claimedBy: null, claimUntil: null },
-        data: { batchStatus: 'FAILED_PERMANENT', lastError: 'IMPORT_ARTIFACT_STAGING_REJECTED' },
+        where: { id: batchId, batchStatus: 'STAGING', claimedBy: 'ARTIFACT_STAGING' },
+        data: { batchStatus: 'FAILED_PERMANENT', claimedBy: null, claimUntil: null, lastError: 'IMPORT_ARTIFACT_STAGING_REJECTED' },
       });
       // If queue ownership already changed, never overwrite its result.
       if (!updated.count) return;
@@ -1001,7 +1126,7 @@ export class PrismaImportRepository {
 
     if (this.prisma) {
       const rows = await this.prisma.importRecord.findMany({
-        where: { sourceDedupKey: { in: keys }, status: { not: 'STAGING_REJECTED' } },
+        where: { sourceDedupKey: { in: keys }, status: { notIn: ['STAGING_REJECTED', 'STAGING_PENDING', 'STAGING_INVALID'] } },
         select: { sourceDedupKey: true },
       });
       return Array.from(new Set(rows.map((row: any) => row.sourceDedupKey).filter(Boolean)));
@@ -1010,7 +1135,7 @@ export class PrismaImportRepository {
     const requested = new Set(keys);
     const found = new Set<string>();
     for (const record of this.inMemoryRecords.values()) {
-      if (record.status !== 'STAGING_REJECTED' && record.sourceDedupKey && requested.has(record.sourceDedupKey))
+      if (!['STAGING_REJECTED', 'STAGING_PENDING', 'STAGING_INVALID'].includes(record.status) && record.sourceDedupKey && requested.has(record.sourceDedupKey))
         found.add(record.sourceDedupKey);
     }
     return Array.from(found);
@@ -1018,7 +1143,7 @@ export class PrismaImportRepository {
 
   async findBySourceDedupKey(sourceDedupKey: string, batchId?: string): Promise<any | null> {
     if (this.prisma) {
-      const where: any = { sourceDedupKey, status: { not: 'STAGING_REJECTED' } };
+      const where: any = { sourceDedupKey, status: { notIn: ['STAGING_REJECTED', 'STAGING_PENDING', 'STAGING_INVALID'] } };
       if (batchId) {
         where.batchId = batchId;
       }
@@ -1027,7 +1152,7 @@ export class PrismaImportRepository {
     }
 
     for (const record of this.inMemoryRecords.values()) {
-      if (record.sourceDedupKey === sourceDedupKey && record.status !== 'STAGING_REJECTED') {
+      if (record.sourceDedupKey === sourceDedupKey && !['STAGING_REJECTED', 'STAGING_PENDING', 'STAGING_INVALID'].includes(record.status)) {
         if (batchId && record.batchId !== batchId) {
           continue;
         }

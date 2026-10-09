@@ -45,8 +45,10 @@ export class ImportSourceIdentity {
     const identity = externalIdentity
       ? `${externalIdentity[0]}:${String(externalIdentity[1]).trim().toLocaleUpperCase('en-US')}`
       : 'payload';
+    const sourceDedupKey = `${this.normalize(input.sourceSystem)}|${this.normalize(input.ownerDomain)}|${identity}|sha256:${payloadFingerprint}`;
+    if (Buffer.byteLength(sourceDedupKey, 'utf8') > 512) throw new Error('IMPORT_SOURCE_IDENTITY_TOO_LARGE');
     return {
-      sourceDedupKey: `${this.normalize(input.sourceSystem)}|${this.normalize(input.ownerDomain)}|${identity}|sha256:${payloadFingerprint}`,
+      sourceDedupKey,
       identityKind: externalIdentity ? 'EXTERNAL_ID' : 'PAYLOAD_FINGERPRINT',
       payloadFingerprint,
     };

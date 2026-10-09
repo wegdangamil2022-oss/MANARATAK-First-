@@ -15,7 +15,7 @@ function parserRegistry() { const parsers = new ImportParserRegistry(); parsers.
 function staging(queueStatus = 'QUEUED') {
   const repo = { createBatch: vi.fn(async () => ({ id: 'batch-1' })),
     bulkCreateRecords: vi.fn(async (rows: any[]) => ({ count: rows.length, acceptedRecordIds: rows.map(row => row.id) })),
-    finalizeStagedStream: vi.fn(), rejectStagedStream: vi.fn() };
+    recoverStaleStaging: vi.fn(), finalizeStagedStream: vi.fn(), rejectStagedStream: vi.fn() };
   const queue = { enqueueImportJob: vi.fn(), getJobStatus: vi.fn(async () => ({ status: queueStatus })) };
   const worker = { runOne: vi.fn() };
   return { repo, queue, worker, imports: new ImportAdminUseCases(repo as any, queue as any, undefined, worker as any) };
@@ -49,7 +49,7 @@ describe('Verified artifact import', () => {
     const result = await imports.stageNormalizedStream({ ownerDomain: 'GENERIC', sourceSystem: 'MANUAL_EAP_UPLOAD', rows: rows() });
     expect(repo.bulkCreateRecords.mock.calls.map(call => call[0].length)).toEqual([500, 1]);
     expect(repo.finalizeStagedStream).toHaveBeenCalledWith('batch-1', 501);
-    expect(queue.enqueueImportJob).toHaveBeenCalledOnce(); expect(worker.runOne).not.toHaveBeenCalled();
+    expect(queue.enqueueImportJob).not.toHaveBeenCalled(); expect(worker.runOne).not.toHaveBeenCalled();
     expect(result.summary.stagedRecords).toBe(501);
     expect(repo.bulkCreateRecords.mock.calls[0][0][0].status).toBe('STAGING_PENDING');
   });
@@ -152,7 +152,7 @@ describe('Prisma artifact finalization fence', () => {
     const tx = { importBatch: { updateMany: vi.fn(async () => ({ count: 1 })) }, importRecord: { updateMany: vi.fn(async () => ({ count: 0 })) } };
     const repository = new PrismaImportRepository({ $transaction: (fn: any) => fn(tx) } as any);
     await expect(repository.finalizeStagedStream('b', 1)).rejects.toThrow('ACCEPTANCE_COUNT_MISMATCH');
-    expect(tx.importBatch.updateMany.mock.calls[0][0]).toMatchObject({ where: { claimedBy: null, claimUntil: null, batchStatus: 'CREATED' } });
+    expect(tx.importBatch.updateMany.mock.calls[0][0]).toMatchObject({ where: { claimedBy: 'ARTIFACT_STAGING', claimUntil: { gt: expect.any(Date) }, batchStatus: 'STAGING' }, data: { batchStatus: 'QUEUED', claimedBy: null, claimUntil: null } });
   });
 });
 

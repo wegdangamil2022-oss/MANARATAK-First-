@@ -150,6 +150,7 @@ type ImportSource = {
   robotsPolicyUrl?: string;
   connectorId: string;
   connectorVersion: string;
+  updatedAt?: string;
   metadata?: Record<string, unknown>;
 };
 
@@ -334,6 +335,7 @@ const RECORD_STATUS_OPTIONS = [
 ] as const;
 
 const ACTIVE_BATCH_STATUSES = new Set([
+  'STAGING',
   'CREATED',
   'QUEUED',
   'RUNNING',
@@ -988,11 +990,11 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       )
     )
       return;
-    const entered = risky
-      ? window.prompt(txt('سبب تغيير الحالة (اختياري):', 'Reason (optional):'))
-      : '';
+    if (!source.updatedAt) return;
+    const entered = window.prompt(txt('سبب تغيير الحالة:', 'Reason for status change:'));
     if (entered === null) return;
-    const reason = entered.trim() || undefined;
+    const reason = entered.trim();
+    if (reason.length < 3) return;
     mutation.current = true;
     setSourceActionLoading(source.sourceId);
     try {
@@ -1000,7 +1002,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         `/admin/imports/sources/${encodeURIComponent(source.sourceId)}/status`,
         {
           method: 'PATCH',
-          body: JSON.stringify({ status: nextStatus, reason }),
+          body: JSON.stringify({ status: nextStatus, reason, expectedUpdatedAt: source.updatedAt }),
         },
       );
       setNotice({
@@ -1758,7 +1760,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                     <td className="p-3">
                       <select
                         value={source.status}
-                        disabled={sourceActionLoading === source.sourceId}
+                        disabled={sourceActionLoading === source.sourceId || source.metadata?.ownerDomain !== 'GENERIC' || !source.updatedAt}
                         onChange={(event) =>
                           void changeSourceStatus(source, event.target.value as SourceStatus)
                         }
@@ -2276,6 +2278,9 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </div>
       </section>
 
+      <BatchComparisonPanel batches={batches} isArabic={isArabic} />
+      <SourceAuthoringPanel sources={sources} isArabic={isArabic} onChanged={() => loadControlPlane()}
+        onStaged={async batchId => { setSelectedBatchId(batchId); await refreshAll(false); }} />
       <VerifiedArtifactPanel key={fixedDomain ?? 'SCHOLARSHIPS'} ownerDomain={fixedDomain ?? 'SCHOLARSHIPS'}
         isArabic={isArabic} onStaged={async batchId => {
           setSelectedBatchId(batchId);
@@ -3198,6 +3203,7 @@ function recordStatusLabel(value: string, isArabic: boolean) {
     PROMOTED: ['رُحّل إلى المجال', 'Transferred to Domain'],
     FAILED: ['فشل', 'Failed'],
     DLQ: ['Dead Letter', 'Dead Letter'],
+    STAGING: ['جارٍ تجهيز الملف', 'Staging file'],
     CREATED: ['أُنشئت', 'Created'],
     QUEUED: ['في الطابور', 'Queued'],
     RUNNING: ['قيد المعالجة', 'Running'],
@@ -3331,6 +3337,138 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
     {busy && <p role="status">{isArabic ? 'جارٍ معالجة الملف…' : 'Processing file…'}</p>}
     {proof && <p role="status">{isArabic ? 'نتيجة فحص التنسيق' : 'Format preflight'}: {proof.validRows} / {proof.invalidRows}
       {' '}{isArabic ? '(صحيحة / تحتاج مراجعة)' : '(valid / review needed)'}</p>}
+    {message && <p role="status">{message}</p>}
+  </section>;
+}
+
+
+function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
+  sources: ImportSource[]; isArabic: boolean; onChanged: () => Promise<void>; onStaged: (id: string) => Promise<void>;
+}) {
+  type Connector = { connectorId: string; connectorVersion: string; category: string };
+  const empty = { sourceId: '', displayName: '', baseUrl: '', connectorId: '', accessClassification: 'PUBLIC_ALLOWED',
+    rateLimitPerMinute: 60, allowedPaths: '/', robotsPolicyUrl: '', reason: '' };
+  const [draft, setDraft] = useState(empty);
+  const [revision, setRevision] = useState<string | null>(null);
+  const [editable, setEditable] = useState(true);
+  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [probe, setProbe] = useState<{ executionAllowed: boolean; executionBlocker: string | null } | null>(null);
+  const [format, setFormat] = useState<'csv' | 'ndjson'>('csv');
+  const [domain, setDomain] = useState('SCHOLARSHIPS');
+  const lock = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    void adminApiClient.request<{ data: Connector[] }>('/admin/imports/sources/connectors')
+      .then(value => { if (mounted.current) setConnectors(value.data); })
+      .catch(() => { if (mounted.current) setMessage(isArabic ? 'تعذر تحميل الموصلات.' : 'Connectors unavailable.'); });
+    return () => { mounted.current = false; };
+  }, [isArabic]);
+  const change = <K extends keyof typeof empty>(key: K, value: typeof empty[K]) => {
+    setDraft(previous => ({ ...previous, [key]: value })); setProbe(null); setMessage('');
+  };
+  const perform = async (task: () => Promise<void>) => {
+    if (lock.current) return;
+    lock.current = true; setBusy(true); setMessage('');
+    try { await task(); }
+    catch (error) { if (mounted.current) setMessage(error instanceof Error ? error.message : (isArabic ? 'تعذر إتمام الطلب.' : 'Request failed.')); }
+    finally { lock.current = false; if (mounted.current) setBusy(false); }
+  };
+  const load = (sourceId: string) => void perform(async () => {
+    const { data } = await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(sourceId)}`);
+    if (!mounted.current) return;
+    const scope = data.metadata?.allowedUrlScope as { allowedPathPrefixes?: string[] } | undefined;
+    setDraft({ sourceId: data.sourceId, displayName: data.displayName, baseUrl: data.baseUrl,
+      connectorId: data.connectorId, accessClassification: data.accessClassification,
+      rateLimitPerMinute: data.rateLimitPerMinute ?? 60, allowedPaths: scope?.allowedPathPrefixes?.join('\n') ?? '/', robotsPolicyUrl: data.robotsPolicyUrl ?? '', reason: '' });
+    setRevision(data.updatedAt ?? null); setProbe(null);
+    setEditable(data.metadata?.ownerDomain === 'GENERIC' && Boolean(data.updatedAt));
+    if (data.metadata?.ownerDomain !== 'GENERIC') setMessage(isArabic ? 'إدارة هذا المصدر تتم من مساحة القسم المالك.' : 'Manage this source in its owner workspace.');
+  });
+  const save = () => void perform(async () => {
+    const connector = connectors.find(value => value.connectorId === draft.connectorId);
+    if (!connector) throw new Error(isArabic ? 'اختر موصلًا متاحًا.' : 'Choose an available connector.');
+    const { allowedPaths, robotsPolicyUrl, ...fields } = draft;
+    await adminApiClient.request(`/admin/imports/sources${revision ? `/${encodeURIComponent(draft.sourceId)}` : ''}`, {
+      method: revision ? 'PUT' : 'POST', body: JSON.stringify({ ...fields, robotsPolicyUrl: robotsPolicyUrl.trim() || undefined, category: connector.category,
+        connectorVersion: connector.connectorVersion, allowedPathPrefixes: allowedPaths.split('\n').map(value => value.trim()).filter(Boolean),
+        ...(revision ? { expectedUpdatedAt: revision } : {}) }),
+    });
+    await onChanged();
+    const { data } = await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}`);
+    if (mounted.current) { setRevision(data.updatedAt ?? null); setProbe(null); setMessage(isArabic ? 'تم الحفظ بحالة معطّل. راجع الإعدادات قبل التفعيل.' : 'Saved as disabled. Review before activating.'); }
+  });
+  return <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+    <h2 className="font-black">{isArabic ? 'تعريفات المصادر وتشغيلها' : 'Source definitions and runs'}</h2>
+    <fieldset disabled={busy} className="space-y-3">
+      <label>{isArabic ? 'مصدر محفوظ' : 'Saved source'} <select value={revision ? draft.sourceId : ''}
+        onChange={event => { if (event.target.value) load(event.target.value); else { setDraft(empty); setRevision(null); setEditable(true); setProbe(null); setMessage(''); } }}>
+        <option value="">{isArabic ? 'مصدر جديد' : 'New source'}</option>
+        {sources.map(source => <option key={source.sourceId} value={source.sourceId}>{source.displayName}</option>)}
+      </select></label>
+      <fieldset disabled={!editable} className="grid gap-3 sm:grid-cols-2">
+        <label>{isArabic ? 'معرّف المصدر' : 'Source ID'}<input value={draft.sourceId} disabled={Boolean(revision)} onChange={event => change('sourceId', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'الاسم' : 'Name'}<input value={draft.displayName} onChange={event => change('displayName', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'رابط المصدر' : 'Source URL'}<input value={draft.baseUrl} onChange={event => change('baseUrl', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'الموصل' : 'Connector'}<select value={draft.connectorId} onChange={event => change('connectorId', event.target.value)} className="block w-full rounded border p-2">
+          <option value="">{isArabic ? 'اختر الموصل' : 'Choose connector'}</option>
+          {connectors.map(value => <option key={value.connectorId} value={value.connectorId}>{value.connectorId} ({value.connectorVersion})</option>)}
+        </select></label>
+        <label>{isArabic ? 'تصنيف الوصول' : 'Access classification'}<select value={draft.accessClassification} onChange={event => change('accessClassification', event.target.value)} className="block w-full rounded border p-2">
+          {['PUBLIC_ALLOWED', 'PUBLIC_ROBOTS_RESTRICTED', 'AUTHORIZED_ACCOUNT', 'DATA_AGREEMENT', 'MANUAL_ONLY', 'BLOCKED'].map(value => <option key={value} value={value}>{sourceAccessLabel(value, isArabic)}</option>)}
+        </select></label>
+        <label>{isArabic ? 'رابط سياسة الروبوتات' : 'Robots policy URL'}<input value={draft.robotsPolicyUrl} onChange={event => change('robotsPolicyUrl', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'طلبات في الدقيقة' : 'Requests per minute'}<input type="number" min={1} max={60000} value={draft.rateLimitPerMinute} onChange={event => change('rateLimitPerMinute', Number(event.target.value))} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'نطاقات المسار، سطر لكل نطاق' : 'Allowed paths, one per line'}<textarea value={draft.allowedPaths} onChange={event => change('allowedPaths', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'سبب التعديل أو التشغيل' : 'Reason for edit or run'}<input value={draft.reason} onChange={event => change('reason', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <button type="button" disabled={draft.reason.trim().length < 3} onClick={save} className="rounded border p-2">{isArabic ? 'حفظ للمراجعة' : 'Save for review'}</button>
+      </fieldset>
+      <button type="button" disabled={!revision} onClick={() => void perform(async () => {
+        const result = await adminApiClient.request<{ executionAllowed: boolean; executionBlocker: string | null }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}/test`, { method: 'POST', body: '{}' });
+        if (mounted.current) setProbe(result);
+      })} className="rounded border p-2">{isArabic ? 'فحص الإعدادات دون جلب' : 'Test configuration without fetching'}</button>
+      <label>{isArabic ? 'تنسيق البيانات' : 'Data format'} <select value={format} onChange={event => setFormat(event.target.value as 'csv' | 'ndjson')}><option value="csv">CSV</option><option value="ndjson">NDJSON</option></select></label>
+      <label>{isArabic ? 'القسم المستلم' : 'Receiving domain'} <select value={domain} onChange={event => setDomain(event.target.value)}>{DOMAIN_CONFIG.map(value => <option key={value.key} value={value.key}>{isArabic ? value.ar : value.en}</option>)}</select></label>
+      <button type="button" disabled={!editable || !revision || !probe?.executionAllowed || draft.reason.trim().length < 3} onClick={() => void perform(async () => {
+        const result = await adminApiClient.request<{ batchId: string }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}/run`, { method: 'POST',
+          body: JSON.stringify({ expectedUpdatedAt: revision, ownerDomain: domain, format, reason: draft.reason }) });
+        await onStaged(result.batchId);
+        if (mounted.current) setMessage(isArabic ? 'تم تجهيز دفعة الجلب للمراجعة.' : 'Acquired batch staged for review.');
+      })} className="rounded border p-2">{isArabic ? 'جلب وتجهيز دفعة' : 'Acquire and stage batch'}</button>
+    </fieldset>
+    {probe && <p role="status">{probe.executionAllowed ? (isArabic ? 'الإعداد يسمح بالتشغيل. لم يُجرَ اختبار شبكة.' : 'Configuration permits execution. No network test performed.') : probe.executionBlocker}</p>}
+    {message && <p role="status">{message}</p>}
+  </section>;
+}
+
+
+function BatchComparisonPanel({ batches, isArabic }: { batches: ImportBatch[]; isArabic: boolean }) {
+  const [left, setLeft] = useState(''); const [right, setRight] = useState('');
+  const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
+  const [result, setResult] = useState<{ counters: { added: number; missingFromComparison: number; changed: number; unchanged: number; unknown: number }; totalDifferences: number } | null>(null);
+  const lock = useRef(false); const generation = useRef(0);
+  useEffect(() => () => { generation.current++; }, []);
+  const compare = async () => {
+    if (lock.current || !left || !right || left === right) return;
+    lock.current = true; setBusy(true); setMessage(''); setResult(null);
+    const current = generation.current;
+    try {
+      const value = await adminApiClient.request<NonNullable<typeof result>>(`/admin/imports/batches/${encodeURIComponent(left)}/diff?againstBatchId=${encodeURIComponent(right)}`);
+      if (current === generation.current) setResult(value);
+    } catch { if (current === generation.current) setMessage(isArabic ? 'تعذرت المقارنة. اختر دفعتين من المصدر والقسم نفسيهما، حتى ٥٠٠٠ سجل لكل دفعة.' : 'Comparison unavailable. Choose batches from the same source and domain, up to 5,000 rows each.'); }
+    finally { lock.current = false; if (current === generation.current) setBusy(false); }
+  };
+  return <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+    <h2 className="font-black">{isArabic ? 'مقارنة دفعتين' : 'Compare two batches'}</h2>
+    <p className="text-sm">{isArabic ? 'المقارنة تشمل السجلات المحفوظة بعد منع التكرار. غياب سجل ليس طلب حذف، ولا يمثل بالضرورة غيابه من المصدر.' : 'Compares persisted rows after deduplication. A missing row never requests deletion or proves absence from the source.'}</p>
+    <fieldset disabled={busy} className="flex flex-wrap gap-3">
+      <label>{isArabic ? 'الدفعة الأولى' : 'First batch'} <select value={left} onChange={event => { setLeft(event.target.value); setResult(null); setMessage(''); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
+      <label>{isArabic ? 'الدفعة الثانية' : 'Second batch'} <select value={right} onChange={event => { setRight(event.target.value); setResult(null); setMessage(''); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
+      <button type="button" disabled={!left || !right || left === right} onClick={() => void compare()} className="rounded border p-2">{isArabic ? 'قارن' : 'Compare'}</button>
+    </fieldset>
+    {result && <dl className="flex flex-wrap gap-4">{Object.entries(result.counters).map(([key, count]) => <div key={key}><dt>{{ added: isArabic ? 'مضافة' : 'Added', missingFromComparison: isArabic ? 'غير موجودة في المقارنة' : 'Missing in comparison', changed: isArabic ? 'تغيّرت' : 'Changed', unchanged: isArabic ? 'لم تتغير' : 'Unchanged', unknown: isArabic ? 'غير محددة' : 'Unknown' }[key]}</dt><dd>{count}</dd></div>)}</dl>}
     {message && <p role="status">{message}</p>}
   </section>;
 }

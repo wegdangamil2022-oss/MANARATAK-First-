@@ -8,7 +8,7 @@ User direction (2026-10-09): finish Section 05 source fixes in three sessions. P
 | --- | --- | --- |
 | 1 | Atomic structured worker failure evidence; stable work-item pagination; bounded staging dedup memory; retry backoff/Retry-After; concurrent local upstream limiter; retry policy validation | Implemented; targeted source verification recorded in the implementation log |
 | 2 | EAP-backed artifact streaming, truthful capabilities, Admin artifact flow and atomic generic source create/detail/edit | Implemented and locally verified; owner receipt/resolution and full source execution workflows remain open |
-| 3 | Remaining source governance/compliance integrations, conditional acquisition, distributed production limiter, drift/fallback decisions; retention/provenance/API contracts; Admin operations and FGA features; final source closure reconciliation | Pending |
+| 3 | Staging lease/recovery and atomic queue visibility; source control test/run/status and UI; byte provenance/resource bounds; bounded diff; retention hold/replay safety; complete original-finding disposition | Repairs implemented and locally verified; original source gaps remain, so the section is not closed |
 
 The second and third sessions must inspect the actual source against every original finding. Do not treat a deny-default guard or an interface alone as a completed functional feature. Do not call the section closed merely because three sessions elapsed.
 
@@ -52,3 +52,7 @@ Session 1 reproduced the baseline W2 asset purge/migration-authority failures an
 ## Session 2 disposition
 
 Implemented artifact acquisition/staging and generic source authoring are documented in Batch 17 and [Session 2 evidence](evidence/section-05/session-02/README.md). Original findings are not blanket closed: IMP-P0-005 owner receipts/resolution and IMP-P1-014 test/run/control UI remain source work for Session 3. New staging crash recovery, safe dedup reservation cleanup, finalization/enqueue repair, temporary spool orphan retention/concurrent disk budget and CSV byte offsets also need explicit disposition. Session 3 must reconcile these with every row above before any source closure claim. Current section status remains IN PROGRESS.
+
+## Session 3 closure reconciliation
+
+See [Session 3 ledger and every original finding](evidence/section-05/session-03/README.md). The three-session allocation did not exhaust the original source scope. The original open register remains binding; completed safeguards and partial UI/API features must not be substituted for owner receipts, access proof integration, mapping profiles or reviewer assignment. Tests deferred to POST-28 are listed separately from unimplemented source work. Current Section 05 status is IN PROGRESS — SOURCE FIXES REQUIRED.

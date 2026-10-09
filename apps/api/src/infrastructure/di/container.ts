@@ -578,8 +578,9 @@ export function registerDependencies(
     verifiedImportArtifactGateway: asFunction(({ assetStorageGateway }) => new VerifiedImportArtifactGateway(assetStorageGateway)).singleton(),
     importArtifactUseCase: asFunction(({ assetReferencePolicy, verifiedImportArtifactGateway, importParserRegistry, importAdminUseCases }) =>
       new ImportArtifactUseCase(assetReferencePolicy, verifiedImportArtifactGateway, importParserRegistry, importAdminUseCases)).scoped(),
-    importSourceControlUseCases: asFunction(({ sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator }) =>
-      new ImportSourceControlUseCases(sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator)).scoped(),
+    importSourceControlUseCases: asFunction(({ sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator, acquireImportSourceUseCase, importAdminUseCases, importParserRegistry }) =>
+      new ImportSourceControlUseCases(sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator,
+        { acquire: acquireImportSourceUseCase, imports: importAdminUseCases, parsers: importParserRegistry })).scoped(),
     sourceRegistryGateway: asFunction(({ prisma }) => isPrisma ? new PrismaSourceRegistryGateway(prisma) : new InMemorySourceRegistryGateway()).singleton(),
     scholarshipSourceRegistryService: asFunction(({ sourceRegistryGateway }) => new ScholarshipSourceRegistryService(sourceRegistryGateway)).singleton(),
     scholarshipAcquisitionPlanner: asFunction(({ scholarshipSourceRegistryService }) => new ScholarshipAcquisitionPlanner(scholarshipSourceRegistryService)).singleton(),

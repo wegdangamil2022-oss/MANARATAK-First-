@@ -267,3 +267,35 @@ describe('verified artifact and source authoring boundaries', () => {
     expect(sources.save).not.toHaveBeenCalled(); expect(artifacts.stage).not.toHaveBeenCalled();
   });
 });
+
+describe('source run and status HTTP contracts', () => {
+  function setup() {
+    const sourceControl = { run: vi.fn(async () => ({ batchId: 'b', status: 'QUEUED' })),
+      changeStatus: vi.fn(async () => ({ sourceId: 's', status: 'DISABLED' })),
+      testConfiguration: vi.fn(async () => ({ networkTestPerformed: false })) };
+    const app = express(); app.use(express.json());
+    app.use((req, _res, next) => { req.authUserId = 'server-admin'; next(); });
+    app.use('/admin/imports', ImportAdminRouter.create({ importAdminUseCases: {} as any, majorImportStagingUseCase: {} as any,
+      assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any,
+      importSourceControlUseCases: sourceControl as any }));
+    return { app, sourceControl };
+  }
+  const input = { expectedUpdatedAt: '2026-10-09T00:00:00.000Z', ownerDomain: 'GENERIC', format: 'ndjson', reason: 'operator review' };
+  it('uses a server actor, pins the source revision and returns 202 job location', async () => {
+    const { app, sourceControl } = setup(); const response = await request(app).post('/admin/imports/sources/s/run').send(input);
+    expect(response.status).toBe(202); expect(response.headers.location).toContain('/queue/jobs/b');
+    expect(sourceControl.run).toHaveBeenCalledWith('s', input, expect.objectContaining({ actorId: 'server-admin' }));
+  });
+  it('rejects caller URLs/credentials and status writes without a pinned revision', async () => {
+    const { app, sourceControl } = setup();
+    expect((await request(app).post('/admin/imports/sources/s/run').send({ ...input, targetUrl: 'https://evil.example/' })).status).toBe(400);
+    expect((await request(app).patch('/admin/imports/sources/s/status').send({ status: 'ACTIVE', reason: 'operator review' })).status).toBe(400);
+    expect(sourceControl.run).not.toHaveBeenCalled(); expect(sourceControl.changeStatus).not.toHaveBeenCalled();
+  });
+  it('returns 409 for stale runs and keeps configuration tests explicitly offline', async () => {
+    const { app, sourceControl } = setup(); sourceControl.run.mockRejectedValueOnce(new Error('IMPORT_SOURCE_STATUS_CONFLICT'));
+    expect((await request(app).post('/admin/imports/sources/s/run').send(input)).status).toBe(409);
+    const probe = await request(app).post('/admin/imports/sources/s/test').send({});
+    expect(probe.status).toBe(200); expect(probe.body.networkTestPerformed).toBe(false);
+  });
+});

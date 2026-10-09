@@ -15,6 +15,8 @@ import { ImportHandoffDispatcher } from '../services/ImportHandoffDispatcher';
 import { ImportWorkerProtocol } from './ImportWorkerProtocol';
 
 type ImportRepository = {
+  compareBatches?(leftId: string, rightId: string, page?: number, versions?: { leftUpdatedAt: string; rightUpdatedAt: string; leftRecordVersion?: string; rightRecordVersion?: string }): Promise<unknown>;
+  recoverStaleStaging?(): Promise<number>;
   finalizeStagedStream?(batchId: string, count: number): Promise<void>;
   rejectStagedStream?(batchId: string): Promise<void>;
   createBatch(data: Record<string, unknown>): Promise<any>;
@@ -166,7 +168,7 @@ export class ImportAdminUseCases {
     return {
       totalBatches: batches.length,
       totalRecords: all.total ?? 0,
-      activeBatches: batches.filter((batch: any) => ['CREATED', 'QUEUED', 'RUNNING', 'PAUSED', 'RESUMING', 'CANCELLING', 'PROCESSING'].includes(batch.batchStatus)).length,
+      activeBatches: batches.filter((batch: any) => ['STAGING', 'CREATED', 'QUEUED', 'RUNNING', 'PAUSED', 'RESUMING', 'CANCELLING', 'PROCESSING'].includes(batch.batchStatus)).length,
       needsReview: (statusTotals.NEEDS_REVIEW ?? 0) + (statusTotals.INCOMPLETE ?? 0),
       failedRecords: (statusTotals.FAILED ?? 0) + (statusTotals.DLQ ?? 0),
       transferredRecords: statusTotals.PROMOTED ?? 0,
@@ -188,7 +190,7 @@ export class ImportAdminUseCases {
     const batches = await this.importRepository.listBatches({ ...(dataType ? { dataType } : {}), limit: 100 });
     const now = Date.now();
     const staleBefore = now - 15 * 60 * 1000;
-    const activeStatuses = new Set(['CREATED', 'QUEUED', 'RUNNING', 'PAUSING', 'PAUSED', 'RESUMING', 'CANCELLING', 'PROCESSING']);
+    const activeStatuses = new Set(['STAGING', 'CREATED', 'QUEUED', 'RUNNING', 'PAUSING', 'PAUSED', 'RESUMING', 'CANCELLING', 'PROCESSING']);
     const stuck = batches.filter((batch: any) => ['RUNNING', 'PROCESSING'].includes(String(batch.batchStatus)) && new Date(batch.updatedAt ?? batch.createdAt).getTime() < staleBefore);
     const pendingStops = batches.filter((batch: any) => ['PAUSING', 'CANCELLING'].includes(String(batch.batchStatus)));
     const strandedStops = pendingStops.filter((batch: any) =>
@@ -481,11 +483,12 @@ export class ImportAdminUseCases {
   }) {
     const repository = this.importRepository;
     if (!this.importQueueGateway || !this.importWorkerProtocol || !repository.bulkCreateRecords ||
-        !repository.finalizeStagedStream || !repository.rejectStagedStream)
+        !repository.finalizeStagedStream || !repository.rejectStagedStream || !repository.recoverStaleStaging)
       throw new Error('IMPORT_STREAM_DURABLE_COMPOSITION_REQUIRED');
     const ownerDomain = this.resolveOwnerDomain(input.ownerDomain);
+    await repository.recoverStaleStaging();
     const batch = await repository.createBatch({ sourceSystem: input.sourceSystem, dataType: ownerDomain,
-      batchStatus: ImportJobStatus.CREATED, totalRecords: 0, processedRecords: 0, failedRecords: 0 });
+      batchStatus: 'STAGING', totalRecords: 0, processedRecords: 0, failedRecords: 0 });
     const envelopeInput: StageImportRowsInput = { ...input, ownerDomain, rows: [] };
     let received = 0; let staged = 0; let skipped = 0; let invalid = 0;
     let chunk: Array<Record<string, unknown>> = [];
@@ -532,8 +535,7 @@ export class ImportAdminUseCases {
       await flush();
       if (!received) throw new Error('IMPORT_ARTIFACT_EMPTY');
       await repository.finalizeStagedStream(batch.id, staged);
-      await this.importQueueGateway.enqueueImportJob({ batchId: batch.id, targetDomain: this.toTargetDomain(ownerDomain),
-        sourceSystem: input.sourceSystem, metadata: { stagingMode: 'VERIFIED_ARTIFACT_STREAM' } });
+      // Durable repository finalization commits QUEUED and all work items atomically.
       const status = await this.importQueueGateway.getJobStatus(batch.id);
       if (!status || status.status === ImportJobStatus.CREATED) throw new Error('IMPORT_STREAM_QUEUE_NOT_ACCEPTED');
       return { batchId: batch.id, status: status.status, summary: {
@@ -564,10 +566,26 @@ export class ImportAdminUseCases {
     return this.importRepository.listRecords(normalized);
   }
 
-  /**
-   * Strictly read-only: a MANUAL_RECONCILIATION_REQUIRED handoff must never
-   * become an automatic retry without a verified owning-domain receipt.
-   */
+  /** Read-only comparison of bounded persisted observations. */
+  async compareBatches(leftId: string, rightId: string, page?: number, cursor?: string) {
+    if (!this.importRepository.compareBatches) throw new Error('IMPORT_BATCH_DIFF_UNAVAILABLE');
+    if (!cursor) return this.importRepository.compareBatches(leftId, rightId, page);
+    try {
+      if (page !== undefined || cursor.length > 1024 || !/^[A-Za-z0-9_-]+$/.test(cursor)) throw new Error();
+      const value = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'));
+      if (!value || typeof value !== 'object' || value.leftId !== leftId || value.rightId !== rightId ||
+          !Number.isSafeInteger(value.page) || value.page < 1 || value.page > 50 ||
+          typeof value.leftUpdatedAt !== 'string' || typeof value.rightUpdatedAt !== 'string' ||
+          !Number.isFinite(Date.parse(value.leftUpdatedAt)) || !Number.isFinite(Date.parse(value.rightUpdatedAt)) ||
+          typeof value.leftRecordVersion !== 'string' || !/^[a-f0-9]{64}$/.test(value.leftRecordVersion) ||
+          typeof value.rightRecordVersion !== 'string' || !/^[a-f0-9]{64}$/.test(value.rightRecordVersion) ||
+          Object.keys(value).length !== 7) throw new Error();
+      return this.importRepository.compareBatches(leftId, rightId, value.page,
+        { leftUpdatedAt: value.leftUpdatedAt, rightUpdatedAt: value.rightUpdatedAt,
+          leftRecordVersion: value.leftRecordVersion, rightRecordVersion: value.rightRecordVersion });
+    } catch { throw new Error('IMPORT_BATCH_DIFF_CURSOR_INVALID'); }
+  }
+
   async getHandoffReconciliation(input: { batchId: string; page?: number; pageSize?: number }) {
     if (!input.batchId?.trim() || input.batchId.length > 180)
       throw new Error('IMPORT_RECONCILIATION_BATCH_INVALID');

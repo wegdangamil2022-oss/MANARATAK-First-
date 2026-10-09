@@ -5,6 +5,10 @@ import { join } from 'node:path';
 import type { IAssetStorageGateway, AssetStorageLocator } from '@manaratak/domain';
 import type { IVerifiedImportArtifactGateway } from '@manaratak/application';
 
+let reservedBytes = 0;
+let activeSpools = 0;
+const SPOOL_BUDGET = 256 * 1024 * 1024;
+
 /** Private bounded spool avoids both whole-artifact RAM buffering and staging unverified bytes. */
 export class VerifiedImportArtifactGateway implements IVerifiedImportArtifactGateway {
   constructor(private readonly storage: IAssetStorageGateway) {}
@@ -15,9 +19,13 @@ export class VerifiedImportArtifactGateway implements IVerifiedImportArtifactGat
         !Number.isSafeInteger(input.expectedByteSize) || input.expectedByteSize < 1 ||
         !Number.isSafeInteger(input.maxBytes) || input.maxBytes < 1 || input.maxBytes > 64 * 1024 * 1024 ||
         input.expectedByteSize > input.maxBytes) throw new Error('IMPORT_ARTIFACT_EVIDENCE_INVALID');
-    const directory = await mkdtemp(join(tmpdir(), 'manaratak-import-'));
+    if (activeSpools >= 4 || reservedBytes + input.expectedByteSize > SPOOL_BUDGET)
+      throw new Error('IMPORT_ARTIFACT_SPOOL_CAPACITY');
+    activeSpools++; reservedBytes += input.expectedByteSize;
+    let directory: string | undefined;
     let handle: Awaited<ReturnType<typeof open>> | undefined;
     try {
+      directory = await mkdtemp(join(tmpdir(), 'manaratak-import-'));
       handle = await open(join(directory, 'verified'), 'wx+', 0o600);
       let size = 0;
       const digest = createHash('sha256');
@@ -39,7 +47,10 @@ export class VerifiedImportArtifactGateway implements IVerifiedImportArtifactGat
       finally { stream.destroy(); }
     } finally {
       try { await handle?.close(); }
-      finally { await rm(directory, { recursive: true, force: true }); }
+      finally {
+        try { if (directory) await rm(directory, { recursive: true, force: true }); }
+        finally { activeSpools--; reservedBytes -= input.expectedByteSize; }
+      }
     }
   }
 }

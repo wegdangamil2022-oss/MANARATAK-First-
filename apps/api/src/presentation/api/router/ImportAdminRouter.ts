@@ -110,6 +110,22 @@ export class ImportAdminRouter {
       if (!source) return res.status(404).json({ error: 'IMPORT_SOURCE_NOT_FOUND' });
       return res.json({ data: source });
     }));
+    router.post('/sources/:sourceId/test', asyncHandler(async (req, res) => {
+      actor(req);
+      z.object({}).strict().parse(req.body ?? {});
+      if (!cradle.importSourceControlUseCases) return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
+      return res.json(await cradle.importSourceControlUseCases.testConfiguration(sourceIdentifier.parse(req.params.sourceId)));
+    }));
+    router.post('/sources/:sourceId/run', asyncHandler(async (req, res) => {
+      if (!cradle.importSourceControlUseCases) return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
+      const principal = actor(req);
+      const input = z.object({ expectedUpdatedAt: z.string().datetime(), ownerDomain: z.nativeEnum(ImportTargetDomain),
+        format: z.enum(['csv', 'ndjson']), reason: z.string().trim().min(3).max(1000) }).strict().parse(req.body);
+      const result = await cradle.importSourceControlUseCases.run(sourceIdentifier.parse(req.params.sourceId), input,
+        { actorId: principal.principalId, actorType: principal.actorType, source: 'admin-import-source-run' });
+      res.setHeader('Location', `/api/v1/admin/imports/queue/jobs/${encodeURIComponent(result.batchId)}`);
+      return res.status(202).json(result);
+    }));
     const saveSource = async (req: Request, res: Response, update: boolean) => {
       if (!cradle.importSourceControlUseCases) return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
       const body = z.object({ ...sourceFields,
@@ -349,7 +365,8 @@ export class ImportAdminRouter {
     const sourceStatusUpdateSchema = z
       .object({
         status: sourceStatusSchema,
-        reason: z.string().trim().min(1).max(500).optional(),
+        reason: z.string().trim().min(3).max(500),
+        expectedUpdatedAt: z.string().datetime(),
       })
       .strict();
     const queueReasonSchema = z
@@ -360,23 +377,13 @@ export class ImportAdminRouter {
     router.patch(
       '/sources/:sourceId/status',
       asyncHandler(async (req: Request, res: Response) => {
-        if (!sourceRegistryGateway)
-          return res.status(503).json({ error: 'IMPORT_SOURCE_REGISTRY_UNAVAILABLE' });
-        const { status, reason } = sourceStatusUpdateSchema.parse(req.body);
-        let updated: boolean;
-        try {
-          updated = await sourceRegistryGateway.updateSourceStatus(
-            req.params.sourceId,
-            status,
-            reason,
-          );
-        } catch (error) {
-          if (error instanceof Error && error.message === 'IMPORT_SOURCE_STATUS_CONFLICT')
-            return res.status(409).json({ error: 'IMPORT_SOURCE_STATUS_CONFLICT' });
-          throw error;
-        }
-        if (!updated) return res.status(404).json({ error: 'IMPORT_SOURCE_NOT_FOUND' });
-        const source = await sourceRegistryGateway.getSource(req.params.sourceId);
+        if (!cradle.importSourceControlUseCases)
+          return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
+        const { status, reason, expectedUpdatedAt } = sourceStatusUpdateSchema.parse(req.body);
+        const principal = actor(req);
+        const source = await cradle.importSourceControlUseCases.changeStatus(sourceIdentifier.parse(req.params.sourceId),
+          status, expectedUpdatedAt, reason, { actorId: principal.principalId,
+            actorType: principal.actorType, source: 'admin-import-source-status' });
         res.json({ data: source });
       }),
     );
@@ -609,6 +616,13 @@ export class ImportAdminRouter {
       }),
     );
 
+    router.get('/batches/:batchId/diff', asyncHandler(async (req, res) => {
+      const query = z.object({ againstBatchId: z.string().trim().min(1).max(180),
+        page: z.coerce.number().int().min(1).max(50).optional(), cursor: z.string().min(1).max(1024).optional() }).strict().parse(req.query);
+      return res.json(await importAdminUseCases.compareBatches(z.string().trim().min(1).max(180).parse(req.params.batchId),
+        query.againstBatchId, query.page, query.cursor));
+    }));
+
     // GET /admin/imports/queue/jobs/:batchId/handoffs/reconciliation
     // Operational read-only evidence. Never exposes imported payloads or
     // performs owner replay, manual release, canonical merge or publication.
@@ -839,6 +853,14 @@ export class ImportAdminRouter {
     );
 
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      if (err instanceof Error && err.message === 'IMPORT_ARTIFACT_SPOOL_CAPACITY')
+        return res.status(503).json({ error: err.message, code: err.message, retryable: true });
+      if (err instanceof Error && ['IMPORT_SOURCE_STATUS_CONFLICT', 'IMPORT_SOURCE_STAGING_BUSY', 'IMPORT_STAGING_LEASE_LOST', 'IMPORT_BATCH_DIFF_VERSION_CONFLICT'].includes(err.message))
+        return res.status(409).json({ error: err.message, code: err.message });
+      if (err instanceof Error && err.message === 'IMPORT_SOURCE_NOT_FOUND')
+        return res.status(404).json({ error: err.message, code: err.message });
+      if (err instanceof Error && /^(IMPORT_SOURCE_OWNER_WORKSPACE_REQUIRED|SOURCE_ACCESS_BLOCKED|SOURCE_(ROBOTS_POLICY_DECISION|AUTHORIZED_ACCOUNT_CAPABILITY|DATA_AGREEMENT_APPROVAL)_REQUIRED)$/.test(err.message))
+        return res.status(403).json({ error: err.message, code: err.message });
       if (err instanceof Error && err.message === 'AUTHENTICATED_PRINCIPAL_REQUIRED')
         return res.status(401).json({ error: err.message });
       if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT')
