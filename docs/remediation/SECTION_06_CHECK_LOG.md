@@ -21,3 +21,7 @@ The two interrupted checks are not successes and do not count toward acceptance;
 - All commits use `[skip ci]`. No branch merge, publish, deploy, migration, seed, backfill or live import was triggered.
 
 Closure: **NOT CLOSED**. See `SECTION_06_ITEM_MATRIX.md` and `workspace/reports/section-06/` for non-test implementation blockers and source-only city decisions.
+
+## Continuation after baseline — 2026-10-10
+
+New code/specs cover P6->P7 SCREENING_ONLY, governed alias/provider mapping review, explicit atomic owner-key transfer and replay guard, quality/impact owner reads, ISO639/BCP47 separation, and disabling unreceipted SeedApply. Focused spec files were added but **NOT RUN**. No new TypeScript/Vitest/DB/E2E/CI run, database writes, migrations, seeds, backfill or imports occurred. Earlier INTERRUPTED checks remain INTERRUPTED and were not rerun. All commits use [skip ci]. Source closure remains PARTIAL.
