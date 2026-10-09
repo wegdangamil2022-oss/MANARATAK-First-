@@ -387,4 +387,39 @@ describe('W2 Phase 6 durable worker integration', () => {
     expect(recent).toEqual([...repo.records.values()].slice(-32).map(record => record.sourceDedupKey));
   });
 
+  it.each([
+    ['cancel', 'CANCELLING', 'CANCELLED'],
+    ['pause', 'PAUSING', 'PAUSED'],
+  ] as const)('does not report a running %s as final while the worker is still inside owner code', async (action, pending, final) => {
+    const queue = new InMemoryImportQueueGateway();
+    await queue.enqueueImportJob({ batchId: 'batch-stop-wait',
+      sourceSystem: 'TEST_SOURCE', targetDomain: 'GENERIC' as any });
+    const worker = new ImportWorkerProtocol(queue, ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 10, maxDelayMs: 10, retryableErrorCodes: [],
+    }));
+    let announce!: () => void;
+    let release!: () => void;
+    const started = new Promise<void>(resolve => { announce = resolve; });
+    const ownerFinishes = new Promise<void>(resolve => { release = resolve; });
+    const processing = worker.runOne('worker-stop-confirm', async (_lease, heartbeat) => {
+      announce();
+      await ownerFinishes;
+      await heartbeat();
+    });
+    await started;
+    if (action === 'cancel')
+      expect(await queue.cancelJob({ batchId: 'batch-stop-wait' })).toBe(true);
+    else expect(await queue.pauseJob({ batchId: 'batch-stop-wait' })).toBe(true);
+    expect((await queue.getJobStatus('batch-stop-wait'))?.status).toBe(pending);
+    expect(await queue.claimNextJob({
+      workerId: 'worker-replacement', leaseDurationMs: 30_000,
+    })).toBeNull();
+    // The callback is still running. Neither stop state may become final yet.
+    expect((await queue.getJobStatus('batch-stop-wait'))?.status).toBe(pending);
+    release();
+    await expect(processing).rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    expect((await queue.getJobStatus('batch-stop-wait'))?.status).toBe(final);
+  });
+
 });
