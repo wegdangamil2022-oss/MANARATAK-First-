@@ -41,6 +41,20 @@ export const referenceDataAdminApi = {
   qualitySnapshot() {
     return adminApiClient.request<{ data: Array<{ collection: ReferenceDataCollection; total: number; active: number; nonActive: number; aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown' }>; asOf: string }>(base + '/quality');
   },
+  reassignProviderMapping(input: {
+    entityType: 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY';
+    fromReferenceId: string;
+    toReferenceId: string;
+    fromExpectedVersion: number;
+    toExpectedVersion: number;
+    providerSystem: string;
+    providerId: string;
+    reason: string;
+    reconciliationId: string;
+  }) {
+    return mutate<{ outcome: 'APPLIED' | 'ALREADY_APPLIED'; reconciliationId: string }>(
+      '/governance/provider-mappings/reassign', 'POST', input);
+  },
   governanceImpact(entityType: GovernedReferenceEntityType, referenceId: string) {
     return adminApiClient.request<{ data: ReferenceDependencyImpact }>(
       base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/impact'

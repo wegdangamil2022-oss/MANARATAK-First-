@@ -12,6 +12,7 @@ import type {
 } from '@manaratak/domain';
 import { ReferenceLifecycleState } from '@manaratak/domain';
 import { referenceDataAdminApi } from '../api/referenceData';
+import { ReferenceProviderReconciliation } from './ReferenceProviderReconciliation';
 
 type GovernedRow = {
   id: string;
@@ -213,7 +214,11 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
                 disabled={saving} onChange={e => setMappings(mappings.map((v, j) => i === j ? { ...v, providerId: e.target.value } : v))} />
               <button type="button" disabled={saving} className="text-red-700" onClick={() => setMappings(mappings.filter((_, j) => i !== j))}>حذف</button>
             </div>)}
-            <p className="text-xs text-amber-800">نقل المعرّف من سجل Canonical آخر محظور؛ يتطلب مسار مصالحة معتمد.</p>
+            <p className="text-xs text-amber-800">تعديل ربط مزود تابع لسجل آخر مرفوض دائمًا من الحفظ العادي.</p>
+            <ReferenceProviderReconciliation entityType={entityType}
+              source={{ id: record.id, versionNumber: record.versionNumber,
+                lifecycleState: record.lifecycleState, countryIso2Code: record.countryIso2Code }}
+              mappings={details.providerMappings} onChanged={onChanged} />
           </section>}
           <button type="button" onClick={() => void save()} disabled={saving || record.lifecycleState !== 'ACTIVE'}
             className="bg-indigo-700 text-white rounded-lg px-4 py-2 disabled:opacity-50">حفظ الأسماء والربط (مع سجل تدقيق)</button>
