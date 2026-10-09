@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ImportCheckpoint, ImportJobStatus, ImportTargetDomain } from '@manaratak/domain';
+import { ImportCheckpoint, ImportJobStatus, ImportTargetDomain, ImportRetryPolicy } from '@manaratak/domain';
 import { InMemoryImportQueueGateway } from '../../src/import-foundation/InMemoryImportQueueGateway';
 
 describe('InMemoryImportQueueGateway', () => {
@@ -325,6 +325,37 @@ describe('InMemoryImportQueueGateway', () => {
 });
 
 describe('InMemoryImportQueueGateway lease recovery hardening', () => {
+  it('fences a prior attempt even when a replacement worker reuses the same worker ID', async () => {
+    const gateway = new InMemoryImportQueueGateway();
+    const batchId = 'batch-same-worker';
+    await gateway.enqueueImportJob({ batchId, targetDomain: ImportTargetDomain.Generic, sourceSystem: 'TEST' });
+    const start = new Date('2026-09-01T09:00:00.000Z');
+    const first = await gateway.claimNextJob({ workerId: 'worker-shared', leaseDurationMs: 1000, now: start });
+    expect(first?.attempt).toBe(1);
+    const second = await gateway.claimNextJob({
+      workerId: 'worker-shared', leaseDurationMs: 1000,
+      now: new Date(start.getTime() + 2000),
+    });
+    expect(second?.attempt).toBe(2);
+    const activeNow = new Date(start.getTime() + 2100);
+    expect(await gateway.heartbeat(first!, 1000, activeNow)).toBeNull();
+    expect(await gateway.completeClaimedJob(first!, activeNow)).toBe(false);
+    const policy = ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 100, maxDelayMs: 100, retryableErrorCodes: ['TRANSIENT'],
+    });
+    expect(await gateway.failClaimedJob({
+      lease: first!, now: activeNow, reason: 'stale', retryPolicy: policy,
+    })).toBe('LEASE_LOST');
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.RUNNING);
+    const renewed = await gateway.heartbeat(second!, 1000, activeNow);
+    expect(renewed?.attempt).toBe(2);
+    // A superseded heartbeat object from the SAME attempt must be fenced as well.
+    expect(await gateway.heartbeat(second!, 1000, new Date(start.getTime() + 2200))).toBeNull();
+    expect(await gateway.completeClaimedJob(renewed!, new Date(start.getTime() + 2200))).toBe(true);
+  });
+
+
   it('reclaims an expired RUNNING lease and rejects completion by the stale worker', async () => {
     const gateway = new InMemoryImportQueueGateway();
     const batchId = 'batch-expired-running';
