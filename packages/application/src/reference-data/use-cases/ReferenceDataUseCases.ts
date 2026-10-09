@@ -282,7 +282,10 @@ export class ReferenceDataUseCases {
     mutation: (transaction: { repository: ITransactionalReferenceDataRepository; context: import('@manaratak/domain').AtomicPersistenceContext }) => Promise<T>,
     legacyMutation: () => Promise<T>,
   ): Promise<T> {
-    if (!this.atomicMutationExecutor) return legacyMutation();
+    if (!this.atomicMutationExecutor) {
+      if (requestContext) throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+      return legacyMutation();
+    }
 
     const repository = this.repository as Partial<ITransactionalReferenceDataRepository>;
     if (entityType === 'REGION' ? !repository.upsertRegionInTransaction : (!repository.upsertCountryInTransaction || !repository.upsertCurrencyInTransaction || !repository.upsertLanguageInTransaction || !repository.upsertCityInTransaction)) {

@@ -516,6 +516,23 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "AdministrativeRegion" WHERE "id" = ${id} FOR UPDATE`);
   }
 
+  private async assertNoReplacementCycle(entityType: GovernedReferenceEntityType, sourceId: string, targetId: string): Promise<void> {
+    // Owner-scoped graph traversal: never follow links across entity types.
+    const result = await this.prisma.$queryRaw<Array<{ referenceId: string }>>(Prisma.sql`
+      WITH RECURSIVE walk("referenceId") AS (
+        SELECT "targetReferenceId" FROM "ReferenceRelationshipRecord"
+        WHERE "sourceEntityType" = ${entityType} AND "targetEntityType" = ${entityType}
+          AND "sourceReferenceId" = ${targetId}
+        UNION
+        SELECT link."targetReferenceId" FROM "ReferenceRelationshipRecord" link
+        JOIN walk ON walk."referenceId" = link."sourceReferenceId"
+        WHERE link."sourceEntityType" = ${entityType} AND link."targetEntityType" = ${entityType}
+      )
+      SELECT "referenceId" FROM walk WHERE "referenceId" = ${sourceId} LIMIT 1
+    `);
+    if (result.length) throw new Error('REFERENCE_REPLACEMENT_RELATIONSHIP_CYCLE');
+  }
+
   private async transitionRegion(command: ReferenceLifecycleTransitionCommand): Promise<void> {
     if (!command.actorId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
     if (!this.inTransaction) return this.prisma.$transaction(tx => new PrismaReferenceDataRepository(tx as unknown as PrismaClient, true).transitionRegion(command));
@@ -536,6 +553,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "AdministrativeRegion" WHERE "id" = ${command.targetReferenceId} FOR SHARE`);
       const target = await this.prisma.administrativeRegion.findUnique({ where: { id: command.targetReferenceId } });
       if (!target || target.countryIso2Code !== current.countryIso2Code || target.lifecycleState !== 'ACTIVE') throw new ReferenceRegionCommandError('REGION_TARGET_INVALID');
+      await this.assertNoReplacementCycle('REGION', current.id, target.id);
       await this.prisma.referenceRelationshipRecord.create({ data: {
         sourceEntityType: 'REGION', sourceReferenceId: current.id,
         targetEntityType: 'REGION', targetReferenceId: target.id,
@@ -870,6 +888,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       `);
       if (targetRows.length !== 1 || targetRows[0].lifecycleState !== 'ACTIVE') throw new Error('REFERENCE_LIFECYCLE_TARGET_NOT_ACTIVE');
       if (command.entityType === 'CITY' && targetRows[0].countryIso2Code !== (currentRows[0].snapshot as Record<string, unknown>).countryIso2Code) throw new Error('REFERENCE_LIFECYCLE_TARGET_COUNTRY_MISMATCH');
+      await this.assertNoReplacementCycle(command.entityType, command.referenceId, command.targetReferenceId);
     }
 
     const now = new Date();

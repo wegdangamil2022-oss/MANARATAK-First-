@@ -115,6 +115,7 @@ export function ReferenceDataAdminPage() {
     url.searchParams.set('p7Page', '1');
     window.history.replaceState(window.history.state, '', url.toString());
   };
+  const [tabRevision, setTabRevision] = useState(0);
   const [quality, setQuality] = useState<Awaited<ReturnType<typeof referenceDataAdminApi.qualitySnapshot>> | null>(null);
   const [qualityState, setQualityState] = useState<'loading' | 'ready' | 'error'>('loading');
   useEffect(() => {
@@ -132,6 +133,7 @@ export function ReferenceDataAdminPage() {
     window.history.replaceState(window.history.state, '', url.toString());
     // Remount the selected tab so its URL-backed owner filters reload.
     setActiveTab(collection);
+    setTabRevision(revision => revision + 1);
   };
 
   const tabLabels: Record<string, string> = {
@@ -190,11 +192,11 @@ export function ReferenceDataAdminPage() {
         </div>
         
         <div className="p-6">
-          {activeTab === 'countries' && <CountriesTab />}
-          {activeTab === 'currencies' && <CurrenciesTab />}
-          {activeTab === 'languages' && <LanguagesTab />}
-          {activeTab === 'cities' && <CitiesTab />}
-          {activeTab === 'regions' && <AdministrativeRegionsTab />}
+          {activeTab === 'countries' && <CountriesTab key={tabRevision} />}
+          {activeTab === 'currencies' && <CurrenciesTab key={tabRevision} />}
+          {activeTab === 'languages' && <LanguagesTab key={tabRevision} />}
+          {activeTab === 'cities' && <CitiesTab key={tabRevision} />}
+          {activeTab === 'regions' && <AdministrativeRegionsTab key={tabRevision} />}
         </div>
       </div>
     </div>
@@ -318,12 +320,12 @@ function CountriesTab() {
           <div className="overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-700">
-                <tr><th className="p-3">ISO2</th><th className="p-3">ISO3</th><th className="p-3">Name</th><th className="p-3">Region</th></tr>
+                <tr><th className="p-3">ISO2</th><th className="p-3">ISO3</th><th className="p-3">Name</th><th className="p-3">Region</th><th className="p-3">Status</th></tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {data.map(item => (
                   <tr key={item.iso2Code} className="hover:bg-gray-50">
-                    <td className="p-3 font-mono">{item.iso2Code}</td><td className="p-3 font-mono">{item.iso3Code}</td><td className="p-3">{item.name}</td><td className="p-3">{item.region || '-'}</td>
+                    <td className="p-3 font-mono">{item.iso2Code}</td><td className="p-3 font-mono">{item.iso3Code}</td><td className="p-3">{item.name}</td><td className="p-3">{item.region || '-'}</td><td className="p-3">{item.lifecycleState}</td>
                   </tr>
                 ))}
               </tbody>
@@ -448,12 +450,12 @@ function CurrenciesTab() {
           <div className="overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-700">
-                <tr><th className="p-3">ISO Code</th><th className="p-3">Name</th><th className="p-3">Symbol</th><th className="p-3">Numeric</th></tr>
+                <tr><th className="p-3">ISO Code</th><th className="p-3">Name</th><th className="p-3">Symbol</th><th className="p-3">Numeric</th><th className="p-3">Status</th></tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {data.map(item => (
                   <tr key={item.isoCode} className="hover:bg-gray-50">
-                    <td className="p-3 font-mono">{item.isoCode}</td><td className="p-3">{item.name}</td><td className="p-3">{item.symbol || '-'}</td><td className="p-3">{item.numericCode || '-'}</td>
+                    <td className="p-3 font-mono">{item.isoCode}</td><td className="p-3">{item.name}</td><td className="p-3">{item.symbol || '-'}</td><td className="p-3">{item.numericCode || '-'}</td><td className="p-3">{item.lifecycleState}</td>
                   </tr>
                 ))}
               </tbody>
@@ -529,12 +531,12 @@ function LanguagesTab() {
           <div className="overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-700">
-                <tr><th className="p-3">ISO Code</th><th className="p-3">Name</th><th className="p-3">Native</th><th className="p-3">Dir</th></tr>
+                <tr><th className="p-3">ISO Code</th><th className="p-3">Name</th><th className="p-3">Native</th><th className="p-3">Dir</th><th className="p-3">Status</th></tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {data.map(item => (
                   <tr key={item.isoCode} className="hover:bg-gray-50">
-                    <td className="p-3 font-mono">{item.isoCode}</td><td className="p-3">{item.name}</td><td className="p-3">{item.nativeName || '-'}</td><td className="p-3">{item.direction}</td>
+                    <td className="p-3 font-mono">{item.isoCode}</td><td className="p-3">{item.name}</td><td className="p-3">{item.nativeName || '-'}</td><td className="p-3">{item.direction}</td><td className="p-3">{item.lifecycleState}</td>
                   </tr>
                 ))}
               </tbody>
@@ -615,6 +617,7 @@ function CitiesTab() {
                   <th className="p-3 text-right">اسم المدينة</th>
                   <th className="p-3 text-right">المنطقة الإدارية</th>
                   <th className="p-3 text-right">المنطقة الزمنية</th>
+                  <th className="p-3 text-right">حالة السجل</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -624,6 +627,7 @@ function CitiesTab() {
                     <td className="p-3 font-bold text-slate-800">{item.nameAr || item.name}</td>
                     <td className="p-3 text-slate-600">{item.administrativeRegion?.nameAr || item.administrativeRegion?.name || item.region || '-'}</td>
                     <td className="p-3 font-mono text-slate-500 text-xs">{item.timezone || '-'}</td>
+                    <td className="p-3 text-xs">{item.lifecycleState}</td>
                   </tr>
                 ))}
               </tbody>
