@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { FolderGit2, RefreshCw, Filter, FileText } from 'lucide-react';
 
@@ -90,17 +90,7 @@ export function AssetAdminPage() {
     createdTo: '',
   });
 
-  const [appliedFilters, setAppliedFilters] = useState(filters);
-  const appliedRef = useRef(filters);
-  const requestGeneration = useRef(0);
-  const inFlightPage = useRef(false);
-  const pendingFilters = (Object.keys(filters) as Array<keyof typeof filters>)
-    .some((key) => filters[key] !== appliedFilters[key]);
-
-  const load = async (reset = true, queryFilters = appliedRef.current) => {
-    if (!reset && (inFlightPage.current || !cursor || !hasMore || pendingFilters)) return;
-    const generation = ++requestGeneration.current;
-    if (!reset) inFlightPage.current = true;
+  const load = async (reset = true) => {
     setLoading(true);
     try {
       setError(null);
