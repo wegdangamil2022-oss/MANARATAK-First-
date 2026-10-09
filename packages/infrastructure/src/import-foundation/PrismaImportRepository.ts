@@ -44,7 +44,7 @@ export class PrismaImportRepository {
     failedRecords?: number;
   }): Promise<any> {
     const batch = {
-      id: `batch-${uuidv4().substring(0, 8)}`,
+      id: `batch-${uuidv4()}`,
       sourceSystem: data.sourceSystem || 'ADMIN_CONSOLE',
       dataType: data.dataType,
       batchStatus: data.batchStatus || 'PROCESSING',
@@ -535,7 +535,7 @@ export class PrismaImportRepository {
     promotedEntityId?: string;
   }): Promise<any> {
     const record = {
-      id: `rec-${uuidv4().substring(0, 8)}`,
+      id: `rec-${uuidv4()}`,
       batchId: data.batchId,
       status: data.status,
       rawPayload: data.rawPayload,
@@ -585,7 +585,7 @@ export class PrismaImportRepository {
   ): Promise<{ count: number }> {
     const recordsWithIds = records.map((record) => ({
       ...record,
-      id: record.id ?? `rec-${uuidv4().substring(0, 8)}`,
+      id: record.id ?? `rec-${uuidv4()}`,
     }));
 
     if (this.prisma) {
