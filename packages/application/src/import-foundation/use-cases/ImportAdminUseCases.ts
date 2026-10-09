@@ -184,18 +184,34 @@ export class ImportAdminUseCases {
     const batches = await this.importRepository.listBatches({ ...(dataType ? { dataType } : {}), limit: 100 });
     const now = Date.now();
     const staleBefore = now - 15 * 60 * 1000;
-    const activeStatuses = new Set(['CREATED', 'QUEUED', 'RUNNING', 'PAUSED', 'RESUMING', 'CANCELLING', 'PROCESSING']);
+    const activeStatuses = new Set(['CREATED', 'QUEUED', 'RUNNING', 'PAUSING', 'PAUSED', 'RESUMING', 'CANCELLING', 'PROCESSING']);
     const stuck = batches.filter((batch: any) => ['RUNNING', 'PROCESSING'].includes(String(batch.batchStatus)) && new Date(batch.updatedAt ?? batch.createdAt).getTime() < staleBefore);
+    const pendingStops = batches.filter((batch: any) => ['PAUSING', 'CANCELLING'].includes(String(batch.batchStatus)));
+    const strandedStops = pendingStops.filter((batch: any) =>
+      new Date(batch.updatedAt ?? batch.createdAt).getTime() < staleBefore &&
+      (!batch.claimUntil || new Date(batch.claimUntil).getTime() < now));
     const highFailure = batches.filter((batch: any) => Number(batch.totalRecords ?? 0) > 0 && (Number(batch.failedRecords ?? 0) / Number(batch.totalRecords)) > 0.10);
     return {
-      stuckBatches: stuck.length,
+      stuckBatches: stuck.length + strandedStops.length,
+      pendingStopBatches: pendingStops.length,
+      strandedStopBatches: strandedStops.length,
       highFailureBatches: highFailure.length,
       retryableBatches: batches.filter((batch: any) => String(batch.batchStatus) === 'FAILED_RETRYABLE').length,
       pausedBatches: batches.filter((batch: any) => String(batch.batchStatus) === 'PAUSED').length,
       queuedBatches: batches.filter((batch: any) => ['CREATED', 'QUEUED', 'RESUMING'].includes(String(batch.batchStatus))).length,
       dlqBatches: batches.filter((batch: any) => String(batch.batchStatus) === 'DLQ').length,
       oldestActiveBatch: batches.filter((batch: any) => activeStatuses.has(String(batch.batchStatus))).sort((a: any, b: any) => new Date(a.updatedAt ?? a.createdAt).getTime() - new Date(b.updatedAt ?? b.createdAt).getTime())[0] ?? null,
-      recentProblemBatches: [...stuck, ...highFailure]
+      recentProblemBatches: [...stuck, ...strandedStops, ...highFailure]
+        .map((batch: any) => ({
+          ...batch,
+          stuck: stuck.some((value: any) => value.id === batch.id) ||
+            strandedStops.some((value: any) => value.id === batch.id),
+          pendingStop: pendingStops.some((value: any) => value.id === batch.id),
+          requiresOwnerVerification: strandedStops.some((value: any) => value.id === batch.id),
+          highFailureRate: highFailure.some((value: any) => value.id === batch.id),
+          failureRate: Number(batch.totalRecords ?? 0) > 0
+            ? Number(batch.failedRecords ?? 0) / Number(batch.totalRecords) : 0,
+        }))
         .filter((batch: any, index: number, all: any[]) => all.findIndex((candidate: any) => candidate.id === batch.id) === index)
         .sort((a: any, b: any) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime())
         .slice(0, 8),
