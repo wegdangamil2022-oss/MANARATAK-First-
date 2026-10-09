@@ -1,4 +1,4 @@
-import { ValueType } from '@manaratak/domain';
+import { ValueType, SettingValidationRules } from '@manaratak/domain';
 
 export interface CreateSettingDefinitionInput {
   id: string;
@@ -6,6 +6,7 @@ export interface CreateSettingDefinitionInput {
   valueType: ValueType;
   description?: string;
   defaultValue?: unknown;
+  validationRules?: SettingValidationRules;
   isFeatureFlag?: boolean;
   isSecret?: boolean;
 }
