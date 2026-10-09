@@ -127,4 +127,40 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
     });
   });
 
+  it('handles archive and restore retries and restoration of never-archived files safely', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-archive-recovery-'));
+    try {
+      await mkdir(path.join(root, 'bucket', 'clean'), { recursive: true });
+      const gateway = new LocalAssetStorageGateway('bucket', root);
+      const record = new AssetStorageLocator(AssetStorageZone.CLEAN, 'bucket', 'clean/asset.pdf');
+      const filename = path.join(root, 'bucket', 'clean', 'asset.pdf');
+      await writeFile(filename, '%PDF-1.7 valid');
+      await expect(gateway.restore(record)).resolves.toBeUndefined(); // Soft delete need not archive.
+      await gateway.archive(record);
+      await expect(gateway.archive(record)).resolves.toBeUndefined();
+      await expect(gateway.read(record, 100)).rejects.toThrow();
+      await gateway.restore(record);
+      await expect(gateway.restore(record)).resolves.toBeUndefined();
+      expect(Buffer.from(await gateway.read(record, 100)).toString()).toBe('%PDF-1.7 valid');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects ambiguous duplicated archive and active copies instead of overwriting either', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-archive-duplicates-'));
+    try {
+      await mkdir(path.join(root, 'bucket', 'clean'), { recursive: true });
+      const filename = path.join(root, 'bucket', 'clean', 'asset.pdf');
+      await writeFile(filename, 'original');
+      await writeFile(filename + '.archived', 'different');
+      const gateway = new LocalAssetStorageGateway('bucket', root);
+      const record = new AssetStorageLocator(AssetStorageZone.CLEAN, 'bucket', 'clean/asset.pdf');
+      await expect(gateway.archive(record)).rejects.toThrow('ASSET_STORAGE_AMBIGUOUS_DUPLICATE_COPIES');
+      await expect(gateway.restore(record)).rejects.toThrow('ASSET_STORAGE_AMBIGUOUS_DUPLICATE_COPIES');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
 });

@@ -95,11 +95,33 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
   }
 
   async archive(locator: AssetStorageLocator): Promise<void> {
-    await rename(this.resolveLocator(locator), this.archivePath(locator));
+    await this.moveIdempotently(this.resolveLocator(locator), this.archivePath(locator));
   }
 
   async restore(locator: AssetStorageLocator): Promise<void> {
-    await rename(this.archivePath(locator), this.resolveLocator(locator));
+    await this.moveIdempotently(this.archivePath(locator), this.resolveLocator(locator));
+  }
+
+  private async moveIdempotently(source: string, destination: string): Promise<void> {
+    const isFile = async (filename: string): Promise<boolean> => {
+      try {
+        const info = await stat(filename);
+        if (!info.isFile()) throw new Error('ASSET_STORAGE_LOCATOR_NOT_FILE');
+        return true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') return false;
+        throw error;
+      }
+    };
+    const [sourceExists, destinationExists] = await Promise.all([
+      isFile(source), isFile(destination),
+    ]);
+    if (sourceExists && destinationExists) {
+      throw new Error('ASSET_STORAGE_AMBIGUOUS_DUPLICATE_COPIES');
+    }
+    if (!sourceExists && destinationExists) return; // Idempotent retry / already restored.
+    if (!sourceExists) throw new Error('ASSET_STORAGE_OBJECT_MISSING');
+    await rename(source, destination);
   }
 
   async delete(locator: AssetStorageLocator): Promise<void> {

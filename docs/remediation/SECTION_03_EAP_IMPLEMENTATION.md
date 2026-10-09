@@ -203,3 +203,11 @@ npm run ci:source:contracts
 - Job builds project references, runs `prisma db push` **only** against the fresh ephemeral test DB, then executes `PrismaAssetPostgres.database.spec.ts` behind the repository's existing `destructiveDatabaseTestsEnabled` guard and an extra EAP-specific flag/URL check.
 - Three real-db regressions: two concurrent lifecycle writes with shared revision, retention/legal-hold/worker-lease enforcement, and PURGED-persisted-before-provider-delete with lease-protected retry.
 - Database integration results are **PENDING CI** until this workflow runs; no database mutation was attempted against user-owned infrastructure.
+
+## Patch K — Archive state-first and idempotent local storage recovery
+
+- `archiveAsset` now commits `ARCHIVED` via optimistic CAS **before** the remote archive action. Storage failure leaves the persisted record in a non-deliverable state; a subsequent archive request retries provider archive without another domain transition.
+- CAS failure blocks the external provider archive call, avoiding ACTIVE DB state with inaccessible storage.
+- Development-only local adapter archive and restore operations are idempotent when the destination already contains the only copy, permit restoration of a soft-deleted asset that was never archived, and reject ambiguous source-plus-archive duplicates rather than overwriting data.
+- Added negative app + real filesystem regression tests for CAS-failed archive, provider-failed archive with manual retry, no-archive restore, duplicate-copy ambiguity.
+- **Remaining:** an automatic archive reconciliation worker and real provider idempotency/SLA; DB-and-provider split brain across activate/restore is still open. Source CI pending.

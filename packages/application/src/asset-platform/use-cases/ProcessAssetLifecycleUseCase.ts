@@ -5,6 +5,7 @@ import {
   IAssetMalwareScannerGateway,
   IAssetSanitizationGateway,
   AssetId,
+  AssetLifecycleState,
 } from '@manaratak/domain';
 
 import {
@@ -210,9 +211,15 @@ export class ProcessAssetLifecycleUseCase {
     }
 
     await this.assertNotInUse(id, 'archive');
-    record.archive();
+    if (record.state !== AssetLifecycleState.ARCHIVED) {
+      record.archive();
+      // Persist the access-denying ARCHIVED state before requesting an external move.
+      // A failed CAS cannot leave storage archived while the DB still reports ACTIVE.
+      await this.assetRepository.save(record);
+    }
+    // If provider archive fails, the stored ARCHIVED record remains inaccessible.
+    // A repeated archive request will retry this idempotent provider operation.
     await this.storageGateway.archive(record.locator);
-    await this.assetRepository.save(record);
     return AssetRecordMapper.toDto(record);
   }
 

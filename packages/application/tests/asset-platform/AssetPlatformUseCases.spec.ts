@@ -567,4 +567,47 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     }
   });
 
+  it('persists ARCHIVED before provider archive and retries storage failure without re-saving', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-archive-retry', assetReference: 'ref-archive-retry',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'memo.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 150,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-archive-retry' });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-archive-retry' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-archive-retry' });
+    await lifecycleUseCase.activateAsset({ assetId: 'asset-archive-retry' });
+    const provider = vi.spyOn(storageGateway, 'archive')
+      .mockRejectedValueOnce(new Error('ASSET_PROVIDER_ARCHIVE_UNAVAILABLE'));
+    await expect(lifecycleUseCase.archiveAsset({ assetId: 'asset-archive-retry' }))
+      .rejects.toThrow('ASSET_PROVIDER_ARCHIVE_UNAVAILABLE');
+    const persisted = await repo.findById(new AssetId('asset-archive-retry'));
+    expect(persisted?.state).toBe(AssetLifecycleState.ARCHIVED);
+    await expect(lifecycleUseCase.requestDeliveryGrant({ assetId: 'asset-archive-retry' }))
+      .rejects.toThrow('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET');
+    const save = vi.spyOn(repo, 'save');
+    await lifecycleUseCase.archiveAsset({ assetId: 'asset-archive-retry' });
+    expect(provider).toHaveBeenCalledTimes(2);
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it('does not call the archive provider when persisting ARCHIVED is rejected', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-archive-cas', assetReference: 'ref-archive-cas',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'memo.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 150,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-archive-cas' });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-archive-cas' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-archive-cas' });
+    await lifecycleUseCase.activateAsset({ assetId: 'asset-archive-cas' });
+    const archive = vi.spyOn(storageGateway, 'archive');
+    vi.spyOn(repo, 'save').mockRejectedValueOnce(new Error('ASSET_RECORD_CONCURRENT_MODIFICATION'));
+    await expect(lifecycleUseCase.archiveAsset({ assetId: 'asset-archive-cas' }))
+      .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    expect(archive).not.toHaveBeenCalled();
+  });
+
 });
