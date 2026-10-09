@@ -102,6 +102,9 @@ export interface ReferenceCityQualityCounters {
   withoutAdministrativeRegion: number;
   withoutTimezone: number;
   withoutCanonicalIdentity: number;
+  withoutCountryReference: number;
+  inconsistentCountryReference: number;
+  inconsistentAdministrativeRegion: number;
 }
 
 /**

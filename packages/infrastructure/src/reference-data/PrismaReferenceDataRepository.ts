@@ -1004,15 +1004,34 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
   public async getCityQualityCounters(countryIso2Code: string): Promise<ReferenceCityQualityCounters> {
     const where = { countryIso2Code };
-    const [total, active, withoutAdministrativeRegion, withoutTimezone, withoutCanonicalIdentity] = await Promise.all([
+    const [total, active, withoutAdministrativeRegion, withoutTimezone, withoutCanonicalIdentity,
+      withoutCountryReference, inconsistentCountryReferenceRows, inconsistentRegionRows] = await Promise.all([
       this.prisma.referenceCity.count({ where }),
       this.prisma.referenceCity.count({ where: { ...where, lifecycleState: 'ACTIVE' } }),
       this.prisma.referenceCity.count({ where: { ...where, administrativeRegionId: null } }),
       this.prisma.referenceCity.count({ where: { ...where, timezone: null } }),
       this.prisma.referenceCity.count({ where: { ...where, canonicalIdentityKey: null } }),
+      this.prisma.referenceCity.count({ where: { ...where, countryReferenceId: null } }),
+      this.prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
+        SELECT COUNT(*)::bigint AS "count" FROM "ReferenceCity" c
+        LEFT JOIN "ReferenceCountry" country ON country."id" = c."countryReferenceId"
+        WHERE c."countryIso2Code" = ${countryIso2Code}
+          AND c."countryReferenceId" IS NOT NULL
+          AND (country."id" IS NULL OR country."iso2Code" <> c."countryIso2Code")
+      `),
+      this.prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
+        SELECT COUNT(*)::bigint AS "count" FROM "ReferenceCity" c
+        LEFT JOIN "AdministrativeRegion" region ON region."id" = c."administrativeRegionId"
+        WHERE c."countryIso2Code" = ${countryIso2Code}
+          AND c."administrativeRegionId" IS NOT NULL
+          AND (region."id" IS NULL OR region."countryIso2Code" <> c."countryIso2Code")
+      `),
     ]);
     return { countryIso2Code, total, active,
-      withoutAdministrativeRegion, withoutTimezone, withoutCanonicalIdentity };
+      withoutAdministrativeRegion, withoutTimezone, withoutCanonicalIdentity,
+      withoutCountryReference,
+      inconsistentCountryReference: Number(inconsistentCountryReferenceRows[0]?.count ?? 0n),
+      inconsistentAdministrativeRegion: Number(inconsistentRegionRows[0]?.count ?? 0n) };
   }
 
   public async getReferenceHistory(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceVersionDto[]> {

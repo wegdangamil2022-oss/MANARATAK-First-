@@ -277,5 +277,8 @@ export function CityCountryQuality({ countryIso2Code }: { countryIso2Code: strin
     <span>بلا منطقة إدارية معتمدة: {data.withoutAdministrativeRegion}</span>
     <span>بلا منطقة زمنية: {data.withoutTimezone}</span>
     <span>بلا معرّف هوية قياسي: {data.withoutCanonicalIdentity}</span>
+    <span>بدون مرجع دولة: {data.withoutCountryReference}</span>
+    <span>رابط دولة غير متطابق: {data.inconsistentCountryReference}</span>
+    <span>منطقة إدارية غير متطابقة: {data.inconsistentAdministrativeRegion}</span>
   </div>;
 }
