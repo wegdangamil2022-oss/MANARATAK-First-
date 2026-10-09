@@ -253,6 +253,7 @@ describe('PrismaSettingAssignmentRepository', () => {
       operation: 'CLEAR_OVERRIDE', changeReason: 'Return to inherited policy', value: 'value' }) });
     expect(mockPrisma.transactionalOutboxRecord.create).toHaveBeenCalledWith({ data: expect.objectContaining({
       eventType: 'SettingOverrideCleared.v1', correlationId: 'request-123', payload: expect.objectContaining({ operation: 'CLEAR_OVERRIDE' }),
+      metadata: expect.objectContaining({ settingsEventRole: 'OWNER_DOMAIN_EVENT', ownerDomain: 'SETTINGS' }),
     }) });
     expect(assignment.domainEvents).toHaveLength(0);
   });
