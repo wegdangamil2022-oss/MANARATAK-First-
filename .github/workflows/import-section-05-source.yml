@@ -11,6 +11,8 @@ on:
       - 'packages/infrastructure/src/import-foundation/**'
       - 'packages/infrastructure/tests/import-foundation/**'
       - 'packages/domain/src/import-foundation/**'
+      - 'packages/infrastructure/prisma/schema.prisma'
+      - 'packages/infrastructure/prisma/migrations/20261009070000_import_governance_receipts/**'
       - 'packages/domain/src/asset-platform/gateways/IAssetStorageGateway.ts'
       - 'packages/infrastructure/src/asset-platform/**'
       - 'packages/infrastructure/src/provider-http/**'
@@ -22,6 +24,9 @@ on:
       - 'apps/api/src/presentation/api/router/ImportAdminRouter.ts'
       - 'apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts'
       - 'apps/admin/src/pages/ImportAdminPage.tsx'
+      - 'apps/admin/src/pages/AdminReviewQueuePage.tsx'
+      - 'apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts'
+      - 'packages/infrastructure/src/scholarships/PrismaScholarshipImportDecisionPorts.ts'
       - '.github/workflows/import-section-05-source.yml'
   workflow_dispatch:
 permissions:
@@ -37,6 +42,7 @@ jobs:
           node-version: 22.16.0
           cache: npm
       - run: npm ci
+      - run: npm run db:generate
       - name: TypeScript
         run: npm run typecheck
       - name: Source quality
@@ -44,6 +50,8 @@ jobs:
       - name: Focused import identities, queue, lease, handoff and SSRF regressions
         run: >-
           npx --no-install vitest run --config vitest.config.ts
+          packages/application/tests/scholarships/ScholarshipImportDecisionUseCases.spec.ts
+          packages/infrastructure/tests/import-foundation/ImportGovernance.spec.ts
           packages/infrastructure/tests/import-foundation/ImportSessionThree.spec.ts
           packages/infrastructure/tests/import-foundation/VerifiedArtifactImport.spec.ts
           packages/application/tests/import-foundation/CsvImportStreamParser.spec.ts

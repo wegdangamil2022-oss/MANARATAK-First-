@@ -48,7 +48,7 @@ describe('Verified artifact import', () => {
     async function* rows() { for (let i = 0; i < 501; i++) yield new ParsedImportRow({ sourceRowNumber: i + 1, raw: { id: i } }); }
     const result = await imports.stageNormalizedStream({ ownerDomain: 'GENERIC', sourceSystem: 'MANUAL_EAP_UPLOAD', rows: rows() });
     expect(repo.bulkCreateRecords.mock.calls.map(call => call[0].length)).toEqual([500, 1]);
-    expect(repo.finalizeStagedStream).toHaveBeenCalledWith('batch-1', 501);
+    expect(repo.finalizeStagedStream).toHaveBeenCalledWith('batch-1', 501, { receivedRecords: 501, skippedRecords: 0, invalidRecords: 0 }, undefined);
     expect(queue.enqueueImportJob).not.toHaveBeenCalled(); expect(worker.runOne).not.toHaveBeenCalled();
     expect(result.summary.stagedRecords).toBe(501);
     expect(repo.bulkCreateRecords.mock.calls[0][0][0].status).toBe('STAGING_PENDING');

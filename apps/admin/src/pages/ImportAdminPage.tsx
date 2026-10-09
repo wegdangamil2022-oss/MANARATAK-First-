@@ -2278,6 +2278,8 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </div>
       </section>
 
+      <ImportMappingPanel sources={sources} isArabic={isArabic} />
+      <ImportGovernancePanel records={records.data} batches={batches} sources={sources} isArabic={isArabic} />
       <BatchComparisonPanel batches={batches} isArabic={isArabic} />
       <SourceAuthoringPanel sources={sources} isArabic={isArabic} onChanged={() => loadControlPlane()}
         onStaged={async batchId => { setSelectedBatchId(batchId); await refreshAll(false); }} />
@@ -3275,7 +3277,8 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
   const [assetId, setAssetId] = useState('');
   const [format, setFormat] = useState<'csv' | 'ndjson'>('csv');
   const [domain, setDomain] = useState(ownerDomain);
-  const [proof, setProof] = useState<{ assetId: string; expectedSha256: string; ownerDomain: string;
+  const [mappingProfileId, setMappingProfileId] = useState('');
+  const [proof, setProof] = useState<{ assetId: string; expectedSha256: string; ownerDomain: string; mappingProfileId?: string;
     format: 'csv' | 'ndjson'; validRows: number; invalidRows: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -3299,7 +3302,7 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
       } else {
         const evidence = await adminApiClient.request<{ expectedSha256: string }>('/admin/imports/artifacts/inspect',
           { method: 'POST', body: JSON.stringify({ assetId }) });
-        const body = { assetId, expectedSha256: evidence.expectedSha256, ownerDomain: domain, format };
+        const body = { assetId, expectedSha256: evidence.expectedSha256, ownerDomain: domain, format, ...(mappingProfileId ? { mappingProfileId } : {}) };
         const result = await adminApiClient.request<{ validRows: number; invalidRows: number }>('/admin/imports/artifacts/preflight',
           { method: 'POST', body: JSON.stringify(body) });
         if (requestGeneration === generation.current) setProof({ ...body, validRows: result.validRows, invalidRows: result.invalidRows });
@@ -3320,6 +3323,7 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
     <p className="text-sm">{isArabic ? 'اختر ملف CSV أو NDJSON من أصولك المعتمدة، وافحصه قبل التجهيز. القبول والنشر يقررهما القسم المالك.'
       : 'Select your approved CSV or NDJSON asset and preflight before staging. The owner decides acceptance and publication.'}</p>
     <fieldset disabled={busy} className="space-y-3">
+      <MappingProfilePicker sourceId="MANUAL_EAP_UPLOAD" domain={domain} value={mappingProfileId} onChange={id => { setMappingProfileId(id); setProof(null); }} isArabic={isArabic} />
       <AssetPicker value={assetId} purpose="IMPORT_ARTIFACT" label={isArabic ? 'الملف' : 'File'}
         onChange={id => { clear(); setAssetId(id); }} />
       <label>{isArabic ? 'التنسيق' : 'Format'} <select value={format} onChange={event => {
@@ -3357,6 +3361,8 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
   const [probe, setProbe] = useState<{ executionAllowed: boolean; executionBlocker: string | null } | null>(null);
   const [format, setFormat] = useState<'csv' | 'ndjson'>('csv');
   const [domain, setDomain] = useState('SCHOLARSHIPS');
+  const [mappingProfileId, setMappingProfileId] = useState('');
+  const [useApprovedFallback, setUseApprovedFallback] = useState(false);
   const lock = useRef(false);
   const mounted = useRef(true);
   useEffect(() => {
@@ -3373,7 +3379,7 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
     if (lock.current) return;
     lock.current = true; setBusy(true); setMessage('');
     try { await task(); }
-    catch (error) { if (mounted.current) setMessage(error instanceof Error ? error.message : (isArabic ? 'تعذر إتمام الطلب.' : 'Request failed.')); }
+    catch (error) { if (mounted.current) setMessage(importCommandError(error, isArabic)); }
     finally { lock.current = false; if (mounted.current) setBusy(false); }
   };
   const load = (sourceId: string) => void perform(async () => {
@@ -3431,9 +3437,11 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
       })} className="rounded border p-2">{isArabic ? 'فحص الإعدادات دون جلب' : 'Test configuration without fetching'}</button>
       <label>{isArabic ? 'تنسيق البيانات' : 'Data format'} <select value={format} onChange={event => setFormat(event.target.value as 'csv' | 'ndjson')}><option value="csv">CSV</option><option value="ndjson">NDJSON</option></select></label>
       <label>{isArabic ? 'القسم المستلم' : 'Receiving domain'} <select value={domain} onChange={event => setDomain(event.target.value)}>{DOMAIN_CONFIG.map(value => <option key={value.key} value={value.key}>{isArabic ? value.ar : value.en}</option>)}</select></label>
-      <button type="button" disabled={!editable || !revision || !probe?.executionAllowed || draft.reason.trim().length < 3} onClick={() => void perform(async () => {
+      <MappingProfilePicker sourceId={draft.sourceId} domain={domain} value={mappingProfileId} onChange={setMappingProfileId} isArabic={isArabic} />
+      <label><input type="checkbox" checked={useApprovedFallback} onChange={event => { setUseApprovedFallback(event.target.checked); setMappingProfileId(''); }} />{isArabic ? 'استخدام البديل المعتمد لهذا التشغيل' : 'Use approved fallback for this run'}</label>
+      <button type="button" disabled={!editable || !revision || (!useApprovedFallback && !probe?.executionAllowed) || draft.reason.trim().length < 3} onClick={() => void perform(async () => {
         const result = await adminApiClient.request<{ batchId: string }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}/run`, { method: 'POST',
-          body: JSON.stringify({ expectedUpdatedAt: revision, ownerDomain: domain, format, reason: draft.reason }) });
+          body: JSON.stringify({ expectedUpdatedAt: revision, ownerDomain: domain, format, reason: draft.reason, ...(mappingProfileId ? { mappingProfileId } : {}), useApprovedFallback }) });
         await onStaged(result.batchId);
         if (mounted.current) setMessage(isArabic ? 'تم تجهيز دفعة الجلب للمراجعة.' : 'Acquired batch staged for review.');
       })} className="rounded border p-2">{isArabic ? 'جلب وتجهيز دفعة' : 'Acquire and stage batch'}</button>
@@ -3447,7 +3455,7 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
 function BatchComparisonPanel({ batches, isArabic }: { batches: ImportBatch[]; isArabic: boolean }) {
   const [left, setLeft] = useState(''); const [right, setRight] = useState('');
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
-  const [result, setResult] = useState<{ counters: { added: number; missingFromComparison: number; changed: number; unchanged: number; unknown: number }; totalDifferences: number } | null>(null);
+  const [result, setResult] = useState<{ counters: { added: number; missingFromComparison: number; changed: number; unchanged: number; unknown: number }; totalDifferences: number; normalization?: { evidenceKnown: boolean; sameMappingVersions: boolean } } | null>(null);
   const lock = useRef(false); const generation = useRef(0);
   useEffect(() => () => { generation.current++; }, []);
   const compare = async () => {
@@ -3469,6 +3477,171 @@ function BatchComparisonPanel({ batches, isArabic }: { batches: ImportBatch[]; i
       <button type="button" disabled={!left || !right || left === right} onClick={() => void compare()} className="rounded border p-2">{isArabic ? 'قارن' : 'Compare'}</button>
     </fieldset>
     {result && <dl className="flex flex-wrap gap-4">{Object.entries(result.counters).map(([key, count]) => <div key={key}><dt>{{ added: isArabic ? 'مضافة' : 'Added', missingFromComparison: isArabic ? 'غير موجودة في المقارنة' : 'Missing in comparison', changed: isArabic ? 'تغيّرت' : 'Changed', unchanged: isArabic ? 'لم تتغير' : 'Unchanged', unknown: isArabic ? 'غير محددة' : 'Unknown' }[key]}</dt><dd>{count}</dd></div>)}</dl>}
+    {result && (!result.normalization?.evidenceKnown || !result.normalization.sameMappingVersions) && <p role="status">{isArabic ? 'نسخ المطابقة تختلف أو لا تتوفر أدلتها التاريخية؛ راجع قواعد التحويل عند تفسير الفروق.' : 'Mapping versions differ or historical evidence is unavailable. Review transformation rules when interpreting differences.'}</p>}
+    {message && <p role="status">{message}</p>}
+  </section>;
+}
+
+function importCommandError(error: unknown, isArabic: boolean) {
+  const code = error instanceof Error ? error.message : '';
+  const messages: Array<[string, string, string]> = [
+    ['IMPORT_SOURCE_DRIFT_REVIEW_REQUIRED', 'تغيرت بنية المصدر. افحص التغير في لوحة المراجعة قبل إعادة التشغيل.', 'Source shape changed. Review the drift before running again.'],
+    ['IMPORT_MAPPING_PROFILE_CONFLICT', 'قاعدة المطابقة لا توافق المصدر والقسم ونسخة الإعداد الحالية. احفظ نسخة جديدة.', 'The mapping does not match the current source, domain and revision. Save a new version.'],
+    ['SOURCE_ACCESS_SIGNED_APPROVAL_REQUIRED', 'هذا المصدر يحتاج موافقة وصول موثوقة في إعدادات التشغيل.', 'This source needs a trusted access approval in the deployment configuration.'],
+    ['SOURCE_ACCOUNT_CREDENTIAL_REQUIRED', 'حساب الوصول للمصدر غير مهيأ أو غير صالح.', 'The source access account is missing or invalid.'],
+    ['SOURCE_ROBOTS_PATH_DENIED', 'سياسة المصدر تمنع جلب هذا المسار.', 'The source robots policy denies this path.'],
+    ['IMPORT_RECEIPT_NOT_FOUND', 'لا يوجد إيصال مطابق يثبت الاستلام. أبقِ السجل للمراجعة دون إعادة التسليم.', 'No matching receipt proves acceptance. Keep the record in review without redelivery.'],
+    ['IMPORT_REVIEW_CONFLICT', 'تغير التعيين أو الحجز. حدّث طابور المراجعة وأعد المحاولة.', 'The assignment or claim changed. Refresh the review queue and retry.'],
+    ['IMPORT_REVIEWER_AUTHORITY_REQUIRED', 'المراجع يحتاج صلاحية الاستيراد وصلاحية القسم المالك.', 'The reviewer needs import and owning-domain permissions.'],
+    ['IMPORT_RECOVERY_EVIDENCE_REQUIRED', 'أدلة هذه الدفعة لا تسمح بإعادتها للطابور بأمان. راجع السجلات أولًا.', 'This batch lacks evidence for safe queue recovery. Review its records first.'],
+    ['IMPORT_SOURCE_STATUS_CONFLICT', 'تغيرت إعدادات المصدر. أعد تحميله قبل التشغيل.', 'Source configuration changed. Reload it before running.'],
+    ['SOURCE_DISTRIBUTED_BUDGET_BUSY', 'وصل الجلب إلى حد الطلبات المشترك. حاول لاحقًا.', 'Acquisition reached the shared request budget. Retry later.'],
+  ];
+  const found = messages.find(([key]) => code.includes(key));
+  return found ? found[isArabic ? 1 : 2] : (isArabic ? 'تعذر تنفيذ الطلب. حدّث البيانات وتحقق من الصلاحيات والحقول المطلوبة.' : 'Request failed. Refresh the data and check permissions and required fields.');
+}
+
+type MappingProfile = { id: string; version: number; definitionHash: string; definition: { fields: Array<{ target: string; aliases: string[]; type: 'string' | 'number' | 'boolean'; required: boolean }> } };
+function MappingProfilePicker({ sourceId, domain, value, onChange, isArabic }: { sourceId: string; domain: string; value: string; onChange: (id: string) => void; isArabic: boolean }) {
+  const [unavailable, setUnavailable] = useState(false);
+  const [reload, setReload] = useState(0);
+  const onChangeRef = useRef(onChange); onChangeRef.current = onChange;
+  const [profiles, setProfiles] = useState<MappingProfile[]>([]);
+  useEffect(() => {
+    let active = true;
+    setProfiles([]); setUnavailable(false); onChangeRef.current('');
+    if (sourceId) void adminApiClient.request<{ data: MappingProfile[] }>(`/admin/imports/mapping-profiles?sourceId=${encodeURIComponent(sourceId)}&ownerDomain=${encodeURIComponent(domain)}`)
+      .then(result => { if (active) setProfiles(result.data); }).catch(() => { if (active) { setProfiles([]); setUnavailable(true); } });
+    return () => { active = false; };
+  }, [sourceId, domain, reload]);
+  return <div><label>{isArabic ? 'قاعدة مطابقة محفوظة' : 'Saved mapping profile'} <select value={value} onChange={event => onChange(event.target.value)}>
+    <option value="">{isArabic ? 'الأعمدة كما هي' : 'Keep original fields'}</option>
+    {profiles.map(profile => <option key={profile.id} value={profile.id}>{isArabic ? 'نسخة' : 'Version'} {profile.version}</option>)}
+  </select></label><button type="button" onClick={() => setReload(previous => previous + 1)}>{isArabic ? 'تحديث القواعد' : 'Refresh profiles'}</button>{unavailable && <p role="status">{isArabic ? 'تعذر تحميل القواعد؛ لا يمكن تأكيد عدم وجودها.' : 'Profiles could not be loaded; their absence is not confirmed.'}</p>}</div>;
+}
+function ImportMappingPanel({ sources, isArabic }: { sources: ImportSource[]; isArabic: boolean }) {
+  const [sourceId, setSourceId] = useState('MANUAL_EAP_UPLOAD'); const [domain, setDomain] = useState('SCHOLARSHIPS');
+  const [profiles, setProfiles] = useState<MappingProfile[]>([]);
+  const [fields, setFields] = useState([{ target: '', aliases: '', type: 'string' as 'string' | 'number' | 'boolean', required: true, sample: '' }]);
+  const [reason, setReason] = useState(''); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<Array<{ sourceRowNumber: number; error?: string; normalized?: Record<string, unknown>; unmappedFields?: string[] }>>([]);
+  const lock = useRef(false); const generation = useRef(0); const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  useEffect(() => {
+    const current = ++generation.current; setProfiles([]); setPreview([]); setMessage('');
+    void adminApiClient.request<{ data: MappingProfile[] }>(`/admin/imports/mapping-profiles?sourceId=${encodeURIComponent(sourceId)}&ownerDomain=${encodeURIComponent(domain)}`)
+      .then(result => { if (current === generation.current) { setProfiles(result.data); if (result.data[0]) setFields(result.data[0].definition.fields.map(field => ({ ...field, aliases: field.aliases.join(', '), sample: '' }))); } })
+      .catch(() => { if (current === generation.current) setMessage(isArabic ? 'تعذر تحميل المطابقة.' : 'Mapping unavailable.'); });
+    return () => { generation.current++; };
+  }, [sourceId, domain, isArabic]);
+  const perform = async (task: () => Promise<void>) => { if (lock.current) return; lock.current = true; setBusy(true); setMessage(''); const current = generation.current;
+    try { await task(); } catch (error) { if (current === generation.current) setMessage(importCommandError(error, isArabic)); }
+    finally { lock.current = false; if (current === generation.current) setBusy(false); } };
+  const edit = (index: number, patch: Partial<typeof fields[number]>) => { setFields(previous => previous.map((field, i) => i === index ? { ...field, ...patch } : field)); setPreview([]); };
+  const latestFields = profiles[0]?.definition.fields ?? [];
+  const previousFields = profiles[1]?.definition.fields ?? [];
+  const mappingDiff = profiles.length > 1 ? {
+    added: latestFields.filter(field => !previousFields.some(previous => previous.target === field.target)).map(field => field.target),
+    removed: previousFields.filter(field => !latestFields.some(current => current.target === field.target)).map(field => field.target),
+    changed: latestFields.filter(field => previousFields.some(previous => previous.target === field.target &&
+      JSON.stringify(previous) !== JSON.stringify(field))).map(field => field.target),
+  } : null;
+  return <section className="space-y-3 rounded-2xl border bg-white p-5">
+    <h2 className="font-black">{isArabic ? 'مطابقة أعمدة المصدر' : 'Source field mapping'}</h2>
+    <p>{isArabic ? 'احفظ نسخة ثم اخترها عند تجهيز الملف أو تشغيل المصدر. الحقول الإلزامية والأنواع تُفحص قبل التسليم للقسم.' : 'Save a version and select it when staging an artifact or running a source. Required fields and types are checked before delivery.'}</p>
+    <fieldset disabled={busy} className="space-y-3">
+      <label>{isArabic ? 'المصدر' : 'Source'} <select value={sourceId} onChange={event => setSourceId(event.target.value)}><option value="MANUAL_EAP_UPLOAD">{isArabic ? 'ملف مرفوع' : 'Uploaded artifact'}</option>{sources.filter(source => source.metadata?.ownerDomain === 'GENERIC').map(source => <option key={source.sourceId} value={source.sourceId}>{source.displayName}</option>)}</select></label>
+      <label>{isArabic ? 'القسم' : 'Domain'} <select value={domain} onChange={event => setDomain(event.target.value)}>{DOMAIN_CONFIG.map(item => <option key={item.key} value={item.key}>{isArabic ? item.ar : item.en}</option>)}</select></label>
+      {fields.map((field, i) => <div key={i} className="grid gap-2 sm:grid-cols-5">
+        <label>{isArabic ? 'أسماء العمود، بفاصلة' : 'Column aliases, comma separated'}<input value={field.aliases} onChange={event => edit(i, { aliases: event.target.value })} className="w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'الحقل المقابل' : 'Target field'}<input value={field.target} onChange={event => edit(i, { target: event.target.value })} className="w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'النوع' : 'Type'}<select value={field.type} onChange={event => edit(i, { type: event.target.value as typeof field.type })}><option value="string">{isArabic ? 'نص' : 'Text'}</option><option value="number">{isArabic ? 'رقم' : 'Number'}</option><option value="boolean">{isArabic ? 'نعم/لا' : 'Boolean'}</option></select></label>
+        <label><input type="checkbox" checked={field.required} onChange={event => edit(i, { required: event.target.checked })} />{isArabic ? 'إلزامي' : 'Required'}</label>
+        <label>{isArabic ? 'قيمة تجريبية' : 'Sample value'}<input value={field.sample} onChange={event => edit(i, { sample: event.target.value })} className="w-full rounded border p-2" /></label>
+        <button type="button" disabled={fields.length === 1} onClick={() => { setFields(previous => previous.filter((_, n) => n !== i)); setPreview([]); }}>{isArabic ? 'إزالة الحقل' : 'Remove field'}</button>
+      </div>)}
+      <button type="button" disabled={fields.length >= 100} onClick={() => { setFields(previous => [...previous, { target: '', aliases: '', type: 'string', required: true, sample: '' }]); setPreview([]); }}>{isArabic ? 'إضافة حقل' : 'Add field'}</button>
+      <label>{isArabic ? 'سبب حفظ النسخة' : 'Version reason'}<input value={reason} onChange={event => setReason(event.target.value)} className="rounded border p-2" /></label>
+      <button type="button" disabled={reason.trim().length < 3} onClick={() => void perform(async () => {
+        const revision = sourceId === 'MANUAL_EAP_UPLOAD' ? '1970-01-01T00:00:00.000Z' :
+          (await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(sourceId)}`)).data.updatedAt;
+        const profile = await adminApiClient.request<MappingProfile>('/admin/imports/mapping-profiles', { method: 'POST', body: JSON.stringify({ sourceId, ownerDomain: domain,
+          sourceRevision: revision, expectedVersion: profiles[0]?.version ?? 0, reason,
+          definition: { fields: fields.map(({ target, aliases, type, required }) => ({ target, aliases: aliases.split(/[,،]/).map(value => value.trim()).filter(Boolean), type, required })) } }) });
+        if (!alive.current) return;
+        setProfiles(previous => [profile, ...previous]); setPreview([]); setMessage(isArabic ? 'حُفظت نسخة ثابتة. يمكنك اختيارها عند الاستيراد.' : 'Immutable version saved. Select it when importing.');
+      })}>{isArabic ? 'حفظ نسخة جديدة' : 'Save new version'}</button>
+      <button type="button" disabled={!profiles[0]} onClick={() => void perform(async () => {
+        const sample = Object.fromEntries(fields.filter(field => field.aliases.trim()).map(field => [field.aliases.split(/[,،]/)[0].trim(), field.sample]));
+        const result = await adminApiClient.request<{ data: typeof preview }>(`/admin/imports/mapping-profiles/${profiles[0].id}/preview`, { method: 'POST', body: JSON.stringify({ sourceId, ownerDomain: domain, rows: [sample] }) });
+        if (alive.current) setPreview(result.data);
+      })}>{isArabic ? 'معاينة النسخة المحفوظة' : 'Preview saved version'}</button>
+    </fieldset>
+    {mappingDiff && <p>{isArabic ? 'تغيرات آخر نسخة مقارنة بالسابقة: ' : 'Latest version changes against previous: '}
+      {isArabic ? 'مضافة' : 'Added'}: {mappingDiff.added.join(', ') || '—'} · {isArabic ? 'محذوفة' : 'Removed'}: {mappingDiff.removed.join(', ') || '—'} · {isArabic ? 'معدلة' : 'Changed'}: {mappingDiff.changed.join(', ') || '—'}</p>}
+    {preview.map(row => <div key={row.sourceRowNumber}>{row.error ?? Object.entries(row.normalized ?? {}).map(([key, value]) => `${key}: ${String(value)}`).join(' · ')}{Boolean(row.unmappedFields?.length) && <p>{isArabic ? 'أعمدة دون مطابقة: ' : 'Unmapped fields: '}{row.unmappedFields?.join(', ')}</p>}</div>)}
+    {message && <p role="status">{message}</p>}
+  </section>;
+}
+function ImportGovernancePanel({ records, batches, sources, isArabic }: { records: ImportRecord[]; batches: ImportBatch[]; sources: ImportSource[]; isArabic: boolean }) {
+  type Assignment = { recordId: string; assigneeId: string; version: number; state: string; dueAt: string; ownerDomain: string };
+  type Observation = { sourceRevision: string; updatedAt: string; driftState: string; fallbackSourceId?: string };
+  const [recordId, setRecordId] = useState(''); const [batchId, setBatchId] = useState(''); const [sourceId, setSourceId] = useState('');
+  const [assignee, setAssignee] = useState(''); const [due, setDue] = useState(''); const [reason, setReason] = useState(''); const [fallback, setFallback] = useState('');
+  const [queue, setQueue] = useState<Assignment[]>([]); const [observation, setObservation] = useState<Observation | null>(null);
+  const [counts, setCounts] = useState<Record<string, unknown> | null>(null); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
+  const lock = useRef(false); const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const refresh = async () => { const result = await adminApiClient.request<{ data: Assignment[] }>('/admin/imports/review-queue'); if (mounted.current) setQueue(result.data); };
+  const perform = async (task: () => Promise<void>) => { if (lock.current) return; lock.current = true; setBusy(true); setMessage('');
+    try { await task(); if (mounted.current) setMessage(isArabic ? 'تم تنفيذ الطلب وتسجيله.' : 'Command completed and audited.'); }
+    catch (error) { if (mounted.current) setMessage(importCommandError(error, isArabic)); }
+    finally { lock.current = false; if (mounted.current) setBusy(false); } };
+  const record = records.find(item => item.id === recordId); const batch = batches.find(item => item.id === batchId);
+  const assignment = queue.find(item => item.recordId === recordId);
+  return <section id="review-assignments" className="space-y-3 rounded-2xl border bg-white p-5">
+    <h2 className="font-black">{isArabic ? 'المراجعة واسترداد الاستيراد' : 'Import review and recovery'}</h2>
+    <p>{isArabic ? 'التعيين والحجز ينظمان المراجعة. قرار قبول البيانات يبقى في مساحة القسم المالك.' : 'Assignments and claims organize review. Data acceptance remains in the owner workspace.'}</p>
+    <fieldset disabled={busy} className="space-y-3">
+      <label>{isArabic ? 'سبب الإجراء' : 'Action reason'}<input value={reason} onChange={event => setReason(event.target.value)} className="rounded border p-2" /></label>
+      <label>{isArabic ? 'السجل' : 'Record'} <select value={recordId} onChange={event => setRecordId(event.target.value)}><option value="">—</option>{records.map(item => <option key={item.id} value={item.id}>{item.id} ({item.status})</option>)}</select></label>
+      <label>{isArabic ? 'معرّف المراجع' : 'Reviewer identity ID'}<input value={assignee} onChange={event => setAssignee(event.target.value)} className="rounded border p-2" /></label>
+      <label>{isArabic ? 'موعد المراجعة' : 'Review due'}<input type="datetime-local" value={due} onChange={event => setDue(event.target.value)} /></label>
+      <button type="button" onClick={() => void perform(refresh)}>{isArabic ? 'تحميل طابور المراجعة' : 'Load review queue'}</button>
+      <button type="button" disabled={!record || !assignee || !due || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/assignment`, { method: 'POST', body: JSON.stringify({ assigneeId: assignee, dueAt: new Date(due).toISOString(), expectedVersion: assignment?.version ?? 0, reason }) }); await refresh();
+      })}>{isArabic ? 'تعيين المراجع' : 'Assign reviewer'}</button>
+      <button type="button" disabled={!assignment || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/claim`, { method: 'POST', body: JSON.stringify({ expectedVersion: assignment?.version, reason }) }); await refresh();
+      })}>{isArabic ? 'حجز المراجعة لي أو تجديدها' : 'Claim or renew my review'}</button>
+      <button type="button" disabled={!assignment || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/release`, { method: 'POST', body: JSON.stringify({ expectedVersion: assignment?.version, reason }) }); await refresh();
+      })}>{isArabic ? 'إخلاء حجز المراجعة' : 'Release my review claim'}</button>
+      <button type="button" disabled={!record?.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/reconcile-receipt`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: record?.updatedAt, reason }) });
+      })}>{isArabic ? 'تسوية التسليم من الإيصال المحفوظ' : 'Reconcile delivery from saved receipt'}</button>
+      <ul>{queue.map(item => <li key={item.recordId}><button type="button" onClick={() => setRecordId(item.recordId)}>{item.recordId}</button> · {item.assigneeId} · {new Date(item.dueAt).toLocaleString()} · {item.state} · <a href={`/imports/${item.ownerDomain.toLowerCase()}?recordId=${encodeURIComponent(item.recordId)}`}>{isArabic ? 'فتح مساحة القسم' : 'Open owner workspace'}</a></li>)}</ul>
+      <label>{isArabic ? 'الدفعة' : 'Batch'} <select value={batchId} onChange={event => { setBatchId(event.target.value); setCounts(null); }}><option value="">—</option>{batches.map(item => <option key={item.id} value={item.id}>{item.id}</option>)}</select></label>
+      <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/counters`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض العدادات' : 'Show counters'}</button>
+      {(['QUEUE','REJECT'] as const).map(decision => <button key={decision} type="button" disabled={batch?.batchStatus !== 'CREATED' || !batch.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/batches/${encodeURIComponent(batchId)}/recover`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: batch?.updatedAt, decision, reason }) });
+      })}>{decision === 'QUEUE' ? (isArabic ? 'استرداد دفعة قديمة للطابور' : 'Recover legacy batch to queue') : (isArabic ? 'رفض دفعة قديمة مع حفظ الأدلة' : 'Reject legacy batch and retain evidence')}</button>)}
+      <button type="button" disabled={!batch?.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/batches/${encodeURIComponent(batchId)}/retention-policy`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: batch?.updatedAt, days: 365, reason }) });
+      })}>{isArabic ? 'تعيين الاحتفاظ سنة للسجلات القديمة' : 'Assign one year retention to legacy records'}</button>
+      <label>{isArabic ? 'المصدر' : 'Source'} <select value={sourceId} onChange={event => { setSourceId(event.target.value); setObservation(null); }}><option value="">—</option>{sources.filter(item => item.metadata?.ownerDomain === 'GENERIC').map(item => <option key={item.sourceId} value={item.sourceId}>{item.displayName}</option>)}</select></label>
+      <button type="button" disabled={!sourceId} onClick={() => void perform(async () => { const result = await adminApiClient.request<{ data: Observation | null }>(`/admin/imports/sources/${encodeURIComponent(sourceId)}/observation`); if (mounted.current) setObservation(result.data); })}>{isArabic ? 'فحص تغير المصدر والبديل' : 'Inspect source drift and fallback'}</button>
+      {observation && <p>{isArabic ? 'حالة بنية المصدر: ' : 'Source shape status: '}{observation.driftState}</p>}
+      {(['ACCEPT','REJECT'] as const).map(decision => <button key={decision} type="button" disabled={observation?.driftState !== 'REVIEW_REQUIRED' || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/sources/${encodeURIComponent(sourceId)}/drift-decision`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: observation?.updatedAt, decision, reason }) }); if (mounted.current) setObservation(null);
+      })}>{decision === 'ACCEPT' ? (isArabic ? 'قبول البنية الجديدة' : 'Accept new shape') : (isArabic ? 'رفض البنية الجديدة' : 'Reject new shape')}</button>)}
+      <label>{isArabic ? 'المصدر البديل المعتمد' : 'Approved fallback source'} <select value={fallback} onChange={event => setFallback(event.target.value)}><option value="">{isArabic ? 'إلغاء البديل' : 'Remove fallback'}</option>{sources.filter(item => item.sourceId !== sourceId && item.metadata?.ownerDomain === 'GENERIC' && item.status === 'ACTIVE').map(item => <option key={item.sourceId} value={item.sourceId}>{item.displayName}</option>)}</select></label>
+      <button type="button" disabled={!observation || reason.trim().length < 3} onClick={() => void perform(async () => {
+        const target = fallback ? (await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(fallback)}`)).data : null;
+        await adminApiClient.request(`/admin/imports/sources/${encodeURIComponent(sourceId)}/fallback`, { method: 'POST', body: JSON.stringify({ fallbackSourceId: fallback || null, sourceRevision: observation?.sourceRevision, fallbackSourceRevision: target?.updatedAt, reason }) }); if (mounted.current) setObservation(null);
+      })}>{isArabic ? 'حفظ قرار البديل' : 'Save fallback decision'}</button>
+    </fieldset>
+    {counts && <dl className="flex flex-wrap gap-3">{['received','staged','skipped','invalid','processed','failed','review'].map(key => <div key={key}><dt>{({ received: 'مستلمة', staged: 'مجهزة', skipped: 'متكررة', invalid: 'غير صالحة', processed: 'معالجة', failed: 'فاشلة', review: 'للمراجعة' } as Record<string, string>)[key] && isArabic ? ({ received: 'مستلمة', staged: 'مجهزة', skipped: 'متكررة', invalid: 'غير صالحة', processed: 'معالجة', failed: 'فاشلة', review: 'للمراجعة' } as Record<string, string>)[key] : key}</dt><dd>{counts[key] === null ? (isArabic ? 'غير معروف تاريخيًا' : 'Historically unknown') : String(counts[key] ?? 0)}</dd></div>)}</dl>}
     {message && <p role="status">{message}</p>}
   </section>;
 }

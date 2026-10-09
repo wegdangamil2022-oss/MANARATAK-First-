@@ -56,3 +56,7 @@ Implemented artifact acquisition/staging and generic source authoring are docume
 ## Session 3 closure reconciliation
 
 See [Session 3 ledger and every original finding](evidence/section-05/session-03/README.md). The three-session allocation did not exhaust the original source scope. The original open register remains binding; completed safeguards and partial UI/API features must not be substituted for owner receipts, access proof integration, mapping profiles or reviewer assignment. Tests deferred to POST-28 are listed separately from unimplemented source work. Current Section 05 status is IN PROGRESS — SOURCE FIXES REQUIRED.
+
+## Additional session after the three-session allocation
+
+The user subsequently authorized implementing the remaining operational areas in one further session. Batch 19 adds actual source, persistence, API and Admin paths; its [disposition/evidence](evidence/section-05/session-04/README.md) supersedes the earlier "not implemented" descriptions for those delivered paths while retaining explicit owner/runtime/history limitations. This is an additional implementation session, not a retroactive assertion that the three-session target succeeded.

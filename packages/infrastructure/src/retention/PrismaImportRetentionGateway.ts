@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { IRetentionOwnerGateway } from '@manaratak/application';
 import { RetentionCandidate, RetentionDecision, RetentionDisposition, RetentionOwner } from '@manaratak/domain';
 
@@ -26,15 +26,17 @@ export class PrismaImportRetentionGateway implements IRetentionOwnerGateway {
       throw new Error('IMPORT_RETENTION_DECISION_MISMATCH');
     return this.prisma.$transaction(async tx => {
       const record = await tx.importRecord.findUnique({ where: { id: candidate.recordId },
-        select: { batchId: true, batch: { select: { batchStatus: true } } } });
+        select: { batchId: true, rawPayload: true, batch: { select: { batchStatus: true } } } });
       if (!record || !TERMINAL_BATCHES.includes(record.batch.batchStatus)) return 'SKIPPED';
+      const payload = record.rawPayload as Record<string, unknown> | null;
+      if (payload && ['DISPATCH_IN_FLIGHT','MANUAL_RECONCILIATION_REQUIRED'].includes(String(payload._phase6HandoffState))) return 'SKIPPED';
       // Lock the parent status in the same transaction: replay cannot race a purge.
       const parent = await tx.importBatch.updateMany({ where: { id: record.batchId,
         batchStatus: record.batch.batchStatus, claimedBy: null, claimUntil: null },
         data: { batchStatus: record.batch.batchStatus } });
       if (parent.count !== 1) return 'SKIPPED';
       const hold = { OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: decision.decidedAt } }] };
-      const fence = { id: candidate.recordId, retentionProcessedAt: null, retentionExpiresAt: candidate.expiresAt,
+      const fence = { rawPayload: { equals: record.rawPayload === null ? Prisma.JsonNull : record.rawPayload as Prisma.InputJsonValue }, id: candidate.recordId, retentionProcessedAt: null, retentionExpiresAt: candidate.expiresAt,
         status: { notIn: PRESERVED_STATES }, AND: [hold] };
       const token = randomUUID();
       const claimed = await tx.importRecord.updateMany({ where: { ...fence,

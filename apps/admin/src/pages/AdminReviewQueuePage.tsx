@@ -662,6 +662,10 @@ export function AdminReviewQueuePage() {
           </section>
         )}
 
+        <Link to="/imports#review-assignments" className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold">
+          {tr('تعيينات مراجعي الاستيراد وحجز المراجعة', 'Import reviewer assignments and claims')}
+        </Link>
+
         {sourceUnavailableCount > 0 && (
           <section className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />

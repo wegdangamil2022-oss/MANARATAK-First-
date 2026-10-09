@@ -62,7 +62,7 @@ check('P6-QUEUE-003 worker supports targeted claims',
   worker.includes('batchId?: string') && worker.includes('batchId,'));
 check('P6-QUEUE-003 composition wires worker protocol into ImportAdminUseCases',
   container.includes('importWorkerProtocol: asFunction') &&
-  container.includes('new ImportAdminUseCases(importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol)'));
+  container.includes('new ImportAdminUseCases(importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol, sweepOrphanImportSpools)'));
 
 check('P6-DUR-004 local raw snapshot storage is development-only',
   rawStore.includes("persistenceClassification = 'DEVELOPMENT_ONLY'"));

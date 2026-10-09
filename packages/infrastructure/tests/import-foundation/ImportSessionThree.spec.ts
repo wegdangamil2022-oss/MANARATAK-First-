@@ -166,7 +166,7 @@ describe('import retention legal hold and replay fencing', () => {
   const decision = { ...candidate, decisionKey: 'key', disposition: RetentionDisposition.PURGE, reason: 'expired', decidedAt: now };
   function setup(status = 'COMPLETED', claimCount = 1) {
     const tx = { importBatch: { updateMany: vi.fn(async () => ({ count: 1 })) }, importRecord: {
-      findUnique: vi.fn(async () => ({ batchId: 'b', batch: { batchStatus: status } })),
+      findUnique: vi.fn(async () => ({ batchId: 'b', rawPayload: {}, batch: { batchStatus: status } })),
       updateMany: vi.fn().mockResolvedValueOnce({ count: claimCount }).mockResolvedValue({ count: 1 }),
     } };
     return { tx, gateway: new PrismaImportRetentionGateway({ $transaction: (work: any) => work(tx) } as any) };

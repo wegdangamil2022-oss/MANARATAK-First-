@@ -24,7 +24,7 @@ export class CsvImportStreamParser implements IImportStreamParser {
       if (!headers) {
         headers = cells.map(value => value.trim());
         if (headers.some(value => ['__proto__', 'prototype', 'constructor', '_domainHandoff',
-          '_sourceRowNumber', '_payloadFingerprint'].includes(value) || value.startsWith('_phase6')))
+          '_sourceRowNumber', '_payloadFingerprint', '_importProvenance', '_mappingOriginal', '_screeningReceiptId'].includes(value) || value.startsWith('_phase6')))
           throw new Error('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
         if (headers.length > 256 || headers.some(value => !value || value.length > 240) ||
           new Set(headers).size !== headers.length) throw new Error('CSV_HEADERS_INVALID');

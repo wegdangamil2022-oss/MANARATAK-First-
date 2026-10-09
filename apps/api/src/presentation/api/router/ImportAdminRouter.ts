@@ -7,6 +7,7 @@ import {
   CourseImportArtifactUseCase,
   ImportArtifactUseCase,
   ImportSourceControlUseCases,
+  ImportGovernanceUseCases,
   ImportAdminUseCases,
   MajorImportStagingUseCase,
   type ISourceRegistryGateway,
@@ -26,6 +27,7 @@ export class ImportAdminRouter {
     importAdminUseCases: ImportAdminUseCases;
     importArtifactUseCase?: ImportArtifactUseCase;
     importSourceControlUseCases?: ImportSourceControlUseCases;
+    importGovernanceUseCases?: ImportGovernanceUseCases;
     majorImportStagingUseCase: MajorImportStagingUseCase;
     assetRecordRepository: IAssetRecordRepository;
     assetStorageGateway: IAssetStorageGateway;
@@ -72,7 +74,7 @@ export class ImportAdminRouter {
     const actor = (req: Request) => requireAuthenticatedPrincipal(req);
     const artifactBody = z.object({ assetId: z.string().trim().min(1).max(120),
       ownerDomain: z.nativeEnum(ImportTargetDomain), expectedSha256: z.string().regex(/^[a-f0-9]{64}$/i),
-      format: z.enum(['csv', 'ndjson']) }).strict();
+      format: z.enum(['csv', 'ndjson']), mappingProfileId: z.string().uuid().optional() }).strict();
     router.get('/artifacts/capabilities', asyncHandler(async (_req, res) => {
       if (!cradle.importArtifactUseCase) return res.status(503).json({ error: 'IMPORT_ARTIFACT_UNAVAILABLE' });
       return res.json(cradle.importArtifactUseCase.capabilities());
@@ -91,6 +93,74 @@ export class ImportAdminRouter {
       const result = await cradle.importArtifactUseCase.stage(artifactBody.parse(req.body), actor(req).principalId);
       res.setHeader('Location', `/api/v1/admin/imports/queue/jobs/${encodeURIComponent(result.batchId)}`);
       return res.status(202).json(result);
+    }));
+
+    const governance = () => {
+      if (!cradle.importGovernanceUseCases) throw new Error('IMPORT_GOVERNANCE_UNAVAILABLE');
+      return cradle.importGovernanceUseCases;
+    };
+    const commandContext = (req: Request) => ({ actorId: actor(req).principalId, actorType: actor(req).actorType,
+      source: 'admin-import-governance', correlationId: req.headers['x-correlation-id'] as string | undefined });
+    const reasonField = z.string().trim().min(3).max(1000);
+    const governanceId = z.string().trim().min(1).max(180);
+    const mappingDefinition = z.object({ fields: z.array(z.object({ target: z.string().min(1).max(120),
+      aliases: z.array(z.string().min(1).max(240)).min(1).max(20), type: z.enum(['string','number','boolean']),
+      required: z.boolean() }).strict()).min(1).max(100) }).strict();
+    router.get('/mapping-profiles', asyncHandler(async (req, res) => {
+      const input = z.object({ sourceId: governanceId, ownerDomain: z.nativeEnum(ImportTargetDomain) }).strict().parse(req.query);
+      return res.json({ data: await governance().profiles(input.sourceId, input.ownerDomain) });
+    }));
+    router.post('/mapping-profiles', asyncHandler(async (req, res) => {
+      const input = z.object({ sourceId: governanceId, ownerDomain: z.nativeEnum(ImportTargetDomain), sourceRevision: z.string().datetime(),
+        expectedVersion: z.number().int().min(0), definition: mappingDefinition, reason: reasonField }).strict().parse(req.body);
+      return res.status(201).json(await governance().saveProfile(input, commandContext(req)));
+    }));
+    router.post('/mapping-profiles/:profileId/preview', asyncHandler(async (req, res) => {
+      actor(req);
+      const input = z.object({ sourceId: governanceId, ownerDomain: z.nativeEnum(ImportTargetDomain),
+        rows: z.array(z.record(z.string(), z.unknown())).max(20) }).strict().parse(req.body);
+      const profile = await governance().pinnedProfile(z.string().uuid().parse(req.params.profileId), input.sourceId, input.ownerDomain);
+      return res.json({ data: governance().preview(profile, input.rows), profileId: profile.id, definitionHash: profile.definitionHash });
+    }));
+    router.get('/review-queue', asyncHandler(async (req, res) => {
+      const input = z.object({ assigneeId: governanceId.optional(), batchId: governanceId.optional(),
+        page: z.coerce.number().int().min(1).max(1000).default(1) }).strict().parse(req.query);
+      return res.json(await governance().reviews(input));
+    }));
+    router.post('/records/:recordId/assignment', asyncHandler(async (req, res) => {
+      const input = z.object({ assigneeId: governanceId, dueAt: z.string().datetime(), expectedVersion: z.number().int().min(0), reason: reasonField }).strict().parse(req.body);
+      return res.json(await governance().assign({ ...input, recordId: governanceId.parse(req.params.recordId) }, commandContext(req)));
+    }));
+    router.post('/records/:recordId/claim', asyncHandler(async (req, res) => {
+      const input = z.object({ expectedVersion: z.number().int().min(1), reason: reasonField }).strict().parse(req.body);
+      return res.json(await governance().claim({ ...input, recordId: governanceId.parse(req.params.recordId) }, commandContext(req)));
+    }));
+    router.post('/records/:recordId/release', asyncHandler(async (req, res) => {
+      const input = z.object({ expectedVersion: z.number().int().min(1), reason: reasonField }).strict().parse(req.body);
+      return res.json(await governance().release({ ...input, recordId: governanceId.parse(req.params.recordId) }, commandContext(req)));
+    }));
+    router.post('/records/:recordId/reconcile-receipt', asyncHandler(async (req, res) => {
+      const input = z.object({ expectedUpdatedAt: z.string().datetime(), reason: reasonField }).strict().parse(req.body);
+      return res.json(await governance().reconcile({ ...input, recordId: governanceId.parse(req.params.recordId) }, commandContext(req)));
+    }));
+    router.get('/sources/:sourceId/observation', asyncHandler(async (req, res) => res.json({ data: await governance().observation(governanceId.parse(req.params.sourceId)) })));
+    router.post('/sources/:sourceId/drift-decision', asyncHandler(async (req, res) => {
+      const input = z.object({ expectedUpdatedAt: z.string().datetime(), decision: z.enum(['ACCEPT','REJECT']), reason: reasonField }).strict().parse(req.body);
+      return res.json(await governance().decideDrift({ ...input, sourceId: governanceId.parse(req.params.sourceId) }, commandContext(req)));
+    }));
+    router.post('/sources/:sourceId/fallback', asyncHandler(async (req, res) => {
+      const input = z.object({ fallbackSourceId: governanceId.nullable(), sourceRevision: z.string().datetime(),
+        fallbackSourceRevision: z.string().datetime().optional(), reason: reasonField }).strict().parse(req.body);
+      return res.json(await governance().fallback({ ...input, sourceId: governanceId.parse(req.params.sourceId) }, commandContext(req)));
+    }));
+    router.get('/batches/:batchId/counters', asyncHandler(async (req, res) => res.json(await governance().counters(governanceId.parse(req.params.batchId)))));
+    router.post('/batches/:batchId/recover', asyncHandler(async (req, res) => {
+      const input = z.object({ expectedUpdatedAt: z.string().datetime(), decision: z.enum(['QUEUE','REJECT']), reason: reasonField }).strict().parse(req.body);
+      return res.json(await governance().recover({ ...input, batchId: governanceId.parse(req.params.batchId) }, commandContext(req)));
+    }));
+    router.post('/batches/:batchId/retention-policy', asyncHandler(async (req, res) => {
+      const input = z.object({ expectedUpdatedAt: z.string().datetime(), days: z.number().int().min(30).max(3650), reason: reasonField }).strict().parse(req.body);
+      return res.json(await governance().retention({ ...input, batchId: governanceId.parse(req.params.batchId) }, commandContext(req)));
     }));
 
     const sourceIdentifier = z.string().regex(/^[a-zA-Z0-9_-]{1,120}$/);
@@ -120,7 +190,8 @@ export class ImportAdminRouter {
       if (!cradle.importSourceControlUseCases) return res.status(503).json({ error: 'IMPORT_SOURCE_CONTROL_UNAVAILABLE' });
       const principal = actor(req);
       const input = z.object({ expectedUpdatedAt: z.string().datetime(), ownerDomain: z.nativeEnum(ImportTargetDomain),
-        format: z.enum(['csv', 'ndjson']), reason: z.string().trim().min(3).max(1000) }).strict().parse(req.body);
+        format: z.enum(['csv', 'ndjson']), reason: z.string().trim().min(3).max(1000),
+        mappingProfileId: z.string().uuid().optional(), useApprovedFallback: z.boolean().optional() }).strict().parse(req.body);
       const result = await cradle.importSourceControlUseCases.run(sourceIdentifier.parse(req.params.sourceId), input,
         { actorId: principal.principalId, actorType: principal.actorType, source: 'admin-import-source-run' });
       res.setHeader('Location', `/api/v1/admin/imports/queue/jobs/${encodeURIComponent(result.batchId)}`);
@@ -853,6 +924,12 @@ export class ImportAdminRouter {
     );
 
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      if (err instanceof Error && /^(IMPORT_GOVERNANCE_UNAVAILABLE|SOURCE_DISTRIBUTED_BUDGET_BUSY)$/.test(err.message))
+        return res.status(503).json({ error: err.message, code: err.message, retryable: true });
+      if (err instanceof Error && /^(IMPORT_[A-Z0-9_]*(CONFLICT|EVIDENCE_REQUIRED|REVIEW_REQUIRED|NOT_READY)|IMPORT_RECEIPT_NOT_FOUND)$/.test(err.message))
+        return res.status(409).json({ error: err.message, code: err.message, retryable: false });
+      if (err instanceof Error && /^(SOURCE_ACCESS_SIGNED_APPROVAL_REQUIRED|SOURCE_ACCESS_APPROVAL_SCOPE_MISMATCH|SOURCE_ACCOUNT_CREDENTIAL_REQUIRED|SOURCE_ROBOTS_[A-Z_]+|IMPORT_REVIEWER_AUTHORITY_REQUIRED|IMPORT_FALLBACK_APPROVAL_REQUIRED)$/.test(err.message))
+        return res.status(403).json({ error: err.message, code: err.message, retryable: false });
       if (err instanceof Error && err.message === 'IMPORT_ARTIFACT_SPOOL_CAPACITY')
         return res.status(503).json({ error: err.message, code: err.message, retryable: true });
       if (err instanceof Error && ['IMPORT_SOURCE_STATUS_CONFLICT', 'IMPORT_SOURCE_STAGING_BUSY', 'IMPORT_STAGING_LEASE_LOST', 'IMPORT_BATCH_DIFF_VERSION_CONFLICT'].includes(err.message))
@@ -868,7 +945,8 @@ export class ImportAdminRouter {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
-      res.status(400).json({ error: err instanceof Error ? err.message : 'An error occurred' });
+      const code = err instanceof Error && /^(IMPORT|SOURCE)_[A-Z0-9_]{1,120}$/.test(err.message) ? err.message : 'IMPORT_REQUEST_FAILED';
+      res.status(400).json({ error: code, code, retryable: false });
     });
 
     return router;

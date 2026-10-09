@@ -836,6 +836,8 @@ export class ScholarshipAdminRouter {
 
     // Simple error handler for Zod errors and Use Case errors
     router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+      if (err instanceof Error && err.message === 'IMPORT_REVIEW_LEASE_REQUIRED')
+        return res.status(409).json({ error: err.message, code: err.message });
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }

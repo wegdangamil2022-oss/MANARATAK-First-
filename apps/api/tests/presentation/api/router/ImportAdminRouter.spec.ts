@@ -299,3 +299,44 @@ describe('source run and status HTTP contracts', () => {
     expect(probe.status).toBe(200); expect(probe.body.networkTestPerformed).toBe(false);
   });
 });
+
+describe('governed import HTTP commands', () => {
+  function setup(authenticated = true) {
+    const governance = { assign: vi.fn(async () => ({ version: 1 })), claim: vi.fn(async () => ({ version: 2 })),
+      reconcile: vi.fn(async () => ({ ownerInvoked: false })), saveProfile: vi.fn(async () => ({ id: 'profile' })),
+      decideDrift: vi.fn(async () => ({})), fallback: vi.fn(async () => ({})), recover: vi.fn(async () => ({})), retention: vi.fn(async () => ({})) };
+    const app = express(); app.use(express.json());
+    if (authenticated) app.use((req, _res, next) => { req.authUserId = 'server-admin'; next(); });
+    app.use('/admin/imports', ImportAdminRouter.create({ importAdminUseCases: {} as any, majorImportStagingUseCase: {} as any,
+      assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any,
+      importGovernanceUseCases: governance as any }));
+    return { app, governance };
+  }
+  const reason = 'Operator review';
+  it('uses server identity and rejects caller-controlled reviewer claims', async () => {
+    const { app, governance } = setup();
+    expect((await request(app).post('/admin/imports/records/r/claim').send({ expectedVersion: 1, reason, actorId: 'spoofed' })).status).toBe(400);
+    expect(governance.claim).not.toHaveBeenCalled();
+    expect((await request(app).post('/admin/imports/records/r/claim').send({ expectedVersion: 1, reason })).status).toBe(200);
+    expect(governance.claim).toHaveBeenCalledWith({ recordId: 'r', expectedVersion: 1, reason }, expect.objectContaining({ actorId: 'server-admin' }));
+  });
+  it('requires authentication and exact versions for receipt reconciliation', async () => {
+    const { app, governance } = setup(false);
+    expect((await request(app).post('/admin/imports/records/r/reconcile-receipt').send({ expectedUpdatedAt: '2026-10-09T00:00:00.000Z', reason })).status).toBe(401);
+    expect(governance.reconcile).not.toHaveBeenCalled();
+    const live = setup(); live.governance.reconcile.mockRejectedValueOnce(new Error('IMPORT_RECEIPT_NOT_FOUND'));
+    expect((await request(live.app).post('/admin/imports/records/r/reconcile-receipt').send({ expectedUpdatedAt: '2026-10-09T00:00:00.000Z', reason })).status).toBe(409);
+  });
+  it('requires an explicit registered fallback and refuses browser/URL substitutions', async () => {
+    const { app, governance } = setup();
+    const input = { fallbackSourceId: 'approved', sourceRevision: '2026-10-09T00:00:00.000Z', fallbackSourceRevision: '2026-10-09T00:00:00.000Z', reason };
+    expect((await request(app).post('/admin/imports/sources/s/fallback').send({ ...input, targetUrl: 'https://other.org', browser: true })).status).toBe(400);
+    expect(governance.fallback).not.toHaveBeenCalled();
+    expect((await request(app).post('/admin/imports/sources/s/fallback').send(input)).status).toBe(200);
+  });
+  it('does not expose database error text to the admin response', async () => {
+    const { app, governance } = setup(); governance.claim.mockRejectedValueOnce(new Error('database host private.internal secret-password'));
+    const result = await request(app).post('/admin/imports/records/r/claim').send({ expectedVersion: 1, reason });
+    expect(result.body.error).toBe('IMPORT_REQUEST_FAILED'); expect(JSON.stringify(result.body)).not.toContain('private.internal');
+  });
+});

@@ -1,4 +1,7 @@
-import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus, SourceAccessExecutionPolicy } from '@manaratak/domain';
+import { ParsedImportRow } from '@manaratak/domain';
+import type { ImportGovernanceUseCases } from './ImportGovernanceUseCases';
+import type { IImportSourceObservationGateway } from '../contracts/IImportRawSnapshotStore';
+import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
 import type { ISourceRegistryGateway } from '../contracts/ISourceRegistryGateway';
 import { SourceConnectorRegistry } from '../services/SourceConnectorRegistry';
 import type { AcquireImportSourceUseCase } from './AcquireImportSourceUseCase';
@@ -16,7 +19,7 @@ export interface ImportSourceDefinitionInput {
 export class ImportSourceControlUseCases {
   constructor(private readonly sources: ISourceRegistryGateway, private readonly connectors: SourceConnectorRegistry,
     private readonly atomic: AtomicDomainMutationCoordinator,
-    private readonly runtime?: { acquire: AcquireImportSourceUseCase; imports: ImportAdminUseCases; parsers: ImportParserRegistry }) {}
+    private readonly runtime?: { acquire: AcquireImportSourceUseCase; imports: ImportAdminUseCases; parsers: ImportParserRegistry; governance?: ImportGovernanceUseCases; observations?: IImportSourceObservationGateway }) {}
   async get(sourceId: string) { return this.sources.getSource(sourceId); }
   capabilities() { return this.connectors.listCapabilities(); }
 
@@ -56,31 +59,64 @@ export class ImportSourceControlUseCases {
       executionBlocker, networkTestPerformed: false, testKind: 'CONFIGURATION_ONLY', updatedAt: source.updatedAt };
   }
 
-  async run(sourceId: string, input: { expectedUpdatedAt: string; ownerDomain: string; format: 'csv' | 'ndjson'; reason: string },
+  async run(sourceId: string, input: { expectedUpdatedAt: string; ownerDomain: string; format: 'csv' | 'ndjson'; reason: string; mappingProfileId?: string; useApprovedFallback?: boolean },
     context: AtomicMutationRequestContext) {
     if (!context.actorId?.trim() || !input.reason?.trim() || input.reason.length > 1000) throw new Error('IMPORT_SOURCE_REVIEW_REQUIRED');
     if (!this.runtime) throw new Error('IMPORT_SOURCE_RUN_UNAVAILABLE');
-    const source = await this.sources.getSource(sourceId);
+    let source = await this.sources.getSource(sourceId);
     if (!source) throw new Error('IMPORT_SOURCE_NOT_FOUND');
     if (source.metadata?.ownerDomain !== 'GENERIC') throw new Error('IMPORT_SOURCE_OWNER_WORKSPACE_REQUIRED');
     if (!source.updatedAt || source.updatedAt.toISOString() !== input.expectedUpdatedAt) throw new Error('IMPORT_SOURCE_STATUS_CONFLICT');
-    SourceAccessExecutionPolicy.assertNetworkAllowed(source);
+    if (input.useApprovedFallback) {
+      const approved = await this.runtime.observations?.fallback(source);
+      if (!approved) throw new Error('IMPORT_FALLBACK_APPROVAL_REQUIRED');
+      const fallback = await this.sources.getSource(approved.sourceId);
+      if (!fallback || fallback.updatedAt?.toISOString() !== approved.sourceRevision || fallback.metadata?.ownerDomain !== 'GENERIC')
+        throw new Error('IMPORT_FALLBACK_CONFLICT');
+      source = fallback;
+    }
+    const executionRevision = source.updatedAt!.toISOString();
+    this.connectors.assertAccess(source);
     const parser = this.runtime.parsers.resolve({ formatHint: input.format });
     if (!parser) throw new Error('IMPORT_FORMAT_UNSUPPORTED');
     await this.atomic.execute({ domain: 'IMPORT', aggregateType: 'ImportSource', aggregateId: sourceId,
-      action: 'IMPORT_SOURCE_RUN_REQUESTED', context, auditMetadata: { reason: input.reason, sourceRevision: input.expectedUpdatedAt } },
+      action: 'IMPORT_SOURCE_RUN_REQUESTED', context, auditMetadata: { reason: input.reason, sourceRevision: executionRevision, requestedSourceId: sourceId, approvedFallback: Boolean(input.useApprovedFallback) } },
       async () => undefined);
+    const profile = input.mappingProfileId ? await this.runtime.governance?.pinnedProfile(input.mappingProfileId,
+      source.sourceId, input.ownerDomain, executionRevision) : null;
+    if (input.mappingProfileId && !profile) throw new Error('IMPORT_MAPPING_UNAVAILABLE');
     const acquired = await this.runtime.acquire.execute(source, { timeoutMs: 10_000, maxResponseBytes: 5 * 1024 * 1024 });
-    const current = await this.sources.getSource(sourceId);
-    if (!current || current.status !== SourceStatus.ACTIVE || current.updatedAt?.toISOString() !== input.expectedUpdatedAt)
+    const current = await this.sources.getSource(source.sourceId);
+    if (!current || current.status !== SourceStatus.ACTIVE || current.updatedAt?.toISOString() !== executionRevision)
       throw new Error('IMPORT_SOURCE_STATUS_CONFLICT');
     const snapshot = acquired.snapshot;
     async function* bytes() { yield acquired.acquisition.rawBytes; }
-    return this.runtime.imports.stageNormalizedStream({ ownerDomain: input.ownerDomain, sourceSystem: sourceId,
-      rows: parser.parse(bytes(), { batchId: '', chunkSize: 500 }), handoffContext: {
+    const parsed = parser.parse(bytes(), { batchId: '', chunkSize: 500 });
+    const observations = this.runtime.observations;
+    const executionSource = source;
+    async function* checkedRows() {
+      const shapes: Record<string, Set<string>> = Object.create(null);
+      for await (const row of parsed) {
+        if (row instanceof ParsedImportRow) for (const [key, value] of Object.entries(row.raw)) {
+          if (!Object.hasOwn(shapes, key) && Object.keys(shapes).length >= 256) throw new Error('IMPORT_SOURCE_SHAPE_FIELD_LIMIT');
+          (shapes[key] ??= new Set()).add(value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value);
+        }
+        yield row;
+      }
+      if (observations) {
+        if (!Object.keys(shapes).length) throw new Error('IMPORT_SOURCE_SHAPE_UNAVAILABLE');
+        await observations.observeShape(executionSource,
+          Object.fromEntries(Object.keys(shapes).sort().map(key => [key, [...shapes[key]].sort()])));
+      }
+    }
+    const rows = profile && this.runtime.governance ? this.runtime.governance.mapRows(checkedRows(), profile) : checkedRows();
+    return this.runtime.imports.stageNormalizedStream({ ownerDomain: input.ownerDomain, sourceSystem: source.sourceId, sourceFence: { sourceId: source.sourceId, revision: executionRevision },
+      rows, handoffContext: {
         artifactId: snapshot.artifactId, rawArtifactReference: snapshot.rawArtifactReference,
-        referenceMetadata: { sourceId, connectorId: source.connectorId, connectorVersion: source.connectorVersion,
-          contentHash: snapshot.contentHash, sourceRevision: input.expectedUpdatedAt, acquisitionKind: 'REGISTERED_SOURCE' },
+        referenceMetadata: { sourceId: source.sourceId, requestedSourceId: sourceId, connectorId: source.connectorId, connectorVersion: source.connectorVersion,
+          contentHash: snapshot.contentHash, sourceRevision: executionRevision, acquisitionKind: 'REGISTERED_SOURCE',
+          ...(profile ? { mappingProfileId: profile.id, mappingProfileHash: profile.definitionHash, mappingProfileVersion: String(profile.version) } : {}),
+          ...(input.useApprovedFallback ? { fallbackApproved: 'true' } : {}) },
       } });
   }
 

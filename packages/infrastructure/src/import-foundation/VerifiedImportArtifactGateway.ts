@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { mkdtemp, open, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdtemp, open, rm, writeFile } from 'node:fs/promises';
+import { hostname, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { IAssetStorageGateway, AssetStorageLocator } from '@manaratak/domain';
 import type { IVerifiedImportArtifactGateway } from '@manaratak/application';
@@ -26,6 +26,7 @@ export class VerifiedImportArtifactGateway implements IVerifiedImportArtifactGat
     let handle: Awaited<ReturnType<typeof open>> | undefined;
     try {
       directory = await mkdtemp(join(tmpdir(), 'manaratak-import-'));
+      await writeFile(join(directory, 'owner.json'), JSON.stringify({ pid: process.pid, host: hostname(), createdAt: Date.now() }), { flag: 'wx', mode: 0o600 });
       handle = await open(join(directory, 'verified'), 'wx+', 0o600);
       let size = 0;
       const digest = createHash('sha256');

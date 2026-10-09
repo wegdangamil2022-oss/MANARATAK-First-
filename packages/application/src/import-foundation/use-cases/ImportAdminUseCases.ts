@@ -17,7 +17,7 @@ import { ImportWorkerProtocol } from './ImportWorkerProtocol';
 type ImportRepository = {
   compareBatches?(leftId: string, rightId: string, page?: number, versions?: { leftUpdatedAt: string; rightUpdatedAt: string; leftRecordVersion?: string; rightRecordVersion?: string }): Promise<unknown>;
   recoverStaleStaging?(): Promise<number>;
-  finalizeStagedStream?(batchId: string, count: number): Promise<void>;
+  finalizeStagedStream?(batchId: string, count: number, counters?: { receivedRecords: number; skippedRecords: number; invalidRecords: number }, sourceFence?: { sourceId: string; revision: string }): Promise<void>;
   rejectStagedStream?(batchId: string): Promise<void>;
   createBatch(data: Record<string, unknown>): Promise<any>;
   createRecord(data: Record<string, unknown>): Promise<any>;
@@ -40,6 +40,7 @@ export interface StageImportRowsInput {
   sourceSystem: string;
   rows: Array<Readonly<Record<string, unknown>>>;
   validationIssues?: Array<readonly unknown[]>;
+  sourceFence?: { sourceId: string; revision: string };
   handoffContext?: {
     artifactId?: string;
     rawArtifactReference?: string;
@@ -70,6 +71,7 @@ export class ImportAdminUseCases {
     private readonly importQueueGateway?: IImportQueueGateway,
     private readonly handoffDispatcher?: ImportHandoffDispatcher,
     private readonly importWorkerProtocol?: ImportWorkerProtocol,
+    private readonly maintenance?: () => Promise<unknown>,
   ) {}
 
   async importData(input: { dataText: string; sourceSystem?: string; dataType?: string }) {
@@ -261,6 +263,7 @@ export class ImportAdminUseCases {
           handoffEffectMode: handoffReady ? 'SCREENING_ONLY' : null,
           canonicalMutationReady: false,
           transactionalOwnerReceiptReady: false,
+          durableScreeningReceiptReady: this.handoffDispatcher?.hasDurableScreeningReceipts() ?? false,
           integrationMode: handoffReady ? 'DOMAIN_HANDOFF_READY' : 'STAGING_ONLY',
           semanticPromotionOwner: 'OWNING_DOMAIN',
         };
@@ -276,7 +279,7 @@ export class ImportAdminUseCases {
     for (const row of input.rows) {
       if (row && typeof row === 'object' &&
           Object.keys(row).some(key => key.startsWith('_phase6') ||
-            ['_domainHandoff', '_sourceRowNumber', '_payloadFingerprint'].includes(key))) {
+            ['_domainHandoff', '_sourceRowNumber', '_payloadFingerprint', '_importProvenance', '_mappingOriginal', '_screeningReceiptId'].includes(key))) {
         throw new Error('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
       }
     }
@@ -386,7 +389,7 @@ export class ImportAdminUseCases {
             processingNotes: `Source row ${sourceRowNumber}`,
             sourceDedupKey: identity.sourceDedupKey,
             chunkIndex: Math.floor((sourceRowNumber - 1) / chunkSize),
-            sourceRowNumber,
+            sourceRowNumber, retentionExpiresAt: new Date(Date.now() + 365 * 86400_000), retentionState: 'IMPORT_RAW_PROVENANCE',
           });
         }
 
@@ -422,7 +425,7 @@ export class ImportAdminUseCases {
       }
 
       const finalizedBatch = await this.importRepository.updateBatchStats(batch.id, {
-        totalRecords: stagedRecords,
+        totalRecords: stagedRecords, receivedRecords: input.rows.length, skippedRecords: skippedDuplicates, invalidRecords: failedRecords,
         processedRecords: durableWorkerPath ? 0 : processedRecords,
         failedRecords: durableWorkerPath ? 0 : failedRecords,
         batchStatus: durableWorkerPath
@@ -509,9 +512,9 @@ export class ImportAdminUseCases {
       for await (const item of input.rows) {
         if (++received > 100_000) throw new Error('IMPORT_ARTIFACT_ROW_LIMIT');
         if (item instanceof ImportParseError && !item.recoverable) throw new Error(item.code);
-        const payload = item instanceof ParsedImportRow ? item.raw : {};
-        if (Object.keys(payload).some(key => key.startsWith('_phase6') ||
-            ['__proto__', 'constructor', 'prototype', '_domainHandoff', '_sourceRowNumber', '_payloadFingerprint'].includes(key)))
+        const payload = item instanceof ParsedImportRow ? item.normalized ?? item.raw : {};
+        if (Object.keys(item instanceof ParsedImportRow ? { ...item.raw, ...payload } : payload).some(key => key.startsWith('_phase6') ||
+            ['__proto__', 'constructor', 'prototype', '_domainHandoff', '_sourceRowNumber', '_payloadFingerprint', '_importProvenance', '_mappingOriginal', '_screeningReceiptId'].includes(key)))
           throw new Error('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
         if (Buffer.byteLength(JSON.stringify(payload), 'utf8') > 1024 * 1024) throw new Error('IMPORT_ROW_SIZE_LIMIT');
         const rowNumber = item.sourceRowNumber ?? received;
@@ -525,16 +528,19 @@ export class ImportAdminUseCases {
         chunk.push({ id: `rec-${uuidv4()}`, batchId: batch.id,
           status: issues.length ? 'STAGING_INVALID' : 'STAGING_PENDING',
           rawPayload: { ...payload, _sourceRowNumber: rowNumber, _payloadFingerprint: identity.payloadFingerprint,
+            ...(input.handoffContext?.referenceMetadata ? { _importProvenance: { ...input.handoffContext.referenceMetadata } } : {}),
+            ...(item instanceof ParsedImportRow && item.normalized ? { _mappingOriginal: item.raw } : {}),
             ...(envelope ? { _phase6HandoffEnvelope: envelope, _phase6HandoffState: 'PENDING_HANDOFF' } : {}) },
           sourceDedupKey: identity.sourceDedupKey, sourceRowNumber: rowNumber,
           chunkIndex: Math.floor((received - 1) / 500), recordOffset: item.recordOffset,
           validationErrors: issues.length ? issues : null,
+          retentionExpiresAt: new Date(Date.now() + 365 * 86400_000), retentionState: 'IMPORT_RAW_PROVENANCE',
         });
         if (chunk.length >= 500) await flush();
       }
       await flush();
       if (!received) throw new Error('IMPORT_ARTIFACT_EMPTY');
-      await repository.finalizeStagedStream(batch.id, staged);
+      await repository.finalizeStagedStream(batch.id, staged, { receivedRecords: received, skippedRecords: skipped, invalidRecords: invalid }, input.sourceFence);
       // Durable repository finalization commits QUEUED and all work items atomically.
       const status = await this.importQueueGateway.getJobStatus(batch.id);
       if (!status || status.status === ImportJobStatus.CREATED) throw new Error('IMPORT_STREAM_QUEUE_NOT_ACCEPTED');
@@ -550,6 +556,8 @@ export class ImportAdminUseCases {
   /** Process one recoverable durable import job. Intended for worker/scheduler composition. */
   async processNextQueuedBatch(workerId: string): Promise<'IDLE' | 'COMPLETED' | 'RETRY_SCHEDULED' | 'DLQ'> {
     if (!this.importWorkerProtocol) throw new Error('IMPORT_WORKER_PROTOCOL_UNAVAILABLE');
+    await this.maintenance?.();
+    await this.importRepository.recoverStaleStaging?.();
     return this.importWorkerProtocol.runOne(workerId, (lease, heartbeat, getActiveLease) =>
       this.processClaimedBatch(lease, heartbeat, getActiveLease),
     );
@@ -673,16 +681,23 @@ export class ImportAdminUseCases {
           // domain provides a transactional receipt, uncertain outcomes need review.
           if (rawPayload._phase6HandoffState === 'DISPATCH_IN_FLIGHT' ||
               rawPayload._phase6HandoffState === 'MANUAL_RECONCILIATION_REQUIRED') {
+            const receipt = await this.handoffDispatcher.findReceipt?.(envelope as any);
+            if (receipt) {
+              await heartbeat();
+              const resolved: Record<string, unknown> = { ...rawPayload, _domainHandoff: receipt.result, _phase6HandoffState: 'DISPATCHED' };
+              delete resolved._phase6HandoffEnvelope;
+              await this.importRepository.updateRecord(record.id, { rawPayload: resolved,
+                status: envelope.validation.state === 'VALID' ? ImportRecordStatus.COMPLETE : ImportRecordStatus.NEEDS_REVIEW, processingNotes: 'Recovered from durable screening receipt; no owner re-invocation.' }, getActiveLease());
+              if (envelope.validation.state === 'VALID') { processedRecords++; rememberAcceptedKey(record.sourceDedupKey); }
+              else { failedRecords++; reviewRequiredRecords++; }
+              continue;
+            }
             await this.importRepository.updateRecord(record.id, {
               status: ImportRecordStatus.NEEDS_REVIEW,
               rawPayload: { ...rawPayload, _phase6HandoffState: 'MANUAL_RECONCILIATION_REQUIRED' },
               processingNotes: 'Owner dispatch outcome uncertain; reconcile before replay.',
             }, getActiveLease());
-            // A review-required delivery is a terminal non-successful work
-            // item, not a successful owning-domain acceptance.
-            failedRecords++;
-            reviewRequiredRecords++;
-            continue;
+            failedRecords++; reviewRequiredRecords++; continue;
           }
           if (!this.hasHandoffConsumer(envelope.ownerDomain)) {
             await this.importRepository.updateRecord(record.id, {

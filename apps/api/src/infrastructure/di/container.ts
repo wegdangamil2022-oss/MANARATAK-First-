@@ -1,3 +1,5 @@
+import { ImportGovernanceUseCases } from '@manaratak/application';
+import { sweepOrphanImportSpools, PrismaImportGovernanceGateway, PrismaImportScreeningReceiptStore, PrismaImportSourceObservationGateway, PrismaSourceAcquisitionLimiter, SignedSourceAccessAuthority } from '@manaratak/infrastructure';
 import { ImportArtifactUseCase, ImportSourceControlUseCases, ImportParserRegistry, CsvImportStreamParser, NdjsonImportStreamParser } from '@manaratak/application';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
@@ -533,14 +535,14 @@ export function registerDependencies(
     canonicalMajorReferenceService: asFunction(({ academicTaxonomyRepository, degreeLevelRepository }) =>
       new CanonicalMajorReferenceService(academicTaxonomyRepository, degreeLevelRepository)).scoped(),
     degreeLevelUseCases: asFunction(({ degreeLevelRepository }) => new DegreeLevelUseCases(degreeLevelRepository)).scoped(),
-    importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer }) => new ImportHandoffDispatcher({
+    importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
       SCHOLARSHIPS: scholarshipImportHandoffConsumer,
       SCHOLARSHIP: scholarshipImportHandoffConsumer,
       UNIVERSITIES: universityImportHandoffConsumer,
       UNIVERSITY: universityImportHandoffConsumer,
       TESTS: internationalTestImportHandoffConsumer,
       INTERNATIONAL_TESTS: internationalTestImportHandoffConsumer,
-    })).scoped(),
+    }, importScreeningReceiptStore)).scoped(),
     importQueueGateway: asFunction(({ prisma }) => isPrisma
       ? new PrismaImportQueueGateway(prisma)
       : new InMemoryImportQueueGateway()).singleton(),
@@ -558,29 +560,49 @@ export function registerDependencies(
     })).singleton(),
     importWorkerProtocol: asFunction(({ importQueueGateway, importWorkerRetryPolicy }) =>
       new ImportWorkerProtocol(importQueueGateway, importWorkerRetryPolicy, 30_000)).singleton(),
-    safeSourceHttpTransport: asFunction(() => new NodeSafeSourceHttpTransport()).singleton(),
-    staticHtmlSourceConnector: asFunction(({ safeSourceHttpTransport }) => new StaticHtmlSourceConnector(safeSourceHttpTransport)).singleton(),
-    sitemapSourceConnector: asFunction(({ safeSourceHttpTransport }) => new SitemapSourceConnector(safeSourceHttpTransport)).singleton(),
-    officialFeedSourceConnector: asFunction(({ safeSourceHttpTransport }) => new OfficialFeedSourceConnector(safeSourceHttpTransport)).singleton(),
-    officialApiSourceConnector: asFunction(({ safeSourceHttpTransport }) => new OfficialApiSourceConnector(safeSourceHttpTransport)).singleton(),
+    importScreeningReceiptStore: asFunction(({ prisma }) => isPrisma ? new PrismaImportScreeningReceiptStore(prisma) : undefined).singleton(),
+    importGovernanceGateway: asFunction(({ prisma }) => new PrismaImportGovernanceGateway(prisma)).singleton(),
+    importSourceObservationGateway: asFunction(({ prisma }) => isPrisma ? new PrismaImportSourceObservationGateway(prisma) : undefined).singleton(),
+    importGovernanceUseCases: asFunction(({ importGovernanceGateway, atomicDomainMutationCoordinator, authEvaluatorService, identityRepository }) =>
+      isPrisma ? new ImportGovernanceUseCases(importGovernanceGateway, atomicDomainMutationCoordinator, async (identityId, ownerDomain) => {
+        const identity = await identityRepository.findById(identityId);
+        if (!identity || identity.status !== 'ACTIVE' || identity.deletedAt) return false;
+        const ownerPermissions: Record<string, string> = { SCHOLARSHIPS: 'admin:scholarships:manage', UNIVERSITIES: 'admin:universities:manage',
+          MAJORS: 'admin:majors:manage', FELLOWSHIPS: 'admin:majors:manage', STUDENT_TOOLS: 'admin:student-tools:manage', GENERIC: 'admin:imports:manage', COURSES: 'admin:courses:manage', TESTS: 'admin:international-tests:manage', CMS: 'admin:cms:manage', SERVICES: 'admin:services:manage' };
+        if (!ownerPermissions[ownerDomain]) return false;
+        const permissions = ['admin:imports:manage', ...(ownerPermissions[ownerDomain] ? [ownerPermissions[ownerDomain]] : [])];
+        const decisions = await Promise.all(permissions.map(permission => authEvaluatorService.evaluatePermission(identityId, permission, { requestTime: new Date() })));
+        return decisions.every(decision => decision.isGranted);
+      }) : undefined).scoped(),
+    sourceAccessAuthority: asFunction(() => {
+      const raw = readConfig<string>('IMPORT_SOURCE_SIGNED_APPROVALS');
+      const tokens = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(tokens)) throw new Error('SOURCE_AUTHORITY_CONFIGURATION_INVALID');
+      return new SignedSourceAccessAuthority(readConfig<string>('IMPORT_SOURCE_APPROVAL_PUBLIC_KEY'), tokens);
+    }).singleton(),
+    safeSourceHttpTransport: asFunction(({ sourceAccessAuthority, sourceAcquisitionLimiter }) => new NodeSafeSourceHttpTransport(undefined, undefined, sourceAccessAuthority, sourceAcquisitionLimiter)).singleton(),
+    staticHtmlSourceConnector: asFunction(({ safeSourceHttpTransport, sourceAccessAuthority }) => new StaticHtmlSourceConnector(safeSourceHttpTransport, sourceAccessAuthority)).singleton(),
+    sitemapSourceConnector: asFunction(({ safeSourceHttpTransport, sourceAccessAuthority }) => new SitemapSourceConnector(safeSourceHttpTransport, sourceAccessAuthority)).singleton(),
+    officialFeedSourceConnector: asFunction(({ safeSourceHttpTransport, sourceAccessAuthority }) => new OfficialFeedSourceConnector(safeSourceHttpTransport, sourceAccessAuthority)).singleton(),
+    officialApiSourceConnector: asFunction(({ safeSourceHttpTransport, sourceAccessAuthority }) => new OfficialApiSourceConnector(safeSourceHttpTransport, sourceAccessAuthority)).singleton(),
     manualUploadSourceConnector: asClass(ManualUploadSourceConnector).singleton(),
-    sourceConnectorRegistry: asFunction(({ staticHtmlSourceConnector, sitemapSourceConnector, officialFeedSourceConnector, officialApiSourceConnector, manualUploadSourceConnector }) =>
-      new SourceConnectorRegistry([staticHtmlSourceConnector, sitemapSourceConnector, officialFeedSourceConnector, officialApiSourceConnector, manualUploadSourceConnector])).singleton(),
+    sourceConnectorRegistry: asFunction(({ staticHtmlSourceConnector, sitemapSourceConnector, officialFeedSourceConnector, officialApiSourceConnector, manualUploadSourceConnector, sourceAccessAuthority }) =>
+      new SourceConnectorRegistry([staticHtmlSourceConnector, sitemapSourceConnector, officialFeedSourceConnector, officialApiSourceConnector, manualUploadSourceConnector], sourceAccessAuthority)).singleton(),
     importRawSnapshotStore: asFunction(() => createImportRawSnapshotStoreForRuntime(effectiveEnvironment, readConfig<string>('IMPORT_RAW_SNAPSHOT_DIR'))).singleton(),
-    sourceAcquisitionLimiter: asFunction(() => new SourceAcquisitionLimiter()).singleton(),
-    acquireImportSourceUseCase: asFunction(({ sourceConnectorRegistry, importRawSnapshotStore, sourceAcquisitionLimiter }) =>
-      new AcquireImportSourceUseCase(sourceConnectorRegistry, importRawSnapshotStore, sourceAcquisitionLimiter)).scoped(),
+    sourceAcquisitionLimiter: asFunction(({ prisma }) => isPrisma ? new PrismaSourceAcquisitionLimiter(prisma) : new SourceAcquisitionLimiter()).singleton(),
+    acquireImportSourceUseCase: asFunction(({ sourceConnectorRegistry, importRawSnapshotStore, sourceAcquisitionLimiter, importSourceObservationGateway }) =>
+      new AcquireImportSourceUseCase(sourceConnectorRegistry, importRawSnapshotStore, sourceAcquisitionLimiter, undefined, importSourceObservationGateway)).scoped(),
     importParserRegistry: asFunction(() => {
       const registry = new ImportParserRegistry();
       registry.register(new CsvImportStreamParser()); registry.register(new NdjsonImportStreamParser());
       return registry;
     }).singleton(),
     verifiedImportArtifactGateway: asFunction(({ assetStorageGateway }) => new VerifiedImportArtifactGateway(assetStorageGateway)).singleton(),
-    importArtifactUseCase: asFunction(({ assetReferencePolicy, verifiedImportArtifactGateway, importParserRegistry, importAdminUseCases }) =>
-      new ImportArtifactUseCase(assetReferencePolicy, verifiedImportArtifactGateway, importParserRegistry, importAdminUseCases)).scoped(),
-    importSourceControlUseCases: asFunction(({ sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator, acquireImportSourceUseCase, importAdminUseCases, importParserRegistry }) =>
+    importArtifactUseCase: asFunction(({ assetReferencePolicy, verifiedImportArtifactGateway, importParserRegistry, importAdminUseCases, importGovernanceUseCases }) =>
+      new ImportArtifactUseCase(assetReferencePolicy, verifiedImportArtifactGateway, importParserRegistry, importAdminUseCases, importGovernanceUseCases)).scoped(),
+    importSourceControlUseCases: asFunction(({ sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator, acquireImportSourceUseCase, importAdminUseCases, importParserRegistry, importGovernanceUseCases, importSourceObservationGateway }) =>
       new ImportSourceControlUseCases(sourceRegistryGateway, sourceConnectorRegistry, atomicDomainMutationCoordinator,
-        { acquire: acquireImportSourceUseCase, imports: importAdminUseCases, parsers: importParserRegistry })).scoped(),
+        { acquire: acquireImportSourceUseCase, imports: importAdminUseCases, parsers: importParserRegistry, governance: importGovernanceUseCases, observations: importSourceObservationGateway })).scoped(),
     sourceRegistryGateway: asFunction(({ prisma }) => isPrisma ? new PrismaSourceRegistryGateway(prisma) : new InMemorySourceRegistryGateway()).singleton(),
     scholarshipSourceRegistryService: asFunction(({ sourceRegistryGateway }) => new ScholarshipSourceRegistryService(sourceRegistryGateway)).singleton(),
     scholarshipAcquisitionPlanner: asFunction(({ scholarshipSourceRegistryService }) => new ScholarshipAcquisitionPlanner(scholarshipSourceRegistryService)).singleton(),
@@ -812,7 +834,7 @@ export function registerDependencies(
     aiWorkflowUseCases: asFunction(({ aiPlatformRepository, aiExecutionUseCases }) => new AIWorkflowUseCases(aiPlatformRepository, aiExecutionUseCases)).scoped(),
     aiEvaluationUseCases: asFunction(({ aiPlatformRepository, aiExecutionUseCases, aiWorkflowUseCases }) => new AIEvaluationUseCases(aiPlatformRepository, aiExecutionUseCases, aiWorkflowUseCases)).scoped(),
     aiKnowledgeUseCases: asFunction(({ aiPlatformRepository, aiProviderRegistry }) => new AIKnowledgeUseCases(aiPlatformRepository, aiProviderRegistry)).scoped(),
-    importAdminUseCases: asFunction(({ importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol }) => new ImportAdminUseCases(importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol)).scoped(),
+    importAdminUseCases: asFunction(({ importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol }) => new ImportAdminUseCases(importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol, sweepOrphanImportSpools)).scoped(),
     majorImportStagingUseCase: asFunction(({ importAdminUseCases }) => new MajorImportStagingUseCase(importAdminUseCases)).scoped(),
     ingestAssetUseCase: asFunction(({ assetRecordRepository, assetStorageGateway }) => new IngestAssetUseCase(assetRecordRepository, assetStorageGateway)).scoped(),
     processAssetLifecycleUseCase: asFunction(({ assetRecordRepository, assetStorageGateway, assetUsageRegistryGateway, assetMalwareScannerGateway, assetSanitizationGateway }) => new ProcessAssetLifecycleUseCase(assetRecordRepository, assetStorageGateway, assetUsageRegistryGateway, assetMalwareScannerGateway, assetSanitizationGateway)).scoped(),

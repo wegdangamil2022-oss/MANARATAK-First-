@@ -459,7 +459,27 @@
       "owner": "import",
       "required": true
     },
+    "ImportMappingProfile": {
+      "owner": "import",
+      "required": true
+    },
+    "ImportRateBudget": {
+      "owner": "import",
+      "required": true
+    },
     "ImportRecord": {
+      "owner": "import",
+      "required": true
+    },
+    "ImportReviewAssignment": {
+      "owner": "import",
+      "required": true
+    },
+    "ImportScreeningReceipt": {
+      "owner": "import",
+      "required": true
+    },
+    "ImportSourceObservation": {
       "owner": "import",
       "required": true
     },
@@ -831,6 +851,14 @@
       "owner": "foundation_control_plane",
       "required": true
     },
+    "StudentApplicationChecklistItem": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentApplicationTracker": {
+      "owner": "student",
+      "required": true
+    },
     "StudentCertificateReadProjection": {
       "owner": "student",
       "required": true
@@ -981,14 +1009,6 @@
     },
     "WorkflowExecutionProjection": {
       "owner": "foundation_control_plane",
-      "required": true
-    },
-    "StudentApplicationTracker": {
-      "owner": "student",
-      "required": true
-    },
-    "StudentApplicationChecklistItem": {
-      "owner": "student",
       "required": true
     }
   },

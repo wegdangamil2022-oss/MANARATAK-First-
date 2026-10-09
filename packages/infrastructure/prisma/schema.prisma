@@ -129,6 +129,10 @@ model ImportBatch {
   totalRecords     Int       @default(0)
   processedRecords Int       @default(0)
   failedRecords    Int       @default(0)
+  receivedRecords  Int?
+  skippedRecords   Int?
+  invalidRecords   Int?
+  stagingCompletedAt DateTime?
   attemptCount     Int       @default(0)
   availableAt      DateTime  @default(now())
   claimedBy        String?
@@ -177,6 +181,74 @@ model ImportRecord {
   @@index([batchId, status])
   @@index([batchId, chunkIndex])
   @@index([retentionExpiresAt])
+}
+
+// Import control-plane records never authorize canonical publication.
+model ImportScreeningReceipt {
+  id String @id
+  ownerDomain String
+  handoffKey String
+  requestHash String
+  result Json
+  createdAt DateTime @default(now())
+  @@unique([ownerDomain, handoffKey])
+}
+
+model ImportMappingProfile {
+  id String @id
+  sourceId String
+  ownerDomain String
+  version Int
+  sourceRevision DateTime
+  definition Json
+  definitionHash String
+  actorId String
+  reason String
+  createdAt DateTime @default(now())
+  @@unique([sourceId, ownerDomain, version])
+  @@index([sourceId, ownerDomain, createdAt])
+}
+
+model ImportReviewAssignment {
+  recordId String @id
+  batchId String
+  ownerDomain String
+  assigneeId String
+  dueAt DateTime
+  state String @default("ASSIGNED")
+  claimedBy String?
+  claimUntil DateTime?
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([assigneeId, state, dueAt])
+  @@index([batchId, state])
+}
+
+model ImportSourceObservation {
+  sourceId String @id
+  sourceRevision DateTime
+  artifactId String
+  contentHash String
+  byteSize Int
+  etag String?
+  lastModified String?
+  shapeHash String?
+  shape Json?
+  pendingShapeHash String?
+  pendingShape Json?
+  driftState String @default("BASELINE")
+  decisionActorId String?
+  decisionReason String?
+  fallbackSourceId String?
+  fallbackSourceRevision DateTime?
+  updatedAt DateTime @updatedAt
+}
+
+model ImportRateBudget {
+  budgetKey String @id
+  nextAvailableAt DateTime
+  updatedAt DateTime @updatedAt
 }
 
 // --- Phase 13 Learning Platform: Core Course Persistence ---

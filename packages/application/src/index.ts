@@ -213,3 +213,6 @@ export * from './background-jobs/handlers/AssetActivationRecoveryBackgroundJobHa
 export * from './import-foundation/contracts/IVerifiedImportArtifactGateway';
 export * from './import-foundation/use-cases/ImportArtifactUseCase';
 export * from './import-foundation/use-cases/ImportSourceControlUseCases';
+export * from './import-foundation/contracts/IImportGovernanceGateway';
+export * from './import-foundation/use-cases/ImportGovernanceUseCases';
+export * from './import-foundation/contracts/ISourceAccessAuthority';

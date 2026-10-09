@@ -734,6 +734,7 @@ export class PrismaImportRepository {
       recordOffset?: number;
       sourceRowNumber?: number;
       retentionExpiresAt?: Date;
+      retentionState?: string;
       id?: string;
     }>,
   ): Promise<{ count: number; acceptedRecordIds: string[] }> {
@@ -794,6 +795,7 @@ export class PrismaImportRepository {
             recordOffset: r.recordOffset ?? null,
             sourceRowNumber: r.sourceRowNumber ?? null,
             retentionExpiresAt: r.retentionExpiresAt ?? null,
+            retentionState: r.retentionState ?? 'PENDING',
           })),
         });
         return { count: created.count, acceptedRecordIds: accepted.map(record => record.id) };
@@ -998,12 +1000,15 @@ export class PrismaImportRepository {
       if (versions && (left.updatedAt.toISOString() !== versions.leftUpdatedAt || right.updatedAt.toISOString() !== versions.rightUpdatedAt))
         throw new Error('IMPORT_BATCH_DIFF_VERSION_CONFLICT');
       if (left.sourceSystem !== right.sourceSystem || left.dataType !== right.dataType) throw new Error('IMPORT_BATCH_DIFF_SCOPE_MISMATCH');
-      type Row = { id: string; sourceDedupKey: string | null; promotedEntityId?: string | null; updatedAt?: Date; fingerprint: string | null };
+      type Row = { id: string; sourceDedupKey: string | null; promotedEntityId?: string | null; updatedAt?: Date; fingerprint: string | null; mappingHash?: string | null; normalizationKnown?: boolean };
       const read = (id: string) => tx.$queryRaw<Row[]>`
         SELECT "id", "updatedAt", CASE WHEN length("sourceDedupKey") <= 512 THEN "sourceDedupKey" ELSE NULL END AS "sourceDedupKey",
         CASE WHEN length("promotedEntityId") <= 512 THEN "promotedEntityId" ELSE NULL END AS "promotedEntityId",
         CASE WHEN "rawPayload"->>'_payloadFingerprint' ~ '^[a-f0-9]{64}$'
-          THEN "rawPayload"->>'_payloadFingerprint' ELSE NULL END AS "fingerprint"
+          THEN "rawPayload"->>'_payloadFingerprint' ELSE NULL END AS "fingerprint",
+        CASE WHEN "rawPayload" #>> '{_importProvenance,mappingProfileHash}' ~ '^[a-f0-9]{64}$'
+          THEN "rawPayload" #>> '{_importProvenance,mappingProfileHash}' ELSE NULL END AS "mappingHash",
+        COALESCE("rawPayload" #>> '{_importProvenance,acquisitionKind}' IN ('REGISTERED_SOURCE','MANUAL_EAP_UPLOAD'), false) AS "normalizationKnown"
         FROM "ImportRecord" WHERE "batchId" = ${id}
         AND "status" NOT IN ('CHECKPOINT', 'DLQ', 'WORKER_FAILURE', 'STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED')
         ORDER BY "id" ASC LIMIT 5001`;
@@ -1049,7 +1054,11 @@ export class PrismaImportRepository {
         differences.push({ identityHash: createHash('sha256').update(key).digest('hex'),
           beforeRecordId: a?.id ?? null, afterRecordId: b?.id ?? null, outcome });
       }
-      return { left, right, counters, rows: differences.slice((page - 1) * 200, page * 200),
+      const mappingHashes = (rows: Row[]) => [...new Set(rows.map(row => row.mappingHash ?? 'ORIGINAL_FIELDS'))].sort();
+      const normalizationKnown = Boolean(leftRows.length && rightRows.length) && [...leftRows, ...rightRows].every(row => row.normalizationKnown === true);
+      return { normalization: { evidenceKnown: normalizationKnown, leftMappingHashes: mappingHashes(leftRows), rightMappingHashes: mappingHashes(rightRows),
+          sameMappingVersions: normalizationKnown && JSON.stringify(mappingHashes(leftRows)) === JSON.stringify(mappingHashes(rightRows)),
+          canonicalResolution: false }, left, right, counters, rows: differences.slice((page - 1) * 200, page * 200),
         page, pageSize: 200, totalDifferences: differences.length, maxRowsPerBatch: 5000,
         nextCursor: page * 200 < differences.length ? Buffer.from(JSON.stringify({
           leftId, rightId, leftUpdatedAt: left.updatedAt.toISOString(), rightUpdatedAt: right.updatedAt.toISOString(),
@@ -1090,14 +1099,25 @@ export class PrismaImportRepository {
     return recovered;
   }
 
-  async finalizeStagedStream(batchId: string, count: number): Promise<void> {
+  async finalizeStagedStream(batchId: string, count: number, counters?: { receivedRecords: number; skippedRecords: number; invalidRecords: number }, sourceFence?: { sourceId: string; revision: string }): Promise<void> {
     if (!this.prisma) throw new Error('IMPORT_STREAM_DURABLE_COMPOSITION_REQUIRED');
     await this.prisma.$transaction(async tx => {
+      if (counters && (!Number.isSafeInteger(counters.receivedRecords) || !Number.isSafeInteger(counters.skippedRecords) ||
+          !Number.isSafeInteger(counters.invalidRecords) || counters.receivedRecords !== count + counters.skippedRecords ||
+          counters.skippedRecords < 0 || counters.invalidRecords < 0 || counters.invalidRecords > count))
+        throw new Error('IMPORT_STREAM_COUNTERS_INVALID');
+      if (sourceFence) {
+        const revision = new Date(sourceFence.revision);
+        const source = await tx.importSourceRegistryEntry.updateMany({ where: { sourceId: sourceFence.sourceId,
+          status: 'ACTIVE', updatedAt: revision }, data: { updatedAt: revision } });
+        if (!source.count) throw new Error('IMPORT_SOURCE_STATUS_CONFLICT');
+      }
+
       const batch = await tx.importBatch.updateMany({
         where: { id: batchId, batchStatus: 'STAGING', claimedBy: 'ARTIFACT_STAGING', claimUntil: { gt: new Date() } },
         // Queue visibility and all promoted rows commit together.
         data: { batchStatus: 'QUEUED', availableAt: new Date(), claimedBy: null, claimUntil: null,
-          totalRecords: count, processedRecords: 0, failedRecords: 0 },
+          totalRecords: count, processedRecords: 0, failedRecords: 0, ...counters, stagingCompletedAt: new Date() },
       });
       if (batch.count !== 1) throw new Error('IMPORT_STREAM_STATE_CONFLICT');
       const valid = await tx.importRecord.updateMany({ where: { batchId, status: 'STAGING_PENDING' }, data: { status: 'COMPLETE' } });
@@ -1226,6 +1246,9 @@ export class PrismaImportRepository {
     batchId: string,
     stats: {
       totalRecords?: number;
+      receivedRecords?: number;
+      skippedRecords?: number;
+      invalidRecords?: number;
       processedRecords?: number;
       failedRecords?: number;
       batchStatus?: string;
@@ -1252,6 +1275,7 @@ export class PrismaImportRepository {
         where: { id: batchId },
         data: {
           totalRecords: stats.totalRecords,
+          receivedRecords: stats.receivedRecords, skippedRecords: stats.skippedRecords, invalidRecords: stats.invalidRecords,
           processedRecords: stats.processedRecords,
           failedRecords: stats.failedRecords,
           batchStatus: stats.batchStatus,
