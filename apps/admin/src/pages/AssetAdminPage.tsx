@@ -136,7 +136,10 @@ export function AssetAdminPage() {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    void load(true);
+    const next = { ...filters };
+    appliedRef.current = next;
+    setAppliedFilters(next);
+    void load(true, next);
   };
 
   return (
