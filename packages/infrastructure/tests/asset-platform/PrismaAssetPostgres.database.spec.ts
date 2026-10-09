@@ -422,4 +422,27 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     expect(await repository.findPendingActivations(new Date('2099-01-01'), 5)).toEqual([]);
   });
 
+  it('filters tampered ACTIVE reuse proof and advances empty PostgreSQL pages', async () => {
+    const prefix = DB_PREFIX + randomUUID();
+    const validId = prefix + '-valid';
+    const invalidId = prefix + '-invalid';
+    await repository.save(deletedCleanAsset(validId));
+    await repository.save(deletedCleanAsset(invalidId));
+    await prisma.assetRecord.update({ where: { id: validId }, data: {
+      lifecycleState: 'ACTIVE', createdAt: new Date('2026-01-01'),
+    } });
+    await prisma.assetRecord.update({ where: { id: invalidId }, data: {
+      lifecycleState: 'ACTIVE', createdAt: new Date('2026-01-02'),
+      metadata: { originalFilename: 'test.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 65 },
+    } });
+    const rejected = await repository.queryAdmin({ reuseOnly: true, q: prefix, limit: 1 });
+    expect(rejected.items).toEqual([]);
+    expect(rejected.hasMore).toBe(true);
+    expect(rejected.nextCursor).not.toBeNull();
+    const next = await repository.queryAdmin({ reuseOnly: true, q: prefix, limit: 1, cursor: rejected.nextCursor! });
+    expect(next.items.map(item => item.id)).toEqual([validId]);
+    expect(next.hasMore).toBe(false);
+    expect((await prisma.assetRecord.findUnique({ where: { id: invalidId } }))?.lifecycleState).toBe('ACTIVE');
+  });
+
 });

@@ -393,7 +393,19 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       take: limit + 1,
     });
     const hasMore = rows.length > limit;
-    const items = rows.slice(0, limit).map((row: any) => ({
+    const scannedPage = rows.slice(0, limit);
+    // SQL narrows the cohort; only the Domain can validate complete persisted proof.
+    // Keep cursor advancement tied to scanned rows, including rejected rows, so an
+    // empty filtered page cannot strand valid assets further down the keyset.
+    const trustedPage = input.reuseOnly ? scannedPage.filter((row: AssetRecordRow) => {
+      try {
+        this.mapToDomain(row).assertCanDeliver();
+        return true;
+      } catch {
+        return false;
+      }
+    }) : scannedPage;
+    const items = trustedPage.map((row: any) => ({
       id: row.id, reference: row.reference, ownerId: row.ownerId, ownerType: row.ownerType,
       lifecycleState: row.lifecycleState, securityClassification: row.securityClassification,
       retentionCategory: row.retentionCategory, retentionExpiresAt: row.retentionExpiresAt,
@@ -402,7 +414,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         fileExtension: row.metadata?.fileExtension, byteSize: row.metadata?.byteSize }, checksumAlgorithm: row.checksumAlgorithm, checksumHash: row.checksumHash,
       createdAt: row.createdAt, updatedAt: row.updatedAt, archivedAt: row.archivedAt, deletedAt: row.deletedAt,
     }));
-    const last = items.at(-1);
+    const last = scannedPage.at(-1);
     return {
       items,
       hasMore,

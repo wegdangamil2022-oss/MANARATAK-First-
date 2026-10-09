@@ -2,28 +2,30 @@ import { describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import {
-  AssetId, AssetLifecycleState, AssetSecurityClassification, AssetStorageZone,
+  AssetId, AssetRecord, AssetReference, AssetOwnerReference, AssetMetadata,
+  AssetStorageLocator, AssetChecksum, AssetSanitizationMetadata, AssetRetentionMetadata,
+  AssetRetentionCategory, AssetLifecycleState, AssetSecurityClassification, AssetStorageZone,
 } from '@manaratak/domain';
 import { AssetReuseRouter } from '../../../../src/presentation/api/router/AssetReuseRouter';
 import { SecurityMiddlewareFactory } from '../../../../src/presentation/security/SecurityMiddlewareFactory';
 
 function asset(overrides: Record<string, unknown> = {}) {
-  return {
-    id: new AssetId('asset-1'),
-    state: AssetLifecycleState.ACTIVE,
-    classification: AssetSecurityClassification.PUBLIC,
-    locator: { storageZone: AssetStorageZone.CLEAN },
-    reference: { value: 'ref-1' },
-    checksum: { hash: 'b'.repeat(64) },
-    malwareScan: { status: 'PASSED', locator: 'quarantine://bucket/upload-1' },
-    uploadVerification: {
-      signatureVerified: true,
-      locator: 'quarantine://bucket/upload-1',
-      checksumSha256: 'b'.repeat(64),
-    },
-    metadata: { originalFilename: 'public.pdf', mimeType: 'application/pdf', byteSize: 100 },
+  const proofLocator = 'quarantine://bucket/upload-1';
+  return new AssetRecord({
+    id: new AssetId('asset-1'), reference: new AssetReference('ref-1'),
+    owner: new AssetOwnerReference('owner-1', 'COURSE'),
+    state: AssetLifecycleState.ACTIVE, classification: AssetSecurityClassification.PUBLIC,
+    locator: new AssetStorageLocator(AssetStorageZone.CLEAN, 'bucket', 'public.pdf'),
+    retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+    checksum: new AssetChecksum('sha256', 'b'.repeat(64)),
+    sanitization: new AssetSanitizationMetadata(true, new Date('2026-01-01')),
+    malwareScan: { status: 'PASSED', locator: proofLocator, scannedAt: '2026-01-01T00:00:00.000Z' },
+    uploadVerification: { signatureVerified: true, locator: proofLocator,
+      checksumSha256: 'b'.repeat(64), byteSize: 100, verifiedMimeType: 'application/pdf',
+      verifiedAt: '2026-01-01T00:00:00.000Z' },
+    metadata: new AssetMetadata('public.pdf', 'application/pdf', 'pdf', 100),
     ...overrides,
-  };
+  });
 }
 
 function fixture({
@@ -66,6 +68,18 @@ function fixture({
 }
 
 describe('Section 03 EAP least-privilege reuse boundary', () => {
+  it.each([
+    { sanitization: undefined }, { malwareScan: undefined },
+    { metadata: new AssetMetadata('public.pdf', 'application/pdf', 'pdf', 101) },
+    { checksum: new AssetChecksum('md5', 'b'.repeat(64)) },
+  ])('rejects untrusted ACTIVE detail, selection and preview before effects', async overrides => {
+    const f = fixture({ record: asset(overrides) });
+    expect((await request(f.app).get('/admin/asset-reuse/asset-1')).status).toBe(404);
+    expect((await request(f.app).post('/admin/asset-reuse/asset-1/selection-audit').send({ purpose: 'COURSE_THUMBNAIL' })).status).toBe(404);
+    expect((await request(f.app).post('/admin/asset-reuse/asset-1/delivery-grant').send({})).status).toBe(404);
+    expect(f.delivery).not.toHaveBeenCalled();
+    expect(f.audit.save).not.toHaveBeenCalled();
+  });
   it('denies users without reuse permission even for read-only list', async () => {
     const f = fixture({ granted: false });
     const response = await request(f.app).get('/admin/asset-reuse');

@@ -1,23 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
-  AssetId, AssetLifecycleState, AssetSecurityClassification, AssetStorageZone,
+  AssetId, AssetRecord, AssetLifecycleState, AssetSecurityClassification,
   IAuditRecordRepository,
 } from '@manaratak/domain';
 import { ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
-type ReuseAsset = {
-  id: AssetId;
-  state: AssetLifecycleState;
-  classification: AssetSecurityClassification;
-  locator: { storageZone: AssetStorageZone };
-  checksum?: { hash: string };
-  malwareScan?: { status: string; locator: string };
-  uploadVerification?: { signatureVerified: boolean; locator: string; checksumSha256: string };
-  metadata: { originalFilename: string; mimeType: string; byteSize: number };
-  reference: { value: string };
-};
+type ReuseAsset = Pick<AssetRecord, 'id' | 'state' | 'classification' | 'metadata' | 'reference' | 'assertCanDeliver'>;
 
 export interface AssetReuseRouterCradle {
   assetRecordRepository: {
@@ -35,13 +25,13 @@ const allowedClassification = new Set<AssetSecurityClassification>([
 ]);
 
 export function isAssetReusable(asset: ReuseAsset): boolean {
-  return asset.state === AssetLifecycleState.ACTIVE &&
-    asset.locator.storageZone === AssetStorageZone.CLEAN &&
-    allowedClassification.has(asset.classification) &&
-    asset.malwareScan?.status === 'PASSED' &&
-    asset.uploadVerification?.signatureVerified === true &&
-    asset.uploadVerification.locator === asset.malwareScan.locator &&
-    asset.checksum?.hash === asset.uploadVerification.checksumSha256.toLowerCase();
+  if (asset.state !== AssetLifecycleState.ACTIVE || !allowedClassification.has(asset.classification)) return false;
+  try {
+    asset.assertCanDeliver();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export class AssetReuseRouter {

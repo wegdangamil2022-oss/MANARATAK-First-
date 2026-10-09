@@ -1,5 +1,14 @@
 # Section 03 — EAP closure register
 
+## Continuation — consistent reusable asset trust (2026-10-09)
+
+Original scope 03/P0-01, P0-06, P1-03 and P1-06. Confirmed follow-on defect: picker detail/selection used a hand-written weaker proof check, and SQL list filters checked only PASSED/signature/CLEAN presence. Both now use the existing Domain delivery-trust gate: repository validates each bounded scanned row; router validates the real aggregate. No N+1 queries or new owner authority. Malformed/untrusted rows are omitted from reuse, not repaired or published.
+
+Keyset cursor advances by the scanned page boundary, including rejected rows, so an empty safe page still permits fetching later valid assets. API regressions exercise real aggregates and deny detail/selection/preview before delivery/audit effects. Repository regressions cover mismatched proof and cursor continuation. Added one guarded disposable PostgreSQL test proving empty-page continuation after metadata tampering; no local or production DB write.
+
+Local TypeScript PASS; 33 targeted tests PASS (8.31s); 15 owner/control-plane guards PASS; source quality PASS; selected lint 0 errors/31 warnings. Matching CI pending. This closes the weaker reuse-trust source path only; original tasks and whole section retain their existing partial status. Consumer insertion versus lifecycle changes, lease/provider fencing, durable restore compensation and real provider workflow acceptance remain OPEN. NOT CLOSED / NO-GO.
+
+
 ## Verified owner-reference trust CI
 
 Source `c6fecfe6f658df6f1255151d80657384257d9be1`: [CI 37933260168](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37933260168) SUCCESS. 252 source tests and 15 disposable PostgreSQL tests passed, including owner-reference guards, TypeScript, quality and audit/provider checks. Local and CI counts overlap and are not added. Evidence-only follow-up changes no tested source. Original review attachment SHA256 remains `9de7c781eb82cd490fc85386267d7e9e3fe2b2028803f9ecd0351531e2cd11fc`. NOT CLOSED / NO-GO for the section; remaining gates below are unchanged.
