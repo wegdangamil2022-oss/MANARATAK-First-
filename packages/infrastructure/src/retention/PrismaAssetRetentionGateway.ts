@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { IRetentionOwnerGateway, ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { RetentionCandidate, RetentionDecision, RetentionDisposition, RetentionOwner } from '@manaratak/domain';
 
@@ -7,7 +7,7 @@ export class PrismaAssetRetentionGateway implements IRetentionOwnerGateway {
   readonly owner = RetentionOwner.ASSET;
   constructor(private readonly prisma: PrismaClient, private readonly lifecycle: ProcessAssetLifecycleUseCase) {}
   async listDue(now: Date, limit: number): Promise<RetentionCandidate[]> {
-    const rows=await (this.prisma as any).assetRecord.findMany({ where:{ retentionExpiresAt:{lte:now}, retentionProcessedAt:null, OR:[{retentionClaimUntil:null},{retentionClaimUntil:{lte:now}}] }, orderBy:{retentionExpiresAt:'asc'}, take:limit, select:{id:true,retentionExpiresAt:true,legalHoldUntil:true,retentionCategory:true,lifecycleState:true} });
+    const rows=await (this.prisma as any).assetRecord.findMany({ where:{ retentionExpiresAt:{lte:now}, retentionProcessedAt:null, AND: [{ OR: [{ malwareScanStatus: { equals: Prisma.DbNull } }, { malwareScanStatus: { path: ['restoreOperation'], equals: Prisma.AnyNull } }, { malwareScanStatus: { path: ['restoreOperation', 'phase'], equals: 'COMPLETED' } }, { malwareScanStatus: { path: ['restoreOperation', 'phase'], equals: 'CANCELLED' } }] }], OR:[{retentionClaimUntil:null},{retentionClaimUntil:{lte:now}}] }, orderBy:{retentionExpiresAt:'asc'}, take:limit, select:{id:true,retentionExpiresAt:true,legalHoldUntil:true,retentionCategory:true,lifecycleState:true} });
     return rows.map((row:any)=>({owner:this.owner,recordId:row.id,expiresAt:new Date(row.retentionExpiresAt),legalHoldUntil:row.legalHoldUntil?new Date(row.legalHoldUntil):null,retentionCategory:row.retentionCategory,lifecycleState:row.lifecycleState}));
   }
   async applyDecision(candidate: RetentionCandidate, decision: RetentionDecision): Promise<'APPLIED'|'SKIPPED'> {

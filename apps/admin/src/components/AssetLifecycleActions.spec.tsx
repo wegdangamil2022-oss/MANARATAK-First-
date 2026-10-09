@@ -6,6 +6,11 @@ describe('asset action contract', () => {
   it.each(['INITIATED', 'QUARANTINED', 'MALWARE_SCAN_FAILED', 'DELETED', 'PURGED', 'UNKNOWN'])('never offers promotion for %s', lifecycleState => {
     expect(availableAssetActions({ id: 'a', lifecycleState })).not.toContain('activate');
   });
+  it.each(['PREPARED', 'RESTORING', 'RECOVERY_REQUIRED'] as const)('prevents lifecycle actions on an unresolved restore (%s)', phase => {
+    expect(availableAssetActions({ id: 'pending', lifecycleState: 'DELETED', securityEvidence: {
+      uploadConfirmed: true, malwareStatus: 'PASSED', sanitized: true, restorePhase: phase,
+    } })).toEqual([]);
+  });
   it('requires post-sanitization scan evidence for promotion', () => {
     expect(availableAssetActions({ id: 'a', lifecycleState: 'SANITIZING' })).not.toContain('activate');
     expect(availableAssetActions({ id: 'a', lifecycleState: 'SANITIZING',

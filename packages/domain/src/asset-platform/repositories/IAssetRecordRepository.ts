@@ -11,6 +11,11 @@ export interface IAssetRecordRepository {
   acquireRestoreLease?(asset: AssetRecord): Promise<void>;
   /** Release a failed restore's lease only if still owned; never clear another worker's claim. */
   releaseRestoreLease?(asset: AssetRecord): Promise<void>;
+  /** Persist provider-start intent before effects; pending intents outlive lease expiry. */
+  markRestoreProviderStarted?(asset: AssetRecord): Promise<void>;
+  renewRestoreLease?(asset: AssetRecord): Promise<void>;
+  /** Preserve the durable safety barrier after any uncertain provider/verification/commit outcome. */
+  markRestoreRecoveryRequired?(asset: AssetRecord): Promise<void>;
   /** Fail closed unless the exact restore lease is still live and DB state remains DELETED. */
   assertRestoreLeaseOwned?(asset: AssetRecord): Promise<void>;
   findById(id: AssetId): Promise<AssetRecord | null>;

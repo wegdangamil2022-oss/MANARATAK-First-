@@ -1,5 +1,20 @@
 # Section 03 — EAP closure register
 
+## Continuation — durable restore safety barrier (2026-10-09)
+
+Original 03/P1-12/P1-13/P1-01/P1-02. Restore now persists a typed PREPARED operation and exact lease before effects, persists RESTORING before contacting storage, verifies bytes, renews the exact owned lease and commits ACTIVE/COMPLETED together. The existing operational JSON is used; no canonical relation, new table or backfill is introduced. Pending operations block Domain delivery/lifecycle and are rehydrated/validated strictly.
+
+A new DB trigger keeps PREPARED/RESTORING/RECOVERY_REQUIRED intents blocking claim replacement, physical deletion and competing lifecycle transitions even after time-based lease expiry or process restart. Only the original pre-provider intent can cancel; a started operation cannot cancel or clear itself after uncertainty. Exact owned renewal may extend an expired lease because the durable barrier has prevented takeover. Destructive owner-reference protection remains enabled alongside this trigger.
+
+Automatic compensation archive/release after provider effects is removed. A timeout, failed verification or failed commit becomes RECOVERY_REQUIRED (or remains durable RESTORING if DB revision/unavailability prevents the marker). No second provider attempt is inferred. DELETED stays inaccessible; a pending operation survives failures without archiving a competitor. Successful commit ends the operation; verified pre-provider cancellation permits a fresh restore.
+
+Retention excludes pending restore operations at database query level, while the DB trigger independently rejects claim takeover. Admin has a validated RESTORE_RECOVERY queue, safe phase/time projection, recovery notice and suppressed lifecycle controls. No provider coordinates or journal proof envelope reach the UI. No operator-clear/retry endpoint is invented: ambiguous operations require provider reconciliation/fencing before a separate repair.
+
+Local TypeScript PASS; initial focused suite 71 PASS (19.03s); complete local suite found one stale select assertion (281 PASS/1 FAIL/34 DB skipped), corrected to require journal retrieval and expanded with expired-pending cases; focused correction suite 70 PASS (8.29s). Source quality PASS, selected lint 0 errors/43 warnings, 15 owner guards PASS. Matching CI pending; local/CI scopes overlap and are not summed.
+
+Operational limits: target migrations are not applied; real provider verification is deferred by the user. Recovery holds favor safety over automatic availability. Full provider reconciliation/immutable fencing and coordination with already in-flight legacy archive/provider requests remain unverified/incomplete; drain and provider quiescence are rollout requirements. This source safety batch does not close every P1-13/workspace/global gate or assert whole-section CLOSED/GO.
+
+
 ## Verified resolution — link versus delete race (2026-10-09)
 
 **Race defect: FIXED AND VERIFIED in source and disposable PostgreSQL.** Source `0345ddc3ffc5ae0737c40dda77db61779c20a363`: [CI 37936012373](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37936012373) SUCCESS: 276 source tests plus 30 disposable PostgreSQL tests. Fourteen new PostgreSQL cases passed in 445ms; both real lock orderings, all destructive actions, JSON references, unlinking, identity protection, precheck-to-save provider prevention and snapshot isolation rejection passed. The existing 16 DB cases also passed with the new triggers installed. Counts overlap local tests and are not added.

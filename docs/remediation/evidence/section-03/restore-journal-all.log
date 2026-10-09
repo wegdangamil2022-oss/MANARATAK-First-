@@ -1,0 +1,47 @@
+
+ RUN  v4.1.11 /workspace/manaratak-audit-main
+
+ ❯ packages/infrastructure/tests/asset-platform/PrismaAssetPurgeGuard.spec.ts (9 tests | 1 failed) 32ms
+     × permits only an explicitly expired, unclaimed, unheld soft-deleted record 22ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/infrastructure/tests/asset-platform/PrismaAssetPurgeGuard.spec.ts > EAP irreversible purge retention and legal hold preflight > permits only an explicitly expired, unclaimed, unheld soft-deleted record
+AssertionError: expected "vi.fn()" to be called with arguments: [ { where: { id: 'asset-1' }, …(1) } ]
+
+Received:
+
+  1st vi.fn() call:
+
+@@ -1,10 +1,11 @@
+  [
+    {
+      "select": {
+        "legalHoldUntil": true,
+        "lifecycleState": true,
++       "malwareScanStatus": true,
+        "retentionClaimToken": true,
+        "retentionClaimUntil": true,
+        "retentionExpiresAt": true,
+      },
+      "where": {
+
+
+Number of calls: 1
+
+ ❯ packages/infrastructure/tests/asset-platform/PrismaAssetPurgeGuard.spec.ts:27:26
+     25|     const f = fixture();
+     26|     await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fix…
+     27|     expect(f.findUnique).toHaveBeenCalledWith({
+       |                          ^
+     28|       where: { id: 'asset-1' },
+     29|       select: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 25 passed | 2 skipped (28)
+      Tests  1 failed | 281 passed | 34 skipped (316)
+   Start at  14:14:41
+   Duration  63.59s (transform 18.87s, setup 0ms, import 54.32s, tests 2.35s, environment 4ms)
+

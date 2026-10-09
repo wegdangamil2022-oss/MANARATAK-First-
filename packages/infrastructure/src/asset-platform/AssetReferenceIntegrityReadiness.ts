@@ -39,7 +39,7 @@ export async function assertAssetReferenceIntegrityInstalled(prisma: Pick<Prisma
     FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid
       JOIN pg_namespace n ON n.oid = c.relnamespace JOIN pg_proc p ON p.oid = t.tgfoid
     WHERE n.nspname = current_schema() AND NOT t.tgisinternal
-      AND t.tgname IN ('eap_asset_reference_owner', 'eap_asset_reference_lifecycle')
+      AND t.tgname IN ('eap_asset_reference_owner', 'eap_asset_reference_lifecycle', 'eap_asset_restore_barrier')
   `;
   const available = (table: string, name: string, type: number, fn: string, args: string, columns: readonly string[]) =>
     guards.some(guard => guard.tableName === table && guard.triggerName === name &&
@@ -48,6 +48,8 @@ export async function assertAssetReferenceIntegrityInstalled(prisma: Pick<Prisma
       JSON.stringify(guard.columns) === JSON.stringify([...columns].sort()));
   if (!available('AssetRecord', 'eap_asset_reference_lifecycle', 27,
     'manaratak_protect_asset_references', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+  if (!available('AssetRecord', 'eap_asset_restore_barrier', 27,
+    'manaratak_protect_pending_asset_restore', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   for (const owner of ASSET_REFERENCE_OWNER_GUARDS) {
     const args = Buffer.from([owner.fields.join(','), String(owner.attachments), String(owner.seo), ''].join('\0')).toString('hex');
     const columns: string[] = [...owner.fields, ...(owner.attachments ? ['attachmentAssetIds'] : []), ...(owner.seo ? ['seoMetadata'] : [])];

@@ -8,6 +8,7 @@ import {
 } from '@manaratak/domain';
 import { ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
+import { PrismaAssetRetentionGateway } from '../../src/retention/PrismaAssetRetentionGateway';
 import { destructiveDatabaseTestsEnabled } from '../courses/disposableDatabaseGuard';
 
 const DB_PREFIX = 'eap-pg-disposable-';
@@ -47,13 +48,19 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     repository = new PrismaAssetRecordRepository(prisma);
   });
 
-  beforeEach(async () => {
-    await prisma.assetRecord.deleteMany({ where: { id: { startsWith: DB_PREFIX } } });
-  });
+  async function cleanupSettledTestRows() {
+    const rows = await prisma.assetRecord.findMany({ where: { id: { startsWith: DB_PREFIX } }, select: { id: true, malwareScanStatus: true } });
+    const ids = rows.filter(row => {
+      const restore = (row.malwareScanStatus as any)?.restoreOperation;
+      return !restore || ['COMPLETED', 'CANCELLED'].includes(restore.phase);
+    }).map(row => row.id);
+    await prisma.assetRecord.deleteMany({ where: { id: { in: ids } } });
+  }
+  beforeEach(cleanupSettledTestRows);
 
   afterAll(async () => {
     if (!prisma) return;
-    await prisma.assetRecord.deleteMany({ where: { id: { startsWith: DB_PREFIX } } });
+    await cleanupSettledTestRows();
     await prisma.$disconnect();
   });
 
@@ -292,7 +299,7 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       .toBe(AssetLifecycleState.ACTIVE);
   });
 
-  it('retains DELETED and compensates if a concurrent transaction invalidates restore CAS', async () => {
+  it('retains a recovery barrier without compensation if a transaction invalidates restore CAS', async () => {
     const id = DB_PREFIX + randomUUID();
     await repository.save(deletedCleanAsset(id));
     const restore = vi.fn(async () => undefined);
@@ -309,10 +316,10 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       restore, archive, verifyRestoredObject,
     } as any, {} as any);
     await expect(useCase.restoreAsset({ assetId: id }))
-      .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
+      .rejects.toThrow('ASSET_RESTORE_RECOVERY_REQUIRED');
     expect(restore).toHaveBeenCalledOnce();
     expect(verifyRestoredObject).toHaveBeenCalledOnce();
-    expect(archive).toHaveBeenCalledOnce();
+    expect(archive).not.toHaveBeenCalled();
     expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
       .toBe(AssetLifecycleState.DELETED);
   });
@@ -332,14 +339,13 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     expect(claimed?.retentionClaimToken).toMatch(/^[0-9a-f-]{36}$/);
     expect(claimed?.lifecycleState).toBe(AssetLifecycleState.DELETED);
     await expect(repository.assertPurgeAllowed(new AssetId(id), new Date()))
-      .rejects.toThrow('ASSET_PURGE_RETENTION_CLAIM_ACTIVE');
+      .rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
     stalePurge.purge();
     await expect(repository.save(stalePurge))
       .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
     const another = (await repository.findById(new AssetId(id)))!;
-    another.restore();
-    await expect(repository.acquireRestoreLease(another))
-      .rejects.toThrow('ASSET_RESTORE_LEASE_CONFLICT');
+    expect(() => another.restore()).toThrow('ASSET_RESTORE_RECOVERY_PENDING');
+    await repository.markRestoreProviderStarted(restorer);
     await repository.save(restorer);
     const active = await prisma.assetRecord.findUnique({ where: { id } });
     expect(active?.lifecycleState).toBe(AssetLifecycleState.ACTIVE);
@@ -353,6 +359,7 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     const restorer = (await repository.findById(new AssetId(id)))!;
     restorer.restore();
     await repository.acquireRestoreLease(restorer);
+    await repository.markRestoreProviderStarted(restorer);
     await prisma.assetRecord.update({
       where: { id },
       data: { retentionClaimUntil: new Date(Date.now() - 1_000) },
@@ -361,10 +368,10 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
     expect((await prisma.assetRecord.findUnique({ where: { id } }))?.lifecycleState)
       .toBe(AssetLifecycleState.DELETED);
-    await repository.releaseRestoreLease(restorer);
+    await expect(repository.releaseRestoreLease(restorer)).rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
     const unlocked = await prisma.assetRecord.findUnique({ where: { id } });
-    expect(unlocked?.retentionClaimToken).toBeNull();
-    expect(unlocked?.retentionClaimUntil).toBeNull();
+    expect(unlocked?.retentionClaimToken).not.toBeNull();
+    expect(unlocked?.retentionClaimUntil).not.toBeNull();
   });
 
   it('preserves persisted version history during a real-DB lifecycle transition', async () => {
@@ -405,8 +412,7 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     await repository.assertRestoreLeaseOwned(record);
     await prisma.assetRecord.update({ where: { id }, data: { retentionClaimUntil: new Date(Date.now() - 1000) } });
     await expect(repository.assertRestoreLeaseOwned(record)).rejects.toThrow('ASSET_RESTORE_LEASE_LOST');
-    await prisma.assetRecord.update({ where: { id }, data: { lifecycleState: 'ACTIVE', retentionClaimUntil: new Date(Date.now() + 60_000) } });
-    await expect(repository.assertRestoreLeaseOwned(record)).rejects.toThrow('ASSET_RESTORE_LEASE_LOST');
+    await expect(prisma.assetRecord.update({ where: { id }, data: { lifecycleState: 'ACTIVE', retentionClaimUntil: new Date(Date.now() + 60_000) } })).rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
   });
 
   it('discovers only old persisted pending activation intents for recovery', async () => {
@@ -443,6 +449,60 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     expect(next.items.map(item => item.id)).toEqual([validId]);
     expect(next.hasMore).toBe(false);
     expect((await prisma.assetRecord.findUnique({ where: { id: invalidId } }))?.lifecycleState).toBe('ACTIVE');
+  });
+
+  it('keeps a crashed restore intent blocking takeover and purge after lease expiry', async () => {
+    const id = DB_PREFIX + randomUUID(); await repository.save(deletedCleanAsset(id));
+    const restorer = (await repository.findById(new AssetId(id)))!; restorer.restore();
+    await repository.acquireRestoreLease(restorer); await repository.markRestoreProviderStarted(restorer);
+    await prisma.$executeRaw`UPDATE "AssetRecord" SET "retentionClaimUntil" = ${new Date(Date.now() - 1000)} WHERE "id" = ${id}`;
+    const retention = new PrismaAssetRetentionGateway(prisma, {} as any);
+    await prisma.$executeRaw`UPDATE "AssetRecord" SET "retentionExpiresAt" = ${new Date(Date.now() - 60000)} WHERE "id" = ${id}`;
+    const dueId = DB_PREFIX + randomUUID(); await repository.save(deletedCleanAsset(dueId));
+    await prisma.assetRecord.update({ where: { id: dueId }, data: { retentionExpiresAt: new Date(Date.now() - 60000) } });
+    const due = (await retention.listDue(new Date(), 100)).map(row => row.recordId);
+    expect(due).not.toContain(id); expect(due).toContain(dueId);
+    const restarted = new PrismaAssetRecordRepository(prisma);
+    const pending = (await restarted.findById(new AssetId(id)))!;
+    expect(pending.restoreOperation?.phase).toBe('RESTORING');
+    expect(() => pending.restore()).toThrow('ASSET_RESTORE_RECOVERY_PENDING');
+    await expect(restarted.assertPurgeAllowed(new AssetId(id), new Date())).rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
+    await expect(prisma.assetRecord.update({ where: { id }, data: { retentionClaimToken: randomUUID(), retentionClaimUntil: new Date(Date.now() + 60000) } })).rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
+    await expect(prisma.assetRecord.delete({ where: { id } })).rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
+    await expect(repository.releaseRestoreLease(restorer)).rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
+  });
+  it('renews an expired lease owned by the durable operation before verified ACTIVE commit', async () => {
+    const id = DB_PREFIX + randomUUID(); await repository.save(deletedCleanAsset(id));
+    const restorer = (await repository.findById(new AssetId(id)))!; restorer.restore();
+    await repository.acquireRestoreLease(restorer); await repository.markRestoreProviderStarted(restorer);
+    await prisma.$executeRaw`UPDATE "AssetRecord" SET "retentionClaimUntil" = ${new Date(Date.now() - 1000)} WHERE "id" = ${id}`;
+    await repository.renewRestoreLease(restorer); await repository.save(restorer);
+    const active = (await repository.findById(new AssetId(id)))!;
+    expect(active.state).toBe('ACTIVE'); expect(active.restoreOperation?.phase).toBe('COMPLETED');
+    expect(() => active.assertCanDeliver()).not.toThrow();
+    expect((await prisma.assetRecord.findUnique({ where: { id } }))?.retentionClaimToken).toBeNull();
+  });
+  it('holds an ambiguous provider failure without compensation or automatic retry', async () => {
+    const id = DB_PREFIX + randomUUID(); await repository.save(deletedCleanAsset(id));
+    const restore = vi.fn(async () => { throw new Error('SIMULATED_PROVIDER_TIMEOUT'); });
+    const archive = vi.fn();
+    const useCase = new ProcessAssetLifecycleUseCase(repository, { restore, archive, verifyRestoredObject: vi.fn() } as any, {} as any);
+    await expect(useCase.restoreAsset({ assetId: id })).rejects.toThrow('ASSET_RESTORE_RECOVERY_REQUIRED');
+    expect(archive).not.toHaveBeenCalled();
+    const pending = (await repository.findById(new AssetId(id)))!;
+    expect(pending.state).toBe('DELETED'); expect(pending.restoreOperation?.phase).toBe('RECOVERY_REQUIRED');
+    await expect(useCase.restoreAsset({ assetId: id })).rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
+    expect(restore).toHaveBeenCalledOnce();
+  });
+  it('cancels only a pre-provider intent and permits a fresh safe restore', async () => {
+    const id = DB_PREFIX + randomUUID(); await repository.save(deletedCleanAsset(id));
+    const restorer = (await repository.findById(new AssetId(id)))!; restorer.restore();
+    await repository.acquireRestoreLease(restorer); await repository.releaseRestoreLease(restorer);
+    const cancelled = (await repository.findById(new AssetId(id)))!;
+    expect(cancelled.restoreOperation?.phase).toBe('CANCELLED'); cancelled.restore();
+    await repository.acquireRestoreLease(cancelled); await repository.markRestoreProviderStarted(cancelled);
+    await repository.save(cancelled);
+    expect((await repository.findById(new AssetId(id)))?.restoreOperation?.phase).toBe('COMPLETED');
   });
 
 });

@@ -105,6 +105,7 @@ export interface PurgeAssetDto {
 
 export interface AssetRecordDto {
   /** Safe opaque recovery identity; storage source coordinates are deliberately excluded. */
+  restoreOperation?: { operationId: string; phase: string; preparedAt: string; updatedAt: string };
   activationOperation?: { operationId: string; phase: 'PREPARED' | 'COMPLETED'; preparedAt: string; completedAt?: string };
   id: string;
   reference: string;

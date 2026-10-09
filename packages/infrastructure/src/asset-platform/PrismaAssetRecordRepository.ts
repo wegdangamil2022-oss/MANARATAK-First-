@@ -15,7 +15,7 @@ import {
   AssetSanitizationMetadata,
   AssetStorageZone,
   AssetRetentionCategory,
-  AssetActivationOperation,
+  AssetActivationOperation, AssetRestoreOperation,
   AssetRetentionSnapshot,
   AssetVersionChain, AssetVersion
 } from '@manaratak/domain';
@@ -83,8 +83,8 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         sanitizedAt: asset.sanitization.sanitizedAt?.toISOString(),
         sanitizerNotes: asset.sanitization.sanitizerNotes
       } as any : null,
-      malwareScanStatus: asset.malwareScan || asset.uploadVerification || asset.activationOperation
-        ? { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null, activationOperation: asset.activationOperation ?? null } as any
+      malwareScanStatus: asset.malwareScan || asset.uploadVerification || asset.activationOperation || asset.restoreOperation
+        ? { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null, activationOperation: asset.activationOperation ?? null, restoreOperation: asset.restoreOperation ?? null } as any
         : null as any,
     };
 
@@ -122,6 +122,11 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         asset.state === AssetLifecycleState.ACTIVE && !restoreToken) {
       throw new Error('ASSET_RESTORE_LEASE_REQUIRED');
     }
+    if (restoreToken) {
+      if (asset.restoreOperation?.phase !== 'RESTORING') throw new Error('ASSET_RESTORE_PROVIDER_START_REQUIRED');
+      (data.malwareScanStatus as any).restoreOperation = { ...asset.restoreOperation, phase: 'COMPLETED', updatedAt: nextRevision.toISOString() };
+      mutation.malwareScanStatus = data.malwareScanStatus;
+    }
     let updated;
     try {
       updated = await delegate.updateMany({
@@ -148,7 +153,10 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     if (!updated || updated.count !== 1) {
       throw new Error('ASSET_RECORD_CONCURRENT_MODIFICATION');
     }
-    if (restoreToken) this.ownedRestoreLeases.delete(asset);
+    if (restoreToken) {
+      asset.recordRestoreOperation((data.malwareScanStatus as any).restoreOperation);
+      this.ownedRestoreLeases.delete(asset);
+    }
     // Snapshot deliberately stays stale: another mutation must rehydrate the aggregate.
   }
 
@@ -162,6 +170,12 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     const token = randomUUID();
     const nextRevision = new Date(Math.max(now.getTime(), captured.updatedAt.getTime() + 1));
     const leaseUntil = new Date(now.getTime() + 10 * 60_000);
+    if (asset.restoreOperation && !['COMPLETED', 'CANCELLED'].includes(asset.restoreOperation.phase)) throw new Error('ASSET_RESTORE_RECOVERY_PENDING');
+    const operation: AssetRestoreOperation = { version: 1, operationId: token, phase: 'PREPARED',
+      sourceLocator: asset.locator.value, expectedSha256: asset.checksum!.hash,
+      expectedByteSize: asset.metadata.byteSize!, expectedMimeType: asset.metadata.mimeType,
+      preparedAt: now.toISOString(), updatedAt: now.toISOString() };
+    asset.recordRestoreOperation(operation);
     const acquired = await this.prisma.assetRecord.updateMany({
       where: {
         id: asset.id.value,
@@ -175,6 +189,8 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       data: {
         retentionClaimToken: token,
         retentionClaimUntil: leaseUntil,
+        malwareScanStatus: { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null,
+          activationOperation: asset.activationOperation ?? null, restoreOperation: operation } as any,
         updatedAt: nextRevision,
       },
     });
@@ -197,22 +213,44 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         row.retentionClaimUntil.getTime() <= Date.now()) throw new Error('ASSET_RESTORE_LEASE_LOST');
   }
 
-  async releaseRestoreLease(asset: AssetRecord): Promise<void> {
+  private async changeRestorePhase(asset: AssetRecord, phase: AssetRestoreOperation['phase']): Promise<void> {
     const token = this.ownedRestoreLeases.get(asset);
-    if (!token) return;
-    const released = await this.prisma.assetRecord.updateMany({
-      where: {
-        id: asset.id.value,
-        lifecycleState: AssetLifecycleState.DELETED,
-        retentionClaimToken: token,
-      },
-      data: {
-        retentionClaimToken: null,
-        retentionClaimUntil: null,
-      },
+    const captured = this.loadedSnapshots.get(asset);
+    const operation = asset.restoreOperation;
+    const valid = phase === 'CANCELLED' || phase === 'RESTORING'
+      ? operation?.phase === 'PREPARED' || (phase === 'RESTORING' && operation?.phase === 'RESTORING')
+      : phase === 'RECOVERY_REQUIRED' && operation?.phase === 'RESTORING';
+    if (!token || !captured || !operation || operation.operationId !== token || !valid) throw new Error('ASSET_RESTORE_LEASE_LOST');
+    const now = new Date();
+    const revision = new Date(Math.max(now.getTime(), captured.updatedAt.getTime() + 1));
+    const updatedOperation = { ...operation, phase, updatedAt: revision.toISOString() };
+    const changed = await this.prisma.assetRecord.updateMany({
+      where: { id: asset.id.value, lifecycleState: AssetLifecycleState.DELETED,
+        retentionClaimToken: token, updatedAt: captured.updatedAt,
+        ...(operation.phase === 'PREPARED' && phase === 'RESTORING' ? { retentionClaimUntil: { gt: now } } : {}),
+        malwareScanStatus: { path: ['restoreOperation', 'phase'], equals: operation.phase } },
+      data: { updatedAt: revision,
+        ...(phase === 'CANCELLED' ? { retentionClaimToken: null, retentionClaimUntil: null }
+          : phase === 'RESTORING' ? { retentionClaimUntil: new Date(now.getTime() + 10 * 60_000) } : {}),
+        malwareScanStatus: { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null,
+          activationOperation: asset.activationOperation ?? null, restoreOperation: updatedOperation } as any },
     });
-    if (released.count !== 1) throw new Error('ASSET_RESTORE_LEASE_RELEASE_FAILED');
-    this.ownedRestoreLeases.delete(asset);
+    if (changed.count !== 1) throw new Error('ASSET_RESTORE_LEASE_LOST');
+    asset.recordRestoreOperation(updatedOperation);
+    this.loadedSnapshots.set(asset, { updatedAt: revision, lifecycleState: AssetLifecycleState.DELETED });
+    if (phase === 'CANCELLED') this.ownedRestoreLeases.delete(asset);
+  }
+
+  async markRestoreProviderStarted(asset: AssetRecord): Promise<void> { await this.changeRestorePhase(asset, 'RESTORING'); }
+  async renewRestoreLease(asset: AssetRecord): Promise<void> {
+    if (asset.restoreOperation?.phase !== 'RESTORING') throw new Error('ASSET_RESTORE_LEASE_LOST');
+    await this.changeRestorePhase(asset, 'RESTORING');
+  }
+  async markRestoreRecoveryRequired(asset: AssetRecord): Promise<void> { await this.changeRestorePhase(asset, 'RECOVERY_REQUIRED'); }
+  async releaseRestoreLease(asset: AssetRecord): Promise<void> {
+    if (!this.ownedRestoreLeases.has(asset)) return;
+    if (asset.restoreOperation?.phase !== 'PREPARED') throw new Error('ASSET_RESTORE_RECOVERY_PENDING');
+    await this.changeRestorePhase(asset, 'CANCELLED');
   }
 
   async assertPurgeAllowed(id: AssetId, at: Date, retentionClaimToken?: string, retryPurgedCleanup = false): Promise<void> {
@@ -221,6 +259,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       where: { id: id.value },
       select: {
         lifecycleState: true,
+        malwareScanStatus: true,
         retentionExpiresAt: true,
         legalHoldUntil: true,
         retentionClaimUntil: true,
@@ -228,6 +267,8 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       },
     });
     if (!row) throw new Error('ASSET_PURGE_NOT_FOUND');
+    const restore = (row.malwareScanStatus as any)?.restoreOperation;
+    if (restore != null && !['COMPLETED', 'CANCELLED'].includes(restore.phase)) throw new Error('ASSET_RESTORE_RECOVERY_PENDING');
     // A terminal PURGED record is a durable, read-inaccessible cleanup intent.
     // Only a correctly leased retention worker can retry its outstanding storage deletion.
     if (row.lifecycleState !== AssetLifecycleState.DELETED &&
@@ -317,7 +358,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     checksumPresence?: 'PRESENT' | 'MISSING';
     malwareStatus?: 'PASSED' | 'FAILED';
     fileFamily?: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'PDF';
-    processingQueue?: 'AWAITING_UPLOAD' | 'QUARANTINE' | 'PROCESSING' | 'FAILED' | 'ACTIVATION_RECOVERY';
+    processingQueue?: 'AWAITING_UPLOAD' | 'QUARANTINE' | 'PROCESSING' | 'FAILED' | 'ACTIVATION_RECOVERY' | 'RESTORE_RECOVERY';
     createdFrom?: string;
     createdTo?: string;
     q?: string;
@@ -375,11 +416,14 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       PROCESSING: [AssetLifecycleState.VALIDATING, AssetLifecycleState.SANITIZING],
       FAILED: [AssetLifecycleState.MALWARE_SCAN_FAILED],
       ACTIVATION_RECOVERY: [AssetLifecycleState.SANITIZING],
+      RESTORE_RECOVERY: [AssetLifecycleState.DELETED],
     };
     if (input.processingQueue) andFilters.push({ lifecycleState: { in: queues[input.processingQueue] } });
     if (input.processingQueue === 'ACTIVATION_RECOVERY') andFilters.push({
       malwareScanStatus: { path: ['activationOperation', 'phase'], equals: 'PREPARED' },
     });
+    if (input.processingQueue === 'RESTORE_RECOVERY') andFilters.push({ OR:
+      ['PREPARED', 'RESTORING', 'RECOVERY_REQUIRED'].map(phase => ({ malwareScanStatus: { path: ['restoreOperation', 'phase'], equals: phase } })) });
     if (input.reuseOnly) andFilters.push(
       { malwareScanStatus: { path: ['status'], equals: 'PASSED' } },
       { malwareScanStatus: { path: ['uploadVerification', 'signatureVerified'], equals: true } },
@@ -564,6 +608,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       malwareScan,
       uploadVerification,
       // Operational EAP-owned JSON, never a client-provided canonical relation.
+      restoreOperation: scan?.restoreOperation == null ? undefined : scan.restoreOperation as unknown as AssetRestoreOperation,
       activationOperation: scan?.activationOperation == null ? undefined : scan.activationOperation as unknown as AssetActivationOperation,
       retentionBeforeLifecycle: metadataObj.lifecycleRetention == null ? undefined : metadataObj.lifecycleRetention as AssetRetentionSnapshot,
       versionChain: this.reconstructVersionChain(row.versionChain)

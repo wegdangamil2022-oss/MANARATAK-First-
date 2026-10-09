@@ -7,7 +7,8 @@ if (process.env.GITHUB_ACTIONS !== 'true' || process.env.DATABASE_MUTATIONS_ALLO
     process.env.DATABASE_URL !== expectedUrl || process.env.DIRECT_URL !== expectedUrl) {
   throw new Error('EAP_DISPOSABLE_GITHUB_POSTGRES_REQUIRED');
 }
-const sql = await readFile(new URL('../../packages/infrastructure/prisma/migrations/20261009010000_eap_asset_reference_serialization/migration.sql', import.meta.url), 'utf8');
+const migrations = ['20261009010000_eap_asset_reference_serialization', '20261009020000_eap_restore_operation_barrier'];
+const sql = (await Promise.all(migrations.map(name => readFile(new URL(`../../packages/infrastructure/prisma/migrations/${name}/migration.sql`, import.meta.url), 'utf8')))).join('\n-- statement-breakpoint\n');
 const prisma = new PrismaClient();
 try {
   await prisma.$transaction(async tx => {

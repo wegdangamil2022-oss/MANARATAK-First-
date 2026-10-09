@@ -28,6 +28,7 @@ describe('EAP irreversible purge retention and legal hold preflight', () => {
       where: { id: 'asset-1' },
       select: {
         lifecycleState: true,
+        malwareScanStatus: true,
         retentionExpiresAt: true,
         legalHoldUntil: true,
         retentionClaimUntil: true,
@@ -47,6 +48,10 @@ describe('EAP irreversible purge retention and legal hold preflight', () => {
     await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed)).rejects.toThrow(code);
   });
 
+  it.each(['PREPARED', 'RESTORING', 'RECOVERY_REQUIRED'])('blocks %s restore intent even after lease expiry', async phase => {
+    const f = fixture({ retentionClaimUntil: new Date(fixed.getTime() - 1000), malwareScanStatus: { restoreOperation: { phase } } });
+    await expect(f.repo.assertPurgeAllowed(new AssetId('asset-1'), fixed)).rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
+  });
   it('fails closed for missing records or an invalid clock', async () => {
     await expect(fixture(null).repo.assertPurgeAllowed(new AssetId('missing'), fixed))
       .rejects.toThrow('ASSET_PURGE_NOT_FOUND');

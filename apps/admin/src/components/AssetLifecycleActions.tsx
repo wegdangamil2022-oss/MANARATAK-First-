@@ -8,6 +8,7 @@ export interface AssetActionSnapshot {
     uploadConfirmed: boolean;
     malwareStatus: 'PASSED' | 'FAILED' | null;
     sanitized: boolean;
+    restorePhase?: 'PREPARED' | 'RESTORING' | 'RECOVERY_REQUIRED' | 'COMPLETED' | 'CANCELLED' | null;
     activationPhase?: 'PREPARED' | 'COMPLETED' | null;
   };
 }
@@ -18,6 +19,7 @@ const labels: Record<Action, string> = {
 };
 export function availableAssetActions(asset: AssetActionSnapshot): Action[] {
   const evidence = asset.securityEvidence;
+  if (evidence?.restorePhase && ['PREPARED', 'RESTORING', 'RECOVERY_REQUIRED'].includes(evidence.restorePhase)) return [];
   switch (asset.lifecycleState) {
     case 'INITIATED': return ['finalize-upload', 'delete'];
     case 'QUARANTINED': return [evidence?.uploadConfirmed ? 'validate' : 'finalize-upload', 'delete'];

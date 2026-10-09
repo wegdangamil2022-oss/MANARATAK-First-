@@ -277,7 +277,8 @@ export function AssetAdminPage() {
           className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
           <option value="">طابور المعالجة — الكل</option><option value="AWAITING_UPLOAD">بانتظار اكتمال الرفع</option>
           <option value="QUARANTINE">الحجر</option><option value="PROCESSING">الفحص والتنظيف</option>
-          <option value="FAILED">فشل الفحص</option><option value="ACTIVATION_RECOVERY">تفعيل ينتظر التعافي</option>
+          <option value="FAILED">فشل الفحص</option><option value="RESTORE_RECOVERY">استعادة تحتاج مراجعة</option>
+          <option value="ACTIVATION_RECOVERY">تفعيل ينتظر التعافي</option>
         </select>
         <input
           value={filters.mimeTypePrefix}

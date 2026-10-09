@@ -4,6 +4,8 @@ import { AssetRecordDto } from '../dtos/AssetDtos';
 export class AssetRecordMapper {
   public static toDto(record: AssetRecord): AssetRecordDto {
     return {
+      restoreOperation: record.restoreOperation ? { operationId: record.restoreOperation.operationId,
+        phase: record.restoreOperation.phase, preparedAt: record.restoreOperation.preparedAt, updatedAt: record.restoreOperation.updatedAt } : undefined,
       activationOperation: record.activationOperation ? {
         operationId: record.activationOperation.operationId, phase: record.activationOperation.phase,
         preparedAt: record.activationOperation.preparedAt, completedAt: record.activationOperation.completedAt,

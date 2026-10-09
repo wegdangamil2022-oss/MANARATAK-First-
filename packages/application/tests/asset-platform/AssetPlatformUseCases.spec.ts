@@ -35,6 +35,10 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
     const stored = this.store.get(asset.id.value);
     if (!stored || stored.state !== AssetLifecycleState.DELETED ||
         this.restoreLeases.has(asset.id.value)) throw new Error('ASSET_RESTORE_LEASE_CONFLICT');
+    const operation = { version: 1 as const, operationId: crypto.randomUUID(), phase: 'PREPARED' as const,
+      sourceLocator: asset.locator.value, expectedSha256: asset.checksum!.hash, expectedByteSize: asset.metadata.byteSize!,
+      expectedMimeType: asset.metadata.mimeType, preparedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    stored.recordRestoreOperation(operation); asset.recordRestoreOperation(operation);
     this.restoreLeases.add(asset.id.value);
   }
 
@@ -44,7 +48,19 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
     }
   }
 
+  async markRestoreProviderStarted(asset: AssetRecord): Promise<void> {
+    await this.assertRestoreLeaseOwned(asset);
+    const operation = { ...asset.restoreOperation!, phase: 'RESTORING' as const };
+    asset.recordRestoreOperation(operation); this.store.get(asset.id.value)!.recordRestoreOperation(operation);
+  }
+  async renewRestoreLease(asset: AssetRecord): Promise<void> { await this.assertRestoreLeaseOwned(asset); }
+  async markRestoreRecoveryRequired(asset: AssetRecord): Promise<void> {
+    const operation = { ...asset.restoreOperation!, phase: 'RECOVERY_REQUIRED' as const };
+    asset.recordRestoreOperation(operation); this.store.get(asset.id.value)!.recordRestoreOperation(operation);
+  }
   async releaseRestoreLease(asset: AssetRecord): Promise<void> {
+    const operation = { ...asset.restoreOperation!, phase: 'CANCELLED' as const };
+    asset.recordRestoreOperation(operation); this.store.get(asset.id.value)!.recordRestoreOperation(operation);
     this.restoreLeases.delete(asset.id.value);
   }
 
@@ -52,6 +68,9 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
     const old = this.store.get(asset.id.value);
     if (old?.state === AssetLifecycleState.DELETED && asset.state === AssetLifecycleState.ACTIVE &&
         !this.restoreLeases.has(asset.id.value)) throw new Error('ASSET_RESTORE_LEASE_REQUIRED');
+    if (old?.state === AssetLifecycleState.DELETED && asset.state === AssetLifecycleState.ACTIVE) {
+      asset.recordRestoreOperation({ ...asset.restoreOperation!, phase: 'COMPLETED' });
+    }
     this.store.set(asset.id.value, asset);
     if (asset.state === AssetLifecycleState.ACTIVE) this.restoreLeases.delete(asset.id.value);
   }
@@ -76,6 +95,7 @@ class InMemoryAssetRecordRepository implements IAssetRecordRepository {
       uploadVerification: stored.uploadVerification ? { ...stored.uploadVerification } : undefined,
       versionChain: stored.versionChain,
       activationOperation: stored.activationOperation,
+      restoreOperation: stored.restoreOperation,
       retentionBeforeLifecycle: stored.retentionBeforeLifecycle,
     });
   }
@@ -759,7 +779,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     }));
   });
 
-  it('re-archives on invalid restored digest and leaves DB DELETED', async () => {
+  it('preserves recovery intent without archiving on invalid restored digest', async () => {
     await ingestUseCase.requestUploadLocator({
       assetId: 'asset-restore-tamper', assetReference: 'ref-restore-tamper',
       ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'file.pdf',
@@ -775,13 +795,13 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
       .mockRejectedValueOnce(new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED'));
     const archive = vi.spyOn(storageGateway, 'archive');
     await expect(lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-tamper' }))
-      .rejects.toThrow('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
-    expect(archive).toHaveBeenCalledTimes(1);
+      .rejects.toThrow('ASSET_RESTORE_RECOVERY_REQUIRED');
+    expect(archive).not.toHaveBeenCalled();
     expect((await repo.findById(new AssetId('asset-restore-tamper')))?.state)
       .toBe(AssetLifecycleState.DELETED);
   });
 
-  it('compensates a failed restore database save and explicitly reports compensation failure', async () => {
+  it('holds uncertain restore after failed save and prevents another provider attempt', async () => {
     await ingestUseCase.requestUploadLocator({
       assetId: 'asset-restore-cas', assetReference: 'ref-restore-cas',
       ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'file.pdf',
@@ -797,8 +817,8 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
       new Error('ASSET_RECORD_CONCURRENT_MODIFICATION'));
     const archive = vi.spyOn(storageGateway, 'archive');
     await expect(lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-cas' }))
-      .rejects.toThrow('ASSET_RECORD_CONCURRENT_MODIFICATION');
-    expect(archive).toHaveBeenCalledTimes(1);
+      .rejects.toThrow('ASSET_RESTORE_RECOVERY_REQUIRED');
+    expect(archive).not.toHaveBeenCalled();
     expect((await repo.findById(new AssetId('asset-restore-cas')))?.state)
       .toBe(AssetLifecycleState.DELETED);
     save.mockRestore();
@@ -806,7 +826,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     vi.spyOn(storageGateway, 'verifyRestoredObject')
       .mockRejectedValueOnce(new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED'));
     await expect(lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-cas' }))
-      .rejects.toThrow('ASSET_RESTORE_COMPENSATION_FAILED');
+      .rejects.toThrow('ASSET_RESTORE_RECOVERY_PENDING');
   });
 
   it('refuses to start restore if clean-byte verification capability is unavailable', async () => {
@@ -865,7 +885,7 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     const archive = vi.spyOn(storageGateway, 'archive');
     const release = vi.spyOn(repo, 'releaseRestoreLease');
     vi.spyOn(repo, 'save').mockRejectedValueOnce(new Error('ASSET_RECORD_CONCURRENT_MODIFICATION'));
-    vi.spyOn(repo, 'assertRestoreLeaseOwned').mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('ASSET_RESTORE_LEASE_LOST'));
+    vi.spyOn(repo, 'renewRestoreLease').mockRejectedValueOnce(new Error('ASSET_RESTORE_LEASE_LOST'));
     await expect(lifecycleUseCase.restoreAsset({ assetId: id })).rejects.toThrow('ASSET_RESTORE_RECOVERY_REQUIRED');
     expect(archive).not.toHaveBeenCalled();
     expect(release).not.toHaveBeenCalled();

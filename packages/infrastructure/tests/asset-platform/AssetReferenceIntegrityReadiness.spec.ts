@@ -5,6 +5,8 @@ import { ASSET_REFERENCE_OWNER_GUARDS, assertAssetReferenceIntegrityInstalled } 
 function installed() {
   return [{ tableName: 'AssetRecord', triggerName: 'eap_asset_reference_lifecycle', enabled: 'O', type: 27,
     functionName: 'manaratak_protect_asset_references', argumentsHex: '', columns: [], replicationRole: 'origin' },
+    { tableName: 'AssetRecord', triggerName: 'eap_asset_restore_barrier', enabled: 'O', type: 27,
+      functionName: 'manaratak_protect_pending_asset_restore', argumentsHex: '', columns: [], replicationRole: 'origin' },
     ...ASSET_REFERENCE_OWNER_GUARDS.map(owner => ({
       tableName: owner.table, triggerName: 'eap_asset_reference_owner', enabled: 'O', type: 23,
       functionName: 'manaratak_require_active_asset_reference',
@@ -24,7 +26,7 @@ describe('EAP reference guards read-only runtime deployment gate', () => {
     { enabled: 'D' }, { type: 21 }, { functionName: 'wrong_guard' },
     { argumentsHex: '00' }, { columns: [] }, { replicationRole: 'replica' },
   ])('rejects disabled, misconfigured or bypassed owner guards', async change => {
-    const rows = installed(); rows[1] = { ...rows[1], ...change };
+    const rows = installed(); rows[2] = { ...rows[2], ...change };
     await expect(assertAssetReferenceIntegrityInstalled(client(rows))).rejects.toThrow('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   });
   it('rejects absent owner or lifecycle guards', async () => {

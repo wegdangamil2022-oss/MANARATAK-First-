@@ -288,7 +288,9 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error('ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED');
     }
     if (!this.assetRepository.acquireRestoreLease ||
-        !this.assetRepository.releaseRestoreLease || !this.assetRepository.assertRestoreLeaseOwned) {
+        !this.assetRepository.releaseRestoreLease || !this.assetRepository.assertRestoreLeaseOwned ||
+        !this.assetRepository.markRestoreProviderStarted || !this.assetRepository.markRestoreRecoveryRequired ||
+        !this.assetRepository.renewRestoreLease) {
       throw new Error('ASSET_RESTORE_LEASE_NOT_CONFIGURED');
     }
     // Serialize restore with retention/purge before any provider side effect.
@@ -296,6 +298,7 @@ export class ProcessAssetLifecycleUseCase {
     let providerRestoreAttempted = false;
     try {
       await this.assetRepository.assertRestoreLeaseOwned(record);
+      await this.assetRepository.markRestoreProviderStarted(record);
       providerRestoreAttempted = true;
       await this.storageGateway.restore(record.locator);
       await this.storageGateway.verifyRestoredObject(record.locator, {
@@ -303,43 +306,21 @@ export class ProcessAssetLifecycleUseCase {
         expectedByteSize: record.metadata.byteSize,
         declaredMimeType: record.metadata.mimeType,
       });
+      await this.assetRepository.renewRestoreLease(record);
       // Repository commits ACTIVE and removes the exact owned lease atomically.
       // Expired or replaced leases make the state CAS fail.
       await this.assetRepository.save(record);
     } catch (error) {
-      let compensationError: unknown;
       if (providerRestoreAttempted) {
-        // A slow restore may lose its lease to a successful retry/purge. Never
-        // archive a competitor's object on the basis of our stale snapshot.
-        try {
-          await this.assetRepository.assertRestoreLeaseOwned(record);
-        } catch (leaseError) {
-          throw new Error('ASSET_RESTORE_RECOVERY_REQUIRED', {
-            cause: { restoreFailure: error, leaseFailure: leaseError },
-          });
-        }
-        try {
-          await this.storageGateway.archive(record.locator);
-        } catch (failure) {
-          compensationError = failure;
-        }
+        // A timeout/crash can leave a provider request running. Keep the durable
+        // barrier; never archive or release an ambiguous operation automatically.
+        let journalFailure: unknown;
+        try { await this.assetRepository.markRestoreRecoveryRequired(record); }
+        catch (failure) { journalFailure = failure; }
+        throw new Error('ASSET_RESTORE_RECOVERY_REQUIRED', { cause: { restoreFailure: error, journalFailure } });
       }
-      let releaseError: unknown;
-      try {
-        await this.assetRepository.releaseRestoreLease(record);
-      } catch (failure) {
-        releaseError = failure;
-      }
-      if (compensationError) {
-        throw new Error('ASSET_RESTORE_COMPENSATION_FAILED', {
-          cause: { restoreFailure: error, compensationFailure: compensationError, leaseReleaseFailure: releaseError },
-        });
-      }
-      if (releaseError) {
-        throw new Error('ASSET_RESTORE_LEASE_RELEASE_FAILED', {
-          cause: { restoreFailure: error, leaseReleaseFailure: releaseError },
-        });
-      }
+      try { await this.assetRepository.releaseRestoreLease(record); }
+      catch (failure) { throw new Error('ASSET_RESTORE_LEASE_RELEASE_FAILED', { cause: failure }); }
       throw error;
     }
     return AssetRecordMapper.toDto(record);
