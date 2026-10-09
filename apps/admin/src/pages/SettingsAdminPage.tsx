@@ -1,6 +1,7 @@
 import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
 import { canEditSettingsAssignment, canEditSettingsScope } from './settingsAssignmentGovernance';
 import { SettingsIdentityScopePicker } from '../components/SettingsIdentityScopePicker';
+import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -20,6 +21,7 @@ import { useTranslation } from '../i18n/I18nProvider';
 
 type ValueType = 'String' | 'Number' | 'Boolean' | 'Json';
 type ScopeLevel = 'GLOBAL' | 'TENANT' | 'DOMAIN' | 'IDENTITY';
+const knownDomainScopeKeys = [...new Set(ADMIN_PERMISSION_CATALOG.map(item => item.domain))].sort();
 
 interface Definition {
   id: string;
@@ -1013,16 +1015,25 @@ export function SettingsAdminPage() {
                   className="input"
                 >
                   <option>GLOBAL</option>
-                  <option value="DOMAIN" disabled>{isAr ? 'DOMAIN — غير معتمد للتعديل' : 'DOMAIN — legacy read-only'}</option>
+                  <option>DOMAIN</option>
                   <option value="TENANT" disabled>{isAr ? 'TENANT — غير معتمد للتعديل' : 'TENANT — legacy read-only'}</option>
                   <option>IDENTITY</option>
                 </select>
                 <p className="text-xs text-slate-500">
                   {isAr
-                    ? 'نطاقا DOMAIN وTENANT للقراءة فقط حتى اعتماد سجل معرفاتهما. يتطلب IDENTITY اختيار هوية من IAM.'
-                    : 'DOMAIN and TENANT are read-only pending approved owner identifiers. IDENTITY must be selected from IAM.'}
+                    ? 'DOMAIN يختار من المجالات المعروفة للمنصة، وIDENTITY من IAM. نطاق TENANT القديم للقراءة فقط.'
+                    : 'DOMAIN uses published platform domain keys, IDENTITY uses IAM. Legacy TENANT stays read-only.'}
                 </p>
               </Field>
+              {assignmentForm.level === 'DOMAIN' ? (
+                <Field label={isAr ? 'المجال المعتمد' : 'Approved domain'}>
+                  <select required value={assignmentForm.scopeId} className="input" dir="ltr"
+                    onChange={event => setAssignmentForm(f => ({ ...f, scopeId: event.target.value }))}>
+                    <option value="">{isAr ? 'اختر المجال' : 'Select domain'}</option>
+                    {knownDomainScopeKeys.map(domain => <option key={domain} value={domain}>{domain}</option>)}
+                  </select>
+                </Field>
+              ) : null}
               {assignmentForm.level === 'IDENTITY' ? (
                 <Field label={isAr ? 'الهوية من IAM' : 'IAM identity'}>
                   <SettingsIdentityScopePicker value={assignmentForm.scopeId} isAr={isAr}
