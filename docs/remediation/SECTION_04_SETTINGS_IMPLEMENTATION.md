@@ -1,3 +1,28 @@
+## Section 04 source closeout — 2026-10-09 — `CODE_CLOSED — RUNTIME_DEFERRED`
+
+**Governing plan:** Library `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md` (2026-10-09 streamlined source closure). This **closes reviewed source fixes only**; it does NOT mean DB schema has been migrated, actual runtime consumers use dynamic Settings, end-to-end/prod verification passed, or release is approved. No production DB operations, merge or deployment occurred.
+
+**Verified final source:** `fd03e8e0ccb86262ab249aa3c6a9742d501b4288` — [Settings Section 04 Source Verification CI 37970330591](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37970330591) **SUCCESS**. **131 Vitest tests across 18 files PASS**; independently one ownership migration-source consistency test PASS; Prisma source schema validation, TypeScript, source-quality, three Settings authority/permission guards, existing audit coverage (321 mutation handlers / 320 endpoints) all PASS. These are separate/overlapping verification categories; do not add them to 131.
+
+### Final source repairs reconciled against Section 04
+
+1. **Single settings authority:** active composed `settings/**` remains the dynamic read/write authority; the orphan Configuration Foundation is not presented as a competing admin runtime authority. Guarded by source composition tests.
+2. **Typed resolution:** the bounded `IResolvedSettingsReader` contract reports effective value, precedence and winner without returning secret material. Actual live service consumption is **POST-28**, not claimed.
+3. **Definition governance:** immutable identity/type/default/constraint metadata, revision-aware description edit/deprecation, typed constraints for numeric bounds/integer, text length and scalar enum; default and assignment/rollback validation; required explicit Boolean flag default. Optional `validationRules` migration is source-only.
+4. **Override lifecycle and safeguards:** immutable history, explicit Clear Override/Inherit, append/rollback reasons, persisted version concurrency, mandatory Admin `expectedCurrentVersionId` on assignments and rollback, source-enforced GLOBAL no-scope ID.
+5. **Scope governance:** `DOMAIN` choices and Application mutations now use **bounded existing, published platform domain names** from shared `ADMIN_PERMISSION_CATALOG.domain` (not arbitrary strings or a new cross-domain registry/FK). `IDENTITY` uses the existing IAM owner directory in Admin plus a real `IIdentityRepository.findById` lookup in Application; absent/PURGED IDs are rejected, missing validation capability fails closed and returns 503. Unrecognized/historical DOMAIN records remain readable but cannot be mutated. `TENANT` remains historical read-only pending a separate architectural owner decision. The permission-domain vocabulary is a finite **current-platform scope vocabulary**, not proof of a universal new Domain Platform.
+6. **Admin scale/read correctness:** bounded server-side keyset pages, safe search/filtering, lazy history, exact independent edit context and redacted secret output. Honest labels avoid promising secret-provider binding.
+7. **Audit/Outbox semantics:** source now differentiates `CONTROL_PLANE_MUTATION` (generic atomic audit-linked notice) from `OWNER_DOMAIN_EVENT` (semantic Settings owner fact) via additive `settingsEventRole` metadata, while reusing one correlation per owner mutation. They are intentionally **distinct outbox entries**, not a single deduplicated message. Consumers must filter by event family/role and use each outbox ID for delivery idempotency. Source regression checks both roles and correlation; live delivery/replay and final consumer behavior are **POST-28**.
+8. **DB pointer integrity:** reviewed Prisma/model ownership relation, deferred/unvalidated SQL FK source design and read-only preflight are present; **not executed**. Index/lock/data-compatibility and real PostgreSQL commit checks are **POST-28**. No target-DB capability is represented as active until migrations and preflight are completed.
+
+**Closure logic:** earlier Batch 7 status `PARTIAL — FIXES_REQUIRED` is superseded for this scoped, verified source-fix campaign by `CODE_CLOSED — RUNTIME_DEFERRED`. The previous intermediate test failures were corrected; only the final successful CI is closure evidence. Remaining `FGA-04-001` atomic multi-key preview and `FGA-04-002` cross-key approval policy remain *unapproved product enhancements*, not secretly marked implemented; they require named product rules/owner sign-off to enter a future source implementation, not a fictitious live-consumer test.
+
+**Post-28 checklist:** target Google Studio/PostgreSQL migration + backup/preflight/rollback plan; ownership FK commit and legacy-row validation; Settings real-consumer/secret provider integration and effective flag behavior; owner+generic Outbox delivery semantics under retry/replay; live IAM/directory and module-domain integration; browser E2E, load/performance, recovery, release readiness. Until completed, runtime/production status is `NOT_VALIDATED / NO-GO`.
+
+**Handoff:** Section 04 source-only acceptance completed; next eligible source-review section is **05 Import Foundation**. This note is not authorization to merge, deploy, or run migrations.
+
+---
+
 ## Verified batch 7 CI and simplified closure policy — 2026-10-09
 
 **Approved plan:** latest `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md` (1,430,742 bytes, Library). Its `CODE_CLOSED — RUNTIME_DEFERRED` policy supersedes old per-section live E2E/DB/provider/consumer acceptance requirements, but **does not waive source security defects or failed change-related tests**. No merge, production deployment or target DB write was requested or performed.
