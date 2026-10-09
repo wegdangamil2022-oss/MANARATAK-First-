@@ -1216,7 +1216,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       const receipt = prior[0].snapshot as Record<string, unknown>;
       if (receipt.fromReferenceId !== sourceId || receipt.toReferenceId !== targetId ||
           receipt.providerSystem !== providerSystem || receipt.providerId !== providerId ||
-          receipt.reason !== command.reason.trim()) {
+          receipt.reason !== command.reason.trim() || receipt.requestActorId !== command.actorId) {
         throw new Error('REFERENCE_MAPPING_RECONCILIATION_ID_CONFLICT');
       }
       if (mapping.referenceId !== targetId || !mapping.isActive)
@@ -1254,7 +1254,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
           ...(updated[0].snapshot as Record<string, unknown>),
           providerMappingReconciliationId: command.reconciliationId,
           fromReferenceId: sourceId, toReferenceId: targetId,
-          providerSystem, providerId, reason: command.reason.trim(),
+          providerSystem, providerId, reason: command.reason.trim(), requestActorId: command.actorId,
         },
         row.id === sourceId ? 'PROVIDER_MAPPING_REASSIGNED_FROM' : 'PROVIDER_MAPPING_REASSIGNED_TO',
         command.actorId,
