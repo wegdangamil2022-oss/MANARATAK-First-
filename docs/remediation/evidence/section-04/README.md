@@ -1,3 +1,7 @@
+## Verified batch 3 CI — 2026-10-09
+
+Source `5a9eae3a0b0f201439cab2a4c7880cd027dc4a9e`: [CI 37956260401](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37956260401) SUCCESS: **102 tests across 14 files**, TypeScript/source quality, three authority/permission guards and unchanged audit coverage PASS. Evidence: `read-projections-ci.json` / `read-projections-ci-summary.txt`. This observed result supersedes the pending notes below. Local and CI counts overlap. No actual target DB, provider, runtime delivery or complete section acceptance is inferred. Section 04 remains IN PROGRESS; bounded row-list/search and other original dependencies are explicitly open.
+
 Batch 3: `read-projections-*` records summary/lazy-history tests, browser reproduction, and verifier limits. Local 102 tests/14 files PASS with overlapping final 10-test projection delta; TS/quality/three permission guards/audit PASS. Focused lint 0 errors/9 warnings. Browser intercepted API only. Source CI pending; entire Section 04 remains open.
 
 Batch 2 source `233c0ac`: [CI 37954207122](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37954207122) SUCCESS, 86 tests/12 files, TS/quality/authority/audit PASS. Matching evidence `governance-ci.*` supersedes pending statements below. No actual database/provider acceptance.

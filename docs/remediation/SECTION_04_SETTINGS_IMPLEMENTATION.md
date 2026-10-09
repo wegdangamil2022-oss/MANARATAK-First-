@@ -1,3 +1,7 @@
+## Verified batch 3 CI — 2026-10-09
+
+Source `5a9eae3a0b0f201439cab2a4c7880cd027dc4a9e`: [CI 37956260401](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37956260401) SUCCESS: **102 tests across 14 files**, TypeScript/source quality, three authority/permission guards and unchanged audit coverage PASS. Evidence: `read-projections-ci.json` / `read-projections-ci-summary.txt`. This observed result supersedes the pending notes below. Local and CI counts overlap. No actual target DB, provider, runtime delivery or complete section acceptance is inferred. Section 04 remains IN PROGRESS; bounded row-list/search and other original dependencies are explicitly open.
+
 ## Batch 3 — 04.21 Patch F: summary projections and bounded lazy history — 2026-10-09
 
 Status remains IN PROGRESS / NOT CLOSED. The original reference and identifiers are unchanged. This source batch addresses the history-loading component of Patch F; it does **not** close server-side list pagination/search, canonical scope selection, actual dynamic-consumer wiring, event-delivery semantics or the source/runtime ownership-FK obligation.
