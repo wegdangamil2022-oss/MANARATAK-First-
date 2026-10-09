@@ -17,6 +17,7 @@ describe('ImportAdminRouter', () => {
   const createMockUseCases = () => ({
     importData: vi.fn(),
     getQueueJobStatus: vi.fn(),
+    getHandoffReconciliation: vi.fn(),
     pauseQueueJob: vi.fn(),
     resumeQueueJob: vi.fn(),
     cancelQueueJob: vi.fn(),
@@ -156,6 +157,43 @@ describe('ImportAdminRouter', () => {
         catalogKind: 'BACHELOR',
         sourceSystem: 'PHASE_10_BULK_DETAILS',
       }));
+    });
+  });
+
+
+  describe('Phase 06 read-only owner handoff reconciliation', () => {
+    it('returns a bounded projection without invoking any mutation or replay', async () => {
+      const useCases = createMockUseCases();
+      useCases.getHandoffReconciliation.mockResolvedValue({
+        data: [{
+          recordId: 'record-review', batchId: 'batch-review',
+          ownerDomain: 'UNIVERSITIES',
+          handoffState: 'MANUAL_RECONCILIATION_REQUIRED',
+          manualVerificationRequired: true,
+        }],
+        total: 1, page: 2, pageSize: 10,
+      });
+      const app = createApp(useCases);
+      const result = await request(app)
+        .get('/admin/imports/queue/jobs/batch-review/handoffs/reconciliation?page=2&pageSize=10');
+      expect(result.status).toBe(200);
+      expect(result.body.data[0].handoffState).toBe('MANUAL_RECONCILIATION_REQUIRED');
+      expect(useCases.getHandoffReconciliation).toHaveBeenCalledWith({
+        batchId: 'batch-review', page: 2, pageSize: 10,
+      });
+      expect(useCases.replayQueueJob).not.toHaveBeenCalled();
+      expect(useCases.resumeQueueJob).not.toHaveBeenCalled();
+    });
+
+    it('fails closed with 503 when the operational reader is absent', async () => {
+      const useCases = createMockUseCases();
+      useCases.getHandoffReconciliation.mockRejectedValue(
+        new Error('IMPORT_RECONCILIATION_READER_UNAVAILABLE'),
+      );
+      const res = await request(createApp(useCases))
+        .get('/admin/imports/queue/jobs/batch-review/handoffs/reconciliation');
+      expect(res.status).toBe(503);
+      expect(res.body).toEqual({ error: 'IMPORT_RECONCILIATION_READER_UNAVAILABLE' });
     });
   });
 
