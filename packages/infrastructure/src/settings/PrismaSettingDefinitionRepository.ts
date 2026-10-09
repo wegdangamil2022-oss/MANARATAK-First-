@@ -137,7 +137,7 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
           if (!eventType) throw new Error(`SETTINGS_DOMAIN_EVENT_NOT_MAPPED:${String(name || 'UNKNOWN')}`);
           await client.transactionalOutboxRecord.create({ data: {
             id: randomUUID(), eventType, domain: 'SETTINGS', aggregateType: 'SettingDefinition', aggregateId: definition.id,
-            payload: { definitionId: definition.id, key: keyStr }, metadata: { schemaVersion: 1, ownerDomain: 'SETTINGS' }, correlationId: metadata?.correlationId ?? randomUUID(),
+            payload: { definitionId: definition.id, key: keyStr }, metadata: { schemaVersion: 1, ownerDomain: 'SETTINGS', settingsEventRole: 'OWNER_DOMAIN_EVENT' }, correlationId: metadata?.correlationId ?? randomUUID(),
             state: 'PENDING', attempts: 0, availableAt: new Date(), createdAt: (event as any).dateTimeOccurred ?? new Date(),
           }});
         }
