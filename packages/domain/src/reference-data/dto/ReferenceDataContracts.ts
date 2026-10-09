@@ -106,6 +106,7 @@ export interface UpsertReferenceCurrencyDto {
 
 export interface ReferenceLanguageDto {
   id: string;
+  /** ISO 639 alpha-2/alpha-3 language code ONLY; not a BCP47 locale tag. */
   isoCode: string;
   name: string;
   nameAr?: string | null;

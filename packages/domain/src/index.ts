@@ -378,3 +378,5 @@ export * from './career-alumni';
 
 export * from './certificates/contracts/ICertificateRenderingService';
 export * from './identity/repositories/IPasswordCredentialRepository';
+
+export * from './reference-data/governance/ReferenceStandardsRegistry';
