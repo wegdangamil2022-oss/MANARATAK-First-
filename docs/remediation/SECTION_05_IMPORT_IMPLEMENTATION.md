@@ -4,6 +4,27 @@
 **Reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05.
 **Status:** `IN PROGRESS — SOURCE FIXES REQUIRED`. This report documents initial fixes, **not** closure of Section 05 or a production release.
 
+## Batch 13 — optimistic concurrency for source governance status updates (2026-10-09)
+
+**Verified source:** `506da4304ec8bd0c33b86a739d8faf557d16b478`; [Import Section 05 CI 37984179607](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37984179607) **SUCCESS** — 148/148 focused tests in 21 files, TypeScript, source quality and unchanged 321-handler/320-endpoint Admin mutation-audit source gate PASS.
+
+- **IMP-P1-014 governance integrity:** Durable `PrismaSourceRegistryGateway.updateSourceStatus` now verifies the source's current status and access classification and executes an optimistic conditional `updateMany` using persisted `updatedAt`, status, access classification, connector ID and version. If another actor changed the source since inspection, the request fails `IMPORT_SOURCE_STATUS_CONFLICT` without overwriting the new source status/metadata. Existing BLOCKED classification cannot be reactivated; runtime-unknown statuses are refused.
+- **HTTP truth:** The status-update route reports `409 IMPORT_SOURCE_STATUS_CONFLICT` for concurrent modifications, distinct from `404 IMPORT_SOURCE_NOT_FOUND`.
+- **Focused regression:** PostgreSQL-shaped Prisma mocks verify the compare-and-swap predicate, safe source status transitions, the conflict path, missing source, and rejection of unknown or BLOCKED status transitions. The workflow now runs the dedicated registry test.
+- **Still open:** Source creation/edit control plane, actual PostgreSQL multi-writer run (post-28), robots decision, agreement/credential gateways, and broader distributed rate limiting. Status CAS alone does not provide a complete owner-authorized source-control workflow.
+
+---
+
+## Batch 12 — unresolved handoffs no longer silently count as full success (2026-10-09)
+
+**Verified source:** `a12244f3a303e363d310127fc6b82eab86e75f23`; [Import Section 05 CI 37983827464](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37983827464) **SUCCESS** — 143/143 focused tests across 20 files, TypeScript, source quality, and Admin audit source gate PASS.
+
+- **IMP-P1-007/IMP-P0-005 truthfulness:** Staged or persisted rows ending in `NEEDS_REVIEW` — including missing owner handoff consumer, uncertain post-dispatch receipt, and preexisting review records — now count toward non-successful worker outcomes and `PARTIALLY_COMPLETED`, never a false `COMPLETED`. The checkpoint stores a bounded `reviewRequiredRecords` counter and `nonSuccessfulWorkIncludesReview` indicator, explicitly distinguishing this conservative queue accounting from structural validation failures at staging time.
+- **Safety retained:** The importer does not retry uncertain owner delivery, delete handoff evidence, or promote/publish canonical entities. Existing manual reconciliation remains read-only until owner evidence and audited resolution exist.
+- **Scope:** Queue `failedRecords` now includes non-successful review-required work; it is **not** exclusively a count of schema-validation failures. This is an interim explicit convention rather than a complete persisted multi-counter redesign. Review count is in checkpoint metadata, not yet a separate database field.
+
+---
+
 ## Batch 11 — legacy finalization lease fencing and zero-work completion accuracy (2026-10-09)
 
 **Verified source commit:** `842155796b3cb2eae2f40ebda7b71b16689cbb2e`; [focused CI 37982879053](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37982879053) **SUCCESS** — 142/142 tests across 20 Vitest files, TypeScript, source-quality gate, and existing 321-handler/320-endpoint Admin audit coverage **PASS**. No live PostgreSQL, migrations, provider network use, production deployment or merge.

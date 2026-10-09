@@ -1,3 +1,13 @@
+> **SUPERSEDED — HISTORICAL VERIFICATION ONLY (2026-10-09). DO NOT USE AS CURRENT IMPLEMENTATION AUTHORITY.**
+>
+> This document captures a prior implementation period. Its domain transfer endpoint table, repeated **Fully Integrated** labels and broad test/build claims are **not evidence** of the present Phase 6 behavior. They must **not** be used to re-enable generic canonical promotion.
+>
+> **Current verified source boundary:** `apps/api/src/presentation/api/router/ImportAdminRouter.ts` deliberately returns **HTTP 422 / PHASE6_DOMAIN_PROMOTION_DISABLED** for `POST /admin/imports/records/:id/transfer`, `POST /admin/imports/records/:id/promote`, `POST /admin/imports/batches/:id/promote` and associated legacy transfer operations. Universal Import Foundation stages and hands off records; every owning domain controls its own semantic review, canonical writes and publication lifecycle. Handoff **does not** mean published.
+>
+> **Current reference:** `MANARATAK_ADMIN_REVIEW_CODEX(20261009-172440).md`, Section 05, and `docs/remediation/SECTION_05_IMPORT_IMPLEMENTATION.md`. Follow those references for current source gaps, conservative owner-receipt safety and the post-28 runtime test deferrals. Section 05 remains **IN PROGRESS**, not production closed.
+
+---
+
 # MANARATAK 2.0 - Import Transfer Runtime Verification Report
 
 This report documents the runtime verification and implementation status of the data import and domain transfer workflow under MANARATAK 2.0.
