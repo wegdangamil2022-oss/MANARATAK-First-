@@ -23,3 +23,9 @@ Branch: codex/section-01-iam-rbac. Starting checkpoint: e4fc7c50730c714556e571d5
 ## Exclusions
 
 No database queries or data modification, migrations, seed/backfill, live imports, browser/E2E/performance/provider tests, CI, deployment or branch merge. Existing source city CSVs and university review artifacts remain unchanged. Read SECTION_06_ITEM_MATRIX.md and SECTION_06_CHECK_LOG.md for exact statuses.
+
+## Later source improvements and one targeted structural check
+
+- Four admin tabs now support non-active-only filtering from the owner repository. Region q/country/status/page state is URL-persisted. Country form includes official name, subregion, calling code and bounded, active-only searchable currency/language default selection. Currency form adds ISO minor unit; city form adds latitude/longitude.
+- Provider mapping owner-transfer replay additionally validates original actor identity in its version receipt.
+- A single lightweight **source inspection** of 14 files with 11 structural checks returned **11/11 PASS**. This ran before the last four UI/actor changes; it does not certify them. TypeScript/Vitest and runtime: **NOT RUN**.

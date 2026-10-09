@@ -30,7 +30,7 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 | 06.22 | 22 Import canonical city identity | SOURCE_IMPLEMENTED_UNVERIFIED | Seed staging uses validator scoped Unicode CITY key; all duplicate-key rows invalidated. |
 | 06.23 | 23 Intentionally incomplete migration | DB_DEFERRED | No database migration applied, per instruction |
 | 06.24 | 24 Scalable canonical pickers | PARTIAL | canonicalPickers.ts; CanonicalPicker.tsx — first bounded page + search; callsites still need review |
-| 06.25 | 25 Admin server query filters | PARTIAL | Four owner tabs URL p7Q,p7Status(active/all/nonactive),p7Country,p7Page; region advanced facets still pending |
+| 06.25 | 25 Admin server query filters | PARTIAL | Four owner tabs and Region preserve q/country/status(active/all/nonactive)/page in URL; updatedFrom/mappingStatus facets pending |
 | 06.26 | 26 Active label/status UI | SOURCE_IMPLEMENTED_UNVERIFIED | ReferenceDataAdminPage.tsx active/all/nonactive, filtered count owner read and URL persistence |
 | 06.27 | 27 Generic governance admin workflow | PARTIAL | Four admin owner tabs expose alias/mapping editing, version history, relationships, DEPRECATED, version conflict; terminal impact remains incomplete. |
 | 06.28 | 28 Dependency impact before lifecycle | PARTIAL | Owner FK impact count with PARTIAL and unknown non-FK consumers; UI exposes known counts but does not certify terminal safety. |
@@ -51,7 +51,7 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 | 06.43 | 43 Additional global data types | OPEN | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
 | 06.44 | 44 Patch execution order | PARTIAL | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
 | 06.45 | 45 Targeted acceptance source/unit checks | NOT_EXECUTED | New focused source/unit contract specs written, not executed; no TS compilation. |
-| 06.46 | 46 Existing regression contracts | NOT_EXECUTED | Existing tests not rerun; test doubles may need update |
+| 06.46 | 46 Existing regression contracts | NOT_EXECUTED | Existing tests not run; legacy seed tests and stage source-key expectations updated in code only |
 | 06.47 | 47 Runtime/DB deferred | DB_RUNTIME_DEFERRED | No DB connected/migrations/seeds/backfill |
 | 06.48 | 48 Documentation clean-up | PARTIAL | docs/remediation/ and workspace/reports/section-06/ |
 | 06.49 | 49 Definition of Done | OPEN | Cannot close while implementation gaps remain |
@@ -63,7 +63,7 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 |---|---|---|
 | FGA-06-001 | PARTIAL | Selected-record edits plus alias/mapping/history/relationship/impact inspector and explicit provider reconciliation now present; not all metadata form controls implemented. |
 | FGA-06-002 | PARTIAL | Active/total/nonactive owner counts; city ISO2 region/timezone/canonical key gaps and mismatched country/region FK counts; global source/authority coverage unknown. |
-| FGA-06-003 | PARTIAL | URL-backed q/status/country filters on four owner tabs and bounded page totals. Region tab URL sync, mappingStatus and updatedFrom filters are not implemented. |
+| FGA-06-003 | PARTIAL | Four owner tabs and Regions now preserve q/status/country/page in URL. Added nonactive-only source-owner lifecycle filter; mappingStatus/updatedFrom remain unimplemented. |
 
 ## Continuation checkpoint: 2026-10-10
 

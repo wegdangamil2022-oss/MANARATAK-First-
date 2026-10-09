@@ -25,3 +25,10 @@ Closure: **NOT CLOSED**. See `SECTION_06_ITEM_MATRIX.md` and `workspace/reports/
 ## Continuation after baseline — 2026-10-10
 
 New code/specs cover P6->P7 SCREENING_ONLY, governed alias/provider mapping review, explicit atomic owner-key transfer and replay guard, quality/impact owner reads, ISO639/BCP47 separation, and disabling unreceipted SeedApply. Focused spec files were added but **NOT RUN**. No new TypeScript/Vitest/DB/E2E/CI run, database writes, migrations, seeds, backfill or imports occurred. Earlier INTERRUPTED checks remain INTERRUPTED and were not rerun. All commits use [skip ci]. Source closure remains PARTIAL.
+
+### Focused source-invariant inspection (one execution)
+
+- 14 remote source files inspected with 11 narrowly scoped structural assertions: **11/11 PASS**.
+- Coverage: Unicode city scope, batch duplicate quarantine, disabled unsafe SeedApply, screening-only registration, owner mapping locks/CAS/replay+audit/outbox, admin reconciliation, owner impact and quality reads, non-active filtering, malformed source quarantine.
+- This is **not** Vitest, TypeScript compilation, a runtime test, a database test or an execution of data changes.
+- The source check ran before the later admin country/currency/city metadata and Region URL enhancements and provider-replay actor binding; those subsequent commits were **not rerun through this source check**.
