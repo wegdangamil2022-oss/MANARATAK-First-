@@ -412,7 +412,7 @@ export class ImportAdminUseCases {
 
         const result = await this.importWorkerProtocol!.runOne(
           `phase6-inline-${uuidv4()}`,
-          (lease, heartbeat) => this.processClaimedBatch(lease, heartbeat),
+          (lease, heartbeat, getActiveLease) => this.processClaimedBatch(lease, heartbeat, getActiveLease),
           batch.id,
         );
         if (result !== 'COMPLETED') {
@@ -452,8 +452,8 @@ export class ImportAdminUseCases {
   /** Process one recoverable durable import job. Intended for worker/scheduler composition. */
   async processNextQueuedBatch(workerId: string): Promise<'IDLE' | 'COMPLETED' | 'RETRY_SCHEDULED' | 'DLQ'> {
     if (!this.importWorkerProtocol) throw new Error('IMPORT_WORKER_PROTOCOL_UNAVAILABLE');
-    return this.importWorkerProtocol.runOne(workerId, (lease, heartbeat) =>
-      this.processClaimedBatch(lease, heartbeat),
+    return this.importWorkerProtocol.runOne(workerId, (lease, heartbeat, getActiveLease) =>
+      this.processClaimedBatch(lease, heartbeat, getActiveLease),
     );
   }
 
@@ -491,6 +491,7 @@ export class ImportAdminUseCases {
   private async processClaimedBatch(
     lease: ImportJobLease,
     heartbeat: () => Promise<void>,
+    getActiveLease: () => ImportJobLease,
   ): Promise<void> {
     if (!this.handoffDispatcher) throw new Error('IMPORT_HANDOFF_DISPATCHER_UNAVAILABLE');
     if (!this.importRepository.updateRecord) throw new Error('IMPORT_RECORD_UPDATE_UNAVAILABLE');
@@ -601,6 +602,7 @@ export class ImportAdminUseCases {
         updatedAt: new Date(),
         metadata: { workerId: lease.workerId, attempt: lease.attempt },
       }),
+      getActiveLease(),
     );
   }
 
