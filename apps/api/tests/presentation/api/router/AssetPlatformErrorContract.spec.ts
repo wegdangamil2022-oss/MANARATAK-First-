@@ -30,6 +30,22 @@ describe('EAP API boundary: query validation and safe Problem Details', () => {
     expect(f.queryAdmin).not.toHaveBeenCalled();
   });
 
+  it.each(['ASSET_TEMPORARY_EXPIRY_REQUIRED', 'ASSET_RETENTION_EXPIRY_INVALID',
+    'ASSET_RETENTION_EXPIRY_NOT_FUTURE', 'ASSET_DECLARED_EXTENSION_MIME_MISMATCH'])('maps known ingress metadata failure %s to sanitized 422', async code => {
+    const f = fixture(new Error(code));
+    const response = await request(f.app).get('/admin/assets');
+    expect(response.status).toBe(422);
+    expect(response.body.code).toBe('ASSET_METADATA_INVALID');
+  });
+
+  it.each(['ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION', 'ASSET_SANITIZED_CONTENT_CHANGED_DURING_SCAN',
+    'ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED'])('maps security conflict %s to safe 409', async code => {
+    const f = fixture(new Error(code));
+    const response = await request(f.app).get('/admin/assets');
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('ASSET_STATE_CONFLICT');
+  });
+
   it('rejects invalid cursor with safe 400 rather than internal error', async () => {
     const f = fixture(new Error('ASSET_CURSOR_INVALID'));
     const response = await request(f.app).get('/admin/assets?cursor=invalid');

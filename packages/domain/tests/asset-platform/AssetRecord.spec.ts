@@ -112,6 +112,18 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       expect(events.some((e) => e instanceof AssetActivatedEvent)).toBe(true);
     });
 
+    it.each([AssetLifecycleState.INITIATED, AssetLifecycleState.DELETED, AssetLifecycleState.PURGED, AssetLifecycleState.ARCHIVED])('does not resurrect %s through manual malware failure', (state) => {
+      const initial = createInitialAsset();
+      const record = new AssetRecord({
+        id: initial.id, reference: initial.reference, locator: initial.locator,
+        metadata: initial.metadata, retention: initial.retention, owner: initial.owner,
+        classification: AssetSecurityClassification.INTERNAL, state,
+      });
+      expect(() => record.failMalwareScan('manual')).toThrow('ASSET_MALWARE_SCAN_INVALID_STATE');
+      expect(record.state).toBe(state);
+      expect(record.getUncommittedEvents()).toHaveLength(0);
+    });
+
     it('prevents activation when malware scan fails', () => {
       const { record } = createInitialAsset();
       record.assignQuarantineLocator(new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q-bucket', 'file.exe'));

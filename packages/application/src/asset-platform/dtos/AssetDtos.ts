@@ -35,6 +35,7 @@ export interface AssetUploadLocatorDto {
   };
 }
 
+/** Legacy allocation command: creates an INITIATED upload, not proof of an existing quarantined object. */
 export interface RegisterQuarantinedAssetDto {
   assetId: string;
   assetReference: string;
@@ -45,8 +46,6 @@ export interface RegisterQuarantinedAssetDto {
   fileExtension: string;
   byteSize: number;
   classification: AssetSecurityClassification;
-  bucketName: string;
-  pathKey: string;
   retentionCategory?: AssetRetentionCategory;
   expiresAt?: string | Date;
 }

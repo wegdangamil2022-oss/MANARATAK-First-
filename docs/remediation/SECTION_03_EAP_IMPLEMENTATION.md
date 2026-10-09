@@ -1,3 +1,68 @@
+# القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
+
+## التحقق الحالي — متابعة 2026-10-09
+
+**هذا القسم يحدّث الحكم الحالي؛ الفقرات اللاحقة سجل تاريخي للدفعات ولا تعني أن عبارة «لم تُشغّل الاختبارات» ما زالت تنطبق.** استؤنف العمل من `1482556`، لا من main أو snapshot قديم. ملف الخطة المعتمد لم يتغير.
+
+### ما أُكمل في المتابعة
+
+- إعادة توصيل إجراءات Finalize/Validate/Sanitize/Activate/Archive/Soft Delete/Restore بالـAPI الموجود، وفق حالة الأصل ودليل الفحص والتنظيف. لا زر purge نهائي. الأرشفة والحذف المنطقي يحتاجان قراءة impact وتأكيدًا صريحًا؛ إخفاق القراءة أو وجود استخدام يمنع التنفيذ في الواجهة، وفحص owner الخادمي محفوظ.
+- ملخص security evidence من GET detail بدون locator؛ الحالة والـchecksum لا يُعرضان كبديل عن إثبات security policy. صلاحية المسار ما زالت `admin:assets:manage`، وإعادة الاستخدام مستقلة `admin:assets:reuse`.
+- فلاتر lifecycle/classification من enums الفعلية، مع الإبقاء على ownerType كقاموس مفتوح دون اختراع enum. البحث المتقدم بالفئات/استخدام الأصل/النسخ ليس مكتملًا.
+- تقوية إعادة التحقق قبل scan/promotion، وبعد rescanning: signature، الحجم، MIME، وقت الدليل، والبصمة جميعًا مطلوبة؛ لا بصمة مطابقة وحدها تسمح بدليل نوع مزور.
+- منع manual malware-failed من إعادة INITIATED/DELETED/PURGED/ARCHIVED إلى حالة معالجة. التغييرات تستمر داخل Aggregate، لا UI فقط.
+- HTTP projection يخفي `storageLocator/storageZone/bucketName/pathKey` من ردود إنشاء الرفع والتسجيل ودورة الحياة، ويحافظ على handle/grant المؤقت. DTO الداخلي للـEAP لا يزال يملك coordinates عند الحاجة؛ لم تُغيّر ملكية البيانات.
+- حذف bucket/path الوهميين من `RegisterQuarantinedAssetDto` وتوثيق route كعقد allocation قديم متوافق، لا تسجيل object مؤكد؛ حالة INITIATED والتأكيد اللاحق محفوظان.
+- تصحيح error mapping للـmetadata إلى 422، ولتغير الدليل/حالة التسليم إلى 409، وخدمة التسليم غير المهيأة إلى 503، دون رسائل SQL/provider خام.
+- روابط الرفع/المعاينة ترفض credentials في URL وHTTP غير المحلي؛ HTTP المحلي مقصور على dev، وانتهاء grant غير الصالح لا يُقبل.
+- إصلاح حارس جرد التدقيق: dependencies داخل Router.create لم تعد تمحو owner الصحيح عند container.resolve(repository). اختبار جديد يحفظ fail-closed للمسارات غير المعروفة. راجعت العمليات الثلاث الجديدة وأُضيفت للجرد بإبقاء atomic owner/outbox pending؛ صار الجرد 319 handler/318 endpoint.
+- CI يتضمن اختبار API lifecycle الأصلي الذي كشف توقع 400 قديمًا؛ صُحح إلى 409 Problem Details وعدم تسريب سبب الاستخدام. أضيفت اختبارات أوامر الواجهة وحارس التدقيق ومسارات workflow للمكونات والـretention gateway.
+
+### حالة المهام الأصلية — دون إعلان CLOSED
+
+| المعرف | نتيجة التحقق الحالية | دليل المصدر / المتبقي |
+| --- | --- | --- |
+| P0-01 | PARTIALLY_IMPLEMENTED | دليل upload/scan/sanitize محفوظ، promotion يفشل مغلقًا؛ attestation/scanner version وربط immutable provider object ما زالا مطلوبين. |
+| P0-02 | PARTIALLY_IMPLEMENTED | precondition قبل move مثبت؛ نجاح move ثم فشل CAS ما زال يحتاج durable reconciliation (P1-13). |
+| P0-03 | PARTIALLY_IMPLEMENTED | INITIATED ثم finalize خادمي قبل scan؛ upload grant الحقيقي وobject version fencing لم يتحققا هنا. |
+| P0-04 | ALREADY_IMPLEMENTED | semantic asset identity موجودة في provider keys مع اختبارات؛ retry عبر replicas يحتاج provider sandbox. |
+| P0-05 | PARTIALLY_IMPLEMENTED | executable مستبعد وverified MIME/hash بوابات خادمية؛ Local محدود وprovider الحقيقي غير مثبت. |
+| P0-06 | PARTIALLY_IMPLEMENTED | reuse permission/router/picker مستقلة بلا destructive capabilities؛ role provisioning وowner/public flow يحتاجان تحققًا تشغيليًا. |
+| P0-07 | PARTIALLY_IMPLEMENTED | استخدام يُفحص قبل archive/delete/purge؛ consumer insert المتزامن بعد الفحص ليس محميًا بعقد مشترك مكتمل. |
+| P1-01 | PARTIALLY_IMPLEMENTED | upload/detail/preview/usage/actions/security summary موجودة؛ timeline/versions/legal-hold view والترجمة الكاملة ليست مكتملة. |
+| P1-02 | PARTIALLY_IMPLEMENTED | selectors للحالة/الأمان؛ retention/processing/in-use/file-family/checksum facets تبقى مفتوحة. |
+| P1-03 | ALREADY_IMPLEMENTED | draft/applied وstale-generation guard موجودة؛ Chromium المعزول أثبت تعطيل pagination مع draft وتثبيت q+cursor وdedupe. |
+| P1-04 | ALREADY_IMPLEMENTED | Prisma AND يجمع q وcursor؛ اختبار query mock موجود. قياس pagination الواقعي لم يُجرَ. |
+| P1-05 | ALREADY_IMPLEMENTED | strict canonical cursor و400 آمن، API tests؛ لا ادعاء أداء dataset كبير. |
+| P1-06 | PARTIALLY_IMPLEMENTED | picker async search/paging/rehydration؛ browser editor-use end-to-end ما زال غير مثبت. |
+| P1-07 | ALREADY_IMPLEMENTED | audit قبل onChange، وصلاحية reuse؛ owner AssetReferencePolicy يبقى السلطة النهائية وليس selection audit. |
+| P1-08 | PARTIALLY_IMPLEMENTED | mapping معروف وآمن للـ400/404/409/422/502/503/500 اختُبر؛ typed exhaustive domain error contract تحسين لاحق. |
+| P1-09 | PARTIALLY_IMPLEMENTED | DTO والـallocation semantics موثقان بلا bucket/path وهمي؛ route القديم متوافق وليس verify-existing-object capability. |
+| P1-10 | PARTIALLY_IMPLEMENTED | ingress/expiry/categories fail-closed؛ restore يعيد PERMANENT ولا يحفظ policy history كاملًا، اعتمادية سياسة مفتوحة. |
+| P1-11 | PARTIALLY_IMPLEMENTED | derived scanner ومخطط consumer guard مثبتان؛ لا central registry ولا ADR معتمد أو ضمان سباق الاستخدام. |
+| P1-12 | PARTIALLY_IMPLEMENTED | CAS monotonic وrestore lease؛ 10 اختبارات PostgreSQL سابقة مثبتة في CI، لكن provider fencing/expired-lease heartbeat لا يزالان مفتوحين. |
+| P1-13 | PARTIALLY_IMPLEMENTED | archive state-first/purge tombstone retries/restore compensation موجودة؛ activate recovery والـjournal الدائم والـheartbeat غير مكتملة. مانع إغلاق مصدرّي. |
+| P1-14 | CONFIRMED_FUNCTIONAL_GAP | events تتولد في Aggregate؛ لا dispatch/outbox مثبت في owner mutations الحالية. لا اعتبارها production notifications أو عقودًا منشورة. |
+| P1-15 | ALREADY_IMPLEMENTED | HTTP grants/handles وprojection آمن دون coordinates؛ DTO الداخلي يبقى لدى EAP. |
+| P1-16 | PARTIALLY_IMPLEMENTED | Wizard موجود؛ Local adapter لا يولد grant وNoop scanning لا يصبح success. يلزم provider متوافق للتطوير وفق docs/operations/ASSET_PROVIDER_RUNTIME.md، لا fallback غير آمن. |
+| FGA-03-001 | PROPOSED_ENHANCEMENT | rights/license register وسياسة mandatory/advisory ودمج publication غير منفذة؛ لا افتراض أن الأصل مرخص. |
+| FGA-03-002 | PROPOSED_ENHANCEMENT | rendition inventory/provider pipeline غير منفذة؛ لا thumbnails/variants وهمية. |
+
+العدد: 7 P0 و16 P1 وإضافتان FGA = **25 مهمة ذات معرف**؛ الفجوات الثماني في §03.6 ليست ثمانية معرفات إضافية مخترعة. قائمة القدرات المؤجلة في closure register محفوظة. المهام ALREADY_IMPLEMENTED أعلاه لا تعني إغلاق أدلة Runtime.
+
+### أدلة الفحص والحكم
+
+- 220 اختبارًا ناجحًا /23 ملفًا، 10 DB tests متخطاة محليًا عمدًا. آخر تعديل UI guard أعيد فحصه ضمن delta tests.
+- TypeScript والجودة و13 source guards ناجحة؛ lint المختار 0 errors/18 warnings. git diff --check ناجح.
+- Chromium حقيقي مع HTTP معترض: دورة الأزرار ومنع in-use وimpact confirmation وpaging نجحت؛ **ليس** provider/API/DB كاملًا. استُخدم bypassCSP في سياق الاختبار لأن React refresh preamble في dev يتعارض مع CSP الحالي، وتعطيل HMR منع خطأ WebSocket؛ سياسة الإنتاج لم تتغير ويظل deployed CSP pending.
+- تحققت من run 37869788764 عند commit 8eb794b: success و120 source tests و10 disposable PostgreSQL tests. لا يُنقل النجاح تلقائيًا إلى commit المتابعة.
+- ci:source:contracts ما زال يفشل في العلاقات الثلاث السابقة خارج EAP؛ guard التدقيق الجديد ينجح. لا GO.
+- [الأوامر والأدلة](evidence/section-03/README.md).
+
+**الحكم: NOT CLOSED.** توجد عوائق مصدرية P1-13/P1-14 وسياسة restore/registry، بجانب أدلة provider/runtime. طلب الإغلاق لا يجيز تغيير هذه الأدلة إلى PASS. لا migrations أو seed أو sweep أو حذف objects حقيقية نُفذت محليًا. لا يُنقل العمل إلى القسم 04 على أساس إغلاق غير مثبت.
+
+---
+
 # القسم 03 — EAP / تنفيذ الدفعة الأمنية الأولى (غير مغلق)
 
 - **مرجع وحيد:** `MANARATAK_ADMIN_REVIEW_CODEX.md`، SHA-256: `9de7c781eb82cd490fc85386267d7e9e3fe2b2028803f9ecd0351531e2cd11fc`.

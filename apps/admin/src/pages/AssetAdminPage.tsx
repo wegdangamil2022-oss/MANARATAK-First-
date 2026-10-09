@@ -1,5 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
+import { AssetLifecycleActions, type AssetActionSnapshot } from '../components/AssetLifecycleActions';
+import { AssetLifecycleState, AssetSecurityClassification } from '@manaratak/domain';
 import { AssetUploadWizard } from '../components/AssetUploadWizard';
 import { FolderGit2, RefreshCw, Filter, FileText } from 'lucide-react';
 
@@ -21,7 +23,7 @@ interface AssetPage {
   nextCursor: string | null;
 }
 
-interface AssetDetails {
+interface AssetDetails extends AssetActionSnapshot {
   id: string;
   reference: string;
   ownerId: string;
@@ -79,7 +81,10 @@ export function AssetAdminPage() {
         throw new Error('ASSET_PREVIEW_REQUIRES_SECURE_PROXY');
       }
       const link = new URL(grant.url);
-      if (!['https:', 'http:'].includes(link.protocol)) throw new Error('ASSET_PREVIEW_URL_INVALID');
+      if (link.username || link.password || (link.protocol !== 'https:' &&
+          !(import.meta.env.DEV && link.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(link.hostname)))) {
+        throw new Error('ASSET_PREVIEW_URL_INVALID');
+      }
       window.open(link.toString(), '_blank', 'noopener,noreferrer');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'تعذرت معاينة الملف');
@@ -212,18 +217,18 @@ export function AssetAdminPage() {
           placeholder="بحث بالمعرف / الاسم / المالك / الملف"
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
         />
-        <input
-          value={filters.lifecycleState}
+        <select aria-label="حالة دورة الحياة" value={filters.lifecycleState}
           onChange={(e) => setFilters((v) => ({ ...v, lifecycleState: e.target.value }))}
-          placeholder="حالة دورة الحياة (Lifecycle State)"
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
-        />
-        <input
-          value={filters.securityClassification}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+          <option value="">حالة دورة الحياة — الكل</option>
+          {Object.values(AssetLifecycleState).map(value => <option key={value} value={value}>{value}</option>)}
+        </select>
+        <select aria-label="تصنيف الأمان" value={filters.securityClassification}
           onChange={(e) => setFilters((v) => ({ ...v, securityClassification: e.target.value }))}
-          placeholder="تصنيف الأمان (Security Classification)"
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
-        />
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+          <option value="">تصنيف الأمان — الكل</option>
+          {Object.values(AssetSecurityClassification).map(value => <option key={value} value={value}>{value}</option>)}
+        </select>
         <input
           value={filters.mimeTypePrefix}
           onChange={(e) => setFilters((v) => ({ ...v, mimeTypePrefix: e.target.value }))}
@@ -286,6 +291,9 @@ export function AssetAdminPage() {
             <div><dt className="text-slate-500">نوع الملف</dt><dd className="mt-1">{selectedAsset.metadata.mimeType}</dd></div>
             <div><dt className="text-slate-500">الحجم</dt><dd className="mt-1">{selectedAsset.metadata.byteSize.toLocaleString()} بايت</dd></div>
           </dl>
+          <p className="mt-3">اكتمال الرفع: {selectedAsset.securityEvidence?.uploadConfirmed ? 'مؤكد' : 'غير مؤكد'} —
+            الفحص: {selectedAsset.securityEvidence?.malwareStatus ?? 'لا يوجد دليل'} —
+            التنظيف: {selectedAsset.securityEvidence?.sanitized ? 'مسجل' : 'غير مسجل'}</p>
           {selectedAsset.checksum && (
             <div className="mt-4 rounded-lg bg-slate-50 p-3">
               <div className="font-bold">بصمة المحتوى — {selectedAsset.checksum.algorithm}</div>
@@ -295,6 +303,11 @@ export function AssetAdminPage() {
           <p className="mt-3 text-slate-500">
             هذه بيانات وصفية فقط؛ لا تُعرض روابط تخزين مباشرة. تحقق من ارتباطات الأصل قبل أي عملية مؤثرة.
           </p>
+          <AssetLifecycleActions key={selectedAsset.id + ':' + selectedAsset.lifecycleState}
+            asset={selectedAsset} onChanged={async () => {
+              await inspectDetails(selectedAsset.id);
+              await load(true, appliedRef.current);
+            }} />
           <button type="button" onClick={() => void inspectUsages(selectedAsset.id)}
             disabled={usageLoadingId !== null} className="mt-3 rounded-lg border px-3 py-1.5 disabled:opacity-50">
             عرض استخدامات هذا الأصل

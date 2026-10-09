@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
+  AssetLifecycleState,
   AssetSecurityClassification,
   AssetRetentionCategory,
   IAuditRecordRepository,
@@ -10,7 +11,8 @@ import {
   IngestAssetUseCase,
   ProcessAssetLifecycleUseCase,
   RequestAssetUploadLocatorDto,
-  RegisterQuarantinedAssetDto
+  RegisterQuarantinedAssetDto,
+  AssetRecordDto
 } from '@manaratak/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
@@ -32,6 +34,10 @@ export class AssetPlatformRouter {
         Promise.resolve(fn(req, res, next)).catch(next);
       };
 
+    const publicAssetDto = (record: AssetRecordDto) => {
+      const { storageLocator: _locator, storageZone: _zone, bucketName: _bucket, pathKey: _path, ...safe } = record;
+      return safe;
+    };
     const urlCheck = (val: string, ctx: z.RefinementCtx, fieldName: string) => {
       if (/^https?:\/\//i.test(val.trim())) {
         ctx.addIssue({
@@ -84,7 +90,7 @@ export class AssetPlatformRouter {
 
 
     const assetListQuerySchema = z.object({
-      lifecycleState: z.string().trim().min(1).max(80).optional(),
+      lifecycleState: z.nativeEnum(AssetLifecycleState).optional(),
       ownerType: z.string().trim().min(1).max(120).optional(),
       ownerId: z.string().trim().min(1).max(240).optional(),
       securityClassification: z.nativeEnum(AssetSecurityClassification).optional(),
@@ -142,6 +148,13 @@ export class AssetPlatformRouter {
           fileExtension: asset.metadata.fileExtension, byteSize: asset.metadata.byteSize,
           width: asset.metadata.width, height: asset.metadata.height, duration: asset.metadata.duration,
         },
+        securityEvidence: {
+          uploadConfirmed: asset.uploadVerification?.signatureVerified === true,
+          malwareStatus: asset.malwareScan?.status ?? null,
+          scannedAt: asset.malwareScan?.scannedAt ?? null,
+          sanitized: Boolean(asset.sanitization?.sanitizedAt),
+          sanitizedAt: asset.sanitization?.sanitizedAt ?? null,
+        },
         checksum: asset.checksum ? { algorithm: asset.checksum.algorithm, hash: asset.checksum.hash } : null,
       });
     }));
@@ -159,7 +172,11 @@ export class AssetPlatformRouter {
           result: 'SUCCESS',
           metadata: { mimeType: payload.mimeType, classification: payload.classification }
         });
-        res.status(201).json(result);
+        // Storage coordinates remain EAP-owned; browsers need only the temporary grant and handle.
+        res.status(201).json({
+          assetId: result.assetId, assetReference: result.assetReference,
+          lifecycleState: result.lifecycleState, uploadGrant: result.uploadGrant,
+        });
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'REQUEST_ASSET_UPLOAD',
@@ -186,7 +203,7 @@ export class AssetPlatformRouter {
           result: 'SUCCESS',
           metadata: { mimeType: payload.mimeType }
         });
-        res.status(201).json(result);
+        res.status(201).json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'REGISTER_QUARANTINED_ASSET',
@@ -217,7 +234,7 @@ export class AssetPlatformRouter {
           targetId: assetId,
           result: 'SUCCESS',
         });
-        res.status(200).json(result);
+        res.status(200).json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'FINALIZE_ASSET_UPLOAD',
@@ -247,7 +264,7 @@ export class AssetPlatformRouter {
           targetId: assetId,
           result: 'SUCCESS'
         });
-        res.json(result);
+        res.json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'VALIDATE_ASSET',
@@ -278,7 +295,7 @@ export class AssetPlatformRouter {
           result: 'SUCCESS',
           metadata: { reason }
         });
-        res.json(result);
+        res.json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'MARK_ASSET_MALWARE_FAILED',
@@ -308,7 +325,7 @@ export class AssetPlatformRouter {
           targetId: assetId,
           result: 'SUCCESS'
         });
-        res.json(result);
+        res.json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'SANITIZE_ASSET',
@@ -338,7 +355,7 @@ export class AssetPlatformRouter {
           targetId: assetId,
           result: 'SUCCESS'
         });
-        res.json(result);
+        res.json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'ACTIVATE_ASSET',
@@ -420,7 +437,7 @@ export class AssetPlatformRouter {
           targetId: assetId,
           result: 'SUCCESS'
         });
-        res.json(result);
+        res.json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'ARCHIVE_ASSET',
@@ -450,7 +467,7 @@ export class AssetPlatformRouter {
           targetId: assetId,
           result: 'SUCCESS'
         });
-        res.json(result);
+        res.json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'SOFT_DELETE_ASSET',
@@ -480,7 +497,7 @@ export class AssetPlatformRouter {
           targetId: assetId,
           result: 'SUCCESS'
         });
-        res.json(result);
+        res.json(publicAssetDto(result));
       } catch (error: any) {
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'RESTORE_ASSET',
@@ -549,12 +566,18 @@ export class AssetPlatformRouter {
         message === 'ASSET_RESTORE_LEASE_NOT_CONFIGURED' ||
         message === 'ASSET_RESTORE_LEASE_RELEASE_FAILED' ||
         message === 'ASSET_MALWARE_SCANNING_NOT_CONFIGURED' ||
-        message === 'ASSET_SANITIZATION_NOT_CONFIGURED') {
+        message === 'ASSET_SANITIZATION_NOT_CONFIGURED' ||
+        message === 'ASSET_SECURE_DELIVERY_NOT_CONFIGURED') {
         return respond(503, 'Asset service temporarily unavailable', message);
       }
+      if (/^ASSET_(UPLOAD_RETENTION_CATEGORY_FORBIDDEN|TEMPORARY_EXPIRY_REQUIRED|RETENTION_EXPIRY_INVALID|RETENTION_EXPIRY_NOT_FUTURE|DECLARED_EXTENSION_MIME_MISMATCH)$/.test(message) ||
+        /^(Original filename is required|File is empty or missing|File size exceeds maximum limit:|Unsupported file extension:|Unsupported mime type:|Unsafe absolute path detected in|Path traversal attempt detected in|Null byte detected in)/.test(message)) {
+        return respond(422, 'Invalid asset metadata', 'ASSET_METADATA_INVALID');
+      }
+      if (message.startsWith('Asset with id ') && message.endsWith(' already exists')) return respond(409, 'Asset already exists', 'ASSET_ALREADY_EXISTS');
       if (message.startsWith('Asset not found:')) return respond(404, 'Asset not found', 'ASSET_NOT_FOUND');
       if (message.startsWith('ASSET_PROVIDER_')) return respond(502, 'Asset storage provider rejected the request', 'ASSET_PROVIDER_ERROR');
-      if (/^ASSET_(UPLOAD_FINALIZATION_REQUIRED|UPLOAD_CHANGED_AFTER_FINALIZATION|RESTORE_CONTENT_VERIFICATION_FAILED|RESTORE_CLEAN_LOCATOR_REQUIRED|RESTORE_EVIDENCE_INVALID|RESTORE_LEASE_CONFLICT|RESTORE_LEASE_REQUIRED|RESTORE_LEASE_INVALID_STATE|UPLOAD_VERIFICATION_FAILED|UPLOAD_VERIFICATION_REQUIRED|UPLOAD_VERIFICATION_INVALID_STATE|RECORD_CONCURRENT_MODIFICATION|PURGE_RETENTION_NOT_EXPIRED|PURGE_LEGAL_HOLD_ACTIVE|PURGE_RETENTION_CLAIM_ACTIVE|PURGE_RETENTION_CLAIM_NOT_OWNED|MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED|MALWARE_SCAN_INVALID_STATE|QUARANTINE_REQUIRED_FOR_ACTIVATION)$/.test(message) ||
+      if (/^ASSET_(QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION|SANITIZED_CONTENT_CHANGED_DURING_SCAN|DELIVERY_TRUST_EVIDENCE_REQUIRED|DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET|UPLOAD_FINALIZATION_REQUIRED|UPLOAD_CHANGED_AFTER_FINALIZATION|RESTORE_CONTENT_VERIFICATION_FAILED|RESTORE_CLEAN_LOCATOR_REQUIRED|RESTORE_EVIDENCE_INVALID|RESTORE_LEASE_CONFLICT|RESTORE_LEASE_REQUIRED|RESTORE_LEASE_INVALID_STATE|UPLOAD_VERIFICATION_FAILED|UPLOAD_VERIFICATION_REQUIRED|UPLOAD_VERIFICATION_INVALID_STATE|RECORD_CONCURRENT_MODIFICATION|PURGE_RETENTION_NOT_EXPIRED|PURGE_LEGAL_HOLD_ACTIVE|PURGE_RETENTION_CLAIM_ACTIVE|PURGE_RETENTION_CLAIM_NOT_OWNED|MALWARE_SCAN_PASSED_EVIDENCE_REQUIRED|MALWARE_SCAN_INVALID_STATE|QUARANTINE_REQUIRED_FOR_ACTIVATION)$/.test(message) ||
         /^Cannot (activate|archive|soft delete|purge|mark)/i.test(message)) {
         return respond(409, 'Asset state or dependency conflict', 'ASSET_STATE_CONFLICT');
       }

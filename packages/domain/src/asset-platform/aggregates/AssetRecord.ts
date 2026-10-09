@@ -131,6 +131,9 @@ export class AssetRecord {
     if (this.props.state === AssetLifecycleState.ACTIVE) {
       throw new Error('Cannot mark active asset as malware scan failed');
     }
+    if (![AssetLifecycleState.QUARANTINED, AssetLifecycleState.VALIDATING, AssetLifecycleState.SANITIZING].includes(this.props.state)) {
+      throw new Error('ASSET_MALWARE_SCAN_INVALID_STATE');
+    }
     this.props.state = AssetLifecycleState.MALWARE_SCAN_FAILED;
     this.props.malwareScan = { status: 'FAILED', scannedAt: new Date().toISOString(), locator: this.props.locator.value };
     this.events.push(new AssetMalwareScanFailedEvent(this.props.id, reason));

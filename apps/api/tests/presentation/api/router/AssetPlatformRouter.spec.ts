@@ -64,6 +64,10 @@ describe('AssetPlatformRouter', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.assetId).toBe('ast_01');
+    expect(res.body).not.toHaveProperty('storageLocator');
+    expect(res.body).not.toHaveProperty('bucketName');
+    expect(res.body).not.toHaveProperty('pathKey');
+    expect(res.body).not.toHaveProperty('storageZone');
     expect(ingestUseCase.requestUploadLocator).toHaveBeenCalledWith(expect.objectContaining({
       assetId: 'ast_01',
       assetReference: 'ref_01',
@@ -279,15 +283,17 @@ describe('AssetPlatformRouter', () => {
     expect(processUseCase.purgeAsset).toHaveBeenCalledWith({ assetId: 'ast_01' });
   });
 
-  it('returns 400 when use case throws an error', async () => {
+  it('returns safe 409 Problem Details for an in-use lifecycle conflict', async () => {
     const processUseCase = createMockProcessLifecycleUseCase();
     processUseCase.purgeAsset.mockRejectedValue(new Error('Cannot purge asset ast_01 because it is currently in use'));
     const app = createApp(undefined, processUseCase);
 
     const res = await request(app).delete('/assets/ast_01/purge');
 
-    expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'Cannot purge asset ast_01 because it is currently in use' });
+    expect(res.status).toBe(409);
+    expect(res.headers['content-type']).toContain('application/problem+json');
+    expect(res.body).toMatchObject({ status: 409, code: 'ASSET_STATE_CONFLICT' });
+    expect(JSON.stringify(res.body)).not.toContain('currently in use');
   });
 
   describe('Route Security Guards', () => {

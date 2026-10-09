@@ -1,0 +1,18 @@
+
+> manaratak-2.0-monorepo@0.0.0 ci:source:contracts
+> npm run audit:coverage:verify && npm run phase11:guards:verify && npm run remediation:verify && npm run closure:plan:verify
+
+
+> manaratak-2.0-monorepo@0.0.0 audit:coverage:verify
+> node scripts/architecture/verify-admin-audit-coverage.mjs
+
+ADMIN_MUTATION_AUDIT_COVERAGE=PASS; handlers=319; uniqueEndpoints=318; owner validation/atomic adoption requires separate evidence
+
+> manaratak-2.0-monorepo@0.0.0 phase11:guards:verify
+> node scripts/architecture/verify-source-architecture-guards.mjs && npm run phase11:guards:test && node scripts/quality/verify-source-quality.mjs
+
+SOURCE_ARCH_GUARD_NAME_BASED_RELATION=3
+SOURCE_ARCHITECTURE_GUARD=FAIL 3
+FAIL name-based-relation apps/admin/src/pages/ScholarshipCatalogDetailPage.tsx:346 :: Relationship resolution must use canonical IDs, never equality on display name/label/title.
+FAIL name-based-relation apps/admin/src/pages/ScholarshipListPage.tsx:474 :: Relationship resolution must use canonical IDs, never equality on display name/label/title.
+FAIL name-based-relation apps/web/src/features/public-template/components/CoursesSearchPage.tsx:110 :: Relationship resolution must use canonical IDs, never equality on display name/label/title.

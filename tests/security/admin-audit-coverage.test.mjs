@@ -56,3 +56,12 @@ test('new collisions between owner routers require a separate explicit review', 
   assert.equal(checkAuditRouteCollisions([row, duplicate]).length, 1);
   assert.deepEqual(checkAuditRouteCollisions([row, duplicate], [{ method: row.method, path: row.path, owners: [row.owner, duplicate.owner] }]), []);
 });
+
+test('inline router construction retains its owner when cradle repositories are resolved', () => {
+  const routes = buildAuditInventory({ ...fixture,
+    appSource: "v1Router.use('/admin/test', requireAdminPermission('admin:settings:manage'), TestRouter.create({repository: container.resolve('testRepository')}));",
+  });
+  assert.equal(routes.length, 1);
+  assert.equal(routes[0].owner, 'TestRouter');
+  assert.deepEqual(routes[0].permissionEvidence, ['admin:settings:manage']);
+});

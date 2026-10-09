@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "baseline": "bac768e7fcd76e5702697760669449b39b0e2cca",
   "scope": "Mounted canonical admin mutations; source checks, not runtime or owner atomicity proof",
   "routes": [
@@ -452,6 +452,38 @@
       "source": "apps/api/src/presentation/api/router/AIAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/asset-reuse/:assetId/delivery-grant",
+      "owner": "AssetReuseRouter",
+      "classification": "STANDARD_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:assets:reuse"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AssetReuseRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/asset-reuse/:assetId/selection-audit",
+      "owner": "AssetReuseRouter",
+      "classification": "STANDARD_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:assets:reuse"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AssetReuseRouter.ts"
+    },
+    {
       "method": "DELETE",
       "path": "/admin/assets/:assetId",
       "owner": "AssetPlatformRouter",
@@ -502,6 +534,22 @@
     {
       "method": "POST",
       "path": "/admin/assets/:assetId/delivery-grant",
+      "owner": "AssetPlatformRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:assets:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AssetPlatformRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/assets/:assetId/finalize-upload",
       "owner": "AssetPlatformRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -5095,5 +5143,14 @@
       "status": "PREEXISTING_ORDER_SENSITIVE_COLLISION",
       "dependency": "Section 05 Import; same mounted permission, first matching handler handles requests. Owner contract review is pending."
     }
-  ]
+  ],
+  "section03Review": {
+    "baseline": "148255694ab115383736ff2d97397719f8f9f3a1",
+    "addedRoutes": [
+      "POST /admin/asset-reuse/:assetId/delivery-grant",
+      "POST /admin/asset-reuse/:assetId/selection-audit",
+      "POST /admin/assets/:assetId/finalize-upload"
+    ],
+    "note": "AssetReuse permission and parsing verified by API contracts; finalization is management-only Critical. Owner atomic audit/outbox remains pending."
+  }
 }

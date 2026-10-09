@@ -11,6 +11,15 @@ This register is an evidence map, not an authorization to deploy or to mark runt
 - OPERATIONS: PENDING. Durable cross-system saga/reconciliation, alerting on compensation failure, expired lease heartbeat, real CDN expiry/cache, legal hold races and realistic pagination data.
 - VERDICT: NOT CLOSED / NO-GO.
 
+## Continuation review — 2026-10-09
+- Source continuation based on branch commit `1482556`: 220 passing tests including selected IAM/Audit regressions; TypeScript and source quality PASS, 13 Node security guards PASS.
+- Admin UI Chromium check PASS only with intercepted test API, dev HMR disabled and test-context CSP bypass. No production CSP/provider/browser end-to-end claim.
+- Historical CI run 37869788764 at `8eb794b` confirmed success, including ten disposable PostgreSQL tests. This does not validate newer commits.
+- Newly fixed: proof rechecks include signature/MIME/size/date; manual scan failure cannot resurrect deleted/purged assets; safe lifecycle actions mounted with usage confirmation; HTTP coordinates hidden; inventory guard understands inline router dependencies and tracks three reviewed asset additions.
+- Source blockers remain: durable activation reconciliation/journal, event/outbox integration or approved non-contract ADR, usage-vs-lifecycle concurrent serialization, restoration of original retention policy. Provider and operations gates above remain open.
+- Optional rights and renditions tasks FGA-03-001/002 remain PROPOSED_ENHANCEMENT, not CLOSED.
+- Verdict remains **NOT CLOSED / NO-GO**. See task-by-task current review in SECTION_03_EAP_IMPLEMENTATION.md and evidence/section-03/README.md.
+
 ## Completion criteria to check, never infer from source-only PASS
 1. Upload remains INITIATED until provider confirms actual bytes; evidence persists.
 2. Malware-failed or missing-scan assets never reach CLEAN/ACTIVE.

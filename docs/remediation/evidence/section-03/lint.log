@@ -1,0 +1,24 @@
+
+/workspace/manaratak-audit-main/apps/admin/src/pages/AssetAdminPage.tsx
+  163:6  warning  React Hook useEffect has a missing dependency: 'load'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/manaratak-audit-main/apps/api/src/presentation/api/router/AssetPlatformRouter.ts
+   24:47   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   24:70   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   24:138  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   24:152  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   32:92   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  207:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  238:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  268:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  299:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  329:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  359:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  390:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  441:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  471:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  501:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  531:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 18 problems (0 errors, 18 warnings)

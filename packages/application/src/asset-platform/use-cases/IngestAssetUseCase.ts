@@ -86,6 +86,7 @@ export class IngestAssetUseCase {
     };
   }
 
+  /** Legacy compatibility allocation; uploaded bytes still require finalizeUploadedAsset. */
   public async registerQuarantinedAsset(input: RegisterQuarantinedAssetDto): Promise<AssetRecordDto> {
     AssetValidator.validate(input);
 

@@ -48,7 +48,12 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
       if (!ts.isCallExpression(child)) return;
       const name = child.expression.getText(app);
       if (name === 'requireAdminPermission') permissions.push(literal(child.arguments[0]));
-      if (name === 'lazyRouter' || /container\.resolve$/.test(name)) owner = bindings.get(literal(child.arguments[0]));
+      if (name === 'lazyRouter' || /container\.resolve$/.test(name)) {
+        const resolved = bindings.get(literal(child.arguments[0]));
+        if (resolved) owner = resolved;
+        else if (name === 'lazyRouter') throw new Error(`ADMIN_ROUTER_BINDING_UNRESOLVED:${prefix}`);
+        // Inline Router.create dependencies may resolve repositories, not routers.
+      }
       if (ts.isPropertyAccessExpression(child.expression) && child.expression.name.text === 'create'
         && ts.isIdentifier(child.expression.expression) && child.expression.expression.text.endsWith('Router')) owner = child.expression.expression.text;
     });

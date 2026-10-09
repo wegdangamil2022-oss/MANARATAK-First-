@@ -357,6 +357,32 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     const purged = await repo.findById(new AssetId('asset-in-use'));
     expect(purged?.state).toBe(AssetLifecycleState.PURGED);
   });
+  it.each([
+    { signatureVerified: false }, { verifiedMimeType: 'application/x-msdownload' },
+    { byteSize: 9999 }, { verifiedAt: 'not-a-date' },
+  ])('rejects changed upload proof before scanning or promotion: %j', async (change) => {
+    const assetId = 'proof-recheck';
+    await ingestUseCase.requestUploadLocator({
+      assetId, assetReference: 'proof-ref', ownerId: 'owner', ownerType: 'STUDENT',
+      originalFilename: 'a.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 10,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId });
+    const originalVerify = storageGateway.verifyUploadedObject.bind(storageGateway);
+    const verify = vi.spyOn(storageGateway, 'verifyUploadedObject');
+    verify.mockImplementation(async (...args) => ({ ...await originalVerify(...args), ...change }));
+    const scan = vi.spyOn(malwareScanner, 'scan');
+    await expect(lifecycleUseCase.validateAsset({ assetId })).rejects.toThrow('ASSET_UPLOAD_CHANGED_AFTER_FINALIZATION');
+    expect(scan).not.toHaveBeenCalled();
+    verify.mockRestore();
+    await lifecycleUseCase.validateAsset({ assetId });
+    await lifecycleUseCase.sanitizeAsset({ assetId });
+    vi.spyOn(storageGateway, 'verifyUploadedObject').mockImplementation(async (...args) => ({ ...await originalVerify(...args), ...change }));
+    const move = vi.spyOn(storageGateway, 'moveToCleanZone');
+    await expect(lifecycleUseCase.activateAsset({ assetId })).rejects.toThrow('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
+    expect(move).not.toHaveBeenCalled();
+  });
+
   it('does not call moveToCleanZone for quarantined or malware-failed assets', async () => {
     await ingestUseCase.requestUploadLocator({
       assetId: 'asset-preflight', assetReference: 'ref-preflight', ownerId: 'owner',

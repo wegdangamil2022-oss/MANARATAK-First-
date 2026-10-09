@@ -42,11 +42,12 @@ export function AssetUploadWizard({ onUploaded }: { onUploaded: () => void }) {
       if (!grant.uploadGrant) throw new Error('خدمة إصدار رابط رفع آمن غير متاحة.');
       setPendingAsset(grant.assetId);
       const target = new URL(grant.uploadGrant.uploadUrl);
-      if (target.protocol !== 'https:' &&
-          !(target.protocol === 'http:' && target.hostname === 'localhost')) {
+      if (target.username || target.password || (target.protocol !== 'https:' &&
+          !(import.meta.env.DEV && target.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(target.hostname)))) {
         throw new Error('رابط الرفع غير آمن.');
       }
-      if (Date.parse(grant.uploadGrant.expiresAt) <= Date.now()) throw new Error('انتهت صلاحية رابط الرفع.');
+      if (!['PUT', 'POST'].includes(grant.uploadGrant.method) ||
+          !Number.isFinite(Date.parse(grant.uploadGrant.expiresAt)) || Date.parse(grant.uploadGrant.expiresAt) <= Date.now()) throw new Error('انتهت صلاحية رابط الرفع.');
       const response = await fetch(target, {
         method: grant.uploadGrant.method, headers: grant.uploadGrant.headers,
         body: file, credentials: 'omit', redirect: 'error',

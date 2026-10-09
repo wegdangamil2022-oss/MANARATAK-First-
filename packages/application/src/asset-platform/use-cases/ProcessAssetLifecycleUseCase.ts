@@ -77,6 +77,9 @@ export class ProcessAssetLifecycleUseCase {
       declaredMimeType: record.uploadVerification.verifiedMimeType,
     });
     if (verified.signatureVerified !== true ||
+        verified.byteSize !== record.uploadVerification.byteSize ||
+        verified.verifiedMimeType !== record.uploadVerification.verifiedMimeType ||
+        !Number.isFinite(Date.parse(verified.verifiedAt)) ||
         verified.checksumSha256.toLowerCase() !== record.uploadVerification.checksumSha256.toLowerCase()) {
       throw new Error('ASSET_UPLOAD_CHANGED_AFTER_FINALIZATION');
     }
@@ -143,7 +146,11 @@ export class ProcessAssetLifecycleUseCase {
     const observed = await this.storageGateway.verifyUploadedObject(record.locator, {
       declaredMimeType: record.metadata.mimeType, expectedByteSize: verified.byteSize,
     });
-    if (observed.checksumSha256.toLowerCase() !== verified.checksumSha256.toLowerCase()) {
+    if (observed.signatureVerified !== true ||
+        observed.byteSize !== verified.byteSize ||
+        observed.verifiedMimeType !== verified.verifiedMimeType ||
+        !Number.isFinite(Date.parse(observed.verifiedAt)) ||
+        observed.checksumSha256.toLowerCase() !== verified.checksumSha256.toLowerCase()) {
       throw new Error('ASSET_SANITIZED_CONTENT_CHANGED_DURING_SCAN');
     }
     record.passSanitizedMalwareScan();
@@ -167,7 +174,11 @@ export class ProcessAssetLifecycleUseCase {
       declaredMimeType: record.metadata.mimeType,
       expectedByteSize: record.uploadVerification?.byteSize,
     });
-    if (verified.checksumSha256.toLowerCase() !== record.checksum?.hash) {
+    if (verified.signatureVerified !== true ||
+        verified.byteSize !== record.uploadVerification?.byteSize ||
+        verified.verifiedMimeType !== record.metadata.mimeType ||
+        !Number.isFinite(Date.parse(verified.verifiedAt)) ||
+        verified.checksumSha256.toLowerCase() !== record.checksum?.hash) {
       throw new Error('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
     }
     const cleanLocator = await this.storageGateway.moveToCleanZone(record.locator, record.checksum!.hash);

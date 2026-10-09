@@ -5,7 +5,12 @@ on:
     branches:
       - codex/section-01-iam-rbac
     paths:
-      - 'apps/admin/src/components/AssetPicker.tsx'
+      - 'apps/admin/src/components/Asset*.tsx'
+      - 'apps/admin/src/pages/Asset*.spec.tsx'
+      - 'packages/infrastructure/src/retention/PrismaAssetRetentionGateway.ts'
+      - 'scripts/architecture/verify-admin-audit-coverage.mjs'
+      - 'tests/security/admin-audit-coverage.test.mjs'
+      - 'docs/remediation/evidence/section-02/admin-mutation-audit-inventory.json'
       - 'apps/admin/src/pages/AssetAdminPage.tsx'
       - 'apps/api/src/app.ts'
       - 'apps/api/src/presentation/api/router/Asset*'
@@ -84,8 +89,14 @@ jobs:
           apps/api/tests/presentation/api/router/AssetUsageImpact.spec.ts
           apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts
           apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts
+          apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts
+          apps/admin/src/components/AssetLifecycleActions.spec.tsx
       - name: Legacy provider transport security checks
         run: node --test tests/remediation/w3-asset-provider.test.mjs
+      - name: Audit inventory and security regression guards
+        run: |
+          npm run audit:coverage:verify
+          node --test tests/security/admin-audit-coverage.test.mjs tests/security/audit-integrity-remediation-source.test.mjs
       - name: Confirm PostgreSQL is the disposable localhost service
         shell: bash
         run: |
