@@ -131,6 +131,8 @@ describe('PrismaImportQueueGateway', () => {
       batchId: 'batch-running', workerId: 'worker-in-flight', attempt: 4,
       claimUntil: new Date(Date.now() + 60_000),
     };
+    // QUEUED/PAUSED cannot match an actively claimed RUNNING job.
+    prisma.importBatch.updateMany.mockResolvedValueOnce({ count: 0 });
     expect(await gateway.cancelJob({ batchId: lease.batchId, reason: 'Operator request' })).toBe(true);
     expect(prisma.importBatch.updateMany).toHaveBeenCalledWith({
       where: { id: lease.batchId,
