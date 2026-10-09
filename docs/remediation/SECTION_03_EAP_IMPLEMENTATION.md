@@ -274,3 +274,11 @@ npm run ci:source:contracts
 - EAP Problem Details returns sanitized 409 for lease conflict/invalid transition, 503 for missing lease capability or unsuccessful lease release; never sends provider/storage exceptions verbatim.
 - Additional negative application regression proves a failed restore lease prevents any provider-side restore and leaves the DB record DELETED.
 - Postgres lease race regression is separate and runs only against disposable localhost.
+
+## CI performance — single-build verification pipeline
+
+- Consolidated three independent EAP jobs into one verification job sharing one ephemeral PostgreSQL service. TypeScript references are compiled **once** rather than three times; `npm ci` installs dependencies once and runs Prisma generate through the existing `postinstall`, rather than executing another redundant generate in each job.
+- Kept all original gates: TypeScript, `quality:source`, EAP domain/application/infrastructure/API Vitest, legacy W3 provider checks, and disposable PostgreSQL integration.
+- DB changes are only permitted in the two isolated PostgreSQL steps. Before the test schema is created, the job checks exact localhost-only `DATABASE_URL` and `DIRECT_URL`. No production DB environment or secrets are used.
+- Retained `cancel-in-progress` for superseded branch pushes; henceforth prefer batched edits per commit/CI cycle to reduce cancelled redundant runs. Job-name consolidation may require adjusting optional GitHub branch-protection required-check configuration if enabled.
+- No tests omitted. Performance improvement is structural; the updated workflow's CI outcome must be verified before claiming success.

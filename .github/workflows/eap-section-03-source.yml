@@ -37,56 +37,10 @@ env:
   DATABASE_ENVIRONMENT: source
 
 jobs:
-  typecheck:
-    name: Repository TypeScript source validation
+  eap-verification:
+    name: EAP all source and disposable PostgreSQL verification
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        # v4.2.2
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        # v4
-        with:
-          node-version: 22.16.0
-          cache: npm
-      - run: npm ci
-      - run: npm run db:generate
-      - name: TypeScript project references
-        run: npm run typecheck
-      - name: Repository source quality
-        run: npm run quality:source
-
-  eap-tests:
-    name: EAP targeted source regression tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: 22.16.0
-          cache: npm
-      - run: npm ci
-      - run: npm run db:generate
-      - name: Build all workspace project references needed by Vitest
-        run: npm run typecheck
-      - name: Asset domain, application, infrastructure and API contracts
-        run: >-
-          npx --no-install vitest run --config vitest.config.ts
-          packages/domain/tests/asset-platform
-          packages/application/tests/asset-platform
-          packages/infrastructure/tests/asset-platform
-          apps/api/tests/presentation/api/router/AssetReuseRouter.spec.ts
-          apps/api/tests/presentation/api/router/AssetUsageImpact.spec.ts
-          apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts
-          apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts
-      - name: Legacy provider transport security checks
-        run: node --test tests/remediation/w3-asset-provider.test.mjs
-
-  eap-postgres:
-    name: EAP disposable PostgreSQL concurrency and purge reconciliation
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     permissions:
       contents: read
     services:
@@ -104,25 +58,53 @@ jobs:
           --health-timeout 5s
           --health-retries 12
     env:
-      # These are *constant localhost disposable* test credentials, not a linked or production database.
+      # A disposable GitHub Actions service on this runner; never use an external DB.
       DATABASE_URL: postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public
       DIRECT_URL: postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public
-      DATABASE_MUTATIONS_ALLOWED: 'true'
-      RUN_DATABASE_INTEGRATION_TESTS: 'true'
-      EAP_EPHEMERAL_DB_TESTS: 'true'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22.16.0
           cache: npm
-      - run: npm ci
-      - run: npm run db:generate
-      - name: Build TypeScript project references
+      # npm ci already invokes postinstall -> npm run db:generate.
+      - name: Install once and generate Prisma client once
+        run: npm ci
+      - name: TypeScript project references (one compilation for all tests)
         run: npm run typecheck
+      - name: Repository source quality
+        run: npm run quality:source
+      - name: EAP domain, application, infrastructure and API contracts
+        run: >-
+          npx --no-install vitest run --config vitest.config.ts
+          packages/domain/tests/asset-platform
+          packages/application/tests/asset-platform
+          packages/infrastructure/tests/asset-platform
+          apps/api/tests/presentation/api/router/AssetReuseRouter.spec.ts
+          apps/api/tests/presentation/api/router/AssetUsageImpact.spec.ts
+          apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts
+          apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts
+      - name: Legacy provider transport security checks
+        run: node --test tests/remediation/w3-asset-provider.test.mjs
+      - name: Confirm PostgreSQL is the disposable localhost service
+        shell: bash
+        run: |
+          test "$DATABASE_URL" = "postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public"
+          test "$DIRECT_URL" = "$DATABASE_URL"
+          pg_isready -h 127.0.0.1 -p 5432 -U eap_ci -d manaratak_eap_ci_test
+        env:
+          PGPASSWORD: eap_ci_disposable_only
       - name: Create schema on disposable localhost PostgreSQL only
         run: npx --no-install prisma db push --schema=packages/infrastructure/prisma/schema.prisma --skip-generate
-      - name: Run EAP PostgreSQL real-CAS and purge-recovery tests
+        env:
+          DATABASE_MUTATIONS_ALLOWED: 'true'
+          RUN_DATABASE_INTEGRATION_TESTS: 'true'
+          EAP_EPHEMERAL_DB_TESTS: 'true'
+      - name: EAP PostgreSQL real-CAS and purge/restore reconciliation tests
         run: >-
           npx --no-install vitest run --config vitest.config.ts
           packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts
+        env:
+          DATABASE_MUTATIONS_ALLOWED: 'true'
+          RUN_DATABASE_INTEGRATION_TESTS: 'true'
+          EAP_EPHEMERAL_DB_TESTS: 'true'
