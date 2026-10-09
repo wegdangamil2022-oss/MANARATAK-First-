@@ -514,6 +514,19 @@ export class ImportAdminUseCases {
           : undefined;
 
         if (envelope) {
+          // A write-ahead marker prevents automatic replay after a crash between
+          // owner acceptance and ImportRecord acknowledgement. Until the owning
+          // domain provides a transactional receipt, uncertain outcomes need review.
+          if (rawPayload._phase6HandoffState === 'DISPATCH_IN_FLIGHT' ||
+              rawPayload._phase6HandoffState === 'MANUAL_RECONCILIATION_REQUIRED') {
+            await this.importRepository.updateRecord(record.id, {
+              status: ImportRecordStatus.NEEDS_REVIEW,
+              rawPayload: { ...rawPayload, _phase6HandoffState: 'MANUAL_RECONCILIATION_REQUIRED' },
+              processingNotes: 'Owner dispatch outcome uncertain; reconcile before replay.',
+            });
+            processedRecords++;
+            continue;
+          }
           if (!this.hasHandoffConsumer(envelope.ownerDomain)) {
             await this.importRepository.updateRecord(record.id, {
               status: ImportRecordStatus.NEEDS_REVIEW,
@@ -528,19 +541,6 @@ export class ImportAdminUseCases {
             continue;
           }
 
-          // A write-ahead marker prevents automatic replay after a crash between
-          // owner acceptance and ImportRecord acknowledgement. Until the owning
-          // domain provides a transactional receipt, uncertain outcomes need review.
-          if (rawPayload._phase6HandoffState === 'DISPATCH_IN_FLIGHT' ||
-              rawPayload._phase6HandoffState === 'MANUAL_RECONCILIATION_REQUIRED') {
-            await this.importRepository.updateRecord(record.id, {
-              status: ImportRecordStatus.NEEDS_REVIEW,
-              rawPayload: { ...rawPayload, _phase6HandoffState: 'MANUAL_RECONCILIATION_REQUIRED' },
-              processingNotes: 'Owner dispatch outcome uncertain; reconcile before replay.',
-            });
-            processedRecords++;
-            continue;
-          }
           await this.importRepository.updateRecord(record.id, {
             rawPayload: { ...rawPayload, _phase6HandoffState: 'DISPATCH_IN_FLIGHT' },
           });
