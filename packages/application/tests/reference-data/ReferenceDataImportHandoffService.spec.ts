@@ -95,10 +95,25 @@ describe('ReferenceDataImportHandoffService', () => {
 
     expect(batch.status).toBe(ReferenceDataSeedStatus.READY_TO_APPLY);
     expect(batch.records).toHaveLength(2);
-    expect(batch.records[0].deterministicKey).toBe('US:New York');
-    expect(batch.records[1].deterministicKey).toBe('GB:London');
+    expect(batch.records[0].deterministicKey).toBe('US|new york|~');
+    expect(batch.records[1].deterministicKey).toBe('GB|london|~');
     expect(batch.validationSummary?.validRecords).toBe(2);
     expect(batch.validationSummary?.invalidRecords).toBe(0);
+  });
+
+  it('distinguishes cities with identical names in different administrative regions', () => {
+    const batch = service.prepareSeedBatch({
+      seedBatchId: 'city-region-scope',
+      sourceName: 'Local gazetteer',
+      sourceVersion: '1',
+      entityType: 'CITY',
+      records: [
+        { countryIso2Code: 'YE', name: 'إب', region: 'محافظة إب' },
+        { countryIso2Code: 'YE', name: 'إب', region: 'مديرية مختلفة' }
+      ]
+    });
+    expect(batch.status).toBe(ReferenceDataSeedStatus.READY_TO_APPLY);
+    expect(batch.records[0].deterministicKey).not.toBe(batch.records[1].deterministicKey);
   });
 
   it('returns VALIDATED (not READY_TO_APPLY) when records are invalid', () => {

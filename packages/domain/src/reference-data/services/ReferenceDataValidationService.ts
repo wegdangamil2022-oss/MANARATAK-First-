@@ -218,11 +218,11 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
 
     if (isoCode) {
       presentFields.push('isoCode');
-      if (!/^[a-z]{2,8}(-[a-z0-9]+)*$/.test(isoCode)) {
+      if (!/^[a-z]{2,3}$/.test(isoCode)) {
         issues.push({
           fieldName: 'isoCode',
           code: 'INVALID_ISO_FORMAT',
-          message: 'isoCode must be 2 to 8 lowercase letters or BCP-47 style with hyphen',
+          message: 'isoCode must be an ISO 639 alpha-2 or alpha-3 lowercase language code; BCP 47 locale tags are a separate concept',
           severity: ReferenceDataValidationSeverity.ERROR
         });
       }

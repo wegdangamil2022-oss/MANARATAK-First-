@@ -9,7 +9,8 @@ import {
   UpsertReferenceCountryDto,
   UpsertReferenceCurrencyDto,
   UpsertReferenceLanguageDto,
-  UpsertReferenceCityDto
+  UpsertReferenceCityDto,
+  referenceCityScopeKey
 } from '@manaratak/domain';
 
 export interface ReferenceDataImportHandoffCommand {
@@ -50,7 +51,13 @@ export class ReferenceDataImportHandoffService {
           break;
         case 'CITY':
           if (record.countryIso2Code && record.name) {
-            deterministicKey = `${String(record.countryIso2Code).trim()}:${String(record.name).trim()}`;
+            // Same scoped canonical identity as validator/repository; never key by bare country:name.
+            deterministicKey = referenceCityScopeKey({
+              countryIso2Code: String(record.countryIso2Code),
+              name: String(record.name),
+              administrativeRegionId: typeof record.administrativeRegionId === 'string' ? record.administrativeRegionId : null,
+              region: typeof record.region === 'string' ? record.region : null,
+            });
           }
           break;
       }

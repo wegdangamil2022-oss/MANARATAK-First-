@@ -78,7 +78,7 @@ export class ReferenceDataAdminRouter {
     const languageSchema = z.object({
       id: z.string().uuid().optional(),
       expectedVersion: z.number().int().positive().optional(),
-      isoCode: z.string().regex(/^[a-z]{2,8}(-[a-z0-9]+)*$/),
+      isoCode: z.string().regex(/^[a-z]{2,3}$/),
       name: z.string().min(1),
       nameAr: z.string().min(1).nullable().optional(),
       nativeName: z.string().nullable().optional(),
