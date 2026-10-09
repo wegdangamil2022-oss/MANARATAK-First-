@@ -1,5 +1,5 @@
 import https from 'node:https';
-import type { ImportSourceDefinition } from '@manaratak/domain';
+import { SourceAccessExecutionPolicy, type ImportSourceDefinition } from '@manaratak/domain';
 import type {
   ISafeSourceHttpTransport,
   SafeSourceHttpResponse,
@@ -97,6 +97,8 @@ export class NodeSafeSourceHttpTransport implements ISafeSourceHttpTransport {
     source: ImportSourceDefinition,
     request: SourceAcquisitionRequest,
   ): Promise<SafeSourceHttpResponse> {
+    // Even callers bypassing connector selection cannot acquire restricted sources.
+    SourceAccessExecutionPolicy.assertNetworkAllowed(source);
     const requestedUrl = request.targetUrl ?? source.baseUrl;
     let current = requestedUrl;
 
