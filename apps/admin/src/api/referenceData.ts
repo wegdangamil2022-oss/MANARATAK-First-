@@ -37,6 +37,9 @@ function mutate<T>(path: string, method: 'POST' | 'PUT', body: unknown, options:
 }
 
 export const referenceDataAdminApi = {
+  qualitySnapshot() {
+    return adminApiClient.request<{ data: Array<{ collection: ReferenceDataCollection; total: number; active: number; nonActive: number; aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown' }>; asOf: string }>(base + '/quality');
+  },
   getRegion(id: string) {
     return adminApiClient.request<AdministrativeRegionDto>(base + '/regions/' + encodeURIComponent(id));
   },

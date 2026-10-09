@@ -108,6 +108,23 @@ export class ReferenceDataUseCases {
       () => { throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED'); });
   }
 
+  /** Only source-backed counts are numeric. No inferred quality or coverage claims. */
+  public async getQualitySnapshot(): Promise<Array<{
+    collection: ReferenceDataCollection; total: number; active: number; nonActive: number;
+    aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown';
+  }>> {
+    const collections: ReferenceDataCollection[] = ['countries', 'currencies', 'languages', 'regions', 'cities'];
+    return Promise.all(collections.map(async collection => {
+      const [total, active] = await Promise.all([
+        this.repository.countRecords(collection, { activeOnly: false }),
+        this.repository.countRecords(collection, { activeOnly: true }),
+      ]);
+      return { collection, total, active, nonActive: total - active,
+        aliasCoverage: 'unknown' as const, authoritativeCoverage: 'unknown' as const,
+        brokenRelationships: 'unknown' as const };
+    }));
+  }
+
   public async listPage(collection: ReferenceDataCollection, filters: ReferenceDataFilters = {}): Promise<ReferenceDataPage<ReferenceCountryDto | ReferenceCurrencyDto | ReferenceLanguageDto | ReferenceCityDto | AdministrativeRegionDto>> {
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 50;

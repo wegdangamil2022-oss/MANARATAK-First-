@@ -144,6 +144,11 @@ export class ReferenceDataAdminRouter {
       res.json(await referenceDataUseCases.upsertRegion({ ...body, id }, mutationContext(req)));
     }));
 
+    router.get('/quality', asyncHandler(async (_req: Request, res: Response) => {
+      res.json({ data: await referenceDataUseCases.getQualitySnapshot(), source: 'P7_OWNER_COUNTS',
+        asOf: new Date().toISOString(), coverageEvidence: 'unknown' });
+    }));
+
     router.get(
       '/countries',
       asyncHandler(async (req: Request, res: Response) => {

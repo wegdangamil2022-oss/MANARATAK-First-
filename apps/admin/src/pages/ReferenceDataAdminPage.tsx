@@ -115,6 +115,24 @@ export function ReferenceDataAdminPage() {
     url.searchParams.set('p7Page', '1');
     window.history.replaceState(window.history.state, '', url.toString());
   };
+  const [quality, setQuality] = useState<Awaited<ReturnType<typeof referenceDataAdminApi.qualitySnapshot>> | null>(null);
+  const [qualityState, setQualityState] = useState<'loading' | 'ready' | 'error'>('loading');
+  useEffect(() => {
+    let live = true;
+    referenceDataAdminApi.qualitySnapshot().then(result => {
+      if (live) { setQuality(result); setQualityState('ready'); }
+    }).catch(() => { if (live) setQualityState('error'); });
+    return () => { live = false; };
+  }, []);
+  const drillDown = (collection: ReferenceDataCollection, nonActiveOnly = false) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('p7Status', nonActiveOnly ? 'all' : 'active');
+    url.searchParams.set('p7Page', '1');
+    url.searchParams.delete('p7Q');
+    window.history.replaceState(window.history.state, '', url.toString());
+    // Remount the selected tab so its URL-backed owner filters reload.
+    setActiveTab(collection);
+  };
 
   const tabLabels: Record<string, string> = {
     countries: 'الدول المعتمدة',
@@ -139,6 +157,21 @@ export function ReferenceDataAdminPage() {
         </div>
       </div>
       
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+        <h3 className="font-black text-base">جودة وتغطية البيانات المرجعية / Reference quality</h3>
+        {qualityState === 'loading' && <p role="status">جارٍ تحميل المؤشرات من خادم البيانات المرجعية…</p>}
+        {qualityState === 'error' && <p role="alert" className="text-red-600">تعذر جلب بيانات المؤشرات. الجودة والتغطية: غير معروفة / Unknown.</p>}
+        {quality && <div className="grid grid-cols-2 md:grid-cols-5 gap-2">{quality.data.map(item => (
+          <button key={item.collection} type="button" onClick={() => drillDown(item.collection)}
+            className="text-right rounded-xl border p-3 hover:bg-slate-50" aria-label={`عرض تفاصيل ${item.collection}`}>
+            <span className="block text-xs font-bold">{item.collection}</span>
+            <span className="block text-lg font-black">{item.active} / {item.total}</span>
+            <span className="block text-xs">غير نشطة: {item.nonActive}</span>
+            <span className="block text-xs text-amber-700">التغطية الموثّقة: unknown</span>
+          </button>
+        ))}</div>}
+        <p className="text-xs text-slate-600">الأعداد من خادم P7 فقط. جودة الأسماء البديلة والروابط والمصادر الرسمية: unknown حتى تتوفر أدلة قابلة للفحص. انقر على المجموعة للاطلاع على سجلاتها.</p>
+      </section>
       <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
         <div className="flex border-b border-slate-100 bg-slate-50/60 overflow-x-auto p-2 gap-2">
           {(['countries', 'currencies', 'languages', 'regions', 'cities'] as const).map(tab => (
