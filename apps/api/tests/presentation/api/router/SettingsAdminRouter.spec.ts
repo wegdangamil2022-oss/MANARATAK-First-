@@ -71,8 +71,8 @@ describe('SettingsAdminRouter', () => {
     const payload = {
       assignmentId: 'assign-1',
       key: 'test.key',
-      level: 'TENANT',
-      scopeId: 'tenant-1',
+      level: 'DOMAIN',
+      scopeId: 'courses',
       versionId: 'v-1',
       value: 'new-val',
       type: 'String'
@@ -87,6 +87,17 @@ describe('SettingsAdminRouter', () => {
       expect.objectContaining({ ...payload, authorId: 'admin-settings-1' }),
       expect.objectContaining({ actorId: 'admin-settings-1', source: 'admin-settings-api' })
     );
+  });
+
+  it('rejects unapproved TENANT writes via the Application boundary without leaking values', async () => {
+    mockManageSettingsUseCase.assignValue.mockRejectedValue(new Error('SETTINGS_TENANT_SCOPE_UNAPPROVED'));
+    const result = await request(app).post('/api/v1/admin/settings/assignments').send({
+      assignmentId: 'legacy', key: 'feature.safe', level: 'TENANT', scopeId: 'legacy',
+      versionId: 'attempt', value: true, type: 'Boolean',
+    });
+    expect(result.status).toBe(400);
+    expect(result.body.error.code).toBe('SETTINGS_OPERATION_REJECTED');
+    expect(JSON.stringify(result.body)).not.toContain('true');
   });
 
   it('POST /assignments/rollback should validate and call use case', async () => {
