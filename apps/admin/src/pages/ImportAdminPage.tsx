@@ -1897,7 +1897,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                             'RUNNING',
                             'PAUSED',
                             'RESUMING',
-                            'CANCELLING',
+                            'PAUSING',
                           ].includes(status) && (
                             <ActionButton
                               icon={Square}
@@ -3156,6 +3156,7 @@ function recordStatusLabel(value: string, isArabic: boolean) {
     CREATED: ['أُنشئت', 'Created'],
     QUEUED: ['في الطابور', 'Queued'],
     RUNNING: ['قيد المعالجة', 'Running'],
+    PAUSING: ['جارٍ الإيقاف المؤقت', 'Pausing'],
     PAUSED: ['متوقفة مؤقتًا', 'Paused'],
     RESUMING: ['قيد الاستئناف', 'Resuming'],
     CANCELLING: ['قيد الإلغاء', 'Cancelling'],
