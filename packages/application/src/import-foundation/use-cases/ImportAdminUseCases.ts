@@ -16,7 +16,7 @@ type ImportRepository = {
   createBatch(data: Record<string, unknown>): Promise<any>;
   createRecord(data: Record<string, unknown>): Promise<any>;
   bulkCreateRecords?(records: Array<Record<string, unknown>>): Promise<{ count: number; acceptedRecordIds?: string[] }>;
-  updateRecord?(id: string, updates: Record<string, unknown>): Promise<any>;
+  updateRecord?(id: string, updates: Record<string, unknown>, lease?: ImportJobLease): Promise<any>;
   updateBatchStats(id: string, data: Record<string, unknown>, lease?: ImportJobLease): Promise<any>;
   getBatchById?(id: string): Promise<any | null>;
   listBatches(filters?: Record<string, unknown>): Promise<any[]>;
@@ -545,7 +545,7 @@ export class ImportAdminUseCases {
               status: ImportRecordStatus.NEEDS_REVIEW,
               rawPayload: { ...rawPayload, _phase6HandoffState: 'MANUAL_RECONCILIATION_REQUIRED' },
               processingNotes: 'Owner dispatch outcome uncertain; reconcile before replay.',
-            });
+            }, getActiveLease());
             processedRecords++;
             continue;
           }
@@ -557,7 +557,7 @@ export class ImportAdminUseCases {
                 _phase6HandoffState: 'AWAITING_DOMAIN_INTEGRATION',
               },
               processingNotes: 'Phase 06 staging completed; owning-domain handoff integration is not registered yet.',
-            });
+            }, getActiveLease());
             processedRecords++;
             rememberAcceptedKey(record.sourceDedupKey);
             continue;
@@ -565,7 +565,7 @@ export class ImportAdminUseCases {
 
           await this.importRepository.updateRecord(record.id, {
             rawPayload: { ...rawPayload, _phase6HandoffState: 'DISPATCH_IN_FLIGHT' },
-          });
+          }, getActiveLease());
           await heartbeat();
           const handoffResult = await this.handoffDispatcher.dispatch(envelope as any);
           // If cancelled during a slow owner call, retain the uncertainty marker.
@@ -576,7 +576,7 @@ export class ImportAdminUseCases {
           if (handoffResult !== null && handoffResult !== undefined) {
             nextPayload._domainHandoff = handoffResult;
           }
-          await this.importRepository.updateRecord(record.id, { rawPayload: nextPayload });
+          await this.importRepository.updateRecord(record.id, { rawPayload: nextPayload }, getActiveLease());
         }
 
         if (record.status === ImportRecordStatus.COMPLETE) {
