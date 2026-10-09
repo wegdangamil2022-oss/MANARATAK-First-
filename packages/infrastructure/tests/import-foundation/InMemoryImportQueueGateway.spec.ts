@@ -94,6 +94,48 @@ describe('InMemoryImportQueueGateway', () => {
     expect(await gateway.cancelJob({ batchId: 'unknown' })).toBe(false);
   });
 
+  it('keeps a running cancellation pending until the same worker actually acknowledges stopping', async () => {
+    const batchId = 'batch-cooperative-cancel';
+    await gateway.enqueueImportJob({
+      batchId, sourceSystem: 'TEST', targetDomain: ImportTargetDomain.UNIVERSITIES,
+    });
+    const lease = await gateway.claimNextJob({ workerId: 'worker-ack', leaseDurationMs: 60_000 });
+    expect(lease).toBeTruthy();
+    expect(await gateway.cancelJob({ batchId, reason: 'Operator request' })).toBe(true);
+    const pending = await gateway.getJobStatus(batchId);
+    expect(pending?.status).toBe(ImportJobStatus.CANCELLING);
+    expect(pending?.claimedBy).toBe('worker-ack');
+    expect(await gateway.claimNextJob({ workerId: 'replacement', leaseDurationMs: 60_000 })).toBeNull();
+    expect(await gateway.heartbeat(lease!, 60_000)).toBeNull();
+    expect(await gateway.completeClaimedJob(lease!)).toBe(false);
+    expect(await gateway.acknowledgeStoppedJob({ ...lease!, attempt: lease!.attempt + 1 })).toBeNull();
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLING);
+    expect(await gateway.acknowledgeStoppedJob(lease!)).toBe('CANCELLED');
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLED);
+    expect(await gateway.acknowledgeStoppedJob(lease!)).toBeNull();
+    expect(await gateway.replayJob({ batchId, fromCheckpoint: true })).toBe(true);
+  });
+
+  it('supports RUNNING to PAUSING, cancellation escalation, and worker-confirmed PAUSED', async () => {
+    const batchId = 'batch-cooperative-pause';
+    await gateway.enqueueImportJob({
+      batchId, sourceSystem: 'TEST', targetDomain: ImportTargetDomain.UNIVERSITIES,
+    });
+    const lease = await gateway.claimNextJob({ workerId: 'pausing-worker', leaseDurationMs: 60_000 });
+    expect(await gateway.pauseJob({ batchId })).toBe(true);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.PAUSING);
+    expect(await gateway.resumeJob({ batchId })).toBe(false);
+    expect(await gateway.acknowledgeStoppedJob({ ...lease!, claimUntil: new Date(0) })).toBeNull();
+    expect(await gateway.acknowledgeStoppedJob(lease!)).toBe('PAUSED');
+    expect(await gateway.resumeJob({ batchId })).toBe(true);
+    const resumed = await gateway.claimNextJob({ workerId: 'pausing-worker', leaseDurationMs: 60_000 });
+    expect(resumed?.attempt).toBe(2);
+    expect(await gateway.pauseJob({ batchId })).toBe(true);
+    expect(await gateway.cancelJob({ batchId })).toBe(true);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLING);
+    expect(await gateway.acknowledgeStoppedJob(resumed!)).toBe('CANCELLED');
+  });
+
   it('records checkpoint and updates progress defensively', async () => {
     const batchId = 'batch-checkpoint';
     await gateway.enqueueImportJob({
