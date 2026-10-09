@@ -1,5 +1,6 @@
 import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
 import { canEditSettingsAssignment, canEditSettingsScope } from './settingsAssignmentGovernance';
+import { SettingsIdentityScopePicker } from '../components/SettingsIdentityScopePicker';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -1012,26 +1013,20 @@ export function SettingsAdminPage() {
                   className="input"
                 >
                   <option>GLOBAL</option>
-                  <option>DOMAIN</option>
+                  <option value="DOMAIN" disabled>{isAr ? 'DOMAIN — غير معتمد للتعديل' : 'DOMAIN — legacy read-only'}</option>
                   <option value="TENANT" disabled>{isAr ? 'TENANT — غير معتمد للتعديل' : 'TENANT — legacy read-only'}</option>
                   <option>IDENTITY</option>
                 </select>
                 <p className="text-xs text-slate-500">
                   {isAr
-                    ? 'نطاق TENANT غير معتمد لإنشاء أو تعديل القيم؛ تبقى سجلاته القديمة قابلة للعرض فقط حتى تحديد الجهة المالكة.'
-                    : 'TENANT is not approved for new Admin values or edits; existing records remain visible until an authoritative owner is established.'}
+                    ? 'نطاقا DOMAIN وTENANT للقراءة فقط حتى اعتماد سجل معرفاتهما. يتطلب IDENTITY اختيار هوية من IAM.'
+                    : 'DOMAIN and TENANT are read-only pending approved owner identifiers. IDENTITY must be selected from IAM.'}
                 </p>
               </Field>
-              {assignmentForm.level !== 'GLOBAL' ? (
-                <Field label={isAr ? 'معرّف النطاق' : 'Scope ID'}>
-                  <input
-                    required
-                    maxLength={240}
-                    value={assignmentForm.scopeId}
-                    onChange={(e) => setAssignmentForm((f) => ({ ...f, scopeId: e.target.value }))}
-                    className="input"
-                    dir="ltr"
-                  />
+              {assignmentForm.level === 'IDENTITY' ? (
+                <Field label={isAr ? 'الهوية من IAM' : 'IAM identity'}>
+                  <SettingsIdentityScopePicker value={assignmentForm.scopeId} isAr={isAr}
+                    disabled={saving} onChange={id => setAssignmentForm(f => ({ ...f, scopeId: id }))} />
                 </Field>
               ) : null}
               {contextError && <div role="alert" className="text-red-700">{contextError === 'SETTINGS_EDITOR_VERSION_CHANGED' ? (isAr ? 'تغيّرت النسخة؛ أعد تحميل القيمة قبل تعديلها.' : 'Version changed; reload the value before editing.') : contextError}
