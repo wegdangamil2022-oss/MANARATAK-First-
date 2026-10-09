@@ -1,0 +1,65 @@
+{
+  "method": "Source-only comparison; no DB access, migrations, seeding or import",
+  "date": "2026-10-10",
+  "repositoryCommit": "93b25a9c6b56e1db2a92230d59b78cf7ac64257c",
+  "universitySource": {
+    "path": "workspace/import-sources/reconciliation/m10-12-14/universities-geography.jsonl",
+    "blobSha": "8ff326132d2b572916e6c5de16de90a10a93b8f0",
+    "population": "unresolved university geography reconciliation ONLY",
+    "rows": 3549,
+    "distinctValidCountryCityKeys": 2103
+  },
+  "catalogSources": [
+    {
+      "continent": "africa",
+      "sha": "8b18c689807ea9b4fd2d4adb5e9d04b80e6ffaae",
+      "path": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
+      "rows": 1607
+    },
+    {
+      "continent": "americas",
+      "sha": "b79ce7016629cf872cf5c10352c9f5da6ff651bc",
+      "path": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
+      "rows": 1894
+    },
+    {
+      "continent": "asia",
+      "sha": "6f0c654badb10cdb24aebf84b2bd396d94c44d70",
+      "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+      "rows": 2885
+    },
+    {
+      "continent": "europe",
+      "sha": "9c72a74a5ec5b63d36a825ec72acc8138f25e54b",
+      "path": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
+      "rows": 2527
+    },
+    {
+      "continent": "oceania",
+      "sha": "6fa66f36357cbec4211446b6120394ccbee45da3",
+      "path": "workspace/reference-data/cities/oceania/22_cities_oceania.csv",
+      "rows": 78
+    }
+  ],
+  "catalogTotalRows": 8991,
+  "invalidCatalogRows": 0,
+  "classificationDistinctKeys": {
+    "MATCHED_EXACT": 22,
+    "MATCHED_ALIAS": 0,
+    "MISSING_IN_CATALOG": 2052,
+    "AMBIGUOUS_COUNTRY_SCOPE": 21,
+    "TERRITORY_SCOPE_REVIEW": 8,
+    "INVALID_SOURCE_RECORD": 1
+  },
+  "classificationUniversityRows": {
+    "MATCHED_EXACT": 61,
+    "MATCHED_ALIAS": 0,
+    "MISSING_IN_CATALOG": 3416,
+    "AMBIGUOUS_COUNTRY_SCOPE": 63,
+    "TERRITORY_SCOPE_REVIEW": 8,
+    "INVALID_SOURCE_RECORD": 1
+  },
+  "conflictingCityIdentityScopes": 8,
+  "timezoneMissingRows": 0,
+  "provenance": "Every case retains university sourceKey, source hash and candidate catalog source path,line,blobSha when matched."
+}

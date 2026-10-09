@@ -1,0 +1,173 @@
+{
+  "scope": "file-only",
+  "collisions": [
+    {
+      "canonicalScope": "AGO|AO-HUI|caluquembe",
+      "competingSources": [
+        {
+          "cityId": "city_ao_caluquembe",
+          "sourceCityId": "1024346445",
+          "sourceLine": 117,
+          "catalogPath": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
+          "regionCode": "AO-HUI",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        },
+        {
+          "cityId": "city_ao_caluquembe_240126",
+          "sourceCityId": "1024240126",
+          "sourceLine": 120,
+          "catalogPath": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
+          "regionCode": "AO-HUI",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "canonicalScope": "MOZ|MZ-Q|mocuba",
+      "competingSources": [
+        {
+          "cityId": "city_mz_mocuba",
+          "sourceCityId": "1508922450",
+          "sourceLine": 1050,
+          "catalogPath": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
+          "regionCode": "MZ-Q",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        },
+        {
+          "cityId": "city_mz_mocuba_699932",
+          "sourceCityId": "1508699932",
+          "sourceLine": 1051,
+          "catalogPath": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
+          "regionCode": "MZ-Q",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "canonicalScope": "BOL|BO-O|oruro",
+      "competingSources": [
+        {
+          "cityId": "city_bo_oruro",
+          "sourceCityId": "1068271533",
+          "sourceLine": 137,
+          "catalogPath": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
+          "regionCode": "BO-O",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        },
+        {
+          "cityId": "city_bo_oruro_2",
+          "sourceCityId": "1068626742",
+          "sourceLine": 142,
+          "catalogPath": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
+          "regionCode": "BO-O",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "canonicalScope": "BGD|BD-55|saidpur",
+      "competingSources": [
+        {
+          "cityId": "city_bd_saidpur",
+          "sourceCityId": "1050512022",
+          "sourceLine": 170,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "BD-55",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        },
+        {
+          "cityId": "city_bd_saidpur_464696",
+          "sourceCityId": "1050464696",
+          "sourceLine": 171,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "BD-55",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "canonicalScope": "KOR|~|asan",
+      "competingSources": [
+        {
+          "cityId": "city_kr_asan",
+          "sourceCityId": "1410521090",
+          "sourceLine": 1497,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        },
+        {
+          "cityId": "city_kr_asan_2",
+          "sourceCityId": "1410904940",
+          "sourceLine": 1498,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "canonicalScope": "KOR|~|gwangju",
+      "competingSources": [
+        {
+          "cityId": "city_kr_gwangju",
+          "sourceCityId": "1410000087",
+          "sourceLine": 1513,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        },
+        {
+          "cityId": "city_kr_gwangju_2",
+          "sourceCityId": "1410978753",
+          "sourceLine": 1514,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "canonicalScope": "KOR|~|yeosu",
+      "competingSources": [
+        {
+          "cityId": "city_kr_yeosu",
+          "sourceCityId": "1410002025",
+          "sourceLine": 1550,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        },
+        {
+          "cityId": "city_kr_yeosu_2",
+          "sourceCityId": "1410698161",
+          "sourceLine": 1551,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "canonicalScope": "YEM|YE-IB|ibb",
+      "competingSources": [
+        {
+          "cityId": "city_ye_ibb",
+          "sourceCityId": "1887321491",
+          "sourceLine": 2875,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "YE-IB",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        },
+        {
+          "cityId": "city_ye_ibb_2",
+          "sourceCityId": "1887036494",
+          "sourceLine": 2876,
+          "catalogPath": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+          "regionCode": "YE-IB",
+          "verificationStatus": "NEEDS_MANUAL_REVIEW"
+        }
+      ]
+    }
+  ]
+}
