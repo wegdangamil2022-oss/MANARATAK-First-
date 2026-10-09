@@ -194,7 +194,8 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
         id: lease.batchId,
         batchStatus: ImportJobStatus.RUNNING,
         claimedBy: lease.workerId,
-        claimUntil: { gte: now },
+        attemptCount: lease.attempt,
+        claimUntil: { equals: lease.claimUntil, gte: now },
       },
       data: { claimUntil },
     });
@@ -207,7 +208,8 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
         id: lease.batchId,
         batchStatus: ImportJobStatus.RUNNING,
         claimedBy: lease.workerId,
-        claimUntil: { gte: now },
+        attemptCount: lease.attempt,
+        claimUntil: { equals: lease.claimUntil, gte: now },
       },
       data: {
         batchStatus: ImportJobStatus.COMPLETED,
@@ -238,7 +240,8 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
         id: command.lease.batchId,
         batchStatus: ImportJobStatus.RUNNING,
         claimedBy: command.lease.workerId,
-        claimUntil: { gte: now },
+        attemptCount: command.lease.attempt,
+        claimUntil: { equals: command.lease.claimUntil, gte: now },
       },
       data: {
         batchStatus: nextStatus,
