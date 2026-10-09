@@ -2,6 +2,7 @@ export enum ImportJobStatus {
   CREATED = 'CREATED',
   QUEUED = 'QUEUED',
   RUNNING = 'RUNNING',
+  PAUSING = 'PAUSING',
   PAUSED = 'PAUSED',
   RESUMING = 'RESUMING',
   CANCELLING = 'CANCELLING',
