@@ -367,4 +367,33 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
     expect(unlocked?.retentionClaimUntil).toBeNull();
   });
 
+  it('preserves persisted version history during a real-DB lifecycle transition', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(newAsset(id));
+    const versions = { versions: [{ versionNumber: 1, createdAt: '2026-10-01T00:00:00.000Z',
+      storageLocator: { storageZone: 'CLEAN', bucketName: 'isolated-old', pathKey: 'v1.pdf' },
+      checksum: { algorithm: 'sha256', hash: 'a'.repeat(64) } }] };
+    await prisma.assetRecord.update({ where: { id }, data: { versionChain: versions } });
+    const asset = (await repository.findById(new AssetId(id)))!;
+    expect(asset.versionChain?.allVersions[0].storageLocator.value).toBe('clean://isolated-old/v1.pdf');
+    asset.softDelete();
+    await repository.save(asset);
+    const persisted = await prisma.assetRecord.findUnique({ where: { id } });
+    expect(persisted?.versionChain).toEqual(versions);
+    expect(persisted?.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it('composes workspace JSON facets with canonical cursor and family predicates in PostgreSQL', async () => {
+    const id = DB_PREFIX + randomUUID();
+    await repository.save(newAsset(id, AssetLifecycleState.SANITIZING));
+    await prisma.assetRecord.update({ where: { id }, data: {
+      malwareScanStatus: { status: 'PASSED', activationOperation: { phase: 'PREPARED' } },
+    } });
+    const matches = await repository.queryAdmin({ q: id, fileFamily: 'PDF', malwareStatus: 'PASSED', processingQueue: 'ACTIVATION_RECOVERY' });
+    expect(matches.items.map(item => item.id)).toEqual([id]);
+    expect((await repository.queryAdmin({ q: id, fileFamily: 'IMAGE', processingQueue: 'ACTIVATION_RECOVERY' })).items).toEqual([]);
+    const cursor = Buffer.from(new Date('2099-01-01').toISOString() + '|zzzz').toString('base64url');
+    expect((await repository.queryAdmin({ q: id, fileFamily: 'PDF', cursor, malwareStatus: 'PASSED' })).items.map(item => item.id)).toEqual([id]);
+  });
+
 });

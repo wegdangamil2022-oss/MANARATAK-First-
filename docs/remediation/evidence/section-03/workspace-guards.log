@@ -1,0 +1,21 @@
+✔ MNT-AUD-0011 signed provider transport requires HTTPS and a strong signing secret (1.855658ms)
+✔ MNT-AUD-0011 provider requests are body-bound, nonce/timestamp signed and base-path confined (80.638717ms)
+✔ MNT-AUD-0011 lifecycle source makes sanitizer output canonical and forbids client-selected clean locators (0.920715ms)
+✔ inventory discovers mounted mutations and refuses an unreviewed added route (96.784487ms)
+✔ inventory detects changed permissions/classification and removed routes (14.230935ms)
+✔ renamed Router variables cannot silently hide new mutations (6.055817ms)
+✔ unresolved mounts and dynamic route paths fail closed (15.510079ms)
+✔ global audit boundary must follow auth and idempotency and precede mounts (3.435772ms)
+✔ new collisions between owner routers require a separate explicit review (6.702767ms)
+✔ inline router construction retains its owner when cradle repositories are resolved (8.79358ms)
+✔ MNT-AUD-0110 audit HTTP surface is read-only and persistence is append-only (1.151044ms)
+✔ MNT-AUD-0106 authenticated Admin actor is server-owned and required (2.740046ms)
+✔ MNT-AUD-0084 all Admin mutations are audited by default (0.533345ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1373.868979

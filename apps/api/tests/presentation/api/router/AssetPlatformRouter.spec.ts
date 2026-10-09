@@ -434,4 +434,47 @@ describe('AssetPlatformRouter', () => {
     expect(queryAdmin).not.toHaveBeenCalled();
   });
 
+  it('GET detail projects governance, persisted versions and operation identity without storage coordinates', async () => {
+    const findAdminDetails = vi.fn(async () => ({
+      asset: { id: { value: 'detail-a' }, reference: { value: 'detail-ref' },
+        owner: { ownerId: 'course-a', ownerType: 'COURSE' }, state: 'SANITIZING', classification: 'INTERNAL',
+        retention: { category: 'PERMANENT', expiresAt: null },
+        metadata: { originalFilename: 'a.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 },
+        versionChain: { allVersions: [{ versionNumber: 1, createdAt: new Date('2026-10-01'),
+          storageLocator: 'clean://secret-version/path', checksum: { algorithm: 'sha256', hash: 'a'.repeat(64) } }] },
+        uploadVerification: { signatureVerified: true, verifiedAt: '2026-10-02T00:00:00.000Z', locator: 'secret-upload' },
+        activationOperation: { operationId: 'operation-a', phase: 'PREPARED', preparedAt: '2026-10-09T00:00:00.000Z', sourceLocator: 'secret-source' },
+      },
+      governance: { createdAt: new Date('2026-10-01'), updatedAt: new Date('2026-10-09'),
+        legalHoldUntil: new Date('2027-01-01'), archivedAt: null, deletedAt: null, purgedAt: null },
+    }));
+    const app = express();
+    app.use('/assets', AssetPlatformRouter.create({
+      ingestAssetUseCase: createMockIngestUseCase() as any,
+      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+      assetRecordRepository: { queryAdmin: vi.fn(), findById: vi.fn(), findAdminDetails },
+    }));
+    const res = await request(app).get('/assets/detail-a');
+    expect(res.status).toBe(200);
+    expect(res.body.versions[0].versionNumber).toBe(1);
+    expect(res.body.governance.legalHoldUntil).toBe('2027-01-01T00:00:00.000Z');
+    expect(res.body.activationOperation.phase).toBe('PREPARED');
+    expect(res.body.securityEvidence.uploadVerifiedAt).toBe('2026-10-02T00:00:00.000Z');
+    expect(JSON.stringify(res.body)).not.toContain('secret-');
+  });
+
+  it('rejects unrecognized workspace facets before repository execution', async () => {
+    const queryAdmin = vi.fn();
+    const app = express();
+    app.use('/assets', AssetPlatformRouter.create({
+      ingestAssetUseCase: createMockIngestUseCase() as any,
+      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+      assetRecordRepository: { queryAdmin, findById: vi.fn() },
+    }));
+    for (const query of [{ fileFamily: 'EXECUTABLE' }, { malwareStatus: 'CLEAN' }, { processingQueue: 'ALL' }]) {
+      expect((await request(app).get('/assets').query(query)).status).toBe(400);
+    }
+    expect(queryAdmin).not.toHaveBeenCalled();
+  });
+
 });

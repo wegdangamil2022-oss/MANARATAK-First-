@@ -1,5 +1,14 @@
 # Section 03 — EAP closure register
 
+## Current broad-batch status — 2026-10-09
+
+- SOURCE WORKSPACE: P1-01 detail governance/metadata/versions/copy and supported owner links, P1-02 security/family/processing queues, P1-03 stale reset prevention implemented; history-loss defect fixed by strict persisted-chain reconstruction.
+- LOCAL: 209 source tests PASS /13 DB tests skipped; TypeScript PASS; 13 guards PASS; quality PASS; lint 0 errors/51 warnings; intercepted-API Chromium PASS. Evidence files `workspace-*` describe exact scopes. No runtime status inferred from mock/UI tests.
+- Native version-chain reconstruction is implemented for the existing serialized domain shape. Native provider versioning/other legacy formats remain unverified; earlier OPEN capability entries below are historical and do not negate this bounded source fix.
+- SOURCE CI for this batch: PENDING until matching pushed SHA finishes. Earlier runs below apply only to their own commits.
+- Section remains **NOT CLOSED / NO-GO**. Remaining source gates include usage-vs-lifecycle serialization, expired lease fencing, automatic reconciliation/monitoring, complete owner/workspace flows; provider/browser real E2E gates also remain pending.
+
+
 ## Current closure decision — fast verification, 2026-10-09
 
 **NOT CLOSED / NO-GO.** Request to close reviewed against existing acceptance criteria; fast tests pass but remaining functionality and cross-system safety are not proven complete.

@@ -21,7 +21,7 @@ export interface AssetPlatformRouterCradle {
   processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase;
   auditRecordRepo?: IAuditRecordRepository;
   assetUsageRegistryGateway?: IAssetUsageRegistryGateway;
-  assetRecordRepository?: { queryAdmin(input: any): Promise<{ items: any[]; nextCursor: string | null; hasMore: boolean }>; findById(id: any): Promise<any> };
+  assetRecordRepository?: { queryAdmin(input: any): Promise<{ items: any[]; nextCursor: string | null; hasMore: boolean }>; findById(id: any): Promise<any>; findAdminDetails?(id: any): Promise<any> };
 }
 
 export class AssetPlatformRouter {
@@ -97,6 +97,9 @@ export class AssetPlatformRouter {
       mimeTypePrefix: z.string().trim().min(1).max(120).optional(),
       retentionCategory: z.nativeEnum(AssetRetentionCategory).optional(),
       checksumPresence: z.enum(['PRESENT', 'MISSING']).optional(),
+      malwareStatus: z.enum(['PASSED', 'FAILED']).optional(),
+      fileFamily: z.enum(['IMAGE', 'VIDEO', 'AUDIO', 'PDF']).optional(),
+      processingQueue: z.enum(['AWAITING_UPLOAD', 'QUARANTINE', 'PROCESSING', 'FAILED', 'ACTIVATION_RECOVERY']).optional(),
       createdFrom: z.string().datetime().optional(),
       createdTo: z.string().datetime().optional(),
       q: z.string().trim().min(1).max(240).optional(),
@@ -135,11 +138,20 @@ export class AssetPlatformRouter {
     }));
 
     router.get('/:assetId', asyncHandler(async (req: Request, res: Response) => {
-      if (!assetRecordRepository) throw new Error('ASSET_ADMIN_READ_MODEL_UNAVAILABLE');
+      if (!assetRecordRepository?.findAdminDetails) throw new Error('ASSET_ADMIN_READ_MODEL_UNAVAILABLE');
       const { AssetId } = await import('@manaratak/domain');
-      const asset = await assetRecordRepository.findById(new AssetId(req.params.assetId));
-      if (!asset) return void res.status(404).json({ error: 'ASSET_NOT_FOUND' });
+      const details = await assetRecordRepository.findAdminDetails(new AssetId(req.params.assetId));
+      if (!details) return void res.status(404).json({ error: 'ASSET_NOT_FOUND' });
+      const { asset, governance } = details;
       res.status(200).json({
+        governance,
+        versions: asset.versionChain?.allVersions.map((version: any) => ({
+          versionNumber: version.versionNumber, createdAt: version.createdAt,
+          checksum: version.checksum ? { algorithm: version.checksum.algorithm, hash: version.checksum.hash } : null,
+        })) ?? [],
+        activationOperation: asset.activationOperation ? { operationId: asset.activationOperation.operationId,
+          phase: asset.activationOperation.phase, preparedAt: asset.activationOperation.preparedAt,
+          completedAt: asset.activationOperation.completedAt ?? null } : null,
         id: asset.id.value,
         reference: asset.reference.value,
         ownerId: asset.owner.ownerId, ownerType: asset.owner.ownerType,
@@ -152,6 +164,7 @@ export class AssetPlatformRouter {
         },
         securityEvidence: {
           uploadConfirmed: asset.uploadVerification?.signatureVerified === true,
+          uploadVerifiedAt: asset.uploadVerification?.verifiedAt ?? null,
           malwareStatus: asset.malwareScan?.status ?? null,
           scannedAt: asset.malwareScan?.scannedAt ?? null,
           activationPhase: asset.activationOperation?.phase ?? null,
@@ -564,6 +577,7 @@ export class AssetPlatformRouter {
       const message = err instanceof Error ? err.message : '';
       if (message === 'ASSET_CURSOR_INVALID') return respond(400, 'Invalid asset cursor', message);
       if (message === 'ASSET_ADMIN_READ_MODEL_UNAVAILABLE' ||
+        message === 'ASSET_VERSION_HISTORY_INVALID' ||
         message === 'ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED' ||
         message === 'ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED' ||
         message === 'ASSET_RESTORE_COMPENSATION_FAILED' ||

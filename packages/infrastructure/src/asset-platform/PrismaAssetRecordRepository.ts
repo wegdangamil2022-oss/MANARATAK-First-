@@ -16,7 +16,8 @@ import {
   AssetStorageZone,
   AssetRetentionCategory,
   AssetActivationOperation,
-  AssetRetentionSnapshot
+  AssetRetentionSnapshot,
+  AssetVersionChain, AssetVersion
 } from '@manaratak/domain';
 
 interface AssetRecordRow {
@@ -70,7 +71,13 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         lifecycleRetention: asset.retentionBeforeLifecycle,
         extraMetadata: asset.metadata.extraMetadata
       } as any,
-      versionChain: asset.versionChain ? (asset.versionChain as any) : null,
+      versionChain: asset.versionChain ? { versions: asset.versionChain.allVersions.map(version => ({
+        versionNumber: version.versionNumber, createdAt: version.createdAt.toISOString(),
+        storageLocator: { storageZone: version.storageLocator.storageZone,
+          bucketName: version.storageLocator.bucketName, pathKey: version.storageLocator.pathKey },
+        ...(version.checksum ? { checksum: { algorithm: version.checksum.algorithm, hash: version.checksum.hash } } : {}),
+        ...(version.changelog ? { changelog: version.changelog } : {}),
+      })) } : null,
       sanitizationMetadata: asset.sanitization ? {
         exifStripped: asset.sanitization.exifStripped,
         sanitizedAt: asset.sanitization.sanitizedAt?.toISOString(),
@@ -104,6 +111,12 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       throw new Error('ASSET_RECORD_REVISION_OVERFLOW');
     }
     mutation.updatedAt = nextRevision;
+    if (captured.lifecycleState !== asset.state) {
+      // Capture only observed transitions; do not fabricate timestamps for historical rows.
+      if (asset.state === AssetLifecycleState.ARCHIVED) mutation.archivedAt = nextRevision;
+      if (asset.state === AssetLifecycleState.DELETED) mutation.deletedAt = nextRevision;
+      if (asset.state === AssetLifecycleState.PURGED) mutation.purgedAt = nextRevision;
+    }
     const restoreToken = this.ownedRestoreLeases.get(asset);
     if (captured.lifecycleState === AssetLifecycleState.DELETED &&
         asset.state === AssetLifecycleState.ACTIVE && !restoreToken) {
@@ -282,6 +295,9 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     mimeTypePrefix?: string;
     retentionCategory?: AssetRetentionCategory;
     checksumPresence?: 'PRESENT' | 'MISSING';
+    malwareStatus?: 'PASSED' | 'FAILED';
+    fileFamily?: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'PDF';
+    processingQueue?: 'AWAITING_UPLOAD' | 'QUARANTINE' | 'PROCESSING' | 'FAILED' | 'ACTIVATION_RECOVERY';
     createdFrom?: string;
     createdTo?: string;
     q?: string;
@@ -329,6 +345,21 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       { checksumAlgorithm: null }, { checksumAlgorithm: '' },
       { checksumHash: null }, { checksumHash: '' },
     ] });
+    if (input.malwareStatus) andFilters.push({ malwareScanStatus: { path: ['status'], equals: input.malwareStatus } });
+    if (input.fileFamily) andFilters.push({ metadata: input.fileFamily === 'PDF'
+      ? { path: ['mimeType'], equals: 'application/pdf' }
+      : { path: ['mimeType'], string_starts_with: { IMAGE: 'image/', VIDEO: 'video/', AUDIO: 'audio/' }[input.fileFamily] } });
+    const queues = {
+      AWAITING_UPLOAD: [AssetLifecycleState.INITIATED],
+      QUARANTINE: [AssetLifecycleState.QUARANTINED],
+      PROCESSING: [AssetLifecycleState.VALIDATING, AssetLifecycleState.SANITIZING],
+      FAILED: [AssetLifecycleState.MALWARE_SCAN_FAILED],
+      ACTIVATION_RECOVERY: [AssetLifecycleState.SANITIZING],
+    };
+    if (input.processingQueue) andFilters.push({ lifecycleState: { in: queues[input.processingQueue] } });
+    if (input.processingQueue === 'ACTIVATION_RECOVERY') andFilters.push({
+      malwareScanStatus: { path: ['activationOperation', 'phase'], equals: 'PREPARED' },
+    });
     if (input.reuseOnly) andFilters.push(
       { malwareScanStatus: { path: ['status'], equals: 'PASSED' } },
       { malwareScanStatus: { path: ['uploadVerification', 'signatureVerified'], equals: true } },
@@ -354,7 +385,9 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       id: row.id, reference: row.reference, ownerId: row.ownerId, ownerType: row.ownerType,
       lifecycleState: row.lifecycleState, securityClassification: row.securityClassification,
       retentionCategory: row.retentionCategory, retentionExpiresAt: row.retentionExpiresAt,
-      metadata: row.metadata, checksumAlgorithm: row.checksumAlgorithm, checksumHash: row.checksumHash,
+      // Do not return operational envelopes or arbitrary owner metadata to a list view.
+      metadata: { originalFilename: row.metadata?.originalFilename, mimeType: row.metadata?.mimeType,
+        fileExtension: row.metadata?.fileExtension, byteSize: row.metadata?.byteSize }, checksumAlgorithm: row.checksumAlgorithm, checksumHash: row.checksumHash,
       createdAt: row.createdAt, updatedAt: row.updatedAt, archivedAt: row.archivedAt, deletedAt: row.deletedAt,
     }));
     const last = items.at(-1);
@@ -363,6 +396,43 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       hasMore,
       nextCursor: hasMore && last ? Buffer.from(`${new Date(last.createdAt).toISOString()}|${last.id}`, 'utf8').toString('base64url') : null,
     };
+  }
+
+  async findAdminDetails(id: AssetId) {
+    const row = await this.prisma.assetRecord.findUnique({ where: { id: id.value } });
+    if (!row) return null;
+    return {
+      asset: this.mapToDomain(row),
+      governance: { createdAt: row.createdAt, updatedAt: row.updatedAt, archivedAt: row.archivedAt,
+        deletedAt: row.deletedAt, purgedAt: row.purgedAt, legalHoldUntil: row.legalHoldUntil },
+    };
+  }
+
+  private reconstructVersionChain(value: unknown): AssetVersionChain | undefined {
+    if (value == null) return undefined;
+    const invalid = () => { throw new Error('ASSET_VERSION_HISTORY_INVALID'); };
+    if (typeof value !== 'object' || !('versions' in value) || !Array.isArray(value.versions)) return invalid();
+    const numbers = new Set<number>();
+    return new AssetVersionChain(value.versions.map((raw: unknown) => {
+      if (!raw || typeof raw !== 'object') return invalid();
+      const version = raw as Record<string, unknown>;
+      if (!Number.isSafeInteger(version.versionNumber) || (version.versionNumber as number) < 1 ||
+          numbers.has(version.versionNumber as number) || typeof version.createdAt !== 'string' ||
+          !Number.isFinite(Date.parse(version.createdAt))) return invalid();
+      numbers.add(version.versionNumber as number);
+      const locator = version.storageLocator as Record<string, unknown> | undefined;
+      if (!locator || !Object.values(AssetStorageZone).includes(locator.storageZone as AssetStorageZone) ||
+          typeof locator.bucketName !== 'string' || !locator.bucketName.trim() ||
+          typeof locator.pathKey !== 'string' || !locator.pathKey.trim()) return invalid();
+      const checksum = version.checksum as Record<string, unknown> | undefined;
+      if (checksum && (typeof checksum.algorithm !== 'string' || !checksum.algorithm.trim() ||
+          typeof checksum.hash !== 'string' || !checksum.hash.trim())) return invalid();
+      if (version.changelog != null && typeof version.changelog !== 'string') return invalid();
+      return new AssetVersion(version.versionNumber as number, new Date(version.createdAt),
+        new AssetStorageLocator(locator.storageZone as AssetStorageZone, locator.bucketName, locator.pathKey),
+        checksum ? new AssetChecksum(checksum.algorithm as string, checksum.hash as string) : undefined,
+        version.changelog as string | undefined);
+    }));
   }
 
   private mapToDomain(row: AssetRecordRow): AssetRecord {
@@ -444,7 +514,7 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       // Operational EAP-owned JSON, never a client-provided canonical relation.
       activationOperation: scan?.activationOperation == null ? undefined : scan.activationOperation as unknown as AssetActivationOperation,
       retentionBeforeLifecycle: metadataObj.lifecycleRetention == null ? undefined : metadataObj.lifecycleRetention as AssetRetentionSnapshot,
-      versionChain: undefined // Existing scope excludes full versionChain reconstruction.
+      versionChain: this.reconstructVersionChain(row.versionChain)
     });
     this.loadedSnapshots.set(asset, {
       updatedAt: row.updatedAt,

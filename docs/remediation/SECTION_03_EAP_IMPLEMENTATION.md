@@ -1,5 +1,25 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## Broad workspace and version-preservation continuation — 2026-10-09
+
+Scope: original 03/P1-01, P1-02, P1-03, P1-08, P1-10, P1-15 and §03.10 Patch I. Prior findings and IDs are retained below; no separate replacement plan.
+
+| Original task / capability | Implemented in this batch | Remaining acceptance |
+| --- | --- | --- |
+| P1-01 / Patch I version history | Rehydrate stored `{versions:[...]}` into real AssetVersion objects and serialize explicitly on save. Fixes confirmed loss: prior mapToDomain unconditionally set versionChain undefined and save wrote null. Invalid/unsupported history fails closed before provider mutations. Read-only version numbers/dates/checksums exposed; storage coordinates stay private. | Real provider native versioning, creating new versions, and other legacy formats are not inferred or backfilled. |
+| P1-01 governance/detail | One DB snapshot supplies aggregate and created/updated/archive/delete/purge/legal-hold dates. Observed future transitions stamp their existing date columns; historical dates are not fabricated. Admin displays metadata dimensions/duration, latest proof timestamps, operation identity and version history. | This is latest evidence, not a complete immutable security-event timeline. Legal-hold editing remains unimplemented. |
+| P1-01 owner/copy | Clipboard copy with explicit failure handling; navigation only to existing COURSE/UNIVERSITY owner routes with encoded IDs. Other owner types display unavailable; destination authorization remains enforced by existing route guards. | All owner types are not guessed from free-text IDs. |
+| P1-02 | Validated PASSED/FAILED scan selectors, IMAGE/VIDEO/AUDIO/PDF families, upload/quarantine/processing/failure/activation-recovery queues. Each predicate intersects existing lifecycle/search/cursor constraints; queue cannot override security state. | In-use/unused global filtering and canonical owner presets remain open; avoid N+1 usage queries or a misleading current-page filter. |
+| P1-03 | Clear old items/cursor on reset; failed new query cannot reuse stale results under newly applied filters. Pending filter and loading/error states explicit; stale detail results cannot reopen a closed drawer. | Realistic production-scale paging still unverified. |
+| P1-15 | List response now projects known metadata fields instead of returning arbitrary owner/operational JSON. Detail versions/proofs never expose locators or provider paths. | Existing provider/browser acceptance still required. |
+
+Validation: incremental TypeScript Admin/API/infrastructure PASS; 209 EAP source tests PASS in 32.35s with 13 isolated-DB tests intentionally skipped locally; 13 security/audit/provider-transport guards PASS; quality PASS (0 cycles/a11y); selected source lint 0 errors/51 warnings. Chromium real Admin with intercepted API PASS including detail governance/history, all new facets retained through paging/reset, and failed reload cannot retain old rows/cursor. Test-only CSP bypass remains; not actual API/DB/provider E2E.
+
+Added two disposable PostgreSQL regression cases: version history survives lifecycle persistence; JSON workspace facets compose with cursor/family. CI evidence will be recorded separately after the pushed commit completes. No production DB/provider operations, migration, seed, reset, policy backfill or retention sweep.
+
+**NOT CLOSED**: completed source capabilities above do not resolve usage-vs-lifecycle serialization, lease-expiry/provider fencing, automatic reconciliation/monitoring, all owner flows, or real upload/scanner/sanitizer/provider acceptance. FGA-03-001/002 remain optional proposed enhancements, not quietly implemented or CLOSED.
+
+
 ## Fast verification and closure review — 2026-10-09
 
 Source `ac3624c`: 193 scoped EAP tests PASS in 36.70s, TypeScript PASS, 13 security guards PASS. CI run 37921628504 SUCCESS with 193 source + 11 disposable PostgreSQL tests. Updated Chromium test confirms retention/checksum selectors survive applied pagination and reset clears both/cursor. HTTP remains intercepted; no real provider proof. See current closure register for unresolved task IDs. Verdict remains NOT CLOSED; no production GO or invented task closure.

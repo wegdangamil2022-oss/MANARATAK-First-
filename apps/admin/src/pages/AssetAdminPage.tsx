@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
-import { AssetLifecycleActions, type AssetActionSnapshot } from '../components/AssetLifecycleActions';
+import { AssetLifecycleActions } from '../components/AssetLifecycleActions';
 import { AssetLifecycleState, AssetSecurityClassification, AssetRetentionCategory } from '@manaratak/domain';
+import { AssetGovernancePanel, type AssetGovernanceSnapshot } from '../components/AssetGovernancePanel';
 import { AssetUploadWizard } from '../components/AssetUploadWizard';
 import { FolderGit2, RefreshCw, Filter, FileText } from 'lucide-react';
 
@@ -23,7 +24,7 @@ interface AssetPage {
   nextCursor: string | null;
 }
 
-interface AssetDetails extends AssetActionSnapshot {
+interface AssetDetails extends AssetGovernanceSnapshot {
   id: string;
   reference: string;
   ownerId: string;
@@ -32,7 +33,7 @@ interface AssetDetails extends AssetActionSnapshot {
   securityClassification: string;
   retentionCategory: string;
   retentionExpiresAt?: string | null;
-  metadata: { originalFilename: string; mimeType: string; fileExtension: string; byteSize: number };
+  metadata: { originalFilename: string; mimeType: string; fileExtension: string; byteSize: number; width?: number; height?: number; duration?: number };
   checksum?: { algorithm: string; hash: string } | null;
 }
 
@@ -48,21 +49,25 @@ export function AssetAdminPage() {
   const [usageLoadingId, setUsageLoadingId] = useState<string | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
   const [detailsLoadingId, setDetailsLoadingId] = useState<string | null>(null);
+  const detailsGenerationRef = useRef(0);
 
   const inspectDetails = async (assetId: string) => {
     if (detailsLoadingId) return;
+    const generation = ++detailsGenerationRef.current;
     setDetailsLoadingId(assetId);
     setError(null);
     try {
       const details = await adminApiClient.request<AssetDetails>(
         `/admin/assets/${encodeURIComponent(assetId)}`, { cache: 'no-store' },
       );
-      setSelectedAsset(details);
+      if (generation === detailsGenerationRef.current) setSelectedAsset(details);
     } catch (cause) {
-      setSelectedAsset(null);
-      setError(cause instanceof Error ? cause.message : 'تعذر تحميل تفاصيل الأصل');
+      if (generation === detailsGenerationRef.current) {
+        setSelectedAsset(null);
+        setError(cause instanceof Error ? cause.message : 'تعذر تحميل تفاصيل الأصل');
+      }
     } finally {
-      setDetailsLoadingId(null);
+      if (generation === detailsGenerationRef.current) setDetailsLoadingId(null);
     }
   };
 
@@ -116,6 +121,9 @@ export function AssetAdminPage() {
     mimeTypePrefix: '',
     retentionCategory: '',
     checksumPresence: '',
+    malwareStatus: '',
+    fileFamily: '',
+    processingQueue: '',
     createdFrom: '',
     createdTo: '',
   });
@@ -132,6 +140,7 @@ export function AssetAdminPage() {
     const generation = ++generationRef.current;
     pagingRef.current = !reset;
     setLoading(true);
+    if (reset) { setItems([]); setCursor(null); setHasMore(false); }
     try {
       setError(null);
       const p = new URLSearchParams({ limit: '50' });
@@ -162,10 +171,15 @@ export function AssetAdminPage() {
 
   useEffect(() => {
     void load(true);
+    return () => { generationRef.current++; detailsGenerationRef.current++; };
   }, []);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
+    if (filters.createdFrom && filters.createdTo && new Date(filters.createdFrom) > new Date(filters.createdTo)) {
+      setError('تاريخ البداية يجب ألا يأتي بعد تاريخ النهاية.');
+      return;
+    }
     const next = { ...filters };
     appliedRef.current = next;
     setAppliedFilters(next);
@@ -206,8 +220,10 @@ export function AssetAdminPage() {
         </div>
       </section>
 
+      {loading && <p role="status">جاري تحميل الأصول…</p>}
+      {pendingFilters && <p role="status">توجد فلاتر غير مطبقة؛ اضغط تصفية وتطبيق البحث.</p>}
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700 shadow-xs">
+        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700 shadow-xs">
           {error}
         </div>
       )}
@@ -243,6 +259,25 @@ export function AssetAdminPage() {
           <option value="">بصمة المحتوى — الكل</option>
           <option value="PRESENT">مسجلة — لا تعني اكتمال التحقق</option>
           <option value="MISSING">غير مكتملة أو غير مسجلة</option>
+        </select>
+        <select aria-label="نتيجة فحص الملف" value={filters.malwareStatus}
+          onChange={e => setFilters(v => ({ ...v, malwareStatus: e.target.value }))}
+          className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
+          <option value="">نتيجة الفحص — الكل</option><option value="PASSED">اجتاز الفحص المسجل</option>
+          <option value="FAILED">فشل الفحص المسجل</option>
+        </select>
+        <select aria-label="عائلة الملف" value={filters.fileFamily}
+          onChange={e => setFilters(v => ({ ...v, fileFamily: e.target.value }))}
+          className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
+          <option value="">عائلة الملف — الكل</option><option value="IMAGE">صور</option>
+          <option value="VIDEO">فيديو</option><option value="AUDIO">صوت</option><option value="PDF">PDF</option>
+        </select>
+        <select aria-label="طابور المعالجة" value={filters.processingQueue}
+          onChange={e => setFilters(v => ({ ...v, processingQueue: e.target.value }))}
+          className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
+          <option value="">طابور المعالجة — الكل</option><option value="AWAITING_UPLOAD">بانتظار اكتمال الرفع</option>
+          <option value="QUARANTINE">الحجر</option><option value="PROCESSING">الفحص والتنظيف</option>
+          <option value="FAILED">فشل الفحص</option><option value="ACTIVATION_RECOVERY">تفعيل ينتظر التعافي</option>
         </select>
         <input
           value={filters.mimeTypePrefix}
@@ -292,7 +327,7 @@ export function AssetAdminPage() {
             <h2 className="text-base font-black text-[#142B5F]">
               تفاصيل الأصل: {selectedAsset.metadata.originalFilename}
             </h2>
-            <button type="button" onClick={() => setSelectedAsset(null)}
+            <button type="button" onClick={() => { detailsGenerationRef.current++; setDetailsLoadingId(null); setSelectedAsset(null); }}
               className="rounded-lg border px-3 py-1.5">إغلاق</button>
           </div>
           <dl className="mt-4 grid gap-3 md:grid-cols-3">
@@ -318,6 +353,7 @@ export function AssetAdminPage() {
           <p className="mt-3 text-slate-500">
             هذه بيانات وصفية فقط؛ لا تُعرض روابط تخزين مباشرة. تحقق من ارتباطات الأصل قبل أي عملية مؤثرة.
           </p>
+          <AssetGovernancePanel key={selectedAsset.id} asset={selectedAsset} />
           <AssetLifecycleActions key={selectedAsset.id + ':' + selectedAsset.lifecycleState}
             asset={selectedAsset} onChanged={async () => {
               await inspectDetails(selectedAsset.id);
@@ -374,7 +410,7 @@ export function AssetAdminPage() {
               {items.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-400 font-bold">
-                    لا توجد أصول أو ملفات مطابقة للبحث.
+                    {loading ? 'جاري التحميل…' : error ? 'تعذر تحميل النتائج؛ أعد المحاولة.' : 'لا توجد أصول أو ملفات مطابقة للبحث.'}
                   </td>
                 </tr>
               ) : (
