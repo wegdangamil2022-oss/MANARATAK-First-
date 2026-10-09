@@ -292,8 +292,37 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
     });
   }
 
-  async recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint): Promise<void> {
+  async recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint, lease?: ImportJobLease): Promise<void> {
     const value = checkpoint.toJSON();
+    if (value.batchId !== batchId) throw new Error('IMPORT_CHECKPOINT_BATCH_MISMATCH');
+    if (lease) {
+      if (lease.batchId !== batchId) throw new Error('IMPORT_WORKER_LEASE_LOST');
+      const now = new Date();
+      // The lease predicate and checkpoint insert share one transaction.
+      // Paused, cancelled, expired or re-claimed workers cannot commit stale progress.
+      await this.prisma.$transaction(async tx => {
+        const updated = await tx.importBatch.updateMany({
+          where: {
+            id: batchId, batchStatus: ImportJobStatus.RUNNING,
+            claimedBy: lease.workerId, attemptCount: lease.attempt,
+            claimUntil: { equals: lease.claimUntil, gte: now },
+          },
+          data: {
+            processedRecords: checkpoint.processedRecords,
+            failedRecords: checkpoint.failedRecords,
+          },
+        });
+        if (updated.count !== 1) throw new Error('IMPORT_WORKER_LEASE_LOST');
+        await tx.importRecord.create({
+          data: {
+            batchId, status: 'CHECKPOINT', rawPayload: value as any,
+            processingNotes: 'Durable import checkpoint',
+          },
+        });
+      });
+      return;
+    }
+    // Non-worker administrative/legacy checkpoint writers are unchanged.
     await this.prisma.$transaction([
       this.prisma.importRecord.create({
         data: {
