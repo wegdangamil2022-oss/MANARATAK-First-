@@ -125,6 +125,28 @@ describe('InMemoryImportQueueGateway', () => {
     expect((status?.checkpoint as any).chunkIndex).toBe(2);
   });
 
+  it('requires the live claimed lease before saving worker progress and blocks cancelled workers', async () => {
+    const gateway = new InMemoryImportQueueGateway();
+    const batchId = 'batch-fenced-checkpoint';
+    await gateway.enqueueImportJob({ batchId, targetDomain: ImportTargetDomain.Generic,
+      sourceSystem: 'TEST' });
+    const lease = await gateway.claimNextJob({ workerId: 'worker-A', leaseDurationMs: 60_000 });
+    const checkpoint = ImportCheckpoint.create({
+      batchId, stage: 'VALIDATE', chunkIndex: 0, recordOffset: 1,
+      processedRecords: 1, failedRecords: 0, acceptedRecordKeys: [], updatedAt: new Date(),
+    });
+    const stale = { ...lease!, attempt: lease!.attempt - 1 };
+    await expect(gateway.recordCheckpoint(batchId, checkpoint, stale))
+      .rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    expect((await gateway.getJobStatus(batchId))?.processedRecords).toBe(0);
+    await expect(gateway.recordCheckpoint(batchId, checkpoint, lease!)).resolves.toBeUndefined();
+    expect((await gateway.getJobStatus(batchId))?.processedRecords).toBe(1);
+    await gateway.cancelJob({ batchId, reason: 'No further writes' });
+    await expect(gateway.recordCheckpoint(batchId, checkpoint, lease!))
+      .rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLED);
+  });
+
   it('throws when recording checkpoint for non-existent job', async () => {
     const checkpoint = ImportCheckpoint.create({
       batchId: 'unknown-batch',
