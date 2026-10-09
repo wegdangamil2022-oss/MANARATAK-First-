@@ -26,6 +26,7 @@ interface Definition {
   valueType: ValueType;
   description?: string;
   defaultValue?: unknown;
+  validationRules?: Record<string, unknown>;
   isFeatureFlag: boolean;
   isDeprecated: boolean;
   isSecret: boolean;
@@ -119,6 +120,7 @@ export function SettingsAdminPage() {
     valueType: 'String' as ValueType,
     description: '',
     defaultValue: '',
+    validationRulesText: '',
     isFeatureFlag: false,
     isSecret: false,
   });
@@ -427,6 +429,11 @@ export function SettingsAdminPage() {
         definitionForm.isSecret || definitionForm.defaultValue === ''
           ? undefined
           : parseValue(definitionForm.valueType, definitionForm.defaultValue);
+      const validationRules = definitionForm.validationRulesText.trim()
+        ? JSON.parse(definitionForm.validationRulesText) as unknown
+        : undefined;
+      if (validationRules !== undefined && (!validationRules || typeof validationRules !== 'object' || Array.isArray(validationRules)))
+        throw new Error(isAr ? 'قيود التحقق يجب أن تكون كائن JSON.' : 'Validation rules must be a JSON object.');
       await saveCommand(
         'definition',
         {
@@ -434,6 +441,7 @@ export function SettingsAdminPage() {
           valueType: definitionForm.valueType,
           description: definitionForm.description.trim() || undefined,
           defaultValue,
+          validationRules,
           isFeatureFlag: definitionForm.isFeatureFlag,
           isSecret: definitionForm.isSecret,
         },
@@ -443,6 +451,7 @@ export function SettingsAdminPage() {
             valueType: 'String',
             description: '',
             defaultValue: '',
+            validationRulesText: '',
             isFeatureFlag: false,
             isSecret: false,
           }),
@@ -798,6 +807,7 @@ export function SettingsAdminPage() {
                       ...f,
                       valueType: e.target.value as ValueType,
                       defaultValue: '',
+                      validationRulesText: '',
                     }))
                   }
                   className="input"
@@ -846,6 +856,13 @@ export function SettingsAdminPage() {
                   )}
                 </Field>
               ) : null}
+              <Field label={isAr ? 'قيود اختيارية على القيمة (JSON)' : 'Optional value constraints (JSON)'}>
+                <textarea value={definitionForm.validationRulesText}
+                  onChange={event => setDefinitionForm(form => ({ ...form, validationRulesText: event.target.value }))}
+                  rows={3} className="input font-mono text-xs" dir="ltr"
+                  placeholder={definitionForm.valueType === 'Number' ? '{"min":0,"max":100,"integer":true}' : definitionForm.valueType === 'String' ? '{"minLength":1,"maxLength":240}' : definitionForm.valueType === 'Boolean' ? '{"allowedValues":[true,false]}' : ''} />
+                <p className="text-xs text-slate-500">{isAr ? 'المسموح: min/max/integer للأرقام، minLength/maxLength للنصوص، allowedValues للأنواع البسيطة. لا يُقبل Regex أو JSON Schema.' : 'Supported: numeric bounds/integer, string lengths and scalar allowedValues. Regex and arbitrary JSON Schema are not accepted.'}</p>
+              </Field>
               <label className="flex items-center gap-2 text-xs font-bold text-slate-700">
                 <input
                   type="checkbox"
@@ -855,7 +872,7 @@ export function SettingsAdminPage() {
                       ...f,
                       isFeatureFlag: e.target.checked,
                       ...(e.target.checked
-                        ? { valueType: 'Boolean', defaultValue: 'false', isSecret: false }
+                        ? { valueType: 'Boolean', defaultValue: 'false', isSecret: false, validationRulesText: '' }
                         : {}),
                     }))
                   }
