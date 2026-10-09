@@ -16,7 +16,7 @@ describe('taxonomy governed edit HTTP contract', () => {
   it('passes the route identity and exact version to the owner command', async () => {
     const { app, cases } = setup();
     expect((await request(app).put('/taxonomy/nodes/stable').send(body)).status).toBe(200);
-    expect(cases.editNode).toHaveBeenCalledWith('stable', expect.objectContaining({ canonicalCode: '06' }), body.expectedUpdatedAt);
+    expect(cases.editNode).toHaveBeenCalledWith('stable', expect.objectContaining({ canonicalCode: '06' }), body.expectedUpdatedAt, expect.objectContaining({ actorId: 'admin' }));
   });
   it('requires a version and refuses unrecognized fields', async () => {
     const { app, cases } = setup();

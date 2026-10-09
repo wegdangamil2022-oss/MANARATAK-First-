@@ -47,7 +47,7 @@ describe('PublicAcademicTaxonomyUseCases', () => {
     const filters = { nodeType: AcademicTaxonomyNodeType.DISCIPLINE };
     const result = await useCases.listNodes(filters);
 
-    expect(repository.listNodes).toHaveBeenCalledWith({ ...filters, status: AcademicTaxonomyStatus.ACTIVE });
+    expect(repository.listNodes).toHaveBeenCalledWith({ ...filters, status: AcademicTaxonomyStatus.ACTIVE, page: 1, pageSize: 50 });
     expect(result).toEqual([mockNode]);
   });
 
@@ -84,7 +84,7 @@ describe('PublicAcademicTaxonomyUseCases', () => {
     const result = await useCases.searchNodes('  computer science  ', filters);
 
     expect(repository.listNodes).toHaveBeenCalledWith({
-      status: AcademicTaxonomyStatus.ACTIVE,
+      status: AcademicTaxonomyStatus.ACTIVE, page: 1, pageSize: 50,
       q: 'computer science',
     });
     expect(result).toEqual([mockNode]);
@@ -97,7 +97,7 @@ describe('PublicAcademicTaxonomyUseCases', () => {
     await useCases.searchNodes('   ', { status: AcademicTaxonomyStatus.ACTIVE });
 
     expect(repository.listNodes).toHaveBeenCalledWith({
-      status: AcademicTaxonomyStatus.ACTIVE,
+      status: AcademicTaxonomyStatus.ACTIVE, page: 1, pageSize: 50,
     });
   });
 

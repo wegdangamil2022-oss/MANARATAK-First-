@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   IAcademicTaxonomyRepository,
+  type AtomicPersistenceContext,
   normalizeAcademicTaxonomyAlias,
   AcademicTaxonomyNodeDto,
   UpsertAcademicTaxonomyNodeDto,
@@ -18,11 +19,22 @@ import {
 } from '@manaratak/domain';
 
 export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly bound = false) {}
+
+  withTransaction(context: AtomicPersistenceContext): IAcademicTaxonomyRepository {
+    const tx = (context as AtomicPersistenceContext & { transactionClient?: Prisma.TransactionClient }).transactionClient;
+    if (!context.boundaryId || !tx) throw new Error('TAXONOMY_ATOMIC_TRANSACTION_REQUIRED');
+    return new PrismaAcademicTaxonomyRepository(tx as unknown as PrismaClient, true);
+  }
 
   async executeSerializable<T>(
     operation: (repository: IAcademicTaxonomyRepository) => Promise<T>,
   ): Promise<T> {
+    if (this.bound) {
+      // One shared graph/alias/mapping lock spans owner writes, audit and outbox.
+      await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'academic-taxonomy:governance'}, 0))`;
+      return operation(this);
+    }
     // The API's explicit in-memory development adapter is intentionally not a
     // real Prisma client and cannot provide database isolation. Keep it usable
     // for source/dev flows while production-like Prisma paths always execute
@@ -36,7 +48,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       try {
         return await this.prisma.$transaction(
           async (transactionClient) =>
-            operation(new PrismaAcademicTaxonomyRepository(transactionClient as unknown as PrismaClient)),
+            new PrismaAcademicTaxonomyRepository(transactionClient as unknown as PrismaClient, true).executeSerializable(operation),
           { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
         );
       } catch (error) {
@@ -49,6 +61,21 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
   }
 
   async listNodes(filters?: AcademicTaxonomyFilters): Promise<AcademicTaxonomyNodeDto[]> {
+    const where = this.nodeWhere(filters);
+
+    const records = await this.prisma.academicTaxonomyNode.findMany({
+      where,
+      orderBy: [{ canonicalCode: 'asc' }, { id: 'asc' }],
+      ...(filters?.page || filters?.pageSize ? {
+        skip: (Math.max(1, filters.page ?? 1) - 1) * Math.min(100, Math.max(1, filters.pageSize ?? 50)),
+        take: Math.min(100, Math.max(1, filters.pageSize ?? 50)),
+      } : {}),
+    });
+
+    return records.map((r: any) => this.toNodeDto(r));
+  }
+
+  private nodeWhere(filters?: AcademicTaxonomyFilters) {
     const where: any = {};
 
     if (filters?.nodeType) {
@@ -60,6 +87,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
     if (filters?.standardType) {
       where.standardType = filters.standardType;
     }
+    if (filters?.parentNodeId) where.childEdges = { some: { parentNodeId: filters.parentNodeId } };
     if (filters?.q) {
       const normalizedQuery = this.normalizeAlias(filters.q);
       const exactStandardQuery = filters.q.trim().toUpperCase();
@@ -73,16 +101,11 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       ];
     }
 
-    const records = await this.prisma.academicTaxonomyNode.findMany({
-      where,
-      orderBy: { canonicalCode: 'asc' },
-      ...(filters?.page || filters?.pageSize ? {
-        skip: (Math.max(1, filters.page ?? 1) - 1) * Math.min(100, Math.max(1, filters.pageSize ?? 50)),
-        take: Math.min(100, Math.max(1, filters.pageSize ?? 50)),
-      } : {}),
-    });
+    return where;
+  }
 
-    return records.map((r: any) => this.toNodeDto(r));
+  async countNodes(filters?: AcademicTaxonomyFilters): Promise<number> {
+    return this.prisma.academicTaxonomyNode.count({ where: this.nodeWhere(filters) });
   }
 
   async getNode(nodeId: string): Promise<AcademicTaxonomyNodeDto | null> {
@@ -110,6 +133,23 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
     });
 
     return record ? this.toNodeDto(record) : null;
+  }
+
+  async createNode(data: UpsertAcademicTaxonomyNodeDto): Promise<AcademicTaxonomyNodeDto> {
+    const standardType = data.standardType ?? AcademicStandardType.CUSTOM_NATIONAL;
+    const deterministicKey = AcademicTaxonomyDeterministicKey.create({ ...data, standardType });
+    try {
+      const row = await this.prisma.academicTaxonomyNode.create({ data: { deterministicKey,
+        nodeType: data.nodeType, canonicalCode: data.canonicalCode, canonicalName: data.canonicalName,
+        status: data.status ?? AcademicTaxonomyStatus.DRAFT, standardType,
+        description: data.description, standardCode: data.standardCode,
+        localizedNames: data.localizedNames as Prisma.InputJsonValue | undefined,
+        metadata: data.metadata as Prisma.InputJsonValue | undefined } });
+      return this.toNodeDto(row);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') throw new Error('TAXONOMY_NODE_VERSION_CONFLICT');
+      throw error;
+    }
   }
 
   async upsertNode(data: UpsertAcademicTaxonomyNodeDto): Promise<AcademicTaxonomyNodeDto> {
@@ -161,7 +201,7 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
           (data.standardType ?? AcademicStandardType.CUSTOM_NATIONAL)) throw new Error('TAXONOMY_IDENTITY_IMMUTABLE');
       const won = await tx.prisma.academicTaxonomyNode.updateMany({
         where: { id: nodeId, updatedAt: revision },
-        data: { canonicalName: data.canonicalName, description: data.description ?? null,
+        data: { updatedAt: new Date(Math.max(Date.now(), current.updatedAt.getTime() + 1)), canonicalName: data.canonicalName, description: data.description ?? null,
           status: data.status ?? current.status, standardCode: data.standardCode ?? null,
           localizedNames: data.localizedNames as Prisma.InputJsonValue | undefined,
           metadata: data.metadata as Prisma.InputJsonValue | undefined },

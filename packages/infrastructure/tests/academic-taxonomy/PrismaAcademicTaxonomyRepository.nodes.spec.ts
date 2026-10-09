@@ -71,7 +71,7 @@ describe('PrismaAcademicTaxonomyRepository - Node Operations', () => {
             { targetMappings: { some: { sourceStandard: 'EDU' } } },
           ],
         },
-        orderBy: { canonicalCode: 'asc' },
+        orderBy: [{ canonicalCode: 'asc' }, { id: 'asc' }],
       });
 
       expect(results).toHaveLength(1);

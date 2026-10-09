@@ -16,13 +16,15 @@ export class AcademicTaxonomyPublicRouter {
     const nodeTypeSchema = z.nativeEnum(AcademicTaxonomyNodeType);
     const standardTypeSchema = z.nativeEnum(AcademicStandardType);
     const listNodesQuerySchema = z.object({
-      nodeType: nodeTypeSchema.optional(), standardType: standardTypeSchema.optional(), q: z.string().optional(),
+      nodeType: nodeTypeSchema.optional(), standardType: standardTypeSchema.optional(), q: z.string().trim().max(200).optional(),
+      page: z.coerce.number().int().min(1).max(1000).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional(),
     }).merge(localeQuerySchema);
     const getByKeyQuerySchema = z.object({
       nodeType: nodeTypeSchema, canonicalCode: z.string().min(1), standardType: standardTypeSchema.optional(),
     }).merge(localeQuerySchema);
     const searchQuerySchema = z.object({
-      q: z.string().min(1), nodeType: nodeTypeSchema.optional(), standardType: standardTypeSchema.optional(),
+      page: z.coerce.number().int().min(1).max(1000).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional(),
+      q: z.string().trim().min(1).max(200), nodeType: nodeTypeSchema.optional(), standardType: standardTypeSchema.optional(),
     }).merge(localeQuerySchema);
 
     router.get('/nodes', asyncHandler(async (req: Request, res: Response) => {
@@ -47,8 +49,8 @@ export class AcademicTaxonomyPublicRouter {
       res.json({ data: await localized.listParents(req.params.nodeId, parseRequestLocale(req.query)) });
     }));
     router.get('/search', asyncHandler(async (req: Request, res: Response) => {
-      const { q, locale, nodeType, standardType } = searchQuerySchema.parse(req.query);
-      res.json({ data: await localized.searchNodes(q, { nodeType, standardType }, locale) });
+      const { q, locale, ...filters } = searchQuerySchema.parse(req.query);
+      res.json({ data: await localized.searchNodes(q, filters, locale) });
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

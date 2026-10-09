@@ -5,7 +5,7 @@ const revision = '2026-10-09T00:00:00.000Z';
 const data = { nodeType: AcademicTaxonomyNodeType.ACADEMIC_FIELD, canonicalCode: '06', canonicalName: 'ICT',
   standardType: AcademicStandardType.ISCED, status: AcademicTaxonomyStatus.ACTIVE };
 function fixture(count: number) {
-  const tx = { academicTaxonomyNode: { findUnique: vi.fn(async () => ({ id: 'stable', ...data,
+  const tx = { $queryRaw: vi.fn(), academicTaxonomyNode: { findUnique: vi.fn(async () => ({ id: 'stable', ...data,
     createdAt: new Date(revision), updatedAt: new Date(revision) })), updateMany: vi.fn(async () => ({ count })) } };
   const prisma = { ...tx, $transaction: vi.fn(async (work: (transaction: unknown) => Promise<unknown>) => work(tx)) };
   return { repository: new PrismaAcademicTaxonomyRepository(prisma as any), tx, prisma };

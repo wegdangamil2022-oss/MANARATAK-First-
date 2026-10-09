@@ -28,6 +28,7 @@ export class AcademicTaxonomyAdminRouter {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
       return req.authUserId;
     };
+    const context = (req: Request) => ({ actorId: actor(req), source: 'admin-academic-taxonomy', correlationId: typeof req.headers['x-correlation-id'] === 'string' ? req.headers['x-correlation-id'] : undefined });
     const mutate = async <T>(
       req: Request,
       input: { action: string; targetType: string; targetId?: string; metadata?: Record<string, unknown> },
@@ -50,6 +51,7 @@ export class AcademicTaxonomyAdminRouter {
     const strengthSchema = z.nativeEnum(AcademicMappingStrength);
 
     const upsertNodeSchema = z.object({
+      expectedUpdatedAt: z.string().datetime().optional(),
       nodeType: nodeTypeSchema,
       status: statusSchema.optional(),
       standardType: standardTypeSchema.optional(),
@@ -76,12 +78,12 @@ export class AcademicTaxonomyAdminRouter {
       existingEdges: z.array(z.any()).optional(), existingAliases: z.array(z.any()).optional(), existingMappings: z.array(z.any()).optional(),
     });
     const listNodesQuerySchema = z.object({
-      nodeType: nodeTypeSchema.optional(), standardType: standardTypeSchema.optional(), status: statusSchema.optional(), q: z.string().optional(),
-      parentNodeId: z.string().optional(), page: z.coerce.number().int().min(1).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional(),
+      nodeType: nodeTypeSchema.optional(), standardType: standardTypeSchema.optional(), status: statusSchema.optional(), q: z.string().trim().max(200).optional(),
+      parentNodeId: z.string().optional(), page: z.coerce.number().int().min(1).max(1000).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional(),
     });
 
     router.get('/nodes', asyncHandler(async (req: Request, res: Response) => {
-      res.json({ data: await adminAcademicTaxonomyUseCases.listNodes(listNodesQuerySchema.parse(req.query)) });
+      res.json(await adminAcademicTaxonomyUseCases.listNodesPage(listNodesQuerySchema.parse(req.query)));
     }));
     router.get('/nodes/:nodeId', asyncHandler(async (req: Request, res: Response) => {
       const node = await adminAcademicTaxonomyUseCases.getNode(req.params.nodeId);
@@ -99,46 +101,46 @@ export class AcademicTaxonomyAdminRouter {
     }));
     router.put('/nodes', asyncHandler(async (req: Request, res: Response) => {
       const data = upsertNodeSchema.parse(req.body);
-      const result = await mutate(req, { action: 'UPSERT_ACADEMIC_TAXONOMY_NODE', targetType: 'ACADEMIC_TAXONOMY_NODE', targetId: data.canonicalCode, metadata: { nodeType: data.nodeType, status: data.status, standardType: data.standardType } }, () => adminAcademicTaxonomyUseCases.upsertNode(data as any));
+      const result = await mutate(req, { action: 'UPSERT_ACADEMIC_TAXONOMY_NODE', targetType: 'ACADEMIC_TAXONOMY_NODE', targetId: data.canonicalCode, metadata: { nodeType: data.nodeType, status: data.status, standardType: data.standardType } }, () => adminAcademicTaxonomyUseCases.upsertNode(data as any, context(req)));
       res.json(result);
     }));
     router.put('/nodes/:nodeId', asyncHandler(async (req: Request, res: Response) => {
       const { expectedUpdatedAt, ...data } = upsertNodeSchema.extend({ expectedUpdatedAt: z.string().datetime() }).strict().parse(req.body);
       const result = await mutate(req, { action: 'UPDATE_ACADEMIC_TAXONOMY_NODE', targetType: 'ACADEMIC_TAXONOMY_NODE', targetId: req.params.nodeId },
-        () => adminAcademicTaxonomyUseCases.editNode(req.params.nodeId, data as any, expectedUpdatedAt));
+        () => adminAcademicTaxonomyUseCases.editNode(req.params.nodeId, data as any, expectedUpdatedAt, context(req)));
       res.json(result);
     }));
     router.post('/edges', asyncHandler(async (req: Request, res: Response) => {
       const data = upsertEdgeSchema.parse(req.body);
-      const edge = await mutate(req, { action: 'ADD_ACADEMIC_TAXONOMY_EDGE', targetType: 'ACADEMIC_TAXONOMY_EDGE', targetId: `${data.parentNodeId}:${data.childNodeId}` }, () => adminAcademicTaxonomyUseCases.addEdge(data));
+      const edge = await mutate(req, { action: 'ADD_ACADEMIC_TAXONOMY_EDGE', targetType: 'ACADEMIC_TAXONOMY_EDGE', targetId: `${data.parentNodeId}:${data.childNodeId}` }, () => adminAcademicTaxonomyUseCases.addEdge(data, context(req)));
       res.json(edge);
     }));
     router.delete('/edges/by-nodes', asyncHandler(async (req: Request, res: Response) => {
       const data = edgeByNodesSchema.parse(req.query);
-      const removed = await mutate(req, { action: 'REMOVE_ACADEMIC_TAXONOMY_EDGE', targetType: 'ACADEMIC_TAXONOMY_EDGE', targetId: `${data.parentNodeId}:${data.childNodeId}` }, () => adminAcademicTaxonomyUseCases.removeEdgeByNodes(data.parentNodeId, data.childNodeId));
+      const removed = await mutate(req, { action: 'REMOVE_ACADEMIC_TAXONOMY_EDGE', targetType: 'ACADEMIC_TAXONOMY_EDGE', targetId: `${data.parentNodeId}:${data.childNodeId}` }, () => adminAcademicTaxonomyUseCases.removeEdgeByNodes(data.parentNodeId, data.childNodeId, context(req)));
       if (!removed) return res.status(404).json({ error: 'Edge not found' });
       res.json({ ok: true });
     }));
     router.delete('/edges/:edgeId', asyncHandler(async (req: Request, res: Response) => {
-      await mutate(req, { action: 'REMOVE_ACADEMIC_TAXONOMY_EDGE', targetType: 'ACADEMIC_TAXONOMY_EDGE', targetId: req.params.edgeId }, () => adminAcademicTaxonomyUseCases.removeEdge(req.params.edgeId));
+      await mutate(req, { action: 'REMOVE_ACADEMIC_TAXONOMY_EDGE', targetType: 'ACADEMIC_TAXONOMY_EDGE', targetId: req.params.edgeId }, () => adminAcademicTaxonomyUseCases.removeEdge(req.params.edgeId, context(req)));
       res.json({ ok: true });
     }));
     router.post('/aliases', asyncHandler(async (req: Request, res: Response) => {
       const data = upsertAliasSchema.parse(req.body);
-      const alias = await mutate(req, { action: 'ADD_ACADEMIC_TAXONOMY_ALIAS', targetType: 'ACADEMIC_TAXONOMY_ALIAS', targetId: data.nodeId, metadata: { locale: data.locale } }, () => adminAcademicTaxonomyUseCases.addAlias(data));
+      const alias = await mutate(req, { action: 'ADD_ACADEMIC_TAXONOMY_ALIAS', targetType: 'ACADEMIC_TAXONOMY_ALIAS', targetId: data.nodeId, metadata: { locale: data.locale } }, () => adminAcademicTaxonomyUseCases.addAlias(data, context(req)));
       res.json(alias);
     }));
     router.delete('/aliases/:aliasId', asyncHandler(async (req: Request, res: Response) => {
-      await mutate(req, { action: 'REMOVE_ACADEMIC_TAXONOMY_ALIAS', targetType: 'ACADEMIC_TAXONOMY_ALIAS', targetId: req.params.aliasId }, () => adminAcademicTaxonomyUseCases.removeAlias(req.params.aliasId));
+      await mutate(req, { action: 'REMOVE_ACADEMIC_TAXONOMY_ALIAS', targetType: 'ACADEMIC_TAXONOMY_ALIAS', targetId: req.params.aliasId }, () => adminAcademicTaxonomyUseCases.removeAlias(req.params.aliasId, context(req)));
       res.json({ ok: true });
     }));
     router.post('/mappings', asyncHandler(async (req: Request, res: Response) => {
       const data = upsertMappingSchema.parse(req.body);
-      const mapping = await mutate(req, { action: 'ADD_ACADEMIC_STANDARD_MAPPING', targetType: 'ACADEMIC_STANDARD_MAPPING', targetId: `${data.sourceNodeId}:${data.targetNodeId}`, metadata: { strength: data.strength, confidence: data.confidence } }, () => adminAcademicTaxonomyUseCases.addMapping(data));
+      const mapping = await mutate(req, { action: 'ADD_ACADEMIC_STANDARD_MAPPING', targetType: 'ACADEMIC_STANDARD_MAPPING', targetId: `${data.sourceNodeId}:${data.targetNodeId}`, metadata: { strength: data.strength, confidence: data.confidence } }, () => adminAcademicTaxonomyUseCases.addMapping(data, context(req)));
       res.json(mapping);
     }));
     router.delete('/mappings/:mappingId', asyncHandler(async (req: Request, res: Response) => {
-      await mutate(req, { action: 'REMOVE_ACADEMIC_STANDARD_MAPPING', targetType: 'ACADEMIC_STANDARD_MAPPING', targetId: req.params.mappingId }, () => adminAcademicTaxonomyUseCases.removeMapping(req.params.mappingId));
+      await mutate(req, { action: 'REMOVE_ACADEMIC_STANDARD_MAPPING', targetType: 'ACADEMIC_STANDARD_MAPPING', targetId: req.params.mappingId }, () => adminAcademicTaxonomyUseCases.removeMapping(req.params.mappingId, context(req)));
       res.json({ ok: true });
     }));
     router.post('/import-handoff', asyncHandler(async (req: Request, res: Response) => {
@@ -149,6 +151,7 @@ export class AcademicTaxonomyAdminRouter {
     }));
 
     const updateDegreeLevelSchema = z.object({
+      expectedUpdatedAt: z.string().datetime(),
       nameEn: z.string().trim().min(1).max(250), nameAr: z.string().trim().min(1).max(250), displayRank: z.number().int().min(0).optional(), status: z.nativeEnum(DegreeLevelStatus).optional(),
     });
     router.get('/degree-levels', asyncHandler(async (_req: Request, res: Response) => res.json({ data: await degreeLevelUseCases.list() })));
@@ -159,15 +162,17 @@ export class AcademicTaxonomyAdminRouter {
     }));
     router.put('/degree-levels/:id', asyncHandler(async (req: Request, res: Response) => {
       const body = updateDegreeLevelSchema.parse(req.body);
-      const updated = await mutate(req, { action: 'UPDATE_DEGREE_LEVEL', targetType: 'DEGREE_LEVEL', targetId: req.params.id, metadata: { status: body.status, displayRank: body.displayRank } }, () => degreeLevelUseCases.update(req.params.id, body));
+      const updated = await mutate(req, { action: 'UPDATE_DEGREE_LEVEL', targetType: 'DEGREE_LEVEL', targetId: req.params.id, metadata: { status: body.status, displayRank: body.displayRank } }, () => degreeLevelUseCases.update(req.params.id, body, context(req)));
       if (!updated) return res.status(404).json({ error: 'Degree level not found' });
       res.json(updated);
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      if (err?.message === 'DEGREE_LEVEL_VERSION_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });
+      if (err instanceof Error && /^(TAXONOMY|DEGREE_LEVEL)_(ATOMIC_CONTEXT_REQUIRED|GOVERNED_EDIT_UNAVAILABLE)$/.test(err.message)) return res.status(503).json({ error: err.message });
       if (err?.message === 'TAXONOMY_NODE_VERSION_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });
-      if (err?.message === 'TAXONOMY_NODE_NOT_FOUND') return res.status(404).json({ error: err.message });
-      if (err?.message === 'TAXONOMY_GOVERNED_EDIT_UNAVAILABLE') return res.status(503).json({ error: err.message });
+      if (err?.message === 'TAXONOMY_NODE_NOT_FOUND' || err?.message === 'DEGREE_LEVEL_NOT_FOUND') return res.status(404).json({ error: err.message });
+      if (err?.message === 'TAXONOMY_GOVERNED_EDIT_UNAVAILABLE' || err?.message === 'TAXONOMY_PAGINATION_UNAVAILABLE') return res.status(503).json({ error: err.message });
       if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation Error', details: err.issues });
       res.status(400).json({ error: err.message || 'An error occurred' });
     });

@@ -158,7 +158,7 @@ describe('AcademicTaxonomyAdminRouter', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.node.nodeId).toBe('node_001');
-    expect(useCases.upsertNode).toHaveBeenCalledWith(input);
+    expect(useCases.upsertNode).toHaveBeenCalledWith(input, expect.objectContaining({ actorId: expect.any(String) }));
   });
 
   it('PUT /admin/academic-taxonomy/nodes returns 400 for invalid body without calling use case', async () => {
@@ -185,7 +185,7 @@ describe('AcademicTaxonomyAdminRouter', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.edgeId).toBe('edge_001');
-    expect(useCases.addEdge).toHaveBeenCalledWith(input);
+    expect(useCases.addEdge).toHaveBeenCalledWith(input, expect.objectContaining({ actorId: expect.any(String) }));
   });
 
   it('DELETE /admin/academic-taxonomy/edges/:edgeId calls removeEdge', async () => {
@@ -197,7 +197,7 @@ describe('AcademicTaxonomyAdminRouter', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
-    expect(useCases.removeEdge).toHaveBeenCalledWith('edge_001');
+    expect(useCases.removeEdge).toHaveBeenCalledWith('edge_001', expect.objectContaining({ actorId: expect.any(String) }));
   });
 
   it('POST /admin/academic-taxonomy/aliases calls addAlias', async () => {
@@ -214,7 +214,7 @@ describe('AcademicTaxonomyAdminRouter', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.aliasId).toBe('alias_001');
-    expect(useCases.addAlias).toHaveBeenCalledWith(input);
+    expect(useCases.addAlias).toHaveBeenCalledWith(input, expect.objectContaining({ actorId: expect.any(String) }));
   });
 
   it('POST /admin/academic-taxonomy/mappings calls addMapping', async () => {
@@ -234,7 +234,7 @@ describe('AcademicTaxonomyAdminRouter', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.mappingId).toBe('mapping_001');
-    expect(useCases.addMapping).toHaveBeenCalledWith(input);
+    expect(useCases.addMapping).toHaveBeenCalledWith(input, expect.objectContaining({ actorId: expect.any(String) }));
   });
 
   it('POST /admin/academic-taxonomy/import-handoff calls prepareImportHandoff', async () => {

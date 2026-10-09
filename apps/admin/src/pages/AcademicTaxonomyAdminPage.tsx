@@ -17,6 +17,7 @@ interface AcademicTaxonomyNode {
 }
 
 interface DegreeLevel {
+  updatedAt?: string;
   id: string;
   canonicalCode: string;
   nameEn: string;
@@ -108,10 +109,10 @@ export function AcademicTaxonomyAdminPage() {
 
       // Using the authorized admin endpoint
       const endpoint = `${localReadOnly ? '/academic-taxonomy' : '/admin/academic-taxonomy'}/nodes?${params.toString()}`;
-      const response = await adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(endpoint);
+      const response = await adminApiClient.request<{ data: AcademicTaxonomyNode[]; hasNextPage?: boolean }>(endpoint);
       const received = response.data || [];
       setNodes(received);
-      setHasNextPage(received.length === pageSize);
+      setHasNextPage(localReadOnly ? received.length === pageSize : response.hasNextPage === true);
     } catch (err) {
       console.error(err);
       setNodesError(isAr 
@@ -208,6 +209,7 @@ export function AcademicTaxonomyAdminPage() {
   const handleEditDegreeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDegree) return;
+    if (!editingDegree.updatedAt) { setDegreeFormError(isAr ? 'أعد تحميل الدرجة للحصول على نسخة التعديل.' : 'Reload the degree level to obtain its edit version.'); return; }
     setSavingDegree(true);
     setDegreeFormError(null);
 
@@ -215,6 +217,7 @@ export function AcademicTaxonomyAdminPage() {
       await adminApiClient.request(`/admin/academic-taxonomy/degree-levels/${editingDegree.id}`, {
         method: 'PUT',
         body: JSON.stringify({
+          expectedUpdatedAt: editingDegree.updatedAt,
           nameEn: degreeFormData.nameEn.trim(),
           nameAr: degreeFormData.nameAr.trim(),
           displayRank: Number(degreeFormData.displayRank),
@@ -226,7 +229,7 @@ export function AcademicTaxonomyAdminPage() {
       fetchDegreeLevels();
     } catch (err: any) {
       console.error(err);
-      setDegreeFormError(err.message || (isAr ? 'حدث خطأ أثناء تحديث الدرجة العلمية.' : 'An error occurred while updating the degree level.'));
+      setDegreeFormError(String(err.message).includes('409') ? (isAr ? 'تغيّرت الدرجة؛ احتفظ بتعديلاتك وأعد تحميل النسخة الحالية.' : 'Degree level changed; keep your edits and reload the current version.') : err.message || (isAr ? 'حدث خطأ أثناء تحديث الدرجة العلمية.' : 'An error occurred while updating the degree level.'));
     } finally {
       setSavingDegree(false);
     }

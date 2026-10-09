@@ -1,3 +1,4 @@
+import type { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 import {
   AcademicTaxonomyNodeDto,
   UpsertAcademicTaxonomyNodeDto,
@@ -17,6 +18,11 @@ import {
 export interface IAcademicTaxonomyRepository {
   /** Execute a hierarchy mutation against one serializable graph snapshot. */
   executeSerializable<T>(operation: (repository: IAcademicTaxonomyRepository) => Promise<T>): Promise<T>;
+
+  withTransaction?(context: AtomicPersistenceContext): IAcademicTaxonomyRepository;
+  createNode?(data: UpsertAcademicTaxonomyNodeDto): Promise<AcademicTaxonomyNodeDto>;
+
+  countNodes?(filters?: AcademicTaxonomyFilters): Promise<number>;
 
   // Node methods
   listNodes(filters?: AcademicTaxonomyFilters): Promise<AcademicTaxonomyNodeDto[]>;

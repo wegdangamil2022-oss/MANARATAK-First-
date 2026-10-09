@@ -24,7 +24,8 @@ describe('DegreeLevelUseCases', () => {
     listDegreeLevels: vi.fn(),
     getDegreeLevelByCode: vi.fn(),
     getDegreeLevelById: vi.fn().mockResolvedValue(existing),
-    upsertDegreeLevel: vi.fn().mockImplementation(async (data) => ({
+    upsertDegreeLevel: vi.fn(),
+    updateDegreeLevel: vi.fn().mockImplementation(async (_id, data) => ({
       ...existing,
       ...data,
       updatedAt: new Date('2026-01-03'),
@@ -35,9 +36,9 @@ describe('DegreeLevelUseCases', () => {
     const repo = repository();
     const useCases = new DegreeLevelUseCases(repo);
 
-    await useCases.update(existing.id, { nameEn: 'Master Degree', nameAr: 'درجة الماجستير' });
+    await useCases.update(existing.id, { expectedUpdatedAt: existing.updatedAt.toISOString(), nameEn: 'Master Degree', nameAr: 'درجة الماجستير' });
 
-    expect(repo.upsertDegreeLevel).toHaveBeenCalledWith({
+    expect(repo.updateDegreeLevel).toHaveBeenCalledWith(existing.id, {
       canonicalCode: 'MASTER',
       nameEn: 'Master Degree',
       nameAr: 'درجة الماجستير',
@@ -45,7 +46,7 @@ describe('DegreeLevelUseCases', () => {
       status: DegreeLevelStatus.DEPRECATED,
       aliases: existing.aliases,
       metadata: existing.metadata,
-    });
+    }, existing.updatedAt.toISOString());
   });
 
   it('applies an explicitly supplied valid lifecycle status', async () => {
@@ -53,16 +54,16 @@ describe('DegreeLevelUseCases', () => {
     const useCases = new DegreeLevelUseCases(repo);
 
     await useCases.update(existing.id, {
-      nameEn: existing.nameEn,
+      expectedUpdatedAt: existing.updatedAt.toISOString(),      nameEn: existing.nameEn,
       nameAr: existing.nameAr,
       status: DegreeLevelStatus.ARCHIVED,
       displayRank: 55,
     });
 
-    expect(repo.upsertDegreeLevel).toHaveBeenCalledWith(expect.objectContaining({
+    expect(repo.updateDegreeLevel).toHaveBeenCalledWith(existing.id, expect.objectContaining({
       status: DegreeLevelStatus.ARCHIVED,
       displayRank: 55,
-    }));
+    }), existing.updatedAt.toISOString());
   });
 
   it('fails closed if persisted canonical code is outside the frozen catalog', async () => {
@@ -70,7 +71,7 @@ describe('DegreeLevelUseCases', () => {
     vi.mocked(repo.getDegreeLevelById).mockResolvedValue({ ...existing, canonicalCode: 'UNKNOWN' as any });
     const useCases = new DegreeLevelUseCases(repo);
 
-    await expect(useCases.update(existing.id, { nameEn: 'X', nameAr: 'X' }))
+    await expect(useCases.update(existing.id, { expectedUpdatedAt: existing.updatedAt.toISOString(), nameEn: 'X', nameAr: 'X' }))
       .rejects.toThrow('Unsupported canonical DegreeLevel code: UNKNOWN');
     expect(repo.upsertDegreeLevel).not.toHaveBeenCalled();
   });

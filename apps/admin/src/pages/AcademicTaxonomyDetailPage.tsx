@@ -95,6 +95,7 @@ export function AcademicTaxonomyDetailPage() {
   const [pickerStandard, setPickerStandard] = useState('');
   const [pickerLoading, setPickerLoading] = useState(false);
   const [pickerError, setPickerError] = useState(false);
+  const [pickerHasNext, setPickerHasNext] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -155,8 +156,8 @@ export function AcademicTaxonomyDetailPage() {
       if (pickerQuery.trim()) query.set('q', pickerQuery.trim());
       if (pickerType) query.set('nodeType', pickerType);
       if (pickerStandard) query.set('standardType', pickerStandard);
-      adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(`/admin/academic-taxonomy/nodes?${query}`, { signal: abort.signal })
-        .then(value => { if (!abort.signal.aborted) setAllNodes(value.data); })
+      adminApiClient.request<{ data: AcademicTaxonomyNode[]; hasNextPage: boolean }>(`/admin/academic-taxonomy/nodes?${query}`, { signal: abort.signal })
+        .then(value => { if (!abort.signal.aborted) { setAllNodes(value.data); setPickerHasNext(value.hasNextPage); } })
         .catch(() => { if (!abort.signal.aborted) setPickerError(true); })
         .finally(() => { if (!abort.signal.aborted) setPickerLoading(false); });
     }, 200);
@@ -541,7 +542,7 @@ export function AcademicTaxonomyDetailPage() {
     {pickerError && <p role="alert">{isAr ? 'تعذر تحميل العقد.' : 'Nodes unavailable.'}</p>}
     {pickerLoading && <p role="status">{isAr ? 'جار البحث…' : 'Searching…'}</p>}
     <div className="flex gap-3"><button type="button" disabled={pickerPage === 1 || pickerLoading} onClick={() => setPickerPage(value => value - 1)}>{isAr ? 'السابق' : 'Previous'}</button>
-      <span>{pickerPage}</span><button type="button" disabled={allNodes.length < 25 || pickerLoading} onClick={() => setPickerPage(value => value + 1)}>{isAr ? 'التالي' : 'Next'}</button></div>
+      <span>{pickerPage}</span><button type="button" disabled={!pickerHasNext || pickerLoading} onClick={() => setPickerPage(value => value + 1)}>{isAr ? 'التالي' : 'Next'}</button></div>
   </div>;
 
 

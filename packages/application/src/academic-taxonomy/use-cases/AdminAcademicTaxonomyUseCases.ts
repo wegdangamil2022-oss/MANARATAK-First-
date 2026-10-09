@@ -1,6 +1,8 @@
+import { AtomicDomainMutationCoordinator, type AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import {
   IAcademicTaxonomyRepository,
   AcademicStandardType,
+  AcademicTaxonomyDeterministicKey,
   normalizeAcademicTaxonomyAlias,
   IAcademicTaxonomyValidationService,
   AcademicTaxonomyValidationService,
@@ -27,11 +29,21 @@ export class AdminAcademicTaxonomyUseCases {
   constructor(
     private readonly repository: IAcademicTaxonomyRepository,
     private readonly validationService: IAcademicTaxonomyValidationService = new AcademicTaxonomyValidationService(),
-    private readonly importHandoffService: AcademicTaxonomyImportHandoffService = new AcademicTaxonomyImportHandoffService()
+    private readonly importHandoffService: AcademicTaxonomyImportHandoffService = new AcademicTaxonomyImportHandoffService(),
+    private readonly atomic?: AtomicDomainMutationCoordinator
   ) {}
 
   public listNodes(filters?: AcademicTaxonomyFilters): Promise<AcademicTaxonomyNodeDto[]> {
     return this.repository.listNodes(filters);
+  }
+
+  public async listNodesPage(filters: AcademicTaxonomyFilters = {}) {
+    const page = filters.page ?? 1; const pageSize = filters.pageSize ?? 50;
+    if (!Number.isSafeInteger(page) || page < 1 || page > 1000 || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 100)
+      throw new Error('TAXONOMY_PAGINATION_INVALID');
+    if (!this.repository.countNodes) throw new Error('TAXONOMY_PAGINATION_UNAVAILABLE');
+    const [data, total] = await Promise.all([this.repository.listNodes({ ...filters, page, pageSize }), this.repository.countNodes(filters)]);
+    return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize), hasNextPage: page * pageSize < total };
   }
 
   public getNode(nodeId: string): Promise<AcademicTaxonomyNodeDto | null> {
@@ -60,18 +72,25 @@ export class AdminAcademicTaxonomyUseCases {
     return this.validationService.validateNode(data);
   }
 
-  public async upsertNode(data: UpsertAcademicTaxonomyNodeDto): Promise<{
+  public async upsertNode(data: UpsertAcademicTaxonomyNodeDto & { expectedUpdatedAt?: string }, context?: AtomicMutationRequestContext): Promise<{
     node: AcademicTaxonomyNodeDto;
     report: AcademicTaxonomyCompletenessReport;
   }> {
+    if (this.atomic) return this.mutate('TAXONOMY_NODE_UPSERTED', AcademicTaxonomyDeterministicKey.create(data), context, cases => cases.upsertNode(data));
+    const current = await this.repository.getNodeByCanonicalKey(data);
+    if (current) {
+      if (!data.expectedUpdatedAt) throw new Error('TAXONOMY_NODE_VERSION_CONFLICT');
+      return this.editNode(current.nodeId, data, data.expectedUpdatedAt);
+    }
     const report = this.validateNode(data);
     this.assertNoErrors(report.issues, 'Node validation failed');
 
-    const node = await this.repository.upsertNode(data);
+    const node = this.repository.createNode ? await this.repository.createNode(data) : await this.repository.upsertNode(data);
     return { node, report };
   }
 
-  public async editNode(nodeId: string, data: UpsertAcademicTaxonomyNodeDto, expectedUpdatedAt: string) {
+  public async editNode(nodeId: string, data: UpsertAcademicTaxonomyNodeDto, expectedUpdatedAt: string, context?: AtomicMutationRequestContext): Promise<{ node: AcademicTaxonomyNodeDto; report: AcademicTaxonomyCompletenessReport }> {
+    if (this.atomic) return this.mutate('TAXONOMY_NODE_CHANGED', nodeId, context, cases => cases.editNode(nodeId, data, expectedUpdatedAt));
     const current = await this.repository.getNode(nodeId);
     if (!current) throw new Error('TAXONOMY_NODE_NOT_FOUND');
     if (data.nodeType !== current.nodeType || data.canonicalCode !== current.canonicalCode ||
@@ -86,7 +105,8 @@ export class AdminAcademicTaxonomyUseCases {
     return { node, report };
   }
 
-  public async addEdge(data: UpsertAcademicTaxonomyEdgeDto): Promise<AcademicTaxonomyEdgeDto> {
+  public async addEdge(data: UpsertAcademicTaxonomyEdgeDto, context?: AtomicMutationRequestContext): Promise<AcademicTaxonomyEdgeDto> {
+    if (this.atomic) return this.mutate('TAXONOMY_HIERARCHY_CHANGED', data.childNodeId, context, cases => cases.addEdge(data));
     return this.repository.executeSerializable(async (transactionRepository) => {
       const existingNodes = await transactionRepository.listNodes();
       const existingEdges = await transactionRepository.listEdges();
@@ -102,22 +122,26 @@ export class AdminAcademicTaxonomyUseCases {
     });
   }
 
-  public async removeEdge(edgeId: string): Promise<void> {
+  public async removeEdge(edgeId: string, context?: AtomicMutationRequestContext): Promise<void> {
+    if (this.atomic) return this.mutate('TAXONOMY_EDGE_REMOVED', edgeId, context, cases => cases.removeEdge(edgeId));
     return this.repository.removeEdge(edgeId);
   }
 
-  public async removeEdgeByNodes(parentNodeId: string, childNodeId: string): Promise<boolean> {
+  public async removeEdgeByNodes(parentNodeId: string, childNodeId: string, context?: AtomicMutationRequestContext): Promise<boolean> {
+    if (this.atomic) return this.mutate('TAXONOMY_HIERARCHY_CHANGED', childNodeId, context, cases => cases.removeEdgeByNodes(parentNodeId, childNodeId));
     const edge = await this.repository.findEdgeByNodes(parentNodeId, childNodeId);
     if (!edge) return false;
     await this.repository.removeEdge(edge.edgeId);
     return true;
   }
 
-  public async removeAlias(aliasId: string): Promise<void> {
+  public async removeAlias(aliasId: string, context?: AtomicMutationRequestContext): Promise<void> {
+    if (this.atomic) return this.mutate('TAXONOMY_ALIAS_REMOVED', aliasId, context, cases => cases.removeAlias(aliasId));
     return this.repository.removeAlias(aliasId);
   }
 
-  public async addAlias(data: UpsertAcademicTaxonomyAliasDto): Promise<AcademicTaxonomyAliasDto> {
+  public async addAlias(data: UpsertAcademicTaxonomyAliasDto, context?: AtomicMutationRequestContext): Promise<AcademicTaxonomyAliasDto> {
+    if (this.atomic) return this.mutate('TAXONOMY_ALIAS_ADDED', data.nodeId, context, cases => cases.addAlias(data));
     const normalizedAlias = normalizeAcademicTaxonomyAlias(data.alias);
     const existingAliases = await this.repository.listAliasesByNormalizedAlias(normalizedAlias);
 
@@ -131,8 +155,9 @@ export class AdminAcademicTaxonomyUseCases {
   }
 
   public async addMapping(
-    data: UpsertAcademicStandardMappingDto
+    data: UpsertAcademicStandardMappingDto, context?: AtomicMutationRequestContext
   ): Promise<AcademicStandardMappingDto> {
+    if (this.atomic) return this.mutate('TAXONOMY_MAPPING_ADDED', data.sourceNodeId, context, cases => cases.addMapping(data));
     const [sourceNode, targetNode, existingMappings] = await Promise.all([
       this.repository.getNode(data.sourceNodeId),
       this.repository.getNode(data.targetNodeId),
@@ -150,7 +175,8 @@ export class AdminAcademicTaxonomyUseCases {
     return this.repository.addMapping(data);
   }
 
-  public async removeMapping(mappingId: string): Promise<void> {
+  public async removeMapping(mappingId: string, context?: AtomicMutationRequestContext): Promise<void> {
+    if (this.atomic) return this.mutate('TAXONOMY_MAPPING_REMOVED', mappingId, context, cases => cases.removeMapping(mappingId));
     return this.repository.removeMapping(mappingId);
   }
 
@@ -160,6 +186,15 @@ export class AdminAcademicTaxonomyUseCases {
     return this.importHandoffService.prepareSeedBatch(command);
   }
 
+
+  private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined,
+    work: (cases: AdminAcademicTaxonomyUseCases) => Promise<T>): Promise<T> {
+    if (!this.atomic || !context?.actorId || !this.repository.withTransaction) throw new Error('TAXONOMY_ATOMIC_CONTEXT_REQUIRED');
+    return this.atomic.execute({ domain: 'ACADEMIC_TAXONOMY', aggregateType: 'ACADEMIC_TAXONOMY', aggregateId: id, action, context }, tx => {
+      const repository = this.repository.withTransaction!(tx);
+      return repository.executeSerializable(() => work(new AdminAcademicTaxonomyUseCases(repository, this.validationService, this.importHandoffService)));
+    });
+  }
 
   private assertNoErrors(issues: AcademicTaxonomyValidationIssue[], messagePrefix: string): void {
     const errorIssues = issues.filter(

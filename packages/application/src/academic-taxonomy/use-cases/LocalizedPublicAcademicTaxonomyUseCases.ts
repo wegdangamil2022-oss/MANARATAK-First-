@@ -1,3 +1,4 @@
+import { PublicAcademicTaxonomyUseCases } from './PublicAcademicTaxonomyUseCases';
 import {
   AcademicStandardType,
   AcademicTaxonomyFilters,
@@ -23,7 +24,7 @@ export class LocalizedPublicAcademicTaxonomyUseCases {
     filters: AcademicTaxonomyFilters = {},
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<LocalizedAcademicTaxonomyNodeDto[]> {
-    const records = await this.repository.listNodes({ ...filters, status: AcademicTaxonomyStatus.ACTIVE });
+    const records = await new PublicAcademicTaxonomyUseCases(this.repository).listNodes(filters);
     return records.map((record) => this.project(record, locale));
   }
 
@@ -52,12 +53,7 @@ export class LocalizedPublicAcademicTaxonomyUseCases {
     filters: AcademicTaxonomyFilters = {},
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<LocalizedAcademicTaxonomyNodeDto[]> {
-    const trimmed = (query ?? '').trim();
-    const records = await this.repository.listNodes({
-      ...filters,
-      status: AcademicTaxonomyStatus.ACTIVE,
-      ...(trimmed ? { q: trimmed } : {}),
-    });
+    const records = await new PublicAcademicTaxonomyUseCases(this.repository).searchNodes(query, filters);
     return records.map((record) => this.project(record, locale));
   }
 

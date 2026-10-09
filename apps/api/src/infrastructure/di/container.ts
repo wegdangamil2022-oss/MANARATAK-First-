@@ -534,7 +534,7 @@ export function registerDependencies(
     degreeLevelRepository: asFunction(({ prisma }) => new DegreeLevelRepository(prisma)).singleton(),
     canonicalMajorReferenceService: asFunction(({ academicTaxonomyRepository, degreeLevelRepository }) =>
       new CanonicalMajorReferenceService(academicTaxonomyRepository, degreeLevelRepository)).scoped(),
-    degreeLevelUseCases: asFunction(({ degreeLevelRepository }) => new DegreeLevelUseCases(degreeLevelRepository)).scoped(),
+    degreeLevelUseCases: asFunction(({ degreeLevelRepository, atomicDomainMutationCoordinator }) => new DegreeLevelUseCases(degreeLevelRepository, atomicDomainMutationCoordinator)).scoped(),
     importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
       SCHOLARSHIPS: scholarshipImportHandoffConsumer,
       SCHOLARSHIP: scholarshipImportHandoffConsumer,
@@ -862,7 +862,7 @@ export function registerDependencies(
     ])).scoped(),
     durableBackgroundWorker: asFunction(({ durableBackgroundJobQueue, backgroundJobHandlerRegistry, backgroundWorkerRuntimeState }) =>
       new DurableBackgroundWorker(durableBackgroundJobQueue, backgroundJobHandlerRegistry, backgroundWorkerRuntimeState)).scoped(),
-    adminAcademicTaxonomyUseCases: asFunction(({ academicTaxonomyRepository, academicTaxonomyValidationService }) => new AdminAcademicTaxonomyUseCases(academicTaxonomyRepository, academicTaxonomyValidationService)).scoped(),
+    adminAcademicTaxonomyUseCases: asFunction(({ academicTaxonomyRepository, academicTaxonomyValidationService, atomicDomainMutationCoordinator }) => new AdminAcademicTaxonomyUseCases(academicTaxonomyRepository, academicTaxonomyValidationService, undefined, atomicDomainMutationCoordinator)).scoped(),
     // Identity
     provisionIdentityUseCase: asFunction(({ identityRepository }) => new ProvisionIdentityUseCase(identityRepository)).scoped(),
     activateIdentityUseCase: asFunction(({ identityRepository }) => new ActivateIdentityUseCase(identityRepository)).scoped(),
