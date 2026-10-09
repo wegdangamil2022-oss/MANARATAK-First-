@@ -743,4 +743,26 @@ describe('Phase 05 EAP Application Layer - Slice 2B', () => {
     expect(restore).not.toHaveBeenCalled();
   });
 
+  it('refuses restore before contacting provider when DB lease cannot be acquired', async () => {
+    await ingestUseCase.requestUploadLocator({
+      assetId: 'asset-restore-lease-busy', assetReference: 'ref-restore-lease-busy',
+      ownerId: 'owner', ownerType: 'STUDENT', originalFilename: 'file.pdf',
+      mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 125,
+      classification: AssetSecurityClassification.INTERNAL,
+    });
+    await lifecycleUseCase.finalizeUploadedAsset({ assetId: 'asset-restore-lease-busy' });
+    await lifecycleUseCase.validateAsset({ assetId: 'asset-restore-lease-busy' });
+    await lifecycleUseCase.sanitizeAsset({ assetId: 'asset-restore-lease-busy' });
+    await lifecycleUseCase.activateAsset({ assetId: 'asset-restore-lease-busy' });
+    await lifecycleUseCase.softDeleteAsset({ assetId: 'asset-restore-lease-busy' });
+    vi.spyOn(repo, 'acquireRestoreLease')
+      .mockRejectedValueOnce(new Error('ASSET_RESTORE_LEASE_CONFLICT'));
+    const restore = vi.spyOn(storageGateway, 'restore');
+    await expect(lifecycleUseCase.restoreAsset({ assetId: 'asset-restore-lease-busy' }))
+      .rejects.toThrow('ASSET_RESTORE_LEASE_CONFLICT');
+    expect(restore).not.toHaveBeenCalled();
+    expect((await repo.findById(new AssetId('asset-restore-lease-busy')))?.state)
+      .toBe(AssetLifecycleState.DELETED);
+  });
+
 });

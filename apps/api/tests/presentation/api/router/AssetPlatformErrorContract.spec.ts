@@ -74,4 +74,29 @@ describe('EAP API boundary: query validation and safe Problem Details', () => {
     expect(JSON.stringify(response.body)).not.toContain('provider locator');
   });
 
+  it('returns sanitized conflicts for restore lease contention, not a generic 500', async () => {
+    for (const errorCode of [
+      'ASSET_RESTORE_LEASE_CONFLICT',
+      'ASSET_RESTORE_LEASE_REQUIRED',
+      'ASSET_RESTORE_LEASE_INVALID_STATE',
+    ]) {
+      const f = fixture(new Error(errorCode));
+      const response = await request(f.app).get('/admin/assets');
+      expect(response.status).toBe(409);
+      expect(response.body.code).toBe('ASSET_STATE_CONFLICT');
+    }
+  });
+
+  it('fails closed with sanitized 503 if restore serialization or lease release is unavailable', async () => {
+    for (const errorCode of [
+      'ASSET_RESTORE_LEASE_NOT_CONFIGURED',
+      'ASSET_RESTORE_LEASE_RELEASE_FAILED',
+    ]) {
+      const f = fixture(new Error(errorCode));
+      const response = await request(f.app).get('/admin/assets');
+      expect(response.status).toBe(503);
+      expect(response.body.code).toBe(errorCode);
+    }
+  });
+
 });

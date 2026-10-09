@@ -268,3 +268,9 @@ npm run ci:source:contracts
 - On failed restore/verify/CAS, the use case attempts archive compensation and releases only its own lease. A failed compensation or lease release is explicitly surfaced; the provider restore itself is included in the compensation boundary to cover partial failures.
 - This avoids the earlier purge-vs-restore preflight race *within a live lease*. **Still open:** a stalled provider action exceeding 10 minutes can lose its lease; production should add heartbeat/operation journal and provider-side immutable version fencing before declaring fully safe.
 - No Prisma migration or production database mutation; pending CI integration tests.
+
+## Patch L — Restore lease API error contracts and negative application test
+
+- EAP Problem Details returns sanitized 409 for lease conflict/invalid transition, 503 for missing lease capability or unsuccessful lease release; never sends provider/storage exceptions verbatim.
+- Additional negative application regression proves a failed restore lease prevents any provider-side restore and leaves the DB record DELETED.
+- Postgres lease race regression is separate and runs only against disposable localhost.
