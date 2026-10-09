@@ -43,7 +43,19 @@ export interface UniversalImportHandoff {
   referenceMetadata?: Readonly<Record<string, string>>;
 }
 
+/**
+ * A Phase 6 dispatcher can invoke a SCREENING_ONLY adapter. Such an adapter
+ * must not write, publish or merge canonical entities.
+ *
+ * A CANONICAL_MUTATION adapter is deliberately NOT admitted by Phase 6 until
+ * it has an owning-domain transactional inbox/receipt and independent tests
+ * demonstrating atomic idempotency with its canonical side effects.
+ * This declaration documents the trust boundary; it is not proof of receipt.
+ */
+export type ImportHandoffEffectMode = 'SCREENING_ONLY' | 'CANONICAL_MUTATION';
+
 /** The owning domain implements semantic matching, merge, and promotion. */
 export interface IImportHandoffConsumer<TResult = unknown> {
+  readonly effectMode: ImportHandoffEffectMode;
   accept(handoff: UniversalImportHandoff): Promise<TResult>;
 }
