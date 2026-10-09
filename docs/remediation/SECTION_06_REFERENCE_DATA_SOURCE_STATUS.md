@@ -33,3 +33,7 @@
 ## Execution exclusions
 
 No database connection, migrations, seed, backfill, provider API calls, live import, runtime deployment, merge or production publication in this review. Source and test files only. Actual source/unit/contract checks must be reported individually; files added under tests/ do not count as executed tests.
+
+## Follow-up source commits after the checkpoint
+
+Selected-record editors now propagate canonical ID and expectedVersion to row-locked writes; explicit 409 conflicts retain form state. Admin list URL query and quality counts exist (coverage unknown); bounded search pickers replace eager full-list loading; resolver now exposes historical replacement metadata. Refer to `SECTION_06_ITEM_MATRIX.md` for all 50 items and FG status. The earlier list of open features is a historical checkpoint; this matrix supersedes its FGA-06-001 and URL-filter status. No DB or runtime validation was performed.
