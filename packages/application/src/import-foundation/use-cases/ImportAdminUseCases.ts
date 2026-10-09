@@ -17,7 +17,7 @@ type ImportRepository = {
   createRecord(data: Record<string, unknown>): Promise<any>;
   bulkCreateRecords?(records: Array<Record<string, unknown>>): Promise<{ count: number; acceptedRecordIds?: string[] }>;
   updateRecord?(id: string, updates: Record<string, unknown>): Promise<any>;
-  updateBatchStats(id: string, data: Record<string, unknown>): Promise<any>;
+  updateBatchStats(id: string, data: Record<string, unknown>, lease?: ImportJobLease): Promise<any>;
   getBatchById?(id: string): Promise<any | null>;
   listBatches(filters?: Record<string, unknown>): Promise<any[]>;
   listRecords(filters?: Record<string, unknown>): Promise<any>;
@@ -581,7 +581,7 @@ export class ImportAdminUseCases {
       await this.importRepository.updateBatchStats(lease.batchId, {
         processedRecords,
         failedRecords,
-      });
+      }, getActiveLease());
 
       if (page * pageSize >= total) break;
       await heartbeat();
