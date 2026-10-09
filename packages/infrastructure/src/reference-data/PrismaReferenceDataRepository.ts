@@ -28,7 +28,8 @@ import {
   ReferenceVersionDto,
   assertReferenceLifecycleTransition,
   lifecycleIsActive,
-  normalizeReferenceIdentityToken
+  normalizeReferenceIdentityToken,
+  referenceCityScopeKey
 } from '@manaratak/domain';
 
 interface DbCountry {
@@ -1150,15 +1151,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
 
   private cityCanonicalIdentityKey(data: UpsertReferenceCityDto): string {
-    const normalizedName = normalizeReferenceIdentityToken(data.name);
-    if (!normalizedName) throw new Error('REFERENCE_CITY_NAME_EMPTY_AFTER_NORMALIZATION');
-    const regionName = normalizeReferenceIdentityToken(data.region ?? '');
-    const regionIdentity = data.administrativeRegionId
-      ? `id:${data.administrativeRegionId.trim().toLowerCase()}`
-      : regionName ? `text:${regionName}` : '~';
-    return createHash('sha256').update([
-      data.countryIso2Code.trim().toUpperCase(), normalizedName, regionIdentity,
-    ].join('|'), 'utf8').digest('hex');
+    return createHash('sha256').update(referenceCityScopeKey(data), 'utf8').digest('hex');
   }
 
   /** Compatibility probe only; never write the legacy identity for new rows. */

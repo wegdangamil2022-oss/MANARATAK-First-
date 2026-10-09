@@ -14,6 +14,7 @@ import {
   ReferenceDataValidationSeverity
 } from '../validation/ReferenceDataValidationTypes';
 import { IReferenceDataValidationService } from '../contracts/IReferenceDataValidationService';
+import { referenceCityScopeKey } from '../governance/ReferenceIdentityNormalization';
 
 export class ReferenceDataValidationService implements IReferenceDataValidationService {
   public validateCountry(
@@ -386,7 +387,7 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
 
     return {
       entityType: 'CITY',
-      deterministicKey: `${countryIso2Code}:${name}`,
+      deterministicKey: countryIso2Code && name ? referenceCityScopeKey(input) : '',
       requiredFields,
       presentFields,
       missingFields,

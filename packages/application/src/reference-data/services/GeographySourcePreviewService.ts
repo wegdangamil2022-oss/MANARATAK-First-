@@ -1,3 +1,5 @@
+import { normalizeReferenceIdentityToken } from '@manaratak/domain';
+
 export interface RegionSourceRecord extends Record<string, unknown> {
   regionId?: unknown; countryIso2?: unknown; regionCode?: unknown; nameEn?: unknown;
   nameAr?: unknown; localName?: unknown; regionType?: unknown; verificationStatus?: unknown;
@@ -11,7 +13,12 @@ export interface CitySourceRecord extends Record<string, unknown> {
 
 export interface GeographySourcePreview {
   mode: 'DRY_RUN'; databaseWrites: 0; promotionAllowed: false;
-  regions: GeographySummary; cities: GeographySummary & { regionMatchStatuses: Record<string, number>; unmatchedRegionReferences: number; regionReviewRequired: number };
+  regions: GeographySummary; cities: GeographySummary & {
+    regionMatchStatuses: Record<string, number>;
+    unmatchedRegionReferences: number; regionReviewRequired: number;
+    /** Source-only collision candidates; regionCode is NOT a canonical administrativeRegionId. */
+    provisionalScopedCollisions: string[];
+  };
   countryCoverage: { canonicalCountries: number; regionCountries: number; cityCountries: number; regionOnlyCodes: string[]; cityOnlyCodes: string[]; canonicalWithoutRegions: string[]; canonicalWithoutCities: string[] };
   promotionBlockers: string[];
 }
@@ -28,6 +35,13 @@ export class GeographySourcePreviewService {
     const cityCountries = new Set(input.cities.map(row => this.text(row.countryIso2)?.toUpperCase()).filter(Boolean) as string[]);
     const regionKeys = input.regions.map(row => `${this.text(row.countryIso2)?.toUpperCase() ?? ''}|${this.text(row.regionCode) ?? ''}`);
     const cityKeys = input.cities.map(row => this.text(row.cityId) ?? '');
+    const provisionalScopedCityKeys = input.cities.map(row => {
+      const country = (this.text(row.countryIso2) ?? '').toUpperCase();
+      const name = normalizeReferenceIdentityToken(this.text(row.cityNameEn) ?? '');
+      const region = normalizeReferenceIdentityToken(this.text(row.regionCode) ?? '');
+      return country && name ? [country, name, region || '~'].join('|') : '';
+    });
+    const provisionalScopedCollisions = this.duplicates(provisionalScopedCityKeys);
     const regionSet = new Set(regionKeys);
     const unmatchedRegionReferences = input.cities.filter(row => {
       const code = this.text(row.regionCode);
@@ -48,6 +62,7 @@ export class GeographySourcePreviewService {
         total: input.cities.length, valid: input.cities.length - invalidCities, invalid: invalidCities,
         duplicateIdentities: this.duplicates(cityKeys), verificationStatuses: this.count(input.cities, 'verificationStatus'),
         regionMatchStatuses: this.count(input.cities, 'regionMatchStatus'), unmatchedRegionReferences, regionReviewRequired,
+        provisionalScopedCollisions,
       },
       countryCoverage: {
         canonicalCountries: canonical.size, regionCountries: regionCountries.size, cityCountries: cityCountries.size,
@@ -59,6 +74,7 @@ export class GeographySourcePreviewService {
         ...(this.difference(regionCountries, canonical).length || this.difference(cityCountries, canonical).length ? ['COUNTRY_COVERAGE_RECONCILIATION_REQUIRED'] : []),
         ...(unmatchedRegionReferences ? ['CITY_REGION_RECONCILIATION_REQUIRED'] : []),
         ...(regionReviewRequired ? ['CITY_REGION_SEMANTIC_REVIEW_REQUIRED'] : []),
+        ...(provisionalScopedCollisions.length ? ['CITY_SOURCE_SCOPED_COLLISION_REVIEW_REQUIRED'] : []),
       ],
     };
   }
