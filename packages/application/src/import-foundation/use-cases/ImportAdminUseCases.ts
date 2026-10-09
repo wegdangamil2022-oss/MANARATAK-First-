@@ -245,6 +245,15 @@ export class ImportAdminUseCases {
 
   async stageNormalizedRows(input: StageImportRowsInput) {
     if (!input.ownerDomain.trim()) throw new Error('Import ownerDomain is required.');
+    // The importer alone owns the private receipt/routing fields. Reject before
+    // any batch is created so input cannot forge a delivery acknowledgement.
+    for (const row of input.rows) {
+      if (row && typeof row === 'object' &&
+          Object.keys(row).some(key => key.startsWith('_phase6') ||
+            ['_domainHandoff', '_sourceRowNumber', '_payloadFingerprint'].includes(key))) {
+        throw new Error('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
+      }
+    }
 
     const durableWorkerPath = Boolean(this.importQueueGateway && this.importWorkerProtocol);
     const batch = await this.importRepository.createBatch({
@@ -328,7 +337,7 @@ export class ImportAdminUseCases {
               _sourceRowNumber: sourceRowNumber,
               _payloadFingerprint: identity.payloadFingerprint,
               ...(durableWorkerPath && handoffEnvelope
-                ? { _phase6HandoffEnvelope: handoffEnvelope }
+                ? { _phase6HandoffEnvelope: handoffEnvelope, _phase6HandoffState: 'PENDING_HANDOFF' }
                 : handoff
                   ? { _domainHandoff: handoff, _phase6HandoffState: 'DISPATCHED' }
                   : handoffEnvelope
@@ -519,9 +528,25 @@ export class ImportAdminUseCases {
             continue;
           }
 
+          // A write-ahead marker prevents automatic replay after a crash between
+          // owner acceptance and ImportRecord acknowledgement. Until the owning
+          // domain provides a transactional receipt, uncertain outcomes need review.
+          if (rawPayload._phase6HandoffState === 'DISPATCH_IN_FLIGHT' ||
+              rawPayload._phase6HandoffState === 'MANUAL_RECONCILIATION_REQUIRED') {
+            await this.importRepository.updateRecord(record.id, {
+              status: ImportRecordStatus.NEEDS_REVIEW,
+              rawPayload: { ...rawPayload, _phase6HandoffState: 'MANUAL_RECONCILIATION_REQUIRED' },
+              processingNotes: 'Owner dispatch outcome uncertain; reconcile before replay.',
+            });
+            processedRecords++;
+            continue;
+          }
+          await this.importRepository.updateRecord(record.id, {
+            rawPayload: { ...rawPayload, _phase6HandoffState: 'DISPATCH_IN_FLIGHT' },
+          });
+          await heartbeat();
           const handoffResult = await this.handoffDispatcher.dispatch(envelope as any);
-          // If cancelled during a slow owner call, never acknowledge its record
-          // under an invalid worker lease. Owner consumers must also deduplicate retries.
+          // If cancelled during a slow owner call, retain the uncertainty marker.
           await heartbeat();
           const nextPayload: Record<string, unknown> = { ...rawPayload };
           delete nextPayload._phase6HandoffEnvelope;
