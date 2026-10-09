@@ -6,7 +6,7 @@
 
 ## Batch 7 — cooperative worker-confirmed pause and cancellation (2026-10-09)
 
-**Source changes pushed; final workflow acceptance recorded when the matching code SHA succeeds.**
+**Verified source:** code commit `edf1b518309c64e401bff84ded1d32ab78508de4`; [Import Section 05 focused CI 37979853893](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37979853893) **SUCCESS** — 124/124 focused Vitest tests across 18 files, TypeScript, source-quality and existing 321-handler/320-endpoint Admin audit gate PASS. Earlier intermediate CI runs failed on old immediate-cancellation test assumptions and mocked CAS branches, which were corrected before this verified source commit.
 
 - **IMP-P0-003/004 — stop acknowledgement semantics:** queued jobs still transition directly to `PAUSED`/`CANCELLED`; an actively claimed `RUNNING` job now transitions to `PAUSING`/`CANCELLING`, **retains its exact worker lease**, and must not be reported as final while an in-flight owner call may still be executing. A PAUSING job may be escalated to CANCELLING. A PAUSING job cannot be resumed before the existing worker acknowledges; no new worker may claim pending-stop states.
 - **IMP-P0-003/004 — claimed worker acknowledgement:** new `acknowledgeStoppedJob(lease)` requires the current worker identity, attempt, and exact lease-generation expiry, transitions `PAUSING → PAUSED` or `CANCELLING → CANCELLED`, and clears the claim. This is checked with conditional Prisma `updateMany` in durable mode and equivalent checks in DEVELOPMENT_ONLY mode. The worker invokes acknowledgement **only after its processing callback has unwound**, whether it failed a heartbeat or its completion raced with a pending stop. Do not claim this forcibly aborts already executing owner calls.
