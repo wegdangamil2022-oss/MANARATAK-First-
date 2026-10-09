@@ -1,3 +1,9 @@
+## Verified batch 7 CI — 2026-10-09
+
+[CI 37967217243](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37967217243), source `70b083e636608e0fb33d8dffd2a20c12e359fce7` — **SUCCESS**: 127 tests/18 files, schema validation, migration source/ownership check, TypeScript, source quality, three authority/permission guards and unchanged 321-handler audit coverage. Adds immutable typed definition rules/default/assignment constraints and Admin API mandatory version preconditions. The rule-column migration is source-only; no DB execution. Earlier test-file corruption and missing CAS fixture checks were corrected before the final run. Remaining canonical DOMAIN/IDENTITY owner selector means source status remains `PARTIAL — FIXES_REQUIRED` under the simplified October 9 closure policy. Runtime E2E/consumer/DB acceptance postponed to after Section 28.
+
+---
+
 ## Verified batch 6 CI — 2026-10-09
 
 Source `d0c33039d34137c419457d9758368f32304f99f8`: [CI 37963510128](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37963510128) **SUCCESS**: 121 tests/17 Vitest files, independent ownership-source test, Prisma source validation, TypeScript, source quality, three authority guards and unchanged 321-handler/320-endpoint audit coverage PASS. The old TENANT-write fixture was corrected to an approved DOMAIN scenario; new tests assert TENANT mutations fail at the Application/HTTP boundary without losing historical resolution. No database/provider/browser runtime verification or Section 04 closure is claimed.
