@@ -24,7 +24,8 @@ import {
   GovernedReferenceEntityType,
   ReferenceLifecycleState,
   ReferenceRelationshipDto,
-  ReferenceVersionDto
+  ReferenceVersionDto,
+  referenceCityScopeKey
 } from '@manaratak/domain';
 import { AtomicAuditedOutboxMutationExecutor } from '../../event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 import { CountryImportPreviewService, CountrySourceRecord } from '../services/CountryImportPreviewService';
@@ -207,7 +208,7 @@ export class ReferenceDataUseCases {
     }
     if (!country.id) throw new ReferenceDataInvariantError('Canonical country ID is required for city persistence.');
     const canonicalData: UpsertReferenceCityDto = { ...data, countryReferenceId: country.id };
-    const identity = `${data.countryIso2Code}:${data.name}:${data.region ?? ''}`;
+    const identity = referenceCityScopeKey(canonicalData);
     return this.atomicUpsert('CITY', identity, context, transaction => transaction.repository.upsertCityInTransaction(canonicalData, transaction.context, context?.actorId, context?.correlationId), () => this.repository.upsertCity(canonicalData));
   }
 
