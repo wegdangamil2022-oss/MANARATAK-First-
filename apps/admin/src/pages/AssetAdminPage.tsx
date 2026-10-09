@@ -112,11 +112,19 @@ export function AssetAdminPage() {
       if (!reset && cursor) p.set('cursor', cursor);
       const r = await adminApiClient.request<AssetPage>(`/admin/assets?${p}`, { cache: 'no-store' });
       if (generation !== generationRef.current) return;
-      setItems((prev) => (reset ? r.items : [...prev, ...r.items]));
+      setItems((prev) => {
+        if (reset) return r.items;
+        const existing = new Set(prev.map((asset) => asset.id));
+        return [...prev, ...r.items.filter((asset) => {
+          if (existing.has(asset.id)) return false;
+          existing.add(asset.id);
+          return true;
+        })];
+      });
       setCursor(r.nextCursor);
       setHasMore(r.hasMore);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'تعذر تحميل الأصول والملفات.');
+      if (generation === generationRef.current) setError(e instanceof Error ? e.message : 'تعذر تحميل الأصول والملفات.');
     } finally {
       setLoading(false);
     }
