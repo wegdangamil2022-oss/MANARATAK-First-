@@ -16,6 +16,7 @@ import {
   OtlpHttpMonitoringProvider,
   SecurityService,
   DatabaseHealthChecker,
+  assertAssetReferenceIntegrityInstalled,
   RedisHealthChecker
 } from '@manaratak/infrastructure';
 import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ProductionReadinessValidator, ZodEnvironmentValidator, loadAppConfig } from '@manaratak/config';
@@ -293,6 +294,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
           if (databaseRequired) throw lastErr;
         }
       }
+      if (connectExternalServices) await assertAssetReferenceIntegrityInstalled(prisma);
     } else {
       if (databaseRequired) throw new Error('DATABASE_URL is required for this runtime mode');
       monitoringService.registerIndicator({
@@ -305,6 +307,20 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         })
       });
     }
+
+    monitoringService.registerIndicator({
+      name: 'asset-reference-integrity',
+      isOptional: false,
+      checkHealth: async () => {
+        try {
+          await assertAssetReferenceIntegrityInstalled(container.resolve<any>('prisma'));
+          return { status: HealthStatus.UP, timestamp: new Date().toISOString(), details: { capabilityStatus: 'INSTALLED' } };
+        } catch {
+          return { status: HealthStatus.DOWN, timestamp: new Date().toISOString(),
+            error: 'ASSET_REFERENCE_INTEGRITY_UNAVAILABLE', details: { capabilityStatus: 'UNAVAILABLE' } };
+        }
+      },
+    });
 
     monitoringService.registerIndicator({
       name: 'database-schema',

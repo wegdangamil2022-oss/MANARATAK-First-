@@ -39,7 +39,7 @@ describe('EAP API boundary: query validation and safe Problem Details', () => {
   });
 
   it.each(['ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION', 'ASSET_SANITIZED_CONTENT_CHANGED_DURING_SCAN',
-    'ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED'])('maps security conflict %s to safe 409', async code => {
+    'ASSET_DELIVERY_TRUST_EVIDENCE_REQUIRED', 'ASSET_REFERENCE_IN_USE', 'ASSET_REFERENCE_ISOLATION_UNSUPPORTED'])('maps security conflict %s to safe 409', async code => {
     const f = fixture(new Error(code));
     const response = await request(f.app).get('/admin/assets');
     expect(response.status).toBe(409);

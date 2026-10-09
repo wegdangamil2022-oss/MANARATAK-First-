@@ -122,21 +122,29 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         asset.state === AssetLifecycleState.ACTIVE && !restoreToken) {
       throw new Error('ASSET_RESTORE_LEASE_REQUIRED');
     }
-    const updated = await delegate.updateMany({
-      where: {
-        id: asset.id.value,
-        updatedAt: captured.updatedAt,
-        lifecycleState: captured.lifecycleState,
-        ...(restoreToken ? {
-          retentionClaimToken: restoreToken,
-          retentionClaimUntil: { gt: new Date() },
-        } : {}),
-      },
-      data: {
-        ...mutation,
-        ...(restoreToken ? { retentionClaimToken: null, retentionClaimUntil: null } : {}),
-      },
-    });
+    let updated;
+    try {
+      updated = await delegate.updateMany({
+        where: {
+          id: asset.id.value,
+          updatedAt: captured.updatedAt,
+          lifecycleState: captured.lifecycleState,
+          ...(restoreToken ? {
+            retentionClaimToken: restoreToken,
+            retentionClaimUntil: { gt: new Date() },
+          } : {}),
+        },
+        data: {
+          ...mutation,
+          ...(restoreToken ? { retentionClaimToken: null, retentionClaimUntil: null } : {}),
+        },
+      });
+    } catch (error) {
+      // Never return a connector/query dump for the authoritative race rejection.
+      const code = error instanceof Error ? error.message.match(/\b(ASSET_REFERENCE_IN_USE|ASSET_REFERENCE_ISOLATION_UNSUPPORTED)\b/)?.[1] : undefined;
+      if (code) throw new Error(code);
+      throw error;
+    }
     if (!updated || updated.count !== 1) {
       throw new Error('ASSET_RECORD_CONCURRENT_MODIFICATION');
     }

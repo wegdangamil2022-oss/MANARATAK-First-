@@ -13,6 +13,7 @@ on:
       - 'docs/remediation/evidence/section-02/admin-mutation-audit-inventory.json'
       - 'apps/admin/src/pages/AssetAdminPage.tsx'
       - 'apps/api/src/app.ts'
+      - 'apps/api/tests/runtime-dependency-bootstrap.spec.ts'
       - 'apps/api/src/server.ts'
       - 'apps/api/src/infrastructure/di/container.ts'
       - 'packages/config/src/AppConfig.ts'
@@ -25,6 +26,8 @@ on:
       - 'packages/domain/src/asset-platform/**'
       - 'packages/domain/tests/asset-platform/**'
       - 'packages/infrastructure/src/asset-platform/**'
+      - 'packages/infrastructure/prisma/migrations/20261009010000_eap_asset_reference_serialization/**'
+      - 'scripts/ci/install-eap-reference-guards.mjs'
       - 'packages/infrastructure/tests/asset-platform/**'
       - 'packages/shared/src/authorization/adminPermissionCatalog.ts'
       - 'docs/remediation/SECTION_03_EAP_IMPLEMENTATION.md'
@@ -100,6 +103,7 @@ jobs:
           apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts
           apps/admin/src/components/AssetLifecycleActions.spec.tsx
           packages/config/tests/AppConfig.spec.ts
+          apps/api/tests/runtime-dependency-bootstrap.spec.ts
       - name: Owner reference integrity and control-plane regressions
         run: node --test tests/remediation/w2-asset-reference-integrity.test.mjs tests/remediation/w4-admin-asset-course-control-plane.test.mjs tests/remediation/w2-services-career-owner-scope.test.mjs
       - name: Legacy provider transport security checks
@@ -122,10 +126,17 @@ jobs:
           DATABASE_MUTATIONS_ALLOWED: 'true'
           RUN_DATABASE_INTEGRATION_TESTS: 'true'
           EAP_EPHEMERAL_DB_TESTS: 'true'
+      - name: Install reference guards on disposable PostgreSQL only
+        run: node scripts/ci/install-eap-reference-guards.mjs
+        env:
+          DATABASE_MUTATIONS_ALLOWED: 'true'
+          RUN_DATABASE_INTEGRATION_TESTS: 'true'
+          EAP_EPHEMERAL_DB_TESTS: 'true'
       - name: EAP PostgreSQL real-CAS and purge/restore reconciliation tests
         run: >-
           npx --no-install vitest run --config vitest.config.ts
           packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts
+          packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts
         env:
           DATABASE_MUTATIONS_ALLOWED: 'true'
           RUN_DATABASE_INTEGRATION_TESTS: 'true'

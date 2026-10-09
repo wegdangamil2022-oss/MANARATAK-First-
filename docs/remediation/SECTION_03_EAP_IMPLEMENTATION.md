@@ -1,5 +1,20 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## Continuation — canonical link versus lifecycle serialization (2026-10-09)
+
+Original scope 03/P0-07, P1-11 and P1-12. Added a schema-only migration for existing tables: owner INSERT/reference-column UPDATE locks newly added canonical AssetRecord IDs FOR SHARE until the owner transaction commits; absent/non-ACTIVE IDs reject the owner write. All 28 direct fields, CMS published attachment array and three SEO references are covered. No central registry/table, backfill or data-ownership transfer.
+
+AssetRecord UPDATE/DELETE obtains a conflicting tuple lock and checks the same canonical references before a non-ACTIVE transition, identity change or physical delete. Its dependency reads require READ COMMITTED; destructive RepeatableRead/Serializable transactions reject rather than trusting stale snapshots. Existing owner Serializable transactions retain their normal locking/snapshot-error semantics. Removing references and unrelated owner edits remain possible. The existing fail-closed usage scanner and UI impact confirmation are retained as early diagnostics; they are no longer the only concurrency barrier.
+
+Added read-only startup/readiness verification of every enabled trigger, function binding, event/column set, arguments and origin replication mode. Connected API startup fails when guards are absent; source-only disconnected API tests remain possible. No installer is called from application startup.
+
+Migration application is prepared only for the already authorized disposable GitHub Actions database, guarded by exact URL/role/database, CI identity and mutation flags. No real database migration, seed/reset, production setting or provider write has occurred. Operational rollout must drain old API/workers, apply this migration separately and pass startup/readiness before reopening writes. User explicitly defers real provider verification to a later environment; this is a deferred gate, not a passing provider test.
+
+Local incremental TypeScript PASS; 36 focused source tests PASS (9.07s), clean bootstrap rerun 4 PASS (8.76s); owner Node guards 15 PASS; lint 0 errors/74 existing warnings; source quality PASS. Fourteen new disposable PostgreSQL cases exercise both lock orderings for archive/delete/purge/physical deletion, precheck-to-save provider prevention, unlinking, CMS JSON, identity changes and isolation rejection. Matching CI pending; no race success claimed before observing those cases.
+
+P1-11 remains derived-registry architecture/performance reconciliation; no central-registry implementation claimed. P1-13 restore compensation/provider fencing and other prior open acceptance remain unchanged. Whole section NOT CLOSED until remaining acceptance is met; real provider gate DEFERRED_BY_USER.
+
+
 ## Verified consistent reuse-trust CI
 
 Source `b06d65e30a7027ea2a742fd8fc99b1e86a98f736`: [CI 37934030180](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37934030180) SUCCESS: 261 source tests plus 16 disposable PostgreSQL tests. The new real-DB case proves rejection of a tampered ACTIVE row and cursor continuation to a trusted row, without changing that rejected row. TypeScript, quality, owner guards, audit and provider-transport checks passed. Evidence-only follow-up changes no source. No overlapping counts added. Whole section NOT CLOSED / NO-GO; cross-owner serialization, provider/lease fencing, restore recovery, remaining workspace functions and real provider acceptance remain open.

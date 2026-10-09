@@ -2,6 +2,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { createApiApp } from '../src/app';
 
 describe('API runtime dependency bootstrap', () => {
+  it('refuses connected runtime startup when canonical asset reference guards are absent', async () => {
+    const query = vi.fn(async () => []);
+    await expect(createApiApp({ resetCache: true, connectExternalServices: true,
+      databaseClient: { $connect: vi.fn(async () => {}), $disconnect: vi.fn(async () => {}), $queryRaw: query },
+      env: { NODE_ENV: 'development' },
+    })).rejects.toThrow('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+    expect(query).toHaveBeenCalled();
+  });
   it('refuses the Google AI Studio Web-only identity before configuration or connections', async () => {
     const query = vi.fn();
     await expect(createApiApp({

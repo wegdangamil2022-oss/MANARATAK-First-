@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /workspace/manaratak-audit-main
+
+{"level":50,"time":"2026-10-09T13:17:13.311Z","timestamp":"2026-10-09T13:17:13.302Z","error":{"name":"TypeError","message":"prisma.$disconnect is not a function","stack":"TypeError: prisma.$disconnect is not a function\n    at /workspace/manaratak-audit-main/apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts:125:28\n    at RuntimeResourceRegistry.closeAll (/workspace/manaratak-audit-main/apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts:129:5)\n    at /workspace/manaratak-audit-main/apps/api/src/app.ts:917:36\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at /workspace/manaratak-audit-main/apps/api/tests/runtime-dependency-bootstrap.spec.ts:7:5\n    at file:///workspace/manaratak-audit-main/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"},"msg":"[RuntimeResources] Prisma shutdown failed"}
+
+ Test Files  4 passed (4)
+      Tests  36 passed (36)
+   Start at  13:17:04
+   Duration  9.07s (transform 4.26s, setup 0ms, import 7.95s, tests 416ms, environment 0ms)
+
