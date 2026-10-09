@@ -530,6 +530,29 @@ export class ImportAdminRouter {
       }),
     );
 
+    // GET /admin/imports/queue/jobs/:batchId/handoffs/reconciliation
+    // Operational read-only evidence. Never exposes imported payloads or
+    // performs owner replay, manual release, canonical merge or publication.
+    router.get(
+      '/queue/jobs/:batchId/handoffs/reconciliation',
+      asyncHandler(async (req: Request, res: Response) => {
+        const batchId = z.string().trim().min(1).max(180).parse(req.params.batchId);
+        const filters = z.object({
+          page: z.coerce.number().int().min(1).optional(),
+          pageSize: z.coerce.number().int().min(1).max(100).optional(),
+        }).strict().parse(req.query);
+        try {
+          const result = await importAdminUseCases.getHandoffReconciliation({ batchId, ...filters });
+          res.status(200).json(result);
+        } catch (error) {
+          if (error instanceof Error && error.message === 'IMPORT_RECONCILIATION_READER_UNAVAILABLE') {
+            return res.status(503).json({ error: 'IMPORT_RECONCILIATION_READER_UNAVAILABLE' });
+          }
+          throw error;
+        }
+      }),
+    );
+
     // GET /admin/imports/queue/jobs/:batchId
     router.get(
       '/queue/jobs/:batchId',
