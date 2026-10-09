@@ -26,6 +26,7 @@ describe('PrismaSettingDefinitionRepository', () => {
       valueType: 'String',
       description: 'A test definition',
       defaultValue: 'default',
+      validationRules: { minLength: 2, maxLength: 100 },
       isFeatureFlag: false,
       isDeprecated: false,
       isSecret: false,
@@ -43,6 +44,7 @@ describe('PrismaSettingDefinitionRepository', () => {
     expect(definition?.valueType).toBe(ValueType.String);
     expect(definition?.description).toBe('A test definition');
     expect(definition?.defaultValue).toBe('default');
+    expect(definition?.validationRules).toEqual({ minLength: 2, maxLength: 100 });
 
     mockPrisma.settingDefinitionRecord.upsert.mockResolvedValue(record);
 
@@ -58,6 +60,7 @@ describe('PrismaSettingDefinitionRepository', () => {
             valueType: 'String',
             description: 'A test definition',
             defaultValue: 'default',
+            validationRules: { minLength: 2, maxLength: 100 },
             isFeatureFlag: false,
             isDeprecated: false
           }),
