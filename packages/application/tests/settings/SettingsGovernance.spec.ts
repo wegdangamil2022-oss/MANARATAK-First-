@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BooleanValue, ConfigurationResolutionService, ConfigurationValidationService, NamespacedKey, ScopeLevel,
-  SettingAssignment, SettingDefinition, ValueType } from '@manaratak/domain';
+  ScopeIdentifier, SettingAssignment, SettingDefinition, SettingVersion, ValueType } from '@manaratak/domain';
 import { ManageSettingsUseCase } from '../../src/settings/use-cases/ManageSettingsUseCase';
 
 function fixture() {
@@ -92,4 +92,33 @@ describe('Settings override and definition governance', () => {
     await expect(f.useCase.clearOverride({ assignmentId: 'GLOBAL', expectedCurrentVersionId: 'GLOBAL-v1', newVersionId: 'clear', changeReason: 'Use default' })).rejects.toThrow('SETTINGS_DEFINITION_NOT_WRITABLE');
     expect(f.definitions.get('feature.safe')?.defaultValue).toBe(false);
   });
+  it('blocks all Admin mutation paths for unowned TENANT while preserving historical resolution', async () => {
+    const f = fixture(); await createFlag(f);
+    const legacy = new SettingAssignment({
+      id: 'legacy-tenant',
+      key: new NamespacedKey('feature.safe'),
+      scope: new ScopeIdentifier(ScopeLevel.TENANT, 'legacy-tenant'),
+      versions: [new SettingVersion('legacy-v1', new BooleanValue(true), new Date('2026-10-09T00:00:00Z'), 'admin')],
+    });
+    f.assignments.set('legacy-tenant', legacy);
+
+    await expect(f.useCase.assignValue({
+      assignmentId: 'legacy-tenant', key: 'feature.safe', level: 'TENANT',
+      scopeId: 'legacy-tenant', versionId: 'new-v2', type: ValueType.Boolean,
+      value: false, changeReason: 'Reviewed policy change',
+    })).rejects.toThrow('SETTINGS_TENANT_SCOPE_UNAPPROVED');
+    await expect(f.useCase.clearOverride({
+      assignmentId: 'legacy-tenant', expectedCurrentVersionId: 'legacy-v1',
+      newVersionId: 'clear-v2', changeReason: 'Reviewed inheritance policy',
+    })).rejects.toThrow('SETTINGS_TENANT_SCOPE_UNAPPROVED');
+    await expect(f.useCase.rollbackValue({
+      assignmentId: 'legacy-tenant', previousVersionId: 'legacy-v1',
+      newVersionId: 'rollback-v2', changeReason: 'Reviewed rollback policy',
+    })).rejects.toThrow('SETTINGS_TENANT_SCOPE_UNAPPROVED');
+
+    expect(f.assignments.get('legacy-tenant')?.getVersions()).toHaveLength(1);
+    await expect(f.resolver.readSetting('feature.safe', { tenantId: 'legacy-tenant' }))
+      .resolves.toMatchObject({ status: 'RESOLVED', value: true, sourceScope: 'TENANT' });
+  });
+
 });
