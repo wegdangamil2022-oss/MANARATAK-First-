@@ -1,0 +1,23 @@
+✔ MNT-AUD-0030 runtime policy rejects missing/state/classification/owner violations (122.551366ms)
+✔ MNT-AUD-0050 derived registry detects direct and CMS JSON usages and remains read-only (42.229246ms)
+✔ MNT-AUD-0050 purge rejects in-use asset before storage deletion (123.792823ms)
+✔ MNT-AUD-0030 consumer use cases fail closed when an AssetId is supplied without P05 policy (0.814212ms)
+✔ MNT-AUD-0058 Service owner use case validates provider/package/pricing/slot invariants (213.142543ms)
+✔ MNT-AUD-0058 Prisma booking transaction rechecks authority and consumes discount with optimistic CAS (54.727948ms)
+✔ MNT-AUD-0058 exhausted discount fails before booking creation (52.623639ms)
+✔ MNT-AUD-0055 career profile/application enforce active student and P05-owned CV/resume (31.905356ms)
+✔ MNT-AUD-0055 alumni non-private visibility requires self-owned consent evidence (20.136196ms)
+✔ MNT-AUD-0055 application lifecycle rejects invalid transitions and fences version (36.473157ms)
+✔ MNT-AUD-0026 AssetReferencePolicy enforces owner, lifecycle, classification and MIME role (105.294804ms)
+✔ MNT-AUD-0026 Admin Asset Center exposes governed query/detail/picker/preview/audit surfaces (0.979331ms)
+✔ MNT-AUD-0026 shared governed selection is wired to Course, CMS, Certificate and Student avatar workflows (3.453915ms)
+✔ MNT-AUD-0027 canonical Admin can create a native course and hand off to authoritative editor (0.683772ms)
+✔ MNT-AUD-0033 public composition has no duplicate P23 visibility authority (1.666704ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2005.474466

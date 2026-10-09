@@ -1,5 +1,13 @@
 # Section 03 — EAP closure register
 
+## Final round closed with documented exceptions — 2026-10-09
+
+**Work-round status: SOURCE_WORK_ROUND_CLOSED_WITH_DOCUMENTED_EXCEPTIONS.** User requested the final round with minor leftovers carried forward. Source `ee069cf8b18ec561cc9e15c5666a722094fb2d67`: [CI 37947891028](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37947891028) SUCCESS, **294 source tests + 39 separate disposable PostgreSQL tests**. Source-phase DB skips are executed successfully in the DB phase and are not double counted. The two new real-PG tests confirm canonical direct/JSON usage discovery, owner filtering and continuation through an empty usage-filtered page. All three DB guard migrations are verified only in disposable CI.
+
+Final scoped browser check PASS in real Chromium with intercepted API, test-only CSP bypass and disabled dev HMR: empty-page continuation, usage filter retained with cursor, exact owner filtering resets cursor, reset removes usage filter, no page exceptions. Reproducible evidence script `evidence/section-03/final-workspace-browser.cjs` assumes the local Admin dev server on 127.0.0.1:3093 with DISABLE_HMR=true; it intercepts API requests and performs no real provider/database writes. Local 66-test scope overlaps CI and is not added to CI counts. TypeScript/quality/owner guards PASS; lint has 0 errors and 60 warnings.
+
+The current work round is ended; original task IDs, partial/runtime dispositions and optional enhancements remain recorded below. **Full-section acceptance is still conditional / production NO-GO.** Material exceptions: reviewed target migration rollout and legacy-operation quiescence, actual provider verification (DEFERRED_BY_USER), authoritative recovery for uncertain operations, complete deployed owner/public/browser E2E and global release gates. These are not represented as minor defects or passing tests. Minor/optional leftovers are carried in the handoff below. No main merge, actual database migration/provider mutation, policy backfill, recovery auto-clear or production configuration change occurred. Original review attachment remains unchanged (SHA256 `9de7c781eb82cd490fc85386267d7e9e3fe2b2028803f9ecd0351531e2cd11fc`).
+
 ## Final source-work round — accepted scope and remaining gates (2026-10-09)
 
 The user requested this as the last section-03 work round and accepted carrying minor leftovers forward. The **work round**, rather than every original acceptance gate, will be closed after matching CI succeeds. Original task IDs and historical findings are retained. No missing runtime evidence is relabeled PASS and no production GO is issued.

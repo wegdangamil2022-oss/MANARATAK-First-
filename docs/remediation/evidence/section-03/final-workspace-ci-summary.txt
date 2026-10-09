@@ -1,0 +1,5 @@
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T14:57:55.0478751Z  Test Files  26 passed | 2 skipped (28)
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T14:57:55.0480325Z       Tests  294 passed | 39 skipped (333)
+EAP all source and disposable PostgreSQL verification	Install reference guards on disposable PostgreSQL only	2026-10-09T14:58:00.8566240Z EAP_REFERENCE_GUARDS_INSTALLED_ON_DISPOSABLE_CI_DATABASE
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T14:58:04.6827762Z  Test Files  2 passed (2)
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T14:58:04.6828758Z       Tests  39 passed (39)

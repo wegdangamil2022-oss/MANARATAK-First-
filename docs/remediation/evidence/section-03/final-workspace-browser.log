@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "scope": "CHROMIUM_UI_WITH_INTERCEPTED_API_ONLY",
+  "testContext": "CSP bypass; dev HMR disabled; no actual API/provider/DB calls",
+  "checks": [
+    "empty usage page continuation",
+    "usage filter retained with cursor",
+    "exact owner filter resets cursor",
+    "reset clears usage filter",
+    "no page exceptions"
+  ],
+  "calls": [
+    "/api/v1/auth/me",
+    "/api/v1/admin/assets?limit=50",
+    "/api/v1/admin/assets?limit=50",
+    "/api/v1/admin/assets?limit=50&usageStatus=IN_USE",
+    "/api/v1/admin/assets?limit=50&usageStatus=IN_USE&cursor=test-cursor",
+    "/api/v1/admin/assets/last-asset",
+    "/api/v1/admin/assets?limit=50&ownerType=STUDENT&ownerId=owner-one&usageStatus=IN_USE",
+    "/api/v1/admin/assets?limit=50"
+  ]
+}

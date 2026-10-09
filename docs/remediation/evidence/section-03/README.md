@@ -1,5 +1,7 @@
 # Section 03 continuation evidence — 2026-10-09
 
+Final round: source `ee069cf`, [CI 37947891028](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37947891028) SUCCESS: 294 source + 39 separate disposable PG tests. `final-workspace-ci.json`, `final-workspace-ci-summary.txt`, `final-workspace-{types,tests,lint,quality,guards,browser}.log` and `final-workspace-browser.cjs` reproduce the bounded evidence. Work round CLOSED WITH DOCUMENTED EXCEPTIONS; actual provider/target deployment/full-section acceptance remain conditional as recorded in the closure register.
+
 Archive barrier source `d40cd0c`: CI 37945629798 SUCCESS, 291 source + 37 separate disposable PostgreSQL tests. Metadata and selected uncolored count/installation log lines: `archive-journal-ci.json`, `archive-journal-ci-summary.txt`. Target migration/provider acceptance and full-section closure remain pending.
 
 Work resumed from `148255694ab115383736ff2d97397719f8f9f3a1` on `codex/section-01-iam-rbac`. The original remediation attachment remains unchanged (SHA256 `9de7c781eb82cd490fc85386267d7e9e3fe2b2028803f9ecd0351531e2cd11fc`).
