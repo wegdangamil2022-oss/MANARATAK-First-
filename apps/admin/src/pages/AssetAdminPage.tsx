@@ -239,6 +239,7 @@ export function AssetAdminPage() {
         >
           <Filter className="h-3.5 w-3.5" /> تصفية وتطبيق البحث
         </button>
+        <button type="button" onClick={resetFilters} className="rounded-xl border px-4 py-2 text-xs">إعادة ضبط</button>
       </form>
 
       {selectedAsset && (
