@@ -1,5 +1,10 @@
 # القسم 03 — الأصول والملفات: سجل التنفيذ وإعادة التحقق
 
+## Verified consistent reuse-trust CI
+
+Source `b06d65e30a7027ea2a742fd8fc99b1e86a98f736`: [CI 37934030180](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/37934030180) SUCCESS: 261 source tests plus 16 disposable PostgreSQL tests. The new real-DB case proves rejection of a tampered ACTIVE row and cursor continuation to a trusted row, without changing that rejected row. TypeScript, quality, owner guards, audit and provider-transport checks passed. Evidence-only follow-up changes no source. No overlapping counts added. Whole section NOT CLOSED / NO-GO; cross-owner serialization, provider/lease fencing, restore recovery, remaining workspace functions and real provider acceptance remain open.
+
+
 ## Continuation — consistent reusable asset trust (2026-10-09)
 
 Original scope 03/P0-01, P0-06, P1-03 and P1-06. Confirmed follow-on defect: picker detail/selection used a hand-written weaker proof check, and SQL list filters checked only PASSED/signature/CLEAN presence. Both now use the existing Domain delivery-trust gate: repository validates each bounded scanned row; router validates the real aggregate. No N+1 queries or new owner authority. Malformed/untrusted rows are omitted from reuse, not repaired or published.
