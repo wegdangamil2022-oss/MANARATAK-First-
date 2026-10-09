@@ -55,6 +55,8 @@ export interface UniversityImportStagingCandidate {
 export class UniversityImportHandoffService
   implements IImportHandoffConsumer<UniversityImportStagingCandidate>
 {
+  readonly effectMode = 'SCREENING_ONLY' as const;
+
   constructor(private readonly repository: IUniversityRepository) {}
 
   async accept(handoff: UniversalImportHandoff): Promise<UniversityImportStagingCandidate> {
