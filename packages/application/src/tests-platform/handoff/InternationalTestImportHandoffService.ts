@@ -55,6 +55,8 @@ export interface InternationalTestImportStagingCandidate {
 export class InternationalTestImportHandoffService
   implements IImportHandoffConsumer<InternationalTestImportStagingCandidate>
 {
+  readonly effectMode = 'SCREENING_ONLY' as const;
+
   constructor(private readonly repository: IInternationalTestRepository) {}
 
   async accept(handoff: UniversalImportHandoff): Promise<InternationalTestImportStagingCandidate> {
