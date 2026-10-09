@@ -107,7 +107,7 @@ export class AssetRecord {
       !Number.isFinite(Date.parse(evidence.verifiedAt))) {
       throw new Error('ASSET_UPLOAD_VERIFICATION_FAILED');
     }
-    const firstConfirmed = this.props.state === AssetLifecycleState.INITIATED;
+    const firstConfirmed = !this.props.uploadVerification;
     this.props.uploadVerification = { ...evidence };
     this.props.checksum = new AssetChecksum('sha256', evidence.checksumSha256.toLowerCase());
     this.props.state = AssetLifecycleState.QUARANTINED;

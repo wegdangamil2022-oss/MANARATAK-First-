@@ -234,3 +234,9 @@ npm run ci:source:contracts
 - `startValidation` now requires `QUARANTINED`; unverified `INITIATED` objects cannot scan or activate, and reassigning an already verified locator is forbidden.
 - Legacy pre-change unverified `QUARANTINED` rows may still finalize after provider verification, allowing non-disruptive migration without changing Prisma schema.
 - Updated domain/application regressions for INITIATED-before-finalize and emitted event-after-proof; no production DB migration or data updates. CI pending.
+
+## Patch B — Legacy upload completion and real-DB finalization proof
+
+- Emitting `AssetQuarantinedEvent` now depends on absence of prior upload verification, including legacy unfinalized QUARANTINED records, not only whether the pre-confirmation state is INITIATED.
+- Added real disposable PostgreSQL integration verifying a newly allocated INITIATED record has no checksum, then finalization persists QUARANTINED and associated proof/digest and rehydrates correctly.
+- Existing historical rows can finalize without a breaking schema migration, and event subscribers receive one verified-quarantine transition.

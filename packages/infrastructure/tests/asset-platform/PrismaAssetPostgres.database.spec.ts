@@ -171,4 +171,30 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
       .toBe(AssetLifecycleState.QUARANTINED);
   });
 
+  it('persists INITIATED before any object exists, then QUARANTINED only with signed verification evidence', async () => {
+    const id = DB_PREFIX + randomUUID();
+    const initial = newAsset(id, AssetLifecycleState.INITIATED);
+    initial.assignQuarantineLocator(initial.locator);
+    await repository.save(initial);
+    const issued = await prisma.assetRecord.findUnique({ where: { id } });
+    expect(issued?.lifecycleState).toBe(AssetLifecycleState.INITIATED);
+    expect(issued?.checksumHash).toBeNull();
+    const pending = (await repository.findById(new AssetId(id)))!;
+    pending.confirmUploadedObject({
+      locator: pending.locator.value,
+      byteSize: pending.metadata.byteSize,
+      verifiedMimeType: pending.metadata.mimeType,
+      checksumSha256: 'a'.repeat(64),
+      verifiedAt: new Date().toISOString(),
+      signatureVerified: true,
+    });
+    await repository.save(pending);
+    const confirmed = await prisma.assetRecord.findUnique({ where: { id } });
+    expect(confirmed?.lifecycleState).toBe(AssetLifecycleState.QUARANTINED);
+    expect(confirmed?.checksumHash).toBe('a'.repeat(64));
+    const rehydrated = (await repository.findById(new AssetId(id)))!;
+    expect(rehydrated.uploadVerification?.signatureVerified).toBe(true);
+    expect(rehydrated.state).toBe(AssetLifecycleState.QUARANTINED);
+  });
+
 });

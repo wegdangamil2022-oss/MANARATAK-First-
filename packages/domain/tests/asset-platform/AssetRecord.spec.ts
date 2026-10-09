@@ -309,4 +309,24 @@ describe('Phase 05 EAP Domain Core - Slice 2A', () => {
       .toThrow('ASSET_UPLOAD_LOCATOR_ASSIGNMENT_INVALID_STATE');
   });
 
+  it('emits quarantine event when an unverified legacy QUARANTINED row is finalized', () => {
+    const record = new AssetRecord({
+      id: new AssetId('asset-legacy-pending'),
+      reference: new AssetReference('ref-legacy-pending'),
+      locator: new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'uploads/legacy.pdf'),
+      metadata: new AssetMetadata('legacy.pdf', 'application/pdf', 'pdf', 100),
+      retention: new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),
+      owner: new AssetOwnerReference('owner', 'STUDENT'),
+      classification: AssetSecurityClassification.INTERNAL,
+      state: AssetLifecycleState.QUARANTINED,
+    });
+    record.confirmUploadedObject({
+      locator: record.locator.value, byteSize: 100,
+      verifiedMimeType: 'application/pdf', checksumSha256: 'a'.repeat(64),
+      verifiedAt: new Date().toISOString(), signatureVerified: true,
+    });
+    expect(record.getUncommittedEvents().filter((event) => event instanceof AssetQuarantinedEvent))
+      .toHaveLength(1);
+  });
+
 });
