@@ -48,15 +48,17 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
 
   async pauseJob(command: PauseImportJobCommand): Promise<boolean> {
     const job = this.jobs.get(command.batchId);
-    if (!job || ![ImportJobStatus.QUEUED, ImportJobStatus.RUNNING].includes(job.status)) {
+    if (!job || ![ImportJobStatus.QUEUED, ImportJobStatus.RUNNING].includes(job.status))
       return false;
-    }
-    job.status = ImportJobStatus.PAUSED;
+    const wasRunning = job.status === ImportJobStatus.RUNNING;
+    job.status = wasRunning ? ImportJobStatus.PAUSING : ImportJobStatus.PAUSED;
     job.updatedAt = new Date();
-    job.claimedBy = undefined;
-    job.claimUntil = undefined;
+    if (!wasRunning) {
+      job.claimedBy = undefined;
+      job.claimUntil = undefined;
+      this.leases.delete(command.batchId);
+    }
     if (command.reason) job.lastError = command.reason;
-    this.leases.delete(command.batchId);
     return true;
   }
 
@@ -78,22 +80,37 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
   async cancelJob(command: CancelImportJobCommand): Promise<boolean> {
     const job = this.jobs.get(command.batchId);
     if (!job) return false;
-    const cancellableStatuses = [
-      ImportJobStatus.QUEUED,
-      ImportJobStatus.RUNNING,
-      ImportJobStatus.PAUSED,
-      ImportJobStatus.RESUMING,
-      ImportJobStatus.CANCELLING,
-    ];
-    if (!cancellableStatuses.includes(job.status)) return false;
+    if (![ImportJobStatus.QUEUED, ImportJobStatus.RUNNING, ImportJobStatus.PAUSING,
+      ImportJobStatus.PAUSED, ImportJobStatus.RESUMING].includes(job.status)) return false;
+    const hasWorker = job.status === ImportJobStatus.RUNNING ||
+      job.status === ImportJobStatus.PAUSING;
+    job.status = hasWorker ? ImportJobStatus.CANCELLING : ImportJobStatus.CANCELLED;
+    job.updatedAt = new Date();
+    if (!hasWorker) {
+      job.claimedBy = undefined;
+      job.claimUntil = undefined;
+      this.leases.delete(command.batchId);
+    }
+    if (command.reason) job.lastError = command.reason;
+    return true;
+  }
 
-    job.status = ImportJobStatus.CANCELLED;
+  async acknowledgeStoppedJob(lease: ImportJobLease): Promise<'PAUSED' | 'CANCELLED' | null> {
+    const job = this.jobs.get(lease.batchId);
+    const current = this.leases.get(lease.batchId);
+    if (!job || !current || current.workerId !== lease.workerId ||
+        current.attempt !== lease.attempt ||
+        current.claimUntil.getTime() !== lease.claimUntil.getTime()) return null;
+    const to = job.status === ImportJobStatus.PAUSING
+      ? ImportJobStatus.PAUSED
+      : job.status === ImportJobStatus.CANCELLING ? ImportJobStatus.CANCELLED : null;
+    if (!to) return null;
+    job.status = to;
     job.updatedAt = new Date();
     job.claimedBy = undefined;
     job.claimUntil = undefined;
-    if (command.reason) job.lastError = command.reason;
-    this.leases.delete(command.batchId);
-    return true;
+    this.leases.delete(lease.batchId);
+    return to === ImportJobStatus.PAUSED ? 'PAUSED' : 'CANCELLED';
   }
 
   async replayJob(command: ReplayImportJobCommand): Promise<boolean> {
