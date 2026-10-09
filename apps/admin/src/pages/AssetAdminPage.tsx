@@ -265,6 +265,7 @@ export function AssetAdminPage() {
         <button type="button" onClick={resetFilters} className="rounded-xl border px-4 py-2 text-xs">إعادة ضبط</button>
       </form>
 
+      <AssetUploadWizard onUploaded={() => void load(true, appliedRef.current)} />
       {selectedAsset && (
         <section className="rounded-2xl border border-slate-200 bg-white p-5 text-xs shadow-xs" aria-live="polite">
           <div className="flex items-center justify-between gap-3">
