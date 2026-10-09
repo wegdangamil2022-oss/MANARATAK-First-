@@ -88,7 +88,8 @@ export class ReferenceDataAdminRouter {
     }).strict();
 
     const citySchema = z.object({
-      id: z.string().uuid().optional(),
+      // Legacy city primary keys may predate UUID defaults; a row-locked ID lookup is authoritative.
+      id: z.string().min(1).max(191).optional(),
       expectedVersion: z.number().int().positive().optional(),
       countryIso2Code: z.string().regex(/^[A-Z]{2}$/),
       name: z.string().min(1),
