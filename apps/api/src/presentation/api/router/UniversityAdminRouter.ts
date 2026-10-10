@@ -190,6 +190,7 @@ export class UniversityAdminRouter {
               organizationUnitName: z.string().nullable().optional(),
               amount: z.number().nonnegative().nullable().optional(),
               currencyCode: z.string().nullable().optional(),
+              currencyReferenceId: z.string().min(1).optional(),
               officialSourceUrl: z.string().url().nullable().optional(),
               effectiveFrom: z.coerce.date().nullable().optional(),
               effectiveTo: z.coerce.date().nullable().optional(),
@@ -205,8 +206,10 @@ export class UniversityAdminRouter {
               internationalEligible: z.boolean().nullable().optional(),
               typicalCost: z.number().nonnegative().nullable().optional(),
               currencyCode: z.string().nullable().optional(),
+              currencyReferenceId: z.string().min(1).optional(),
               averageMonthlyLivingCost: z.number().nonnegative().nullable().optional(),
               livingCostCurrencyCode: z.string().nullable().optional(),
+              livingCostCurrencyReferenceId: z.string().min(1).optional(),
               costVariationNote: z.string().nullable().optional(),
               metadata: z.record(z.string(), z.unknown()).optional(),
             }),
@@ -452,6 +455,8 @@ export class UniversityAdminRouter {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
+      if (err?.message === 'UNIVERSITY_STALE_REVISION') return res.status(409).json({ error: err.message });
+      if (err?.message === 'UNIVERSITY_EXPECTED_REVISION_REQUIRED') return res.status(428).json({ error: err.message });
       res.status(400).json({ error: err.message || 'An error occurred' });
     });
 

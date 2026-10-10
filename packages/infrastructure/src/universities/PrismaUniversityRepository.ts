@@ -694,12 +694,6 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   ): Promise<UniversityDto> {
     await this.prisma.university.findUniqueOrThrow({ where: { id }, select: { id: true } });
     await new UniversityCanonicalRelationshipValidator(this.prisma).validate(details);
-    if (details.campuses !== undefined && !details.campuses.every(row => row.id) && details.academicPrograms === undefined) {
-      throw new Error('UNIVERSITY_PROGRAMS_REQUIRED_WHEN_REPLACING_CAMPUSES');
-    }
-    if (details.organizationUnits !== undefined && !details.organizationUnits.every(row => row.id) && details.academicPrograms === undefined) {
-      throw new Error('UNIVERSITY_PROGRAMS_REQUIRED_WHEN_REPLACING_ORGANIZATION_UNITS');
-    }
 
     // A section write is an upsert, never a destructive replacement of unmentioned children.
     // Archived programs retain their canonical IDs and external references.
@@ -711,13 +705,11 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
             select: { id: true, sourceReferenceId: true },
           })
         : [];
-    const campusIds = new Map<string, string>(
-      retainedCampuses
-        .filter((campus): campus is { id: string; sourceReferenceId: string } =>
-          Boolean(campus.sourceReferenceId),
-        )
-        .map((campus) => [campus.sourceReferenceId, campus.id]),
-    );
+    const campusIds = new Map<string, string>();
+    for (const campus of retainedCampuses) {
+      campusIds.set(campus.id, campus.id);
+      if (campus.sourceReferenceId) campusIds.set(campus.sourceReferenceId, campus.id);
+    }
     for (const campus of details.campuses ?? []) {
       const { id: rowId } = campus;
       const match = !rowId && campus.sourceReferenceId
@@ -754,13 +746,11 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
             select: { id: true, sourceReferenceId: true },
           })
         : [];
-    const unitIds = new Map<string, string>(
-      retainedUnits
-        .filter((unit): unit is { id: string; sourceReferenceId: string } =>
-          Boolean(unit.sourceReferenceId),
-        )
-        .map((unit) => [unit.sourceReferenceId, unit.id]),
-    );
+    const unitIds = new Map<string, string>();
+    for (const unit of retainedUnits) {
+      unitIds.set(unit.id, unit.id);
+      if (unit.sourceReferenceId) unitIds.set(unit.sourceReferenceId, unit.id);
+    }
     for (const unit of details.organizationUnits ?? []) {
       const match = !unit.id && unit.sourceReferenceId
         ? await this.prisma.universityOrganizationUnit.findFirst({ where: { universityId: id, sourceReferenceId: unit.sourceReferenceId }, select: { id: true } })
@@ -776,12 +766,12 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       const data = {
           universityId: id,
           sourceReferenceId: unit.sourceReferenceId,
-          campusId,
+          campusId: unit.campusSourceReferenceId === undefined ? undefined : campusId ?? null,
           unitType: unit.unitType,
           name: unit.name,
           normalizedName: unit.name.trim().toLocaleLowerCase(),
           status: unit.status ?? 'ACTIVE',
-          parentOrganizationUnitId: null,
+          parentOrganizationUnitId: unit.parentSourceReferenceId === undefined ? undefined : null,
           metadata: unit.metadata as Prisma.InputJsonObject | undefined,
         };
       const created = targetId
@@ -799,6 +789,28 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         where: { id: unitId },
         data: { parentOrganizationUnitId: parentId },
       });
+    }
+
+    if (details.organizationUnits !== undefined) {
+      const nodes = await this.prisma.universityOrganizationUnit.findMany({
+        where: { universityId: id },
+        select: { id: true, parentOrganizationUnitId: true, campusId: true, unitType: true },
+      });
+      const owners = new Map(nodes.map(node => [node.id, node]));
+      for (const node of nodes) {
+        const seen = new Set<string>([node.id]);
+        let cursor = node;
+        while (cursor.parentOrganizationUnitId) {
+          const parent = owners.get(cursor.parentOrganizationUnitId);
+          if (!parent) throw new Error('UNIVERSITY_ORGANIZATION_CROSS_OWNER_PARENT');
+          if (seen.has(parent.id)) throw new Error('UNIVERSITY_ORGANIZATION_HIERARCHY_CYCLE');
+          if (parent.unitType === 'DEPARTMENT') throw new Error('UNIVERSITY_DEPARTMENT_CANNOT_BE_PARENT');
+          if (cursor.campusId && parent.campusId && cursor.campusId !== parent.campusId)
+            throw new Error('UNIVERSITY_ORGANIZATION_CAMPUS_MISMATCH');
+          seen.add(parent.id);
+          cursor = parent;
+        }
+      }
     }
 
     for (const program of details.academicPrograms ?? []) {
