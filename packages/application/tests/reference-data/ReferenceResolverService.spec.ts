@@ -21,6 +21,9 @@ describe('ReferenceResolverService canonical contract', () => {
     iso3Code: 'SAU',
     name: 'Saudi Arabia',
     isActive: true,
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
   const region: AdministrativeRegionDto = {
     id: 'region-riyadh',
@@ -37,6 +40,9 @@ describe('ReferenceResolverService canonical contract', () => {
     countryIso2Code: 'SA',
     name: 'Riyadh',
     isActive: true,
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
   const language: ReferenceLanguageDto = {
     id: 'language-ar',
@@ -44,12 +50,18 @@ describe('ReferenceResolverService canonical contract', () => {
     name: 'Arabic',
     direction: 'RTL',
     isActive: true,
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
   const currency: ReferenceCurrencyDto = {
     id: 'currency-sar',
     isoCode: 'SAR',
     name: 'Saudi Riyal',
     isActive: true,
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
 
   beforeEach(() => {
