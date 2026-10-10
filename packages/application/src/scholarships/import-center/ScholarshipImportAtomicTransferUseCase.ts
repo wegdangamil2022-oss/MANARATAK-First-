@@ -402,7 +402,7 @@ export class ScholarshipImportAtomicTransferUseCase
     };
 
     const scalarKeys: Array<keyof UpdateScholarshipDto> = [
-      'displayName', 'providerName', 'amountMinorUnits', 'amountCurrencyCode', 'isFullyFunded',
+      'displayName', 'providerName', 'sponsorUniversityId', 'amountMinorUnits', 'amountCurrencyCode', 'isFullyFunded',
       'applicationDeadline', 'officialWebsite', 'sourceUrl', 'academicYear', 'cycleName',
       'countryReferenceId', 'countrySourceLabel', 'countryScope', 'fundingTypeCode', 'deadlineType',
       'applicationMethod', 'applicationUrl', 'officialSourceUrl', 'sourceLocale', 'lastVerifiedAt', 'verificationStatus',
@@ -481,6 +481,7 @@ export class ScholarshipImportAtomicTransferUseCase
     return {
       displayName: plan.cleanedName.displayName,
       providerName: payload.providerName ?? payload.sponsorName ?? null,
+      sponsorUniversityId: this.firstResolved(plan.canonical, 'PROVIDER_UNIVERSITY')?.canonicalReferenceId ?? null,
       completenessStatus: plan.completeness.state,
       verificationStatus: plan.decisionSnapshot.verificationState === 'VERIFIED'
         ? ScholarshipVerificationStatus.VERIFIED

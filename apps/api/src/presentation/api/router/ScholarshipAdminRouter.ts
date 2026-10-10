@@ -294,6 +294,7 @@ export class ScholarshipAdminRouter {
     });
 
     const canonicalRelationshipsSchema = z.object({
+      sponsorUniversityId: z.string().min(1).nullable().optional(),
       countryReferenceId: z.string().min(1).nullable().optional(),
       studyLanguageReferenceId: z.string().min(1).nullable().optional(),
       benefits: z.array(benefitSchema.extend({

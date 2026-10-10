@@ -158,7 +158,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       requiredDocuments: this.toNestedCreate(data.requiredDocumentItems),
       sourceEvidence: this.toNestedCreate(data.sourceEvidence),
       universityLinks: this.toNestedCreate(data.universityLinks),
-      sponsorContext: { create: { sponsorType: 'CONTEXTUAL', displayName: data.providerName ?? data.sponsorName ?? 'UNKNOWN_SPONSOR', source: 'SCHOLARSHIP_ROOT' } },
+      sponsorContext: { create: { sponsorType: 'CONTEXTUAL', displayName: data.providerName ?? data.sponsorName ?? 'UNKNOWN_SPONSOR', source: 'SCHOLARSHIP_ROOT', universityId: data.sponsorUniversityId ?? null } },
       applicationCycles: { create: [this.applicationCycleData(data)] },
       versions: { create: [this.initialVersionData(data)] },
     } as unknown as Prisma.ScholarshipCreateInput;
@@ -243,8 +243,8 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       const version = await this.appendStructuralVersion(id, record);
       await this.prisma.scholarshipSponsorContext.upsert({
         where: { scholarshipId: id },
-        create: { scholarshipId: id, sponsorType: 'CONTEXTUAL', displayName: record.providerName ?? 'UNKNOWN_SPONSOR', source: 'SCHOLARSHIP_ROOT' },
-        update: { displayName: record.providerName ?? 'UNKNOWN_SPONSOR' },
+        create: { scholarshipId: id, sponsorType: 'CONTEXTUAL', displayName: record.providerName ?? 'UNKNOWN_SPONSOR', source: 'SCHOLARSHIP_ROOT', universityId: updates.sponsorUniversityId ?? null },
+        update: { displayName: record.providerName ?? 'UNKNOWN_SPONSOR', universityId: updates.sponsorUniversityId },
       });
       const cycle = this.applicationCycleData(record);
       await this.prisma.scholarshipApplicationCycle.upsert({
@@ -555,7 +555,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
 
   private hasStructuralChanges(updates: ScholarshipRepositoryUpdateDto): boolean {
     const structuralKeys = new Set([
-      'displayName', 'sourceEvidence', 'providerName', 'amountMinorUnits', 'amountCurrencyCode', 'isFullyFunded', 'applicationDeadline',
+      'sponsorUniversityId', 'displayName', 'sourceEvidence', 'providerName', 'amountMinorUnits', 'amountCurrencyCode', 'isFullyFunded', 'applicationDeadline',
       'academicYear', 'cycleName', 'countryReferenceId', 'countrySourceLabel', 'countryScope',
       'fundingTypeCode', 'deadlineType', 'applicationMethod', 'applicationUrl', 'officialSourceUrl',
       'studyLanguageReferenceId', 'studyLanguageSourceLabel', 'benefits', 'degreeTargets', 'majorTargets',

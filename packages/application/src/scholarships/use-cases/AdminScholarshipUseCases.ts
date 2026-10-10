@@ -33,6 +33,7 @@ type AdminScholarshipRepository = IScholarshipRepository & {
   getAdminSummary?: () => Promise<Record<string, number>>;
 };
 export interface ScholarshipCanonicalAuthoringInput {
+  sponsorUniversityId?: string | null;
   countryReferenceId?: string | null;
   studyLanguageReferenceId?: string | null;
   benefits?: ScholarshipBenefitDto[];
@@ -240,6 +241,7 @@ export class AdminScholarshipUseCases {
     if (existing.publicationStatus !== ScholarshipPublicationStatus.DRAFT || [ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED].includes(existing.status)) throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS');
     if (!this.canonicalLookup) throw new Error('SCHOLARSHIP_CANONICAL_LOOKUP_NOT_CONFIGURED');
 
+    await this.assertCanonicalReference('UNIVERSITY', input.sponsorUniversityId);
     await this.assertCanonicalReference('COUNTRY', input.countryReferenceId);
     await this.assertCanonicalReference('LANGUAGE', input.studyLanguageReferenceId);
 
@@ -290,6 +292,7 @@ export class AdminScholarshipUseCases {
     }));
 
     const dataToUpdate: ScholarshipRepositoryUpdateDto = {
+      sponsorUniversityId: input.sponsorUniversityId,
       countryReferenceId: input.countryReferenceId,
       studyLanguageReferenceId: input.studyLanguageReferenceId,
       studyLanguageResolutionStatus: input.studyLanguageReferenceId ? 'RESOLVED' : 'UNRESOLVED',
@@ -400,6 +403,10 @@ export class AdminScholarshipUseCases {
     if (this.unresolvedLinks(existing).length > 0) throw new Error('SCHOLARSHIP_CANONICAL_LINKS_UNRESOLVED');
     if (!existing.versions?.length) throw new Error('SCHOLARSHIP_VERSION_REQUIRED');
     if (!existing.sponsorContext) throw new Error('SCHOLARSHIP_SPONSOR_CONTEXT_REQUIRED');
+    if (existing.sponsorContext.universityId) {
+      const sponsor = await this.assertCanonicalReference('UNIVERSITY', existing.sponsorContext.universityId);
+      if (sponsor?.lifecycle !== 'PUBLISHED') throw new Error('SCHOLARSHIP_SPONSOR_UNIVERSITY_NOT_PUBLISHED');
+    }
     if (!existing.applicationCycles?.length) throw new Error('SCHOLARSHIP_APPLICATION_CYCLE_REQUIRED');
     for (const item of existing.majorTargets ?? []) {
       if (!item.majorId) continue;

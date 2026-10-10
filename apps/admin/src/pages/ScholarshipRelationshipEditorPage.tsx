@@ -14,7 +14,7 @@ interface DocumentRow { documentKey: string; documentTypeCode?: string | null; d
 interface UniversityLinkRow { linkKey: string; universityId?: string | null; academicProgramId?: string | null; sourceLabel?: string | null; relationshipTypeCode?: string; metadata?: JsonObject | null; }
 interface ScholarshipDetail {
   id: string; displayName: string; status: string; publicationStatus?: string;
-  countryReferenceId?: string | null; studyLanguageReferenceId?: string | null;
+  sponsorContext?: { universityId?: string | null }; countryReferenceId?: string | null; studyLanguageReferenceId?: string | null;
   benefits?: BenefitRow[]; degreeTargets?: DegreeRow[]; majorTargets?: MajorRow[];
   eligibilityItems?: EligibilityRow[]; requiredDocumentItems?: DocumentRow[]; universityLinks?: UniversityLinkRow[];
 }
@@ -23,6 +23,7 @@ const key = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
 export function ScholarshipRelationshipEditorPage() {
   const { id = '' } = useParams();
   const [scholarship, setScholarship] = useState<ScholarshipDetail | null>(null);
+  const [sponsorUniversityId, setSponsorUniversityId] = useState<string | null>(null);
   const [countryReferenceId, setCountryReferenceId] = useState<string | null>(null);
   const [studyLanguageReferenceId, setStudyLanguageReferenceId] = useState<string | null>(null);
   const [benefits, setBenefits] = useState<BenefitRow[]>([]);
@@ -35,7 +36,7 @@ export function ScholarshipRelationshipEditorPage() {
   const [saving, setSaving] = useState(false); const [error, setError] = useState(''); const [message, setMessage] = useState('');
 
   const hydrate = (detail: ScholarshipDetail) => {
-    setScholarship(detail); setCountryReferenceId(detail.countryReferenceId ?? null); setStudyLanguageReferenceId(detail.studyLanguageReferenceId ?? null);
+    setScholarship(detail); setSponsorUniversityId(detail.sponsorContext?.universityId ?? null); setCountryReferenceId(detail.countryReferenceId ?? null); setStudyLanguageReferenceId(detail.studyLanguageReferenceId ?? null);
     setBenefits(detail.benefits ?? []); setDegreeTargets(detail.degreeTargets ?? []); setMajorTargets(detail.majorTargets ?? []); setEligibilityItems(detail.eligibilityItems ?? []); setRequiredDocumentItems(detail.requiredDocumentItems ?? []); setUniversityLinks(detail.universityLinks ?? []);
   };
   const load = async () => hydrate(await adminApiClient.request<ScholarshipDetail>(`/admin/scholarships/${encodeURIComponent(id)}`));
@@ -46,7 +47,7 @@ export function ScholarshipRelationshipEditorPage() {
     setSaving(true); setError(''); setMessage('');
     try {
       const saved = await adminApiClient.request<ScholarshipDetail>(`/admin/scholarships/${encodeURIComponent(id)}/canonical-relationships`, {
-        method: 'PUT', headers: { 'X-Review-Reason': reviewReason.trim() }, body: JSON.stringify({ countryReferenceId, studyLanguageReferenceId, benefits, degreeTargets, majorTargets, eligibilityItems, requiredDocumentItems, universityLinks }),
+        method: 'PUT', headers: { 'X-Review-Reason': reviewReason.trim() }, body: JSON.stringify({ sponsorUniversityId, countryReferenceId, studyLanguageReferenceId, benefits, degreeTargets, majorTargets, eligibilityItems, requiredDocumentItems, universityLinks }),
       });
       hydrate(saved); setMessage('Canonical scholarship relationships saved through the Scholarship owner API.');
     } catch (err) { setError(err instanceof Error ? err.message : 'Unable to save scholarship relationships.'); }
@@ -63,7 +64,7 @@ export function ScholarshipRelationshipEditorPage() {
     {(majorTargets.some(row => row.sourceLabel?.trim() && !row.majorId)) ? <Link to="/majors" className="text-sm text-[#0E7C86] underline">Unresolved scholarship majors: review them in the Section 09 New Majors queue, with their evidence and source references. Do not auto-create a Major.</Link> : null}
     {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}{message ? <div className="rounded-lg border border-[#21A7B4]/30 bg-[#DDEFF2]/45 p-3 text-sm text-[#0E7C86]">{message}</div> : null}
 
-    <section className="grid gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-2"><CanonicalPicker label="Study country" value={countryReferenceId} onChange={(next) => setCountryReferenceId(next)} load={() => canonicalPickerApi.countries()} reloadKey="scholarship-countries" optional /><CanonicalPicker label="Study language" value={studyLanguageReferenceId} onChange={(next) => setStudyLanguageReferenceId(next)} load={() => canonicalPickerApi.languages()} reloadKey="scholarship-languages" optional /></section>
+    <section className="grid gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-2"><CanonicalPicker label="Sponsoring university (when applicable)" value={sponsorUniversityId} onChange={setSponsorUniversityId} load={() => canonicalPickerApi.universities()} reloadKey="scholarship-sponsor-university" optional /><CanonicalPicker label="Study country" value={countryReferenceId} onChange={(next) => setCountryReferenceId(next)} load={() => canonicalPickerApi.countries()} reloadKey="scholarship-countries" optional /><CanonicalPicker label="Study language" value={studyLanguageReferenceId} onChange={(next) => setStudyLanguageReferenceId(next)} load={() => canonicalPickerApi.languages()} reloadKey="scholarship-languages" optional /></section>
 
     <EditorSection title="Degree targets" onAdd={() => setDegreeTargets((rows) => [...rows, { targetKey: key('degree'), sourceLabel: '', degreeLevelId: null }])}>{degreeTargets.map((row, index) => <Row key={row.targetKey} onDelete={() => setDegreeTargets((rows) => rows.filter((_, i) => i !== index))}><CanonicalPicker label="Canonical degree" value={row.degreeLevelId} onChange={(next, option) => setDegreeTargets((rows) => rows.map((item, i) => i === index ? { ...item, degreeLevelId: next, sourceLabel: option?.label ?? item.sourceLabel } : item))} load={() => canonicalPickerApi.degreeLevels()} reloadKey="scholarship-degrees" optional /><SourceLabel value={row.sourceLabel ?? ''} onChange={(value) => setDegreeTargets((rows) => rows.map((item, i) => i === index ? { ...item, sourceLabel: value } : item))} /></Row>)}</EditorSection>
 
