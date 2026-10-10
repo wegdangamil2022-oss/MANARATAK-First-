@@ -103,7 +103,7 @@ export class ScholarshipAdminRouter {
       let expectedRevision: number | undefined;
       if (!create) {
         if (!ifMatch) throw new Error('SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED');
-        const match = /^"?(\\d+)"?$/.exec(ifMatch.trim());
+        const match = /^"?(\d+)"?$/.exec(ifMatch.trim());
         if (!match || !Number.isSafeInteger(Number(match[1])) || Number(match[1]) < 1) {
           throw new Error('SCHOLARSHIP_INVALID_REVISION_PRECONDITION');
         }
@@ -820,7 +820,7 @@ export class ScholarshipAdminRouter {
     router.post(
       '/:id/mark-ready',
       asyncHandler(async (req: Request, res: Response) => {
-        await adminScholarshipUseCases.markReadyToReview(req.params.id, mutationContext(req));
+        await adminScholarshipUseCases.markReadyToReview(req.params.id, ownerContext(req));
         sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
@@ -829,7 +829,7 @@ export class ScholarshipAdminRouter {
     router.post(
       '/:id/mark-publishable',
       asyncHandler(async (req: Request, res: Response) => {
-        await adminScholarshipUseCases.markReadyToPublish(req.params.id, mutationContext(req));
+        await adminScholarshipUseCases.markReadyToPublish(req.params.id, ownerContext(req));
         sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
@@ -838,7 +838,7 @@ export class ScholarshipAdminRouter {
     router.post(
       '/:id/publish',
       asyncHandler(async (req: Request, res: Response) => {
-        await adminScholarshipUseCases.publish(req.params.id, mutationContext(req));
+        await adminScholarshipUseCases.publish(req.params.id, ownerContext(req));
         sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
@@ -847,7 +847,7 @@ export class ScholarshipAdminRouter {
     router.post(
       '/:id/unpublish',
       asyncHandler(async (req: Request, res: Response) => {
-        await adminScholarshipUseCases.unpublish(req.params.id, mutationContext(req));
+        await adminScholarshipUseCases.unpublish(req.params.id, ownerContext(req));
         sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
@@ -856,7 +856,7 @@ export class ScholarshipAdminRouter {
     router.post(
       '/:id/reject',
       asyncHandler(async (req: Request, res: Response) => {
-        await adminScholarshipUseCases.reject(req.params.id, mutationContext(req));
+        await adminScholarshipUseCases.reject(req.params.id, ownerContext(req));
         sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
@@ -865,7 +865,7 @@ export class ScholarshipAdminRouter {
     router.post(
       '/:id/archive',
       asyncHandler(async (req: Request, res: Response) => {
-        await adminScholarshipUseCases.archive(req.params.id, mutationContext(req));
+        await adminScholarshipUseCases.archive(req.params.id, ownerContext(req));
         sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
