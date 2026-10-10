@@ -506,6 +506,8 @@ export interface UniversityProgramAdmissionRequirementReadDto {
 }
 
 export interface UniversityAcademicProgramReadDto {
+  /** Internal published-major status for server-side readiness/public projection only. */
+  major?: { status: string } | null;
   degreeLevel?: { canonicalCode: string; nameAr?: string | null; nameEn?: string | null } | null;
   id: string;
   universityId: string;

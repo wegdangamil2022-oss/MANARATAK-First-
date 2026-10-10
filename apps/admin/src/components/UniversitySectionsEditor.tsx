@@ -10,6 +10,7 @@ type Field = {
   label: string;
   type?: 'number' | 'boolean' | 'lines' | 'date' | 'select' | 'currency';
   options?: string[];
+  optionLabels?: Record<string, string>;
 };
 const sectionDefinitions: {
   key: string;
@@ -22,10 +23,12 @@ const sectionDefinitions: {
     key: 'accreditations',
     title: 'الاعتمادات',
     canAdd: true,
+    defaults: { reviewStatus: 'NEEDS_REVIEW' },
     fields: [
       { key: 'name', label: 'اسم الاعتماد' },
       { key: 'organization', label: 'الجهة' },
       { key: 'officialUrl', label: 'الرابط الرسمي' },
+      { key: 'reviewStatus', label: 'حالة المراجعة', type: 'select', options: ['NEEDS_REVIEW', 'APPROVED', 'REJECTED'] },
       { key: 'note', label: 'ملاحظات' },
     ],
   },
@@ -192,7 +195,7 @@ function fieldsForm(
               >
                 <option value="">اختر</option>
                 {field.options?.map((option) => (
-                  <option key={option}>{option}</option>
+                  <option key={option} value={option}>{field.optionLabels?.[option] ?? option}</option>
                 ))}
               </select>
             ) : field.type === 'lines' ? (
@@ -420,7 +423,27 @@ export function UniversitySectionsEditor({
           {rows[section.key].map((row, index) => (
             <div key={String(row.id ?? index)} className="mb-3 rounded-xl border p-3">
               {fieldsForm(
-                section.fields,
+                section.key === 'organizationUnits'
+                  ? [
+                      ...section.fields,
+                      {
+                        key: 'campusSourceReferenceId', label: 'الحرم الجامعي', type: 'select' as const,
+                        options: rows.campuses.map(item => String(item.sourceReferenceId ?? item.id ?? '')).filter(Boolean),
+                        optionLabels: Object.fromEntries(rows.campuses.map(item => [
+                          String(item.sourceReferenceId ?? item.id ?? ''), String(item.name ?? ''),
+                        ])),
+                      },
+                      {
+                        key: 'parentSourceReferenceId', label: 'الكلية أو الوحدة الأم', type: 'select' as const,
+                        options: rows.organizationUnits
+                          .filter(item => item !== row && item.unitType !== 'DEPARTMENT')
+                          .map(item => String(item.sourceReferenceId ?? item.id ?? '')).filter(Boolean),
+                        optionLabels: Object.fromEntries(rows.organizationUnits.map(item => [
+                          String(item.sourceReferenceId ?? item.id ?? ''), String(item.name ?? ''),
+                        ])),
+                      },
+                    ]
+                  : section.fields,
                 row,
                 (key, value) => {
                   setRows((current) => ({

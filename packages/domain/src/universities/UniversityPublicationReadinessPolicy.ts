@@ -33,6 +33,8 @@ export class UniversityPublicationReadinessPolicy implements PublicationReadines
       if (!program.degreeLevelId) blockingIssues.push(issue('UNIVERSITY_PROGRAM_DEGREE_REFERENCE_MISSING', `academicPrograms.${index}.degreeLevelId`, 'ACTIVE Academic Program requires canonical DegreeLevel ID before publication.'));
       if (!program.majorId || program.majorMappingState !== 'CANONICALLY_MAPPED')
         blockingIssues.push(issue('UNIVERSITY_PROGRAM_MAJOR_REVIEW_REQUIRED', `academicPrograms.${index}.majorId`, 'ACTIVE programs require a reviewed Canonical Major and a compatible degree level; unresolved source labels remain drafts in the New Majors queue.'));
+      if (program.majorId && program.major?.status !== 'PUBLISHED')
+        blockingIssues.push(issue('UNIVERSITY_PROGRAM_MAJOR_NOT_PUBLISHED', `academicPrograms.${index}.majorId`, 'ACTIVE programs require a published Canonical Major.'));
     });
 
     if (excludedPrograms.length > 0) {

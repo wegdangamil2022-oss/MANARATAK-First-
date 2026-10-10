@@ -946,6 +946,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         degreeLevelId: program.degreeLevelId,
         degreeLevel: program.degreeLevel,
         majorId: program.majorId,
+        major: program.major ? { status: program.major.status } : null,
         majorMappingState: program.majorMappingState,
         status: program.status,
         campusIds: (program.campuses ?? []).map((link) => link.campusId),
