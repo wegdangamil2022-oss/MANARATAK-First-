@@ -76,6 +76,7 @@ export function startPollingWorkers(
             await worker.runIdentityOnce(`${workerId}-identity`);
             await worker.runRoleOnce(`${workerId}-role`);
             await worker.runLearningOnce(`${workerId}-learning`);
+            await worker.runCertificatesOnce(`${workerId}-certificates`);
           });
           pollingWorkerRuntimeRegistry.success('student-workspace-outbox');
         } catch (error) {

@@ -63,6 +63,29 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       return null;
     }
 
+    // P14 owns certificate truth. Only a bounded, explicitly scoped lifecycle projection is accepted.
+    if (entry.domain === 'CERTIFICATES' && ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed'].includes(entry.eventType)) {
+      const studentReferenceId = typeof payload.studentReferenceId === 'string' ? payload.studentReferenceId.trim() : '';
+      const certificateId = typeof payload.certificateId === 'string' ? payload.certificateId.trim() : '';
+      if (!studentReferenceId || !certificateId)
+        throw new Error('STUDENT_WORKSPACE_CERTIFICATE_EVENT_REFERENCE_REQUIRED');
+      if (entry.aggregate?.aggregateId && entry.aggregate.aggregateId !== certificateId)
+        throw new Error('STUDENT_WORKSPACE_CERTIFICATE_EVENT_AGGREGATE_MISMATCH');
+      const allowedFields = [
+        'certificateId', 'publicId', 'serialNumber', 'verificationCode', 'status', 'courseDisplayName',
+        'issuedAt', 'expiresAt', 'replacesCertificateId', 'certificatePdfAssetId', 'previewImageAssetId',
+      ] as const;
+      const metadata: Record<string, unknown> = {};
+      for (const key of allowedFields) {
+        const value = payload[key];
+        if (typeof value === 'string' && value.length <= 320) metadata[key] = value;
+      }
+      metadata.certificateId = certificateId;
+      metadata.status = entry.eventType === 'CertificateRevoked' ? 'REVOKED' :
+        (entry.eventType === 'CertificateRenewed' ? 'ACTIVE' : metadata.status ?? 'ACTIVE');
+      return this.event(entry, studentReferenceId, entry.eventType, 'تم تحديث حالة الشهادة', metadata, certificateId);
+    }
+
     if (entry.domain === 'COURSES' && ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'].includes(entry.eventType)) {
       const studentReferenceId = String(payload.studentReferenceId ?? '');
       const courseId = String(payload.courseId ?? '');

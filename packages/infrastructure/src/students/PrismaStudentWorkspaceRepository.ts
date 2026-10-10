@@ -796,25 +796,55 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         });
       }
     }
-    if (['CertificateIssued', 'CertificateRevoked', 'CertificateReissued'].includes(event.eventType)) {
+    if (['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed'].includes(event.eventType)) {
       const certificateId = String(metadata.certificateId ?? event.sourceReferenceId ?? '');
-      if (certificateId) {
-        await tx.studentCertificateReadProjection.upsert({
-          where: { studentReferenceId_certificateId: { studentReferenceId: event.studentReferenceId, certificateId } },
-          create: {
-            id: randomUUID(), studentReferenceId: event.studentReferenceId, certificateId,
-            publicId: String(metadata.publicId ?? certificateId), serialNumber: String(metadata.serialNumber ?? certificateId),
-            verificationCode: String(metadata.verificationCode ?? ''), status: String(metadata.status ?? (event.eventType === 'CertificateRevoked' ? 'REVOKED' : 'ISSUED')),
-            courseDisplayName: String(metadata.courseDisplayName ?? event.title), issuedAt: new Date(String(metadata.issuedAt ?? event.occurredAt)),
-            expiresAt: metadata.expiresAt ? new Date(String(metadata.expiresAt)) : null,
-            certificatePdfAssetId: metadata.certificatePdfAssetId ? String(metadata.certificatePdfAssetId) : null,
-            previewImageAssetId: metadata.previewImageAssetId ? String(metadata.previewImageAssetId) : null, sourceEventId: event.eventId,
-          },
-          update: {
-            status: String(metadata.status ?? (event.eventType === 'CertificateRevoked' ? 'REVOKED' : 'ISSUED')),
-            certificatePdfAssetId: metadata.certificatePdfAssetId ? String(metadata.certificatePdfAssetId) : undefined,
-            previewImageAssetId: metadata.previewImageAssetId ? String(metadata.previewImageAssetId) : undefined, sourceEventId: event.eventId,
-          },
+      if (!certificateId) throw new Error('STUDENT_CERTIFICATE_REFERENCE_REQUIRED');
+      const key = { studentReferenceId: event.studentReferenceId, certificateId };
+      const current = await tx.studentCertificateReadProjection.findUnique({
+        where: { studentReferenceId_certificateId: key },
+      });
+      // Ordering derives from the original owner event stored in the idempotent inbox,
+      // not from the local projection update timestamp. A late issued event may not revive a revoked certificate.
+      if (current) {
+        const previous = await tx.studentWorkspaceEventInbox.findUnique({ where: { eventId: current.sourceEventId } });
+        const priorOccurredAt = new Date(String((previous?.payload as any)?.occurredAt ?? current.updatedAt));
+        const incoming = event.occurredAt.getTime();
+        const prior = priorOccurredAt.getTime();
+        const rank = (kind: string) => kind === 'CertificateRevoked' ? 3 :
+          kind === 'CertificateReissued' ? 2 : kind === 'CertificateRenewed' ? 1 : 0;
+        if (Number.isFinite(prior) && (incoming < prior ||
+          (incoming === prior && rank(event.eventType) < rank(String(previous?.eventType ?? ''))))) return;
+      }
+      const status = event.eventType === 'CertificateRevoked' ? 'REVOKED' :
+        event.eventType === 'CertificateRenewed' ? 'ACTIVE' :
+        String(metadata.status ?? 'ACTIVE');
+      if (!['ACTIVE', 'ISSUED', 'REVOKED', 'EXPIRED', 'REISSUED', 'PENDING', 'SUSPENDED'].includes(status))
+        throw new Error('STUDENT_CERTIFICATE_STATUS_INVALID');
+      await tx.studentCertificateReadProjection.upsert({
+        where: { studentReferenceId_certificateId: key },
+        create: {
+          id: randomUUID(), ...key,
+          publicId: String(metadata.publicId ?? certificateId),
+          serialNumber: String(metadata.serialNumber ?? certificateId),
+          verificationCode: String(metadata.verificationCode ?? ''),
+          status,
+          courseDisplayName: String(metadata.courseDisplayName ?? 'شهادة'),
+          issuedAt: new Date(String(metadata.issuedAt ?? event.occurredAt)),
+          expiresAt: metadata.expiresAt ? new Date(String(metadata.expiresAt)) : null,
+          certificatePdfAssetId: metadata.certificatePdfAssetId ? String(metadata.certificatePdfAssetId) : null,
+          previewImageAssetId: metadata.previewImageAssetId ? String(metadata.previewImageAssetId) : null,
+          sourceEventId: event.eventId,
+        },
+        update: {
+          status, sourceEventId: event.eventId,
+          ...(metadata.certificatePdfAssetId ? { certificatePdfAssetId: String(metadata.certificatePdfAssetId) } : {}),
+          ...(metadata.previewImageAssetId ? { previewImageAssetId: String(metadata.previewImageAssetId) } : {}),
+        },
+      });
+      if (event.eventType === 'CertificateReissued' && metadata.replacesCertificateId) {
+        await tx.studentCertificateReadProjection.updateMany({
+          where: { studentReferenceId: event.studentReferenceId, certificateId: String(metadata.replacesCertificateId), status: { not: 'REVOKED' } },
+          data: { status: 'REISSUED' },
         });
       }
     }
