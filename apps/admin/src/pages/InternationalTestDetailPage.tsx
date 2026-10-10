@@ -1,3 +1,8 @@
+import { InternationalTestGovernanceWorkspace } from '../components/InternationalTestGovernanceWorkspace';
+import { CanonicalPicker } from '../components/CanonicalPicker';
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import type { InternationalTestStatus as CanonicalTestStatus } from '@manaratak/domain';
+type InternationalTestStatus = `${CanonicalTestStatus}`;
 import type { InternationalTestDto } from '@manaratak/domain';
 import {
 AlertCircle,
@@ -31,7 +36,6 @@ import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
 import { SavedTestCanonicalRelationships } from '../components/SavedTestCanonicalRelationships';
 import { useTranslation } from '../i18n/I18nProvider';
 
-type InternationalTestStatus = 'IMPORTED' | 'READY_TO_REVIEW' | 'NEEDS_REVIEW' | 'INCOMPLETE' | 'READY_TO_PUBLISH' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED';
 type InternationalTestCompletenessStatus = 'INCOMPLETE' | 'COMPLETE' | 'NEEDS_REVIEW';
 type InternationalTestCategory = 'ENGLISH_LANGUAGE' | 'NON_ENGLISH_LANGUAGE' | 'GENERAL_UNDERGRADUATE_ADMISSION' | 'GRADUATE_ADMISSION' | 'NATIONAL_INTERNATIONAL_ADMISSION' | 'SPECIALIZED_ADMISSION' | 'PROFESSIONAL_LICENSING_CERTIFICATION' | 'LANGUAGE_PROFICIENCY' | 'UNDERGRAD_ADMISSION' | 'GRAD_ADMISSION' | 'PROFESSIONAL_LICENSING' | 'ACADEMIC_PLACEMENT' | 'OTHER';
 
@@ -228,7 +232,8 @@ export function InternationalTestDetailPage() {
     setActionMessage(null);
     setActionError(null);
     try {
-      await adminApiClient.publishInternationalTest(test.id);
+      const reason=window.prompt(isRtl?'سبب الإجراء والمراجعة:':'Review reason:'); if(!reason?.trim()) return;
+      await adminApiClient.publishInternationalTest(test.id,reason);
       setActionMessage(
         isRtl
           ? 'تم نشر الاختبار بنجاح!'
@@ -252,7 +257,8 @@ export function InternationalTestDetailPage() {
     setActionError(null);
     setShowMoreMenu(false);
     try {
-      await adminApiClient.unpublishInternationalTest(test.id);
+      const reason=window.prompt(isRtl?'سبب الإجراء والمراجعة:':'Review reason:'); if(!reason?.trim()) return;
+      await adminApiClient.unpublishInternationalTest(test.id,reason);
       setActionMessage(isRtl ? 'تم إلغاء النشر وإعادة الاختبار إلى جاهز للنشر.' : 'Test unpublished successfully.');
       setLastSavedAt(new Date().toISOString());
       await fetchDetail();
@@ -271,7 +277,8 @@ export function InternationalTestDetailPage() {
     setShowArchiveModal(false);
     setShowMoreMenu(false);
     try {
-      await adminApiClient.archiveInternationalTest(test.id);
+      const reason=window.prompt(isRtl?'سبب الإجراء والمراجعة:':'Review reason:'); if(!reason?.trim()) return;
+      await adminApiClient.archiveInternationalTest(test.id,reason);
       setActionMessage(isRtl ? 'تمت أرشفة السجل بنجاح مع الحفاظ على كافة البيانات والأدلة دون حذف.' : 'Test archived successfully. Record preserved without deletion.');
       setLastSavedAt(new Date().toISOString());
       await fetchDetail();
@@ -759,6 +766,7 @@ export function InternationalTestDetailPage() {
         )}
 
         {/* TAB 3: الجاهزية والنشر (Readiness Report & Blockers) */}
+        {(activeTab === 'readiness' || activeTab === 'sources_history') && <InternationalTestGovernanceWorkspace testId={test.id} isRtl={isRtl} onSaved={fetchDetail} />}
         {activeTab === 'readiness' && (
           <ReadinessTab
             test={test}
@@ -788,7 +796,7 @@ export function InternationalTestDetailPage() {
               معاينة البيانات المحفوظة بنفس تصميم الصفحة العامة؛ لا تعني نشر المسودة.
               {hasUnsavedChanges && <span className="block mt-1">احفظ التعديلات أولاً لتظهر في المعاينة.</span>}
             </div>
-            <ExamDetails exam={mapInternationalTestToExam(test)} onClose={() => setShowPreviewModal(false)} />
+            <ExamDetails exam={mapInternationalTestToExam({...test,locale:isRtl?'ar':'en'})} onClose={() => setShowPreviewModal(false)} />
           </div>
         </div>
       )}
@@ -1877,8 +1885,8 @@ function getStatusLabel(status: InternationalTestStatus): string {
       return 'جاهز للمراجعة';
     case 'IMPORTED':
       return 'مستورد';
-    case 'INCOMPLETE':
-      return 'ناقص';
+    case 'NEEDS_REVIEW':
+      return 'يحتاج مراجعة';
     case 'ARCHIVED':
       return 'مؤرشف';
     case 'REJECTED':
@@ -2062,6 +2070,7 @@ function AvailabilityTab({
   const [countriesInput, setCountriesInput] = useState('');
   const [citiesInput, setCitiesInput] = useState('');
   const [regionsInput, setRegionsInput] = useState('');
+  const [countryScope,setCountryScope]=useState<string>();
   const [windowsNotes, setWindowsNotes] = useState('');
 
 
@@ -2191,27 +2200,14 @@ function AvailabilityTab({
 
         <div className="space-y-4 text-sm">
           <div>
-            <label className="block text-gray-700 font-medium mb-1">{isRtl ? 'الدول المتاحة (رموز الدول مفصولة بفاصلة)' : 'Available Country IDs (comma separated)'}</label>
-            <input
-              type="text"
-              value={countriesInput}
-              onChange={(e) => setCountriesInput(e.target.value)}
-              placeholder="e.g. SA, AE, EG, US, KW"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black font-mono text-xs"
-            />
-            <p className="text-xs text-gray-500 mt-1">{isRtl ? 'رمز الدولة المرجعي فقط دون تكرار للبيانات.' : 'Reference code only, no duplicate data.'}</p>
+            <CanonicalPicker paged label={isRtl?'إضافة دولة':'Add country'} value={null} load={(q,page)=>canonicalPickerApi.countries(q,page)} onChange={(id,item)=>{if(id){setCountriesInput([...new Set([...countriesInput.split(',').map(x=>x.trim()).filter(Boolean),id])].join(', '));setCountryScope(item?.code);}}} />
+            {countriesInput.split(',').filter(Boolean).map(id=><button type="button" key={id} onClick={()=>setCountriesInput(countriesInput.split(',').filter(x=>x!==id).join(', '))}>{id} ×</button>)}
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium mb-1">{isRtl ? 'المدن المتاحة (رموز المدن مفصولة بفاصلة)' : 'Available City IDs (comma separated)'}</label>
-            <input
-              type="text"
-              value={citiesInput}
-              onChange={(e) => setCitiesInput(e.target.value)}
-              placeholder="e.g. RUH, JED, DXB, CAI"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black font-mono text-xs"
-            />
-            <p className="text-xs text-gray-500 mt-1">{isRtl ? 'رمز المدينة المرجعي فقط.' : 'Reference city code only.'}</p>
+            <CanonicalPicker paged label={isRtl?'دولة البحث عن المدن':'City search country'} value={null} load={(q,page)=>canonicalPickerApi.countries(q,page)} onChange={(_id,item)=>setCountryScope(item?.code)} />
+            <CanonicalPicker paged label={isRtl?'إضافة مدينة':'Add city'} value={null} reloadKey={countryScope??''} disabled={!countryScope} load={(q,page)=>canonicalPickerApi.cities(countryScope,null,q,page)} onChange={id=>{if(id)setCitiesInput([...new Set([...citiesInput.split(',').map(x=>x.trim()).filter(Boolean),id])].join(', '));}} />
+            {citiesInput.split(',').filter(Boolean).map(id=><button type="button" key={id} onClick={()=>setCitiesInput(citiesInput.split(',').filter(x=>x!==id).join(', '))}>{id} ×</button>)}
           </div>
 
           <div>
@@ -2495,6 +2491,8 @@ function EvidenceTab({
     originalImportedName: '',
     sourceId: '',
     sourceUrl: '',
+    contentHash: '',
+    retrievedAt: '',
     evidenceSnippet: '',
     sourceTrustLevel: 'AUTHORITATIVE'
   });
@@ -2511,12 +2509,14 @@ function EvidenceTab({
 
     setSaving(true);
     try {
-      await adminApiClient.addInternationalTestEvidence(testId, form);
+      await adminApiClient.addInternationalTestEvidence(testId, {...form,retrievedAt:new Date(form.retrievedAt).toISOString()});
       setSuccess(isRtl ? 'تم إدراج بيانات الدليل بنجاح.' : 'Evidence recorded successfully.');
       setForm({
         originalImportedName: '',
         sourceId: '',
         sourceUrl: '',
+        contentHash: '',
+        retrievedAt: '',
         evidenceSnippet: '',
         sourceTrustLevel: 'AUTHORITATIVE'
       });
@@ -2700,6 +2700,8 @@ function EvidenceTab({
           />
         </div>
 
+        <label className="block text-sm">{isRtl?'بصمة محتوى المصدر (SHA-256)':'Source content hash (SHA-256)'}<input required pattern="[a-fA-F0-9]{64}" className="block w-full rounded border p-2" value={form.contentHash} onChange={event=>setForm({...form,contentHash:event.target.value})}/></label>
+        <label className="block text-sm">{isRtl?'وقت استرجاع المصدر':'Source retrieval time'}<input required type="datetime-local" className="block rounded border p-2" value={form.retrievedAt} onChange={event=>setForm({...form,retrievedAt:event.target.value})}/></label>
         <button
           type="submit"
           disabled={saving}
@@ -2747,7 +2749,8 @@ function ReadinessTab({
   const handleVerifySource = async () => {
     setError(null); setSuccess(null); setActionLoading('verify');
     try {
-      await adminApiClient.verifyInternationalTestSource(test.id);
+      const reason=window.prompt(isRtl?'سبب الإجراء والمراجعة:':'Review reason:'); if(!reason?.trim()) return;
+      await adminApiClient.verifyInternationalTestSource(test.id,reason);
       setSuccess(isRtl ? 'تم اعتماد المصدر بناءً على دليل رسمي/عالي الثقة.' : 'Source verified from authoritative/high-trust evidence.');
       await onRefresh();
       await loadReadiness();
@@ -2761,7 +2764,8 @@ function ReadinessTab({
     setSuccess(null);
     setActionLoading('mark');
     try {
-      await adminApiClient.markInternationalTestReadyToPublish(test.id);
+      const reason=window.prompt(isRtl?'سبب الإجراء والمراجعة:':'Review reason:'); if(!reason?.trim()) return;
+      await adminApiClient.markInternationalTestReadyToPublish(test.id,reason);
       setSuccess(isRtl ? 'تم تغيير حالة الاختبار إلى جاهز للنشر بنجاح.' : 'Test status updated to Ready to Publish.');
       onRefresh();
     } catch (err: any) {
@@ -2786,7 +2790,8 @@ function ReadinessTab({
     setActionLoading('archive');
     setConfirmModal(null);
     try {
-      await adminApiClient.archiveInternationalTest(test.id);
+      const reason=window.prompt(isRtl?'سبب الإجراء والمراجعة:':'Review reason:'); if(!reason?.trim()) return;
+      await adminApiClient.archiveInternationalTest(test.id,reason);
       setSuccess(isRtl ? 'تم أرشفة الاختبار الدولي بنجاح.' : 'International test archived successfully.');
       onRefresh();
     } catch (err: any) {
@@ -3003,7 +3008,7 @@ function ReadinessTab({
 // DESCRIPTION TAB
 // ----------------------------------------------------------------------
 function DescriptionTab({ test, onRefresh, isRtl }: { test: InternationalTestDetail; onRefresh: () => void; isRtl: boolean }) {
-  const [providers, setProviders] = useState<any[]>([]);
+  const [providerReload,setProviderReload]=useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -3018,16 +3023,7 @@ function DescriptionTab({ test, onRefresh, isRtl }: { test: InternationalTestDet
     setForm({ providerId: test.providerId || '', testCategory: test.testCategory, abbreviation: test.abbreviation || '' });
   }, [test.id, test.providerId, test.testCategory, test.abbreviation]);
 
-  const loadProviders = async () => {
-    try {
-      const rows = await adminApiClient.listInternationalTestProviders<any[]>();
-      setProviders(Array.isArray(rows) ? rows : []);
-    } catch (err: any) {
-      setError(err.message || (isRtl ? 'تعذر تحميل مزودي الاختبارات.' : 'Failed to load test providers.'));
-    }
-  };
-
-  useEffect(() => { void loadProviders(); }, []);
+  const loadProviders = async () => {setProviderReload(n=>n+1);};
 
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -3090,10 +3086,7 @@ function DescriptionTab({ test, onRefresh, isRtl }: { test: InternationalTestDet
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
             <label className="block font-medium text-gray-700 mb-1">{isRtl ? 'المزود المعياري' : 'Canonical Provider'}</label>
-            <select value={form.providerId} onChange={(e) => setForm({ ...form, providerId: e.target.value })} className="w-full border rounded-lg px-3 py-2">
-              <option value="">{isRtl ? 'اختر المزود' : 'Select provider'}</option>
-              {providers.map((provider) => <option key={provider.id} value={provider.id}>{provider.displayName}</option>)}
-            </select>
+            <CanonicalPicker paged reloadKey={String(providerReload)} label={isRtl?'المزود':'Provider'} value={form.providerId||null} load={async(q,page)=>{const rows=await adminApiClient.request<Array<{id:string;displayName:string}>>(`/admin/international-tests/providers?search=${encodeURIComponent(q??'')}&page=${page??1}`);return rows.map(row=>({id:row.id,label:row.displayName,lifecycle:'ACTIVE'}));}} onChange={id=>setForm(current=>({...current,providerId:id??''}))} />
           </div>
           <div>
             <label className="block font-medium text-gray-700 mb-1">{isRtl ? 'فئة الاختبار' : 'Test Category'}</label>

@@ -17,6 +17,7 @@ export interface CanonicalReference {
   id: string;
   type: CanonicalReferenceType;
   standardCode?: string;
+  countryIso2Code?: string;
   active: boolean | null;
   resolutionMethod?: ReferenceResolutionMethod;
   /** Historical identity is retained; consumers explicitly decide whether to follow. */

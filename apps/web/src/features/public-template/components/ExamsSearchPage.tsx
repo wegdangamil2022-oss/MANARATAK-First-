@@ -1,10 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import { ApiClient } from '../../../api/client';
+import { mapExam } from '../publicLiveDataSource';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, Award, Search, X, Clock, ShieldCheck, Languages } from 'lucide-react';
 import { Exam } from '../types';
 import { FavoriteButton } from './FavoriteButton';
 
 interface ExamsSearchPageProps {
   exams?: Exam[];
+  dataMode?:'api'|'prototype';
+  locale?:'ar'|'en';
   onBack?: () => void;
   onSelectExam?: (exam: Exam) => void;
   initialQuery?: string;
@@ -33,7 +37,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
-  exams = [],
+  exams: initialExams = [], dataMode='prototype',locale='ar',
   onBack,
   onSelectExam,
   initialQuery = '',
@@ -43,18 +47,23 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState('الكل');
 
+  const [remote,setRemote]=useState<Exam[]>([]);const [page,setPage]=useState(1);const [total,setTotal]=useState(0);const [error,setError]=useState('');const [loading,setLoading]=useState(false);
+  const exams=dataMode==='api'?remote:initialExams;
+  useEffect(()=>{if(dataMode!=='api')return;let active=true;setLoading(true);setError('');const timer=setTimeout(()=>ApiClient.getInternationalTests({locale,page,pageSize:50,searchQuery:searchQuery.trim()||undefined,testCategory:selectedCategory==='الكل'?undefined:selectedCategory}).then(result=>{if(active){setRemote(result.data.map(mapExam));setTotal(result.total);setLoading(false);}}).catch(err=>{if(active){setError(err.message);setLoading(false);}}),200);return()=>{active=false;clearTimeout(timer);};},[dataMode,locale,page,searchQuery,selectedCategory]);
+  useEffect(()=>setPage(1),[searchQuery,selectedCategory]);
   // Derive categories
   const categories = useMemo(() => {
     const cats = new Set<string>();
     exams.forEach((exam) => cats.add(exam.category));
     const canonical = CANONICAL_TEST_CATEGORIES.filter((category) => cats.has(category));
     const additional = Array.from(cats).filter((category) => !CANONICAL_TEST_CATEGORIES.includes(category as (typeof CANONICAL_TEST_CATEGORIES)[number]));
-    return ['الكل', ...canonical, ...additional];
-  }, [exams]);
+    return ['الكل', ...(dataMode==='api'?CANONICAL_TEST_CATEGORIES:canonical), ...additional];
+  }, [exams,dataMode]);
 
   const filteredExams = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     const priority: Record<string, number> = { ielts: 0, hsk: 1 };
+    if(dataMode==='api')return exams;
     return exams
       .filter((exam) => {
         const searchable = [
@@ -74,12 +83,12 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
         return matchesQuery && matchesCategory;
       })
       .sort((a, b) => (priority[a.id] ?? 99) - (priority[b.id] ?? 99));
-  }, [exams, searchQuery, selectedCategory]);
+  }, [exams, searchQuery, selectedCategory,dataMode]);
 
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
-      dir="rtl"
+      dir={locale==='en'?'ltr':'rtl'}
     >
       {/* ========================================================================= */}
       {/* HERO SECTION - ELEGANT INTERNATIONAL EXAMS THEME */}
@@ -322,6 +331,7 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
             </article>
           ))}
         </div>
+        {dataMode==='api'&&<div><p role="status">{loading?(locale==='en'?'Loading…':'جارٍ التحميل…'):total}</p>{error&&<p role="alert">{error}</p>}<button type="button" disabled={loading||page<=1} onClick={()=>setPage(p=>p-1)}>{locale==='en'?'Previous':'السابق'}</button><span>{page}</span><button type="button" disabled={loading||page*50>=total} onClick={()=>setPage(p=>p+1)}>{locale==='en'?'Next':'التالي'}</button></div>}
         {filteredExams.length === 0 && (
           <div className="bg-[var(--mn-surface)] border border-dashed border-[var(--mn-border)] rounded-2xl p-6 text-center text-xs font-bold text-[var(--mn-text-muted)] mn-panel ">
             لا توجد اختبارات مطابقة لهذا البحث.

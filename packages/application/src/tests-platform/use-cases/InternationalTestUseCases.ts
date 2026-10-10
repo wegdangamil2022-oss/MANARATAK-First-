@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import { assertInternationalTestTransition, publicInternationalTest, assertOfficialTestUrl } from '@manaratak/domain';
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 import {
   validateInternationalTestScorePolicy,
@@ -34,7 +36,6 @@ import {
   ReviewInternationalTestSourceNamesDto,
   CorrectDraftInternationalTestCanonicalIdentityDto,
   InternationalTestDeduplicationService,
-  InternationalTestSourceTrustLevel,
   InternationalTestPublicationReadinessPolicy,
   PublicationReadinessEngine,
   PublicationReadinessResult,
@@ -44,6 +45,7 @@ import {
 } from '@manaratak/domain';
 import { assertNoTranslationPayloadFields } from '@manaratak/shared';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
+type TestMutationContext = AtomicMutationRequestContext & { expectedRevision?: number; reason?: string };
 import { InternationalTestCanonicalRelationshipService } from './InternationalTestCanonicalRelationshipService';
 
 export class InternationalTestAdminUseCases {
@@ -77,7 +79,9 @@ export class InternationalTestAdminUseCases {
     return test;
   }
 
-  public async createTest(data: UpsertInternationalTestDto, context?: AtomicMutationRequestContext): Promise<InternationalTestDto> {
+  public async createTest(data: UpsertInternationalTestDto, context?: TestMutationContext): Promise<InternationalTestDto> {
+    if (['isPubliclyVisible','isSourceVerified','currentPublishedVersionId'].some(key => data[key] !== undefined)) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_FIELDS_FORBIDDEN');
+    if (data.status && !['IMPORTED','READY_TO_REVIEW','NEEDS_REVIEW'].includes(data.status)) throw new Error('INTERNATIONAL_TEST_CREATE_STATUS_INVALID');
     assertNoTranslationPayloadFields('INTERNATIONAL_TEST', data as unknown as Record<string, unknown>, ['localizedNameAr', 'localizedNameEn']);
     const canonicalData = { ...data, ...(await this.canonicalRelationshipService.canonicalize(data)), ...(await this.canonicalizeProvider(data)) };
     const report = this.validationService.validate(canonicalData);
@@ -86,12 +90,14 @@ export class InternationalTestAdminUseCases {
       const errorMsg = report.issues.map(i => `${i.field}: ${i.message}`).join('; ');
       throw new Error(`Validation failed for international test creation: ${errorMsg}`);
     }
-    const identityData = data as UpsertInternationalTestDto & { id?: string; publicId?: unknown };
-    const identity = identityData.id || (typeof identityData.publicId === 'string' ? identityData.publicId : undefined) || (typeof data.slug === 'string' ? data.slug : data.canonicalName);
-    return this.mutate('INTERNATIONAL_TEST_CREATED', identity, context, repository => repository.create(canonicalData));
+    const id=typeof data.id==='string'?data.id:randomUUID();
+    const canonicalName=canonicalData.canonicalName.trim();
+    const prepared={...canonicalData,id,publicId:typeof data.publicId==='string'?data.publicId:`ITEST_${id}`,slug:typeof data.slug==='string'?data.slug:`${canonicalName.normalize('NFKD').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-|-$/g,'')}-${id.slice(0,8)}`,displayName:typeof data.displayName==='string'?data.displayName:canonicalName,canonicalDedupKey:InternationalTestDeduplicationService.generateKey({canonicalName,providerName:canonicalData.providerName}),status:canonicalData.status??InternationalTestStatus.READY_TO_REVIEW,completenessStatus:report.status};
+    return this.mutate('INTERNATIONAL_TEST_CREATED',id,context,repository=>repository.create(prepared));
   }
 
-  public async updateTest(id: string, data: Partial<UpsertInternationalTestDto>, context?: AtomicMutationRequestContext): Promise<InternationalTestDto> {
+  public async updateTest(id: string, data: Partial<UpsertInternationalTestDto>, context?: TestMutationContext): Promise<InternationalTestDto> {
+    if (['isPubliclyVisible','isSourceVerified','currentPublishedVersionId'].some(key => data[key] !== undefined)) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_FIELDS_FORBIDDEN');
     assertNoTranslationPayloadFields('INTERNATIONAL_TEST', data as unknown as Record<string, unknown>, ['localizedNameAr', 'localizedNameEn']);
     const canonicalData = { ...data, ...(await this.canonicalRelationshipService.canonicalize(data)), ...(await this.canonicalizeProvider(data)) };
     const existing = await this.get(id);
@@ -108,7 +114,7 @@ export class InternationalTestAdminUseCases {
   public async addCanonicalRelationship(id: string, input: {
     kind: 'COUNTRY' | 'LANGUAGE' | 'TAXONOMY' | 'DEGREE'; referenceId: string;
     relationshipType: string; reason: string; evidenceReference: string;
-  }, context?: AtomicMutationRequestContext): Promise<void> {
+  }, context?: TestMutationContext): Promise<void> {
     if (!this.atomicMutations || !context?.actorId) throw new Error('INTERNATIONAL_TEST_GRAPH_AUDITED_ACTOR_REQUIRED');
     if (!input.reason.trim() || !input.evidenceReference.trim() || !input.relationshipType.trim()) throw new Error('INTERNATIONAL_TEST_GRAPH_REVIEW_REQUIRED');
     await this.mutate('INTERNATIONAL_TEST_CANONICAL_RELATIONSHIP_ADDED', id, context, async repository => {
@@ -116,7 +122,7 @@ export class InternationalTestAdminUseCases {
       await repository.acquireGraphMutationLock(id, input.kind, input.referenceId);
       const test = await repository.findById(id);
       if (!test || test.id !== id) throw new Error('INTERNATIONAL_TEST_GRAPH_OWNER_NOT_FOUND');
-      if (['PUBLISHED', 'ARCHIVED', 'SUPERSEDED', 'REJECTED', 'MERGED'].includes(test.status)) throw new Error('INTERNATIONAL_TEST_GRAPH_OWNER_IMMUTABLE');
+      if (['ARCHIVED', 'SUPERSEDED', 'REJECTED', 'MERGED'].includes(test.status)) throw new Error('INTERNATIONAL_TEST_GRAPH_OWNER_IMMUTABLE');
       const common = { relationshipType: input.relationshipType.trim(), notes: input.reason.trim(), metadata: { source: 'ADMIN_REVIEW', evidenceReference: input.evidenceReference.trim() } };
       const duplicate = <T extends { relationshipType: string }>(relationships: T[] | undefined, reference: (item: T) => string | undefined) => {
         if (relationships?.some(item => reference(item) === input.referenceId && item.relationshipType === common.relationshipType)) throw new Error('INTERNATIONAL_TEST_GRAPH_DUPLICATE_RELATIONSHIP');
@@ -148,70 +154,75 @@ export class InternationalTestAdminUseCases {
     }, { kind: input.kind, referenceId: input.referenceId, relationshipType: input.relationshipType, reason: input.reason, evidenceReference: input.evidenceReference });
   }
 
-  public async upsertTest(data: UpsertInternationalTestDto, context?: AtomicMutationRequestContext): Promise<InternationalTestDto> {
-    assertNoTranslationPayloadFields('INTERNATIONAL_TEST', data as unknown as Record<string, unknown>, ['localizedNameAr', 'localizedNameEn']);
-    const canonicalData = { ...data, ...(await this.canonicalRelationshipService.canonicalize(data)), ...(await this.canonicalizeProvider(data)) };
-    const report = this.validationService.validate(canonicalData);
-    const hasErrors = report.issues.some(i => i.severity === InternationalTestValidationSeverity.ERROR);
-    if (hasErrors) {
-      const errorMsg = report.issues.map(i => `${i.field}: ${i.message}`).join('; ');
-      throw new Error(`Validation failed for international test upsert: ${errorMsg}`);
-    }
-    const dataWithId = data as UpsertInternationalTestDto & { id?: string };
-    const publicId = typeof data.publicId === 'string' ? data.publicId : undefined;
-    const identity = dataWithId.id || publicId || (typeof data.slug === 'string' ? data.slug : data.canonicalName);
-    return this.mutate('INTERNATIONAL_TEST_UPSERTED', identity, context, repository => {
-      if (repository.upsertTest) return repository.upsertTest(canonicalData);
-      if (dataWithId.id) return repository.update(dataWithId.id, canonicalData);
-      return repository.create(canonicalData);
-    });
+  public async upsertTest(data:UpsertInternationalTestDto,context?:TestMutationContext):Promise<InternationalTestDto> {
+    // Compatibility creation alias. Existing records require their explicit owner/revision update.
+    return this.createTest(data,context);
   }
 
-  public async markReadyToPublish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
-    const test = await this.get(id);
-    this.publicationReadiness.assertReady(
-      id,
-      { ...test, status: InternationalTestStatus.READY_TO_PUBLISH },
-      this.publicationPolicy
-    );
-    await this.mutate('INTERNATIONAL_TEST_MARKED_READY_TO_PUBLISH', id, context, async repository => {
-      await repository.update(id, { status: InternationalTestStatus.READY_TO_PUBLISH, isPubliclyVisible: false });
+  public async markReadyToPublish(id: string, context?: TestMutationContext): Promise<void> {
+    await this.mutate('INTERNATIONAL_TEST_APPROVED', id, context, async repository => {
+      const test = await repository.findById(id); if (!test) throw new Error('INTERNATIONAL_TEST_NOT_FOUND');
+      assertInternationalTestTransition(test.status,InternationalTestStatus.READY_TO_PUBLISH);
+      if (!repository.govern) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_REQUIRED');
+      await repository.govern(id,'APPROVE',{reason:context?.reason},context!.actorId);
+      await repository.update(id,{status:InternationalTestStatus.READY_TO_PUBLISH});
     });
   }
 
   public async checkPublicationReadiness(id: string): Promise<PublicationReadinessResult> {
     const test = await this.get(id);
-    return this.publicationReadiness.evaluate(id, test, this.publicationPolicy);
+    const result=this.publicationReadiness.evaluate(id,test,this.publicationPolicy);
+    if(!this.repository.govern) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_REQUIRED');
+    const owner=await this.repository.govern(id,'READINESS',{},'') as {blockers:string[]};
+    const blockingIssues=[...result.blockingIssues,...owner.blockers.map(code=>({code,message:code,field:'sourceReview'}))];
+    return {...result,blockingIssues,ready:blockingIssues.length===0};
   }
 
-  public async publish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
-    const test = await this.get(id);
-    this.publicationReadiness.assertReady(id, test, this.publicationPolicy);
-    await this.mutate('INTERNATIONAL_TEST_PUBLISHED', id, context, async repository => {
-      await repository.update(id, { status: InternationalTestStatus.PUBLISHED, isPubliclyVisible: true });
+  public async publish(id: string, context?: TestMutationContext): Promise<void> {
+    await this.mutate('INTERNATIONAL_TEST_PUBLISHED',id,context,async repository=>{
+      const test = await repository.findById(id); if (!test) throw new Error('INTERNATIONAL_TEST_NOT_FOUND');
+      assertInternationalTestTransition(test.status,InternationalTestStatus.PUBLISHED);
+      if (!repository.govern) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_REQUIRED');
+      const result = await repository.govern(id,'PUBLISH',{reason:context?.reason},context!.actorId) as {versionId:string};
+      await repository.update(id,{status:InternationalTestStatus.PUBLISHED,isPubliclyVisible:true,currentPublishedVersionId:result.versionId});
     });
   }
-
-  public async unpublish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
-    await this.get(id);
-    await this.mutate('INTERNATIONAL_TEST_UNPUBLISHED', id, context, async repository => {
-      await repository.update(id, { status: InternationalTestStatus.READY_TO_PUBLISH, isPubliclyVisible: false });
-    });
+  public async unpublish(id:string,context?:TestMutationContext):Promise<void> {
+    await this.transition(id,InternationalTestStatus.READY_TO_PUBLISH,context,true);
+  }
+  public async archive(id:string,context?:TestMutationContext):Promise<void> {
+    await this.transition(id,InternationalTestStatus.ARCHIVED,context,true);
+  }
+  public async transition(id:string,to:InternationalTestStatus,context?:TestMutationContext,hide=false):Promise<void> {
+    await this.mutate('INTERNATIONAL_TEST_'+to,id,context,async repository=>{
+      const test=await repository.findById(id); if (!test) throw new Error('INTERNATIONAL_TEST_NOT_FOUND');
+      assertInternationalTestTransition(test.status,to);
+      await repository.update(id,{status:to,...(hide?{isPubliclyVisible:false}:{})});
+    },{reason:context?.reason});
+  }
+  public async govern(id:string,action:string,input:Record<string,unknown>,context?:TestMutationContext):Promise<unknown> {
+    if (action === 'HISTORY') { if (!this.repository.govern) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_REQUIRED'); return this.repository.govern(id,action,input,context?.actorId??''); }
+    return this.mutate('INTERNATIONAL_TEST_'+action,id,context,async repository=>{
+      if (!repository.govern) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_REQUIRED');
+      const result=await repository.govern(id,action,input,context!.actorId);
+      if (action==='REVOKE') await repository.update(id,{isSourceVerified:false,isPubliclyVisible:false,status:InternationalTestStatus.NEEDS_REVIEW});
+      return result;
+    },{reason:input.reason,kind:input.kind,versionId:input.versionId,sourceHash:input.sourceHash,blockId:input.blockId,decision:input.decision,mappingReference:input.mappingReference});
+  }
+  public async manualNames(id:string,input:{localizedNameAr:string;localizedNameEn:string;reason:string},context?:TestMutationContext):Promise<InternationalTestDto> {
+    if (!input.localizedNameAr.trim() || !input.localizedNameEn.trim() || !input.reason.trim()) throw new Error('LOCALIZED_NAMES_AND_REASON_REQUIRED');
+    return this.mutate('INTERNATIONAL_TEST_MANUAL_NAMES_REVIEWED',id,context,async repository=>{
+      if ((await repository.listImportVersions?.(id))?.some(version=>version.sourceHash&&version.metadata?.publicationSnapshot!==true)) throw new Error('INTERNATIONAL_TEST_IMPORTED_NAME_REVIEW_REQUIRED');
+      return repository.update(id,{localizedNameAr:input.localizedNameAr.trim(),localizedNameEn:input.localizedNameEn.trim()});
+    },{reason:input.reason});
   }
 
-  public async archive(id: string, context?: AtomicMutationRequestContext): Promise<void> {
-    await this.get(id);
-    await this.mutate('INTERNATIONAL_TEST_ARCHIVED', id, context, async repository => {
-      await repository.update(id, { status: InternationalTestStatus.ARCHIVED, isPubliclyVisible: false });
-    });
-  }
-
-  public async listProviders(search?: string): Promise<InternationalTestProviderDto[]> {
+  public async listProviders(search?: string, page = 1): Promise<InternationalTestProviderDto[]> {
     if (!this.repository.listProviders) return [];
-    return this.repository.listProviders(search);
+    return this.repository.listProviders(search,page);
   }
 
-  public async upsertProvider(data: Omit<InternationalTestProviderDto, 'id'> & { id?: string }, context?: AtomicMutationRequestContext): Promise<InternationalTestProviderDto> {
+  public async upsertProvider(data: Omit<InternationalTestProviderDto, 'id'> & { id?: string }, context?: TestMutationContext): Promise<InternationalTestProviderDto> {
     if (!this.repository.upsertProvider) throw new Error('Repository method upsertProvider not implemented');
     const key = data.key?.trim();
     const displayName = data.displayName?.trim();
@@ -228,23 +239,18 @@ export class InternationalTestAdminUseCases {
     });
   }
 
-  public async verifySource(id: string, context?: AtomicMutationRequestContext): Promise<void> {
-    await this.get(id);
-    const evidence = await this.listEvidence(id);
-    const trusted = evidence.some(item =>
-      Boolean(item.sourceUrl?.trim()) &&
-      (item.sourceTrustLevel === InternationalTestSourceTrustLevel.AUTHORITATIVE ||
-       item.sourceTrustLevel === InternationalTestSourceTrustLevel.HIGH)
-    );
-    if (!trusted) throw new Error('TRUSTED_SOURCE_EVIDENCE_REQUIRED');
-    await this.mutate('INTERNATIONAL_TEST_SOURCE_VERIFIED', id, context, repository =>
-      repository.update(id, { isSourceVerified: true }).then(() => undefined));
+  public async verifySource(id:string,context?:TestMutationContext):Promise<void> {
+    await this.mutate('INTERNATIONAL_TEST_SOURCE_VERIFIED',id,context,async repository=>{
+      if (!repository.govern) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_REQUIRED');
+      await repository.govern(id,'VERIFY',{reason:context?.reason},context!.actorId);
+      await repository.update(id,{isSourceVerified:true});
+    },{reason:context?.reason});
   }
 
-  public async reviewSourceNames(id: string, input: ReviewInternationalTestSourceNamesDto, context?: AtomicMutationRequestContext): Promise<InternationalTestDto> {
+  public async reviewSourceNames(id: string, input: ReviewInternationalTestSourceNamesDto, context?: TestMutationContext): Promise<InternationalTestDto> {
     const test = await this.get(id);
     const versions = await this.listImportVersions(id);
-    const version = versions.find(v => v.id === input.versionId);
+    const version = this.repository.findImportVersion?await this.repository.findImportVersion(id,input.versionId):versions.find(v => v.id === input.versionId);
     if (!version || version.testId !== id) {
       throw new Error(`Import version ${input.versionId} does not belong to test ${id}`);
     }
@@ -287,7 +293,7 @@ export class InternationalTestAdminUseCases {
       context,
       async (repository) => {
         const current = await this.lockSourceReviewOwner(repository, id);
-        const currentVersions = await repository.listImportVersions?.(id);
+        const currentVersions = repository.findImportVersion?[await repository.findImportVersion(id,input.versionId)].filter((v):v is InternationalTestVersionDto=>v!==null):await repository.listImportVersions?.(id);
         if (!currentVersions?.some(v => v.id === input.versionId && v.testId === id && v.sourceHash === input.sourceHash)) {
           throw new Error('TEST_IMPORT_SOURCE_HASH_MISMATCH');
         }
@@ -314,7 +320,7 @@ export class InternationalTestAdminUseCases {
   public async correctDraftCanonicalIdentity(
     id: string,
     input: CorrectDraftInternationalTestCanonicalIdentityDto,
-    context?: AtomicMutationRequestContext
+    context?: TestMutationContext
   ): Promise<InternationalTestDto> {
     const test = await this.get(id);
     if ([InternationalTestStatus.PUBLISHED, InternationalTestStatus.ARCHIVED, InternationalTestStatus.REJECTED].includes(test.status) || test.currentPublishedVersionId != null) {
@@ -322,7 +328,7 @@ export class InternationalTestAdminUseCases {
     }
 
     const versions = await this.listImportVersions(id);
-    const version = versions.find(v => v.id === input.versionId);
+    const version = this.repository.findImportVersion?await this.repository.findImportVersion(id,input.versionId):versions.find(v => v.id === input.versionId);
     if (!version || version.testId !== id) {
       throw new Error(`Import version ${input.versionId} does not belong to test ${id}`);
     }
@@ -382,7 +388,7 @@ export class InternationalTestAdminUseCases {
         if (current.canonicalName !== test.canonicalName || current.providerName !== test.providerName) {
           throw new Error('CONFLICTING_CANONICAL_NAME_MODIFICATION');
         }
-        const currentVersions = await repository.listImportVersions?.(id);
+        const currentVersions = repository.findImportVersion?[await repository.findImportVersion(id,input.versionId)].filter((v):v is InternationalTestVersionDto=>v!==null):await repository.listImportVersions?.(id);
         if (!currentVersions?.some(v => v.id === input.versionId && v.testId === id && v.sourceHash === input.sourceHash)) {
           throw new Error('TEST_IMPORT_SOURCE_HASH_MISMATCH');
         }
@@ -416,7 +422,7 @@ export class InternationalTestAdminUseCases {
     return this.repository.listVariants(testId);
   }
 
-  public async upsertVariant(testId: string, data: UpsertInternationalTestVariantDto & { id?: string }, context?: AtomicMutationRequestContext): Promise<InternationalTestVariantDto> {
+  public async upsertVariant(testId: string, data: UpsertInternationalTestVariantDto & { id?: string }, context?: TestMutationContext): Promise<InternationalTestVariantDto> {
     await this.get(testId);
     if (!this.repository.upsertVariant) throw new Error('Repository method upsertVariant not implemented');
     return this.mutate('INTERNATIONAL_TEST_VARIANT_UPSERTED', testId, context, repository => repository.upsertVariant!(testId, data));
@@ -428,7 +434,7 @@ export class InternationalTestAdminUseCases {
     return this.repository.listSections(testId);
   }
 
-  public async upsertSection(testId: string, data: UpsertInternationalTestSectionDto & { id?: string }, context?: AtomicMutationRequestContext): Promise<InternationalTestSectionDto> {
+  public async upsertSection(testId: string, data: UpsertInternationalTestSectionDto & { id?: string }, context?: TestMutationContext): Promise<InternationalTestSectionDto> {
     await this.get(testId);
     const issues = validateInternationalTestSectionScore(data);
     if (issues.length) throw new Error(`Invalid section scores: ${issues.map(issue => issue.message).join('; ')}`);
@@ -436,15 +442,18 @@ export class InternationalTestAdminUseCases {
     return this.mutate('INTERNATIONAL_TEST_SECTION_UPSERTED', testId, context, repository => repository.upsertSection!(testId, data));
   }
 
-  public async upsertScoreScale(testId: string, data: UpsertInternationalTestScoreScaleDto, context?: AtomicMutationRequestContext): Promise<InternationalTestScoreScaleDto> {
+  public async upsertScoreScale(testId: string, data: UpsertInternationalTestScoreScaleDto, context?: TestMutationContext): Promise<InternationalTestScoreScaleDto> {
     await this.get(testId);
+    const owner=await this.get(testId);
+    if((data.cefrEquivalency||data.crossTestEquivalency)&&!['ENGLISH_LANGUAGE','NON_ENGLISH_LANGUAGE','LANGUAGE_PROFICIENCY'].includes(owner.testCategory)) throw new Error('INTERNATIONAL_TEST_EQUIVALENCY_FAMILY_INVALID');
+    if(data.scoreReportingUrl){const provider=owner.providerId?await this.repository.findProviderById?.(owner.providerId):null;assertOfficialTestUrl(data.scoreReportingUrl,provider?.officialWebsite);}
     const issues = validateInternationalTestScorePolicy(data);
     if (issues.length) throw new Error(`Invalid score scale: ${issues.map(issue => issue.message).join('; ')}`);
     if (!this.repository.upsertScoreScale) throw new Error('Repository method upsertScoreScale not implemented');
     return this.mutate('INTERNATIONAL_TEST_SCORE_SCALE_UPSERTED', testId, context, repository => repository.upsertScoreScale!(testId, data));
   }
 
-  public async upsertFeeMetadata(testId: string, data: Omit<UpsertInternationalTestFeeMetadataDto, 'currencyReferenceId'> & { currencyReferenceId?: string; id?: string }, context?: AtomicMutationRequestContext): Promise<InternationalTestFeeMetadataDto> {
+  public async upsertFeeMetadata(testId: string, data: Omit<UpsertInternationalTestFeeMetadataDto, 'currencyReferenceId'> & { currencyReferenceId?: string; id?: string }, context?: TestMutationContext): Promise<InternationalTestFeeMetadataDto> {
     await this.get(testId);
     if (data.amount < 0) {
       throw new Error('Fee amount cannot be negative');
@@ -474,11 +483,14 @@ export class InternationalTestAdminUseCases {
     return this.mutate('INTERNATIONAL_TEST_FEE_UPSERTED', testId, context, repository => repository.upsertFeeMetadata!(testId, canonicalData));
   }
 
-  public async upsertOfficialLink(testId: string, data: UpsertInternationalTestOfficialLinkDto & { id?: string }, context?: AtomicMutationRequestContext): Promise<InternationalTestOfficialLinkDto> {
+  public async upsertOfficialLink(testId: string, data: UpsertInternationalTestOfficialLinkDto & { id?: string }, context?: TestMutationContext): Promise<InternationalTestOfficialLinkDto> {
     await this.get(testId);
     if (!data.url || data.url.trim() === '') {
       throw new Error('URL is required for official link');
     }
+    const owner = await this.get(testId);
+    const provider = owner.providerId ? await this.repository.findProviderById?.(owner.providerId) : null;
+    assertOfficialTestUrl(data.url,provider?.officialWebsite);
     if (!this.repository.upsertOfficialLink) throw new Error('Repository method upsertOfficialLink not implemented');
     return this.mutate('INTERNATIONAL_TEST_OFFICIAL_LINK_UPSERTED', testId, context, repository => repository.upsertOfficialLink!(testId, data));
   }
@@ -489,16 +501,20 @@ export class InternationalTestAdminUseCases {
     return this.repository.listAvailability(testId);
   }
 
-  public async upsertAvailability(testId: string, data: UpsertInternationalTestAvailabilityDto, context?: AtomicMutationRequestContext): Promise<InternationalTestAvailabilityDto> {
+  public async upsertAvailability(testId: string, data: UpsertInternationalTestAvailabilityDto, context?: TestMutationContext): Promise<InternationalTestAvailabilityDto> {
     await this.get(testId);
     if (!this.referenceResolver) throw new Error('Canonical Reference resolver is not configured');
+    if (new Set(data.availableCountryIds).size !== data.availableCountryIds.length || new Set(data.availableCityIds??[]).size !== (data.availableCityIds??[]).length) throw new Error('INTERNATIONAL_TEST_DUPLICATE_AVAILABILITY');
+    const countryCodes = new Set<string>();
     for (const countryId of data.availableCountryIds) {
       const country = await this.referenceResolver.resolveCountry({ id: countryId });
       if (!country?.active) throw new Error(`Active canonical Country not found: ${countryId}`);
+      if (country.standardCode) countryCodes.add(country.standardCode);
     }
     for (const cityId of data.availableCityIds || []) {
       const city = await this.referenceResolver.resolveCity({ id: cityId });
       if (!city?.active) throw new Error(`Active canonical City not found: ${cityId}`);
+      if (!city.countryIso2Code || !countryCodes.has(city.countryIso2Code)) throw new Error('INTERNATIONAL_TEST_AVAILABILITY_COUNTRY_MISMATCH');
     }
     if (!this.repository.upsertAvailability) throw new Error('Repository method upsertAvailability not implemented');
     return this.mutate('INTERNATIONAL_TEST_AVAILABILITY_UPSERTED', testId, context, repository => repository.upsertAvailability!(testId, data));
@@ -510,7 +526,7 @@ export class InternationalTestAdminUseCases {
     return this.repository.listPreparationMaterials(testId);
   }
 
-  public async upsertPreparationMaterial(testId: string, data: UpsertInternationalTestPreparationMaterialDto & { id?: string }, context?: AtomicMutationRequestContext): Promise<InternationalTestPreparationMaterialDto> {
+  public async upsertPreparationMaterial(testId: string, data: UpsertInternationalTestPreparationMaterialDto & { id?: string }, context?: TestMutationContext): Promise<InternationalTestPreparationMaterialDto> {
     await this.get(testId);
     if (data.url && (data.url.startsWith('file://') || data.url.startsWith('/local/') || data.url.startsWith('C:\\'))) {
       throw new Error('Raw local file paths are not allowed as persisted material URLs');
@@ -526,16 +542,16 @@ export class InternationalTestAdminUseCases {
     return this.repository.listEvidence(testId);
   }
 
-  public async addEvidence(testId: string, data: InternationalTestEvidenceDto, context?: AtomicMutationRequestContext): Promise<InternationalTestEvidenceDto> {
+  public async addEvidence(testId: string, data: InternationalTestEvidenceDto, context?: TestMutationContext): Promise<InternationalTestEvidenceDto> {
     await this.get(testId);
     if (!this.repository.addEvidence) throw new Error('Repository method addEvidence not implemented');
-    return this.mutate('INTERNATIONAL_TEST_EVIDENCE_ADDED', testId, context, repository => repository.addEvidence!(testId, data));
+    return this.mutate('INTERNATIONAL_TEST_EVIDENCE_ADDED', testId, context, repository => repository.addEvidence!(testId, { ...data, reviewActorId: context?.actorId } as InternationalTestEvidenceDto));
   }
 
   public async createImportDraftVersion(
     testId: string,
     data: InternationalTestImportDraftRequestDto,
-    context?: AtomicMutationRequestContext,
+    context?: TestMutationContext,
   ): Promise<InternationalTestImportDraftResultDto> {
     await this.get(testId);
     if (!data.sourceFileName || data.sourceFileName.trim() === '') {
@@ -550,10 +566,10 @@ export class InternationalTestAdminUseCases {
     }));
   }
 
-  public async listImportVersions(testId: string): Promise<InternationalTestVersionDto[]> {
+  public async listImportVersions(testId: string, page = 1): Promise<InternationalTestVersionDto[]> {
     await this.get(testId);
     if (!this.repository.listImportVersions) return [];
-    return this.repository.listImportVersions(testId);
+    return this.repository.listImportVersions(testId,page);
   }
 
   private async canonicalizeProvider(data: Partial<UpsertInternationalTestDto>): Promise<Partial<UpsertInternationalTestDto>> {
@@ -572,12 +588,33 @@ export class InternationalTestAdminUseCases {
     return current;
   }
 
-  private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined, mutation: (repository: IInternationalTestRepository) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {
-    if (!this.atomicMutations) return mutation(this.repository);
+  private mutate<T>(action: string, id: string, context: TestMutationContext | undefined, mutation: (repository: IInternationalTestRepository) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {
+    if(!context?.actorId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
+    if (!this.atomicMutations) throw new Error('INTERNATIONAL_TEST_ATOMIC_COORDINATOR_REQUIRED');
     const repository = this.repository as Partial<ITransactionalInternationalTestRepository>;
     if (!repository.withTransaction) throw new Error('INTERNATIONAL_TEST_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    return this.atomicMutations.execute({ domain: 'INTERNATIONAL_TESTS', aggregateType: 'INTERNATIONAL_TEST', aggregateId: id, action, context, auditMetadata },
-      transaction => mutation(repository.withTransaction!(transaction)));
+    const eventPayload:Record<string,unknown>={entityType:'INTERNATIONAL_TEST',entityId:id,operation:action};
+    return this.atomicMutations.execute({ outbox:{payload:eventPayload}, domain: 'INTERNATIONAL_TESTS', aggregateType: 'INTERNATIONAL_TEST', aggregateId: id, action, context, auditMetadata:{reason:context.reason,...auditMetadata} },
+      async transaction => {
+        const scoped = repository.withTransaction!(transaction);
+        const ownerMutation = !['INTERNATIONAL_TEST_CREATED','INTERNATIONAL_TEST_PROVIDER_UPSERTED'].includes(action);
+        if (!ownerMutation) return mutation(scoped);
+        if (!context?.actorId || !scoped.getRevision || !scoped.advanceRevision || !scoped.acquireSourceReviewLock) throw new Error('INTERNATIONAL_TEST_GOVERNED_ACTOR_REQUIRED');
+        if (!Number.isSafeInteger(context.expectedRevision) || context.expectedRevision! < 0) throw new Error('INTERNATIONAL_TEST_EXPECTED_REVISION_REQUIRED');
+        await scoped.acquireSourceReviewLock(id);
+        const before = await scoped.findById(id); if (!before) throw new Error('INTERNATIONAL_TEST_NOT_FOUND');
+        const revision = await scoped.getRevision(id);
+        if (revision !== context.expectedRevision) throw new Error('INTERNATIONAL_TEST_REVISION_CONFLICT');
+        if (before.status === InternationalTestStatus.ARCHIVED) throw new Error('INTERNATIONAL_TEST_ARCHIVED_IMMUTABLE');
+        if (before.status === InternationalTestStatus.REJECTED && action !== 'INTERNATIONAL_TEST_NEEDS_REVIEW' && action !== 'INTERNATIONAL_TEST_ARCHIVED') throw new Error('INTERNATIONAL_TEST_REJECTED_IMMUTABLE');
+        const result = await mutation(scoped);
+        if(action==='INTERNATIONAL_TEST_PUBLISHED'){const published=await scoped.findById(id);eventPayload.versionId=published?.currentPublishedVersionId;}
+        const preserveApproval=['INTERNATIONAL_TEST_APPROVED','INTERNATIONAL_TEST_PUBLISHED'].includes(action);
+        if(!preserveApproval && !['INTERNATIONAL_TEST_ARCHIVED','INTERNATIONAL_TEST_REJECTED','INTERNATIONAL_TEST_READY_TO_PUBLISH'].includes(action) && ['PUBLISHED','READY_TO_PUBLISH'].includes(before.status)) await scoped.update(id,{status:InternationalTestStatus.NEEDS_REVIEW});
+        await scoped.advanceRevision(id,revision,preserveApproval);
+        if (result && typeof result === 'object' && 'id' in result && (result as {id?:string}).id === id) (result as {revision?:number}).revision = revision+1;
+        return result;
+      });
   }
 }
 
@@ -588,11 +625,12 @@ export class InternationalTestPublicUseCases {
     const safeFilters = filters || {};
     const requestedPage = typeof safeFilters.page === 'number' ? safeFilters.page : 1;
     const requestedPageSize = typeof safeFilters.pageSize === 'number' ? safeFilters.pageSize : 20;
-    return this.repository.listPublished({
+    const result=await this.repository.listPublished({
       ...safeFilters,
       page: Math.max(1, Math.floor(requestedPage)),
       pageSize: Math.min(50, Math.max(1, Math.floor(requestedPageSize)))
     });
+    return {...result,data:result.data.map(publicInternationalTest)};
   }
 
   public async getPublishedBySlug(slug: string): Promise<InternationalTestDto> {
@@ -600,6 +638,6 @@ export class InternationalTestPublicUseCases {
     if (!test) {
       throw new Error('International test not found');
     }
-    return test;
+    return publicInternationalTest(test);
   }
 }

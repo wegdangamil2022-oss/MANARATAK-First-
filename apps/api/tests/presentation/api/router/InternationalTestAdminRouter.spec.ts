@@ -1,3 +1,4 @@
+vi.mock('../../../../src/presentation/security/SecurityMiddlewareFactory.js',()=>({SecurityMiddlewareFactory:{createAdminPermissionGuard:()=> (_req:any,_res:any,next:any)=>next()}}));
 import { describe, it, expect, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
@@ -37,7 +38,7 @@ describe('InternationalTestAdminRouter', () => {
   const createApp = (useCases: any) => {
     const app = express();
     app.use(express.json());
-    app.use((req, _res, next) => { req.authUserId = 'admin-X'; next(); });
+    app.use((req, _res, next) => { req.authUserId = 'admin-X'; req.headers['if-match']='0'; next(); });
     app.use('/admin/international-tests', InternationalTestAdminRouter.create({
       internationalTestAdminUseCases: useCases as any,
       crossDomainGraphReadService: { getInternationalTestGraphById: vi.fn().mockResolvedValue({ relationships: {} }) } as any,
@@ -260,10 +261,10 @@ describe('InternationalTestAdminRouter', () => {
     const res = await request(app).get('/admin/international-tests/missing-id');
 
     expect(res.status).toBe(404);
-    expect(res.body).toEqual({ error: 'International test not found' });
+    expect(res.body.code).toBe('INTERNATIONAL_TEST_NOT_FOUND');
   });
 
-  it('returns 400 on validation error', async () => {
+  it('returns sanitized 422 for invalid score policy', async () => {
     const useCases = createMockUseCases();
     useCases.upsertScoreScale.mockRejectedValue(new Error('Invalid score scale: overallMinimum cannot be greater than overallMaximum'));
     const app = createApp(useCases);
@@ -272,8 +273,9 @@ describe('InternationalTestAdminRouter', () => {
       .post('/admin/international-tests/test-1/score-scale')
       .send({ overallMinimum: 10, overallMaximum: 2 });
 
-    expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid score scale: overallMinimum cannot be greater than overallMaximum' });
+    
+    expect(res.status).toBe(422);
+    expect(res.body.code).toBe('INTERNATIONAL_TEST_SCORE_POLICY_INVALID');
   });
 
   it('POST /admin/international-tests/:id/review-source-names succeeds and calls use case', async () => {

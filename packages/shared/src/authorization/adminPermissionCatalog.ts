@@ -106,6 +106,9 @@ export const ADMIN_PERMISSION_CATALOG = [
     risk: 'STANDARD',
     delegable: true,
   },
+  {key:'admin:international-tests:review',domain:'international-tests',action:'review',labelAr:'مراجعة الاختبارات الدولية',labelEn:'Review international tests',descriptionAr:'صلاحية مستقلة؛ تتطلب إدارة الاختبارات للوصول.',descriptionEn:'Separate operation permission; test management is required for access.',risk:'STANDARD',delegable:true},
+  {key:'admin:international-tests:verify',domain:'international-tests',action:'verify',labelAr:'التحقق من مصادر الاختبارات',labelEn:'Verify test sources',descriptionAr:'صلاحية مستقلة؛ تتطلب إدارة الاختبارات للوصول.',descriptionEn:'Separate operation permission; test management is required for access.',risk:'STANDARD',delegable:true},
+  {key:'admin:international-tests:publish',domain:'international-tests',action:'publish',labelAr:'نشر الاختبارات الدولية',labelEn:'Publish international tests',descriptionAr:'صلاحية مستقلة؛ تتطلب إدارة الاختبارات للوصول.',descriptionEn:'Separate operation permission; test management is required for access.',risk:'STANDARD',delegable:true},
   {
     key: 'admin:international-tests:manage',
     domain: 'international-tests',

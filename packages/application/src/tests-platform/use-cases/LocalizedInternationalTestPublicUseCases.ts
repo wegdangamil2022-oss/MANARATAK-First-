@@ -4,6 +4,7 @@ import {
   InternationalTestFilters,
   PaginatedInternationalTestResult,
 } from '@manaratak/domain';
+import { publicInternationalTest } from '@manaratak/domain';
 import { DEFAULT_LOCALE, type SupportedLocale } from '@manaratak/shared';
 import { ApplicationLocaleProjectionService } from '../../localization/ApplicationLocaleProjectionService';
 
@@ -27,7 +28,7 @@ export class LocalizedInternationalTestPublicUseCases {
     });
     return {
       ...paginated,
-      data: paginated.data.map((test) => this.projection.projectInternationalTest(test, locale)),
+      data: paginated.data.map((test) => this.projection.projectInternationalTest(publicInternationalTest(test), locale)),
     };
   }
 
@@ -39,6 +40,6 @@ export class LocalizedInternationalTestPublicUseCases {
     if (!test) {
       throw new Error('International test not found');
     }
-    return this.projection.projectInternationalTest(test, locale);
+    return this.projection.projectInternationalTest(publicInternationalTest(test), locale);
   }
 }

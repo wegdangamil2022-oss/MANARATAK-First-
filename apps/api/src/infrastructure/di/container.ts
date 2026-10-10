@@ -1,3 +1,4 @@
+import { PrismaInternationalTestConsumerReadGateway } from '@manaratak/infrastructure';
 import { ImportGovernanceUseCases } from '@manaratak/application';
 import { sweepOrphanImportSpools, PrismaImportGovernanceGateway, PrismaImportScreeningReceiptStore, PrismaImportSourceObservationGateway, PrismaSourceAcquisitionLimiter, SignedSourceAccessAuthority } from '@manaratak/infrastructure';
 import { ImportArtifactUseCase, ImportSourceControlUseCases, ImportParserRegistry, CsvImportStreamParser, NdjsonImportStreamParser, JsonImportStreamParser } from '@manaratak/application';
@@ -833,6 +834,7 @@ export function registerDependencies(
     careerReferenceGateway: asFunction(({ referenceResolver, referenceDataRepository }) => new CanonicalCareerReferenceGateway(referenceResolver, referenceDataRepository)).scoped(),
     careerAdminUseCases: asFunction(({ careerRepository, careerReferenceGateway, assetReferencePolicy }) => new CareerAdminUseCases(careerRepository, careerReferenceGateway, assetReferencePolicy)).scoped(),
     careerPublicUseCases: asFunction(({ careerRepository, careerReferenceGateway }) => new CareerPublicUseCases(careerRepository, careerReferenceGateway)).scoped(),
+    internationalTestConsumerReadGateway: asFunction(({ prisma }) => new PrismaInternationalTestConsumerReadGateway(prisma)).scoped(),
     internationalTestAdminUseCases: asFunction(({ internationalTestRepository, referenceResolver, degreeLevelRepository, academicTaxonomyRepository, atomicDomainMutationCoordinator, assetReferencePolicy }) =>
       new InternationalTestAdminUseCases(
         internationalTestRepository,

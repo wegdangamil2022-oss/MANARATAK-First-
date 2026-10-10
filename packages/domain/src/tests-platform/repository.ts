@@ -30,6 +30,9 @@ import { InternationalTestStatus } from './enums';
 import { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 
 export interface IInternationalTestRepository {
+  getRevision?(testId: string): Promise<number>;
+  advanceRevision?(testId: string, expected: number, preserveApproval?: boolean): Promise<void>;
+  govern?(testId: string, action: string, input: Record<string, unknown>, actorId: string): Promise<unknown>;
   acquireSourceReviewLock?(testId: string): Promise<void>;
   acquireGraphMutationLock?(testId: string, kind: 'COUNTRY' | 'LANGUAGE' | 'TAXONOMY' | 'DEGREE', referenceId: string): Promise<void>;
   // Legacy / current application compatibility methods
@@ -73,9 +76,10 @@ export interface IInternationalTestRepository {
   addEvidence?(testId: string, data: InternationalTestEvidenceDto): Promise<InternationalTestEvidenceDto>;
 
   createImportDraftVersion?(testId: string, data: InternationalTestImportDraftRequestDto): Promise<InternationalTestImportDraftResultDto>;
-  listImportVersions?(testId: string): Promise<InternationalTestVersionDto[]>;
+  findImportVersion?(testId:string,versionId:string):Promise<InternationalTestVersionDto|null>;
+  listImportVersions?(testId: string, page?: number): Promise<InternationalTestVersionDto[]>;
   findProviderById?(providerId: string): Promise<InternationalTestProviderDto | null>;
-  listProviders?(search?: string): Promise<InternationalTestProviderDto[]>;
+  listProviders?(search?: string, page?: number): Promise<InternationalTestProviderDto[]>;
   upsertProvider?(data: Omit<InternationalTestProviderDto, 'id'> & { id?: string }): Promise<InternationalTestProviderDto>;
   upsertCountryRelationship?(testId: string, data: UpsertInternationalTestReferenceRelationshipDto): Promise<void>;
   upsertLanguageRelationship?(testId: string, data: UpsertInternationalTestReferenceRelationshipDto): Promise<void>;

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InternationalTestAdminUseCases } from '../../src/tests-platform/use-cases/InternationalTestUseCases';
 import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { 
+  InternationalTestPublicationReadinessPolicy, PublicationReadinessEngine,
   InternationalTestCategory, 
   InternationalTestCompletenessStatus, 
   InternationalTestDeliveryMode,
@@ -38,13 +39,16 @@ describe('InternationalTestAdminUseCases', () => {
       upsertPreparationMaterial: vi.fn(),
       listEvidence: vi.fn(),
       addEvidence: vi.fn(),
-      listImportVersions: vi.fn()
+      listImportVersions: vi.fn(),
+      acquireSourceReviewLock:vi.fn(),getRevision:vi.fn(async()=>0),advanceRevision:vi.fn(),
+      govern:vi.fn(async(id,action)=>{if(['APPROVE','PUBLISH'].includes(action))new PublicationReadinessEngine().assertReady(id,{...await mockRepository.findById(id),status:InternationalTestStatus.READY_TO_PUBLISH},new InternationalTestPublicationReadinessPolicy());return {versionId:'release-1'};}),
+      withTransaction:vi.fn(()=>mockRepository),findProviderById:vi.fn(async()=>({id:'provider',officialWebsite:'https://example.com'}))
     };
 
     const referenceResolver: IReferenceResolver = {
-      resolveCountry: vi.fn(async ({ id }: { id?: string }) => id ? ({ id, type: 'COUNTRY', active: true }) : null),
+      resolveCountry: vi.fn(async ({ id }: { id?: string }) => id ? ({ id, type: 'COUNTRY', standardCode:id, active: true }) : null),
       resolveRegion: vi.fn(),
-      resolveCity: vi.fn(async ({ id }: { id?: string }) => id ? ({ id, type: 'CITY', active: true }) : null),
+      resolveCity: vi.fn(async ({ id }: { id?: string }) => id ? ({ id, type: 'CITY', countryIso2Code:id==='Riyadh'?'SA':'AE', active: true }) : null),
       resolveLanguage: vi.fn(async ({ id }: { id?: string }) => id ? ({ id, type: 'LANGUAGE', active: true }) : null),
       resolveCurrency: vi.fn(async ({ id, standardCode }: { id?: string; standardCode?: string }) => ({
         id: id ?? `currency-${standardCode}`,
@@ -59,7 +63,7 @@ describe('InternationalTestAdminUseCases', () => {
       undefined,
       undefined,
       undefined,
-      referenceResolver
+      referenceResolver, undefined, { execute:async (_definition:any,mutation:any)=>mutation({boundaryId:'fixture'}) } as AtomicDomainMutationCoordinator
     );
   });
 
@@ -70,7 +74,7 @@ describe('InternationalTestAdminUseCases', () => {
         canonicalName: 'IELTS Academic'
       };
 
-      await expect(useCases.createTest(invalidData)).rejects.toThrow(/Validation failed/);
+      await expect(useCases.createTest(invalidData, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow(/Validation failed/);
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
 
@@ -83,16 +87,16 @@ describe('InternationalTestAdminUseCases', () => {
 
       mockRepository.create.mockResolvedValue({ id: 'test-1', ...validData });
 
-      const result = await useCases.createTest(validData);
+      const result = await useCases.createTest(validData, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(result.id).toBe('test-1');
-      expect(mockRepository.create).toHaveBeenCalledWith(validData);
+      expect(mockRepository.create).toHaveBeenCalledWith(expect.objectContaining(validData));
     });
   });
 
   describe('updateTest', () => {
     it('should block update if merged data produces validation ERROR', async () => {
-      mockRepository.findById.mockResolvedValue({
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW, 
         id: 'test-1',
         canonicalName: 'IELTS Academic',
         providerName: 'IDP',
@@ -100,7 +104,7 @@ describe('InternationalTestAdminUseCases', () => {
       });
 
       // Updating providerName to empty string -> ERROR
-      await expect(useCases.updateTest('test-1', { providerName: '' })).rejects.toThrow(/Validation failed/);
+      await expect(useCases.updateTest('test-1', { providerName: '' }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow(/Validation failed/);
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
   });
@@ -112,26 +116,26 @@ describe('InternationalTestAdminUseCases', () => {
         // Missing providerName and testCategory
       };
 
-      await expect(useCases.upsertTest(invalidData)).rejects.toThrow(/Validation failed/);
+      await expect(useCases.upsertTest(invalidData, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow(/Validation failed/);
       expect(mockRepository.upsertTest).not.toHaveBeenCalled();
     });
   });
 
   describe('markReadyToPublish', () => {
     it('should block markReadyToPublish if test is incomplete', async () => {
-      mockRepository.findById.mockResolvedValue({
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW, 
         id: 'test-1',
         canonicalName: 'IELTS Academic',
         // Missing providerName and testCategory
         completenessStatus: InternationalTestCompletenessStatus.INCOMPLETE
       });
 
-      await expect(useCases.markReadyToPublish('test-1')).rejects.toThrow(/INTERNATIONAL_TEST_PROVIDERNAME_INVALID/);
+      await expect(useCases.markReadyToPublish('test-1', { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow(/INTERNATIONAL_TEST_PROVIDERNAME_INVALID/);
       expect(mockRepository.updateStatus).not.toHaveBeenCalled();
     });
 
     it('should update status to READY_TO_PUBLISH if test is complete and reviewable', async () => {
-      mockRepository.findById.mockResolvedValue({
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW, 
         id: 'test-1',
         canonicalName: 'IELTS Academic',
         localizedNameAr: 'آيلتس الأكاديمي',
@@ -145,11 +149,10 @@ describe('InternationalTestAdminUseCases', () => {
         completenessStatus: InternationalTestCompletenessStatus.COMPLETE
       });
 
-      await useCases.markReadyToPublish('test-1');
+      await useCases.markReadyToPublish('test-1', { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(mockRepository.update).toHaveBeenCalledWith('test-1', {
         status: InternationalTestStatus.READY_TO_PUBLISH,
-        isPubliclyVisible: false,
       });
     });
   });
@@ -164,7 +167,7 @@ describe('InternationalTestAdminUseCases', () => {
         status: InternationalTestStatus.IMPORTED
       });
 
-      await expect(useCases.publish('test-1')).rejects.toThrow(/INTERNATIONAL_TEST_INVALID_PUBLICATION_STATUS/);
+      await expect(useCases.publish('test-1', { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow(/INTERNATIONAL_TEST_INVALID_TRANSITION/);
       expect(mockRepository.updateStatus).not.toHaveBeenCalled();
     });
 
@@ -176,7 +179,7 @@ describe('InternationalTestAdminUseCases', () => {
         status: InternationalTestStatus.READY_TO_PUBLISH
       });
 
-      await expect(useCases.publish('test-1')).rejects.toThrow(/INTERNATIONAL_TEST_PROVIDERNAME_INVALID/);
+      await expect(useCases.publish('test-1', { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow(/INTERNATIONAL_TEST_PROVIDERNAME_INVALID/);
       expect(mockRepository.updateStatus).not.toHaveBeenCalled();
     });
 
@@ -195,11 +198,12 @@ describe('InternationalTestAdminUseCases', () => {
         status: InternationalTestStatus.READY_TO_PUBLISH
       });
 
-      await useCases.publish('test-1');
+      await useCases.publish('test-1', { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(mockRepository.update).toHaveBeenCalledWith('test-1', {
         status: InternationalTestStatus.PUBLISHED,
         isPubliclyVisible: true,
+        currentPublishedVersionId: 'release-1',
       });
     });
   });
@@ -212,7 +216,7 @@ describe('InternationalTestAdminUseCases', () => {
         status: InternationalTestStatus.PUBLISHED
       });
 
-      await useCases.archive('test-1');
+      await useCases.archive('test-1', { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(mockRepository.update).toHaveBeenCalledWith('test-1', {
         status: InternationalTestStatus.ARCHIVED,
@@ -227,7 +231,7 @@ describe('InternationalTestAdminUseCases', () => {
       canonicalName: 'IELTS Academic',
       providerName: 'IDP',
       testCategory: InternationalTestCategory.LANGUAGE_PROFICIENCY,
-      status: InternationalTestStatus.DRAFT
+      status: InternationalTestStatus.READY_TO_REVIEW
     };
 
     it('listVariants delegates to repository after verifying parent', async () => {
@@ -249,7 +253,7 @@ describe('InternationalTestAdminUseCases', () => {
           variantName: 'Academic Paper-based',
           deliveryMode: InternationalTestDeliveryMode.PAPER,
           isActive: true
-        })
+        }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })
       ).rejects.toThrow(/not found/);
 
       expect(mockRepository.upsertVariant).not.toHaveBeenCalled();
@@ -263,7 +267,7 @@ describe('InternationalTestAdminUseCases', () => {
           sectionName: 'Listening',
           sectionType: 'LISTENING',
           order: 1
-        })
+        }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })
       ).rejects.toThrow(/not found/);
 
       expect(mockRepository.upsertSection).not.toHaveBeenCalled();
@@ -276,7 +280,7 @@ describe('InternationalTestAdminUseCases', () => {
         useCases.upsertScoreScale('test-1', {
           overallMinimum: 100,
           overallMaximum: 10
-        })
+        }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })
       ).rejects.toThrow(/overallMinimum cannot be greater than overallMaximum/);
 
       expect(mockRepository.upsertScoreScale).not.toHaveBeenCalled();
@@ -291,7 +295,7 @@ describe('InternationalTestAdminUseCases', () => {
           amount: -50,
           currencyCode: 'USD',
           hasRegionalVariation: false
-        })
+        }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })
       ).rejects.toThrow(/Fee amount cannot be negative/);
 
       expect(mockRepository.upsertFeeMetadata).not.toHaveBeenCalled();
@@ -302,7 +306,7 @@ describe('InternationalTestAdminUseCases', () => {
       mockRepository.upsertFeeMetadata.mockResolvedValue({});
       await useCases.upsertFeeMetadata('test-1', {
         feeType: 'REGISTRATION', amount: 200, currencyCode: 'USD', hasRegionalVariation: false,
-      });
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
       expect(mockRepository.upsertFeeMetadata).toHaveBeenCalledWith('test-1', expect.objectContaining({
         currencyCode: 'USD', currencyReferenceId: 'currency-USD',
       }));
@@ -313,7 +317,7 @@ describe('InternationalTestAdminUseCases', () => {
       mockRepository.findById.mockResolvedValue(parentTest);
       await expect(useCases.upsertFeeMetadata('test-1', {
         feeType: 'REGISTRATION', amount: 200, currencyCode: 'USD', currencyReferenceId: 'currency-EUR', hasRegionalVariation: false,
-      })).rejects.toThrow('CURRENCY_REFERENCE_ID_CODE_MISMATCH');
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow('CURRENCY_REFERENCE_ID_CODE_MISMATCH');
       expect(mockRepository.upsertFeeMetadata).not.toHaveBeenCalled();
     });
 
@@ -327,7 +331,7 @@ describe('InternationalTestAdminUseCases', () => {
           currencyCode: 'USD',
           hasRegionalVariation: false,
           paymentGatewayId: 'stripe_123'
-        } as any)
+        } as any, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })
       ).rejects.toThrow(/Payment execution fields are not supported/);
 
       expect(mockRepository.upsertFeeMetadata).not.toHaveBeenCalled();
@@ -340,7 +344,7 @@ describe('InternationalTestAdminUseCases', () => {
         useCases.upsertOfficialLink('test-1', {
           linkType: 'REGISTRATION',
           url: '   '
-        })
+        }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })
       ).rejects.toThrow(/URL is required/);
 
       expect(mockRepository.upsertOfficialLink).not.toHaveBeenCalled();
@@ -358,7 +362,7 @@ describe('InternationalTestAdminUseCases', () => {
       const result = await useCases.upsertAvailability('test-1', {
         availableCountryIds: ['SA', 'AE'],
         availableCityIds: ['Riyadh', 'Dubai']
-      });
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(result).toEqual(availabilityDto);
       expect(mockRepository.updateStatus).not.toHaveBeenCalled();
@@ -372,7 +376,7 @@ describe('InternationalTestAdminUseCases', () => {
           materialType: 'GUIDE',
           title: 'Official Prep Guide',
           url: 'file:///C:/Users/Admin/SecretGuide.pdf'
-        })
+        }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })
       ).rejects.toThrow(/Raw local file paths are not allowed/);
 
       expect(mockRepository.upsertPreparationMaterial).not.toHaveBeenCalled();
@@ -386,7 +390,7 @@ describe('InternationalTestAdminUseCases', () => {
       };
       mockRepository.addEvidence.mockResolvedValue(evidence);
 
-      const result = await useCases.addEvidence('test-1', evidence);
+      const result = await useCases.addEvidence('test-1', evidence, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(result).toEqual(evidence);
       expect(mockRepository.updateStatus).not.toHaveBeenCalled();
@@ -423,7 +427,7 @@ describe('InternationalTestAdminUseCases', () => {
     };
 
     it('successfully updates localized names when version and source hash match', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([validVersion]);
       mockRepository.update.mockResolvedValue({
         ...parentTest,
@@ -438,7 +442,7 @@ describe('InternationalTestAdminUseCases', () => {
         localizedNameEn: 'IELTS',
         reviewReason: 'Verified from official candidate guide',
         evidenceReference: 'workspace/sources/ielts.md'
-      });
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(mockRepository.update).toHaveBeenCalledWith('test-1', {
         localizedNameAr: 'اختبار الآيلتس',
@@ -449,7 +453,7 @@ describe('InternationalTestAdminUseCases', () => {
     });
 
     it('rejects version belonging to another test or not found', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([
         { ...validVersion, id: 'ver-other' }
       ]);
@@ -461,13 +465,13 @@ describe('InternationalTestAdminUseCases', () => {
         localizedNameEn: 'IELTS',
         reviewReason: 'Official update',
         evidenceReference: 'sources/ielts.md'
-      })).rejects.toThrow(/does not belong to test/);
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow(/does not belong to test/);
 
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('rejects when source hash does not match version', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([validVersion]);
 
       await expect(useCases.reviewSourceNames('test-1', {
@@ -477,23 +481,23 @@ describe('InternationalTestAdminUseCases', () => {
         localizedNameEn: 'IELTS',
         reviewReason: 'Official update',
         evidenceReference: 'sources/ielts.md'
-      })).rejects.toThrow('TEST_IMPORT_SOURCE_HASH_MISMATCH');
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow('TEST_IMPORT_SOURCE_HASH_MISMATCH');
 
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('rejects a version returned with a foreign owner', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([{ ...validVersion, testId: 'other-test' }]);
       await expect(useCases.reviewSourceNames('test-1', {
         versionId: 'ver-1', sourceHash: 'a'.repeat(64), localizedNameAr: 'الآيلتس', localizedNameEn: 'IELTS',
         reviewReason: 'Reviewed', evidenceReference: 'sources/ielts.md',
-      })).rejects.toThrow(/does not belong/);
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow(/does not belong/);
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('rejects a name changed between the initial read and the transaction lock', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([validVersion]);
       const transactionRepository = {
         ...mockRepository,
@@ -508,13 +512,13 @@ describe('InternationalTestAdminUseCases', () => {
       await expect(atomicUseCases.reviewSourceNames('test-1', {
         versionId: 'ver-1', sourceHash: 'a'.repeat(64), localizedNameAr: 'الآيلتس', localizedNameEn: 'IELTS',
         reviewReason: 'Reviewed', evidenceReference: 'sources/ielts.md',
-      }, { actorId: 'reviewer' })).rejects.toThrow('CONFLICTING_LOCALIZED_NAME_MODIFICATION');
+      }, { expectedRevision:0,  actorId: 'reviewer' })).rejects.toThrow('CONFLICTING_LOCALIZED_NAME_MODIFICATION');
       expect(transactionRepository.acquireSourceReviewLock).toHaveBeenCalledWith('test-1');
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('rejects conflicting modification when expectedCurrent does not match', async () => {
-      mockRepository.findById.mockResolvedValue({
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW, 
         ...parentTest,
         localizedNameAr: 'اسم قديم'
       });
@@ -528,13 +532,13 @@ describe('InternationalTestAdminUseCases', () => {
         reviewReason: 'Official update',
         evidenceReference: 'sources/ielts.md',
         expectedCurrentLocalizedNameAr: 'اسم مختلف'
-      })).rejects.toThrow('CONFLICTING_LOCALIZED_NAME_AR_MODIFICATION');
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow('CONFLICTING_LOCALIZED_NAME_AR_MODIFICATION');
 
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('is idempotent on replay when names already match requested', async () => {
-      mockRepository.findById.mockResolvedValue({
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW, 
         ...parentTest,
         localizedNameAr: 'اختبار الآيلتس',
         localizedNameEn: 'IELTS'
@@ -548,7 +552,7 @@ describe('InternationalTestAdminUseCases', () => {
         localizedNameEn: 'IELTS',
         reviewReason: 'Replay request',
         evidenceReference: 'sources/ielts.md'
-      });
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(result.localizedNameAr).toBe('اختبار الآيلتس');
       expect(result.localizedNameEn).toBe('IELTS');
@@ -575,7 +579,7 @@ describe('InternationalTestAdminUseCases', () => {
     };
 
     it('successfully corrects draft canonical identity and updates dedup key', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([validVersion]);
       mockRepository.findByDedupKey.mockResolvedValue(null);
       mockRepository.update.mockResolvedValue({
@@ -592,7 +596,7 @@ describe('InternationalTestAdminUseCases', () => {
         newCanonicalName: 'SAT',
         correctionReason: 'Official SAT source correction',
         evidenceReference: 'sources/sat.md'
-      });
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(mockRepository.update).toHaveBeenCalledWith('test-sat', {
         canonicalName: 'SAT',
@@ -611,7 +615,7 @@ describe('InternationalTestAdminUseCases', () => {
         newCanonicalName: 'SAT',
         correctionReason: 'Official update',
         evidenceReference: 'sources/sat.md'
-      })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
     });
 
     it.each(['ARCHIVED', 'REJECTED'])('rejects identity changes on a %s test', async status => {
@@ -619,22 +623,22 @@ describe('InternationalTestAdminUseCases', () => {
       await expect(useCases.correctDraftCanonicalIdentity('test-sat', {
         versionId: 'ver-sat-1', sourceHash: 'b'.repeat(64), newCanonicalName: 'SAT',
         correctionReason: 'Reviewed', evidenceReference: 'sources/sat.md',
-      })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('treats an explicitly expected null canonical name as a conflict', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([validVersion]);
       await expect(useCases.correctDraftCanonicalIdentity('test-sat', {
         versionId: 'ver-sat-1', sourceHash: 'b'.repeat(64), expectedCurrentCanonicalName: null,
         newCanonicalName: 'SAT', correctionReason: 'Reviewed', evidenceReference: 'sources/sat.md',
-      })).rejects.toThrow('CONFLICTING_CANONICAL_NAME_MODIFICATION');
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow('CONFLICTING_CANONICAL_NAME_MODIFICATION');
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('rechecks publication after acquiring the transaction lock', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([validVersion]);
       mockRepository.findByDedupKey.mockResolvedValue(null);
       const transactionRepository = {
@@ -650,13 +654,13 @@ describe('InternationalTestAdminUseCases', () => {
       await expect(atomicUseCases.correctDraftCanonicalIdentity('test-sat', {
         versionId: 'ver-sat-1', sourceHash: 'b'.repeat(64), newCanonicalName: 'SAT',
         correctionReason: 'Reviewed', evidenceReference: 'sources/sat.md',
-      }, { actorId: 'reviewer' })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
+      }, { expectedRevision:0,  actorId: 'reviewer' })).rejects.toThrow('CANNOT_CORRECT_PUBLISHED_INTERNATIONAL_TEST_IDENTITY');
       expect(transactionRepository.acquireSourceReviewLock).toHaveBeenCalledWith('test-sat');
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('rejects if expected current canonical name does not match', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([validVersion]);
 
       await expect(useCases.correctDraftCanonicalIdentity('test-sat', {
@@ -666,11 +670,11 @@ describe('InternationalTestAdminUseCases', () => {
         newCanonicalName: 'SAT',
         correctionReason: 'Official update',
         evidenceReference: 'sources/sat.md'
-      })).rejects.toThrow('CONFLICTING_CANONICAL_NAME_MODIFICATION');
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow('CONFLICTING_CANONICAL_NAME_MODIFICATION');
     });
 
     it('rejects if identity collision occurs with another test', async () => {
-      mockRepository.findById.mockResolvedValue({ ...parentTest });
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW,  ...parentTest });
       mockRepository.listImportVersions.mockResolvedValue([validVersion]);
       mockRepository.findByDedupKey.mockResolvedValue({ id: 'another-test-id' });
 
@@ -680,11 +684,11 @@ describe('InternationalTestAdminUseCases', () => {
         newCanonicalName: 'SAT',
         correctionReason: 'Official update',
         evidenceReference: 'sources/sat.md'
-      })).rejects.toThrow('INTERNATIONAL_TEST_CANONICAL_IDENTITY_COLLISION');
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' })).rejects.toThrow('INTERNATIONAL_TEST_CANONICAL_IDENTITY_COLLISION');
     });
 
     it('is idempotent on replay when canonical name and dedup key already match', async () => {
-      mockRepository.findById.mockResolvedValue({
+      mockRepository.findById.mockResolvedValue({ status: InternationalTestStatus.READY_TO_REVIEW, 
         ...parentTest,
         canonicalName: 'SAT',
         displayName: 'SAT',
@@ -699,7 +703,7 @@ describe('InternationalTestAdminUseCases', () => {
         newCanonicalName: 'SAT',
         correctionReason: 'Replay request',
         evidenceReference: 'sources/sat.md'
-      });
+      }, { actorId:'reviewer', expectedRevision:0, reason:'Reviewed source' });
 
       expect(result.canonicalName).toBe('SAT');
       expect(mockRepository.update).not.toHaveBeenCalled();

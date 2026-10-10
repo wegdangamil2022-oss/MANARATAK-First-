@@ -1,0 +1,6 @@
+packages/application/src/tests-platform/use-cases/InternationalTestUseCases.ts(38,3): error TS6133: 'InternationalTestSourceTrustLevel' is declared but its value is never read.
+packages/infrastructure/src/international-tests/PrismaInternationalTestRepository.ts(597,54): error TS2345: Argument of type '{}' is not assignable to parameter of type 'number'.
+packages/infrastructure/src/international-tests/PrismaInternationalTestRepository.ts(597,122): error TS2345: Argument of type '{}' is not assignable to parameter of type 'number'.
+packages/infrastructure/src/international-tests/PrismaInternationalTestRepository.ts(604,214): error TS2339: Property 'toUpperCase' does not exist on type '{}'.
+packages/ui/src/public-tests/InternationalTestGovernanceCloseout.spec.tsx(1,34): error TS6133: 'React' is declared but its value is never read.
+apps/admin/src/pages/InternationalTestDetailPage.tsx(2202,315): error TS1005: '}' expected.

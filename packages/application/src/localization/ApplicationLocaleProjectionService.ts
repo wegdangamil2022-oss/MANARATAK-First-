@@ -289,7 +289,7 @@ export class ApplicationLocaleProjectionService {
     const sourceLocale = this.extractInternationalTestSourceLocale(test);
     const sourceDisplayName =
       this.nonEmptyText(test.displayName as string | undefined) ?? test.canonicalName;
-    const displayName = this.resolveValue<string>({
+    const resolvedName = this.resolveValue<string>({
       requestedLocale: locale,
       sourceLocale,
       sourceValue: sourceDisplayName,
@@ -297,7 +297,8 @@ export class ApplicationLocaleProjectionService {
         ar: this.nonEmptyText(test.localizedNameAr),
         en: this.nonEmptyText(test.localizedNameEn),
       },
-    }).value ?? sourceDisplayName;
+    });
+    const displayName=resolvedName.value??sourceDisplayName;
 
     const {
       localizedNameAr: _localizedNameAr,
@@ -308,6 +309,10 @@ export class ApplicationLocaleProjectionService {
     return {
       ...publicData,
       displayName,
+      localizedNameAr: test.localizedNameAr,
+      localizedNameEn: test.localizedNameEn,
+      locale,
+      localization:resolvedName.resolution,
       family: test.family ? this.projectNamedCarrier(test.family, locale) : test.family,
       provider: test.provider ? this.projectNamedCarrier(test.provider, locale) : test.provider,
       versions: test.versions?.map((version) => this.projectInternationalTestVersion(version, locale)),

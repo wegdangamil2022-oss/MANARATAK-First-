@@ -39,7 +39,7 @@ export class ReferenceResolverService implements IReferenceResolver {
   public async resolveCity(lookup: ReferenceLookup): Promise<CanonicalReference | null> {
     const result = await this.repository.resolveCityCandidate(lookup);
     return result ? this.withReplacement({
-      id: result.record.id, type: 'CITY', active: result.record.isActive && result.record.lifecycleState === ReferenceLifecycleState.ACTIVE,
+      id: result.record.id, type: 'CITY', countryIso2Code: result.record.countryIso2Code, active: result.record.isActive && result.record.lifecycleState === ReferenceLifecycleState.ACTIVE,
       resolutionMethod: result.method,
     }) : null;
   }

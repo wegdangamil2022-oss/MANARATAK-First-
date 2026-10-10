@@ -31,6 +31,8 @@ export interface ExamOfficialLink {
 }
 
 export interface PublicExam {
+  locale?: 'ar' | 'en';
+  availabilitySummary?: string;
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;
@@ -80,6 +82,10 @@ export interface PublicExam {
 
 /** The same adapter is used for saved admin previews and published API data. */
 export interface InternationalTestPresentationInput {
+  locale?: 'ar' | 'en';
+  locations?:{countries?:Array<{id:string;name:string;nameAr?:string;iso2Code:string}>;cities?:Array<{id:string;name:string;nameAr?:string;countryIso2Code:string}>};
+  relatedUniversities?: ExamEntityRef[];
+  relatedScholarships?: ExamEntityRef[];
   id: string;
   publicId?: string;
   slug?: string;
@@ -124,14 +130,15 @@ const finite = (value: unknown): value is number => typeof value === 'number' &&
 const safeLink = (url?: string): boolean => !!url && /^https?:\/\//i.test(url);
 
 export function mapInternationalTestToExam(dto: InternationalTestPresentationInput): PublicExam {
+  const locale=dto.locale??'ar'; const en=locale==='en'; const number=new Intl.NumberFormat(locale);
   const score = dto.scoreScale;
   const variants = dto.variants?.filter(variant => variant.isActive) ?? [];
   const sections = [...(dto.sections ?? [])].sort((a, b) => a.order - b.order);
   const durations = sections.map(section => section.durationMinutes);
-  const duration = durations.length && durations.every(finite) ? `${durations.reduce((sum, value) => sum + value, 0)} دقيقة (مجموع الأقسام)` : undefined;
+  const duration = durations.length && durations.every(finite) ? `${number.format(durations.reduce((sum, value) => sum + value, 0))} ${en?'minutes (section total)':'دقيقة (مجموع الأقسام)'}` : undefined;
   const scoreRange = score && finite(score.overallMinimum) && finite(score.overallMaximum) ? `${score.overallMinimum}–${score.overallMaximum}` : undefined;
   const feeLabels: Record<string, string> = { REGISTRATION: 'التسجيل', LATE_REGISTRATION: 'التسجيل المتأخر', RESCHEDULING: 'تغيير الموعد', CANCELLATION: 'الإلغاء', OTHER: 'رسوم أخرى' };
-  const feeSummary = dto.fees?.map(fee => `${feeLabels[fee.feeType] || fee.feeType}: ${fee.amount} ${fee.currencyCode}${fee.hasRegionalVariation ? ' (تختلف حسب المنطقة)' : ''}${fee.validityWindowNotes ? ` — ${fee.validityWindowNotes}` : ''}`).join(' • ');
+  const feeSummary = dto.fees?.map(fee => `${en?fee.feeType.replace(/_/g,' '):feeLabels[fee.feeType] || fee.feeType}: ${number.format(fee.amount)} ${fee.currencyCode}${fee.hasRegionalVariation ? (en?' (regional variation)':' (تختلف حسب المنطقة)') : ''}${fee.validityWindowNotes ? ` — ${fee.validityWindowNotes}` : ''}`).join(' • ');
   const links = (dto.officialLinks ?? []).filter(link => safeLink(link.url)).map(link => ({ label: link.description || link.linkType, url: link.url }));
   if (safeLink(score?.scoreReportingUrl) && !links.some(link => link.url === score?.scoreReportingUrl)) links.push({ label: 'تقارير النتائج', url: score!.scoreReportingUrl! });
   for (const material of dto.preparationMaterials ?? []) {
@@ -140,29 +147,30 @@ export function mapInternationalTestToExam(dto: InternationalTestPresentationInp
   const nameEn = nonEmpty(dto.localizedNameEn, dto.abbreviation, dto.testCode, dto.canonicalName);
   return {
     id: dto.slug || dto.id, ownerId: dto.id, publicId: dto.publicId, slug: dto.slug,
-    name: nonEmpty(dto.localizedNameAr, dto.displayName, dto.canonicalName), nameEn,
-    category: dto.testCategory, categoryLabel: categoryLabels[dto.testCategory] || dto.testCategory,
+    locale, name: en?nonEmpty(dto.displayName,dto.localizedNameEn,dto.canonicalName):nonEmpty(dto.displayName,dto.localizedNameAr,dto.canonicalName), nameEn,
+    category: dto.testCategory, categoryLabel: en?dto.testCategory.replace(/_/g,' '):categoryLabels[dto.testCategory] || dto.testCategory,
     description: dto.description?.trim() || '', tags: [dto.abbreviation, dto.testCode, dto.providerName].filter((value): value is string => !!value),
     providerName: dto.providerName, testCode: dto.testCode ?? undefined, status: dto.status,
     scoreRange, duration,
     language: dto.languageRelationships?.map(relation => relation.referenceCode || relation.notes).filter(Boolean).join('، ') || undefined,
-    variants: variants.map(variant => ({ name: variant.variantName, meta: deliveryLabels[variant.deliveryMode] || variant.deliveryMode, note: variant.administrativeNotes })),
-    deliveryModes: [...new Set(variants.map(variant => deliveryLabels[variant.deliveryMode] || variant.deliveryMode))],
+    variants: variants.map(variant => ({ name: variant.variantName, meta: en?variant.deliveryMode.replace(/_/g,' '):deliveryLabels[variant.deliveryMode] || variant.deliveryMode, note: variant.administrativeNotes })),
+    deliveryModes: [...new Set(variants.map(variant => en?variant.deliveryMode.replace(/_/g,' '):deliveryLabels[variant.deliveryMode] || variant.deliveryMode))],
     sections: sections.map(section => ({ name: section.sectionName,
-      duration: finite(section.durationMinutes) ? `${section.durationMinutes} دقيقة` : undefined,
+      duration: finite(section.durationMinutes) ? `${number.format(section.durationMinutes)} ${en?'minutes':'دقيقة'}` : undefined,
       score: finite(section.scoreMinimum) && finite(section.scoreMaximum) ? `${section.scoreMinimum}–${section.scoreMaximum}` : undefined,
       meta: section.questionTypes?.join('، ') || section.sectionType,
     })),
-    scoreNotes: score ? [scoreRange ? `نطاق الدرجات: ${scoreRange}` : '', finite(score.scoreIncrement) ? `زيادة الدرجة: ${score.scoreIncrement}` : '',
+    scoreNotes: score ? [scoreRange ? `${en?'Score range':'نطاق الدرجات'}: ${scoreRange}` : '', finite(score.scoreIncrement) ? `${en?'Score increment':'زيادة الدرجة'}: ${score.scoreIncrement}` : '',
       ...(score.bandsOrLevels ?? []), ...lines(score.passFailRules), ...lines(score.cefrEquivalency), ...lines(score.crossTestEquivalency)].filter(Boolean) : [],
     registrationRequirements: [...lines(dto.registrationRequirements), ...lines(dto.identificationRequirements)],
-    resultNotes: score ? [finite(score.resultValidityDurationMonths) ? `مدة الصلاحية المسجلة: ${score.resultValidityDurationMonths} شهر؛ راجع سياسة الجهة المستقبلة.` : '',
-      finite(score.resultDeliveryTimeDays) ? `مدة إصدار النتيجة المسجلة: ${score.resultDeliveryTimeDays} يوم؛ راجع مواعيد الجهة الرسمية.` : ''].filter(Boolean) : [],
+    resultNotes: score ? [finite(score.resultValidityDurationMonths) ? en?`Recorded validity: ${score.resultValidityDurationMonths} months; check the accepting institution's policy.`:`مدة الصلاحية المسجلة: ${score.resultValidityDurationMonths} شهر؛ راجع سياسة الجهة المستقبلة.` : '',
+      finite(score.resultDeliveryTimeDays) ? en?`Recorded result delivery: ${score.resultDeliveryTimeDays} days; check the official provider's schedule.`:`مدة إصدار النتيجة المسجلة: ${score.resultDeliveryTimeDays} يوم؛ راجع مواعيد الجهة الرسمية.` : ''].filter(Boolean) : [],
     retakeNotes: [...lines(dto.retakePolicy), ...lines(dto.cancellationReschedulingNotes)],
     importantWarnings: lines(dto.accessibilityNotes),
     preparationTips: dto.preparationMaterials?.map(material => [material.title, material.description].filter(Boolean).join(' — ')) ?? [],
-    feeSummary, recognitionSummary: dto.availability?.testingWindowsNotes,
-    relatedCountries: dto.countryRelationships?.map(relation => ({ id: relation.canonicalReferenceId, name: relation.referenceCode || relation.notes || relation.canonicalReferenceId || 'دولة مرتبطة', meta: relation.relationshipType })) ?? [],
+    feeSummary, availabilitySummary: dto.availability?.testingWindowsNotes,
+    relatedUniversities:dto.relatedUniversities,relatedScholarships:dto.relatedScholarships,
+    relatedCountries: dto.locations?.countries?.map(country=>({id:country.id,name:en?country.name:country.nameAr||country.name,meta:country.iso2Code}))??dto.countryRelationships?.map(relation => ({ id: relation.canonicalReferenceId, name: relation.referenceCode || relation.notes || relation.canonicalReferenceId || 'دولة مرتبطة', meta: relation.relationshipType })) ?? [],
     officialLinks: links,
   };
 }
