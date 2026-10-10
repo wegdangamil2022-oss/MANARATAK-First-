@@ -9,7 +9,11 @@ if (analysis.unreachable.length) errors.push(`Unreachable production DI registra
 if (manifest.registrationCount !== analysis.registrationCount) errors.push(`Manifest registrationCount=${manifest.registrationCount}, actual=${analysis.registrationCount}`);
 const manifestNames = new Set((manifest.registrations ?? []).map((entry) => entry.name));
 for (const entry of analysis.registrations) {
-  if (!manifestNames.has(entry.name)) errors.push(`Registration missing from manifest: ${entry.name}`);
+  if (!manifestNames.has(entry.name)) {
+    errors.push(`Registration missing from manifest: ${entry.name}`);
+    // Safe, exact source-analysis evidence for updating the signed DI inventory; no runtime secrets.
+    console.error('DI_REGISTRATION_MISSING_JSON ' + JSON.stringify(entry));
+  }
 }
 for (const entry of manifest.registrations ?? []) {
   if (!analysis.registrations.some((actual) => actual.name === entry.name)) errors.push(`Stale registration remains in manifest: ${entry.name}`);
