@@ -242,8 +242,8 @@ export class MajorImportPromotionUseCase {
     rawPayload: unknown,
     payload: MajorImportPayload,
   ): Promise<number> {
-    const profile = await this.ensureLevelProfile(majorId, payload, record.id);
     await this.repository.acquireVersionAllocationLock?.(majorId);
+    const profile = await this.ensureLevelProfile(majorId, payload, record.id);
     const existingVersions = this.repository.listVersions
       ? await this.repository.listVersions(majorId)
       : [];

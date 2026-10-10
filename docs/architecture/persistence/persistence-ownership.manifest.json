@@ -266,7 +266,9 @@
     "ReferenceStandardSnapshot": "reference",
     "InternationalTestGovernance": "tests",
     "InternationalTestPublicationSnapshot": "tests",
-    "InternationalTestEvidenceHistory": "tests"
+    "InternationalTestEvidenceHistory": "tests",
+    "NewMajorCandidateDecision": "majors",
+    "MajorPublicationSnapshot": "majors"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -333,7 +335,8 @@
     ],
     "packages/infrastructure/src/majors/PrismaNewMajorCandidateRepository.ts": [
       "scholarships",
-      "universities"
+      "universities",
+      "academic_taxonomy"
     ],
     "packages/infrastructure/src/scholarships/PrismaScholarshipCanonicalLookupGateway.ts": [
       "majors",

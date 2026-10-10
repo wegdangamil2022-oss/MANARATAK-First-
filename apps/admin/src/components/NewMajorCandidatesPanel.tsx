@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, ExternalLink, GraduationCap, Link2, Loader2, Search } from 'lucide-react';
 import { adminApiClient } from '../api/client';
@@ -20,6 +21,8 @@ type Source = {
 };
 type Candidate = {
   candidateKey: string;
+  sourceDigest:string;
+  sourcesTruncated?:boolean;
   displayLabel: string;
   normalizedLabel: string;
   sourceCount: number;
@@ -34,8 +37,7 @@ type Candidate = {
 type PageResult = { data: Candidate[]; total: number; page: number; pageSize: number; totalPages: number };
 type FormState = {
   canonicalMajorName: string;
-  localizedNameAr: string;
-  localizedNameEn: string;
+  reason:string;
   degreeLevel: string;
   degreeLevelId: string;
   academicFieldId: string;
@@ -46,7 +48,7 @@ type FormState = {
 };
 
 const EMPTY: FormState = {
-  canonicalMajorName: '', localizedNameAr: '', localizedNameEn: '', degreeLevel: '', degreeLevelId: '',
+  canonicalMajorName: '', reason:'', degreeLevel: '', degreeLevelId: '',
   academicFieldId: '', disciplineId: '', academicFieldOrDiscipline: '', officialSourceUrl: '', existingMajorId: '',
 };
 const SOURCE_LABELS: Record<SourceType, string> = {
@@ -56,6 +58,9 @@ const SOURCE_LABELS: Record<SourceType, string> = {
 };
 
 export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (total: number) => void }) {
+  const {hasPermission}=useAdminAuthorization();
+  const canReview=hasPermission('admin:majors:review');
+  const canResolve=canReview && hasPermission('admin:universities:manage') && hasPermission('admin:scholarships:manage');
   const [data, setData] = useState<PageResult | null>(null);
   const [search, setSearch] = useState('');
   const [sourceType, setSourceType] = useState('');
@@ -68,26 +73,31 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
   const [success, setSuccess] = useState<string | null>(null);
   const [resolvedMajorId, setResolvedMajorId] = useState<string | null>(null);
 
-  const load = async () => {
+  const generation=useRef(0);
+  const load = async (signal?:AbortSignal) => {
+    const current=++generation.current;
     setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams({ page: String(page), pageSize: '25' });
       if (search.trim()) params.set('search', search.trim());
       if (sourceType) params.set('sourceType', sourceType);
-      const result = await adminApiClient.request<PageResult>(`/admin/majors/new-candidates?${params}`);
+      const result = await adminApiClient.request<PageResult>(`/admin/majors/new-candidates?${params}`,{signal});
+      if(signal?.aborted || current!==generation.current) return;
       setData(result);
       onTotalChange?.(result.total);
     } catch (reason) {
+      if(signal?.aborted || current!==generation.current) return;
       setError(reason instanceof Error ? reason.message : 'تعذر تحميل التخصصات الجديدة.');
     } finally {
-      setLoading(false);
+      if(current===generation.current && !signal?.aborted) setLoading(false);
     }
   };
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void load(), 200);
-    return () => window.clearTimeout(timer);
+    const controller=new AbortController();
+    const timer = window.setTimeout(() => void load(controller.signal), 200);
+    return () => {window.clearTimeout(timer);controller.abort();};
   }, [search, sourceType, page]);
 
   const selectCandidate = (candidate: Candidate) => {
@@ -99,8 +109,6 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
     setForm({
       ...EMPTY,
       canonicalMajorName: candidate.displayLabel,
-      localizedNameAr: /[\u0600-\u06FF]/.test(candidate.displayLabel) ? candidate.displayLabel : '',
-      localizedNameEn: /[A-Za-z]/.test(candidate.displayLabel) ? candidate.displayLabel : '',
       degreeLevel: uniqueDegreeCode,
       degreeLevelId: candidate.degreeLevelIds.length === 1 ? candidate.degreeLevelIds[0] : '',
       officialSourceUrl: candidate.officialSourceUrls[0] ?? '',
@@ -108,9 +116,10 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
   };
 
   const approve = async () => {
-    if (!selected) return;
-    if (!form.canonicalMajorName.trim() || !form.degreeLevel || !form.degreeLevelId) {
-      setError('الاسم المعتمد والدرجة المرجعية مطلوبان قبل الاعتماد.');
+    if (!selected || saving) return;
+    if(!form.reason.trim()) {setError('سبب القرار مطلوب.');return;}
+    if (!form.canonicalMajorName.trim() || !form.degreeLevel || !form.degreeLevelId || (!form.academicFieldId && !form.disciplineId)) {
+      setError('الاسم المعتمد والدرجة المرجعية والتصنيف مطلوبة قبل الاعتماد.');
       return;
     }
     setSaving(true);
@@ -126,8 +135,7 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
         method: 'POST',
         body: JSON.stringify({
           canonicalMajorName: form.canonicalMajorName.trim(),
-          localizedNameAr: form.localizedNameAr.trim() || null,
-          localizedNameEn: form.localizedNameEn.trim() || null,
+          reason:form.reason.trim(),sourceDigest:selected.sourceDigest,
           degreeLevel: form.degreeLevel,
           degreeLevelId: form.degreeLevelId,
           academicFieldId: form.academicFieldId || null,
@@ -153,14 +161,15 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
   };
 
   const linkExisting = async () => {
-    if (!selected || !form.existingMajorId) return;
+    if (!selected || !form.existingMajorId || saving) return;
+    if(!form.reason.trim()) {setError('سبب الربط مطلوب.');return;}
     setSaving(true);
     setError(null);
     setSuccess(null);
     try {
       await adminApiClient.request(`/admin/majors/new-candidates/${encodeURIComponent(selected.candidateKey)}/link`, {
         method: 'POST',
-        body: JSON.stringify({ majorId: form.existingMajorId }),
+        body: JSON.stringify({ majorId: form.existingMajorId,reason:form.reason.trim(),sourceDigest:selected.sourceDigest }),
       });
       setSuccess('تم ربط المراجع غير المحسومة بالتخصص الموجود دون إنشاء نسخة مكررة.');
       setResolvedMajorId(form.existingMajorId);
@@ -172,6 +181,15 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
     } finally {
       setSaving(false);
     }
+  };
+
+  const reject = async () => {
+    if(!selected || saving || !form.reason.trim()) {setError('اختر تخصصًا واكتب سبب الرفض.');return;}
+    setSaving(true);setError(null);
+    try {
+      await adminApiClient.request(`/admin/majors/new-candidates/${encodeURIComponent(selected.candidateKey)}/reject`,{method:'POST',body:JSON.stringify({reason:form.reason.trim(),sourceDigest:selected.sourceDigest})});
+      setSelected(null);setForm(EMPTY);setSuccess('تم حفظ قرار الرفض. سيعود المرجع للمراجعة إذا تغيرت أدلته.');await load();
+    }catch(error){setError(error instanceof Error?error.message:'تعذر الرفض.');}finally{setSaving(false);}
   };
 
   const countBySource = useMemo(() => (data?.data ?? []).reduce((acc, item) => {
@@ -192,14 +210,14 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
 
     <section className="grid gap-3 sm:grid-cols-4">
       <Stat label="غير محسومة" value={data?.total ?? 0} />
-      <Stat label="من برامج الجامعات" value={countBySource.UNIVERSITY_PROGRAM ?? 0} />
-      <Stat label="من أهداف المنح" value={countBySource.SCHOLARSHIP_MAJOR_TARGET ?? 0} />
-      <Stat label="من أهلية المنح" value={countBySource.SCHOLARSHIP_ELIGIBILITY ?? 0} />
+      <Stat label="برامج الجامعات في الصفحة" value={countBySource.UNIVERSITY_PROGRAM ?? 0} />
+      <Stat label="أهداف المنح في الصفحة" value={countBySource.SCHOLARSHIP_MAJOR_TARGET ?? 0} />
+      <Stat label="أهلية المنح في الصفحة" value={countBySource.SCHOLARSHIP_ELIGIBILITY ?? 0} />
     </section>
 
     <section className="grid gap-3 rounded-2xl border border-[#DDEFF2] bg-white p-4 md:grid-cols-[1fr_240px]">
-      <label className="relative"><Search className="absolute right-3 top-3.5 h-4 w-4 text-[#0E7C86]" /><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} className="min-h-11 w-full rounded-xl border border-[#DDEFF2] bg-[#FAF7F0] pr-10 pl-3 text-sm outline-none focus:border-[#21A7B4]" placeholder="ابحث بالاسم الوارد" /></label>
-      <select value={sourceType} onChange={(event) => { setSourceType(event.target.value); setPage(1); }} className="min-h-11 rounded-xl border border-[#DDEFF2] bg-white px-3 text-sm"><option value="">كل المصادر</option>{Object.entries(SOURCE_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
+      <label className="relative"><Search className="absolute right-3 top-3.5 h-4 w-4 text-[#0E7C86]" /><input aria-label="البحث في المراجع الجديدة" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} className="min-h-11 w-full rounded-xl border border-[#DDEFF2] bg-[#FAF7F0] pr-10 pl-3 text-sm outline-none focus:border-[#21A7B4]" placeholder="ابحث بالاسم الوارد" /></label>
+      <select aria-label="مصدر المرجع" value={sourceType} onChange={(event) => { setSourceType(event.target.value); setPage(1); }} className="min-h-11 rounded-xl border border-[#DDEFF2] bg-white px-3 text-sm"><option value="">كل المصادر</option>{Object.entries(SOURCE_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
     </section>
 
     {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700"><AlertCircle className="ml-2 inline h-4 w-4" />{error}</div>}
@@ -220,15 +238,18 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
           : <div className="space-y-4">
             <div><p className="text-xs font-bold text-[#0E7C86]">المصدر الخام</p><h2 className="mt-1 text-xl font-black text-[#142B5F]">{selected.displayLabel}</h2>{selected.facultyOrUnitNames.length > 0 && <p className="mt-2 text-xs text-[#203442]">سياق الكلية في المصدر: {selected.facultyOrUnitNames.join('، ')}</p>}</div>
             <Input label="الاسم Canonical المعتمد" value={form.canonicalMajorName} onChange={(value) => setForm({ ...form, canonicalMajorName: value })} />
-            <div className="grid gap-3 sm:grid-cols-2"><Input label="الاسم العربي" value={form.localizedNameAr} onChange={(value) => setForm({ ...form, localizedNameAr: value })} /><Input label="الاسم الإنجليزي" value={form.localizedNameEn} onChange={(value) => setForm({ ...form, localizedNameEn: value })} /></div>
-            <label className="block text-xs font-bold text-[#203442]">نوع الدرجة<select value={form.degreeLevel} onChange={(event) => setForm({ ...form, degreeLevel: event.target.value })} className="mt-1 min-h-10 w-full rounded-lg border border-[#DDEFF2] px-3 text-sm"><option value="">اختر</option><option value="BACHELOR">بكالوريوس — MJR</option><option value="MASTER">ماجستير — MAS</option><option value="DOCTORATE">دكتوراه — DOC</option><option value="FELLOWSHIP">زمالة — FEL</option></select></label>
+            <Input label="سبب القرار" value={form.reason} onChange={value=>setForm({...form,reason:value})}/>
+            {selected.sourcesTruncated && <p role="alert">هذه المجموعة كبيرة؛ يجب تقسيم مراجعة مراجعها قبل الاعتماد.</p>}
+
+            <label className="block text-xs font-bold text-[#203442]">نوع الدرجة<select value={form.degreeLevel} onChange={(event) => setForm({ ...form, degreeLevel: event.target.value })} className="mt-1 min-h-10 w-full rounded-lg border border-[#DDEFF2] px-3 text-sm"><option value="">اختر</option><option value="BACHELOR">بكالوريوس — MJR</option><option value="MASTER">ماجستير — MAS</option><option value="DOCTORATE">دكتوراه — DOC</option></select></label>
             <CanonicalPicker label="الدرجة المرجعية" value={form.degreeLevelId} onChange={(id) => setForm({ ...form, degreeLevelId: id ?? '' })} load={() => canonicalPickerApi.degreeLevels()} reloadKey="new-major-degrees" />
             <CanonicalPicker label="المجال الأكاديمي (اختياري)" value={form.academicFieldId} onChange={(id, option) => setForm({ ...form, academicFieldId: id ?? '', academicFieldOrDiscipline: option?.label ?? form.academicFieldOrDiscipline })} load={() => canonicalPickerApi.taxonomyNodes('ACADEMIC_FIELD')} reloadKey="new-major-fields" optional />
             <CanonicalPicker label="التخصص الفرعي/Discipline (اختياري)" value={form.disciplineId} onChange={(id, option) => setForm({ ...form, disciplineId: id ?? '', academicFieldOrDiscipline: option?.label ?? form.academicFieldOrDiscipline })} load={() => canonicalPickerApi.taxonomyNodes('DISCIPLINE')} reloadKey="new-major-disciplines" optional />
             <Input label="المصدر الرسمي" value={form.officialSourceUrl} onChange={(value) => setForm({ ...form, officialSourceUrl: value })} />
-            {form.officialSourceUrl && <a href={form.officialSourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-[#0E7C86]"><ExternalLink className="h-3.5 w-3.5" />فتح المصدر</a>}
-            <button disabled={saving} onClick={() => void approve()} className="min-h-11 w-full rounded-xl bg-[#0E7C86] px-4 text-sm font-black text-white disabled:opacity-50">{saving ? 'جاري الاعتماد...' : 'اعتماد وربط المصادر'}</button>
-            <div className="border-t border-[#DDEFF2] pt-4"><p className="mb-2 text-xs font-black text-[#142B5F]">إذا كان التخصص موجودًا بالفعل</p><CanonicalPicker label="ربط بتخصص Canonical موجود" value={form.existingMajorId} onChange={(id) => setForm({ ...form, existingMajorId: id ?? '' })} load={() => canonicalPickerApi.majors(selected.displayLabel)} reloadKey={`existing-major:${selected.candidateKey}`} optional /><button disabled={saving || !form.existingMajorId} onClick={() => void linkExisting()} className="mt-3 min-h-10 w-full rounded-xl border border-[#0E7C86] px-4 text-xs font-black text-[#0E7C86] disabled:opacity-40"><Link2 className="ml-1 inline h-4 w-4" />ربط الموجود بدون إنشاء نسخة</button></div>
+            {/^https:\/\//i.test(form.officialSourceUrl) && <a href={form.officialSourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-[#0E7C86]"><ExternalLink className="h-3.5 w-3.5" />فتح المصدر</a>}
+            <button disabled={saving || !canResolve || selected.sourcesTruncated} onClick={() => void approve()} className="min-h-11 w-full rounded-xl bg-[#0E7C86] px-4 text-sm font-black text-white disabled:opacity-50">{saving ? 'جاري الاعتماد...' : 'اعتماد وربط المصادر'}</button>
+            <button type="button" disabled={saving || !canReview} onClick={()=>void reject()} className="min-h-10 w-full rounded-xl border border-red-300 text-red-700">رفض المرجع مع حفظ السبب</button>
+            <div className="border-t border-[#DDEFF2] pt-4"><p className="mb-2 text-xs font-black text-[#142B5F]">إذا كان التخصص موجودًا بالفعل</p><CanonicalPicker label="ربط بتخصص Canonical موجود" value={form.existingMajorId} onChange={(id) => setForm({ ...form, existingMajorId: id ?? '' })} load={() => canonicalPickerApi.majors(selected.displayLabel)} reloadKey={`existing-major:${selected.candidateKey}`} optional /><button disabled={saving || !canResolve || selected.sourcesTruncated || !form.existingMajorId} onClick={() => void linkExisting()} className="mt-3 min-h-10 w-full rounded-xl border border-[#0E7C86] px-4 text-xs font-black text-[#0E7C86] disabled:opacity-40"><Link2 className="ml-1 inline h-4 w-4" />ربط الموجود بدون إنشاء نسخة</button></div>
           </div>}
       </aside>
     </div>

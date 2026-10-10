@@ -1,3 +1,4 @@
+import {publicMajorProjection} from '@manaratak/domain';
 import {
   AdministrativeRegionDto,
   InternationalTestContentBlockDto,
@@ -5,7 +6,6 @@ import {
   InternationalTestVersionDto,
   MajorContentSectionDto,
   MajorDto,
-  MajorPhaseLinkingService,
   PublicMajorDto,
   PublicUniversityDto,
   ReferenceCityDto,
@@ -248,38 +248,8 @@ export class ApplicationLocaleProjectionService {
     }).value ?? major.displayName;
 
     const projectedSections = this.selectMajorSections(contentSections, locale, sourceLocale);
-    const {
-      id: _id,
-      canonicalDedupKey: _canonicalDedupKey,
-      sourceImportRecordId: _sourceImportRecordId,
-      status: _status,
-      completenessStatus: _completenessStatus,
-      createdAt: _createdAt,
-      optionalFields,
-      localizedNameAr: _localizedNameAr,
-      localizedNameEn: _localizedNameEn,
-      ...publicData
-    } = major;
-
-    const projectedMajor = {
-      ...(optionalFields ?? {}),
-      ...publicData,
-      displayName,
-      localizedNameAr: major.localizedNameAr,
-      localizedNameEn: major.localizedNameEn,
-    } as PublicMajorDto;
-
-    return {
-      ...projectedMajor,
-      contentSections: projectedSections.map((section) => ({
-        sectionKey: section.sectionKey,
-        title: section.title,
-        content: section.content,
-        reviewStatus: section.reviewStatus,
-        metadata: section.metadata,
-      })),
-      phaseLinks: MajorPhaseLinkingService.buildLinks(major),
-    };
+    const exposed=publicMajorProjection(major,projectedSections);
+    return {...exposed,displayName,localizedNameAr:major.localizedNameAr,localizedNameEn:major.localizedNameEn};
   }
 
   public projectInternationalTest(

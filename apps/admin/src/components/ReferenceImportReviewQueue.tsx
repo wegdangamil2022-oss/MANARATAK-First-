@@ -86,10 +86,10 @@ export function ReferenceImportReviewQueue({ onSelectReceipt }: { onSelectReceip
         {data.data.length === 0 && <p className="text-xs text-slate-500">لا توجد نتائج فحص P7 محفوظة.</p>}
         <div className="flex gap-2 justify-between items-center text-xs">
           <button type="button" className="border rounded-lg px-3 py-1 disabled:opacity-50"
-            disabled={status === 'loading' || page <= 1} onClick={() => setPage(value => value - 1)}>السابق</button>
+            disabled={page <= 1} onClick={() => setPage(value => value - 1)}>السابق</button>
           <span>{data.page} / {Math.max(1, data.totalPages)}</span>
           <button type="button" className="border rounded-lg px-3 py-1 disabled:opacity-50"
-            disabled={status === 'loading' || page >= data.totalPages} onClick={() => setPage(value => value + 1)}>التالي</button>
+            disabled={page >= data.totalPages} onClick={() => setPage(value => value + 1)}>التالي</button>
         </div>
       </>}
     </>}

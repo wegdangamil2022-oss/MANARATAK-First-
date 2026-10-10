@@ -1,3 +1,4 @@
+import {MajorGovernanceWorkspace} from '../components/MajorGovernanceWorkspace';
 /// <reference types="vite/client" />
 import {
 AlertCircle,
@@ -633,6 +634,7 @@ export function MajorDetailPage() {
       }>(`/admin/majors/${major.id}/content-sections`, {
         method: 'PUT',
         body: JSON.stringify({
+          reason:window.prompt('سبب تعديل المحتوى') || '',
           profileId: activeProfile.id,
           versionId: targetVersionId,
           sections: [
@@ -680,8 +682,8 @@ export function MajorDetailPage() {
       return {
         id: original?.id,
         sectionKey: key,
-        title: data?.title || original?.title,
-        content: data?.content || original?.content || '',
+        title: data?.title ?? original?.title,
+        content: data?.content ?? original?.content ?? '',
         reviewStatus: data?.reviewStatus || original?.reviewStatus || 'NEEDS_REVIEW',
       };
     });
@@ -695,6 +697,7 @@ export function MajorDetailPage() {
       }>(`/admin/majors/${major.id}/content-sections`, {
         method: 'PUT',
         body: JSON.stringify({
+          reason:window.prompt('سبب تعديل المحتوى') || '',
           profileId: activeProfile.id,
           versionId: targetVersionId,
           sections: dirtySectionsPayload,
@@ -725,7 +728,7 @@ export function MajorDetailPage() {
     try {
       if (dirtyBlockKeys.size > 0) throw new Error('احفظ تعديلات المحتوى قبل تغيير حالة النشر.');
       const targetId = activeProfile?.id || major.id;
-      await adminApiClient.request(`/admin/majors/${targetId}/${action}`, { method: 'POST' });
+      await adminApiClient.request(`/admin/majors/${targetId}/${action}`, { method: 'POST',body:JSON.stringify({reason:window.prompt('سبب الإجراء') || ''}) });
 
       setSuccess(successMessage);
       await loadMajorAndProfiles();
@@ -1306,7 +1309,7 @@ export function MajorDetailPage() {
                                       className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-[#0E7C86]"
                                     >
                                       <option value="NEEDS_REVIEW">بحاجة لمراجعة (NEEDS_REVIEW)</option>
-                                      <option value="COMPLETE">مكتمل ومعتمد (COMPLETE)</option>
+                                      <option value="COMPLETE">مكتمل وجاهز للمراجعة (COMPLETE)</option>
                                       <option value="INCOMPLETE">غير مكتمل (INCOMPLETE)</option>
                                     </select>
                                   </div>
@@ -1482,6 +1485,8 @@ export function MajorDetailPage() {
         </section>
       )}
 
+      {activeTab === 'versions' && <MajorGovernanceWorkspace majorId={major.id} profileId={activeProfile?.id} onSaved={loadMajorAndProfiles}/> }
+
       {/* Tab 5: Versions and Sources */}
       {activeTab === 'versions' && (
         <section className="rounded-3xl border border-[#DDEFF2] bg-white p-6 shadow-xs space-y-6">
@@ -1496,7 +1501,7 @@ export function MajorDetailPage() {
               </p>
             </div>
             <span className="rounded-xl bg-teal-50 px-3 py-1 text-xs font-bold text-[#0E7C86] border border-teal-200">
-              {versions.length} نسخ مسجلة
+              {versions.length} نسخة ضمن الصفحة الأولى
             </span>
           </div>
 
@@ -1516,7 +1521,7 @@ export function MajorDetailPage() {
                       </span>
                       {idx === 0 && (
                         <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-800">
-                          النسخة الحالية النشطة
+                          أحدث نسخة عمل أو نشر
                         </span>
                       )}
                     </div>
@@ -1558,8 +1563,8 @@ export function MajorDetailPage() {
                 setSaving(true);
                 try {
                   await adminApiClient.request(`/admin/majors/${major.id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(editFormData),
+                    method: 'PATCH',
+                    body: JSON.stringify({displayName:editFormData.displayName,collegeOrFaculty:editFormData.collegeOrFaculty,academicFieldOrDiscipline:editFormData.academicFieldOrDiscipline,officialSourceUrl:editFormData.officialSourceUrl,description:editFormData.description,studentFriendlySummary:editFormData.studentFriendlySummary,reason:window.prompt('سبب تعديل البيانات') || ''}),
                   });
                   setSuccess('تم تحديث البيانات الأساسية بنجاح.');
                   setShowEditModal(false);
@@ -1587,6 +1592,7 @@ export function MajorDetailPage() {
                 <label className="block text-xs font-bold text-slate-700 mb-1">الاسم الإنجليزي المعياري</label>
                 <input
                   type="text"
+                  readOnly
                   value={editFormData.canonicalName}
                   onChange={(e) => setEditFormData({ ...editFormData, canonicalName: e.target.value })}
                   className="w-full rounded-xl border border-slate-300 p-2.5 text-xs font-bold"

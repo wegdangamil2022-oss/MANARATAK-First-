@@ -39,6 +39,22 @@ export class CanonicalMajorReferenceService {
     await this.assertTaxonomyReference(payload.disciplineId, AcademicTaxonomyNodeType.DISCIPLINE);
   }
 
+  public async discoveryDegrees(ids:readonly string[]):Promise<Array<{id:string;level:'BACHELOR'|'MASTER'|'DOCTORATE'}>> {
+    const result:Array<{id:string;level:'BACHELOR'|'MASTER'|'DOCTORATE'}>=[];
+    for(const id of [...new Set(ids)].sort()) {
+      const degree=await this.degreeLevelRepository.getDegreeLevelById(id);
+      if(!degree || degree.status!==DegreeLevelStatus.ACTIVE) throw new Error('NEW_MAJOR_DEGREE_REFERENCE_MISMATCH');
+      if(!['BACHELOR','MASTER','DOCTORATE'].includes(degree.canonicalCode)) throw new Error('NEW_MAJOR_DEGREE_OWNER_REVIEW_REQUIRED');
+      result.push({id,level:degree.canonicalCode as 'BACHELOR'|'MASTER'|'DOCTORATE'});
+    }
+    return result;
+  }
+
+  public async assertDegreeMatches(id:string,level:string):Promise<void> {
+    const degree=await this.degreeLevelRepository.getDegreeLevelById(id);
+    if(!degree || degree.status!==DegreeLevelStatus.ACTIVE || degree.canonicalCode!==level) throw new Error('NEW_MAJOR_DEGREE_REFERENCE_MISMATCH');
+  }
+
   public async publicationIssues(major: MajorDto): Promise<PublicationReadinessIssue[]> {
     const issues: PublicationReadinessIssue[] = [];
     const degreeIds = new Set((major.profiles ?? []).map(profile => profile.degreeLevelId).filter(Boolean) as string[]);

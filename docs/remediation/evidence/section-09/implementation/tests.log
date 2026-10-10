@@ -1,0 +1,29 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-09
+
+ ❯ packages/infrastructure/tests/majors/MajorGovernanceCloseout.spec.ts (8 tests | 2 failed) 24ms
+     × rejects a stale revision under the database owner lock 12ms
+     × does not expose a legacy root without an owned published snapshot 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/infrastructure/tests/majors/MajorGovernanceCloseout.spec.ts > P10 immutable publications and source reconciliation > rejects a stale revision under the database owner lock
+AssertionError: the given combination of arguments (undefined and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string
+ ❯ packages/infrastructure/tests/majors/MajorGovernanceCloseout.spec.ts:6:338
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  packages/infrastructure/tests/majors/MajorGovernanceCloseout.spec.ts > P10 immutable publications and source reconciliation > does not expose a legacy root without an owned published snapshot
+AssertionError: the given combination of arguments (undefined and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string
+ ❯ packages/infrastructure/tests/majors/MajorGovernanceCloseout.spec.ts:7:271
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 30 passed (32)
+   Start at  13:05:04
+   Duration  6.71s (transform 7.41s, setup 0ms, import 12.13s, tests 293ms, environment 0ms)
+
