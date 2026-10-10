@@ -324,6 +324,25 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
   public async upsertCountry(data: UpsertReferenceCountryDto): Promise<ReferenceCountryDto> {
     this.rejectLegacyLifecycleMutation(data.isActive);
+    // Country defaults are code references without foreign-key constraints.
+    // Recheck & hold eligible parent rows until the owner transaction commits
+    // so a concurrent lifecycle change cannot invalidate newly stored defaults.
+    if (this.inTransaction && data.defaultCurrencyCode) {
+      const rows = await this.prisma.$queryRaw<Array<{ id: string; isActive: boolean; lifecycleState: string }>>(Prisma.sql`
+        SELECT "id", "isActive", "lifecycleState" FROM "ReferenceCurrency"
+        WHERE "isoCode" = ${data.defaultCurrencyCode} FOR SHARE
+      `);
+      if (rows.length !== 1 || !rows[0].isActive || rows[0].lifecycleState !== 'ACTIVE')
+        throw new Error('REFERENCE_COUNTRY_DEFAULT_CURRENCY_NOT_ACTIVE');
+    }
+    if (this.inTransaction && data.defaultLanguageCode) {
+      const rows = await this.prisma.$queryRaw<Array<{ id: string; isActive: boolean; lifecycleState: string }>>(Prisma.sql`
+        SELECT "id", "isActive", "lifecycleState" FROM "ReferenceLanguage"
+        WHERE "isoCode" = ${data.defaultLanguageCode} FOR SHARE
+      `);
+      if (rows.length !== 1 || !rows[0].isActive || rows[0].lifecycleState !== 'ACTIVE')
+        throw new Error('REFERENCE_COUNTRY_DEFAULT_LANGUAGE_NOT_ACTIVE');
+    }
     const existing = await this.prisma.referenceCountry.findUnique({ where: { iso2Code: data.iso2Code } });
     if (existing) {
       if (data.id && data.id !== existing.id) throw new Error('REFERENCE_EDIT_IDENTITY_MISMATCH');
