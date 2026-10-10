@@ -159,6 +159,17 @@ describe('CertificateUseCases W10 trust model', () => {
     expect(repository.issue).toHaveBeenCalledTimes(1);
   });
 
+  it('never advertises trusted issuance when a signing provider is missing even in source preview', async () => {
+    repository.listTemplates.mockResolvedValue([template]);
+    repository.listIssuers.mockResolvedValue([issuer]);
+    const withoutSigner = new CertificateUseCases(repository, courses);
+    const readiness = await withoutSigner.readiness();
+    expect(readiness.activeIssuer).toBe(true);
+    expect(readiness.activeTemplate).toBe(true);
+    expect(readiness.signingProviderConfigured).toBe(false);
+    expect(readiness.trustedCompletionIssuanceReady).toBe(false);
+  });
+
   it('fails closed when no governed ACTIVE template exists instead of auto-activating one', async () => {
     repository.findActiveTemplateByName.mockResolvedValue(null);
     await expect(useCases.consumeCompletionEvent(courseEvent())).rejects.toThrow('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');
