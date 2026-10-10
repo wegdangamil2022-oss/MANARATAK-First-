@@ -73,9 +73,9 @@ interface StudentSupportDetail extends StudentSupportItem {
     updatedAt: string;
   }>;
   ownerReadStatus?: {
-    learning: 'AVAILABLE' | 'DEGRADED';
-    certificates: 'AVAILABLE' | 'DEGRADED';
-    services: 'AVAILABLE' | 'DEGRADED';
+    learning: 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED';
+    certificates: 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED';
+    services: 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED';
   };
   learning?: Enrollment[];
   certificates?: Certificate[];
@@ -108,6 +108,7 @@ const labels: Record<string, string> = {
   EXPIRED: 'منتهية الصلاحية',
   HEALTHY: 'تعمل بصورة طبيعية',
   FAILED: 'تحتاج معالجة',
+  RESTRICTED: 'غير مصرح بعرض بيانات هذا المجال',
   COURSE: 'الدورات',
   UNIVERSITY: 'الجامعات',
   SCHOLARSHIP: 'المنح',
@@ -285,7 +286,22 @@ export function StudentSupportAdminPage() {
       await load();
       if (selectedId === resetTarget.studentReferenceId) await inspect(selectedId);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذرت إعادة ضبط الواجهة.');
+      const message = cause instanceof Error ? cause.message : 'تعذرت إعادة ضبط الواجهة.';
+      if (message.includes('STUDENT_WORKSPACE_VERSION_CONFLICT') || message.includes('تغيرت بيانات الطالب')) {
+        try {
+          const current = await adminApiClient.request<StudentSupportDetail>(
+            `/admin/students/support/${encodeURIComponent(resetTarget.studentReferenceId)}`,
+          );
+          setDetail(current);
+          setResetTarget(current);
+          setError('تغيرت نسخة مساحة الطالب. راجع البيانات المحدثة وأكّد إعادة الضبط مرة أخرى.');
+        } catch {
+          setResetTarget(null);
+          setError('حدث تعارض وتعذر تحديث حالة الطالب. أعد تحميل الملف قبل المحاولة.');
+        }
+      } else {
+        setError(message);
+      }
     } finally {
       setResetting(false);
     }
@@ -526,6 +542,11 @@ export function StudentSupportAdminPage() {
                     </button>
                   ))}
                 </nav>
+                {Object.values(detail.ownerReadStatus ?? {}).includes('RESTRICTED') && (
+                  <p role="status" className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
+                    بعض بيانات الدورات والشهادات والخدمات محجوبة لعدم امتلاك صلاحيات مجالاتها. الأعداد المحجوبة لا تعني صفرًا.
+                  </p>
+                )}
                 {Object.values(detail.ownerReadStatus ?? {}).includes('DEGRADED') && (
                   <p
                     role="status"

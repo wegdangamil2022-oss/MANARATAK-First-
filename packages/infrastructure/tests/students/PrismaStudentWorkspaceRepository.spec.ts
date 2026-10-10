@@ -189,4 +189,60 @@ describe('PrismaStudentWorkspaceRepository', () => {
     expect(decision).toMatchObject({ workspaceVersion: 2, afterPreferences: updated.privacyPreferences });
     expect(decision.changedFields).toEqual(expect.arrayContaining(['retainSearchHistory', 'allowPersonalization', 'allowProductAnalytics']));
   });
+
+  it('does not duplicate privacy preferences into audit or outbox payloads', async () => {
+    const preferences = { retainSearchHistory: true, allowPersonalization: false, allowProductAnalytics: false, publicProfileEnabled: false };
+    const next = { ...workspace, version: 2, privacyPreferences: preferences };
+    const tx = {
+      studentWorkspace: {
+        findUnique: vi.fn().mockResolvedValueOnce({ ...workspace, privacyPreferences: {} }).mockResolvedValueOnce(next),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
+      studentPrivacyConsentDecision: { create: vi.fn() },
+      auditRecord: { create: vi.fn() },
+      transactionalOutboxRecord: { create: vi.fn() },
+    };
+    const repo = new PrismaStudentWorkspaceRepository({ $transaction: (fn: (db: typeof tx) => unknown) => fn(tx) } as any);
+    await repo.updatePrivacyConsent({ studentReferenceId: 'student-1', expectedVersion: 1, actorId: 'student-1', purpose: 'privacy-settings', privacyPreferences: preferences });
+    const audit = JSON.stringify(vi.mocked(tx.auditRecord.create).mock.calls);
+    const outbox = JSON.stringify(vi.mocked(tx.transactionalOutboxRecord.create).mock.calls);
+    expect(audit).not.toContain('beforePreferences');
+    expect(audit).not.toContain('afterPreferences');
+    expect(outbox).not.toContain('beforePreferences');
+    expect(outbox).not.toContain('afterPreferences');
+    expect(tx.studentPrivacyConsentDecision.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ beforePreferences: expect.anything(), afterPreferences: preferences }),
+    }));
+  });
+
+  it('denies stale consent updates before writing the decision or the outbox', async () => {
+    const tx = {
+      studentWorkspace: {
+        findUnique: vi.fn().mockResolvedValue({ ...workspace, privacyPreferences: {} }),
+        updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+      },
+      studentPrivacyConsentDecision: { create: vi.fn() },
+      auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
+    };
+    const repo = new PrismaStudentWorkspaceRepository({ $transaction: (fn: (db: typeof tx) => unknown) => fn(tx) } as any);
+    await expect(repo.updatePrivacyConsent({
+      studentReferenceId: 'student-1', expectedVersion: 1, actorId: 'student-1',
+      purpose: 'settings', privacyPreferences: { retainSearchHistory: true, allowPersonalization: false, allowProductAnalytics: false, publicProfileEnabled: false },
+    })).rejects.toThrow('STUDENT_WORKSPACE_VERSION_CONFLICT');
+    expect(tx.studentPrivacyConsentDecision.create).not.toHaveBeenCalled();
+    expect(tx.auditRecord.create).not.toHaveBeenCalled();
+    expect(tx.transactionalOutboxRecord.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a stale support reset without an extra audit or outbox', async () => {
+    const tx = {
+      studentWorkspace: { findUnique: vi.fn().mockResolvedValue(workspace), updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
+    };
+    const repo = new PrismaStudentWorkspaceRepository({ $transaction: (fn: (db: typeof tx) => unknown) => fn(tx) } as any);
+    await expect(repo.resetLayout('student-1', 1, { actorId: 'support-1', reason: 'Approved support request' }))
+      .rejects.toThrow('STUDENT_WORKSPACE_VERSION_CONFLICT');
+    expect(tx.auditRecord.create).not.toHaveBeenCalled();
+    expect(tx.transactionalOutboxRecord.create).not.toHaveBeenCalled();
+  });
 });

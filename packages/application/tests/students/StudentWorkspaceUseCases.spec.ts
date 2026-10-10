@@ -48,6 +48,22 @@ describe('StudentWorkspaceUseCases', () => {
     useCases = new StudentWorkspaceUseCases(repository);
   });
 
+  it('rejects a profile update without an expected version', async () => {
+    await expect(useCases.upsertWorkspace({ studentReferenceId: 'student-1', displayName: 'Student' }))
+      .rejects.toThrow('STUDENT_WORKSPACE_VERSION_REQUIRED');
+    expect(repository.upsertWorkspace).not.toHaveBeenCalled();
+  });
+
+  it('rejects spoofed integration event domains and malformed dates', async () => {
+    repository.ingestIntegrationEvent = vi.fn();
+    const common = {eventId:'event-1', studentReferenceId:'student-1', eventType:'CourseCompleted',
+      title:'Completed', occurredAt:new Date()};
+    await expect(useCases.consumeIntegrationEvent({...common, sourceDomain:'PUBLIC'})).rejects.toThrow('STUDENT_EVENT_TYPE_NOT_ALLOWED');
+    await expect(useCases.consumeIntegrationEvent({...common, sourceDomain:'COURSES', occurredAt:new Date('invalid')}))
+      .rejects.toThrow('STUDENT_EVENT_PAYLOAD_INVALID');
+    expect(repository.ingestIntegrationEvent).not.toHaveBeenCalled();
+  });
+
   it('never provisions a workspace from a normal read', async () => {
     vi.mocked(repository.findWorkspace).mockResolvedValueOnce(null);
     await expect(useCases.getWorkspace('student-1')).rejects.toThrow('STUDENT_WORKSPACE_PROVISIONING_PENDING');

@@ -62,4 +62,40 @@ describe('StudentDashboardHydrationService', () => {
     expect(learning.listForStudent).not.toHaveBeenCalled();
     expect(certificates.listForStudent).not.toHaveBeenCalled();
   });
+
+  it('does not call any owner or disclose cross-domain data without domain grants', async () => {
+    const workspace = { getSupportWorkspaceDetail: vi.fn().mockResolvedValue({
+      studentReferenceId: 'student-1', status: 'ACTIVE', version: 1,
+      provisioningHealth: {state:'HEALTHY',pendingEventCount:0,failedEventCount:0},
+      consentAudit: {hasDecision:false},
+      linkedSummaries: {activeCourseCount:5,certificateCount:2,unreadNotificationCount:0},
+    }) };
+    const learning = { listForStudent: vi.fn() };
+    const certificates = { listForStudent: vi.fn() };
+    const requests = { listMyRequests: vi.fn() };
+    const service = new StudentDashboardHydrationService(workspace as any, learning, certificates, requests as any);
+    const detail = await service.getSupportDetail('student-1');
+    expect(learning.listForStudent).not.toHaveBeenCalled();
+    expect(certificates.listForStudent).not.toHaveBeenCalled();
+    expect(requests.listMyRequests).not.toHaveBeenCalled();
+    expect(detail.learning).toBeUndefined();
+    expect(detail.certificates).toBeUndefined();
+    expect(detail.linkedSummaries.activeCourseCount).toBeNull();
+    expect(detail.linkedSummaries.certificateCount).toBeNull();
+    expect(detail.ownerReadStatus).toEqual({learning:'RESTRICTED',certificates:'RESTRICTED',services:'RESTRICTED'});
+  });
+
+  it('reads only explicitly granted owner domains', async () => {
+    const workspace = { getSupportWorkspaceDetail: vi.fn().mockResolvedValue({
+      studentReferenceId: 'student-1', linkedSummaries: {activeCourseCount:1,certificateCount:3,unreadNotificationCount:0},
+    }) };
+    const learning = { listForStudent: vi.fn().mockResolvedValue([{courseId:'a',status:'ACTIVE'}]) };
+    const certificates = { listForStudent: vi.fn() };
+    const service = new StudentDashboardHydrationService(workspace as any, learning as any, certificates as any);
+    const detail = await service.getSupportDetail('student-1',{learning:true,certificates:false,services:false});
+    expect(learning.listForStudent).toHaveBeenCalledWith('student-1');
+    expect(certificates.listForStudent).not.toHaveBeenCalled();
+    expect(detail.learning).toHaveLength(1);
+    expect(detail.certificates).toBeUndefined();
+  });
 });
