@@ -113,6 +113,21 @@ describe('ReferenceDataSeedPlanner', () => {
     expect(validated.records[3].validationReport?.canBeImported).toBe(true);
   });
 
+  it('quarantines the valid row when another invalid row uses its canonical identity', () => {
+    const staged = planner.createBatch({
+      seedBatchId: 'conflict-with-invalid',
+      sourceName: 'test-source', sourceVersion: '1',
+      records: [
+        { entityType: 'COUNTRY', payload: { iso2Code: 'YE', iso3Code: 'YEM', name: 'Yemen' } },
+        { entityType: 'COUNTRY', payload: { iso2Code: 'YE', iso3Code: 'YEM', name: '' } },
+      ],
+    });
+    const checked = planner.validateBatch(staged);
+    expect(checked.validationSummary).toMatchObject({ validRecords: 0, invalidRecords: 2 });
+    expect(checked.records.every(record =>
+      record.validationReport?.issues.some(issue => issue.code === 'DUPLICATE_CANONICAL_IDENTITY_IN_BATCH'))).toBe(true);
+  });
+
   it('prevents marking DRAFT batches as READY_TO_APPLY', () => {
     const batch = planner.createBatch({
       seedBatchId: 'batch-003',

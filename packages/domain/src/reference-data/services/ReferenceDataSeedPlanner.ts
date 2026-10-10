@@ -78,7 +78,10 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
     // row happens to appear after the first. City keys include region scope.
     const occurrences = new Map<string, number>();
     for (const rec of validatedRecords) {
-      if (!rec.deterministicKey || !rec.validationReport?.canBeImported) continue;
+      // An invalid source row can still compete for the same identity as a
+      // valid one (e.g. an incomplete alternate country record). Neither can
+      // be promoted until an owner explicitly resolves the source conflict.
+      if (!rec.deterministicKey) continue;
       const key = rec.entityType + '|' + rec.deterministicKey;
       occurrences.set(key, (occurrences.get(key) ?? 0) + 1);
     }
