@@ -29,7 +29,8 @@ import {
   ReferenceCityQualityCounters,
   ReferenceDependencyImpact,
   ReferenceProviderMappingReassignmentCommand,
-  referenceCityScopeKey
+  referenceCityScopeKey,
+  referenceStandardsReadiness
 } from '@manaratak/domain';
 import { AtomicAuditedOutboxMutationExecutor } from '../../event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 import { CountryImportPreviewService, CountrySourceRecord } from '../services/CountryImportPreviewService';
@@ -111,6 +112,13 @@ export class ReferenceDataUseCases {
     return this.atomicUpsert('REGION', id, context,
       transaction => transaction.repository.upsertRegionInTransaction(canonicalData, context.actorId, transaction.context),
       () => { throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED'); });
+  }
+
+  /** Read-only manifest; no reviewed authority snapshot ships in this revision.
+   * Do not confuse ICU code-format checks with an approved standards baseline.
+   */
+  public getStandardsReadiness() {
+    return referenceStandardsReadiness([]);
   }
 
   /** Only source-backed counts are numeric. No inferred quality or coverage claims. */

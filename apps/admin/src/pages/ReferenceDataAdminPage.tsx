@@ -120,9 +120,14 @@ export function ReferenceDataAdminPage() {
   };
   const [tabRevision, setTabRevision] = useState(0);
   const [quality, setQuality] = useState<Awaited<ReturnType<typeof referenceDataAdminApi.qualitySnapshot>> | null>(null);
+  const [standards, setStandards] = useState<Awaited<ReturnType<typeof referenceDataAdminApi.standardsReadiness>> | null>(null);
+  const [standardsError, setStandardsError] = useState(false);
   const [qualityState, setQualityState] = useState<'loading' | 'ready' | 'error'>('loading');
   useEffect(() => {
     let live = true;
+    referenceDataAdminApi.standardsReadiness().then(result => {
+      if (live) setStandards(result);
+    }).catch(() => { if (live) setStandardsError(true); });
     referenceDataAdminApi.qualitySnapshot().then(result => {
       if (live) { setQuality(result); setQualityState('ready'); }
     }).catch(() => { if (live) setQualityState('error'); });
@@ -176,6 +181,19 @@ export function ReferenceDataAdminPage() {
           </button>
         ))}</div>}
         <p className="text-xs text-slate-600">الأعداد من خادم P7 فقط. جودة الأسماء البديلة والروابط والمصادر الرسمية: unknown حتى تتوفر أدلة قابلة للفحص. انقر على المجموعة للاطلاع على سجلاتها.</p>
+      </section>
+      <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-2">
+        <h3 className="font-bold text-sm">حالة المعايير المرجعية / Official standards evidence</h3>
+        {!standards && !standardsError && <p role="status" className="text-xs">جارٍ قراءة سجل المصادر المعتمدة…</p>}
+        {standardsError && <p role="alert" className="text-xs text-red-800">تعذر قراءة سجل المعايير؛ لا يمكن إثبات سلامة مصدر البيانات.</p>}
+        {standards && <>
+          <div className="flex flex-wrap gap-2">{standards.data.map(item =>
+            <span key={item.standardFamily} className="rounded border border-amber-300 bg-white px-2 py-1 text-xs">
+              {item.standardFamily}: {item.readiness === 'EVIDENCE_RECORDED' ? item.sourceVersion : 'غير موثق / Missing reviewed snapshot'}
+            </span>)}</div>
+          <p className="text-xs text-amber-900">مطابقة صيغة الرموز وحدها لا تثبت الانتماء إلى ISO أو IANA أو CLDR.
+            تظل الشهادات غير معتمدة حتى تُراجع نسخ المصدر والتجزئة الرقمية (SHA-256) والجهة المراجعة.</p>
+        </>}
       </section>
       <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
         <div className="flex border-b border-slate-100 bg-slate-50/60 overflow-x-auto p-2 gap-2">

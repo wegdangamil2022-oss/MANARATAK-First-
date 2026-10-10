@@ -38,6 +38,11 @@ function mutate<T>(path: string, method: 'POST' | 'PUT', body: unknown, options:
 }
 
 export const referenceDataAdminApi = {
+  standardsReadiness() {
+    return adminApiClient.request<{ evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS';
+      data: Array<{ standardFamily: string; readiness: string; sourceVersion: string | null; candidateVersions: string[] }>; asOf: string }>(
+      base + '/standards/readiness');
+  },
   qualitySnapshot() {
     return adminApiClient.request<{ data: Array<{ collection: ReferenceDataCollection; total: number; active: number; nonActive: number; aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown' }>; asOf: string }>(base + '/quality');
   },

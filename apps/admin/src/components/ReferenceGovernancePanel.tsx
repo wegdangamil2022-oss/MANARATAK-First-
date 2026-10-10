@@ -223,6 +223,10 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
           <button type="button" onClick={() => void save()} disabled={saving || record.lifecycleState !== 'ACTIVE'}
             className="bg-indigo-700 text-white rounded-lg px-4 py-2 disabled:opacity-50">حفظ الأسماء والربط (مع سجل تدقيق)</button>
           <section className="border-t pt-4 space-y-2">
+            <h4 className="font-bold">المصدر والتحقق / Source provenance</h4>
+            <ReferenceProvenanceReadOnly metadata={record.metadata} />
+          </section>
+          <section className="border-t pt-4 space-y-2">
             <h4 className="font-bold">الإصدارات السابقة / History ({history.length})</h4>
             <div className="max-h-40 overflow-auto">
               {history.map(h => <p key={h.id} className="text-xs border-b py-1">
@@ -281,4 +285,23 @@ export function CityCountryQuality({ countryIso2Code }: { countryIso2Code: strin
     <span>رابط دولة غير متطابق: {data.inconsistentCountryReference}</span>
     <span>منطقة إدارية غير متطابقة: {data.inconsistentAdministrativeRegion}</span>
   </div>;
+}
+
+/** Only show known governance metadata keys; do not dump arbitrary raw fields. */
+function ReferenceProvenanceReadOnly({ metadata }: { metadata: unknown }) {
+  const values = metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+    ? metadata as Record<string, unknown> : {};
+  const keys = ['sourceAuthority', 'sourceVersion', 'sourceArtifactHash',
+    'sourceAuditDate', 'sourceRevision', 'sourcePublicId', 'referenceSources',
+    'reviewedBy', 'reviewedAt', 'sourceVerificationStatus'] as const;
+  const shown = keys
+    .filter(key => values[key] !== null && values[key] !== undefined)
+    .map(key => ({ key, text: typeof values[key] === 'string' ? values[key] as string :
+      Array.isArray(values[key]) ? (values[key] as unknown[]).filter(v => typeof v === 'string').join(', ') : '' }))
+    .filter(value => value.text && value.text.length <= 1500);
+  if (!shown.length) return <p className="text-xs text-amber-800">لا توجد أدلة مصدر معتمد محفوظة لهذا السجل / unknown.</p>;
+  return <dl className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+    {shown.map(row => <div key={row.key} className="border rounded p-2 break-all">
+      <dt className="font-bold">{row.key}</dt><dd>{row.text}</dd></div>)}
+  </dl>;
 }

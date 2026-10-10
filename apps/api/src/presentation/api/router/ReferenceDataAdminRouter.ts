@@ -164,6 +164,11 @@ export class ReferenceDataAdminRouter {
       res.json(await referenceDataUseCases.upsertRegion({ ...body, id }, mutationContext(req)));
     }));
 
+    router.get('/standards/readiness', asyncHandler(async (_req: Request, res: Response) => {
+      res.json({ data: referenceDataUseCases.getStandardsReadiness(), source: 'P7_REVIEWED_SNAPSHOT_MANIFEST',
+        evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS', asOf: new Date().toISOString() });
+    }));
+
     router.get('/quality/cities/:countryIso2Code', asyncHandler(async (req: Request, res: Response) => {
       const { iso2Code } = countryCodeParamSchema.parse({ iso2Code: req.params.countryIso2Code });
       res.json({ data: await referenceDataUseCases.getCityQualityCounters(iso2Code), source: 'P7_OWNER_COUNTS', asOf: new Date().toISOString() });
