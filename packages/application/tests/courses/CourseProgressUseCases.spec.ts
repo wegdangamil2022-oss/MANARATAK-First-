@@ -58,6 +58,7 @@ describe('CourseProgressUseCases W9 integrity', () => {
         assets: [], quizzes: [], questionBanks: [], questions: [],
       }),
     } as any;
+    curriculumRepo.getLearningVersion = vi.fn(async () => ({course: nativeCourse, curriculum: await curriculumRepo.getCurriculumSnapshot('course-1')}));
     progressRepo = {
       enroll: vi.fn(),
       enrollWithCapacity: vi.fn().mockResolvedValue({ id: 'enrollment-1', status: CourseEnrollmentStatus.ACTIVE, progressPercentage: 0, enrolledAt: new Date() }),
@@ -70,6 +71,7 @@ describe('CourseProgressUseCases W9 integrity', () => {
       submitQuizAttempt: vi.fn(), listQuizAttempts: vi.fn().mockResolvedValue([]),
       completeCourse: vi.fn().mockResolvedValue({ id: 'completion-1' }), findCompletion: vi.fn(),
       getStudentProgressSnapshot: vi.fn().mockResolvedValue({ enrollment: { id: 'enrollment-1', status: CourseEnrollmentStatus.ACTIVE, progressPercentage: 100 }, lessons: [], quizAttempts: [], completion: null }),
+      lockEnrollment: vi.fn(),
       withTransaction: vi.fn().mockReturnThis(),
     } as any;
     useCases = new CourseProgressUseCases(courseRepo, curriculumRepo, progressRepo, undefined, undefined, atomic);
@@ -78,7 +80,7 @@ describe('CourseProgressUseCases W9 integrity', () => {
   it('enrolls only through guarded capacity enrollment', async () => {
     (progressRepo.findEnrollment as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
     await useCases.enroll('course-1', 'student-1');
-    expect(progressRepo.enrollWithCapacity).toHaveBeenCalledWith({ courseId: 'course-1', studentReferenceId: 'student-1' }, null, false);
+    expect(progressRepo.enrollWithCapacity).toHaveBeenCalledWith({ courseId: 'course-1', studentReferenceId: 'student-1', metadata: {courseVersion: 3} }, null, false);
   });
 
   it('rejects foreign lesson progress', async () => {

@@ -15,6 +15,7 @@ function harness() {
   const course:any = {id:'c',status:'PUBLISHED',originType:'NATIVE_MANARATAK_COURSE',optionalFields:{completionCriteria:{assessmentRequired:true}}};
   const courses:any = {findById:async()=>course};
   const curriculum:any = {getCurriculumSnapshot:async()=>({quizzes:[{id:'q',passingScore:60,status:'PUBLISHED'}],questions,modules:[],lessons:[],assets:[]})};
+  curriculum.getLearningVersion = async()=>({course, curriculum: await curriculum.getCurriculumSnapshot()});
   const repository:any = {
     withTransaction:()=>repository, findEnrollment:async()=>({id:'e',status:'ACTIVE',progressPercentage:100}), findQuizAttempt:async()=>structuredClone(state.attempt),
     findCompletion:async()=>null, listQuizAttempts:async()=>[state.attempt], getStudentProgressSnapshot:async()=>({enrollment:{id:'e'},lessons:[],quizAttempts:[state.attempt]}),

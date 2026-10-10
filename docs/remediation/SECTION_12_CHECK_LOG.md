@@ -31,3 +31,13 @@ Final whitespace check: `git diff --check` PASS once after source corrections, b
 - Raw logs: `evidence/section-12/assessment-tests.log`, `assessment-types.log`; logs retain the observations before the source corrections.
 - Added Prisma schema/migration source only for assessment type and queue index. **No migration application, Prisma generate, database call, full build, E2E, deployment or main merge.** Activation must apply migration and regenerate the client in an authorized later runtime session.
 - React checklist: stable hook order, labeled/bounded inputs, disabled concurrent submissions, cleanup/generation checks for course changes, manual review refresh and pagination, and no automatic grading retry.
+
+
+## Enrollment-version continuation after 1690e2a
+
+- Only new `Section12LearningVersions.spec.ts` ran once, bounded to 45 seconds: **16 PASS / 1 FAIL, 3.98 seconds**. The failure was `this.progressRepository.findQuizAttempt is not a function` in the new harness, before answer-key grading assertions ran. Added the missing repository double; **no rerun**. The corrected case is unverified, not reported PASS.
+- Passing cases cover original workspace/asset/progress, missing/invalid snapshots, original completion criteria/version, duplicate completion events, registration version changes, exact/history resolution, archival and original attempt caps. All persistence uses doubles; no database calls occurred.
+- One selected changed-file semantic noEmit check: **0 diagnostics**. Dependency diagnostics excluded. Final missing-double correction and module archival relation refinement occurred afterward, without another check.
+- Adapted prior CourseProgressUseCases, Section12Followup and Section12Assessments test doubles to the immutable-version port; those files were not rerun.
+- Logs: `evidence/section-12/version-tests.log`, `version-types.log`.
+- No new schema change in this continuation. Existing assessment migration remains unapplied; no Prisma generation, DB backfill, provider execution, build/E2E, deployment or main merge.

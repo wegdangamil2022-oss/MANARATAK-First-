@@ -28,7 +28,14 @@ export interface CourseCurriculumSnapshotDto {
   questions: CourseQuestionDto[];
 }
 
+export interface CourseLearningVersionDto {
+  course: import('../entities/Course').CourseDto;
+  curriculum: CourseCurriculumSnapshotDto;
+}
+
 export interface ICourseCurriculumRepository {
+  /** Immutable published version. Legacy enrollment resolution uses only history before enrollment. */
+  getLearningVersion?(courseId: string, version: number | undefined, enrolledAt: Date): Promise<CourseLearningVersionDto | null>;
   createModule(data: CreateCourseModuleDto): Promise<CourseModuleDto>;
   updateModule(id: string, data: UpdateCourseModuleDto): Promise<CourseModuleDto>;
   deleteModule(id: string): Promise<void>;

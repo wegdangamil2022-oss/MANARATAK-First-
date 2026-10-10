@@ -17,6 +17,7 @@ describe('P13 follow-up integrity',()=>{
  it('does not count a student-forged COMPLETED label at 10 percent',async()=>{
   let stored:any;const courses:any={findById:async()=>({id:'c1',originType:'NATIVE_MANARATAK_COURSE',status:'PUBLISHED'})};
   const curriculum:any={getCurriculumSnapshot:async()=>({modules:[{id:'m1',status:'PUBLISHED'}],lessons:[{id:'l1',moduleId:'m1',lessonType:'VIDEO',status:'PUBLISHED'}]})};
+  curriculum.getLearningVersion=async()=>({course:await courses.findById(),curriculum:await curriculum.getCurriculumSnapshot()});
   const progress:any={findEnrollment:async()=>({id:'enrollment',status:'ACTIVE',progressPercentage:0}),withTransaction:()=>progress,
     upsertLessonProgress:async(data:any)=>{stored=data;},listLessonProgress:async()=>[stored],updateEnrollmentProgress:vi.fn(async()=>({status:'ACTIVE'})),getStudentProgressSnapshot:async()=>({})};
   const atomic:any={execute:async(_def:any,fn:any)=>fn({boundaryId:'tx',transactionClient:{}})};

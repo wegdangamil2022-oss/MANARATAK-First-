@@ -2,6 +2,9 @@ import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseContentStatus,
+  CourseLearningVersionDto,
+  CourseDto,
+  CourseStatus,
   CourseCurriculumSnapshotDto,
   CourseLessonDto,
   CourseLessonType,
@@ -57,7 +60,11 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
   }
 
   public async deleteModule(id: string): Promise<void> {
-    await this.prisma.courseModule.delete({ where: { id } });
+    await this.inTransaction(async tx => {
+      await tx.courseModule.update({where: {id}, data: {status: CourseContentStatus.ARCHIVED}});
+      await tx.courseLesson.updateMany({where: {moduleId: id}, data: {status: CourseContentStatus.ARCHIVED}});
+      await tx.courseQuiz.updateMany({where: {OR: [{moduleId: id}, {lesson: {moduleId: id}}]}, data: {status: CourseContentStatus.ARCHIVED}});
+    });
   }
 
   public async reorderModules(
@@ -86,7 +93,10 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
   }
 
   public async deleteLesson(id: string): Promise<void> {
-    await this.prisma.courseLesson.delete({ where: { id } });
+    await this.inTransaction(async tx => {
+      await tx.courseLesson.update({where: {id}, data: {status: CourseContentStatus.ARCHIVED}});
+      await tx.courseQuiz.updateMany({where: {lessonId: id}, data: {status: CourseContentStatus.ARCHIVED}});
+    });
   }
 
   public async reorderLessons(
@@ -152,7 +162,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
   }
 
   public async deleteQuiz(id: string): Promise<void> {
-    await this.prisma.courseQuiz.delete({ where: { id } });
+    await this.prisma.courseQuiz.update({ where: { id }, data: {status: CourseContentStatus.ARCHIVED} });
   }
 
   public async listQuizzesByCourseId(courseId: string): Promise<CourseQuizDto[]> {
@@ -179,7 +189,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
   }
 
   public async deleteQuestionBank(id: string): Promise<void> {
-    await this.prisma.courseQuestionBank.delete({ where: { id } });
+    await this.prisma.courseQuestionBank.update({ where: { id }, data: {status: CourseContentStatus.ARCHIVED} });
   }
 
   public async createQuestion(data: CreateCourseQuestionDto): Promise<CourseQuestionDto> {
@@ -298,6 +308,25 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
       questionBanks: questionBanks.map((item) => this.bank(item)),
       questions: questions.map((item) => this.question(item)),
     };
+  }
+
+  public async getLearningVersion(courseId: string, version: number | undefined, enrolledAt: Date): Promise<CourseLearningVersionDto | null> {
+    const row = version === undefined
+      ? await this.prisma.courseVersion.findFirst({where: {courseId, createdAt: {lte: enrolledAt}, snapshot: {path: ['course', 'status'], equals: 'PUBLISHED'}}, orderBy: [{createdAt: 'desc'}, {versionNumber: 'desc'}]})
+      : await this.prisma.courseVersion.findUnique({where: {courseId_versionNumber: {courseId, versionNumber: version}}});
+    if (!row) return null;
+    const snapshot = row.snapshot as unknown as {course: CourseDto} & CourseCurriculumSnapshotDto;
+    if (!snapshot.course || snapshot.course.id !== courseId || snapshot.course.version !== row.versionNumber || snapshot.course.status !== CourseStatus.PUBLISHED ||
+      !['modules', 'lessons', 'assets', 'quizzes', 'questionBanks', 'questions'].every(key => Array.isArray((snapshot as unknown as Record<string, unknown>)[key]))) {
+      throw new Error('COURSE_LEARNING_VERSION_INVALID');
+    }
+    // Hydrate persisted JSON dates; grading keys stay private until the learner projection.
+    const dated = <T extends {createdAt: Date; updatedAt?: Date}>(record: T): T => ({...record, createdAt: new Date(record.createdAt), ...(record.updatedAt ? {updatedAt: new Date(record.updatedAt)} : {})});
+    return {course: dated(snapshot.course), curriculum: {
+      modules: snapshot.modules.map(dated), lessons: snapshot.lessons.map(dated), assets: snapshot.assets.map(dated),
+      quizzes: snapshot.quizzes.map(record => ({...dated(record), assessmentType: record.assessmentType ?? 'QUIZ'})),
+      questionBanks: snapshot.questionBanks.map(dated), questions: snapshot.questions.map(dated),
+    }};
   }
 
   private async reorder(

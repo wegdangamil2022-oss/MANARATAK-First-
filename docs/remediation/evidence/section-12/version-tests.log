@@ -1,0 +1,43 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-12
+
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > reads the registered version and never loads latest curriculum into the learner workspace 17ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > resolves historical asset references from the enrolled definition 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > rejects a new-version lesson outside the enrolled curriculum 2ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > tracks original lessons against original totals 2ms
+ × packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > grades against original answer keys after later course changes 6ms
+   → this.progressRepository.findQuizAttempt is not a function
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > keeps original required assessments even when the latest version removes that requirement 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > records original completion version and certificate eligibility 4ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > does not append another completion event if a concurrent request already completed under the enrollment lock 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > fails closed when pinned history is missing rather than falling back to current content 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > rejects invalid stored version pins 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > records current version during new registration 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 historical persistence boundaries > resolves a legacy enrollment using only published history at or before its enrollment time 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 historical persistence boundaries > reads an exact pinned version rather than the newest historical row 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 historical persistence boundaries > rejects a foreign or unpublished history snapshot 0ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 historical persistence boundaries > retires a module and its children without deleting historical IDs or starting a nested transaction 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 historical persistence boundaries > blocks registration after the course changes version inside the owner lock 1ms
+ ✓ packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 historical persistence boundaries > enforces the enrolled quiz attempt cap even if the current archived quiz has a different cap 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/application/tests/courses/Section12LearningVersions.spec.ts > P13 enrollment-pinned learning definition > grades against original answer keys after later course changes
+TypeError: this.progressRepository.findQuizAttempt is not a function
+ ❯ CourseProgressUseCases.submitQuizAttempt packages/application/src/courses/use-cases/CourseProgressUseCases.ts:295:51
+    293|     await this.ensureTrackableCourse(data.courseId);
+    294|     const enrollment = await this.requireActiveEnrollment(data.courseI…
+    295|     const attempt = await this.progressRepository.findQuizAttempt(data…
+       |                                                   ^
+    296|     if (!attempt || attempt.courseId !== data.courseId || attempt.stud…
+    297|       throw new Error('COURSE_QUIZ_ATTEMPT_SCOPE_MISMATCH');
+ ❯ packages/application/tests/courses/Section12LearningVersions.spec.ts:31:111
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  15:26:38
+   Duration  3.98s (transform 2.83s, setup 0ms, import 3.65s, tests 42ms, environment 0ms)
+

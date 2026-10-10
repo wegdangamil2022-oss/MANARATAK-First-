@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaCourseCurriculumRepository } from './PrismaCourseCurriculumRepository';
 import {
   AtomicPersistenceContext,
   CourseCompletionDto,
@@ -42,7 +43,7 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
     return this.enrollment(await this.prisma.courseEnrollment.upsert({
       where: { courseId_studentReferenceId: { courseId: data.courseId, studentReferenceId: data.studentReferenceId } },
       create: { ...data, status: data.status ?? CourseEnrollmentStatus.ACTIVE, metadata: json(data.metadata) },
-      update: { lastAccessedAt: new Date(), metadata: json(data.metadata) },
+      update: { lastAccessedAt: new Date() },
     }));
   }
 
@@ -57,6 +58,10 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
         where: { courseId_studentReferenceId: { courseId: data.courseId, studentReferenceId: data.studentReferenceId } },
       });
       if (existing) return this.enrollment(existing);
+      const owner = await db.course.findUnique({where: {id: data.courseId}, select: {version: true, status: true}});
+      if (!owner || owner.status !== 'PUBLISHED' || owner.version !== data.metadata?.courseVersion) throw new Error('COURSE_ENROLLMENT_VERSION_CHANGED');
+      const definition = await new PrismaCourseCurriculumRepository(db as PrismaClient).getLearningVersion(data.courseId, owner.version, new Date());
+      if (!definition) throw new Error('COURSE_ENROLLMENT_VERSION_NOT_FOUND');
 
       let status = CourseEnrollmentStatus.ACTIVE;
       if (maximumSeats !== null) {
@@ -72,6 +77,11 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
         data: { ...data, status, metadata: json(data.metadata) },
       }));
     });
+  }
+
+  public async lockEnrollment(courseId: string, studentReferenceId: string): Promise<void> {
+    if (typeof (this.prisma as Partial<PrismaClient>).$transaction === 'function') throw new Error('COURSE_ENROLLMENT_LOCK_REQUIRES_BOUND_TRANSACTION');
+    await this.prisma.$queryRaw`SELECT id FROM "CourseEnrollment" WHERE "courseId" = ${courseId} AND "studentReferenceId" = ${studentReferenceId} FOR UPDATE`;
   }
 
   public async findEnrollment(courseId: string, studentReferenceId: string): Promise<CourseEnrollmentDto | null> {
@@ -125,7 +135,12 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
       await db.$queryRaw`SELECT id FROM "CourseEnrollment" WHERE "courseId" = ${data.courseId} AND "studentReferenceId" = ${data.studentReferenceId} FOR UPDATE`;
       const enrollment=await db.courseEnrollment.findUnique({where:{courseId_studentReferenceId:{courseId:data.courseId,studentReferenceId:data.studentReferenceId}}});
       if(!enrollment || enrollment.status!==CourseEnrollmentStatus.ACTIVE) throw new Error('COURSE_ENROLLMENT_NOT_ACTIVE');
-      const quiz=await db.courseQuiz.findFirst({where:{id:data.quizId,courseId:data.courseId,status:{not:'ARCHIVED'}}});
+      const metadata = enrollment.metadata as Record<string, unknown> | null;
+      const version = metadata?.courseVersion;
+      if (version !== undefined && (!Number.isSafeInteger(version) || (version as number) < 1)) throw new Error('COURSE_ENROLLMENT_VERSION_INVALID');
+      const definition = await new PrismaCourseCurriculumRepository(db as PrismaClient).getLearningVersion(data.courseId, version as number | undefined, enrollment.enrolledAt);
+      if (!definition) throw new Error('COURSE_ENROLLMENT_VERSION_NOT_FOUND');
+      const quiz = definition.curriculum.quizzes.find(item => item.id === data.quizId && item.status !== 'ARCHIVED');
       if(!quiz) throw new Error('COURSE_QUIZ_SCOPE_MISMATCH');
       const existing = await db.courseQuizAttempt.findFirst({where: {quizId: data.quizId, studentReferenceId: data.studentReferenceId, status: CourseQuizAttemptStatus.IN_PROGRESS, submittedAt: null}, orderBy: {startedAt: 'desc'}});
       if (existing) return this.quizAttempt(existing);

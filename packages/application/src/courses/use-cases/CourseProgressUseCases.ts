@@ -11,6 +11,7 @@ import {
   CourseProgressStatus,
   CourseQuestionType,
   CourseQuizAttemptDto,
+  CourseEnrollmentDto,
   AssessmentReviewSnapshot,
   CourseLearnerWorkspaceDto,
   CourseQuizAttemptStatus,
@@ -45,6 +46,15 @@ export class CourseProgressUseCases {
     })};
   }
 
+  private async learningVersion(courseId: string, enrollment: CourseEnrollmentDto) {
+    const rawVersion = enrollment.metadata?.courseVersion;
+    if (rawVersion !== undefined && (!Number.isSafeInteger(rawVersion) || (rawVersion as number) < 1)) throw new Error('COURSE_ENROLLMENT_VERSION_INVALID');
+    if (!this.curriculumRepository.getLearningVersion) throw new Error('COURSE_LEARNING_VERSION_PERSISTENCE_REQUIRED');
+    const definition = await this.curriculumRepository.getLearningVersion(courseId, rawVersion as number | undefined, enrollment.enrolledAt);
+    if (!definition) throw new Error('COURSE_ENROLLMENT_VERSION_NOT_FOUND');
+    return definition;
+  }
+
   private async ensureTrackableCourse(courseId: string): Promise<CourseDto> {
     const course = await this.courseRepository.findById(courseId);
     if (!course) throw new Error(`Course with id ${courseId} not found`);
@@ -73,8 +83,8 @@ export class CourseProgressUseCases {
 
   public async resolveLearningAsset(courseId: string, lessonId: string, assetReferenceId: string, studentReferenceId: string): Promise<string> {
     await this.ensureTrackableCourse(courseId);
-    await this.requireLearningAccessEnrollment(courseId, studentReferenceId);
-    const curriculum = await this.curriculumRepository.getCurriculumSnapshot(courseId);
+    const enrollment = await this.requireLearningAccessEnrollment(courseId, studentReferenceId);
+    const {curriculum} = await this.learningVersion(courseId, enrollment);
     const lesson = curriculum.lessons.find(row => row.id === lessonId && row.status !== CourseContentStatus.ARCHIVED);
     const module = lesson && curriculum.modules.find(row => row.id === lesson.moduleId && row.status !== CourseContentStatus.ARCHIVED);
     const asset = curriculum.assets.find(row => row.id === assetReferenceId && row.lessonId === lessonId);
@@ -84,11 +94,12 @@ export class CourseProgressUseCases {
 
   public async getLearningWorkspace(courseId: string, studentReferenceId: string): Promise<CourseLearnerWorkspaceDto> {
     await this.ensureTrackableCourse(courseId);
-    await this.requireLearningAccessEnrollment(courseId, studentReferenceId);
-    const [progress, curriculum] = await Promise.all([
+    const enrollment = await this.requireLearningAccessEnrollment(courseId, studentReferenceId);
+    const [progress, definition] = await Promise.all([
       this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId),
-      this.curriculumRepository.getCurriculumSnapshot(courseId),
+      this.learningVersion(courseId, enrollment),
     ]);
+    const {curriculum} = definition;
     if (!progress) throw new Error('COURSE_PROGRESS_SNAPSHOT_NOT_FOUND');
 
     const modules = curriculum.modules
@@ -189,10 +200,11 @@ export class CourseProgressUseCases {
     }, async persistence => {
       const tx = (this.progressRepository as ITransactionalCourseProgressRepository).withTransaction(persistence);
       const enrollment = await tx.enrollWithCapacity(
-        { courseId, studentReferenceId },
+        { courseId, studentReferenceId, metadata: {courseVersion: course.version} },
         policy?.isCapacityLimited ? policy.maximumSeats ?? null : null,
         Boolean(policy?.waitlistEnabled),
       );
+      enrollmentPayload.courseVersion = enrollment.metadata?.courseVersion;
       enrollmentPayload.enrollmentId = enrollment.id;
       enrollmentPayload.enrollmentStatus = enrollment.status;
       enrollmentPayload.progressPercentage = enrollment.progressPercentage;
@@ -209,7 +221,7 @@ export class CourseProgressUseCases {
   ): Promise<StudentCourseProgressSnapshotDto> {
     await this.ensureTrackableCourse(data.courseId);
     const enrollment = await this.requireActiveEnrollment(data.courseId, data.studentReferenceId);
-    const curriculum = await this.curriculumRepository.getCurriculumSnapshot(data.courseId);
+    const {curriculum} = await this.learningVersion(data.courseId, enrollment);
     if (!curriculum.lessons.some(lesson => lesson.id === data.lessonId && lesson.status !== CourseContentStatus.ARCHIVED)) {
       throw new Error('COURSE_LESSON_SCOPE_MISMATCH');
     }
@@ -265,8 +277,8 @@ export class CourseProgressUseCases {
     data: Omit<CreateQuizAttemptDto, 'attemptNumber'>,
   ): Promise<CourseQuizAttemptDto> {
     await this.ensureTrackableCourse(data.courseId);
-    await this.requireActiveEnrollment(data.courseId, data.studentReferenceId);
-    const curriculum = await this.curriculumRepository.getCurriculumSnapshot(data.courseId);
+    const enrollment = await this.requireActiveEnrollment(data.courseId, data.studentReferenceId);
+    const {curriculum} = await this.learningVersion(data.courseId, enrollment);
     const quiz = curriculum.quizzes.find(item => item.id === data.quizId && item.status !== CourseContentStatus.ARCHIVED);
     if (!quiz) throw new Error('COURSE_QUIZ_SCOPE_MISMATCH');
     const existing = (await this.progressRepository.listQuizAttempts(data.courseId, data.studentReferenceId))
@@ -279,14 +291,14 @@ export class CourseProgressUseCases {
 
   public async submitQuizAttempt(data: SubmitQuizAttemptDto): Promise<CourseQuizAttemptDto> {
     await this.ensureTrackableCourse(data.courseId);
-    await this.requireActiveEnrollment(data.courseId, data.studentReferenceId);
+    const enrollment = await this.requireActiveEnrollment(data.courseId, data.studentReferenceId);
     const attempt = await this.progressRepository.findQuizAttempt(data.attemptId);
     if (!attempt || attempt.courseId !== data.courseId || attempt.studentReferenceId !== data.studentReferenceId) {
       throw new Error('COURSE_QUIZ_ATTEMPT_SCOPE_MISMATCH');
     }
     if (attempt.status !== CourseQuizAttemptStatus.IN_PROGRESS || attempt.submittedAt) throw new Error('COURSE_QUIZ_ATTEMPT_ALREADY_SUBMITTED');
 
-    const curriculum = await this.curriculumRepository.getCurriculumSnapshot(data.courseId);
+    const {curriculum} = await this.learningVersion(data.courseId, enrollment);
     const quiz = curriculum.quizzes.find(item => item.id === attempt.quizId && item.status !== CourseContentStatus.ARCHIVED);
     if (!quiz) throw new Error('COURSE_QUIZ_SCOPE_MISMATCH');
     if (quiz.passingScore == null) throw new Error('COURSE_QUIZ_PASSING_SCORE_REQUIRED');
@@ -371,7 +383,7 @@ export class CourseProgressUseCases {
     studentReferenceId: string,
     context?: AtomicMutationRequestContext,
   ): Promise<StudentCourseProgressSnapshotDto> {
-    const course = await this.ensureTrackableCourse(courseId);
+    await this.ensureTrackableCourse(courseId);
     const existing = await this.progressRepository.findCompletion(courseId, studentReferenceId);
     if (existing) {
       const completedSnapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
@@ -379,11 +391,11 @@ export class CourseProgressUseCases {
       return this.learnerSnapshot(completedSnapshot);
     }
     const enrollment = await this.requireActiveEnrollment(courseId, studentReferenceId);
+    const {course, curriculum} = await this.learningVersion(courseId, enrollment);
     const completionCriteria = course.optionalFields?.completionCriteria && typeof course.optionalFields.completionCriteria === 'object' && !Array.isArray(course.optionalFields.completionCriteria)
       ? course.optionalFields.completionCriteria as Record<string, unknown>
       : {};
     if (enrollment.progressPercentage < 100) throw new Error('Course progress must reach 100% before completion');
-    const curriculum = await this.curriculumRepository.getCurriculumSnapshot(courseId);
     const assessmentRequired = completionCriteria.assessmentRequired === true;
     if (assessmentRequired) {
       const requiredQuizzes = curriculum.quizzes.filter(quiz => quiz.status !== CourseContentStatus.ARCHIVED);
@@ -405,7 +417,7 @@ export class CourseProgressUseCases {
     const completedAt = new Date();
     await this.atomicMutations.execute({
       domain: 'COURSES', aggregateType: 'COURSE_COMPLETION', aggregateId: `${courseId}:${studentReferenceId}`,
-      action: 'COURSE_COMPLETED', context,
+      action: 'COURSE_COMPLETED', context: context ?? {actorId: studentReferenceId, actorType: 'STUDENT', source: 'learner-api'},
       outbox: {
         id: `course-completed:${courseId}:${studentReferenceId}:v${course.version}`,
         eventType: COURSE_COMPLETED_EVENT_TYPE,
@@ -419,7 +431,9 @@ export class CourseProgressUseCases {
       },
     }, async persistence => {
       const tx = (this.progressRepository as ITransactionalCourseProgressRepository).withTransaction(persistence);
-      if (await tx.findCompletion(courseId, studentReferenceId)) return;
+      if (!tx.lockEnrollment) throw new Error('COURSE_COMPLETION_ENROLLMENT_LOCK_REQUIRED');
+      await tx.lockEnrollment(courseId, studentReferenceId);
+      if (await tx.findCompletion(courseId, studentReferenceId)) return false;
       const currentEnrollment = await tx.findEnrollment(courseId, studentReferenceId);
       if (!currentEnrollment || currentEnrollment.status !== CourseEnrollmentStatus.ACTIVE || currentEnrollment.progressPercentage < 100) {
         throw new Error('COURSE_COMPLETION_STATE_CHANGED');
@@ -431,7 +445,8 @@ export class CourseProgressUseCases {
         metadata: { phase14OwnsCertificateIssuance: true },
       });
       await tx.markEnrollmentCompleted(courseId, studentReferenceId);
-    });
+      return true;
+    }, created => created);
 
     const snapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
     if (!snapshot) throw new Error('Completion snapshot could not be loaded');

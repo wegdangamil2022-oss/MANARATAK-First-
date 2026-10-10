@@ -30,12 +30,21 @@ Completed source implementation after `681bac4`:
 - Source migration `20261010000000_course_assessment_type` adds the assessment discriminator/check and review-queue index. **It was not applied.** Deployment must apply it and regenerate the Prisma client before this branch is activated.
 - New light checks: **23/23 tests passed in 4.38 seconds**, only the two new assessment test files, once. This is 66 distinct passing cases across recorded rounds, not a rerun of all 66 on the final tree. Single selected-file semantic check recorded 13 diagnostics; unused imports/parameters and isolated Express augmentation inclusion were corrected without rerunning. No final semantic PASS is claimed.
 
+## Enrollment version continuation after 1690e2a
+
+- New registration stores the published `courseVersion` in enrollment metadata. Capacity persistence locks the course and rejects publication/version changes before creating the enrollment; it also verifies the immutable published snapshot exists. Generic enrollment upserts preserve existing metadata.
+- Workspace, lesson progress totals, asset resolution, quiz attempts/submission and completion use the registered course snapshot. Completion criteria, result version and certificate eligibility come from that snapshot, preserving the P13/P14 boundary. The current course must still be published for learner access.
+- Legacy enrollments without a pin resolve only published history at or before their enrollment timestamp. Missing/corrupt history fails closed; there is no fallback to latest curriculum. Existing recorded enrollment timestamps/history must be verified during activation; no database backfill was run.
+- Curriculum deletion now archives module/lesson/quiz/question/bank identities. Module/lesson retirement also retires associated assessments, keeping historical foreign-key targets alive for pinned learners. Snapshot reads hydrate JSON dates and default older quiz assessment types to `QUIZ`.
+- Attempt limits use the enrolled quiz definition inside the enrollment lock. Completion locks enrollment, skips duplicate business/audit/outbox writes when another request already completed, and records the student context by default.
+- New version suite ran once: **16/17 passed in 3.98 seconds**. One case stopped because its test double omitted `findQuizAttempt`; that double was corrected without rerun. No claim of 17/17 PASS. Selected changed-file noEmit semantic check: **zero diagnostics**, before the final fixture correction and module-to-lesson assessment retirement refinement; dependency diagnostics excluded. Previously executed suites were not repeated; their doubles were adapted to the new version port.
+
 ## Limits and activation handoff
 
 - No database query, migration, seed, import, Prisma generation, build, browser/E2E, provider execution or deployment was performed. The initial round used existing tables; the continuation adds the unapplied assessment-type/index migration described above.
 - Selected lightweight tests passed; PostgreSQL row-lock behavior, real Audit/Outbox rollback, Prisma bound-client behavior, endpoint RBAC/session/CSRF and actual UI workflows still require operational verification.
 - Assignment submission/review and manual grading are now implemented in source and covered by selected light tests. Activation and end-to-end operational acceptance remain deferred, so this document does not certify full runtime closure of Phase 13.
 - Provider-specific enrichment adapters remain explicitly unavailable where no registered adapter exists; no fallback crawling was introduced.
-- Enrollment-version pinning here covers learning paths. Course curriculum/progress version migration semantics for existing learners remain a separate runtime/product validation item.
+- Version pinning now covers both learning paths and course learning definitions. Legacy historical resolution and real PostgreSQL version/concurrency behavior remain operational acceptance items.
 - The selected-file semantic type check reported eight diagnostics which were corrected without rerun. Whole-project type correctness is not certified; see check log.
 - Branch is pushed only. No Section 11/12 main merge, production publication, certificate issuance or runtime activation is part of this task.
