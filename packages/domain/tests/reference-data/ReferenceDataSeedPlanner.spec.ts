@@ -122,7 +122,7 @@ describe('ReferenceDataSeedPlanner', () => {
     });
 
     expect(() => planner.markReadyToApply(batch)).toThrow(
-      'Batch must be validated before marking ready to apply'
+      'REFERENCE_DATA_SEED_APPROVAL_RECEIPT_REQUIRED'
     );
   });
 
@@ -147,11 +147,11 @@ describe('ReferenceDataSeedPlanner', () => {
 
     expect(validated.validationSummary?.invalidRecords).toBe(1);
     expect(() => planner.markReadyToApply(validated)).toThrow(
-      'Cannot mark batch ready to apply: batch contains invalid records'
+      'REFERENCE_DATA_SEED_APPROVAL_RECEIPT_REQUIRED'
     );
   });
 
-  it('marks valid batches as READY_TO_APPLY', () => {
+  it('does not grant READY_TO_APPLY even for fully validated batches', () => {
     const batch = planner.createBatch({
       seedBatchId: 'batch-005',
       sourceName: 'Clean-Source',
@@ -170,9 +170,8 @@ describe('ReferenceDataSeedPlanner', () => {
     });
 
     const validated = planner.validateBatch(batch);
-    const ready = planner.markReadyToApply(validated);
-
-    expect(ready.status).toBe(ReferenceDataSeedStatus.READY_TO_APPLY);
-    expect(ready.appliedAt).toBeUndefined(); // APPLIED is not set by planner; actual apply is deferred
+    expect(validated.validationSummary?.invalidRecords).toBe(0);
+    expect(() => planner.markReadyToApply(validated)).toThrow('REFERENCE_DATA_SEED_APPROVAL_RECEIPT_REQUIRED');
+    expect(validated.status).toBe(ReferenceDataSeedStatus.VALIDATED);
   });
 });

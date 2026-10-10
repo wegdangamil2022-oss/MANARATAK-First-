@@ -113,26 +113,10 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
     };
   }
 
-  public markReadyToApply(batch: ReferenceDataSeedBatch): ReferenceDataSeedBatch {
-    if (batch.status === ReferenceDataSeedStatus.DRAFT) {
-      throw new Error('Batch must be validated before marking ready to apply');
-    }
-    if (batch.records.length === 0) {
-      throw new Error('Empty seed batches cannot be approved for apply');
-    }
+  public markReadyToApply(_batch: ReferenceDataSeedBatch): ReferenceDataSeedBatch {
+    // Validation cannot authorize canonical publication. Without a durable
+    // source-hash-bound, actor-reviewed P7 receipt this transition is forbidden.
+    throw new Error('REFERENCE_DATA_SEED_APPROVAL_RECEIPT_REQUIRED');
 
-    if (!batch.validationSummary || batch.validationSummary.invalidRecords > 0) {
-      throw new Error('Cannot mark batch ready to apply: batch contains invalid records');
-    }
-
-    const hasInvalid = batch.records.some(r => !r.validationReport || !r.validationReport.canBeImported);
-    if (hasInvalid) {
-      throw new Error('Cannot mark batch ready to apply: one or more records cannot be imported');
-    }
-
-    return {
-      ...batch,
-      status: ReferenceDataSeedStatus.READY_TO_APPLY
-    };
   }
 }
