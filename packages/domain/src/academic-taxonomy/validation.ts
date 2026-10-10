@@ -400,12 +400,12 @@ export class AcademicTaxonomyValidationService implements IAcademicTaxonomyValid
       });
     }
 
-    const localeNormalized = alias.locale ? alias.locale.trim() : null;
+    const localeNormalized = alias.locale ? alias.locale.trim().toLowerCase() || null : null;
 
     for (const existing of existingAliases) {
-      const existingLocale = existing.locale ? existing.locale.trim() : null;
+      const existingLocale = existing.locale ? existing.locale.trim().toLowerCase() || null : null;
 
-      if (normalizeAcademicTaxonomyAlias(existing.normalizedAlias) === normalizedAlias) {
+      if (normalizeAcademicTaxonomyAlias(existing.alias) === normalizedAlias || normalizeAcademicTaxonomyAlias(existing.normalizedAlias) === normalizedAlias) {
         if (nodeId && existing.nodeId !== nodeId) {
           issues.push({
             fieldName: 'alias',

@@ -1,3 +1,5 @@
+import { taxonomyRevisionHash } from '../services/TaxonomyRevisionHash';
+import { TaxonomyDiagnosticsService } from '../services/TaxonomyDiagnosticsService';
 import { AtomicDomainMutationCoordinator, type AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import {
   IAcademicTaxonomyRepository,
@@ -5,6 +7,7 @@ import {
   AcademicLifecycleDecision,
   assertAcademicLifecycleDecision,
   AcademicStandardType,
+  TaxonomyCrosswalkQuery,
   AcademicTaxonomyDeterministicKey,
   normalizeAcademicTaxonomyAlias,
   IAcademicTaxonomyValidationService,
@@ -48,6 +51,67 @@ export class AdminAcademicTaxonomyUseCases {
     if (!this.repository.countNodes) throw new Error('TAXONOMY_PAGINATION_UNAVAILABLE');
     const [data, total] = await Promise.all([this.repository.listNodes({ ...filters, page, pageSize }), this.repository.countNodes(filters)]);
     return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize), hasNextPage: page * pageSize < total };
+  }
+
+  public async relatedNodesPage(nodeId: string, direction: 'parents' | 'children', filters?: { page?: number; pageSize?: number }) {
+    if (!this.repository.relatedNodesPage) throw new Error('TAXONOMY_GOVERNANCE_READ_UNAVAILABLE');
+    return this.repository.relatedNodesPage(nodeId, direction, filters);
+  }
+
+  public async primaryPath(nodeId: string) {
+    const path: AcademicTaxonomyNodeDto[] = []; const visited = new Set<string>();
+    let current: string | undefined = nodeId;
+    let alternatives: AcademicTaxonomyNodeDto[] = []; let alternativeTotal = 0;
+    let termination = 'NO_PRIMARY_PARENT';
+    for (let depth = 0; current && depth < 32; depth++) {
+      if (visited.has(current)) throw new Error('TAXONOMY_PATH_CYCLE'); visited.add(current);
+      const node = await this.repository.getNode(current); if (!node) throw new Error('TAXONOMY_NODE_NOT_FOUND');
+      path.unshift(node);
+      const parents = await this.relatedNodesPage(current, 'parents', { pageSize: 100 });
+      // This repository contract orders primary links first and exposes actual edge flags.
+      const primary = parents.links?.filter(link => link.isPrimary) ?? [];
+      if (primary.length > 1) throw new Error('TAXONOMY_MULTIPLE_PRIMARY_PARENTS');
+      if (depth === 0) { alternatives = parents.data.filter(parent => !primary.some(link => link.nodeId === parent.nodeId)); alternativeTotal = parents.total - primary.length; }
+      current = primary[0]?.nodeId;
+      if (current && depth === 31) termination = 'DEPTH_LIMIT';
+    }
+    return { path, alternativeParents: alternatives, alternativeTotal, termination, maxDepth: 32 };
+  }
+
+  public async diagnostics(query: { standardType?: AcademicStandardType; page?: number; code?: string }) {
+    if (!this.repository.getGovernanceSnapshot) throw new Error('TAXONOMY_GOVERNANCE_READ_UNAVAILABLE');
+    return new TaxonomyDiagnosticsService().report(await this.repository.getGovernanceSnapshot(query.standardType), query);
+  }
+  public crosswalk(query: TaxonomyCrosswalkQuery) {
+    if (!this.repository.crosswalkReport) throw new Error('TAXONOMY_GOVERNANCE_READ_UNAVAILABLE');
+    return this.repository.crosswalkReport(query);
+  }
+  public async previewMapping(data: UpsertAcademicStandardMappingDto) {
+    const [sourceNode, targetNode, existingMappings] = await Promise.all([this.repository.getNode(data.sourceNodeId), this.repository.getNode(data.targetNodeId), this.repository.listMappings(data.sourceNodeId)]);
+    return { sourceNode, targetNode, issues: this.validationService.validateMapping({ mapping: data, sourceNode, targetNode, existingMappings }), direction: 'SOURCE_TO_TARGET',
+      meaning: data.strength === 'BROAD' ? 'TARGET_IS_BROADER' : data.strength === 'NARROW' ? 'TARGET_IS_NARROWER' : data.strength === 'EXACT' ? 'PROPOSED_EQUIVALENCE' : data.strength === 'RELATED' ? 'RELATED_WITHOUT_EQUIVALENCE' : 'UNRESOLVED_NO_EQUIVALENCE' };
+  }
+
+  public async bulkReview(input: { nodes: Array<{ nodeId: string; expectedUpdatedAt: string }>; nextStatus: 'DRAFT' | 'READY_TO_REVIEW'; reason: string;
+    acknowledgeHistoricalReferences: boolean; dryRun: boolean; previewHash?: string }, context?: AtomicMutationRequestContext): Promise<any> {
+    if (!input.nodes.length || input.nodes.length > 25 || new Set(input.nodes.map(node => node.nodeId)).size !== input.nodes.length || !['DRAFT', 'READY_TO_REVIEW'].includes(input.nextStatus)) throw new Error('TAXONOMY_BULK_REVIEW_INVALID');
+    assertAcademicLifecycleDecision({ reason: input.reason, acknowledgeHistoricalReferences: input.acknowledgeHistoricalReferences });
+    if (this.atomic && !input.dryRun) return this.mutate('TAXONOMY_BULK_REVIEWED', 'review-queue', context, owner => owner.bulkReview(input), { lifecycleReason: input.reason, requestedStatus: input.nextStatus });
+    const entries = await Promise.all(input.nodes.map(async item => {
+      const node = await this.repository.getNode(item.nodeId);
+      const issues = !node ? ['NODE_NOT_FOUND'] : node.updatedAt.toISOString() !== item.expectedUpdatedAt ? ['VERSION_CONFLICT'] : !['DRAFT', 'READY_TO_REVIEW'].includes(node.status) ? ['STATUS_NOT_REVIEWABLE'] : this.validationService.validateNode(node).issues.filter(issue => issue.severity === 'ERROR').map(issue => issue.code);
+      const impact = node ? await this.getUsage(node.nodeId) : null;
+      return { ...item, node, issues, impact };
+    }));
+    const previewHash = taxonomyRevisionHash({ entries: entries.map(({ node, impact, ...entry }) => ({ ...entry, impact: impact ? { counts: impact.counts, totalReferences: impact.totalReferences } : null, actualVersion: node?.updatedAt.toISOString(), status: node?.status })), nextStatus: input.nextStatus, reason: input.reason.trim() });
+    const preview = { previewHash, data: entries.map(({ node, ...entry }) => entry), canApply: entries.every(entry => !entry.issues.length), maxBatchSize: 25 };
+    if (input.dryRun) return preview;
+    if (!preview.canApply || input.previewHash !== previewHash) throw new Error('TAXONOMY_BULK_PREVIEW_CONFLICT');
+    for (const entry of entries) {
+      if (entry.node!.status === input.nextStatus) continue;
+      await this.editNode(entry.nodeId, { ...entry.node!, status: input.nextStatus as any, lifecycle: { reason: input.reason, acknowledgeHistoricalReferences: true } }, entry.expectedUpdatedAt);
+    }
+    return { ...preview, applied: true };
   }
 
   public getNode(nodeId: string): Promise<AcademicTaxonomyNodeDto | null> {
@@ -208,7 +272,7 @@ export class AdminAcademicTaxonomyUseCases {
   private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined,
     work: (cases: AdminAcademicTaxonomyUseCases) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {
     if (!this.atomic || !context?.actorId || !this.repository.withTransaction) throw new Error('TAXONOMY_ATOMIC_CONTEXT_REQUIRED');
-    return this.atomic.execute({ domain: 'ACADEMIC_TAXONOMY', aggregateType: 'ACADEMIC_TAXONOMY', aggregateId: id, action, context, auditMetadata }, tx => {
+    return this.atomic.execute({ domain: 'ACADEMIC_TAXONOMY', aggregateType: 'ACADEMIC_TAXONOMY', aggregateId: id, action, context, auditMetadata, outbox: { eventType: 'TaxonomyCatalogChanged', payload: { changedAggregateId: id, operation: action, requiresOwnerReload: true } } }, tx => {
       const repository = this.repository.withTransaction!(tx);
       return repository.executeSerializable(() => work(new AdminAcademicTaxonomyUseCases(repository, this.validationService, this.importHandoffService, undefined, this.usage?.withTransaction(tx))));
     });

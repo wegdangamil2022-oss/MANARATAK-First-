@@ -11,6 +11,8 @@ import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } fr
 export class AcademicTaxonomyPublicRouter {
   public static create(cradle: { academicTaxonomyRepository: IAcademicTaxonomyRepository }): Router {
     const router = Router();
+    // No public catalog cache: activation/archive is visible on the next owner read.
+    router.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store, max-age=0'); next(); });
     const localized = new LocalizedPublicAcademicTaxonomyUseCases(cradle.academicTaxonomyRepository);
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
     const nodeTypeSchema = z.nativeEnum(AcademicTaxonomyNodeType);
@@ -27,6 +29,7 @@ export class AcademicTaxonomyPublicRouter {
       q: z.string().trim().min(1).max(200), nodeType: nodeTypeSchema.optional(), standardType: standardTypeSchema.optional(),
     }).merge(localeQuerySchema);
 
+    const relatedQuery = z.object({ page: z.coerce.number().int().min(1).max(1000).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() }).merge(localeQuerySchema);
     router.get('/nodes', asyncHandler(async (req: Request, res: Response) => {
       const { locale, ...filters } = listNodesQuerySchema.parse(req.query);
       res.json({ data: await localized.listNodes(filters, locale) });
@@ -43,10 +46,12 @@ export class AcademicTaxonomyPublicRouter {
       res.json(node);
     }));
     router.get('/nodes/:nodeId/children', asyncHandler(async (req: Request, res: Response) => {
-      res.json({ data: await localized.listChildren(req.params.nodeId, parseRequestLocale(req.query)) });
+      const { locale, ...filters } = relatedQuery.parse(req.query);
+      res.json({ data: await localized.listChildren(req.params.nodeId, locale, filters) });
     }));
     router.get('/nodes/:nodeId/parents', asyncHandler(async (req: Request, res: Response) => {
-      res.json({ data: await localized.listParents(req.params.nodeId, parseRequestLocale(req.query)) });
+      const { locale, ...filters } = relatedQuery.parse(req.query);
+      res.json({ data: await localized.listParents(req.params.nodeId, locale, filters) });
     }));
     router.get('/search', asyncHandler(async (req: Request, res: Response) => {
       const { q, locale, ...filters } = searchQuerySchema.parse(req.query);

@@ -38,7 +38,7 @@ export class DegreeLevelUseCases {
     if (this.atomic) {
       if (!context?.actorId || !this.repository.withTransaction) throw new Error('DEGREE_LEVEL_ATOMIC_CONTEXT_REQUIRED');
       return this.atomic.execute({ domain: 'ACADEMIC_TAXONOMY', aggregateType: 'DEGREE_LEVEL', aggregateId: id,
-        action: 'DEGREE_LEVEL_CHANGED', context, auditMetadata: command.lifecycle ? { lifecycleReason: command.lifecycle.reason.trim(), historicalReferencesPreserved: true, requestedStatus: command.status } : undefined }, async tx => {
+        action: 'DEGREE_LEVEL_CHANGED', context, outbox: { eventType: 'DegreeLevelChanged', payload: { degreeLevelId: id, requiresOwnerReload: true } }, auditMetadata: command.lifecycle ? { lifecycleReason: command.lifecycle.reason.trim(), historicalReferencesPreserved: true, requestedStatus: command.status } : undefined }, async tx => {
         const updated = await new DegreeLevelUseCases(this.repository.withTransaction!(tx), undefined, this.usage?.withTransaction(tx)).update(id, command);
         if (!updated) throw new Error('DEGREE_LEVEL_NOT_FOUND');
         return updated;

@@ -27,7 +27,7 @@ export interface AtomicDomainMutationDefinition {
 export class AtomicDomainMutationCoordinator {
   public constructor(private readonly executor: AtomicAuditedOutboxMutationExecutor) {}
 
-  public execute<T>(definition: AtomicDomainMutationDefinition, mutation: (context: AtomicPersistenceContext) => Promise<T>): Promise<T> {
+  public execute<T>(definition: AtomicDomainMutationDefinition, mutation: (context: AtomicPersistenceContext) => Promise<T>, shouldRecord?: (result: T) => boolean): Promise<T> {
     const now = new Date();
     const auditId = randomUUID();
     const outboxId = definition.outbox?.id ?? randomUUID();
@@ -61,6 +61,6 @@ export class AtomicDomainMutationCoordinator {
       availableAt: now,
       state: OutboxProcessingState.PENDING,
       attempts: 0,
-    }, mutation);
+    }, mutation, shouldRecord);
   }
 }

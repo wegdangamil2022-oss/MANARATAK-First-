@@ -68,7 +68,7 @@ const INLINE_LIMIT_BYTES = 90 * 1024;
 const RECORD_PAGE_SIZE = 25;
 
 export type DomainKey =
-  'ALL' | 'SCHOLARSHIPS' | 'UNIVERSITIES' | 'MAJORS' | 'COURSES' | 'TESTS' | 'SERVICES' | 'CMS';
+  'ALL' | 'ACADEMIC_TAXONOMY' | 'SCHOLARSHIPS' | 'UNIVERSITIES' | 'MAJORS' | 'COURSES' | 'TESTS' | 'SERVICES' | 'CMS';
 type LoadState = 'idle' | 'loading' | 'ready' | 'unavailable';
 type SourceStatus = 'ACTIVE' | 'NEEDS_REVIEW' | 'DISABLED' | 'BLOCKED';
 type InputMode = 'file' | 'paste';
@@ -254,6 +254,15 @@ type DomainConfig = {
 };
 
 const DOMAIN_CONFIG: DomainConfig[] = [
+  {
+    key: 'ACADEMIC_TAXONOMY',
+    ar: 'التصنيف الأكاديمي',
+    en: 'Academic Taxonomy',
+    workspace: '/academic-taxonomy?view=imports',
+    importPath: '/imports/academic-taxonomy',
+    icon: Sparkles,
+    template: 'nodeType,canonicalCode,canonicalName,standardType,standardCode',
+  },
   {
     key: 'SCHOLARSHIPS',
     ar: 'المنح الدراسية',
@@ -3134,6 +3143,7 @@ function normalizeDomain(value?: string | null): string {
     .trim()
     .toUpperCase();
   if (domain === 'INTERNATIONAL_TESTS') return 'TESTS';
+  if (domain === 'TAXONOMY') return 'ACADEMIC_TAXONOMY';
   return domain || 'UNKNOWN';
 }
 

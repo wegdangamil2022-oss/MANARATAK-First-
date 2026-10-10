@@ -7,6 +7,7 @@ import {
   AcademicStandardMappingDto,
   UpsertAcademicStandardMappingDto,
 } from './contracts';
+import { normalizeAcademicTaxonomyAlias } from './key';
 import { AcademicTaxonomyValidationSeverity } from './enums';
 import {
   AcademicTaxonomySeedStatus,
@@ -82,6 +83,8 @@ export class AcademicTaxonomySeedPlanner implements IAcademicTaxonomySeedPlanner
           break;
         }
         case 'ALIAS': {
+          const alias = record.payload as UpsertAcademicTaxonomyAliasDto;
+          deterministicKey = `${alias.nodeId}:${alias.locale?.trim().toLowerCase() ?? ''}:${typeof alias.alias === 'string' ? normalizeAcademicTaxonomyAlias(alias.alias) : 'INVALID_ALIAS'}`;
           issues = this.validationService.validateAlias({
             alias: record.payload as UpsertAcademicTaxonomyAliasDto,
             existingAliases,

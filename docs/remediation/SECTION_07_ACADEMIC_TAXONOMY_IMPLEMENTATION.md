@@ -1,9 +1,15 @@
 # Section 07 — Academic Taxonomy / P8
 
-Status: **IN PROGRESS — three remediation batches**, not CODE_CLOSED.
+Status: **CODE_CLOSED — RUNTIME_DEFERRED** (2026-10-10).
+
+All original Section 07 source tasks, including FGA-07-001/002, are implemented across four commits/batches. Runtime acceptance remains open under the review's Post-28 policy. This status does not claim successful deployment, applied schema, real database execution, browser acceptance, or a fully passing repository-wide verification gate.
+
+Final source commit: the commit containing this document, on the branch below. Earlier source commits: `7b5e2c0`, `84d053b`, `0374d1e`.
 
 Branch: `codex/section-07-academic-taxonomy`, based on `7231f2c`.
 Worktree: `/workspace/manaratak-section-07`. The original checkout and branch remain available for Section 06. Shared external dependencies are read-only symlinks; workspace package links/build outputs resolve to this worktree. No Section 06 source, city data or DB schema changed.
+
+The first three batches below are historical records; their then-pending source work is resolved by the final closure register. Failed checks remain recorded and were not rerun.
 
 ## First batch
 
@@ -44,20 +50,56 @@ Second-batch verification: TypeScript PASS once (`tsc -b` scoped to domain/appli
 
 Third-batch source verification: TypeScript PASS once (`tsc -b` scoped to domain/application/infrastructure/admin/api, 60s ceiling); **17 PASS / 0 FAIL**, three new lifecycle/read-model/HTTP suites, 3.05s, once. Prior tests were not repeated. No DB access, migration, seed, provider, browser or load tests; real aggregate query performance and consumer races remain runtime acceptance work. Exact logs: `evidence/section-07/batch-03/`.
 
-## Remaining original scope
+## Final source closure register
 
-| Original area | Remaining work |
+| Requirement | Implemented behavior and evidence |
 | --- | --- |
-| TAX-P0-001/002 | Browser acceptance; preserve new identity/validation safeguards. |
-| TAX-P0-003 / TAX-P1-004 | Browser pagination/picker acceptance; canonical list totals/status filters implemented in batch 02. |
-| TAX-P0-004 | Node/legacy-create and Degree Level edit CAS implemented; archive/status governance implemented in batch 03; runtime acceptance remains. |
-| TAX-P0-005 | Real PostgreSQL contention proof deferred; graph integrity read model still pending. |
-| TAX-P0-006 | Actual P6→P8 screening composition and owner preview/review/apply/idempotency; retain generic mutation denial. |
-| TAX-P1-001/002/003 | Archive-only retirement and generic impact/degree edit governance implemented in batch 03; consumer browser/runtime acceptance and targeted consumer navigation remain. |
-| TAX-P1-005 | Mapping direction/standard validation and preview/semantics UX. |
-| TAX-P1-006 | Historical alias collision evidence and remaining seed normalization adoption. |
-| TAX-P1-007 | Owner command adoption implemented in batch 02; consumer-specific payloads/cache invalidation and runtime atomicity acceptance remain. |
-| 07.6 / 07.8 | Tree/primary/alternative paths, triage/integrity/orphan/alias queues, public bounds/cache acceptance. |
-| FGA-07-001 / 002 | Crosswalk coverage/conflict worklist and standard compliance curation, per original appendix. |
+| TAX-P0-001 | Stable-ID edits; immutable standard/type/code identity in UI, use case and persistence; no edit upsert. Batch 01 contracts. |
+| TAX-P0-002 | Shared completeness DTO and honest node-only validation; separate actual graph diagnostics. |
+| TAX-P0-003 | Searchable, filtered 25-node server picker with paging and stale-response cancellation. No fixed first-100 catalog. |
+| TAX-P0-004 | Node and Degree Level timestamp CAS, 409 conflict and preserved edit inputs; legacy create refuses versionless overwrites. |
+| TAX-P0-005 | Blocking multiple-primary validation and shared owner transactional lock; source-only partial unique index for one primary per child. Real contention proof deferred. |
+| TAX-P0-006 | Actual DI dispatcher registers a pure P8 screening consumer for ACADEMIC_TAXONOMY/TAXONOMY. P6 upload route leads to owner preview/review/apply; durable owner review/CAS, source/preview hashes, explicit approval, refresh invalidation, idempotent applied receipts and atomic audit/outbox. No generic canonical promotion. New nodes always become DRAFT. |
+| TAX-P1-001 | Explicit archive-only retirement; no deletion, implicit replacement, reference rewriting or new supersession states. |
+| TAX-P1-002 | Generic read-only usage counts, mandatory lifecycle reason/acknowledgement and owner impact check before status changes. |
+| TAX-P1-003 | Degree CAS, usage warning, aliases/metadata inspection, audit links and links to actual consumer workspaces. Consumer links open the workspace; no entity-filtered view is claimed. |
+| TAX-P1-004 | Matching SQL predicates for total and page; stable ordering and server pagination metadata; hierarchy pages preserve actual edge flags. |
+| TAX-P1-005 | Node-derived mapping standards, searchable target, source→target preview with real validation and EXACT/BROAD/NARROW/RELATED/UNKNOWN explanations. Final save validates again transactionally. |
+| TAX-P1-006 | Shared NFC/Unicode-preserving identity in validation, persistence and seed planning; bounded legacy raw/stored alias collision lookup; drift/conflict/duplicate queue. Historical data is reported, never silently rewritten. |
+| TAX-P1-007 | Explicit TaxonomyCatalogChanged/DegreeLevelChanged owner events with reload payloads in the business/audit/outbox transaction. Public endpoints use no-store rather than serving a stale catalog cache. Delivery proof deferred. |
+| TAX-P1-008 | Phase comments corrected without changing routes or domain ownership. |
+| 07.6 | Actual root→children graph browser, true primary breadcrumb and alternative parents, bounded relation pages, orphan/root/unmapped filters, integrity and alias queues, bulk DRAFT/READY_TO_REVIEW dry-run/review with exact preview hash. Bulk workflow cannot publish/archive. |
+| 07.7 | P8 stays separate from Majors and other consumers. Usage/import gateways are approved cross-context read models; no downstream owner repository dependency or canonical consumer rewrite. DegreeLevel's existing reference persistence declaration is preserved. |
+| 07.8 | ACTIVE-only list/search/direct/parent/child paths, localized owner use cases and paged SQL hierarchy reads; maximum page size 100/page 1000; immediate no-store public cache semantics. |
+| FGA-07-001 | SQL-paged source/target-standard crosswalk report with type/status/query/confidence/state filters, accurate facets and mapped/unmapped/ambiguous/conflicting/unresolved worklists linked to editors. No automatic match/publication or relationship mutation. |
+| FGA-07-002 | Read-only consistent bounded snapshot; version/asOf and explicit scope/boundary evidence; iterative cycles, primary conflicts, approved roots/orphans, empty roots, isolated leaves, depth, unreachable national mappings, invalid/historical mappings and alias issues. No graph repair or deletion. |
 
-Section 07 remains open until the complete original register is implemented. An added button, interface, passing mock or deferred runtime test does not close missing source work.
+## Final implementation details
+
+- New owner import use cases and screening consumer live under `packages/application/src/academic-taxonomy/`; the transactional raw-SQL review gateway lives in `packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyImportGateway.ts`. JSON hashes sort object keys recursively so PostgreSQL JSONB key ordering cannot invalidate a reviewed preview. Source hashes, node revisions and current validation are checked again before canonical application. Applied receipt replays skip duplicate business/audit/outbox effects.
+- Owner review persistence is declared in Prisma/ADR-028 ownership manifest, with an **unapplied** source migration `20261010010000_taxonomy_owner_import_review`. Parameterized SQL avoids generating a shared Prisma client during this review. Production activation requires that migration and later normal client generation; no DB commands were run here.
+- Diagnostics cap selected/context nodes at 5,000 and each edge/alias/mapping collection at 20,000; oversized scopes fail closed and can be narrowed by standard. Reports return 25 issues and at most 32 IDs per issue. Scoped reports disclose boundary edges and do not invent global cycle/reachability claims. Primary path traversal stops at 32 hops; alternative parents are paged.
+- Historical alias collision lookup compares raw and stored identities through the same JavaScript NFC normalizer, capped at 20,000 aliases. Above that bound the write fails closed pending future reconciliation. No historical normalization/backfill occurred.
+- New workspaces are actual API clients, with loading/error/empty states, bounded paging, editor links, cancelled/stale reads, preview-bound apply controls and reason/acknowledgement inputs. Taxonomy owner import is reachable from the P6 file-upload domain route and returns to the imports view via URL parameters. No dev server/browser was started.
+- Condensed React review covered unconditional hooks, abort/stale guards, preview invalidation, native navigation buttons, control labels, button types and error/status announcements. Browser keyboard/accessibility acceptance remains deferred.
+
+## Final one-shot verification — exact results
+
+| Check | Observed result | Resolution / limitation |
+| --- | --- | --- |
+| Scoped TypeScript (`tsc -b` domain/application/infrastructure/admin/api; 60s ceiling) | FAIL: five TS2783 diagnostics on one crosswalk facet-default expression | Replaced duplicate spread defaults with `Object.assign(defaults, result.counts)`. Source reviewed; **not rerun**, per user instruction. Do not claim final TypeScript PASS. |
+| Four new targeted Vitest suites | **33 PASS / 0 FAIL**, 3.67s | Ran once after the expression fix; unit/mock/HTTP contracts only. |
+| `git diff --check` | PASS | Ran once before the TypeScript expression fix and final documentation. No repeated whitespace gate. |
+| Persistence boundary verifier | FAIL: **18 inherited migration metadata violations** | All findings are missing owner/scope/ADR-028 markers in six pre-existing `20261009` migrations outside Section 07. No finding targeted the new P8 migration/model/adapter. Not rerun and not described as a passing global gate. |
+
+Inherited verifier findings apply to `20261009010000_eap_asset_reference_serialization`, `20261009020000_eap_restore_operation_barrier`, `20261009030000_eap_archive_operation_barrier`, `20261009040000_settings_override_history`, `20261009050000_settings_current_version_ownership`, and `20261009060000_settings_definition_validation_rules`. Their SQL was already present at HEAD before this batch; these files are unchanged by Section 07. Their owners must resolve their metadata separately. They are not suppressed or added to historical exceptions here.
+
+Exact unedited logs: `evidence/section-07/closure/`. The new tests cover dispatcher mutation denial/foreign payloads, reviewer approval/source revisions, JSONB-stable previews, stale apply/refresh, receipt replay, rollback on outbox failure, bulk preview/impact changes, true primary edges, structural/Unicode diagnostics, SQL pagination/filter contracts and archived public paths/cache headers. Mock rollback proves the application boundary contract, not PostgreSQL durability.
+
+Historical batch results remain: batch 01 **80 PASS / 1 FAIL**, expectation corrected without rerun; batch 02 **18 PASS**; batch 03 **17 PASS**. Do not combine these into a claim that every historical test passed.
+
+## Runtime remains deferred
+
+See [Section 07 runtime register](SECTION_07_ACADEMIC_TAXONOMY_RUNTIME_DEFERRED.md). No migration, database write, seed, alias rewrite, city import, heavy suite, provider test, load test, browser E2E, deployment or merge occurred. The new owner import persistence cannot operate on a database lacking its unapplied table. Existing duplicate primary history must be reconciled before activating the unique index.
+
+Source closure follows Section 07.10–07.12 and the user's no-repeat rule: relevant source failures were corrected, lightweight targeted contracts were run once, complete source work is committed, and operational acceptance stays explicitly open. Advanced ontology reasoning, SKOS publication, automatic semantic classification and full external ontology synchronization remain outside the agreed scope.

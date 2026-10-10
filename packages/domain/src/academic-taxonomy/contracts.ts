@@ -85,6 +85,9 @@ export interface UpsertAcademicStandardMappingDto {
 }
 
 export interface AcademicTaxonomyFilters {
+  rootOnly?: boolean;
+  orphan?: boolean;
+  unmapped?: boolean;
   q?: string;
   nodeType?: AcademicTaxonomyNodeType;
   status?: AcademicTaxonomyStatus;

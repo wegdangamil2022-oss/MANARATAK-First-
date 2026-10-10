@@ -5568,3 +5568,21 @@ model ApiSearchRequestRecord {
   @@index([scope, createdAt])
   @@index([createdAt])
 }
+
+// P8 owns reviewed application; P6 receipts remain pure screening transport.
+model AcademicTaxonomyImportReview {
+  id String @id
+  receiptId String @unique
+  sourceHash String
+  record Json
+  preview Json
+  previewHash String
+  status String @default("PREVIEWED")
+  version Int @default(1)
+  reviewedBy String?
+  reason String?
+  result Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([status, updatedAt])
+}

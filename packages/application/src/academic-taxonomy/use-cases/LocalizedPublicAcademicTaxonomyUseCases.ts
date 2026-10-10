@@ -57,24 +57,11 @@ export class LocalizedPublicAcademicTaxonomyUseCases {
     return records.map((record) => this.project(record, locale));
   }
 
-  public async listChildren(
-    parentNodeId: string,
-    locale: SupportedLocale = DEFAULT_LOCALE,
-  ): Promise<LocalizedAcademicTaxonomyNodeDto[]> {
-    const parent = await this.repository.getNode(parentNodeId);
-    if (parent?.status !== AcademicTaxonomyStatus.ACTIVE) return [];
-    const records = await this.repository.listChildren(parentNodeId);
-    return records.filter((record) => record.status === AcademicTaxonomyStatus.ACTIVE).map((record) => this.project(record, locale));
+  public async listChildren(parentNodeId: string, locale: SupportedLocale = DEFAULT_LOCALE, filters: { page?: number; pageSize?: number } = {}): Promise<LocalizedAcademicTaxonomyNodeDto[]> {
+    return (await new PublicAcademicTaxonomyUseCases(this.repository).listChildren(parentNodeId, filters)).map(node => this.project(node, locale));
   }
-
-  public async listParents(
-    childNodeId: string,
-    locale: SupportedLocale = DEFAULT_LOCALE,
-  ): Promise<LocalizedAcademicTaxonomyNodeDto[]> {
-    const child = await this.repository.getNode(childNodeId);
-    if (child?.status !== AcademicTaxonomyStatus.ACTIVE) return [];
-    const records = await this.repository.listParents(childNodeId);
-    return records.filter((record) => record.status === AcademicTaxonomyStatus.ACTIVE).map((record) => this.project(record, locale));
+  public async listParents(childNodeId: string, locale: SupportedLocale = DEFAULT_LOCALE, filters: { page?: number; pageSize?: number } = {}): Promise<LocalizedAcademicTaxonomyNodeDto[]> {
+    return (await new PublicAcademicTaxonomyUseCases(this.repository).listParents(childNodeId, filters)).map(node => this.project(node, locale));
   }
 
   private project(

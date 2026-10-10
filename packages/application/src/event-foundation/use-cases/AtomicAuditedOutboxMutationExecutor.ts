@@ -19,9 +19,11 @@ export class AtomicAuditedOutboxMutationExecutor {
     audit: CreateAuditRecordDto,
     outboxEntry: TransactionalOutboxEntry,
     mutation: (context: AtomicPersistenceContext) => Promise<T>,
+    shouldRecord: (result: T) => boolean = () => true,
   ): Promise<T> {
     return this.unitOfWork.execute(async context => {
       const result = await mutation(context);
+      if (!shouldRecord(result)) return result;
       await this.auditRepository.saveInTransaction(createAuditRecordFromDto(audit), context);
       await this.outboxStore.appendInTransaction(outboxEntry, context);
       return result;

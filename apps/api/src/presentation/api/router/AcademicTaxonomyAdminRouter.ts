@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { AdminAcademicTaxonomyUseCases, AdminMajorUseCases, DegreeLevelUseCases } from '@manaratak/application';
+import { AdminAcademicTaxonomyUseCases, AdminMajorUseCases, DegreeLevelUseCases, AcademicTaxonomyOwnerImportUseCases, TAXONOMY_DIAGNOSTIC_CODES } from '@manaratak/application';
 import {
   AcademicTaxonomyNodeType,
   AcademicTaxonomyStatus,
@@ -14,12 +14,13 @@ import { AuditHelper } from '../../audit/AuditHelper.js';
 export class AcademicTaxonomyAdminRouter {
   public static create(cradle: {
     adminAcademicTaxonomyUseCases: AdminAcademicTaxonomyUseCases;
+    academicTaxonomyOwnerImportUseCases?: AcademicTaxonomyOwnerImportUseCases;
     degreeLevelUseCases: DegreeLevelUseCases;
     adminMajorUseCases: AdminMajorUseCases;
     auditRecordRepo?: IAuditRecordRepository;
   }): Router {
     const router = Router();
-    const { adminAcademicTaxonomyUseCases, adminMajorUseCases, degreeLevelUseCases, auditRecordRepo } = cradle;
+    const { academicTaxonomyOwnerImportUseCases, adminAcademicTaxonomyUseCases, adminMajorUseCases, degreeLevelUseCases, auditRecordRepo } = cradle;
 
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
       Promise.resolve(fn(req, res, next)).catch(next);
@@ -28,7 +29,7 @@ export class AcademicTaxonomyAdminRouter {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
       return req.authUserId;
     };
-    const context = (req: Request) => ({ actorId: actor(req), source: 'admin-academic-taxonomy', correlationId: typeof req.headers['x-correlation-id'] === 'string' ? req.headers['x-correlation-id'] : undefined });
+    const context = (req: Request) => ({ actorId: actor(req), source: 'admin-academic-taxonomy', correlationId: typeof req.headers['x-correlation-id'] === 'string' ? req.headers['x-correlation-id'].slice(0, 256) : undefined });
     const mutate = async <T>(
       req: Request,
       input: { action: string; targetType: string; targetId?: string; metadata?: Record<string, unknown> },
@@ -80,9 +81,40 @@ export class AcademicTaxonomyAdminRouter {
       existingEdges: z.array(z.any()).optional(), existingAliases: z.array(z.any()).optional(), existingMappings: z.array(z.any()).optional(),
     });
     const listNodesQuerySchema = z.object({
+      rootOnly: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
+      orphan: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
+      unmapped: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
       nodeType: nodeTypeSchema.optional(), standardType: standardTypeSchema.optional(), status: statusSchema.optional(), q: z.string().trim().max(200).optional(),
       parentNodeId: z.string().optional(), page: z.coerce.number().int().min(1).max(1000).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional(),
     });
+
+    const pageQuery = z.object({ page: z.coerce.number().int().min(1).max(1000).optional(), pageSize: z.coerce.number().int().min(1).max(100).optional() });
+    router.get('/nodes/:nodeId/paths', asyncHandler(async (req: Request, res: Response) => res.json(await adminAcademicTaxonomyUseCases.primaryPath(req.params.nodeId))));
+    router.get('/diagnostics', asyncHandler(async (req: Request, res: Response) => {
+      const query = z.object({ standardType: standardTypeSchema.optional(), page: z.coerce.number().int().min(1).max(1000).optional(), code: z.enum(TAXONOMY_DIAGNOSTIC_CODES).optional() }).parse(req.query);
+      res.json(await adminAcademicTaxonomyUseCases.diagnostics(query));
+    }));
+    router.get('/crosswalk', asyncHandler(async (req: Request, res: Response) => {
+      const query = z.object({ sourceStandard: standardTypeSchema, targetStandard: standardTypeSchema, nodeType: nodeTypeSchema.optional(), status: statusSchema.optional(),
+        minConfidence: z.coerce.number().min(0).max(1).optional(), mappingState: z.enum(['MAPPED','UNMAPPED','AMBIGUOUS','CONFLICTING','UNRESOLVED']).optional(), q: z.string().trim().max(200).optional(), page: z.coerce.number().int().min(1).max(1000).optional() }).parse(req.query);
+      res.json(await adminAcademicTaxonomyUseCases.crosswalk(query));
+    }));
+    router.post('/mappings/preview', asyncHandler(async (req: Request, res: Response) => res.json(await adminAcademicTaxonomyUseCases.previewMapping(upsertMappingSchema.parse(req.body) as any))));
+    router.post('/review/bulk', asyncHandler(async (req: Request, res: Response) => {
+      const body = z.object({ nodes: z.array(z.object({ nodeId: z.string().min(1).max(128), expectedUpdatedAt: z.string().datetime() }).strict()).min(1).max(25),
+        nextStatus: z.enum(['DRAFT', 'READY_TO_REVIEW']), reason: z.string().trim().min(1).max(1000), acknowledgeHistoricalReferences: z.literal(true), dryRun: z.boolean(), previewHash: z.string().regex(/^[a-f0-9]{64}$/).optional() }).strict().parse(req.body);
+      res.json(await adminAcademicTaxonomyUseCases.bulkReview(body, context(req)));
+    }));
+    const ownerImports = () => { if (!academicTaxonomyOwnerImportUseCases) throw new Error('TAXONOMY_IMPORT_UNAVAILABLE'); return academicTaxonomyOwnerImportUseCases; };
+    const importPage = z.object({ page: z.coerce.number().int().min(1).max(1000).default(1), status: z.enum(['PREVIEWED', 'APPROVED', 'REJECTED', 'APPLIED']).optional() });
+    router.get('/imports/screenings', asyncHandler(async (req: Request, res: Response) => res.json(await ownerImports().screenings(importPage.parse(req.query).page))));
+    router.get('/imports', asyncHandler(async (req: Request, res: Response) => { const query = importPage.parse(req.query); res.json(await ownerImports().list(query.page, query.status)); }));
+    router.get('/imports/:id', asyncHandler(async (req: Request, res: Response) => { const plan = await ownerImports().get(req.params.id); if (!plan) return res.status(404).json({ error: 'TAXONOMY_IMPORT_NOT_FOUND' }); res.json(plan); }));
+    router.post('/imports/preview', asyncHandler(async (req: Request, res: Response) => { const body = z.object({ receiptId: z.string().min(1).max(128) }).strict().parse(req.body); res.json(await ownerImports().preview(body.receiptId, context(req))); }));
+    const importVersion = z.object({ expectedVersion: z.number().int().min(1), previewHash: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
+    router.post('/imports/:id/refresh', asyncHandler(async (req: Request, res: Response) => { const body = z.object({ expectedVersion: z.number().int().min(1) }).strict().parse(req.body); res.json(await ownerImports().refresh(req.params.id, body.expectedVersion, context(req))); }));
+    router.post('/imports/:id/review', asyncHandler(async (req: Request, res: Response) => { const body = importVersion.extend({ decision: z.enum(['APPROVE', 'REJECT']), reason: z.string().trim().min(1).max(1000) }).strict().parse(req.body); res.json(await ownerImports().review(req.params.id, body, context(req))); }));
+    router.post('/imports/:id/apply', asyncHandler(async (req: Request, res: Response) => res.json(await ownerImports().apply(req.params.id, importVersion.parse(req.body), context(req)))));
 
     router.get('/nodes', asyncHandler(async (req: Request, res: Response) => {
       res.json(await adminAcademicTaxonomyUseCases.listNodesPage(listNodesQuerySchema.parse(req.query)));
@@ -93,8 +125,8 @@ export class AcademicTaxonomyAdminRouter {
       if (!node) return res.status(404).json({ error: 'Academic taxonomy node not found' });
       res.json(node);
     }));
-    router.get('/nodes/:nodeId/children', asyncHandler(async (req: Request, res: Response) => res.json({ data: await adminAcademicTaxonomyUseCases.listChildren(req.params.nodeId) })));
-    router.get('/nodes/:nodeId/parents', asyncHandler(async (req: Request, res: Response) => res.json({ data: await adminAcademicTaxonomyUseCases.listParents(req.params.nodeId) })));
+    router.get('/nodes/:nodeId/children', asyncHandler(async (req: Request, res: Response) => res.json(await adminAcademicTaxonomyUseCases.relatedNodesPage(req.params.nodeId, 'children', pageQuery.parse(req.query)))));
+    router.get('/nodes/:nodeId/parents', asyncHandler(async (req: Request, res: Response) => res.json(await adminAcademicTaxonomyUseCases.relatedNodesPage(req.params.nodeId, 'parents', pageQuery.parse(req.query)))));
     router.get('/nodes/:nodeId/aliases', asyncHandler(async (req: Request, res: Response) => res.json({ data: await adminAcademicTaxonomyUseCases.listAliases(req.params.nodeId) })));
     router.get('/nodes/:nodeId/mappings', asyncHandler(async (req: Request, res: Response) => res.json({ data: await adminAcademicTaxonomyUseCases.listMappings(req.params.nodeId) })));
     router.get('/nodes/:nodeId/mapped-majors', asyncHandler(async (req: Request, res: Response) => res.json({ data: await adminMajorUseCases.listByTaxonomyNode(req.params.nodeId) })));
@@ -173,6 +205,9 @@ export class AcademicTaxonomyAdminRouter {
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      if (err?.message === 'AUTHENTICATED_ADMIN_ACTOR_REQUIRED') return res.status(401).json({ error: err.message });
+      if (err?.message?.startsWith('TAXONOMY_IMPORT_') && /CONFLICT|STALE|APPROVAL/.test(err.message) || err?.message === 'TAXONOMY_BULK_PREVIEW_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });
+      if (['TAXONOMY_GOVERNANCE_READ_UNAVAILABLE', 'TAXONOMY_IMPORT_UNAVAILABLE', 'TAXONOMY_DIAGNOSTICS_SCOPE_TOO_LARGE', 'TAXONOMY_ALIAS_RECONCILIATION_SCOPE_TOO_LARGE'].includes(err?.message)) return res.status(503).json({ error: err.message });
       if (err?.message === 'ACADEMIC_USAGE_UNAVAILABLE') return res.status(503).json({ error: err.message });
       if (err?.message === 'ACADEMIC_USAGE_REFERENCE_NOT_FOUND') return res.status(404).json({ error: err.message });
       if (err?.message === 'DEGREE_LEVEL_VERSION_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });

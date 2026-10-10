@@ -8,3 +8,4 @@ export * from './seed-planner';
 export * from './isced-f-baseline';
 
 export * from './lifecycle';
+export * from './governance';

@@ -1,3 +1,4 @@
+import type { TaxonomyCrosswalkQuery, TaxonomyCrosswalkReport, TaxonomyGovernanceSnapshot, TaxonomyRelatedNodesPage } from './governance';
 import type { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 import {
   AcademicTaxonomyNodeDto,
@@ -23,6 +24,10 @@ export interface IAcademicTaxonomyRepository {
   createNode?(data: UpsertAcademicTaxonomyNodeDto): Promise<AcademicTaxonomyNodeDto>;
 
   countNodes?(filters?: AcademicTaxonomyFilters): Promise<number>;
+
+  getGovernanceSnapshot?(standardType?: AcademicStandardType): Promise<TaxonomyGovernanceSnapshot>;
+  crosswalkReport?(query: TaxonomyCrosswalkQuery): Promise<TaxonomyCrosswalkReport>;
+  relatedNodesPage?(nodeId: string, direction: 'parents' | 'children', filters?: { page?: number; pageSize?: number; activeOnly?: boolean }): Promise<TaxonomyRelatedNodesPage>;
 
   // Node methods
   listNodes(filters?: AcademicTaxonomyFilters): Promise<AcademicTaxonomyNodeDto[]>;

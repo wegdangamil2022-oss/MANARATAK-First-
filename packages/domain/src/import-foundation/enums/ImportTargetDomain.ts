@@ -8,5 +8,6 @@ export enum ImportTargetDomain {
   Services = 'SERVICES',
   Cms = 'CMS',
   StudentTools = 'STUDENT_TOOLS',
+  AcademicTaxonomy = 'ACADEMIC_TAXONOMY',
   Generic = 'GENERIC',
 }

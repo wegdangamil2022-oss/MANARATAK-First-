@@ -32,6 +32,7 @@
     "AcademicTaxonomyAlias": "academic_taxonomy",
     "AcademicTaxonomyEdge": "academic_taxonomy",
     "AcademicTaxonomyNode": "academic_taxonomy",
+    "AcademicTaxonomyImportReview": "academic_taxonomy",
     "AccountRecord": "identity",
     "AdminEmergencyAccessRecord": "identity",
     "AdministrativeRegion": "reference",
@@ -293,6 +294,8 @@
     "packages/infrastructure/src/authorization/": "identity"
   },
   "approvedCrossContextReadModels": {
+    "packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyImportGateway.ts": ["import"],
+    "packages/infrastructure/src/academic-taxonomy/PrismaCanonicalAcademicUsageGateway.ts": ["reference", "majors", "tests", "universities", "scholarships", "courses"],
     "packages/infrastructure/src/international-tests/PrismaInternationalTestImportChangeGateway.ts": [
       "identity"
     ],

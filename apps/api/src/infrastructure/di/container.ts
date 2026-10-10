@@ -127,6 +127,7 @@ import {
   PrismaAssetRetentionGateway,
   PrismaAtomicPersistenceUnitOfWork,
   PrismaAcademicTaxonomyRepository,
+  PrismaAcademicTaxonomyImportGateway,
   PrismaCanonicalAcademicUsageGateway,
   DegreeLevelRepository,
   PrismaScholarshipCanonicalLookupGateway,
@@ -242,6 +243,8 @@ import {
   ProcessAssetLifecycleUseCase,
   AssetReferencePolicy,
   AdminAcademicTaxonomyUseCases,
+  AcademicTaxonomyOwnerImportUseCases,
+  AcademicTaxonomyScreeningConsumer,
   RetentionSweepUseCase,
   RetentionBackgroundJobHandler,
   RecoverAssetActivationsUseCase, AssetActivationRecoveryBackgroundJobHandler,
@@ -537,7 +540,12 @@ export function registerDependencies(
     canonicalMajorReferenceService: asFunction(({ academicTaxonomyRepository, degreeLevelRepository }) =>
       new CanonicalMajorReferenceService(academicTaxonomyRepository, degreeLevelRepository)).scoped(),
     degreeLevelUseCases: asFunction(({ degreeLevelRepository, atomicDomainMutationCoordinator, canonicalAcademicUsageGateway }) => new DegreeLevelUseCases(degreeLevelRepository, atomicDomainMutationCoordinator, canonicalAcademicUsageGateway)).scoped(),
-    importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
+    academicTaxonomyScreeningConsumer: asClass(AcademicTaxonomyScreeningConsumer).singleton(),
+    academicTaxonomyImportGateway: asFunction(({ prisma }) => new PrismaAcademicTaxonomyImportGateway(prisma)).singleton(),
+    academicTaxonomyOwnerImportUseCases: asFunction(({ academicTaxonomyRepository, academicTaxonomyImportGateway, atomicDomainMutationCoordinator }) => new AcademicTaxonomyOwnerImportUseCases(academicTaxonomyRepository, academicTaxonomyImportGateway, atomicDomainMutationCoordinator)).scoped(),
+    importHandoffDispatcher: asFunction(({ academicTaxonomyScreeningConsumer, scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
+      ACADEMIC_TAXONOMY: academicTaxonomyScreeningConsumer,
+      TAXONOMY: academicTaxonomyScreeningConsumer,
       SCHOLARSHIPS: scholarshipImportHandoffConsumer,
       SCHOLARSHIP: scholarshipImportHandoffConsumer,
       UNIVERSITIES: universityImportHandoffConsumer,
@@ -569,7 +577,7 @@ export function registerDependencies(
       isPrisma ? new ImportGovernanceUseCases(importGovernanceGateway, atomicDomainMutationCoordinator, async (identityId, ownerDomain) => {
         const identity = await identityRepository.findById(identityId);
         if (!identity || identity.status !== 'ACTIVE' || identity.deletedAt) return false;
-        const ownerPermissions: Record<string, string> = { SCHOLARSHIPS: 'admin:scholarships:manage', UNIVERSITIES: 'admin:universities:manage',
+        const ownerPermissions: Record<string, string> = { ACADEMIC_TAXONOMY: 'admin:academic-taxonomy:manage', TAXONOMY: 'admin:academic-taxonomy:manage', SCHOLARSHIPS: 'admin:scholarships:manage', UNIVERSITIES: 'admin:universities:manage',
           MAJORS: 'admin:majors:manage', FELLOWSHIPS: 'admin:majors:manage', STUDENT_TOOLS: 'admin:student-tools:manage', GENERIC: 'admin:imports:manage', COURSES: 'admin:courses:manage', TESTS: 'admin:international-tests:manage', CMS: 'admin:cms:manage', SERVICES: 'admin:services:manage' };
         if (!ownerPermissions[ownerDomain]) return false;
         const permissions = ['admin:imports:manage', ...(ownerPermissions[ownerDomain] ? [ownerPermissions[ownerDomain]] : [])];

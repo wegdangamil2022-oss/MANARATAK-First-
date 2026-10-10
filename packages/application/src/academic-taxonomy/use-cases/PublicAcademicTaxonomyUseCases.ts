@@ -44,15 +44,19 @@ export class PublicAcademicTaxonomyUseCases {
     });
   }
 
-  public async listChildren(parentNodeId: string): Promise<AcademicTaxonomyNodeDto[]> {
+  public async listChildren(parentNodeId: string, filters: { page?: number; pageSize?: number } = {}): Promise<AcademicTaxonomyNodeDto[]> {
     const parent = await this.repository.getNode(parentNodeId);
     if (parent?.status !== AcademicTaxonomyStatus.ACTIVE) return [];
-    return (await this.repository.listChildren(parentNodeId)).filter((node) => node.status === AcademicTaxonomyStatus.ACTIVE);
+    const bounded = this.bounded(filters);
+    if (this.repository.relatedNodesPage) return (await this.repository.relatedNodesPage(parentNodeId, 'children', { page: bounded.page, pageSize: bounded.pageSize, activeOnly: true })).data;
+    return (await this.repository.listChildren(parentNodeId)).filter((node) => node.status === AcademicTaxonomyStatus.ACTIVE).slice(((bounded.page ?? 1) - 1) * (bounded.pageSize ?? 50), (bounded.page ?? 1) * (bounded.pageSize ?? 50));
   }
 
-  public async listParents(childNodeId: string): Promise<AcademicTaxonomyNodeDto[]> {
+  public async listParents(childNodeId: string, filters: { page?: number; pageSize?: number } = {}): Promise<AcademicTaxonomyNodeDto[]> {
     const child = await this.repository.getNode(childNodeId);
     if (child?.status !== AcademicTaxonomyStatus.ACTIVE) return [];
-    return (await this.repository.listParents(childNodeId)).filter((node) => node.status === AcademicTaxonomyStatus.ACTIVE);
+    const bounded = this.bounded(filters);
+    if (this.repository.relatedNodesPage) return (await this.repository.relatedNodesPage(childNodeId, 'parents', { page: bounded.page, pageSize: bounded.pageSize, activeOnly: true })).data;
+    return (await this.repository.listParents(childNodeId)).filter((node) => node.status === AcademicTaxonomyStatus.ACTIVE).slice(((bounded.page ?? 1) - 1) * (bounded.pageSize ?? 50), (bounded.page ?? 1) * (bounded.pageSize ?? 50));
   }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { AcademicLifecycleDecision, CanonicalAcademicUsageSummary } from '@manaratak/domain';
 import { adminApiClient } from '../../api/client';
 
@@ -14,6 +15,11 @@ const labels: Record<string, [string, string]> = {
   scholarshipEligibility: ['أهلية المنح', 'Scholarship eligibility'], legacyTestDegreeCodes: ['روابط اختبارات تاريخية بالرمز', 'Historic test code links'],
   legacyMajorProfileCodes: ['ملفات تاريخية بالرمز', 'Historic profile code links'],
 };
+const consumerRoutes: Record<string, string> = {
+  majorAcademicFieldLinks: '/majors', majorDisciplineLinks: '/majors', majorProfileAcademicFieldLinks: '/majors', majorProfileDisciplineLinks: '/majors', majorClassificationMappings: '/majors', majorProfiles: '/majors', legacyMajorProfileCodes: '/majors',
+  internationalTestRelationships: '/international-tests', internationalTestDegreeRelationships: '/international-tests', legacyTestDegreeCodes: '/international-tests',
+  courseTaxonomyResolutions: '/courses', courseTaxonomyLinks: '/courses', courseMajorProjections: '/courses', universityPrograms: '/universities', scholarshipTargets: '/scholarships', scholarshipEligibility: '/scholarships',
+};
 interface Props {
   endpoint: string;
   isAr: boolean;
@@ -28,7 +34,7 @@ export function CanonicalAcademicGovernancePanel({ endpoint, isAr, requiresDecis
   useEffect(() => {
     const abort = new AbortController();
     setReport(null); setFailed(false); onReady(false);
-    adminApiClient.request<CanonicalAcademicUsageSummary>(endpoint, { signal: abort.signal })
+    adminApiClient.request<CanonicalAcademicUsageSummary>(endpoint, { signal: abort.signal, cache: 'no-store' })
       .then(value => { if (!abort.signal.aborted) { setReport(value); onReady(true); } })
       .catch(() => { if (!abort.signal.aborted) setFailed(true); });
     return () => abort.abort();
@@ -38,7 +44,7 @@ export function CanonicalAcademicGovernancePanel({ endpoint, isAr, requiresDecis
     {failed ? <p role="alert">{isAr ? 'تعذر قراءة الأثر؛ تغيير الحالة متوقف حتى إعادة فتح النموذج.' : 'Impact unavailable; reopen this form before changing status.'}</p>
       : !report ? <p role="status">{isAr ? 'جار تحميل الارتباطات…' : 'Loading references…'}</p>
       : <><p>{isAr ? 'عدد الروابط (قد يتكرر المستهلك): ' : 'Relationship count (consumers may repeat): '}{report.totalReferences}</p>
-        <dl className="grid grid-cols-2 gap-1">{Object.entries(report.counts).map(([key, count]) => <div key={key}><dt className="inline">{labels[key]?.[isAr ? 0 : 1] ?? key}: </dt><dd className="inline font-bold">{count}</dd></div>)}</dl></>}
+        <dl className="grid grid-cols-2 gap-1">{Object.entries(report.counts).map(([key, count]) => <div key={key}><dt className="inline">{labels[key]?.[isAr ? 0 : 1] ?? key}: </dt><dd className="inline font-bold">{count}</dd>{consumerRoutes[key] && count > 0 && <Link className="ms-2 underline" to={consumerRoutes[key]}>{isAr ? 'فتح منصة المستهلك' : 'Open consumer workspace'}</Link>}</div>)}</dl></>}
     <p>{isAr ? 'الأرشفة توقف الظهور العام؛ تبقى المعرّفات والروابط التاريخية دون حذف أو تحويل تلقائي.' : 'Archive hides public discovery; IDs and historic links remain, without deletion or automatic reassignment.'}</p>
     {requiresDecision && <>
       <label className="block">{isAr ? 'سبب تغيير الحالة' : 'Reason for status change'}

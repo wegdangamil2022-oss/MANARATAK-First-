@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { TaxonomyPagination, useTaxonomyRead } from '../components/academic-taxonomy/AcademicTaxonomyOperationsWorkspace';
 import { CanonicalAcademicGovernancePanel } from '../components/academic-taxonomy/CanonicalAcademicGovernancePanel';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import {
   AcademicTaxonomyDeterministicKey,
@@ -84,8 +85,14 @@ export function AcademicTaxonomyDetailPage() {
   const localReadOnly = import.meta.env.VITE_LOCAL_ADMIN_READ_ONLY === 'true';
 
   const [node, setNode] = useState<AcademicTaxonomyNode | null>(null);
-  const [children, setChildren] = useState<AcademicTaxonomyNode[]>([]);
-  const [parents, setParents] = useState<AcademicTaxonomyNode[]>([]);
+  const [previewChildren, setChildren] = useState<AcademicTaxonomyNode[]>([]);
+  const [previewParents, setParents] = useState<AcademicTaxonomyNode[]>([]);
+  const [parentPage, setParentPage] = useState(1); const [childPage, setChildPage] = useState(1);
+  const parentsRead = useTaxonomyRead<{ data: AcademicTaxonomyNode[]; total: number; links: Array<{ nodeId: string; isPrimary: boolean }> }>(!localReadOnly && nodeId ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/parents?page=${parentPage}&pageSize=25` : null);
+  const childrenRead = useTaxonomyRead<{ data: AcademicTaxonomyNode[]; total: number }>(!localReadOnly && nodeId ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/children?page=${childPage}&pageSize=25` : null);
+  const primaryPath = useTaxonomyRead<{ path: AcademicTaxonomyNode[]; alternativeTotal: number; termination: string }>(!localReadOnly && nodeId ? `/admin/academic-taxonomy/nodes/${encodeURIComponent(nodeId)}/paths` : null);
+  const parents = localReadOnly ? previewParents : parentsRead.data?.data ?? [];
+  const children = localReadOnly ? previewChildren : childrenRead.data?.data ?? [];
   const [aliases, setAliases] = useState<AliasDto[]>([]);
   const [mappings, setMappings] = useState<MappingDto[]>([]);
   const [mappedMajors, setMappedMajors] = useState<MappedMajorDto[]>([]);
@@ -100,7 +107,10 @@ export function AcademicTaxonomyDetailPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab') ?? 'overview';
+  const activeTab = ['overview', 'hierarchy', 'aliases', 'mappings', 'majors', 'validation'].includes(requestedTab) ? requestedTab : 'overview';
+  const setActiveTab = (tab: string) => { const next = new URLSearchParams(searchParams); next.set('tab', tab); setSearchParams(next, { replace: true }); };
 
   // --- Modal & Action States ---
   const [showEditNodeModal, setShowEditNodeModal] = useState(false);
@@ -144,6 +154,19 @@ export function AcademicTaxonomyDetailPage() {
     notes: '',
   });
 
+  const [mappingPreview, setMappingPreview] = useState<{ key: string; meaning: string; issues: Array<{ code: string; severity: string; message: string }> } | null>(null);
+  const [previewingMapping, setPreviewingMapping] = useState(false);
+  const mappingPayload = { sourceNodeId: node?.nodeId, targetNodeId: mappingFormData.targetNodeId, sourceStandard: mappingFormData.sourceStandard,
+    targetStandard: mappingFormData.targetStandard, strength: mappingFormData.strength, confidence: Number(mappingFormData.confidence), notes: mappingFormData.notes.trim() || undefined };
+  const mappingKey = JSON.stringify(mappingPayload);
+  const currentMappingPreview = mappingPreview?.key === mappingKey ? mappingPreview : null;
+  const previewMapping = async () => {
+    setPreviewingMapping(true); setMappingError(null);
+    try { const result = await adminApiClient.request<Omit<NonNullable<typeof mappingPreview>, 'key'>>('/admin/academic-taxonomy/mappings/preview', { method: 'POST', body: mappingKey }); setMappingPreview({ ...result, key: mappingKey }); }
+    catch (cause) { setMappingError(cause instanceof Error ? cause.message : 'MAPPING_PREVIEW_FAILED'); }
+    finally { setPreviewingMapping(false); }
+  };
+
   // --- Validation State ---
   const [validationReport, setValidationReport] = useState<ValidationReport | null>(null);
   const [runningValidation, setRunningValidation] = useState(false);
@@ -167,7 +190,7 @@ export function AcademicTaxonomyDetailPage() {
     return () => { clearTimeout(timer); abort.abort(); };
   }, [localReadOnly, showAddEdgeModal, showAddMappingModal, pickerQuery, pickerPage, pickerType, pickerStandard]);
 
-  const fetchDetails = async () => {
+  const fetchDetails = async (refreshRelations = false) => {
     setLoading(true);
     setError(null);
     try {
@@ -198,11 +221,7 @@ export function AcademicTaxonomyDetailPage() {
         return;
       }
       const basePath = localReadOnly ? '/academic-taxonomy' : '/admin/academic-taxonomy';
-      const [nodeRes, childrenRes, parentsRes] = await Promise.all([
-        adminApiClient.request<AcademicTaxonomyNode>(`${basePath}/nodes/${nodeId}`),
-        adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(`${basePath}/nodes/${nodeId}/children`),
-        adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(`${basePath}/nodes/${nodeId}/parents`),
-      ]);
+      const nodeRes = await adminApiClient.request<AcademicTaxonomyNode>(`${basePath}/nodes/${nodeId}`, { cache: 'no-store' });
       const [aliasesRes, mappingsRes, majorsRes] = localReadOnly
         ? [
             { data: [] as AliasDto[] },
@@ -216,8 +235,7 @@ export function AcademicTaxonomyDetailPage() {
           ]);
 
       setNode(nodeRes);
-      setChildren(childrenRes.data || []);
-      setParents(parentsRes.data || []);
+      if (refreshRelations) { parentsRead.reload(); childrenRead.reload(); primaryPath.reload(); }
       setAliases(aliasesRes.data || []);
       setMappings(mappingsRes.data || []);
       setMappedMajors(majorsRes.data || []);
@@ -244,6 +262,7 @@ export function AcademicTaxonomyDetailPage() {
 
   useEffect(() => {
     if (nodeId) {
+      setParentPage(1); setChildPage(1);
       fetchDetails();
     }
   }, [nodeId]);
@@ -313,7 +332,7 @@ export function AcademicTaxonomyDetailPage() {
       });
 
       setShowEditNodeModal(false);
-      fetchDetails();
+      fetchDetails(true);
     } catch (err: any) {
       console.error(err);
       setNodeFormError(String(err.message).includes('409')
@@ -346,7 +365,7 @@ export function AcademicTaxonomyDetailPage() {
 
       setShowAddEdgeModal(null);
       setSelectedEdgeNodeId('');
-      fetchDetails();
+      fetchDetails(true);
     } catch (err: any) {
       console.error(err);
       setEdgeError(err.message || (isAr ? 'فشل إنشاء العلاقة الهرمية.' : 'Failed to create hierarchy edge.'));
@@ -372,7 +391,7 @@ export function AcademicTaxonomyDetailPage() {
       await adminApiClient.request(`/admin/academic-taxonomy/edges/by-nodes?parentNodeId=${parentNodeId}&childNodeId=${childNodeId}`, {
         method: 'DELETE',
       });
-      fetchDetails();
+      fetchDetails(true);
     } catch (err: any) {
       console.error(err);
       alert(err.message || (isAr ? 'فشل حذف العلاقة.' : 'Failed to delete relationship.'));
@@ -397,7 +416,7 @@ export function AcademicTaxonomyDetailPage() {
       });
 
       setNewAliasText('');
-      fetchDetails();
+      fetchDetails(true);
     } catch (err: any) {
       console.error(err);
       setAliasError(err.message || (isAr ? 'فشل إضافة المرادف الأكاديمي.' : 'Failed to add academic alias.'));
@@ -415,7 +434,7 @@ export function AcademicTaxonomyDetailPage() {
       await adminApiClient.request(`/admin/academic-taxonomy/aliases/${aliasId}`, {
         method: 'DELETE',
       });
-      fetchDetails();
+      fetchDetails(true);
     } catch (err: any) {
       console.error(err);
       alert(err.message || (isAr ? 'تعذر حذف المرادف.' : 'Failed to delete alias.'));
@@ -425,7 +444,7 @@ export function AcademicTaxonomyDetailPage() {
   // --- Add Standard Mapping Submit ---
   const handleAddMappingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!node || !mappingFormData.targetNodeId) return;
+    if (!node || !mappingFormData.targetNodeId || !currentMappingPreview || currentMappingPreview.issues.some(issue => issue.severity === 'ERROR')) return;
     setSavingMapping(true);
     setMappingError(null);
 
@@ -452,7 +471,7 @@ export function AcademicTaxonomyDetailPage() {
         confidence: 1.0,
         notes: '',
       });
-      fetchDetails();
+      fetchDetails(true);
     } catch (err: any) {
       console.error(err);
       setMappingError(err.message || (isAr ? 'فشل ربط المعيار.' : 'Failed to add standard mapping.'));
@@ -470,7 +489,7 @@ export function AcademicTaxonomyDetailPage() {
       await adminApiClient.request(`/admin/academic-taxonomy/mappings/${mappingId}`, {
         method: 'DELETE',
       });
-      fetchDetails();
+      fetchDetails(true);
     } catch (err: any) {
       console.error(err);
       alert(err.message || (isAr ? 'تعذر حذف الربط المعياري.' : 'Failed to delete standard mapping.'));
@@ -691,6 +710,15 @@ export function AcademicTaxonomyDetailPage() {
         {/* PANEL: HIERARCHY / EDGES */}
         {activeTab === 'hierarchy' && (
           <div className="space-y-8">
+            {!localReadOnly && <div className="rounded border p-3 space-y-2 text-xs">
+              <h3 className="font-bold">{isAr ? 'المسار الرئيسي والآباء البديلون' : 'Primary path and alternative parents'}</h3>
+              {primaryPath.loading && <p role="status">{isAr ? 'جار تحميل المسار…' : 'Loading path…'}</p>}
+              {primaryPath.error && <p role="alert">{primaryPath.error}</p>}
+              <nav aria-label={isAr ? 'المسار الرئيسي' : 'Primary path'} className="flex flex-wrap gap-2">{primaryPath.data?.path.map((item, index) => <span key={item.nodeId}>{index > 0 && ' / '}<Link className="underline" to={`/academic-taxonomy/${encodeURIComponent(item.nodeId)}`}>{item.canonicalName}</Link></span>)}</nav>
+              <p>{isAr ? 'الآباء البديلون: ' : 'Alternative parents: '}{primaryPath.data?.alternativeTotal ?? '—'}</p>
+              {primaryPath.data?.termination === 'DEPTH_LIMIT' && <p role="status">{isAr ? 'المسار المعروض محدود بـ32 مستوى.' : 'Displayed path is bounded to 32 levels.'}</p>}
+              {(parentsRead.error || childrenRead.error) && <p role="alert">{parentsRead.error || childrenRead.error}</p>}
+            </div>}
             {/* Parents Section */}
             <div>
               <div className="flex justify-between items-center mb-4">
@@ -721,7 +749,7 @@ export function AcademicTaxonomyDetailPage() {
                           <Link to={`/academic-taxonomy/${parent.nodeId}`} className="font-bold text-slate-950 text-xs hover:underline">
                             {parent.canonicalName}
                           </Link>
-                          <div className="text-[10px] text-slate-500 font-mono">{parent.canonicalCode}</div>
+                          <div className="text-[10px] text-slate-500 font-mono">{parent.canonicalCode} · {parentsRead.data?.links?.find(link => link.nodeId === parent.nodeId)?.isPrimary ? isAr ? 'رئيسي' : 'Primary' : isAr ? 'بديل' : 'Alternative'}</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -741,6 +769,7 @@ export function AcademicTaxonomyDetailPage() {
               )}
             </div>
 
+            {!localReadOnly && parentsRead.data && <TaxonomyPagination page={parentPage} total={parentsRead.data.total} loading={parentsRead.loading} onPage={setParentPage} isAr={isAr} />}
             {/* Children Section */}
             <div>
               <div className="flex justify-between items-center mb-4">
@@ -790,6 +819,7 @@ export function AcademicTaxonomyDetailPage() {
                 </div>
               )}
             </div>
+            {!localReadOnly && childrenRead.data && <TaxonomyPagination page={childPage} total={childrenRead.data.total} loading={childrenRead.loading} onPage={setChildPage} isAr={isAr} />}
           </div>
         )}
 
@@ -887,7 +917,7 @@ export function AcademicTaxonomyDetailPage() {
                 {isAr ? 'الربط بالمعايير العالمية (Standard Mappings)' : 'Standard Mappings'}
               </h3>
               <button
-                onClick={() => setShowAddMappingModal(true)}
+                onClick={() => { setMappingPreview(null); setMappingFormData(value => ({ ...value, sourceStandard: node.standardType || 'CUSTOM_NATIONAL', targetNodeId: '' })); setShowAddMappingModal(true); }}
                 className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1"
               >
                 <Plus className="h-3 w-3" />
@@ -1335,8 +1365,11 @@ export function AcademicTaxonomyDetailPage() {
               </button>
             </div>
 
-            <form onSubmit={handleAddMappingSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleAddMappingSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               {pickerControls}
+              <p className="text-xs">{isAr ? 'الاتجاه من المصدر إلى الهدف: BROAD هدف أوسع، NARROW هدف أضيق، RELATED علاقة دون تكافؤ، UNKNOWN غير محسوم. لا تُنشر مطابقة تلقائيًا.' : 'Direction is source → target: BROAD means broader target, NARROW narrower target, RELATED has no equivalence and UNKNOWN is unresolved. No automatic publication.'}</p>
+              <button type="button" disabled={previewingMapping || !mappingFormData.targetNodeId} onClick={previewMapping}>{isAr ? 'معاينة الربط والتحقق من المعيارين' : 'Preview mapping and validate standards'}</button>
+              {currentMappingPreview && <div role="status" className="text-xs border p-3"><p>{node.canonicalName} → {allNodes.find(item => item.nodeId === mappingFormData.targetNodeId)?.canonicalName} · {currentMappingPreview.meaning}</p><ul>{currentMappingPreview.issues.map((issue, index) => <li key={index}>{issue.severity}: {issue.message}</li>)}</ul></div>}
               {mappingError && (
                 <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
                   {mappingError}
@@ -1351,7 +1384,7 @@ export function AcademicTaxonomyDetailPage() {
                   required
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
                   value={mappingFormData.targetNodeId}
-                  onChange={(e) => setMappingFormData(d => ({ ...d, targetNodeId: e.target.value }))}
+                  onChange={(e) => { const selected = allNodes.find(item => item.nodeId === e.target.value); setMappingFormData(d => ({ ...d, targetNodeId: e.target.value, targetStandard: selected?.standardType || 'CUSTOM_NATIONAL' })); }}
                 >
                   <option value="">{isAr ? '-- اختر العقدة من القائمة --' : '-- Select target node --'}</option>
                   {potentialEdgeNodes.map(n => (
@@ -1370,7 +1403,7 @@ export function AcademicTaxonomyDetailPage() {
                   <select
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
                     value={mappingFormData.sourceStandard}
-                    onChange={(e) => setMappingFormData(d => ({ ...d, sourceStandard: e.target.value }))}
+                    disabled
                   >
                     <option value="CUSTOM_NATIONAL">CUSTOM_NATIONAL</option>
                     <option value="ISCED">ISCED</option>
@@ -1385,7 +1418,7 @@ export function AcademicTaxonomyDetailPage() {
                   <select
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0E7C86]"
                     value={mappingFormData.targetStandard}
-                    onChange={(e) => setMappingFormData(d => ({ ...d, targetStandard: e.target.value }))}
+                    disabled
                   >
                     <option value="ISCED">ISCED</option>
                     <option value="CIP">CIP</option>
@@ -1451,7 +1484,7 @@ export function AcademicTaxonomyDetailPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={savingMapping}
+                  disabled={savingMapping || previewingMapping || !currentMappingPreview || currentMappingPreview.issues.some(issue => issue.severity === 'ERROR')}
                   className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
                 >
                   {savingMapping ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
