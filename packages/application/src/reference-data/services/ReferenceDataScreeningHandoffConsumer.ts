@@ -41,13 +41,26 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
       deterministicKey: null, issues: [], canonicalWrites: 0,
       state: 'NEEDS_OWNER_REVIEW',
     };
+    const sourceIssues = (handoff.validation.issues || [])
+      .slice(0, 100).map(issue => ({
+        code: issue.code, message: issue.message,
+      }));
+    if (!handoff.artifact.artifactId || !/^[a-fA-F0-9]{64}$/.test(handoff.provenance.contentHash || '')) {
+      return {
+        ...decision, state: 'INVALID',
+        issues: [...sourceIssues, {
+          code: 'P7_DURABLE_SOURCE_SHA256_AND_ARTIFACT_REQUIRED',
+          message: 'A source artifact ID and verified SHA-256 source hash are mandatory for P7 review.',
+        }],
+      };
+    }
     if (handoff.validation.state === 'INVALID') {
       return { ...decision, state: 'INVALID',
-        issues: handoff.validation.issues.map(issue => ({ code: issue.code, message: issue.message })) };
+        issues: sourceIssues };
     }
     if (!entityType) {
       return { ...decision, state: 'NEEDS_OWNER_REVIEW',
-        issues: [{ code: 'P7_EXPLICIT_REFERENCE_TYPE_REQUIRED',
+        issues: [...sourceIssues, { code: 'P7_EXPLICIT_REFERENCE_TYPE_REQUIRED',
           message: 'Supply referenceMetadata.referenceEntityType; P7 will not guess from field shapes.' }] };
     }
     let report: ReturnType<ReferenceDataImportHandoffService['prepareSeedBatch']>['records'][number]['validationReport'];
@@ -78,7 +91,7 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
       ...decision,
       deterministicKey: report.deterministicKey || null,
       state: report.canBeImported ? 'NEEDS_OWNER_REVIEW' : 'INVALID',
-      issues,
+      issues: [...sourceIssues, ...issues],
     };
   }
 }

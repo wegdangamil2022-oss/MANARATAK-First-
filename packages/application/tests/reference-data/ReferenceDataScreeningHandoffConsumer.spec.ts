@@ -8,7 +8,7 @@ const handoff = (referenceMetadata: Record<string, string> | undefined, normaliz
   ownerDomain: 'REFERENCE_DATA',
   artifact: { sourceId: 'source-1', artifactId: 'artifact-1' },
   normalizedPayload,
-  provenance: { sourceSystem: 'source-test', contentHash: 'abc123' },
+  provenance: { sourceSystem: 'source-test', contentHash: 'a'.repeat(64) },
   validation: { state: 'VALID', issues: [] },
   execution: { executionId: 'run-1', dryRun: false, attempt: 1, idempotencyKey: 'p7-key-1' },
   referenceMetadata,
@@ -30,6 +30,31 @@ describe('P6 -> P7 screening consumer', () => {
     expect(result.state).toBe('NEEDS_OWNER_REVIEW');
     expect(result.issues[0].code).toBe('P7_EXPLICIT_REFERENCE_TYPE_REQUIRED');
   });
+  it('does not allow review progression for a P6 handoff without immutable artifact hash', async () => {
+    const input = handoff({ referenceEntityType: 'CITY' }, { countryIso2Code: 'YE', name: 'صنعاء' });
+    const result = await owner.accept({
+      ...input,
+      provenance: { ...input.provenance, contentHash: 'unverified' },
+    });
+    expect(result.state).toBe('INVALID');
+    expect(result.issues[0].code).toBe('P7_DURABLE_SOURCE_SHA256_AND_ARTIFACT_REQUIRED');
+    expect(result.canonicalWrites).toBe(0);
+  });
+
+  it('retains review-required issues from P6 even when the P7 row structure is valid', async () => {
+    const input = handoff({ referenceEntityType: 'COUNTRY' },
+      { iso2Code: 'YE', iso3Code: 'YEM', name: 'Yemen' });
+    const result = await owner.accept({
+      ...input, validation: {
+        state: 'NEEDS_REVIEW',
+        issues: [{ code: 'P6_PROVIDER_DRIFT', message: 'Source layout changed',
+          severity: 'WARNING' }],
+      },
+    });
+    expect(result.state).toBe('NEEDS_OWNER_REVIEW');
+    expect(result.issues.some(issue => issue.code === 'P6_PROVIDER_DRIFT')).toBe(true);
+  });
+
   it('rejects punctuation-only city names without retry loops', async () => {
     const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, {
       countryIso2Code: 'YE', name: '!!!',
