@@ -692,7 +692,16 @@ function CitiesTab() {
           <Input label="الاسم باللغة العربية (اختياري)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
           <CanonicalPicker label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={(query) => canonicalPickerApi.regions(form.countryIso2Code || undefined, query)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId || Boolean(editing)} />
           <Input label="تسمية المنطقة الإدارية الأصلية (اختياري)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
-          <Input label="المنطقة الزمنية (مثل Asia/Riyadh - اختياري)" value={form.timezone} onChange={(v: string) => setForm({...form, timezone: v})} />
+          <label className="flex flex-col gap-1 text-sm">منطقة زمنية IANA (اختياري)
+            <input list="p7-city-iana-timezones" className="border rounded px-3 py-2" value={form.timezone}
+              placeholder="Asia/Riyadh"
+              onChange={e => setForm({ ...form, timezone: e.target.value })} />
+            <datalist id="p7-city-iana-timezones">
+              {typeof Intl.supportedValuesOf === 'function' &&
+                ['UTC', ...Intl.supportedValuesOf('timeZone')].map(zone => <option key={zone} value={zone} />)}
+            </datalist>
+            <small className="text-slate-500">Runtime ICU suggestions; official IANA version evidence remains pending.</small>
+          </label>
           <label className="flex flex-col gap-1 text-sm">Latitude (−90 … 90)
             <input type="number" min={-90} max={90} step="any" value={form.latitude} className="border rounded px-3 py-2"
               onChange={e => setForm({ ...form, latitude: e.target.value })} />

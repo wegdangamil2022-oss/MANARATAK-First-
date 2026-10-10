@@ -15,6 +15,7 @@ import {
 } from '../validation/ReferenceDataValidationTypes';
 import { IReferenceDataValidationService } from '../contracts/IReferenceDataValidationService';
 import { normalizeReferenceIdentityToken, referenceCityScopeKey } from '../governance/ReferenceIdentityNormalization';
+import { isRuntimeSupportedIanaTimeZone } from '../governance/ReferenceIanaTimeZonePolicy';
 
 export class ReferenceDataValidationService implements IReferenceDataValidationService {
   public validateCountry(
@@ -368,16 +369,12 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
     }
 
     if (input.timezone) {
-      // Runtime ICU supplies a bounded canonical IANA candidate set. This is
-      // validation, NOT proof that a complete IANA snapshot is bundled.
-      const zones = typeof Intl.supportedValuesOf === 'function'
-        ? Intl.supportedValuesOf('timeZone')
-        : [];
-      if (!zones.includes(input.timezone)) {
+      // Runtime source validation; authoritative IANA snapshot remains separate.
+      if (!isRuntimeSupportedIanaTimeZone(input.timezone)) {
         issues.push({
           fieldName: 'timezone',
           code: 'NON_CANONICAL_IANA_TIMEZONE',
-          message: 'timezone must be a canonical IANA region name supported by the runtime ICU snapshot',
+          message: 'timezone must be a runtime-accepted IANA timezone identifier (including UTC)',
           severity: ReferenceDataValidationSeverity.ERROR
         });
       }
