@@ -1210,11 +1210,11 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (city.versionNumber !== command.expectedVersion) throw new Error('REFERENCE_VERSION_CONFLICT');
     if (city.lifecycleState !== 'ACTIVE') throw new Error('REFERENCE_CITY_REPAIR_ACTIVE_ONLY');
     if (city.countryReferenceId !== null) throw new Error('REFERENCE_CITY_REPAIR_NOT_LEGACY_UNLINKED');
-    const countries = await this.prisma.$queryRaw<Array<{ id: string; iso2Code: string; lifecycleState: string }>>(Prisma.sql`
-      SELECT "id", "iso2Code", "lifecycleState" FROM "ReferenceCountry"
+    const countries = await this.prisma.$queryRaw<Array<{ id: string; iso2Code: string; lifecycleState: string; isActive: boolean }>>(Prisma.sql`
+      SELECT "id", "iso2Code", "lifecycleState", "isActive" FROM "ReferenceCountry"
       WHERE "id" = ${command.countryReferenceId} LIMIT 1 FOR SHARE
     `);
-    if (countries.length !== 1 || countries[0].lifecycleState !== 'ACTIVE' ||
+    if (countries.length !== 1 || countries[0].lifecycleState !== 'ACTIVE' || !countries[0].isActive ||
         countries[0].iso2Code !== city.countryIso2Code)
       throw new Error('REFERENCE_CITY_REPAIR_COUNTRY_MISMATCH');
     if (city.administrativeRegionId) {
