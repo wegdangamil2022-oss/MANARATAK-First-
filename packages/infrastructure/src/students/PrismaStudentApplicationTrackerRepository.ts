@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-import { CreateStudentApplicationTrackerDto, IStudentApplicationTrackerRepository, StudentApplicationTrackerDto, UpdateStudentApplicationTrackerDto } from '@manaratak/domain';
+import { CreateStudentApplicationTrackerDto, IStudentApplicationTrackerRepository, StudentApplicationTrackerDto, UpdateStudentApplicationTrackerDto, StudentSupportApplicationTrackerPage } from '@manaratak/domain';
 
 export class PrismaStudentApplicationTrackerRepository implements IStudentApplicationTrackerRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -15,6 +15,41 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
     });
     return this.dto(row);
   }
+  async listSupportPage(studentReferenceId: string, input: { limit?: number; cursor?: string }): Promise<StudentSupportApplicationTrackerPage> {
+    const limit = Math.min(50, Math.max(1, input.limit ?? 20));
+    let cursorAt: Date | null = null;
+    let cursorId: string | null = null;
+    if (input.cursor) {
+      if (input.cursor.length > 256 || !/^[A-Za-z0-9_-]+$/.test(input.cursor))
+        throw new Error('STUDENT_SUPPORT_CURSOR_INVALID');
+      const decoded = Buffer.from(input.cursor, 'base64url').toString('utf8');
+      const index = decoded.lastIndexOf('|');
+      cursorAt = index > 0 ? new Date(decoded.slice(0, index)) : null;
+      cursorId = index > 0 ? decoded.slice(index + 1) : null;
+      if (!cursorAt || !Number.isFinite(cursorAt.getTime()) || !cursorId || cursorId.length > 128)
+        throw new Error('STUDENT_SUPPORT_CURSOR_INVALID');
+    }
+    const where = { studentReferenceId };
+    const selected = await this.db.studentApplicationTracker.findMany({
+      where: { AND: [where, ...(cursorAt && cursorId ? [{
+        OR: [{updatedAt: {lt: cursorAt}}, {updatedAt: cursorAt, id: {lt: cursorId}}],
+      }] : [])] },
+      select: { id: true, scholarshipId: true, stage: true, status: true, deadlineAt: true, updatedAt: true },
+      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+    });
+    const total = await this.db.studentApplicationTracker.count({ where });
+    const hasMore = selected.length > limit;
+    const items = selected.slice(0, limit);
+    const last = items[items.length - 1];
+    return {
+      items, total, hasMore,
+      nextCursor: hasMore && last
+        ? Buffer.from(`${new Date(last.updatedAt).toISOString()}|${last.id}`, 'utf8').toString('base64url')
+        : null,
+    };
+  }
+
   async list(studentReferenceId:string):Promise<StudentApplicationTrackerDto[]> { return (await this.db.studentApplicationTracker.findMany({where:{studentReferenceId},orderBy:{updatedAt:'desc'},include:this.include})).map((r:any)=>this.dto(r)); }
   async findById(studentReferenceId:string,trackerId:string):Promise<StudentApplicationTrackerDto|null>{ const row=await this.db.studentApplicationTracker.findFirst({where:{id:trackerId,studentReferenceId},include:this.include}); return row?this.dto(row):null; }
   async update(studentReferenceId:string,trackerId:string,data:UpdateStudentApplicationTrackerDto):Promise<StudentApplicationTrackerDto>{

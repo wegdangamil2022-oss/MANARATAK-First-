@@ -367,7 +367,22 @@ export interface UpdateStudentApplicationTrackerDto {
   expectedVersion: number; stage?: string; notes?: string | null; deadlineAt?: Date | null;
 }
 
+export interface StudentSupportApplicationTrackerPage {
+  items: Array<{
+    id: string;
+    scholarshipId: string;
+    stage: string;
+    status: StudentApplicationTrackerStatus;
+    deadlineAt: Date | null;
+    updatedAt: Date;
+  }>;
+  total: number;
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
 export interface IStudentApplicationTrackerRepository {
+  listSupportPage(studentReferenceId: string, input: { limit?: number; cursor?: string }): Promise<StudentSupportApplicationTrackerPage>;
   create(data: CreateStudentApplicationTrackerDto): Promise<StudentApplicationTrackerDto>;
   list(studentReferenceId: string): Promise<StudentApplicationTrackerDto[]>;
   findById(studentReferenceId: string, trackerId: string): Promise<StudentApplicationTrackerDto | null>;

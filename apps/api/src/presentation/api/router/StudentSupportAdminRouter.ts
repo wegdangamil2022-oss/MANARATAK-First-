@@ -5,18 +5,20 @@ import {
   type IAuditRecordRepository,
   type AuthorizationEvaluatorService,
 } from '@manaratak/domain';
-import { StudentWorkspaceUseCases, StudentDashboardHydrationService } from '@manaratak/application';
+import { StudentWorkspaceUseCases, StudentDashboardHydrationService, StudentApplicationTrackerUseCases } from '@manaratak/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
 export class StudentSupportAdminRouter {
   public static create({
     studentWorkspaceUseCases,
     studentDashboardHydrationService,
+    studentApplicationTrackerUseCases,
     auditRecordRepo,
     authEvaluatorService,
   }: {
     studentWorkspaceUseCases: StudentWorkspaceUseCases;
     studentDashboardHydrationService: StudentDashboardHydrationService;
+    studentApplicationTrackerUseCases: StudentApplicationTrackerUseCases;
     auditRecordRepo?: IAuditRecordRepository;
     authEvaluatorService: AuthorizationEvaluatorService;
   }): Router {
@@ -96,6 +98,30 @@ export class StudentSupportAdminRouter {
           metadata: { purpose: 'student-support-case-review', ownerScopes: { learning, certificates, services } },
         }, { reliability: 'REQUIRED', principal: 'REQUIRED' });
         res.status(200).json(result);
+      } catch (error) { next(error); }
+    });
+
+    // FGA-15-001: read-only case review; bounded P15 tracker projection with explicit purpose.
+    router.get('/support/:studentReferenceId/application-trackers', requireSupportRead, async (req, res, next) => {
+      try {
+        const studentReferenceId = z.string().trim().min(1).max(128).parse(req.params.studentReferenceId);
+        const query = z.object({
+          purpose: z.enum(['CASE_REVIEW', 'APPLICATION_STATUS_INQUIRY', 'SYNC_DIAGNOSTIC']),
+          limit: z.coerce.number().int().min(1).max(50).optional(),
+          cursor: z.string().trim().max(256).optional(),
+        }).strict().parse(req.query);
+        // Return 404 for an invalid student rather than showing a plausible empty list.
+        await studentWorkspaceUseCases.getSupportWorkspaceDetail(studentReferenceId);
+        const data = await studentApplicationTrackerUseCases.listSupportPage(studentReferenceId, {
+          limit: query.limit, cursor: query.cursor,
+        });
+        await AuditHelper.recordMutation(auditRecordRepo, req, {
+          action: 'STUDENT_SUPPORT_APPLICATION_TRACKERS_VIEW',
+          category: 'STUDENT_SUPPORT', targetType: 'STUDENT_WORKSPACE',
+          targetId: studentReferenceId, result: 'SUCCESS',
+          metadata: { purpose: query.purpose, view: 'application-tracker-page' },
+        }, { reliability: 'REQUIRED', principal: 'REQUIRED' });
+        res.status(200).json(data);
       } catch (error) { next(error); }
     });
 

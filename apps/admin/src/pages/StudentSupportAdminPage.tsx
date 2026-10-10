@@ -80,6 +80,12 @@ interface StudentSupportDetail extends StudentSupportItem {
   learning?: Enrollment[];
   certificates?: Certificate[];
 }
+interface SupportApplicationPage {
+  items: Array<{id:string;scholarshipId:string;stage:string;status:string;deadlineAt:string|null;updatedAt:string}>;
+  total: number;
+  hasMore: boolean;
+  nextCursor: string|null;
+}
 interface StudentPage {
   items: StudentSupportItem[];
   total?: number;
@@ -168,6 +174,10 @@ export function StudentSupportAdminPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [tab, setTab] = useState<Tab>('OVERVIEW');
   const [resetTarget, setResetTarget] = useState<StudentSupportItem | null>(null);
+  const [trackerPurpose, setTrackerPurpose] = useState('CASE_REVIEW');
+  const [trackerPage, setTrackerPage] = useState<SupportApplicationPage | null>(null);
+  const [trackerError, setTrackerError] = useState<string | null>(null);
+  const [trackerLoading, setTrackerLoading] = useState(false);
   const [reason, setReason] = useState('');
   const [resetting, setResetting] = useState(false);
   const listRequest = useRef(0);
@@ -239,6 +249,8 @@ export function StudentSupportAdminPage() {
     }
   }, []);
   useEffect(() => {
+    setTrackerPage(null);
+    setTrackerError(null);
     setTab('OVERVIEW');
     if (selectedId) void inspect(selectedId);
     else {
@@ -254,7 +266,26 @@ export function StudentSupportAdminPage() {
   useEffect(() => {
     if (detail) detailAnchor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [detail?.studentReferenceId]);
+  async function openSupportTrackerPage(nextCursor?:string) {
+    if (!selectedId || trackerLoading) return;
+    setTrackerLoading(true);
+    setTrackerError(null);
+    try {
+      const query = new URLSearchParams({purpose:trackerPurpose,limit:'20'});
+      if (nextCursor) query.set('cursor',nextCursor);
+      const result = await adminApiClient.request<SupportApplicationPage>(
+        `/admin/students/support/${encodeURIComponent(selectedId)}/application-trackers?${query}`,
+      );
+      setTrackerPage((prev) => nextCursor && prev
+        ? {...result, items:[...prev.items,...result.items]}
+        : result);
+    } catch (cause) {
+      setTrackerError(cause instanceof Error ? cause.message : 'تعذر استعراض متابعات الطالب.');
+    } finally {setTrackerLoading(false);}
+  }
   function chooseStudent(id: string | null) {
+    setTrackerPage(null);
+    setTrackerError(null);
     const next = new URLSearchParams(params);
     if (id) next.set('student', id);
     else next.delete('student');
@@ -724,6 +755,33 @@ export function StudentSupportAdminPage() {
                         title="طلبات الخدمات المسجلة"
                         value={detail.serviceRequestCount ?? '—'}
                       />
+                    </div>
+                    <div className="space-y-3 rounded-xl border p-4">
+                      <h3 className="font-bold text-[#142B5F]">متابعات التقديم — عرض دعم محدود</h3>
+                      <p className="text-xs text-slate-600">مرحلة الطلب وحالته وموعده فقط. الملاحظات والمستندات الخاصة لا تُعرض.</p>
+                      <label className="block text-sm font-semibold">
+                        غرض الاطلاع
+                        <select value={trackerPurpose} onChange={(e)=>{setTrackerPurpose(e.target.value);setTrackerPage(null);}} className="mt-2 block w-full rounded-lg border p-2">
+                          <option value="CASE_REVIEW">مراجعة بلاغ دعم</option>
+                          <option value="APPLICATION_STATUS_INQUIRY">استفسار عن حالة التقديم</option>
+                          <option value="SYNC_DIAGNOSTIC">تشخيص المزامنة</option>
+                        </select>
+                      </label>
+                      <button type="button" disabled={trackerLoading} onClick={()=>void openSupportTrackerPage()}
+                        className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">فتح سجل المتابعة</button>
+                      {trackerError && <p role="alert" className="text-sm text-red-700">{trackerError}</p>}
+                      {trackerPage && <div className="space-y-2">
+                        <p className="text-xs text-slate-500">عرض {trackerPage.items.length} من {trackerPage.total} متابعة</p>
+                        {trackerPage.items.length === 0 && <p className="text-sm text-slate-500">لا توجد متابعات مسجلة.</p>}
+                        {trackerPage.items.map((item)=><article key={item.id} className="rounded-lg bg-slate-50 p-3 text-sm">
+                          <span className="font-bold">{item.scholarshipId}</span> · {statusLabel(item.status)}
+                          <p className="mt-1">المرحلة: {item.stage}</p>
+                          <p className="text-xs text-slate-500">الموعد: {date(item.deadlineAt)} · التحديث: {date(item.updatedAt)}</p>
+                        </article>)}
+                        {trackerPage.hasMore && trackerPage.nextCursor && <button type="button"
+                          disabled={trackerLoading} onClick={()=>void openSupportTrackerPage(trackerPage.nextCursor!)}
+                          className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">المزيد من المتابعات</button>}
+                      </div>}
                     </div>
                     <h3 className="font-bold text-[#142B5F]">توزيع المحفوظات</h3>
                     {detail.savedSummary?.length ? (
