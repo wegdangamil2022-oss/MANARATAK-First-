@@ -25,6 +25,7 @@ export class LearningPathUseCases {
     const courses = input.courses ?? [];
     if (!input.title.trim()) throw new Error('LEARNING_PATH_TITLE_REQUIRED');
     this.assertCourseGraph(courses);
+    if(input.completionLogic !== 'ALL' && courses.length && !courses.some(course=>course.required)) throw new Error('LEARNING_PATH_REQUIRED_COURSE_MISSING');
     for (const item of courses) {
       const course = await this.courseRepository.findById(item.courseId);
       if (!course) throw new Error(`LEARNING_PATH_COURSE_NOT_FOUND:${item.courseId}`);
@@ -49,6 +50,8 @@ export class LearningPathUseCases {
 
   public async markReadyToPublish(id: string): Promise<LearningPathDto> {
     const path = await this.get(id);
+    if (path.status !== LearningPathStatus.DRAFT) throw new Error('LEARNING_PATH_INVALID_REVIEW_TRANSITION');
+    this.assertCourseGraph(path.courses);
     if (path.courses.length === 0) throw new Error('LEARNING_PATH_COURSES_REQUIRED');
     return this.repository.updateStatus(id, LearningPathStatus.READY_TO_PUBLISH);
   }
@@ -73,13 +76,17 @@ export class LearningPathUseCases {
   public async enroll(pathId: string, studentReferenceId: string) {
     const path = await this.get(pathId);
     if (path.status !== LearningPathStatus.PUBLISHED) throw new Error('LEARNING_PATH_ENROLLMENT_REQUIRES_PUBLISHED_PATH');
+    for(const item of path.courses){
+      const course=await this.courseRepository.findById(item.courseId);
+      if(!course || course.status!=='PUBLISHED') throw new Error('LEARNING_PATH_COURSE_NOT_PUBLISHED');
+    }
     return this.repository.enroll(path.id, path.version, studentReferenceId);
   }
 
   public async refreshProgress(pathId: string, studentReferenceId: string, context?: AtomicMutationRequestContext) {
-    const path = await this.get(pathId);
     const enrollment = await this.repository.findEnrollment(pathId, studentReferenceId);
     if (!enrollment || enrollment.status !== LearningPathEnrollmentStatus.ACTIVE) throw new Error('LEARNING_PATH_ACTIVE_ENROLLMENT_REQUIRED');
+    const path = await this.enrolledVersion(pathId,enrollment.learningPathVersion);
     const target = path.completionLogic === 'ALL' ? path.courses : path.courses.filter(item => item.required);
     const completed = new Set<string>();
     for (const item of target) if (await this.progressRepository.findCompletion(item.courseId, studentReferenceId)) completed.add(item.courseId);
@@ -108,7 +115,9 @@ export class LearningPathUseCases {
   }
 
   public async availableCourses(pathId: string, studentReferenceId: string): Promise<string[]> {
-    const path = await this.get(pathId);
+    const enrollment=await this.repository.findEnrollment(pathId,studentReferenceId);
+    if(!enrollment || ![LearningPathEnrollmentStatus.ACTIVE,LearningPathEnrollmentStatus.COMPLETED].includes(enrollment.status)) throw new Error('LEARNING_PATH_ACTIVE_ENROLLMENT_REQUIRED');
+    const path=await this.enrolledVersion(pathId,enrollment.learningPathVersion);
     const completed = new Set<string>();
     for (const item of path.courses) if (await this.progressRepository.findCompletion(item.courseId, studentReferenceId)) completed.add(item.courseId);
     return path.courses.filter(item => item.prerequisiteCourseIds.every(id => completed.has(id)) && (!path.isStrictlyOrdered || path.courses.filter(x => x.position < item.position && x.required).every(x => completed.has(x.courseId)))).map(item => item.courseId);
@@ -118,11 +127,29 @@ export class LearningPathUseCases {
     const ids = new Set(courses.map(item => item.courseId));
     if (ids.size !== courses.length) throw new Error('LEARNING_PATH_DUPLICATE_COURSE');
     const positions = new Set(courses.map(item => item.position));
+    if(courses.some(item=>!Number.isSafeInteger(item.position)||item.position<1)) throw new Error('LEARNING_PATH_INVALID_POSITION');
     if (positions.size !== courses.length) throw new Error('LEARNING_PATH_DUPLICATE_POSITION');
     for (const item of courses) for (const prerequisite of item.prerequisiteCourseIds) {
       if (prerequisite === item.courseId) throw new Error('LEARNING_PATH_SELF_PREREQUISITE');
       if (!ids.has(prerequisite)) throw new Error(`LEARNING_PATH_PREREQUISITE_NOT_IN_PATH:${prerequisite}`);
     }
+    const nodes=new Map(courses.map(item=>[item.courseId,item]));
+    const visited=new Set<string>();
+    const visiting=new Set<string>();
+    const visit=(id:string):void=>{
+      if(visiting.has(id)) throw new Error('LEARNING_PATH_PREREQUISITE_CYCLE');
+      if(visited.has(id)) return;
+      visiting.add(id);
+      for(const parent of nodes.get(id)!.prerequisiteCourseIds) visit(parent);
+      visiting.delete(id);visited.add(id);
+    };
+    for(const id of ids) visit(id);
+  }
+  private async enrolledVersion(id:string,version:number):Promise<LearningPathDto> {
+    if(!this.repository.findByVersion) throw new Error('LEARNING_PATH_VERSION_READER_REQUIRED');
+    const path=await this.repository.findByVersion(id,version);
+    if(!path) throw new Error('LEARNING_PATH_VERSION_NOT_FOUND');
+    return path;
   }
   private slug(value: string): string { return value.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 48) || 'learning-path'; }
 }

@@ -65,6 +65,11 @@ let currentAdminAuthState: AdminAuthState = 'LOADING';
 let authStateListeners: Array<(state: AdminAuthState) => void> = [];
 let globalAbortController = new AbortController();
 let sessionGeneration = 0;
+const courseVersions = new Map<string,number>();
+const courseReviewReasons = new Map<string,string>();
+export function setCourseReviewReason(id:string,reason:string):void {
+  if(reason.trim()) courseReviewReasons.set(id,reason.trim());else courseReviewReasons.delete(id);
+}
 const testRevisions = new Map<string,number>();
 const majorRevisions = new Map<string,number>();
 const universityRevisions = new Map<string,number>();
@@ -83,7 +88,7 @@ export function setAdminAuthStatus(state: AdminAuthState): void {
 
 export function abortAllPendingAdminRequests(): void {
   sessionGeneration++;
-  testRevisions.clear();
+  testRevisions.clear(); courseVersions.clear(); courseReviewReasons.clear();
   majorRevisions.clear(); majorOwnerAliases.clear(); universityRevisions.clear(); scholarshipRevisions.clear();
   globalAbortController.abort();
   globalAbortController = new AbortController();
@@ -160,7 +165,7 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 
   const method = (options.method || 'GET').toUpperCase();
   const cacheKey = `${method}:${endpoint}`;
-  const freshRead = options.cache === 'no-store' || options.cache === 'reload' || /^\/admin\/(international-tests|majors|universities|scholarships)(?:\/|\?|$)/.test(endpoint);
+  const freshRead = options.cache === 'no-store' || options.cache === 'reload' || /^\/admin\/(international-tests|majors|universities|scholarships|courses)(?:\/|\?|$)/.test(endpoint);
   const coalesce = method === 'GET' && !freshRead && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
 
   if (method === 'GET' && !isPublicAuthRoute) {
@@ -240,9 +245,23 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     headers.set('If-Match',`"${revision}"`);
   }
 
+  const courseMatch = endpoint.match(/^\/admin\/courses\/(?:learning-paths\/([^/?]+)|([^/?]+))(?:\/|\?|$)/);
+  const courseOwner = courseMatch ? (courseMatch[1] ? `learning-paths/${courseMatch[1]}` : courseMatch[2]==='learning-paths'?undefined:courseMatch[2]) : undefined;
+  if(courseOwner && isMutation(options.method)) {
+    if(!headers.has('If-Match')) {
+      const version=courseVersions.get(courseOwner);
+      if(version===undefined) throw new Error('أعد تحميل الدورة قبل التعديل.');
+      headers.set('If-Match',`"${version}"`);
+    }
+    if(!headers.has('X-Review-Reason')) {
+      const reason=courseReviewReasons.get(courseOwner);
+      if(!reason || reason.length<3) throw new Error('اكتب سبب التعديل قبل الحفظ.');
+      headers.set('X-Review-Reason',reason);
+    }
+  }
   const universityMatch = endpoint.match(/^\/admin\/universities\/([^/?]+)(?:\/|\?|$)/);
   const universityOwner = universityMatch && universityMatch[1] !== 'organization-units' ? universityMatch[1] : undefined;
-  if (universityOwner && method !== 'GET' && !headers.has('If-Match')) {
+  if (universityOwner && isMutation(options.method) && !headers.has('If-Match')) {
     const revision = universityRevisions.get(universityOwner);
     if (revision === undefined) throw new Error('أعد تحميل الجامعة قبل التعديل (إصدار السجل مطلوب).');
     headers.set('If-Match', `"${revision}"`);
@@ -335,6 +354,18 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     const remember=(row:unknown)=>{if(row&&typeof row==='object'&&'id' in row&&'revision' in row) {const value=Number(row.revision);if(Number.isSafeInteger(value)) testRevisions.set(String(row.id),Math.max(testRevisions.get(String(row.id))??0,value));}};
     remember(payload); if(payload&&typeof payload==='object'&&'data' in payload&&Array.isArray(payload.data)) payload.data.forEach(remember);
     const revision=response.headers.get('X-Entity-Revision'); if(testOwner&&revision!==null)testRevisions.set(testOwner,Number(revision));
+  }
+  if(endpoint.startsWith('/admin/courses')) {
+    const remember=(row:unknown)=>{
+      if(row && typeof row==='object' && 'id' in row && 'version' in row) {
+        const item=row as {id:string;version:number};
+        if(Number.isSafeInteger(item.version)) courseVersions.set(endpoint.includes('/learning-paths')?`learning-paths/${item.id}`:item.id,item.version);
+      }
+    };
+    remember(payload);
+    if(payload && typeof payload==='object' && 'data' in payload && Array.isArray(payload.data)) payload.data.forEach(remember);
+    const version=response.headers.get('X-Entity-Version');
+    if(courseOwner && version!==null && Number.isSafeInteger(Number(version))) courseVersions.set(courseOwner,Number(version));
   }
   if(endpoint.startsWith('/admin/majors')) {
     const remember=(row:unknown)=>{

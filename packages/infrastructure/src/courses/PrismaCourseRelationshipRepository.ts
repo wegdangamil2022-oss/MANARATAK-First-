@@ -1,3 +1,4 @@
+import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseAcademicTaxonomyLinkDto,
@@ -31,6 +32,12 @@ function jsonArray(value: Prisma.JsonValue | null): string[] {
 
 export class PrismaCourseRelationshipRepository implements ICourseRelationshipRepository {
   public constructor(private readonly prisma: PrismaClient) {}
+
+  public withTransaction(context: AtomicPersistenceContext): ICourseRelationshipRepository {
+    const tx = (context as AtomicPersistenceContext & { transactionClient?: unknown }).transactionClient;
+    if (!context.boundaryId || !tx) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return new PrismaCourseRelationshipRepository(tx as PrismaClient);
+  }
 
   public async getRelationshipSource(courseId: string): Promise<CourseRelationshipSourceDto | null> {
     const course = await this.prisma.course.findUnique({

@@ -1,3 +1,4 @@
+import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseEnrollmentPolicyDto,
@@ -10,6 +11,12 @@ const json = (value: unknown): Prisma.InputJsonValue | undefined =>
 
 export class PrismaCourseEnrollmentPolicyRepository implements ICourseEnrollmentPolicyRepository {
   public constructor(private readonly prisma: PrismaClient) {}
+
+  public withTransaction(context: AtomicPersistenceContext): ICourseEnrollmentPolicyRepository {
+    const tx = (context as AtomicPersistenceContext & { transactionClient?: unknown }).transactionClient;
+    if (!context.boundaryId || !tx) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return new PrismaCourseEnrollmentPolicyRepository(tx as PrismaClient);
+  }
 
   public async getPolicy(courseId: string): Promise<CourseEnrollmentPolicyDto | null> {
     const row = await this.prisma.courseEnrollmentPolicy.findUnique({ where: { courseId } });

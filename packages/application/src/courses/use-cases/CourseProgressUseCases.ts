@@ -43,6 +43,7 @@ export class CourseProgressUseCases {
     if (course.originType === CourseOriginType.EXTERNAL_LINKED_COURSE) {
       throw new Error('External linked courses do not support MANARATAK enrollment or local progress tracking');
     }
+    if (course.status !== CourseStatus.PUBLISHED) throw new Error('COURSE_LEARNING_REQUIRES_PUBLISHED_COURSE');
     return course;
   }
 
@@ -120,8 +121,12 @@ export class CourseProgressUseCases {
         position: item.position,
       }));
 
-    // Never expose correctAnswer or explanation in learner read models before submission.
-    return { progress, curriculum: { modules, lessons, assets, quizzes, questions } };
+    const publicModules = modules.map(({id,courseId,title,description,position,status}) => ({id,courseId,title,description,position,status}));
+    const publicLessons = lessons.map(({id,courseId,moduleId,title,summary,lessonType,position,estimatedDurationMinutes,contentText,status}) =>
+      ({id,courseId,moduleId,title,summary,lessonType,position,estimatedDurationMinutes,contentText,status}));
+    const publicQuizzes = quizzes.map(({id,courseId,moduleId,lessonId,title,instructions,position,passingScore,maxAttempts,status}) =>
+      ({id,courseId,moduleId,lessonId,title,instructions,position,passingScore,maxAttempts,status}));
+    return { progress, curriculum: { modules:publicModules, lessons:publicLessons, assets, quizzes:publicQuizzes, questions } };
   }
 
   public async enroll(
@@ -200,8 +205,12 @@ export class CourseProgressUseCases {
     if (!curriculum.lessons.some(lesson => lesson.id === data.lessonId && lesson.status !== CourseContentStatus.ARCHIVED)) {
       throw new Error('COURSE_LESSON_SCOPE_MISMATCH');
     }
+    if (!Number.isFinite(data.progressPercentage)) throw new Error('COURSE_PROGRESS_PERCENTAGE_INVALID');
+    const activeModules = new Set(curriculum.modules.filter(module => module.status !== CourseContentStatus.ARCHIVED).map(module => module.id));
+    const targetLesson = curriculum.lessons.find(lesson => lesson.id === data.lessonId)!;
+    if (!activeModules.has(targetLesson.moduleId) || targetLesson.lessonType === 'QUIZ') throw new Error('COURSE_LESSON_NOT_TRACKABLE');
     const trackableIds = new Set(curriculum.lessons
-      .filter(lesson => lesson.lessonType !== 'QUIZ' && lesson.status !== CourseContentStatus.ARCHIVED)
+      .filter(lesson => lesson.lessonType !== 'QUIZ' && lesson.status !== CourseContentStatus.ARCHIVED && activeModules.has(lesson.moduleId))
       .map(lesson => lesson.id));
     const transactional = this.progressRepository as Partial<ITransactionalCourseProgressRepository>;
     if (!this.atomicMutations || typeof transactional.withTransaction !== 'function') {
@@ -227,7 +236,7 @@ export class CourseProgressUseCases {
       const tx = (this.progressRepository as ITransactionalCourseProgressRepository).withTransaction(persistence);
       await tx.upsertLessonProgress({
         ...data,
-        status: normalizedPercentage >= 100 ? CourseProgressStatus.COMPLETED : data.status,
+        status: normalizedPercentage >= 100 ? CourseProgressStatus.COMPLETED : CourseProgressStatus.IN_PROGRESS,
         progressPercentage: normalizedPercentage,
       });
       const progress = await tx.listLessonProgress(data.courseId, data.studentReferenceId);
@@ -282,6 +291,7 @@ export class CourseProgressUseCases {
     for (const question of questions) {
       const points = Math.max(1, question.points);
       total += points;
+      if (question.correctAnswer === undefined || question.correctAnswer === null) throw new Error('COURSE_ASSESSMENT_ANSWER_KEY_REQUIRED');
       if (this.sameAnswer((data.answers as Record<string, unknown>)[question.id], question.correctAnswer)) earned += points;
     }
     const score = total > 0 ? Math.round((earned / total) * 10000) / 100 : 0;

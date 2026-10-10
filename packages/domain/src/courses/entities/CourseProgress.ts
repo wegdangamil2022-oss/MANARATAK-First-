@@ -127,10 +127,10 @@ export interface CourseLearnerAssetDto {
 export interface CourseLearnerWorkspaceDto {
   progress: StudentCourseProgressSnapshotDto;
   curriculum: {
-    modules: import('./CourseCurriculum').CourseModuleDto[];
-    lessons: import('./CourseCurriculum').CourseLessonDto[];
+    modules: Omit<import('./CourseCurriculum').CourseModuleDto,'createdAt'|'updatedAt'|'metadata'>[];
+    lessons: Omit<import('./CourseCurriculum').CourseLessonDto,'createdAt'|'updatedAt'|'metadata'>[];
     assets: CourseLearnerAssetDto[];
-    quizzes: import('./CourseCurriculum').CourseQuizDto[];
+    quizzes: Omit<import('./CourseCurriculum').CourseQuizDto,'createdAt'|'updatedAt'|'metadata'>[];
     questions: CourseLearnerQuestionDto[];
   };
 }

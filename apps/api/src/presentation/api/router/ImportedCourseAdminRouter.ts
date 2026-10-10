@@ -1,3 +1,4 @@
+import type {CourseAdminCommandUseCases,CourseAdminContext,AdminCourseUseCases} from '@manaratak/application';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -8,15 +9,44 @@ import {
 import { ImportedCourseAdminUseCases } from '@manaratak/application';
 
 export class ImportedCourseAdminRouter {
-  public static create(cradle: { importedCourseAdminUseCases: ImportedCourseAdminUseCases }): Router {
+  public static create(cradle: { courseAdminCommandUseCases:CourseAdminCommandUseCases; adminCourseUseCases:AdminCourseUseCases; importedCourseAdminUseCases: ImportedCourseAdminUseCases }): Router {
     const router = Router();
     const useCases = cradle.importedCourseAdminUseCases;
 
-    const asyncHandler = (
-      fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>,
-    ) => (req: Request, res: Response, next: NextFunction) => {
-      Promise.resolve(fn(req, res, next)).catch(next);
+    const mutationContext=(req:Request):CourseAdminContext=>{
+      if(!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
+      const reason=z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason')??req.body?.reason);
+      const match=/^(?:"(\d+)"|(\d+))$/.exec(req.get('If-Match')??'');
+      const expectedVersion=match?Number(match[1]??match[2]):undefined;
+      if(!Number.isSafeInteger(expectedVersion)||expectedVersion!<1) throw new Error('COURSE_VERSION_PRECONDITION_REQUIRED');
+      return {actorId:req.authUserId,actorType:'IDENTITY',source:'admin-imported-course-api',reason,expectedVersion};
     };
+    const asyncHandler=(fn:(req:Request,res:Response,useCases:ImportedCourseAdminUseCases)=>Promise<unknown>)=>
+      (req:Request,res:Response,next:NextFunction)=>{
+        const run=async()=>{
+          if(req.method==='GET') return fn(req,res,useCases);
+          const context=mutationContext(req);
+          let body:unknown;let send=false;
+          const buffered:Response=new Proxy(res,{get(target,key){
+            if(key==='json')return(value:unknown)=>{body=value;return buffered;};
+            if(key==='end'||key==='send')return(value:unknown)=>{body=value;send=true;return buffered;};
+            if(key==='status')return(code:number)=>{target.statusCode=code;return buffered;};
+            const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;
+          }});
+          let version:number|undefined;
+          if(req.route.path==='/:id/publish'){
+            await fn(req,buffered,useCases);
+            version=(await cradle.adminCourseUseCases.getCourse(req.params.id)).version;
+          }else{
+            const action=req.route.path==='/:id/unpublish'?'COURSE_UNPUBLISH':req.route.path==='/:id/archive'?'COURSE_ARCHIVE':'IMPORTED_COURSE_ADMIN_COMMAND';
+            const result=await cradle.courseAdminCommandUseCases.execute('COURSE',req.params.id,action,context,
+              scope=>fn(req,buffered,scope.importedCourseAdminUseCases));
+            version=result.version;
+          }
+          if(version!==undefined)res.setHeader('X-Entity-Version',String(version));
+          if(send)res.send(body);else res.json(body);
+        };run().catch(next);
+      };
 
     const optionalPositiveInt = z.string().optional().transform((value) => {
       if (!value) return undefined;
@@ -70,54 +100,56 @@ export class ImportedCourseAdminRouter {
       completenessStatus: z.nativeEnum(CourseImportCompletenessState).optional(),
     }).strict();
 
-    router.get('/', asyncHandler(async (req, res) => {
+    router.get('/', asyncHandler(async (req, res, useCases) => {
       const filters = listSchema.parse(req.query);
       res.json(await useCases.list(filters));
     }));
 
-    router.get('/:id', asyncHandler(async (req, res) => {
+    router.get('/:id', asyncHandler(async (req, res, useCases) => {
       res.json(await useCases.get(req.params.id));
     }));
 
-    router.patch('/:id', asyncHandler(async (req, res) => {
+    router.patch('/:id', asyncHandler(async (req, res, useCases) => {
       const update = updateSchema.parse(req.body);
       res.json(await useCases.update(req.params.id, update));
     }));
 
-    router.post('/:id/verify-source', asyncHandler(async (req, res) => {
+    router.post('/:id/verify-source', asyncHandler(async (req, res, useCases) => {
       res.json(await useCases.verifySource(req.params.id));
     }));
 
-    router.post('/:id/check-link', asyncHandler(async (req, res) => {
+    router.post('/:id/check-link', asyncHandler(async (req, res, useCases) => {
       res.json(await useCases.checkLink(req.params.id));
     }));
 
-    router.post('/:id/fetch-missing', asyncHandler(async (req, res) => {
+    router.post('/:id/fetch-missing', asyncHandler(async (req, res, useCases) => {
       await useCases.fetchMissing(req.params.id);
       res.status(204).end();
     }));
 
-    router.post('/:id/mark-ready', asyncHandler(async (req, res) => {
+    router.post('/:id/mark-ready', asyncHandler(async (req, res, useCases) => {
       res.json(await useCases.markReady(req.params.id));
     }));
 
-    router.post('/:id/publish', asyncHandler(async (req, res) => {
-      res.json(await useCases.publish(req.params.id));
+    router.post('/:id/publish', asyncHandler(async (req, res, useCases) => {
+      res.json(await useCases.publish(req.params.id,mutationContext(req)));
     }));
 
-    router.post('/:id/unpublish', asyncHandler(async (req, res) => {
+    router.post('/:id/unpublish', asyncHandler(async (req, res, useCases) => {
       res.json(await useCases.unpublish(req.params.id));
     }));
 
-    router.post('/:id/reject', asyncHandler(async (req, res) => {
+    router.post('/:id/reject', asyncHandler(async (req, res, useCases) => {
       res.json(await useCases.reject(req.params.id));
     }));
 
-    router.post('/:id/archive', asyncHandler(async (req, res) => {
+    router.post('/:id/archive', asyncHandler(async (req, res, useCases) => {
       res.json(await useCases.archive(req.params.id));
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      if(err.message==='COURSE_VERSION_PRECONDITION_REQUIRED')return res.status(428).json({error:err.message});
+      if(['COURSE_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED'].includes(err.message))return res.status(409).json({error:err.message});
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }

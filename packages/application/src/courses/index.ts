@@ -8,3 +8,5 @@ export * from './services/CourseRelationshipQueryService';
 export * from './services/CoursePublicationService';
 export * from './use-cases/CourseEnrollmentPolicyUseCases';
 export * from './use-cases/LearningPathUseCases';
+
+export * from "./use-cases/CourseAdminCommandUseCases";

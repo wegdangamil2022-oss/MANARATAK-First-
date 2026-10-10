@@ -8,6 +8,8 @@ import {
 } from '../entities/LearningPath';
 
 export interface ILearningPathRepository {
+  findByVersion?(id:string,version:number):Promise<LearningPathDto|null>;
+  assertCurrentVersion?(id: string, version: number): Promise<void>;
   create(data: CreateLearningPathDto): Promise<LearningPathDto>;
   findById(id: string): Promise<LearningPathDto | null>;
   findBySlug(slug: string): Promise<LearningPathDto | null>;

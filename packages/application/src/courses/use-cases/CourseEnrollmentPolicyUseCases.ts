@@ -18,6 +18,13 @@ export class CourseEnrollmentPolicyUseCases {
 
   public async configure(input: UpsertCourseEnrollmentPolicyDto): Promise<CourseEnrollmentPolicyDto> {
     await this.requireCourse(input.courseId);
+    const owner = await this.courseRepository.findById(input.courseId);
+    if (owner && ['PUBLISHED','ARCHIVED','REJECTED'].includes(owner.status)) throw new Error('COURSE_ENROLLMENT_POLICY_IMMUTABLE');
+    for (const id of input.prerequisiteCourseIds ?? []) {
+      const course = await this.courseRepository.findById(id);
+      if (!course || course.originType === 'EXTERNAL_LINKED_COURSE' || ['ARCHIVED','REJECTED'].includes(course.status)) throw new Error('COURSE_PREREQUISITE_NOT_AVAILABLE');
+    }
+    if (input.maximumSeats != null && !Number.isSafeInteger(input.maximumSeats)) throw new Error('COURSE_ENROLLMENT_CAPACITY_REQUIRED');
     if (input.isCapacityLimited && (!input.maximumSeats || input.maximumSeats < 1)) {
       throw new Error('COURSE_ENROLLMENT_CAPACITY_REQUIRED');
     }

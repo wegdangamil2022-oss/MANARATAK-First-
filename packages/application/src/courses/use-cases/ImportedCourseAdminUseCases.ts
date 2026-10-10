@@ -1,3 +1,4 @@
+import type {AtomicMutationRequestContext} from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import {
   CourseOriginType,
   ExternalCourseProviderImportStrategy,
@@ -133,11 +134,11 @@ export class ImportedCourseAdminUseCases {
     return this.get(course.id);
   }
 
-  public async publish(id: string): Promise<ImportedCourseAdminDetail> {
+  public async publish(id: string, context?:AtomicMutationRequestContext): Promise<ImportedCourseAdminDetail> {
     const course = await this.get(id);
     await this.verifySource(course.id);
     this.assertVerifiedLink(course);
-    await this.adminCourseUseCases.publish(course.id);
+    await this.adminCourseUseCases.publish(course.id,context);
     return this.get(course.id);
   }
 

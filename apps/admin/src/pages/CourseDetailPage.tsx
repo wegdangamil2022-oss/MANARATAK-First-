@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { adminApiClient } from '../api/client';
+import { adminApiClient, setCourseReviewReason } from '../api/client';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -132,6 +132,12 @@ export function CourseDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [reviewReason,setReviewReason]=useState('');
+  useEffect(()=>{
+    if(!id) return;
+    setCourseReviewReason(id,reviewReason);
+    return ()=>setCourseReviewReason(id,'');
+  },[id,reviewReason]);
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [snapshot, setSnapshot] = useState<CurriculumSnapshot | null>(null);
   const [relationships, setRelationships] = useState<CourseRelationshipReview | null>(null);
@@ -560,6 +566,10 @@ export function CourseDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      <label className="block text-sm font-semibold">سبب التعديل أو المراجعة
+        <input value={reviewReason} onChange={event=>setReviewReason(event.target.value)} maxLength={2000}
+          placeholder="اكتب سببًا واضحًا قبل حفظ التعديلات" className="mt-2 w-full rounded-lg border p-3" />
+      </label>
       <div className="flex items-center justify-between gap-4">
         <button
           onClick={() => navigate('/courses')}

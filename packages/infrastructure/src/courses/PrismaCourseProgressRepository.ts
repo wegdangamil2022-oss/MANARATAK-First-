@@ -119,9 +119,18 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
   }
 
   public async createQuizAttempt(data: CreateQuizAttemptDto): Promise<CourseQuizAttemptDto> {
-    return this.quizAttempt(await this.prisma.courseQuizAttempt.create({
-      data: { ...data, status: CourseQuizAttemptStatus.IN_PROGRESS, answers: json(data.answers), metadata: json(data.metadata) },
-    }));
+    return this.serializable(async db => {
+      await db.$queryRaw`SELECT id FROM "CourseEnrollment" WHERE "courseId" = ${data.courseId} AND "studentReferenceId" = ${data.studentReferenceId} FOR UPDATE`;
+      const enrollment=await db.courseEnrollment.findUnique({where:{courseId_studentReferenceId:{courseId:data.courseId,studentReferenceId:data.studentReferenceId}}});
+      if(!enrollment || enrollment.status!==CourseEnrollmentStatus.ACTIVE) throw new Error('COURSE_ENROLLMENT_NOT_ACTIVE');
+      const quiz=await db.courseQuiz.findFirst({where:{id:data.quizId,courseId:data.courseId,status:{not:'ARCHIVED'}}});
+      if(!quiz) throw new Error('COURSE_QUIZ_SCOPE_MISMATCH');
+      const count=await db.courseQuizAttempt.count({where:{quizId:data.quizId,studentReferenceId:data.studentReferenceId}});
+      if(quiz.maxAttempts!=null && count>=quiz.maxAttempts) throw new Error('COURSE_QUIZ_MAX_ATTEMPTS_REACHED');
+      return this.quizAttempt(await db.courseQuizAttempt.create({
+        data:{...data,attemptNumber:count+1,status:CourseQuizAttemptStatus.IN_PROGRESS,answers:json(data.answers),metadata:json(data.metadata)},
+      }));
+    });
   }
 
   public async findQuizAttempt(attemptId: string): Promise<CourseQuizAttemptDto | null> {
@@ -135,6 +144,7 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
 
   public async submitQuizAttempt(data: GradeQuizAttemptDto): Promise<CourseQuizAttemptDto> {
     return this.serializable(async db => {
+      await db.$queryRaw`SELECT id FROM "CourseQuizAttempt" WHERE id = ${data.attemptId} FOR UPDATE`;
       const current = await db.courseQuizAttempt.findUnique({ where: { id: data.attemptId } });
       if (!current) throw new Error('COURSE_QUIZ_ATTEMPT_NOT_FOUND');
       if (current.submittedAt || current.status !== CourseQuizAttemptStatus.IN_PROGRESS) throw new Error('COURSE_QUIZ_ATTEMPT_ALREADY_SUBMITTED');

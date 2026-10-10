@@ -98,6 +98,7 @@ export function CourseListPage() {
   const [stats, setStats] = useState<(number | null)[]>([null, null, null, null]);
   const [page, setPage] = useState(1);
   const [showCreate, setShowCreate] = useState(false);
+  const [createReason,setCreateReason]=useState('');
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState({
     titleAr: '',
@@ -110,6 +111,7 @@ export function CourseListPage() {
 
   const createNativeCourse = async (event: FormEvent) => {
     event.preventDefault();
+    if(createReason.trim().length<3){setError('اكتب سبب إنشاء الدورة.');return;}
     setCreating(true);
     setError(null);
     try {
@@ -127,6 +129,7 @@ export function CourseListPage() {
       };
       const created = await adminApiClient.request<{ id: string }>('/admin/courses', {
         method: 'POST',
+        headers:{'X-Review-Reason':createReason.trim()},
         body: JSON.stringify(payload),
       });
       setShowCreate(false);
@@ -487,6 +490,9 @@ export function CourseListPage() {
               <X className="h-5 w-5" />
             </button>
           </div>
+          <label className="mt-4 block text-sm font-semibold">سبب إنشاء الدورة
+            <input value={createReason} onChange={event=>setCreateReason(event.target.value)} maxLength={2000} required className="mt-2 w-full rounded-lg border p-2" />
+          </label>
           <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <input
               required

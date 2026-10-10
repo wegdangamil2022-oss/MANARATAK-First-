@@ -168,14 +168,21 @@ function asInputJson(value: Record<string, unknown> | undefined): Prisma.InputJs
 }
 
 export class PrismaCourseRepository implements ITransactionalCourseRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
 
   public withTransaction(context: AtomicPersistenceContext): ICourseRepository {
     const transactionClient = (context as Partial<CourseTransactionContext>).transactionClient;
     if (!context.boundaryId || !transactionClient) {
       throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
     }
-    return new PrismaCourseRepository(transactionClient as unknown as PrismaClient);
+    return new PrismaCourseRepository(transactionClient as unknown as PrismaClient, true);
+  }
+
+  public async assertCurrentVersion(id: string, expectedVersion: number): Promise<void> {
+    if (!this.transactionBound) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    const rows = await this.prisma.$queryRaw<Array<{ version: number }>>`SELECT version FROM "Course" WHERE id = ${id} FOR UPDATE`;
+    if (!rows.length) throw new Error('COURSE_NOT_FOUND');
+    if (rows[0].version !== expectedVersion) throw new Error('COURSE_STALE_VERSION');
   }
 
   public async create(data: CreateCourseDto): Promise<CourseDto> {
@@ -222,6 +229,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
 
   public async update(id: string, updates: UpdateCourseDto): Promise<CourseDto> {
     return this.withVersionTransaction(async db => {
+      await db.$queryRaw`SELECT id FROM "Course" WHERE id = ${id} FOR UPDATE`;
       const existing = await db.course.findUnique({ where: { id } });
       if (!existing) throw new Error(`COURSE_NOT_FOUND:${id}`);
 
@@ -261,6 +269,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
           thumbnailAssetId: updates.thumbnailAssetId,
           optionalFields: asInputJson(optionalFields),
           version: { increment: 1 },
+          status: existing.status === CourseStatus.READY_TO_PUBLISH ? CourseStatus.READY_TO_REVIEW : undefined,
         },
       });
       await this.captureVersion(db, record, 'COURSE_UPDATED');

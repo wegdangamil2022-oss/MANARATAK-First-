@@ -43,6 +43,7 @@ export class AdminCourseUseCases {
     await assertAssetReferenceUsable(this.assetReferences, updates.thumbnailAssetId, { purpose: 'COURSE_THUMBNAIL' });
     assertNoTranslationPayloadFields('COURSE', updates.optionalFields, ['localizedNames', 'titleEn']);
     const existing = await this.getCourse(id);
+    if ([CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(existing.status)) throw new Error('COURSE_INACTIVE_IMMUTABLE');
     if (updates.originType && updates.originType !== existing.originType) {
       throw new Error('COURSE_ORIGIN_TYPE_MUTATION_FORBIDDEN');
     }
@@ -105,6 +106,7 @@ export class AdminCourseUseCases {
 
   public async markReadyToReview(id: string): Promise<void> {
     const existing = await this.getCourse(id);
+    if ([CourseStatus.PUBLISHED, CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(existing.status)) throw new Error('COURSE_INVALID_REVIEW_TRANSITION');
     if (existing.completenessStatus === CourseImportCompletenessState.INCOMPLETE ||
         existing.completenessStatus === CourseImportCompletenessState.REJECTED) {
       throw new Error('Cannot mark non-reviewable course as READY_TO_REVIEW');
@@ -119,6 +121,7 @@ export class AdminCourseUseCases {
     if (existing.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) {
       throw new Error('NATIVE_COURSE_LIFECYCLE_REQUIRES_NATIVE_BOUNDARY');
     }
+    if (existing.status !== CourseStatus.READY_TO_REVIEW) throw new Error('COURSE_REVIEW_REQUIRED');
     if (!this.publicationService) throw new Error('COURSE_PUBLICATION_POLICY_NOT_CONFIGURED');
     await this.publicationService.assertPublicationReady(existing);
     await this.repository.updateStatus(id, CourseStatus.READY_TO_PUBLISH);

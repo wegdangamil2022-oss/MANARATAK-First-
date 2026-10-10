@@ -17,12 +17,19 @@ type Db = PrismaClient | Prisma.TransactionClient;
 const json = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 
 export class PrismaLearningPathRepository implements ITransactionalLearningPathRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
 
   public withTransaction(context: AtomicPersistenceContext): ILearningPathRepository {
     const tx = (context as Partial<LearningPathTransactionContext>).transactionClient;
     if (!context.boundaryId || !tx) throw new Error('LEARNING_PATH_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
-    return new PrismaLearningPathRepository(tx as unknown as PrismaClient);
+    return new PrismaLearningPathRepository(tx as unknown as PrismaClient, true);
+  }
+
+  public async assertCurrentVersion(id: string, version: number): Promise<void> {
+    if (!this.transactionBound) throw new Error('LEARNING_PATH_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    const rows = await this.prisma.$queryRaw<Array<{version: number}>>`SELECT version FROM "LearningPath" WHERE id = ${id} FOR UPDATE`;
+    if (!rows.length) throw new Error('LEARNING_PATH_NOT_FOUND');
+    if (rows[0].version !== version) throw new Error('LEARNING_PATH_STALE_VERSION');
   }
 
   public async create(data: CreateLearningPathDto): Promise<LearningPathDto> {
@@ -71,6 +78,15 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
   public async findBySlug(slug: string): Promise<LearningPathDto | null> {
     const path = await this.prisma.learningPath.findUnique({ where: { slug } });
     return path ? this.findById(path.id) : null;
+  }
+
+  public async findByVersion(id:string,versionNumber:number):Promise<LearningPathDto|null> {
+    const [path,version]=await Promise.all([
+      this.prisma.learningPath.findUnique({where:{id}}),
+      this.prisma.learningPathVersion.findUnique({where:{learningPathId_versionNumber:{learningPathId:id,versionNumber}},include:{courses:true}}),
+    ]);
+    if(!path || !version) return null;
+    return this.map({...path,version:versionNumber,status:version.status},version.courses);
   }
 
   public async list(): Promise<LearningPathDto[]> {

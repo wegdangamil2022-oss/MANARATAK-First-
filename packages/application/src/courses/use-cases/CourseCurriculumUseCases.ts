@@ -61,7 +61,7 @@ export class CourseCurriculumUseCases {
 
   private async ensureMutableCourse(courseId: string): Promise<CourseDto> {
     const course = await this.ensureAuthorableCourse(courseId);
-    if (course.status === CourseStatus.PUBLISHED || course.status === CourseStatus.ARCHIVED) {
+    if (course.status === CourseStatus.PUBLISHED || course.status === CourseStatus.ARCHIVED || course.status === CourseStatus.REJECTED) {
       throw new Error('PUBLISHED_OR_ARCHIVED_COURSE_CONTENT_MUTATION_FORBIDDEN');
     }
     return course;
@@ -86,6 +86,7 @@ export class CourseCurriculumUseCases {
   }
 
   private assertExactIds(expected: readonly string[], actual: readonly string[], code: string): void {
+    if (actual.length !== new Set(actual).size) throw new Error(code);
     const left = [...new Set(expected)].sort();
     const right = [...new Set(actual)].sort();
     if (left.length !== right.length || left.some((value, index) => value !== right[index])) {
@@ -266,7 +267,10 @@ export class CourseCurriculumUseCases {
   ): Promise<CourseQuizDto> {
     await this.ensureMutableCourse(courseId);
     await this.ensureCurriculumMember(courseId, 'quizzes', quizId);
-    await this.assertQuizReferences(courseId, data.moduleId, data.lessonId);
+    const current = (await this.curriculumRepository.getCurriculumSnapshot(courseId)).quizzes.find(quiz => quiz.id === quizId)!;
+    await this.assertQuizReferences(courseId,
+      data.moduleId === undefined ? current.moduleId : data.moduleId,
+      data.lessonId === undefined ? current.lessonId : data.lessonId);
     const updated = await this.curriculumRepository.updateQuiz(quizId, data);
     await this.checkpointCourseVersion(courseId);
     return updated;

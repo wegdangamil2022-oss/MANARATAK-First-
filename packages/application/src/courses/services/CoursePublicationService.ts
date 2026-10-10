@@ -108,6 +108,10 @@ export class CoursePublicationService {
       },
     }, async persistence => {
       const tx = (this.repository as ITransactionalCourseRepository).withTransaction(persistence);
+      if (!tx.assertCurrentVersion) throw new Error('COURSE_VERSION_LOCK_REQUIRED');
+      const expected = (context as (AtomicMutationRequestContext & {expectedVersion?:number}) | undefined)?.expectedVersion ?? course.version;
+      if (expected !== course.version) throw new Error('COURSE_STALE_VERSION');
+      await tx.assertCurrentVersion(course.id, expected);
       const current = await tx.findById(course.id);
       if (!current || current.status !== CourseStatus.READY_TO_PUBLISH || current.version !== course.version) {
         throw new Error('COURSE_PUBLICATION_STATE_CHANGED');

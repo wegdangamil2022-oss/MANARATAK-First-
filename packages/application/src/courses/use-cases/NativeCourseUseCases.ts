@@ -121,7 +121,7 @@ export class NativeCourseUseCases {
         lessonAssets.set(asset.lessonId, (lessonAssets.get(asset.lessonId) ?? 0) + 1);
     }
     const lessonQuizzes = new Set(
-      curriculum.quizzes.filter((quiz) => quiz.lessonId).map((quiz) => quiz.lessonId as string),
+      curriculum.quizzes.filter((quiz) => quiz.lessonId && quiz.status !== CourseContentStatus.ARCHIVED).map((quiz) => quiz.lessonId as string),
     );
     const incompleteLessons = lessons.filter((lesson) => {
       const hasText = Boolean(lesson.contentText?.trim());
@@ -306,6 +306,8 @@ export class NativeCourseUseCases {
   }
 
   public async markReadyToReview(courseId: string): Promise<void> {
+    const course = await this.requireNative(courseId);
+    if ([CourseStatus.PUBLISHED, CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(course.status)) throw new Error('NATIVE_COURSE_INVALID_REVIEW_TRANSITION');
     const readiness = await this.getReadiness(courseId);
     if (!readiness.ready) throw new Error('NATIVE_COURSE_NOT_READY');
     await this.courseRepository.update(courseId, {

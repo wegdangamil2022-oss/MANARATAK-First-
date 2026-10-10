@@ -1,3 +1,4 @@
+import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseContentStatus,
@@ -31,6 +32,17 @@ const json = (value: unknown): Prisma.InputJsonValue | undefined =>
 
 export class PrismaCourseCurriculumRepository implements ICourseCurriculumRepository {
   public constructor(private readonly prisma: PrismaClient) {}
+
+  public withTransaction(context: AtomicPersistenceContext): ICourseCurriculumRepository {
+    const tx = (context as AtomicPersistenceContext & { transactionClient?: unknown }).transactionClient;
+    if (!context.boundaryId || !tx) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return new PrismaCourseCurriculumRepository(tx as PrismaClient);
+  }
+
+  private async inTransaction<T>(work:(tx:Prisma.TransactionClient)=>Promise<T>):Promise<T> {
+    if (typeof this.prisma.$transaction === 'function') return this.prisma.$transaction(work);
+    return work(this.prisma as unknown as Prisma.TransactionClient);
+  }
 
   public async createModule(data: CreateCourseModuleDto): Promise<CourseModuleDto> {
     return this.module(
@@ -171,7 +183,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
   }
 
   public async createQuestion(data: CreateCourseQuestionDto): Promise<CourseQuestionDto> {
-    const record = await this.prisma.$transaction(async tx => {
+    const record = await this.inTransaction(async tx => {
       const created = await tx.courseQuestion.create({
         data: {
           courseId: data.courseId,
@@ -204,7 +216,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
     id: string,
     data: UpdateCourseQuestionDto,
   ): Promise<CourseQuestionDto> {
-    const record = await this.prisma.$transaction(async tx => {
+    const record = await this.inTransaction(async tx => {
       const updated = await tx.courseQuestion.update({
         where: { id },
         data: {
@@ -235,7 +247,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
   }
 
   public async deleteQuestion(id: string): Promise<void> {
-    await this.prisma.$transaction(async tx => {
+    await this.inTransaction(async tx => {
       const archived = await tx.courseQuestion.update({
         where: { id },
         data: { status: CourseContentStatus.ARCHIVED, version: { increment: 1 } },
@@ -302,7 +314,7 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
     }
     if (positions.some((item) => item.position < 1))
       throw new Error('COURSE_CURRICULUM_POSITION_INVALID');
-    await this.prisma.$transaction(async (tx) => {
+    await this.inTransaction(async (tx) => {
       const records =
         kind === 'module'
           ? await tx.courseModule.findMany({

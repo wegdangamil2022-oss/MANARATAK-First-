@@ -1,3 +1,4 @@
+import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -14,19 +15,58 @@ import {
 import { AdminCourseUseCases, CourseCurriculumUseCases, CourseEnrollmentPolicyUseCases, CourseRelationshipResolutionService, LearningPathUseCases, NativeCourseUseCases } from '@manaratak/application';
 
 export class CourseAdminRouter {
-  public static create(cradle: { adminCourseUseCases: AdminCourseUseCases; courseCurriculumUseCases: CourseCurriculumUseCases; courseEnrollmentPolicyUseCases: CourseEnrollmentPolicyUseCases; courseRelationshipResolutionService: CourseRelationshipResolutionService; learningPathUseCases: LearningPathUseCases; nativeCourseUseCases: NativeCourseUseCases }): Router {
+  public static create(cradle: CourseAdminScope & {courseAdminCommandUseCases:CourseAdminCommandUseCases}): Router {
     const router = Router();
-    const { adminCourseUseCases, courseCurriculumUseCases, courseEnrollmentPolicyUseCases, courseRelationshipResolutionService, learningPathUseCases, nativeCourseUseCases } = cradle;
+    const {learningPathUseCases} = cradle;
 
-    const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
-      Promise.resolve(fn(req, res, next)).catch(next);
+    const mutationContext = (req: Request): CourseAdminContext => {
+      if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
+      const reason = z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason') ?? req.body?.reason);
+      const raw = req.get('If-Match');
+      let expectedVersion: number | undefined;
+      if (req.params.id || req.params.pathId) {
+        const match = raw && /^(?:"(\d+)"|(\d+))$/.exec(raw);
+        expectedVersion = match ? Number(match[1] ?? match[2]) : undefined;
+        if (!Number.isSafeInteger(expectedVersion) || expectedVersion! < 1) throw new Error('COURSE_VERSION_PRECONDITION_REQUIRED');
+      }
+      return {actorId:req.authUserId,actorType:'IDENTITY',source:'admin-course-api',reason,expectedVersion,
+        correlationId:req.get('X-Correlation-ID') ?? req.get('X-Request-ID')};
     };
-    const mutationContext = (req: Request) => ({
-      actorId: req.authUserId || 'SYSTEM',
-      actorType: 'IDENTITY',
-      correlationId: (req.headers['x-correlation-id'] as string | undefined) || (req.headers['x-request-id'] as string | undefined),
-      source: 'admin-course-api',
-    });
+    const asyncHandler = (fn: (req:Request,res:Response,scope:CourseAdminScope)=>Promise<unknown>) =>
+      (req:Request,res:Response,next:NextFunction) => {
+        const run = async () => {
+          if (req.method === 'GET') return fn(req,res,cradle);
+          const context=mutationContext(req);
+          // Publication retains its dedicated domain event and atomic coordinator.
+          if(req.params.id && req.route.path === '/:id/publish') {
+            let body:unknown;
+            const buffered:Response=new Proxy(res,{get(target,key){if(key==='json')return (value:unknown)=>{body=value;return buffered;};const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;}});
+            await fn(req,buffered,cradle);
+            const current=await cradle.adminCourseUseCases.getCourse(req.params.id);
+            res.setHeader('X-Entity-Version',String(current.version));
+            res.json(body);
+            return;
+          }
+          const kind=req.route.path.startsWith('/learning-paths')?'LEARNING_PATH':'COURSE';
+          const id=req.params.pathId ?? req.params.id;
+          const commandName=req.route.path === '/:id/unpublish'?'COURSE_UNPUBLISH':
+            req.route.path === '/:id/archive'?'COURSE_ARCHIVE':
+            `ADMIN_${req.method}_${req.route.path.replace(/[^a-zA-Z0-9]+/g,'_').toUpperCase()}`;
+          // Buffer response bodies until the business/audit/outbox transaction commits.
+          let responseBody: unknown;
+          const responseState:{kind:'json'|'send'}={kind:'json'};
+          const buffered: Response = new Proxy(res,{get(target,key){
+            if(key==='json' || key==='send') return (body:unknown)=>{responseBody=body;responseState.kind=key;return buffered;};
+            if(key==='status') return (code:number)=>{target.statusCode=code;return buffered;};
+            const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;
+          }});
+          const result=await cradle.courseAdminCommandUseCases.execute(kind,id,commandName,context,
+            async scope=>{await fn(req,buffered,scope);return responseBody;});
+          if(result.version!==undefined) res.setHeader('X-Entity-Version',String(result.version));
+          if(responseState.kind==='send') res.send(responseBody);else res.json(responseBody);
+        };
+        run().catch(next);
+      };
 
     const listQuerySchema = z.object({
       status: z.preprocess(v => v === '' || v === 'all' ? undefined : v, z.nativeEnum(CourseStatus).optional()),
@@ -183,12 +223,14 @@ export class CourseAdminRouter {
       positions: z.array(z.object({ id: z.string().min(1), position: z.number().int().positive() })).min(1)
     });
 
-    router.post('/', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {nativeCourseUseCases}=scope;
       const course = await nativeCourseUseCases.create(nativeCreateBodySchema.parse(req.body));
       res.status(201).json(course);
     }));
 
-    router.get('/', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases}=scope;
       const filters = listQuerySchema.parse(req.query);
       const result = await adminCourseUseCases.listCourses(filters);
       res.json(result);
@@ -197,116 +239,144 @@ export class CourseAdminRouter {
     router.get('/learning-paths', asyncHandler(async (_req: Request, res: Response) => {
       res.json({ data: await learningPathUseCases.list() });
     }));
-    router.post('/learning-paths', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/learning-paths', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {learningPathUseCases}=scope;
       res.status(201).json(await learningPathUseCases.create(learningPathSchema.parse(req.body)));
     }));
-    router.get('/learning-paths/:pathId', asyncHandler(async (req: Request, res: Response) => {
-      res.json(await learningPathUseCases.get(req.params.pathId));
+    router.get('/learning-paths/:pathId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {learningPathUseCases}=scope;
+      const path=await learningPathUseCases.get(req.params.pathId);
+      res.setHeader('ETag', `"${path.version}"`);
+      res.json(path);
     }));
-    router.post('/learning-paths/:pathId/mark-publishable', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/learning-paths/:pathId/mark-publishable', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.markReadyToPublish(req.params.pathId));
     }));
-    router.post('/learning-paths/:pathId/publish', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/learning-paths/:pathId/publish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.publish(req.params.pathId));
     }));
-    router.post('/learning-paths/:pathId/archive', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/learning-paths/:pathId/archive', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.archive(req.params.pathId));
     }));
 
-    router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
+      res.setHeader('ETag', `"${course.version}"`);
       res.json(course);
     }));
 
-    router.get('/:id/curriculum', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/curriculum', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const snapshot = await courseCurriculumUseCases.getCurriculumSnapshot(req.params.id);
       res.json(snapshot);
     }));
 
-    router.get('/:id/relationships', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/relationships', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json(await courseRelationshipResolutionService.getReviewModel(req.params.id));
     }));
 
-    router.post('/:id/relationships/analyze', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/analyze', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json(await courseRelationshipResolutionService.analyzeCourse(req.params.id));
     }));
 
-    router.post('/:id/relationships/taxonomy', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/taxonomy', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       const body = taxonomyRelationshipBodySchema.parse(req.body);
       res.status(201).json(await courseRelationshipResolutionService.proposeManualTaxonomyLink(
         req.params.id, body.taxonomyNodeId, body.relationshipType, mutationContext(req).actorId,
       ));
     }));
 
-    router.post('/:id/relationships/taxonomy/:linkId/approve', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/taxonomy/:linkId/approve', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json(await courseRelationshipResolutionService.approveTaxonomyLink(req.params.id, req.params.linkId, mutationContext(req).actorId));
     }));
 
-    router.post('/:id/relationships/taxonomy/:linkId/reject', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/taxonomy/:linkId/reject', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json(await courseRelationshipResolutionService.rejectTaxonomyLink(req.params.id, req.params.linkId, mutationContext(req).actorId));
     }));
 
-    router.post('/:id/relationships/language', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/language', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       const body = z.object({ languageReferenceId: z.string().trim().min(1) }).parse(req.body);
       await courseRelationshipResolutionService.approveLanguageReference(req.params.id, body.languageReferenceId, mutationContext(req).actorId);
       res.json(await courseRelationshipResolutionService.getReviewModel(req.params.id));
     }));
 
-    router.post('/:id/relationships/majors/project', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/majors/project', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json({ data: await courseRelationshipResolutionService.projectMajors(req.params.id) });
     }));
 
-    router.post('/:id/relationships/majors', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/majors', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       const body = majorRelationshipBodySchema.parse(req.body);
       res.status(201).json(await courseRelationshipResolutionService.proposeDirectMajorProjection(
         req.params.id, body.majorId, body.relationshipType, mutationContext(req).actorId,
       ));
     }));
 
-    router.post('/:id/relationships/majors/:projectionId/approve', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/majors/:projectionId/approve', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json(await courseRelationshipResolutionService.approveMajorProjection(req.params.id, req.params.projectionId, mutationContext(req).actorId));
     }));
 
-    router.post('/:id/relationships/majors/:projectionId/reject', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/majors/:projectionId/reject', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json(await courseRelationshipResolutionService.rejectMajorProjection(req.params.id, req.params.projectionId, mutationContext(req).actorId));
     }));
 
-    router.post('/:id/relationships/tests', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/tests', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       const body = testRelationshipBodySchema.parse(req.body);
       res.status(201).json(await courseRelationshipResolutionService.proposeInternationalTestRelationship(
         req.params.id, body.internationalTestId, body.relationshipType, mutationContext(req).actorId,
       ));
     }));
 
-    router.post('/:id/relationships/tests/:relationshipId/approve', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/tests/:relationshipId/approve', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json(await courseRelationshipResolutionService.approveInternationalTestRelationship(
         req.params.id, req.params.relationshipId, mutationContext(req).actorId,
       ));
     }));
 
-    router.post('/:id/relationships/tests/:relationshipId/reject', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/relationships/tests/:relationshipId/reject', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseRelationshipResolutionService}=scope;
       res.json(await courseRelationshipResolutionService.rejectInternationalTestRelationship(
         req.params.id, req.params.relationshipId, mutationContext(req).actorId,
       ));
     }));
 
-    router.get('/:id/enrollment-policy', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/enrollment-policy', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseEnrollmentPolicyUseCases}=scope;
       res.json(await courseEnrollmentPolicyUseCases.get(req.params.id));
     }));
-    router.put('/:id/enrollment-policy', asyncHandler(async (req: Request, res: Response) => {
+    router.put('/:id/enrollment-policy', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseEnrollmentPolicyUseCases}=scope;
       res.json(await courseEnrollmentPolicyUseCases.configure({ courseId: req.params.id, ...enrollmentPolicySchema.parse(req.body) }));
     }));
 
-    router.get('/:id/readiness', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/readiness', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {nativeCourseUseCases}=scope;
       res.json(await nativeCourseUseCases.getReadiness(req.params.id));
     }));
 
-    router.get('/:id/modules', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/modules', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const modules = await courseCurriculumUseCases.listModules(req.params.id);
       res.json({ data: modules });
     }));
 
-    router.post('/:id/modules', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/modules', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const body = moduleBodySchema.parse(req.body);
       const module = await courseCurriculumUseCases.createModule({
         courseId: req.params.id,
@@ -318,28 +388,33 @@ export class CourseAdminRouter {
       res.status(201).json(module);
     }));
 
-    router.patch('/:id/modules/:moduleId', asyncHandler(async (req: Request, res: Response) => {
+    router.patch('/:id/modules/:moduleId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const body = modulePatchSchema.parse(req.body);
       const module = await courseCurriculumUseCases.updateModule(req.params.id, req.params.moduleId, body);
       res.json(module);
     }));
 
-    router.delete('/:id/modules/:moduleId', asyncHandler(async (req: Request, res: Response) => {
+    router.delete('/:id/modules/:moduleId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       await courseCurriculumUseCases.deleteModule(req.params.id, req.params.moduleId);
       res.status(204).send();
     }));
 
-    router.put('/:id/modules/reorder', asyncHandler(async (req: Request, res: Response) => {
+    router.put('/:id/modules/reorder', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       await courseCurriculumUseCases.reorderModules(req.params.id, reorderBodySchema.parse(req.body).positions);
       res.json({ success: true });
     }));
 
-    router.get('/:id/modules/:moduleId/lessons', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/modules/:moduleId/lessons', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const lessons = await courseCurriculumUseCases.listLessons(req.params.id, req.params.moduleId);
       res.json({ data: lessons });
     }));
 
-    router.post('/:id/modules/:moduleId/lessons', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/modules/:moduleId/lessons', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const body = lessonBodySchema.parse(req.body);
       const lesson = await courseCurriculumUseCases.createLesson({
         courseId: req.params.id,
@@ -355,28 +430,33 @@ export class CourseAdminRouter {
       res.status(201).json(lesson);
     }));
 
-    router.patch('/:id/lessons/:lessonId', asyncHandler(async (req: Request, res: Response) => {
+    router.patch('/:id/lessons/:lessonId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const body = lessonPatchSchema.parse(req.body);
       const lesson = await courseCurriculumUseCases.updateLesson(req.params.id, req.params.lessonId, body);
       res.json(lesson);
     }));
 
-    router.delete('/:id/lessons/:lessonId', asyncHandler(async (req: Request, res: Response) => {
+    router.delete('/:id/lessons/:lessonId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       await courseCurriculumUseCases.deleteLesson(req.params.id, req.params.lessonId);
       res.status(204).send();
     }));
 
-    router.put('/:id/modules/:moduleId/lessons/reorder', asyncHandler(async (req: Request, res: Response) => {
+    router.put('/:id/modules/:moduleId/lessons/reorder', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       await courseCurriculumUseCases.reorderLessons(req.params.id, req.params.moduleId, reorderBodySchema.parse(req.body).positions);
       res.json({ success: true });
     }));
 
-    router.get('/:id/lessons/:lessonId/assets', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/lessons/:lessonId/assets', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const assets = await courseCurriculumUseCases.listLessonAssets(req.params.id, req.params.lessonId);
       res.json({ data: assets });
     }));
 
-    router.post('/:id/lessons/:lessonId/assets', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/lessons/:lessonId/assets', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const body = lessonAssetBodySchema.parse(req.body);
       const asset = await courseCurriculumUseCases.attachAssetToLesson(req.params.id, {
         lessonId: req.params.lessonId,
@@ -391,17 +471,20 @@ export class CourseAdminRouter {
       res.status(201).json(asset);
     }));
 
-    router.delete('/:id/lessons/:lessonId/assets/:assetId', asyncHandler(async (req: Request, res: Response) => {
+    router.delete('/:id/lessons/:lessonId/assets/:assetId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       await courseCurriculumUseCases.detachAssetFromLesson(req.params.id, req.params.assetId);
       res.status(204).send();
     }));
 
-    router.get('/:id/quizzes', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/quizzes', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const quizzes = await courseCurriculumUseCases.listQuizzes(req.params.id);
       res.json({ data: quizzes });
     }));
 
-    router.post('/:id/quizzes', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/quizzes', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const body = quizBodySchema.parse(req.body);
       const quiz = await courseCurriculumUseCases.createQuiz({
         courseId: req.params.id,
@@ -417,16 +500,19 @@ export class CourseAdminRouter {
       res.status(201).json(quiz);
     }));
 
-    router.patch('/:id/quizzes/:quizId', asyncHandler(async (req: Request, res: Response) => {
+    router.patch('/:id/quizzes/:quizId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       res.json(await courseCurriculumUseCases.updateQuiz(req.params.id, req.params.quizId, quizBodySchema.partial().parse(req.body)));
     }));
 
-    router.delete('/:id/quizzes/:quizId', asyncHandler(async (req: Request, res: Response) => {
+    router.delete('/:id/quizzes/:quizId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       await courseCurriculumUseCases.deleteQuiz(req.params.id, req.params.quizId);
       res.status(204).send();
     }));
 
-    router.post('/:id/question-banks', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/question-banks', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const body = questionBankBodySchema.parse(req.body);
       const questionBank = await courseCurriculumUseCases.createQuestionBank({
         courseId: req.params.id,
@@ -437,21 +523,25 @@ export class CourseAdminRouter {
       res.status(201).json(questionBank);
     }));
 
-    router.patch('/:id/question-banks/:bankId', asyncHandler(async (req: Request, res: Response) => {
+    router.patch('/:id/question-banks/:bankId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       res.json(await courseCurriculumUseCases.updateQuestionBank(req.params.id, req.params.bankId, questionBankBodySchema.partial().parse(req.body)));
     }));
 
-    router.delete('/:id/question-banks/:bankId', asyncHandler(async (req: Request, res: Response) => {
+    router.delete('/:id/question-banks/:bankId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       await courseCurriculumUseCases.deleteQuestionBank(req.params.id, req.params.bankId);
       res.status(204).send();
     }));
 
-    router.get('/:id/quizzes/:quizId/questions', asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/quizzes/:quizId/questions', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const questions = await courseCurriculumUseCases.listQuizQuestions(req.params.id, req.params.quizId);
       res.json({ data: questions });
     }));
 
-    router.post('/:id/questions', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/questions', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       const body = questionBodySchema.parse(req.body);
       const question = await courseCurriculumUseCases.createQuestion({
         courseId: req.params.id,
@@ -469,16 +559,19 @@ export class CourseAdminRouter {
       res.status(201).json(question);
     }));
 
-    router.patch('/:id/questions/:questionId', asyncHandler(async (req: Request, res: Response) => {
+    router.patch('/:id/questions/:questionId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       res.json(await courseCurriculumUseCases.updateQuestion(req.params.id, req.params.questionId, questionBodySchema.partial().parse(req.body) as any));
     }));
 
-    router.delete('/:id/questions/:questionId', asyncHandler(async (req: Request, res: Response) => {
+    router.delete('/:id/questions/:questionId', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {courseCurriculumUseCases}=scope;
       await courseCurriculumUseCases.deleteQuestion(req.params.id, req.params.questionId);
       res.status(204).send();
     }));
 
-    router.patch('/:id', asyncHandler(async (req: Request, res: Response) => {
+    router.patch('/:id', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases}=scope;
       const updates = updateBodySchema.parse(req.body);
 
       const optionalFields: Record<string, unknown> = {};
@@ -521,47 +614,56 @@ export class CourseAdminRouter {
       res.json(course);
     }));
 
-    router.post('/:id/mark-ready', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/mark-ready', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
       if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.markReadyToReview(req.params.id);
       else await adminCourseUseCases.markReadyToReview(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/mark-publishable', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/mark-publishable', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
       if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.markReadyToPublish(req.params.id);
       else await adminCourseUseCases.markReadyToPublish(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/publish', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/publish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
       if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.publish(req.params.id, mutationContext(req));
       else await adminCourseUseCases.publish(req.params.id, mutationContext(req));
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/unpublish', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/unpublish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases}=scope;
       await adminCourseUseCases.unpublish(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/reject', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/reject', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases}=scope;
       await adminCourseUseCases.reject(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/archive', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/archive', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+      const {adminCourseUseCases}=scope;
       await adminCourseUseCases.archive(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      if (['COURSE_STALE_VERSION','LEARNING_PATH_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED'].includes(err.message)) return res.status(409).json({error:err.message});
+      if (err.message === 'COURSE_VERSION_PRECONDITION_REQUIRED') return res.status(428).json({error:err.message});
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
-      res.status(400).json({ error: err.message || 'An error occurred' });
+      if(typeof err.message==='string' && /^(COURSE_|NATIVE_COURSE_|LEARNING_PATH_|IMPORTED_COURSE_|AUTHENTICATED_ADMIN_)/.test(err.message)) return res.status(400).json({error:err.message});
+      res.status(500).json({error:'COURSE_OPERATION_FAILED'});
     });
 
     return router;

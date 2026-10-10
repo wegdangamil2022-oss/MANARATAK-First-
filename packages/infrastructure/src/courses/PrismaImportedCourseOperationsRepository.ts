@@ -1,3 +1,4 @@
+import type {AtomicPersistenceContext} from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseImportOperationsOverview,
@@ -71,6 +72,16 @@ function pageSize(value: unknown, fallback: number): number {
 
 export class PrismaImportedCourseOperationsRepository implements IImportedCourseOperationsRepository {
   public constructor(private readonly prisma: PrismaClient) {}
+  public withTransaction(context:AtomicPersistenceContext):IImportedCourseOperationsRepository {
+    const tx=(context as AtomicPersistenceContext & {transactionClient?:unknown}).transactionClient;
+    if(!context.boundaryId||!tx) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return new PrismaImportedCourseOperationsRepository(tx as PrismaClient);
+  }
+  private async batch(queries:Prisma.PrismaPromise<unknown>[]):Promise<unknown[]> {
+    if(typeof this.prisma.$transaction==='function') return this.prisma.$transaction(queries);
+    return Promise.all(queries);
+  }
+
 
   public async listImportedCourses(filters: ImportedCourseAdminFilters): Promise<ImportedCoursePage> {
     const page = pageNumber(filters.page, 1);
@@ -281,7 +292,7 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
       },
     });
 
-    await this.prisma.$transaction([
+    await this.batch([
       this.prisma.courseSourceUrlHistory.updateMany({
         where: { courseSourceIdentityId: context.sourceIdentityId },
         data: { isCurrent: false },

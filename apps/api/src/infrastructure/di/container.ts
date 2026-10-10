@@ -2,7 +2,6 @@ import { PrismaInternationalTestConsumerReadGateway } from '@manaratak/infrastru
 import { ImportGovernanceUseCases } from '@manaratak/application';
 import { sweepOrphanImportSpools, PrismaImportGovernanceGateway, PrismaImportScreeningReceiptStore, PrismaImportSourceObservationGateway, PrismaSourceAcquisitionLimiter, SignedSourceAccessAuthority } from '@manaratak/infrastructure';
 import { ImportArtifactUseCase, ImportSourceControlUseCases, ImportParserRegistry, CsvImportStreamParser, NdjsonImportStreamParser, JsonImportStreamParser } from '@manaratak/application';
-import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -15,7 +14,6 @@ import {
 } from '@manaratak/domain';
 
 import { createContainer, InjectionMode, asClass, asValue, asFunction } from '@manaratak-vendor/awilix-core';
-import { Router } from 'express';
 import { ConfigurationRegistry } from '@manaratak/config';
 import { RuntimeResourceRegistry } from '../runtime/RuntimeResourceRegistry.js';
 import { createAssetMalwareScannerGatewayForRuntime, createAssetSanitizationGatewayForRuntime, createAssetStorageGatewayForRuntime, createImportRawSnapshotStoreForRuntime } from './RuntimeDependencyPolicy.js';
@@ -194,6 +192,8 @@ import {
   CourseEnrollmentPolicyUseCases,
   LearningPathUseCases,
   CoursePublicationService,
+  CourseAdminCommandUseCases,
+  bindCourseRepository,
   NativeCourseUseCases,
   CertificateUseCases,
   CertificateArtifactRenderUseCase,
@@ -760,6 +760,28 @@ export function registerDependencies(
     courseRelationshipResolutionService: asFunction(({ courseRelationshipRepository }) => new CourseRelationshipResolutionService(courseRelationshipRepository)).scoped(),
     crossDomainGraphReadService: asFunction(({ majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository }) =>
       new CrossDomainGraphReadService(majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository)).scoped(),
+    courseAdminCommandUseCases: asFunction(({courseRepository, learningPathRepository, courseProgressRepository, courseCurriculumRepository,
+      courseEnrollmentPolicyRepository, courseRelationshipRepository, assetRecordRepository, assetReferencePolicy,
+      importedCourseOperationsRepository, externalCourseProviderRepository, importedCourseLinkChecker, atomicDomainMutationCoordinator}) => new CourseAdminCommandUseCases(
+        courseRepository, learningPathRepository, atomicDomainMutationCoordinator, context => {
+          const courses = bindCourseRepository(courseRepository, context);
+          const curriculum = bindCourseRepository(courseCurriculumRepository, context);
+          const policy = bindCourseRepository(courseEnrollmentPolicyRepository, context);
+          const relationships = bindCourseRepository(courseRelationshipRepository, context);
+          const paths = bindCourseRepository(learningPathRepository, context);
+          const operations=bindCourseRepository(importedCourseOperationsRepository,context);
+          const publication = new CoursePublicationService(courses, operations, atomicDomainMutationCoordinator, relationships);
+          const admin = new AdminCourseUseCases(courses,publication,assetReferencePolicy);
+          return {
+            adminCourseUseCases: admin,
+            importedCourseAdminUseCases: new ImportedCourseAdminUseCases(operations,externalCourseProviderRepository,admin,importedCourseLinkChecker),
+            nativeCourseUseCases: new NativeCourseUseCases(courses, curriculum, assetRecordRepository, publication, relationships, policy),
+            courseCurriculumUseCases: new CourseCurriculumUseCases(courses, curriculum, assetRecordRepository),
+            courseEnrollmentPolicyUseCases: new CourseEnrollmentPolicyUseCases(courses, policy),
+            courseRelationshipResolutionService: new CourseRelationshipResolutionService(relationships),
+            learningPathUseCases: new LearningPathUseCases(paths, courses, courseProgressRepository, atomicDomainMutationCoordinator),
+          };
+        })).scoped(),
     courseCurriculumUseCases: asFunction(({ courseRepository, courseCurriculumRepository, assetRecordRepository }) => new CourseCurriculumUseCases(courseRepository, courseCurriculumRepository, assetRecordRepository)).scoped(),
     courseEnrollmentPolicyUseCases: asFunction(({ courseRepository, courseEnrollmentPolicyRepository }) =>
       new CourseEnrollmentPolicyUseCases(courseRepository, courseEnrollmentPolicyRepository)).scoped(),
