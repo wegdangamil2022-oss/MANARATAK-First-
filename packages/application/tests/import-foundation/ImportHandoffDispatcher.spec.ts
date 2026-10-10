@@ -56,7 +56,7 @@ describe('ImportHandoffDispatcher', () => {
     const accept = vi.fn().mockResolvedValue({ state: 'NEEDS_OWNER_REVIEW' });
     const receiptStore = {
       find: vi.fn().mockResolvedValue(null),
-      accept: vi.fn(async (_input, screen) => screen()),
+      accept: vi.fn(async (_input: typeof handoff, screen: () => Promise<unknown>) => screen()),
     };
     const dispatcher = new ImportHandoffDispatcher({
       REFERENCE_DATA: { effectMode: 'SCREENING_ONLY', accept },
