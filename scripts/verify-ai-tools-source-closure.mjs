@@ -22,6 +22,7 @@ const toolsPage = read('apps/web/src/features/public-template/components/AITools
 const banner = read('apps/web/src/features/public-template/components/AIToolsBanner.tsx');
 const liveSource = read('apps/web/src/features/public-template/publicLiveDataSource.ts');
 const executionPage = read('apps/web/src/features/student-tools/StudentToolPage.tsx');
+const resultView = read('apps/web/src/features/student-tools/StudentToolResultView.tsx');
 const aiAdmin = read('apps/admin/src/pages/AIGovernancePage.tsx');
 const toolsAdmin = read('apps/admin/src/pages/StudentToolsAdminPage.tsx');
 const container = read('apps/api/src/infrastructure/di/container.ts');
@@ -38,11 +39,11 @@ const checks = {
   pending_provider_can_be_attempted: /status === 'READY' \|\| status === 'RUNTIME_PENDING'/.test(aiUseCases),
   ai_health_reports_runtime_pending: /AI_PROVIDER_RUNTIME_PENDING/.test(app) && /runtimePending/.test(app),
   ai_overview_reports_runtime_pending: /counts\.RUNTIME_PENDING/.test(aiRepo) && /'RUNTIME_PENDING'/.test(aiRepo),
-  ai_admin_overview_uses_live_adapter_status: /for \(const adapter of this\.providers\.list\(\)\) counts\[adapter\.status\(\)\] \+= 1/.test(aiUseCases) && /else overallStatus = 'RUNTIME_PENDING'/.test(aiUseCases),
+  ai_admin_overview_uses_live_adapter_status: aiUseCases.includes('for (const definition of definitions)') && aiUseCases.includes('this.providers.get(definition.key)') && aiUseCases.includes('counts[status] += 1') && aiUseCases.includes("else overallStatus = 'RUNTIME_PENDING'"),
   ai_idempotency_requester_scoped: /consumerKey}:\$\{requesterScope}:\$\{request\.idempotencyKey}/.test(aiUseCases),
-  ai_request_fingerprint: /const requestFingerprint = sha256\(stableStringify/.test(aiUseCases),
+  ai_request_fingerprint: aiUseCases.includes('const requestFingerprint = sha256(') && aiUseCases.includes('stableStringify({'),
   ai_idempotency_reuse_rejected: /AI_IDEMPOTENCY_KEY_REUSED/.test(aiUseCases),
-  ai_fingerprint_persisted: /requestFingerprint \}\),/.test(aiUseCases),
+  ai_fingerprint_persisted: aiUseCases.includes('metadata: sanitizeMetadata({') && aiUseCases.includes('requestFingerprint,') && aiUseCases.includes('execution.metadata?.requestFingerprint !== requestFingerprint'),
   ai_structured_output_validation: /validateStructuredOutput/.test(aiUseCases),
   ai_prompt_injection_control: /PROMPT_INJECTION/.test(aiUseCases),
   ai_pii_redaction: /PII_REDACTED/.test(aiUseCases),
@@ -77,8 +78,8 @@ const checks = {
   canonical_university_gateway: /CanonicalUniversityComparisonGateway/.test(toolGateways),
   canonical_scholarship_gateway: /CanonicalScholarshipRecommendationGateway/.test(toolGateways),
   phase18_ai_boundary: /Phase17StudentToolsAIConsumerGateway/.test(toolGateways),
-  university_result_deep_link: /to=\{`\/universities\//.test(executionPage),
-  scholarship_result_deep_link: /to=\{`\/scholarships\//.test(executionPage),
+  university_result_deep_link: resultView.includes('to={`/universities/${encodeURIComponent(item.slug)}`}') && executionPage.includes('StudentToolResultView'),
+  scholarship_result_deep_link: resultView.includes('to={`/scholarships/${encodeURIComponent(item.scholarship.slug)}`}') && executionPage.includes('StudentToolResultView'),
   university_deep_link_owner_hydration: /ApiClient\.getUniversityBySlug/.test(publicApp),
 
   canonical_ai_admin_redirect: /path: 'admin\/\*'/.test(webRouter) && /<CanonicalAdminRedirect legacyPath=\{window\.location\.pathname\}/.test(webRouter),
