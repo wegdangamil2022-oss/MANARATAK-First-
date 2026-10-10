@@ -88,6 +88,12 @@ const groups: NavigationGroup[] = [
     labelKey: 'admin_nav_group_governance',
     items: [
       { to: '/academic-taxonomy', labelKey: 'admin_nav_academic_taxonomy', icon: ShieldCheck, requiredPermission: 'admin:academic-taxonomy:manage' },
+      {
+        to: '/identities',
+        labelKey: 'admin_nav_identities',
+        icon: Users,
+        requiredPermission: 'admin:identities:manage',
+      },
       { to: '/authorization', labelKey: 'admin_nav_authorization', icon: Users, requiredPermission: 'admin:authorization:manage' },
       { to: '/audit', labelKey: 'admin_nav_audit', icon: ScrollText, requiredPermission: 'admin:audit:manage' },
       { to: '/assets', labelKey: 'admin_nav_assets', icon: Images, requiredPermission: 'admin:assets:manage' },
@@ -157,7 +163,9 @@ export function AdminNavigation() {
               <Languages className="h-4 w-4 text-[#0E7C86]" />
               {t('admin_bilingual_control')}
             </div>
-            <p className="mt-1 text-[10px] font-semibold leading-5 text-[#203442]/58">{t('admin_bilingual_control_help')}</p>
+            <p className="mt-1 text-[10px] font-semibold leading-5 text-[#203442]/58">
+              {t('admin_bilingual_control_help')}
+            </p>
           </div>
 
           <nav aria-label={t('admin_navigation')} className="space-y-5">

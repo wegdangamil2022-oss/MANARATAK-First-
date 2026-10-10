@@ -14,7 +14,7 @@ describe('WP12-9 ScholarshipAdminRouter normalized catalog detail', () => {
       updateScholarship: vi.fn(async (_id, updates) => ({ id: 'sch-1', ...updates })),
     };
     const manageAuditRecordsUseCase = {
-      queryAuditRecords: vi.fn(async () => []),
+      queryAuditPage: vi.fn(async () => ({ items: [], hasMore: true })),
     };
     const app = express();
     app.use(express.json());
@@ -38,9 +38,12 @@ describe('WP12-9 ScholarshipAdminRouter normalized catalog detail', () => {
     expect(response.status).toBe(200);
     expect(response.body.scholarship.id).toBe('sch-1');
     expect(response.body.historyAvailable).toBe(true);
-    expect(env.manageAuditRecordsUseCase.queryAuditRecords).toHaveBeenCalledWith({
+    expect(response.body.historyHasMore).toBe(true);
+    expect(response.body.historyLimit).toBe(50);
+    expect(env.manageAuditRecordsUseCase.queryAuditPage).toHaveBeenCalledWith({
       targetId: 'sch-1',
       category: 'SCHOLARSHIPS_MUTATION',
+      limit: 50,
     });
   });
 

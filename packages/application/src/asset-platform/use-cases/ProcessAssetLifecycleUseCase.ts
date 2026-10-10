@@ -5,12 +5,12 @@ import {
   IAssetMalwareScannerGateway,
   IAssetSanitizationGateway,
   AssetId,
-  AssetStorageZone,
-  AssetLifecycleState
+  AssetLifecycleState,
 } from '@manaratak/domain';
 
 import {
   ValidateAssetDto,
+  FinalizeAssetUploadDto,
   MarkAssetMalwareScanFailedDto,
   SanitizeAssetDto,
   ActivateAssetDto,
@@ -33,6 +33,27 @@ export class ProcessAssetLifecycleUseCase {
     private readonly sanitizationGateway?: IAssetSanitizationGateway
   ) {}
 
+  /**
+   * Marks a direct-to-quarantine upload as complete only after provider-owned verification.
+   * Recording the verification precedes malware scanning and is revision-gated by the repository.
+   */
+  public async finalizeUploadedAsset(dto: FinalizeAssetUploadDto): Promise<AssetRecordDto> {
+    const id = new AssetId(dto.assetId);
+    const record = await this.assetRepository.findById(id);
+    if (!record) throw new Error(`Asset not found: ${dto.assetId}`);
+    if (!this.storageGateway.verifyUploadedObject) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+    }
+    // Domain accepts INITIATED (and legacy unverified QUARANTINED) only after provider proof.
+    const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+      expectedByteSize: record.metadata.byteSize,
+      declaredMimeType: record.metadata.mimeType,
+    });
+    record.confirmUploadedObject({ ...verified, locator: record.locator.value });
+    await this.assetRepository.save(record);
+    return AssetRecordMapper.toDto(record);
+  }
+
   public async validateAsset(dto: ValidateAssetDto): Promise<AssetRecordDto> {
     const id = new AssetId(dto.assetId);
     const record = await this.assetRepository.findById(id);
@@ -40,6 +61,28 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
+    if (!record.uploadVerification ||
+      record.uploadVerification.locator !== record.locator.value ||
+      record.uploadVerification.signatureVerified !== true ||
+      record.checksum?.hash !== record.uploadVerification.checksumSha256.toLowerCase()) {
+      throw new Error('ASSET_UPLOAD_FINALIZATION_REQUIRED');
+    }
+    if (!this.storageGateway.verifyUploadedObject) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+    }
+    // A completed upload is not immutable merely because it has finalization evidence.
+    // Reobserve the bytes immediately before scanning and reject overwrite attempts.
+    const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+      expectedByteSize: record.uploadVerification.byteSize,
+      declaredMimeType: record.uploadVerification.verifiedMimeType,
+    });
+    if (verified.signatureVerified !== true ||
+        verified.byteSize !== record.uploadVerification.byteSize ||
+        verified.verifiedMimeType !== record.uploadVerification.verifiedMimeType ||
+        !Number.isFinite(Date.parse(verified.verifiedAt)) ||
+        verified.checksumSha256.toLowerCase() !== record.uploadVerification.checksumSha256.toLowerCase()) {
+      throw new Error('ASSET_UPLOAD_CHANGED_AFTER_FINALIZATION');
+    }
     record.startValidation();
 
     if (!this.malwareScannerGateway) {
@@ -77,28 +120,98 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
-    record.startSanitizing();
-
     if (!this.sanitizationGateway) {
       throw new Error('ASSET_SANITIZATION_NOT_CONFIGURED');
     }
+    if (!this.storageGateway.verifyUploadedObject) {
+      throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+    }
+    if (!this.malwareScannerGateway) {
+      throw new Error('ASSET_MALWARE_SCANNING_NOT_CONFIGURED');
+    }
+    record.startSanitizing();
     const result = await this.sanitizationGateway.sanitize(record.locator);
     record.completeSanitization(result.metadata, result.sanitizedLocator);
-
+    const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+      declaredMimeType: record.metadata.mimeType,
+    });
+    record.confirmSanitizedObject({ ...verified, locator: record.locator.value });
+    const rescanned = await this.malwareScannerGateway.scan(record.locator);
+    if (!rescanned.clean) {
+      record.failMalwareScan(rescanned.threatsFound?.join(', ') || 'Threat in sanitized output');
+      await this.assetRepository.save(record);
+      return AssetRecordMapper.toDto(record);
+    }
+    // A sanitizer or scanner must not silently change bytes during post-scan verification.
+    const observed = await this.storageGateway.verifyUploadedObject(record.locator, {
+      declaredMimeType: record.metadata.mimeType, expectedByteSize: verified.byteSize,
+    });
+    if (observed.signatureVerified !== true ||
+        observed.byteSize !== verified.byteSize ||
+        observed.verifiedMimeType !== verified.verifiedMimeType ||
+        !Number.isFinite(Date.parse(observed.verifiedAt)) ||
+        observed.checksumSha256.toLowerCase() !== verified.checksumSha256.toLowerCase()) {
+      throw new Error('ASSET_SANITIZED_CONTENT_CHANGED_DURING_SCAN');
+    }
+    record.passSanitizedMalwareScan();
     await this.assetRepository.save(record);
     return AssetRecordMapper.toDto(record);
   }
 
   public async activateAsset(dto: ActivateAssetDto): Promise<AssetRecordDto> {
     const id = new AssetId(dto.assetId);
-    const record = await this.assetRepository.findById(id);
-    if (!record) {
-      throw new Error(`Asset not found: ${dto.assetId}`);
+    let record = await this.assetRepository.findById(id);
+    if (!record) throw new Error(`Asset not found: ${dto.assetId}`);
+    // A lost HTTP response after a committed activation is safe to retry.
+    if (record.state === AssetLifecycleState.ACTIVE && record.activationOperation?.phase === 'COMPLETED') {
+      record.assertCanDeliver();
+      return AssetRecordMapper.toDto(record);
     }
-
-    const cleanLocator = await this.storageGateway.moveToCleanZone(record.locator);
+    record.assertCanActivate();
+    if (!record.activationOperation) {
+      if (!this.storageGateway.verifyUploadedObject) throw new Error('ASSET_UPLOAD_VERIFICATION_NOT_CONFIGURED');
+      const verified = await this.storageGateway.verifyUploadedObject(record.locator, {
+        declaredMimeType: record.metadata.mimeType, expectedByteSize: record.uploadVerification?.byteSize,
+      });
+      if (verified.signatureVerified !== true || verified.byteSize !== record.uploadVerification?.byteSize ||
+          verified.verifiedMimeType !== record.metadata.mimeType || !Number.isFinite(Date.parse(verified.verifiedAt)) ||
+          verified.checksumSha256.toLowerCase() !== record.checksum?.hash) {
+        throw new Error('ASSET_QUARANTINE_CONTENT_CHANGED_BEFORE_ACTIVATION');
+      }
+      record.prepareActivation(globalThis.crypto.randomUUID());
+      // Commit the intent before provider movement. A rejected CAS never moves bytes.
+      await this.assetRepository.save(record);
+      const operationId = record.activationOperation!.operationId;
+      record = await this.assetRepository.findById(id);
+      if (!record || record.activationOperation?.operationId !== operationId) {
+        throw new Error('ASSET_ACTIVATION_OPERATION_INVALID');
+      }
+      if (record.state === AssetLifecycleState.ACTIVE && record.activationOperation.phase === 'COMPLETED') {
+        record.assertCanDeliver();
+        return AssetRecordMapper.toDto(record);
+      }
+    }
+    record.assertActivationOperation();
+    const operationId = record.activationOperation!.operationId;
+    // Retry the same source+digest key even if source bytes already moved. The provider
+    // must durably replay its original digest-bound result; it must never publish twice.
+    const cleanLocator = await this.storageGateway.moveToCleanZone(record.locator, record.checksum!.hash);
     record.activate(cleanLocator);
-    await this.assetRepository.save(record);
+    try {
+      await this.assetRepository.save(record);
+    } catch (error) {
+      // A competing retry may have committed the same promotion. Never compensate by
+      // deleting/archiving a CLEAN object another successful command is already using.
+      const committed = await this.assetRepository.findById(id);
+      if (committed?.state === AssetLifecycleState.ACTIVE &&
+          committed.activationOperation?.operationId === operationId &&
+          committed.activationOperation.phase === 'COMPLETED' &&
+          committed.checksum?.hash === record.checksum?.hash && committed.locator.value === cleanLocator.value) {
+        committed.assertCanDeliver();
+        return AssetRecordMapper.toDto(committed);
+      }
+      throw error;
+    }
     return AssetRecordMapper.toDto(record);
   }
 
@@ -106,9 +219,7 @@ export class ProcessAssetLifecycleUseCase {
     const id = new AssetId(dto.assetId);
     const record = await this.assetRepository.findById(id);
     if (!record) throw new Error(`Asset not found: ${dto.assetId}`);
-    if (record.state !== AssetLifecycleState.ACTIVE || record.locator.storageZone !== AssetStorageZone.CLEAN) {
-      throw new Error('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET');
-    }
+    record.assertCanDeliver();
     if (!this.storageGateway.generateDeliveryGrant) {
       throw new Error('ASSET_SECURE_DELIVERY_NOT_CONFIGURED');
     }
@@ -121,6 +232,16 @@ export class ProcessAssetLifecycleUseCase {
     };
   }
 
+  private async assertNotInUse(id: AssetId, operation: 'archive' | 'soft delete' | 'purge'): Promise<void> {
+    // Errors from the registry propagate: an unavailable usage check must not authorize destruction.
+    const usages = this.usageRegistry.findUsages ? await this.usageRegistry.findUsages(id) : null;
+    const inUse = usages ? usages.length > 0 : await this.usageRegistry.isAssetInUse(id);
+    if (inUse) {
+      const detail = usages?.length ? ` (${usages.map((usage) => `${usage.consumer}.${usage.field}`).join(', ')})` : '';
+      throw new Error(`Cannot ${operation} asset ${id.value} because it is currently in use${detail}`);
+    }
+  }
+
   public async archiveAsset(dto: ArchiveAssetDto): Promise<AssetRecordDto> {
     const id = new AssetId(dto.assetId);
     const record = await this.assetRepository.findById(id);
@@ -128,9 +249,26 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
+    await this.assertNotInUse(id, 'archive');
+    if (record.archiveOperation?.phase === 'COMPLETED' && record.state === AssetLifecycleState.ARCHIVED) return AssetRecordMapper.toDto(record);
+    if (record.archiveOperation && record.archiveOperation.phase !== 'COMPLETED') throw new Error('ASSET_ARCHIVE_RECOVERY_PENDING');
+    if (record.state === AssetLifecycleState.ARCHIVED) throw new Error('ASSET_ARCHIVE_LEGACY_VERIFICATION_REQUIRED');
+    if (!this.assetRepository.completeArchiveOperation || !this.assetRepository.markArchiveRecoveryRequired) throw new Error('ASSET_ARCHIVE_JOURNAL_NOT_CONFIGURED');
     record.archive();
-    await this.storageGateway.archive(record.locator);
+    const preparedAt = new Date().toISOString();
+    record.recordArchiveOperation({ version: 1, operationId: globalThis.crypto.randomUUID(), phase: 'RUNNING',
+      sourceLocator: record.locator.value, preparedAt, updatedAt: preparedAt });
+    // ARCHIVED plus a non-expiring intent commits before the sole provider call.
     await this.assetRepository.save(record);
+    try {
+      await this.storageGateway.archive(record.locator);
+      await this.assetRepository.completeArchiveOperation(record);
+    } catch (error) {
+      let journalFailure: unknown;
+      try { await this.assetRepository.markArchiveRecoveryRequired(record); }
+      catch (failure) { journalFailure = failure; }
+      throw new Error('ASSET_ARCHIVE_RECOVERY_REQUIRED', { cause: { archiveFailure: error, journalFailure } });
+    }
     return AssetRecordMapper.toDto(record);
   }
 
@@ -141,6 +279,7 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
+    await this.assertNotInUse(id, 'soft delete');
     record.softDelete();
     await this.assetRepository.save(record);
     return AssetRecordMapper.toDto(record);
@@ -154,8 +293,46 @@ export class ProcessAssetLifecycleUseCase {
     }
 
     record.restore();
-    await this.storageGateway.restore(record.locator);
-    await this.assetRepository.save(record);
+    if (!this.storageGateway.verifyRestoredObject ||
+        !record.checksum || !record.metadata.byteSize) {
+      throw new Error('ASSET_RESTORE_VERIFICATION_NOT_CONFIGURED');
+    }
+    if (!this.assetRepository.acquireRestoreLease ||
+        !this.assetRepository.releaseRestoreLease || !this.assetRepository.assertRestoreLeaseOwned ||
+        !this.assetRepository.markRestoreProviderStarted || !this.assetRepository.markRestoreRecoveryRequired ||
+        !this.assetRepository.renewRestoreLease) {
+      throw new Error('ASSET_RESTORE_LEASE_NOT_CONFIGURED');
+    }
+    // Serialize restore with retention/purge before any provider side effect.
+    await this.assetRepository.acquireRestoreLease(record);
+    let providerRestoreAttempted = false;
+    try {
+      await this.assetRepository.assertRestoreLeaseOwned(record);
+      await this.assetRepository.markRestoreProviderStarted(record);
+      providerRestoreAttempted = true;
+      await this.storageGateway.restore(record.locator);
+      await this.storageGateway.verifyRestoredObject(record.locator, {
+        expectedSha256: record.checksum.hash,
+        expectedByteSize: record.metadata.byteSize,
+        declaredMimeType: record.metadata.mimeType,
+      });
+      await this.assetRepository.renewRestoreLease(record);
+      // Repository commits ACTIVE and removes the exact owned lease atomically.
+      // Expired or replaced leases make the state CAS fail.
+      await this.assetRepository.save(record);
+    } catch (error) {
+      if (providerRestoreAttempted) {
+        // A timeout/crash can leave a provider request running. Keep the durable
+        // barrier; never archive or release an ambiguous operation automatically.
+        let journalFailure: unknown;
+        try { await this.assetRepository.markRestoreRecoveryRequired(record); }
+        catch (failure) { journalFailure = failure; }
+        throw new Error('ASSET_RESTORE_RECOVERY_REQUIRED', { cause: { restoreFailure: error, journalFailure } });
+      }
+      try { await this.assetRepository.releaseRestoreLease(record); }
+      catch (failure) { throw new Error('ASSET_RESTORE_LEASE_RELEASE_FAILED', { cause: failure }); }
+      throw error;
+    }
     return AssetRecordMapper.toDto(record);
   }
 
@@ -166,19 +343,26 @@ export class ProcessAssetLifecycleUseCase {
       throw new Error(`Asset not found: ${dto.assetId}`);
     }
 
-    const usages = this.usageRegistry.findUsages
-      ? await this.usageRegistry.findUsages(id)
-      : null;
-    const inUse = usages ? usages.length > 0 : await this.usageRegistry.isAssetInUse(id);
-    if (inUse) {
-      const detail = usages?.length
-        ? ` (${usages.map((usage) => `${usage.consumer}.${usage.field}`).join(', ')})`
-        : '';
-      throw new Error(`Cannot purge asset ${dto.assetId} because it is currently in use${detail}`);
-    }
+    await this.assertNotInUse(id, 'purge');
 
-    record.purge();
+    // Deletion is irreversible: never interpret an absent repository guard as permission.
+    if (!this.assetRepository.assertPurgeAllowed) {
+      throw new Error('ASSET_PURGE_RETENTION_GUARD_NOT_CONFIGURED');
+    }
+    const retryingStoredPurge = record.state === 'PURGED';
+    if (retryingStoredPurge && !dto.retentionClaimToken) {
+      throw new Error('ASSET_PURGE_CLEANUP_LEASE_REQUIRED');
+    }
+    await this.assetRepository.assertPurgeAllowed(id, new Date(), dto.retentionClaimToken, retryingStoredPurge);
+
+    if (!retryingStoredPurge) {
+      record.purge();
+      // Durable record state MUST be committed before irreversible provider deletion.
+      // If this CAS fails, the external object remains untouched.
+      await this.assetRepository.save(record);
+    }
+    // If provider deletion fails, persisted PURGED + retentionProcessedAt=NULL
+    // is a retryable tombstone for the retention worker. Repeated delete must be idempotent.
     await this.storageGateway.delete(record.locator);
-    await this.assetRepository.save(record);
   }
 }

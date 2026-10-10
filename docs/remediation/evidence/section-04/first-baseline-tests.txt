@@ -1,0 +1,240 @@
+
+ RUN  v4.1.11 /workspace/manaratak-audit-main
+
+ ❯ apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts (5 tests | 3 failed) 120ms
+     × POST /definitions should validate and call use case 46ms
+     × POST /assignments should validate and call use case 12ms
+     × POST /assignments/rollback should validate and call use case 10ms
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts (5 tests | 4 failed) 25ms
+     × maps setting assignment round trip including versions 12ms
+     × rejects moving the current pointer directly to an existing historical version 6ms
+     × rejects assignment identity collisions across key/scope boundaries 2ms
+     × rejects reusing a persisted version id for another assignment 3ms
+ ❯ packages/infrastructure/tests/settings/PrismaSettingDefinitionRepository.spec.ts (2 tests | 1 failed) 16ms
+     × maps setting definition round trip 12ms
+ ❯ apps/api/tests/presentation/api/router/SettingsRuntimeRouter.spec.ts (3 tests | 1 failed) 83ms
+     × GET /resolve/:key handles resolution error 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts > PrismaSettingAssignmentRepository > maps setting assignment round trip including versions
+TypeError: tx.$queryRaw is not a function
+ ❯ persist packages/infrastructure/src/settings/PrismaSettingAssignmentRepository.ts:158:16
+    156|     const persist = async (tx: Prisma.TransactionClient) => {
+    157|       const lockKey = `setting:${keyStr}:${scopeLevel}:${scopeId}`;
+    158|       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended…
+       |                ^
+    159|       const client = tx as unknown as SettingsAssignmentPrismaClient;
+    160|       const existingByKey = await client.settingAssignmentRecord.findU…
+ ❯ Object.<anonymous> packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts:11:78
+ ❯ PrismaSettingAssignmentRepository.save packages/infrastructure/src/settings/PrismaSettingAssignmentRepository.ts:295:28
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts:73:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts > PrismaSettingAssignmentRepository > rejects moving the current pointer directly to an existing historical version
+AssertionError: expected [Function] to throw error matching /rollback must create a new immutable…/i but got 'tx.$queryRaw is not a function'
+
+- Expected:
+/rollback must create a new immutable version/i
+
++ Received:
+"tx.$queryRaw is not a function"
+
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts:125:45
+    123|     }));
+    124|
+    125|     await expect(repository.save(assignment)).rejects.toThrow(/rollbac…
+       |                                             ^
+    126|     expect(mockPrisma.settingAssignmentRecord.upsert).not.toHaveBeenCa…
+    127|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts > PrismaSettingAssignmentRepository > rejects assignment identity collisions across key/scope boundaries
+AssertionError: expected [Function] to throw error matching /already belongs to another key or sc…/i but got 'tx.$queryRaw is not a function'
+
+- Expected:
+/already belongs to another key or scope/i
+
++ Received:
+"tx.$queryRaw is not a function"
+
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts:147:45
+    145|     });
+    146|
+    147|     await expect(repository.save(assignment)).rejects.toThrow(/already…
+       |                                             ^
+    148|     expect(mockPrisma.settingVersionRecord.findUnique).not.toHaveBeenC…
+    149|     expect(mockPrisma.settingAssignmentRecord.upsert).not.toHaveBeenCa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts > PrismaSettingAssignmentRepository > rejects reusing a persisted version id for another assignment
+AssertionError: expected [Function] to throw error matching /cannot be mutated or reassigned/i but got 'tx.$queryRaw is not a function'
+
+- Expected:
+/cannot be mutated or reassigned/i
+
++ Received:
+"tx.$queryRaw is not a function"
+
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts:167:45
+    165|     });
+    166|
+    167|     await expect(repository.save(assignment)).rejects.toThrow(/cannot …
+       |                                             ^
+    168|     expect(mockPrisma.settingVersionRecord.create).not.toHaveBeenCalle…
+    169|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingDefinitionRepository.spec.ts > PrismaSettingDefinitionRepository > maps setting definition round trip
+TypeError: this.prisma.$transaction is not a function
+ ❯ PrismaSettingDefinitionRepository.save packages/infrastructure/src/settings/PrismaSettingDefinitionRepository.ts:118:25
+    116|       definition.clearEvents();
+    117|     } else {
+    118|       await this.prisma.$transaction(persist);
+       |                         ^
+    119|     }
+    120|   }
+ ❯ packages/infrastructure/tests/settings/PrismaSettingDefinitionRepository.spec.ts:48:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts > SettingsAdminRouter > POST /definitions should validate and call use case
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
++   {
+      "description": "Test",
+      "id": "def-1",
+      "key": "test.key",
+      "valueType": "String",
++   },
++   {
++     "actorId": "admin-settings-1",
++     "actorType": "IDENTITY",
++     "correlationId": undefined,
++     "source": "admin-settings-api",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts:47:56
+     45|
+     46|     expect(res.status).toBe(201);
+     47|     expect(mockManageSettingsUseCase.createDefinition).toHaveBeenCalle…
+       |                                                        ^
+     48|       expect.objectContaining(payload)
+     49|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts > SettingsAdminRouter > POST /assignments should validate and call use case
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
++   {
+      "assignmentId": "assign-1",
+      "authorId": "admin-settings-1",
+      "key": "test.key",
+      "level": "TENANT",
+      "scopeId": "tenant-1",
+      "type": "String",
+      "value": "new-val",
+      "versionId": "v-1",
++   },
++   {
++     "actorId": "admin-settings-1",
++     "actorType": "IDENTITY",
++     "correlationId": undefined,
++     "source": "admin-settings-api",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts:84:51
+     82|
+     83|     expect(res.status).toBe(201);
+     84|     expect(mockManageSettingsUseCase.assignValue).toHaveBeenCalledWith(
+       |                                                   ^
+     85|       expect.objectContaining({ ...payload, authorId: 'admin-settings-…
+     86|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts > SettingsAdminRouter > POST /assignments/rollback should validate and call use case
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…} ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
++   {
+      "assignmentId": "assign-1",
+      "authorId": "admin-settings-1",
+      "newVersionId": "v-2",
+      "previousVersionId": "v-1",
++   },
++   {
++     "actorId": "admin-settings-1",
++     "actorType": "IDENTITY",
++     "correlationId": undefined,
++     "source": "admin-settings-api",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts:101:53
+     99|
+    100|     expect(res.status).toBe(200);
+    101|     expect(mockManageSettingsUseCase.rollbackValue).toHaveBeenCalledWi…
+       |                                                     ^
+    102|       expect.objectContaining({ ...payload, authorId: 'admin-settings-…
+    103|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/SettingsRuntimeRouter.spec.ts > SettingsRuntimeRouter > GET /resolve/:key handles resolution error
+AssertionError: expected 503 to be 400 // Object.is equality
+
+- Expected
++ Received
+
+- 400
++ 503
+
+ ❯ apps/api/tests/presentation/api/router/SettingsRuntimeRouter.spec.ts:49:24
+     47|       .get('/api/v1/runtime/settings/resolve/test.key');
+     48|
+     49|     expect(res.status).toBe(400);
+       |                        ^
+     50|     expect(res.body.error.code).toBe('RESOLUTION_ERROR');
+     51|     expect(res.body.error.message).toBe('Resolution failed');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  4 failed | 5 passed (9)
+      Tests  9 failed | 20 passed (29)
+   Start at  15:15:49
+   Duration  11.62s (transform 3.73s, setup 0ms, import 9.08s, tests 295ms, environment 1ms)

@@ -1,0 +1,5 @@
+
+> manaratak-2.0-monorepo@0.0.0 audit:coverage:verify
+> node scripts/architecture/verify-admin-audit-coverage.mjs
+
+ADMIN_MUTATION_AUDIT_COVERAGE=PASS; handlers=316; uniqueEndpoints=315; owner validation/atomic adoption requires separate evidence

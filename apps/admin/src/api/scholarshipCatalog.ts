@@ -40,6 +40,8 @@ export interface ScholarshipCatalogDetailResponse {
   unresolvedLinks: ScholarshipCatalogUnresolvedLink[];
   history: ScholarshipCatalogAuditEvent[];
   historyAvailable: boolean;
+  historyHasMore?: boolean;
+  historyLimit?: number;
 }
 
 export interface ScholarshipCatalogUpdate {

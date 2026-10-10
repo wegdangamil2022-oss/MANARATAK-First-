@@ -333,6 +333,7 @@ export * from './import-foundation/enums/SourceStatus';
 export * from './import-foundation/enums/DriftType';
 export * from './import-foundation/enums/DriftSeverity';
 export * from './import-foundation/value-objects/ImportSourceDefinition';
+export * from './import-foundation/value-objects/SourceAccessExecutionPolicy';
 export * from './import-foundation/value-objects/ConnectorSignature';
 export * from './import-foundation/value-objects/DriftAlert';
 export * from './import-foundation/enums/ExtractorType';

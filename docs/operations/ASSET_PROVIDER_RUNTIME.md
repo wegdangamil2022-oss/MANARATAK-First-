@@ -40,8 +40,9 @@ All paths are relative to the configured base path.
 
 - `POST v1/assets/locators`
 - `POST v1/assets/upload-grants`
+- `POST v1/assets/verify-upload` (server-owned observed bytes; never client-supplied proof)
 - `POST v1/assets/delivery-grants`
-- `POST v1/assets/move-to-clean`
+- `POST v1/assets/move-to-clean` (conditional source digest; `expectedSha256` request and matching `verifiedSourceSha256` acknowledgment)
 - `POST v1/assets/read`
 - `POST v1/assets/archive`
 - `POST v1/assets/restore`
@@ -50,6 +51,14 @@ All paths are relative to the configured base path.
 - `POST v1/assets/sanitize`
 
 Upload grants must target `QUARANTINE`. Delivery grants are accepted only for `ACTIVE` assets whose canonical locator is in `CLEAN`. Grant URLs must be HTTPS and short-lived. Credential-bearing response headers such as `Authorization`/cookies are rejected by the API boundary.
+
+## Finalization and atomic promotion requirements
+
+1. Quarantine upload grants do **not** imply the binary was uploaded. API `POST /admin/assets/:assetId/finalize-upload` calls provider `verify-upload` to confirm the actual file size, MIME/signature and SHA-256 before persisting evidence.
+2. Validation and malware scanning reject non-finalized objects. Before scan, the provider re-verifies bytes against persisted SHA-256; sanitization output is verified and rescanned independently.
+3. Promotion from QUARANTINE to CLEAN sends `expectedSha256`. The provider must compare the immutable source object version/digest **atomically** with promotion and return `verifiedSourceSha256`. An echo without atomic enforcement is insufficient.
+4. On source-CAS rejection, the provider must not publish content. Provider-side immutable version or ETag fencing and post-move reconciliation remain **external runtime acceptance obligations**; HTTP adapter checks alone do not prove them.
+5. Provider `archive`, `restore` and `delete` must be idempotent for retries. Archive domain state is committed before provider operation; failed provider archives must remain retryable and non-deliverable.
 
 ## Lifecycle security rules
 
@@ -74,3 +83,9 @@ Source verification is not provider verification. Runtime closure still requires
 - redacted logs containing no signing secret, object credentials or presigned query material.
 
 Until those tests are executed against a real configured provider, `MNT-AUD-0011` must remain `SOURCE_VERIFIED / PROVIDER_RUNTIME_PENDING` rather than production-closed.
+
+## Restore integrity and compensation (source contract)
+
+- Before a DELETED asset becomes ACTIVE, the server calls provider `restore` and then **POST `v1/assets/verify-clean`**, requiring provider-observed digest, byte count, MIME and timestamp. The provider must independently rehash actual restored CLEAN bytes, not merely echo caller evidence. The source adapter rejects missing/contradictory proof.
+- The DB remains DELETED during provider restoration and verification. On verification or DB CAS failure, the application attempts `archive` compensation; if that fails, `ASSET_RESTORE_COMPENSATION_FAILED` is surfaced and requires manual reconciliation.
+- This compensation is **best effort**, not a cross-provider atomic transaction. Race-safe purge-vs-restore locking, immutable object versions and independent provider sandbox integration remain P0 acceptance dependencies.

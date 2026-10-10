@@ -76,6 +76,7 @@ export interface IScholarshipImportCenterGateway {
  * Implementations must bind all reads/writes to the supplied transaction context.
  */
 export interface IScholarshipImportAtomicGateway extends IScholarshipImportCenterGateway {
+  assertReviewLease(recordId: string, actorId: string): Promise<void>;
   updateRecord(id: string, updates: {
     status?: string;
     validationErrors?: unknown;

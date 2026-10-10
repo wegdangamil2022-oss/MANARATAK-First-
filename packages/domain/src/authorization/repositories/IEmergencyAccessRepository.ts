@@ -18,6 +18,13 @@ export interface EmergencyAccessGrantRecord {
 
 export interface IEmergencyAccessRepository {
   withTransaction?(context: AtomicPersistenceContext): IEmergencyAccessRepository;
+  queryPage?(input: {
+    limit: number;
+    cursor?: string;
+    principalId?: string;
+    activeOnly?: boolean;
+    state?: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'REVOKED';
+  }): Promise<{ items: EmergencyAccessGrantRecord[]; nextCursor: string | null }>;
   list(input?: {
     principalId?: string;
     activeOnly?: boolean;

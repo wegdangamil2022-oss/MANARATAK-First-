@@ -73,6 +73,7 @@ model SettingDefinitionRecord {
   valueType     String
   description   String?
   defaultValue  Json?
+  validationRules Json?
   isFeatureFlag Boolean  @default(false)
   isDeprecated  Boolean  @default(false)
   isSecret      Boolean  @default(false)
@@ -89,8 +90,12 @@ model SettingAssignmentRecord {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  versions SettingVersionRecord[]
+  versions SettingVersionRecord[] @relation("SettingAssignmentHistory")
+  // SQL plan makes this circular pointer FK DEFERRABLE INITIALLY DEFERRED.
+  // Prisma cannot express deferrability; preserve the reviewed migration SQL.
+  currentVersion SettingVersionRecord @relation("SettingCurrentVersion", fields: [id, currentVersionId], references: [assignmentId, id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([id, currentVersionId])
   @@unique([key, scopeLevel, scopeId])
   @@index([key])
   @@index([scopeLevel, scopeId])
@@ -104,9 +109,13 @@ model SettingVersionRecord {
   authorId            String?
   createdAt           DateTime @default(now())
   rollbackOfVersionId String?
+  operation           String   @default("SET")
+  changeReason        String?
 
-  assignment SettingAssignmentRecord @relation(fields: [assignmentId], references: [id])
+  assignment SettingAssignmentRecord @relation("SettingAssignmentHistory", fields: [assignmentId], references: [id])
+  currentForAssignment SettingAssignmentRecord? @relation("SettingCurrentVersion")
 
+  @@unique([assignmentId, id])
   @@index([assignmentId, createdAt])
 }
 
@@ -120,6 +129,10 @@ model ImportBatch {
   totalRecords     Int       @default(0)
   processedRecords Int       @default(0)
   failedRecords    Int       @default(0)
+  receivedRecords  Int?
+  skippedRecords   Int?
+  invalidRecords   Int?
+  stagingCompletedAt DateTime?
   attemptCount     Int       @default(0)
   availableAt      DateTime  @default(now())
   claimedBy        String?
@@ -168,6 +181,74 @@ model ImportRecord {
   @@index([batchId, status])
   @@index([batchId, chunkIndex])
   @@index([retentionExpiresAt])
+}
+
+// Import control-plane records never authorize canonical publication.
+model ImportScreeningReceipt {
+  id String @id
+  ownerDomain String
+  handoffKey String
+  requestHash String
+  result Json
+  createdAt DateTime @default(now())
+  @@unique([ownerDomain, handoffKey])
+}
+
+model ImportMappingProfile {
+  id String @id
+  sourceId String
+  ownerDomain String
+  version Int
+  sourceRevision DateTime
+  definition Json
+  definitionHash String
+  actorId String
+  reason String
+  createdAt DateTime @default(now())
+  @@unique([sourceId, ownerDomain, version])
+  @@index([sourceId, ownerDomain, createdAt])
+}
+
+model ImportReviewAssignment {
+  recordId String @id
+  batchId String
+  ownerDomain String
+  assigneeId String
+  dueAt DateTime
+  state String @default("ASSIGNED")
+  claimedBy String?
+  claimUntil DateTime?
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([assigneeId, state, dueAt])
+  @@index([batchId, state])
+}
+
+model ImportSourceObservation {
+  sourceId String @id
+  sourceRevision DateTime
+  artifactId String
+  contentHash String
+  byteSize Int
+  etag String?
+  lastModified String?
+  shapeHash String?
+  shape Json?
+  pendingShapeHash String?
+  pendingShape Json?
+  driftState String @default("BASELINE")
+  decisionActorId String?
+  decisionReason String?
+  fallbackSourceId String?
+  fallbackSourceRevision DateTime?
+  updatedAt DateTime @updatedAt
+}
+
+model ImportRateBudget {
+  budgetKey String @id
+  nextAvailableAt DateTime
+  updatedAt DateTime @updatedAt
 }
 
 // --- Phase 13 Learning Platform: Core Course Persistence ---

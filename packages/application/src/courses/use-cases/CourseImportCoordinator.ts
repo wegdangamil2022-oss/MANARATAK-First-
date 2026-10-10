@@ -89,6 +89,7 @@ export class CourseImportCoordinator {
       },
     }, async (context) => {
       const gateway = this.gateway.withTransaction(context);
+      await gateway.assertReviewLease(input.recordId, input.actorId);
       const courseRepository = transactionalCourseRepository.withTransaction(context);
       const currentRecord = await gateway.getRecordById(input.recordId);
       if (!currentRecord) throw new Error('COURSE_IMPORT_RECORD_NOT_FOUND');
@@ -96,7 +97,11 @@ export class CourseImportCoordinator {
       if (currentRecord.promotedEntityId) {
         const already = await courseRepository.findById(currentRecord.promotedEntityId);
         if (!already) throw new Error('COURSE_IMPORT_PROMOTION_LINK_CORRUPT');
-        return this.result(currentRecord.id, already, 'TRANSFERRED_UNCHANGED');
+        const receipt = this.readReceipt(currentRecord.processingNotes);
+        if (!receipt || receipt.recordId !== currentRecord.id || receipt.courseId !== already.id ||
+            receipt.publicId !== already.publicId || typeof receipt.transferredAt !== 'string' ||
+            !Number.isFinite(Date.parse(receipt.transferredAt))) throw new Error('COURSE_IMPORT_PROMOTION_LINK_CORRUPT');
+        return { ...this.result(currentRecord.id, already, 'TRANSFERRED_UNCHANGED'), transferredAt: receipt.transferredAt };
       }
 
       const plan = await this.buildPlan(input.recordId, gateway, courseRepository);
@@ -381,6 +386,17 @@ export class CourseImportCoordinator {
       transferredAt: course.updatedAt.toISOString(),
       publicationStatus: course.status === CourseStatus.INCOMPLETE ? 'INCOMPLETE' : 'IMPORTED',
     };
+  }
+
+  private readReceipt(notes: string | null | undefined): Record<string, unknown> | null {
+    const prefix = '[COURSE_IMPORT_TRANSFER_RECEIPT]';
+    const line = notes?.split('\n').filter(item => item.startsWith(prefix)).at(-1);
+    if (!line || line.length > 64 * 1024) return null;
+    try {
+      const parsed: unknown = JSON.parse(line.slice(prefix.length));
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) &&
+        (parsed as Record<string, unknown>).version === 1 ? parsed as Record<string, unknown> : null;
+    } catch { return null; }
   }
 
   private appendReceipt(existing: string | null | undefined, receipt: Record<string, unknown>): string {

@@ -13,12 +13,13 @@ export class ImportParserRegistry {
   }
 
   public resolve(input: ImportStreamParserInput): IImportStreamParser | null {
-    for (const parser of this.parsers) {
-      if (parser.supports(input)) {
-        return parser;
-      }
-    }
-    return null;
+    // An explicit format is authoritative. Conflicting file/MIME metadata
+    // must not silently pick the first registered parser.
+    const hint = input.formatHint?.toLowerCase();
+    const matches = this.parsers.filter(parser => hint
+      ? parser.supports({ formatHint: hint }) : parser.supports(input));
+    if (matches.length > 1) throw new Error('IMPORT_FORMAT_AMBIGUOUS');
+    return matches[0] ?? null;
   }
 
   public list(): IImportStreamParser[] {

@@ -218,6 +218,7 @@ export class CourseImportOperationsRouter {
         return res.status(409).json({ error: err.message, driftAlert: err.alert });
       }
       const message = err instanceof Error ? err.message : 'COURSE_IMPORT_OPERATION_FAILED';
+      if (message === 'IMPORT_REVIEW_LEASE_REQUIRED') return res.status(409).json({ error: message, code: message, retryable: false });
       if (message.includes('NOT_FOUND')) return res.status(404).json({ error: message });
       if (
         message.includes('BLOCKED') ||

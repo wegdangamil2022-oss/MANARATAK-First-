@@ -7,7 +7,7 @@ import { AuthorizationAdminRouter } from '../../../../src/presentation/api/route
 function appFor({ verified = true, actorPermission = true, grantedPermission = 'admin:universities:manage' } = {}) {
   const role = new Role({ id: 'section-editor', name: 'Section editor', description: 'Limited role',
     permissions: [new PermissionReference(grantedPermission)], policyIds: [] });
-  const assignments = { execute: vi.fn(async () => {}), listAssignments: vi.fn(async () => []), getAssignment: vi.fn(async () => null) };
+  const assignments = { execute: vi.fn(async (input: { id: string }) => ({ assignmentId: input.id, replayed: false })), listAssignments: vi.fn(async () => []), getAssignment: vi.fn(async () => null) };
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => { req.authUserId = 'manager-1'; next(); });
@@ -29,23 +29,23 @@ describe('delegated staff role assignment', () => {
     const { app, assignments } = appFor({ verified: false });
     const response = await request(app).post('/admin/authorization/assignments').send(body);
     expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe('VERIFIED_ACTIVE_IDENTITY_REQUIRED');
+    expect(response.body.code).toBe('VERIFIED_ACTIVE_IDENTITY_REQUIRED');
     expect(assignments.execute).not.toHaveBeenCalled();
   });
 
   it('refuses permissions the actor does not have', async () => {
     const { app, assignments } = appFor({ actorPermission: false });
     const response = await request(app).post('/admin/authorization/assignments').send(body);
-    expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe('ROLE_PERMISSION_EXCEEDS_ACTOR');
+    expect(response.status).toBe(403);
+    expect(response.body.code).toBe('ROLE_PERMISSION_EXCEEDS_ACTOR');
     expect(assignments.execute).not.toHaveBeenCalled();
   });
 
   it('never delegates the owner wildcard through staff management', async () => {
     const { app, assignments } = appFor({ grantedPermission: 'admin:*' });
     const response = await request(app).post('/admin/authorization/assignments').send(body);
-    expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe('NON_DELEGABLE_PERMISSION');
+    expect(response.status).toBe(403);
+    expect(response.body.code).toBe('NON_DELEGABLE_PERMISSION');
     expect(assignments.execute).not.toHaveBeenCalled();
   });
 
@@ -54,5 +54,13 @@ describe('delegated staff role assignment', () => {
     const response = await request(app).post('/admin/authorization/assignments').send(body);
     expect(response.status).toBe(201);
     expect(assignments.execute).toHaveBeenCalledOnce();
+  });
+
+  it('returns the persisted assignment ID when a duplicate grant is replayed', async () => {
+    const { app, assignments } = appFor();
+    assignments.execute.mockResolvedValueOnce({ assignmentId: 'existing-assignment', replayed: true });
+    const response = await request(app).post('/admin/authorization/assignments').send(body);
+    expect(response.status).toBe(201);
+    expect(response.body.data).toMatchObject({ assignmentId: 'existing-assignment', replayed: true });
   });
 });

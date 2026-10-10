@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   AssetDeliveryGrant,
   AssetSanitizationMetadata,
@@ -6,6 +6,8 @@ import {
   AssetStorageZone,
   AssetUploadGrant,
   AssetUploadGrantRequest,
+  AssetUploadVerificationRequest,
+  VerifiedAssetUpload,
   IAssetMalwareScannerGateway,
   IAssetSanitizationGateway,
   IAssetStorageGateway,
@@ -86,10 +88,11 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     this.client = new SignedProviderHttpClient(options);
   }
 
-  async generateUploadLocator(zone: AssetStorageZone = AssetStorageZone.QUARANTINE): Promise<AssetStorageLocator> {
+  async generateUploadLocator(zone: AssetStorageZone = AssetStorageZone.QUARANTINE, assetId?: string): Promise<AssetStorageLocator> {
     const payload = { storageZone: zone };
+    const operationIdentity = assetId?.trim() || randomUUID();
     const response = await this.client.json<{ locator: LocatorWire }>('POST', '/v1/assets/locators', payload, {
-      idempotencyKey: operationIdempotencyKey('locator', payload),
+      idempotencyKey: operationIdempotencyKey('locator', { ...payload, assetId: operationIdentity }),
     });
     const locator = parseLocator(response.locator);
     if (locator.storageZone !== zone) throw new Error('ASSET_PROVIDER_LOCATOR_ZONE_MISMATCH');
@@ -107,8 +110,9 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
       mimeType: request.mimeType,
       byteSize: request.byteSize,
     };
+    const operationIdentity = request.assetId?.trim() || randomUUID();
     const response = await this.client.json<UploadGrantWire>('POST', '/v1/assets/upload-grants', payload, {
-      idempotencyKey: operationIdempotencyKey('upload-grant', payload),
+      idempotencyKey: operationIdempotencyKey('upload-grant', { ...payload, assetId: operationIdentity }),
     });
     const locator = parseLocator(response.locator);
     if (locator.storageZone !== zone) throw new Error('ASSET_PROVIDER_LOCATOR_ZONE_MISMATCH');
@@ -120,6 +124,25 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
       headers: sanitizeHeaders(response.headers),
       expiresAt: parseGrantExpiry(response.expiresAt, 900),
     };
+  }
+
+  async verifyUploadedObject(locator: AssetStorageLocator, request: AssetUploadVerificationRequest): Promise<VerifiedAssetUpload> {
+    if (locator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_UPLOAD_VERIFICATION_QUARANTINE_REQUIRED');
+    const result = await this.client.json<VerifiedAssetUpload>('POST', '/v1/assets/verify-upload', {
+      locator: locatorPayload(locator),
+      expectedByteSize: request.expectedByteSize,
+      declaredMimeType: request.declaredMimeType,
+    });
+    if (!result || result.signatureVerified !== true ||
+      !Number.isSafeInteger(result.byteSize) || result.byteSize <= 0 ||
+      typeof result.verifiedMimeType !== 'string' ||
+      !/^[a-f0-9]{64}$/i.test(result.checksumSha256) ||
+      typeof result.verifiedAt !== 'string' || !Number.isFinite(Date.parse(result.verifiedAt)) ||
+      (request.expectedByteSize !== undefined && result.byteSize !== request.expectedByteSize) ||
+      result.verifiedMimeType !== request.declaredMimeType) {
+      throw new Error('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    }
+    return { ...result, checksumSha256: result.checksumSha256.toLowerCase() };
   }
 
   async generateDeliveryGrant(locator: AssetStorageLocator, expiresInSeconds: number): Promise<AssetDeliveryGrant> {
@@ -136,15 +159,23 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     };
   }
 
-  async moveToCleanZone(quarantineLocator: AssetStorageLocator): Promise<AssetStorageLocator> {
+  async moveToCleanZone(quarantineLocator: AssetStorageLocator, expectedSha256?: string): Promise<AssetStorageLocator> {
     if (quarantineLocator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_STORAGE_QUARANTINE_LOCATOR_REQUIRED');
-    const payload = { locator: locatorPayload(quarantineLocator) };
-    const response = await this.client.json<{ locator: LocatorWire }>('POST', '/v1/assets/move-to-clean', payload, {
+    if (!expectedSha256 || !/^[a-f0-9]{64}$/i.test(expectedSha256)) throw new Error('ASSET_CLEAN_PROMOTION_CHECKSUM_REQUIRED');
+    const payload = { locator: locatorPayload(quarantineLocator), expectedSha256: expectedSha256.toLowerCase() };
+    const response = await this.client.json<{ locator: LocatorWire; verifiedSourceSha256?: string }>('POST', '/v1/assets/move-to-clean', payload, {
       idempotencyKey: operationIdempotencyKey('move-to-clean', payload),
     });
+    if (typeof response.verifiedSourceSha256 !== 'string' || response.verifiedSourceSha256.toLowerCase() !== payload.expectedSha256) throw new Error('ASSET_PROVIDER_ATOMIC_PROMOTION_PROOF_REQUIRED');
     const locator = parseLocator(response.locator);
     if (locator.storageZone !== AssetStorageZone.CLEAN) throw new Error('ASSET_PROVIDER_CLEAN_LOCATOR_REQUIRED');
     return locator;
+  }
+
+  async *openRead(locator: AssetStorageLocator, maxBytes: number): AsyncIterable<Uint8Array> {
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > 64 * 1024 * 1024)
+      throw new Error('ASSET_READ_MAX_BYTES_INVALID');
+    yield* this.client.streamBytes('POST', '/v1/assets/read', { locator: locatorPayload(locator), maxBytes }, maxBytes);
   }
 
   async read(locator: AssetStorageLocator, maxBytes: number): Promise<Uint8Array> {
@@ -162,6 +193,32 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
   async restore(locator: AssetStorageLocator): Promise<void> {
     const payload = { locator: locatorPayload(locator) };
     await this.client.json<void>('POST', '/v1/assets/restore', payload, { idempotencyKey: operationIdempotencyKey('restore', payload) });
+  }
+
+  async verifyRestoredObject(locator: AssetStorageLocator, request: {
+    expectedSha256: string; expectedByteSize: number; declaredMimeType: string;
+  }): Promise<void> {
+    if (locator.storageZone !== AssetStorageZone.CLEAN) throw new Error('ASSET_RESTORE_CLEAN_LOCATOR_REQUIRED');
+    if (!/^[a-f0-9]{64}$/i.test(request.expectedSha256) ||
+        !Number.isSafeInteger(request.expectedByteSize) || request.expectedByteSize <= 0 ||
+        !request.declaredMimeType) throw new Error('ASSET_RESTORE_EVIDENCE_INVALID');
+    const payload = {
+      locator: locatorPayload(locator), expectedSha256: request.expectedSha256.toLowerCase(),
+      expectedByteSize: request.expectedByteSize, declaredMimeType: request.declaredMimeType,
+    };
+    const verified = await this.client.json<{
+      verifiedSha256?: string; verifiedByteSize?: number; verifiedMimeType?: string;
+      verifiedAt?: string; signatureVerified?: boolean;
+    }>('POST', '/v1/assets/verify-clean', payload);
+    if (!verified || verified.signatureVerified !== true ||
+        typeof verified.verifiedSha256 !== 'string' ||
+        verified.verifiedSha256.toLowerCase() !== payload.expectedSha256 ||
+        verified.verifiedByteSize !== request.expectedByteSize ||
+        verified.verifiedMimeType !== request.declaredMimeType ||
+        typeof verified.verifiedAt !== 'string' ||
+        !Number.isFinite(Date.parse(verified.verifiedAt))) {
+      throw new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+    }
   }
 
   async delete(locator: AssetStorageLocator): Promise<void> {

@@ -39,6 +39,7 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
             policyIds: [],
           }),
         listRoles: vi.fn().mockResolvedValue([]),
+        getMemberCount: vi.fn().mockResolvedValue(0),
       };
       mockAssignRoleUseCase = {
         execute: vi.fn().mockResolvedValue({ success: true }),
@@ -157,7 +158,7 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
       );
     });
 
-    it('POST /definitions creates audit record', async () => {
+    it('POST /definitions delegates success audit to the atomic Settings owner', async () => {
       const res = await request(app).post('/api/v1/admin/settings/definitions').send({
         id: 'def-1',
         key: 'system.timeout',
@@ -166,13 +167,14 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
       });
 
       expect(res.status).toBe(201);
-      const records = getRecords();
-      expect(records.length).toBe(1);
-      expect(records[0].getAction().getValue()).toBe('CREATE_SETTING_DEFINITION');
-      expect(records[0].getTarget().getTargetType()).toBe('SETTING_DEFINITION');
+      expect(mockManageSettingsUseCase.createDefinition).toHaveBeenCalledWith(
+        { id: 'def-1', key: 'system.timeout', valueType: 'Number', isSecret: false },
+        expect.objectContaining({ actorId: 'admin-1', actorType: 'IDENTITY', source: 'admin-settings-api' }),
+      );
+      expect(getRecords()).toHaveLength(0);
     });
 
-    it('POST /assignments/rollback creates audit record', async () => {
+    it('POST /assignments/rollback delegates success audit to the atomic Settings owner', async () => {
       const res = await request(app).post('/api/v1/admin/settings/assignments/rollback').send({
         assignmentId: 'assign-100',
         previousVersionId: 'v-1',
@@ -180,9 +182,11 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
       });
 
       expect(res.status).toBe(200);
-      const records = getRecords();
-      expect(records.length).toBe(1);
-      expect(records[0].getAction().getValue()).toBe('ROLLBACK_SETTING_VALUE');
+      expect(mockManageSettingsUseCase.rollbackValue).toHaveBeenCalledWith(
+        { assignmentId: 'assign-100', previousVersionId: 'v-1', newVersionId: 'v-2', authorId: 'admin-1' },
+        expect.objectContaining({ actorId: 'admin-1', source: 'admin-settings-api' }),
+      );
+      expect(getRecords()).toHaveLength(0);
     });
   });
 
@@ -351,7 +355,7 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
   });
 
   describe('Non-blocking Audit Behavior & Secret Redaction', () => {
-    it('primary operation succeeds even if auditRepo.save fails', async () => {
+    it('does not duplicate a delegated owner success record through the secondary audit repository', async () => {
       const failingRepo: any = {
         save: vi.fn().mockRejectedValue(new Error('Database Connection Failed')),
       };
@@ -381,8 +385,11 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
       });
 
       expect(res.status).toBe(201);
-      expect(mockManageSettingsUseCase.createDefinition).toHaveBeenCalled();
-      expect(failingRepo.save).toHaveBeenCalled();
+      expect(mockManageSettingsUseCase.createDefinition).toHaveBeenCalledWith(
+        { id: 'def-1', key: 'system.timeout', valueType: 'Number' },
+        expect.objectContaining({ actorId: 'admin-1', source: 'admin-settings-api' }),
+      );
+      expect(failingRepo.save).not.toHaveBeenCalled();
     });
   });
 });

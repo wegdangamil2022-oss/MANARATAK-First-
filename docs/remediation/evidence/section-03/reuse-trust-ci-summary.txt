@@ -1,0 +1,15 @@
+Source b06d65e30a7027ea2a742fd8fc99b1e86a98f736; CI 37934030180 SUCCESS
+EAP all source and disposable PostgreSQL verification	Repository source quality	2026-10-09T13:03:44.5463518Z SOURCE_QUALITY_GATE=PASS
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T13:03:58.5936789Z  Test Files  24 passed | 1 skipped (25)
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T13:03:58.5938552Z       Tests  261 passed | 16 skipped (277)
+EAP all source and disposable PostgreSQL verification	Owner reference integrity and control-plane regressions	2026-10-09T13:03:59.6117361Z # tests 15
+EAP all source and disposable PostgreSQL verification	Owner reference integrity and control-plane regressions	2026-10-09T13:03:59.6117736Z # pass 15
+EAP all source and disposable PostgreSQL verification	Owner reference integrity and control-plane regressions	2026-10-09T13:03:59.6117922Z # fail 0
+EAP all source and disposable PostgreSQL verification	Legacy provider transport security checks	2026-10-09T13:04:00.0164453Z # tests 3
+EAP all source and disposable PostgreSQL verification	Legacy provider transport security checks	2026-10-09T13:04:00.0166176Z # pass 3
+EAP all source and disposable PostgreSQL verification	Legacy provider transport security checks	2026-10-09T13:04:00.0166567Z # fail 0
+EAP all source and disposable PostgreSQL verification	Audit inventory and security regression guards	2026-10-09T13:04:01.5036483Z # tests 10
+EAP all source and disposable PostgreSQL verification	Audit inventory and security regression guards	2026-10-09T13:04:01.5037198Z # pass 10
+EAP all source and disposable PostgreSQL verification	Audit inventory and security regression guards	2026-10-09T13:04:01.5037547Z # fail 0
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T13:04:07.6225598Z  Test Files  1 passed (1)
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T13:04:07.6226792Z       Tests  16 passed (16)

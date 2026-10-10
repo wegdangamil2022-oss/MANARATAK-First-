@@ -31,7 +31,7 @@ test('MNT-AUD-0026 AssetReferencePolicy enforces owner, lifecycle, classificatio
     '@manaratak/domain': { AssetId, AssetLifecycleState, AssetSecurityClassification },
   });
   const records = new Map([
-    ['img', { state: 'ACTIVE', classification: 'PUBLIC', owner: { ownerId: 'student-1', ownerType: 'STUDENT' }, metadata: { mimeType: 'image/png' } }],
+    ['img', { assertCanDeliver() {}, state: 'ACTIVE', classification: 'PUBLIC', owner: { ownerId: 'student-1', ownerType: 'STUDENT' }, metadata: { mimeType: 'image/png' } }],
     ['pdf', { state: 'ACTIVE', classification: 'PUBLIC', owner: { ownerId: 'student-1', ownerType: 'STUDENT' }, metadata: { mimeType: 'application/pdf' } }],
   ]);
   const policy = new AssetReferencePolicy({ findById: async (id) => records.get(id.value) ?? null });
@@ -49,7 +49,10 @@ test('MNT-AUD-0026 Admin Asset Center exposes governed query/detail/picker/previ
   assert.match(router, /router\.get\('\/:assetId'/);
   assert.match(router, /delivery-grant/);
   assert.match(router, /selection-audit/);
-  assert.match(picker, /lifecycleState: 'ACTIVE'/);
+  assert.match(picker, /const BASE = '\/admin\/asset-reuse'/);
+  const reuse = read('apps/api/src/presentation/api/router/AssetReuseRouter.ts');
+  assert.match(reuse, /queryAdmin\(\{ \.\.\.query, reuseOnly: true \}\)/);
+  assert.match(repo, /reuseOnly[\s\S]*lifecycleState: AssetLifecycleState\.ACTIVE/);
   assert.match(picker, /mimeTypePrefix/);
   assert.match(picker, /delivery-grant/);
   assert.match(picker, /selection-audit/);
@@ -75,7 +78,7 @@ test('MNT-AUD-0027 canonical Admin can create a native course and hand off to au
   const router = read('apps/api/src/presentation/api/router/CourseAdminRouter.ts');
   const app = read('apps/api/src/app.ts');
   assert.match(ui, /Create native course/);
-  assert.match(ui, /request<\{ id: string \}>\('\/admin\/courses', \{ method: 'POST'/);
+  assert.match(ui, /request<\{ id: string \}>\('\/admin\/courses', \{\s*method: 'POST'/);
   assert.match(ui, /navigate\(`\/courses\/\$\{created\.id\}`\)/);
   for (const field of ['titleAr', 'accessType', 'learningLanguage', 'category', 'difficultyLevel']) assert.match(ui, new RegExp(field));
   assert.match(router, /nativeCreateBodySchema/);

@@ -1,0 +1,122 @@
+
+ RUN  v4.1.11 /workspace/manaratak-audit-main
+
+ ❯ apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts (9 tests | 1 failed) 173ms
+     × POST /assignments/rollback should validate and call use case 17ms
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts (6 tests | 4 failed) 27ms
+     × maps setting assignment round trip including versions 12ms
+     × rejects moving the current pointer directly to an existing historical version 7ms
+     × rejects assignment identity collisions across key/scope boundaries 2ms
+     × rejects reusing a persisted version id for another assignment 2ms
+ ❯ packages/application/tests/settings/ManageSettingsUseCase.spec.ts (5 tests | 1 failed) 38ms
+     × supports version update and rollback 23ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/application/tests/settings/ManageSettingsUseCase.spec.ts > ManageSettingsUseCase > supports version update and rollback
+Error: SETTINGS_CHANGE_REASON_REQUIRED
+ ❯ ManageSettingsUseCase.changeReason packages/application/src/settings/use-cases/ManageSettingsUseCase.ts:314:13
+    312|     if (!normalized && !required) return undefined;
+    313|     if (!normalized || normalized.length < 3 || normalized.length > 10…
+    314|       throw new Error('SETTINGS_CHANGE_REASON_REQUIRED');
+       |             ^
+    315|     return normalized;
+    316|   }
+ ❯ ManageSettingsUseCase.rollbackValue packages/application/src/settings/use-cases/ManageSettingsUseCase.ts:301:31
+ ❯ packages/application/tests/settings/ManageSettingsUseCase.spec.ts:135:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts > PrismaSettingAssignmentRepository > maps setting assignment round trip including versions
+TypeError: Cannot read properties of undefined (reading 'findUnique')
+ ❯ persist packages/infrastructure/src/settings/PrismaSettingAssignmentRepository.ts:175:55
+    173|       // and a value write cannot pass independent prechecks and race …
+    174|       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended…
+    175|       const record = await tx.settingDefinitionRecord.findUnique({ whe…
+       |                                                       ^
+    176|       if (!record || record.isDeprecated || record.isSecret) throw new…
+    177|       const definition = new SettingDefinition({ id: record.id, key: n…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts > PrismaSettingAssignmentRepository > rejects moving the current pointer directly to an existing historical version
+AssertionError: expected [Function] to throw error matching /rollback must create a new immutable…/i but got 'Cannot read properties of undefined (…'
+
+- Expected:
+/rollback must create a new immutable version/i
+
++ Received:
+"Cannot read properties of undefined (reading 'findUnique')"
+
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts:127:45
+    125|     }));
+    126|
+    127|     await expect(repository.save(assignment)).rejects.toThrow(/rollbac…
+       |                                             ^
+    128|     expect(mockPrisma.settingAssignmentRecord.upsert).not.toHaveBeenCa…
+    129|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts > PrismaSettingAssignmentRepository > rejects assignment identity collisions across key/scope boundaries
+AssertionError: expected [Function] to throw error matching /already belongs to another key or sc…/i but got 'Cannot read properties of undefined (…'
+
+- Expected:
+/already belongs to another key or scope/i
+
++ Received:
+"Cannot read properties of undefined (reading 'findUnique')"
+
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts:149:45
+    147|     });
+    148|
+    149|     await expect(repository.save(assignment)).rejects.toThrow(/already…
+       |                                             ^
+    150|     expect(mockPrisma.settingVersionRecord.findUnique).not.toHaveBeenC…
+    151|     expect(mockPrisma.settingAssignmentRecord.upsert).not.toHaveBeenCa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts > PrismaSettingAssignmentRepository > rejects reusing a persisted version id for another assignment
+AssertionError: expected [Function] to throw error matching /cannot be mutated or reassigned/i but got 'Cannot read properties of undefined (…'
+
+- Expected:
+/cannot be mutated or reassigned/i
+
++ Received:
+"Cannot read properties of undefined (reading 'findUnique')"
+
+ ❯ packages/infrastructure/tests/settings/PrismaSettingAssignmentRepository.spec.ts:169:45
+    167|     });
+    168|
+    169|     await expect(repository.save(assignment)).rejects.toThrow(/cannot …
+       |                                             ^
+    170|     expect(mockPrisma.settingVersionRecord.create).not.toHaveBeenCalle…
+    171|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts > SettingsAdminRouter > POST /assignments/rollback should validate and call use case
+AssertionError: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts:102:24
+    100|       .send(payload);
+    101|
+    102|     expect(res.status).toBe(200);
+       |                        ^
+    103|     expect(mockManageSettingsUseCase.rollbackValue).toHaveBeenCalledWi…
+    104|       expect.objectContaining({ ...payload, authorId: 'admin-settings-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  3 failed | 8 passed (11)
+      Tests  6 failed | 61 passed (67)
+   Start at  15:34:46
+   Duration  14.58s (transform 5.41s, setup 0ms, import 11.55s, tests 568ms, environment 1ms)

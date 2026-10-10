@@ -1,3 +1,4 @@
+import { lockImportOwnerCommand } from '../import-foundation/ImportReviewLeaseGuard';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaImportPromotionLinkWriter } from '../import-foundation/PrismaImportPromotionLinkWriter';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
@@ -24,6 +25,7 @@ export class PrismaCourseImportTransferGateway implements CourseImportTransferGa
   public constructor(
     private readonly prisma: PrismaClient,
     private readonly importPromotionWriter = new PrismaImportPromotionLinkWriter(prisma),
+    private readonly transactionBound = false,
   ) {}
 
   public withTransaction(context: AtomicPersistenceContext): CourseImportTransferGateway {
@@ -35,7 +37,14 @@ export class PrismaCourseImportTransferGateway implements CourseImportTransferGa
     return new PrismaCourseImportTransferGateway(
       transactionPrisma,
       new PrismaImportPromotionLinkWriter(transactionPrisma),
+      true,
     );
+  }
+
+  public async assertReviewLease(recordId: string, actorId: string): Promise<void> {
+    if (!this.transactionBound) throw new Error('COURSE_IMPORT_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    await lockImportOwnerCommand(this.prisma, recordId, actorId);
+    await this.prisma.$queryRaw`SELECT "id" FROM "CourseImportAnalysis" WHERE "importRecordId" = ${recordId} FOR UPDATE`;
   }
 
   public async getRecordById(recordId: string): Promise<CourseImportTransferStoredRecord | null> {

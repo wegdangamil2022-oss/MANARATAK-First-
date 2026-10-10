@@ -132,6 +132,58 @@ describe('ProcessImportJobUseCase', () => {
     expect(finalStatus?.lastError).toBe('Failed to parse CSV records');
   });
 
+
+  it('does not claim success when the queue rejects the legacy completion CAS', async () => {
+    const batchId = 'batch-stale-completion';
+    await queueGateway.enqueueImportJob({
+      batchId, targetDomain: ImportTargetDomain.UNIVERSITIES, sourceSystem: 'ADMIN_CONSOLE',
+    });
+    vi.spyOn(importAdminUseCases, 'importData').mockResolvedValueOnce({ imported: 1 } as any);
+    vi.spyOn(queueGateway, 'markJobCompleted').mockResolvedValueOnce(false);
+    const failed = vi.spyOn(queueGateway, 'markJobFailed');
+    const dlq = vi.spyOn(queueGateway, 'moveToDeadLetter');
+    await expect(processUseCase.execute({ batchId, dataText: 'title,code\nExample,E1' }))
+      .rejects.toThrow('IMPORT_LEGACY_QUEUE_STATE_LOST');
+    expect(failed).not.toHaveBeenCalled();
+    expect(dlq).not.toHaveBeenCalled();
+  });
+
+  it('refuses DLQ evidence if a concurrent state change defeated the legacy failure CAS', async () => {
+    const batchId = 'batch-stale-failure';
+    await queueGateway.enqueueImportJob({
+      batchId, targetDomain: ImportTargetDomain.UNIVERSITIES, sourceSystem: 'ADMIN_CONSOLE',
+    });
+    vi.spyOn(importAdminUseCases, 'importData').mockRejectedValueOnce(new Error('Import failed'));
+    vi.spyOn(queueGateway, 'markJobFailed').mockResolvedValueOnce(false);
+    const dlq = vi.spyOn(queueGateway, 'moveToDeadLetter');
+    await expect(processUseCase.execute({ batchId, dataText: 'bad' }))
+      .rejects.toThrow('IMPORT_LEGACY_QUEUE_STATE_LOST');
+    expect(dlq).not.toHaveBeenCalled();
+    expect(queueGateway.getDeadLetters(batchId)).toHaveLength(0);
+  });
+
+
+  it('stages ordinary CSV without fabricating a reserved source-row marker', async () => {
+    const result = await importAdminUseCases.importData({
+      dataText: 'id,name\nU1,University One',
+      sourceSystem: 'ADMIN_CONSOLE',
+      dataType: 'UNIVERSITIES',
+    });
+    expect(result.summary).toMatchObject({ totalRecords: 1, stagedRecords: 1, failedRecords: 0 });
+    const stored = mockImportRepo.createRecord.mock.calls[0][0];
+    expect(stored.rawPayload._sourceRowNumber).toBe(1);
+    expect(stored.rawPayload.id).toBe('U1');
+  });
+
+  it('still rejects a CSV header that attempts to inject an importer-owned marker', async () => {
+    await expect(importAdminUseCases.importData({
+      dataText: '_sourceRowNumber,name\n900,Injected',
+      sourceSystem: 'ADMIN_CONSOLE',
+      dataType: 'UNIVERSITIES',
+    })).rejects.toThrow('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
+    expect(mockImportRepo.createBatch).not.toHaveBeenCalled();
+  });
+
   it('does not alter synchronous importData execution', async () => {
     const directResult = await importAdminUseCases.importData({
       dataText: 'title,code\nDirect Uni,DU1',

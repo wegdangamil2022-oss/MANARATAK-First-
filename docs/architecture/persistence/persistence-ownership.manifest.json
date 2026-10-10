@@ -97,9 +97,8 @@
     "CourseTaxonomyResolution": "learning",
     "CourseVersion": "learning",
     "CredentialRecord": "identity",
-    "EmailVerificationTokenRecord": "identity",
-    "PasswordResetTokenRecord": "identity",
     "DegreeLevel": "reference",
+    "EmailVerificationTokenRecord": "identity",
     "EnterpriseEventRecord": "events",
     "ExternalCourseProvider": "learning",
     "ExternalCourseProviderAlias": "learning",
@@ -124,7 +123,12 @@
     "FinancialTransactionRecord": "finance",
     "IdentityRecord": "identity",
     "ImportBatch": "import",
+    "ImportMappingProfile": "import",
+    "ImportRateBudget": "import",
     "ImportRecord": "import",
+    "ImportReviewAssignment": "import",
+    "ImportScreeningReceipt": "import",
+    "ImportSourceObservation": "import",
     "ImportSourceRegistryEntry": "import",
     "InternationalTest": "tests",
     "InternationalTestAcademicTaxonomyRelationship": "tests",
@@ -165,6 +169,7 @@
     "NotificationDeliveryReceipt": "notifications",
     "NotificationIntentRecord": "notifications",
     "NotificationTemplateRecord": "notifications",
+    "PasswordResetTokenRecord": "identity",
     "PolicyRecord": "identity",
     "ReferenceAliasRecord": "reference",
     "ReferenceCity": "reference",
@@ -216,6 +221,8 @@
     "Settings": "settings",
     "SharedComponentControlRecord": "foundation_control_plane",
     "SharedComponentRenderingProjection": "foundation_control_plane",
+    "StudentApplicationChecklistItem": "student",
+    "StudentApplicationTracker": "student",
     "StudentCertificateReadProjection": "student",
     "StudentLearningProjection": "student",
     "StudentNotificationProjection": "student",
@@ -253,9 +260,7 @@
     "UniversityTuitionProfile": "universities",
     "UserRecord": "identity",
     "WorkflowControlRecord": "foundation_control_plane",
-    "WorkflowExecutionProjection": "foundation_control_plane",
-    "StudentApplicationTracker": "student",
-    "StudentApplicationChecklistItem": "student"
+    "WorkflowExecutionProjection": "foundation_control_plane"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -318,6 +323,9 @@
       "reference",
       "tests",
       "universities"
+    ],
+    "packages/infrastructure/src/scholarships/PrismaScholarshipImportDecisionPorts.ts": [
+      "import"
     ]
   },
   "historicalMigrationBaseline": [

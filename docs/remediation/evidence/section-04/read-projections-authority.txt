@@ -1,0 +1,11 @@
+✔ active composition keeps one Settings value authority and no orphan Configuration Foundation wiring (2.829986ms)
+✔ diagnostic settings reads retain existing control-plane permission protection (1.784599ms)
+✔ summary and lazy history remain under the existing admin Settings permission (0.446725ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 164.908587

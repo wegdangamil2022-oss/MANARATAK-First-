@@ -26,6 +26,9 @@ export type { ListIdentitiesInput, ListIdentitiesOutput } from './identity/ListI
 // Authorization Application layer exports
 export * from './authorization/dtos/AuthorizationDtos';
 export * from './authorization/use-cases/ManageRolesUseCase';
+export * from './authorization/use-cases/ManagePoliciesUseCase';
+export * from './audit/use-cases/AuditRetentionPolicyResolver';
+export * from './audit/use-cases/AuditRecordFactory';
 export * from './authorization/use-cases/AssignRoleUseCase';
 export * from './authorization/use-cases/EvaluateAccessUseCase';
 export * from './authorization/use-cases/ManageEmergencyAccessUseCase';
@@ -161,9 +164,11 @@ export * from './ai-platform';
 export * from './import-foundation/parsers/IImportStreamParser';
 export * from './import-foundation/parsers/ImportParserRegistry';
 export * from './import-foundation/parsers/NdjsonImportStreamParser';
+export * from './import-foundation/parsers/JsonImportStreamParser';
 export * from './import-foundation/parsers/CsvImportStreamParser';
 export * from './import-foundation/contracts/ISourceRegistryGateway';
 export * from './import-foundation/contracts/ISourceConnector';
+export * from './import-foundation/contracts/SourceHttpError';
 export * from './import-foundation/contracts/IImportRawSnapshotStore';
 export * from './import-foundation/services/SourceConnectorRegistry';
 export * from './import-foundation/use-cases/AcquireImportSourceUseCase';
@@ -203,3 +208,12 @@ export * from './background-jobs/handlers/NotificationDeliveryBackgroundJobHandl
 export * from './identity/use-cases/ChangePasswordUseCase';
 export * from './identity/use-cases/DisablePasswordCredentialUseCase';
 export * from './import-foundation/services/CanonicalSourceReview';
+
+export * from './background-jobs/handlers/AssetActivationRecoveryBackgroundJobHandler';
+
+export * from './import-foundation/contracts/IVerifiedImportArtifactGateway';
+export * from './import-foundation/use-cases/ImportArtifactUseCase';
+export * from './import-foundation/use-cases/ImportSourceControlUseCases';
+export * from './import-foundation/contracts/IImportGovernanceGateway';
+export * from './import-foundation/use-cases/ImportGovernanceUseCases';
+export * from './import-foundation/contracts/ISourceAccessAuthority';

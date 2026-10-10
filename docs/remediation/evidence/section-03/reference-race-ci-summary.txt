@@ -1,0 +1,20 @@
+Source 0345ddc3ffc5ae0737c40dda77db61779c20a363; CI 37936012373 SUCCESS
+EAP all source and disposable PostgreSQL verification	Repository source quality	2026-10-09T13:20:46.1196404Z SOURCE_QUALITY_GATE=PASS
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T13:20:51.5358650Z  ↓ packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts (14 tests | 14 skipped)
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T13:20:57.5607785Z  Test Files  26 passed | 2 skipped (28)
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T13:20:57.5608827Z       Tests  276 passed | 30 skipped (306)
+EAP all source and disposable PostgreSQL verification	Owner reference integrity and control-plane regressions	2026-10-09T13:20:58.2340756Z # tests 15
+EAP all source and disposable PostgreSQL verification	Owner reference integrity and control-plane regressions	2026-10-09T13:20:58.2341222Z # pass 15
+EAP all source and disposable PostgreSQL verification	Owner reference integrity and control-plane regressions	2026-10-09T13:20:58.2341442Z # fail 0
+EAP all source and disposable PostgreSQL verification	Legacy provider transport security checks	2026-10-09T13:20:58.5401954Z # tests 3
+EAP all source and disposable PostgreSQL verification	Legacy provider transport security checks	2026-10-09T13:20:58.5403134Z # pass 3
+EAP all source and disposable PostgreSQL verification	Legacy provider transport security checks	2026-10-09T13:20:58.5426328Z # fail 0
+EAP all source and disposable PostgreSQL verification	Audit inventory and security regression guards	2026-10-09T13:20:59.6527075Z # tests 10
+EAP all source and disposable PostgreSQL verification	Audit inventory and security regression guards	2026-10-09T13:20:59.6527417Z # pass 10
+EAP all source and disposable PostgreSQL verification	Audit inventory and security regression guards	2026-10-09T13:20:59.6527584Z # fail 0
+EAP all source and disposable PostgreSQL verification	Install reference guards on disposable PostgreSQL only	2026-10-09T13:21:01.9531058Z EAP_REFERENCE_GUARDS_INSTALLED_ON_DISPOSABLE_CI_DATABASE
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	﻿2026-10-09T13:21:01.9679009Z ##[group]Run npx --no-install vitest run --config vitest.config.ts packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T13:21:01.9680382Z npx --no-install vitest run --config vitest.config.ts packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T13:21:04.7588394Z  ✓ packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts (14 tests) 445ms
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T13:21:04.7612877Z  Test Files  2 passed (2)
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T13:21:04.7613622Z       Tests  30 passed (30)

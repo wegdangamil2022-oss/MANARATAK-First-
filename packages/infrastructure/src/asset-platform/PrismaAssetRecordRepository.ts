@@ -1,3 +1,5 @@
+import { findUsedAssetIds } from './AssetUsageBatchQuery';
+import { randomUUID } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
 import {
   IAssetRecordRepository,
@@ -13,7 +15,10 @@ import {
   AssetChecksum,
   AssetSanitizationMetadata,
   AssetStorageZone,
-  AssetRetentionCategory
+  AssetRetentionCategory,
+  AssetActivationOperation, AssetRestoreOperation, AssetArchiveOperation,
+  AssetRetentionSnapshot,
+  AssetVersionChain, AssetVersion
 } from '@manaratak/domain';
 
 interface AssetRecordRow {
@@ -33,9 +38,14 @@ interface AssetRecordRow {
   versionChain: unknown | null;
   sanitizationMetadata: unknown | null;
   malwareScanStatus: unknown | null;
+  updatedAt: Date;
 }
 
 export class PrismaAssetRecordRepository implements IAssetRecordRepository {
+  /** Repository-local revision captures enforce conditional writes without a schema migration. */
+  private readonly loadedSnapshots = new WeakMap<AssetRecord, { updatedAt: Date; lifecycleState: string }>();
+  private readonly ownedArchiveOperations = new WeakMap<AssetRecord, string>();
+  private readonly ownedRestoreLeases = new WeakMap<AssetRecord, string>();
   constructor(private readonly prisma: PrismaClient) {}
 
   async save(asset: AssetRecord): Promise<void> {
@@ -60,30 +70,265 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
         width: asset.metadata.width,
         height: asset.metadata.height,
         duration: asset.metadata.duration,
+        lifecycleRetention: asset.retentionBeforeLifecycle,
         extraMetadata: asset.metadata.extraMetadata
       } as any,
-      versionChain: asset.versionChain ? (asset.versionChain as any) : null,
+      versionChain: asset.versionChain ? { versions: asset.versionChain.allVersions.map(version => ({
+        versionNumber: version.versionNumber, createdAt: version.createdAt.toISOString(),
+        storageLocator: { storageZone: version.storageLocator.storageZone,
+          bucketName: version.storageLocator.bucketName, pathKey: version.storageLocator.pathKey },
+        ...(version.checksum ? { checksum: { algorithm: version.checksum.algorithm, hash: version.checksum.hash } } : {}),
+        ...(version.changelog ? { changelog: version.changelog } : {}),
+      })) } : null,
       sanitizationMetadata: asset.sanitization ? {
         exifStripped: asset.sanitization.exifStripped,
         sanitizedAt: asset.sanitization.sanitizedAt?.toISOString(),
         sanitizerNotes: asset.sanitization.sanitizerNotes
       } as any : null,
-      malwareScanStatus: null as any,
+      malwareScanStatus: asset.malwareScan || asset.uploadVerification || asset.activationOperation || asset.restoreOperation || asset.archiveOperation
+        ? { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null, activationOperation: asset.activationOperation ?? null, restoreOperation: asset.restoreOperation ?? null, archiveOperation: asset.archiveOperation ?? null } as any
+        : null as any,
     };
 
-    const prismaClient = this.prisma as unknown as {
-      assetRecord: {
-        upsert: (args: any) => Promise<any>,
-        findUnique: (args: any) => Promise<any>,
-        findMany: (args: any) => Promise<any>
+    const delegate = (this.prisma as any).assetRecord;
+    const captured = this.loadedSnapshots.get(asset);
+    if (!captured) {
+      // New entities must never overwrite an existing record via upsert.
+      const created = await delegate.create({ data });
+      if (created?.updatedAt instanceof Date) {
+        this.loadedSnapshots.set(asset, { updatedAt: created.updatedAt, lifecycleState: asset.state });
       }
-    };
+      return;
+    }
 
-    await prismaClient.assetRecord.upsert({
-      where: { id: asset.id.value },
-      update: data,
-      create: data
+    // Conditional state+timestamp CAS rejects stale lifecycle commands without altering schema.
+    const mutation: Record<string, unknown> = { ...data };
+    delete mutation.id;
+    delete mutation.reference;
+    // Prisma @updatedAt is millisecond-resolution. Updating an unchanged lifecycle
+    // state in the same millisecond must still advance the compare-and-swap token.
+    // An explicit monotonic timestamp fences concurrent finalization/evidence writes.
+    const nextRevision = new Date(Math.max(Date.now(), captured.updatedAt.getTime() + 1));
+    if (!Number.isFinite(nextRevision.getTime())) {
+      throw new Error('ASSET_RECORD_REVISION_OVERFLOW');
+    }
+    mutation.updatedAt = nextRevision;
+    if (captured.lifecycleState !== asset.state) {
+      // Capture only observed transitions; do not fabricate timestamps for historical rows.
+      if (asset.state === AssetLifecycleState.ARCHIVED) mutation.archivedAt = nextRevision;
+      if (asset.state === AssetLifecycleState.DELETED) mutation.deletedAt = nextRevision;
+      if (asset.state === AssetLifecycleState.PURGED) mutation.purgedAt = nextRevision;
+    }
+    const restoreToken = this.ownedRestoreLeases.get(asset);
+    if (captured.lifecycleState === AssetLifecycleState.DELETED &&
+        asset.state === AssetLifecycleState.ACTIVE && !restoreToken) {
+      throw new Error('ASSET_RESTORE_LEASE_REQUIRED');
+    }
+    if (restoreToken) {
+      if (asset.restoreOperation?.phase !== 'RESTORING') throw new Error('ASSET_RESTORE_PROVIDER_START_REQUIRED');
+      (data.malwareScanStatus as any).restoreOperation = { ...asset.restoreOperation, phase: 'COMPLETED', updatedAt: nextRevision.toISOString() };
+      mutation.malwareScanStatus = data.malwareScanStatus;
+    }
+    let updated;
+    try {
+      updated = await delegate.updateMany({
+        where: {
+          id: asset.id.value,
+          updatedAt: captured.updatedAt,
+          lifecycleState: captured.lifecycleState,
+          ...(restoreToken ? {
+            retentionClaimToken: restoreToken,
+            retentionClaimUntil: { gt: new Date() },
+          } : {}),
+        },
+        data: {
+          ...mutation,
+          ...(restoreToken ? { retentionClaimToken: null, retentionClaimUntil: null } : {}),
+        },
+      });
+    } catch (error) {
+      // Never return a connector/query dump for the authoritative race rejection.
+      const code = error instanceof Error ? error.message.match(/\b(ASSET_REFERENCE_IN_USE|ASSET_REFERENCE_ISOLATION_UNSUPPORTED)\b/)?.[1] : undefined;
+      if (code) throw new Error(code);
+      throw error;
+    }
+    if (!updated || updated.count !== 1) {
+      throw new Error('ASSET_RECORD_CONCURRENT_MODIFICATION');
+    }
+    if (restoreToken) {
+      asset.recordRestoreOperation((data.malwareScanStatus as any).restoreOperation);
+      this.ownedRestoreLeases.delete(asset);
+    }
+    if (captured.lifecycleState === AssetLifecycleState.ACTIVE && asset.state === AssetLifecycleState.ARCHIVED && asset.archiveOperation?.phase === 'RUNNING') {
+      this.ownedArchiveOperations.set(asset, asset.archiveOperation.operationId);
+      this.loadedSnapshots.set(asset, { updatedAt: nextRevision, lifecycleState: AssetLifecycleState.ARCHIVED });
+    }
+    // Snapshot deliberately stays stale: another mutation must rehydrate the aggregate.
+  }
+
+  private async changeArchivePhase(asset: AssetRecord, phase: 'COMPLETED' | 'RECOVERY_REQUIRED'): Promise<void> {
+    const token = this.ownedArchiveOperations.get(asset);
+    const captured = this.loadedSnapshots.get(asset);
+    const operation = asset.archiveOperation;
+    if (!token || !captured || !operation || token !== operation.operationId || operation.phase !== 'RUNNING') throw new Error('ASSET_ARCHIVE_RECOVERY_PENDING');
+    const revision = new Date(Math.max(Date.now(), captured.updatedAt.getTime() + 1));
+    const nextOperation = { ...operation, phase, updatedAt: revision.toISOString() };
+    const changed = await this.prisma.assetRecord.updateMany({
+      where: { id: asset.id.value, lifecycleState: AssetLifecycleState.ARCHIVED, updatedAt: captured.updatedAt,
+        malwareScanStatus: { path: ['archiveOperation', 'operationId'], equals: token } },
+      data: { updatedAt: revision, malwareScanStatus: { ...(asset.malwareScan ?? {}),
+        uploadVerification: asset.uploadVerification ?? null, activationOperation: asset.activationOperation ?? null,
+        restoreOperation: asset.restoreOperation ?? null, archiveOperation: nextOperation } as any },
     });
+    if (changed.count !== 1) throw new Error('ASSET_ARCHIVE_RECOVERY_PENDING');
+    asset.recordArchiveOperation(nextOperation);
+    this.ownedArchiveOperations.delete(asset);
+    this.loadedSnapshots.set(asset, { updatedAt: revision, lifecycleState: AssetLifecycleState.ARCHIVED });
+  }
+  async completeArchiveOperation(asset: AssetRecord): Promise<void> { await this.changeArchivePhase(asset, 'COMPLETED'); }
+  async markArchiveRecoveryRequired(asset: AssetRecord): Promise<void> { await this.changeArchivePhase(asset, 'RECOVERY_REQUIRED'); }
+
+  async acquireRestoreLease(asset: AssetRecord): Promise<void> {
+    const captured = this.loadedSnapshots.get(asset);
+    if (!captured || captured.lifecycleState !== AssetLifecycleState.DELETED ||
+        asset.state !== AssetLifecycleState.ACTIVE || this.ownedRestoreLeases.has(asset)) {
+      throw new Error('ASSET_RESTORE_LEASE_INVALID_STATE');
+    }
+    const now = new Date();
+    const token = randomUUID();
+    const nextRevision = new Date(Math.max(now.getTime(), captured.updatedAt.getTime() + 1));
+    const leaseUntil = new Date(now.getTime() + 10 * 60_000);
+    if (asset.restoreOperation && !['COMPLETED', 'CANCELLED'].includes(asset.restoreOperation.phase)) throw new Error('ASSET_RESTORE_RECOVERY_PENDING');
+    const operation: AssetRestoreOperation = { version: 1, operationId: token, phase: 'PREPARED',
+      sourceLocator: asset.locator.value, expectedSha256: asset.checksum!.hash,
+      expectedByteSize: asset.metadata.byteSize!, expectedMimeType: asset.metadata.mimeType,
+      preparedAt: now.toISOString(), updatedAt: now.toISOString() };
+    asset.recordRestoreOperation(operation);
+    const acquired = await this.prisma.assetRecord.updateMany({
+      where: {
+        id: asset.id.value,
+        lifecycleState: AssetLifecycleState.DELETED,
+        updatedAt: captured.updatedAt,
+        OR: [
+          { retentionClaimUntil: null },
+          { retentionClaimUntil: { lte: now } },
+        ],
+      },
+      data: {
+        retentionClaimToken: token,
+        retentionClaimUntil: leaseUntil,
+        malwareScanStatus: { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null,
+          activationOperation: asset.activationOperation ?? null, restoreOperation: operation, archiveOperation: asset.archiveOperation ?? null } as any,
+        updatedAt: nextRevision,
+      },
+    });
+    if (acquired.count !== 1) throw new Error('ASSET_RESTORE_LEASE_CONFLICT');
+    this.loadedSnapshots.set(asset, {
+      updatedAt: nextRevision, lifecycleState: AssetLifecycleState.DELETED,
+    });
+    this.ownedRestoreLeases.set(asset, token);
+  }
+
+  async assertRestoreLeaseOwned(asset: AssetRecord): Promise<void> {
+    const token = this.ownedRestoreLeases.get(asset);
+    if (!token) throw new Error('ASSET_RESTORE_LEASE_LOST');
+    const row = await this.prisma.assetRecord.findUnique({
+      where: { id: asset.id.value },
+      select: { lifecycleState: true, retentionClaimToken: true, retentionClaimUntil: true },
+    });
+    if (!row || row.lifecycleState !== AssetLifecycleState.DELETED || row.retentionClaimToken !== token ||
+        !row.retentionClaimUntil || !Number.isFinite(row.retentionClaimUntil.getTime()) ||
+        row.retentionClaimUntil.getTime() <= Date.now()) throw new Error('ASSET_RESTORE_LEASE_LOST');
+  }
+
+  private async changeRestorePhase(asset: AssetRecord, phase: AssetRestoreOperation['phase']): Promise<void> {
+    const token = this.ownedRestoreLeases.get(asset);
+    const captured = this.loadedSnapshots.get(asset);
+    const operation = asset.restoreOperation;
+    const valid = phase === 'CANCELLED' || phase === 'RESTORING'
+      ? operation?.phase === 'PREPARED' || (phase === 'RESTORING' && operation?.phase === 'RESTORING')
+      : phase === 'RECOVERY_REQUIRED' && operation?.phase === 'RESTORING';
+    if (!token || !captured || !operation || operation.operationId !== token || !valid) throw new Error('ASSET_RESTORE_LEASE_LOST');
+    const now = new Date();
+    const revision = new Date(Math.max(now.getTime(), captured.updatedAt.getTime() + 1));
+    const updatedOperation = { ...operation, phase, updatedAt: revision.toISOString() };
+    const changed = await this.prisma.assetRecord.updateMany({
+      where: { id: asset.id.value, lifecycleState: AssetLifecycleState.DELETED,
+        retentionClaimToken: token, updatedAt: captured.updatedAt,
+        ...(operation.phase === 'PREPARED' && phase === 'RESTORING' ? { retentionClaimUntil: { gt: now } } : {}),
+        malwareScanStatus: { path: ['restoreOperation', 'phase'], equals: operation.phase } },
+      data: { updatedAt: revision,
+        ...(phase === 'CANCELLED' ? { retentionClaimToken: null, retentionClaimUntil: null }
+          : phase === 'RESTORING' ? { retentionClaimUntil: new Date(now.getTime() + 10 * 60_000) } : {}),
+        malwareScanStatus: { ...(asset.malwareScan ?? {}), uploadVerification: asset.uploadVerification ?? null,
+          activationOperation: asset.activationOperation ?? null, restoreOperation: updatedOperation, archiveOperation: asset.archiveOperation ?? null } as any },
+    });
+    if (changed.count !== 1) throw new Error('ASSET_RESTORE_LEASE_LOST');
+    asset.recordRestoreOperation(updatedOperation);
+    this.loadedSnapshots.set(asset, { updatedAt: revision, lifecycleState: AssetLifecycleState.DELETED });
+    if (phase === 'CANCELLED') this.ownedRestoreLeases.delete(asset);
+  }
+
+  async markRestoreProviderStarted(asset: AssetRecord): Promise<void> { await this.changeRestorePhase(asset, 'RESTORING'); }
+  async renewRestoreLease(asset: AssetRecord): Promise<void> {
+    if (asset.restoreOperation?.phase !== 'RESTORING') throw new Error('ASSET_RESTORE_LEASE_LOST');
+    await this.changeRestorePhase(asset, 'RESTORING');
+  }
+  async markRestoreRecoveryRequired(asset: AssetRecord): Promise<void> { await this.changeRestorePhase(asset, 'RECOVERY_REQUIRED'); }
+  async releaseRestoreLease(asset: AssetRecord): Promise<void> {
+    if (!this.ownedRestoreLeases.has(asset)) return;
+    if (asset.restoreOperation?.phase !== 'PREPARED') throw new Error('ASSET_RESTORE_RECOVERY_PENDING');
+    await this.changeRestorePhase(asset, 'CANCELLED');
+  }
+
+  async assertPurgeAllowed(id: AssetId, at: Date, retentionClaimToken?: string, retryPurgedCleanup = false): Promise<void> {
+    if (!Number.isFinite(at.getTime())) throw new Error('ASSET_PURGE_CLOCK_INVALID');
+    const row = await this.prisma.assetRecord.findUnique({
+      where: { id: id.value },
+      select: {
+        lifecycleState: true,
+        malwareScanStatus: true,
+        retentionExpiresAt: true,
+        legalHoldUntil: true,
+        retentionClaimUntil: true,
+        retentionClaimToken: true,
+      },
+    });
+    if (!row) throw new Error('ASSET_PURGE_NOT_FOUND');
+    const archive = (row.malwareScanStatus as any)?.archiveOperation;
+    if (archive != null && archive.phase !== 'COMPLETED') throw new Error('ASSET_ARCHIVE_RECOVERY_PENDING');
+    const restore = (row.malwareScanStatus as any)?.restoreOperation;
+    if (restore != null && !['COMPLETED', 'CANCELLED'].includes(restore.phase)) throw new Error('ASSET_RESTORE_RECOVERY_PENDING');
+    // A terminal PURGED record is a durable, read-inaccessible cleanup intent.
+    // Only a correctly leased retention worker can retry its outstanding storage deletion.
+    if (row.lifecycleState !== AssetLifecycleState.DELETED &&
+        !(retryPurgedCleanup && retentionClaimToken && row.lifecycleState === AssetLifecycleState.PURGED)) {
+      throw new Error('ASSET_PURGE_SOFT_DELETE_REQUIRED');
+    }
+    // A missing expiration is an indefinite hold, not evidence that deletion is allowed.
+    if (!row.retentionExpiresAt || !Number.isFinite(row.retentionExpiresAt.getTime()) ||
+        row.retentionExpiresAt.getTime() > at.getTime()) {
+      throw new Error('ASSET_PURGE_RETENTION_NOT_EXPIRED');
+    }
+    if (row.legalHoldUntil && (!Number.isFinite(row.legalHoldUntil.getTime()) ||
+        row.legalHoldUntil.getTime() > at.getTime())) {
+      throw new Error('ASSET_PURGE_LEGAL_HOLD_ACTIVE');
+    }
+    if (retryPurgedCleanup && !retentionClaimToken) {
+      throw new Error('ASSET_PURGE_CLEANUP_LEASE_REQUIRED');
+    }
+    if (retentionClaimToken !== undefined) {
+      if (typeof retentionClaimToken !== 'string' ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(retentionClaimToken) ||
+          row.retentionClaimToken !== retentionClaimToken ||
+          !row.retentionClaimUntil || !Number.isFinite(row.retentionClaimUntil.getTime()) ||
+          row.retentionClaimUntil.getTime() <= at.getTime()) {
+        throw new Error('ASSET_PURGE_RETENTION_CLAIM_NOT_OWNED');
+      }
+    } else if (row.retentionClaimUntil && (!Number.isFinite(row.retentionClaimUntil.getTime()) ||
+        row.retentionClaimUntil.getTime() > at.getTime())) {
+      throw new Error('ASSET_PURGE_RETENTION_CLAIM_ACTIVE');
+    }
   }
 
   async findById(id: AssetId): Promise<AssetRecord | null> {
@@ -139,57 +384,191 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
     ownerId?: string;
     securityClassification?: string;
     mimeTypePrefix?: string;
+    retentionCategory?: AssetRetentionCategory;
+    checksumPresence?: 'PRESENT' | 'MISSING';
+    usageStatus?: 'IN_USE' | 'UNUSED';
+    malwareStatus?: 'PASSED' | 'FAILED';
+    fileFamily?: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'PDF';
+    processingQueue?: 'AWAITING_UPLOAD' | 'QUARANTINE' | 'PROCESSING' | 'FAILED' | 'ACTIVATION_RECOVERY' | 'RESTORE_RECOVERY' | 'ARCHIVE_RECOVERY';
     createdFrom?: string;
     createdTo?: string;
     q?: string;
     limit?: number;
     cursor?: string;
+    reuseOnly?: boolean;
   }): Promise<{ items: any[]; nextCursor: string | null; hasMore: boolean }> {
     const limit = Math.min(100, Math.max(1, Math.trunc(input.limit ?? 30)));
-    const decodedCursor = input.cursor ? Buffer.from(input.cursor, 'base64url').toString('utf8') : null;
-    const [cursorCreatedAt, cursorId] = decodedCursor?.split('|') ?? [];
+    let cursorCreatedAt: string | undefined;
+    let cursorId: string | undefined;
+    if (input.cursor) {
+      if (!/^[A-Za-z0-9_-]{1,2048}$/.test(input.cursor)) throw new Error('ASSET_CURSOR_INVALID');
+      const decoded = Buffer.from(input.cursor, 'base64url').toString('utf8');
+      if (Buffer.from(decoded, 'utf8').toString('base64url') !== input.cursor) throw new Error('ASSET_CURSOR_INVALID');
+      const pieces = decoded.split('|');
+      if (pieces.length !== 2 || !pieces[1] || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}T/.test(pieces[0]) ||
+        !Number.isFinite(Date.parse(pieces[0])) || new Date(pieces[0]).toISOString() !== pieces[0]) {
+        throw new Error('ASSET_CURSOR_INVALID');
+      }
+      [cursorCreatedAt, cursorId] = pieces;
+    }
     const where: any = {
       ...(input.lifecycleState ? { lifecycleState: input.lifecycleState } : {}),
       ...(input.ownerType ? { ownerType: input.ownerType } : {}),
       ...(input.ownerId ? { ownerId: input.ownerId } : {}),
-      ...(input.securityClassification ? { securityClassification: input.securityClassification } : {}),
+      ...(input.reuseOnly
+        ? { lifecycleState: AssetLifecycleState.ACTIVE, securityClassification: { in: [
+          AssetSecurityClassification.PUBLIC, AssetSecurityClassification.INTERNAL,
+        ] }, cleanStorageLocator: { not: null } }
+        : input.securityClassification ? { securityClassification: input.securityClassification } : {}),
       ...(input.mimeTypePrefix ? { metadata: { path: ['mimeType'], string_starts_with: input.mimeTypePrefix } } : {}),
       ...((input.createdFrom || input.createdTo) ? { createdAt: {
         ...(input.createdFrom ? { gte: new Date(input.createdFrom) } : {}),
         ...(input.createdTo ? { lte: new Date(input.createdTo) } : {}),
       } } : {}),
-      ...(input.q ? { OR: [
-        { id: { contains: input.q, mode: 'insensitive' } },
-        { reference: { contains: input.q, mode: 'insensitive' } },
-        { ownerId: { contains: input.q, mode: 'insensitive' } },
-        { metadata: { path: ['originalFilename'], string_contains: input.q } },
-      ] } : {}),
-      ...(cursorCreatedAt && cursorId ? {
-        OR: [
-          { createdAt: { lt: new Date(cursorCreatedAt) } },
-          { createdAt: new Date(cursorCreatedAt), id: { lt: cursorId } },
-        ],
-      } : {}),
     };
+    const andFilters: any[] = [];
+    if (input.retentionCategory) andFilters.push({ retentionCategory: input.retentionCategory });
+    // Presence describes persisted evidence only; it does not assert verification or delivery readiness.
+    if (input.checksumPresence === 'PRESENT') andFilters.push({ AND: [
+      { checksumAlgorithm: { not: null } }, { checksumAlgorithm: { not: '' } },
+      { checksumHash: { not: null } }, { checksumHash: { not: '' } },
+    ] });
+    if (input.checksumPresence === 'MISSING') andFilters.push({ OR: [
+      { checksumAlgorithm: null }, { checksumAlgorithm: '' },
+      { checksumHash: null }, { checksumHash: '' },
+    ] });
+    if (input.malwareStatus) andFilters.push({ malwareScanStatus: { path: ['status'], equals: input.malwareStatus } });
+    if (input.fileFamily) andFilters.push({ metadata: input.fileFamily === 'PDF'
+      ? { path: ['mimeType'], equals: 'application/pdf' }
+      : { path: ['mimeType'], string_starts_with: { IMAGE: 'image/', VIDEO: 'video/', AUDIO: 'audio/' }[input.fileFamily] } });
+    const queues = {
+      AWAITING_UPLOAD: [AssetLifecycleState.INITIATED],
+      QUARANTINE: [AssetLifecycleState.QUARANTINED],
+      PROCESSING: [AssetLifecycleState.VALIDATING, AssetLifecycleState.SANITIZING],
+      FAILED: [AssetLifecycleState.MALWARE_SCAN_FAILED],
+      ACTIVATION_RECOVERY: [AssetLifecycleState.SANITIZING],
+      RESTORE_RECOVERY: [AssetLifecycleState.DELETED],
+      ARCHIVE_RECOVERY: [AssetLifecycleState.ARCHIVED],
+    };
+    if (input.processingQueue) andFilters.push({ lifecycleState: { in: queues[input.processingQueue] } });
+    if (input.processingQueue === 'ACTIVATION_RECOVERY') andFilters.push({
+      malwareScanStatus: { path: ['activationOperation', 'phase'], equals: 'PREPARED' },
+    });
+    if (input.processingQueue === 'ARCHIVE_RECOVERY') andFilters.push({ OR:
+      ['RUNNING', 'RECOVERY_REQUIRED'].map(phase => ({ malwareScanStatus: { path: ['archiveOperation', 'phase'], equals: phase } })) });
+    if (input.processingQueue === 'RESTORE_RECOVERY') andFilters.push({ OR:
+      ['PREPARED', 'RESTORING', 'RECOVERY_REQUIRED'].map(phase => ({ malwareScanStatus: { path: ['restoreOperation', 'phase'], equals: phase } })) });
+    if (input.reuseOnly) andFilters.push(
+      { malwareScanStatus: { path: ['status'], equals: 'PASSED' } },
+      { malwareScanStatus: { path: ['uploadVerification', 'signatureVerified'], equals: true } },
+    );
+    if (input.q) andFilters.push({ OR: [
+      { id: { contains: input.q, mode: 'insensitive' } },
+      { reference: { contains: input.q, mode: 'insensitive' } },
+      { ownerId: { contains: input.q, mode: 'insensitive' } },
+      { metadata: { path: ['originalFilename'], string_contains: input.q } },
+    ] });
+    if (cursorCreatedAt && cursorId) andFilters.push({ OR: [
+      { createdAt: { lt: new Date(cursorCreatedAt) } },
+      { createdAt: new Date(cursorCreatedAt), id: { lt: cursorId } },
+    ] });
+    if (andFilters.length) where.AND = andFilters;
     const rows = await (this.prisma as any).assetRecord.findMany({
       where,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit + 1,
     });
     const hasMore = rows.length > limit;
-    const items = rows.slice(0, limit).map((row: any) => ({
+    const scannedPage = rows.slice(0, limit);
+    // SQL narrows the cohort; only the Domain can validate complete persisted proof.
+    // Keep cursor advancement tied to scanned rows, including rejected rows, so an
+    // empty filtered page cannot strand valid assets further down the keyset.
+    const trustedPage = input.reuseOnly ? scannedPage.filter((row: AssetRecordRow) => {
+      try {
+        this.mapToDomain(row).assertCanDeliver();
+        return true;
+      } catch {
+        return false;
+      }
+    }) : scannedPage;
+    // Resolve all canonical owner references in one bounded query, never per asset.
+    // Empty filtered pages retain the scanned cursor and may have more matches later.
+    const usedIds = input.usageStatus
+      ? await findUsedAssetIds(this.prisma, trustedPage.map((row: AssetRecordRow) => row.id)) : null;
+    const visiblePage = usedIds ? trustedPage.filter((row: AssetRecordRow) =>
+      input.usageStatus === 'IN_USE' ? usedIds.has(row.id) : !usedIds.has(row.id)) : trustedPage;
+    const items = visiblePage.map((row: any) => ({
       id: row.id, reference: row.reference, ownerId: row.ownerId, ownerType: row.ownerType,
       lifecycleState: row.lifecycleState, securityClassification: row.securityClassification,
       retentionCategory: row.retentionCategory, retentionExpiresAt: row.retentionExpiresAt,
-      metadata: row.metadata, checksumAlgorithm: row.checksumAlgorithm, checksumHash: row.checksumHash,
+      // Do not return operational envelopes or arbitrary owner metadata to a list view.
+      metadata: { originalFilename: row.metadata?.originalFilename, mimeType: row.metadata?.mimeType,
+        fileExtension: row.metadata?.fileExtension, byteSize: row.metadata?.byteSize }, checksumAlgorithm: row.checksumAlgorithm, checksumHash: row.checksumHash,
       createdAt: row.createdAt, updatedAt: row.updatedAt, archivedAt: row.archivedAt, deletedAt: row.deletedAt,
     }));
-    const last = items.at(-1);
+    const last = scannedPage.at(-1);
     return {
       items,
       hasMore,
       nextCursor: hasMore && last ? Buffer.from(`${new Date(last.createdAt).toISOString()}|${last.id}`, 'utf8').toString('base64url') : null,
     };
+  }
+
+  async findPendingActivations(before: Date, limit: number): Promise<Array<{ assetId: string; operationId: string }>> {
+    if (!Number.isFinite(before.getTime()) || !Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new Error('ASSET_ACTIVATION_RECOVERY_QUERY_INVALID');
+    }
+    const rows = await this.prisma.assetRecord.findMany({
+      where: { lifecycleState: AssetLifecycleState.SANITIZING, updatedAt: { lte: before },
+        malwareScanStatus: { path: ['activationOperation', 'phase'], equals: 'PREPARED' } },
+      orderBy: [{ updatedAt: 'asc' }, { id: 'asc' }], take: limit,
+      select: { id: true, malwareScanStatus: true },
+    });
+    return rows.map(row => {
+      const scan = row.malwareScanStatus as { activationOperation?: { operationId?: unknown } } | null;
+      const operationId = scan?.activationOperation?.operationId;
+      if (typeof operationId !== 'string' || !/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(operationId)) {
+        throw new Error('ASSET_ACTIVATION_OPERATION_INVALID');
+      }
+      return { assetId: row.id, operationId };
+    });
+  }
+
+  async findAdminDetails(id: AssetId) {
+    const row = await this.prisma.assetRecord.findUnique({ where: { id: id.value } });
+    if (!row) return null;
+    return {
+      asset: this.mapToDomain(row),
+      governance: { createdAt: row.createdAt, updatedAt: row.updatedAt, archivedAt: row.archivedAt,
+        deletedAt: row.deletedAt, purgedAt: row.purgedAt, legalHoldUntil: row.legalHoldUntil },
+    };
+  }
+
+  private reconstructVersionChain(value: unknown): AssetVersionChain | undefined {
+    if (value == null) return undefined;
+    const invalid = () => { throw new Error('ASSET_VERSION_HISTORY_INVALID'); };
+    if (typeof value !== 'object' || !('versions' in value) || !Array.isArray(value.versions)) return invalid();
+    const numbers = new Set<number>();
+    return new AssetVersionChain(value.versions.map((raw: unknown) => {
+      if (!raw || typeof raw !== 'object') return invalid();
+      const version = raw as Record<string, unknown>;
+      if (!Number.isSafeInteger(version.versionNumber) || (version.versionNumber as number) < 1 ||
+          numbers.has(version.versionNumber as number) || typeof version.createdAt !== 'string' ||
+          !Number.isFinite(Date.parse(version.createdAt))) return invalid();
+      numbers.add(version.versionNumber as number);
+      const locator = version.storageLocator as Record<string, unknown> | undefined;
+      if (!locator || !Object.values(AssetStorageZone).includes(locator.storageZone as AssetStorageZone) ||
+          typeof locator.bucketName !== 'string' || !locator.bucketName.trim() ||
+          typeof locator.pathKey !== 'string' || !locator.pathKey.trim()) return invalid();
+      const checksum = version.checksum as Record<string, unknown> | undefined;
+      if (checksum && (typeof checksum.algorithm !== 'string' || !checksum.algorithm.trim() ||
+          typeof checksum.hash !== 'string' || !checksum.hash.trim())) return invalid();
+      if (version.changelog != null && typeof version.changelog !== 'string') return invalid();
+      return new AssetVersion(version.versionNumber as number, new Date(version.createdAt),
+        new AssetStorageLocator(locator.storageZone as AssetStorageZone, locator.bucketName, locator.pathKey),
+        checksum ? new AssetChecksum(checksum.algorithm as string, checksum.hash as string) : undefined,
+        version.changelog as string | undefined);
+    }));
   }
 
   private mapToDomain(row: AssetRecordRow): AssetRecord {
@@ -226,7 +605,33 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       );
     }
 
-    return new AssetRecord({
+    const scan = row.malwareScanStatus as Record<string, unknown> | null;
+    const malwareScan = scan && (scan.status === 'PASSED' || scan.status === 'FAILED') &&
+      typeof scan.scannedAt === 'string' && Number.isFinite(Date.parse(scan.scannedAt)) &&
+      typeof scan.locator === 'string' && scan.locator.length > 0
+      ? { status: scan.status as 'PASSED' | 'FAILED', scannedAt: scan.scannedAt, locator: scan.locator }
+      : undefined;
+
+    const uploadObj = scan?.uploadVerification as Record<string, unknown> | undefined;
+    const uploadVerification = uploadObj && uploadObj.signatureVerified === true &&
+      typeof uploadObj.locator === 'string' && typeof uploadObj.byteSize === 'number' &&
+      typeof uploadObj.verifiedMimeType === 'string' &&
+      typeof uploadObj.checksumSha256 === 'string' &&
+      typeof uploadObj.verifiedAt === 'string'
+      ? {
+          locator: uploadObj.locator,
+          byteSize: uploadObj.byteSize,
+          verifiedMimeType: uploadObj.verifiedMimeType,
+          checksumSha256: uploadObj.checksumSha256,
+          verifiedAt: uploadObj.verifiedAt,
+          signatureVerified: true as const,
+        } : undefined;
+
+    if (!(row.updatedAt instanceof Date) || !Number.isFinite(row.updatedAt.getTime())) {
+      throw new Error('ASSET_RECORD_REVISION_MISSING');
+    }
+
+    const asset = new AssetRecord({
       id: new AssetId(row.id),
       reference: new AssetReference(row.reference),
       locator,
@@ -240,7 +645,19 @@ export class PrismaAssetRecordRepository implements IAssetRecordRepository {
       state: row.lifecycleState as AssetLifecycleState,
       checksum: row.checksumAlgorithm && row.checksumHash ? new AssetChecksum(row.checksumAlgorithm, row.checksumHash) : undefined,
       sanitization,
-      versionChain: undefined // We are skipping complex versionChain reconstruction for now as it's not strictly required in full unless requested
+      malwareScan,
+      uploadVerification,
+      // Operational EAP-owned JSON, never a client-provided canonical relation.
+      archiveOperation: scan?.archiveOperation == null ? undefined : scan.archiveOperation as unknown as AssetArchiveOperation,
+      restoreOperation: scan?.restoreOperation == null ? undefined : scan.restoreOperation as unknown as AssetRestoreOperation,
+      activationOperation: scan?.activationOperation == null ? undefined : scan.activationOperation as unknown as AssetActivationOperation,
+      retentionBeforeLifecycle: metadataObj.lifecycleRetention == null ? undefined : metadataObj.lifecycleRetention as AssetRetentionSnapshot,
+      versionChain: this.reconstructVersionChain(row.versionChain)
     });
+    this.loadedSnapshots.set(asset, {
+      updatedAt: row.updatedAt,
+      lifecycleState: row.lifecycleState,
+    });
+    return asset;
   }
 }

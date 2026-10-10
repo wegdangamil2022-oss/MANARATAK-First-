@@ -22,6 +22,21 @@ export class InMemoryRoleAssignmentRepository implements IRoleAssignmentReposito
     return all.filter(assignment => assignment.identityId === identityId);
   }
 
+  async queryPage(input: { limit: number; cursor?: string; roleId?: string; search?: string }) {
+    const rows = [...this.assignments.values()]
+      .filter(
+        (item) =>
+          (!input.cursor || item.id > input.cursor) &&
+          (!input.roleId || item.roleId === input.roleId) &&
+          (!input.search ||
+            [item.id, item.identityId, item.roleId].some((value) =>
+              value.toLowerCase().includes(input.search!.toLowerCase()),
+            )),
+      )
+      .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    const items = rows.slice(0, input.limit);
+    return { items, nextCursor: rows.length > input.limit ? items.at(-1)!.id : null };
+  }
   async listAll(): Promise<RoleAssignment[]> {
     return Array.from(this.assignments.values());
   }

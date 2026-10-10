@@ -17,6 +17,9 @@ export class ScopeIdentifier {
     }
 
     this.level = normalizedLevel as ScopeLevel;
+    if (this.level === ScopeLevel.GLOBAL && scopeId !== undefined) {
+      throw new Error('SETTINGS_GLOBAL_SCOPE_ID_FORBIDDEN');
+    }
     if (this.level !== ScopeLevel.GLOBAL && (!scopeId || scopeId.trim() === '')) {
       throw new Error(`ScopeId is required for scope level ${this.level}`);
     }

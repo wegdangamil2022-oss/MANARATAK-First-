@@ -58,7 +58,9 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
       progress:
         batch.totalRecords > 0
           ? Math.min(100, Math.round((completed / batch.totalRecords) * 100))
-          : 0,
+          // All input rows may already be imported elsewhere and deduplicated,
+          // leaving a valid completed batch with zero persisted work items.
+          : batch.batchStatus === ImportJobStatus.COMPLETED ? 100 : 0,
       processedRecords: batch.processedRecords,
       failedRecords: batch.failedRecords,
       totalRecords: batch.totalRecords,
@@ -73,17 +75,15 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
     };
   }
 
-  pauseJob(command: PauseImportJobCommand): Promise<boolean> {
-    return this.transition(
-      command.batchId,
-      [ImportJobStatus.QUEUED, ImportJobStatus.RUNNING],
-      ImportJobStatus.PAUSED,
-      {
-        claimedBy: null,
-        claimUntil: null,
-        ...(command.reason ? { lastError: this.sanitize(command.reason) } : {}),
-      },
-    );
+  async pauseJob(command: PauseImportJobCommand): Promise<boolean> {
+    const note = command.reason ? { lastError: this.sanitize(command.reason) } : {};
+    // A queued job has no executing worker and can stop immediately.
+    if (await this.transition(command.batchId, [ImportJobStatus.QUEUED],
+      ImportJobStatus.PAUSED, { claimedBy: null, claimUntil: null, ...note })) return true;
+    // A running owner call cannot be interrupted safely. Retain its lease and
+    // show PAUSING until that exact worker acknowledges after the call returns.
+    return this.transition(command.batchId, [ImportJobStatus.RUNNING],
+      ImportJobStatus.PAUSING, note);
   }
 
   resumeJob(command: ResumeImportJobCommand): Promise<boolean> {
@@ -95,23 +95,37 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
     );
   }
 
-  cancelJob(command: CancelImportJobCommand): Promise<boolean> {
-    return this.transition(
-      command.batchId,
-      [
-        ImportJobStatus.QUEUED,
-        ImportJobStatus.RUNNING,
-        ImportJobStatus.PAUSED,
-        ImportJobStatus.RESUMING,
-        ImportJobStatus.CANCELLING,
-      ],
-      ImportJobStatus.CANCELLED,
-      {
-        claimedBy: null,
-        claimUntil: null,
-        ...(command.reason ? { lastError: this.sanitize(command.reason) } : {}),
-      },
-    );
+  async cancelJob(command: CancelImportJobCommand): Promise<boolean> {
+    const note = command.reason ? { lastError: this.sanitize(command.reason) } : {};
+    if (await this.transition(command.batchId, [
+      ImportJobStatus.QUEUED, ImportJobStatus.PAUSED, ImportJobStatus.RESUMING,
+    ], ImportJobStatus.CANCELLED, {
+      claimedBy: null, claimUntil: null, ...note,
+    })) return true;
+    return this.transition(command.batchId, [
+      ImportJobStatus.RUNNING, ImportJobStatus.PAUSING,
+    ], ImportJobStatus.CANCELLING, note);
+  }
+
+  async acknowledgeStoppedJob(lease: ImportJobLease): Promise<'PAUSED' | 'CANCELLED' | null> {
+    // A worker may acknowledge after its lease expires; no other worker can
+    // reclaim PAUSING/CANCELLING. Exact attempt + generation still fence old workers.
+    for (const [pending, final] of [
+      [ImportJobStatus.CANCELLING, ImportJobStatus.CANCELLED],
+      [ImportJobStatus.PAUSING, ImportJobStatus.PAUSED],
+    ] as const) {
+      const result = await this.prisma.importBatch.updateMany({
+        where: {
+          id: lease.batchId, batchStatus: pending,
+          claimedBy: lease.workerId, attemptCount: lease.attempt,
+          claimUntil: { equals: lease.claimUntil },
+        },
+        data: { batchStatus: final, claimedBy: null, claimUntil: null },
+      });
+      if (result.count === 1)
+        return final === ImportJobStatus.PAUSED ? 'PAUSED' : 'CANCELLED';
+    }
+    return null;
   }
 
   markJobRunning(batchId: string): Promise<boolean> {
@@ -122,21 +136,39 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
     );
   }
 
-  markJobCompleted(batchId: string): Promise<boolean> {
-    return this.transition(batchId, [ImportJobStatus.RUNNING], ImportJobStatus.COMPLETED, {
-      claimedBy: null,
-      claimUntil: null,
-      lastError: null,
-    });
+  async markJobCompleted(batchId: string): Promise<boolean> {
+    // Compatibility/unclaimed job path only. A legacy caller must never steal
+    // a live claimed lease or override worker-confirmed completion.
+    for (const [failedRecords, status] of [
+      [{ gt: 0 }, ImportJobStatus.PARTIALLY_COMPLETED],
+      [0, ImportJobStatus.COMPLETED],
+    ] as const) {
+      const updated = await this.prisma.importBatch.updateMany({
+        where: {
+          id: batchId, batchStatus: ImportJobStatus.RUNNING,
+          claimedBy: null, claimUntil: null, failedRecords,
+        },
+        data: { batchStatus: status, lastError: null },
+      });
+      if (updated.count === 1) return true;
+    }
+    return false;
   }
 
-  markJobFailed(batchId: string, reason: string): Promise<boolean> {
-    return this.transition(
-      batchId,
-      [ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE],
-      ImportJobStatus.FAILED_PERMANENT,
-      { claimedBy: null, claimUntil: null, lastError: this.sanitize(reason) },
-    );
+  async markJobFailed(batchId: string, reason: string): Promise<boolean> {
+    const updated = await this.prisma.importBatch.updateMany({
+      where: {
+        id: batchId,
+        batchStatus: { in: [ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE] },
+        claimedBy: null,
+        claimUntil: null,
+      },
+      data: {
+        batchStatus: ImportJobStatus.FAILED_PERMANENT,
+        lastError: this.sanitize(reason),
+      },
+    });
+    return updated.count === 1;
   }
 
   async claimNextJob(command: ClaimImportJobCommand): Promise<ImportJobLease | null> {
@@ -194,7 +226,8 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
         id: lease.batchId,
         batchStatus: ImportJobStatus.RUNNING,
         claimedBy: lease.workerId,
-        claimUntil: { gte: now },
+        attemptCount: lease.attempt,
+        claimUntil: { equals: lease.claimUntil, gte: now },
       },
       data: { claimUntil },
     });
@@ -202,21 +235,32 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
   }
 
   async completeClaimedJob(lease: ImportJobLease, now = new Date()): Promise<boolean> {
-    const updated = await this.prisma.importBatch.updateMany({
-      where: {
+    // Select terminal status from persisted counters in the same conditional
+    // write as the claimed worker's lease fence. A separate read would race
+    // with a concurrent checkpoint and risk a false full completion.
+    for (const [failurePredicate, status] of [
+      [{ gt: 0 }, ImportJobStatus.PARTIALLY_COMPLETED],
+      [0, ImportJobStatus.COMPLETED],
+    ] as const) {
+      const updated = await this.prisma.importBatch.updateMany({
+        where: {
         id: lease.batchId,
         batchStatus: ImportJobStatus.RUNNING,
         claimedBy: lease.workerId,
-        claimUntil: { gte: now },
-      },
-      data: {
-        batchStatus: ImportJobStatus.COMPLETED,
-        claimedBy: null,
-        claimUntil: null,
-        lastError: null,
-      },
-    });
-    return updated.count === 1;
+        attemptCount: lease.attempt,
+        claimUntil: { equals: lease.claimUntil, gte: now },
+          failedRecords: failurePredicate,
+        },
+        data: {
+          batchStatus: status,
+          claimedBy: null,
+          claimUntil: null,
+          lastError: null,
+        },
+      });
+      if (updated.count === 1) return true;
+    }
+    return false;
   }
 
   async failClaimedJob(
@@ -233,25 +277,50 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
       policy.backoffStrategy === 'exponential' ? Math.max(0, command.lease.attempt - 1) : 0;
     const delay = Math.min(policy.maxDelayMs, policy.initialDelayMs * Math.pow(2, exponent));
 
-    const updated = await this.prisma.importBatch.updateMany({
-      where: {
-        id: command.lease.batchId,
-        batchStatus: ImportJobStatus.RUNNING,
-        claimedBy: command.lease.workerId,
-        claimUntil: { gte: now },
-      },
-      data: {
-        batchStatus: nextStatus,
-        availableAt: new Date(
-          now.getTime() + (nextStatus === ImportJobStatus.FAILED_RETRYABLE ? delay : 0),
-        ),
-        claimedBy: null,
-        claimUntil: null,
-        lastError: this.sanitize(command.reason),
-      },
+    return this.prisma.$transaction(async tx => {
+      const updated = await tx.importBatch.updateMany({
+        where: {
+          id: command.lease.batchId,
+          batchStatus: ImportJobStatus.RUNNING,
+          claimedBy: command.lease.workerId,
+          attemptCount: command.lease.attempt,
+          claimUntil: { equals: command.lease.claimUntil, gte: now },
+        },
+        data: {
+          batchStatus: nextStatus,
+          availableAt: new Date(
+            now.getTime() + (nextStatus === ImportJobStatus.FAILED_RETRYABLE ? delay : 0),
+          ),
+          claimedBy: null,
+          claimUntil: null,
+          lastError: this.sanitize(command.reason),
+        },
+      });
+      if (updated.count !== 1) return 'LEASE_LOST';
+      // Failure evidence must commit with the fenced terminal/retry transition.
+      // A crash cannot leave a DLQ batch without its cause, or a stale worker
+      // manufacture failure records after losing ownership. No imported payload
+      // or provider response is copied into operational evidence.
+      await tx.importRecord.create({
+        data: {
+          batchId: command.lease.batchId,
+          status: 'WORKER_FAILURE',
+          retentionExpiresAt: new Date(now.getTime() + 365 * 86400_000),
+          retentionState: 'IMPORT_WORKER_FAILURE',
+          rawPayload: {
+            stage: 'BATCH_WORKER',
+            errorCode: command.errorCode && /^[A-Z][A-Z0-9_]{0,127}$/.test(command.errorCode)
+              ? command.errorCode : null,
+            attempt: command.lease.attempt,
+            retryable: retryable && !exhausted,
+            failedAt: now.toISOString(),
+            outcome: nextStatus,
+          },
+          processingNotes: this.sanitize(command.reason),
+        },
+      });
+      return nextStatus === ImportJobStatus.FAILED_RETRYABLE ? 'RETRY_SCHEDULED' : 'DLQ';
     });
-    if (updated.count !== 1) return 'LEASE_LOST';
-    return nextStatus === ImportJobStatus.FAILED_RETRYABLE ? 'RETRY_SCHEDULED' : 'DLQ';
   }
 
   async replayJob(command: ReplayImportJobCommand): Promise<boolean> {
@@ -266,7 +335,10 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
 
     return this.prisma.$transaction(async (client) => {
       const updated = await client.importBatch.updateMany({
-        where: { id: command.batchId, batchStatus: { in: terminalStatuses } },
+        where: { id: command.batchId, batchStatus: { in: terminalStatuses },
+          records: { none: { status: { in: ['STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED'] } } },
+          OR: [{ lastError: null }, { lastError: { not: 'IMPORT_ARTIFACT_STAGING_REJECTED' } }],
+        },
         data: {
           batchStatus: ImportJobStatus.QUEUED,
           availableAt: now,
@@ -289,30 +361,91 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
     });
   }
 
-  async recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint): Promise<void> {
+  async recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint, lease?: ImportJobLease): Promise<void> {
     const value = checkpoint.toJSON();
-    await this.prisma.$transaction([
-      this.prisma.importRecord.create({
+    if (value.batchId !== batchId) throw new Error('IMPORT_CHECKPOINT_BATCH_MISMATCH');
+    if (lease) {
+      if (lease.batchId !== batchId) throw new Error('IMPORT_WORKER_LEASE_LOST');
+      const now = new Date();
+      // The lease predicate and checkpoint insert share one transaction.
+      // Paused, cancelled, expired or re-claimed workers cannot commit stale progress.
+      await this.prisma.$transaction(async tx => {
+        const updated = await tx.importBatch.updateMany({
+          where: {
+            id: batchId, batchStatus: ImportJobStatus.RUNNING,
+            claimedBy: lease.workerId, attemptCount: lease.attempt,
+            claimUntil: { equals: lease.claimUntil, gte: now },
+          },
+          data: {
+            processedRecords: checkpoint.processedRecords,
+            failedRecords: checkpoint.failedRecords,
+          },
+        });
+        if (updated.count !== 1) throw new Error('IMPORT_WORKER_LEASE_LOST');
+        await tx.importRecord.create({
+          data: {
+            batchId, status: 'CHECKPOINT', rawPayload: value as any,
+            processingNotes: 'Durable import checkpoint',
+          },
+        });
+      });
+      return;
+    }
+    // A legacy checkpoint without a lease must never override a claimed
+    // worker's counters. Check the unclaimed batch *in the same transaction*
+    // as the checkpoint insert, so a failed fence cannot leave evidence.
+    await this.prisma.$transaction(async tx => {
+      const updated = await tx.importBatch.updateMany({
+        where: {
+          id: batchId,
+          claimedBy: null,
+          claimUntil: null,
+          batchStatus: { in: [
+            ImportJobStatus.CREATED,
+            ImportJobStatus.QUEUED,
+            ImportJobStatus.RESUMING,
+            ImportJobStatus.RUNNING,
+            ImportJobStatus.PAUSED,
+            ImportJobStatus.FAILED_RETRYABLE,
+          ] },
+        },
+        data: {
+          processedRecords: checkpoint.processedRecords,
+          failedRecords: checkpoint.failedRecords,
+        },
+      });
+      if (updated.count !== 1) throw new Error('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
+      await tx.importRecord.create({
         data: {
           batchId,
           status: 'CHECKPOINT',
           rawPayload: value as any,
           processingNotes: 'Durable import checkpoint',
         },
-      }),
-      this.prisma.importBatch.update({
-        where: { id: batchId },
-        data: {
-          processedRecords: checkpoint.processedRecords,
-          failedRecords: checkpoint.failedRecords,
-        },
-      }),
-    ]);
+      });
+    });
   }
 
   async moveToDeadLetter(dto: DeadLetterImportRecordDto): Promise<void> {
-    await this.prisma.$transaction([
-      this.prisma.importRecord.create({
+    // This is the legacy/manual DLQ path, NOT the worker's fenced
+    // failClaimedJob. Never permit a late compatibility call to erase an
+    // active worker claim, a pending stop, or a finished batch's result.
+    await this.prisma.$transaction(async tx => {
+      const updated = await tx.importBatch.updateMany({
+        where: {
+          id: dto.batchId,
+          batchStatus: { in: [ImportJobStatus.QUEUED, ImportJobStatus.FAILED_PERMANENT] },
+          claimedBy: null,
+          claimUntil: null,
+        },
+        data: {
+          batchStatus: ImportJobStatus.DLQ,
+          failedRecords: { increment: 1 },
+          lastError: this.sanitize(dto.reason),
+        },
+      });
+      if (updated.count !== 1) throw new Error('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+      await tx.importRecord.create({
         data: {
           id: dto.recordId,
           batchId: dto.batchId,
@@ -324,23 +457,14 @@ export class PrismaImportQueueGateway implements IImportQueueGateway {
           },
           processingNotes: this.sanitize(dto.reason),
         },
-      }),
-      this.prisma.importBatch.update({
-        where: { id: dto.batchId },
-        data: {
-          batchStatus: ImportJobStatus.DLQ,
-          failedRecords: { increment: 1 },
-          claimedBy: null,
-          claimUntil: null,
-          lastError: this.sanitize(dto.reason),
-        },
-      }),
-    ]);
+      });
+    });
   }
 
   private reclaimableWhere(now: Date, batchId?: string): Record<string, unknown> {
     return {
       ...(batchId ? { id: batchId } : {}),
+      records: { none: { status: { in: ['STAGING_PENDING', 'STAGING_INVALID', 'STAGING_REJECTED'] } } },
       OR: [
         {
           batchStatus: { in: [ImportJobStatus.QUEUED, ImportJobStatus.FAILED_RETRYABLE] },

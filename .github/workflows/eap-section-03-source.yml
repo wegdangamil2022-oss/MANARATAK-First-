@@ -1,0 +1,145 @@
+name: EAP Section 03 Source Verification
+
+on:
+  push:
+    branches:
+      - codex/section-01-iam-rbac
+    paths:
+      - 'apps/admin/src/components/Asset*.tsx'
+      - 'apps/admin/src/pages/Asset*.spec.tsx'
+      - 'packages/infrastructure/src/retention/PrismaAssetRetentionGateway.ts'
+      - 'scripts/architecture/verify-admin-audit-coverage.mjs'
+      - 'tests/security/admin-audit-coverage.test.mjs'
+      - 'docs/remediation/evidence/section-02/admin-mutation-audit-inventory.json'
+      - 'apps/admin/src/pages/AssetAdminPage.tsx'
+      - 'apps/api/src/app.ts'
+      - 'apps/api/tests/runtime-dependency-bootstrap.spec.ts'
+      - 'apps/api/src/server.ts'
+      - 'apps/api/src/infrastructure/di/container.ts'
+      - 'packages/config/src/AppConfig.ts'
+      - 'packages/config/tests/AppConfig.spec.ts'
+      - 'packages/application/src/background-jobs/handlers/AssetActivationRecoveryBackgroundJobHandler.ts'
+      - 'apps/api/src/presentation/api/router/Asset*'
+      - 'apps/api/tests/presentation/api/router/Asset*'
+      - 'packages/application/src/asset-platform/**'
+      - 'packages/application/tests/asset-platform/**'
+      - 'packages/domain/src/asset-platform/**'
+      - 'packages/domain/tests/asset-platform/**'
+      - 'packages/infrastructure/src/asset-platform/**'
+      - 'packages/infrastructure/prisma/migrations/20261009010000_eap_asset_reference_serialization/**'
+      - 'packages/infrastructure/prisma/migrations/20261009020000_eap_restore_operation_barrier/**'
+      - 'packages/infrastructure/prisma/migrations/20261009030000_eap_archive_operation_barrier/**'
+      - 'scripts/ci/install-eap-reference-guards.mjs'
+      - 'packages/infrastructure/tests/asset-platform/**'
+      - 'packages/shared/src/authorization/adminPermissionCatalog.ts'
+      - 'docs/remediation/SECTION_03_EAP_IMPLEMENTATION.md'
+      - 'docs/operations/ASSET_PROVIDER_RUNTIME.md'
+      - 'scripts/verify-w3-source.mjs'
+      - 'tests/remediation/w3-asset-provider.test.mjs'
+      - 'tests/remediation/w2-asset-reference-integrity.test.mjs'
+      - 'tests/remediation/w4-admin-asset-course-control-plane.test.mjs'
+      - 'tests/remediation/w2-services-career-owner-scope.test.mjs'
+      - '.github/workflows/eap-section-03-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eap-section-03-source-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: test
+  DATABASE_MUTATIONS_ALLOWED: 'false'
+  DATABASE_ENVIRONMENT: source
+
+jobs:
+  eap-verification:
+    name: EAP all source and disposable PostgreSQL verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: eap_ci
+          POSTGRES_PASSWORD: eap_ci_disposable_only
+          POSTGRES_DB: manaratak_eap_ci_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eap_ci -d manaratak_eap_ci_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      # A disposable GitHub Actions service on this runner; never use an external DB.
+      DATABASE_URL: postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public
+      DIRECT_URL: postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      # npm ci already invokes postinstall -> npm run db:generate.
+      - name: Install once and generate Prisma client once
+        run: npm ci
+      - name: TypeScript project references (one compilation for all tests)
+        run: npm run typecheck
+      - name: Repository source quality
+        run: npm run quality:source
+      - name: EAP domain, application, infrastructure and API contracts
+        run: >-
+          npx --no-install vitest run --config vitest.config.ts
+          packages/domain/tests/asset-platform
+          packages/application/tests/asset-platform
+          packages/infrastructure/tests/asset-platform
+          apps/api/tests/presentation/api/router/AssetReuseRouter.spec.ts
+          apps/api/tests/presentation/api/router/AssetUsageImpact.spec.ts
+          apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts
+          apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts
+          apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts
+          apps/admin/src/components/AssetLifecycleActions.spec.tsx
+          packages/config/tests/AppConfig.spec.ts
+          apps/api/tests/runtime-dependency-bootstrap.spec.ts
+      - name: Owner reference integrity and control-plane regressions
+        run: node --test tests/remediation/w2-asset-reference-integrity.test.mjs tests/remediation/w4-admin-asset-course-control-plane.test.mjs tests/remediation/w2-services-career-owner-scope.test.mjs
+      - name: Legacy provider transport security checks
+        run: node --test tests/remediation/w3-asset-provider.test.mjs
+      - name: Audit inventory and security regression guards
+        run: |
+          npm run audit:coverage:verify
+          node --test tests/security/admin-audit-coverage.test.mjs tests/security/audit-integrity-remediation-source.test.mjs
+      - name: Confirm PostgreSQL is the disposable localhost service
+        shell: bash
+        run: |
+          test "$DATABASE_URL" = "postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public"
+          test "$DIRECT_URL" = "$DATABASE_URL"
+          pg_isready -h 127.0.0.1 -p 5432 -U eap_ci -d manaratak_eap_ci_test
+        env:
+          PGPASSWORD: eap_ci_disposable_only
+      - name: Create schema on disposable localhost PostgreSQL only
+        run: npx --no-install prisma db push --schema=packages/infrastructure/prisma/schema.prisma --skip-generate
+        env:
+          DATABASE_MUTATIONS_ALLOWED: 'true'
+          RUN_DATABASE_INTEGRATION_TESTS: 'true'
+          EAP_EPHEMERAL_DB_TESTS: 'true'
+      - name: Install reference guards on disposable PostgreSQL only
+        run: node scripts/ci/install-eap-reference-guards.mjs
+        env:
+          DATABASE_MUTATIONS_ALLOWED: 'true'
+          RUN_DATABASE_INTEGRATION_TESTS: 'true'
+          EAP_EPHEMERAL_DB_TESTS: 'true'
+      - name: EAP PostgreSQL real-CAS and purge/restore reconciliation tests
+        run: >-
+          npx --no-install vitest run --config vitest.config.ts
+          packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts
+          packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts
+        env:
+          DATABASE_MUTATIONS_ALLOWED: 'true'
+          RUN_DATABASE_INTEGRATION_TESTS: 'true'
+          EAP_EPHEMERAL_DB_TESTS: 'true'

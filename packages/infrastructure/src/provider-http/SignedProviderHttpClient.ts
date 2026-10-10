@@ -73,13 +73,30 @@ export class SignedProviderHttpClient {
     return this.request(method, endpointPath, encoded, body === undefined ? undefined : 'application/json', requestOptions);
   }
 
-  private async request(
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-    endpointPath: string,
-    bodyBytes: Uint8Array,
-    contentType: string | undefined,
-    requestOptions: SignedProviderRequestOptions,
-  ): Promise<Uint8Array> {
+  async *streamBytes(method: 'GET' | 'POST' | 'PUT', endpointPath: string, body?: unknown,
+    maxBytes = this.maxResponseBytes): AsyncIterable<Uint8Array> {
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > this.maxResponseBytes)
+      throw new Error('PROVIDER_MAX_RESPONSE_BYTES_INVALID');
+    const encoded = body === undefined ? new Uint8Array() : new TextEncoder().encode(JSON.stringify(body));
+    yield* this.streamRequest(method, endpointPath, encoded, body === undefined ? undefined : 'application/json', {}, maxBytes);
+  }
+
+  private async request(method: 'GET' | 'POST' | 'PUT' | 'DELETE', endpointPath: string,
+    bodyBytes: Uint8Array, contentType: string | undefined, requestOptions: SignedProviderRequestOptions): Promise<Uint8Array> {
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    for await (const chunk of this.streamRequest(method, endpointPath, bodyBytes, contentType, requestOptions, this.maxResponseBytes)) {
+      chunks.push(chunk); total += chunk.byteLength;
+    }
+    const bytes = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+    return bytes;
+  }
+
+  private async *streamRequest(method: 'GET' | 'POST' | 'PUT' | 'DELETE', endpointPath: string,
+    bodyBytes: Uint8Array, contentType: string | undefined, requestOptions: SignedProviderRequestOptions,
+    maxBytes: number): AsyncIterable<Uint8Array> {
     const url = this.resolveEndpoint(endpointPath);
     const timestamp = this.now().toISOString();
     const nonce = randomUUID();
@@ -99,6 +116,7 @@ export class SignedProviderHttpClient {
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     try {
       const response = await this.fetchImpl(url, {
         method,
@@ -107,6 +125,7 @@ export class SignedProviderHttpClient {
         signal: controller.signal,
         redirect: 'error',
       });
+      reader = response.body?.getReader();
       const expected = requestOptions.expectedStatuses ?? [];
       if (!response.ok && !expected.includes(response.status)) {
         throw new Error(`PROVIDER_HTTP_ERROR:${response.status}`);
@@ -115,17 +134,30 @@ export class SignedProviderHttpClient {
       if (declaredLengthHeader) {
         const declaredLength = Number(declaredLengthHeader);
         if (!Number.isFinite(declaredLength) || declaredLength < 0) throw new Error('PROVIDER_RESPONSE_CONTENT_LENGTH_INVALID');
-        if (declaredLength > this.maxResponseBytes) throw new Error(`PROVIDER_RESPONSE_TOO_LARGE:${declaredLength}`);
+        if (declaredLength > maxBytes) throw new Error(`PROVIDER_RESPONSE_TOO_LARGE:${declaredLength}`);
       }
-      const bytes = new Uint8Array(await response.arrayBuffer());
-      if (bytes.byteLength > this.maxResponseBytes) throw new Error(`PROVIDER_RESPONSE_TOO_LARGE:${bytes.byteLength}`);
-      return bytes;
+      if (!reader) {
+        if (declaredLengthHeader && Number(declaredLengthHeader) !== 0) throw new Error('PROVIDER_RESPONSE_LENGTH_MISMATCH');
+        return;
+      }
+      let received = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        received += value.byteLength;
+        if (received > maxBytes) throw new Error('PROVIDER_RESPONSE_TOO_LARGE');
+        yield value;
+      }
+      if (declaredLengthHeader && received !== Number(declaredLengthHeader))
+        throw new Error('PROVIDER_RESPONSE_LENGTH_MISMATCH');
     } catch (error) {
       if (controller.signal.aborted) throw new Error('PROVIDER_REQUEST_TIMEOUT');
       if (error instanceof Error && error.message.startsWith('PROVIDER_')) throw error;
       throw new Error('PROVIDER_REQUEST_FAILED');
     } finally {
       clearTimeout(timeout);
+      await reader?.cancel().catch(() => undefined);
+      reader?.releaseLock();
     }
   }
 

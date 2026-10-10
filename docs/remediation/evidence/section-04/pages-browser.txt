@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "scope": "CHROMIUM_WITH_INTERCEPTED_API_ONLY",
+  "checks": [
+    "next/previous use server cursors",
+    "search resets cursor and queries server",
+    "off-page assignment uses exact identity/current revision",
+    "changed list revision blocks save without silent rebase",
+    "late context response ignored",
+    "bounded requests, trusted actor/idempotency"
+  ],
+  "writes": [
+    {
+      "key": "site.offpage",
+      "level": "GLOBAL",
+      "value": "Reviewed edit",
+      "type": "String",
+      "expectedCurrentVersionId": "hidden-v7",
+      "assignmentId": "hidden-assignment",
+      "versionId": "setting-version-218934e5-0874-46c1-a11c-864eaec7db1a"
+    }
+  ]
+}

@@ -38,6 +38,39 @@ export class PrismaEmergencyAccessRepository implements IEmergencyAccessReposito
     return new PrismaEmergencyAccessRepository(transactionClient as unknown as PrismaClient, true);
   }
 
+  async queryPage(input: {
+    limit: number;
+    cursor?: string;
+    principalId?: string;
+    activeOnly?: boolean;
+    state?: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'REVOKED';
+  }) {
+    const now = new Date();
+    const stateWhere =
+      input.state === 'REVOKED'
+        ? { revokedAt: { not: null } }
+        : input.state === 'EXPIRED'
+          ? { revokedAt: null, expiresAt: { lte: now } }
+          : input.state === 'SCHEDULED'
+            ? { revokedAt: null, startsAt: { gt: now }, expiresAt: { gt: now } }
+            : input.state === 'ACTIVE'
+              ? { revokedAt: null, startsAt: { lte: now }, expiresAt: { gt: now } }
+              : {};
+    const rows = await this.prisma.adminEmergencyAccessRecord.findMany({
+      where: {
+        ...stateWhere,
+        ...(input.cursor ? { id: { gt: input.cursor } } : {}),
+        ...(input.principalId ? { principalId: input.principalId } : {}),
+        ...(input.activeOnly
+          ? { revokedAt: null, startsAt: { lte: now }, expiresAt: { gt: now } }
+          : {}),
+      },
+      orderBy: { id: 'asc' },
+      take: input.limit + 1,
+    });
+    const items = rows.slice(0, input.limit).map(map);
+    return { items, nextCursor: rows.length > input.limit ? items.at(-1)!.id : null };
+  }
   async list(
     input: { principalId?: string; activeOnly?: boolean; limit?: number } = {},
   ): Promise<EmergencyAccessGrantRecord[]> {
@@ -73,8 +106,11 @@ export class PrismaEmergencyAccessRepository implements IEmergencyAccessReposito
       // Serialise overlapping grants even when joining an existing audit/outbox transaction.
       const lockKey = `emergency-access:${input.principalId}:${input.roleId}`;
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))::text AS lock_result`;
+      const roleLock = `authorization-role-reference:${input.roleId}`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${roleLock}, 0))::text AS lock_result`;
       const role = await tx.roleRecord.findUnique({ where: { id: input.roleId } });
       if (!role) throw new Error('EMERGENCY_ACCESS_ROLE_NOT_FOUND');
+      if (!Array.isArray(role.permissions) || !role.permissions.length) throw new Error('ROLE_RETIRED');
       const overlapping = await tx.adminEmergencyAccessRecord.findFirst({
         where: {
           principalId: input.principalId,

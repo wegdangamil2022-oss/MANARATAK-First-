@@ -143,6 +143,7 @@ export class ScholarshipImportAtomicTransferUseCase
       },
     }, async (context) => {
       const importTx = this.importGateway.withTransaction(context);
+      await importTx.assertReviewLease(input.recordId, input.actorId);
       const scholarshipTx = repository.withTransaction(context);
       const current = await this.requireRecord(importTx, input.recordId);
       const batch = await this.requireScholarshipBatch(importTx, current.batchId);
@@ -182,6 +183,7 @@ export class ScholarshipImportAtomicTransferUseCase
       },
     }, async (context) => {
       const importTx = this.importGateway.withTransaction(context);
+      await importTx.assertReviewLease(input.recordId, input.actorId);
       const scholarshipTx = repository.withTransaction(context);
       const record = await this.requireRecord(importTx, input.recordId);
       const batch = await this.requireScholarshipBatch(importTx, record.batchId);

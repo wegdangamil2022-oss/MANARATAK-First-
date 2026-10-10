@@ -34,6 +34,14 @@ export class SettingsAdminRouter {
     });
     const identifier = z.string().trim().min(1).max(240);
 
+    const validationRulesSchema = z.object({
+      min: z.number().finite().optional(), max: z.number().finite().optional(),
+      integer: z.boolean().optional(),
+      minLength: z.number().int().min(0).max(100000).optional(),
+      maxLength: z.number().int().min(0).max(100000).optional(),
+      allowedValues: z.array(z.union([z.string(), z.number().finite(), z.boolean()])).min(1).max(50).optional(),
+    }).strict();
+
     const createDefinitionSchema = z
       .object({
         id: identifier,
@@ -41,11 +49,17 @@ export class SettingsAdminRouter {
         valueType: z.nativeEnum(ValueType),
         description: z.string().max(2000).optional(),
         defaultValue: z.unknown().optional(),
+        validationRules: validationRulesSchema.optional(),
         isFeatureFlag: z.boolean().optional(),
         isSecret: z.boolean().optional(),
       })
-      .strict();
+      .strict().superRefine((value, ctx) => {
+        if (value.isFeatureFlag && (value.valueType !== ValueType.Boolean || value.isSecret || typeof value.defaultValue !== 'boolean')) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['defaultValue'], message: 'Feature flags require an explicit non-secret Boolean default.' });
+        }
+      });
 
+    const changeReason = z.string().trim().min(3).max(1000).regex(/^[^\u0000-\u001f\u007f]*$/);
     const assignValueSchema = z
       .object({
         assignmentId: identifier,
@@ -55,7 +69,8 @@ export class SettingsAdminRouter {
         versionId: identifier,
         value: z.unknown(),
         type: z.nativeEnum(ValueType),
-        expectedCurrentVersionId: identifier.nullable().optional(),
+        expectedCurrentVersionId: identifier.nullable(),
+        changeReason: changeReason.optional(),
       })
       .strict()
       .superRefine((value, ctx) => {
@@ -79,35 +94,85 @@ export class SettingsAdminRouter {
       .object({
         assignmentId: identifier,
         previousVersionId: identifier,
+        changeReason,
         newVersionId: identifier,
-        expectedCurrentVersionId: identifier.optional(),
+        expectedCurrentVersionId: identifier,
       })
       .strict();
 
-    const listAssignmentsSchema = z
-      .object({
-        key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/).optional(),
-        level: z.nativeEnum(ScopeLevel).optional(),
-        scopeId: identifier.optional(),
-      })
-      .strict();
+    const pageFields = { q: z.string().trim().min(1).max(200).optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(50), cursor: identifier.optional() };
+    const listAssignmentsSchema = z.object({ ...pageFields,
+      key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/).optional(), level: z.nativeEnum(ScopeLevel).optional(), scopeId: identifier.optional() }).strict();
+    const listDefinitionsSchema = z.object({ ...pageFields,
+      cursor: identifier.regex(/^[a-zA-Z0-9_\-.]+$/).optional(),
+      classification: z.enum(['ALL', 'SETTING', 'FLAG', 'SECRET', 'DEPRECATED']).default('ALL') }).strict();
 
-    router.get(
-      '/definitions',
-      asyncHandler(async (_req: Request, res: Response) => {
-        const definitions = await manageSettingsUseCase.listDefinitions();
-        res.status(200).json(responseFormatter.success({ definitions }));
-      }),
-    );
+    router.get('/definitions', asyncHandler(async (req, res) => {
+      const query = listDefinitionsSchema.parse(req.query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.definitionPage(query)));
+    }));
+    router.get('/assignments', asyncHandler(async (req, res) => {
+      const query = listAssignmentsSchema.parse(req.query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.assignmentPage(query)));
+    }));
+    router.get('/assignments/context', asyncHandler(async (req, res) => {
+      const query = z.object({ key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/),
+        level: z.nativeEnum(ScopeLevel), scopeId: identifier.optional() }).strict().superRefine((value, ctx) => {
+          if (value.level === ScopeLevel.GLOBAL && value.scopeId !== undefined)
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['scopeId'], message: 'GLOBAL must omit scopeId' });
+          if (value.level !== ScopeLevel.GLOBAL && !value.scopeId)
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['scopeId'], message: 'scopeId required for this scope' });
+        }).parse(req.query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.assignmentContext(query.key, query.level, query.scopeId)));
+    }));
 
-    router.get(
-      '/assignments',
-      asyncHandler(async (req: Request, res: Response) => {
-        const filters = listAssignmentsSchema.parse(req.query);
-        const assignments = await manageSettingsUseCase.listAssignments(filters);
-        res.status(200).json(responseFormatter.success({ assignments }));
-      }),
-    );
+    router.get('/assignments/:id/history', asyncHandler(async (req, res) => {
+      const id = identifier.parse(req.params.id);
+      const query = z.object({ expectedCurrentVersionId: identifier,
+        limit: z.coerce.number().int().min(1).max(100).default(50), cursor: identifier.optional() }).strict().parse(req.query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.assignmentHistory(
+        id, query.expectedCurrentVersionId, query.limit, query.cursor)));
+    }));
+
+    const updateDefinitionSchema = z.object({ key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/),
+      expectedRevision: z.string().datetime(), description: z.string().max(2000).optional(),
+      isDeprecated: z.literal(true).optional(), changeReason }).strict().refine(
+        value => value.description !== undefined || value.isDeprecated === true, 'No metadata change supplied');
+    const clearOverrideSchema = z.object({ assignmentId: identifier, newVersionId: identifier,
+      expectedCurrentVersionId: identifier, changeReason }).strict();
+
+    router.get('/definitions/:key/impact', asyncHandler(async (req, res) => {
+      const key = identifier.regex(/^[a-zA-Z0-9_\-.]+$/).parse(req.params.key);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(responseFormatter.success(await manageSettingsUseCase.definitionImpact(key)));
+    }));
+    router.post('/definitions/update', asyncHandler(async (req, res) => {
+      try {
+        const input = updateDefinitionSchema.parse(req.body);
+        await manageSettingsUseCase.updateDefinition(input, context(req));
+        res.json(responseFormatter.success({ message: 'Setting definition updated' }));
+      } catch (error) {
+        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'UPDATE_SETTING_DEFINITION', category: 'SETTINGS',
+          targetType: 'SETTING_DEFINITION', targetId: req.body?.key, result: 'FAILURE', error });
+        throw error;
+      }
+    }));
+    router.post('/assignments/clear', asyncHandler(async (req, res) => {
+      try {
+        const input = clearOverrideSchema.parse(req.body);
+        const assignmentId = await manageSettingsUseCase.clearOverride({ ...input, authorId: actor(req) }, context(req));
+        res.json(responseFormatter.success({ assignmentId, versionId: input.newVersionId, message: 'Override cleared; inheritance restored' }));
+      } catch (error) {
+        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'CLEAR_SETTING_OVERRIDE', category: 'SETTINGS',
+          targetType: 'SETTING_ASSIGNMENT', targetId: req.body?.assignmentId, result: 'FAILURE', error });
+        throw error;
+      }
+    }));
 
     router.post(
       '/definitions',
@@ -210,13 +275,17 @@ export class SettingsAdminRouter {
       }
       const message = err?.message || 'Settings operation failed';
       const conflict =
-        /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|already belongs/i.test(message);
+        /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|SETTINGS_ASSIGNMENT_CONFLICT|SETTINGS_DEFINITION_CONFLICT|SETTINGS_OVERRIDE_ALREADY_CLEARED|SETTINGS_DEFINITION_NOT_WRITABLE|already belongs/i.test(message);
+      const known = /^SETTINGS_[A-Z_]+/.exec(message)?.[0];
+      const missing = /_NOT_FOUND$/.test(known ?? '') || /not found/i.test(message);
+      const unavailable = /SETTINGS_(ATOMIC|IMPACT|DURABLE|IDENTITY_SCOPE_VALIDATOR)/.test(known ?? '');
+      const rejected = known || /already exists|cannot be mutated|already belongs|Secret |Feature flags|deprecated|not found|Type mismatch|Value must/.test(message);
       res
-        .status(conflict ? 409 : 400)
+        .status(conflict ? 409 : missing ? 404 : unavailable ? 503 : !rejected ? 503 : 400)
         .json(
           responseFormatter.error({
-            code: conflict ? 'SETTINGS_CONFLICT' : 'SETTINGS_OPERATION_REJECTED',
-            message,
+            code: conflict ? 'SETTINGS_CONFLICT' : missing ? 'SETTINGS_NOT_FOUND' : unavailable || !rejected ? 'SETTINGS_UNAVAILABLE' : 'SETTINGS_OPERATION_REJECTED',
+            message: conflict ? 'Settings changed; reload before retrying.' : !rejected || unavailable ? 'Settings operation unavailable.' : known ?? 'Settings operation rejected.',
           }),
         );
     });

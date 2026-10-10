@@ -2,6 +2,36 @@ import type { EmergencyAccessGrantRecord, IEmergencyAccessRepository } from '@ma
 
 export class InMemoryEmergencyAccessRepository implements IEmergencyAccessRepository {
   private readonly rows = new Map<string, EmergencyAccessGrantRecord>();
+  async queryPage(input: {
+    limit: number;
+    cursor?: string;
+    principalId?: string;
+    activeOnly?: boolean;
+    state?: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'REVOKED';
+  }) {
+    const now = new Date();
+    const rows = [...this.rows.values()]
+      .filter(
+        (row) =>
+          !input.state ||
+          (row.revokedAt
+            ? 'REVOKED'
+            : row.expiresAt <= now
+              ? 'EXPIRED'
+              : row.startsAt > now
+                ? 'SCHEDULED'
+                : 'ACTIVE') === input.state,
+      )
+      .filter(
+        (row) =>
+          (!input.cursor || row.id > input.cursor) &&
+          (!input.principalId || row.principalId === input.principalId) &&
+          (!input.activeOnly || (!row.revokedAt && row.startsAt <= now && row.expiresAt > now)),
+      )
+      .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    const items = rows.slice(0, input.limit);
+    return { items, nextCursor: rows.length > input.limit ? items.at(-1)!.id : null };
+  }
   async list(input: { principalId?: string; activeOnly?: boolean; limit?: number } = {}) {
     const now = new Date();
     return [...this.rows.values()]

@@ -114,4 +114,117 @@ describe('W3 MNT-AUD-0011 production asset provider adapters', () => {
       300,
     )).resolves.toMatchObject({ url: expect.stringContaining('https://cdn.example.test/download') });
   });
+  it('binds locator and upload-grant idempotency to asset identity, not just shared metadata', async () => {
+    const keys: string[] = [];
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      keys.push(new Headers(init?.headers).get('idempotency-key') ?? '');
+      return jsonResponse({
+        locator: { storageZone: 'QUARANTINE', bucketName: 'q', pathKey: 'uploads/a.pdf' },
+        uploadUrl: 'https://object.example.test/upload', method: 'PUT',
+        expiresAt: new Date(Date.now() + 300_000).toISOString(),
+      });
+    });
+    const gateway = new HttpAssetStorageGateway(options(fetchMock as any));
+    await gateway.generateUploadLocator(AssetStorageZone.QUARANTINE, 'asset-a');
+    await gateway.generateUploadLocator(AssetStorageZone.QUARANTINE, 'asset-b');
+    await gateway.generateUploadLocator(AssetStorageZone.QUARANTINE, 'asset-a');
+    expect(keys[0]).not.toBe(keys[1]);
+    expect(keys[0]).toBe(keys[2]);
+    const base = { originalFilename: 'same.pdf', mimeType: 'application/pdf', byteSize: 200 };
+    await gateway.generateUploadGrant(AssetStorageZone.QUARANTINE, { ...base, assetId: 'asset-a' });
+    await gateway.generateUploadGrant(AssetStorageZone.QUARANTINE, { ...base, assetId: 'asset-b' });
+    await gateway.generateUploadGrant(AssetStorageZone.QUARANTINE, { ...base, assetId: 'asset-a' });
+    expect(keys[3]).not.toBe(keys[4]);
+    expect(keys[3]).toBe(keys[5]);
+  });
+
+  it('rejects forged provider verification and accepts only observed signed content metadata', async () => {
+    const locator = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'uploads/a.pdf');
+    const request = { expectedByteSize: 50, declaredMimeType: 'application/pdf' };
+    const provider = (result: unknown) => new HttpAssetStorageGateway(options(
+      (async () => jsonResponse(result)) as any,
+    ));
+    await expect(provider({
+      byteSize: 50, verifiedMimeType: 'application/pdf', signatureVerified: false,
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(),
+    }).verifyUploadedObject(locator, request)).rejects.toThrow('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    await expect(provider({
+      byteSize: 51, verifiedMimeType: 'application/pdf', signatureVerified: true,
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(),
+    }).verifyUploadedObject(locator, request)).rejects.toThrow('ASSET_PROVIDER_UPLOAD_VERIFICATION_FAILED');
+    await expect(provider({
+      byteSize: 50, verifiedMimeType: 'application/pdf', signatureVerified: true,
+      checksumSha256: 'a'.repeat(64), verifiedAt: new Date().toISOString(),
+    }).verifyUploadedObject(locator, request)).resolves.toMatchObject({ byteSize: 50, signatureVerified: true });
+  });
+
+  it('requires an echoed source digest on provider promotion into CLEAN', async () => {
+    const source = new AssetStorageLocator(AssetStorageZone.QUARANTINE, 'q', 'sanitized/asset.pdf');
+    const sha256 = 'd'.repeat(64);
+    const gateway = new HttpAssetStorageGateway(options((async (_url: RequestInfo | URL, init?: RequestInit) => {
+      const payload = JSON.parse(new TextDecoder().decode(init?.body as Uint8Array));
+      expect(payload.expectedSha256).toBe(sha256);
+      return jsonResponse({
+        locator: { storageZone: 'CLEAN', bucketName: 'c', pathKey: 'clean/asset.pdf' },
+        verifiedSourceSha256: sha256,
+      });
+    }) as any));
+    await expect(gateway.moveToCleanZone(source)).rejects.toThrow('ASSET_CLEAN_PROMOTION_CHECKSUM_REQUIRED');
+    await expect(gateway.moveToCleanZone(source, sha256)).resolves.toMatchObject({
+      storageZone: AssetStorageZone.CLEAN,
+    });
+    const legacy = new HttpAssetStorageGateway(options((async () => jsonResponse({
+      locator: { storageZone: 'CLEAN', bucketName: 'c', pathKey: 'clean/asset.pdf' },
+    })) as any));
+    await expect(legacy.moveToCleanZone(source, sha256))
+      .rejects.toThrow('ASSET_PROVIDER_ATOMIC_PROMOTION_PROOF_REQUIRED');
+  });
+
+  it('requires authoritative clean-byte proof before restored objects can be delivered', async () => {
+    const locator = new AssetStorageLocator(AssetStorageZone.CLEAN, 'clean-bucket', 'clean/restored.pdf');
+    const sha = 'a'.repeat(64);
+    const request = { expectedSha256: sha, expectedByteSize: 125, declaredMimeType: 'application/pdf' };
+    const healthy = new HttpAssetStorageGateway(options((async (_url: RequestInfo | URL, init?: RequestInit) => {
+      const body = JSON.parse(new TextDecoder().decode(init?.body as Uint8Array));
+      expect(body.expectedSha256).toBe(sha);
+      expect(body.locator.storageZone).toBe('CLEAN');
+      return jsonResponse({
+        verifiedSha256: sha, verifiedByteSize: 125, verifiedMimeType: 'application/pdf',
+        verifiedAt: new Date().toISOString(), signatureVerified: true,
+      });
+    }) as any));
+    await expect(healthy.verifyRestoredObject(locator, request)).resolves.toBeUndefined();
+    const untrusted = new HttpAssetStorageGateway(options((async () => jsonResponse({
+      verifiedSha256: sha, verifiedByteSize: 125, verifiedMimeType: 'application/pdf',
+      verifiedAt: new Date().toISOString(),
+    })) as any));
+    await expect(untrusted.verifyRestoredObject(locator, request))
+      .rejects.toThrow('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+  });
+
+});
+
+describe('bounded signed provider streaming', () => {
+  it('enforces actual streamed bytes and cancels a provider without content-length', async () => {
+    const cancel = vi.fn();
+    const fetchMock = vi.fn(async (_url: any, init: any) => {
+      expect(init.redirect).toBe('error');
+      expect(new Headers(init.headers).get('x-manaratak-signature')).toMatch(/^[a-f0-9]{64}$/);
+      return new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(5)); }, cancel }));
+    });
+    const client = new SignedProviderHttpClient({ ...options(fetchMock as any), maxResponseBytes: 4 });
+    await expect(client.streamBytes('POST', '/v1/assets/read', {})[Symbol.asyncIterator]().next()).rejects.toThrow('RESPONSE_TOO_LARGE');
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+  it('cancels the native response when its consumer stops early', async () => {
+    const cancel = vi.fn();
+    const fetchMock = async () => new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array([1])); }, cancel }));
+    const client = new SignedProviderHttpClient(options(fetchMock as any));
+    for await (const chunk of client.streamBytes('GET', '/v1/read')) { expect(chunk[0]).toBe(1); break; }
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+  it('rejects a truncated provider response', async () => {
+    const client = new SignedProviderHttpClient(options((async () => new Response('abc', { headers: { 'content-length': '5' } })) as any));
+    await expect(client.bytes('GET', '/v1/read')).rejects.toThrow('LENGTH_MISMATCH');
+  });
 });

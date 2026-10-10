@@ -85,6 +85,28 @@ export class PrismaRoleAssignmentRepository implements ITransactionalRoleAssignm
     return records.map(record => this.mapToDomain(record));
   }
 
+  async queryPage(input: { limit: number; cursor?: string; roleId?: string; search?: string }) {
+    const rows = await this.prisma.roleAssignmentRecord.findMany({
+      where: {
+        ...(input.cursor ? { id: { gt: input.cursor } } : {}),
+        ...(input.roleId ? { roleId: input.roleId } : {}),
+        ...(input.search
+          ? {
+              OR: [
+                { identityId: { contains: input.search, mode: 'insensitive' } },
+                { roleId: { contains: input.search, mode: 'insensitive' } },
+                { id: { contains: input.search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { id: 'asc' },
+      take: input.limit + 1,
+    });
+    const items = rows.slice(0, input.limit).map((row) => this.mapToDomain(row));
+    return { items, nextCursor: rows.length > input.limit ? items.at(-1)!.id : null };
+  }
+
   async listAll(): Promise<RoleAssignment[]> {
     const records = await this.client.roleAssignmentRecord.findMany();
     return records.map(record => this.mapToDomain(record));

@@ -17,6 +17,49 @@ export class AuthorizationEvaluatorService {
     private readonly emergencyAccessRepository?: IEmergencyAccessRepository
   ) {}
 
+  public async describeIdentityAccess(identityId: string) {
+    const assignments = await this.roleAssignmentRepository.findByIdentityId(identityId);
+    const emergencyRoleIds =
+      (await this.emergencyAccessRepository?.listActiveRoleIds(identityId)) ?? [];
+    const ids = [...new Set([...assignments.map((item) => item.roleId), ...emergencyRoleIds])];
+    if (ids.length > 200) throw new Error('AUTHORIZATION_ACCESS_PROJECTION_LIMIT');
+    return Promise.all(
+      ids.map(async (id) => {
+        const role = await this.roleRepository.findById(id);
+        if (!role)
+          return {
+            id,
+            missing: true,
+            sources: [] as string[],
+            permissions: [] as string[],
+            policies: [],
+          };
+        const policies = await Promise.all(
+          role.policyIds.map(async (policyId) => {
+            const policy = await this.policyRepository.findById(policyId);
+            return {
+              id: policyId,
+              name: policy?.name,
+              ruleType: policy?.ruleType,
+              missing: !policy,
+            };
+          }),
+        );
+        return {
+          id,
+          name: role.name,
+          missing: false,
+          sources: [
+            ...(assignments.some((item) => item.roleId === id) ? ['ASSIGNMENT'] : []),
+            ...(emergencyRoleIds.includes(id) ? ['EMERGENCY'] : []),
+          ],
+          permissions: role.permissions.map((permission) => permission.value),
+          policies,
+        };
+      }),
+    );
+  }
+
   public async evaluatePermission(
     identityId: string,
     permissionStr: string,
@@ -41,15 +84,14 @@ export class AuthorizationEvaluatorService {
     identityId: string,
     resourceUrn: ResourceUrn,
     action: Action,
-    contextAttributes: Record<string, unknown> = {}
+    contextAttributes: Record<string, unknown> = {},
   ): Promise<AccessDecision> {
     const requiredPermission = new PermissionReference(`${resourceUrn.value}:${action.value}`);
 
     // Fetch all role assignments for identity
-    const assignments = await this.roleAssignmentRepository.findBy({
-      isSatisfiedBy: (assignment) => assignment.identityId === identityId
-    });
-    const emergencyRoleIds = await this.emergencyAccessRepository?.listActiveRoleIds(identityId) ?? [];
+    const assignments = await this.roleAssignmentRepository.findByIdentityId(identityId);
+    const emergencyRoleIds =
+      (await this.emergencyAccessRepository?.listActiveRoleIds(identityId)) ?? [];
     const roleIds = Array.from(new Set([...assignments.map(assignment => assignment.roleId), ...emergencyRoleIds]));
 
     if (roleIds.length === 0) {
@@ -57,10 +99,10 @@ export class AuthorizationEvaluatorService {
     }
 
     const context: EvaluationContext = {
+      ...contextAttributes,
       identityId,
       resourceUrn,
       action,
-      ...contextAttributes
     };
 
     let failedPolicyReasons: string[] = [];

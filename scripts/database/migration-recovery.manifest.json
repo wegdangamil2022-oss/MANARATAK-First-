@@ -322,6 +322,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Unapplied source migration. After authoring starts, restoring a backup is required to preserve region lifecycle, aliases, versions and dependent relationships; no destructive reverse SQL is asserted."
+    },
+    "20261009070000_import_governance_receipts": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Additive import control-plane evidence must be retained; recover from pre-mutation backup or reprovision a disposable target. No destructive reverse SQL is asserted."
     }
   }
 }

@@ -11,6 +11,16 @@ export class ManageEmergencyAccessUseCase {
     private readonly atomicMutations?: AtomicDomainMutationCoordinator,
   ) {}
 
+  page(input: {
+    limit: number;
+    cursor?: string;
+    principalId?: string;
+    activeOnly?: boolean;
+    state?: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'REVOKED';
+  }) {
+    if (!this.repository.queryPage) throw new Error('EMERGENCY_ACCESS_PAGINATION_UNAVAILABLE');
+    return this.repository.queryPage(input);
+  }
   list(input?: { principalId?: string; activeOnly?: boolean; limit?: number }) {
     return this.repository.list(input);
   }

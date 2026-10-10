@@ -5,6 +5,23 @@ import { AssetPlatformRouter } from '../../../../src/presentation/api/router/Ass
 import { SecurityMiddlewareFactory } from '../../../../src/presentation/security/SecurityMiddlewareFactory';
 
 describe('AssetPlatformRouter', () => {
+  it('projects recovery state without provider coordinates or proof payloads', async () => {
+    const operation = { operationId: 'safe-operation', phase: 'RECOVERY_REQUIRED', preparedAt: '2026-10-09', updatedAt: '2026-10-09',
+      sourceLocator: 'clean://private/recovery-path.pdf', expectedSha256: 'private-proof-hash', expectedByteSize: 64 };
+    const asset = { id: { value: 'pending' }, reference: { value: 'ref-pending' }, owner: { ownerId: 'owner', ownerType: 'STUDENT' },
+      state: 'DELETED', classification: 'INTERNAL', retention: { category: 'SOFT_DELETED' },
+      metadata: { originalFilename: 'test.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 }, restoreOperation: operation, archiveOperation: { ...operation, phase: 'RECOVERY_REQUIRED' } };
+    const app = express();
+    app.use('/assets', AssetPlatformRouter.create({ ingestAssetUseCase: {} as any, processAssetLifecycleUseCase: {} as any,
+      assetRecordRepository: { findAdminDetails: vi.fn(async () => ({ asset, governance: {} })) } as any }));
+    const response = await request(app).get('/assets/pending');
+    expect(response.status).toBe(200); expect(response.body.securityEvidence.restorePhase).toBe('RECOVERY_REQUIRED');
+    expect(response.body.securityEvidence.archivePhase).toBe('RECOVERY_REQUIRED');
+    expect(response.body.restoreOperation).toEqual({ operationId: operation.operationId, phase: operation.phase,
+      preparedAt: operation.preparedAt, updatedAt: operation.updatedAt });
+    expect(JSON.stringify(response.body)).not.toContain(operation.sourceLocator);
+    expect(JSON.stringify(response.body)).not.toContain(operation.expectedSha256);
+  });
   const createMockIngestUseCase = () => ({
     requestUploadLocator: vi.fn(),
     registerQuarantinedAsset: vi.fn()
@@ -64,6 +81,10 @@ describe('AssetPlatformRouter', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.assetId).toBe('ast_01');
+    expect(res.body).not.toHaveProperty('storageLocator');
+    expect(res.body).not.toHaveProperty('bucketName');
+    expect(res.body).not.toHaveProperty('pathKey');
+    expect(res.body).not.toHaveProperty('storageZone');
     expect(ingestUseCase.requestUploadLocator).toHaveBeenCalledWith(expect.objectContaining({
       assetId: 'ast_01',
       assetReference: 'ref_01',
@@ -279,15 +300,17 @@ describe('AssetPlatformRouter', () => {
     expect(processUseCase.purgeAsset).toHaveBeenCalledWith({ assetId: 'ast_01' });
   });
 
-  it('returns 400 when use case throws an error', async () => {
+  it('returns safe 409 Problem Details for an in-use lifecycle conflict', async () => {
     const processUseCase = createMockProcessLifecycleUseCase();
     processUseCase.purgeAsset.mockRejectedValue(new Error('Cannot purge asset ast_01 because it is currently in use'));
     const app = createApp(undefined, processUseCase);
 
     const res = await request(app).delete('/assets/ast_01/purge');
 
-    expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'Cannot purge asset ast_01 because it is currently in use' });
+    expect(res.status).toBe(409);
+    expect(res.headers['content-type']).toContain('application/problem+json');
+    expect(res.body).toMatchObject({ status: 409, code: 'ASSET_STATE_CONFLICT' });
+    expect(JSON.stringify(res.body)).not.toContain('currently in use');
   });
 
   describe('Route Security Guards', () => {
@@ -407,4 +430,69 @@ describe('AssetPlatformRouter', () => {
       expect(res.headers['x-admin-required-permission']).toBe('admin:assets:manage');
     });
   });
+  it('GET /assets validates canonical facets before calling the read model', async () => {
+    const queryAdmin = vi.fn(async () => ({ items: [], hasMore: false, nextCursor: null }));
+    const app = express();
+    app.use('/assets', AssetPlatformRouter.create({
+      ingestAssetUseCase: createMockIngestUseCase() as any,
+      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+      assetRecordRepository: { queryAdmin, findById: vi.fn() },
+    }));
+    const result = await request(app).get('/assets').query({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', usageStatus: 'UNUSED', q: 'pdf' });
+    expect(result.status).toBe(200);
+    expect(queryAdmin).toHaveBeenCalledWith({ retentionCategory: 'TEMPORARY', checksumPresence: 'MISSING', usageStatus: 'UNUSED', q: 'pdf' });
+    queryAdmin.mockClear();
+    for (const query of [
+      { checksumPresence: 'false' }, { checksumPresence: ['PRESENT', 'MISSING'] },
+      { retentionCategory: 'unknown' }, { checksumPresence: 'VERIFIED' },
+      { usageStatus: 'ALL' }, { usageStatus: ['IN_USE', 'UNUSED'] },
+    ]) {
+      expect((await request(app).get('/assets').query(query)).status).toBe(400);
+    }
+    expect(queryAdmin).not.toHaveBeenCalled();
+  });
+
+  it('GET detail projects governance, persisted versions and operation identity without storage coordinates', async () => {
+    const findAdminDetails = vi.fn(async () => ({
+      asset: { id: { value: 'detail-a' }, reference: { value: 'detail-ref' },
+        owner: { ownerId: 'course-a', ownerType: 'COURSE' }, state: 'SANITIZING', classification: 'INTERNAL',
+        retention: { category: 'PERMANENT', expiresAt: null },
+        metadata: { originalFilename: 'a.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 },
+        versionChain: { allVersions: [{ versionNumber: 1, createdAt: new Date('2026-10-01'),
+          storageLocator: 'clean://secret-version/path', checksum: { algorithm: 'sha256', hash: 'a'.repeat(64) } }] },
+        uploadVerification: { signatureVerified: true, verifiedAt: '2026-10-02T00:00:00.000Z', locator: 'secret-upload' },
+        activationOperation: { operationId: 'operation-a', phase: 'PREPARED', preparedAt: '2026-10-09T00:00:00.000Z', sourceLocator: 'secret-source' },
+      },
+      governance: { createdAt: new Date('2026-10-01'), updatedAt: new Date('2026-10-09'),
+        legalHoldUntil: new Date('2027-01-01'), archivedAt: null, deletedAt: null, purgedAt: null },
+    }));
+    const app = express();
+    app.use('/assets', AssetPlatformRouter.create({
+      ingestAssetUseCase: createMockIngestUseCase() as any,
+      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+      assetRecordRepository: { queryAdmin: vi.fn(), findById: vi.fn(), findAdminDetails },
+    }));
+    const res = await request(app).get('/assets/detail-a');
+    expect(res.status).toBe(200);
+    expect(res.body.versions[0].versionNumber).toBe(1);
+    expect(res.body.governance.legalHoldUntil).toBe('2027-01-01T00:00:00.000Z');
+    expect(res.body.activationOperation.phase).toBe('PREPARED');
+    expect(res.body.securityEvidence.uploadVerifiedAt).toBe('2026-10-02T00:00:00.000Z');
+    expect(JSON.stringify(res.body)).not.toContain('secret-');
+  });
+
+  it('rejects unrecognized workspace facets before repository execution', async () => {
+    const queryAdmin = vi.fn();
+    const app = express();
+    app.use('/assets', AssetPlatformRouter.create({
+      ingestAssetUseCase: createMockIngestUseCase() as any,
+      processAssetLifecycleUseCase: createMockProcessLifecycleUseCase() as any,
+      assetRecordRepository: { queryAdmin, findById: vi.fn() },
+    }));
+    for (const query of [{ fileFamily: 'EXECUTABLE' }, { malwareStatus: 'CLEAN' }, { processingQueue: 'ALL' }]) {
+      expect((await request(app).get('/assets').query(query)).status).toBe(400);
+    }
+    expect(queryAdmin).not.toHaveBeenCalled();
+  });
+
 });

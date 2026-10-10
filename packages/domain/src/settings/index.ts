@@ -3,6 +3,7 @@ export * from './enums/ValueType';
 export * from './value-objects/NamespacedKey';
 export * from './value-objects/ScopeIdentifier';
 export * from './value-objects/SettingValueData';
+export * from './value-objects/SettingValidationRules';
 export * from './value-objects/SettingVersion';
 export * from './entities/SettingDefinition';
 export * from './entities/SettingAssignment';
@@ -16,3 +17,5 @@ export * from './services/ConfigurationResolutionService';
 export * from './repositories/ISettingDefinitionRepository';
 export * from './repositories/ISettingAssignmentRepository';
 
+export * from './services/IResolvedSettingsReader';
+export * from './events/SettingOverrideClearedEvent';

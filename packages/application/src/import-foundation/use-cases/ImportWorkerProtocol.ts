@@ -10,6 +10,7 @@ export interface ImportWorkerFailure {
 export type ImportWorkerProcessor = (
   lease: ImportJobLease,
   heartbeat: () => Promise<void>,
+  getActiveLease: () => ImportJobLease,
 ) => Promise<void>;
 
 export class ImportWorkerProtocol {
@@ -39,11 +40,15 @@ export class ImportWorkerProtocol {
     };
 
     try {
-      await process(activeLease, heartbeat);
+      await process(activeLease, heartbeat, () => activeLease);
       if (!(await this.queue.completeClaimedJob(activeLease)))
         throw new Error('IMPORT_WORKER_LEASE_LOST');
       return 'COMPLETED';
     } catch (error: unknown) {
+      // A pause/cancel is only final once the in-flight owner call has returned.
+      // Never acknowledge while process() can still make side effects.
+      const acknowledged = await this.queue.acknowledgeStoppedJob(activeLease);
+      if (acknowledged) throw new Error('IMPORT_WORKER_LEASE_LOST');
       const failure = this.failureFrom(error);
       const result = await this.queue.failClaimedJob({
         lease: activeLease,
@@ -61,7 +66,9 @@ export class ImportWorkerProtocol {
       const value = error as { message?: unknown; code?: unknown };
       return {
         reason: typeof value.message === 'string' ? value.message : 'Import worker failed',
-        errorCode: typeof value.code === 'string' ? value.code : undefined,
+        errorCode: typeof value.code === 'string' ? value.code
+          : typeof value.message === 'string' && /^IMPORT_[A-Z0-9_]+$/.test(value.message)
+            ? value.message : undefined,
       };
     }
     return { reason: typeof error === 'string' ? error : 'Import worker failed' };

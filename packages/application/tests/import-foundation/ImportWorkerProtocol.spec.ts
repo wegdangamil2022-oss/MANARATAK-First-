@@ -18,6 +18,7 @@ function queue(overrides: Partial<IImportQueueGateway> = {}): IImportQueueGatewa
     pauseJob: vi.fn(),
     resumeJob: vi.fn(),
     cancelJob: vi.fn(),
+    acknowledgeStoppedJob: vi.fn().mockResolvedValue(null),
     replayJob: vi.fn(),
     recordCheckpoint: vi.fn(),
     moveToDeadLetter: vi.fn(),

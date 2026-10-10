@@ -5,3 +5,5 @@ export * from './use-cases/ProcessAssetLifecycleUseCase';
 export * from './utils/AssetValidator';
 
 export * from './AssetReferencePolicy';
+
+export * from './use-cases/RecoverAssetActivationsUseCase';

@@ -102,6 +102,7 @@ export interface CourseFieldProvenanceWrite {
 }
 
 export interface CourseImportTransferGateway {
+  assertReviewLease(recordId: string, actorId: string): Promise<void>;
   withTransaction(context: AtomicPersistenceContext): CourseImportTransferGateway;
   getRecordById(recordId: string): Promise<CourseImportTransferStoredRecord | null>;
   getBatchById(batchId: string): Promise<CourseImportTransferBatch | null>;

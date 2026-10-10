@@ -48,6 +48,7 @@ import {
   Wrench,
   X,
 } from 'lucide-react';
+import { AssetPicker } from '../components/AssetPicker';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
@@ -149,6 +150,7 @@ type ImportSource = {
   robotsPolicyUrl?: string;
   connectorId: string;
   connectorVersion: string;
+  updatedAt?: string;
   metadata?: Record<string, unknown>;
 };
 
@@ -180,6 +182,8 @@ type ImportResult = {
 
 type OperationalInsights = {
   stuckBatches: number;
+  pendingStopBatches?: number;
+  strandedStopBatches?: number;
   highFailureBatches: number;
   retryableBatches: number;
   pausedBatches: number;
@@ -187,7 +191,7 @@ type OperationalInsights = {
   dlqBatches: number;
   oldestActiveBatch?: ImportBatch | null;
   recentProblemBatches?: Array<
-    ImportBatch & { stuck?: boolean; highFailureRate?: boolean; failureRate?: number }
+    ImportBatch & { stuck?: boolean; pendingStop?: boolean; requiresOwnerVerification?: boolean; highFailureRate?: boolean; failureRate?: number }
   >;
   thresholds?: { stuckAfterMinutes?: number; highFailureRate?: number };
   generatedAt?: string;
@@ -222,6 +226,19 @@ type ErrorReport = {
   dlq: number;
   rows: ImportRecord[];
   truncated?: boolean;
+  batchFailureTotal?: number;
+  batchFailures?: Array<{
+    batchId: string; domain: string; sourceSystem: string; status: string;
+    stage: string; errorCode: string | null; retryable: boolean;
+    attempt: number; message: string; updatedAt: string | null;
+  }>;
+  workerFailures?: Array<{
+    eventId: string; batchId: string; domain: string; sourceSystem: string;
+    stage: string; errorCode: string | null; attempt: number | null;
+    retryable: boolean; outcome: string | null; message: string; createdAt: string;
+  }>;
+  truncatedWorkerFailures?: boolean;
+  truncatedBatchFailures?: boolean;
   generatedAt?: string;
 };
 
@@ -318,9 +335,11 @@ const RECORD_STATUS_OPTIONS = [
 ] as const;
 
 const ACTIVE_BATCH_STATUSES = new Set([
+  'STAGING',
   'CREATED',
   'QUEUED',
   'RUNNING',
+  'PAUSING',
   'PAUSED',
   'RESUMING',
   'CANCELLING',
@@ -927,9 +946,21 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           reason ? { reason } : action === 'replay' ? { fromCheckpoint: true } : {},
         ),
       });
+      let pendingStop = false;
+      if (action === 'pause' || action === 'cancel') {
+        // The command may have been accepted while a domain call is still running.
+        // Never claim that cancellation or pause has finished before owner exit.
+        const latest = await adminApiClient.request<{ status: string }>(
+          `/admin/imports/queue/jobs/${encodeURIComponent(batch.id)}`,
+        );
+        pendingStop = latest.status === 'PAUSING' || latest.status === 'CANCELLING';
+      }
       setNotice({
-        tone: 'success',
-        content: txt('تم تنفيذ الإجراء على الدفعة بنجاح.', 'Batch action completed successfully.'),
+        tone: pendingStop ? 'warning' : 'success',
+        content: pendingStop
+          ? txt('تم تسجيل الطلب؛ لا تزال المهمة تنتظر تأكيد توقف العامل.',
+            'Stop requested; the job is awaiting worker acknowledgement.')
+          : txt('تم تنفيذ الإجراء على الدفعة بنجاح.', 'Batch action completed successfully.'),
       });
       await refreshAll(false);
     } catch (error) {
@@ -959,11 +990,11 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       )
     )
       return;
-    const entered = risky
-      ? window.prompt(txt('سبب تغيير الحالة (اختياري):', 'Reason (optional):'))
-      : '';
+    if (!source.updatedAt) return;
+    const entered = window.prompt(txt('سبب تغيير الحالة:', 'Reason for status change:'));
     if (entered === null) return;
-    const reason = entered.trim() || undefined;
+    const reason = entered.trim();
+    if (reason.length < 3) return;
     mutation.current = true;
     setSourceActionLoading(source.sourceId);
     try {
@@ -971,7 +1002,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         `/admin/imports/sources/${encodeURIComponent(source.sourceId)}/status`,
         {
           method: 'PATCH',
-          body: JSON.stringify({ status: nextStatus, reason }),
+          body: JSON.stringify({ status: nextStatus, reason, expectedUpdatedAt: source.updatedAt }),
         },
       );
       setNotice({
@@ -1002,7 +1033,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       const report = await adminApiClient.request<ErrorReport>(
         `/admin/imports/error-report?${params}`,
       );
-      if (!Array.isArray(report.rows) || report.rows.length === 0) {
+      if ((!Array.isArray(report.rows) || report.rows.length === 0) && !report.batchFailures?.length && !report.workerFailures?.length) {
         setNotice({
           tone: 'warning',
           content: txt(
@@ -1037,7 +1068,28 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           record.createdAt ?? '',
         ];
       });
-      const csv = [headers, ...rows].map((row) => row.map(csvCell).join(',')).join('\n');
+      // The worker can fail a whole batch without writing a FAILED/DLQ row.
+      // Preserve that evidence as its own CSV row, never fabricate a record ID.
+      const batchFailureRows = (report.batchFailures ?? []).map(failure => [
+        '',
+        failure.batchId,
+        normalizeDomain(failure.domain),
+        failure.sourceSystem,
+        failure.status,
+        '',
+        [failure.errorCode ?? '', failure.stage, failure.retryable ? 'RETRYABLE' : 'TERMINAL',
+          `attempt=${failure.attempt}`].filter(Boolean).join(' | '),
+        failure.message,
+        failure.updatedAt ?? '',
+      ]);
+      const workerFailureRows = (report.workerFailures ?? []).map(failure => [
+        '', failure.batchId, normalizeDomain(failure.domain), failure.sourceSystem,
+        failure.outcome ?? 'WORKER_FAILURE', '',
+        [failure.errorCode ?? '', failure.stage, `attempt=${failure.attempt ?? 'UNKNOWN'}`,
+          `event=${failure.eventId}`].filter(Boolean).join(' | '),
+        failure.message, failure.createdAt,
+      ]);
+      const csv = [headers, ...rows, ...batchFailureRows, ...workerFailureRows].map((row) => row.map(csvCell).join(',')).join('\n');
       const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' });
       const href = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1047,12 +1099,12 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       link.click();
       link.remove();
       URL.revokeObjectURL(href);
-      if (report.truncated) {
+      if (report.truncated || report.truncatedBatchFailures || report.truncatedWorkerFailures) {
         setNotice({
           tone: 'warning',
           content: txt(
-            'تم تصدير أول 1000 سجل خطأ فقط. استخدم تصفية المجال أو الدفعة لتضييق التقرير.',
-            'Only the first 1000 error rows were exported. Filter by domain or batch to narrow the report.',
+            'التقرير يتضمن أول 1000 نتيجة لكل نوع (السجلات والدفعات وأحداث فشل العامل). استخدم تصفية المجال أو الدفعة للحصول على بقية النتائج.',
+            'Report includes up to 1000 results per category (records, batches and worker failures). Filter by domain or batch for additional results.',
           ),
         });
       }
@@ -1192,6 +1244,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       </section>
 
       {((operations?.stuckBatches ?? 0) > 0 ||
+        (operations?.strandedStopBatches ?? 0) > 0 ||
         (operations?.highFailureBatches ?? 0) > 0 ||
         failedJobs > 0 ||
         dlqRecords > 0 ||
@@ -1203,8 +1256,8 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
               value={operations?.stuckBatches ?? 0}
               title={txt('دفعات عالقة', 'Stuck batches')}
               detail={txt(
-                'RUNNING/PROCESSING بلا تقدم لأكثر من 15 دقيقة.',
-                'RUNNING/PROCESSING with no progress for more than 15 minutes.',
+                'دفعات بلا تقدم أو طلبات إيقاف عالقة تحتاج تحققًا من القسم المالك.',
+                'Stalled processing or stranded stop requests requiring owner verification.',
               )}
             />
           )}
@@ -1374,10 +1427,18 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           />
         ) : (
           <>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
               <MiniStat
                 label={txt('عالقة >15د', 'Stuck >15m')}
                 value={operations?.stuckBatches ?? 0}
+              />
+              <MiniStat
+                label={txt('بانتظار إقرار التوقف', 'Pending stop ack')}
+                value={operations?.pendingStopBatches ?? 0}
+              />
+              <MiniStat
+                label={txt('توقف عالق - تحقق يدوي', 'Stranded stop - verify')}
+                value={operations?.strandedStopBatches ?? 0}
               />
               <MiniStat
                 label={txt('فشل >10%', 'Failure >10%')}
@@ -1428,6 +1489,8 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                         <td className="p-3 font-black">
                           {Math.round(Number(batch.failureRate ?? 0) * 100)}%
                           {batch.stuck ? ` · ${txt('عالقة', 'stuck')}` : ''}
+                          {batch.requiresOwnerVerification
+                            ? ` · ${txt('تحقق من القسم المالك مطلوب', 'owner verification required')}` : ''}
                         </td>
                         <td className="p-3 font-bold text-slate-500">
                           {formatDate(batch.updatedAt, isArabic)}
@@ -1697,7 +1760,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                     <td className="p-3">
                       <select
                         value={source.status}
-                        disabled={sourceActionLoading === source.sourceId}
+                        disabled={sourceActionLoading === source.sourceId || source.metadata?.ownerDomain !== 'GENERIC' || !source.updatedAt}
                         onChange={(event) =>
                           void changeSourceStatus(source, event.target.value as SourceStatus)
                         }
@@ -1876,7 +1939,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                             'RUNNING',
                             'PAUSED',
                             'RESUMING',
-                            'CANCELLING',
+                            'PAUSING',
                           ].includes(status) && (
                             <ActionButton
                               icon={Square}
@@ -1915,6 +1978,14 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           </div>
         )}
       </section>
+
+      {selectedBatchId && (
+        <HandoffReconciliationPanel
+          key={selectedBatchId}
+          batchId={selectedBatchId}
+          isArabic={isArabic}
+        />
+      )}
 
       <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
@@ -2207,6 +2278,16 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
         </div>
       </section>
 
+      <ImportMappingPanel sources={sources} isArabic={isArabic} />
+      <ImportGovernancePanel records={records.data} batches={batches} sources={sources} isArabic={isArabic} />
+      <BatchComparisonPanel batches={batches} isArabic={isArabic} />
+      <SourceAuthoringPanel sources={sources} isArabic={isArabic} onChanged={() => loadControlPlane()}
+        onStaged={async batchId => { setSelectedBatchId(batchId); await refreshAll(false); }} />
+      <VerifiedArtifactPanel key={fixedDomain ?? 'SCHOLARSHIPS'} ownerDomain={fixedDomain ?? 'SCHOLARSHIPS'}
+        isArabic={isArabic} onStaged={async batchId => {
+          setSelectedBatchId(batchId);
+          await refreshAll(false);
+        }} />
       {showImportModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1730]/70 p-3 backdrop-blur-sm"
@@ -2834,6 +2915,116 @@ function TagBadge({ children }: { children: ReactNode }) {
   );
 }
 
+type HandoffReviewRow = {
+  recordId: string;
+  batchId: string;
+  recordStatus: string;
+  handoffState: string;
+  handoffId: string | null;
+  ownerDomain: string | null;
+  manualVerificationRequired: boolean;
+  updatedAt: string | null;
+};
+type HandoffReviewResponse = {
+  data: HandoffReviewRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+/**
+ * Strictly read-only review panel. No retry, release, merge, or publication
+ * capability is exposed while the owning-domain receipt is still uncertain.
+ */
+function HandoffReconciliationPanel({ batchId, isArabic }: { batchId: string; isArabic: boolean }) {
+  const [page, setPage] = useState(1);
+  const [result, setResult] = useState<HandoffReviewResponse | null>(null);
+  const [state, setState] = useState<LoadState>('loading');
+  useEffect(() => {
+    let cancelled = false;
+    setState('loading');
+    void adminApiClient.request<HandoffReviewResponse>(
+      `/admin/imports/queue/jobs/${encodeURIComponent(batchId)}/handoffs/reconciliation?page=${page}&pageSize=20`,
+    ).then(response => {
+      if (cancelled) return;
+      setResult(response);
+      setState('ready');
+    }).catch(() => {
+      if (cancelled) return;
+      setResult(null);
+      setState('unavailable');
+    });
+    return () => { cancelled = true; };
+  }, [batchId, page]);
+
+  const pages = Math.max(1, Math.ceil((result?.total ?? 0) / 20));
+  return (
+    <section className="rounded-2xl border border-[#DDEFF2] bg-white p-5 shadow-sm">
+      <div className="mb-3 flex items-center gap-2">
+        <ShieldCheck className="h-5 w-5 text-[#0E7C86]" />
+        <h2 className="text-sm font-black">
+          {isArabic ? 'مراجعة تسليم البيانات للقسم المالك' : 'Owner handoff reconciliation'}
+        </h2>
+      </div>
+      <p className="mb-4 text-xs font-semibold leading-6 text-slate-600">
+        {isArabic
+          ? 'عرض معلومات التتبع دون المحتوى المستورد. التسليم غير المؤكد يحتاج إثباتًا من القسم المالك، ولا تجوز إعادة إرساله تلقائيًا.'
+          : 'Tracking information only, not source content. Uncertain deliveries require owning-domain verification and must never be replayed automatically.'}
+      </p>
+      {state === 'loading' ? (
+        <LoadingBlock label={isArabic ? 'جاري تحميل سجلات المراجعة...' : 'Loading handoff review...'} />
+      ) : state === 'unavailable' ? (
+        <EmptyBlock icon={AlertTriangle}
+          title={isArabic ? 'تعذر تحميل قائمة المراجعة' : 'Handoff review unavailable'}
+          detail={isArabic ? 'راجع صلاحيات واجهة الاستيراد أو سجل التشغيل.' : 'Check the import API and operational logs.'} />
+      ) : !result?.data.length ? (
+        <p className="text-xs font-semibold text-slate-500">
+          {isArabic ? 'لا توجد عمليات تسليم معلّقة في الدفعة المحددة.' : 'No pending handoff reviews for this batch.'}
+        </p>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {result.data.map(row => (
+              <div key={row.recordId}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 p-3 text-xs">
+                <div className="min-w-0">
+                  <div className="break-all font-mono text-[10px] font-bold">{row.recordId}</div>
+                  <div className="mt-1 text-[10px] text-slate-500">
+                    {row.ownerDomain ?? '—'} · {row.handoffState}
+                  </div>
+                </div>
+                <span className="font-bold text-amber-800">
+                  {row.manualVerificationRequired
+                    ? (isArabic ? 'يتطلب التحقق من القسم المالك' : 'Owner verification required')
+                    : (isArabic ? 'بانتظار ربط القسم المالك' : 'Awaiting owner integration')}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center justify-between text-[11px] font-bold">
+            <span>{isArabic ? 'إجمالي السجلات للمراجعة' : 'Review records'}: {result.total}</span>
+            <div className="flex items-center gap-2">
+              <button type="button" disabled={page <= 1}
+                onClick={() => setPage(value => Math.max(1, value - 1))}
+                className="rounded-lg border px-2 py-1 disabled:opacity-40"
+                aria-label={isArabic ? 'الصفحة السابقة' : 'Previous page'}>
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span>{page} / {pages}</span>
+              <button type="button" disabled={page >= pages}
+                onClick={() => setPage(value => value + 1)}
+                className="rounded-lg border px-2 py-1 disabled:opacity-40"
+                aria-label={isArabic ? 'الصفحة التالية' : 'Next page'}>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
 function StatusBadge({ value, isArabic }: { value: string; isArabic: boolean }) {
   const normalized = value.toUpperCase();
   const good = ['COMPLETED', 'COMPLETE', 'PROMOTED', 'VALID'].includes(normalized);
@@ -3014,9 +3205,11 @@ function recordStatusLabel(value: string, isArabic: boolean) {
     PROMOTED: ['رُحّل إلى المجال', 'Transferred to Domain'],
     FAILED: ['فشل', 'Failed'],
     DLQ: ['Dead Letter', 'Dead Letter'],
+    STAGING: ['جارٍ تجهيز الملف', 'Staging file'],
     CREATED: ['أُنشئت', 'Created'],
     QUEUED: ['في الطابور', 'Queued'],
     RUNNING: ['قيد المعالجة', 'Running'],
+    PAUSING: ['جارٍ الإيقاف المؤقت', 'Pausing'],
     PAUSED: ['متوقفة مؤقتًا', 'Paused'],
     RESUMING: ['قيد الاستئناف', 'Resuming'],
     CANCELLING: ['قيد الإلغاء', 'Cancelling'],
@@ -3075,4 +3268,381 @@ function formatDate(value: string | undefined | null, isArabic: boolean) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(date);
+}
+
+
+function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
+  ownerDomain: Exclude<DomainKey, 'ALL'>; isArabic: boolean; onStaged: (batchId: string) => Promise<void>;
+}) {
+  const [assetId, setAssetId] = useState('');
+  const [format, setFormat] = useState<'csv' | 'ndjson' | 'json'>('csv');
+  const [domain, setDomain] = useState(ownerDomain);
+  const [mappingProfileId, setMappingProfileId] = useState('');
+  const [proof, setProof] = useState<{ assetId: string; expectedSha256: string; ownerDomain: string; mappingProfileId?: string;
+    format: 'csv' | 'ndjson' | 'json'; validRows: number; invalidRows: number } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const inFlight = useRef(false);
+  const generation = useRef(0);
+  useEffect(() => () => { generation.current++; }, []);
+  const clear = () => { generation.current++; setProof(null); setMessage(''); };
+  const execute = async (stage: boolean) => {
+    if (inFlight.current || !assetId || (stage && !proof)) return;
+    const requestGeneration = generation.current;
+    inFlight.current = true; setBusy(true); setMessage('');
+    try {
+      if (stage && proof) {
+        const { validRows: _valid, invalidRows: _invalid, ...body } = proof;
+        const result = await adminApiClient.request<{ batchId: string; status: string }>('/admin/imports/artifacts',
+          { method: 'POST', body: JSON.stringify(body) });
+        if (requestGeneration !== generation.current) return;
+        setProof(null);
+        setMessage(isArabic ? `تم تجهيز الدفعة: ${result.status}` : `Batch staged: ${result.status}`);
+        await onStaged(result.batchId);
+      } else {
+        const evidence = await adminApiClient.request<{ expectedSha256: string }>('/admin/imports/artifacts/inspect',
+          { method: 'POST', body: JSON.stringify({ assetId }) });
+        const body = { assetId, expectedSha256: evidence.expectedSha256, ownerDomain: domain, format, ...(mappingProfileId ? { mappingProfileId } : {}) };
+        const result = await adminApiClient.request<{ validRows: number; invalidRows: number }>('/admin/imports/artifacts/preflight',
+          { method: 'POST', body: JSON.stringify(body) });
+        if (requestGeneration === generation.current) setProof({ ...body, validRows: result.validRows, invalidRows: result.invalidRows });
+      }
+    } catch {
+      if (requestGeneration === generation.current) {
+        setProof(null);
+        setMessage(isArabic ? 'تعذر إتمام الطلب. تحقق من ملكية الملف واعتماده وصحة التنسيق، ثم أعد الفحص.'
+          : 'Request failed. Check file ownership, approval and format, then preflight again.');
+      }
+    } finally {
+      inFlight.current = false;
+      if (requestGeneration === generation.current) setBusy(false);
+    }
+  };
+  return <section className="rounded-2xl border border-slate-200 bg-white p-5 space-y-3">
+    <h2 className="font-black">{isArabic ? 'استيراد ملف معتمد' : 'Import an approved file'}</h2>
+    <p className="text-sm">{isArabic ? 'اختر ملف CSV أو NDJSON من أصولك المعتمدة، وافحصه قبل التجهيز. القبول والنشر يقررهما القسم المالك.'
+      : 'Select your approved CSV or NDJSON asset and preflight before staging. The owner decides acceptance and publication.'}</p>
+    <fieldset disabled={busy} className="space-y-3">
+      <MappingProfilePicker sourceId="MANUAL_EAP_UPLOAD" domain={domain} value={mappingProfileId} onChange={id => { setMappingProfileId(id); setProof(null); }} isArabic={isArabic} />
+      <AssetPicker value={assetId} purpose="IMPORT_ARTIFACT" label={isArabic ? 'الملف' : 'File'}
+        onChange={id => { clear(); setAssetId(id); }} />
+      <label>{isArabic ? 'التنسيق' : 'Format'} <select value={format} onChange={event => {
+        clear(); setFormat(event.target.value as 'csv' | 'ndjson' | 'json');
+      }}><option value="csv">CSV</option><option value="ndjson">NDJSON</option><option value="json">JSON</option></select></label>
+      <label>{isArabic ? 'القسم المالك' : 'Owner domain'} <select value={domain} onChange={event => {
+        clear(); setDomain(event.target.value as Exclude<DomainKey, 'ALL'>);
+      }}>{DOMAIN_CONFIG.map(item =>
+        <option key={item.key} value={item.key}>{isArabic ? item.ar : item.en}</option>)}</select></label>
+      <button type="button" disabled={!assetId || busy} onClick={() => void execute(false)}
+        className="rounded-lg border px-4 py-2">{isArabic ? 'فحص الملف' : 'Preflight file'}</button>
+      <button type="button" disabled={!proof || busy} onClick={() => void execute(true)}
+        className="rounded-lg border px-4 py-2">{isArabic ? 'تجهيز الدفعة' : 'Stage batch'}</button>
+    </fieldset>
+    {busy && <p role="status">{isArabic ? 'جارٍ معالجة الملف…' : 'Processing file…'}</p>}
+    {proof && <p role="status">{isArabic ? 'نتيجة فحص التنسيق' : 'Format preflight'}: {proof.validRows} / {proof.invalidRows}
+      {' '}{isArabic ? '(صحيحة / تحتاج مراجعة)' : '(valid / review needed)'}</p>}
+    {message && <p role="status">{message}</p>}
+  </section>;
+}
+
+
+function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
+  sources: ImportSource[]; isArabic: boolean; onChanged: () => Promise<void>; onStaged: (id: string) => Promise<void>;
+}) {
+  type Connector = { connectorId: string; connectorVersion: string; category: string };
+  const empty = { sourceId: '', displayName: '', baseUrl: '', connectorId: '', accessClassification: 'PUBLIC_ALLOWED',
+    rateLimitPerMinute: 60, allowedPaths: '/', robotsPolicyUrl: '', reason: '' };
+  const [draft, setDraft] = useState(empty);
+  const [revision, setRevision] = useState<string | null>(null);
+  const [editable, setEditable] = useState(true);
+  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [probe, setProbe] = useState<{ executionAllowed: boolean; executionBlocker: string | null } | null>(null);
+  const [format, setFormat] = useState<'csv' | 'ndjson' | 'json'>('csv');
+  const [domain, setDomain] = useState('SCHOLARSHIPS');
+  const [mappingProfileId, setMappingProfileId] = useState('');
+  const [useApprovedFallback, setUseApprovedFallback] = useState(false);
+  const lock = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    void adminApiClient.request<{ data: Connector[] }>('/admin/imports/sources/connectors')
+      .then(value => { if (mounted.current) setConnectors(value.data); })
+      .catch(() => { if (mounted.current) setMessage(isArabic ? 'تعذر تحميل الموصلات.' : 'Connectors unavailable.'); });
+    return () => { mounted.current = false; };
+  }, [isArabic]);
+  const change = <K extends keyof typeof empty>(key: K, value: typeof empty[K]) => {
+    setDraft(previous => ({ ...previous, [key]: value })); setProbe(null); setMessage('');
+  };
+  const perform = async (task: () => Promise<void>) => {
+    if (lock.current) return;
+    lock.current = true; setBusy(true); setMessage('');
+    try { await task(); }
+    catch (error) { if (mounted.current) setMessage(importCommandError(error, isArabic)); }
+    finally { lock.current = false; if (mounted.current) setBusy(false); }
+  };
+  const load = (sourceId: string) => void perform(async () => {
+    const { data } = await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(sourceId)}`);
+    if (!mounted.current) return;
+    const scope = data.metadata?.allowedUrlScope as { allowedPathPrefixes?: string[] } | undefined;
+    setDraft({ sourceId: data.sourceId, displayName: data.displayName, baseUrl: data.baseUrl,
+      connectorId: data.connectorId, accessClassification: data.accessClassification,
+      rateLimitPerMinute: data.rateLimitPerMinute ?? 60, allowedPaths: scope?.allowedPathPrefixes?.join('\n') ?? '/', robotsPolicyUrl: data.robotsPolicyUrl ?? '', reason: '' });
+    setRevision(data.updatedAt ?? null); setProbe(null);
+    setEditable(data.metadata?.ownerDomain === 'GENERIC' && Boolean(data.updatedAt));
+    if (data.metadata?.ownerDomain !== 'GENERIC') setMessage(isArabic ? 'إدارة هذا المصدر تتم من مساحة القسم المالك.' : 'Manage this source in its owner workspace.');
+  });
+  const save = () => void perform(async () => {
+    const connector = connectors.find(value => value.connectorId === draft.connectorId);
+    if (!connector) throw new Error(isArabic ? 'اختر موصلًا متاحًا.' : 'Choose an available connector.');
+    const { allowedPaths, robotsPolicyUrl, ...fields } = draft;
+    await adminApiClient.request(`/admin/imports/sources${revision ? `/${encodeURIComponent(draft.sourceId)}` : ''}`, {
+      method: revision ? 'PUT' : 'POST', body: JSON.stringify({ ...fields, robotsPolicyUrl: robotsPolicyUrl.trim() || undefined, category: connector.category,
+        connectorVersion: connector.connectorVersion, allowedPathPrefixes: allowedPaths.split('\n').map(value => value.trim()).filter(Boolean),
+        ...(revision ? { expectedUpdatedAt: revision } : {}) }),
+    });
+    await onChanged();
+    const { data } = await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}`);
+    if (mounted.current) { setRevision(data.updatedAt ?? null); setProbe(null); setMessage(isArabic ? 'تم الحفظ بحالة معطّل. راجع الإعدادات قبل التفعيل.' : 'Saved as disabled. Review before activating.'); }
+  });
+  return <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+    <h2 className="font-black">{isArabic ? 'تعريفات المصادر وتشغيلها' : 'Source definitions and runs'}</h2>
+    <fieldset disabled={busy} className="space-y-3">
+      <label>{isArabic ? 'مصدر محفوظ' : 'Saved source'} <select value={revision ? draft.sourceId : ''}
+        onChange={event => { if (event.target.value) load(event.target.value); else { setDraft(empty); setRevision(null); setEditable(true); setProbe(null); setMessage(''); } }}>
+        <option value="">{isArabic ? 'مصدر جديد' : 'New source'}</option>
+        {sources.map(source => <option key={source.sourceId} value={source.sourceId}>{source.displayName}</option>)}
+      </select></label>
+      <fieldset disabled={!editable} className="grid gap-3 sm:grid-cols-2">
+        <label>{isArabic ? 'معرّف المصدر' : 'Source ID'}<input value={draft.sourceId} disabled={Boolean(revision)} onChange={event => change('sourceId', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'الاسم' : 'Name'}<input value={draft.displayName} onChange={event => change('displayName', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'رابط المصدر' : 'Source URL'}<input value={draft.baseUrl} onChange={event => change('baseUrl', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'الموصل' : 'Connector'}<select value={draft.connectorId} onChange={event => change('connectorId', event.target.value)} className="block w-full rounded border p-2">
+          <option value="">{isArabic ? 'اختر الموصل' : 'Choose connector'}</option>
+          {connectors.map(value => <option key={value.connectorId} value={value.connectorId}>{value.connectorId} ({value.connectorVersion})</option>)}
+        </select></label>
+        <label>{isArabic ? 'تصنيف الوصول' : 'Access classification'}<select value={draft.accessClassification} onChange={event => change('accessClassification', event.target.value)} className="block w-full rounded border p-2">
+          {['PUBLIC_ALLOWED', 'PUBLIC_ROBOTS_RESTRICTED', 'AUTHORIZED_ACCOUNT', 'DATA_AGREEMENT', 'MANUAL_ONLY', 'BLOCKED'].map(value => <option key={value} value={value}>{sourceAccessLabel(value, isArabic)}</option>)}
+        </select></label>
+        <label>{isArabic ? 'رابط سياسة الروبوتات' : 'Robots policy URL'}<input value={draft.robotsPolicyUrl} onChange={event => change('robotsPolicyUrl', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'طلبات في الدقيقة' : 'Requests per minute'}<input type="number" min={1} max={60000} value={draft.rateLimitPerMinute} onChange={event => change('rateLimitPerMinute', Number(event.target.value))} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'نطاقات المسار، سطر لكل نطاق' : 'Allowed paths, one per line'}<textarea value={draft.allowedPaths} onChange={event => change('allowedPaths', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'سبب التعديل أو التشغيل' : 'Reason for edit or run'}<input value={draft.reason} onChange={event => change('reason', event.target.value)} className="block w-full rounded border p-2" /></label>
+        <button type="button" disabled={draft.reason.trim().length < 3} onClick={save} className="rounded border p-2">{isArabic ? 'حفظ للمراجعة' : 'Save for review'}</button>
+      </fieldset>
+      <button type="button" disabled={!revision} onClick={() => void perform(async () => {
+        const result = await adminApiClient.request<{ executionAllowed: boolean; executionBlocker: string | null }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}/test`, { method: 'POST', body: '{}' });
+        if (mounted.current) setProbe(result);
+      })} className="rounded border p-2">{isArabic ? 'فحص الإعدادات دون جلب' : 'Test configuration without fetching'}</button>
+      <label>{isArabic ? 'تنسيق البيانات' : 'Data format'} <select value={format} onChange={event => setFormat(event.target.value as 'csv' | 'ndjson' | 'json')}><option value="csv">CSV</option><option value="ndjson">NDJSON</option><option value="json">JSON</option></select></label>
+      <label>{isArabic ? 'القسم المستلم' : 'Receiving domain'} <select value={domain} onChange={event => setDomain(event.target.value)}>{DOMAIN_CONFIG.map(value => <option key={value.key} value={value.key}>{isArabic ? value.ar : value.en}</option>)}</select></label>
+      <MappingProfilePicker sourceId={draft.sourceId} domain={domain} value={mappingProfileId} onChange={setMappingProfileId} isArabic={isArabic} />
+      <label><input type="checkbox" checked={useApprovedFallback} onChange={event => { setUseApprovedFallback(event.target.checked); setMappingProfileId(''); }} />{isArabic ? 'استخدام البديل المعتمد لهذا التشغيل' : 'Use approved fallback for this run'}</label>
+      <button type="button" disabled={!editable || !revision || (!useApprovedFallback && !probe?.executionAllowed) || draft.reason.trim().length < 3} onClick={() => void perform(async () => {
+        const result = await adminApiClient.request<{ batchId: string }>(`/admin/imports/sources/${encodeURIComponent(draft.sourceId)}/run`, { method: 'POST',
+          body: JSON.stringify({ expectedUpdatedAt: revision, ownerDomain: domain, format, reason: draft.reason, ...(mappingProfileId ? { mappingProfileId } : {}), useApprovedFallback }) });
+        await onStaged(result.batchId);
+        if (mounted.current) setMessage(isArabic ? 'تم تجهيز دفعة الجلب للمراجعة.' : 'Acquired batch staged for review.');
+      })} className="rounded border p-2">{isArabic ? 'جلب وتجهيز دفعة' : 'Acquire and stage batch'}</button>
+    </fieldset>
+    {probe && <p role="status">{probe.executionAllowed ? (isArabic ? 'الإعداد يسمح بالتشغيل. لم يُجرَ اختبار شبكة.' : 'Configuration permits execution. No network test performed.') : probe.executionBlocker}</p>}
+    {message && <p role="status">{message}</p>}
+  </section>;
+}
+
+
+function BatchComparisonPanel({ batches, isArabic }: { batches: ImportBatch[]; isArabic: boolean }) {
+  const [left, setLeft] = useState(''); const [right, setRight] = useState('');
+  const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
+  const [result, setResult] = useState<{ counters: { added: number; missingFromComparison: number; changed: number; unchanged: number; unknown: number }; totalDifferences: number; normalization?: { evidenceKnown: boolean; sameMappingVersions: boolean } } | null>(null);
+  const lock = useRef(false); const generation = useRef(0);
+  useEffect(() => () => { generation.current++; }, []);
+  const compare = async () => {
+    if (lock.current || !left || !right || left === right) return;
+    lock.current = true; setBusy(true); setMessage(''); setResult(null);
+    const current = generation.current;
+    try {
+      const value = await adminApiClient.request<NonNullable<typeof result>>(`/admin/imports/batches/${encodeURIComponent(left)}/diff?againstBatchId=${encodeURIComponent(right)}`);
+      if (current === generation.current) setResult(value);
+    } catch { if (current === generation.current) setMessage(isArabic ? 'تعذرت المقارنة. اختر دفعتين من المصدر والقسم نفسيهما، حتى ٥٠٠٠ سجل لكل دفعة.' : 'Comparison unavailable. Choose batches from the same source and domain, up to 5,000 rows each.'); }
+    finally { lock.current = false; if (current === generation.current) setBusy(false); }
+  };
+  return <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+    <h2 className="font-black">{isArabic ? 'مقارنة دفعتين' : 'Compare two batches'}</h2>
+    <p className="text-sm">{isArabic ? 'المقارنة تشمل السجلات المحفوظة بعد منع التكرار. غياب سجل ليس طلب حذف، ولا يمثل بالضرورة غيابه من المصدر.' : 'Compares persisted rows after deduplication. A missing row never requests deletion or proves absence from the source.'}</p>
+    <fieldset disabled={busy} className="flex flex-wrap gap-3">
+      <label>{isArabic ? 'الدفعة الأولى' : 'First batch'} <select value={left} onChange={event => { setLeft(event.target.value); setResult(null); setMessage(''); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
+      <label>{isArabic ? 'الدفعة الثانية' : 'Second batch'} <select value={right} onChange={event => { setRight(event.target.value); setResult(null); setMessage(''); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
+      <button type="button" disabled={!left || !right || left === right} onClick={() => void compare()} className="rounded border p-2">{isArabic ? 'قارن' : 'Compare'}</button>
+    </fieldset>
+    {result && <dl className="flex flex-wrap gap-4">{Object.entries(result.counters).map(([key, count]) => <div key={key}><dt>{{ added: isArabic ? 'مضافة' : 'Added', missingFromComparison: isArabic ? 'غير موجودة في المقارنة' : 'Missing in comparison', changed: isArabic ? 'تغيّرت' : 'Changed', unchanged: isArabic ? 'لم تتغير' : 'Unchanged', unknown: isArabic ? 'غير محددة' : 'Unknown' }[key]}</dt><dd>{count}</dd></div>)}</dl>}
+    {result && (!result.normalization?.evidenceKnown || !result.normalization.sameMappingVersions) && <p role="status">{isArabic ? 'نسخ المطابقة تختلف أو لا تتوفر أدلتها التاريخية؛ راجع قواعد التحويل عند تفسير الفروق.' : 'Mapping versions differ or historical evidence is unavailable. Review transformation rules when interpreting differences.'}</p>}
+    {message && <p role="status">{message}</p>}
+  </section>;
+}
+
+function importCommandError(error: unknown, isArabic: boolean) {
+  const code = error instanceof Error ? error.message : '';
+  const messages: Array<[string, string, string]> = [
+    ['IMPORT_SOURCE_DRIFT_REVIEW_REQUIRED', 'تغيرت بنية المصدر. افحص التغير في لوحة المراجعة قبل إعادة التشغيل.', 'Source shape changed. Review the drift before running again.'],
+    ['IMPORT_MAPPING_PROFILE_CONFLICT', 'قاعدة المطابقة لا توافق المصدر والقسم ونسخة الإعداد الحالية. احفظ نسخة جديدة.', 'The mapping does not match the current source, domain and revision. Save a new version.'],
+    ['SOURCE_ACCESS_SIGNED_APPROVAL_REQUIRED', 'هذا المصدر يحتاج موافقة وصول موثوقة في إعدادات التشغيل.', 'This source needs a trusted access approval in the deployment configuration.'],
+    ['SOURCE_ACCOUNT_CREDENTIAL_REQUIRED', 'حساب الوصول للمصدر غير مهيأ أو غير صالح.', 'The source access account is missing or invalid.'],
+    ['SOURCE_ROBOTS_PATH_DENIED', 'سياسة المصدر تمنع جلب هذا المسار.', 'The source robots policy denies this path.'],
+    ['IMPORT_RECEIPT_NOT_FOUND', 'لا يوجد إيصال مطابق يثبت الاستلام. أبقِ السجل للمراجعة دون إعادة التسليم.', 'No matching receipt proves acceptance. Keep the record in review without redelivery.'],
+    ['IMPORT_REVIEW_CONFLICT', 'تغير التعيين أو الحجز. حدّث طابور المراجعة وأعد المحاولة.', 'The assignment or claim changed. Refresh the review queue and retry.'],
+    ['IMPORT_REVIEWER_AUTHORITY_REQUIRED', 'المراجع يحتاج صلاحية الاستيراد وصلاحية القسم المالك.', 'The reviewer needs import and owning-domain permissions.'],
+    ['IMPORT_RECOVERY_EVIDENCE_REQUIRED', 'أدلة هذه الدفعة لا تسمح بإعادتها للطابور بأمان. راجع السجلات أولًا.', 'This batch lacks evidence for safe queue recovery. Review its records first.'],
+    ['IMPORT_SOURCE_STATUS_CONFLICT', 'تغيرت إعدادات المصدر. أعد تحميله قبل التشغيل.', 'Source configuration changed. Reload it before running.'],
+    ['SOURCE_DISTRIBUTED_BUDGET_BUSY', 'وصل الجلب إلى حد الطلبات المشترك. حاول لاحقًا.', 'Acquisition reached the shared request budget. Retry later.'],
+  ];
+  const found = messages.find(([key]) => code.includes(key));
+  return found ? found[isArabic ? 1 : 2] : (isArabic ? 'تعذر تنفيذ الطلب. حدّث البيانات وتحقق من الصلاحيات والحقول المطلوبة.' : 'Request failed. Refresh the data and check permissions and required fields.');
+}
+
+type MappingProfile = { id: string; version: number; definitionHash: string; definition: { fields: Array<{ target: string; aliases: string[]; type: 'string' | 'number' | 'boolean'; required: boolean }> } };
+function MappingProfilePicker({ sourceId, domain, value, onChange, isArabic }: { sourceId: string; domain: string; value: string; onChange: (id: string) => void; isArabic: boolean }) {
+  const [unavailable, setUnavailable] = useState(false);
+  const [reload, setReload] = useState(0);
+  const onChangeRef = useRef(onChange); onChangeRef.current = onChange;
+  const [profiles, setProfiles] = useState<MappingProfile[]>([]);
+  useEffect(() => {
+    let active = true;
+    setProfiles([]); setUnavailable(false); onChangeRef.current('');
+    if (sourceId) void adminApiClient.request<{ data: MappingProfile[] }>(`/admin/imports/mapping-profiles?sourceId=${encodeURIComponent(sourceId)}&ownerDomain=${encodeURIComponent(domain)}`)
+      .then(result => { if (active) setProfiles(result.data); }).catch(() => { if (active) { setProfiles([]); setUnavailable(true); } });
+    return () => { active = false; };
+  }, [sourceId, domain, reload]);
+  return <div><label>{isArabic ? 'قاعدة مطابقة محفوظة' : 'Saved mapping profile'} <select value={value} onChange={event => onChange(event.target.value)}>
+    <option value="">{isArabic ? 'الأعمدة كما هي' : 'Keep original fields'}</option>
+    {profiles.map(profile => <option key={profile.id} value={profile.id}>{isArabic ? 'نسخة' : 'Version'} {profile.version}</option>)}
+  </select></label><button type="button" onClick={() => setReload(previous => previous + 1)}>{isArabic ? 'تحديث القواعد' : 'Refresh profiles'}</button>{unavailable && <p role="status">{isArabic ? 'تعذر تحميل القواعد؛ لا يمكن تأكيد عدم وجودها.' : 'Profiles could not be loaded; their absence is not confirmed.'}</p>}</div>;
+}
+function ImportMappingPanel({ sources, isArabic }: { sources: ImportSource[]; isArabic: boolean }) {
+  const [sourceId, setSourceId] = useState('MANUAL_EAP_UPLOAD'); const [domain, setDomain] = useState('SCHOLARSHIPS');
+  const [profiles, setProfiles] = useState<MappingProfile[]>([]);
+  const [fields, setFields] = useState([{ target: '', aliases: '', type: 'string' as 'string' | 'number' | 'boolean', required: true, sample: '' }]);
+  const [reason, setReason] = useState(''); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<Array<{ sourceRowNumber: number; error?: string; normalized?: Record<string, unknown>; unmappedFields?: string[] }>>([]);
+  const lock = useRef(false); const generation = useRef(0); const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  useEffect(() => {
+    const current = ++generation.current; setProfiles([]); setPreview([]); setMessage('');
+    void adminApiClient.request<{ data: MappingProfile[] }>(`/admin/imports/mapping-profiles?sourceId=${encodeURIComponent(sourceId)}&ownerDomain=${encodeURIComponent(domain)}`)
+      .then(result => { if (current === generation.current) { setProfiles(result.data); if (result.data[0]) setFields(result.data[0].definition.fields.map(field => ({ ...field, aliases: field.aliases.join(', '), sample: '' }))); } })
+      .catch(() => { if (current === generation.current) setMessage(isArabic ? 'تعذر تحميل المطابقة.' : 'Mapping unavailable.'); });
+    return () => { generation.current++; };
+  }, [sourceId, domain, isArabic]);
+  const perform = async (task: () => Promise<void>) => { if (lock.current) return; lock.current = true; setBusy(true); setMessage(''); const current = generation.current;
+    try { await task(); } catch (error) { if (current === generation.current) setMessage(importCommandError(error, isArabic)); }
+    finally { lock.current = false; if (current === generation.current) setBusy(false); } };
+  const edit = (index: number, patch: Partial<typeof fields[number]>) => { setFields(previous => previous.map((field, i) => i === index ? { ...field, ...patch } : field)); setPreview([]); };
+  const latestFields = profiles[0]?.definition.fields ?? [];
+  const previousFields = profiles[1]?.definition.fields ?? [];
+  const mappingDiff = profiles.length > 1 ? {
+    added: latestFields.filter(field => !previousFields.some(previous => previous.target === field.target)).map(field => field.target),
+    removed: previousFields.filter(field => !latestFields.some(current => current.target === field.target)).map(field => field.target),
+    changed: latestFields.filter(field => previousFields.some(previous => previous.target === field.target &&
+      JSON.stringify(previous) !== JSON.stringify(field))).map(field => field.target),
+  } : null;
+  return <section className="space-y-3 rounded-2xl border bg-white p-5">
+    <h2 className="font-black">{isArabic ? 'مطابقة أعمدة المصدر' : 'Source field mapping'}</h2>
+    <p>{isArabic ? 'احفظ نسخة ثم اخترها عند تجهيز الملف أو تشغيل المصدر. الحقول الإلزامية والأنواع تُفحص قبل التسليم للقسم.' : 'Save a version and select it when staging an artifact or running a source. Required fields and types are checked before delivery.'}</p>
+    <fieldset disabled={busy} className="space-y-3">
+      <label>{isArabic ? 'المصدر' : 'Source'} <select value={sourceId} onChange={event => setSourceId(event.target.value)}><option value="MANUAL_EAP_UPLOAD">{isArabic ? 'ملف مرفوع' : 'Uploaded artifact'}</option>{sources.filter(source => source.metadata?.ownerDomain === 'GENERIC').map(source => <option key={source.sourceId} value={source.sourceId}>{source.displayName}</option>)}</select></label>
+      <label>{isArabic ? 'القسم' : 'Domain'} <select value={domain} onChange={event => setDomain(event.target.value)}>{DOMAIN_CONFIG.map(item => <option key={item.key} value={item.key}>{isArabic ? item.ar : item.en}</option>)}</select></label>
+      {fields.map((field, i) => <div key={i} className="grid gap-2 sm:grid-cols-5">
+        <label>{isArabic ? 'أسماء العمود، بفاصلة' : 'Column aliases, comma separated'}<input value={field.aliases} onChange={event => edit(i, { aliases: event.target.value })} className="w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'الحقل المقابل' : 'Target field'}<input value={field.target} onChange={event => edit(i, { target: event.target.value })} className="w-full rounded border p-2" /></label>
+        <label>{isArabic ? 'النوع' : 'Type'}<select value={field.type} onChange={event => edit(i, { type: event.target.value as typeof field.type })}><option value="string">{isArabic ? 'نص' : 'Text'}</option><option value="number">{isArabic ? 'رقم' : 'Number'}</option><option value="boolean">{isArabic ? 'نعم/لا' : 'Boolean'}</option></select></label>
+        <label><input type="checkbox" checked={field.required} onChange={event => edit(i, { required: event.target.checked })} />{isArabic ? 'إلزامي' : 'Required'}</label>
+        <label>{isArabic ? 'قيمة تجريبية' : 'Sample value'}<input value={field.sample} onChange={event => edit(i, { sample: event.target.value })} className="w-full rounded border p-2" /></label>
+        <button type="button" disabled={fields.length === 1} onClick={() => { setFields(previous => previous.filter((_, n) => n !== i)); setPreview([]); }}>{isArabic ? 'إزالة الحقل' : 'Remove field'}</button>
+      </div>)}
+      <button type="button" disabled={fields.length >= 100} onClick={() => { setFields(previous => [...previous, { target: '', aliases: '', type: 'string', required: true, sample: '' }]); setPreview([]); }}>{isArabic ? 'إضافة حقل' : 'Add field'}</button>
+      <label>{isArabic ? 'سبب حفظ النسخة' : 'Version reason'}<input value={reason} onChange={event => setReason(event.target.value)} className="rounded border p-2" /></label>
+      <button type="button" disabled={reason.trim().length < 3} onClick={() => void perform(async () => {
+        const revision = sourceId === 'MANUAL_EAP_UPLOAD' ? '1970-01-01T00:00:00.000Z' :
+          (await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(sourceId)}`)).data.updatedAt;
+        const profile = await adminApiClient.request<MappingProfile>('/admin/imports/mapping-profiles', { method: 'POST', body: JSON.stringify({ sourceId, ownerDomain: domain,
+          sourceRevision: revision, expectedVersion: profiles[0]?.version ?? 0, reason,
+          definition: { fields: fields.map(({ target, aliases, type, required }) => ({ target, aliases: aliases.split(/[,،]/).map(value => value.trim()).filter(Boolean), type, required })) } }) });
+        if (!alive.current) return;
+        setProfiles(previous => [profile, ...previous]); setPreview([]); setMessage(isArabic ? 'حُفظت نسخة ثابتة. يمكنك اختيارها عند الاستيراد.' : 'Immutable version saved. Select it when importing.');
+      })}>{isArabic ? 'حفظ نسخة جديدة' : 'Save new version'}</button>
+      <button type="button" disabled={!profiles[0]} onClick={() => void perform(async () => {
+        const sample = Object.fromEntries(fields.filter(field => field.aliases.trim()).map(field => [field.aliases.split(/[,،]/)[0].trim(), field.sample]));
+        const result = await adminApiClient.request<{ data: typeof preview }>(`/admin/imports/mapping-profiles/${profiles[0].id}/preview`, { method: 'POST', body: JSON.stringify({ sourceId, ownerDomain: domain, rows: [sample] }) });
+        if (alive.current) setPreview(result.data);
+      })}>{isArabic ? 'معاينة النسخة المحفوظة' : 'Preview saved version'}</button>
+    </fieldset>
+    {mappingDiff && <p>{isArabic ? 'تغيرات آخر نسخة مقارنة بالسابقة: ' : 'Latest version changes against previous: '}
+      {isArabic ? 'مضافة' : 'Added'}: {mappingDiff.added.join(', ') || '—'} · {isArabic ? 'محذوفة' : 'Removed'}: {mappingDiff.removed.join(', ') || '—'} · {isArabic ? 'معدلة' : 'Changed'}: {mappingDiff.changed.join(', ') || '—'}</p>}
+    {preview.map(row => <div key={row.sourceRowNumber}>{row.error ?? Object.entries(row.normalized ?? {}).map(([key, value]) => `${key}: ${String(value)}`).join(' · ')}{Boolean(row.unmappedFields?.length) && <p>{isArabic ? 'أعمدة دون مطابقة: ' : 'Unmapped fields: '}{row.unmappedFields?.join(', ')}</p>}</div>)}
+    {message && <p role="status">{message}</p>}
+  </section>;
+}
+function ImportGovernancePanel({ records, batches, sources, isArabic }: { records: ImportRecord[]; batches: ImportBatch[]; sources: ImportSource[]; isArabic: boolean }) {
+  type Assignment = { recordId: string; assigneeId: string; version: number; state: string; dueAt: string; ownerDomain: string };
+  type Observation = { sourceRevision: string; updatedAt: string; driftState: string; fallbackSourceId?: string };
+  const [recordId, setRecordId] = useState(''); const [batchId, setBatchId] = useState(''); const [sourceId, setSourceId] = useState('');
+  const [assignee, setAssignee] = useState(''); const [due, setDue] = useState(''); const [reason, setReason] = useState(''); const [fallback, setFallback] = useState('');
+  const [queue, setQueue] = useState<Assignment[]>([]); const [observation, setObservation] = useState<Observation | null>(null);
+  const [counts, setCounts] = useState<Record<string, unknown> | null>(null); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
+  const lock = useRef(false); const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const refresh = async () => { const result = await adminApiClient.request<{ data: Assignment[] }>('/admin/imports/review-queue'); if (mounted.current) setQueue(result.data); };
+  const perform = async (task: () => Promise<void>) => { if (lock.current) return; lock.current = true; setBusy(true); setMessage('');
+    try { await task(); if (mounted.current) setMessage(isArabic ? 'تم تنفيذ الطلب وتسجيله.' : 'Command completed and audited.'); }
+    catch (error) { if (mounted.current) setMessage(importCommandError(error, isArabic)); }
+    finally { lock.current = false; if (mounted.current) setBusy(false); } };
+  const record = records.find(item => item.id === recordId); const batch = batches.find(item => item.id === batchId);
+  const assignment = queue.find(item => item.recordId === recordId);
+  return <section id="review-assignments" className="space-y-3 rounded-2xl border bg-white p-5">
+    <h2 className="font-black">{isArabic ? 'المراجعة واسترداد الاستيراد' : 'Import review and recovery'}</h2>
+    <p>{isArabic ? 'التعيين والحجز ينظمان المراجعة. قرار قبول البيانات يبقى في مساحة القسم المالك.' : 'Assignments and claims organize review. Data acceptance remains in the owner workspace.'}</p>
+    <fieldset disabled={busy} className="space-y-3">
+      <label>{isArabic ? 'سبب الإجراء' : 'Action reason'}<input value={reason} onChange={event => setReason(event.target.value)} className="rounded border p-2" /></label>
+      <label>{isArabic ? 'السجل' : 'Record'} <select value={recordId} onChange={event => setRecordId(event.target.value)}><option value="">—</option>{records.map(item => <option key={item.id} value={item.id}>{item.id} ({item.status})</option>)}</select></label>
+      <label>{isArabic ? 'معرّف المراجع' : 'Reviewer identity ID'}<input value={assignee} onChange={event => setAssignee(event.target.value)} className="rounded border p-2" /></label>
+      <label>{isArabic ? 'موعد المراجعة' : 'Review due'}<input type="datetime-local" value={due} onChange={event => setDue(event.target.value)} /></label>
+      <button type="button" onClick={() => void perform(refresh)}>{isArabic ? 'تحميل طابور المراجعة' : 'Load review queue'}</button>
+      <button type="button" disabled={!record || !assignee || !due || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/assignment`, { method: 'POST', body: JSON.stringify({ assigneeId: assignee, dueAt: new Date(due).toISOString(), expectedVersion: assignment?.version ?? 0, reason }) }); await refresh();
+      })}>{isArabic ? 'تعيين المراجع' : 'Assign reviewer'}</button>
+      <button type="button" disabled={!assignment || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/claim`, { method: 'POST', body: JSON.stringify({ expectedVersion: assignment?.version, reason }) }); await refresh();
+      })}>{isArabic ? 'حجز المراجعة لي أو تجديدها' : 'Claim or renew my review'}</button>
+      <button type="button" disabled={!assignment || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/release`, { method: 'POST', body: JSON.stringify({ expectedVersion: assignment?.version, reason }) }); await refresh();
+      })}>{isArabic ? 'إخلاء حجز المراجعة' : 'Release my review claim'}</button>
+      <button type="button" disabled={!record?.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/reconcile-receipt`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: record?.updatedAt, reason }) });
+      })}>{isArabic ? 'تسوية التسليم من الإيصال المحفوظ' : 'Reconcile delivery from saved receipt'}</button>
+      <ul>{queue.map(item => <li key={item.recordId}><button type="button" onClick={() => setRecordId(item.recordId)}>{item.recordId}</button> · {item.assigneeId} · {new Date(item.dueAt).toLocaleString()} · {item.state} · <a href={`/imports/${item.ownerDomain.toLowerCase()}?recordId=${encodeURIComponent(item.recordId)}`}>{isArabic ? 'فتح مساحة القسم' : 'Open owner workspace'}</a></li>)}</ul>
+      <label>{isArabic ? 'الدفعة' : 'Batch'} <select value={batchId} onChange={event => { setBatchId(event.target.value); setCounts(null); }}><option value="">—</option>{batches.map(item => <option key={item.id} value={item.id}>{item.id}</option>)}</select></label>
+      <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/timeline`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض سجل التشغيل' : 'Show execution history'}</button>
+      <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/counters`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض العدادات' : 'Show counters'}</button>
+      {(['QUEUE','REJECT'] as const).map(decision => <button key={decision} type="button" disabled={batch?.batchStatus !== 'CREATED' || !batch.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/batches/${encodeURIComponent(batchId)}/recover`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: batch?.updatedAt, decision, reason }) });
+      })}>{decision === 'QUEUE' ? (isArabic ? 'استرداد دفعة قديمة للطابور' : 'Recover legacy batch to queue') : (isArabic ? 'رفض دفعة قديمة مع حفظ الأدلة' : 'Reject legacy batch and retain evidence')}</button>)}
+      <button type="button" disabled={!batch?.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/batches/${encodeURIComponent(batchId)}/retention-policy`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: batch?.updatedAt, days: 365, reason }) });
+      })}>{isArabic ? 'تعيين الاحتفاظ سنة للسجلات القديمة' : 'Assign one year retention to legacy records'}</button>
+      <label>{isArabic ? 'المصدر' : 'Source'} <select value={sourceId} onChange={event => { setSourceId(event.target.value); setObservation(null); }}><option value="">—</option>{sources.filter(item => item.metadata?.ownerDomain === 'GENERIC').map(item => <option key={item.sourceId} value={item.sourceId}>{item.displayName}</option>)}</select></label>
+      <button type="button" disabled={!sourceId} onClick={() => void perform(async () => { const result = await adminApiClient.request<{ data: Observation | null }>(`/admin/imports/sources/${encodeURIComponent(sourceId)}/observation`); if (mounted.current) setObservation(result.data); })}>{isArabic ? 'فحص تغير المصدر والبديل' : 'Inspect source drift and fallback'}</button>
+      {observation && <p>{isArabic ? 'حالة بنية المصدر: ' : 'Source shape status: '}{observation.driftState}</p>}
+      {(['ACCEPT','REJECT'] as const).map(decision => <button key={decision} type="button" disabled={observation?.driftState !== 'REVIEW_REQUIRED' || reason.trim().length < 3} onClick={() => void perform(async () => {
+        await adminApiClient.request(`/admin/imports/sources/${encodeURIComponent(sourceId)}/drift-decision`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: observation?.updatedAt, decision, reason }) }); if (mounted.current) setObservation(null);
+      })}>{decision === 'ACCEPT' ? (isArabic ? 'قبول البنية الجديدة' : 'Accept new shape') : (isArabic ? 'رفض البنية الجديدة' : 'Reject new shape')}</button>)}
+      <label>{isArabic ? 'المصدر البديل المعتمد' : 'Approved fallback source'} <select value={fallback} onChange={event => setFallback(event.target.value)}><option value="">{isArabic ? 'إلغاء البديل' : 'Remove fallback'}</option>{sources.filter(item => item.sourceId !== sourceId && item.metadata?.ownerDomain === 'GENERIC' && item.status === 'ACTIVE').map(item => <option key={item.sourceId} value={item.sourceId}>{item.displayName}</option>)}</select></label>
+      <button type="button" disabled={!observation || reason.trim().length < 3} onClick={() => void perform(async () => {
+        const target = fallback ? (await adminApiClient.request<{ data: ImportSource }>(`/admin/imports/sources/${encodeURIComponent(fallback)}`)).data : null;
+        await adminApiClient.request(`/admin/imports/sources/${encodeURIComponent(sourceId)}/fallback`, { method: 'POST', body: JSON.stringify({ fallbackSourceId: fallback || null, sourceRevision: observation?.sourceRevision, fallbackSourceRevision: target?.updatedAt, reason }) }); if (mounted.current) setObservation(null);
+      })}>{isArabic ? 'حفظ قرار البديل' : 'Save fallback decision'}</button>
+    </fieldset>
+    {counts && <dl className="flex flex-wrap gap-3">{['received','staged','skipped','invalid','processed','failed','review'].map(key => <div key={key}><dt>{({ received: 'مستلمة', staged: 'مجهزة', skipped: 'متكررة', invalid: 'غير صالحة', processed: 'معالجة', failed: 'فاشلة', review: 'للمراجعة' } as Record<string, string>)[key] && isArabic ? ({ received: 'مستلمة', staged: 'مجهزة', skipped: 'متكررة', invalid: 'غير صالحة', processed: 'معالجة', failed: 'فاشلة', review: 'للمراجعة' } as Record<string, string>)[key] : key}</dt><dd>{counts[key] === null ? (isArabic ? 'غير معروف تاريخيًا' : 'Historically unknown') : String(counts[key] ?? 0)}</dd></div>)}</dl>}
+    {message && <p role="status">{message}</p>}
+  </section>;
 }

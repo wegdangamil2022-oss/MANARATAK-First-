@@ -1,5 +1,9 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
+import { AssetLifecycleActions } from '../components/AssetLifecycleActions';
+import { AssetLifecycleState, AssetSecurityClassification, AssetRetentionCategory } from '@manaratak/domain';
+import { AssetGovernancePanel, type AssetGovernanceSnapshot } from '../components/AssetGovernancePanel';
+import { AssetUploadWizard } from '../components/AssetUploadWizard';
 import { FolderGit2, RefreshCw, Filter, FileText } from 'lucide-react';
 
 interface AssetDto {
@@ -20,12 +24,94 @@ interface AssetPage {
   nextCursor: string | null;
 }
 
+interface AssetDetails extends AssetGovernanceSnapshot {
+  id: string;
+  reference: string;
+  ownerId: string;
+  ownerType: string;
+  lifecycleState: string;
+  securityClassification: string;
+  retentionCategory: string;
+  retentionExpiresAt?: string | null;
+  metadata: { originalFilename: string; mimeType: string; fileExtension: string; byteSize: number; width?: number; height?: number; duration?: number };
+  checksum?: { algorithm: string; hash: string } | null;
+}
+
 export function AssetAdminPage() {
   const [items, setItems] = useState<AssetDto[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [usagePreview, setUsagePreview] = useState<{
+    assetId: string; inUse: boolean; usages: Array<{ consumer: string; field: string }>;
+  } | null>(null);
+  const [usageLoadingId, setUsageLoadingId] = useState<string | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<AssetDetails | null>(null);
+  const [detailsLoadingId, setDetailsLoadingId] = useState<string | null>(null);
+  const detailsGenerationRef = useRef(0);
+
+  const inspectDetails = async (assetId: string) => {
+    if (detailsLoadingId) return;
+    const generation = ++detailsGenerationRef.current;
+    setDetailsLoadingId(assetId);
+    setError(null);
+    try {
+      const details = await adminApiClient.request<AssetDetails>(
+        `/admin/assets/${encodeURIComponent(assetId)}`, { cache: 'no-store' },
+      );
+      if (generation === detailsGenerationRef.current) setSelectedAsset(details);
+    } catch (cause) {
+      if (generation === detailsGenerationRef.current) {
+        setSelectedAsset(null);
+        setError(cause instanceof Error ? cause.message : 'تعذر تحميل تفاصيل الأصل');
+      }
+    } finally {
+      if (generation === detailsGenerationRef.current) setDetailsLoadingId(null);
+    }
+  };
+
+  const previewAsset = async (assetId: string, mimeType: string) => {
+    if (!['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(mimeType)) {
+      setError('المعاينة متاحة فقط لملفات PDF والصور المتحقق منها.');
+      return;
+    }
+    setError(null);
+    try {
+      const grant = await adminApiClient.request<{ url: string; headers?: Record<string, string> }>(
+        `/admin/assets/${encodeURIComponent(assetId)}/delivery-grant`,
+        { method: 'POST', body: JSON.stringify({ expiresInSeconds: 120 }) },
+      );
+      if (grant.headers && Object.keys(grant.headers).length > 0) {
+        throw new Error('ASSET_PREVIEW_REQUIRES_SECURE_PROXY');
+      }
+      const link = new URL(grant.url);
+      if (link.username || link.password || (link.protocol !== 'https:' &&
+          !(import.meta.env.DEV && link.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(link.hostname)))) {
+        throw new Error('ASSET_PREVIEW_URL_INVALID');
+      }
+      window.open(link.toString(), '_blank', 'noopener,noreferrer');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'تعذرت معاينة الملف');
+    }
+  };
+
+  const inspectUsages = async (assetId: string) => {
+    if (usageLoadingId) return;
+    setUsageLoadingId(assetId);
+    setError(null);
+    try {
+      const result = await adminApiClient.request<{
+        assetId: string; inUse: boolean; usages: Array<{ consumer: string; field: string }>;
+      }>(`/admin/assets/${encodeURIComponent(assetId)}/usages`, { cache: 'no-store' });
+      setUsagePreview(result);
+    } catch (cause) {
+      setUsagePreview(null);
+      setError(cause instanceof Error ? cause.message : 'تعذر فحص استخدامات الأصل');
+    } finally {
+      setUsageLoadingId(null);
+    }
+  };
   const [filters, setFilters] = useState({
     q: '',
     lifecycleState: '',
@@ -33,38 +119,80 @@ export function AssetAdminPage() {
     ownerType: '',
     ownerId: '',
     mimeTypePrefix: '',
+    retentionCategory: '',
+    checksumPresence: '',
+    usageStatus: '',
+    malwareStatus: '',
+    fileFamily: '',
+    processingQueue: '',
     createdFrom: '',
     createdTo: '',
   });
 
-  const load = async (reset = true) => {
+  const [appliedFilters, setAppliedFilters] = useState(filters);
+  const appliedRef = useRef(filters);
+  const generationRef = useRef(0);
+  const pagingRef = useRef(false);
+  const pendingFilters = (Object.keys(filters) as Array<keyof typeof filters>)
+    .some((key) => filters[key] !== appliedFilters[key]);
+
+  const load = async (reset = true, selected = appliedRef.current) => {
+    if (!reset && (pagingRef.current || pendingFilters || !cursor || !hasMore)) return;
+    const generation = ++generationRef.current;
+    pagingRef.current = !reset;
     setLoading(true);
+    if (reset) { setItems([]); setCursor(null); setHasMore(false); }
     try {
       setError(null);
       const p = new URLSearchParams({ limit: '50' });
-      Object.entries(filters).forEach(([k, v]) => {
+      Object.entries(selected).forEach(([k, v]) => {
         if (!v.trim()) return;
         p.set(k, k === 'createdFrom' || k === 'createdTo' ? new Date(v).toISOString() : v.trim());
       });
       if (!reset && cursor) p.set('cursor', cursor);
-      const r = await adminApiClient.request<AssetPage>(`/admin/assets?${p}`);
-      setItems((prev) => (reset ? r.items : [...prev, ...r.items]));
+      const r = await adminApiClient.request<AssetPage>(`/admin/assets?${p}`, { cache: 'no-store' });
+      if (generation !== generationRef.current) return;
+      setItems((prev) => {
+        if (reset) return r.items;
+        const existing = new Set(prev.map((asset) => asset.id));
+        return [...prev, ...r.items.filter((asset) => {
+          if (existing.has(asset.id)) return false;
+          existing.add(asset.id);
+          return true;
+        })];
+      });
       setCursor(r.nextCursor);
       setHasMore(r.hasMore);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'تعذر تحميل الأصول والملفات.');
+      if (generation === generationRef.current) setError(e instanceof Error ? e.message : 'تعذر تحميل الأصول والملفات.');
     } finally {
-      setLoading(false);
+      if (generation === generationRef.current) { pagingRef.current = false; setLoading(false); }
     }
   };
 
   useEffect(() => {
     void load(true);
+    return () => { generationRef.current++; detailsGenerationRef.current++; };
   }, []);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    void load(true);
+    if (filters.createdFrom && filters.createdTo && new Date(filters.createdFrom) > new Date(filters.createdTo)) {
+      setError('تاريخ البداية يجب ألا يأتي بعد تاريخ النهاية.');
+      return;
+    }
+    const next = { ...filters };
+    appliedRef.current = next;
+    setAppliedFilters(next);
+    void load(true, next);
+  };
+
+  const resetFilters = () => {
+    const empty = Object.fromEntries(Object.keys(filters).map((key) => [key, ''])) as typeof filters;
+    setFilters(empty);
+    setAppliedFilters(empty);
+    appliedRef.current = empty;
+    void load(true, empty);
   };
 
   return (
@@ -93,8 +221,10 @@ export function AssetAdminPage() {
         </div>
       </section>
 
+      {loading && <p role="status">جاري تحميل الأصول…</p>}
+      {pendingFilters && <p role="status">توجد فلاتر غير مطبقة؛ اضغط تصفية وتطبيق البحث.</p>}
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700 shadow-xs">
+        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700 shadow-xs">
           {error}
         </div>
       )}
@@ -106,18 +236,57 @@ export function AssetAdminPage() {
           placeholder="بحث بالمعرف / الاسم / المالك / الملف"
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
         />
-        <input
-          value={filters.lifecycleState}
+        <select aria-label="حالة دورة الحياة" value={filters.lifecycleState}
           onChange={(e) => setFilters((v) => ({ ...v, lifecycleState: e.target.value }))}
-          placeholder="حالة دورة الحياة (Lifecycle State)"
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
-        />
-        <input
-          value={filters.securityClassification}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+          <option value="">حالة دورة الحياة — الكل</option>
+          {Object.values(AssetLifecycleState).map(value => <option key={value} value={value}>{value}</option>)}
+        </select>
+        <select aria-label="تصنيف الأمان" value={filters.securityClassification}
           onChange={(e) => setFilters((v) => ({ ...v, securityClassification: e.target.value }))}
-          placeholder="تصنيف الأمان (Security Classification)"
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
-        />
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+          <option value="">تصنيف الأمان — الكل</option>
+          {Object.values(AssetSecurityClassification).map(value => <option key={value} value={value}>{value}</option>)}
+        </select>
+        <select aria-label="سياسة الاحتفاظ" value={filters.retentionCategory}
+          onChange={(e) => setFilters((v) => ({ ...v, retentionCategory: e.target.value }))}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+          <option value="">سياسة الاحتفاظ — الكل</option>
+          {Object.values(AssetRetentionCategory).map(value => <option key={value} value={value}>{value}</option>)}
+        </select>
+        <select aria-label="وجود بصمة المحتوى" value={filters.checksumPresence}
+          onChange={(e) => setFilters((v) => ({ ...v, checksumPresence: e.target.value }))}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+          <option value="">بصمة المحتوى — الكل</option>
+          <option value="PRESENT">مسجلة — لا تعني اكتمال التحقق</option>
+          <option value="MISSING">غير مكتملة أو غير مسجلة</option>
+        </select>
+        <select aria-label="حالة الاستخدام" value={filters.usageStatus}
+          onChange={e => setFilters(v => ({ ...v, usageStatus: e.target.value }))}
+          className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
+          <option value="">حالة الاستخدام — الكل</option>
+          <option value="IN_USE">مرتبط بسجلات المنصة</option><option value="UNUSED">غير مرتبط حاليًا</option>
+        </select>
+        <select aria-label="نتيجة فحص الملف" value={filters.malwareStatus}
+          onChange={e => setFilters(v => ({ ...v, malwareStatus: e.target.value }))}
+          className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
+          <option value="">نتيجة الفحص — الكل</option><option value="PASSED">اجتاز الفحص المسجل</option>
+          <option value="FAILED">فشل الفحص المسجل</option>
+        </select>
+        <select aria-label="عائلة الملف" value={filters.fileFamily}
+          onChange={e => setFilters(v => ({ ...v, fileFamily: e.target.value }))}
+          className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
+          <option value="">عائلة الملف — الكل</option><option value="IMAGE">صور</option>
+          <option value="VIDEO">فيديو</option><option value="AUDIO">صوت</option><option value="PDF">PDF</option>
+        </select>
+        <select aria-label="طابور المعالجة" value={filters.processingQueue}
+          onChange={e => setFilters(v => ({ ...v, processingQueue: e.target.value }))}
+          className="rounded-xl border border-slate-200 px-3 py-2 text-xs">
+          <option value="">طابور المعالجة — الكل</option><option value="AWAITING_UPLOAD">بانتظار اكتمال الرفع</option>
+          <option value="QUARANTINE">الحجر</option><option value="PROCESSING">الفحص والتنظيف</option>
+          <option value="FAILED">فشل الفحص</option><option value="ARCHIVE_RECOVERY">أرشفة تحتاج مراجعة</option><option value="RESTORE_RECOVERY">استعادة تحتاج مراجعة</option>
+          <option value="ACTIVATION_RECOVERY">تفعيل ينتظر التعافي</option>
+        </select>
         <input
           value={filters.mimeTypePrefix}
           onChange={(e) => setFilters((v) => ({ ...v, mimeTypePrefix: e.target.value }))}
@@ -125,12 +294,17 @@ export function AssetAdminPage() {
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
         />
         <input
+          aria-label="نوع المالك" list="asset-owner-types"
           value={filters.ownerType}
           onChange={(e) => setFilters((v) => ({ ...v, ownerType: e.target.value }))}
           placeholder="نوع المالك (Owner Type)"
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-[#21A7B4]"
         />
-        <input
+        <datalist id="asset-owner-types">
+          <option value="COURSE">الدورات</option><option value="UNIVERSITY">الجامعات</option>
+          <option value="STUDENT">الطلاب</option>
+        </datalist>
+        <input aria-label="معرف المالك"
           value={filters.ownerId}
           onChange={(e) => setFilters((v) => ({ ...v, ownerId: e.target.value }))}
           placeholder="معرف المالك (Owner ID)"
@@ -156,11 +330,89 @@ export function AssetAdminPage() {
         >
           <Filter className="h-3.5 w-3.5" /> تصفية وتطبيق البحث
         </button>
+        <button type="button" onClick={resetFilters} className="rounded-xl border px-4 py-2 text-xs">إعادة ضبط</button>
       </form>
+
+      {appliedFilters.usageStatus && <p role="status" className="text-xs text-slate-600">
+        الاستخدام يُفحص من سجلات المنصة وقت التحميل؛ يُعاد التحقق عند أي إجراء مؤثر.
+      </p>}
+      <AssetUploadWizard onUploaded={() => void load(true, appliedRef.current)} />
+      {selectedAsset && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 text-xs shadow-xs" aria-live="polite">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-black text-[#142B5F]">
+              تفاصيل الأصل: {selectedAsset.metadata.originalFilename}
+            </h2>
+            <button type="button" onClick={() => { detailsGenerationRef.current++; setDetailsLoadingId(null); setSelectedAsset(null); }}
+              className="rounded-lg border px-3 py-1.5">إغلاق</button>
+          </div>
+          <dl className="mt-4 grid gap-3 md:grid-cols-3">
+            <div><dt className="text-slate-500">المعرف</dt><dd className="mt-1 break-all font-mono">{selectedAsset.id}</dd></div>
+            <div><dt className="text-slate-500">المرجع</dt><dd className="mt-1 break-all font-mono">{selectedAsset.reference}</dd></div>
+            <div><dt className="text-slate-500">المالك</dt><dd className="mt-1">{selectedAsset.ownerType}: {selectedAsset.ownerId}</dd></div>
+            <div><dt className="text-slate-500">الحالة</dt><dd className="mt-1 font-bold">{selectedAsset.lifecycleState}</dd></div>
+            <div><dt className="text-slate-500">تصنيف الأمان</dt><dd className="mt-1">{selectedAsset.securityClassification}</dd></div>
+            <div><dt className="text-slate-500">الاحتفاظ</dt><dd className="mt-1">{selectedAsset.retentionCategory}</dd></div>
+            <div><dt className="text-slate-500">تاريخ انتهاء الاحتفاظ</dt><dd className="mt-1">{selectedAsset.retentionExpiresAt || 'غير محدد'}</dd></div>
+            <div><dt className="text-slate-500">نوع الملف</dt><dd className="mt-1">{selectedAsset.metadata.mimeType}</dd></div>
+            <div><dt className="text-slate-500">الحجم</dt><dd className="mt-1">{selectedAsset.metadata.byteSize.toLocaleString()} بايت</dd></div>
+          </dl>
+          <p className="mt-3">اكتمال الرفع: {selectedAsset.securityEvidence?.uploadConfirmed ? 'مؤكد' : 'غير مؤكد'} —
+            الفحص: {selectedAsset.securityEvidence?.malwareStatus ?? 'لا يوجد دليل'} —
+            التنظيف: {selectedAsset.securityEvidence?.sanitized ? 'مسجل' : 'غير مسجل'}</p>
+          {selectedAsset.checksum && (
+            <div className="mt-4 rounded-lg bg-slate-50 p-3">
+              <div className="font-bold">بصمة المحتوى — {selectedAsset.checksum.algorithm}</div>
+              <code dir="ltr" className="mt-1 block break-all text-[11px]">{selectedAsset.checksum.hash}</code>
+            </div>
+          )}
+          <p className="mt-3 text-slate-500">
+            هذه بيانات وصفية فقط؛ لا تُعرض روابط تخزين مباشرة. تحقق من ارتباطات الأصل قبل أي عملية مؤثرة.
+          </p>
+          <button type="button" className="mt-3 rounded-lg border px-3 py-1.5"
+            onClick={() => {
+              const next = { ...appliedRef.current, ownerId: selectedAsset.ownerId, ownerType: selectedAsset.ownerType };
+              setFilters(next); setAppliedFilters(next); appliedRef.current = next;
+              void load(true, next);
+            }}>عرض أصول هذا المالك</button>
+          <AssetGovernancePanel key={selectedAsset.id} asset={selectedAsset} />
+          <AssetLifecycleActions key={selectedAsset.id + ':' + selectedAsset.lifecycleState}
+            asset={selectedAsset} onChanged={async () => {
+              await inspectDetails(selectedAsset.id);
+              await load(true, appliedRef.current);
+            }} />
+          <button type="button" onClick={() => void inspectUsages(selectedAsset.id)}
+            disabled={usageLoadingId !== null} className="mt-3 rounded-lg border px-3 py-1.5 disabled:opacity-50">
+            عرض استخدامات هذا الأصل
+          </button>
+          <button type="button"
+            disabled={selectedAsset.lifecycleState !== 'ACTIVE'}
+            onClick={() => void previewAsset(selectedAsset.id, selectedAsset.metadata.mimeType)}
+            className="mt-3 mr-2 rounded-lg border px-3 py-1.5 disabled:opacity-50">
+            معاينة آمنة للملف
+          </button>
+        </section>
+      )}
+
+      {usagePreview && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 text-xs" aria-live="polite">
+          <div className="font-bold text-[#142B5F]">تأثير الإجراءات على الأصل: {usagePreview.assetId}</div>
+          <p className="mt-2">{usagePreview.inUse
+            ? `مرتبط بـ ${usagePreview.usages.length} موضع استخدام — تُمنع عمليات الإزالة أثناء الارتباط.`
+            : 'لم يجد سجل الاستخدام ارتباطًا حاليًا. يجب إعادة الفحص عند تنفيذ أي إجراء.'}</p>
+          <ul className="mt-2 list-inside list-disc">
+            {usagePreview.usages.map((usage, index) => (
+              <li key={index}>{usage.consumer} — {usage.field}</li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => setUsagePreview(null)}
+            className="mt-2 rounded-lg border px-3 py-1">إغلاق التفاصيل</button>
+        </section>
+      )}
 
       <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
         <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4">
-          <h2 className="text-base font-black text-[#142B5F]">سجل الأصول والملفات ({items.length})</h2>
+          <h2 className="text-base font-black text-[#142B5F]">الأصول المحمّلة ({items.length})</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-start text-xs">
@@ -172,13 +424,15 @@ export function AssetAdminPage() {
                 <th className="p-3.5 text-start">دورة الحياة</th>
                 <th className="p-3.5 text-start">تصنيف الأمان</th>
                 <th className="p-3.5 text-start">سياسة الاحتفاظ</th>
+                <th className="p-3.5 text-start">تأثير الاستخدام</th>
+                <th className="p-3.5 text-start">التفاصيل</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400 font-bold">
-                    لا توجد أصول أو ملفات مطابقة للبحث.
+                  <td colSpan={8} className="p-8 text-center text-slate-400 font-bold">
+                    {loading ? 'جاري التحميل…' : error ? 'تعذر تحميل النتائج؛ أعد المحاولة.' : hasMore ? 'لا توجد نتائج في هذه الدفعة؛ حمّل المزيد لمتابعة البحث.' : 'لا توجد أصول مطابقة في نهاية البحث.'}
                   </td>
                 </tr>
               ) : (
@@ -206,6 +460,20 @@ export function AssetAdminPage() {
                       </span>
                     </td>
                     <td className="p-3.5 text-slate-600 font-medium">{a.retentionCategory}</td>
+                    <td className="p-3.5">
+                      <button type="button" disabled={usageLoadingId !== null}
+                        onClick={() => void inspectUsages(a.id)}
+                        className="rounded-lg border px-3 py-1 text-xs disabled:opacity-50">
+                        {usageLoadingId === a.id ? 'جاري الفحص…' : 'عرض الارتباطات'}
+                      </button>
+                    </td>
+                    <td className="p-3.5">
+                      <button type="button" disabled={detailsLoadingId !== null}
+                        onClick={() => void inspectDetails(a.id)}
+                        className="rounded-lg border px-3 py-1 text-xs disabled:opacity-50">
+                        {detailsLoadingId === a.id ? 'جاري التحميل…' : 'عرض التفاصيل'}
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -217,7 +485,8 @@ export function AssetAdminPage() {
       {hasMore && (
         <div className="text-center pt-2">
           <button
-            onClick={() => void load(false)}
+            disabled={loading || pendingFilters}
+            onClick={() => void load(false, appliedRef.current)}
             className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 text-xs font-black text-[#142B5F] hover:bg-slate-50 transition shadow-xs"
           >
             تحميل المزيد من الأصول

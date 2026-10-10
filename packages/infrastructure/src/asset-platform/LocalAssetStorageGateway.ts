@@ -1,10 +1,12 @@
-import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rename, rm, stat } from 'fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
+import { mkdir, open, readFile, rename, rm, stat } from 'fs/promises';
 import * as path from 'path';
 import {
   IAssetStorageGateway,
   AssetStorageLocator,
-  AssetStorageZone
+  AssetStorageZone,
+  AssetUploadVerificationRequest,
+  VerifiedAssetUpload
 } from '@manaratak/domain';
 
 export class LocalAssetStorageGateway implements IAssetStorageGateway {
@@ -24,15 +26,89 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
     return new AssetStorageLocator(targetZone, this.localBucketName, pathKey);
   }
 
-  async moveToCleanZone(quarantineLocator: AssetStorageLocator): Promise<AssetStorageLocator> {
+  async verifyUploadedObject(locator: AssetStorageLocator, request: AssetUploadVerificationRequest): Promise<VerifiedAssetUpload> {
+    if (locator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_UPLOAD_VERIFICATION_QUARANTINE_REQUIRED');
+    const content = await this.read(locator, 10 * 1024 * 1024);
+    const bytes = Buffer.from(content);
+    const prefix = bytes.subarray(0, 8);
+    const declared = request.declaredMimeType;
+    const text = ['text/plain', 'text/csv', 'application/json'].includes(declared);
+    let matches = false;
+    if (declared === 'application/pdf') matches = bytes.subarray(0, 5).equals(Buffer.from('%PDF-'));
+    else if (declared === 'image/png') matches = prefix.equals(Buffer.from([137,80,78,71,13,10,26,10]));
+    else if (declared === 'image/jpeg') matches = bytes.length >= 4 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+    else if (text) {
+      try {
+        const decoded = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        matches = !decoded.includes('\0');
+        if (declared === 'application/json' && matches) JSON.parse(decoded);
+      } catch { matches = false; }
+    }
+    if (!matches || (request.expectedByteSize !== undefined && bytes.length !== request.expectedByteSize)) throw new Error('ASSET_UPLOAD_VERIFICATION_FAILED');
+    return {
+      byteSize: bytes.length,
+      verifiedMimeType: declared,
+      checksumSha256: createHash('sha256').update(bytes).digest('hex'),
+      verifiedAt: new Date().toISOString(),
+      signatureVerified: true,
+    };
+  }
+
+  async moveToCleanZone(quarantineLocator: AssetStorageLocator, expectedSha256?: string): Promise<AssetStorageLocator> {
     if (quarantineLocator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_STORAGE_QUARANTINE_LOCATOR_REQUIRED');
-    const cleanPathKey = quarantineLocator.pathKey.replace(/^uploads\//, 'clean/');
+    const cleanPathKey = 'clean/' + quarantineLocator.pathKey.replace(/^uploads\//, '');
     const cleanLocator = new AssetStorageLocator(AssetStorageZone.CLEAN, this.localBucketName, cleanPathKey);
     const source = this.resolveLocator(quarantineLocator);
     const destination = this.resolveLocator(cleanLocator);
+    const digest = async (filename: string) => createHash('sha256').update(await readFile(filename)).digest('hex');
+    const exists = async (filename: string) => {
+      try { const info = await stat(filename); if (!info.isFile()) throw new Error('ASSET_STORAGE_LOCATOR_NOT_FILE'); return true; }
+      catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false; throw error; }
+    };
+    const checkRecovered = async () => {
+      if (!expectedSha256 || !/^[a-f0-9]{64}$/i.test(expectedSha256) ||
+          await digest(destination) !== expectedSha256.toLowerCase()) {
+        throw new Error('ASSET_CLEAN_PROMOTION_CHECKSUM_MISMATCH');
+      }
+    };
+    const [sourceExists, destinationExists] = await Promise.all([exists(source), exists(destination)]);
+    if (sourceExists && destinationExists) throw new Error('ASSET_STORAGE_AMBIGUOUS_DUPLICATE_COPIES');
+    if (!sourceExists) {
+      if (!destinationExists) throw new Error('ASSET_STORAGE_OBJECT_MISSING');
+      await checkRecovered();
+      return cleanLocator;
+    }
+    if (expectedSha256 && (!/^[a-f0-9]{64}$/i.test(expectedSha256) ||
+        await digest(source) !== expectedSha256.toLowerCase())) {
+      throw new Error('ASSET_CLEAN_PROMOTION_CHECKSUM_MISMATCH');
+    }
     await mkdir(path.dirname(destination), { recursive: true });
-    await rename(source, destination);
+    try { await rename(source, destination); }
+    catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT' || await exists(source) || !await exists(destination)) throw error;
+      await checkRecovered(); // Concurrent retry may have completed the same move.
+    }
     return cleanLocator;
+  }
+
+  async *openRead(locator: AssetStorageLocator, maxBytes: number): AsyncIterable<Uint8Array> {
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > 64 * 1024 * 1024)
+      throw new Error('ASSET_READ_MAX_BYTES_INVALID');
+    const handle = await open(this.resolveLocator(locator), 'r');
+    try {
+      const info = await handle.stat();
+      if (!info.isFile()) throw new Error('ASSET_STORAGE_LOCATOR_NOT_FILE');
+      if (info.size > maxBytes) throw new Error('ASSET_READ_SIZE_LIMIT_EXCEEDED');
+      const stream = handle.createReadStream({ highWaterMark: 64 * 1024, autoClose: false });
+      let total = 0;
+      try {
+        for await (const chunk of stream) {
+          total += chunk.length;
+          if (total > maxBytes) throw new Error('ASSET_READ_SIZE_LIMIT_EXCEEDED');
+          yield new Uint8Array(chunk);
+        }
+      } finally { stream.destroy(); }
+    } finally { await handle.close(); }
   }
 
   async read(locator: AssetStorageLocator, maxBytes: number): Promise<Uint8Array> {
@@ -60,12 +136,50 @@ export class LocalAssetStorageGateway implements IAssetStorageGateway {
     return new Uint8Array(data);
   }
 
+  async verifyRestoredObject(locator: AssetStorageLocator, request: {
+    expectedSha256: string; expectedByteSize: number; declaredMimeType: string;
+  }): Promise<void> {
+    if (locator.storageZone !== AssetStorageZone.CLEAN ||
+        !/^[a-f0-9]{64}$/i.test(request.expectedSha256) ||
+        !Number.isSafeInteger(request.expectedByteSize) || request.expectedByteSize <= 0) {
+      throw new Error('ASSET_RESTORE_EVIDENCE_INVALID');
+    }
+    const bytes = await this.read(locator, 10 * 1024 * 1024);
+    const actual = createHash('sha256').update(bytes).digest('hex');
+    if (bytes.byteLength !== request.expectedByteSize ||
+        actual !== request.expectedSha256.toLowerCase()) {
+      throw new Error('ASSET_RESTORE_CONTENT_VERIFICATION_FAILED');
+    }
+  }
+
   async archive(locator: AssetStorageLocator): Promise<void> {
-    await rename(this.resolveLocator(locator), this.archivePath(locator));
+    await this.moveIdempotently(this.resolveLocator(locator), this.archivePath(locator));
   }
 
   async restore(locator: AssetStorageLocator): Promise<void> {
-    await rename(this.archivePath(locator), this.resolveLocator(locator));
+    await this.moveIdempotently(this.archivePath(locator), this.resolveLocator(locator));
+  }
+
+  private async moveIdempotently(source: string, destination: string): Promise<void> {
+    const isFile = async (filename: string): Promise<boolean> => {
+      try {
+        const info = await stat(filename);
+        if (!info.isFile()) throw new Error('ASSET_STORAGE_LOCATOR_NOT_FILE');
+        return true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') return false;
+        throw error;
+      }
+    };
+    const [sourceExists, destinationExists] = await Promise.all([
+      isFile(source), isFile(destination),
+    ]);
+    if (sourceExists && destinationExists) {
+      throw new Error('ASSET_STORAGE_AMBIGUOUS_DUPLICATE_COPIES');
+    }
+    if (!sourceExists && destinationExists) return; // Idempotent retry / already restored.
+    if (!sourceExists) throw new Error('ASSET_STORAGE_OBJECT_MISSING');
+    await rename(source, destination);
   }
 
   async delete(locator: AssetStorageLocator): Promise<void> {

@@ -37,6 +37,7 @@ import { AcademicTaxonomyAdminPage } from './pages/AcademicTaxonomyAdminPage';
 import { AcademicTaxonomyDetailPage } from './pages/AcademicTaxonomyDetailPage';
 import { AdminTranslationWorkspacePage } from './pages/AdminTranslationWorkspacePage';
 import { AuthorizationAdminPage } from './pages/AuthorizationAdminPage';
+import { IdentityAdminPage } from './pages/IdentityAdminPage';
 import { AuditCenterPage } from './pages/AuditCenterPage';
 import { AssetAdminPage } from './pages/AssetAdminPage';
 import { StudentSupportAdminPage } from './pages/StudentSupportAdminPage';
@@ -296,6 +297,7 @@ function AdminLayout() {
                 <Route path="/student-tools/:toolKey" element={<RequireAdminPermission permission="admin:student-tools:manage"><StudentToolsAdminPage /></RequireAdminPermission>} />
                 <Route path="/study-destinations" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationsAdminPage /></RequireAdminPermission>} />
                 <Route path="/study-destinations/:countryIso2Code" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationDetailPage /></RequireAdminPermission>} />
+                <Route path="/identities" element={<RequireAdminPermission permission="admin:identities:manage"><IdentityAdminPage /></RequireAdminPermission>} />
                 <Route path="/authorization" element={<RequireAdminPermission permission="admin:authorization:manage"><AuthorizationAdminPage /></RequireAdminPermission>} />
                 <Route path="/audit" element={<RequireAdminPermission permission="admin:audit:manage"><AuditCenterPage /></RequireAdminPermission>} />
                 <Route path="/assets" element={<RequireAdminPermission permission="admin:assets:manage"><AssetAdminPage /></RequireAdminPermission>} />

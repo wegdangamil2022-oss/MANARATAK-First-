@@ -1,0 +1,1 @@
+Installer refused this non-GitHub/source environment with EAP_DISPOSABLE_GITHUB_POSTGRES_REQUIRED before creating a Prisma client. No DB connection/write.

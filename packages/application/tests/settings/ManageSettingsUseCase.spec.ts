@@ -109,8 +109,7 @@ describe('ManageSettingsUseCase', () => {
     await useCase.assignValue({
       assignmentId: 'assign-2',
       key: 'ui.theme',
-      level: 'TENANT',
-      scopeId: 'tenant-99',
+      level: 'GLOBAL',
       versionId: 'v1',
       value: 'dark',
       type: ValueType.String,
@@ -120,8 +119,7 @@ describe('ManageSettingsUseCase', () => {
     await useCase.assignValue({
       assignmentId: 'assign-2',
       key: 'ui.theme',
-      level: 'TENANT',
-      scopeId: 'tenant-99',
+      level: 'GLOBAL',
       versionId: 'v2',
       value: 'twilight',
       type: ValueType.String,
@@ -129,21 +127,46 @@ describe('ManageSettingsUseCase', () => {
     });
 
     await expect(useCase.assignValue({
-      assignmentId: 'assign-2', key: 'ui.theme', level: 'TENANT', scopeId: 'tenant-99', versionId: 'v2', value: 'overwrite', type: ValueType.String, authorId: 'admin-3'
+      assignmentId: 'assign-2', key: 'ui.theme', level: 'GLOBAL', versionId: 'v2', value: 'overwrite', type: ValueType.String, authorId: 'admin-3'
     })).rejects.toThrow(/already exists/);
 
     await useCase.rollbackValue({
       assignmentId: 'assign-2',
       previousVersionId: 'v1',
+      changeReason: 'Restore reviewed prior theme',
       newVersionId: 'v3',
       authorId: 'admin-1',
     });
 
-    const scope = new ScopeIdentifier('TENANT', 'tenant-99');
+    const scope = new ScopeIdentifier('GLOBAL');
     const key = new NamespacedKey('ui.theme');
     const assignment = await assignRepo.findByScopeAndKey(scope, key);
 
     expect(assignment?.getCurrentVersion().id).toBe('v3');
     expect(assignment?.getCurrentVersion().value.getValue()).toBe('dark');
   });
+  it('rejects out-of-bounds configuration values before any assignment write', async () => {
+    await useCase.createDefinition({ id: 'constrained', key: 'upload.max_files', valueType: ValueType.Number,
+      defaultValue: 10, validationRules: { min: 1, max: 50, integer: true } });
+    const invalid = { assignmentId: 'outside', key: 'upload.max_files', level: 'GLOBAL',
+      versionId: 'v1', value: 100, type: ValueType.Number };
+    await expect(useCase.assignValue(invalid)).rejects.toThrow('SETTINGS_VALUE_OUTSIDE_CONSTRAINTS');
+    expect(await assignRepo.findByScopeAndKey(new ScopeIdentifier('GLOBAL'), new NamespacedKey('upload.max_files'))).toBeNull();
+    await useCase.assignValue({ ...invalid, value: 20 });
+    expect((await assignRepo.findByScopeAndKey(new ScopeIdentifier('GLOBAL'), new NamespacedKey('upload.max_files')))
+      ?.getCurrentVersion().value.getValue()).toBe(20);
+  });
+  it('rejects feature flags without an explicit default before persisting anything', async () => {
+    await expect(useCase.createDefinition({ id: 'flag', key: 'feature.safe', valueType: ValueType.Boolean,
+      isFeatureFlag: true })).rejects.toThrow('SETTINGS_FEATURE_FLAG_BOOLEAN_DEFAULT_REQUIRED');
+    expect(await defRepo.findByKey(new NamespacedKey('feature.safe'))).toBeNull();
+  });
+  it('rejects a hidden GLOBAL identifier before writing a version', async () => {
+    await useCase.createDefinition({ id: 'def', key: 'feature.safe', valueType: ValueType.Boolean, defaultValue: false });
+    await expect(useCase.assignValue({ assignmentId: 'hidden', key: 'feature.safe', level: 'GLOBAL',
+      scopeId: 'hidden-id', versionId: 'v1', value: true, type: ValueType.Boolean }))
+      .rejects.toThrow('SETTINGS_GLOBAL_SCOPE_ID_FORBIDDEN');
+    expect(await assignRepo.findByScopeAndKey(new ScopeIdentifier('GLOBAL'), new NamespacedKey('feature.safe'))).toBeNull();
+  });
+
 });

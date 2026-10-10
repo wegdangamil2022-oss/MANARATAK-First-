@@ -1,0 +1,13 @@
+✔ MNT-AUD-0007 cron scheduler calculates deterministic UTC occurrences (7.262955ms)
+✔ MNT-AUD-0007 worker owns terminal transitions and uses job reference as handler idempotency key (1.32634ms)
+✔ MNT-AUD-0007 stale worker completion is rejected without a false success (0.528168ms)
+✔ MNT-AUD-0068 dispatcher treats stale final CAS as lease loss, not success/failure (6.425585ms)
+✔ MNT-AUD-0068 Prisma source uses SKIP LOCKED, claim tokens, heartbeat and ownership CAS (2.445322ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1448.327097

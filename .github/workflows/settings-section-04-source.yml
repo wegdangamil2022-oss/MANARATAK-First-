@@ -1,0 +1,67 @@
+name: Settings Section 04 Source Verification
+on:
+  push:
+    branches:
+      - codex/section-01-iam-rbac
+    paths:
+      - 'packages/domain/src/settings/**'
+      - 'packages/domain/tests/settings/**'
+      - 'packages/application/src/settings/**'
+      - 'packages/application/tests/settings/**'
+      - 'packages/application/tests/audit/SettingsAtomicAuditBoundary.spec.ts'
+      - 'packages/infrastructure/src/settings/**'
+      - 'packages/infrastructure/tests/settings/**'
+      - 'packages/infrastructure/prisma/schema.prisma'
+      - 'packages/infrastructure/prisma/migrations/20261009040000_settings_override_history/**'
+      - 'packages/infrastructure/prisma/migrations/20261009050000_settings_current_version_ownership/**'
+      - 'docs/remediation/evidence/section-02/admin-mutation-audit-inventory.json'
+      - 'apps/api/src/presentation/api/router/Settings*'
+      - 'apps/api/tests/presentation/api/router/Settings*'
+      - 'apps/admin/src/pages/SettingsAdminPage.tsx'
+      - 'apps/admin/src/pages/settingsAssignmentGovernance*'
+      - 'apps/admin/src/components/SettingsResolutionInspector.tsx'
+      - 'apps/admin/src/components/SettingsIdentityScopePicker.tsx'
+      - 'tests/remediation/section04-settings-authority.test.mjs'
+      - 'tests/remediation/section04-settings-ownership-plan.test.mjs'
+      - 'scripts/verify-academic-settings-source-closure.mjs'
+      - '.github/workflows/settings-section-04-source.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  settings-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Settings schema source validation (no database connection)
+        env:
+          DATABASE_URL: postgresql://source_only:source_only@127.0.0.1:1/source_only
+          DIRECT_URL: postgresql://source_only:source_only@127.0.0.1:1/source_only
+        run: npx --no-install prisma validate --schema packages/infrastructure/prisma/schema.prisma
+      - name: Ownership constraint source consistency (no database execution)
+        run: node --test tests/remediation/section04-settings-ownership-plan.test.mjs
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Source quality
+        run: npm run quality:source
+      - name: Settings invariants, effective resolution, persistence and API contracts
+        run: >-
+          npx --no-install vitest run --config vitest.config.ts
+          packages/domain/tests/settings
+          packages/application/tests/settings
+          apps/admin/src/pages/settingsAssignmentGovernance.spec.ts
+          packages/infrastructure/tests/settings
+          packages/application/tests/audit/SettingsAtomicAuditBoundary.spec.ts
+          apps/api/tests/presentation/api/router/SettingsAdminRouter.spec.ts
+          apps/api/tests/presentation/api/router/SettingsRuntimeRouter.spec.ts
+          apps/api/tests/infrastructure/di/W1Composition.spec.ts
+      - name: Authority and permission guards
+        run: node --test tests/remediation/section04-settings-authority.test.mjs
+      - name: Existing audit coverage
+        run: npm run audit:coverage:verify

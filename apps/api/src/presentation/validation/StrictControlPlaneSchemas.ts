@@ -159,7 +159,6 @@ export const fileActivateSchema = z.object({
   checksumHash: z.string().trim().min(1).max(512),
 }).strict();
 
-
 // Authorization / IAM edge contracts.
 export const authorizationRoleCreateSchema = z.object({
   id: shortId,
@@ -222,14 +221,25 @@ export const identityContactUpdateSchema = z.object({
   verifyPhone: z.boolean().optional(),
 }).strict().refine(value => Object.keys(value).length > 0, 'At least one contact update is required');
 export const identityListQuerySchema = z.object({
-  type: z.nativeEnum(IdentityType).optional(),
-  status: z.nativeEnum(LifeStatus).optional(),
-  limit: z.coerce.number().int().min(1).max(100).optional(),
-  offset: z.coerce.number().int().min(0).max(1_000_000).optional(),
-  page: z.coerce.number().int().min(1).optional(),
-  pageSize: z.coerce.number().int().min(1).max(100).optional(),
-  search: z.string().trim().max(240).optional(),
-}).strict().transform((data) => {
+    roleId: z.string().trim().min(1).max(240).optional(),
+    adminAccess: z.enum(['true', 'false'])
+      .transform((value) => value === 'true')
+      .optional(),
+    cursor: z.string().max(240).optional(),
+    accessState: z.enum(['Active', 'Suspended', 'Locked', 'RateLimited']).optional(),
+    verified: z.enum(['true', 'false'])
+      .transform((value) => value === 'true')
+      .optional(),
+    type: z.nativeEnum(IdentityType).optional(),
+    status: z.nativeEnum(LifeStatus).optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+    offset: z.coerce.number().int().min(0).max(1_000_000).optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    pageSize: z.coerce.number().int().min(1).max(100).optional(),
+    search: z.string().trim().max(240).optional(),
+  })
+  .strict()
+  .transform((data) => {
   const limit = data.limit ?? data.pageSize ?? 20;
   const offset = data.offset ?? (data.page ? (data.page - 1) * limit : 0);
   return {

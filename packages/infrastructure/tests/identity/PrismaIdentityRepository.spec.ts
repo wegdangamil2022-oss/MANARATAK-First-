@@ -22,6 +22,32 @@ describe('PrismaIdentityRepository', () => {
     mockPrisma.$transaction = vi.fn(async (mutation: (tx: any) => Promise<unknown>) => mutation(mockPrisma));
     repository = new PrismaIdentityRepository(mockPrisma);
   });
+  it('applies search and verification before both count and pagination, with a stable tie-breaker', async () => {
+    mockPrisma.identityRecord.count.mockResolvedValue(41);
+    mockPrisma.identityRecord.findMany.mockResolvedValue([]);
+    const result = await repository.findPaged({
+      search: '  أمل  ',
+      verified: false,
+      limit: 20,
+      offset: 20,
+    });
+    const where = mockPrisma.identityRecord.count.mock.calls[0][0].where;
+    expect(where.OR).toEqual([
+      { id: { contains: 'أمل', mode: 'insensitive' } },
+      { user: { is: { displayName: { contains: 'أمل', mode: 'insensitive' } } } },
+      { user: { is: { primaryEmail: { contains: 'أمل', mode: 'insensitive' } } } },
+    ]);
+    expect(where.user).toEqual({ is: { isEmailVerified: false } });
+    expect(mockPrisma.identityRecord.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where,
+        take: 20,
+        skip: 20,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      }),
+    );
+    expect(result.total).toBe(41);
+  });
 
   it('should save and find an identity by id', async () => {
     const technicalMetadata = TechnicalMetadata.create('sysadmin');

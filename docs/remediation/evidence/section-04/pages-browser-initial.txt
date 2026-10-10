@@ -1,0 +1,10 @@
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('td').getByText('site.offpage', { exact: true }) to be visible[22m
+
+    at /workspace/manaratak-audit-main/docs/remediation/evidence/section-04/pages-browser.cjs:38:91 {
+  log: [
+    "  - waiting for locator('td').getByText('site.offpage', { exact: true }) to be visible"
+  ],
+  name: 'TimeoutError'
+}

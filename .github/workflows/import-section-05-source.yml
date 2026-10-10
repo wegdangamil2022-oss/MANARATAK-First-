@@ -1,0 +1,88 @@
+name: Import Section 05 Source Verification
+on:
+  push:
+    branches:
+      - codex/section-01-iam-rbac
+    paths:
+      - 'packages/application/src/import-foundation/**'
+      - 'packages/application/tests/import-foundation/**'
+      - 'packages/application/src/translation-import/TranslationImportPreparationService.ts'
+      - 'packages/application/tests/translation-import/TranslationImportPreparationService.spec.ts'
+      - 'packages/infrastructure/src/import-foundation/**'
+      - 'packages/infrastructure/tests/import-foundation/**'
+      - 'packages/domain/src/import-foundation/**'
+      - 'packages/infrastructure/prisma/schema.prisma'
+      - 'packages/infrastructure/prisma/migrations/20261009070000_import_governance_receipts/**'
+      - 'packages/domain/src/asset-platform/gateways/IAssetStorageGateway.ts'
+      - 'packages/infrastructure/src/asset-platform/**'
+      - 'packages/infrastructure/src/provider-http/**'
+      - 'packages/infrastructure/src/retention/PrismaImportRetentionGateway.ts'
+      - 'packages/infrastructure/tests/asset-platform/HttpAssetSecurityGateways.spec.ts'
+      - 'apps/api/src/infrastructure/di/container.ts'
+      - 'packages/domain/src/index.ts'
+      - 'packages/domain/tests/import-foundation/**'
+      - 'apps/api/src/presentation/api/router/ImportAdminRouter.ts'
+      - 'apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts'
+      - 'apps/admin/src/pages/ImportAdminPage.tsx'
+      - 'apps/admin/src/pages/AdminReviewQueuePage.tsx'
+      - 'apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts'
+      - 'packages/infrastructure/src/scholarships/PrismaScholarshipImportDecisionPorts.ts'
+      - '.github/workflows/import-section-05-source.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  import-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Source quality
+        run: npm run quality:source
+      - name: Focused import identities, queue, lease, handoff and SSRF regressions
+        run: >-
+          npx --no-install vitest run --config vitest.config.ts
+          packages/application/tests/scholarships/ScholarshipImportDecisionUseCases.spec.ts
+          packages/infrastructure/tests/import-foundation/ImportGovernance.spec.ts
+          packages/infrastructure/tests/import-foundation/ImportSessionThree.spec.ts
+          packages/infrastructure/tests/import-foundation/VerifiedArtifactImport.spec.ts
+          packages/application/tests/import-foundation/CsvImportStreamParser.spec.ts
+          packages/application/tests/import-foundation/JsonImportStreamParser.spec.ts
+          packages/infrastructure/tests/import-foundation/ImportOwnerCommand.spec.ts
+          packages/application/tests/import-foundation/NdjsonImportStreamParser.spec.ts
+          packages/application/tests/import-foundation/ImportParserRegistry.spec.ts
+          packages/infrastructure/tests/asset-platform/HttpAssetSecurityGateways.spec.ts
+          packages/infrastructure/tests/import-foundation/ProcessImportJobUseCase.integration.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaSourceRegistryGateway.spec.ts
+          packages/infrastructure/tests/import-foundation/ImportIdentifierSafety.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportSourceDedup.spec.ts
+          packages/infrastructure/tests/import-foundation/ImportAdminDurableWorkerIntegration.spec.ts
+          packages/infrastructure/tests/import-foundation/InMemoryImportQueueGateway.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportQueueGateway.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportWorkerStats.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportRecordLease.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportHandoffReconciliation.spec.ts
+          apps/api/tests/presentation/api/router/ImportAdminRouter.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportErrorReport.spec.ts
+          packages/infrastructure/tests/import-foundation/PrismaImportStrandedStopInsights.spec.ts
+          packages/application/tests/import-foundation/ImportWorkerProtocol.spec.ts
+          packages/application/tests/import-foundation/ImportSourceIdentity.spec.ts
+          packages/application/tests/import-foundation/ImportHandoffDispatcher.spec.ts
+          packages/application/tests/translation-import/TranslationImportPreparationService.spec.ts
+          packages/infrastructure/tests/import-foundation/SourceNetworkSecurityPolicy.spec.ts
+          packages/infrastructure/tests/import-foundation/NodeSafeSourceHttpTransport.spec.ts
+          packages/infrastructure/tests/import-foundation/connectors/SourceConnectors.spec.ts
+          packages/application/tests/import-foundation/AcquireImportSourceUseCase.spec.ts
+          packages/domain/tests/import-foundation/value-objects/SourceAccessExecutionPolicy.spec.ts
+          packages/domain/tests/import-foundation/ImportRetryPolicySafety.spec.ts
+          packages/infrastructure/tests/import-foundation/SourceAcquisitionLimiter.spec.ts
+      - name: Existing admin audit coverage
+        run: npm run audit:coverage:verify

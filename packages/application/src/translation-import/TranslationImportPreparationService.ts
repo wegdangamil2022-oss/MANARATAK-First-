@@ -17,6 +17,8 @@ const UNIVERSITY_PUBLIC_ID = /^INS-[A-Z0-9]+(?:-[A-Z0-9]+)+$/;
 export class TranslationImportPreparationService
   implements IImportHandoffConsumer<TranslationStagedCandidate>
 {
+  readonly effectMode = 'SCREENING_ONLY' as const;
+
   constructor(private readonly gateway: ITranslationImportGateway) {}
 
   async accept(handoff: UniversalImportHandoff): Promise<TranslationStagedCandidate> {

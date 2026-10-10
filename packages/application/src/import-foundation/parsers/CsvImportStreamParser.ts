@@ -2,223 +2,87 @@ import { ParsedImportRow, ImportParseError } from '@manaratak/domain';
 import { IImportStreamParser, ImportStreamParserInput, ImportStreamParserContext } from './IImportStreamParser';
 
 export class CsvImportStreamParser implements IImportStreamParser {
-  public readonly format = 'csv';
-
-  public supports(input: ImportStreamParserInput): boolean {
-    const hint = input.formatHint?.toLowerCase();
-    if (hint === 'csv') return true;
-
-    const mime = input.mimeType?.toLowerCase();
-    if (mime === 'text/csv' || mime === 'application/csv') return true;
-
-    const file = input.fileName?.toLowerCase();
-    if (file && file.endsWith('.csv')) return true;
-
-    return false;
+  readonly format = 'csv';
+  supports(input: ImportStreamParserInput): boolean {
+    return input.formatHint?.toLowerCase() === 'csv' ||
+      ['text/csv', 'application/csv'].includes(input.mimeType?.toLowerCase() ?? '') ||
+      Boolean(input.fileName?.toLowerCase().endsWith('.csv'));
   }
 
-  public async *parse(
-    input: AsyncIterable<Uint8Array> | NodeJS.ReadableStream,
-    context: ImportStreamParserContext
-  ): AsyncIterable<ParsedImportRow | ImportParseError> {
-    const decoder = new TextDecoder('utf-8');
-    let inQuotes = false;
-    let currentCell = '';
-    let currentRow: string[] = [];
-    let headers: string[] | null = null;
-    let sourceRowNumber = 0;
-    let recordOffset = 0;
+  async *parse(input: AsyncIterable<Uint8Array> | NodeJS.ReadableStream,
+    context: ImportStreamParserContext): AsyncIterable<ParsedImportRow | ImportParseError> {
+    // Preserve BOM in decoding so offsets still account for its original bytes.
+    const decoder = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
+    let quoted = false; let quotePending = false; let closedQuote = false; let skipLF = false;
+    let cell = ''; let cells: string[] = []; let touched = false;
+    let headers: string[] | undefined; let rowNumber = 0; let offset = 0; let rowStart = 0; let rowBytes = 0;
     const chunkSize = context.chunkSize || 1000;
-    let buffer = '';
-    
     const processRow = function* (): Generator<ParsedImportRow | ImportParseError> {
-      if (currentRow.length === 0 && currentCell === '') return;
-      
-      currentRow.push(currentCell);
-      currentCell = '';
-      
-      if (currentRow.length === 1 && currentRow[0] === '') {
-        currentRow = [];
-        return;
-      }
-
-      sourceRowNumber++;
-      const chunkIndex = Math.floor((sourceRowNumber - 1) / chunkSize);
-
+      if (!touched && !cells.length && !cell) { rowBytes = 0; return; }
+      cells.push(cell); cell = ''; touched = false; rowBytes = 0; closedQuote = false;
+      rowNumber++;
       if (!headers) {
-        headers = [...currentRow];
+        headers = cells.map(value => value.trim());
+        if (headers.some(value => ['__proto__', 'prototype', 'constructor', '_domainHandoff',
+          '_sourceRowNumber', '_payloadFingerprint', '_importProvenance', '_mappingOriginal', '_screeningReceiptId'].includes(value) || value.startsWith('_phase6')))
+          throw new Error('IMPORT_RESERVED_HANDOFF_METADATA_FORBIDDEN');
+        if (headers.length > 256 || headers.some(value => !value || value.length > 240) ||
+          new Set(headers).size !== headers.length) throw new Error('CSV_HEADERS_INVALID');
+      } else if (cells.length !== headers.length) {
+        yield new ImportParseError({ code: 'CSV_COLUMN_COUNT_MISMATCH', message: 'CSV column count does not match header',
+          sourceRowNumber: rowNumber, chunkIndex: Math.floor((rowNumber - 1) / chunkSize), recordOffset: rowStart,
+          recoverable: true, rawFragment: cells.join(',').slice(0, 500) });
       } else {
-        if (currentRow.length !== headers.length) {
-          yield new ImportParseError({
-            code: 'CSV_COLUMN_COUNT_MISMATCH',
-            message: `Expected ${headers.length} columns, got ${currentRow.length}`,
-            sourceRowNumber,
-            chunkIndex,
-            recordOffset,
-            recoverable: true,
-            rawFragment: currentRow.join(',').slice(0, 500)
-          });
-        } else {
-          const raw: Record<string, unknown> = {};
-          for (let j = 0; j < headers.length; j++) {
-            raw[headers[j]] = currentRow[j];
-          }
-          yield new ParsedImportRow({
-            batchId: context.batchId,
-            sourceRowNumber,
-            chunkIndex,
-            recordOffset,
-            raw
-          });
-        }
+        const raw: Record<string, unknown> = Object.create(null);
+        for (let i = 0; i < headers.length; i++) raw[headers[i]] = cells[i];
+        yield new ParsedImportRow({ batchId: context.batchId, sourceRowNumber: rowNumber,
+          chunkIndex: Math.floor((rowNumber - 1) / chunkSize), recordOffset: rowStart, raw });
       }
-      currentRow = [];
+      cells = [];
     };
-
-    for await (const chunk of input as AsyncIterable<Uint8Array>) {
-      const text = typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true });
-      buffer += text;
-      
-      let i = 0;
-      while (i < buffer.length) {
-        const char = buffer[i];
-        
-        if (inQuotes && char === '"') {
-          if (i + 1 >= buffer.length) {
-            break;
-          }
-          const nextChar = buffer[i + 1];
-          if (nextChar === '"') {
-            currentCell += '"';
-            i += 2;
-            recordOffset += 2;
-            continue;
-          } else {
-            inQuotes = false;
-            i++;
-            recordOffset++;
-            continue;
-          }
+    const consume = function* (text: string): Generator<ParsedImportRow | ImportParseError> {
+      // for-of iterates code points; a multibyte character split across chunks
+      // is decoded once, so its byte offset/limit does not depend on chunking.
+      for (const char of text) {
+        const bytes = Buffer.byteLength(char, 'utf8');
+        if (!offset && char === '\uFEFF') { offset += bytes; rowStart = offset; continue; }
+        offset += bytes;
+        if (skipLF) {
+          skipLF = false;
+          if (char === '\n') { rowStart = offset; continue; }
         }
-        
-        if (!inQuotes && char === '\r') {
-          if (i + 1 >= buffer.length) {
-            break;
-          }
-          const nextChar = buffer[i + 1];
-          if (nextChar === '\n') {
-             yield* processRow();
-             i += 2;
-             recordOffset += 2;
-             continue;
-          }
-          yield* processRow();
-          i++;
-          recordOffset++;
+        rowBytes += bytes;
+        if (rowBytes > 1024 * 1024 || cells.length >= 256) throw new Error('IMPORT_ROW_SIZE_LIMIT');
+        if (quotePending) {
+          quotePending = false;
+          if (char === '"') { cell += '"'; continue; }
+          quoted = false; closedQuote = true;
+        }
+        if (quoted) {
+          if (char === '"') quotePending = true;
+          else cell += char;
           continue;
         }
-
-        if (inQuotes) {
-          currentCell += char;
-        } else {
-          if (char === '"') {
-            inQuotes = true;
-          } else if (char === ',') {
-            currentRow.push(currentCell);
-            currentCell = '';
-          } else if (char === '\n') {
-            yield* processRow();
-          } else {
-            currentCell += char;
-          }
-        }
-        i++;
-        recordOffset++;
+        if (closedQuote && ![',', '\r', '\n'].includes(char)) throw new Error('CSV_TRAILING_QUOTED_CONTENT');
+        if (char === '"') {
+          if (cell !== '' || closedQuote) throw new Error('CSV_UNEXPECTED_QUOTE');
+          quoted = true; touched = true;
+        } else if (char === ',') {
+          cells.push(cell); cell = ''; closedQuote = false; touched = true;
+        } else if (char === '\r' || char === '\n') {
+          yield* processRow(); rowStart = offset; skipLF = char === '\r';
+        } else { cell += char; touched = true; }
       }
-      
-      buffer = buffer.slice(i);
+    };
+    for await (const chunk of input as AsyncIterable<Uint8Array>) {
+      yield* consume(typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true }));
     }
-
-    const remainingText = decoder.decode();
-    buffer += remainingText;
-
-    let i = 0;
-    while (i < buffer.length) {
-        const char = buffer[i];
-        
-        if (inQuotes && char === '"') {
-          if (i + 1 >= buffer.length) {
-            inQuotes = false;
-            i++;
-            recordOffset++;
-            continue;
-          }
-          const nextChar = buffer[i + 1];
-          if (nextChar === '"') {
-            currentCell += '"';
-            i += 2;
-            recordOffset += 2;
-            continue;
-          } else {
-            inQuotes = false;
-            i++;
-            recordOffset++;
-            continue;
-          }
-        }
-        
-        if (!inQuotes && char === '\r') {
-          if (i + 1 >= buffer.length) {
-            yield* processRow();
-            i++;
-            recordOffset++;
-            continue;
-          }
-          const nextChar = buffer[i + 1];
-          if (nextChar === '\n') {
-             yield* processRow();
-             i += 2;
-             recordOffset += 2;
-             continue;
-          }
-          yield* processRow();
-          i++;
-          recordOffset++;
-          continue;
-        }
-
-        if (inQuotes) {
-          currentCell += char;
-        } else {
-          if (char === '"') {
-            inQuotes = true;
-          } else if (char === ',') {
-            currentRow.push(currentCell);
-            currentCell = '';
-          } else if (char === '\n') {
-            yield* processRow();
-          } else {
-            currentCell += char;
-          }
-        }
-        i++;
-        recordOffset++;
-    }
-
-    buffer = '';
-
-    if (inQuotes) {
-      yield new ImportParseError({
-        code: 'CSV_UNTERMINATED_QUOTE',
-        message: 'Unterminated quoted field at end of stream',
-        sourceRowNumber: sourceRowNumber + 1,
-        chunkIndex: Math.floor(sourceRowNumber / chunkSize),
-        recordOffset,
-        recoverable: false,
-        rawFragment: currentCell.slice(0, 500)
-      });
-    } else if (currentRow.length > 0 || currentCell.length > 0) {
-      yield* processRow();
-    }
+    yield* consume(decoder.decode());
+    if (quotePending) { quoted = false; quotePending = false; }
+    if (quoted) {
+      yield new ImportParseError({ code: 'CSV_UNTERMINATED_QUOTE', message: 'Unterminated quoted field',
+        sourceRowNumber: rowNumber + 1, chunkIndex: Math.floor(rowNumber / chunkSize), recordOffset: rowStart,
+        recoverable: false, rawFragment: cell.slice(0, 500) });
+    } else yield* processRow();
   }
 }

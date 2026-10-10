@@ -4,6 +4,14 @@ import { AssetRecordDto } from '../dtos/AssetDtos';
 export class AssetRecordMapper {
   public static toDto(record: AssetRecord): AssetRecordDto {
     return {
+      archiveOperation: record.archiveOperation ? { operationId: record.archiveOperation.operationId,
+        phase: record.archiveOperation.phase, preparedAt: record.archiveOperation.preparedAt, updatedAt: record.archiveOperation.updatedAt } : undefined,
+      restoreOperation: record.restoreOperation ? { operationId: record.restoreOperation.operationId,
+        phase: record.restoreOperation.phase, preparedAt: record.restoreOperation.preparedAt, updatedAt: record.restoreOperation.updatedAt } : undefined,
+      activationOperation: record.activationOperation ? {
+        operationId: record.activationOperation.operationId, phase: record.activationOperation.phase,
+        preparedAt: record.activationOperation.preparedAt, completedAt: record.activationOperation.completedAt,
+      } : undefined,
       id: record.id.value,
       reference: record.reference.value,
       storageLocator: record.locator.value,

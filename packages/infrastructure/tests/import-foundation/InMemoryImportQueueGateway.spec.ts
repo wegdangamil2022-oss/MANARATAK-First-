@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ImportCheckpoint, ImportJobStatus, ImportTargetDomain } from '@manaratak/domain';
+import { ImportCheckpoint, ImportJobStatus, ImportTargetDomain, ImportRetryPolicy } from '@manaratak/domain';
 import { InMemoryImportQueueGateway } from '../../src/import-foundation/InMemoryImportQueueGateway';
 
 describe('InMemoryImportQueueGateway', () => {
@@ -94,6 +94,48 @@ describe('InMemoryImportQueueGateway', () => {
     expect(await gateway.cancelJob({ batchId: 'unknown' })).toBe(false);
   });
 
+  it('keeps a running cancellation pending until the same worker actually acknowledges stopping', async () => {
+    const batchId = 'batch-cooperative-cancel';
+    await gateway.enqueueImportJob({
+      batchId, sourceSystem: 'TEST', targetDomain: ImportTargetDomain.UNIVERSITIES,
+    });
+    const lease = await gateway.claimNextJob({ workerId: 'worker-ack', leaseDurationMs: 60_000 });
+    expect(lease).toBeTruthy();
+    expect(await gateway.cancelJob({ batchId, reason: 'Operator request' })).toBe(true);
+    const pending = await gateway.getJobStatus(batchId);
+    expect(pending?.status).toBe(ImportJobStatus.CANCELLING);
+    expect(pending?.claimedBy).toBe('worker-ack');
+    expect(await gateway.claimNextJob({ workerId: 'replacement', leaseDurationMs: 60_000 })).toBeNull();
+    expect(await gateway.heartbeat(lease!, 60_000)).toBeNull();
+    expect(await gateway.completeClaimedJob(lease!)).toBe(false);
+    expect(await gateway.acknowledgeStoppedJob({ ...lease!, attempt: lease!.attempt + 1 })).toBeNull();
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLING);
+    expect(await gateway.acknowledgeStoppedJob(lease!)).toBe('CANCELLED');
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLED);
+    expect(await gateway.acknowledgeStoppedJob(lease!)).toBeNull();
+    expect(await gateway.replayJob({ batchId, fromCheckpoint: true })).toBe(true);
+  });
+
+  it('supports RUNNING to PAUSING, cancellation escalation, and worker-confirmed PAUSED', async () => {
+    const batchId = 'batch-cooperative-pause';
+    await gateway.enqueueImportJob({
+      batchId, sourceSystem: 'TEST', targetDomain: ImportTargetDomain.UNIVERSITIES,
+    });
+    const lease = await gateway.claimNextJob({ workerId: 'pausing-worker', leaseDurationMs: 60_000 });
+    expect(await gateway.pauseJob({ batchId })).toBe(true);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.PAUSING);
+    expect(await gateway.resumeJob({ batchId })).toBe(false);
+    expect(await gateway.acknowledgeStoppedJob({ ...lease!, claimUntil: new Date(0) })).toBeNull();
+    expect(await gateway.acknowledgeStoppedJob(lease!)).toBe('PAUSED');
+    expect(await gateway.resumeJob({ batchId })).toBe(true);
+    const resumed = await gateway.claimNextJob({ workerId: 'pausing-worker', leaseDurationMs: 60_000 });
+    expect(resumed?.attempt).toBe(2);
+    expect(await gateway.pauseJob({ batchId })).toBe(true);
+    expect(await gateway.cancelJob({ batchId })).toBe(true);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLING);
+    expect(await gateway.acknowledgeStoppedJob(resumed!)).toBe('CANCELLED');
+  });
+
   it('records checkpoint and updates progress defensively', async () => {
     const batchId = 'batch-checkpoint';
     await gateway.enqueueImportJob({
@@ -123,6 +165,60 @@ describe('InMemoryImportQueueGateway', () => {
     expect(status?.progress).toBe(50); // (45 + 5) / 100 * 100 = 50%
     expect(status?.checkpoint).toBeDefined();
     expect((status?.checkpoint as any).chunkIndex).toBe(2);
+  });
+
+  it('requires the live claimed lease before saving worker progress and blocks cancelled workers', async () => {
+    const gateway = new InMemoryImportQueueGateway();
+    const batchId = 'batch-fenced-checkpoint';
+    await gateway.enqueueImportJob({ batchId, targetDomain: ImportTargetDomain.Generic,
+      sourceSystem: 'TEST' });
+    const lease = await gateway.claimNextJob({ workerId: 'worker-A', leaseDurationMs: 60_000 });
+    const checkpoint = ImportCheckpoint.create({
+      batchId, stage: 'VALIDATE', chunkIndex: 0, recordOffset: 1,
+      processedRecords: 1, failedRecords: 0, acceptedRecordKeys: [], updatedAt: new Date(),
+    });
+    const stale = { ...lease!, attempt: lease!.attempt - 1 };
+    await expect(gateway.recordCheckpoint(batchId, checkpoint, stale))
+      .rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    expect((await gateway.getJobStatus(batchId))?.processedRecords).toBe(0);
+    await expect(gateway.recordCheckpoint(batchId, checkpoint, lease!)).resolves.toBeUndefined();
+    expect((await gateway.getJobStatus(batchId))?.processedRecords).toBe(1);
+    await gateway.cancelJob({ batchId, reason: 'No further writes' });
+    await expect(gateway.recordCheckpoint(batchId, checkpoint, lease!))
+      .rejects.toThrow('IMPORT_WORKER_LEASE_LOST');
+    // Still cancelling until the in-flight worker actually acknowledges exit.
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLING);
+    expect(await gateway.acknowledgeStoppedJob(lease!)).toBe('CANCELLED');
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.CANCELLED);
+  });
+
+
+  it('rejects legacy progress and DLQ mutation while a claimed worker is active', async () => {
+    const batchId = 'batch-claim-legacy-write-guard';
+    await gateway.enqueueImportJob({
+      batchId,
+      targetDomain: ImportTargetDomain.Generic,
+      sourceSystem: 'TEST',
+    });
+    const lease = await gateway.claimNextJob({ batchId, workerId: 'owner-worker', leaseDurationMs: 60_000 });
+    const checkpoint = ImportCheckpoint.create({
+      batchId, stage: 'VALIDATE', chunkIndex: 0, recordOffset: 1,
+      processedRecords: 1, failedRecords: 0, acceptedRecordKeys: [], updatedAt: new Date(),
+    });
+    await expect(gateway.recordCheckpoint(batchId, checkpoint))
+      .rejects.toThrow('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
+    await expect(gateway.moveToDeadLetter({
+      batchId, failedAt: new Date(), reason: 'late compatibility failure',
+    })).rejects.toThrow('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    expect(gateway.getDeadLetters(batchId)).toHaveLength(0);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.RUNNING);
+    expect(await gateway.completeClaimedJob(lease!)).toBe(true);
+    await expect(gateway.recordCheckpoint(batchId, checkpoint))
+      .rejects.toThrow('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
+    await expect(gateway.moveToDeadLetter({
+      batchId, failedAt: new Date(), reason: 'already completed',
+    })).rejects.toThrow('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.COMPLETED);
   });
 
   it('throws when recording checkpoint for non-existent job', async () => {
@@ -169,19 +265,15 @@ describe('InMemoryImportQueueGateway', () => {
     expect(dlqRecords[0].errorCode).toBe('INVALID_FORMAT');
   });
 
-  it('creates minimal job snapshot when moving non-existent batch item to DLQ', async () => {
+  it('refuses creating a synthetic DLQ batch when the source batch does not exist', async () => {
     const batchId = 'unregistered-batch-dlq';
-
-    await gateway.moveToDeadLetter({
+    await expect(gateway.moveToDeadLetter({
       batchId,
       failedAt: new Date(),
       reason: 'Fatal parsing failure',
-    });
-
-    const status = await gateway.getJobStatus(batchId);
-    expect(status?.status).toBe(ImportJobStatus.DLQ);
-    expect(status?.failedRecords).toBe(1);
-    expect(status?.lastError).toBe('Fatal parsing failure');
+    })).rejects.toThrow('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    expect(await gateway.getJobStatus(batchId)).toBeNull();
+    expect(gateway.getDeadLetters(batchId)).toHaveLength(0);
   });
 
   it('replays job from terminal status, respecting fromCheckpoint option', async () => {
@@ -324,7 +416,52 @@ describe('InMemoryImportQueueGateway', () => {
   });
 });
 
+
+  it('rejects legacy completion/failure against a claimed worker but allows the leased worker to complete', async () => {
+    const gateway = new InMemoryImportQueueGateway();
+    const batchId = 'legacy-lease-guard';
+    await gateway.enqueueImportJob({ batchId, targetDomain: ImportTargetDomain.Generic, sourceSystem: 'TEST' });
+    const lease = await gateway.claimNextJob({ workerId: 'owner', leaseDurationMs: 30_000 });
+    expect(lease).not.toBeNull();
+    expect(await gateway.markJobCompleted(batchId)).toBe(false);
+    expect(await gateway.markJobFailed(batchId, 'premature failure')).toBe(false);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.RUNNING);
+    expect(await gateway.completeClaimedJob(lease!)).toBe(true);
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.COMPLETED);
+  });
+
 describe('InMemoryImportQueueGateway lease recovery hardening', () => {
+  it('fences a prior attempt even when a replacement worker reuses the same worker ID', async () => {
+    const gateway = new InMemoryImportQueueGateway();
+    const batchId = 'batch-same-worker';
+    await gateway.enqueueImportJob({ batchId, targetDomain: ImportTargetDomain.Generic, sourceSystem: 'TEST' });
+    const start = new Date(Date.now() + 1_000);
+    const first = await gateway.claimNextJob({ workerId: 'worker-shared', leaseDurationMs: 1000, now: start });
+    expect(first?.attempt).toBe(1);
+    const second = await gateway.claimNextJob({
+      workerId: 'worker-shared', leaseDurationMs: 1000,
+      now: new Date(start.getTime() + 2000),
+    });
+    expect(second?.attempt).toBe(2);
+    const activeNow = new Date(start.getTime() + 2100);
+    expect(await gateway.heartbeat(first!, 1000, activeNow)).toBeNull();
+    expect(await gateway.completeClaimedJob(first!, activeNow)).toBe(false);
+    const policy = ImportRetryPolicy.create({
+      maxAttempts: 3, dlqAfterAttempts: 3, backoffStrategy: 'fixed',
+      initialDelayMs: 100, maxDelayMs: 100, retryableErrorCodes: ['TRANSIENT'],
+    });
+    expect(await gateway.failClaimedJob({
+      lease: first!, now: activeNow, reason: 'stale', retryPolicy: policy,
+    })).toBe('LEASE_LOST');
+    expect((await gateway.getJobStatus(batchId))?.status).toBe(ImportJobStatus.RUNNING);
+    const renewed = await gateway.heartbeat(second!, 1000, activeNow);
+    expect(renewed?.attempt).toBe(2);
+    // A superseded heartbeat object from the SAME attempt must be fenced as well.
+    expect(await gateway.heartbeat(second!, 1000, new Date(start.getTime() + 2200))).toBeNull();
+    expect(await gateway.completeClaimedJob(renewed!, new Date(start.getTime() + 2200))).toBe(true);
+  });
+
+
   it('reclaims an expired RUNNING lease and rejects completion by the stale worker', async () => {
     const gateway = new InMemoryImportQueueGateway();
     const batchId = 'batch-expired-running';

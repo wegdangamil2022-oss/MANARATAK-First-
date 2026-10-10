@@ -1,0 +1,4 @@
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T01:28:09.3932429Z [2m Test Files [22m [1m[32m18 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (19)[39m
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T01:28:09.3933164Z [2m      Tests [22m [1m[32m120 passed[39m[22m[2m | [22m[33m10 skipped[39m[90m (130)[39m
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T01:28:13.6177358Z [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T01:28:13.6177894Z [2m      Tests [22m [1m[32m10 passed[39m[22m[90m (10)[39m

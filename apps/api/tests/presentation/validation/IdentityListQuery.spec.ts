@@ -10,4 +10,12 @@ describe('privileged identity list query contract', () => {
   it.each([{ limti: '20' }, { includePasswords: 'true' }, { limit: '101' }, { offset: '-1' }, { page: '0' }])('rejects undeclared or invalid options: %j', (query) => {
     expect(identityListQuerySchema.safeParse(query).success).toBe(false);
   });
+  it('parses verification explicitly rather than treating false as truthy', () => {
+    expect(identityListQuerySchema.parse({ search: '  Amal  ', verified: 'false' })).toMatchObject({
+      search: 'Amal',
+      verified: false,
+    });
+    expect(identityListQuerySchema.parse({ verified: 'true' }).verified).toBe(true);
+    expect(identityListQuerySchema.safeParse({ verified: 'yes' }).success).toBe(false);
+  });
 });

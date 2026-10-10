@@ -1,3 +1,4 @@
+import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import { createHash, randomUUID } from 'node:crypto';
 import { Identity, IIdentityRepository, ListIdentitiesCriteria } from '@manaratak/domain';
 import { IdentityMapper } from './IdentityMapper';
@@ -148,24 +149,58 @@ export class PrismaIdentityRepository implements IIdentityRepository {
     return !existing;
   }
 
-  public async findPaged(criteria: ListIdentitiesCriteria): Promise<{ items: Identity[]; total: number }> {
+  public async findPaged(
+    criteria: ListIdentitiesCriteria,
+  ): Promise<{ items: Identity[]; total: number }> {
     const where: any = {};
+    if (criteria.roleId) where.roleAssignments = { some: { roleId: criteria.roleId } };
+    if (criteria.adminAccess !== undefined) {
+      const permissionChoices = ['*', ...ADMIN_PERMISSION_CATALOG.map((entry) => entry.key)];
+      const condition = {
+        role: {
+          is: {
+            OR: permissionChoices
+              .map((permission) => ({ permissions: { array_contains: [permission] } }))
+              .concat([{ permissions: { array_contains: ['admin:*'] } }]),
+          },
+        },
+      };
+      where.AND = [
+        { roleAssignments: criteria.adminAccess ? { some: condition } : { none: condition } },
+      ];
+    }
+    if (criteria.accessState) where.account = { is: { accessState: criteria.accessState } };
     if (criteria.type) {
       where.type = criteria.type;
     }
     if (criteria.status) {
       where.status = criteria.status;
     }
+    if (criteria.search?.trim()) {
+      const contains = { contains: criteria.search.trim(), mode: 'insensitive' };
+      where.OR = [
+        { id: contains },
+        { user: { is: { displayName: contains } } },
+        { user: { is: { primaryEmail: contains } } },
+      ];
+    }
+    if (criteria.verified !== undefined) {
+      where.user = { is: { isEmailVerified: criteria.verified } };
+    }
 
     const [total, records] = await Promise.all([
       this.delegate.count({ where }),
       this.delegate.findMany({
-        where,
+        where:
+          criteria.cursor !== undefined
+            ? { ...where, ...(criteria.cursor ? { id: { gt: criteria.cursor } } : {}) }
+            : where,
         take: criteria.limit !== undefined ? criteria.limit : 20,
         skip: criteria.offset !== undefined ? criteria.offset : 0,
         include: { user: true, account: true },
-        orderBy: { createdAt: 'desc' }
-      })
+        orderBy:
+          criteria.cursor !== undefined ? [{ id: 'asc' }] : [{ createdAt: 'desc' }, { id: 'desc' }],
+      }),
     ]);
 
     return {

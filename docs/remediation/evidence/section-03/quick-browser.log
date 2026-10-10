@@ -1,0 +1,128 @@
+{
+  "status": "PASS",
+  "scope": "CHROMIUM_UI_WITH_INTERCEPTED_API_ONLY",
+  "checks": [
+    "security-dependent actions",
+    "scan/sanitize/activate request contracts",
+    "in-use archive denied",
+    "usage confirmation before archive",
+    "draft filters block pagination",
+    "applied query retained with cursor",
+    "duplicate rows eliminated",
+    "canonical facets retained with cursor",
+    "reset removes facets and cursor",
+    "no page exceptions"
+  ],
+  "calls": [
+    {
+      "path": "/auth/me",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50"
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50"
+    },
+    {
+      "path": "/admin/assets/isolated-a",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/auth/csrf-token",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets/isolated-a/validate",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets/isolated-a",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50"
+    },
+    {
+      "path": "/admin/assets/isolated-a/sanitize",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets/isolated-a",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50"
+    },
+    {
+      "path": "/admin/assets/isolated-a/activate",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets/isolated-a",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50"
+    },
+    {
+      "path": "/admin/assets/isolated-a/usages",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets/isolated-a/usages",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets/isolated-a/archive",
+      "method": "POST",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets/isolated-a",
+      "method": "GET",
+      "query": ""
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50"
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50&q=different-query&retentionCategory=TEMPORARY&checksumPresence=MISSING"
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50&q=different-query&retentionCategory=TEMPORARY&checksumPresence=MISSING&cursor=isolated-cursor"
+    },
+    {
+      "path": "/admin/assets",
+      "method": "GET",
+      "query": "?limit=50"
+    }
+  ]
+}

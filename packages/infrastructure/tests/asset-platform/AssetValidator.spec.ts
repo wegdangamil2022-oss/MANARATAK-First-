@@ -138,4 +138,40 @@ describe('AssetValidator', () => {
       });
     }).toThrow('Null byte detected');
   });
+  it('rejects executable uploads and contradictory extension/MIME metadata by default', () => {
+    expect(() => AssetValidator.validate({
+      originalFilename: 'run.exe', mimeType: 'application/x-msdownload', fileExtension: 'exe', byteSize: 123,
+    })).toThrow('Unsupported file extension');
+    expect(() => AssetValidator.validate({
+      originalFilename: 'document.pdf', mimeType: 'image/png', fileExtension: 'pdf', byteSize: 123,
+    })).toThrow('ASSET_DECLARED_EXTENSION_MIME_MISMATCH');
+  });
+
+  it('disallows upload callers from setting archived or soft-deleted retention categories', () => {
+    const valid = {
+      originalFilename: 'draft.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 50,
+    };
+    expect(() => AssetValidator.validate({ ...valid, retentionCategory: 'ARCHIVED' as any }))
+      .toThrow('ASSET_UPLOAD_RETENTION_CATEGORY_FORBIDDEN');
+    expect(() => AssetValidator.validate({ ...valid, retentionCategory: 'SOFT_DELETED' as any }))
+      .toThrow('ASSET_UPLOAD_RETENTION_CATEGORY_FORBIDDEN');
+  });
+
+  it('requires an explicit, valid future expiration for temporary uploads', () => {
+    const valid = {
+      originalFilename: 'draft.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 50,
+      retentionCategory: 'TEMPORARY' as const,
+    };
+    expect(() => AssetValidator.validate(valid)).toThrow('ASSET_TEMPORARY_EXPIRY_REQUIRED');
+    expect(() => AssetValidator.validate({ ...valid, expiresAt: 'tomorrow' }))
+      .toThrow('ASSET_RETENTION_EXPIRY_INVALID');
+    expect(() => AssetValidator.validate({ ...valid, expiresAt: '2026-10-09' }))
+      .toThrow('ASSET_RETENTION_EXPIRY_INVALID');
+    expect(() => AssetValidator.validate({ ...valid, expiresAt: new Date(Date.now() - 60_000).toISOString() }))
+      .toThrow('ASSET_RETENTION_EXPIRY_NOT_FUTURE');
+    expect(() => AssetValidator.validate({
+      ...valid, expiresAt: new Date(Date.now() + 3600_000).toISOString(),
+    })).not.toThrow();
+  });
+
 });

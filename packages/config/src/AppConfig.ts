@@ -129,6 +129,7 @@ export const AppConfigSchema = z.preprocess((input) => {
       OWNER_DOMAIN_OUTBOX_WORKER_ENABLED: env.OWNER_DOMAIN_OUTBOX_WORKER_ENABLED ?? true,
       OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS: env.OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS || 2_000,
       BACKGROUND_WORKER_ENABLED: env.BACKGROUND_WORKER_ENABLED ?? false,
+      ASSET_ACTIVATION_RECOVERY_ENABLED: env.ASSET_ACTIVATION_RECOVERY_ENABLED ?? false,
       BACKGROUND_WORKER_INTERVAL_MS: env.BACKGROUND_WORKER_INTERVAL_MS || 2_000,
       BACKGROUND_WORKER_BATCH_SIZE: env.BACKGROUND_WORKER_BATCH_SIZE || 10,
       BACKGROUND_WORKER_LEASE_MS: env.BACKGROUND_WORKER_LEASE_MS || 60_000,
@@ -193,6 +194,8 @@ export const AppConfigSchema = z.preprocess((input) => {
   OWNER_DOMAIN_OUTBOX_WORKER_ENABLED: envBoolean.optional(),
   OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS: z.coerce.number().int().min(1_000).max(300_000).optional(),
   BACKGROUND_WORKER_ENABLED: envBoolean.optional(),
+  ASSET_ACTIVATION_RECOVERY_ENABLED: envBoolean.optional(),
+  ASSET_ACTIVATION_RECOVERY_CRON: z.string().trim().min(9).max(128).optional(),
   BACKGROUND_WORKER_INTERVAL_MS: z.coerce.number().int().min(1_000).max(300_000).optional(),
   BACKGROUND_WORKER_BATCH_SIZE: z.coerce.number().int().min(1).max(100).optional(),
   BACKGROUND_WORKER_LEASE_MS: z.coerce.number().int().min(5_000).max(3_600_000).optional(),
@@ -232,6 +235,12 @@ export const AppConfigSchema = z.preprocess((input) => {
   ADMIN_AUTH_MODE: z.literal('strict').optional(),
 }).passthrough().superRefine((data, ctx) => {
   const isProdOrStaging = data.NODE_ENV === 'production' || data.NODE_ENV === 'staging';
+  if (data.ASSET_ACTIVATION_RECOVERY_ENABLED === true) {
+    if (data.BACKGROUND_WORKER_ENABLED !== true) ctx.addIssue({ code: z.ZodIssueCode.custom,
+      message: 'Asset activation recovery requires the durable background worker', path: ['BACKGROUND_WORKER_ENABLED'] });
+    if (!data.ASSET_ACTIVATION_RECOVERY_CRON) ctx.addIssue({ code: z.ZodIssueCode.custom,
+      message: 'Asset activation recovery requires an explicit UTC cron schedule', path: ['ASSET_ACTIVATION_RECOVERY_CRON'] });
+  }
   if (!isProdOrStaging && data.DATABASE_URL && !isLoopbackPostgres(data.DATABASE_URL) && !data.DIRECT_URL) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'DIRECT_URL is required for a remote development database', path: ['DIRECT_URL'] });
   if (data.EMAIL_DELIVERY_PROVIDER === 'smtp') {
     if (!data.SMTP_HOST || !data.SMTP_PORT || !data.SMTP_FROM) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Test SMTP configuration is incomplete', path: ['EMAIL_DELIVERY_PROVIDER'] });

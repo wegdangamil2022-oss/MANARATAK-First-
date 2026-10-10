@@ -42,9 +42,9 @@ check('P6-QUEUE-002 Prisma queue reclaims expired RUNNING jobs',
 check('P6-QUEUE-002 in-memory queue mirrors expired RUNNING recovery',
   memoryQueue.includes('abandonedRunning') && memoryQueue.includes('this.leases.delete(candidate.batchId)'));
 check('P6-QUEUE-002 completion rejects expired leases',
-  /completeClaimedJob[\s\S]*?claimUntil:\s*\{\s*gte:\s*now\s*\}/.test(prismaQueue));
+  /completeClaimedJob[\s\S]*?claimUntil:\s*\{\s*equals:\s*lease\.claimUntil,\s*gte:\s*now\s*\}/.test(prismaQueue));
 check('P6-QUEUE-002 failure rejects expired leases',
-  /failClaimedJob[\s\S]*?claimUntil:\s*\{\s*gte:\s*now\s*\}/.test(prismaQueue));
+  /failClaimedJob[\s\S]*?claimUntil:\s*\{\s*equals:\s*command\.lease\.claimUntil,\s*gte:\s*now\s*\}/.test(prismaQueue));
 
 check('P6-REPLAY-007 fresh replay clears durable checkpoints',
   prismaQueue.includes("status: 'CHECKPOINT'") && prismaQueue.includes('deleteMany'));
@@ -62,7 +62,7 @@ check('P6-QUEUE-003 worker supports targeted claims',
   worker.includes('batchId?: string') && worker.includes('batchId,'));
 check('P6-QUEUE-003 composition wires worker protocol into ImportAdminUseCases',
   container.includes('importWorkerProtocol: asFunction') &&
-  container.includes('new ImportAdminUseCases(importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol)'));
+  container.includes('new ImportAdminUseCases(importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol, sweepOrphanImportSpools)'));
 
 check('P6-DUR-004 local raw snapshot storage is development-only',
   rawStore.includes("persistenceClassification = 'DEVELOPMENT_ONLY'"));

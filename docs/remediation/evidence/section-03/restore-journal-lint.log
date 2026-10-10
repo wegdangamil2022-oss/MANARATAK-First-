@@ -1,0 +1,52 @@
+
+/workspace/manaratak-audit-main/apps/admin/src/pages/AssetAdminPage.tsx
+  174:34  warning  The ref value 'generationRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'generationRef.current' to a variable inside the effect, and use that variable in the cleanup function                react-hooks/exhaustive-deps
+  174:66  warning  The ref value 'detailsGenerationRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'detailsGenerationRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  175:6   warning  React Hook useEffect has a missing dependency: 'load'. Either include it or remove the dependency array                                                                                                                                                                                  react-hooks/exhaustive-deps
+
+/workspace/manaratak-audit-main/packages/infrastructure/src/asset-platform/PrismaAssetRecordRepository.ts
+   73:12   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:12   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:207  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   88:19   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:38   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:34   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  157:63   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:100  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  236:107  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  270:47   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  307:24   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  307:40   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  308:28   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  308:44   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  309:26   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  309:42   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  322:24   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  322:40   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  323:28   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  323:44   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  324:26   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  324:42   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  337:24   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  337:40   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  338:28   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  338:44   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  339:26   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  339:42   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  368:24   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  383:18   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  398:23   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  442:40   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  460:41   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  546:41   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  560:50   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/manaratak-audit-main/packages/infrastructure/src/retention/PrismaAssetRetentionGateway.ts
+  10:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 43 problems (0 errors, 43 warnings)
+

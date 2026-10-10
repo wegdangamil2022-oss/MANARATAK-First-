@@ -48,15 +48,17 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
 
   async pauseJob(command: PauseImportJobCommand): Promise<boolean> {
     const job = this.jobs.get(command.batchId);
-    if (!job || ![ImportJobStatus.QUEUED, ImportJobStatus.RUNNING].includes(job.status)) {
+    if (!job || ![ImportJobStatus.QUEUED, ImportJobStatus.RUNNING].includes(job.status))
       return false;
-    }
-    job.status = ImportJobStatus.PAUSED;
+    const wasRunning = job.status === ImportJobStatus.RUNNING;
+    job.status = wasRunning ? ImportJobStatus.PAUSING : ImportJobStatus.PAUSED;
     job.updatedAt = new Date();
-    job.claimedBy = undefined;
-    job.claimUntil = undefined;
+    if (!wasRunning) {
+      job.claimedBy = undefined;
+      job.claimUntil = undefined;
+      this.leases.delete(command.batchId);
+    }
     if (command.reason) job.lastError = command.reason;
-    this.leases.delete(command.batchId);
     return true;
   }
 
@@ -78,22 +80,37 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
   async cancelJob(command: CancelImportJobCommand): Promise<boolean> {
     const job = this.jobs.get(command.batchId);
     if (!job) return false;
-    const cancellableStatuses = [
-      ImportJobStatus.QUEUED,
-      ImportJobStatus.RUNNING,
-      ImportJobStatus.PAUSED,
-      ImportJobStatus.RESUMING,
-      ImportJobStatus.CANCELLING,
-    ];
-    if (!cancellableStatuses.includes(job.status)) return false;
+    if (![ImportJobStatus.QUEUED, ImportJobStatus.RUNNING, ImportJobStatus.PAUSING,
+      ImportJobStatus.PAUSED, ImportJobStatus.RESUMING].includes(job.status)) return false;
+    const hasWorker = job.status === ImportJobStatus.RUNNING ||
+      job.status === ImportJobStatus.PAUSING;
+    job.status = hasWorker ? ImportJobStatus.CANCELLING : ImportJobStatus.CANCELLED;
+    job.updatedAt = new Date();
+    if (!hasWorker) {
+      job.claimedBy = undefined;
+      job.claimUntil = undefined;
+      this.leases.delete(command.batchId);
+    }
+    if (command.reason) job.lastError = command.reason;
+    return true;
+  }
 
-    job.status = ImportJobStatus.CANCELLED;
+  async acknowledgeStoppedJob(lease: ImportJobLease): Promise<'PAUSED' | 'CANCELLED' | null> {
+    const job = this.jobs.get(lease.batchId);
+    const current = this.leases.get(lease.batchId);
+    if (!job || !current || current.workerId !== lease.workerId ||
+        current.attempt !== lease.attempt ||
+        current.claimUntil.getTime() !== lease.claimUntil.getTime()) return null;
+    const to = job.status === ImportJobStatus.PAUSING
+      ? ImportJobStatus.PAUSED
+      : job.status === ImportJobStatus.CANCELLING ? ImportJobStatus.CANCELLED : null;
+    if (!to) return null;
+    job.status = to;
     job.updatedAt = new Date();
     job.claimedBy = undefined;
     job.claimUntil = undefined;
-    if (command.reason) job.lastError = command.reason;
-    this.leases.delete(command.batchId);
-    return true;
+    this.leases.delete(lease.batchId);
+    return to === ImportJobStatus.PAUSED ? 'PAUSED' : 'CANCELLED';
   }
 
   async replayJob(command: ReplayImportJobCommand): Promise<boolean> {
@@ -128,9 +145,23 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
     return true;
   }
 
-  async recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint): Promise<void> {
+  async recordCheckpoint(batchId: string, checkpoint: ImportCheckpoint, lease?: ImportJobLease): Promise<void> {
     const job = this.jobs.get(batchId);
     if (!job) throw new Error(`Import job with batchId '${batchId}' not found`);
+    if (checkpoint.toJSON().batchId !== batchId) throw new Error('IMPORT_CHECKPOINT_BATCH_MISMATCH');
+    if (!lease && (job.claimedBy || job.claimUntil || this.leases.has(batchId) ||
+        ![ImportJobStatus.CREATED, ImportJobStatus.QUEUED, ImportJobStatus.RESUMING,
+          ImportJobStatus.RUNNING, ImportJobStatus.PAUSED, ImportJobStatus.FAILED_RETRYABLE]
+          .includes(job.status)))
+      throw new Error('IMPORT_CHECKPOINT_LEGACY_STATE_CONFLICT');
+    if (lease) {
+      const current = this.leases.get(batchId);
+      if (!current || job.status !== ImportJobStatus.RUNNING ||
+          current.workerId !== lease.workerId || current.attempt !== lease.attempt ||
+          current.claimUntil.getTime() !== lease.claimUntil.getTime() ||
+          current.claimUntil.getTime() < Date.now())
+        throw new Error('IMPORT_WORKER_LEASE_LOST');
+    }
 
     job.checkpoint = checkpoint.toJSON();
     job.processedRecords = checkpoint.processedRecords;
@@ -145,31 +176,20 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
   }
 
   async moveToDeadLetter(dto: DeadLetterImportRecordDto): Promise<void> {
+    const job = this.jobs.get(dto.batchId);
+    if (!job ||
+        ![ImportJobStatus.QUEUED, ImportJobStatus.FAILED_PERMANENT].includes(job.status) ||
+        job.claimedBy || job.claimUntil || this.leases.has(dto.batchId))
+      throw new Error('IMPORT_DLQ_LEGACY_STATE_CONFLICT');
+    // Validate before appending evidence. An invalid call must not create a
+    // synthetic job, retain a DLQ record, or erase a live worker lease.
     const records = this.deadLetters.get(dto.batchId) ?? [];
     records.push({ ...dto });
     this.deadLetters.set(dto.batchId, records);
-
-    const job = this.jobs.get(dto.batchId);
-    const now = new Date();
-    if (job) {
-      job.status = ImportJobStatus.DLQ;
-      job.lastError = dto.reason;
-      job.updatedAt = now;
-      job.claimedBy = undefined;
-      job.claimUntil = undefined;
-      this.leases.delete(dto.batchId);
-    } else {
-      this.jobs.set(dto.batchId, {
-        batchId: dto.batchId,
-        status: ImportJobStatus.DLQ,
-        progress: 0,
-        processedRecords: 0,
-        failedRecords: 1,
-        createdAt: now,
-        updatedAt: now,
-        lastError: dto.reason,
-      });
-    }
+    job.status = ImportJobStatus.DLQ;
+    job.lastError = dto.reason;
+    job.updatedAt = new Date();
+    job.failedRecords += 1;
   }
 
   async markJobRunning(batchId: string): Promise<boolean> {
@@ -184,8 +204,11 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
 
   async markJobCompleted(batchId: string): Promise<boolean> {
     const job = this.jobs.get(batchId);
-    if (!job || job.status !== ImportJobStatus.RUNNING) return false;
-    job.status = ImportJobStatus.COMPLETED;
+    if (!job || job.status !== ImportJobStatus.RUNNING ||
+        job.claimedBy || job.claimUntil || this.leases.has(batchId)) return false;
+    job.status = job.failedRecords > 0
+      ? ImportJobStatus.PARTIALLY_COMPLETED
+      : ImportJobStatus.COMPLETED;
     job.progress = 100;
     job.updatedAt = new Date();
     job.claimedBy = undefined;
@@ -196,7 +219,8 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
 
   async markJobFailed(batchId: string, reason: string): Promise<boolean> {
     const job = this.jobs.get(batchId);
-    if (!job || ![ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE].includes(job.status)) {
+    if (!job || ![ImportJobStatus.RUNNING, ImportJobStatus.FAILED_RETRYABLE].includes(job.status) ||
+        job.claimedBy || job.claimUntil || this.leases.has(batchId)) {
       return false;
     }
     job.status = ImportJobStatus.FAILED_PERMANENT;
@@ -255,6 +279,8 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
       !current ||
       !job ||
       current.workerId !== lease.workerId ||
+      current.attempt !== lease.attempt ||
+      current.claimUntil.getTime() !== lease.claimUntil.getTime() ||
       current.claimUntil < now ||
       job.status !== ImportJobStatus.RUNNING
     ) {
@@ -274,12 +300,16 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
       !current ||
       !job ||
       current.workerId !== lease.workerId ||
+      current.attempt !== lease.attempt ||
+      current.claimUntil.getTime() !== lease.claimUntil.getTime() ||
       current.claimUntil < now ||
       job.status !== ImportJobStatus.RUNNING
     ) {
       return false;
     }
-    job.status = ImportJobStatus.COMPLETED;
+    job.status = job.failedRecords > 0
+      ? ImportJobStatus.PARTIALLY_COMPLETED
+      : ImportJobStatus.COMPLETED;
     job.progress = 100;
     job.claimedBy = undefined;
     job.claimUntil = undefined;
@@ -299,6 +329,8 @@ export class InMemoryImportQueueGateway implements IImportQueueGateway {
       !current ||
       !job ||
       current.workerId !== command.lease.workerId ||
+      current.attempt !== command.lease.attempt ||
+      current.claimUntil.getTime() !== command.lease.claimUntil.getTime() ||
       current.claimUntil < now ||
       job.status !== ImportJobStatus.RUNNING
     ) {

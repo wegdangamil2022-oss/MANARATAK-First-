@@ -47,6 +47,7 @@ export class InMemorySourceRegistryGateway implements ISourceRegistryGateway {
   }
 
   async updateSourceStatus(sourceId: string, status: SourceStatus, _reason?: string): Promise<boolean> {
+    if (!Object.values(SourceStatus).includes(status)) throw new Error('IMPORT_SOURCE_STATUS_INVALID');
     const source = this.registry.get(sourceId);
     if (!source) {
       return false;

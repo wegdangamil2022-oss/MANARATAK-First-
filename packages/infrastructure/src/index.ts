@@ -207,3 +207,13 @@ export * from './students/PrismaStudentApplicationTrackerRepository';
 
 export * from './students/ScholarshipStudentApplicationTrackerGateway';
 export * from './auth/PrismaPasswordCredentialRepository';
+
+export * from './asset-platform/AssetReferenceIntegrityReadiness';
+
+export * from './import-foundation/VerifiedImportArtifactGateway';
+export * from './import-foundation/PrismaImportScreeningReceiptStore';
+export * from './import-foundation/PrismaImportGovernanceGateway';
+export * from './import-foundation/PrismaImportSourceObservationGateway';
+export * from './import-foundation/PrismaSourceAcquisitionLimiter';
+export * from './import-foundation/network/SignedSourceAccessAuthority';
+export * from './import-foundation/ImportSpoolMaintenance';

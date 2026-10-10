@@ -35,6 +35,7 @@ export interface AssetUploadLocatorDto {
   };
 }
 
+/** Legacy allocation command: creates an INITIATED upload, not proof of an existing quarantined object. */
 export interface RegisterQuarantinedAssetDto {
   assetId: string;
   assetReference: string;
@@ -45,10 +46,12 @@ export interface RegisterQuarantinedAssetDto {
   fileExtension: string;
   byteSize: number;
   classification: AssetSecurityClassification;
-  bucketName: string;
-  pathKey: string;
   retentionCategory?: AssetRetentionCategory;
   expiresAt?: string | Date;
+}
+
+export interface FinalizeAssetUploadDto {
+  assetId: string;
 }
 
 export interface ValidateAssetDto {
@@ -96,9 +99,15 @@ export interface RestoreAssetDto {
 
 export interface PurgeAssetDto {
   assetId: string;
+  /** Internal retention worker lease only. API routes must never forward user-supplied tokens. */
+  retentionClaimToken?: string;
 }
 
 export interface AssetRecordDto {
+  /** Safe opaque recovery identity; storage source coordinates are deliberately excluded. */
+  archiveOperation?: { operationId: string; phase: string; preparedAt: string; updatedAt: string };
+  restoreOperation?: { operationId: string; phase: string; preparedAt: string; updatedAt: string };
+  activationOperation?: { operationId: string; phase: 'PREPARED' | 'COMPLETED'; preparedAt: string; completedAt?: string };
   id: string;
   reference: string;
   storageLocator: string;

@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 import { ValidationException } from '@manaratak/core';
 import { 
   ProvisionIdentityUseCase,
@@ -86,6 +87,22 @@ export class IdentityRouter {
       }
     }));
 
+    // Identity directory projection: canonical role identifiers/names only, never authorization mutations.
+    router.get(
+      '/role-options',
+      safe(async (req, res) => {
+        const query = z
+          .object({
+            limit: z.coerce.number().int().min(1).max(100).default(25),
+            cursor: z.string().min(1).max(240).optional(),
+            search: z.string().trim().max(240).optional(),
+          })
+          .strict()
+          .parse(req.query);
+        res.json(responseFormatter.success(await listIdentitiesUseCase.roleOptions(query)));
+      }),
+    );
+
     // 2. Get Identity Details (Read-only, no audit)
     router.get('/:id', safe(async (req: Request, res: Response) => {
       const { id } = parseStrict(identityIdParamSchema, req.params);
@@ -101,11 +118,13 @@ export class IdentityRouter {
     }));
 
     // 3. List Identities (Paged & Filtered, Read-only, no audit)
-    router.get('/', safe(async (req: Request, res: Response) => {
-      const query = parseStrict(identityListQuerySchema, req.query);
-      const result = await listIdentitiesUseCase.execute(query);
+    router.get(
+      '/',
+      safe(async (req: Request, res: Response) => {
+        const query = parseStrict(identityListQuerySchema, req.query);
+        const result = await listIdentitiesUseCase.execute({ ...query, includeAccess: true });
 
-      if (result.isSuccess) {
+        if (result.isSuccess) {
         res.status(200).json(responseFormatter.success(result.getValue()));
       } else {
         res.status(400).json(responseFormatter.error({
@@ -113,7 +132,8 @@ export class IdentityRouter {
           message: result.error?.message || 'Failed to query identities'
         }));
       }
-    }));
+      }),
+    );
 
     // 4. Activate Identity
     router.post('/:id/activate', safe(async (req: Request, res: Response) => {
@@ -301,4 +321,3 @@ export class IdentityRouter {
     return router;
   }
 }
-

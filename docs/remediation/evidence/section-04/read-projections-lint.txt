@@ -1,0 +1,18 @@
+
+/workspace/manaratak-audit-main/apps/admin/src/pages/SettingsAdminPage.tsx
+  113:6  warning  React Hook useEffect has a missing dependency: 'selectedHistory'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  205:6  warning  React Hook useEffect has a missing dependency: 'refresh'. Either include it or remove the dependency array          react-hooks/exhaustive-deps
+  244:6  warning  React Hook useEffect has a missing dependency: 'selectedHistory'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/manaratak-audit-main/apps/api/src/presentation/api/router/SettingsAdminRouter.ts
+  173:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  205:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  237:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  251:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/manaratak-audit-main/packages/infrastructure/src/settings/PrismaSettingAssignmentRepository.ts
+  343:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  346:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 9 problems (0 errors, 9 warnings)
+

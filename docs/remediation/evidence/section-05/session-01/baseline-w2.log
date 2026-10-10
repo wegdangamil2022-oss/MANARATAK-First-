@@ -1,0 +1,85 @@
+PASS P6-SEC-005 path prefixes are segment bounded
+PASS P6-RES-006 response size has a hard cap
+PASS P6-RES-006 timeout has a hard cap
+PASS P6-RES-006 redirects remain hard bounded
+PASS P6-QUEUE-002 Prisma queue reclaims expired RUNNING jobs
+PASS P6-QUEUE-002 in-memory queue mirrors expired RUNNING recovery
+FAIL P6-QUEUE-002 completion rejects expired leases
+FAIL P6-QUEUE-002 failure rejects expired leases
+PASS P6-REPLAY-007 fresh replay clears durable checkpoints
+PASS P6-REPLAY-007 fresh replay clears lease/error/attempt state
+PASS P6-QUEUE-003 live staging persists CREATED before queue ownership
+PASS P6-QUEUE-003 live staging enqueues before worker processing
+PASS P6-QUEUE-003 worker supports targeted claims
+PASS P6-QUEUE-003 composition wires worker protocol into ImportAdminUseCases
+PASS P6-DUR-004 local raw snapshot storage is development-only
+PASS P6-DUR-004 production raw snapshots fail closed without durable provider
+PASS P6-DUR-004 active composition no longer constructs LocalImportRawSnapshotStore directly
+PASS P5-EVT-004 enterprise events have durable Prisma repository
+PASS P5-EVT-004 publishing atomically updates event and appends outbox
+PASS P5-EVT-004 production composition does not use process-local event adapters
+PASS P5-EVT-004 migration source exists for durable event record
+PASS P3-INFRA-001 misleading empty implementation exports removed
+PASS P4-STORAGE-001 storage baseline explicitly records W2 compatibility cleanup
+PASS MNT-AUD-0095 production domain barrel does not export generated dummy
+PASS MNT-AUD-0095 replacement foundation contracts reject permissive dummy signatures
+PASS MNT-AUD-0095 historical dummy export inventory is explicitly classified
+PASS MNT-AUD-0056 identity provisioning/mapper no longer suppress TypeScript
+PASS MNT-AUD-0056 provisioning actor is server-owned and absent from client schema
+PASS MNT-AUD-0088 ADR-028 formally selects shared relational ownership strategy
+PASS MNT-AUD-0088 persistence ownership manifest covers every Prisma model
+PASS MNT-AUD-0088 source guard enforces zero cross-context mutations and approved reads
+PASS MNT-AUD-0088 Phase 02 active authority reconciles schema-isolation drift
+PASS MNT-AUD-0041 source contains authoritative greenfield migration replay + parity diff
+PASS MNT-AUD-0041 verifier fails closed on unsafe targets and catalog anomalies
+PASS MNT-AUD-0041 runbook separates source proof from disposable-DB runtime evidence
+PASS MNT-AUD-0083 migration ledger and required counters fail closed
+PASS MNT-AUD-0083 baseline manifest covers all persistence-owned models
+PASS MNT-AUD-0083 artifacts include identity and source fingerprints
+PASS MNT-AUD-0083 before/after comparison requires declared count tolerances
+PASS MNT-AUD-0035 canonical ordered seed manifest and fail-closed orchestrator exist
+PASS MNT-AUD-0035 mandatory seed versions/provenance/reconciliation contracts are explicit
+PASS MNT-AUD-0035 reference sources are hash-pinned or explicitly blocked before seeding
+PASS MNT-AUD-0035 root DB commands distinguish production provisioning from development mutations
+PASS MNT-AUD-0013 typed canonical lifecycle and terminal transition rules are source-enforced
+PASS MNT-AUD-0013 DTO authority exposes lifecycle/version/effective history instead of isActive-only state
+PASS MNT-AUD-0013 alias/provider resolution uses explicit governed stores, not metadata JSON
+PASS MNT-AUD-0013 immutable versions and supersession/merge relationship persistence are authored
+PASS MNT-AUD-0013 Admin lifecycle authority is a dedicated audited command surface
+PASS MNT-AUD-0030 canonical AssetReferencePolicy enforces existence/state/classification/owner boundaries
+PASS MNT-AUD-0030 weak consumer domains compose the P05 asset policy before persistence
+PASS MNT-AUD-0030 asset reference manifest covers direct Prisma AssetId fields and JSON-owned CMS references
+PASS MNT-AUD-0050 production composition uses derived Prisma asset usage authority instead of UNAVAILABLE
+FAIL MNT-AUD-0050 purge fail-closes with concrete usage evidence
+PASS MNT-AUD-0049 mounted Foundation control-plane repositories are durable Prisma adapters
+PASS MNT-AUD-0049 execution/exposure/rendering dependencies are operational durable projections
+PASS MNT-AUD-0049 Prisma schema and migration author all Foundation control-plane persistence
+PASS MNT-AUD-0058 Phase 20 retained owner scope has first-class typed contracts and governed use cases
+PASS MNT-AUD-0058 booking/pricing/capacity/delivery invariants are enforced at owner persistence boundary
+PASS MNT-AUD-0058 Prisma owner scope is real and later-wave runtime composition is explicitly deferred
+PASS MNT-AUD-0055 Career owner scope implements profiles, applications/CV and alumni contracts
+PASS MNT-AUD-0055 application ownership, snapshot, AssetId, consent and optimistic concurrency fail closed
+PASS MNT-AUD-0055 Prisma owner scope is real and later-wave runtime composition is explicitly deferred
+PASS MNT-AUD-0075 direct root Prisma mutations are removed and disposable dev commands are guarded
+FAIL MNT-AUD-0079 every migration has fail-closed recovery classification and artifact authority
+PASS MNT-AUD-0057 canonical persisted identifier generator is cryptographic and fail-closed
+PASS MNT-AUD-0057 persisted/public identity paths no longer use Math.random
+PASS MNT-AUD-0096 late-domain mutable records expose monotonic versions in schema and DTOs
+PASS MNT-AUD-0096 repositories fence every core Service/Career mutation with id+expectedVersion and increment
+PASS MNT-AUD-0096 application and HTTP mutation boundaries require expectedVersion
+PASS MNT-AUD-0096 controlled migration adds version fences for all four legacy late-domain aggregates
+PASS MNT-AUD-0081 canonical policy distinguishes owner disposition and legal hold
+PASS MNT-AUD-0081 durable sweeper is retryable/idempotent and only terminal decisions suppress retry
+PASS MNT-AUD-0081 owner gateways claim before mutation and preserve owner-specific retention semantics
+PASS MNT-AUD-0081 schema/migration authors legal hold, claims, processed state and append-only decision evidence
+PASS MNT-AUD-0081 owner executors remain valid when W3 durable scheduling/composition advances
+PASS MNT-AUD-0109 production DI has no orphan registrations or shadow Prisma authority
+PASS MNT-AUD-0109 legacy foundation orchestrators are outside canonical production exports and DI
+PASS MNT-AUD-0109 deferred later-wave source is explicitly classified while completed W3 retention wiring is reachable
+PASS MNT-AUD-0109 dead diagnostic source is removed and reachability guard is executable
+PASS MNT-AUD-0091 shared identity authority is Unicode-aware with explicit Arabic rules
+PASS MNT-AUD-0091 Services/Careers use one canonical identity policy and Unicode slug policy
+PASS MNT-AUD-0091 Arabic create/update/dedup regression tests are authored for both owner domains
+PASS MNT-AUD-0091 existing-data remediation is dry-run-first, collision-safe and mutation-gated
+PASS MNT-AUD-0091 source guard forbids regression to ASCII-only owner identity normalizers
+W2_SOURCE_VERIFIER = FAIL 80/84

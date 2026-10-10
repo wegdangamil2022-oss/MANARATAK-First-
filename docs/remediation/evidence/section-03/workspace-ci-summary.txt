@@ -1,0 +1,6 @@
+SUCCESS; run 37923765109; source 2632dde49d2eeb61a5d31ac9a1cfce881e94a3c0
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T11:28:31.3363625Z  Test Files  21 passed | 1 skipped (22)
+EAP all source and disposable PostgreSQL verification	EAP domain, application, infrastructure and API contracts	2026-10-09T11:28:31.3365039Z       Tests  209 passed | 13 skipped (222)
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T11:28:39.2007337Z  Test Files  1 passed (1)
+EAP all source and disposable PostgreSQL verification	EAP PostgreSQL real-CAS and purge/restore reconciliation tests	2026-10-09T11:28:39.2008663Z       Tests  13 passed (13)
+This validates the workspace batch, not the subsequent restore-ownership delta.

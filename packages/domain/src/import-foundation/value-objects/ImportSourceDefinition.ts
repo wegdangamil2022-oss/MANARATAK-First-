@@ -13,6 +13,7 @@ export interface ImportSourceDefinitionProps {
   robotsPolicyUrl?: string;
   connectorId: string;
   connectorVersion: string;
+  updatedAt?: Date;
   metadata?: Record<string, any>;
 }
 
@@ -27,6 +28,7 @@ export class ImportSourceDefinition {
   public readonly robotsPolicyUrl?: string;
   public readonly connectorId: string;
   public readonly connectorVersion: string;
+  public readonly updatedAt?: Date;
   public readonly metadata?: Record<string, any>;
 
   constructor(props: ImportSourceDefinitionProps) {
@@ -53,6 +55,7 @@ export class ImportSourceDefinition {
       throw new Error('A BLOCKED source cannot have an ACTIVE status');
     }
 
+    this.updatedAt = props.updatedAt;
     this.sourceId = props.sourceId;
     this.displayName = props.displayName;
     this.baseUrl = props.baseUrl;

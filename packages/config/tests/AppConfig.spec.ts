@@ -110,3 +110,15 @@ describe('AppConfig', () => {
     expect(() => loadAppConfig({ ...productionBase, ADMIN_AUTH_MODE: 'demo' })).toThrowError(/expected "strict"/);
   });
 });
+
+
+describe('asset activation recovery opt-in', () => {
+  it('remains disabled in local defaults', () => {
+    expect(AppConfigSchema.parse({ NODE_ENV: 'test' }).ASSET_ACTIVATION_RECOVERY_ENABLED).toBe(false);
+  });
+  it('requires both the durable worker and an explicit schedule', () => {
+    expect(AppConfigSchema.safeParse({ NODE_ENV: 'test', ASSET_ACTIVATION_RECOVERY_ENABLED: 'true' }).success).toBe(false);
+    expect(AppConfigSchema.safeParse({ NODE_ENV: 'test', ASSET_ACTIVATION_RECOVERY_ENABLED: 'true', BACKGROUND_WORKER_ENABLED: 'true' }).success).toBe(false);
+    expect(AppConfigSchema.safeParse({ NODE_ENV: 'test', ASSET_ACTIVATION_RECOVERY_ENABLED: 'true', BACKGROUND_WORKER_ENABLED: 'true', ASSET_ACTIVATION_RECOVERY_CRON: '*/5 * * * *' }).success).toBe(true);
+  });
+});

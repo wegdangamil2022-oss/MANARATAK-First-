@@ -16,6 +16,7 @@ import {
   OtlpHttpMonitoringProvider,
   SecurityService,
   DatabaseHealthChecker,
+  assertAssetReferenceIntegrityInstalled,
   RedisHealthChecker
 } from '@manaratak/infrastructure';
 import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ProductionReadinessValidator, ZodEnvironmentValidator, loadAppConfig } from '@manaratak/config';
@@ -30,6 +31,7 @@ import { canonicalProblemDetailsMiddleware } from './presentation/middleware/Can
 import { createCanonicalIdempotencyMiddleware } from './presentation/middleware/CanonicalIdempotencyMiddleware.js';
 import { OptionalAuthMiddleware } from './presentation/middleware/OptionalAuthMiddleware.js';
 import { ApiRouter } from './presentation/api/router/ApiRouter.js';
+import { AssetReuseRouter } from './presentation/api/router/AssetReuseRouter.js';
 import { ResponseFormatter } from './presentation/api/response/ResponseFormatter.js';
 import { MonitoringRouter } from './presentation/api/router/MonitoringRouter.js';
 import { MonitoringMiddleware } from './presentation/monitoring/MonitoringMiddleware.js';
@@ -292,6 +294,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
           if (databaseRequired) throw lastErr;
         }
       }
+      if (connectExternalServices) await assertAssetReferenceIntegrityInstalled(prisma);
     } else {
       if (databaseRequired) throw new Error('DATABASE_URL is required for this runtime mode');
       monitoringService.registerIndicator({
@@ -304,6 +307,20 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         })
       });
     }
+
+    monitoringService.registerIndicator({
+      name: 'asset-reference-integrity',
+      isOptional: false,
+      checkHealth: async () => {
+        try {
+          await assertAssetReferenceIntegrityInstalled(container.resolve<any>('prisma'));
+          return { status: HealthStatus.UP, timestamp: new Date().toISOString(), details: { capabilityStatus: 'INSTALLED' } };
+        } catch {
+          return { status: HealthStatus.DOWN, timestamp: new Date().toISOString(),
+            error: 'ASSET_REFERENCE_INTEGRITY_UNAVAILABLE', details: { capabilityStatus: 'UNAVAILABLE' } };
+        }
+      },
+    });
 
     monitoringService.registerIndicator({
       name: 'database-schema',
@@ -766,6 +783,12 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // Static course-import operations MUST be mounted before the generic /admin/imports router.
     v1Router.use('/admin/imports/courses', requireAdminPermission('admin:imports:manage'), container.resolve<Router>('courseImportOperationsRouter'));
     v1Router.use('/admin/imports', requireAdminPermission('admin:imports:manage'), container.resolve<Router>('importAdminRouter'));
+    // Deliberately distinct from /admin/assets: users with reuse rights never receive lifecycle/purge routes.
+    v1Router.use('/admin/asset-reuse', requireAdminPermission('admin:assets:reuse'), AssetReuseRouter.create({
+      assetRecordRepository: container.resolve<any>('assetRecordRepository'),
+      processAssetLifecycleUseCase: container.resolve<any>('processAssetLifecycleUseCase'),
+      auditRecordRepo: auditRecordRepository,
+    }));
     v1Router.use('/admin/assets', requireAdminPermission('admin:assets:manage'), container.resolve<Router>('assetPlatformRouter'));
 
     // Phase 7: Reference Data & Academic Taxonomy

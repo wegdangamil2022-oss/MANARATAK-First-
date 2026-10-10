@@ -1,3 +1,7 @@
+import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
+import { canEditSettingsAssignment, canEditSettingsScope } from './settingsAssignmentGovernance';
+import { SettingsIdentityScopePicker } from '../components/SettingsIdentityScopePicker';
+import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -17,6 +21,7 @@ import { useTranslation } from '../i18n/I18nProvider';
 
 type ValueType = 'String' | 'Number' | 'Boolean' | 'Json';
 type ScopeLevel = 'GLOBAL' | 'TENANT' | 'DOMAIN' | 'IDENTITY';
+const knownDomainScopeKeys = [...new Set(ADMIN_PERMISSION_CATALOG.map(item => item.domain))].sort();
 
 interface Definition {
   id: string;
@@ -24,9 +29,11 @@ interface Definition {
   valueType: ValueType;
   description?: string;
   defaultValue?: unknown;
+  validationRules?: Record<string, unknown>;
   isFeatureFlag: boolean;
   isDeprecated: boolean;
   isSecret: boolean;
+  revision?: string;
 }
 
 interface Version {
@@ -36,6 +43,8 @@ interface Version {
   authorId?: string;
   createdAt: string;
   rollbackOfVersionId?: string;
+  operation?: 'SET' | 'CLEAR_OVERRIDE';
+  changeReason?: string;
 }
 
 interface Assignment {
@@ -45,7 +54,10 @@ interface Assignment {
   scopeId?: string;
   currentVersionId: string;
   currentValue: unknown;
+  isOverrideCleared?: boolean;
   versions: Version[];
+  versionCount?: number;
+  isWritable?: boolean;
 }
 
 function safeId(prefix: string) {
@@ -68,12 +80,50 @@ export function SettingsAdminPage() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'definitions' | 'assignments'>('definitions');
   const [selectedHistory, setSelectedHistory] = useState<Assignment | null>(null);
+  const [historyVersions, setHistoryVersions] = useState<Version[]>([]);
+  const [historyCursor, setHistoryCursor] = useState<string | undefined>();
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
+  const historyGeneration = useRef(0);
+  const historyBusy = useRef(false);
+
+  const loadHistory = async (assignment: Assignment, cursor?: string) => {
+    if (historyBusy.current) return;
+    historyBusy.current = true;
+    const request = ++historyGeneration.current;
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const query = new URLSearchParams({ expectedCurrentVersionId: assignment.currentVersionId, limit: '50' });
+      if (cursor) query.set('cursor', cursor);
+      const result = await adminApiClient.request<{ data: { versions: Version[]; nextCursor?: string } }>(
+        `/admin/settings/assignments/${encodeURIComponent(assignment.id)}/history?${query}`, { cache: 'no-store' });
+      if (request !== historyGeneration.current) return;
+      if (!Array.isArray(result.data?.versions)) throw new Error('Invalid history response');
+      setHistoryVersions(previous => cursor ? [...new Map([...previous, ...result.data.versions].map(version => [version.id, version])).values()] : result.data.versions);
+      setHistoryCursor(result.data.nextCursor);
+    } catch (cause) {
+      if (request === historyGeneration.current) setHistoryError(errorText(cause));
+    } finally {
+      if (request === historyGeneration.current) { setHistoryLoading(false); historyBusy.current = false; }
+    }
+  };
+
+  useEffect(() => {
+    setHistoryVersions([]);
+    setHistoryCursor(undefined);
+    setHistoryError('');
+    historyBusy.current = false;
+    if (selectedHistory) void loadHistory(selectedHistory);
+    return () => { historyGeneration.current += 1; historyBusy.current = false; };
+  }, [selectedHistory?.id, selectedHistory?.currentVersionId]);
 
   const [definitionForm, setDefinitionForm] = useState({
     key: '',
     valueType: 'String' as ValueType,
     description: '',
     defaultValue: '',
+    validationRulesText: '',
     isFeatureFlag: false,
     isSecret: false,
   });
@@ -82,6 +132,7 @@ export function SettingsAdminPage() {
     level: 'GLOBAL' as ScopeLevel,
     scopeId: '',
     value: '',
+    changeReason: '',
   });
 
   const [notice, setNotice] = useState('');
@@ -90,6 +141,46 @@ export function SettingsAdminPage() {
   const [search, setSearch] = useState('');
   const [classification, setClassification] = useState('ALL');
   const [scopeFilter, setScopeFilter] = useState('ALL');
+  const [appliedSearch, setAppliedSearch] = useState('');
+  const [definitionCursors, setDefinitionCursors] = useState<string[]>([]);
+  const [assignmentCursors, setAssignmentCursors] = useState<string[]>([]);
+  const [definitionNext, setDefinitionNext] = useState<string | undefined>();
+  const [assignmentNext, setAssignmentNext] = useState<string | undefined>();
+  const [contextEpoch, setContextEpoch] = useState(0);
+  const [contextState, setContextState] = useState<{ signature: string; definition: Definition; assignment: Assignment | null } | null>(null);
+  const [contextError, setContextError] = useState('');
+  const contextGeneration = useRef(0);
+  const editingVersion = useRef<{ signature: string; version: string } | null>(null);
+  const contextSignature = JSON.stringify([assignmentForm.key.trim(), assignmentForm.level, assignmentForm.level === 'GLOBAL' ? '' : assignmentForm.scopeId.trim()]);
+  const selectedDefinition = contextState?.signature === contextSignature ? contextState.definition : undefined;
+  const selectedAssignment = contextState?.signature === contextSignature ? contextState.assignment : undefined;
+  const contextReady = contextState?.signature === contextSignature;
+
+  useEffect(() => {
+    if (search.trim() === appliedSearch) return;
+    const timer = window.setTimeout(() => { setAppliedSearch(search.trim()); setDefinitionCursors([]); setAssignmentCursors([]); }, 250);
+    return () => window.clearTimeout(timer);
+  }, [search, appliedSearch]);
+  useEffect(() => {
+    const request = ++contextGeneration.current;
+    setContextState(null); setContextError('');
+    const [key, level, rawScopeId] = JSON.parse(contextSignature) as [string, ScopeLevel, string];
+    const scopeId = level === 'GLOBAL' ? undefined : rawScopeId;
+    if (!key || !/^[a-zA-Z0-9_\-.]+$/.test(key) || (level !== 'GLOBAL' && !scopeId)) return;
+    const timer = window.setTimeout(() => {
+      const query = new URLSearchParams({ key, level });
+      if (scopeId) query.set('scopeId', scopeId);
+      void adminApiClient.request<{ data: { definition: Definition; assignment: Assignment | null } }>(
+        `/admin/settings/assignments/context?${query}`, { cache: 'no-store' }).then(result => {
+          if (request !== contextGeneration.current) return;
+          if (!result.data?.definition || !('assignment' in result.data)) throw new Error('Invalid context response');
+          if (editingVersion.current?.signature === contextSignature && editingVersion.current.version !== result.data.assignment?.currentVersionId)
+            throw new Error('SETTINGS_EDITOR_VERSION_CHANGED');
+          setContextState({ signature: contextSignature, ...result.data });
+        }).catch(cause => { if (request === contextGeneration.current) setContextError(errorText(cause)); });
+    }, 250);
+    return () => { window.clearTimeout(timer); contextGeneration.current += 1; };
+  }, [contextSignature, contextEpoch]);
   const generation = useRef(0);
   const busy = useRef(false);
   const refreshing = useRef(false);
@@ -106,13 +197,19 @@ export function SettingsAdminPage() {
     refreshing.current = true;
     setLoading(true);
     setReady(false);
+    const definitionQuery = new URLSearchParams({ limit: '50', classification });
+    const assignmentQuery = new URLSearchParams({ limit: '50' });
+    if (appliedSearch) { definitionQuery.set('q', appliedSearch); assignmentQuery.set('q', appliedSearch); }
+    if (scopeFilter !== 'ALL') assignmentQuery.set('level', scopeFilter);
+    if (definitionCursors.length) definitionQuery.set('cursor', definitionCursors.at(-1)!);
+    if (assignmentCursors.length) assignmentQuery.set('cursor', assignmentCursors.at(-1)!);
     const results = await Promise.allSettled([
-      adminApiClient.request<{ data: { definitions: Definition[] } }>(
-        '/admin/settings/definitions',
+      adminApiClient.request<{ data: { definitions: Definition[]; nextCursor?: string } }>(
+        `/admin/settings/definitions?${definitionQuery}`,
         { cache: 'no-store' },
       ),
-      adminApiClient.request<{ data: { assignments: Assignment[] } }>(
-        '/admin/settings/assignments',
+      adminApiClient.request<{ data: { assignments: Assignment[]; nextCursor?: string } }>(
+        `/admin/settings/assignments?${assignmentQuery}`,
         { cache: 'no-store' },
       ),
     ]);
@@ -122,9 +219,11 @@ export function SettingsAdminPage() {
     if (
       definitionResult.status === 'fulfilled' &&
       Array.isArray(definitionResult.value.data?.definitions)
-    )
+    ) {
       setDefinitions(definitionResult.value.data.definitions);
-    else {
+      setDefinitionNext(definitionResult.value.data.nextCursor);
+    } else {
+      setDefinitionNext(undefined);
       setDefinitions([]);
       failures.push(
         `${isAr ? 'التعريفات' : 'Definitions'}: ${definitionResult.status === 'rejected' ? errorText(definitionResult.reason) : 'Invalid response'}`,
@@ -136,11 +235,13 @@ export function SettingsAdminPage() {
     ) {
       const values = assignmentResult.value.data.assignments;
       setAssignments(values);
+      setAssignmentNext(assignmentResult.value.data.nextCursor);
       setSelectedHistory((previous) =>
         previous ? (values.find((item) => item.id === previous.id) ?? null) : null,
       );
     } else {
       setAssignments([]);
+      setAssignmentNext(undefined);
       setSelectedHistory(null);
       failures.push(
         `${isAr ? 'القيم' : 'Values'}: ${assignmentResult.status === 'rejected' ? errorText(assignmentResult.reason) : 'Invalid response'}`,
@@ -158,7 +259,7 @@ export function SettingsAdminPage() {
       generation.current += 1;
       refreshing.current = false;
     };
-  }, []);
+  }, [appliedSearch, classification, scopeFilter, definitionCursors, assignmentCursors]);
   useEffect(() => {
     if (!selectedHistory) return;
     const previousFocus = document.activeElement as HTMLElement | null;
@@ -199,36 +300,13 @@ export function SettingsAdminPage() {
     };
   }, [selectedHistory?.id]);
 
-  const matched = (key: string, other = '') =>
-    `${key} ${other}`.toLowerCase().includes(search.trim().toLowerCase());
-  const filteredDefinitions = definitions.filter(
-    (item) =>
-      matched(item.key, item.description) &&
-      (classification === 'ALL' ||
-        (classification === 'SECRET'
-          ? item.isSecret
-          : classification === 'DEPRECATED'
-            ? item.isDeprecated
-            : classification === 'FLAG'
-              ? item.isFeatureFlag
-              : !item.isFeatureFlag && !item.isSecret && !item.isDeprecated)),
-  );
-  const filteredAssignments = assignments.filter(
-    (item) =>
-      matched(item.key, `${item.scopeId || ''} ${item.level}`) &&
-      (scopeFilter === 'ALL' || item.level === scopeFilter),
-  );
-  const canRestore = (key: string) =>
-    ready && definitions.some((item) => item.key === key && !item.isSecret && !item.isDeprecated);
-  const selectedAssignment = assignments.find(
-    (item) =>
-      item.key === assignmentForm.key &&
-      item.level === assignmentForm.level &&
-      (item.scopeId || '') ===
-        (assignmentForm.level === 'GLOBAL' ? '' : assignmentForm.scopeId.trim()),
-  );
+  const filteredDefinitions = definitions;
+  const filteredAssignments = assignments;
+  // TENANT has no approved canonical owner/selector. Preserve historical reads,
+  // but block new Admin edits and lifecycle mutations until its authority is decided.
+  const canRestore = (assignment: Assignment) => canEditSettingsAssignment(assignment.level, assignment.isWritable, ready);
   const editAssignment = (item: Assignment) => {
-    if (busy.current) return;
+    if (busy.current || !canEditSettingsScope(item.level)) return;
     if (
       assignmentForm.value &&
       !window.confirm(
@@ -238,10 +316,14 @@ export function SettingsAdminPage() {
       )
     )
       return;
+    setContextState(null);
+    setContextEpoch(current => current + 1);
+    editingVersion.current = { signature: JSON.stringify([item.key, item.level, item.scopeId || '']), version: item.currentVersionId };
     setAssignmentForm({
       key: item.key,
       level: item.level,
       scopeId: item.scopeId || '',
+      changeReason: '',
       value:
         typeof item.currentValue === 'string'
           ? item.currentValue
@@ -254,10 +336,6 @@ export function SettingsAdminPage() {
         : 'Current value loaded for editing; save to create a new version.',
     );
   };
-  const selectedDefinition = useMemo(
-    () => definitions.find((item) => item.key === assignmentForm.key),
-    [definitions, assignmentForm.key],
-  );
   const writableDefinitions = useMemo(
     () => definitions.filter((item) => !item.isSecret && !item.isDeprecated),
     [definitions],
@@ -284,7 +362,7 @@ export function SettingsAdminPage() {
   };
 
   const saveCommand = async (
-    operation: 'definition' | 'assignment' | 'rollback',
+    operation: 'definition' | 'assignment' | 'rollback' | 'clear' | 'definition-update',
     payload: Record<string, unknown>,
     complete: () => void,
   ) => {
@@ -314,14 +392,16 @@ export function SettingsAdminPage() {
                 assignmentId: selectedAssignment?.id ?? command.assignmentId,
                 versionId: command.versionId,
               }
-            : { newVersionId: command.versionId }),
+            : operation === 'definition-update' ? {} : { newVersionId: command.versionId }),
       };
       const endpoint =
         operation === 'definition'
           ? '/admin/settings/definitions'
           : operation === 'assignment'
             ? '/admin/settings/assignments'
-            : '/admin/settings/assignments/rollback';
+            : operation === 'clear' ? '/admin/settings/assignments/clear'
+              : operation === 'definition-update' ? '/admin/settings/definitions/update'
+              : '/admin/settings/assignments/rollback';
       await adminApiClient.request(endpoint, {
         method: 'POST',
         idempotencyKey: command.key,
@@ -334,6 +414,7 @@ export function SettingsAdminPage() {
           ? 'تم الحفظ؛ أُعيد طلب القيم من الخادم.'
           : 'Saved; current values were requested again from the server.',
       );
+      if (operation === 'assignment') { editingVersion.current = null; setContextState(null); setContextEpoch(current => current + 1); }
       await refresh();
     } catch (cause) {
       setError(errorText(cause));
@@ -351,6 +432,11 @@ export function SettingsAdminPage() {
         definitionForm.isSecret || definitionForm.defaultValue === ''
           ? undefined
           : parseValue(definitionForm.valueType, definitionForm.defaultValue);
+      const validationRules = definitionForm.validationRulesText.trim()
+        ? JSON.parse(definitionForm.validationRulesText) as unknown
+        : undefined;
+      if (validationRules !== undefined && (!validationRules || typeof validationRules !== 'object' || Array.isArray(validationRules)))
+        throw new Error(isAr ? 'قيود التحقق يجب أن تكون كائن JSON.' : 'Validation rules must be a JSON object.');
       await saveCommand(
         'definition',
         {
@@ -358,6 +444,7 @@ export function SettingsAdminPage() {
           valueType: definitionForm.valueType,
           description: definitionForm.description.trim() || undefined,
           defaultValue,
+          validationRules,
           isFeatureFlag: definitionForm.isFeatureFlag,
           isSecret: definitionForm.isSecret,
         },
@@ -367,6 +454,7 @@ export function SettingsAdminPage() {
             valueType: 'String',
             description: '',
             defaultValue: '',
+            validationRulesText: '',
             isFeatureFlag: false,
             isSecret: false,
           }),
@@ -377,7 +465,7 @@ export function SettingsAdminPage() {
   };
   const assignValue = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated)
+    if (!contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated || !canEditSettingsScope(assignmentForm.level))
       return;
     try {
       if (assignmentForm.level !== 'GLOBAL' && !assignmentForm.scopeId.trim())
@@ -391,15 +479,16 @@ export function SettingsAdminPage() {
           value: parseValue(selectedDefinition.valueType, assignmentForm.value),
           type: selectedDefinition.valueType,
           expectedCurrentVersionId: selectedAssignment?.currentVersionId ?? null,
+          changeReason: assignmentForm.changeReason.trim() || undefined,
         },
-        () => setAssignmentForm((current) => ({ ...current, value: '' })),
+        () => setAssignmentForm((current) => ({ ...current, value: '', changeReason: '' })),
       );
     } catch (cause) {
       setError(errorText(cause));
     }
   };
   const rollback = async (assignment: Assignment, version: Version) => {
-    if (busy.current || !canRestore(assignment.key) || version.id === assignment.currentVersionId)
+    if (busy.current || !canRestore(assignment) || version.id === assignment.currentVersionId)
       return;
     if (
       !window.confirm(
@@ -409,15 +498,46 @@ export function SettingsAdminPage() {
       )
     )
       return;
+    const changeReason = window.prompt(isAr ? 'سبب الرجوع (3 أحرف على الأقل)' : 'Rollback reason (at least 3 characters)')?.trim();
+    if (!changeReason || changeReason.length < 3) return;
     await saveCommand(
       'rollback',
       {
         assignmentId: assignment.id,
         previousVersionId: version.id,
+        changeReason,
         expectedCurrentVersionId: assignment.currentVersionId,
       },
       () => setSelectedHistory(null),
     );
+  };
+
+  const clearOverride = async (assignment: Assignment) => {
+    if (busy.current || assignment.isOverrideCleared || !canRestore(assignment)) return;
+    const changeReason = window.prompt(isAr ? 'سبب العودة للوراثة (3 أحرف على الأقل)' : 'Inheritance reason (at least 3 characters)')?.trim();
+    if (!changeReason || changeReason.length < 3) return;
+    await saveCommand('clear', { assignmentId: assignment.id, expectedCurrentVersionId: assignment.currentVersionId,
+      changeReason }, () => setSelectedHistory(null));
+  };
+  const updateDefinition = async (definition: Definition, deprecate: boolean) => {
+    if (busy.current || !definition.revision) return;
+    try {
+      let description: string | undefined;
+      if (deprecate) {
+        const impact = await adminApiClient.request<{ data: { assignmentCount: number } }>(
+          `/admin/settings/definitions/${encodeURIComponent(definition.key)}/impact`, { cache: 'no-store' });
+        if (!window.confirm(isAr ? `سيوقف هذا التعريف عن الحل والتعيين. توجد ${impact.data.assignmentCount} تعيينات؛ سيُحفظ التاريخ. موافق؟`
+          : `This disables resolution and new writes. ${impact.data.assignmentCount} assignments retain their history. Continue?`)) return;
+      } else {
+        const value = window.prompt(isAr ? 'الوصف الجديد' : 'New description', definition.description ?? '');
+        if (value === null) return;
+        description = value;
+      }
+      const changeReason = window.prompt(isAr ? 'سبب التغيير (3 أحرف على الأقل)' : 'Change reason (at least 3 characters)')?.trim();
+      if (!changeReason || changeReason.length < 3) return;
+      await saveCommand('definition-update', { key: definition.key, expectedRevision: definition.revision,
+        ...(deprecate ? { isDeprecated: true } : { description }), changeReason }, () => {});
+    } catch (cause) { setError(errorText(cause)); }
   };
 
   return (
@@ -458,6 +578,8 @@ export function SettingsAdminPage() {
           </button>
         </div>
       </section>
+
+      <SettingsResolutionInspector definitions={definitions} isAr={isAr} />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Boundary
@@ -550,20 +672,20 @@ export function SettingsAdminPage() {
         <Field label={isAr ? 'تصنيف التعريفات' : 'Definition class'}>
           <select
             value={classification}
-            onChange={(event) => setClassification(event.target.value)}
+            onChange={(event) => { setClassification(event.target.value); setDefinitionCursors([]); }}
             className="input"
           >
             <option value="ALL">{isAr ? 'الكل' : 'All'}</option>
             <option value="SETTING">{isAr ? 'إعدادات عادية' : 'Settings'}</option>
             <option value="FLAG">Feature Flags</option>
-            <option value="SECRET">{isAr ? 'مراجع الأسرار' : 'Secret references'}</option>
+            <option value="SECRET">{isAr ? 'متطلبات الأسرار' : 'Secret requirements'}</option>
             <option value="DEPRECATED">{isAr ? 'متوقفة' : 'Deprecated'}</option>
           </select>
         </Field>
         <Field label={isAr ? 'نطاق القيم' : 'Value scope'}>
           <select
             value={scopeFilter}
-            onChange={(event) => setScopeFilter(event.target.value)}
+            onChange={(event) => { setScopeFilter(event.target.value); setAssignmentCursors([]); }}
             className="input"
           >
             <option value="ALL">{isAr ? 'كل النطاقات' : 'All scopes'}</option>
@@ -575,6 +697,15 @@ export function SettingsAdminPage() {
           </select>
         </Field>
       </section>
+      <div className="flex items-center gap-3" aria-label={isAr ? 'تصفح صفحات الإعدادات' : 'Settings pagination'}>
+        <button type="button" disabled={loading || saving || search.trim() !== appliedSearch || !(activeTab === 'definitions' ? definitionCursors.length : assignmentCursors.length)}
+          onClick={() => activeTab === 'definitions' ? setDefinitionCursors(previous => previous.slice(0, -1)) : setAssignmentCursors(previous => previous.slice(0, -1))}
+          className="rounded border px-3 py-2 disabled:opacity-50">{isAr ? 'الصفحة السابقة' : 'Previous page'}</button>
+        <span>{isAr ? 'الصفحة' : 'Page'} {(activeTab === 'definitions' ? definitionCursors.length : assignmentCursors.length) + 1}</span>
+        <button type="button" disabled={loading || saving || search.trim() !== appliedSearch || !(activeTab === 'definitions' ? definitionNext : assignmentNext)}
+          onClick={() => activeTab === 'definitions' ? definitionNext && setDefinitionCursors(previous => [...previous, definitionNext]) : assignmentNext && setAssignmentCursors(previous => [...previous, assignmentNext])}
+          className="rounded border px-3 py-2 disabled:opacity-50">{isAr ? 'الصفحة التالية' : 'Next page'}</button>
+      </div>
       {loading ? (
         <div className="flex min-h-52 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-[#0E7C86]" />
@@ -587,8 +718,7 @@ export function SettingsAdminPage() {
                 {isAr ? 'تعريفات الإعدادات' : 'Setting Definitions'}
               </h2>
               <p className="mt-1 text-xs font-semibold text-slate-500">
-                {filteredDefinitions.length} / {definitions.length}{' '}
-                {isAr ? 'تعريفًا مسجلًا' : 'registered definitions'}
+                {definitions.length} {isAr ? 'تعريفًا في الصفحة الحالية' : 'definitions on this page'}
               </p>
             </div>
             {filteredDefinitions.length === 0 ? (
@@ -608,6 +738,7 @@ export function SettingsAdminPage() {
                       <Th>{isAr ? 'النوع' : 'Type'}</Th>
                       <Th>{isAr ? 'التصنيف' : 'Classification'}</Th>
                       <Th>{isAr ? 'القيمة الافتراضية' : 'Default'}</Th>
+                      <Th>{isAr ? 'الحالة والإجراءات' : 'Status and actions'}</Th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -621,8 +752,8 @@ export function SettingsAdminPage() {
                           >
                             {item.isSecret
                               ? isAr
-                                ? 'مرجع سر خارجي'
-                                : 'External secret ref'
+                                ? 'متطلب سر — الربط غير مثبت'
+                                : 'Secret requirement — binding unverified'
                               : item.isFeatureFlag
                                 ? 'Feature Flag'
                                 : isAr
@@ -631,6 +762,14 @@ export function SettingsAdminPage() {
                           </span>
                         </Td>
                         <Td mono>{item.isSecret ? '••••••••' : displayValue(item.defaultValue)}</Td>
+                        <Td>
+                          <span>{item.isDeprecated ? (isAr ? 'متوقف' : 'Deprecated') : (isAr ? 'فعال' : 'Active')}</span>
+                          <p className="text-slate-500">{item.description}</p>
+                          <button type="button" disabled={saving || !item.revision} onClick={() => void updateDefinition(item, false)}
+                            className="ms-2 rounded border px-2 py-1">{isAr ? 'تعديل الوصف' : 'Edit description'}</button>
+                          {!item.isDeprecated && <button type="button" disabled={saving || !item.revision} onClick={() => void updateDefinition(item, true)}
+                            className="ms-2 rounded border px-2 py-1">{isAr ? 'إيقاف التعريف' : 'Deprecate definition'}</button>}
+                        </Td>
                       </tr>
                     ))}
                   </tbody>
@@ -671,6 +810,7 @@ export function SettingsAdminPage() {
                       ...f,
                       valueType: e.target.value as ValueType,
                       defaultValue: '',
+                      validationRulesText: '',
                     }))
                   }
                   className="input"
@@ -693,7 +833,7 @@ export function SettingsAdminPage() {
                 />
               </Field>
               {!definitionForm.isSecret ? (
-                <Field label={isAr ? 'القيمة الافتراضية (اختيارية)' : 'Default value (optional)'}>
+                <Field label={definitionForm.isFeatureFlag ? (isAr ? 'القيمة الافتراضية للميزة (إلزامية)' : 'Flag default (required)') : (isAr ? 'القيمة الافتراضية (اختيارية)' : 'Default value (optional)')}>
                   {definitionForm.valueType === 'Boolean' ? (
                     <select
                       value={definitionForm.defaultValue}
@@ -702,7 +842,7 @@ export function SettingsAdminPage() {
                       }
                       className="input"
                     >
-                      <option value="">—</option>
+                      {!definitionForm.isFeatureFlag && <option value="">—</option>}
                       <option value="true">true</option>
                       <option value="false">false</option>
                     </select>
@@ -719,6 +859,13 @@ export function SettingsAdminPage() {
                   )}
                 </Field>
               ) : null}
+              <Field label={isAr ? 'قيود اختيارية على القيمة (JSON)' : 'Optional value constraints (JSON)'}>
+                <textarea value={definitionForm.validationRulesText}
+                  onChange={event => setDefinitionForm(form => ({ ...form, validationRulesText: event.target.value }))}
+                  rows={3} className="input font-mono text-xs" dir="ltr"
+                  placeholder={definitionForm.valueType === 'Number' ? '{"min":0,"max":100,"integer":true}' : definitionForm.valueType === 'String' ? '{"minLength":1,"maxLength":240}' : definitionForm.valueType === 'Boolean' ? '{"allowedValues":[true,false]}' : ''} />
+                <p className="text-xs text-slate-500">{isAr ? 'المسموح: min/max/integer للأرقام، minLength/maxLength للنصوص، allowedValues للأنواع البسيطة. لا يُقبل Regex أو JSON Schema.' : 'Supported: numeric bounds/integer, string lengths and scalar allowedValues. Regex and arbitrary JSON Schema are not accepted.'}</p>
+              </Field>
               <label className="flex items-center gap-2 text-xs font-bold text-slate-700">
                 <input
                   type="checkbox"
@@ -728,7 +875,7 @@ export function SettingsAdminPage() {
                       ...f,
                       isFeatureFlag: e.target.checked,
                       ...(e.target.checked
-                        ? { valueType: 'Boolean', defaultValue: '', isSecret: false }
+                        ? { valueType: 'Boolean', defaultValue: 'false', isSecret: false, validationRulesText: '' }
                         : {}),
                     }))
                   }
@@ -804,7 +951,7 @@ export function SettingsAdminPage() {
                             </span>
                           ) : null}
                         </Td>
-                        <Td mono>{displayValue(item.currentValue)}</Td>
+                        <Td mono>{item.isOverrideCleared ? (isAr ? 'وراثة — دون قيمة محلية' : 'Inheriting — no local value') : displayValue(item.currentValue)}</Td>
                         <Td>
                           <button
                             type="button"
@@ -813,9 +960,12 @@ export function SettingsAdminPage() {
                             className="inline-flex items-center gap-1 rounded-lg border border-[#0E7C86]/20 px-2.5 py-1.5 font-black text-[#142B5F] hover:bg-[#DDEFF2]/40"
                           >
                             <History className="h-3.5 w-3.5" />
-                            {item.versions.length}
+                            {item.versionCount ?? item.versions.length}
                           </button>
-                          {canRestore(item.key) && (
+                          {canRestore(item) && !item.isOverrideCleared && <button type="button" disabled={saving}
+                            onClick={() => void clearOverride(item)} className="ms-2 rounded border px-2 py-1">
+                            {isAr ? 'إلغاء القيمة والوراثة' : 'Clear override / inherit'}</button>}
+                          {canRestore(item) && (
                             <button
                               type="button"
                               disabled={saving}
@@ -847,21 +997,10 @@ export function SettingsAdminPage() {
               className="mt-4 min-w-0 space-y-4 disabled:opacity-60"
             >
               <Field label={isAr ? 'التعريف' : 'Definition'}>
-                <select
-                  required
-                  value={assignmentForm.key}
-                  onChange={(e) =>
-                    setAssignmentForm((f) => ({ ...f, key: e.target.value, value: '' }))
-                  }
-                  className="input"
-                >
-                  <option value="">—</option>
-                  {writableDefinitions.map((item) => (
-                    <option key={item.id} value={item.key}>
-                      {item.key}
-                    </option>
-                  ))}
-                </select>
+                <input required list="settings-definition-options" value={assignmentForm.key} maxLength={200}
+                  onChange={event => { editingVersion.current = null; setAssignmentForm(form => ({ ...form, key: event.target.value, value: '' })); }} className="input" dir="ltr" />
+                <datalist id="settings-definition-options">{writableDefinitions.map(item => <option key={item.id} value={item.key} />)}</datalist>
+                <p className="text-xs text-slate-500">{isAr ? 'اختر أو أدخل مفتاح تعريف موجود؛ يُتحقق من التعريف والنطاق مباشرة.' : 'Choose or enter an existing key; definition and scope are checked directly.'}</p>
               </Field>
               <Field label={isAr ? 'النطاق' : 'Scope'}>
                 <select
@@ -877,22 +1016,34 @@ export function SettingsAdminPage() {
                 >
                   <option>GLOBAL</option>
                   <option>DOMAIN</option>
-                  <option>TENANT</option>
+                  <option value="TENANT" disabled>{isAr ? 'TENANT — غير معتمد للتعديل' : 'TENANT — legacy read-only'}</option>
                   <option>IDENTITY</option>
                 </select>
+                <p className="text-xs text-slate-500">
+                  {isAr
+                    ? 'DOMAIN يختار من المجالات المعروفة للمنصة، وIDENTITY من IAM. نطاق TENANT القديم للقراءة فقط.'
+                    : 'DOMAIN uses published platform domain keys, IDENTITY uses IAM. Legacy TENANT stays read-only.'}
+                </p>
               </Field>
-              {assignmentForm.level !== 'GLOBAL' ? (
-                <Field label={isAr ? 'معرّف النطاق' : 'Scope ID'}>
-                  <input
-                    required
-                    maxLength={240}
-                    value={assignmentForm.scopeId}
-                    onChange={(e) => setAssignmentForm((f) => ({ ...f, scopeId: e.target.value }))}
-                    className="input"
-                    dir="ltr"
-                  />
+              {assignmentForm.level === 'DOMAIN' ? (
+                <Field label={isAr ? 'المجال المعتمد' : 'Approved domain'}>
+                  <select required value={assignmentForm.scopeId} className="input" dir="ltr"
+                    onChange={event => setAssignmentForm(f => ({ ...f, scopeId: event.target.value }))}>
+                    <option value="">{isAr ? 'اختر المجال' : 'Select domain'}</option>
+                    {knownDomainScopeKeys.map(domain => <option key={domain} value={domain}>{domain}</option>)}
+                  </select>
                 </Field>
               ) : null}
+              {assignmentForm.level === 'IDENTITY' ? (
+                <Field label={isAr ? 'الهوية من IAM' : 'IAM identity'}>
+                  <SettingsIdentityScopePicker value={assignmentForm.scopeId} isAr={isAr}
+                    disabled={saving} onChange={id => setAssignmentForm(f => ({ ...f, scopeId: id }))} />
+                </Field>
+              ) : null}
+              {contextError && <div role="alert" className="text-red-700">{contextError === 'SETTINGS_EDITOR_VERSION_CHANGED' ? (isAr ? 'تغيّرت النسخة؛ أعد تحميل القيمة قبل تعديلها.' : 'Version changed; reload the value before editing.') : contextError}
+                <button type="button" onClick={() => { editingVersion.current = null; setAssignmentForm(form => ({ ...form, value: '' })); setContextState(null); setContextEpoch(current => current + 1); }} className="ms-2 rounded border px-2 py-1">{isAr ? 'إعادة التحقق ومسح الإدخال' : 'Recheck and clear input'}</button>
+              </div>}
+              {assignmentForm.key && !contextReady && !contextError && <p role="status">{isAr ? 'بانتظار التحقق من التعريف والنطاق…' : 'Waiting for definition and scope verification…'}</p>}
               {selectedDefinition ? (
                 <Field label={`${isAr ? 'القيمة' : 'Value'} · ${selectedDefinition.valueType}`}>
                   {selectedDefinition.valueType === 'Boolean' ? (
@@ -918,8 +1069,13 @@ export function SettingsAdminPage() {
                   )}
                 </Field>
               ) : null}
+              <Field label={isAr ? 'سبب التغيير' : 'Change reason'}>
+                <input value={assignmentForm.changeReason} maxLength={1000} minLength={3}
+                  required={selectedDefinition?.isFeatureFlag}
+                  onChange={event => setAssignmentForm(form => ({ ...form, changeReason: event.target.value }))} className="input" />
+              </Field>
               <button
-                disabled={saving || !selectedDefinition}
+                disabled={saving || !contextReady || !selectedDefinition || selectedDefinition.isSecret || selectedDefinition.isDeprecated || !canEditSettingsScope(assignmentForm.level)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 py-3 text-xs font-black text-white hover:bg-[#0E7C86] disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
@@ -962,7 +1118,12 @@ export function SettingsAdminPage() {
               </button>
             </div>
             <div className="mt-5 space-y-3">
-              {[...selectedHistory.versions]
+              {historyError && <div role="alert" className="text-red-700">{historyError}
+                <button type="button" disabled={historyLoading} onClick={() => void loadHistory(selectedHistory, historyCursor)} className="ms-2 rounded border px-2 py-1">{isAr ? 'إعادة المحاولة' : 'Retry'}</button>
+              </div>}
+              {historyLoading && <p role="status">{isAr ? 'تحميل السجل…' : 'Loading history…'}</p>}
+              {!historyLoading && !historyError && historyVersions.length === 0 && <p>{isAr ? 'لا توجد نسخ في هذه الصفحة.' : 'No versions on this page.'}</p>}
+              {[...historyVersions]
                 .sort(
                   (a, b) =>
                     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
@@ -976,7 +1137,8 @@ export function SettingsAdminPage() {
                           {version.id}
                         </div>
                         <div className="mt-1 break-all font-mono text-xs font-bold text-slate-900">
-                          {displayValue(version.value)}
+                          {version.operation === 'CLEAR_OVERRIDE' ? (isAr ? 'إلغاء Override والعودة للوراثة' : 'Override cleared; inheritance restored') : displayValue(version.value)}
+                          {version.changeReason && <p className="mt-1 text-slate-600">{version.changeReason}</p>}
                         </div>
                         <div className="mt-2 text-[10px] font-semibold text-slate-400">
                           {new Date(version.createdAt).toLocaleString(isAr ? 'ar-YE' : 'en-GB', {
@@ -994,7 +1156,7 @@ export function SettingsAdminPage() {
                         </span>
                       ) : (
                         <button
-                          disabled={saving || !canRestore(selectedHistory.key)}
+                          disabled={saving || !canRestore(selectedHistory)}
                           onClick={() => void rollback(selectedHistory, version)}
                           className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800 hover:bg-amber-100"
                         >
@@ -1004,6 +1166,7 @@ export function SettingsAdminPage() {
                     </div>
                   </div>
                 ))}
+              {historyCursor && !historyError && <button type="button" disabled={historyLoading} onClick={() => void loadHistory(selectedHistory, historyCursor)} className="rounded border px-3 py-2">{isAr ? 'تحميل نسخ أقدم' : 'Load older versions'}</button>}
             </div>
           </div>
         </div>

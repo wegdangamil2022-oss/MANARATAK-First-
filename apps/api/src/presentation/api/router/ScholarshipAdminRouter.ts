@@ -58,7 +58,8 @@ export class ScholarshipAdminRouter {
       atomicImportGateway &&
       scholarshipRepository &&
       atomicDomainMutationCoordinator &&
-      typeof atomicImportGateway.withTransaction === 'function'
+      typeof atomicImportGateway.withTransaction === 'function' &&
+      typeof atomicImportGateway.assertReviewLease === 'function'
         ? new ScholarshipImportAtomicTransferUseCase(
             atomicImportGateway as IScholarshipImportAtomicGateway,
             scholarshipRepository,
@@ -721,13 +722,14 @@ export class ScholarshipAdminRouter {
       '/:id/catalog-detail',
       asyncHandler(async (req: Request, res: Response) => {
         const detail = await adminScholarshipUseCases.getScholarshipCatalogDetail(req.params.id);
-        const historyRecords = manageAuditRecordsUseCase
-          ? await manageAuditRecordsUseCase.queryAuditRecords({
+        const historyPage = manageAuditRecordsUseCase
+          ? await manageAuditRecordsUseCase.queryAuditPage({
               targetId: req.params.id,
               category: 'SCHOLARSHIPS_MUTATION',
+              limit: 50,
             })
-          : [];
-        const history = historyRecords
+          : { items: [], hasMore: false };
+        const history = historyPage.items
           .map((record) => ({
             id: record.getId().getValue(),
             action: record.getAction().getValue(),
@@ -738,7 +740,8 @@ export class ScholarshipAdminRouter {
             correlationReference: record.getCorrelationReference()?.getValue(),
           }))
           .sort((left, right) => Date.parse(right.timestamp) - Date.parse(left.timestamp));
-        res.json({ ...detail, history, historyAvailable: Boolean(manageAuditRecordsUseCase) });
+        res.json({ ...detail, history, historyAvailable: Boolean(manageAuditRecordsUseCase),
+          historyHasMore: historyPage.hasMore, historyLimit: 50 });
       }),
     );
 
@@ -834,6 +837,8 @@ export class ScholarshipAdminRouter {
 
     // Simple error handler for Zod errors and Use Case errors
     router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+      if (err instanceof Error && err.message === 'IMPORT_REVIEW_LEASE_REQUIRED')
+        return res.status(409).json({ error: err.message, code: err.message });
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
