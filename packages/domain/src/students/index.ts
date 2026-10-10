@@ -326,7 +326,7 @@ export interface StudentSupportWorkspaceDetailDto extends StudentSupportWorkspac
   activeApplicationCount?: number;
   serviceRequestCount?: number | null;
   recentServiceRequests?: Array<{id:string;publicId:string;status:string;createdAt:Date|string;updatedAt:Date|string}>;
-  ownerReadStatus?: {learning:'AVAILABLE'|'DEGRADED';certificates:'AVAILABLE'|'DEGRADED';services:'AVAILABLE'|'DEGRADED'};
+  ownerReadStatus?: {learning:'AVAILABLE'|'DEGRADED'|'RESTRICTED';certificates:'AVAILABLE'|'DEGRADED'|'RESTRICTED';services:'AVAILABLE'|'DEGRADED'|'RESTRICTED'};
   learning?: StudentCourseProgressDto[];
   certificates?: Array<Pick<StudentCertificateProjectionDto,'id'|'publicId'|'serialNumber'|'verificationCode'|'status'|'courseDisplayName'|'issuedAt'|'expiresAt'>>;
 
@@ -342,8 +342,8 @@ export interface StudentSupportWorkspaceDetailDto extends StudentSupportWorkspac
     lastDecidedAt?: Date | null;
   };
   linkedSummaries: {
-    activeCourseCount: number;
-    certificateCount: number;
+    activeCourseCount: number | null;
+    certificateCount: number | null;
     unreadNotificationCount: number;
   };
 }
@@ -446,7 +446,7 @@ export interface IStudentWorkspaceRepository {
     snapshotId: string,
     expectedVersion: number,
   ): Promise<StudentWorkspaceDto>;
-  resetLayout(studentReferenceId: string, expectedVersion: number): Promise<StudentWorkspaceDto>;
+  resetLayout(studentReferenceId: string, expectedVersion: number, supportActor?: { actorId: string; reason: string; correlationId?: string }): Promise<StudentWorkspaceDto>;
   ingestIntegrationEvent(event: StudentWorkspaceIntegrationEventDto): Promise<boolean>;
 }
 

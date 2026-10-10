@@ -38,6 +38,14 @@ export class StudentSupportAdminRouter {
         reason: z.string().trim().min(6).max(1000),
       })
       .strict();
+    const requireSupportRead = async (req: Request, res: any, next: any) => {
+      try {
+        if (!req.authUserId) return void res.status(401).json({ error: { code: 'ADMIN_AUTH_REQUIRED' } });
+        const decision = await authEvaluatorService.evaluatePermission(req.authUserId, 'admin:students:support', { ip: req.ip, requestTime: new Date() });
+        if (!decision.isGranted) return void res.status(403).json({ error: { code: 'ADMIN_PERMISSION_DENIED' } });
+        next();
+      } catch (error) { next(error); }
+    };
     const requireSupportMutation = async (req: Request, res: any, next: any) => {
       const principalId = req.authUserId;
       if (!principalId)
@@ -59,7 +67,7 @@ export class StudentSupportAdminRouter {
       next();
     };
 
-    router.get('/support', async (req, res, next) => {
+    router.get('/support', requireSupportRead, async (req, res, next) => {
       try {
         res
           .status(200)
@@ -69,16 +77,26 @@ export class StudentSupportAdminRouter {
       }
     });
 
-    router.get('/support/:studentReferenceId', async (req, res, next) => {
+    router.get('/support/:studentReferenceId', requireSupportRead, async (req, res, next) => {
       try {
-        res
-          .status(200)
-          .json(
-            await studentDashboardHydrationService.getSupportDetail(req.params.studentReferenceId),
-          );
-      } catch (error) {
-        next(error);
-      }
+        const studentReferenceId = z.string().trim().min(1).max(128).parse(req.params.studentReferenceId);
+        const permission = async (name: string) => (await authEvaluatorService.evaluatePermission(
+          req.authUserId!, name, { ip: req.ip, requestTime: new Date() },
+        )).isGranted;
+        const [learning, certificates, services] = await Promise.all([
+          permission('admin:courses:manage'),
+          permission('admin:certificates:view'),
+          permission('admin:services:manage'),
+        ]);
+        const result = await studentDashboardHydrationService.getSupportDetail(studentReferenceId, { learning, certificates, services });
+        // Sensitive support reads have a mandatory, privacy-minimized audit record before disclosure.
+        await AuditHelper.recordMutation(auditRecordRepo, req, {
+          action: 'STUDENT_SUPPORT_DETAIL_VIEW', category: 'STUDENT_SUPPORT', targetType: 'STUDENT_WORKSPACE',
+          targetId: studentReferenceId, result: 'SUCCESS',
+          metadata: { purpose: 'student-support-case-review', ownerScopes: { learning, certificates, services } },
+        }, { reliability: 'REQUIRED', principal: 'REQUIRED' });
+        res.status(200).json(result);
+      } catch (error) { next(error); }
     });
 
     router.post(
@@ -88,18 +106,11 @@ export class StudentSupportAdminRouter {
         const studentReferenceId = req.params.studentReferenceId;
         try {
           const body = resetSchema.parse(req.body);
+          if (!req.authUserId) return void res.status(401).json({ error: { code: 'ADMIN_AUTH_REQUIRED' } });
           const result = await studentWorkspaceUseCases.resetLayout(
-            studentReferenceId,
-            body.expectedVersion,
+            studentReferenceId, body.expectedVersion,
+            { actorId: req.authUserId, reason: body.reason, correlationId: String(req.headers['x-correlation-id'] ?? req.headers['x-request-id'] ?? '').slice(0, 128) },
           );
-          await AuditHelper.recordMutation(auditRecordRepo, req, {
-            action: 'STUDENT_SUPPORT_RESET_LAYOUT',
-            category: 'STUDENT_SUPPORT',
-            targetType: 'STUDENT_WORKSPACE',
-            targetId: studentReferenceId,
-            result: 'SUCCESS',
-            metadata: { reason: body.reason },
-          });
           res.status(200).json(result);
         } catch (error: any) {
           await AuditHelper.recordMutation(auditRecordRepo, req, {

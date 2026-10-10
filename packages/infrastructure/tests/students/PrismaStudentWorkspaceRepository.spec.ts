@@ -176,7 +176,7 @@ describe('PrismaStudentWorkspaceRepository', () => {
   it('persists every privacy toggle, advances version, and records the authoritative decision', async () => {
     const updated = { ...workspace, version: 2, privacyPreferences: { retainSearchHistory: false, allowPersonalization: true, allowProductAnalytics: true, publicProfileEnabled: false } };
     const tx = {
-      studentWorkspace: { findUnique: vi.fn().mockResolvedValue({ ...workspace, privacyPreferences: { retainSearchHistory: true, allowPersonalization: false, allowProductAnalytics: false, publicProfileEnabled: false } }), update: vi.fn().mockResolvedValue(updated) },
+      studentWorkspace: { findUnique: vi.fn().mockResolvedValueOnce({ ...workspace, privacyPreferences: { retainSearchHistory: true, allowPersonalization: false, allowProductAnalytics: false, publicProfileEnabled: false } }).mockResolvedValueOnce(updated), updateMany: vi.fn().mockResolvedValue({count:1}) },
       studentPrivacyConsentDecision: { create: vi.fn() }, auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
     };
     const repository = new PrismaStudentWorkspaceRepository({ $transaction: (callback: (client: typeof tx) => unknown) => callback(tx) } as any);
@@ -184,7 +184,7 @@ describe('PrismaStudentWorkspaceRepository', () => {
       studentReferenceId: 'student-1', expectedVersion: 1, actorId: 'student-1', purpose: 'settings',
       privacyPreferences: updated.privacyPreferences,
     });
-    expect(tx.studentWorkspace.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ privacyPreferences: updated.privacyPreferences, version: { increment: 1 } }) }));
+    expect(tx.studentWorkspace.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({version:1,status:'ACTIVE'}), data: expect.objectContaining({ privacyPreferences: updated.privacyPreferences, version: { increment: 1 } }) }));
     expect(tx.studentPrivacyConsentDecision.create).toHaveBeenCalledOnce();
     expect(decision).toMatchObject({ workspaceVersion: 2, afterPreferences: updated.privacyPreferences });
     expect(decision.changedFields).toEqual(expect.arrayContaining(['retainSearchHistory', 'allowPersonalization', 'allowProductAnalytics']));

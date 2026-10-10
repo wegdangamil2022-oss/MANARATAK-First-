@@ -32,6 +32,7 @@ export class StudentWorkspaceUseCases {
     this.ensureStudentReference(data.studentReferenceId);
     await assertAssetReferenceUsable(this.assetReferences, data.avatarAssetId, { purpose: 'STUDENT_AVATAR', expectedOwnerId: data.studentReferenceId, allowedOwnerTypes: ['STUDENT'], allowedMimeTypePrefixes: ['image/'] });
     const current = await this.requireReadableWorkspace(data.studentReferenceId);
+    if (!Number.isSafeInteger(data.expectedVersion) || (data.expectedVersion ?? 0) <= 0) throw new Error('STUDENT_WORKSPACE_VERSION_REQUIRED');
     if (current.status === StudentWorkspaceStatus.SUSPENDED) throw new Error('STUDENT_WORKSPACE_SUSPENDED');
     if (data.status !== undefined && data.status !== current.status) throw new Error('STUDENT_WORKSPACE_LIFECYCLE_EVENT_REQUIRED');
     if (data.privacyPreferences !== undefined) throw new Error('STUDENT_PRIVACY_CONSENT_COMMAND_REQUIRED');
@@ -228,9 +229,11 @@ export class StudentWorkspaceUseCases {
   public async resetLayout(
     studentReferenceId: string,
     expectedVersion: number,
+    supportActor?: { actorId: string; reason: string; correlationId?: string },
   ): Promise<StudentWorkspaceDto> {
     this.ensureStudentReference(studentReferenceId);
-    return this.mutate(studentReferenceId, 'layout-reset', () => this.repository.resetLayout(studentReferenceId, expectedVersion));
+    if (supportActor && (!supportActor.actorId.trim() || supportActor.reason.trim().length < 6)) throw new Error('STUDENT_SUPPORT_ACTOR_REQUIRED');
+    return this.mutate(studentReferenceId, 'layout-reset', () => this.repository.resetLayout(studentReferenceId, expectedVersion, supportActor));
   }
 
   public async consumeIntegrationEvent(
@@ -250,7 +253,12 @@ export class StudentWorkspaceUseCases {
 
   private async mutate<T>(studentReferenceId: string, reason: string, operation: () => Promise<T>): Promise<T> {
     const result = await operation();
-    await this.deliveryCache?.invalidate(studentReferenceId, reason);
+    // Cache is a derived projection. A cache outage must never turn a committed mutation into an HTTP failure.
+    try {
+      await this.deliveryCache?.invalidate(studentReferenceId, reason);
+    } catch {
+      console.warn('STUDENT_WORKSPACE_CACHE_INVALIDATION_DEFERRED');
+    }
     return result;
   }
 

@@ -19,58 +19,50 @@ export class StudentDashboardHydrationService {
     private readonly serviceRequests?: StudentServiceRequestUseCases,
   ) {}
 
-  async getSupportDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto> {
+  async getSupportDetail(
+    studentReferenceId: string,
+    grants: { learning: boolean; certificates: boolean; services: boolean } = {
+      learning: false, certificates: false, services: false,
+    },
+  ): Promise<StudentSupportWorkspaceDetailDto> {
     const base = await this.workspace.getSupportWorkspaceDetail(studentReferenceId);
+    // Each owner is invoked only after its own server-side permission has been granted.
     const [learning, certificates, services] = await Promise.allSettled([
-      this.learning.listForStudent(studentReferenceId),
-      this.certificates.listForStudent(studentReferenceId),
-      this.serviceRequests
+      grants.learning ? this.learning.listForStudent(studentReferenceId) : Promise.resolve(null),
+      grants.certificates ? this.certificates.listForStudent(studentReferenceId) : Promise.resolve(null),
+      grants.services && this.serviceRequests
         ? this.serviceRequests.listMyRequests(studentReferenceId, { page: 1, pageSize: 12 })
-        : Promise.reject(new Error('SERVICE_OWNER_READ_NOT_CONFIGURED')),
+        : Promise.resolve(null),
     ]);
-    const learningRows = learning.status === 'fulfilled' ? learning.value : [];
-    const certificateRows = certificates.status === 'fulfilled' ? certificates.value : [];
+    const learningRows = learning.status === 'fulfilled' ? learning.value : null;
+    const certificateRows = certificates.status === 'fulfilled' ? certificates.value : null;
+    const serviceRows = services.status === 'fulfilled' ? services.value : null;
     return {
       ...base,
-      learning: learningRows,
-      certificates: certificateRows.map((row) => ({
-        id: row.id,
-        publicId: row.publicId,
-        serialNumber: row.serialNumber,
-        verificationCode: row.verificationCode,
-        status: row.status,
-        courseDisplayName: row.courseDisplayName,
-        issuedAt: row.issuedAt,
-        expiresAt: row.expiresAt,
-      })),
+      learning: grants.learning && learningRows ? learningRows : undefined,
+      certificates: grants.certificates && certificateRows ? certificateRows.map((row) => ({
+        id: row.id, publicId: row.publicId, serialNumber: row.serialNumber,
+        verificationCode: row.verificationCode, status: row.status,
+        courseDisplayName: row.courseDisplayName, issuedAt: row.issuedAt, expiresAt: row.expiresAt,
+      })) : undefined,
       linkedSummaries: {
         ...base.linkedSummaries,
-        activeCourseCount:
-          learning.status === 'fulfilled'
-            ? learningRows.filter((row) =>
-                ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(row.status),
-              ).length
-            : base.linkedSummaries.activeCourseCount,
-        certificateCount:
-          certificates.status === 'fulfilled'
-            ? certificateRows.length
-            : base.linkedSummaries.certificateCount,
+        activeCourseCount: grants.learning && learningRows
+          ? learningRows.filter((row) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(row.status)).length
+          : null,
+        certificateCount: grants.certificates && certificateRows ? certificateRows.length : null,
       },
-      serviceRequestCount: services.status === 'fulfilled' ? services.value.total : null,
-      recentServiceRequests:
-        services.status === 'fulfilled'
-          ? services.value.data.map((row) => ({
-              id: row.id,
-              publicId: row.publicId,
-              status: row.status,
-              createdAt: row.createdAt,
-              updatedAt: row.updatedAt,
-            }))
-          : [],
+      serviceRequestCount: grants.services && serviceRows ? serviceRows.total : null,
+      recentServiceRequests: grants.services && serviceRows
+        ? serviceRows.data.map((row) => ({
+            id: row.id, publicId: row.publicId, status: row.status,
+            createdAt: row.createdAt, updatedAt: row.updatedAt,
+          }))
+        : undefined,
       ownerReadStatus: {
-        learning: learning.status === 'fulfilled' ? 'AVAILABLE' : 'DEGRADED',
-        certificates: certificates.status === 'fulfilled' ? 'AVAILABLE' : 'DEGRADED',
-        services: services.status === 'fulfilled' ? 'AVAILABLE' : 'DEGRADED',
+        learning: !grants.learning ? 'RESTRICTED' : learningRows ? 'AVAILABLE' : 'DEGRADED',
+        certificates: !grants.certificates ? 'RESTRICTED' : certificateRows ? 'AVAILABLE' : 'DEGRADED',
+        services: !grants.services ? 'RESTRICTED' : serviceRows ? 'AVAILABLE' : 'DEGRADED',
       },
     };
   }

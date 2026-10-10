@@ -55,6 +55,8 @@ interface StudentAuditActor {
   actorType: 'USER' | 'SYSTEM';
   source: string;
   sourceEventId?: string | null;
+  reason?: string;
+  correlationId?: string;
 }
 
 const WIDGET_REGISTRY = [
@@ -140,7 +142,8 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         pendingEventCount,
         failedEventCount,
         lastEventAt: inbox[0]?.receivedAt ?? null,
-        lastFailureCode: lastFailure?.failureCode ?? null,
+        lastFailureCode: /^WORKSPACE_SYNC_BLOCKED_(SUSPENDED|ARCHIVED|INITIALIZING)$/.test(String(lastFailure?.failureCode ?? ''))
+          ? lastFailure.failureCode : lastFailure?.failureCode ? 'STUDENT_SYNC_FAILURE' : null,
       },
       consentAudit: { hasDecision: Boolean(lastConsent), lastDecidedAt: lastConsent?.decidedAt ?? null },
       linkedSummaries: { activeCourseCount, certificateCount, unreadNotificationCount },
@@ -165,13 +168,14 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       if (current.status === StudentWorkspaceStatus.INITIALIZING) throw new Error('STUDENT_WORKSPACE_INITIALIZING');
       if (data.status !== undefined && data.status !== current.status) throw new Error('STUDENT_WORKSPACE_LIFECYCLE_EVENT_REQUIRED');
       if (data.privacyPreferences !== undefined) throw new Error('STUDENT_PRIVACY_CONSENT_COMMAND_REQUIRED');
-      if (data.expectedVersion !== undefined && current.version !== data.expectedVersion)
+      if (!Number.isSafeInteger(data.expectedVersion) || (data.expectedVersion ?? 0) <= 0)
+        throw new Error('STUDENT_WORKSPACE_VERSION_REQUIRED');
+      if (current.version !== data.expectedVersion)
         throw new Error('STUDENT_WORKSPACE_VERSION_CONFLICT');
 
       const { studentReferenceId: _reference, expectedVersion: _version, ...values } = data;
       const status = values.status ?? current.status;
-      const row = await tx.studentWorkspace.update({
-        where: { id: current.id },
+      const row = await this.casWorkspaceUpdate(tx, current, {
         data: {
           ...values,
           layoutPreferences: json(values.layoutPreferences),
@@ -206,8 +210,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       const after = { ...data.privacyPreferences };
       const changedFields = Object.keys(after).filter((key) => before[key as keyof typeof before] !== after[key as keyof typeof after]);
       const decisionId = randomUUID();
-      const row = await tx.studentWorkspace.update({
-        where: { id: workspace.id },
+      const row = await this.casWorkspaceUpdate(tx, workspace, {
         data: { privacyPreferences: json(after), version: { increment: 1 }, lastActiveAt: new Date() },
       });
       const decidedAt = new Date();
@@ -219,7 +222,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       }});
       await this.appendOutbox(tx, workspace.id, 'StudentPrivacyConsentDecided', {
         studentReferenceId: data.studentReferenceId, decisionId, workspaceVersion: row.version, purpose: data.purpose,
-        changedFields, beforePreferences: before, afterPreferences: after, correlationId: data.correlationId ?? null,
+        changedFields, correlationId: data.correlationId ?? null,
       }, { actorId: data.actorId, actorType: data.actorType ?? 'USER', source: data.source ?? 'student-workspace-api' });
       return { id: decisionId, studentReferenceId: data.studentReferenceId, workspaceVersion: row.version, actorId: data.actorId,
         actorType: data.actorType ?? 'USER', purpose: data.purpose, source: data.source ?? 'student-workspace-api',
@@ -616,8 +619,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       const snapshot = await tx.studentWorkspaceSnapshot.findFirst({ where: { id: snapshotId, studentReferenceId } });
       if (!snapshot) throw new Error('STUDENT_SNAPSHOT_NOT_FOUND');
       const configuration = snapshot.configuration as Record<string, unknown>;
-      const row = await tx.studentWorkspace.update({
-        where: { id: workspace.id },
+      const row = await this.casWorkspaceUpdate(tx, workspace, {
         data: {
           layoutPreferences: configuration.layoutPreferences === undefined ? undefined : json(configuration.layoutPreferences),
           notificationMatrix: configuration.notificationMatrix === undefined ? undefined : json(configuration.notificationMatrix),
@@ -633,12 +635,13 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     });
   }
 
-  public async resetLayout(studentReferenceId: string, expectedVersion: number): Promise<StudentWorkspaceDto> {
+  public async resetLayout(studentReferenceId: string, expectedVersion: number, supportActor?: { actorId: string; reason: string; correlationId?: string }): Promise<StudentWorkspaceDto> {
     return this.db.$transaction(async (tx: any) => {
       const workspace = await this.requireWritable(tx, studentReferenceId);
       if (workspace.version !== expectedVersion) throw new Error('STUDENT_WORKSPACE_VERSION_CONFLICT');
-      const row = await tx.studentWorkspace.update({ where: { id: workspace.id }, data: { layoutPreferences: json(DEFAULT_LAYOUT), version: { increment: 1 } } });
-      await this.appendOutbox(tx, workspace.id, 'StudentDashboardLayoutReset', { studentReferenceId, version: row.version });
+      const row = await this.casWorkspaceUpdate(tx, workspace, { data: { layoutPreferences: json(DEFAULT_LAYOUT), version: { increment: 1 } } });
+      await this.appendOutbox(tx, workspace.id, 'StudentDashboardLayoutReset', { studentReferenceId, version: row.version },
+        supportActor ? { actorId: supportActor.actorId, actorType: 'USER', source: 'admin-student-support', reason: supportActor.reason, correlationId: supportActor.correlationId } : undefined);
       return this.workspace(row);
     });
   }
@@ -726,6 +729,16 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     });
   }
 
+  private async casWorkspaceUpdate(tx: any, workspace: any, input: { data: Record<string, unknown> }): Promise<any> {
+    // The predicate is evaluated by the database under the same transaction as audit/outbox.
+    const result = await tx.studentWorkspace.updateMany({
+      where: { id: workspace.id, version: workspace.version, status: workspace.status },
+      data: input.data,
+    });
+    if (result.count !== 1) throw new Error('STUDENT_WORKSPACE_VERSION_CONFLICT');
+    return tx.studentWorkspace.findUnique({ where: { id: workspace.id } });
+  }
+
   private async requireWritable(tx: any, studentReferenceId: string): Promise<any> {
     const workspace = await tx.studentWorkspace.findUnique({ where: { studentReferenceId } });
     if (!workspace) throw new Error('STUDENT_WORKSPACE_NOT_FOUND');
@@ -747,7 +760,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     await tx.auditRecord.create({ data: {
       id: auditId, reference: `student-audit-${auditId}`, action: eventType, category: 'STUDENT_WORKSPACE',
       severity: eventType.includes('Archived') || eventType.includes('Suspended') ? 'HIGH' : 'INFO', actorId: principal.actorId, actorType: principal.actorType,
-      targetId: workspaceId, targetType: 'StudentWorkspace', source: principal.source, timestamp: new Date(), contextMetadata: json(enrichedPayload),
+      targetId: workspaceId, targetType: 'StudentWorkspace', source: principal.source, timestamp: new Date(), contextMetadata: json({ ...enrichedPayload, ...(principal.reason ? { supportReason: principal.reason } : {}), ...(principal.correlationId ? { correlationId: principal.correlationId } : {}) }),
     }});
     await tx.transactionalOutboxRecord.create({ data: {
       id: randomUUID(), eventType, domain: 'STUDENT_WORKSPACE', aggregateType: 'StudentWorkspace', aggregateId: workspaceId,
