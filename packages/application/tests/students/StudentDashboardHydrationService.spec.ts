@@ -11,7 +11,7 @@ function fixture() {
     capabilityStatus: { workspace: 'AVAILABLE' },
     partialFailures: [],
   } as unknown as StudentDashboardSummaryDto;
-  const workspace = { getDashboard: vi.fn().mockResolvedValue(base) };
+  const workspace = { getDashboard: vi.fn().mockResolvedValue(base), getSupportWorkspaceDetail: vi.fn() };
   const learning = { listForStudent: vi.fn().mockResolvedValue([]) };
   const certificates = { listForStudent: vi.fn().mockResolvedValue([]) };
   const service = new StudentDashboardHydrationService(
