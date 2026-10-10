@@ -402,6 +402,7 @@ model CourseLessonAsset {
 }
 
 model CourseQuiz {
+  assessmentType String @default("QUIZ")
   id           String   @id @default(uuid())
   courseId     String
   moduleId     String?
@@ -530,6 +531,7 @@ model CourseQuizAttempt {
 
   @@unique([quizId, studentReferenceId, attemptNumber])
   @@index([courseId, studentReferenceId])
+  @@index([courseId, status, submittedAt])
 }
 
 model CourseCompletion {

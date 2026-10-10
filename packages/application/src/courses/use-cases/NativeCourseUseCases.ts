@@ -146,16 +146,15 @@ export class NativeCourseUseCases {
     const activeQuizzes = curriculum.quizzes.filter((quiz) => quiz.status !== CourseContentStatus.ARCHIVED);
     const invalidQuizzes = activeQuizzes.filter((quiz) => {
       const questions = curriculum.questions.filter((question) => question.quizId === quiz.id && question.status !== CourseContentStatus.ARCHIVED);
-      const containsUnsupportedManualGrading = questions.some((question) =>
-        question.questionType === CourseQuestionType.SHORT_ANSWER || question.questionType === CourseQuestionType.ESSAY,
-      );
+      const invalidQuestions = questions.some(question => !Number.isFinite(question.points) || question.points <= 0 ||
+        ((question.questionType !== CourseQuestionType.SHORT_ANSWER && question.questionType !== CourseQuestionType.ESSAY) && question.correctAnswer == null));
       return (
         quiz.passingScore == null ||
         quiz.passingScore < 0 ||
         quiz.passingScore > 100 ||
         (quiz.maxAttempts != null && quiz.maxAttempts < 1) ||
         questions.length === 0 ||
-        containsUnsupportedManualGrading
+        invalidQuestions
       );
     });
     const assessmentRequired = completionCriteria.assessmentRequired === true;
@@ -260,7 +259,7 @@ export class NativeCourseUseCases {
         'assessments',
         'سلامة الاختبارات',
         invalidQuizzes.length === 0,
-        invalidQuizzes.length ? 'أكمل أسئلة الاختبارات وقواعد النجاح. الأسئلة المقالية/القصيرة غير قابلة للنشر حتى يتصل مسار التصحيح اليدوي.' : undefined,
+        invalidQuizzes.length ? 'أكمل أسئلة الاختبارات وقواعد النجاح. أكمل أوزان الأسئلة ومفاتيح الإجابات التلقائية.' : undefined,
         'assessments',
       ),
       this.check(

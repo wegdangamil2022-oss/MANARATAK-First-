@@ -8,6 +8,8 @@ import {
   CreateCourseEnrollmentDto,
   CreateQuizAttemptDto,
   GradeQuizAttemptDto,
+  PendingAssessmentSubmissionDto,
+  ManualAssessmentGradeDto,
   StudentCourseProgressSnapshotDto,
   UpsertLessonProgressDto
 } from '../entities/CourseProgress';
@@ -28,6 +30,9 @@ export interface ICourseProgressRepository {
   findQuizAttempt(attemptId: string): Promise<CourseQuizAttemptDto | null>;
   countQuizAttempts(quizId: string, studentReferenceId: string): Promise<number>;
   submitQuizAttempt(data: GradeQuizAttemptDto): Promise<CourseQuizAttemptDto>;
+  submitAssessmentForReview?(data: PendingAssessmentSubmissionDto): Promise<CourseQuizAttemptDto>;
+  gradeAssessment?(data: ManualAssessmentGradeDto): Promise<CourseQuizAttemptDto>;
+  listPendingAssessments?(courseId: string, page: number, pageSize: number): Promise<CourseQuizAttemptDto[]>;
   listQuizAttempts(courseId: string, studentReferenceId: string): Promise<CourseQuizAttemptDto[]>;
 
   completeCourse(data: CreateCourseCompletionDto): Promise<CourseCompletionDto>;

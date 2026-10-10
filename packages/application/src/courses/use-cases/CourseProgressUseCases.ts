@@ -11,6 +11,7 @@ import {
   CourseProgressStatus,
   CourseQuestionType,
   CourseQuizAttemptDto,
+  AssessmentReviewSnapshot,
   CourseLearnerWorkspaceDto,
   CourseQuizAttemptStatus,
   CourseStatus,
@@ -36,6 +37,13 @@ export class CourseProgressUseCases {
     private readonly financialClearance?: ICourseFinancialClearanceGateway,
     private readonly atomicMutations?: AtomicDomainMutationCoordinator,
   ) {}
+
+  private learnerSnapshot(snapshot: StudentCourseProgressSnapshotDto): StudentCourseProgressSnapshotDto {
+    return {...snapshot, quizAttempts: (snapshot.quizAttempts ?? []).map(attempt => {
+      const grade = attempt.metadata?.assessmentGrade as {feedback?: string; gradedAt?: string} | undefined;
+      return {...attempt, metadata: grade ? {assessmentGrade: {feedback: grade.feedback, gradedAt: grade.gradedAt}} : null};
+    })};
+  }
 
   private async ensureTrackableCourse(courseId: string): Promise<CourseDto> {
     const course = await this.courseRepository.findById(courseId);
@@ -124,9 +132,9 @@ export class CourseProgressUseCases {
     const publicModules = modules.map(({id,courseId,title,description,position,status}) => ({id,courseId,title,description,position,status}));
     const publicLessons = lessons.map(({id,courseId,moduleId,title,summary,lessonType,position,estimatedDurationMinutes,contentText,status}) =>
       ({id,courseId,moduleId,title,summary,lessonType,position,estimatedDurationMinutes,contentText,status}));
-    const publicQuizzes = quizzes.map(({id,courseId,moduleId,lessonId,title,instructions,position,passingScore,maxAttempts,status}) =>
-      ({id,courseId,moduleId,lessonId,title,instructions,position,passingScore,maxAttempts,status}));
-    return { progress, curriculum: { modules:publicModules, lessons:publicLessons, assets, quizzes:publicQuizzes, questions } };
+    const publicQuizzes = quizzes.map(({id,courseId,moduleId,lessonId,title,instructions,position,passingScore,maxAttempts,assessmentType,status}) =>
+      ({id,courseId,moduleId,lessonId,title,instructions,position,passingScore,maxAttempts,assessmentType,status}));
+    return { progress: this.learnerSnapshot(progress), curriculum: { modules:publicModules, lessons:publicLessons, assets, quizzes:publicQuizzes, questions } };
   }
 
   public async enroll(
@@ -152,7 +160,7 @@ export class CourseProgressUseCases {
     if (existingEnrollment) {
       const existingSnapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
       if (!existingSnapshot) throw new Error('Enrollment snapshot could not be loaded');
-      return existingSnapshot;
+      return this.learnerSnapshot(existingSnapshot);
     }
 
     const needsFinance = Boolean(policy?.requiresFinancialClearance || course.originType === CourseOriginType.PAID_COURSE || course.accessType === 'PAID');
@@ -192,7 +200,7 @@ export class CourseProgressUseCases {
     });
     const snapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
     if (!snapshot) throw new Error('Enrollment snapshot could not be created');
-    return snapshot;
+    return this.learnerSnapshot(snapshot);
   }
 
   public async markLessonProgress(
@@ -250,7 +258,7 @@ export class CourseProgressUseCases {
     });
     const snapshot = await this.progressRepository.getStudentProgressSnapshot(data.courseId, data.studentReferenceId);
     if (!snapshot) throw new Error('Progress snapshot could not be loaded');
-    return snapshot;
+    return this.learnerSnapshot(snapshot);
   }
 
   public async startQuizAttempt(
@@ -261,6 +269,9 @@ export class CourseProgressUseCases {
     const curriculum = await this.curriculumRepository.getCurriculumSnapshot(data.courseId);
     const quiz = curriculum.quizzes.find(item => item.id === data.quizId && item.status !== CourseContentStatus.ARCHIVED);
     if (!quiz) throw new Error('COURSE_QUIZ_SCOPE_MISMATCH');
+    const existing = (await this.progressRepository.listQuizAttempts(data.courseId, data.studentReferenceId))
+      .find(attempt => attempt.quizId === quiz.id && attempt.status === CourseQuizAttemptStatus.IN_PROGRESS && !attempt.submittedAt);
+    if (existing) return existing;
     const attempts = await this.progressRepository.countQuizAttempts(quiz.id, data.studentReferenceId);
     if (quiz.maxAttempts != null && attempts >= quiz.maxAttempts) throw new Error('COURSE_QUIZ_MAX_ATTEMPTS_REACHED');
     return this.progressRepository.createQuizAttempt({ ...data, attemptNumber: attempts + 1 });
@@ -281,18 +292,30 @@ export class CourseProgressUseCases {
     if (quiz.passingScore == null) throw new Error('COURSE_QUIZ_PASSING_SCORE_REQUIRED');
     const questions = curriculum.questions.filter(q => q.quizId === quiz.id && q.status !== CourseContentStatus.ARCHIVED);
     if (questions.length === 0) throw new Error('COURSE_QUIZ_QUESTIONS_REQUIRED');
-    if (questions.some(q => q.questionType === CourseQuestionType.ESSAY || q.questionType === CourseQuestionType.SHORT_ANSWER)) {
-      throw new Error('COURSE_ASSESSMENT_MANUAL_GRADING_REQUIRED');
-    }
     if (!data.answers || Array.isArray(data.answers)) throw new Error('COURSE_ASSESSMENT_ANSWER_MAP_REQUIRED');
 
+    const answerMap = data.answers as Record<string, unknown>;
+    if (Object.keys(answerMap).some(id => !questions.some(q => q.id === id))) throw new Error('COURSE_ASSESSMENT_UNKNOWN_QUESTION');
+    if (JSON.stringify(answerMap).length > 100000) throw new Error('COURSE_ASSESSMENT_ANSWERS_TOO_LARGE');
+    const manualQuestions: AssessmentReviewSnapshot['questions'] = [];
     let earned = 0;
     let total = 0;
     for (const question of questions) {
-      const points = Math.max(1, question.points);
+      const points = question.points;
+      if (!Number.isFinite(points) || points <= 0) throw new Error('COURSE_ASSESSMENT_INVALID_POINTS');
       total += points;
+      if (question.questionType === CourseQuestionType.ESSAY || question.questionType === CourseQuestionType.SHORT_ANSWER) {
+        if (typeof answerMap[question.id] !== 'string' || !(answerMap[question.id] as string).trim()) throw new Error('COURSE_ASSESSMENT_WRITTEN_ANSWER_REQUIRED');
+        manualQuestions.push({id: question.id, prompt: question.prompt, maximumPoints: points});
+        continue;
+      }
       if (question.correctAnswer === undefined || question.correctAnswer === null) throw new Error('COURSE_ASSESSMENT_ANSWER_KEY_REQUIRED');
       if (this.sameAnswer((data.answers as Record<string, unknown>)[question.id], question.correctAnswer)) earned += points;
+    }
+    if (manualQuestions.length) {
+      if (!this.progressRepository.submitAssessmentForReview) throw new Error('COURSE_MANUAL_GRADING_PERSISTENCE_REQUIRED');
+      return this.progressRepository.submitAssessmentForReview({attemptId: data.attemptId, answers: answerMap,
+        review: {passingScore: quiz.passingScore, totalPoints: total, automaticPoints: earned, questions: manualQuestions}});
     }
     const score = total > 0 ? Math.round((earned / total) * 10000) / 100 : 0;
     return this.progressRepository.submitQuizAttempt({
@@ -300,6 +323,46 @@ export class CourseProgressUseCases {
       score,
       passed: score >= quiz.passingScore,
       answers: data.answers,
+    });
+  }
+
+  public async listPendingAssessments(courseId: string, page = 1, pageSize = 20): Promise<CourseQuizAttemptDto[]> {
+    if (!await this.courseRepository.findById(courseId)) throw new Error('COURSE_NOT_FOUND');
+    if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new Error('COURSE_REVIEW_PAGINATION_INVALID');
+    if (!this.progressRepository.listPendingAssessments) throw new Error('COURSE_MANUAL_GRADING_PERSISTENCE_REQUIRED');
+    return this.progressRepository.listPendingAssessments(courseId, page, pageSize);
+  }
+
+  public async gradeAssessment(courseId: string, attemptId: string, input: {
+    expectedSubmittedAt: string; questionScores: Record<string, number>; feedback: string; reason: string;
+  }, context: AtomicMutationRequestContext): Promise<CourseQuizAttemptDto> {
+    if (!context.actorId || !input.reason.trim() || input.reason.trim().length < 3 || input.reason.length > 2000 || input.feedback.length > 5000) throw new Error('COURSE_REVIEW_CONTEXT_REQUIRED');
+    const attempt = await this.progressRepository.findQuizAttempt(attemptId);
+    if (!attempt || attempt.courseId !== courseId) throw new Error('COURSE_QUIZ_ATTEMPT_SCOPE_MISMATCH');
+    if (attempt.status !== CourseQuizAttemptStatus.SUBMITTED || !attempt.submittedAt) throw new Error('COURSE_ASSESSMENT_NOT_PENDING');
+    if (attempt.submittedAt.toISOString() !== input.expectedSubmittedAt) throw new Error('COURSE_ASSESSMENT_REVIEW_CONFLICT');
+    const review = attempt.metadata?.assessmentReview as AssessmentReviewSnapshot | undefined;
+    if (!review || !Array.isArray(review.questions) || !review.questions.length || review.questions.some(q => !Number.isFinite(q.maximumPoints) || q.maximumPoints <= 0) || new Set(review.questions.map(q => q.id)).size !== review.questions.length || !Number.isFinite(review.totalPoints) || review.totalPoints <= 0 || !Number.isFinite(review.automaticPoints) || review.automaticPoints < 0 || !Number.isFinite(review.passingScore) || review.passingScore < 0 || review.passingScore > 100) throw new Error('COURSE_REVIEW_SNAPSHOT_REQUIRED');
+    if (Object.keys(input.questionScores).length !== review.questions.length || Object.keys(input.questionScores).some(id => !review.questions.some(q => q.id === id))) throw new Error('COURSE_REVIEW_QUESTION_SCOPE_MISMATCH');
+    let earned = review.automaticPoints;
+    for (const question of review.questions) {
+      const points = input.questionScores[question.id];
+      if (!Number.isFinite(points) || points < 0 || points > question.maximumPoints) throw new Error('COURSE_REVIEW_POINTS_OUT_OF_RANGE');
+      earned += points;
+    }
+    if (earned > review.totalPoints) throw new Error('COURSE_REVIEW_POINTS_OUT_OF_RANGE');
+    const score = Math.round(earned / review.totalPoints * 10000) / 100;
+    const transactional = this.progressRepository as Partial<ITransactionalCourseProgressRepository>;
+    if (!this.atomicMutations || !transactional.withTransaction) throw new Error('COURSE_REVIEW_ATOMIC_PERSISTENCE_REQUIRED');
+    return this.atomicMutations.execute({domain: 'COURSES', aggregateType: 'COURSE_QUIZ_ATTEMPT', aggregateId: attemptId,
+      action: 'COURSE_ASSESSMENT_GRADED', context,
+      auditMetadata: {courseId, reason: input.reason.trim(), score},
+      outbox: {eventType: 'COURSE_ASSESSMENT_GRADED', payload: {courseId, attemptId, studentReferenceId: attempt.studentReferenceId, score, passed: score >= review.passingScore}},
+    }, async tx => {
+      const repo = transactional.withTransaction!(tx);
+      if (!repo.gradeAssessment) throw new Error('COURSE_MANUAL_GRADING_PERSISTENCE_REQUIRED');
+      return repo.gradeAssessment({attemptId, courseId, expectedSubmittedAt: input.expectedSubmittedAt, score,
+        passed: score >= review.passingScore, reviewerId: context.actorId, reason: input.reason.trim(), feedback: input.feedback.trim(), questionScores: input.questionScores});
     });
   }
 
@@ -313,7 +376,7 @@ export class CourseProgressUseCases {
     if (existing) {
       const completedSnapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
       if (!completedSnapshot) throw new Error('COURSE_COMPLETION_SNAPSHOT_NOT_FOUND');
-      return completedSnapshot;
+      return this.learnerSnapshot(completedSnapshot);
     }
     const enrollment = await this.requireActiveEnrollment(courseId, studentReferenceId);
     const completionCriteria = course.optionalFields?.completionCriteria && typeof course.optionalFields.completionCriteria === 'object' && !Array.isArray(course.optionalFields.completionCriteria)
@@ -372,12 +435,13 @@ export class CourseProgressUseCases {
 
     const snapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
     if (!snapshot) throw new Error('Completion snapshot could not be loaded');
-    return snapshot;
+    return this.learnerSnapshot(snapshot);
   }
 
   public async getProgress(courseId: string, studentReferenceId: string): Promise<StudentCourseProgressSnapshotDto | null> {
     await this.ensureTrackableCourse(courseId);
-    return this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
+    const snapshot = await this.progressRepository.getStudentProgressSnapshot(courseId, studentReferenceId);
+    return snapshot ? this.learnerSnapshot(snapshot) : null;
   }
 
   private sameAnswer(left: unknown, right: unknown): boolean {

@@ -372,6 +372,7 @@ export interface CourseLessonAssetDto {
   metadata?: Record<string, unknown> | null;
 }
 export interface CourseQuizDto {
+  assessmentType?: 'QUIZ' | 'ASSIGNMENT';
   id: string;
   courseId: string;
   moduleId?: string | null;
@@ -708,6 +709,7 @@ export interface StudentCourseProgressSnapshotDto {
     completedAt?: string | null;
   }>;
   quizAttempts: Array<{
+    metadata?: {assessmentGrade?: {feedback?: string; gradedAt?: string}};
     id: string;
     courseId: string;
     quizId: string;
@@ -4354,7 +4356,7 @@ export class ApiClient {
   }
 
   // Student Services API (Phase 20)
-  static async getAdminStudentServices(params?: any): Promise<any[]> {
+  static async getAdminStudentServices(_params?: any): Promise<any[]> {
     const res = await apiFetch(`${API_BASE_URL}/admin/services/student`);
     if (!res.ok) throw new Error('Failed to fetch student services');
     return res.json();
@@ -4394,7 +4396,7 @@ export class ApiClient {
   }
 
   // General Services API (Phase 20)
-  static async getAdminGeneralServices(params?: any): Promise<any[]> {
+  static async getAdminGeneralServices(_params?: any): Promise<any[]> {
     const res = await apiFetch(`${API_BASE_URL}/admin/services/general`);
     if (!res.ok) throw new Error('Failed to fetch general services');
     return res.json();

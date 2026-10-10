@@ -88,11 +88,13 @@ export interface CreateCourseQuizDto {
   position: number;
   passingScore?: number;
   maxAttempts?: number;
+  assessmentType?: 'QUIZ' | 'ASSIGNMENT';
   status?: CourseContentStatus;
 }
 
-export interface CourseQuizDto extends Required<Omit<CreateCourseQuizDto, 'moduleId' | 'lessonId' | 'instructions' | 'passingScore' | 'maxAttempts' | 'status'>> {
+export interface CourseQuizDto extends Required<Omit<CreateCourseQuizDto, 'moduleId' | 'lessonId' | 'instructions' | 'passingScore' | 'maxAttempts' | 'status' | 'assessmentType'>> {
   id: string;
+  assessmentType?: 'QUIZ' | 'ASSIGNMENT';
   moduleId?: string | null;
   lessonId?: string | null;
   instructions?: string | null;
@@ -104,6 +106,7 @@ export interface CourseQuizDto extends Required<Omit<CreateCourseQuizDto, 'modul
 }
 
 export interface UpdateCourseQuizDto {
+  assessmentType?: 'QUIZ' | 'ASSIGNMENT';
   moduleId?: string | null;
   lessonId?: string | null;
   title?: string;

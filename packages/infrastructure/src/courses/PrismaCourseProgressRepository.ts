@@ -13,6 +13,8 @@ import {
   CreateCourseEnrollmentDto,
   CreateQuizAttemptDto,
   GradeQuizAttemptDto,
+  PendingAssessmentSubmissionDto,
+  ManualAssessmentGradeDto,
   ICourseProgressRepository,
   ITransactionalCourseProgressRepository,
   StudentCourseProgressSnapshotDto,
@@ -125,6 +127,8 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
       if(!enrollment || enrollment.status!==CourseEnrollmentStatus.ACTIVE) throw new Error('COURSE_ENROLLMENT_NOT_ACTIVE');
       const quiz=await db.courseQuiz.findFirst({where:{id:data.quizId,courseId:data.courseId,status:{not:'ARCHIVED'}}});
       if(!quiz) throw new Error('COURSE_QUIZ_SCOPE_MISMATCH');
+      const existing = await db.courseQuizAttempt.findFirst({where: {quizId: data.quizId, studentReferenceId: data.studentReferenceId, status: CourseQuizAttemptStatus.IN_PROGRESS, submittedAt: null}, orderBy: {startedAt: 'desc'}});
+      if (existing) return this.quizAttempt(existing);
       const count=await db.courseQuizAttempt.count({where:{quizId:data.quizId,studentReferenceId:data.studentReferenceId}});
       if(quiz.maxAttempts!=null && count>=quiz.maxAttempts) throw new Error('COURSE_QUIZ_MAX_ATTEMPTS_REACHED');
       return this.quizAttempt(await db.courseQuizAttempt.create({
@@ -152,6 +156,38 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
         where: { id: data.attemptId },
         data: { score: data.score, passed: data.passed, answers: json(data.answers), status: data.passed ? CourseQuizAttemptStatus.PASSED : CourseQuizAttemptStatus.FAILED, submittedAt: new Date() },
       }));
+    });
+  }
+
+  public async submitAssessmentForReview(data: PendingAssessmentSubmissionDto): Promise<CourseQuizAttemptDto> {
+    return this.serializable(async db => {
+      await db.$queryRaw`SELECT id FROM "CourseQuizAttempt" WHERE id = ${data.attemptId} FOR UPDATE`;
+      const current = await db.courseQuizAttempt.findUnique({where: {id: data.attemptId}});
+      if (!current || current.status !== CourseQuizAttemptStatus.IN_PROGRESS || current.submittedAt) throw new Error('COURSE_QUIZ_ATTEMPT_ALREADY_SUBMITTED');
+      return this.quizAttempt(await db.courseQuizAttempt.update({where: {id: data.attemptId}, data: {
+        answers: json(data.answers), score: null, passed: null, status: CourseQuizAttemptStatus.SUBMITTED, submittedAt: new Date(),
+        metadata: json({...((current.metadata as Record<string, unknown>) ?? {}), assessmentReview: data.review}),
+      }}));
+    });
+  }
+
+  public async listPendingAssessments(courseId: string, page: number, pageSize: number): Promise<CourseQuizAttemptDto[]> {
+    return (await this.prisma.courseQuizAttempt.findMany({where: {courseId, status: CourseQuizAttemptStatus.SUBMITTED},
+      orderBy: [{submittedAt: 'asc'}, {id: 'asc'}], skip: (page - 1) * pageSize, take: pageSize})).map(row => this.quizAttempt(row));
+  }
+
+  public async gradeAssessment(data: ManualAssessmentGradeDto): Promise<CourseQuizAttemptDto> {
+    // Called with the coordinator's transaction client. The attempt lock also prevents double grading.
+    return this.serializable(async db => {
+      await db.$queryRaw`SELECT id FROM "CourseQuizAttempt" WHERE id = ${data.attemptId} FOR UPDATE`;
+      const current = await db.courseQuizAttempt.findUnique({where: {id: data.attemptId}});
+      if (!current || current.courseId !== data.courseId || current.status !== CourseQuizAttemptStatus.SUBMITTED || current.submittedAt?.toISOString() !== data.expectedSubmittedAt) throw new Error('COURSE_ASSESSMENT_REVIEW_CONFLICT');
+      return this.quizAttempt(await db.courseQuizAttempt.update({where: {id: data.attemptId}, data: {
+        score: data.score, passed: data.passed, status: data.passed ? CourseQuizAttemptStatus.PASSED : CourseQuizAttemptStatus.FAILED,
+        metadata: json({...((current.metadata as Record<string, unknown>) ?? {}), assessmentGrade: {
+          reviewerId: data.reviewerId, gradedAt: new Date().toISOString(), reason: data.reason, feedback: data.feedback, questionScores: data.questionScores,
+        }}),
+      }}));
     });
   }
 

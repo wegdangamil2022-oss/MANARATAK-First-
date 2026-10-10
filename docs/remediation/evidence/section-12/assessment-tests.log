@@ -1,0 +1,32 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-12
+
+ ✓ apps/api/tests/presentation/api/router/Section12AssessmentReview.spec.ts > P13 admin assessment review API > grades with the authenticated actor independently of published curriculum editing 98ms
+ ✓ apps/api/tests/presentation/api/router/Section12AssessmentReview.spec.ts > P13 admin assessment review API > rejects caller supplied final scores or actor identity 30ms
+ ✓ apps/api/tests/presentation/api/router/Section12AssessmentReview.spec.ts > P13 admin assessment review API > returns 409 for a concurrent grading conflict 77ms
+ ✓ apps/api/tests/presentation/api/router/Section12AssessmentReview.spec.ts > P13 admin assessment review API > does not return success when audit/outbox commit fails 17ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > resumes an unfinished attempt without consuming another attempt 7ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > stores written submission pending, with no passing result or answer keys 2ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > still automatically grades objective-only quizzes 5ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > rejects another student before persisting answers 1ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > requires a nonempty written answer 0ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > rejects unknown question IDs 0ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > rejects invalid question weights 0ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > cannot complete a course while a required assignment is pending 1ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > combines automatic points and reviewer points using the immutable submission rubric 6ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > prevents grades outside the saved rubric 1ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > requires exactly the manual question IDs 0ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > rejects a stale submission token 0ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > rejects repeated final grading 5ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > requires the reviewer reason 1ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > rolls grade, audit and event back when outbox persistence fails 1ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > exposes feedback to the learner without reviewer identity/reason or rubric 1ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 assignments and manual grading > bounds the review queue before hitting persistence 5ms
+ ✓ packages/application/tests/courses/Section12Assessments.spec.ts > P13 bound persistence grading guard > locks and rejects a concurrently graded attempt without writing or starting a nested transaction 1ms
+ ✓ apps/api/tests/presentation/api/router/Section12AssessmentReview.spec.ts > P13 admin assessment review API > bounds pending review pagination 25ms
+
+ Test Files  2 passed (2)
+      Tests  23 passed (23)
+   Start at  15:07:45
+   Duration  4.38s (transform 5.40s, setup 0ms, import 7.56s, tests 290ms, environment 0ms)
+

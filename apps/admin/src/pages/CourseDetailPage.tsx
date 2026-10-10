@@ -12,6 +12,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
+import { AssessmentReviewPanel } from '../components/AssessmentReviewPanel';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { AssetPicker } from '../components/AssetPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -183,6 +184,7 @@ export function CourseDetailPage() {
     OTHER: undefined,
   };
   const [quizDraft, setQuizDraft] = useState({
+    assessmentType: 'QUIZ',
     moduleId: '',
     lessonId: '',
     title: '',
@@ -456,6 +458,7 @@ export function CourseDetailPage() {
       }),
     });
     setQuizDraft({
+      assessmentType: quizDraft.assessmentType,
       moduleId: quizDraft.moduleId,
       lessonId: quizDraft.lessonId,
       title: '',
@@ -467,8 +470,9 @@ export function CourseDetailPage() {
 
   const createQuestion = async () => {
     if (!id || !questionDraft.quizId) return;
-    const choices = questionDraft.choices ? JSON.parse(questionDraft.choices) : undefined;
-    const correctAnswer = questionDraft.correctAnswer
+    const manual = ['ESSAY', 'SHORT_ANSWER'].includes(questionDraft.questionType);
+    const choices = !manual && questionDraft.choices ? JSON.parse(questionDraft.choices) : undefined;
+    const correctAnswer = !manual && questionDraft.correctAnswer
       ? JSON.parse(questionDraft.correctAnswer)
       : undefined;
     await adminApiClient.request(`/admin/courses/${id}/questions`, {
@@ -622,6 +626,7 @@ export function CourseDetailPage() {
           لتحرير البيانات أو الدروس، ألغِ النشر أولاً ثم احفظ التعديلات وأعد النشر.
         </p>
       )}
+      {course.originType !== 'EXTERNAL_LINKED_COURSE' && <AssessmentReviewPanel courseId={course.id} />}
       {editingLesson && (
         <section className="rounded-2xl border bg-white p-5 space-y-3" dir="rtl">
           <h3 className="font-black text-[#142B5F]">تعديل الدرس</h3>
@@ -1130,10 +1135,17 @@ export function CourseDetailPage() {
                   <FileQuestion className="h-5 w-5 text-gray-500" />
                   <h3 className="font-semibold">{t('assessments')}</h3>
                 </div>
+                <label className="block mb-3">نوع التقييم
+                  <select className="mx-2 rounded border p-2" disabled={saving || course.status === 'PUBLISHED'} value={quizDraft.assessmentType}
+                    onChange={event => setQuizDraft({...quizDraft, assessmentType: event.target.value})}>
+                    <option value="QUIZ">اختبار</option><option value="ASSIGNMENT">واجب</option>
+                  </select>
+                </label>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
                   <input
                     disabled={saving || course?.status === 'PUBLISHED'}
                     placeholder={t('quiz_title')}
+                    aria-label="عنوان التقييم"
                     value={quizDraft.title}
                     onChange={(event) => setQuizDraft({ ...quizDraft, title: event.target.value })}
                     className="md:col-span-2 rounded border border-gray-300 px-3 py-2 text-sm"

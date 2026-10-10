@@ -18,11 +18,23 @@ Reviewed the available Phase 13 architecture, existing learning domain contracts
 6. **Learning paths.** Multi-node prerequisite cycles, invalid positions and empty required-course policies are rejected. Archived/published paths cannot reenter draft review. Enrollment checks constituent course publication; course availability requires an existing enrollment. Availability/completion read the immutable path version recorded on the enrollment, rather than the latest edited path.
 7. **Admin UI.** Native course creation and course editing expose reviewer reason fields. Client propagates If-Match and committed version headers, bypasses stale course GET caches, and clears version/reason state on auth changes. React skill checklist applied: stable hook order, labeled controls, bounded input, cleanup of per-owner reason state and no automatic stale-write retries. Also fixed the existing undefined `method` reference in University client mutation preconditions.
 
+## Assignment and manual-review continuation
+
+Completed source implementation after `681bac4`:
+
+- Unified assessments distinguish `QUIZ` and `ASSIGNMENT`, preserving existing quizzes by default. Admin can create a written assignment through the same curriculum/question workflow. Learner renders both module assessments and course-level assessments, uses a bounded written-answer area, and can resume an unfinished attempt without allocating another attempt.
+- Written/mixed submissions persist answers and a server-built immutable review snapshot in existing attempt JSON: passing threshold, total/automatic points, manual question prompts and maximum points. No answer key is copied into this snapshot. `SUBMITTED` has null score/pass and cannot satisfy required-assessment completion.
+- Paginated admin review queue and grading endpoint live under the existing authenticated `admin:courses:manage` mount. The server derives reviewer identity and final score; requires reason, exact rubric question IDs, bounded scores, and a submission timestamp precondition. Published-course grading does not edit/version the curriculum.
+- Attempt row locks, pending-state checks and transaction-bound repositories prevent duplicate grading. Final score/pass, reviewer/feedback, Audit and Outbox commit together. Failure is not returned as successful grading. Grades are final through this endpoint; no result-edit path was introduced.
+- Learner progress exposes only grading feedback/time from assessment metadata; reviewer identity/reason and internal rubric remain administrative. Publication now accepts manual questions with valid weights; objective questions require answer keys.
+- Source migration `20261010000000_course_assessment_type` adds the assessment discriminator/check and review-queue index. **It was not applied.** Deployment must apply it and regenerate the Prisma client before this branch is activated.
+- New light checks: **23/23 tests passed in 4.38 seconds**, only the two new assessment test files, once. This is 66 distinct passing cases across recorded rounds, not a rerun of all 66 on the final tree. Single selected-file semantic check recorded 13 diagnostics; unused imports/parameters and isolated Express augmentation inclusion were corrected without rerunning. No final semantic PASS is claimed.
+
 ## Limits and activation handoff
 
-- No database query, migration, seed, import, Prisma generation, build, browser/E2E, provider execution or deployment was performed. These repairs use existing version/learning tables; no new schema migration was introduced.
+- No database query, migration, seed, import, Prisma generation, build, browser/E2E, provider execution or deployment was performed. The initial round used existing tables; the continuation adds the unapplied assessment-type/index migration described above.
 - Selected lightweight tests passed; PostgreSQL row-lock behavior, real Audit/Outbox rollback, Prisma bound-client behavior, endpoint RBAC/session/CSRF and actual UI workflows still require operational verification.
-- Manual essay/short-answer grading and assignment submission/review are not implemented by this repair round; the existing fail-closed publication/grading gates are retained. They remain functional follow-up, not PASSED or CLOSED.
+- Assignment submission/review and manual grading are now implemented in source and covered by selected light tests. Activation and end-to-end operational acceptance remain deferred, so this document does not certify full runtime closure of Phase 13.
 - Provider-specific enrichment adapters remain explicitly unavailable where no registered adapter exists; no fallback crawling was introduced.
 - Enrollment-version pinning here covers learning paths. Course curriculum/progress version migration semantics for existing learners remain a separate runtime/product validation item.
 - The selected-file semantic type check reported eight diagnostics which were corrected without rerun. Whole-project type correctness is not certified; see check log.

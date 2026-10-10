@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Award, BookOpen, CheckCircle2, Loader2, LockKeyhole, PlayCircle } from 'lucide-react';
 import {
@@ -260,14 +260,15 @@ export function CourseLearnerPage() {
         <progress className="mn-native-progress mt-4 h-2 w-full" value={progress} max={100} />
       </section>
 
-      {[...workspace.curriculum.modules]
+      {[...workspace.curriculum.modules, ...(workspace.curriculum.quizzes.some(quiz => !quiz.moduleId) ?
+        [{id: '__course_assessments', title: 'تقييمات الدورة والواجبات', description: '', position: Number.MAX_SAFE_INTEGER}] : [])]
         .sort((a, b) => a.position - b.position)
         .map((module) => {
           const lessons = workspace.curriculum.lessons
             .filter((lesson) => lesson.moduleId === module.id)
             .sort((a, b) => a.position - b.position);
           const quizzes = workspace.curriculum.quizzes
-            .filter((quiz) => quiz.moduleId === module.id)
+            .filter((quiz) => module.id === '__course_assessments' ? !quiz.moduleId : quiz.moduleId === module.id)
             .sort((a, b) => a.position - b.position);
           return (
             <section key={module.id} className="mn-card rounded-3xl p-5 sm:p-6">
@@ -347,13 +348,19 @@ export function CourseLearnerPage() {
                       </div>
                       <Award className="h-5 w-5" />
                     </div>
+                    {workspace?.progress.quizAttempts.filter(attempt => attempt.quizId === quiz.id).map(attempt => (
+                      <p key={attempt.id} className="mt-2 text-sm" role="status">
+                        المحاولة {attempt.attemptNumber}: {attempt.status === 'SUBMITTED' ? 'بانتظار التصحيح اليدوي' : attempt.score != null ? `${attempt.score}% — ${attempt.passed ? 'ناجح' : 'لم يجتز'}` : 'قيد الحل'}
+                        {attempt.metadata?.assessmentGrade?.feedback && <span className="block">ملاحظات المصحّح: {attempt.metadata.assessmentGrade.feedback}</span>}
+                      </p>
+                    ))}
                     {activeQuizId !== quiz.id ? (
                       <button
                         disabled={busy}
                         onClick={() => void startQuiz(quiz.id)}
                         className="mt-4 rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
                       >
-                        بدء الاختبار
+                        {quiz.assessmentType === 'ASSIGNMENT' ? 'بدء الواجب' : 'بدء الاختبار'}
                       </button>
                     ) : (
                       <form onSubmit={submitQuiz} className="mt-4 space-y-4">
@@ -395,7 +402,9 @@ export function CourseLearnerPage() {
                                   </label>
                                 ))
                               ) : (
-                                <input
+                                <textarea
+                                  aria-label={question.prompt}
+                                  maxLength={10000}
                                   className="mn-search-control mt-2 w-full"
                                   required
                                   onChange={(event) =>

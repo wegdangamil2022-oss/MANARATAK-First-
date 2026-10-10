@@ -66,6 +66,31 @@ export interface GradeQuizAttemptDto {
   answers: Record<string, unknown> | readonly unknown[];
 }
 
+export interface AssessmentReviewSnapshot {
+  passingScore: number;
+  totalPoints: number;
+  automaticPoints: number;
+  questions: { id: string; prompt: string; maximumPoints: number }[];
+}
+
+export interface PendingAssessmentSubmissionDto {
+  attemptId: string;
+  answers: Record<string, unknown>;
+  review: AssessmentReviewSnapshot;
+}
+
+export interface ManualAssessmentGradeDto {
+  attemptId: string;
+  courseId: string;
+  expectedSubmittedAt: string;
+  score: number;
+  passed: boolean;
+  reviewerId: string;
+  reason: string;
+  feedback: string;
+  questionScores: Record<string, number>;
+}
+
 export interface CourseQuizAttemptDto extends Required<Omit<CreateQuizAttemptDto, 'answers' | 'metadata'>> {
   id: string;
   status: CourseQuizAttemptStatus;

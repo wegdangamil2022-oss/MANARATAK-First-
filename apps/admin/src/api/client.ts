@@ -247,7 +247,7 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
 
   const courseMatch = endpoint.match(/^\/admin\/courses\/(?:learning-paths\/([^/?]+)|([^/?]+))(?:\/|\?|$)/);
   const courseOwner = courseMatch ? (courseMatch[1] ? `learning-paths/${courseMatch[1]}` : courseMatch[2]==='learning-paths'?undefined:courseMatch[2]) : undefined;
-  if(courseOwner && isMutation(options.method)) {
+  if(courseOwner && isMutation(options.method) && !/^\/admin\/courses\/[^/?]+\/assessment-reviews\/[^/?]+\/grade$/.test(endpoint)) {
     if(!headers.has('If-Match')) {
       const version=courseVersions.get(courseOwner);
       if(version===undefined) throw new Error('أعد تحميل الدورة قبل التعديل.');

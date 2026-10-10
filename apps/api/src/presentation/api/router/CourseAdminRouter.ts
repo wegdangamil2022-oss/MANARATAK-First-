@@ -12,10 +12,11 @@ import {
   LessonAssetType,
   UpdateCourseDto
 } from '@manaratak/domain';
-import { AdminCourseUseCases, CourseCurriculumUseCases, CourseEnrollmentPolicyUseCases, CourseRelationshipResolutionService, LearningPathUseCases, NativeCourseUseCases } from '@manaratak/application';
+import type { CourseProgressUseCases } from '@manaratak/application';
+import type {} from '../../middleware/AuthMiddleware.js';
 
 export class CourseAdminRouter {
-  public static create(cradle: CourseAdminScope & {courseAdminCommandUseCases:CourseAdminCommandUseCases}): Router {
+  public static create(cradle: CourseAdminScope & {courseAdminCommandUseCases:CourseAdminCommandUseCases; courseProgressUseCases: CourseProgressUseCases}): Router {
     const router = Router();
     const {learningPathUseCases} = cradle;
 
@@ -67,6 +68,20 @@ export class CourseAdminRouter {
         };
         run().catch(next);
       };
+
+    const assessmentHandler = (fn: (req: Request, res: Response) => Promise<unknown>) =>
+      (req: Request, res: Response, next: NextFunction) => { Promise.resolve().then(() => fn(req, res)).catch(next); };
+    router.get('/:id/assessment-reviews', assessmentHandler(async (req, res) => {
+      const query = z.object({page: z.coerce.number().int().positive().default(1), pageSize: z.coerce.number().int().min(1).max(50).default(20)}).parse(req.query);
+      res.json({data: await cradle.courseProgressUseCases.listPendingAssessments(req.params.id, query.page, query.pageSize)});
+    }));
+    router.post('/:id/assessment-reviews/:attemptId/grade', assessmentHandler(async (req, res) => {
+      if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
+      const body = z.object({expectedSubmittedAt: z.string().datetime(), questionScores: z.record(z.string(), z.number().finite().nonnegative()),
+        feedback: z.string().max(5000), reason: z.string().trim().min(3).max(2000)}).strict().parse(req.body);
+      res.json(await cradle.courseProgressUseCases.gradeAssessment(req.params.id, req.params.attemptId, body,
+        {actorId: req.authUserId, source: 'admin-course-assessment-api', correlationId: req.get('X-Correlation-ID')}));
+    }));
 
     const listQuerySchema = z.object({
       status: z.preprocess(v => v === '' || v === 'all' ? undefined : v, z.nativeEnum(CourseStatus).optional()),
@@ -147,6 +162,7 @@ export class CourseAdminRouter {
     });
 
     const quizBodySchema = z.object({
+      assessmentType: z.enum(['QUIZ', 'ASSIGNMENT']).optional(),
       moduleId: z.string().optional(),
       lessonId: z.string().optional(),
       title: z.string().min(1),
@@ -495,6 +511,7 @@ export class CourseAdminRouter {
         position: body.position,
         passingScore: body.passingScore ?? undefined,
         maxAttempts: body.maxAttempts ?? undefined,
+        assessmentType: body.assessmentType,
         status: body.status,
       });
       res.status(201).json(quiz);
@@ -657,7 +674,7 @@ export class CourseAdminRouter {
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      if (['COURSE_STALE_VERSION','LEARNING_PATH_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED'].includes(err.message)) return res.status(409).json({error:err.message});
+      if (['COURSE_STALE_VERSION','LEARNING_PATH_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED','COURSE_ASSESSMENT_REVIEW_CONFLICT','COURSE_ASSESSMENT_NOT_PENDING'].includes(err.message)) return res.status(409).json({error:err.message});
       if (err.message === 'COURSE_VERSION_PRECONDITION_REQUIRED') return res.status(428).json({error:err.message});
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });

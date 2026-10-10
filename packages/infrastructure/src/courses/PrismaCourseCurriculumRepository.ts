@@ -423,7 +423,8 @@ export class PrismaCourseCurriculumRepository implements ICourseCurriculumReposi
     createdAt: Date;
     updatedAt: Date;
   }): CourseQuizDto {
-    return { ...record, status: record.status as CourseContentStatus };
+    const assessmentType = (record as typeof record & {assessmentType?: string}).assessmentType;
+    return { ...record, assessmentType: assessmentType === 'ASSIGNMENT' ? 'ASSIGNMENT' : 'QUIZ', status: record.status as CourseContentStatus };
   }
 
   private bank(record: {

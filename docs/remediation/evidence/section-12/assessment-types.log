@@ -1,0 +1,14 @@
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:15 TS6133 'AdminCourseUseCases' is declared but its value is never read.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:15 TS6133 'CourseCurriculumUseCases' is declared but its value is never read.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:15 TS6133 'CourseEnrollmentPolicyUseCases' is declared but its value is never read.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:15 TS6133 'CourseRelationshipResolutionService' is declared but its value is never read.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:15 TS6133 'LearningPathUseCases' is declared but its value is never read.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:15 TS6133 'NativeCourseUseCases' is declared but its value is never read.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:23 TS2339 Property 'authUserId' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:32 TS2339 Property 'authUserId' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:78 TS2339 Property 'authUserId' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+apps/api/src/presentation/api/router/CourseAdminRouter.ts:82 TS2339 Property 'authUserId' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+apps/web/src/api/client.ts:4359 TS6133 'params' is declared but its value is never read.
+apps/web/src/api/client.ts:4399 TS6133 'params' is declared but its value is never read.
+apps/web/src/features/learning/CourseLearnerPage.tsx:1 TS6133 'React' is declared but its value is never read.
+Selected changed-file diagnostics: 13; dependency diagnostics excluded. No build outputs.
