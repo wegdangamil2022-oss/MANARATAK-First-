@@ -462,6 +462,13 @@ export class PrismaCmsRepository implements ICmsRepository {
           publishedAt: now,
         },
         update: {
+          // A republished localized slug must update the same public identity/canonical URL.
+          // Do not retain an obsolete delivery slug after a reviewed change-slug action.
+          siteIdentifier: content.siteIdentifier,
+          locale: full.locale,
+          slug: full.localizedSlug,
+          canonicalUrl: seo.canonicalUrl,
+          contentType: content.contentType,
           title: full.title,
           summary: full.summary,
           body: full.body,
@@ -675,21 +682,9 @@ export class PrismaCmsRepository implements ICmsRepository {
     let row = await this.db.cmsPublishedContent.findUnique({
       where: { siteIdentifier_locale_slug: { siteIdentifier, locale, slug } },
     });
-    if (!row || row.status !== CmsContentStatus.PUBLISHED) {
-      const direct = await this.db.cmsPublishedContent.findFirst({ where: { siteIdentifier, slug, status: CmsContentStatus.PUBLISHED } });
-      const node = direct
-        ? await this.db.cmsContentNode.findUnique({ where: { id: direct.contentId } })
-        : await this.db.cmsContentNode.findFirst({ where: { siteIdentifier, slug } });
-      if (!node) return null;
-      row = await this.db.cmsPublishedContent.findFirst({
-        where: {
-          contentId: node.id,
-          status: CmsContentStatus.PUBLISHED,
-          locale: node.primaryLocale,
-        },
-      });
-    }
-    if (!row) return null;
+    // Strict /ar and /en content routes do not silently return another locale,
+    // which would otherwise present the wrong canonical URL and language metadata.
+    if (!row || row.status !== CmsContentStatus.PUBLISHED) return null;
     const locales = await this.availableLocales([row.contentId]);
     return this.publicContent(row, locales.get(row.contentId) ?? []);
   }
