@@ -266,6 +266,9 @@ export type PublicUniversityDto = Omit<
   | 'localizedTexts'
   | 'localizedNames'
   | 'createdAt'
+  | 'revision'
+  | 'metadata'
+  | 'sourceUrl'
 >;
 
 export interface PaginatedUniversityResult<T = UniversityDto> {
@@ -506,8 +509,12 @@ export interface UniversityProgramAdmissionRequirementReadDto {
 }
 
 export interface UniversityAcademicProgramReadDto {
-  /** Internal published-major status for server-side readiness/public projection only. */
-  major?: { status: string } | null;
+  /** Internal P10 owner/profile publication state; never exposed in public DTOs. */
+  major?: { status: string; levelProfiles: Array<{
+    degreeLevelId: string | null;
+    status: string;
+    currentPublishedVersionId: string | null;
+  }> } | null;
   degreeLevel?: { canonicalCode: string; nameAr?: string | null; nameEn?: string | null } | null;
   id: string;
   universityId: string;

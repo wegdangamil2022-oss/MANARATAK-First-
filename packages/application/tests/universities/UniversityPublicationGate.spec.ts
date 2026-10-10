@@ -15,7 +15,9 @@ const ready = (): UniversityDto => ({
   academicPrograms: [{
     id: 'program-1', universityId: 'university-1', sourceProgramName: 'Physics',
     normalizedName: 'physics', degreeLevelId: 'degree-1',
-    majorId: 'major-1', major: { status: 'PUBLISHED' },
+    majorId: 'major-1', major: { status: 'PUBLISHED', levelProfiles: [
+      { degreeLevelId: 'degree-1', status: 'PUBLISHED', currentPublishedVersionId: 'version-1' },
+    ] },
     majorMappingState: 'CANONICALLY_MAPPED', status: 'ACTIVE',
     campusIds: [], admissionRequirements: [],
   }],
@@ -34,7 +36,7 @@ describe('University publication gates', () => {
       .toContain('UNIVERSITY_PROGRAM_MAJOR_REVIEW_REQUIRED');
     entity.academicPrograms![0].majorId = 'major-1';
     entity.academicPrograms![0].majorMappingState = 'CANONICALLY_MAPPED';
-    entity.academicPrograms![0].major = { status: 'READY_TO_REVIEW' };
+    entity.academicPrograms![0].major = { status: 'READY_TO_REVIEW', levelProfiles: [] };
     expect(policy.evaluate(entity).blockingIssues.map(issue => issue.code))
       .toContain('UNIVERSITY_PROGRAM_MAJOR_NOT_PUBLISHED');
   });

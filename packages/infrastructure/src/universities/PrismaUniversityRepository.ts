@@ -27,7 +27,7 @@ import { queryStableCursorPage } from '../api-foundation/StableCursor';
 const universityDetails = {
   campuses: true,
   organizationUnits: true,
-  academicPrograms: { include: { campuses: true, major: { select: { status: true } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true } } } } } },
+  academicPrograms: { include: { campuses: true, major: { select: { status: true, levelProfiles: { select: { degreeLevelId: true, status: true, currentPublishedVersionId: true } } } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true } } } } } },
   tuitionProfiles: true,
   accommodationProfiles: true,
   rankings: true,
@@ -949,7 +949,14 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         degreeLevelId: program.degreeLevelId,
         degreeLevel: program.degreeLevel,
         majorId: program.majorId,
-        major: program.major ? { status: program.major.status } : null,
+        major: program.major ? {
+          status: program.major.status,
+          levelProfiles: program.major.levelProfiles.map(profile => ({
+            degreeLevelId: profile.degreeLevelId,
+            status: profile.status,
+            currentPublishedVersionId: profile.currentPublishedVersionId,
+          })),
+        } : null,
         majorMappingState: program.majorMappingState,
         status: program.status,
         campusIds: (program.campuses ?? []).map((link) => link.campusId),

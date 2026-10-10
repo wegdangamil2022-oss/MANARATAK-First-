@@ -43,7 +43,12 @@ export function projectPublicUniversity(university: UniversityDto): PublicUniver
   const programs = (university.academicPrograms ?? [])
     .filter(program => program.status === 'ACTIVE' &&
       program.majorMappingState === 'CANONICALLY_MAPPED' && Boolean(program.majorId) &&
-      record(program).major !== undefined && record(record(program).major).status === 'PUBLISHED')
+      record(program).major !== undefined &&
+      record(record(program).major).status === 'PUBLISHED' &&
+      (Array.isArray(record(record(program).major).levelProfiles) &&
+        (record(record(program).major).levelProfiles as Array<{ degreeLevelId?: string; status?: string; currentPublishedVersionId?: string | null }>)
+          .some(profile => profile.degreeLevelId === program.degreeLevelId &&
+            profile.status === 'PUBLISHED' && Boolean(profile.currentPublishedVersionId))))
     .map(program => ({
       id: program.id,
       sourceProgramName: program.sourceProgramName,

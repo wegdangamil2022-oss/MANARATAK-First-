@@ -37,7 +37,9 @@ const university = (): UniversityDto => ({
     {
       id: 'program-1', universityId: 'private-owner-1', sourceProgramName: 'Physics',
       normalizedName: 'physics', degreeLevelId: 'degree-1',
-      majorId: 'major-1', major: { status: 'PUBLISHED' },
+      majorId: 'major-1', major: { status: 'PUBLISHED', levelProfiles: [
+        { degreeLevelId: 'degree-1', status: 'PUBLISHED', currentPublishedVersionId: 'version-1' },
+      ] },
       majorMappingState: 'CANONICALLY_MAPPED', status: 'ACTIVE',
       campusIds: ['campus-1'],
       admissionRequirements: [
@@ -83,7 +85,7 @@ describe('University public projection — allowlist and canonical relationships
 
   it('excludes an unapproved Major even when the program falsely claims a canonical mapping', () => {
     const input = university();
-    input.academicPrograms![0].major = { status: 'READY_TO_REVIEW' };
+    input.academicPrograms![0].major = { status: 'READY_TO_REVIEW', levelProfiles: [] };
     expect(projectPublicUniversity(input).academicPrograms).toEqual([]);
   });
 });
