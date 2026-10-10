@@ -1334,7 +1334,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   private async finalizeGovernedUpsert(
     entityType: GovernedReferenceEntityType,
     referenceId: string,
-    snapshotInput: object,
+    _snapshotInput: object,
     aliases: ReferenceAliasInput[] | undefined,
     providerMappings: ReferenceProviderMappingInput[] | undefined,
     existed: boolean,
@@ -1375,13 +1375,16 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     ]);
     if (effectiveAliases.length > 100 || effectiveMappings.length > 100)
       throw new Error('REFERENCE_GOVERNANCE_DETAILS_LIMIT_EXCEEDED');
-    const { aliases: _aliases, providerMappings: _providerMappings, isActive: _legacyIsActive, ...snapshot } = snapshotInput as Record<string, unknown> & {
-      aliases?: unknown; providerMappings?: unknown; isActive?: unknown;
-    };
+    // Snapshot *persisted state*, not just the patch payload, or omitted
+    // metadata/default links would vanish from historical versions.
+    const persisted = await this.prisma.$queryRaw<Array<{ snapshot: Record<string, unknown> }>>(Prisma.sql`
+      SELECT to_jsonb(t) AS "snapshot" FROM ${table} t WHERE "id" = ${referenceId} LIMIT 1
+    `);
+    if (persisted.length !== 1) throw new Error('REFERENCE_GOVERNANCE_STATE_UNAVAILABLE');
     await this.appendVersionRecord(
       entityType, referenceId, rows[0].versionNumber, ReferenceLifecycleState.ACTIVE,
       rows[0].effectiveFrom, rows[0].effectiveTo,
-      { ...snapshot, lifecycleState: ReferenceLifecycleState.ACTIVE, versionNumber: rows[0].versionNumber,
+      { ...persisted[0].snapshot, lifecycleState: ReferenceLifecycleState.ACTIVE, versionNumber: rows[0].versionNumber,
         aliases: effectiveAliases, providerMappings: effectiveMappings,
         mutationCorrelationId: this.mutationCorrelationId ?? null },
       existed ? 'UPSERT_UPDATE' : 'UPSERT_CREATE', this.mutationActorId ?? null,
