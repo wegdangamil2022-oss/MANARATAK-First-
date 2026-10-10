@@ -1,4 +1,4 @@
-import { listAllReferenceData } from './referenceData';
+import { getReferenceDataPage } from './referenceData';
 import { adminApiClient } from './client';
 
 export type CanonicalPickerLifecycle =
@@ -48,19 +48,20 @@ type DataEnvelope<T> = { data: T[] };
 type PageEnvelope<T> = { data: T[] };
 
 export const canonicalPickerApi = {
-  async countries(query = ''): Promise<CanonicalPickerOption[]> {
-    const records = await listAllReferenceData<Record<string, unknown>>('countries', { activeOnly: false, q: query.trim() || undefined });
+  async countries(query = '', page = 1): Promise<CanonicalPickerOption[]> {
+    const { data: records } = await getReferenceDataPage<Record<string, unknown>>('countries', { activeOnly: false, q: query.trim() || undefined, page, pageSize: 50 });
     return records.map((item) => option(item));
   },
-  async regions(countryIso2Code?: string): Promise<CanonicalPickerOption[]> {
+  async regions(countryIso2Code?: string, query = '', page = 1): Promise<CanonicalPickerOption[]> {
     if (!countryIso2Code) return [];
-    const records = await listAllReferenceData<Record<string, unknown>>('regions', { activeOnly: false, countryIso2Code });
+    const { data: records } = await getReferenceDataPage<Record<string, unknown>>('regions', { activeOnly: false, countryIso2Code, q: query.trim() || undefined, page, pageSize: 50 });
     return records.map((item) => option(item, { metadata: { countryIso2Code: String(item.countryIso2Code ?? '') } }));
   },
-  async cities(countryIso2Code?: string, administrativeRegionId?: string | null): Promise<CanonicalPickerOption[]> {
+  async cities(countryIso2Code?: string, administrativeRegionId?: string | null, query = '', page = 1): Promise<CanonicalPickerOption[]> {
     if (!countryIso2Code) return [];
-    const records = await listAllReferenceData<Record<string, unknown>>('cities', {
+    const { data: records } = await getReferenceDataPage<Record<string, unknown>>('cities', {
       activeOnly: false, countryIso2Code, administrativeRegionId: administrativeRegionId || undefined,
+      q: query.trim() || undefined, page, pageSize: 50,
     });
     return records.map((item) => option(item, { metadata: {
       countryIso2Code: String(item.countryIso2Code ?? ''),
@@ -70,12 +71,12 @@ export const canonicalPickerApi = {
       nameAr: typeof item.nameAr === 'string' ? item.nameAr : null,
     } }));
   },
-  async languages(query = ''): Promise<CanonicalPickerOption[]> {
-    const records = await listAllReferenceData<Record<string, unknown>>('languages', { activeOnly: false, q: query.trim() || undefined });
+  async languages(query = '', page = 1): Promise<CanonicalPickerOption[]> {
+    const { data: records } = await getReferenceDataPage<Record<string, unknown>>('languages', { activeOnly: false, q: query.trim() || undefined, page, pageSize: 50 });
     return records.map((item) => option(item));
   },
-  async currencies(query = ''): Promise<CanonicalPickerOption[]> {
-    const records = await listAllReferenceData<Record<string, unknown>>('currencies', { activeOnly: false, q: query.trim() || undefined });
+  async currencies(query = '', page = 1): Promise<CanonicalPickerOption[]> {
+    const { data: records } = await getReferenceDataPage<Record<string, unknown>>('currencies', { activeOnly: false, q: query.trim() || undefined, page, pageSize: 50 });
     return records.map((item) => option(item));
   },
   async degreeLevels(): Promise<CanonicalPickerOption[]> {

@@ -40,8 +40,15 @@ export class ImportHandoffDispatcher {
   hasDurableScreeningReceipts() { return Boolean(this.receipts); }
 
   async dispatch(handoff: UniversalImportHandoff): Promise<unknown | null> {
-    const consumer = this.consumers[handoff.ownerDomain.trim().toUpperCase()];
+    const owner = handoff.ownerDomain.trim().toUpperCase();
+    const consumer = this.consumers[owner];
     if (!consumer) return null;
+    // P7 is never allowed a volatile review screening decision. A disconnected
+    // receipt store must fail closed rather than silently silently bypassing
+    // the durable identity/content-hash idempotency guarantee.
+    if (owner === 'REFERENCE_DATA' && !this.receipts) {
+      throw new Error('P7_DURABLE_SCREENING_RECEIPT_REQUIRED');
+    }
     return this.receipts ? this.receipts.accept(handoff, () => consumer.accept(handoff)) : consumer.accept(handoff);
   }
 }

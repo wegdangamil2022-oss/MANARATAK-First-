@@ -24,7 +24,7 @@ export class ReferenceDataPublicRouter {
     }));
     router.get('/countries/:iso2Code/universities', asyncHandler(async (req: Request, res: Response) => {
       const country = await cradle.referenceDataRepository.getCountry(req.params.iso2Code.toUpperCase());
-      if (!country) return res.status(404).json({ error: 'Country not found' });
+      if (!country || country.lifecycleState !== 'ACTIVE') return res.status(404).json({ error: 'Country not found' });
       res.json(await universities.listUniversities({ countryReferenceId: country.id }, parseRequestLocale(req.query)));
     }));
     router.get('/currencies', asyncHandler(async (req: Request, res: Response) => {
@@ -41,7 +41,14 @@ export class ReferenceDataPublicRouter {
     }));
     router.get('/cities', asyncHandler(async (req: Request, res: Response) => {
       const { locale, ...filters } = cityQuerySchema.parse(req.query);
-      res.json({ data: await localized.listCities(filters, locale) });
+      const page = filters.page ?? 1;
+      const pageSize = filters.pageSize ?? 50;
+      const bounded = { ...filters, page, pageSize };
+      const [data, total] = await Promise.all([
+        localized.listCities(bounded, locale),
+        cradle.referenceDataRepository.countRecords('cities', { ...bounded, activeOnly: true }),
+      ]);
+      res.json({ data, page, pageSize, total, totalPages: Math.ceil(total / pageSize) });
     }));
 
     router.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {

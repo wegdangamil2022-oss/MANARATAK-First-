@@ -21,6 +21,9 @@ describe('ReferenceResolverService canonical contract', () => {
     iso3Code: 'SAU',
     name: 'Saudi Arabia',
     isActive: true,
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
   const region: AdministrativeRegionDto = {
     id: 'region-riyadh',
@@ -37,6 +40,9 @@ describe('ReferenceResolverService canonical contract', () => {
     countryIso2Code: 'SA',
     name: 'Riyadh',
     isActive: true,
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
   const language: ReferenceLanguageDto = {
     id: 'language-ar',
@@ -44,12 +50,18 @@ describe('ReferenceResolverService canonical contract', () => {
     name: 'Arabic',
     direction: 'RTL',
     isActive: true,
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
   const currency: ReferenceCurrencyDto = {
     id: 'currency-sar',
     isoCode: 'SAR',
     name: 'Saudi Riyal',
     isActive: true,
+    lifecycleState: ReferenceLifecycleState.ACTIVE,
+    versionNumber: 1,
+    effectiveFrom: new Date(),
   };
 
   beforeEach(() => {
@@ -98,6 +110,14 @@ describe('ReferenceResolverService canonical contract', () => {
     });
   });
 
+  it('preserves explicit country scope when forwarding city lookup contracts', async () => {
+    vi.mocked(repository.resolveCityCandidate).mockResolvedValue(null);
+    await expect(resolver.resolveCity({ alias: 'Springfield', countryIso2Code: 'US' })).resolves.toBeNull();
+    expect(repository.resolveCityCandidate).toHaveBeenCalledWith({
+      alias: 'Springfield', countryIso2Code: 'US',
+    });
+  });
+
   it('maps Region and City identities without introducing name-only matching in the service', async () => {
     vi.mocked(repository.resolveRegionCandidate).mockResolvedValue({
       record: region,
@@ -129,6 +149,26 @@ describe('ReferenceResolverService canonical contract', () => {
       method: 'NORMALIZED_ALIAS',
     });
     await expect(resolver.resolveRegion({ alias: 'Riyadh' })).resolves.toMatchObject({ id: region.id, active: false, resolutionMethod: 'NORMALIZED_ALIAS' });
+  });
+
+  it('requires both the compatibility active flag and authoritative lifecycle for selectability', async () => {
+    vi.mocked(repository.resolveCountryCandidate).mockResolvedValue({
+      record: { ...country, lifecycleState: ReferenceLifecycleState.DEPRECATED, isActive: true },
+      method: 'EXACT_STANDARD_CODE',
+    });
+    await expect(resolver.resolveCountry({ standardCode: 'SA' })).resolves.toMatchObject({ active: false });
+
+    vi.mocked(repository.resolveCityCandidate).mockResolvedValue({
+      record: { ...city, lifecycleState: ReferenceLifecycleState.ACTIVE, isActive: false },
+      method: 'EXACT_ID',
+    });
+    await expect(resolver.resolveCity({ id: 'city-riyadh' })).resolves.toMatchObject({ active: false });
+
+    vi.mocked(repository.resolveCurrencyCandidate).mockResolvedValue({
+      record: { ...currency, lifecycleState: ReferenceLifecycleState.MERGED, isActive: true },
+      method: 'EXACT_STANDARD_CODE',
+    });
+    await expect(resolver.resolveCurrency({ standardCode: 'SAR' })).resolves.toMatchObject({ active: false });
   });
 
   it('maps Language and Currency candidates and returns null when no unique candidate exists', async () => {

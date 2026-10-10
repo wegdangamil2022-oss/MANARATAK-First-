@@ -3,6 +3,8 @@ import type {
   UpsertReferenceCountryDto, UpsertReferenceCurrencyDto,
   UpsertReferenceLanguageDto, UpsertReferenceCityDto,
   AdministrativeRegionDto, UpsertAdministrativeRegionDto, ReferenceLifecycleState, ReferenceVersionDto,
+  ReferenceGovernanceDetails, ReferenceRelationshipDto, ReferenceCityQualityCounters, GovernedReferenceEntityType, ReferenceDependencyImpact,
+  ReferenceImportScreeningReviewPage, ReferenceHistoryPage,
 } from '@manaratak/domain';
 import { adminApiClient, type AdminRequestOptions } from './client';
 
@@ -10,7 +12,7 @@ const base = '/admin/reference-data';
 
 export function getReferenceDataPage<T>(collection: ReferenceDataCollection, filters: ReferenceDataFilters = {}): Promise<ReferenceDataPage<T>> {
   const params = new URLSearchParams({ page: String(filters.page ?? 1), pageSize: String(filters.pageSize ?? 50) });
-  for (const key of ['activeOnly', 'region', 'countryIso2Code', 'q', 'administrativeRegionId'] as const) {
+  for (const key of ['updatedFrom', 'mappingStatus', 'activeOnly', 'nonActiveOnly', 'region', 'countryIso2Code', 'q', 'administrativeRegionId'] as const) {
     const value = filters[key];
     if (value !== undefined) params.set(key, String(value));
   }
@@ -37,6 +39,73 @@ function mutate<T>(path: string, method: 'POST' | 'PUT', body: unknown, options:
 }
 
 export const referenceDataAdminApi = {
+  screeningReviews(page = 1) {
+    return adminApiClient.request<ReferenceImportScreeningReviewPage>(
+      base + '/import-review?page=' + encodeURIComponent(String(page)) + '&pageSize=25');
+  },
+  standardsReadiness() {
+    return adminApiClient.request<{ evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS' | 'REVIEWED_EVIDENCE_RECORDED';
+      data: Array<{ standardFamily: string; readiness: string; sourceVersion: string | null; candidateVersions: string[] }>; asOf: string }>(
+      base + '/standards/readiness');
+  },
+  qualitySnapshot() {
+    return adminApiClient.request<{ data: Array<{ collection: ReferenceDataCollection; total: number; active: number; nonActive: number; aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown' }>; asOf: string }>(base + '/quality');
+  },
+  repairCityCountryLink(input: { cityId: string; expectedVersion: number; countryReferenceId: string; reason: string }) {
+    return mutate<void>('/cities/' + encodeURIComponent(input.cityId) + '/reconcile-country', 'POST', {
+      expectedVersion: input.expectedVersion, countryReferenceId: input.countryReferenceId, reason: input.reason,
+    });
+  },
+  reassignProviderMapping(input: {
+    entityType: 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY';
+    fromReferenceId: string;
+    toReferenceId: string;
+    fromExpectedVersion: number;
+    toExpectedVersion: number;
+    providerSystem: string;
+    providerId: string;
+    reason: string;
+    reconciliationId: string;
+  }) {
+    return mutate<{ outcome: 'APPLIED' | 'ALREADY_APPLIED'; reconciliationId: string }>(
+      '/governance/provider-mappings/reassign', 'POST', input);
+  },
+  governanceImpact(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<{ data: ReferenceDependencyImpact }>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/impact'
+    );
+  },
+  governanceDetails(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<{ data: ReferenceGovernanceDetails }>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/details'
+    );
+  },
+  governanceHistoryPage(entityType: GovernedReferenceEntityType, referenceId: string, page = 1) {
+    return adminApiClient.request<ReferenceHistoryPage>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' +
+      encodeURIComponent(referenceId) + '/history-page?page=' + encodeURIComponent(String(page)) + '&pageSize=30'
+    );
+  },
+  governanceHistory(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<{ data: ReferenceVersionDto[] }>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/history'
+    );
+  },
+  governanceRelationships(entityType: GovernedReferenceEntityType, referenceId: string) {
+    return adminApiClient.request<{ data: ReferenceRelationshipDto[] }>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/relationships'
+    );
+  },
+  cityQuality(countryIso2Code: string) {
+    return adminApiClient.request<{ data: ReferenceCityQualityCounters; asOf: string }>(
+      base + '/quality/cities/' + encodeURIComponent(countryIso2Code)
+    );
+  },
+  transitionReference(entityType: GovernedReferenceEntityType, referenceId: string,
+    body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string; acknowledgeHistoricalReferences?: boolean }) {
+    return mutate<void>('/governance/' + encodeURIComponent(entityType) + '/' +
+      encodeURIComponent(referenceId) + '/lifecycle', 'POST', body);
+  },
   getRegion(id: string) {
     return adminApiClient.request<AdministrativeRegionDto>(base + '/regions/' + encodeURIComponent(id));
   },
@@ -48,7 +117,7 @@ export const referenceDataAdminApi = {
   regionHistory(id: string) {
     return adminApiClient.request<{ data: ReferenceVersionDto[] }>(base + '/governance/REGION/' + encodeURIComponent(id) + '/history');
   },
-  transitionRegion(id: string, body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string }, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {
+  transitionRegion(id: string, body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string; acknowledgeHistoricalReferences?: boolean }, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {
     return mutate<void>('/governance/REGION/' + encodeURIComponent(id) + '/lifecycle', 'POST', body, options);
   },
   saveCountry({ iso2Code, ...body }: UpsertReferenceCountryDto, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {

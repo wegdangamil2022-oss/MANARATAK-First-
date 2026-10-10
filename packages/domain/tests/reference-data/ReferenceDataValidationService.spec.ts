@@ -165,7 +165,7 @@ describe('ReferenceDataValidationService', () => {
       expect(report.canBeImported).toBe(true);
     });
 
-    it('accepts valid BCP-47 language tag like pt-br', () => {
+    it('rejects BCP-47 locale tags in the ISO-639 language registry', () => {
       const input: ReferenceLanguageDto = {
         id: 'language-test',
         isoCode: 'pt-br',
@@ -178,7 +178,8 @@ describe('ReferenceDataValidationService', () => {
 
       expect(report.deterministicKey).toBe('pt-br');
       expect(report.isComplete).toBe(true);
-      expect(report.canBeImported).toBe(true);
+      expect(report.canBeImported).toBe(false);
+      expect(report.issues.some(issue => issue.code === 'INVALID_ISO_FORMAT')).toBe(true);
     });
 
     it('produces ERROR issue for invalid direction', () => {
@@ -196,7 +197,7 @@ describe('ReferenceDataValidationService', () => {
   });
 
   describe('validateCity', () => {
-    it('returns isComplete true and computes deterministicKey as countryIso2Code:name', () => {
+    it('returns a region-aware Unicode canonical city identity key', () => {
       const input: ReferenceCityDto = {
         id: 'city-test',
         countryIso2Code: 'EG',
@@ -209,7 +210,7 @@ describe('ReferenceDataValidationService', () => {
       const report = service.validateCity(input);
 
       expect(report.entityType).toBe('CITY');
-      expect(report.deterministicKey).toBe('EG:Cairo');
+      expect(report.deterministicKey).toBe('EG|cairo|~');
       expect(report.isComplete).toBe(true);
       expect(report.canBeImported).toBe(true);
     });

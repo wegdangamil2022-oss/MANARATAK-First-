@@ -372,8 +372,17 @@ export * from './services-platform';
 
 export * from './study-destinations';
 export * from './reference-data/governance/ReferenceGovernance';
+export * from './reference-data/governance/ReferenceIdentityNormalization';
 export * from './retention';
 export * from './career-alumni';
 
 export * from './certificates/contracts/ICertificateRenderingService';
 export * from './identity/repositories/IPasswordCredentialRepository';
+
+export * from './reference-data/governance/ReferenceStandardsRegistry';
+
+export * from './reference-data/governance/ReferenceIanaTimeZonePolicy';
+
+export * from './reference-data/governance/ReferenceImportReviewEligibility';
+
+export * from './reference-data/governance/ReferenceRetirementPolicy';

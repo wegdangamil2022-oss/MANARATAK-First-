@@ -68,7 +68,7 @@ const INLINE_LIMIT_BYTES = 90 * 1024;
 const RECORD_PAGE_SIZE = 25;
 
 export type DomainKey =
-  'ALL' | 'SCHOLARSHIPS' | 'UNIVERSITIES' | 'MAJORS' | 'COURSES' | 'TESTS' | 'SERVICES' | 'CMS';
+  'ALL' | 'REFERENCE_DATA' | 'SCHOLARSHIPS' | 'UNIVERSITIES' | 'MAJORS' | 'COURSES' | 'TESTS' | 'SERVICES' | 'CMS';
 type LoadState = 'idle' | 'loading' | 'ready' | 'unavailable';
 type SourceStatus = 'ACTIVE' | 'NEEDS_REVIEW' | 'DISABLED' | 'BLOCKED';
 type InputMode = 'file' | 'paste';
@@ -254,6 +254,7 @@ type DomainConfig = {
 };
 
 const DOMAIN_CONFIG: DomainConfig[] = [
+  { key: 'REFERENCE_DATA', ar: 'البيانات المرجعية', en: 'Reference Data', workspace: '/reference-data', importPath: '/imports/reference-data', icon: Sparkles, template: 'iso2Code,iso3Code,name,nameAr' },
   {
     key: 'SCHOLARSHIPS',
     ar: 'المنح الدراسية',
@@ -3277,8 +3278,9 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
   const [assetId, setAssetId] = useState('');
   const [format, setFormat] = useState<'csv' | 'ndjson' | 'json'>('csv');
   const [domain, setDomain] = useState(ownerDomain);
+  const [referenceEntityType, setReferenceEntityType] = useState<'COUNTRY'|'CURRENCY'|'LANGUAGE'|'CITY'>('COUNTRY');
   const [mappingProfileId, setMappingProfileId] = useState('');
-  const [proof, setProof] = useState<{ assetId: string; expectedSha256: string; ownerDomain: string; mappingProfileId?: string;
+  const [proof, setProof] = useState<{ assetId: string; expectedSha256: string; ownerDomain: string; mappingProfileId?: string; referenceEntityType?: 'COUNTRY'|'CURRENCY'|'LANGUAGE'|'CITY';
     format: 'csv' | 'ndjson' | 'json'; validRows: number; invalidRows: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -3302,7 +3304,7 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
       } else {
         const evidence = await adminApiClient.request<{ expectedSha256: string }>('/admin/imports/artifacts/inspect',
           { method: 'POST', body: JSON.stringify({ assetId }) });
-        const body = { assetId, expectedSha256: evidence.expectedSha256, ownerDomain: domain, format, ...(mappingProfileId ? { mappingProfileId } : {}) };
+        const body = { assetId, expectedSha256: evidence.expectedSha256, ownerDomain: domain, format, ...(domain === 'REFERENCE_DATA' ? { referenceEntityType } : {}), ...(mappingProfileId ? { mappingProfileId } : {}) };
         const result = await adminApiClient.request<{ validRows: number; invalidRows: number }>('/admin/imports/artifacts/preflight',
           { method: 'POST', body: JSON.stringify(body) });
         if (requestGeneration === generation.current) setProof({ ...body, validRows: result.validRows, invalidRows: result.invalidRows });
@@ -3324,6 +3326,7 @@ function VerifiedArtifactPanel({ ownerDomain, isArabic, onStaged }: {
       : 'Select your approved CSV or NDJSON asset and preflight before staging. The owner decides acceptance and publication.'}</p>
     <fieldset disabled={busy} className="space-y-3">
       <MappingProfilePicker sourceId="MANUAL_EAP_UPLOAD" domain={domain} value={mappingProfileId} onChange={id => { setMappingProfileId(id); setProof(null); }} isArabic={isArabic} />
+      {domain === 'REFERENCE_DATA' && <label className="block">نوع المرجع<select className="border rounded p-2" value={referenceEntityType} onChange={event => { setReferenceEntityType(event.target.value as typeof referenceEntityType); clear(); }}>{['COUNTRY','CURRENCY','LANGUAGE','CITY'].map(type => <option key={type}>{type}</option>)}</select></label>}
       <AssetPicker value={assetId} purpose="IMPORT_ARTIFACT" label={isArabic ? 'الملف' : 'File'}
         onChange={id => { clear(); setAssetId(id); }} />
       <label>{isArabic ? 'التنسيق' : 'Format'} <select value={format} onChange={event => {

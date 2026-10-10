@@ -37,7 +37,15 @@ function parseCSVLine(line: string): string[] {
   return parts;
 }
 
+/** Intentionally always blocked until replaced by an ARB-approved P6→P7 apply implementation. */
+function legacyReferenceImportBlocked(): boolean { return true; }
+
 async function main() {
+  // P7 governance gate: disabled legacy direct importer. This must not bypass
+  // durable owner review/approval, transactional Audit/Outbox, or identity CAS.
+  if (legacyReferenceImportBlocked()) {
+    throw new Error('REFERENCE_LEGACY_DIRECT_IMPORT_DISABLED_USE_GOVERNED_REVIEW_APPLY');
+  }
   console.log('=== STARTING GEOGRAPHIC DATA IMPORT ===');
   if (!NEW_PASSWORD) {
     console.error('Error: M10_OWNER_NEW_PASSWORD not set in environment.');

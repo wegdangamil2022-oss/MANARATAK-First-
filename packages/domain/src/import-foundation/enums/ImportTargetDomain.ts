@@ -8,5 +8,6 @@ export enum ImportTargetDomain {
   Services = 'SERVICES',
   Cms = 'CMS',
   StudentTools = 'STUDENT_TOOLS',
+  ReferenceData = 'REFERENCE_DATA',
   Generic = 'GENERIC',
 }

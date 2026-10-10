@@ -6,6 +6,7 @@ import {
 import { IReferenceDataSeedPlanner } from '../contracts/IReferenceDataSeedPlanner';
 import { IReferenceDataValidationService } from '../contracts/IReferenceDataValidationService';
 import { ReferenceDataValidationService } from './ReferenceDataValidationService';
+import { ReferenceDataValidationSeverity } from '../validation/ReferenceDataValidationTypes';
 import {
   ReferenceCountryDto,
   UpsertReferenceCountryDto,
@@ -39,9 +40,6 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
   }
 
   public validateBatch(batch: ReferenceDataSeedBatch): ReferenceDataSeedBatch {
-    let validRecords = 0;
-    let invalidRecords = 0;
-
     const validatedRecords: ReferenceDataSeedRecord[] = batch.records.map(record => {
       let report;
       switch (record.entityType) {
@@ -69,12 +67,6 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
           throw new Error(`Unsupported entityType: ${(record as any).entityType}`);
       }
 
-      if (report.canBeImported) {
-        validRecords++;
-      } else {
-        invalidRecords++;
-      }
-
       return {
         ...record,
         deterministicKey: report.deterministicKey,
@@ -82,36 +74,52 @@ export class ReferenceDataSeedPlanner implements IReferenceDataSeedPlanner {
       };
     });
 
+    // Reject *all* occurrences of a staged duplicate, not merely whichever
+    // row happens to appear after the first. City keys include region scope.
+    const occurrences = new Map<string, number>();
+    for (const rec of validatedRecords) {
+      // An invalid source row can still compete for the same identity as a
+      // valid one (e.g. an incomplete alternate country record). Neither can
+      // be promoted until an owner explicitly resolves the source conflict.
+      if (!rec.deterministicKey) continue;
+      const key = rec.entityType + '|' + rec.deterministicKey;
+      occurrences.set(key, (occurrences.get(key) ?? 0) + 1);
+    }
+    const uniqueRecords = validatedRecords.map(rec => {
+      const key = rec.entityType + '|' + (rec.deterministicKey ?? '');
+      if (!rec.deterministicKey || (occurrences.get(key) ?? 0) < 2 || !rec.validationReport) return rec;
+      return {
+        ...rec,
+        validationReport: {
+          ...rec.validationReport,
+          canBeImported: false,
+          issues: [...rec.validationReport.issues, {
+            code: 'DUPLICATE_CANONICAL_IDENTITY_IN_BATCH',
+            message: 'Several source records resolve to the same canonical identity; manual review is required',
+            severity: ReferenceDataValidationSeverity.ERROR,
+          }],
+        },
+      };
+    });
+    const validRecords = uniqueRecords.filter(rec => rec.validationReport?.canBeImported).length;
+    const invalidRecords = uniqueRecords.length - validRecords;
     return {
       ...batch,
       status: ReferenceDataSeedStatus.VALIDATED,
-      records: validatedRecords,
+      records: uniqueRecords,
       validatedAt: new Date(),
       validationSummary: {
-        totalRecords: validatedRecords.length,
+        totalRecords: uniqueRecords.length,
         validRecords,
         invalidRecords
       }
     };
   }
 
-  public markReadyToApply(batch: ReferenceDataSeedBatch): ReferenceDataSeedBatch {
-    if (batch.status === ReferenceDataSeedStatus.DRAFT) {
-      throw new Error('Batch must be validated before marking ready to apply');
-    }
+  public markReadyToApply(_batch: ReferenceDataSeedBatch): ReferenceDataSeedBatch {
+    // Validation cannot authorize canonical publication. Without a durable
+    // source-hash-bound, actor-reviewed P7 receipt this transition is forbidden.
+    throw new Error('REFERENCE_DATA_SEED_APPROVAL_RECEIPT_REQUIRED');
 
-    if (!batch.validationSummary || batch.validationSummary.invalidRecords > 0) {
-      throw new Error('Cannot mark batch ready to apply: batch contains invalid records');
-    }
-
-    const hasInvalid = batch.records.some(r => !r.validationReport || !r.validationReport.canBeImported);
-    if (hasInvalid) {
-      throw new Error('Cannot mark batch ready to apply: one or more records cannot be imported');
-    }
-
-    return {
-      ...batch,
-      status: ReferenceDataSeedStatus.READY_TO_APPLY
-    };
   }
 }

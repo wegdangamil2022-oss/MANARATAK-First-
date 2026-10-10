@@ -11,7 +11,19 @@ const aliasTypes = ['COMMON', 'HISTORIC', 'PROVIDER', 'TRANSLITERATION', 'OTHER'
 const message = (error: unknown) => error instanceof Error ? error.message : 'تعذّر تنفيذ الطلب';
 
 export function AdministrativeRegionsTab() {
-  const [filters, setFilters] = useState({ country: '', q: '', page: 1 });
+  const [filters, setFilters] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedPage = Number(params.get('p7Page') ?? '1');
+    const rawStatus = params.get('p7Status');
+    return {
+      country: params.get('p7Country') ?? '',
+      q: params.get('p7Q') ?? '',
+      mappingStatus: params.get('p7MappingStatus') ?? '',
+      updatedFrom: params.get('p7UpdatedFrom') ?? '',
+      page: Number.isSafeInteger(requestedPage) && requestedPage > 0 && requestedPage <= 1000000 ? requestedPage : 1,
+      status: (rawStatus === 'active' || rawStatus === 'nonactive' ? rawStatus : 'all') as 'active' | 'all' | 'nonactive',
+    };
+  });
   const [page, setPage] = useState<ReferenceDataPage<AdministrativeRegionDto>>({ data: [], page: 1, pageSize: 50, total: 0, totalPages: 0 });
   const [reload, setReload] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -19,6 +31,9 @@ export function AdministrativeRegionsTab() {
   const [form, setForm] = useState(emptyForm);
   const [aliases, setAliases] = useState<ReferenceAliasInput[]>([]);
   const [history, setHistory] = useState<ReferenceVersionDto[]>([]);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotalPages, setHistoryTotalPages] = useState(0);
+  const [impactTotal, setImpactTotal] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [listError, setListError] = useState('');
   const [historyError, setHistoryError] = useState('');
@@ -26,9 +41,23 @@ export function AdministrativeRegionsTab() {
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState('');
+  const [acknowledgement, setAcknowledgement] = useState(false);
   const [toState, setToState] = useState(ReferenceLifecycleState.ARCHIVED);
   const [targetId, setTargetId] = useState<string | null>(null);
   const detailSequence = useRef(0);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (filters.mappingStatus) url.searchParams.set('p7MappingStatus',filters.mappingStatus); else url.searchParams.delete('p7MappingStatus');
+    if (filters.updatedFrom) url.searchParams.set('p7UpdatedFrom',filters.updatedFrom); else url.searchParams.delete('p7UpdatedFrom');
+    url.searchParams.set('p7Page', String(filters.page));
+    url.searchParams.set('p7Status', filters.status);
+    if (filters.country) url.searchParams.set('p7Country', filters.country);
+    else url.searchParams.delete('p7Country');
+    if (filters.q) url.searchParams.set('p7Q', filters.q);
+    else url.searchParams.delete('p7Q');
+    window.history.replaceState(window.history.state, '', url.toString());
+  }, [filters]);
 
   useEffect(() => {
     let current = true;
@@ -39,7 +68,9 @@ export function AdministrativeRegionsTab() {
     }
     setLoading(true); setListError('');
     getReferenceDataPage<AdministrativeRegionDto>('regions', {
-      activeOnly: false, countryIso2Code: filters.country || undefined, q: filters.q || undefined, page: filters.page, pageSize: 50,
+      activeOnly: filters.status === 'active',
+      nonActiveOnly: filters.status === 'nonactive',
+      countryIso2Code: filters.country || undefined, q: filters.q || undefined, mappingStatus: (filters.mappingStatus || undefined) as 'MAPPED'|'UNMAPPED'|undefined, updatedFrom: filters.updatedFrom ? new Date(filters.updatedFrom).toISOString() : undefined, page: filters.page, pageSize: 50,
     }).then(result => { if (current) setPage(result); })
       .catch(err => { if (current) { setPage({ data: [], page: filters.page, pageSize: 50, total: 0, totalPages: 0 }); setListError(message(err)); } })
       .finally(() => { if (current) setLoading(false); });
@@ -47,20 +78,27 @@ export function AdministrativeRegionsTab() {
   }, [filters, reload]);
   useEffect(() => () => { detailSequence.current++; }, []);
 
+  useEffect(() => {
+    if (!selected) return; const id=selected.id; let live=true;
+    setHistoryLoading(true); setHistoryError('');
+    referenceDataAdminApi.governanceHistoryPage('REGION',id,historyPage).then(result => { if (live) { setHistory(result.data); setHistoryTotalPages(result.totalPages); } })
+      .catch(error => { if (live) setHistoryError(message(error)); }).finally(() => { if (live) setHistoryLoading(false); });
+    referenceDataAdminApi.governanceImpact('REGION',id).then(result => { if (live) setImpactTotal(result.data.knownTotal); })
+      .catch(() => { if (live) setImpactTotal(null); });
+    return () => { live=false; };
+  }, [selected,historyPage]);
+
   function reset() {
     detailSequence.current++;
     setSelected(null); setForm(emptyForm); setAliases([]); setHistory([]); setHistoryError(''); setHistoryLoading(false);
-    setReason(''); setTargetId(null); setError(''); setStatus('');
+    setImpactTotal(null); setAcknowledgement(false); setReason(''); setTargetId(null); setError(''); setStatus('');
   }
 
   async function open(id: string) {
     const sequence = ++detailSequence.current;
     setBusy(true); setError(''); setStatus(''); setHistory([]); setHistoryError(''); setHistoryLoading(true);
     setSelected(null); setForm(emptyForm); setAliases([]);
-    // Independent reads start together; history failure does not hide detail.
-    void referenceDataAdminApi.regionHistory(id).then(result => { if (sequence === detailSequence.current) setHistory(result.data); })
-      .catch(err => { if (sequence === detailSequence.current) setHistoryError(message(err)); })
-      .finally(() => { if (sequence === detailSequence.current) setHistoryLoading(false); });
+    setHistoryPage(1); setImpactTotal(null);
     try {
       const record = await referenceDataAdminApi.getRegion(id);
       if (sequence !== detailSequence.current) return;
@@ -94,7 +132,7 @@ export function AdministrativeRegionsTab() {
     setBusy(true); setError(''); setStatus('');
     try {
       await referenceDataAdminApi.transitionRegion(selected.id, {
-        expectedVersion: selected.versionNumber, toState: state, reason: reason.trim(),
+        expectedVersion: selected.versionNumber, toState: state, reason: reason.trim(), acknowledgeHistoricalReferences: acknowledgement,
         targetReferenceId: [ReferenceLifecycleState.MERGED, ReferenceLifecycleState.SUPERSEDED].includes(state) ? targetId ?? undefined : undefined,
       });
       setReload(value => value + 1);
@@ -110,8 +148,18 @@ export function AdministrativeRegionsTab() {
   return <section dir="rtl" className="space-y-5" aria-label="إدارة المناطق">
     <h3 className="text-lg font-bold">المناطق الإدارية</h3>
     <div className="flex flex-wrap gap-3">
+      <label>ربط المزوّد<select value={filters.mappingStatus} onChange={event => setFilters(value => ({...value,mappingStatus:event.target.value,page:1}))}><option value="">الكل</option><option value="MAPPED">مربوط</option><option value="UNMAPPED">غير مربوط</option></select></label>
+      <label>تحديث منذ<input type="datetime-local" value={filters.updatedFrom} onChange={event => setFilters(value => ({...value,updatedFrom:event.target.value,page:1}))} /></label>
       <label>رمز الدولة للبحث<input aria-label="رمز الدولة للبحث" maxLength={2} value={filters.country} onChange={event => setFilters({ ...filters, country: event.target.value.toUpperCase(), page: 1 })} className="border rounded p-2" /></label>
       <label>البحث<input value={filters.q} onChange={event => setFilters({ ...filters, q: event.target.value, page: 1 })} className="border rounded p-2" /></label>
+      <label>حالة المنطقة
+        <select className="border rounded p-2" value={filters.status}
+          onChange={event => setFilters({ ...filters, status: event.target.value as 'active' | 'all' | 'nonactive', page: 1 })}>
+          <option value="active">النشطة فقط</option>
+          <option value="all">جميع الحالات</option>
+          <option value="nonactive">غير النشطة فقط</option>
+        </select>
+      </label>
       <button type="button" disabled={busy} onClick={reset}>منطقة جديدة</button>
       <button type="button" disabled={loading} onClick={() => setReload(value => value + 1)}>تحديث القائمة</button>
     </div>
@@ -134,7 +182,7 @@ export function AdministrativeRegionsTab() {
     <form onSubmit={save} className="space-y-3 rounded border p-4">
       <fieldset disabled={busy || !editable} className="grid gap-3 md:grid-cols-2">
         <legend>{selected ? 'تعديل المنطقة' : 'إنشاء منطقة'}</legend>
-        <CanonicalPicker label="الدولة" value={form.countryId} load={canonicalPickerApi.countries} disabled={Boolean(selected)}
+        <CanonicalPicker paged label="الدولة" value={form.countryId} load={canonicalPickerApi.countries} disabled={Boolean(selected)}
           onChange={(id, option) => setForm({ ...form, countryId: id ?? '', countryIso2Code: option?.code ?? '' })} />
         <label>رمز المنطقة<input required pattern="[A-Z0-9][A-Z0-9-]{0,31}" maxLength={32} readOnly={Boolean(selected)} value={form.regionCode} onChange={event => setForm({ ...form, regionCode: event.target.value })} className="border rounded p-2 w-full" /></label>
         {(['name', 'nameAr', 'localName', 'regionType'] as const).map((key, index) => <label key={key}>
@@ -157,18 +205,20 @@ export function AdministrativeRegionsTab() {
     </form>
     {canTransition ? <fieldset disabled={busy} className="space-y-3 rounded border p-4">
       <legend>تغيير الحالة</legend>
-      <p>الإيقاف يمنع الاختيار الجديد. الأرشفة أو الاستبدال أو الدمج يتطلب إزالة العلاقات التابعة أولًا، ويحفظ المعرف والتاريخ.</p>
+      <p>الإيقاف يمنع الاختيار الجديد. الأرشفة تُمنع عند وجود روابط مرصودة؛ الاستبدال والدمج يحفظان المعرّف والتاريخ دون نقل تلقائي.</p>
       {selected.lifecycleState === ReferenceLifecycleState.ACTIVE ? <p>الخطوة التالية: DEPRECATED</p> :
         <label>الحالة التالية<select value={toState} onChange={event => { setToState(event.target.value as ReferenceLifecycleState); setTargetId(null); }}>
           {[ReferenceLifecycleState.ARCHIVED, ReferenceLifecycleState.SUPERSEDED, ReferenceLifecycleState.MERGED].map(state => <option key={state}>{state}</option>)}
         </select></label>}
-      {needsTarget ? <CanonicalPicker label="المنطقة البديلة من الدولة نفسها" value={targetId} reloadKey={selected.countryIso2Code + ':' + reload}
-        load={async () => (await canonicalPickerApi.regions(selected.countryIso2Code)).filter(item => item.id !== selected.id)} onChange={setTargetId} /> : null}
+      {needsTarget ? <CanonicalPicker paged label="المنطقة البديلة من الدولة نفسها" value={targetId} reloadKey={selected.countryIso2Code + ':' + reload}
+        load={async (query,page) => (await canonicalPickerApi.regions(selected.countryIso2Code,query,page)).filter(item => item.id !== selected.id)} onChange={setTargetId} /> : null}
       <label>سبب التغيير<textarea minLength={3} maxLength={1000} value={reason} onChange={event => setReason(event.target.value)} className="border rounded p-2 w-full" /></label>
-      <button type="button" disabled={reason.trim().length < 3 || Boolean(needsTarget && !targetId)} onClick={() => void transition()}>تسجيل تغيير الحالة</button>
+      <label><input type="checkbox" checked={acknowledgement} onChange={event => setAcknowledgement(event.target.checked)} />راجعت الأثر؛ تبقى العلاقات التاريخية محفوظة.</label>
+      <button type="button" disabled={busy || impactTotal === null || selected.lifecycleState !== ReferenceLifecycleState.ACTIVE && toState === ReferenceLifecycleState.ARCHIVED && impactTotal > 0 || reason.trim().length < 3 || selected.lifecycleState !== ReferenceLifecycleState.ACTIVE && !acknowledgement || Boolean(needsTarget && !targetId)} onClick={() => void transition()}>تسجيل تغيير الحالة</button>
     </fieldset> : null}
     {selected ? <details><summary>سجل نسخ المنطقة</summary>
       {historyLoading ? <p role="status">جارٍ تحميل السجل…</p> : historyError ? <p role="alert">{historyError}</p> : <ul>{history.map(version => <li key={version.id}>#{version.versionNumber} · {version.lifecycleState} · {version.changeReason} · {version.actorId} · {String(version.createdAt)}</li>)}</ul>}
+      <div className="flex gap-3"><button type="button" disabled={historyLoading || historyPage<=1} onClick={() => setHistoryPage(value=>value-1)}>السابق</button><span>{historyPage} / {Math.max(1,historyTotalPages)}</span><button type="button" disabled={historyLoading || historyPage>=historyTotalPages} onClick={() => setHistoryPage(value=>value+1)}>التالي</button></div>
     </details> : null}
   </section>;
 }

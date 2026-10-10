@@ -7,6 +7,8 @@ export interface ReferenceLookup {
   providerId?: string;
   alias?: string;
   normalizedAlias?: string;
+  /** Explicit ISO 3166-1 alpha2 national scope for city/region non-ID matching. */
+  countryIso2Code?: string;
 }
 
 export type ReferenceResolutionMethod = 'EXACT_ID' | 'EXACT_STANDARD_CODE' | 'PROVIDER_MAPPING' | 'NORMALIZED_ALIAS';
@@ -17,6 +19,11 @@ export interface CanonicalReference {
   standardCode?: string;
   active: boolean | null;
   resolutionMethod?: ReferenceResolutionMethod;
+  /** Historical identity is retained; consumers explicitly decide whether to follow. */
+  replacement?: {
+    relationshipType: 'SUPERSEDED_BY' | 'MERGED_INTO';
+    targetReferenceId: string;
+  };
 }
 
 export interface IReferenceResolver {

@@ -25,7 +25,7 @@ describe('CountryImportPreviewService', () => {
     expect(result.promotionBlockers).toContain('DATABASE_RECOVERY_GATE_REQUIRED');
     expect(result.promotionBlockers).toContain('SOURCE_REVIEW_REQUIRED');
     expect(result.sample[0]).toMatchObject({
-      iso2Code: 'EG', iso3Code: 'EGY', name: 'Egypt', sourcePublicId: 'ctry-EG',
+      iso2Code: 'EG', iso3Code: 'EGY', name: 'Egypt', nameAr: 'مصر', sourcePublicId: 'ctry-EG',
       defaultCurrencyCode: 'EGP', defaultLanguageCode: 'ar',
     });
     expect(result.sample[0].metadata).toMatchObject({ sourceCreatedAt: '2026-08-07', sourceUpdatedAt: '2026-08-08' });
@@ -41,7 +41,8 @@ describe('CountryImportPreviewService', () => {
       ],
     });
 
-    expect(result.invalidRecords).toBe(1);
+    expect(result.invalidRecords).toBe(3); // both duplicate rows and the malformed row
+    expect(result.validRecords).toBe(0);
     expect(result.duplicateKeys.iso2).toEqual(['AA']);
     expect(result.duplicateKeys.iso3).toEqual(['AAA']);
     expect(result.promotionBlockers).toContain('DUPLICATE_CANONICAL_KEYS');

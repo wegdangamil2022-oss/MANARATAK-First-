@@ -83,6 +83,7 @@ import {
   RedisStudentWorkspaceDeliveryCache,
   RedisCmsDeliveryCache,
   PrismaReferenceDataRepository,
+  PrismaReferenceOwnerReviewGateway,
   PrismaStudyDestinationRepository,
   PrismaFinanceRepository,
   PrismaFinanceCurrencyReferenceGateway,
@@ -167,6 +168,7 @@ import {
   ScholarshipImportHandoffService,
   ScholarshipRepositoryDuplicateLookup,
   ImportHandoffDispatcher,
+  ReferenceDataScreeningHandoffConsumer,
   AdminUniversityUseCases,
   UniversityImportHandoffService,
   InternationalTestImportHandoffService,
@@ -215,6 +217,7 @@ import {
   MotivationLetterGeneratorHandler,
   ScholarshipRecommendationHandler,
   ReferenceDataUseCases,
+  ReferenceOwnerReviewUseCases,
   StudyDestinationUseCases,
   AtomicAuditedOutboxMutationExecutor,
   AtomicDomainMutationCoordinator,
@@ -535,13 +538,14 @@ export function registerDependencies(
     canonicalMajorReferenceService: asFunction(({ academicTaxonomyRepository, degreeLevelRepository }) =>
       new CanonicalMajorReferenceService(academicTaxonomyRepository, degreeLevelRepository)).scoped(),
     degreeLevelUseCases: asFunction(({ degreeLevelRepository }) => new DegreeLevelUseCases(degreeLevelRepository)).scoped(),
-    importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
+    importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, referenceDataScreeningHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
       SCHOLARSHIPS: scholarshipImportHandoffConsumer,
       SCHOLARSHIP: scholarshipImportHandoffConsumer,
       UNIVERSITIES: universityImportHandoffConsumer,
       UNIVERSITY: universityImportHandoffConsumer,
       TESTS: internationalTestImportHandoffConsumer,
       INTERNATIONAL_TESTS: internationalTestImportHandoffConsumer,
+      REFERENCE_DATA: referenceDataScreeningHandoffConsumer,
     }, importScreeningReceiptStore)).scoped(),
     importQueueGateway: asFunction(({ prisma }) => isPrisma
       ? new PrismaImportQueueGateway(prisma)
@@ -567,7 +571,7 @@ export function registerDependencies(
       isPrisma ? new ImportGovernanceUseCases(importGovernanceGateway, atomicDomainMutationCoordinator, async (identityId, ownerDomain) => {
         const identity = await identityRepository.findById(identityId);
         if (!identity || identity.status !== 'ACTIVE' || identity.deletedAt) return false;
-        const ownerPermissions: Record<string, string> = { SCHOLARSHIPS: 'admin:scholarships:manage', UNIVERSITIES: 'admin:universities:manage',
+        const ownerPermissions: Record<string, string> = { REFERENCE_DATA: 'admin:reference-data:manage', SCHOLARSHIPS: 'admin:scholarships:manage', UNIVERSITIES: 'admin:universities:manage',
           MAJORS: 'admin:majors:manage', FELLOWSHIPS: 'admin:majors:manage', STUDENT_TOOLS: 'admin:student-tools:manage', GENERIC: 'admin:imports:manage', COURSES: 'admin:courses:manage', TESTS: 'admin:international-tests:manage', CMS: 'admin:cms:manage', SERVICES: 'admin:services:manage' };
         if (!ownerPermissions[ownerDomain]) return false;
         const permissions = ['admin:imports:manage', ...(ownerPermissions[ownerDomain] ? [ownerPermissions[ownerDomain]] : [])];
@@ -723,6 +727,7 @@ export function registerDependencies(
       new UniversityImportHandoffService(universityRepository)).scoped(),
     internationalTestImportHandoffConsumer: asFunction(({ internationalTestRepository }) =>
       new InternationalTestImportHandoffService(internationalTestRepository)).scoped(),
+    referenceDataScreeningHandoffConsumer: asFunction(() => new ReferenceDataScreeningHandoffConsumer()).scoped(),
     adminMajorUseCases: asFunction(({ majorRepository, phase10CatalogRepository, atomicDomainMutationCoordinator, canonicalMajorReferenceService, newMajorCandidateRepository }) =>
       new AdminMajorUseCases(majorRepository, phase10CatalogRepository, undefined, undefined, atomicDomainMutationCoordinator, canonicalMajorReferenceService, newMajorCandidateRepository)).scoped(),
     coursePublicationService: asFunction(({ courseRepository, importedCourseOperationsRepository, atomicDomainMutationCoordinator, courseRelationshipRepository }) =>
@@ -792,6 +797,8 @@ export function registerDependencies(
     publicCmsUseCases: asFunction(({ cmsRepository, cmsDeliveryCache }) => new PublicCmsUseCases(cmsRepository, cmsDeliveryCache)).scoped(),
     studentToolRegistryUseCases: asFunction(({ studentToolRegistryRepository, studentToolActivationReadinessService, studentToolHealthService, studentToolDependencyHealthGateway, assetReferencePolicy }) => new StudentToolRegistryUseCases(studentToolRegistryRepository, studentToolActivationReadinessService, studentToolHealthService, studentToolDependencyHealthGateway, assetReferencePolicy)).scoped(),
     studentToolExecutionUseCases: asFunction(({ studentToolRegistryRepository, studentToolHandlerRegistry, studentToolRateLimitGateway, studentToolDependencyHealthGateway, studentToolResultProtector, studentToolSaveGateway }) => new StudentToolExecutionUseCases(studentToolRegistryRepository, studentToolHandlerRegistry, studentToolRateLimitGateway, studentToolDependencyHealthGateway, studentToolResultProtector, studentToolSaveGateway)).scoped(),
+    referenceOwnerReviewGateway: asFunction(({ prisma }) => new PrismaReferenceOwnerReviewGateway(prisma)).singleton(),
+    referenceOwnerReviewUseCases: asFunction(({ referenceOwnerReviewGateway, atomicDomainMutationCoordinator }) => new ReferenceOwnerReviewUseCases(referenceOwnerReviewGateway, atomicDomainMutationCoordinator)).scoped(),
     referenceDataUseCases: asFunction(({ referenceDataRepository, atomicAuditedOutboxMutationExecutor, referenceDataValidationService, assetReferencePolicy }) =>
       new ReferenceDataUseCases(referenceDataRepository, undefined, undefined, atomicAuditedOutboxMutationExecutor, referenceDataValidationService, assetReferencePolicy)).scoped(),
     studyDestinationUseCases: asFunction(({ studyDestinationRepository, referenceDataRepository, assetReferencePolicy }) =>

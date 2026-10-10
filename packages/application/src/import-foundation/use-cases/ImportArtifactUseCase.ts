@@ -6,7 +6,7 @@ import { ImportParserRegistry } from '../parsers/ImportParserRegistry';
 import { ImportParseError, ParsedImportRow } from '@manaratak/domain';
 
 export interface ImportArtifactInput {
-  assetId: string; ownerDomain: string; expectedSha256: string; format: 'csv' | 'ndjson' | 'json'; mappingProfileId?: string;
+  assetId: string; ownerDomain: string; expectedSha256: string; format: 'csv' | 'ndjson' | 'json'; mappingProfileId?: string; referenceEntityType?: 'COUNTRY'|'CURRENCY'|'LANGUAGE'|'CITY';
 }
 export class ImportArtifactUseCase {
   constructor(private readonly assets: AssetReferencePolicy, private readonly bytes: IVerifiedImportArtifactGateway,
@@ -37,6 +37,7 @@ export class ImportArtifactUseCase {
       throw new Error('IMPORT_ARTIFACT_CHECKSUM_MISMATCH');
     const stream = this.bytes.readVerified({ locator: asset.locator, expectedSha256: input.expectedSha256,
       expectedByteSize: asset.metadata.byteSize, maxBytes: 64 * 1024 * 1024 });
+    if (input.ownerDomain === 'REFERENCE_DATA' && !['COUNTRY','CURRENCY','LANGUAGE','CITY'].includes(input.referenceEntityType ?? '')) throw new Error('IMPORT_REFERENCE_ENTITY_TYPE_REQUIRED');
     const rows = parser.parse(stream, { batchId: '', chunkSize: 500 });
     if (!input.mappingProfileId) return rows;
     if (!this.governance) throw new Error('IMPORT_MAPPING_UNAVAILABLE');
@@ -75,7 +76,7 @@ export class ImportArtifactUseCase {
       // Manual labels cannot impersonate registered official source provenance.
       sourceSystem: 'MANUAL_EAP_UPLOAD', rows,
       handoffContext: { artifactId: input.assetId, rawArtifactReference: `eap:${input.assetId}`,
-        referenceMetadata: { artifactSha256: input.expectedSha256.toLowerCase(), acquisitionKind: 'MANUAL_EAP_UPLOAD', ...(profile ? { mappingProfileId: profile.id, mappingProfileHash: profile.definitionHash, mappingProfileVersion: String(profile.version) } : {}) } },
+        referenceMetadata: { ...(input.referenceEntityType ? { referenceEntityType: input.referenceEntityType } : {}), artifactSha256: input.expectedSha256.toLowerCase(), acquisitionKind: 'MANUAL_EAP_UPLOAD', ...(profile ? { mappingProfileId: profile.id, mappingProfileHash: profile.definitionHash, mappingProfileVersion: String(profile.version) } : {}) } },
     });
   }
 }

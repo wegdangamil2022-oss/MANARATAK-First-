@@ -1,0 +1,12 @@
+packages/infrastructure/src/reference-data/PrismaReferenceDataRepository.ts(1059,60): error TS2345: Argument of type '{ state: string; entityType: "COUNTRY" | "LANGUAGE" | "CURRENCY" | "CITY" | null; canonicalKey: string | null; normalizedPayloadHash: string | null; sourceArtifactId: string | null; sourceContentHash: string | null; issueCodes: string[]; }' is not assignable to parameter of type 'ReferenceImportTriageInput'.
+  Types of property 'state' are incompatible.
+    Type 'string' is not assignable to type '"UNKNOWN" | "NEEDS_OWNER_REVIEW" | "INVALID"'.
+packages/infrastructure/src/reference-data/PrismaReferenceDataRepository.ts(1063,14): error TS2322: Type '{ triage: ReferenceImportTriage; reviewed: false; approved: false; applied: false; state: string; entityType: "COUNTRY" | "LANGUAGE" | "CURRENCY" | "CITY" | null; ... 7 more ...; screenedAt: Date; }[]' is not assignable to type 'ReferenceImportScreeningReview[]'.
+  Type '{ triage: ReferenceImportTriage; reviewed: false; approved: false; applied: false; state: string; entityType: "COUNTRY" | "LANGUAGE" | "CURRENCY" | "CITY" | null; ... 7 more ...; screenedAt: Date; }' is not assignable to type 'ReferenceImportScreeningReview'.
+    Types of property 'state' are incompatible.
+      Type 'string' is not assignable to type '"UNKNOWN" | "NEEDS_OWNER_REVIEW" | "INVALID"'.
+apps/admin/src/pages/ReferenceDataAdminPage.tsx(536,21): error TS2657: JSX expressions must have one parent element.
+apps/admin/src/pages/ReferenceDataAdminPage.tsx(556,7): error TS1005: '}' expected.
+apps/admin/src/pages/ReferenceDataAdminPage.tsx(622,21): error TS2657: JSX expressions must have one parent element.
+apps/admin/src/pages/ReferenceDataAdminPage.tsx(648,7): error TS1005: '}' expected.
+apps/admin/src/pages/ReferenceDataAdminPage.tsx(723,9): error TS1005: '}' expected.

@@ -22,4 +22,7 @@ export interface IReferenceResolutionRepository {
   resolveCityCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<ReferenceCityDto> | null>;
   resolveLanguageCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<ReferenceLanguageDto> | null>;
   resolveCurrencyCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<ReferenceCurrencyDto> | null>;
+  /** Only replacement outgoing from a historical source; reject multiple candidates. */
+  getReplacement?(entityType: 'COUNTRY' | 'REGION' | 'CITY' | 'LANGUAGE' | 'CURRENCY', referenceId: string):
+    Promise<{ relationshipType: 'SUPERSEDED_BY' | 'MERGED_INTO'; targetReferenceId: string } | null>;
 }

@@ -5,7 +5,7 @@ import { ReferenceDataPublicRouter } from '../../../../src/presentation/api/rout
 
 describe('ReferenceDataPublicRouter locale contract', () => {
   const createRepository = () => ({
-    listCountries: vi.fn(), listCurrencies: vi.fn(), listLanguages: vi.fn(), listCities: vi.fn(), listRegions: vi.fn(), getCountry: vi.fn(),
+    listCountries: vi.fn(), listCurrencies: vi.fn(), listLanguages: vi.fn(), listCities: vi.fn(), listRegions: vi.fn(), getCountry: vi.fn(), countRecords: vi.fn().mockResolvedValue(0),
   });
   const createApp = (repository: ReturnType<typeof createRepository>, universityRepository = { listPublished: vi.fn() }) => {
     const app = express();
@@ -17,11 +17,22 @@ describe('ReferenceDataPublicRouter locale contract', () => {
     const repository = createRepository(); repository.listCities.mockResolvedValue([]);
     const app = createApp(repository); const regionId = '11111111-1111-4111-8111-111111111111';
     expect((await request(app).get(`/reference-data/cities?countryIso2Code=YE&administrativeRegionId=${regionId}`)).status).toBe(200);
-    expect(repository.listCities).toHaveBeenCalledWith({ countryIso2Code: 'YE', administrativeRegionId: regionId, activeOnly: true });
+    expect(repository.listCities).toHaveBeenCalledWith({ countryIso2Code: 'YE', administrativeRegionId: regionId, page: 1, pageSize: 50, activeOnly: true });
     repository.listCities.mockClear();
     expect((await request(app).get('/reference-data/cities?administrativeRegionId=label')).status).toBe(400);
     expect((await request(app).get(`/reference-data/languages?administrativeRegionId=${regionId}`)).status).toBe(400);
     expect(repository.listCities).not.toHaveBeenCalled(); expect(repository.listLanguages).not.toHaveBeenCalled();
+  });
+
+  it('bounds public cities and counts only ACTIVE records', async () => {
+    const repository = createRepository();
+    repository.listCities.mockResolvedValue([{ id: 'city-1', name: 'Sanaa', lifecycleState: 'ACTIVE' }]);
+    repository.countRecords.mockResolvedValue(83);
+    const res = await request(createApp(repository)).get('/reference-data/cities?page=2&pageSize=20');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ page: 2, pageSize: 20, total: 83, totalPages: 5 });
+    expect(repository.listCities).toHaveBeenCalledWith({ page: 2, pageSize: 20, activeOnly: true });
+    expect(repository.countRecords).toHaveBeenCalledWith('cities', { page: 2, pageSize: 20, activeOnly: true });
   });
 
   it('projects reference names by locale', async () => {
@@ -41,7 +52,7 @@ describe('ReferenceDataPublicRouter locale contract', () => {
 
   it('lists published universities through canonical country identity', async () => {
     const repository = createRepository();
-    repository.getCountry.mockResolvedValue({ id: 'country-ye', iso2Code: 'YE' });
+    repository.getCountry.mockResolvedValue({ id: 'country-ye', iso2Code: 'YE', lifecycleState: 'ACTIVE', isActive: true });
     const universityRepository = { listPublished: vi.fn().mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 }) };
     const res = await request(createApp(repository, universityRepository)).get('/reference-data/countries/ye/universities');
     expect(res.status).toBe(200);
@@ -54,5 +65,6 @@ describe('ReferenceDataPublicRouter locale contract', () => {
     const res = await request(createApp(repository)).get('/reference-data/regions?countryIso2Code=YE&locale=ar');
     expect(res.status).toBe(200);
     expect(res.body.data[0].name).toBe('صنعاء');
+    expect(repository.listRegions).toHaveBeenCalledWith({ countryIso2Code: 'YE', activeOnly: true });
   });
 });

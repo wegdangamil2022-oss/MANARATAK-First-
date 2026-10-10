@@ -12,7 +12,15 @@ if (!url || url.includes('postgres-host')) {
 
 const prisma = new PrismaClient({ datasources: { db: { url } } });
 
+/** Intentionally always blocked until replaced by an ARB-approved P6→P7 apply implementation. */
+function legacyReferenceImportBlocked(): boolean { return true; }
+
 async function run() {
+  // P7 governance gate: disabled legacy direct importer. This must not bypass
+  // durable owner review/approval, transactional Audit/Outbox, or identity CAS.
+  if (legacyReferenceImportBlocked()) {
+    throw new Error('REFERENCE_LEGACY_DIRECT_IMPORT_DISABLED_USE_GOVERNED_REVIEW_APPLY');
+  }
   const csvPath = path.join(process.cwd(), 'workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv');
   const rootCsvPath = path.join(process.cwd(), 'MANARATAK_Asia_Cities_All_Combined.csv');
   console.log('1. File found in project root: ' + (fs.existsSync(rootCsvPath) ? 'YES' : 'NO'));

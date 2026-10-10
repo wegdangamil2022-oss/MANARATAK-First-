@@ -10,6 +10,8 @@ export interface IHierarchyNode<TNode = unknown> {
   readonly parentNodeIds: readonly string[];
   readonly childNodeIds: readonly string[];
   readonly depth: number;
+  /** Preferred display parent in a polyhierarchy, not an identity override. */
+  readonly primaryParentNodeId?: string | null;
   readonly value?: TNode;
 }
 
@@ -17,6 +19,10 @@ export interface IClosureTableRepository<TNode = unknown> {
   maintainClosureAsync(ancestorId: string, descendantId: string, depth: number): Promise<void>;
   getAncestorsAsync(nodeId: string): Promise<readonly string[]>;
   getDescendantsAsync(nodeId: string): Promise<readonly string[]>;
+  /** ADR 7.13 read contracts; optional for legacy implementation compatibility. */
+  getPathAsync?(ancestorId: string, descendantId: string): Promise<readonly string[] | null>;
+  getRootNodesAsync?(): Promise<readonly TNode[]>;
+  getLeafNodesAsync?(rootNodeId?: string): Promise<readonly TNode[]>;
   detectCycleAsync(ancestorId: string, descendantId: string): Promise<boolean>;
   getNodeAsync?(nodeId: string): Promise<TNode | null>;
 }
@@ -76,8 +82,8 @@ export class HierarchyValidationService implements ICycleDetectionValidator, IHi
     const visited = new Set<string>([startNodeId]);
     const queue: string[] = [startNodeId];
 
-    while (queue.length > 0) {
-      const current = queue.shift()!;
+    for (let cursor = 0; cursor < queue.length; cursor++) {
+      const current = queue[cursor];
       for (const child of adjacency.get(current) ?? []) {
         if (child === targetNodeId) return true;
         if (!visited.has(child)) {
@@ -99,17 +105,29 @@ export class HierarchyValidationService implements ICycleDetectionValidator, IHi
 
     const adjacency = this.buildAdjacency(existingEdges);
     const visited = new Set<string>([startNodeId]);
-    const queue: Array<readonly string[]> = [[startNodeId]];
+    const predecessor = new Map<string, string>();
+    const queue: string[] = [startNodeId];
 
-    while (queue.length > 0) {
-      const path = queue.shift()!;
-      const current = path[path.length - 1];
+    // O(V + E) over one immutable graph snapshot, without copying an entire
+    // route for every queued node or shift() re-indexing a long array.
+    for (let cursor = 0; cursor < queue.length; cursor++) {
+      const current = queue[cursor];
       for (const child of adjacency.get(current) ?? []) {
         if (visited.has(child)) continue;
-        const nextPath = [...path, child];
-        if (child === targetNodeId) return nextPath;
         visited.add(child);
-        queue.push(nextPath);
+        predecessor.set(child, current);
+        if (child === targetNodeId) {
+          const reversePath: string[] = [child];
+          let cursorNode = child;
+          while (cursorNode !== startNodeId) {
+            const parent = predecessor.get(cursorNode);
+            if (!parent) throw new Error('HIERARCHY_PATH_PREDECESSOR_MISSING');
+            reversePath.push(parent);
+            cursorNode = parent;
+          }
+          return reversePath.reverse();
+        }
+        queue.push(child);
       }
     }
 

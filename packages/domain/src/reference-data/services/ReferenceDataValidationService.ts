@@ -14,6 +14,8 @@ import {
   ReferenceDataValidationSeverity
 } from '../validation/ReferenceDataValidationTypes';
 import { IReferenceDataValidationService } from '../contracts/IReferenceDataValidationService';
+import { normalizeReferenceIdentityToken, referenceCityScopeKey } from '../governance/ReferenceIdentityNormalization';
+import { isRuntimeSupportedIanaTimeZone } from '../governance/ReferenceIanaTimeZonePolicy';
 
 export class ReferenceDataValidationService implements IReferenceDataValidationService {
   public validateCountry(
@@ -217,11 +219,11 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
 
     if (isoCode) {
       presentFields.push('isoCode');
-      if (!/^[a-z]{2,8}(-[a-z0-9]+)*$/.test(isoCode)) {
+      if (!/^[a-z]{2,3}$/.test(isoCode)) {
         issues.push({
           fieldName: 'isoCode',
           code: 'INVALID_ISO_FORMAT',
-          message: 'isoCode must be 2 to 8 lowercase letters or BCP-47 style with hyphen',
+          message: 'isoCode must be an ISO 639 alpha-2 or alpha-3 lowercase language code; BCP 47 locale tags are a separate concept',
           severity: ReferenceDataValidationSeverity.ERROR
         });
       }
@@ -333,6 +335,15 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
       });
     }
 
+    if (name && !normalizeReferenceIdentityToken(name)) {
+      issues.push({
+        fieldName: 'name',
+        code: 'INVALID_CITY_IDENTITY_TOKEN',
+        message: 'City identity name must contain at least one Unicode letter or number',
+        severity: ReferenceDataValidationSeverity.ERROR,
+      });
+    }
+
     if (input.latitude !== undefined && input.latitude !== null) {
       const lat = input.latitude;
       if (typeof lat !== 'number' || isNaN(lat) || lat < -90 || lat > 90) {
@@ -357,6 +368,17 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
       }
     }
 
+    if (input.timezone) {
+      // Runtime source validation; authoritative IANA snapshot remains separate.
+      if (!isRuntimeSupportedIanaTimeZone(input.timezone)) {
+        issues.push({
+          fieldName: 'timezone',
+          code: 'NON_CANONICAL_IANA_TIMEZONE',
+          message: 'timezone must be a runtime-accepted IANA timezone identifier (including UTC)',
+          severity: ReferenceDataValidationSeverity.ERROR
+        });
+      }
+    }
     if (!input.timezone) {
       issues.push({
         fieldName: 'timezone',
@@ -371,7 +393,7 @@ export class ReferenceDataValidationService implements IReferenceDataValidationS
 
     return {
       entityType: 'CITY',
-      deterministicKey: `${countryIso2Code}:${name}`,
+      deterministicKey: /^[A-Z]{2}$/.test(countryIso2Code) && normalizeReferenceIdentityToken(name) ? referenceCityScopeKey(input) : '',
       requiredFields,
       presentFields,
       missingFields,
