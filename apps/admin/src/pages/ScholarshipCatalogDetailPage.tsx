@@ -242,6 +242,7 @@ export function ScholarshipDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [reviewReason, setReviewReason] = useState('');
 
   // Hierarchical Degree & Majors State
   const [degreeGroups, setDegreeGroups] = useState<DegreeWithMajors[]>([]);
@@ -413,11 +414,12 @@ export function ScholarshipDetailPage() {
 
   const save = async () => {
     if (!id) return;
+    if (reviewReason.trim().length < 3) { setError('أدخل سبب التعديل للمراجعة (3 أحرف على الأقل).'); return; }
     setSaving(true);
     setError(null);
     setMessage(null);
     try {
-      await scholarshipCatalogApi.update(id, form);
+      await scholarshipCatalogApi.update(id, form, reviewReason.trim());
       setMessage('تم حفظ كافة تعديلات المنحة والدرجات والتخصصات بنجاح.');
       await load();
     } catch (err: unknown) {
@@ -446,6 +448,7 @@ export function ScholarshipDetailPage() {
 
   const executeConfirmedAction = async () => {
     if (!id || !confirmModal.type) return;
+    if (reviewReason.trim().length < 3) { setError('أدخل سبب القرار للمراجعة (3 أحرف على الأقل).'); return; }
     const command = confirmModal.type;
     setConfirmModal(prev => ({ ...prev, isOpen: false }));
     setActionLoading(true);
@@ -454,7 +457,7 @@ export function ScholarshipDetailPage() {
 
     try {
       if (['publish', 'mark-publishable', 'mark-ready'].includes(command) && JSON.stringify(form) !== savedForm.current) throw new Error('احفظ التعديلات قبل تغيير حالة النشر.');
-      await scholarshipCatalogApi.command(id, command);
+      await scholarshipCatalogApi.command(id, command, reviewReason.trim());
       setMessage(`تم تنفيذ الأمر (${command}) بنجاح.`);
       await load();
     } catch (err: unknown) {
@@ -631,6 +634,7 @@ export function ScholarshipDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <input aria-label="سبب تعديل المنحة أو قرار النشر" title="سبب التعديل (إلزامي للتدقيق)" placeholder="سبب التعديل / النشر" value={reviewReason} onChange={event => setReviewReason(event.target.value)} className="min-h-11 w-48 rounded-xl border border-white/30 bg-white px-3 text-xs text-[#142B5F]" />
             <button
               disabled={saving}
               type="button"

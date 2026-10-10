@@ -83,9 +83,10 @@ export const scholarshipCatalogApi = {
     );
   },
 
-  update(id: string, input: ScholarshipCatalogUpdate) {
+  update(id: string, input: ScholarshipCatalogUpdate, reason: string) {
     return adminApiClient.request<ScholarshipDto>(`${BASE}/${encodeURIComponent(id)}`, {
       method: 'PATCH',
+      headers: { 'X-Review-Reason': reason },
       body: JSON.stringify(input),
     });
   },
@@ -93,10 +94,11 @@ export const scholarshipCatalogApi = {
   command(
     id: string,
     command: 'mark-ready' | 'mark-publishable' | 'publish' | 'unpublish' | 'archive' | 'reject',
+    reason: string,
   ) {
     return adminApiClient.request<{ success: true }>(
       `${BASE}/${encodeURIComponent(id)}/${command}`,
-      { method: 'POST' },
+      { method: 'POST', headers: { 'X-Review-Reason': reason } },
     );
   },
 };

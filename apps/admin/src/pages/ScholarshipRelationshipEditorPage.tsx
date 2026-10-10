@@ -31,6 +31,7 @@ export function ScholarshipRelationshipEditorPage() {
   const [eligibilityItems, setEligibilityItems] = useState<EligibilityRow[]>([]);
   const [requiredDocumentItems, setRequiredDocumentItems] = useState<DocumentRow[]>([]);
   const [universityLinks, setUniversityLinks] = useState<UniversityLinkRow[]>([]);
+  const [reviewReason, setReviewReason] = useState('');
   const [saving, setSaving] = useState(false); const [error, setError] = useState(''); const [message, setMessage] = useState('');
 
   const hydrate = (detail: ScholarshipDetail) => {
@@ -41,10 +42,11 @@ export function ScholarshipRelationshipEditorPage() {
   useEffect(() => { load().catch((err) => setError(err instanceof Error ? err.message : 'Unable to load scholarship relationships.')); }, [id]);
 
   const save = async () => {
+    if (reviewReason.trim().length < 3) { setError('Enter a review reason before saving.'); return; }
     setSaving(true); setError(''); setMessage('');
     try {
       const saved = await adminApiClient.request<ScholarshipDetail>(`/admin/scholarships/${encodeURIComponent(id)}/canonical-relationships`, {
-        method: 'PUT', body: JSON.stringify({ countryReferenceId, studyLanguageReferenceId, benefits, degreeTargets, majorTargets, eligibilityItems, requiredDocumentItems, universityLinks }),
+        method: 'PUT', headers: { 'X-Review-Reason': reviewReason.trim() }, body: JSON.stringify({ countryReferenceId, studyLanguageReferenceId, benefits, degreeTargets, majorTargets, eligibilityItems, requiredDocumentItems, universityLinks }),
       });
       hydrate(saved); setMessage('Canonical scholarship relationships saved through the Scholarship owner API.');
     } catch (err) { setError(err instanceof Error ? err.message : 'Unable to save scholarship relationships.'); }
@@ -57,6 +59,8 @@ export function ScholarshipRelationshipEditorPage() {
   return <div className="mx-auto max-w-6xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
     <div className="flex items-center justify-between gap-4"><div><Link to={`/scholarships/${id}`} className="inline-flex items-center gap-1 text-sm font-semibold text-[#0E7C86]"><ArrowLeft className="h-4 w-4" /> Scholarship</Link><h2 className="mt-2 text-2xl font-bold">{scholarship.displayName}</h2><p className="text-sm text-[#203442]/65">Canonical relationship authoring · P12 owner API</p></div><span className="rounded-full bg-[#DDEFF2]/60 text-[#142B5F] px-3 py-1 text-xs font-semibold">{scholarship.status}</span></div>
     {immutable ? <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Published scholarship structure is immutable. Unpublish before changing relationships.</div> : null}
+    <label className="block text-sm font-medium">Review reason (required for audit)<input value={reviewReason} onChange={event => setReviewReason(event.target.value)} placeholder="Why are these relationships changing?" className="mt-2 w-full rounded-lg border border-[#DDEFF2] px-3 py-2" /></label>
+    {(majorTargets.some(row => row.sourceLabel?.trim() && !row.majorId)) ? <Link to="/majors" className="text-sm text-[#0E7C86] underline">Unresolved scholarship majors: review them in the Section 09 New Majors queue, with their evidence and source references. Do not auto-create a Major.</Link> : null}
     {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}{message ? <div className="rounded-lg border border-[#21A7B4]/30 bg-[#DDEFF2]/45 p-3 text-sm text-[#0E7C86]">{message}</div> : null}
 
     <section className="grid gap-4 rounded-2xl border border-[#DDEFF2] bg-white p-5 md:grid-cols-2"><CanonicalPicker label="Study country" value={countryReferenceId} onChange={(next) => setCountryReferenceId(next)} load={() => canonicalPickerApi.countries()} reloadKey="scholarship-countries" optional /><CanonicalPicker label="Study language" value={studyLanguageReferenceId} onChange={(next) => setStudyLanguageReferenceId(next)} load={() => canonicalPickerApi.languages()} reloadKey="scholarship-languages" optional /></section>

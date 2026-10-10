@@ -45,6 +45,7 @@ export function ScholarshipDetailPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   
   const [formData, setFormData] = useState<Partial<ScholarshipDetail>>({});
+  const [reviewReason, setReviewReason] = useState('');
 
   const fetchScholarship = async () => {
     setLoading(true);
@@ -87,6 +88,7 @@ export function ScholarshipDetailPage() {
   const fetchScholarships = fetchScholarship;
 
   const handleSave = async () => {
+    if (reviewReason.trim().length < 3) { setError('Review reason required.'); return; }
     setSaving(true);
     setError(null);
     setSuccessMsg(null);
@@ -94,6 +96,7 @@ export function ScholarshipDetailPage() {
       // Stringify JSON/array fields if needed for API compatibility or leave as is
       const res = await adminApiClient.request<ScholarshipDetail>(`/admin/scholarships/${id}`, {
         method: 'PATCH',
+        headers: { 'X-Review-Reason': reviewReason.trim() },
         body: JSON.stringify(formData),
       });
       setData(res);
@@ -106,11 +109,13 @@ export function ScholarshipDetailPage() {
   };
 
   const handleAction = async (endpoint: string, actionName: string) => {
+    if (reviewReason.trim().length < 3) { setError('Review reason required.'); return; }
     setError(null);
     setSuccessMsg(null);
     try {
       await adminApiClient.request(`/admin/scholarships/${id}/${endpoint}`, {
         method: 'POST',
+        headers: { 'X-Review-Reason': reviewReason.trim() },
       });
       setSuccessMsg(`Successfully executed: ${actionName}`);
       fetchScholarship(); // Refresh to get new status
@@ -133,6 +138,7 @@ export function ScholarshipDetailPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      <label className="block text-sm text-gray-700">Reason for scholarship change or publication decision<input value={reviewReason} onChange={event => setReviewReason(event.target.value)} className="mt-1 w-full max-w-lg rounded border border-gray-300 bg-white px-3 py-2" placeholder="Required for audit trail" /></label>
       <div className="flex items-center justify-between">
         <button 
           onClick={() => navigate('/scholarships')}
