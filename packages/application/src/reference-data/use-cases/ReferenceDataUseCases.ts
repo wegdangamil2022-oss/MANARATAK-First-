@@ -172,7 +172,7 @@ export class ReferenceDataUseCases {
 
   public async getCountry(iso2Code: string): Promise<ReferenceCountryDto> {
     const country = await this.repository.getCountry(iso2Code);
-    if (!country || country.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
+    if (!country || !country.isActive || country.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
       throw new ReferenceDataNotFoundError('COUNTRY', iso2Code);
     }
     return country;
@@ -180,7 +180,7 @@ export class ReferenceDataUseCases {
 
   public async getCurrency(isoCode: string): Promise<ReferenceCurrencyDto> {
     const currency = await this.repository.getCurrency(isoCode);
-    if (!currency || currency.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
+    if (!currency || !currency.isActive || currency.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
       throw new ReferenceDataNotFoundError('CURRENCY', isoCode);
     }
     return currency;
@@ -188,7 +188,7 @@ export class ReferenceDataUseCases {
 
   public async getLanguage(isoCode: string): Promise<ReferenceLanguageDto> {
     const language = await this.repository.getLanguage(isoCode);
-    if (!language || language.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
+    if (!language || !language.isActive || language.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
       throw new ReferenceDataNotFoundError('LANGUAGE', isoCode);
     }
     return language;
@@ -200,12 +200,12 @@ export class ReferenceDataUseCases {
     // Code fields are authoritative links, never free-form labels.
     if (data.defaultCurrencyCode) {
       const currency = await this.repository.getCurrency(data.defaultCurrencyCode);
-      if (!currency || currency.lifecycleState !== ReferenceLifecycleState.ACTIVE)
+      if (!currency || !currency.isActive || currency.lifecycleState !== ReferenceLifecycleState.ACTIVE)
         throw new ReferenceDataNotFoundError('ACTIVE_CURRENCY', data.defaultCurrencyCode);
     }
     if (data.defaultLanguageCode) {
       const language = await this.repository.getLanguage(data.defaultLanguageCode);
-      if (!language || language.lifecycleState !== ReferenceLifecycleState.ACTIVE)
+      if (!language || !language.isActive || language.lifecycleState !== ReferenceLifecycleState.ACTIVE)
         throw new ReferenceDataNotFoundError('ACTIVE_LANGUAGE', data.defaultLanguageCode);
     }
     return this.atomicUpsert('COUNTRY', data.iso2Code, context, transaction => transaction.repository.upsertCountryInTransaction(data, transaction.context, context?.actorId, context?.correlationId), () => this.repository.upsertCountry(data));
@@ -224,12 +224,12 @@ export class ReferenceDataUseCases {
   public async upsertCity(data: UpsertReferenceCityDto, context?: ReferenceDataMutationContext): Promise<ReferenceCityDto> {
     this.assertCanonicalValidation('CITY', this.validationService.validateCity(data).issues);
     const country = await this.repository.getCountry(data.countryIso2Code);
-    if (!country || country.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
+    if (!country || !country.isActive || country.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
       throw new ReferenceDataNotFoundError('ACTIVE_COUNTRY', data.countryIso2Code);
     }
     if (data.administrativeRegionId) {
       const region = await this.repository.getRegionById(data.administrativeRegionId);
-      if (!region || region.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
+      if (!region || !region.isActive || region.lifecycleState !== ReferenceLifecycleState.ACTIVE) {
         throw new ReferenceDataNotFoundError('REGION', data.administrativeRegionId);
       }
       if (region.countryIso2Code !== country.iso2Code) {
