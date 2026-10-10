@@ -15,13 +15,13 @@ export class PrismaScholarshipMajorResolutionWriter {
     const [targets, eligibility] = await Promise.all([
       input.targets.length
         ? this.prisma.scholarshipMajorTarget.updateMany({
-            where: {OR:input.targets.map(source=>({id:source.sourceId,scholarshipId:source.ownerId,sourceLabel:source.rawLabel,updatedAt:source.sourceUpdatedAt ? new Date(source.sourceUpdatedAt) : undefined})), majorId:null,resolutionStatus:{notIn:RESOLVED_STATES},scholarship:{is:{status:{notIn:['ARCHIVED','REJECTED']}}}},
+            where: {OR:input.targets.map(source=>({id:source.sourceId,scholarshipId:source.ownerId,sourceLabel:source.rawLabel,updatedAt:source.sourceUpdatedAt ? new Date(source.sourceUpdatedAt) : undefined})), majorId:null,resolutionStatus:{notIn:RESOLVED_STATES},scholarship:{is:{publicationStatus:'DRAFT',status:{notIn:['ARCHIVED','REJECTED','PUBLISHED']}}}},
             data: { majorId: input.majorId, resolutionStatus: 'RESOLVED' },
           })
         : Promise.resolve({ count: 0 }),
       input.eligibility.length
         ? this.prisma.scholarshipEligibilityItem.updateMany({
-            where: {OR:input.eligibility.map(source=>({id:source.sourceId,scholarshipId:source.ownerId,valueText:source.rawLabel,degreeLevelId:source.degreeLevelId ?? null,updatedAt:source.sourceUpdatedAt ? new Date(source.sourceUpdatedAt) : undefined})), majorId:null,resolutionStatus:{notIn:RESOLVED_STATES},scholarship:{is:{status:{notIn:['ARCHIVED','REJECTED']}}}},
+            where: {OR:input.eligibility.map(source=>({id:source.sourceId,scholarshipId:source.ownerId,valueText:source.rawLabel,degreeLevelId:source.degreeLevelId ?? null,updatedAt:source.sourceUpdatedAt ? new Date(source.sourceUpdatedAt) : undefined})), majorId:null,resolutionStatus:{notIn:RESOLVED_STATES},scholarship:{is:{publicationStatus:'DRAFT',status:{notIn:['ARCHIVED','REJECTED','PUBLISHED']}}}},
             data: { majorId: input.majorId, resolutionStatus: 'RESOLVED' },
           })
         : Promise.resolve({ count: 0 }),

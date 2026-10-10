@@ -1642,6 +1642,7 @@ model Scholarship {
   slug                 String    @unique
   canonicalName        String
   canonicalDedupKey    String    @unique
+  revision             Int       @default(1)
   displayName          String
   providerName         String?
   status               String

@@ -247,6 +247,8 @@ export interface ScholarshipApplicationCycleDto {
 
 export interface ScholarshipDto extends CreateScholarshipDto {
   id: string;
+  /** Monotonic owner revision for conditional writes. */
+  revision?: number;
   versions?: ScholarshipVersionDto[];
   sponsorContext?: ScholarshipSponsorContextDto | null;
   applicationCycles?: ScholarshipApplicationCycleDto[];
@@ -345,11 +347,16 @@ export type PublicScholarshipDto = Omit<
   | 'versions'
   | 'sponsorContext'
   | 'applicationCycles'
+  | 'revision'
+  | 'sourceEvidence'
+  | 'metadata'
+  | 'notes'
 >;
 
 export interface IScholarshipRepository {
   create(data: CreateScholarshipDto): Promise<ScholarshipDto>;
   update(id: string, updates: ScholarshipRepositoryUpdateDto): Promise<ScholarshipDto>;
+  assertCurrentRevision?(id: string, expectedRevision: number): Promise<void>;
   findByDedupKey(key: string): Promise<ScholarshipDto | null>;
   findById(id: string): Promise<ScholarshipDto | null>;
   findBySlug(slug: string): Promise<ScholarshipDto | null>;

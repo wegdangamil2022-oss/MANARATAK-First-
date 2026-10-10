@@ -101,7 +101,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
 
   async findPublishedBySlug(slug: string): Promise<ScholarshipDto | null> {
     const record = await this.prisma.scholarship.findFirst({
-      where: { slug, publicationStatus: ScholarshipPublicationStatus.PUBLISHED, verificationStatus: ScholarshipVerificationStatus.VERIFIED },
+      where: { slug, status: ScholarshipStatus.PUBLISHED, publicationStatus: ScholarshipPublicationStatus.PUBLISHED, verificationStatus: ScholarshipVerificationStatus.VERIFIED, versions: { some: { status: 'PUBLISHED' } } },
       include: this.normalizedInclude,
     });
     return record ? this.mapToDto(record) : null;
@@ -171,20 +171,30 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     return this.mapToDto(record);
   }
 
+  async assertCurrentRevision(id: string, expectedRevision: number): Promise<void> {
+    if (!this.transactionBound) throw new Error('SCHOLARSHIP_ATOMIC_TRANSACTION_REQUIRED');
+    await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "Scholarship" WHERE "id" = ${id} FOR UPDATE`);
+    const record = await this.prisma.scholarship.findUnique({ where: { id }, select: { revision: true } });
+    if (!record) throw new Error('SCHOLARSHIP_NOT_FOUND');
+    if (record.revision !== expectedRevision) throw new Error('SCHOLARSHIP_STALE_REVISION');
+  }
+
   async update(id: string, updates: ScholarshipRepositoryUpdateDto): Promise<ScholarshipDto> {
     const structural = this.hasStructuralChanges(updates);
-    if (structural && !this.transactionBound) throw new Error('SCHOLARSHIP_STRUCTURAL_TRANSACTION_REQUIRED');
-    if (structural) await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "Scholarship" WHERE "id" = ${id} FOR UPDATE`);
+    if (!this.transactionBound) throw new Error('SCHOLARSHIP_ATOMIC_TRANSACTION_REQUIRED');
+    await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "Scholarship" WHERE "id" = ${id} FOR UPDATE`);
     const existing = await this.prisma.scholarship.findUnique({ where: { id } });
     if (!existing) {
       throw new Error(`SCHOLARSHIP_NOT_FOUND:${id}`);
     }
+    if (existing.publicationStatus !== ScholarshipPublicationStatus.DRAFT || [ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED].includes(existing.status as ScholarshipStatus)) throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS');
 
     const legacyCompatibility = this.buildLegacyCompatibility(
       this.asOptionalRecord(existing.optionalFields),
       updates,
     );
     const updateData = {
+      revision: { increment: 1 },
       canonicalDedupKey: updates.canonicalDedupKey,
       displayName: updates.displayName,
       providerName: updates.providerName,
@@ -248,9 +258,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async updateStatus(id: string, status: ScholarshipStatus): Promise<void> {
+    if (!this.transactionBound) throw new Error('SCHOLARSHIP_ATOMIC_TRANSACTION_REQUIRED');
     await this.prisma.scholarship.update({
       where: { id },
-      data: { status },
+      data: { status, revision: { increment: 1 } },
     });
   }
 
@@ -259,9 +270,12 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     verificationStatus?: ScholarshipVerificationStatus;
     publicationStatus?: ScholarshipPublicationStatus;
   }): Promise<void> {
+    if (!this.transactionBound) throw new Error('SCHOLARSHIP_ATOMIC_TRANSACTION_REQUIRED');
+    await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "Scholarship" WHERE "id" = ${id} FOR UPDATE`);
     await this.prisma.scholarship.update({
       where: { id },
       data: {
+        revision: { increment: 1 },
         status: lifecycle.workflowStatus,
         verificationStatus: lifecycle.verificationStatus,
         publicationStatus: lifecycle.publicationStatus,
@@ -438,7 +452,9 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   async listPublished(filters: PublicScholarshipFilters): Promise<ScholarshipPage<ScholarshipDto>> {
     const where: Prisma.ScholarshipWhereInput = {
       publicationStatus: ScholarshipPublicationStatus.PUBLISHED,
+      status: ScholarshipStatus.PUBLISHED,
       verificationStatus: ScholarshipVerificationStatus.VERIFIED,
+      versions: { some: { status: 'PUBLISHED' } },
     };
     const constraints: Prisma.ScholarshipWhereInput[] = [];
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
