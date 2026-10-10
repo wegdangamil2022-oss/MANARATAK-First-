@@ -172,9 +172,9 @@ const inlineStyleViolations = (base) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const file = path.join(dir, entry.name);
       if (entry.isDirectory()) pending.push(file);
-      else if (/\\.(tsx|jsx)$/.test(entry.name)) {
+      else if (/\.(tsx|jsx)$/.test(entry.name)) {
         const source = fs.readFileSync(file, 'utf8');
-        if (/\\bstyle\\s*=\\s*\\{|<style(?:\\s|>)/i.test(source)) violations.push(path.relative(root, file));
+        if (/\bstyle\s*=\s*\{|<style(?:\s|>)/i.test(source)) violations.push(path.relative(root, file));
       }
     }
   }
