@@ -147,7 +147,7 @@ describe('ImportedCourseAdminUseCases', () => {
   it('publishes through AdminCourseUseCases only after source/link gates', async () => {
     const f = createFixture();
     await f.useCases.publish('course-1');
-    expect(f.admin.publish).toHaveBeenCalledWith('course-1');
+    expect(f.admin.publish).toHaveBeenCalledWith('course-1', undefined);
   });
 
   it('forbids changing provider identity through the generic imported-course patch', async () => {

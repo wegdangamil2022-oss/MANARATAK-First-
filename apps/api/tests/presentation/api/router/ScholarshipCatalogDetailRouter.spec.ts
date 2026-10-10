@@ -50,7 +50,7 @@ describe('WP12-9 ScholarshipAdminRouter normalized catalog detail', () => {
   it('passes normalized nested structures directly instead of repacking optionalFields', async () => {
     const env = setup();
     const response = await request(env.app)
-      .patch('/admin/scholarships/sch-1')
+      .patch('/admin/scholarships/sch-1').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send({
         displayName: 'Updated',
         fundingTypeCode: 'FULLY_FUNDED',
@@ -92,7 +92,7 @@ describe('WP12-9 ScholarshipAdminRouter normalized catalog detail', () => {
 
   it('strips lifecycle and immutable fields from generic PATCH', async () => {
     const env = setup();
-    await request(env.app).patch('/admin/scholarships/sch-1').send({
+    await request(env.app).patch('/admin/scholarships/sch-1').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
       id: 'bad',
       publicId: 'bad-public',
       status: 'PUBLISHED',

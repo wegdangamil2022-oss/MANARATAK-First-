@@ -11,6 +11,8 @@ const check = (name, condition, detail = '') => {
 };
 
 const useCases = read('packages/application/src/tests-platform/use-cases/InternationalTestUseCases.ts');
+const governance = read('packages/infrastructure/src/international-tests/InternationalTestGovernancePersistence.ts');
+const publicMapper = read('packages/ui/src/public-tests/presentation.ts');
 const repo = read('packages/infrastructure/src/international-tests/PrismaInternationalTestRepository.ts');
 const repositoryContract = read('packages/domain/src/tests-platform/repository.ts');
 const router = read('apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts');
@@ -34,11 +36,11 @@ const testsIndex = read('packages/application/src/tests-platform/index.ts');
 check('Publication synchronizes PUBLISHED + public visibility',
   /status:\s*InternationalTestStatus\.PUBLISHED,\s*isPubliclyVisible:\s*true/.test(useCases));
 check('Archive synchronizes ARCHIVED + hidden visibility',
-  /status:\s*InternationalTestStatus\.ARCHIVED,\s*isPubliclyVisible:\s*false/.test(useCases));
+  useCases.includes('this.transition(id,InternationalTestStatus.ARCHIVED,context,true)') && useCases.includes('...(hide?{isPubliclyVisible:false}:{})'));
 check('Ready-to-publish remains hidden',
-  /status:\s*InternationalTestStatus\.READY_TO_PUBLISH,\s*isPubliclyVisible:\s*false/.test(useCases));
+  useCases.includes('this.transition(id,InternationalTestStatus.READY_TO_PUBLISH,context,true)') && useCases.includes('...(hide?{isPubliclyVisible:false}:{})'));
 check('Source verification requires trusted evidence',
-  useCases.includes('TRUSTED_SOURCE_EVIDENCE_REQUIRED') && useCases.includes('InternationalTestSourceTrustLevel.AUTHORITATIVE') && useCases.includes('InternationalTestSourceTrustLevel.HIGH'));
+  useCases.includes("repository.govern(id,'VERIFY'") && governance.includes('INTERNATIONAL_TEST_SOURCE_ATTESTATION_REQUIRED') && governance.includes("['HIGH','AUTHORITATIVE']") && governance.includes('assertOfficialTestUrl(ev.sourceUrl'));
 
 check('Provider contract exposed on test repository',
   repositoryContract.includes('findProviderById?') && repositoryContract.includes('listProviders?') && repositoryContract.includes('upsertProvider?'));
@@ -51,7 +53,7 @@ check('Admin relationship read route exists', router.includes("router.get('/:id/
 
 check('Admin public page uses slug instead of owner id',
   adminDetail.includes('href={`/international-tests/${test.slug}`}') && !adminDetail.includes('href={`/international-tests/${test.id}`}'));
-check('Admin reads canonical providers', adminDetail.includes('listInternationalTestProviders'));
+check('Admin reads canonical providers', adminDetail.includes('<CanonicalPicker paged') && adminDetail.includes('/admin/international-tests/providers?search='));
 check('Admin can create/link canonical provider', adminDetail.includes('upsertInternationalTestProvider') && adminDetail.includes('providerId'));
 check('Admin uses canonical evidence trust enum values',
   adminDetail.includes("sourceTrustLevel: 'AUTHORITATIVE'") && !adminDetail.includes("sourceTrustLevel: 'OFFICIAL_PROVIDER'"));
@@ -68,9 +70,9 @@ const canonicalCategories = [
 check('Admin canonical category filters aligned', canonicalCategories.every(k => adminList.includes(k)));
 check('Public canonical category filters aligned', canonicalCategories.every(k => publicList.includes(k)));
 check('Public detail no longer exposes raw availability UUID arrays',
-  !publicDetail.includes('availableCountryIds')
-  && publicDataSource.includes('dto.countryRelationships?.map')
-  && publicDetail.includes('exam.relatedCountries'));
+  !publicDetail.includes('exam.availableCountryIds')
+  && publicDataSource.includes('mapInternationalTestToExam(dto)') && publicMapper.includes('relatedCountries:')
+  && publicDetail.includes('<ExamDetails {...props}') && read('packages/ui/src/public-tests/ExamDetails.tsx').includes('relatedCountries'));
 check('Public DTO exposes canonical reference relationships', publicClient.includes('PublicInternationalTestReferenceRelationshipDto'));
 
 check('University filter accepts canonical internationalTestId', universityContract.includes('internationalTestId?: string'));

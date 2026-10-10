@@ -602,19 +602,12 @@ export function StudentSupportAdminPage() {
                               <span>التقدم</span>
                               <span>{progress}%</span>
                             </div>
-                            <div
-                              role="progressbar"
+                            <progress
                               aria-label={`التقدم في ${item.courseName}`}
-                              aria-valuemin={0}
-                              aria-valuemax={100}
-                              aria-valuenow={progress}
-                              className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"
-                            >
-                              <div
-                                className="h-full rounded-full bg-[#0E7C86]"
-                                style={{ width: `${progress}%` }}
-                              />
-                            </div>
+                              max={100}
+                              value={progress}
+                              className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100 [&::-webkit-progress-bar]:bg-slate-100 [&::-webkit-progress-value]:bg-[#0E7C86] [&::-moz-progress-bar]:bg-[#0E7C86]"
+                            />
                             <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
                               <span>التسجيل: {date(item.enrolledAt)}</span>
                               <span>آخر وصول: {date(item.lastAccessedAt)}</span>

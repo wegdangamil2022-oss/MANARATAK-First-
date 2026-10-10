@@ -28,7 +28,7 @@ check('P7-PLAN-002 migration backfills canonical country IDs', migration.include
 check('P7-PLAN-002 migration retains explicit DB gate warning', migration.includes('Apply only through the normal database remediation/migration gate'));
 
 check('P7-PLAN-003 city application write resolves canonical country first', useCases.includes('countryReferenceId: country.id'));
-check('P7-PLAN-003 seed write resolves canonical country first', seed.includes("countryReferenceId: country.id"));
+check('P7-PLAN-003 unapproved seed writes remain disabled', seed.includes('REFERENCE_DATA_SEED_APPLY_REQUIRES_DURABLE_OWNER_APPROVAL') && !seed.includes('.upsertCity('));
 check('P7-PLAN-003 repository rejects canonical country/code mismatch', repo.includes('REFERENCE_CITY_CANONICAL_COUNTRY_MISMATCH'));
 check('P7-PLAN-003 repository persists canonical countryReferenceId', repo.includes('countryReferenceId: canonicalCountry.id'));
 

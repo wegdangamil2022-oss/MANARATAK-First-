@@ -35,8 +35,8 @@ const checks = [
     hasReservedKey('completenessStatus') &&
     ordered(mapToDto, '...safeOptionalFields,', '...rest,') &&
     files.repoContract.includes('findPublishedBySlug') &&
-    files.repository.includes('status: InternationalTestStatus.PUBLISHED') &&
-    files.repository.includes('isPubliclyVisible: true') &&
+    files.repository.includes('this.publishedSnapshot(record)') && files.repository.includes('InternationalTestPublicationSnapshot') && files.repository.includes('record.currentPublishedVersionId') &&
+    /isPubliclyVisible:\s*true/.test(files.repository) &&
     files.useCases.includes('this.repository.findPublishedBySlug(slug)') &&
     files.localized.includes('this.repository.findPublishedBySlug(slug)') &&
     files.adminRouter.includes('rootCreateSchema.parse(req.body)') &&

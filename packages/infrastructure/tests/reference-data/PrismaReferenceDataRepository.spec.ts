@@ -14,27 +14,29 @@ function createMockPrismaClient() {
     $queryRaw: vi.fn().mockResolvedValue([{
       lifecycleState: 'ACTIVE', versionNumber: 1, effectiveFrom: new Date(), effectiveTo: null, isActive: true,
     }]),
+    referenceAliasRecord: {findMany: vi.fn().mockResolvedValue([])},
+    referenceProviderMappingRecord: {findMany: vi.fn().mockResolvedValue([])},
     $executeRaw: vi.fn().mockResolvedValue(1),
     referenceCountry: {
+      findFirst: vi.fn(async ({where}) => ({id: where.id ?? `country-${where.iso2Code.toLowerCase()}`, iso2Code: where.iso2Code ?? 'EG', lifecycleState: 'ACTIVE', isActive: true})),
       findMany: vi.fn(),
       findUnique: vi.fn(),
-      upsert: vi.fn()
+      create: vi.fn(), update: vi.fn(), upsert: vi.fn()
     },
     referenceCurrency: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
-      upsert: vi.fn()
+      create: vi.fn(), update: vi.fn(), upsert: vi.fn()
     },
     referenceLanguage: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
-      upsert: vi.fn()
+      create: vi.fn(), update: vi.fn(), upsert: vi.fn()
     },
     referenceCity: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
-      update: vi.fn(),
-      upsert: vi.fn()
+      create: vi.fn(), update: vi.fn(), upsert: vi.fn()
     }
   } as unknown as PrismaClient;
 }
@@ -82,10 +84,11 @@ describe('PrismaReferenceDataRepository', () => {
 
       expect(mockPrisma.referenceCountry.findMany).toHaveBeenCalledWith({
         where: {
-          isActive: true,
+          isActive: true, lifecycleState: 'ACTIVE',
           region: 'Africa',
           OR: [
             { name: { contains: 'Egy', mode: 'insensitive' } },
+            { nameAr: { contains: 'Egy', mode: 'insensitive' } },
             { officialName: { contains: 'Egy', mode: 'insensitive' } },
             { iso2Code: { contains: 'Egy', mode: 'insensitive' } },
             { iso3Code: { contains: 'Egy', mode: 'insensitive' } }
@@ -158,7 +161,7 @@ describe('PrismaReferenceDataRepository', () => {
       });
     });
 
-    it('upsertCountry calls referenceCountry.upsert using iso2Code as unique key', async () => {
+    it('upsertCountry calls referenceCountry.create using iso2Code as unique key', async () => {
       const input: UpsertReferenceCountryDto = {
         iso2Code: 'EG',
         iso3Code: 'EGY',
@@ -185,26 +188,12 @@ describe('PrismaReferenceDataRepository', () => {
         updatedAt: new Date()
       };
 
-      mockPrisma.referenceCountry.upsert.mockResolvedValue(dbRecord);
+      mockPrisma.referenceCountry.create.mockResolvedValue(dbRecord);
 
       const result = await repository.upsertCountry(input);
 
-      expect(mockPrisma.referenceCountry.upsert).toHaveBeenCalledWith({
-        where: { iso2Code: 'EG' },
-        update: {
-          iso3Code: 'EGY',
-          name: 'Egypt',
-          nameAr: undefined,
-          officialName: undefined,
-          region: undefined,
-          subregion: undefined,
-          defaultCurrencyCode: undefined,
-          defaultLanguageCode: undefined,
-          callingCode: undefined,
-          flagAssetId: undefined,
-          metadata: { key: 'value' }
-        },
-        create: {
+      expect(mockPrisma.referenceCountry.create).toHaveBeenCalledWith({
+        data: {
           iso2Code: 'EG',
           iso3Code: 'EGY',
           name: 'Egypt',
@@ -250,7 +239,7 @@ describe('PrismaReferenceDataRepository', () => {
 
       expect(mockPrisma.referenceCurrency.findMany).toHaveBeenCalledWith({
         where: {
-          isActive: true,
+          isActive: true, lifecycleState: 'ACTIVE',
           OR: [
             { name: { contains: 'USD', mode: 'insensitive' } },
             { isoCode: { contains: 'USD', mode: 'insensitive' } },
@@ -303,7 +292,7 @@ describe('PrismaReferenceDataRepository', () => {
       expect(result?.isoCode).toBe('USD');
     });
 
-    it('upsertCurrency calls referenceCurrency.upsert using isoCode', async () => {
+    it('upsertCurrency calls referenceCurrency.create using isoCode', async () => {
       const input: UpsertReferenceCurrencyDto = {
         isoCode: 'USD',
         name: 'US Dollar',
@@ -324,20 +313,11 @@ describe('PrismaReferenceDataRepository', () => {
         updatedAt: new Date()
       };
 
-      mockPrisma.referenceCurrency.upsert.mockResolvedValue(dbRecord);
+      mockPrisma.referenceCurrency.create.mockResolvedValue(dbRecord);
 
       const result = await repository.upsertCurrency(input);
-      expect(mockPrisma.referenceCurrency.upsert).toHaveBeenCalledWith({
-        where: { isoCode: 'USD' },
-        update: {
-          numericCode: undefined,
-          name: 'US Dollar',
-          nameAr: undefined,
-          symbol: '$',
-          minorUnit: undefined,
-          metadata: undefined
-        },
-        create: {
+      expect(mockPrisma.referenceCurrency.create).toHaveBeenCalledWith({
+        data: {
           isoCode: 'USD',
           numericCode: undefined,
           name: 'US Dollar',
@@ -375,7 +355,7 @@ describe('PrismaReferenceDataRepository', () => {
 
       expect(mockPrisma.referenceLanguage.findMany).toHaveBeenCalledWith({
         where: {
-          isActive: true,
+          isActive: true, lifecycleState: 'ACTIVE',
           OR: [
             { name: { contains: 'ar', mode: 'insensitive' } },
             { nativeName: { contains: 'ar', mode: 'insensitive' } },
@@ -420,7 +400,7 @@ describe('PrismaReferenceDataRepository', () => {
       expect(result?.direction).toBe('LTR');
     });
 
-    it('upsertLanguage calls referenceLanguage.upsert using isoCode', async () => {
+    it('upsertLanguage calls referenceLanguage.create using isoCode', async () => {
       const input: UpsertReferenceLanguageDto = {
         isoCode: 'en',
         name: 'English',
@@ -440,19 +420,11 @@ describe('PrismaReferenceDataRepository', () => {
         updatedAt: new Date()
       };
 
-      mockPrisma.referenceLanguage.upsert.mockResolvedValue(dbRecord);
+      mockPrisma.referenceLanguage.create.mockResolvedValue(dbRecord);
 
       const result = await repository.upsertLanguage(input);
-      expect(mockPrisma.referenceLanguage.upsert).toHaveBeenCalledWith({
-        where: { isoCode: 'en' },
-        update: {
-          name: 'English',
-          nameAr: undefined,
-          nativeName: undefined,
-          direction: 'LTR',
-          metadata: undefined
-        },
-        create: {
+      expect(mockPrisma.referenceLanguage.create).toHaveBeenCalledWith({
+        data: {
           isoCode: 'en',
           name: 'English',
           nameAr: undefined,
@@ -512,7 +484,7 @@ describe('PrismaReferenceDataRepository', () => {
 
       expect(mockPrisma.referenceCity.findMany).toHaveBeenCalledWith({
         where: {
-          isActive: true,
+          isActive: true, lifecycleState: 'ACTIVE',
           countryIso2Code: 'EG',
           region: 'Cairo Governorate',
           OR: [
@@ -660,7 +632,7 @@ describe('PrismaReferenceDataRepository', () => {
       };
       mockPrisma.referenceCity.findUnique.mockResolvedValue(null);
       mockPrisma.referenceCity.findMany.mockResolvedValue([]);
-      mockPrisma.referenceCity.upsert.mockResolvedValue({
+      mockPrisma.referenceCity.create.mockResolvedValue({
         id: 'city-aswan',
         countryIso2Code: 'EG',
         name: 'Aswan',
@@ -677,10 +649,10 @@ describe('PrismaReferenceDataRepository', () => {
 
       const result = await repository.upsertCity(input);
 
-      const call = mockPrisma.referenceCity.upsert.mock.calls[0][0];
-      expect(call.where.canonicalIdentityKey).toMatch(/^[a-f0-9]{64}$/);
-      expect(call.create).toMatchObject({
-        canonicalIdentityKey: call.where.canonicalIdentityKey,
+      const call = mockPrisma.referenceCity.create.mock.calls[0][0];
+      expect(call.data.canonicalIdentityKey).toMatch(/^[a-f0-9]{64}$/);
+      expect(call.data).toMatchObject({
+        canonicalIdentityKey: call.data.canonicalIdentityKey,
         countryReferenceId: 'country-eg',
         countryIso2Code: 'EG',
         name: 'Aswan',

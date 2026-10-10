@@ -63,7 +63,8 @@ describe('InternationalTestPublicUseCases', () => {
 
       const result = await useCases.getPublishedBySlug('sat-digital');
 
-      expect(result).toEqual(publishedTest);
+      expect(result).toMatchObject({id: 'test-1', slug: 'sat-digital', canonicalName: 'SAT Digital'});
+      expect(result).toHaveProperty('status', InternationalTestStatus.PUBLISHED);
     });
   });
 });

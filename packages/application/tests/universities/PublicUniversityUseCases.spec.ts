@@ -43,7 +43,8 @@ describe('PublicUniversityUseCases', () => {
         status: UniversityStatus.PUBLISHED,
         completenessStatus: UniversityImportCompletenessState.COMPLETE,
         sourceImportRecordId: 'rec-1',
-        optionalFields: { description: 'Official university profile' },
+        description: 'Official university profile',
+        optionalFields: { internalNote: 'Not public' },
         createdAt: new Date(),
         updatedAt: new Date()
       }],

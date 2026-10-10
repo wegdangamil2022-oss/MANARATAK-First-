@@ -25,7 +25,7 @@
 
 اختبار CertificateStudentAccountFlow يستعمل مسار الإصدار والتوقيع التطويري والتوليد والقارئ وStudentWorkspaceRouter وبوابة dashboard الحقيقيين؛ persistence وcustody والتسليم الخارجي بدائل اختبار. يثبت الإصدار الواحد، الهوية التاريخية، عرض الطالب المالك، التنزيل الخاص، التحقق العام، رفض طالب آخر ورفض التنزيل بعد الإلغاء. لا يثبت أقفال PostgreSQL أو HSM.
 
-اختبار المتصفح `scripts/certificates/verify-student-browser.mjs` يحمل المكونات الحقيقية وApiClient، ويحاكي API فقط: قائمة فارغة ثم ظهور إصدار في polling، grant مع idempotency key، عرض SVG، تنزيل PDF صالح، وتحميل الصفحة التالية. يستعمل بيانات PREVIEW؛ لا يدخل حساب طالب حقيقيًا ولا يكتب إلى DB.
+اختبار المتصفح `tests/certificates/verify-student-browser.mjs` يحمل المكونات الحقيقية وApiClient، ويحاكي API فقط: قائمة فارغة ثم ظهور إصدار في polling، grant مع idempotency key، عرض SVG، تنزيل PDF صالح، وتحميل الصفحة التالية. يستعمل بيانات PREVIEW؛ لا يدخل حساب طالب حقيقيًا ولا يكتب إلى DB.
 
 ## تجهيز جوجل استوديو
 

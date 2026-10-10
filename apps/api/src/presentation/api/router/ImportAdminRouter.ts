@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { ResponseFormatter } from '../response/ResponseFormatter';
+import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { readFile } from 'fs/promises';

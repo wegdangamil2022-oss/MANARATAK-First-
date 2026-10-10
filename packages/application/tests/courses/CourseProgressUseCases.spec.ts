@@ -110,7 +110,7 @@ describe('CourseProgressUseCases W9 integrity', () => {
 
   it('completes and emits through one atomic boundary', async () => {
     await useCases.completeCourse('course-1', 'student-1');
-    expect(atomic.execute).toHaveBeenCalledWith(expect.objectContaining({ outbox: expect.objectContaining({ eventType: 'CourseCompleted' }) }), expect.any(Function));
+    expect(atomic.execute).toHaveBeenCalledWith(expect.objectContaining({ outbox: expect.objectContaining({ eventType: 'CourseCompleted' }) }), expect.any(Function), expect.any(Function));
     expect(progressRepo.completeCourse).toHaveBeenCalledWith(expect.objectContaining({ courseVersion: 3, status: CourseCompletionStatus.CERTIFICATE_SIGNAL_READY }));
     expect(progressRepo.markEnrollmentCompleted).toHaveBeenCalled();
   });

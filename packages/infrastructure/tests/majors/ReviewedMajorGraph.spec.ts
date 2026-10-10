@@ -56,13 +56,15 @@ describe('M10-10 reviewed Major graph persistence', () => {
     expect(f.prisma.majorClassificationMapping.findFirst).toHaveBeenCalledWith({ where: { profileId: 'profile', taxonomyNodeId: 'node', relationshipType: 'PRIMARY' } });
     expect(f.prisma.majorClassificationMapping.create).not.toHaveBeenCalled();
   });
-  it('applies canonical graph filter and search together to the list and count', async () => {
-    const f = fixture(); await f.base.list({ taxonomyNodeId: 'node', search: 'science', page: 2, pageSize: 50 });
-    const where = f.prisma.major.findMany.mock.calls[0][0].where;
-    expect(f.prisma.major.count).toHaveBeenCalledWith({ where });
-    expect(where.OR[0]).toMatchObject({ displayName: { contains: 'science' } });
-    expect(where.AND[0].OR).toContainEqual({ classificationMappings: { some: { taxonomyNodeId: 'node' } } });
-    expect(where.AND[0].OR).toContainEqual({ levelProfiles: { some: { OR: expect.arrayContaining([{ classificationMappings: { some: { taxonomyNodeId: 'node' } } }]) } } });
+  it('applies canonical graph and search filters to both page and count queries', async () => {
+    const f = fixture(); await f.base.list({taxonomyNodeId:'node',search:'science',page:2,pageSize:50});
+    expect(f.prisma.$queryRaw).toHaveBeenCalledTimes(2);
+    for (const [sql] of f.prisma.$queryRaw.mock.calls) {
+      expect(sql.sql).toContain('"MajorClassificationMapping"');
+      expect(sql.sql).toContain('c."profileId"=r."profileId"');
+      expect(sql.values).toContain('node'); expect(sql.values).toContain('science');
+    }
+    expect(f.prisma.$queryRaw.mock.calls[0][0].values.slice(-2)).toEqual([50,50]);
   });
   it('locks test owner and allowlisted reference using parameterized IDs', async () => {
     const prisma = { $queryRaw: vi.fn().mockResolvedValue([]) };
@@ -74,11 +76,13 @@ describe('M10-10 reviewed Major graph persistence', () => {
     expect(prisma.$queryRaw.mock.calls[1][0].text).toContain('"AcademicTaxonomyNode"');
     expect(prisma.$queryRaw.mock.calls[1][0].values).toEqual(['reference']);
   });
-  it('applies canonical mappings to the published filter while retaining publication and cursor predicates', async () => {
-    const f = fixture(); await f.base.listPublished({ taxonomyNodeId: 'node', search: 'science', limit: 50 });
-    const args = f.prisma.major.findMany.mock.calls[0][0];
-    expect(args.where.status).toBe('PUBLISHED'); expect(args.take).toBe(51); expect(args.orderBy).toEqual({ id: 'asc' });
-    expect(args.where.AND[0].OR).toContainEqual({ classificationMappings: { some: { taxonomyNodeId: 'node' } } });
-    expect(f.prisma.major.count).toHaveBeenCalledWith({ where: args.where });
+  it('filters the immutable published snapshots by canonical mapping and cursor', async () => {
+    const f=fixture(); await f.base.listPublished({taxonomyNodeId:'node',search:'science',limit:50});
+    expect(f.prisma.$queryRaw).toHaveBeenCalledTimes(2);
+    for (const [sql] of f.prisma.$queryRaw.mock.calls) {
+      expect(sql.sql).toContain('"MajorPublicationSnapshot"');
+      expect(sql.values).toContain('node'); expect(sql.values).toContain('science');
+    }
+    expect(f.prisma.$queryRaw.mock.calls[0][0].values).toContain(51);
   });
 });

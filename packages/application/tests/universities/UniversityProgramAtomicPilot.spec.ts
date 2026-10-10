@@ -20,7 +20,7 @@ function fixture(failure?: 'business' | 'audit' | 'outbox') {
       try { return await work(context); } catch (error) { state = before; throw error; }
     },
   };
-  const transactionRepository = {
+  const transactionRepository = { lockForRevision: vi.fn(), advanceRevision: vi.fn().mockResolvedValue(1),
     upsertAcademicProgram: vi.fn(async (_owner: string, programId: string | null, data: UniversityAcademicProgramAuthoringInput) => {
       state.programId = programId!; state.campusIds = [...data.campusIds!];
       if (failure === 'business') throw new Error('INJECTED_BUSINESS_FAILURE');
@@ -46,7 +46,7 @@ function fixture(failure?: 'business' | 'audit' | 'outbox') {
   const write = () => useCases.upsertAcademicProgram('university', 'existing-program', {
     sourceProgramName: 'CS', degreeLevelId: 'degree', majorMappingState: 'UNMAPPED',
     campusIds: ['new-campus'], admissionRequirements: [{ internationalTestId: 'new-test' }],
-  }, { actorId: 'verified-actor', correlationId: 'pilot-correlation' });
+  }, { actorId: 'verified-actor', reason: 'Reviewed pilot program', expectedRevision: 0, correlationId: 'pilot-correlation' });
   return { write, read: () => state, initial, repository, audit, outbox };
 }
 describe('M10-16 source University mutation transaction composition', () => {

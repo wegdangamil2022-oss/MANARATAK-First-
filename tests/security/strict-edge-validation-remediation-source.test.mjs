@@ -27,7 +27,7 @@ test('MNT-AUD-0111 privileged routers never forward raw request bodies into appl
       if (!line.includes('req.body')) continue;
       if (/\.parse\(req\.body|\.safeParse\(req\.body|parseStrict\([^,]+, req\.body|req\.body \?\? \{\}/.test(line)) continue;
       // Failure-audit target extraction is not an application DTO and cannot mutate state.
-      if (/targetId:\s*req\.body\?\./.test(line)) continue;
+      if (/targetId:\s*(?:req\.params\.id\s*\|\|\s*)?req\.body\?\./.test(line)) continue;
       violations.push(`${name}:${index + 1}:${line.trim()}`);
     }
   }

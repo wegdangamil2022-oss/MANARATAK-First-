@@ -36,12 +36,12 @@ for (const call of [
 }
 
 assert(app.includes('path="/imports/scholarships"'), 'missing canonical admin route');
-assert(app.includes('href="/imports/scholarships"'), 'missing admin navigation entry');
+assert(readFileSync(resolve(root, 'apps/admin/src/components/AdminNavigation.tsx'), 'utf8').includes("to: '/imports'") && readFileSync(resolve(root, 'apps/admin/src/pages/ImportAdminPage.tsx'), 'utf8').includes('/imports/'), 'missing admin import navigation entry');
 assert(api.includes("'AUTHORITATIVE_SCHOLARSHIP_SOURCE_REGISTRY'"), 'authoritative source registry contract missing');
 assert(api.includes('observedStatistics'), 'observed statistics must remain separate from source registry');
 assert(api.includes('screeningOrigin'), 'persisted/legacy screening-origin contract missing');
 assert(api.includes('ScholarshipImportHistoryEvent'), 'history event contract missing');
-assert(page.includes('response.events ?? []'), 'history must render backend event stream');
+assert(page.includes('scanResult?.events ?? []'), 'history must render backend event stream');
 assert(page.includes("reviewDecisionPersistence === 'CONFIGURED'"), 'review capability gate missing');
 assert(page.includes("atomicTransfer === 'CONFIGURED'"), 'transfer capability gate missing');
 assert(page.includes('record.readyToTransfer'), 'transfer readiness gate missing');

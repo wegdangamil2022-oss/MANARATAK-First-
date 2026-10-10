@@ -30,7 +30,7 @@ test('MNT-AUD-0081 failed attempts remain retryable while applied decisions are 
 
 test('MNT-AUD-0081 import owner uses a lease then purges raw payload without deleting provenance row',async()=>{
  const {PrismaImportRetentionGateway}=load('packages/infrastructure/src/retention/PrismaImportRetentionGateway.ts',{'@manaratak/application':{},'@manaratak/domain':domain,'@prisma/client':{}});
- const updates=[]; const prisma={importRecord:{updateMany:async(args)=>{updates.push(args); return {count:1};}}}; const g=new PrismaImportRetentionGateway(prisma);
+ const updates=[]; const prisma={importRecord:{findUnique:async()=>({batchId:'batch-1',batch:{batchStatus:'COMPLETED'},rawPayload:{source:'preserved'}}),updateMany:async(args)=>{updates.push(args); return {count:1};}},importBatch:{updateMany:async()=>({count:1})},$transaction:async(work)=>work(prisma)}; const g=new PrismaImportRetentionGateway(prisma);
  const c={owner:domain.RetentionOwner.IMPORT,recordId:'r',expiresAt:new Date('2026-09-01T00:00:00Z')}; const d=domain.decideRetention(c,new Date('2026-09-07T00:00:00Z'));
  assert.equal(await g.applyDecision(c,d),'APPLIED'); assert.equal(updates.length,2); assert.ok(updates[0].data.retentionClaimToken); assert.equal(updates[1].data.retentionState,'RAW_PURGED'); assert.equal(updates[1].data.rawPayload.retentionPurged,true);
  assert.equal('delete' in updates[1],false);

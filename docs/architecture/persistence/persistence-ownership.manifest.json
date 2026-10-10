@@ -364,6 +364,9 @@
     "packages/infrastructure/src/international-tests/InternationalTestGovernancePersistence.ts": [
       "reference",
       "academic_taxonomy"
+    ],
+    "packages/infrastructure/src/reference-data/PrismaReferenceDataRepository.ts": [
+      "import"
     ]
   },
   "historicalMigrationBaseline": [
@@ -444,6 +447,86 @@
       "decision": "ADR-028",
       "reason": "Historical M7 reconciliation accepted in the M0-M9 planning baseline; preserve SQL bytes. Governance metadata is recorded here without asserting live application status.",
       "reviewReference": "M10-06 source-only policy, 2026-10-01; DB application status RUNTIME_UNTESTED"
+    },
+    "20261009050000_settings_current_version_ownership": {
+      "sha256": "c95388b1ff5bd28df5086ee5302b5b8fbde0cef57cdc400cd86812564e16d187",
+      "owner": "settings",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261009040000_settings_override_history": {
+      "sha256": "be93cf547a461a5053289c7778653cc737f101542e1a0964bd40391e4f8d51f8",
+      "owner": "settings",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261010180000_certificate_issuer_pending_default": {
+      "sha256": "51fae13c113a0177bb39eefda84463c68b36f75efd7f6fba8ff95b3bf501ee81",
+      "owner": "certificates",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261010183000_p12_scholarship_revision": {
+      "sha256": "5ba9abfb4eed7bc26a3dbc8a292cc04ac4af7fe6942e6a290ee24e1b6ed4d208",
+      "owner": "scholarships",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261009060000_settings_definition_validation_rules": {
+      "sha256": "f67821c21f341926c469026cc8d22faa9917559cc80ff8bb3ccf3b04fe6702c8",
+      "owner": "settings",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261010170000_p11_unit_source_identity": {
+      "sha256": "bf4878a9827d27fb269db582e298535acf831c6e4b8e311eb9ce1a259f6ce14d",
+      "owner": "universities",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261010000000_course_assessment_type": {
+      "sha256": "dcdbc4880d0f9970075b43d42537988ff308b62074ecea06d55ed30205b3c8bc",
+      "owner": "learning",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261009030000_eap_archive_operation_barrier": {
+      "sha256": "2c722df56aeb6303860ce59bcc62748998199a780c14c26a809037e92f946c91",
+      "owner": "assets",
+      "scope": "cross_context_approved",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261009020000_eap_restore_operation_barrier": {
+      "sha256": "fb08ee3012aabe2ec3ffaffb77da1378dd274dc4071fd198d7b6da7718935416",
+      "owner": "assets",
+      "scope": "cross_context_approved",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
+    },
+    "20261009010000_eap_asset_reference_serialization": {
+      "sha256": "4c66980afa46fcbdae28dddcbe7953484ca9f16ba06e2247d80e18ed7e9ac27b",
+      "owner": "assets",
+      "scope": "cross_context_approved",
+      "decision": "ADR-028",
+      "reason": "Preserve SQL bytes already committed to main; classify missing ownership metadata separately without asserting database application.",
+      "reviewReference": "docs/remediation/REPOSITORY_CI_REPAIR_2026-10-10.md"
     }
   }
 }

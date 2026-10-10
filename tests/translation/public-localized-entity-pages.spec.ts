@@ -10,7 +10,7 @@ describe('TR-WP11 public localized entity pages source contract', () => {
     const liveData = source('apps/web/src/features/public-template/publicLiveDataSource.ts');
     expect(liveData).toContain('ApiClient.getUniversities({ locale');
     expect(liveData).toContain('ApiClient.getMajors({ locale');
-    expect(liveData).toContain('ApiClient.getInternationalTests({ locale');
+    expect(liveData).toMatch(/ApiClient\.getInternationalTests\(\{\s*locale/);
     expect(liveData).toContain('ApiClient.getCmsContent({ locale');
   });
 
@@ -33,8 +33,10 @@ describe('TR-WP11 public localized entity pages source contract', () => {
 
   it('does not leak alternate-language names as canonical display identity', () => {
     const liveData = source('apps/web/src/features/public-template/publicLiveDataSource.ts');
-    expect(liveData).toContain('name: dto.displayName');
-    expect(liveData).toContain('nameEn: dto.canonicalName');
+    const mapper = source('packages/ui/src/public-tests/presentation.ts');
+    expect(liveData).toContain('mapInternationalTestToExam(dto)');
+    expect(mapper).toContain('dto.displayName');
+    expect(mapper).toContain('dto.canonicalName');
     expect(liveData).not.toContain('name: dto.localizedNames?.en');
   });
 });

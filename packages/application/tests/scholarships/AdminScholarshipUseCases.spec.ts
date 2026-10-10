@@ -1,3 +1,9 @@
+import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
+const mutationContext = {actorId: 'reviewer-1', reason: 'Reviewed official source', expectedRevision: 1};
+const atomic = new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(
+{execute: async operation => operation({boundaryId: 'source-test'})},
+{saveInTransaction: async () => undefined} as never, {appendInTransaction: async () => undefined} as never));
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AdminScholarshipUseCases } from '../../src/scholarships/use-cases/AdminScholarshipUseCases';
 import { 
@@ -8,7 +14,7 @@ import {
 } from '@manaratak/domain';
 
 describe('AdminScholarshipUseCases', () => {
-  const publicationReady = {
+  const publicationReady = { publicationStatus: ScholarshipPublicationStatus.DRAFT, officialSourceUrl: 'https://example.edu/scholarship',
     completenessStatus: ScholarshipCompletenessState.COMPLETE,
     verificationStatus: 'VERIFIED',
     versions: [{ id: 'version-1' }],
@@ -31,8 +37,14 @@ describe('AdminScholarshipUseCases', () => {
       listByStatus: vi.fn(),
       listPublishable: vi.fn(),
       list: vi.fn(),
+        withTransaction() {
+            return this;
+        },
+        lockForRevision: vi.fn(),
+        advanceRevision: vi.fn().mockResolvedValue(2),
+        assertCurrentRevision: vi.fn()
     };
-    useCases = new AdminScholarshipUseCases(mockRepo);
+    useCases = new AdminScholarshipUseCases(mockRepo, atomic);
   });
 
   it('listScholarships calls repo.list with filters', async () => {
@@ -55,7 +67,7 @@ describe('AdminScholarshipUseCases', () => {
     await useCases.updateScholarship('schol-1', {
       displayName: 'Updated Test',
       fundingCoverage: 'None'
-    });
+    }, mutationContext);
     
     expect(mockRepo.update).toHaveBeenCalledWith('schol-1', expect.objectContaining({
       displayName: 'Updated Test',
@@ -71,7 +83,7 @@ describe('AdminScholarshipUseCases', () => {
       ...publicationReady,
     });
     
-    await useCases.markReadyToPublish('schol-1');
+    await useCases.markReadyToPublish('schol-1', mutationContext);
     expect(mockRepo.updateStatus).toHaveBeenCalledWith('schol-1', ScholarshipStatus.READY_TO_PUBLISH);
   });
 
@@ -82,7 +94,7 @@ describe('AdminScholarshipUseCases', () => {
       completenessStatus: ScholarshipCompletenessState.INCOMPLETE
     });
     
-    await expect(useCases.markReadyToPublish('schol-1')).rejects.toThrow('SCHOLARSHIP_NOT_COMPLETE');
+    await expect(useCases.markReadyToPublish('schol-1', mutationContext)).rejects.toThrow('SCHOLARSHIP_NOT_COMPLETE');
   });
 
   it('publish transitions only if READY_TO_PUBLISH', async () => {
@@ -92,7 +104,7 @@ describe('AdminScholarshipUseCases', () => {
       ...publicationReady,
     });
     
-    await useCases.publish('schol-1');
+    await useCases.publish('schol-1', mutationContext);
     expect(mockRepo.updateStatus).toHaveBeenCalledWith('schol-1', ScholarshipStatus.PUBLISHED);
   });
   
@@ -102,7 +114,7 @@ describe('AdminScholarshipUseCases', () => {
       status: ScholarshipStatus.IMPORTED,
     });
     
-    await expect(useCases.publish('schol-1')).rejects.toThrow('Only READY_TO_PUBLISH');
+    await expect(useCases.publish('schol-1', mutationContext)).rejects.toThrow('Only READY_TO_PUBLISH');
   });
 
   it('publishes through canonical publication lifecycle without changing completeness', async () => {
@@ -111,7 +123,7 @@ describe('AdminScholarshipUseCases', () => {
       id: 'schol-1', status: ScholarshipStatus.READY_TO_PUBLISH,
       ...publicationReady,
     });
-    await useCases.publish('schol-1');
+    await useCases.publish('schol-1', mutationContext);
     expect(mockRepo.updateLifecycle).toHaveBeenCalledWith('schol-1', {
       workflowStatus: ScholarshipStatus.PUBLISHED,
       publicationStatus: ScholarshipPublicationStatus.PUBLISHED,

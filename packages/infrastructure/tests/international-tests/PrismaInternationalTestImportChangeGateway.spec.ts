@@ -14,7 +14,7 @@ const copy = <T>(value: T): T => structuredClone(value);
 /** In-memory Prisma delegates execute the actual gateway + draft-version
  * repository + authorization + atomic audit/outbox adapters. Not a database. */
 function harness() {
-  let roots: Root[] = []; let versions: Version[] = []; let audits: Row[] = []; let outbox: Row[] = [];
+  let revisions: Record<string, number> = {}; let roots: Root[] = []; let versions: Version[] = []; let audits: Row[] = []; let outbox: Row[] = [];
   const now = new Date('2026-10-02T00:00:00Z');
   const body = reviewBody(); const provider = { id: body.entries[0].core.providerId, displayName: 'Reviewed provider' };
   let permissions = ['admin:imports:manage', 'admin:international-tests:manage'];
@@ -22,8 +22,16 @@ function harness() {
   const root = (id: string) => { const row = roots.find(item => item.id === id); return row ? copy({ ...row, _count: { ...row._count, versions: versions.filter(version => version.testId === id).length } }) : null; };
   const version = (id: string) => { const row = versions.find(item => item.id === id); return row ? copy(row) : null; };
   const tx = {
-    $executeRaw: vi.fn(async (..._query: unknown[]) => 0),
-    $queryRaw: vi.fn(async () => [{ id: body.entries[0].targetId }]),
+    $executeRaw: vi.fn(async (sql: Prisma.Sql) => {
+      if (sql.sql?.includes('UPDATE "InternationalTestGovernance" SET "revision"')) {
+        const [, id, expected] = sql.values as [boolean, string, number];
+        if ((revisions[id] ?? 0) !== expected) return 0;
+        revisions[id] = expected + 1;
+      }
+      return 1;
+    }),
+    $queryRaw: vi.fn(async (sql: Prisma.Sql) => sql.sql?.includes('SELECT "revision"')
+      ? [{revision: revisions[String(sql.values[0])] ?? 0}] : [{id: body.entries[0].targetId}]),
     identityRecord: { findUnique: vi.fn(async ({ where }: { where: { id: string } }) => where.id === actorId ? { id: actorId, status: active ? 'ACTIVE' : 'DISABLED', deletedAt: null, user: { isEmailVerified: verified }, account: { accessState: 'Active' } } : null) },
     roleAssignmentRecord: { findMany: vi.fn(async () => [{ id: 'assignment', identityId: actorId, roleId: 'role', assignedAt: now }]) },
     roleRecord: { findUnique: vi.fn(async () => ({ id: 'role', name: 'Import operator', description: '', permissions, policyIds, createdAt: now, updatedAt: now })) },
@@ -58,8 +66,8 @@ function harness() {
     transactionalOutboxRecord: { create: vi.fn(async ({ data }: { data: Row }) => { if (failOutbox) throw new Error('outbox unavailable'); outbox.push(copy(data)); return copy(data); }) },
   };
   const prisma = { $transaction: vi.fn(async (operation: (value: typeof tx) => Promise<unknown>, _options?: unknown) => {
-    const snapshot = copy({ roots, versions, audits, outbox });
-    try { return await operation(tx); } catch (error) { ({ roots, versions, audits, outbox } = snapshot); throw error; }
+    const snapshot = copy({ roots, versions, audits, outbox, revisions });
+    try { return await operation(tx); } catch (error) { ({ roots, versions, audits, outbox, revisions } = snapshot); throw error; }
   }) } as unknown as PrismaClient;
   const executor = new InternationalTestImportChangeExecutor(new PrismaInternationalTestImportChangeGateway(prisma));
   const plan = prepareInternationalTestImport(body);

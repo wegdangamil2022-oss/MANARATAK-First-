@@ -50,13 +50,19 @@ describe('PrismaUniversityRepository', () => {
   });
 
   function configureGeography(regionCountry = 'YE') {
-    mockPrisma.referenceCountry = { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE', isActive: true }) };
+    mockPrisma.referenceCountry = { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE', isActive: true,
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
+    }) };
     mockPrisma.administrativeRegion = { findUnique: vi.fn(async (query) => {
       expect(query.select).toEqual({ countryIso2Code: true, countryReferenceId: true, lifecycleState: true });
       return { countryIso2Code: regionCountry, countryReferenceId: regionCountry === 'YE' ? 'country-ye' : 'country-sa', lifecycleState: 'ACTIVE' };
     }) };
-    mockPrisma.referenceCity = { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', countryReferenceId: 'country-ye', administrativeRegionId: 'region-aden', isActive: true }) };
-    const record = { id: 'uni-1', status: 'DRAFT', optionalFields: {}, countryReferenceId: 'country-ye', regionReferenceId: 'region-aden', cityReferenceId: 'city-aden' };
+    mockPrisma.referenceCity = { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', countryReferenceId: 'country-ye', administrativeRegionId: 'region-aden', isActive: true,
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
+    }) };
+    const record = { id: 'uni-1', status: 'DRAFT', optionalFields: {}, countryReferenceId: 'country-ye', regionReferenceId: 'region-aden', cityReferenceId: 'city-aden',
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
+    };
     mockPrisma.university.findUnique.mockResolvedValue(record);
     mockPrisma.university.create.mockResolvedValue(record); mockPrisma.university.update.mockResolvedValue(record);
     return record;
@@ -78,7 +84,9 @@ describe('PrismaUniversityRepository', () => {
   });
 
   it('rejects invalid replacement geography before deleting or inserting any normalized records', async () => {
-    configureGeography('SA'); mockPrisma.university.findUniqueOrThrow = vi.fn().mockResolvedValue({ id: 'uni-1' });
+    configureGeography('SA'); mockPrisma.university.findUniqueOrThrow = vi.fn().mockResolvedValue({ id: 'uni-1',
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
+    });
     mockPrisma.universityCampus = { deleteMany: vi.fn(), create: vi.fn() };
     mockPrisma.universityAcademicProgram = { deleteMany: vi.fn() };
     await expect(repository.replaceNormalizedDetails('uni-1', { campuses: [{ name: 'Main', countryReferenceId: 'country-ye', regionReferenceId: 'region-aden', cityReferenceId: 'city-aden' }], academicPrograms: [] })).rejects.toThrow('UNIVERSITY_CAMPUS_REGION_COUNTRY_MISMATCH');
@@ -92,6 +100,7 @@ describe('PrismaUniversityRepository', () => {
       optionalFields: {
         oldField: 'oldValue',
       },
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
     });
 
     mockPrisma.university.update.mockResolvedValue({
@@ -101,6 +110,7 @@ describe('PrismaUniversityRepository', () => {
         oldField: 'oldValue',
         newField: 'newValue',
       },
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
     });
 
     const result = await repository.update('db-id-1', {
@@ -129,6 +139,7 @@ describe('PrismaUniversityRepository', () => {
       id: 'db-id-1',
       canonicalDedupKey: 'test|key',
       optionalFields: { foo: 'bar' },
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
     });
 
     const result = await repository.findByDedupKey('test|key');
@@ -158,6 +169,7 @@ describe('PrismaUniversityRepository', () => {
         academicPrograms: [{ majorId: 'fake-major' }],
         description: 'Allowed legacy presentation field',
       },
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
     });
 
     const result = await repository.findById('db-id-1');
@@ -173,13 +185,15 @@ describe('PrismaUniversityRepository', () => {
   });
 
   it('removes reserved canonical keys before persisting optional fields', async () => {
-    mockPrisma.university.findUnique.mockResolvedValue({ id: 'db-id-1', optionalFields: {} });
+    mockPrisma.university.findUnique.mockResolvedValue({ id: 'db-id-1', optionalFields: {},
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
+    });
     mockPrisma.university.update.mockImplementation(async ({ data }: any) => ({
       id: 'db-id-1',
       publicId: 'INS-USA-0001',
       status: 'READY_TO_REVIEW',
       completenessStatus: 'NEEDS_REVIEW',
-      ...data,
+      ...data, updatedAt: new Date('2026-10-01T00:00:00.000Z'),
     }));
 
     await repository.update('db-id-1', {
@@ -207,6 +221,7 @@ describe('PrismaUniversityRepository', () => {
         campuses: [{ campusId: 'campus-1' }],
         admissionRequirements: [{ id: 'req-1', academicProgramId: 'program-1', internationalTestId: 'test-ielts', testVariantId: null, testVersionId: null, minimumScore: 6.5, sectionScores: null, validityMetadata: null, restrictionMetadata: null, status: 'ACTIVE' }],
       }],
+        updatedAt: new Date('2026-10-01T00:00:00.000Z')
     });
     const result = await repository.findById('db-id-1');
     expect(result?.academicPrograms?.[0]).toMatchObject({

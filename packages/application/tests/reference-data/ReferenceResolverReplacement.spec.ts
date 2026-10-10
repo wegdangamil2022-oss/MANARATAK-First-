@@ -17,7 +17,7 @@ describe('P7 historical canonical resolver continuity', () => {
   it('does not follow historical links for an ACTIVE canonical record', async () => {
     const getReplacement = vi.fn();
     const resolver = new ReferenceResolverService({
-      resolveCityCandidate: vi.fn().mockResolvedValue({ record: { id: 'active-id', isActive: true }, method: 'EXACT_ID' }),
+      resolveCityCandidate: vi.fn().mockResolvedValue({ record: { id: 'active-id', isActive: true, lifecycleState: 'ACTIVE' }, method: 'EXACT_ID' }),
       getReplacement,
     } as unknown as IReferenceResolutionRepository);
     const value = await resolver.resolveCity({ id: 'active-id' });

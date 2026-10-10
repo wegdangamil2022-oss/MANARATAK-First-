@@ -20,6 +20,10 @@ export default defineConfig({
       // P12: database/runtime tests are classified out of the source unit gate.
       'apps/api/tests/presentation/api/router/MajorImportE2E.spec.ts',
       'apps/api/tests/presentation/api/router/CheckDbE2E.spec.ts',
+      'apps/api/tests/presentation/api/router/CheckApiCountE2E.spec.ts',
+      'apps/api/tests/presentation/api/router/CheckApiE2E.spec.ts',
+      'apps/api/tests/presentation/api/router/CheckApiOutput.spec.ts',
+
       'packages/infrastructure/tests/auth/PrismaCredentialIntegration.spec.ts',
       'packages/infrastructure/tests/auth/RealDatabaseIntegration.spec.ts',
       'packages/infrastructure/tests/courses/PrismaCourseRepository.integration.spec.ts',

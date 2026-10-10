@@ -161,7 +161,7 @@ check('MNT-AUD-0011 sanitizer output becomes canonical quarantine locator before
   assetLifecycle.includes('storageGateway.moveToCleanZone(record.locator, record.checksum!.hash)') && !assetLifecycle.includes('dto.cleanBucketName') && !assetLifecycle.includes('dto.cleanPathKey'));
 check('MNT-AUD-0011 client cannot forge sanitizer metadata or clean storage locator and secure delivery route exists',
   assetRouter.includes('const sanitizeAssetSchema = z.object({}).strict()') && assetRouter.includes('const activateAssetSchema = z.object({}).strict()') &&
-  assetRouter.includes("router.post('/:assetId/delivery-grant'") && assetLifecycle.includes('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET'));
+  assetRouter.includes("router.post('/:assetId/delivery-grant'") && read('packages/domain/src/asset-platform/aggregates/AssetRecord.ts').includes('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET'));
 check('MNT-AUD-0011 upload ingestion returns provider-issued upload grant when production storage supports it',
   assetIngest.includes('storageGateway.generateUploadGrant') && assetIngest.includes('uploadGrant: uploadGrant ?'));
 check('MNT-AUD-0011 provider contract/security tests and runtime pending runbook are authored',
@@ -256,12 +256,12 @@ check('MNT-AUD-0077 payment health reports the real provider runtime capability 
 
 check('MNT-AUD-0034 notification foundation is durable, provider-capable and uses the canonical background handler contract',
   schema.includes('NotificationIntentRecord') && notificationRepo.includes('class PrismaNotificationIntentRepository') &&
-  notificationProvider.includes("capabilityStatus = 'PRODUCTION_CAPABLE'") && notificationHandler.includes('IBackgroundJobHandler') &&
+  notificationProvider.includes("return this.client ? 'PRODUCTION_CAPABLE' : 'IN_APP_ONLY'") && notificationHandler.includes('IBackgroundJobHandler') &&
   notificationHandler.includes('async handle(') && notificationHandler.includes('NOTIFICATION_DELIVERY_LEASE_LOST') && notificationHandler.includes('markSuppressed') && notificationHandler.includes('hasOptedOut') && notificationHandler.includes('DELIVERY_CONCURRENCY'));
 check('MNT-AUD-0034 approved owner events create notification intents and P23 exposes governed operations',
   notificationOutbox.includes('context.idempotencyKey !== entry.id') && notificationOutbox.includes("entry.domain === 'SERVICES'") &&
-  notificationRouter.includes("router.get('/templates'") && notificationRouter.includes("router.get('/intents'") && notificationRouter.includes("/:id/retry") &&
-  notificationAdmin.includes('عمليات الإشعارات') && apiApp.includes("v1Router.use('/notifications', ...protectControlPlane('admin:platform:manage'"));
+  notificationRouter.includes("router.get('/templates'") && notificationRouter.includes("router.get('/intents'") && notificationRouter.includes("/intents/:id/retry") &&
+  notificationAdmin.includes('إدارة الإشعارات') && apiApp.includes("v1Router.use('/notifications', ...protectControlPlane('admin:platform:manage'"));
 check('MNT-AUD-0034 notification migration/config/runbook are governed and runtime evidence remains pending',
   notificationMigration.includes('MANARATAK_MIGRATION_OWNER: notifications') &&
   migrationRecovery.migrations['20260907013000_w3_notification_delivery']?.recoveryClass === 'BACKUP_RESTORE_REQUIRED' &&

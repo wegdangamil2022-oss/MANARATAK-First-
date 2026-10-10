@@ -4,62 +4,46 @@ import { PrismaNewMajorCandidateRepository } from '../../src/majors/PrismaNewMaj
 describe('PrismaNewMajorCandidateRepository', () => {
   let prisma: any;
   let repository: PrismaNewMajorCandidateRepository;
-
   beforeEach(() => {
     prisma = {
-      universityAcademicProgram: { findMany: vi.fn().mockResolvedValue([]), updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
-      scholarshipMajorTarget: { findMany: vi.fn().mockResolvedValue([]), updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
-      scholarshipEligibilityItem: { findMany: vi.fn().mockResolvedValue([]), updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      universityAcademicProgram: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+      scholarshipMajorTarget: { updateMany: vi.fn() },
+      scholarshipEligibilityItem: { updateMany: vi.fn() },
     };
     repository = new PrismaNewMajorCandidateRepository(prisma);
   });
-
-  it('discovers only unresolved, active university programs', async () => {
-    await repository.list({ page: 1, pageSize: 25, sourceType: 'UNIVERSITY_PROGRAM' });
-
-    expect(prisma.universityAcademicProgram.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({
-        majorId: null,
-        majorMappingState: { in: ['MAJOR_REVIEW_REQUIRED', 'UNMAPPED'] },
-        status: { notIn: ['INACTIVE', 'ARCHIVED'] },
-      }),
-    }));
-    expect(prisma.scholarshipMajorTarget.findMany).not.toHaveBeenCalled();
+  it('discovers unresolved active programs and groups before applying pagination', async () => {
+    await repository.list({page: 2, pageSize: 25, sourceType: 'UNIVERSITY_PROGRAM'});
+    const [parts, ...values] = prisma.$queryRaw.mock.calls[0];
+    const sql = {sql: parts.join('?'), values};
+    expect(sql.sql).toContain('p."majorId" IS NULL');
+    expect(sql.sql).toContain("p.status NOT IN ('INACTIVE','ARCHIVED','REJECTED')");
+    expect(sql.sql.indexOf('GROUP BY "candidateKey"')).toBeLessThan(sql.sql.indexOf('LIMIT'));
+    expect(sql.values).toContain('UNIVERSITY_PROGRAM');
+    expect(sql.values.slice(-2)).toEqual([25,25]);
   });
-
-  it('does not surface archived scholarship relations as new-major candidates', async () => {
-    await repository.list({ page: 1, pageSize: 25, sourceType: 'SCHOLARSHIP_MAJOR_TARGET' });
-
-    expect(prisma.scholarshipMajorTarget.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({
-        majorId: null,
-        resolutionStatus: { notIn: ['RESOLVED', 'NOT_APPLICABLE'] },
-        scholarship: { is: { status: { not: 'ARCHIVED' } } },
-      }),
-    }));
+  it('excludes archived scholarship owners and parameterizes source filters', async () => {
+    await repository.list({page:1,pageSize:25,sourceType:'SCHOLARSHIP_MAJOR_TARGET'});
+    const [parts, ...values] = prisma.$queryRaw.mock.calls[0];
+    const sql = {sql: parts.join('?'), values};
+    expect(sql.sql).toContain('t."majorId" IS NULL');
+    expect(sql.sql).toContain("t.\"resolutionStatus\" NOT IN ('RESOLVED','NOT_APPLICABLE') AND s.status NOT IN ('ARCHIVED','REJECTED')");
+    expect(sql.values).toContain('SCHOLARSHIP_MAJOR_TARGET');
   });
-
-  it('resolves a candidate with guarded writes that cannot overwrite an existing major link', async () => {
-    prisma.universityAcademicProgram.findMany.mockResolvedValue([{
-      id: 'program-1', sourceProgramName: 'New Engineering Major', degreeLevelId: 'degree-bachelor',
-      degreeLevel: { id: 'degree-bachelor', canonicalCode: 'BACHELOR', displayName: 'Bachelor' },
-      organizationUnit: { name: 'Faculty of Engineering' }, status: 'ACTIVE',
-      university: { id: 'uni-1', publicId: 'INS-1', displayName: 'University 1', officialSourceUrl: 'https://u.example', sourceUrl: null, status: 'PUBLISHED' },
-      createdAt: new Date('2026-09-01'), updatedAt: new Date('2026-09-02'),
-    }]);
-    const listed = await repository.list({ page: 1, pageSize: 25, sourceType: 'UNIVERSITY_PROGRAM' });
-    prisma.universityAcademicProgram.updateMany.mockResolvedValue({ count: 1 });
-
-    const result = await repository.resolve(listed.data[0].candidateKey, 'major-1');
-
+  it('requires transaction and current digest, then preserves owner identity in guarded writes', async () => {
+    const digest='a'.repeat(64);
+    const source={sourceType:'UNIVERSITY_PROGRAM',sourceId:'program-1',ownerId:'uni-1',rawLabel:'Computer Science',degreeLevelId:'degree-1',status:'ACTIVE',sourceUpdatedAt:'2026-09-02T00:00:00.000Z'};
+    const row={candidateKey:'NMC-1',sourceDigest:digest,displayLabel:'Computer Science',normalizedLabel:'computer science',sourceCount:1,sources:[source],total:1};
+    prisma.$queryRaw.mockImplementation(async (parts: TemplateStringsArray)=>parts.join('?').includes('WITH source_rows')?[row]:[]);
+    await expect(repository.resolve('NMC-1','major-1',digest)).rejects.toThrow('TRANSACTION_REQUIRED');
+    const bound=repository.withTransaction({boundaryId:'review-1',transactionClient:prisma} as any);
+    await expect(bound.resolve('NMC-1','major-1','b'.repeat(64))).rejects.toThrow('STALE_SOURCE');
+    expect(prisma.universityAcademicProgram.updateMany).not.toHaveBeenCalled();
+    expect(await bound.resolve('NMC-1','major-1',digest)).toMatchObject({universityPrograms:1});
     expect(prisma.universityAcademicProgram.updateMany).toHaveBeenCalledWith({
-      where: {
-        id: { in: ['program-1'] },
-        majorId: null,
-        majorMappingState: { in: ['MAJOR_REVIEW_REQUIRED', 'UNMAPPED'] },
-      },
-      data: { majorId: 'major-1', majorMappingState: 'CANONICALLY_MAPPED' },
+      where: {OR:[{id:'program-1',universityId:'uni-1',sourceProgramName:'Computer Science',updatedAt:new Date(source.sourceUpdatedAt),degreeLevelId:'degree-1',status:'ACTIVE'}],majorId:null,majorMappingState:{in:['MAJOR_REVIEW_REQUIRED','UNMAPPED','AMBIGUOUS']},university:{is:{status:{notIn:['ARCHIVED','REJECTED']}}}},
+      data:{majorId:'major-1',majorMappingState:'CANONICALLY_MAPPED'},
     });
-    expect(result.universityPrograms).toBe(1);
   });
 });

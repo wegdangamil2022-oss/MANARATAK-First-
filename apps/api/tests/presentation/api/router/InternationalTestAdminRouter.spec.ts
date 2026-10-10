@@ -38,7 +38,7 @@ describe('InternationalTestAdminRouter', () => {
   const createApp = (useCases: any) => {
     const app = express();
     app.use(express.json());
-    app.use((req, _res, next) => { req.authUserId = 'admin-X'; req.headers['if-match']='0'; next(); });
+    app.use((req, _res, next) => { req.authUserId = 'admin-X'; req.headers['if-match']='0'; req.headers['x-review-reason']='Reviewed official test source'; next(); });
     app.use('/admin/international-tests', InternationalTestAdminRouter.create({
       internationalTestAdminUseCases: useCases as any,
       crossDomainGraphReadService: { getInternationalTestGraphById: vi.fn().mockResolvedValue({ relationships: {} }) } as any,

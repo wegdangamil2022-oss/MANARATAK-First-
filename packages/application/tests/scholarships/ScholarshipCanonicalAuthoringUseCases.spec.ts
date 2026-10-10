@@ -1,3 +1,9 @@
+import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
+const mutationContext = {actorId: 'reviewer-1', reason: 'Reviewed official source', expectedRevision: 1};
+const atomic = new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(
+{execute: async operation => operation({boundaryId: 'source-test'})},
+{saveInTransaction: async () => undefined} as never, {appendInTransaction: async () => undefined} as never));
 import { describe, expect, it, vi } from 'vitest';
 import {
   ScholarshipCompletenessState,
@@ -45,7 +51,11 @@ function repository(current: ScholarshipDto): IScholarshipRepository {
     findById: vi.fn(async () => current),
     findByDedupKey: vi.fn(async () => null),
     update: vi.fn(async (_id, updates) => ({ ...current, ...updates, updatedAt: new Date() })),
-  } as unknown as IScholarshipRepository;
+      withTransaction() {
+          return this;
+      },
+      assertCurrentRevision: vi.fn()
+} as unknown as IScholarshipRepository;
 }
 
 function candidate(target: ScholarshipCanonicalLookupTarget, id: string, extra: Partial<ScholarshipCanonicalCandidate> = {}): ScholarshipCanonicalCandidate {
@@ -77,7 +87,7 @@ describe('P9 Scholarship canonical relationship authoring', () => {
     const gateway = lookup({
       'ACADEMIC_PROGRAM:program-1': { ownerId: 'university-1' },
     });
-    const service = new AdminScholarshipUseCases(repo, undefined, gateway);
+    const service = new AdminScholarshipUseCases(repo, atomic, gateway);
 
     await service.replaceCanonicalRelationships('sch-1', {
       countryReferenceId: 'country-1',
@@ -88,7 +98,7 @@ describe('P9 Scholarship canonical relationship authoring', () => {
       eligibilityItems: [{ itemKey: 'test', itemTypeCode: 'TEST_SCORE', internationalTestId: 'test-ielts', valueText: 'IELTS', isRequired: true }],
       requiredDocumentItems: [{ documentKey: 'test-doc', documentTypeCode: 'TEST_SCORE', displayName: 'IELTS', internationalTestId: 'test-ielts', isRequired: true }],
       universityLinks: [{ linkKey: 'program', relationshipTypeCode: 'TARGET_PROGRAM', universityId: 'university-1', academicProgramId: 'program-1', sourceLabel: 'Program' }],
-    });
+    }, mutationContext);
 
     expect(repo.update).toHaveBeenCalledWith('sch-1', expect.objectContaining({
       countryReferenceId: 'country-1',
@@ -102,25 +112,25 @@ describe('P9 Scholarship canonical relationship authoring', () => {
 
   it('fails closed when Admin submits an inactive canonical reference', async () => {
     const repo = repository(scholarship());
-    const service = new AdminScholarshipUseCases(repo, undefined, lookup({
+    const service = new AdminScholarshipUseCases(repo, atomic, lookup({
       'MAJOR:major-old': { lifecycle: 'ARCHIVED' },
     }));
 
     await expect(service.replaceCanonicalRelationships('sch-1', {
       majorTargets: [{ targetKey: 'old-major', majorId: 'major-old', sourceLabel: 'Old major' }],
-    })).rejects.toThrow('SCHOLARSHIP_CANONICAL_REFERENCE_NOT_ACTIVE:MAJOR:major-old:ARCHIVED');
+    }, mutationContext)).rejects.toThrow('SCHOLARSHIP_CANONICAL_REFERENCE_NOT_ACTIVE:MAJOR:major-old:ARCHIVED');
     expect(repo.update).not.toHaveBeenCalled();
   });
 
   it('rejects an AcademicProgram that does not belong to the selected University', async () => {
     const repo = repository(scholarship());
-    const service = new AdminScholarshipUseCases(repo, undefined, lookup({
+    const service = new AdminScholarshipUseCases(repo, atomic, lookup({
       'ACADEMIC_PROGRAM:program-1': { ownerId: 'university-2' },
     }));
 
     await expect(service.replaceCanonicalRelationships('sch-1', {
       universityLinks: [{ linkKey: 'mismatch', relationshipTypeCode: 'TARGET_PROGRAM', universityId: 'university-1', academicProgramId: 'program-1', sourceLabel: 'Program' }],
-    })).rejects.toThrow('SCHOLARSHIP_ACADEMIC_PROGRAM_UNIVERSITY_MISMATCH:mismatch');
+    }, mutationContext)).rejects.toThrow('SCHOLARSHIP_ACADEMIC_PROGRAM_UNIVERSITY_MISMATCH:mismatch');
     expect(repo.update).not.toHaveBeenCalled();
   });
 });

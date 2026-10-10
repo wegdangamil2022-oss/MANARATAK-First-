@@ -105,7 +105,8 @@
     "scripts/import_oceania_combined.ts",
     "scripts/import-sa-geography.ts",
     "scripts/reconcile_asia_report.ts",
-    "scripts/test-regions-cities.ts"
+    "scripts/test-regions-cities.ts",
+    "scripts/ci/install-eap-reference-guards.mjs"
   ],
   "classifiedPresentationImportScripts": [
     "scripts/generate-localized-public-sitemap.ts"

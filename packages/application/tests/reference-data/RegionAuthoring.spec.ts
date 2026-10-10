@@ -82,7 +82,7 @@ describe('M10-07 region authoring with memory transaction adapters', () => {
   });
   it('rejects a deprecated region before a city write', async () => {
     const f = fixture();
-    f.repository.getCountry.mockResolvedValue({ id: 'country-1', iso2Code: 'YE', lifecycleState: 'ACTIVE' });
+    f.repository.getCountry.mockResolvedValue({ id: 'country-1', iso2Code: 'YE', lifecycleState: 'ACTIVE', isActive: true });
     f.repository.getRegionById.mockResolvedValue({ countryIso2Code: 'YE', lifecycleState: 'DEPRECATED' });
     await expect(f.cases.upsertCity({ countryIso2Code: 'YE', name: 'Aden', administrativeRegionId: 'r1' }, actor)).rejects.toThrow('Region not found');
     expect(f.repository.upsertCity).not.toHaveBeenCalled();

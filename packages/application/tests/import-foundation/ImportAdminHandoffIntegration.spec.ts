@@ -19,6 +19,6 @@ describe('ImportAdminUseCases generic handoff integration', () => {
   it('persists invalid rows without dispatching or failing the batch', async () => {
     const storage = repo(); const dispatch = vi.fn(); const service = new ImportAdminUseCases(storage as any, undefined, { dispatch } as any);
     const result = await service.stageNormalizedRows({ ownerDomain: 'SCHOLARSHIPS', sourceSystem: 'TEST', rows: [{}] });
-    expect(dispatch).not.toHaveBeenCalled(); expect(storage.records).toHaveLength(1); expect(storage.records[0].validationErrors).toContain('EMPTY_NORMALIZED_PAYLOAD'); expect(result.batch.batchStatus).toBe('COMPLETED');
+    expect(dispatch).not.toHaveBeenCalled(); expect(storage.records).toHaveLength(1); expect(storage.records[0].validationErrors).toContain('EMPTY_NORMALIZED_PAYLOAD'); expect(result.batch.batchStatus).toBe('PARTIALLY_COMPLETED');
   });
 });

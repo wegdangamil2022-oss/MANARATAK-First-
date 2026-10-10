@@ -8,7 +8,7 @@ describe('UniversityAdminRouter', () => {
   const createMockUseCases = () => ({
     listUniversities: vi.fn(),
     listOrganizationUnits: vi.fn(),
-    getUniversity: vi.fn(),
+    getUniversity: vi.fn().mockResolvedValue({id: 'owner-1', revision: 2}),
     updateUniversity: vi.fn(),
     replaceNormalizedDetails: vi.fn(),
     checkPublicationReadiness: vi.fn(),
@@ -78,7 +78,7 @@ describe('UniversityAdminRouter', () => {
     useCases.updateUniversity.mockResolvedValue({ id: 'uni-1' });
     const app = createApp(useCases);
 
-    const res = await request(app).patch('/admin/universities/uni-1').send({
+    const res = await request(app).patch('/admin/universities/uni-1').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
       id: 'injected',
       publicId: 'injected-public',
       displayName: 'Updated Qatar University',
@@ -109,7 +109,7 @@ describe('UniversityAdminRouter', () => {
     useCases.publish.mockResolvedValue(undefined);
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/universities/uni-1/publish');
+    const res = await request(app).post('/admin/universities/uni-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
 
     expect(res.status).toBe(200);
     expect(useCases.publish).toHaveBeenCalledWith(
@@ -142,7 +142,7 @@ describe('UniversityAdminRouter', () => {
       ],
     };
     const res = await request(app)
-      .put('/admin/universities/uni-1/normalized-details')
+      .put('/admin/universities/uni-1/normalized-details').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send(details);
 
     expect(res.status).toBe(200);
@@ -160,7 +160,7 @@ describe('UniversityAdminRouter', () => {
     );
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/universities/uni-1/publish');
+    const res = await request(app).post('/admin/universities/uni-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ error: 'Only READY_TO_PUBLISH universities can be PUBLISHED' });

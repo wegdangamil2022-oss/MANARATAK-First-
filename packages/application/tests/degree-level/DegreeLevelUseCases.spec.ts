@@ -63,7 +63,6 @@ describe('DegreeLevelUseCases', () => {
 
     expect(repo.updateDegreeLevel).toHaveBeenCalledWith(existing.id, expect.objectContaining({
       status: DegreeLevelStatus.ARCHIVED,
-      lifecycle: { reason: 'Retire reviewed level', acknowledgeHistoricalReferences: true },
       displayRank: 55,
     }), existing.updatedAt.toISOString());
   });

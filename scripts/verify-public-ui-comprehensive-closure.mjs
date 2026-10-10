@@ -94,10 +94,10 @@ const detailFiles=[
  'ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx','ExamDetailModal.tsx',
  'ImportedCourseDetail.tsx','ArticleDetail.tsx','ServiceDetail.tsx','modal/FellowshipDetailView.tsx'
 ].map(f=>`apps/web/src/features/public-template/components/${f}`);
-for(const p of detailFiles) check(`DETAIL_HEADER_${path.basename(p).replace(/\W/g,'_')}`,contains(p,'DetailSectionHeader'),p);
+for(const p of detailFiles) check(`DETAIL_HEADER_${path.basename(p).replace(/\W/g,'_')}`,(p.endsWith('/ExamDetailModal.tsx') ? contains(p,'<ExamDetails {...props}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','<header') : contains(p,'DetailSectionHeader')),p);
 check('DETAIL_NO_TEXT_BACK',!/>\s*العودة\s*</.test(allPublic),'no standalone return text buttons');
 check('DETAIL_BACK_ARIA',contains('apps/web/src/features/public-template/components/DetailUi.tsx',"aria-label={mode === 'close' ? 'إغلاق' : 'العودة'}"),'accessible close/back control');
-for(const p of ['ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx','ExamDetailModal.tsx'].map(f=>`apps/web/src/features/public-template/components/${f}`)) check(`DETAIL_CLOSE_MODE_${path.basename(p).replace(/\W/g,'_')}`,contains(p,'mode="close"'),p);
+for(const p of ['ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx','ExamDetailModal.tsx'].map(f=>`apps/web/src/features/public-template/components/${f}`)) check(`DETAIL_CLOSE_MODE_${path.basename(p).replace(/\W/g,'_')}`,(p.endsWith('/ExamDetailModal.tsx') ? contains(p,'<ExamDetails {...props}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','onClick={onClose}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','aria-label={t("إغلاق")}') : contains(p,'mode="close"')),p);
 check('DETAIL_SCROLL_TARGET',contains('apps/web/src/features/public-template/components/DetailUi.tsx','scrollIntoView'),'search anchor scroll');
 check('DETAIL_TEMP_HIGHLIGHT',contains('apps/web/src/features/public-template/components/DetailUi.tsx','mn-search-term-mark'),'temporary matched phrase highlight');
 

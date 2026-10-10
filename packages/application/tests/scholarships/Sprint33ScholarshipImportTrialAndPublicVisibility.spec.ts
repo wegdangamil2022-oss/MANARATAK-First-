@@ -1,3 +1,9 @@
+import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
+const atomic = new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(
+{execute: async operation => operation({boundaryId: 'source-test'})},
+{saveInTransaction: async () => undefined} as never, {appendInTransaction: async () => undefined} as never));
+const mutationContext = {actorId: 'reviewer-1', reason: 'Reviewed official source', expectedRevision: 1};
 import { describe, it, expect } from 'vitest';
 import { 
   ScholarshipStatus, 
@@ -13,6 +19,8 @@ import {
 } from '../../src';
 
 class InMemoryScholarshipRepo implements IScholarshipRepository {
+  withTransaction(){return this;}
+  async assertCurrentRevision(_id: string, expected: number){if(expected !== 1) throw new Error('SCHOLARSHIP_REVISION_CONFLICT');}
   public items: Map<string, ScholarshipDto> = new Map();
 
   async create(data: any): Promise<ScholarshipDto> {
@@ -191,7 +199,7 @@ Doha Institute Master Fellowship 2027,Fully Funded,Master,https://dohainstitute.
 
     // ImportAdminUseCases is constructed with generic importRepository only
     const importAdminUseCases = new ImportAdminUseCases(importRepo);
-    const adminScholarshipUseCases = new AdminScholarshipUseCases(scholarshipRepo);
+    const adminScholarshipUseCases = new AdminScholarshipUseCases(scholarshipRepo, atomic);
     const publicScholarshipUseCases = new PublicScholarshipUseCases(scholarshipRepo);
 
     // 1. Run Generic Import Data Trial
@@ -221,6 +229,7 @@ Doha Institute Master Fellowship 2027,Fully Funded,Master,https://dohainstitute.
 
     // 2. Separate domain publication workflow (Phase 12 lifecycle, decoupled from Phase 06 import)
     const created = await scholarshipRepo.create({
+      officialSourceUrl: 'https://example.edu/scholarship', publicationStatus: 'DRAFT',
       displayName: 'King Fahd University Graduate Scholarship 2027',
       fundingCoverage: 'Fully Funded',
       degreeLevel: 'Master',
@@ -233,8 +242,9 @@ Doha Institute Master Fellowship 2027,Fully Funded,Master,https://dohainstitute.
       applicationCycles: [{ id: 'cycle-1' }]
     });
 
-    await adminScholarshipUseCases.markReadyToPublish(created.id);
-    await adminScholarshipUseCases.publish(created.id);
+    await adminScholarshipUseCases.markReadyToReview(created.id, mutationContext);
+    await adminScholarshipUseCases.markReadyToPublish(created.id, mutationContext);
+    await adminScholarshipUseCases.publish(created.id, mutationContext);
 
     const publicList = await publicScholarshipUseCases.listScholarships({});
     expect(publicList.data.length).toBe(1);

@@ -91,6 +91,10 @@
       "owner": "academic_taxonomy",
       "required": true
     },
+    "AcademicTaxonomyImportReview": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
     "AcademicTaxonomyNode": {
       "owner": "academic_taxonomy",
       "required": true
@@ -527,11 +531,19 @@
       "owner": "tests",
       "required": true
     },
+    "InternationalTestEvidenceHistory": {
+      "owner": "tests",
+      "required": true
+    },
     "InternationalTestFamily": {
       "owner": "tests",
       "required": true
     },
     "InternationalTestFeeMetadata": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestGovernance": {
       "owner": "tests",
       "required": true
     },
@@ -552,6 +564,10 @@
       "required": true
     },
     "InternationalTestProvider": {
+      "owner": "tests",
+      "required": true
+    },
+    "InternationalTestPublicationSnapshot": {
       "owner": "tests",
       "required": true
     },
@@ -619,6 +635,10 @@
       "owner": "majors",
       "required": true
     },
+    "MajorPublicationSnapshot": {
+      "owner": "majors",
+      "required": true
+    },
     "MajorRelationship": {
       "owner": "majors",
       "required": true
@@ -628,6 +648,10 @@
       "required": true
     },
     "MajorVersion": {
+      "owner": "majors",
+      "required": true
+    },
+    "NewMajorCandidateDecision": {
       "owner": "majors",
       "required": true
     },
@@ -671,11 +695,19 @@
       "owner": "reference",
       "required": true
     },
+    "ReferenceOwnerImportReview": {
+      "owner": "reference",
+      "required": true
+    },
     "ReferenceProviderMappingRecord": {
       "owner": "reference",
       "required": true
     },
     "ReferenceRelationshipRecord": {
+      "owner": "reference",
+      "required": true
+    },
+    "ReferenceStandardSnapshot": {
       "owner": "reference",
       "required": true
     },

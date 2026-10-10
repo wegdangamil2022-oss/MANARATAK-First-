@@ -7,7 +7,7 @@ import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-
 import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 
 const review = { relationshipType: 'PRIMARY' as const, reason: 'Official source checked', evidenceReference: 'review-1' };
-const actor = { actorId: 'verified-identity' };
+const actor = { actorId: 'verified-identity', reason: review.reason, expectedRevision: 0 };
 function fixture(failure?: 'audit' | 'outbox') {
   let state = { writes: 0, audits: [] as AuditRecord[], outbox: [] as TransactionalOutboxEntry[] };
   const tx = { boundaryId: 'graph-memory' };
@@ -19,8 +19,8 @@ function fixture(failure?: 'audit' | 'outbox') {
   const outbox = { appendInTransaction: async (record: TransactionalOutboxEntry, context: AtomicPersistenceContext) => { expect(context).toBe(tx); if (failure === 'outbox') throw new Error('outbox failure'); state.outbox.push(record); } };
   const coordinator = new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(unit, audits as unknown as ITransactionalAuditRecordRepository, outbox as unknown as ITransactionalOutboxStore));
   const write = vi.fn(async () => { state.writes++; });
-  const majorRepo = { withTransaction: vi.fn(() => majorRepo), addReviewedClassificationMapping: vi.fn(async () => { state.writes++; return { id: 'mapping', taxonomyNodeId: 'node', ...review }; }), list: vi.fn().mockResolvedValue({ data: [] }) };
-  const testRepo = { withTransaction: vi.fn(() => testRepo), acquireGraphMutationLock: vi.fn(), findById: vi.fn().mockResolvedValue({ id: 'test', status: 'DRAFT', countryRelationships: [] }), upsertCountryRelationship: write, upsertLanguageRelationship: write, upsertAcademicTaxonomyRelationship: write, upsertDegreeRelationship: write };
+  const majorRepo = { findById: vi.fn().mockResolvedValue({id:'major',revision:0}), lockForRevision: vi.fn(), advanceRevision: vi.fn().mockResolvedValue(1), withTransaction: vi.fn(() => majorRepo), addReviewedClassificationMapping: vi.fn(async () => { state.writes++; return { id: 'mapping', taxonomyNodeId: 'node', ...review }; }), list: vi.fn().mockResolvedValue({ data: [] }) };
+  const testRepo = { update: vi.fn(), getRevision: vi.fn().mockResolvedValue(0), advanceRevision: vi.fn(), acquireSourceReviewLock: vi.fn(), withTransaction: vi.fn(() => testRepo), acquireGraphMutationLock: vi.fn(), findById: vi.fn().mockResolvedValue({ id: 'test', status: 'DRAFT', countryRelationships: [] }), upsertCountryRelationship: write, upsertLanguageRelationship: write, upsertAcademicTaxonomyRelationship: write, upsertDegreeRelationship: write };
   const references = { resolveCountry: vi.fn().mockResolvedValue({ id: 'reference', active: true, standardCode: 'YE' }), resolveLanguage: vi.fn().mockResolvedValue({ id: 'reference', active: true, standardCode: 'ara' }) };
   const degrees = { getDegreeLevelById: vi.fn().mockResolvedValue({ id: 'reference', status: 'ACTIVE', canonicalCode: 'BACHELOR' }) };
   const taxonomy = { getNode: vi.fn().mockResolvedValue({ nodeId: 'reference', status: 'ACTIVE' }) };
@@ -67,15 +67,22 @@ describe('M10-10 canonical graph source mutations', () => {
     await expect(f.tests.addCanonicalRelationship('test', { kind, referenceId: 'reference', ...review }, actor)).rejects.toThrow('DUPLICATE_RELATIONSHIP');
     expect(f.state().writes).toBe(0);
   });
-  it.each(['PUBLISHED', 'ARCHIVED'])('rejects immutable test owner %s', async status => {
-    const f = fixture(); f.testRepo.findById.mockResolvedValue({ id: 'test', status } as never);
-    await expect(f.tests.addCanonicalRelationship('test', { kind: 'COUNTRY', referenceId: 'reference', ...review }, actor)).rejects.toThrow('OWNER_IMMUTABLE'); expect(f.write).not.toHaveBeenCalled();
+  it('rejects an archived test owner before writing', async () => {
+    const f = fixture(); f.testRepo.findById.mockResolvedValue({ id: 'test', status: 'ARCHIVED' } as never);
+    await expect(f.tests.addCanonicalRelationship('test', { kind: 'COUNTRY', referenceId: 'reference', ...review }, actor)).rejects.toThrow('INTERNATIONAL_TEST_ARCHIVED_IMMUTABLE');
+    expect(f.write).not.toHaveBeenCalled();
+  });
+  it('moves a published owner to review without replacing its published version', async () => {
+    const f = fixture(); f.testRepo.findById.mockResolvedValue({ id: 'test', status: 'PUBLISHED', currentPublishedVersionId: 'published-1' } as never);
+    await f.tests.addCanonicalRelationship('test', { kind: 'COUNTRY', referenceId: 'reference', ...review }, actor);
+    expect(f.testRepo.update).toHaveBeenCalledWith('test', expect.objectContaining({status: 'NEEDS_REVIEW'}));
+    expect(f.testRepo.update.mock.calls.every(([, patch]) => !('currentPublishedVersionId' in patch))).toBe(true);
   });
   it('rejects inactive canonical target and nonexistent test', async () => {
     const f = fixture(); f.references.resolveCountry.mockResolvedValue({ id: 'reference', active: false, standardCode: 'YE' });
     await expect(f.tests.addCanonicalRelationship('test', { kind: 'COUNTRY', referenceId: 'reference', ...review }, actor)).rejects.toThrow('Active canonical COUNTRY not found');
     f.testRepo.findById.mockResolvedValue(null as never);
-    await expect(f.tests.addCanonicalRelationship('test', { kind: 'DEGREE', referenceId: 'reference', ...review }, actor)).rejects.toThrow('OWNER_NOT_FOUND'); expect(f.write).not.toHaveBeenCalled();
+    await expect(f.tests.addCanonicalRelationship('test', { kind: 'DEGREE', referenceId: 'reference', ...review }, actor)).rejects.toThrow('INTERNATIONAL_TEST_NOT_FOUND'); expect(f.write).not.toHaveBeenCalled();
   });
   it('canonical filter bypasses the source catalog without losing bounded pagination', async () => {
     const f = fixture(); const filters = { taxonomyNodeId: 'node', page: 2, pageSize: 50 };

@@ -110,3 +110,35 @@ describe('Admin session refresh and command retry', () => {
     expect(security.fetchWithCsrf).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('Course owner version boundaries', () => {
+  it('uses each imported course version for its own commands', async () => {
+    const { adminApiClient, setCourseReviewReason } = await import('./client');
+    adminApiClient.setAdminAuthStatus('AUTHORIZED');
+    security.fetchWithCsrf.mockImplementation(async (url: string, options: RequestInit) => {
+      if (!options.method || options.method === 'GET') {
+        const id = url.endsWith('/course-1') ? 'course-1' : 'course-2';
+        return Response.json({id, version: id === 'course-1' ? 3 : 7});
+      }
+      return Response.json({success: true});
+    });
+    for (const id of ['course-1','course-2']) {
+      await adminApiClient.request(`/admin/courses/imported/${id}`);
+      setCourseReviewReason(id, 'Reviewed official source');
+    }
+    for (const id of ['course-1','course-2']) {
+      await adminApiClient.request(`/admin/courses/imported/${id}/verify-source`, {method: 'POST'});
+    }
+    const commands = security.fetchWithCsrf.mock.calls.filter(([, options]) => options.method === 'POST');
+    expect(commands.map(([, options]) => new Headers(options.headers).get('If-Match'))).toEqual(['"3"','"7"']);
+  });
+  it('requires a fresh read of the selected imported course', async () => {
+    const { adminApiClient, setCourseReviewReason } = await import('./client');
+    adminApiClient.setAdminAuthStatus('AUTHORIZED');
+    security.fetchWithCsrf.mockResolvedValue(Response.json({id: 'course-1', version: 3}));
+    await adminApiClient.request('/admin/courses/imported/course-1');
+    setCourseReviewReason('course-2','Reviewed official source');
+    await expect(adminApiClient.request('/admin/courses/imported/course-2/verify-source', {method: 'POST'})).rejects.toThrow('أعد تحميل الدورة');
+    expect(security.fetchWithCsrf).toHaveBeenCalledOnce();
+  });
+});

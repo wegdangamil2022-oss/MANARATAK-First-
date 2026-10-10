@@ -1,3 +1,5 @@
+import { asValue } from '@manaratak-vendor/awilix-core';
+import { container } from '../../../../src/infrastructure/di/container';
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
@@ -12,9 +14,10 @@ const owner = '913e0a15-54f3-4af1-a771-1f0bfcdd0d77';
 const reference = '913e0a15-54f3-4af1-a771-1f0bfcdd0d78';
 const review = { relationshipType: 'PRIMARY', reason: 'Official source checked', evidenceReference: 'review-1' };
 function fixture(domain: 'major' | 'test', granted = true, authenticated = true) {
+  container.register({authEvaluatorService: asValue({evaluatePermission: vi.fn().mockResolvedValue({isGranted: granted})})});
   const write = vi.fn().mockResolvedValue({ id: 'mapping' });
   const list = vi.fn().mockResolvedValue({ data: [] });
-  const cases = { addClassificationMapping: write, addCanonicalRelationship: write, listMajors: list };
+  const cases = { getMajor: vi.fn().mockResolvedValue({id: owner, revision: 2}), addClassificationMapping: write, addCanonicalRelationship: write, listMajors: list };
   const security = new SecurityService(undefined, { signingSecret: 'graph-source-signing-secret-32-characters' });
   const session = 'graph-source-session'; const csrf = security.generateCsrfToken(session);
   const app = express(); app.use(express.json()); app.use(SecurityMiddlewareFactory.createCsrfGuard(security));
@@ -27,7 +30,7 @@ function fixture(domain: 'major' | 'test', granted = true, authenticated = true)
   app.use(root, SecurityMiddlewareFactory.createAdminPermissionGuard(permission, { evaluatePermission: vi.fn().mockResolvedValue({ isGranted: granted }) } as never), createCanonicalIdempotencyMiddleware({ store: store as never, requireKey: true }), router);
   const path = `${root}/${owner}/${domain === 'major' ? 'classification-mappings' : 'canonical-relationships'}`;
   const body = domain === 'major' ? { taxonomyNodeId: reference, ...review } : { kind: 'TAXONOMY', referenceId: reference, ...review };
-  const command = () => request(app).post(path).set('Cookie', 'manaratak_refresh=' + session).set('X-CSRF-Token', csrf).set('Idempotency-Key', 'reviewed-graph');
+  const command = () => request(app).post(path).set('If-Match', '1').set('X-Review-Reason', 'Reviewed source').set('Cookie', 'manaratak_refresh=' + session).set('X-CSRF-Token', csrf).set('Idempotency-Key', 'reviewed-graph');
   return { app, path, root, body, command, write, store, session, csrf, list };
 }
 describe.each(['major', 'test'] as const)('M10-10 %s graph API security and command contracts', domain => {

@@ -27,12 +27,12 @@ describe('Phase 17 evaluation deployment gates', () => {
     const repository = {
       list: vi.fn().mockResolvedValue([{ key: 'eval-1', status: 'ACTIVE', target: { type: 'PROMPT', key: 'prompt-1' }, deploymentGate: { minimumScore: 0.9, maximumSafetyFailures: 0, requiresHumanApproval: true } }]),
       findPromptVersion: vi.fn().mockResolvedValue({ id: 'pv-3', promptKey: 'prompt-1', version: 3, checksum: 'sha-3', status: 'APPROVED' }),
-      findLatestEvaluationRun: vi.fn().mockResolvedValue({ score: 1, safetyFailures: 0, approvedBy: null, targetType: 'PROMPT', targetKey: 'prompt-1', targetVersion: 3, targetChecksum: 'sha-3' }),
+      findLatestEvaluationRun: vi.fn().mockResolvedValue({ status: 'COMPLETED', score: 1, safetyFailures: 0, approvedBy: null, targetType: 'PROMPT', targetKey: 'prompt-1', targetVersion: 3, targetChecksum: 'sha-3' }),
       deployPrompt: vi.fn(),
     };
     const useCases = new AIPlatformAdminUseCases(repository as any, { get: vi.fn(), list: vi.fn() } as any);
     await expect(useCases.deployPrompt('prompt-1', 3, 'admin-1')).rejects.toThrow('AI_EVALUATION_HUMAN_APPROVAL_REQUIRED');
-    repository.findLatestEvaluationRun.mockResolvedValue({ score: 1, safetyFailures: 0, approvedBy: 'reviewer-1', targetType: 'PROMPT', targetKey: 'prompt-1', targetVersion: 3, targetChecksum: 'sha-3' });
+    repository.findLatestEvaluationRun.mockResolvedValue({ status: 'COMPLETED', score: 1, safetyFailures: 0, approvedBy: 'reviewer-1', targetType: 'PROMPT', targetKey: 'prompt-1', targetVersion: 3, targetChecksum: 'sha-3' });
     await useCases.deployPrompt('prompt-1', 3, 'admin-1');
     expect(repository.findLatestEvaluationRun).toHaveBeenCalledWith('eval-1', { type: 'PROMPT', key: 'prompt-1', version: 3, checksum: 'sha-3' });
     expect(repository.deployPrompt).toHaveBeenCalledWith('prompt-1', 3, 'admin-1');
@@ -55,7 +55,7 @@ describe('Phase 17 governed configuration fail-closed controls', () => {
     const repository = { upsert: vi.fn() };
     const useCases = new AIPlatformAdminUseCases(repository as any, { get: vi.fn(), list: vi.fn() } as any);
     await expect(useCases.save('consumers', {
-      id: 'c-1', consumerKey: 'student-tools', displayName: 'Student tools', status: 'ACTIVE',
+      id: 'c-1', key: 'student-tools', consumerKey: 'student-tools', displayName: 'Student tools', status: 'ACTIVE',
       allowedCapabilities: ['student.letter'], requestsPerMinute: 10, dailyRequestLimit: 100,
       monthlyTokenLimit: 10000, requireHumanReview: true,
     } as any, 'admin-1')).rejects.toThrow('AI_HUMAN_REVIEW_WORKFLOW_NOT_CONFIGURED');

@@ -1,11 +1,17 @@
+import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
+const atomic = new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(
+{execute: async operation => operation({boundaryId: 'source-test'})},
+{saveInTransaction: async () => undefined} as never, {appendInTransaction: async () => undefined} as never));
+const mutationContext = {actorId: 'reviewer-1', reason: 'Reviewed official source', expectedRevision: 1};
 import { describe, expect, it, vi } from 'vitest';
 import { InternationalTestAdminUseCases } from '../../src/tests-platform/use-cases/InternationalTestUseCases';
 import { InternationalTestPublicationReadinessPolicy, type IInternationalTestRepository, type InternationalTestDto } from '@manaratak/domain';
 
 describe('M10-15 score policy negative cases', () => {
   const fixture = () => {
-    const repository = { findById: vi.fn().mockResolvedValue({ id: 'test-owner' }), upsertScoreScale: vi.fn().mockImplementation(async (_id, data) => ({ id: 'scale', ...data })), upsertSection: vi.fn().mockImplementation(async (_id, data) => ({ id: 'section', ...data })) };
-    return { repository, useCases: new InternationalTestAdminUseCases(repository as unknown as IInternationalTestRepository) };
+    const repository = { withTransaction(){return this;}, acquireSourceReviewLock: vi.fn(), getRevision: vi.fn().mockResolvedValue(1), advanceRevision: vi.fn(), findById: vi.fn().mockResolvedValue({ id: 'test-owner', status: 'DRAFT' }), upsertScoreScale: vi.fn().mockImplementation(async (_id, data) => ({ id: 'scale', ...data })), upsertSection: vi.fn().mockImplementation(async (_id, data) => ({ id: 'section', ...data })) };
+    return { repository, useCases: new InternationalTestAdminUseCases(repository as unknown as IInternationalTestRepository, undefined, undefined, undefined, undefined, undefined, atomic) };
   };
   it.each([
     { overallMinimum: NaN, overallMaximum: 9 },
@@ -25,7 +31,7 @@ describe('M10-15 score policy negative cases', () => {
   });
   it('preserves reviewed policy text, finite fractional increments and owner identity', async () => {
     const f = fixture(); const data = { overallMinimum: 0, overallMaximum: 9, scoreIncrement: 0.5, passFailRules: 'No inferred admission threshold', resultValidityDurationMonths: 24 };
-    await expect(f.useCases.upsertScoreScale('test-owner', data)).resolves.toMatchObject(data);
+    await expect(f.useCases.upsertScoreScale('test-owner', data, mutationContext)).resolves.toMatchObject(data);
     expect(f.repository.upsertScoreScale).toHaveBeenCalledWith('test-owner', data);
   });
   it('blocks existing invalid score increments and sections at the publication boundary', () => {

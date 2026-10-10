@@ -8,7 +8,7 @@ describe('ScholarshipAdminRouter', () => {
   const createMockUseCases = () => ({
     listScholarships: vi.fn(),
     getScholarshipSummary: vi.fn(),
-    getScholarship: vi.fn(),
+    getScholarship: vi.fn().mockResolvedValue({id: 'owner-1', revision: 2}),
     updateScholarship: vi.fn(),
     markReadyToReview: vi.fn(),
     markReadyToPublish: vi.fn(),
@@ -20,7 +20,7 @@ describe('ScholarshipAdminRouter', () => {
 
   it('forwards the complete canonical admin filter contract', async () => {
     const useCases = createMockUseCases();
-    useCases.listScholarships.mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 });
+    useCases.listScholarships.mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 24, totalPages: 0 });
     const res = await request(createApp(useCases)).get('/admin/scholarships?countryReferenceId=country-sa&degreeLevelId=degree-bachelor&majorId=major-cs&internationalTestId=test-ielts&universityId=university-1&academicProgramId=program-1&fundingCoverage=FULL&sponsorName=Ministry&verificationStatus=VERIFIED&translationState=NEEDS_TRANSLATION&sourceType=OFFICIAL&query=engineering&deadlineTo=2027-01-01T00:00:00.000Z');
     expect(res.status).toBe(200);
     expect(useCases.listScholarships).toHaveBeenCalledWith(expect.objectContaining({
@@ -59,7 +59,7 @@ describe('ScholarshipAdminRouter', () => {
       data: [],
       total: 0,
       page: 1,
-      pageSize: 20,
+      pageSize: 24,
       totalPages: 0,
     });
     const app = createApp(useCases);
@@ -73,7 +73,7 @@ describe('ScholarshipAdminRouter', () => {
       status: ScholarshipStatus.READY_TO_REVIEW,
       countryReferenceId: 'country-sa',
       page: 2,
-      pageSize: 20,
+      pageSize: 24,
     });
   });
 
@@ -91,7 +91,7 @@ describe('ScholarshipAdminRouter', () => {
     const app = createApp(useCases);
 
     const res = await request(app)
-      .patch('/admin/scholarships/schol-1')
+      .patch('/admin/scholarships/schol-1').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send({ displayName: 'New Name' });
 
     expect(res.status).toBe(200);
@@ -110,7 +110,7 @@ describe('ScholarshipAdminRouter', () => {
     const app = createApp(useCases);
 
     await request(app)
-      .patch('/admin/scholarships/schol-1')
+      .patch('/admin/scholarships/schol-1').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send({ id: 'injected-id', publicId: 'injected-pub', displayName: 'New Name' });
 
     expect(useCases.updateScholarship).toHaveBeenCalledWith(
@@ -128,7 +128,7 @@ describe('ScholarshipAdminRouter', () => {
     useCases.publish.mockResolvedValue(undefined);
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/scholarships/schol-1/publish');
+    const res = await request(app).post('/admin/scholarships/schol-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
 
     expect(res.status).toBe(200);
     expect(useCases.publish).toHaveBeenCalledWith(
@@ -142,7 +142,7 @@ describe('ScholarshipAdminRouter', () => {
     useCases.publish.mockRejectedValue(new Error('Only READY_TO_PUBLISH'));
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/scholarships/schol-1/publish');
+    const res = await request(app).post('/admin/scholarships/schol-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ error: 'Only READY_TO_PUBLISH' });

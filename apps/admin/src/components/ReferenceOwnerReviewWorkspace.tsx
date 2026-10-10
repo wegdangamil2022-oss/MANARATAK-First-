@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import type { ReferenceOwnerReview, ReferenceSnapshotRecord } from '@manaratak/application';
+import type { ReferenceOwnerReview, ReferenceSnapshotRecord } from '@manaratak/domain';
 import { REQUIRED_REFERENCE_STANDARD_FAMILIES } from '@manaratak/domain';
 import { adminApiClient } from '../api/client';
 const base = '/admin/reference-data';

@@ -77,14 +77,18 @@ describe('CourseAdminRouter', () => {
   ) => {
     const app = express();
     app.use(express.json());
+    app.use((req, _res, next) => { req.authUserId = 'admin-X'; next(); });
     app.use(
       '/admin/courses',
       CourseAdminRouter.create({
+        courseAdminCommandUseCases: { execute: vi.fn(async (_kind, _id, _command, _context, work) => ({ value: await work({ adminCourseUseCases: useCases, courseCurriculumUseCases: curriculumUseCases, nativeCourseUseCases: nativeUseCases, courseRelationshipResolutionService: relationshipService }), version: 2 })) } as any,
         adminCourseUseCases: useCases as any,
         courseCurriculumUseCases: curriculumUseCases as any,
         courseEnrollmentPolicyUseCases: {} as any,
         courseRelationshipResolutionService: relationshipService as any,
         learningPathUseCases: {} as any,
+        importedCourseAdminUseCases: {} as any,
+        courseProgressUseCases: {} as any,
         nativeCourseUseCases: nativeUseCases as any,
       }),
     );
@@ -121,7 +125,7 @@ describe('CourseAdminRouter', () => {
     useCases.updateCourse.mockResolvedValue({ id: 'course-1' });
     const app = createApp(useCases);
 
-    const res = await request(app).patch('/admin/courses/course-1').send({
+    const res = await request(app).patch('/admin/courses/course-1').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
       id: 'injected',
       publicId: 'injected-public',
       displayName: 'Updated Course',
@@ -151,11 +155,11 @@ describe('CourseAdminRouter', () => {
     useCases.publish.mockResolvedValue(undefined);
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/courses/course-1/publish');
+    const res = await request(app).post('/admin/courses/course-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
 
     expect(res.status).toBe(200);
     expect(useCases.publish).toHaveBeenCalledWith('course-1', expect.objectContaining({
-      actorId: 'SYSTEM', actorType: 'IDENTITY', source: 'admin-course-api',
+      actorId: 'admin-X', actorType: 'IDENTITY', source: 'admin-course-api',
     }));
   });
 
@@ -169,7 +173,7 @@ describe('CourseAdminRouter', () => {
     });
     const app = createApp(useCases, createMockCurriculumUseCases(), nativeUseCases);
 
-    const response = await request(app).post('/admin/courses').send({
+    const response = await request(app).post('/admin/courses').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
       titleAr: 'دورة الذكاء الاصطناعي',
       titleEn: 'AI Course',
       learningLanguage: 'Arabic',
@@ -193,7 +197,7 @@ describe('CourseAdminRouter', () => {
     const app = createApp(useCases, createMockCurriculumUseCases(), nativeUseCases);
 
     const readiness = await request(app).get('/admin/courses/course-1/readiness');
-    const publish = await request(app).post('/admin/courses/course-1/publish');
+    const publish = await request(app).post('/admin/courses/course-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
 
     expect(readiness.body.ready).toBe(false);
     expect(publish.status).toBe(400);
@@ -244,13 +248,13 @@ describe('CourseAdminRouter', () => {
     relationshipService.approveMajorProjection.mockResolvedValue({ id: 'projection-1', projectionState: 'APPROVED' });
     const app = createApp(useCases, createMockCurriculumUseCases(), createMockNativeUseCases(), relationshipService);
 
-    const taxonomy = await request(app).post('/admin/courses/course-1/relationships/taxonomy/link-1/approve');
-    const major = await request(app).post('/admin/courses/course-1/relationships/majors/projection-1/approve');
+    const taxonomy = await request(app).post('/admin/courses/course-1/relationships/taxonomy/link-1/approve').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
+    const major = await request(app).post('/admin/courses/course-1/relationships/majors/projection-1/approve').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
 
     expect(taxonomy.status).toBe(200);
     expect(major.status).toBe(200);
-    expect(relationshipService.approveTaxonomyLink).toHaveBeenCalledWith('course-1', 'link-1', 'SYSTEM');
-    expect(relationshipService.approveMajorProjection).toHaveBeenCalledWith('course-1', 'projection-1', 'SYSTEM');
+    expect(relationshipService.approveTaxonomyLink).toHaveBeenCalledWith('course-1', 'link-1', 'admin-X');
+    expect(relationshipService.approveMajorProjection).toHaveBeenCalledWith('course-1', 'projection-1', 'admin-X');
   });
 
   it('POST /admin/courses/:id/modules creates course modules', async () => {
@@ -260,7 +264,7 @@ describe('CourseAdminRouter', () => {
     const app = createApp(useCases, curriculumUseCases);
 
     const res = await request(app)
-      .post('/admin/courses/course-1/modules')
+      .post('/admin/courses/course-1/modules').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send({ title: 'Getting Started', position: 1 });
 
     expect(res.status).toBe(201);
@@ -279,7 +283,7 @@ describe('CourseAdminRouter', () => {
     curriculumUseCases.createLesson.mockResolvedValue({ id: 'lesson-1' });
     const app = createApp(useCases, curriculumUseCases);
 
-    const res = await request(app).post('/admin/courses/course-1/modules/module-1/lessons').send({
+    const res = await request(app).post('/admin/courses/course-1/modules/module-1/lessons').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
       title: 'Welcome',
       lessonType: CourseLessonType.VIDEO,
       position: 1,
@@ -302,7 +306,7 @@ describe('CourseAdminRouter', () => {
     const curriculumUseCases = createMockCurriculumUseCases();
     const app = createApp(useCases, curriculumUseCases);
 
-    const res = await request(app).post('/admin/courses/course-1/lessons/lesson-1/assets').send({
+    const res = await request(app).post('/admin/courses/course-1/lessons/lesson-1/assets').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
       assetId: 'https://cdn.example.com/video.mp4',
       assetType: LessonAssetType.VIDEO,
       position: 1,
@@ -320,11 +324,11 @@ describe('CourseAdminRouter', () => {
     const app = createApp(useCases, curriculumUseCases);
 
     const quizRes = await request(app)
-      .post('/admin/courses/course-1/quizzes')
+      .post('/admin/courses/course-1/quizzes').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send({ title: 'Final Quiz', position: 1, passingScore: 70 });
 
     const questionRes = await request(app)
-      .post('/admin/courses/course-1/questions')
+      .post('/admin/courses/course-1/questions').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send({
         quizId: 'quiz-1',
         questionType: 'MULTIPLE_CHOICE',
@@ -347,12 +351,12 @@ describe('CourseAdminRouter', () => {
   it('returns 400 on use case errors', async () => {
     const useCases = createMockUseCases();
     useCases.getCourse.mockResolvedValue({ originType: 'EXTERNAL_LINKED_COURSE' });
-    useCases.publish.mockRejectedValue(new Error('Only READY_TO_PUBLISH courses can be PUBLISHED'));
+    useCases.publish.mockRejectedValue(new Error('COURSE_READY_TO_PUBLISH_REQUIRED'));
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/courses/course-1/publish');
+    const res = await request(app).post('/admin/courses/course-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source');
 
     expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'Only READY_TO_PUBLISH courses can be PUBLISHED' });
+    expect(res.body).toEqual({ error: 'COURSE_READY_TO_PUBLISH_REQUIRED' });
   });
 });

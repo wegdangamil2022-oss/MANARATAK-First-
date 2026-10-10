@@ -45,6 +45,6 @@ describe('Phase 17 durable async execution', () => {
     const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any, protector);
     vi.spyOn(useCases, 'execute').mockResolvedValue({ executionPublicId: 'ai_failed', traceId: 't', status: AIExecutionStatus.FAILED, errorCode: 'AI_PROVIDER_UNAVAILABLE', usage: { inputTokens: 0, outputTokens: 0 } });
     await useCases.processAsync('aij_1', 'worker-1');
-    expect(repo.updateAsyncJob).toHaveBeenCalledWith('aij_1', expect.objectContaining({ status: 'DEAD_LETTER', errorCode: 'AI_PROVIDER_UNAVAILABLE' }));
+    expect(repo.updateAsyncJob).toHaveBeenCalledWith('aij_1', expect.objectContaining({ status: 'DEAD_LETTER', errorCode: 'AI_PROVIDER_UNAVAILABLE' }), expect.objectContaining({workerId: 'worker-1'}));
   });
 });

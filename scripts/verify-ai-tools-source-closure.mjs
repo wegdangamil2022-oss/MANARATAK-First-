@@ -21,7 +21,7 @@ const publicApp = read('apps/web/src/features/public-template/PublicTemplateApp.
 const toolsPage = read('apps/web/src/features/public-template/components/AIToolsPage.tsx');
 const banner = read('apps/web/src/features/public-template/components/AIToolsBanner.tsx');
 const liveSource = read('apps/web/src/features/public-template/publicLiveDataSource.ts');
-const executionPage = read('apps/web/src/features/student-tools/StudentToolPage.tsx');
+const executionPage = read('apps/web/src/features/student-tools/StudentToolPage.tsx') + read('apps/web/src/features/student-tools/StudentToolResultView.tsx');
 const aiAdmin = read('apps/admin/src/pages/AIGovernancePage.tsx');
 const toolsAdmin = read('apps/admin/src/pages/StudentToolsAdminPage.tsx');
 const container = read('apps/api/src/infrastructure/di/container.ts');
@@ -38,11 +38,11 @@ const checks = {
   pending_provider_can_be_attempted: /status === 'READY' \|\| status === 'RUNTIME_PENDING'/.test(aiUseCases),
   ai_health_reports_runtime_pending: /AI_PROVIDER_RUNTIME_PENDING/.test(app) && /runtimePending/.test(app),
   ai_overview_reports_runtime_pending: /counts\.RUNTIME_PENDING/.test(aiRepo) && /'RUNTIME_PENDING'/.test(aiRepo),
-  ai_admin_overview_uses_live_adapter_status: /for \(const adapter of this\.providers\.list\(\)\) counts\[adapter\.status\(\)\] \+= 1/.test(aiUseCases) && /else overallStatus = 'RUNTIME_PENDING'/.test(aiUseCases),
+  ai_admin_overview_uses_live_adapter_status: /for \(const definition of definitions\)[\s\S]{0,400}this\.providers\.get\(definition\.key\)[\s\S]{0,400}counts\[status\] \+= 1/.test(aiUseCases) && /else overallStatus = 'RUNTIME_PENDING'/.test(aiUseCases),
   ai_idempotency_requester_scoped: /consumerKey}:\$\{requesterScope}:\$\{request\.idempotencyKey}/.test(aiUseCases),
-  ai_request_fingerprint: /const requestFingerprint = sha256\(stableStringify/.test(aiUseCases),
+  ai_request_fingerprint: /const requestFingerprint = sha256\(\s*stableStringify/.test(aiUseCases),
   ai_idempotency_reuse_rejected: /AI_IDEMPOTENCY_KEY_REUSED/.test(aiUseCases),
-  ai_fingerprint_persisted: /requestFingerprint \}\),/.test(aiUseCases),
+  ai_fingerprint_persisted: /metadata:\s*sanitizeMetadata\(\{[\s\S]{0,300}requestFingerprint,\s*\}\)/.test(aiUseCases),
   ai_structured_output_validation: /validateStructuredOutput/.test(aiUseCases),
   ai_prompt_injection_control: /PROMPT_INJECTION/.test(aiUseCases),
   ai_pii_redaction: /PII_REDACTED/.test(aiUseCases),

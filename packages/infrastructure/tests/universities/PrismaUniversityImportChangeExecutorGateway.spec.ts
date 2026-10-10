@@ -164,7 +164,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
         findUnique: vi.fn().mockResolvedValue({ id: 'db-uni-1', publicId: 'INS-DZA-0001' }),
       },
       referenceCurrency: {
-        findUnique: vi.fn().mockResolvedValue({ id: 'currency-usd', isActive: true }),
+        findUnique: vi.fn().mockResolvedValue({ id: 'currency-usd', isoCode: 'USD', isActive: true, lifecycleState: 'ACTIVE' }),
       },
       universityTuitionProfile: {
         findFirst: vi.fn().mockResolvedValue(null),
@@ -197,7 +197,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
     });
     expect(transaction.referenceCurrency.findUnique).toHaveBeenCalledWith({
       where: { isoCode: 'USD' },
-      select: { id: true, isActive: true },
+      select: { id: true, isoCode: true, isActive: true, lifecycleState: true },
     });
     expect(transaction.universityTuitionProfile.create).toHaveBeenCalledWith(
       expect.objectContaining({

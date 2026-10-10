@@ -25,6 +25,7 @@ describe('AtomicDomainMutationCoordinator', () => {
         aggregate: expect.objectContaining({ aggregateId: 'test-1' }),
       }),
       mutation,
+      undefined,
     );
   });
 });

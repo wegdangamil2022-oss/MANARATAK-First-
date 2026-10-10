@@ -52,11 +52,11 @@ describe('ReferenceData admin transport', () => {
     const { canonicalPickerApi, canonicalOptionIsSelectable } = await import('./canonicalPickers');
     vi.mocked(fetch).mockImplementation(async (url) => {
       const parsed = new URL(String(url), 'https://fixture.invalid'); const page = Number(parsed.searchParams.get('page'));
-      expect(parsed.searchParams.get('pageSize')).toBe('100'); expect(parsed.searchParams.get('countryIso2Code')).toBe('YE');
+      expect(parsed.searchParams.get('pageSize')).toBe('50'); expect(parsed.searchParams.get('countryIso2Code')).toBe('YE');
       expect(parsed.searchParams.get('activeOnly')).toBe('false');
       return Response.json({ data: [{ id: `city-${page}`, name: `City ${page}`, countryIso2Code: 'YE', lifecycleState: page === 1 ? 'ARCHIVED' : 'ACTIVE' }], page, pageSize: 100, total: 101, totalPages: 2 });
     });
-    const options = await canonicalPickerApi.cities('YE');
+    const options = [...await canonicalPickerApi.cities('YE', null, '', 1), ...await canonicalPickerApi.cities('YE', null, '', 2)];
     expect(options.map((item) => item.id)).toEqual(['city-1', 'city-2']);
     expect(canonicalOptionIsSelectable(options[0])).toBe(false); expect(canonicalOptionIsSelectable(options[1])).toBe(true);
   });

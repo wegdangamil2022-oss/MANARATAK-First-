@@ -1,3 +1,9 @@
+import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
+const mutationContext = {actorId: 'reviewer-1', reason: 'Reviewed official source', expectedRevision: 1};
+const atomic = new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(
+{execute: async operation => operation({boundaryId: 'source-test'})},
+{saveInTransaction: async () => undefined} as never, {appendInTransaction: async () => undefined} as never));
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AdminUniversityUseCases } from '../../src/universities/use-cases/AdminUniversityUseCases';
 import {
@@ -24,8 +30,14 @@ describe('AdminUniversityUseCases', () => {
       list: vi.fn(),
       upsertAcademicProgram: vi.fn(),
       archiveAcademicProgram: vi.fn(),
+        withTransaction() {
+            return this;
+        },
+        lockForRevision: vi.fn(),
+        advanceRevision: vi.fn().mockResolvedValue(2),
+        assertCurrentRevision: vi.fn()
     };
-    useCases = new AdminUniversityUseCases(mockRepo);
+    useCases = new AdminUniversityUseCases(mockRepo, atomic);
   });
 
   it('listUniversities delegates filters to repository', async () => {
@@ -53,7 +65,7 @@ describe('AdminUniversityUseCases', () => {
 
     await useCases.updateUniversity('uni-1', {
       displayName: 'Updated Qatar University', city: 'Doha'
-    });
+    }, mutationContext);
 
     expect(mockRepo.update).toHaveBeenCalledWith('uni-1', expect.objectContaining({
       displayName: 'Updated Qatar University', city: 'Doha',
@@ -70,7 +82,7 @@ describe('AdminUniversityUseCases', () => {
       completenessStatus: UniversityImportCompletenessState.COMPLETE
     });
 
-    await useCases.markReadyToPublish('uni-1');
+    await useCases.markReadyToPublish('uni-1', mutationContext);
 
     expect(mockRepo.updateStatus).toHaveBeenCalledWith('uni-1', UniversityStatus.READY_TO_PUBLISH);
   });
@@ -98,7 +110,7 @@ describe('AdminUniversityUseCases', () => {
       completenessStatus: UniversityImportCompletenessState.COMPLETE
     });
 
-    await expect(useCases.publish('uni-1')).rejects.toThrow('Only READY_TO_PUBLISH');
+    await expect(useCases.publish('uni-1', mutationContext)).rejects.toThrow('Only READY_TO_PUBLISH');
   });
   it('updates an AcademicProgram through the owner repository without replacing its canonical ID', async () => {
     mockRepo.findById = vi.fn().mockResolvedValue({
@@ -111,7 +123,7 @@ describe('AdminUniversityUseCases', () => {
       sourceReferenceId: 'source-program-1', sourceProgramName: 'Computer Science',
       degreeLevelId: 'degree-bachelor', majorId: 'major-cs', majorMappingState: 'CANONICALLY_MAPPED',
       campusIds: ['campus-1'], admissionRequirements: [{ internationalTestId: 'test-ielts', minimumScore: 6.5 }],
-    });
+    }, mutationContext);
 
     expect(mockRepo.upsertAcademicProgram).toHaveBeenCalledWith('uni-1', 'program-1', expect.objectContaining({
       degreeLevelId: 'degree-bachelor', majorId: 'major-cs',
@@ -124,7 +136,7 @@ describe('AdminUniversityUseCases', () => {
     });
     mockRepo.archiveAcademicProgram = vi.fn().mockResolvedValue({ id: 'uni-1' } as any);
 
-    await useCases.archiveAcademicProgram('uni-1', 'program-1');
+    await useCases.archiveAcademicProgram('uni-1', 'program-1', mutationContext);
 
     expect(mockRepo.archiveAcademicProgram).toHaveBeenCalledWith('uni-1', 'program-1');
   });
@@ -135,8 +147,8 @@ describe('AdminUniversityUseCases', () => {
       countryReferenceId: 'country-old',
     });
 
-    await expect(useCases.replaceNormalizedDetails('uni-1', {} as any))
-      .rejects.toThrow('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    await expect(useCases.replaceNormalizedDetails('uni-1', {} as any, mutationContext))
+      .rejects.toThrow('UNIVERSITY_NON_EDITABLE_STATUS');
     await expect(useCases.archive('uni-1'))
       .rejects.toThrow('Cannot archive a PUBLISHED university. Unpublish first.');
     expect(mockRepo.updateStatus).not.toHaveBeenCalled();
@@ -148,11 +160,11 @@ describe('AdminUniversityUseCases', () => {
       countryReferenceId: 'country-old',
     });
 
-    await expect(useCases.updateUniversity('uni-1', { countryReferenceId: 'country-new' }))
-      .rejects.toThrow('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    await expect(useCases.updateUniversity('uni-1', { countryReferenceId: 'country-new' }, mutationContext))
+      .rejects.toThrow('UNIVERSITY_NON_EDITABLE_STATUS');
     await expect(useCases.upsertAcademicProgram('uni-1', 'program-1', {
       sourceProgramName: 'Computer Science', degreeLevelId: 'degree-bachelor', majorMappingState: 'UNMAPPED',
-    })).rejects.toThrow('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    }, mutationContext)).rejects.toThrow('UNIVERSITY_NON_EDITABLE_STATUS');
     expect(mockRepo.update).not.toHaveBeenCalled();
     expect(mockRepo.upsertAcademicProgram).not.toHaveBeenCalled();
   });

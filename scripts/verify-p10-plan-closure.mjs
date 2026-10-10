@@ -103,10 +103,10 @@ check('P10-060 no CountryDetail name identity callback', !has(countryDetail, 'on
 
 check('P10-061 University locale contract in API client', has(client, "export interface UniversityFilters {\n  locale?: 'ar' | 'en';"));
 check('P10-062 Major locale contract in API client', has(client, "export interface MajorFilters {\n  locale?: 'ar' | 'en';"));
-check('P10-063 International Test locale contract in API client', has(client, "export interface InternationalTestFilters {\n  locale?: 'ar' | 'en';"));
+check('P10-063 International Test locale contract in API client', /export interface InternationalTestFilters\s*\{[^}]*locale\?: 'ar' \| 'en';/s.test(client));
 check('P10-064 owner locale sent to universities', has(live, 'ApiClient.getUniversities({ locale,'));
 check('P10-065 owner locale sent to majors', has(live, 'ApiClient.getMajors({ locale,'));
-check('P10-066 owner locale sent to tests', has(live, 'ApiClient.getInternationalTests({ locale,'));
+check('P10-066 owner locale sent to tests', /ApiClient\.getInternationalTests\(\{\s*locale\s*,/.test(live));
 check('P10-067 owner locale sent to CMS', has(live, 'ApiClient.getCmsContent({ locale,'));
 check('P10-068 tool identity is locale-independent', has(live, 'id: dto.toolKey') && has(live, "title: locale === 'en' ? dto.nameEn : dto.nameAr"));
 check('P10-069 App passes presentation locale to live source', has(app, 'usePublicLiveData(import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE, language)'));

@@ -43,7 +43,7 @@ describe('PrismaCourseRepository', () => {
   let repository: PrismaCourseRepository;
 
   beforeEach(() => {
-    prisma = {
+    prisma = { $queryRaw: vi.fn().mockResolvedValue([]),
       course: {
         create: vi.fn(),
         update: vi.fn(),
@@ -195,7 +195,9 @@ describe('PrismaCourseRepository', () => {
 
     expect(prisma.course.findUnique).toHaveBeenNthCalledWith(1, { where: { id: 'course-db-1' } });
     expect(prisma.course.findUnique).toHaveBeenNthCalledWith(2, { where: { publicId: 'crs-test-0001' } });
-    expect(prisma.course.findUnique).toHaveBeenNthCalledWith(3, { where: { slug: 'test-course' } });
+    expect(prisma.course.findUnique).toHaveBeenNthCalledWith(3, { where: { slug: 'test-course' },
+        include: {majorProjections: {where: {projectionState: 'APPROVED', major: {status: 'PUBLISHED'}},select: {major: {select: {id: true, displayName: true}}}}}
+    });
     expect(prisma.course.findUnique).toHaveBeenNthCalledWith(4, { where: { canonicalDedupKey: 'legacy-dedup-key' } });
   });
 
@@ -247,7 +249,7 @@ describe('PrismaCourseRepository', () => {
         completenessStatus: CourseImportCompletenessState.COMPLETE,
         accessType: CourseAccessType.FREE_STUDY_AND_CERTIFICATE,
         originType: CourseOriginType.EXTERNAL_LINKED_COURSE,
-        platformName: 'Example Platform',
+        platformName: {contains: 'Example Platform', mode: 'insensitive'},
       },
       skip: 100,
       take: 100,
@@ -275,7 +277,7 @@ describe('PrismaCourseRepository', () => {
         completenessStatus: CourseImportCompletenessState.COMPLETE,
         accessType: CourseAccessType.FREE_STUDY,
         originType: CourseOriginType.EXTERNAL_LINKED_COURSE,
-        platformName: 'Example Platform',
+        platformName: {contains: 'Example Platform', mode: 'insensitive'},
         category: 'Technology',
         learningLanguage: 'English',
         AND: [{ OR: [
@@ -290,6 +292,7 @@ describe('PrismaCourseRepository', () => {
       },
       take: 11,
       orderBy: { id: 'asc' },
+        include: {majorProjections: {where: {projectionState: 'APPROVED', major: {status: 'PUBLISHED'}},select: {major: {select: {id: true, displayName: true}}}}}
     });
   });
 

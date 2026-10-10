@@ -245,8 +245,9 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     headers.set('If-Match',`"${revision}"`);
   }
 
-  const courseMatch = endpoint.match(/^\/admin\/courses\/(?:learning-paths\/([^/?]+)|([^/?]+))(?:\/|\?|$)/);
-  const courseOwner = courseMatch ? (courseMatch[1] ? `learning-paths/${courseMatch[1]}` : courseMatch[2]==='learning-paths'?undefined:courseMatch[2]) : undefined;
+  const courseMatch = endpoint.match(/^\/admin\/courses\/(?:learning-paths\/([^/?]+)|imported\/([^/?]+)|([^/?]+))(?:\/|\?|$)/);
+  const courseOwner = courseMatch?.[1] ? `learning-paths/${courseMatch[1]}`
+    : courseMatch?.[2] ?? (courseMatch?.[3] && !['learning-paths', 'imported', 'providers'].includes(courseMatch[3]) ? courseMatch[3] : undefined);
   if(courseOwner && isMutation(options.method) && !/^\/admin\/courses\/[^/?]+\/assessment-reviews\/[^/?]+\/grade$/.test(endpoint)) {
     if(!headers.has('If-Match')) {
       const version=courseVersions.get(courseOwner);

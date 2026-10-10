@@ -155,7 +155,7 @@ describe('ApplicationLocaleProjectionService', () => {
     const result = projection.projectInternationalTest(test, 'ar');
     expect(result.id).toBe('test-1');
     expect(result.displayName).toBe('اختبار اللغة الإنجليزية الدولي');
-    expect(result.localizedNameAr).toBeUndefined();
+    expect(result.localizedNameAr).toBe('اختبار اللغة الإنجليزية الدولي');
     expect(result.versions?.[0].contentBlocks?.map((block) => block.content)).toEqual(['وصف']);
   });
 

@@ -1,3 +1,5 @@
+import { asValue } from '@manaratak-vendor/awilix-core';
+import { container } from '../../../../src/infrastructure/di/container';
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
@@ -12,7 +14,7 @@ describe('MajorAdminRouter', () => {
     listNewMajorCandidates: vi.fn(),
     approveNewMajorCandidate: vi.fn(),
     linkNewMajorCandidate: vi.fn(),
-    getMajor: vi.fn(),
+    getMajor: vi.fn().mockResolvedValue({id: 'major-1', revision: 2}),
     updateMajor: vi.fn(),
     markReadyToReview: vi.fn(),
     markReadyToPublish: vi.fn(),
@@ -30,6 +32,7 @@ describe('MajorAdminRouter', () => {
   });
 
   const createApp = (useCases: ReturnType<typeof createMockUseCases>) => {
+    container.register({authEvaluatorService: asValue({evaluatePermission: vi.fn().mockResolvedValue({isGranted: true})})});
     const app = express();
     app.use(express.json());
     app.use((req, _res, next) => {
@@ -87,10 +90,10 @@ describe('MajorAdminRouter', () => {
     const useCases = createMockUseCases();
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/majors/new-candidates/NMC-1/approve').send({
-      canonicalMajorName: 'Computer Science',
+    const res = await request(app).post('/admin/majors/new-candidates/NMC-1/approve').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
+      canonicalMajorName: 'Computer Science', reason: 'Reviewed source', sourceDigest: 'a'.repeat(64),
       degreeLevel: 'BACHELOR',
-      degreeLevelId: 'degree-bachelor',
+      degreeLevelId: '913e0a15-54f3-4af1-a771-1f0bfcdd0d78',
       collegeOrFaculty: 'Faculty of Engineering',
     });
 
@@ -106,15 +109,15 @@ describe('MajorAdminRouter', () => {
     });
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/majors/new-candidates/NMC-1/approve').send({
-      canonicalMajorName: 'Computer Science',
+    const res = await request(app).post('/admin/majors/new-candidates/NMC-1/approve').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
+      canonicalMajorName: 'Computer Science', reason: 'Reviewed source', sourceDigest: 'a'.repeat(64),
       degreeLevel: 'BACHELOR',
-      degreeLevelId: 'degree-bachelor',
+      degreeLevelId: '913e0a15-54f3-4af1-a771-1f0bfcdd0d78',
     });
 
     expect(res.status).toBe(200);
     expect(useCases.approveNewMajorCandidate).toHaveBeenCalledWith(
-      expect.objectContaining({ candidateKey: 'NMC-1', canonicalMajorName: 'Computer Science', degreeLevelId: 'degree-bachelor' }),
+      expect.objectContaining({ candidateKey: 'NMC-1', canonicalMajorName: 'Computer Science', reason: 'Reviewed source', sourceDigest: 'a'.repeat(64), degreeLevelId: '913e0a15-54f3-4af1-a771-1f0bfcdd0d78' }),
       expect.objectContaining({ actorId: 'admin-X', source: 'admin-major-api' }),
     );
   });
@@ -124,12 +127,12 @@ describe('MajorAdminRouter', () => {
     useCases.linkNewMajorCandidate.mockResolvedValue({ universityPrograms: 1, scholarshipMajorTargets: 0, scholarshipEligibilityItems: 0 });
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/majors/new-candidates/NMC-1/link').send({ majorId: 'major-existing' });
+    const res = await request(app).post('/admin/majors/new-candidates/NMC-1/link').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({ majorId: '913e0a15-54f3-4af1-a771-1f0bfcdd0d77', reason: 'Reviewed source', sourceDigest: 'a'.repeat(64) });
 
     expect(res.status).toBe(200);
     expect(useCases.linkNewMajorCandidate).toHaveBeenCalledWith(
       'NMC-1',
-      'major-existing',
+      '913e0a15-54f3-4af1-a771-1f0bfcdd0d77',
       expect.objectContaining({ actorId: 'admin-X', source: 'admin-major-api' }),
     );
   });
@@ -139,9 +142,8 @@ describe('MajorAdminRouter', () => {
     useCases.updateMajor.mockResolvedValue({ id: 'major-1' });
     const app = createApp(useCases);
 
-    const res = await request(app).patch('/admin/majors/major-1').send({
-      id: 'injected',
-      publicId: 'injected-public',
+    const res = await request(app).patch('/admin/majors/major-1').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({
+      reason: 'Reviewed source',
       displayName: 'Updated Computer Science',
       degreeLevel: 'Bachelor',
     });
@@ -170,7 +172,7 @@ describe('MajorAdminRouter', () => {
     useCases.publish.mockResolvedValue(undefined);
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/majors/major-1/publish');
+    const res = await request(app).post('/admin/majors/major-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({reason: 'Reviewed source'});
 
     expect(res.status).toBe(200);
     expect(useCases.publish).toHaveBeenCalledWith(
@@ -188,7 +190,7 @@ describe('MajorAdminRouter', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ data: [{ id: 'version-1', versionNumber: 1 }] });
-    expect(useCases.listVersions).toHaveBeenCalledWith('major-1');
+    expect(useCases.listVersions).toHaveBeenCalledWith('major-1', {page: 1, profileId: undefined});
   });
 
   it('GET /admin/majors/:id/profiles returns level profiles', async () => {
@@ -273,12 +275,12 @@ describe('MajorAdminRouter', () => {
 
   it('returns 400 on use case errors', async () => {
     const useCases = createMockUseCases();
-    useCases.publish.mockRejectedValue(new Error('Only READY_TO_PUBLISH majors can be PUBLISHED'));
+    useCases.publish.mockRejectedValue(new Error('MAJOR_READY_TO_PUBLISH_REQUIRED'));
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/majors/major-1/publish');
+    const res = await request(app).post('/admin/majors/major-1/publish').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({reason: 'Reviewed source'});
 
-    expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'Only READY_TO_PUBLISH majors can be PUBLISHED' });
+    expect(res.status).toBe(422);
+    expect(res.body).toEqual({ error: 'MAJOR_READY_TO_PUBLISH_REQUIRED' });
   });
 });

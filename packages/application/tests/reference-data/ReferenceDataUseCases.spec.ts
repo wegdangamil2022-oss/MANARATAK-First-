@@ -213,7 +213,7 @@ describe('ReferenceDataUseCases', () => {
     it('rejects a city region owned by another country', async () => {
       repository.getCountry.mockResolvedValue({ id: 'country-eg', iso2Code: 'EG', iso3Code: 'EGY', name: 'Egypt', isActive: true, lifecycleState: ReferenceLifecycleState.ACTIVE });
       repository.getRegionById.mockResolvedValue({
-        id: 'region-us-ca', countryIso2Code: 'US', regionCode: 'US-CA', name: 'California', lifecycleState: ReferenceLifecycleState.ACTIVE
+        id: 'region-us-ca', countryIso2Code: 'US', regionCode: 'US-CA', name: 'California', isActive: true, lifecycleState: ReferenceLifecycleState.ACTIVE
       });
 
       await expect(useCases.upsertCity({

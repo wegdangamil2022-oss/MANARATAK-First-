@@ -88,11 +88,11 @@ describe('PrismaScholarshipRepository', () => {
         },
       }),
       include: expect.objectContaining({
-        benefits: true,
-        degreeTargets: true,
-        majorTargets: true,
+        benefits: {include: {currency: {select: {isoCode: true, nameAr: true, name: true}}}},
+        degreeTargets: {include: {degreeLevel: {select: {canonicalCode: true, nameEn: true, nameAr: true}}}},
+        majorTargets: {include: {major: {select: {status: true}}}},
         sourceEvidence: true,
-        universityLinks: true,
+        universityLinks: {include: {university: {select: {status: true}},academicProgram: {select: {status: true,majorMappingState: true}}}},
       }),
     });
     expect(result.fundingCoverage).toBe('Tuition and Fees');
@@ -143,9 +143,9 @@ describe('PrismaScholarshipRepository', () => {
       expect.objectContaining({
         where: expect.objectContaining({ publicationStatus: 'PUBLISHED' }),
         include: expect.objectContaining({
-          benefits: true,
+          benefits: {include: {currency: {select: {isoCode: true, nameAr: true, name: true}}}},
           requiredDocuments: true,
-          universityLinks: true,
+          universityLinks: {include: {university: {select: {status: true}},academicProgram: {select: {status: true,majorMappingState: true}}}},
         }),
       }),
     );
@@ -166,8 +166,8 @@ describe('PrismaScholarshipRepository', () => {
     const where = mockPrisma.scholarship.findMany.mock.calls[0][0].where;
     expect(where.countryReferenceId).toBe('country-sa');
     expect(JSON.stringify(where)).not.toContain('primaryCountry');
-    expect(JSON.stringify(where)).not.toContain('countrySourceLabel');
-    expect(JSON.stringify(where)).not.toContain('sourceLabel');
+    expect(where).not.toHaveProperty('countrySourceLabel');
+    expect(where).not.toHaveProperty('sourceLabel');
     expect(JSON.stringify(where)).toContain('degreeTargets');
     expect(JSON.stringify(where)).toContain('majorTargets');
     expect(JSON.stringify(where)).toContain('internationalTestId');

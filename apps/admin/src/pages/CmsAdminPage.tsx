@@ -388,7 +388,6 @@ export function CmsAdminPage() {
           seoMetadata: {
             title: currentEditor.seoTitle.trim(),
             description: currentEditor.seoDescription.trim(),
-            canonicalUrl: currentEditor.canonicalUrl.trim() || null,
             keywords: splitValues(currentEditor.keywords),
             noIndex: currentEditor.noIndex,
             noFollow: currentEditor.noFollow,

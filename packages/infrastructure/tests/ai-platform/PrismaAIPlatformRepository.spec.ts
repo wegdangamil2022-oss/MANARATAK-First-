@@ -11,8 +11,8 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
 
   it('writes registry, audit, and outbox evidence in one transaction', async () => {
     const saved = { id: 'registry-1', key: 'provider', resourceType: 'providers', status: 'DRAFT', secretReference: 'PROVIDER_API_KEY', configuration: { displayName: 'Provider' } };
-    const tx = {
-      aIRegistryRecord: { upsert: vi.fn().mockResolvedValue(saved) },
+    const tx = { $queryRaw: vi.fn().mockResolvedValue([]),
+      aIRegistryRecord: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn().mockResolvedValue(saved) },
       auditRecord: { create: vi.fn().mockResolvedValue({}) },
       transactionalOutboxRecord: { create: vi.fn().mockResolvedValue({}) },
     };

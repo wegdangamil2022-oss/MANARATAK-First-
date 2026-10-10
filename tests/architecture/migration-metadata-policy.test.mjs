@@ -6,9 +6,23 @@ import { validateMigrationMetadata } from '../../scripts/architecture/migration-
 
 const manifest = JSON.parse(readFileSync('docs/architecture/persistence/persistence-ownership.manifest.json', 'utf8'));
 
-test('three explicitly named historical migrations retain exact SQL bytes via sidecar metadata', () => {
+test('explicitly reviewed historical migrations retain exact SQL bytes via sidecar metadata', () => {
   const names = Object.keys(manifest.historicalMigrationMetadataExceptions);
-  assert.equal(names.length, 3);
+  assert.deepEqual(names.sort(), [
+    "20260907030000_m7_batch_a2_structural_reconciliation",
+    "20260907033000_m7_batch_b_index_reconciliation",
+    "20260907040000_m7_batch_c_fk_reconciliation",
+    "20261009010000_eap_asset_reference_serialization",
+    "20261009020000_eap_restore_operation_barrier",
+    "20261009030000_eap_archive_operation_barrier",
+    "20261009040000_settings_override_history",
+    "20261009050000_settings_current_version_ownership",
+    "20261009060000_settings_definition_validation_rules",
+    "20261010000000_course_assessment_type",
+    "20261010170000_p11_unit_source_identity",
+    "20261010180000_certificate_issuer_pending_default",
+    "20261010183000_p12_scholarship_revision"
+  ]);
   for (const name of names) {
     const sql = readFileSync(`packages/infrastructure/prisma/migrations/${name}/migration.sql`);
     assert.equal(createHash('sha256').update(sql).digest('hex'), manifest.historicalMigrationMetadataExceptions[name].sha256);

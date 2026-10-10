@@ -69,7 +69,7 @@ interface DegreeWithMajors {
   id: string;
   degreeLevel: string; // e.g. 'بكالوريوس' | 'ماجستير' | 'دكتوراه'
   customLabel?: string;
-  majors: string[];
+  majors: Array<{ targetKey: string; label: string }>;
 }
 
 const PRESET_DEGREE_OPTIONS = [
@@ -275,7 +275,7 @@ export function ScholarshipDetailPage() {
       else if (dLabel.includes('زمالة') || dLabel.toLowerCase().includes('fellow')) matchedDegree = 'زمالة';
 
       // If majors exist, distribute or list them
-      const majorsList = rawMajors.filter(m => m.metadata?.degreeTargetKey === d.targetKey).map(m => m.sourceLabel || '').filter(Boolean);
+      const majorsList = rawMajors.filter(m => m.metadata?.degreeTargetKey === d.targetKey).map(m => ({ targetKey: m.targetKey, label: m.sourceLabel || '' }));
 
       return {
         id: d.targetKey || `deg-${index + 1}`,
@@ -343,10 +343,10 @@ export function ScholarshipDetailPage() {
     });
     // Keep ungrouped canonical targets intact; a label is never a canonical identifier.
     const allMajors: ScholarshipMajorTargetDto[] = existingMajors.filter(item => !item.metadata?.degreeTargetKey);
-    groups.forEach(g => g.majors.forEach(label => {
-      const existing = existingMajors.find(item => item.metadata?.degreeTargetKey === g.id && item.sourceLabel === label);
-      allMajors.push({ ...existing, targetKey: existing?.targetKey || `major-${crypto.randomUUID()}`,
-        sourceLabel: label, majorId: existing?.majorId ?? null,
+    groups.forEach(g => g.majors.forEach(major => {
+      const existing = existingMajors.find(item => item.targetKey === major.targetKey);
+      allMajors.push({ ...existing, targetKey: major.targetKey,
+        sourceLabel: major.label, majorId: existing?.majorId ?? null,
         resolutionStatus: existing?.majorId ? existing.resolutionStatus : 'UNRESOLVED',
         metadata: { ...existing?.metadata, degreeTargetKey: g.id },
       });
@@ -382,10 +382,10 @@ export function ScholarshipDetailPage() {
 
     const updated = degreeGroups.map((g) => {
       if (g.id === groupId) {
-        if (g.majors.includes(nameToAdd)) return g;
+        if (new Set(g.majors.map(major => major.label)).has(nameToAdd)) return g;
         return {
           ...g,
-          majors: [...g.majors, nameToAdd],
+          majors: [...g.majors, { targetKey: `major-${crypto.randomUUID()}`, label: nameToAdd }],
         };
       }
       return g;
@@ -599,6 +599,8 @@ export function ScholarshipDetailPage() {
               }`}>
                 ● {scholarship.status === 'PUBLISHED' ? 'منشورة للطلاب' : scholarship.status === 'READY_TO_PUBLISH' ? 'جاهزة للنشر' : 'قيد المراجعة'}
               </span>
+
+              <span className="text-xs">النشر: {display(scholarship.publicationStatus)} · التحقق: {display(scholarship.verificationStatus)}</span>
 
               {isFullFunding && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-300/30 px-3 py-0.5 text-xs font-black text-emerald-200">
@@ -1216,7 +1218,7 @@ export function ScholarshipDetailPage() {
                             <span className="text-[11px] font-bold text-slate-400">💡 تخصصات شائعة (انقر للإضافة السريعة):</span>
                             <div className="flex flex-wrap gap-1.5">
                               {POPULAR_MAJOR_SUGGESTIONS.map((sug) => {
-                                const isAdded = group.majors.includes(sug);
+                                const isAdded = new Set(group.majors.map(major => major.label)).has(sug);
                                 return (
                                   <button
                                     key={sug}
@@ -1250,13 +1252,13 @@ export function ScholarshipDetailPage() {
                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                                 {group.majors.map((major, mIdx) => (
                                   <div
-                                    key={mIdx}
+                                    key={major.targetKey}
                                     className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xs hover:border-[#0E7C86] transition group/item"
                                   >
                                     <div className="flex items-center gap-2 min-w-0">
                                       <BookOpen className="h-4 w-4 text-[#21A7B4] shrink-0" />
                                       <span className="text-xs font-bold text-slate-800 truncate">
-                                        {major}
+                                        {major.label}
                                       </span>
                                     </div>
                                     <button
@@ -1290,6 +1292,7 @@ export function ScholarshipDetailPage() {
                 icon={<CheckCheck className="h-5 w-5" />}
               >
                 <div className="space-y-3.5">
+                  {eligibility.filter(item => item.internationalTestId).map(item => <p key={item.itemKey} className="text-xs text-slate-500">مرجع الاختبار المعتمد: {item.internationalTestId}</p>)}
                   {eligibility.map((item, index) => (
                     <div
                       key={item.itemKey || index}
@@ -1507,6 +1510,19 @@ export function ScholarshipDetailPage() {
                       <span>زيارة بوابة التقديم الرسمية الآن</span>
                     </a>
                   </div>
+                </div>
+              </Card>
+
+              <Card title="أدلة المصدر" subtitle="سجل المصادر والتحقق المحفوظ للمنحة" icon={<ExternalLink className="h-5 w-5" />}>
+                <div className="space-y-3">
+                  {(scholarship.sourceEvidence ?? []).map((evidence) => (
+                    <div key={evidence.evidenceKey} className="rounded-2xl border border-slate-200 p-4 text-sm">
+                      <p className="font-bold">{evidence.sourceName || evidence.sourceTypeCode}</p>
+                      <p className="break-all text-xs text-slate-600" dir="ltr">{evidence.sourceUrl}</p>
+                      <p className="mt-2 text-xs">الثقة: {display(evidence.trustLevel)} · التحقق: {display(evidence.verifiedAt)}</p>
+                    </div>
+                  ))}
+                  {!scholarship.sourceEvidence?.length && <p className="text-sm text-slate-500">لا توجد أدلة مصدر محفوظة لهذه المنحة.</p>}
                 </div>
               </Card>
 

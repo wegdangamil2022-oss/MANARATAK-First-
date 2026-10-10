@@ -1,11 +1,6 @@
-import type { AtomicPersistenceContext, ReferenceStandardSnapshot } from '@manaratak/domain';
+import type { AtomicPersistenceContext, ReferenceOwnerReview, ReferenceSnapshotRecord } from '@manaratak/domain';
 import type { P7ScreeningDecision } from './ReferenceDataScreeningHandoffConsumer';
-export interface ReferenceOwnerReview {
-  id: string; receiptId: string; sourceHash: string; entityType: 'COUNTRY'|'CURRENCY'|'LANGUAGE'|'CITY';
-  payload: Record<string, unknown>; preview: { issues: string[]; currentId: string | null; currentVersion: number | null; dependencyHash: string };
-  previewHash: string; version: number; status: 'PREVIEWED'|'APPROVED'|'REJECTED'|'APPLIED'; reviewer?: string | null; reason?: string | null; result?: unknown;
-}
-export interface ReferenceSnapshotRecord extends ReferenceStandardSnapshot { sourceArtifactId: string; version: number }
+export type { ReferenceOwnerReview, ReferenceSnapshotRecord } from '@manaratak/domain';
 export interface IReferenceOwnerReviewGateway {
   withTransaction(context: AtomicPersistenceContext): IReferenceOwnerReviewGateway;
   lock(key: string): Promise<void>;

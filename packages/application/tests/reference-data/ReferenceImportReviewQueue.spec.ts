@@ -18,8 +18,8 @@ describe('P7 durable screening review queue boundary', () => {
   it('rejects invalid/too-large requests before repository reads', async () => {
     const listImportScreeningReviews = vi.fn();
     const service = new ReferenceDataUseCases({ listImportScreeningReviews } as unknown as IReferenceDataRepository);
-    await expect(service.listImportScreeningReviews(1, 500)).rejects.toThrow('Invalid reference import screening review pagination');
-    await expect(service.listImportScreeningReviews(0, 25)).rejects.toThrow('Invalid reference import screening review pagination');
+    expect(() => service.listImportScreeningReviews(1, 500)).toThrow('Invalid reference import screening review pagination');
+    expect(() => service.listImportScreeningReviews(0, 25)).toThrow('Invalid reference import screening review pagination');
     expect(listImportScreeningReviews).not.toHaveBeenCalled();
   });
 });

@@ -38,16 +38,15 @@ describe('PrismaMajorRepository source integrity', () => {
     }
   });
 
-  it('keeps legacy optionalFields filter fallback behind an explicit compatibility mode', () => {
-    const canonicalOnly = new PrismaMajorRepository({} as any, false) as any;
-    const legacyEnabled = new PrismaMajorRepository({} as any, true) as any;
-    const canonical = { facultyName: { contains: 'Medicine', mode: 'insensitive' } };
-    const legacy = { optionalFields: { path: ['collegeOrFaculty'], string_contains: 'Medicine' } };
-
-    expect(canonicalOnly.withLegacyOptionalFallback(canonical, legacy)).toEqual(canonical);
-    expect(legacyEnabled.withLegacyOptionalFallback(canonical, legacy)).toEqual({
-      OR: [canonical, legacy],
-    });
+  it('filters faculty context through canonical fields without legacy JSON fallback', async () => {
+    const query = vi.fn().mockResolvedValue([]);
+    const repository = new PrismaMajorRepository({$queryRaw: query} as any);
+    await repository.list({collegeOrFaculty: 'Medicine'});
+    for (const [sql] of query.mock.calls) {
+      expect(sql.sql).toContain('r."facultyName"');
+      expect(sql.values).toContain('Medicine');
+      expect(sql.sql).not.toContain("->>'collegeOrFaculty'");
+    }
   });
 
   it('rejects ownerless, self, and duplicate semantic relationships', () => {

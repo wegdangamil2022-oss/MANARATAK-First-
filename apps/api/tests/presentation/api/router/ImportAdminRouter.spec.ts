@@ -353,7 +353,7 @@ describe('canonical import response contract', () => {
   it('wraps success and errors with bounded correlation and stable codes', async () => {
     const app = express(); app.use(express.json());
     app.use('/admin/imports', ImportAdminRouter.create({ importAdminUseCases: { getTimeline: async () => ({ batchId: 'b', historyComplete: false }) } as any,
-      assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any }));
+      majorImportStagingUseCase: {} as any, assetRecordRepository: {} as any, assetStorageGateway: {} as any, externalCourseProviderRepository: {} as any }));
     const success = await request(app).get('/admin/imports/batches/b/timeline').set('X-Correlation-Id', 'test-1');
     expect(success.body.data).toEqual({ batchId: 'b', historyComplete: false });
     expect(success.body.meta.requestId).toBe('test-1');

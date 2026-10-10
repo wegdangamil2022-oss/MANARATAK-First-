@@ -343,9 +343,9 @@ check('P4-SEC-001 distributed limiter is production capable', redisLimiter.inclu
 check('P4-SEC-001 Redis atomic script present', redisLimiter.includes("redis.call('INCR'") && redisLimiter.includes("redis.call('PEXPIRE'"));
 check('P4-SEC-001 app selects runtime limiter factory', app.includes('createRateLimiterForRuntime(currentEnv, logger, undefined, sharedRedisClient)'));
 
-check('P6-DI-001 safe HTTP transport uses explicit factory', container.includes('safeSourceHttpTransport: asFunction(() => new NodeSafeSourceHttpTransport()).singleton()'));
+check('P6-DI-001 safe HTTP transport uses explicit factory', container.includes('safeSourceHttpTransport: asFunction(({ sourceAccessAuthority, sourceAcquisitionLimiter }) => new NodeSafeSourceHttpTransport(undefined, undefined, sourceAccessAuthority, sourceAcquisitionLimiter)).singleton()'));
 check('P6-DI-001 raw snapshot store uses explicit factory', container.includes("importRawSnapshotStore: asFunction(() => createImportRawSnapshotStoreForRuntime(effectiveEnvironment, readConfig<string>('IMPORT_RAW_SNAPSHOT_DIR'))).singleton()"));
-check('P6-DI-001 acquisition limiter uses explicit factory', container.includes('sourceAcquisitionLimiter: asFunction(() => new SourceAcquisitionLimiter()).singleton()'));
+check('P6-DI-001 acquisition limiter uses explicit factory', container.includes('sourceAcquisitionLimiter: asFunction(({ prisma }) => isPrisma ? new PrismaSourceAcquisitionLimiter(prisma) : new SourceAcquisitionLimiter()).singleton()'));
 
 const failed = checks.filter((item) => !item.ok);
 for (const item of checks) console.log(`${item.ok ? 'PASS' : 'FAIL'} ${item.name}`);

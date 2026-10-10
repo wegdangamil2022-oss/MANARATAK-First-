@@ -36,7 +36,7 @@ check('P17-EVAL-003:knowledge-not-falsely-executed', /AI_EVALUATION_KNOWLEDGE_TA
 
 // 124 P17-WORKFLOW-009
 check('P17-WORKFLOW-009:immutable-version-store', /model AIWorkflowVersionRecord/.test(src.schema) && /AI_WORKFLOW_VERSION_IMMUTABLE/.test(src.repo));
-check('P17-WORKFLOW-009:run-bound-version', /findWorkflowVersion\(run\.workflowKey, run\.workflowVersion\)/.test(src.app));
+check('P17-WORKFLOW-009:run-bound-version', /findWorkflowVersion\(\s*run\.workflowKey,\s*run\.workflowVersion,?\s*\)/.test(src.app));
 
 // 125 P17-WORKFLOW-008
 check('P17-WORKFLOW-008:depends-on', /step\.dependsOn/.test(src.app) && /topologicalSteps/.test(src.app));
@@ -53,7 +53,7 @@ check('P17-SCHEMA-011:recursive-schema', /additionalProperties/.test(src.app) &&
 check('P17-SCHEMA-011:unsupported-keyword-fail-closed', /AI_JSON_SCHEMA_UNSUPPORTED_KEYWORD/.test(src.app));
 
 // 128 P17-GUARD-007
-check('P17-GUARD-007:governance-compile', /resource === 'guardrails'\) validateGuardrailDefinition/.test(src.app));
+check('P17-GUARD-007:governance-compile', /resource === 'guardrails'\)[\s\S]{0,80}validateGuardrailDefinition/.test(src.app));
 check('P17-GUARD-007:safe-regex', /MAX_GOVERNED_REGEX_LENGTH/.test(src.app) && /AI_GUARDRAIL_REGEX_UNSAFE/.test(src.app) && /AI_GUARDRAIL_REGEX_INVALID/.test(src.app));
 
 // 129 P17-QUOTA-005

@@ -5,6 +5,7 @@ import { UniversityAdminRouter } from '../../../../src/presentation/api/router/U
 
 describe('University translation workspace routes', () => {
   const createUseCases = () => ({
+    getUniversity: vi.fn().mockResolvedValue({id: 'owner-1', revision: 2}),
     listTranslations: vi.fn(),
     upsertTranslation: vi.fn(),
   });
@@ -43,7 +44,7 @@ describe('University translation workspace routes', () => {
       reviewStatus: 'APPROVED',
     });
     const response = await request(createApp(useCases))
-      .put('/admin/universities/university-1/translations/en')
+      .put('/admin/universities/university-1/translations/en').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send({ displayName: 'Test University', reviewStatus: 'APPROVED', id: 'different-id' });
 
     expect(response.status).toBe(200);
@@ -62,7 +63,7 @@ describe('University translation workspace routes', () => {
   it('rejects unsupported locales deterministically', async () => {
     const useCases = createUseCases();
     const response = await request(createApp(useCases))
-      .put('/admin/universities/university-1/translations/fr')
+      .put('/admin/universities/university-1/translations/fr').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source')
       .send({ displayName: 'Université' });
 
     expect(response.status).toBe(400);

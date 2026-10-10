@@ -179,11 +179,13 @@ describe('Phase 05 Slice 2: Admin Mutation Audit Hooks', () => {
         assignmentId: 'assign-100',
         previousVersionId: 'v-1',
         newVersionId: 'v-2',
+        expectedCurrentVersionId: 'v-current',
+        changeReason: 'Restore the reviewed prior setting',
       });
 
       expect(res.status).toBe(200);
       expect(mockManageSettingsUseCase.rollbackValue).toHaveBeenCalledWith(
-        { assignmentId: 'assign-100', previousVersionId: 'v-1', newVersionId: 'v-2', authorId: 'admin-1' },
+        { assignmentId: 'assign-100', previousVersionId: 'v-1', newVersionId: 'v-2', expectedCurrentVersionId: 'v-current', changeReason: 'Restore the reviewed prior setting', authorId: 'admin-1' },
         expect.objectContaining({ actorId: 'admin-1', source: 'admin-settings-api' }),
       );
       expect(getRecords()).toHaveLength(0);

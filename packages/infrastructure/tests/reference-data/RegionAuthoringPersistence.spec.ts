@@ -11,9 +11,9 @@ function fixture() {
   let aliases: any[] = []; let versions: unknown[][] = []; let relationships: any[] = [];
   const counts = { cities: 0, universities: 0, universityCampuses: 0 };
   const client = {
-    referenceCountry: { findUnique: vi.fn().mockResolvedValue({ id: 'country-1', iso2Code: 'YE', lifecycleState: 'ACTIVE' }) },
+    referenceCountry: { findFirst: vi.fn(async ({where}: any) => ({id: 'country-1', iso2Code: where.iso2Code, lifecycleState: 'ACTIVE', isActive: true})), findUnique: vi.fn().mockResolvedValue({ id: 'country-1', iso2Code: 'YE', lifecycleState: 'ACTIVE', isActive: true }) },
     administrativeRegion: {
-      findUnique: vi.fn(async ({ where, select }: any) => select ? { _count: counts } : rows.get(where.id) ?? null),
+      findUnique: vi.fn(async ({ where, select }: any) => select?._count ? { _count: counts } : rows.get(where.id) ?? null),
       findMany: vi.fn(async ({ where }: any) => [...rows.values()].filter(row => !where.lifecycleState || row.lifecycleState === where.lifecycleState)),
       create: vi.fn(async ({ data }: any) => {
         if ([...rows.values()].some(row => row.countryIso2Code === data.countryIso2Code && row.regionCode === data.regionCode)) throw new Prisma.PrismaClientKnownRequestError('duplicate', { code: 'P2002', clientVersion: '5.22.0' });
@@ -23,7 +23,8 @@ function fixture() {
     },
     referenceAliasRecord: { findMany: vi.fn(async ({ where }: any) => aliases.filter(row => row.referenceId === where.referenceId).map(({ alias, locale, aliasType }) => ({ alias, locale, aliasType }))) },
     referenceRelationshipRecord: { create: vi.fn(async ({ data }: any) => { relationships.push(data); }) },
-    $queryRaw: vi.fn(async () => []),
+    $queryRaw: vi.fn(async (sql: Prisma.Sql) => sql.sql?.includes('FROM "ReferenceCountry" WHERE')
+      ? [{id: 'country-1',iso2Code: 'YE',isActive: true,lifecycleState:'ACTIVE'}] : []),
     $executeRaw: vi.fn(async (sql: Prisma.Sql) => {
       if (sql.sql.includes('INSERT INTO "ReferenceVersionRecord"')) versions.push([...sql.values]);
       if (sql.sql.includes('UPDATE "ReferenceAliasRecord"')) aliases = aliases.filter(row => row.referenceId !== sql.values[1]);
@@ -40,23 +41,23 @@ function fixture() {
 }
 const create = { countryIso2Code: 'YE', regionCode: 'YE-AD', name: 'Aden', aliases: [{ alias: 'عدن', aliasType: 'HISTORIC' as const, locale: 'ar' }] };
 const lifecycle = (expectedVersion: number, toState: ReferenceLifecycleState, extra = {}) => ({
-  entityType: 'REGION' as const, referenceId: 'region-1', expectedVersion, toState, reason: 'source verified', actorId: 'verified-admin', ...extra,
+  entityType: 'REGION' as const, referenceId: 'region-1', expectedVersion, toState, reason: 'source verified', actorId: 'verified-admin', acknowledgeHistoricalReferences: true, ...extra,
 });
 describe('M10-07 typed region persistence with Prisma mocks (no database)', () => {
   it('resolves a saved regional alias by stable ID and deduplicates rows for the same reference', async () => {
     const f = fixture(); f.seed();
     f.client.$queryRaw.mockImplementation(async (sql: Prisma.Sql) => {
-      expect(sql.sql).toContain('SELECT DISTINCT "referenceId"');
-      expect(sql.sql).toContain('LIMIT 2');
-      expect(sql.values).toEqual(['REGION', 'aden']);
-      return [{ referenceId: 'region-1' }];
+      expect(sql.sql).toContain('SELECT "referenceId", "alias", "normalizedAlias"');
+      expect(sql.sql).toContain('LIMIT 5001');
+      expect(sql.values).toContain('REGION'); expect(sql.values).toContain('YE');
+      return [{ referenceId: 'region-1', alias: 'Aden', normalizedAlias: 'aden' }];
     });
-    expect(await f.repository.resolveRegionCandidate({ alias: 'Aden' })).toMatchObject({ record: { id: 'region-1', lifecycleState: 'ACTIVE' }, method: 'NORMALIZED_ALIAS' });
+    expect(await f.repository.resolveRegionCandidate({ alias: 'Aden', countryIso2Code: 'YE' })).toMatchObject({ record: { id: 'region-1', lifecycleState: 'ACTIVE' }, method: 'NORMALIZED_ALIAS' });
   });
   it('keeps an alias shared by two canonical region IDs ambiguous instead of choosing one', async () => {
     const f = fixture();
-    f.client.$queryRaw.mockResolvedValue([{ referenceId: 'region-1' }, { referenceId: 'region-2' }] as never);
-    expect(await f.repository.resolveRegionCandidate({ alias: 'Aden' })).toBeNull();
+    f.client.$queryRaw.mockResolvedValue([{ referenceId: 'region-1', alias: 'Aden', normalizedAlias: 'aden' }, { referenceId: 'region-2', alias: 'Aden', normalizedAlias: 'aden' }] as never);
+    expect(await f.repository.resolveRegionCandidate({ alias: 'Aden', countryIso2Code: 'YE' })).toBeNull();
     expect(f.client.administrativeRegion.findUnique).not.toHaveBeenCalled();
   });
   it('persists country ID, alias locale/type, initial version and actor; edits preserve canonical ID', async () => {
@@ -100,7 +101,7 @@ describe('M10-07 typed region persistence with Prisma mocks (no database)', () =
   });
   it.each(['cities', 'universities', 'universityCampuses'] as const)('blocks terminal state with %s dependencies and keeps version/state intact', async dependency => {
     const f = fixture(); f.seed({ ...region(), lifecycleState: 'DEPRECATED', isActive: false }); f.counts[dependency] = 1;
-    await expect(f.repository.transitionReferenceLifecycle(lifecycle(1, ReferenceLifecycleState.ARCHIVED))).rejects.toThrow('REGION_HAS_DEPENDENCIES');
+    await expect(f.repository.transitionReferenceLifecycle(lifecycle(1, ReferenceLifecycleState.ARCHIVED))).rejects.toThrow('REFERENCE_ARCHIVE_HAS_DEPENDENCIES');
     expect(f.rows().get('region-1')?.versionNumber).toBe(1); expect(f.versions()).toHaveLength(0);
   });
   it('archives only after deprecation and with no dependent records', async () => {
@@ -132,6 +133,7 @@ describe('M10-07 typed region persistence with Prisma mocks (no database)', () =
     const f = fixture(); f.seed({ ...region(), lifecycleState: 'DEPRECATED', isActive: false });
     await expect(f.repository.upsertCity({ countryIso2Code: 'YE', name: 'Aden', administrativeRegionId: 'region-1' })).rejects.toThrow('REGION_NOT_ACTIVE');
     f.seed();
+    f.client.$queryRaw.mockImplementation(async (sql: Prisma.Sql) => sql.sql?.includes('FROM "ReferenceCountry" WHERE') ? [{id:'country-1',iso2Code:'SA',isActive:true,lifecycleState:'ACTIVE'}] : []);
     await expect(f.repository.upsertCity({ countryIso2Code: 'SA', name: 'Aden', administrativeRegionId: 'region-1' })).rejects.toThrow('REGION_NOT_ACTIVE');
   });
 });

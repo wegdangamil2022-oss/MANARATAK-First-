@@ -201,7 +201,7 @@ describe('PrismaInternationalTestRepository', () => {
           status: { in: [InternationalTestStatus.PUBLISHED] },
           testCategory: { in: [InternationalTestCategory.LANGUAGE_PROFICIENCY] },
           providerName: 'ETS',
-          OR: expect.any(Array)
+          AND: expect.arrayContaining([expect.objectContaining({OR: expect.any(Array)})])
         })
       })
     );

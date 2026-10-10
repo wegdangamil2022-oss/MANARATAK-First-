@@ -38,7 +38,7 @@ assert(useCases.includes('catalogCompleteness'), 'normalized-aware completeness 
 assert(useCases.includes('getScholarshipCatalogDetail'), 'catalog detail application projection missing');
 assert(useCases.includes('unresolvedLinks'), 'unresolved canonical-link projection missing');
 
-assert(page.includes('International test canonical ID'), 'tests are not represented inside requirements/documents');
+assert(page.includes('item.internationalTestId'), 'tests are not represented inside requirements/documents');
 assert(!page.includes('title="Tests"') && !page.includes("title={ui.tests}"), 'separate Tests section is forbidden');
 assert(page.includes('sourceEvidence'), 'source provenance is not rendered');
 assert(page.includes('detail.history'), 'real audit history is not rendered');
@@ -46,16 +46,16 @@ assert(router.includes("category: 'SCHOLARSHIPS_MUTATION'"), 'Scholarship change
 
 assert(page.includes('publicationStatus'), 'publication dimension not shown');
 assert(page.includes('verificationStatus'), 'verification dimension not shown');
-assert(page.includes("run('publish')"), 'explicit Publish command missing');
-assert(page.includes("run('unpublish')"), 'explicit Unpublish command missing');
-assert(page.includes("run('archive')"), 'explicit Archive command missing');
+assert(/openConfirmModal\(\s*'publish',/.test(page), 'explicit Publish command missing');
+assert(/openConfirmModal\(\s*'unpublish',/.test(page), 'explicit Unpublish command missing');
+assert(/openConfirmModal\(\s*'archive',/.test(page), 'explicit Archive command missing');
 assert(!page.includes('setTimeout('), 'fake status transition remains');
 assert(!page.includes('previewScholarshipFixture'), 'preview fixture leaked into production canonical page');
 assert(!page.includes('Math.random()'), 'random fake authoring data detected');
 assert(!page.includes('fetch('), 'page must not bypass typed API adapter');
 assert(!combined.includes('@prisma/client'), 'Presentation/Admin must not use Prisma directly');
 
-assert(page.includes('canonicalLocked'), 'canonical-reference protection note missing');
+assert(page.includes('value={scholarship.canonicalName} readOnly') && page.includes('value={scholarship.canonicalDedupKey} readOnly'), 'canonical-reference protection note missing');
 assert(!page.includes('onChange={(canonicalId)'), 'raw canonical id editor detected');
 assert(useCases.includes('preserveCanonicalReferences'), 'Application canonical-reference preservation gate missing');
 assert(useCases.includes("normalize('NFKC')"), 'NFKC semantic normalization missing');
@@ -82,7 +82,7 @@ assert(useCases.includes('ScholarshipDeduplicationService.buildKey({'), 'Applica
 assert(useCases.includes('repository.findByDedupKey(dataToUpdate.canonicalDedupKey)'), 'dedupe collision lookup missing');
 assert(useCases.includes('SCHOLARSHIP_CANONICAL_DEDUPE_COLLISION'), 'explicit dedupe collision error missing');
 assert(repository.includes('canonicalDedupKey: updates.canonicalDedupKey'), 'internally derived rekey is not persisted');
-assert(page.includes('compatibilityNote'), 'legacy compatibility must be explicitly non-SSoT');
+assert(contracts.includes('Legacy compatibility fields retained') && !page.includes('form.optionalFields'), 'legacy compatibility must be explicitly non-SSoT');
 
 const completenessStart = useCases.indexOf('  private catalogCompleteness(');
 const completenessEnd = useCases.indexOf('  private unresolvedLinks(', completenessStart);

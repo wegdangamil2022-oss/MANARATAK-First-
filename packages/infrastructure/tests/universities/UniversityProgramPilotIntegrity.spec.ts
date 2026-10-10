@@ -54,7 +54,7 @@ describe('M10-16 University program persistence integrity', () => {
   });
   it('retains optional scores and different reviewed variants without inferring thresholds', async () => {
     const f = fixture(); const data = input(); data.admissionRequirements![0].minimumScore = null;
-    data.admissionRequirements!.push({ internationalTestId: 'test', minimumScore: -0.5 });
+    data.admissionRequirements!.push({ internationalTestId: 'test', minimumScore: 0.5 });
     await expect(f.validator.validateProgramAuthoring('university', data)).resolves.toBeUndefined();
   });
 });

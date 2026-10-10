@@ -22,9 +22,9 @@ describe('M10-08 scoped city selection (source only)', () => {
       const page = Number(params.get('page'));
       return Response.json({ data: [{ id: `city-${page}`, name: 'Same name', countryIso2Code: 'YE', administrativeRegionId: regionId, region: 'Original region', lifecycleState: 'ACTIVE' }], page, pageSize: 100, totalPages: 2, total: 101 });
     });
-    const first = await canonicalPickerApi.cities('YE', regionId);
+    const first = [...await canonicalPickerApi.cities('YE', regionId, '', 1), ...await canonicalPickerApi.cities('YE', regionId, '', 2)];
     adminApiClient.clearSecuritySession(); adminApiClient.setAdminAuthStatus('AUTHORIZED');
-    const refreshed = await canonicalPickerApi.cities('YE', regionId);
+    const refreshed = [...await canonicalPickerApi.cities('YE', regionId, '', 1), ...await canonicalPickerApi.cities('YE', regionId, '', 2)];
     expect(first.map(item => item.id)).toEqual(['city-1', 'city-2']);
     expect(refreshed).toEqual(first); expect(fetch).toHaveBeenCalledTimes(4);
     expect(first[1].metadata).toMatchObject({ administrativeRegionId: regionId, rawRegionLabel: 'Original region' });

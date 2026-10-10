@@ -20,12 +20,16 @@ function fixture() {
     reject: vi.fn().mockResolvedValue({ id: 'course-1', status: 'REJECTED' }),
     archive: vi.fn().mockResolvedValue({ id: 'course-1', status: 'ARCHIVED' }),
   };
+  const execute = vi.fn(async (_kind: string, _id: string, _action: string, _context: unknown, work: (scope: {importedCourseAdminUseCases: typeof useCases}) => Promise<unknown>) => ({value: await work({importedCourseAdminUseCases: useCases}), version: 2}));
   const app = express();
   app.use(express.json());
+  app.use((req,_res,next)=>{req.authUserId='reviewer-1';next();});
   app.use('/admin/courses/imported', ImportedCourseAdminRouter.create({
+    courseAdminCommandUseCases: {execute} as any,
+    adminCourseUseCases: {getCourse: vi.fn().mockResolvedValue({version:2})} as any,
     importedCourseAdminUseCases: useCases as any,
   }));
-  return { app, useCases };
+  return { app, useCases, execute };
 }
 
 describe('ImportedCourseAdminRouter', () => {
@@ -43,16 +47,19 @@ describe('ImportedCourseAdminRouter', () => {
 
   it('uses explicit verify-source and check-link endpoints', async () => {
     const f = fixture();
-    expect((await request(f.app).post('/admin/courses/imported/course-1/verify-source')).status).toBe(200);
-    expect((await request(f.app).post('/admin/courses/imported/course-1/check-link')).status).toBe(200);
+    expect((await request(f.app).post('/admin/courses/imported/course-1/verify-source').set('If-Match', '1').set('X-Review-Reason', 'Reviewed source')).status).toBe(200);
+    expect((await request(f.app).post('/admin/courses/imported/course-1/check-link').set('If-Match', '1').set('X-Review-Reason', 'Reviewed source')).status).toBe(200);
     expect(f.useCases.verifySource).toHaveBeenCalledWith('course-1');
     expect(f.useCases.checkLink).toHaveBeenCalledWith('course-1');
+    expect(f.execute).toHaveBeenCalledTimes(2);
+    expect(f.execute).toHaveBeenCalledWith('COURSE', 'course-1', 'IMPORTED_COURSE_ADMIN_COMMAND',
+      expect.objectContaining({actorId: 'reviewer-1', expectedVersion: 1, reason: 'Reviewed source'}), expect.any(Function));
   });
 
   it('supports PATCH without allowing arbitrary readonly fields', async () => {
     const f = fixture();
     const res = await request(f.app)
-      .patch('/admin/courses/imported/course-1')
+      .patch('/admin/courses/imported/course-1').set('If-Match', '1').set('X-Review-Reason', 'Reviewed source')
       .send({ displayName: 'Updated', id: 'injected' });
     expect(res.status).toBe(400);
     expect(f.useCases.update).not.toHaveBeenCalled();
@@ -60,14 +67,14 @@ describe('ImportedCourseAdminRouter', () => {
 
   it('maps fetch-missing provider policy refusal to 409', async () => {
     const f = fixture();
-    const res = await request(f.app).post('/admin/courses/imported/course-1/fetch-missing');
+    const res = await request(f.app).post('/admin/courses/imported/course-1/fetch-missing').set('If-Match', '1').set('X-Review-Reason', 'Reviewed source');
     expect(res.status).toBe(409);
     expect(res.body.error).toBe('COURSE_FETCH_MISSING_PROVIDER_POLICY_FILE_ONLY');
   });
 
   it('does not implement a generic action route', async () => {
     const f = fixture();
-    const res = await request(f.app).post('/admin/courses/imported/course-1/ARBITRARY_ACTION');
+    const res = await request(f.app).post('/admin/courses/imported/course-1/ARBITRARY_ACTION').set('If-Match', '1').set('X-Review-Reason', 'Reviewed source');
     expect(res.status).toBe(404);
   });
 });

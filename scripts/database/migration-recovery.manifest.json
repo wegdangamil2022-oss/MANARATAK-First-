@@ -327,6 +327,76 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Additive import control-plane evidence must be retained; recover from pre-mutation backup or reprovision a disposable target. No destructive reverse SQL is asserted."
+    },
+    "20261009010000_eap_asset_reference_serialization": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Asset-reference triggers serialize active references across owners. Removing them permits invalid references; recover a shared environment from a verified backup or a reviewed forward fix."
+    },
+    "20261009020000_eap_restore_operation_barrier": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Restore-operation barriers protect in-flight external operations. Recovery must preserve operational intent and storage reconciliation; use pre-mutation backup or a reviewed forward fix."
+    },
+    "20261009030000_eap_archive_operation_barrier": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Archive-operation barriers protect in-flight provider intent. Recover from pre-mutation backup with storage reconciliation or a reviewed forward fix; do not drop the barrier on a live operation."
+    },
+    "20261009040000_settings_override_history": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Setting history stores clear-override operations and reasons. Dropping columns loses audit meaning; shared targets require backup recovery or a reviewed forward fix."
+    },
+    "20261009050000_settings_current_version_ownership": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Deferred same-owner settings pointers protect version integrity. Existing anomalies need independent diagnostics; restore a verified pre-mutation backup or use a reviewed forward fix."
+    },
+    "20261009060000_settings_definition_validation_rules": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Validation rules become policy evidence once definitions are authored. Preserve them via backup restore or a reviewed forward fix rather than dropping stored rules."
+    },
+    "20261010000000_course_assessment_type": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Assignment types and submission index support historical learning evidence. Removing type storage can reinterpret assignments as quizzes; restore backup or use a reviewed forward fix."
+    },
+    "20261010010000_taxonomy_owner_import_review": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Owner review receipts and primary-parent uniqueness are governance evidence. Restore backup or use a reviewed forward fix; never discard approvals or silently rewrite relationships."
+    },
+    "20261010020000_reference_owner_review": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Reference owner decisions and standard snapshots contain approval/source evidence. Restore a verified backup or use a reviewed forward fix; no destructive reverse SQL is asserted."
+    },
+    "20261010100000_tests_publication_governance": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Immutable publication snapshots and evidence history must survive recovery. Restore a pre-mutation backup or apply a reviewed forward fix; do not delete review history."
+    },
+    "20261010120000_major_review_governance": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Major candidate decisions and immutable publication snapshots are governance evidence. Restore a verified backup or use a reviewed forward fix rather than dropping historical decisions."
+    },
+    "20261010170000_p11_unit_source_identity": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Source-identity uniqueness protects canonical University units. Restore a verified backup or use a reviewed forward fix; inspect duplicate historical pairs before activation."
+    },
+    "20261010180000_certificate_issuer_pending_default": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Issuer trust transition changes existing external-issuer status and cannot be reversed by blanket activation. Restore a verified pre-mutation backup or a reviewed forward fix preserving credential history."
+    },
+    "20261010183000_p12_scholarship_revision": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution. Scholarship revision participates in concurrency and audited authoring. Restore backup or use a reviewed forward fix rather than resetting revision evidence."
     }
   }
 }

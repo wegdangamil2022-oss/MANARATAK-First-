@@ -74,7 +74,7 @@ check('Public detail requires published status', useCases.includes('profile.stat
 
 check('Admin API is mounted', app.includes("'/admin/study-destinations'"));
 check('Public Study Destination API is mounted', app.includes("'/study-destinations'"));
-check('Admin API exposes list/detail/upsert', adminRouter.includes("router.get('/',") && adminRouter.includes("router.get('/:iso2Code',") && adminRouter.includes("router.put('/:iso2Code/profile',"));
+check('Admin API exposes list/detail/upsert', /router\.get\(\s*'\/',/.test(adminRouter) && /router\.get\(\s*'\/:iso2Code',/.test(adminRouter) && /router\.put\(\s*'\/:iso2Code\/profile',/.test(adminRouter));
 check('Admin API exposes review/publish/archive', ['submit-review','publish','archive'].every((x) => adminRouter.includes(x)));
 check('Admin relationship route uses read model', adminRouter.includes("/:iso2Code/relationships") && adminRouter.includes('crossDomainGraphReadService'));
 check('Public API exposes only Study Destination use cases', publicRouter.includes('listPublic') && publicRouter.includes('getPublicBySlug'));
