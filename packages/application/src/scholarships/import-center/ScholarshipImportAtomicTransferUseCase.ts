@@ -209,10 +209,10 @@ export class ScholarshipImportAtomicTransferUseCase
       let mode: 'CREATE' | 'MERGE';
 
       if (plan.existing) {
+        this.assertMergeDecision(decision, plan);
         if (!scholarshipTx.assertCurrentRevision || !Number.isSafeInteger(plan.existing.revision))
           throw new Error('SCHOLARSHIP_REVISION_LOCK_NOT_CONFIGURED');
         await scholarshipTx.assertCurrentRevision(plan.existing.id, plan.existing.revision!);
-        this.assertMergeDecision(decision, plan);
         if (
           plan.existing.publicationStatus === 'PUBLISHED' ||
           plan.existing.publicationStatus === 'ARCHIVED'

@@ -32,3 +32,7 @@ See `SECTION_11_CHECK_LOG.md` for the exact checks performed.
 ## Quick branch review follow-up
 
 The authorized review added selected-language public payloads, publication/public filtering for eligibility-linked Majors, stable display identity during source merge, missing-field child enrichment, persisted sponsor comparison, read-relation stripping for nested writes, strict revision header syntax, revision-locked import merge and repository-level invalidation of publish readiness. The new review cases and adjusted import fixture are source tests; the one-time run observed 28/33 passing before corrections. No post-fix rerun was performed. Full checklist closure and database/runtime sign-off remain deferred.
+
+### Authorized quick-test completion
+
+After explicit user authorization to rerun, corrected the stale merge-decision error ordering while retaining the pre-write revision lock. The three selected unit-test files now pass **33/33 with zero failures**. This supersedes the earlier quick-test failure count for these files; operational and TypeScript verification remain deferred.

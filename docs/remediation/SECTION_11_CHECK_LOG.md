@@ -48,3 +48,14 @@ Additional manual corrections: hydrate missing child fields without replacing po
 `git diff --check origin/main..HEAD` executed once before these corrections: PASS. No check or test was rerun after corrections. Final correctness/type-check/runtime success is not claimed.
 
 No database calls, schema application, Prisma generation, heavy tests, browser, full build, deployment or main merge. Push only, as authorized. The temporary test config was removed after its single execution.
+
+## Authorized rerun to zero failures — 2026-10-10
+
+The user explicitly authorized rerunning the selected quick tests until no failures remained, superseding the earlier no-rerun constraint for this task.
+
+- First rerun: 32 PASS / 1 FAIL, 2.58 seconds. The changed-duplicate-target case correctly blocked writing but returned a revision error before the specific stale review decision error.
+- Correction: validate the durable merge decision before acquiring/comparing the target revision; the revision lock still precedes every merge write.
+- Final rerun, same three files and 45-second bound: **33 PASS / 0 FAIL**, 3 files passed, 2.31 seconds.
+- Raw outputs: `evidence/section-11/zero-failures-first.log` and `evidence/section-11/zero-failures-final.log`.
+
+This confirms the selected unit tests only. TypeScript compilation, generated Prisma compatibility, database concurrency/integrity, full test coverage, browser and deployment remain unverified. No database operation or heavy test was executed.

@@ -1,0 +1,30 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-11-review
+
+ ❯ packages/application/tests/scholarships/ScholarshipImportAtomicTransferUseCase.spec.ts (21 tests | 1 failed) 67ms
+     × rejects when the duplicate target changes after durable review 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/application/tests/scholarships/ScholarshipImportAtomicTransferUseCase.spec.ts > WP12-10 ScholarshipImportAtomicTransferUseCase > rejects when the duplicate target changes after durable review
+AssertionError: expected [Function] to throw error including 'SCHOLARSHIP_IMPORT_REVIEW_DECISION_ST…' but got 'SCHOLARSHIP_STALE_REVISION'
+
+Expected: "SCHOLARSHIP_IMPORT_REVIEW_DECISION_STALE"
+Received: "SCHOLARSHIP_STALE_REVISION"
+
+ ❯ packages/application/tests/scholarships/ScholarshipImportAtomicTransferUseCase.spec.ts:283:81
+    281|     changedTarget.id = 'sch-different';
+    282|     vi.spyOn(env.repository, 'findByDedupKey').mockResolvedValue(chang…
+    283|     await expect(env.service.transfer({ recordId: 'rec-1', actorId: 'a…
+       |                                                                                 ^
+    284|       .rejects.toThrow('SCHOLARSHIP_IMPORT_REVIEW_DECISION_STALE');
+    285|     expect(env.update).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 32 passed (33)
+   Start at  14:23:54
+   Duration  2.58s (transform 2.96s, setup 0ms, import 4.20s, tests 84ms, environment 0ms)
+
