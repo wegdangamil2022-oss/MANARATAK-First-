@@ -388,10 +388,16 @@ export class ScholarshipImportAtomicTransferUseCase
     };
   }
 
+  private canonicalValue(value: unknown): string {
+    if (value instanceof Date) return value.toISOString();
+    if (typeof value === 'string') return value.normalize('NFKC').trim().toLowerCase();
+    return JSON.stringify(value) ?? '';
+  }
+
   private buildMergeUpdate(existing: ScholarshipDto, plan: TransferPlan): UpdateScholarshipDto {
     const incoming = this.incomingData(plan);
     const updates: UpdateScholarshipDto = {
-      completenessStatus: incoming.completenessStatus,
+      completenessStatus: existing.completenessStatus === 'COMPLETE' ? existing.completenessStatus : incoming.completenessStatus,
       sourceImportRecordId: existing.sourceImportRecordId ?? plan.record.id,
     };
 
@@ -407,15 +413,41 @@ export class ScholarshipImportAtomicTransferUseCase
     ];
     for (const key of scalarKeys) {
       const value = incoming[key as keyof typeof incoming];
-      if (this.meaningful(value)) (updates as any)[key] = value;
+      if (!this.meaningful(value)) continue;
+      const previous = existing[key as keyof typeof existing];
+      if (!this.meaningful(previous)) (updates as any)[key] = value;
+      else if (this.canonicalValue(previous) !== this.canonicalValue(value)) {
+        throw new Error(`SCHOLARSHIP_IMPORT_FIELD_CONFLICT_REVIEW_REQUIRED:${String(key)}`);
+      }
     }
 
-    if (incoming.benefits?.length) updates.benefits = incoming.benefits;
-    if (incoming.degreeTargets?.length) updates.degreeTargets = incoming.degreeTargets;
-    if (incoming.majorTargets?.length) updates.majorTargets = incoming.majorTargets;
-    if (incoming.eligibilityItems?.length) updates.eligibilityItems = incoming.eligibilityItems;
-    if (incoming.requiredDocumentItems?.length) updates.requiredDocumentItems = incoming.requiredDocumentItems;
-    if (incoming.universityLinks?.length) updates.universityLinks = incoming.universityLinks;
+    const mergeChildren = <T extends Record<string, unknown>>(
+      current: T[] | undefined, received: T[] | undefined, identity: keyof T, area: string,
+    ): T[] | undefined => {
+      if (!received?.length) return undefined;
+      if (!current?.length) return received;
+      const existingByKey = new Map(current.map(item => [String(item[identity]), item]));
+      if (existingByKey.size !== current.length || received.some(item => !existingByKey.has(String(item[identity])))) {
+        throw new Error(`SCHOLARSHIP_IMPORT_CHILD_CONFLICT_REVIEW_REQUIRED:${area}`);
+      }
+      for (const item of received) {
+        const previous = existingByKey.get(String(item[identity]))!;
+        for (const [field, value] of Object.entries(item)) {
+          if (['id','scholarshipId','createdAt','updatedAt','metadata','resolutionStatus'].includes(field)) continue;
+          if (this.meaningful(value) && this.meaningful(previous[field]) &&
+              this.canonicalValue(value) !== this.canonicalValue(previous[field])) {
+            throw new Error(`SCHOLARSHIP_IMPORT_CHILD_CONFLICT_REVIEW_REQUIRED:${area}`);
+          }
+        }
+      }
+      return undefined; // no write if existing reviewed children are unchanged
+    };
+    updates.benefits = mergeChildren(existing.benefits as Record<string, unknown>[] | undefined, incoming.benefits as Record<string, unknown>[] | undefined, 'benefitKey', 'BENEFITS') as typeof updates.benefits;
+    updates.degreeTargets = mergeChildren(existing.degreeTargets as Record<string, unknown>[] | undefined, incoming.degreeTargets as Record<string, unknown>[] | undefined, 'targetKey', 'DEGREES') as typeof updates.degreeTargets;
+    updates.majorTargets = mergeChildren(existing.majorTargets as Record<string, unknown>[] | undefined, incoming.majorTargets as Record<string, unknown>[] | undefined, 'targetKey', 'MAJORS') as typeof updates.majorTargets;
+    updates.eligibilityItems = mergeChildren(existing.eligibilityItems as Record<string, unknown>[] | undefined, incoming.eligibilityItems as Record<string, unknown>[] | undefined, 'itemKey', 'ELIGIBILITY') as typeof updates.eligibilityItems;
+    updates.requiredDocumentItems = mergeChildren(existing.requiredDocumentItems as Record<string, unknown>[] | undefined, incoming.requiredDocumentItems as Record<string, unknown>[] | undefined, 'documentKey', 'DOCUMENTS') as typeof updates.requiredDocumentItems;
+    updates.universityLinks = mergeChildren(existing.universityLinks as Record<string, unknown>[] | undefined, incoming.universityLinks as Record<string, unknown>[] | undefined, 'linkKey', 'UNIVERSITIES') as typeof updates.universityLinks;
     updates.sourceEvidence = this.mergeSourceEvidence(existing, incoming.sourceEvidence ?? []);
     return updates;
   }

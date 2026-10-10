@@ -202,6 +202,7 @@ export class AdminScholarshipUseCases {
     const dataToUpdate: ScholarshipRepositoryUpdateDto = {
       ...canonicalSafeUpdates,
       completenessStatus: classification.state,
+      status: existing.status === ScholarshipStatus.READY_TO_PUBLISH ? ScholarshipStatus.READY_TO_REVIEW : undefined,
     };
     const identityChanged =
       (updates.providerName !== undefined && !this.semanticEquivalent(existing.providerName, updates.providerName)) ||
@@ -300,6 +301,7 @@ export class AdminScholarshipUseCases {
       universityLinks,
     };
     dataToUpdate.completenessStatus = this.catalogCompleteness(existing, dataToUpdate).state;
+    if (existing.status === ScholarshipStatus.READY_TO_PUBLISH) dataToUpdate.status = ScholarshipStatus.READY_TO_REVIEW;
 
     if (input.countryReferenceId !== undefined && input.countryReferenceId !== existing.countryReferenceId) {
       const cleanedName = ScholarshipNamingService.clean(existing.canonicalName).cleanedScholarshipName;

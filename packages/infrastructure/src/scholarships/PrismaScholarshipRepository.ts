@@ -225,13 +225,13 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       studyLanguageSourceLabel: updates.studyLanguageSourceLabel,
       studyLanguageResolutionStatus: updates.studyLanguageResolutionStatus,
       optionalFields: legacyCompatibility,
-      benefits: this.toNestedReplace(updates.benefits),
-      degreeTargets: this.toNestedReplace(updates.degreeTargets),
-      majorTargets: this.toNestedReplace(updates.majorTargets),
-      eligibilityItems: this.toNestedReplace(updates.eligibilityItems),
-      requiredDocuments: this.toNestedReplace(updates.requiredDocumentItems),
-      sourceEvidence: this.toNestedReplace(updates.sourceEvidence),
-      universityLinks: this.toNestedReplace(updates.universityLinks),
+      benefits: this.toNestedUpsert(id, updates.benefits, 'benefitKey'),
+      degreeTargets: this.toNestedUpsert(id, updates.degreeTargets, 'targetKey'),
+      majorTargets: this.toNestedUpsert(id, updates.majorTargets, 'targetKey'),
+      eligibilityItems: this.toNestedUpsert(id, updates.eligibilityItems, 'itemKey'),
+      requiredDocuments: this.toNestedUpsert(id, updates.requiredDocumentItems, 'documentKey'),
+      sourceEvidence: this.toNestedUpsert(id, updates.sourceEvidence, 'evidenceKey'),
+      universityLinks: this.toNestedUpsert(id, updates.universityLinks, 'linkKey'),
     } as unknown as Prisma.ScholarshipUpdateInput;
 
     let record = await this.prisma.scholarship.update({
@@ -628,13 +628,24 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     return { create: items.map((item) => this.stripPersistenceFields(item)) };
   }
 
-  private toNestedReplace<T extends object>(
-    items: readonly T[] | undefined,
-  ): { deleteMany: object; create: Record<string, unknown>[] } | undefined {
+  /** Preserve child primary keys and source provenance by immutable owner/key upsert. */
+  private toNestedUpsert<T extends object>(
+    scholarshipId: string, items: readonly T[] | undefined, keyName: keyof T,
+  ): { deleteMany: object; upsert: Record<string, unknown>[] } | undefined {
     if (items === undefined) return undefined;
+    const keys = items.map(item => String(item[keyName] ?? '').trim());
+    if (keys.some(key => !key) || keys.length !== new Set(keys).size) throw new Error('SCHOLARSHIP_DUPLICATE_OR_EMPTY_CHILD_IDENTITY');
+    const name = String(keyName);
     return {
-      deleteMany: {},
-      create: items.map((item) => this.stripPersistenceFields(item)),
+      deleteMany: { [name]: { notIn: keys } },
+      upsert: items.map((item, index) => {
+        const data = this.stripPersistenceFields(item);
+        const identity = { scholarshipId, [name]: keys[index] };
+        return {
+          where: { [`scholarshipId_${name}`]: identity },
+          create: data, update: data,
+        };
+      }),
     };
   }
 
