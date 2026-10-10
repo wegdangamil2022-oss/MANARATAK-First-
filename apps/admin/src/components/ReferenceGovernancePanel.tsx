@@ -7,6 +7,7 @@ import type {
   ReferenceProviderMappingInput,
   ReferenceGovernanceDetails,
   ReferenceVersionDto,
+  ReferenceHistoryPage,
   ReferenceRelationshipDto,
   ReferenceDependencyImpact,
 } from '@manaratak/domain';
@@ -59,6 +60,10 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
   const [error, setError] = useState<string | null>(null);
   const [details, setDetails] = useState<ReferenceGovernanceDetails | null>(null);
   const [history, setHistory] = useState<ReferenceVersionDto[]>([]);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyMeta, setHistoryMeta] = useState<ReferenceHistoryPage | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
   const [relationships, setRelationships] = useState<ReferenceRelationshipDto[]>([]);
   const [impact, setImpact] = useState<ReferenceDependencyImpact | null>(null);
   const [aliases, setAliases] = useState<ReferenceAliasInput[]>([]);
@@ -69,15 +74,13 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
     let live = true;
     Promise.all([
       referenceDataAdminApi.governanceDetails(entityType, record.id),
-      referenceDataAdminApi.governanceHistory(entityType, record.id),
       referenceDataAdminApi.governanceRelationships(entityType, record.id),
       referenceDataAdminApi.governanceImpact(entityType, record.id),
-    ]).then(([d, h, r, i]) => {
+    ]).then(([d, r, i]) => {
       if (!live) return;
       setDetails(d.data);
       setAliases(d.data.aliases.map(alias => ({ ...alias })));
       setMappings(d.data.providerMappings.map(mapping => ({ ...mapping })));
-      setHistory(h.data);
       setRelationships(r.data);
       setImpact(i.data);
     }).catch((err: unknown) => {
@@ -85,6 +88,21 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
     }).finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
   }, [entityType, record.id]);
+
+  useEffect(() => {
+    let active = true;
+    setHistoryLoading(true);
+    setHistoryError(false);
+    referenceDataAdminApi.governanceHistoryPage(entityType, record.id, historyPage)
+      .then(result => {
+        if (!active) return;
+        setHistory(result.data);
+        setHistoryMeta(result);
+      })
+      .catch(() => { if (active) setHistoryError(true); })
+      .finally(() => { if (active) setHistoryLoading(false); });
+    return () => { active = false; };
+  }, [entityType, record.id, historyPage]);
 
   const save = async () => {
     if (!details || !Number.isInteger(record.versionNumber)) return;
@@ -231,13 +249,24 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
             <ReferenceProvenanceReadOnly metadata={record.metadata} />
           </section>
           <section className="border-t pt-4 space-y-2">
-            <h4 className="font-bold">الإصدارات السابقة / History ({history.length})</h4>
+            <h4 className="font-bold">الإصدارات السابقة / History ({historyMeta?.total ?? 'unknown'})</h4>
+            {historyLoading && <p role="status" className="text-xs">جارٍ تحميل الإصدارات…</p>}
+            {historyError && <p role="alert" className="text-red-700 text-xs">تعذر قراءة سجل الإصدارات.</p>}
             <div className="max-h-40 overflow-auto">
               {history.map(h => <p key={h.id} className="text-xs border-b py-1">
                 v{h.versionNumber} · {h.lifecycleState} · {String(h.effectiveFrom)} → {h.effectiveTo ? String(h.effectiveTo) : 'current'}
                 {' · '}{h.changeReason ?? '-'} · actor {h.actorId ?? 'unknown'}
               </p>)}
             </div>
+            {historyMeta && <nav className="flex items-center justify-between gap-3 text-xs" aria-label="Historical versions pages">
+              <button type="button" className="border rounded-lg px-2 py-1 disabled:opacity-50"
+                disabled={historyLoading || historyPage <= 1}
+                onClick={() => setHistoryPage(page => page - 1)}>الأحدث</button>
+              <span>{historyMeta.page} / {Math.max(1, historyMeta.totalPages)}</span>
+              <button type="button" className="border rounded-lg px-2 py-1 disabled:opacity-50"
+                disabled={historyLoading || historyPage >= historyMeta.totalPages}
+                onClick={() => setHistoryPage(page => page + 1)}>الأقدم</button>
+            </nav>}
             <h4 className="font-bold">علاقات الاستبدال / Relationships ({relationships.length})</h4>
             {relationships.map(r => <p key={r.id} className="text-xs border-b py-1 font-mono" dir="ltr">
               {r.relationshipType}: {r.sourceReferenceId} → {r.targetReferenceId}
