@@ -23,7 +23,7 @@ export class ReferenceResolverService implements IReferenceResolver {
     const result = await this.repository.resolveCountryCandidate(lookup);
     return result?.record.id ? this.withReplacement({
       id: result.record.id, type: 'COUNTRY', standardCode: result.record.iso2Code,
-      active: result.record.isActive, resolutionMethod: result.method,
+      active: result.record.isActive && result.record.lifecycleState === ReferenceLifecycleState.ACTIVE, resolutionMethod: result.method,
     }) : null;
   }
 
@@ -31,7 +31,7 @@ export class ReferenceResolverService implements IReferenceResolver {
     const result = await this.repository.resolveRegionCandidate(lookup);
     return result ? this.withReplacement({
       id: result.record.id, type: 'REGION', standardCode: result.record.regionCode,
-      active: result.record.lifecycleState === ReferenceLifecycleState.ACTIVE,
+      active: result.record.isActive && result.record.lifecycleState === ReferenceLifecycleState.ACTIVE,
       resolutionMethod: result.method,
     }) : null;
   }
@@ -39,7 +39,7 @@ export class ReferenceResolverService implements IReferenceResolver {
   public async resolveCity(lookup: ReferenceLookup): Promise<CanonicalReference | null> {
     const result = await this.repository.resolveCityCandidate(lookup);
     return result ? this.withReplacement({
-      id: result.record.id, type: 'CITY', active: result.record.isActive,
+      id: result.record.id, type: 'CITY', active: result.record.isActive && result.record.lifecycleState === ReferenceLifecycleState.ACTIVE,
       resolutionMethod: result.method,
     }) : null;
   }
@@ -48,7 +48,7 @@ export class ReferenceResolverService implements IReferenceResolver {
     const result = await this.repository.resolveLanguageCandidate(lookup);
     return result?.record.id ? this.withReplacement({
       id: result.record.id, type: 'LANGUAGE', standardCode: result.record.isoCode,
-      active: result.record.isActive, resolutionMethod: result.method,
+      active: result.record.isActive && result.record.lifecycleState === ReferenceLifecycleState.ACTIVE, resolutionMethod: result.method,
     }) : null;
   }
 
@@ -56,7 +56,7 @@ export class ReferenceResolverService implements IReferenceResolver {
     const result = await this.repository.resolveCurrencyCandidate(lookup);
     return result?.record.id ? this.withReplacement({
       id: result.record.id, type: 'CURRENCY', standardCode: result.record.isoCode,
-      active: result.record.isActive, resolutionMethod: result.method,
+      active: result.record.isActive && result.record.lifecycleState === ReferenceLifecycleState.ACTIVE, resolutionMethod: result.method,
     }) : null;
   }
 }

@@ -139,6 +139,26 @@ describe('ReferenceResolverService canonical contract', () => {
     await expect(resolver.resolveRegion({ alias: 'Riyadh' })).resolves.toMatchObject({ id: region.id, active: false, resolutionMethod: 'NORMALIZED_ALIAS' });
   });
 
+  it('requires both the compatibility active flag and authoritative lifecycle for selectability', async () => {
+    vi.mocked(repository.resolveCountryCandidate).mockResolvedValue({
+      record: { ...country, lifecycleState: ReferenceLifecycleState.DEPRECATED, isActive: true },
+      method: 'EXACT_STANDARD_CODE',
+    });
+    await expect(resolver.resolveCountry({ standardCode: 'SA' })).resolves.toMatchObject({ active: false });
+
+    vi.mocked(repository.resolveCityCandidate).mockResolvedValue({
+      record: { ...city, lifecycleState: ReferenceLifecycleState.ACTIVE, isActive: false },
+      method: 'EXACT_ID',
+    });
+    await expect(resolver.resolveCity({ id: 'city-riyadh' })).resolves.toMatchObject({ active: false });
+
+    vi.mocked(repository.resolveCurrencyCandidate).mockResolvedValue({
+      record: { ...currency, lifecycleState: ReferenceLifecycleState.MERGED, isActive: true },
+      method: 'EXACT_STANDARD_CODE',
+    });
+    await expect(resolver.resolveCurrency({ standardCode: 'SAR' })).resolves.toMatchObject({ active: false });
+  });
+
   it('maps Language and Currency candidates and returns null when no unique candidate exists', async () => {
     vi.mocked(repository.resolveLanguageCandidate).mockResolvedValue({
       record: language,
