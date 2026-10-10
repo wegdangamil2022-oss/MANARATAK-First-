@@ -4,6 +4,7 @@ import type {
   UpsertReferenceLanguageDto, UpsertReferenceCityDto,
   AdministrativeRegionDto, UpsertAdministrativeRegionDto, ReferenceLifecycleState, ReferenceVersionDto,
   ReferenceGovernanceDetails, ReferenceRelationshipDto, ReferenceCityQualityCounters, GovernedReferenceEntityType, ReferenceDependencyImpact,
+  ReferenceImportScreeningReviewPage,
 } from '@manaratak/domain';
 import { adminApiClient, type AdminRequestOptions } from './client';
 
@@ -38,6 +39,10 @@ function mutate<T>(path: string, method: 'POST' | 'PUT', body: unknown, options:
 }
 
 export const referenceDataAdminApi = {
+  screeningReviews(page = 1) {
+    return adminApiClient.request<ReferenceImportScreeningReviewPage>(
+      base + '/import-review?page=' + encodeURIComponent(String(page)) + '&pageSize=25');
+  },
   standardsReadiness() {
     return adminApiClient.request<{ evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS';
       data: Array<{ standardFamily: string; readiness: string; sourceVersion: string | null; candidateVersions: string[] }>; asOf: string }>(

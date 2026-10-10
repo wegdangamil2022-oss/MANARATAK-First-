@@ -30,6 +30,7 @@ import {
   ReferenceDependencyImpact,
   ReferenceProviderMappingReassignmentCommand,
   ReferenceCityCountryLinkRepairCommand,
+  ReferenceImportScreeningReviewPage,
   referenceCityScopeKey,
   referenceStandardsReadiness
 } from '@manaratak/domain';
@@ -118,6 +119,18 @@ export class ReferenceDataUseCases {
   /** Read-only manifest; no reviewed authority snapshot ships in this revision.
    * Do not confuse ICU code-format checks with an approved standards baseline.
    */
+  public listImportScreeningReviews(page = 1, pageSize = 25): Promise<ReferenceImportScreeningReviewPage> {
+    if (!Number.isSafeInteger(page) || page < 1 || page > 100000 ||
+        !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50)
+      throw new ReferenceDataInvariantError('Invalid reference import screening review pagination.');
+    const owner = this.repository as IReferenceDataRepository & {
+      listImportScreeningReviews?: (page: number, pageSize: number) => Promise<ReferenceImportScreeningReviewPage>;
+    };
+    if (!owner.listImportScreeningReviews)
+      throw new Error('REFERENCE_IMPORT_REVIEW_OWNER_READ_UNAVAILABLE');
+    return owner.listImportScreeningReviews(page, pageSize);
+  }
+
   public getStandardsReadiness() {
     return referenceStandardsReadiness([]);
   }

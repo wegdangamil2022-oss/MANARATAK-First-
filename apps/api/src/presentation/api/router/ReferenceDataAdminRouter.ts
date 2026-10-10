@@ -164,6 +164,15 @@ export class ReferenceDataAdminRouter {
       res.json(await referenceDataUseCases.upsertRegion({ ...body, id }, mutationContext(req)));
     }));
 
+    router.get('/import-review', asyncHandler(async (req: Request, res: Response) => {
+      const params = z.object({
+        page: z.coerce.number().int().min(1).max(100000).optional(),
+        pageSize: z.coerce.number().int().min(1).max(50).optional(),
+      }).strict().parse(req.query);
+      res.json(await referenceDataUseCases.listImportScreeningReviews(
+        params.page ?? 1, params.pageSize ?? 25));
+    }));
+
     router.get('/standards/readiness', asyncHandler(async (_req: Request, res: Response) => {
       res.json({ data: referenceDataUseCases.getStandardsReadiness(), source: 'P7_REVIEWED_SNAPSHOT_MANIFEST',
         evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS', asOf: new Date().toISOString() });

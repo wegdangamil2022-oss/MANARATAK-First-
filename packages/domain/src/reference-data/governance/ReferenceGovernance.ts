@@ -145,3 +145,28 @@ export interface ReferenceCityCountryLinkRepairCommand {
   actorId: string;
   reason: string;
 }
+
+/** Review-only view over durable P6 screening receipts. No apply permission. */
+export interface ReferenceImportScreeningReview {
+  receiptId: string;
+  handoffKey: string;
+  screenedAt: Date;
+  state: 'NEEDS_OWNER_REVIEW' | 'INVALID' | 'UNKNOWN';
+  entityType: 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY' | null;
+  canonicalKey: string | null;
+  sourceArtifactId: string | null;
+  sourceContentHash: string | null;
+  issueCodes: string[];
+  reviewed: false;
+  approved: false;
+  applied: false;
+}
+
+export interface ReferenceImportScreeningReviewPage {
+  data: ReferenceImportScreeningReview[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  applyAvailable: false;
+}

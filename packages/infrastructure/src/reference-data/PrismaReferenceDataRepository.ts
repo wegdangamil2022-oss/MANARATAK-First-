@@ -31,6 +31,7 @@ import {
   ReferenceDependencyImpact,
   ReferenceProviderMappingReassignmentCommand,
   ReferenceCityCountryLinkRepairCommand,
+  ReferenceImportScreeningReviewPage,
   assertReferenceLifecycleTransition,
   lifecycleIsActive,
   normalizeReferenceIdentityToken,
@@ -939,6 +940,52 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     return this.mapToCityDto({ ...(record as unknown as DbCity), ...governance });
   }
 
+
+  /** Read existing P6 SCREENING_ONLY receipts for P7 review triage.
+   * This intentionally does not read or infer any operator approval state
+   * from a P6 validation result and never modifies canonical records.
+   */
+  public async listImportScreeningReviews(
+    page: number, pageSize: number,
+  ): Promise<ReferenceImportScreeningReviewPage> {
+    if (!Number.isSafeInteger(page) || page < 1 || page > 100000 ||
+        !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50)
+      throw new Error('REFERENCE_IMPORT_REVIEW_PAGINATION_INVALID');
+    const where = { ownerDomain: 'REFERENCE_DATA' };
+    const [total, receipts] = await Promise.all([
+      this.prisma.importScreeningReceipt.count({ where }),
+      this.prisma.importScreeningReceipt.findMany({
+        where, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * pageSize, take: pageSize,
+        select: { id: true, handoffKey: true, createdAt: true, result: true },
+      }),
+    ]);
+    const safeText = (v: unknown): string | null =>
+      typeof v === 'string' && v.length > 0 && v.length <= 300 ? v : null;
+    const choices = new Set(['COUNTRY', 'CURRENCY', 'LANGUAGE', 'CITY']);
+    const data = receipts.map(receipt => {
+      const raw: Record<string, unknown> =
+        receipt.result && typeof receipt.result === 'object' && !Array.isArray(receipt.result)
+          ? receipt.result as Record<string, unknown> : {};
+      const state = raw.state === 'NEEDS_OWNER_REVIEW' || raw.state === 'INVALID'
+        ? raw.state : 'UNKNOWN';
+      const entityType = typeof raw.entityType === 'string' && choices.has(raw.entityType)
+        ? raw.entityType as 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY' : null;
+      const issues = Array.isArray(raw.issues) ? raw.issues : [];
+      return {
+        receiptId: receipt.id, handoffKey: receipt.handoffKey, screenedAt: receipt.createdAt,
+        state, entityType, canonicalKey: safeText(raw.deterministicKey),
+        sourceArtifactId: safeText(raw.sourceArtifactId),
+        sourceContentHash: safeText(raw.sourceContentHash),
+        issueCodes: issues.slice(0, 30).map(issue =>
+          issue && typeof issue === 'object' && 'code' in issue ? safeText(issue.code) : null)
+          .filter((code): code is string => Boolean(code)),
+        reviewed: false as const, approved: false as const, applied: false as const,
+      };
+    });
+    return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize),
+      applyAvailable: false };
+  }
 
   /** Owner-backed, active-only alias and provider mapping inspection. */
   public async getReferenceGovernanceDetails(
