@@ -12,6 +12,7 @@ const check = (name, condition, detail = '') => {
 
 const useCases = read('packages/application/src/tests-platform/use-cases/InternationalTestUseCases.ts');
 const repo = read('packages/infrastructure/src/international-tests/PrismaInternationalTestRepository.ts');
+const governance = read('packages/infrastructure/src/international-tests/InternationalTestGovernancePersistence.ts');
 const repositoryContract = read('packages/domain/src/tests-platform/repository.ts');
 const router = read('apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts');
 const adminDetail = read('apps/admin/src/pages/InternationalTestDetailPage.tsx');
@@ -19,6 +20,8 @@ const adminList = read('apps/admin/src/pages/InternationalTestsAdminPage.tsx');
 const adminClient = read('apps/admin/src/api/client.ts');
 const publicList = read('apps/web/src/features/public-template/components/ExamsSearchPage.tsx');
 const publicDetail = read('apps/web/src/features/public-template/components/ExamDetailModal.tsx');
+const presentation = read('packages/ui/src/public-tests/presentation.ts');
+const sharedExamDetails = read('packages/ui/src/public-tests/ExamDetails.tsx');
 const publicDataSource = read('apps/web/src/features/public-template/publicLiveDataSource.ts');
 const publicClient = read('apps/web/src/api/client.ts');
 const graph = read('packages/application/src/read-models/CrossDomainGraphReadService.ts');
@@ -34,11 +37,16 @@ const testsIndex = read('packages/application/src/tests-platform/index.ts');
 check('Publication synchronizes PUBLISHED + public visibility',
   /status:\s*InternationalTestStatus\.PUBLISHED,\s*isPubliclyVisible:\s*true/.test(useCases));
 check('Archive synchronizes ARCHIVED + hidden visibility',
-  /status:\s*InternationalTestStatus\.ARCHIVED,\s*isPubliclyVisible:\s*false/.test(useCases));
+  useCases.includes('this.transition(id,InternationalTestStatus.ARCHIVED,context,true)') &&
+  useCases.includes('...(hide?{isPubliclyVisible:false}:{})'));
 check('Ready-to-publish remains hidden',
-  /status:\s*InternationalTestStatus\.READY_TO_PUBLISH,\s*isPubliclyVisible:\s*false/.test(useCases));
+  useCases.includes('status:InternationalTestStatus.READY_TO_PUBLISH,isPubliclyVisible:false') &&
+  useCases.includes('this.transition(id,InternationalTestStatus.READY_TO_PUBLISH,context,true)'));
 check('Source verification requires trusted evidence',
-  useCases.includes('TRUSTED_SOURCE_EVIDENCE_REQUIRED') && useCases.includes('InternationalTestSourceTrustLevel.AUTHORITATIVE') && useCases.includes('InternationalTestSourceTrustLevel.HIGH'));
+  useCases.includes("repository.govern(id,'VERIFY'") &&
+  governance.includes('INTERNATIONAL_TEST_SOURCE_ATTESTATION_REQUIRED') &&
+  governance.includes("['HIGH','AUTHORITATIVE']") &&
+  governance.includes('ev.sourceUrl') && governance.includes('ev.retrievedAt'));
 
 check('Provider contract exposed on test repository',
   repositoryContract.includes('findProviderById?') && repositoryContract.includes('listProviders?') && repositoryContract.includes('upsertProvider?'));
@@ -51,7 +59,9 @@ check('Admin relationship read route exists', router.includes("router.get('/:id/
 
 check('Admin public page uses slug instead of owner id',
   adminDetail.includes('href={`/international-tests/${test.slug}`}') && !adminDetail.includes('href={`/international-tests/${test.id}`}'));
-check('Admin reads canonical providers', adminDetail.includes('listInternationalTestProviders'));
+check('Admin reads canonical providers', adminDetail.includes('<CanonicalPicker paged') &&
+  adminDetail.includes('/admin/international-tests/providers?search=') &&
+  adminDetail.includes('providerId'));
 check('Admin can create/link canonical provider', adminDetail.includes('upsertInternationalTestProvider') && adminDetail.includes('providerId'));
 check('Admin uses canonical evidence trust enum values',
   adminDetail.includes("sourceTrustLevel: 'AUTHORITATIVE'") && !adminDetail.includes("sourceTrustLevel: 'OFFICIAL_PROVIDER'"));
@@ -69,8 +79,9 @@ check('Admin canonical category filters aligned', canonicalCategories.every(k =>
 check('Public canonical category filters aligned', canonicalCategories.every(k => publicList.includes(k)));
 check('Public detail no longer exposes raw availability UUID arrays',
   !publicDetail.includes('availableCountryIds')
-  && publicDataSource.includes('dto.countryRelationships?.map')
-  && publicDetail.includes('exam.relatedCountries'));
+  && publicDataSource.includes('mapInternationalTestToExam(dto)')
+  && presentation.includes('dto.countryRelationships?.map')
+  && sharedExamDetails.includes('exam.relatedCountries'));
 check('Public DTO exposes canonical reference relationships', publicClient.includes('PublicInternationalTestReferenceRelationshipDto'));
 
 check('University filter accepts canonical internationalTestId', universityContract.includes('internationalTestId?: string'));

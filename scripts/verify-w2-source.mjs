@@ -307,7 +307,9 @@ check('MNT-AUD-0050 production composition uses derived Prisma asset usage autho
 check('MNT-AUD-0050 purge fail-closes with concrete usage evidence',
   assetUsageContract.includes('findUsages?') &&
   assetLifecycleUseCase.includes('usageRegistry.findUsages') &&
-  assetLifecycleUseCase.includes('Cannot purge asset') &&
+  assetLifecycleUseCase.includes('Cannot ${operation} asset') &&
+  assetLifecycleUseCase.includes("await this.assertNotInUse(id, 'purge')") &&
+  assetLifecycleUseCase.includes('if (inUse)') &&
   assetUsageRegistry.includes('cmsPublishedContent') &&
   assetUsageRegistry.includes('seoMetadata') &&
   assetUsageRegistry.includes('attachmentAssetIds'));

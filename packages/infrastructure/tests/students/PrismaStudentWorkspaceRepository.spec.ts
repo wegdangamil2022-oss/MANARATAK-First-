@@ -186,6 +186,15 @@ describe('PrismaStudentWorkspaceRepository', () => {
     });
     expect(tx.studentWorkspace.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ privacyPreferences: updated.privacyPreferences, version: { increment: 1 } }) }));
     expect(tx.studentPrivacyConsentDecision.create).toHaveBeenCalledOnce();
+    expect(tx.studentWorkspace.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'workspace-1', version: 1 } }));
+    // The decision store owns sensitive before/after snapshots. Audit/outbox receive only metadata.
+    const event = vi.mocked(tx.transactionalOutboxRecord.create).mock.calls[0]?.[0]?.data;
+    const audit = vi.mocked(tx.auditRecord.create).mock.calls[0]?.[0]?.data;
+    for (const payload of [event?.payload, audit?.contextMetadata]) {
+      expect(payload).toMatchObject({ changedFields: expect.any(Array), actorId: 'student-1' });
+      expect(payload).not.toHaveProperty('beforePreferences');
+      expect(payload).not.toHaveProperty('afterPreferences');
+    }
     expect(decision).toMatchObject({ workspaceVersion: 2, afterPreferences: updated.privacyPreferences });
     expect(decision.changedFields).toEqual(expect.arrayContaining(['retainSearchHistory', 'allowPersonalization', 'allowProductAnalytics']));
   });

@@ -15,8 +15,8 @@ pass('Phase 06 router has no domain promotion use-case dependency',
   !/internationalTestImportPromotionUseCase|majorImportPromotionUseCase|fellowshipImportPromotionUseCase/.test(router));
 pass('Legacy promote endpoints are fail-closed',
   (router.match(/PHASE6_DOMAIN_PROMOTION_DISABLED/g) || []).length >= 1 &&
-  /router\.post\('\/records\/:id\/promote'[\s\S]*?status\(422\)/.test(router) &&
-  /router\.post\('\/batches\/:id\/promote'[\s\S]*?status\(422\)/.test(router));
+  /router\.post\(\s*'\/records\/:id\/promote'[\s\S]{0,350}?res\.status\(422\)/.test(router) &&
+  /router\.post\(\s*'\/batches\/:id\/promote'[\s\S]{0,350}?res\.status\(422\)/.test(router));
 
 const nav = read('apps/admin/src/components/AdminNavigation.tsx');
 pass('Admin navigation exposes one Imports entry',

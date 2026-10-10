@@ -69,7 +69,7 @@ interface DegreeWithMajors {
   id: string;
   degreeLevel: string; // e.g. 'بكالوريوس' | 'ماجستير' | 'دكتوراه'
   customLabel?: string;
-  majors: string[];
+  majors: Array<{ targetKey: string; label: string }>;
 }
 
 const PRESET_DEGREE_OPTIONS = [
@@ -275,7 +275,7 @@ export function ScholarshipDetailPage() {
       else if (dLabel.includes('زمالة') || dLabel.toLowerCase().includes('fellow')) matchedDegree = 'زمالة';
 
       // If majors exist, distribute or list them
-      const majorsList = rawMajors.filter(m => m.metadata?.degreeTargetKey === d.targetKey).map(m => m.sourceLabel || '').filter(Boolean);
+      const majorsList = rawMajors.filter(m => m.metadata?.degreeTargetKey === d.targetKey).map(m => ({ targetKey: m.targetKey, label: m.sourceLabel || '' })).filter(m => m.label && m.targetKey);
 
       return {
         id: d.targetKey || `deg-${index + 1}`,
@@ -343,10 +343,11 @@ export function ScholarshipDetailPage() {
     });
     // Keep ungrouped canonical targets intact; a label is never a canonical identifier.
     const allMajors: ScholarshipMajorTargetDto[] = existingMajors.filter(item => !item.metadata?.degreeTargetKey);
-    groups.forEach(g => g.majors.forEach(label => {
-      const existing = existingMajors.find(item => item.metadata?.degreeTargetKey === g.id && item.sourceLabel === label);
-      allMajors.push({ ...existing, targetKey: existing?.targetKey || `major-${crypto.randomUUID()}`,
-        sourceLabel: label, majorId: existing?.majorId ?? null,
+    groups.forEach(g => g.majors.forEach(major => {
+      // Stable target keys, not mutable source labels, determine relationship identity.
+      const existing = existingMajors.find(item => item.targetKey === major.targetKey);
+      allMajors.push({ ...existing, targetKey: major.targetKey,
+        sourceLabel: major.label, majorId: existing?.majorId ?? null,
         resolutionStatus: existing?.majorId ? existing.resolutionStatus : 'UNRESOLVED',
         metadata: { ...existing?.metadata, degreeTargetKey: g.id },
       });
@@ -382,10 +383,10 @@ export function ScholarshipDetailPage() {
 
     const updated = degreeGroups.map((g) => {
       if (g.id === groupId) {
-        if (g.majors.includes(nameToAdd)) return g;
+        if (g.majors.map(item => item.label).includes(nameToAdd)) return g;
         return {
           ...g,
-          majors: [...g.majors, nameToAdd],
+          majors: [...g.majors, { targetKey: `major-${crypto.randomUUID()}`, label: nameToAdd }],
         };
       }
       return g;
@@ -1216,7 +1217,7 @@ export function ScholarshipDetailPage() {
                             <span className="text-[11px] font-bold text-slate-400">💡 تخصصات شائعة (انقر للإضافة السريعة):</span>
                             <div className="flex flex-wrap gap-1.5">
                               {POPULAR_MAJOR_SUGGESTIONS.map((sug) => {
-                                const isAdded = group.majors.includes(sug);
+                                const isAdded = group.majors.map(item => item.label).includes(sug);
                                 return (
                                   <button
                                     key={sug}
@@ -1250,13 +1251,13 @@ export function ScholarshipDetailPage() {
                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                                 {group.majors.map((major, mIdx) => (
                                   <div
-                                    key={mIdx}
+                                    key={major.targetKey}
                                     className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xs hover:border-[#0E7C86] transition group/item"
                                   >
                                     <div className="flex items-center gap-2 min-w-0">
                                       <BookOpen className="h-4 w-4 text-[#21A7B4] shrink-0" />
                                       <span className="text-xs font-bold text-slate-800 truncate">
-                                        {major}
+                                        {major.label}
                                       </span>
                                     </div>
                                     <button

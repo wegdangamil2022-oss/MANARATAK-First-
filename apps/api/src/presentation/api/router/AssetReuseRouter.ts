@@ -103,10 +103,10 @@ export class AssetReuseRouter {
     }));
 
     router.post('/:assetId/delivery-grant', wrap(async (req, res) => {
-      z.object({ expiresInSeconds: z.number().int().min(1).max(300).optional() }).strict().parse(req.body ?? {});
+      const { expiresInSeconds = 300 } = z.object({ expiresInSeconds: z.number().int().min(1).max(300).optional() }).strict().parse(req.body ?? {});
       const asset = await requireReusable(req.params.assetId);
       if (!asset) { res.status(404).json({ error: 'ASSET_REUSE_NOT_FOUND' }); return; }
-      const expiresInSeconds = req.body?.expiresInSeconds ?? 300;
+
       const result = await cradle.processAssetLifecycleUseCase.requestDeliveryGrant({
         assetId: asset.id.value, expiresInSeconds,
       });

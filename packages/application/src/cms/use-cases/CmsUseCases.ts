@@ -404,8 +404,13 @@ export class PublicCmsUseCases {
     return this.repository.listPublishedByDomainTarget(targetType, normalizedTargetId, locale, siteIdentifier, limit);
   }
 
-  public async resolveRedirect(siteIdentifier: string, locale: string, sourcePath: string): Promise<CmsRedirectDto | null> {
-    return (await this.repository.listRedirects(siteIdentifier, locale)).find((redirect) => redirect.active && redirect.sourcePath === sourcePath) ?? null;
+  public async resolveRedirect(siteIdentifier: string, locale: string, sourcePath: string): Promise<Pick<CmsRedirectDto, 'destinationPath' | 'statusCode'> | null> {
+    const redirect = (await this.repository.listRedirects(siteIdentifier, locale))
+      .find(row => row.active && row.sourcePath === sourcePath);
+    if (!redirect) return null;
+    // Only a public destination and HTTP redirect status are eligible for delivery.
+    // Editorial actor, rationale, content ID and audit metadata remain owner-private.
+    return { destinationPath: redirect.destinationPath, statusCode: redirect.statusCode };
   }
 }
 

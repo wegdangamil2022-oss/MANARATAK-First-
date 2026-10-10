@@ -8,6 +8,7 @@ const taxonomyPublicRouter = read('apps/api/src/presentation/api/router/Academic
 const taxonomyAdminRouter = read('apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts');
 const taxonomyPublic = read('packages/application/src/academic-taxonomy/use-cases/PublicAcademicTaxonomyUseCases.ts');
 const taxonomyLocalized = read('packages/application/src/academic-taxonomy/use-cases/LocalizedPublicAcademicTaxonomyUseCases.ts');
+const taxonomyPublicOwner = read('packages/application/src/academic-taxonomy/use-cases/PublicAcademicTaxonomyUseCases.ts');
 const taxonomyAdminPage = read('apps/admin/src/pages/AcademicTaxonomyAdminPage.tsx');
 const taxonomyDetailPage = read('apps/admin/src/pages/AcademicTaxonomyDetailPage.tsx');
 const settingsDefinition = read('packages/domain/src/settings/entities/SettingDefinition.ts');
@@ -43,12 +44,12 @@ const checks = {
   taxonomy_public_separate_route: app.includes("'/academic-taxonomy', container.resolve<Router>('academicTaxonomyPublicRouter')"),
   taxonomy_public_router_has_no_status_filter: !/status:\s*statusSchema/.test(taxonomyPublicRouter),
   taxonomy_public_list_forces_active: /status: AcademicTaxonomyStatus\.ACTIVE/.test(taxonomyPublic),
-  taxonomy_localized_list_forces_active: /status: AcademicTaxonomyStatus\.ACTIVE/.test(taxonomyLocalized),
+  taxonomy_localized_list_forces_active: taxonomyLocalized.includes('new PublicAcademicTaxonomyUseCases(this.repository).listNodes(filters)') && taxonomyPublicOwner.includes('status: AcademicTaxonomyStatus.ACTIVE'),
   taxonomy_public_direct_read_active_only: /node\?\.status === AcademicTaxonomyStatus\.ACTIVE/.test(taxonomyPublic),
   taxonomy_localized_direct_read_active_only: /record\?\.status === AcademicTaxonomyStatus\.ACTIVE/.test(taxonomyLocalized),
   taxonomy_public_children_parent_guard: /parent\?\.status !== AcademicTaxonomyStatus\.ACTIVE/.test(taxonomyPublic),
   taxonomy_public_parents_child_guard: /child\?\.status !== AcademicTaxonomyStatus\.ACTIVE/.test(taxonomyPublic),
-  taxonomy_localized_children_filtered: /records\.filter\(\(record\) => record\.status === AcademicTaxonomyStatus\.ACTIVE\)/.test(taxonomyLocalized),
+  taxonomy_localized_children_filtered: taxonomyLocalized.includes('new PublicAcademicTaxonomyUseCases(this.repository).listChildren(parentNodeId, filters)') && taxonomyPublicOwner.includes('parent?.status !== AcademicTaxonomyStatus.ACTIVE') && taxonomyPublicOwner.includes('listChildren(parentNodeId)).filter((node) => node.status === AcademicTaxonomyStatus.ACTIVE'),
   taxonomy_localized_names_not_raw_public: /localizedNames: undefined/.test(taxonomyLocalized),
   taxonomy_admin_actor_required: /AUTHENTICATED_ADMIN_ACTOR_REQUIRED/.test(taxonomyAdminRouter),
   taxonomy_admin_audit_helper: /AuditHelper\.recordMutation/.test(taxonomyAdminRouter),

@@ -71,11 +71,15 @@ export class StudentSupportAdminRouter {
 
     router.get('/support/:studentReferenceId', async (req, res, next) => {
       try {
-        res
-          .status(200)
-          .json(
-            await studentDashboardHydrationService.getSupportDetail(req.params.studentReferenceId),
-          );
+        const actorId = req.authUserId;
+        if (!actorId) return void res.status(401).json({ error: { code: 'ADMIN_AUTH_REQUIRED' } });
+        // Support capability alone never grants P13/P14/P20 owner detail reads.
+        const [learning, certificates, services] = await Promise.all([
+          'admin:courses:view', 'admin:certificates:view', 'admin:services:manage',
+        ].map(permission => authEvaluatorService.evaluatePermission(actorId, permission, { ip: req.ip, requestTime: new Date() })));
+        res.status(200).json(await studentDashboardHydrationService.getSupportDetail(req.params.studentReferenceId, {
+          learning: learning.isGranted, certificates: certificates.isGranted, services: services.isGranted,
+        }));
       } catch (error) {
         next(error);
       }

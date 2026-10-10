@@ -91,13 +91,18 @@ check('LOGO_OBJECT_CONTAIN',contains(logoComponent,'object-contain'),'preserve a
 
 // Shared detail patterns
 const detailFiles=[
- 'ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx','ExamDetailModal.tsx',
+ 'ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx',
  'ImportedCourseDetail.tsx','ArticleDetail.tsx','ServiceDetail.tsx','modal/FellowshipDetailView.tsx'
 ].map(f=>`apps/web/src/features/public-template/components/${f}`);
 for(const p of detailFiles) check(`DETAIL_HEADER_${path.basename(p).replace(/\W/g,'_')}`,contains(p,'DetailSectionHeader'),p);
 check('DETAIL_NO_TEXT_BACK',!/>\s*العودة\s*</.test(allPublic),'no standalone return text buttons');
 check('DETAIL_BACK_ARIA',contains('apps/web/src/features/public-template/components/DetailUi.tsx',"aria-label={mode === 'close' ? 'إغلاق' : 'العودة'}"),'accessible close/back control');
-for(const p of ['ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx','ExamDetailModal.tsx'].map(f=>`apps/web/src/features/public-template/components/${f}`)) check(`DETAIL_CLOSE_MODE_${path.basename(p).replace(/\W/g,'_')}`,contains(p,'mode="close"'),p);
+for(const p of ['ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx'].map(f=>`apps/web/src/features/public-template/components/${f}`)) check(`DETAIL_CLOSE_MODE_${path.basename(p).replace(/\W/g,'_')}`,contains(p,'mode="close"'),p);
+// Exam detail delegates to the shared UI package, including accessible close control.
+const sharedExamWrapper='apps/web/src/features/public-template/components/ExamDetailModal.tsx';
+const sharedExamDetail='packages/ui/src/public-tests/ExamDetails.tsx';
+check('DETAIL_HEADER_SharedExamDetails', contains(sharedExamWrapper, '<ExamDetails {...props') && contains(sharedExamDetail, 'mn-exam-section-title'), sharedExamDetail);
+check('DETAIL_CLOSE_MODE_SharedExamDetails', contains(sharedExamWrapper, '<ExamDetails {...props') && contains(sharedExamDetail, 'onClick={onClose}') && contains(sharedExamDetail, 'aria-label={t("إغلاق")}'), sharedExamDetail);
 check('DETAIL_SCROLL_TARGET',contains('apps/web/src/features/public-template/components/DetailUi.tsx','scrollIntoView'),'search anchor scroll');
 check('DETAIL_TEMP_HIGHLIGHT',contains('apps/web/src/features/public-template/components/DetailUi.tsx','mn-search-term-mark'),'temporary matched phrase highlight');
 

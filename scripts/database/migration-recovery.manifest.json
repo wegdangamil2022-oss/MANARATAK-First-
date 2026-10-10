@@ -327,6 +327,81 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Additive import control-plane evidence must be retained; recover from pre-mutation backup or reprovision a disposable target. No destructive reverse SQL is asserted."
+    },
+    "20261009010000_eap_asset_reference_serialization": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261009010000_eap_asset_reference_serialization: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261009020000_eap_restore_operation_barrier": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261009020000_eap_restore_operation_barrier: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261009030000_eap_archive_operation_barrier": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261009030000_eap_archive_operation_barrier: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261009040000_settings_override_history": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261009040000_settings_override_history: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261009050000_settings_current_version_ownership": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261009050000_settings_current_version_ownership: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261009060000_settings_definition_validation_rules": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261009060000_settings_definition_validation_rules: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261010000000_course_assessment_type": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261010000000_course_assessment_type: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261010010000_taxonomy_owner_import_review": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261010010000_taxonomy_owner_import_review: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261010020000_reference_owner_review": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261010020000_reference_owner_review: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261010100000_tests_publication_governance": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261010100000_tests_publication_governance: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261010120000_major_review_governance": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261010120000_major_review_governance: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261010170000_p11_unit_source_identity": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261010170000_p11_unit_source_identity: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261010180000_certificate_issuer_pending_default": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261010180000_certificate_issuer_pending_default: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261010183000_p12_scholarship_revision": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "20261010183000_p12_scholarship_revision: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261011010000_p14_certificate_replacement_one_to_one": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "P14 source-only 1:1 replacement invariant; before applying on a separately approved disposable environment, verify there are no non-null duplicate replacesCertificateId values. Migration fails closed on duplicates; production requires backup and reviewed forward recovery, not blind cleanup or destructive rollback. No database changes were run in this task."
     }
   }
 }

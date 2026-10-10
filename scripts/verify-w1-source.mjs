@@ -29,16 +29,17 @@ check('P5-SEC-002 control-plane mutation audit enabled', app.includes("new Mutat
 
 for (const dir of ['packages/application/src', 'packages/infrastructure/src']) {
   const stack = [path.join(root, dir)];
-  let directEnv = false;
+  const directEnvFiles = [];
   while (stack.length) {
     const current = stack.pop();
     for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
       const full = path.join(current, entry.name);
       if (entry.isDirectory()) stack.push(full);
-      else if (/\.(ts|tsx|js|mjs)$/.test(entry.name) && /process\.env|import\.meta\.env/.test(fs.readFileSync(full, 'utf8'))) directEnv = true;
+      else if (/\.(ts|tsx|js|mjs)$/.test(entry.name) && /process\.env|import\.meta\.env/.test(fs.readFileSync(full, 'utf8'))) directEnvFiles.push(path.relative(root, full).replaceAll('\\', '/'));
     }
   }
-  check(`P3-CONFIG-001 no direct env reads under ${dir}`, !directEnv);
+  if (directEnvFiles.length) console.error('P3_CONFIG_UNAPPROVED_ENV_FILES: ' + directEnvFiles.join(', '));
+  check(`P3-CONFIG-001 no direct env reads under ${dir}`, directEnvFiles.length === 0);
 }
 
 const settingsService = read('packages/domain/src/settings/services/ConfigurationResolutionService.ts');
@@ -155,26 +156,45 @@ try {
   const strictValidationTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/strict-edge-validation-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0111 native source contract tests execute', /# fail 0/.test(strictValidationTest));
 } catch (error) {
+  console.error('MNT_AUD_0111_NATIVE_FAILURE', String(error?.stdout ?? '').slice(-4500), String(error?.stderr ?? '').slice(-1200));
   check('MNT-AUD-0111 native source contract tests execute', false);
 }
 
 const frontendSecurityPolicy = read('apps/frontend-security/ViteFrontendSecurityHeaders.ts');
 const webVite = read('apps/web/vite.config.ts');
 const adminVite = read('apps/admin/vite.config.ts');
-const webInlineStyleCount = (execFileSync('bash', ['-lc', "rg -n 'style=\\{\\{' apps/web/src --glob '*.{ts,tsx}' | wc -l"], { encoding: 'utf8', cwd: root }).trim() || '0');
-const adminInlineStyleCount = (execFileSync('bash', ['-lc', "rg -n 'style=\\{\\{' apps/admin/src --glob '*.{ts,tsx}' | wc -l"], { encoding: 'utf8', cwd: root }).trim() || '0');
+// Scan with built-in Node APIs: do not silently report zero when rg is missing on CI runners.
+const inlineStyleViolations = (base) => {
+  const pending = [path.join(root, base)];
+  const violations = [];
+  while (pending.length) {
+    const dir = pending.pop();
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) pending.push(file);
+      else if (/\.(tsx|jsx)$/.test(entry.name)) {
+        const source = fs.readFileSync(file, 'utf8');
+        if (/\bstyle\s*=\s*\{|<style(?:\s|>)/i.test(source)) violations.push(path.relative(root, file));
+      }
+    }
+  }
+  return violations;
+};
+const inlineStyles = [...inlineStyleViolations('apps/web/src'), ...inlineStyleViolations('apps/admin/src')];
+if (inlineStyles.length) console.error('MNT_AUD_0114_INLINE_STYLE_FILES: ' + inlineStyles.join(', '));
 check('MNT-AUD-0101 Web/Admin compose canonical frontend security policy', webVite.includes('frontendSecurityHeadersPlugin()') && adminVite.includes('frontendSecurityHeadersPlugin()'));
 check('MNT-AUD-0101 canonical frontend policy denies framing', frontendSecurityPolicy.includes("frame-ancestors 'none'") && frontendSecurityPolicy.includes("'X-Frame-Options': 'DENY'"));
 check('MNT-AUD-0101 script/style element policies do not permit unsafe-inline', !/script-src[^\n]*unsafe-inline/.test(frontendSecurityPolicy) && !/style-src 'self' 'unsafe-inline'/.test(frontendSecurityPolicy));
 check('MNT-AUD-0101 API defense CSP denies framing and inline style elements', middleware.includes('frameAncestors: ["\'none\'"]') && middleware.includes('styleSrc: ["\'self\'"]'));
 check('MNT-AUD-0101 build policy emits _headers artifact', frontendSecurityPolicy.includes("fileName: '_headers'") && exists('scripts/security/verify-frontend-security-headers.mjs'));
 check('MNT-AUD-0114 inline-style remediation is explicitly registered', exists('docs/remediation/MNT-AUD-0114-INLINE-STYLE-CSP-COMPATIBILITY.md') && frontendSecurityPolicy.includes("style-src-attr 'none'") && !frontendSecurityPolicy.includes('unsafe-inline'));
-check('MNT-AUD-0114 Web/Admin inline style inventory is zero', Number(webInlineStyleCount) === 0 && Number(adminInlineStyleCount) === 0);
+check('MNT-AUD-0114 Web/Admin inline style inventory is zero', inlineStyles.length === 0);
 
 try {
   const frontendSecurityTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/frontend-security-headers-source.test.mjs'), path.join(root, 'tests/security/public-auth-source-policy.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0101/0114 native source contract tests execute', /# fail 0/.test(frontendSecurityTest));
 } catch (error) {
+  console.error('MNT_AUD_0101_NATIVE_FAILURE', String(error?.stdout ?? '').slice(-4500), String(error?.stderr ?? '').slice(-1200));
   check('MNT-AUD-0101/0114 native source contract tests execute', false);
 }
 
@@ -343,9 +363,9 @@ check('P4-SEC-001 distributed limiter is production capable', redisLimiter.inclu
 check('P4-SEC-001 Redis atomic script present', redisLimiter.includes("redis.call('INCR'") && redisLimiter.includes("redis.call('PEXPIRE'"));
 check('P4-SEC-001 app selects runtime limiter factory', app.includes('createRateLimiterForRuntime(currentEnv, logger, undefined, sharedRedisClient)'));
 
-check('P6-DI-001 safe HTTP transport uses explicit factory', container.includes('safeSourceHttpTransport: asFunction(() => new NodeSafeSourceHttpTransport()).singleton()'));
+check('P6-DI-001 safe HTTP transport uses explicit factory with source authority and limiter', container.includes('safeSourceHttpTransport: asFunction(({ sourceAccessAuthority, sourceAcquisitionLimiter }) => new NodeSafeSourceHttpTransport(undefined, undefined, sourceAccessAuthority, sourceAcquisitionLimiter)).singleton()'));
 check('P6-DI-001 raw snapshot store uses explicit factory', container.includes("importRawSnapshotStore: asFunction(() => createImportRawSnapshotStoreForRuntime(effectiveEnvironment, readConfig<string>('IMPORT_RAW_SNAPSHOT_DIR'))).singleton()"));
-check('P6-DI-001 acquisition limiter uses explicit factory', container.includes('sourceAcquisitionLimiter: asFunction(() => new SourceAcquisitionLimiter()).singleton()'));
+check('P6-DI-001 acquisition limiter uses explicit durable runtime factory', container.includes('sourceAcquisitionLimiter: asFunction(({ prisma }) => isPrisma ? new PrismaSourceAcquisitionLimiter(prisma) : new SourceAcquisitionLimiter()).singleton()'));
 
 const failed = checks.filter((item) => !item.ok);
 for (const item of checks) console.log(`${item.ok ? 'PASS' : 'FAIL'} ${item.name}`);

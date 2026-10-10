@@ -99,7 +99,16 @@ if (process.argv.includes('--write')) {
 }
 if (process.argv.includes('--check')) {
   for (const [file, content] of environmentArtifacts) {
-    if (fs.readFileSync(path.join(root, file), 'utf8').replaceAll('\r\n', '\n') !== content) {
+    const actual = fs.readFileSync(path.join(root, file), 'utf8').replaceAll('\r\n', '\n');
+    if (actual !== content) {
+      // Drift diagnostics contain source-derived *variable names and paths only*, never environment values.
+      const expectedLines = content.split('\n');
+      const actualLines = actual.split('\n');
+      const expectedSet = new Set(expectedLines);
+      const actualSet = new Set(actualLines);
+      console.error('Environment inventory drift: ' + file);
+      for (const line of expectedLines.filter(line => !actualSet.has(line)).slice(0, 100)) console.error('INVENTORY_EXPECTED_ONLY: ' + line);
+      for (const line of actualLines.filter(line => !expectedSet.has(line)).slice(0, 100)) console.error('INVENTORY_STALE_ONLY: ' + line);
       throw new Error('Environment inventory stale: run node scripts/aistudio/environment.mjs --write');
     }
   }

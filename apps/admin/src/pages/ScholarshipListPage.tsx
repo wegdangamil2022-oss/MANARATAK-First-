@@ -153,7 +153,8 @@ export function ScholarshipListPage() {
       if (searchTerm.trim()) params.append('query', searchTerm.trim());
       const selectedCountry = countryOptions.find(item => item.id === countryFilter);
       if (selectedCountry) params.set('countryReferenceId', selectedCountry.id);
-      for (const [key, value] of Object.entries({ countryLabel: selectedCountry?.label || countryFilter, fundingType: fundingFilter, degreeLabel: degreeFilter, majorLabel: majorFilter, languageLabel: languageFilter, deadlineStatus: deadlineFilter })) if (value) params.set(key, value);
+      // Canonical country filtering uses the owner reference ID; labels are not identifiers.
+      for (const [key, value] of Object.entries({ fundingType: fundingFilter, degreeLabel: degreeFilter, majorLabel: majorFilter, languageLabel: languageFilter, deadlineStatus: deadlineFilter })) if (value) params.set(key, value);
 
       const res = await adminApiClient.request<PaginatedResponse>(`/admin/scholarships?${params.toString()}`);
       if (request !== listRequest.current) return;
@@ -195,16 +196,6 @@ export function ScholarshipListPage() {
 
   // Filtering happens before pagination in the owner API.
   const filteredItems = data?.data ?? [];
-
-  const availableCountries = useMemo(() => {
-    if (!data?.data) return [];
-    const set = new Set<string>();
-    data.data.forEach(item => {
-      const c = item.countrySourceLabel || item.studyCountry;
-      if (c && c.trim()) set.add(c.trim());
-    });
-    return Array.from(set);
-  }, [data?.data]);
 
   const hasActiveFilters = Boolean(
     searchTerm || statusFilter || completenessFilter || countryFilter || fundingFilter || degreeFilter || majorFilter || languageFilter || deadlineFilter
@@ -471,7 +462,6 @@ export function ScholarshipListPage() {
               >
                 <option value="">جميع الدول والوجهات</option>
                 {countryOptions.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
-                {availableCountries.filter(label => !countryOptions.some(item => item.label === label)).map(label => <option key={label} value={label}>{label}</option>)}
               </select>
             </div>
 

@@ -35,8 +35,14 @@ const checks = [
     hasReservedKey('completenessStatus') &&
     ordered(mapToDto, '...safeOptionalFields,', '...rest,') &&
     files.repoContract.includes('findPublishedBySlug') &&
-    files.repository.includes('status: InternationalTestStatus.PUBLISHED') &&
-    files.repository.includes('isPubliclyVisible: true') &&
+    // Public reads must use frozen, same-owner snapshots and SQL visibility gates,
+    // not the mutable admin-shaped root or a stale PUBLISHED literal.
+    files.repository.includes('private async publishedSnapshot(') &&
+    files.repository.includes('s."testId"=${record.id}') &&
+    files.repository.includes('this.publishedSnapshot(record)') &&
+    files.repository.includes('isPubliclyVisible:true') &&
+    files.repository.includes('t."isPubliclyVisible"=true') &&
+    files.repository.includes('JOIN "InternationalTestPublicationSnapshot"') &&
     files.useCases.includes('this.repository.findPublishedBySlug(slug)') &&
     files.localized.includes('this.repository.findPublishedBySlug(slug)') &&
     files.adminRouter.includes('rootCreateSchema.parse(req.body)') &&

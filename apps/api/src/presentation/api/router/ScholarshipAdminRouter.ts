@@ -113,7 +113,8 @@ export class ScholarshipAdminRouter {
       return {
         ...mutationContext(req),
         expectedRevision,
-        reason: reviewReasonSchema.parse(req.get('X-Review-Reason') ?? req.body?.reason),
+        reason: reviewReasonSchema.parse(req.get('X-Review-Reason') ??
+          z.object({ reason: reviewReasonSchema.optional() }).parse(req.body ?? {}).reason),
       };
     };
     const sendRevision = (res: Response, value: { revision?: number }) => {

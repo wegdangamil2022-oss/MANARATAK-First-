@@ -165,14 +165,12 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       if (current.status === StudentWorkspaceStatus.INITIALIZING) throw new Error('STUDENT_WORKSPACE_INITIALIZING');
       if (data.status !== undefined && data.status !== current.status) throw new Error('STUDENT_WORKSPACE_LIFECYCLE_EVENT_REQUIRED');
       if (data.privacyPreferences !== undefined) throw new Error('STUDENT_PRIVACY_CONSENT_COMMAND_REQUIRED');
-      if (data.expectedVersion !== undefined && current.version !== data.expectedVersion)
+      if (data.expectedVersion === undefined || current.version !== data.expectedVersion)
         throw new Error('STUDENT_WORKSPACE_VERSION_CONFLICT');
 
       const { studentReferenceId: _reference, expectedVersion: _version, ...values } = data;
       const status = values.status ?? current.status;
-      const row = await tx.studentWorkspace.update({
-        where: { id: current.id },
-        data: {
+      const row = await this.updateWorkspaceCAS(tx, current.id, data.expectedVersion, {
           ...values,
           layoutPreferences: json(values.layoutPreferences),
           notificationMatrix: json(values.notificationMatrix),
@@ -186,7 +184,6 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
               : null,
           archivedAt:
             status === StudentWorkspaceStatus.ARCHIVED ? (current.archivedAt ?? new Date()) : null,
-        },
       });
       await this.appendOutbox(tx, row.id, 'StudentWorkspaceUpdated', {
         studentReferenceId: row.studentReferenceId,
@@ -206,9 +203,8 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       const after = { ...data.privacyPreferences };
       const changedFields = Object.keys(after).filter((key) => before[key as keyof typeof before] !== after[key as keyof typeof after]);
       const decisionId = randomUUID();
-      const row = await tx.studentWorkspace.update({
-        where: { id: workspace.id },
-        data: { privacyPreferences: json(after), version: { increment: 1 }, lastActiveAt: new Date() },
+      const row = await this.updateWorkspaceCAS(tx, workspace.id, data.expectedVersion, {
+        privacyPreferences: json(after), version: { increment: 1 }, lastActiveAt: new Date(),
       });
       const decidedAt = new Date();
       await tx.studentPrivacyConsentDecision.create({ data: {
@@ -219,7 +215,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       }});
       await this.appendOutbox(tx, workspace.id, 'StudentPrivacyConsentDecided', {
         studentReferenceId: data.studentReferenceId, decisionId, workspaceVersion: row.version, purpose: data.purpose,
-        changedFields, beforePreferences: before, afterPreferences: after, correlationId: data.correlationId ?? null,
+        changedFields, actorId: data.actorId, correlationId: data.correlationId ?? null,
       }, { actorId: data.actorId, actorType: data.actorType ?? 'USER', source: data.source ?? 'student-workspace-api' });
       return { id: decisionId, studentReferenceId: data.studentReferenceId, workspaceVersion: row.version, actorId: data.actorId,
         actorType: data.actorType ?? 'USER', purpose: data.purpose, source: data.source ?? 'student-workspace-api',
@@ -616,9 +612,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       const snapshot = await tx.studentWorkspaceSnapshot.findFirst({ where: { id: snapshotId, studentReferenceId } });
       if (!snapshot) throw new Error('STUDENT_SNAPSHOT_NOT_FOUND');
       const configuration = snapshot.configuration as Record<string, unknown>;
-      const row = await tx.studentWorkspace.update({
-        where: { id: workspace.id },
-        data: {
+      const row = await this.updateWorkspaceCAS(tx, workspace.id, expectedVersion, {
           layoutPreferences: configuration.layoutPreferences === undefined ? undefined : json(configuration.layoutPreferences),
           notificationMatrix: configuration.notificationMatrix === undefined ? undefined : json(configuration.notificationMatrix),
           accessibilityPreferences: configuration.accessibilityPreferences === undefined ? undefined : json(configuration.accessibilityPreferences),
@@ -626,7 +620,6 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
           preferredLanguage: typeof configuration.preferredLanguage === 'string' ? configuration.preferredLanguage : undefined,
           timezone: typeof configuration.timezone === 'string' ? configuration.timezone : undefined,
           version: { increment: 1 },
-        },
       });
       await this.appendOutbox(tx, workspace.id, 'StudentWorkspaceSnapshotRestored', { studentReferenceId, snapshotId, version: row.version });
       return this.workspace(row);
@@ -637,7 +630,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     return this.db.$transaction(async (tx: any) => {
       const workspace = await this.requireWritable(tx, studentReferenceId);
       if (workspace.version !== expectedVersion) throw new Error('STUDENT_WORKSPACE_VERSION_CONFLICT');
-      const row = await tx.studentWorkspace.update({ where: { id: workspace.id }, data: { layoutPreferences: json(DEFAULT_LAYOUT), version: { increment: 1 } } });
+      const row = await this.updateWorkspaceCAS(tx, workspace.id, expectedVersion, { layoutPreferences: json(DEFAULT_LAYOUT), version: { increment: 1 } });
       await this.appendOutbox(tx, workspace.id, 'StudentDashboardLayoutReset', { studentReferenceId, version: row.version });
       return this.workspace(row);
     });
@@ -724,6 +717,16 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       await tx.studentNotificationProjection.updateMany({ where: { id: notificationId, studentReferenceId, readAt: null }, data: { readAt: new Date() } });
       await this.refreshPersonalStatistics(tx, studentReferenceId);
     });
+  }
+
+  /** Compare-and-swap guarded by persisted version. Stale commands have no audit/outbox effect. */
+  private async updateWorkspaceCAS(tx: any, id: string, expectedVersion: number, data: Record<string, unknown>): Promise<any> {
+    try {
+      return await tx.studentWorkspace.update({ where: { id, version: expectedVersion }, data });
+    } catch (error: any) {
+      if (error?.code === 'P2025') throw new Error('STUDENT_WORKSPACE_VERSION_CONFLICT');
+      throw error;
+    }
   }
 
   private async requireWritable(tx: any, studentReferenceId: string): Promise<any> {

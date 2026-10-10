@@ -24,7 +24,8 @@ export class UniversityAdminRouter {
       if (!Number.isSafeInteger(expectedRevision)) throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
       return {
         expectedRevision,
-        reason: reasonSchema.parse(req.get('X-Review-Reason') ?? req.body?.reason),
+        reason: reasonSchema.parse(req.get('X-Review-Reason') ??
+          z.object({ reason: reasonSchema.optional() }).parse(req.body ?? {}).reason),
         actorId: req.authUserId,
         actorType: 'IDENTITY',
         correlationId:

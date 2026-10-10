@@ -9,7 +9,7 @@ export class SignedSourceAccessAuthority implements ISourceAccessAuthority {
   private readonly key?: KeyObject;
   private readonly tokens: readonly string[];
   constructor(publicKey: string | undefined, tokens: readonly string[] = [],
-    private readonly credential: (binding: string) => string | undefined = binding => process.env[binding],
+    private readonly credential: (binding: string) => string | undefined = () => undefined,
     private readonly now: () => number = Date.now) {
     if (tokens.length > 1000 || tokens.some(token => typeof token !== 'string' || token.length > 16_000)) throw new Error('SOURCE_AUTHORITY_CONFIGURATION_INVALID');
     this.tokens = Object.freeze([...tokens]);

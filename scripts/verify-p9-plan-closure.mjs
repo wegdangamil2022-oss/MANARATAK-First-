@@ -49,7 +49,7 @@ check('P9-PICKER-001 canonical option carries label', has(pickerApi, 'label: str
 check('P9-PICKER-001 canonical option carries lifecycle', has(pickerApi, 'lifecycle: CanonicalPickerLifecycle;'));
 check('P9-PICKER-002 inactive lifecycle states are blocked', has(pickerApi, 'DEPRECATED|ARCHIVED|SUPERSEDED|MERGED|REJECTED|INACTIVE'));
 check('P9-PICKER-002 picker disables blocked options', has(picker, 'disabled={!canonicalOptionIsSelectable(item)}'));
-check('P9-PICKER-003 existing missing canonical IDs are explicit', has(picker, 'Canonical ID not found in owner API'));
+check('P9-PICKER-003 existing missing canonical IDs are explicit', has(picker, 'Current ID is not in this bounded page. Search to verify; no relationship has been changed.'));
 check('P9-PICKER-003 blocked existing relation is explicit', has(picker, 'Existing relation is'));
 check('P9-PICKER-004 country owner loader exists', has(pickerApi, 'async countries('));
 check('P9-PICKER-004 language owner loader exists', has(pickerApi, 'async languages('));
@@ -74,11 +74,11 @@ check('P9-UNI-002 program editor consumes Degree/Major/Test canonical pickers', 
 check('P9-UNI-003 University owner router accepts canonical geography IDs', has(universityRouter, 'countryReferenceId') && has(universityRouter, 'regionReferenceId') && has(universityRouter, 'cityReferenceId'));
 check('P9-UNI-003 organization-unit identity is retained in read DTO path', has('packages/domain/src/universities/universities.ts', 'organizationUnitId?: string | null') && has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', 'organizationUnitId'));
 check('P9-UNI-004 Program canonical ID is preserved on edit', has('packages/domain/src/universities/universities.ts', 'upsertAcademicProgram?(') && has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', 'const program = programId') && has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', 'universityAcademicProgram.update'));
-check('P9-UNI-004 Program removal archives instead of hard-deleting canonical identity', has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', "data: { status: 'ARCHIVED' }") && has(universityPage, "{ method: 'DELETE' }"));
+check('P9-UNI-004 Program removal archives instead of hard-deleting canonical identity', has('packages/infrastructure/src/universities/PrismaUniversityRepository.ts', "data: { status: 'ARCHIVED' }") && has(universityPage, "method: 'DELETE'"));
 check('P9-UNI-004 Admin editor no longer uses destructive normalized-details replacement for programs', notHas(universityPage, '/normalized-details'));
 check('P9-UNI-005 owner validation constrains Program campus/unit to the same University', has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', 'validateProgramAuthoring') && has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', "where: { id: input.organizationUnitId, universityId }") && has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', "where: { universityId, id: { in: campusIds } }"));
 check('P9-UNI-005 owner validation rejects inactive canonical relationships', has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', 'UNIVERSITY_PROGRAM_DEGREE_LEVEL_NOT_ACTIVE') && has('packages/infrastructure/src/universities/UniversityCanonicalRelationshipValidator.ts', 'UNIVERSITY_ADMISSION_TEST_NOT_ACTIVE'));
-check('P9-UNI-006 published University relationship structure is immutable', has('packages/application/src/universities/use-cases/AdminUniversityUseCases.ts', 'UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE'));
+check('P9-UNI-006 published University relationship structure is immutable', has('packages/application/src/universities/use-cases/AdminUniversityUseCases.ts', '[UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(university.status)') && has('packages/application/src/universities/use-cases/AdminUniversityUseCases.ts', "throw new Error('UNIVERSITY_NON_EDITABLE_STATUS')"));
 check('P9-UNI-007 stable Program authoring regression tests exist', has('packages/application/tests/universities/AdminUniversityUseCases.spec.ts', 'without replacing its canonical ID') && has('packages/application/tests/universities/AdminUniversityUseCases.spec.ts', 'instead of hard-deleting its canonical identity'));
 
 // Scholarship canonical relationship authoring through P12 owner authority.
@@ -90,7 +90,7 @@ check('P9-SCH-003 owner use case validates canonical references', has(scholarshi
 check('P9-SCH-003 inactive references fail closed', has(scholarshipUseCases, 'SCHOLARSHIP_CANONICAL_REFERENCE_NOT_ACTIVE') && has(scholarshipUseCases, 'SUSPENDED'));
 check('P9-SCH-003 missing references fail closed', has(scholarshipUseCases, 'SCHOLARSHIP_CANONICAL_REFERENCE_NOT_FOUND'));
 check('P9-SCH-004 program/university ownership mismatch fails closed', has(scholarshipUseCases, 'SCHOLARSHIP_ACADEMIC_PROGRAM_UNIVERSITY_MISMATCH') && has(scholarshipContract, 'ownerId?: string | null'));
-check('P9-SCH-004 published structure remains immutable', has(scholarshipUseCases, 'SCHOLARSHIP_PUBLISHED_STRUCTURE_IMMUTABLE'));
+check('P9-SCH-004 published structure remains immutable', has(scholarshipUseCases, 'existing.publicationStatus !== ScholarshipPublicationStatus.DRAFT') && has(scholarshipUseCases, "throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS')"));
 check('P9-SCH-005 canonical lookup supports internal owner identity', has(scholarshipLookup, 'canonicalId'));
 check('P9-SCH-005 canonical lookup exposes lifecycle to authoring guard', has(scholarshipLookup, 'lifecycle'));
 check('P9-SCH-005 unsupported canonical lookup targets fail closed', has(scholarshipLookup, 'SCHOLARSHIP_CANONICAL_TARGET_UNSUPPORTED'));

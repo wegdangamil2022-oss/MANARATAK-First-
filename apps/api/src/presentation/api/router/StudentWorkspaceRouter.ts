@@ -35,7 +35,7 @@ export class StudentWorkspaceRouter {
     };
 
     const workspaceSchema = z.object({
-      expectedVersion: z.number().int().positive().optional(),
+      expectedVersion: z.number().int().positive(),
       displayName: z.string().nullable().optional(),
       preferredLanguage: z.string().nullable().optional(),
       timezone: z.string().nullable().optional(),
