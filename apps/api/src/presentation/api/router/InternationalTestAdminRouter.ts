@@ -26,7 +26,9 @@ export class InternationalTestAdminRouter {
       if (req.params.id && expectedRevision === undefined) throw new Error('INTERNATIONAL_TEST_EXPECTED_REVISION_REQUIRED');
       if (expectedRevision !== undefined) resRevision(req,expectedRevision+1);
       return {
-      expectedRevision, reason: typeof req.body?.reason === 'string' ? req.body.reason : req.get('X-Review-Reason'),
+      expectedRevision, reason: z.string().trim().min(3).max(2000).optional().parse(
+        z.object({reason:z.string().trim().min(3).max(2000).optional()}).parse(req.body ?? {}).reason ?? req.get('X-Review-Reason'),
+      ),
       actorId: req.authUserId,
       actorType: 'IDENTITY',
       correlationId: (req.headers['x-correlation-id'] as string | undefined) || (req.headers['x-request-id'] as string | undefined),

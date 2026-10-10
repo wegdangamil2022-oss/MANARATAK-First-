@@ -22,7 +22,10 @@ export class CourseAdminRouter {
 
     const mutationContext = (req: Request): CourseAdminContext => {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
-      const reason = z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason') ?? req.body?.reason);
+      const reasonSchema = z.string().trim().min(3).max(2000);
+      const suppliedReason = req.get('X-Review-Reason') ??
+        z.object({ reason: reasonSchema.optional() }).parse(req.body ?? {}).reason;
+      const reason = reasonSchema.parse(suppliedReason);
       const raw = req.get('If-Match');
       let expectedVersion: number | undefined;
       if (req.params.id || req.params.pathId) {

@@ -504,7 +504,7 @@ export class AuthorizationAdminRouter {
         await manageRolesUseCase.createRole(body, mutationContext(req, approval));
         res.status(201).json(responseFormatter.success({ roleId: body.id, message: 'Role created successfully' }));
       } catch (error: unknown) {
-        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'CREATE_ROLE', category: 'AUTHORIZATION', targetType: 'ROLE', targetId: req.body?.id || req.body?.name, result: 'FAILURE', error });
+        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'CREATE_ROLE', category: 'AUTHORIZATION', targetType: 'ROLE', targetId: z.object({ id: z.string().trim().max(240).optional(), name: z.string().trim().max(240).optional() }).safeParse(req.body).data?.id ?? undefined, result: 'FAILURE', error });
         sendAuthorizationError(req, res, error);
       }
     });
@@ -643,7 +643,7 @@ export class AuthorizationAdminRouter {
         const result = await assignRoleUseCase.execute(body, mutationContext(req, approval));
         res.status(201).json(responseFormatter.success({ ...result, message: 'Role assigned successfully' }));
       } catch (error: unknown) {
-        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'ASSIGN_ROLE', category: 'AUTHORIZATION', targetType: 'ROLE_ASSIGNMENT', targetId: req.body?.id || req.body?.identityId || req.body?.roleId, result: 'FAILURE', error });
+        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'ASSIGN_ROLE', category: 'AUTHORIZATION', targetType: 'ROLE_ASSIGNMENT', targetId: z.object({ id: z.string().trim().max(240).optional(), identityId: z.string().trim().max(240).optional(), roleId: z.string().trim().max(240).optional() }).safeParse(req.body).data?.id ?? undefined, result: 'FAILURE', error });
         sendAuthorizationError(req, res, error);
       }
     });
@@ -709,7 +709,7 @@ export class AuthorizationAdminRouter {
         const grant = await manageEmergencyAccessUseCase.grant({ ...body, requestedBy: actor, approvedBy: approval.secondApproverId, changeTicket: approval.changeTicket }, mutationContext(req));
         res.status(201).json(responseFormatter.success({ grant }));
       } catch (error: unknown) {
-        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'GRANT_BREAK_GLASS_ACCESS', category: 'AUTHORIZATION', targetType: 'EMERGENCY_ACCESS', targetId: req.body?.principalId, result: 'FAILURE', error });
+        await AuditHelper.recordMutation(auditRecordRepo, req, { action: 'GRANT_BREAK_GLASS_ACCESS', category: 'AUTHORIZATION', targetType: 'EMERGENCY_ACCESS', targetId: z.object({ principalId: z.string().trim().max(240).optional() }).safeParse(req.body).data?.principalId, result: 'FAILURE', error });
         sendAuthorizationError(req, res, error);
       }
     });
@@ -737,7 +737,7 @@ export class AuthorizationAdminRouter {
             action: 'POLICY_MUTATION_REJECTED',
             category: 'AUTHORIZATION',
             targetType: 'POLICY',
-            targetId: req.params.id || req.body?.id,
+            targetId: req.params.id,
             result: 'FAILURE',
             error,
           });
