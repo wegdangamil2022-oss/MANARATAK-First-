@@ -1,3 +1,4 @@
+import { readReferenceCodeUsage } from './ReferenceCodeUsageInventory';
 import { createHash, randomUUID } from 'crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -29,6 +30,7 @@ import {
   ReferenceGovernanceDetails,
   ReferenceCityQualityCounters,
   ReferenceDependencyImpact,
+  assertReferenceRetirementPolicy,
   ReferenceProviderMappingReassignmentCommand,
   ReferenceCityCountryLinkRepairCommand,
   ReferenceImportScreeningReviewPage,
@@ -281,15 +283,14 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     const alias = lookup.normalizedAlias || lookup.alias;
     if (alias) {
       const normalizedAlias = this.normalizeResolutionAlias(alias);
-      const rows = await this.prisma.$queryRaw<Array<{ referenceId: string }>>(Prisma.sql`
-        SELECT DISTINCT "referenceId"
-        FROM "ReferenceAliasRecord"
-        WHERE "entityType" = ${entityType}
-          AND "isActive" = true
-          AND "normalizedAlias" = ${normalizedAlias}
-          ${ownerScope}
-        LIMIT 2
+      const legacy = await this.prisma.$queryRaw<Array<{ referenceId: string; alias: string; normalizedAlias: string }>>(Prisma.sql`
+        SELECT "referenceId", "alias", "normalizedAlias" FROM "ReferenceAliasRecord"
+        WHERE "entityType"=${entityType} AND "isActive"=true ${ownerScope}
+        ORDER BY "id" LIMIT 5001
       `);
+      if (legacy.length > 5000) throw new Error('REFERENCE_ALIAS_SCOPE_RECONCILIATION_REQUIRED');
+      const ids = [...new Set(legacy.filter(row => this.normalizeResolutionAlias(row.alias) === normalizedAlias || this.normalizeResolutionAlias(row.normalizedAlias) === normalizedAlias).map(row => row.referenceId))];
+      const rows = ids.map(referenceId => ({ referenceId }));
       if (rows.length > 1) return null;
       if (rows.length === 1) {
         const record = await load(rows[0].referenceId);
@@ -304,6 +305,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listCountries(filters?: ReferenceDataFilters): Promise<ReferenceCountryDto[]> {
+    if (filters?.updatedFrom || filters?.mappingStatus) return (await this.governedFilteredRecords('COUNTRY',filters)).map(row => this.mapToCountryDto(row));
     const where = this.countryWhere(filters);
 
     const records = await this.prisma.referenceCountry.findMany({
@@ -394,6 +396,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listCurrencies(filters?: ReferenceDataFilters): Promise<ReferenceCurrencyDto[]> {
+    if (filters?.updatedFrom || filters?.mappingStatus) return (await this.governedFilteredRecords('CURRENCY',filters)).map(row => this.mapToCurrencyDto(row));
     const where = this.currencyWhere(filters);
 
     const records = await this.prisma.referenceCurrency.findMany({
@@ -455,6 +458,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listLanguages(filters?: ReferenceDataFilters): Promise<ReferenceLanguageDto[]> {
+    if (filters?.updatedFrom || filters?.mappingStatus) return (await this.governedFilteredRecords('LANGUAGE',filters)).map(row => this.mapToLanguageDto(row));
     const where = this.languageWhere(filters);
 
     const records = await this.prisma.referenceLanguage.findMany({
@@ -514,6 +518,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listCities(filters?: ReferenceDataFilters): Promise<ReferenceCityDto[]> {
+    if (filters?.updatedFrom || filters?.mappingStatus) return (await this.governedFilteredRecords('CITY',filters)).map(row => this.mapToCityDto(row));
     const where = this.cityWhere(filters);
 
     const records = await this.prisma.referenceCity.findMany({
@@ -529,6 +534,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public async listRegions(filters?: ReferenceDataFilters): Promise<AdministrativeRegionDto[]> {
+    if (filters?.updatedFrom || filters?.mappingStatus) return (await this.governedFilteredRecords('REGION',filters)).map(row => this.mapToRegionDto(row));
     const records = await this.prisma.administrativeRegion.findMany({
       where: this.regionWhere(filters),
       orderBy: [{ countryIso2Code: 'asc' }, { name: 'asc' }, { id: 'asc' }],
@@ -619,17 +625,12 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (current.versionNumber !== command.expectedVersion) throw new ReferenceRegionCommandError('REGION_VERSION_CONFLICT');
     try { assertReferenceLifecycleTransition(current.lifecycleState as ReferenceLifecycleState, command.toState, command.targetReferenceId); }
     catch { throw new ReferenceRegionCommandError('REGION_TRANSITION_INVALID'); }
-    if ([ReferenceLifecycleState.ARCHIVED, ReferenceLifecycleState.MERGED, ReferenceLifecycleState.SUPERSEDED].includes(command.toState)) {
-      // The FK inventory does not include all university/source/public consumers.
-      // Even a zero FK count cannot authorize destructive terminal transitions.
-      // Use the same owner boundary as the generic reference types.
-      throw new ReferenceRegionCommandError('REGION_IMPACT_CERTIFICATION_REQUIRED');
-    }
+    assertReferenceRetirementPolicy(command.toState, await this.getReferenceDependencyImpact('REGION',command.referenceId), command.acknowledgeHistoricalReferences);
     if (command.targetReferenceId) {
       if (![ReferenceLifecycleState.MERGED, ReferenceLifecycleState.SUPERSEDED].includes(command.toState) || command.targetReferenceId === current.id) throw new ReferenceRegionCommandError('REGION_TARGET_INVALID');
       await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "AdministrativeRegion" WHERE "id" = ${command.targetReferenceId} FOR SHARE`);
       const target = await this.prisma.administrativeRegion.findUnique({ where: { id: command.targetReferenceId } });
-      if (!target || target.countryIso2Code !== current.countryIso2Code || target.lifecycleState !== 'ACTIVE') throw new ReferenceRegionCommandError('REGION_TARGET_INVALID');
+      if (!target || target.countryIso2Code !== current.countryIso2Code || target.lifecycleState !== 'ACTIVE' || !target.isActive) throw new ReferenceRegionCommandError('REGION_TARGET_INVALID');
       await this.assertNoReplacementCycle('REGION', current.id, target.id);
       await this.prisma.referenceRelationshipRecord.create({ data: {
         sourceEntityType: 'REGION', sourceReferenceId: current.id,
@@ -644,6 +645,35 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     } });
     const detail = await this.getRegionById(record.id);
     await this.appendVersionRecord('REGION', record.id, record.versionNumber, command.toState, now, null, { ...record, aliases: detail?.aliases ?? [] }, command.reason, command.actorId);
+  }
+
+  private governedFilterSql(type: GovernedReferenceEntityType, filters: ReferenceDataFilters) {
+    const predicates: Prisma.Sql[] = [Prisma.sql`TRUE`];
+    const active = type === 'REGION'
+      ? Prisma.sql`t."isActive"=TRUE AND t."lifecycleState"='ACTIVE' AND EXISTS (SELECT 1 FROM "ReferenceCountry" c WHERE c."id"=t."countryReferenceId" AND c."isActive"=TRUE AND c."lifecycleState"='ACTIVE')`
+      : Prisma.sql`t."isActive"=TRUE AND t."lifecycleState"='ACTIVE'`;
+    if (filters.activeOnly) predicates.push(Prisma.sql`(${active})`);
+    if (filters.nonActiveOnly) predicates.push(Prisma.sql`NOT (${active})`);
+    if (filters.updatedFrom) predicates.push(Prisma.sql`t."updatedAt">=${new Date(filters.updatedFrom)}`);
+    if (filters.mappingStatus) {
+      const exists = Prisma.sql`EXISTS (SELECT 1 FROM "ReferenceProviderMappingRecord" m WHERE m."entityType"=${type} AND m."referenceId"=t."id" AND m."isActive"=TRUE)`;
+      predicates.push(filters.mappingStatus === 'MAPPED' ? exists : Prisma.sql`NOT (${exists})`);
+    }
+    if (filters.countryIso2Code && ['CITY','REGION'].includes(type)) predicates.push(Prisma.sql`t."countryIso2Code"=${filters.countryIso2Code}`);
+    if (filters.administrativeRegionId && type === 'CITY') predicates.push(Prisma.sql`t."administrativeRegionId"=${filters.administrativeRegionId}`);
+    if (filters.region && ['COUNTRY','CITY'].includes(type)) predicates.push(Prisma.sql`t."region"=${filters.region}`);
+    if (filters.q) {
+      const columns = { COUNTRY:['name','nameAr','officialName','iso2Code','iso3Code'], CURRENCY:['name','isoCode','symbol'], LANGUAGE:['name','nativeName','isoCode'], CITY:['name','timezone'], REGION:['name','regionCode'] }[type];
+      predicates.push(Prisma.sql`(${Prisma.join(columns.map(column => Prisma.sql`${Prisma.raw(`t."${column}"`)} ILIKE ${`%${filters.q}%`}`),' OR ')})`);
+    }
+    return Prisma.join(predicates,' AND ');
+  }
+  private async governedFilteredRecords(type: GovernedReferenceEntityType, filters: ReferenceDataFilters): Promise<any[]> {
+    const { skip = 0, take = 50 } = this.pagination(filters);
+    return this.prisma.$queryRaw<any[]>(Prisma.sql`SELECT t.* FROM ${this.referenceTable(type)} t WHERE ${this.governedFilterSql(type,filters)} ORDER BY t."name",t."id" LIMIT ${take} OFFSET ${skip}`);
+  }
+  private async governedFilteredCount(type: GovernedReferenceEntityType, filters: ReferenceDataFilters): Promise<number> {
+    const rows = await this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT COUNT(*) AS total FROM ${this.referenceTable(type)} t WHERE ${this.governedFilterSql(type,filters)}`); return Number(rows[0]?.total ?? 0);
   }
 
   private countryWhere(filters?: ReferenceDataFilters): Prisma.ReferenceCountryWhereInput {
@@ -792,6 +822,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   }
 
   public countRecords(collection: ReferenceDataCollection, filters: ReferenceDataFilters): Promise<number> {
+    if (filters.updatedFrom || filters.mappingStatus) return this.governedFilteredCount(({countries:'COUNTRY',currencies:'CURRENCY',languages:'LANGUAGE',cities:'CITY',regions:'REGION'} as const)[collection],filters);
     switch (collection) {
       case 'countries': return this.prisma.referenceCountry.count({ where: this.countryWhere(filters) });
       case 'currencies': return this.prisma.referenceCurrency.count({ where: this.currencyWhere(filters) });
@@ -1009,7 +1040,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       const raw: Record<string, unknown> =
         receipt.result && typeof receipt.result === 'object' && !Array.isArray(receipt.result)
           ? receipt.result as Record<string, unknown> : {};
-      const state = raw.state === 'NEEDS_OWNER_REVIEW' || raw.state === 'INVALID'
+      const state: 'NEEDS_OWNER_REVIEW'|'INVALID'|'UNKNOWN' = raw.state === 'NEEDS_OWNER_REVIEW' || raw.state === 'INVALID'
         ? raw.state : 'UNKNOWN';
       const entityType = typeof raw.entityType === 'string' && choices.has(raw.entityType)
         ? raw.entityType as 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY' : null;
@@ -1165,6 +1196,13 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         knownRelationCounts = row?._count; break;
       }
     }
+    if (knownRelationCounts && entityType === 'COUNTRY') {
+      const current = await this.prisma.referenceCountry.findUnique({where:{id:referenceId},select:{iso2Code:true}});
+      knownRelationCounts.legacyCityCountryCodes = current ? await this.prisma.referenceCity.count({where:{countryReferenceId:null,countryIso2Code:current.iso2Code}}) : 0;
+      knownRelationCounts.legacyRegionCountryCodes = current ? await this.prisma.administrativeRegion.count({where:{countryReferenceId:null,countryIso2Code:current.iso2Code}}) : 0;
+      knownRelationCounts.studyDestination = await this.prisma.studyDestinationProfile.count({where:{countryReferenceId:referenceId}});
+    }
+    if (knownRelationCounts) Object.assign(knownRelationCounts,await readReferenceCodeUsage(this.prisma,entityType,referenceId));
     if (!knownRelationCounts) throw new Error('REFERENCE_USAGE_TARGET_NOT_FOUND');
     return {
       entityType, referenceId, knownRelationCounts,
@@ -1299,21 +1337,18 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (currentRows[0].versionNumber !== command.expectedVersion) throw new Error('REFERENCE_VERSION_CONFLICT');
     const from = currentRows[0].lifecycleState as ReferenceLifecycleState;
     assertReferenceLifecycleTransition(from, command.toState, command.targetReferenceId);
-    // FK impact alone is PARTIAL: non-FK consumers are not inventoried.
-    // Keep all terminal states closed until an explicit certified-impact
-    // protocol exists. Admin hiding the action is NOT an authorization guard.
-    if ([ReferenceLifecycleState.ARCHIVED, ReferenceLifecycleState.MERGED,
-      ReferenceLifecycleState.SUPERSEDED].includes(command.toState)) {
-      throw new Error('REFERENCE_TERMINAL_IMPACT_CERTIFICATION_REQUIRED');
-    }
-
+    assertReferenceRetirementPolicy(command.toState, await this.getReferenceDependencyImpact(command.entityType,command.referenceId), command.acknowledgeHistoricalReferences);
 
     if (command.targetReferenceId) {
-      const targetRows = await this.prisma.$queryRaw<Array<{ id: string; lifecycleState: string; countryIso2Code?: string }>>(Prisma.sql`
-        SELECT "id", "lifecycleState", ${command.entityType === 'CITY' ? Prisma.raw('"countryIso2Code"') : Prisma.raw('NULL::text AS "countryIso2Code"')} FROM ${table} WHERE "id" = ${command.targetReferenceId} LIMIT 1 FOR SHARE
+      const targetRows = await this.prisma.$queryRaw<Array<{ id: string; isActive: boolean; lifecycleState: string; countryIso2Code?: string; administrativeRegionId?: string | null; region?: string | null }>>(Prisma.sql`
+        SELECT "id", "isActive", "lifecycleState", ${command.entityType === 'CITY' ? Prisma.raw('"countryIso2Code", "administrativeRegionId", "region"') : Prisma.raw('NULL::text AS "countryIso2Code"')} FROM ${table} WHERE "id" = ${command.targetReferenceId} LIMIT 1 FOR SHARE
       `);
-      if (targetRows.length !== 1 || targetRows[0].lifecycleState !== 'ACTIVE') throw new Error('REFERENCE_LIFECYCLE_TARGET_NOT_ACTIVE');
+      if (targetRows.length !== 1 || targetRows[0].lifecycleState !== 'ACTIVE' || !targetRows[0].isActive) throw new Error('REFERENCE_LIFECYCLE_TARGET_NOT_ACTIVE');
       if (command.entityType === 'CITY' && targetRows[0].countryIso2Code !== (currentRows[0].snapshot as Record<string, unknown>).countryIso2Code) throw new Error('REFERENCE_LIFECYCLE_TARGET_COUNTRY_MISMATCH');
+      if (command.entityType === 'CITY') {
+        const source = currentRows[0].snapshot as Record<string, unknown>; const target = targetRows[0];
+        if ((source.administrativeRegionId ?? null) !== (target.administrativeRegionId ?? null) || normalizeReferenceIdentityToken(String(source.region ?? '')) !== normalizeReferenceIdentityToken(target.region ?? '')) throw new Error('REFERENCE_LIFECYCLE_TARGET_REGION_MISMATCH');
+      }
       await this.assertNoReplacementCycle(command.entityType, command.referenceId, command.targetReferenceId);
     }
 

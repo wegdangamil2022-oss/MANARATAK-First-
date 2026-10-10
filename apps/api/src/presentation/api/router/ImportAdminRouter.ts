@@ -98,7 +98,7 @@ export class ImportAdminRouter {
     const actor = (req: Request) => requireAuthenticatedPrincipal(req);
     const artifactBody = z.object({ assetId: z.string().trim().min(1).max(120),
       ownerDomain: z.nativeEnum(ImportTargetDomain), expectedSha256: z.string().regex(/^[a-f0-9]{64}$/i),
-      format: z.enum(['csv', 'ndjson', 'json']), mappingProfileId: z.string().uuid().optional() }).strict();
+      format: z.enum(['csv', 'ndjson', 'json']), mappingProfileId: z.string().uuid().optional(), referenceEntityType: z.enum(['COUNTRY','CURRENCY','LANGUAGE','CITY']).optional() }).strict().refine(value => value.ownerDomain !== ImportTargetDomain.ReferenceData || Boolean(value.referenceEntityType), { message: 'REFERENCE_ENTITY_TYPE_REQUIRED' });
     router.get('/artifacts/capabilities', asyncHandler(async (_req, res) => {
       if (!cradle.importArtifactUseCase) return res.status(503).json({ error: 'IMPORT_ARTIFACT_UNAVAILABLE' });
       return res.json(cradle.importArtifactUseCase.capabilities());

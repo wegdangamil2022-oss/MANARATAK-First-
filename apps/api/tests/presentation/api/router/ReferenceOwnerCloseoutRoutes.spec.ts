@@ -1,0 +1,12 @@
+import {describe,it,expect,vi} from 'vitest';
+import express from 'express';
+import request from 'supertest';
+import {ReferenceDataAdminRouter} from '../../../../src/presentation/api/router/ReferenceDataAdminRouter';
+function app(actor=true) {const owner:any={preview:vi.fn(async()=>({id:'plan'})),apply:vi.fn(async()=>({id:'canonical'})),review:vi.fn(),readiness:vi.fn(async()=>[{standardFamily:'ISO_3166',readiness:'EVIDENCE_RECORDED',sourceVersion:'2026'}])};const api=express();api.use(express.json());api.use((req,_res,next)=>{if(actor)req.authUserId='owner';next();});api.use('/p7',ReferenceDataAdminRouter.create({referenceDataUseCases:{} as any,referenceOwnerReviewUseCases:owner}));return{api,owner};}
+describe('P7 owner approval HTTP boundary',()=>{
+ it('requires authenticated actor before canonical approval/apply',async()=>{const h=app(false);expect((await request(h.api).post('/p7/owner-imports/preview').send({receiptId:'screen'})).status).toBe(401);expect(h.owner.preview).not.toHaveBeenCalled();});
+ it('rejects client-forged reviewer and missing reviewed hashes',async()=>{const h=app();expect((await request(h.api).post('/p7/owner-imports/plan/apply').send({expectedVersion:2})).status).toBe(400);expect((await request(h.api).post('/p7/owner-imports/plan/review').send({expectedVersion:1,previewHash:'a'.repeat(64),decision:'APPROVE',reason:'Reviewed',reviewer:'forged'})).status).toBe(400);expect(h.owner.apply).not.toHaveBeenCalled();});
+ it('returns conflict for stale reference preview',async()=>{const h=app();h.owner.apply.mockRejectedValueOnce(Error('REFERENCE_OWNER_STALE_PREVIEW'));expect((await request(h.api).post('/p7/owner-imports/plan/apply').send({expectedVersion:2,previewHash:'a'.repeat(64)})).status).toBe(409);expect(h.owner.apply).toHaveBeenCalledWith('plan',{expectedVersion:2,previewHash:'a'.repeat(64)},expect.objectContaining({actorId:'owner'}));});
+ it('reports actual persisted standards readiness without a hardcoded missing assertion',async()=>{const h=app();const response=await request(h.api).get('/p7/standards/readiness');expect(response.status).toBe(200);expect(response.body.evidenceState).toBe('REVIEWED_EVIDENCE_RECORDED');expect(response.body.data[0].sourceVersion).toBe('2026');});
+ it('bounds review pagination and refuses arbitrary review state',async()=>{const h=app();expect((await request(h.api).get('/p7/owner-imports?page=1001')).status).toBe(400);expect((await request(h.api).get('/p7/owner-imports?status=PUBLISHED')).status).toBe(400);});
+});

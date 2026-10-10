@@ -12,7 +12,7 @@ const base = '/admin/reference-data';
 
 export function getReferenceDataPage<T>(collection: ReferenceDataCollection, filters: ReferenceDataFilters = {}): Promise<ReferenceDataPage<T>> {
   const params = new URLSearchParams({ page: String(filters.page ?? 1), pageSize: String(filters.pageSize ?? 50) });
-  for (const key of ['activeOnly', 'nonActiveOnly', 'region', 'countryIso2Code', 'q', 'administrativeRegionId'] as const) {
+  for (const key of ['updatedFrom', 'mappingStatus', 'activeOnly', 'nonActiveOnly', 'region', 'countryIso2Code', 'q', 'administrativeRegionId'] as const) {
     const value = filters[key];
     if (value !== undefined) params.set(key, String(value));
   }
@@ -44,7 +44,7 @@ export const referenceDataAdminApi = {
       base + '/import-review?page=' + encodeURIComponent(String(page)) + '&pageSize=25');
   },
   standardsReadiness() {
-    return adminApiClient.request<{ evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS';
+    return adminApiClient.request<{ evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS' | 'REVIEWED_EVIDENCE_RECORDED';
       data: Array<{ standardFamily: string; readiness: string; sourceVersion: string | null; candidateVersions: string[] }>; asOf: string }>(
       base + '/standards/readiness');
   },
@@ -102,7 +102,7 @@ export const referenceDataAdminApi = {
     );
   },
   transitionReference(entityType: GovernedReferenceEntityType, referenceId: string,
-    body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string }) {
+    body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string; acknowledgeHistoricalReferences?: boolean }) {
     return mutate<void>('/governance/' + encodeURIComponent(entityType) + '/' +
       encodeURIComponent(referenceId) + '/lifecycle', 'POST', body);
   },
@@ -117,7 +117,7 @@ export const referenceDataAdminApi = {
   regionHistory(id: string) {
     return adminApiClient.request<{ data: ReferenceVersionDto[] }>(base + '/governance/REGION/' + encodeURIComponent(id) + '/history');
   },
-  transitionRegion(id: string, body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string }, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {
+  transitionRegion(id: string, body: { expectedVersion: number; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string; acknowledgeHistoricalReferences?: boolean }, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {
     return mutate<void>('/governance/REGION/' + encodeURIComponent(id) + '/lifecycle', 'POST', body, options);
   },
   saveCountry({ iso2Code, ...body }: UpsertReferenceCountryDto, options?: Pick<AdminRequestOptions, 'idempotencyKey' | 'signal'>) {

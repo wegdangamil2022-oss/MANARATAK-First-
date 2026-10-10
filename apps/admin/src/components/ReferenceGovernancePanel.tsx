@@ -69,6 +69,9 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
   const [aliases, setAliases] = useState<ReferenceAliasInput[]>([]);
   const [mappings, setMappings] = useState<ReferenceProviderMappingInput[]>([]);
   const [reason, setReason] = useState('');
+  const [retirementState, setRetirementState] = useState<ReferenceLifecycleState>(ReferenceLifecycleState.ARCHIVED);
+  const [replacementId, setReplacementId] = useState<string | null>(null);
+  const [acknowledgement, setAcknowledgement] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -183,7 +186,9 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
     setSaving(true); setError(null);
     try {
       await referenceDataAdminApi.transitionReference(entityType, record.id, {
-        expectedVersion: record.versionNumber, toState: ReferenceLifecycleState.DEPRECATED, reason: reason.trim(),
+        expectedVersion: record.versionNumber, toState: record.lifecycleState === 'ACTIVE' ? ReferenceLifecycleState.DEPRECATED : retirementState, reason: reason.trim(),
+        acknowledgeHistoricalReferences: acknowledgement,
+        targetReferenceId: record.lifecycleState !== 'ACTIVE' && ['MERGED','SUPERSEDED'].includes(retirementState) ? replacementId ?? undefined : undefined,
       });
       onChanged();
     } catch (err: unknown) {
@@ -275,17 +280,22 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
           <section className="border-t pt-4 space-y-2">
             <h4 className="font-bold">دورة حياة السجل</h4>
             {impact && <div className="border border-slate-200 rounded-xl p-3 text-xs space-y-2">
-              <p className="font-bold">الروابط الموثقة من قاعدة البيانات: {impact.knownTotal} (تغطية جزئية فقط)</p>
+              <p className="font-bold">الروابط الموثقة من FK والرموز: {impact.knownTotal} (تغطية جزئية فقط)</p>
               <div className="flex gap-2 flex-wrap">{Object.entries(impact.knownRelationCounts).map(([relation, count]) =>
                 <span className="border rounded-lg px-2 py-1" key={relation}>{relation}: {count}</span>)}</div>
             </div>}
-            <p className="text-xs text-amber-800">الاعتماديات غير المباشرة أو غير المربوطة بـFK: unknown.
-              الأرشفة والدمج والاستبدال محظورة من هذه الشاشة حتى استكمال تغطية الاستهلاك وموافقات الحوكمة.</p>
-            {record.lifecycleState === 'ACTIVE' && <div className="flex gap-2 items-center flex-wrap">
-              <input value={reason} onChange={e => setReason(e.target.value)}
-                className="border rounded-lg p-2 flex-1" placeholder="سبب إيقاف الاختيار الجديد (مطلوب)" />
-              <button type="button" className="border border-amber-500 text-amber-800 p-2 rounded-lg"
-                disabled={saving || reason.trim().length < 3} onClick={() => void deprecate()}>DEPRECATED — منع الاختيار الجديد</button>
+            <p className="text-xs text-amber-800">تبقى المعرّفات والعلاقات التاريخية محفوظة؛ لا حذف ولا نقل تلقائي. الأرشفة تمنع عند وجود روابط مرصودة. الاستخدامات النصية/الخارجية غير المرصودة تبقى unknown، ولا يُستنتج منها اكتمال التغطية.</p>
+            {['ACTIVE','DEPRECATED'].includes(record.lifecycleState) && <div className="space-y-2">
+              {record.lifecycleState === 'DEPRECATED' && <>
+                <label>قرار التقاعد<select className="border p-2" value={retirementState} onChange={event => { setRetirementState(event.target.value as ReferenceLifecycleState); setReplacementId(null); }}>{['ARCHIVED','MERGED','SUPERSEDED'].map(state => <option key={state}>{state}</option>)}</select></label>
+                {['MERGED','SUPERSEDED'].includes(retirementState) && <CanonicalPicker paged label="السجل البديل النشط" value={replacementId} reloadKey={`replacement:${entityType}:${record.id}`} load={async (query,page) => {
+                  const values = entityType === 'COUNTRY' ? await canonicalPickerApi.countries(query,page) : entityType === 'CURRENCY' ? await canonicalPickerApi.currencies(query,page) : entityType === 'LANGUAGE' ? await canonicalPickerApi.languages(query,page) : await canonicalPickerApi.cities(record.countryIso2Code,undefined,query,page);
+                  return values.filter(item => item.id !== record.id);
+                }} onChange={setReplacementId} />}
+                <label className="block"><input type="checkbox" checked={acknowledgement} onChange={event => setAcknowledgement(event.target.checked)} />راجعت الأثر؛ تبقى المراجع التاريخية والاستخدامات غير المرصودة محفوظة دون إعادة تعيين.</label>
+              </>}
+              <label className="block">سبب القرار<input value={reason} maxLength={1000} onChange={event => setReason(event.target.value)} className="border rounded p-2 w-full" /></label>
+              <button type="button" className="border border-amber-500 text-amber-800 p-2 rounded-lg" disabled={saving || !impact || reason.trim().length < 3 || record.lifecycleState === 'DEPRECATED' && (!acknowledgement || ['MERGED','SUPERSEDED'].includes(retirementState) && !replacementId || retirementState === 'ARCHIVED' && impact.knownTotal > 0)} onClick={() => void deprecate()}>{record.lifecycleState === 'ACTIVE' ? 'DEPRECATED — منع الاختيار الجديد' : 'تسجيل قرار التقاعد'}</button>
             </div>}
           </section>
         </>}
@@ -350,8 +360,8 @@ function CityCountryLinkRepair({ record, onChanged }: { record: GovernedRow; onC
   return <section className="space-y-3 rounded-lg border border-amber-400 p-3 bg-amber-50">
     <h5 className="font-bold text-sm">إصلاح مرجع دولة مفقود لمدينة قديمة (سجل واحد فقط)</h5>
     <p className="text-xs">رمز الدولة الثابت: {record.countryIso2Code}. تبقى هوية المدينة ومعرّفها ثابتين، ولا تُنشأ سجلات جديدة.</p>
-    <CanonicalPicker label="الدولة المعتمدة المطابقة لرمز المدينة" value={countryId}
-      load={async query => (await canonicalPickerApi.countries(query)).filter(item =>
+    <CanonicalPicker paged label="الدولة المعتمدة المطابقة لرمز المدينة" value={countryId}
+      load={async (query,page) => (await canonicalPickerApi.countries(query,page)).filter(item =>
         item.lifecycle === 'ACTIVE' && item.code === record.countryIso2Code)}
       onChange={(id, option) => setCountryId(option?.code === record.countryIso2Code ? id : null)}
       disabled={busy} />

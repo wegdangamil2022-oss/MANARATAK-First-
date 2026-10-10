@@ -1,3 +1,9 @@
+# Final Section 06 status — CODE_CLOSED — RUNTIME_DEFERRED
+
+The source gaps listed in this historical continuation are superseded by [the final source closure register](SECTION_06_SOURCE_CLOSURE.md). Durable owner approval/apply and standards registry are now implemented; official files/approvals and runtime/data activation are not claimed. Final targeted tests: **30/30 PASS**, once; TypeScript attempt failed on seven diagnostics, source corrected without rerun. Preserve all earlier interrupted/unexecuted evidence as recorded.
+
+## Historical record
+
 # Section 06 / P7 — continuation, 2026-10-10
 
 Branch: codex/section-01-iam-rbac. Starting checkpoint: e4fc7c50730c714556e571d5d3605504be7598d9. Status: PARTIAL; NOT CODE_CLOSED.

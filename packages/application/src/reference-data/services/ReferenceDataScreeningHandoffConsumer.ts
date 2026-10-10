@@ -108,6 +108,8 @@ export interface P7ScreeningDecision {
   issues: Array<{ code: string; message: string }>;
   /** Preview is NOT approval; no canonical mutation has occurred. */
   canonicalWrites: 0;
+  normalizedPayload?: Record<string, unknown>;
+  dryRun?: boolean;
 }
 
 /**
@@ -149,7 +151,7 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
         }],
       };
     }
-    if (handoff.validation.state === 'INVALID') {
+    if (handoff.validation.state === 'INVALID' || handoff.validation.issues.some(issue => issue.severity === 'ERROR')) {
       return { ...decision, state: 'INVALID',
         issues: sourceIssues };
     }
@@ -192,6 +194,8 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
       .map(issue => ({ code: issue.code, message: issue.message }));
     return {
       ...decision,
+      normalizedPayload: JSON.parse(JSON.stringify(handoff.normalizedPayload)),
+      dryRun: handoff.execution.dryRun,
       normalizedPayloadHash: referenceImportPayloadDigest(handoff.normalizedPayload),
       deterministicKey: report.deterministicKey || null,
       state: report.canBeImported ? 'NEEDS_OWNER_REVIEW' : 'INVALID',

@@ -1,3 +1,68 @@
+# Section 06 — final disposition (2026-10-10)
+
+**CODE_CLOSED — RUNTIME_DEFERRED.** This final source matrix supersedes the historical checkpoint below. See [closure register](SECTION_06_SOURCE_CLOSURE.md) for implemented behavior, scope decisions and exact one-shot verification. No live dataset, database migration, browser acceptance or final compiler PASS is asserted.
+
+| Original item | Final disposition | Evidence / scope |
+| --- | --- | --- |
+| 06.01 | SOURCE_IMPLEMENTED | Existing five-type inventory preserved; final source capabilities documented. |
+| 06.02 | SOURCE_IMPLEMENTED | Five owner tabs share guarded edits, history, impact and query controls. |
+| 06.03 | SOURCE_IMPLEMENTED | NFKC scoped city identity and legacy-collision refusal; historical data activation deferred. |
+| 06.04 | SOURCE_IMPLEMENTED | Shared Unicode aliases plus bounded scoped raw/stored legacy comparison; no rewrite. |
+| 06.05 | SOURCE_IMPLEMENTED | ACTIVE lifecycle plus compatibility flag for public regions retained. |
+| 06.06 | SOURCE_IMPLEMENTED | Default 50 / maximum 100 public city paging retained. |
+| 06.07 | SOURCE_IMPLEMENTED | Reviewed non-destructive retirement policy, CAS, active replacement, country/region/cycle guards. |
+| 06.08 | SOURCE_IMPLEMENTED | Stable-ID selected editors and owner expectedVersion/row-lock commands retained. |
+| 06.09 | SOURCE_IMPLEMENTED | Temporal predecessor closing retained; all owner/Region history views independently paged. |
+| 06.10 | SOURCE_IMPLEMENTED | Persisted actor/correlation and actual governed snapshots retained. |
+| 06.11 | SOURCE_IMPLEMENTED | Explicit audited two-owner provider-key reconciliation with version/replay guard retained. |
+| 06.12 | SOURCE_IMPLEMENTED | Historical identity remains separate from replacement metadata; no silent redirect. |
+| 06.13 | SOURCE_IMPLEMENTED | ISO639 languages separated from canonical BCP47 locale-tag contract. |
+| 06.14 | SOURCE_IMPLEMENTED | ICU-resolvable IANA/UTC validation plus governed source registry; actual authority file pending activation. |
+| 06.15 | SOURCE_IMPLEMENTED | Canonical default/parent checks and transaction locks; scalar-code usage counts included. |
+| 06.16 | SOURCE_IMPLEMENTED | Durable source proposal/reviewer/CAS/supersession registry with verified artifact evidence. |
+| 06.17 | SOURCE_SCOPE_DOCUMENTED | AR/EN projection implemented; broad CLDR localization explicitly out of launch scope per plan. |
+| 06.18 | SOURCE_SCOPE_DOCUMENTED | Global/runtime/authority scope distinguished in final closure document. |
+| 06.19 | SOURCE_SCOPE_DOCUMENTED | Existing generic DAG contracts retained; closure contracts optimized; runtime without immediate consumer deferred by original scope. |
+| 06.20 | SOURCE_IMPLEMENTED | P6 typed screening payload → durable P7 preview/review/atomic apply/replay composed in DI/API/UI. |
+| 06.21 | SOURCE_IMPLEMENTED | Legacy SeedApply and pure planner promotion remain disabled; only new owner-approved path can apply. |
+| 06.22 | SOURCE_IMPLEMENTED | Seed/staging/canonical identity shares owner validation; duplicate quarantine and scoped collision refusal. |
+| 06.23 | RUNTIME_DEFERRED | Source migration only; no deployment/backfill. |
+| 06.24 | SOURCE_IMPLEMENTED | Bounded searchable P7 canonical pickers now navigate pages; no full catalog preload. |
+| 06.25 | SOURCE_IMPLEMENTED | Five tabs carry q/country/status/page plus SQL updatedFrom/mappingStatus URL filters. |
+| 06.26 | SOURCE_IMPLEMENTED | Active/all/non-active controls and actual owner totals retained. |
+| 06.27 | SOURCE_IMPLEMENTED | Generic governance inspector plus actual persistent approval/apply workspace. |
+| 06.28 | SOURCE_IMPLEMENTED | FK/scalar-code/legacy owner counts; explicit reason/acknowledgement and strict archive policy; arbitrary text/external coverage remains unknown. |
+| 06.29 | SOURCE_IMPLEMENTED | P7 domain/application imports no downstream business-owner repositories; infra read-model inventory declared. |
+| 06.30 | SOURCE_SCOPE_DOCUMENTED | Country source preview stays dry-run; never source approval. |
+| 06.31 | SOURCE_IMPLEMENTED | Existing canonical country fields and AR names preserved; source evidence remains evidence. |
+| 06.32 | SOURCE_SCOPE_DOCUMENTED | Derived currency/language preview is not an authority approval. |
+| 06.33 | SOURCE_IMPLEMENTED | ACTIVE/isActive replacement, self/cycle refusal and exact city country/region compatibility. |
+| 06.34 | SOURCE_IMPLEMENTED | Scoped Unicode alias ambiguity fails closed; no fuzzy auto-match or foreign ID assignment. |
+| 06.35 | SOURCE_IMPLEMENTED | Identity NFKC and search folding remain separate. |
+| 06.36 | SOURCE_IMPLEMENTED | Stable UUID/code identity and version-gated edits retained. |
+| 06.37 | SOURCE_IMPLEMENTED | Region authoring CAS/locks/version pattern preserved; history/impact/retirement UI completed. |
+| 06.38 | SOURCE_IMPLEMENTED | Strict owner approval/snapshot/facet/read APIs and server-controlled reviewer metadata. |
+| 06.39 | SOURCE_IMPLEMENTED | Stale/approval/version errors return 409; invalid schemas remain 400; source evidence errors fail closed. |
+| 06.40 | SOURCE_IMPLEMENTED | Selected-row editing, actual owner review, registry proposals, bounded history and lifecycle controls. |
+| 06.41 | SOURCE_IMPLEMENTED | Actual quality/relationship counters retained; no invented source/global coverage percentages. |
+| 06.42 | SOURCE_IMPLEMENTED | Persistent versioned standards proposals/review and actual readiness; no fabricated official baseline. |
+| 06.43 | SOURCE_SCOPE_DOCUMENTED | Current five types repaired; advanced nationality/postal/CLDR/ontology scope stays deferred per original plan. |
+| 06.44 | SOURCE_SCOPE_DOCUMENTED | Original patches A–I implemented across preceding continuation and this closeout. |
+| 06.45 | SOURCE_IMPLEMENTED | New targeted tests 30/30; reported compile causes fixed without rerun. |
+| 06.46 | SOURCE_IMPLEMENTED | Existing contracts retained; old suites not repeated and not claimed PASS. |
+| 06.47 | RUNTIME_DEFERRED | All DB/provider/browser acceptance remains open under Post-28 policy. |
+| 06.48 | SOURCE_IMPLEMENTED | Final source register, matrix and honest check log updated; previous records historical. |
+| 06.49 | SOURCE_IMPLEMENTED | Source implementation closed; real runtime/schema/data activation explicitly deferred. |
+| 06.50 | SOURCE_IMPLEMENTED | CODE_CLOSED — RUNTIME_DEFERRED; P7 ownership remains separate from P8/P9. |
+
+| Functional gap | Final source disposition |
+| --- | --- |
+| FGA-06-001 | Selected-record editors preserve ID and CAS and prefill current canonical fields for country/currency/language/city; governed aliases/mappings/history/lifecycle/source inspection. |
+| FGA-06-002 | Actual country/city quality, FK and scalar-code usage counters; unknown authority/JSON/text/external coverage explicitly labeled. |
+| FGA-06-003 | Owner query/status/country/page/updatedFrom/mappingStatus URL facets with matching SQL count/list. |
+
+## Historical continuation matrix (superseded; preserved evidence)
+
 # Section 06 / P7 — item-by-item source acceptance matrix
 
 Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-iam-rbac`, report 2026-10-10.

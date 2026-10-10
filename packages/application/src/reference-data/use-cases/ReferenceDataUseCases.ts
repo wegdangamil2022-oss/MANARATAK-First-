@@ -402,7 +402,7 @@ export class ReferenceDataUseCases {
   }
 
   public async transitionReferenceLifecycle(
-    input: { entityType: GovernedReferenceEntityType; referenceId: string; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string; expectedVersion?: number },
+    input: { entityType: GovernedReferenceEntityType; referenceId: string; toState: ReferenceLifecycleState; targetReferenceId?: string; reason: string; expectedVersion?: number; acknowledgeHistoricalReferences?: boolean },
     context: ReferenceDataMutationContext,
   ): Promise<void> {
     if (!context.actorId) throw new ReferenceDataInvariantError('Authenticated actor is required for lifecycle transitions.');
@@ -432,7 +432,7 @@ export class ReferenceDataUseCases {
         targetType: `REFERENCE_${input.entityType}`,
         source: context.source || 'admin-reference-data-api',
         timestamp: now,
-        contextMetadata: { toState: input.toState, reason: input.reason.trim(), targetReferenceId: input.targetReferenceId ?? null },
+        contextMetadata: { historicalReferencesPreserved: true, acknowledgeHistoricalReferences: input.acknowledgeHistoricalReferences ?? false, toState: input.toState, reason: input.reason.trim(), targetReferenceId: input.targetReferenceId ?? null },
         correlationReference: context.correlationId,
       },
       {

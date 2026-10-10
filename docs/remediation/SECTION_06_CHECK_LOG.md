@@ -1,3 +1,9 @@
+# Final Section 06 status — CODE_CLOSED — RUNTIME_DEFERRED
+
+The source gaps listed in this historical continuation are superseded by [the final source closure register](SECTION_06_SOURCE_CLOSURE.md). Durable owner approval/apply and standards registry are now implemented; official files/approvals and runtime/data activation are not claimed. Final targeted tests: **30/30 PASS**, once; TypeScript attempt failed on seven diagnostics, source corrected without rerun. Preserve all earlier interrupted/unexecuted evidence as recorded.
+
+## Historical record
+
 # Section 06 checks / execution exclusions
 
 Date: 2026-10-10. Commit baseline `7231f2c53b307cb5f98e3af0083285322802603a`.

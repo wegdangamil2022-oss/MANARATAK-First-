@@ -5,7 +5,7 @@ import { referenceDataAdminApi } from '../api/referenceData';
 /** P7 triage only: a screening receipt is NEVER operator approval.
  * There is deliberately no "approve/apply" affordance.
  */
-export function ReferenceImportReviewQueue() {
+export function ReferenceImportReviewQueue({ onSelectReceipt }: { onSelectReceipt?: (id: string) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [page, setPage] = useState(1);
   const [revision, setRevision] = useState(0);
@@ -35,7 +35,7 @@ export function ReferenceImportReviewQueue() {
     </div>
     {expanded && <>
       <p className="text-xs bg-amber-50 text-amber-900 border border-amber-200 rounded-lg p-2">
-        اعتماد المصدر، حل التعارضات، وكتابة البيانات المرجعية ما زال يتطلب آلية موافقات وتطبيق ذريّ منفصلة. لا يوجد زر استيراد أو ترقية تلقائية هنا.
+        اعتماد المصدر، حل التعارضات، وكتابة البيانات المرجعية ما زال يتطلب آلية موافقات وتطبيق ذريّ منفصلة. ابدأ معاينة المالك أدناه؛ لا ترقية تلقائية من هذا الفحص.
       </p>
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-medium">
@@ -57,7 +57,7 @@ export function ReferenceImportReviewQueue() {
               <th className="p-2">بصمة الحمولة</th><th className="p-2">التاريخ</th><th className="p-2">الملاحظات</th>
             </tr></thead>
             <tbody>{data.data.map(row => <tr key={row.receiptId} className="border-t">
-              <td className="p-2 font-bold">{row.entityType || 'غير محدد'}</td>
+              <td className="p-2 font-bold">{row.entityType || 'غير محدد'}{row.state === 'NEEDS_OWNER_REVIEW' && onSelectReceipt && <button type="button" className="block underline" onClick={() => onSelectReceipt(row.receiptId)}>معاينة المالك</button>}</td>
               <td className="p-2">{row.triage === 'REVIEWABLE' ? 'جاهز للفحص اليدوي (غير معتمد)' :
                 row.triage === 'SOURCE_ISSUES_REQUIRE_REVIEW' ? 'يتطلب حل مشكلة المصدر' :
                 row.triage === 'INVALID_SOURCE' ? 'بيانات غير صالحة' :

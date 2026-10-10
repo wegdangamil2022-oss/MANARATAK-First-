@@ -217,3 +217,5 @@ export * from './import-foundation/PrismaImportSourceObservationGateway';
 export * from './import-foundation/PrismaSourceAcquisitionLimiter';
 export * from './import-foundation/network/SignedSourceAccessAuthority';
 export * from './import-foundation/ImportSpoolMaintenance';
+
+export * from './reference-data/PrismaReferenceOwnerReviewGateway';

@@ -12,6 +12,8 @@ export const referenceDataQueryShape = {
 
 export const adminReferenceDataQuerySchema = z.object({
   ...referenceDataQueryShape,
+  updatedFrom: z.string().datetime({ offset: true }).optional(),
+  mappingStatus: z.enum(['MAPPED','UNMAPPED']).optional(),
   activeOnly: z.preprocess((value) => {
     if (value === undefined || typeof value === 'boolean') return value;
     if (typeof value === 'string') {

@@ -1,6 +1,8 @@
 import { ReferenceAliasInput, ReferenceLifecycleState, ReferenceProviderMappingInput } from '../governance/ReferenceGovernance';
 
 export interface ReferenceDataFilters {
+  updatedFrom?: string;
+  mappingStatus?: 'MAPPED' | 'UNMAPPED';
   activeOnly?: boolean;
   nonActiveOnly?: boolean;
   region?: string;

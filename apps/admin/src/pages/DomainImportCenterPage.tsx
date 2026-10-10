@@ -2,6 +2,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { ImportAdminPage, type DomainKey } from './ImportAdminPage';
 
 const DOMAIN_ROUTE_MAP: Record<string, Exclude<DomainKey, 'ALL'>> = {
+  'reference-data': 'REFERENCE_DATA',
   universities: 'UNIVERSITIES',
   majors: 'MAJORS',
   courses: 'COURSES',

@@ -260,7 +260,9 @@
     "UniversityTuitionProfile": "universities",
     "UserRecord": "identity",
     "WorkflowControlRecord": "foundation_control_plane",
-    "WorkflowExecutionProjection": "foundation_control_plane"
+    "WorkflowExecutionProjection": "foundation_control_plane",
+    "ReferenceOwnerImportReview": "reference",
+    "ReferenceStandardSnapshot": "reference"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -326,6 +328,17 @@
     ],
     "packages/infrastructure/src/scholarships/PrismaScholarshipImportDecisionPorts.ts": [
       "import"
+    ],
+    "packages/infrastructure/src/reference-data/PrismaReferenceOwnerReviewGateway.ts": [
+      "import",
+      "assets"
+    ],
+    "packages/infrastructure/src/reference-data/ReferenceCodeUsageInventory.ts": [
+      "finance",
+      "scholarships",
+      "services",
+      "tests",
+      "universities"
     ]
   },
   "historicalMigrationBaseline": [

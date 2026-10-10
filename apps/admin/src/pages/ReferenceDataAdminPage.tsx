@@ -11,6 +11,7 @@ import { AdministrativeRegionsTab } from './AdministrativeRegionsTab';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { ReferenceGovernanceButton, CityCountryQuality } from '../components/ReferenceGovernancePanel';
+import { ReferenceOwnerReviewWorkspace } from '../components/ReferenceOwnerReviewWorkspace';
 import { ReferenceImportReviewQueue } from '../components/ReferenceImportReviewQueue';
 
 /** Bounded owner-API query state, shareable as URL parameters. */
@@ -20,6 +21,8 @@ function readP7Url() {
   return {
     page: Number.isSafeInteger(rawPage) && rawPage > 0 ? rawPage : 1,
     q: params.get('p7Q') ?? '',
+    mappingStatus: params.get('p7MappingStatus') === 'MAPPED' ? 'MAPPED' as const : params.get('p7MappingStatus') === 'UNMAPPED' ? 'UNMAPPED' as const : '',
+    updatedFrom: params.get('p7UpdatedFrom') ?? '',
     status: params.get('p7Status') === 'all' ? 'all' as const :
       params.get('p7Status') === 'nonactive' ? 'nonactive' as const : 'active' as const,
     country: params.get('p7Country') ?? '',
@@ -31,6 +34,8 @@ function useFetchData(collection: ReferenceDataCollection) {
   const [data, setData] = useState<any[]>([]);
   const [page, setPage] = useState(initial.page);
   const [q, setQ] = useState(initial.q);
+  const [mappingStatus, setMappingStatus] = useState(initial.mappingStatus);
+  const [updatedFrom, setUpdatedFrom] = useState(initial.updatedFrom);
   const [status, setStatus] = useState<'active' | 'all' | 'nonactive'>(initial.status);
   const [country, setCountry] = useState(initial.country);
   const [total, setTotal] = useState(0);
@@ -45,18 +50,22 @@ function useFetchData(collection: ReferenceDataCollection) {
   const updateCountry = (next: string) => { setCountry(next.toUpperCase()); setPage(1); };
   useEffect(() => {
     const url = new URL(window.location.href);
+    if (mappingStatus) url.searchParams.set('p7MappingStatus',mappingStatus); else url.searchParams.delete('p7MappingStatus');
+    if (updatedFrom) url.searchParams.set('p7UpdatedFrom',updatedFrom); else url.searchParams.delete('p7UpdatedFrom');
     url.searchParams.set('p7Page', String(page));
     if (q) url.searchParams.set('p7Q', q); else url.searchParams.delete('p7Q');
     url.searchParams.set('p7Status', status);
     if (supportsCountry && country) url.searchParams.set('p7Country', country);
     else url.searchParams.delete('p7Country');
     window.history.replaceState(window.history.state, '', url.toString());
-  }, [page, q, status, country, supportsCountry]);
+  }, [page, q, status, country, supportsCountry, mappingStatus, updatedFrom]);
   const fetchData = useCallback(async () => {
     const sequence = ++requestSequence.current;
     setLoading(true); setError(null);
     try {
       const filters: ReferenceDataFilters = { page, pageSize: 50, q: deferredQ || undefined, activeOnly: status === 'active', nonActiveOnly: status === 'nonactive' };
+      if (mappingStatus) filters.mappingStatus = mappingStatus as 'MAPPED'|'UNMAPPED';
+      if (updatedFrom) filters.updatedFrom = new Date(updatedFrom).toISOString();
       if (supportsCountry && country) filters.countryIso2Code = country;
       const result = await getReferenceDataPage<any>(collection, filters);
       if (sequence !== requestSequence.current) return;
@@ -68,17 +77,18 @@ function useFetchData(collection: ReferenceDataCollection) {
     } finally {
       if (sequence === requestSequence.current) setLoading(false);
     }
-  }, [collection, page, deferredQ, status, country, supportsCountry]);
+  }, [collection, page, deferredQ, status, country, supportsCountry, mappingStatus, updatedFrom]);
   useEffect(() => {
     void fetchData();
     return () => { requestSequence.current++; };
   }, [fetchData]);
   return { data, loading, error, refetch: fetchData, page, total, totalPages, setPage,
+    mappingStatus, setMappingStatus: (value: string) => { setMappingStatus(value); setPage(1); }, updatedFrom, setUpdatedFrom: (value: string) => { setUpdatedFrom(value); setPage(1); },
     q, setQ: updateQ, status, setStatus: updateStatus, country, setCountry: updateCountry, supportsCountry };
 }
 
-function ReferenceFilters({ q, setQ, status, setStatus, country, setCountry, supportsCountry }: Pick<ReturnType<typeof useFetchData>,
-  'q' | 'setQ' | 'status' | 'setStatus' | 'country' | 'setCountry' | 'supportsCountry'>) {
+function ReferenceFilters({ q, setQ, status, setStatus, country, setCountry, supportsCountry, mappingStatus, setMappingStatus, updatedFrom, setUpdatedFrom }: Pick<ReturnType<typeof useFetchData>,
+  'mappingStatus'|'setMappingStatus'|'updatedFrom'|'setUpdatedFrom'|'q' | 'setQ' | 'status' | 'setStatus' | 'country' | 'setCountry' | 'supportsCountry'>) {
   return <div className="flex flex-wrap gap-3 mb-4 items-end" dir="rtl">
     <label className="flex flex-col gap-1 text-xs font-bold">بحث / Search
       <input className="border rounded-lg px-3 py-2 text-sm" aria-label="بحث البيانات المرجعية" value={q} onChange={e => setQ(e.target.value)} placeholder="الاسم أو الرمز" />
@@ -90,6 +100,8 @@ function ReferenceFilters({ q, setQ, status, setStatus, country, setCountry, sup
         <option value="nonactive">غير النشطة فقط / Non-active</option>
       </select>
     </label>
+    <label className="flex flex-col text-xs">ربط المزوّد<select className="border p-2" value={mappingStatus} onChange={event => setMappingStatus(event.target.value)}><option value="">الكل</option><option value="MAPPED">مربوط</option><option value="UNMAPPED">غير مربوط</option></select></label>
+    <label className="flex flex-col text-xs">تحديث منذ<input className="border p-2" type="datetime-local" value={updatedFrom} onChange={event => setUpdatedFrom(event.target.value)} /></label>
     {supportsCountry && <label className="flex flex-col gap-1 text-xs font-bold">رمز الدولة / ISO2
       <input className="border rounded-lg px-3 py-2 text-sm w-24" value={country} maxLength={2} onChange={e => setCountry(e.target.value)} placeholder="YE" />
     </label>}
@@ -107,6 +119,7 @@ function ReferencePagination({ page, totalPages, setPage, loading }: {
 }
 
 export function ReferenceDataAdminPage() {
+  const [selectedReceipt, setSelectedReceipt] = useState<string>();
   const tabValues: ReferenceDataCollection[] = ['countries', 'currencies', 'languages', 'regions', 'cities'];
   const [activeTab, setActiveTab] = useState<ReferenceDataCollection>(() => {
     const value = new URLSearchParams(window.location.search).get('p7Tab');
@@ -183,9 +196,11 @@ export function ReferenceDataAdminPage() {
         ))}</div>}
         <p className="text-xs text-slate-600">الأعداد من خادم P7 فقط. جودة الأسماء البديلة والروابط والمصادر الرسمية: unknown حتى تتوفر أدلة قابلة للفحص. انقر على المجموعة للاطلاع على سجلاتها.</p>
       </section>
-      <ReferenceImportReviewQueue />
+      <ReferenceImportReviewQueue onSelectReceipt={setSelectedReceipt} />
+      <ReferenceOwnerReviewWorkspace receiptId={selectedReceipt} />
       <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-2">
         <h3 className="font-bold text-sm">حالة المعايير المرجعية / Official standards evidence</h3>
+        <button type="button" className="underline text-xs" onClick={() => { setStandardsError(false); referenceDataAdminApi.standardsReadiness().then(setStandards).catch(() => setStandardsError(true)); }}>تحديث حالة المصادر</button>
         {!standards && !standardsError && <p role="status" className="text-xs">جارٍ قراءة سجل المصادر المعتمدة…</p>}
         {standardsError && <p role="alert" className="text-xs text-red-800">تعذر قراءة سجل المعايير؛ لا يمكن إثبات سلامة مصدر البيانات.</p>}
         {standards && <>
@@ -518,7 +533,7 @@ function CurrenciesTab() {
       <DerivedReferencePreview kind="currencies" />
       <form onSubmit={handleSave} className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
         <h3 className="font-bold text-lg">{editing ? 'تحرير العملة المحددة / Edit currency' : 'إضافة عملة / Add currency'}</h3>
-        {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>
+        {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input label="ISO Code" required disabled={Boolean(editing)} value={form.isoCode} onChange={(v: string) => setForm({...form, isoCode: v})} />
           <Input label="Name" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
@@ -604,7 +619,7 @@ function LanguagesTab() {
       <DerivedReferencePreview kind="languages" />
       <form onSubmit={handleSave} className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
         <h3 className="font-bold text-lg">{editing ? 'تحرير اللغة المحددة / Edit language' : 'إضافة لغة / Add language'}</h3>
-        {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>
+        {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input label="ISO Code" required disabled={Boolean(editing)} value={form.isoCode} onChange={(v: string) => setForm({...form, isoCode: v})} />
           <Input label="Name" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
@@ -704,13 +719,13 @@ function CitiesTab() {
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-[#0E7C86]"></div>
           <h3 className="font-black text-lg text-slate-800">{editing ? 'تحرير المدينة المحددة' : 'إضافة مدينة جديدة'}</h3>
-          {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>
+          {editing && <p className="text-xs">Canonical ID: {editing.id} | expectedVersion: {editing.expectedVersion} | {editing.lifecycleState}</p>}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <CanonicalPicker label="الدولة المعتمدة" value={countryId} load={(query) => canonicalPickerApi.countries(query)} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading || Boolean(editing)} />
+          <CanonicalPicker paged label="الدولة المعتمدة" value={countryId} load={(query,page) => canonicalPickerApi.countries(query,page)} onChange={(next, option) => { setCountryId(next); setRegionId(null); setForm({ ...form, countryIso2Code: option?.code ?? '' }); }} disabled={saveStatus.loading || Boolean(editing)} />
           <Input label="الاسم بالإنجليزية" required value={form.name} onChange={(v: string) => setForm({...form, name: v})} />
           <Input label="الاسم باللغة العربية (اختياري)" value={form.nameAr} onChange={(v: string) => setForm({...form, nameAr: v})} />
-          <CanonicalPicker label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={(query) => canonicalPickerApi.regions(form.countryIso2Code || undefined, query)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId || Boolean(editing)} />
+          <CanonicalPicker paged label="المنطقة الإدارية المعتمدة (اختياري)" value={regionId} load={(query,page) => canonicalPickerApi.regions(form.countryIso2Code || undefined, query,page)} reloadKey={`city-region:${form.countryIso2Code}`} onChange={setRegionId} optional disabled={saveStatus.loading || !countryId || Boolean(editing)} />
           <Input label="تسمية المنطقة الإدارية الأصلية (اختياري)" value={form.region} onChange={(v: string) => setForm({...form, region: v})} />
           <label className="flex flex-col gap-1 text-sm">منطقة زمنية IANA (اختياري)
             <input list="p7-city-iana-timezones" className="border rounded px-3 py-2" value={form.timezone}

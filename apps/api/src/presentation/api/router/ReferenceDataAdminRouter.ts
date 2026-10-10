@@ -5,12 +5,13 @@ import {
   ReferenceDataInvariantError,
   ReferenceDataNotFoundError,
   ReferenceDataUseCases,
+  ReferenceOwnerReviewUseCases,
   ReferenceDataValidationError,
 } from '@manaratak/application';
 import { ReferenceLifecycleState, ReferenceRegionCommandError, type GovernedReferenceEntityType } from '@manaratak/domain';
 
 export class ReferenceDataAdminRouter {
-  public static create(cradle: { referenceDataUseCases: ReferenceDataUseCases }): Router {
+  public static create(cradle: { referenceDataUseCases: ReferenceDataUseCases; referenceOwnerReviewUseCases?: ReferenceOwnerReviewUseCases }): Router {
     const router = Router();
     const { referenceDataUseCases } = cradle;
 
@@ -134,6 +135,7 @@ export class ReferenceDataAdminRouter {
       reconciliationId: z.string().uuid(),
     }).strict();
     const lifecycleTransitionSchema = z.object({
+      acknowledgeHistoricalReferences: z.boolean().optional(),
       toState: z.nativeEnum(ReferenceLifecycleState).refine((state) => state !== ReferenceLifecycleState.ACTIVE),
       targetReferenceId: z.string().uuid().optional(),
       reason: z.string().min(3).max(1000),
@@ -173,9 +175,22 @@ export class ReferenceDataAdminRouter {
         params.page ?? 1, params.pageSize ?? 25));
     }));
 
+    const owner = () => { if (!cradle.referenceOwnerReviewUseCases) throw new Error('REFERENCE_OWNER_UNAVAILABLE'); return cradle.referenceOwnerReviewUseCases; };
+    const pageQuery = z.object({ page: z.coerce.number().int().min(1).max(1000).default(1), status: z.enum(['PREVIEWED','APPROVED','REJECTED','APPLIED']).optional() }).strict();
+    const revisionBody = z.object({ expectedVersion: z.number().int().positive(), previewHash: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
+    router.get('/owner-imports', asyncHandler(async (req: Request, res: Response) => { const q = pageQuery.parse(req.query); res.json(await owner().list(q.page, q.status)); }));
+    router.post('/owner-imports/preview', asyncHandler(async (req: Request, res: Response) => { const body = z.object({ receiptId: z.string().min(1).max(128) }).strict().parse(req.body); res.json(await owner().preview(body.receiptId,mutationContext(req))); }));
+    router.post('/owner-imports/:id/refresh', asyncHandler(async (req: Request, res: Response) => { const body = z.object({ expectedVersion: z.number().int().positive() }).strict().parse(req.body); res.json(await owner().refresh(String(req.params.id),body.expectedVersion,mutationContext(req))); }));
+    router.post('/owner-imports/:id/review', asyncHandler(async (req: Request, res: Response) => { const body = revisionBody.extend({ decision: z.enum(['APPROVE','REJECT']), reason: z.string().trim().min(3).max(1000) }).strict().parse(req.body); res.json(await owner().review(String(req.params.id),body,mutationContext(req))); }));
+    router.post('/owner-imports/:id/apply', asyncHandler(async (req: Request, res: Response) => { res.json(await owner().apply(String(req.params.id),revisionBody.parse(req.body),mutationContext(req))); }));
+    router.get('/standards/snapshots', asyncHandler(async (req: Request, res: Response) => { const { page } = pageQuery.omit({ status: true }).parse(req.query); res.json(await owner().snapshots(page)); }));
+    router.post('/standards/snapshots', asyncHandler(async (req: Request, res: Response) => {
+      const body = z.object({ standardFamily: z.enum(['ISO_3166','ISO_4217','ISO_639','UN_M49','IANA_TZ','CLDR']), sourceAuthority: z.string().trim().min(1).max(300), sourceVersion: z.string().trim().min(1).max(128), sourceArtifactHash: z.string().regex(/^[a-fA-F0-9]{64}$/), sourceArtifactId: z.string().min(1).max(128), sourceUrl: z.string().url().max(2000).refine(value => value.startsWith('https://')), retrievedAt: z.string().datetime({ offset: true }), supersedesSnapshotId: z.string().uuid().nullable().optional(), notes: z.string().max(1000).nullable().optional() }).strict().parse(req.body);
+      res.status(201).json(await owner().createSnapshot(body,mutationContext(req)));
+    }));
+    router.post('/standards/snapshots/:id/review', asyncHandler(async (req: Request, res: Response) => { const body = z.object({ expectedVersion: z.number().int().positive(), decision: z.enum(['APPROVE','REJECT']), reason: z.string().trim().min(3).max(1000) }).strict().parse(req.body); res.json(await owner().reviewSnapshot(String(req.params.id),body.expectedVersion,body.decision,body.reason,mutationContext(req))); }));
     router.get('/standards/readiness', asyncHandler(async (_req: Request, res: Response) => {
-      res.json({ data: referenceDataUseCases.getStandardsReadiness(), source: 'P7_REVIEWED_SNAPSHOT_MANIFEST',
-        evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS', asOf: new Date().toISOString() });
+      const data = await owner().readiness(); res.json({ data, source: 'P7_REVIEWED_SNAPSHOT_REGISTRY', evidenceState: data.some(item => item.readiness === 'EVIDENCE_RECORDED') ? 'REVIEWED_EVIDENCE_RECORDED' : 'NO_APPROVED_STANDARD_SNAPSHOTS', asOf: new Date().toISOString() });
     }));
 
     router.get('/quality/cities/:countryIso2Code', asyncHandler(async (req: Request, res: Response) => {
@@ -373,6 +388,8 @@ export class ReferenceDataAdminRouter {
       if (err instanceof ReferenceRegionCommandError) {
         return res.status(err.code === 'REGION_NOT_FOUND' ? 404 : 409).json({ error: err.code });
       }
+      if (err instanceof Error && err.message === 'AUTHENTICATED_ADMIN_ACTOR_REQUIRED') return res.status(401).json({ error: err.message });
+      if (err instanceof Error && /^(REFERENCE_OWNER_|REFERENCE_STANDARD_)/.test(err.message)) return res.status(err.message.includes('UNAVAILABLE') || err.message.includes('TOO_LARGE') ? 503 : err.message.includes('CONFLICT') || err.message.includes('STALE') || err.message.includes('APPROVAL') ? 409 : 422).json({ error: err.message });
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
@@ -387,6 +404,9 @@ export class ReferenceDataAdminRouter {
       }
       // Fail closed but keep optimistic conflicts actionable in admin UI.
       const governedConflicts = new Set([
+        'REFERENCE_ARCHIVE_HAS_DEPENDENCIES',
+        'REFERENCE_HISTORICAL_ACKNOWLEDGEMENT_REQUIRED',
+        'REFERENCE_LIFECYCLE_TARGET_REGION_MISMATCH',
         'REFERENCE_VERSION_CONFLICT',
         'REFERENCE_EDIT_TARGET_NOT_FOUND',
         'REFERENCE_EDIT_IDENTITY_MISMATCH',

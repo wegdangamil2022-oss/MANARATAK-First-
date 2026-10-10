@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { type CanonicalPickerOption, canonicalOptionIsSelectable } from '../api/canonicalPickers';
 
-type Loader = (query?: string) => Promise<CanonicalPickerOption[]>;
+type Loader = (query?: string, page?: number) => Promise<CanonicalPickerOption[]>;
 
-export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'default', optional = false, disabled = false }: {
+export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'default', optional = false, disabled = false, paged = false }: {
   label: string;
   value?: string | null;
   onChange: (id: string | null, option?: CanonicalPickerOption) => void;
@@ -11,6 +11,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   reloadKey?: string;
   optional?: boolean;
   disabled?: boolean;
+  paged?: boolean;
 }) {
   const loaderRef = useRef(load);
   loaderRef.current = load;
@@ -18,12 +19,14 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
+  useEffect(() => { setPage(1); }, [reloadKey]);
   useEffect(() => {
     let active = true;
     setState('loading');
     setError('');
-    const timer = setTimeout(() => loaderRef.current(search.trim()).then((items) => {
+    const timer = setTimeout(() => loaderRef.current(search.trim(), paged ? page : 1).then((items) => {
       if (!active) return;
       setOptions(items);
       setState('ready');
@@ -33,7 +36,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       setState('error');
     }), 200);
     return () => { active = false; clearTimeout(timer); };
-  }, [reloadKey, search]);
+  }, [reloadKey, search, page, paged]);
 
   const selected = useMemo(() => options.find((item) => item.id === value), [options, value]);
   const selectedBlocked = selected && !canonicalOptionIsSelectable(selected);
@@ -42,7 +45,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
   return <label className="block space-y-1 text-xs font-medium text-slate-700">
     <span>{label}</span>
     <input type="search" aria-label={`Search ${label}`} value={search}
-      disabled={disabled} onChange={event => setSearch(event.target.value)}
+      disabled={disabled} onChange={event => { setSearch(event.target.value); setPage(1); }}
       placeholder="Search owner records (up to 50 results)"
       className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
     <select
@@ -63,6 +66,7 @@ export function CanonicalPicker({ label, value, onChange, load, reloadKey = 'def
       </option>)}
     </select>
     {state === 'error' ? <span className="text-red-600">{error}</span> : null}
+    {paged && <span className="flex gap-3"><button type="button" disabled={disabled || state !== 'ready' || page <= 1} onClick={() => setPage(value => value - 1)}>السابق</button><span>{page}</span><button type="button" disabled={disabled || state !== 'ready' || options.length === 0 || page >= 1000} onClick={() => setPage(value => value + 1)}>التالي</button></span>}
     {missing ? <span className="text-amber-700">Current ID is not in this bounded page. Search to verify; no relationship has been changed.</span> : null}
     {selectedBlocked ? <span className="text-amber-700">Existing relation is {selected.lifecycle}; choose an ACTIVE/PUBLISHED replacement before saving.</span> : null}
   </label>;

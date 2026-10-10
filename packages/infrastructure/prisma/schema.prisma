@@ -5568,3 +5568,32 @@ model ApiSearchRequestRecord {
   @@index([scope, createdAt])
   @@index([createdAt])
 }
+
+// P7 owns approvals and source evidence; P6 screening is never approval.
+model ReferenceOwnerImportReview {
+  id String @id
+  receiptId String @unique
+  sourceHash String
+  entityType String
+  payload Json
+  preview Json
+  previewHash String
+  version Int @default(1)
+  status String @default("PREVIEWED")
+  reviewer String?
+  reason String?
+  result Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([status, updatedAt])
+}
+model ReferenceStandardSnapshot {
+  id String @id
+  family String
+  status String @default("DRAFT")
+  version Int @default(1)
+  record Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([family, status])
+}

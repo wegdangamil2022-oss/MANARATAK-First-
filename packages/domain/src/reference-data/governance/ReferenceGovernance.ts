@@ -62,6 +62,7 @@ export interface ReferenceRelationshipDto {
 }
 
 export interface ReferenceLifecycleTransitionCommand {
+  acknowledgeHistoricalReferences?: boolean;
   entityType: GovernedReferenceEntityType;
   referenceId: string;
   toState: ReferenceLifecycleState;

@@ -384,3 +384,5 @@ export * from './reference-data/governance/ReferenceStandardsRegistry';
 export * from './reference-data/governance/ReferenceIanaTimeZonePolicy';
 
 export * from './reference-data/governance/ReferenceImportReviewEligibility';
+
+export * from './reference-data/governance/ReferenceRetirementPolicy';
