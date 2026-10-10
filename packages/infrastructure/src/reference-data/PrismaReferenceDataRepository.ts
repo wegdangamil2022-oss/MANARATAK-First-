@@ -619,7 +619,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
     if (filters?.nonActiveOnly) {
-      Object.assign(where, { NOT: { lifecycleState: 'ACTIVE' } });
+      // Non-active is exactly the complement of canonical public selectability:
+      // older rows may have isActive=false while lifecycleState remains ACTIVE.
+      Object.assign(where, { NOT: { AND: [{ lifecycleState: 'ACTIVE' }, { isActive: true }] } });
     }
     if (filters?.region) {
       where.region = filters.region;
@@ -653,7 +655,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
     if (filters?.nonActiveOnly) {
-      Object.assign(where, { NOT: { lifecycleState: 'ACTIVE' } });
+      // Non-active is exactly the complement of canonical public selectability:
+      // older rows may have isActive=false while lifecycleState remains ACTIVE.
+      Object.assign(where, { NOT: { AND: [{ lifecycleState: 'ACTIVE' }, { isActive: true }] } });
     }
     if (filters?.q) {
       where.OR = [
@@ -682,7 +686,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
     if (filters?.nonActiveOnly) {
-      Object.assign(where, { NOT: { lifecycleState: 'ACTIVE' } });
+      // Non-active is exactly the complement of canonical public selectability:
+      // older rows may have isActive=false while lifecycleState remains ACTIVE.
+      Object.assign(where, { NOT: { AND: [{ lifecycleState: 'ACTIVE' }, { isActive: true }] } });
     }
     if (filters?.q) {
       where.OR = [
@@ -707,7 +713,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       Object.assign(where, { lifecycleState: 'ACTIVE' });
     }
     if (filters?.nonActiveOnly) {
-      Object.assign(where, { NOT: { lifecycleState: 'ACTIVE' } });
+      // Non-active is exactly the complement of canonical public selectability:
+      // older rows may have isActive=false while lifecycleState remains ACTIVE.
+      Object.assign(where, { NOT: { AND: [{ lifecycleState: 'ACTIVE' }, { isActive: true }] } });
     }
     if (filters?.countryIso2Code) {
       where.countryIso2Code = filters.countryIso2Code;
@@ -727,8 +735,12 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
 
   private regionWhere(filters?: ReferenceDataFilters): Prisma.AdministrativeRegionWhereInput {
     return {
-      ...(filters?.activeOnly ? { lifecycleState: 'ACTIVE', countryReference: { lifecycleState: 'ACTIVE' } } : {}),
-      ...(filters?.nonActiveOnly ? { NOT: { lifecycleState: 'ACTIVE' } } : {}),
+      ...(filters?.activeOnly ? { lifecycleState: 'ACTIVE', isActive: true,
+        countryReference: { lifecycleState: 'ACTIVE', isActive: true } } : {}),
+      ...(filters?.nonActiveOnly ? { NOT: { AND: [
+        { lifecycleState: 'ACTIVE' }, { isActive: true },
+        { countryReference: { lifecycleState: 'ACTIVE', isActive: true } },
+      ] } } : {}),
       ...(filters?.countryIso2Code ? { countryIso2Code: filters.countryIso2Code } : {}),
       ...(filters?.q ? { OR: [{ name: { contains: filters.q, mode: 'insensitive' as const } }, { regionCode: { contains: filters.q, mode: 'insensitive' as const } }] } : {}),
     };
