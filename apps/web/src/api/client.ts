@@ -2090,6 +2090,13 @@ export class ApiClient {
     return studentCourseRequest<StudentAssetDeliveryGrantDto>(`/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}/assets/${encodeURIComponent(assetReferenceId)}/delivery-grant`, {method:'POST'});
   }
 
+  static async listMyCertificates(cursor?: string, signal?: AbortSignal): Promise<{data:StudentCertificateProjectionDto[];nextCursor:string|null}> {
+    const res = await apiFetch(`${API_BASE_URL}/student/certificates${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`, {headers:getStudentHeaders(),signal});
+    if(!res.ok) throw new Error('تعذر تحميل الشهادات');
+    const page = await res.json() as {data:Array<Omit<StudentCertificateProjectionDto,'id'|'courseDisplayName'> & {certificateId:string;achievementDisplayName:string}>;nextCursor:string|null};
+    return {data:page.data.map(row=>({...row,id:row.certificateId,courseDisplayName:row.achievementDisplayName})),nextCursor:page.nextCursor};
+  }
+
   static async getMyCertificateArtifactDeliveryGrant(certificateId: string, kind: 'pdf' | 'preview'): Promise<StudentAssetDeliveryGrantDto> {
     const res = await apiFetch(`${API_BASE_URL}/student/certificates/${encodeURIComponent(certificateId)}/artifacts/${kind}/delivery-grant`, {method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({})});
     if(!res.ok) {const body=await res.json().catch(()=>({}));throw new Error(body.error?.message || body.error || 'تعذر تحميل ملف الشهادة');}

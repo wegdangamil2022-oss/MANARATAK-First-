@@ -1,5 +1,5 @@
 import { StudentToolResultView } from '../student-tools/StudentToolResultView';
-import { StudentCertificateActions } from '../certificates/StudentCertificateActions';
+import { StudentCertificatesPanel } from '../certificates/StudentCertificatesPanel';
 import { StudentNotificationsView, studentNotificationLink } from './StudentNotificationsView';
 import './student-workspace.css';
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
@@ -2158,90 +2158,10 @@ function LearningView({ dashboard }: { dashboard: StudentDashboardSummaryDto }) 
           )}
 
           {filter === 'ALL' && otherCourses.length > 0 && <section className="space-y-3"><h3 className="text-sm font-bold text-[var(--mn-heading)]">تسجيلات معلقة أو سابقة</h3><div className="grid gap-3 sm:grid-cols-2">{otherCourses.map(course => <CourseCard key={course.enrollmentId} course={course} />)}</div></section>}
-          {/* Section 3: Certificates & Achievements */}
-          {(filter === 'ALL' || filter === 'CERTIFICATES') && (
-            <div id="certificates" className="space-y-3 scroll-mt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                    <Award className="w-3.5 h-3.5 text-[#E5B54F]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[var(--mn-heading)]">إنجازاتي وشهاداتي</h3>
-                  </div>
-                </div>
-                <span className="text-xs font-semibold text-[var(--mn-text-muted)]">
-                  {certificates.length} شهادة
-                </span>
-              </div>
 
-              {certificates.length === 0 ? (
-                <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
-                  <Award className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-                  <h4 className="font-bold text-sm text-[var(--mn-heading)]">{dashboard.capabilityStatus?.certificates === 'DEGRADED' ? 'الشهادات غير متاحة مؤقتاً' : 'لا توجد شهادات صادرة بعد'}</h4>
-                  <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
-                    تظهر شهادة منارتك للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {certificates.map((cert) => {
-                    const verifyCode = cert.verificationCode;
-                    return (
-                      <div
-                        key={cert.id || cert.publicId}
-                        className="rounded-2xl border border-[#D6A43B]/40 bg-gradient-to-br from-[var(--mn-surface)] to-[var(--mn-page)] p-4 shadow-2xs mn-panel flex flex-col justify-between"
-                      >
-                        <div>
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F]">
-                                <Award className="w-4 h-4 text-[#E5B54F]" />
-                              </div>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D6A43B]/15 text-[#B38018] dark:text-[#E5B54F] border border-[#D6A43B]/30">
-                                {cert.status === 'ACTIVE' && (!cert.expiresAt || new Date(cert.expiresAt) > new Date()) ? 'شهادة صادرة' : cert.status === 'ACTIVE' ? 'منتهية الصلاحية' : arabicStatus(cert.status)}
-                              </span>
-                            </div>
-                            <span className="text-[10px] font-mono text-[var(--mn-text-muted)]">
-                              #{cert.serialNumber || cert.verificationCode}
-                            </span>
-                          </div>
-
-                          <h4 className="text-sm font-bold text-[var(--mn-heading)] mt-2.5 line-clamp-2">
-                            {cert.courseDisplayName}
-                          </h4>
-
-                          <div className="mt-2.5 text-[11px] text-[var(--mn-text-muted)] space-y-1">
-                            <div>تاريخ الإصدار: <strong>{formatDate(cert.issuedAt)}</strong></div>
-                            {cert.expiresAt && <div>تاريخ الانتهاء: <strong>{formatDate(cert.expiresAt)}</strong></div>}
-                          </div>
-                        </div>
-
-                        <StudentCertificateActions certificate={cert}/>
-                        <div className="mt-4 pt-3 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between">
-                          <span className="text-[10px] text-[var(--mn-success-text)] font-semibold flex items-center gap-1">
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                            <span>سجل شهادة منارتك</span>
-                          </span>
-                          {verifyCode && (
-                            <Link
-                              to={`/certificates/verify?code=${encodeURIComponent(verifyCode)}`}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 text-[#E5B54F] text-xs font-bold hover:bg-[#112450] transition-all shadow-2xs"
-                            >
-                              <span>التحقق من الشهادة</span>
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       )}
+      {(filter === 'ALL' || filter === 'CERTIFICATES') && <StudentCertificatesPanel initial={certificates}/> }
     </div>
   );
 }

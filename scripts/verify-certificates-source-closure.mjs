@@ -18,6 +18,7 @@ const files = {
   adminPage: read('apps/admin/src/pages/CertificateAdminPage.tsx'),
   detailPage: read('apps/admin/src/pages/CertificateDetailPage.tsx'),
   preview: read('apps/admin/src/components/certificates/CertificatePreview.tsx'),
+  approvedDesign: read('packages/shared/src/certificates/approvedCertificateDesign.ts'),
   adminApp: read('apps/admin/src/App.tsx'),
   publicPage: read('apps/web/src/features/certificates/CertificateVerificationPage.tsx'),
   webClient: read('apps/web/src/api/client.ts'),
@@ -81,7 +82,7 @@ check('CERT-PUB-006', all(files.publicPage,['useSearchParams','initialCode','voi
 check('CERT-PUB-007', files.publicPage.includes('حالة الشهادة') && !files.publicPage.includes('حالة الاعتماد'), 'Public copy describes certificate status without implying accreditation.');
 check('CERT-PUB-008', files.publicPage.includes('الختم الرقمي سليم'), 'Public page explains integrity result.');
 check('CERT-PUB-009', !files.publicPage.includes('revocationReason'), 'Public page does not disclose administrative revocation reason.');
-check('CERT-PUB-010', files.publicPage.includes("Intl.DateTimeFormat('ar'"), 'Public verification dates are localized for Arabic UI.');
+check('CERT-PUB-010', all(files.publicPage, ['Intl.DateTimeFormat(language', 'formatDate(result.issuedAt, language)', 'formatDate(result.expiresAt, language)']), 'Public verification dates follow the selected Arabic/English UI language.');
 check('CERT-PUB-011', files.publicPage.includes('لا تمثل درجة جامعية أو اعتمادًا مهنيًا خارجيًا'), 'Public verification page clearly distinguishes completion certificates from external accreditation.');
 check('CERT-PUB-012', all(files.publicPage,['صلاحية الشهادة','تاريخ الانتهاء']), 'Public verification shows validity and expiration semantics.');
 check('CERT-PUB-013', files.readService.includes('verificationUrl: row.verificationUrl'), 'Public read model returns the canonical persisted verification URL.');
@@ -93,9 +94,9 @@ check('CERT-TPL-003', files.schema.includes('model CertificateTemplateVersion'),
 check('CERT-TPL-004', files.usecase.includes("accentColor: '#142B5F'"), 'Default template uses MANARATAK navy.');
 check('CERT-TPL-005', files.usecase.includes("secondaryColor: '#D6A43B'"), 'Default template uses MANARATAK gold.');
 check('CERT-TPL-006', files.usecase.includes("titleAr: 'شهادة إتمام'"), 'Default Arabic credential title is Certificate of Completion.');
-check('CERT-TPL-007', files.usecase.includes("titleEn: 'CERTIFICATE OF COMPLETION'"), 'Default English credential title is Certificate of Completion.');
+check('CERT-TPL-007', files.usecase.includes('titleEn: approvedCertificateCopy.titleEn') && files.approvedDesign.includes("titleEn: 'Certificate of Completion'"), 'Default English credential title is Certificate of Completion.');
 check('CERT-TPL-008', !files.usecase.includes('شهادة إتمام معتمدة'), 'Default MANARATAK template does not falsely claim external accreditation.');
-check('CERT-TPL-009', files.usecase.includes('إدارة الشهادات — منارتك'), 'Default signatory is MANARATAK Certificates Office, not academic-accreditation office.');
+check('CERT-TPL-009', all(files.usecase, ["signatoryNameAr: 'إدارة منصة منارتك'", "signatoryNameEn: 'MANARATAK Management'"]), 'Approved default signatory is bilingual MANARATAK Management.');
 check('CERT-TPL-010', all(files.usecase,['UNIVERSITY','CERTIFICATE_ISSUER_ACCREDITATION_REQUIRED']), 'Non-MANARATAK issuer paths require explicit accreditation evidence where configured.');
 check('CERT-TPL-011', files.adminRouter.includes('/templates/bootstrap-default'), 'Admin can bootstrap the governed default draft through the real owner API.');
 check('CERT-TPL-012', all(files.adminRouter,['templates:author','templates:approve','issuers:manage','lifecycle:manage']), 'Admin API separates certificate permissions by responsibility.');

@@ -142,6 +142,7 @@ export interface CertificateSignedEnvelopeV2 {
     type: 'COURSE' | 'LEARNING_PATH';
     id: string;
     displayName: string;
+    displayNames?: { ar?: string; en?: string };
     completionId: string;
     completedAt: string;
   };

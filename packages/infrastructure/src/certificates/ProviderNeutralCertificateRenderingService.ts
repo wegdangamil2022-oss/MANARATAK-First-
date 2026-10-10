@@ -1,6 +1,9 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import PDFDocument from 'pdfkit';
+import SVGtoPDF from 'svg-to-pdfkit';
+import { create as createFont, type Font } from 'fontkit';
+import { APPROVED_CERTIFICATE_DESIGN, renderApprovedCertificateSvg } from '@manaratak/shared';
 import {
   CertificateRenderInput,
   CertificateRenderResult,
@@ -22,7 +25,7 @@ const xml = (value: unknown) =>
  */
 export class ProviderNeutralCertificateRenderingService implements ICertificateRenderingService {
   public readonly rendererId = 'manaratak-provider-neutral-certificate-renderer';
-  public readonly rendererVersion = '1.3.0';
+  public readonly rendererVersion = '1.4.0';
   constructor(
     private readonly visualAssets?: {
       resolve(id: string, hash: string): Promise<{ bytes: Uint8Array; mimeType: string }>;
@@ -65,10 +68,12 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
       verificationUrl: input.certificate.verificationUrl,
       recipientDisplayName: input.certificate.recipientDisplayName ?? null,
       achievementDisplayName: input.certificate.achievementDisplayName,
+      achievementDisplayNames: (input.certificate.metadata?.signedEnvelope as {achievement?:{displayNames?:{ar?:string;en?:string}}} | undefined)?.achievement?.displayNames ?? null,
       issuedAt: input.certificate.issuedAt.toISOString(),
       templateVersionId: input.templateVersion.id,
       templateVersionNumber: input.templateVersion.versionNumber,
       template: {
+        designId: input.templateVersion.metadata?.designId ?? null,
         language: input.templateVersion.language,
         layout: input.templateVersion.layout,
         accentColor: input.templateVersion.accentColor,
@@ -93,6 +98,107 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
     const font = await readFile(
       new URL('../../assets/certificates/NotoSansArabic-Regular.ttf', import.meta.url),
     );
+    if (input.templateVersion.metadata?.designId === APPROVED_CERTIFICATE_DESIGN) {
+      if (
+        input.templateVersion.layout !== 'LANDSCAPE' ||
+        input.templateVersion.language !== 'BILINGUAL' ||
+        input.templateVersion.designAssetId || input.templateVersion.logoAssetId
+      ) {
+        throw new Error('CERTIFICATE_APPROVED_DESIGN_CONFIGURATION_INVALID');
+      }
+      const logo =
+        visualAssets.logoAssetId?.bytes ??
+        (await readFile(
+          new URL('../../assets/certificates/manaratak-logo-official.png', import.meta.url),
+        ));
+      const metrics = new PDFDocument({ autoFirstPage: false });
+      metrics.registerFont('CertificateArabic', font);
+      const latinFont = await readFile(
+        new URL('../../assets/certificates/DejaVuSerif.ttf', import.meta.url),
+      );
+      metrics.registerFont('CertificateLatin', latinFont);
+      const arabicBoldFont = await readFile(
+        new URL('../../assets/certificates/NotoSansArabic-Bold.ttf', import.meta.url),
+      );
+      const latinBoldFont = await readFile(
+        new URL('../../assets/certificates/DejaVuSerif-Bold.ttf', import.meta.url),
+      );
+      metrics.registerFont('CertificateArabicBold', arabicBoldFont);
+      metrics.registerFont('CertificateLatinBold', latinBoldFont);
+      const imageUrl = (role: string) =>
+        visualAssets[role]
+          ? `data:${visualAssets[role].mimeType};base64,${Buffer.from(visualAssets[role].bytes).toString('base64')}`
+          : undefined;
+      const svg = renderApprovedCertificateSvg({
+        ...input.templateVersion,
+        recipient: input.certificate.recipientDisplayName ?? '—',
+        achievement: input.certificate.achievementDisplayName,
+        achievementAr: (
+          input.certificate.metadata?.signedEnvelope as
+            { achievement?: { displayNames?: { ar?: string } } } | undefined
+        )?.achievement?.displayNames?.ar,
+        achievementEn: (
+          input.certificate.metadata?.signedEnvelope as
+            { achievement?: { displayNames?: { en?: string } } } | undefined
+        )?.achievement?.displayNames?.en,
+        serial: input.certificate.serialNumber,
+        issuedAt: input.certificate.issuedAt.toISOString().slice(0, 10),
+        verificationUrl: input.certificate.verificationUrl,
+        issuerName: input.certificate.issuerName,
+        logoUrl: `data:${visualAssets.logoAssetId?.mimeType ?? 'image/png'};base64,${Buffer.from(logo).toString('base64')}`,
+        signatureUrl: imageUrl('signatureAssetId'),
+        sealUrl: imageUrl('sealAssetId'),
+        arabicFontUrl: `data:font/ttf;base64,${font.toString('base64')}`,
+        latinFontUrl: `data:font/ttf;base64,${latinFont.toString('base64')}`,
+        arabicBoldFontUrl: `data:font/ttf;base64,${arabicBoldFont.toString('base64')}`,
+        latinBoldFontUrl: `data:font/ttf;base64,${latinBoldFont.toString('base64')}`,
+        measure: (value, size, arabic, bold) =>
+          metrics
+            .font((arabic ? 'CertificateArabic' : 'CertificateLatin') + (bold ? 'Bold' : ''))
+            .fontSize(size)
+            .widthOfString(value),
+      });
+      metrics.end();
+      const pdf = await this.approvedPdf(
+        input,
+        svg,
+        font,
+        latinFont,
+        arabicBoldFont,
+        latinBoldFont,
+      );
+      const stem = `certificate-${input.certificate.serialNumber}-${renderFingerprint.slice(0, 12)}`;
+      return {
+        rendererId: this.rendererId,
+        rendererVersion: this.rendererVersion,
+        templateVersionId: input.templateVersion.id,
+        templateVersionNumber: input.templateVersion.versionNumber,
+        renderFingerprint,
+        artifacts: [
+          {
+            kind: 'PDF',
+            bytes: pdf,
+            mimeType: 'application/pdf',
+            fileExtension: 'pdf',
+            filename: `${stem}.pdf`,
+          },
+          {
+            kind: 'PREVIEW',
+            bytes: encode(svg),
+            mimeType: 'image/svg+xml',
+            fileExtension: 'svg',
+            filename: `${stem}-preview.svg`,
+          },
+          {
+            kind: 'QR',
+            bytes: encode(qrSvg),
+            mimeType: 'image/svg+xml',
+            fileExtension: 'svg',
+            filename: `${stem}-qr.svg`,
+          },
+        ],
+      };
+    }
     const layout = this.layout(input, font);
     const previewSvg = this.previewSvg(input, renderFingerprint, visualAssets, font, layout);
     const pdf = await this.pdf(input, visualAssets, font, layout);
@@ -127,6 +233,106 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
         },
       ],
     };
+  }
+
+  private approvedPdf(
+    input: CertificateRenderInput,
+    svg: string,
+    font: Buffer,
+    latinFont: Buffer,
+    arabicBoldFont: Buffer,
+    latinBoldFont: Buffer,
+  ): Promise<Uint8Array> {
+    return new Promise((resolve, reject) => {
+      const document = new PDFDocument({
+        size: [842, 595],
+        margin: 0,
+        info: {
+          Title: input.templateVersion.titleAr,
+          Author: input.certificate.issuerName,
+          CreationDate: input.certificate.issuedAt,
+          ModDate: input.certificate.issuedAt,
+        },
+      });
+      const chunks: Buffer[] = [];
+      document.on('data', (chunk: Buffer) => chunks.push(chunk));
+      document.on('end', () => resolve(Buffer.concat(chunks)));
+      document.on('error', reject);
+      try {
+        document.registerFont('CertificateArabic', font);
+        // Preserve complex Arabic glyph shaping rather than re-encoding SVG text.
+        const arabic = createFont(font) as Font,
+          latin = createFont(latinFont) as Font;
+        const arabicBold = createFont(arabicBoldFont) as Font,
+          latinBold = createFont(latinBoldFont) as Font;
+        const outlined = svg.replace(
+          /<text ([^>]+)>([^<]*)<\/text>/g,
+          (_match, attributes: string, escapedText: string) => {
+            const attr = (name: string) =>
+              new RegExp(`${name}="([^"]*)"`).exec(attributes)?.[1] ?? '';
+            const text = escapedText.replace(
+              /&(lt|gt|amp|quot|apos);/g,
+              (_entity, key: string) =>
+                ({ lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" })[key]!,
+            );
+            const rtl = attr('direction') === 'rtl';
+            const bold = attr('font-weight') === 'bold';
+            const selected =
+              attr('font-family').startsWith('CertificateArabic')
+                ? bold
+                  ? arabicBold
+                  : arabic
+                : bold
+                  ? latinBold
+                  : latin;
+            const size = Number(attr('font-size')),
+              scale = size / selected.unitsPerEm;
+            const run = selected.layout(text, undefined, undefined, undefined, rtl ? 'rtl' : 'ltr');
+            const advances = run.glyphs.map((glyph, index) =>
+              glyph.id === 0 && glyph.codePoints.length === 1
+                ? (latin.glyphForCodePoint(glyph.codePoints[0]).advanceWidth * size) /
+                  latin.unitsPerEm
+                : run.positions[index].xAdvance * scale,
+            );
+            const width = advances.reduce((sum, advance) => sum + advance, 0);
+            let x = Number(attr('x')) - width / 2;
+            const y = Number(attr('y'));
+            return `<g aria-label="${xml(text)}" fill="${attr('fill')}">${run.glyphs
+              .map((glyph, index) => {
+                const position = run.positions[index];
+                const fallback = glyph.id === 0 && glyph.codePoints.length === 1;
+                const drawn = fallback ? latin.glyphForCodePoint(glyph.codePoints[0]) : glyph;
+                const glyphScale = fallback ? size / latin.unitsPerEm : scale;
+                const path = `<path transform="translate(${x + position.xOffset * scale} ${y - position.yOffset * scale}) scale(${glyphScale} ${-glyphScale})" d="${drawn.path.toSVG()}"/>`;
+                x += advances[index];
+                return path;
+              })
+              .join('')}</g>`;
+          },
+        );
+        SVGtoPDF(document, outlined, 0, 0, {
+          width: 842,
+          height: 595,
+          assumePt: true,
+          fontCallback: (family) =>
+            family === 'CertificateArabic' ? 'CertificateArabic' : 'Times-Roman',
+          imageCallback: (link) => {
+            if (!/^data:image\/(png|jpeg);base64,/.test(link))
+              throw new Error('CERTIFICATE_EXTERNAL_IMAGE_FORBIDDEN');
+            return link;
+          },
+        });
+        document
+          .font('CertificateArabic')
+          .fontSize(1)
+          .fillColor('white')
+          .text(' ', 0, 0, { lineBreak: false });
+        document.end();
+      } catch (error) {
+        document.destroy();
+        reject(error);
+      }
+    });
   }
 
   private layout(input: CertificateRenderInput, font: Buffer) {

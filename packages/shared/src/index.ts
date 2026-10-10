@@ -10,3 +10,4 @@ export * from './authorization/adminPermissionCatalog';
 export * from './authorization/auditQueryCatalog';
 
 export * from './localization/certificateCopy';
+export * from './certificates/approvedCertificateDesign';

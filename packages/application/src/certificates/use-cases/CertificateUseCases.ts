@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'crypto';
+import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@manaratak/shared';
 import {
   AssetId,
   AssetLifecycleState,
@@ -176,23 +177,24 @@ export class CertificateUseCases {
       accentColor: '#142B5F',
       secondaryColor: '#D6A43B',
       titleAr: 'شهادة إتمام',
-      titleEn: 'CERTIFICATE OF COMPLETION',
-      bodyAr: 'تشهد منصة منارتك بأن المتعلم قد أتم بنجاح متطلبات هذه الدورة واستحق شهادة الإتمام الرقمية القابلة للتحقق.',
-      bodyEn: 'MANARATAK confirms that the learner has successfully completed the course requirements and earned this digitally verifiable certificate of completion.',
-      signatoryNameAr: 'إدارة الشهادات — منارتك',
-      signatoryNameEn: 'MANARATAK Certificates Office',
+      titleEn: approvedCertificateCopy.titleEn,
+      bodyAr: approvedCertificateCopy.bodyAr,
+      bodyEn: approvedCertificateCopy.bodyEn,
+      signatoryNameAr: 'إدارة منصة منارتك',
+      signatoryNameEn: 'MANARATAK Management',
       signatoryTitleAr: 'توقيع الإصدار الرقمي',
       signatoryTitleEn: 'Digital Issuance Signature',
       validityPolicy: 'PERMANENT',
       requiresRevalidation: false,
-      metadata: { phase: 'Phase 14', eapAssetsRequiredForProduction: true },
+      metadata: { phase: 'Phase 14', eapAssetsRequiredForProduction: true, designId: APPROVED_CERTIFICATE_DESIGN },
     }, context);
   }
 
   public async createTemplate(input: CertificateTemplateAuthoringInput, context: CertificateMutationContext) {
     this.validateTemplate(input);
     await this.ensureActiveAssets(input);
-    await this.requireActiveIssuer(input.issuerId);
+    const issuer = await this.requireActiveIssuer(input.issuerId);
+    if(input.metadata?.designId === APPROVED_CERTIFICATE_DESIGN && (issuer.issuerType !== 'MANARATAK' || issuer.code !== 'MANARATAK')) throw new Error('CERTIFICATE_APPROVED_DESIGN_ISSUER_INVALID');
     return this.certificateRepository.createTemplate({
       ...input,
       metadata: { ...input.metadata, assetProvenance: await this.assetProvenance(input) },
@@ -208,6 +210,11 @@ export class CertificateUseCases {
     const current = await this.certificateRepository.findTemplateById(id);
     if (!current) throw new Error('CERTIFICATE_TEMPLATE_NOT_FOUND');
     const combined = {...current.currentVersion, ...input};
+    this.validateTemplate(combined);
+    if(combined.metadata?.designId === APPROVED_CERTIFICATE_DESIGN) {
+      const issuer=await this.requireActiveIssuer(combined.issuerId);
+      if(issuer.issuerType !== 'MANARATAK' || issuer.code !== 'MANARATAK') throw new Error('CERTIFICATE_APPROVED_DESIGN_ISSUER_INVALID');
+    }
     return this.certificateRepository.updateTemplate(id, { ...input, metadata: { ...combined.metadata, assetProvenance: await this.assetProvenance(combined) } }, context);
   }
 
@@ -380,6 +387,7 @@ export class CertificateUseCases {
       type: 'COURSE',
       id: payload.courseId,
       displayName: course.displayName,
+      displayNames: this.localizedAchievement(course.optionalFields?.certificateDisplayNames),
       completionId: payload.completionId,
       completedAt: new Date(payload.completedAt),
       courseId: payload.courseId,
@@ -421,6 +429,7 @@ export class CertificateUseCases {
       type: 'COURSE' | 'LEARNING_PATH';
       id: string;
       displayName: string;
+      displayNames?: {ar?:string;en?:string};
       completionId: string;
       completedAt: Date;
       courseId?: string;
@@ -521,6 +530,7 @@ export class CertificateUseCases {
         type: source.achievementType,
         id: source.achievementId,
         displayName: source.achievementDisplayName,
+        ...(this.readSignedEnvelope(source.metadata?.signedEnvelope)?.achievement.displayNames ? {displayNames: this.readSignedEnvelope(source.metadata?.signedEnvelope)!.achievement.displayNames} : {}),
         completionId,
         completedAt: source.completedAt,
       },
@@ -589,7 +599,7 @@ export class CertificateUseCases {
     certificateType: CertificateSignedEnvelopeV2['certificateType'];
     studentReferenceId: string;
     recipientDisplayName: string | null;
-    achievement: { type: 'COURSE' | 'LEARNING_PATH'; id: string; displayName: string; completionId: string; completedAt: Date };
+    achievement: { type: 'COURSE' | 'LEARNING_PATH'; id: string; displayName: string; displayNames?: {ar?:string;en?:string}; completionId: string; completedAt: Date };
     issuedAt: Date;
     expiresAt: Date | null;
     template: CertificateTemplateDto;
@@ -644,6 +654,13 @@ export class CertificateUseCases {
     return displayName.slice(0, 180);
   }
 
+  private localizedAchievement(value:unknown): {ar?:string;en?:string} | undefined {
+    if(!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+    const names=value as Record<string,unknown>;
+    const read=(locale:string) => typeof names[locale]==='string' && (names[locale] as string).trim().length<=180 ? (names[locale] as string).trim() || undefined : undefined;
+    const ar=read('ar'),en=read('en');return ar || en ? {ar,en} : undefined;
+  }
+
   private async requireDefaultActiveTemplate(): Promise<CertificateTemplateDto> {
     const template = await this.certificateRepository.findActiveTemplateByName('MANARATAK Signature Certificate');
     if (!template || template.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');
@@ -690,6 +707,9 @@ export class CertificateUseCases {
   }
 
   private validateTemplate(input: UpdateCertificateTemplateDto): void {
+    const designId = input.metadata?.designId;
+    if (designId && designId !== APPROVED_CERTIFICATE_DESIGN) throw new Error('CERTIFICATE_DESIGN_NOT_SUPPORTED');
+    if (designId === APPROVED_CERTIFICATE_DESIGN && (input.layout !== 'LANDSCAPE' || input.language !== 'BILINGUAL' || input.designAssetId || input.logoAssetId)) throw new Error('CERTIFICATE_APPROVED_DESIGN_CONFIGURATION_INVALID');
     for (const color of [input.accentColor, input.secondaryColor]) if (color && !/^#[0-9A-F]{6}$/i.test(color)) throw new Error('CERTIFICATE_TEMPLATE_COLOR_INVALID');
     for (const asset of [input.logoAssetId, input.sealAssetId, input.signatureAssetId, input.designAssetId]) if (asset && /^https?:|^file:|[\\/]/i.test(asset)) throw new Error('CERTIFICATE_TEMPLATE_RAW_ASSET_FORBIDDEN');
     if (input.validityDurationDays !== undefined && input.validityDurationDays !== null && (!Number.isInteger(input.validityDurationDays) || input.validityDurationDays <= 0)) throw new Error('CERTIFICATE_VALIDITY_DURATION_INVALID');

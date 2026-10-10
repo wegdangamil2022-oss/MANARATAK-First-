@@ -160,7 +160,8 @@
     "w7:docs:verify": "node scripts/verify-w7-documentation-closure.mjs",
     "rbac:baseline:provision": "node scripts/rbac-baseline-provision.mjs",
     "auth:owner:preflight": "node scripts/owner-access-preflight.mjs",
-    "test:node": "node scripts/testing/run-node-unit-tests.mjs"
+    "test:node": "node scripts/testing/run-node-unit-tests.mjs",
+    "certificates:template:export": "tsc -b packages/shared && tsx scripts/certificates/export-approved-template.ts"
   },
   "dependencies": {
     "@e965/xlsx": "0.20.3",

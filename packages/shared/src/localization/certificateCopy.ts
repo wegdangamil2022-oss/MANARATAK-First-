@@ -1,5 +1,12 @@
 /** Certificate workspace copy shared by Admin, Public and Student. */
 const english: Readonly<Record<string, string>> = {
+  'إنجازاتي وشهاداتي': 'My achievements and certificates',
+  'عرض الشهادة': 'View certificate',
+  'معاينة الشهادة': 'Certificate preview',
+  'عرض المزيد': 'Show more',
+  'تعذر تحميل الشهادات': 'Could not load certificates',
+  'الشهادات': 'Certificates',
+  'تظهر شهادة منارتك للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.': 'Your MANARATAK certificate appears after completing an eligible course and finishing certificate issuance.',
   'تحتاج الشهادة إلى إعادة تحقق معتمدة قبل استخدامها.':
     'The certificate requires approved revalidation before use.',
   'تعذر إثبات سلامة الشهادة؛ لم تُعرض بياناتها.':
