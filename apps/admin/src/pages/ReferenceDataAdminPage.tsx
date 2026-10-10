@@ -11,6 +11,7 @@ import { AdministrativeRegionsTab } from './AdministrativeRegionsTab';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { ReferenceGovernanceButton, CityCountryQuality } from '../components/ReferenceGovernancePanel';
+import { ReferenceImportReviewQueue } from '../components/ReferenceImportReviewQueue';
 
 /** Bounded owner-API query state, shareable as URL parameters. */
 function readP7Url() {
@@ -182,6 +183,7 @@ export function ReferenceDataAdminPage() {
         ))}</div>}
         <p className="text-xs text-slate-600">الأعداد من خادم P7 فقط. جودة الأسماء البديلة والروابط والمصادر الرسمية: unknown حتى تتوفر أدلة قابلة للفحص. انقر على المجموعة للاطلاع على سجلاتها.</p>
       </section>
+      <ReferenceImportReviewQueue />
       <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-2">
         <h3 className="font-bold text-sm">حالة المعايير المرجعية / Official standards evidence</h3>
         {!standards && !standardsError && <p role="status" className="text-xs">جارٍ قراءة سجل المصادر المعتمدة…</p>}
