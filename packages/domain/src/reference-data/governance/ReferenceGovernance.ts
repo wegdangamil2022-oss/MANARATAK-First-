@@ -166,6 +166,7 @@ export interface ReferenceImportScreeningReview {
   sourceArtifactId: string | null;
   sourceContentHash: string | null;
   issueCodes: string[];
+  triage: 'REVIEWABLE' | 'SOURCE_ISSUES_REQUIRE_REVIEW' | 'LEGACY_RECEIPT_MISSING_EVIDENCE' | 'INVALID_SOURCE';
   reviewed: false;
   approved: false;
   applied: false;

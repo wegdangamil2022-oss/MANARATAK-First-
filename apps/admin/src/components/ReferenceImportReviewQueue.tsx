@@ -52,12 +52,16 @@ export function ReferenceImportReviewQueue() {
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-right text-xs">
             <thead className="bg-slate-50"><tr>
-              <th className="p-2">نوع المرجع</th><th className="p-2">قرار الفحص</th>
+              <th className="p-2">نوع المرجع</th><th className="p-2">جاهزية المراجعة</th><th className="p-2">قرار الفحص</th>
               <th className="p-2">المفتاح القياسي</th><th className="p-2">المصدر</th>
               <th className="p-2">بصمة الحمولة</th><th className="p-2">التاريخ</th><th className="p-2">الملاحظات</th>
             </tr></thead>
             <tbody>{data.data.map(row => <tr key={row.receiptId} className="border-t">
               <td className="p-2 font-bold">{row.entityType || 'غير محدد'}</td>
+              <td className="p-2">{row.triage === 'REVIEWABLE' ? 'جاهز للفحص اليدوي (غير معتمد)' :
+                row.triage === 'SOURCE_ISSUES_REQUIRE_REVIEW' ? 'يتطلب حل مشكلة المصدر' :
+                row.triage === 'INVALID_SOURCE' ? 'بيانات غير صالحة' :
+                'إيصال قديم ناقص الأدلة'}</td>
               <td className="p-2">{row.state === 'INVALID' ? 'غير صالح' :
                 row.state === 'NEEDS_OWNER_REVIEW' ? 'بانتظار مراجعة المالك' : 'غير معروف'}</td>
               <td className="p-2 font-mono break-all" dir="auto">{row.canonicalKey || '—'}</td>

@@ -36,7 +36,8 @@ import {
   assertReferenceLifecycleTransition,
   lifecycleIsActive,
   normalizeReferenceIdentityToken,
-  referenceCityScopeKey
+  referenceCityScopeKey,
+  classifyReferenceImportTriage
 } from '@manaratak/domain';
 
 interface DbCountry {
@@ -973,8 +974,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       const entityType = typeof raw.entityType === 'string' && choices.has(raw.entityType)
         ? raw.entityType as 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY' : null;
       const issues = Array.isArray(raw.issues) ? raw.issues : [];
-      return {
-        receiptId: receipt.id, handoffKey: receipt.handoffKey, screenedAt: receipt.createdAt,
+      const evidence = {
         state, entityType, canonicalKey: safeText(raw.deterministicKey),
         normalizedPayloadHash: safeText(raw.normalizedPayloadHash),
         sourceArtifactId: safeText(raw.sourceArtifactId),
@@ -982,6 +982,10 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         issueCodes: issues.slice(0, 30).map(issue =>
           issue && typeof issue === 'object' && 'code' in issue ? safeText(issue.code) : null)
           .filter((code): code is string => Boolean(code)),
+      };
+      return {
+        receiptId: receipt.id, handoffKey: receipt.handoffKey, screenedAt: receipt.createdAt,
+        ...evidence, triage: classifyReferenceImportTriage(evidence),
         reviewed: false as const, approved: false as const, applied: false as const,
       };
     });

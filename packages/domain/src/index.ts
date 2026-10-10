@@ -382,3 +382,5 @@ export * from './identity/repositories/IPasswordCredentialRepository';
 export * from './reference-data/governance/ReferenceStandardsRegistry';
 
 export * from './reference-data/governance/ReferenceIanaTimeZonePolicy';
+
+export * from './reference-data/governance/ReferenceImportReviewEligibility';
