@@ -71,6 +71,20 @@ describe('P6 -> P7 screening consumer', () => {
     expect(result.canonicalWrites).toBe(0);
     expect(result.issues[0].code).toBe('P7_IMPORT_SOURCE_SHAPE_INVALID');
   });
+  it('quarantines forged canonical control flags and typed array-shaped codes', async () => {
+    for (const data of [
+      { countryIso2Code: ['YE'], name: 'صنعاء' },
+      { countryIso2Code: 'YE', name: 'صنعاء', isActive: false },
+      { countryIso2Code: 'YE', name: 'صنعاء', providerMappings: [{ providerId: 'a' }] },
+      { countryIso2Code: 'YE', name: 'صنعاء', latitude: Infinity },
+    ]) {
+      const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, data));
+      expect(result.state).toBe('INVALID');
+      expect(result.issues.some(i => i.code === 'P7_IMPORT_SOURCE_SHAPE_INVALID')).toBe(true);
+      expect(result.canonicalWrites).toBe(0);
+    }
+  });
+
   it('reports invalid owner data without canonical writes', async () => {
     const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, {
       countryIso2Code: 'Y', name: 'broken',

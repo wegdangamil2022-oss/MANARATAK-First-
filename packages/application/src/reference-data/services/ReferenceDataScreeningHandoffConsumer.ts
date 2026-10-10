@@ -2,6 +2,55 @@
 import type { IImportHandoffConsumer, UniversalImportHandoff } from '@manaratak/domain';
 import { ReferenceDataImportHandoffService } from './ReferenceDataImportHandoffService';
 
+/**
+ * P6 payloads are UNTRUSTED runtime objects. A TS cast is not validation;
+ * String(value) in the domain validator would otherwise turn arrays/objects
+ * into fake source identifiers. The screening boundary does not "fix" them.
+ */
+const TYPE_FIELDS: Record<'COUNTRY'|'CURRENCY'|'LANGUAGE'|'CITY', readonly string[]> = {
+  COUNTRY: ['iso2Code', 'iso3Code', 'name'],
+  CURRENCY: ['isoCode', 'name'],
+  LANGUAGE: ['isoCode', 'name', 'direction'],
+  CITY: ['countryIso2Code', 'name'],
+};
+const OPTIONAL_STRING_FIELDS = new Set([
+  'nameAr', 'officialName', 'region', 'subregion', 'defaultCurrencyCode',
+  'defaultLanguageCode', 'callingCode', 'flagAssetId', 'numericCode', 'symbol',
+  'nativeName', 'timezone', 'administrativeRegionId',
+]);
+const OPTIONAL_NUMERIC_FIELDS = new Set(['latitude', 'longitude', 'minorUnit']);
+const FORBIDDEN_P6_CANONICAL_FIELDS = new Set([
+  'id', 'expectedVersion', 'isActive', 'lifecycleState', 'versionNumber',
+  'countryReferenceId', 'canonicalIdentityKey', 'effectiveFrom', 'effectiveTo',
+  'providerMappings', 'aliases', 'sourceApprovedAt', 'appliedAt',
+]);
+function invalidP7FieldShape(
+  entityType: keyof typeof TYPE_FIELDS,
+  payload: unknown,
+): string | null {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return 'payload';
+  const fields = payload as Record<string, unknown>;
+  if (Object.keys(fields).length > 80) return 'fieldCount';
+  for (const field of TYPE_FIELDS[entityType]) {
+    if (typeof fields[field] !== 'string') return field;
+    if (fields[field].length > 500) return field;
+  }
+  for (const [field, value] of Object.entries(fields)) {
+    if (FORBIDDEN_P6_CANONICAL_FIELDS.has(field)) return field;
+    if (value === undefined || value === null) continue;
+    if (OPTIONAL_STRING_FIELDS.has(field) &&
+        (typeof value !== 'string' || value.length > 500)) return field;
+    if (OPTIONAL_NUMERIC_FIELDS.has(field) &&
+        (typeof value !== 'number' || !Number.isFinite(value))) return field;
+    if (field === 'metadata') {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) return field;
+      try { if (JSON.stringify(value).length > 8192) return field; }
+      catch { return field; }
+    }
+  }
+  return null;
+}
+
 export interface P7ScreeningDecision {
   ownerDomain: 'REFERENCE_DATA';
   effect: 'SCREENING_ONLY';
@@ -63,6 +112,12 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
         issues: [...sourceIssues, { code: 'P7_EXPLICIT_REFERENCE_TYPE_REQUIRED',
           message: 'Supply referenceMetadata.referenceEntityType; P7 will not guess from field shapes.' }] };
     }
+    const malformed = invalidP7FieldShape(entityType, handoff.normalizedPayload);
+    if (malformed) return {
+      ...decision, state: 'INVALID',
+      issues: [...sourceIssues, { code: 'P7_IMPORT_SOURCE_SHAPE_INVALID',
+        message: 'Field ' + malformed + ' requires verified P6 canonical source mapping.' }],
+    };
     let report: ReturnType<ReferenceDataImportHandoffService['prepareSeedBatch']>['records'][number]['validationReport'];
     try {
       const batch = this.planner.prepareSeedBatch({
