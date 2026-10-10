@@ -249,7 +249,9 @@ export class CertificateUseCases {
     if (reason.trim().length < 8) throw new Error('RENEWAL_REASON_TOO_SHORT');
     const source = await this.requireCertificate(id);
     if (source.validityPolicy !== 'RENEWABLE') throw new Error('CERTIFICATE_NOT_RENEWABLE');
-    if (![CertificateStatus.ACTIVE, CertificateStatus.EXPIRED].includes(source.status)) throw new Error('CERTIFICATE_RENEWAL_STATE_INVALID');
+    if (![CertificateStatus.ACTIVE, CertificateStatus.EXPIRED].includes(source.status) &&
+      !(source.status === CertificateStatus.REISSUED && source.replacedByCertificateId))
+      throw new Error('CERTIFICATE_RENEWAL_STATE_INVALID');
     const template = await this.requireActiveTemplate(source.templateId);
     const periodDays = template.renewalPeriodDays ?? template.validityDurationDays;
     if (!periodDays || periodDays <= 0) throw new Error('CERTIFICATE_RENEWAL_PERIOD_REQUIRED');
@@ -260,7 +262,9 @@ export class CertificateUseCases {
   public async reissue(id: string, reason: string, actorId = 'admin', recipientDisplayName?: string, templateId?: string, correlationId?: string) {
     if (reason.trim().length < 8) throw new Error('REISSUE_REASON_TOO_SHORT');
     const source = await this.requireCertificate(id);
-    if (source.status !== CertificateStatus.REVOKED) throw new Error('CERTIFICATE_MUST_BE_REVOKED_BEFORE_REISSUE');
+    if (source.status !== CertificateStatus.REVOKED &&
+      !(source.status === CertificateStatus.REISSUED && source.replacedByCertificateId))
+      throw new Error('CERTIFICATE_MUST_BE_REVOKED_BEFORE_REISSUE');
     const template = await this.requireActiveTemplate(templateId ?? source.templateId);
     if (recipientDisplayName !== undefined && recipientDisplayName !== source.recipientDisplayName) {
       const correction = source.metadata?.recipientCorrection as {state?:string;name?:string;approvedBy?:string} | undefined;
