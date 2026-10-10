@@ -137,7 +137,10 @@ export class ReferenceDataUseCases {
       throw new Error('REFERENCE_DATA_PAGINATION_INVALID');
     }
     if (filters.activeOnly && filters.nonActiveOnly) throw new Error('REFERENCE_DATA_FILTER_CONFLICT');
-    const normalized = { activeOnly: true, ...filters, page, pageSize };
+    // Explicit non-active-only must not be accidentally intersected with the
+    // default public ACTIVE filter when activeOnly was omitted.
+    const normalized = { ...filters, activeOnly: filters.nonActiveOnly ? false :
+      filters.activeOnly ?? true, page, pageSize };
     const [data, total] = await Promise.all([
       this.repository[({ countries: 'listCountries', currencies: 'listCurrencies', languages: 'listLanguages', regions: 'listRegions', cities: 'listCities' } as const)[collection]](normalized),
       this.repository.countRecords(collection, normalized),
