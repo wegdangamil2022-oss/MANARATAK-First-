@@ -135,9 +135,10 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
       deterministicKey: null, normalizedPayloadHash: null, issues: [], canonicalWrites: 0,
       state: 'NEEDS_OWNER_REVIEW',
     };
-    const sourceIssues = (handoff.validation.issues || [])
+    const sourceIssues = (Array.isArray(handoff.validation?.issues) ? handoff.validation.issues : [])
       .slice(0, 100).map(issue => ({
-        code: issue.code, message: issue.message,
+        code: typeof issue?.code === 'string' ? issue.code.slice(0, 80) : 'P6_UNKNOWN_ISSUE',
+        message: typeof issue?.message === 'string' ? issue.message.slice(0, 500) : 'Unverified P6 validation issue',
       }));
     if (!handoff.artifact.artifactId || !/^[a-fA-F0-9]{64}$/.test(handoff.provenance.contentHash || '')) {
       return {
@@ -157,7 +158,9 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
         issues: [...sourceIssues, { code: 'P7_EXPLICIT_REFERENCE_TYPE_REQUIRED',
           message: 'Supply referenceMetadata.referenceEntityType; P7 will not guess from field shapes.' }] };
     }
-    const malformed = invalidP7FieldShape(entityType, handoff.normalizedPayload);
+    let malformed: string | null;
+    try { malformed = invalidP7FieldShape(entityType, handoff.normalizedPayload); }
+    catch { malformed = 'payload'; }
     if (malformed) return {
       ...decision, state: 'INVALID',
       issues: [...sourceIssues, { code: 'P7_IMPORT_SOURCE_SHAPE_INVALID',
