@@ -32,3 +32,9 @@ New code/specs cover P6->P7 SCREENING_ONLY, governed alias/provider mapping revi
 - Coverage: Unicode city scope, batch duplicate quarantine, disabled unsafe SeedApply, screening-only registration, owner mapping locks/CAS/replay+audit/outbox, admin reconciliation, owner impact and quality reads, non-active filtering, malformed source quarantine.
 - This is **not** Vitest, TypeScript compilation, a runtime test, a database test or an execution of data changes.
 - The source check ran before the later admin country/currency/city metadata and Region URL enhancements and provider-replay actor binding; those subsequent commits were **not rerun through this source check**.
+
+### Further P7 source-only remediation (2026-10-10)
+
+- One static source-inspection pass of 9 revised files with 10 limited assertions: **10/10 PASS**. Focus: terminal lifecycle owner gate, audited CAS country-link repair with scope validation, effective governed version snapshots, batched alias ambiguity, complementary non-active filters, UTC/ICU timezone policy, iterative DAG traversal, evidence-status UI.
+- This **is not a type-check, Vitest suite, runtime/DB integration test or certificate of correctness**. New test files are present but not executed, and no checks were rerun to chase green.
+- No database connected, no migrations applied, no seed/backfill and no CI invoked. All commits remain [skip ci].

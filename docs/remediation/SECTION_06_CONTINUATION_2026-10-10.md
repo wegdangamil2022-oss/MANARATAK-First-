@@ -29,3 +29,14 @@ No database queries or data modification, migrations, seed/backfill, live import
 - Four admin tabs now support non-active-only filtering from the owner repository. Region q/country/status/page state is URL-persisted. Country form includes official name, subregion, calling code and bounded, active-only searchable currency/language default selection. Currency form adds ISO minor unit; city form adds latitude/longitude.
 - Provider mapping owner-transfer replay additionally validates original actor identity in its version receipt.
 - A single lightweight **source inspection** of 14 files with 11 structural checks returned **11/11 PASS**. This ran before the last four UI/actor changes; it does not certify them. TypeScript/Vitest and runtime: **NOT RUN**.
+
+## Further continuation (P7 owner correctness fixes)
+
+- Terminal ARCHIVED/MERGED/SUPERSEDED actions are now **blocked by owner transactional logic** for generic reference types until a reviewed full downstream dependency-impact policy is built. UI-only prevention was insufficient.
+- P7 version history now captures complete persisted record state and the active aliases/provider mappings after each upsert, including edits that omitted these collections in request payloads; historical DB rows were not backfilled.
+- Optimized existing P7.13 generic DAG (contracts were already in domain), timezone ICU validation + UTC, admin timezone choices, and accurate non-active lifecycle status accounting.
+- Added *explicit single-city* legacy country-link repair: exact ISO2, reviewed active country, region consistency, expectedVersion, reason/actor, atomic Audit/Outbox, and temporal version. This is not an automated data correction.
+- Six authority standard families are shown as missing reviewed snapshots, backed by source contracts rather than fabricated coverage.
+- This continuation's single static source inspection passed 10/10 checks; TypeScript, Vitest and DB/runtime remain NOT RUN.
+
+**Still not CODE_CLOSED:** P7-owned durable review and atomic canonical apply/inbox, verifiable approved source standards and full cross-domain non-FK terminal impact. University-city source comparisons have not changed and no candidate rows were automatically inserted.
