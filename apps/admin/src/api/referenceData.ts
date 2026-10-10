@@ -46,6 +46,11 @@ export const referenceDataAdminApi = {
   qualitySnapshot() {
     return adminApiClient.request<{ data: Array<{ collection: ReferenceDataCollection; total: number; active: number; nonActive: number; aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown' }>; asOf: string }>(base + '/quality');
   },
+  repairCityCountryLink(input: { cityId: string; expectedVersion: number; countryReferenceId: string; reason: string }) {
+    return mutate<void>('/cities/' + encodeURIComponent(input.cityId) + '/reconcile-country', 'POST', {
+      expectedVersion: input.expectedVersion, countryReferenceId: input.countryReferenceId, reason: input.reason,
+    });
+  },
   reassignProviderMapping(input: {
     entityType: 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY';
     fromReferenceId: string;

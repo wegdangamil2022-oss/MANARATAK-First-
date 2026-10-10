@@ -13,6 +13,8 @@ import type {
 import { ReferenceLifecycleState } from '@manaratak/domain';
 import { referenceDataAdminApi } from '../api/referenceData';
 import { ReferenceProviderReconciliation } from './ReferenceProviderReconciliation';
+import { CanonicalPicker } from './CanonicalPicker';
+import { canonicalPickerApi } from '../api/canonicalPickers';
 
 type GovernedRow = {
   id: string;
@@ -222,6 +224,8 @@ function GovernanceDialog({ entityType, record, onClose, onChanged }: {
           </section>}
           <button type="button" onClick={() => void save()} disabled={saving || record.lifecycleState !== 'ACTIVE'}
             className="bg-indigo-700 text-white rounded-lg px-4 py-2 disabled:opacity-50">حفظ الأسماء والربط (مع سجل تدقيق)</button>
+          {entityType === 'CITY' && !record.countryReferenceId && record.lifecycleState === 'ACTIVE' &&
+            <CityCountryLinkRepair record={record} onChanged={onChanged} />}
           <section className="border-t pt-4 space-y-2">
             <h4 className="font-bold">المصدر والتحقق / Source provenance</h4>
             <ReferenceProvenanceReadOnly metadata={record.metadata} />
@@ -304,4 +308,43 @@ function ReferenceProvenanceReadOnly({ metadata }: { metadata: unknown }) {
     {shown.map(row => <div key={row.key} className="border rounded p-2 break-all">
       <dt className="font-bold">{row.key}</dt><dd>{row.text}</dd></div>)}
   </dl>;
+}
+
+/** Manual one-city repair for an already-existing legacy row with a NULL
+ * canonical-country FK; the resolver never assigns foreign UUIDs by guessing.
+ */
+function CityCountryLinkRepair({ record, onChanged }: { record: GovernedRow; onChanged: () => void }) {
+  const [countryId, setCountryId] = useState<string | null>(null);
+  const [reason, setReason] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  return <section className="space-y-3 rounded-lg border border-amber-400 p-3 bg-amber-50">
+    <h5 className="font-bold text-sm">إصلاح مرجع دولة مفقود لمدينة قديمة (سجل واحد فقط)</h5>
+    <p className="text-xs">رمز الدولة الثابت: {record.countryIso2Code}. تبقى هوية المدينة ومعرّفها ثابتين، ولا تُنشأ سجلات جديدة.</p>
+    <CanonicalPicker label="الدولة المعتمدة المطابقة لرمز المدينة" value={countryId}
+      load={async query => (await canonicalPickerApi.countries(query)).filter(item =>
+        item.lifecycle === 'ACTIVE' && item.code === record.countryIso2Code)}
+      onChange={(id, option) => setCountryId(option?.code === record.countryIso2Code ? id : null)}
+      disabled={busy} />
+    <label className="block text-xs">سبب الربط اليدوي
+      <textarea value={reason} maxLength={1000} minLength={3} className="border rounded-lg p-2 w-full"
+        onChange={event => setReason(event.target.value)} disabled={busy} />
+    </label>
+    {error && <p role="alert" className="text-xs text-red-800">{error}</p>}
+    <button type="button" className="bg-amber-800 text-white rounded-lg p-2 disabled:opacity-50 text-xs"
+      disabled={!countryId || reason.trim().length < 3 || busy}
+      onClick={async () => {
+        if (!countryId) return;
+        setBusy(true); setError('');
+        try {
+          await referenceDataAdminApi.repairCityCountryLink({
+            cityId: record.id, countryReferenceId: countryId,
+            expectedVersion: record.versionNumber, reason: reason.trim(),
+          });
+          onChanged();
+        } catch (err: unknown) {
+          setError(err instanceof Error ? err.message : 'فشل الإصلاح؛ أعد تحميل النسخة الحالية');
+        } finally { setBusy(false); }
+      }}>ربط الدولة بهذا السجل بعد المراجعة</button>
+  </section>;
 }
