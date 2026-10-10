@@ -29,6 +29,7 @@ This file is the navigation entrypoint for the current `docs/` tree. It does not
 | `implementation-status/` | Current implementation-status evidence. |
 | `imports/` | Import-domain documentation and source/data evidence. |
 | `standards/` | Shared repository/documentation standards. |
+| `templates/` | Reusable documentation templates; confirm active governance before reuse. |
 | `legacy/` | Superseded historical artifacts only. |
 | root `*_FINAL_CLOSURE_*.md` files | Domain-specific closure artifacts retained at `docs/` root for compatibility; consult remediation/governance authority before treating them as current runtime evidence. |
 
