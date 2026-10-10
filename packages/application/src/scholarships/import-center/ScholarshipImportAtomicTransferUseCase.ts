@@ -442,12 +442,12 @@ export class ScholarshipImportAtomicTransferUseCase
       }
       return undefined; // no write if existing reviewed children are unchanged
     };
-    updates.benefits = mergeChildren(existing.benefits as Record<string, unknown>[] | undefined, incoming.benefits as Record<string, unknown>[] | undefined, 'benefitKey', 'BENEFITS') as typeof updates.benefits;
-    updates.degreeTargets = mergeChildren(existing.degreeTargets as Record<string, unknown>[] | undefined, incoming.degreeTargets as Record<string, unknown>[] | undefined, 'targetKey', 'DEGREES') as typeof updates.degreeTargets;
-    updates.majorTargets = mergeChildren(existing.majorTargets as Record<string, unknown>[] | undefined, incoming.majorTargets as Record<string, unknown>[] | undefined, 'targetKey', 'MAJORS') as typeof updates.majorTargets;
-    updates.eligibilityItems = mergeChildren(existing.eligibilityItems as Record<string, unknown>[] | undefined, incoming.eligibilityItems as Record<string, unknown>[] | undefined, 'itemKey', 'ELIGIBILITY') as typeof updates.eligibilityItems;
-    updates.requiredDocumentItems = mergeChildren(existing.requiredDocumentItems as Record<string, unknown>[] | undefined, incoming.requiredDocumentItems as Record<string, unknown>[] | undefined, 'documentKey', 'DOCUMENTS') as typeof updates.requiredDocumentItems;
-    updates.universityLinks = mergeChildren(existing.universityLinks as Record<string, unknown>[] | undefined, incoming.universityLinks as Record<string, unknown>[] | undefined, 'linkKey', 'UNIVERSITIES') as typeof updates.universityLinks;
+    updates.benefits = mergeChildren(existing.benefits as unknown as Record<string, unknown>[] | undefined, incoming.benefits as unknown as Record<string, unknown>[] | undefined, 'benefitKey', 'BENEFITS') as typeof updates.benefits;
+    updates.degreeTargets = mergeChildren(existing.degreeTargets as unknown as Record<string, unknown>[] | undefined, incoming.degreeTargets as unknown as Record<string, unknown>[] | undefined, 'targetKey', 'DEGREES') as typeof updates.degreeTargets;
+    updates.majorTargets = mergeChildren(existing.majorTargets as unknown as Record<string, unknown>[] | undefined, incoming.majorTargets as unknown as Record<string, unknown>[] | undefined, 'targetKey', 'MAJORS') as typeof updates.majorTargets;
+    updates.eligibilityItems = mergeChildren(existing.eligibilityItems as unknown as Record<string, unknown>[] | undefined, incoming.eligibilityItems as unknown as Record<string, unknown>[] | undefined, 'itemKey', 'ELIGIBILITY') as typeof updates.eligibilityItems;
+    updates.requiredDocumentItems = mergeChildren(existing.requiredDocumentItems as unknown as Record<string, unknown>[] | undefined, incoming.requiredDocumentItems as unknown as Record<string, unknown>[] | undefined, 'documentKey', 'DOCUMENTS') as typeof updates.requiredDocumentItems;
+    updates.universityLinks = mergeChildren(existing.universityLinks as unknown as Record<string, unknown>[] | undefined, incoming.universityLinks as unknown as Record<string, unknown>[] | undefined, 'linkKey', 'UNIVERSITIES') as typeof updates.universityLinks;
     updates.sourceEvidence = this.mergeSourceEvidence(existing, incoming.sourceEvidence ?? []);
     return updates;
   }

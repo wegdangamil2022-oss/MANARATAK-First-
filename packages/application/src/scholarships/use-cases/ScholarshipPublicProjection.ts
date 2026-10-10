@@ -1,9 +1,18 @@
 import type { PublicScholarshipDto, ScholarshipDto } from '@manaratak/domain';
 
 /** Public scholarship shape: explicit allowlist, never a spread of the mutable owner record. */
-export function projectPublishedScholarship(source: ScholarshipDto, displayName: string, localizedNames: Record<string, string>): PublicScholarshipDto {
+export function projectPublishedScholarship(source: ScholarshipDto, displayName: string, localizedNames: Partial<Record<string, string>>): PublicScholarshipDto {
   const resolved = (s: unknown) => String(s ?? '').toUpperCase() === 'RESOLVED';
   const httpsUrl = (s: unknown) => typeof s === 'string' && /^https:\/\//i.test(s) ? s : null;
+  const majorPublished = (value: unknown) => {
+    const major = (value as { major?: { status?: string } })?.major;
+    return major?.status === 'PUBLISHED';
+  };
+  const institutionPublished = (value: unknown) => {
+    const row = value as { university?: { status?: string }; academicProgram?: { status?: string; majorMappingState?: string } };
+    if (row.university?.status !== 'PUBLISHED') return false;
+    return !row.academicProgram || (row.academicProgram.status === 'ACTIVE' && row.academicProgram.majorMappingState === 'CANONICALLY_MAPPED');
+  };
   return {
     publicId: source.publicId, slug: source.slug, canonicalName: source.canonicalName,
     displayName, localizedNames, providerName: source.providerName,
@@ -26,7 +35,7 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
     })),
     degreeTargets: (source.degreeTargets ?? []).filter(d => d.degreeLevelId && resolved(d.resolutionStatus))
       .map(d => ({targetKey:d.targetKey,degreeLevelId:d.degreeLevelId,sourceLabel:d.sourceLabel,resolutionStatus:'RESOLVED'})),
-    majorTargets: (source.majorTargets ?? []).filter(m => m.majorId && resolved(m.resolutionStatus))
+    majorTargets: (source.majorTargets ?? []).filter(m => m.majorId && resolved(m.resolutionStatus) && majorPublished(m))
       .map(m => ({targetKey:m.targetKey,majorId:m.majorId,sourceLabel:m.sourceLabel,resolutionStatus:'RESOLVED'})),
     eligibilityItems: (source.eligibilityItems ?? []).filter(e =>
       resolved(e.resolutionStatus) || ![e.countryReferenceId,e.degreeLevelId,e.majorId,e.internationalTestId].some(Boolean))
@@ -39,7 +48,7 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
       .map(d => ({documentKey:d.documentKey,documentTypeCode:d.documentTypeCode,
         displayName:d.displayName,description:d.description,internationalTestId:d.internationalTestId,
         isRequired:d.isRequired,displayOrder:d.displayOrder})),
-    universityLinks: (source.universityLinks ?? []).filter(u => resolved(u.resolutionStatus) && u.universityId)
+    universityLinks: (source.universityLinks ?? []).filter(u => resolved(u.resolutionStatus) && u.universityId && institutionPublished(u))
       .map(u => ({linkKey:u.linkKey,universityId:u.universityId,academicProgramId:u.academicProgramId,
         relationshipTypeCode:u.relationshipTypeCode,resolutionStatus:'RESOLVED'})),
   } as PublicScholarshipDto;

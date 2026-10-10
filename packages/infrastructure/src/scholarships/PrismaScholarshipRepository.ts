@@ -65,11 +65,11 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   private readonly normalizedInclude = {
     benefits: { include: { currency: { select: { isoCode: true, nameAr: true, name: true } } } },
     degreeTargets: { include: { degreeLevel: { select: { canonicalCode: true, nameEn: true, nameAr: true } } } },
-    majorTargets: true,
+    majorTargets: { include: { major: { select: { status: true } } } },
     eligibilityItems: true,
     requiredDocuments: true,
     sourceEvidence: true,
-    universityLinks: true,
+    universityLinks: { include: { university: { select: { status: true } }, academicProgram: { select: { status: true, majorMappingState: true } } } },
     versions: { orderBy: { versionNumber: 'asc' as const } },
     sponsorContext: true,
     applicationCycles: { orderBy: { createdAt: 'asc' as const } },
@@ -455,6 +455,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       status: ScholarshipStatus.PUBLISHED,
       verificationStatus: ScholarshipVerificationStatus.VERIFIED,
       versions: { some: { status: 'PUBLISHED' } },
+      completenessStatus: ScholarshipCompletenessState.COMPLETE,
     };
     const constraints: Prisma.ScholarshipWhereInput[] = [];
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
@@ -554,7 +555,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
 
   private hasStructuralChanges(updates: ScholarshipRepositoryUpdateDto): boolean {
     const structuralKeys = new Set([
-      'providerName', 'amountMinorUnits', 'amountCurrencyCode', 'isFullyFunded', 'applicationDeadline',
+      'displayName', 'sourceEvidence', 'providerName', 'amountMinorUnits', 'amountCurrencyCode', 'isFullyFunded', 'applicationDeadline',
       'academicYear', 'cycleName', 'countryReferenceId', 'countrySourceLabel', 'countryScope',
       'fundingTypeCode', 'deadlineType', 'applicationMethod', 'applicationUrl', 'officialSourceUrl',
       'studyLanguageReferenceId', 'studyLanguageSourceLabel', 'benefits', 'degreeTargets', 'majorTargets',

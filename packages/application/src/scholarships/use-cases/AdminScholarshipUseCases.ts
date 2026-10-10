@@ -337,7 +337,7 @@ export class AdminScholarshipUseCases {
 
   public async markReadyToPublish(id: string, context?: ScholarshipMutationContext): Promise<void> {
     const existing = await this.getScholarship(id);
-    this.assertPublicationReady(existing);
+    await this.assertPublicationReady(existing);
     if (existing.status !== ScholarshipStatus.READY_TO_REVIEW) throw new Error('SCHOLARSHIP_REVIEW_REQUIRED_BEFORE_PUBLISH');
     await this.lifecycleMutation('SCHOLARSHIP_MARKED_READY_TO_PUBLISH', id, { workflowStatus: ScholarshipStatus.READY_TO_PUBLISH }, context);
   }
@@ -345,7 +345,7 @@ export class AdminScholarshipUseCases {
   public async publish(id: string, context?: ScholarshipMutationContext): Promise<void> {
     const existing = await this.getScholarship(id);
     if (existing.status !== ScholarshipStatus.READY_TO_PUBLISH) throw new Error('Only READY_TO_PUBLISH scholarships can be PUBLISHED');
-    this.assertPublicationReady(existing);
+    await this.assertPublicationReady(existing);
     await this.lifecycleMutation('SCHOLARSHIP_PUBLISHED', id, {
       workflowStatus: ScholarshipStatus.PUBLISHED,
       publicationStatus: ScholarshipPublicationStatus.PUBLISHED,
@@ -394,13 +394,28 @@ export class AdminScholarshipUseCases {
     return candidate;
   }
 
-  private assertPublicationReady(existing: ScholarshipDto): void {
+  private async assertPublicationReady(existing: ScholarshipDto): Promise<void> {
     if (existing.completenessStatus !== ScholarshipCompletenessState.COMPLETE) throw new Error('SCHOLARSHIP_NOT_COMPLETE');
     if (existing.verificationStatus !== 'VERIFIED') throw new Error('SCHOLARSHIP_SOURCE_NOT_VERIFIED');
     if (this.unresolvedLinks(existing).length > 0) throw new Error('SCHOLARSHIP_CANONICAL_LINKS_UNRESOLVED');
     if (!existing.versions?.length) throw new Error('SCHOLARSHIP_VERSION_REQUIRED');
     if (!existing.sponsorContext) throw new Error('SCHOLARSHIP_SPONSOR_CONTEXT_REQUIRED');
     if (!existing.applicationCycles?.length) throw new Error('SCHOLARSHIP_APPLICATION_CYCLE_REQUIRED');
+    for (const item of existing.majorTargets ?? []) {
+      if (!item.majorId) continue;
+      const major = await this.assertCanonicalReference('MAJOR', item.majorId);
+      if (major?.lifecycle !== 'PUBLISHED') throw new Error('SCHOLARSHIP_MAJOR_NOT_PUBLISHED');
+    }
+    for (const item of existing.universityLinks ?? []) {
+      if (!item.universityId) continue;
+      const university = await this.assertCanonicalReference('UNIVERSITY', item.universityId);
+      if (university?.lifecycle !== 'PUBLISHED') throw new Error('SCHOLARSHIP_UNIVERSITY_NOT_PUBLISHED');
+      if (item.academicProgramId) {
+        const program = await this.assertCanonicalReference('ACADEMIC_PROGRAM', item.academicProgramId);
+        if (program?.lifecycle !== 'ACTIVE' || program.ownerId !== university.id)
+          throw new Error('SCHOLARSHIP_PROGRAM_NOT_ACTIVE_OR_OWNER_MISMATCH');
+      }
+    }
     if (!existing.officialSourceUrl?.startsWith('https://') && !existing.sourceEvidence?.some(e => e.isOfficial && e.sourceUrl.startsWith('https://'))) throw new Error('SCHOLARSHIP_OFFICIAL_SOURCE_REQUIRED');
   }
 
