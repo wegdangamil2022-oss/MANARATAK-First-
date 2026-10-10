@@ -44,17 +44,18 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
   favoriteControl,
   relatedArticles,
 }) => {
+  const t=(value:string)=>exam.locale==='en'?(examLabels[value]??value):value;
   const facts = exam.keyFacts?.length
     ? exam.keyFacts
     : [
-        { label: 'الدرجة', value: exam.scoreRange || 'حسب الاختبار' },
-        { label: 'المدة', value: exam.duration || 'تختلف' },
-        { label: 'الصلاحية', value: exam.validity || 'حسب الجهة' },
-        { label: 'اللغة', value: exam.language || exam.category },
+        { label: t("الدرجة"), value: exam.scoreRange || t("حسب الاختبار") },
+        { label: t("المدة"), value: exam.duration || t("تختلف") },
+        { label: t("الصلاحية"), value: exam.validity || t("حسب الجهة") },
+        { label: t("اللغة"), value: exam.language || exam.category },
       ];
 
   return (
-    <div className="mn-exam-details min-h-screen bg-[var(--mn-page)] pb-24 font-['Cairo',sans-serif] text-[var(--mn-heading)] mn-exam-panel " dir="rtl">
+    <div className="mn-exam-details min-h-screen bg-[var(--mn-page)] pb-24 font-['Cairo',sans-serif] text-[var(--mn-heading)] mn-exam-panel " dir={exam.locale==='en'?'ltr':'rtl'}>
       <header className="relative overflow-hidden border-b-[3px] border-[var(--mn-accent)]/65 bg-gradient-to-b from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-primary)] px-4 pb-4 pt-3 text-white shadow-md mn-exam-inverse ">
         <div className="pointer-events-none absolute inset-0 opacity-25">
           <div className="absolute -left-16 -top-16 h-48 w-48 rounded-full border border-[var(--mn-accent)]" />
@@ -64,7 +65,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
 
         <div className="relative mx-auto max-w-3xl">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <button type="button" onClick={onClose} className="mn-exam-close" aria-label="إغلاق">×</button>
+            <button type="button" onClick={onClose} className="mn-exam-close" aria-label={t("إغلاق")}>×</button>
             <div className="flex min-w-0 items-center gap-2">
               {favoriteControl}
               <span className="rounded-full border border-[var(--mn-accent)]/45 bg-[var(--mn-accent)]/10 px-2.5 py-1 text-[9.5px] font-bold text-[var(--mn-accent-text)]">
@@ -72,7 +73,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
               </span>
               {exam.status && (
                 <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[9.5px] font-bold text-white">
-                  {exam.status === 'PUBLISHED' ? 'منشور' : exam.status === 'READY_TO_PUBLISH' ? 'جاهز للنشر' : 'معاينة'}
+                  {exam.status === 'PUBLISHED' ? t("منشور") : exam.status === 'READY_TO_PUBLISH' ? t("جاهز للنشر") : t("معاينة")}
                 </span>
               )}
             </div>
@@ -110,7 +111,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
               <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
               <span>
                 {exam.verificationLabel}
-                {exam.lastVerifiedAt ? ` • آخر تحقق: ${exam.lastVerifiedAt}` : ''}
+                {exam.lastVerifiedAt ? ` • ${exam.locale==='en'?'Last verified':'آخر تحقق'}: ${exam.lastVerifiedAt}` : ''}
               </span>
             </div>
           )}
@@ -120,7 +121,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
       <main className="mx-auto flex max-w-3xl flex-col gap-4 mn-exam-gutter pt-4">
         {exam.studentUses && exam.studentUses.length > 0 && (
           <section>
-            <SectionTitle icon={<Target className="h-4 w-4" />} id="exam-about" title="متى تحتاج هذا الاختبار؟" />
+            <SectionTitle icon={<Target className="h-4 w-4" />} id="exam-about" title={t("متى تحتاج هذا الاختبار؟")} />
             <div className="grid grid-cols-2 gap-1.5">
               {exam.studentUses.map((item, index) => (
                 <CompactTile key={item} index={index + 1} text={item} />
@@ -131,7 +132,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
 
         {exam.variants && exam.variants.length > 0 && (
           <section>
-            <SectionTitle icon={<Languages className="h-4 w-4" />} id="exam-versions" title="النسخ وطرق الاستخدام" subtitle="اختر النسخة حسب هدفك، لا حسب الاسم فقط" />
+            <SectionTitle icon={<Languages className="h-4 w-4" />} id="exam-versions" title={t("النسخ وطرق الاستخدام")} subtitle={t("اختر النسخة حسب هدفك، لا حسب الاسم فقط")} />
             <div className="mn-exam-snap-row no-scrollbar">
               {exam.variants.map((variant) => (
                 <article key={variant.name} className="w-[76%] min-w-[230px] max-w-[290px] snap-start rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-exam-panel ">
@@ -146,7 +147,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
 
         {exam.sections && exam.sections.length > 0 && (
           <section>
-            <SectionTitle icon={<BookOpen className="h-4 w-4" />} id="exam-structure" title="بنية الاختبار والأقسام" />
+            <SectionTitle icon={<BookOpen className="h-4 w-4" />} id="exam-structure" title={t("بنية الاختبار والأقسام")} />
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {exam.sections.map((section, index) => (
                 <article key={`${section.name}-${index}`} className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-exam-panel ">
@@ -158,9 +159,9 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
                     <span className="rounded-lg bg-[var(--mn-primary)]/8 px-2 py-1 text-[8.5px] font-bold text-[var(--mn-heading)]">{index + 1}</span>
                   </div>
                   <div className="mt-2 grid grid-cols-3 gap-1">
-                    <MiniFact label="الأسئلة" value={section.questionCount || '—'} />
-                    <MiniFact label="الوقت" value={section.duration || '—'} />
-                    <MiniFact label="الدرجة" value={section.score || '—'} />
+                    <MiniFact label={t("الأسئلة")} value={section.questionCount || '—'} />
+                    <MiniFact label={t("الوقت")} value={section.duration || '—'} />
+                    <MiniFact label={t("الدرجة")} value={section.score || '—'} />
                   </div>
                 </article>
               ))}
@@ -170,22 +171,22 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
 
         <section className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {exam.scoreNotes && exam.scoreNotes.length > 0 && (
-            <InfoPanel icon={<Award className="h-4 w-4" />} title="الدرجات والتقييم" items={exam.scoreNotes} />
+            <InfoPanel icon={<Award className="h-4 w-4" />} title={t("الدرجات والتقييم")} items={exam.scoreNotes} />
           )}
           {exam.deliveryModes && exam.deliveryModes.length > 0 && (
-            <InfoPanel icon={<Monitor className="h-4 w-4" />} title="طريقة التقديم" items={exam.deliveryModes} />
+            <InfoPanel icon={<Monitor className="h-4 w-4" />} title={t("طريقة التقديم")} items={exam.deliveryModes} />
           )}
         </section>
 
         {(exam.registrationSteps?.length || exam.registrationRequirements?.length) && (
           <section>
-            <SectionTitle icon={<FileText className="h-4 w-4" />} id="exam-registration" title="التسجيل والوثائق" />
+            <SectionTitle icon={<FileText className="h-4 w-4" />} id="exam-registration" title={t("التسجيل والوثائق")} />
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {exam.registrationSteps && exam.registrationSteps.length > 0 && (
-                <NumberedPanel title="خطوات التسجيل" items={exam.registrationSteps} />
+                <NumberedPanel title={t("خطوات التسجيل")} items={exam.registrationSteps} />
               )}
               {exam.registrationRequirements && exam.registrationRequirements.length > 0 && (
-                <InfoPanel title="متطلبات أساسية" items={exam.registrationRequirements} compact />
+                <InfoPanel title={t("متطلبات أساسية")} items={exam.registrationRequirements} compact />
               )}
             </div>
           </section>
@@ -193,36 +194,37 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
 
         <section className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {exam.resultNotes && exam.resultNotes.length > 0 && (
-            <InfoPanel icon={<Calendar className="h-4 w-4" />} title="النتائج والصلاحية" items={exam.resultNotes} />
+            <InfoPanel icon={<Calendar className="h-4 w-4" />} title={t("النتائج والصلاحية")} items={exam.resultNotes} />
           )}
           <article className="rounded-2xl border border-[var(--mn-border-brand)]/25 bg-[var(--mn-surface)] p-3 shadow-sm mn-exam-panel ">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-[var(--mn-heading)]" />
-              <h3 id="exam-scores" className="mn-exam-section-title scroll-mt-28">الرسوم والتوفر</h3>
+              <h3 id="exam-scores" className="mn-exam-section-title scroll-mt-28">{t("الرسوم والتوفر")}</h3>
             </div>
             <div className="mt-2 grid grid-cols-1 gap-1.5">
-              <MiniFact label="الرسوم" value={exam.feeSummary || 'تختلف حسب المركز'} wide />
-              <MiniFact label="الانتشار / الاستخدام" value={exam.recognitionSummary || 'حسب الاختبار والجهة'} wide />
+              <MiniFact label={t("الرسوم")} value={exam.feeSummary || t("تختلف حسب المركز")} wide />
+              {exam.availabilitySummary&&<MiniFact label={exam.locale==='en'?'Testing windows':'مواعيد الاختبار'} value={exam.availabilitySummary} wide />}
+              {exam.recognitionSummary&&<MiniFact label={t("الانتشار / الاستخدام")} value={exam.recognitionSummary} wide />}
             </div>
           </article>
         </section>
 
         {exam.retakeNotes && exam.retakeNotes.length > 0 && (
-          <InfoPanel icon={<RotateCcw className="h-4 w-4" />} title="الإعادة ومراجعة النتيجة" items={exam.retakeNotes} />
+          <InfoPanel icon={<RotateCcw className="h-4 w-4" />} title={t("الإعادة ومراجعة النتيجة")} items={exam.retakeNotes} />
         )}
 
         <section className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {exam.testDayRules && exam.testDayRules.length > 0 && (
-            <InfoPanel icon={<ShieldCheck className="h-4 w-4" />} title="يوم الاختبار والأمان" items={exam.testDayRules} />
+            <InfoPanel icon={<ShieldCheck className="h-4 w-4" />} title={t("يوم الاختبار والأمان")} items={exam.testDayRules} />
           )}
           {exam.preparationTips && exam.preparationTips.length > 0 && (
-            <InfoPanel icon={<BookOpen className="h-4 w-4" />} title="التحضير الذكي" items={exam.preparationTips} />
+            <InfoPanel icon={<BookOpen className="h-4 w-4" />} title={t("التحضير الذكي")} items={exam.preparationTips} />
           )}
         </section>
 
         {exam.comparisonCards && exam.comparisonCards.length > 0 && (
           <section>
-            <SectionTitle icon={<Globe2 className="h-4 w-4" />} id="exam-preparation" title="قرارات مهمة قبل الحجز" />
+            <SectionTitle icon={<Globe2 className="h-4 w-4" />} id="exam-preparation" title={t("قرارات مهمة قبل الحجز")} />
             <div className="grid grid-cols-2 gap-1.5">
               {exam.comparisonCards.map((item) => (
                 <article key={item.title} className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 shadow-sm mn-exam-panel ">
@@ -236,10 +238,10 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
 
         {(exam.relatedUniversities?.length || exam.relatedScholarships?.length || exam.relatedCountries?.length) && (
           <section>
-            <SectionTitle icon={<Globe2 className="h-4 w-4" />} id="exam-recognition" title="ارتباطات منارتك" subtitle="روابط هوية مرتبطة بالقبول والمنح والدول عند توفرها" />
+            <SectionTitle icon={<Globe2 className="h-4 w-4" />} id="exam-recognition" title={t("ارتباطات منارتك")} subtitle={t("روابط هوية مرتبطة بالقبول والمنح والدول عند توفرها")} />
             {exam.relatedUniversities && exam.relatedUniversities.length > 0 && (
               <RelatedRow
-                title="جامعات وبرامج مرتبطة"
+                title={t("جامعات وبرامج مرتبطة")}
                 icon={<Building2 className="h-3.5 w-3.5" />}
                 items={exam.relatedUniversities}
                 onSelect={(item) => item.id && onOpenUniversity?.(item.id)}
@@ -247,7 +249,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
             )}
             {exam.relatedScholarships && exam.relatedScholarships.length > 0 && (
               <RelatedRow
-                title="منح مرتبطة"
+                title={t("منح مرتبطة")}
                 icon={<GraduationCap className="h-3.5 w-3.5" />}
                 items={exam.relatedScholarships}
                 onSelect={(item) => item.id && onOpenScholarship?.(item.id)}
@@ -255,7 +257,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
             )}
             {exam.relatedCountries && exam.relatedCountries.length > 0 && (
               <RelatedRow
-                title="دول مرتبطة بالاستخدام"
+                title={t("دول مرتبطة بالاستخدام")}
                 icon={<MapPin className="h-3.5 w-3.5" />}
                 items={exam.relatedCountries}
                 onSelect={(item) => item.id && onOpenCountry?.(item.id)}
@@ -268,7 +270,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
 
         {exam.importantWarnings && exam.importantWarnings.length > 0 && (
           <section className="rounded-2xl border border-[var(--mn-border-gold)] bg-[var(--mn-exam-gold-surface)]/80 p-3 shadow-sm mn-exam-panel ">
-            <SectionTitle id="exam-warnings" icon={<AlertTriangle className="h-4 w-4" />} title="تنبيهات قبل الاعتماد على النتيجة" />
+            <SectionTitle id="exam-warnings" icon={<AlertTriangle className="h-4 w-4" />} title={t("تنبيهات قبل الاعتماد على النتيجة")} />
             <ul className="mt-2 space-y-1.5">
               {exam.importantWarnings.map((item) => (
                 <li key={item} className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-accent-text)]">
@@ -282,7 +284,7 @@ export const ExamDetails: React.FC<ExamDetailsProps> = ({
 
         {exam.officialLinks && exam.officialLinks.length > 0 && (
           <section>
-            <SectionTitle icon={<ExternalLink className="h-4 w-4" />} id="exam-official-links" title="المصادر والروابط الرسمية" />
+            <SectionTitle icon={<ExternalLink className="h-4 w-4" />} id="exam-official-links" title={t("المصادر والروابط الرسمية")} />
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {exam.officialLinks.map((link) => (
                 <a
@@ -327,7 +329,7 @@ function CompactTile({ index, text }: { index: number; text: string }) {
 
 function MiniFact({ label, value, wide = false }: { label: string; value: string; wide?: boolean }) {
   return (
-    <div className={`rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1.5  mn-exam-panel ${wide ? 'text-right' : 'text-center'}`}>
+    <div className={`rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1.5  mn-exam-panel ${wide ? 'text-start' : 'text-center'}`}>
       <p className="text-[7.8px] font-bold text-[var(--mn-text-muted)]">{label}</p>
       <p className="mt-0.5 text-[8.8px] font-bold leading-3.5 text-[var(--mn-text)]">{value}</p>
     </div>
@@ -402,7 +404,7 @@ function RelatedRow({
             type="button"
             key={`${title}-${item.id || item.name}`}
             onClick={() => onSelect(item)}
-            className="w-[66%] min-w-[205px] max-w-[250px] snap-start rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 text-right shadow-sm transition hover:border-[var(--mn-accent)] active:scale-[0.99] mn-exam-panel "
+            className="w-[66%] min-w-[205px] max-w-[250px] snap-start rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 text-start shadow-sm transition hover:border-[var(--mn-accent)] active:scale-[0.99] mn-exam-panel "
           >
             <p className="text-[10px] font-bold leading-4 text-[var(--mn-heading)]">{item.name}</p>
             {item.nameEn && <p className="mt-0.5 text-[8px] font-bold text-[var(--mn-accent-text)]">{item.nameEn}</p>}
@@ -413,3 +415,45 @@ function RelatedRow({
     </div>
   );
 }
+
+const examLabels:Record<string,string>={
+  "الدرجة": "Score",
+  "حسب الاختبار": "Depends on the test",
+  "المدة": "Duration",
+  "تختلف": "Varies",
+  "الصلاحية": "Validity",
+  "حسب الجهة": "Depends on the institution",
+  "اللغة": "Language",
+  "إغلاق": "Close",
+  "منشور": "Published",
+  "جاهز للنشر": "Ready to publish",
+  "معاينة": "Preview",
+  "متى تحتاج هذا الاختبار؟": "When do you need this test?",
+  "النسخ وطرق الاستخدام": "Versions and delivery modes",
+  "اختر النسخة حسب هدفك، لا حسب الاسم فقط": "Choose the version for your goal",
+  "بنية الاختبار والأقسام": "Test structure and sections",
+  "الأسئلة": "Questions",
+  "الوقت": "Time",
+  "الدرجات والتقييم": "Scores and assessment",
+  "طريقة التقديم": "Delivery mode",
+  "التسجيل والوثائق": "Registration and documents",
+  "خطوات التسجيل": "Registration steps",
+  "متطلبات أساسية": "Requirements",
+  "النتائج والصلاحية": "Results and validity",
+  "الرسوم والتوفر": "Fees and availability",
+  "الرسوم": "Fees",
+  "تختلف حسب المركز": "Varies by center",
+  "الانتشار / الاستخدام": "Recognition / usage",
+  "حسب الاختبار والجهة": "Depends on test and institution",
+  "الإعادة ومراجعة النتيجة": "Retakes and score review",
+  "يوم الاختبار والأمان": "Test day and safety",
+  "التحضير الذكي": "Preparation",
+  "قرارات مهمة قبل الحجز": "Before registration",
+  "ارتباطات منارتك": "Related profiles",
+  "روابط هوية مرتبطة بالقبول والمنح والدول عند توفرها": "Admission, scholarship and country links when available",
+  "جامعات وبرامج مرتبطة": "Related universities and programs",
+  "منح مرتبطة": "Related scholarships",
+  "دول مرتبطة بالاستخدام": "Related countries",
+  "تنبيهات قبل الاعتماد على النتيجة": "Before relying on your result",
+  "المصادر والروابط الرسمية": "Official sources and links"
+};

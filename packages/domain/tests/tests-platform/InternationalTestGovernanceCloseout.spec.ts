@@ -1,0 +1,10 @@
+import { describe,it,expect } from 'vitest';
+import { publicInternationalTest,assertInternationalTestTransition,assertOfficialTestUrl } from '../../src/tests-platform/governance';
+import { InternationalTestStatus as S } from '../../src/tests-platform/enums';
+describe('P9 public and governance boundary',()=>{
+ it('omits nested and future administrative metadata',()=>{const dto=publicInternationalTest({id:'test',canonicalName:'Exam',testCategory:'OTHER',providerName:'Provider',status:S.PUBLISHED,isPubliclyVisible:true,isSourceVerified:true,optionalFields:{password:'secret'},unknownFutureField:'secret',importEvidence:{evidenceSnippet:'secret'},variants:[{id:'v',variantName:'Exam',deliveryMode:'ONLINE',isActive:true,administrativeNotes:'secret'}],countryRelationships:[{id:'r',testId:'test',canonicalReferenceId:'US',relationshipType:'AVAILABLE',notes:'secret',metadata:{secret:true}}]} as any);expect(JSON.stringify(dto)).not.toContain('secret');expect(dto.countryRelationships?.[0].canonicalReferenceId).toBe('US');});
+ it('cannot directly publish an imported or rejected record',()=>{for(const status of [S.IMPORTED,S.REJECTED,S.ARCHIVED])expect(()=>assertInternationalTestTransition(status,S.PUBLISHED)).toThrow('INVALID_TRANSITION');});
+ it('allows reviewed publication, then a new draft while retaining a snapshot',()=>{expect(()=>assertInternationalTestTransition(S.READY_TO_PUBLISH,S.PUBLISHED)).not.toThrow();expect(()=>assertInternationalTestTransition(S.PUBLISHED,S.NEEDS_REVIEW)).not.toThrow();});
+ it.each(['http://official.test/register','https://official.test.attacker.test/register','https://user:secret@official.test/register','file:///register'])('refuses a misleading official URL: %s',url=>expect(()=>assertOfficialTestUrl(url,'https://official.test')).toThrow('UNTRUSTED'));
+ it('requires a configured authority and permits exact HTTPS origin',()=>{expect(()=>assertOfficialTestUrl('https://official.test/register',undefined)).toThrow();expect(()=>assertOfficialTestUrl('https://official.test/register','https://official.test/')).not.toThrow();});
+});

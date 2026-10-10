@@ -1,3 +1,5 @@
+import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
+import type { IAuditRecordRepository } from '@manaratak/domain';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { CrossDomainGraphReadService, InternationalTestAdminUseCases } from '@manaratak/application';
@@ -11,14 +13,20 @@ import {
 } from '@manaratak/domain';
 
 export class InternationalTestAdminRouter {
-  public static create(cradle: { internationalTestAdminUseCases: InternationalTestAdminUseCases; crossDomainGraphReadService: CrossDomainGraphReadService }): Router {
+  public static create(cradle: { internationalTestAdminUseCases: InternationalTestAdminUseCases; crossDomainGraphReadService: CrossDomainGraphReadService; internationalTestConsumerReadGateway?: {usage(id:string,page:number,publishedOnly?:boolean):Promise<unknown>}; auditRecordRepo?: IAuditRecordRepository }): Router {
     const router = Router();
     const { internationalTestAdminUseCases, crossDomainGraphReadService } = cradle;
     type AsyncRouteHandler = (req: Request, res: Response, next: NextFunction) => Promise<unknown> | unknown;
     const asyncHandler = (fn: AsyncRouteHandler) => (req: Request, res: Response, next: NextFunction) => Promise.resolve(fn(req, res, next)).catch(next);
+    const resRevision = (req:Request,value:number) => req.res?.setHeader('X-Entity-Revision',String(value));
     const mutationContext = (req: Request) => {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
+      const value = req.get('If-Match');
+      const expectedRevision = value && /^\"?\d+\"?$/.test(value) ? Number(value.replace(/\"/g,'')) : undefined;
+      if (req.params.id && expectedRevision === undefined) throw new Error('INTERNATIONAL_TEST_EXPECTED_REVISION_REQUIRED');
+      if (expectedRevision !== undefined) resRevision(req,expectedRevision+1);
       return {
+      expectedRevision, reason: typeof req.body?.reason === 'string' ? req.body.reason : req.get('X-Review-Reason'),
       actorId: req.authUserId,
       actorType: 'IDENTITY',
       correlationId: (req.headers['x-correlation-id'] as string | undefined) || (req.headers['x-request-id'] as string | undefined),
@@ -56,6 +64,9 @@ export class InternationalTestAdminRouter {
       status: cleanOptionalEnum(InternationalTestStatus),
       completenessStatus: cleanOptionalEnum(InternationalTestCompletenessStatus),
       testCategory: cleanOptionalEnum(InternationalTestCategory),
+      staleOnly:z.enum(['true','false']).transform(value=>value==='true').optional(),
+      sortBy:z.enum(['createdAt','updatedAt','canonicalName']).optional(),
+      sortDirection:z.enum(['asc','desc']).optional(),
       providerName: cleanOptionalString(),
       countryIso2Code: z.preprocess((val) => {
         if (typeof val === 'string') {
@@ -122,12 +133,10 @@ export class InternationalTestAdminRouter {
       canonicalName: z.string().min(1),
       testCategory: z.nativeEnum(InternationalTestCategory),
       providerName: z.string().min(1),
-      localizedNameAr: z.string().optional(),
-      localizedNameEn: z.string().optional(),
       abbreviation: z.string().optional(),
       familyId: z.string().optional(),
       providerId: z.string().optional(),
-      status: z.nativeEnum(InternationalTestStatus).optional(),
+      status: z.enum(['IMPORTED','READY_TO_REVIEW','NEEDS_REVIEW']).optional(),
       countryRelationships: z.array(referenceRelationshipSchema).optional(),
       languageRelationships: z.array(referenceRelationshipSchema).optional(),
       academicTaxonomyRelationships: z.array(academicTaxonomyRelationshipSchema).optional(),
@@ -170,7 +179,7 @@ export class InternationalTestAdminRouter {
       deterministicKey: z.string().optional(),
       sourceId: z.string().optional(),
       sourceUrl: z.string().url().optional(),
-      contentHash: z.string().optional(),
+      contentHash: z.string().regex(/^[a-f0-9]{64}$/i).optional(),
       retrievedAt: z.coerce.date().optional(),
       evidenceSnippet: z.string().optional(),
       duplicateStatus: z.enum(['NEW', 'DUPLICATE_SKIPPED', 'EXISTING_ENRICHED']).optional(),
@@ -243,7 +252,7 @@ export class InternationalTestAdminRouter {
       title: z.string().trim().min(1).max(500),
       description: z.string().max(5000).optional(),
     }).strict();
-    const emptyMutationBody = z.object({}).strict();
+    const emptyMutationBody = z.object({reason:z.string().trim().min(3).max(2000).optional()}).strict();
 
     const reviewSourceNamesSchema = z.object({
       versionId: z.string().uuid(),
@@ -291,7 +300,7 @@ export class InternationalTestAdminRouter {
 
     router.get('/providers', asyncHandler(async (req: Request, res: Response) => {
       const search = typeof req.query.search === 'string' ? req.query.search : undefined;
-      res.json(await internationalTestAdminUseCases.listProviders(search));
+      res.json(await internationalTestAdminUseCases.listProviders(search,z.coerce.number().int().min(1).max(1000).parse(req.query.page??1)));
     }));
 
     router.post('/providers', asyncHandler(async (req: Request, res: Response) => {
@@ -315,7 +324,7 @@ export class InternationalTestAdminRouter {
     }));
 
     router.get('/:id/import-versions', asyncHandler(async (req: Request, res: Response) => {
-      res.json(await internationalTestAdminUseCases.listImportVersions(req.params.id));
+      res.json(await internationalTestAdminUseCases.listImportVersions(req.params.id,z.coerce.number().int().min(1).max(1000).parse(req.query.page??1)));
     }));
 
     router.get('/:id/relationships', asyncHandler(async (req: Request, res: Response) => {
@@ -327,13 +336,13 @@ export class InternationalTestAdminRouter {
       res.json(await internationalTestAdminUseCases.checkPublicationReadiness(req.params.id));
     }));
 
-    router.post('/:id/verify-source', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/verify-source', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:verify'), asyncHandler(async (req: Request, res: Response) => {
       emptyMutationBody.parse(req.body ?? {});
       await internationalTestAdminUseCases.verifySource(req.params.id, mutationContext(req));
       res.json({ success: true });
     }));
 
-    router.post('/:id/review-source-names', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/review-source-names', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:review'), asyncHandler(async (req: Request, res: Response) => {
       const parsed = reviewSourceNamesSchema.parse(req.body);
       const updated = await internationalTestAdminUseCases.reviewSourceNames(req.params.id, parsed, mutationContext(req));
       res.json(updated);
@@ -345,8 +354,41 @@ export class InternationalTestAdminRouter {
       res.json(updated);
     }));
 
+    const reason = z.string().trim().min(3).max(2000);
+    const pageQuery = z.object({page:z.coerce.number().int().min(1).max(1000).default(1)}).strict();
+    router.get('/:id/usage', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:universities:manage'), asyncHandler(async(req,res)=>{
+      if (!cradle.internationalTestConsumerReadGateway) throw new Error('INTERNATIONAL_TEST_CONSUMER_GATEWAY_UNAVAILABLE');
+      res.json(await cradle.internationalTestConsumerReadGateway.usage(req.params.id,pageQuery.parse(req.query).page));
+    }));
+    router.get('/:id/governance-history',asyncHandler(async(req,res)=>res.json(await internationalTestAdminUseCases.govern(req.params.id,'HISTORY',pageQuery.parse(req.query)))));
+    router.get('/:id/timeline', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:audit:manage'), asyncHandler(async(req,res)=>{
+      if (!cradle.auditRecordRepo) throw new Error('AUDIT_REPOSITORY_UNAVAILABLE');
+      const query=z.object({cursor:z.string().optional()}).strict().parse(req.query);
+      let raw:unknown=null;if(query.cursor){try{raw=JSON.parse(query.cursor);}catch{throw new Error('INTERNATIONAL_TEST_CURSOR_INVALID');}}
+      const parsed=raw?z.object({timestamp:z.coerce.date(),id:z.string().min(1)}).strict().parse(raw):null;
+      const page=await cradle.auditRecordRepo.queryPage({targetId:req.params.id,targetType:'INTERNATIONAL_TEST',limit:25,cursor:parsed});
+      res.json({data:page.items.map(row=>({action:row.getAction().getValue(),actorId:row.getActor().getActorId(),timestamp:row.getTimestamp().getValue(),correlationId:row.getCorrelationReference()?.getValue(),reason:row.getContextMetadata().getData().reason})),nextCursor:page.nextCursor,hasMore:page.hasMore});
+    }));
+    router.post('/:id/remove-relationship',asyncHandler(async(req,res)=>{
+      const input=z.object({kind:z.enum(['COUNTRY','LANGUAGE','TAXONOMY','DEGREE']),referenceId:z.string().min(1),relationshipType:z.string().min(1),reason}).strict().parse(req.body);
+      res.json(await internationalTestAdminUseCases.govern(req.params.id,'REMOVE_RELATIONSHIP',input,mutationContext(req)));
+    }));
+    router.post('/:id/profile',asyncHandler(async(req,res)=>{
+      const input=z.object({kind:z.enum(['SESSION','CENTER','REQUIREMENT','POLICY','EQUIVALENCY']),payload:z.record(z.string(),z.unknown()),reason,evidenceReference:z.string().trim().min(1).max(1000)}).strict().parse(req.body);
+      res.json(await internationalTestAdminUseCases.govern(req.params.id,'PROFILE',input,mutationContext(req)));
+    }));
+    router.post('/:id/review-block', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:review'),asyncHandler(async(req,res)=>{
+      const input=z.object({versionId:z.string().min(1),sourceHash:z.string().regex(/^[a-f0-9]{64}$/i),blockId:z.string().min(1),decision:z.enum(['APPROVED','IGNORED','MAPPED']),mappingReference:z.string().max(500).optional(),reason}).strict().parse(req.body);
+      res.json(await internationalTestAdminUseCases.govern(req.params.id,'BLOCK',input,mutationContext(req)));
+    }));
+    router.post('/:id/revoke-source', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:verify'),asyncHandler(async(req,res)=>res.json(await internationalTestAdminUseCases.govern(req.params.id,'REVOKE',z.object({reason}).strict().parse(req.body),mutationContext(req)))));
+    router.post('/:id/manual-names', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:review'),asyncHandler(async(req,res)=>res.json(await internationalTestAdminUseCases.manualNames(req.params.id,z.object({localizedNameAr:z.string().trim().min(1),localizedNameEn:z.string().trim().min(1),reason}).strict().parse(req.body),mutationContext(req)))));
+    router.post('/:id/review-transition', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:review'),asyncHandler(async(req,res)=>{
+      const input=z.object({status:z.enum(['READY_TO_REVIEW','NEEDS_REVIEW','REJECTED']),reason}).strict().parse(req.body);
+      await internationalTestAdminUseCases.transition(req.params.id,input.status as InternationalTestStatus,mutationContext(req)); res.json({success:true});
+    }));
     router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
-      res.json(await internationalTestAdminUseCases.get(req.params.id));
+      const test=await internationalTestAdminUseCases.get(req.params.id); res.setHeader('ETag',`"${test.revision??0}"`); res.json(test);
     }));
 
     router.patch('/:id', asyncHandler(async (req: Request, res: Response) => {
@@ -359,19 +401,19 @@ export class InternationalTestAdminRouter {
       res.json(await internationalTestAdminUseCases.updateTest(req.params.id, parsed as unknown as Partial<UpsertInternationalTestDto>, mutationContext(req)));
     }));
 
-    router.post('/:id/mark-publishable', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/mark-publishable', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:review'), asyncHandler(async (req: Request, res: Response) => {
       emptyMutationBody.parse(req.body ?? {});
       await internationalTestAdminUseCases.markReadyToPublish(req.params.id, mutationContext(req));
       res.json({ success: true });
     }));
 
-    router.post('/:id/publish', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/publish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:publish'), asyncHandler(async (req: Request, res: Response) => {
       emptyMutationBody.parse(req.body ?? {});
       await internationalTestAdminUseCases.publish(req.params.id, mutationContext(req));
       res.json({ success: true });
     }));
 
-    router.post('/:id/unpublish', asyncHandler(async (req: Request, res: Response) => {
+    router.post('/:id/unpublish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:international-tests:publish'), asyncHandler(async (req: Request, res: Response) => {
       emptyMutationBody.parse(req.body ?? {});
       await internationalTestAdminUseCases.unpublish(req.params.id, mutationContext(req));
       res.json({ success: true });
@@ -467,9 +509,15 @@ export class InternationalTestAdminRouter {
 
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation Error', details: err.issues });
-      const message = err instanceof Error ? err.message : String(err);
-      if (message.includes('not found')) return res.status(404).json({ error: message });
-      res.status(400).json({ error: message || 'An error occurred' });
+      const persistenceCode=err&&typeof err==='object'&&'code' in err?String(err.code):'';
+      let message = persistenceCode==='P2025'?'INTERNATIONAL_TEST_CHILD_OWNER_NOT_FOUND':persistenceCode==='P2002'?'INTERNATIONAL_TEST_IDENTITY_CONFLICT':err instanceof Error ? err.message : '';
+      if(message.startsWith('Invalid score scale:'))message='INTERNATIONAL_TEST_SCORE_POLICY_INVALID';
+      else if(message.startsWith('Invalid section scores:'))message='INTERNATIONAL_TEST_SECTION_SCORE_POLICY_INVALID';
+      else if(message.startsWith('Validation failed'))message='INTERNATIONAL_TEST_VALIDATION_FAILED';
+      else if(message.includes('not found'))message='INTERNATIONAL_TEST_NOT_FOUND';
+      const known=/^[A-Z][A-Z0-9_]+$/.test(message); const code=known?message:'INTERNATIONAL_TEST_COMMAND_FAILED';
+      const status=message.includes('CONFLICT')||message.includes('STALE')?409:message.includes('not found')||message.includes('NOT_FOUND')?404:message.includes('ACTOR')?401:message.includes('UNTRUSTED')||message.includes('POLICY_INVALID')||message.includes('VALIDATION_FAILED')||message.includes('NOT_READY')?422:known?400:500;
+      res.status(status).json({type:'about:blank',status,code,detail:known?code:'Unable to complete this operation',traceId:_req.get('X-Request-Id')});
     });
 
     return router;

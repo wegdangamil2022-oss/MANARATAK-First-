@@ -515,8 +515,8 @@ export async function loadPublishedCountries(locale: PublicLiveLocale = 'ar'): P
   return rows.map((item) => mapCountry(item, locale));
 }
 export async function loadPublishedExams(locale: PublicLiveLocale = 'ar'): Promise<Exam[]> {
-  const rows = await collectOffsetPages((page) => ApiClient.getInternationalTests({ locale, page, pageSize: 50 }));
-  return rows.map(mapExam);
+  const result=await ApiClient.getInternationalTests({locale,page:1,pageSize:50});
+  return result.data.map(mapExam);
 }
 export async function loadPublishedCourses(): Promise<{ courses: Course[]; paidCourses: Course[]; importedCourses: ImportedCourse[] }> {
   const rows = await collectCursorPages((cursor) => ApiClient.getCourses({ cursor, limit: 100 }));

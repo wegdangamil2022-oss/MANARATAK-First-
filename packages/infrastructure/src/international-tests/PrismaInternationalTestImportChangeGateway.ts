@@ -88,13 +88,14 @@ export class PrismaInternationalTestImportChangeGateway implements International
               optionalFields: json({ ...metadata(before.optionalFields), m10Source: { sourceKey: entry.sourceKey, sourceHash: entry.sourceHash, changeSetId: plan.changeSetId } }),
             } });
           }
-          const repository = new PrismaInternationalTestRepository(tx as unknown as PrismaClient);
+          const repository = new PrismaInternationalTestRepository(tx as unknown as PrismaClient,true);
           const draft = await repository.createImportDraftVersion(entry.targetId, {
             sourceFileName: entry.sourceKey.split('/').at(-1)!, sourceLocale: 'ar', sourceUri: entry.sourceUri,
             sourceHash: entry.sourceHash, rawContent: entry.rawContent, importedBy: approval.actorId,
             unmappedSections: InternationalTestMarkdownParser.parse(entry.rawContent).map(block => ({ sectionKey: block.blockKey, title: block.title, locale: 'ar', content: block.content, sourceSectionPath: block.blockKey })),
             metadata: { sourceCycle: entry.sourceCycle, sourceKey: entry.sourceKey, sourceClassification: entry.sourceClassification, resolution: entry.resolution, reviewReason: entry.reviewReason, evidenceReference: entry.evidenceReference, sourceManifestHash: plan.sourceManifestHash },
           });
+          await repository.advanceRevision(entry.targetId,await repository.getRevision(entry.targetId));
           const root = await tx.internationalTest.findUniqueOrThrow({ where: { id: entry.targetId }, include: rootInclude });
           const version = await tx.internationalTestVersion.findUniqueOrThrow({ where: { id: draft.versionId }, include: versionInclude });
           const journal: Journal = {

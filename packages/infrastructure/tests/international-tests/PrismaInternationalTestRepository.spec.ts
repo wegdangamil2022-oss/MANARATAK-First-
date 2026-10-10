@@ -13,11 +13,12 @@ describe('PrismaInternationalTestRepository', () => {
 
   beforeEach(() => {
     mockPrisma = {
+      $queryRaw:vi.fn(async()=>[]),$executeRaw:vi.fn(async()=>1),
       internationalTest: {
         findUnique: vi.fn(),
         findFirst: vi.fn(),
         findMany: vi.fn(),
-        count: vi.fn(),
+        count: vi.fn(),groupBy:vi.fn(async()=>[]),
         create: vi.fn(),
         update: vi.fn()
       },
@@ -57,7 +58,7 @@ describe('PrismaInternationalTestRepository', () => {
       }
     };
 
-    repository = new PrismaInternationalTestRepository(mockPrisma as any);
+    repository = new PrismaInternationalTestRepository(mockPrisma as any,true);
   });
 
   it('should findById and map optionalFields fallback alongside normalized relations', async () => {
@@ -73,7 +74,7 @@ describe('PrismaInternationalTestRepository', () => {
       variants: [{
         id: 'var-1',
         variantName: 'Computer-delivered',
-        deliveryMode: InternationalTestDeliveryMode.COMPUTER_BASED,
+        deliveryMode: InternationalTestDeliveryMode.ONLINE,
         isActive: true
       }],
       scoreScale: {
@@ -131,7 +132,6 @@ describe('PrismaInternationalTestRepository', () => {
       expect.objectContaining({
         where: {
           slug: 'private-test',
-          status: InternationalTestStatus.PUBLISHED,
           isPubliclyVisible: true,
         },
       }),
@@ -207,21 +207,11 @@ describe('PrismaInternationalTestRepository', () => {
     );
   });
 
-  it('should listPublished forcing status PUBLISHED', async () => {
-    mockPrisma.internationalTest.findMany.mockResolvedValue([]);
-    mockPrisma.internationalTest.count.mockResolvedValue(0);
-
-    await repository.listPublished({ providerName: 'IDP' });
-
-    expect(mockPrisma.internationalTest.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          status: { in: [InternationalTestStatus.PUBLISHED] },
-          isPubliclyVisible: true,
-          providerName: 'IDP'
-        })
-      })
-    );
+  it('should listPublished exclusively through an immutable owner snapshot',async()=>{
+    await repository.listPublished({providerName:'IDP'});
+    expect(mockPrisma.internationalTest.findMany).not.toHaveBeenCalled();
+    expect(mockPrisma.$queryRaw.mock.calls[0][0].text).toContain('InternationalTestPublicationSnapshot');
+    expect(mockPrisma.$queryRaw.mock.calls[0][0].values).toContain('IDP');
   });
 
   it('should updateStatus and return updated DTO', async () => {
@@ -266,7 +256,7 @@ describe('PrismaInternationalTestRepository', () => {
     mockPrisma.internationalTestVariant.findMany.mockResolvedValue([{
       id: 'var-1',
       variantName: 'Paper',
-      deliveryMode: InternationalTestDeliveryMode.PAPER_BASED,
+      deliveryMode: InternationalTestDeliveryMode.IN_PERSON,
       isActive: true
     }]);
 

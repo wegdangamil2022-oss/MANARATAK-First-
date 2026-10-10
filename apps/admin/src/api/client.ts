@@ -65,6 +65,7 @@ let currentAdminAuthState: AdminAuthState = 'LOADING';
 let authStateListeners: Array<(state: AdminAuthState) => void> = [];
 let globalAbortController = new AbortController();
 let sessionGeneration = 0;
+const testRevisions = new Map<string,number>();
 
 export function setAdminAuthStatus(state: AdminAuthState): void {
   currentAdminAuthState = state;
@@ -78,6 +79,7 @@ export function setAdminAuthStatus(state: AdminAuthState): void {
 
 export function abortAllPendingAdminRequests(): void {
   sessionGeneration++;
+  testRevisions.clear();
   globalAbortController.abort();
   globalAbortController = new AbortController();
   inFlightRequests.clear();
@@ -153,7 +155,7 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 
   const method = (options.method || 'GET').toUpperCase();
   const cacheKey = `${method}:${endpoint}`;
-  const freshRead = options.cache === 'no-store' || options.cache === 'reload';
+  const freshRead = options.cache === 'no-store' || options.cache === 'reload' || /^\/admin\/international-tests(?:\/|\?|$)/.test(endpoint);
   const coalesce = method === 'GET' && !freshRead && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
 
   if (method === 'GET' && !isPublicAuthRoute) {
@@ -217,6 +219,14 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   const requestGeneration = sessionGeneration;
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
+  const ownerMatch=endpoint.match(/^\/admin\/international-tests\/([^/?]+)(?:\/|\?|$)/);
+  const testOwner=ownerMatch && !['providers','upsert'].includes(ownerMatch[1])?ownerMatch[1]:undefined;
+  if(testOwner && isMutation(options.method) && !headers.has('If-Match')) {
+    const revision=testRevisions.get(testOwner);
+    if(revision===undefined) throw new Error('Reload the test before editing (revision required).');
+    headers.set('If-Match',`"${revision}"`);
+  }
+
   if (/^\/admin\/imports(?:\/|\?|$)/.test(endpoint)) headers.set('X-Import-Envelope-Version', '2');
 
   if (isMutation(options.method) && !headers.has('Idempotency-Key')) {
@@ -293,6 +303,11 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     csrfManager.clearToken();
     abortAllPendingAdminRequests();
   }
+  if(endpoint.startsWith('/admin/international-tests')) {
+    const remember=(row:unknown)=>{if(row&&typeof row==='object'&&'id' in row&&'revision' in row) {const value=Number(row.revision);if(Number.isSafeInteger(value)) testRevisions.set(String(row.id),Math.max(testRevisions.get(String(row.id))??0,value));}};
+    remember(payload); if(payload&&typeof payload==='object'&&'data' in payload&&Array.isArray(payload.data)) payload.data.forEach(remember);
+    const revision=response.headers.get('X-Entity-Revision'); if(testOwner&&revision!==null)testRevisions.set(testOwner,Number(revision));
+  }
   return payload;
 }
 
@@ -358,9 +373,10 @@ export const adminApiClient = {
     return adminRequest<T>(`/admin/international-tests/${testId}/relationships?locale=${locale}`);
   },
 
-  verifyInternationalTestSource(testId: string) {
+  verifyInternationalTestSource(testId: string, reason?: string) {
     return adminRequest<unknown>(`/admin/international-tests/${testId}/verify-source`, {
       method: 'POST',
+      body: JSON.stringify({reason}),
     });
   },
 
@@ -420,21 +436,24 @@ export const adminApiClient = {
     });
   },
 
-  markInternationalTestReadyToPublish(testId: string) {
+  markInternationalTestReadyToPublish(testId: string, reason?: string) {
     return adminRequest<unknown>(`/admin/international-tests/${testId}/mark-publishable`, {
       method: 'POST',
+      body: JSON.stringify({reason}),
     });
   },
 
-  publishInternationalTest(testId: string) {
+  publishInternationalTest(testId: string, reason?: string) {
     return adminRequest<unknown>(`/admin/international-tests/${testId}/publish`, {
       method: 'POST',
+      body: JSON.stringify({reason}),
     });
   },
 
-  unpublishInternationalTest(testId: string) {
+  unpublishInternationalTest(testId: string, reason?: string) {
     return adminRequest<unknown>(`/admin/international-tests/${testId}/unpublish`, {
       method: 'POST',
+      body: JSON.stringify({reason}),
     });
   },
 
@@ -449,9 +468,10 @@ export const adminApiClient = {
     });
   },
 
-  archiveInternationalTest(testId: string) {
+  archiveInternationalTest(testId: string, reason?: string) {
     return adminRequest<unknown>(`/admin/international-tests/${testId}/archive`, {
       method: 'POST',
+      body: JSON.stringify({reason}),
     });
   },
 };

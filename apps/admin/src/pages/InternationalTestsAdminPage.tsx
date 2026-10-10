@@ -1,10 +1,14 @@
+import { useSearchParams } from 'react-router-dom';
+import { CanonicalPicker } from '../components/CanonicalPicker';
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import type { InternationalTestStatus as CanonicalTestStatus } from '@manaratak/domain';
+type InternationalTestStatus = `${CanonicalTestStatus}`;
 import { AlertCircle,Archive,BookOpen,CheckCircle2,Eye,Filter,GraduationCap,Loader2,Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
-type InternationalTestStatus = 'IMPORTED' | 'READY_TO_REVIEW' | 'NEEDS_REVIEW' | 'INCOMPLETE' | 'READY_TO_PUBLISH' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED';
 type InternationalTestCompletenessStatus = 'INCOMPLETE' | 'COMPLETE' | 'NEEDS_REVIEW';
 type InternationalTestCategory = 'ENGLISH_LANGUAGE' | 'NON_ENGLISH_LANGUAGE' | 'GENERAL_UNDERGRADUATE_ADMISSION' | 'GRADUATE_ADMISSION' | 'NATIONAL_INTERNATIONAL_ADMISSION' | 'SPECIALIZED_ADMISSION' | 'PROFESSIONAL_LICENSING_CERTIFICATION' | 'LANGUAGE_PROFICIENCY' | 'UNDERGRAD_ADMISSION' | 'GRAD_ADMISSION' | 'PROFESSIONAL_LICENSING' | 'ACADEMIC_PLACEMENT' | 'OTHER';
 
@@ -83,6 +87,7 @@ export function getTestDisplayTitle(test: Partial<InternationalTest>, isRtl: boo
 }
 
 interface InternationalTestListResponse {
+  statistics?: {published:number;underReview:number;incomplete:number;scope:string};
   data: InternationalTest[];
   total: number;
   page: number;
@@ -111,7 +116,6 @@ const statuses: InternationalTestStatus[] = [
   'IMPORTED',
   'READY_TO_REVIEW',
   'NEEDS_REVIEW',
-  'INCOMPLETE',
   'READY_TO_PUBLISH',
   'PUBLISHED',
   'REJECTED',
@@ -122,16 +126,21 @@ export function InternationalTestsAdminPage() {
   const { t, language } = useTranslation();
   const isRtl = language === 'ar';
 
+  const [urlParams,setUrlParams]=useSearchParams();
+  const [countryFilter,setCountryFilter]=useState(urlParams.get('countryIso2Code')??'');
+  const [providerFilter,setProviderFilter]=useState(urlParams.get('providerName')??'');
+  const [completenessFilter,setCompletenessFilter]=useState(urlParams.get('completenessStatus')??'');
+  const [staleOnly,setStaleOnly]=useState(urlParams.get('staleOnly')==='true');
   const [tests, setTests] = useState<InternationalTestListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(urlParams.get('status')??'');
+  const [categoryFilter, setCategoryFilter] = useState(urlParams.get('testCategory')??'');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [archiveConfirmTest, setArchiveConfirmTest] = useState<InternationalTest | null>(null);
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(urlParams.get('searchQuery')??'');
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
@@ -144,6 +153,7 @@ export function InternationalTestsAdminPage() {
     setError(null);
     try {
       const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+      if(countryFilter)params.set('countryIso2Code',countryFilter);if(providerFilter)params.set('providerName',providerFilter);if(completenessFilter)params.set('completenessStatus',completenessFilter);if(staleOnly)params.set('staleOnly','true');
       const cleanStatus = statusFilter.trim();
       if (cleanStatus && cleanStatus.toLowerCase() !== 'all') {
         params.append('status', cleanStatus);
@@ -178,14 +188,16 @@ export function InternationalTestsAdminPage() {
     const controller = new AbortController();
     void loadTests(controller.signal);
     return () => controller.abort();
-  }, [statusFilter, categoryFilter, searchQuery, page, pageSize]);
+  }, [statusFilter, categoryFilter, searchQuery, page, pageSize,countryFilter,providerFilter,completenessFilter,staleOnly]);
+  useEffect(()=>{const params=new URLSearchParams();for(const [key,value]of Object.entries({status:statusFilter,testCategory:categoryFilter,searchQuery,countryIso2Code:countryFilter,providerName:providerFilter,completenessStatus:completenessFilter,staleOnly:staleOnly?'true':''}))if(value)params.set(key,value);setUrlParams(params,{replace:true});},[statusFilter,categoryFilter,searchQuery,countryFilter,providerFilter,completenessFilter,staleOnly,setUrlParams]);
 
   const transitionTest = async (id: string, action: 'mark-publishable' | 'publish' | 'unpublish' | 'archive') => {
     setSaving(true);
     setError(null);
     setMessage(null);
     try {
-      await adminApiClient.request(`/admin/international-tests/${id}/${action}`, { method: 'POST' });
+      const reason=window.prompt(isRtl?'سبب الإجراء والمراجعة:':'Review reason:');if(!reason?.trim())return;
+      await adminApiClient.request(`/admin/international-tests/${id}/${action}`, { method: 'POST',body:JSON.stringify({reason}) });
       setMessage(
         isRtl
           ? `تم تنفيذ الإجراء بنجاح: ${getActionLabel(action, isRtl)}`
@@ -202,6 +214,11 @@ export function InternationalTestsAdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      <div className="grid gap-3 rounded border bg-white p-4 sm:grid-cols-3"><CanonicalPicker paged label={isRtl?'التوفر حسب الدولة':'Availability by country'} value={null} load={(q,page)=>canonicalPickerApi.countries(q,page)} onChange={(_id,item)=>{setCountryFilter(item?.code??'');setPage(1);}} />
+        <CanonicalPicker paged label={isRtl?'الجهة المنظمة':'Provider'} value={null} load={async(q,page)=>{const rows=await adminApiClient.request<Array<{id:string;displayName:string}>>(`/admin/international-tests/providers?search=${encodeURIComponent(q??'')}&page=${page??1}`);return rows.map(row=>({id:row.id,label:row.displayName,lifecycle:'ACTIVE'}));}} onChange={(_id,item)=>{setProviderFilter(item?.label??'');setPage(1);}} />
+        <label>{isRtl?'اكتمال البيانات':'Completeness'}<select value={completenessFilter} onChange={e=>{setCompletenessFilter(e.target.value);setPage(1);}}><option value="">{isRtl?'الكل':'All'}</option>{['INCOMPLETE','COMPLETE','NEEDS_REVIEW'].map(value=><option key={value}>{value}</option>)}</select></label>
+        <label><input type="checkbox" checked={staleOnly} onChange={e=>{setStaleOnly(e.target.checked);setPage(1);}}/>{isRtl?'مصادر تحتاج تحققًا حديثًا':'Sources needing fresh verification'}</label><p>{isRtl?'الإحصاءات تشمل نتائج الفلاتر كاملة.':'Metrics cover all filtered results.'}</p>
+      </div>
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -273,9 +290,9 @@ export function InternationalTestsAdminPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label={isRtl ? "إجمالي الاختبارات" : "Total Tests"} value={tests?.total ?? 0} icon={BookOpen} accent="#142B5F" />
-        <MetricCard label={isRtl ? "منشور في الموقع" : "Published Tests"} value={tests?.data.filter(x => x.status === 'PUBLISHED').length ?? 0} icon={CheckCircle2} accent="#2E7D5A" />
-        <MetricCard label={isRtl ? "قيد المراجعة" : "Under Review"} value={tests?.data.filter(x => x.status === 'READY_TO_REVIEW' || x.status === 'NEEDS_REVIEW').length ?? 0} icon={AlertCircle} accent="#D6A43B" />
-        <MetricCard label={isRtl ? "غير مكتمل" : "Incomplete"} value={tests?.data.filter(x => x.completenessStatus === 'INCOMPLETE').length ?? 0} icon={GraduationCap} accent="#B94A48" />
+        <MetricCard label={isRtl ? "حالة: منشور" : "Status: published"} value={tests?.statistics?.published ?? 0} icon={CheckCircle2} accent="#2E7D5A" />
+        <MetricCard label={isRtl ? "قيد المراجعة" : "Under Review"} value={tests?.statistics?.underReview ?? 0} icon={AlertCircle} accent="#D6A43B" />
+        <MetricCard label={isRtl ? "غير مكتمل" : "Incomplete"} value={tests?.statistics?.incomplete ?? 0} icon={GraduationCap} accent="#B94A48" />
       </div>
 
       <div className="bg-white border border-[#DDEFF2] rounded-2xl shadow-sm overflow-hidden">
@@ -641,7 +658,7 @@ function StatusBadge({ status, isRtl }: { status: InternationalTestStatus; isRtl
       ? { badge: 'bg-slate-100 text-slate-600 border-slate-200', dot: 'bg-slate-400' }
       : status === 'READY_TO_REVIEW' || status === 'NEEDS_REVIEW'
       ? { badge: 'bg-amber-50 text-amber-800 border-amber-200/80', dot: 'bg-amber-500' }
-      : status === 'REJECTED' || status === 'INCOMPLETE'
+      : status === 'REJECTED'
       ? { badge: 'bg-rose-50 text-rose-700 border-rose-200/80', dot: 'bg-rose-500' }
       : { badge: 'bg-slate-100 text-slate-700 border-slate-200', dot: 'bg-slate-400' };
 
@@ -681,8 +698,6 @@ function getStatusLabel(status: InternationalTestStatus, isRtl: boolean): string
         return 'جاهز للمراجعة';
       case 'IMPORTED':
         return 'مستورد';
-      case 'INCOMPLETE':
-        return 'ناقص';
       case 'ARCHIVED':
         return 'مؤرشف';
       case 'REJECTED':

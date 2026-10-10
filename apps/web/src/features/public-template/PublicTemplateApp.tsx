@@ -1814,6 +1814,7 @@ export default function App() {
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'exams' ? (
               <ExamsSearchPage
+                locale={language} dataMode={publicDataMode}
                 exams={exams}
                 initialQuery={examNavigationQuery}
                 onBack={goBack}

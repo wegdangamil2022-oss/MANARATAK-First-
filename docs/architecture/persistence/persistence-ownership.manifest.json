@@ -263,7 +263,10 @@
     "WorkflowControlRecord": "foundation_control_plane",
     "WorkflowExecutionProjection": "foundation_control_plane",
     "ReferenceOwnerImportReview": "reference",
-    "ReferenceStandardSnapshot": "reference"
+    "ReferenceStandardSnapshot": "reference",
+    "InternationalTestGovernance": "tests",
+    "InternationalTestPublicationSnapshot": "tests",
+    "InternationalTestEvidenceHistory": "tests"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -296,8 +299,17 @@
     "packages/infrastructure/src/authorization/": "identity"
   },
   "approvedCrossContextReadModels": {
-    "packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyImportGateway.ts": ["import"],
-    "packages/infrastructure/src/academic-taxonomy/PrismaCanonicalAcademicUsageGateway.ts": ["reference", "majors", "tests", "universities", "scholarships", "courses"],
+    "packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyImportGateway.ts": [
+      "import"
+    ],
+    "packages/infrastructure/src/academic-taxonomy/PrismaCanonicalAcademicUsageGateway.ts": [
+      "reference",
+      "majors",
+      "tests",
+      "universities",
+      "scholarships",
+      "courses"
+    ],
     "packages/infrastructure/src/international-tests/PrismaInternationalTestImportChangeGateway.ts": [
       "identity"
     ],
@@ -342,6 +354,13 @@
       "services",
       "tests",
       "universities"
+    ],
+    "packages/infrastructure/src/universities/PrismaInternationalTestConsumerReadGateway.ts": [
+      "universities"
+    ],
+    "packages/infrastructure/src/international-tests/InternationalTestGovernancePersistence.ts": [
+      "reference",
+      "academic_taxonomy"
     ]
   },
   "historicalMigrationBaseline": [

@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import { InternationalTestGovernancePersistence } from './InternationalTestGovernancePersistence';
 import { PrismaClient, Prisma } from '@prisma/client';
 import {
   IInternationalTestRepository,
@@ -73,6 +75,11 @@ export const INTERNATIONAL_TEST_OPTIONAL_FIELDS_RESERVED_KEYS = new Set([
 ]);
 
 const defaultInclude = {
+  sessions: true,
+  centers: true,
+  requirements: true,
+  policies: true,
+  equivalencyMappings: true,
   variants: true,
   sections: { orderBy: { order: 'asc' as const } },
   scoreScale: true,
@@ -129,6 +136,17 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM ${Prisma.raw('"' + tables[kind] + '"')} WHERE "id" = ${referenceId} FOR SHARE`);
   }
 
+  async getRevision(testId: string): Promise<number> { return new InternationalTestGovernancePersistence(this.prisma,this.transactionBound).revision(testId); }
+  async advanceRevision(testId: string, expected: number, preserveApproval = false): Promise<void> { return new InternationalTestGovernancePersistence(this.prisma,this.transactionBound).advance(testId,expected,preserveApproval); }
+  async govern(testId: string, action: string, input: Record<string,unknown>, actorId: string): Promise<unknown> {
+    const test = await this.findById(testId); if (!test) throw new Error('INTERNATIONAL_TEST_NOT_FOUND');
+    return new InternationalTestGovernancePersistence(this.prisma,this.transactionBound).execute(test,action,input,actorId);
+  }
+  private async publishedSnapshot(record: {id:string;currentPublishedVersionId?:string|null}): Promise<InternationalTestDto|null> {
+    if (!record.currentPublishedVersionId) return null;
+    const rows = await this.prisma.$queryRaw<Array<{payload:InternationalTestDto}>>(Prisma.sql`SELECT s."payload" FROM "InternationalTestPublicationSnapshot" s JOIN "InternationalTestVersion" v ON v."id"=s."id" AND v."testId"=s."testId" WHERE s."id"=${record.currentPublishedVersionId} AND s."testId"=${record.id}`);
+    return rows[0]?.payload??null;
+  }
   // --- Legacy & Core Methods ---
 
   async findById(id: string): Promise<InternationalTestDto | null> {
@@ -176,7 +194,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
           : null;
     }
 
-    return this.mapToDto(record);
+    return { ...this.mapToDto(record), revision: await this.getRevision(id) };
   }
 
   async findBySlug(slug: string): Promise<InternationalTestDto | null> {
@@ -234,15 +252,8 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
   }
 
   async findPublishedBySlug(slug: string): Promise<InternationalTestDto | null> {
-    const record = await this.prisma.internationalTest.findFirst({
-      where: {
-        slug,
-        status: InternationalTestStatus.PUBLISHED,
-        isPubliclyVisible: true,
-      },
-      include: defaultInclude,
-    });
-    return record ? this.mapToDto(record) : null;
+    const record = await this.prisma.internationalTest.findFirst({where:{slug,isPubliclyVisible:true},select:{id:true,currentPublishedVersionId:true}});
+    return record ? this.publishedSnapshot(record) : null;
   }
 
   async findByDedupKey(key: string): Promise<InternationalTestDto | null> {
@@ -255,6 +266,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
 
   async create(data: any): Promise<InternationalTestDto> {
     const {
+      id,
       publicId,
       slug,
       canonicalName,
@@ -295,6 +307,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
 
     const record = await this.prisma.internationalTest.create({
       data: {
+        id,
         publicId,
         slug,
         canonicalName,
@@ -372,6 +385,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
   }
 
   async update(id: string, updates: any): Promise<InternationalTestDto> {
+    if (['countryRelationships','languageRelationships','academicTaxonomyRelationships','degreeRelationships'].some(key => updates[key] !== undefined)) throw new Error('INTERNATIONAL_TEST_INCREMENTAL_GRAPH_REQUIRED');
     const {
       id: _id,
       createdAt,
@@ -468,46 +482,10 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
               },
             }
           : {}),
-        ...(countryRelationships !== undefined
-          ? {
-              countryRelationships: {
-                deleteMany: {},
-                create: (countryRelationships || []).map((relationship: any) =>
-                  this.countryRelationshipPersistencePayload(relationship),
-                ),
-              },
-            }
-          : {}),
-        ...(languageRelationships !== undefined
-          ? {
-              languageRelationships: {
-                deleteMany: {},
-                create: (languageRelationships || []).map((relationship: any) =>
-                  this.languageRelationshipPersistencePayload(relationship),
-                ),
-              },
-            }
-          : {}),
-        ...(academicTaxonomyRelationships !== undefined
-          ? {
-              academicTaxonomyRelationships: {
-                deleteMany: {},
-                create: (academicTaxonomyRelationships || []).map((relationship: any) =>
-                  this.taxonomyRelationshipPersistencePayload(relationship),
-                ),
-              },
-            }
-          : {}),
-        ...(degreeRelationships !== undefined
-          ? {
-              degreeRelationships: {
-                deleteMany: {},
-                create: (degreeRelationships || []).map((relationship: any) =>
-                  this.degreeRelationshipPersistencePayload(relationship),
-                ),
-              },
-            }
-          : {}),
+
+
+
+
       } as any,
       include: defaultInclude,
     });
@@ -565,11 +543,11 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     }
 
     if (filters?.countryIso2Code) {
-      where.countryRelationships = {
-        some: { countryIso2Code: filters.countryIso2Code.toUpperCase() },
-      };
+      const country=await this.prisma.referenceCountry.findUnique({where:{iso2Code:String(filters.countryIso2Code).toUpperCase()},select:{id:true}});
+      where.availability={is:{availableCountryIds:{array_contains:[country?.id??'UNRESOLVED_COUNTRY']}}};
     }
 
+    if(filters?.staleOnly) where.OR=[{evidence:{is:null}},{evidence:{is:{retrievedAt:{lt:new Date(Date.now()-30*86400000)}}}}];
     if (filters?.completenessStatus) {
       if (Array.isArray(filters.completenessStatus)) {
         where.completenessStatus = { in: filters.completenessStatus };
@@ -585,7 +563,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     const search = filters?.searchQuery || filters?.q;
     if (search && typeof search === 'string' && search.trim() !== '') {
       const query = search.trim();
-      where.OR = [
+      where.AND = [...(where.OR?[{OR:where.OR}]:[]),{OR:[
         { canonicalName: { contains: query, mode: 'insensitive' } },
         { localizedNameAr: { contains: query, mode: 'insensitive' } },
         { localizedNameEn: { contains: query, mode: 'insensitive' } },
@@ -593,36 +571,43 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
         { providerName: { contains: query, mode: 'insensitive' } },
         { displayName: { contains: query, mode: 'insensitive' } },
         { slug: { contains: query, mode: 'insensitive' } },
-      ];
+      ]}]; delete where.OR;
     }
 
-    const [data, total] = await Promise.all([
+    const [data, total, groups] = await Promise.all([
       this.prisma.internationalTest.findMany({
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{[(['createdAt','updatedAt','canonicalName'].includes(String(filters.sortBy))?String(filters.sortBy):'createdAt')]:filters.sortDirection==='asc'?'asc':'desc'}, { id: filters.sortDirection==='asc'?'asc':'desc' }],
         include: defaultInclude,
       }),
       this.prisma.internationalTest.count({ where }),
+      this.prisma.internationalTest.groupBy({by:['status','completenessStatus'],where,_count:{_all:true}}),
     ]);
 
-    return {
-      data: data.map((d: any) => this.mapToDto(d)),
-      total,
-      page,
-      limit: pageSize,
+    const revisions = data.length ? await this.prisma.$queryRaw<Array<{testId:string;revision:number}>>(Prisma.sql`SELECT "testId","revision" FROM "InternationalTestGovernance" WHERE "testId" IN (${Prisma.join(data.map(row=>row.id))})`) : [];
+    const revisionById = new Map(revisions.map(row=>[row.testId,row.revision]));
+    const result = {
+      data: data.map((d: any) => ({...this.mapToDto(d),revision:revisionById.get(d.id)??0})), total, page, limit:pageSize,
+      statistics: {scope:'FILTERED',published:groups.filter(row=>row.status==='PUBLISHED').reduce((n,row)=>n+row._count._all,0),underReview:groups.filter(row=>['READY_TO_REVIEW','NEEDS_REVIEW'].includes(row.status)).reduce((n,row)=>n+row._count._all,0),incomplete:groups.filter(row=>row.completenessStatus==='INCOMPLETE').reduce((n,row)=>n+row._count._all,0)},
     };
+    return result;
   }
 
-  async listPublished(
-    filters?: Omit<InternationalTestFilters, 'status'>,
-  ): Promise<PaginatedInternationalTestResult<InternationalTestDto>> {
-    return this.list({
-      ...filters,
-      status: [InternationalTestStatus.PUBLISHED],
-      isPubliclyVisible: true,
-    });
+  async listPublished(filters: Omit<InternationalTestFilters,'status'> = {}): Promise<PaginatedInternationalTestResult<InternationalTestDto>> {
+    const page = Math.max(1,Math.min(1000,Math.floor(Number(filters.page)||1))); const limit = Math.min(50,Math.max(1,Math.floor(Number(filters.pageSize)||20)));
+    const clauses = [Prisma.sql`t."isPubliclyVisible"=true`];
+    const search = filters.searchQuery??filters.q;
+    if (search) clauses.push(Prisma.sql`(s."payload"->>'canonicalName' ILIKE ${'%'+search+'%'} OR s."payload"->>'localizedNameAr' ILIKE ${'%'+search+'%'} OR s."payload"->>'localizedNameEn' ILIKE ${'%'+search+'%'})`);
+    if (filters.providerName) clauses.push(Prisma.sql`s."payload"->>'providerName'=${filters.providerName}`);
+    const categories = filters.testCategory??filters.category;
+    if (categories) clauses.push(Prisma.sql`s."payload"->>'testCategory' IN (${Prisma.join(Array.isArray(categories)?categories:[categories])})`);
+    if (filters.countryIso2Code) clauses.push(Prisma.sql`EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(s."payload"->'countryRelationships','[]'::jsonb)) r WHERE r->>'referenceCode'=${String(filters.countryIso2Code).toUpperCase()})`);
+    const where=Prisma.join(clauses,' AND ');
+    const from=Prisma.sql`FROM "InternationalTest" t JOIN "InternationalTestPublicationSnapshot" s ON s."id"=t."currentPublishedVersionId" AND s."testId"=t."id" JOIN "InternationalTestVersion" v ON v."id"=s."id" AND v."testId"=t."id" WHERE ${where}`;
+    const [rows,counts] = await Promise.all([this.prisma.$queryRaw<Array<{payload:InternationalTestDto}>>(Prisma.sql`SELECT s."payload" ${from} ORDER BY s."publishedAt" DESC,s."id" DESC LIMIT ${limit} OFFSET ${(page-1)*limit}`),this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT COUNT(*) AS total ${from}`)]);
+    return {data:rows.map(row=>row.payload),total:Number(counts[0]?.total??0),page,limit};
   }
 
   // --- Normalized Profile & Discovery Methods ---
@@ -678,7 +663,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     return record ? this.mapProviderToDto(record) : null;
   }
 
-  async listProviders(search?: string): Promise<InternationalTestProviderDto[]> {
+  async listProviders(search?: string, page = 1): Promise<InternationalTestProviderDto[]> {
     const query = search?.trim();
     const records = await this.prisma.internationalTestProvider.findMany({
       where: query
@@ -691,8 +676,8 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
             ],
           }
         : undefined,
-      orderBy: { displayName: 'asc' },
-      take: 250,
+      orderBy: [{ displayName: 'asc' },{ id: 'asc' }],
+      skip: (Math.min(1000,Math.max(1,page))-1)*50, take: 50,
     });
     return records.map((record: any) => this.mapProviderToDto(record));
   }
@@ -740,7 +725,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     let record: any;
     if (data.id) {
       record = await this.prisma.internationalTestVariant.update({
-        where: { id: data.id },
+        where: { id: data.id, testId },
         data: {
           variantName: data.variantName,
           deliveryMode: data.deliveryMode,
@@ -780,7 +765,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     const questionTypesJson = toRequiredPrismaJson(data.questionTypes ?? null);
     if (data.id) {
       record = await this.prisma.internationalTestSection.update({
-        where: { id: data.id },
+        where: { id: data.id, testId },
         data: {
           sectionName: data.sectionName,
           sectionType: data.sectionType,
@@ -841,7 +826,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     let record: any;
     if (data.id) {
       record = await this.prisma.internationalTestFeeMetadata.update({
-        where: { id: data.id },
+        where: { id: data.id, testId },
         data: {
           feeType: data.feeType,
           amount: data.amount,
@@ -874,7 +859,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     let record: any;
     if (data.id) {
       record = await this.prisma.internationalTestOfficialLink.update({
-        where: { id: data.id },
+        where: { id: data.id, testId },
         data: {
           linkType: data.linkType,
           url: data.url,
@@ -944,7 +929,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     let record: any;
     if (data.id) {
       record = await this.prisma.internationalTestPreparationMaterial.update({
-        where: { id: data.id },
+        where: { id: data.id, testId },
         data: {
           materialType: data.materialType,
           url: data.url,
@@ -999,6 +984,9 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
       sourceTrustLevel: data.sourceTrustLevel,
     };
 
+    if (!this.transactionBound) throw new Error('INTERNATIONAL_TEST_TRANSACTION_REQUIRED');
+    const previous = await this.prisma.internationalTestEvidence.findUnique({where:{testId}});
+    for (const entry of [previous, payload].filter(Boolean)) await this.prisma.$executeRaw(Prisma.sql`INSERT INTO "InternationalTestEvidenceHistory" ("id","testId","payload","actorId") VALUES (${randomUUID()},${testId},${JSON.stringify(entry)}::jsonb,${String((data as InternationalTestEvidenceDto & {reviewActorId?:string}).reviewActorId??'LEGACY_CAPTURE')})`);
     const record = await this.prisma.internationalTestEvidence.upsert({
       where: { testId },
       create: { testId, ...payload },
@@ -1149,7 +1137,11 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     };
   }
 
-  async listImportVersions(testId: string): Promise<InternationalTestVersionDto[]> {
+  async findImportVersion(testId:string,versionId:string):Promise<InternationalTestVersionDto|null> {
+    const row=await this.prisma.internationalTestVersion.findFirst({where:{id:versionId,testId},include:{contentBlocks:true}});
+    return row?this.mapVersionToDto(row,testId):null;
+  }
+  async listImportVersions(testId: string, page = 1): Promise<InternationalTestVersionDto[]> {
     const existingTest = await this.prisma.internationalTest.findUnique({ where: { id: testId } });
     if (!existingTest) {
       throw new Error(`International test with id ${testId} not found`);
@@ -1157,6 +1149,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
 
     const records = await this.prisma.internationalTestVersion.findMany({
       where: { testId },
+      take:25,skip:(Math.min(1000,Math.max(1,page))-1)*25,
       orderBy: [{ versionNumber: 'desc' }],
       include: { contentBlocks: true },
     });

@@ -5615,3 +5615,28 @@ model AcademicTaxonomyImportReview {
   updatedAt DateTime @updatedAt
   @@index([status, updatedAt])
 }
+
+// P9 owner governance; foreign keys/checks in the owner migration.
+model InternationalTestGovernance {
+  testId String @id
+  revision Int @default(0)
+  approval Json?
+  verification Json?
+}
+model InternationalTestPublicationSnapshot {
+  id String @id
+  testId String
+  candidateHash String
+  payload Json
+  reviewerId String
+  publishedAt DateTime @default(now())
+  @@index([testId, publishedAt])
+}
+model InternationalTestEvidenceHistory {
+  id String @id
+  testId String
+  payload Json
+  actorId String
+  capturedAt DateTime @default(now())
+  @@index([testId, capturedAt])
+}

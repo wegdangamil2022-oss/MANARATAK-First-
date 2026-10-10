@@ -450,6 +450,7 @@ export interface ServiceFilters {
 }
 
 export interface InternationalTestFilters {
+  searchQuery?:string;
   locale?: 'ar' | 'en';
   testCategory?: string;
   providerName?: string;
