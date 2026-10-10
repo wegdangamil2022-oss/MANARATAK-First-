@@ -194,6 +194,12 @@ describe('CertificateUseCases W10 trust model', () => {
     expect(replacement).not.toHaveProperty('revocationReason');
     expect(replacement).not.toHaveProperty('revokedBy');
     expect(replacement.metadata.signedEnvelope.replacesCertificateId).toBe('old-cert');
+    // An HTTP idempotency retry after a committed replacement sees REISSUED.
+    // Application must still reach the repository lock/semantic comparison, not reject early.
+    const original = await repository.findById('old-cert');
+    repository.findById.mockResolvedValue({ ...original, status: CertificateStatus.REISSUED, replacedByCertificateId: 'replacement-1' });
+    await useCases.reissue('old-cert', 'Administrative correction', 'checker-1');
+    expect(repository.reissue).toHaveBeenCalledTimes(2);
   });
 
   it('is idempotent for duplicate trusted completion events and never issues twice', async () => {
