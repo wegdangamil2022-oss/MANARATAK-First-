@@ -28,3 +28,7 @@ Inspected the live repository tree and Phase 12 architecture, contracts, impleme
 - Runtime verification still required for Prisma nested upsert/relations/schema compatibility, application compilation/type generation after migration, per-role authorization, true stale-write race behavior, Audit/Outbox atomic rollback, import review decisions, candidate review evidence, official-source and publication gating, approved language translations and public response shape. Mark these **RUNTIME_VERIFICATION_DEFERRED**, never passed.
 
 See `SECTION_11_CHECK_LOG.md` for the exact checks performed.
+
+## Quick branch review follow-up
+
+The authorized review added selected-language public payloads, publication/public filtering for eligibility-linked Majors, stable display identity during source merge, missing-field child enrichment, persisted sponsor comparison, read-relation stripping for nested writes, strict revision header syntax, revision-locked import merge and repository-level invalidation of publish readiness. The new review cases and adjusted import fixture are source tests; the one-time run observed 28/33 passing before corrections. No post-fix rerun was performed. Full checklist closure and database/runtime sign-off remain deferred.

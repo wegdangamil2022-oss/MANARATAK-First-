@@ -408,7 +408,7 @@ export class AdminScholarshipUseCases {
       if (sponsor?.lifecycle !== 'PUBLISHED') throw new Error('SCHOLARSHIP_SPONSOR_UNIVERSITY_NOT_PUBLISHED');
     }
     if (!existing.applicationCycles?.length) throw new Error('SCHOLARSHIP_APPLICATION_CYCLE_REQUIRED');
-    for (const item of existing.majorTargets ?? []) {
+    for (const item of [...(existing.majorTargets ?? []), ...(existing.eligibilityItems ?? [])]) {
       if (!item.majorId) continue;
       const major = await this.assertCanonicalReference('MAJOR', item.majorId);
       if (major?.lifecycle !== 'PUBLISHED') throw new Error('SCHOLARSHIP_MAJOR_NOT_PUBLISHED');

@@ -43,7 +43,7 @@ export class PublicScholarshipUseCases {
       localizedValues: localizedNames,
     }).value ?? scholarship.displayName;
 
-    return projectPublishedScholarship(scholarship, displayName, localizedNames);
+    return projectPublishedScholarship(scholarship, displayName);
   }
 
   private localeValues(value: unknown): Partial<Record<SupportedLocale, string>> {

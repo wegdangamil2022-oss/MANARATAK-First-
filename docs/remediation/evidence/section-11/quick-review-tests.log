@@ -1,0 +1,106 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-11-review
+
+ ❯ packages/application/tests/scholarships/PublicScholarshipUseCases.spec.ts (6 tests | 1 failed) 18ms
+     × projects the requested locale without exposing alternate-language payloads 7ms
+ ❯ packages/application/tests/scholarships/ScholarshipImportAtomicTransferUseCase.spec.ts (21 tests | 2 failed) 60ms
+     × requires a durable MERGE decision and preserves existing id/publicId 22ms
+     × merge retains prior SourceEvidence and adds incoming provenance deterministically 1ms
+ ❯ packages/application/tests/scholarships/Section11Review.spec.ts (6 tests | 2 failed) 19ms
+     × excludes resolved eligibility tied to an unpublished Major 7ms
+     × blocks publication when an eligibility Major is unpublished 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/application/tests/scholarships/PublicScholarshipUseCases.spec.ts > PublicScholarshipUseCases > projects the requested locale without exposing alternate-language payloads
+AssertionError: expected { publicId: undefined, …(34) } to not have property "localizedNames"
+
+- Expected:
+undefined
+
++ Received:
+{
+  "ar": "منحة عالمية",
+  "en": "Global Scholarship",
+}
+
+ ❯ packages/application/tests/scholarships/PublicScholarshipUseCases.spec.ts:101:24
+     99|     expect(arabic.displayName).toBe('منحة عالمية');
+    100|     expect(english.displayName).toBe('Global Scholarship');
+    101|     expect(arabic).not.toHaveProperty('localizedNames');
+       |                        ^
+    102|   });
+    103|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  packages/application/tests/scholarships/ScholarshipImportAtomicTransferUseCase.spec.ts > WP12-10 ScholarshipImportAtomicTransferUseCase > requires a durable MERGE decision and preserves existing id/publicId
+ FAIL  packages/application/tests/scholarships/ScholarshipImportAtomicTransferUseCase.spec.ts > WP12-10 ScholarshipImportAtomicTransferUseCase > merge retains prior SourceEvidence and adds incoming provenance deterministically
+Error: SCHOLARSHIP_IMPORT_FIELD_CONFLICT_REVIEW_REQUIRED:displayName
+ ❯ ScholarshipImportAtomicTransferUseCase.buildMergeUpdate packages/application/src/scholarships/import-center/ScholarshipImportAtomicTransferUseCase.ts:420:15
+    418|       if (!this.meaningful(previous)) (updates as any)[key] = value;
+    419|       else if (this.canonicalValue(previous) !== this.canonicalValue(v…
+    420|         throw new Error(`SCHOLARSHIP_IMPORT_FIELD_CONFLICT_REVIEW_REQU…
+       |               ^
+    421|       }
+    422|     }
+ ❯ packages/application/src/scholarships/import-center/ScholarshipImportAtomicTransferUseCase.ts:221:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  packages/application/tests/scholarships/Section11Review.spec.ts > Section 11 review: public safety and authoring boundaries > excludes resolved eligibility tied to an unpublished Major
+AssertionError: expected [ { itemKey: 'major-rule', …(11) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "countryReferenceId": undefined,
++     "degreeLevelId": undefined,
++     "internationalTestId": undefined,
++     "isRequired": undefined,
++     "itemKey": "major-rule",
++     "itemTypeCode": undefined,
++     "majorId": "private-major",
++     "maximumValue": undefined,
++     "minimumValue": undefined,
++     "operatorCode": undefined,
++     "priorityOrder": undefined,
++     "valueText": undefined,
++   },
++ ]
+
+ ❯ packages/application/tests/scholarships/Section11Review.spec.ts:25:86
+     23|   it('excludes resolved eligibility tied to an unpublished Major',()=>{
+     24|     const source={...fixture(),eligibilityItems:[{itemKey:'major-rule'…
+     25|     expect(projectPublishedScholarship(source as any,'Example',{}).eli…
+       |                                                                                      ^
+     26|   });
+     27|   it('blocks canonical relationship writes without actor and audit con…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  packages/application/tests/scholarships/Section11Review.spec.ts > Section 11 review: public safety and authoring boundaries > blocks publication when an eligibility Major is unpublished
+AssertionError: expected [Function] to throw error including 'SCHOLARSHIP_MAJOR_NOT_PUBLISHED' but got 'SCHOLARSHIP_REVIEW_REASON_AND_ACTOR_R…'
+
+Expected: "SCHOLARSHIP_MAJOR_NOT_PUBLISHED"
+Received: "SCHOLARSHIP_REVIEW_REASON_AND_ACTOR_REQUIRED"
+
+ ❯ packages/application/tests/scholarships/Section11Review.spec.ts:45:54
+     43|     const current={...fixture(),eligibilityItems:[{itemKey:'major-rule…
+     44|     const {useCases}=service(current,[{id:'private-major',lifecycle:'R…
+     45|     await expect(useCases.markReadyToPublish('sch-1')).rejects.toThrow…
+       |                                                      ^
+     46|   });
+     47| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  5 failed | 28 passed (33)
+   Start at  14:18:36
+   Duration  2.85s (transform 3.29s, setup 0ms, import 4.70s, tests 98ms, environment 0ms)
+

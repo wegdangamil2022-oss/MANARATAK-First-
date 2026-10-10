@@ -1,7 +1,7 @@
 import type { PublicScholarshipDto, ScholarshipDto } from '@manaratak/domain';
 
 /** Public scholarship shape: explicit allowlist, never a spread of the mutable owner record. */
-export function projectPublishedScholarship(source: ScholarshipDto, displayName: string, localizedNames: Partial<Record<string, string>>): PublicScholarshipDto {
+export function projectPublishedScholarship(source: ScholarshipDto, displayName: string): PublicScholarshipDto {
   const resolved = (s: unknown) => String(s ?? '').toUpperCase() === 'RESOLVED';
   const httpsUrl = (s: unknown) => typeof s === 'string' && /^https:\/\//i.test(s) ? s : null;
   const majorPublished = (value: unknown) => {
@@ -15,7 +15,7 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
   };
   return {
     publicId: source.publicId, slug: source.slug, canonicalName: source.canonicalName,
-    displayName, localizedNames, providerName: source.providerName,
+    displayName, providerName: source.providerName,
     academicYear: source.academicYear, cycleName: source.cycleName,
     countryReferenceId: source.countryReferenceId, countrySourceLabel: source.countrySourceLabel,
     countryScope: source.countryScope, studyLanguageReferenceId: source.studyLanguageReferenceId,
@@ -38,7 +38,8 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
     majorTargets: (source.majorTargets ?? []).filter(m => m.majorId && resolved(m.resolutionStatus) && majorPublished(m))
       .map(m => ({targetKey:m.targetKey,majorId:m.majorId,sourceLabel:m.sourceLabel,resolutionStatus:'RESOLVED'})),
     eligibilityItems: (source.eligibilityItems ?? []).filter(e =>
-      resolved(e.resolutionStatus) || ![e.countryReferenceId,e.degreeLevelId,e.majorId,e.internationalTestId].some(Boolean))
+      (resolved(e.resolutionStatus) || ![e.countryReferenceId,e.degreeLevelId,e.majorId,e.internationalTestId].some(Boolean)) &&
+      (!e.majorId || majorPublished(e)))
       .map(e => ({itemKey:e.itemKey,itemTypeCode:e.itemTypeCode,operatorCode:e.operatorCode,
         valueText:e.valueText,minimumValue:e.minimumValue,maximumValue:e.maximumValue,
         countryReferenceId:e.countryReferenceId,degreeLevelId:e.degreeLevelId,

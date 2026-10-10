@@ -66,7 +66,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     benefits: { include: { currency: { select: { isoCode: true, nameAr: true, name: true } } } },
     degreeTargets: { include: { degreeLevel: { select: { canonicalCode: true, nameEn: true, nameAr: true } } } },
     majorTargets: { include: { major: { select: { status: true } } } },
-    eligibilityItems: true,
+    eligibilityItems: { include: { major: { select: { status: true } } } },
     requiredDocuments: true,
     sourceEvidence: true,
     universityLinks: { include: { university: { select: { status: true } }, academicProgram: { select: { status: true, majorMappingState: true } } } },
@@ -198,7 +198,8 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       canonicalDedupKey: updates.canonicalDedupKey,
       displayName: updates.displayName,
       providerName: updates.providerName,
-      status: updates.status,
+      status: structural && existing.status === ScholarshipStatus.READY_TO_PUBLISH
+        ? ScholarshipStatus.READY_TO_REVIEW : updates.status,
       completenessStatus: updates.completenessStatus,
       verificationStatus: updates.verificationStatus,
       publicationStatus: updates.publicationStatus,
@@ -658,6 +659,9 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     delete copy.updatedAt;
     delete copy.currency;
     delete copy.degreeLevel;
+    delete copy.major;
+    delete copy.university;
+    delete copy.academicProgram;
     return copy;
   }
 }

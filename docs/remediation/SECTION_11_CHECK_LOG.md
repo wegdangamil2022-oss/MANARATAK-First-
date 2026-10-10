@@ -10,7 +10,7 @@ Covered: schema + unapplied revision SQL; row-locked compare-and-fail for stale 
 
 **Scope qualification:** these are source text/structure invariants, not TypeScript compilation, unit test, Prisma schema validation, database integrity, or runtime behavior. All 18 passing means the selected source anchors exist in the branch. No subsequent rerun was performed and no previous-phase tests were repeated.
 
-## Not executed — explicit constraints
+## Not executed during the initial source round — explicit constraints
 
 - No `tsc`, comprehensive build, `vitest`, heavy/E2E/browser tests or remote actions.
 - No database query, Prisma generate, migrations applied, seed, import, data promotion, background provider execution or network calls to production services.
@@ -27,3 +27,24 @@ Covered: schema + unapplied revision SQL; row-locked compare-and-fail for stale 
 6. Validate actual scholarship detail/list screens, all command buttons and public bilingual projections with real persisted records; exclude private evidence/unapproved relations.
 
 Final classification: **SOURCE_FIXES_COMMITTED / BOUNDED_STATIC_CHECKS_PASSED / OPERATIONAL_SIGNOFF_DEFERRED**.
+
+## Authorized quick branch review — 2026-10-10
+
+Reviewed the 17-file Section 11 diff against main `91b7d97` and the available Phase 12 architecture requirements (canonical references, independent ownership, source merge/provenance, publication review and version integrity). The original consolidated admin review plan remains unavailable; this is not a certification of every item in that missing checklist.
+
+Executed once with local source aliases, Node environment and two workers:
+`timeout 45s node node_modules/vitest/vitest.mjs run --config .section11-quick-vitest.config.ts`
+
+Selected files: `PublicScholarshipUseCases.spec.ts`, `ScholarshipImportAtomicTransferUseCase.spec.ts`, and the new `Section11Review.spec.ts`.
+**Observed result: 28 PASS / 5 FAIL / 33 total, 2.85 seconds.** Raw output: `evidence/section-11/quick-review-tests.log`.
+
+Failure causes and source corrections:
+- One locale projection regression: removed alternate `localizedNames` from the public payload while retaining selected-language displayName resolution.
+- Two import merge failures: preserve the existing canonical displayName instead of blocking provenance merge over a supplier display label; incoming evidence is retained. Conflicting populated funding/eligibility/reference values still require explicit reconciliation.
+- Two unpublished eligibility-Major failures: verify eligibility-linked Majors at publication and include their actual owner status for public projection filtering.
+
+Additional manual corrections: hydrate missing child fields without replacing populated values; read existing sponsor University from sponsorContext; strip hydrated read relations before nested Prisma writes; reject unbalanced If-Match quoting; compare and lock the existing Scholarship revision before import merge; invalidate publish readiness on structural repository edits including import changes. The import test fixture now models the required revision lock.
+
+`git diff --check origin/main..HEAD` executed once before these corrections: PASS. No check or test was rerun after corrections. Final correctness/type-check/runtime success is not claimed.
+
+No database calls, schema application, Prisma generation, heavy tests, browser, full build, deployment or main merge. Push only, as authorized. The temporary test config was removed after its single execution.

@@ -100,6 +100,10 @@ function setup(existing: ScholarshipDto | null = null) {
     async findById(id) { return current?.id === id ? current : null; },
     async findBySlug() { return null; },
     async updateStatus() {},
+    async assertCurrentRevision(id, revision) {
+      if (!current || current.id !== id || current.revision !== revision)
+        throw new Error('SCHOLARSHIP_STALE_REVISION');
+    },
     async list() { return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 }; },
     async listPublished() { return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 }; },
     withTransaction() { return this; },
@@ -134,6 +138,7 @@ function existingScholarship(status: ScholarshipStatus = ScholarshipStatus.IMPOR
   }).duplicateKey;
   return {
     id: 'sch-existing',
+    revision: 1,
     publicId: 'SCH-PUBLIC-1',
     slug: 'qatar-university-scholarship-2027',
     canonicalName: cleaned.cleanedScholarshipName,

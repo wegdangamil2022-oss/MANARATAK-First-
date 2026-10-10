@@ -103,11 +103,12 @@ export class ScholarshipAdminRouter {
       let expectedRevision: number | undefined;
       if (!create) {
         if (!ifMatch) throw new Error('SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED');
-        const match = /^"?(\d+)"?$/.exec(ifMatch.trim());
-        if (!match || !Number.isSafeInteger(Number(match[1])) || Number(match[1]) < 1) {
+        const match = /^(?:"(\d+)"|(\d+))$/.exec(ifMatch.trim());
+        const revisionText = match?.[1] ?? match?.[2];
+        if (!match || !Number.isSafeInteger(Number(revisionText)) || Number(revisionText) < 1) {
           throw new Error('SCHOLARSHIP_INVALID_REVISION_PRECONDITION');
         }
-        expectedRevision = Number(match[1]);
+        expectedRevision = Number(revisionText);
       }
       return {
         ...mutationContext(req),

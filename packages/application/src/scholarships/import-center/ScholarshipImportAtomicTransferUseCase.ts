@@ -209,6 +209,9 @@ export class ScholarshipImportAtomicTransferUseCase
       let mode: 'CREATE' | 'MERGE';
 
       if (plan.existing) {
+        if (!scholarshipTx.assertCurrentRevision || !Number.isSafeInteger(plan.existing.revision))
+          throw new Error('SCHOLARSHIP_REVISION_LOCK_NOT_CONFIGURED');
+        await scholarshipTx.assertCurrentRevision(plan.existing.id, plan.existing.revision!);
         this.assertMergeDecision(decision, plan);
         if (
           plan.existing.publicationStatus === 'PUBLISHED' ||
@@ -414,7 +417,11 @@ export class ScholarshipImportAtomicTransferUseCase
     for (const key of scalarKeys) {
       const value = incoming[key as keyof typeof incoming];
       if (!this.meaningful(value)) continue;
-      const previous = existing[key as keyof typeof existing];
+      const previous = key === 'sponsorUniversityId'
+        ? existing.sponsorContext?.universityId
+        : existing[key as keyof typeof existing];
+      // Retain canonical display identity; alternate incoming names remain in source evidence.
+      if (key === 'displayName' && this.meaningful(previous)) continue;
       if (!this.meaningful(previous)) (updates as any)[key] = value;
       else if (this.canonicalValue(previous) !== this.canonicalValue(value)) {
         throw new Error(`SCHOLARSHIP_IMPORT_FIELD_CONFLICT_REVIEW_REQUIRED:${String(key)}`);
@@ -430,17 +437,28 @@ export class ScholarshipImportAtomicTransferUseCase
       if (existingByKey.size !== current.length || received.some(item => !existingByKey.has(String(item[identity])))) {
         throw new Error(`SCHOLARSHIP_IMPORT_CHILD_CONFLICT_REVIEW_REQUIRED:${area}`);
       }
+      let changed = false;
+      const mergedByKey = new Map(current.map(item => [String(item[identity]), { ...item }]));
       for (const item of received) {
         const previous = existingByKey.get(String(item[identity]))!;
+        const merged = mergedByKey.get(String(item[identity]))!;
         for (const [field, value] of Object.entries(item)) {
           if (['id','scholarshipId','createdAt','updatedAt','metadata','resolutionStatus'].includes(field)) continue;
           if (this.meaningful(value) && this.meaningful(previous[field]) &&
               this.canonicalValue(value) !== this.canonicalValue(previous[field])) {
             throw new Error(`SCHOLARSHIP_IMPORT_CHILD_CONFLICT_REVIEW_REQUIRED:${area}`);
           }
+          if (this.meaningful(value) && !this.meaningful(previous[field])) {
+            merged[field as keyof T] = value as T[keyof T];
+            changed = true;
+            if (['countryReferenceId','degreeLevelId','majorId','internationalTestId','universityId','academicProgramId'].includes(field)
+                && item.resolutionStatus === 'RESOLVED') {
+              merged['resolutionStatus' as keyof T] = 'RESOLVED' as T[keyof T];
+            }
+          }
         }
       }
-      return undefined; // no write if existing reviewed children are unchanged
+      return changed ? current.map(item => mergedByKey.get(String(item[identity]))!) : undefined;
     };
     updates.benefits = mergeChildren(existing.benefits as unknown as Record<string, unknown>[] | undefined, incoming.benefits as unknown as Record<string, unknown>[] | undefined, 'benefitKey', 'BENEFITS') as typeof updates.benefits;
     updates.degreeTargets = mergeChildren(existing.degreeTargets as unknown as Record<string, unknown>[] | undefined, incoming.degreeTargets as unknown as Record<string, unknown>[] | undefined, 'targetKey', 'DEGREES') as typeof updates.degreeTargets;
