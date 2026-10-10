@@ -110,7 +110,9 @@ export class CertificateUseCases {
     return {
       activeTemplate,
       activeIssuer,
-      trustedCompletionIssuanceReady: activeTemplate && activeIssuer && (!runtime.productionLike || (runtime.signingProviderConfigured && runtime.signingKeyReferenceConfigured && runtime.publicVerificationBaseUrlConfigured)),
+      // A DRAFT/EAP-only setup must never display trusted issuance READY without a usable signer.
+      trustedCompletionIssuanceReady: activeTemplate && activeIssuer && runtime.signingProviderConfigured &&
+        (!runtime.productionLike || (runtime.signingKeyReferenceConfigured && runtime.publicVerificationBaseUrlConfigured)),
       artifactRendererMode: 'EAP_ASYNC',
       artifactRendererRuntimeReady: artifacts.status === 'READY' && Boolean(artifacts.verifiedAt),
       artifactRendererStatus: artifacts.status,
