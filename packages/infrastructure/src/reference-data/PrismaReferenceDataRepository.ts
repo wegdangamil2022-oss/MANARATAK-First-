@@ -1112,6 +1112,14 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (currentRows[0].versionNumber !== command.expectedVersion) throw new Error('REFERENCE_VERSION_CONFLICT');
     const from = currentRows[0].lifecycleState as ReferenceLifecycleState;
     assertReferenceLifecycleTransition(from, command.toState, command.targetReferenceId);
+    // FK impact alone is PARTIAL: non-FK consumers are not inventoried.
+    // Keep all terminal states closed until an explicit certified-impact
+    // protocol exists. Admin hiding the action is NOT an authorization guard.
+    if ([ReferenceLifecycleState.ARCHIVED, ReferenceLifecycleState.MERGED,
+      ReferenceLifecycleState.SUPERSEDED].includes(command.toState)) {
+      throw new Error('REFERENCE_TERMINAL_IMPACT_CERTIFICATION_REQUIRED');
+    }
+
 
     if (command.targetReferenceId) {
       const targetRows = await this.prisma.$queryRaw<Array<{ id: string; lifecycleState: string; countryIso2Code?: string }>>(Prisma.sql`
