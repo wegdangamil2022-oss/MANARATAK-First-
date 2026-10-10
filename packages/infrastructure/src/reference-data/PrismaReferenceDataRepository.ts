@@ -576,10 +576,10 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     try { assertReferenceLifecycleTransition(current.lifecycleState as ReferenceLifecycleState, command.toState, command.targetReferenceId); }
     catch { throw new ReferenceRegionCommandError('REGION_TRANSITION_INVALID'); }
     if ([ReferenceLifecycleState.ARCHIVED, ReferenceLifecycleState.MERGED, ReferenceLifecycleState.SUPERSEDED].includes(command.toState)) {
-      const dependencies = await this.prisma.administrativeRegion.findUnique({
-        where: { id: current.id }, select: { _count: { select: { cities: true, universities: true, universityCampuses: true } } },
-      });
-      if (!dependencies || Object.values(dependencies._count).some(count => count > 0)) throw new ReferenceRegionCommandError('REGION_HAS_DEPENDENCIES');
+      // The FK inventory does not include all university/source/public consumers.
+      // Even a zero FK count cannot authorize destructive terminal transitions.
+      // Use the same owner boundary as the generic reference types.
+      throw new ReferenceRegionCommandError('REGION_IMPACT_CERTIFICATION_REQUIRED');
     }
     if (command.targetReferenceId) {
       if (![ReferenceLifecycleState.MERGED, ReferenceLifecycleState.SUPERSEDED].includes(command.toState) || command.targetReferenceId === current.id) throw new ReferenceRegionCommandError('REGION_TARGET_INVALID');

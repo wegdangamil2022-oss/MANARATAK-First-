@@ -9,7 +9,7 @@ export enum ReferenceLifecycleState {
 export type GovernedReferenceEntityType = 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY' | 'REGION';
 
 export class ReferenceRegionCommandError extends Error {
-  constructor(public readonly code: 'REGION_NOT_FOUND' | 'REGION_VERSION_CONFLICT' | 'REGION_IDENTITY_IMMUTABLE' | 'REGION_CODE_CONFLICT' | 'REGION_COUNTRY_INACTIVE' | 'REGION_NOT_ACTIVE' | 'REGION_HAS_DEPENDENCIES' | 'REGION_TRANSITION_INVALID' | 'REGION_TARGET_INVALID') {
+  constructor(public readonly code: 'REGION_NOT_FOUND' | 'REGION_VERSION_CONFLICT' | 'REGION_IDENTITY_IMMUTABLE' | 'REGION_CODE_CONFLICT' | 'REGION_COUNTRY_INACTIVE' | 'REGION_NOT_ACTIVE' | 'REGION_HAS_DEPENDENCIES' | 'REGION_TRANSITION_INVALID' | 'REGION_TARGET_INVALID' | 'REGION_IMPACT_CERTIFICATION_REQUIRED') {
     super(code);
     this.name = 'ReferenceRegionCommandError';
   }
