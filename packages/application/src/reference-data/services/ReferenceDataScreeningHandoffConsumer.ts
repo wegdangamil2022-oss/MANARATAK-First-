@@ -20,6 +20,30 @@ const OPTIONAL_STRING_FIELDS = new Set([
   'nativeName', 'timezone', 'administrativeRegionId',
 ]);
 const OPTIONAL_NUMERIC_FIELDS = new Set(['latitude', 'longitude', 'minorUnit']);
+const ALLOWED_FIELDS: Record<keyof typeof TYPE_FIELDS, ReadonlySet<string>> = {
+  COUNTRY: new Set(['iso2Code', 'iso3Code', 'name', 'nameAr', 'officialName',
+    'region', 'subregion', 'defaultCurrencyCode', 'defaultLanguageCode',
+    'callingCode', 'flagAssetId', 'metadata']),
+  CURRENCY: new Set(['isoCode', 'name', 'nameAr', 'numericCode', 'symbol', 'minorUnit', 'metadata']),
+  LANGUAGE: new Set(['isoCode', 'name', 'nameAr', 'nativeName', 'direction', 'metadata']),
+  CITY: new Set(['countryIso2Code', 'name', 'nameAr', 'region', 'timezone',
+    'latitude', 'longitude', 'administrativeRegionId', 'metadata']),
+};
+function isBoundedJson(value: unknown, depth = 0): boolean {
+  if (depth > 6) return false;
+  if (value === null || typeof value === 'boolean') return true;
+  if (typeof value === 'string') return value.length <= 5000;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return value.length <= 100 &&
+    value.every(item => isBoundedJson(item, depth + 1));
+  if (!value || typeof value !== 'object') return false;
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) return false;
+  const entries = Object.entries(value as Record<string, unknown>);
+  return entries.length <= 100 &&
+    entries.every(([key, item]) => key.length <= 100 && isBoundedJson(item, depth + 1));
+}
+
 const FORBIDDEN_P6_CANONICAL_FIELDS = new Set([
   'id', 'expectedVersion', 'isActive', 'lifecycleState', 'versionNumber',
   'countryReferenceId', 'canonicalIdentityKey', 'effectiveFrom', 'effectiveTo',
@@ -37,14 +61,16 @@ function invalidP7FieldShape(
     if (fields[field].length > 500) return field;
   }
   for (const [field, value] of Object.entries(fields)) {
-    if (FORBIDDEN_P6_CANONICAL_FIELDS.has(field)) return field;
+    if (FORBIDDEN_P6_CANONICAL_FIELDS.has(field) ||
+        !ALLOWED_FIELDS[entityType].has(field)) return field;
     if (value === undefined || value === null) continue;
     if (OPTIONAL_STRING_FIELDS.has(field) &&
         (typeof value !== 'string' || value.length > 500)) return field;
     if (OPTIONAL_NUMERIC_FIELDS.has(field) &&
         (typeof value !== 'number' || !Number.isFinite(value))) return field;
     if (field === 'metadata') {
-      if (!value || typeof value !== 'object' || Array.isArray(value)) return field;
+      if (!value || typeof value !== 'object' || Array.isArray(value) ||
+          !isBoundedJson(value)) return field;
       try { if (JSON.stringify(value).length > 8192) return field; }
       catch { return field; }
     }

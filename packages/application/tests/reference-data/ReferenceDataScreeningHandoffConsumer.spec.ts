@@ -87,6 +87,8 @@ describe('P6 -> P7 screening consumer', () => {
       { countryIso2Code: 'YE', name: 'صنعاء', isActive: false },
       { countryIso2Code: 'YE', name: 'صنعاء', providerMappings: [{ providerId: 'a' }] },
       { countryIso2Code: 'YE', name: 'صنعاء', latitude: Infinity },
+      { countryIso2Code: 'YE', name: 'صنعاء', injectedField: 'not from normalized mapping' },
+      { countryIso2Code: 'YE', name: 'صنعاء', metadata: { leaked: () => 'secret' } },
     ]) {
       const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, data));
       expect(result.state).toBe('INVALID');
