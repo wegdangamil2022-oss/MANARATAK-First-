@@ -608,6 +608,20 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     }
 
     const normalizedName = input.sourceProgramName.trim().toLocaleLowerCase();
+    const duplicate = await this.prisma.universityAcademicProgram.findFirst({
+      where: { universityId, normalizedName, degreeLevelId: input.degreeLevelId,
+        organizationUnitId: input.organizationUnitId ?? null, status: { not: 'ARCHIVED' },
+        ...(programId ? { id: { not: programId } } : {}) },
+      select: { id: true },
+    });
+    if (duplicate) throw new Error('UNIVERSITY_ACADEMIC_PROGRAM_DUPLICATE');
+    if (input.sourceReferenceId && !programId) {
+      const sourceDuplicate = await this.prisma.universityAcademicProgram.findFirst({
+        where: { universityId, sourceReferenceId: input.sourceReferenceId },
+        select: { id: true },
+      });
+      if (sourceDuplicate) throw new Error('UNIVERSITY_ACADEMIC_PROGRAM_SOURCE_DUPLICATE');
+    }
     const data = {
       sourceReferenceId: input.sourceReferenceId ?? null,
       organizationUnitId: input.organizationUnitId ?? null,
@@ -687,18 +701,8 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       throw new Error('UNIVERSITY_PROGRAMS_REQUIRED_WHEN_REPLACING_ORGANIZATION_UNITS');
     }
 
-    if (details.academicPrograms !== undefined)
-      await this.prisma.universityAcademicProgram.deleteMany({ where: { universityId: id } });
-    if (details.organizationUnits !== undefined && !details.organizationUnits.some(row => row.id))
-      await this.prisma.universityOrganizationUnit.deleteMany({ where: { universityId: id } });
-    if (details.campuses !== undefined && !details.campuses.some(row => row.id))
-      await this.prisma.universityCampus.deleteMany({ where: { universityId: id } });
-    if (details.tuitionProfiles !== undefined && !details.tuitionProfiles.some(row => row.id))
-      await this.prisma.universityTuitionProfile.deleteMany({ where: { universityId: id } });
-    if (details.accommodationProfiles !== undefined && !details.accommodationProfiles.some(row => row.id))
-      await this.prisma.universityAccommodationProfile.deleteMany({ where: { universityId: id } });
-    if (details.rankings !== undefined && !details.rankings.some(row => row.id))
-      await this.prisma.universityRanking.deleteMany({ where: { universityId: id } });
+    // A section write is an upsert, never a destructive replacement of unmentioned children.
+    // Archived programs retain their canonical IDs and external references.
 
     const retainedCampuses =
       details.campuses === undefined
@@ -716,6 +720,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     );
     for (const campus of details.campuses ?? []) {
       const { id: rowId } = campus;
+      const match = !rowId && campus.sourceReferenceId
+        ? await this.prisma.universityCampus.findFirst({ where: { universityId: id, sourceReferenceId: campus.sourceReferenceId }, select: { id: true } })
+        : null;
+      const targetId = rowId ?? match?.id;
       if (rowId && !(await this.prisma.universityCampus.findFirst({ where: { id: rowId, universityId: id }, select: { id: true } }))) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
       const data = {
           universityId: id,
@@ -732,10 +740,11 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           coordinateSource: campus.coordinateSource,
           metadata: campus.metadata as Prisma.InputJsonObject | undefined,
         };
-      const created = rowId
-        ? await this.prisma.universityCampus.update({ where: { id: rowId }, data })
+      const created = targetId
+        ? await this.prisma.universityCampus.update({ where: { id: targetId }, data })
         : await this.prisma.universityCampus.create({ data });
       if (campus.sourceReferenceId) campusIds.set(campus.sourceReferenceId, created.id);
+      campusIds.set(created.id, created.id);
     }
 
     const retainedUnits =
@@ -753,12 +762,16 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         .map((unit) => [unit.sourceReferenceId, unit.id]),
     );
     for (const unit of details.organizationUnits ?? []) {
+      const match = !unit.id && unit.sourceReferenceId
+        ? await this.prisma.universityOrganizationUnit.findFirst({ where: { universityId: id, sourceReferenceId: unit.sourceReferenceId }, select: { id: true } })
+        : null;
       const campusId = unit.campusSourceReferenceId
         ? campusIds.get(unit.campusSourceReferenceId)
         : undefined;
       if (unit.campusSourceReferenceId && !campusId)
         throw new Error(`UNIVERSITY_CAMPUS_REFERENCE_NOT_FOUND:${unit.campusSourceReferenceId}`);
       const { id: rowId } = unit;
+      const targetId = rowId ?? match?.id;
       if (rowId && !(await this.prisma.universityOrganizationUnit.findFirst({ where: { id: rowId, universityId: id }, select: { id: true } }))) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
       const data = {
           universityId: id,
@@ -768,12 +781,14 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           name: unit.name,
           normalizedName: unit.name.trim().toLocaleLowerCase(),
           status: unit.status ?? 'ACTIVE',
+          parentOrganizationUnitId: null,
           metadata: unit.metadata as Prisma.InputJsonObject | undefined,
         };
-      const created = rowId
-        ? await this.prisma.universityOrganizationUnit.update({ where: { id: rowId }, data })
+      const created = targetId
+        ? await this.prisma.universityOrganizationUnit.update({ where: { id: targetId }, data })
         : await this.prisma.universityOrganizationUnit.create({ data });
       if (unit.sourceReferenceId) unitIds.set(unit.sourceReferenceId, created.id);
+      unitIds.set(created.id, created.id);
     }
     for (const unit of details.organizationUnits ?? []) {
       if (!unit.sourceReferenceId || !unit.parentSourceReferenceId) continue;
@@ -787,13 +802,16 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     }
 
     for (const program of details.academicPrograms ?? []) {
+      if (!program.sourceReferenceId) throw new Error('UNIVERSITY_PROGRAM_STABLE_SOURCE_ID_REQUIRED');
       const organizationUnitId = program.organizationUnitSourceReferenceId
         ? unitIds.get(program.organizationUnitSourceReferenceId)
         : undefined;
       if (program.organizationUnitSourceReferenceId && !organizationUnitId)
         throw new Error(`UNIVERSITY_ORGANIZATION_REFERENCE_NOT_FOUND:${program.organizationUnitSourceReferenceId}`);
-      const created = await this.prisma.universityAcademicProgram.create({
-        data: {
+      const prior = await this.prisma.universityAcademicProgram.findFirst({
+        where: { universityId: id, sourceReferenceId: program.sourceReferenceId }, select: { id: true },
+      });
+      const programData = {
           universityId: id,
           sourceReferenceId: program.sourceReferenceId,
           organizationUnitId,
@@ -804,8 +822,16 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           majorMappingState: program.majorMappingState,
           status: program.status ?? 'DRAFT',
           metadata: program.metadata as Prisma.InputJsonObject | undefined,
-        } as Prisma.UniversityAcademicProgramUncheckedCreateInput,
-      });
+      };
+      const created = prior
+        ? await this.prisma.universityAcademicProgram.update({ where: { id: prior.id }, data: programData })
+        : await this.prisma.universityAcademicProgram.create({
+            data: programData as Prisma.UniversityAcademicProgramUncheckedCreateInput,
+          });
+      if (prior) {
+        await this.prisma.universityProgramCampus.deleteMany({ where: { academicProgramId: created.id } });
+        await this.prisma.universityProgramAdmissionRequirement.deleteMany({ where: { academicProgramId: created.id } });
+      }
       for (const campusReference of program.campusSourceReferenceIds ?? []) {
         const campusId = campusIds.get(campusReference);
         if (!campusId) throw new Error(`UNIVERSITY_CAMPUS_REFERENCE_NOT_FOUND:${campusReference}`);

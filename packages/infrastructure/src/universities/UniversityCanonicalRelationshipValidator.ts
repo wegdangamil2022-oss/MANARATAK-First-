@@ -3,14 +3,53 @@ import type { PrismaClient } from '@prisma/client';
 
 export type UniversityRelationshipValidationClient = Pick<PrismaClient,
   'referenceCountry' | 'administrativeRegion' | 'referenceCity' | 'degreeLevel' |
-  'major' | 'majorLevelProfile' | 'internationalTest' | 'internationalTestVariant' |
+  'major' | 'majorLevelProfile' | 'referenceCurrency' | 'internationalTest' | 'internationalTestVariant' |
   'internationalTestVersion' | 'universityOrganizationUnit' | 'universityCampus'>;
 
 export class UniversityCanonicalRelationshipValidator {
   constructor(private readonly client: UniversityRelationshipValidationClient) {}
 
   async validate(details: UniversityNormalizedDetailsUpdate): Promise<void> {
+    const unique = (items: readonly { sourceReferenceId?: string; id?: string }[] | undefined, kind: string) => {
+      const keys = new Set<string>();
+      for (const item of items ?? []) {
+        const key = item.sourceReferenceId?.trim() || item.id;
+        if (!key) continue;
+        if (keys.has(key)) throw new Error(`UNIVERSITY_${kind}_SOURCE_DUPLICATE`);
+        keys.add(key);
+      }
+    };
+    unique(details.campuses, 'CAMPUS');
+    unique(details.organizationUnits, 'ORGANIZATION_UNIT');
+    unique(details.academicPrograms, 'PROGRAM');
+    const units = new Map((details.organizationUnits ?? [])
+      .filter(unit => unit.sourceReferenceId)
+      .map(unit => [unit.sourceReferenceId!, unit]));
+    for (const unit of details.organizationUnits ?? []) {
+      if (!unit.parentSourceReferenceId) continue;
+      const path = new Set<string>();
+      let current = unit;
+      while (current?.parentSourceReferenceId && units.has(current.parentSourceReferenceId)) {
+        if (path.has(current.parentSourceReferenceId) || current.parentSourceReferenceId === unit.sourceReferenceId)
+          throw new Error('UNIVERSITY_ORGANIZATION_HIERARCHY_CYCLE');
+        path.add(current.parentSourceReferenceId);
+        const parent = units.get(current.parentSourceReferenceId)!;
+        if (parent.unitType === 'DEPARTMENT') throw new Error('UNIVERSITY_DEPARTMENT_CANNOT_BE_PARENT');
+        current = parent;
+      }
+    }
     for (const campus of details.campuses ?? []) await this.validateCampus(campus);
+    for (const tuition of details.tuitionProfiles ?? []) {
+      if (tuition.effectiveFrom && tuition.effectiveTo && tuition.effectiveFrom > tuition.effectiveTo)
+        throw new Error('UNIVERSITY_TUITION_EFFECTIVE_RANGE_INVALID');
+      await this.validateCurrency(tuition.currencyReferenceId, tuition.currencyCode);
+      if (tuition.amount != null && (!Number.isFinite(tuition.amount) || tuition.amount < 0))
+        throw new Error('UNIVERSITY_TUITION_AMOUNT_INVALID');
+    }
+    for (const profile of details.accommodationProfiles ?? []) {
+      await this.validateCurrency(profile.currencyReferenceId, profile.currencyCode);
+      await this.validateCurrency(profile.livingCostCurrencyReferenceId, profile.livingCostCurrencyCode);
+    }
     for (const program of details.academicPrograms ?? []) {
       if (!program.degreeLevelId) throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_REQUIRED');
       await this.validateProgram(program.degreeLevelId, program.majorId, program.majorMappingState);
@@ -57,6 +96,23 @@ export class UniversityCanonicalRelationshipValidator {
     if (region && city && (city.administrativeRegionId !== input.regionReferenceId ||
       city.countryIso2Code !== region.countryIso2Code))
       throw new Error('UNIVERSITY_CAMPUS_CITY_REGION_MISMATCH');
+    if (region && !country) throw new Error('UNIVERSITY_CAMPUS_REGION_COUNTRY_REQUIRED');
+    if (city && !country) throw new Error('UNIVERSITY_CAMPUS_CITY_COUNTRY_REQUIRED');
+  }
+
+  async validateCurrency(currencyReferenceId?: string, currencyCode?: string | null): Promise<void> {
+    if (!currencyReferenceId) {
+      if (currencyCode?.trim()) throw new Error('UNIVERSITY_CANONICAL_CURRENCY_REQUIRED');
+      return;
+    }
+    const currency = await this.client.referenceCurrency.findUnique({
+      where: { id: currencyReferenceId },
+      select: { isoCode: true, isActive: true, lifecycleState: true },
+    });
+    if (!currency || !currency.isActive || currency.lifecycleState !== 'ACTIVE')
+      throw new Error('UNIVERSITY_CURRENCY_REFERENCE_NOT_ACTIVE');
+    if (currencyCode?.trim() && currency.isoCode.toUpperCase() !== currencyCode.trim().toUpperCase())
+      throw new Error('UNIVERSITY_CURRENCY_CODE_MISMATCH');
   }
 
   async validateProgramAuthoring(
@@ -115,6 +171,8 @@ export class UniversityCanonicalRelationshipValidator {
     });
     if (!degree) throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_NOT_FOUND');
     if (degree.status !== 'ACTIVE') throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_NOT_ACTIVE');
+    if (majorId && mappingState !== 'CANONICALLY_MAPPED')
+      throw new Error('UNIVERSITY_PROGRAM_MAPPING_STATE_INCONSISTENT');
     if (!majorId) {
       if (mappingState === 'CANONICALLY_MAPPED') throw new Error('UNIVERSITY_PROGRAM_MAJOR_REFERENCE_REQUIRED');
       return;
