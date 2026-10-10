@@ -148,30 +148,40 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
   public async resolveRegionCandidate(
     lookup: ReferenceLookup,
   ): Promise<ReferenceResolutionMatch<AdministrativeRegionDto> | null> {
+    if (lookup.countryIso2Code && !/^[A-Z]{2}$/.test(lookup.countryIso2Code)) return null;
     if (lookup.id) {
       const record = await this.prisma.administrativeRegion.findUnique({ where: { id: lookup.id } });
-      if (record) return { record: this.mapToRegionDto(record), method: 'EXACT_ID' };
+      if (record && (!lookup.countryIso2Code || record.countryIso2Code === lookup.countryIso2Code))
+        return { record: this.mapToRegionDto(record), method: 'EXACT_ID' };
     }
     if (lookup.standardCode) {
       const code = lookup.standardCode.trim();
       const records = await this.prisma.administrativeRegion.findMany({
-        where: { regionCode: { equals: code, mode: 'insensitive' } },
+        where: { regionCode: { equals: code, mode: 'insensitive' },
+          ...(lookup.countryIso2Code ? { countryIso2Code: lookup.countryIso2Code } : {}) },
         take: 2,
       });
       if (records.length === 1) return { record: this.mapToRegionDto(records[0]), method: 'EXACT_STANDARD_CODE' };
     }
+    // No national scope means common subdivision labels are ambiguous.
+    if (!lookup.countryIso2Code) return null;
     return this.resolveGovernedCandidate('REGION', lookup, id => this.getRegionById(id));
   }
 
   public async resolveCityCandidate(
     lookup: ReferenceLookup,
   ): Promise<ReferenceResolutionMatch<ReferenceCityDto> | null> {
+    // UUID may be resolved globally. An alias/provider key is never an
+    // authoritative city identity without its country discriminator.
+    if (!lookup.id && !/^[A-Z]{2}$/.test(lookup.countryIso2Code ?? '')) return null;
+    if (lookup.countryIso2Code && !/^[A-Z]{2}$/.test(lookup.countryIso2Code)) return null;
     if (lookup.id) {
       const record = await this.prisma.referenceCity.findUnique({
         where: { id: lookup.id },
         include: { administrativeRegion: true },
       });
-      if (record) return { record: this.mapToCityDto(record as unknown as DbCity), method: 'EXACT_ID' };
+      if (record && (!lookup.countryIso2Code || record.countryIso2Code === lookup.countryIso2Code))
+        return { record: this.mapToCityDto(record as unknown as DbCity), method: 'EXACT_ID' };
     }
 
     return this.resolveGovernedCandidate(
@@ -236,6 +246,15 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     lookup: ReferenceLookup,
     load: (id: string) => Promise<T | null>,
   ): Promise<ReferenceResolutionMatch<T> | null> {
+    // Resolve nationality before candidate limiting. Applying a country check
+    // only after LIMIT 2 could discard the correct city from a common alias.
+    const ownerScope = entityType === 'CITY' ? Prisma.sql`
+      AND "referenceId" IN (
+        SELECT "id" FROM "ReferenceCity" WHERE "countryIso2Code" = ${lookup.countryIso2Code}
+      )` : entityType === 'REGION' ? Prisma.sql`
+      AND "referenceId" IN (
+        SELECT "id" FROM "AdministrativeRegion" WHERE "countryIso2Code" = ${lookup.countryIso2Code}
+      )` : Prisma.empty;
     if (lookup.providerSystem && lookup.providerId) {
       const providerSystem = lookup.providerSystem.trim().toLowerCase();
       const providerId = lookup.providerId.trim().toLowerCase();
@@ -246,6 +265,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
           AND "isActive" = true
           AND "normalizedProviderSystem" = ${providerSystem}
           AND "normalizedProviderId" = ${providerId}
+          ${ownerScope}
         LIMIT 2
       `);
       if (rows.length > 1) return null;
@@ -264,6 +284,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         WHERE "entityType" = ${entityType}
           AND "isActive" = true
           AND "normalizedAlias" = ${normalizedAlias}
+          ${ownerScope}
         LIMIT 2
       `);
       if (rows.length > 1) return null;

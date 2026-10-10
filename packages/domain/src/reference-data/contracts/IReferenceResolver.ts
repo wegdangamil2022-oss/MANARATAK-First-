@@ -7,6 +7,8 @@ export interface ReferenceLookup {
   providerId?: string;
   alias?: string;
   normalizedAlias?: string;
+  /** Explicit ISO 3166-1 alpha2 national scope for city/region non-ID matching. */
+  countryIso2Code?: string;
 }
 
 export type ReferenceResolutionMethod = 'EXACT_ID' | 'EXACT_STANDARD_CODE' | 'PROVIDER_MAPPING' | 'NORMALIZED_ALIAS';

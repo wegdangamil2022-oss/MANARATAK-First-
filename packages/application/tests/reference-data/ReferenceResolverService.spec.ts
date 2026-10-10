@@ -98,6 +98,14 @@ describe('ReferenceResolverService canonical contract', () => {
     });
   });
 
+  it('preserves explicit country scope when forwarding city lookup contracts', async () => {
+    vi.mocked(repository.resolveCityCandidate).mockResolvedValue(null);
+    await expect(resolver.resolveCity({ alias: 'Springfield', countryIso2Code: 'US' })).resolves.toBeNull();
+    expect(repository.resolveCityCandidate).toHaveBeenCalledWith({
+      alias: 'Springfield', countryIso2Code: 'US',
+    });
+  });
+
   it('maps Region and City identities without introducing name-only matching in the service', async () => {
     vi.mocked(repository.resolveRegionCandidate).mockResolvedValue({
       record: region,
