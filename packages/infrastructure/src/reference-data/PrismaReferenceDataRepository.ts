@@ -535,7 +535,8 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     const id = data.id ?? randomUUID();
     await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "ReferenceCountry" WHERE "iso2Code" = ${data.countryIso2Code} FOR SHARE`);
     const country = await this.prisma.referenceCountry.findUnique({ where: { iso2Code: data.countryIso2Code } });
-    if (!country || country.lifecycleState !== 'ACTIVE') throw new ReferenceRegionCommandError('REGION_COUNTRY_INACTIVE');
+    if (!country || country.lifecycleState !== 'ACTIVE' || !country.isActive)
+      throw new ReferenceRegionCommandError('REGION_COUNTRY_INACTIVE');
     const now = new Date();
     const fields = { name: data.name.trim(), nameAr: data.nameAr, localName: data.localName, regionType: data.regionType, countryReferenceId: country.id };
     if (data.expectedVersion !== undefined) {
@@ -792,17 +793,37 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (data.administrativeRegionId && !this.inTransaction) {
       return this.prisma.$transaction(tx => new PrismaReferenceDataRepository(tx as unknown as PrismaClient, true).upsertCity(data));
     }
+    // Parent-before-child lock order matches administrative-region authoring:
+    // COUNTRY FOR SHARE -> REGION FOR UPDATE -> CITY version row.
+    this.rejectLegacyLifecycleMutation(data.isActive);
+    const countryLookup = data.countryReferenceId
+      ? { id: data.countryReferenceId } : { iso2Code: data.countryIso2Code };
+    const canonicalCountry = await this.prisma.referenceCountry.findFirst({
+      where: countryLookup,
+    });
+    if (!canonicalCountry || canonicalCountry.iso2Code !== data.countryIso2Code ||
+        canonicalCountry.lifecycleState !== 'ACTIVE' || !canonicalCountry.isActive) {
+      throw new Error('REFERENCE_CITY_CANONICAL_COUNTRY_MISMATCH');
+    }
+    if (this.inTransaction) {
+      const parent = await this.prisma.$queryRaw<Array<{ id: string; iso2Code: string;
+        isActive: boolean; lifecycleState: string }>>(Prisma.sql`
+        SELECT "id", "iso2Code", "isActive", "lifecycleState"
+        FROM "ReferenceCountry" WHERE "id" = ${canonicalCountry.id} FOR SHARE
+      `);
+      if (parent.length !== 1 || parent[0].iso2Code !== data.countryIso2Code ||
+          !parent[0].isActive || parent[0].lifecycleState !== 'ACTIVE')
+        throw new Error('REFERENCE_CITY_CANONICAL_COUNTRY_MISMATCH');
+    }
     if (data.administrativeRegionId) {
       await this.lockRegion(data.administrativeRegionId);
-      const region = await this.prisma.administrativeRegion.findUnique({ where: { id: data.administrativeRegionId } });
-      if (!region || region.lifecycleState !== 'ACTIVE' || region.countryIso2Code !== data.countryIso2Code) throw new ReferenceRegionCommandError('REGION_NOT_ACTIVE');
-    }
-    this.rejectLegacyLifecycleMutation(data.isActive);
-    const canonicalCountry = data.countryReferenceId
-      ? await this.prisma.referenceCountry.findUnique({ where: { id: data.countryReferenceId } })
-      : await this.prisma.referenceCountry.findUnique({ where: { iso2Code: data.countryIso2Code } });
-    if (!canonicalCountry || canonicalCountry.iso2Code !== data.countryIso2Code) {
-      throw new Error('REFERENCE_CITY_CANONICAL_COUNTRY_MISMATCH');
+      const region = await this.prisma.administrativeRegion.findUnique({
+        where: { id: data.administrativeRegionId },
+      });
+      if (!region || region.lifecycleState !== 'ACTIVE' || !region.isActive ||
+          region.countryIso2Code !== data.countryIso2Code ||
+          (region.countryReferenceId && region.countryReferenceId !== canonicalCountry.id))
+        throw new ReferenceRegionCommandError('REGION_NOT_ACTIVE');
     }
     const canonicalIdentityKey = this.cityCanonicalIdentityKey(data);
     if (data.id || data.expectedVersion !== undefined) {
