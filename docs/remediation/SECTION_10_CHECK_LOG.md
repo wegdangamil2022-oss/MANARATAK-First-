@@ -10,7 +10,10 @@ Date: 2026-10-10 | Branch: `codex/section-10-universities`.
 
 ## Executed checks
 
-The only bounded source consistency check, if reported as executed, is recorded here after running; it is never rerun after a failure.
+A **single bounded static source consistency check** was executed once against the pushed Section 10 branch:
+- 13/14 source assertions PASS.
+- One assertion FAIL (the New Major candidate SQL query pattern check). Root cause: the checker's string literal erroneously searched for escaped double quotes instead of the actual SQL source characters (the query contains `p."majorMappingState" IN ('MAJOR_REVIEW_REQUIRED','UNMAPPED','AMBIGUOUS')`). The Section 09 query and candidate source was already independently inspected before this one-time check. This is **a checker false negative**, not evidence of an absent candidate path; nevertheless the failing assertion is **not** counted as passed.
+- Per the user rule, **no re-run** was performed after diagnosing that one failure. No test suite or type-check was run.
 
 ## Deliberately not executed
 
