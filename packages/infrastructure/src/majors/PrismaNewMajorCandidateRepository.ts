@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { randomUUID } from 'crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaUniversityMajorResolutionWriter } from '../universities/PrismaUniversityMajorResolutionWriter';
 import { PrismaScholarshipMajorResolutionWriter } from '../scholarships/PrismaScholarshipMajorResolutionWriter';
@@ -6,11 +6,9 @@ import {
   AtomicPersistenceContext,
   INewMajorCandidateRepository,
   ITransactionalNewMajorCandidateRepository,
-  MajorNamingService,
   NewMajorCandidateDto,
   NewMajorCandidateFilters,
   NewMajorCandidateSourceRef,
-  NewMajorCandidateSourceType,
   NewMajorCandidateResolutionResult,
   PaginatedNewMajorCandidateResult,
 } from '@manaratak/domain';
@@ -19,12 +17,10 @@ interface CandidateTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;
 }
 
-interface CandidateRow extends NewMajorCandidateSourceRef {
-  createdAt: Date;
-  updatedAt: Date;
+interface CandidateProjection {
+  candidateKey:string; normalizedLabel:string; displayLabel:string; sourceDigest:string; sourceCount:number;
+  sources:NewMajorCandidateSourceRef[]; firstSeenAt:Date; lastSeenAt:Date; total:number;
 }
-
-const RESOLVED_STATES = ['RESOLVED', 'NOT_APPLICABLE'];
 
 /**
  * Cross-domain read/reconciliation projection for unresolved Major references.
@@ -38,6 +34,7 @@ export class PrismaNewMajorCandidateRepository
     private readonly prisma: PrismaClient,
     private readonly universityWriter = new PrismaUniversityMajorResolutionWriter(prisma),
     private readonly scholarshipWriter = new PrismaScholarshipMajorResolutionWriter(prisma),
+    private readonly transactionBound = false,
   ) {}
 
   withTransaction(context: AtomicPersistenceContext): INewMajorCandidateRepository {
@@ -50,273 +47,113 @@ export class PrismaNewMajorCandidateRepository
       transactionPrisma,
       new PrismaUniversityMajorResolutionWriter(transactionPrisma),
       new PrismaScholarshipMajorResolutionWriter(transactionPrisma),
+      true,
     );
   }
 
   async list(filters: NewMajorCandidateFilters): Promise<PaginatedNewMajorCandidateResult> {
-    const rows = await this.loadRows(filters.search, filters.sourceType);
-    const grouped = this.group(rows);
-    const page = Math.max(1, filters.page || 1);
-    const pageSize = Math.min(100, Math.max(1, filters.pageSize || 25));
-    const start = (page - 1) * pageSize;
-
-    return {
-      data: grouped.slice(start, start + pageSize),
-      total: grouped.length,
-      page,
-      pageSize,
-      totalPages: Math.max(1, Math.ceil(grouped.length / pageSize)),
-    };
+    const page = Math.min(1000, Math.max(1, filters.page || 1));
+    const pageSize = Math.min(50, Math.max(1, filters.pageSize || 25));
+    const rows = await this.queryCandidates(filters, undefined, page, pageSize);
+    return {data: rows.filter(row => row.candidateKey).map(row => this.toCandidate(row)), total: Number(rows[0]?.total ?? 0), page, pageSize,
+      totalPages: Math.max(1, Math.ceil(Number(rows[0]?.total ?? 0) / pageSize))};
   }
 
   async findByKey(candidateKey: string): Promise<NewMajorCandidateDto | null> {
-    const rows = await this.loadRows();
-    return this.group(rows).find(candidate => candidate.candidateKey === candidateKey) ?? null;
+    const rows = await this.queryCandidates({}, candidateKey, 1, 1);
+    return rows[0]?.candidateKey ? this.toCandidate(rows[0]) : null;
   }
 
-  async resolve(candidateKey: string, majorId: string): Promise<NewMajorCandidateResolutionResult> {
+  async acquireReviewLock(candidateKey: string): Promise<void> {
+    if (!this.transactionBound) throw new Error('NEW_MAJOR_CANDIDATE_TRANSACTION_REQUIRED');
+    await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${candidateKey}, 10))::text`;
+  }
+
+  async recordDecision(input: {candidateKey:string; sourceDigest:string; decision:'APPROVED'|'LINKED'|'REJECTED'; actorId:string; reason:string; majorId?:string; evidence:NewMajorCandidateDto}): Promise<void> {
+    if (!this.transactionBound) throw new Error('NEW_MAJOR_CANDIDATE_TRANSACTION_REQUIRED');
+    const id = randomUUID();
+    await this.prisma.$executeRaw`INSERT INTO "NewMajorCandidateDecision" ("id","candidateKey","sourceDigest","decision","actorId","reason","majorId","evidence")
+      VALUES (${id},${input.candidateKey},${input.sourceDigest},${input.decision},${input.actorId},${input.reason},${input.majorId ?? null},${JSON.stringify(input.evidence)}::jsonb)`;
+  }
+
+  async resolve(candidateKey: string, majorId: string, expectedDigest: string): Promise<NewMajorCandidateResolutionResult> {
+    if (!this.transactionBound) throw new Error('NEW_MAJOR_CANDIDATE_TRANSACTION_REQUIRED');
+    await this.acquireReviewLock(candidateKey);
     const candidate = await this.findByKey(candidateKey);
     if (!candidate) throw new Error('NEW_MAJOR_CANDIDATE_NOT_FOUND_OR_ALREADY_RESOLVED');
-
-    const universityProgramIds = candidate.sources
-      .filter(source => source.sourceType === 'UNIVERSITY_PROGRAM')
-      .map(source => source.sourceId);
-    const scholarshipTargetIds = candidate.sources
-      .filter(source => source.sourceType === 'SCHOLARSHIP_MAJOR_TARGET')
-      .map(source => source.sourceId);
-    const scholarshipEligibilityIds = candidate.sources
-      .filter(source => source.sourceType === 'SCHOLARSHIP_ELIGIBILITY')
-      .map(source => source.sourceId);
-
-    const [universityPrograms, scholarshipResolution] = await Promise.all([
-      this.universityWriter.resolveProgramMajor(universityProgramIds, majorId),
-      this.scholarshipWriter.resolveMajorReferences({
-        targetIds: scholarshipTargetIds,
-        eligibilityIds: scholarshipEligibilityIds,
-        majorId,
-      }),
-    ]);
-
-    return {
-      universityPrograms,
-      scholarshipMajorTargets: scholarshipResolution.scholarshipMajorTargets,
-      scholarshipEligibilityItems: scholarshipResolution.scholarshipEligibilityItems,
-    };
+    if (candidate.sourceDigest !== expectedDigest) throw new Error('NEW_MAJOR_CANDIDATE_STALE_SOURCE');
+    if (candidate.sourcesTruncated) throw new Error('NEW_MAJOR_CANDIDATE_SOURCE_LIMIT_REVIEW_REQUIRED');
+    const programs = candidate.sources.filter(source => source.sourceType === 'UNIVERSITY_PROGRAM');
+    const targets = candidate.sources.filter(source => source.sourceType === 'SCHOLARSHIP_MAJOR_TARGET');
+    const eligibility = candidate.sources.filter(source => source.sourceType === 'SCHOLARSHIP_ELIGIBILITY');
+    const universityPrograms = await this.universityWriter.resolveProgramMajor(programs, majorId);
+    const scholarshipResolution = await this.scholarshipWriter.resolveMajorReferences({targets, eligibility, majorId});
+    if (universityPrograms + scholarshipResolution.scholarshipMajorTargets + scholarshipResolution.scholarshipEligibilityItems !== candidate.sourceCount)
+      throw new Error('NEW_MAJOR_CANDIDATE_STALE_SOURCE');
+    return {universityPrograms, ...scholarshipResolution};
   }
 
-  private async loadRows(search?: string, sourceType?: NewMajorCandidateSourceType): Promise<CandidateRow[]> {
-    const normalizedSearch = search?.trim();
-    const includeUniversities = !sourceType || sourceType === 'UNIVERSITY_PROGRAM';
-    const includeTargets = !sourceType || sourceType === 'SCHOLARSHIP_MAJOR_TARGET';
-    const includeEligibility = !sourceType || sourceType === 'SCHOLARSHIP_ELIGIBILITY';
-
-    const [programs, targets, eligibility] = await Promise.all([
-      includeUniversities
-        ? this.prisma.universityAcademicProgram.findMany({
-            where: {
-              majorId: null,
-              majorMappingState: { in: ['MAJOR_REVIEW_REQUIRED', 'UNMAPPED'] },
-              status: { notIn: ['INACTIVE', 'ARCHIVED'] },
-              ...(normalizedSearch
-                ? { sourceProgramName: { contains: normalizedSearch, mode: 'insensitive' as const } }
-                : {}),
-            },
-            take: 10000,
-            include: {
-              university: {
-                select: {
-                  id: true,
-                  publicId: true,
-                  displayName: true,
-                  officialSourceUrl: true,
-                  sourceUrl: true,
-                  status: true,
-                },
-              },
-              degreeLevel: { select: { id: true, canonicalCode: true, nameAr: true } },
-              organizationUnit: { select: { name: true } },
-            },
-          })
-        : Promise.resolve([]),
-      includeTargets
-        ? this.prisma.scholarshipMajorTarget.findMany({
-            where: {
-              sourceLabel: normalizedSearch
-                ? { not: null, contains: normalizedSearch, mode: 'insensitive' as const }
-                : { not: null },
-              majorId: null,
-              resolutionStatus: { notIn: RESOLVED_STATES },
-              scholarship: { is: { status: { not: 'ARCHIVED' } } },
-            },
-            take: 10000,
-            include: {
-              scholarship: {
-                select: {
-                  id: true,
-                  publicId: true,
-                  displayName: true,
-                  officialSourceUrl: true,
-                  sourceUrl: true,
-                  status: true,
-                  degreeTargets: {
-                    where: { degreeLevelId: { not: null } },
-                    select: {
-                      degreeLevelId: true,
-                      degreeLevel: { select: { canonicalCode: true, nameAr: true } },
-                    },
-                  },
-                },
-              },
-            },
-          })
-        : Promise.resolve([]),
-      includeEligibility
-        ? this.prisma.scholarshipEligibilityItem.findMany({
-            where: {
-              itemTypeCode: { contains: 'MAJOR', mode: 'insensitive' },
-              valueText: normalizedSearch
-                ? { not: null, contains: normalizedSearch, mode: 'insensitive' as const }
-                : { not: null },
-              majorId: null,
-              resolutionStatus: { notIn: RESOLVED_STATES },
-              scholarship: { is: { status: { not: 'ARCHIVED' } } },
-            },
-            take: 10000,
-            include: {
-              scholarship: {
-                select: {
-                  id: true,
-                  publicId: true,
-                  displayName: true,
-                  officialSourceUrl: true,
-                  sourceUrl: true,
-                  status: true,
-                  degreeTargets: {
-                    where: { degreeLevelId: { not: null } },
-                    select: {
-                      degreeLevelId: true,
-                      degreeLevel: { select: { canonicalCode: true, nameAr: true } },
-                    },
-                  },
-                },
-              },
-            },
-          })
-        : Promise.resolve([]),
-    ]);
-
-    const rows: CandidateRow[] = [];
-    for (const program of programs as any[]) {
-      if (!program.sourceProgramName?.trim()) continue;
-      rows.push({
-        sourceType: 'UNIVERSITY_PROGRAM',
-        sourceId: program.id,
-        ownerId: program.university.id,
-        ownerPublicId: program.university.publicId,
-        ownerDisplayName: program.university.displayName,
-        rawLabel: program.sourceProgramName.trim(),
-        degreeLevelId: program.degreeLevel?.id ?? program.degreeLevelId ?? null,
-        degreeLevelCode: program.degreeLevel?.canonicalCode ?? null,
-        degreeLevelLabel: program.degreeLevel?.nameAr ?? null,
-        facultyOrUnitName: program.organizationUnit?.name ?? null,
-        officialSourceUrl: program.university.officialSourceUrl ?? null,
-        sourceUrl: program.university.sourceUrl ?? null,
-        status: program.status,
-        createdAt: program.createdAt,
-        updatedAt: program.updatedAt,
-      });
-    }
-
-    const pushScholarship = (record: any, sourceTypeValue: NewMajorCandidateSourceType, rawLabel: string) => {
-      const degreeTargets = record.scholarship.degreeTargets ?? [];
-      if (degreeTargets.length === 0) {
-        rows.push({
-          sourceType: sourceTypeValue,
-          sourceId: record.id,
-          ownerId: record.scholarship.id,
-          ownerPublicId: record.scholarship.publicId,
-          ownerDisplayName: record.scholarship.displayName,
-          rawLabel,
-          officialSourceUrl: record.scholarship.officialSourceUrl ?? null,
-          sourceUrl: record.scholarship.sourceUrl ?? null,
-          status: record.scholarship.status,
-          createdAt: record.createdAt,
-          updatedAt: record.updatedAt,
-        });
-        return;
-      }
-      for (const degree of degreeTargets) {
-        rows.push({
-          sourceType: sourceTypeValue,
-          sourceId: record.id,
-          ownerId: record.scholarship.id,
-          ownerPublicId: record.scholarship.publicId,
-          ownerDisplayName: record.scholarship.displayName,
-          rawLabel,
-          degreeLevelId: degree.degreeLevelId ?? null,
-          degreeLevelCode: degree.degreeLevel?.canonicalCode ?? null,
-          degreeLevelLabel: degree.degreeLevel?.nameAr ?? null,
-          officialSourceUrl: record.scholarship.officialSourceUrl ?? null,
-          sourceUrl: record.scholarship.sourceUrl ?? null,
-          status: record.scholarship.status,
-          createdAt: record.createdAt,
-          updatedAt: record.updatedAt,
-        });
-      }
-    };
-
-    for (const target of targets as any[]) {
-      if (target.sourceLabel?.trim()) pushScholarship(target, 'SCHOLARSHIP_MAJOR_TARGET', target.sourceLabel.trim());
-    }
-    for (const item of eligibility as any[]) {
-      if (item.valueText?.trim()) pushScholarship(item, 'SCHOLARSHIP_ELIGIBILITY', item.valueText.trim());
-    }
-    return rows;
+  /** One SQL statement groups the complete owner projections before filtering/paging.
+   * Raw program names remain owner evidence; grouping is never automatic identity matching.
+   * Source sets over 500 references remain visible but cannot be partially resolved.
+   */
+  private queryCandidates(filters: NewMajorCandidateFilters, key: string|undefined, page:number, size:number): Promise<CandidateProjection[]> {
+    const search = filters.search?.trim() ?? '';
+    return this.prisma.$queryRaw<CandidateProjection[]>`
+      WITH source_rows AS (
+        SELECT 'UNIVERSITY_PROGRAM'::text AS "sourceType", p.id AS "sourceId", u.id AS "ownerId", u."publicId" AS "ownerPublicId",
+          u."displayName" AS "ownerDisplayName", p."sourceProgramName" AS "rawLabel", p."degreeLevelId", d."canonicalCode" AS "degreeLevelCode",
+          d."nameAr" AS "degreeLevelLabel", o.name AS "facultyOrUnitName", u."officialSourceUrl", u."sourceUrl", p.status,
+          p."createdAt", p."updatedAt" AS "sourceUpdatedAt", NULL::jsonb AS "degreeReferences"
+        FROM "UniversityAcademicProgram" p JOIN "University" u ON u.id=p."universityId"
+          LEFT JOIN "DegreeLevel" d ON d.id=p."degreeLevelId" LEFT JOIN "UniversityOrganizationUnit" o ON o.id=p."organizationUnitId"
+        WHERE p."majorId" IS NULL AND p."majorMappingState" IN ('MAJOR_REVIEW_REQUIRED','UNMAPPED','AMBIGUOUS')
+          AND p.status NOT IN ('INACTIVE','ARCHIVED','REJECTED') AND u.status NOT IN ('ARCHIVED','REJECTED')
+        UNION ALL
+        SELECT 'SCHOLARSHIP_MAJOR_TARGET', t.id, s.id, s."publicId", s."displayName", t."sourceLabel", NULL::text, NULL::text, NULL::text, NULL::text,
+          s."officialSourceUrl", s."sourceUrl", s.status, t."createdAt", t."updatedAt",
+          (SELECT jsonb_agg(jsonb_build_object('id',d.id,'code',d."canonicalCode",'label',d."nameAr") ORDER BY d.id) FROM "ScholarshipDegreeTarget" dt JOIN "DegreeLevel" d ON d.id=dt."degreeLevelId" WHERE dt."scholarshipId"=s.id)
+        FROM "ScholarshipMajorTarget" t JOIN "Scholarship" s ON s.id=t."scholarshipId"
+        WHERE t."majorId" IS NULL AND t."resolutionStatus" NOT IN ('RESOLVED','NOT_APPLICABLE') AND s.status NOT IN ('ARCHIVED','REJECTED')
+        UNION ALL
+        SELECT 'SCHOLARSHIP_ELIGIBILITY', e.id, s.id, s."publicId", s."displayName", e."valueText", e."degreeLevelId", d."canonicalCode", d."nameAr", NULL::text,
+          s."officialSourceUrl", s."sourceUrl", s.status, e."createdAt", e."updatedAt",
+          (SELECT jsonb_agg(jsonb_build_object('id',d.id,'code',d."canonicalCode",'label',d."nameAr") ORDER BY d.id) FROM "ScholarshipDegreeTarget" dt JOIN "DegreeLevel" d ON d.id=dt."degreeLevelId" WHERE dt."scholarshipId"=s.id)
+        FROM "ScholarshipEligibilityItem" e JOIN "Scholarship" s ON s.id=e."scholarshipId" LEFT JOIN "DegreeLevel" d ON d.id=e."degreeLevelId"
+        WHERE e."majorId" IS NULL AND e."resolutionStatus" NOT IN ('RESOLVED','NOT_APPLICABLE') AND e."itemTypeCode" ILIKE '%MAJOR%'
+          AND s.status NOT IN ('ARCHIVED','REJECTED')
+      ), normalized AS (
+        SELECT *, btrim(regexp_replace(regexp_replace(
+          CASE WHEN "rawLabel" ~ '[؀-ۿ]' THEN translate(regexp_replace(normalize("rawLabel",NFKD),'[ً-ٰٟـ]','','g'),'إأآىؤئة','ااايويه')
+          ELSE lower(normalize("rawLabel",NFKD)) END, '[^[:alnum:][:space:]]',' ','g'),'[[:space:]]+',' ','g')) AS "normalizedLabel"
+        FROM source_rows WHERE btrim(coalesce("rawLabel",'')) <> ''
+      ), keyed AS (
+        SELECT *, 'NMC-' || upper(substr(encode(sha256(convert_to("normalizedLabel",'UTF8')),'hex'),1,20)) AS "candidateKey",
+          row_number() OVER (PARTITION BY "normalizedLabel" ORDER BY "sourceType","sourceId") AS rn
+        FROM normalized WHERE "normalizedLabel" NOT IN ('','unknown')
+      ), grouped AS (
+        SELECT "candidateKey", min("normalizedLabel") AS "normalizedLabel", min("rawLabel") AS "displayLabel", count(*)::integer AS "sourceCount",
+          jsonb_agg(to_jsonb(k) ORDER BY "sourceType","sourceId") FILTER (WHERE rn <= 500) AS sources,
+          encode(sha256(convert_to(jsonb_agg(to_jsonb(k) - 'rn' ORDER BY "sourceType","sourceId")::text,'UTF8')),'hex') AS "sourceDigest",
+          min("createdAt") AS "firstSeenAt", max("sourceUpdatedAt") AS "lastSeenAt",
+          bool_or(${filters.sourceType ?? null}::text IS NULL OR "sourceType"=${filters.sourceType ?? null}) AS "matchesType",
+          bool_or(${search}='' OR strpos(lower("rawLabel"),lower(${search}))>0 OR strpos("normalizedLabel",lower(${search}))>0) AS "matchesSearch"
+        FROM keyed k GROUP BY "candidateKey"
+      ), visible AS (
+        SELECT * FROM grouped g WHERE "matchesType" AND "matchesSearch" AND (${key ?? null}::text IS NULL OR "candidateKey"=${key ?? null})
+          AND NOT EXISTS (SELECT 1 FROM "NewMajorCandidateDecision" x WHERE x."candidateKey"=g."candidateKey" AND x."sourceDigest"=g."sourceDigest" AND x.decision='REJECTED')
+      ), page AS (SELECT * FROM visible ORDER BY "lastSeenAt" DESC,"candidateKey" LIMIT ${size} OFFSET ${(page-1)*size})
+      SELECT page.*, totals.total FROM (SELECT count(*)::integer AS total FROM visible) totals LEFT JOIN page ON true`;
   }
 
-  private group(rows: CandidateRow[]): NewMajorCandidateDto[] {
-    const grouped = new Map<string, CandidateRow[]>();
-    for (const row of rows) {
-      const normalizedLabel = MajorNamingService.normalizeSearchText(row.rawLabel);
-      if (normalizedLabel === 'unknown') continue;
-      const key = this.key(normalizedLabel);
-      const group = grouped.get(key) ?? [];
-      if (!group.some(existing =>
-        existing.sourceType === row.sourceType &&
-        existing.sourceId === row.sourceId &&
-        existing.degreeLevelId === row.degreeLevelId
-      )) group.push(row);
-      grouped.set(key, group);
-    }
-
-    return [...grouped.entries()]
-      .map(([candidateKey, group]) => {
-        const normalizedLabel = MajorNamingService.normalizeSearchText(group[0].rawLabel);
-        const sourceRefs = group.map(({ createdAt: _createdAt, updatedAt: _updatedAt, ...source }) => source);
-        const unique = (values: Array<string | null | undefined>) => [...new Set(values.filter((value): value is string => Boolean(value?.trim())).map(value => value.trim()))];
-        const displayLabel = [...group]
-          .sort((a, b) => a.rawLabel.length - b.rawLabel.length)[0].rawLabel;
-        const timestamps = group.flatMap(item => [item.createdAt, item.updatedAt]).filter(Boolean).map(value => value.getTime());
-        return {
-          candidateKey,
-          normalizedLabel,
-          displayLabel,
-          sourceCount: new Set(group.map(item => `${item.sourceType}:${item.sourceId}`)).size,
-          sourceTypes: [...new Set(group.map(item => item.sourceType))],
-          degreeLevelIds: unique(group.map(item => item.degreeLevelId)),
-          degreeLevelCodes: unique(group.map(item => item.degreeLevelCode)),
-          degreeLevelLabels: unique(group.map(item => item.degreeLevelLabel)),
-          facultyOrUnitNames: unique(group.map(item => item.facultyOrUnitName)),
-          officialSourceUrls: unique(group.flatMap(item => [item.officialSourceUrl, item.sourceUrl])),
-          sources: sourceRefs,
-          firstSeenAt: timestamps.length ? new Date(Math.min(...timestamps)) : undefined,
-          lastSeenAt: timestamps.length ? new Date(Math.max(...timestamps)) : undefined,
-        } satisfies NewMajorCandidateDto;
-      })
-      .sort((a, b) => (b.lastSeenAt?.getTime() ?? 0) - (a.lastSeenAt?.getTime() ?? 0));
-  }
-
-  private key(normalizedLabel: string): string {
-    return `NMC-${createHash('sha256').update(normalizedLabel).digest('hex').slice(0, 20).toUpperCase()}`;
+  private toCandidate(row:CandidateProjection): NewMajorCandidateDto {
+    const sources = row.sources ?? [];
+    const unique = (values:(string|null|undefined)[]) => [...new Set(values.filter((value):value is string => Boolean(value)))];
+    return {candidateKey:row.candidateKey,sourceDigest:row.sourceDigest,normalizedLabel:row.normalizedLabel,displayLabel:row.displayLabel,
+      sourceCount:Number(row.sourceCount),sourcesTruncated:Number(row.sourceCount)>sources.length,
+      sourceTypes:[...new Set(sources.map(source=>source.sourceType))],degreeLevelIds:unique(sources.flatMap(source=>[source.degreeLevelId,...(source.degreeReferences ?? []).map(degree=>degree.id)])),
+      degreeLevelCodes:unique(sources.flatMap(source=>[source.degreeLevelCode,...(source.degreeReferences ?? []).map(degree=>degree.code)])),degreeLevelLabels:unique(sources.flatMap(source=>[source.degreeLevelLabel,...(source.degreeReferences ?? []).map(degree=>degree.label)])),
+      facultyOrUnitNames:unique(sources.map(source=>source.facultyOrUnitName)),officialSourceUrls:unique(sources.flatMap(source=>[source.officialSourceUrl,source.sourceUrl])),
+      sources,firstSeenAt:row.firstSeenAt,lastSeenAt:row.lastSeenAt};
   }
 }

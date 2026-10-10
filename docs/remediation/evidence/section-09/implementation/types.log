@@ -1,0 +1,22 @@
+packages/infrastructure/src/majors/PrismaMajorRepository.ts(1084,11): error TS6133: 'withLegacyOptionalFallback' is declared but its value is never read.
+packages/infrastructure/src/majors/PrismaMajorRepository.ts(1091,11): error TS6133: 'taxonomyGraphFilter' is declared but its value is never read.
+packages/infrastructure/src/majors/PrismaNewMajorCandidateRepository.ts(12,3): error TS6133: 'NewMajorCandidateSourceType' is declared but its value is never read.
+apps/admin/src/App.tsx(53,37): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/App.tsx(92,39): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/App.tsx(134,38): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/App.tsx(220,36): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/api/client.ts(4,73): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/api/client.ts(220,104): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/components/AssetUploadWizard.tsx(46,25): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/components/ReferenceImportReviewQueue.tsx(89,23): error TS2367: This comparison appears to be unintentional because the types '"ready"' and '"loading"' have no overlap.
+apps/admin/src/components/ReferenceImportReviewQueue.tsx(92,23): error TS2367: This comparison appears to be unintentional because the types '"ready"' and '"loading"' have no overlap.
+apps/admin/src/pages/AcademicTaxonomyAdminPage.tsx(37,37): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/AcademicTaxonomyDetailPage.tsx(85,37): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/AdminLoginPage.tsx(21,73): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/AssetAdminPage.tsx(90,25): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/CmsAdminPage.tsx(594,37): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/InternationalTestDetailPage.tsx(638,40): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/MajorDetailPage.tsx(141,42): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/ServicesAdminPage.tsx(576,59): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/StudentSupportAdminPage.tsx(90,38): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+apps/admin/src/pages/StudyDestinationDetailPage.tsx(670,33): error TS2339: Property 'env' does not exist on type 'ImportMeta'.

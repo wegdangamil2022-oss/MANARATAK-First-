@@ -1395,6 +1395,7 @@ model UniversityOrganizationUnit {
   programs                 UniversityAcademicProgram[]
 
   @@unique([universityId, unitType, normalizedName, parentOrganizationUnitId], map: "UniversityOrganizationUnit_identity_key")
+  @@unique([universityId, sourceReferenceId])
   @@index([universityId])
   @@index([campusId])
   @@index([parentOrganizationUnitId], map: "UniversityOrganizationUnit_parent_idx")
@@ -5639,4 +5640,28 @@ model InternationalTestEvidenceHistory {
   actorId String
   capturedAt DateTime @default(now())
   @@index([testId, capturedAt])
+}
+
+// P10 governance; source-only activation. SQL supplies owner FKs and insert-only triggers.
+model NewMajorCandidateDecision {
+  id String @id
+  candidateKey String
+  sourceDigest String
+  decision String
+  actorId String
+  reason String
+  majorId String?
+  evidence Json
+  createdAt DateTime @default(now())
+  @@index([candidateKey, sourceDigest])
+}
+
+model MajorPublicationSnapshot {
+  versionId String @id
+  majorId String
+  profileId String
+  payload Json
+  reviewerId String
+  publishedAt DateTime @default(now())
+  @@index([majorId, profileId])
 }

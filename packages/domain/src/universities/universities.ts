@@ -103,6 +103,8 @@ export interface UniversityDto {
   optionalFields?: Record<string, unknown> | null;
   createdAt?: Date;
   updatedAt?: Date;
+  /** Owner revision in epoch milliseconds; required for all admin mutations. */
+  revision?: number;
 }
 
 export interface UpdateUniversityDto {
@@ -264,6 +266,9 @@ export type PublicUniversityDto = Omit<
   | 'localizedTexts'
   | 'localizedNames'
   | 'createdAt'
+  | 'revision'
+  | 'metadata'
+  | 'sourceUrl'
 >;
 
 export interface PaginatedUniversityResult<T = UniversityDto> {
@@ -362,6 +367,8 @@ export interface IUniversityRepository {
     input: UniversityAcademicProgramAuthoringInput,
   ): Promise<UniversityDto>;
   archiveAcademicProgram?(universityId: string, programId: string): Promise<UniversityDto>;
+  lockForRevision?(id: string, expectedRevision: number): Promise<void>;
+  advanceRevision?(id: string, expectedRevision: number): Promise<number>;
 }
 
 export const UNIVERSITY_CANONICAL_KEYS = new Set<string>([
@@ -502,6 +509,12 @@ export interface UniversityProgramAdmissionRequirementReadDto {
 }
 
 export interface UniversityAcademicProgramReadDto {
+  /** Internal P10 owner/profile publication state; never exposed in public DTOs. */
+  major?: { status: string; levelProfiles: Array<{
+    degreeLevelId: string | null;
+    status: string;
+    currentPublishedVersionId: string | null;
+  }> } | null;
   degreeLevel?: { canonicalCode: string; nameAr?: string | null; nameEn?: string | null } | null;
   id: string;
   universityId: string;

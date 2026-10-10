@@ -13,6 +13,7 @@ export class MajorPublicRouter {
     const listQuerySchema = z.object({
       taxonomyNodeId: z.string().uuid().optional(),
       degreeLevel: z.string().optional(),
+      search:z.string().trim().max(200).optional(),
       academicFieldOrDiscipline: z.string().optional(),
       collegeOrFaculty: z.string().optional(),
       cursor: z.string().trim().min(1).max(2048).optional(),
@@ -54,6 +55,7 @@ export class MajorPublicRouter {
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError) return res.status(400).json(toApiValidationErrorPayload(err));
+      if(err instanceof Error && err.message==='CURSOR_INVALID') return res.status(400).json({error:'CURSOR_INVALID'});
       res.status(500).json({ error: 'Internal Server Error' });
     });
     return router;

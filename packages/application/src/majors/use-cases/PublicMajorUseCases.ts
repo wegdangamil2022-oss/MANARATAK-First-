@@ -1,7 +1,7 @@
 import {
   IMajorRepository,
   MajorDto,
-  MajorPhaseLinkingService,
+  publicMajorProjection,
   MajorStatus,
   PaginatedMajorResult,
   PublicMajorDto,
@@ -21,12 +21,13 @@ export class PublicMajorUseCases {
   }
 
   public async getMajor(slug: string, options?: { degreeLevel?: string; profileCode?: string }): Promise<PublicMajorDto> {
-    const major = await this.repository.findBySlug(slug);
+    const major = this.repository.findPublishedSnapshot ? await this.repository.findPublishedSnapshot(slug,options) : await this.repository.findBySlug(slug);
 
     if (!major) {
       throw new Error('Major not found');
     }
 
+    if(this.repository.findPublishedSnapshot) return publicMajorProjection(major,major.profiles?.flatMap(profile=>profile.contentSections ?? []) ?? []);
     const profiles = major.profiles ?? [];
     let targetProfile = options?.profileCode
       ? profiles.find((p) => p.code === options.profileCode)
@@ -71,27 +72,11 @@ export class PublicMajorUseCases {
         title: section.title,
         content: section.content,
         reviewStatus: section.reviewStatus,
-        metadata: section.metadata,
       })),
     };
   }
 
   private mapToPublicDto(major: MajorDto): PublicMajorDto {
-    const {
-      id: _id,
-      canonicalDedupKey: _canonicalDedupKey,
-      sourceImportRecordId: _sourceImportRecordId,
-      status: _status,
-      completenessStatus: _completenessStatus,
-      createdAt: _createdAt,
-      optionalFields,
-      ...publicData
-    } = major;
-
-    return {
-      ...(optionalFields || {}),
-      ...publicData,
-      phaseLinks: MajorPhaseLinkingService.buildLinks(major),
-    };
+    return publicMajorProjection(major,major.profiles?.flatMap(profile=>profile.contentSections ?? []) ?? []);
   }
 }

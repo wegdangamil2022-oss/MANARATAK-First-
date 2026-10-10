@@ -15,9 +15,16 @@ export class UniversityAdminRouter {
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
       Promise.resolve(fn(req, res, next)).catch(next);
     };
+    const reasonSchema = z.string().trim().min(1).max(2000);
     const mutationContext = (req: Request) => {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
+      const rawRevision = req.get('If-Match');
+      const expectedRevision = rawRevision && /^(?:"[0-9]+"|[0-9]+)$/.test(rawRevision)
+        ? Number(rawRevision.replace(/"/g, '')) : undefined;
+      if (!Number.isSafeInteger(expectedRevision)) throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
       return {
+        expectedRevision,
+        reason: reasonSchema.parse(req.get('X-Review-Reason') ?? req.body?.reason),
         actorId: req.authUserId,
         actorType: 'IDENTITY',
         correlationId:
@@ -62,7 +69,15 @@ export class UniversityAdminRouter {
       logoAssetId: z.string().optional(),
       foundedYear: z.number().int().min(1000).max(new Date().getFullYear()).nullable().optional(),
       localizedNames: z.record(z.string(), z.string()).optional(),
-      accreditations: z.array(z.record(z.string(), z.unknown())).optional(),
+      accreditations: z.array(z.object({
+        name: z.string().trim().min(1),
+        organization: z.string().trim().min(1),
+        officialUrl: z.string().url().refine(value => value.startsWith('https://'), 'HTTPS accreditation evidence required'),
+        reviewStatus: z.enum(['NEEDS_REVIEW', 'APPROVED', 'REJECTED']).default('NEEDS_REVIEW'),
+        validFrom: z.string().optional(),
+        validUntil: z.string().optional(),
+        note: z.string().optional(),
+      }).strict()).optional(),
       description: z.string().optional(),
       languagesOfInstruction: z.array(z.string()).optional(),
       contactEmail: z.union([z.string().email(), z.literal('')]).optional(),
@@ -183,6 +198,7 @@ export class UniversityAdminRouter {
               organizationUnitName: z.string().nullable().optional(),
               amount: z.number().nonnegative().nullable().optional(),
               currencyCode: z.string().nullable().optional(),
+              currencyReferenceId: z.string().min(1).optional(),
               officialSourceUrl: z.string().url().nullable().optional(),
               effectiveFrom: z.coerce.date().nullable().optional(),
               effectiveTo: z.coerce.date().nullable().optional(),
@@ -198,8 +214,10 @@ export class UniversityAdminRouter {
               internationalEligible: z.boolean().nullable().optional(),
               typicalCost: z.number().nonnegative().nullable().optional(),
               currencyCode: z.string().nullable().optional(),
+              currencyReferenceId: z.string().min(1).optional(),
               averageMonthlyLivingCost: z.number().nonnegative().nullable().optional(),
               livingCostCurrencyCode: z.string().nullable().optional(),
+              livingCostCurrencyReferenceId: z.string().min(1).optional(),
               costVariationNote: z.string().nullable().optional(),
               metadata: z.record(z.string(), z.unknown()).optional(),
             }),
@@ -248,6 +266,7 @@ export class UniversityAdminRouter {
       '/:id',
       asyncHandler(async (req: Request, res: Response) => {
         const university = await adminUniversityUseCases.getUniversity(req.params.id);
+        res.setHeader('ETag', `"${university.revision}"`);
         res.json(university);
       }),
     );
@@ -270,6 +289,7 @@ export class UniversityAdminRouter {
           { locale, ...payload },
           mutationContext(req),
         );
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.json(translation);
       }),
     );
@@ -320,6 +340,7 @@ export class UniversityAdminRouter {
           dataToUpdate,
           mutationContext(req),
         );
+        res.setHeader('X-Entity-Revision', String(university.revision));
         res.json(university);
       }),
     );
@@ -381,6 +402,7 @@ export class UniversityAdminRouter {
       '/:id/mark-ready',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.markReadyToReview(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -389,6 +411,7 @@ export class UniversityAdminRouter {
       '/:id/mark-publishable',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.markReadyToPublish(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -404,6 +427,7 @@ export class UniversityAdminRouter {
       '/:id/publish',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.publish(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -412,6 +436,7 @@ export class UniversityAdminRouter {
       '/:id/unpublish',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.unpublish(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -420,6 +445,7 @@ export class UniversityAdminRouter {
       '/:id/reject',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.reject(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -428,6 +454,7 @@ export class UniversityAdminRouter {
       '/:id/archive',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.archive(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -436,6 +463,8 @@ export class UniversityAdminRouter {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
+      if (err?.message === 'UNIVERSITY_STALE_REVISION') return res.status(409).json({ error: err.message });
+      if (err?.message === 'UNIVERSITY_EXPECTED_REVISION_REQUIRED') return res.status(428).json({ error: err.message });
       res.status(400).json({ error: err.message || 'An error occurred' });
     });
 

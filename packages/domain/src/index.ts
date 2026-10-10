@@ -386,3 +386,7 @@ export * from './reference-data/governance/ReferenceIanaTimeZonePolicy';
 export * from './reference-data/governance/ReferenceImportReviewEligibility';
 
 export * from './reference-data/governance/ReferenceRetirementPolicy';
+
+export * from './majors/PublicMajorProjection';
+
+export * from './majors/MajorReviewTemplate';

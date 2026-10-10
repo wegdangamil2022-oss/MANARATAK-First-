@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Save, Plus } from 'lucide-react';
 import { adminApiClient } from '../api/client';
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import { CanonicalPicker } from './CanonicalPicker';
 
 type Row = Record<string, unknown>;
 type Field = {
   key: string;
   label: string;
-  type?: 'number' | 'boolean' | 'lines' | 'date' | 'select';
+  type?: 'number' | 'boolean' | 'lines' | 'date' | 'select' | 'currency';
   options?: string[];
+  optionLabels?: Record<string, string>;
 };
 const sectionDefinitions: {
   key: string;
@@ -20,16 +23,19 @@ const sectionDefinitions: {
     key: 'accreditations',
     title: 'الاعتمادات',
     canAdd: true,
+    defaults: { reviewStatus: 'NEEDS_REVIEW' },
     fields: [
       { key: 'name', label: 'اسم الاعتماد' },
       { key: 'organization', label: 'الجهة' },
       { key: 'officialUrl', label: 'الرابط الرسمي' },
+      { key: 'reviewStatus', label: 'حالة المراجعة', type: 'select', options: ['NEEDS_REVIEW', 'APPROVED', 'REJECTED'] },
       { key: 'note', label: 'ملاحظات' },
     ],
   },
   {
     key: 'campuses',
     title: 'الحرم الجامعي',
+    canAdd: true,
     fields: [
       { key: 'name', label: 'الاسم' },
       { key: 'address', label: 'العنوان' },
@@ -39,6 +45,8 @@ const sectionDefinitions: {
   {
     key: 'organizationUnits',
     title: 'الكليات والأقسام',
+    canAdd: true,
+    defaults: { unitType: 'FACULTY' },
     fields: [
       { key: 'name', label: 'الاسم' },
       {
@@ -59,6 +67,7 @@ const sectionDefinitions: {
       { key: 'organizationUnitName', label: 'الكلية أو البرنامج' },
       { key: 'amount', label: 'المبلغ', type: 'number' },
       { key: 'currencyCode', label: 'رمز العملة' },
+      { key: 'currencyReferenceId', label: 'العملة المعتمدة', type: 'currency' },
       { key: 'officialSourceUrl', label: 'رابط الرسوم الرسمي' },
     ],
   },
@@ -71,8 +80,10 @@ const sectionDefinitions: {
       { key: 'internationalEligible', label: 'متاح للطلاب الدوليين', type: 'boolean' },
       { key: 'typicalCost', label: 'تكلفة السكن', type: 'number' },
       { key: 'currencyCode', label: 'عملة السكن' },
+      { key: 'currencyReferenceId', label: 'عملة السكن المعتمدة', type: 'currency' },
       { key: 'averageMonthlyLivingCost', label: 'المعيشة الشهرية', type: 'number' },
       { key: 'livingCostCurrencyCode', label: 'عملة المعيشة' },
+      { key: 'livingCostCurrencyReferenceId', label: 'عملة المعيشة المعتمدة', type: 'currency' },
       { key: 'costVariationNote', label: 'ملاحظات التكلفة' },
     ],
   },
@@ -157,7 +168,14 @@ function fieldsForm(
         return (
           <label key={field.key} className="text-xs font-bold text-[#142B5F]">
             {field.label}
-            {field.type === 'boolean' ? (
+            {field.type === 'currency' ? (
+              <CanonicalPicker label={field.label} value={typeof value === 'string' ? value : null}
+                load={() => canonicalPickerApi.currencies()} reloadKey="university-currencies"
+                onChange={(next, option) => {
+                  change(field.key, next);
+                  change(field.key === 'livingCostCurrencyReferenceId' ? 'livingCostCurrencyCode' : 'currencyCode', option?.code ?? null);
+                }} optional disabled={disabled} />
+            ) : field.type === 'boolean' ? (
               <select
                 value={value == null ? '' : String(value)}
                 onChange={(e) =>
@@ -177,7 +195,7 @@ function fieldsForm(
               >
                 <option value="">اختر</option>
                 {field.options?.map((option) => (
-                  <option key={option}>{option}</option>
+                  <option key={option} value={option}>{field.optionLabels?.[option] ?? option}</option>
                 ))}
               </select>
             ) : field.type === 'lines' ? (
@@ -221,8 +239,10 @@ export function UniversitySectionsEditor({
   disabled,
   onDirtyChange,
   onSaved,
+  reviewReason,
 }: {
   id: string;
+  reviewReason: string;
   initial: Row;
   disabled: boolean;
   onDirtyChange: (dirty: boolean) => void;
@@ -251,6 +271,7 @@ export function UniversitySectionsEditor({
     onDirtyChange(true);
   };
   const save = async (key: string) => {
+    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
     setSaving(key);
     setError('');
     setMessage('');
@@ -316,6 +337,7 @@ export function UniversitySectionsEditor({
             key === 'identity' || key === 'admissions' || key === 'accreditations'
               ? 'PATCH'
               : 'PUT',
+          headers: { 'X-Review-Reason': reviewReason.trim() },
           body: JSON.stringify(data),
         },
       );
@@ -401,7 +423,27 @@ export function UniversitySectionsEditor({
           {rows[section.key].map((row, index) => (
             <div key={String(row.id ?? index)} className="mb-3 rounded-xl border p-3">
               {fieldsForm(
-                section.fields,
+                section.key === 'organizationUnits'
+                  ? [
+                      ...section.fields,
+                      {
+                        key: 'campusSourceReferenceId', label: 'الحرم الجامعي', type: 'select' as const,
+                        options: rows.campuses.map(item => String(item.sourceReferenceId ?? item.id ?? '')).filter(Boolean),
+                        optionLabels: Object.fromEntries(rows.campuses.map(item => [
+                          String(item.sourceReferenceId ?? item.id ?? ''), String(item.name ?? ''),
+                        ])),
+                      },
+                      {
+                        key: 'parentSourceReferenceId', label: 'الكلية أو الوحدة الأم', type: 'select' as const,
+                        options: rows.organizationUnits
+                          .filter(item => item !== row && item.unitType !== 'DEPARTMENT')
+                          .map(item => String(item.sourceReferenceId ?? item.id ?? '')).filter(Boolean),
+                        optionLabels: Object.fromEntries(rows.organizationUnits.map(item => [
+                          String(item.sourceReferenceId ?? item.id ?? ''), String(item.name ?? ''),
+                        ])),
+                      },
+                    ]
+                  : section.fields,
                 row,
                 (key, value) => {
                   setRows((current) => ({
@@ -426,7 +468,11 @@ export function UniversitySectionsEditor({
               onClick={() => {
                 setRows((current) => ({
                   ...current,
-                  [section.key]: [...current[section.key], { ...section.defaults }],
+                  [section.key]: [...current[section.key], {
+                    ...section.defaults,
+                    ...(['campuses', 'organizationUnits'].includes(section.key)
+                      ? { sourceReferenceId: `admin-${section.key}-${crypto.randomUUID()}` } : {}),
+                  }],
                 }));
                 mark(section.key);
               }}

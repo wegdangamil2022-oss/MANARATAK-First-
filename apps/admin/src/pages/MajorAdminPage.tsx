@@ -52,6 +52,7 @@ interface PaginatedResponse {
   page: number;
   pageSize: number;
   totalPages: number;
+  stats?:{published:number;needsReview:number;complete:number};
 }
 
 const degreeOptions = [
@@ -137,7 +138,7 @@ function metricAccentClasses(accent: string) {
 export function MajorAdminPage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const view = searchParams.get('view') === 'new' ? 'new' : 'all';
+  const view = searchParams.get('view') === 'new' ? 'new' : searchParams.get('view') === 'catalog' ? 'catalog' : 'all';
   const [newCandidatesTotal, setNewCandidatesTotal] = useState(0);
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -174,7 +175,7 @@ export function MajorAdminPage() {
       setLoading(true);
       setError(null);
       try {
-        const params = new URLSearchParams({ page: page.toString(), pageSize: '24' });
+        const params = new URLSearchParams({ page: page.toString(), pageSize: '24',catalog:view==='catalog'?'true':'false' });
         if (statusFilter) params.append('status', statusFilter);
         if (completenessFilter) params.append('completenessStatus', completenessFilter);
         if (degreeFilter) params.append('degreeLevel', degreeFilter);
@@ -200,10 +201,10 @@ export function MajorAdminPage() {
   const visibleMajors = useMemo(() => data?.data ?? [], [data?.data]);
   const stats = useMemo(() => ({
     total: data?.total ?? 0,
-    published: visibleMajors.filter((major) => major.status === 'PUBLISHED').length,
-    needsReview: visibleMajors.filter((major) => major.completenessStatus === 'NEEDS_REVIEW' || major.status === 'READY_TO_REVIEW').length,
-    complete: visibleMajors.filter((major) => major.completenessStatus === 'COMPLETE').length,
-  }), [data?.total, visibleMajors]);
+    published: data?.stats?.published ?? visibleMajors.filter((major) => major.status === 'PUBLISHED').length,
+    needsReview: data?.stats?.needsReview ?? visibleMajors.filter((major) => major.completenessStatus === 'NEEDS_REVIEW' || major.status === 'READY_TO_REVIEW').length,
+    complete: data?.stats?.complete ?? visibleMajors.filter((major) => major.completenessStatus === 'COMPLETE').length,
+  }), [data?.total,data?.stats,visibleMajors]);
 
   const hasActiveFilters = Boolean(search || degreeFilter || statusFilter || completenessFilter || taxonomyIdFilter);
 
@@ -247,6 +248,7 @@ export function MajorAdminPage() {
             >
               كل التخصصات
             </button>
+            <button type="button" onClick={()=>{setPage(1);setSearchParams({view:'catalog'});}} className="rounded-xl border border-white/30 px-4 py-2 text-sm">كتالوجات المصدر للمراجعة</button>
             <button
               type="button"
               onClick={() => setSearchParams({ view: 'new' })}
@@ -282,8 +284,8 @@ export function MajorAdminPage() {
           {/* Metrics Overview */}
           <section className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard label="إجمالي التخصصات" value={stats.total} icon={BookOpen} accent="#142B5F" />
-            <MetricCard label="تخصصات منشورة" value={stats.published} icon={CheckCircle2} accent="#2E7D5A" />
-            <MetricCard label="بحاجة لمراجعة" value={stats.needsReview} icon={AlertCircle} accent="#D6A43B" />
+            <MetricCard label={data?.stats?"منشورة ضمن النتائج":"منشورة في الصفحة"} value={stats.published} icon={CheckCircle2} accent="#2E7D5A" />
+            <MetricCard label={data?.stats?"تحتاج مراجعة ضمن النتائج":"تحتاج مراجعة في الصفحة"} value={stats.needsReview} icon={AlertCircle} accent="#D6A43B" />
             <MetricCard label="مكتملة البيانات" value={stats.complete} icon={GraduationCap} accent="#21A7B4" />
           </section>
 

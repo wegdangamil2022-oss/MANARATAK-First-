@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import type {NewMajorCandidateSourceRef} from '@manaratak/domain';
 
 const RESOLVED_STATES = ['RESOLVED', 'NOT_APPLICABLE'];
 
@@ -7,20 +8,20 @@ export class PrismaScholarshipMajorResolutionWriter {
   public constructor(private readonly prisma: PrismaClient) {}
 
   public async resolveMajorReferences(input: {
-    targetIds: readonly string[];
-    eligibilityIds: readonly string[];
+    targets: readonly NewMajorCandidateSourceRef[];
+    eligibility: readonly NewMajorCandidateSourceRef[];
     majorId: string;
   }): Promise<{ scholarshipMajorTargets: number; scholarshipEligibilityItems: number }> {
     const [targets, eligibility] = await Promise.all([
-      input.targetIds.length
+      input.targets.length
         ? this.prisma.scholarshipMajorTarget.updateMany({
-            where: { id: { in: [...input.targetIds] }, majorId: null, resolutionStatus: { notIn: RESOLVED_STATES } },
+            where: {OR:input.targets.map(source=>({id:source.sourceId,scholarshipId:source.ownerId,sourceLabel:source.rawLabel,updatedAt:source.sourceUpdatedAt ? new Date(source.sourceUpdatedAt) : undefined})), majorId:null,resolutionStatus:{notIn:RESOLVED_STATES},scholarship:{is:{status:{notIn:['ARCHIVED','REJECTED']}}}},
             data: { majorId: input.majorId, resolutionStatus: 'RESOLVED' },
           })
         : Promise.resolve({ count: 0 }),
-      input.eligibilityIds.length
+      input.eligibility.length
         ? this.prisma.scholarshipEligibilityItem.updateMany({
-            where: { id: { in: [...input.eligibilityIds] }, majorId: null, resolutionStatus: { notIn: RESOLVED_STATES } },
+            where: {OR:input.eligibility.map(source=>({id:source.sourceId,scholarshipId:source.ownerId,valueText:source.rawLabel,degreeLevelId:source.degreeLevelId ?? null,updatedAt:source.sourceUpdatedAt ? new Date(source.sourceUpdatedAt) : undefined})), majorId:null,resolutionStatus:{notIn:RESOLVED_STATES},scholarship:{is:{status:{notIn:['ARCHIVED','REJECTED']}}}},
             data: { majorId: input.majorId, resolutionStatus: 'RESOLVED' },
           })
         : Promise.resolve({ count: 0 }),

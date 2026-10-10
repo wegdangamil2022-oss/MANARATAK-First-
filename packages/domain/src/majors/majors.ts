@@ -180,6 +180,7 @@ export interface MajorPhaseLinkSummaryDto {
 }
 
 export interface MajorDto {
+  revision?: number;
   id: string;
   publicId: string;
   slug: string;
@@ -421,6 +422,7 @@ export interface PaginatedMajorResult<T = MajorDto> {
   page: number;
   pageSize: number;
   totalPages: number;
+  stats?: {published:number;needsReview:number;complete:number};
   hasMore?: boolean;
   nextCursor?: string | null;
 }
@@ -455,6 +457,12 @@ export interface TaxonomyMappedMajorDto {
 }
 
 export interface IMajorRepository {
+  lockForRevision?(id:string,expectedRevision:number):Promise<void>;
+  advanceRevision?(id:string,expectedRevision:number):Promise<number>;
+  startWorkingCopy?(id:string,actorId:string,reason:string):Promise<void>;
+  unpublishProfile?(id:string):Promise<void>;
+  reviewGraph?(id:string,kind:'ALIAS'|'RELATIONSHIP',input:Record<string,string>,actorId:string):Promise<void>;
+  reviewWorkingVersion?(id:string,versionId:string,actorId:string,reason:string,coverage:Record<string,string>):Promise<void>;
   /** Requires an active audited transaction; locks the owner before validating and writing. */
   addReviewedClassificationMapping?(majorId: string, input: ReviewedMajorClassificationInput): Promise<MajorClassificationMappingDto>;
   create(data: Omit<MajorDto, 'id' | 'createdAt' | 'updatedAt'> & Partial<Pick<MajorDto, 'id' | 'createdAt' | 'updatedAt'>>): Promise<MajorDto>;
@@ -463,6 +471,7 @@ export interface IMajorRepository {
   findByPublicId?(publicId: string): Promise<MajorDto | null>;
   findPublishedByIds?(ids: string[]): Promise<MajorDto[]>;
   findBySlug(slug: string): Promise<MajorDto | null>;
+  findPublishedSnapshot?(slug:string,options?:{degreeLevel?:string;profileCode?:string}):Promise<MajorDto|null>;
   findByDedupKey(key: string): Promise<MajorDto | null>;
   updateStatus(id: string, status: MajorLifecycleStatus): Promise<void>;
   updateImportLink?(id: string, sourceImportRecordId: string): Promise<void>;
@@ -471,7 +480,7 @@ export interface IMajorRepository {
   createVersion?(data: Omit<MajorVersionDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<MajorVersionDto>;
   /** Serializes version-number allocation for one Major inside the active transaction. */
   acquireVersionAllocationLock?(majorId: string): Promise<void>;
-  listVersions?(majorId: string, options?: { profileId?: string }): Promise<MajorVersionDto[]>;
+  listVersions?(majorId: string, options?: { profileId?: string;page?:number }): Promise<MajorVersionDto[]>;
   createLevelProfile?(data: Omit<MajorLevelProfileDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<MajorLevelProfileDto>;
   findLevelProfile?(majorId: string, level: MajorLevel, code?: string): Promise<MajorLevelProfileDto | null>;
   listLevelProfiles?(majorId: string): Promise<MajorLevelProfileDto[]>;

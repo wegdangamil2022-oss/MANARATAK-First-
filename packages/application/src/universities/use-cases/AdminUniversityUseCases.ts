@@ -24,6 +24,11 @@ import {
   AtomicMutationRequestContext,
 } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 
+export interface UniversityMutationContext extends AtomicMutationRequestContext {
+  expectedRevision?: number;
+  reason?: string;
+}
+
 export class AdminUniversityUseCases {
   constructor(
     private readonly repository: IUniversityRepository,
@@ -70,7 +75,7 @@ export class AdminUniversityUseCases {
       UniversityTranslationDto,
       'id' | 'universityId' | 'createdAt' | 'updatedAt'
     >,
-    context?: AtomicMutationRequestContext,
+    context?: UniversityMutationContext,
   ): Promise<UniversityTranslationDto> {
     assertTranslationContentAuthoringEnabled('UNIVERSITY');
     await this.getUniversity(id);
@@ -89,17 +94,14 @@ export class AdminUniversityUseCases {
   public async updateUniversity(
     id: string,
     updates: UpdateUniversityDto,
-    context?: AtomicMutationRequestContext,
+    context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     assertNoTranslationPayloadFields('UNIVERSITY', updates.optionalFields, ['localizedNames']);
     await assertAssetReferenceUsable(this.assetReferences, updates.logoAssetId, { purpose: 'UNIVERSITY_LOGO' });
     const existing = await this.getUniversity(id);
-    const canonicalRelationshipMutation =
-      updates.countryReferenceId !== undefined ||
-      updates.regionReferenceId !== undefined ||
-      updates.cityReferenceId !== undefined;
-    if (existing.status === UniversityStatus.PUBLISHED && canonicalRelationshipMutation) {
-      throw new Error('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED]
+      .includes(existing.status)) {
+      throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
 
     const payloadForClassification = {
@@ -121,6 +123,7 @@ export class AdminUniversityUseCases {
     return this.mutate('UNIVERSITY_UPDATED', id, context, (repository) =>
       repository.update(id, {
         ...updates,
+        status: existing.status === UniversityStatus.READY_TO_PUBLISH ? UniversityStatus.READY_TO_REVIEW : existing.status,
         completenessStatus: classification.state,
       }),
     );
@@ -130,11 +133,11 @@ export class AdminUniversityUseCases {
     universityId: string,
     programId: string | null,
     input: UniversityAcademicProgramAuthoringInput,
-    context?: AtomicMutationRequestContext,
+    context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     const university = await this.getUniversity(universityId);
-    if (university.status === UniversityStatus.PUBLISHED) {
-      throw new Error('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(university.status)) {
+      throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
     if (!input.sourceProgramName.trim()) throw new Error('UNIVERSITY_PROGRAM_NAME_REQUIRED');
     if (!input.degreeLevelId) throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_REQUIRED');
@@ -144,7 +147,12 @@ export class AdminUniversityUseCases {
       context,
       async (repository) => {
         if (!repository.upsertAcademicProgram) throw new Error('UNIVERSITY_PROGRAM_PERSISTENCE_NOT_AVAILABLE');
-        return repository.upsertAcademicProgram(universityId, programId, input);
+        const result = await repository.upsertAcademicProgram(universityId, programId, input);
+        if (university.status === UniversityStatus.READY_TO_PUBLISH) {
+          await repository.updateStatus(universityId, UniversityStatus.READY_TO_REVIEW);
+          result.status = UniversityStatus.READY_TO_REVIEW;
+        }
+        return result;
       },
     );
   }
@@ -152,22 +160,27 @@ export class AdminUniversityUseCases {
   public async archiveAcademicProgram(
     universityId: string,
     programId: string,
-    context?: AtomicMutationRequestContext,
+    context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     const university = await this.getUniversity(universityId);
-    if (university.status === UniversityStatus.PUBLISHED) {
-      throw new Error('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(university.status)) {
+      throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
     return this.mutate('UNIVERSITY_ACADEMIC_PROGRAM_ARCHIVED', universityId, context, async (repository) => {
       if (!repository.archiveAcademicProgram) throw new Error('UNIVERSITY_PROGRAM_PERSISTENCE_NOT_AVAILABLE');
-      return repository.archiveAcademicProgram(universityId, programId);
+      const result = await repository.archiveAcademicProgram(universityId, programId);
+      if (university.status === UniversityStatus.READY_TO_PUBLISH) {
+        await repository.updateStatus(universityId, UniversityStatus.READY_TO_REVIEW);
+        result.status = UniversityStatus.READY_TO_REVIEW;
+      }
+      return result;
     });
   }
 
   public async replaceNormalizedDetails(
     id: string,
     details: UniversityNormalizedDetailsUpdate,
-    context?: AtomicMutationRequestContext,
+    context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     assertNoTranslationPayloadFields(
       'UNIVERSITY',
@@ -175,8 +188,8 @@ export class AdminUniversityUseCases {
       ['localizedNames'],
     );
     const existing = await this.getUniversity(id);
-    if (existing.status === UniversityStatus.PUBLISHED) {
-      throw new Error('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(existing.status)) {
+      throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
     return this.mutate(
       'UNIVERSITY_NORMALIZED_DETAILS_REPLACED',
@@ -186,16 +199,23 @@ export class AdminUniversityUseCases {
         if (!repository.replaceNormalizedDetails) {
           throw new Error('UNIVERSITY_NORMALIZED_PERSISTENCE_NOT_AVAILABLE');
         }
-        return repository.replaceNormalizedDetails(id, details);
+        const result = await repository.replaceNormalizedDetails(id, details);
+        if (existing.status === UniversityStatus.READY_TO_PUBLISH) {
+          await repository.updateStatus(id, UniversityStatus.READY_TO_REVIEW);
+          result.status = UniversityStatus.READY_TO_REVIEW;
+        }
+        return result;
       },
     );
   }
 
   public async markReadyToReview(
     id: string,
-    context?: AtomicMutationRequestContext,
+    context?: UniversityMutationContext,
   ): Promise<void> {
     const existing = await this.getUniversity(id);
+    if (existing.status !== UniversityStatus.IMPORTED && existing.status !== UniversityStatus.READY_TO_REVIEW)
+      throw new Error('UNIVERSITY_INVALID_REVIEW_TRANSITION');
     if (existing.completenessStatus === UniversityImportCompletenessState.INCOMPLETE) {
       throw new Error('Cannot mark INCOMPLETE university as READY_TO_REVIEW');
     }
@@ -208,9 +228,11 @@ export class AdminUniversityUseCases {
 
   public async markReadyToPublish(
     id: string,
-    context?: AtomicMutationRequestContext,
+    context?: UniversityMutationContext,
   ): Promise<void> {
     const existing = await this.getUniversity(id);
+    if (existing.status !== UniversityStatus.READY_TO_REVIEW)
+      throw new Error('UNIVERSITY_INVALID_PUBLISHABLE_TRANSITION');
     if (existing.completenessStatus !== UniversityImportCompletenessState.COMPLETE) {
       throw new Error('Only COMPLETE universities can be marked as READY_TO_PUBLISH');
     }
@@ -233,7 +255,7 @@ export class AdminUniversityUseCases {
     );
   }
 
-  public async publish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async publish(id: string, context?: UniversityMutationContext): Promise<void> {
     const existing = await this.getUniversity(id);
     if (existing.status !== UniversityStatus.READY_TO_PUBLISH) {
       throw new Error('Only READY_TO_PUBLISH universities can be PUBLISHED');
@@ -244,7 +266,7 @@ export class AdminUniversityUseCases {
     );
   }
 
-  public async unpublish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async unpublish(id: string, context?: UniversityMutationContext): Promise<void> {
     const existing = await this.getUniversity(id);
     if (existing.status !== UniversityStatus.PUBLISHED) {
       throw new Error('Cannot unpublish a university that is not PUBLISHED');
@@ -254,7 +276,7 @@ export class AdminUniversityUseCases {
     );
   }
 
-  public async reject(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async reject(id: string, context?: UniversityMutationContext): Promise<void> {
     const existing = await this.getUniversity(id);
     if (existing.status === UniversityStatus.PUBLISHED) {
       throw new Error('Cannot reject a PUBLISHED university. Unpublish first.');
@@ -264,7 +286,7 @@ export class AdminUniversityUseCases {
     );
   }
 
-  public async archive(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async archive(id: string, context?: UniversityMutationContext): Promise<void> {
     const existing = await this.getUniversity(id);
     if (existing.status === UniversityStatus.PUBLISHED) {
       throw new Error('Cannot archive a PUBLISHED university. Unpublish first.');
@@ -277,16 +299,29 @@ export class AdminUniversityUseCases {
   private mutate<T>(
     action: string,
     id: string,
-    context: AtomicMutationRequestContext | undefined,
+    context: UniversityMutationContext | undefined,
     mutation: (repository: IUniversityRepository) => Promise<T>,
   ): Promise<T> {
-    if (!this.atomicMutations) return mutation(this.repository);
+    if (!this.atomicMutations || !context?.actorId || !context.reason?.trim())
+      throw new Error('UNIVERSITY_AUDITED_REVIEW_CONTEXT_REQUIRED');
+    if (!Number.isSafeInteger(context.expectedRevision) || (context.expectedRevision ?? -1) < 0)
+      throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
     const repository = this.repository as Partial<ITransactionalUniversityRepository>;
-    if (!repository.withTransaction)
-      throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    if (!repository.withTransaction) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     return this.atomicMutations.execute(
-      { domain: 'UNIVERSITIES', aggregateType: 'UNIVERSITY', aggregateId: id, action, context },
-      (transaction) => mutation(repository.withTransaction!(transaction)),
+      { domain: 'UNIVERSITIES', aggregateType: 'UNIVERSITY', aggregateId: id, action, context,
+        auditMetadata: { reason: context.reason, expectedRevision: context.expectedRevision } },
+      async (transaction) => {
+        const tx = repository.withTransaction!(transaction);
+        if (!tx.lockForRevision || !tx.advanceRevision)
+          throw new Error('UNIVERSITY_REVISION_PERSISTENCE_REQUIRED');
+        await tx.lockForRevision(id, context.expectedRevision!);
+        const result = await mutation(tx);
+        const revision = await tx.advanceRevision(id, context.expectedRevision!);
+        if (result && typeof result === 'object' && 'id' in result)
+          Object.assign(result, { revision });
+        return result;
+      },
     );
   }
 }

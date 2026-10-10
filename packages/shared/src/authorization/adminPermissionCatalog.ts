@@ -106,6 +106,8 @@ export const ADMIN_PERMISSION_CATALOG = [
     risk: 'STANDARD',
     delegable: true,
   },
+  {key:'admin:majors:review',domain:'majors',action:'review',labelAr:'مراجعة التخصصات',labelEn:'Review majors',descriptionAr:'اعتماد نسخ التخصصات والمراجع الجديدة.',descriptionEn:'Review major versions and discovery references.',risk:'STANDARD',delegable:true},
+  {key:'admin:majors:publish',domain:'majors',action:'publish',labelAr:'نشر التخصصات',labelEn:'Publish majors',descriptionAr:'نشر النسخ المعتمدة وإلغاء نشرها.',descriptionEn:'Publish and unpublish approved major versions.',risk:'STANDARD',delegable:true},
   {key:'admin:international-tests:review',domain:'international-tests',action:'review',labelAr:'مراجعة الاختبارات الدولية',labelEn:'Review international tests',descriptionAr:'صلاحية مستقلة؛ تتطلب إدارة الاختبارات للوصول.',descriptionEn:'Separate operation permission; test management is required for access.',risk:'STANDARD',delegable:true},
   {key:'admin:international-tests:verify',domain:'international-tests',action:'verify',labelAr:'التحقق من مصادر الاختبارات',labelEn:'Verify test sources',descriptionAr:'صلاحية مستقلة؛ تتطلب إدارة الاختبارات للوصول.',descriptionEn:'Separate operation permission; test management is required for access.',risk:'STANDARD',delegable:true},
   {key:'admin:international-tests:publish',domain:'international-tests',action:'publish',labelAr:'نشر الاختبارات الدولية',labelEn:'Publish international tests',descriptionAr:'صلاحية مستقلة؛ تتطلب إدارة الاختبارات للوصول.',descriptionEn:'Separate operation permission; test management is required for access.',risk:'STANDARD',delegable:true},

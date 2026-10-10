@@ -18,7 +18,7 @@ export function createAdminIdempotencyKey(): string {
 }
 
 function isMutation(method?: string): boolean {
-  return ['POST', 'PUT', 'PATCH'].includes((method || 'GET').toUpperCase());
+  return ['POST', 'PUT', 'PATCH', 'DELETE'].includes((method || 'GET').toUpperCase());
 }
 
 let activeRefreshPromise: Promise<boolean> | null = null;
@@ -66,6 +66,9 @@ let authStateListeners: Array<(state: AdminAuthState) => void> = [];
 let globalAbortController = new AbortController();
 let sessionGeneration = 0;
 const testRevisions = new Map<string,number>();
+const majorRevisions = new Map<string,number>();
+const universityRevisions = new Map<string,number>();
+const majorOwnerAliases = new Map<string,string>();
 
 export function setAdminAuthStatus(state: AdminAuthState): void {
   currentAdminAuthState = state;
@@ -80,6 +83,7 @@ export function setAdminAuthStatus(state: AdminAuthState): void {
 export function abortAllPendingAdminRequests(): void {
   sessionGeneration++;
   testRevisions.clear();
+  majorRevisions.clear(); majorOwnerAliases.clear(); universityRevisions.clear();
   globalAbortController.abort();
   globalAbortController = new AbortController();
   inFlightRequests.clear();
@@ -155,7 +159,7 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 
   const method = (options.method || 'GET').toUpperCase();
   const cacheKey = `${method}:${endpoint}`;
-  const freshRead = options.cache === 'no-store' || options.cache === 'reload' || /^\/admin\/international-tests(?:\/|\?|$)/.test(endpoint);
+  const freshRead = options.cache === 'no-store' || options.cache === 'reload' || /^\/admin\/(international-tests|majors|universities)(?:\/|\?|$)/.test(endpoint);
   const coalesce = method === 'GET' && !freshRead && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
 
   if (method === 'GET' && !isPublicAuthRoute) {
@@ -227,6 +231,21 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     headers.set('If-Match',`"${revision}"`);
   }
 
+  const majorMatch=endpoint.match(/^\/admin\/majors\/([^/?]+)(?:\/|\?|$)/);
+  const majorOwner=majorMatch && !['facets','new-candidates'].includes(majorMatch[1]) ? majorMatch[1] : undefined;
+  if(majorOwner && isMutation(options.method) && !headers.has('If-Match')) {
+    const revision=majorRevisions.get(majorOwner);
+    if(revision===undefined) throw new Error('أعد تحميل التخصص قبل التعديل.');
+    headers.set('If-Match',`"${revision}"`);
+  }
+
+  const universityMatch = endpoint.match(/^\/admin\/universities\/([^/?]+)(?:\/|\?|$)/);
+  const universityOwner = universityMatch && universityMatch[1] !== 'organization-units' ? universityMatch[1] : undefined;
+  if (universityOwner && method !== 'GET' && !headers.has('If-Match')) {
+    const revision = universityRevisions.get(universityOwner);
+    if (revision === undefined) throw new Error('أعد تحميل الجامعة قبل التعديل (إصدار السجل مطلوب).');
+    headers.set('If-Match', `"${revision}"`);
+  }
   if (/^\/admin\/imports(?:\/|\?|$)/.test(endpoint)) headers.set('X-Import-Envelope-Version', '2');
 
   if (isMutation(options.method) && !headers.has('Idempotency-Key')) {
@@ -307,6 +326,36 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     const remember=(row:unknown)=>{if(row&&typeof row==='object'&&'id' in row&&'revision' in row) {const value=Number(row.revision);if(Number.isSafeInteger(value)) testRevisions.set(String(row.id),Math.max(testRevisions.get(String(row.id))??0,value));}};
     remember(payload); if(payload&&typeof payload==='object'&&'data' in payload&&Array.isArray(payload.data)) payload.data.forEach(remember);
     const revision=response.headers.get('X-Entity-Revision'); if(testOwner&&revision!==null)testRevisions.set(testOwner,Number(revision));
+  }
+  if(endpoint.startsWith('/admin/majors')) {
+    const remember=(row:unknown)=>{
+      if(!row || typeof row!=='object' || !('id' in row) || !('revision' in row)) return;
+      const item=row as {id:string;revision:number;publicId?:string;profileId?:string;profiles?:Array<{id?:string;code?:string}>};
+      if(!Number.isSafeInteger(item.revision)) return;
+      const aliases=[item.id,item.publicId,item.profileId,...(item.profiles ?? []).flatMap(profile=>[profile.id,profile.code])].filter((id):id is string=>Boolean(id));
+      if(majorOwner) aliases.push(majorOwner);
+      for(const alias of aliases) {majorRevisions.set(alias,item.revision);majorOwnerAliases.set(alias,item.id);}
+    };
+    remember(payload);if(payload && typeof payload==='object' && 'data' in payload && Array.isArray(payload.data)) payload.data.forEach(remember);
+    const value=response.headers.get('X-Entity-Revision');
+    if(majorOwner && value!==null && Number.isSafeInteger(Number(value))) {
+      const canonical=majorOwnerAliases.get(majorOwner) ?? majorOwner;
+      majorRevisions.set(majorOwner,Number(value));
+      for(const [alias,owner] of majorOwnerAliases) if(owner===canonical) majorRevisions.set(alias,Number(value));
+    }
+  }
+  if (endpoint.startsWith('/admin/universities')) {
+    const remember = (row: unknown) => {
+      if (!row || typeof row !== 'object' || !('id' in row) || !('revision' in row)) return;
+      const item = row as { id: string; revision: number };
+      if (Number.isSafeInteger(item.revision)) universityRevisions.set(item.id, item.revision);
+    };
+    remember(payload);
+    if (payload && typeof payload === 'object' && 'data' in payload && Array.isArray(payload.data))
+      payload.data.forEach(remember);
+    const value = response.headers.get('X-Entity-Revision');
+    if (universityOwner && value !== null && Number.isSafeInteger(Number(value)))
+      universityRevisions.set(universityOwner, Number(value));
   }
   return payload;
 }

@@ -21,7 +21,7 @@ export class LocalizedPublicMajorUseCases {
     const paginated = await this.repository.listPublished(filters);
     return {
       ...paginated,
-      data: paginated.data.map((major) => this.projection.projectMajor(major, [], locale)),
+      data: paginated.data.map((major) => this.projection.projectMajor(major, major.profiles?.flatMap(profile=>profile.contentSections ?? []) ?? [], locale)),
     };
   }
 
@@ -30,11 +30,12 @@ export class LocalizedPublicMajorUseCases {
     locale: SupportedLocale = DEFAULT_LOCALE,
     options?: { degreeLevel?: string; profileCode?: string },
   ): Promise<PublicMajorDto> {
-    const major = await this.repository.findBySlug(slug);
+    const major = this.repository.findPublishedSnapshot ? await this.repository.findPublishedSnapshot(slug,options) : await this.repository.findBySlug(slug);
     if (!major) {
       throw new Error('Major not found');
     }
 
+    if(this.repository.findPublishedSnapshot) return this.projection.projectMajor(major,major.profiles?.flatMap(profile=>profile.contentSections ?? []) ?? [],locale);
     const profiles = major.profiles ?? [];
     let targetProfile = options?.profileCode
       ? profiles.find((p) => p.code === options.profileCode)

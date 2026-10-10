@@ -19,6 +19,8 @@ export interface NewMajorCandidateSourceRef {
   officialSourceUrl?: string | null;
   sourceUrl?: string | null;
   status?: string | null;
+  sourceUpdatedAt?: string;
+  degreeReferences?: Array<{id:string; code:string; label?:string}>;
 }
 
 /**
@@ -27,6 +29,9 @@ export interface NewMajorCandidateSourceRef {
  */
 export interface NewMajorCandidateDto {
   candidateKey: string;
+  /** Digest of the complete unresolved source set; required for review commands. */
+  sourceDigest: string;
+  sourcesTruncated?: boolean;
   normalizedLabel: string;
   displayLabel: string;
   sourceCount: number;
@@ -65,7 +70,9 @@ export interface NewMajorCandidateResolutionResult {
 export interface INewMajorCandidateRepository {
   list(filters: NewMajorCandidateFilters): Promise<PaginatedNewMajorCandidateResult>;
   findByKey(candidateKey: string): Promise<NewMajorCandidateDto | null>;
-  resolve(candidateKey: string, majorId: string): Promise<NewMajorCandidateResolutionResult>;
+  resolve(candidateKey: string, majorId: string, expectedDigest: string): Promise<NewMajorCandidateResolutionResult>;
+  acquireReviewLock?(candidateKey: string): Promise<void>;
+  recordDecision?(input: {candidateKey: string; sourceDigest: string; decision: 'APPROVED' | 'LINKED' | 'REJECTED'; actorId: string; reason: string; majorId?: string; evidence: NewMajorCandidateDto}): Promise<void>;
 }
 
 export interface ITransactionalNewMajorCandidateRepository extends INewMajorCandidateRepository {
