@@ -39,3 +39,7 @@ The unapplied source migration `20261010020000_reference_owner_review` creates o
 POST-28 must verify genuine EAP bytes/provider behavior and authorization, real P6 staging/receipts/owner apply, PostgreSQL row/advisory lock races and audit/outbox rollback/delivery, lifecycle usage performance and consumers, browser/AR-EN/public flows, standards source files and reviewer decisions, historical Unicode/legacy-city reconciliation and actual university-city inventory. The held source queue (3,549 university rows and earlier unmatched city candidates) is neither a database count nor permission to insert cities. Existing review artifacts are preserved. Any data correction remains a separately reviewed operation.
 
 No migration, database query/write, seed, backfill, live import, browser/provider/load test, deployment, force push or history rewrite was performed. Integration commits use `[skip ci]` and do not change historical evidence into successful runtime tests.
+
+## Integration with Section 07
+
+The main integration retains both P7 and P8 import entry points, screening consumers, owner permissions and persistence models. Six shared-file conflicts were resolved explicitly. The older terminal-safety source-contract assertions were updated to the new retirement policy and active geographic replacement guards; this historical suite was not executed again. No integration compiler, database operation or repeated test run was performed.

@@ -1,3 +1,4 @@
+import { normalizeAcademicTaxonomyAlias } from './key';
 import {
   AcademicTaxonomyNodeDto,
   UpsertAcademicTaxonomyNodeDto,
@@ -351,7 +352,7 @@ export class AcademicTaxonomyValidationService implements IAcademicTaxonomyValid
           fieldName: 'isPrimary',
           code: 'MULTIPLE_PRIMARY_PARENTS',
           message: `Child node "${childId}" already has another primary parent edge`,
-          severity: AcademicTaxonomyValidationSeverity.WARNING,
+          severity: AcademicTaxonomyValidationSeverity.ERROR,
         });
       }
     }
@@ -388,7 +389,7 @@ export class AcademicTaxonomyValidationService implements IAcademicTaxonomyValid
       return issues;
     }
 
-    const normalizedAlias = rawAlias.trim().toLowerCase().replace(/\s+/g, ' ');
+    const normalizedAlias = normalizeAcademicTaxonomyAlias(rawAlias);
 
     if (!alias.locale || alias.locale.trim() === '') {
       issues.push({
@@ -399,12 +400,12 @@ export class AcademicTaxonomyValidationService implements IAcademicTaxonomyValid
       });
     }
 
-    const localeNormalized = alias.locale ? alias.locale.trim() : null;
+    const localeNormalized = alias.locale ? alias.locale.trim().toLowerCase() || null : null;
 
     for (const existing of existingAliases) {
-      const existingLocale = existing.locale ? existing.locale.trim() : null;
+      const existingLocale = existing.locale ? existing.locale.trim().toLowerCase() || null : null;
 
-      if (existing.normalizedAlias === normalizedAlias) {
+      if (normalizeAcademicTaxonomyAlias(existing.alias) === normalizedAlias || normalizeAcademicTaxonomyAlias(existing.normalizedAlias) === normalizedAlias) {
         if (nodeId && existing.nodeId !== nodeId) {
           issues.push({
             fieldName: 'alias',

@@ -1,0 +1,11 @@
+Command: timeout 60s npx --no-install vitest run packages/application/tests/academic-taxonomy/AcademicLifecycleGovernance.spec.ts packages/infrastructure/tests/academic-taxonomy/CanonicalAcademicUsageReadModel.spec.ts apps/api/tests/presentation/api/router/AcademicLifecycleRoutes.spec.ts
+Runs: 1
+
+ RUN  v4.1.11 /workspace/manaratak-section-07
+
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  23:59:55
+   Duration  3.05s (transform 1.52s, setup 0ms, import 2.58s, tests 97ms, environment 0ms)
+

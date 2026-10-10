@@ -77,7 +77,7 @@ describe('AdminAcademicTaxonomyUseCases', () => {
       executeSerializable: vi.fn(),
       listNodes: vi.fn().mockResolvedValue([mockNode, mockChildNode]),
       getNode: vi.fn().mockResolvedValue(mockNode),
-      getNodeByCanonicalKey: vi.fn().mockResolvedValue(mockNode),
+      getNodeByCanonicalKey: vi.fn().mockResolvedValue(null),
       upsertNode: vi.fn().mockResolvedValue(mockNode),
       listChildren: vi.fn().mockResolvedValue([mockChildNode]),
       listParents: vi.fn().mockResolvedValue([]),

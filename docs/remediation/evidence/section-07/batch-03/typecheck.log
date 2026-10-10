@@ -1,0 +1,3 @@
+Command: timeout 60s npx --no-install tsc -b packages/domain packages/application packages/infrastructure apps/admin apps/api
+Exit: 0
+Runs: 1

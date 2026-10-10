@@ -1,0 +1,5 @@
+packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyRepository.ts(179,35): error TS2783: 'MAPPED' is specified more than once, so this usage will be overwritten.
+packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyRepository.ts(179,46): error TS2783: 'UNMAPPED' is specified more than once, so this usage will be overwritten.
+packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyRepository.ts(179,59): error TS2783: 'AMBIGUOUS' is specified more than once, so this usage will be overwritten.
+packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyRepository.ts(179,73): error TS2783: 'CONFLICTING' is specified more than once, so this usage will be overwritten.
+packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyRepository.ts(179,89): error TS2783: 'UNRESOLVED' is specified more than once, so this usage will be overwritten.

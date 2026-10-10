@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { AcademicTaxonomyOperationsWorkspace } from '../components/academic-taxonomy/AcademicTaxonomyOperationsWorkspace';
+import { AcademicTaxonomyImportWorkspace } from '../components/academic-taxonomy/AcademicTaxonomyImportWorkspace';
+import { CanonicalAcademicGovernancePanel } from '../components/academic-taxonomy/CanonicalAcademicGovernancePanel';
+import { Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { Loader2, Search, Filter, Plus, Edit, X } from 'lucide-react';
@@ -17,6 +20,9 @@ interface AcademicTaxonomyNode {
 }
 
 interface DegreeLevel {
+  aliases?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  updatedAt?: string;
   id: string;
   canonicalCode: string;
   nameEn: string;
@@ -30,7 +36,13 @@ export function AcademicTaxonomyAdminPage() {
   const isAr = language === 'ar';
   const localReadOnly = import.meta.env.VITE_LOCAL_ADMIN_READ_ONLY === 'true';
 
-  const [activeMainTab, setActiveMainTab] = useState<'taxonomy' | 'degrees'>('taxonomy');
+  const [viewParams, setViewParams] = useSearchParams();
+  type MainTab = 'taxonomy' | 'degrees' | 'governance' | 'imports';
+  const requestedView = viewParams.get('view');
+  const activeMainTab: MainTab = ['taxonomy', 'degrees', 'governance', 'imports'].includes(requestedView ?? '') ? requestedView as MainTab : 'taxonomy';
+  const setActiveMainTab = (view: MainTab) => {
+    const next = new URLSearchParams(viewParams); next.set('view', view); setViewParams(next);
+  };
 
   // --- Taxonomy Node State ---
   const [nodes, setNodes] = useState<AcademicTaxonomyNode[]>([]);
@@ -44,6 +56,7 @@ export function AcademicTaxonomyAdminPage() {
     nodeType: 'all',
     standardType: 'all',
     status: 'all',
+    orphan: false, unmapped: false,
   });
 
   // --- Degree Levels State ---
@@ -69,6 +82,8 @@ export function AcademicTaxonomyAdminPage() {
 
   const [editingDegree, setEditingDegree] = useState<DegreeLevel | null>(null);
   const [savingDegree, setSavingDegree] = useState(false);
+  const [degreeLifecycleDecision, setDegreeLifecycleDecision] = useState({ reason: '', acknowledgeHistoricalReferences: false });
+  const [degreeUsageReady, setDegreeUsageReady] = useState(false);
   const [degreeFormError, setDegreeFormError] = useState<string | null>(null);
   const [degreeFormData, setDegreeFormData] = useState({
     nameEn: '',
@@ -77,8 +92,12 @@ export function AcademicTaxonomyAdminPage() {
     status: 'ACTIVE',
   });
 
+  const nodeReadAbort = useRef<AbortController | null>(null);
+  const degreeReadAbort = useRef<AbortController | null>(null);
+
   // --- Fetch Taxonomy Nodes ---
   const fetchNodes = async () => {
+    nodeReadAbort.current?.abort(); const abort = new AbortController(); nodeReadAbort.current = abort;
     setLoadingNodes(true);
     setNodesError(null);
     try {
@@ -104,26 +123,31 @@ export function AcademicTaxonomyAdminPage() {
       if (searchQuery) params.append('q', searchQuery);
       if (filters.nodeType !== 'all') params.append('nodeType', filters.nodeType);
       if (filters.standardType !== 'all') params.append('standardType', filters.standardType);
+      if (filters.orphan) params.append('orphan', 'true');
+      if (filters.unmapped) params.append('unmapped', 'true');
       if (filters.status !== 'all') params.append('status', filters.status);
 
       // Using the authorized admin endpoint
       const endpoint = `${localReadOnly ? '/academic-taxonomy' : '/admin/academic-taxonomy'}/nodes?${params.toString()}`;
-      const response = await adminApiClient.request<{ data: AcademicTaxonomyNode[] }>(endpoint);
+      const response = await adminApiClient.request<{ data: AcademicTaxonomyNode[]; hasNextPage?: boolean }>(endpoint, { signal: abort.signal, cache: 'no-store' });
+      if (abort.signal.aborted) return;
       const received = response.data || [];
       setNodes(received);
-      setHasNextPage(received.length === pageSize);
+      setHasNextPage(localReadOnly ? received.length === pageSize : response.hasNextPage === true);
     } catch (err) {
+      if (abort.signal.aborted) return;
       console.error(err);
       setNodesError(isAr 
         ? 'تعذر تحميل التصنيف الأكاديمي من واجهة البيانات.' 
         : 'Unable to load academic taxonomy from the API.');
     } finally {
-      setLoadingNodes(false);
+      if (!abort.signal.aborted) setLoadingNodes(false);
     }
   };
 
   // --- Fetch Degree Levels ---
   const fetchDegreeLevels = async () => {
+    degreeReadAbort.current?.abort(); const abort = new AbortController(); degreeReadAbort.current = abort;
     setLoadingDegrees(true);
     setDegreesError(null);
     if (localReadOnly) {
@@ -131,28 +155,30 @@ export function AcademicTaxonomyAdminPage() {
       setDegreesError(isAr
         ? 'الدرجات العلمية متاحة من لوحة الإدارة بعد الاتصال بقاعدة البيانات.'
         : 'Degree levels are available in the admin console after the database is connected.');
-      setLoadingDegrees(false);
+      if (!abort.signal.aborted) setLoadingDegrees(false);
       return;
     }
     try {
-      const response = await adminApiClient.request<{ data: DegreeLevel[] }>('/admin/academic-taxonomy/degree-levels');
-      setDegreeLevels(response.data || []);
+      const response = await adminApiClient.request<{ data: DegreeLevel[] }>('/admin/academic-taxonomy/degree-levels', { signal: abort.signal, cache: 'no-store' });
+      if (!abort.signal.aborted) setDegreeLevels(response.data || []);
     } catch (err) {
+      if (abort.signal.aborted) return;
       console.error(err);
       setDegreesError(isAr
         ? 'تعذر تحميل الدرجات الأكاديمية.'
         : 'Unable to load degree levels.');
     } finally {
-      setLoadingDegrees(false);
+      if (!abort.signal.aborted) setLoadingDegrees(false);
     }
   };
 
   useEffect(() => {
     if (activeMainTab === 'taxonomy') {
       fetchNodes();
-    } else {
+    } else if (activeMainTab === 'degrees') {
       fetchDegreeLevels();
     }
+    return () => { nodeReadAbort.current?.abort(); degreeReadAbort.current?.abort(); };
   }, [activeMainTab, filters, searchQuery, page]);
 
   // --- Handle Add Node Submit ---
@@ -208,6 +234,8 @@ export function AcademicTaxonomyAdminPage() {
   const handleEditDegreeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDegree) return;
+    if (!editingDegree.updatedAt) { setDegreeFormError(isAr ? 'أعد تحميل الدرجة للحصول على نسخة التعديل.' : 'Reload the degree level to obtain its edit version.'); return; }
+    if (degreeFormData.status !== editingDegree.status && !degreeUsageReady) { setDegreeFormError(isAr ? 'انتظر تحميل أثر التغيير.' : 'Wait for the impact report.'); return; }
     setSavingDegree(true);
     setDegreeFormError(null);
 
@@ -215,6 +243,8 @@ export function AcademicTaxonomyAdminPage() {
       await adminApiClient.request(`/admin/academic-taxonomy/degree-levels/${editingDegree.id}`, {
         method: 'PUT',
         body: JSON.stringify({
+          expectedUpdatedAt: editingDegree.updatedAt,
+          lifecycle: degreeFormData.status !== editingDegree.status ? degreeLifecycleDecision : undefined,
           nameEn: degreeFormData.nameEn.trim(),
           nameAr: degreeFormData.nameAr.trim(),
           displayRank: Number(degreeFormData.displayRank),
@@ -226,13 +256,14 @@ export function AcademicTaxonomyAdminPage() {
       fetchDegreeLevels();
     } catch (err: any) {
       console.error(err);
-      setDegreeFormError(err.message || (isAr ? 'حدث خطأ أثناء تحديث الدرجة العلمية.' : 'An error occurred while updating the degree level.'));
+      setDegreeFormError(String(err.message).includes('409') ? (isAr ? 'تغيّرت الدرجة؛ احتفظ بتعديلاتك وأعد تحميل النسخة الحالية.' : 'Degree level changed; keep your edits and reload the current version.') : err.message || (isAr ? 'حدث خطأ أثناء تحديث الدرجة العلمية.' : 'An error occurred while updating the degree level.'));
     } finally {
       setSavingDegree(false);
     }
   };
 
   const openEditDegreeModal = (degree: DegreeLevel) => {
+    setDegreeFormError(null); setDegreeUsageReady(false); setDegreeLifecycleDecision({ reason: '', acknowledgeHistoricalReferences: false });
     setEditingDegree(degree);
     setDegreeFormData({
       nameEn: degree.nameEn,
@@ -301,7 +332,7 @@ export function AcademicTaxonomyAdminPage() {
       </section>
 
       {/* Main Tab Switcher */}
-      <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit gap-1 border border-slate-200">
+      <div className="flex flex-wrap bg-slate-100 p-1.5 rounded-2xl w-fit gap-1 border border-slate-200">
         <button
           onClick={() => setActiveMainTab('taxonomy')}
           className={`px-6 py-2.5 rounded-xl font-bold text-xs transition-all ${
@@ -322,6 +353,8 @@ export function AcademicTaxonomyAdminPage() {
         >
           {isAr ? 'الدرجات العلمية (Reference)' : 'Degree Levels (Reference)'}
         </button>
+        {!localReadOnly && <><button type="button" onClick={() => setActiveMainTab('governance')} className="px-4 py-2 border rounded-xl">{isAr ? 'الشجرة والمراجعة والسلامة' : 'Hierarchy, review and integrity'}</button>
+        <button type="button" onClick={() => setActiveMainTab('imports')} className="px-4 py-2 border rounded-xl">{isAr ? 'الاستيراد المحكوم' : 'Governed imports'}</button></>}
       </div>
 
       {/* --- TAB CONTENT: TAXONOMY --- */}
@@ -375,10 +408,12 @@ export function AcademicTaxonomyAdminPage() {
                   <option value="ACTIVE">{isAr ? 'نشط' : 'ACTIVE'}</option>
                   <option value="ARCHIVED">{isAr ? 'مؤرشف' : 'ARCHIVED'}</option>
                 </select>
+                {!localReadOnly && <><label className="text-xs flex items-center gap-1"><input type="checkbox" checked={filters.orphan} onChange={event => { setFilters(value => ({ ...value, orphan: event.target.checked })); setPage(1); }} />{isAr ? 'يتيمة' : 'Orphan'}</label>
+                <label className="text-xs flex items-center gap-1"><input type="checkbox" checked={filters.unmapped} onChange={event => { setFilters(value => ({ ...value, unmapped: event.target.checked })); setPage(1); }} />{isAr ? 'بلا مطابقة' : 'Unmapped'}</label></>}
                 <button
                   onClick={() => {
                     setSearchQuery('');
-                    setFilters({ nodeType: 'all', standardType: 'all', status: 'all' });
+                    setFilters({ nodeType: 'all', standardType: 'all', status: 'all', orphan: false, unmapped: false });
                     setPage(1);
                   }}
                   className="text-slate-500 hover:text-slate-800 font-bold text-xs px-2.5 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
@@ -540,6 +575,9 @@ export function AcademicTaxonomyAdminPage() {
           </div>
         </div>
       )}
+
+      {activeMainTab === 'governance' && !localReadOnly && <AcademicTaxonomyOperationsWorkspace isAr={isAr} />}
+      {activeMainTab === 'imports' && !localReadOnly && <AcademicTaxonomyImportWorkspace isAr={isAr} />}
 
       {/* --- MODAL: ADD TAXONOMY NODE --- */}
       {showAddNodeModal && (
@@ -736,7 +774,13 @@ export function AcademicTaxonomyAdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleEditDegreeSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleEditDegreeSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              <CanonicalAcademicGovernancePanel endpoint={`/admin/academic-taxonomy/degree-levels/${encodeURIComponent(editingDegree.id)}/usage`} isAr={isAr}
+                requiresDecision={degreeFormData.status !== editingDegree.status} decision={degreeLifecycleDecision} onDecision={setDegreeLifecycleDecision} onReady={setDegreeUsageReady} />
+              <Link to={`/audit?targetId=${encodeURIComponent(editingDegree.id)}`} className="text-xs underline">{isAr ? 'سجل التدقيق' : 'Audit history'}</Link>
+              <details className="text-xs"><summary>{isAr ? 'الأسماء البديلة والبيانات الوصفية' : 'Aliases and metadata'}</summary>
+                <pre className="overflow-auto whitespace-pre-wrap max-h-40" dir="ltr">{JSON.stringify({ aliases: editingDegree.aliases, metadata: editingDegree.metadata }, null, 2)?.slice(0, 10000)}</pre>
+              </details>
               {degreeFormError && (
                 <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
                   {degreeFormError}
@@ -807,7 +851,7 @@ export function AcademicTaxonomyAdminPage() {
                     onChange={(e) => setDegreeFormData(d => ({ ...d, status: e.target.value }))}
                   >
                     <option value="ACTIVE">{isAr ? 'نشط' : 'ACTIVE'}</option>
-                    <option value="DRAFT">{isAr ? 'مسودة' : 'DRAFT'}</option>
+                    <option value="DEPRECATED">{isAr ? 'متوقف' : 'DEPRECATED'}</option>
                     <option value="ARCHIVED">{isAr ? 'مؤرشف' : 'ARCHIVED'}</option>
                   </select>
                 </div>
@@ -823,7 +867,7 @@ export function AcademicTaxonomyAdminPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={savingDegree}
+                  disabled={savingDegree || (degreeFormData.status !== editingDegree.status && !degreeUsageReady)}
                   className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
                 >
                   {savingDegree ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

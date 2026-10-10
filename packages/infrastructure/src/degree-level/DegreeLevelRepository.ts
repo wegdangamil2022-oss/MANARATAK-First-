@@ -1,8 +1,26 @@
-import { PrismaClient } from '@prisma/client';
-import { CanonicalDegreeLevelCode, DegreeLevelStatus, IDegreeLevelRepository, DegreeLevelDto, UpsertDegreeLevelDto } from '@manaratak/domain';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { type AtomicPersistenceContext, CanonicalDegreeLevelCode, DegreeLevelStatus, IDegreeLevelRepository, DegreeLevelDto, UpsertDegreeLevelDto } from '@manaratak/domain';
 
 export class DegreeLevelRepository implements IDegreeLevelRepository {
   constructor(private readonly prisma: PrismaClient) {}
+
+  withTransaction(context: AtomicPersistenceContext): IDegreeLevelRepository {
+    const tx = (context as AtomicPersistenceContext & { transactionClient?: Prisma.TransactionClient }).transactionClient;
+    if (!context.boundaryId || !tx) throw new Error('DEGREE_LEVEL_ATOMIC_TRANSACTION_REQUIRED');
+    return new DegreeLevelRepository(tx as unknown as PrismaClient);
+  }
+
+  async updateDegreeLevel(id: string, data: UpsertDegreeLevelDto, expectedUpdatedAt: string): Promise<DegreeLevelDto> {
+    const revision = new Date(expectedUpdatedAt);
+    if (!Number.isFinite(revision.getTime())) throw new Error('DEGREE_LEVEL_VERSION_CONFLICT');
+    const won = await this.prisma.degreeLevel.updateMany({ where: { id, canonicalCode: data.canonicalCode, updatedAt: revision },
+      data: { nameEn: data.nameEn, nameAr: data.nameAr, displayRank: data.displayRank, status: data.status,
+        updatedAt: new Date(Math.max(Date.now(), revision.getTime() + 1)) } });
+    if (won.count !== 1) throw new Error('DEGREE_LEVEL_VERSION_CONFLICT');
+    const updated = await this.getDegreeLevelById(id);
+    if (!updated) throw new Error('DEGREE_LEVEL_NOT_FOUND');
+    return updated;
+  }
 
   async listDegreeLevels(): Promise<DegreeLevelDto[]> {
     const results = await this.prisma.degreeLevel.findMany({

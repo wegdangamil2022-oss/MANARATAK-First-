@@ -3,6 +3,7 @@ import { ImportAdminPage, type DomainKey } from './ImportAdminPage';
 
 const DOMAIN_ROUTE_MAP: Record<string, Exclude<DomainKey, 'ALL'>> = {
   'reference-data': 'REFERENCE_DATA',
+  'academic-taxonomy': 'ACADEMIC_TAXONOMY',
   universities: 'UNIVERSITIES',
   majors: 'MAJORS',
   courses: 'COURSES',

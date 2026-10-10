@@ -15,7 +15,7 @@ describe('LocalizedPublicAcademicTaxonomyUseCases', () => {
     expect(node.canonicalName).toBe('Computer Science');
     expect(node.canonicalCode).toBe('0611');
     expect(node.localizedNames).toBeUndefined();
-    expect(repository.listNodes).toHaveBeenCalledWith({ status: 'ACTIVE' });
+    expect(repository.listNodes).toHaveBeenCalledWith({ status: 'ACTIVE', page: 1, pageSize: 50 });
   });
 
   it('hides draft nodes from direct public reads', async () => {

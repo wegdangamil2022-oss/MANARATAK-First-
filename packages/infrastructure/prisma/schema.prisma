@@ -5597,3 +5597,21 @@ model ReferenceStandardSnapshot {
   updatedAt DateTime @updatedAt
   @@index([family, status])
 }
+
+// P8 owns its review and apply; P6 never writes canonical taxonomy.
+model AcademicTaxonomyImportReview {
+  id String @id
+  receiptId String @unique
+  sourceHash String
+  record Json
+  preview Json
+  previewHash String
+  status String @default("PREVIEWED")
+  version Int @default(1)
+  reviewedBy String?
+  reason String?
+  result Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([status, updatedAt])
+}

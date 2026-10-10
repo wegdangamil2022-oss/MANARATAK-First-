@@ -32,3 +32,8 @@ export class AcademicTaxonomyDeterministicKey {
     return `${nodeTypeUpper}:${codeUpper}`;
   }
 }
+
+/** Canonical composition and locale-independent case normalization; no transliteration. */
+export function normalizeAcademicTaxonomyAlias(value: string): string {
+  return value.normalize('NFC').trim().toLowerCase().normalize('NFC').replace(/\s+/gu, ' ');
+}

@@ -1,6 +1,7 @@
 import { ImportTargetDomain } from '@manaratak/domain';
 
 export const LEGACY_DATATYPE_MAP: Record<string, ImportTargetDomain> = {
+  TAXONOMY: ImportTargetDomain.AcademicTaxonomy,
   SCHOLARSHIP: ImportTargetDomain.Scholarships,
   UNIVERSITY: ImportTargetDomain.Universities,
   MAJOR: ImportTargetDomain.Majors,

@@ -1,0 +1,11 @@
+Command: timeout 60s npx --no-install vitest run packages/application/tests/academic-taxonomy/TaxonomyAtomicGovernance.spec.ts packages/application/tests/degree-level/DegreeLevelUseCases.spec.ts packages/infrastructure/tests/degree-level/DegreeLevelGovernedPersistence.spec.ts apps/api/tests/presentation/api/router/TaxonomyDegreeGovernance.spec.ts
+Runs: 1
+
+ RUN  v4.1.11 /workspace/manaratak-section-07
+
+
+ Test Files  4 passed (4)
+      Tests  18 passed (18)
+   Start at  23:38:28
+   Duration  3.66s (transform 1.53s, setup 0ms, import 3.13s, tests 90ms, environment 0ms)
+

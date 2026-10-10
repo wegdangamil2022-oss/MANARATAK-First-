@@ -219,3 +219,5 @@ export * from './import-foundation/network/SignedSourceAccessAuthority';
 export * from './import-foundation/ImportSpoolMaintenance';
 
 export * from './reference-data/PrismaReferenceOwnerReviewGateway';
+export * from './academic-taxonomy/PrismaCanonicalAcademicUsageGateway';
+export * from './academic-taxonomy/PrismaAcademicTaxonomyImportGateway';

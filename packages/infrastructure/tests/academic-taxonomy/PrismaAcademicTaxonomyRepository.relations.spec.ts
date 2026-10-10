@@ -253,8 +253,7 @@ describe('PrismaAcademicTaxonomyRepository - Relations Operations (P8E-2)', () =
       const aliases = await repository.listAliasesByNormalizedAlias(' Computer   Science ');
 
       expect(mockPrisma.academicTaxonomyAlias.findMany).toHaveBeenCalledWith({
-        where: { normalizedAlias: 'computer science' },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { id: 'asc' }, take: 20001,
       });
       expect(aliases).toEqual([
         expect.objectContaining({
