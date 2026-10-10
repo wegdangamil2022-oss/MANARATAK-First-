@@ -395,10 +395,12 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     const before = await transaction.university.findUnique({
       where: { publicId: change.sourceReferenceId },
     });
-    const displayName = this.requiredString(
+    // Enrichment stages deliberately do not repeat the Stage-1 university name.
+    // Preserve the reviewed identity instead of failing, renaming, or creating a placeholder.
+    const displayName = this.string(
       after.officialEnglishName ?? after.officialName ?? after.universityName ?? after.displayName,
-      'UNIVERSITY_NAME_REQUIRED',
-    );
+    ) ?? before?.displayName;
+    if (!displayName) throw new Error('UNIVERSITY_NAME_REQUIRED');
     if (before && ['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(before.status))
       throw new Error('UNIVERSITY_IMPORT_OWNER_LIFECYCLE_IMMUTABLE');
     const data = {
@@ -418,6 +420,8 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       status: 'READY_TO_REVIEW',
     };
     await new UniversityCanonicalRelationshipValidator(transaction).validateCampus(data);
+    if (change.operation === 'UPDATE' && !before) throw new Error('UNIVERSITY_IMPORT_IDENTITY_CHANGED_SINCE_PLAN');
+    if (change.operation === 'CREATE' && before) throw new Error('UNIVERSITY_IMPORT_IDENTITY_CREATED_SINCE_PLAN');
     const record = before
       ? await transaction.university.update({ where: { id: before.id }, data })
       : await transaction.university.create({
