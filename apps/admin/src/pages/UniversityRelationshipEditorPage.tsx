@@ -83,6 +83,8 @@ export function UniversityRelationshipEditorPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [reviewReason, setReviewReason] = useState('');
+  const reviewHeaders = () => ({ 'X-Review-Reason': reviewReason.trim() });
   const [readiness, setReadiness] = useState<PublicationReadiness | null>(null);
 
   const refreshReadiness = async () => {
@@ -116,11 +118,12 @@ export function UniversityRelationshipEditorPage() {
 
   const saveLocation = async (event: FormEvent) => {
     event.preventDefault();
+    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
     if (!countryReferenceId) return setError('Country canonical relationship is required.');
     setSaving(true); setError(''); setMessage('');
     try {
       await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`, {
-        method: 'PATCH', body: JSON.stringify({ countryReferenceId, regionReferenceId, cityReferenceId }),
+        method: 'PATCH', headers: reviewHeaders(), body: JSON.stringify({ countryReferenceId, regionReferenceId, cityReferenceId }),
       });
       setUniversity(await adminApiClient.request<UniversityDetail>(`/admin/universities/${encodeURIComponent(id)}`)); await refreshReadiness(); setMessage('Canonical university location saved through the University owner API.');
     } catch (err) { setError(err instanceof Error ? err.message : 'Unable to save location.'); }
@@ -129,6 +132,7 @@ export function UniversityRelationshipEditorPage() {
 
   const saveProgram = async (index: number) => {
     const program = programs[index];
+    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
     if (!program || !program.sourceProgramName.trim() || !program.degreeLevelId) {
       setError('Every academic program needs a name and canonical Degree Level before saving.');
       return;
@@ -165,6 +169,7 @@ export function UniversityRelationshipEditorPage() {
         : `/admin/universities/${encodeURIComponent(id)}/academic-programs`;
       const saved = await adminApiClient.request<UniversityDetail>(endpoint, {
         method: program.id ? 'PUT' : 'POST',
+        headers: reviewHeaders(),
         body: JSON.stringify(payload),
       });
       setUniversity(saved);
@@ -183,6 +188,7 @@ export function UniversityRelationshipEditorPage() {
 
   const archiveProgram = async (index: number) => {
     const program = programs[index];
+    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
     if (!program) return;
     if (!program.id) {
       setPrograms((current) => current.filter((_, idx) => idx !== index));
@@ -192,7 +198,7 @@ export function UniversityRelationshipEditorPage() {
     try {
       const saved = await adminApiClient.request<UniversityDetail>(
         `/admin/universities/${encodeURIComponent(id)}/academic-programs/${encodeURIComponent(program.id)}`,
-        { method: 'DELETE' },
+        { method: 'DELETE', headers: reviewHeaders() },
       );
       setUniversity(saved);
       setPrograms(current => current.filter((_, idx) => idx !== index));
@@ -204,10 +210,11 @@ export function UniversityRelationshipEditorPage() {
   };
 
   const runLifecycleAction = async (action: 'mark-ready' | 'mark-publishable' | 'publish' | 'unpublish') => {
+    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
     if (hasUnsavedChanges) { setError('احفظ تعديلات الأقسام والبرامج والموقع قبل تغيير حالة النشر.'); return; }
     setSaving(true); setError(''); setMessage('');
     try {
-      await adminApiClient.request(`/admin/universities/${encodeURIComponent(id)}/${action}`, { method: 'POST' });
+      await adminApiClient.request(`/admin/universities/${encodeURIComponent(id)}/${action}`, { method: 'POST', headers: reviewHeaders() });
       await load();
       const labels: Record<string, string> = {
         'mark-ready': 'University moved to READY_TO_REVIEW.',
@@ -255,6 +262,9 @@ export function UniversityRelationshipEditorPage() {
       </div>
     </div>
 
+    <label className="block text-sm font-semibold text-[#142B5F]">سبب التعديل / المراجعة
+      <input value={reviewReason} onChange={event => setReviewReason(event.target.value)} maxLength={2000} placeholder="اكتب مبررًا واضحًا لكل عملية حفظ أو نشر" className="mt-2 w-full rounded-lg border border-[#DDEFF2] bg-white p-3 text-sm" />
+    </label>
     {immutable ? <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">الجامعة منشورة حالياً. ألغِ نشرها أولاً لتعديل الأقسام والعلاقات، ثم احفظها وأعد نشرها.</div> : null}
     {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
     {message ? <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{message}</div> : null}
@@ -266,7 +276,7 @@ export function UniversityRelationshipEditorPage() {
       <div className="md:col-span-3"><button disabled={saving || immutable || !countryReferenceId} className="inline-flex items-center gap-2 rounded-lg bg-[#0E7C86] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"><Save className="h-4 w-4" /> Save canonical location</button></div>
     </form>
 
-    <UniversitySectionsEditor key={id} id={id} initial={university} disabled={saving || immutable} onDirtyChange={setSectionsDirty} onSaved={refreshUniversity} />
+    <UniversitySectionsEditor key={id} id={id} initial={university} reviewReason={reviewReason} disabled={saving || immutable} onDirtyChange={setSectionsDirty} onSaved={refreshUniversity} />
     {hasUnsavedChanges && <p className="text-sm font-bold text-amber-700">توجد تعديلات غير محفوظة؛ احفظ كل قسم قبل النشر.</p>}
     {university.slug && <a href={`/universities/${university.slug}`} target="_blank" rel="noreferrer" className="text-sm font-bold text-[#0E7C86]">عرض الجامعة في الصفحة العامة</a>}
     <section className="space-y-4 rounded-2xl border border-[#DDEFF2] bg-white p-5">

@@ -221,8 +221,10 @@ export function UniversitySectionsEditor({
   disabled,
   onDirtyChange,
   onSaved,
+  reviewReason,
 }: {
   id: string;
+  reviewReason: string;
   initial: Row;
   disabled: boolean;
   onDirtyChange: (dirty: boolean) => void;
@@ -251,6 +253,7 @@ export function UniversitySectionsEditor({
     onDirtyChange(true);
   };
   const save = async (key: string) => {
+    if (!reviewReason.trim()) { setError('اكتب سبب التعديل أو المراجعة قبل الحفظ.'); return; }
     setSaving(key);
     setError('');
     setMessage('');
@@ -316,6 +319,7 @@ export function UniversitySectionsEditor({
             key === 'identity' || key === 'admissions' || key === 'accreditations'
               ? 'PATCH'
               : 'PUT',
+          headers: { 'X-Review-Reason': reviewReason.trim() },
           body: JSON.stringify(data),
         },
       );
