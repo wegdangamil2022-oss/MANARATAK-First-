@@ -1243,8 +1243,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
              "effectiveFrom", "effectiveTo", "snapshot", "changeReason", "actorId", "createdAt"
       FROM "ReferenceVersionRecord"
       WHERE "entityType" = ${entityType} AND "referenceId" = ${referenceId}
-      ORDER BY "versionNumber" ASC
+      ORDER BY "versionNumber" ASC LIMIT 101
     `);
+    if (rows.length > 100) throw new Error('REFERENCE_GOVERNANCE_HISTORY_USE_PAGINATED_ENDPOINT');
     return rows.map((row) => ({
       ...row,
       lifecycleState: row.lifecycleState as ReferenceLifecycleState,
