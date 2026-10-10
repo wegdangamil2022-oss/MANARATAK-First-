@@ -130,6 +130,35 @@ describe('CertificateUseCases W10 trust model', () => {
     }));
   });
 
+  it('rejects a learning-path completion identity reused with another student or altered facts', async () => {
+    const event = {
+      eventId: 'learning-path-completed:path-1:student-1:v1',
+      eventType: 'LearningPathCompleted' as const, eventVersion: '1.0.0',
+      sourceDomain: 'COURSES' as const, occurredAt: new Date(),
+      payload: {
+        learningPathId: 'path-1', learningPathVersion: 1,
+        studentReferenceId: 'student-1', completedAt: new Date('2026-10-01T10:00:00.000Z'),
+        eligibleForCertificate: true,
+        certificateOwnerPhase: 'Phase 14 - Enterprise Certificates Platform' as const,
+        sourcePhase: 'Phase 13 - Learning Platform' as const,
+      },
+    };
+    const first = await useCases.consumeCompletionEvent(event);
+    repository.findByLearningPathCompletionId.mockResolvedValue(first);
+    // Simulate a legacy missing source-event lookup: fallback must still validate
+    // the full immutable fingerprint, not merely the duplicated completion key.
+    const replay = await useCases.consumeCompletionEvent(event);
+    expect(replay).toBe(first);
+    expect(repository.issue).toHaveBeenCalledTimes(1);
+    await expect(useCases.consumeCompletionEvent({
+      ...event, payload: { ...event.payload, studentReferenceId: 'intruder' },
+    })).rejects.toThrow('CERTIFICATE_SOURCE_COMPLETION_COLLISION');
+    await expect(useCases.consumeCompletionEvent({
+      ...event, payload: { ...event.payload, learningPathVersion: 2 },
+    })).rejects.toThrow('CERTIFICATE_SOURCE_COMPLETION_COLLISION');
+    expect(repository.issue).toHaveBeenCalledTimes(1);
+  });
+
   it('fails closed when no governed ACTIVE template exists instead of auto-activating one', async () => {
     repository.findActiveTemplateByName.mockResolvedValue(null);
     await expect(useCases.consumeCompletionEvent(courseEvent())).rejects.toThrow('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');
