@@ -51,3 +51,15 @@ No database queries or data modification, migrations, seed/backfill, live import
 6. One-pass structural source audit: 13/13 PASS across 11 files. No TS, Vitest, DB, seed, backfill, live import, E2E or CI runs.
 
 Remaining: *P7-owned durable operator approval and atomic canonical import/apply*, reviewed/versioned authoritative standards datasets, full consumer impact and actual source/DB reconciliation. **Status: PARTIAL; NOT CODE_CLOSED.**
+
+## Continuation from ef39904f — review integrity and owner read performance
+
+Added after the last checkpoint:
+
+1. P6→P7 typed source fields and canonical-control spoofing rejection; bound the review result to SHA256 of the normalized payload as well as the original artifact hash. The source hash is only a supplied P6 evidence string until independently confirmed against the raw archived artifact.
+2. Added source-only review readiness classifier: INVALID_SOURCE, LEGACY_RECEIPT_MISSING_EVIDENCE, SOURCE_ISSUES_REQUIRE_REVIEW, REVIEWABLE. **None** implies a durable operator approval, an Apply authorization or a canonical write.
+3. Fixed stale lifecycle-vs-active-flag disagreements in canonical resolver and application entity getters, and held country/region and country default currency/language parents in audited transaction reads.
+4. Added paginated governance version history and async admin navigation to avoid loading unbounded source history into one modal.
+5. **13/13 targeted static source invariants passed once**. TypeScript, unit tests, database and service runtime were not exercised.
+
+Still open: durable P7 owner approval inbox and transactional apply; genuine reviewed authority standards snapshots; full direct/non-FK dependency impact; historical city reconciliation. No live DB operations were performed, and the section remains PARTIAL.

@@ -44,3 +44,10 @@ New code/specs cover P6->P7 SCREENING_ONLY, governed alias/provider mapping revi
 - One static source audit: **13/13 PASS** across **11** source files. Checked durable receipt requirement, source SHA256/artifact evidence, warning propagation, disabled seed approval/apply, duplicate quarantine including invalid rows, city/region scoped resolvers, owner-scoped alias ambiguity, read-only paginated admin inbox and terminal region guard.
 - This is **static contract evidence only**. No TypeScript type-check, Vitest, browser, DB, migrations, seed, import apply or CI was run. New test files remain unexecuted; their presence is not a passed test.
 - P7 owner atomic reviewed apply, official authority snapshots and full downstream lifecycle impact are OPEN implementation requirements, not deferred verification.
+
+### Continuation from ef39904f — security and review (2026-10-10)
+
+- Hardened P6 handoff runtime shape (canonical control flags forbidden), sourced payload digest, reviewer triage, stale active flags, parent lock order, currency/language references, bounded history UI.
+- One targeted static source inspection **13/13 PASS (12 files)**. This verifies presence of source invariants, not TypeScript syntax or runtime correctness.
+- New specs drafted for P6 malformed inputs, normalized hash, review triage, stale active reference lookup. **Vitest NOT EXECUTED**. No TypeScript compilation, DB query, migrations, CI, browser/E2E or import apply.
+- P7 durable operator approval and atomic apply owner inbox remain **NOT IMPLEMENTED**. Legacy direct seed apply and planner promotion remain fail-closed.

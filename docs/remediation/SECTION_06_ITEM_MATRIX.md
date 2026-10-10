@@ -12,27 +12,27 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 | 06.04 | 04 Unicode aliases | PARTIAL | ReferenceIdentityNormalization.ts; historical DB alias keys unchanged |
 | 06.05 | 05 Public Regions ACTIVE | SOURCE_IMPLEMENTED | LocalizedReferenceDataQueries.ts; PrismaReferenceDataRepository.ts |
 | 06.06 | 06 Public Cities pagination | SOURCE_IMPLEMENTED | ReferenceDataPublicRouter.ts; max pageSize=100 / default=50 |
-| 06.07 | 07 Generic lifecycle semantics | PARTIAL | All reference types including REGION now block terminal ARCHIVED/MERGED/SUPERSEDED at owner transaction until complete certified dependency impact. DEPRECATED remains available. Downstream coverage still incomplete. |
+| 06.07 | 07 Generic lifecycle semantics | PARTIAL | P7 owner blocks unsafe terminal lifecycle states for all reference types including REGION; active canonical checks now require BOTH isActive and lifecycleState. Full dependency certification still absent. |
 | 06.08 | 08 CRUD expectedVersion/CAS | PARTIAL | ReferenceDataContracts.ts; admin router; PrismaReferenceDataRepository.ts; selected-record editor |
-| 06.09 | 09 Version temporal intervals | PARTIAL | Every governed upsert now records actual owner DB row state plus effective active aliases/mappings and temporal predecessor closure. Runtime non-overlap DB proof still pending. |
+| 06.09 | 09 Version temporal intervals | PARTIAL | Paginated owner version history endpoint uses bounded Prisma count/page and independent admin paging; legacy unbounded endpoint remains, cleanup outstanding. |
 | 06.10 | 10 Non-region actor provenance | SOURCE_IMPLEMENTED | ReferenceDataUseCases.ts and PrismaReferenceDataRepository.ts actor / snapshot correlation |
 | 06.11 | 11 Provider mapping reassignment | PARTIAL | Audited explicit mapping transfer with source/destination CAS, stable replay receipt, city country scope and reviewed admin target; runtime/test unverified. |
 | 06.12 | 12 Replacement resolver continuity | SOURCE_IMPLEMENTED | ReferenceResolverService.ts and IReferenceResolver.ts replacement metadata |
 | 06.13 | 13 ISO639 versus BCP47 Locale | PARTIAL | ISO639 alpha2/alpha3 validator and separate BCP47 canonical locale parser; legacy locale code data needs review. |
 | 06.14 | 14 Canonical IANA timezones | PARTIAL | Runtime ICU IANA timezone validator now accepts UTC plus resolvable region names and rejects bare labels; city admin datalist added; no versioned reviewed IANA source snapshot. |
-| 06.15 | 15 Country default Currency/Language reference | PARTIAL | ReferenceDataUseCases.ts checks active ISO codes, no DB FK enforcement |
+| 06.15 | 15 Country default Currency/Language reference | PARTIAL | Cross-entity canonical selection and city writer check isActive+lifecycle; country parent locked before region and city, country default currency/language locked during audited transaction. |
 | 06.16 | 16 Standards registry provenance | PARTIAL | Read-only standards readiness API/UI lists six unverified families; versioned authority manifest contract exists. No reviewed official sources are falsely claimed. |
 | 06.17 | 17 Public CLDR localization | OPEN | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
 | 06.18 | 18 Global scope vs active runtime scope | PARTIAL | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
 | 06.19 | 19 Hierarchy/DAG generic contracts | SOURCE_IMPLEMENTED_UNVERIFIED | Generic DAG contracts already existed under packages/domain/src/hierarchy and are exported. This continuation adds optional closure read contracts and linear-time iterative path traversal. Real graph-persistence usage needs independent verification. |
-| 06.20 | 20 P6→P7 durable handoff | PARTIAL | P6→P7 SCREENING_ONLY now requires existing durable ImportScreeningReceipt store, immutable artifact ID and 64-hex SHA256 source hash; read-only P7 triage queue exposes stored review candidates. P7 approved atomic canonical apply still missing. |
-| 06.21 | 21 Unsafe SeedApply exposure gate | SOURCE_IMPLEMENTED_UNVERIFIED | Legacy SeedApply always fail-closed; domain planner markReadyToApply now always requires a reviewed P7 approval receipt. No canonical promotion path from validation. |
-| 06.22 | 22 Import canonical city identity | SOURCE_IMPLEMENTED_UNVERIFIED | Scoped Unicode canonical city identity shared across staging and owner; all duplicate-key source rows quarantined including invalid rows sharing a valid identity. |
+| 06.20 | 20 P6→P7 durable handoff | PARTIAL | P6→P7 SCREENING_ONLY requires configured durable screening receipt store and SHA256 source artifact; added mapped-payload digest. No actual P7 owner atomic apply receipt. |
+| 06.21 | 21 Unsafe SeedApply exposure gate | SOURCE_IMPLEMENTED_UNVERIFIED | Both Legacy SeedApplyService and pure SeedPlanner READY_TO_APPLY are fail-closed without durable P7 owner approval. |
+| 06.22 | 22 Import canonical city identity | SOURCE_IMPLEMENTED_UNVERIFIED | P6 payload required field type checking rejects array/object string coercion, owner flags (isActive, ID, version) and malformed numeric data; scoped city key/dedup remains in domain. |
 | 06.23 | 23 Intentionally incomplete migration | DB_DEFERRED | No database migration applied, per instruction |
 | 06.24 | 24 Scalable canonical pickers | PARTIAL | canonicalPickers.ts; CanonicalPicker.tsx — first bounded page + search; callsites still need review |
 | 06.25 | 25 Admin server query filters | PARTIAL | Four owner tabs and Region preserve q/country/status(active/all/nonactive)/page in URL; updatedFrom/mappingStatus facets pending |
 | 06.26 | 26 Active label/status UI | SOURCE_IMPLEMENTED_UNVERIFIED | ReferenceDataAdminPage.tsx active/all/nonactive, filtered count owner read and URL persistence |
-| 06.27 | 27 Generic governance admin workflow | PARTIAL | Owner UI now includes stored P6 screening review queue (no approval or publish controls), governance details and alias/map lifecycle history. Durable operator approval workflow still incomplete. |
+| 06.27 | 27 Generic governance admin workflow | PARTIAL | Governance history paginated independently; persisted screening queue has review-evidence classification, no forged APPROVED status/actions. |
 | 06.28 | 28 Dependency impact before lifecycle | PARTIAL | Non-Region terminal actions now fail closed in owner transaction pending full certified downstream impact; FK usage preview explicitly remains partial with unknown non-FK consumers. |
 | 06.29 | 29 Zero Upward Dependency | PARTIAL | No upward references newly imported into domain P7 |
 | 06.30 | 30 Country source preview Dry Run | SOURCE_PRESERVED | Countries source preview remains dry-run |
@@ -43,14 +43,14 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 | 06.35 | 35 Search versus identity normalization | SOURCE_IMPLEMENTED_UNVERIFIED | Unicode identity/search normalization remains separate; ICU timezone policy added. Source invariant inspection passed, TS runtime not checked. |
 | 06.36 | 36 Canonical codes and UUID identity | PARTIAL | Selected edit uses id, expectedVersion; non-upsert creations preserve UUID |
 | 06.37 | 37 Region golden pattern | PARTIAL | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
-| 06.38 | 38 API contract gaps | PARTIAL | Read-only bounded /import-review returns P7 durable screening receipts; admission requires P6 receipt store and source SHA-256. Existing owner governance and reconciliation routes retained. |
+| 06.38 | 38 API contract gaps | PARTIAL | Added bounded governance history-page API and P7 import-review receipt triage; legacy history route remains read-only unbounded. |
 | 06.39 | 39 Error status and conflicts | PARTIAL | ReferenceDataAdminRouter.ts explicit 409 conflict taxonomy |
-| 06.40 | 40 Admin UX completeness | PARTIAL | Admin now has paged screening inbox, ISO2-scoped alias inspection, verified-standard readiness, quality facets, canonical edit/reconciliation. Apply/approve intentionally absent. |
+| 06.40 | 40 Admin UX completeness | PARTIAL | Admin history pagination, payload digest and evidence triage display; metadata editors and full approval workflow incomplete. |
 | 06.41 | 41 Quality/governance metrics | PARTIAL | Non-active query complements public selectability, including legacy isActive=false and Region parent-country lifecycle; owner city quality counters previously added. |
 | 06.42 | 42 Standards snapshot registry | PARTIAL | Read-only ISO/UN/IANA/CLDR reviewed-snapshot readiness delivered to admin; no reviewed source files or persistent registry approval engine yet. |
 | 06.43 | 43 Additional global data types | OPEN | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
 | 06.44 | 44 Patch execution order | PARTIAL | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
-| 06.45 | 45 Targeted acceptance source/unit checks | PARTIAL | This round single static source audit 13/13 PASS across 11 source files; TypeScript compilation, Vitest and DB NOT RUN. |
+| 06.45 | 45 Targeted acceptance source/unit checks | PARTIAL | One static source invariant pass 13/13 across 12 files (not TypeScript/Vitest). New isolated specs authored but NOT RUN. |
 | 06.46 | 46 Existing regression contracts | NOT_EXECUTED | Existing tests not run; legacy seed tests and stage source-key expectations updated in code only |
 | 06.47 | 47 Runtime/DB deferred | DB_RUNTIME_DEFERRED | No DB connected/migrations/seeds/backfill |
 | 06.48 | 48 Documentation clean-up | PARTIAL | Updated matrix, check log and continuation report to differentiate durable P6 screening receipts from missing P7 reviewed atomic canonical apply. |
@@ -89,6 +89,16 @@ The P6 SCREENING_ONLY consumer, explicit audited provider-key transfer, source-o
 - Country ISO2 scope is now required before CITY/REGION alias/provider matching, not merely filtered after LIMIT 2. Owner inspector only reports same-country CITY/REGION alias collisions.
 - Owner terminal-state safety includes REGION; no terminal state can rely on incomplete FK-only impact.
 - Lightweight structural inspection: **13/13 PASS** across 11 source files in a *single* static audit; TypeScript/Vitest/Prisma runtime **NOT RUN**. No DB migrations/seed/backfill.
+
+## Continuation after commit ef39904f (2026-10-10)
+
+- Strengthened import-screening trust boundary: typed field guards for P6 payloads, forbidden canonical lifecycle/id/version flags, stable mapped-payload SHA256 digest in durable screening receipt and P7 review triage.
+- Added evidence-only review eligibility labels. **REVIEWABLE != REVIEWED != APPROVED != APPLIED**; no approval buttons or canonical writes.
+- Fixed resolver and owner reference getter to require both lifecycle ACTIVE and compatibility isActive, preventing stale flag selection.
+- Added parent-first row lock policy for CITY (active COUNTRY FOR SHARE → REGION FOR UPDATE → CITY), and lock-recheck for COUNTRY default currency and language references; all in source, no DB connected.
+- Added bounded paginated historical version API and on-demand admin controls; older unbounded history endpoint is still a follow-up.
+- One lightweight static invariant inspection: **13/13 PASS across 12 files**. TypeScript/Vitest/DB tests NOT RUN, test specifications do not count as passing.
+- No migrations, seed/backfill, import publish or production operations.
 
 ## Actionable open implementation blockers
 
