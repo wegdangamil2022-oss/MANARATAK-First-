@@ -24,6 +24,11 @@ import type { IScholarshipCanonicalLookupGateway, ScholarshipCanonicalLookupTarg
 import { assertNoTranslationPayloadFields } from '@manaratak/shared';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 
+export interface ScholarshipMutationContext extends AtomicMutationRequestContext {
+  expectedRevision?: number;
+  reason?: string;
+}
+
 type AdminScholarshipRepository = IScholarshipRepository & {
   getAdminSummary?: () => Promise<Record<string, number>>;
 };
@@ -104,7 +109,7 @@ export class AdminScholarshipUseCases {
     fundingAmount?: string;
     currency?: string;
     duration?: string;
-  }, context?: AtomicMutationRequestContext): Promise<ScholarshipDto> {
+  }, context?: ScholarshipMutationContext): Promise<ScholarshipDto> {
     const displayName = (input.displayName || '').trim();
     if (!displayName) {
       throw new Error('Scholarship name is required.');
@@ -187,13 +192,11 @@ export class AdminScholarshipUseCases {
     });
   }
 
-  public async updateScholarship(id: string, updates: UpdateScholarshipDto, context?: AtomicMutationRequestContext): Promise<ScholarshipDto> {
+  public async updateScholarship(id: string, updates: UpdateScholarshipDto, context?: ScholarshipMutationContext): Promise<ScholarshipDto> {
     assertNoTranslationPayloadFields('SCHOLARSHIP', updates as unknown as Record<string, unknown>, ['localizedNames']);
     assertNoTranslationPayloadFields('SCHOLARSHIP', updates.optionalFields, ['localizedNames']);
     const existing = await this.getScholarship(id);
-    if (existing.publicationStatus === ScholarshipPublicationStatus.PUBLISHED && Object.keys(updates).length > 0) {
-      throw new Error('SCHOLARSHIP_PUBLISHED_STRUCTURE_IMMUTABLE');
-    }
+    if (existing.publicationStatus !== ScholarshipPublicationStatus.DRAFT || [ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED].includes(existing.status)) throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS');
     const canonicalSafeUpdates = this.preserveCanonicalReferences(existing, updates);
     const classification = this.catalogCompleteness(existing, canonicalSafeUpdates);
     const dataToUpdate: ScholarshipRepositoryUpdateDto = {
@@ -230,19 +233,27 @@ export class AdminScholarshipUseCases {
   public async replaceCanonicalRelationships(
     id: string,
     input: ScholarshipCanonicalAuthoringInput,
-    context?: AtomicMutationRequestContext,
+    context?: ScholarshipMutationContext,
   ): Promise<ScholarshipDto> {
     const existing = await this.getScholarship(id);
-    if (existing.publicationStatus === ScholarshipPublicationStatus.PUBLISHED) {
-      throw new Error('SCHOLARSHIP_PUBLISHED_STRUCTURE_IMMUTABLE');
-    }
+    if (existing.publicationStatus !== ScholarshipPublicationStatus.DRAFT || [ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED].includes(existing.status)) throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS');
     if (!this.canonicalLookup) throw new Error('SCHOLARSHIP_CANONICAL_LOOKUP_NOT_CONFIGURED');
 
     await this.assertCanonicalReference('COUNTRY', input.countryReferenceId);
     await this.assertCanonicalReference('LANGUAGE', input.studyLanguageReferenceId);
 
+    const unique = (keys: string[], area: string) => { if (new Set(keys).size !== keys.length) throw new Error(`SCHOLARSHIP_DUPLICATE_CHILD_KEY:${area}`); };
+    if (input.benefits) unique(input.benefits.map(x => x.benefitKey), 'BENEFITS');
+    if (input.degreeTargets) unique(input.degreeTargets.map(x => x.targetKey), 'DEGREES');
+    if (input.majorTargets) unique(input.majorTargets.map(x => x.targetKey), 'MAJORS');
+    if (input.eligibilityItems) unique(input.eligibilityItems.map(x => x.itemKey), 'ELIGIBILITY');
+    if (input.requiredDocumentItems) unique(input.requiredDocumentItems.map(x => x.documentKey), 'DOCUMENTS');
+    if (input.universityLinks) unique(input.universityLinks.map(x => x.linkKey), 'UNIVERSITIES');
+
     const benefits = input.benefits === undefined ? undefined : await Promise.all(input.benefits.map(async item => {
       await this.assertCanonicalReference('CURRENCY', item.currencyReferenceId);
+      if (item.amount !== undefined && item.amount !== null && (!Number.isFinite(Number(item.amount)) || Number(item.amount) < 0)) throw new Error(`SCHOLARSHIP_INVALID_FUNDING_AMOUNT:${item.benefitKey}`);
+      if (item.amount !== undefined && item.amount !== null && !item.currencyReferenceId) throw new Error(`SCHOLARSHIP_FUNDING_CURRENCY_REQUIRED:${item.benefitKey}`);
       return { ...item };
     }));
     const degreeTargets = input.degreeTargets === undefined ? undefined : await Promise.all(input.degreeTargets.map(async item => {
@@ -258,6 +269,8 @@ export class AdminScholarshipUseCases {
       await this.assertCanonicalReference('DEGREE_LEVEL', item.degreeLevelId);
       await this.assertCanonicalReference('MAJOR', item.majorId);
       await this.assertCanonicalReference('INTERNATIONAL_TEST', item.internationalTestId);
+      for (const number of [item.minimumValue, item.maximumValue]) if (number !== undefined && number !== null && (!Number.isFinite(Number(number)) || Number(number) < 0)) throw new Error(`SCHOLARSHIP_INVALID_ELIGIBILITY_VALUE:${item.itemKey}`);
+      if (item.minimumValue != null && item.maximumValue != null && Number(item.minimumValue) > Number(item.maximumValue)) throw new Error(`SCHOLARSHIP_ELIGIBILITY_RANGE_INVALID:${item.itemKey}`);
       const hasCanonicalRelationship = Boolean(item.countryReferenceId || item.degreeLevelId || item.majorId || item.internationalTestId);
       return { ...item, resolutionStatus: hasCanonicalRelationship ? 'RESOLVED' : 'UNRESOLVED' };
     }));
@@ -268,6 +281,7 @@ export class AdminScholarshipUseCases {
     const universityLinks = input.universityLinks === undefined ? undefined : await Promise.all(input.universityLinks.map(async item => {
       const university = await this.assertCanonicalReference('UNIVERSITY', item.universityId);
       const program = await this.assertCanonicalReference('ACADEMIC_PROGRAM', item.academicProgramId);
+      if (program && !university) throw new Error(`SCHOLARSHIP_PROGRAM_UNIVERSITY_REQUIRED:${item.linkKey}`);
       if (program && university && program.ownerId && program.ownerId !== university.id) {
         throw new Error(`SCHOLARSHIP_ACADEMIC_PROGRAM_UNIVERSITY_MISMATCH:${item.linkKey}`);
       }
@@ -308,8 +322,9 @@ export class AdminScholarshipUseCases {
     });
   }
 
-  public async markReadyToReview(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async markReadyToReview(id: string, context?: ScholarshipMutationContext): Promise<void> {
     const existing = await this.getScholarship(id);
+    if ([ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED, ScholarshipStatus.PUBLISHED].includes(existing.status)) throw new Error('SCHOLARSHIP_INVALID_LIFECYCLE_TRANSITION');
     if (existing.completenessStatus === ScholarshipCompletenessState.INCOMPLETE) {
       throw new Error('Cannot mark INCOMPLETE scholarship as READY_TO_REVIEW');
     }
@@ -318,13 +333,14 @@ export class AdminScholarshipUseCases {
     }
   }
 
-  public async markReadyToPublish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async markReadyToPublish(id: string, context?: ScholarshipMutationContext): Promise<void> {
     const existing = await this.getScholarship(id);
     this.assertPublicationReady(existing);
+    if (existing.status !== ScholarshipStatus.READY_TO_REVIEW) throw new Error('SCHOLARSHIP_REVIEW_REQUIRED_BEFORE_PUBLISH');
     await this.lifecycleMutation('SCHOLARSHIP_MARKED_READY_TO_PUBLISH', id, { workflowStatus: ScholarshipStatus.READY_TO_PUBLISH }, context);
   }
 
-  public async publish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async publish(id: string, context?: ScholarshipMutationContext): Promise<void> {
     const existing = await this.getScholarship(id);
     if (existing.status !== ScholarshipStatus.READY_TO_PUBLISH) throw new Error('Only READY_TO_PUBLISH scholarships can be PUBLISHED');
     this.assertPublicationReady(existing);
@@ -334,7 +350,7 @@ export class AdminScholarshipUseCases {
     }, context);
   }
 
-  public async unpublish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async unpublish(id: string, context?: ScholarshipMutationContext): Promise<void> {
     const existing = await this.getScholarship(id);
     if (existing.publicationStatus !== ScholarshipPublicationStatus.PUBLISHED) {
       throw new Error('Cannot unpublish a scholarship that is not PUBLISHED');
@@ -345,15 +361,18 @@ export class AdminScholarshipUseCases {
     }, context);
   }
 
-  public async reject(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async reject(id: string, context?: ScholarshipMutationContext): Promise<void> {
     const existing = await this.getScholarship(id);
     if (existing.publicationStatus === ScholarshipPublicationStatus.PUBLISHED) {
       throw new Error('Cannot reject a PUBLISHED scholarship. Unpublish first.');
     }
+    if ([ScholarshipStatus.ARCHIVED, ScholarshipStatus.REJECTED].includes(existing.status)) throw new Error('SCHOLARSHIP_INVALID_LIFECYCLE_TRANSITION');
     await this.lifecycleMutation('SCHOLARSHIP_REJECTED', id, { workflowStatus: ScholarshipStatus.REJECTED }, context);
   }
 
-  public async archive(id: string, context?: AtomicMutationRequestContext): Promise<void> {
+  public async archive(id: string, context?: ScholarshipMutationContext): Promise<void> {
+    const existing = await this.getScholarship(id);
+    if (existing.status === ScholarshipStatus.ARCHIVED) throw new Error('SCHOLARSHIP_ALREADY_ARCHIVED');
     await this.lifecycleMutation('SCHOLARSHIP_ARCHIVED', id, {
       workflowStatus: ScholarshipStatus.ARCHIVED,
       publicationStatus: ScholarshipPublicationStatus.ARCHIVED,
@@ -365,7 +384,7 @@ export class AdminScholarshipUseCases {
     if (!id) return null;
     if (!this.canonicalLookup) throw new Error('SCHOLARSHIP_CANONICAL_LOOKUP_NOT_CONFIGURED');
     const candidates = await this.canonicalLookup.findCandidates(target, { target, canonicalId: id });
-    const candidate = candidates.find(item => item.id === id || item.publicId === id) ?? candidates[0];
+    const candidate = candidates.find(item => item.id === id || item.publicId === id);
     if (!candidate) throw new Error(`SCHOLARSHIP_CANONICAL_REFERENCE_NOT_FOUND:${target}:${id}`);
     if (candidate.lifecycle && /(?:DEPRECATED|ARCHIVED|SUPERSEDED|MERGED|REJECTED|INACTIVE|SUSPENDED)/u.test(candidate.lifecycle.toUpperCase())) {
       throw new Error(`SCHOLARSHIP_CANONICAL_REFERENCE_NOT_ACTIVE:${target}:${id}:${candidate.lifecycle}`);
@@ -380,6 +399,7 @@ export class AdminScholarshipUseCases {
     if (!existing.versions?.length) throw new Error('SCHOLARSHIP_VERSION_REQUIRED');
     if (!existing.sponsorContext) throw new Error('SCHOLARSHIP_SPONSOR_CONTEXT_REQUIRED');
     if (!existing.applicationCycles?.length) throw new Error('SCHOLARSHIP_APPLICATION_CYCLE_REQUIRED');
+    if (!existing.officialSourceUrl?.startsWith('https://') && !existing.sourceEvidence?.some(e => e.isOfficial && e.sourceUrl.startsWith('https://'))) throw new Error('SCHOLARSHIP_OFFICIAL_SOURCE_REQUIRED');
   }
 
   private preserveCanonicalReferences(existing: ScholarshipDto, updates: UpdateScholarshipDto): UpdateScholarshipDto {
@@ -654,19 +674,33 @@ export class AdminScholarshipUseCases {
     return result;
   }
 
-  private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined, mutation: (repository: IScholarshipRepository) => Promise<T>): Promise<T> {
-    if (!this.atomicMutations) return mutation(this.repository);
+  private mutate<T>(action: string, id: string, context: ScholarshipMutationContext | undefined, mutation: (repository: IScholarshipRepository) => Promise<T>): Promise<T> {
+    if (!context?.actorId || !context.reason?.trim()) throw new Error('SCHOLARSHIP_REVIEW_REASON_AND_ACTOR_REQUIRED');
+    if (!this.atomicMutations) throw new Error('SCHOLARSHIP_ATOMIC_AUDIT_OUTBOX_REQUIRED');
     const repository = this.repository as Partial<ITransactionalScholarshipRepository>;
     if (!repository.withTransaction) throw new Error('SCHOLARSHIP_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    return this.atomicMutations.execute({ domain: 'SCHOLARSHIPS', aggregateType: 'SCHOLARSHIP', aggregateId: id, action, context },
-      transaction => mutation(repository.withTransaction!(transaction)));
+    if (action !== 'SCHOLARSHIP_CREATED' && (!Number.isSafeInteger(context.expectedRevision) || (context.expectedRevision ?? 0) < 1)) {
+      throw new Error('SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED');
+    }
+    return this.atomicMutations.execute({
+      domain: 'SCHOLARSHIPS', aggregateType: 'SCHOLARSHIP', aggregateId: id, action, context,
+      auditMetadata: { reason: context.reason.trim(), previousRevision: context.expectedRevision ?? null },
+      outbox: { metadata: { reason: context.reason.trim(), previousRevision: context.expectedRevision ?? null } },
+    }, async transaction => {
+      const owner = repository.withTransaction!(transaction);
+      if (action !== 'SCHOLARSHIP_CREATED') {
+        if (!owner.assertCurrentRevision) throw new Error('SCHOLARSHIP_REVISION_LOCK_NOT_CONFIGURED');
+        await owner.assertCurrentRevision(id, context.expectedRevision!);
+      }
+      return mutation(owner);
+    });
   }
 
   private lifecycleMutation(
     action: string,
     id: string,
     lifecycle: { workflowStatus?: ScholarshipStatus; publicationStatus?: ScholarshipPublicationStatus },
-    context?: AtomicMutationRequestContext,
+    context?: ScholarshipMutationContext,
   ): Promise<void> {
     return this.mutate(action, id, context, repository => {
       if (repository.updateLifecycle) return repository.updateLifecycle(id, lifecycle);

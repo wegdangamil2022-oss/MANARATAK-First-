@@ -6,6 +6,7 @@ import {
 } from '@manaratak/domain';
 import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from '@manaratak/shared';
 import { ApplicationLocaleProjectionService } from '../../localization/ApplicationLocaleProjectionService';
+import { projectPublishedScholarship } from './ScholarshipPublicProjection';
 
 export class PublicScholarshipUseCases {
   private readonly localeProjection = new ApplicationLocaleProjectionService();
@@ -42,16 +43,7 @@ export class PublicScholarshipUseCases {
       localizedValues: localizedNames,
     }).value ?? scholarship.displayName;
 
-    const {
-      id, canonicalDedupKey, sourceImportRecordId, status, completenessStatus,
-      verificationStatus, publicationStatus, createdAt, optionalFields, localizedNames: _localizedNames,
-      versions, sponsorContext, applicationCycles,
-      ...publicData
-    } = scholarship;
-
-    // Canonical fields always win; optionalFields are not spread into the response.
-    // Keep localized names for bilingual cards while projecting the requested display locale.
-    return { ...publicData, displayName, localizedNames } as PublicScholarshipDto;
+    return projectPublishedScholarship(scholarship, displayName, localizedNames);
   }
 
   private localeValues(value: unknown): Partial<Record<SupportedLocale, string>> {
