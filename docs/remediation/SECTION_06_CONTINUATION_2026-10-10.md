@@ -63,3 +63,9 @@ Added after the last checkpoint:
 5. **13/13 targeted static source invariants passed once**. TypeScript, unit tests, database and service runtime were not exercised.
 
 Still open: durable P7 owner approval inbox and transactional apply; genuine reviewed authority standards snapshots; full direct/non-FK dependency impact; historical city reconciliation. No live DB operations were performed, and the section remains PARTIAL.
+
+## Source continuation from ef39904f — 2026-10-10
+
+Further P7 source changes: strict allowed source field types and metadata JSON bounds; SHA256 hash of normalized payload in screening evidence; reviewer triage labels not equivalent to approval; active lifecycle + compatibility flag enforced for canonical lookup; ordered country→region→city row locks and locked default currency/language references; bounded history API/UI and explicit legacy history overflow. New targeted specs exist but are NOT RUN. Static source inspection 13/13 PASS before the final edits is not full compilation/runtime confirmation.
+
+Remaining source implementation: P7-owned durable reviewer decision, checksum-bound transactional inbox + canonical Apply; official reviewed standard source snapshots; full downstream non-FK impact and legacy city reconciliation. No DB operations or schema migrations applied.

@@ -25,9 +25,9 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 | 06.17 | 17 Public CLDR localization | OPEN | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
 | 06.18 | 18 Global scope vs active runtime scope | PARTIAL | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
 | 06.19 | 19 Hierarchy/DAG generic contracts | SOURCE_IMPLEMENTED_UNVERIFIED | Generic DAG contracts already existed under packages/domain/src/hierarchy and are exported. This continuation adds optional closure read contracts and linear-time iterative path traversal. Real graph-persistence usage needs independent verification. |
-| 06.20 | 20 P6→P7 durable handoff | PARTIAL | P6→P7 SCREENING_ONLY requires configured durable screening receipt store and SHA256 source artifact; added mapped-payload digest. No actual P7 owner atomic apply receipt. |
+| 06.20 | 20 P6→P7 durable handoff | PARTIAL | P6→P7 SCREENING_ONLY requires durable P6 receipt storage; mapped payload SHA256 fingerprint recorded; no P7 owner approval or atomic apply. |
 | 06.21 | 21 Unsafe SeedApply exposure gate | SOURCE_IMPLEMENTED_UNVERIFIED | Both Legacy SeedApplyService and pure SeedPlanner READY_TO_APPLY are fail-closed without durable P7 owner approval. |
-| 06.22 | 22 Import canonical city identity | SOURCE_IMPLEMENTED_UNVERIFIED | P6 payload required field type checking rejects array/object string coercion, owner flags (isActive, ID, version) and malformed numeric data; scoped city key/dedup remains in domain. |
+| 06.22 | 22 Import canonical city identity | PARTIAL | Strict P6 mapped field allowlists reject canonical lifecycle/version keys, non-JSON metadata, malformed runtime types and source shape drift; staged duplicates quarantined. |
 | 06.23 | 23 Intentionally incomplete migration | DB_DEFERRED | No database migration applied, per instruction |
 | 06.24 | 24 Scalable canonical pickers | PARTIAL | canonicalPickers.ts; CanonicalPicker.tsx — first bounded page + search; callsites still need review |
 | 06.25 | 25 Admin server query filters | PARTIAL | Four owner tabs and Region preserve q/country/status(active/all/nonactive)/page in URL; updatedFrom/mappingStatus facets pending |
@@ -43,14 +43,14 @@ Baseline: `7231f2c53b307cb5f98e3af0083285322802603a`; branch `codex/section-01-i
 | 06.35 | 35 Search versus identity normalization | SOURCE_IMPLEMENTED_UNVERIFIED | Unicode identity/search normalization remains separate; ICU timezone policy added. Source invariant inspection passed, TS runtime not checked. |
 | 06.36 | 36 Canonical codes and UUID identity | PARTIAL | Selected edit uses id, expectedVersion; non-upsert creations preserve UUID |
 | 06.37 | 37 Region golden pattern | PARTIAL | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
-| 06.38 | 38 API contract gaps | PARTIAL | Added bounded governance history-page API and P7 import-review receipt triage; legacy history route remains read-only unbounded. |
+| 06.38 | 38 API contract gaps | PARTIAL | Bounded owner history read, evidence-based screening review and stable normalized payload digest; no publication endpoint. |
 | 06.39 | 39 Error status and conflicts | PARTIAL | ReferenceDataAdminRouter.ts explicit 409 conflict taxonomy |
-| 06.40 | 40 Admin UX completeness | PARTIAL | Admin history pagination, payload digest and evidence triage display; metadata editors and full approval workflow incomplete. |
+| 06.40 | 40 Admin UX completeness | PARTIAL | Admin screening inbox displays review triage/digests and bounded history; legacy history read refuses over 100 versions. |
 | 06.41 | 41 Quality/governance metrics | PARTIAL | Non-active query complements public selectability, including legacy isActive=false and Region parent-country lifecycle; owner city quality counters previously added. |
 | 06.42 | 42 Standards snapshot registry | PARTIAL | Read-only ISO/UN/IANA/CLDR reviewed-snapshot readiness delivered to admin; no reviewed source files or persistent registry approval engine yet. |
 | 06.43 | 43 Additional global data types | OPEN | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
 | 06.44 | 44 Patch execution order | PARTIAL | See original MANARATAK_ADMIN_REVIEW_CODEX.md and checkpoint status; source completeness not yet established. |
-| 06.45 | 45 Targeted acceptance source/unit checks | PARTIAL | One static source invariant pass 13/13 across 12 files (not TypeScript/Vitest). New isolated specs authored but NOT RUN. |
+| 06.45 | 45 Targeted acceptance source/unit checks | PARTIAL | One 13/13 static source inspection across 12 files was performed before final patches. TypeScript/Vitest/DB NOT RUN. |
 | 06.46 | 46 Existing regression contracts | NOT_EXECUTED | Existing tests not run; legacy seed tests and stage source-key expectations updated in code only |
 | 06.47 | 47 Runtime/DB deferred | DB_RUNTIME_DEFERRED | No DB connected/migrations/seeds/backfill |
 | 06.48 | 48 Documentation clean-up | PARTIAL | Updated matrix, check log and continuation report to differentiate durable P6 screening receipts from missing P7 reviewed atomic canonical apply. |
@@ -99,6 +99,15 @@ The P6 SCREENING_ONLY consumer, explicit audited provider-key transfer, source-o
 - Added bounded paginated historical version API and on-demand admin controls; older unbounded history endpoint is still a follow-up.
 - One lightweight static invariant inspection: **13/13 PASS across 12 files**. TypeScript/Vitest/DB tests NOT RUN, test specifications do not count as passing.
 - No migrations, seed/backfill, import publish or production operations.
+
+## Source continuation after ef39904f (2026-10-10)
+
+- Durable P6 receipt now contains SHA256 of typed, allowlisted P7 normalized payload, separately from submitted source artifact SHA256. The latter is still P6 evidence, not verified against a raw archive.
+- Rejects unknown mapped keys, non-JSON metadata, bad typed code values, forged owner ID/lifecycle/version fields, invalid numeric values and overlong issue text.
+- Read-only review labels: REVIEWABLE, SOURCE_ISSUES_REQUIRE_REVIEW, LEGACY_RECEIPT_MISSING_EVIDENCE, INVALID_SOURCE; never operator APPROVED/APPLIED.
+- Public canonical resolvers require lifecycleState ACTIVE and isActive true. Child writes lock parent COUNTRY before REGION/CITY; country default currency and language references are transactionally rechecked.
+- Owner history paging is bounded; old history route now fails closed for more than 100 versions.
+- One 13/13 targeted static source pass across 12 files predates some final edits; not a TS/Vitest/DB test.
 
 ## Actionable open implementation blockers
 

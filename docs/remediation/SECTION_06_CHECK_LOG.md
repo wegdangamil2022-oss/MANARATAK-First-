@@ -51,3 +51,7 @@ New code/specs cover P6->P7 SCREENING_ONLY, governed alias/provider mapping revi
 - One targeted static source inspection **13/13 PASS (12 files)**. This verifies presence of source invariants, not TypeScript syntax or runtime correctness.
 - New specs drafted for P6 malformed inputs, normalized hash, review triage, stale active reference lookup. **Vitest NOT EXECUTED**. No TypeScript compilation, DB query, migrations, CI, browser/E2E or import apply.
 - P7 durable operator approval and atomic apply owner inbox remain **NOT IMPLEMENTED**. Legacy direct seed apply and planner promotion remain fail-closed.
+
+### ef39904f continuation, 2026-10-10
+
+Authoring source: normalized P7 digest, strict untrusted P6 shape guard, scoped review triage, active-flag/lifecycle consistency, parent row locks, country default reference locks, paginated history. One focused static inspection yielded 13/13 PASS before the final changes; NOT TypeScript compilation, Vitest, DB, CI or runtime verification. No schema migration, seed, backfill or import Apply executed. Durable owner approval/atomic inbox apply remains open.
