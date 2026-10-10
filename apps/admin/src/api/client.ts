@@ -68,6 +68,7 @@ let sessionGeneration = 0;
 const testRevisions = new Map<string,number>();
 const majorRevisions = new Map<string,number>();
 const universityRevisions = new Map<string,number>();
+const scholarshipRevisions = new Map<string,number>();
 const majorOwnerAliases = new Map<string,string>();
 
 export function setAdminAuthStatus(state: AdminAuthState): void {
@@ -83,7 +84,7 @@ export function setAdminAuthStatus(state: AdminAuthState): void {
 export function abortAllPendingAdminRequests(): void {
   sessionGeneration++;
   testRevisions.clear();
-  majorRevisions.clear(); majorOwnerAliases.clear(); universityRevisions.clear();
+  majorRevisions.clear(); majorOwnerAliases.clear(); universityRevisions.clear(); scholarshipRevisions.clear();
   globalAbortController.abort();
   globalAbortController = new AbortController();
   inFlightRequests.clear();
@@ -159,7 +160,7 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 
   const method = (options.method || 'GET').toUpperCase();
   const cacheKey = `${method}:${endpoint}`;
-  const freshRead = options.cache === 'no-store' || options.cache === 'reload' || /^\/admin\/(international-tests|majors|universities)(?:\/|\?|$)/.test(endpoint);
+  const freshRead = options.cache === 'no-store' || options.cache === 'reload' || /^\/admin\/(international-tests|majors|universities|scholarships)(?:\/|\?|$)/.test(endpoint);
   const coalesce = method === 'GET' && !freshRead && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
 
   if (method === 'GET' && !isPublicAuthRoute) {
@@ -244,6 +245,14 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
   if (universityOwner && method !== 'GET' && !headers.has('If-Match')) {
     const revision = universityRevisions.get(universityOwner);
     if (revision === undefined) throw new Error('أعد تحميل الجامعة قبل التعديل (إصدار السجل مطلوب).');
+    headers.set('If-Match', `"${revision}"`);
+  }
+  const scholarshipMatch = endpoint.match(/^\/admin\/scholarships\/([^/?]+)(?:\/|\?|$)/);
+  const scholarshipOwner = scholarshipMatch && !['summary','import','import-center','imported-records'].includes(scholarshipMatch[1])
+    ? scholarshipMatch[1] : undefined;
+  if (scholarshipOwner && isMutation(options.method) && !headers.has('If-Match')) {
+    const revision = scholarshipRevisions.get(scholarshipOwner);
+    if (revision === undefined) throw new Error('أعد تحميل المنحة قبل التعديل (إصدار السجل مطلوب).');
     headers.set('If-Match', `"${revision}"`);
   }
   if (/^\/admin\/imports(?:\/|\?|$)/.test(endpoint)) headers.set('X-Import-Envelope-Version', '2');
@@ -356,6 +365,19 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     const value = response.headers.get('X-Entity-Revision');
     if (universityOwner && value !== null && Number.isSafeInteger(Number(value)))
       universityRevisions.set(universityOwner, Number(value));
+  }
+  if (endpoint.startsWith('/admin/scholarships')) {
+    const remember = (value: unknown) => {
+      if (!value || typeof value !== 'object' || !('id' in value) || !('revision' in value)) return;
+      const row = value as { id: string; revision: number };
+      if (Number.isSafeInteger(row.revision)) scholarshipRevisions.set(row.id, Math.max(scholarshipRevisions.get(row.id) ?? 0, row.revision));
+    };
+    remember(payload);
+    if (payload && typeof payload === 'object' && 'scholarship' in payload) remember(payload.scholarship);
+    if (payload && typeof payload === 'object' && 'data' in payload && Array.isArray(payload.data)) payload.data.forEach(remember);
+    const revision = response.headers.get('X-Entity-Revision');
+    if (scholarshipOwner && revision !== null && Number.isSafeInteger(Number(revision)))
+      scholarshipRevisions.set(scholarshipOwner, Math.max(scholarshipRevisions.get(scholarshipOwner) ?? 0, Number(revision)));
   }
   return payload;
 }

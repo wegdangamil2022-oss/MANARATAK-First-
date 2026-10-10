@@ -97,6 +97,31 @@ export class ScholarshipAdminRouter {
       };
     };
 
+    const reviewReasonSchema = z.string().trim().min(3).max(2000);
+    const ownerContext = (req: Request, create = false) => {
+      const ifMatch = req.get('If-Match');
+      let expectedRevision: number | undefined;
+      if (!create) {
+        if (!ifMatch) throw new Error('SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED');
+        const match = /^"?(\\d+)"?$/.exec(ifMatch.trim());
+        if (!match || !Number.isSafeInteger(Number(match[1])) || Number(match[1]) < 1) {
+          throw new Error('SCHOLARSHIP_INVALID_REVISION_PRECONDITION');
+        }
+        expectedRevision = Number(match[1]);
+      }
+      return {
+        ...mutationContext(req),
+        expectedRevision,
+        reason: reviewReasonSchema.parse(req.get('X-Review-Reason') ?? req.body?.reason),
+      };
+    };
+    const sendRevision = (res: Response, value: { revision?: number }) => {
+      if (Number.isSafeInteger(value.revision)) {
+        res.setHeader('ETag', `"${value.revision}"`);
+        res.setHeader('X-Entity-Revision', String(value.revision));
+      }
+    };
+
     const allAsUndefined = (value: unknown) => typeof value === 'string' && ['', 'all', 'الكل'].includes(value.trim().toLowerCase()) ? undefined : value;
     const listQuerySchema = z.object({
       countryLabel: z.string().trim().min(1).optional(),
@@ -431,9 +456,10 @@ export class ScholarshipAdminRouter {
             currency: payload.currency,
             duration: payload.duration,
           },
-          mutationContext(req),
+          ownerContext(req, true),
         );
 
+        sendRevision(res, scholarship);
         res.status(201).json(scholarship);
       }),
     );
@@ -740,6 +766,7 @@ export class ScholarshipAdminRouter {
             correlationReference: record.getCorrelationReference()?.getValue(),
           }))
           .sort((left, right) => Date.parse(right.timestamp) - Date.parse(left.timestamp));
+        sendRevision(res, detail.scholarship);
         res.json({ ...detail, history, historyAvailable: Boolean(manageAuditRecordsUseCase),
           historyHasMore: historyPage.hasMore, historyLimit: 50 });
       }),
@@ -750,6 +777,7 @@ export class ScholarshipAdminRouter {
       '/:id',
       asyncHandler(async (req: Request, res: Response) => {
         const scholarship = await adminScholarshipUseCases.getScholarship(req.params.id);
+        sendRevision(res, scholarship);
         res.json(scholarship);
       }),
     );
@@ -764,8 +792,9 @@ export class ScholarshipAdminRouter {
         const scholarship = await adminScholarshipUseCases.updateScholarship(
           req.params.id,
           updates as UpdateScholarshipDto,
-          mutationContext(req),
+          ownerContext(req),
         );
+        sendRevision(res, scholarship);
         res.json(scholarship);
       }),
     );
@@ -780,8 +809,9 @@ export class ScholarshipAdminRouter {
         const scholarship = await adminScholarshipUseCases.replaceCanonicalRelationships(
           req.params.id,
           input,
-          mutationContext(req),
+          ownerContext(req),
         );
+        sendRevision(res, scholarship);
         res.json(scholarship);
       }),
     );
@@ -791,6 +821,7 @@ export class ScholarshipAdminRouter {
       '/:id/mark-ready',
       asyncHandler(async (req: Request, res: Response) => {
         await adminScholarshipUseCases.markReadyToReview(req.params.id, mutationContext(req));
+        sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
     );
@@ -799,6 +830,7 @@ export class ScholarshipAdminRouter {
       '/:id/mark-publishable',
       asyncHandler(async (req: Request, res: Response) => {
         await adminScholarshipUseCases.markReadyToPublish(req.params.id, mutationContext(req));
+        sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
     );
@@ -807,6 +839,7 @@ export class ScholarshipAdminRouter {
       '/:id/publish',
       asyncHandler(async (req: Request, res: Response) => {
         await adminScholarshipUseCases.publish(req.params.id, mutationContext(req));
+        sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
     );
@@ -815,6 +848,7 @@ export class ScholarshipAdminRouter {
       '/:id/unpublish',
       asyncHandler(async (req: Request, res: Response) => {
         await adminScholarshipUseCases.unpublish(req.params.id, mutationContext(req));
+        sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
     );
@@ -823,6 +857,7 @@ export class ScholarshipAdminRouter {
       '/:id/reject',
       asyncHandler(async (req: Request, res: Response) => {
         await adminScholarshipUseCases.reject(req.params.id, mutationContext(req));
+        sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
     );
@@ -831,12 +866,16 @@ export class ScholarshipAdminRouter {
       '/:id/archive',
       asyncHandler(async (req: Request, res: Response) => {
         await adminScholarshipUseCases.archive(req.params.id, mutationContext(req));
+        sendRevision(res, await adminScholarshipUseCases.getScholarship(req.params.id));
         res.status(200).json({ success: true });
       }),
     );
 
     // Simple error handler for Zod errors and Use Case errors
     router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+      if (err instanceof Error && err.message === 'SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED') return res.status(428).json({ error: err.message, code: err.message });
+      if (err instanceof Error && err.message === 'SCHOLARSHIP_STALE_REVISION') return res.status(409).json({ error: err.message, code: err.message });
+      if (err instanceof Error && err.message === 'SCHOLARSHIP_INVALID_REVISION_PRECONDITION') return res.status(400).json({ error: err.message, code: err.message });
       if (err instanceof Error && err.message === 'IMPORT_REVIEW_LEASE_REQUIRED')
         return res.status(409).json({ error: err.message, code: err.message });
       if (err instanceof z.ZodError) {
