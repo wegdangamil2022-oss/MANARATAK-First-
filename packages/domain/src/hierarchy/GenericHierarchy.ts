@@ -117,13 +117,15 @@ export class HierarchyValidationService implements ICycleDetectionValidator, IHi
         visited.add(child);
         predecessor.set(child, current);
         if (child === targetNodeId) {
-          const path: string[] = [child];
-          while (path[0] !== startNodeId) {
-            const parent = predecessor.get(path[0]);
+          const reversePath: string[] = [child];
+          let cursorNode = child;
+          while (cursorNode !== startNodeId) {
+            const parent = predecessor.get(cursorNode);
             if (!parent) throw new Error('HIERARCHY_PATH_PREDECESSOR_MISSING');
-            path.unshift(parent);
+            reversePath.push(parent);
+            cursorNode = parent;
           }
-          return path;
+          return reversePath.reverse();
         }
         queue.push(child);
       }
