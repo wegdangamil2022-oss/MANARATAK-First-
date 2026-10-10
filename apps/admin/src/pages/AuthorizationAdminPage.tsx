@@ -769,9 +769,8 @@ export function AuthorizationAdminPage() {
       </div>
       <fieldset
         hidden={tab !== 'roles' && tab !== 'assignments'}
-        style={{ display: tab !== 'roles' && tab !== 'assignments' ? 'none' : undefined }}
         disabled={mutationBlocked}
-        className="grid min-w-0 gap-6 xl:grid-cols-2 disabled:opacity-60"
+        className={`${tab !== 'roles' && tab !== 'assignments' ? 'hidden' : 'grid'} min-w-0 gap-6 xl:grid-cols-2 disabled:opacity-60`}
       >
         <form
           hidden={tab !== 'roles'}

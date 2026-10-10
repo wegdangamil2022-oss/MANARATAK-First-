@@ -595,7 +595,8 @@ export function registerDependencies(
       const raw = readConfig<string>('IMPORT_SOURCE_SIGNED_APPROVALS');
       const tokens = raw ? JSON.parse(raw) : [];
       if (!Array.isArray(tokens)) throw new Error('SOURCE_AUTHORITY_CONFIGURATION_INVALID');
-      return new SignedSourceAccessAuthority(readConfig<string>('IMPORT_SOURCE_APPROVAL_PUBLIC_KEY'), tokens);
+      // Credential references are validated inside the authority and resolved only by the runtime composition boundary.
+      return new SignedSourceAccessAuthority(readConfig<string>('IMPORT_SOURCE_APPROVAL_PUBLIC_KEY'), tokens, binding => readConfig<string>(binding));
     }).singleton(),
     safeSourceHttpTransport: asFunction(({ sourceAccessAuthority, sourceAcquisitionLimiter }) => new NodeSafeSourceHttpTransport(undefined, undefined, sourceAccessAuthority, sourceAcquisitionLimiter)).singleton(),
     staticHtmlSourceConnector: asFunction(({ safeSourceHttpTransport, sourceAccessAuthority }) => new StaticHtmlSourceConnector(safeSourceHttpTransport, sourceAccessAuthority)).singleton(),

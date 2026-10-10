@@ -163,15 +163,32 @@ try {
 const frontendSecurityPolicy = read('apps/frontend-security/ViteFrontendSecurityHeaders.ts');
 const webVite = read('apps/web/vite.config.ts');
 const adminVite = read('apps/admin/vite.config.ts');
-const webInlineStyleCount = (execFileSync('bash', ['-lc', "rg -n 'style=\\{\\{' apps/web/src --glob '*.{ts,tsx}' | wc -l"], { encoding: 'utf8', cwd: root }).trim() || '0');
-const adminInlineStyleCount = (execFileSync('bash', ['-lc', "rg -n 'style=\\{\\{' apps/admin/src --glob '*.{ts,tsx}' | wc -l"], { encoding: 'utf8', cwd: root }).trim() || '0');
+// Scan with built-in Node APIs: do not silently report zero when rg is missing on CI runners.
+const inlineStyleViolations = (base) => {
+  const pending = [path.join(root, base)];
+  const violations = [];
+  while (pending.length) {
+    const dir = pending.pop();
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) pending.push(file);
+      else if (/\\.(tsx|jsx)$/.test(entry.name)) {
+        const source = fs.readFileSync(file, 'utf8');
+        if (/\\bstyle\\s*=\\s*\\{|<style(?:\\s|>)/i.test(source)) violations.push(path.relative(root, file));
+      }
+    }
+  }
+  return violations;
+};
+const inlineStyles = [...inlineStyleViolations('apps/web/src'), ...inlineStyleViolations('apps/admin/src')];
+if (inlineStyles.length) console.error('MNT_AUD_0114_INLINE_STYLE_FILES: ' + inlineStyles.join(', '));
 check('MNT-AUD-0101 Web/Admin compose canonical frontend security policy', webVite.includes('frontendSecurityHeadersPlugin()') && adminVite.includes('frontendSecurityHeadersPlugin()'));
 check('MNT-AUD-0101 canonical frontend policy denies framing', frontendSecurityPolicy.includes("frame-ancestors 'none'") && frontendSecurityPolicy.includes("'X-Frame-Options': 'DENY'"));
 check('MNT-AUD-0101 script/style element policies do not permit unsafe-inline', !/script-src[^\n]*unsafe-inline/.test(frontendSecurityPolicy) && !/style-src 'self' 'unsafe-inline'/.test(frontendSecurityPolicy));
 check('MNT-AUD-0101 API defense CSP denies framing and inline style elements', middleware.includes('frameAncestors: ["\'none\'"]') && middleware.includes('styleSrc: ["\'self\'"]'));
 check('MNT-AUD-0101 build policy emits _headers artifact', frontendSecurityPolicy.includes("fileName: '_headers'") && exists('scripts/security/verify-frontend-security-headers.mjs'));
 check('MNT-AUD-0114 inline-style remediation is explicitly registered', exists('docs/remediation/MNT-AUD-0114-INLINE-STYLE-CSP-COMPATIBILITY.md') && frontendSecurityPolicy.includes("style-src-attr 'none'") && !frontendSecurityPolicy.includes('unsafe-inline'));
-check('MNT-AUD-0114 Web/Admin inline style inventory is zero', Number(webInlineStyleCount) === 0 && Number(adminInlineStyleCount) === 0);
+check('MNT-AUD-0114 Web/Admin inline style inventory is zero', inlineStyles.length === 0);
 
 try {
   const frontendSecurityTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/frontend-security-headers-source.test.mjs'), path.join(root, 'tests/security/public-auth-source-policy.test.mjs')], { encoding: 'utf8' });
