@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CanonicalAcademicGovernancePanel } from '../components/academic-taxonomy/CanonicalAcademicGovernancePanel';
 import { useParams, Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import {
@@ -104,6 +105,8 @@ export function AcademicTaxonomyDetailPage() {
   // --- Modal & Action States ---
   const [showEditNodeModal, setShowEditNodeModal] = useState(false);
   const [savingNode, setSavingNode] = useState(false);
+  const [lifecycleDecision, setLifecycleDecision] = useState({ reason: '', acknowledgeHistoricalReferences: false });
+  const [usageReady, setUsageReady] = useState(false);
   const [nodeFormError, setNodeFormError] = useState<string | null>(null);
   const [nodeFormData, setNodeFormData] = useState({
     canonicalName: '',
@@ -277,6 +280,7 @@ export function AcademicTaxonomyDetailPage() {
   const handleEditNodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!node) return;
+    if (nodeFormData.status !== node.status && !usageReady) { setNodeFormError(isAr ? 'انتظر تحميل أثر التغيير.' : 'Wait for the impact report.'); return; }
     setSavingNode(true);
     setNodeFormError(null);
     if (!node.updatedAt) {
@@ -298,6 +302,7 @@ export function AcademicTaxonomyDetailPage() {
         status: nodeFormData.status,
         standardType: node.standardType || 'CUSTOM_NATIONAL',
         expectedUpdatedAt: node.updatedAt,
+        lifecycle: nodeFormData.status !== node.status ? lifecycleDecision : undefined,
         standardCode: nodeFormData.standardCode.trim() || undefined,
         localizedNames: Object.keys(localizedNames).length > 0 ? localizedNames : undefined,
       };
@@ -582,7 +587,7 @@ export function AcademicTaxonomyDetailPage() {
         </div>
 
         <button
-          onClick={() => setShowEditNodeModal(true)}
+          onClick={() => { setLifecycleDecision({ reason: '', acknowledgeHistoricalReferences: false }); setUsageReady(false); setShowEditNodeModal(true); }}
           className="bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 border border-slate-200"
         >
           <Edit2 className="h-3.5 w-3.5" />
@@ -1078,7 +1083,10 @@ export function AcademicTaxonomyDetailPage() {
               </button>
             </div>
 
-            <form onSubmit={handleEditNodeSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleEditNodeSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              <CanonicalAcademicGovernancePanel endpoint={`/admin/academic-taxonomy/nodes/${encodeURIComponent(node.nodeId)}/usage`} isAr={isAr}
+                requiresDecision={nodeFormData.status !== node.status} decision={lifecycleDecision} onDecision={setLifecycleDecision} onReady={setUsageReady} />
+              <Link to={`/audit?targetId=${encodeURIComponent(node.nodeId)}`} className="text-xs underline">{isAr ? 'سجل التدقيق' : 'Audit history'}</Link>
               {nodeFormError && (
                 <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
                   {nodeFormError}
@@ -1218,7 +1226,7 @@ export function AcademicTaxonomyDetailPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={savingNode}
+                  disabled={savingNode || (nodeFormData.status !== node.status && !usageReady)}
                   className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
                 >
                   {savingNode ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

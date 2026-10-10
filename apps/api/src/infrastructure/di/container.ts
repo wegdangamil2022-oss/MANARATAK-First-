@@ -127,6 +127,7 @@ import {
   PrismaAssetRetentionGateway,
   PrismaAtomicPersistenceUnitOfWork,
   PrismaAcademicTaxonomyRepository,
+  PrismaCanonicalAcademicUsageGateway,
   DegreeLevelRepository,
   PrismaScholarshipCanonicalLookupGateway,
   VerifiedImportArtifactGateway, NodeSafeSourceHttpTransport, SourceAcquisitionLimiter,
@@ -530,11 +531,12 @@ export function registerDependencies(
     aiPlatformRepository: asFunction(({ prisma }) => new PrismaAIPlatformRepository(prisma)).singleton(),
     aiAsyncPayloadProtector: asFunction(() => new EnvironmentAIAsyncPayloadProtector('AI_ASYNC_PAYLOAD_KEY', effectiveEnvironment)).singleton(),
     importRepository: asFunction(({ prisma }) => new PrismaImportRepository(prisma)).singleton(),
+    canonicalAcademicUsageGateway: asFunction(({ prisma }) => new PrismaCanonicalAcademicUsageGateway(prisma)).singleton(),
     academicTaxonomyRepository: asFunction(({ prisma }) => new PrismaAcademicTaxonomyRepository(prisma)).singleton(),
     degreeLevelRepository: asFunction(({ prisma }) => new DegreeLevelRepository(prisma)).singleton(),
     canonicalMajorReferenceService: asFunction(({ academicTaxonomyRepository, degreeLevelRepository }) =>
       new CanonicalMajorReferenceService(academicTaxonomyRepository, degreeLevelRepository)).scoped(),
-    degreeLevelUseCases: asFunction(({ degreeLevelRepository, atomicDomainMutationCoordinator }) => new DegreeLevelUseCases(degreeLevelRepository, atomicDomainMutationCoordinator)).scoped(),
+    degreeLevelUseCases: asFunction(({ degreeLevelRepository, atomicDomainMutationCoordinator, canonicalAcademicUsageGateway }) => new DegreeLevelUseCases(degreeLevelRepository, atomicDomainMutationCoordinator, canonicalAcademicUsageGateway)).scoped(),
     importHandoffDispatcher: asFunction(({ scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
       SCHOLARSHIPS: scholarshipImportHandoffConsumer,
       SCHOLARSHIP: scholarshipImportHandoffConsumer,
@@ -862,7 +864,7 @@ export function registerDependencies(
     ])).scoped(),
     durableBackgroundWorker: asFunction(({ durableBackgroundJobQueue, backgroundJobHandlerRegistry, backgroundWorkerRuntimeState }) =>
       new DurableBackgroundWorker(durableBackgroundJobQueue, backgroundJobHandlerRegistry, backgroundWorkerRuntimeState)).scoped(),
-    adminAcademicTaxonomyUseCases: asFunction(({ academicTaxonomyRepository, academicTaxonomyValidationService, atomicDomainMutationCoordinator }) => new AdminAcademicTaxonomyUseCases(academicTaxonomyRepository, academicTaxonomyValidationService, undefined, atomicDomainMutationCoordinator)).scoped(),
+    adminAcademicTaxonomyUseCases: asFunction(({ academicTaxonomyRepository, academicTaxonomyValidationService, atomicDomainMutationCoordinator, canonicalAcademicUsageGateway }) => new AdminAcademicTaxonomyUseCases(academicTaxonomyRepository, academicTaxonomyValidationService, undefined, atomicDomainMutationCoordinator, canonicalAcademicUsageGateway)).scoped(),
     // Identity
     provisionIdentityUseCase: asFunction(({ identityRepository }) => new ProvisionIdentityUseCase(identityRepository)).scoped(),
     activateIdentityUseCase: asFunction(({ identityRepository }) => new ActivateIdentityUseCase(identityRepository)).scoped(),

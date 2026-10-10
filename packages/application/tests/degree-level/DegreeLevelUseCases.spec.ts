@@ -34,7 +34,7 @@ describe('DegreeLevelUseCases', () => {
 
   it('preserves displayRank and lifecycle status on partial update', async () => {
     const repo = repository();
-    const useCases = new DegreeLevelUseCases(repo);
+    const useCases = new DegreeLevelUseCases(repo, undefined, { summarize: vi.fn().mockResolvedValue({ totalReferences: 0 }), withTransaction: vi.fn() } as any);
 
     await useCases.update(existing.id, { expectedUpdatedAt: existing.updatedAt.toISOString(), nameEn: 'Master Degree', nameAr: 'درجة الماجستير' });
 
@@ -51,17 +51,19 @@ describe('DegreeLevelUseCases', () => {
 
   it('applies an explicitly supplied valid lifecycle status', async () => {
     const repo = repository();
-    const useCases = new DegreeLevelUseCases(repo);
+    const useCases = new DegreeLevelUseCases(repo, undefined, { summarize: vi.fn().mockResolvedValue({ totalReferences: 0 }), withTransaction: vi.fn() } as any);
 
     await useCases.update(existing.id, {
       expectedUpdatedAt: existing.updatedAt.toISOString(),      nameEn: existing.nameEn,
       nameAr: existing.nameAr,
       status: DegreeLevelStatus.ARCHIVED,
+      lifecycle: { reason: 'Retire reviewed level', acknowledgeHistoricalReferences: true },
       displayRank: 55,
     });
 
     expect(repo.updateDegreeLevel).toHaveBeenCalledWith(existing.id, expect.objectContaining({
       status: DegreeLevelStatus.ARCHIVED,
+      lifecycle: { reason: 'Retire reviewed level', acknowledgeHistoricalReferences: true },
       displayRank: 55,
     }), existing.updatedAt.toISOString());
   });
@@ -69,7 +71,7 @@ describe('DegreeLevelUseCases', () => {
   it('fails closed if persisted canonical code is outside the frozen catalog', async () => {
     const repo = repository();
     vi.mocked(repo.getDegreeLevelById).mockResolvedValue({ ...existing, canonicalCode: 'UNKNOWN' as any });
-    const useCases = new DegreeLevelUseCases(repo);
+    const useCases = new DegreeLevelUseCases(repo, undefined, { summarize: vi.fn().mockResolvedValue({ totalReferences: 0 }), withTransaction: vi.fn() } as any);
 
     await expect(useCases.update(existing.id, { expectedUpdatedAt: existing.updatedAt.toISOString(), nameEn: 'X', nameAr: 'X' }))
       .rejects.toThrow('Unsupported canonical DegreeLevel code: UNKNOWN');

@@ -1,6 +1,6 @@
 # Section 07 — Academic Taxonomy / P8
 
-Status: **IN PROGRESS — two remediation batches**, not CODE_CLOSED.
+Status: **IN PROGRESS — three remediation batches**, not CODE_CLOSED.
 
 Branch: `codex/section-07-academic-taxonomy`, based on `7231f2c`.
 Worktree: `/workspace/manaratak-section-07`. The original checkout and branch remain available for Section 06. Shared external dependencies are read-only symlinks; workspace package links/build outputs resolve to this worktree. No Section 06 source, city data or DB schema changed.
@@ -34,16 +34,26 @@ Exact logs: `evidence/section-07/batch-01/`. These are isolated source/mock test
 
 Second-batch verification: TypeScript PASS once (`tsc -b` scoped to domain/application/infrastructure/admin/api; 60s ceiling). Targeted tests: **18 PASS / 0 FAIL**, four files, 3.66s, once. Earlier first-batch suites were not rerun; their historical one failure remains documented above. New mock tests do not prove real PostgreSQL contention, durable rollback or consumer delivery. Evidence: `evidence/section-07/batch-02/`.
 
+## Third batch — lifecycle and generic impact
+
+- TAX-P1-001: adopted **archive-only taxonomy retirement**. Existing canonical IDs, names, aliases, edges, mappings and downstream references stay intact; no hard delete, automatic reassignment or implicit replacement. Public taxonomy discovery/direct reads already hide ARCHIVED records. Restore/status transitions require an operator reason and acknowledgement too. Creating an already archived identity is refused. A future supersession model requires a separate reviewed contract; no new taxonomy status/schema introduced.
+- TAX-P1-002: a generic owner-neutral usage gateway returns relationship counts through bounded Prisma `_count` selections. It covers taxonomy major/profile links, classifications, tests, course resolutions/links/projections and hierarchy/crosswalk links; Degree Levels cover major profiles, test degrees, university programs and scholarship targets/eligibility. Historical code-only test and major-profile degree links are counted separately using `degreeLevelId: null`, avoiding duplicate ID-backed counts. Counts represent relationship rows, not unique people or unique consumer entities. P8 application/domain imports no downstream owner repository.
+- Actual status changes require a nonempty reason (maximum 1000 characters), an explicit historical-reference acknowledgement and successful server-side impact retrieval. The impact adapter binds to the owner atomic transaction; failures abort the business write. CAS protection from batch 02 remains in force. Owner audit records the reason and requested status; owner event remains in the same transaction. Advisory locking covers cooperating taxonomy owner commands, not independent downstream consumer writes.
+- TAX-P1-003: edit forms now show the impact counts, preserve error/conflict inputs, require reason/acknowledgement for status changes and disable status submission until the impact report loads. Degree metadata/aliases are inspectable (bounded display) and both forms deep-link to the audit center by target ID. Fixed the unsupported degree DRAFT option to DEPRECATED. New degree MERGED/SUPERSEDED transitions are refused until replacement semantics exist; the current API enum remains backward-compatible for historical reads.
+- React best-practices review: shared typed panel; stable setter effect dependency; request abort/stale guard; associated field labels, required checkbox/text area, error/status roles and scrollable edit forms. No browser/dev server started.
+
+Third-batch source verification: TypeScript PASS once (`tsc -b` scoped to domain/application/infrastructure/admin/api, 60s ceiling); **17 PASS / 0 FAIL**, three new lifecycle/read-model/HTTP suites, 3.05s, once. Prior tests were not repeated. No DB access, migration, seed, provider, browser or load tests; real aggregate query performance and consumer races remain runtime acceptance work. Exact logs: `evidence/section-07/batch-03/`.
+
 ## Remaining original scope
 
 | Original area | Remaining work |
 | --- | --- |
 | TAX-P0-001/002 | Browser acceptance; preserve new identity/validation safeguards. |
 | TAX-P0-003 / TAX-P1-004 | Browser pagination/picker acceptance; canonical list totals/status filters implemented in batch 02. |
-| TAX-P0-004 | Node/legacy-create and Degree Level edit CAS implemented; governed lifecycle/retirement policies remain. |
+| TAX-P0-004 | Node/legacy-create and Degree Level edit CAS implemented; archive/status governance implemented in batch 03; runtime acceptance remains. |
 | TAX-P0-005 | Real PostgreSQL contention proof deferred; graph integrity read model still pending. |
 | TAX-P0-006 | Actual P6→P8 screening composition and owner preview/review/apply/idempotency; retain generic mutation denial. |
-| TAX-P1-001/002/003 | Retirement semantics, generic usage/impact contracts, Degree Level governance/UI. |
+| TAX-P1-001/002/003 | Archive-only retirement and generic impact/degree edit governance implemented in batch 03; consumer browser/runtime acceptance and targeted consumer navigation remain. |
 | TAX-P1-005 | Mapping direction/standard validation and preview/semantics UX. |
 | TAX-P1-006 | Historical alias collision evidence and remaining seed normalization adoption. |
 | TAX-P1-007 | Owner command adoption implemented in batch 02; consumer-specific payloads/cache invalidation and runtime atomicity acceptance remain. |

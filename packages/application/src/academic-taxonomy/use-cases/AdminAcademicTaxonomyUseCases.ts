@@ -1,6 +1,9 @@
 import { AtomicDomainMutationCoordinator, type AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import {
   IAcademicTaxonomyRepository,
+  ICanonicalAcademicUsageGateway,
+  AcademicLifecycleDecision,
+  assertAcademicLifecycleDecision,
   AcademicStandardType,
   AcademicTaxonomyDeterministicKey,
   normalizeAcademicTaxonomyAlias,
@@ -30,7 +33,8 @@ export class AdminAcademicTaxonomyUseCases {
     private readonly repository: IAcademicTaxonomyRepository,
     private readonly validationService: IAcademicTaxonomyValidationService = new AcademicTaxonomyValidationService(),
     private readonly importHandoffService: AcademicTaxonomyImportHandoffService = new AcademicTaxonomyImportHandoffService(),
-    private readonly atomic?: AtomicDomainMutationCoordinator
+    private readonly atomic?: AtomicDomainMutationCoordinator,
+    private readonly usage?: ICanonicalAcademicUsageGateway
   ) {}
 
   public listNodes(filters?: AcademicTaxonomyFilters): Promise<AcademicTaxonomyNodeDto[]> {
@@ -72,11 +76,11 @@ export class AdminAcademicTaxonomyUseCases {
     return this.validationService.validateNode(data);
   }
 
-  public async upsertNode(data: UpsertAcademicTaxonomyNodeDto & { expectedUpdatedAt?: string }, context?: AtomicMutationRequestContext): Promise<{
+  public async upsertNode(data: UpsertAcademicTaxonomyNodeDto & { expectedUpdatedAt?: string; lifecycle?: AcademicLifecycleDecision }, context?: AtomicMutationRequestContext): Promise<{
     node: AcademicTaxonomyNodeDto;
     report: AcademicTaxonomyCompletenessReport;
   }> {
-    if (this.atomic) return this.mutate('TAXONOMY_NODE_UPSERTED', AcademicTaxonomyDeterministicKey.create(data), context, cases => cases.upsertNode(data));
+    if (this.atomic) return this.mutate('TAXONOMY_NODE_UPSERTED', AcademicTaxonomyDeterministicKey.create(data), context, cases => cases.upsertNode(data), this.lifecycleAudit(data));
     const current = await this.repository.getNodeByCanonicalKey(data);
     if (current) {
       if (!data.expectedUpdatedAt) throw new Error('TAXONOMY_NODE_VERSION_CONFLICT');
@@ -85,12 +89,13 @@ export class AdminAcademicTaxonomyUseCases {
     const report = this.validateNode(data);
     this.assertNoErrors(report.issues, 'Node validation failed');
 
+    if (data.status === 'ARCHIVED') throw new Error('ACADEMIC_CREATE_ARCHIVED_FORBIDDEN');
     const node = this.repository.createNode ? await this.repository.createNode(data) : await this.repository.upsertNode(data);
     return { node, report };
   }
 
-  public async editNode(nodeId: string, data: UpsertAcademicTaxonomyNodeDto, expectedUpdatedAt: string, context?: AtomicMutationRequestContext): Promise<{ node: AcademicTaxonomyNodeDto; report: AcademicTaxonomyCompletenessReport }> {
-    if (this.atomic) return this.mutate('TAXONOMY_NODE_CHANGED', nodeId, context, cases => cases.editNode(nodeId, data, expectedUpdatedAt));
+  public async editNode(nodeId: string, data: UpsertAcademicTaxonomyNodeDto & { lifecycle?: AcademicLifecycleDecision }, expectedUpdatedAt: string, context?: AtomicMutationRequestContext): Promise<{ node: AcademicTaxonomyNodeDto; report: AcademicTaxonomyCompletenessReport }> {
+    if (this.atomic) return this.mutate('TAXONOMY_NODE_CHANGED', nodeId, context, cases => cases.editNode(nodeId, data, expectedUpdatedAt), this.lifecycleAudit(data));
     const current = await this.repository.getNode(nodeId);
     if (!current) throw new Error('TAXONOMY_NODE_NOT_FOUND');
     if (data.nodeType !== current.nodeType || data.canonicalCode !== current.canonicalCode ||
@@ -98,6 +103,10 @@ export class AdminAcademicTaxonomyUseCases {
         (current.standardType ?? AcademicStandardType.CUSTOM_NATIONAL)) throw new Error('TAXONOMY_IDENTITY_IMMUTABLE');
     if (!Number.isFinite(Date.parse(expectedUpdatedAt)) || current.updatedAt.toISOString() !== expectedUpdatedAt)
       throw new Error('TAXONOMY_NODE_VERSION_CONFLICT');
+    if (data.status && data.status !== current.status) {
+      assertAcademicLifecycleDecision(data.lifecycle);
+      await this.getUsage(nodeId); // Fail closed if impact cannot be obtained; historical references remain untouched.
+    }
     const report = this.validateNode(data);
     this.assertNoErrors(report.issues, 'Node validation failed');
     if (!this.repository.updateNode) throw new Error('TAXONOMY_GOVERNED_EDIT_UNAVAILABLE');
@@ -187,12 +196,21 @@ export class AdminAcademicTaxonomyUseCases {
   }
 
 
+  public async getUsage(nodeId: string) {
+    if (!this.usage) throw new Error('ACADEMIC_USAGE_UNAVAILABLE');
+    return this.usage.summarize('TAXONOMY_NODE', nodeId);
+  }
+
+  private lifecycleAudit(data: UpsertAcademicTaxonomyNodeDto & { lifecycle?: AcademicLifecycleDecision }) {
+    return data.lifecycle ? { lifecycleReason: data.lifecycle.reason.trim(), historicalReferencesPreserved: true, requestedStatus: data.status } : undefined;
+  }
+
   private mutate<T>(action: string, id: string, context: AtomicMutationRequestContext | undefined,
-    work: (cases: AdminAcademicTaxonomyUseCases) => Promise<T>): Promise<T> {
+    work: (cases: AdminAcademicTaxonomyUseCases) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {
     if (!this.atomic || !context?.actorId || !this.repository.withTransaction) throw new Error('TAXONOMY_ATOMIC_CONTEXT_REQUIRED');
-    return this.atomic.execute({ domain: 'ACADEMIC_TAXONOMY', aggregateType: 'ACADEMIC_TAXONOMY', aggregateId: id, action, context }, tx => {
+    return this.atomic.execute({ domain: 'ACADEMIC_TAXONOMY', aggregateType: 'ACADEMIC_TAXONOMY', aggregateId: id, action, context, auditMetadata }, tx => {
       const repository = this.repository.withTransaction!(tx);
-      return repository.executeSerializable(() => work(new AdminAcademicTaxonomyUseCases(repository, this.validationService, this.importHandoffService)));
+      return repository.executeSerializable(() => work(new AdminAcademicTaxonomyUseCases(repository, this.validationService, this.importHandoffService, undefined, this.usage?.withTransaction(tx))));
     });
   }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CanonicalAcademicGovernancePanel } from '../components/academic-taxonomy/CanonicalAcademicGovernancePanel';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -17,6 +18,8 @@ interface AcademicTaxonomyNode {
 }
 
 interface DegreeLevel {
+  aliases?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   updatedAt?: string;
   id: string;
   canonicalCode: string;
@@ -70,6 +73,8 @@ export function AcademicTaxonomyAdminPage() {
 
   const [editingDegree, setEditingDegree] = useState<DegreeLevel | null>(null);
   const [savingDegree, setSavingDegree] = useState(false);
+  const [degreeLifecycleDecision, setDegreeLifecycleDecision] = useState({ reason: '', acknowledgeHistoricalReferences: false });
+  const [degreeUsageReady, setDegreeUsageReady] = useState(false);
   const [degreeFormError, setDegreeFormError] = useState<string | null>(null);
   const [degreeFormData, setDegreeFormData] = useState({
     nameEn: '',
@@ -210,6 +215,7 @@ export function AcademicTaxonomyAdminPage() {
     e.preventDefault();
     if (!editingDegree) return;
     if (!editingDegree.updatedAt) { setDegreeFormError(isAr ? 'أعد تحميل الدرجة للحصول على نسخة التعديل.' : 'Reload the degree level to obtain its edit version.'); return; }
+    if (degreeFormData.status !== editingDegree.status && !degreeUsageReady) { setDegreeFormError(isAr ? 'انتظر تحميل أثر التغيير.' : 'Wait for the impact report.'); return; }
     setSavingDegree(true);
     setDegreeFormError(null);
 
@@ -218,6 +224,7 @@ export function AcademicTaxonomyAdminPage() {
         method: 'PUT',
         body: JSON.stringify({
           expectedUpdatedAt: editingDegree.updatedAt,
+          lifecycle: degreeFormData.status !== editingDegree.status ? degreeLifecycleDecision : undefined,
           nameEn: degreeFormData.nameEn.trim(),
           nameAr: degreeFormData.nameAr.trim(),
           displayRank: Number(degreeFormData.displayRank),
@@ -236,6 +243,7 @@ export function AcademicTaxonomyAdminPage() {
   };
 
   const openEditDegreeModal = (degree: DegreeLevel) => {
+    setDegreeFormError(null); setDegreeUsageReady(false); setDegreeLifecycleDecision({ reason: '', acknowledgeHistoricalReferences: false });
     setEditingDegree(degree);
     setDegreeFormData({
       nameEn: degree.nameEn,
@@ -739,7 +747,13 @@ export function AcademicTaxonomyAdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleEditDegreeSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleEditDegreeSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              <CanonicalAcademicGovernancePanel endpoint={`/admin/academic-taxonomy/degree-levels/${encodeURIComponent(editingDegree.id)}/usage`} isAr={isAr}
+                requiresDecision={degreeFormData.status !== editingDegree.status} decision={degreeLifecycleDecision} onDecision={setDegreeLifecycleDecision} onReady={setDegreeUsageReady} />
+              <Link to={`/audit?targetId=${encodeURIComponent(editingDegree.id)}`} className="text-xs underline">{isAr ? 'سجل التدقيق' : 'Audit history'}</Link>
+              <details className="text-xs"><summary>{isAr ? 'الأسماء البديلة والبيانات الوصفية' : 'Aliases and metadata'}</summary>
+                <pre className="overflow-auto whitespace-pre-wrap max-h-40" dir="ltr">{JSON.stringify({ aliases: editingDegree.aliases, metadata: editingDegree.metadata }, null, 2)?.slice(0, 10000)}</pre>
+              </details>
               {degreeFormError && (
                 <div className="p-3 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl">
                   {degreeFormError}
@@ -810,7 +824,7 @@ export function AcademicTaxonomyAdminPage() {
                     onChange={(e) => setDegreeFormData(d => ({ ...d, status: e.target.value }))}
                   >
                     <option value="ACTIVE">{isAr ? 'نشط' : 'ACTIVE'}</option>
-                    <option value="DRAFT">{isAr ? 'مسودة' : 'DRAFT'}</option>
+                    <option value="DEPRECATED">{isAr ? 'متوقف' : 'DEPRECATED'}</option>
                     <option value="ARCHIVED">{isAr ? 'مؤرشف' : 'ARCHIVED'}</option>
                   </select>
                 </div>
@@ -826,7 +840,7 @@ export function AcademicTaxonomyAdminPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={savingDegree}
+                  disabled={savingDegree || (degreeFormData.status !== editingDegree.status && !degreeUsageReady)}
                   className="bg-[#142B5F] hover:bg-[#0E7C86] text-white font-bold px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2"
                 >
                   {savingDegree ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

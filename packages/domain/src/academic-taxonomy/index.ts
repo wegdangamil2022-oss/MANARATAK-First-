@@ -7,3 +7,4 @@ export * from './seed';
 export * from './seed-planner';
 export * from './isced-f-baseline';
 
+export * from './lifecycle';

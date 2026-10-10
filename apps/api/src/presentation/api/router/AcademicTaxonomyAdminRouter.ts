@@ -50,7 +50,9 @@ export class AcademicTaxonomyAdminRouter {
     const standardTypeSchema = z.nativeEnum(AcademicStandardType);
     const strengthSchema = z.nativeEnum(AcademicMappingStrength);
 
+    const lifecycleSchema = z.object({ reason: z.string().trim().min(1).max(1000), acknowledgeHistoricalReferences: z.literal(true) }).strict();
     const upsertNodeSchema = z.object({
+      lifecycle: lifecycleSchema.optional(),
       expectedUpdatedAt: z.string().datetime().optional(),
       nodeType: nodeTypeSchema,
       status: statusSchema.optional(),
@@ -85,6 +87,7 @@ export class AcademicTaxonomyAdminRouter {
     router.get('/nodes', asyncHandler(async (req: Request, res: Response) => {
       res.json(await adminAcademicTaxonomyUseCases.listNodesPage(listNodesQuerySchema.parse(req.query)));
     }));
+    router.get('/nodes/:nodeId/usage', asyncHandler(async (req: Request, res: Response) => res.json(await adminAcademicTaxonomyUseCases.getUsage(req.params.nodeId))));
     router.get('/nodes/:nodeId', asyncHandler(async (req: Request, res: Response) => {
       const node = await adminAcademicTaxonomyUseCases.getNode(req.params.nodeId);
       if (!node) return res.status(404).json({ error: 'Academic taxonomy node not found' });
@@ -151,10 +154,12 @@ export class AcademicTaxonomyAdminRouter {
     }));
 
     const updateDegreeLevelSchema = z.object({
+      lifecycle: lifecycleSchema.optional(),
       expectedUpdatedAt: z.string().datetime(),
       nameEn: z.string().trim().min(1).max(250), nameAr: z.string().trim().min(1).max(250), displayRank: z.number().int().min(0).optional(), status: z.nativeEnum(DegreeLevelStatus).optional(),
     });
     router.get('/degree-levels', asyncHandler(async (_req: Request, res: Response) => res.json({ data: await degreeLevelUseCases.list() })));
+    router.get('/degree-levels/:id/usage', asyncHandler(async (req: Request, res: Response) => res.json(await degreeLevelUseCases.getUsage(req.params.id))));
     router.get('/degree-levels/:id', asyncHandler(async (req: Request, res: Response) => {
       const item = await degreeLevelUseCases.getById(req.params.id);
       if (!item) return res.status(404).json({ error: 'Degree level not found' });
@@ -168,6 +173,8 @@ export class AcademicTaxonomyAdminRouter {
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      if (err?.message === 'ACADEMIC_USAGE_UNAVAILABLE') return res.status(503).json({ error: err.message });
+      if (err?.message === 'ACADEMIC_USAGE_REFERENCE_NOT_FOUND') return res.status(404).json({ error: err.message });
       if (err?.message === 'DEGREE_LEVEL_VERSION_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });
       if (err instanceof Error && /^(TAXONOMY|DEGREE_LEVEL)_(ATOMIC_CONTEXT_REQUIRED|GOVERNED_EDIT_UNAVAILABLE)$/.test(err.message)) return res.status(503).json({ error: err.message });
       if (err?.message === 'TAXONOMY_NODE_VERSION_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });
