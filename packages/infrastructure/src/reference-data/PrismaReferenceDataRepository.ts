@@ -927,23 +927,31 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     if (aliases.length > 100 || mappings.length > 100) {
       throw new Error('REFERENCE_GOVERNANCE_DETAILS_LIMIT_EXCEEDED');
     }
-    // Ambiguity is evaluated across active alias rows; never arbitrarily pick a winner.
+    // One bounded owner lookup, not one round-trip per alias (N+1).
+    // The cap is fail-closed: partial ambiguity evidence must not appear final.
     const uniqueNormalized = Array.from(new Set(aliases.map(a => a.normalizedAlias)));
-    const ambiguousAliases: ReferenceGovernanceDetails['ambiguousAliases'] = [];
-    for (const normalizedAlias of uniqueNormalized) {
-      const matches = await this.prisma.referenceAliasRecord.findMany({
-        where: { entityType, normalizedAlias, isActive: true,
-          NOT: { referenceId } },
-        select: { referenceId: true },
-        take: 21,
-      });
-      if (matches.length) {
-        ambiguousAliases.push({
-          alias: aliases.find(a => a.normalizedAlias === normalizedAlias)!.alias,
-          conflictingReferenceIds: Array.from(new Set(matches.map(a => a.referenceId))),
-        });
-      }
+    const competitors = uniqueNormalized.length
+      ? await this.prisma.referenceAliasRecord.findMany({
+          where: { entityType, normalizedAlias: { in: uniqueNormalized },
+            isActive: true, NOT: { referenceId } },
+          select: { normalizedAlias: true, referenceId: true }, take: 2101,
+        })
+      : [];
+    if (competitors.length > 2100) throw new Error('REFERENCE_ALIAS_AMBIGUITY_SCAN_LIMIT');
+    const byAlias = new Map<string, Set<string>>();
+    for (const row of competitors) {
+      const owners = byAlias.get(row.normalizedAlias) ?? new Set<string>();
+      owners.add(row.referenceId);
+      byAlias.set(row.normalizedAlias, owners);
     }
+    const ambiguousAliases: ReferenceGovernanceDetails['ambiguousAliases'] = aliases
+      .filter((alias, index, all) =>
+        all.findIndex(row => row.normalizedAlias === alias.normalizedAlias) === index &&
+        (byAlias.get(alias.normalizedAlias)?.size ?? 0) > 0)
+      .map(alias => ({
+        alias: alias.alias,
+        conflictingReferenceIds: Array.from(byAlias.get(alias.normalizedAlias) ?? []),
+      }));
     return {
       entityType,
       referenceId,
