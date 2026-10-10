@@ -32,7 +32,10 @@ const checks = [
     files.executor.includes('academicProgram.universityId !== university.id') &&
     files.plannerTests.includes('emits executable admission requirements only with canonical identities')],
   ['P11-PUB-001',
-    files.policy.includes("program.majorMappingState === 'CANONICALLY_MAPPED'") &&
+    // ACTIVE programs cannot publish while the canonical major mapping is unresolved.
+    files.policy.includes("program.majorMappingState !== 'CANONICALLY_MAPPED'") &&
+    files.policy.includes('if (!program.majorId ||') &&
+    files.policy.includes('UNIVERSITY_PROGRAM_MAJOR_REVIEW_REQUIRED') &&
     !files.policy.includes("program.status === 'MATCHED'")],
 ];
 
