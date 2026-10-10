@@ -1,6 +1,6 @@
 
 import { describe, it, expect } from 'vitest';
-import { ReferenceDataScreeningHandoffConsumer } from '../../src/reference-data/services/ReferenceDataScreeningHandoffConsumer';
+import { referenceImportPayloadDigest, ReferenceDataScreeningHandoffConsumer } from '../../src/reference-data/services/ReferenceDataScreeningHandoffConsumer';
 import type { UniversalImportHandoff } from '@manaratak/domain';
 
 const handoff = (referenceMetadata: Record<string, string> | undefined, normalizedPayload: Record<string, unknown>): UniversalImportHandoff => ({
@@ -16,6 +16,15 @@ const handoff = (referenceMetadata: Record<string, string> | undefined, normaliz
 
 describe('P6 -> P7 screening consumer', () => {
   const owner = new ReferenceDataScreeningHandoffConsumer();
+  it('hashes semantically identical mapped source payloads in stable key order', () => {
+    const left = referenceImportPayloadDigest({ countryIso2Code: 'YE',
+      name: 'Taiz', metadata: { x: 3, y: 1 } });
+    const right = referenceImportPayloadDigest({ metadata: { y: 1, x: 3 },
+      name: 'Taiz', countryIso2Code: 'YE' });
+    expect(left).toBe(right);
+    expect(left).toMatch(/^[a-f0-9]{64}$/);
+    expect(referenceImportPayloadDigest({ name: 'Other', countryIso2Code: 'YE' })).not.toBe(left);
+  });
   it('screens canonical city scope but never marks rows approved or applied', async () => {
     const result = await owner.accept(handoff({ referenceEntityType: 'CITY' }, {
       countryIso2Code: 'YE', name: 'صنعاء', region: 'أمانة العاصمة',
@@ -23,6 +32,7 @@ describe('P6 -> P7 screening consumer', () => {
     expect(result.state).toBe('NEEDS_OWNER_REVIEW');
     expect(result.deterministicKey).toBe('YE|صنعاء|text:أمانة العاصمة');
     expect(result.canonicalWrites).toBe(0);
+    expect(result.normalizedPayloadHash).toMatch(/^[a-f0-9]{64}$/);
     expect(owner.effectMode).toBe('SCREENING_ONLY');
   });
   it('fails closed without explicit canonical type', async () => {

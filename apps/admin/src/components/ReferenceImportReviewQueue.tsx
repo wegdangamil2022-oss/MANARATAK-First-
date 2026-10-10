@@ -54,7 +54,7 @@ export function ReferenceImportReviewQueue() {
             <thead className="bg-slate-50"><tr>
               <th className="p-2">نوع المرجع</th><th className="p-2">قرار الفحص</th>
               <th className="p-2">المفتاح القياسي</th><th className="p-2">المصدر</th>
-              <th className="p-2">التاريخ</th><th className="p-2">الملاحظات</th>
+              <th className="p-2">بصمة الحمولة</th><th className="p-2">التاريخ</th><th className="p-2">الملاحظات</th>
             </tr></thead>
             <tbody>{data.data.map(row => <tr key={row.receiptId} className="border-t">
               <td className="p-2 font-bold">{row.entityType || 'غير محدد'}</td>
@@ -65,6 +65,12 @@ export function ReferenceImportReviewQueue() {
                 {row.sourceArtifactId || '—'}
                 {row.sourceContentHash && <details><summary className="cursor-pointer">SHA/Hash</summary>
                   {row.sourceContentHash}</details>}
+              </td>
+              <td className="p-2 font-mono break-all" dir="ltr">
+                {row.normalizedPayloadHash
+                  ? <details><summary className="cursor-pointer">{row.normalizedPayloadHash.slice(0, 12)}…</summary>
+                    {row.normalizedPayloadHash}</details>
+                  : 'unknown — no normalized digest'}
               </td>
               <td className="p-2 whitespace-nowrap" dir="ltr">
                 {row.screenedAt ? new Date(row.screenedAt).toLocaleString('ar') : '—'}

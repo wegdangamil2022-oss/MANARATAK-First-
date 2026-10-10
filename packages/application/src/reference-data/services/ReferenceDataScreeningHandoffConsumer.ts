@@ -1,5 +1,6 @@
 
 import type { IImportHandoffConsumer, UniversalImportHandoff } from '@manaratak/domain';
+import { createHash } from 'node:crypto';
 import { ReferenceDataImportHandoffService } from './ReferenceDataImportHandoffService';
 
 /**
@@ -51,6 +52,23 @@ function invalidP7FieldShape(
   return null;
 }
 
+/** Stable content fingerprint of mapped source fields only, NOT an approval.
+ * Future owner receipt/apply must compare this digest to exact replayed data.
+ */
+function normalizeForHash(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(normalizeForHash);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>)
+      .filter(([, val]) => val !== undefined)
+      .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
+      .map(([key, val]) => [key, normalizeForHash(val)]));
+  }
+  return value;
+}
+export function referenceImportPayloadDigest(payload: Readonly<Record<string, unknown>>): string {
+  return createHash('sha256').update(JSON.stringify(normalizeForHash(payload))).digest('hex');
+}
+
 export interface P7ScreeningDecision {
   ownerDomain: 'REFERENCE_DATA';
   effect: 'SCREENING_ONLY';
@@ -60,6 +78,7 @@ export interface P7ScreeningDecision {
   sourceArtifactId: string | null;
   sourceContentHash: string | null;
   deterministicKey: string | null;
+  normalizedPayloadHash: string | null;
   issues: Array<{ code: string; message: string }>;
   /** Preview is NOT approval; no canonical mutation has occurred. */
   canonicalWrites: 0;
@@ -87,7 +106,7 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
       handoffId: handoff.handoffId, entityType,
       sourceArtifactId: handoff.artifact.artifactId ?? null,
       sourceContentHash: handoff.provenance.contentHash ?? null,
-      deterministicKey: null, issues: [], canonicalWrites: 0,
+      deterministicKey: null, normalizedPayloadHash: null, issues: [], canonicalWrites: 0,
       state: 'NEEDS_OWNER_REVIEW',
     };
     const sourceIssues = (handoff.validation.issues || [])
@@ -144,6 +163,7 @@ export class ReferenceDataScreeningHandoffConsumer implements IImportHandoffCons
       .map(issue => ({ code: issue.code, message: issue.message }));
     return {
       ...decision,
+      normalizedPayloadHash: referenceImportPayloadDigest(handoff.normalizedPayload),
       deterministicKey: report.deterministicKey || null,
       state: report.canBeImported ? 'NEEDS_OWNER_REVIEW' : 'INVALID',
       issues: [...sourceIssues, ...issues],

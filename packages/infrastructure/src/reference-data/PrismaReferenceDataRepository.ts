@@ -975,6 +975,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       return {
         receiptId: receipt.id, handoffKey: receipt.handoffKey, screenedAt: receipt.createdAt,
         state, entityType, canonicalKey: safeText(raw.deterministicKey),
+        normalizedPayloadHash: safeText(raw.normalizedPayloadHash),
         sourceArtifactId: safeText(raw.sourceArtifactId),
         sourceContentHash: safeText(raw.sourceContentHash),
         issueCodes: issues.slice(0, 30).map(issue =>

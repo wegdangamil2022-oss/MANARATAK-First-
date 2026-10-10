@@ -154,6 +154,7 @@ export interface ReferenceImportScreeningReview {
   state: 'NEEDS_OWNER_REVIEW' | 'INVALID' | 'UNKNOWN';
   entityType: 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY' | null;
   canonicalKey: string | null;
+  normalizedPayloadHash: string | null;
   sourceArtifactId: string | null;
   sourceContentHash: string | null;
   issueCodes: string[];
