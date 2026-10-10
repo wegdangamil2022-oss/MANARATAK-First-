@@ -1358,6 +1358,23 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     }
     await this.replaceAliases(entityType, referenceId, aliases);
     await this.replaceProviderMappings(entityType, referenceId, providerMappings);
+    // The historical snapshot must contain the *effective persisted* aliases and
+    // mappings, even if this patch omitted the optional arrays (preserve old).
+    // Never mistake omitted arrays for "clear everything" in an audit record.
+    const [effectiveAliases, effectiveMappings] = await Promise.all([
+      this.prisma.referenceAliasRecord.findMany({
+        where: { entityType, referenceId, isActive: true },
+        select: { alias: true, normalizedAlias: true, aliasType: true, locale: true },
+        orderBy: [{ normalizedAlias: 'asc' }, { id: 'asc' }], take: 101,
+      }),
+      this.prisma.referenceProviderMappingRecord.findMany({
+        where: { entityType, referenceId, isActive: true },
+        select: { providerSystem: true, providerId: true },
+        orderBy: [{ normalizedProviderSystem: 'asc' }, { normalizedProviderId: 'asc' }], take: 101,
+      }),
+    ]);
+    if (effectiveAliases.length > 100 || effectiveMappings.length > 100)
+      throw new Error('REFERENCE_GOVERNANCE_DETAILS_LIMIT_EXCEEDED');
     const { aliases: _aliases, providerMappings: _providerMappings, isActive: _legacyIsActive, ...snapshot } = snapshotInput as Record<string, unknown> & {
       aliases?: unknown; providerMappings?: unknown; isActive?: unknown;
     };
@@ -1365,6 +1382,7 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       entityType, referenceId, rows[0].versionNumber, ReferenceLifecycleState.ACTIVE,
       rows[0].effectiveFrom, rows[0].effectiveTo,
       { ...snapshot, lifecycleState: ReferenceLifecycleState.ACTIVE, versionNumber: rows[0].versionNumber,
+        aliases: effectiveAliases, providerMappings: effectiveMappings,
         mutationCorrelationId: this.mutationCorrelationId ?? null },
       existed ? 'UPSERT_UPDATE' : 'UPSERT_CREATE', this.mutationActorId ?? null,
     );
