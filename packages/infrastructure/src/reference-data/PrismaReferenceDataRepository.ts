@@ -1011,13 +1011,36 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     // One bounded owner lookup, not one round-trip per alias (N+1).
     // The cap is fail-closed: partial ambiguity evidence must not appear final.
     const uniqueNormalized = Array.from(new Set(aliases.map(a => a.normalizedAlias)));
-    const competitors = uniqueNormalized.length
-      ? await this.prisma.referenceAliasRecord.findMany({
-          where: { entityType, normalizedAlias: { in: uniqueNormalized },
-            isActive: true, NOT: { referenceId } },
-          select: { normalizedAlias: true, referenceId: true }, take: 2101,
-        })
-      : [];
+    let competitors: Array<{ normalizedAlias: string; referenceId: string }> = [];
+    if (uniqueNormalized.length && (entityType === 'CITY' || entityType === 'REGION')) {
+      // Cities and subdivisions are *country scoped*. Do not warn that an
+      // alias used in a different sovereign country is a collision.
+      const row = entityType === 'CITY'
+        ? await this.prisma.referenceCity.findUnique({
+            where: { id: referenceId }, select: { countryIso2Code: true },
+          })
+        : await this.prisma.administrativeRegion.findUnique({
+            where: { id: referenceId }, select: { countryIso2Code: true },
+          });
+      if (!row) throw new Error('REFERENCE_GOVERNANCE_STATE_UNAVAILABLE');
+      const ownerTable = this.referenceTable(entityType);
+      competitors = await this.prisma.$queryRaw<Array<{ normalizedAlias: string; referenceId: string }>>(Prisma.sql`
+        SELECT alias."normalizedAlias", alias."referenceId"
+        FROM "ReferenceAliasRecord" alias
+        JOIN ${ownerTable} owner ON owner."id" = alias."referenceId"
+        WHERE alias."entityType" = ${entityType} AND alias."isActive" = true
+          AND alias."referenceId" <> ${referenceId}
+          AND alias."normalizedAlias" IN (${Prisma.join(uniqueNormalized)})
+          AND owner."countryIso2Code" = ${row.countryIso2Code}
+        LIMIT 2101
+      `);
+    } else if (uniqueNormalized.length) {
+      competitors = await this.prisma.referenceAliasRecord.findMany({
+        where: { entityType, normalizedAlias: { in: uniqueNormalized },
+          isActive: true, NOT: { referenceId } },
+        select: { normalizedAlias: true, referenceId: true }, take: 2101,
+      });
+    }
     if (competitors.length > 2100) throw new Error('REFERENCE_ALIAS_AMBIGUITY_SCAN_LIMIT');
     const byAlias = new Map<string, Set<string>>();
     for (const row of competitors) {
