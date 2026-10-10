@@ -4,7 +4,7 @@ import type {
   UpsertReferenceLanguageDto, UpsertReferenceCityDto,
   AdministrativeRegionDto, UpsertAdministrativeRegionDto, ReferenceLifecycleState, ReferenceVersionDto,
   ReferenceGovernanceDetails, ReferenceRelationshipDto, ReferenceCityQualityCounters, GovernedReferenceEntityType, ReferenceDependencyImpact,
-  ReferenceImportScreeningReviewPage,
+  ReferenceImportScreeningReviewPage, ReferenceHistoryPage,
 } from '@manaratak/domain';
 import { adminApiClient, type AdminRequestOptions } from './client';
 
@@ -78,6 +78,12 @@ export const referenceDataAdminApi = {
   governanceDetails(entityType: GovernedReferenceEntityType, referenceId: string) {
     return adminApiClient.request<{ data: ReferenceGovernanceDetails }>(
       base + '/governance/' + encodeURIComponent(entityType) + '/' + encodeURIComponent(referenceId) + '/details'
+    );
+  },
+  governanceHistoryPage(entityType: GovernedReferenceEntityType, referenceId: string, page = 1) {
+    return adminApiClient.request<ReferenceHistoryPage>(
+      base + '/governance/' + encodeURIComponent(entityType) + '/' +
+      encodeURIComponent(referenceId) + '/history-page?page=' + encodeURIComponent(String(page)) + '&pageSize=30'
     );
   },
   governanceHistory(entityType: GovernedReferenceEntityType, referenceId: string) {

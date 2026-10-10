@@ -31,6 +31,7 @@ import {
   ReferenceProviderMappingReassignmentCommand,
   ReferenceCityCountryLinkRepairCommand,
   ReferenceImportScreeningReviewPage,
+  ReferenceHistoryPage,
   referenceCityScopeKey,
   referenceStandardsReadiness
 } from '@manaratak/domain';
@@ -266,6 +267,20 @@ export class ReferenceDataUseCases {
     };
     if (!owner.getCityQualityCounters) throw new Error('REFERENCE_GOVERNANCE_OWNER_READ_UNAVAILABLE');
     return owner.getCityQualityCounters(countryIso2Code);
+  }
+
+  public getReferenceHistoryPage(
+    entityType: GovernedReferenceEntityType, referenceId: string, page = 1, pageSize = 30,
+  ): Promise<ReferenceHistoryPage> {
+    if (!Number.isSafeInteger(page) || page < 1 || page > 100000 ||
+        !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 100)
+      throw new ReferenceDataInvariantError('Invalid reference governance history pagination.');
+    const owner = this.repository as IReferenceDataRepository & {
+      getReferenceHistoryPage?: (type: GovernedReferenceEntityType, id: string,
+        page: number, pageSize: number) => Promise<ReferenceHistoryPage>;
+    };
+    if (!owner.getReferenceHistoryPage) throw new Error('REFERENCE_GOVERNANCE_OWNER_HISTORY_UNAVAILABLE');
+    return owner.getReferenceHistoryPage(entityType, referenceId, page, pageSize);
   }
 
   public getReferenceHistory(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceVersionDto[]> {

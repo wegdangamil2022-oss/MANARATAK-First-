@@ -290,6 +290,19 @@ export class ReferenceDataAdminRouter {
     );
 
     router.get(
+      '/governance/:entityType/:referenceId/history-page',
+      asyncHandler(async (req: Request, res: Response) => {
+        const { entityType, referenceId } = governanceParamSchema.parse(req.params);
+        const { page, pageSize } = z.object({
+          page: z.coerce.number().int().min(1).max(100000).optional(),
+          pageSize: z.coerce.number().int().min(1).max(100).optional(),
+        }).strict().parse(req.query);
+        res.json(await referenceDataUseCases.getReferenceHistoryPage(
+          entityType, referenceId, page ?? 1, pageSize ?? 30));
+      }),
+    );
+
+    router.get(
       '/governance/:entityType/:referenceId/history',
       asyncHandler(async (req: Request, res: Response) => {
         const { entityType, referenceId } = governanceParamSchema.parse(req.params);

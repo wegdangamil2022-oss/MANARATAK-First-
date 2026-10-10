@@ -41,6 +41,14 @@ export interface ReferenceVersionDto {
   createdAt: Date;
 }
 
+export interface ReferenceHistoryPage {
+  data: ReferenceVersionDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface ReferenceRelationshipDto {
   id: string;
   sourceEntityType: GovernedReferenceEntityType;

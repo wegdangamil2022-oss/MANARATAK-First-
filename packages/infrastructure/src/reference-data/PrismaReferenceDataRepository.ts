@@ -32,6 +32,7 @@ import {
   ReferenceProviderMappingReassignmentCommand,
   ReferenceCityCountryLinkRepairCommand,
   ReferenceImportScreeningReviewPage,
+  ReferenceHistoryPage,
   assertReferenceLifecycleTransition,
   lifecycleIsActive,
   normalizeReferenceIdentityToken,
@@ -1158,6 +1159,34 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
       withoutCountryReference,
       inconsistentCountryReference: Number(inconsistentCountryReferenceRows[0]?.count ?? 0n),
       inconsistentAdministrativeRegion: Number(inconsistentRegionRows[0]?.count ?? 0n) };
+  }
+
+  /** Bounded historical read, newest first, with accurate owner total. */
+  public async getReferenceHistoryPage(
+    entityType: GovernedReferenceEntityType, referenceId: string, page: number, pageSize: number,
+  ): Promise<ReferenceHistoryPage> {
+    if (!Number.isSafeInteger(page) || page < 1 || page > 100000 ||
+        !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 100)
+      throw new Error('REFERENCE_HISTORY_PAGINATION_INVALID');
+    const where = { entityType, referenceId };
+    const [total, rows] = await Promise.all([
+      this.prisma.referenceVersionRecord.count({ where }),
+      this.prisma.referenceVersionRecord.findMany({
+        where, orderBy: [{ versionNumber: 'desc' }, { createdAt: 'desc' }],
+        skip: (page - 1) * pageSize, take: pageSize,
+        select: {
+          id: true, entityType: true, referenceId: true, versionNumber: true,
+          lifecycleState: true, effectiveFrom: true, effectiveTo: true,
+          snapshot: true, changeReason: true, actorId: true, createdAt: true,
+        },
+      }),
+    ]);
+    return { page, pageSize, total, totalPages: Math.ceil(total / pageSize),
+      data: rows.map(row => ({
+        ...row, entityType: row.entityType as GovernedReferenceEntityType,
+        lifecycleState: row.lifecycleState as ReferenceLifecycleState,
+        snapshot: row.snapshot as Record<string, unknown>,
+      })) };
   }
 
   public async getReferenceHistory(entityType: GovernedReferenceEntityType, referenceId: string): Promise<ReferenceVersionDto[]> {
