@@ -165,7 +165,7 @@ export class InternationalTestAdminUseCases {
       assertInternationalTestTransition(test.status,InternationalTestStatus.READY_TO_PUBLISH);
       if (!repository.govern) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_REQUIRED');
       await repository.govern(id,'APPROVE',{reason:context?.reason},context!.actorId);
-      await repository.update(id,{status:InternationalTestStatus.READY_TO_PUBLISH});
+      await repository.update(id,{status:InternationalTestStatus.READY_TO_PUBLISH,isPubliclyVisible:false});
     });
   }
 
