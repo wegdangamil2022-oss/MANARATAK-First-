@@ -52,7 +52,7 @@ export function projectPublicUniversity(university: UniversityDto): PublicUniver
       degreeLevel: fields(program.degreeLevel, ['canonicalCode', 'nameAr', 'nameEn']),
       majorId: program.majorId,
       majorMappingState: program.majorMappingState,
-      campusIds: [...program.campusIds],
+      campusIds: [...(program.campusIds ?? [])],
       admissionRequirements: (program.admissionRequirements ?? [])
         .filter(req => req.status === 'ACTIVE' && req.internationalTest?.status === 'PUBLISHED')
         .map(req => ({

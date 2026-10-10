@@ -99,12 +99,9 @@ export class AdminUniversityUseCases {
     assertNoTranslationPayloadFields('UNIVERSITY', updates.optionalFields, ['localizedNames']);
     await assertAssetReferenceUsable(this.assetReferences, updates.logoAssetId, { purpose: 'UNIVERSITY_LOGO' });
     const existing = await this.getUniversity(id);
-    const canonicalRelationshipMutation =
-      updates.countryReferenceId !== undefined ||
-      updates.regionReferenceId !== undefined ||
-      updates.cityReferenceId !== undefined;
-    if (existing.status === UniversityStatus.PUBLISHED && canonicalRelationshipMutation) {
-      throw new Error('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED]
+      .includes(existing.status)) {
+      throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
 
     const payloadForClassification = {
@@ -126,6 +123,7 @@ export class AdminUniversityUseCases {
     return this.mutate('UNIVERSITY_UPDATED', id, context, (repository) =>
       repository.update(id, {
         ...updates,
+        status: existing.status === UniversityStatus.READY_TO_PUBLISH ? UniversityStatus.READY_TO_REVIEW : existing.status,
         completenessStatus: classification.state,
       }),
     );
@@ -138,8 +136,8 @@ export class AdminUniversityUseCases {
     context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     const university = await this.getUniversity(universityId);
-    if (university.status === UniversityStatus.PUBLISHED) {
-      throw new Error('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(university.status)) {
+      throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
     if (!input.sourceProgramName.trim()) throw new Error('UNIVERSITY_PROGRAM_NAME_REQUIRED');
     if (!input.degreeLevelId) throw new Error('UNIVERSITY_PROGRAM_DEGREE_LEVEL_REQUIRED');
@@ -149,7 +147,12 @@ export class AdminUniversityUseCases {
       context,
       async (repository) => {
         if (!repository.upsertAcademicProgram) throw new Error('UNIVERSITY_PROGRAM_PERSISTENCE_NOT_AVAILABLE');
-        return repository.upsertAcademicProgram(universityId, programId, input);
+        const result = await repository.upsertAcademicProgram(universityId, programId, input);
+        if (university.status === UniversityStatus.READY_TO_PUBLISH) {
+          await repository.updateStatus(universityId, UniversityStatus.READY_TO_REVIEW);
+          result.status = UniversityStatus.READY_TO_REVIEW;
+        }
+        return result;
       },
     );
   }
@@ -160,12 +163,17 @@ export class AdminUniversityUseCases {
     context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     const university = await this.getUniversity(universityId);
-    if (university.status === UniversityStatus.PUBLISHED) {
-      throw new Error('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(university.status)) {
+      throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
     return this.mutate('UNIVERSITY_ACADEMIC_PROGRAM_ARCHIVED', universityId, context, async (repository) => {
       if (!repository.archiveAcademicProgram) throw new Error('UNIVERSITY_PROGRAM_PERSISTENCE_NOT_AVAILABLE');
-      return repository.archiveAcademicProgram(universityId, programId);
+      const result = await repository.archiveAcademicProgram(universityId, programId);
+      if (university.status === UniversityStatus.READY_TO_PUBLISH) {
+        await repository.updateStatus(universityId, UniversityStatus.READY_TO_REVIEW);
+        result.status = UniversityStatus.READY_TO_REVIEW;
+      }
+      return result;
     });
   }
 
@@ -180,8 +188,8 @@ export class AdminUniversityUseCases {
       ['localizedNames'],
     );
     const existing = await this.getUniversity(id);
-    if (existing.status === UniversityStatus.PUBLISHED) {
-      throw new Error('UNIVERSITY_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(existing.status)) {
+      throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
     }
     return this.mutate(
       'UNIVERSITY_NORMALIZED_DETAILS_REPLACED',
@@ -191,7 +199,12 @@ export class AdminUniversityUseCases {
         if (!repository.replaceNormalizedDetails) {
           throw new Error('UNIVERSITY_NORMALIZED_PERSISTENCE_NOT_AVAILABLE');
         }
-        return repository.replaceNormalizedDetails(id, details);
+        const result = await repository.replaceNormalizedDetails(id, details);
+        if (existing.status === UniversityStatus.READY_TO_PUBLISH) {
+          await repository.updateStatus(id, UniversityStatus.READY_TO_REVIEW);
+          result.status = UniversityStatus.READY_TO_REVIEW;
+        }
+        return result;
       },
     );
   }
@@ -201,6 +214,8 @@ export class AdminUniversityUseCases {
     context?: UniversityMutationContext,
   ): Promise<void> {
     const existing = await this.getUniversity(id);
+    if (existing.status !== UniversityStatus.IMPORTED && existing.status !== UniversityStatus.READY_TO_REVIEW)
+      throw new Error('UNIVERSITY_INVALID_REVIEW_TRANSITION');
     if (existing.completenessStatus === UniversityImportCompletenessState.INCOMPLETE) {
       throw new Error('Cannot mark INCOMPLETE university as READY_TO_REVIEW');
     }
@@ -216,6 +231,8 @@ export class AdminUniversityUseCases {
     context?: UniversityMutationContext,
   ): Promise<void> {
     const existing = await this.getUniversity(id);
+    if (existing.status !== UniversityStatus.READY_TO_REVIEW)
+      throw new Error('UNIVERSITY_INVALID_PUBLISHABLE_TRANSITION');
     if (existing.completenessStatus !== UniversityImportCompletenessState.COMPLETE) {
       throw new Error('Only COMPLETE universities can be marked as READY_TO_PUBLISH');
     }

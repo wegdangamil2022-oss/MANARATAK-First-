@@ -146,7 +146,7 @@ export class UniversityCanonicalRelationshipValidator {
   ): Promise<void> {
     const requirementKeys = new Set<string>();
     for (const requirement of requirements) {
-      if (requirement.minimumScore != null && !Number.isFinite(requirement.minimumScore)) {
+      if (requirement.minimumScore != null && (!Number.isFinite(requirement.minimumScore) || requirement.minimumScore < 0)) {
         throw new Error('UNIVERSITY_ADMISSION_TEST_MINIMUM_SCORE_INVALID');
       }
       const key = JSON.stringify([requirement.internationalTestId, requirement.testVariantId ?? null, requirement.testVersionId ?? null]);
