@@ -602,9 +602,12 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     if (programId) {
       const existing = await this.prisma.universityAcademicProgram.findFirst({
         where: { id: programId, universityId },
-        select: { id: true },
+        select: { id: true, sourceReferenceId: true, status: true },
       });
       if (!existing) throw new Error('UNIVERSITY_ACADEMIC_PROGRAM_NOT_FOUND');
+      if (existing.status === 'ARCHIVED') throw new Error('UNIVERSITY_PROGRAM_ARCHIVED_IMMUTABLE');
+      if (existing.sourceReferenceId && input.sourceReferenceId !== existing.sourceReferenceId)
+        throw new Error('UNIVERSITY_PROGRAM_SOURCE_ID_IMMUTABLE');
     }
 
     const normalizedName = input.sourceProgramName.trim().toLocaleLowerCase();

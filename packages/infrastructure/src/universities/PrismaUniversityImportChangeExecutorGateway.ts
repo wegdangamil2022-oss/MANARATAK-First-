@@ -113,6 +113,8 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     });
     if (!university) throw new Error(`UNIVERSITY_IDENTITY_NOT_FOUND:${change.sourceReferenceId}`);
     const after = change.afterState as JsonRecord;
+    if (['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(university.status))
+      throw new Error('UNIVERSITY_IMPORT_OWNER_LIFECYCLE_IMMUTABLE');
 
     switch (change.entityType) {
       case 'CAMPUS': {
@@ -142,14 +144,24 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
           .trim()
           .toLocaleLowerCase('en-US');
         const unitType = this.requiredString(after.unitType, 'ORGANIZATION_UNIT_TYPE_REQUIRED');
+        if (!['FACULTY', 'SCHOOL', 'COLLEGE', 'DEPARTMENT'].includes(unitType))
+          throw new Error('UNIVERSITY_IMPORT_ORGANIZATION_TYPE_INVALID');
+        const sourceReferenceId = this.childReference(change);
         const before = await transaction.universityOrganizationUnit.findFirst({
-          where: { universityId: university.id, unitType, normalizedName },
+          where: { universityId: university.id, sourceReferenceId },
         });
+        if (!before) {
+          const ambiguous = await transaction.universityOrganizationUnit.findFirst({
+            where: { universityId: university.id, unitType, normalizedName },
+            select: { id: true },
+          });
+          if (ambiguous) throw new Error('UNIVERSITY_IMPORT_ORGANIZATION_DUPLICATE_REVIEW_REQUIRED');
+        }
         const data = {
           unitType,
           name: String(after.name),
           normalizedName,
-          sourceReferenceId: this.childReference(change),
+          sourceReferenceId,
           status: this.string(after.status) ?? 'ACTIVE',
         };
         const record = before
@@ -387,6 +399,8 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       after.officialEnglishName ?? after.officialName ?? after.universityName ?? after.displayName,
       'UNIVERSITY_NAME_REQUIRED',
     );
+    if (before && ['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(before.status))
+      throw new Error('UNIVERSITY_IMPORT_OWNER_LIFECYCLE_IMMUTABLE');
     const data = {
       displayName,
       canonicalName: displayName.trim(),
@@ -603,13 +617,19 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     sourceCode: string | undefined,
     code: string,
   ): Promise<string | undefined> {
-    if (explicitId) return explicitId;
-    if (!sourceCode) return undefined;
-    const currency = await transaction.referenceCurrency.findUnique({
-      where: { isoCode: sourceCode.toUpperCase() },
-      select: { id: true, isActive: true },
-    });
-    if (!currency?.isActive) throw new Error(code);
+    if (!explicitId && !sourceCode) return undefined;
+    const currency = explicitId
+      ? await transaction.referenceCurrency.findUnique({
+          where: { id: explicitId },
+          select: { id: true, isoCode: true, isActive: true, lifecycleState: true },
+        })
+      : await transaction.referenceCurrency.findUnique({
+          where: { isoCode: sourceCode!.toUpperCase() },
+          select: { id: true, isoCode: true, isActive: true, lifecycleState: true },
+        });
+    if (!currency?.isActive || currency.lifecycleState !== 'ACTIVE') throw new Error(code);
+    if (sourceCode && currency.isoCode.toUpperCase() !== sourceCode.toUpperCase())
+      throw new Error('UNIVERSITY_IMPORT_CURRENCY_REFERENCE_MISMATCH');
     return currency.id;
   }
   private number(value: unknown): number | undefined {

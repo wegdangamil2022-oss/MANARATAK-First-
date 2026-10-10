@@ -1395,6 +1395,7 @@ model UniversityOrganizationUnit {
   programs                 UniversityAcademicProgram[]
 
   @@unique([universityId, unitType, normalizedName, parentOrganizationUnitId], map: "UniversityOrganizationUnit_identity_key")
+  @@unique([universityId, sourceReferenceId])
   @@index([universityId])
   @@index([campusId])
   @@index([parentOrganizationUnitId], map: "UniversityOrganizationUnit_parent_idx")
