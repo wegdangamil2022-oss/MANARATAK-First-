@@ -188,6 +188,7 @@ export function CertificateAdminPage() {
   const [templateModal, setTemplateModal] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<CertificateTemplate | null>(null);
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  const [editingTemplateCondition, setEditingTemplateCondition] = useState('');
   const [draft, setDraft] = useState<CertificateTemplateDraft>(templateDraft);
   const [issuerModal, setIssuerModal] = useState(false);
   const [issuerDraft, setIssuerDraft] = useState({ code: 'MANARATAK', name: 'MANARATAK — منارتك', issuerType: 'MANARATAK' as CertificateIssuer['issuerType'], issuerLogoAssetId: '', signingKeyReference: '', accreditationAuthority: '', accreditationReference: '' });
@@ -227,12 +228,14 @@ export function CertificateAdminPage() {
 
   const openCreateTemplate = () => {
     setEditingTemplateId(null);
+    setEditingTemplateCondition('');
     setDraft({ ...templateDraft, issuerId: issuers.find((item) => item.status === 'ACTIVE')?.id || '' });
     setTemplateModal(true);
   };
 
   const openEditTemplate = (item: CertificateTemplate) => {
     setEditingTemplateId(item.id);
+    setEditingTemplateCondition(`"${item.currentVersionId}:${item.status}"`);
     setDraft({
       code: item.code,
       name: item.name,
@@ -280,7 +283,7 @@ export function CertificateAdminPage() {
         renewalPolicy: draft.validityPolicy === 'RENEWABLE' ? draft.renewalPolicy : null,
       };
       if (editingTemplateId) {
-        await adminApiClient.request(`/admin/certificates/templates/${editingTemplateId}`, { method: 'PATCH', body: JSON.stringify(payload) });
+        await adminApiClient.request(`/admin/certificates/templates/${editingTemplateId}`, { method: 'PATCH', headers: {'If-Match': editingTemplateCondition}, body: JSON.stringify(payload) });
         setMessage('تم إنشاء نسخة جديدة من القالب مع الحفاظ على النسخة التاريخية.');
       } else {
         await adminApiClient.request('/admin/certificates/templates', { method: 'POST', body: JSON.stringify(payload) });
@@ -294,7 +297,7 @@ export function CertificateAdminPage() {
   const transitionTemplate = async (item: CertificateTemplate, nextStatus: TemplateStatus) => {
     setError(''); setMessage('');
     try {
-      await adminApiClient.request(`/admin/certificates/templates/${item.id}/transition`, { method: 'POST', body: JSON.stringify({ status: nextStatus, reason: `Admin transition ${item.status} -> ${nextStatus}` }) });
+      await adminApiClient.request(`/admin/certificates/templates/${item.id}/transition`, { method: 'POST', headers: {'If-Match': `"${item.currentVersionId}:${item.status}"`}, body: JSON.stringify({ status: nextStatus, reason: `Admin transition ${item.status} -> ${nextStatus}` }) });
       setMessage(`تم نقل القالب من ${item.status} إلى ${nextStatus}.`);
       await load();
     } catch (e: any) { setError(e.message || 'تعذر تغيير حالة القالب.'); }

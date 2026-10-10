@@ -1,0 +1,13 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-13
+
+ ✓ packages/application/tests/certificates/CertificateCompletionEventConsumer.spec.ts > P6 CertificateCompletionEventConsumer > acknowledges an authoritative but ineligible completion as a no-op without retryable issuance failure 2ms
+ ✓ packages/application/tests/certificates/CertificateCompletionEventConsumer.spec.ts > P6 CertificateCompletionEventConsumer > forwards eligible completion using the persisted outbox record identity and version 6ms
+ ✓ packages/application/tests/certificates/CertificateCompletionEventConsumer.spec.ts > P6 CertificateCompletionEventConsumer > does not retry document generation for an already revoked issuance replay 1ms
+ ✓ packages/application/tests/certificates/CertificateCompletionEventConsumer.spec.ts > P6 CertificateCompletionEventConsumer > still renders a newly active certificate through the registered renderer 0ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  17:21:21
+   Duration  1.76s (transform 1.28s, setup 0ms, import 1.63s, tests 11ms, environment 0ms)
+

@@ -41,7 +41,7 @@ const template = {
 } as any;
 
 const course = {
-  id: 'course-1', publicId: 'course-public-1', slug: 'native-course', canonicalName: 'Native Course',
+  id: 'course-1', version: 3, publicId: 'course-public-1', slug: 'native-course', canonicalName: 'Native Course',
   canonicalDedupKey: 'native-course', displayName: 'Native Course', accessType: CourseAccessType.FREE_CERTIFICATE,
   originType: CourseOriginType.NATIVE_MANARATAK_COURSE, directCourseUrl: '/courses/native-course',
   status: CourseStatus.PUBLISHED, completenessStatus: CourseImportCompletenessState.COMPLETE,
@@ -53,7 +53,7 @@ function courseEvent(overrides: Record<string, unknown> = {}) {
     eventId: 'course-completed:course-1:student-1:v1', eventType: 'CourseCompleted' as const,
     eventVersion: '1.0.0', sourceDomain: 'COURSES' as const, occurredAt: new Date(),
     payload: {
-      courseId: 'course-1', studentReferenceId: 'student-1', completedAt: new Date(),
+      courseId: 'course-1', courseVersion: 3, studentReferenceId: 'student-1', completedAt: new Date(),
       completionId: 'completion-1', eligibleForCertificate: true,
       certificateOwnerPhase: 'Phase 14 - Enterprise Certificates Platform' as const,
       sourcePhase: 'Phase 13 - Learning Platform' as const,
@@ -84,12 +84,12 @@ describe('CertificateUseCases W10 trust model', () => {
       listByStudent: vi.fn(), list: vi.fn(), analytics: vi.fn(), revoke: vi.fn(), expireDue: vi.fn(), archive: vi.fn(), recordVerification: vi.fn(), listLedger: vi.fn(),
     };
     courses = { findById: vi.fn().mockResolvedValue(course) };
-    learningPaths = { findById: vi.fn().mockResolvedValue({ id: 'path-1', title: 'AI Learning Path' }) };
+    learningPaths = { findByVersion: vi.fn().mockResolvedValue({ id: 'path-1', title: 'AI Learning Path' }), findById: vi.fn().mockResolvedValue({ id: 'path-1', title: 'AI Learning Path' }) };
     useCases = new CertificateUseCases(repository, courses, undefined, {
       signingKeyReference: issuer.signingKeyReference,
       signingSecret: 'test-secret',
       productionLike: false,
-    }, learningPaths);
+    }, learningPaths, undefined, {getLearningVersion: async () => ({course, curriculum: {modules:[],lessons:[],assets:[],quizzes:[],questionBanks:[],questions:[]}})} as any);
   });
 
   it('issues only from an authoritative persisted CourseCompleted envelope and seals trust semantics', async () => {
@@ -122,7 +122,7 @@ describe('CertificateUseCases W10 trust model', () => {
   it('supports LearningPathCompleted as a first-class issuance contract', async () => {
     await useCases.consumeCompletionEvent({
       eventId: 'learning-path-completed:path-1:student-1:v1', eventType: 'LearningPathCompleted', eventVersion: '1.0.0', sourceDomain: 'COURSES', occurredAt: new Date(),
-      payload: { learningPathId: 'path-1', studentReferenceId: 'student-1', completedAt: new Date(), eligibleForCertificate: true, certificateOwnerPhase: 'Phase 14 - Enterprise Certificates Platform', sourcePhase: 'Phase 13 - Learning Platform' },
+      payload: { learningPathId: 'path-1', learningPathVersion: 1, studentReferenceId: 'student-1', completedAt: new Date(), eligibleForCertificate: true, certificateOwnerPhase: 'Phase 14 - Enterprise Certificates Platform', sourcePhase: 'Phase 13 - Learning Platform' },
     });
     expect(repository.issue).toHaveBeenCalledWith(expect.objectContaining({
       certificateType: 'LEARNING_PATH', achievementType: 'LEARNING_PATH', learningPathId: 'path-1',
@@ -157,11 +157,12 @@ describe('CertificateUseCases W10 trust model', () => {
   });
 
   it('is idempotent for duplicate trusted completion events and never issues twice', async () => {
-    const existing = { id: 'cert-existing', sourceEventId: 'course-completed:course-1:student-1:v1' } as any;
+    const event = courseEvent();
+    const existing = await useCases.consumeCompletionEvent(event);
     repository.findBySourceEventId.mockResolvedValue(existing);
-    const result = await useCases.consumeCompletionEvent(courseEvent());
+    const result = await useCases.consumeCompletionEvent(event);
     expect(result).toBe(existing);
-    expect(repository.issue).not.toHaveBeenCalled();
+    expect(repository.issue).toHaveBeenCalledTimes(1);
   });
 
   it('records revocation only through the P14 repository lifecycle boundary', async () => {

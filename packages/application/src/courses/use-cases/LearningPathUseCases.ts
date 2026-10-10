@@ -102,7 +102,7 @@ export class LearningPathUseCases {
       outbox: {
         id: `learning-path-completed:${pathId}:${studentReferenceId}:v${enrollment.learningPathVersion}`,
         eventType: LEARNING_PATH_COMPLETED_EVENT_TYPE,
-        payload: { learningPathId: pathId, studentReferenceId, completedAt: completedAt.toISOString(), eligibleForCertificate: false, certificateOwnerPhase: 'Phase 14 - Enterprise Certificates Platform', sourcePhase: 'Phase 13 - Learning Platform' },
+        payload: { learningPathId: pathId, learningPathVersion: enrollment.learningPathVersion, studentReferenceId, completedAt: completedAt.toISOString(), eligibleForCertificate: false, certificateOwnerPhase: 'Phase 14 - Enterprise Certificates Platform', sourcePhase: 'Phase 13 - Learning Platform' },
         metadata: { eventVersion: '1.0.0', category: 'LearningPlatform' },
       },
     }, async persistence => {

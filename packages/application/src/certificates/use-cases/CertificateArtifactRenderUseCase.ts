@@ -1,5 +1,6 @@
 import {
   ICertificateArtifactStore,
+  CertificateStatus,
   ICertificateRenderingService,
   ICertificateRepository,
 } from '@manaratak/domain';
@@ -43,6 +44,7 @@ export class CertificateArtifactRenderUseCase {
       };
     }
 
+    if (certificate.status !== CertificateStatus.ACTIVE) throw new Error('CERTIFICATE_ARTIFACT_STATE_INVALID');
     const templateVersion = await this.repository.findTemplateVersionById(certificate.templateVersionId);
     if (!templateVersion) throw new Error('CERTIFICATE_TEMPLATE_VERSION_NOT_FOUND');
     if (templateVersion.templateId !== certificate.templateId) throw new Error('CERTIFICATE_TEMPLATE_VERSION_IDENTITY_MISMATCH');
@@ -50,6 +52,12 @@ export class CertificateArtifactRenderUseCase {
 
     const rendered = await this.renderer.render({ certificate, templateVersion });
     if (rendered.templateVersionId !== certificate.templateVersionId) throw new Error('CERTIFICATE_RENDER_TEMPLATE_VERSION_MISMATCH');
+    if (rendered.templateVersionNumber !== certificate.templateVersion || !rendered.renderFingerprint?.trim() || !rendered.rendererVersion?.trim()) throw new Error('CERTIFICATE_RENDER_IDENTITY_INVALID');
+    if (rendered.artifacts.length !== 3 || new Set(rendered.artifacts.map(artifact => artifact.kind)).size !== 3) throw new Error('CERTIFICATE_RENDER_ARTIFACT_SET_INVALID');
+    for (const artifact of rendered.artifacts) {
+      if (!(artifact.bytes instanceof Uint8Array) || !artifact.bytes.byteLength || artifact.bytes.byteLength > 20 * 1024 * 1024) throw new Error('CERTIFICATE_RENDER_ARTIFACT_BYTES_INVALID');
+      if (artifact.kind === 'PDF' ? artifact.mimeType !== 'application/pdf' : !['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'].includes(artifact.mimeType)) throw new Error('CERTIFICATE_RENDER_ARTIFACT_MIME_INVALID');
+    }
     const byKind = new Map(rendered.artifacts.map((artifact) => [artifact.kind, artifact] as const));
     const pdf = byKind.get('PDF');
     const preview = byKind.get('PREVIEW');

@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-13
+
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > issues from the completed course version even when current course changes or disables certificates 7ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > verifies a newly signed certificate and binds serial and verification code 6ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > rejects repeated event IDs with changed payloads 2ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > replays the identical event without another issuance 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > rejects reused completion identity belonging to another student 0ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > requires a course version on the authoritative completion 0ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > rejects invalid completion dates before accessing issuance persistence 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > invalidates a certificate when persisted serialNumber changes 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > invalidates a certificate when persisted recipientDisplayName changes 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > invalidates a certificate when persisted achievementDisplayName changes 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > invalidates a certificate when persisted templateVersion changes 7ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > invalidates a certificate when persisted issuerName changes 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > preserves revocation status even when sealed expiry is in the past 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 source event and signed identity > treats malformed signed dates as invalid without crashing verification 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 signing and URL configuration > uses safe signature comparison and rejects malformed signatures 0ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 signing and URL configuration > rejects insecure production verification origins 0ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 signing and URL configuration > rejects credentials in verification origins 0ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 persistence locks and immutable artifacts > locks an already archived certificate and returns it without another audit/event 8ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 persistence locks and immutable artifacts > blocks artifact replacement after acquiring the certificate lock 1ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 persistence locks and immutable artifacts > locks both event/completion identities before detecting an inbox collision 0ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 rendering validation > rejects renderer template-version drift before storing artifacts 3ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 rendering validation > rejects duplicate artifact kinds 0ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 rendering validation > rejects a PDF returned with an executable MIME type 0ms
+ ✓ packages/application/tests/certificates/Section13TrustRepairs.spec.ts > P14 rendering validation > does not create fresh documents for revoked certificates 0ms
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  17:16:41
+   Duration  3.96s (transform 2.95s, setup 0ms, import 3.79s, tests 47ms, environment 0ms)
+

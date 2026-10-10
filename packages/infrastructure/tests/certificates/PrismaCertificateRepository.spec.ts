@@ -14,10 +14,11 @@ const issueData: any = {
 describe('PrismaCertificateRepository W10 trust model', () => {
   it('atomically persists issuance inbox, certificate, ledger/audit and the Phase 15-complete CertificateIssued event', async () => {
     const tx: any = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       certificateIssuanceInbox: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn() },
       certificate: { findUnique: vi.fn().mockResolvedValue(null), findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockImplementation(({ data }) => ({ id: 'cert-1', ...data, issuedAt: new Date(), createdAt: new Date(), updatedAt: new Date() })) },
-      certificateTemplate: { findUnique: vi.fn().mockResolvedValue({ id: 'template-1', status: CertificateTemplateStatus.ACTIVE, issuerId: 'issuer-1' }) },
-      certificateTemplateVersion: { findUnique: vi.fn().mockResolvedValue({ id: 'version-1', templateId: 'template-1', issuerId: 'issuer-1', status: CertificateTemplateStatus.ACTIVE }) },
+      certificateTemplate: { findUnique: vi.fn().mockResolvedValue({ id: 'template-1', currentVersionId: 'version-1', status: CertificateTemplateStatus.ACTIVE, issuerId: 'issuer-1' }) },
+      certificateTemplateVersion: { findUnique: vi.fn().mockResolvedValue({ id: 'version-1', versionNumber: '1.0.0', templateId: 'template-1', issuerId: 'issuer-1', status: CertificateTemplateStatus.ACTIVE }) },
       certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', status: 'ACTIVE', signingKeyReference: 'kms://issuer/key' }) },
       certificateLedgerEntry: { create: vi.fn() }, auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
     };
@@ -32,6 +33,7 @@ describe('PrismaCertificateRepository W10 trust model', () => {
 
   it('creates immutable template versions and records template governance audit/outbox', async () => {
     const tx: any = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', status: 'ACTIVE', issuerLogoAssetId: 'asset', signingKeyReference: 'key' }) },
       certificateTemplate: {
         create: vi.fn().mockResolvedValue({ id: 'template-1' }),
@@ -49,21 +51,23 @@ describe('PrismaCertificateRepository W10 trust model', () => {
 
   it('enforces maker-checker separation for template approval', async () => {
     const tx: any = {
-      certificateTemplate: { findUnique: vi.fn().mockResolvedValue({ id: 'template-1', status: CertificateTemplateStatus.PENDING_APPROVAL, currentVersion: { id: 'version-1', createdBy: 'maker-1' } }) },
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      certificateTemplate: { findUnique: vi.fn().mockResolvedValue({ id: 'template-1', currentVersionId: 'version-1', status: CertificateTemplateStatus.PENDING_APPROVAL, currentVersion: { id: 'version-1', createdBy: 'maker-1' } }) },
     };
     const repository = new PrismaCertificateRepository({ $transaction: (callback: any) => callback(tx) } as any);
-    await expect(repository.transitionTemplate('template-1', CertificateTemplateStatus.APPROVED, { actorId: 'maker-1' })).rejects.toThrow('MAKER_CHECKER_REQUIRED');
+    await expect(repository.transitionTemplate('template-1', CertificateTemplateStatus.APPROVED, { actorId: 'maker-1', expectedTemplateVersionId: 'version-1', expectedTemplateStatus: CertificateTemplateStatus.PENDING_APPROVAL })).rejects.toThrow('MAKER_CHECKER_REQUIRED');
   });
 
   it('clears revocation lifecycle fields on replacement creation', async () => {
     const tx: any = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       certificate: {
         findUnique: vi.fn().mockResolvedValue({ id: 'old', status: CertificateStatus.REVOKED, replacedByCertificateId: null }),
         create: vi.fn().mockImplementation(({ data }) => ({ id: 'new', ...data, createdAt: new Date(), updatedAt: new Date() })),
         update: vi.fn(),
       },
-      certificateTemplate: { findUnique: vi.fn().mockResolvedValue({ id: 'template-1', status: CertificateTemplateStatus.ACTIVE, issuerId: 'issuer-1' }) },
-      certificateTemplateVersion: { findUnique: vi.fn().mockResolvedValue({ id: 'version-1', templateId: 'template-1', issuerId: 'issuer-1', status: CertificateTemplateStatus.ACTIVE }) },
+      certificateTemplate: { findUnique: vi.fn().mockResolvedValue({ id: 'template-1', currentVersionId: 'version-1', status: CertificateTemplateStatus.ACTIVE, issuerId: 'issuer-1' }) },
+      certificateTemplateVersion: { findUnique: vi.fn().mockResolvedValue({ id: 'version-1', versionNumber: '1.0.0', templateId: 'template-1', issuerId: 'issuer-1', status: CertificateTemplateStatus.ACTIVE }) },
       certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', status: 'ACTIVE', signingKeyReference: 'kms://issuer/key' }) },
       certificateLedgerEntry: { create: vi.fn() }, auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
     };

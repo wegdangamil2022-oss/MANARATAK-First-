@@ -113,6 +113,8 @@ export interface CertificateTemplateDto extends CreateCertificateTemplateDto {
 }
 
 export interface CertificateMutationContext {
+  expectedTemplateVersionId?: string;
+  expectedTemplateStatus?: CertificateTemplateStatus;
   actorId: string;
   correlationId?: string | null;
   reason?: string | null;
@@ -129,6 +131,8 @@ export interface CertificateAuthoritativeEventEnvelope<TPayload> {
 
 export interface CertificateSignedEnvelopeV2 {
   schemaVersion: 'certificate-envelope-v2';
+  serialNumber?: string;
+  verificationCode?: string;
   certificateType: CertificateType;
   studentReferenceId: string;
   recipientDisplayName: string | null;

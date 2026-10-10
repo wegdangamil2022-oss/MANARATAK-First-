@@ -1,0 +1,12 @@
+import {describe,it,expect,vi} from 'vitest';
+import express from 'express';
+import request from 'supertest';
+import {CertificateAdminRouter} from '../../../../src/presentation/api/router/CertificateAdminRouter';
+function harness(error?:string){const uc:any={list:vi.fn(async()=>({data:[]})),transitionTemplate:vi.fn(async()=>{if(error)throw new Error(error);return{id:'t'};})};const app=express();app.use(express.json());app.use((req:any,_res,next)=>{req.authUserId='server-reviewer';next();});app.use('/certificates',CertificateAdminRouter.create({certificateUseCases:uc,authEvaluatorService:{evaluatePermission:async()=>({isGranted:true})} as any}));return{app,uc};}
+describe('P14 administration request governance',()=>{
+ it('requires the displayed version/state precondition for approval',async()=>{const h=harness();const response=await request(h.app).post('/certificates/templates/t/transition').send({status:'APPROVED'});expect(response.status).toBe(428);expect(h.uc.transitionTemplate).not.toHaveBeenCalled();});
+ it('uses authenticated reviewer and caller version/state without trusting body actor',async()=>{const h=harness();const response=await request(h.app).post('/certificates/templates/t/transition').set('If-Match','"tv:PENDING_APPROVAL"').send({status:'APPROVED',actorId:'forged',reason:'Reviewed'});expect(response.status).toBe(200);expect(h.uc.transitionTemplate.mock.calls[0][2]).toMatchObject({actorId:'server-reviewer',expectedTemplateVersionId:'tv',expectedTemplateStatus:'PENDING_APPROVAL'});});
+ it('returns conflict for a stale approval screen',async()=>{const h=harness('CERTIFICATE_TEMPLATE_STALE');const response=await request(h.app).post('/certificates/templates/t/transition').set('If-Match','"tv:PENDING_APPROVAL"').send({status:'APPROVED'});expect(response.status).toBe(409);});
+ it('bounds list pagination before calling persistence',async()=>{const h=harness();const response=await request(h.app).get('/certificates?pageSize=1000000');expect(response.status).toBe(400);expect(h.uc.list).not.toHaveBeenCalled();});
+ it('sanitizes unexpected persistence errors',async()=>{const h=harness('postgres password=secret');const response=await request(h.app).post('/certificates/templates/t/transition').set('If-Match','"tv:PENDING_APPROVAL"').send({status:'APPROVED'});expect(response.status).toBe(500);expect(response.body).toEqual({error:'CERTIFICATE_OPERATION_FAILED'});});
+});

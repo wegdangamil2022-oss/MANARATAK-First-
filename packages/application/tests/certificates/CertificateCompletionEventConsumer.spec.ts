@@ -23,4 +23,17 @@ describe('P6 CertificateCompletionEventConsumer', () => {
     });
     expect(certificates.consumeCompletionEvent).toHaveBeenCalledWith(expect.objectContaining({ eventId: 'evt-2', eventVersion: '1.0.0', sourceDomain: 'COURSES' }));
   });
+  it('does not retry document generation for an already revoked issuance replay', async () => {
+    const certificates = {consumeCompletionEvent: vi.fn().mockResolvedValue({id:'cert',status:'REVOKED'})} as any;
+    const renderer = {renderCertificate: vi.fn()} as any;
+    await new CertificateCompletionEventConsumer(certificates,renderer).consume({id:'evt',domain:'COURSES',eventType:'CourseCompleted',metadata:{eventVersion:'1.0.0'},payload:{eligibleForCertificate:true}});
+    expect(renderer.renderCertificate).not.toHaveBeenCalled();
+  });
+  it('still renders a newly active certificate through the registered renderer', async () => {
+    const certificates = {consumeCompletionEvent: vi.fn().mockResolvedValue({id:'cert',status:'ACTIVE'})} as any;
+    const renderer = {renderCertificate: vi.fn()} as any;
+    await new CertificateCompletionEventConsumer(certificates,renderer).consume({id:'evt',domain:'COURSES',eventType:'CourseCompleted',metadata:{eventVersion:'1.0.0'},payload:{eligibleForCertificate:true}});
+    expect(renderer.renderCertificate).toHaveBeenCalledWith('cert','phase14-renderer','evt');
+  });
+
 });

@@ -1,5 +1,6 @@
 import {
   CertificateAuthoritativeEventEnvelope,
+  CertificateStatus,
   CourseCompletedEventPayload,
   LearningPathCompletedEventPayload,
 } from '@manaratak/domain';
@@ -46,7 +47,7 @@ export class CertificateCompletionEventConsumer {
       payload,
     };
     const certificate = await this.certificates.consumeCompletionEvent(envelope);
-    if (certificate && this.artifactRenderer) {
+    if (certificate && certificate.status === CertificateStatus.ACTIVE && this.artifactRenderer) {
       await this.artifactRenderer.renderCertificate(certificate.id, 'phase14-renderer', record.id);
     }
     return certificate;

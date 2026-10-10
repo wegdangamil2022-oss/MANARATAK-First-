@@ -1,0 +1,19 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-13
+
+ ✓ apps/api/tests/presentation/api/router/Section13Governance.spec.ts > P14 administration request governance > requires the displayed version/state precondition for approval 31ms
+ ✓ apps/api/tests/presentation/api/router/Section13Governance.spec.ts > P14 administration request governance > uses authenticated reviewer and caller version/state without trusting body actor 6ms
+ ✓ apps/api/tests/presentation/api/router/Section13Governance.spec.ts > P14 administration request governance > returns conflict for a stale approval screen 4ms
+ ✓ apps/api/tests/presentation/api/router/Section13Governance.spec.ts > P14 administration request governance > bounds list pagination before calling persistence 6ms
+ ✓ apps/api/tests/presentation/api/router/Section13Governance.spec.ts > P14 administration request governance > sanitizes unexpected persistence errors 4ms
+ ✓ packages/application/tests/certificates/Section13ArtifactGovernance.spec.ts > P14 follow-up asset and template governance > accepts an active PDF artifact with its correct MIME 3ms
+ ✓ packages/application/tests/certificates/Section13ArtifactGovernance.spec.ts > P14 follow-up asset and template governance > rejects a purported PDF artifact with image MIME 2ms
+ ✓ packages/application/tests/certificates/Section13ArtifactGovernance.spec.ts > P14 follow-up asset and template governance > does not report issuance ready when only an unrelated issuer is active 0ms
+ ✓ packages/application/tests/certificates/Section13ArtifactGovernance.spec.ts > P14 follow-up asset and template governance > rejects a stale template version while holding the owner lock 1ms
+ ✓ packages/application/tests/certificates/Section13ArtifactGovernance.spec.ts > P14 follow-up asset and template governance > rejects a stale template state while holding the owner lock 0ms
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  17:19:08
+   Duration  2.00s (transform 2.66s, setup 0ms, import 3.62s, tests 63ms, environment 0ms)
+

@@ -1,4 +1,4 @@
-import { createHash, createHmac } from 'crypto';
+import { createHash, createHmac, timingSafeEqual } from 'crypto';
 import { createQrMatrix } from '@manaratak/shared';
 import {
   CertificateNumberingInput,
@@ -50,7 +50,9 @@ export class CertificateTrustPolicy
   public verifyHash(hash: string, signature: string | null | undefined, signingKeyReference: string): boolean {
     if (!signature) return false;
     try {
-      return signature === this.signHash(hash, signingKeyReference);
+      const expected = this.signHash(hash, signingKeyReference);
+      if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
+      return timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
     } catch {
       return false;
     }
@@ -64,7 +66,9 @@ export class CertificateTrustPolicy
     if (!configured && this.runtime.productionLike) {
       throw new Error('CERTIFICATE_PUBLIC_VERIFICATION_BASE_URL_NOT_CONFIGURED');
     }
-    const base = (configured || 'http://localhost:5173').replace(/\/$/, '');
+    const origin = new URL(configured || 'http://localhost:5173');
+    if (!['http:', 'https:'].includes(origin.protocol) || origin.username || origin.password || origin.search || origin.hash || (this.runtime.productionLike && origin.protocol !== 'https:')) throw new Error('CERTIFICATE_PUBLIC_VERIFICATION_BASE_URL_INVALID');
+    const base = origin.toString().replace(/\/$/, '');
     const url = `${base}/certificates/verify?code=${encodeURIComponent(code)}`;
     try {
       createQrMatrix(url);

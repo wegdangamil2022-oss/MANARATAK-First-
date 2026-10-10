@@ -13,7 +13,13 @@ const mutationContext = (req: Request, reason?: string | null) => ({
   actorId: actor(req),
   correlationId: req.header('x-correlation-id') ?? req.header('x-request-id') ?? undefined,
   reason: reason ?? null,
+  ...(/^\/templates\/[^/]+(?:\/transition)?$/.test(req.route?.path?.replace(':id', req.params.id ?? '')) && req.method !== 'GET' ? templateCondition(req) : {}),
 });
+const templateCondition = (req: Request) => {
+  const match = /^"([A-Za-z0-9_-]+):(DRAFT|PENDING_APPROVAL|APPROVED|ACTIVE|DEPRECATED|ARCHIVED|RETIRED)"$/.exec(req.get('If-Match') ?? '');
+  if (!match) throw new Error('CERTIFICATE_TEMPLATE_PRECONDITION_REQUIRED');
+  return {expectedTemplateVersionId: match[1], expectedTemplateStatus: match[2] as CertificateTemplateStatus};
+};
 const optionalAsset = z.string().max(160).nullable().optional();
 
 const templateBody = z.object({
@@ -89,14 +95,10 @@ export class CertificateAdminRouter {
       return permit(permission)(req, res, next);
     };
 
+    const listQuery = z.object({search: z.string().trim().max(200).optional(), status: z.nativeEnum(CertificateStatus).optional(), templateId: z.string().max(160).optional(),
+      page: z.coerce.number().int().positive().max(100000).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(25)});
     router.get('/', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) =>
-      res.json(await useCases.list({
-        search: String(req.query.search ?? '') || undefined,
-        status: req.query.status ? z.nativeEnum(CertificateStatus).parse(req.query.status) : undefined,
-        templateId: String(req.query.templateId ?? '') || undefined,
-        page: Number(req.query.page ?? 1),
-        pageSize: Number(req.query.pageSize ?? 25),
-      })),
+      res.json(await useCases.list(listQuery.parse(req.query))),
     ));
     router.get('/analytics', permit('admin:certificates:view'), asyncHandler(async (_req: Request, res: Response) => res.json(await useCases.analytics())));
     router.get('/readiness', permit('admin:certificates:view'), asyncHandler(async (_req: Request, res: Response) => res.json(await useCases.readiness())));
@@ -141,26 +143,26 @@ export class CertificateAdminRouter {
       res.json(item);
     }));
     router.post('/:id/revoke', permit('admin:certificates:lifecycle:manage'), asyncHandler(async (req: Request, res: Response) => {
-      const body = z.object({ reason: z.string().min(8) }).parse(req.body);
+      const body = z.object({ reason: z.string().trim().min(8).max(2000) }).parse(req.body);
       res.json(await useCases.revoke(req.params.id, body.reason, actor(req), mutationContext(req).correlationId ?? undefined));
     }));
     router.post('/:id/reissue', permit('admin:certificates:lifecycle:manage'), asyncHandler(async (req: Request, res: Response) => {
-      const body = z.object({ reason: z.string().min(8), recipientDisplayName: z.string().optional(), templateId: z.string().optional() }).parse(req.body);
+      const body = z.object({ reason: z.string().trim().min(8).max(2000), recipientDisplayName: z.string().trim().min(1).max(180).optional(), templateId: z.string().optional() }).parse(req.body);
       res.status(201).json(await useCases.reissue(req.params.id, body.reason, actor(req), body.recipientDisplayName, body.templateId, mutationContext(req).correlationId ?? undefined));
     }));
     router.post('/:id/renew', permit('admin:certificates:lifecycle:manage'), asyncHandler(async (req: Request, res: Response) => {
-      const body = z.object({ reason: z.string().min(8) }).parse(req.body);
+      const body = z.object({ reason: z.string().trim().min(8).max(2000) }).parse(req.body);
       res.status(201).json(await useCases.renew(req.params.id, body.reason, actor(req), mutationContext(req).correlationId ?? undefined));
     }));
     router.post('/:id/archive', permit('admin:certificates:lifecycle:manage'), asyncHandler(async (req: Request, res: Response) => {
-      const body = z.object({ reason: z.string().min(3) }).parse(req.body);
+      const body = z.object({ reason: z.string().trim().min(3).max(2000) }).parse(req.body);
       res.json(await useCases.archive(req.params.id, body.reason, actor(req), mutationContext(req).correlationId ?? undefined));
     }));
 
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation Error', details: err.issues });
-      const message = err.message || 'Certificate operation failed';
-      const status = /NOT_FOUND|not found/.test(message) ? 404 : /IMMUTABLE|ARCHIVED|TRANSITION|MUST_BE|MAKER_CHECKER|COLLISION/.test(message) ? 409 : /AUTHENTICATED|PERMISSION/.test(message) ? 403 : 400;
+      const message = typeof err.message === 'string' && /^(CERTIFICATE_|ACTIVE_|REVOCATION_|ARCHIVE_|RENEWAL_|REISSUE_|AUTHENTICATED_)/.test(err.message) ? err.message : 'CERTIFICATE_OPERATION_FAILED';
+      const status = message === 'CERTIFICATE_TEMPLATE_PRECONDITION_REQUIRED' ? 428 : message === 'CERTIFICATE_TEMPLATE_STALE' ? 409 : message === 'CERTIFICATE_OPERATION_FAILED' ? 500 : /NOT_FOUND|not found/.test(message) ? 404 : /IMMUTABLE|ARCHIVED|TRANSITION|MUST_BE|MAKER_CHECKER|COLLISION/.test(message) ? 409 : /AUTHENTICATED|PERMISSION/.test(message) ? 403 : 400;
       return res.status(status).json({ error: message });
     });
     return router;

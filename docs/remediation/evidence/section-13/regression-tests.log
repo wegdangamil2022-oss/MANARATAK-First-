@@ -1,0 +1,23 @@
+
+ RUN  v4.1.11 /workspace/manaratak-section-13
+
+ ✓ packages/infrastructure/tests/certificates/PrismaCertificateRepository.spec.ts > PrismaCertificateRepository W10 trust model > atomically persists issuance inbox, certificate, ledger/audit and the Phase 15-complete CertificateIssued event 7ms
+ ✓ packages/infrastructure/tests/certificates/PrismaCertificateRepository.spec.ts > PrismaCertificateRepository W10 trust model > creates immutable template versions and records template governance audit/outbox 1ms
+ ✓ packages/infrastructure/tests/certificates/PrismaCertificateRepository.spec.ts > PrismaCertificateRepository W10 trust model > enforces maker-checker separation for template approval 3ms
+ ✓ packages/infrastructure/tests/certificates/PrismaCertificateRepository.spec.ts > PrismaCertificateRepository W10 trust model > clears revocation lifecycle fields on replacement creation 2ms
+ ✓ packages/application/tests/certificates/CertificateUseCases.spec.ts > CertificateUseCases W10 trust model > issues only from an authoritative persisted CourseCompleted envelope and seals trust semantics 9ms
+ ✓ packages/application/tests/certificates/CertificateUseCases.spec.ts > CertificateUseCases W10 trust model > rejects a completion envelope from a non-authoritative domain 2ms
+ ✓ packages/application/tests/certificates/CertificateUseCases.spec.ts > CertificateUseCases W10 trust model > supports LearningPathCompleted as a first-class issuance contract 1ms
+ ✓ packages/application/tests/certificates/CertificateUseCases.spec.ts > CertificateUseCases W10 trust model > fails closed when no governed ACTIVE template exists instead of auto-activating one 1ms
+ ✓ packages/application/tests/certificates/CertificateUseCases.spec.ts > CertificateUseCases W10 trust model > builds reissue replacement from an allow-listed credential state without revocation metadata 2ms
+ ✓ packages/application/tests/certificates/CertificateUseCases.spec.ts > CertificateUseCases W10 trust model > is idempotent for duplicate trusted completion events and never issues twice 1ms
+ ✓ packages/application/tests/certificates/CertificateUseCases.spec.ts > CertificateUseCases W10 trust model > records revocation only through the P14 repository lifecycle boundary 1ms
+ ✓ packages/application/tests/certificates/CertificateUseCases.spec.ts > CertificateUseCases W10 trust model > verifies signed certificate integrity and records the public verification ledger event 2ms
+ ✓ packages/application/tests/certificates/CertificateArtifactRenderUseCase.spec.ts > CertificateArtifactRenderUseCase > stores PDF, preview and QR then attaches deterministic render metadata 2ms
+ ✓ packages/application/tests/certificates/CertificateArtifactRenderUseCase.spec.ts > CertificateArtifactRenderUseCase > replays already attached artifacts without regenerating 1ms
+
+ Test Files  3 passed (3)
+      Tests  14 passed (14)
+   Start at  17:20:31
+   Duration  2.29s (transform 2.70s, setup 0ms, import 3.86s, tests 38ms, environment 0ms)
+

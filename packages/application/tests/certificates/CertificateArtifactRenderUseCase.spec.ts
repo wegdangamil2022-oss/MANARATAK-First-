@@ -3,7 +3,7 @@ import { CertificateArtifactRenderUseCase } from '../../src/certificates/use-cas
 
 describe('CertificateArtifactRenderUseCase', () => {
   it('stores PDF, preview and QR then attaches deterministic render metadata', async () => {
-    const certificate: any = { id:'c1', templateId:'t1', templateVersionId:'tv1', templateVersion:'1.0.0', metadata:{} };
+    const certificate: any = { id:'c1', status:'ACTIVE', templateId:'t1', templateVersionId:'tv1', templateVersion:'1.0.0', metadata:{} };
     const version: any = { id:'tv1', templateId:'t1', versionNumber:'1.0.0' };
     const repository: any = { findById:vi.fn().mockResolvedValue(certificate), findTemplateVersionById:vi.fn().mockResolvedValue(version), attachArtifacts:vi.fn().mockResolvedValue({}) };
     const renderer: any = { render:vi.fn().mockResolvedValue({ rendererId:'r', rendererVersion:'1', templateVersionId:'tv1', templateVersionNumber:'1.0.0', renderFingerprint:'abc', artifacts:[

@@ -57,6 +57,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async updateIssuer(id: string, data: UpdateCertificateIssuerDto, context: CertificateMutationContext): Promise<CertificateIssuerDto> {
     return this.db.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT id FROM "CertificateIssuer" WHERE id = ${id} FOR UPDATE`;
       const current = await tx.certificateIssuer.findUnique({ where: { id } });
       if (!current) throw new Error('CERTIFICATE_ISSUER_NOT_FOUND');
       if (data.signingKeyReference && data.signingKeyReference !== current.signingKeyReference && current.status === 'ACTIVE') {
@@ -109,14 +110,25 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async updateTemplate(id: string, data: UpdateCertificateTemplateDto, context: CertificateMutationContext): Promise<CertificateTemplateDto> {
     return this.db.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT id FROM "CertificateTemplate" WHERE id = ${id} FOR UPDATE`;
       const current = await tx.certificateTemplate.findUnique({ where: { id }, include: this.templateInclude });
       if (!current) throw new Error('CERTIFICATE_TEMPLATE_NOT_FOUND');
+      if (!context.expectedTemplateVersionId || !context.expectedTemplateStatus) throw new Error('CERTIFICATE_TEMPLATE_PRECONDITION_REQUIRED');
+      if (current.currentVersionId !== context.expectedTemplateVersionId || current.status !== context.expectedTemplateStatus) throw new Error('CERTIFICATE_TEMPLATE_STALE');
       if (current.status !== CertificateTemplateStatus.DRAFT) throw new Error('CERTIFICATE_TEMPLATE_IMMUTABLE');
       if (!current.currentVersion) throw new Error('CERTIFICATE_TEMPLATE_CURRENT_VERSION_REQUIRED');
       const issuerId = data.issuerId ?? current.currentVersion.issuerId ?? current.issuerId;
       await this.requireActiveIssuer(tx, issuerId);
       const versionNumber = data.templateVersion ?? this.bumpPatch(current.currentVersion.versionNumber);
-      if (versionNumber === current.currentVersion.versionNumber) throw new Error('CERTIFICATE_TEMPLATE_VERSION_MUST_ADVANCE');
+      const parseVersion = (value: string) => {
+        if (!/^\d+\.\d+\.\d+$/.test(value)) throw new Error('CERTIFICATE_TEMPLATE_VERSION_INVALID');
+        const parts = value.split('.').map(Number);
+        if (!parts.every(Number.isSafeInteger)) throw new Error('CERTIFICATE_TEMPLATE_VERSION_INVALID');
+        return parts;
+      };
+      const before = parseVersion(current.currentVersion.versionNumber), after = parseVersion(versionNumber);
+      const changed = after.findIndex((part, index) => part !== before[index]);
+      if (changed < 0 || after[changed] < before[changed]) throw new Error('CERTIFICATE_TEMPLATE_VERSION_MUST_ADVANCE');
       const versionInput = this.mergeTemplateVersion(current.currentVersion, data, issuerId);
       const version = await tx.certificateTemplateVersion.create({
         data: this.templateVersionCreateData(current.id, versionNumber, CertificateTemplateStatus.DRAFT, versionInput, context.actorId),
@@ -139,8 +151,11 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async transitionTemplate(id: string, status: CertificateTemplateStatus, context: CertificateMutationContext): Promise<CertificateTemplateDto> {
     return this.db.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT id FROM "CertificateTemplate" WHERE id = ${id} FOR UPDATE`;
       const current = await tx.certificateTemplate.findUnique({ where: { id }, include: this.templateInclude });
       if (!current) throw new Error('CERTIFICATE_TEMPLATE_NOT_FOUND');
+      if (!context.expectedTemplateVersionId || !context.expectedTemplateStatus) throw new Error('CERTIFICATE_TEMPLATE_PRECONDITION_REQUIRED');
+      if (current.currentVersionId !== context.expectedTemplateVersionId || current.status !== context.expectedTemplateStatus) throw new Error('CERTIFICATE_TEMPLATE_STALE');
       if (!current.currentVersion) throw new Error('CERTIFICATE_TEMPLATE_CURRENT_VERSION_REQUIRED');
       const currentStatus = current.status as CertificateTemplateStatus;
       if (!templateTransitions[currentStatus].includes(status)) throw new Error('CERTIFICATE_TEMPLATE_TRANSITION_INVALID');
@@ -152,6 +167,9 @@ export class PrismaCertificateRepository implements ICertificateRepository {
         await this.requireActiveIssuer(tx, current.currentVersion.issuerId);
       }
       const versionUpdate: Record<string, unknown> = { status };
+      if (status === CertificateTemplateStatus.DRAFT || status === CertificateTemplateStatus.PENDING_APPROVAL) {
+        versionUpdate.approvedBy = null; versionUpdate.approvedAt = null;
+      }
       if (status === CertificateTemplateStatus.APPROVED) {
         versionUpdate.approvedBy = context.actorId;
         versionUpdate.approvedAt = new Date();
@@ -188,13 +206,19 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async issue(data: IssueCertificateDto): Promise<CertificateDto> {
     return this.db.$transaction(async (tx: any) => {
+      for (const identity of [`event:${data.sourceEventId}`, `completion:${data.sourceCompletionId}`].sort()) {
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${identity}, 0))`;
+      }
       const inbox = await tx.certificateIssuanceInbox.findUnique({ where: { eventId: data.sourceEventId }, include: { certificate: true } });
       if (inbox) {
         if (inbox.payloadHash !== data.sourceEventPayloadHash) throw new Error('CERTIFICATE_SOURCE_EVENT_ID_COLLISION');
         return this.certificate(inbox.certificate);
       }
       const existing = await tx.certificate.findFirst({ where: { sourceCompletionId: data.sourceCompletionId }, orderBy: { issuedAt: 'asc' } });
-      if (existing) return this.certificate(existing);
+      if (existing) {
+        if (existing.studentReferenceId !== data.studentReferenceId || existing.achievementId !== data.achievementId || existing.sourceEventPayloadHash !== data.sourceEventPayloadHash) throw new Error('CERTIFICATE_SOURCE_COMPLETION_COLLISION');
+        return this.certificate(existing);
+      }
       await this.assertIssuanceReferences(tx, data);
       const certificate = await tx.certificate.create({ data: this.issueData(data) });
       await tx.certificateIssuanceInbox.create({ data: { eventId: data.sourceEventId, eventType: data.sourceEventType, eventVersion: data.sourceEventVersion, sourceDomain: 'COURSES', payloadHash: data.sourceEventPayloadHash, certificateId: certificate.id } });
@@ -205,8 +229,15 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async attachArtifacts(data: AttachCertificateArtifactsDto): Promise<CertificateDto> {
     return this.db.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT id FROM "Certificate" WHERE id = ${data.certificateId} FOR UPDATE`;
       const current = await tx.certificate.findUnique({ where: { id: data.certificateId } });
       if (!current) throw new Error('CERTIFICATE_NOT_FOUND');
+      if (current.status !== CertificateStatus.ACTIVE) throw new Error('CERTIFICATE_ARTIFACT_STATE_INVALID');
+      for (const field of ['certificatePdfAssetId', 'previewImageAssetId', 'verificationQrAssetId'] as const) {
+        if (current[field] && data[field] !== undefined && current[field] !== data[field]) throw new Error('CERTIFICATE_ARTIFACT_IMMUTABLE');
+      }
+      const supplied = ['certificatePdfAssetId', 'previewImageAssetId', 'verificationQrAssetId'].filter(field => (data as any)[field] !== undefined);
+      if (supplied.length && supplied.every(field => current[field] === (data as any)[field])) return this.certificate(current);
       const row = await tx.certificate.update({
         where: { id: data.certificateId },
         data: {
@@ -216,7 +247,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
           ...(data.renderMetadata !== undefined ? {
             metadata: json({
               ...((current.metadata && typeof current.metadata === 'object' && !Array.isArray(current.metadata)) ? current.metadata : {}),
-              artifactState: 'RENDERED',
+              artifactState: ['certificatePdfAssetId', 'previewImageAssetId', 'verificationQrAssetId'].every(field => (data as any)[field] ?? current[field]) ? 'RENDERED' : 'PARTIAL',
               render: data.renderMetadata ?? null,
             }),
           } : {}),
@@ -302,6 +333,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async revoke(data: RevokeCertificateDto): Promise<CertificateDto> {
     return this.db.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT id FROM "Certificate" WHERE id = ${data.certificateId} FOR UPDATE`;
       const current = await tx.certificate.findUnique({ where: { id: data.certificateId } });
       if (!current) throw new Error('CERTIFICATE_NOT_FOUND');
       if (current.status === CertificateStatus.REVOKED) return this.certificate(current);
@@ -314,6 +346,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async reissue(data: ReissueCertificateDto & { replacement: IssueCertificateDto; eventType?: 'CertificateReissued' | 'CertificateRenewed' }): Promise<CertificateDto> {
     return this.db.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT id FROM "Certificate" WHERE id = ${data.certificateId} FOR UPDATE`;
       const original = await tx.certificate.findUnique({ where: { id: data.certificateId } });
       if (!original) throw new Error('CERTIFICATE_NOT_FOUND');
       if (original.replacedByCertificateId) return this.certificate(await tx.certificate.findUnique({ where: { id: original.replacedByCertificateId } }));
@@ -347,8 +380,10 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async archive(certificateId: string, actorId: string, reason: string, correlationId?: string | null): Promise<CertificateDto> {
     return this.db.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT id FROM "Certificate" WHERE id = ${certificateId} FOR UPDATE`;
       const current = await tx.certificate.findUnique({ where: { id: certificateId } });
       if (!current) throw new Error('CERTIFICATE_NOT_FOUND');
+      if (current.status === CertificateStatus.ARCHIVED) return this.certificate(current);
       const row = await tx.certificate.update({ where: { id: certificateId }, data: { status: CertificateStatus.ARCHIVED, archivedAt: new Date() } });
       await this.appendMutation(tx, row.id, 'ARCHIVED', actorId, reason, correlationId, {}, 'CertificateArchived');
       return this.certificate(row);
@@ -367,13 +402,15 @@ export class PrismaCertificateRepository implements ICertificateRepository {
   }
 
   private async assertIssuanceReferences(tx: any, data: IssueCertificateDto): Promise<void> {
+    await tx.$queryRaw`SELECT id FROM "CertificateTemplate" WHERE id = ${data.templateId} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "CertificateIssuer" WHERE id = ${data.issuerId} FOR UPDATE`;
     const [template, version, issuer] = await Promise.all([
       tx.certificateTemplate.findUnique({ where: { id: data.templateId } }),
       tx.certificateTemplateVersion.findUnique({ where: { id: data.templateVersionId } }),
       tx.certificateIssuer.findUnique({ where: { id: data.issuerId } }),
     ]);
     if (!template || template.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');
-    if (!version || version.templateId !== template.id || version.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_VERSION_REQUIRED');
+    if (!version || version.templateId !== template.id || template.currentVersionId !== version.id || version.versionNumber !== data.templateVersion || version.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_VERSION_REQUIRED');
     if (!issuer || issuer.status !== 'ACTIVE' || version.issuerId !== issuer.id || template.issuerId !== issuer.id) throw new Error('ACTIVE_ACCREDITED_CERTIFICATE_ISSUER_REQUIRED');
     if (issuer.signingKeyReference !== data.signingKeyReference) throw new Error('CERTIFICATE_ISSUER_SIGNING_KEY_MISMATCH');
   }

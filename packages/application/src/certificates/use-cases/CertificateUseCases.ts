@@ -21,6 +21,7 @@ import {
   IAssetRecordRepository,
   ICertificateRepository,
   ICourseRepository,
+  ICourseCurriculumRepository,
   ILearningPathRepository,
   IIdentityRepository,
   LearningPathCompletedEventPayload,
@@ -54,6 +55,7 @@ export class CertificateUseCases {
     signingRuntime: CertificateSigningRuntimeConfiguration = {},
     private readonly learningPathRepository?: ILearningPathRepository,
     private readonly identityRepository?: IIdentityRepository,
+    private readonly curriculumRepository?: ICourseCurriculumRepository,
   ) {
     this.trustPolicy = new CertificateTrustPolicy(signingRuntime);
   }
@@ -67,7 +69,10 @@ export class CertificateUseCases {
   ): Promise<CertificateDto> {
     this.assertAuthoritativeCompletionEnvelope(event);
     const repeated = await this.certificateRepository.findBySourceEventId(event.eventId);
-    if (repeated) return repeated;
+    if (repeated) {
+      if (repeated.sourceEventPayloadHash !== this.digest(this.canonicalJson(event.payload)) || repeated.sourceEventType !== event.eventType || repeated.sourceEventVersion !== event.eventVersion) throw new Error('CERTIFICATE_SOURCE_EVENT_ID_COLLISION');
+      return repeated;
+    }
     return event.eventType === 'CourseCompleted'
       ? this.issueCourseCompletion(event as CertificateAuthoritativeEventEnvelope<CourseCompletedEventPayload>)
       : this.issueLearningPathCompletion(event as CertificateAuthoritativeEventEnvelope<LearningPathCompletedEventPayload>);
@@ -84,13 +89,14 @@ export class CertificateUseCases {
     await this.requireCertificate(certificateId);
     const assetIds = [input.certificatePdfAssetId, input.previewImageAssetId, input.verificationQrAssetId].filter((value): value is string => Boolean(value));
     if (!assetIds.length) throw new Error('CERTIFICATE_RENDERED_ARTIFACT_REQUIRED');
-    for (const assetId of assetIds) await this.ensureActiveAsset(assetId, 'CERTIFICATE_RENDERED_ARTIFACT');
+    for (const assetId of assetIds) await this.ensureActiveAsset(assetId, 'CERTIFICATE_RENDERED_ARTIFACT', assetId === input.certificatePdfAssetId ? 'PDF' : 'IMAGE');
     return this.certificateRepository.attachArtifacts({ certificateId, ...input, actorId, correlationId });
   }
   public async readiness() {
     const [templates, issuers] = await Promise.all([this.certificateRepository.listTemplates(), this.certificateRepository.listIssuers()]);
     const runtime = this.trustPolicy.runtimeReadiness();
-    const activeTemplate = templates.some((item) => item.status === CertificateTemplateStatus.ACTIVE && item.currentVersion.status === CertificateTemplateStatus.ACTIVE);
+    const activeIssuerIds = new Set(issuers.filter(item => item.status === 'ACTIVE').map(item => item.id));
+    const activeTemplate = templates.some((item) => item.status === CertificateTemplateStatus.ACTIVE && item.currentVersion.status === CertificateTemplateStatus.ACTIVE && activeIssuerIds.has(item.issuerId) && item.currentVersion.issuerId === item.issuerId);
     const activeIssuer = issuers.some((item) => item.status === 'ACTIVE');
     return {
       activeTemplate,
@@ -116,6 +122,9 @@ export class CertificateUseCases {
   }
 
   public async updateIssuer(id: string, input: UpdateCertificateIssuerDto, context: CertificateMutationContext) {
+    const current = await this.certificateRepository.findIssuerById(id);
+    if (!current) throw new Error('CERTIFICATE_ISSUER_NOT_FOUND');
+    this.validateIssuer({...current, ...input});
     if (input.issuerLogoAssetId) await this.ensureActiveAsset(input.issuerLogoAssetId, 'CERTIFICATE_ISSUER_LOGO');
     if (input.signingKeyReference !== undefined && !input.signingKeyReference.trim()) throw new Error('CERTIFICATE_ISSUER_SIGNING_KEY_REQUIRED');
     return this.certificateRepository.updateIssuer(id, input, context);
@@ -226,7 +235,7 @@ export class CertificateUseCases {
     const expiresAt = envelope?.validity.expiresAt ? new Date(envelope.validity.expiresAt) : null;
     const expired = Boolean(expiresAt && expiresAt <= new Date());
     const isValid = certificate.status === CertificateStatus.ACTIVE && !expired && integrityVerified;
-    await this.certificateRepository.recordVerification(certificate.id, isValid ? 'VALID' : expired ? 'EXPIRED' : certificate.status, 'PUBLIC_CODE');
+    await this.certificateRepository.recordVerification(certificate.id, isValid ? 'VALID' : certificate.status === CertificateStatus.ACTIVE && expired ? 'EXPIRED' : certificate.status, 'PUBLIC_CODE');
     const achievement = envelope?.achievement;
     return {
       publicId: certificate.publicId,
@@ -234,7 +243,7 @@ export class CertificateUseCases {
       verificationCode: certificate.verificationCode,
       verificationUrl: certificate.verificationUrl,
       verificationHash: certificate.verificationHash,
-      status: expired ? CertificateStatus.EXPIRED : certificate.status,
+      status: certificate.status === CertificateStatus.ACTIVE && expired ? CertificateStatus.EXPIRED : certificate.status,
       certificateType: envelope?.certificateType ?? certificate.certificateType,
       recipientDisplayName: envelope?.recipientDisplayName ?? certificate.recipientDisplayName,
       achievementType: achievement?.type ?? certificate.achievementType,
@@ -262,8 +271,19 @@ export class CertificateUseCases {
     const payload = event.payload;
     if (!payload.eligibleForCertificate) throw new Error('Course completion is not eligible (COURSE_COMPLETION_NOT_ELIGIBLE)');
     const existing = await this.certificateRepository.findBySourceCompletionId(payload.completionId);
-    if (existing) return existing;
-    const course = await this.courseRepository.findById(payload.courseId);
+    if (existing) {
+      if (existing.studentReferenceId !== payload.studentReferenceId || existing.achievementId !== payload.courseId || existing.sourceEventPayloadHash !== this.digest(this.canonicalJson(payload))) throw new Error('CERTIFICATE_SOURCE_COMPLETION_COLLISION');
+      return existing;
+    }
+    let course = await this.courseRepository.findById(payload.courseId);
+    if (payload.courseVersion !== undefined) {
+      if (!this.curriculumRepository?.getLearningVersion) throw new Error('CERTIFICATE_COURSE_VERSION_REPOSITORY_REQUIRED');
+      const definition = await this.curriculumRepository.getLearningVersion(payload.courseId, payload.courseVersion, new Date(payload.completedAt));
+      if (!definition) throw new Error('CERTIFICATE_COURSE_VERSION_NOT_FOUND');
+      course = definition.course;
+    } else {
+      throw new Error('CERTIFICATE_COURSE_VERSION_REQUIRED');
+    }
     if (!course) throw new Error('COURSE_NOT_FOUND');
     if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) {
       throw new Error('MANARATAK_CERTIFICATE_NATIVE_COURSE_REQUIRED');
@@ -288,7 +308,8 @@ export class CertificateUseCases {
     const payload = event.payload;
     if (!payload.eligibleForCertificate) throw new Error('Learning path completion is not eligible (LEARNING_PATH_COMPLETION_NOT_ELIGIBLE)');
     if (!this.learningPathRepository) throw new Error('LEARNING_PATH_REPOSITORY_NOT_CONFIGURED');
-    const path = await this.learningPathRepository.findById(payload.learningPathId);
+    if (!Number.isSafeInteger(payload.learningPathVersion) || payload.learningPathVersion! < 1 || !this.learningPathRepository.findByVersion) throw new Error('CERTIFICATE_LEARNING_PATH_VERSION_REQUIRED');
+    const path = await this.learningPathRepository.findByVersion(payload.learningPathId, payload.learningPathVersion!);
     if (!path) throw new Error('LEARNING_PATH_NOT_FOUND');
     const completionId = event.eventId;
     const existing = await this.certificateRepository.findByLearningPathCompletionId(completionId);
@@ -336,6 +357,7 @@ export class CertificateUseCases {
     const verificationUrl = this.trustPolicy.createPublicVerificationUrl(verificationCode);
     const verificationQr = this.trustPolicy.createPayload(verificationCode, verificationUrl);
     const envelope = this.signedEnvelope({
+      serialNumber, verificationCode,
       certificateType: achievement.certificateType,
       studentReferenceId: event.payload.studentReferenceId,
       recipientDisplayName,
@@ -407,6 +429,7 @@ export class CertificateUseCases {
     const verificationUrl = this.trustPolicy.createPublicVerificationUrl(verificationCode);
     const verificationQr = this.trustPolicy.createPayload(verificationCode, verificationUrl);
     const envelope = this.signedEnvelope({
+      serialNumber, verificationCode,
       certificateType: source.certificateType,
       studentReferenceId: source.studentReferenceId,
       recipientDisplayName: recipientDisplayName ?? null,
@@ -477,6 +500,8 @@ export class CertificateUseCases {
   }
 
   private signedEnvelope(input: {
+    serialNumber: string;
+    verificationCode: string;
     certificateType: CertificateSignedEnvelopeV2['certificateType'];
     studentReferenceId: string;
     recipientDisplayName: string | null;
@@ -493,6 +518,7 @@ export class CertificateUseCases {
   }): CertificateSignedEnvelopeV2 {
     return {
       schemaVersion: 'certificate-envelope-v2',
+      serialNumber: input.serialNumber, verificationCode: input.verificationCode,
       certificateType: input.certificateType,
       studentReferenceId: input.studentReferenceId,
       recipientDisplayName: input.recipientDisplayName,
@@ -510,12 +536,20 @@ export class CertificateUseCases {
   }
 
   private assertAuthoritativeCompletionEnvelope(event: CertificateAuthoritativeEventEnvelope<CourseCompletedEventPayload | LearningPathCompletedEventPayload>): void {
-    if (!event.eventId?.trim()) throw new Error('CERTIFICATE_SOURCE_EVENT_ID_REQUIRED');
+    if (typeof event.eventId !== 'string' || !event.eventId.trim()) throw new Error('CERTIFICATE_SOURCE_EVENT_ID_REQUIRED');
     if (event.sourceDomain !== 'COURSES') throw new Error('CERTIFICATE_SOURCE_EVENT_DOMAIN_INVALID');
     if (event.eventVersion !== '1.0.0') throw new Error('CERTIFICATE_SOURCE_EVENT_VERSION_UNSUPPORTED');
     if (!['CourseCompleted', 'LearningPathCompleted'].includes(event.eventType)) throw new Error('CERTIFICATE_SOURCE_EVENT_TYPE_INVALID');
+    if (!event.payload || typeof event.payload !== 'object') throw new Error('CERTIFICATE_SOURCE_EVENT_PAYLOAD_INVALID');
     if (event.payload.sourcePhase !== 'Phase 13 - Learning Platform' || event.payload.certificateOwnerPhase !== 'Phase 14 - Enterprise Certificates Platform') throw new Error('CERTIFICATE_SOURCE_EVENT_AUTHORITY_INVALID');
-    if (Number.isNaN(new Date(event.occurredAt).getTime())) throw new Error('CERTIFICATE_SOURCE_EVENT_TIMESTAMP_INVALID');
+    const validDate = (value: unknown) => (typeof value === 'string' && Boolean(value.trim()) || value instanceof Date) && Number.isFinite(new Date(value as Date).getTime());
+    const payload = event.payload;
+    if (!payload || typeof payload !== 'object' || typeof payload.studentReferenceId !== 'string' || !payload.studentReferenceId.trim() || typeof payload.eligibleForCertificate !== 'boolean' || !validDate(payload.completedAt)) throw new Error('CERTIFICATE_SOURCE_EVENT_PAYLOAD_INVALID');
+    if (event.eventType === 'CourseCompleted') {
+      const course = payload as CourseCompletedEventPayload;
+      if (typeof course.courseId !== 'string' || !course.courseId.trim() || typeof course.completionId !== 'string' || !course.completionId.trim() || !Number.isSafeInteger(course.courseVersion) || course.courseVersion! < 1) throw new Error('CERTIFICATE_SOURCE_EVENT_PAYLOAD_INVALID');
+    } else if (typeof (payload as LearningPathCompletedEventPayload).learningPathId !== 'string' || !(payload as LearningPathCompletedEventPayload).learningPathId.trim()) throw new Error('CERTIFICATE_SOURCE_EVENT_PAYLOAD_INVALID');
+    if (!validDate(event.occurredAt)) throw new Error('CERTIFICATE_SOURCE_EVENT_TIMESTAMP_INVALID');
   }
 
   private async resolveRecipientDisplayName(studentReferenceId: string): Promise<string | null> {
@@ -583,7 +617,7 @@ export class CertificateUseCases {
     for (const assetId of assetIds) await this.ensureActiveAsset(assetId, 'CERTIFICATE_TEMPLATE_ASSET');
   }
 
-  private async ensureActiveAsset(assetId: string, prefix: string): Promise<void> {
+  private async ensureActiveAsset(assetId: string, prefix: string, kind: 'IMAGE' | 'PDF' = 'IMAGE'): Promise<void> {
     if (/^https?:|^file:|[\\/]/i.test(assetId)) throw new Error(`${prefix}_RAW_ASSET_FORBIDDEN`);
     if (!this.assetRepository) throw new Error('CERTIFICATE_ASSET_PLATFORM_NOT_CONFIGURED');
     const asset = await this.assetRepository.findById(new AssetId(assetId));
@@ -592,13 +626,26 @@ export class CertificateUseCases {
     if (![AssetSecurityClassification.PUBLIC, AssetSecurityClassification.INTERNAL].includes(asset.classification)) {
       throw new Error(`${prefix}_CLASSIFICATION_NOT_ALLOWED:${asset.classification}`);
     }
-    if (!asset.metadata.mimeType.toLowerCase().startsWith('image/')) {
+    const mime = asset.metadata.mimeType.toLowerCase();
+    if (kind === 'PDF' ? mime !== 'application/pdf' : !['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'].includes(mime)) {
       throw new Error(`${prefix}_MIME_NOT_ALLOWED:${asset.metadata.mimeType}`);
     }
   }
 
   private persistedIdentityMatchesEnvelope(certificate: CertificateDto, envelope: CertificateSignedEnvelopeV2): boolean {
-    return certificate.certificateType === envelope.certificateType &&
+    const dateMatches = (stored: Date | string | null | undefined, sealed: string | null) => stored == null ? sealed === null : Number.isFinite(new Date(stored).getTime()) && new Date(stored).toISOString() === sealed;
+    return (envelope.serialNumber === undefined || certificate.serialNumber === envelope.serialNumber) &&
+      (envelope.verificationCode === undefined || certificate.verificationCode === envelope.verificationCode) &&
+      (certificate.recipientDisplayName ?? null) === envelope.recipientDisplayName &&
+      certificate.achievementDisplayName === envelope.achievement.displayName &&
+      dateMatches(certificate.completedAt, envelope.achievement.completedAt) && dateMatches(certificate.issuedAt, envelope.issuedAt) && dateMatches(certificate.expiresAt, envelope.validity.expiresAt) &&
+      certificate.validityPolicy === envelope.validity.policy && (certificate.renewalPolicy ?? null) === envelope.validity.renewalPolicy &&
+      certificate.requiresRevalidation === envelope.validity.requiresRevalidation && certificate.templateVersion === envelope.template.versionNumber &&
+      certificate.issuerName === envelope.issuer.issuerName &&
+      (certificate.grade ?? null) === envelope.grade && (certificate.score ?? null) === envelope.score &&
+      this.canonicalJson(certificate.skills) === this.canonicalJson(envelope.skills) && this.canonicalJson(certificate.competencies) === this.canonicalJson(envelope.competencies) &&
+      (certificate.replacesCertificateId ?? null) === envelope.replacesCertificateId &&
+      certificate.certificateType === envelope.certificateType &&
       certificate.studentReferenceId === envelope.studentReferenceId &&
       certificate.achievementType === envelope.achievement.type &&
       certificate.achievementId === envelope.achievement.id &&
@@ -613,6 +660,10 @@ export class CertificateUseCases {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
     const envelope = value as Partial<CertificateSignedEnvelopeV2>;
     if (envelope.schemaVersion !== 'certificate-envelope-v2' || !envelope.achievement || !envelope.validity || !envelope.template || !envelope.issuer) return null;
+    if (![envelope.issuedAt, envelope.achievement.completedAt].every(date => typeof date === 'string' && Number.isFinite(new Date(date).getTime())) ||
+      (envelope.validity.expiresAt !== null && (typeof envelope.validity.expiresAt !== 'string' || !Number.isFinite(new Date(envelope.validity.expiresAt).getTime()))) ||
+      ![envelope.studentReferenceId, envelope.achievement.id, envelope.achievement.displayName, envelope.achievement.completionId, envelope.template.templateId, envelope.template.templateVersionId, envelope.template.versionNumber, envelope.issuer.issuerId, envelope.issuer.issuerName, envelope.issuer.signingKeyReference].every(text => typeof text === 'string' && text.trim()) ||
+      !Array.isArray(envelope.skills) || !Array.isArray(envelope.competencies)) return null;
     return envelope as CertificateSignedEnvelopeV2;
   }
 

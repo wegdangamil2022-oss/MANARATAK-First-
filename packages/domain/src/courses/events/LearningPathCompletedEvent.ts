@@ -4,6 +4,7 @@ export const LEARNING_PATH_COMPLETED_EVENT_VERSION = '1.0.0';
 
 export interface LearningPathCompletedEventPayload {
   learningPathId: string;
+  learningPathVersion?: number;
   studentReferenceId: string;
   completedAt: Date | string;
   eligibleForCertificate: boolean;

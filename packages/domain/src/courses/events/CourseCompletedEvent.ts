@@ -4,6 +4,7 @@ export const COURSE_COMPLETED_EVENT_VERSION = '1.0.0';
 
 export interface CourseCompletedEventPayload {
   courseId: string;
+  courseVersion?: number;
   studentReferenceId: string;
   completedAt: Date | string;
   completionId: string;
