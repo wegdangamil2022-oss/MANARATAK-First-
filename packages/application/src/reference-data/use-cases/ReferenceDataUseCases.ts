@@ -29,6 +29,7 @@ import {
   ReferenceCityQualityCounters,
   ReferenceDependencyImpact,
   ReferenceProviderMappingReassignmentCommand,
+  ReferenceCityCountryLinkRepairCommand,
   referenceCityScopeKey,
   referenceStandardsReadiness
 } from '@manaratak/domain';
@@ -262,6 +263,53 @@ export class ReferenceDataUseCases {
     return this.repository.getReferenceRelationships(entityType, referenceId);
   }
 
+
+  /** Explicit reviewed country FK repair for an unlinked legacy city.
+   * Does not silently claim identity keys, merge cities or rewrite regions.
+   */
+  public async repairCityCountryLink(
+    input: Omit<ReferenceCityCountryLinkRepairCommand, 'actorId'>,
+    context: ReferenceDataMutationContext,
+  ): Promise<void> {
+    if (!context.actorId || !this.atomicMutationExecutor ||
+        !input.cityId || !input.countryReferenceId || input.reason.trim().length < 3 ||
+        !Number.isSafeInteger(input.expectedVersion) || input.expectedVersion < 1)
+      throw new ReferenceDataInvariantError('City country link repair requires an actor, reason, canonical country and current version.');
+    const repo = this.repository as IReferenceDataRepository & {
+      repairCityCountryLinkInTransaction?: (
+        command: ReferenceCityCountryLinkRepairCommand,
+        tx: import('@manaratak/domain').AtomicPersistenceContext,
+        correlationId?: string,
+      ) => Promise<void>
+    };
+    if (!repo.repairCityCountryLinkInTransaction)
+      throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const now = new Date();
+    const command = { ...input, actorId: context.actorId, reason: input.reason.trim() };
+    const auditId = randomUUID();
+    await this.atomicMutationExecutor.execute(
+      {
+        id: auditId, reference: 'AUD-' + auditId, action: 'REFERENCE_CITY_COUNTRY_LINK_RECONCILED',
+        category: 'REFERENCE_DATA_GOVERNANCE', severity: 'INFO',
+        actorId: context.actorId, actorType: context.actorType || 'IDENTITY',
+        targetId: input.cityId, targetType: 'REFERENCE_CITY',
+        source: context.source || 'admin-reference-data-api', timestamp: now,
+        contextMetadata: { expectedVersion: input.expectedVersion, countryReferenceId: input.countryReferenceId,
+          reason: command.reason }, correlationReference: context.correlationId,
+      },
+      {
+        id: randomUUID(), eventType: 'REFERENCE_CITY_COUNTRY_LINK_RECONCILED',
+        domain: 'REFERENCE_DATA',
+        aggregate: { domain: 'REFERENCE_DATA', aggregateType: 'CITY', aggregateId: input.cityId },
+        payload: { cityId: input.cityId, countryReferenceId: input.countryReferenceId,
+          expectedVersion: input.expectedVersion, reason: command.reason },
+        metadata: { actorId: context.actorId, atomicity: 'BUSINESS_AUDIT_OUTBOX' },
+        correlationId: context.correlationId, createdAt: now, availableAt: now,
+        state: OutboxProcessingState.PENDING, attempts: 0,
+      },
+      tx => repo.repairCityCountryLinkInTransaction!(command, tx, context.correlationId),
+    );
+  }
 
   /** Explicit audited ownership change; other mapping updates cannot reassign. */
   public async reassignProviderMapping(

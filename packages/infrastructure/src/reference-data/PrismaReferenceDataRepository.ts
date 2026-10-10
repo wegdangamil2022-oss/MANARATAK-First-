@@ -30,6 +30,7 @@ import {
   ReferenceCityQualityCounters,
   ReferenceDependencyImpact,
   ReferenceProviderMappingReassignmentCommand,
+  ReferenceCityCountryLinkRepairCommand,
   assertReferenceLifecycleTransition,
   lifecycleIsActive,
   normalizeReferenceIdentityToken,
@@ -1188,6 +1189,66 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     );
   }
 
+
+  /** One reviewed reconciliation fixes a NULL canonical-country link while
+   * preserving historical city UUID, name and geographic identity. No batch
+   * repair/backfill is performed from an admin request.
+   */
+  public async repairCityCountryLink(command: ReferenceCityCountryLinkRepairCommand): Promise<void> {
+    if (!this.inTransaction || !command.actorId || command.reason.trim().length < 3)
+      throw new Error('REFERENCE_CITY_REPAIR_REVIEW_REQUIRED');
+    const rows = await this.prisma.$queryRaw<Array<{
+      id: string; countryIso2Code: string; countryReferenceId: string | null;
+      lifecycleState: string; versionNumber: number; administrativeRegionId: string | null;
+    }>>(Prisma.sql`
+      SELECT "id", "countryIso2Code", "countryReferenceId", "lifecycleState",
+        "versionNumber", "administrativeRegionId"
+      FROM "ReferenceCity" WHERE "id" = ${command.cityId} LIMIT 1 FOR UPDATE
+    `);
+    if (rows.length !== 1) throw new Error('REFERENCE_CITY_REPAIR_TARGET_NOT_FOUND');
+    const city = rows[0];
+    if (city.versionNumber !== command.expectedVersion) throw new Error('REFERENCE_VERSION_CONFLICT');
+    if (city.lifecycleState !== 'ACTIVE') throw new Error('REFERENCE_CITY_REPAIR_ACTIVE_ONLY');
+    if (city.countryReferenceId !== null) throw new Error('REFERENCE_CITY_REPAIR_NOT_LEGACY_UNLINKED');
+    const countries = await this.prisma.$queryRaw<Array<{ id: string; iso2Code: string; lifecycleState: string }>>(Prisma.sql`
+      SELECT "id", "iso2Code", "lifecycleState" FROM "ReferenceCountry"
+      WHERE "id" = ${command.countryReferenceId} LIMIT 1 FOR SHARE
+    `);
+    if (countries.length !== 1 || countries[0].lifecycleState !== 'ACTIVE' ||
+        countries[0].iso2Code !== city.countryIso2Code)
+      throw new Error('REFERENCE_CITY_REPAIR_COUNTRY_MISMATCH');
+    if (city.administrativeRegionId) {
+      const region = await this.prisma.administrativeRegion.findUnique({
+        where: { id: city.administrativeRegionId }, select: { countryIso2Code: true },
+      });
+      if (!region || region.countryIso2Code !== city.countryIso2Code)
+        throw new Error('REFERENCE_CITY_REPAIR_REGION_MISMATCH');
+    }
+    const now = new Date();
+    const updated = await this.prisma.$queryRaw<Array<{ snapshot: Record<string, unknown> }>>(Prisma.sql`
+      UPDATE "ReferenceCity" c SET "countryReferenceId" = ${command.countryReferenceId},
+        "versionNumber" = "versionNumber" + 1, "effectiveFrom" = ${now},
+        "effectiveTo" = NULL, "updatedAt" = ${now}
+      WHERE "id" = ${command.cityId} AND "versionNumber" = ${command.expectedVersion}
+        AND "countryReferenceId" IS NULL
+      RETURNING to_jsonb(c) AS "snapshot"
+    `);
+    if (updated.length !== 1) throw new Error('REFERENCE_VERSION_CONFLICT');
+    await this.appendVersionRecord(
+      'CITY', city.id, city.versionNumber + 1, ReferenceLifecycleState.ACTIVE,
+      now, null,
+      { ...updated[0].snapshot, linkedCountryId: command.countryReferenceId,
+        reason: command.reason.trim(), mutationCorrelationId: this.mutationCorrelationId ?? null },
+      'CITY_COUNTRY_LINK_RECONCILED', command.actorId,
+    );
+  }
+
+  public repairCityCountryLinkInTransaction(
+    command: ReferenceCityCountryLinkRepairCommand, context: AtomicPersistenceContext,
+    correlationId?: string,
+  ): Promise<void> {
+    return this.transactionRepository(context, command.actorId, correlationId).repairCityCountryLink(command);
+  }
 
   /** Atomic mapping owner transfer. The existing version records double as an
    * append-only, per-source durable replay receipt; there is no owner change

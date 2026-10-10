@@ -246,6 +246,18 @@ export class ReferenceDataAdminRouter {
       }),
     );
 
+    router.post('/cities/:id/reconcile-country', asyncHandler(async (req: Request, res: Response) => {
+      const params = z.object({ id: z.string().min(1).max(191) }).strict().parse(req.params);
+      const body = z.object({
+        countryReferenceId: z.string().uuid(), expectedVersion: z.number().int().positive(),
+        reason: z.string().trim().min(3).max(1000),
+      }).strict().parse(req.body);
+      await referenceDataUseCases.repairCityCountryLink({
+        cityId: params.id, ...body,
+      }, mutationContext(req));
+      res.status(204).send();
+    }));
+
     router.post('/governance/provider-mappings/reassign', asyncHandler(async (req: Request, res: Response) => {
       const body = mappingReconciliationSchema.parse(req.body);
       const outcome = await referenceDataUseCases.reassignProviderMapping(body, mutationContext(req));
@@ -372,6 +384,11 @@ export class ReferenceDataAdminRouter {
         'REFERENCE_MAPPING_SOURCE_NOT_FOUND',
         'REFERENCE_MAPPING_ACTIVE_OWNERS_REQUIRED',
         'REFERENCE_MAPPING_CITY_COUNTRY_SCOPE_MISMATCH',
+        'REFERENCE_CITY_REPAIR_TARGET_NOT_FOUND',
+        'REFERENCE_CITY_REPAIR_ACTIVE_ONLY',
+        'REFERENCE_CITY_REPAIR_NOT_LEGACY_UNLINKED',
+        'REFERENCE_CITY_REPAIR_COUNTRY_MISMATCH',
+        'REFERENCE_CITY_REPAIR_REGION_MISMATCH',
         'REFERENCE_GOVERNANCE_DETAILS_LIMIT_EXCEEDED',
         'REFERENCE_ALIAS_AMBIGUITY_SCAN_LIMIT',
         'REFERENCE_REPLACEMENT_RELATIONSHIP_CYCLE',

@@ -136,3 +136,12 @@ export interface ReferenceProviderMappingReassignmentCommand {
   reconciliationId: string;
   actorId: string;
 }
+
+/** Explicit legacy-city link repair; never a bulk backfill or city UUID change. */
+export interface ReferenceCityCountryLinkRepairCommand {
+  cityId: string;
+  expectedVersion: number;
+  countryReferenceId: string;
+  actorId: string;
+  reason: string;
+}
