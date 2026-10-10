@@ -55,6 +55,27 @@ describe('StudentDashboardHydrationService', () => {
     expect(base.partialFailures).toEqual(['learning-owner-read']);
   });
 
+  it('does not hydrate P13/P14/P20 support records without explicit owner permissions', async () => {
+    const { workspace, learning, certificates, service } = fixture();
+    workspace.getSupportWorkspaceDetail = vi.fn().mockResolvedValue({
+      studentReferenceId: 'student-1',
+      linkedSummaries: { activeCourseCount: 2, certificateCount: 3 },
+    });
+    const minimal = await service.getSupportDetail('student-1');
+    expect(minimal.learning).toEqual([]);
+    expect(minimal.certificates).toEqual([]);
+    expect(minimal.recentServiceRequests).toEqual([]);
+    expect(minimal.ownerReadStatus).toEqual({ learning: 'DEGRADED', certificates: 'DEGRADED', services: 'DEGRADED' });
+    expect(learning.listForStudent).not.toHaveBeenCalled();
+    expect(certificates.listForStudent).not.toHaveBeenCalled();
+
+    const granted = await service.getSupportDetail('student-1', { learning: true, certificates: true, services: false });
+    expect(granted.ownerReadStatus.learning).toBe('AVAILABLE');
+    expect(granted.ownerReadStatus.certificates).toBe('AVAILABLE');
+    expect(learning.listForStudent).toHaveBeenCalledWith('student-1');
+    expect(certificates.listForStudent).toHaveBeenCalledWith('student-1');
+  });
+
   it('does not read owners when the workspace request fails', async () => {
     const { workspace, learning, certificates, service } = fixture();
     workspace.getDashboard.mockRejectedValue(new Error('workspace denied'));
