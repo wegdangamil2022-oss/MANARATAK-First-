@@ -19,12 +19,12 @@ export class StudentDashboardHydrationService {
     private readonly serviceRequests?: StudentServiceRequestUseCases,
   ) {}
 
-  async getSupportDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto> {
+  async getSupportDetail(studentReferenceId: string, visible: { learning: boolean; certificates: boolean; services: boolean } = { learning: false, certificates: false, services: false }): Promise<StudentSupportWorkspaceDetailDto> {
     const base = await this.workspace.getSupportWorkspaceDetail(studentReferenceId);
     const [learning, certificates, services] = await Promise.allSettled([
-      this.learning.listForStudent(studentReferenceId),
-      this.certificates.listForStudent(studentReferenceId),
-      this.serviceRequests
+      visible.learning ? this.learning.listForStudent(studentReferenceId) : Promise.reject(new Error('SUPPORT_LEARNING_OWNER_PERMISSION_REQUIRED')),
+      visible.certificates ? this.certificates.listForStudent(studentReferenceId) : Promise.reject(new Error('SUPPORT_CERTIFICATE_OWNER_PERMISSION_REQUIRED')),
+      visible.services && this.serviceRequests
         ? this.serviceRequests.listMyRequests(studentReferenceId, { page: 1, pageSize: 12 })
         : Promise.reject(new Error('SERVICE_OWNER_READ_NOT_CONFIGURED')),
     ]);
