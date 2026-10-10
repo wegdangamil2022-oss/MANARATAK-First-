@@ -1,4 +1,5 @@
 import {publicMajorProjection} from '@manaratak/domain';
+import { projectPublicUniversity } from '../universities/use-cases/UniversityPublicProjection';
 import {
   AdministrativeRegionDto,
   InternationalTestContentBlockDto,
@@ -12,7 +13,6 @@ import {
   ReferenceCountryDto,
   ReferenceCurrencyDto,
   ReferenceLanguageDto,
-  sanitizeUniversityOptionalFields,
   UniversityDto,
   UniversityLocalizedTextDto,
   UniversityLocalizedTextTargetType,
@@ -159,76 +159,30 @@ export class ApplicationLocaleProjectionService {
       localizedValues: this.collectUniversityTranslationValues(translations, 'description'),
     }).value;
 
-    const {
-      id: _id,
-      canonicalDedupKey: _canonicalDedupKey,
-      sourceImportRecordId: _sourceImportRecordId,
-      status: _status,
-      completenessStatus: _completenessStatus,
-      createdAt: _createdAt,
-      optionalFields,
-      translations: _translations,
-      localizedTexts: _localizedTexts,
-      localizedNames: _localizedNames,
-      sourceRecords: _sourceRecords,
-      ...publicData
-    } = university;
-
-    return {
-      ...sanitizeUniversityOptionalFields(optionalFields),
-      ...publicData,
+    const projected = {
+      ...university,
       displayName,
       description,
-      localizedNames: Object.fromEntries(translations.filter(translation => translation.displayName).map(translation => [translation.locale, translation.displayName as string])),
-      admissionRequirements: this.publicActiveUniversityChildren(university.admissionRequirements),
       campuses: this.projectUniversityChildren(
-        this.publicActiveUniversityChildren(university.campuses),
-        'CAMPUS',
-        localizedTexts,
-        locale,
-        sourceLocale,
+        this.publicActiveUniversityChildren(university.campuses), 'CAMPUS', localizedTexts, locale, sourceLocale,
       ),
       organizationUnits: this.projectUniversityChildren(
-        this.publicActiveUniversityChildren(university.organizationUnits),
-        'ORGANIZATION_UNIT',
-        localizedTexts,
-        locale,
-        sourceLocale,
+        this.publicActiveUniversityChildren(university.organizationUnits), 'ORGANIZATION_UNIT', localizedTexts, locale, sourceLocale,
       ),
       academicPrograms: this.projectUniversityChildren(
-        (university.academicPrograms ?? [])
-          .filter((program) => program.status === 'ACTIVE')
-          .map((program) => ({
-            ...program,
-            admissionRequirements: (program.admissionRequirements ?? []).filter((requirement) => requirement.status === 'ACTIVE'),
-          })),
-        'ACADEMIC_PROGRAM',
-        localizedTexts,
-        locale,
-        sourceLocale,
-      ) as PublicUniversityDto['academicPrograms'],
-      tuitionProfiles: this.projectUniversityChildren(
-        university.tuitionProfiles,
-        'TUITION_PROFILE',
-        localizedTexts,
-        locale,
-        sourceLocale,
-      ),
-      accommodationProfiles: this.projectUniversityChildren(
-        university.accommodationProfiles,
-        'ACCOMMODATION_PROFILE',
-        localizedTexts,
-        locale,
-        sourceLocale,
-      ),
-      rankings: this.projectUniversityChildren(
-        university.rankings,
-        'RANKING',
-        localizedTexts,
-        locale,
-        sourceLocale,
-      ),
-    } as PublicUniversityDto;
+        (university.academicPrograms ?? []).filter(program => program.status === 'ACTIVE')
+          .map(program => ({ ...program, admissionRequirements: (program.admissionRequirements ?? [])
+            .filter(requirement => requirement.status === 'ACTIVE') })),
+        'ACADEMIC_PROGRAM', localizedTexts, locale, sourceLocale,
+      ) as UniversityDto['academicPrograms'],
+      tuitionProfiles: this.projectUniversityChildren(university.tuitionProfiles, 'TUITION_PROFILE',
+        localizedTexts, locale, sourceLocale),
+      accommodationProfiles: this.projectUniversityChildren(university.accommodationProfiles, 'ACCOMMODATION_PROFILE',
+        localizedTexts, locale, sourceLocale),
+      rankings: this.projectUniversityChildren(university.rankings, 'RANKING', localizedTexts, locale, sourceLocale),
+      translations,
+    } as UniversityDto;
+    return projectPublicUniversity(projected);
   }
 
   public projectMajor(

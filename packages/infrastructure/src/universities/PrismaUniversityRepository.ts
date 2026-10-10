@@ -27,7 +27,7 @@ import { queryStableCursorPage } from '../api-foundation/StableCursor';
 const universityDetails = {
   campuses: true,
   organizationUnits: true,
-  academicPrograms: { include: { campuses: true, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true } } } } } },
+  academicPrograms: { include: { campuses: true, major: { select: { status: true } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true } } } } } },
   tuitionProfiles: true,
   accommodationProfiles: true,
   rankings: true,
