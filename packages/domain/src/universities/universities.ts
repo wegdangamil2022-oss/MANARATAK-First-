@@ -103,6 +103,8 @@ export interface UniversityDto {
   optionalFields?: Record<string, unknown> | null;
   createdAt?: Date;
   updatedAt?: Date;
+  /** Owner revision in epoch milliseconds; required for all admin mutations. */
+  revision?: number;
 }
 
 export interface UpdateUniversityDto {
@@ -362,6 +364,8 @@ export interface IUniversityRepository {
     input: UniversityAcademicProgramAuthoringInput,
   ): Promise<UniversityDto>;
   archiveAcademicProgram?(universityId: string, programId: string): Promise<UniversityDto>;
+  lockForRevision?(id: string, expectedRevision: number): Promise<void>;
+  advanceRevision?(id: string, expectedRevision: number): Promise<number>;
 }
 
 export const UNIVERSITY_CANONICAL_KEYS = new Set<string>([

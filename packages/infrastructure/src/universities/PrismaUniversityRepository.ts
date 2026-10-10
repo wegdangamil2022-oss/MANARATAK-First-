@@ -77,6 +77,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   constructor(
     private readonly prisma: PrismaClient,
     private readonly legacyCountryTextFiltersEnabled = false,
+    private readonly transactionBound = false,
   ) {}
 
   withTransaction(context: AtomicPersistenceContext): IUniversityRepository {
@@ -86,7 +87,30 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     return new PrismaUniversityRepository(
       transactionClient as unknown as PrismaClient,
       this.legacyCountryTextFiltersEnabled,
+      true,
     );
+  }
+
+  async lockForRevision(id: string, expectedRevision: number): Promise<void> {
+    if (!this.transactionBound) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const rows = await this.prisma.$queryRaw<Array<{ revision: bigint; status: string }>>`
+      SELECT floor(extract(epoch FROM "updatedAt") * 1000)::bigint AS revision, status
+      FROM "University" WHERE id = ${id} FOR UPDATE`;
+    if (!rows.length) throw new Error('UNIVERSITY_NOT_FOUND');
+    if (Number(rows[0].revision) !== expectedRevision) throw new Error('UNIVERSITY_STALE_REVISION');
+    if (['ARCHIVED', 'REJECTED'].includes(rows[0].status))
+      throw new Error('UNIVERSITY_INACTIVE_IMMUTABLE');
+  }
+
+  async advanceRevision(id: string, expectedRevision: number): Promise<number> {
+    if (!this.transactionBound) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const rows = await this.prisma.$queryRaw<Array<{ revision: bigint }>>`
+      UPDATE "University"
+      SET "updatedAt" = GREATEST(clock_timestamp(), to_timestamp(${expectedRevision} / 1000.0) + interval '1 millisecond')
+      WHERE id = ${id}
+      RETURNING floor(extract(epoch FROM "updatedAt") * 1000)::bigint AS revision`;
+    if (!rows.length) throw new Error('UNIVERSITY_NOT_FOUND');
+    return Number(rows[0].revision);
   }
 
   async findById(id: string): Promise<UniversityDto | null> {
@@ -932,6 +956,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         updatedAt: text.updatedAt,
       })),
       optionalFields: safeOptionalFields,
+      revision: record.updatedAt.getTime(),
     } as unknown as UniversityDto;
   }
 

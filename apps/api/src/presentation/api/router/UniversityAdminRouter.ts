@@ -15,9 +15,16 @@ export class UniversityAdminRouter {
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
       Promise.resolve(fn(req, res, next)).catch(next);
     };
+    const reasonSchema = z.string().trim().min(1).max(2000);
     const mutationContext = (req: Request) => {
       if (!req.authUserId) throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');
+      const rawRevision = req.get('If-Match');
+      const expectedRevision = rawRevision && /^(?:"[0-9]+"|[0-9]+)$/.test(rawRevision)
+        ? Number(rawRevision.replace(/"/g, '')) : undefined;
+      if (!Number.isSafeInteger(expectedRevision)) throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
       return {
+        expectedRevision,
+        reason: reasonSchema.parse(req.get('X-Review-Reason') ?? req.body?.reason),
         actorId: req.authUserId,
         actorType: 'IDENTITY',
         correlationId:
@@ -248,6 +255,7 @@ export class UniversityAdminRouter {
       '/:id',
       asyncHandler(async (req: Request, res: Response) => {
         const university = await adminUniversityUseCases.getUniversity(req.params.id);
+        res.setHeader('ETag', `"${university.revision}"`);
         res.json(university);
       }),
     );
@@ -270,6 +278,7 @@ export class UniversityAdminRouter {
           { locale, ...payload },
           mutationContext(req),
         );
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.json(translation);
       }),
     );
@@ -320,6 +329,7 @@ export class UniversityAdminRouter {
           dataToUpdate,
           mutationContext(req),
         );
+        res.setHeader('X-Entity-Revision', String(university.revision));
         res.json(university);
       }),
     );
@@ -381,6 +391,7 @@ export class UniversityAdminRouter {
       '/:id/mark-ready',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.markReadyToReview(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -389,6 +400,7 @@ export class UniversityAdminRouter {
       '/:id/mark-publishable',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.markReadyToPublish(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -404,6 +416,7 @@ export class UniversityAdminRouter {
       '/:id/publish',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.publish(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -412,6 +425,7 @@ export class UniversityAdminRouter {
       '/:id/unpublish',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.unpublish(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -420,6 +434,7 @@ export class UniversityAdminRouter {
       '/:id/reject',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.reject(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
@@ -428,6 +443,7 @@ export class UniversityAdminRouter {
       '/:id/archive',
       asyncHandler(async (req: Request, res: Response) => {
         await adminUniversityUseCases.archive(req.params.id, mutationContext(req));
+        res.setHeader('X-Entity-Revision', String((await adminUniversityUseCases.getUniversity(req.params.id)).revision));
         res.status(200).json({ success: true });
       }),
     );
