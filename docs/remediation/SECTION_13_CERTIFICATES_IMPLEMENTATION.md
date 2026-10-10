@@ -24,3 +24,8 @@ Selected light tests ran in separate, nonrepeated files; details and raw observa
 No database call, migration application, Prisma generation, seed/import, full build, E2E, external provider execution, deployment or main merge occurred. No schema migration was needed for this source round. Inherited Section 12's assessment migration remains unapplied.
 
 Versionless legacy completion events now fail closed before issuance and need explicit historical reconciliation during activation; no queue/database backfill was attempted. Older signed v2 envelopes without serial/code bindings retain compatibility for their originally sealed fields; full new identity binding requires governed reissue, not silent resigning. Custom artwork remains deferred by the user, and runtime template approval/activation was not performed.
+
+
+## 2026-10-10 — original attached plan follow-up
+
+The original review attachment is now available and was used to map all 35 certificate tasks. See [the dated plan report](SECTION_13_CERTIFICATES_PLAN_2026-10-10.md) for source changes, final verification, proposed unapplied migration, and production blockers. Earlier unavailability and check statements above describe the earlier commit only; they do not describe this follow-up. Production signing remains blocked until approved non-exportable custody is provisioned; no live database or storage mutations occurred.

@@ -1,0 +1,38 @@
+name: Certificate plan source verification
+on:
+  pull_request:
+    paths:
+      - '**/certificates/**'
+      - '**/*Certificate*.ts*'
+      - 'packages/infrastructure/prisma/**'
+      - 'packages/shared/src/authorization/adminPermissionCatalog.ts'
+      - 'packages/shared/src/localization/certificateCopy.ts'
+      - 'apps/api/src/infrastructure/di/container.ts'
+      - '.certificates-vitest.config.ts'
+      - 'scripts/architecture/verify-certificate-audit-coverage.mjs'
+      - '.github/workflows/certificates-plan-source.yml'
+  push:
+    branches: [codex/section-13-certificates]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://source_validation:unused@127.0.0.1:1/source_validation
+      DIRECT_URL: postgresql://source_validation:unused@127.0.0.1:1/source_validation
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run db:generate
+      - run: npx --no-install prisma validate --schema packages/infrastructure/prisma/schema.prisma
+      - run: npx --no-install tsc -b apps/api apps/admin apps/web
+      - run: npx --no-install vitest run --config .certificates-vitest.config.ts
+      - run: npm run quality:source
+      - run: node scripts/architecture/verify-certificate-audit-coverage.mjs

@@ -1014,6 +1014,54 @@
     },
     {
       "method": "POST",
+      "path": "/admin/certificates/:id/artifacts/:kind/delivery-grant",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:download"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/:id/recipient-correction",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:lifecycle:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/:id/recipient-correction/approve",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:lifecycle:approve"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/certificates/:id/reissue",
       "owner": "CertificateAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -1035,6 +1083,22 @@
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:certificates:lifecycle:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/:id/revalidation",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:lifecycle:approve"
       ],
       "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -1083,6 +1147,22 @@
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:certificates:issuers:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/issuers/:id/approve",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:issuers:approve"
       ],
       "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",

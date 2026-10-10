@@ -21,6 +21,7 @@ export class CertificateArtifactRenderUseCase {
     private readonly repository: ICertificateRepository,
     private readonly renderer: ICertificateRenderingService,
     private readonly artifactStore: ICertificateArtifactStore,
+    private readonly trustGuard?: { assertRenderable(certificate: import('@manaratak/domain').CertificateDto): Promise<void>; attachRenderedArtifacts?: (id: string, input: Omit<import('@manaratak/domain').AttachCertificateArtifactsDto, 'certificateId' | 'actorId' | 'correlationId'>, actor: string, correlation?: string) => Promise<unknown> },
   ) {}
 
   public async renderCertificate(
@@ -31,6 +32,8 @@ export class CertificateArtifactRenderUseCase {
     const certificate = await this.repository.findById(certificateId);
     if (!certificate) throw new Error('CERTIFICATE_NOT_FOUND');
 
+    if (!this.trustGuard) throw new Error('CERTIFICATE_RENDER_TRUST_GUARD_REQUIRED');
+    await this.trustGuard.assertRenderable(certificate);
     const existingRender = this.object(certificate.metadata?.render);
     if (certificate.certificatePdfAssetId && certificate.previewImageAssetId && certificate.verificationQrAssetId) {
       return {
@@ -64,20 +67,25 @@ export class CertificateArtifactRenderUseCase {
     const qr = byKind.get('QR');
     if (!pdf || !preview || !qr) throw new Error('CERTIFICATE_RENDER_ARTIFACT_SET_INCOMPLETE');
 
-    const [certificatePdfAssetId, previewImageAssetId, verificationQrAssetId] = await Promise.all([
-      this.artifactStore.store({ certificateId, renderFingerprint: rendered.renderFingerprint, artifact: pdf }),
-      this.artifactStore.store({ certificateId, renderFingerprint: rendered.renderFingerprint, artifact: preview }),
-      this.artifactStore.store({ certificateId, renderFingerprint: rendered.renderFingerprint, artifact: qr }),
-    ]);
-
-    await this.repository.attachArtifacts({
-      certificateId, certificatePdfAssetId, previewImageAssetId, verificationQrAssetId, actorId, correlationId,
-      renderMetadata: {
-        rendererId: rendered.rendererId, rendererVersion: rendered.rendererVersion,
-        renderFingerprint: rendered.renderFingerprint, templateVersionId: rendered.templateVersionId,
-        templateVersionNumber: rendered.templateVersionNumber, renderedAt: new Date().toISOString(),
-      },
-    });
+    if (!this.trustGuard.attachRenderedArtifacts) throw new Error('CERTIFICATE_RENDER_ATTACHMENT_GUARD_REQUIRED');
+    const stored = await this.repository.checkpointRender(certificateId, rendered.renderFingerprint, 'BEGIN');
+    try {
+      for (const artifact of [pdf,preview,qr]) {
+        if (stored[artifact.kind]) continue;
+        const assetId = await this.artifactStore.store({certificateId,renderFingerprint:rendered.renderFingerprint,artifact});
+        await this.repository.checkpointRender(certificateId,rendered.renderFingerprint,artifact.kind,assetId);
+        stored[artifact.kind] = assetId;
+      }
+      await this.trustGuard.attachRenderedArtifacts(certificateId, {
+        certificatePdfAssetId:stored.PDF,previewImageAssetId:stored.PREVIEW,verificationQrAssetId:stored.QR,
+        renderMetadata:{rendererId:rendered.rendererId,rendererVersion:rendered.rendererVersion,renderFingerprint:rendered.renderFingerprint,templateVersionId:rendered.templateVersionId,templateVersionNumber:rendered.templateVersionNumber,renderedAt:new Date().toISOString()},
+      },actorId,correlationId ?? undefined);
+      await this.repository.checkpointRender(certificateId,rendered.renderFingerprint,'COMPLETE');
+    } catch(error) {
+      await this.repository.checkpointRender(certificateId,rendered.renderFingerprint,'FAILED');
+      throw error;
+    }
+    const certificatePdfAssetId=stored.PDF,previewImageAssetId=stored.PREVIEW,verificationQrAssetId=stored.QR;
 
     return { certificateId, certificatePdfAssetId, previewImageAssetId, verificationQrAssetId,
       renderFingerprint: rendered.renderFingerprint, rendererVersion: rendered.rendererVersion, replayed: false };

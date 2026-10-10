@@ -17,6 +17,7 @@ export class EapCertificateArtifactStore implements ICertificateArtifactStore {
     const referenceValue = `certificate:${input.certificateId}:render:${input.renderFingerprint}:${input.artifact.kind.toLowerCase()}`;
     const existing = await this.repository.findByReference(new AssetReference(referenceValue));
     if (existing) {
+      if (existing.owner.ownerType !== 'Certificate' || existing.owner.ownerId !== input.certificateId || existing.metadata.mimeType !== input.artifact.mimeType || (input.artifact.kind !== 'QR' && existing.classification === AssetSecurityClassification.PUBLIC)) throw new Error('CERTIFICATE_ARTIFACT_EXISTING_SECURITY_MISMATCH');
       if (existing.state !== AssetLifecycleState.ACTIVE) throw new Error('CERTIFICATE_ARTIFACT_IDEMPOTENCY_RECORD_NOT_ACTIVE');
       return existing.id.value;
     }
@@ -24,7 +25,7 @@ export class EapCertificateArtifactStore implements ICertificateArtifactStore {
     const locator = await this.ingest.requestUploadLocator({
       assetId: randomUUID(), assetReference: referenceValue, ownerId: input.certificateId, ownerType: 'Certificate',
       originalFilename: input.artifact.filename, mimeType: input.artifact.mimeType, fileExtension: input.artifact.fileExtension,
-      byteSize: input.artifact.bytes.byteLength, classification: AssetSecurityClassification.PUBLIC,
+      byteSize: input.artifact.bytes.byteLength, classification: input.artifact.kind === 'QR' ? AssetSecurityClassification.PUBLIC : AssetSecurityClassification.INTERNAL,
       retentionCategory: AssetRetentionCategory.PERMANENT,
     });
     if (!locator.uploadGrant) throw new Error('EAP_GENERATED_ARTIFACT_UPLOAD_GRANT_REQUIRED');

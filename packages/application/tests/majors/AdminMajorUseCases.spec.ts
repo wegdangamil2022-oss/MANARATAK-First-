@@ -46,7 +46,7 @@ describe('AdminMajorUseCases', () => {
     expect(mockRepo.listByTaxonomyNode).toHaveBeenCalledWith('taxonomy-1');
   });
 
-  it('updateMajor updates fields and recomputes completeness', async () => {
+  it('updateMajor refuses changes without the canonical reference owner', async () => {
     mockRepo.findById = vi.fn().mockResolvedValue({
       id: 'major-1',
       displayName: 'Computer Science',
@@ -61,17 +61,14 @@ describe('AdminMajorUseCases', () => {
     });
     mockRepo.update = vi.fn().mockResolvedValue({ id: 'major-1' });
 
-    await useCases.updateMajor('major-1', {
+    await expect(useCases.updateMajor('major-1', {
       displayName: 'Updated Computer Science'
-    });
+    })).rejects.toThrow('MAJOR_CANONICAL_REFERENCE_SERVICE_REQUIRED');
+    expect(mockRepo.update).not.toHaveBeenCalled();
 
-    expect(mockRepo.update).toHaveBeenCalledWith('major-1', expect.objectContaining({
-      displayName: 'Updated Computer Science',
-      completenessStatus: MajorImportCompletenessState.COMPLETE
-    }));
   });
 
-  it('markReadyToPublish only allows COMPLETE majors', async () => {
+  it('markReadyToPublish requires canonical reference validation even for COMPLETE majors', async () => {
     mockRepo.findById = vi.fn().mockResolvedValue({
       id: 'major-1',
       canonicalName: 'Computer Science',
@@ -86,9 +83,8 @@ describe('AdminMajorUseCases', () => {
       completenessStatus: MajorImportCompletenessState.COMPLETE
     });
 
-    await useCases.markReadyToPublish('major-1');
-
-    expect(mockRepo.updateStatus).toHaveBeenCalledWith('major-1', MajorStatus.READY_TO_PUBLISH);
+    await expect(useCases.markReadyToPublish('major-1')).rejects.toThrow('MAJOR_CANONICAL_REFERENCE_SERVICE_REQUIRED');
+    expect(mockRepo.updateStatus).not.toHaveBeenCalled();
   });
 
   it('publish only allows READY_TO_PUBLISH majors', async () => {

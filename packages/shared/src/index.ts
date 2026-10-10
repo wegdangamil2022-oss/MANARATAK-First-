@@ -8,3 +8,5 @@ export * from './spreadsheet/SpreadsheetWorkbookAdapter';
 export * from './qr/qrCode';
 export * from './authorization/adminPermissionCatalog';
 export * from './authorization/auditQueryCatalog';
+
+export * from './localization/certificateCopy';

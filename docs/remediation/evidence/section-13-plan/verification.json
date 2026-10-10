@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-10",
+  "branch": "codex/section-13-certificates",
+  "baseline": "1819c97577ad33961517eedf77bef8d97a9b31f6",
+  "attachment_section": 14,
+  "repository_section": 13,
+  "tasks_mapped": 35,
+  "node_local": "24.19.0",
+  "node_workflow": "22.16.0",
+  "tests": {
+    "command": "npx vitest run --config .certificates-vitest.config.ts",
+    "exit_code": 0,
+    "files_passed": 19,
+    "tests_passed": 165,
+    "failed": 0,
+    "postgresql": "NOT_EXECUTED",
+    "provider_calls": "NOT_EXECUTED"
+  },
+  "typecheck": {
+    "command": "npx tsc -b apps/api apps/admin apps/web",
+    "exit_code": 0,
+    "diagnostics": 0
+  },
+  "schema_validation": {
+    "exit_code": 0,
+    "database_connection": "NOT_EXECUTED"
+  },
+  "source_quality": "PASS",
+  "certificate_admin_audit": {
+    "status": "PASS",
+    "mutation_handlers": 15,
+    "global_boundaries": "PASS"
+  },
+  "whole_repository_audit": "FAIL_INHERITED_NON_CERTIFICATE_CONTRACTS",
+  "eslint": {
+    "errors": 0,
+    "warnings": 57
+  },
+  "staged_secret_scan": "PASS",
+  "ci_remote": "NOT_VERIFIED",
+  "migration": "SOURCE_ONLY_NOT_APPLIED",
+  "production_signer": "NOT_PROVISIONED_FAIL_CLOSED",
+  "production_acl_containment": "NOT_EXECUTED",
+  "runtime_acceptance": "PENDING",
+  "merge_deployment": "NOT_EXECUTED"
+}

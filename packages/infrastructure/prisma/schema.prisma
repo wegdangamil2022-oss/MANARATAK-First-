@@ -674,7 +674,7 @@ model CertificateIssuer {
   code                   String   @unique
   name                   String
   issuerType             String
-  status                 String   @default("ACTIVE")
+  status                 String   @default("PENDING_APPROVAL")
   organizationId         String?
   universityId           String?
   issuerLogoAssetId      String
@@ -840,6 +840,8 @@ model Certificate {
   @@index([issuerId])
   @@index([issuedAt])
   @@index([expiresAt])
+  @@index([issuerId, issuedAt(sort: Desc), id(sort: Desc)])
+  @@index([studentReferenceId, issuedAt(sort: Desc), id(sort: Desc)])
 }
 
 model CertificateIssuanceInbox {
@@ -868,6 +870,7 @@ model CertificateLedgerEntry {
   certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([certificateId, occurredAt])
+  @@index([certificateId, occurredAt(sort: Desc), id(sort: Desc)])
   @@index([action])
 }
 

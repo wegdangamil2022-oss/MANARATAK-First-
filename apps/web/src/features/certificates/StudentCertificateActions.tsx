@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useTranslation } from '../../i18n/I18nProvider';
+import { certificateCopy } from '@manaratak/shared';
+import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createQrMatrix } from '@manaratak/shared';
 import { ApiClient, type StudentCertificateProjectionDto } from '../../api/client';
@@ -8,6 +10,8 @@ export function StudentCertificateActions({
 }: {
   certificate: StudentCertificateProjectionDto;
 }) {
+  const {language} = useTranslation();
+  const copy = useCallback((value:string) => certificateCopy(language,value), [language]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const verifyPath = certificate.verificationCode
@@ -28,9 +32,9 @@ export function StudentCertificateActions({
     setError('');
     try {
       const grant = await ApiClient.getMyCertificateArtifactDeliveryGrant(certificate.id, 'pdf');
-      if (!/^https?:\/\//i.test(grant.url)) throw new Error('رابط ملف الشهادة غير صالح.');
+      if (!/^https?:\/\//i.test(grant.url)) throw new Error(copy("رابط ملف الشهادة غير صالح."));
       const response = await fetch(grant.url, { headers: grant.headers });
-      if (!response.ok) throw new Error('تعذر تنزيل الشهادة.');
+      if (!response.ok) throw new Error(copy("تعذر تنزيل الشهادة."));
       const objectUrl = URL.createObjectURL(await response.blob());
       const anchor = document.createElement('a');
       anchor.href = objectUrl;
@@ -38,7 +42,7 @@ export function StudentCertificateActions({
       anchor.click();
       setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'تعذر تحميل الشهادة');
+      setError(error instanceof Error ? error.message : copy("تعذر تحميل الشهادة"));
     } finally {
       setBusy(false);
     }
@@ -48,7 +52,7 @@ export function StudentCertificateActions({
       {matrix && (
         <svg
           role="img"
-          aria-label="QR للتحقق من الشهادة"
+          aria-label={copy("QR للتحقق من الشهادة")}
           viewBox={`0 0 ${matrix.length + 8} ${matrix.length + 8}`}
           className="h-28 w-28 rounded bg-white p-1"
           shapeRendering="crispEdges"
@@ -66,8 +70,7 @@ export function StudentCertificateActions({
       <div className="flex flex-wrap gap-3 text-xs font-bold">
         {verifyPath && (
           <Link to={verifyPath} className="text-[var(--mn-secondary)] underline">
-            التحقق من الشهادة
-          </Link>
+            {copy("التحقق من الشهادة")}</Link>
         )}
         {certificate.certificatePdfAssetId ? (
           <button
@@ -75,16 +78,15 @@ export function StudentCertificateActions({
             onClick={() => void download()}
             className="text-[var(--mn-secondary)] underline disabled:opacity-50"
           >
-            {busy ? 'جارٍ التحميل…' : 'تحميل الشهادة PDF'}
+            {busy ? copy("جارٍ التحميل…") : copy("تحميل الشهادة PDF")}
           </button>
         ) : (
-          <span className="text-[var(--mn-text-muted)]">ملف الشهادة قيد التجهيز</span>
+          <span className="text-[var(--mn-text-muted)]">{copy("ملف الشهادة قيد التجهيز")}</span>
         )}
       </div>
       {!matrix && verifyPath && (
         <p className="text-xs text-[var(--mn-text-muted)]">
-          يمكن التحقق عبر الرابط أو رمز الشهادة.
-        </p>
+          {copy("يمكن التحقق عبر الرابط أو رمز الشهادة.")}</p>
       )}
       {error && (
         <p role="alert" className="text-xs text-[var(--mn-danger-text)]">

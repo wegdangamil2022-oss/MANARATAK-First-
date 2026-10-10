@@ -10,6 +10,11 @@ export interface ICertificateNumberingService {
   generate(input: CertificateNumberingInput): string;
 }
 
+/** Trusted server injection only: production implementations must keep private keys
+ * non-exportable, enforce an issuer-specific key allowlist, reject retired signing
+ * keys, and preserve historically trusted verification keys through rotation.
+ * An arbitrary reference supplied by a signed envelope must never create trust.
+ */
 export interface ICertificateSignatureService {
   assertIssuerKeyAvailable(signingKeyReference: string): void;
   signHash(hash: string, signingKeyReference: string): string;

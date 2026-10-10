@@ -155,15 +155,15 @@ export class StudentWorkspaceRouter {
         res.json(result);
       }),
     );
+    router.get('/certificates',asyncHandler(async(req:Request,res:Response)=>{
+      const {cursor}=z.object({cursor:z.string().uuid().optional()}).strict().parse(req.query);
+      const data=await cradle.certificateReadModelService.listForStudent(ownStudent(req),cursor);
+      res.json({data,nextCursor:data.length===50 ? data[data.length-1].certificateId : null});
+    }));
     router.post('/certificates/:certificateId/artifacts/:kind/delivery-grant', asyncHandler(async (req: Request, res: Response) => {
       const ownerId = ownStudent(req);
       const kind = z.enum(['pdf', 'preview']).parse(req.params.kind);
-      const certificates = await cradle.certificateReadModelService.listForStudent(ownerId);
-      const certificate = certificates.find(row => row.certificateId === req.params.certificateId);
-      const assetId = kind === 'pdf' ? certificate?.certificatePdfAssetId : certificate?.previewImageAssetId;
-      if (!certificate || !assetId) return void res.status(404).json({error:'CERTIFICATE_ARTIFACT_NOT_FOUND'});
-      const asset = await assetRecordRepository.findById(new AssetId(assetId));
-      if (!asset || asset.owner.ownerType !== 'Certificate' || asset.owner.ownerId !== certificate.certificateId) return void res.status(404).json({error:'CERTIFICATE_ARTIFACT_NOT_FOUND'});
+      const assetId = await cradle.certificateReadModelService.deliveryArtifact(req.params.certificateId, kind, ownerId);
       res.json(await processAssetLifecycleUseCase.requestDeliveryGrant({assetId,expiresInSeconds:300}));
     }));
 
@@ -637,7 +637,7 @@ export class StudentWorkspaceRouter {
       }),
     );
 
-    router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }

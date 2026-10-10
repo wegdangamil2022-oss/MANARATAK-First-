@@ -95,8 +95,8 @@ export class CertificateAdminRouter {
       return permit(permission)(req, res, next);
     };
 
-    const listQuery = z.object({search: z.string().trim().max(200).optional(), status: z.nativeEnum(CertificateStatus).optional(), templateId: z.string().max(160).optional(),
-      page: z.coerce.number().int().positive().max(100000).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(25)});
+    const listQuery = z.object({issuerId: z.string().uuid().optional(), studentReferenceId: z.string().uuid().optional(), templateVersionId: z.string().uuid().optional(), issuedFrom: z.string().datetime().optional(), issuedTo: z.string().datetime().optional(), search: z.string().trim().max(200).optional(), status: z.nativeEnum(CertificateStatus).optional(), templateId: z.string().uuid().optional(),
+      page: z.coerce.number().int().positive().max(100000).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(25)}).strict().refine(q => !q.issuedFrom || !q.issuedTo || q.issuedFrom <= q.issuedTo, {message: 'Invalid date range'});
     router.get('/', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) =>
       res.json(await useCases.list(listQuery.parse(req.query))),
     ));
@@ -107,10 +107,27 @@ export class CertificateAdminRouter {
     router.post('/issuers', permit('admin:certificates:issuers:manage'), asyncHandler(async (req: Request, res: Response) =>
       res.status(201).json(await useCases.createIssuer(issuerBody.parse(req.body), mutationContext(req))),
     ));
-    router.patch('/issuers/:id', permit('admin:certificates:issuers:manage'), asyncHandler(async (req: Request, res: Response) =>
-      res.json(await useCases.updateIssuer(req.params.id, issuerBody.omit({ code: true }).partial().parse(req.body), mutationContext(req))),
-    ));
+    const issuerContext = (req: Request, reason?: string) => {
+      const value = req.get('If-Match')?.replace(/^"|"$/g, '');
+      if (!value || !Number.isFinite(new Date(value).getTime()) || new Date(value).toISOString() !== value) throw new Error('CERTIFICATE_ISSUER_PRECONDITION_REQUIRED');
+      return { ...mutationContext(req, reason), expectedIssuerUpdatedAt: value };
+    };
+    router.post('/issuers/:id/approve', permit('admin:certificates:issuers:approve'), asyncHandler(async (req: Request, res: Response) => {
+      const body = z.object({ evidenceAssetId: z.string().uuid(), authorityReference: z.string().trim().min(3).max(300), reason: z.string().trim().min(8).max(2000) }).strict().parse(req.body);
+      res.json(await useCases.approveIssuer(req.params.id, body.evidenceAssetId, body.authorityReference, issuerContext(req, body.reason)));
+    }));
+    router.patch('/issuers/:id', permit('admin:certificates:issuers:manage'), asyncHandler(async (req: Request, res: Response) => {
+      const body = issuerBody.omit({code:true,metadata:true}).partial().extend({status:z.enum(['SUSPENDED','DEPRECATED']).optional(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);
+      const {reason,...fields}=body;
+      res.json(await useCases.updateIssuer(req.params.id,fields,issuerContext(req,reason)));
+    }));
 
+
+    router.get('/template-versions/:id', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) => {
+      const version = await useCases.getTemplateVersion(req.params.id);
+      if (!version) return res.status(404).json({error: 'CERTIFICATE_TEMPLATE_VERSION_NOT_FOUND'});
+      res.json(version);
+    }));
     router.get('/templates', permit('admin:certificates:view'), asyncHandler(async (_req: Request, res: Response) => res.json({ data: await useCases.listTemplates() })));
     router.post('/templates/bootstrap-default', permit('admin:certificates:templates:author'), asyncHandler(async (req: Request, res: Response) => {
       const body = z.object({ issuerId: z.string().min(1) }).parse(req.body);
@@ -132,10 +149,34 @@ export class CertificateAdminRouter {
     // from the trusted Phase 13 event/inbox integration boundary.
 
     router.get('/students/:studentReferenceId', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) =>
-      res.json({ data: await useCases.listStudentCertificates(req.params.studentReferenceId) }),
+      res.json({ data: await useCases.listStudentCertificates(req.params.studentReferenceId, z.coerce.number().int().min(1).max(100000).default(1).parse(req.query.page), z.string().uuid().optional().parse(req.query.cursor)) }),
     ));
+    router.post('/:id/recipient-correction', permit('admin:certificates:lifecycle:manage'), asyncHandler(async (req: Request, res: Response) => {
+      const body = z.object({name:z.string().trim().min(1).max(180).optional(),evidenceAssetId:z.string().uuid(),validUntil:z.string().datetime().optional(),expectedUpdatedAt:z.string().datetime(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);
+      res.json(await useCases.reviewCertificate(req.params.id, 'RECIPIENT_CORRECTION_REQUESTED', body, mutationContext(req, body.reason)));
+    }));
+    router.post('/:id/recipient-correction/approve', permit('admin:certificates:lifecycle:approve'), asyncHandler(async (req: Request, res: Response) => {
+      const body = z.object({name:z.string().trim().min(1).max(180).optional(),evidenceAssetId:z.string().uuid(),validUntil:z.string().datetime().optional(),expectedUpdatedAt:z.string().datetime(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);
+      res.json(await useCases.reviewCertificate(req.params.id, 'RECIPIENT_CORRECTION_APPROVED', body, mutationContext(req, body.reason)));
+    }));
+    router.post('/:id/revalidation', permit('admin:certificates:lifecycle:approve'), asyncHandler(async (req: Request, res: Response) => {
+      const body = z.object({name:z.string().trim().min(1).max(180).optional(),evidenceAssetId:z.string().uuid(),validUntil:z.string().datetime().optional(),expectedUpdatedAt:z.string().datetime(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);
+      res.json(await useCases.reviewCertificate(req.params.id, 'REVALIDATION_APPROVED', body, mutationContext(req, body.reason)));
+    }));
+    router.get('/:id/verification', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) => {
+      const certificate = await useCases.getCertificate(req.params.id);
+      if (!certificate) return res.status(404).json({error: 'CERTIFICATE_NOT_FOUND'});
+      res.json({...await useCases.verifyByCode(certificate.verificationCode, false), checkedAt: new Date().toISOString()});
+    }));
+    router.post('/:id/artifacts/:kind/delivery-grant', permit('admin:certificates:download'), asyncHandler(async (req: Request, res: Response) => {
+      const kind = z.enum(['pdf', 'preview']).parse(req.params.kind);
+      const assetId = await useCases.deliveryArtifact(req.params.id, kind);
+      const grants = (cradle as unknown as {processAssetLifecycleUseCase?: {requestDeliveryGrant(input: {assetId: string; expiresInSeconds: number}): Promise<unknown>}}).processAssetLifecycleUseCase;
+      if (!grants) throw new Error('CERTIFICATE_DELIVERY_NOT_CONFIGURED');
+      res.json(await grants.requestDeliveryGrant({assetId,expiresInSeconds:300}));
+    }));
     router.get('/:id/ledger', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) =>
-      res.json({ data: await useCases.listLedger(req.params.id) }),
+      res.json({ data: await useCases.listLedger(req.params.id, z.coerce.number().int().min(1).max(100000).default(1).parse(req.query.page), z.string().uuid().optional().parse(req.query.cursor)) }),
     ));
     router.get('/:id', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) => {
       const item = await useCases.getCertificate(req.params.id);
@@ -162,7 +203,7 @@ export class CertificateAdminRouter {
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation Error', details: err.issues });
       const message = typeof err.message === 'string' && /^(CERTIFICATE_|ACTIVE_|REVOCATION_|ARCHIVE_|RENEWAL_|REISSUE_|AUTHENTICATED_)/.test(err.message) ? err.message : 'CERTIFICATE_OPERATION_FAILED';
-      const status = message === 'CERTIFICATE_TEMPLATE_PRECONDITION_REQUIRED' ? 428 : message === 'CERTIFICATE_TEMPLATE_STALE' ? 409 : message === 'CERTIFICATE_OPERATION_FAILED' ? 500 : /NOT_FOUND|not found/.test(message) ? 404 : /IMMUTABLE|ARCHIVED|TRANSITION|MUST_BE|MAKER_CHECKER|COLLISION/.test(message) ? 409 : /AUTHENTICATED|PERMISSION/.test(message) ? 403 : 400;
+      const status = /PRECONDITION_REQUIRED/.test(message) ? 428 : /STALE|CONFLICT/.test(message) ? 409 : message === 'CERTIFICATE_OPERATION_FAILED' ? 500 : /NOT_FOUND|not found/.test(message) ? 404 : /IMMUTABLE|ARCHIVED|TRANSITION|MUST_BE|MAKER_CHECKER|COLLISION/.test(message) ? 409 : /AUTHENTICATED|PERMISSION/.test(message) ? 403 : 400;
       return res.status(status).json({ error: message });
     });
     return router;

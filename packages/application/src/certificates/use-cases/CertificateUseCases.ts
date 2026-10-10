@@ -24,6 +24,7 @@ import {
   ICourseCurriculumRepository,
   ILearningPathRepository,
   IIdentityRepository,
+  CertificateIssuerDto,
   LearningPathCompletedEventPayload,
   UpdateCertificateIssuerDto,
   UpdateCertificateTemplateDto,
@@ -56,6 +57,7 @@ export class CertificateUseCases {
     private readonly learningPathRepository?: ILearningPathRepository,
     private readonly identityRepository?: IIdentityRepository,
     private readonly curriculumRepository?: ICourseCurriculumRepository,
+    private readonly authorityResolver?: { validate(issuer: CertificateIssuerDto): Promise<boolean> },
   ) {
     this.trustPolicy = new CertificateTrustPolicy(signingRuntime);
   }
@@ -83,18 +85,24 @@ export class CertificateUseCases {
   public listTemplates() { return this.certificateRepository.listTemplates(); }
   public listIssuers() { return this.certificateRepository.listIssuers(); }
   public getCertificate(id: string) { return this.certificateRepository.findById(id); }
-  public listLedger(id: string) { return this.certificateRepository.listLedger(id); }
-  public listStudentCertificates(studentReferenceId: string) { return this.certificateRepository.listByStudent(studentReferenceId); }
+  public listLedger(id: string, page = 1, cursor?:string) { return this.certificateRepository.listLedger(id, page, cursor); }
+  public getTemplateVersion(id: string) { return this.certificateRepository.findTemplateVersionById(id); }
+  public listStudentCertificates(studentReferenceId: string, page = 1, cursor?:string) { return this.certificateRepository.listByStudent(studentReferenceId, page, 50, cursor); }
   public async attachRenderedArtifacts(certificateId: string, input: Omit<AttachCertificateArtifactsDto, 'certificateId' | 'actorId' | 'correlationId'>, actorId = 'phase14-artifact-renderer', correlationId?: string) {
     await this.requireCertificate(certificateId);
     const assetIds = [input.certificatePdfAssetId, input.previewImageAssetId, input.verificationQrAssetId].filter((value): value is string => Boolean(value));
     if (!assetIds.length) throw new Error('CERTIFICATE_RENDERED_ARTIFACT_REQUIRED');
-    for (const assetId of assetIds) await this.ensureActiveAsset(assetId, 'CERTIFICATE_RENDERED_ARTIFACT', assetId === input.certificatePdfAssetId ? 'PDF' : 'IMAGE');
+    for (const assetId of assetIds) {
+      await this.ensureActiveAsset(assetId, 'CERTIFICATE_RENDERED_ARTIFACT', assetId === input.certificatePdfAssetId ? 'PDF' : 'IMAGE');
+      const asset = await this.assetRepository!.findById(new AssetId(assetId));
+      if (asset?.owner.ownerType !== 'Certificate' || asset.owner.ownerId !== certificateId || (assetId !== input.verificationQrAssetId && asset.classification === AssetSecurityClassification.PUBLIC)) throw new Error('CERTIFICATE_ARTIFACT_OWNERSHIP_INVALID');
+    }
     return this.certificateRepository.attachArtifacts({ certificateId, ...input, actorId, correlationId });
   }
   public async readiness() {
     const [templates, issuers] = await Promise.all([this.certificateRepository.listTemplates(), this.certificateRepository.listIssuers()]);
     const runtime = this.trustPolicy.runtimeReadiness();
+    const artifacts = await this.trustPolicy.artifactReadiness();
     const activeIssuerIds = new Set(issuers.filter(item => item.status === 'ACTIVE').map(item => item.id));
     const activeTemplate = templates.some((item) => item.status === CertificateTemplateStatus.ACTIVE && item.currentVersion.status === CertificateTemplateStatus.ACTIVE && activeIssuerIds.has(item.issuerId) && item.currentVersion.issuerId === item.issuerId);
     const activeIssuer = issuers.some((item) => item.status === 'ACTIVE');
@@ -103,7 +111,9 @@ export class CertificateUseCases {
       activeIssuer,
       trustedCompletionIssuanceReady: activeTemplate && activeIssuer && (!runtime.productionLike || (runtime.signingProviderConfigured && runtime.signingKeyReferenceConfigured && runtime.publicVerificationBaseUrlConfigured)),
       artifactRendererMode: 'EAP_ASYNC',
-      artifactRendererRuntimeReady: false,
+      artifactRendererRuntimeReady: artifacts.status === 'READY' && Boolean(artifacts.verifiedAt),
+      artifactRendererStatus: artifacts.status,
+      artifactRendererReason: artifacts.reason,
       ...runtime,
     };
   }
@@ -117,17 +127,37 @@ export class CertificateUseCases {
     return this.certificateRepository.createIssuer({
       ...input,
       publicId: `cert-issuer-${randomUUID()}`,
-      status: input.status ?? 'ACTIVE',
+      status: 'PENDING_APPROVAL',
+      metadata: { ...input.metadata, trust: { createdBy: context.actorId, approvedBy: null } },
     }, context);
   }
 
   public async updateIssuer(id: string, input: UpdateCertificateIssuerDto, context: CertificateMutationContext) {
     const current = await this.certificateRepository.findIssuerById(id);
     if (!current) throw new Error('CERTIFICATE_ISSUER_NOT_FOUND');
+    if (input.status === 'ACTIVE' || input.metadata !== undefined) throw new Error('CERTIFICATE_ISSUER_APPROVAL_REQUIRED');
     this.validateIssuer({...current, ...input});
     if (input.issuerLogoAssetId) await this.ensureActiveAsset(input.issuerLogoAssetId, 'CERTIFICATE_ISSUER_LOGO');
     if (input.signingKeyReference !== undefined && !input.signingKeyReference.trim()) throw new Error('CERTIFICATE_ISSUER_SIGNING_KEY_REQUIRED');
     return this.certificateRepository.updateIssuer(id, input, context);
+  }
+
+  public async approveIssuer(id: string, evidenceAssetId: string, authorityReference: string, context: CertificateMutationContext) {
+    const issuer = await this.certificateRepository.findIssuerById(id);
+    if (!issuer) throw new Error('CERTIFICATE_ISSUER_NOT_FOUND');
+    if (!context.reason?.trim() || !authorityReference.trim()) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_EVIDENCE_REQUIRED');
+    if (issuer.status !== 'PENDING_APPROVAL' && issuer.status !== 'SUSPENDED') throw new Error('CERTIFICATE_ISSUER_TRANSITION_INVALID');
+    const trust = issuer.metadata?.trust as { createdBy?: string } | undefined;
+    if (!trust?.createdBy || trust.createdBy === context.actorId) throw new Error('CERTIFICATE_ISSUER_MAKER_CHECKER_REQUIRED');
+    if (!this.assetRepository) throw new Error('CERTIFICATE_ASSET_PLATFORM_NOT_CONFIGURED');
+    const evidence = await this.assetRepository.findById(new AssetId(evidenceAssetId));
+    if (!evidence || evidence.state !== AssetLifecycleState.ACTIVE || evidence.classification === AssetSecurityClassification.PUBLIC || evidence.owner.ownerType !== 'CertificateIssuer' || evidence.owner.ownerId !== id) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_EVIDENCE_INVALID');
+    if (issuer.issuerType === 'MANARATAK') {
+      if (issuer.code !== 'MANARATAK' || issuer.universityId || issuer.organizationId) throw new Error('CERTIFICATE_OFFICIAL_ISSUER_BINDING_INVALID');
+    } else if (!this.authorityResolver || !await this.authorityResolver.validate(issuer)) {
+      throw new Error('CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED');
+    }
+    return this.certificateRepository.updateIssuer(id, { status: 'ACTIVE' }, { ...context, issuerApproval: { evidenceAssetId, authorityReference } });
   }
 
   /** Bootstrap can create a draft only; issuance never auto-creates or auto-activates it. */
@@ -165,6 +195,7 @@ export class CertificateUseCases {
     await this.requireActiveIssuer(input.issuerId);
     return this.certificateRepository.createTemplate({
       ...input,
+      metadata: { ...input.metadata, assetProvenance: await this.assetProvenance(input) },
       publicId: `cert-template-${randomUUID()}`,
       status: CertificateTemplateStatus.DRAFT,
     }, context);
@@ -174,14 +205,20 @@ export class CertificateUseCases {
     this.validateTemplate(input);
     await this.ensureActiveAssets(input);
     if (input.issuerId) await this.requireActiveIssuer(input.issuerId);
-    return this.certificateRepository.updateTemplate(id, input, context);
+    const current = await this.certificateRepository.findTemplateById(id);
+    if (!current) throw new Error('CERTIFICATE_TEMPLATE_NOT_FOUND');
+    const combined = {...current.currentVersion, ...input};
+    return this.certificateRepository.updateTemplate(id, { ...input, metadata: { ...combined.metadata, assetProvenance: await this.assetProvenance(combined) } }, context);
   }
 
   public async transitionTemplate(id: string, status: CertificateTemplateStatus, context: CertificateMutationContext) {
     const template = await this.certificateRepository.findTemplateById(id);
     if (!template) throw new Error('CERTIFICATE_TEMPLATE_NOT_FOUND');
     if (!templateTransitions[template.status].includes(status)) throw new Error('CERTIFICATE_TEMPLATE_TRANSITION_INVALID');
-    if (status === CertificateTemplateStatus.ACTIVE) await this.requireActiveIssuer(template.issuerId);
+    if (status === CertificateTemplateStatus.ACTIVE || status === CertificateTemplateStatus.APPROVED) {
+      await this.requireActiveIssuer(template.issuerId);
+      await this.assertAssetProvenance(template.currentVersion);
+    }
     return this.certificateRepository.transitionTemplate(id, status, context);
   }
 
@@ -216,11 +253,46 @@ export class CertificateUseCases {
     const source = await this.requireCertificate(id);
     if (source.status !== CertificateStatus.REVOKED) throw new Error('CERTIFICATE_MUST_BE_REVOKED_BEFORE_REISSUE');
     const template = await this.requireActiveTemplate(templateId ?? source.templateId);
+    if (recipientDisplayName !== undefined && recipientDisplayName !== source.recipientDisplayName) {
+      const correction = source.metadata?.recipientCorrection as {state?:string;name?:string;approvedBy?:string} | undefined;
+      if (correction?.state !== 'APPROVED' || correction.name !== recipientDisplayName || !correction.approvedBy || await this.resolveRecipientDisplayName(source.studentReferenceId) !== recipientDisplayName) throw new Error('CERTIFICATE_RECIPIENT_CORRECTION_APPROVAL_REQUIRED');
+    }
     const replacement = await this.buildReplacement(source, template, actorId, recipientDisplayName ?? source.recipientDisplayName ?? undefined, `reissue:${source.id}:${randomUUID()}`);
     return this.certificateRepository.reissue({ certificateId: id, reason: reason.trim(), actorId, recipientDisplayName, templateId, correlationId, replacement, eventType: 'CertificateReissued' });
   }
 
-  public async verifyByCode(code: string): Promise<CertificateVerificationDto> {
+  public async reviewCertificate(id: string, kind: 'RECIPIENT_CORRECTION_REQUESTED' | 'RECIPIENT_CORRECTION_APPROVED' | 'REVALIDATION_APPROVED', input: {name?:string;evidenceAssetId:string;validUntil?:string;expectedUpdatedAt:string}, context: CertificateMutationContext) {
+    const certificate = await this.requireCertificate(id);
+    if (!this.assetRepository) throw new Error('CERTIFICATE_ASSET_PLATFORM_NOT_CONFIGURED');
+    const evidence = await this.assetRepository.findById(new AssetId(input.evidenceAssetId));
+    if (!evidence || evidence.state !== AssetLifecycleState.ACTIVE || evidence.classification === AssetSecurityClassification.PUBLIC || evidence.owner.ownerType !== 'Certificate' || evidence.owner.ownerId !== id) throw new Error('CERTIFICATE_REVIEW_EVIDENCE_INVALID');
+    if (kind !== 'REVALIDATION_APPROVED' && (!input.name || await this.resolveRecipientDisplayName(certificate.studentReferenceId) !== input.name)) throw new Error('CERTIFICATE_CANONICAL_RECIPIENT_NAME_REQUIRED');
+    if (kind === 'REVALIDATION_APPROVED' && (!input.validUntil || !Number.isFinite(new Date(input.validUntil).getTime()))) throw new Error('CERTIFICATE_REVALIDATION_DATE_INVALID');
+    return this.certificateRepository.recordReview(id,kind,input,context);
+  }
+
+  public async assertRenderable(certificate: CertificateDto): Promise<void> {
+    const envelope = this.readSignedEnvelope(certificate.metadata?.signedEnvelope);
+    if (!envelope || this.digest(this.canonicalJson(envelope)) !== certificate.verificationHash || !this.persistedIdentityMatchesEnvelope(certificate, envelope) || !this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference)) throw new Error('CERTIFICATE_INTEGRITY_INVALID');
+    if (certificate.status !== CertificateStatus.ACTIVE || (certificate.expiresAt && certificate.expiresAt <= new Date())) throw new Error('CERTIFICATE_ARTIFACT_STATE_INVALID');
+    const review = certificate.metadata?.revalidation as {approvedBy?:string;validUntil?:string} | undefined;
+    if (envelope.validity.requiresRevalidation && (!review?.approvedBy || !review.validUntil || !Number.isFinite(new Date(review.validUntil).getTime()) || new Date(review.validUntil)<=new Date())) throw new Error('CERTIFICATE_REVALIDATION_REQUIRED');
+    const version = await this.getTemplateVersion(certificate.templateVersionId);
+    if (!version) throw new Error('CERTIFICATE_TEMPLATE_VERSION_NOT_FOUND');
+    await this.assertAssetProvenance(version);
+  }
+  public async deliveryArtifact(id: string, kind: 'pdf' | 'preview', studentReferenceId?: string): Promise<string> {
+    const certificate = studentReferenceId ? await this.certificateRepository.findForStudent(id, studentReferenceId) : await this.getCertificate(id);
+    if (!certificate) throw new Error('CERTIFICATE_NOT_FOUND');
+    await this.assertRenderable(certificate);
+    const assetId = kind === 'pdf' ? certificate.certificatePdfAssetId : certificate.previewImageAssetId;
+    if (!assetId || !this.assetRepository) throw new Error('CERTIFICATE_ARTIFACT_NOT_FOUND');
+    const asset = await this.assetRepository.findById(new AssetId(assetId));
+    if (!asset || asset.state !== AssetLifecycleState.ACTIVE || asset.classification === AssetSecurityClassification.PUBLIC || asset.owner.ownerType !== 'Certificate' || asset.owner.ownerId !== id) throw new Error('CERTIFICATE_ARTIFACT_NOT_FOUND');
+    return assetId;
+  }
+
+  public async verifyByCode(code: string, recordAnalytics = true): Promise<CertificateVerificationDto> {
     const certificate = await this.certificateRepository.findByVerificationCode(code.trim());
     if (!certificate) throw new Error('Certificate not found');
     const envelope = this.readSignedEnvelope(certificate.metadata?.signedEnvelope);
@@ -234,10 +306,22 @@ export class CertificateUseCases {
     );
     const expiresAt = envelope?.validity.expiresAt ? new Date(envelope.validity.expiresAt) : null;
     const expired = Boolean(expiresAt && expiresAt <= new Date());
-    const isValid = certificate.status === CertificateStatus.ACTIVE && !expired && integrityVerified;
-    await this.certificateRepository.recordVerification(certificate.id, isValid ? 'VALID' : certificate.status === CertificateStatus.ACTIVE && expired ? 'EXPIRED' : certificate.status, 'PUBLIC_CODE');
+    const review = certificate.metadata?.revalidation as {validUntil?:string;approvedBy?:string} | undefined;
+    const revalidationRequired = Boolean(envelope?.validity.requiresRevalidation && (!review?.approvedBy || !review.validUntil || !Number.isFinite(new Date(review.validUntil).getTime()) || new Date(review.validUntil) <= new Date()));
+    const isValid = certificate.status === CertificateStatus.ACTIVE && !expired && integrityVerified && !revalidationRequired;
+    if (recordAnalytics) await this.certificateRepository.recordVerification(certificate.id, isValid ? 'VALID' : certificate.status === CertificateStatus.ACTIVE && expired ? 'EXPIRED' : certificate.status, 'PUBLIC_CODE');
+    if (!integrityVerified) return {
+      publicId: certificate.publicId, serialNumber: certificate.serialNumber, verificationCode: certificate.verificationCode,
+      verificationUrl: '', verificationHash: '', status: certificate.status, lifecycleStatus: certificate.status,
+      temporalStatus: expired ? 'EXPIRED' : 'CURRENT', verificationFailure: 'INTEGRITY_INVALID',
+      certificateType: certificate.certificateType, recipientDisplayName: null, achievementType: certificate.achievementType,
+      achievementDisplayName: '', completedAt: new Date(0), issuedAt: new Date(0), expiresAt: null,
+      validityPolicy: 'PERMANENT', issuerId: '', issuerName: '', skills: [], competencies: [], templateVersion: '', isValid: false, integrityVerified: false,
+    };
     const achievement = envelope?.achievement;
     return {
+      lifecycleStatus: certificate.status, temporalStatus: expired ? 'EXPIRED' : 'CURRENT',
+      ...(revalidationRequired ? { verificationFailure: 'REVALIDATION_REQUIRED' as const } : {}),
       publicId: certificate.publicId,
       serialNumber: certificate.serialNumber,
       verificationCode: certificate.verificationCode,
@@ -411,7 +495,7 @@ export class CertificateUseCases {
       signingKeyReference: issuer.signingKeyReference,
       skills: [],
       competencies: [],
-      metadata: { signedEnvelope: envelope, verificationQr, issuedFromEvent: event.eventType, sourceEventId: event.eventId, sourcePhase: event.payload.sourcePhase, certificateOwnerPhase: event.payload.certificateOwnerPhase, artifactState: 'AWAITING_EAP_RENDER' },
+      metadata: { issuedBy:'phase14-system', signedEnvelope: envelope, verificationQr, issuedFromEvent: event.eventType, sourceEventId: event.eventId, sourcePhase: event.payload.sourcePhase, certificateOwnerPhase: event.payload.certificateOwnerPhase, artifactState: 'AWAITING_EAP_RENDER' },
       actorId: 'phase14-system',
     });
   }
@@ -494,7 +578,7 @@ export class CertificateUseCases {
       competencies: [...source.competencies],
       digitalSignature: this.trustPolicy.signHash(verificationHash, issuer.signingKeyReference),
       signingKeyReference: issuer.signingKeyReference,
-      metadata: { signedEnvelope: envelope, verificationQr, reissuedFromCertificateId: source.id },
+      metadata: { issuedBy:actorId, signedEnvelope: envelope, verificationQr, reissuedFromCertificateId: source.id },
       actorId,
     };
   }
@@ -576,7 +660,7 @@ export class CertificateUseCases {
 
   private async requireActiveIssuer(id: string) {
     const issuer = await this.certificateRepository.findIssuerById(id);
-    if (!issuer || issuer.status !== 'ACTIVE') throw new Error('ACTIVE_CERTIFICATE_ISSUER_REQUIRED');
+    if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'MANARATAK' && !(issuer.metadata?.trust as { approvedBy?: string } | undefined)?.approvedBy)) throw new Error('ACTIVE_CERTIFICATE_ISSUER_REQUIRED');
     if (!issuer.issuerLogoAssetId || !issuer.signingKeyReference) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_INCOMPLETE');
     return issuer;
   }
@@ -610,6 +694,23 @@ export class CertificateUseCases {
     for (const asset of [input.logoAssetId, input.sealAssetId, input.signatureAssetId, input.designAssetId]) if (asset && /^https?:|^file:|[\\/]/i.test(asset)) throw new Error('CERTIFICATE_TEMPLATE_RAW_ASSET_FORBIDDEN');
     if (input.validityDurationDays !== undefined && input.validityDurationDays !== null && (!Number.isInteger(input.validityDurationDays) || input.validityDurationDays <= 0)) throw new Error('CERTIFICATE_VALIDITY_DURATION_INVALID');
     if (input.renewalPeriodDays !== undefined && input.renewalPeriodDays !== null && (!Number.isInteger(input.renewalPeriodDays) || input.renewalPeriodDays <= 0)) throw new Error('CERTIFICATE_RENEWAL_PERIOD_INVALID');
+  }
+
+  private async assetProvenance(input: UpdateCertificateTemplateDto): Promise<Record<string, string>> {
+    const result: Record<string, string> = {};
+    for (const id of [input.logoAssetId, input.sealAssetId, input.signatureAssetId, input.designAssetId].filter((id): id is string => Boolean(id))) {
+      await this.ensureActiveAsset(id, 'CERTIFICATE_TEMPLATE_ASSET');
+      const record = await this.assetRepository!.findById(new AssetId(id));
+      if (!record || !['image/png','image/jpeg'].includes(record.metadata.mimeType)) throw new Error('CERTIFICATE_TEMPLATE_ASSET_MIME_NOT_ALLOWED');
+      if (!record?.checksum || record.checksum.algorithm.toLowerCase().replace('-', '') !== 'sha256' || !/^[0-9a-f]{64}$/i.test(record.checksum.hash)) throw new Error('CERTIFICATE_TEMPLATE_ASSET_PROVENANCE_REQUIRED');
+      result[id] = record.checksum.hash;
+    }
+    return result;
+  }
+  private async assertAssetProvenance(input: UpdateCertificateTemplateDto): Promise<void> {
+    const current = await this.assetProvenance(input);
+    const pinned = input.metadata?.assetProvenance as Record<string,string> | undefined;
+    if (Object.entries(current).some(([id, hash]) => pinned?.[id] !== hash)) throw new Error('CERTIFICATE_TEMPLATE_ASSET_PROVENANCE_CHANGED');
   }
 
   private async ensureActiveAssets(input: UpdateCertificateTemplateDto): Promise<void> {

@@ -764,18 +764,21 @@ export interface CertificateVerificationDto {
   verificationCode: string;
   verificationUrl?: string | null;
   status: string;
-  certificateType: string;
+  lifecycleStatus?: string;
+  temporalStatus?: "CURRENT" | "EXPIRED";
+  verificationFailure?: "INTEGRITY_INVALID" | "REVALIDATION_REQUIRED";
+  certificateType?: string;
   recipientDisplayName?: string | null;
-  achievementType: 'COURSE' | 'LEARNING_PATH';
-  achievementDisplayName: string;
+  achievementType?: 'COURSE' | 'LEARNING_PATH';
+  achievementDisplayName?: string;
   courseDisplayName?: string | null;
   learningPathDisplayName?: string | null;
-  completedAt: string;
+  completedAt?: string;
   /** Compatibility alias for older admin-preview code; public API uses completedAt. */
   courseCompletedAt?: string;
-  issuedAt: string;
+  issuedAt?: string;
   expiresAt?: string | null;
-  validityPolicy: string;
+  validityPolicy?: string;
   issuerName?: string | null;
   grade?: string | null;
   skills: string[];

@@ -9,6 +9,9 @@ import {
 } from '@manaratak/domain';
 
 export interface CertificateSigningRuntimeConfiguration {
+  artifactReadinessProbe?: () => Promise<{status:'READY'|'DEGRADED'|'RUNTIME_PENDING'|'NOT_CONFIGURED';reason:string;verifiedAt?:string}>;
+  signatureService?: ICertificateSignatureService;
+  historicalKeys?: Readonly<Record<string, string>>;
   signingKeyReference?: string;
   signingSecret?: string;
   productionLike?: boolean;
@@ -18,7 +21,7 @@ export interface CertificateSigningRuntimeConfiguration {
 /**
  * Default source-level Phase 14 trust policy. Production key custody remains a
  * KMS/HSM runtime concern; the source contract fails closed in production-like
- * mode when no signing provider secret is configured.
+ * mode unless a non-exportable signature provider is injected.
  */
 export class CertificateTrustPolicy
   implements ICertificateNumberingService, ICertificateSignatureService, ICertificateVerificationQrService {
@@ -32,6 +35,8 @@ export class CertificateTrustPolicy
 
   public assertIssuerKeyAvailable(signingKeyReference: string): void {
     if (!signingKeyReference.trim()) throw new Error('CERTIFICATE_ISSUER_SIGNING_KEY_REQUIRED');
+    if (this.runtime.signatureService) return this.runtime.signatureService.assertIssuerKeyAvailable(signingKeyReference);
+    if (this.runtime.productionLike) throw new Error('CERTIFICATE_NON_EXPORTABLE_SIGNER_REQUIRED');
     if (this.runtime.signingKeyReference && this.runtime.signingKeyReference !== signingKeyReference) {
       throw new Error('CERTIFICATE_ISSUER_SIGNING_KEY_NOT_CONFIGURED');
     }
@@ -42,15 +47,22 @@ export class CertificateTrustPolicy
 
   public signHash(hash: string, signingKeyReference: string): string {
     this.assertIssuerKeyAvailable(signingKeyReference);
-    return createHmac('sha256', this.runtime.signingSecret ?? 'source-only-development-signing-key')
+    if (this.runtime.signatureService) return this.runtime.signatureService.signHash(hash, signingKeyReference);
+    const secret = this.runtime.historicalKeys?.[signingKeyReference] ?? this.runtime.signingSecret;
+    if (!secret) throw new Error('CERTIFICATE_SIGNING_PROVIDER_NOT_CONFIGURED');
+    return createHmac('sha256', secret)
       .update(`${signingKeyReference}:${hash}`)
       .digest('hex');
   }
 
   public verifyHash(hash: string, signature: string | null | undefined, signingKeyReference: string): boolean {
     if (!signature) return false;
+    if (this.runtime.signatureService) {try {return this.runtime.signatureService.verifyHash(hash, signature, signingKeyReference);}catch{return false;}}
     try {
-      const expected = this.signHash(hash, signingKeyReference);
+      const historicalSecret = this.runtime.historicalKeys?.[signingKeyReference];
+      const expected = historicalSecret && !this.runtime.productionLike
+        ? createHmac('sha256', historicalSecret).update(`${signingKeyReference}:${hash}`).digest('hex')
+        : this.signHash(hash, signingKeyReference);
       if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
       return timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
     } catch {
@@ -81,11 +93,14 @@ export class CertificateTrustPolicy
     return url;
   }
 
+  public async artifactReadiness() { return this.runtime.artifactReadinessProbe ? this.runtime.artifactReadinessProbe() : {status:'NOT_CONFIGURED' as const,reason:'Artifact runtime probe is not configured'}; }
+
   public runtimeReadiness() {
     return {
       productionLike: Boolean(this.runtime.productionLike),
       signingKeyReferenceConfigured: Boolean(this.runtime.signingKeyReference?.trim()),
-      signingProviderConfigured: Boolean(this.runtime.signingSecret?.trim()),
+      signingProviderConfigured: Boolean(this.runtime.signatureService || (!this.runtime.productionLike && this.runtime.signingSecret?.trim())),
+      signingCustody: this.runtime.signatureService ? 'OPAQUE_PROVIDER' : 'DEVELOPMENT_ONLY',
       publicVerificationBaseUrlConfigured: Boolean(this.runtime.publicVerificationBaseUrl?.trim()),
     };
   }

@@ -232,6 +232,42 @@ export const ADMIN_PERMISSION_CATALOG = [
     delegable: true,
   },
   {
+    key: 'admin:certificates:issuers:approve',
+    domain: 'certificates',
+    action: 'approve',
+    labelAr: 'اعتماد جهات إصدار — الشهادات',
+    labelEn: 'Approve issuers — Certificates',
+    descriptionAr: 'تسمح بهذه العملية ضمن المجال فقط؛ لا تمنح صلاحيات مجالات أخرى.',
+    descriptionEn:
+      'Allows this operation within its domain; does not grant access to other domains.',
+    risk: 'HIGH',
+    delegable: true,
+  },
+  {
+    key: 'admin:certificates:download',
+    domain: 'certificates',
+    action: 'download',
+    labelAr: 'تنزيل — الشهادات',
+    labelEn: 'Download — Certificates',
+    descriptionAr: 'تسمح بهذه العملية ضمن المجال فقط؛ لا تمنح صلاحيات مجالات أخرى.',
+    descriptionEn:
+      'Allows this operation within its domain; does not grant access to other domains.',
+    risk: 'STANDARD',
+    delegable: true,
+  },
+  {
+    key: 'admin:certificates:lifecycle:approve',
+    domain: 'certificates',
+    action: 'approve',
+    labelAr: 'اعتماد تصحيح وإعادة تحقق — الشهادات',
+    labelEn: 'Approve corrections and revalidation — Certificates',
+    descriptionAr: 'تسمح بهذه العملية ضمن المجال فقط؛ لا تمنح صلاحيات مجالات أخرى.',
+    descriptionEn:
+      'Allows this operation within its domain; does not grant access to other domains.',
+    risk: 'HIGH',
+    delegable: true,
+  },
+  {
     key: 'admin:students:support',
     domain: 'students',
     action: 'support',

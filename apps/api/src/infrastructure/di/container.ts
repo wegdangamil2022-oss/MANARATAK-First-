@@ -1,3 +1,4 @@
+import { EapCertificateVisualAssetResolver } from '@manaratak/infrastructure';
 import { PrismaInternationalTestConsumerReadGateway } from '@manaratak/infrastructure';
 import { ImportGovernanceUseCases } from '@manaratak/application';
 import { sweepOrphanImportSpools, PrismaImportGovernanceGateway, PrismaImportScreeningReceiptStore, PrismaImportSourceObservationGateway, PrismaSourceAcquisitionLimiter, SignedSourceAccessAuthority } from '@manaratak/infrastructure';
@@ -197,6 +198,7 @@ import {
   NativeCourseUseCases,
   CertificateUseCases,
   CertificateArtifactRenderUseCase,
+  CertificateArtifactOutboxDeliveryGateway,
   CertificateCompletionEventConsumer,
   CertificateCompletionOutboxDeliveryGateway,
   CertificateCompletionOutboxWorker,
@@ -791,17 +793,21 @@ export function registerDependencies(
       new LearningPathUseCases(learningPathRepository, courseRepository, courseProgressRepository, atomicDomainMutationCoordinator)).scoped(),
     nativeCourseUseCases: asFunction(({ courseRepository, courseCurriculumRepository, assetRecordRepository, coursePublicationService, courseRelationshipRepository, courseEnrollmentPolicyRepository }) =>
       new NativeCourseUseCases(courseRepository, courseCurriculumRepository, assetRecordRepository, coursePublicationService, courseRelationshipRepository, courseEnrollmentPolicyRepository)).scoped(),
-    certificateUseCases: asFunction(({ certificateRepository, courseRepository, assetRecordRepository, learningPathRepository, identityRepository, courseCurriculumRepository }) => new CertificateUseCases(certificateRepository, courseRepository, assetRecordRepository, { signingKeyReference: readConfig<string>('CERTIFICATE_SIGNING_KEY_REFERENCE'), signingSecret: readConfig<string>('CERTIFICATE_SIGNING_SECRET'), publicVerificationBaseUrl: readConfig<string>('CERTIFICATE_PUBLIC_VERIFICATION_BASE_URL'), productionLike }, learningPathRepository, identityRepository, courseCurriculumRepository)).scoped(),
-    certificateRenderingService: asClass(ProviderNeutralCertificateRenderingService).singleton(),
+    // Override this port with the approved non-exportable signer during runtime provisioning.
+    certificateSignatureService: asValue(null),
+    certificateUseCases: asFunction(({ certificateSignatureService, certificateRepository, courseRepository, assetRecordRepository, learningPathRepository, identityRepository, courseCurriculumRepository, universityRepository, pollingWorkerRuntimeRegistry }) => new CertificateUseCases(certificateRepository, courseRepository, assetRecordRepository, { signatureService: certificateSignatureService ?? undefined, artifactReadinessProbe: async () => { const worker = pollingWorkerRuntimeRegistry.snapshot('certificate-completion'); return worker.state === 'STOPPED' ? {status:'NOT_CONFIGURED',reason:'Completion worker is stopped'} : worker.state === 'DEGRADED' || !worker.lastSuccessAt || Date.now()-new Date(worker.lastSuccessAt).getTime()>60000 ? {status:'DEGRADED',reason:'No recent successful worker iteration'} : {status:'RUNTIME_PENDING',reason:'Worker active; actual artifact storage/delivery probe evidence remains pending'}; }, signingKeyReference: readConfig<string>('CERTIFICATE_SIGNING_KEY_REFERENCE'), signingSecret: readConfig<string>('CERTIFICATE_SIGNING_SECRET'), publicVerificationBaseUrl: readConfig<string>('CERTIFICATE_PUBLIC_VERIFICATION_BASE_URL'), productionLike }, learningPathRepository, identityRepository, courseCurriculumRepository, { validate: async issuer => issuer.issuerType === 'UNIVERSITY' && Boolean(issuer.universityId && await universityRepository.findById(issuer.universityId)) })).scoped(),
+    certificateRenderingService: asFunction(({assetRecordRepository,processAssetLifecycleUseCase}) => new ProviderNeutralCertificateRenderingService(new EapCertificateVisualAssetResolver(assetRecordRepository,processAssetLifecycleUseCase))).scoped(),
     certificateArtifactStore: asFunction(({ assetRecordRepository, ingestAssetUseCase, processAssetLifecycleUseCase }) => new EapCertificateArtifactStore(assetRecordRepository, ingestAssetUseCase, processAssetLifecycleUseCase)).scoped(),
-    certificateArtifactRenderUseCase: asFunction(({ certificateRepository, certificateRenderingService, certificateArtifactStore }) => new CertificateArtifactRenderUseCase(certificateRepository, certificateRenderingService, certificateArtifactStore)).scoped(),
+    certificateArtifactRenderUseCase: asFunction(({ certificateRepository, certificateRenderingService, certificateArtifactStore, certificateUseCases }) => new CertificateArtifactRenderUseCase(certificateRepository, certificateRenderingService, certificateArtifactStore, certificateUseCases)).scoped(),
     certificateCompletionEventConsumer: asFunction(({ certificateUseCases, certificateArtifactRenderUseCase }) => new CertificateCompletionEventConsumer(certificateUseCases, certificateArtifactRenderUseCase)).scoped(),
     certificateCompletionOutboxDeliveryGateway: asFunction(({ certificateCompletionEventConsumer }) => new CertificateCompletionOutboxDeliveryGateway(certificateCompletionEventConsumer)).scoped(),
     enterpriseEventOutboxProjectionGateway: asFunction(({ enterpriseEventRepo }) => new EnterpriseEventOutboxProjectionGateway(enterpriseEventRepo)).scoped(),
     notificationOutboxDeliveryGateway: asFunction(({ intentsUseCase, notificationTemplateRepo }) => new NotificationOutboxDeliveryGateway(intentsUseCase, notificationTemplateRepo)).scoped(),
     certificateCompletionFanoutDeliveryGateway: asFunction(({ certificateCompletionOutboxDeliveryGateway, studentWorkspaceOutboxDeliveryGateway, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new FanoutOutboxDeliveryGateway([certificateCompletionOutboxDeliveryGateway, studentWorkspaceOutboxDeliveryGateway, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway])).scoped(),
     certificateCompletionOutboxDispatcher: asFunction(({ transactionalOutboxStore, certificateCompletionFanoutDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, certificateCompletionFanoutDeliveryGateway)).scoped(),
-    certificateCompletionOutboxWorker: asFunction(({ certificateCompletionOutboxDispatcher }) => new CertificateCompletionOutboxWorker(certificateCompletionOutboxDispatcher)).scoped(),
+    certificateArtifactOutboxDeliveryGateway: asFunction(({certificateArtifactRenderUseCase}) => new CertificateArtifactOutboxDeliveryGateway(certificateArtifactRenderUseCase)).scoped(),
+    certificateArtifactOutboxDispatcher: asFunction(({transactionalOutboxStore,certificateArtifactOutboxDeliveryGateway}) => new TransactionalOutboxDispatcher(transactionalOutboxStore,certificateArtifactOutboxDeliveryGateway)).scoped(),
+    certificateCompletionOutboxWorker: asFunction(({ certificateCompletionOutboxDispatcher, certificateUseCases,certificateArtifactOutboxDispatcher }) => new CertificateCompletionOutboxWorker(certificateCompletionOutboxDispatcher, {}, certificateUseCases,certificateArtifactOutboxDispatcher)).scoped(),
     certificateReadModelService: asFunction(({ certificateRepository, certificateUseCases }) => new CertificateReadModelService(certificateRepository, certificateUseCases)).scoped(),
     studentWorkspaceUseCases: asFunction(({ studentWorkspaceRepository, studentWorkspaceDeliveryCache, assetReferencePolicy }) => new StudentWorkspaceUseCases(studentWorkspaceRepository, studentWorkspaceDeliveryCache, assetReferencePolicy)).scoped(),
     studentApplicationReminderGateway: asFunction(({ intentsUseCase, templatesUseCase }) => new StudentApplicationReminderNotificationGateway(intentsUseCase, templatesUseCase)).scoped(),

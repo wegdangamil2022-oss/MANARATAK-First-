@@ -21,7 +21,7 @@ export type CertificateIssuerType =
   | 'GOVERNMENT'
   | 'TRAINING_CENTER'
   | 'EXTERNAL_PARTNER';
-export type CertificateIssuerStatus = 'ACTIVE' | 'SUSPENDED' | 'DEPRECATED';
+export type CertificateIssuerStatus = 'PENDING_APPROVAL' | 'ACTIVE' | 'SUSPENDED' | 'DEPRECATED';
 
 export interface CreateCertificateIssuerDto {
   publicId: string;
@@ -113,6 +113,8 @@ export interface CertificateTemplateDto extends CreateCertificateTemplateDto {
 }
 
 export interface CertificateMutationContext {
+  expectedIssuerUpdatedAt?: string;
+  issuerApproval?: { evidenceAssetId: string; authorityReference: string };
   expectedTemplateVersionId?: string;
   expectedTemplateStatus?: CertificateTemplateStatus;
   actorId: string;
@@ -268,6 +270,9 @@ export interface CertificateDto extends IssueCertificateDto {
 }
 
 export interface CertificateVerificationDto {
+  lifecycleStatus?: CertificateStatus;
+  temporalStatus?: 'CURRENT' | 'EXPIRED';
+  verificationFailure?: 'INTEGRITY_INVALID' | 'REVALIDATION_REQUIRED';
   publicId: string;
   serialNumber: string;
   verificationCode: string;
@@ -335,6 +340,11 @@ export interface CertificateAnalyticsDto {
   verifications: number;
 }
 export interface CertificateListQuery {
+  issuerId?: string;
+  studentReferenceId?: string;
+  templateVersionId?: string;
+  issuedFrom?: string;
+  issuedTo?: string;
   search?: string;
   status?: CertificateStatus;
   templateId?: string;

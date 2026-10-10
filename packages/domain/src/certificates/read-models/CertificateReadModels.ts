@@ -23,26 +23,29 @@ export interface StudentCertificateReadModelDto {
 /** Public, privacy-minimized P14 verification projection. Internal hashes, student IDs,
  * signing-key references and administrative revocation reasons are deliberately omitted. */
 export interface PublicCertificateVerificationDto {
+  lifecycleStatus?: CertificateStatus;
+  temporalStatus?: 'CURRENT' | 'EXPIRED';
+  verificationFailure?: 'INTEGRITY_INVALID' | 'REVALIDATION_REQUIRED';
   publicId: string;
   serialNumber: string;
   verificationCode: string;
   verificationUrl?: string | null;
   status: CertificateStatus;
-  certificateType: CertificateType;
+  certificateType?: CertificateType;
   recipientDisplayName?: string | null;
-  achievementType: 'COURSE' | 'LEARNING_PATH';
-  achievementDisplayName: string;
+  achievementType?: 'COURSE' | 'LEARNING_PATH';
+  achievementDisplayName?: string;
   courseDisplayName?: string | null;
   learningPathDisplayName?: string | null;
-  completedAt: Date;
-  issuedAt: Date;
+  completedAt?: Date;
+  issuedAt?: Date;
   expiresAt?: Date | null;
-  validityPolicy: CertificateValidityPolicy;
-  issuerName: string;
+  validityPolicy?: CertificateValidityPolicy;
+  issuerName?: string;
   grade?: string | null;
   skills: string[];
   competencies: string[];
-  templateVersion: string;
+  templateVersion?: string;
   revokedAt?: Date | null;
   isValid: boolean;
   integrityVerified: boolean;

@@ -1,0 +1,1 @@
+CERTIFICATE_ADMIN_AUDIT_COVERAGE=PASS; handlers=15; includes global auth/idempotency/audit boundaries; other owners are outside this check

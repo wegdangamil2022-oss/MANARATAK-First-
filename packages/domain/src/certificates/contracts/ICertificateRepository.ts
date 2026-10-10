@@ -34,6 +34,8 @@ export interface ICertificateRepository {
   findActiveTemplateByName(name: string): Promise<CertificateTemplateDto | null>;
   listTemplates(): Promise<CertificateTemplateDto[]>;
 
+  checkpointRender(id:string,fingerprint:string,stage:'BEGIN'|'PDF'|'PREVIEW'|'QR'|'FAILED'|'COMPLETE',assetId?:string): Promise<Record<string,string>>;
+  recordReview(id: string, kind: 'RECIPIENT_CORRECTION_REQUESTED' | 'RECIPIENT_CORRECTION_APPROVED' | 'REVALIDATION_APPROVED', input: {name?:string;evidenceAssetId:string;validUntil?:string;expectedUpdatedAt:string}, context: CertificateMutationContext): Promise<CertificateDto>;
   issue(data: IssueCertificateDto): Promise<CertificateDto>;
   attachArtifacts(data: AttachCertificateArtifactsDto): Promise<CertificateDto>;
   findById(id: string): Promise<CertificateDto | null>;
@@ -43,7 +45,8 @@ export interface ICertificateRepository {
   findByLearningPathCompletionId(learningPathCompletionId: string): Promise<CertificateDto | null>;
   findByVerificationCode(verificationCode: string): Promise<CertificateDto | null>;
   findBySerialNumber(serialNumber: string): Promise<CertificateDto | null>;
-  listByStudent(studentReferenceId: string): Promise<CertificateDto[]>;
+  listByStudent(studentReferenceId: string, page?: number, pageSize?: number, cursor?: string): Promise<CertificateDto[]>;
+  findForStudent(id: string, studentReferenceId: string): Promise<CertificateDto | null>;
   list(query: CertificateListQuery): Promise<CertificateListResult>;
   analytics(): Promise<CertificateAnalyticsDto>;
   revoke(data: RevokeCertificateDto): Promise<CertificateDto>;
@@ -51,5 +54,5 @@ export interface ICertificateRepository {
   expireDue(asOf: Date, actorId: string, correlationId?: string | null): Promise<number>;
   archive(certificateId: string, actorId: string, reason: string, correlationId?: string | null): Promise<CertificateDto>;
   recordVerification(certificateId: string, result: string, channel: string): Promise<void>;
-  listLedger(certificateId: string): Promise<CertificateLedgerEntryDto[]>;
+  listLedger(certificateId: string, page?: number, cursor?: string): Promise<CertificateLedgerEntryDto[]>;
 }

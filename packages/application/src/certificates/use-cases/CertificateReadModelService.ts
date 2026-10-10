@@ -16,16 +16,16 @@ export class CertificateReadModelService {
     private readonly certificates: CertificateUseCases,
   ) {}
 
-  public async listForStudent(studentReferenceId: string): Promise<StudentCertificateReadModelDto[]> {
+  public async listForStudent(studentReferenceId: string, cursor?:string): Promise<StudentCertificateReadModelDto[]> {
     if (!studentReferenceId.trim()) throw new Error('CERTIFICATE_STUDENT_REFERENCE_REQUIRED');
-    const rows = await this.repository.listByStudent(studentReferenceId.trim());
+    const rows = await this.repository.listByStudent(studentReferenceId.trim(),1,50,cursor);
     return rows.map((row) => ({
       certificateId: row.id,
       publicId: row.publicId,
       serialNumber: row.serialNumber,
       verificationCode: row.verificationCode,
       verificationUrl: row.verificationUrl,
-      status: row.status,
+      status: row.status === 'ACTIVE' && row.expiresAt && new Date(row.expiresAt) <= new Date() ? 'EXPIRED' as import('@manaratak/domain').CertificateStatus : row.status,
       certificateType: row.certificateType,
       achievementType: row.achievementType,
       achievementId: row.achievementId,
@@ -37,14 +37,18 @@ export class CertificateReadModelService {
     }));
   }
 
+  public deliveryArtifact(id: string, kind: 'pdf' | 'preview', ownerId: string) { return this.certificates.deliveryArtifact(id, kind, ownerId); }
+
   public async verifyPublic(verificationCode: string): Promise<PublicCertificateVerificationDto> {
     const row: CertificateVerificationDto = await this.certificates.verifyByCode(verificationCode);
+    if (!row.integrityVerified) return {publicId:row.publicId,serialNumber:row.serialNumber,verificationCode:row.verificationCode,status:row.status,lifecycleStatus:row.lifecycleStatus,temporalStatus:row.temporalStatus,verificationFailure:'INTEGRITY_INVALID',isValid:false,integrityVerified:false,skills:[],competencies:[]};
     return {
+      lifecycleStatus: row.lifecycleStatus, temporalStatus: row.temporalStatus, verificationFailure: row.verificationFailure,
       publicId: row.publicId,
       serialNumber: row.serialNumber,
       verificationCode: row.verificationCode,
       verificationUrl: row.verificationUrl,
-      status: row.status,
+      status: row.status === 'ACTIVE' && row.expiresAt && new Date(row.expiresAt) <= new Date() ? 'EXPIRED' as import('@manaratak/domain').CertificateStatus : row.status,
       certificateType: row.certificateType,
       recipientDisplayName: row.recipientDisplayName,
       achievementType: row.achievementType,

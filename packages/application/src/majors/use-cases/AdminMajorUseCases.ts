@@ -649,7 +649,7 @@ export class AdminMajorUseCases {
     );
   }
 
-  private mutate<T>(action: string, id: string, context: MajorMutationContext | undefined, mutation: (repository: IMajorRepository) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {
+  private async mutate<T>(action: string, id: string, context: MajorMutationContext | undefined, mutation: (repository: IMajorRepository) => Promise<T>, auditMetadata?: Record<string, unknown>): Promise<T> {
     if (!this.atomicMutations || !context?.actorId || !context.reason?.trim()) throw new Error('MAJOR_AUDITED_REVIEW_CONTEXT_REQUIRED');
     if(!Number.isSafeInteger(context.expectedRevision)) throw new Error('MAJOR_EXPECTED_REVISION_REQUIRED');
     const repository = this.repository as Partial<ITransactionalMajorRepository>;

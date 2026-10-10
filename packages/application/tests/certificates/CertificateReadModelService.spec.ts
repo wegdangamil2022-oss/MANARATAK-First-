@@ -25,7 +25,7 @@ describe('P6 certificate read models', () => {
 
   it('delegates public verification truth to the P14 use case instead of duplicating it', async () => {
     const repository = { listByStudent: vi.fn() } as any;
-    const useCases = { verifyByCode: vi.fn().mockResolvedValue({ verificationCode: 'VERIFY-1', isValid: true }) } as any;
+    const useCases = { verifyByCode: vi.fn().mockResolvedValue({ verificationCode: 'VERIFY-1', isValid: true, integrityVerified:true }) } as any;
     const service = new CertificateReadModelService(repository, useCases);
     await expect(service.verifyPublic('VERIFY-1')).resolves.toEqual(expect.objectContaining({ isValid: true }));
     expect(useCases.verifyByCode).toHaveBeenCalledWith('VERIFY-1');
