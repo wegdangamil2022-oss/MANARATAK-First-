@@ -58,13 +58,15 @@ export class StudentWorkspaceUseCases {
 
   public async getDashboard(studentReferenceId: string): Promise<StudentDashboardSummaryDto> {
     await this.requireReadableWorkspace(studentReferenceId);
-    const cached = await this.deliveryCache?.getDashboard(studentReferenceId);
-    if (cached) return cached;
+    // Until a durable per-student cache generation is available, never serve Redis snapshots.
+    // Workspace mutations such as saved items and notifications do not all advance workspace.version;
+    // a failed Redis DEL must not expose stale consent or activity to subsequent readers.
     const summary = await this.repository.getDashboardSummary(studentReferenceId);
     if (!summary) {
       throw new Error('Student dashboard could not be loaded');
     }
-    await this.deliveryCache?.setDashboard(studentReferenceId, summary);
+    try { await this.deliveryCache?.setDashboard(studentReferenceId, summary); }
+    catch { /* An optional read cache may not change the result of a canonical read. */ }
     return summary;
   }
 

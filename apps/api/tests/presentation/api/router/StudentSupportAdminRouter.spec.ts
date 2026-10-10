@@ -8,10 +8,12 @@ function fixture(granted: string[]) {
   const workspace = {
     listSupportWorkspaces: vi.fn().mockResolvedValue({ items: [], nextCursor: null, hasMore: false }),
     resetLayout: vi.fn().mockResolvedValue({studentReferenceId:'student-1',version:2}),
+    getSupportWorkspaceDetail: vi.fn().mockResolvedValue({studentReferenceId:'student-1',status:'ACTIVE'}),
   };
   const hydration = { getSupportDetail: vi.fn().mockResolvedValue({
     studentReferenceId: 'student-1', linkedSummaries: {activeCourseCount:null,certificateCount:null,unreadNotificationCount:0},
   }) };
+  const tracker = { listSupportPage: vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}) };
   const evaluator = { evaluatePermission: vi.fn().mockImplementation(async (_id: string, permission: string) =>
     ({ isGranted: granted.includes(permission) })) };
   const app = express();
@@ -20,11 +22,12 @@ function fixture(granted: string[]) {
   app.use('/admin/students', StudentSupportAdminRouter.create({
     studentWorkspaceUseCases: workspace as any,
     studentDashboardHydrationService: hydration as any,
+    studentApplicationTrackerUseCases: tracker as any,
     authEvaluatorService: evaluator as any,
     auditRecordRepo: {} as any,
   }));
   app.use((_err:any,_req:any,res:any,_next:any)=>res.status(500).json({error:'AUDIT_UNAVAILABLE'}));
-  return { app, workspace, hydration, evaluator };
+  return { app, workspace, hydration, evaluator, tracker };
 }
 
 describe('StudentSupportAdminRouter authorization boundary', () => {
@@ -54,6 +57,30 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
       expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
         expect.objectContaining({action:'STUDENT_SUPPORT_DETAIL_VIEW'}), {reliability:'REQUIRED',principal:'REQUIRED'});
     } finally { audit.mockRestore(); }
+  });
+
+  it('requires support authorization and purpose for paged application-tracker review', async () => {
+    const denied = fixture([]);
+    expect((await request(denied.app).get('/admin/students/support/student-1/application-trackers?purpose=CASE_REVIEW')).status).toBe(403);
+    expect(denied.tracker.listSupportPage).not.toHaveBeenCalled();
+    const authorized = fixture(['admin:students:support']);
+    expect((await request(authorized.app).get('/admin/students/support/student-1/application-trackers')).status).toBe(400);
+    expect(authorized.tracker.listSupportPage).not.toHaveBeenCalled();
+  });
+
+  it('limits case review output to the scoped tracker page and audits purpose', async () => {
+    const audit = vi.spyOn(AuditHelper, 'recordMutation').mockResolvedValue(undefined);
+    try {
+      const {app,tracker,workspace} = fixture(['admin:students:support']);
+      tracker.listSupportPage.mockResolvedValue({items:[{id:'t-1',stage:'DOCUMENTS',status:'ACTIVE'}],total:1,hasMore:false,nextCursor:null});
+      const response = await request(app).get('/admin/students/support/student-1/application-trackers?purpose=CASE_REVIEW&limit=20');
+      expect(response.status).toBe(200);
+      expect(tracker.listSupportPage).toHaveBeenCalledWith('student-1',{limit:20,cursor:undefined});
+      expect(workspace.getSupportWorkspaceDetail).toHaveBeenCalledWith('student-1');
+      expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
+        expect.objectContaining({action:'STUDENT_SUPPORT_APPLICATION_TRACKERS_VIEW',metadata:{purpose:'CASE_REVIEW',view:'application-tracker-page'}}),
+        {reliability:'REQUIRED',principal:'REQUIRED'});
+    } finally {audit.mockRestore();}
   });
 
   it('captures the real support actor in the atomic reset command', async () => {

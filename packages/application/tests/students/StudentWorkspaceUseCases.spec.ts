@@ -64,6 +64,19 @@ describe('StudentWorkspaceUseCases', () => {
     expect(repository.ingestIntegrationEvent).not.toHaveBeenCalled();
   });
 
+  it('never serves a stale Redis dashboard after invalidation failure', async () => {
+    const cache = {
+      getDashboard: vi.fn().mockResolvedValue({workspace:{studentReferenceId:'student-1'},certificateCount:999}),
+      setDashboard: vi.fn().mockRejectedValue(new Error('Redis outage')),
+      invalidate: vi.fn(),
+    };
+    const fresh = new StudentWorkspaceUseCases(repository, cache);
+    const result = await fresh.getDashboard('student-1');
+    expect(result.certificateCount).toBe(1);
+    expect(cache.getDashboard).not.toHaveBeenCalled();
+    expect(repository.getDashboardSummary).toHaveBeenCalledWith('student-1');
+  });
+
   it('never provisions a workspace from a normal read', async () => {
     vi.mocked(repository.findWorkspace).mockResolvedValueOnce(null);
     await expect(useCases.getWorkspace('student-1')).rejects.toThrow('STUDENT_WORKSPACE_PROVISIONING_PENDING');

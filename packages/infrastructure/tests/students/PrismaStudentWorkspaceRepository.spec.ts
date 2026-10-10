@@ -234,6 +234,25 @@ describe('PrismaStudentWorkspaceRepository', () => {
     expect(tx.transactionalOutboxRecord.create).not.toHaveBeenCalled();
   });
 
+  it('ignores a late certificate issue after a newer revoke was projected', async () => {
+    const tx = {
+      studentCertificateReadProjection: {
+        findUnique: vi.fn().mockResolvedValue({sourceEventId:'evt-revoke',updatedAt:new Date('2026-01-06T00:00:00Z'),status:'REVOKED'}),
+        upsert: vi.fn(),
+      },
+      studentWorkspaceEventInbox: {
+        findUnique: vi.fn().mockResolvedValue({eventType:'CertificateRevoked',payload:{occurredAt:'2026-01-06T00:00:00Z'}}),
+      },
+    };
+    const repo = new PrismaStudentWorkspaceRepository(tx as any);
+    await (repo as any).projectIntegrationEvent(tx,{
+      eventId:'evt-issued',studentReferenceId:'student-1',sourceDomain:'CERTIFICATES',eventType:'CertificateIssued',
+      sourceReferenceId:'cert-1',title:'Issued',occurredAt:new Date('2026-01-05T00:00:00Z'),
+      metadata:{certificateId:'cert-1',status:'ACTIVE'},
+    });
+    expect(tx.studentCertificateReadProjection.upsert).not.toHaveBeenCalled();
+  });
+
   it('rejects a stale support reset without an extra audit or outbox', async () => {
     const tx = {
       studentWorkspace: { findUnique: vi.fn().mockResolvedValue(workspace), updateMany: vi.fn().mockResolvedValue({ count: 0 }) },

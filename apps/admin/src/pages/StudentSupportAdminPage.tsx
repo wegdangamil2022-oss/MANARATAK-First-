@@ -182,6 +182,7 @@ export function StudentSupportAdminPage() {
   const [resetting, setResetting] = useState(false);
   const listRequest = useRef(0);
   const detailRequest = useRef(0);
+  const trackerRequest = useRef(0);
   const detailAnchor = useRef<HTMLDivElement>(null);
 
   const load = useCallback(
@@ -249,8 +250,10 @@ export function StudentSupportAdminPage() {
     }
   }, []);
   useEffect(() => {
+    ++trackerRequest.current;
     setTrackerPage(null);
     setTrackerError(null);
+    setTrackerLoading(false);
     setTab('OVERVIEW');
     if (selectedId) void inspect(selectedId);
     else {
@@ -268,6 +271,7 @@ export function StudentSupportAdminPage() {
   }, [detail?.studentReferenceId]);
   async function openSupportTrackerPage(nextCursor?:string) {
     if (!selectedId || trackerLoading) return;
+    const request = ++trackerRequest.current;
     setTrackerLoading(true);
     setTrackerError(null);
     try {
@@ -276,14 +280,16 @@ export function StudentSupportAdminPage() {
       const result = await adminApiClient.request<SupportApplicationPage>(
         `/admin/students/support/${encodeURIComponent(selectedId)}/application-trackers?${query}`,
       );
-      setTrackerPage((prev) => nextCursor && prev
+      if (request === trackerRequest.current) setTrackerPage((prev) => nextCursor && prev
         ? {...result, items:[...prev.items,...result.items]}
         : result);
     } catch (cause) {
-      setTrackerError(cause instanceof Error ? cause.message : 'تعذر استعراض متابعات الطالب.');
-    } finally {setTrackerLoading(false);}
+      if (request === trackerRequest.current)
+        setTrackerError(cause instanceof Error ? cause.message : 'تعذر استعراض متابعات الطالب.');
+    } finally {if (request === trackerRequest.current) setTrackerLoading(false);}
   }
   function chooseStudent(id: string | null) {
+    ++trackerRequest.current;
     setTrackerPage(null);
     setTrackerError(null);
     const next = new URLSearchParams(params);
@@ -761,7 +767,7 @@ export function StudentSupportAdminPage() {
                       <p className="text-xs text-slate-600">مرحلة الطلب وحالته وموعده فقط. الملاحظات والمستندات الخاصة لا تُعرض.</p>
                       <label className="block text-sm font-semibold">
                         غرض الاطلاع
-                        <select value={trackerPurpose} onChange={(e)=>{setTrackerPurpose(e.target.value);setTrackerPage(null);}} className="mt-2 block w-full rounded-lg border p-2">
+                        <select value={trackerPurpose} onChange={(e)=>{++trackerRequest.current;setTrackerPurpose(e.target.value);setTrackerPage(null);setTrackerLoading(false);}} className="mt-2 block w-full rounded-lg border p-2">
                           <option value="CASE_REVIEW">مراجعة بلاغ دعم</option>
                           <option value="APPLICATION_STATUS_INQUIRY">استفسار عن حالة التقديم</option>
                           <option value="SYNC_DIAGNOSTIC">تشخيص المزامنة</option>
