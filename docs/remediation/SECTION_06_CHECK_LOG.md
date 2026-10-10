@@ -38,3 +38,9 @@ New code/specs cover P6->P7 SCREENING_ONLY, governed alias/provider mapping revi
 - One static source-inspection pass of 9 revised files with 10 limited assertions: **10/10 PASS**. Focus: terminal lifecycle owner gate, audited CAS country-link repair with scope validation, effective governed version snapshots, batched alias ambiguity, complementary non-active filters, UTC/ICU timezone policy, iterative DAG traversal, evidence-status UI.
 - This **is not a type-check, Vitest suite, runtime/DB integration test or certificate of correctness**. New test files are present but not executed, and no checks were rerun to chase green.
 - No database connected, no migrations applied, no seed/backfill and no CI invoked. All commits remain [skip ci].
+
+### P7 screening + canonical-identity review continuation (2026-10-10)
+
+- One static source audit: **13/13 PASS** across **11** source files. Checked durable receipt requirement, source SHA256/artifact evidence, warning propagation, disabled seed approval/apply, duplicate quarantine including invalid rows, city/region scoped resolvers, owner-scoped alias ambiguity, read-only paginated admin inbox and terminal region guard.
+- This is **static contract evidence only**. No TypeScript type-check, Vitest, browser, DB, migrations, seed, import apply or CI was run. New test files remain unexecuted; their presence is not a passed test.
+- P7 owner atomic reviewed apply, official authority snapshots and full downstream lifecycle impact are OPEN implementation requirements, not deferred verification.

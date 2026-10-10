@@ -40,3 +40,14 @@ No database queries or data modification, migrations, seed/backfill, live import
 - This continuation's single static source inspection passed 10/10 checks; TypeScript, Vitest and DB/runtime remain NOT RUN.
 
 **Still not CODE_CLOSED:** P7-owned durable review and atomic canonical apply/inbox, verifiable approved source standards and full cross-domain non-FK terminal impact. University-city source comparisons have not changed and no candidate rows were automatically inserted.
+
+## P7 receipt review and scoped resolver follow-up
+
+1. P7 import SCREENING_ONLY now fails closed when the durable P6 screening receipt store is unavailable; source artifact ID and SHA-256 content hash are required and upstream P6 review warnings are retained.
+2. P7 has a **read-only**, bounded receipt-backed screening queue in the Admin area. Neither the API nor UI can approve/apply, because the separate P7 operator approval and atomic owner inbox are not yet implemented.
+3. Source duplicates now quarantine both legitimate-looking and malformed records with the same identity. The pure domain SeedPlanner cannot elevate validated batches to READY_TO_APPLY and the legacy SeedApply is disabled.
+4. ReferenceResolver CITY/REGION alias/provider lookups now require national ISO2 scope (global canonical ID lookups remain possible), and owner ambiguity inspection uses same-country comparisons.
+5. REGION terminal lifecycle transitions are blocked by the same owner-side dependency-certification boundary as non-Region entities.
+6. One-pass structural source audit: 13/13 PASS across 11 files. No TS, Vitest, DB, seed, backfill, live import, E2E or CI runs.
+
+Remaining: *P7-owned durable operator approval and atomic canonical import/apply*, reviewed/versioned authoritative standards datasets, full consumer impact and actual source/DB reconciliation. **Status: PARTIAL; NOT CODE_CLOSED.**
