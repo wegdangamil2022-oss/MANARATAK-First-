@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Final source reconciliation after W7 — 2026-09-07",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 335,
-  "reachableCount": 335,
+  "registrationCount": 360,
+  "reachableCount": 360,
   "unreachable": [],
   "registrations": [
     {
@@ -15,6 +15,30 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": []
+    },
+    {
+      "name": "academicTaxonomyImportGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "academicTaxonomyOwnerImportUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "academicTaxonomyOwnerImportUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "academicTaxonomyImportGateway",
+        "academicTaxonomyRepository",
+        "atomicDomainMutationCoordinator"
+      ]
     },
     {
       "name": "academicTaxonomyPublicRouter",
@@ -39,6 +63,15 @@
       "dependencies": [
         "prisma"
       ]
+    },
+    {
+      "name": "academicTaxonomyScreeningConsumer",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "importHandoffDispatcher"
+      ],
+      "dependencies": []
     },
     {
       "name": "academicTaxonomyValidationService",
@@ -391,6 +424,17 @@
       ]
     },
     {
+      "name": "assetActivationRecoveryBackgroundJobHandler",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "backgroundJobHandlerRegistry"
+      ],
+      "dependencies": [
+        "recoverAssetActivationsUseCase"
+      ]
+    },
+    {
       "name": "assetMalwareScannerGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -630,6 +674,24 @@
       ]
     },
     {
+      "name": "authorizationAdminRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "authorizationRuntimeRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
       "name": "authRouter",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -651,24 +713,6 @@
         "sessionManager",
         "tokenProvider"
       ]
-    },
-    {
-      "name": "authorizationAdminRouter",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
-      ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
-    },
-    {
-      "name": "authorizationRuntimeRouter",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
-      ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
     },
     {
       "name": "backgroundJobHandlerRegistry",
@@ -761,6 +805,18 @@
       "dependencies": []
     },
     {
+      "name": "canonicalAcademicUsageGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "adminAcademicTaxonomyUseCases",
+        "degreeLevelUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
       "name": "canonicalMajorReferenceService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -849,6 +905,29 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": []
+    },
+    {
+      "name": "certificateArtifactOutboxDeliveryGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "certificateArtifactOutboxDispatcher"
+      ],
+      "dependencies": [
+        "certificateArtifactRenderUseCase"
+      ]
+    },
+    {
+      "name": "certificateArtifactOutboxDispatcher",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "certificateCompletionOutboxWorker"
+      ],
+      "dependencies": [
+        "certificateArtifactOutboxDeliveryGateway",
+        "transactionalOutboxStore"
+      ]
     },
     {
       "name": "certificateArtifactRenderUseCase",
@@ -983,6 +1062,15 @@
       ]
     },
     {
+      "name": "certificateSignatureService",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "certificateUseCases"
+      ],
+      "dependencies": []
+    },
+    {
       "name": "certificateStudentDashboardReadGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -1109,6 +1197,36 @@
         "manageSettingsUseCase"
       ],
       "dependencies": []
+    },
+    {
+      "name": "courseAdminCommandUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CourseAdminRouter.ts",
+        "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "adminCourseUseCases",
+        "assetRecordRepository",
+        "assetReferencePolicy",
+        "atomicDomainMutationCoordinator",
+        "courseCurriculumRepository",
+        "courseCurriculumUseCases",
+        "courseEnrollmentPolicyRepository",
+        "courseEnrollmentPolicyUseCases",
+        "courseProgressRepository",
+        "courseRelationshipRepository",
+        "courseRelationshipResolutionService",
+        "courseRepository",
+        "externalCourseProviderRepository",
+        "importedCourseAdminUseCases",
+        "importedCourseLinkChecker",
+        "importedCourseOperationsRepository",
+        "learningPathRepository",
+        "learningPathUseCases",
+        "nativeCourseUseCases"
+      ]
     },
     {
       "name": "courseAdminRouter",
@@ -1327,15 +1445,6 @@
       ]
     },
     {
-      "name": "coursePublicRouter",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
-      ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
-    },
-    {
       "name": "coursePublicationService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -1349,6 +1458,15 @@
         "courseRepository",
         "importedCourseOperationsRepository"
       ]
+    },
+    {
+      "name": "coursePublicRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
     },
     {
       "name": "courseRelationshipQueryService",
@@ -1906,6 +2024,98 @@
       ]
     },
     {
+      "name": "importArtifactUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "assetReferencePolicy",
+        "importAdminUseCases",
+        "importGovernanceUseCases",
+        "importParserRegistry",
+        "verifiedImportArtifactGateway"
+      ]
+    },
+    {
+      "name": "importedCourseAdminRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "importedCourseAdminUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "adminCourseUseCases",
+        "externalCourseProviderRepository",
+        "importedCourseLinkChecker",
+        "importedCourseOperationsRepository"
+      ]
+    },
+    {
+      "name": "importedCourseLinkChecker",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CourseImportOperationsRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "importedCourseAdminUseCases"
+      ],
+      "dependencies": []
+    },
+    {
+      "name": "importedCourseOperationsRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CourseImportOperationsRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "courseImportOperationsUseCases",
+        "coursePublicationService",
+        "importedCourseAdminUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "importGovernanceGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "importGovernanceUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "importGovernanceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "importArtifactUseCase",
+        "importSourceControlUseCases"
+      ],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "authEvaluatorService",
+        "identityRepository",
+        "importGovernanceGateway"
+      ]
+    },
+    {
       "name": "importHandoffDispatcher",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -1917,6 +2127,16 @@
         "scholarshipImportHandoffConsumer",
         "universityImportHandoffConsumer"
       ]
+    },
+    {
+      "name": "importParserRegistry",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "importArtifactUseCase",
+        "importSourceControlUseCases"
+      ],
+      "dependencies": []
     },
     {
       "name": "importQueueBackgroundJobHandler",
@@ -1982,6 +2202,47 @@
       ]
     },
     {
+      "name": "importScreeningReceiptStore",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "importHandoffDispatcher"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "importSourceControlUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "acquireImportSourceUseCase",
+        "atomicDomainMutationCoordinator",
+        "importAdminUseCases",
+        "importGovernanceUseCases",
+        "importParserRegistry",
+        "importSourceObservationGateway",
+        "sourceConnectorRegistry",
+        "sourceRegistryGateway"
+      ]
+    },
+    {
+      "name": "importSourceObservationGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "acquireImportSourceUseCase",
+        "importSourceControlUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
       "name": "importWorkerProtocol",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2001,55 +2262,6 @@
         "importWorkerProtocol"
       ],
       "dependencies": []
-    },
-    {
-      "name": "importedCourseAdminRouter",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
-      ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
-    },
-    {
-      "name": "importedCourseAdminUseCases",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/ImportedCourseAdminRouter.ts"
-      ],
-      "reachableThroughRegistrations": [],
-      "dependencies": [
-        "adminCourseUseCases",
-        "externalCourseProviderRepository",
-        "importedCourseLinkChecker",
-        "importedCourseOperationsRepository"
-      ]
-    },
-    {
-      "name": "importedCourseLinkChecker",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/CourseImportOperationsRouter.ts"
-      ],
-      "reachableThroughRegistrations": [
-        "importedCourseAdminUseCases"
-      ],
-      "dependencies": []
-    },
-    {
-      "name": "importedCourseOperationsRepository",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/CourseImportOperationsRouter.ts"
-      ],
-      "reachableThroughRegistrations": [
-        "courseImportOperationsUseCases",
-        "coursePublicationService",
-        "importedCourseAdminUseCases"
-      ],
-      "dependencies": [
-        "prisma"
-      ]
     },
     {
       "name": "ingestAssetUseCase",
@@ -2107,6 +2319,18 @@
       ]
     },
     {
+      "name": "internationalTestConsumerReadGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts",
+        "apps/api/src/presentation/api/router/InternationalTestPublicRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
       "name": "internationalTestImportHandoffConsumer",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2139,6 +2363,17 @@
       ],
       "dependencies": [
         "prisma"
+      ]
+    },
+    {
+      "name": "internationalTestStudentSavedItemHydrationGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentSavedItemHydrationService"
+      ],
+      "dependencies": [
+        "internationalTestRepository"
       ]
     },
     {
@@ -2318,6 +2553,18 @@
         "fileIntegrityValidationService",
         "fileRepo",
         "storageGateway"
+      ]
+    },
+    {
+      "name": "managePoliciesUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "policyRepository"
       ]
     },
     {
@@ -2856,6 +3103,19 @@
       ]
     },
     {
+      "name": "recoverAssetActivationsUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "assetActivationRecoveryBackgroundJobHandler"
+      ],
+      "dependencies": [
+        "assetRecordRepository",
+        "auditRecordRepo",
+        "processAssetLifecycleUseCase"
+      ]
+    },
+    {
       "name": "redisClient",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -2906,6 +3166,15 @@
       ]
     },
     {
+      "name": "referenceDataScreeningHandoffConsumer",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "importHandoffDispatcher"
+      ],
+      "dependencies": []
+    },
+    {
       "name": "referenceDataUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -2927,6 +3196,29 @@
         "referenceDataUseCases"
       ],
       "dependencies": []
+    },
+    {
+      "name": "referenceOwnerReviewGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "referenceOwnerReviewUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "referenceOwnerReviewUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "referenceOwnerReviewGateway"
+      ]
     },
     {
       "name": "referenceResolver",
@@ -3516,6 +3808,20 @@
       ]
     },
     {
+      "name": "sourceAccessAuthority",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "officialApiSourceConnector",
+        "officialFeedSourceConnector",
+        "safeSourceHttpTransport",
+        "sitemapSourceConnector",
+        "sourceConnectorRegistry",
+        "staticHtmlSourceConnector"
+      ],
+      "dependencies": []
+    },
+    {
       "name": "sourceAcquisitionLimiter",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -3768,17 +4074,6 @@
       ]
     },
     {
-      "name": "studentToolRateLimitGateway",
-      "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [],
-      "reachableThroughRegistrations": [
-        "studentToolExecutionUseCases"
-      ],
-      "dependencies": [
-        "studentToolRateLimiter"
-      ]
-    },
-    {
       "name": "studentToolRateLimiter",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -3789,6 +4084,17 @@
       ],
       "dependencies": [
         "redisClient"
+      ]
+    },
+    {
+      "name": "studentToolRateLimitGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentToolExecutionUseCases"
+      ],
+      "dependencies": [
+        "studentToolRateLimiter"
       ]
     },
     {
@@ -3831,15 +4137,13 @@
       "dependencies": []
     },
     {
-      "name": "studentToolSaveGateway",
+      "name": "studentToolsAdminRouter",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [],
-      "reachableThroughRegistrations": [
-        "studentToolExecutionUseCases"
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
       ],
-      "dependencies": [
-        "studentWorkspaceRepository"
-      ]
+      "reachableThroughRegistrations": [],
+      "dependencies": []
     },
     {
       "name": "studentToolsAIConsumerGateway",
@@ -3853,13 +4157,15 @@
       ]
     },
     {
-      "name": "studentToolsAdminRouter",
+      "name": "studentToolSaveGateway",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/app.ts"
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentToolExecutionUseCases"
       ],
-      "reachableThroughRegistrations": [],
-      "dependencies": []
+      "dependencies": [
+        "studentWorkspaceRepository"
+      ]
     },
     {
       "name": "studentToolsPublicRouter",
@@ -4162,6 +4468,17 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "identityRepository"
+      ]
+    },
+    {
+      "name": "verifiedImportArtifactGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "importArtifactUseCase"
+      ],
+      "dependencies": [
+        "assetStorageGateway"
       ]
     },
     {
