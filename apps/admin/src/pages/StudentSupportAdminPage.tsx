@@ -264,7 +264,10 @@ export function StudentSupportAdminPage() {
     event.preventDefault();
     const next = query.trim();
     if (next === appliedQuery) void load();
-    else setAppliedQuery(next);
+    else {
+      chooseStudent(null);
+      setAppliedQuery(next);
+    }
   }
   async function resetLayout(event: FormEvent) {
     event.preventDefault();
@@ -359,7 +362,10 @@ export function StudentSupportAdminPage() {
           حالة الحساب
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value !== status) chooseStudent(null);
+              setStatus(e.target.value);
+            }}
             className="mt-2 w-full rounded-xl border p-3 text-sm"
           >
             <option value="">جميع الحالات</option>
@@ -382,6 +388,7 @@ export function StudentSupportAdminPage() {
           onClick={() => {
             setQuery('');
             if (appliedQuery || status) {
+              chooseStudent(null);
               setAppliedQuery('');
               setStatus('');
             } else void load();
