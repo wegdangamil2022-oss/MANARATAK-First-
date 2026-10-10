@@ -811,7 +811,7 @@ model Certificate {
   revokedAt                DateTime?
   revocationReason         String?
   revokedBy                String?
-  replacesCertificateId    String?
+  replacesCertificateId    String?  @unique
   replacedByCertificateId  String?
   archivedAt               DateTime?
   metadata                 Json?
@@ -825,7 +825,7 @@ model Certificate {
   verificationLogs     CertificateVerificationLog[]
   issuanceInbox        CertificateIssuanceInbox?
   replacesCertificate  Certificate?               @relation("CertificateReplaces", fields: [replacesCertificateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  replacementFor       Certificate[]              @relation("CertificateReplaces")
+  replacementFor       Certificate?                @relation("CertificateReplaces")
   replacedByCertificate Certificate?              @relation("CertificateReplacedBy", fields: [replacedByCertificateId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   replacedSources      Certificate[]              @relation("CertificateReplacedBy")
 

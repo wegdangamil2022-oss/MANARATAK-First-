@@ -397,6 +397,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "20261010183000_p12_scholarship_revision: additive or schema-governance source migration; no reversible production SQL has been approved. rollback.sql is authorized only for disposable migration-replay targets; recover shared environments from verified pre-mutation backups or a separately reviewed forward fix. No deployment or production recovery has been exercised."
+    },
+    "20261011010000_p14_certificate_replacement_one_to_one": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "P14 source-only 1:1 replacement invariant; before applying on a separately approved disposable environment, verify there are no non-null duplicate replacesCertificateId values. Migration fails closed on duplicates; production requires backup and reviewed forward recovery, not blind cleanup or destructive rollback. No database changes were run in this task."
     }
   }
 }
