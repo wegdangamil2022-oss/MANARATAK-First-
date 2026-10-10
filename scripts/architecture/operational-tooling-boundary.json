@@ -105,9 +105,15 @@
     "scripts/import_oceania_combined.ts",
     "scripts/import-sa-geography.ts",
     "scripts/reconcile_asia_report.ts",
-    "scripts/test-regions-cities.ts"
+    "scripts/test-regions-cities.ts",
+    "scripts/ci/install-eap-reference-guards.mjs"
   ],
   "classifiedPresentationImportScripts": [
-    "scripts/generate-localized-public-sitemap.ts"
-  ]
+    "scripts/generate-localized-public-sitemap.ts",
+    "scripts/certificates/verify-student-browser.mjs"
+  ],
+  "classificationRationales": {
+    "scripts/ci/install-eap-reference-guards.mjs": "Prisma only against hard-pinned disposable GitHub Actions PostgreSQL; all mutation flags and exact URLs must match before constructing a client.",
+    "scripts/certificates/verify-student-browser.mjs": "Isolated Playwright fixture compiles Admin/Web presentation components against stubbed API; not an operational server entry point or live student session."
+  }
 }

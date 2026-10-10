@@ -44,10 +44,14 @@ const FREE_COURSE_OPTIONS: Array<{ value: FreeCourseMode; label: string }> = [
 
 export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, onSelectCourse, importedCourses = [], initialQuery = '', initialField = '', favoriteIds = [], onToggleFavorite }) => {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const normalizedInitialField = initialField.trim() || 'all';
+  const normalizedInitialField = initialField.trim() ? (initialField.startsWith('major:') || initialField.startsWith('field:') ? initialField : `field:${initialField.trim()}`) : 'all';
   const distinct = (values: string[]) => [...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));
   const IMPORTED_PLATFORM_OPTIONS = distinct(importedCourses.map(c=>c.platform ?? c.provider));
-  const COURSE_FIELD_OPTIONS = distinct(importedCourses.flatMap(c=>[c.field,...(c.relatedMajors ?? []).map(m=>m.name)]));
+  const COURSE_FIELD_OPTIONS = [
+    ...distinct(importedCourses.map(c => c.field)).map(label => ({ value: `field:${label}`, label })),
+    ...importedCourses.flatMap(c => c.relatedMajors ?? []).filter(m => m.id).filter((m, index, refs) => refs.findIndex(ref => ref.id === m.id) === index)
+      .map(m => ({ value: `major:${m.id}`, label: m.name })),
+  ];
   const LANGUAGE_OPTIONS = distinct(importedCourses.map(c=>c.language));
   const LEVEL_OPTIONS = distinct(importedCourses.map(c=>c.level));
   const CERTIFICATE_OPTIONS = distinct(importedCourses.map(c=>c.certificateType).concat('بدون شهادة مجانية'));
@@ -107,7 +111,8 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
       if (freeCourseMode === 'free-with-certificate' && (!course.studyFree || !course.freeCertificate)) return false;
       if (freeCourseMode === 'free-only' && (!course.studyFree || course.freeCertificate)) return false;
       if (selectedPlatform !== 'all' && (course.platform ?? course.provider) !== selectedPlatform) return false;
-      if (selectedField !== 'all' && course.field !== selectedField && !(course.relatedMajors ?? []).some(m=>m.name===selectedField)) return false;
+      if (selectedField.startsWith('field:') && course.field !== selectedField.slice(6)) return false;
+      if (selectedField.startsWith('major:') && !(course.relatedMajors ?? []).some(m => m.id === selectedField.slice(6))) return false;
       if (selectedLanguage !== 'all' && course.language !== selectedLanguage) return false;
       if (selectedLevel !== 'all' && course.level !== selectedLevel) return false;
 
@@ -295,10 +300,10 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
             <div className="grid grid-cols-2 gap-2">
               <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
                 <BookOpen className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedField === 'all' ? 'المجال أو التخصص' : selectedField}</span>
+                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedField === 'all' ? 'المجال أو التخصص' : COURSE_FIELD_OPTIONS.find(option => option.value === selectedField)?.label ?? selectedField.replace(/^field:/, '')}</span>
                 <select value={selectedField} onChange={(event) => setSelectedField(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
                   <option value="all">كل المجالات والتخصصات</option>
-                  {COURSE_FIELD_OPTIONS.map((field) => <option key={field} value={field}>{field}</option>)}
+                  {COURSE_FIELD_OPTIONS.map((field) => <option key={field.value} value={field.value}>{field.label}</option>)}
                 </select>
               </label>
 
