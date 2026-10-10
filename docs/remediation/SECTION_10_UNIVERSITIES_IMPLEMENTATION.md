@@ -1,12 +1,12 @@
 # Section 10 — Universities & Educational Institutions (P11) — Source Remediation
 
-Date: 2026-10-10. Source branch: `codex/section-10-universities` (from `codex/section-09-majors` at `37ef04c9bc8cb9440fea18483f23a52de95d6355`). No main merge or deployment.
+Date: 2026-10-10. Source branch: `codex/section-10-universities` (from `codex/section-09-majors` at `37ef04c9bc8cb9440fea18483f23a52de95d6355`). Main merge authorized following the quick source review; no deployment.
 
 ## Repository grounding and scope
 
 The implementation was based on the actual Phase 11 architecture, domain and implementation guides in `docs/phases/phase-11-universities-institutions/`, the Section 09 Major implementation and check log, the existing P11 owner APIs, Prisma schema, and the Phase 11 remediation contracts. No `AGENTS.md` or original `MANARATAK_ADMIN_REVIEW_CODEX.md` was found in the recursively inspected source tree on the base branch; therefore neither is represented as reviewed.
 
-Section **10** is the remediation section; **P11** is the platform phase. The pre-existing Section 09 Major candidate governance remains the canonical owner. This work does not merge Section 09 into main.
+Section **10** is the remediation section; **P11** is the platform phase. The pre-existing Section 09 Major candidate governance remains the canonical owner. The authorized Section 10 merge also carries its Section 09 base into main.
 
 ## Source changes
 

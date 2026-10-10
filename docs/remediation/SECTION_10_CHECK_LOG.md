@@ -32,3 +32,12 @@ A **single bounded static source consistency check** was executed once against t
 6. Confirm the admin form's campus/department changes and content-based publication invalidation end to end.
 
 State: **SOURCE CHANGES PUSHED / RUNTIME VERIFICATION DEFERRED**.
+
+## Authorized quick merge review — 2026-10-10
+
+- Reviewed the Section 10 diff against Section 09, including owner revision locks, audit context, hierarchy upserts, import identity and public projection gates.
+- Ran the two newly added P11 test files once, with source aliases and a 45-second bound: **2 files / 5 tests PASS**, 2.09 seconds. No Section 09 suite was rerun.
+- Ran `git diff --check codex/section-09-majors..HEAD` once: PASS.
+- Manual review found parent assignment ignored for existing units without sourceReferenceId and partial hierarchy updates omitted unchanged reference targets. Corrected by retaining all existing same-owner campus/unit reference mappings and resolving children by canonical ID or source reference. These corrections were not retested, per the user's instruction.
+- No TypeScript check, full build, database operation, migration application, browser test or deployment was performed.
+- User authorized merging Sections 09 and 10 into main and pushing the result. Operational validation remains deferred.

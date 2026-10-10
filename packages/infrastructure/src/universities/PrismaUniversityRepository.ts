@@ -701,13 +701,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     // A section write is an upsert, never a destructive replacement of unmentioned children.
     // Archived programs retain their canonical IDs and external references.
 
-    const retainedCampuses =
-      details.campuses === undefined
-        ? await this.prisma.universityCampus.findMany({
-            where: { universityId: id },
-            select: { id: true, sourceReferenceId: true },
-          })
-        : [];
+    const retainedCampuses = await this.prisma.universityCampus.findMany({
+      where: { universityId: id },
+      select: { id: true, sourceReferenceId: true },
+    });
     const campusIds = new Map<string, string>();
     for (const campus of retainedCampuses) {
       campusIds.set(campus.id, campus.id);
@@ -742,13 +739,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       campusIds.set(created.id, created.id);
     }
 
-    const retainedUnits =
-      details.organizationUnits === undefined
-        ? await this.prisma.universityOrganizationUnit.findMany({
-            where: { universityId: id },
-            select: { id: true, sourceReferenceId: true },
-          })
-        : [];
+    const retainedUnits = await this.prisma.universityOrganizationUnit.findMany({
+      where: { universityId: id },
+      select: { id: true, sourceReferenceId: true },
+    });
     const unitIds = new Map<string, string>();
     for (const unit of retainedUnits) {
       unitIds.set(unit.id, unit.id);
@@ -784,8 +778,9 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       unitIds.set(created.id, created.id);
     }
     for (const unit of details.organizationUnits ?? []) {
-      if (!unit.sourceReferenceId || !unit.parentSourceReferenceId) continue;
-      const unitId = unitIds.get(unit.sourceReferenceId);
+      if (!unit.parentSourceReferenceId) continue;
+      const unitKey = unit.id ?? unit.sourceReferenceId;
+      const unitId = unitKey ? unitIds.get(unitKey) : undefined;
       const parentId = unitIds.get(unit.parentSourceReferenceId);
       if (!unitId || !parentId) throw new Error('UNIVERSITY_ORGANIZATION_REFERENCE_NOT_FOUND');
       await this.prisma.universityOrganizationUnit.update({
