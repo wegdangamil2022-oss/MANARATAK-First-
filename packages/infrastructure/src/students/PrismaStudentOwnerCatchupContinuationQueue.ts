@@ -32,10 +32,14 @@ export class PrismaStudentOwnerCatchupContinuationQueue implements IStudentOwner
       // errors must still propagate to outbox retry/backoff.
       if(error&&typeof error==='object'&&'code' in error&&(error as {code?:string}).code==='P2002'){
         const existing=await this.prisma.transactionalOutboxRecord.findUnique({
-          where:{id},select:{id:true,domain:true,eventType:true,payload:true},
+          where:{id},select:{id:true,domain:true,eventType:true,payload:true,state:true},
         });
         if(existing?.domain==='STUDENT_WORKSPACE_CATCHUP'&&
           existing.eventType==='StudentOwnerCatchupContinuationRequested'&&
+          !['EXHAUSTED','DEAD_LETTER','FAILED_PERMANENT'].includes(existing.state)&&
+          (existing.payload as Record<string,unknown>)?.roleEventId===input.roleEventId&&
+          (existing.payload as Record<string,unknown>)?.studentReferenceId===input.studentReferenceId&&
+          (existing.payload as Record<string,unknown>)?.ownerDomain===input.domain&&
           (existing.payload as Record<string,unknown>)?.cursor===input.cursor)return;
       }
       throw error;

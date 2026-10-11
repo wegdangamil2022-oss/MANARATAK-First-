@@ -44,7 +44,8 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       const roleAssignedAt=new Date(String(payload.roleAssignedAt??''));
       if(!roleEventId||!studentReferenceId||!cursor||
         !['COURSES','CERTIFICATES'].includes(String(domain)) ||
-        entry.aggregate?.aggregateId!==studentReferenceId ||
+        entry.aggregate?.aggregateType!=='StudentWorkspace' ||
+        entry.aggregate.aggregateId!==studentReferenceId ||
         !Number.isFinite(roleAssignedAt.getTime()))
         throw new Error('STUDENT_OWNER_CATCHUP_ENVELOPE_INVALID');
       const identity=await this.identities.findById(studentReferenceId);
