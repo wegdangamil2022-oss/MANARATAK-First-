@@ -114,7 +114,7 @@ export class StudentSupportAdminRouter {
         const query = z.object({
           purpose: z.enum(['CASE_REVIEW', 'APPLICATION_STATUS_INQUIRY', 'SYNC_DIAGNOSTIC']),
           limit: z.coerce.number().int().min(1).max(50).optional(),
-          cursor: z.string().trim().max(256).optional(),
+          cursor: z.string().trim().max(2048).optional(),
         }).strict().parse(req.query);
         // Return 404 for an invalid student rather than showing a plausible empty list.
         await studentWorkspaceUseCases.getSupportWorkspaceDetail(studentReferenceId);
