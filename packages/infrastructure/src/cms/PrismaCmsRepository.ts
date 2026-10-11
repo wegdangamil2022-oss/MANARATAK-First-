@@ -1385,6 +1385,61 @@ export class PrismaCmsRepository implements ICmsRepository {
     });
   }
 
+  public async listFailedSchedules(siteIdentifier: string, locale?: string, limit = 50): Promise<Array<{
+    id: string; localizedContentId: string; contentId: string; locale: string;
+    attemptCount: number; failureCode: string | null; scheduledAt: Date;
+  }>> {
+    const safeLimit = Math.max(1, Math.min(100, limit));
+    return this.db.$queryRaw(Prisma.sql`
+      SELECT j."id", j."localizedContentId", l."contentId", l."locale",
+             j."attemptCount", j."failureCode", j."scheduledAt"
+      FROM "CmsScheduledJob" AS j
+      JOIN "CmsLocalizedContent" AS l ON l."id" = j."localizedContentId"
+      WHERE j."status" = 'FAILED' AND l."siteIdentifier" = ${siteIdentifier}
+        ${locale ? Prisma.sql`AND l."locale" = ${locale}` : Prisma.empty}
+      ORDER BY j."updatedAt" DESC, j."id" DESC
+      LIMIT ${safeLimit}
+    `);
+  }
+
+  public async retryFailedSchedule(
+    jobId: string, expectedAttemptCount: number, actorId: string, reason: string,
+  ): Promise<{ id: string; status: string; attemptCount: number }> {
+    if (!actorId || !reason.trim() || reason.length > 2000) throw new Error('CMS_REPAIR_CONTEXT_REQUIRED');
+    if (!Number.isInteger(expectedAttemptCount) || expectedAttemptCount < 1) throw new Error('CMS_REPAIR_ATTEMPT_REQUIRED');
+    return this.serializable(async (tx: any) => {
+      const job = await tx.cmsScheduledJob.findUnique({ where: { id: jobId } });
+      if (!job) throw new Error('CMS_SCHEDULE_JOB_NOT_FOUND');
+      if (job.status !== 'FAILED' || job.attemptCount !== expectedAttemptCount) throw new Error('CMS_VERSION_CONFLICT');
+      if (job.jobType !== 'PUBLISH') throw new Error('CMS_REPAIR_UNSUPPORTED_JOB');
+      const localized = await tx.cmsLocalizedContent.findUnique({ where: { id: job.localizedContentId } });
+      if (!localized || localized.state !== CmsContentStatus.SCHEDULED || !localized.scheduledAt ||
+          localized.scheduledAt.getTime() > Date.now()) throw new Error('CMS_REPAIR_STALE_SCHEDULE');
+      const content = await this.requireContent(tx, localized.contentId);
+      const approved = await tx.cmsWorkflowReview.findFirst({
+        where: { localizedContentId: localized.id, status: 'APPROVED' },
+        orderBy: { reviewedAt: 'desc' },
+      });
+      if (!approved || !approved.reviewSnapshotHash ||
+          approved.reviewSnapshotHash !== await this.editorialFingerprint(tx, content, localized)) {
+        throw new Error('CMS_APPROVAL_STALE');
+      }
+      const written = await tx.cmsScheduledJob.updateMany({
+        where: { id: jobId, status: 'FAILED', attemptCount: expectedAttemptCount },
+        data: {
+          status: 'PENDING', scheduledAt: new Date(), failureCode: null,
+          claimedBy: null, claimedAt: null, leaseExpiresAt: null, completedAt: null,
+        },
+      });
+      if (written.count !== 1) throw new Error('CMS_VERSION_CONFLICT');
+      await this.appendMutation(tx, content, localized.id, 'SCHEDULE_REPAIR_REQUESTED', actorId, {
+        jobId, reason: reason.trim(), previousFailureCode: job.failureCode,
+        attemptCount: expectedAttemptCount, locale: localized.locale,
+      });
+      return { id: jobId, status: 'PENDING', attemptCount: expectedAttemptCount };
+    });
+  }
+
   public async processDueSchedules(actorId: string, now: Date, limit = 50): Promise<CmsScheduleResultDto> {
     const boundedLimit = Math.min(100, Math.max(1, limit));
     const leaseOwner = `cms-scheduler:${randomUUID()}`;
