@@ -1046,10 +1046,30 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       const current = await tx.aIEvaluationRunRecord.findUnique({ where: { publicId } });
       if (!current || current.status !== 'COMPLETED')
         throw new Error('AI_EVALUATION_RUN_NOT_APPROVABLE');
-      const approved = await tx.aIEvaluationRunRecord.update({
-        where: { publicId },
+      const evidence = current.targetEvidence as Record<string, unknown> | null;
+      if (!evidence?.submittedBy || !evidence?.executedBy ||
+          evidence.submittedBy === actorReferenceId ||
+          evidence.executedBy === actorReferenceId)
+        throw new Error('AI_EVALUATION_INDEPENDENT_REVIEW_REQUIRED');
+      if (current.approvedBy || current.approvedAt)
+        throw new Error('AI_EVALUATION_ALREADY_APPROVED');
+      const expectedResultChecksum = createHash('sha256')
+        .update(stableStringify({
+          results: current.results,
+          score: current.score,
+          safetyFailures: current.safetyFailures,
+          targetChecksum: current.targetChecksum,
+          definitionChecksum: evidence.definitionChecksum,
+        }))
+        .digest('hex');
+      if (!evidence.definitionChecksum || evidence.resultChecksum !== expectedResultChecksum)
+        throw new Error('AI_EVALUATION_RESULT_EVIDENCE_CHANGED');
+      const changed = await tx.aIEvaluationRunRecord.updateMany({
+        where: { publicId, status: 'COMPLETED', approvedBy: null, approvedAt: null },
         data: { approvedBy: actorReferenceId, approvedAt: new Date() },
       });
+      if (changed.count !== 1) throw new Error('AI_EVALUATION_APPROVAL_CONFLICT');
+      const approved = await tx.aIEvaluationRunRecord.findUniqueOrThrow({ where: { publicId } });
       await appendGovernanceEvidence(tx, {
         action: 'AI_EVALUATION_RUN_APPROVED',
         actorReferenceId,
