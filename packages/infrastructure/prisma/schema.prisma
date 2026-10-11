@@ -3174,6 +3174,8 @@ model CmsContentNode {
   categorySlug      String?
   authorId          String
   ownerId           String
+  // Last effective root editor is distinct from immutable original author.
+  lastModifiedBy    String
   version           Int      @default(1)
   featuredAssetId   String?
   seoMetadata       Json?
