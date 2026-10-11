@@ -149,8 +149,12 @@ function escapeXml(value) {
 
 /** Sitemap contains only pages generated from published, indexable snapshots. */
 async function writeSitemap(distDir, manifest) {
+  // Static sitemap owns static/catalog paths only. CMS content is discovered
+  // from the live published-snapshot endpoint, so archives cannot leave stale
+  // CMS URLs in a deployment artifact's sitemap.xml.
+  const entries = manifest.filter((entry) => entry.kind !== 'cms');
   const groups = new Map();
-  for (const item of manifest) {
+  for (const item of entries) {
     const key = item.cmsContentId
       ? `cms:${item.cmsContentId}`
       : `path:${stripLocale(item.path)}`;
@@ -159,7 +163,7 @@ async function writeSitemap(distDir, manifest) {
     if (locale === 'ar' || locale === 'en') group[locale] = item.canonical;
     groups.set(key, group);
   }
-  const rows = manifest.map((item) => {
+  const rows = entries.map((item) => {
     const key = item.cmsContentId
       ? `cms:${item.cmsContentId}` : `path:${stripLocale(item.path)}`;
     const group = groups.get(key);
@@ -274,7 +278,7 @@ async function main() {
   await writeSitemap(distDir, manifest);
 
   await writeFile(resolve(distDir, 'prerender-manifest.json'), JSON.stringify({ generatedAt: new Date().toISOString(), staticOnly, routes: manifest }, null, 2), 'utf8');
-  await writeFile(resolve(distDir, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /student\nDisallow: /login\nSitemap: ${publicBase}/sitemap.xml\n`, 'utf8');
+  await writeFile(resolve(distDir, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /student\nDisallow: /login\nSitemap: ${publicBase}/sitemap.xml\nSitemap: ${publicBase}/cms-sitemap.xml\n`, 'utf8');
   console.log(`PUBLIC_PRERENDER=PASS routes=${manifest.length} staticOnly=${staticOnly}`);
 }
 
