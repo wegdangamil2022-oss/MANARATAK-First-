@@ -89,7 +89,7 @@ export function CmsOperationsPanels({
     const suffix = `siteIdentifier=manaratak&locale=${locale}`;
     try {
       const [redirectResult, navigationResult, schemaResult, blockResult, announcementResult] =
-        await Promise.all([
+        await Promise.allSettled([
           adminApiClient.request<List<Redirect>>(`/admin/cms/redirects?${suffix}`),
           adminApiClient.request<List<NavigationMenu>>(`/admin/cms/navigation?${suffix}`),
           adminApiClient.request<List<BlockSchema>>('/admin/cms/block-schemas'),
@@ -97,11 +97,14 @@ export function CmsOperationsPanels({
           adminApiClient.request<List<Announcement>>(`/admin/cms/announcements?${suffix}`),
         ]);
       if (current !== sequence.current) return;
-      setRedirects(redirectResult.data);
-      setNavigation(navigationResult.data);
-      setSchemas(schemaResult.data);
-      setBlocks(blockResult.data);
-      setAnnouncements(announcementResult.data);
+      setRedirects(redirectResult.status === 'fulfilled' ? redirectResult.value.data : []);
+      setNavigation(navigationResult.status === 'fulfilled' ? navigationResult.value.data : []);
+      setSchemas(schemaResult.status === 'fulfilled' ? schemaResult.value.data : []);
+      setBlocks(blockResult.status === 'fulfilled' ? blockResult.value.data : []);
+      setAnnouncements(announcementResult.status === 'fulfilled' ? announcementResult.value.data : []);
+      const failed = [redirectResult, navigationResult, schemaResult, blockResult, announcementResult]
+        .filter((result) => result.status === 'rejected').length;
+      if (failed) setError(locale === 'ar' ? 'تعذر تحميل بعض الأقسام؛ البيانات المتأثرة مخفية مؤقتًا.' : 'Some panels failed to load; their stale data has been cleared.');
     } catch (reason) {
       if (current === sequence.current)
         setError(reason instanceof Error ? reason.message : 'تعذر تحميل عمليات المحتوى.');
@@ -328,12 +331,19 @@ export function CmsOperationsPanels({
           <p className="mt-2 text-[11px] leading-5 text-slate-500">
             الإضافة تحفظ العقد الموجودة وتستخدم رقم الإصدار الحالي لمنع الاستبدال المتزامن.
           </p>
-          <Items
-            empty="لا توجد قوائم."
-            items={navigation.map(
-              (x) => `${x.locationKey} — ${x.status} — ${x.nodes.length} روابط`,
-            )}
-          />
+          <ul className="mt-4 space-y-3">
+            {navigation.map((menu) => (
+              <li key={menu.id} className="rounded-lg bg-slate-50 p-3 text-sm">
+                <span>{menu.locationKey} — {menu.status} — {menu.nodes.length}</span>
+                {menu.status === 'DRAFT' && <button type="button" disabled={busy} className={button}
+                  onClick={() => void submit(() => adminApiClient.request('/admin/cms/navigation/' + encodeURIComponent(menu.id) + '/publish', {
+                    method: 'POST', body: JSON.stringify({ expectedVersion: menu.version }),
+                  }), locale === 'ar' ? 'نُشرت القائمة بعد اعتماد المراجع.' : 'Menu reviewed and published.')}>
+                  {locale === 'ar' ? 'اعتماد ونشر القائمة' : 'Approve and publish menu'}
+                </button>}
+              </li>
+            ))}
+          </ul>
         </Card>
         <Card title="الكتل الديناميكية">
           <p className="mb-3 text-xs leading-5 text-slate-500">
@@ -375,10 +385,25 @@ export function CmsOperationsPanels({
               حفظ كمسودة
             </button>
           </form>
-          <Items
-            empty="لا توجد إعلانات."
-            items={announcements.map((x) => `${x.title} — ${x.status}`)}
-          />
+          <ul className="mt-4 space-y-3">
+            {announcements.map((notice) => (
+              <li key={notice.id} className="rounded-lg bg-slate-50 p-3 text-sm">
+                <span>{notice.title} — {notice.status}</span>
+                {notice.status === 'DRAFT' && <button type="button" disabled={busy} className={button}
+                  onClick={() => void submit(() => adminApiClient.request('/admin/cms/announcements/' + encodeURIComponent(notice.id) + '/publish', {
+                    method: 'POST', body: JSON.stringify({ expectedVersion: notice.version }),
+                  }), locale === 'ar' ? 'نُشر الإعلان بعد الاعتماد.' : 'Announcement published.')}>
+                  {locale === 'ar' ? 'اعتماد ونشر الإعلان' : 'Approve and publish'}
+                </button>}
+                {notice.status === 'PUBLISHED' && <button type="button" disabled={busy} className={button}
+                  onClick={() => void submit(() => adminApiClient.request('/admin/cms/announcements/' + encodeURIComponent(notice.id) + '/archive', {
+                    method: 'POST', body: JSON.stringify({ expectedVersion: notice.version }),
+                  }), locale === 'ar' ? 'أُرشف الإعلان.' : 'Announcement archived.')}>
+                  {locale === 'ar' ? 'أرشفة' : 'Archive'}
+                </button>}
+              </li>
+            ))}
+          </ul>
         </Card>
       </div>
     </section>
