@@ -37,6 +37,7 @@ export class CmsAdminRouter {
       if (method === 'POST' && /^\/operations\/failed-schedules\/[^/]+\/retry$/.test(path)) return 'admin:cms:operations:run';
       if ((method === 'POST' || method === 'PATCH') && /^\/redirects(?:\/[^/]+)?$/.test(path)) return 'admin:cms:redirects:manage';
       if (method === 'PUT' && path === '/navigation') return 'admin:cms:navigation:manage';
+      if (method === 'POST' && /^\/block-schemas\/[^/]+\/approve$/.test(path)) return 'admin:cms:schemas:approve';
       if (method === 'POST' && path === '/block-schemas') return 'admin:cms:schemas:manage';
       if ((method === 'POST' && (path === '/content' || path === '/categories' || path === '/tags'
         || /^\/content\/[^/]+\/(submit-review|change-slug)$/.test(path)
