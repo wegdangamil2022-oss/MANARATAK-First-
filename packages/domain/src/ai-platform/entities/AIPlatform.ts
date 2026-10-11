@@ -139,6 +139,8 @@ export interface AIConsumerPolicy {
   allowedModels?: string[] | null;
   requestsPerMinute: number;
   dailyRequestLimit: number;
+  requesterRequestsPerMinute?: number;
+  requesterConcurrentLimit?: number;
   monthlyTokenLimit: number;
   monthlyCostLimit?: number | null;
   currency?: string | null;
