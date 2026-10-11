@@ -143,6 +143,19 @@ describe('CmsPublicRouter', () => {
     expect(crossLocale.status).toBe(422);
   });
 
+  it('prohibits intermediate caches from re-serving archived CMS article snapshots', async () => {
+    const cms = createUseCases();
+    cms.listPublished.mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 });
+    cms.getBySlug.mockResolvedValue({ slug: 'published-article', locale: 'ar', publishedAt: new Date() });
+    const server = createApp(cms);
+    const list = await request(server).get('/cms/content');
+    const detail = await request(server).get('/cms/content/published-article');
+    expect(list.status).toBe(200);
+    expect(detail.status).toBe(200);
+    expect(list.headers['cache-control']).toContain('no-store');
+    expect(detail.headers['cache-control']).toContain('no-store');
+  });
+
   it('returns a stable ETag and honors conditional delivery', async () => {
     const useCases = createUseCases();
     useCases.listPublished.mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 });
