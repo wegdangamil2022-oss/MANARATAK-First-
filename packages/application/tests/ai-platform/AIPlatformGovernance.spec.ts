@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIPlatformAdminUseCases, AIKnowledgeUseCases, AIProviderCircuitBreaker, EnterpriseAIGuardrailEngine, evaluationDefinitionChecksum } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
+import { AIPlatformAdminUseCases, AIKnowledgeUseCases, AIProviderCircuitBreaker, EnterpriseAIGuardrailEngine, evaluationDefinitionChecksum, estimateQuotaReservation } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
 import { AISafetyDecision } from '@manaratak/domain';
 
 describe('Phase 17 safety and resilience', () => {
@@ -90,5 +90,31 @@ describe('P17 unverified source safety', () => {
       actorReferenceId: 'admin-1',
     })).rejects.toThrow('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
     expect(embed).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('P17 known-price routing', () => {
+  const consumer = {
+    consumerKey: 'ai-test', requestsPerMinute: 10, dailyRequestLimit: 10,
+    monthlyTokenLimit: 100_000, monthlyCostLimit: null,
+  };
+  const route = (model: Record<string, unknown>) => [{
+    provider: { key: 'provider-1' },
+    model: { key: 'model-1', maxOutputTokens: 256, ...model },
+    target: { modelKey: 'model-1', enabled: true, priority: 1, weight: 1 },
+  }];
+  it('fails closed when a model has unknown input/output prices even without a budget ceiling', () => {
+    expect(() => estimateQuotaReservation({
+      consumer: consumer as any, candidates: route({ currency: 'USD' }) as any,
+      prices: [], inputTokens: 100,
+    })).toThrow('AI_COST_PRICE_REQUIRED_FOR_ROUTED_MODEL:model-1');
+  });
+  it('permits an explicitly declared zero-cost model without inventing a price', () => {
+    expect(estimateQuotaReservation({
+      consumer: consumer as any,
+      candidates: route({ currency: 'USD', inputPricePerMillion: 0, outputPricePerMillion: 0 }) as any,
+      prices: [], inputTokens: 100,
+    })).toEqual({ tokens: 356, cost: 0 });
   });
 });
