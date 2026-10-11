@@ -8,6 +8,7 @@ import { CmsPublicRouter } from '../../../../src/presentation/api/router/CmsPubl
 describe('CmsPublicRouter', () => {
   const createUseCases = () => ({
     listPublished: vi.fn(),
+    listIndexableSitemapEntries: vi.fn(),
     getBySlug: vi.fn(),
     resolveRedirect: vi.fn(),
   });
@@ -61,6 +62,52 @@ describe('CmsPublicRouter', () => {
     expect(useCases.listPublished).not.toHaveBeenCalled();
     expect(useCases.getBySlug).not.toHaveBeenCalled();
     expect(useCases.resolveRedirect).not.toHaveBeenCalled();
+  });
+
+  it('serves authoritative live CMS XML with content-bound locale alternates and conditional caching', async () => {
+    const previous = process.env.PUBLIC_WEB_URL;
+    process.env.PUBLIC_WEB_URL = 'https://manaratak.example';
+    try {
+      const cms = createUseCases();
+      cms.listIndexableSitemapEntries.mockResolvedValue([
+        { contentId: 'cms-1', locale: 'ar', canonicalPath: '/ar/news/arabic-news' },
+        { contentId: 'cms-1', locale: 'en', canonicalPath: '/en/news/english-news' },
+      ]);
+      const server = createApp(cms);
+      const response = await request(server).get('/cms/sitemap.xml');
+      expect(response.status).toBe(200);
+      expect(response.headers['content-type']).toMatch(/application\/xml/);
+      expect(response.text).toContain('<loc>https://manaratak.example/ar/news/arabic-news</loc>');
+      expect(response.text).toContain('hreflang="en" href="https://manaratak.example/en/news/english-news"');
+      expect(response.headers['cache-control']).toContain('must-revalidate');
+      const notModified = await request(server).get('/cms/sitemap.xml')
+        .set('If-None-Match', response.headers.etag);
+      expect(notModified.status).toBe(304);
+      expect(cms.listIndexableSitemapEntries).toHaveBeenCalledTimes(2);
+    } finally {
+      if (previous === undefined) delete process.env.PUBLIC_WEB_URL;
+      else process.env.PUBLIC_WEB_URL = previous;
+    }
+  });
+
+  it('fails closed if the public sitemap origin is unsafe or unconfigured', async () => {
+    const previous = process.env.PUBLIC_WEB_URL;
+    const fallback = process.env.VITE_PUBLIC_WEB_URL;
+    delete process.env.VITE_PUBLIC_WEB_URL;
+    const cms = createUseCases();
+    cms.listIndexableSitemapEntries.mockResolvedValue([]);
+    try {
+      delete process.env.PUBLIC_WEB_URL;
+      expect((await request(createApp(cms)).get('/cms/sitemap.xml')).status).toBe(503);
+      expect(cms.listIndexableSitemapEntries).not.toHaveBeenCalled();
+      process.env.PUBLIC_WEB_URL = 'http://unsafe.invalid';
+      expect((await request(createApp(cms)).get('/cms/sitemap.xml')).status).toBe(503);
+    } finally {
+      if (previous === undefined) delete process.env.PUBLIC_WEB_URL;
+      else process.env.PUBLIC_WEB_URL = previous;
+      if (fallback === undefined) delete process.env.VITE_PUBLIC_WEB_URL;
+      else process.env.VITE_PUBLIC_WEB_URL = fallback;
+    }
   });
 
   it('returns 404 for unpublished or missing content', async () => {
