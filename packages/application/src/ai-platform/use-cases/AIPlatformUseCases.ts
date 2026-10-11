@@ -2,7 +2,6 @@ import { validateAIRegistry } from './AIRegistryValidation';
 import { createHash, randomUUID } from 'node:crypto';
 import {
   AICapabilityDefinition,
-  AIAsyncJobRecord,
   AIConsumerPolicy,
   AIDataClassification,
   AIEvaluationDefinition,
