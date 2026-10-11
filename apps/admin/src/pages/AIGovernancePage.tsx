@@ -430,7 +430,7 @@ function PlaygroundPanel() {
   const [classification, setClassification] = useState('INTERNAL');
   const [running, setRunning] = useState(false);
   const lock = useRef(false);
-  const readiness = useAIData<{ ready: boolean; reason?: string; candidateCount: number }>(
+  const readiness = useAIData<{ ready: boolean; canAttempt?: boolean; healthVerified?: boolean; reason?: string; candidateCount: number }>(
     capabilityKey
       ? `/admin/ai/capabilities/${encodeURIComponent(capabilityKey)}/readiness?dataClassification=${classification}`
       : null,
@@ -498,8 +498,10 @@ function PlaygroundPanel() {
             {readiness.data && (
               <p className="text-xs">
                 {readiness.data.ready
-                  ? 'السياسة تسمح بالمحاولة؛ نجاح المزوّد يتأكد عند التنفيذ.'
-                  : `القدرة غير جاهزة: ${readiness.data.reason}`}
+                  ? 'القدرة مهيأة وقد نجح مزوّد لها في تنفيذ سابق (لا يثبت جاهزية الإنتاج الشاملة).'
+                  : readiness.data.canAttempt
+                    ? 'المزوّد قابل للمحاولة، لكن لم يتم التحقق من نجاح التنفيذ لهذه القدرة.'
+                    : `القدرة غير قابلة للتنفيذ: ${readiness.data.reason}`}
               </p>
             )}
             <Field label="تصنيف البيانات">
@@ -530,7 +532,7 @@ function PlaygroundPanel() {
               running ||
               capabilities.loading ||
               readiness.loading ||
-              readiness.data?.ready !== true ||
+              readiness.data?.canAttempt !== true ||
               !capabilityKey ||
               !input.trim()
             }
