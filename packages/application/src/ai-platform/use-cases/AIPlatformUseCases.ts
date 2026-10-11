@@ -1333,7 +1333,8 @@ export class AIWorkflowUseCases {
       throw new Error('AI_WORKFLOW_INPUT_TOO_LARGE');
   }
 
-  async start(workflowKey: string, input: Record<string, unknown>) {
+  async start(workflowKey: string, input: Record<string, unknown>, requesterReferenceId: string) {
+    if (!requesterReferenceId?.trim()) throw new Error('AI_WORKFLOW_AUTHENTICATED_REQUESTER_REQUIRED');
     this.assertProtectedWorkflowInput(input);
     const workflow = await this.repository.find<AIWorkflowDefinition>('workflows', workflowKey);
     if (!workflow || workflow.status !== 'ACTIVE' || !workflow.activeVersion)
@@ -1346,17 +1347,23 @@ export class AIWorkflowUseCases {
       workflowVersion: frozen.version,
       status: 'QUEUED',
       traceId: randomUUID(),
-      inputReferenceHash: sha256(stableStringify(input)),
+      inputReferenceHash: sha256(stableStringify({
+        scope: 'workflow-requester-v1', requesterReferenceId, input,
+      })),
       outputReferenceHash: null,
     });
   }
 
-  async run(publicId: string, input: Record<string, unknown>) {
+  async run(publicId: string, input: Record<string, unknown>, requesterReferenceId: string) {
+    if (!requesterReferenceId?.trim()) throw new Error('AI_WORKFLOW_AUTHENTICATED_REQUESTER_REQUIRED');
     this.assertProtectedWorkflowInput(input);
     const run = await this.repository.findWorkflowRun(publicId);
     if (!run) throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
-    if (run.inputReferenceHash !== sha256(stableStringify(input)))
-      throw new Error('AI_WORKFLOW_INPUT_REFERENCE_MISMATCH');
+    // Legacy unscoped runs cannot be claimed after introducing this privacy
+    // boundary. Caller identity and payload must both match the immutable digest.
+    if (run.inputReferenceHash !== sha256(stableStringify({
+      scope: 'workflow-requester-v1', requesterReferenceId, input,
+    }))) throw new Error('AI_WORKFLOW_REQUESTER_OR_INPUT_MISMATCH');
     const workflow = await this.repository.findWorkflowVersion(
       run.workflowKey,
       run.workflowVersion,
@@ -1428,6 +1435,7 @@ export class AIWorkflowUseCases {
             promptKey: step.promptKey,
             capabilityKey: step.capabilityKey,
             consumerKey: 'workflow',
+            requesterReferenceId,
             sourceDomain: 'AIWorkflow',
             input: JSON.stringify({
               workflowInput: input,
@@ -1560,7 +1568,7 @@ export class AIEvaluationUseCases {
     try {
       for (const item of definition.dataset) {
         const started = Date.now();
-        const response = await this.executeTarget(publicId, definition, run, item.input, item.key);
+        const response = await this.executeTarget(publicId, definition, run, item.input, item.key, executedBy);
         const latencyMs = Date.now() - started;
         if (response.status === AIExecutionStatus.BLOCKED) safetyFailures += 1;
         const evaluatorResults = definition.evaluators.map((evaluator) =>
@@ -1631,6 +1639,7 @@ export class AIEvaluationUseCases {
     run: AIEvaluationRun,
     input: string,
     itemKey: string,
+    executedBy: string,
   ): Promise<AIOrchestrationResponse> {
     if (run.targetType === 'PROMPT')
       return this.execution.executePromptVersionForEvaluation({
@@ -1666,8 +1675,8 @@ export class AIEvaluationUseCases {
       );
     if (run.targetType === 'WORKFLOW') {
       if (!this.workflows) throw new Error('AI_EVALUATION_WORKFLOW_EXECUTOR_NOT_CONFIGURED');
-      const workflowRun = await this.workflows.start(run.targetKey, { evaluationInput: input });
-      const completed = await this.workflows.run(workflowRun.publicId, { evaluationInput: input });
+      const workflowRun = await this.workflows.start(run.targetKey, { evaluationInput: input }, executedBy);
+      const completed = await this.workflows.run(workflowRun.publicId, { evaluationInput: input }, executedBy);
       return {
         executionPublicId: completed.publicId,
         traceId: completed.traceId,
