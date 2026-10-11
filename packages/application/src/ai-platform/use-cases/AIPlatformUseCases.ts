@@ -1590,7 +1590,8 @@ export class AIKnowledgeUseCases {
     // canonical publication, classification, owner authorization or consent.
     // Quarantine it until a typed, read-only owner verification gateway is wired.
     // Never transfer unverified student/canonical content to a paid embedding provider.
-    throw new Error('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
+    if (input.content.length > 0) throw new Error('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
+    if (!input.content.length) throw new Error('AI_KNOWLEDGE_SOURCE_CONTENT_REQUIRED');
     const model = await this.repository.find<AIModelDefinition>('models', index.embeddingModelKey);
     if (
       !model ||
