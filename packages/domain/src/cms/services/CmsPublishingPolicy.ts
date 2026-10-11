@@ -125,14 +125,34 @@ export class CmsPublishingPolicy {
     assetFields: unknown,
   ): void {
     this.validateSchemaNode(payload, fieldSchema, '$');
-    for (const key of Array.isArray(assetFields) ? assetFields : []) {
-      const value = payload[String(key)];
-      if (Array.isArray(value)) {
-        for (const item of value) this.assertAssetHandle(typeof item === 'string' ? item : null);
-      } else {
-        this.assertAssetHandle(typeof value === 'string' ? value : null);
-      }
+    for (const assetId of this.extractBlockAssetHandles(payload, assetFields)) {
+      this.assertAssetHandle(assetId);
     }
+  }
+
+  public static extractBlockAssetHandles(payload: Record<string, unknown>, fields: unknown): string[] {
+    if (!Array.isArray(fields)) throw new Error('CMS_BLOCK_ASSET_FIELD_LIST_REQUIRED');
+    const result: string[] = [];
+    const scan = (value: unknown, segments: string[]): void => {
+      if (value == null) return;
+      if (Array.isArray(value)) { value.forEach((item) => scan(item, segments)); return; }
+      if (segments.length === 0) {
+        if (typeof value !== 'string' || value.trim() === '') throw new Error('CMS_BLOCK_ASSET_HANDLE_INVALID');
+        result.push(value); return;
+      }
+      if (!value || typeof value !== 'object') throw new Error('CMS_BLOCK_ASSET_FIELD_INVALID');
+      const [name, ...tail] = segments;
+      if (Object.prototype.hasOwnProperty.call(value, name)) scan((value as Record<string, unknown>)[name], tail);
+    };
+    for (const field of fields) {
+      if (typeof field !== 'string' || field.length > 160 ||
+          !/^[a-zA-Z][a-zA-Z0-9_]*(?:\.(?:[a-zA-Z][a-zA-Z0-9_]*))*$/.test(field) ||
+          field.split('.').some((s) => ['__proto__', 'prototype', 'constructor'].includes(s))) {
+        throw new Error('CMS_BLOCK_ASSET_FIELD_INVALID');
+      }
+      scan(payload, field.split('.'));
+    }
+    return [...new Set(result)];
   }
 
   private static validateSchemaNode(value: unknown, schemaValue: unknown, path: string): void {

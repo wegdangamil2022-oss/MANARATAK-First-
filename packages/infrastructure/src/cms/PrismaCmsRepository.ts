@@ -6,6 +6,7 @@ import {
   CmsAnnouncementDto,
   CmsBlockSchemaDto,
   CmsContentBlockDto,
+  PublicCmsBlockDto,
   CmsContentDetailDto,
   CmsContentDomainLinkDto,
   CmsContentDto,
@@ -1112,13 +1113,63 @@ export class PrismaCmsRepository implements ICmsRepository {
     return (await this.db.cmsContentBlock.findMany({ where: { siteIdentifier, locale }, orderBy: { updatedAt: 'desc' } })).map((row: any) => this.block(row));
   }
 
+  public async listPublishedBlocks(siteIdentifier: string, locale: string): Promise<PublicCmsBlockDto[]> {
+    const snapshots = await this.db.cmsSitePublishedSnapshot.findMany({
+      where: { kind: 'BLOCK', siteIdentifier, locale },
+      orderBy: [{ publishedAt: 'desc' }, { sourceId: 'asc' }],
+      take: 100,
+    });
+    return snapshots.map((row: any) => row.payload as PublicCmsBlockDto);
+  }
+
+  public async publishBlock(id: string, expectedVersion: number, actorId: string): Promise<CmsContentBlockDto> {
+    return this.serializable(async (tx: any) => {
+      const existing = await tx.cmsContentBlock.findUnique({ where: { id } });
+      if (!existing) throw new Error('CMS_BLOCK_NOT_FOUND');
+      this.assertVersion(existing.version, expectedVersion);
+      if (existing.status !== CmsContentStatus.DRAFT) throw new Error('CMS_BLOCK_DRAFT_REQUIRED');
+      CmsPublishingPolicy.assertMakerChecker(existing.updatedBy, actorId);
+      const schema = await tx.cmsBlockSchema.findUnique({ where: { id: existing.schemaId } });
+      if (!schema || schema.status !== 'ACTIVE') throw new Error('CMS_BLOCK_SCHEMA_NOT_ACTIVE');
+      CmsPublishingPolicy.assertBlockPayload(existing.payload, schema.fieldSchema, schema.assetFields);
+      await this.verifyAssetIds(CmsPublishingPolicy.extractBlockAssetHandles(existing.payload, schema.assetFields));
+      const changed = await tx.cmsContentBlock.updateMany({
+        where: { id, version: expectedVersion, status: CmsContentStatus.DRAFT },
+        data: { status: CmsContentStatus.PUBLISHED, version: { increment: 1 } },
+      });
+      if (changed.count !== 1) throw new Error('CMS_VERSION_CONFLICT');
+      const row = await tx.cmsContentBlock.findUnique({ where: { id } });
+      const publishedAt = new Date();
+      const payload: PublicCmsBlockDto = {
+        publicId: row.publicId, siteIdentifier: row.siteIdentifier, locale: row.locale,
+        name: row.name, schemaKey: schema.key, schemaVersion: schema.version,
+        payload: row.payload, publishedAt,
+      };
+      await tx.cmsSitePublishedSnapshot.upsert({
+        where: { kind_sourceId: { kind: 'BLOCK', sourceId: row.id } },
+        create: { id: randomUUID(), kind: 'BLOCK', sourceId: row.id, siteIdentifier: row.siteIdentifier,
+          locale: row.locale, payload: json(payload), publishedAt },
+        update: { payload: json(payload), publishedAt },
+      });
+      await this.appendStandaloneMutation(tx, row.id, 'CmsContentBlock', 'BLOCK_PUBLISHED', actorId, {
+        siteIdentifier: row.siteIdentifier, locale: row.locale, version: row.version, schemaVersion: schema.version,
+      });
+      return this.block(row);
+    });
+  }
+
   public async saveBlock(data: Omit<CmsContentBlockDto, 'id' | 'publicId' | 'version' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsContentBlockDto> {
     return this.serializable(async (tx: any) => {
       const schema = await tx.cmsBlockSchema.findUnique({ where: { id: data.schemaId } });
       if (!schema || schema.status !== 'ACTIVE') throw new Error('CMS_BLOCK_SCHEMA_NOT_ACTIVE');
       CmsPublishingPolicy.assertBlockPayload(data.payload, schema.fieldSchema, schema.assetFields);
+      await this.verifyAssetIds(CmsPublishingPolicy.extractBlockAssetHandles(data.payload, schema.assetFields));
       const existing = data.id ? await tx.cmsContentBlock.findUnique({ where: { id: data.id } }) : null;
-      if (existing) this.assertVersion(existing.version, data.expectedVersion);
+      if (data.id && !existing) throw new Error('CMS_BLOCK_NOT_FOUND');
+      if (existing) {
+        if (existing.siteIdentifier !== data.siteIdentifier || existing.locale !== data.locale) throw new Error('CMS_SCOPE_CONFLICT');
+        this.assertVersion(existing.version, data.expectedVersion);
+      }
       const row = existing
         ? await tx.cmsContentBlock.update({ where: { id: existing.id }, data: { name: data.name, payload: json(data.payload), status: CmsContentStatus.DRAFT, updatedBy: data.updatedBy, version: { increment: 1 } } })
         : await tx.cmsContentBlock.create({ data: { id: randomUUID(), publicId: `cms-block-${randomUUID()}`, siteIdentifier: data.siteIdentifier, locale: data.locale, schemaId: data.schemaId, name: data.name, payload: json(data.payload), status: CmsContentStatus.DRAFT, updatedBy: data.updatedBy } });
@@ -1494,14 +1545,18 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   private async verifyPublishedAssets(content: any, localized: any): Promise<void> {
-    const referenced = [
+    const ids = [
       content.featuredAssetId,
-      (content.seoMetadata as { openGraphAssetId?: string } | null)?.openGraphAssetId,
+      (content.seoMetadata as {openGraphAssetId?: string} | null)?.openGraphAssetId,
       localized.featuredAssetId,
-      (localized.seoMetadata as { openGraphAssetId?: string } | null)?.openGraphAssetId,
-      ...(localized.attachments ?? []).map((asset: any) => asset.assetId),
+      (localized.seoMetadata as {openGraphAssetId?: string} | null)?.openGraphAssetId,
+      ...(localized.attachments ?? []).map((row: any) => row.assetId),
     ].filter((id): id is string => typeof id === 'string' && id.length > 0);
-    for (const assetId of new Set(referenced)) {
+    await this.verifyAssetIds(ids);
+  }
+
+  private async verifyAssetIds(assetIds: string[]): Promise<void> {
+    for (const assetId of new Set(assetIds)) {
       CmsPublishingPolicy.assertAssetHandle(assetId);
       if (!this.assetRecords) throw new Error('CMS_PUBLIC_MEDIA_ASSET_REFERENCE_POLICY_REQUIRED');
       const record = await this.assetRecords.findById(new AssetId(assetId));
@@ -1509,11 +1564,8 @@ export class PrismaCmsRepository implements ICmsRepository {
       if (record.classification !== AssetSecurityClassification.PUBLIC) {
         throw new Error('CMS_PUBLIC_MEDIA_ASSET_CLASSIFICATION_NOT_ALLOWED');
       }
-      try {
-        record.assertCanDeliver();
-      } catch {
-        throw new Error('CMS_PUBLIC_MEDIA_ASSET_TRUST_EVIDENCE_REQUIRED');
-      }
+      try { record.assertCanDeliver(); }
+      catch { throw new Error('CMS_PUBLIC_MEDIA_ASSET_TRUST_EVIDENCE_REQUIRED'); }
     }
   }
 
