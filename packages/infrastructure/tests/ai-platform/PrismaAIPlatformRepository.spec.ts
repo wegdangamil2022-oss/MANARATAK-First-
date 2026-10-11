@@ -213,4 +213,39 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     expect(tx.aIPromptDeploymentRecord.updateMany).not.toHaveBeenCalled();
   });
 
+
+  it('rejects requester rate/concurrency saturation atomically before creating billable work', async () => {
+    for (const scenario of [
+      { count: 2, active: 0, error: 'AI_REQUESTER_RATE_LIMIT_EXCEEDED' },
+      { count: 1, active: 1, error: 'AI_REQUESTER_CONCURRENCY_EXCEEDED' },
+    ]) {
+      const tx = {
+        aIExecutionRecord: {
+          count: vi.fn()
+            .mockResolvedValueOnce(0) // global minute
+            .mockResolvedValueOnce(0) // global day
+            .mockResolvedValueOnce(scenario.count)
+            .mockResolvedValueOnce(scenario.active),
+          create: vi.fn(),
+        },
+        aIUsageRecord: { findMany: vi.fn().mockResolvedValue([]) },
+        aIQuotaReservationRecord: { findMany: vi.fn().mockResolvedValue([]), create: vi.fn() },
+      };
+      const repo = new PrismaAIPlatformRepository({
+        $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+      });
+      await expect(repo.createExecutionWithQuota({
+        publicId: 'ai_scoped', consumerKey: 'shared',
+        requesterReferenceId: 'operator-1', idempotencyKeyHash: null,
+      } as any, {
+        reservationKey: 'job-1', requestsPerMinute: 100,
+        dailyRequestLimit: 1000, requesterRequestsPerMinute: 2,
+        requesterConcurrentLimit: 1, monthlyTokenLimit: 10000,
+        reservedTokens: 10, reservedCost: 0,
+      })).rejects.toThrow(scenario.error);
+      expect(tx.aIExecutionRecord.create).not.toHaveBeenCalled();
+      expect(tx.aIQuotaReservationRecord.create).not.toHaveBeenCalled();
+    }
+  });
+
 });
