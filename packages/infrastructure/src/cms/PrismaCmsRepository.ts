@@ -1016,6 +1016,13 @@ export class PrismaCmsRepository implements ICmsRepository {
     return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
   }
 
+  public async resolveActiveRedirect(siteIdentifier: string, locale: string, sourcePath: string): Promise<CmsRedirectDto | null> {
+    const redirect = await this.db.cmsRedirect.findUnique({
+      where: { siteIdentifier_locale_sourcePath: { siteIdentifier, locale, sourcePath } },
+    });
+    return redirect?.active === true ? redirect : null;
+  }
+
   public async listRedirects(siteIdentifier?: string, locale?: string): Promise<CmsRedirectDto[]> {
     return this.db.cmsRedirect.findMany({ where: { ...(siteIdentifier ? { siteIdentifier } : {}), ...(locale ? { locale } : {}) }, orderBy: { updatedAt: 'desc' } });
   }
