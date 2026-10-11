@@ -98,6 +98,10 @@ interface OwnerTabResponse {
   serviceRequestCount?: number|null;
   recentServiceRequests?: StudentSupportDetail['recentServiceRequests']|null;
 }
+interface TrackerHistory {
+  items:Array<{eventType:string;occurredAt:string;version:number;status:string}>;
+  hasMore:boolean;
+}
 interface SupportApplicationPage {
   items: Array<{id:string;scholarshipId:string;stage:string;status:string;deadlineAt:string|null;updatedAt:string}>;
   total: number;
@@ -209,6 +213,9 @@ export function StudentSupportAdminPage() {
   const [trackerPage, setTrackerPage] = useState<SupportApplicationPage | null>(null);
   const [trackerError, setTrackerError] = useState<string | null>(null);
   const [trackerLoading, setTrackerLoading] = useState(false);
+  const [trackerHistory,setTrackerHistory]=useState<{trackerId:string;page:TrackerHistory}|null>(null);
+  const [trackerHistoryLoading,setTrackerHistoryLoading]=useState(false);
+  const [trackerHistoryError,setTrackerHistoryError]=useState<string|null>(null);
   const [reason, setReason] = useState('');
   const [resetting, setResetting] = useState(false);
   const listRequest = useRef(0);
@@ -216,6 +223,7 @@ export function StudentSupportAdminPage() {
   const ownerRequest = useRef(0);
   const loadedOwnerTabs = useRef(new Set<string>());
   const trackerRequest = useRef(0);
+  const historyRequest = useRef(0);
   const triageRequest = useRef(0);
   const detailAnchor = useRef<HTMLDivElement>(null);
 
@@ -289,6 +297,10 @@ export function StudentSupportAdminPage() {
   }, []);
   useEffect(() => {
     ++trackerRequest.current;
+    ++historyRequest.current;
+    setTrackerHistory(null);
+    setTrackerHistoryLoading(false);
+    setTrackerHistoryError(null);
     setTrackerPage(null);
     setTrackerError(null);
     setTrackerLoading(false);
@@ -386,6 +398,24 @@ export function StudentSupportAdminPage() {
       if(request===triageRequest.current)setTriageLoading(false);
     }
   }
+  async function openTrackerHistory(trackerId:string) {
+    if(!selectedId||trackerHistoryLoading)return;
+    const request=++historyRequest.current;
+    setTrackerHistoryLoading(true);
+    setTrackerHistoryError(null);
+    try {
+      const query=new URLSearchParams({purpose:trackerPurpose,limit:'20'});
+      const page=await adminApiClient.request<TrackerHistory>(
+        `/admin/students/support/${encodeURIComponent(selectedId)}/application-trackers/${encodeURIComponent(trackerId)}/history?${query}`,
+      );
+      if(request===historyRequest.current)setTrackerHistory({trackerId,page});
+    }catch(error){
+      if(request===historyRequest.current)setTrackerHistoryError(
+        error instanceof Error?error.message:'تعذر تحميل سجل المتابعة.',
+      );
+    }finally{if(request===historyRequest.current)setTrackerHistoryLoading(false);}
+  }
+
   async function openSupportTrackerPage(nextCursor?:string) {
     if (!selectedId || trackerLoading) return;
     const request = ++trackerRequest.current;
@@ -406,6 +436,10 @@ export function StudentSupportAdminPage() {
     } finally {if (request === trackerRequest.current) setTrackerLoading(false);}
   }
   function chooseStudent(id: string | null) {
+    ++historyRequest.current;
+    setTrackerHistory(null);
+    setTrackerHistoryError(null);
+    setTrackerHistoryLoading(false);
     ++trackerRequest.current;
     setTrackerPage(null);
     setTrackerError(null);
@@ -947,7 +981,11 @@ export function StudentSupportAdminPage() {
                       <p className="text-xs text-slate-600">مرحلة الطلب وحالته وموعده فقط. الملاحظات والمستندات الخاصة لا تُعرض.</p>
                       <label className="block text-sm font-semibold">
                         غرض الاطلاع
-                        <select value={trackerPurpose} onChange={(e)=>{++trackerRequest.current;setTrackerPurpose(e.target.value);setTrackerPage(null);setTrackerLoading(false);}} className="mt-2 block w-full rounded-lg border p-2">
+                        <select value={trackerPurpose} onChange={(e)=>{
+                          ++trackerRequest.current;++historyRequest.current;
+                          setTrackerHistory(null);setTrackerHistoryError(null);setTrackerHistoryLoading(false);
+                          setTrackerPurpose(e.target.value);setTrackerPage(null);setTrackerLoading(false);
+                        }} className="mt-2 block w-full rounded-lg border p-2">
                           <option value="CASE_REVIEW">مراجعة بلاغ دعم</option>
                           <option value="APPLICATION_STATUS_INQUIRY">استفسار عن حالة التقديم</option>
                           <option value="SYNC_DIAGNOSTIC">تشخيص المزامنة</option>
@@ -956,6 +994,7 @@ export function StudentSupportAdminPage() {
                       <button type="button" disabled={trackerLoading} onClick={()=>void openSupportTrackerPage()}
                         className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">فتح سجل المتابعة</button>
                       {trackerError && <p role="alert" className="text-sm text-red-700">{trackerError}</p>}
+                      {trackerHistoryError&&<p role="alert" className="text-sm text-red-700">{trackerHistoryError}</p>}
                       {trackerPage && <div className="space-y-2">
                         <p className="text-xs text-slate-500">عرض {trackerPage.items.length} من {trackerPage.total} متابعة</p>
                         {trackerPage.items.length === 0 && <p className="text-sm text-slate-500">لا توجد متابعات مسجلة.</p>}
@@ -963,6 +1002,16 @@ export function StudentSupportAdminPage() {
                           <span className="font-bold">{item.scholarshipId}</span> · {statusLabel(item.status)}
                           <p className="mt-1">المرحلة: {item.stage}</p>
                           <p className="text-xs text-slate-500">الموعد: {date(item.deadlineAt)} · التحديث: {date(item.updatedAt)}</p>
+                          <button type="button" disabled={trackerHistoryLoading}
+                            className="mt-2 rounded-lg border px-3 py-1 text-xs font-bold disabled:opacity-50"
+                            onClick={()=>void openTrackerHistory(item.id)}>سجل تغييرات المتابعة</button>
+                          {trackerHistory?.trackerId===item.id&&<div className="mt-3 space-y-1 border-t pt-2">
+                            {trackerHistory.page.items.length===0&&<p className="text-xs text-slate-500">لا توجد أحداث متابعة مسجلة.</p>}
+                            {trackerHistory.page.items.map((event,index)=><p key={index} className="text-xs text-slate-600">
+                              {event.eventType} · {statusLabel(event.status)} · النسخة {event.version} · {date(event.occurredAt)}
+                            </p>)}
+                            {trackerHistory.page.hasMore&&<p className="text-xs text-amber-700">يعرض آخر 20 حدثًا فقط.</p>}
+                          </div>}
                         </article>)}
                         {trackerPage.hasMore && trackerPage.nextCursor && <button type="button"
                           disabled={trackerLoading} onClick={()=>void openSupportTrackerPage(trackerPage.nextCursor!)}
