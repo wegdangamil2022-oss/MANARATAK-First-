@@ -33,6 +33,7 @@ function fixture(completionCount = 1) {
       updateMany: vi.fn().mockResolvedValue({ count: completionCount }),
     },
     cmsContentDomainLink: { findMany: vi.fn().mockResolvedValue([]) },
+    university: { findFirst: vi.fn().mockResolvedValue(null) },
     cmsPublishedContent: { upsert: vi.fn().mockResolvedValue({}) },
     cmsRedirect: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
   };
@@ -68,6 +69,17 @@ describe('CMS scheduled publication atomic closure', () => {
       tx, expect.anything(), 'localized-1', 'CONTENT_PUBLISHED', 'system:cms-scheduler',
       expect.objectContaining({ scheduledJobId: 'job-1' }),
     );
+  });
+
+  it('revalidates an owner domain target at final publication and refuses a revoked record', async () => {
+    const { repository, tx, command } = fixture();
+    tx.cmsContentDomainLink.findMany.mockResolvedValue([
+      { targetType: 'UNIVERSITY', targetId: 'a92ddc80-dede-475d-a062-7d836832737b' },
+    ]);
+    await expect(repository.publish(command)).rejects.toThrow('CMS_DOMAIN_OWNER_TARGET_NOT_PUBLIC');
+    expect(tx.cmsPublishedContent.upsert).not.toHaveBeenCalled();
+    expect(tx.cmsScheduledJob.updateMany).not.toHaveBeenCalled();
+    expect((repository as any).appendMutation).not.toHaveBeenCalled();
   });
 
   it('aborts the publishing decision if the conditional lease completion fails', async () => {
