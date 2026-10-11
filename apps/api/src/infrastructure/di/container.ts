@@ -480,7 +480,7 @@ export function registerDependencies(
     cmsDeliveryCache: asFunction(({ redisClient }) =>
       redisClient ? new RedisCmsDeliveryCache(redisClient) : null,
     ).singleton(),
-    cmsRepository: asFunction(({ prisma }) => new PrismaCmsRepository(prisma)).singleton(),
+    cmsRepository: asFunction(({ prisma, assetRecordRepository }) => new PrismaCmsRepository(prisma, assetRecordRepository)).singleton(),
     studentToolRegistryRepository: asFunction(({ prisma }) => new PrismaStudentToolRegistryRepository(prisma)).singleton(),
     studentToolResultProtector: asFunction(() => new EnvironmentStudentToolResultProtector('STUDENT_TOOL_RESULT_KEY', { ...effectiveEnvironment, STUDENT_TOOL_RESULT_KEY: readConfig<string>('STUDENT_TOOL_RESULT_KEY') })).singleton(),
     studentToolAnonymousSessionService: asFunction(() => new StudentToolAnonymousSessionService(readConfig<string>('STUDENT_TOOL_ANONYMOUS_SESSION_SECRET'))).singleton(),

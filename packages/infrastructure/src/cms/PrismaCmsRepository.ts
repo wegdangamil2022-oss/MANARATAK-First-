@@ -12,6 +12,9 @@ import {
   CmsContentFilters,
   CmsContentRevisionDto,
   CmsContentStatus,
+  AssetId,
+  AssetSecurityClassification,
+  IAssetRecordRepository,
   CmsNavigationMenuDto,
   CmsLocalizedContentDto,
   CmsPublishingPolicy,
@@ -38,7 +41,7 @@ const json = (value: unknown): Prisma.InputJsonValue | undefined =>
   value === undefined ? undefined : (JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue);
 
 export class PrismaCmsRepository implements ICmsRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient, private readonly assetRecords?: IAssetRecordRepository) {}
 
   private get db(): any {
     return this.prisma as any;
@@ -472,6 +475,7 @@ export class PrismaCmsRepository implements ICmsRepository {
       });
       const readiness = await this.readinessFromRows(content, full);
       if (!readiness.ready) throw new Error(`CMS_NOT_READY:${readiness.missing.join(',')}`);
+      await this.verifyPublishedAssets(content, full);
       await this.captureRevision(tx, full, command.actorId, 'PUBLISHED');
       const seo = this.seo(
         full.seoMetadata,
@@ -1470,6 +1474,30 @@ export class PrismaCmsRepository implements ICmsRepository {
   private assertVersion(current: number, expected?: number): void {
     if (!Number.isInteger(expected) || (expected ?? 0) < 1) throw new Error('CMS_VERSION_REQUIRED');
     if (current !== expected) throw new Error('CMS_VERSION_CONFLICT');
+  }
+
+  private async verifyPublishedAssets(content: any, localized: any): Promise<void> {
+    const referenced = [
+      content.featuredAssetId,
+      (content.seoMetadata as { openGraphAssetId?: string } | null)?.openGraphAssetId,
+      localized.featuredAssetId,
+      (localized.seoMetadata as { openGraphAssetId?: string } | null)?.openGraphAssetId,
+      ...(localized.attachments ?? []).map((asset: any) => asset.assetId),
+    ].filter((id): id is string => typeof id === 'string' && id.length > 0);
+    for (const assetId of new Set(referenced)) {
+      CmsPublishingPolicy.assertAssetHandle(assetId);
+      if (!this.assetRecords) throw new Error('CMS_PUBLIC_MEDIA_ASSET_REFERENCE_POLICY_REQUIRED');
+      const record = await this.assetRecords.findById(new AssetId(assetId));
+      if (!record) throw new Error('CMS_PUBLIC_MEDIA_ASSET_NOT_FOUND');
+      if (record.classification !== AssetSecurityClassification.PUBLIC) {
+        throw new Error('CMS_PUBLIC_MEDIA_ASSET_CLASSIFICATION_NOT_ALLOWED');
+      }
+      try {
+        record.assertCanDeliver();
+      } catch {
+        throw new Error('CMS_PUBLIC_MEDIA_ASSET_TRUST_EVIDENCE_REQUIRED');
+      }
+    }
   }
 
   private async editorialFingerprint(tx: any, content: any, localized: any): Promise<string> {
