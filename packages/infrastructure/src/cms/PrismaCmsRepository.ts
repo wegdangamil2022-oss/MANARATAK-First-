@@ -71,6 +71,7 @@ export class PrismaCmsRepository implements ICmsRepository {
       const row = await tx.cmsContentNode.create({
         data: {
           ...data,
+          lastModifiedBy: data.authorId,
           categoryId: category?.id ?? null,
           categorySlug: category?.slug ?? data.categorySlug ?? null,
           seoMetadata: json(data.seoMetadata),
@@ -137,6 +138,7 @@ export class PrismaCmsRepository implements ICmsRepository {
           editorialMetadata: json(values.editorialMetadata),
           metadata: json(values.metadata),
           version: { increment: 1 },
+          lastModifiedBy: actorId,
         },
       });
       if (mutation.count !== 1) throw new Error('CMS_VERSION_CONFLICT');
@@ -380,6 +382,7 @@ export class PrismaCmsRepository implements ICmsRepository {
       CmsPublishingPolicy.assertMakerChecker(review.requestedBy, command.actorId);
       CmsPublishingPolicy.assertMakerChecker(localized.lastModifiedBy, command.actorId);
       CmsPublishingPolicy.assertMakerChecker(content.authorId, command.actorId);
+      CmsPublishingPolicy.assertMakerChecker(content.lastModifiedBy ?? content.authorId, command.actorId);
       if (!review.reviewSnapshotHash || review.reviewSnapshotHash !== await this.editorialFingerprint(tx, content, localized)) throw new Error('CMS_APPROVAL_STALE');
       await tx.cmsWorkflowReview.update({
         where: { id: review.id },
@@ -477,6 +480,7 @@ export class PrismaCmsRepository implements ICmsRepository {
         CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.PUBLISHED);
       }
       CmsPublishingPolicy.assertMakerChecker(content.authorId, command.actorId);
+      CmsPublishingPolicy.assertMakerChecker(content.lastModifiedBy ?? content.authorId, command.actorId);
       CmsPublishingPolicy.assertMakerChecker(localized.lastModifiedBy, command.actorId);
       const approved = await tx.cmsWorkflowReview.findFirst({
         where: { localizedContentId: localized.id, status: 'APPROVED' },
@@ -878,7 +882,7 @@ export class PrismaCmsRepository implements ICmsRepository {
 
       const changed = await tx.cmsContentNode.updateMany({
         where: { id: contentId, version: expectedVersion },
-        data: { version: { increment: 1 } },
+        data: { version: { increment: 1 }, lastModifiedBy: actorId },
       });
       if (changed.count !== 1) throw new Error('CMS_VERSION_CONFLICT');
       await tx.cmsContentDomainLink.deleteMany({ where: { contentId } });
