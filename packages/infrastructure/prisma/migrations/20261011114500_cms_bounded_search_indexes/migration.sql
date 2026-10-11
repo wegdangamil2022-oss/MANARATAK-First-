@@ -1,3 +1,6 @@
+-- MANARATAK_MIGRATION_OWNER: cms
+-- MANARATAK_MIGRATION_SCOPE: owner_only
+-- MANARATAK_ARCH_DECISION: ADR-028
 -- SOURCE ONLY: apply after backup and separately approved post-28 rollout.
 -- pg_trgm extension/GIN indexes require DBA review, disk/time estimates and
 -- realistic EXPLAIN validation. No statement has been executed in this review.

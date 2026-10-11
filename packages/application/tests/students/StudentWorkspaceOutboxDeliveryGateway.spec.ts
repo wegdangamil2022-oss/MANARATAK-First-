@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { assertStudentIntegrationEvent } from '@manaratak/domain';
 import { StudentWorkspaceOutboxDeliveryGateway } from '../../src/students/use-cases/StudentWorkspaceOutboxDeliveryGateway';
 import { StudentWorkspaceOutboxWorker } from '../../src/students/use-cases/StudentWorkspaceOutboxWorker';
 
@@ -231,6 +232,7 @@ describe('Student certificate owner-outbox bridge', () => {
   it('does not run source catch-up for suspended identities', async () => {
     const {students,assignments,identities}=fixture();
     identities.findById.mockResolvedValue({type:'Human',status:'SUSPENDED'});
+    students.consumeIntegrationEvent.mockImplementation(async event => { assertStudentIntegrationEvent(event); return true; });
     const learning={listForStudent:vi.fn()};
     const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,assignments as any,
       identities as any,learning as any);
@@ -239,7 +241,8 @@ describe('Student certificate owner-outbox bridge', () => {
       {idempotencyKey:'role-3'} as any);
     expect(learning.listForStudent).not.toHaveBeenCalled();
     expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
-      eventType:'StudentIdentitySuspended',eventId:'role-3:lifecycle',
+      eventType:'StudentIdentitySuspended',eventId:'role-3:lifecycle',sourceDomain:'IDENTITY',
+      metadata:expect.objectContaining({identityId:'student-1',newStatus:'SUSPENDED',causationId:'role-3'}),
     }));
   });
 

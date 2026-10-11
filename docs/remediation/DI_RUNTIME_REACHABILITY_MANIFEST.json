@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "finding": "MNT-AUD-0109",
-  "generatedFor": "Final source reconciliation after W7 — 2026-09-07",
+  "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 360,
-  "reachableCount": 360,
+  "registrationCount": 364,
+  "reachableCount": 364,
   "unreachable": [],
   "registrations": [
     {
@@ -214,7 +214,8 @@
       "name": "adminServiceFulfillmentUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+        "apps/api/src/presentation/api/router/ServiceAdminRouter.ts",
+        "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
@@ -477,6 +478,7 @@
         "certificateArtifactStore",
         "certificateRenderingService",
         "certificateUseCases",
+        "cmsRepository",
         "courseAdminCommandUseCases",
         "courseCurriculumUseCases",
         "courseImportArtifactUseCase",
@@ -689,6 +691,7 @@
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CmsAdminRouter.ts",
         "apps/api/src/presentation/api/router/FinanceAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
@@ -1117,7 +1120,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentDashboardHydrationService"
+        "studentDashboardHydrationService",
+        "studentWorkspaceOutboxDeliveryGateway"
       ],
       "dependencies": [
         "certificateReadModelService"
@@ -1200,6 +1204,7 @@
         "publicCmsUseCases"
       ],
       "dependencies": [
+        "assetRecordRepository",
         "prisma"
       ]
     },
@@ -1594,7 +1599,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentDashboardHydrationService"
+        "studentDashboardHydrationService",
+        "studentWorkspaceOutboxDeliveryGateway"
       ],
       "dependencies": [
         "courseProgressRepository",
@@ -2023,7 +2029,8 @@
       "name": "identityRepository",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/AuthRouter.ts"
+        "apps/api/src/presentation/api/router/AuthRouter.ts",
+        "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
         "activateIdentityUseCase",
@@ -2041,6 +2048,7 @@
         "registerUserUseCase",
         "resendVerificationUseCase",
         "resetPasswordUseCase",
+        "studentApplicationReminderDeliveryPolicy",
         "studentWorkspaceOutboxDeliveryGateway",
         "suspendIdentityUseCase",
         "updateContactUseCase",
@@ -2764,7 +2772,8 @@
       "dependencies": [
         "notificationDeliveryGateway",
         "notificationDeliveryRepo",
-        "notificationPrefGateway"
+        "notificationPrefGateway",
+        "studentApplicationReminderDeliveryPolicy"
       ]
     },
     {
@@ -3113,6 +3122,7 @@
         "sourceAcquisitionLimiter",
         "sourceRegistryGateway",
         "studentApplicationTrackerRepository",
+        "studentOwnerCatchupContinuationQueue",
         "studentToolRegistryRepository",
         "studentWorkspaceRepository",
         "studyDestinationRepository",
@@ -3455,6 +3465,7 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
       ],
       "reachableThroughRegistrations": [
@@ -3463,6 +3474,7 @@
         "identityRepository",
         "listIdentitiesUseCase",
         "registerUserUseCase",
+        "studentApplicationReminderDeliveryPolicy",
         "studentWorkspaceOutboxDeliveryGateway"
       ],
       "dependencies": [
@@ -4012,15 +4024,52 @@
       "dependencies": []
     },
     {
+      "name": "studentApplicationReminderDeliveryPolicy",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "notificationDeliveryBackgroundJobHandler"
+      ],
+      "dependencies": [
+        "identityRepository",
+        "roleAssignmentRepository",
+        "studentApplicationTrackerRepository"
+      ]
+    },
+    {
       "name": "studentApplicationReminderGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentApplicationTrackerUseCases"
+        "studentApplicationReminderOutboxDeliveryGateway"
       ],
       "dependencies": [
         "intentsUseCase",
         "templatesUseCase"
+      ]
+    },
+    {
+      "name": "studentApplicationReminderOutboxDeliveryGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentApplicationReminderOutboxDispatcher"
+      ],
+      "dependencies": [
+        "studentApplicationReminderGateway",
+        "studentApplicationTrackerRepository"
+      ]
+    },
+    {
+      "name": "studentApplicationReminderOutboxDispatcher",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentWorkspaceOutboxWorker"
+      ],
+      "dependencies": [
+        "studentApplicationReminderOutboxDeliveryGateway",
+        "transactionalOutboxStore"
       ]
     },
     {
@@ -4039,6 +4088,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
+        "studentApplicationReminderDeliveryPolicy",
+        "studentApplicationReminderOutboxDeliveryGateway",
         "studentApplicationTrackerUseCases"
       ],
       "dependencies": [
@@ -4049,11 +4100,11 @@
       "name": "studentApplicationTrackerUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
-        "studentApplicationReminderGateway",
         "studentApplicationScholarshipGateway",
         "studentApplicationTrackerRepository"
       ]
@@ -4082,6 +4133,17 @@
         "courseStudentDashboardReadGateway",
         "studentServiceRequestUseCases",
         "studentWorkspaceUseCases"
+      ]
+    },
+    {
+      "name": "studentOwnerCatchupContinuationQueue",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentWorkspaceOutboxDeliveryGateway"
+      ],
+      "dependencies": [
+        "prisma"
       ]
     },
     {
@@ -4346,8 +4408,11 @@
         "studentWorkspaceFanoutOutboxDeliveryGateway"
       ],
       "dependencies": [
+        "certificateStudentDashboardReadGateway",
+        "courseStudentDashboardReadGateway",
         "identityRepository",
         "roleAssignmentRepository",
+        "studentOwnerCatchupContinuationQueue",
         "studentWorkspaceUseCases"
       ]
     },
@@ -4372,7 +4437,9 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
-        "studentWorkspaceOutboxDispatcher"
+        "studentApplicationReminderOutboxDispatcher",
+        "studentWorkspaceOutboxDispatcher",
+        "studentWorkspaceUseCases"
       ]
     },
     {
@@ -4407,7 +4474,8 @@
       ],
       "reachableThroughRegistrations": [
         "studentDashboardHydrationService",
-        "studentWorkspaceOutboxDeliveryGateway"
+        "studentWorkspaceOutboxDeliveryGateway",
+        "studentWorkspaceOutboxWorker"
       ],
       "dependencies": [
         "assetReferencePolicy",
@@ -4510,6 +4578,7 @@
         "certificateCompletionOutboxDispatcher",
         "ownerDomainProjectionDispatcher",
         "ownerDomainServicesDispatcher",
+        "studentApplicationReminderOutboxDispatcher",
         "studentWorkspaceOutboxDispatcher"
       ],
       "dependencies": [

@@ -30,7 +30,7 @@ const checks = {
     !/data:\s*\{\s*status:\s*next/.test(repo),
 
   'P16-NAV-005':
-    /publishNavigation\(id: string, expectedVersion: number, actorId: string\)/.test(contracts) &&
+    /publishNavigation\(\s*id: string,\s*expectedVersion: number,\s*actorId: string,?\s*\)/.test(contracts) &&
     /status:\s*CmsContentStatus\.DRAFT/.test(repo) &&
     /publishedContentHash:\s*null/.test(repo) &&
     /assertMakerChecker\(existing\.updatedBy, actorId\)/.test(repo) &&
@@ -40,7 +40,7 @@ const checks = {
     !/navigation\/:id\/publish[\s\S]{0,280}nodes:/.test(router),
 
   'P16-ANN-006':
-    /publishAnnouncement\(id: string, expectedVersion: number, actorId: string\)/.test(contracts) &&
+    /publishAnnouncement\(\s*id: string,\s*expectedVersion: number,\s*actorId: string,?\s*\)/.test(contracts) &&
     /updatedBy\s+String/.test(schema) &&
     /publishedContentHash\s+String\?/.test(schema) &&
     /CMS_ANNOUNCEMENT_DRAFT_REQUIRED/.test(repo) &&
@@ -71,7 +71,7 @@ const checks = {
     /CmsContentType\.STUDY_GUIDE\]:\s*'study-guides'/.test(policy) &&
     /CmsContentType\.NEWS\]:\s*'news'/.test(policy) &&
     /CmsContentType\.STATIC_PAGE\]:\s*'pages'/.test(policy) &&
-    /canonicalPath\(data\.locale, content\.contentType/.test(repo) &&
+    /canonicalPath\(\s*data\.locale,\s*content\.contentType/.test(repo) &&
     !/`\/\$\{data\.locale\}\/articles\//.test(repo) &&
     !/`\/\$\{locale\}\/articles\//.test(repo),
 
@@ -80,7 +80,7 @@ const checks = {
     /const visited = new Set<string>\(\[sourcePath\]\)/.test(repo) &&
     /for \(let depth = 0; depth < 256; depth \+= 1\)/.test(repo) &&
     /visited\.has\(cursor\)/.test(repo) &&
-    (repo.match(/assertRedirectGraphSafe\(tx/g) ?? []).length >= 2,
+    (repo.match(/assertRedirectGraphSafe\(\s*tx\s*,/g) ?? []).length >= 2,
 
   'P16-NAV-010':
     /CMS_NAVIGATION_PARENT_NOT_FOUND/.test(policy) &&

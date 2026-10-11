@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
 import PDFDocument from 'pdfkit';
 import SVGtoPDF from 'svg-to-pdfkit';
 import { create as createFont, type Font } from 'fontkit';
@@ -10,6 +12,14 @@ import {
   ICertificateRenderingService,
 } from '@manaratak/domain';
 import { createQrMatrix, qrMatrixToSvg } from '@manaratak/shared';
+
+// Package assets retain their paths in source, ESM workspaces and CJS API bundles.
+// CJS uses the actual bundle location; ESM launchers run from a workspace root.
+const assetRequire = createRequire(
+  typeof __filename === 'string' ? __filename : resolve(process.cwd(), 'package.json'),
+);
+const certificateAsset = (name: string) =>
+  assetRequire.resolve(`@manaratak/infrastructure/assets/certificates/${name}`);
 
 const encode = (value: string) => new TextEncoder().encode(value);
 const xml = (value: unknown) =>
@@ -68,7 +78,11 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
       verificationUrl: input.certificate.verificationUrl,
       recipientDisplayName: input.certificate.recipientDisplayName ?? null,
       achievementDisplayName: input.certificate.achievementDisplayName,
-      achievementDisplayNames: (input.certificate.metadata?.signedEnvelope as {achievement?:{displayNames?:{ar?:string;en?:string}}} | undefined)?.achievement?.displayNames ?? null,
+      achievementDisplayNames:
+        (
+          input.certificate.metadata?.signedEnvelope as
+            { achievement?: { displayNames?: { ar?: string; en?: string } } } | undefined
+        )?.achievement?.displayNames ?? null,
       issuedAt: input.certificate.issuedAt.toISOString(),
       templateVersionId: input.templateVersion.id,
       templateVersionNumber: input.templateVersion.versionNumber,
@@ -95,34 +109,25 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
       moduleSize: 6,
       quietZone: 4,
     });
-    const font = await readFile(
-      new URL('../../assets/certificates/NotoSansArabic-Regular.ttf', import.meta.url),
-    );
+    const font = await readFile(certificateAsset('NotoSansArabic-Regular.ttf'));
     if (input.templateVersion.metadata?.designId === APPROVED_CERTIFICATE_DESIGN) {
       if (
         input.templateVersion.layout !== 'LANDSCAPE' ||
         input.templateVersion.language !== 'BILINGUAL' ||
-        input.templateVersion.designAssetId || input.templateVersion.logoAssetId
+        input.templateVersion.designAssetId ||
+        input.templateVersion.logoAssetId
       ) {
         throw new Error('CERTIFICATE_APPROVED_DESIGN_CONFIGURATION_INVALID');
       }
       const logo =
         visualAssets.logoAssetId?.bytes ??
-        (await readFile(
-          new URL('../../assets/certificates/manaratak-logo-official.png', import.meta.url),
-        ));
+        (await readFile(certificateAsset('manaratak-logo-official.png')));
       const metrics = new PDFDocument({ autoFirstPage: false });
       metrics.registerFont('CertificateArabic', font);
-      const latinFont = await readFile(
-        new URL('../../assets/certificates/DejaVuSerif.ttf', import.meta.url),
-      );
+      const latinFont = await readFile(certificateAsset('DejaVuSerif.ttf'));
       metrics.registerFont('CertificateLatin', latinFont);
-      const arabicBoldFont = await readFile(
-        new URL('../../assets/certificates/NotoSansArabic-Bold.ttf', import.meta.url),
-      );
-      const latinBoldFont = await readFile(
-        new URL('../../assets/certificates/DejaVuSerif-Bold.ttf', import.meta.url),
-      );
+      const arabicBoldFont = await readFile(certificateAsset('NotoSansArabic-Bold.ttf'));
+      const latinBoldFont = await readFile(certificateAsset('DejaVuSerif-Bold.ttf'));
       metrics.registerFont('CertificateArabicBold', arabicBoldFont);
       metrics.registerFont('CertificateLatinBold', latinBoldFont);
       const imageUrl = (role: string) =>
@@ -277,14 +282,13 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
             );
             const rtl = attr('direction') === 'rtl';
             const bold = attr('font-weight') === 'bold';
-            const selected =
-              attr('font-family').startsWith('CertificateArabic')
-                ? bold
-                  ? arabicBold
-                  : arabic
-                : bold
-                  ? latinBold
-                  : latin;
+            const selected = attr('font-family').startsWith('CertificateArabic')
+              ? bold
+                ? arabicBold
+                : arabic
+              : bold
+                ? latinBold
+                : latin;
             const size = Number(attr('font-size')),
               scale = size / selected.unitsPerEm;
             const run = selected.layout(text, undefined, undefined, undefined, rtl ? 'rtl' : 'ltr');

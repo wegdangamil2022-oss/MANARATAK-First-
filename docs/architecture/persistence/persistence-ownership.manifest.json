@@ -73,6 +73,7 @@
     "CmsPublishedContent": "cms",
     "CmsRedirect": "cms",
     "CmsScheduledJob": "cms",
+    "CmsSitePublishedSnapshot": "cms",
     "CmsTag": "cms",
     "CmsWorkflowReview": "cms",
     "Course": "learning",

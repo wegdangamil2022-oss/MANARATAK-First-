@@ -39,6 +39,11 @@
       "command": "npm run phase16:verify"
     },
     {
+      "id": "cms-nginx-local-contract",
+      "classification": "SOURCE",
+      "command": "node scripts/testing/verify-cms-nginx-source.mjs \"$(command -v nginx)\""
+    },
+    {
       "id": "p17",
       "classification": "SOURCE",
       "command": "npm run phase17:verify"
@@ -199,7 +204,8 @@
     "scripts/verify-w9-source.mjs",
     "scripts/verify-wp12-8-scholarship-import-center-ui-source.mjs",
     "scripts/verify-wp12-9-scholarship-catalog-detail-source.mjs",
-    "scripts/verify-wp9-phase10-source-freeze.mjs"
+    "scripts/verify-wp9-phase10-source-freeze.mjs",
+    "scripts/testing/verify-cms-nginx-source.mjs"
   ],
   "runtimePendingManifest": "docs/remediation/W7_RUNTIME_PENDING_CHECKS.md"
 }

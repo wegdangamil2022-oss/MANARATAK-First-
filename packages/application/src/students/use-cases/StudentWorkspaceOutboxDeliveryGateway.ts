@@ -82,7 +82,11 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     // Late assignment events must project the current owner lifecycle, not revive a suspended identity.
     if (event.eventType === 'StudentIdentityCreated' && ['SUSPENDED', 'ARCHIVED', 'PURGED'].includes(identity.status)) {
       await this.students.consumeIntegrationEvent({ ...event, eventId: `${entry.id}:lifecycle`,
-        eventType: identity.status === 'SUSPENDED' ? 'StudentIdentitySuspended' : 'StudentIdentityArchived' });
+        sourceDomain: 'IDENTITY', sourceReferenceId: event.studentReferenceId,
+        eventType: identity.status === 'SUSPENDED' ? 'StudentIdentitySuspended' : 'StudentIdentityArchived',
+        title: identity.status === 'SUSPENDED' ? 'تم تعليق هوية الطالب' : 'تمت أرشفة هوية الطالب',
+        metadata: { identityId: event.studentReferenceId, newStatus: identity.status, causationId: entry.id },
+      });
     }
   }
 

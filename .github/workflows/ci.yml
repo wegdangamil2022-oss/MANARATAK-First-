@@ -63,6 +63,8 @@ jobs:
         run: npm run quality:source
       - name: CI and migration source regression contracts
         run: node --test tests/architecture/ci-runtime-regressions.test.mjs tests/remediation/w2-migration-recovery-source.test.mjs tests/remediation/m10-recovery-gate-exit.test.mjs
+      - name: Install local Nginx contract fixture
+        run: sudo apt-get update && sudo apt-get install -y nginx
       - name: Authoritative registered source-closure manifest
         env:
           DATABASE_MUTATIONS_ALLOWED: 'false'
