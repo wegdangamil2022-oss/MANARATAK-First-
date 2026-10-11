@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 import { AdminCmsUseCases } from '@manaratak/application';
+import { AuthorizationEvaluatorService } from '@manaratak/domain';
 import { CmsAdminRouter } from '../../../../src/presentation/api/router/CmsAdminRouter';
 
 describe('Phase 16 CMS admin router', () => {
@@ -41,7 +42,7 @@ describe('Phase 16 CMS admin router', () => {
     archiveAnnouncement: vi.fn(),
     processDueSchedules: vi.fn(),
   });
-  const app = (cms: ReturnType<typeof useCases>, actorId?: string) => {
+  const app = (cms: ReturnType<typeof useCases>, actorId?: string, grants: string[] = ['admin:cms:view', 'admin:cms:author', 'admin:cms:review', 'admin:cms:publish']) => {
     const server = express();
     server.use(express.json());
     if (actorId)
@@ -51,10 +52,44 @@ describe('Phase 16 CMS admin router', () => {
       });
     server.use(
       '/cms',
-      CmsAdminRouter.create({ adminCmsUseCases: cms as unknown as AdminCmsUseCases }),
+      CmsAdminRouter.create({
+        adminCmsUseCases: cms as unknown as AdminCmsUseCases,
+        authEvaluatorService: {
+          evaluatePermission: vi.fn(async (_principalId: string, requiredPermission: string) => ({
+            isGranted: grants.includes(requiredPermission),
+          })),
+        } as unknown as AuthorizationEvaluatorService,
+      }),
     );
     return server;
   };
+
+  it('rejects self-service approval when author has no independent review grant', async () => {
+    const cms = useCases();
+    const response = await request(app(cms, 'author-1', ['admin:cms:author']))
+      .post('/cms/content/c-1/approve').send({ locale: 'ar', expectedVersion: 1 });
+    expect(response.status).toBe(403);
+    expect(cms.approveReview).not.toHaveBeenCalled();
+  });
+
+  it('requires root conditional version and refuses site/owner tampering', async () => {
+    const cms = useCases();
+    const server = app(cms, 'editor-1');
+    const missing = await request(server).patch('/cms/content/c-1').send({ title: 'Changed' });
+    expect(missing.status).toBe(400);
+    const alteredSite = await request(server).patch('/cms/content/c-1')
+      .send({ title: 'Changed', expectedVersion: 2, siteIdentifier: 'other-tenant' });
+    expect(alteredSite.status).toBe(400);
+    expect(cms.updateContent).not.toHaveBeenCalled();
+  });
+
+  it('rejects publishing without expectedVersion', async () => {
+    const cms = useCases();
+    const response = await request(app(cms, 'checker'))
+      .post('/cms/content/c-1/publish').send({ locale: 'en' });
+    expect(response.status).toBe(400);
+    expect(cms.publish).not.toHaveBeenCalled();
+  });
 
   it('derives the author from authentication and applies Arabic-first defaults', async () => {
     const cms = useCases();
@@ -74,7 +109,7 @@ describe('Phase 16 CMS admin router', () => {
     const response = await request(app(cms))
       .post('/cms/content')
       .send({ slug: 'arabic-guide', title: 'دليل عربي', contentType: 'ARTICLE' });
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
     expect(cms.createContent).not.toHaveBeenCalled();
   });
 
