@@ -386,7 +386,13 @@ export interface StudentSupportApplicationTrackerPage {
   nextCursor: string | null;
 }
 
+export interface StudentSupportTrackerHistoryPage {
+  items:Array<{eventType:string;occurredAt:Date;version:number;status:string}>;
+  hasMore:boolean;
+}
+
 export interface IStudentApplicationTrackerRepository {
+  listSupportHistory(studentReferenceId:string,trackerId:string,limit?:number):Promise<StudentSupportTrackerHistoryPage>;
   listSupportPage(studentReferenceId: string, input: { limit?: number; cursor?: string }): Promise<StudentSupportApplicationTrackerPage>;
   create(data: CreateStudentApplicationTrackerDto): Promise<StudentApplicationTrackerDto>;
   list(studentReferenceId: string): Promise<StudentApplicationTrackerDto[]>;

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '@prisma/client';
 import { StudentSupportCursorCodec } from './StudentSupportCursorCodec';
-import { CreateStudentApplicationTrackerDto, IStudentApplicationTrackerRepository, StudentApplicationTrackerDto, UpdateStudentApplicationTrackerDto, StudentSupportApplicationTrackerPage } from '@manaratak/domain';
+import { CreateStudentApplicationTrackerDto, IStudentApplicationTrackerRepository, StudentApplicationTrackerDto, UpdateStudentApplicationTrackerDto, StudentSupportApplicationTrackerPage, StudentSupportTrackerHistoryPage } from '@manaratak/domain';
 
 export class PrismaStudentApplicationTrackerRepository implements IStudentApplicationTrackerRepository {
   constructor(private readonly prisma: PrismaClient, private readonly cursorSigningSecret?:string) {}
@@ -61,6 +61,27 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
     };
   }
 
+  async listSupportHistory(studentReferenceId:string,trackerId:string,limit=20):Promise<StudentSupportTrackerHistoryPage>{
+    const take=Math.min(30,Math.max(1,Math.trunc(limit)));
+    const owned=await this.db.studentApplicationTracker.findFirst({
+      where:{id:trackerId,studentReferenceId},select:{id:true},
+    });
+    if(!owned)throw new Error('STUDENT_APPLICATION_TRACKER_NOT_FOUND');
+    const rows=await this.db.studentTimelineEntry.findMany({
+      where:{studentReferenceId,sourceDomain:'STUDENT_APPLICATIONS',sourceReferenceId:trackerId},
+      orderBy:[{occurredAt:'desc'},{id:'desc'}],take:take+1,
+      select:{eventType:true,occurredAt:true,metadata:true},
+    });
+    return {
+      items:rows.slice(0,take).map((row:any)=>({
+        eventType:row.eventType,occurredAt:row.occurredAt,
+        version:Number(row.metadata?.version??0),
+        status:String(row.metadata?.status??'UNKNOWN'),
+      })),
+      hasMore:rows.length>take,
+    };
+  }
+
   async list(studentReferenceId:string):Promise<StudentApplicationTrackerDto[]> { return (await this.db.studentApplicationTracker.findMany({where:{studentReferenceId},orderBy:{updatedAt:'desc'},include:this.include})).map((r:any)=>this.dto(r)); }
   async findById(studentReferenceId:string,trackerId:string):Promise<StudentApplicationTrackerDto|null>{ const row=await this.db.studentApplicationTracker.findFirst({where:{id:trackerId,studentReferenceId},include:this.include}); return row?this.dto(row):null; }
   async update(studentReferenceId:string,trackerId:string,data:UpdateStudentApplicationTrackerDto):Promise<StudentApplicationTrackerDto>{
@@ -81,6 +102,29 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
   }
   private async cas(tx:any,current:any,data:Record<string,unknown>):Promise<void>{ const result=await tx.studentApplicationTracker.updateMany({where:{id:current.id,studentReferenceId:current.studentReferenceId,version:current.version,status:'ACTIVE'},data:{...data,version:{increment:1}}}); if(result.count!==1) throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT'); }
   private async queueReminder(tx:any,row:any,previousVersion:number|null):Promise<void>{
+    const eventType=row.status==='DELETED'?'StudentApplicationTrackerDeleted':
+      row.status==='ARCHIVED'?'StudentApplicationTrackerArchived':
+      previousVersion===null?'StudentApplicationTrackerCreated':'StudentApplicationTrackerUpdated';
+    const eventMetadata={
+      studentReferenceId:row.studentReferenceId,scholarshipId:row.scholarshipId,
+      version:row.version,status:row.status,
+    };
+    const auditId=randomUUID();
+    await tx.auditRecord.create({data:{
+      id:auditId,reference:`student-tracker-audit-${auditId}`,
+      action:eventType,category:'STUDENT_APPLICATION',severity:'INFO',
+      actorId:row.studentReferenceId,actorType:'USER',
+      targetId:row.id,targetType:'StudentApplicationTracker',
+      source:'student-application-tracker',timestamp:new Date(),
+      contextMetadata:eventMetadata,
+    }});
+    await tx.studentTimelineEntry.create({data:{
+      id:randomUUID(),studentReferenceId:row.studentReferenceId,
+      eventType,title:'تغيرت حالة متابعة التقديم',
+      sourceDomain:'STUDENT_APPLICATIONS',sourceReferenceId:row.id,
+      metadata:{version:row.version,status:row.status},
+      occurredAt:new Date(),
+    }});
     await tx.transactionalOutboxRecord.create({data:{
       id:randomUUID(),domain:'STUDENT_APPLICATIONS',eventType:'StudentApplicationReminderReconcileRequested',
       aggregateType:'StudentApplicationTracker',aggregateId:row.id,
