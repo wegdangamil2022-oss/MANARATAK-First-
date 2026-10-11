@@ -24,6 +24,7 @@ import {
   CmsPublishingReadinessDto,
   CmsRedirectDto,
   CmsScheduleResultDto,
+  CmsSitemapEntryDto,
   CmsSlugChangeDto,
   CmsRestoreRevisionDto,
   CmsSeoMetadata,
@@ -836,6 +837,35 @@ export class PrismaCmsRepository implements ICmsRepository {
     if (!row || row.status !== CmsContentStatus.PUBLISHED) return null;
     const locales = await this.availableLocales([row.contentId]);
     return this.publicContent(row, locales.get(row.contentId) ?? []);
+  }
+
+  /**
+   * Sitemap discovery reads only immutable public projections, never mutable
+   * content drafts. Published rows are bounded to the sitemap protocol limit;
+   * the sentinel prevents accidentally returning a truncated "complete" feed.
+   */
+  public async listIndexableSitemapEntries(siteIdentifier: string): Promise<CmsSitemapEntryDto[]> {
+    if (siteIdentifier !== 'manaratak') throw new Error('CMS_SITE_SCOPE_UNSUPPORTED');
+    const rows = await this.db.cmsPublishedContent.findMany({
+      where: { siteIdentifier, status: CmsContentStatus.PUBLISHED },
+      select: {
+        contentId: true, locale: true, slug: true, contentType: true,
+        canonicalUrl: true, seoMetadata: true,
+      },
+      orderBy: { id: 'asc' },
+      take: 50_001,
+    });
+    if (rows.length > 50_000) throw new Error('CMS_SITEMAP_SPLIT_REQUIRED');
+    const entries: CmsSitemapEntryDto[] = [];
+    for (const row of rows) {
+      if (row.locale !== 'ar' && row.locale !== 'en') continue;
+      if (row.seoMetadata && typeof row.seoMetadata === 'object' &&
+          !Array.isArray(row.seoMetadata) && row.seoMetadata.noIndex === true) continue;
+      const expected = CmsPublishingPolicy.canonicalPath(row.locale, row.contentType, row.slug);
+      if (row.canonicalUrl !== expected) throw new Error('CMS_SITEMAP_CANONICAL_MISMATCH');
+      entries.push({ contentId: row.contentId, locale: row.locale, canonicalPath: expected });
+    }
+    return entries;
   }
 
   public async replaceDomainLinks(
