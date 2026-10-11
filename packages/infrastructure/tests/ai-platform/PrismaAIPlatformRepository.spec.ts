@@ -64,4 +64,32 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     ]));
   });
 
+
+  it('requires independent evaluation review and rejects a second approval', async () => {
+    const baseRun = {
+      publicId: 'aiev_1', id: 'record-1', status: 'COMPLETED', targetEvidence: {
+        submittedBy: 'author-1', executedBy: 'operator-1',
+        definitionChecksum: 'definition-hash', resultChecksum: 'test-result-hash',
+      },
+      score: 1, results: [], safetyFailures: 0, targetChecksum: 'prompt-hash',
+    };
+    for (const [reviewer, record, expected] of [
+      ['author-1', baseRun, 'AI_EVALUATION_INDEPENDENT_REVIEW_REQUIRED'],
+      ['operator-1', baseRun, 'AI_EVALUATION_INDEPENDENT_REVIEW_REQUIRED'],
+      ['reviewer-1', { ...baseRun, approvedBy: 'other-reviewer' }, 'AI_EVALUATION_ALREADY_APPROVED'],
+      ['reviewer-1', baseRun, 'AI_EVALUATION_RESULT_EVIDENCE_CHANGED'],
+    ] as const) {
+      const tx = {
+        aIEvaluationRunRecord: {
+          findUnique: vi.fn().mockResolvedValue(record), updateMany: vi.fn(),
+        },
+      };
+      const repository = new PrismaAIPlatformRepository({
+        $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+      });
+      await expect(repository.approveEvaluationRun('aiev_1', reviewer)).rejects.toThrow(expected);
+      expect(tx.aIEvaluationRunRecord.updateMany).not.toHaveBeenCalled();
+    }
+  });
+
 });
