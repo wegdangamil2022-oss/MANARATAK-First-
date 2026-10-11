@@ -61,24 +61,47 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
     };
   }
 
-  async listSupportHistory(studentReferenceId:string,trackerId:string,limit=20):Promise<StudentSupportTrackerHistoryPage>{
+  async listSupportHistory(
+    studentReferenceId:string,trackerId:string,limit=20,cursor?:string,
+  ):Promise<StudentSupportTrackerHistoryPage>{
     const take=Math.min(30,Math.max(1,Math.trunc(limit)));
+    const scope=JSON.stringify({domain:'tracker-history',studentReferenceId,trackerId,limit:take});
+    const codec=new StudentSupportCursorCodec(this.cursorSigningSecret);
+    const anchor=cursor?codec.decode(cursor,scope):null;
     const owned=await this.db.studentApplicationTracker.findFirst({
       where:{id:trackerId,studentReferenceId},select:{id:true},
     });
-    if(!owned)throw new Error('STUDENT_APPLICATION_TRACKER_NOT_FOUND');
+    // Once a tracker is deleted its append-only timeline still belongs to the
+    // same student. Require a prior P15 event to guard orphan/foreign IDs.
+    if(!owned){
+      const archivedEvidence=await this.db.studentTimelineEntry.findFirst({
+        where:{studentReferenceId,sourceDomain:'STUDENT_APPLICATIONS',sourceReferenceId:trackerId},
+        select:{id:true},
+      });
+      if(!archivedEvidence)throw new Error('STUDENT_APPLICATION_TRACKER_NOT_FOUND');
+    }
     const rows=await this.db.studentTimelineEntry.findMany({
-      where:{studentReferenceId,sourceDomain:'STUDENT_APPLICATIONS',sourceReferenceId:trackerId},
+      where:{
+        studentReferenceId,sourceDomain:'STUDENT_APPLICATIONS',sourceReferenceId:trackerId,
+        ...(anchor?{OR:[
+          {occurredAt:{lt:new Date(anchor.updatedAt)}},
+          {occurredAt:new Date(anchor.updatedAt),id:{lt:anchor.id}},
+        ]}:{}),
+      },
       orderBy:[{occurredAt:'desc'},{id:'desc'}],take:take+1,
-      select:{eventType:true,occurredAt:true,metadata:true},
+      select:{id:true,eventType:true,occurredAt:true,metadata:true},
     });
+    const selected=rows.slice(0,take);
+    const last=selected[selected.length-1];
     return {
-      items:rows.slice(0,take).map((row:any)=>({
+      items:selected.map((row:any)=>({
         eventType:row.eventType,occurredAt:row.occurredAt,
         version:Number(row.metadata?.version??0),
         status:String(row.metadata?.status??'UNKNOWN'),
       })),
       hasMore:rows.length>take,
+      nextCursor:rows.length>take && last
+        ?codec.encode({id:last.id,updatedAt:last.occurredAt},scope):null,
     };
   }
 

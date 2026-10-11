@@ -389,10 +389,11 @@ export interface StudentSupportApplicationTrackerPage {
 export interface StudentSupportTrackerHistoryPage {
   items:Array<{eventType:string;occurredAt:Date;version:number;status:string}>;
   hasMore:boolean;
+  nextCursor:string|null;
 }
 
 export interface IStudentApplicationTrackerRepository {
-  listSupportHistory(studentReferenceId:string,trackerId:string,limit?:number):Promise<StudentSupportTrackerHistoryPage>;
+  listSupportHistory(studentReferenceId:string,trackerId:string,limit?:number,cursor?:string):Promise<StudentSupportTrackerHistoryPage>;
   listSupportPage(studentReferenceId: string, input: { limit?: number; cursor?: string }): Promise<StudentSupportApplicationTrackerPage>;
   create(data: CreateStudentApplicationTrackerDto): Promise<StudentApplicationTrackerDto>;
   list(studentReferenceId: string): Promise<StudentApplicationTrackerDto[]>;

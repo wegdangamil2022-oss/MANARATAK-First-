@@ -20,9 +20,9 @@ export class StudentApplicationTrackerUseCases {
     return this.repository.listSupportPage(studentReferenceId,input);
   }
   /** P15-only, read-only and privacy-minimal tracker change history. */
-  async listSupportHistory(studentReferenceId:string,trackerId:string,limit=20){
+  async listSupportHistory(studentReferenceId:string,trackerId:string,limit=20,cursor?:string){
     if(!studentReferenceId.trim()||!trackerId.trim())throw new Error('STUDENT_REFERENCE_REQUIRED');
-    return this.repository.listSupportHistory(studentReferenceId,trackerId,limit);
+    return this.repository.listSupportHistory(studentReferenceId,trackerId,limit,cursor);
   }
   async list(studentReferenceId:string){
     const items=await this.repository.list(studentReferenceId);
