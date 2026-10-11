@@ -1582,6 +1582,11 @@ export class AIKnowledgeUseCases {
   }) {
     const index = await this.repository.find<AIKnowledgeIndex>('knowledgeIndexes', input.indexKey);
     if (!index || index.status !== 'ACTIVE') throw new Error('AI_KNOWLEDGE_INDEX_NOT_ACTIVE');
+    // This legacy HTTP contract accepts client-supplied content and cannot prove
+    // canonical publication, classification, owner authorization or consent.
+    // Quarantine it until a typed, read-only owner verification gateway is wired.
+    // Never transfer unverified student/canonical content to a paid embedding provider.
+    throw new Error('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
     const model = await this.repository.find<AIModelDefinition>('models', index.embeddingModelKey);
     if (
       !model ||
