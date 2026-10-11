@@ -977,7 +977,9 @@ export class AIExecutionOrchestrator {
         (request.capabilityKey ?? request.purpose) !== job.capabilityKey
       )
         throw new Error('AI_ASYNC_PAYLOAD_IDENTITY_MISMATCH');
-      const response = await this.execute(request);
+      // Durable queue identity overrides any caller key so a lease reclaim cannot
+      // dispatch a second independent paid execution for the same job.
+      const response = await this.execute({ ...request, idempotencyKey: `async-job:${job.publicId}` });
       if (
         response.status !== AIExecutionStatus.COMPLETED &&
         response.status !== AIExecutionStatus.BLOCKED
@@ -1019,27 +1021,7 @@ export class AIExecutionOrchestrator {
   async processDueAsyncJobs(workerId: string, limit = 10, signal?: AbortSignal) {
     if (!workerId.trim()) throw new Error('AI_ASYNC_WORKER_ID_REQUIRED');
     const bounded = Math.min(50, Math.max(1, Math.trunc(limit)));
-    const now = Date.now();
-    const candidates = [] as AIAsyncJobRecord[];
-    for (const status of ['QUEUED', 'RETRYING', 'RUNNING']) {
-      const page = await this.repository.listAsyncJobs({ status, page: 1, pageSize: bounded });
-      for (const job of page.data) {
-        if (candidates.length >= bounded) break;
-        if (
-          status === 'RETRYING' &&
-          job.nextAttemptAt &&
-          new Date(job.nextAttemptAt).getTime() > now
-        )
-          continue;
-        if (
-          status === 'RUNNING' &&
-          (!job.leaseExpiresAt || new Date(job.leaseExpiresAt).getTime() > now)
-        )
-          continue;
-        candidates.push(job);
-      }
-      if (candidates.length >= bounded) break;
-    }
+    const candidates = await this.repository.listClaimableAsyncJobs(bounded);
     let processed = 0;
     for (const job of candidates) {
       if (signal?.aborted) throw signal.reason ?? new Error('BACKGROUND_JOB_ABORTED');
@@ -2327,9 +2309,8 @@ function estimateCost(
   );
 }
 function privacyPreview(value: string, classification: AIDataClassification) {
-  return classification === 'STUDENT_PRIVATE' || classification === 'HIGHLY_SENSITIVE'
-    ? null
-    : value.slice(0, 500);
+  // Metadata suffices for operations; only explicitly PUBLIC inputs allow a preview.
+  return classification === 'PUBLIC' ? value.slice(0, 500) : null;
 }
 function sanitizeMetadata(value?: Record<string, unknown> | null): Record<string, unknown> | null {
   if (!value) return null;

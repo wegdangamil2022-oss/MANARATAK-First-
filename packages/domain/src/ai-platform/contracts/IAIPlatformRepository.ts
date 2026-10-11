@@ -106,6 +106,7 @@ export interface IAIPlatformRepository {
     page?: number;
     pageSize?: number;
   }): Promise<{ data: AIAsyncJobRecord[]; total: number }>;
+  listClaimableAsyncJobs(limit: number, now?: Date): Promise<AIAsyncJobRecord[]>;
   claimAsyncJob(publicId: string, workerId: string): Promise<AIAsyncJobRecord | null>;
   updateAsyncJob(
     publicId: string,

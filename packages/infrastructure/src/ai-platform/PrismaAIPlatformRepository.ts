@@ -294,6 +294,8 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       if (!current) throw new Error('AI_PROMPT_VERSION_NOT_FOUND');
       if (!['DRAFT', 'REVIEW'].includes(current.status))
         throw new Error('AI_PROMPT_VERSION_NOT_APPROVABLE');
+      if (current.createdBy === actorReferenceId)
+        throw new Error('AI_PROMPT_SELF_APPROVAL_FORBIDDEN');
       const changed = await tx.aIPromptVersionRecord.updateMany({
         where: { id: current.id, status: current.status },
         data: { status: 'APPROVED', approvedBy: actorReferenceId },
@@ -326,6 +328,10 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       });
       if (!versionRecord || versionRecord.status !== 'APPROVED')
         throw new Error('Only an approved immutable prompt version can be deployed.');
+      // Author, checker, and deployer must be independent, even on direct repository calls.
+      if (!versionRecord.approvedBy || versionRecord.createdBy === actorReferenceId ||
+          versionRecord.approvedBy === actorReferenceId)
+        throw new Error('AI_PROMPT_DEPLOYER_NOT_INDEPENDENT');
       const record = await tx.aIRegistryRecord.findUnique({
         where: { resourceType_key: { resourceType: 'prompts', key: promptKey } },
       });
@@ -684,6 +690,22 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       this.prisma.aIAsyncJobRecord.count({ where }),
     ]);
     return { data, total };
+  }
+
+  async listClaimableAsyncJobs(limit: number, now: Date = new Date()): Promise<AIAsyncJobRecord[]> {
+    // Database-side due filtering prevents a page of future retries hiding older ready jobs.
+    const due = { OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: now } }] };
+    return this.prisma.aIAsyncJobRecord.findMany({
+      where: {
+        OR: [
+          { status: 'QUEUED', ...due },
+          { status: 'RETRYING', ...due },
+          { status: 'RUNNING', leaseExpiresAt: { lte: now } },
+        ],
+      },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      take: Math.min(50, Math.max(1, Math.trunc(limit))),
+    });
   }
 
   async claimAsyncJob(publicId: string, workerId: string): Promise<AIAsyncJobRecord | null> {
