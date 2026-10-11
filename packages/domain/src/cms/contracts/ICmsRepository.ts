@@ -80,6 +80,7 @@ export interface ICmsRepository {
   saveNavigation(data: Omit<CmsNavigationMenuDto, 'id' | 'version' | 'status' | 'publishedContentHash' | 'publishedBy' | 'publishedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsNavigationMenuDto>;
   publishNavigation(id: string, expectedVersion: number, actorId: string): Promise<CmsNavigationMenuDto>;
   listBlockSchemas(): Promise<CmsBlockSchemaDto[]>;
+  approveBlockSchema(id: string, actorId: string): Promise<CmsBlockSchemaDto>;
   createBlockSchema(data: Omit<CmsBlockSchemaDto, 'id' | 'createdAt'>): Promise<CmsBlockSchemaDto>;
   listBlocks(siteIdentifier: string, locale: string): Promise<CmsContentBlockDto[]>;
   publishBlock(id: string, expectedVersion: number, actorId: string): Promise<CmsContentBlockDto>;
