@@ -2,6 +2,8 @@
 
 **Verdict: SOURCE_INCOMPLETE — DO NOT CLAIM CODE_CLOSED OR RUNTIME_READY.**
 
+**Review PR:** [#19](https://github.com/wegdangamil2022-oss/MANARATAK-First-/pull/19) (Draft, targets main; no merge).
+
 - Repository: `wegdangamil2022-oss/MANARATAK-First-`; review branch: `feat/section-17-enterprise-ai-platform`.
 - Baseline inspected: `main@4571ec9c3e4362470d03a2ed2706664cd8ee09c0` (merged PR #18).
 - Authoritative plan: Library `MANARATAK_ADMIN_REVIEW_CODEX.md`, heading **18 — Enterprise AI Platform (P17)**, tasks `AI-ADM-001…030` and annex `FGA-18-001…002`. Plan's numeric 18 section is **not** P18 Student Tools.
@@ -47,7 +49,7 @@ Status names mean **source patches only** unless a separate executed test record
 | `AI-ADM-017` | **PARTIAL** | Active routing now fails closed when more than one exact/fallback policy applies, avoiding updatedAt silent winner. Atomic approved effective binding, immutable schedule and rollback still OPEN. |
 | `AI-ADM-018` | **PARTIAL** | Evaluation submitter/executor identity recorded in evidence; independent one-shot reviewer and result checksum required at repository. Immutable definition snapshot and broader history proof missing. |
 | `AI-ADM-019` | **SOURCE_PATCHED_UNVERIFIED** | Repository requires expectedUpdatedAt on existing records under transaction+advisory lock; Admin editor already sends revision. Need executed concurrent write regression. |
-| `AI-ADM-020` | **PARTIAL** | Production execution enforces finite explicit model input/output prices (zero only if declared), checks effective overlapping ACTIVE pricing windows before writes, tests authored. Cost kind/ledger real-provider reconciliation and historic unknown amounts remain OPEN. |
+| `AI-ADM-020` | **PARTIAL** | Production execution enforces explicit finite model prices even without a monthly cost limit (zero only when declared). Active price interval overlap is checked while holding a model-scoped transaction advisory lock; mocked negative tests authored. Ledger/provider reconciliation and unknown historical cost remain OPEN. |
 | `AI-ADM-021` | **PARTIAL** | Per-requester consumer quotas (rate, daily, in-flight) now carry optional governed policy and safe bounded defaults into serializable atomic execution reservation. Full multi-process contention/fairness tests and async queue admission fairness still outstanding. |
 | `AI-ADM-022` | **OPEN** | Embedding replace identity still omits sourceType/version; collision risk remains (legacy path quarantined). |
 | `AI-ADM-023` | **OPEN** | In-flight cancellation provider signal, honest cancel state and late-result CAS incomplete. |
@@ -56,7 +58,7 @@ Status names mean **source patches only** unless a separate executed test record
 | `AI-ADM-026` | **PARTIAL** | AI Admin hub group/section navigation, title, intro and text direction respect language ar/en, but operational panels, dialogs, hints and error/status translations still Arabic-first. Full extraction to dictionaries and browser validation OPEN. |
 | `AI-ADM-027` | **OPEN** | Canonical source ingestion byte/chunk/vector/provider batch bounds not implemented; unverified path blocked. |
 | `AI-ADM-028` | **PARTIAL** | Incidents now transition only via atomic audited NOTE_ADDED / INVESTIGATION_UPDATE / MITIGATION_RECORDED / RESOLUTION_RECORDED state machine; direct status edits blocked. Severity-specific approval, replay-idempotent events, negative lifecycle runtime tests still OPEN. |
-| `AI-ADM-029` | **PARTIAL** | Provider Fetch transport now limits response bytes before JSON parse; malformed/oversized mocks added; structured-output schema depth/node complexity bounded with hostile-shape tests authored. Full multi-provider fuzz/timeout/exhaustive matrix OPEN. |
+| `AI-ADM-029` | **PARTIAL** | Provider HTTP fetch caps body bytes before parsing and rejects malformed JSON; schema depth/node complexity capped; mocked hostile shape tests authored. Multi-provider large-response timeout/fuzz matrix incomplete. |
 | `AI-ADM-030` | **DEFERRED_POST_28** | Real provider, database migration, queue worker, outbox, cross-domain E2E/security tests deferred per instruction. |
 | `FGA-18-001` | **SOURCE_PATCHED_UNVERIFIED** | Admin executions now offer consumerKey/providerKey/purpose facets, query URL persistence and reset; API already has validated filters. Pagination/backend fixture proof deferred. |
 | `FGA-18-002` | **PARTIAL** | Async job table links existing executionPublicId to read-only execution/trace page, no API re-execution; richer attempt-cost correlation and RBAC/source timestamps pending. |
@@ -80,3 +82,20 @@ Status names mean **source patches only** unless a separate executed test record
 - Post-28 runtime: disposable DB migration/rollback, worker lease fault injection, real provider sandbox tests, secrets/cost reconciliation, E2E requester privacy, audit/outbox, AR/EN browser checks.
 
 **No claim of completion of 30 tasks; do not merge this Draft PR as source-closed.** Use it as an independently reviewable remediation tranche. See `section-17-closure-gates.md` for explicit release and follow-up verification gates.
+
+
+## New source remediation and exact-SHA CI evidence (11 October 2026)
+
+The source was changed after the initial implementation report. Additional committed patches:
+- `AI-ADM-002`: current ACTIVE evaluation gate/dataset/evaluator fingerprint, numeric score and reviewer are rechecked **under deployment's DB transaction** before retiring the prior production version; gate writes share the governance lock. See `PrismaAIPlatformRepository.ts` and its negative unit test. No live DB contention executed.
+- `AI-ADM-004/009`: the Admin UI now gates privileged operation buttons by `useAdminAuthorization`, and Admin API execution list/detail/trace prevent older NON-PUBLIC previews/attributes being disclosed even when historically persisted. The API is still the primary authorization enforcement point.
+- `AI-ADM-020/021/025/029`: governed model pricing (no unknown-cost-as-free), model-level overlap lock; requester concurrency and minute limits; health-verified vs can-attempt provider status; and bounded provider response parsing plus schema complexity.
+- `AI-ADM-006`: UI disables manual unverified knowledge ingestion in addition to the fail-closed server path, pending canonical read-only owner gateway. This is an unavailable feature, **not** verified indexing completeness.
+- Additional mock regression coverage: per-requester admission limits; stale evaluation transaction gate; historical confidential execution views; provider malformed/oversized JSON; deep/wide structured output; price interval overlap; incident transitions and protected async result retrieval.
+- A source-only CI workflow `.github/workflows/p17-targeted-source.yml` now exercises six P17-specific mock/unit/HTTP suites. Its green/failed result must be recorded **at the final head SHA** before closure.
+
+### CI observations and evidence boundaries
+
+Prior failing CI runs on earlier P17 commits were inspected, **not treated as success**: TypeScript unused import, previously unrecognized `security(p17)` commit prefix, old source-contract assertions expecting `admin:ai:manage`, duplicate `export`, and an ESLint test fixture named `useCases`. These source failures were addressed in subsequent commits. A previous source mock workflow could not resolve the runtime `@manaratak/domain` entry because compiled package outputs were missing; the workflow was updated to build TypeScript project references before running Vitest. These fixes require re-verification on the final commit. Google AI Studio environment inventory checks have also reported staleness in one earlier run, and remain subject to final verification.
+
+**Provisional evidence:** GH Actions are executing source checks. Only a `completed/success` check attached to the exact final PR commit counts as PASS. `queued`, `in_progress`, `cancelled` and prior-commit successes do not. Runtime migrations, provider calls, workers, DB faults, and E2E are deferred until after section 28. No live secret or credential was used or printed in this review.
