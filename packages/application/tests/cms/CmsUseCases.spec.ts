@@ -48,6 +48,7 @@ describe('Phase 16 CMS use cases', () => {
       getPublishedBySlug: vi.fn(),
       changeLocalizedSlug: vi.fn(),
       listRedirects: vi.fn(),
+      searchRedirects: vi.fn(),
       createRedirect: vi.fn(),
       listNavigation: vi.fn(),
       saveNavigation: vi.fn(),
@@ -198,6 +199,15 @@ describe('Phase 16 CMS use cases', () => {
     await expect(admin.restoreRevision('content-1', 'en', 'rev-1', 'editor', 2))
       .rejects.toThrow('CMS_REVISION_RELATIONS_UNAVAILABLE');
     expect(repository.restoreRevision).not.toHaveBeenCalled();
+  });
+
+  it('passes paginated redirect search to the CMS owner without reading public content', async () => {
+    vi.mocked(repository.searchRedirects).mockResolvedValue({ data: [], total: 0, page: 2, pageSize: 10, totalPages: 0 });
+    const query = { siteIdentifier: 'manaratak', locale: 'ar', q: 'old', active: true, page: 2, pageSize: 10 };
+    const result = await admin.searchRedirects(query);
+    expect(result.page).toBe(2);
+    expect(repository.searchRedirects).toHaveBeenCalledWith(query);
+    expect(repository.listPublished).not.toHaveBeenCalled();
   });
 
   it('keeps the public query on the published projection only', async () => {
