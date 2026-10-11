@@ -3,7 +3,7 @@ import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 import { AIAdminRouter } from '../../../../src/presentation/api/router/AIAdminRouter';
 
-const useCases = () => ({
+const createUseCases = () => ({
   aiPlatformAdminUseCases: {
     overview: vi.fn().mockResolvedValue({ enabled: true }),
     approvePromptVersion: vi.fn().mockResolvedValue({ status: 'APPROVED' }),
@@ -16,7 +16,7 @@ const useCases = () => ({
 });
 
 function appFor(permissions: string[], authenticated = true) {
-  const deps = useCases();
+  const deps = createUseCases();
   const evaluatePermission = vi.fn().mockImplementation(async (_actor, permission) => ({
     isGranted: permissions.includes(permission),
   }));
