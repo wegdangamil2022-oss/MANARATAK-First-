@@ -94,23 +94,56 @@ export class StudentSupportAdminRouter {
     router.get('/support/:studentReferenceId', requireSupportRead, async (req, res, next) => {
       try {
         const studentReferenceId = z.string().trim().min(1).max(128).parse(req.params.studentReferenceId);
-        const permission = async (name: string) => (await authEvaluatorService.evaluatePermission(
-          req.authUserId!, name, { ip: req.ip, requestTime: new Date() },
-        )).isGranted;
-        const [learning, certificates, services] = await Promise.all([
-          permission('admin:courses:manage'),
-          permission('admin:certificates:view'),
-          permission('admin:services:manage'),
-        ]);
-        const result = await studentDashboardHydrationService.getSupportDetail(studentReferenceId, { learning, certificates, services });
+        // Base support details are P15-only; opening a profile cannot hydrate P13/P14/P20 data.
+        const result = await studentDashboardHydrationService.getSupportDetail(studentReferenceId);
         // Sensitive support reads have a mandatory, privacy-minimized audit record before disclosure.
         await AuditHelper.recordMutation(auditRecordRepo, req, {
           action: 'STUDENT_SUPPORT_DETAIL_VIEW', category: 'STUDENT_SUPPORT', targetType: 'STUDENT_WORKSPACE',
           targetId: studentReferenceId, result: 'SUCCESS',
-          metadata: { purpose: 'student-support-case-review', ownerScopes: { learning, certificates, services } },
+          metadata: { purpose: 'student-support-case-review', ownerScopes: { learning: false, certificates: false, services: false } },
         }, { reliability: 'REQUIRED', principal: 'REQUIRED' });
         res.status(200).json(result);
       } catch (error) { next(error); }
+    });
+
+    // STU-ADM-025: independent, on-demand owner reads. No implicit cross-domain grant.
+    router.get('/support/:studentReferenceId/owner/:ownerDomain', requireSupportRead, async (req, res, next) => {
+      try {
+        const studentReferenceId = z.string().trim().min(1).max(128).parse(req.params.studentReferenceId);
+        const domain = z.enum(['learning','certificates','services']).parse(req.params.ownerDomain);
+        const requiredPermission = {
+          learning: 'admin:courses:manage',
+          certificates: 'admin:certificates:view',
+          services: 'admin:services:manage',
+        }[domain];
+        const permitted = await authEvaluatorService.evaluatePermission(
+          req.authUserId!, requiredPermission, {ip: req.ip, requestTime: new Date()},
+        );
+        if (!permitted.isGranted)
+          return void res.status(403).json({error:{code:'STUDENT_SUPPORT_OWNER_READ_DENIED'}});
+        const grants = {
+          learning: domain === 'learning', certificates: domain === 'certificates',
+          services: domain === 'services',
+        };
+        const detail = await studentDashboardHydrationService.getSupportDetail(studentReferenceId, grants);
+        const payload = {
+          domain,
+          status: detail.ownerReadStatus?.[domain] ?? 'DEGRADED',
+          provenance: detail.ownerReadProvenance?.[domain] ?? null,
+          ...(domain === 'learning'
+            ? { learning: detail.learning ?? null, activeCourseCount: detail.linkedSummaries.activeCourseCount }
+            : domain === 'certificates'
+              ? { certificates: detail.certificates ?? null, certificateCount: detail.linkedSummaries.certificateCount }
+              : { serviceRequestCount: detail.serviceRequestCount ?? null,
+                  recentServiceRequests: detail.recentServiceRequests ?? null }),
+        };
+        await AuditHelper.recordMutation(auditRecordRepo, req, {
+          action: 'STUDENT_SUPPORT_OWNER_TAB_VIEW', category: 'STUDENT_SUPPORT',
+          targetType: 'STUDENT_WORKSPACE', targetId: studentReferenceId,
+          result: 'SUCCESS', metadata: {purpose:'student-support-owner-tab', domain},
+        }, {reliability:'REQUIRED',principal:'REQUIRED'});
+        res.status(200).json(payload);
+      } catch (error) {next(error);}
     });
 
     // P15 provisioning diagnostic is a read-only owner comparison; it never creates

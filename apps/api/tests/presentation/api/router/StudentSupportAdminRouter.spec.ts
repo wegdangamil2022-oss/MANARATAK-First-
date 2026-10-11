@@ -91,12 +91,64 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
     try {
       const {app,hydration} = fixture(['admin:students:support']);
       expect((await request(app).get('/admin/students/support/student-1')).status).toBe(200);
-      expect(hydration.getSupportDetail).toHaveBeenCalledWith('student-1', {
-        learning:false, certificates:false, services:false,
-      });
+      expect(hydration.getSupportDetail).toHaveBeenCalledWith('student-1');
       expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
         expect.objectContaining({action:'STUDENT_SUPPORT_DETAIL_VIEW'}), {reliability:'REQUIRED',principal:'REQUIRED'});
     } finally { audit.mockRestore(); }
+  });
+
+  it('never loads owner data on base profile read, even for an elevated support user', async () => {
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try{
+      const {app,hydration,evaluator}=fixture([
+        'admin:students:support','admin:courses:manage','admin:certificates:view','admin:services:manage',
+      ]);
+      expect((await request(app).get('/admin/students/support/student-1')).status).toBe(200);
+      expect(hydration.getSupportDetail).toHaveBeenCalledWith('student-1');
+      expect(evaluator.evaluatePermission).not.toHaveBeenCalledWith(
+        'support-1','admin:courses:manage',expect.anything(),
+      );
+    }finally{audit.mockRestore();}
+  });
+
+  it('enforces domain-specific RBAC before any lazy owner read', async () => {
+    const {app,hydration}=fixture(['admin:students:support']);
+    expect((await request(app).get('/admin/students/support/student-1/owner/learning')).status).toBe(403);
+    expect((await request(app).get('/admin/students/support/student-1/owner/certificates')).status).toBe(403);
+    expect((await request(app).get('/admin/students/support/student-1/owner/services')).status).toBe(403);
+    expect(hydration.getSupportDetail).not.toHaveBeenCalled();
+  });
+
+  it('reads only the explicitly authorized owner and audits before disclosing it', async () => {
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try {
+      const {app,hydration}=fixture(['admin:students:support','admin:courses:manage']);
+      hydration.getSupportDetail.mockResolvedValue({
+        ownerReadStatus:{learning:'AVAILABLE',certificates:'RESTRICTED',services:'RESTRICTED'},
+        ownerReadProvenance:{learning:{source:'P13',queriedAt:'2026-10-11T00:00:00Z',returned:1,limit:12,complete:true}},
+        learning:[{courseId:'c1',status:'ACTIVE'}],
+        linkedSummaries:{activeCourseCount:1,certificateCount:null,unreadNotificationCount:0},
+      });
+      const result=await request(app).get('/admin/students/support/student-1/owner/learning');
+      expect(result.status).toBe(200);
+      expect(result.body.learning).toHaveLength(1);
+      expect(result.body).not.toHaveProperty('certificates');
+      expect(hydration.getSupportDetail).toHaveBeenCalledWith('student-1',{
+        learning:true,certificates:false,services:false,
+      });
+      expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
+        expect.objectContaining({action:'STUDENT_SUPPORT_OWNER_TAB_VIEW',
+          metadata:{purpose:'student-support-owner-tab',domain:'learning'}}),
+        {reliability:'REQUIRED',principal:'REQUIRED'});
+    }finally{audit.mockRestore();}
+  });
+
+  it('does not disclose lazy owner data when mandatory audit fails', async () => {
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockRejectedValue(new Error('AUDIT_OFFLINE'));
+    try {
+      const {app}=fixture(['admin:students:support','admin:certificates:view']);
+      expect((await request(app).get('/admin/students/support/student-1/owner/certificates')).status).toBe(500);
+    }finally{audit.mockRestore();}
   });
 
   it('requires support authorization and purpose for paged application-tracker review', async () => {
