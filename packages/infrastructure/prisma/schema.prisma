@@ -3314,6 +3314,7 @@ model CmsWorkflowReview {
   localizedContentId String
   status             String   @default("PENDING")
   requestedBy        String
+  reviewSnapshotHash String?
   requestedAt        DateTime @default(now())
   reviewedBy         String?
   reviewedAt         DateTime?

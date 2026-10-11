@@ -73,6 +73,19 @@ export class PrismaCmsRepository implements ICmsRepository {
     return this.db.$transaction(async (tx: any) => {
       const current = await this.requireContent(tx, id);
       this.assertVersion(current.version, data.expectedVersion);
+      // Root public facts are not part of the localized reviewer snapshot in older
+      // installations. Fail closed rather than silently alter a signed publication.
+      const reviewedRootFields = ['slug', 'title', 'summary', 'contentType', 'categoryId',
+        'categorySlug', 'ownerId', 'featuredAssetId', 'seoMetadata', 'editorialMetadata', 'metadata'];
+      if (reviewedRootFields.some((field) => Object.prototype.hasOwnProperty.call(data, field))) {
+        const [published, underReview] = await Promise.all([
+          tx.cmsPublishedContent.findFirst({ where: { contentId: id } }),
+          tx.cmsLocalizedContent.findFirst({ where: { contentId: id, state: { in: [
+            CmsContentStatus.IN_REVIEW, CmsContentStatus.READY_TO_PUBLISH, CmsContentStatus.SCHEDULED,
+          ] } } }),
+        ]);
+        if (published || underReview) throw new Error('CMS_ROOT_REVIEW_REQUIRED');
+      }
       if (data.slug && data.slug !== current.slug) {
         const published = await tx.cmsPublishedContent.findFirst({ where: { contentId: id } });
         if (published) throw new Error('CMS_CANONICAL_IDENTITY_IMMUTABLE');
@@ -82,8 +95,8 @@ export class PrismaCmsRepository implements ICmsRepository {
           ? await this.resolveCategory(tx, data.categoryId, data.categorySlug)
           : undefined;
       const { expectedVersion: _expectedVersion, ...values } = data;
-      const row = await tx.cmsContentNode.update({
-        where: { id },
+      const mutation = await tx.cmsContentNode.updateMany({
+        where: { id, version: current.version },
         data: {
           ...values,
           ...(category !== undefined
@@ -95,6 +108,8 @@ export class PrismaCmsRepository implements ICmsRepository {
           version: { increment: 1 },
         },
       });
+      if (mutation.count !== 1) throw new Error('CMS_VERSION_CONFLICT');
+      const row = await this.requireContent(tx, id);
       await this.appendMutation(tx, row, null, 'CONTENT_UPDATED', actorId, {
         version: row.version,
       });
@@ -328,6 +343,9 @@ export class PrismaCmsRepository implements ICmsRepository {
       });
       if (!review) throw new Error('CMS_PENDING_REVIEW_NOT_FOUND');
       CmsPublishingPolicy.assertMakerChecker(review.requestedBy, command.actorId);
+      CmsPublishingPolicy.assertMakerChecker(localized.lastModifiedBy, command.actorId);
+      CmsPublishingPolicy.assertMakerChecker(content.authorId, command.actorId);
+      if (!review.reviewSnapshotHash || review.reviewSnapshotHash !== await this.editorialFingerprint(tx, content, localized)) throw new Error('CMS_APPROVAL_STALE');
       await tx.cmsWorkflowReview.update({
         where: { id: review.id },
         data: {
@@ -412,11 +430,13 @@ export class PrismaCmsRepository implements ICmsRepository {
         CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.PUBLISHED);
       }
       CmsPublishingPolicy.assertMakerChecker(content.authorId, command.actorId);
+      CmsPublishingPolicy.assertMakerChecker(localized.lastModifiedBy, command.actorId);
       const approved = await tx.cmsWorkflowReview.findFirst({
         where: { localizedContentId: localized.id, status: 'APPROVED' },
         orderBy: { reviewedAt: 'desc' },
       });
       if (!approved) throw new Error('CMS_APPROVAL_REQUIRED');
+      if (!approved.reviewSnapshotHash || approved.reviewSnapshotHash !== await this.editorialFingerprint(tx, content, localized)) throw new Error('CMS_APPROVAL_STALE');
       const full = await tx.cmsLocalizedContent.findUnique({
         where: { id: localized.id },
         include: { tags: { include: { tag: true } }, attachments: true },
@@ -462,6 +482,11 @@ export class PrismaCmsRepository implements ICmsRepository {
           publishedAt: now,
         },
         update: {
+          siteIdentifier: content.siteIdentifier,
+          locale: full.locale,
+          slug: full.localizedSlug,
+          canonicalUrl: seo.canonicalUrl,
+          contentType: content.contentType,
           title: full.title,
           summary: full.summary,
           body: full.body,
@@ -481,6 +506,10 @@ export class PrismaCmsRepository implements ICmsRepository {
           archivedAt: null,
           publishedAt: now,
         },
+      });
+      await tx.cmsRedirect.updateMany({
+        where: { contentId: content.id, locale: full.locale, active: false, sourcePath: { not: seo.canonicalUrl } },
+        data: { destinationPath: seo.canonicalUrl, active: true },
       });
       const row = await tx.cmsLocalizedContent.update({
         where: { id: full.id },
@@ -672,24 +701,10 @@ export class PrismaCmsRepository implements ICmsRepository {
     locale = 'ar',
     siteIdentifier = 'manaratak',
   ): Promise<PublicCmsContentDto | null> {
-    let row = await this.db.cmsPublishedContent.findUnique({
+    const row = await this.db.cmsPublishedContent.findUnique({
       where: { siteIdentifier_locale_slug: { siteIdentifier, locale, slug } },
     });
-    if (!row || row.status !== CmsContentStatus.PUBLISHED) {
-      const direct = await this.db.cmsPublishedContent.findFirst({ where: { siteIdentifier, slug, status: CmsContentStatus.PUBLISHED } });
-      const node = direct
-        ? await this.db.cmsContentNode.findUnique({ where: { id: direct.contentId } })
-        : await this.db.cmsContentNode.findFirst({ where: { siteIdentifier, slug } });
-      if (!node) return null;
-      row = await this.db.cmsPublishedContent.findFirst({
-        where: {
-          contentId: node.id,
-          status: CmsContentStatus.PUBLISHED,
-          locale: node.primaryLocale,
-        },
-      });
-    }
-    if (!row) return null;
+    if (!row || row.status !== CmsContentStatus.PUBLISHED) return null;
     const locales = await this.availableLocales([row.contentId]);
     return this.publicContent(row, locales.get(row.contentId) ?? []);
   }
@@ -701,6 +716,11 @@ export class PrismaCmsRepository implements ICmsRepository {
   ): Promise<CmsContentDomainLinkDto[]> {
     return this.db.$transaction(async (tx: any) => {
       const content = await this.requireContent(tx, contentId);
+      // Domain owner validity is not shape-only. Until a canonical owner gateway is
+      // wired, reject new references and prohibit changes to live review facts.
+      if (links.length) throw new Error('CMS_DOMAIN_OWNER_VALIDATION_REQUIRED');
+      const hasPublished = await tx.cmsPublishedContent.findFirst({ where: { contentId } });
+      if (hasPublished) throw new Error('CMS_ROOT_REVIEW_REQUIRED');
       await tx.cmsContentDomainLink.deleteMany({ where: { contentId } });
       if (links.length) {
         await tx.cmsContentDomainLink.createMany({
@@ -778,8 +798,8 @@ export class PrismaCmsRepository implements ICmsRepository {
       await this.syncRootLifecycle(tx, content.id);
       await tx.cmsRedirect.upsert({
         where: { siteIdentifier_locale_sourcePath: { siteIdentifier: content.siteIdentifier, locale: data.locale, sourcePath } },
-        create: { id: randomUUID(), siteIdentifier: content.siteIdentifier, locale: data.locale, sourcePath, destinationPath, statusCode: 301, reason: data.reason, contentId: content.id, createdBy: data.actorId },
-        update: { destinationPath, statusCode: 301, reason: data.reason, active: true },
+        create: { id: randomUUID(), siteIdentifier: content.siteIdentifier, locale: data.locale, sourcePath, destinationPath, statusCode: 301, reason: data.reason, contentId: content.id, createdBy: data.actorId, active: false },
+        update: { destinationPath, statusCode: 301, reason: data.reason, active: false },
       });
       await this.appendMutation(tx, content, localized.id, 'SLUG_CHANGED', data.actorId, { locale: data.locale, sourcePath, destinationPath, reason: data.reason });
       return this.localized(row);
@@ -1152,6 +1172,7 @@ export class PrismaCmsRepository implements ICmsRepository {
             id: randomUUID(),
             localizedContentId: localized.id,
             requestedBy: command.actorId,
+            reviewSnapshotHash: await this.editorialFingerprint(tx, content, localized),
             comments: command.comments,
           },
         });
@@ -1159,8 +1180,9 @@ export class PrismaCmsRepository implements ICmsRepository {
       if (next === CmsContentStatus.SCHEDULED) {
         const approved = await tx.cmsWorkflowReview.findFirst({
           where: { localizedContentId: localized.id, status: 'APPROVED' },
+          orderBy: { reviewedAt: 'desc' },
         });
-        if (!approved) throw new Error('CMS_APPROVAL_REQUIRED');
+        if (!approved || !approved.reviewSnapshotHash || approved.reviewSnapshotHash !== await this.editorialFingerprint(tx, content, localized)) throw new Error('CMS_APPROVAL_STALE');
         await tx.cmsScheduledJob.upsert({
           where: { idempotencyKey: `publish:${localized.id}:${localized.version + 1}` },
           create: {
@@ -1240,7 +1262,42 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   private assertVersion(current: number, expected?: number): void {
-    if (expected !== undefined && current !== expected) throw new Error('CMS_VERSION_CONFLICT');
+    if (!Number.isInteger(expected) || (expected ?? 0) < 1) throw new Error('CMS_VERSION_REQUIRED');
+    if (current !== expected) throw new Error('CMS_VERSION_CONFLICT');
+  }
+
+  private async editorialFingerprint(tx: any, content: any, localized: any): Promise<string> {
+    const full = await tx.cmsLocalizedContent.findUnique({
+      where: { id: localized.id },
+      include: { tags: true, attachments: true },
+    });
+    if (!full) throw new Error('CMS_LOCALIZATION_NOT_FOUND');
+    const links = await tx.cmsContentDomainLink.findMany({
+      where: { contentId: content.id }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+    });
+    return this.contentHash({
+      root: {
+        publicId: content.publicId, slug: content.slug, siteIdentifier: content.siteIdentifier,
+        primaryLocale: content.primaryLocale, contentType: content.contentType,
+        title: content.title, summary: content.summary, categoryId: content.categoryId,
+        categorySlug: content.categorySlug, ownerId: content.ownerId,
+        featuredAssetId: content.featuredAssetId, seoMetadata: content.seoMetadata,
+        editorialMetadata: content.editorialMetadata, metadata: content.metadata,
+      },
+      locale: {
+        locale: full.locale, localizedSlug: full.localizedSlug, title: full.title,
+        summary: full.summary, body: full.body, readingTimeMinutes: full.readingTimeMinutes,
+        featuredAssetId: full.featuredAssetId, seoMetadata: full.seoMetadata, metadata: full.metadata,
+      },
+      tags: full.tags.map((tag: any) => tag.tagId).sort(),
+      attachments: full.attachments.map((a: any) => ({
+        assetId: a.assetId, role: a.role, sortOrder: a.sortOrder, caption: a.caption,
+      })).sort((a: any, b: any) => a.sortOrder - b.sortOrder || a.assetId.localeCompare(b.assetId)),
+      domainLinks: links.map((link: any) => ({
+        targetType: link.targetType, targetId: link.targetId,
+        relationType: link.relationType, sortOrder: link.sortOrder, metadata: link.metadata,
+      })),
+    });
   }
 
   private async captureRevision(
@@ -1440,7 +1497,7 @@ export class PrismaCmsRepository implements ICmsRepository {
         category: 'CMS',
         severity: action.includes('PUBLISHED') || action.includes('ARCHIVED') ? 'HIGH' : 'INFO',
         actorId,
-        actorType: 'USER',
+        actorType: actorId.startsWith('system:') ? 'SYSTEM' : 'USER',
         targetId,
         targetType,
         source: 'Phase16',
