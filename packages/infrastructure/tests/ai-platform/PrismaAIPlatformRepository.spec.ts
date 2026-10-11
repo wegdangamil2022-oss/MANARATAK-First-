@@ -22,4 +22,46 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     expect(tx.auditRecord.create).toHaveBeenCalledOnce();
     expect(tx.transactionalOutboxRecord.create).toHaveBeenCalledOnce();
   });
+
+  it('rejects self-approval inside the transaction before any state change', async () => {
+    const tx = {
+      aIPromptVersionRecord: {
+        findUnique: vi.fn().mockResolvedValue({ id: 'v1', status: 'REVIEW', createdBy: 'author-1' }),
+        updateMany: vi.fn(),
+      },
+    };
+    const repository = new PrismaAIPlatformRepository({ $transaction: (fn: (client: typeof tx) => unknown) => fn(tx) });
+    await expect(repository.approvePromptVersion('prompt', 1, 'author-1')).rejects.toThrow('AI_PROMPT_SELF_APPROVAL_FORBIDDEN');
+    expect(tx.aIPromptVersionRecord.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('refuses prompt deployment by either maker or checker', async () => {
+    for (const actor of ['author-1', 'reviewer-1']) {
+      const tx = {
+        $queryRaw: vi.fn().mockResolvedValue([]),
+        aIPromptVersionRecord: {
+          findUnique: vi.fn().mockResolvedValue({ id: 'v1', status: 'APPROVED', createdBy: 'author-1', approvedBy: 'reviewer-1' }),
+        },
+        aIPromptDeploymentRecord: { create: vi.fn(), updateMany: vi.fn() },
+      };
+      const repository = new PrismaAIPlatformRepository({ $transaction: (fn: (client: typeof tx) => unknown) => fn(tx) });
+      await expect(repository.deployPrompt('prompt', 1, actor)).rejects.toThrow('AI_PROMPT_DEPLOYER_NOT_INDEPENDENT');
+      expect(tx.aIPromptDeploymentRecord.create).not.toHaveBeenCalled();
+    }
+  });
+
+  it('queries only due async jobs before pagination, oldest first', async () => {
+    const findMany = vi.fn().mockResolvedValue([{ publicId: 'older-due' }]);
+    const repository = new PrismaAIPlatformRepository({ aIAsyncJobRecord: { findMany } });
+    const now = new Date('2026-10-11T12:00:00Z');
+    expect(await repository.listClaimableAsyncJobs(5, now)).toEqual([{ publicId: 'older-due' }]);
+    const query = findMany.mock.calls[0][0];
+    expect(query.take).toBe(5);
+    expect(query.orderBy).toEqual([{ createdAt: 'asc' }, { id: 'asc' }]);
+    expect(query.where.OR).toEqual(expect.arrayContaining([
+      expect.objectContaining({ status: 'RUNNING', leaseExpiresAt: { lte: now } }),
+      expect.objectContaining({ status: 'RETRYING' }),
+    ]));
+  });
+
 });
