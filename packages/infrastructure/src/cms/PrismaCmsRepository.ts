@@ -2129,10 +2129,15 @@ export class PrismaCmsRepository implements ICmsRepository {
     if (!contentIds.length) return new Map();
     const rows = await this.db.cmsPublishedContent.findMany({
       where: { contentId: { in: [...new Set(contentIds)] }, status: CmsContentStatus.PUBLISHED },
-      select: { contentId: true, locale: true, slug: true },
+      select: { contentId: true, locale: true, slug: true, seoMetadata: true },
     });
     const result = new Map<string, Array<{ locale: string; slug: string }>>();
     for (const row of rows) {
+      // Do not advertise a noindex locale as an alternate search result.
+      // A published noindex draft may still be directly readable, but should
+      // not appear in canonical discovery/hreflang.
+      if (row.seoMetadata && typeof row.seoMetadata === 'object' &&
+          !Array.isArray(row.seoMetadata) && row.seoMetadata.noIndex === true) continue;
       const entries = result.get(row.contentId) ?? [];
       entries.push({ locale: row.locale, slug: row.slug });
       result.set(row.contentId, entries);
