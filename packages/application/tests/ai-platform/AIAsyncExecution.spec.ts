@@ -141,4 +141,68 @@ describe('Phase 17 durable async execution', () => {
     expect(repo.updateAsyncJob).not.toHaveBeenCalled();
   });
 
+
+  it('replays an already queued request with the same requester-scoped idempotency key', async () => {
+    const repo = repository();
+    const stored = {
+      publicId: 'initial-placeholder', requesterReferenceId: 'student-1',
+      payloadCiphertext: 'cipher', payloadIv: 'iv', payloadAuthTag: 'tag', payloadKeyVersion: 'v1',
+    };
+    const protector = {
+      status: () => 'READY' as const,
+      protect: vi.fn().mockReturnValue({
+        ciphertext: 'cipher', iv: 'iv', authTag: 'tag', keyVersion: 'v1',
+      }),
+      unprotect: vi.fn().mockReturnValue({ ...request, idempotencyKey: 'retry-1' }),
+    };
+    const first = { ...request, idempotencyKey: 'retry-1' };
+    repo.findAsyncJob.mockResolvedValueOnce(null).mockResolvedValueOnce(stored);
+    const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any, protector);
+    const created = await useCases.submitAsync(first);
+    expect(created.publicId).toMatch(/^aij_[a-f0-9]{64}$/);
+    expect(repo.createAsyncJob).toHaveBeenCalledTimes(1);
+    const repeated = await useCases.submitAsync(first);
+    expect(repeated).toBe(stored);
+    expect(repo.createAsyncJob).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a changed request reusing an idempotency key before queue admission', async () => {
+    const repo = repository();
+    const protector = {
+      status: () => 'READY' as const, protect: vi.fn(),
+      unprotect: vi.fn().mockReturnValue({ ...request, idempotencyKey: 'retry-1' }),
+    };
+    repo.findAsyncJob.mockResolvedValue({
+      publicId: 'aij_existing', payloadCiphertext: 'cipher', payloadIv: 'iv',
+      payloadAuthTag: 'tag', payloadKeyVersion: 'v1',
+    });
+    const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any, protector);
+    await expect(useCases.submitAsync({
+      ...request, idempotencyKey: 'retry-1', input: 'different private input',
+    })).rejects.toThrow('AI_ASYNC_IDEMPOTENCY_KEY_REUSED');
+    expect(repo.createAsyncJob).not.toHaveBeenCalled();
+    expect(protector.protect).not.toHaveBeenCalled();
+  });
+
+  it('resolves concurrent duplicate insert conflicts to the original durable job', async () => {
+    const repo = repository();
+    const previous = {
+      publicId: 'aij_existing', payloadCiphertext: 'cipher', payloadIv: 'iv',
+      payloadAuthTag: 'tag', payloadKeyVersion: 'v1',
+    };
+    repo.findAsyncJob.mockResolvedValueOnce(null).mockResolvedValueOnce(previous);
+    repo.createAsyncJob.mockRejectedValue({ code: 'P2002' });
+    const input = { ...request, idempotencyKey: 'retry-race' };
+    const protector = {
+      status: () => 'READY' as const,
+      protect: vi.fn().mockReturnValue({
+        ciphertext: 'cipher', iv: 'iv', authTag: 'tag', keyVersion: 'v1',
+      }),
+      unprotect: vi.fn().mockReturnValue(input),
+    };
+    const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any, protector);
+    expect(await useCases.submitAsync(input)).toBe(previous);
+    expect(repo.createAsyncJob).toHaveBeenCalledOnce();
+  });
+
 });
