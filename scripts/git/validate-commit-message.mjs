@@ -7,7 +7,7 @@ if (!message) {
   process.exit(2);
 }
 
-const conventional = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .{3,}$/;
+const conventional = /^(feat|fix|security|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .{3,}$/;
 const generated = /^(Merge|Revert)\b.+/;
 
 if (!conventional.test(message) && !generated.test(message)) {
