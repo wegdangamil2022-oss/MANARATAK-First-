@@ -459,9 +459,10 @@ export class PublicCmsUseCases {
   public async getBySlug(slug: string, locale?: string, siteIdentifier?: string): Promise<PublicCmsContentDto> {
     const site = siteIdentifier ?? 'manaratak';
     const language = locale ?? 'ar';
-    const cached = await this.deliveryCache?.getPublished(site, language, slug);
-    if (cached) return cached;
-    const content = await this.repository.getPublishedBySlug(slug, locale, siteIdentifier);
+    // Redis invalidation is best-effort. A stale cached publication can survive
+    // failed invalidation after archive, so the canonical published repository
+    // MUST authorize every public detail read before any cached payload is used.
+    const content = await this.repository.getPublishedBySlug(slug, language, site);
     if (!content) throw new Error('CMS_CONTENT_NOT_FOUND');
     await this.deliveryCache?.setPublished(content);
     return content;
