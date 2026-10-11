@@ -934,6 +934,10 @@ export class AIExecutionOrchestrator {
 
   async submitAsync(request: AIExecutionRequestDto) {
     validateExecutionRequest(request);
+    // Cap encrypted queue ingress BEFORE persisting or dispatching billable work.
+    // Length alone is insufficient for multi-byte input and arbitrary metadata.
+    if (Buffer.byteLength(JSON.stringify(request), 'utf8') > 256_000)
+      throw new Error('AI_ASYNC_PAYLOAD_TOO_LARGE');
     if (!request.requesterReferenceId) throw new Error('AI_AUTHENTICATED_REQUESTER_REQUIRED');
     if (!this.asyncPayloads || this.asyncPayloads.status() !== 'READY')
       throw new Error('AI_ASYNC_QUEUE_NOT_CONFIGURED');
