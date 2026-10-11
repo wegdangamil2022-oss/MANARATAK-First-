@@ -1323,9 +1323,18 @@ export class AIWorkflowUseCases {
   constructor(
     private readonly repository: IAIPlatformRepository,
     private readonly execution: AIExecutionOrchestrator,
+    private readonly workflowPayloads?: IAIAsyncPayloadProtector,
   ) {}
 
+  private assertProtectedWorkflowInput(input: Record<string, unknown>) {
+    if (!this.workflowPayloads || this.workflowPayloads.status() !== 'READY')
+      throw new Error('AI_WORKFLOW_PROTECTED_STATE_NOT_CONFIGURED');
+    if (Buffer.byteLength(stableStringify(input), 'utf8') > 64 * 1024)
+      throw new Error('AI_WORKFLOW_INPUT_TOO_LARGE');
+  }
+
   async start(workflowKey: string, input: Record<string, unknown>) {
+    this.assertProtectedWorkflowInput(input);
     const workflow = await this.repository.find<AIWorkflowDefinition>('workflows', workflowKey);
     if (!workflow || workflow.status !== 'ACTIVE' || !workflow.activeVersion)
       throw new Error('AI_WORKFLOW_NOT_ACTIVE');
@@ -1343,6 +1352,7 @@ export class AIWorkflowUseCases {
   }
 
   async run(publicId: string, input: Record<string, unknown>) {
+    this.assertProtectedWorkflowInput(input);
     const run = await this.repository.findWorkflowRun(publicId);
     if (!run) throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
     if (run.inputReferenceHash !== sha256(stableStringify(input)))
@@ -1362,8 +1372,23 @@ export class AIWorkflowUseCases {
       const prior = await this.repository.listWorkflowStepRuns(publicId);
       for (const completed of prior.filter(
         (item) => item.status === 'COMPLETED' && item.outputSnapshot !== undefined,
-      ))
-        outputs[completed.stepKey] = completed.outputSnapshot;
+      )) {
+        const envelope = completed.outputSnapshot as Record<string, unknown> | null;
+        if (!envelope || envelope.kind !== 'AI_WORKFLOW_PROTECTED_STEP' ||
+            typeof envelope.expiresAt !== 'string' ||
+            !Number.isFinite(Date.parse(envelope.expiresAt)) ||
+            Date.parse(envelope.expiresAt) <= Date.now())
+          throw new Error('AI_WORKFLOW_STEP_SNAPSHOT_UNTRUSTED_OR_EXPIRED');
+        const decoded = this.workflowPayloads!.unprotect({
+          ciphertext: String(envelope.ciphertext ?? ''),
+          iv: String(envelope.iv ?? ''),
+          authTag: String(envelope.authTag ?? ''),
+          keyVersion: String(envelope.keyVersion ?? ''),
+        }) as { value?: unknown };
+        if (!decoded || !Object.prototype.hasOwnProperty.call(decoded, 'value'))
+          throw new Error('AI_WORKFLOW_STEP_SNAPSHOT_INTEGRITY_FAILED');
+        outputs[completed.stepKey] = decoded.value;
+      }
       const order = topologicalSteps(workflow.definition.steps);
       for (const step of order) {
         if (outputs[step.key] !== undefined) continue;
@@ -1411,15 +1436,23 @@ export class AIWorkflowUseCases {
               ),
             }),
             idempotencyKey: `${publicId}:${step.key}:${attempt}`,
-            dataClassification: 'INTERNAL',
+            // Unverified arbitrary admin workflow content is never presumed public.
+            dataClassification: mostSensitiveAIClassification('CONFIDENTIAL', input.dataClassification),
           });
           if (response.status === AIExecutionStatus.COMPLETED) {
             outputs[step.key] = response.result ?? null;
+            const encoded = stableStringify(outputs[step.key]);
+            if (Buffer.byteLength(encoded, 'utf8') > 256 * 1024)
+              throw new Error('AI_WORKFLOW_STEP_RESULT_TOO_LARGE');
+            const protectedSnapshot = this.workflowPayloads!.protect({ value: outputs[step.key] });
             await this.repository.updateWorkflowStepRun(publicId, step.key, attempt, {
               executionId: response.executionPublicId,
               status: 'COMPLETED',
-              outputReferenceHash: sha256(stableStringify(outputs[step.key])),
-              outputSnapshot: outputs[step.key],
+              outputReferenceHash: sha256(encoded),
+              outputSnapshot: {
+                kind: 'AI_WORKFLOW_PROTECTED_STEP', ...protectedSnapshot,
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+              },
               completedAt: new Date(),
             });
             break;
