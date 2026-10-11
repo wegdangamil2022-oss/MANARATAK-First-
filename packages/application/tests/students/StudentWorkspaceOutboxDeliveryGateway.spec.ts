@@ -72,6 +72,64 @@ describe('Student certificate owner-outbox bridge', () => {
     expect(JSON.stringify(mapped)).not.toContain('never-forward');
   });
 
+  it('projects owner snapshots after a late student-role assignment using stable event ids', async () => {
+    const {students,assignments,identities}=fixture();
+    const learning={listForStudent:vi.fn().mockResolvedValue([{
+      enrollmentId:'enroll-1',courseId:'course-1',courseSlug:'course',
+      courseName:'Study',status:'COMPLETED',progressPercentage:100,
+      enrolledAt:new Date('2026-01-01T00:00:00Z'),completedAt:new Date('2026-01-05T00:00:00Z'),
+    }])};
+    const certificates={listForStudent:vi.fn().mockResolvedValue([{
+      id:'cert-1',status:'REVOKED',issuedAt:new Date('2026-01-03T00:00:00Z'),
+      publicId:'pub-1',serialNumber:'serial',verificationCode:'code',
+      courseDisplayName:'Study',
+    }])};
+    const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any, assignments as any,
+      identities as any, learning as any, certificates as any);
+    const entry={id:'role-event-1',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
+      createdAt:new Date('2026-01-10T00:00:00Z'),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
+    await gateway.deliver(entry as any,{idempotencyKey:'role-event-1'} as any);
+    expect(learning.listForStudent).toHaveBeenCalledWith('student-1',51);
+    expect(certificates.listForStudent).toHaveBeenCalledWith('student-1',51);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
+      eventId:'role-event-1:learning:enroll-1',eventType:'CourseCompleted',
+      sourceDomain:'COURSES',studentReferenceId:'student-1',
+    }));
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
+      eventId:'role-event-1:certificate:cert-1',eventType:'CertificateRevoked',
+      sourceDomain:'CERTIFICATES',studentReferenceId:'student-1',
+    }));
+  });
+
+  it('does not claim full catch-up when a source has more records than the bounded page', async () => {
+    const {students,assignments,identities}=fixture();
+    const learning={listForStudent:vi.fn().mockResolvedValue(
+      Array.from({length:51},(_,i)=>({enrollmentId:`e-${i}`,courseId:`c-${i}`})),
+    )};
+    const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,assignments as any,
+      identities as any,learning as any);
+    const entry={id:'role-2',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
+      createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
+    await expect(gateway.deliver(entry as any,{idempotencyKey:'role-2'} as any))
+      .rejects.toThrow('STUDENT_LEARNING_CATCHUP_PAGE_REQUIRED');
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not run source catch-up for suspended identities', async () => {
+    const {students,assignments,identities}=fixture();
+    identities.findById.mockResolvedValue({type:'Human',status:'SUSPENDED'});
+    const learning={listForStudent:vi.fn()};
+    const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,assignments as any,
+      identities as any,learning as any);
+    await gateway.deliver({id:'role-3',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
+      createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}} as any,
+      {idempotencyKey:'role-3'} as any);
+    expect(learning.listForStudent).not.toHaveBeenCalled();
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
+      eventType:'StudentIdentitySuspended',eventId:'role-3:lifecycle',
+    }));
+  });
+
   it('claims certificate lifecycle events but leaves rendering to P14', async () => {
     const dispatcher={dispatchBatch:vi.fn().mockResolvedValue({claimed:0,processed:0,failed:0,exhausted:0})};
     const worker=new StudentWorkspaceOutboxWorker(dispatcher as any);

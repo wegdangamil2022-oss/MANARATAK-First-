@@ -5,6 +5,8 @@ import {
   StudentWorkspaceIntegrationEventDto,
   IRoleAssignmentRepository,
   IIdentityRepository,
+  IStudentLearningReadGateway,
+  IStudentCertificateReadGateway,
 } from '@manaratak/domain';
 import { StudentWorkspaceUseCases } from './StudentWorkspaceUseCases';
 
@@ -15,7 +17,9 @@ import { StudentWorkspaceUseCases } from './StudentWorkspaceUseCases';
  */
 export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGateway {
   public constructor(private readonly students: StudentWorkspaceUseCases,
-    private readonly assignments: IRoleAssignmentRepository, private readonly identities: IIdentityRepository) {}
+    private readonly assignments: IRoleAssignmentRepository, private readonly identities: IIdentityRepository,
+    private readonly learning?: IStudentLearningReadGateway,
+    private readonly certificates?: IStudentCertificateReadGateway) {}
 
   public async deliver(entry: TransactionalOutboxEntry, context: OutboxDeliveryContext): Promise<void> {
     if (context.idempotencyKey !== entry.id) throw new Error('STUDENT_WORKSPACE_IDEMPOTENCY_KEY_MISMATCH');
@@ -33,10 +37,61 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       else return;
     }
     await this.students.consumeIntegrationEvent(event);
+    // Role assignment may arrive after older P13/P14 events were already dispatched
+    // while this principal had no student role. Reconcile from owner snapshots only.
+    if (entry.domain === 'AUTHORIZATION' && event.eventType === 'StudentIdentityCreated' &&
+        identity.status === 'ACTIVE') {
+      await this.catchUpFromOwners(entry.id, event.studentReferenceId);
+    }
     // Late assignment events must project the current owner lifecycle, not revive a suspended identity.
     if (event.eventType === 'StudentIdentityCreated' && ['SUSPENDED', 'ARCHIVED', 'PURGED'].includes(identity.status)) {
       await this.students.consumeIntegrationEvent({ ...event, eventId: `${entry.id}:lifecycle`,
         eventType: identity.status === 'SUSPENDED' ? 'StudentIdentitySuspended' : 'StudentIdentityArchived' });
+    }
+  }
+
+  private async catchUpFromOwners(roleEventId: string, studentReferenceId: string): Promise<void> {
+    // A 51st row signals incompleteness rather than pretending the snapshot is exhaustive.
+    // Backfill must be continued via a paginated reconciliation job for large accounts.
+    if (this.learning) {
+      const rows = await this.learning.listForStudent(studentReferenceId, 51);
+      if (rows.length > 50) throw new Error('STUDENT_LEARNING_CATCHUP_PAGE_REQUIRED');
+      for (const row of rows) {
+        await this.students.consumeIntegrationEvent({
+          eventId: `${roleEventId}:learning:${row.enrollmentId}`,
+          studentReferenceId, eventType: row.status === 'COMPLETED' ? 'CourseCompleted' : 'CourseProgressUpdated',
+          sourceDomain: 'COURSES', sourceReferenceId: row.enrollmentId,
+          title: 'تمت مزامنة تقدم الدورة',
+          occurredAt: row.completedAt ?? row.enrolledAt,
+          metadata: {
+            courseId: row.courseId, enrollmentId: row.enrollmentId,
+            progressPercentage: row.progressPercentage,
+            status: row.status,
+            enrolledAt: row.enrolledAt, completedAt: row.completedAt,
+          },
+        });
+      }
+    }
+    if (this.certificates) {
+      const rows = await this.certificates.listForStudent(studentReferenceId, 51);
+      if (rows.length > 50) throw new Error('STUDENT_CERTIFICATE_CATCHUP_PAGE_REQUIRED');
+      for (const row of rows) {
+        const eventType = row.status === 'REVOKED' ? 'CertificateRevoked' :
+          row.status === 'EXPIRED' ? 'CertificateExpired' : 'CertificateIssued';
+        await this.students.consumeIntegrationEvent({
+          eventId: `${roleEventId}:certificate:${row.id}`,
+          studentReferenceId, eventType, sourceDomain: 'CERTIFICATES', sourceReferenceId: row.id,
+          title: 'تمت مزامنة حالة الشهادة', occurredAt: row.issuedAt,
+          metadata: {
+            certificateId: row.id, publicId: row.publicId, serialNumber: row.serialNumber,
+            verificationCode: row.verificationCode, status: row.status,
+            courseDisplayName: row.courseDisplayName,
+            issuedAt: row.issuedAt, expiresAt: row.expiresAt,
+            certificatePdfAssetId: row.certificatePdfAssetId,
+            previewImageAssetId: row.previewImageAssetId,
+          },
+        });
+      }
     }
   }
 

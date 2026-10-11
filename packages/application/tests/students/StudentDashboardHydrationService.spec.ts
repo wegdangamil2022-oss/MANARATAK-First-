@@ -30,9 +30,9 @@ describe('StudentDashboardHydrationService', () => {
     learning.listForStudent.mockResolvedValue(courses);
     certificates.listForStudent.mockResolvedValue([{ id: 'certificate-1' }]);
     const result = await service.getDashboard('student-1');
-    for (const read of [workspace.getDashboard, learning.listForStudent, certificates.listForStudent]) {
-      expect(read).toHaveBeenCalledWith('student-1', 51);
-    }
+    expect(workspace.getDashboard).toHaveBeenCalledWith('student-1');
+    expect(learning.listForStudent).toHaveBeenCalledWith('student-1',51);
+    expect(certificates.listForStudent).toHaveBeenCalledWith('student-1',51);
     expect(result.courseEnrollments).toEqual(courses);
     expect(result.statistics).toEqual({ savedItems: 2, unreadNotifications: 3, activeCourses: 1,
       completedCourses: 1, averageCourseProgress: 63, certificates: 1 });
