@@ -248,4 +248,53 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     }
   });
 
+
+  it('fails closed before provider dispatch when cancellation loses a race', async () => {
+    const tx = {
+      aIExecutionRecord: {
+        updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+        findUniqueOrThrow: vi.fn(),
+      },
+      auditRecord: { create: vi.fn() },
+      transactionalOutboxRecord: { create: vi.fn() },
+    };
+    const repo = new PrismaAIPlatformRepository({
+      $transaction: (cb: (client: typeof tx) => unknown) => cb(tx),
+    });
+    await expect(repo.cancelUnstartedExecution('ai_running', 'student-1'))
+      .rejects.toThrow('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED');
+    expect(tx.aIExecutionRecord.updateMany).toHaveBeenCalledWith({
+      where: {
+        publicId: 'ai_running', requesterReferenceId: 'student-1',
+        status: { in: ['RECEIVED', 'QUEUED'] },
+      },
+      data: { status: 'CANCELLED' },
+    });
+    expect(tx.aIExecutionRecord.findUniqueOrThrow).not.toHaveBeenCalled();
+    expect(tx.auditRecord.create).not.toHaveBeenCalled();
+  });
+
+  it('atomically records a cancellation and governance audit before replying', async () => {
+    const cancelled = { id: 'ai-id', publicId: 'ai_waiting', status: 'CANCELLED' };
+    const tx = {
+      aIExecutionRecord: {
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+        findUniqueOrThrow: vi.fn().mockResolvedValue(cancelled),
+      },
+      auditRecord: { create: vi.fn().mockResolvedValue({}) },
+      transactionalOutboxRecord: { create: vi.fn().mockResolvedValue({}) },
+    };
+    const repo = new PrismaAIPlatformRepository({
+      $transaction: (cb: (client: typeof tx) => unknown) => cb(tx),
+    });
+    await expect(repo.cancelUnstartedExecution('ai_waiting', 'student-1'))
+      .resolves.toMatchObject(cancelled);
+    expect(tx.auditRecord.create).toHaveBeenCalledOnce();
+    expect(tx.transactionalOutboxRecord.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({
+        eventType: 'AI_EXECUTION_CANCELLED_BEFORE_DISPATCH',
+      }) }),
+    );
+  });
+
 });
