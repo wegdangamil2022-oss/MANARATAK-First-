@@ -62,7 +62,7 @@ const groups: NavigationGroup[] = [
     labelKey: 'admin_nav_group_localization',
     items: [
       { to: '/translations', labelKey: 'admin_nav_translations', icon: Languages, requiredPermission: 'admin:cms:manage' },
-      { to: '/cms', labelKey: 'admin_nav_cms', icon: FileText, requiredPermission: 'admin:cms:manage' },
+      { to: '/cms', labelKey: 'admin_nav_cms', icon: FileText, requiredPermission: 'admin:cms:view' },
     ],
   },
   {

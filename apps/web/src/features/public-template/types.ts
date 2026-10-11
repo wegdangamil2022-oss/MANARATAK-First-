@@ -530,6 +530,7 @@ export interface PublicArticle {
   contentType: 'STUDY_GUIDE' | 'ARTICLE' | 'NEWS' | 'CHECKLIST' | 'FAQ' | 'STATIC_PAGE' | 'LANDING_PAGE';
   body?: string;
   canonicalUrl?: string;
+  cmsSeo?: { locale: string; availableLocales: Array<{ locale: string; slug: string }>; title: string; description: string; noIndex: boolean; noFollow: boolean };
   contentTypeLabelAr: string;
   categoryAr: string;
   author: string;

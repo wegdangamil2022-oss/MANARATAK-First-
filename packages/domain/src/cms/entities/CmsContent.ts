@@ -53,6 +53,7 @@ export interface UpdateCmsContentDto {
 }
 
 export interface CmsContentDto extends CreateCmsContentDto {
+  localizedStates?: Array<{ locale: string; state: CmsContentStatus; scheduledAt: Date | null }>;
   id: string;
   /** Effective root editor, separate from the original author. */
   lastModifiedBy?: string;
@@ -152,6 +153,8 @@ export interface CmsContentRevisionDto {
 }
 
 export interface CmsPublishingReadinessDto {
+  /** Hash of the exact owner readback; approval always rechecks independently. */
+  previewHash?: string;
   ready: boolean;
   missing: string[];
   warnings: string[];
@@ -208,7 +211,6 @@ export interface PublicCmsContentDto {
   localizedPayload?: CmsLocalizedContentDto | null;
 }
 
-
 export interface CmsContentDomainLinkDto {
   id: string;
   contentId: string;
@@ -229,7 +231,14 @@ export interface UpsertCmsContentDomainLinkDto {
   metadata?: Record<string, unknown> | null;
 }
 
+export interface CmsExecutionContext {
+  jobReference: string;
+  attempt: number;
+  idempotencyKey: string;
+}
+
 export interface CmsWorkflowCommandDto {
+  executionContext?: CmsExecutionContext;
   contentId: string;
   locale: string;
   actorId: string;

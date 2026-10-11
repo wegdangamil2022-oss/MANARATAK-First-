@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
+import { cmsAppEntryPlugin } from './config/CmsAppEntryPlugin';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { fileURLToPath } from 'node:url';
@@ -115,7 +116,7 @@ export default defineConfig(({ mode, command }) => {
       'import.meta.env.VITE_GOOGLE_AI_STUDIO': JSON.stringify(studio ? 'true' : 'false'),
       ...(studio ? { 'import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE': JSON.stringify(studioDataMode) } : {}),
     },
-    plugins: [frontendSecurityHeadersPlugin(), react(), tailwindcss(),
+    plugins: [frontendSecurityHeadersPlugin(), react(), tailwindcss(), cmsAppEntryPlugin(),
       ...(studio ? [googleAiStudioPreviewPlugin()] : []), expressApiPlugin(studio), disableHmrPlugin()],
     resolve: {
       alias: {

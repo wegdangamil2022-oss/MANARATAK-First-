@@ -19,6 +19,12 @@ describe('current admin section permissions', () => {
     expect(canAccessAdminPath('/admin/finance', permissions)).toBe(false);
     expect(canAccessAdminPath('/ar/admin/universities', permissions)).toBe(true);
   });
+  it('admits CMS readers independently of legacy manage and publication permissions', () => {
+    expect(canAccessAdminPath('/admin/cms', ['admin:cms:view'])).toBe(true);
+    expect(firstAllowedAdminPath(['admin:cms:view'])).toBe('/cms');
+    expect(canAccessAdminPath('/admin/cms', ['admin:cms:manage'])).toBe(false);
+    expect(canAccessAdminPath('/admin/cms', ['admin:cms:publish'])).toBe(false);
+  });
   it('rejects an old admin return path for a student in the same browser', () => {
     expect(firstAllowedAdminPath([])).toBeNull();
     expect(canAccessAdminPath('/admin/dashboard', [])).toBe(false);

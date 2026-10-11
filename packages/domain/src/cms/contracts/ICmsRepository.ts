@@ -1,4 +1,5 @@
 import {
+  CmsExecutionContext,
   CmsCategoryDto,
   CmsAnnouncementDto,
   CmsBlockSchemaDto,
@@ -30,7 +31,11 @@ import {
 } from '../entities/CmsContent';
 
 export interface ICmsDeliveryCache {
-  getPublished(siteIdentifier: string, locale: string, slug: string): Promise<PublicCmsContentDto | null>;
+  getPublished(
+    siteIdentifier: string,
+    locale: string,
+    slug: string,
+  ): Promise<PublicCmsContentDto | null>;
   setPublished(content: PublicCmsContentDto): Promise<void>;
   invalidateSite(siteIdentifier: string, reason: string): Promise<void>;
 }
@@ -54,8 +59,23 @@ export interface ICmsRepository {
   publish(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto>;
   archive(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto>;
 
+  listRevisionPage(
+    contentId: string,
+    locale: string,
+    beforeVersion?: number,
+  ): Promise<{
+    data: Array<
+      Pick<CmsContentRevisionDto, 'id' | 'versionNumber' | 'reason' | 'capturedAt' | 'capturedBy'>
+    >;
+    hasMore: boolean;
+    nextBeforeVersion: number | null;
+  }>;
   listRevisions(contentId: string, locale: string): Promise<CmsContentRevisionDto[]>;
-  getRevisionForRestore(contentId: string, locale: string, revisionId: string): Promise<CmsContentRevisionDto | null>;
+  getRevisionForRestore(
+    contentId: string,
+    locale: string,
+    revisionId: string,
+  ): Promise<CmsContentRevisionDto | null>;
   restoreRevision(data: CmsRestoreRevisionDto): Promise<CmsLocalizedContentDto>;
 
   createCategory(data: CreateCmsCategoryDto, actorId: string): Promise<CmsCategoryDto>;
@@ -67,36 +87,143 @@ export interface ICmsRepository {
     filters: CmsContentFilters,
     locale?: string,
   ): Promise<PaginatedCmsResult<PublicCmsContentDto>>;
-  getPublishedBySlug(slug: string, locale?: string, siteIdentifier?: string): Promise<PublicCmsContentDto | null>;
+  getPublishedBySlug(
+    slug: string,
+    locale?: string,
+    siteIdentifier?: string,
+  ): Promise<PublicCmsContentDto | null>;
   listIndexableSitemapEntries?(siteIdentifier: string): Promise<CmsSitemapEntryDto[]>;
-  replaceDomainLinks?(contentId: string, links: UpsertCmsContentDomainLinkDto[], actorId: string, expectedVersion: number): Promise<CmsContentDomainLinkDto[]>;
+  replaceDomainLinks?(
+    contentId: string,
+    links: UpsertCmsContentDomainLinkDto[],
+    actorId: string,
+    expectedVersion: number,
+  ): Promise<CmsContentDomainLinkDto[]>;
   listDomainLinks?(contentId: string): Promise<CmsContentDomainLinkDto[]>;
-  listPublishedByDomainTarget?(targetType: string, targetId: string, locale?: string, siteIdentifier?: string, limit?: number): Promise<PublicCmsContentDto[]>;
+  listPublishedByDomainTarget?(
+    targetType: string,
+    targetId: string,
+    locale?: string,
+    siteIdentifier?: string,
+    limit?: number,
+  ): Promise<PublicCmsContentDto[]>;
   changeLocalizedSlug(data: CmsSlugChangeDto): Promise<CmsLocalizedContentDto>;
   listRedirects(siteIdentifier?: string, locale?: string): Promise<CmsRedirectDto[]>;
-  resolveActiveRedirect?(siteIdentifier: string, locale: string, sourcePath: string): Promise<CmsRedirectDto | null>;
-  searchRedirects(filters: { siteIdentifier: string; locale?: string; q?: string; active?: boolean; page: number; pageSize: number }): Promise<PaginatedCmsResult<CmsRedirectDto>>;
-  updateRedirect(id: string, data: { expectedVersion: number; destinationPath?: string; statusCode?: 301 | 302 | 308; active?: boolean; reason: string }, actorId: string): Promise<CmsRedirectDto>;
-  createRedirect(data: Omit<CmsRedirectDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<CmsRedirectDto>;
+  resolveActiveRedirect?(
+    siteIdentifier: string,
+    locale: string,
+    sourcePath: string,
+  ): Promise<CmsRedirectDto | null>;
+  searchRedirects(filters: {
+    siteIdentifier: string;
+    locale?: string;
+    q?: string;
+    active?: boolean;
+    page: number;
+    pageSize: number;
+  }): Promise<PaginatedCmsResult<CmsRedirectDto>>;
+  updateRedirect(
+    id: string,
+    data: {
+      expectedVersion: number;
+      destinationPath?: string;
+      statusCode?: 301 | 302 | 308;
+      active?: boolean;
+      reason: string;
+    },
+    actorId: string,
+  ): Promise<CmsRedirectDto>;
+  createRedirect(
+    data: Omit<CmsRedirectDto, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<CmsRedirectDto>;
   listNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]>;
   listPublishedNavigation?(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]>;
-  saveNavigation(data: Omit<CmsNavigationMenuDto, 'id' | 'version' | 'status' | 'publishedContentHash' | 'publishedBy' | 'publishedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsNavigationMenuDto>;
-  publishNavigation(id: string, expectedVersion: number, actorId: string): Promise<CmsNavigationMenuDto>;
+  saveNavigation(
+    data: Omit<
+      CmsNavigationMenuDto,
+      | 'id'
+      | 'version'
+      | 'status'
+      | 'publishedContentHash'
+      | 'publishedBy'
+      | 'publishedAt'
+      | 'createdAt'
+      | 'updatedAt'
+    > & { id?: string; expectedVersion?: number },
+  ): Promise<CmsNavigationMenuDto>;
+  publishNavigation(
+    id: string,
+    expectedVersion: number,
+    actorId: string,
+  ): Promise<CmsNavigationMenuDto>;
   listBlockSchemas(): Promise<CmsBlockSchemaDto[]>;
   approveBlockSchema(id: string, actorId: string): Promise<CmsBlockSchemaDto>;
   createBlockSchema(data: Omit<CmsBlockSchemaDto, 'id' | 'createdAt'>): Promise<CmsBlockSchemaDto>;
   listBlocks(siteIdentifier: string, locale: string): Promise<CmsContentBlockDto[]>;
+  archiveBlock(id: string, expectedVersion: number, actorId: string): Promise<CmsContentBlockDto>;
   publishBlock(id: string, expectedVersion: number, actorId: string): Promise<CmsContentBlockDto>;
   listPublishedBlocks(siteIdentifier: string, locale: string): Promise<PublicCmsBlockDto[]>;
-  saveBlock(data: Omit<CmsContentBlockDto, 'id' | 'publicId' | 'version' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsContentBlockDto>;
-  listAnnouncements(siteIdentifier: string, locale: string, publicOnly?: boolean): Promise<CmsAnnouncementDto[]>;
-  saveAnnouncement(data: Omit<CmsAnnouncementDto, 'id' | 'publicId' | 'version' | 'status' | 'approvedBy' | 'publishedContentHash' | 'publishedAt' | 'archivedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsAnnouncementDto>;
-  publishAnnouncement(id: string, expectedVersion: number, actorId: string): Promise<CmsAnnouncementDto>;
-  archiveAnnouncement(id: string, expectedVersion: number, actorId: string): Promise<CmsAnnouncementDto>;
-  listFailedSchedules(siteIdentifier: string, locale?: string, limit?: number): Promise<Array<{
-    id: string; localizedContentId: string; contentId: string; locale: string;
-    attemptCount: number; failureCode: string | null; scheduledAt: Date;
-  }>>;
-  retryFailedSchedule(jobId: string, expectedAttemptCount: number, actorId: string, reason: string): Promise<{ id: string; status: string; attemptCount: number }>;
-  processDueSchedules(actorId: string, now: Date, limit?: number): Promise<CmsScheduleResultDto>;
+  saveBlock(
+    data: Omit<CmsContentBlockDto, 'id' | 'publicId' | 'version' | 'createdAt' | 'updatedAt'> & {
+      id?: string;
+      expectedVersion?: number;
+    },
+  ): Promise<CmsContentBlockDto>;
+  listAnnouncements(
+    siteIdentifier: string,
+    locale: string,
+    publicOnly?: boolean,
+  ): Promise<CmsAnnouncementDto[]>;
+  saveAnnouncement(
+    data: Omit<
+      CmsAnnouncementDto,
+      | 'id'
+      | 'publicId'
+      | 'version'
+      | 'status'
+      | 'approvedBy'
+      | 'publishedContentHash'
+      | 'publishedAt'
+      | 'archivedAt'
+      | 'createdAt'
+      | 'updatedAt'
+    > & { id?: string; expectedVersion?: number },
+  ): Promise<CmsAnnouncementDto>;
+  publishAnnouncement(
+    id: string,
+    expectedVersion: number,
+    actorId: string,
+  ): Promise<CmsAnnouncementDto>;
+  archiveAnnouncement(
+    id: string,
+    expectedVersion: number,
+    actorId: string,
+  ): Promise<CmsAnnouncementDto>;
+  listFailedSchedules(
+    siteIdentifier: string,
+    locale?: string,
+    limit?: number,
+  ): Promise<
+    Array<{
+      id: string;
+      localizedContentId: string;
+      contentId: string;
+      locale: string;
+      attemptCount: number;
+      failureCode: string | null;
+      scheduledAt: Date;
+    }>
+  >;
+  retryFailedSchedule(
+    jobId: string,
+    expectedAttemptCount: number,
+    actorId: string,
+    reason: string,
+  ): Promise<{ id: string; status: string; attemptCount: number }>;
+  processDueSchedules(
+    actorId: string,
+    now: Date,
+    limit?: number,
+    executionContext?: CmsExecutionContext,
+  ): Promise<CmsScheduleResultDto>;
 }

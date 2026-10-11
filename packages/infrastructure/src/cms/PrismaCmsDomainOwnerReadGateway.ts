@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { CmsDomainTargetType } from '@manaratak/domain';
 
 /**
@@ -5,29 +6,87 @@ import { CmsDomainTargetType } from '@manaratak/domain';
  * publication writes, or generic UUID-existence shortcut is permitted.
  * The transaction-bound client shares CMS's serializable mutation snapshot.
  */
+type CmsOwnerReadClient = Pick<
+  Prisma.TransactionClient,
+  | 'university'
+  | 'universityAcademicProgram'
+  | 'major'
+  | 'scholarship'
+  | 'internationalTest'
+  | 'internationalTestPublicationSnapshot'
+  | 'course'
+  | 'referenceCountry'
+  | 'studyDestinationProfile'
+>;
+
 export class PrismaCmsDomainOwnerReadGateway {
-  public constructor(private readonly db: any) {}
+  public constructor(private readonly db: CmsOwnerReadClient) {}
 
   /**
    * Navigation targets use TYPE:<canonical-owner-UUID> and resolve to a real
    * locale-prefixed public path. Academic programs have no dedicated public
    * detail route, so they intentionally cannot become nav destinations yet.
    */
-  public async resolvePublicPath(targetType: CmsDomainTargetType, targetId: string, locale: string): Promise<string> {
+  public async resolvePublicPath(
+    targetType: CmsDomainTargetType,
+    targetId: string,
+    locale: string,
+  ): Promise<string> {
     if (locale !== 'ar' && locale !== 'en') throw new Error('CMS_NAVIGATION_LOCALE_UNSUPPORTED');
-    const routes: Partial<Record<CmsDomainTargetType, { delegate: string; segment: string; field: string }>> = {
-      [CmsDomainTargetType.UNIVERSITY]: { delegate: 'university', segment: 'universities', field: 'slug' },
-      [CmsDomainTargetType.MAJOR]: { delegate: 'major', segment: 'majors', field: 'slug' },
-      [CmsDomainTargetType.SCHOLARSHIP]: { delegate: 'scholarship', segment: 'scholarships', field: 'slug' },
-      [CmsDomainTargetType.INTERNATIONAL_TEST]: { delegate: 'internationalTest', segment: 'international-tests', field: 'slug' },
-      [CmsDomainTargetType.COURSE]: { delegate: 'course', segment: 'courses', field: 'slug' },
+    const routes: Partial<
+      Record<
+        CmsDomainTargetType,
+        {
+          read: (id: string) => PromiseLike<{ slug: string } | null>;
+          segment: string;
+        }
+      >
+    > = {
+      [CmsDomainTargetType.UNIVERSITY]: {
+        read: (id) => this.db.university.findUnique({ where: { id }, select: { slug: true } }),
+        segment: 'universities',
+      },
+      [CmsDomainTargetType.MAJOR]: {
+        read: (id) => this.db.major.findUnique({ where: { id }, select: { slug: true } }),
+        segment: 'majors',
+      },
+      [CmsDomainTargetType.SCHOLARSHIP]: {
+        read: (id) => this.db.scholarship.findUnique({ where: { id }, select: { slug: true } }),
+        segment: 'scholarships',
+      },
+      [CmsDomainTargetType.INTERNATIONAL_TEST]: {
+        read: (id) =>
+          this.db.internationalTest.findUnique({ where: { id }, select: { slug: true } }),
+        segment: 'international-tests',
+      },
+      [CmsDomainTargetType.COURSE]: {
+        read: (id) => this.db.course.findUnique({ where: { id }, select: { slug: true } }),
+        segment: 'courses',
+      },
     };
+    if (targetType === CmsDomainTargetType.REFERENCE_COUNTRY) {
+      await this.assertPublished(targetType, targetId);
+      const profile = await this.db.studyDestinationProfile.findFirst({
+        where: {
+          countryReferenceId: targetId,
+          status: 'PUBLISHED',
+          countryReference: { isActive: true },
+        },
+        select: { slug: true },
+      });
+      if (
+        !profile ||
+        typeof profile.slug !== 'string' ||
+        !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(profile.slug)
+      ) {
+        throw new Error('CMS_NAVIGATION_TARGET_NOT_PUBLISHED');
+      }
+      return `/${locale}/countries/${profile.slug}`;
+    }
     const config = routes[targetType];
     if (!config) throw new Error('CMS_NAVIGATION_DOMAIN_ROUTE_UNSUPPORTED');
     await this.assertPublished(targetType, targetId);
-    const row = await this.db[config.delegate].findUnique({
-      where: { id: targetId }, select: { slug: true },
-    });
+    const row = await config.read(targetId);
     const slug = row?.slug;
     if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
       throw new Error('CMS_NAVIGATION_DOMAIN_SLUG_INVALID');
@@ -40,15 +99,18 @@ export class PrismaCmsDomainOwnerReadGateway {
     switch (targetType) {
       case CmsDomainTargetType.UNIVERSITY:
         found = await this.db.university.findFirst({
-          where: { id: targetId, status: 'PUBLISHED' }, select: { id: true },
+          where: { id: targetId, status: 'PUBLISHED' },
+          select: { id: true },
         });
         break;
       case CmsDomainTargetType.ACADEMIC_PROGRAM:
         found = await this.db.universityAcademicProgram.findFirst({
           where: {
-            id: targetId, status: 'ACTIVE',
+            id: targetId,
+            status: 'ACTIVE',
             majorMappingState: 'CANONICALLY_MAPPED',
-            majorId: { not: null }, degreeLevelId: { not: null },
+            majorId: { not: null },
+            degreeLevelId: { not: null },
             major: { is: { status: 'PUBLISHED' } },
             university: { is: { status: 'PUBLISHED' } },
           },
@@ -57,14 +119,18 @@ export class PrismaCmsDomainOwnerReadGateway {
         break;
       case CmsDomainTargetType.MAJOR:
         found = await this.db.major.findFirst({
-          where: { id: targetId, status: 'PUBLISHED' }, select: { id: true },
+          where: { id: targetId, status: 'PUBLISHED' },
+          select: { id: true },
         });
         break;
       case CmsDomainTargetType.SCHOLARSHIP:
         found = await this.db.scholarship.findFirst({
           where: {
-            id: targetId, status: 'PUBLISHED', publicationStatus: 'PUBLISHED',
-            verificationStatus: 'VERIFIED', completenessStatus: 'COMPLETE',
+            id: targetId,
+            status: 'PUBLISHED',
+            publicationStatus: 'PUBLISHED',
+            verificationStatus: 'VERIFIED',
+            completenessStatus: 'COMPLETE',
             versions: { some: { status: 'PUBLISHED' } },
           },
           select: { id: true },
@@ -72,7 +138,11 @@ export class PrismaCmsDomainOwnerReadGateway {
         break;
       case CmsDomainTargetType.INTERNATIONAL_TEST: {
         const test = await this.db.internationalTest.findFirst({
-          where: { id: targetId, isPubliclyVisible: true, currentPublishedVersionId: { not: null } },
+          where: {
+            id: targetId,
+            isPubliclyVisible: true,
+            currentPublishedVersionId: { not: null },
+          },
           select: { currentPublishedVersionId: true },
         });
         found = test?.currentPublishedVersionId
@@ -86,13 +156,16 @@ export class PrismaCmsDomainOwnerReadGateway {
       case CmsDomainTargetType.COURSE:
         found = await this.db.course.findFirst({
           where: {
-            id: targetId, status: 'PUBLISHED', completenessStatus: 'COMPLETE',
+            id: targetId,
+            status: 'PUBLISHED',
+            completenessStatus: 'COMPLETE',
             OR: [
               { originType: { not: 'EXTERNAL_LINKED_COURSE' } },
               {
                 originType: 'EXTERNAL_LINKED_COURSE',
                 accessType: 'FREE_STUDY_AND_CERTIFICATE',
-                isStudyFree: true, isFreeCertificate: true,
+                isStudyFree: true,
+                isFreeCertificate: true,
               },
             ],
           },

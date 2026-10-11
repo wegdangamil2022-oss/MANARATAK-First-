@@ -3197,6 +3197,7 @@ model CmsContentNode {
   @@index([contentType, status])
   @@index([categoryId, status])
   @@index([siteIdentifier, status])
+  @@index([siteIdentifier, status, updatedAt, id], map: "CmsContentNode_site_status_updated_id")
   @@index([authorId])
   @@index([ownerId])
   @@unique([siteIdentifier, slug])

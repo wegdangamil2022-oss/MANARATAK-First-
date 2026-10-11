@@ -14,9 +14,13 @@ import {
   Tags,
 } from 'lucide-react';
 import { adminApiClient } from '../api/client';
+import { CmsRevisionHistory } from '../features/cms/CmsRevisionHistory';
+import { useTranslation } from '../i18n/I18nProvider';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { CmsOperationsPanels } from '../features/cms/CmsOperationsPanels';
 import { CmsRichText } from '@manaratak/ui';
 import { AssetPicker } from '../components/AssetPicker';
+import { useCmsCopy, translateCms } from '../features/cms/cmsCopy';
 
 type Locale = 'ar' | 'en';
 interface Content {
@@ -34,6 +38,7 @@ interface Content {
   version: number;
   updatedAt: string;
   scheduledAt?: string | null;
+  localizedStates?: Array<{ locale: string; state: string; scheduledAt: string | null }>;
 }
 interface Localized {
   id: string;
@@ -62,7 +67,10 @@ interface Detail extends Content {
   localizedPayloads: Localized[];
   tags: Tag[];
   revisions: Array<{ id: string; versionNumber: number; reason: string; capturedAt: string }>;
-  readiness: Record<string, { ready: boolean; missing: string[]; warnings: string[] }>;
+  readiness: Record<
+    string,
+    { ready: boolean; missing: string[]; warnings: string[]; previewHash?: string }
+  >;
   domainLinks: DomainLink[];
 }
 interface Category {
@@ -153,18 +161,24 @@ const contentTypes = [
   'CHECKLIST',
   'LANDING_PAGE',
 ];
-const workflow = [
-  'قائمة المحتوى',
-  'إنشاء المحتوى',
-  'التحرير',
-  'الوسائط',
-  'تهيئة SEO',
-  'المعاينة',
-  'المراجعة',
-  'النشر',
-];
 
 export function CmsAdminPage() {
+  const tr = useCmsCopy();
+  const workflow = [
+    tr('قائمة المحتوى'),
+    tr('إنشاء المحتوى'),
+    tr('التحرير'),
+    tr('الوسائط'),
+    tr('تهيئة SEO'),
+    tr('المعاينة'),
+    tr('المراجعة'),
+    tr('النشر'),
+  ];
+  const { language: uiLanguage } = useTranslation();
+  const { hasPermission } = useAdminAuthorization();
+  const canAuthor = hasPermission('admin:cms:author');
+  const canReview = hasPermission('admin:cms:review');
+  const canPublish = hasPermission('admin:cms:publish');
   const [list, setList] = useState<ListResponse | null>(null);
   const [listError, setListError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -232,7 +246,7 @@ export function CmsAdminPage() {
       const contentResult = contentLoad.value;
       if (categoryLoad.status === 'rejected' || tagLoad.status === 'rejected')
         setError(
-          'تعذر تحميل بعض التصنيفات أو الوسوم. قائمة المحتوى متاحة؛ أعد التحميل قبل استخدامها.',
+          tr('تعذر تحميل بعض التصنيفات أو الوسوم. قائمة المحتوى متاحة؛ أعد التحميل قبل استخدامها.'),
         );
       if (page > Math.max(1, contentResult.totalPages)) {
         setPage(Math.max(1, contentResult.totalPages));
@@ -241,13 +255,13 @@ export function CmsAdminPage() {
       setList(contentResult);
     } catch (reason) {
       if (sequence === listSequence.current) {
-        setListError(messageOf(reason));
+        setListError(messageOf(reason, uiLanguage));
         setList(null);
       }
     } finally {
       if (sequence === listSequence.current) setLoading(false);
     }
-  }, [query, status, page, typeFilter, categoryFilter]);
+  }, [query, status, page, typeFilter, categoryFilter, tr, uiLanguage]);
 
   useEffect(() => {
     void loadDashboard();
@@ -299,14 +313,15 @@ export function CmsAdminPage() {
         en: keep('en') ? previous.en : next.en,
       }));
     } catch (reason) {
-      setError(messageOf(reason));
+      setError(messageOf(reason, uiLanguage));
     } finally {
       setBusy(false);
     }
   };
   const chooseContent = (id: string) => {
     if (busy || mutationLock.current) return;
-    if (dirty && !window.confirm('توجد تعديلات غير محفوظة. هل تريد تجاهلها وفتح المادة؟')) return;
+    if (dirty && !window.confirm(tr('توجد تعديلات غير محفوظة. هل تريد تجاهلها وفتح المادة؟')))
+      return;
     void openContent(id);
   };
 
@@ -314,7 +329,7 @@ export function CmsAdminPage() {
     event.preventDefault();
     if (
       mutationLock.current ||
-      (dirty && !window.confirm('توجد تعديلات غير محفوظة. تجاهلها وإنشاء مادة جديدة؟'))
+      (dirty && !window.confirm(tr('توجد تعديلات غير محفوظة. تجاهلها وإنشاء مادة جديدة؟')))
     )
       return;
     mutationLock.current = true;
@@ -342,12 +357,57 @@ export function CmsAdminPage() {
         featuredAssetId: '',
       });
       setNotice(
-        'تم إنشاء المسودة. أكمل اللغة المطلوبة واربطها بالكيانات ذات الصلة ثم أرسلها للمراجعة.',
+        tr('تم إنشاء المسودة. أكمل اللغة المطلوبة واربطها بالكيانات ذات الصلة ثم أرسلها للمراجعة.'),
       );
       await Promise.all([openContent(created.id), loadDashboard()]);
     } catch (reason) {
-      setError(messageOf(reason));
+      setError(messageOf(reason, uiLanguage));
       setBusy(false);
+    } finally {
+      mutationLock.current = false;
+      setBusy(false);
+    }
+  };
+
+  const changeSlug = async () => {
+    if (!selected || dirty || busy || mutationLock.current || !canAuthor) return;
+    const current = selected.localizedPayloads.find((item) => item.locale === locale);
+    if (!current) return;
+    const newSlug = window
+      .prompt(
+        uiLanguage === 'ar' ? 'الرابط الجديد بالحروف اللاتينية:' : 'New slug in Latin characters:',
+        current.localizedSlug,
+      )
+      ?.trim();
+    if (!newSlug || newSlug === current.localizedSlug) return;
+    const reason = window
+      .prompt(uiLanguage === 'ar' ? 'سبب تغيير الرابط:' : 'Reason for changing the slug:')
+      ?.trim();
+    if (!reason) return;
+    if (
+      !window.confirm(
+        uiLanguage === 'ar'
+          ? 'ستحتاج المسودة مراجعة ونشرًا جديدين قبل تفعيل الرابط والتحويل. متابعة؟'
+          : 'New review and publication are required before the new slug and redirect go live. Continue?',
+      )
+    )
+      return;
+    mutationLock.current = true;
+    setBusy(true);
+    setError(null);
+    try {
+      await adminApiClient.request(`/admin/cms/content/${selected.id}/change-slug`, {
+        method: 'POST',
+        body: JSON.stringify({ locale, expectedVersion: current.version, newSlug, reason }),
+      });
+      await openContent(selected.id, locale === 'ar' ? 'en' : 'ar');
+      setNotice(
+        uiLanguage === 'ar'
+          ? 'حُفظ الرابط في المسودة؛ النسخة العامة مستمرة حتى النشر الجديد.'
+          : 'Draft slug saved; the current publication remains available until republishing.',
+      );
+    } catch (reason) {
+      setError(messageOf(reason, uiLanguage));
     } finally {
       mutationLock.current = false;
       setBusy(false);
@@ -362,7 +422,7 @@ export function CmsAdminPage() {
     if (!selected || mutationLock.current) return;
     const minutes = Number(currentEditor.readingTimeMinutes);
     if (currentEditor.readingTimeMinutes.trim() && (!Number.isInteger(minutes) || minutes <= 0)) {
-      setError('وقت القراءة يجب أن يكون عدد دقائق صحيحًا موجبًا.');
+      setError(tr('وقت القراءة يجب أن يكون عدد دقائق صحيحًا موجبًا.'));
       return;
     }
     mutationLock.current = true;
@@ -398,12 +458,14 @@ export function CmsAdminPage() {
         }),
       });
       setNotice(
-        `تم حفظ النسخة ${locale === 'ar' ? 'العربية' : 'الإنجليزية'} في الخادم مع نسخة مراجعة جديدة.`,
+        uiLanguage === 'ar'
+          ? `حُفظت النسخة ${locale === 'ar' ? 'العربية' : 'الإنجليزية'}.`
+          : `Saved the ${locale === 'ar' ? 'Arabic' : 'English'} version.`,
       );
       await openContent(selected.id, locale === 'ar' ? 'en' : 'ar');
       await loadDashboard();
     } catch (reason) {
-      setError(messageOf(reason));
+      setError(messageOf(reason, uiLanguage));
       setBusy(false);
     } finally {
       mutationLock.current = false;
@@ -416,17 +478,19 @@ export function CmsAdminPage() {
   ) => {
     if (!selected || mutationLock.current) return;
     if (dirty) {
-      setError('احفظ تعديلات المحتوى والروابط قبل تغيير حالة النشر.');
+      setError(tr('احفظ تعديلات المحتوى والروابط قبل تغيير حالة النشر.'));
       return;
     }
     if (
       ['publish', 'archive'].includes(action) &&
       !window.confirm(
-        action === 'publish' ? 'نشر هذه اللغة للعامة؟' : 'أرشفة هذه اللغة وإخفاؤها عن العامة؟',
+        action === 'publish'
+          ? tr('نشر هذه اللغة للعامة؟')
+          : tr('أرشفة هذه اللغة وإخفاؤها عن العامة؟'),
       )
     )
       return;
-    const comments = action === 'reject' ? window.prompt('سبب الرفض (إلزامي):') : null;
+    const comments = action === 'reject' ? window.prompt(tr('سبب الرفض (إلزامي):')) : null;
     if (action === 'reject' && !comments?.trim()) return;
     mutationLock.current = true;
     setBusy(true);
@@ -439,18 +503,18 @@ export function CmsAdminPage() {
       });
       setNotice(
         action === 'submit-review'
-          ? 'أُرسلت النسخة للمراجعة.'
+          ? tr('أُرسلت النسخة للمراجعة.')
           : action === 'approve'
-            ? 'اعتمدها الناشر وأصبحت جاهزة للنشر.'
+            ? tr('اعتمدها الناشر وأصبحت جاهزة للنشر.')
             : action === 'publish'
-              ? 'نُشرت النسخة بنجاح.'
+              ? tr('نُشرت النسخة بنجاح.')
               : action === 'archive'
-                ? 'أُرشفت النسخة.'
-                : 'أُعيدت للمحرر مع سبب الرفض.',
+                ? tr('أُرشفت النسخة.')
+                : tr('أُعيدت للمحرر مع سبب الرفض.'),
       );
       await Promise.all([openContent(selected.id), loadDashboard()]);
     } catch (reason) {
-      setError(messageOf(reason));
+      setError(messageOf(reason, uiLanguage));
       setBusy(false);
     } finally {
       mutationLock.current = false;
@@ -461,13 +525,13 @@ export function CmsAdminPage() {
   const schedule = async () => {
     if (!selected || mutationLock.current) return;
     if (dirty) {
-      setError('احفظ التعديلات قبل جدولة النشر.');
+      setError(tr('احفظ التعديلات قبل جدولة النشر.'));
       return;
     }
-    const value = window.prompt('موعد النشر بصيغة ISO، مثال: 2026-09-01T08:00:00Z');
+    const value = window.prompt(tr('موعد النشر بصيغة ISO، مثال: 2026-09-01T08:00:00Z'));
     if (!value) return;
     if (!Number.isFinite(Date.parse(value)) || Date.parse(value) <= Date.now()) {
-      setError('اختر موعد نشر صالحًا في المستقبل.');
+      setError(tr('اختر موعد نشر صالحًا في المستقبل.'));
       return;
     }
     mutationLock.current = true;
@@ -482,10 +546,10 @@ export function CmsAdminPage() {
           scheduledAt: value,
         }),
       });
-      setNotice('تمت الجدولة دون نشر تلقائي من الواجهة؛ عامل الجدولة ينفذها في بيئة التشغيل.');
+      setNotice(tr('تمت الجدولة دون نشر تلقائي من الواجهة؛ عامل الجدولة ينفذها في بيئة التشغيل.'));
       await Promise.all([openContent(selected.id), loadDashboard()]);
     } catch (reason) {
-      setError(messageOf(reason));
+      setError(messageOf(reason, uiLanguage));
       setBusy(false);
     } finally {
       mutationLock.current = false;
@@ -504,9 +568,9 @@ export function CmsAdminPage() {
         body: JSON.stringify({ locale, expectedVersion: currentEditor.version }),
       });
       await Promise.all([openContent(selected.id), loadDashboard()]);
-      setNotice('أُلغيت الجدولة وأُعيدت النسخة إلى المسودة.');
+      setNotice(tr('أُلغيت الجدولة وأُعيدت النسخة إلى المسودة.'));
     } catch (reason) {
-      setError(messageOf(reason));
+      setError(messageOf(reason, uiLanguage));
     } finally {
       mutationLock.current = false;
       setBusy(false);
@@ -526,10 +590,10 @@ export function CmsAdminPage() {
           links: domainLinks.map((link, index) => ({ ...link, sortOrder: index })),
         }),
       });
-      setNotice('تم حفظ روابط المحتوى مع أقسام المنصة باستخدام المعرّفات Canonical.');
+      setNotice(tr('تم حفظ روابط المحتوى مع أقسام المنصة باستخدام المعرّفات Canonical.'));
       await openContent(selected.id, undefined, true);
     } catch (reason) {
-      setError(messageOf(reason));
+      setError(messageOf(reason, uiLanguage));
     } finally {
       mutationLock.current = false;
       setBusy(false);
@@ -561,10 +625,10 @@ export function CmsAdminPage() {
             labelEn: taxonomy.tagEn,
           }),
         });
-      setNotice(kind === 'category' ? 'تم إنشاء التصنيف.' : 'تم إنشاء الوسم.');
+      setNotice(kind === 'category' ? tr('تم إنشاء التصنيف.') : tr('تم إنشاء الوسم.'));
       await loadDashboard();
     } catch (reason) {
-      setError(messageOf(reason));
+      setError(messageOf(reason, uiLanguage));
     } finally {
       mutationLock.current = false;
       setBusy(false);
@@ -602,34 +666,42 @@ export function CmsAdminPage() {
 
   return (
     <main
-      dir={locale === 'ar' ? 'rtl' : 'ltr'}
+      dir={uiLanguage === 'ar' ? 'rtl' : 'ltr'}
       className="mx-auto max-w-[1500px] space-y-6 font-sans text-slate-900"
     >
       <header className="overflow-hidden rounded-3xl bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="mb-2 text-sm font-bold text-[#F2CD78]">منصة المحتوى المؤسسية</p>
-            <h1 className="text-3xl font-black">إدارة المحتوى والنشر</h1>
+            <p className="mb-2 text-sm font-bold text-[#F2CD78]"> {tr('منصة المحتوى المؤسسية')} </p>
+            <h1 className="text-3xl font-black"> {tr('إدارة المحتوى والنشر')} </h1>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/85">
-              تحرير ثنائي اللغة، وسائط من منصة الأصول، SEO، مراجعة مستقلة، وجدولة ونشر موثوق.
+              {tr(
+                'تحرير ثنائي اللغة، وسائط من منصة الأصول، SEO، مراجعة مستقلة، وجدولة ونشر موثوق.',
+              )}{' '}
             </p>
           </div>
           <div className="grid grid-cols-3 gap-3 text-center">
-            <Metric value={list?.total ?? 0} label="إجمالي المحتوى" />
+            <Metric value={list?.total ?? 0} label={tr('إجمالي المحتوى')} />
             <Metric
               value={list?.data.filter((x) => x.status === 'PUBLISHED').length ?? 0}
-              label="منشور في الصفحة"
+              label={tr('منشور في الصفحة')}
             />
             <Metric
-              value={list?.data.filter((x) => x.status === 'IN_REVIEW').length ?? 0}
-              label="مراجعة في الصفحة"
+              value={
+                list?.data.filter((x) =>
+                  x.localizedStates?.some(
+                    (entry) => entry.locale === locale && entry.state === 'IN_REVIEW',
+                  ),
+                ).length ?? 0
+              }
+              label={tr('مراجعة في الصفحة')}
             />
           </div>
         </div>
       </header>
 
       <nav
-        aria-label="مسار النشر"
+        aria-label={tr('مسار النشر')}
         className="grid grid-cols-2 gap-2 rounded-2xl border border-[#DDEFF2] bg-white p-3 shadow-sm sm:grid-cols-4 xl:grid-cols-8"
       >
         {workflow.map((label, index) => (
@@ -649,23 +721,23 @@ export function CmsAdminPage() {
 
       <section className="grid gap-6 xl:grid-cols-[1.1fr_1.9fr]">
         <aside className="space-y-6">
-          <Panel title="قائمة المحتوى" icon={<FilePenLine className="h-5 w-5" />}>
+          <Panel title={tr('قائمة المحتوى')} icon={<FilePenLine className="h-5 w-5" />}>
             <div className="mb-4 flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute right-3 top-3 h-4 w-4 text-slate-400" />
                 <input
-                  aria-label="بحث المحتوى"
+                  aria-label={tr('بحث المحتوى')}
                   value={query}
                   onChange={(e) => {
                     setQuery(e.target.value);
                     setPage(1);
                   }}
                   className="input pr-9"
-                  placeholder="العنوان أو الرابط..."
+                  placeholder={tr('العنوان أو الرابط...')}
                 />
               </div>
               <select
-                aria-label="تصفية الحالة"
+                aria-label={tr('تصفية الحالة')}
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
@@ -673,7 +745,7 @@ export function CmsAdminPage() {
                 }}
                 className="input w-36"
               >
-                <option value="">كل الحالات</option>
+                <option value=""> {tr('كل الحالات')} </option>
                 {[
                   'DRAFT',
                   'IN_REVIEW',
@@ -683,33 +755,33 @@ export function CmsAdminPage() {
                   'ARCHIVED',
                 ].map((x) => (
                   <option key={x} value={x}>
-                    {labelOf(x)}
+                    {labelOf(x, uiLanguage)}
                   </option>
                 ))}
               </select>
             </div>
             <div className="mb-4 grid grid-cols-2 gap-2">
               <Select
-                label="نوع المحتوى"
+                label={tr('نوع المحتوى')}
                 value={typeFilter}
                 onChange={(value) => {
                   setTypeFilter(value);
                   setPage(1);
                 }}
                 options={[
-                  { value: '', label: 'كل الأنواع' },
-                  ...contentTypes.map((value) => ({ value, label: labelOf(value) })),
+                  { value: '', label: tr('كل الأنواع') },
+                  ...contentTypes.map((value) => ({ value, label: labelOf(value, uiLanguage) })),
                 ]}
               />
               <Select
-                label="التصنيف"
+                label={tr('التصنيف')}
                 value={categoryFilter}
                 onChange={(value) => {
                   setCategoryFilter(value);
                   setPage(1);
                 }}
                 options={[
-                  { value: '', label: 'كل التصنيفات' },
+                  { value: '', label: tr('كل التصنيفات') },
                   ...categories.map((value) => ({ value: value.slug, label: value.nameAr })),
                 ]}
               />
@@ -741,7 +813,7 @@ export function CmsAdminPage() {
                 ))}
               </div>
             ) : (
-              <Empty text="لا يوجد محتوى مطابق." />
+              <Empty text={tr('لا يوجد محتوى مطابق.')} />
             )}
             {list && (
               <div className="mt-4 flex items-center justify-between gap-2 text-sm">
@@ -749,60 +821,60 @@ export function CmsAdminPage() {
                   disabled={loading || page <= 1}
                   onClick={() => setPage((value) => value - 1)}
                 >
-                  السابق
+                  {tr('السابق')}{' '}
                 </button>
                 <span>
-                  {page} / {Math.max(1, list.totalPages)} · {list.total} مادة
+                  {page} / {Math.max(1, list.totalPages)} · {list.total} {tr('مادة')}{' '}
                 </span>
                 <button
                   disabled={loading || page >= list.totalPages}
                   onClick={() => setPage((value) => value + 1)}
                 >
-                  التالي
+                  {tr('التالي')}{' '}
                 </button>
               </div>
             )}
           </Panel>
-          <Panel title="إنشاء مسودة" icon={<Plus className="h-5 w-5" />}>
+          <Panel title={tr('إنشاء مسودة')} icon={<Plus className="h-5 w-5" />}>
             <form onSubmit={createContent} className="space-y-3">
               <Field
-                label="العنوان العربي"
+                label={tr('العنوان العربي')}
                 value={create.title}
                 onChange={(v) => setCreate({ ...create, title: v })}
                 required
               />
               <Field
-                label="الرابط الثابت بالإنجليزية"
+                label={tr('الرابط الثابت بالإنجليزية')}
                 dir="ltr"
                 value={create.slug}
                 onChange={(v) => setCreate({ ...create, slug: v })}
                 required
               />
               <Select
-                label="نوع المحتوى"
+                label={tr('نوع المحتوى')}
                 value={create.contentType}
                 onChange={(v) => setCreate({ ...create, contentType: v })}
-                options={contentTypes.map((x) => ({ value: x, label: labelOf(x) }))}
+                options={contentTypes.map((x) => ({ value: x, label: labelOf(x, uiLanguage) }))}
               />
               <Select
-                label="التصنيف"
+                label={tr('التصنيف')}
                 value={create.categoryId}
                 onChange={(v) => setCreate({ ...create, categoryId: v })}
                 options={[
-                  { value: '', label: 'اختر لاحقًا' },
+                  { value: '', label: tr('اختر لاحقًا') },
                   ...categories.map((x) => ({ value: x.id, label: x.nameAr })),
                 ]}
               />
               <AssetPicker
-                label="الصورة البارزة"
+                label={tr('الصورة البارزة')}
                 purpose="CMS_FEATURED_ASSET"
                 mimeTypePrefix="image/"
                 value={create.featuredAssetId}
                 onChange={(featuredAssetId) => setCreate({ ...create, featuredAssetId })}
               />
-              <PrimaryButton disabled={busy || !create.title || !create.slug}>
+              <PrimaryButton disabled={!canAuthor || busy || !create.title || !create.slug}>
                 <Plus className="h-4 w-4" />
-                إنشاء المسودة
+                {tr('إنشاء المسودة')}{' '}
               </PrimaryButton>
             </form>
           </Panel>
@@ -810,14 +882,14 @@ export function CmsAdminPage() {
             taxonomy={taxonomy}
             setTaxonomy={setTaxonomy}
             createTaxonomy={createTaxonomy}
-            busy={busy}
+            busy={busy || !canAuthor}
           />
         </aside>
 
         <section className="space-y-6">
           {!selected ? (
-            <Panel title="محرر المحتوى" icon={<FilePenLine className="h-5 w-5" />}>
-              <Empty text="اختر محتوى من القائمة أو أنشئ مسودة جديدة للبدء." />
+            <Panel title={tr('محرر المحتوى')} icon={<FilePenLine className="h-5 w-5" />}>
+              <Empty text={tr('اختر محتوى من القائمة أو أنشئ مسودة جديدة للبدء.')} />
             </Panel>
           ) : (
             <>
@@ -829,12 +901,13 @@ export function CmsAdminPage() {
                       <Status value={localizedState ?? 'DRAFT'} />
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
-                      {selected.publicId} · إصدار اللغة {currentEditor.version ?? 'غير محفوظة'}
+                      {selected.publicId} {tr('· إصدار اللغة')}{' '}
+                      {currentEditor.version ?? tr('غير محفوظة')}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <Action disabled={busy} onClick={() => chooseContent(selected.id)}>
-                      إعادة التحميل
+                      {tr('إعادة التحميل')}{' '}
                     </Action>
                     <LocaleButton
                       active={locale === 'ar'}
@@ -842,7 +915,7 @@ export function CmsAdminPage() {
                         if (!busy) setLocale('ar');
                       }}
                     >
-                      العربية
+                      {tr('العربية')}{' '}
                     </LocaleButton>
                     <LocaleButton
                       active={locale === 'en'}
@@ -855,33 +928,66 @@ export function CmsAdminPage() {
                   </div>
                 </div>
               </div>
-              <section aria-label={locale === 'ar' ? 'مقارنة جاهزية النشر بالعربية والإنجليزية' : 'Arabic and English publishing readiness'} className="grid gap-3 sm:grid-cols-2">
+              <section
+                aria-label={
+                  uiLanguage === 'ar'
+                    ? tr('مقارنة جاهزية النشر بالعربية والإنجليزية')
+                    : 'Arabic and English publishing readiness'
+                }
+                className="grid gap-3 sm:grid-cols-2"
+              >
                 {(['ar', 'en'] as const).map((language) => {
-                  const item = selected.localizedPayloads.find((entry) => entry.locale === language);
+                  const item = selected.localizedPayloads.find(
+                    (entry) => entry.locale === language,
+                  );
                   const check = selected.readiness[language];
-                  return <div key={language} className="rounded-2xl border bg-white p-4">
-                    <h3 className="font-bold">{language === 'ar' ? 'العربية' : 'English'}</h3>
-                    <p className="text-sm" aria-live="polite">
-                      {!item ? (locale === 'ar' ? 'لم تُحفظ النسخة' : 'No saved version')
-                        : check?.ready ? (locale === 'ar' ? 'جاهزة للمراجعة' : 'Ready for review')
-                        : (locale === 'ar' ? 'غير جاهزة' : 'Not ready')}
-                    </p>
-                    <p className="text-xs text-slate-600">{locale === 'ar' ? 'الحالة' : 'State'}: {item?.state ?? 'MISSING'} · v{item?.version ?? '—'}</p>
-                    {!!check?.missing?.length && <p className="text-xs text-amber-800">
-                      {locale === 'ar' ? 'حقول ناقصة' : 'Missing'}: {check.missing.join(', ')}
-                    </p>}
-                    <button type="button" disabled={busy} className="mt-2 text-sm underline"
-                      onClick={() => setLocale(language)}>
-                      {locale === 'ar' ? 'فتح محرر اللغة' : 'Open language editor'}
-                    </button>
-                  </div>;
+                  return (
+                    <div key={language} className="rounded-2xl border bg-white p-4">
+                      <h3 className="font-bold">{language === 'ar' ? tr('العربية') : 'English'}</h3>
+                      <p className="text-sm" aria-live="polite">
+                        {!item
+                          ? uiLanguage === 'ar'
+                            ? tr('لم تُحفظ النسخة')
+                            : 'No saved version'
+                          : check?.ready
+                            ? uiLanguage === 'ar'
+                              ? tr('جاهزة للمراجعة')
+                              : 'Ready for review'
+                            : uiLanguage === 'ar'
+                              ? tr('غير جاهزة')
+                              : 'Not ready'}
+                      </p>
+                      <p className="text-xs text-slate-600">
+                        {uiLanguage === 'ar' ? tr('الحالة') : 'State'}: {item?.state ?? 'MISSING'} ·
+                        v{item?.version ?? '—'}
+                      </p>
+                      {!!check?.missing?.length && (
+                        <p className="text-xs text-amber-800">
+                          {uiLanguage === 'ar' ? tr('حقول ناقصة') : 'Missing'}:{' '}
+                          {check.missing.join(', ')}
+                        </p>
+                      )}
+                      <p className="break-all text-xs" dir="ltr">
+                        {uiLanguage === 'ar' ? 'بصمة النسخة' : 'Readback hash'}:{' '}
+                        {check?.previewHash ?? '—'}
+                      </p>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        className="mt-2 text-sm underline"
+                        onClick={() => setLocale(language)}
+                      >
+                        {uiLanguage === 'ar' ? tr('فتح محرر اللغة') : 'Open language editor'}
+                      </button>
+                    </div>
+                  );
                 })}
               </section>
               {dirty && (
                 <Alert tone="error">
-                  توجد تعديلات غير محفوظة{dirtyLocales.ar ? ' · العربية' : ''}
-                  {dirtyLocales.en ? ' · الإنجليزية' : ''}
-                  {linksDirty ? ' · الروابط' : ''}.
+                  {tr('توجد تعديلات غير محفوظة')} {dirtyLocales.ar ? tr(' · العربية') : ''}
+                  {dirtyLocales.en ? tr(' · الإنجليزية') : ''}
+                  {linksDirty ? tr(' · الروابط') : ''}.
                 </Alert>
               )}
               {localizedState === 'PUBLISHED' && (
@@ -891,48 +997,49 @@ export function CmsAdminPage() {
                   rel="noopener noreferrer"
                   className="block font-bold text-[#0E7C86]"
                 >
-                  عرض المادة المنشورة في الصفحة العامة ↗
+                  {tr('عرض المادة المنشورة في الصفحة العامة ↗')}{' '}
                 </a>
               )}
-              <fieldset disabled={busy || editorLocked}>
+              <fieldset disabled={!canAuthor || busy || editorLocked}>
                 <form onSubmit={saveLocale} className="grid gap-6 2xl:grid-cols-2">
                   <Panel
-                    title={`المحرر — ${locale === 'ar' ? 'العربية' : 'English'}`}
+                    title={`${tr('التحرير')} — ${locale === 'ar' ? tr('العربية') : tr('الإنجليزية')}`}
                     icon={<FilePenLine className="h-5 w-5" />}
                   >
                     <div className="space-y-4">
                       <Field
-                        label="الرابط المحلي"
+                        label={tr('الرابط المحلي')}
                         dir="ltr"
                         value={currentEditor.localizedSlug}
                         onChange={(v) => updateEditor({ localizedSlug: v })}
                         required
                       />
                       <Field
-                        label="العنوان"
+                        label={tr('العنوان')}
                         value={currentEditor.title}
                         onChange={(v) => updateEditor({ title: v })}
                         required
                       />
                       <TextArea
-                        label="الملخص"
+                        label={tr('الملخص')}
                         value={currentEditor.summary}
                         onChange={(v) => updateEditor({ summary: v })}
                         rows={3}
                       />
                       <p className="text-xs text-slate-500">
-                        يمكن كتابة نص عادي أو HTML للفقرات والعناوين والقوائم والروابط HTTPS. تُعرض
-                        المعاينة والعامة بنفس التنسيق الآمن.
+                        {tr(
+                          'يمكن كتابة نص عادي أو HTML للفقرات والعناوين والقوائم والروابط HTTPS. تُعرض المعاينة والعامة بنفس التنسيق الآمن.',
+                        )}{' '}
                       </p>
                       <TextArea
-                        label="نص المحتوى"
+                        label={tr('نص المحتوى')}
                         value={currentEditor.body}
                         onChange={(v) => updateEditor({ body: v })}
                         rows={15}
                         required
                       />
                       <Field
-                        label="مدة القراءة بالدقائق"
+                        label={tr('مدة القراءة بالدقائق')}
                         dir="ltr"
                         value={currentEditor.readingTimeMinutes}
                         onChange={(v) => updateEditor({ readingTimeMinutes: v })}
@@ -940,10 +1047,10 @@ export function CmsAdminPage() {
                     </div>
                   </Panel>
                   <div className="space-y-6">
-                    <Panel title="الوسائط والتصنيف" icon={<Eye className="h-5 w-5" />}>
+                    <Panel title={tr('الوسائط والتصنيف')} icon={<Eye className="h-5 w-5" />}>
                       <div className="space-y-4">
                         <AssetPicker
-                          label="الصورة البارزة"
+                          label={tr('الصورة البارزة')}
                           purpose="CMS_LOCALIZED_FEATURED_ASSET"
                           mimeTypePrefix="image/"
                           value={currentEditor.featuredAssetId}
@@ -951,7 +1058,7 @@ export function CmsAdminPage() {
                         />
                         <div className="space-y-2">
                           <AssetPicker
-                            label="إضافة مرفق من مكتبة الأصول"
+                            label={tr('إضافة مرفق من مكتبة الأصول')}
                             purpose="CMS_ATTACHMENT_ASSET"
                             value=""
                             onChange={(assetId) => {
@@ -962,7 +1069,7 @@ export function CmsAdminPage() {
                             }}
                           />
                           <TextArea
-                            label="المرفقات المختارة"
+                            label={tr('المرفقات المختارة')}
                             dir="ltr"
                             value={currentEditor.attachmentAssetIds}
                             onChange={(v) => updateEditor({ attachmentAssetIds: v })}
@@ -970,7 +1077,7 @@ export function CmsAdminPage() {
                           />
                         </div>
                         <fieldset>
-                          <legend className="mb-2 text-sm font-bold">الوسوم</legend>
+                          <legend className="mb-2 text-sm font-bold"> {tr('الوسوم')} </legend>
                           <div className="flex flex-wrap gap-2">
                             {tags.map((tag) => (
                               <label
@@ -988,7 +1095,7 @@ export function CmsAdminPage() {
                                     })
                                   }
                                 />
-                                {locale === 'ar' ? tag.labelAr : tag.labelEn}
+                                {uiLanguage === 'ar' ? tag.labelAr : tag.labelEn}
                               </label>
                             ))}
                           </div>
@@ -998,35 +1105,36 @@ export function CmsAdminPage() {
                     <DomainLinksPanel
                       links={domainLinks}
                       setLinks={setDomainLinks}
-                      busy={busy}
+                      busy={busy || !canAuthor}
                       onSave={saveDomainLinks}
                     />
-                    <Panel title="تهيئة محركات البحث" icon={<Search className="h-5 w-5" />}>
+                    <Panel title={tr('تهيئة محركات البحث')} icon={<Search className="h-5 w-5" />}>
                       <div className="space-y-4">
                         <Field
-                          label="عنوان SEO"
+                          label={tr('عنوان SEO')}
                           value={currentEditor.seoTitle}
                           onChange={(v) => updateEditor({ seoTitle: v })}
                           required
                         />
                         <TextArea
-                          label="وصف SEO"
+                          label={tr('وصف SEO')}
                           value={currentEditor.seoDescription}
                           onChange={(v) => updateEditor({ seoDescription: v })}
                           rows={3}
                           required
                         />
                         <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-                          Canonical URL يُولَّد تلقائيًا من نوع المحتوى واللغة والـslug ولا يمكن
-                          للناشر استبداله يدويًا.
+                          {tr(
+                            'Canonical URL يُولَّد تلقائيًا من نوع المحتوى واللغة والـslug ولا يمكن للناشر استبداله يدويًا.',
+                          )}{' '}
                         </p>
                         <Field
-                          label="الكلمات المفتاحية"
+                          label={tr('الكلمات المفتاحية')}
                           value={currentEditor.keywords}
                           onChange={(v) => updateEditor({ keywords: v })}
                         />
                         <AssetPicker
-                          label="صورة Open Graph"
+                          label={tr('صورة Open Graph')}
                           purpose="CMS_OPEN_GRAPH_ASSET"
                           mimeTypePrefix="image/"
                           value={currentEditor.openGraphAssetId}
@@ -1034,12 +1142,12 @@ export function CmsAdminPage() {
                         />
                         <div className="flex gap-5 text-sm">
                           <Check
-                            label="منع الفهرسة"
+                            label={tr('منع الفهرسة')}
                             checked={currentEditor.noIndex}
                             onChange={(v) => updateEditor({ noIndex: v })}
                           />
                           <Check
-                            label="منع تتبع الروابط"
+                            label={tr('منع تتبع الروابط')}
                             checked={currentEditor.noFollow}
                             onChange={(v) => updateEditor({ noFollow: v })}
                           />
@@ -1062,112 +1170,144 @@ export function CmsAdminPage() {
                       ) : (
                         <CheckCircle2 className="h-4 w-4" />
                       )}
-                      حفظ النسخة على الخادم
+                      {tr('حفظ النسخة على الخادم')}{' '}
                     </PrimaryButton>
                   </div>
                 </form>
               </fieldset>
               {editorLocked && (
                 <p className="text-sm text-amber-800">
-                  النسخة مقفلة للمراجعة أو النشر. أعدها للمحرر أو ألغِ الجدولة قبل تحريرها.
+                  {tr(
+                    'النسخة مقفلة للمراجعة أو النشر. أعدها للمحرر أو ألغِ الجدولة قبل تحريرها.',
+                  )}{' '}
                 </p>
               )}
               <div className="grid gap-6 2xl:grid-cols-2">
-                <Panel title="المعاينة" icon={<Eye className="h-5 w-5" />}>
+                <Panel title={tr('المعاينة')} icon={<Eye className="h-5 w-5" />}>
                   <article className="rounded-2xl border bg-slate-50 p-6">
-                    <p className="text-xs font-bold text-[#0E7C86]">معاينة مسودة غير عامة</p>
-                    <h3 className="mt-3 text-3xl font-black">{preview.title || 'العنوان'}</h3>
+                    <p className="text-xs font-bold text-[#0E7C86]">
+                      {' '}
+                      {tr('معاينة مسودة غير عامة')}{' '}
+                    </p>
+                    <h3 className="mt-3 text-3xl font-black">{preview.title || tr('العنوان')}</h3>
                     {preview.summary && <p className="mt-3 text-slate-600">{preview.summary}</p>}
                     <div className="mt-6 whitespace-pre-wrap leading-8 text-slate-800">
                       <CmsRichText
-                        body={preview.body || 'اكتب المحتوى لتظهر المعاينة هنا.'}
+                        body={preview.body || tr('اكتب المحتوى لتظهر المعاينة هنا.')}
                         className="cms-rich-text"
                       />
                     </div>
                   </article>
                 </Panel>
-                <Panel title="الجاهزية والمراجعة والنشر" icon={<Send className="h-5 w-5" />}>
+                <Panel title={tr('الجاهزية والمراجعة والنشر')} icon={<Send className="h-5 w-5" />}>
                   <div className="space-y-4">
                     {readiness ? (
                       <div
                         className={`rounded-xl border p-4 ${readiness.ready ? 'border-[#DDEFF2] bg-[#DDEFF2]/55' : 'border-amber-200 bg-amber-50'}`}
                       >
                         <p className="font-bold">
-                          {readiness.ready ? 'جاهز للإرسال للمراجعة' : 'توجد حقول مطلوبة'}
+                          {readiness.ready ? tr('جاهز للإرسال للمراجعة') : tr('توجد حقول مطلوبة')}
                         </p>
                         {readiness.missing.length > 0 && (
-                          <p className="mt-2 text-sm">الناقص: {readiness.missing.join('، ')}</p>
+                          <p className="mt-2 text-sm">
+                            {' '}
+                            {tr('الناقص:')} {readiness.missing.join(tr('، '))}
+                          </p>
                         )}
                         {readiness.warnings.length > 0 && (
-                          <p className="mt-2 text-sm">تنبيهات: {readiness.warnings.join('، ')}</p>
+                          <p className="mt-2 text-sm">
+                            {' '}
+                            {tr('تنبيهات:')} {readiness.warnings.join(tr('، '))}
+                          </p>
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-500">احفظ هذه اللغة لإظهار فحص الجاهزية.</p>
+                      <p className="text-sm text-slate-500">
+                        {' '}
+                        {tr('احفظ هذه اللغة لإظهار فحص الجاهزية.')}{' '}
+                      </p>
                     )}
                     <div className="grid grid-cols-2 gap-2">
                       <Action
                         onClick={() => void runWorkflow('submit-review')}
-                        disabled={busy || dirty || !readiness?.ready || localizedState !== 'DRAFT'}
+                        disabled={
+                          !canAuthor ||
+                          busy ||
+                          dirty ||
+                          !readiness?.ready ||
+                          localizedState !== 'DRAFT'
+                        }
                       >
                         <Send className="h-4 w-4" />
-                        إرسال للمراجعة
+                        {tr('إرسال للمراجعة')}{' '}
                       </Action>
                       <Action
                         onClick={() => void runWorkflow('approve')}
-                        disabled={busy || dirty || localizedState !== 'IN_REVIEW'}
+                        disabled={!canReview || busy || dirty || localizedState !== 'IN_REVIEW'}
                       >
                         <CheckCircle2 className="h-4 w-4" />
-                        اعتماد كناشر
+                        {tr('اعتماد كناشر')}{' '}
                       </Action>
                       <Action
                         onClick={schedule}
-                        disabled={busy || dirty || localizedState !== 'READY_TO_PUBLISH'}
+                        disabled={
+                          !canPublish || busy || dirty || localizedState !== 'READY_TO_PUBLISH'
+                        }
                       >
                         <Clock3 className="h-4 w-4" />
-                        جدولة
+                        {tr('جدولة')}{' '}
                       </Action>
                       <Action
                         onClick={() => void runWorkflow('publish')}
-                        disabled={busy || dirty || localizedState !== 'READY_TO_PUBLISH'}
+                        disabled={
+                          !canPublish || busy || dirty || localizedState !== 'READY_TO_PUBLISH'
+                        }
                       >
                         <Send className="h-4 w-4" />
-                        نشر الآن
+                        {tr('نشر الآن')}{' '}
                       </Action>
                       <Action
                         onClick={() => void runWorkflow('reject')}
-                        disabled={busy || dirty || localizedState !== 'IN_REVIEW'}
+                        disabled={!canReview || busy || dirty || localizedState !== 'IN_REVIEW'}
                       >
-                        إعادة للمحرر
+                        {tr('إعادة للمحرر')}{' '}
                       </Action>
                       <Action
                         onClick={() => void runWorkflow('archive')}
-                        disabled={busy || dirty || localizedState !== 'PUBLISHED'}
+                        disabled={!canPublish || busy || dirty || localizedState !== 'PUBLISHED'}
                       >
                         <Archive className="h-4 w-4" />
-                        أرشفة
+                        {tr('أرشفة')}{' '}
                       </Action>
                       {localizedState === 'SCHEDULED' && (
-                        <Action disabled={busy || dirty} onClick={() => void cancelSchedule()}>
-                          إلغاء الجدولة
+                        <Action
+                          disabled={!canPublish || busy || dirty}
+                          onClick={() => void cancelSchedule()}
+                        >
+                          {tr('إلغاء الجدولة')}{' '}
                         </Action>
                       )}
                     </div>
                     <p className="text-xs leading-6 text-slate-500">
-                      لا يستطيع منشئ النسخة اعتمادها بنفسه. يلزم حساب ناشر آخر، ولا يحدث نشر تلقائي
-                      عند الحفظ أو المراجعة.
+                      {tr(
+                        'لا يستطيع منشئ النسخة اعتمادها بنفسه. يلزم حساب ناشر آخر، ولا يحدث نشر تلقائي عند الحفظ أو المراجعة.',
+                      )}{' '}
                     </p>
-                    {selected.revisions.length > 0 && (
-                      <div>
-                        <p className="mb-2 text-sm font-bold">آخر النسخ</p>
-                        {selected.revisions.slice(0, 5).map((revision) => (
-                          <div key={revision.id} className="border-t py-2 text-xs">
-                            الإصدار {revision.versionNumber} · {revision.reason} ·{' '}
-                            {formatDate(revision.capturedAt)}
-                          </div>
-                        ))}
-                      </div>
+                    {canAuthor && currentEditor.version && (
+                      <Action disabled={busy || dirty} onClick={() => void changeSlug()}>
+                        {uiLanguage === 'ar'
+                          ? 'تغيير الرابط بمراجعة جديدة'
+                          : 'Change slug with new review'}
+                      </Action>
                     )}
+                    <CmsRevisionHistory
+                      key={`${selected.id}:${locale}`}
+                      contentId={selected.id}
+                      locale={locale}
+                      version={currentEditor.version}
+                      disabled={busy || dirty}
+                      onRestore={() => openContent(selected.id)}
+                    />
                   </div>
                 </Panel>
               </div>
@@ -1363,6 +1503,7 @@ function LocaleButton({
   );
 }
 function Status({ value }: { value: string }) {
+  const { language: uiLanguage } = useTranslation();
   const color =
     value === 'PUBLISHED'
       ? 'bg-emerald-100 text-[#0E7C86]'
@@ -1373,7 +1514,7 @@ function Status({ value }: { value: string }) {
           : 'bg-blue-100 text-blue-800';
   return (
     <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-black ${color}`}>
-      {labelOf(value)}
+      {labelOf(value, uiLanguage)}
     </span>
   );
 }
@@ -1402,16 +1543,18 @@ function DomainLinksPanel({
   busy: boolean;
   onSave: () => Promise<void>;
 }) {
+  const tr = useCmsCopy();
   const add = () =>
     setLinks([
       ...links,
       { targetType: 'UNIVERSITY', targetId: '', relationType: 'RELATED', sortOrder: links.length },
     ]);
   return (
-    <Panel title="الربط مع أقسام المنصة" icon={<Link2 className="h-5 w-5" />}>
+    <Panel title={tr('الربط مع أقسام المنصة')} icon={<Link2 className="h-5 w-5" />}>
       <p className="mb-4 text-xs leading-6 text-slate-500">
-        اربط المادة بالـOwner UUID للكيان Canonical فقط. استخدم معرف السجل الفعلي من لوحة الإدارة.
-        لا تستخدم الاسم أو الرابط المختصر، ولا تنسخ بيانات الكيان داخل المادة.
+        {tr(
+          'اربط المادة بالـOwner UUID للكيان Canonical فقط. استخدم معرف السجل الفعلي من لوحة الإدارة. لا تستخدم الاسم أو الرابط المختصر، ولا تنسخ بيانات الكيان داخل المادة.',
+        )}{' '}
       </p>
       <div className="space-y-3">
         {links.map((link, index) => (
@@ -1431,13 +1574,13 @@ function DomainLinksPanel({
                 )
               }
             >
-              <option value="UNIVERSITY">جامعة</option>
-              <option value="ACADEMIC_PROGRAM">برنامج جامعي</option>
-              <option value="SCHOLARSHIP">منحة</option>
-              <option value="MAJOR">تخصص</option>
-              <option value="INTERNATIONAL_TEST">اختبار دولي</option>
-              <option value="COURSE">دورة</option>
-              <option value="REFERENCE_COUNTRY">دولة / وجهة دراسية</option>
+              <option value="UNIVERSITY"> {tr('جامعة')} </option>
+              <option value="ACADEMIC_PROGRAM"> {tr('برنامج جامعي')} </option>
+              <option value="SCHOLARSHIP"> {tr('منحة')} </option>
+              <option value="MAJOR"> {tr('تخصص')} </option>
+              <option value="INTERNATIONAL_TEST"> {tr('اختبار دولي')} </option>
+              <option value="COURSE"> {tr('دورة')} </option>
+              <option value="REFERENCE_COUNTRY"> {tr('دولة / وجهة دراسية')} </option>
             </select>
             <input
               disabled={busy}
@@ -1465,12 +1608,12 @@ function DomainLinksPanel({
                 )
               }
             >
-              <option value="RELATED">مرتبط</option>
-              <option value="FEATURED">مميز</option>
-              <option value="GUIDE">دليل</option>
-              <option value="APPLICATION">التقديم</option>
-              <option value="REQUIREMENTS">المتطلبات</option>
-              <option value="ELIGIBILITY">الأهلية</option>
+              <option value="RELATED"> {tr('مرتبط')} </option>
+              <option value="FEATURED"> {tr('مميز')} </option>
+              <option value="GUIDE"> {tr('دليل')} </option>
+              <option value="APPLICATION"> {tr('التقديم')} </option>
+              <option value="REQUIREMENTS"> {tr('المتطلبات')} </option>
+              <option value="ELIGIBILITY"> {tr('الأهلية')} </option>
             </select>
             <button
               type="button"
@@ -1478,7 +1621,7 @@ function DomainLinksPanel({
               className="rounded-lg px-3 text-sm font-bold text-red-600 hover:bg-red-50"
               onClick={() => setLinks(links.filter((_, i) => i !== index))}
             >
-              حذف
+              {tr('حذف')}{' '}
             </button>
           </div>
         ))}
@@ -1489,7 +1632,7 @@ function DomainLinksPanel({
             onClick={add}
             className="rounded-xl border border-[#0E7C86] px-4 py-2 text-sm font-bold text-[#0E7C86] hover:bg-[#DDEFF2]/50"
           >
-            + إضافة رابط
+            {tr('+ إضافة رابط')}{' '}
           </button>
           <button
             type="button"
@@ -1497,7 +1640,7 @@ function DomainLinksPanel({
             onClick={() => void onSave()}
             className="rounded-xl bg-[#142B5F] px-4 py-2 text-sm font-bold text-white hover:bg-[#0E7C86] disabled:opacity-50"
           >
-            حفظ الروابط
+            {tr('حفظ الروابط')}{' '}
           </button>
         </div>
       </div>
@@ -1516,48 +1659,49 @@ function TaxonomyPanel({
   createTaxonomy: (kind: 'category' | 'tag') => Promise<void>;
   busy: boolean;
 }) {
+  const tr = useCmsCopy();
   return (
-    <Panel title="التصنيفات والوسوم" icon={<FolderTree className="h-5 w-5" />}>
+    <Panel title={tr('التصنيفات والوسوم')} icon={<FolderTree className="h-5 w-5" />}>
       <div className="space-y-5">
         <div className="space-y-2">
           <p className="flex items-center gap-2 text-sm font-bold">
             <FolderTree className="h-4 w-4" />
-            تصنيف جديد
+            {tr('تصنيف جديد')}{' '}
           </p>
           <Field
-            label="الرابط"
+            label={tr('الرابط')}
             dir="ltr"
             value={taxonomy.categorySlug}
             onChange={(v) => setTaxonomy({ ...taxonomy, categorySlug: v })}
           />
           <Field
-            label="الاسم العربي"
+            label={tr('الاسم العربي')}
             value={taxonomy.categoryAr}
             onChange={(v) => setTaxonomy({ ...taxonomy, categoryAr: v })}
           />
           <Field
-            label="الاسم الإنجليزي"
+            label={tr('الاسم الإنجليزي')}
             dir="ltr"
             value={taxonomy.categoryEn}
             onChange={(v) => setTaxonomy({ ...taxonomy, categoryEn: v })}
           />
           <Action disabled={busy} onClick={() => void createTaxonomy('category')}>
-            إضافة التصنيف
+            {tr('إضافة التصنيف')}{' '}
           </Action>
         </div>
         <div className="space-y-2 border-t pt-4">
           <p className="flex items-center gap-2 text-sm font-bold">
             <Tags className="h-4 w-4" />
-            وسم جديد
+            {tr('وسم جديد')}{' '}
           </p>
           <Field
-            label="القيمة المطبّعة"
+            label={tr('القيمة المطبّعة')}
             dir="ltr"
             value={taxonomy.tagValue}
             onChange={(v) => setTaxonomy({ ...taxonomy, tagValue: v })}
           />
           <Field
-            label="العربي"
+            label={tr('العربي')}
             value={taxonomy.tagAr}
             onChange={(v) => setTaxonomy({ ...taxonomy, tagAr: v })}
           />
@@ -1568,7 +1712,7 @@ function TaxonomyPanel({
             onChange={(v) => setTaxonomy({ ...taxonomy, tagEn: v })}
           />
           <Action disabled={busy} onClick={() => void createTaxonomy('tag')}>
-            إضافة الوسم
+            {tr('إضافة الوسم')}{' '}
           </Action>
         </div>
       </div>
@@ -1610,46 +1754,47 @@ function splitValues(value: string): string[] {
     ),
   ];
 }
-function messageOf(reason: unknown): string {
-  const message = reason instanceof Error ? reason.message : 'تعذر إكمال العملية.';
+function messageOf(reason: unknown, language: string = 'ar'): string {
+  const tr = (text: string) => translateCms(text, language);
+  const message = reason instanceof Error ? reason.message : tr('تعذر إكمال العملية.');
   const explanations: Record<string, string> = {
-    CMS_VERSION_CONFLICT:
+    CMS_VERSION_CONFLICT: tr(
       'تغيرت النسخة لدى مستخدم آخر. أعد تحميل المادة قبل الحفظ؛ تعديلاتك الحالية لم تُحذف.',
-    CMS_MAKER_CHECKER_VIOLATION:
+    ),
+    CMS_MAKER_CHECKER_VIOLATION: tr(
       'يلزم ناشر آخر لاعتماد هذه النسخة؛ لا يستطيع محررها اعتمادها بنفسه.',
-    CMS_CONTENT_LOCKED_FOR_WORKFLOW:
+    ),
+    CMS_CONTENT_LOCKED_FOR_WORKFLOW: tr(
       'النسخة مقفلة للمراجعة أو الجدولة. أعدها للمسودة عبر الإجراء الرسمي أولًا.',
-    CMS_INVALID_LIFECYCLE_TRANSITION: 'هذا الإجراء لا يتوافق مع حالة النسخة الحالية.',
-    CMS_REJECTION_REASON_REQUIRED: 'أدخل سبب إعادة المادة للمحرر.',
-    CMS_UNSAFE_RICH_TEXT:
+    ),
+    CMS_INVALID_LIFECYCLE_TRANSITION: tr('هذا الإجراء لا يتوافق مع حالة النسخة الحالية.'),
+    CMS_REJECTION_REASON_REQUIRED: tr('أدخل سبب إعادة المادة للمحرر.'),
+    CMS_UNSAFE_RICH_TEXT: tr(
       'يتضمن النص تنسيق HTML غير مسموح. استخدم العناوين والفقرات والقوائم والروابط الآمنة.',
+    ),
   };
   const code = Object.keys(explanations).find((key) => message.includes(key));
-  return code ? explanations[code] : message;
+  return code ? explanations[code] : tr('تعذر إكمال العملية.');
 }
-function labelOf(value: string): string {
+function labelOf(value: string, language: string = 'ar'): string {
+  const tr = (text: string) => translateCms(text, language);
   return (
     (
       {
-        ARTICLE: 'مقال',
-        NEWS: 'خبر',
-        STUDY_GUIDE: 'دليل دراسي',
-        CHECKLIST: 'قائمة تجهيز',
-        FAQ: 'أسئلة شائعة',
-        STATIC_PAGE: 'صفحة ثابتة',
-        LANDING_PAGE: 'صفحة هبوط',
-        DRAFT: 'مسودة',
-        IN_REVIEW: 'قيد المراجعة',
-        READY_TO_PUBLISH: 'جاهز للنشر',
-        SCHEDULED: 'مجدول',
-        PUBLISHED: 'منشور',
-        ARCHIVED: 'مؤرشف',
+        ARTICLE: tr('مقال'),
+        NEWS: tr('خبر'),
+        STUDY_GUIDE: tr('دليل دراسي'),
+        CHECKLIST: tr('قائمة تجهيز'),
+        FAQ: tr('أسئلة شائعة'),
+        STATIC_PAGE: tr('صفحة ثابتة'),
+        LANDING_PAGE: tr('صفحة هبوط'),
+        DRAFT: tr('مسودة'),
+        IN_REVIEW: tr('قيد المراجعة'),
+        READY_TO_PUBLISH: tr('جاهز للنشر'),
+        SCHEDULED: tr('مجدول'),
+        PUBLISHED: tr('منشور'),
+        ARCHIVED: tr('مؤرشف'),
       } as Record<string, string>
     )[value] ?? value.replaceAll('_', ' ')
-  );
-}
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('ar', { dateStyle: 'medium', timeStyle: 'short' }).format(
-    new Date(value),
   );
 }

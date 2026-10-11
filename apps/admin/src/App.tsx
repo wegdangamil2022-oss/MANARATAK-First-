@@ -281,7 +281,7 @@ function AdminLayout() {
                 <Route path="/courses/:id" element={<RequireAdminPermission permission="admin:courses:manage"><CourseDetailPage /></RequireAdminPermission>} />
                 <Route path="/certificates" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
                 <Route path="/certificates/:id" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateDetailPage /></RequireAdminPermission>} />
-                <Route path="/cms" element={<RequireAdminPermission permission="admin:cms:manage"><CmsAdminPage /></RequireAdminPermission>} />
+                <Route path="/cms" element={<RequireAdminPermission permission="admin:cms:view"><CmsAdminPage /></RequireAdminPermission>} />
                 <Route path="/services" element={<RequireAdminPermission permission="admin:services:manage"><ServicesAdminPage /></RequireAdminPermission>} />
                 <Route path="/finance" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceAdminPage /></RequireAdminPermission>} />
                 <Route path="/finance/invoices/:id" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceInvoiceDetailPage /></RequireAdminPermission>} />

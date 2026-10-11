@@ -347,6 +347,7 @@ export function mapArticle(dto: PublicCmsContentDto): PublicArticle {
     titleEn: dto.title,
     body: dto.body,
     canonicalUrl: dto.canonicalUrl,
+    cmsSeo: { locale: dto.locale, availableLocales: dto.availableLocales, title: dto.seoMetadata.title || dto.title, description: dto.seoMetadata.description || dto.summary || "", noIndex: dto.seoMetadata.noIndex, noFollow: dto.seoMetadata.noFollow },
     contentType,
     contentTypeLabelAr: contentType === 'NEWS' ? 'خبر' : contentType === 'STUDY_GUIDE' ? 'دليل دراسي' : contentType === 'CHECKLIST' ? 'قائمة تحقق' : contentType === 'FAQ' ? 'أسئلة شائعة' : contentType === 'STATIC_PAGE' ? 'صفحة ثابتة' : contentType === 'LANDING_PAGE' ? 'صفحة هبوط' : 'مقال',
     categoryAr: dto.categorySlug ?? 'محتوى',

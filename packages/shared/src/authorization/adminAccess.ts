@@ -7,7 +7,7 @@ export const ADMIN_SECTIONS = [
   ['/courses', 'admin:courses:manage'],
   ['/study-destinations', 'admin:reference-data:manage'],
   ['/translations', 'admin:cms:manage'],
-  ['/cms', 'admin:cms:manage'],
+  ['/cms', 'admin:cms:view'],
   ['/imports', 'admin:imports:manage'],
   ['/certificates', 'admin:certificates:view'],
   ['/notifications', 'admin:platform:manage'],

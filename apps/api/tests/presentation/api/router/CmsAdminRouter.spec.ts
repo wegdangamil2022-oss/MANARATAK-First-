@@ -14,6 +14,8 @@ describe('Phase 16 CMS admin router', () => {
     upsertLocalizedContent: vi.fn(),
     getReadiness: vi.fn(),
     listRevisions: vi.fn(),
+    listRevisionPage: vi.fn(),
+    archiveBlock: vi.fn(),
     restoreRevision: vi.fn(),
     submitForReview: vi.fn(),
     approveReview: vi.fn(),
@@ -49,7 +51,16 @@ describe('Phase 16 CMS admin router', () => {
     retryFailedSchedule: vi.fn(),
     processDueSchedules: vi.fn(),
   });
-  const app = (cms: ReturnType<typeof useCases>, actorId?: string, grants: string[] = ['admin:cms:view', 'admin:cms:author', 'admin:cms:review', 'admin:cms:publish']) => {
+  const app = (
+    cms: ReturnType<typeof useCases>,
+    actorId?: string,
+    grants: string[] = [
+      'admin:cms:view',
+      'admin:cms:author',
+      'admin:cms:review',
+      'admin:cms:publish',
+    ],
+  ) => {
     const server = express();
     server.use(express.json());
     if (actorId)
@@ -71,21 +82,60 @@ describe('Phase 16 CMS admin router', () => {
     return server;
   };
 
+  it('validates revision cursors and restore versions independently of author permissions', async () => {
+    const cms = useCases();
+    cms.listRevisionPage.mockResolvedValue({ data: [], hasMore: false, nextBeforeVersion: null });
+    const reader = app(cms, 'reader', ['admin:cms:view']);
+    expect(
+      (await request(reader).get('/cms/content/c1/revisions/en?beforeVersion=31')).status,
+    ).toBe(200);
+    expect(cms.listRevisionPage).toHaveBeenCalledWith('c1', 'en', 31);
+    expect((await request(reader).get('/cms/content/c1/revisions/en?beforeVersion=0')).status).toBe(
+      400,
+    );
+    expect(
+      (
+        await request(reader)
+          .post('/cms/content/c1/revisions/en/r1/restore')
+          .send({ expectedVersion: 4 })
+      ).status,
+    ).toBe(403);
+    const author = app(cms, 'author', ['admin:cms:author']);
+    expect(
+      (await request(author).post('/cms/content/c1/revisions/en/r1/restore').send({})).status,
+    ).toBe(400);
+    expect(cms.restoreRevision).not.toHaveBeenCalled();
+    expect(
+      (await request(author).post('/cms/blocks/b1/archive').send({ expectedVersion: 2 })).status,
+    ).toBe(403);
+    const publisher = app(cms, 'publisher', ['admin:cms:publish']);
+    expect(
+      (await request(publisher).post('/cms/blocks/b1/archive').send({ expectedVersion: 2 })).status,
+    ).toBe(200);
+    expect(cms.archiveBlock).toHaveBeenCalledWith('b1', 2, 'publisher');
+  });
+
   it('forces draft-only block schema writes and independent approval grants', async () => {
     const cms = useCases();
     const payload = {
-      key: 'CMS_HERO', version: 1, nameAr: 'واجهة', nameEn: 'Hero',
+      key: 'CMS_HERO',
+      version: 1,
+      nameAr: 'واجهة',
+      nameEn: 'Hero',
       fieldSchema: { type: 'object', properties: {}, additionalProperties: false },
-      localizedFields: [], assetFields: [],
+      localizedFields: [],
+      assetFields: [],
     };
     const author = app(cms, 'author', ['admin:cms:schemas:manage']);
-    const draft = await request(author).post('/cms/block-schemas').send({ ...payload, status: 'ACTIVE' });
+    const draft = await request(author)
+      .post('/cms/block-schemas')
+      .send({ ...payload, status: 'ACTIVE' });
     expect(draft.status).toBe(400);
     expect(cms.createBlockSchema).not.toHaveBeenCalled();
     const selfApprove = await request(author).post('/cms/block-schemas/schema-1/approve').send({});
     expect(selfApprove.status).toBe(403);
     expect(cms.approveBlockSchema).not.toHaveBeenCalled();
-    cms.approveBlockSchema.mockResolvedValue({id:'schema-1',status:'ACTIVE'});
+    cms.approveBlockSchema.mockResolvedValue({ id: 'schema-1', status: 'ACTIVE' });
     const reviewer = app(cms, 'reviewer', ['admin:cms:schemas:approve']);
     const approved = await request(reviewer).post('/cms/block-schemas/schema-1/approve').send({});
     expect(approved.status).toBe(200);
@@ -97,8 +147,13 @@ describe('Phase 16 CMS admin router', () => {
     for (const grant of ['admin:cms:view', 'admin:cms:author']) {
       const server = app(cms, 'limited', [grant]);
       expect((await request(server).get('/cms/operations/failed-schedules')).status).toBe(403);
-      expect((await request(server).post('/cms/operations/failed-schedules/job-1/retry')
-        .send({ expectedAttemptCount: 3, reason: 'Operator correction' })).status).toBe(403);
+      expect(
+        (
+          await request(server)
+            .post('/cms/operations/failed-schedules/job-1/retry')
+            .send({ expectedAttemptCount: 3, reason: 'Operator correction' })
+        ).status,
+      ).toBe(403);
     }
     expect(cms.listFailedSchedules).not.toHaveBeenCalled();
     expect(cms.retryFailedSchedule).not.toHaveBeenCalled();
@@ -107,28 +162,47 @@ describe('Phase 16 CMS admin router', () => {
   it('validates failed-job replay attempt and reason before invoking the owner', async () => {
     const cms = useCases();
     const server = app(cms, 'operator', ['admin:cms:operations:run']);
-    const bad = await request(server).post('/cms/operations/failed-schedules/job-1/retry')
+    const bad = await request(server)
+      .post('/cms/operations/failed-schedules/job-1/retry')
       .send({ expectedAttemptCount: -1, reason: 'no' });
     expect(bad.status).toBe(400);
     expect(cms.retryFailedSchedule).not.toHaveBeenCalled();
     cms.retryFailedSchedule.mockResolvedValue({ id: 'job-1', status: 'PENDING', attemptCount: 3 });
-    const allowed = await request(server).post('/cms/operations/failed-schedules/job-1/retry')
+    const allowed = await request(server)
+      .post('/cms/operations/failed-schedules/job-1/retry')
       .send({ expectedAttemptCount: 3, reason: 'Validated approval' });
     expect(allowed.status).toBe(200);
-    expect(cms.retryFailedSchedule).toHaveBeenCalledWith('job-1', 3, 'operator', 'Validated approval');
+    expect(cms.retryFailedSchedule).toHaveBeenCalledWith(
+      'job-1',
+      3,
+      'operator',
+      'Validated approval',
+    );
   });
 
   it('requires viewer permission and restricts redirect search to site-scoped bounded filters', async () => {
     const cms = useCases();
-    const query = '/cms/redirects?siteIdentifier=manaratak&locale=en&q=guide&active=false&page=2&pageSize=10';
+    const query =
+      '/cms/redirects?siteIdentifier=manaratak&locale=en&q=guide&active=false&page=2&pageSize=10';
     const denied = await request(app(cms, 'editor', ['admin:cms:author'])).get(query);
     expect(denied.status).toBe(403);
     expect(cms.searchRedirects).not.toHaveBeenCalled();
-    cms.searchRedirects.mockResolvedValue({ data: [], total: 0, page: 2, pageSize: 10, totalPages: 0 });
+    cms.searchRedirects.mockResolvedValue({
+      data: [],
+      total: 0,
+      page: 2,
+      pageSize: 10,
+      totalPages: 0,
+    });
     const allowed = await request(app(cms, 'viewer', ['admin:cms:view'])).get(query);
     expect(allowed.status).toBe(200);
     expect(cms.searchRedirects).toHaveBeenCalledWith({
-      siteIdentifier: 'manaratak', locale: 'en', q: 'guide', active: false, page: 2, pageSize: 10,
+      siteIdentifier: 'manaratak',
+      locale: 'en',
+      q: 'guide',
+      active: false,
+      page: 2,
+      pageSize: 10,
     });
   });
 
@@ -155,13 +229,28 @@ describe('Phase 16 CMS admin router', () => {
       targetId: '683a90d4-abab-4f77-9f32-5a44d8288928',
       relationType: 'RELATED',
     };
-    expect((await request(server).put('/cms/content/node-1/domain-links')
-      .send({ links: [link] })).status).toBe(400);
+    expect(
+      (
+        await request(server)
+          .put('/cms/content/node-1/domain-links')
+          .send({ links: [link] })
+      ).status,
+    ).toBe(400);
     expect(cms.replaceDomainLinks).not.toHaveBeenCalled();
     cms.replaceDomainLinks.mockResolvedValue([]);
-    expect((await request(server).put('/cms/content/node-1/domain-links')
-      .send({ expectedVersion: 3, links: [link] })).status).toBe(200);
-    expect(cms.replaceDomainLinks).toHaveBeenCalledWith('node-1', [expect.objectContaining(link)], 'editor', 3);
+    expect(
+      (
+        await request(server)
+          .put('/cms/content/node-1/domain-links')
+          .send({ expectedVersion: 3, links: [link] })
+      ).status,
+    ).toBe(200);
+    expect(cms.replaceDomainLinks).toHaveBeenCalledWith(
+      'node-1',
+      [expect.objectContaining(link)],
+      'editor',
+      3,
+    );
   });
 
   it('denies redirect editing to users without redirect management grant', async () => {
@@ -184,21 +273,24 @@ describe('Phase 16 CMS admin router', () => {
 
   it('requires independent publish permission for blocks', async () => {
     const cms = useCases();
-    const deny = await request(app(cms,'editor',['admin:cms:author']))
-      .post('/cms/blocks/block-1/publish').send({expectedVersion:2});
+    const deny = await request(app(cms, 'editor', ['admin:cms:author']))
+      .post('/cms/blocks/block-1/publish')
+      .send({ expectedVersion: 2 });
     expect(deny.status).toBe(403);
     expect(cms.publishBlock).not.toHaveBeenCalled();
-    cms.publishBlock.mockResolvedValue({id:'block-1',status:'PUBLISHED'});
-    const allow = await request(app(cms,'publisher',['admin:cms:publish']))
-      .post('/cms/blocks/block-1/publish').send({expectedVersion:2});
+    cms.publishBlock.mockResolvedValue({ id: 'block-1', status: 'PUBLISHED' });
+    const allow = await request(app(cms, 'publisher', ['admin:cms:publish']))
+      .post('/cms/blocks/block-1/publish')
+      .send({ expectedVersion: 2 });
     expect(allow.status).toBe(200);
-    expect(cms.publishBlock).toHaveBeenCalledWith('block-1',2,'publisher');
+    expect(cms.publishBlock).toHaveBeenCalledWith('block-1', 2, 'publisher');
   });
 
   it('rejects self-service approval when author has no independent review grant', async () => {
     const cms = useCases();
     const response = await request(app(cms, 'author-1', ['admin:cms:author']))
-      .post('/cms/content/c-1/approve').send({ locale: 'ar', expectedVersion: 1 });
+      .post('/cms/content/c-1/approve')
+      .send({ locale: 'ar', expectedVersion: 1 });
     expect(response.status).toBe(403);
     expect(cms.approveReview).not.toHaveBeenCalled();
   });
@@ -208,7 +300,8 @@ describe('Phase 16 CMS admin router', () => {
     const server = app(cms, 'editor-1');
     const missing = await request(server).patch('/cms/content/c-1').send({ title: 'Changed' });
     expect(missing.status).toBe(400);
-    const alteredSite = await request(server).patch('/cms/content/c-1')
+    const alteredSite = await request(server)
+      .patch('/cms/content/c-1')
       .send({ title: 'Changed', expectedVersion: 2, siteIdentifier: 'other-tenant' });
     expect(alteredSite.status).toBe(400);
     expect(cms.updateContent).not.toHaveBeenCalled();
@@ -217,7 +310,8 @@ describe('Phase 16 CMS admin router', () => {
   it('rejects publishing without expectedVersion', async () => {
     const cms = useCases();
     const response = await request(app(cms, 'checker'))
-      .post('/cms/content/c-1/publish').send({ locale: 'en' });
+      .post('/cms/content/c-1/publish')
+      .send({ locale: 'en' });
     expect(response.status).toBe(400);
     expect(cms.publish).not.toHaveBeenCalled();
   });
@@ -244,7 +338,6 @@ describe('Phase 16 CMS admin router', () => {
     expect(cms.createContent).not.toHaveBeenCalled();
   });
 
-
   it('publishes reviewed navigation without accepting replacement nodes in the checker request', async () => {
     const cms = useCases();
     cms.publishNavigation.mockResolvedValue({ id: 'menu-1', status: 'PUBLISHED' });
@@ -261,12 +354,17 @@ describe('Phase 16 CMS admin router', () => {
     const response = await request(app(cms, 'editor-1'))
       .put('/cms/content/content-1/localized')
       .send({
-        locale: 'ar', localizedSlug: 'news-item', title: 'خبر', body: 'محتوى',
+        locale: 'ar',
+        localizedSlug: 'news-item',
+        title: 'خبر',
+        body: 'محتوى',
         seoMetadata: { title: 'خبر', description: 'وصف', canonicalUrl: 'https://evil.invalid/x' },
       });
     expect(response.status).toBe(200);
     expect(cms.upsertLocalizedContent).toHaveBeenCalledWith(
-      expect.objectContaining({ seoMetadata: expect.not.objectContaining({ canonicalUrl: expect.anything() }) }),
+      expect.objectContaining({
+        seoMetadata: expect.not.objectContaining({ canonicalUrl: expect.anything() }),
+      }),
       'editor-1',
     );
   });

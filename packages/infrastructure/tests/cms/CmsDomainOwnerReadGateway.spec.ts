@@ -24,18 +24,23 @@ describe('P16 canonical owner publication gateway', () => {
     for (const type of Object.values(CmsDomainTargetType)) {
       await expect(gateway.assertPublished(type, 'valid-id')).resolves.toBeUndefined();
     }
-    expect(db.scholarship.findFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({
-        publicationStatus: 'PUBLISHED', verificationStatus: 'VERIFIED',
-        versions: { some: { status: 'PUBLISHED' } },
+    expect(db.scholarship.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          publicationStatus: 'PUBLISHED',
+          verificationStatus: 'VERIFIED',
+          versions: { some: { status: 'PUBLISHED' } },
+        }),
       }),
-    }));
-    expect(db.universityAcademicProgram.findFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({
-        university: { is: { status: 'PUBLISHED' } },
-        major: { is: { status: 'PUBLISHED' } },
+    );
+    expect(db.universityAcademicProgram.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          university: { is: { status: 'PUBLISHED' } },
+          major: { is: { status: 'PUBLISHED' } },
+        }),
       }),
-    }));
+    );
   });
 
   it('rejects missing, draft, archived or privately scoped targets at the owner boundary', async () => {
@@ -49,7 +54,9 @@ describe('P16 canonical owner publication gateway', () => {
       CmsDomainTargetType.SCHOLARSHIP,
       CmsDomainTargetType.REFERENCE_COUNTRY,
     ]) {
-      await expect(gateway.assertPublished(type, 'not-public')).rejects.toThrow('CMS_DOMAIN_OWNER_TARGET_NOT_PUBLIC');
+      await expect(gateway.assertPublished(type, 'not-public')).rejects.toThrow(
+        'CMS_DOMAIN_OWNER_TARGET_NOT_PUBLIC',
+      );
     }
   });
 
@@ -57,32 +64,63 @@ describe('P16 canonical owner publication gateway', () => {
     const db = mockDb();
     db.internationalTestPublicationSnapshot.findFirst.mockResolvedValue(null);
     const gateway = new PrismaCmsDomainOwnerReadGateway(db);
-    await expect(gateway.assertPublished(CmsDomainTargetType.INTERNATIONAL_TEST, 'test-1'))
-      .rejects.toThrow('CMS_DOMAIN_OWNER_TARGET_NOT_PUBLIC');
-    expect(db.internationalTestPublicationSnapshot.findFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: { id: 'v', testId: 'test-1' },
-    }));
+    await expect(
+      gateway.assertPublished(CmsDomainTargetType.INTERNATIONAL_TEST, 'test-1'),
+    ).rejects.toThrow('CMS_DOMAIN_OWNER_TARGET_NOT_PUBLIC');
+    expect(db.internationalTestPublicationSnapshot.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'v', testId: 'test-1' },
+      }),
+    );
   });
 
   it('resolves a published canonical owner slug as a locale-prefixed public navigation path', async () => {
     const db = mockDb();
     const gateway = new PrismaCmsDomainOwnerReadGateway(db);
-    await expect(gateway.resolvePublicPath(CmsDomainTargetType.UNIVERSITY, 'owner-1', 'en'))
-      .resolves.toBe('/en/universities/sample-university');
+    await expect(
+      gateway.resolvePublicPath(CmsDomainTargetType.UNIVERSITY, 'owner-1', 'en'),
+    ).resolves.toBe('/en/universities/sample-university');
     expect(db.university.findUnique).toHaveBeenCalledWith({
-      where: { id: 'owner-1' }, select: { slug: true },
+      where: { id: 'owner-1' },
+      select: { slug: true },
     });
+  });
+
+  it('uses the published study destination owner for country navigation, not a guessed country slug', async () => {
+    const db = {
+      ...mockDb(),
+      studyDestinationProfile: { findFirst: vi.fn().mockResolvedValue({ slug: 'canada' }) },
+    };
+    const gateway = new PrismaCmsDomainOwnerReadGateway(db);
+    await expect(
+      gateway.resolvePublicPath(CmsDomainTargetType.REFERENCE_COUNTRY, 'country-id', 'en'),
+    ).resolves.toBe('/en/countries/canada');
+    expect(db.studyDestinationProfile.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          countryReferenceId: 'country-id',
+          status: 'PUBLISHED',
+          countryReference: { isActive: true },
+        },
+      }),
+    );
+    db.studyDestinationProfile.findFirst.mockResolvedValue(null);
+    await expect(
+      gateway.resolvePublicPath(CmsDomainTargetType.REFERENCE_COUNTRY, 'country-id', 'en'),
+    ).rejects.toThrow('CMS_NAVIGATION_TARGET_NOT_PUBLISHED');
   });
 
   it('rejects owner kinds without a supported public detail route', async () => {
     const gateway = new PrismaCmsDomainOwnerReadGateway(mockDb());
-    await expect(gateway.resolvePublicPath(CmsDomainTargetType.ACADEMIC_PROGRAM, 'owner-1', 'ar'))
-      .rejects.toThrow('CMS_NAVIGATION_DOMAIN_ROUTE_UNSUPPORTED');
+    await expect(
+      gateway.resolvePublicPath(CmsDomainTargetType.ACADEMIC_PROGRAM, 'owner-1', 'ar'),
+    ).rejects.toThrow('CMS_NAVIGATION_DOMAIN_ROUTE_UNSUPPORTED');
   });
 
   it('rejects unknown target types instead of accepting arbitrary UUIDs', async () => {
     const gateway = new PrismaCmsDomainOwnerReadGateway(mockDb());
-    await expect(gateway.assertPublished('OTHER' as CmsDomainTargetType, 'any'))
-      .rejects.toThrow('CMS_DOMAIN_TARGET_TYPE_UNSUPPORTED');
+    await expect(gateway.assertPublished('OTHER' as CmsDomainTargetType, 'any')).rejects.toThrow(
+      'CMS_DOMAIN_TARGET_TYPE_UNSUPPORTED',
+    );
   });
 });

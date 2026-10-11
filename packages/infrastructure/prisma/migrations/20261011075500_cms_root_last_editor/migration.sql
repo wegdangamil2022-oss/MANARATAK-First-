@@ -1,8 +1,16 @@
--- SOURCE ONLY. Never apply automatically. Rollout requires backup, schema validation,
--- reviewer approval, and a gated staging migration before the new API binary.
--- Preserve historical author identity as the least-privilege fallback for
--- existing rows; new mutations record the actual root editor.
+-- SOURCE ONLY. Apply only through separately approved post-28 migration rollout.
+-- Prefer the real effective root editor recorded in the editorial ledger.
+-- Primary-localization title/summary writes also modify root presentation.
+-- Historical author is only the fallback when no qualifying editor is recorded.
 ALTER TABLE "CmsContentNode" ADD COLUMN "lastModifiedBy" TEXT;
-UPDATE "CmsContentNode" SET "lastModifiedBy" = "authorId"
-WHERE "lastModifiedBy" IS NULL;
+UPDATE "CmsContentNode" AS c
+SET "lastModifiedBy" = COALESCE((
+  SELECT l."actorId" FROM "CmsEditorialLedger" AS l
+  WHERE l."contentId" = c."id"
+    AND (l."action" IN ('CONTENT_UPDATED', 'DOMAIN_LINKS_REPLACED')
+      OR (l."action" = 'LOCALIZATION_SAVED' AND l."payload"->>'locale' = c."primaryLocale"))
+  ORDER BY l."occurredAt" DESC, l."id" DESC
+  LIMIT 1
+), c."authorId")
+WHERE c."lastModifiedBy" IS NULL;
 ALTER TABLE "CmsContentNode" ALTER COLUMN "lastModifiedBy" SET NOT NULL;

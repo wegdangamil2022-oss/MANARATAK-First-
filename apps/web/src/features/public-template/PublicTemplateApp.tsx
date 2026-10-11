@@ -32,6 +32,7 @@ import { ImportedCourseDetail } from './components/ImportedCourseDetail';
 import { CareersSearchPage } from './components/CareersSearchPage';
 import { ArticlesSearchPage } from './components/ArticlesSearchPage';
 import { ArticleDetail } from './components/ArticleDetail';
+import { CmsArticleSeo } from './components/CmsArticleSeo';
 import { ServicesLandingPage } from './components/ServicesLandingPage';
 import { ServicesDirectoryPage } from './components/ServicesDirectoryPage';
 import { ServiceDetail } from './components/ServiceDetail';
@@ -1096,6 +1097,8 @@ export default function App() {
             }}
           />
         ) : selectedArticle ? (
+          <>
+          <CmsArticleSeo article={selectedArticle} />
           <ArticleDetail
             article={selectedArticle}
             searchAnchor={detailSearchAnchor}
@@ -1171,6 +1174,7 @@ export default function App() {
               window.scrollTo({ top: 0, behavior: 'instant' });
             }}
           />
+          </>
         ) : selectedScholarship ? (
           <ScholarshipDetailModal
             scholarship={selectedScholarship}
