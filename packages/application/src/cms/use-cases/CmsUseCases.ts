@@ -293,6 +293,10 @@ export class AdminCmsUseCases {
     return result;
   }
 
+  public async searchRedirects(filters: { siteIdentifier: string; locale?: string; q?: string; active?: boolean; page: number; pageSize: number }): Promise<PaginatedCmsResult<CmsRedirectDto>> {
+    return this.repository.searchRedirects(filters);
+  }
+
   public async listRedirects(siteIdentifier?: string, locale?: string): Promise<CmsRedirectDto[]> {
     return this.repository.listRedirects(siteIdentifier, locale);
   }
