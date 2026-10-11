@@ -19,7 +19,7 @@ describe('live CMS sitemap authority', () => {
   });
 
   it('never allows caller-controlled domains, credentials, port/path queries or unsafe CMS paths', () => {
-    for (const origin of ['http://unsafe.example', 'https://evil@valid.example', 'https://valid.example/subpath', 'not-a-url']) {
+    for (const origin of ['http://unsafe.example', 'https://evil@valid.example', 'https://valid.example/subpath', 'https://valid.example:8443', 'not-a-url']) {
       expect(() => buildCmsSitemapXml(paths, origin)).toThrow('CMS_SITEMAP_PUBLIC_URL_INVALID');
     }
     expect(() => buildCmsSitemapXml([
