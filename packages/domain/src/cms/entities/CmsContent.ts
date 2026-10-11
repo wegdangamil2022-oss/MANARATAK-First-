@@ -294,6 +294,8 @@ export interface CmsBlockSchemaDto {
   assetFields: string[];
   status: string;
   createdBy: string;
+  approvedBy?: string | null;
+  approvedAt?: Date | null;
   createdAt: Date;
 }
 
