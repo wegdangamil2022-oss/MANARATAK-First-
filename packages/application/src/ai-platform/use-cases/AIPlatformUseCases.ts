@@ -542,9 +542,19 @@ export class AIExecutionOrchestrator {
       return toExecutionResponse(execution, safety.reasons.join(' '));
     }
 
-    execution = await this.repository.updateExecution(execution.publicId, {
-      status: AIExecutionStatus.RUNNING,
-    });
+    try {
+      execution = await this.repository.updateExecution(execution.publicId, {
+        status: AIExecutionStatus.RUNNING,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'AI_EXECUTION_STATE_CONFLICT') {
+        // Cancellation won before dispatch; no paid provider call occurred.
+        await this.repository.finalizeQuotaReservation(execution.publicId, {
+          tokens: 0, cost: 0, currency: consumer.currency, release: true,
+        });
+      }
+      throw error;
+    }
     await this.repository.appendSpan({
       executionPublicId: execution.publicId,
       traceId: execution.traceId,
