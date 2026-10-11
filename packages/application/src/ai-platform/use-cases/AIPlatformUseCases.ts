@@ -770,7 +770,7 @@ export class AIExecutionOrchestrator {
     consumerKey: string;
     capabilityKey: string;
     dataClassification?: AIDataClassification | null;
-  }): Promise<{ ready: boolean; reason?: string; candidateCount: number; promptVersion?: number }> {
+  }): Promise<{ ready: boolean; canAttempt?: boolean; healthVerified?: boolean; reason?: string; candidateCount: number; promptVersion?: number }> {
     const dataClassification = normalizeDataClassification(request.dataClassification);
     const prompt = await this.repository.resolvePromptForCapability(request.capabilityKey);
     if (!prompt || prompt.status !== 'ACTIVE' || !prompt.activeVersion)
@@ -841,19 +841,23 @@ export class AIExecutionOrchestrator {
       `readiness:${request.consumerKey}:${request.capabilityKey}`,
     );
     let candidateCount = 0;
+    let verifiedCandidates = 0;
     for (const candidate of routed) {
       const adapter = this.providers.get(candidate.provider.key);
       if (!adapter || !isProviderExecutable(adapter.status())) continue;
       candidateCount += 1;
+      if (adapter.status() === 'READY') verifiedCandidates += 1;
     }
-    return candidateCount > 0
-      ? { ready: true, candidateCount, promptVersion: prompt.activeVersion }
-      : {
-          ready: false,
-          reason: 'AI_ROUTE_NOT_EXECUTABLE',
-          candidateCount: 0,
-          promptVersion: prompt.activeVersion,
-        };
+    return {
+      ready: verifiedCandidates > 0,
+      canAttempt: candidateCount > 0,
+      healthVerified: verifiedCandidates > 0,
+      reason: candidateCount === 0
+        ? 'AI_ROUTE_NOT_EXECUTABLE'
+        : verifiedCandidates === 0 ? 'AI_PROVIDER_RUNTIME_UNVERIFIED' : undefined,
+      candidateCount,
+      promptVersion: prompt.activeVersion,
+    };
   }
 
   async executeCapabilityForEvaluation(
