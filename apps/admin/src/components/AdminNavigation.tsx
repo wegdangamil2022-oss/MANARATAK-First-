@@ -80,7 +80,7 @@ const groups: NavigationGroup[] = [
       { to: '/services', labelKey: 'admin_nav_services', icon: Wrench, requiredPermission: 'admin:services:manage' },
       { to: '/finance', labelKey: 'admin_nav_finance', icon: CircleDollarSign, requiredPermission: 'admin:finance:manage' },
       { to: '/careers', labelKey: 'admin_nav_careers', icon: BriefcaseBusiness, requiredPermission: 'admin:careers:manage' },
-      { to: '/ai', labelKey: 'admin_nav_ai', icon: Bot, requiredPermission: 'admin:ai:manage' },
+      { to: '/ai', labelKey: 'admin_nav_ai', icon: Bot, requiredPermission: 'admin:ai:view' },
       { to: '/student-tools', labelKey: 'admin_nav_tools', icon: Activity, requiredPermission: 'admin:student-tools:manage' },
     ],
   },

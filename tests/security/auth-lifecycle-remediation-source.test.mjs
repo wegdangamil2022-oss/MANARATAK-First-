@@ -43,7 +43,7 @@ test('MNT-AUD-0065 compatibility control plane uses the same strict session and 
 
 test('MNT-AUD-0062 AI operator gateway is reachable only through authenticated privileged composition', () => {
   const app = read('apps/api/src/app.ts');
-  assert.match(app, /v1Router\.use\('\/admin\/ai\/operator', requireAdminPermission\('admin:ai:manage'\), lazyRouter\('aiGatewayRouter'\)\)/);
-  assert.match(app, /v1Router\.use\('\/ai', \.\.\.protectControlPlane\('admin:ai:manage', 'aiGatewayRouter'\)\)/);
-  assert.doesNotMatch(app, /v1Router\.use\('\/ai', requireAdminPermission\('admin:ai:manage'\), lazyRouter\('aiGatewayRouter'\)\)/);
+  assert.match(app, /v1Router\.use\('\/admin\/ai\/operator', requireAdminPermission\('admin:ai:execute'\), lazyRouter\('aiGatewayRouter'\)\)/);
+  assert.match(app, /v1Router\.use\('\/ai', \.\.\.protectControlPlane\('admin:ai:execute', 'aiGatewayRouter'\)\)/);
+  assert.doesNotMatch(app, /v1Router\.use\('\/ai', requireAdminPermission\('admin:ai:execute'\), lazyRouter\('aiGatewayRouter'\)\)/);
 });

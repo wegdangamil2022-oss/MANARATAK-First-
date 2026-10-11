@@ -427,6 +427,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/reviews/section-16-migration-recovery.md",
       "decision": "Source-only CMS governance change; no database execution. Restore a verified pre-migration backup including editorial/review/publication history, or apply a reviewed forward fix. Do not drop snapshot, editor, version or approval evidence to reverse the application rollout."
+    },
+    "20261011150000_ai_workflow_execution_plan": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-17-migration-recovery.md",
+      "decision": "Expand-only requester/plan columns; preserve ownership, budgets and immutable bindings through backup restore or reviewed forward fix. No reverse SQL or execution asserted."
     }
   }
 }

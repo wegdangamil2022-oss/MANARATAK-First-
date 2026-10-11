@@ -290,8 +290,8 @@ function AdminLayout() {
                 <Route path="/international-tests/:id" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestDetailPage /></RequireAdminPermission>} />
                 <Route path="/admin/international-tests" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestsAdminPage /></RequireAdminPermission>} />
                 <Route path="/admin/international-tests/:id" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestDetailPage /></RequireAdminPermission>} />
-                <Route path="/ai" element={<RequireAdminPermission permission="admin:ai:manage"><AIGovernancePage /></RequireAdminPermission>} />
-                <Route path="/ai/:section" element={<RequireAdminPermission permission="admin:ai:manage"><AIGovernancePage /></RequireAdminPermission>} />
+                <Route path="/ai" element={<RequireAdminPermission permission="admin:ai:view"><AIGovernancePage /></RequireAdminPermission>} />
+                <Route path="/ai/:section" element={<RequireAdminPermission permission="admin:ai:view"><AIGovernancePage /></RequireAdminPermission>} />
                 <Route path="/ai-governance" element={<Navigate to="/ai" replace />} />
                 <Route path="/student-tools" element={<RequireAdminPermission permission="admin:student-tools:manage"><StudentToolsAdminPage /></RequireAdminPermission>} />
                 <Route path="/student-tools/:toolKey" element={<RequireAdminPermission permission="admin:student-tools:manage"><StudentToolsAdminPage /></RequireAdminPermission>} />

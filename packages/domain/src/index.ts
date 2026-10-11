@@ -3,6 +3,7 @@ export * from './asset-platform';
 export * from './ai-platform/contracts/IAIExecutionRepository';
 export * from './ai-platform/contracts/IAIProviderGateway';
 export * from './ai-platform/contracts/IAIPlatformRepository';
+export * from './ai-platform/contracts/IAIKnowledgeOwnerGateway';
 export * from './ai-platform/entities/AIExecution';
 export * from './ai-platform/entities/AIPlatform';
 export * from './ai-platform/enums/AIExecutionStatus';

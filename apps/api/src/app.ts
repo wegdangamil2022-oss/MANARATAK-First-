@@ -870,9 +870,10 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // Phase 17 privileged operator gateway. Canonical Admin path inherits the
     // strict /admin auth + mutation-audit boundary; the legacy /ai alias keeps
     // compatibility but composes the same explicit control-plane boundary.
-    v1Router.use('/admin/ai/operator', requireAdminPermission('admin:ai:manage'), lazyRouter('aiGatewayRouter'));
-    v1Router.use('/ai', ...protectControlPlane('admin:ai:manage', 'aiGatewayRouter'));
-    v1Router.use('/admin/ai', requireAdminPermission('admin:ai:manage'), lazyRouter('aiAdminRouter'));
+    v1Router.use('/admin/ai/operator', requireAdminPermission('admin:ai:execute'), lazyRouter('aiGatewayRouter'));
+    v1Router.use('/ai', ...protectControlPlane('admin:ai:execute', 'aiGatewayRouter'));
+    // Authentication/audit inherited from /admin; AI Admin enforces granular RBAC per operation.
+    v1Router.use('/admin/ai', lazyRouter('aiAdminRouter'));
 
     // Public monitoring exposes only liveness/readiness health contracts. The richer
     // diagnostic and production-readiness payload is control-plane data and stays

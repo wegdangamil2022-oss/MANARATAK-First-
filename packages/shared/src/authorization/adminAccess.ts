@@ -16,7 +16,7 @@ export const ADMIN_SECTIONS = [
   ['/services', 'admin:services:manage'],
   ['/finance', 'admin:finance:manage'],
   ['/careers', 'admin:careers:manage'],
-  ['/ai', 'admin:ai:manage'],
+  ['/ai', 'admin:ai:view'],
   ['/student-tools', 'admin:student-tools:manage'],
   ['/academic-taxonomy', 'admin:academic-taxonomy:manage'],
   ['/identities', 'admin:identities:manage'],
@@ -28,14 +28,23 @@ export const ADMIN_SECTIONS = [
   ['/settings', 'admin:settings:manage'],
 ] as const;
 
-export function grantsAdminPermission(permissions: readonly string[] = [], required: string): boolean {
-  return permissions.some(granted => granted === '*' || granted === 'admin:*' || granted === required ||
-    (granted.endsWith(':*') && required.startsWith(granted.slice(0, -1))));
+export function grantsAdminPermission(
+  permissions: readonly string[] = [],
+  required: string,
+): boolean {
+  return permissions.some(
+    (granted) =>
+      granted === '*' ||
+      granted === 'admin:*' ||
+      granted === required ||
+      (granted.endsWith(':*') && required.startsWith(granted.slice(0, -1))),
+  );
 }
 
 export function firstAllowedAdminPath(permissions: readonly string[] = []): string | null {
   return (
-    ADMIN_SECTIONS.find(([, permission]) => grantsAdminPermission(permissions, permission))?.[0] ?? null
+    ADMIN_SECTIONS.find(([, permission]) => grantsAdminPermission(permissions, permission))?.[0] ??
+    null
   );
 }
 
@@ -44,12 +53,15 @@ export function isAdministrativePath(path: string): boolean {
 }
 
 export function canAccessAdminPath(path: string, permissions: readonly string[] = []): boolean {
-  if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\') || path.includes('://')) return false;
+  if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\') || path.includes('://'))
+    return false;
   if (!isAdministrativePath(path)) return false;
   const rawPathname = path.split(/[?#]/, 1)[0];
   try {
     if (new URL(path, 'https://manaratak.invalid').pathname !== rawPathname) return false;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
   const pathname = rawPathname.replace(/^\/(?:ar\/|en\/)?admin(?=\/|$)/i, '') || '/';
   if (pathname === '/') return firstAllowedAdminPath(permissions) !== null;
   const match = [...ADMIN_SECTIONS]

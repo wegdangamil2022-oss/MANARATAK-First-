@@ -1,3 +1,4 @@
+import { useAICopy, aiStatusLabel } from './AIGovernanceCopy';
 import {
   FormEvent,
   ReactNode,
@@ -9,7 +10,7 @@ import {
   createContext,
   useId,
 } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   Activity,
   AlertTriangle,
@@ -33,7 +34,10 @@ import {
   UsersRound,
   Workflow,
 } from 'lucide-react';
-import { adminApiClient } from '../api/client';
+import { AIConfigurationOperations, AICostReconciliation } from './AIGovernanceOperations';
+import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useTranslation } from '../i18n/I18nProvider';
 
 type ResourceKey =
   | 'providers'
@@ -93,6 +97,14 @@ interface QueueStatus {
   oldestQueuedAt: string | null;
 }
 interface AsyncJob {
+  execution?: {
+    traceId: string;
+    actualCost?: number | string | null;
+    currency?: string | null;
+    updatedAt: string;
+    providerKey?: string | null;
+    modelKey?: string | null;
+  } | null;
   publicId: string;
   consumerKey: string;
   capabilityKey: string;
@@ -101,7 +113,37 @@ interface AsyncJob {
   maxAttempts: number;
   createdAt: string;
   errorCode?: string | null;
+  executionPublicId?: string | null;
 }
+
+const sectionNamesEn: Record<SectionKey, string> = {
+  overview: 'Overview',
+  executions: 'Executions and trace',
+  providers: 'Providers',
+  models: 'Models and pricing',
+  modelPrices: 'Price history',
+  capabilities: 'Capabilities',
+  routingPolicies: 'Routing and fallbacks',
+  prompts: 'Prompts and versions',
+  playground: 'AI playground',
+  guardrails: 'Safety and guardrails',
+  consumers: 'Consumers and budgets',
+  workflows: 'Workflows',
+  evaluations: 'Evaluations',
+  knowledgeIndexes: 'Knowledge and indexes',
+  knowledgeSources: 'Knowledge sources',
+  incidents: 'Incidents',
+  platformSettings: 'Platform settings',
+};
+const groupNamesEn: Record<string, string> = {
+  المراقبة: 'Monitoring',
+  السجلات: 'Registry',
+  التشغيل: 'Operations',
+  الحوكمة: 'Governance',
+  الأتمتة: 'Automation',
+  الجودة: 'Quality',
+  المعرفة: 'Knowledge',
+};
 
 const sections: Array<{ key: SectionKey; label: string; group: string; icon: ReactNode }> = [
   { key: 'overview', label: 'نظرة عامة', group: 'المراقبة', icon: <Gauge /> },
@@ -124,6 +166,8 @@ const sections: Array<{ key: SectionKey; label: string; group: string; icon: Rea
 ];
 
 export function AIGovernancePage() {
+  const copy = useAICopy();
+  const { language, dir } = useTranslation();
   const [guards, setGuards] = useState<Record<string, { dirty: boolean; busy: boolean }>>({});
   const report = useCallback((key: string, state: { dirty: boolean; busy: boolean } | null) => {
     setGuards((previous) => {
@@ -155,12 +199,12 @@ export function AIGovernancePage() {
         onClickCapture={(event) => {
           const anchor = (event.target as HTMLElement).closest('a[href]');
           if (!anchor || (!busy && !dirty)) return;
-          if (busy || !window.confirm('هناك تعديلات غير محفوظة؛ مغادرة الصفحة؟')) {
+          if (busy || !window.confirm(copy('هناك تعديلات غير محفوظة؛ مغادرة الصفحة؟'))) {
             event.preventDefault();
             event.stopPropagation();
           }
         }}
-        dir="rtl"
+        dir={dir}
         className="mx-auto max-w-[1600px] space-y-6"
       >
         <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
@@ -170,20 +214,31 @@ export function AIGovernancePage() {
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
                 <BrainCircuit className="h-4 w-4 text-[#21A7B4]" />
-                <span>مركز الذكاء الاصطناعي والحوكمة · </span>
+                <span>
+                  {language === 'en'
+                    ? 'Enterprise AI governance ·'
+                    : copy('مركز الذكاء الاصطناعي والحوكمة ·')}
+                </span>
               </div>
               <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
-                مركز منارتك للذكاء الاصطناعي
+                {language === 'en' ? 'MANARATAK AI Center' : copy('مركز منارتك للذكاء الاصطناعي')}
               </h1>
               <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-cyan-50/90">
-                حوكمة مركزية للمزوّدين والنماذج والتوجيه والموجّهات والسلامة والتكلفة والتقييم، دون
-                تخزين أي مفاتيح سرية.
+                {language === 'en'
+                  ? 'Centralized provider, model, routing, prompt, safety, cost and evaluation governance. Provider secrets are not stored here.'
+                  : copy(
+                      'حوكمة مركزية للمزوّدين والنماذج والتوجيه والموجّهات والسلامة والتكلفة والتقييم، دون تخزين أي مفاتيح سرية.',
+                    )}
               </p>
             </div>
             <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-xs leading-6 backdrop-blur-md shadow-xs shrink-0">
-              <div className="font-bold text-cyan-100">وضع التنفيذ الحالي</div>
+              <div className="font-bold text-cyan-100">
+                {language === 'en' ? 'Current execution state' : copy('وضع التنفيذ الحالي')}
+              </div>
               <div className="text-white/80">
-                المزوّد غير المهيأ يظهر NOT_CONFIGURED — ولا يُعد فشلًا
+                {language === 'en'
+                  ? 'An unconfigured provider reports NOT_CONFIGURED, not a failed execution.'
+                  : copy('المزوّد غير المهيأ يظهر NOT_CONFIGURED — ولا يُعد فشلًا')}
               </div>
             </div>
           </div>
@@ -194,7 +249,9 @@ export function AIGovernancePage() {
             <aside className="border-l border-slate-100 bg-slate-50/60 p-4">
               {[...new Set(sections.map((item) => item.group))].map((group) => (
                 <div key={group} className="mb-5">
-                  <div className="mb-2 px-3 text-[11px] font-bold text-[#142B5F]/70">{group}</div>
+                  <div className="mb-2 px-3 text-[11px] font-bold text-[#142B5F]/70">
+                    {language === 'en' ? (groupNamesEn[group] ?? group) : group}
+                  </div>
                   <nav className="space-y-1">
                     {sections
                       .filter((item) => item.group === group)
@@ -213,7 +270,7 @@ export function AIGovernancePage() {
                           >
                             {item.icon}
                           </span>
-                          <span>{item.label}</span>
+                          <span>{language === 'en' ? sectionNamesEn[item.key] : item.label}</span>
                         </Link>
                       ))}
                   </nav>
@@ -222,9 +279,13 @@ export function AIGovernancePage() {
             </aside>
             <main className="min-w-0 bg-white p-5 lg:p-8">
               <div className="mb-6 flex items-center gap-2 text-slate-500">
-                <span className="text-xs font-bold">مركز الذكاء الاصطناعي</span>
+                <span className="text-xs font-bold">
+                  {language === 'en' ? 'AI Center' : copy('مركز الذكاء الاصطناعي')}
+                </span>
                 <ChevronLeft className="h-3.5 w-3.5 text-slate-400" />
-                <h3 className="text-base font-black text-[#142B5F]">{selected.label}</h3>
+                <h3 className="text-base font-black text-[#142B5F]">
+                  {language === 'en' ? sectionNamesEn[selected.key] : selected.label}
+                </h3>
               </div>
               {active === 'overview' ? (
                 <OverviewPanel />
@@ -236,17 +297,17 @@ export function AIGovernancePage() {
                 <WorkflowsPanel />
               ) : active === 'evaluations' ? (
                 <div className="space-y-6">
-                  <RegistryPanel resource="evaluations" title="تعريفات التقييم" />
+                  <RegistryPanel resource="evaluations" title={copy('تعريفات التقييم')} />
                   <GovernedRunPanel kind="evaluations" />
                 </div>
               ) : active === 'knowledgeSources' ? (
                 <div className="space-y-6">
-                  <RegistryPanel resource="knowledgeSources" title="مصادر المعرفة" />
+                  <RegistryPanel resource="knowledgeSources" title={copy('مصادر المعرفة')} />
                   <KnowledgeIndexingPanel />
                 </div>
               ) : active === 'incidents' ? (
                 <div className="space-y-6">
-                  <RegistryPanel resource="incidents" title="الحوادث" />
+                  <RegistryPanel resource="incidents" title={copy('الحوادث')} />
                   <IncidentEventPanel />
                 </div>
               ) : active === 'prompts' ? (
@@ -255,7 +316,7 @@ export function AIGovernancePage() {
                 <RegistryPanel
                   key={active}
                   resource={active as ResourceKey}
-                  title={selected.label}
+                  title={language === 'en' ? sectionNamesEn[selected.key] : selected.label}
                 />
               )}
             </main>
@@ -267,6 +328,7 @@ export function AIGovernancePage() {
 }
 
 function useAIData<T>(path: string | null) {
+  const { language } = useTranslation();
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -286,11 +348,11 @@ function useAIData<T>(path: string | null) {
       const value = await adminApiClient.request<T>(path);
       if (generation === sequence.current) setData(value);
     } catch (cause) {
-      if (generation === sequence.current) setError(errorMessage(cause));
+      if (generation === sequence.current) setError(errorMessage(cause, language));
     } finally {
       if (generation === sequence.current) setLoading(false);
     }
-  }, [path]);
+  }, [path, language]);
   useEffect(() => {
     void load();
     return () => {
@@ -321,28 +383,32 @@ function Pagination({
   size: number;
   onPage: (page: number) => void;
 }) {
+  const copy = useAICopy();
   const pages = Math.max(1, Math.ceil(total / size));
   return (
     <div className="mt-4 flex items-center justify-between text-sm">
       <span>
-        {total} سجل · صفحة {page} من {pages}
+        {total} {copy('سجل · صفحة')}
+        {page} {copy('من')}
+        {pages}
       </span>
       <div className="flex gap-2">
         <button className="action-secondary" disabled={page <= 1} onClick={() => onPage(page - 1)}>
-          السابق
+          {copy('السابق')}
         </button>
         <button
           className="action-secondary"
           disabled={page >= pages}
           onClick={() => onPage(page + 1)}
         >
-          التالي
+          {copy('التالي')}
         </button>
       </div>
     </div>
   );
 }
 function OverviewPanel() {
+  const copy = useAICopy();
   const overview = useAIData<Overview>('/admin/ai/overview');
   const providers = useAIData<{
     data: Array<{ key: string; status: string; capabilities: string[] }>;
@@ -358,9 +424,9 @@ function OverviewPanel() {
           )
           .join(' · ')
       : data?.currency === 'MULTI'
-        ? 'عملات متعددة'
+        ? copy('عملات متعددة')
         : data?.currency === 'N/A'
-          ? 'لا يوجد استهلاك مسجل'
+          ? copy('لا يوجد استهلاك مسجل')
           : data
             ? `${data.costMonthToDate} ${data.currency}`
             : '—';
@@ -374,7 +440,7 @@ function OverviewPanel() {
           void providers.load();
         }}
       >
-        <RefreshCw className="h-4 w-4" /> تحديث
+        <RefreshCw className="h-4 w-4" /> {copy('تحديث')}
       </button>
       {overview.error && <ErrorBanner message={overview.error} />}
       {overview.loading ? (
@@ -383,21 +449,35 @@ function OverviewPanel() {
         data && (
           <>
             <div className="flex justify-between rounded-2xl border p-4">
-              <strong>الحالة التشغيلية العامة</strong>
+              <strong>{copy('الحالة التشغيلية العامة')}</strong>
               <StatusBadge value={data.overallStatus} />
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <Metric label="تنفيذات اليوم" value={data.executionsToday} icon={<PlayCircle />} />
-              <Metric label="النماذج النشطة" value={data.activeModels} icon={<Bot />} />
-              <Metric label="المحجوب اليوم" value={data.blockedToday} icon={<ShieldCheck />} />
-              <Metric label="تكلفة الشهر حسب العملة" value={cost} icon={<CircleDollarSign />} />
+              <Metric
+                label={copy('تنفيذات اليوم')}
+                value={data.executionsToday}
+                icon={<PlayCircle />}
+              />
+              <Metric label={copy('النماذج النشطة')} value={data.activeModels} icon={<Bot />} />
+              <Metric
+                label={copy('المحجوب اليوم')}
+                value={data.blockedToday}
+                icon={<ShieldCheck />}
+              />
+              <Metric
+                label={copy('تكلفة الشهر حسب العملة')}
+                value={cost}
+                icon={<CircleDollarSign />}
+              />
             </div>
           </>
         )
       )}
       <Panel
-        title="جاهزية المزوّدين"
-        subtitle="وجود مفتاح في البيئة يتيح المحاولة؛ READY تتطلب استجابة فعلية. التحديث لا يستدعي خدمة مدفوعة."
+        title={copy('جاهزية المزوّدين')}
+        subtitle={copy(
+          'وجود مفتاح في البيئة يتيح المحاولة؛ READY تتطلب استجابة فعلية. التحديث لا يستدعي خدمة مدفوعة.',
+        )}
       >
         {providers.error && <ErrorBanner message={providers.error} />}
         {providers.loading ? (
@@ -415,12 +495,16 @@ function OverviewPanel() {
             ))}
           </div>
         )}
-        {providers.data?.data.length === 0 && <Empty text="لا توجد محولات مزوّدين مسجلة." />}
+        {providers.data?.data.length === 0 && (
+          <Empty text={copy('لا توجد محولات مزوّدين مسجلة.')} />
+        )}
       </Panel>
     </div>
   );
 }
 function PlaygroundPanel() {
+  const copy = useAICopy();
+  const { hasPermission } = useAdminAuthorization();
   const capabilities = useAIData<{ data: RegistryRecord[] }>(
     '/admin/ai/capabilities?status=ACTIVE',
   );
@@ -429,7 +513,13 @@ function PlaygroundPanel() {
   const [classification, setClassification] = useState('INTERNAL');
   const [running, setRunning] = useState(false);
   const lock = useRef(false);
-  const readiness = useAIData<{ ready: boolean; reason?: string; candidateCount: number }>(
+  const readiness = useAIData<{
+    ready: boolean;
+    canAttempt?: boolean;
+    healthVerified?: boolean;
+    reason?: string;
+    candidateCount: number;
+  }>(
     capabilityKey
       ? `/admin/ai/capabilities/${encodeURIComponent(capabilityKey)}/readiness?dataClassification=${classification}`
       : null,
@@ -441,7 +531,9 @@ function PlaygroundPanel() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (lock.current || !input.trim() || !capabilityKey) return;
-    if (!window.confirm('هذا تشغيل فعلي وقد يستهلك رصيد المزوّد وفق الميزانية المحددة. متابعة؟'))
+    if (
+      !window.confirm(copy('هذا تشغيل فعلي وقد يستهلك رصيد المزوّد وفق الميزانية المحددة. متابعة؟'))
+    )
       return;
     const payload = { capabilityKey, input, locale: 'ar', dataClassification: classification };
     const fingerprint = JSON.stringify(payload);
@@ -460,7 +552,7 @@ function PlaygroundPanel() {
         }),
       );
     } catch (cause) {
-      setError(errorMessage(cause));
+      setError(errorMessage(cause, copy.language));
     } finally {
       lock.current = false;
       setRunning(false);
@@ -469,12 +561,14 @@ function PlaygroundPanel() {
   return (
     <div className="grid gap-5 xl:grid-cols-2">
       <Panel
-        title="مختبر التنفيذ المحكوم"
-        subtitle="التشغيل يدوي ويخضع لسياسة المستهلك admin-ai-playground. لا تُرسل بيانات سرية."
+        title={copy('مختبر التنفيذ المحكوم')}
+        subtitle={copy(
+          'التشغيل يدوي ويخضع لسياسة المستهلك admin-ai-playground. لا تُرسل بيانات سرية.',
+        )}
       >
         <form onSubmit={submit} className="space-y-4">
           <fieldset disabled={running} className="space-y-4">
-            <Field label="القدرة النشطة">
+            <Field label={copy('القدرة النشطة')}>
               <select
                 required
                 value={capabilityKey}
@@ -484,10 +578,10 @@ function PlaygroundPanel() {
                 }}
                 className="input"
               >
-                <option value="">اختر القدرة</option>
+                <option value="">{copy('اختر القدرة')}</option>
                 {capabilities.data?.data.map((record) => (
                   <option key={record.key} value={record.key}>
-                    {displayName(record)}
+                    {displayName(record, copy.language)}
                   </option>
                 ))}
               </select>
@@ -497,11 +591,15 @@ function PlaygroundPanel() {
             {readiness.data && (
               <p className="text-xs">
                 {readiness.data.ready
-                  ? 'السياسة تسمح بالمحاولة؛ نجاح المزوّد يتأكد عند التنفيذ.'
-                  : `القدرة غير جاهزة: ${readiness.data.reason}`}
+                  ? copy(
+                      'القدرة مهيأة وقد نجح مزوّد لها في تنفيذ سابق (لا يثبت جاهزية الإنتاج الشاملة).',
+                    )
+                  : readiness.data.canAttempt
+                    ? copy('المزوّد قابل للمحاولة، لكن لم يتم التحقق من نجاح التنفيذ لهذه القدرة.')
+                    : `القدرة غير قابلة للتنفيذ: ${readiness.data.reason}`}
               </p>
             )}
-            <Field label="تصنيف البيانات">
+            <Field label={copy('تصنيف البيانات')}>
               <select
                 value={classification}
                 onChange={(e) => setClassification(e.target.value)}
@@ -512,7 +610,7 @@ function PlaygroundPanel() {
                 ))}
               </select>
             </Field>
-            <Field label="المدخل">
+            <Field label={copy('المدخل')}>
               <textarea
                 required
                 value={input}
@@ -526,10 +624,11 @@ function PlaygroundPanel() {
           {error && <ErrorBanner message={error} />}
           <button
             disabled={
+              !hasPermission('admin:ai:execute') ||
               running ||
               capabilities.loading ||
               readiness.loading ||
-              readiness.data?.ready !== true ||
+              readiness.data?.canAttempt !== true ||
               !capabilityKey ||
               !input.trim()
             }
@@ -540,26 +639,51 @@ function PlaygroundPanel() {
             ) : (
               <PlayCircle className="h-4 w-4" />
             )}{' '}
-            تشغيل فعلي
+            {copy('تشغيل فعلي')}
           </button>
           <p className="text-xs text-slate-500">
-            إعادة الطلب نفسه تستخدم مفتاحه السابق لتفادي تكرار الاستهلاك. النتائج المسجلة تظهر في
-            سجل التنفيذ.
+            {copy(
+              'إعادة الطلب نفسه تستخدم مفتاحه السابق لتفادي تكرار الاستهلاك. النتائج المسجلة تظهر في سجل التنفيذ.',
+            )}
           </p>
         </form>
       </Panel>
-      <Panel title="النتيجة والتتبّع" subtitle="غياب الإعداد لا يعني وجود نتيجة تجريبية.">
-        {result ? <JsonView value={result} /> : <Empty text="لم يُنفّذ طلب من هذه الصفحة." />}
+      <Panel
+        title={copy('النتيجة والتتبّع')}
+        subtitle={copy('غياب الإعداد لا يعني وجود نتيجة تجريبية.')}
+      >
+        {result ? (
+          <JsonView value={result} />
+        ) : (
+          <Empty text={copy('لم يُنفّذ طلب من هذه الصفحة.')} />
+        )}
       </Panel>
     </div>
   );
 }
 function ExecutionsPanel() {
+  const copy = useAICopy();
+  const [urlParams, setUrlParams] = useSearchParams();
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState('');
-  const [search, setSearch] = useState('');
-  const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState('');
+  const [status, setStatus] = useState(urlParams.get('status') ?? '');
+  const [search, setSearch] = useState(urlParams.get('search') ?? '');
+  const [query, setQuery] = useState(urlParams.get('search') ?? '');
+  const [consumerKey, setConsumerKey] = useState(urlParams.get('consumerKey') ?? '');
+  const [providerKey, setProviderKey] = useState(urlParams.get('providerKey') ?? '');
+  const [purpose, setPurpose] = useState(urlParams.get('purpose') ?? '');
+  const [selected, setSelected] = useState(urlParams.get('execution') ?? '');
+  const chooseExecution = (publicId: string) => {
+    setSelected(publicId);
+    setUrlParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (publicId) next.set('execution', publicId);
+        else next.delete('execution');
+        return next;
+      },
+      { replace: true },
+    );
+  };
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setQuery(search.trim());
@@ -568,11 +692,33 @@ function ExecutionsPanel() {
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
+  useEffect(() => {
+    setUrlParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        for (const [key, value] of Object.entries({
+          status,
+          search: query,
+          consumerKey,
+          providerKey,
+          purpose,
+        })) {
+          if (value) next.set(key, value);
+          else next.delete(key);
+        }
+        return next.toString() === current.toString() ? current : next;
+      },
+      { replace: true },
+    );
+  }, [status, query, consumerKey, providerKey, purpose, setUrlParams]);
   const params = new URLSearchParams({
     page: String(page),
     pageSize: '25',
     ...(status ? { status } : {}),
     ...(query ? { search: query } : {}),
+    ...(consumerKey ? { consumerKey } : {}),
+    ...(providerKey ? { providerKey } : {}),
+    ...(purpose ? { purpose } : {}),
   });
   const list = useAIData<{ data: ExecutionRecord[]; total: number }>(
     `/admin/ai/executions?${params}`,
@@ -584,19 +730,19 @@ function ExecutionsPanel() {
   return (
     <div className="space-y-5">
       <Panel
-        title="التنفيذ والتتبّع"
-        subtitle="البحث بالمعرف أو Trace ID أو المستهلك أو القدرة أو النموذج."
+        title={copy('التنفيذ والتتبّع')}
+        subtitle={copy('البحث بالمعرف أو Trace ID أو المستهلك أو القدرة أو النموذج.')}
       >
         <div className="mb-4 flex flex-wrap gap-3">
           <input
-            aria-label="بحث التنفيذ"
-            placeholder="بحث"
+            aria-label={copy('بحث التنفيذ')}
+            placeholder={copy('بحث')}
             className="input flex-1"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <select
-            aria-label="حالة التنفيذ"
+            aria-label={copy('حالة التنفيذ')}
             className="input max-w-52"
             value={status}
             onChange={(e) => {
@@ -605,7 +751,7 @@ function ExecutionsPanel() {
               setSelected('');
             }}
           >
-            <option value="">كل الحالات</option>
+            <option value="">{copy('كل الحالات')}</option>
             {[
               'RECEIVED',
               'QUEUED',
@@ -622,12 +768,47 @@ function ExecutionsPanel() {
               <option key={value}>{value}</option>
             ))}
           </select>
+          {(
+            [
+              ['consumerKey', copy('المستهلك'), consumerKey, setConsumerKey],
+              ['providerKey', copy('المزوّد'), providerKey, setProviderKey],
+              ['purpose', copy('الغرض'), purpose, setPurpose],
+            ] as const
+          ).map(([key, label, value, setter]) => (
+            <input
+              key={key}
+              aria-label={label}
+              placeholder={label}
+              className="input max-w-48"
+              value={value}
+              onChange={(event) => {
+                setter(event.target.value.trim().slice(0, 160));
+                setPage(1);
+              }}
+            />
+          ))}
+          <button
+            type="button"
+            className="action-secondary"
+            onClick={() => {
+              setStatus('');
+              setSearch('');
+              setQuery('');
+              setConsumerKey('');
+              setProviderKey('');
+              setPurpose('');
+              setPage(1);
+              chooseExecution('');
+            }}
+          >
+            {copy('مسح الفلاتر')}
+          </button>
           <button
             disabled={list.loading}
             onClick={() => void list.load()}
             className="action-secondary"
           >
-            تحديث
+            {copy('تحديث')}
           </button>
         </div>
         {list.error && <ErrorBanner message={list.error} />}
@@ -641,13 +822,13 @@ function ExecutionsPanel() {
                   <thead>
                     <tr className="border-b text-xs text-slate-500">
                       {[
-                        'المعرّف والتفاصيل',
-                        'الحالة',
-                        'الغرض',
-                        'المزوّد / النموذج',
-                        'الأمان',
-                        'الاستهلاك',
-                        'الوقت',
+                        copy('المعرّف والتفاصيل'),
+                        copy('الحالة'),
+                        copy('الغرض'),
+                        copy('المزوّد / النموذج'),
+                        copy('الأمان'),
+                        copy('الاستهلاك'),
+                        copy('الوقت'),
                       ].map((label) => (
                         <th key={label} className="p-3">
                           {label}
@@ -660,7 +841,7 @@ function ExecutionsPanel() {
                       <tr key={item.publicId} className="border-b">
                         <td className="p-3">
                           <button
-                            onClick={() => setSelected(item.publicId)}
+                            onClick={() => chooseExecution(item.publicId)}
                             className="font-mono text-xs text-[#0E7C86] underline"
                           >
                             {item.publicId}
@@ -682,19 +863,20 @@ function ExecutionsPanel() {
                   </tbody>
                 </table>
               </div>
-              {!list.data.data.length && <Empty text="لا توجد نتائج لهذه الفلاتر." />}
+              {!list.data.data.length && <Empty text={copy('لا توجد نتائج لهذه الفلاتر.')} />}
               <Pagination page={page} total={list.data.total} size={25} onPage={setPage} />
             </>
           )
         )}
       </Panel>
       {selected && (
-        <ExecutionDetails key={selected} publicId={selected} onClose={() => setSelected('')} />
+        <ExecutionDetails key={selected} publicId={selected} onClose={() => chooseExecution('')} />
       )}
     </div>
   );
 }
 function ExecutionDetails({ publicId, onClose }: { publicId: string; onClose: () => void }) {
+  const copy = useAICopy();
   const record = useAIData<Record<string, unknown>>(
     `/admin/ai/executions/${encodeURIComponent(publicId)}`,
   );
@@ -703,20 +885,23 @@ function ExecutionDetails({ publicId, onClose }: { publicId: string; onClose: ()
   );
   return (
     <Panel
-      title="تفاصيل التنفيذ ومراحله"
-      subtitle="المعاينات مختصرة ومقيدة بتصنيف البيانات، وليست نسخة كاملة من الإجابة."
+      title={copy('تفاصيل التنفيذ ومراحله')}
+      subtitle={copy('المعاينات مختصرة ومقيدة بتصنيف البيانات، وليست نسخة كاملة من الإجابة.')}
     >
       <button onClick={onClose} className="action-secondary mb-3">
-        إغلاق
+        {copy('إغلاق')}
       </button>
       {record.error && <ErrorBanner message={record.error} />}
       {record.loading ? <Loading /> : record.data && <JsonView value={record.data} />}
       {trace.error && <ErrorBanner message={trace.error} />}
       {trace.data && <JsonView value={trace.data.data} />}
+      <AICostReconciliation publicId={publicId} />
     </Panel>
   );
 }
 function WorkflowsPanel() {
+  const copy = useAICopy();
+  const { hasPermission } = useAdminAuthorization();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
@@ -732,8 +917,8 @@ function WorkflowsPanel() {
       lock.current ||
       !window.confirm(
         action === 'RETRY'
-          ? 'إعادة المهمة قد تستدعي المزوّد وتستهلك رصيداً. متابعة؟'
-          : 'إلغاء المهمة المنتظرة؟',
+          ? copy('إعادة المهمة قد تستدعي المزوّد وتستهلك رصيداً. متابعة؟')
+          : copy('إلغاء المهمة المنتظرة؟'),
       )
     )
       return;
@@ -747,7 +932,7 @@ function WorkflowsPanel() {
       });
       await Promise.all([queue.load(), jobs.load()]);
     } catch (cause) {
-      setError(errorMessage(cause));
+      setError(errorMessage(cause, copy.language));
     } finally {
       lock.current = false;
       setBusy(false);
@@ -755,10 +940,13 @@ function WorkflowsPanel() {
   };
   return (
     <div className="space-y-6">
-      <Panel title="طابور التنفيذ غير المتزامن" subtitle="الحمولة مشفرة ولا تُعرض في لوحة الإدارة.">
+      <Panel
+        title={copy('طابور التنفيذ غير المتزامن')}
+        subtitle={copy('الحمولة مشفرة ولا تُعرض في لوحة الإدارة.')}
+      >
         <div className="mb-4 flex gap-3">
           <select
-            aria-label="حالة المهمة"
+            aria-label={copy('حالة المهمة')}
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
@@ -767,7 +955,7 @@ function WorkflowsPanel() {
             disabled={busy}
             className="input"
           >
-            <option value="">كل الحالات</option>
+            <option value="">{copy('كل الحالات')}</option>
             {[
               'QUEUED',
               'RUNNING',
@@ -788,7 +976,7 @@ function WorkflowsPanel() {
               void jobs.load();
             }}
           >
-            تحديث
+            {copy('تحديث')}
           </button>
         </div>
         {error && <ErrorBanner message={error} />}
@@ -796,10 +984,10 @@ function WorkflowsPanel() {
         {queue.data && (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {[
-              ['بانتظار التنفيذ', queue.data.queued],
-              ['قيد التنفيذ', queue.data.running],
-              ['إعادة المحاولة', queue.data.retrying],
-              ['فشل', queue.data.failed],
+              [copy('بانتظار التنفيذ'), queue.data.queued],
+              [copy('قيد التنفيذ'), queue.data.running],
+              [copy('إعادة المحاولة'), queue.data.retrying],
+              [copy('فشل'), queue.data.failed],
               ['Dead letter', queue.data.deadLetter],
             ].map(([label, value]) => (
               <Metric key={label} label={String(label)} value={value} icon={<Workflow />} />
@@ -817,11 +1005,12 @@ function WorkflowsPanel() {
                   <thead>
                     <tr className="border-b text-right text-xs">
                       {[
-                        'المهمة',
-                        'المستهلك / القدرة',
-                        'الحالة',
-                        'المحاولات / الخطأ',
-                        'الإجراء',
+                        copy('المهمة'),
+                        copy('المستهلك / القدرة'),
+                        copy('الحالة'),
+                        copy('المحاولات / الخطأ'),
+                        copy('التكلفة'),
+                        copy('الإجراء'),
                       ].map((label) => (
                         <th className="p-2" key={label}>
                           {label}
@@ -832,7 +1021,19 @@ function WorkflowsPanel() {
                   <tbody>
                     {jobs.data.data.map((job) => (
                       <tr key={job.publicId} className="border-b">
-                        <td className="p-2 font-mono text-xs">{job.publicId}</td>
+                        <td className="p-2 font-mono text-xs">
+                          <div>{job.publicId}</div>
+                          {job.executionPublicId ? (
+                            <Link
+                              className="mt-1 block text-[#0E7C86] underline"
+                              to={`/ai/executions?execution=${encodeURIComponent(job.executionPublicId)}&consumerKey=${encodeURIComponent(job.consumerKey)}`}
+                            >
+                              {copy('عرض التنفيذ والتتبّع')}
+                            </Link>
+                          ) : (
+                            <span className="text-slate-500">{copy('لم يبدأ تنفيذ مرتبط')}</span>
+                          )}
+                        </td>
                         <td>
                           {job.consumerKey}
                           <div className="text-xs">{job.capabilityKey}</div>
@@ -845,21 +1046,37 @@ function WorkflowsPanel() {
                           <div className="text-xs">{job.errorCode}</div>
                         </td>
                         <td>
+                          {job.execution?.actualCost != null && job.execution.currency
+                            ? `${job.execution.actualCost} ${job.execution.currency}`
+                            : copy('غير معروف')}
+                          {job.execution && (
+                            <div className="text-xs" dir="ltr">
+                              {job.execution.providerKey} / {job.execution.modelKey}
+                              <div>{job.execution.traceId}</div>
+                              <time dateTime={job.execution.updatedAt}>
+                                {new Date(job.execution.updatedAt).toLocaleString(
+                                  copy.language === 'en' ? 'en' : 'ar',
+                                )}
+                              </time>
+                            </div>
+                          )}
+                        </td>
+                        <td>
                           {['FAILED', 'DEAD_LETTER'].includes(job.status) ? (
                             <button
-                              disabled={busy}
+                              disabled={busy || !hasPermission('admin:ai:queue:operate')}
                               onClick={() => void operate(job, 'RETRY')}
                               className="action-secondary"
                             >
-                              إعادة
+                              {copy('إعادة')}
                             </button>
                           ) : ['QUEUED', 'RETRYING'].includes(job.status) ? (
                             <button
-                              disabled={busy}
+                              disabled={busy || !hasPermission('admin:ai:queue:operate')}
                               onClick={() => void operate(job, 'CANCEL')}
                               className="action-secondary"
                             >
-                              إلغاء
+                              {copy('إلغاء')}
                             </button>
                           ) : (
                             '—'
@@ -870,18 +1087,20 @@ function WorkflowsPanel() {
                   </tbody>
                 </table>
               </div>
-              {!jobs.data.data.length && <Empty text="لا توجد مهام لهذه الحالة." />}
+              {!jobs.data.data.length && <Empty text={copy('لا توجد مهام لهذه الحالة.')} />}
               <Pagination page={page} total={jobs.data.total} size={25} onPage={setPage} />
             </>
           )
         )}
       </Panel>
-      <RegistryPanel resource="workflows" title="تعريفات سير العمل" />
+      <RegistryPanel resource="workflows" title={copy('تعريفات سير العمل')} />
       <GovernedRunPanel kind="workflows" />
     </div>
   );
 }
 function PromptsPanel() {
+  const copy = useAICopy();
+  const { hasPermission } = useAdminAuthorization();
   const [promptKey, setPromptKey] = useState('');
   const [version, setVersion] = useState(1);
   const [template, setTemplate] = useState('');
@@ -899,20 +1118,20 @@ function PromptsPanel() {
       !Number.isSafeInteger(version) ||
       version < 1
     ) {
-      setError('أدخل مفتاحاً صالحاً ورقم إصدار صحيحاً.');
+      setError(copy('أدخل مفتاحاً صالحاً ورقم إصدار صحيحاً.'));
       return;
     }
     if (
       ['approve', 'deploy', 'rollback'].includes(operation) &&
       !window.confirm(
-        `تأكيد ${operation === 'approve' ? 'اعتماد' : operation === 'rollback' ? 'استعادة' : 'نشر'} الإصدار ${version}؟`,
+        `تأكيد ${operation === 'approve' ? copy('اعتماد') : operation === 'rollback' ? copy('استعادة') : copy('نشر')} الإصدار ${version}؟`,
       )
     )
       return;
     if (
       operation !== 'create' &&
       template !== snapshot &&
-      !window.confirm('هناك قالب غير محفوظ؛ تجاهل تعديلاته ومتابعة قراءة الإصدار المحفوظ؟')
+      !window.confirm(copy('هناك قالب غير محفوظ؛ تجاهل تعديلاته ومتابعة قراءة الإصدار المحفوظ؟'))
     )
       return;
     lock.current = true;
@@ -950,16 +1169,16 @@ function PromptsPanel() {
       if (operation === 'deploy' || operation === 'rollback') {
         const current = await adminApiClient.request<RegistryRecord>(path);
         if (current.activeVersion !== version || current.status !== 'ACTIVE')
-          throw new Error('القراءة اللاحقة لا تؤكد نشر الإصدار المطلوب.');
+          throw new Error(copy('القراءة اللاحقة لا تؤكد نشر الإصدار المطلوب.'));
       }
       setMessage(
         operation === 'load'
-          ? 'تم تحميل الإصدار المحفوظ.'
-          : 'نجحت العملية وأُعيدت قراءة الإصدار من الخادم.',
+          ? copy('تم تحميل الإصدار المحفوظ.')
+          : copy('نجحت العملية وأُعيدت قراءة الإصدار من الخادم.'),
       );
     } catch (cause) {
       setError(
-        `${written ? 'نجحت استجابة الكتابة، لكن تعذر تأكيد القراءة اللاحقة. حمّل الإصدار قبل إعادة العملية. ' : ''}${errorMessage(cause)}`,
+        `${written ? copy('نجحت استجابة الكتابة، لكن تعذر تأكيد القراءة اللاحقة. حمّل الإصدار قبل إعادة العملية.') : ''}${errorMessage(cause, copy.language)}`,
       );
     } finally {
       lock.current = false;
@@ -967,7 +1186,7 @@ function PromptsPanel() {
     }
   };
   const changeIdentity = (change: () => void) => {
-    if (busy || (template !== snapshot && !window.confirm('تجاهل تعديل القالب غير المحفوظ؟')))
+    if (busy || (template !== snapshot && !window.confirm(copy('تجاهل تعديل القالب غير المحفوظ؟'))))
       return;
     change();
     setTemplate('');
@@ -978,14 +1197,16 @@ function PromptsPanel() {
   };
   return (
     <div className="space-y-6">
-      <RegistryPanel resource="prompts" title="سجل الموجّهات" />
+      <RegistryPanel resource="prompts" title={copy('سجل الموجّهات')} />
       <Panel
-        title="دورة حياة إصدار الموجّه"
-        subtitle="حمّل الإصدار لمراجعته قبل الاعتماد. النشر والاستعادة يخضعان لبوابات التقييم."
+        title={copy('دورة حياة إصدار الموجّه')}
+        subtitle={copy(
+          'حمّل الإصدار لمراجعته قبل الاعتماد. النشر والاستعادة يخضعان لبوابات التقييم.',
+        )}
       >
         <fieldset disabled={busy} className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-[1fr_140px]">
-            <Field label="مفتاح الموجّه">
+            <Field label={copy('مفتاح الموجّه')}>
               <input
                 value={promptKey}
                 onChange={(e) => changeIdentity(() => setPromptKey(e.target.value))}
@@ -993,7 +1214,7 @@ function PromptsPanel() {
                 dir="ltr"
               />
             </Field>
-            <Field label="رقم الإصدار">
+            <Field label={copy('رقم الإصدار')}>
               <input
                 type="number"
                 min="1"
@@ -1003,7 +1224,7 @@ function PromptsPanel() {
               />
             </Field>
           </div>
-          <Field label="قالب النظام (مدخل الطالب يُرسل منفصلاً)">
+          <Field label={copy('قالب النظام (مدخل الطالب يُرسل منفصلاً)')}>
             <textarea
               value={template}
               onChange={(e) => setTemplate(e.target.value)}
@@ -1018,17 +1239,23 @@ function PromptsPanel() {
               onClick={() => void action('load')}
               className="action-secondary"
             >
-              تحميل الإصدار
-            </button>
-            <button
-              disabled={!promptKey || !template.trim() || record !== null}
-              onClick={() => void action('create')}
-              className="action-secondary"
-            >
-              إنشاء إصدار REVIEW
+              {copy('تحميل الإصدار')}
             </button>
             <button
               disabled={
+                !hasPermission('admin:ai:prompt:author') ||
+                !promptKey ||
+                !template.trim() ||
+                record !== null
+              }
+              onClick={() => void action('create')}
+              className="action-secondary"
+            >
+              {copy('إنشاء إصدار REVIEW')}
+            </button>
+            <button
+              disabled={
+                !hasPermission('admin:ai:prompt:review') ||
                 !record ||
                 !['DRAFT', 'REVIEW'].includes(String(record.status)) ||
                 template !== snapshot
@@ -1036,21 +1263,29 @@ function PromptsPanel() {
               onClick={() => void action('approve')}
               className="action-secondary"
             >
-              اعتماد الإصدار المحفوظ
+              {copy('اعتماد الإصدار المحفوظ')}
             </button>
             <button
-              disabled={record?.status !== 'APPROVED' || template !== snapshot}
+              disabled={
+                !hasPermission('admin:ai:deploy') ||
+                record?.status !== 'APPROVED' ||
+                template !== snapshot
+              }
               onClick={() => void action('deploy')}
               className="action-primary"
             >
-              نشر الإصدار
+              {copy('نشر الإصدار')}
             </button>
             <button
-              disabled={record?.status !== 'APPROVED' || template !== snapshot}
+              disabled={
+                !hasPermission('admin:ai:deploy') ||
+                record?.status !== 'APPROVED' ||
+                template !== snapshot
+              }
               onClick={() => void action('rollback')}
               className="action-secondary"
             >
-              استعادة هذا الإصدار
+              {copy('استعادة هذا الإصدار')}
             </button>
           </div>
         </fieldset>
@@ -1067,18 +1302,20 @@ function PromptsPanel() {
   );
 }
 function KnowledgeIndexingPanel() {
+  const copy = useAICopy();
   const indexes = useAIData<{ data: RegistryRecord[] }>('/admin/ai/knowledgeIndexes?status=ACTIVE');
   const [key, setKey] = useState('');
   const [sourceType, setSourceType] = useState('');
   const [reference, setReference] = useState('');
   const [sourceVersion, setSourceVersion] = useState('');
-  const [content, setContent] = useState('');
+  const { hasPermission } = useAdminAuthorization();
+  const [locale, setLocale] = useState('ar');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const lock = useRef(false);
   const intent = useRef<{ body: string; key: string } | null>(null);
-  useGovernanceGuard(!!content, busy);
+  useGovernanceGuard(!!reference, busy);
   const index = indexes.data?.data.find((item) => item.key === key);
   const domains = Array.isArray(index?.sourceDomains)
     ? index.sourceDomains.filter((item): item is string => typeof item === 'string')
@@ -1086,9 +1323,12 @@ function KnowledgeIndexingPanel() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (
+      !hasPermission('admin:ai:index:approve') ||
       lock.current ||
       !window.confirm(
-        'فهرسة فعلية قد تستهلك رصيد المزوّد. المحتوى المدخل يدوياً لا يُعتمد كمصدر رسمي تلقائياً. متابعة؟',
+        copy(
+          'فهرسة فعلية قد تستهلك رصيد المزوّد. المحتوى المدخل يدوياً لا يُعتمد كمصدر رسمي تلقائياً. متابعة؟',
+        ),
       )
     )
       return;
@@ -1100,8 +1340,7 @@ function KnowledgeIndexingPanel() {
         sourceType,
         sourceReferenceId: reference.trim(),
         ...(sourceVersion.trim() ? { sourceVersion: sourceVersion.trim() } : {}),
-        locale: 'ar',
-        content,
+        locale,
       });
       if (intent.current?.body !== body) intent.current = { body, key: crypto.randomUUID() };
       const value = await adminApiClient.request<Record<string, unknown>>(
@@ -1109,9 +1348,8 @@ function KnowledgeIndexingPanel() {
         { method: 'POST', idempotencyKey: intent.current.key, body },
       );
       setResult(value);
-      if (value.status === 'COMPLETED') setContent('');
     } catch (cause) {
-      setError(errorMessage(cause));
+      setError(errorMessage(cause, copy.language));
     } finally {
       lock.current = false;
       setBusy(false);
@@ -1119,12 +1357,17 @@ function KnowledgeIndexingPanel() {
   };
   return (
     <Panel
-      title="فهرسة مصدر معرفة"
-      subtitle="تتطلب قدرة knowledge.indexing من نوع EMBEDDINGS ومستهلك knowledge-indexing نشطاً بميزانية، ومزوّداً ونموذجاً معتمدين."
+      title={copy('فهرسة مصدر معرفة')}
+      subtitle={copy('يقرأ النظام النسخة المنشورة من مالك المحتوى؛ لا يُقبل نص يدوي أو مسودة.')}
     >
       <form onSubmit={submit} className="space-y-4">
-        <fieldset disabled={busy} className="space-y-4">
-          <Field label="الفهرس النشط">
+        <p role="status" className="rounded-lg border border-amber-200 p-3 text-sm text-amber-900">
+          {copy(
+            'يدعم هذا المسار صفحات CMS المنشورة فقط. تُعاد مراجعة المصدر عند القراءة، وتُشفّر المقاطع لمدة يوم واحد.',
+          )}
+        </p>
+        <fieldset disabled={busy || !hasPermission('admin:ai:index:approve')} className="space-y-4">
+          <Field label={copy('الفهرس النشط')}>
             <select
               required
               value={key}
@@ -1135,29 +1378,31 @@ function KnowledgeIndexingPanel() {
               }}
               className="input"
             >
-              <option value="">اختر الفهرس</option>
+              <option value="">{copy('اختر الفهرس')}</option>
               {indexes.data?.data.map((item) => (
                 <option key={item.key} value={item.key}>
-                  {displayName(item)}
+                  {displayName(item, copy.language)}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="نطاق المصدر المسموح">
+          <Field label={copy('نطاق المصدر المسموح')}>
             <select
               required
               value={sourceType}
               onChange={(e) => setSourceType(e.target.value)}
               className="input"
             >
-              <option value="">اختر النطاق</option>
-              {domains.map((domain) => (
-                <option key={domain}>{domain}</option>
-              ))}
+              <option value="">{copy('اختر النطاق')}</option>
+              {domains
+                .filter((domain) => domain === 'CMS')
+                .map((domain) => (
+                  <option key={domain}>{domain}</option>
+                ))}
             </select>
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="معرف المصدر">
+            <Field label={copy('معرف المصدر')}>
               <input
                 required
                 maxLength={500}
@@ -1167,7 +1412,7 @@ function KnowledgeIndexingPanel() {
                 dir="ltr"
               />
             </Field>
-            <Field label="إصدار المصدر الحقيقي (اختياري)">
+            <Field label={copy('إصدار المصدر الحقيقي (اختياري)')}>
               <input
                 maxLength={200}
                 value={sourceVersion}
@@ -1177,24 +1422,30 @@ function KnowledgeIndexingPanel() {
               />
             </Field>
           </div>
-          <Field label="المحتوى المراد فهرسته">
-            <textarea
-              required
-              maxLength={2000000}
-              rows={8}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+          <Field label={copy('اللغة')}>
+            <select
               className="input"
-            />
+              value={locale}
+              onChange={(event) => setLocale(event.target.value)}
+            >
+              <option value="ar">{copy('العربية')}</option>
+              <option value="en">English</option>
+            </select>
           </Field>
         </fieldset>
         {indexes.error && <ErrorBanner message={indexes.error} />}
         {error && <ErrorBanner message={error} />}
         <button
-          disabled={busy || !key || !sourceType || !reference.trim() || !content.trim()}
+          disabled={
+            busy ||
+            !hasPermission('admin:ai:index:approve') ||
+            !key ||
+            !sourceType ||
+            !reference.trim()
+          }
           className="action-primary"
         >
-          فهرسة عبر السياسة والميزانية
+          {copy('فهرسة عبر السياسة والميزانية')}
         </button>
         {result && <JsonView value={result} />}
       </form>
@@ -1202,6 +1453,8 @@ function KnowledgeIndexingPanel() {
   );
 }
 function IncidentEventPanel() {
+  const copy = useAICopy();
+  const { hasPermission } = useAdminAuthorization();
   const incidents = useAIData<{ data: RegistryRecord[] }>('/admin/ai/incidents');
   const [key, setKey] = useState('');
   const [action, setAction] = useState('NOTE_ADDED');
@@ -1210,22 +1463,28 @@ function IncidentEventPanel() {
   const [error, setError] = useState('');
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const lock = useRef(false);
+  const intent = useRef<{ payload: string; key: string } | null>(null);
   useGovernanceGuard(!!note, busy);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (lock.current) return;
+    if (!hasPermission('admin:ai:safety:manage') || lock.current) return;
     lock.current = true;
     setBusy(true);
     setError('');
     try {
+      const payload = JSON.stringify({ action, note });
+      if (intent.current?.payload !== payload)
+        intent.current = { payload, key: createAdminIdempotencyKey() };
       await adminApiClient.request(`/admin/ai/incidents/${encodeURIComponent(key)}/events`, {
         method: 'POST',
-        body: JSON.stringify({ action, note }),
+        headers: { 'Idempotency-Key': intent.current.key },
+        body: payload,
       });
+      intent.current = null;
       setNote('');
       setResult(await adminApiClient.request(`/admin/ai/incidents/${encodeURIComponent(key)}`));
     } catch (cause) {
-      setError(errorMessage(cause));
+      setError(errorMessage(cause, copy.language));
     } finally {
       lock.current = false;
       setBusy(false);
@@ -1233,12 +1492,14 @@ function IncidentEventPanel() {
   };
   return (
     <Panel
-      title="سجل متابعة الحادثة"
-      subtitle="تضاف الملاحظات كأحداث محفوظة مع التدقيق؛ لا يُعاد كتابة التاريخ من محرر الإعدادات."
+      title={copy('سجل متابعة الحادثة')}
+      subtitle={copy(
+        'تضاف الملاحظات كأحداث محفوظة مع التدقيق؛ لا يُعاد كتابة التاريخ من محرر الإعدادات.',
+      )}
     >
       <form onSubmit={submit} className="space-y-4">
         <fieldset disabled={busy} className="space-y-4">
-          <Field label="الحادثة">
+          <Field label={copy('الحادثة')}>
             <select
               required
               className="input"
@@ -1248,15 +1509,15 @@ function IncidentEventPanel() {
                 setResult(null);
               }}
             >
-              <option value="">اختر الحادثة</option>
+              <option value="">{copy('اختر الحادثة')}</option>
               {incidents.data?.data.map((item) => (
                 <option key={item.key} value={item.key}>
-                  {displayName(item)}
+                  {displayName(item, copy.language)}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="نوع المتابعة">
+          <Field label={copy('نوع المتابعة')}>
             <select className="input" value={action} onChange={(e) => setAction(e.target.value)}>
               {[
                 'NOTE_ADDED',
@@ -1264,11 +1525,13 @@ function IncidentEventPanel() {
                 'MITIGATION_RECORDED',
                 'RESOLUTION_RECORDED',
               ].map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {aiStatusLabel(item, copy.language)}
+                </option>
               ))}
             </select>
           </Field>
-          <Field label="الملاحظة">
+          <Field label={copy('الملاحظة')}>
             <textarea
               required
               maxLength={4000}
@@ -1281,8 +1544,11 @@ function IncidentEventPanel() {
         </fieldset>
         {incidents.error && <ErrorBanner message={incidents.error} />}
         {error && <ErrorBanner message={error} />}
-        <button disabled={busy || !key || !note.trim()} className="action-primary">
-          حفظ المتابعة
+        <button
+          disabled={!hasPermission('admin:ai:safety:manage') || busy || !key || !note.trim()}
+          className="action-primary"
+        >
+          {copy('حفظ المتابعة')}
         </button>
         {result && <JsonView value={result} />}
       </form>
@@ -1291,9 +1557,12 @@ function IncidentEventPanel() {
 }
 
 function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
+  const copy = useAICopy();
+  const { hasPermission } = useAdminAuthorization();
   const definitions = useAIData<{ data: RegistryRecord[] }>(`/admin/ai/${kind}?status=ACTIVE`);
   const [key, setKey] = useState('');
   const [publicId, setPublicId] = useState('');
+  const [processingConsent, setProcessingConsent] = useState(false);
   const [argumentsJson, setArgumentsJson] = useState('{}');
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [busy, setBusy] = useState(false);
@@ -1308,11 +1577,14 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
     if (
       operation === 'execute' &&
       !window.confirm(
-        'تشغيل فعلي قد يُرسل عدة طلبات مدفوعة للمزوّد وفق السياسات والميزانيات. متابعة؟',
+        copy('تشغيل فعلي قد يُرسل عدة طلبات مدفوعة للمزوّد وفق السياسات والميزانيات. متابعة؟'),
       )
     )
       return;
-    if (operation === 'approve' && !window.confirm('اعتماد نتائج التقييم المحفوظة بعد مراجعتها؟'))
+    if (
+      operation === 'approve' &&
+      !window.confirm(copy('اعتماد نتائج التقييم المحفوظة بعد مراجعتها؟'))
+    )
       return;
     lock.current = true;
     setBusy(true);
@@ -1323,16 +1595,20 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
       if (operation !== 'load') {
         const args: unknown = JSON.parse(argumentsJson);
         if (!args || typeof args !== 'object' || Array.isArray(args))
-          throw new Error('المعاملات يجب أن تكون كائن JSON.');
-        if (operation === 'start' && !key) throw new Error('اختر تعريفاً نشطاً.');
+          throw new Error(copy('المعاملات يجب أن تكون كائن JSON.'));
+        if (operation === 'start' && !key) throw new Error(copy('اختر تعريفاً نشطاً.'));
         if (operation !== 'start' && !/^[a-zA-Z0-9_.:-]{1,160}$/.test(id))
-          throw new Error('أدخل معرف تشغيل صالحاً.');
+          throw new Error(copy('أدخل معرف تشغيل صالحاً.'));
         const path =
           operation === 'start'
             ? `/admin/ai/${kind}/${encodeURIComponent(key)}/runs`
             : `/admin/ai/${runPath}/${encodeURIComponent(id)}/${operation}`;
         const body = JSON.stringify(
-          operation === 'start' || (kind === 'workflows' && operation === 'execute') ? args : {},
+          operation === 'start' || (kind === 'workflows' && operation === 'execute')
+            ? kind === 'workflows'
+              ? { ...(args as Record<string, unknown>), processingConsent }
+              : args
+            : {},
         );
         const signature = `${path}:${body}`;
         if (intent.current?.signature !== signature)
@@ -1347,7 +1623,7 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
         setPublicId(id);
         setPendingRead(true);
       }
-      if (!/^[a-zA-Z0-9_.:-]{1,160}$/.test(id)) throw new Error('أدخل معرف تشغيل صالحاً.');
+      if (!/^[a-zA-Z0-9_.:-]{1,160}$/.test(id)) throw new Error(copy('أدخل معرف تشغيل صالحاً.'));
       const saved = await adminApiClient.request<Record<string, unknown>>(
         `/admin/ai/${runPath}/${encodeURIComponent(id)}`,
       );
@@ -1355,7 +1631,7 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
       setPendingRead(false);
     } catch (cause) {
       setError(
-        `${written ? 'وصلت استجابة العملية؛ تعذرت القراءة اللاحقة. حمّل الحالة قبل إعادة التنفيذ. ' : ''}${errorMessage(cause)}`,
+        `${written ? copy('وصلت استجابة العملية؛ تعذرت القراءة اللاحقة. حمّل الحالة قبل إعادة التنفيذ.') : ''}${errorMessage(cause, copy.language)}`,
       );
     } finally {
       lock.current = false;
@@ -1364,11 +1640,11 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
   };
   return (
     <Panel
-      title={kind === 'workflows' ? 'تشغيل سير العمل' : 'تشغيل التقييم ومراجعة النتائج'}
-      subtitle="إنشاء سجل التشغيل لا ينفّذه. التنفيذ خطوة يدوية مستقلة ومقيدة بالميزانيات."
+      title={kind === 'workflows' ? copy('تشغيل سير العمل') : copy('تشغيل التقييم ومراجعة النتائج')}
+      subtitle={copy('إنشاء سجل التشغيل لا ينفّذه. التنفيذ خطوة يدوية مستقلة ومقيدة بالميزانيات.')}
     >
       <fieldset disabled={busy} className="space-y-4">
-        <Field label="التعريف النشط">
+        <Field label={copy('التعريف النشط')}>
           <select
             className="input"
             value={key}
@@ -1380,10 +1656,10 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
               intent.current = null;
             }}
           >
-            <option value="">اختر التعريف</option>
+            <option value="">{copy('اختر التعريف')}</option>
             {definitions.data?.data.map((record) => (
               <option key={record.key} value={record.key}>
-                {displayName(record)}
+                {displayName(record, copy.language)}
               </option>
             ))}
           </select>
@@ -1392,8 +1668,8 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
         <Field
           label={
             kind === 'workflows'
-              ? 'مدخل سير العمل (JSON؛ أعد استخدامه نفسه عند الاستئناف)'
-              : 'خيارات التقييم (JSON؛ مثل promptVersion للإصدار المستهدف)'
+              ? copy('مدخل سير العمل (JSON؛ أعد استخدامه نفسه عند الاستئناف)')
+              : copy('خيارات التقييم (JSON؛ مثل promptVersion للإصدار المستهدف)')
           }
         >
           <textarea
@@ -1404,7 +1680,7 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
             onChange={(e) => setArgumentsJson(e.target.value)}
           />
         </Field>
-        <Field label="معرف سجل التشغيل">
+        <Field label={copy('معرف سجل التشغيل')}>
           <input
             className="input"
             dir="ltr"
@@ -1416,23 +1692,41 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
             }}
           />
         </Field>
+        {kind === 'workflows' && (
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={processingConsent}
+              onChange={(event) => setProcessingConsent(event.target.checked)}
+            />
+            {copy.language === 'en'
+              ? 'I authorize processing this input for this workflow and have permission to provide it.'
+              : 'أوافق على معالجة هذا المدخل لغرض سير العمل وأملك صلاحية تقديمه.'}
+          </label>
+        )}
         <div className="flex flex-wrap gap-2">
           <button
-            disabled={!key || pendingRead}
+            disabled={
+              !hasPermission('admin:ai:execute') ||
+              !key ||
+              pendingRead ||
+              (kind === 'workflows' && !processingConsent)
+            }
             className="action-secondary"
             onClick={() => void act('start')}
           >
-            إنشاء سجل تشغيل
+            {copy('إنشاء سجل تشغيل')}
           </button>
           <button
             disabled={!publicId.trim()}
             className="action-secondary"
             onClick={() => void act('load')}
           >
-            تحميل الحالة
+            {copy('تحميل الحالة')}
           </button>
           <button
             disabled={
+              !hasPermission('admin:ai:execute') ||
               pendingRead ||
               !result ||
               !['QUEUED', ...(kind === 'workflows' ? ['FAILED'] : [])].includes(
@@ -1442,15 +1736,20 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
             className="action-primary"
             onClick={() => void act('execute')}
           >
-            تنفيذ فعلي
+            {copy('تنفيذ فعلي')}
           </button>
           {kind === 'evaluations' && (
             <button
-              disabled={pendingRead || result?.status !== 'COMPLETED' || !!result.approvedBy}
+              disabled={
+                !hasPermission('admin:ai:prompt:review') ||
+                pendingRead ||
+                result?.status !== 'COMPLETED' ||
+                !!result.approvedBy
+              }
               className="action-secondary"
               onClick={() => void act('approve')}
             >
-              اعتماد النتائج
+              {copy('اعتماد النتائج')}
             </button>
           )}
         </div>
@@ -1581,7 +1880,18 @@ function registryDefaults(resource: ResourceKey): RegistryRecord {
       return shared;
   }
 }
+function aiRegistryWritePermission(resource: ResourceKey): string {
+  if (['guardrails', 'platformSettings', 'incidents'].includes(resource))
+    return 'admin:ai:safety:manage';
+  if (['consumers', 'modelPrices'].includes(resource)) return 'admin:ai:cost:manage';
+  if (resource === 'prompts') return 'admin:ai:prompt:author';
+  if (['knowledgeIndexes', 'knowledgeSources'].includes(resource)) return 'admin:ai:index:approve';
+  return 'admin:ai:configure';
+}
 function RegistryPanel({ resource, title }: { resource: ResourceKey; title: string }) {
+  const copy = useAICopy();
+  const { hasPermission } = useAdminAuthorization();
+  const canEdit = hasPermission(aiRegistryWritePermission(resource));
   const list = useAIData<{ data: RegistryRecord[] }>(`/admin/ai/${resource}`);
   const [editing, setEditing] = useState<RegistryRecord | null>(null);
   const [search, setSearch] = useState('');
@@ -1595,7 +1905,7 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
   const choose = (record: RegistryRecord | null) => {
     if (
       guard.current.busy ||
-      (guard.current.dirty && !window.confirm('تجاهل التعديلات غير المحفوظة؟'))
+      (guard.current.dirty && !window.confirm(copy('تجاهل التعديلات غير المحفوظة؟')))
     )
       return;
     setEditing(record);
@@ -1604,7 +1914,8 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
   const refresh = () => {
     if (
       guard.current.busy ||
-      (guard.current.dirty && !window.confirm('التحديث سيغلق المحرر ويفقد التعديلات. متابعة؟'))
+      (guard.current.dirty &&
+        !window.confirm(copy('التحديث سيغلق المحرر ويفقد التعديلات. متابعة؟')))
     )
       return;
     setEditing(null);
@@ -1638,17 +1949,17 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
         title={title}
         subtitle={
           resource === 'providers'
-            ? 'مراجع البيئة فقط. العنوان ومرجع المفتاح يجب أن يطابقا محول التشغيل المسجل.'
+            ? copy('مراجع البيئة فقط. العنوان ومرجع المفتاح يجب أن يطابقا محول التشغيل المسجل.')
             : resource === 'knowledgeSources'
-              ? 'مصادر القراءة والفهرسة؛ حالة INDEXED تُحدّث عبر مسار الفهرسة فقط.'
-              : 'السجلات محفوظة في الخادم. ACTIVE لا تثبت وحدها جاهزية التنفيذ.'
+              ? copy('مصادر القراءة والفهرسة؛ حالة INDEXED تُحدّث عبر مسار الفهرسة فقط.')
+              : copy('السجلات محفوظة في الخادم. ACTIVE لا تثبت وحدها جاهزية التنفيذ.')
         }
       >
         <div className="mb-4 flex flex-wrap gap-2">
           <input
             className="input flex-1"
-            aria-label="بحث السجلات"
-            placeholder="اسم أو مفتاح"
+            aria-label={copy('بحث السجلات')}
+            placeholder={copy('اسم أو مفتاح')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -1656,7 +1967,7 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
             }}
           />
           <select
-            aria-label="حالة السجل"
+            aria-label={copy('حالة السجل')}
             className="input max-w-40"
             value={status}
             onChange={(e) => {
@@ -1664,17 +1975,17 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
               setPage(1);
             }}
           >
-            <option value="">كل الحالات</option>
+            <option value="">{copy('كل الحالات')}</option>
             {statuses.map((value) => (
               <option key={value}>{value}</option>
             ))}
           </select>
           <button onClick={refresh} disabled={list.loading} className="action-secondary">
-            تحديث
+            {copy('تحديث')}
           </button>
-          {resource !== 'knowledgeSources' && (
+          {resource !== 'knowledgeSources' && canEdit && (
             <button onClick={() => choose(registryDefaults(resource))} className="action-primary">
-              سجل جديد
+              {copy('سجل جديد')}
             </button>
           )}
         </div>
@@ -1692,7 +2003,7 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
                   className="flex items-center justify-between rounded-xl border bg-white p-4 text-right hover:border-[#21A7B4]"
                 >
                   <div>
-                    <strong>{displayName(record)}</strong>
+                    <strong>{displayName(record, copy.language)}</strong>
                     <div className="mt-1 font-mono text-xs text-slate-500">{record.key}</div>
                   </div>
                   <div className="space-x-1">
@@ -1702,7 +2013,7 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
                 </button>
               ))}
             </div>
-            {records.length === 0 && <Empty text="لا توجد سجلات مطابقة." />}
+            {records.length === 0 && <Empty text={copy('لا توجد سجلات مطابقة.')} />}
             <Pagination page={page} total={records.length} size={20} onPage={setPage} />
           </>
         )}
@@ -1711,11 +2022,12 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
         key={editing?.id ?? editing?.key ?? 'empty'}
         resource={resource}
         value={editing}
+        canEdit={canEdit}
         onState={setGuard}
         onSaved={() => {
           guard.current = { dirty: false, busy: false };
           setEditing(null);
-          setMessage('تم الحفظ وإعادة قراءة السجل من الخادم.');
+          setMessage(copy('تم الحفظ وإعادة قراءة السجل من الخادم.'));
           void list.load();
         }}
       />
@@ -1725,14 +2037,17 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
 function RegistryEditor({
   resource,
   value,
+  canEdit,
   onSaved,
   onState,
 }: {
   resource: ResourceKey;
   value: RegistryRecord | null;
+  canEdit: boolean;
   onSaved: () => void;
   onState: (state: { dirty: boolean; busy: boolean }) => void;
 }) {
+  const copy = useAICopy();
   const [key, setKey] = useState('');
   const [status, setStatus] = useState('DRAFT');
   const [json, setJson] = useState('{}');
@@ -1767,10 +2082,10 @@ function RegistryEditor({
   }, [dirty, saving, onState]);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (lock.current || uncertain) return;
+    if (!canEdit || lock.current || uncertain) return;
     setError('');
     if (!/^[a-zA-Z0-9_.:-]{1,160}$/.test(key)) {
-      setError('المفتاح يجب أن يحتوي حروفاً إنجليزية أو أرقاماً أو . _ : -');
+      setError(copy('المفتاح يجب أن يحتوي حروفاً إنجليزية أو أرقاماً أو . _ : -'));
       return;
     }
     lock.current = true;
@@ -1779,7 +2094,7 @@ function RegistryEditor({
     try {
       const settings: unknown = JSON.parse(json);
       if (!settings || typeof settings !== 'object' || Array.isArray(settings))
-        throw new Error('الإعدادات يجب أن تكون كائن JSON.');
+        throw new Error(copy('الإعدادات يجب أن تكون كائن JSON.'));
       const payload: Record<string, unknown> = {
         ...(settings as Record<string, unknown>),
         key,
@@ -1803,13 +2118,13 @@ function RegistryEditor({
           !['expectedUpdatedAt', 'operationalStatus'].includes(field) &&
           canonicalJson(saved[field]) !== canonicalJson(candidate),
       );
-      if (mismatched) throw new Error('القيم المسترجعة لا تطابق الإعدادات المطلوبة.');
+      if (mismatched) throw new Error(copy('القيم المسترجعة لا تطابق الإعدادات المطلوبة.'));
       setSnapshot(JSON.stringify([key, status, json]));
       onSaved();
     } catch (cause) {
       setUncertain(written);
       setError(
-        `${written ? 'وصلت استجابة الحفظ، لكن لم تُؤكّد القراءة اللاحقة. حدّث السجل قبل أي كتابة أخرى. ' : ''}${errorMessage(cause)}`,
+        `${written ? copy('وصلت استجابة الحفظ، لكن لم تُؤكّد القراءة اللاحقة. حدّث السجل قبل أي كتابة أخرى.') : ''}${errorMessage(cause, copy.language)}`,
       );
     } finally {
       lock.current = false;
@@ -1822,14 +2137,16 @@ function RegistryEditor({
       : ['DRAFT', 'REVIEW', 'ACTIVE', 'INACTIVE', 'ARCHIVED'];
   return (
     <aside className="h-fit rounded-2xl border border-[#0E7C86]/15 bg-white p-5 shadow-sm">
-      <h4 className="font-black text-[#142B5F]">{value?.id ? 'تعديل السجل' : 'إنشاء سجل'}</h4>
+      <h4 className="font-black text-[#142B5F]">
+        {value?.id ? copy('تعديل السجل') : copy('إنشاء سجل')}
+      </h4>
       {value ? (
         resource === 'knowledgeSources' ? (
           <JsonView value={value} />
         ) : (
           <form onSubmit={submit} className="mt-5 space-y-4">
-            <fieldset disabled={saving || uncertain} className="space-y-4">
-              <Field label="المفتاح الثابت">
+            <fieldset disabled={!canEdit || saving || uncertain} className="space-y-4">
+              <Field label={copy('المفتاح الثابت')}>
                 <input
                   required
                   disabled={!!value.id || resource === 'platformSettings'}
@@ -1839,18 +2156,20 @@ function RegistryEditor({
                   dir="ltr"
                 />
               </Field>
-              <Field label="الحالة">
+              <Field label={copy('الحالة')}>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   className="input"
                 >
                   {statuses.map((item) => (
-                    <option key={item}>{item}</option>
+                    <option key={item} value={item}>
+                      {aiStatusLabel(item, copy.language)}
+                    </option>
                   ))}
                 </select>
               </Field>
-              <Field label="الإعدادات والأسماء الأصلية (JSON)">
+              <Field label={copy('الإعدادات والأسماء الأصلية (JSON)')}>
                 <textarea
                   value={json}
                   onChange={(e) => setJson(e.target.value)}
@@ -1860,24 +2179,26 @@ function RegistryEditor({
                 />
               </Field>
               <p className="text-xs leading-6 text-slate-500">
-                الأسماء العربية والإنجليزية محفوظة بحقولها. لا تدخل الأسرار؛ استخدم secretReference
-                للمزوّد. نشر الموجّهات من دورة الإصدارات فقط.
+                {copy(
+                  'الأسماء العربية والإنجليزية محفوظة بحقولها. لا تدخل الأسرار؛ استخدم secretReference للمزوّد. نشر الموجّهات من دورة الإصدارات فقط.',
+                )}
               </p>
             </fieldset>
-            {dirty && <p className="text-xs text-amber-800">تعديلات غير محفوظة</p>}
+            {dirty && <p className="text-xs text-amber-800">{copy('تعديلات غير محفوظة')}</p>}
             {error && <ErrorBanner message={error} />}
             <button
-              disabled={saving || uncertain || !dirty}
+              disabled={!canEdit || saving || uncertain || !dirty}
               className="action-primary w-full justify-center"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{' '}
-              حفظ الإعدادات
+              {copy('حفظ الإعدادات')}
             </button>
           </form>
         )
       ) : (
-        <Empty text="اختر سجلاً أو أنشئ سجلاً جديداً." />
+        <Empty text={copy('اختر سجلاً أو أنشئ سجلاً جديداً.')} />
       )}
+      {value && <AIConfigurationOperations resource={resource} record={value} candidate={json} />}
     </aside>
   );
 }
@@ -1940,6 +2261,7 @@ function Metric({
   );
 }
 function StatusBadge({ value }: { value: string }) {
+  const { language } = useTranslation();
   const good = ['ACTIVE', 'APPROVED', 'READY', 'COMPLETED', 'ALLOWED', 'RESOLVED'].includes(value);
   const neutral = ['ARCHIVED', 'INACTIVE', 'DISABLED', 'CANCELLED', 'RETIRED'].includes(value);
   const warn = [
@@ -1956,7 +2278,7 @@ function StatusBadge({ value }: { value: string }) {
     <span
       className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${neutral ? 'bg-slate-100 text-slate-600' : good ? 'bg-[#0E7C86]/10 text-[#142B5F]' : warn ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}`}
     >
-      {value}
+      {aiStatusLabel(value, language)}
     </span>
   );
 }
@@ -1989,15 +2311,19 @@ function ErrorBanner({ message }: { message: string }) {
     </div>
   );
 }
-function displayName(record: RegistryRecord) {
+function displayName(record: RegistryRecord, language: string) {
   return String(
-    record.displayNameAr ??
+    (language === 'en' ? record.displayNameEn : record.displayNameAr) ??
       record.displayName ??
       record.displayNameEn ??
       record.title ??
       record.key,
   );
 }
-function errorMessage(cause: unknown) {
-  return cause instanceof Error ? cause.message : 'تعذر إكمال العملية.';
+function errorMessage(cause: unknown, language: string) {
+  return cause instanceof Error
+    ? cause.message
+    : language === 'en'
+      ? 'The operation failed.'
+      : 'تعذر إكمال العملية.';
 }

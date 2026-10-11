@@ -10,6 +10,7 @@ describe('AIGatewayRouter capability boundary', () => {
     submitAsyncCapability: vi.fn(),
     findForRequester: vi.fn(),
     findAsyncForRequester: vi.fn(),
+    findAsyncResultForRequester: vi.fn(),
     cancel: vi.fn(),
     cancelAsync: vi.fn(),
   });
@@ -85,4 +86,52 @@ describe('AIGatewayRouter capability boundary', () => {
     expect(response.status).toBe(404);
     expect(useCases.findForRequester).toHaveBeenCalledWith('ai-private', 'admin-1');
   });
+
+  it('returns a requester-owned encrypted-at-rest result without permitting caches', async () => {
+    const useCases = createUseCases();
+    useCases.findAsyncResultForRequester.mockResolvedValue({
+      publicId: 'aij_owned', executionPublicId: 'ai_owned',
+      result: 'Complete private response', expiresAt: '2026-10-12T12:00:00Z',
+    });
+    const response = await request(createApp(useCases)).get('/ai/executions/aij_owned/result');
+    expect(response.status).toBe(200);
+    expect(response.header['cache-control']).toContain('no-store');
+    expect(useCases.findAsyncResultForRequester).toHaveBeenCalledWith('aij_owned', 'admin-1');
+    expect(response.body.result).toBe('Complete private response');
+  });
+
+  it('refuses cross-requester result reads and invalid execution identifiers', async () => {
+    const useCases = createUseCases();
+    useCases.findAsyncResultForRequester.mockResolvedValue(null);
+    const other = await request(createApp(useCases)).get('/ai/executions/aij_other/result');
+    expect(other.status).toBe(404);
+    expect(other.body).not.toHaveProperty('result');
+    const bad = await request(createApp(useCases)).get('/ai/executions/ai_sync/result');
+    expect(bad.status).toBe(404);
+    expect(useCases.findAsyncResultForRequester).toHaveBeenCalledTimes(1);
+  });
+
+
+  it('cancels only a request owned by the authenticated caller', async () => {
+    const useCases = createUseCases();
+    useCases.findForRequester.mockResolvedValue({ publicId: 'ai_waiting', status: 'QUEUED' });
+    useCases.cancel.mockResolvedValue({ publicId: 'ai_waiting', status: 'CANCELLED' });
+    const result = await request(createApp(useCases)).post('/ai/executions/ai_waiting/cancel');
+    expect(result.status).toBe(200);
+    expect(useCases.cancel).toHaveBeenCalledWith('ai_waiting', 'admin-1');
+    useCases.findForRequester.mockResolvedValue(null);
+    const other = await request(createApp(useCases)).post('/ai/executions/ai_private/cancel');
+    expect(other.status).toBe(404);
+    expect(useCases.cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not claim an in-flight provider invocation was cancelled', async () => {
+    const useCases = createUseCases();
+    useCases.findForRequester.mockResolvedValue({ publicId: 'ai_running', status: 'RUNNING' });
+    useCases.cancel.mockRejectedValue(new Error('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED'));
+    const result = await request(createApp(useCases)).post('/ai/executions/ai_running/cancel');
+    expect(result.status).toBe(409);
+    expect(result.body.error).toBe('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED');
+  });
+
 });

@@ -2,7 +2,6 @@ import { validateAIRegistry } from './AIRegistryValidation';
 import { createHash, randomUUID } from 'node:crypto';
 import {
   AICapabilityDefinition,
-  AIAsyncJobRecord,
   AIConsumerPolicy,
   AIDataClassification,
   AIEvaluationDefinition,
@@ -27,6 +26,7 @@ import {
   IAIAsyncPayloadProtector,
   IAIPlatformRepository,
   IAIProviderRegistry,
+  IAIKnowledgeOwnerGateway,
   type AIPlatformResourceValue,
 } from '@manaratak/domain';
 
@@ -52,6 +52,11 @@ interface InternalExecutionOptions {
   promptVersion?: number;
   forcedModelKey?: string;
   forcedRoutingPolicyKey?: string;
+  asyncJobPublicId?: string;
+  admissionOnly?: boolean;
+  bindingFingerprint?: string;
+  maximumReservedTokens?: number;
+  maximumReservedCost?: number;
 }
 
 const HUMAN_REVIEW_UNSUPPORTED = 'AI_HUMAN_REVIEW_WORKFLOW_NOT_CONFIGURED';
@@ -205,6 +210,76 @@ export class AIPlatformAdminUseCases {
     return this.repository.upsert(resource, value, actorReferenceId);
   }
 
+  listConfigurationRevisions(resource: AIRegistryResource, key: string) {
+    return this.repository.listConfigurationRevisions(resource, key);
+  }
+  async reconciliationEvidence(publicId: string) {
+    const record = await this.repository.findExecution(publicId);
+    if (!record) throw new Error('AI_EXECUTION_NOT_FOUND');
+    return {
+      publicId,
+      status: record.status,
+      updatedAt: record.updatedAt,
+      proposal: record.metadata?.reconciliation ?? null,
+      actualCost: record.actualCost ?? null,
+      currency: record.currency ?? null,
+      errorCode: record.errorCode ?? null,
+    };
+  }
+
+  async governConfiguration(
+    resource: AIRegistryResource,
+    key: string,
+    action: 'STAGE' | 'APPROVE' | 'ACTIVATE' | 'ROLLBACK',
+    input: {
+      configuration?: Record<string, unknown>;
+      revisionKey?: string;
+      expectedUpdatedAt?: string;
+      reason: string;
+      incidentReference?: string;
+    },
+    actorReferenceId: string,
+  ) {
+    if (action === 'STAGE') {
+      const value: Record<string, unknown> = { ...input.configuration, key, status: 'ACTIVE' };
+      validateAIRegistry(resource, value);
+      if (resource === 'guardrails')
+        validateGuardrailDefinition(value as unknown as AIGuardrailDefinition);
+      if (resource === 'evaluations')
+        validateEvaluationDefinition(value as unknown as AIEvaluationDefinition);
+      if (resource === 'consumers' && value.requireHumanReview === true)
+        throw new Error(HUMAN_REVIEW_UNSUPPORTED);
+      const references: Array<[AIRegistryResource, string]> = [];
+      if (resource === 'routingPolicies' || resource === 'evaluations')
+        references.push(['capabilities', String(value.capabilityKey)]);
+      if (resource === 'consumers')
+        for (const capability of value.allowedCapabilities as string[])
+          references.push(['capabilities', capability]);
+      for (const [type, referenceKey] of references) {
+        const record = await this.repository.find<{ status: string }>(type, referenceKey);
+        if (record?.status !== 'ACTIVE')
+          throw new Error(`AI_REFERENCE_NOT_ACTIVE:${type}:${referenceKey}`);
+      }
+    }
+    return this.repository.governConfiguration(resource, key, action, input, actorReferenceId);
+  }
+
+  reconcileReservation(
+    publicId: string,
+    action: 'PROPOSE' | 'APPROVE',
+    evidence: { tokens: number; cost: number; currency: string; reference: string; reason: string },
+    actorReferenceId: string,
+    expectedUpdatedAt: string,
+  ) {
+    return this.repository.reconcileReservation(
+      publicId,
+      action,
+      evidence,
+      actorReferenceId,
+      expectedUpdatedAt,
+    );
+  }
+
   async createPromptVersion(value: Omit<AIPromptVersion, 'id' | 'createdAt' | 'checksum'>) {
     if (!(await this.repository.find('prompts', value.promptKey)))
       throw new Error('AI_PROMPT_NOT_FOUND');
@@ -248,7 +323,8 @@ export class AIPlatformAdminUseCases {
         run.targetType !== 'PROMPT' ||
         run.targetKey !== promptKey ||
         run.targetVersion !== version ||
-        run.targetChecksum !== versionRecord.checksum
+        run.targetChecksum !== versionRecord.checksum ||
+        run.targetEvidence?.definitionChecksum !== evaluationDefinitionChecksum(evaluation)
       )
         throw new Error(`AI_EVALUATION_EXACT_TARGET_EVIDENCE_REQUIRED:${evaluation.key}`);
       if (
@@ -266,22 +342,45 @@ export class AIPlatformAdminUseCases {
   rollbackPrompt(promptKey: string, version: number, actorReferenceId: string) {
     return this.deployPrompt(promptKey, version, actorReferenceId);
   }
-  executions(filters?: Record<string, unknown>) {
-    return this.repository.listExecutions(filters);
+  async executions(filters?: Record<string, unknown>) {
+    const page = await this.repository.listExecutions(filters);
+    return { ...page, data: page.data.map(privacySafeExecutionRecord) };
   }
-  execution(publicId: string) {
-    return this.repository.findExecution(publicId);
+  async execution(publicId: string) {
+    const record = await this.repository.findExecution(publicId);
+    return record ? privacySafeExecutionRecord(record) : null;
   }
-  executionTrace(publicId: string) {
-    return this.repository.listExecutionSpans(publicId);
+  async executionTrace(publicId: string) {
+    const [record, spans] = await Promise.all([
+      this.repository.findExecution(publicId),
+      this.repository.listExecutionSpans(publicId),
+    ]);
+    if (!record) return [];
+    return record.dataClassification === 'PUBLIC'
+      ? spans
+      : spans.map((span) => ({
+          ...span,
+          attributes: sanitizeOperationalAttributes(span.attributes),
+        }));
   }
-  appendIncidentEvent(publicId: string, action: string, actorReferenceId: string, note?: string) {
-    return this.repository.appendIncidentEvent(publicId, {
-      at: new Date(),
-      action,
-      actorReferenceId,
-      note,
-    });
+  appendIncidentEvent(
+    publicId: string,
+    action: string,
+    actorReferenceId: string,
+    note?: string,
+    idempotencyKey?: string,
+  ) {
+    if (!idempotencyKey) throw new Error('AI_INCIDENT_IDEMPOTENCY_REQUIRED');
+    return this.repository.appendIncidentEvent(
+      publicId,
+      {
+        at: new Date(),
+        action,
+        actorReferenceId,
+        note,
+      },
+      idempotencyKey,
+    );
   }
   providerStatuses(): Array<{
     key: string;
@@ -311,8 +410,12 @@ export class AIExecutionOrchestrator {
     validateExecutionRequest(request);
     const consumerKey = request.consumerKey ?? request.sourceDomain ?? 'default';
     const capabilityKey = request.capabilityKey ?? request.purpose;
-    const dataClassification = normalizeDataClassification(
-      request.dataClassification ?? request.metadata?.dataClassification,
+    // Never let an explicit caller PUBLIC/INTERNAL label downgrade provenance
+    // carried by a trusted owner-domain consumer. Both labels only raise sensitivity.
+    const dataClassification = mostSensitiveAIClassification(
+      request.dataClassification,
+      request.metadata?.dataClassification,
+      request.metadata?.ownerDataClassification,
     );
     const requesterScope = request.requesterReferenceId ?? request.sourceDomain ?? 'system';
     const requestFingerprint = sha256(
@@ -341,7 +444,12 @@ export class AIExecutionOrchestrator {
       if (previous) {
         if (previous.metadata?.requestFingerprint !== requestFingerprint)
           throw new Error('AI_IDEMPOTENCY_KEY_REUSED');
-        return toExecutionResponse(previous);
+        if (!(
+          options.asyncJobPublicId &&
+          !options.admissionOnly &&
+          previous.status === AIExecutionStatus.QUEUED
+        ))
+          return this.replayExecution(previous, request, options);
       }
     }
 
@@ -382,6 +490,21 @@ export class AIExecutionOrchestrator {
     );
     if (!promptVersion || promptVersion.status !== 'APPROVED')
       throw new Error('AI_PROMPT_VERSION_NOT_APPROVED');
+    if (
+      options.bindingFingerprint &&
+      options.bindingFingerprint !==
+        bindingFingerprint({
+          promptVersion,
+          consumer,
+          capability,
+          routing,
+          models,
+          providerDefinitions,
+          prices,
+          configuredGuardrails,
+        })
+    )
+      throw new Error('AI_WORKFLOW_EXECUTION_BINDING_CHANGED');
     if (!consumer || consumer.status !== 'ACTIVE') throw new Error('AI_CONSUMER_NOT_ACTIVE');
     if (!consumer.allowedCapabilities.includes(capabilityKey))
       throw new Error('AI_CAPABILITY_NOT_ALLOWED');
@@ -439,6 +562,12 @@ export class AIExecutionOrchestrator {
       inputTokens: inputTokenEstimate,
       maxOutputTokens: request.maxOutputTokens,
     });
+    if (
+      (options.maximumReservedTokens != null &&
+        reservation.tokens > options.maximumReservedTokens) ||
+      (options.maximumReservedCost != null && reservation.cost > options.maximumReservedCost)
+    )
+      throw new Error('AI_WORKFLOW_RUN_BUDGET_EXCEEDED');
     const created = await this.repository.createExecutionWithQuota(
       {
         publicId,
@@ -452,7 +581,9 @@ export class AIExecutionOrchestrator {
         status:
           safety.decision === AISafetyDecision.BLOCKED
             ? AIExecutionStatus.BLOCKED
-            : AIExecutionStatus.RECEIVED,
+            : options.admissionOnly
+              ? AIExecutionStatus.QUEUED
+              : AIExecutionStatus.RECEIVED,
         safetyDecision: safety.decision,
         dataClassification,
         inputPreview: privacyPreview(safety.value, dataClassification),
@@ -472,6 +603,10 @@ export class AIExecutionOrchestrator {
         reservationKey: idempotencyKeyHash ?? publicId,
         requestsPerMinute: consumer.requestsPerMinute,
         dailyRequestLimit: consumer.dailyRequestLimit,
+        requesterRequestsPerMinute:
+          consumer.requesterRequestsPerMinute ??
+          Math.max(1, Math.min(10, consumer.requestsPerMinute)),
+        requesterConcurrentLimit: consumer.requesterConcurrentLimit ?? 2,
         monthlyTokenLimit: consumer.monthlyTokenLimit,
         monthlyCostLimit: consumer.monthlyCostLimit,
         currency: consumer.currency,
@@ -480,10 +615,17 @@ export class AIExecutionOrchestrator {
       },
     );
     let execution = created.execution;
-    if (created.replayed) {
+    if (
+      created.replayed &&
+      !(
+        options.asyncJobPublicId &&
+        !options.admissionOnly &&
+        execution.status === AIExecutionStatus.QUEUED
+      )
+    ) {
       if (execution.metadata?.requestFingerprint !== requestFingerprint)
         throw new Error('AI_IDEMPOTENCY_KEY_REUSED');
-      return toExecutionResponse(execution);
+      return this.replayExecution(execution, request, options);
     }
 
     await this.repository.appendSpan({
@@ -515,9 +657,26 @@ export class AIExecutionOrchestrator {
       return toExecutionResponse(execution, safety.reasons.join(' '));
     }
 
-    execution = await this.repository.updateExecution(execution.publicId, {
-      status: AIExecutionStatus.RUNNING,
-    });
+    if (options.admissionOnly) return toExecutionResponse(execution);
+
+    try {
+      execution = await this.repository.updateExecution(execution.publicId, {
+        status: AIExecutionStatus.RUNNING,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'AI_EXECUTION_STATE_CONFLICT') {
+        // Cancellation won before dispatch; no paid provider call occurred.
+        const current = await this.repository.findExecution(execution.publicId);
+        if (current?.status === AIExecutionStatus.CANCELLED)
+          await this.repository.finalizeQuotaReservation(execution.publicId, {
+            tokens: 0,
+            cost: 0,
+            currency: consumer.currency,
+            release: true,
+          });
+      }
+      throw error;
+    }
     await this.repository.appendSpan({
       executionPublicId: execution.publicId,
       traceId: execution.traceId,
@@ -572,9 +731,25 @@ export class AIExecutionOrchestrator {
         totalAttempts += 1;
         const spanStarted = new Date();
         let result: AIProviderInvocationResult;
+        const providerAbort = new AbortController();
+        let checkingCancellation = false;
+        const cancellationMonitor = setInterval(() => {
+          if (checkingCancellation) return;
+          checkingCancellation = true;
+          void this.repository
+            .findExecution(execution.publicId)
+            .then((current) => {
+              if (current?.metadata?.cancellationRequestedAt) providerAbort.abort();
+            })
+            .catch(() => providerAbort.abort())
+            .finally(() => {
+              checkingCancellation = false;
+            });
+        }, 250);
         try {
           result = await adapter.invoke({
             model: candidate.model.providerModelId,
+            signal: providerAbort.signal,
             systemPrompt: renderPrompt(promptVersion.template, safety.value, request.locale),
             input: safety.value,
             maxOutputTokens: effectiveOutputLimit(request.maxOutputTokens, candidate.model),
@@ -613,8 +788,14 @@ export class AIExecutionOrchestrator {
           if (!isRetryable(lastError) || attempt >= candidateAttempts) break;
           await boundedBackoff(attempt);
           continue;
+        } finally {
+          clearInterval(cancellationMonitor);
         }
-        const price = selectPriceSnapshot(prices, candidate.model.key, new Date());
+        const price = selectPriceSnapshot(
+          prices,
+          candidate.model.key,
+          new Date(execution.createdAt),
+        );
         const cost = estimateCost(candidate.model, result, price);
         const currency = price?.currency ?? candidate.model.currency ?? 'USD';
         // Account for the paid response before output validation. Keep the reservation
@@ -706,6 +887,16 @@ export class AIExecutionOrchestrator {
             structured: Boolean(request.structuredOutputSchema ?? promptVersion.outputSchema),
           },
         });
+        // Persist the full result only as AES-GCM ciphertext inside the durable
+        // execution record, atomically with its COMPLETED transition.
+        const asyncResult =
+          this.asyncPayloads?.status() === 'READY'
+            ? this.encryptAsyncResult(
+                options.asyncJobPublicId ?? execution.publicId,
+                request.requesterReferenceId ?? '',
+                outputSafety.value,
+              )
+            : null;
         execution = await this.repository.updateExecution(execution.publicId, {
           providerKey: candidate.provider.key,
           modelKey: candidate.model.key,
@@ -721,6 +912,7 @@ export class AIExecutionOrchestrator {
             providerRequestId: result.providerRequestId,
             finishReason: result.finishReason,
             priceSnapshotKey: price?.key ?? null,
+            ...(asyncResult ? { asyncResult } : {}),
           }),
         });
         return { ...toExecutionResponse(execution), result: outputSafety.value };
@@ -745,6 +937,76 @@ export class AIExecutionOrchestrator {
     return toExecutionResponse(execution);
   }
 
+  async freezeWorkflowBinding(promptKey: string, capabilityKey: string) {
+    const prompt = await this.repository.find<AIPromptDefinition>('prompts', promptKey);
+    if (
+      !prompt ||
+      prompt.status !== 'ACTIVE' ||
+      !prompt.activeVersion ||
+      prompt.capabilityKey !== capabilityKey
+    )
+      throw new Error('AI_WORKFLOW_PROMPT_NOT_ACTIVE');
+    const [
+      promptVersion,
+      consumer,
+      capability,
+      routing,
+      models,
+      providerDefinitions,
+      prices,
+      configuredGuardrails,
+    ] = await Promise.all([
+      this.repository.findPromptVersion(promptKey, prompt.activeVersion),
+      this.repository.find<AIConsumerPolicy>('consumers', 'workflow'),
+      this.repository.find<AICapabilityDefinition>('capabilities', capabilityKey),
+      this.findRoutingPolicy(capabilityKey, 'workflow'),
+      this.repository.list<AIModelDefinition>('models', { status: 'ACTIVE' }),
+      this.repository.list<AIProviderDefinition>('providers', { status: 'ACTIVE' }),
+      this.repository.list<AIModelPrice>('modelPrices', { status: 'ACTIVE' }),
+      this.repository.list<AIGuardrailDefinition>('guardrails', { status: 'ACTIVE' }),
+    ]);
+    if (
+      !promptVersion ||
+      promptVersion.status !== 'APPROVED' ||
+      !consumer ||
+      consumer.status !== 'ACTIVE'
+    )
+      throw new Error('AI_WORKFLOW_BINDING_NOT_APPROVED');
+    return {
+      promptVersion: prompt.activeVersion,
+      routingPolicyKey: routing?.key,
+      fingerprint: bindingFingerprint({
+        promptVersion,
+        consumer,
+        capability,
+        routing,
+        models,
+        providerDefinitions,
+        prices,
+        configuredGuardrails,
+      }),
+      purpose: prompt.purpose,
+    };
+  }
+
+  private replayExecution(
+    execution: AIExecutionRecord,
+    request: AIExecutionRequestDto,
+    options: InternalExecutionOptions,
+  ): AIOrchestrationResponse {
+    if (execution.requesterReferenceId !== request.requesterReferenceId)
+      throw new Error('AI_EXECUTION_REQUESTER_MISMATCH');
+    if (execution.status !== AIExecutionStatus.COMPLETED) return toExecutionResponse(execution);
+    const artifact = execution.metadata?.asyncResult as Record<string, unknown> | undefined;
+    if (
+      !artifact ||
+      artifact.requesterReferenceId !== request.requesterReferenceId ||
+      artifact.jobPublicId !== (options.asyncJobPublicId ?? execution.publicId)
+    )
+      throw new Error('AI_ASYNC_RESULT_UNRECOVERABLE');
+    return { ...toExecutionResponse(execution), result: this.decryptAsyncResult(artifact) };
+  }
+
   async executeCapability(request: {
     consumerKey: string;
     capabilityKey: string;
@@ -766,7 +1028,14 @@ export class AIExecutionOrchestrator {
     consumerKey: string;
     capabilityKey: string;
     dataClassification?: AIDataClassification | null;
-  }): Promise<{ ready: boolean; reason?: string; candidateCount: number; promptVersion?: number }> {
+  }): Promise<{
+    ready: boolean;
+    canAttempt?: boolean;
+    healthVerified?: boolean;
+    reason?: string;
+    candidateCount: number;
+    promptVersion?: number;
+  }> {
     const dataClassification = normalizeDataClassification(request.dataClassification);
     const prompt = await this.repository.resolvePromptForCapability(request.capabilityKey);
     if (!prompt || prompt.status !== 'ACTIVE' || !prompt.activeVersion)
@@ -837,19 +1106,27 @@ export class AIExecutionOrchestrator {
       `readiness:${request.consumerKey}:${request.capabilityKey}`,
     );
     let candidateCount = 0;
+    let verifiedCandidates = 0;
     for (const candidate of routed) {
       const adapter = this.providers.get(candidate.provider.key);
       if (!adapter || !isProviderExecutable(adapter.status())) continue;
       candidateCount += 1;
+      const evidence = adapter.healthEvidence?.(capability.kind, candidate.model.providerModelId);
+      if (evidence && Date.parse(evidence.expiresAt) > Date.now()) verifiedCandidates += 1;
     }
-    return candidateCount > 0
-      ? { ready: true, candidateCount, promptVersion: prompt.activeVersion }
-      : {
-          ready: false,
-          reason: 'AI_ROUTE_NOT_EXECUTABLE',
-          candidateCount: 0,
-          promptVersion: prompt.activeVersion,
-        };
+    return {
+      ready: verifiedCandidates > 0,
+      canAttempt: candidateCount > 0,
+      healthVerified: verifiedCandidates > 0,
+      reason:
+        candidateCount === 0
+          ? 'AI_ROUTE_NOT_EXECUTABLE'
+          : verifiedCandidates === 0
+            ? 'AI_PROVIDER_RUNTIME_UNVERIFIED'
+            : undefined,
+      candidateCount,
+      promptVersion: prompt.activeVersion,
+    };
   }
 
   async executeCapabilityForEvaluation(
@@ -897,6 +1174,10 @@ export class AIExecutionOrchestrator {
 
   async submitAsync(request: AIExecutionRequestDto) {
     validateExecutionRequest(request);
+    // Cap encrypted queue ingress BEFORE persisting or dispatching billable work.
+    // Length alone is insufficient for multi-byte input and arbitrary metadata.
+    if (Buffer.byteLength(JSON.stringify(request), 'utf8') > 256_000)
+      throw new Error('AI_ASYNC_PAYLOAD_TOO_LARGE');
     if (!request.requesterReferenceId) throw new Error('AI_AUTHENTICATED_REQUESTER_REQUIRED');
     if (!this.asyncPayloads || this.asyncPayloads.status() !== 'READY')
       throw new Error('AI_ASYNC_QUEUE_NOT_CONFIGURED');
@@ -917,9 +1198,46 @@ export class AIExecutionOrchestrator {
     )
       throw new Error('AI_CAPABILITY_NOT_ALLOWED');
     assertNoSecretMaterial(request.metadata ?? {});
+    const scopedKey = request.idempotencyKey?.trim();
+    if (!scopedKey) throw new Error('AI_ASYNC_IDEMPOTENCY_REQUIRED');
+    // Optional client retry identity is scoped to its verified requester and the
+    // governed consumer/capability. It never becomes an operator-controlled job ID.
+    const publicId = scopedKey
+      ? `aij_${sha256(
+          stableStringify({
+            requester: request.requesterReferenceId,
+            consumerKey,
+            capabilityKey,
+            key: scopedKey,
+          }),
+        )}`
+      : `aij_${randomUUID()}`;
+    const readReplay = async () => {
+      const existing = await this.repository.findAsyncJob(publicId);
+      if (!existing) return null;
+      const original = this.asyncPayloads!.unprotect({
+        ciphertext: existing.payloadCiphertext,
+        iv: existing.payloadIv,
+        authTag: existing.payloadAuthTag,
+        keyVersion: existing.payloadKeyVersion,
+      });
+      if (stableStringify(original) !== stableStringify(request))
+        throw new Error('AI_ASYNC_IDEMPOTENCY_KEY_REUSED');
+      return existing;
+    };
+    if (scopedKey) {
+      const existing = await readReplay();
+      if (existing) return existing;
+    }
+    const admitted = await this.execute(
+      { ...request, idempotencyKey: `async-job:${publicId}` },
+      { asyncJobPublicId: publicId, admissionOnly: true },
+    );
+    if (admitted.status !== AIExecutionStatus.QUEUED)
+      throw new Error(admitted.errorCode ?? 'AI_ASYNC_ADMISSION_DENIED');
     const protectedPayload = this.asyncPayloads.protect(request);
-    return this.repository.createAsyncJob({
-      publicId: `aij_${randomUUID()}`,
+    const candidate: Parameters<IAIPlatformRepository['createAsyncJob']>[0] = {
+      publicId,
       requesterReferenceId: request.requesterReferenceId,
       consumerKey,
       capabilityKey,
@@ -934,10 +1252,30 @@ export class AIExecutionOrchestrator {
       lockedAt: null,
       lockedBy: null,
       leaseExpiresAt: null,
-      executionPublicId: null,
+      executionPublicId: admitted.executionPublicId,
       errorCode: null,
       completedAt: null,
-    });
+    };
+    try {
+      return await this.repository.createAsyncJob(candidate);
+    } catch (error) {
+      // A write acknowledgement can be lost after the durable job was created.
+      // Re-read for every failure, not only unique violations; if that read fails,
+      // retain the reservation rather than guessing that admission did not commit.
+      const existing = await readReplay();
+      if (existing) return existing;
+      await this.repository.cancelUnstartedExecution(
+        admitted.executionPublicId,
+        request.requesterReferenceId,
+      );
+      await this.repository.finalizeQuotaReservation(admitted.executionPublicId, {
+        tokens: 0,
+        cost: 0,
+        currency: consumer.currency,
+        release: true,
+      });
+      throw error;
+    }
   }
 
   async submitAsyncCapability(request: {
@@ -963,6 +1301,32 @@ export class AIExecutionOrchestrator {
       throw new Error('AI_ASYNC_QUEUE_NOT_CONFIGURED');
     const job = await this.repository.claimAsyncJob(publicId, workerId);
     if (!job) throw new Error('AI_ASYNC_JOB_NOT_CLAIMABLE');
+    const lease = { workerId, lockedAt: job.lockedAt! };
+    let renewal: Promise<void> | null = null;
+    let heartbeatError: Error | null = null;
+    const refreshLease = () => {
+      if (renewal || heartbeatError) return;
+      renewal = this.repository
+        .renewAsyncJobLease(publicId, lease)
+        .then((valid) => {
+          if (!valid) throw new Error('AI_ASYNC_LEASE_LOST');
+        })
+        .catch((error: unknown) => {
+          heartbeatError =
+            error instanceof Error ? error : new Error('AI_ASYNC_LEASE_RENEWAL_FAILED');
+        })
+        .then(() => {
+          renewal = null;
+        });
+    };
+    // Keep claims fenced while the provider is busy. A lost heartbeat never
+    // authorizes a new paid call; the durable execution idempotency key still wins.
+    const heartbeat = setInterval(refreshLease, Math.trunc(ASYNC_LEASE_MS / 3));
+    const finishLease = async () => {
+      clearInterval(heartbeat);
+      if (renewal) await renewal;
+      if (heartbeatError) throw heartbeatError;
+    };
     try {
       const request = this.asyncPayloads.unprotect({
         ciphertext: job.payloadCiphertext,
@@ -977,7 +1341,13 @@ export class AIExecutionOrchestrator {
         (request.capabilityKey ?? request.purpose) !== job.capabilityKey
       )
         throw new Error('AI_ASYNC_PAYLOAD_IDENTITY_MISMATCH');
-      const response = await this.execute(request);
+      // Durable queue identity overrides any caller key so a lease reclaim cannot
+      // dispatch a second independent paid execution for the same job.
+      const response = await this.execute(
+        { ...request, idempotencyKey: `async-job:${job.publicId}` },
+        { asyncJobPublicId: job.publicId },
+      );
+      await finishLease();
       if (
         response.status !== AIExecutionStatus.COMPLETED &&
         response.status !== AIExecutionStatus.BLOCKED
@@ -997,6 +1367,8 @@ export class AIExecutionOrchestrator {
         { workerId, lockedAt: job.lockedAt! },
       );
     } catch (error) {
+      await finishLease();
+      if (error instanceof Error && error.message === 'AI_ASYNC_LEASE_LOST') throw error;
       const retry = job.attempts < job.maxAttempts;
       return this.repository.updateAsyncJob(
         publicId,
@@ -1013,33 +1385,19 @@ export class AIExecutionOrchestrator {
         },
         { workerId, lockedAt: job.lockedAt! },
       );
+    } finally {
+      clearInterval(heartbeat);
     }
+  }
+
+  maintainPrivacyAndReservations() {
+    return this.repository.maintainPrivacyAndReservations();
   }
 
   async processDueAsyncJobs(workerId: string, limit = 10, signal?: AbortSignal) {
     if (!workerId.trim()) throw new Error('AI_ASYNC_WORKER_ID_REQUIRED');
     const bounded = Math.min(50, Math.max(1, Math.trunc(limit)));
-    const now = Date.now();
-    const candidates = [] as AIAsyncJobRecord[];
-    for (const status of ['QUEUED', 'RETRYING', 'RUNNING']) {
-      const page = await this.repository.listAsyncJobs({ status, page: 1, pageSize: bounded });
-      for (const job of page.data) {
-        if (candidates.length >= bounded) break;
-        if (
-          status === 'RETRYING' &&
-          job.nextAttemptAt &&
-          new Date(job.nextAttemptAt).getTime() > now
-        )
-          continue;
-        if (
-          status === 'RUNNING' &&
-          (!job.leaseExpiresAt || new Date(job.leaseExpiresAt).getTime() > now)
-        )
-          continue;
-        candidates.push(job);
-      }
-      if (candidates.length >= bounded) break;
-    }
+    const candidates = await this.repository.listClaimableAsyncJobs(bounded);
     let processed = 0;
     for (const job of candidates) {
       if (signal?.aborted) throw signal.reason ?? new Error('BACKGROUND_JOB_ABORTED');
@@ -1070,6 +1428,68 @@ export class AIExecutionOrchestrator {
     const value = await this.repository.findAsyncJob(publicId);
     return value?.requesterReferenceId === requesterReferenceId ? redactAsyncJob(value) : null;
   }
+
+  async findAsyncResultForRequester(publicId: string, requesterReferenceId: string) {
+    if (!requesterReferenceId) throw new Error('AI_AUTHENTICATED_REQUESTER_REQUIRED');
+    const job = await this.repository.findAsyncJob(publicId);
+    if (!job || job.requesterReferenceId !== requesterReferenceId) return null;
+    if (job.status !== 'COMPLETED') throw new Error('AI_ASYNC_RESULT_NOT_READY');
+    if (!job.executionPublicId) throw new Error('AI_ASYNC_RESULT_NOT_AVAILABLE');
+    const execution = await this.repository.findExecution(job.executionPublicId);
+    if (!execution || execution.requesterReferenceId !== requesterReferenceId) return null;
+    const artifact = execution.metadata?.asyncResult as Record<string, unknown> | undefined;
+    if (
+      !artifact ||
+      artifact.jobPublicId !== job.publicId ||
+      artifact.requesterReferenceId !== requesterReferenceId
+    )
+      throw new Error('AI_ASYNC_RESULT_NOT_AVAILABLE');
+    return {
+      publicId: job.publicId,
+      executionPublicId: execution.publicId,
+      result: this.decryptAsyncResult(artifact),
+      expiresAt: artifact.expiresAt as string,
+    };
+  }
+
+  private encryptAsyncResult(jobPublicId: string, requesterReferenceId: string, result: string) {
+    if (!this.asyncPayloads || this.asyncPayloads.status() !== 'READY')
+      throw new Error('AI_ASYNC_RESULT_PROTECTION_NOT_CONFIGURED');
+    if (Buffer.byteLength(result, 'utf8') > 256 * 1024)
+      throw new Error('AI_ASYNC_RESULT_TOO_LARGE');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    return {
+      ...this.asyncPayloads.protect({ result, jobPublicId, requesterReferenceId, expiresAt }),
+      jobPublicId,
+      requesterReferenceId,
+      expiresAt,
+    };
+  }
+
+  private decryptAsyncResult(artifact: Record<string, unknown>): string {
+    if (!this.asyncPayloads || this.asyncPayloads.status() !== 'READY')
+      throw new Error('AI_ASYNC_RESULT_PROTECTION_NOT_CONFIGURED');
+    if (
+      !Number.isFinite(Date.parse(String(artifact.expiresAt))) ||
+      Date.parse(String(artifact.expiresAt)) <= Date.now()
+    )
+      throw new Error('AI_ASYNC_RESULT_EXPIRED');
+    const recovered = this.asyncPayloads.unprotect({
+      ciphertext: String(artifact.ciphertext ?? ''),
+      iv: String(artifact.iv ?? ''),
+      authTag: String(artifact.authTag ?? ''),
+      keyVersion: String(artifact.keyVersion ?? ''),
+    }) as Record<string, unknown>;
+    if (
+      !recovered ||
+      typeof recovered.result !== 'string' ||
+      recovered.jobPublicId !== artifact.jobPublicId ||
+      recovered.requesterReferenceId !== artifact.requesterReferenceId ||
+      recovered.expiresAt !== artifact.expiresAt
+    )
+      throw new Error('AI_ASYNC_RESULT_INTEGRITY_FAILED');
+    return recovered.result;
+  }
   async cancelAsync(publicId: string, requesterReferenceId: string) {
     const value = await this.repository.findAsyncJob(publicId);
     if (!value || value.requesterReferenceId !== requesterReferenceId)
@@ -1093,32 +1513,37 @@ export class AIExecutionOrchestrator {
   listLogs(filters?: Record<string, unknown>) {
     return this.repository.listExecutions(filters);
   }
-  async cancel(publicId: string) {
-    const value = await this.repository.findExecution(publicId);
-    if (!value) throw new Error('AI_EXECUTION_NOT_FOUND');
-    if (
-      ![
-        AIExecutionStatus.RECEIVED,
-        AIExecutionStatus.QUEUED,
-        AIExecutionStatus.RUNNING,
-        AIExecutionStatus.RETRYING,
-      ].includes(value.status)
-    )
-      throw new Error('AI_EXECUTION_NOT_CANCELLABLE');
-    return this.repository.updateExecution(publicId, { status: AIExecutionStatus.CANCELLED });
+  async cancel(publicId: string, requesterReferenceId: string) {
+    if (!requesterReferenceId) throw new Error('AI_AUTHENTICATED_REQUESTER_REQUIRED');
+    // Request transport abort without asserting zero cost or immediate cancellation.
+    const current = await this.repository.findExecution(publicId);
+    if (current?.requesterReferenceId !== requesterReferenceId)
+      throw new Error('AI_EXECUTION_NOT_FOUND');
+    if (current.status === AIExecutionStatus.RUNNING)
+      return this.repository.requestExecutionCancellation(publicId, requesterReferenceId);
+    const cancelled = await this.repository.cancelUnstartedExecution(
+      publicId,
+      requesterReferenceId,
+    );
+    await this.repository.finalizeQuotaReservation(publicId, { tokens: 0, cost: 0, release: true });
+    return cancelled;
   }
 
   private async findRoutingPolicy(capabilityKey: string, consumerKey: string) {
     const values = await this.repository.list<AIRoutingPolicy>('routingPolicies', {
       status: 'ACTIVE',
     });
-    return (
-      values.find(
-        (item) => item.capabilityKey === capabilityKey && item.consumerKey === consumerKey,
-      ) ??
-      values.find((item) => item.capabilityKey === capabilityKey && !item.consumerKey) ??
-      null
+    // Active routing is a governance binding, not a "most recently edited wins" rule.
+    // Reject ambiguous effective bindings instead of choosing by database order.
+    const exact = values.filter(
+      (item) => item.capabilityKey === capabilityKey && item.consumerKey === consumerKey,
     );
+    const fallback = values.filter(
+      (item) => item.capabilityKey === capabilityKey && !item.consumerKey,
+    );
+    if (exact.length > 1 || (exact.length === 0 && fallback.length > 1))
+      throw new Error('AI_ACTIVE_ROUTING_POLICY_CONFLICT');
+    return exact[0] ?? fallback[0] ?? null;
   }
 
   private route(
@@ -1179,30 +1604,94 @@ export class AIWorkflowUseCases {
   constructor(
     private readonly repository: IAIPlatformRepository,
     private readonly execution: AIExecutionOrchestrator,
+    private readonly workflowPayloads?: IAIAsyncPayloadProtector,
   ) {}
 
-  async start(workflowKey: string, input: Record<string, unknown>) {
+  private assertProtectedWorkflowInput(input: Record<string, unknown>) {
+    if (!this.workflowPayloads || this.workflowPayloads.status() !== 'READY')
+      throw new Error('AI_WORKFLOW_PROTECTED_STATE_NOT_CONFIGURED');
+    if (input.processingConsent !== true)
+      throw new Error('AI_WORKFLOW_PROCESSING_CONSENT_REQUIRED');
+    if (['STUDENT_PRIVATE', 'HIGHLY_SENSITIVE'].includes(String(input.dataClassification)))
+      throw new Error('AI_WORKFLOW_OWNER_VERIFICATION_REQUIRED');
+    if (Buffer.byteLength(stableStringify(input), 'utf8') > 64 * 1024)
+      throw new Error('AI_WORKFLOW_INPUT_TOO_LARGE');
+  }
+
+  async start(workflowKey: string, input: Record<string, unknown>, requesterReferenceId: string) {
+    if (!requesterReferenceId?.trim())
+      throw new Error('AI_WORKFLOW_AUTHENTICATED_REQUESTER_REQUIRED');
+    this.assertProtectedWorkflowInput(input);
     const workflow = await this.repository.find<AIWorkflowDefinition>('workflows', workflowKey);
     if (!workflow || workflow.status !== 'ACTIVE' || !workflow.activeVersion)
       throw new Error('AI_WORKFLOW_NOT_ACTIVE');
     const frozen = await this.repository.findWorkflowVersion(workflowKey, workflow.activeVersion);
     if (!frozen) throw new Error('AI_WORKFLOW_VERSION_NOT_FROZEN');
+    const consumer = await this.repository.find<AIConsumerPolicy>('consumers', 'workflow');
+    if (!consumer || consumer.status !== 'ACTIVE' || !consumer.currency)
+      throw new Error('AI_WORKFLOW_CONSUMER_BUDGET_REQUIRED');
+    const budget = frozen.definition.budget ?? {
+      maxTokens: Math.min(100_000, consumer.monthlyTokenLimit),
+      maxCost: Math.min(100, consumer.monthlyCostLimit ?? 100),
+      currency: consumer.currency,
+    };
+    if (
+      !Number.isSafeInteger(budget.maxTokens) ||
+      budget.maxTokens < 1 ||
+      !Number.isFinite(budget.maxCost) ||
+      budget.maxCost < 0 ||
+      budget.currency !== consumer.currency
+    )
+      throw new Error('AI_WORKFLOW_RUN_BUDGET_INVALID');
+    const bindings: NonNullable<
+      import('@manaratak/domain').AIWorkflowRun['executionPlan']
+    >['bindings'] = {};
+    for (const step of frozen.definition.steps)
+      bindings[step.key] = await this.execution.freezeWorkflowBinding(
+        step.promptKey,
+        step.capabilityKey,
+      );
     return this.repository.createWorkflowRun({
       publicId: `aiw_${randomUUID()}`,
       workflowKey,
       workflowVersion: frozen.version,
+      requesterReferenceId,
+      executionPlan: { budget, bindings },
       status: 'QUEUED',
       traceId: randomUUID(),
-      inputReferenceHash: sha256(stableStringify(input)),
+      inputReferenceHash: sha256(
+        stableStringify({
+          scope: 'workflow-requester-v1',
+          requesterReferenceId,
+          input,
+        }),
+      ),
       outputReferenceHash: null,
     });
   }
 
-  async run(publicId: string, input: Record<string, unknown>) {
+  async run(publicId: string, input: Record<string, unknown>, requesterReferenceId: string) {
+    if (!requesterReferenceId?.trim())
+      throw new Error('AI_WORKFLOW_AUTHENTICATED_REQUESTER_REQUIRED');
+    this.assertProtectedWorkflowInput(input);
     const run = await this.repository.findWorkflowRun(publicId);
     if (!run) throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
-    if (run.inputReferenceHash !== sha256(stableStringify(input)))
-      throw new Error('AI_WORKFLOW_INPUT_REFERENCE_MISMATCH');
+    // Legacy unscoped runs cannot be claimed after introducing this privacy
+    // boundary. Caller identity and payload must both match the immutable digest.
+    if (
+      run.inputReferenceHash !==
+      sha256(
+        stableStringify({
+          scope: 'workflow-requester-v1',
+          requesterReferenceId,
+          input,
+        }),
+      )
+    )
+      throw new Error('AI_WORKFLOW_REQUESTER_OR_INPUT_MISMATCH');
+    if (run.requesterReferenceId !== requesterReferenceId || !run.executionPlan)
+      throw new Error('AI_WORKFLOW_REQUESTER_OR_INPUT_MISMATCH');
+    const plan = run.executionPlan;
     const workflow = await this.repository.findWorkflowVersion(
       run.workflowKey,
       run.workflowVersion,
@@ -1218,8 +1707,54 @@ export class AIWorkflowUseCases {
       const prior = await this.repository.listWorkflowStepRuns(publicId);
       for (const completed of prior.filter(
         (item) => item.status === 'COMPLETED' && item.outputSnapshot !== undefined,
-      ))
-        outputs[completed.stepKey] = completed.outputSnapshot;
+      )) {
+        const envelope = completed.outputSnapshot as Record<string, unknown> | null;
+        if (
+          !envelope ||
+          envelope.kind !== 'AI_WORKFLOW_PROTECTED_STEP' ||
+          typeof envelope.expiresAt !== 'string' ||
+          !Number.isFinite(Date.parse(envelope.expiresAt)) ||
+          Date.parse(envelope.expiresAt) <= Date.now()
+        )
+          throw new Error('AI_WORKFLOW_STEP_SNAPSHOT_UNTRUSTED_OR_EXPIRED');
+        const decoded = this.workflowPayloads!.unprotect({
+          ciphertext: String(envelope.ciphertext ?? ''),
+          iv: String(envelope.iv ?? ''),
+          authTag: String(envelope.authTag ?? ''),
+          keyVersion: String(envelope.keyVersion ?? ''),
+        }) as {
+          value?: unknown;
+          workflowPublicId?: string;
+          requesterReferenceId?: string;
+          stepKey?: string;
+          expiresAt?: string;
+        };
+        if (
+          !decoded ||
+          !Object.prototype.hasOwnProperty.call(decoded, 'value') ||
+          decoded.workflowPublicId !== publicId ||
+          decoded.requesterReferenceId !== requesterReferenceId ||
+          decoded.stepKey !== completed.stepKey ||
+          decoded.expiresAt !== envelope.expiresAt ||
+          sha256(stableStringify(decoded.value)) !== completed.outputReferenceHash
+        )
+          throw new Error('AI_WORKFLOW_STEP_SNAPSHOT_INTEGRITY_FAILED');
+        outputs[completed.stepKey] = decoded.value;
+      }
+      let spentTokens = 0;
+      let spentCost = 0;
+      for (const item of prior) {
+        if (!item.executionId) continue;
+        const execution = await this.repository.findExecution(item.executionId);
+        if (
+          !execution ||
+          execution.actualCost == null ||
+          execution.currency !== plan.budget.currency
+        )
+          throw new Error('AI_WORKFLOW_PRIOR_COST_RECONCILIATION_REQUIRED');
+        spentTokens += execution.inputTokens + execution.outputTokens;
+        spentCost += execution.actualCost;
+      }
       const order = topologicalSteps(workflow.definition.steps);
       for (const step of order) {
         if (outputs[step.key] !== undefined) continue;
@@ -1252,30 +1787,65 @@ export class AIWorkflowUseCases {
             startedAt: new Date(),
             completedAt: null,
           });
-          response = await this.execution.execute({
-            purpose:
-              (await this.repository.find<AIPromptDefinition>('prompts', step.promptKey))
-                ?.purpose ?? ('TOOL_ASSISTANCE' as any),
-            promptKey: step.promptKey,
-            capabilityKey: step.capabilityKey,
-            consumerKey: 'workflow',
-            sourceDomain: 'AIWorkflow',
-            input: JSON.stringify({
-              workflowInput: input,
-              dependencyOutputs: Object.fromEntries(
-                (step.dependsOn ?? []).map((key) => [key, outputs[key]]),
+          const binding = plan.bindings[step.key];
+          if (!binding) throw new Error('AI_WORKFLOW_FROZEN_BINDING_REQUIRED');
+          response = await this.execution.execute(
+            {
+              purpose: binding.purpose,
+              promptKey: step.promptKey,
+              capabilityKey: step.capabilityKey,
+              consumerKey: 'workflow',
+              requesterReferenceId,
+              sourceDomain: 'AIWorkflow',
+              input: JSON.stringify({
+                workflowInput: input,
+                dependencyOutputs: Object.fromEntries(
+                  (step.dependsOn ?? []).map((key) => [key, outputs[key]]),
+                ),
+              }),
+              idempotencyKey: `${publicId}:${step.key}`,
+              // Unverified arbitrary admin workflow content is never presumed public.
+              dataClassification: mostSensitiveAIClassification(
+                'CONFIDENTIAL',
+                input.dataClassification,
               ),
-            }),
-            idempotencyKey: `${publicId}:${step.key}:${attempt}`,
-            dataClassification: 'INTERNAL',
-          });
+            },
+            {
+              promptVersion: binding.promptVersion,
+              forcedRoutingPolicyKey: binding.routingPolicyKey,
+              bindingFingerprint: binding.fingerprint,
+              maximumReservedTokens: plan.budget.maxTokens - spentTokens,
+              maximumReservedCost: plan.budget.maxCost - spentCost,
+            },
+          );
+          if (response.usage.cost != null) {
+            spentCost += response.usage.cost;
+            spentTokens += response.usage.inputTokens + response.usage.outputTokens;
+          }
           if (response.status === AIExecutionStatus.COMPLETED) {
+            if (response.usage.cost == null || response.usage.currency !== plan.budget.currency)
+              throw new Error('AI_WORKFLOW_STEP_COST_RECONCILIATION_REQUIRED');
             outputs[step.key] = response.result ?? null;
+            const encoded = stableStringify(outputs[step.key]);
+            if (Buffer.byteLength(encoded, 'utf8') > 256 * 1024)
+              throw new Error('AI_WORKFLOW_STEP_RESULT_TOO_LARGE');
+            const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            const protectedSnapshot = this.workflowPayloads!.protect({
+              value: outputs[step.key],
+              workflowPublicId: publicId,
+              requesterReferenceId,
+              stepKey: step.key,
+              expiresAt,
+            });
             await this.repository.updateWorkflowStepRun(publicId, step.key, attempt, {
               executionId: response.executionPublicId,
               status: 'COMPLETED',
-              outputReferenceHash: sha256(stableStringify(outputs[step.key])),
-              outputSnapshot: outputs[step.key],
+              outputReferenceHash: sha256(encoded),
+              outputSnapshot: {
+                kind: 'AI_WORKFLOW_PROTECTED_STEP',
+                ...protectedSnapshot,
+                expiresAt,
+              },
               completedAt: new Date(),
             });
             break;
@@ -1317,7 +1887,10 @@ export class AIEvaluationUseCases {
     private readonly workflows?: AIWorkflowUseCases,
   ) {}
 
-  async start(evaluationKey: string, options: { promptVersion?: number; modelKey?: string } = {}) {
+  async start(
+    evaluationKey: string,
+    options: { promptVersion?: number; modelKey?: string; requestedBy?: string } = {},
+  ) {
     const definition = await this.repository.find<AIEvaluationDefinition>(
       'evaluations',
       evaluationKey,
@@ -1335,7 +1908,12 @@ export class AIEvaluationUseCases {
       targetKey: evidence.key,
       targetVersion: evidence.version ?? null,
       targetChecksum: evidence.checksum ?? null,
-      targetEvidence: evidence.details,
+      targetEvidence: {
+        ...evidence.details,
+        definitionChecksum: evaluationDefinitionChecksum(definition),
+        definitionSnapshot: JSON.parse(stableStringify(definition)),
+        submittedBy: options.requestedBy ?? null,
+      },
       passed: 0,
       failed: 0,
       safetyFailures: 0,
@@ -1346,7 +1924,8 @@ export class AIEvaluationUseCases {
     });
   }
 
-  async run(publicId: string) {
+  async run(publicId: string, executedBy?: string) {
+    if (!executedBy) throw new Error('AI_EVALUATION_EXECUTOR_REQUIRED');
     const run = await this.repository.findEvaluationRun(publicId);
     if (!run) throw new Error('AI_EVALUATION_RUN_NOT_FOUND');
     const definition = await this.repository.find<AIEvaluationDefinition>(
@@ -1354,6 +1933,8 @@ export class AIEvaluationUseCases {
       run.evaluationKey,
     );
     if (!definition || definition.status !== 'ACTIVE') throw new Error('AI_EVALUATION_NOT_ACTIVE');
+    if (run.targetEvidence?.definitionChecksum !== evaluationDefinitionChecksum(definition))
+      throw new Error('AI_EVALUATION_DEFINITION_CHANGED');
     const currentEvidence = await this.resolveTargetEvidence(definition, {
       promptVersion: run.targetVersion ?? undefined,
       modelKey: run.modelKey ?? undefined,
@@ -1367,14 +1948,31 @@ export class AIEvaluationUseCases {
       throw new Error('AI_EVALUATION_TARGET_EVIDENCE_CHANGED');
     if (run.status === 'COMPLETED') return run;
     if (run.status !== 'QUEUED') throw new Error('AI_EVALUATION_RUN_NOT_EXECUTABLE');
-    await this.repository.updateEvaluationRun(publicId, { status: 'RUNNING' });
+    await this.repository.updateEvaluationRun(publicId, {
+      status: 'RUNNING',
+      targetEvidence: { ...run.targetEvidence, executedBy },
+    });
+    const frozenDefinition = run.targetEvidence?.definitionSnapshot as
+      AIEvaluationDefinition | undefined;
+    if (
+      !frozenDefinition ||
+      evaluationDefinitionChecksum(frozenDefinition) !== run.targetEvidence?.definitionChecksum
+    )
+      throw new Error('AI_EVALUATION_FROZEN_DEFINITION_REQUIRED');
     const results: Record<string, unknown>[] = [];
     let passed = 0;
     let safetyFailures = 0;
     try {
-      for (const item of definition.dataset) {
+      for (const item of frozenDefinition.dataset) {
         const started = Date.now();
-        const response = await this.executeTarget(publicId, definition, run, item.input, item.key);
+        const response = await this.executeTarget(
+          publicId,
+          definition,
+          run,
+          item.input,
+          item.key,
+          executedBy,
+        );
         const latencyMs = Date.now() - started;
         if (response.status === AIExecutionStatus.BLOCKED) safetyFailures += 1;
         const evaluatorResults = definition.evaluators.map((evaluator) =>
@@ -1400,8 +1998,28 @@ export class AIEvaluationUseCases {
         if (ok) passed += 1;
       }
       const score = definition.dataset.length ? passed / definition.dataset.length : 0;
+      const latest = await this.repository.find<AIEvaluationDefinition>(
+        'evaluations',
+        run.evaluationKey,
+      );
+      if (
+        !latest ||
+        latest.status !== 'ACTIVE' ||
+        evaluationDefinitionChecksum(latest) !== run.targetEvidence?.definitionChecksum
+      )
+        throw new Error('AI_EVALUATION_DEFINITION_CHANGED_DURING_RUN');
+      const resultChecksum = sha256(
+        stableStringify({
+          results,
+          score,
+          safetyFailures,
+          targetChecksum: run.targetChecksum,
+          definitionChecksum: run.targetEvidence?.definitionChecksum,
+        }),
+      );
       return this.repository.updateEvaluationRun(publicId, {
         status: 'COMPLETED',
+        targetEvidence: { ...run.targetEvidence, executedBy, resultChecksum },
         passed,
         failed: definition.dataset.length - passed,
         safetyFailures,
@@ -1436,6 +2054,7 @@ export class AIEvaluationUseCases {
     run: AIEvaluationRun,
     input: string,
     itemKey: string,
+    executedBy: string,
   ): Promise<AIOrchestrationResponse> {
     if (run.targetType === 'PROMPT')
       return this.execution.executePromptVersionForEvaluation({
@@ -1471,8 +2090,16 @@ export class AIEvaluationUseCases {
       );
     if (run.targetType === 'WORKFLOW') {
       if (!this.workflows) throw new Error('AI_EVALUATION_WORKFLOW_EXECUTOR_NOT_CONFIGURED');
-      const workflowRun = await this.workflows.start(run.targetKey, { evaluationInput: input });
-      const completed = await this.workflows.run(workflowRun.publicId, { evaluationInput: input });
+      const workflowRun = await this.workflows.start(
+        run.targetKey,
+        { evaluationInput: input, processingConsent: true },
+        executedBy,
+      );
+      const completed = await this.workflows.run(
+        workflowRun.publicId,
+        { evaluationInput: input, processingConsent: true },
+        executedBy,
+      );
       return {
         executionPublicId: completed.publicId,
         traceId: completed.traceId,
@@ -1569,18 +2196,131 @@ export class AIKnowledgeUseCases {
   constructor(
     private readonly repository: IAIPlatformRepository,
     private readonly providers: IAIProviderRegistry,
+    private readonly owners?: IAIKnowledgeOwnerGateway,
+    private readonly payloads?: IAIAsyncPayloadProtector,
   ) {}
+  async readSource(
+    indexKey: string,
+    sourceType: string,
+    sourceReferenceId: string,
+    requesterReferenceId: string,
+    locale?: string,
+  ) {
+    if (!this.owners || this.payloads?.status() !== 'READY')
+      throw new Error('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
+    const source = await this.owners.resolve({
+      sourceType,
+      sourceReferenceId,
+      requesterReferenceId,
+      locale,
+    });
+    if (
+      !source ||
+      !source.transferAllowed ||
+      (source.readerScope !== 'PUBLIC' && source.readerScope !== requesterReferenceId)
+    ) {
+      if (sourceType === 'CMS' && (!source || source.readerScope === 'PUBLIC'))
+        await this.repository.removeKnowledgeSource(
+          indexKey,
+          sourceType,
+          sourceReferenceId,
+          requesterReferenceId,
+        );
+      return [];
+    }
+    const rows = await this.repository.listKnowledgeChunks(
+      indexKey,
+      sourceType,
+      sourceReferenceId,
+      source.sourceVersion,
+    );
+    const result: Array<{ text: string }> = [];
+    for (const row of rows) {
+      if (
+        !row.metadata ||
+        !Number.isFinite(Date.parse(String(row.metadata.expiresAt))) ||
+        Date.parse(String(row.metadata.expiresAt)) <= Date.now()
+      )
+        continue;
+      const protectedChunk = row.metadata.protectedChunk as
+        Parameters<IAIAsyncPayloadProtector['unprotect']>[0] | undefined;
+      if (!protectedChunk) continue;
+      const value = this.payloads.unprotect(protectedChunk) as {
+        text: string;
+        indexKey?: string;
+        sourceType?: string;
+        sourceReferenceId?: string;
+        sourceVersion?: string;
+        readerScope?: string;
+        expiresAt?: string;
+      };
+      if (
+        typeof value.text !== 'string' ||
+        value.indexKey !== indexKey ||
+        value.sourceType !== sourceType ||
+        value.sourceReferenceId !== sourceReferenceId ||
+        value.sourceVersion !== source.sourceVersion ||
+        value.readerScope !== source.readerScope ||
+        value.expiresAt !== row.metadata.expiresAt
+      )
+        throw new Error('AI_KNOWLEDGE_CHUNK_INTEGRITY_FAILED');
+      result.push({ text: value.text });
+    }
+    return result;
+  }
+
+  removeSource(
+    indexKey: string,
+    sourceType: string,
+    sourceReferenceId: string,
+    actorReferenceId: string,
+  ) {
+    return this.repository.removeKnowledgeSource(
+      indexKey,
+      sourceType,
+      sourceReferenceId,
+      actorReferenceId,
+    );
+  }
+
   async index(input: {
     indexKey: string;
     sourceType: string;
     sourceReferenceId: string;
     sourceVersion?: string;
     locale?: string;
-    content: string;
+    content?: string;
     actorReferenceId: string;
   }) {
+    if (Buffer.byteLength(input.content ?? '', 'utf8') > 256_000)
+      throw new Error('AI_KNOWLEDGE_SOURCE_BYTES_EXCEEDED');
     const index = await this.repository.find<AIKnowledgeIndex>('knowledgeIndexes', input.indexKey);
     if (!index || index.status !== 'ACTIVE') throw new Error('AI_KNOWLEDGE_INDEX_NOT_ACTIVE');
+    if (input.content != null) throw new Error('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
+    if (!this.owners || this.payloads?.status() !== 'READY')
+      throw new Error('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
+    const ownerRequest = {
+      sourceType: input.sourceType,
+      sourceReferenceId: input.sourceReferenceId,
+      locale: input.locale,
+      requesterReferenceId: input.actorReferenceId,
+    };
+    const verified = await this.owners.resolve(ownerRequest);
+    if (
+      !verified ||
+      !verified.transferAllowed ||
+      verified.sourceType !== input.sourceType ||
+      verified.sourceReferenceId !== input.sourceReferenceId ||
+      (verified.readerScope !== 'PUBLIC' && verified.readerScope !== input.actorReferenceId)
+    )
+      throw new Error('AI_KNOWLEDGE_OWNER_SOURCE_NOT_AUTHORIZED');
+    if (input.sourceVersion && input.sourceVersion !== verified.sourceVersion)
+      throw new Error('AI_KNOWLEDGE_OWNER_REVISION_CHANGED');
+    const content = verified.content;
+    if (!content.trim()) throw new Error('AI_KNOWLEDGE_SOURCE_CONTENT_REQUIRED');
+    if (Buffer.byteLength(content, 'utf8') > 256_000)
+      throw new Error('AI_KNOWLEDGE_SOURCE_BYTES_EXCEEDED');
+    const classification = verified.dataClassification;
     const model = await this.repository.find<AIModelDefinition>('models', index.embeddingModelKey);
     if (
       !model ||
@@ -1627,41 +2367,55 @@ export class AIKnowledgeUseCases {
     if (consumer.requireHumanReview || capability.requiresHumanReview)
       throw new Error(HUMAN_REVIEW_UNSUPPORTED);
     if (
-      !classificationAllowed('INTERNAL', model.maxDataClassification) ||
-      !classificationAllowed('INTERNAL', provider.maxDataClassification) ||
+      !classificationAllowed(classification, model.maxDataClassification) ||
+      !classificationAllowed(classification, provider.maxDataClassification) ||
       (consumer.allowedDataClassifications &&
-        !consumer.allowedDataClassifications.includes('INTERNAL')) ||
+        !consumer.allowedDataClassifications.includes(classification)) ||
       (capability.allowedDataClassifications &&
-        !capability.allowedDataClassifications.includes('INTERNAL'))
+        !capability.allowedDataClassifications.includes(classification))
     )
       throw new Error('AI_DATA_CLASSIFICATION_NOT_ALLOWED');
-    const sourceChecksum = sha256(input.content);
+    if (!Number.isFinite(Date.parse(verified.publishedAt)))
+      throw new Error('AI_KNOWLEDGE_OWNER_PUBLICATION_EVIDENCE_REQUIRED');
+    const sourceChecksum = sha256(content);
     const source: AIKnowledgeSource = {
       id: '',
       indexKey: input.indexKey,
       sourceType: input.sourceType,
       sourceReferenceId: input.sourceReferenceId,
-      sourceVersion: input.sourceVersion,
+      sourceVersion: verified.sourceVersion,
       checksum: sourceChecksum,
-      locale: input.locale,
+      locale: verified.locale,
       status: 'PENDING',
-      metadata: { canonicalSourceOnly: false, sourceVerification: 'ADMIN_SUBMITTED_UNVERIFIED' },
+      metadata: {
+        canonicalSourceOnly: true,
+        canonicalPublishedAt: verified.publishedAt,
+        readerScope: verified.readerScope,
+        dataClassification: classification,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      },
     };
     const chunks = chunkText(
-      input.content,
+      content,
       Number(index.chunkingStrategy.maxCharacters ?? 1600),
       Number(index.chunkingStrategy.overlapCharacters ?? 160),
     );
+    if (
+      !Number.isInteger(index.dimensions) ||
+      index.dimensions < 1 ||
+      index.dimensions > 4096 ||
+      chunks.length > 256
+    )
+      throw new Error('AI_KNOWLEDGE_INDEXING_BATCH_LIMIT_EXCEEDED');
     const tokens = chunks.reduce((sum, chunk) => sum + estimateTokens(chunk), 0);
     const price = selectPriceSnapshot(prices, model.key, new Date());
     const currency = price?.currency ?? model.currency ?? 'USD';
     const inputPrice = price?.inputPricePerMillion ?? model.inputPricePerMillion;
     if (
-      consumer.monthlyCostLimit != null &&
-      (!consumer.currency ||
-        consumer.currency !== currency ||
-        inputPrice == null ||
-        !Number.isFinite(inputPrice))
+      inputPrice == null ||
+      !Number.isFinite(inputPrice) ||
+      inputPrice < 0 ||
+      (consumer.monthlyCostLimit != null && (!consumer.currency || consumer.currency !== currency))
     )
       throw new Error('AI_KNOWLEDGE_BUDGET_PRICE_REQUIRED');
     const estimatedCost = (tokens * (inputPrice ?? 0)) / 1_000_000;
@@ -1670,7 +2424,7 @@ export class AIKnowledgeUseCases {
         indexKey: index.key,
         sourceType: input.sourceType,
         sourceReferenceId: input.sourceReferenceId,
-        sourceVersion: input.sourceVersion ?? null,
+        sourceVersion: verified.sourceVersion,
         sourceChecksum,
         modelKey: model.key,
         dimensions: index.dimensions,
@@ -1689,7 +2443,7 @@ export class AIKnowledgeUseCases {
         idempotencyKeyHash: fingerprint,
         status: AIExecutionStatus.RUNNING,
         safetyDecision: AISafetyDecision.ALLOWED,
-        dataClassification: 'INTERNAL',
+        dataClassification: classification,
         inputTokens: tokens,
         outputTokens: 0,
         requesterReferenceId: input.actorReferenceId,
@@ -1719,14 +2473,6 @@ export class AIKnowledgeUseCases {
     let providerResponded = false;
     let providerAttempted = false;
     try {
-      await this.repository.upsert(
-        'knowledgeSources',
-        {
-          ...source,
-          key: `${input.indexKey}:${input.sourceType}:${input.sourceReferenceId}`,
-        } as any,
-        input.actorReferenceId,
-      );
       await this.repository.createIndexingRun({
         publicId: runId,
         indexKey: input.indexKey,
@@ -1783,34 +2529,49 @@ export class AIKnowledgeUseCases {
         )
       )
         throw new Error('AI_EMBEDDING_RESPONSE_INVALID');
+      // Re-read the canonical owner after provider latency; never activate a withdrawn revision.
+      const latestOwner = await this.owners.resolve(ownerRequest);
+      if (
+        !latestOwner ||
+        !latestOwner.transferAllowed ||
+        latestOwner.sourceVersion !== verified.sourceVersion ||
+        latestOwner.publishedAt !== verified.publishedAt ||
+        latestOwner.readerScope !== verified.readerScope ||
+        latestOwner.dataClassification !== classification ||
+        sha256(latestOwner.content) !== sourceChecksum
+      )
+        throw new Error('AI_KNOWLEDGE_OWNER_REVISION_CHANGED');
       await this.repository.replaceEmbeddings({
         indexKey: input.indexKey,
+        sourceType: input.sourceType,
         sourceReferenceId: input.sourceReferenceId,
+        sourceVersion: verified.sourceVersion,
         modelKey: model.key,
         dimensions: index.dimensions,
+        source: { ...source, status: 'INDEXED' },
+        runPublicId: runId,
         chunks: chunks.map((text, position) => ({
           chunkKey: `${position + 1}`,
-          chunkText: text,
+          chunkText: '[PROTECTED]',
           embeddingRef: sha256(JSON.stringify(result.embeddings[position])),
           checksum: sha256(text),
-          metadata: { position, vector: result.embeddings[position], sourceChecksum },
+          metadata: {
+            position,
+            sourceChecksum,
+            protectedChunk: this.payloads!.protect({
+              text,
+              vector: result.embeddings[position],
+              indexKey: input.indexKey,
+              sourceType: verified.sourceType,
+              sourceReferenceId: verified.sourceReferenceId,
+              sourceVersion: verified.sourceVersion,
+              readerScope: verified.readerScope,
+              expiresAt: source.metadata!.expiresAt,
+            }),
+            expiresAt: source.metadata!.expiresAt,
+          },
         })),
       });
-      await this.repository.upsert(
-        'knowledgeSources',
-        {
-          ...source,
-          key: `${input.indexKey}:${input.sourceType}:${input.sourceReferenceId}`,
-          status: 'INDEXED',
-          metadata: {
-            canonicalSourceOnly: false,
-            sourceVerification: 'ADMIN_SUBMITTED_UNVERIFIED',
-            chunks: chunks.length,
-            modelKey: model.key,
-          },
-        } as any,
-        input.actorReferenceId,
-      );
       await this.repository.updateExecution(executionId, { status: AIExecutionStatus.COMPLETED });
       return this.repository.updateIndexingRun(runId, {
         status: 'COMPLETED',
@@ -1861,10 +2622,12 @@ export class EnterpriseAIGuardrailEngine {
     let value = input;
     const reasons: string[] = [];
     let decision = AISafetyDecision.ALLOWED;
+    // Every input repetition is bounded: failed email/phone matches must not
+    // rescan an arbitrarily long suffix at every possible starting character.
     const pii = [
-      /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,
-      /\+?\d[\d\s()-]{7,}\d/g,
-      /\b(?:\d[ -]*?){13,19}\b/g,
+      /(?<![A-Z0-9._%+-])[A-Z0-9._%+-]{1,64}@[A-Z0-9.-]{1,253}\.[A-Z]{2,63}/gi,
+      /\+?\d[\d\s()-]{7,64}\d/g,
+      /\b(?:\d[ -]{0,3}){13,19}\b/g,
     ];
     for (const pattern of pii)
       if (pattern.test(value)) {
@@ -1989,7 +2752,10 @@ function compileGovernedJsonSchema(schema: Record<string, unknown>): (value: unk
     'minItems',
     'maxItems',
   ]);
-  const compile = (node: unknown, path: string): ((value: unknown) => boolean) => {
+  let schemaNodeCount = 0;
+  const compile = (node: unknown, path: string, depth = 0): ((value: unknown) => boolean) => {
+    schemaNodeCount += 1;
+    if (schemaNodeCount > 256 || depth > 20) throw new Error('AI_JSON_SCHEMA_COMPLEXITY_LIMIT');
     if (!node || typeof node !== 'object' || Array.isArray(node))
       throw new Error(`AI_JSON_SCHEMA_INVALID:${path}`);
     const definition = node as Record<string, unknown>;
@@ -2023,18 +2789,20 @@ function compileGovernedJsonSchema(schema: Record<string, unknown>): (value: unk
     const propertyValidators = new Map(
       Object.entries(properties).map(([key, child]) => [
         key,
-        compile(child, `${path}.properties.${key}`),
+        compile(child, `${path}.properties.${key}`, depth + 1),
       ]),
     );
-    const itemValidator = definition.items ? compile(definition.items, `${path}.items`) : null;
+    const itemValidator = definition.items
+      ? compile(definition.items, `${path}.items`, depth + 1)
+      : null;
     const anyOf = Array.isArray(definition.anyOf)
-      ? definition.anyOf.map((child, index) => compile(child, `${path}.anyOf.${index}`))
+      ? definition.anyOf.map((child, index) => compile(child, `${path}.anyOf.${index}`, depth + 1))
       : [];
     const oneOf = Array.isArray(definition.oneOf)
-      ? definition.oneOf.map((child, index) => compile(child, `${path}.oneOf.${index}`))
+      ? definition.oneOf.map((child, index) => compile(child, `${path}.oneOf.${index}`, depth + 1))
       : [];
     const allOf = Array.isArray(definition.allOf)
-      ? definition.allOf.map((child, index) => compile(child, `${path}.allOf.${index}`))
+      ? definition.allOf.map((child, index) => compile(child, `${path}.allOf.${index}`, depth + 1))
       : [];
     const safePattern =
       typeof definition.pattern === 'string'
@@ -2043,7 +2811,7 @@ function compileGovernedJsonSchema(schema: Record<string, unknown>): (value: unk
     const additional = definition.additionalProperties;
     const additionalValidator =
       additional && typeof additional === 'object'
-        ? compile(additional, `${path}.additionalProperties`)
+        ? compile(additional, `${path}.additionalProperties`, depth + 1)
         : null;
     return (value: unknown) => {
       if (type && !matchesJsonType(value, type)) return false;
@@ -2167,6 +2935,20 @@ function topologicalSteps(steps: AIWorkflowDefinition['definition']['steps']) {
   return order;
 }
 
+export function evaluationDefinitionChecksum(definition: AIEvaluationDefinition): string {
+  // Bind gates to the exact dataset, evaluators, target, and deployment thresholds.
+  return sha256(
+    stableStringify({
+      key: definition.key,
+      status: definition.status,
+      capabilityKey: definition.capabilityKey,
+      target: definition.target,
+      dataset: definition.dataset,
+      evaluators: definition.evaluators,
+      deploymentGate: definition.deploymentGate ?? null,
+    }),
+  );
+}
 function validateEvaluationDefinition(definition: AIEvaluationDefinition) {
   if (definition.target.type === 'KNOWLEDGE')
     throw new Error('AI_EVALUATION_KNOWLEDGE_TARGET_NOT_SUPPORTED');
@@ -2248,7 +3030,7 @@ function evaluateDefinition(
   }
 }
 
-function estimateQuotaReservation(input: {
+export function estimateQuotaReservation(input: {
   consumer: AIConsumerPolicy;
   candidates: Array<{
     model: AIModelDefinition;
@@ -2270,13 +3052,32 @@ function estimateQuotaReservation(input: {
         ),
       ),
     );
-  if (input.consumer.monthlyCostLimit == null) return { tokens: reservedTokens, cost: 0 };
-  if (!input.consumer.currency) throw new Error('AI_CONSUMER_BUDGET_CURRENCY_REQUIRED');
+  // Production route candidates must have explicit monetary evidence (including
+  // deliberate zero-priced models). Never turn missing prices into a known $0.
+  for (const candidate of input.candidates) {
+    const price = selectPriceSnapshot(input.prices, candidate.model.key, new Date());
+    const inputRate = price?.inputPricePerMillion ?? candidate.model.inputPricePerMillion;
+    const outputRate = price?.outputPricePerMillion ?? candidate.model.outputPricePerMillion;
+    const currency = price?.currency ?? candidate.model.currency;
+    if (
+      !currency ||
+      inputRate == null ||
+      outputRate == null ||
+      !Number.isFinite(Number(inputRate)) ||
+      !Number.isFinite(Number(outputRate)) ||
+      Number(inputRate) < 0 ||
+      Number(outputRate) < 0
+    )
+      throw new Error(`AI_COST_PRICE_REQUIRED_FOR_ROUTED_MODEL:${candidate.model.key}`);
+  }
+  if (input.consumer.monthlyCostLimit != null && !input.consumer.currency)
+    throw new Error('AI_CONSUMER_BUDGET_CURRENCY_REQUIRED');
   if (!input.candidates.length) return { tokens: reservedTokens, cost: 0 };
   const costs = input.candidates.map((candidate) => {
     const price = selectPriceSnapshot(input.prices, candidate.model.key, new Date());
     const currency = price?.currency ?? candidate.model.currency;
-    if (!currency || currency !== input.consumer.currency)
+    if (!currency) throw new Error('AI_MODEL_PRICE_UNVERIFIED');
+    if (input.consumer.monthlyCostLimit != null && currency !== input.consumer.currency)
       throw new Error('AI_COST_CURRENCY_MISMATCH');
     const inputPrice = Number(
       price?.inputPricePerMillion ?? candidate.model.inputPricePerMillion ?? NaN,
@@ -2284,8 +3085,13 @@ function estimateQuotaReservation(input: {
     const outputPrice = Number(
       price?.outputPricePerMillion ?? candidate.model.outputPricePerMillion ?? NaN,
     );
-    if (!Number.isFinite(inputPrice) || !Number.isFinite(outputPrice))
-      throw new Error('AI_COST_PRICE_REQUIRED_FOR_BUDGETED_CONSUMER');
+    if (
+      !Number.isFinite(inputPrice) ||
+      inputPrice < 0 ||
+      !Number.isFinite(outputPrice) ||
+      outputPrice < 0
+    )
+      throw new Error('AI_MODEL_PRICE_UNVERIFIED');
     return (
       (input.inputTokens * inputPrice +
         effectiveOutputLimit(input.maxOutputTokens, candidate.model) * outputPrice) /
@@ -2326,10 +3132,44 @@ function estimateCost(
     1_000_000
   );
 }
+// Admin projections must not re-expose historical preview/metadata persisted before
+// non-public preview suppression was introduced. This is read-time protection;
+// historical database cleanup remains a separately approved migration/backfill.
+function sanitizeOperationalAttributes(
+  value?: Record<string, unknown> | null,
+): Record<string, unknown> {
+  if (!value) return {};
+  const safeKeys = new Set([
+    'providerKey',
+    'modelKey',
+    'attempt',
+    'priceSnapshotKey',
+    'durationMs',
+    'status',
+    'code',
+    'tokenCount',
+    'routingPolicyKey',
+  ]);
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      ([key, item]) =>
+        safeKeys.has(key) &&
+        (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean'),
+    ),
+  );
+}
+function privacySafeExecutionRecord<T extends AIExecutionRecord>(record: T): T {
+  if (record.dataClassification === 'PUBLIC') return record;
+  return {
+    ...record,
+    inputPreview: null,
+    outputPreview: null,
+    metadata: sanitizeOperationalAttributes(record.metadata),
+  };
+}
 function privacyPreview(value: string, classification: AIDataClassification) {
-  return classification === 'STUDENT_PRIVATE' || classification === 'HIGHLY_SENSITIVE'
-    ? null
-    : value.slice(0, 500);
+  // Metadata suffices for operations; only explicitly PUBLIC inputs allow a preview.
+  return classification === 'PUBLIC' ? value.slice(0, 500) : null;
 }
 function sanitizeMetadata(value?: Record<string, unknown> | null): Record<string, unknown> | null {
   if (!value) return null;
@@ -2412,6 +3252,18 @@ function normalizeDataClassification(value: unknown): AIDataClassification {
     ? (value as AIDataClassification)
     : 'INTERNAL';
 }
+function mostSensitiveAIClassification(...values: unknown[]): AIDataClassification {
+  const labels = values.filter(
+    (value): value is AIDataClassification =>
+      typeof value === 'string' && value in classificationRank,
+  );
+  if (labels.length === 0) return 'INTERNAL';
+  return labels.reduce<AIDataClassification>(
+    (current, candidate) =>
+      classificationRank[candidate] > classificationRank[current] ? candidate : current,
+    'PUBLIC',
+  );
+}
 function classificationAllowed(value: AIDataClassification, maximum?: AIDataClassification) {
   return maximum != null && classificationRank[value] <= classificationRank[maximum];
 }
@@ -2460,6 +3312,19 @@ function renderPrompt(template: string, _input: string, locale?: string | null) 
   if (template.includes('{{input}}')) throw new Error('AI_PROMPT_UNSAFE_INPUT_INTERPOLATION');
   return template.replaceAll('{{locale}}', locale ?? 'ar');
 }
+function bindingFingerprint(value: unknown): string {
+  const canonical = (item: unknown): unknown => {
+    if (Array.isArray(item)) return item.map(canonical);
+    if (!item || typeof item !== 'object') return item;
+    return Object.fromEntries(
+      Object.entries(item)
+        .filter(([key]) => !['id', 'createdAt', 'updatedAt', 'operationalStatus'].includes(key))
+        .map(([key, nested]) => [key, canonical(nested)]),
+    );
+  };
+  return sha256(stableStringify(canonical(value)));
+}
+
 function stableStringify(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'undefined';
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;

@@ -1,12 +1,17 @@
 import { AIExecutionStatus, AIProviderType, AIRequestPurpose, AISafetyDecision } from '../enums';
 
 export type AIRecordStatus = 'DRAFT' | 'REVIEW' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
-export type AIProviderOperationalStatus = 'NOT_CONFIGURED' | 'RUNTIME_PENDING' | 'READY' | 'DEGRADED' | 'UNAVAILABLE' | 'DISABLED';
-export type AIDataClassification = 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'STUDENT_PRIVATE' | 'HIGHLY_SENSITIVE';
-export type AICapabilityKind = 'TEXT_GENERATION' | 'CHAT' | 'STRUCTURED_OUTPUT' | 'EMBEDDINGS' | 'RERANKING' | 'MODERATION';
-export type AIWorkflowRunStatus = 'QUEUED' | 'RUNNING' | 'PAUSED' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+export type AIProviderOperationalStatus =
+  'NOT_CONFIGURED' | 'RUNTIME_PENDING' | 'READY' | 'DEGRADED' | 'UNAVAILABLE' | 'DISABLED';
+export type AIDataClassification =
+  'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'STUDENT_PRIVATE' | 'HIGHLY_SENSITIVE';
+export type AICapabilityKind =
+  'TEXT_GENERATION' | 'CHAT' | 'STRUCTURED_OUTPUT' | 'EMBEDDINGS' | 'RERANKING' | 'MODERATION';
+export type AIWorkflowRunStatus =
+  'QUEUED' | 'RUNNING' | 'PAUSED' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
 export type AIEvaluationRunStatus = 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
-export type AIAsyncJobStatus = 'QUEUED' | 'RUNNING' | 'RETRYING' | 'COMPLETED' | 'FAILED' | 'DEAD_LETTER' | 'CANCELLED';
+export type AIAsyncJobStatus =
+  'QUEUED' | 'RUNNING' | 'RETRYING' | 'COMPLETED' | 'FAILED' | 'DEAD_LETTER' | 'CANCELLED';
 
 export interface AIProviderDefinition {
   id: string;
@@ -139,6 +144,8 @@ export interface AIConsumerPolicy {
   allowedModels?: string[] | null;
   requestsPerMinute: number;
   dailyRequestLimit: number;
+  requesterRequestsPerMinute?: number;
+  requesterConcurrentLimit?: number;
   monthlyTokenLimit: number;
   monthlyCostLimit?: number | null;
   currency?: string | null;
@@ -221,7 +228,16 @@ export interface AIWorkflowDefinition {
   displayNameEn: string;
   status: AIRecordStatus;
   activeVersion?: number | null;
-  definition: { steps: Array<{ key: string; capabilityKey: string; promptKey: string; dependsOn?: string[]; retryLimit?: number }> };
+  definition: {
+    budget?: { maxTokens: number; maxCost: number; currency: string };
+    steps: Array<{
+      key: string;
+      capabilityKey: string;
+      promptKey: string;
+      dependsOn?: string[];
+      retryLimit?: number;
+    }>;
+  };
 }
 
 export interface AIWorkflowVersion {
@@ -257,6 +273,19 @@ export interface AIWorkflowRun {
   status: AIWorkflowRunStatus;
   traceId: string;
   inputReferenceHash: string;
+  requesterReferenceId?: string | null;
+  executionPlan?: {
+    budget: { maxTokens: number; maxCost: number; currency: string };
+    bindings: Record<
+      string,
+      {
+        promptVersion: number;
+        routingPolicyKey?: string;
+        fingerprint: string;
+        purpose: AIRequestPurpose;
+      }
+    >;
+  } | null;
   outputReferenceHash?: string | null;
   currentStep?: string | null;
   errorMessage?: string | null;
@@ -271,9 +300,22 @@ export interface AIEvaluationDefinition {
   status: AIRecordStatus;
   capabilityKey: string;
   target: { type: 'PROMPT' | 'MODEL' | 'ROUTING' | 'WORKFLOW' | 'KNOWLEDGE'; key: string };
-  deploymentGate?: { minimumScore: number; maximumSafetyFailures: number; requiresHumanApproval: boolean } | null;
-  dataset: Array<{ key: string; input: string; expected?: unknown; metadata?: Record<string, unknown> }>;
-  evaluators: Array<{ key: string; type: 'EXACT_MATCH' | 'JSON_SCHEMA' | 'REGEX' | 'LATENCY' | 'COST' | 'HUMAN'; threshold?: number }>;
+  deploymentGate?: {
+    minimumScore: number;
+    maximumSafetyFailures: number;
+    requiresHumanApproval: boolean;
+  } | null;
+  dataset: Array<{
+    key: string;
+    input: string;
+    expected?: unknown;
+    metadata?: Record<string, unknown>;
+  }>;
+  evaluators: Array<{
+    key: string;
+    type: 'EXACT_MATCH' | 'JSON_SCHEMA' | 'REGEX' | 'LATENCY' | 'COST' | 'HUMAN';
+    threshold?: number;
+  }>;
 }
 
 export interface AIEvaluationRun {
@@ -344,7 +386,12 @@ export interface AIIncident {
   description: string;
   executionPublicId?: string | null;
   ownerReferenceId?: string | null;
-  timeline: Array<{ at: Date | string; action: string; actorReferenceId?: string | null; note?: string | null }>;
+  timeline: Array<{
+    at: Date | string;
+    action: string;
+    actorReferenceId?: string | null;
+    note?: string | null;
+  }>;
   createdAt: Date | string;
   updatedAt: Date | string;
 }

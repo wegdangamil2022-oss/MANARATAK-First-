@@ -1,0 +1,52 @@
+name: P17 Targeted Source Verification
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/api/src/presentation/api/router/AIAdminRouter.ts'
+      - 'apps/api/src/presentation/api/router/AIGatewayRouter.ts'
+      - 'apps/api/tests/presentation/api/router/AIAdminRouter.spec.ts'
+      - 'apps/api/tests/presentation/api/router/AIGatewayRouter.spec.ts'
+      - 'packages/application/src/ai-platform/**'
+      - 'packages/application/tests/ai-platform/**'
+      - 'packages/infrastructure/src/ai-platform/**'
+      - 'packages/infrastructure/tests/ai-platform/**'
+      - 'packages/domain/src/ai-platform/**'
+      - 'apps/admin/src/pages/AIGovernance*'
+      - 'packages/shared/src/authorization/**'
+      - '.github/workflows/p17-targeted-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p17-targeted-source:
+    name: P17 isolated source and mock tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Generate Prisma source client without database access
+        run: |
+          unset DATABASE_URL
+          npm run db:source:verify
+      - name: Compile source project references for local workspace package resolution
+        run: |
+          unset DATABASE_URL
+          npm run typecheck
+      - name: Run focused P17 governance, adapters and HTTP boundary tests
+        run: |
+          unset DATABASE_URL
+          npx --no-install vitest run \
+            packages/infrastructure/tests/ai-platform \
+            packages/application/tests/ai-platform \
+            apps/admin/src/pages/AIGovernancePage.spec.tsx \
+            apps/api/tests/presentation/api/router/AIAdminRouter.spec.ts \
+            apps/api/tests/presentation/api/router/AIGatewayRouter.spec.ts

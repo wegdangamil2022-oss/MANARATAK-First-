@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
-import { AIExecutionStatus } from '@manaratak/domain';
+import { AIExecutionStatus, AuthorizationEvaluatorService } from '@manaratak/domain';
 import {
   AIExecutionOrchestrator,
   AIKnowledgeUseCases,
@@ -112,8 +112,88 @@ export class AIAdminRouter {
     aiWorkflowUseCases: AIWorkflowUseCases;
     aiEvaluationUseCases: AIEvaluationUseCases;
     aiKnowledgeUseCases: AIKnowledgeUseCases;
+    authEvaluatorService: AuthorizationEvaluatorService;
   }): Router {
     const router = Router();
+    const permissionFor = (method: string, path: string): string | null => {
+      if (method === 'GET')
+        return /^\/executions\/[^/]+\/reconciliation$/.test(path)
+          ? 'admin:ai:cost:manage'
+          : 'admin:ai:view';
+      if (method === 'PUT' && /^\/[^/]+\/[^/]+$/.test(path)) {
+        const resource = path.split('/')[1];
+        if (['guardrails', 'platformSettings', 'incidents'].includes(resource))
+          return 'admin:ai:safety:manage';
+        if (['consumers', 'modelPrices'].includes(resource)) return 'admin:ai:cost:manage';
+        if (resource === 'prompts') return 'admin:ai:prompt:author';
+        if (['knowledgeIndexes', 'knowledgeSources'].includes(resource))
+          return 'admin:ai:index:approve';
+        return 'admin:ai:configure';
+      }
+      if (method !== 'POST') return null;
+      if (/^\/configuration\/[^/]+\/[^/]+\/(STAGE|ROLLBACK)$/.test(path)) {
+        const resource = path.split('/')[2];
+        return ['guardrails', 'platformSettings'].includes(resource)
+          ? 'admin:ai:safety:manage'
+          : resource === 'consumers'
+            ? 'admin:ai:cost:manage'
+            : 'admin:ai:configure';
+      }
+      if (/^\/configuration\/[^/]+\/[^/]+\/APPROVE$/.test(path)) return 'admin:ai:prompt:review';
+      if (/^\/configuration\/[^/]+\/[^/]+\/ACTIVATE$/.test(path)) return 'admin:ai:deploy';
+      if (/^\/executions\/[^/]+\/reconciliation\/(PROPOSE|APPROVE)$/.test(path))
+        return 'admin:ai:cost:manage';
+      if (/^\/knowledge-indexes\/[^/]+\/remove$/.test(path)) return 'admin:ai:index:approve';
+      if (/^\/async-queue\/jobs\/[^/]+\/(RETRY|CANCEL)$/.test(path))
+        return 'admin:ai:queue:operate';
+      if (/^\/prompts\/[^/]+\/versions$/.test(path)) return 'admin:ai:prompt:author';
+      if (/^\/prompts\/[^/]+\/versions\/[^/]+\/approve$/.test(path))
+        return 'admin:ai:prompt:review';
+      if (/^\/prompts\/[^/]+\/(deployments|rollback)$/.test(path)) return 'admin:ai:deploy';
+      if (/^\/evaluation-runs\/[^/]+\/approve$/.test(path)) return 'admin:ai:prompt:review';
+      if (/^\/knowledge-indexes\/[^/]+\/index$/.test(path)) return 'admin:ai:index:approve';
+      if (/^\/incidents\/[^/]+\/events$/.test(path)) return 'admin:ai:safety:manage';
+      if (
+        path === '/playground/execute' ||
+        /^\/workflows\/[^/]+\/runs$/.test(path) ||
+        /^\/workflow-runs\/[^/]+\/execute$/.test(path) ||
+        /^\/evaluations\/[^/]+\/runs$/.test(path) ||
+        /^\/evaluation-runs\/[^/]+\/execute$/.test(path)
+      )
+        return 'admin:ai:execute';
+      return null;
+    };
+    router.use(async (req, res, next) => {
+      if (!req.authUserId) {
+        res.status(401).json({ error: 'AI_AUTHENTICATED_ACTOR_REQUIRED' });
+        return;
+      }
+      const permission = permissionFor(req.method, req.path);
+      if (!permission) {
+        res.status(403).json({ error: 'AI_CAPABILITY_UNRECOGNIZED' });
+        return;
+      }
+      try {
+        const result = await cradle.authEvaluatorService.evaluatePermission(
+          req.authUserId,
+          permission,
+          {
+            ip: req.ip || req.socket?.remoteAddress || undefined,
+            requestTime: new Date(),
+            userAgent: req.headers['user-agent'],
+            correlationId: req.headers['x-correlation-id'],
+          },
+        );
+        if (!result.isGranted) {
+          res.status(403).json({ error: 'AI_PERMISSION_DENIED', requiredPermission: permission });
+          return;
+        }
+        res.setHeader('X-Admin-Required-Permission', permission);
+        next();
+      } catch {
+        res.status(403).json({ error: 'AI_PERMISSION_DENIED', requiredPermission: permission });
+      }
+    });
     const asyncHandler =
       (fn: (req: Request, res: Response) => Promise<void>) =>
       (req: Request, res: Response, next: NextFunction) =>
@@ -295,16 +375,14 @@ export class AIAdminRouter {
             status: z.enum(['DRAFT', 'REVIEW']).default('DRAFT'),
           })
           .parse(req.body);
-        res
-          .status(201)
-          .json(
-            await cradle.aiPlatformAdminUseCases.createPromptVersion({
-              ...body,
-              promptKey: keySchema.parse(req.params.key),
-              createdBy: actor(req),
-              approvedBy: null,
-            }),
-          );
+        res.status(201).json(
+          await cradle.aiPlatformAdminUseCases.createPromptVersion({
+            ...body,
+            promptKey: keySchema.parse(req.params.key),
+            createdBy: actor(req),
+            approvedBy: null,
+          }),
+        );
       }),
     );
     router.post(
@@ -354,6 +432,7 @@ export class AIAdminRouter {
             await cradle.aiWorkflowUseCases.start(
               keySchema.parse(req.params.key),
               safeRecord.parse(req.body),
+              actor(req),
             ),
           );
       }),
@@ -362,39 +441,164 @@ export class AIAdminRouter {
       '/workflow-runs/:publicId/execute',
       asyncHandler(async (req, res) => {
         res.json(
-          await cradle.aiWorkflowUseCases.run(req.params.publicId, safeRecord.parse(req.body)),
+          await cradle.aiWorkflowUseCases.run(
+            req.params.publicId,
+            safeRecord.parse(req.body),
+            actor(req),
+          ),
         );
       }),
     );
     router.post(
       '/evaluations/:key/runs',
       asyncHandler(async (req, res) => {
-        res
-          .status(202)
-          .json(
-            await cradle.aiEvaluationUseCases.start(
-              keySchema.parse(req.params.key),
-              z
-                .object({
-                  promptVersion: z.number().int().positive().optional(),
-                  modelKey: keySchema.optional(),
-                })
-                .parse(req.body),
-            ),
-          );
+        res.status(202).json(
+          await cradle.aiEvaluationUseCases.start(keySchema.parse(req.params.key), {
+            ...z
+              .object({
+                promptVersion: z.number().int().positive().optional(),
+                modelKey: keySchema.optional(),
+              })
+              .parse(req.body),
+            requestedBy: actor(req),
+          }),
+        );
       }),
     );
     router.post(
       '/evaluation-runs/:publicId/execute',
       asyncHandler(async (req, res) => {
         actor(req);
-        res.json(await cradle.aiEvaluationUseCases.run(req.params.publicId));
+        res.json(await cradle.aiEvaluationUseCases.run(req.params.publicId, actor(req)));
       }),
     );
     router.post(
       '/evaluation-runs/:publicId/approve',
       asyncHandler(async (req, res) => {
         res.json(await cradle.aiEvaluationUseCases.approve(req.params.publicId, actor(req)));
+      }),
+    );
+    router.get(
+      '/configuration/:resource/:key/revisions',
+      asyncHandler(async (req, res) => {
+        const resource = z
+          .enum(['guardrails', 'routingPolicies', 'consumers', 'evaluations', 'platformSettings'])
+          .parse(req.params.resource);
+        res.json(
+          await cradle.aiPlatformAdminUseCases.listConfigurationRevisions(resource, req.params.key),
+        );
+      }),
+    );
+    router.get(
+      '/executions/:publicId/reconciliation',
+      asyncHandler(async (req, res) => {
+        res.setHeader('Cache-Control', 'no-store');
+        res.json(await cradle.aiPlatformAdminUseCases.reconciliationEvidence(req.params.publicId));
+      }),
+    );
+    router.post(
+      '/configuration/:resource/:key/:action',
+      asyncHandler(async (req, res) => {
+        const resource = z
+          .enum(['guardrails', 'routingPolicies', 'consumers', 'evaluations', 'platformSettings'])
+          .parse(req.params.resource);
+        const action = z
+          .enum(['STAGE', 'APPROVE', 'ACTIVATE', 'ROLLBACK'])
+          .parse(req.params.action);
+        const body = z
+          .object({
+            configuration: z.record(z.string(), z.unknown()).optional(),
+            revisionKey: z.string().max(200).optional(),
+            expectedUpdatedAt: z.string().datetime().optional(),
+            reason: z.string().min(3).max(1000),
+            incidentReference: z.string().max(200).optional(),
+          })
+          .strict()
+          .parse(req.body);
+        if (body.incidentReference) {
+          const approved = await cradle.authEvaluatorService.evaluatePermission(
+            actor(req),
+            'admin:ai:break-glass',
+          );
+          if (!approved.isGranted) {
+            res.status(403).json({ error: 'AI_BREAK_GLASS_PERMISSION_REQUIRED' });
+            return;
+          }
+        }
+        res.json(
+          await cradle.aiPlatformAdminUseCases.governConfiguration(
+            resource,
+            keySchema.parse(req.params.key),
+            action,
+            body,
+            actor(req),
+          ),
+        );
+      }),
+    );
+    router.post(
+      '/executions/:publicId/reconciliation/:action',
+      asyncHandler(async (req, res) => {
+        const action = z.enum(['PROPOSE', 'APPROVE']).parse(req.params.action);
+        const body = z
+          .object({
+            tokens: z.number().int().nonnegative(),
+            cost: z.number().finite().nonnegative(),
+            currency: z.string().regex(/^[A-Z]{3}$/),
+            reference: z.string().min(1).max(500),
+            reason: z.string().min(3).max(1000),
+            expectedUpdatedAt: z.string().datetime(),
+          })
+          .strict()
+          .parse(req.body);
+        const { expectedUpdatedAt, ...evidence } = body;
+        res.json(
+          await cradle.aiPlatformAdminUseCases.reconcileReservation(
+            req.params.publicId,
+            action,
+            evidence,
+            actor(req),
+            expectedUpdatedAt,
+          ),
+        );
+      }),
+    );
+    router.get(
+      '/knowledge-indexes/:key/source',
+      asyncHandler(async (req, res) => {
+        const query = z
+          .object({
+            sourceType: keySchema,
+            sourceReferenceId: z.string().min(1).max(500),
+            locale: z.enum(['ar', 'en']).optional(),
+          })
+          .parse(req.query);
+        res.setHeader('Cache-Control', 'no-store');
+        res.json(
+          await cradle.aiKnowledgeUseCases.readSource(
+            req.params.key,
+            query.sourceType,
+            query.sourceReferenceId,
+            actor(req),
+            query.locale,
+          ),
+        );
+      }),
+    );
+    router.post(
+      '/knowledge-indexes/:key/remove',
+      asyncHandler(async (req, res) => {
+        const body = z
+          .object({ sourceType: keySchema, sourceReferenceId: z.string().min(1).max(500) })
+          .strict()
+          .parse(req.body);
+        await cradle.aiKnowledgeUseCases.removeSource(
+          req.params.key,
+          body.sourceType,
+          body.sourceReferenceId,
+          actor(req),
+        );
+        res.status(204).end();
       }),
     );
     router.post(
@@ -406,18 +610,15 @@ export class AIAdminRouter {
             sourceReferenceId: z.string().min(1).max(500),
             sourceVersion: z.string().max(200).optional(),
             locale: z.string().max(20).optional(),
-            content: z.string().min(1).max(2_000_000),
           })
           .parse(req.body);
-        res
-          .status(202)
-          .json(
-            await cradle.aiKnowledgeUseCases.index({
-              indexKey: keySchema.parse(req.params.key),
-              ...body,
-              actorReferenceId: actor(req),
-            }),
-          );
+        res.status(202).json(
+          await cradle.aiKnowledgeUseCases.index({
+            indexKey: keySchema.parse(req.params.key),
+            ...body,
+            actorReferenceId: actor(req),
+          }),
+        );
       }),
     );
     router.post(
@@ -432,6 +633,7 @@ export class AIAdminRouter {
             body.action,
             actor(req),
             body.note,
+            z.string().min(1).max(200).parse(req.get('Idempotency-Key')),
           ),
         );
       }),

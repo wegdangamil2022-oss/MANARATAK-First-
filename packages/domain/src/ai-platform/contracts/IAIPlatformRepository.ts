@@ -69,6 +69,8 @@ export interface IAIPlatformRepository {
       reservationKey: string;
       requestsPerMinute: number;
       dailyRequestLimit: number;
+      requesterRequestsPerMinute?: number;
+      requesterConcurrentLimit?: number;
       monthlyTokenLimit: number;
       monthlyCostLimit?: number | null;
       currency?: string | null;
@@ -81,14 +83,20 @@ export interface IAIPlatformRepository {
     usage: { tokens: number; cost: number; currency?: string | null; release?: boolean },
   ): Promise<void>;
   updateExecution(publicId: string, patch: Partial<AIExecutionRecord>): Promise<AIExecutionRecord>;
+  requestExecutionCancellation(
+    publicId: string,
+    requesterReferenceId: string,
+  ): Promise<AIExecutionRecord>;
+  cancelUnstartedExecution(
+    publicId: string,
+    requesterReferenceId: string,
+  ): Promise<AIExecutionRecord>;
   findExecution(publicId: string): Promise<AIExecutionRecord | null>;
   findExecutionByIdempotency(
     consumerKey: string,
     idempotencyKeyHash: string,
   ): Promise<AIExecutionRecord | null>;
-  listExecutions(
-    filters?: Record<string, unknown>,
-  ): Promise<{
+  listExecutions(filters?: Record<string, unknown>): Promise<{
     data: AIExecutionRecord[];
     total: number;
     page: number;
@@ -106,7 +114,12 @@ export interface IAIPlatformRepository {
     page?: number;
     pageSize?: number;
   }): Promise<{ data: AIAsyncJobRecord[]; total: number }>;
+  listClaimableAsyncJobs(limit: number, now?: Date): Promise<AIAsyncJobRecord[]>;
   claimAsyncJob(publicId: string, workerId: string): Promise<AIAsyncJobRecord | null>;
+  renewAsyncJobLease(
+    publicId: string,
+    lease: { workerId: string; lockedAt: Date | string },
+  ): Promise<boolean>;
   updateAsyncJob(
     publicId: string,
     patch: Partial<AIAsyncJobRecord>,
@@ -169,14 +182,22 @@ export interface IAIPlatformRepository {
   ): Promise<AIEvaluationRun | null>;
   updateEvaluationRun(publicId: string, patch: Partial<AIEvaluationRun>): Promise<AIEvaluationRun>;
   approveEvaluationRun(publicId: string, actorReferenceId: string): Promise<AIEvaluationRun>;
-  appendIncidentEvent(publicId: string, event: AIIncident['timeline'][number]): Promise<AIIncident>;
+  appendIncidentEvent(
+    publicId: string,
+    event: AIIncident['timeline'][number],
+    idempotencyKey?: string,
+  ): Promise<AIIncident>;
   createIndexingRun(value: Omit<AIIndexingRun, 'id' | 'createdAt'>): Promise<AIIndexingRun>;
   updateIndexingRun(publicId: string, patch: Partial<AIIndexingRun>): Promise<AIIndexingRun>;
   replaceEmbeddings(input: {
     indexKey: string;
+    sourceType: string;
     sourceReferenceId: string;
+    sourceVersion?: string | null;
     modelKey: string;
     dimensions: number;
+    source?: AIKnowledgeSource;
+    runPublicId?: string;
     chunks: Array<{
       chunkKey: string;
       chunkText: string;
@@ -185,6 +206,43 @@ export interface IAIPlatformRepository {
       metadata?: Record<string, unknown>;
     }>;
   }): Promise<void>;
+  listConfigurationRevisions(
+    resource: AIRegistryResource,
+    key: string,
+  ): Promise<Record<string, unknown>[]>;
+  governConfiguration(
+    resource: AIRegistryResource,
+    key: string,
+    action: 'STAGE' | 'APPROVE' | 'ACTIVATE' | 'ROLLBACK',
+    input: {
+      configuration?: Record<string, unknown>;
+      revisionKey?: string;
+      expectedUpdatedAt?: string;
+      reason: string;
+      incidentReference?: string;
+    },
+    actorReferenceId: string,
+  ): Promise<Record<string, unknown>>;
+  removeKnowledgeSource(
+    indexKey: string,
+    sourceType: string,
+    sourceReferenceId: string,
+    actorReferenceId: string,
+  ): Promise<void>;
+  listKnowledgeChunks(
+    indexKey: string,
+    sourceType: string,
+    sourceReferenceId: string,
+    sourceVersion: string,
+  ): Promise<Array<{ metadata: Record<string, unknown> | null }>>;
+  maintainPrivacyAndReservations(limit?: number): Promise<{ purged: number; reconciled: number }>;
+  reconcileReservation(
+    publicId: string,
+    action: 'PROPOSE' | 'APPROVE',
+    evidence: { tokens: number; cost: number; currency: string; reference: string; reason: string },
+    actorReferenceId: string,
+    expectedUpdatedAt: string,
+  ): Promise<AIExecutionRecord>;
   providerCircuitCanAttempt(
     key: string,
     threshold?: number,

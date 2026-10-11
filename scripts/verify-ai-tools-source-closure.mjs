@@ -33,8 +33,10 @@ const checks = {
   ai_repository_present: exists('packages/infrastructure/src/ai-platform/PrismaAIPlatformRepository.ts'),
   ai_admin_present: exists('apps/admin/src/pages/AIGovernancePage.tsx'),
   provider_runtime_pending_status: /'RUNTIME_PENDING'/.test(aiDomain),
-  env_secret_not_fake_ready: /this\.secret\(\) \? \(this\.runtimeVerified \? 'READY' : 'RUNTIME_PENDING'\)/.test(adapters),
-  provider_ready_requires_runtime_success: /markRuntimeVerified/.test(adapters) && /runtimeVerified = true/.test(adapters),
+  env_secret_not_fake_ready: /return this\.secret\(\)[\s\S]{0,200}'RUNTIME_PENDING'[\s\S]{0,60}'NOT_CONFIGURED'/.test(adapters),
+  provider_ready_requires_runtime_success: /this\.health\.set/.test(adapters) &&
+    /Date\.now\(\) - at < 300_000/.test(adapters) &&
+    /healthEvidence\(capability: AICapabilityKind, model: string\)/.test(adapters),
   pending_provider_can_be_attempted: /status === 'READY' \|\| status === 'RUNTIME_PENDING'/.test(aiUseCases),
   ai_health_reports_runtime_pending: /AI_PROVIDER_RUNTIME_PENDING/.test(app) && /runtimePending/.test(app),
   ai_overview_reports_runtime_pending: /counts\.RUNTIME_PENDING/.test(aiRepo) && /'RUNTIME_PENDING'/.test(aiRepo),
