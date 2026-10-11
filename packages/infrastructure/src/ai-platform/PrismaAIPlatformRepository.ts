@@ -918,6 +918,22 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
     });
   }
 
+  async renewAsyncJobLease(
+    publicId: string,
+    lease: { workerId: string; lockedAt: Date | string },
+  ): Promise<boolean> {
+    const now = new Date();
+    const changed = await this.prisma.aIAsyncJobRecord.updateMany({
+      where: {
+        publicId, status: 'RUNNING', lockedBy: lease.workerId,
+        lockedAt: new Date(lease.lockedAt),
+        leaseExpiresAt: { gt: now },
+      },
+      data: { leaseExpiresAt: new Date(now.getTime() + ASYNC_LEASE_MS) },
+    });
+    return changed.count === 1;
+  }
+
   async updateAsyncJob(
     publicId: string,
     patch: Partial<AIAsyncJobRecord>,
