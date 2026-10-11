@@ -318,8 +318,15 @@ export class CmsAdminRouter {
       res.json(await adminCmsUseCases.changeLocalizedSlug(req.params.id, body.locale, body.newSlug, body.reason, body.expectedVersion, actor(req)));
     }));
     router.get('/redirects', asyncHandler(async (req, res) => {
-      const query = z.object({ siteIdentifier: z.literal('manaratak').optional(), locale: z.string().optional() }).parse(req.query);
-      res.json({ data: await adminCmsUseCases.listRedirects(query.siteIdentifier, query.locale) });
+      const query = z.object({
+        siteIdentifier: z.literal('manaratak').default('manaratak'),
+        locale: z.enum(['ar', 'en']).optional(),
+        q: z.string().trim().max(200).optional(),
+        active: z.enum(['true', 'false']).transform((value) => value === 'true').optional(),
+        page: z.coerce.number().int().min(1).max(1000).default(1),
+        pageSize: z.coerce.number().int().min(1).max(100).default(20),
+      }).strict().parse(req.query);
+      res.json(await adminCmsUseCases.searchRedirects(query));
     }));
     router.post('/redirects', asyncHandler(async (req, res) => {
       const body = z.object({ siteIdentifier: z.literal('manaratak').default('manaratak'), locale: z.enum(['ar', 'en']), sourcePath: z.string().min(2), destinationPath: z.string().min(2), statusCode: z.union([z.literal(301), z.literal(302), z.literal(308)]).default(301), reason: z.string().trim().min(3), active: z.boolean().default(true) }).parse(req.body);
