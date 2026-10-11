@@ -54,6 +54,8 @@ export interface UpdateCmsContentDto {
 
 export interface CmsContentDto extends CreateCmsContentDto {
   id: string;
+  /** Effective root editor, separate from the original author. */
+  lastModifiedBy?: string;
   version: number;
   archivedAt?: Date | null;
   createdAt: Date;
