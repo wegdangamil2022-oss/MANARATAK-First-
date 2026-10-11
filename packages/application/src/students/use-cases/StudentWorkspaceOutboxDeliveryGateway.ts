@@ -151,14 +151,14 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     return {items,nextCursor:null};
   }
 
-  /** 40 x 50 = at most 2,000 records per owner; source cursor must advance. */
+  /** 4 x 50 = at most 200 records per dispatch; durable continuation handles the remainder. */
   private async catchUpPages<T>(roleEventId:string,studentReferenceId:string,roleAssignedAt:Date,
     domain:'COURSES'|'CERTIFICATES',
     read:(limit:number,cursor?:string)=>Promise<{items:T[];nextCursor:string|null}>,
     project:(item:T)=>Promise<void>,startCursor?:string):Promise<void> {
     let cursor:string|undefined=startCursor;
     const seen=new Set<string>();
-    for(let index=0;index<40;index++){
+    for(let index=0;index<4;index++){
       const page=await read(50,cursor);
       if(!Array.isArray(page.items)||page.items.length>50||
           typeof page.nextCursor!=='string'&&page.nextCursor!==null)

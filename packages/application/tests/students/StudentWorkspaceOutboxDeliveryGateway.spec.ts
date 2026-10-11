@@ -206,12 +206,12 @@ describe('Student certificate owner-outbox bridge', () => {
       createdAt:new Date('2026-10-10T00:00:00Z'),metadata:{},
       payload:{roleId:'student',identityId:'student-1'}};
     await gateway.deliver(role as any,{idempotencyKey:'role-big'});
-    expect(learning.listPageForStudent).toHaveBeenCalledTimes(40);
+    expect(learning.listPageForStudent).toHaveBeenCalledTimes(4);
     expect(continuation.enqueueContinuation).toHaveBeenCalledWith({
       roleEventId:'role-big',studentReferenceId:'student-1',
-      roleAssignedAt:role.createdAt,domain:'COURSES',cursor:'40',
+      roleAssignedAt:role.createdAt,domain:'COURSES',cursor:'4',
     });
-    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(41);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(5);
   });
 
   it('refuses a forged continuation and never projects it',async()=>{
