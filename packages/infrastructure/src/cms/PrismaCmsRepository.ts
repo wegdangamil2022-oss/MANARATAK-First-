@@ -639,11 +639,12 @@ export class PrismaCmsRepository implements ICmsRepository {
         throw new Error('CMS_REVISION_RELATIONS_UNAVAILABLE');
       }
       const root = await this.requireContent(tx, data.contentId);
-      if (payload.rootFingerprint !== this.contentHash({
-        contentType: root.contentType, siteIdentifier: root.siteIdentifier,
-        categoryId: root.categoryId, categorySlug: root.categorySlug,
-        featuredAssetId: root.featuredAssetId,
-      })) throw new Error('CMS_REVISION_ROOT_CHANGED');
+      const domainLinks = await tx.cmsContentDomainLink.findMany({
+        where: { contentId: root.id }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+      });
+      if (payload.rootFingerprint !== this.rootReviewFingerprint(root, domainLinks)) {
+        throw new Error('CMS_REVISION_ROOT_CHANGED');
+      }
       if ([CmsContentStatus.IN_REVIEW, CmsContentStatus.READY_TO_PUBLISH, CmsContentStatus.SCHEDULED].includes(localized.state)) {
         throw new Error('CMS_CONTENT_LOCKED_FOR_WORKFLOW');
       }
@@ -1619,16 +1620,32 @@ export class PrismaCmsRepository implements ICmsRepository {
     });
   }
 
+  private rootReviewFingerprint(root: any, domainLinks: any[]): string {
+    return this.contentHash({
+      slug: root.slug, siteIdentifier: root.siteIdentifier,
+      primaryLocale: root.primaryLocale, contentType: root.contentType,
+      title: root.title, summary: root.summary, ownerId: root.ownerId,
+      categoryId: root.categoryId, categorySlug: root.categorySlug,
+      featuredAssetId: root.featuredAssetId, seoMetadata: root.seoMetadata,
+      editorialMetadata: root.editorialMetadata, metadata: root.metadata,
+      domainLinks: domainLinks.map((link) => ({
+        targetType: link.targetType, targetId: link.targetId,
+        relationType: link.relationType, sortOrder: link.sortOrder, metadata: link.metadata,
+      })),
+    });
+  }
+
   private async captureRevision(
     tx: any,
     localized: any,
     actorId: string,
     reason: string,
   ): Promise<void> {
-    const [root, tags, attachments] = await Promise.all([
+    const [root, tags, attachments, domainLinks] = await Promise.all([
       this.requireContent(tx, localized.contentId),
       tx.cmsContentTag.findMany({ where: { localizedContentId: localized.id }, select: { tagId: true } }),
       tx.cmsContentAttachment.findMany({ where: { localizedContentId: localized.id }, orderBy: { sortOrder: 'asc' } }),
+      tx.cmsContentDomainLink.findMany({ where: { contentId: localized.contentId }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] }),
     ]);
     await tx.cmsContentRevision.upsert({
       where: {
@@ -1652,11 +1669,7 @@ export class PrismaCmsRepository implements ICmsRepository {
           featuredAssetId: localized.featuredAssetId,
           seoMetadata: localized.seoMetadata,
           metadata: localized.metadata,
-          rootFingerprint: this.contentHash({
-            contentType: root.contentType, siteIdentifier: root.siteIdentifier,
-            categoryId: root.categoryId, categorySlug: root.categorySlug,
-            featuredAssetId: root.featuredAssetId,
-          }),
+          rootFingerprint: this.rootReviewFingerprint(root, domainLinks),
           tagIds: tags.map((entry: any) => entry.tagId).sort(),
           attachments: attachments.map((entry: any) => ({
             assetId: entry.assetId, role: entry.role, sortOrder: entry.sortOrder, caption: entry.caption,
