@@ -29,14 +29,14 @@ Status names mean **source patches only** unless a separate executed test record
 | Plan item | Source status | Actual code evidence, gaps and acceptance needs |
 | --- | --- | --- |
 | `AI-ADM-001` | **PARTIAL** | Transaction blocks prompt author approval and author/checker deployment; distinct RBAC author/review/deploy. Missing explicit break-glass reviewed path, executed regression proof. |
-| `AI-ADM-002` | **PARTIAL** | Definition/dataset/evaluator/gate SHA-256 bound to run, drift checked before and after evaluation, deploy requires match. Transaction-time revalidation, frozen-definition snapshot and race test still needed. |
+| `AI-ADM-002` | **PARTIAL** | SHA-256 binds definition/dataset/evaluators/gate to run; run checks drift pre/post evaluation; deployment now independently revalidates exact approved gate evidence inside its transaction and common advisory gate lock. Immutable evaluated snapshot, active gate activation governance and race proof still needed. |
 | `AI-ADM-003` | **PARTIAL** | Worker-scoped stable idempotency key derived from job.publicId; no caller override. Provider outcome reconciliation, lease heartbeat/fencing and charge-once crash proof still pending. |
-| `AI-ADM-004` | **PARTIAL** | Per-action authorization in AIAdminRouter and operator alias; Admin view route/navigation updated. Missing role provisioning proof, denied RBAC matrix runtime, permission-aware buttons. |
+| `AI-ADM-004` | **PARTIAL** | Admin API checks granular P17 permissions for each operation, operator alias execute-only; UI read-only viewer controls now deny mutations and navigation supports view. Active role/permission provisioning and every-route denied matrix runtime proof still required. |
 | `AI-ADM-005` | **OPEN** | No immutable activation gate for guardrail, routing, consumer spend ceilings, and emergency switch. |
 | `AI-ADM-006` | **MITIGATED_NOT_CLOSED** | Manual unverified ingestion now fails closed before embedding provider; canonical owner verification and trusted read-only gateway remain unwired. |
 | `AI-ADM-007` | **OPEN** | Plaintext chunks/vector persistence classification, retention, search scoping, and revocation lifecycle not completed. Legacy manual indexing is quarantined. |
 | `AI-ADM-008` | **PARTIAL** | Execution now selects max sensitivity from caller/metadata/ownerDataClassification; authenticated owner provenance and positive consent still needed. |
-| `AI-ADM-009` | **PARTIAL** | New non-PUBLIC input/output preview persistence suppressed; existing records purge, TTL and scoped diagnostics remain pending. |
+| `AI-ADM-009` | **PARTIAL** | New non-PUBLIC execution previews omitted; Admin now redacts historical private input/output and trace attributes on reads without mutating DB. Physical historical purge, purpose-scoped diagnostics and retention TTL still outstanding. |
 | `AI-ADM-010` | **OPEN** | Reservation reconciliation for crash/unknown provider outcomes and operator adjudication missing. |
 | `AI-ADM-011` | **OPEN** | Durable queue admission quota/occupancy/idempotency before submit absent; execution-time quota retained. |
 | `AI-ADM-012` | **SOURCE_PATCHED_UNVERIFIED** | Database selects due QUEUED/RETRYING and expired RUNNING before oldest-first limit; new focused tests committed, not executed. |
@@ -48,7 +48,7 @@ Status names mean **source patches only** unless a separate executed test record
 | `AI-ADM-018` | **PARTIAL** | Evaluation submitter/executor identity recorded in evidence; independent one-shot reviewer and result checksum required at repository. Immutable definition snapshot and broader history proof missing. |
 | `AI-ADM-019` | **SOURCE_PATCHED_UNVERIFIED** | Repository requires expectedUpdatedAt on existing records under transaction+advisory lock; Admin editor already sends revision. Need executed concurrent write regression. |
 | `AI-ADM-020` | **PARTIAL** | Production execution enforces finite explicit model input/output prices (zero only if declared), checks effective overlapping ACTIVE pricing windows before writes, tests authored. Cost kind/ledger real-provider reconciliation and historic unknown amounts remain OPEN. |
-| `AI-ADM-021` | **OPEN** | Requester-scoped fairness and concurrent in-flight admission not implemented. |
+| `AI-ADM-021` | **PARTIAL** | Per-requester consumer quotas (rate, daily, in-flight) now carry optional governed policy and safe bounded defaults into serializable atomic execution reservation. Full multi-process contention/fairness tests and async queue admission fairness still outstanding. |
 | `AI-ADM-022` | **OPEN** | Embedding replace identity still omits sourceType/version; collision risk remains (legacy path quarantined). |
 | `AI-ADM-023` | **OPEN** | In-flight cancellation provider signal, honest cancel state and late-result CAS incomplete. |
 | `AI-ADM-024` | **OPEN** | Atomic staged indexing/source activation and PENDING recovery not implemented (manual path quarantined). |
@@ -67,8 +67,10 @@ Status names mean **source patches only** unless a separate executed test record
 - `packages/application/tests/ai-platform/AIAsyncExecution.spec.ts`: stable async job-key and due queue sweep.
 - `packages/application/tests/ai-platform/AIPlatformGovernance.spec.ts`: immutable evaluation definition drift and unverified source ingestion denial.
 - `apps/api/tests/presentation/api/router/AIAdminRouter.spec.ts` (new): fine-grained HTTP RBAC 401/403, reviewer allowed, unknown operations denied.
+- `apps/api/tests/presentation/api/router/AIGatewayRouter.spec.ts`: requester-owned encrypted result/no-store HTTP matrix.
+- `.github/workflows/p17-targeted-source.yml`: Draft-PR source-only TypeScript and focused mock Vitest checks; no provider, DB, workers, migration or paid inference.
 
-**Execution evidence:** Source tests committed but no full positive exact-head CI verification yet. GitHub plugin provided file/commit operations, but no working-tree shell with authenticated repository clone/installed dependencies. TypeScript, Vitest, ESLint, formatting, application build and coverage must be run in a trusted isolated checkout at this branch SHA. Do not convert the presence of source tests or previous `main` GitHub checks into success for this branch. Latest independent GitHub CI outcomes must be bound to head SHA when available.
+**Execution evidence (as of review; not a final exact-head pass):** New dedicated mock workflow initially failed because workspace package dist references were not compiled; source-project compile was added. A later run passed **46/47 tests** with one inconsistent unknown-price error-code assertion; that test was corrected. GitHub CI for subsequent PR heads is being re-run, and no final green result is implied by the prior passes. No database, worker or external provider tests executed. GitHub plugin provided file/commit operations, but no working-tree shell with authenticated repository clone/installed dependencies. TypeScript, Vitest, ESLint, formatting, application build and coverage must be run in a trusted isolated checkout at this branch SHA. Do not convert the presence of source tests or previous `main` GitHub checks into success for this branch. Latest independent GitHub CI outcomes must be bound to head SHA when available.
 
 ## Unresolved source blockers — prerequisites before CODE_CLOSED
 
