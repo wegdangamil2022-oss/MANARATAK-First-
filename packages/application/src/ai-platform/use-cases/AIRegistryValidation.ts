@@ -130,6 +130,26 @@ export function validateAIRegistry(resource: AIRegistryResource, value: Record<s
     number('dailyRequestLimit', 0, 100000000, true);
     number('requesterRequestsPerMinute', 1, 1000000, true, true);
     number('requesterConcurrentLimit', 1, 1000, true, true);
+    number('requesterDailyCostLimit', 0.00000001, 1000000000, false, true);
+    number('requesterMonthlyCostLimit', 0.00000001, 1000000000, false, true);
+    number('requesterMonthlyTokenLimit', 1, Number.MAX_SAFE_INTEGER, true, true);
+    if (
+      [
+        value.requesterDailyCostLimit,
+        value.requesterMonthlyCostLimit,
+        value.requesterMonthlyTokenLimit,
+      ].some((item) => item != null)
+    ) {
+      text('currency');
+      if (
+        [
+          value.requesterDailyCostLimit,
+          value.requesterMonthlyCostLimit,
+          value.requesterMonthlyTokenLimit,
+        ].some((item) => item == null)
+      )
+        fail('requesterBudget');
+    }
     number('monthlyTokenLimit', 0, Number.MAX_SAFE_INTEGER, true);
     number('monthlyCostLimit', 0, 1000000000, false, true);
     if (value.monthlyCostLimit != null) text('currency');

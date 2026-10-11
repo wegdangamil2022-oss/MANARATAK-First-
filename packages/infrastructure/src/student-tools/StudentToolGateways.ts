@@ -15,7 +15,6 @@ import {
   IUniversityRepository,
   ScholarshipCandidate,
   StudentToolDependency,
-  StudentSavedItemType,
   UniversityComparisonItem,
 } from '@manaratak/domain';
 import { IRateLimiter } from '@manaratak/core';
@@ -26,14 +25,26 @@ export class Phase17StudentToolsAIConsumerGateway implements IEnterpriseAIConsum
     request: Parameters<IEnterpriseAIConsumerGateway['executeCapability']>[0],
   ) {
     try {
+      if (request.dataClassification === 'PRIVATE_STUDENT_DATA' && request.privacyConsent !== true)
+        return { status: 'BLOCKED' as const, errorCode: 'TOOL_PRIVACY_CONSENT_REQUIRED' };
+      const readiness = await this.orchestrator.capabilityReadiness({
+        consumerKey: request.consumerKey,
+        capabilityKey: request.capabilityKey,
+        dataClassification:
+          request.dataClassification === 'PRIVATE_STUDENT_DATA' ? 'STUDENT_PRIVATE' : 'PUBLIC',
+      });
+      if (!readiness.ready)
+        return { status: 'NOT_CONFIGURED' as const, errorCode: 'TOOL_AI_CAPABILITY_UNAVAILABLE' };
       const response = await this.orchestrator.executeCapability({
         consumerKey: request.consumerKey,
         capabilityKey: request.capabilityKey,
         input: JSON.stringify(request.payload),
         locale: request.locale,
         sourceDomain: 'Phase18StudentTools',
+        requesterReferenceId: request.requesterReferenceId,
         metadata: {
           correlationId: request.correlationId,
+          isTest: request.consumerKey === 'phase18-student-tools-test',
           dataClassification: request.dataClassification,
         },
         dataClassification:
@@ -84,7 +95,7 @@ export class Phase15StudentContextGateway implements IStudentContextGateway {
     studentReference: string,
   ): ReturnType<IStudentContextGateway['getMinimalContext']> {
     const workspace = await this.repository.findWorkspace(studentReference);
-    if (!workspace) return null;
+    if (!workspace || workspace.privacyPreferences?.allowPersonalization !== true) return null;
     const metadata = workspace.metadata ?? {};
     const interests = Array.isArray(metadata.interests)
       ? metadata.interests.filter((item): item is string => typeof item === 'string').slice(0, 20)
@@ -103,18 +114,14 @@ export class Phase15StudentContextGateway implements IStudentContextGateway {
 export class Phase15StudentToolSaveGateway implements IStudentToolSaveGateway {
   constructor(private readonly repository: IStudentWorkspaceRepository) {}
   async savePrivateResult(input: Parameters<IStudentToolSaveGateway['savePrivateResult']>[0]) {
-    const saved = await this.repository.saveItem({
+    if (!this.repository.savePrivateToolResult)
+      throw new Error('STUDENT_PRIVATE_RESULT_NOT_CONFIGURED');
+    return this.repository.savePrivateToolResult({
       studentReferenceId: input.studentReference,
-      entityType: StudentSavedItemType.STUDENT_TOOL,
-      entityId: input.executionId,
-      entitySlug: input.toolKey,
-      metadata: {
-        sourceDomain: 'PHASE_18',
-        resultReference: input.resultReference,
-        privateResult: input.result,
-      },
+      toolKey: input.toolKey,
+      executionId: input.executionId,
+      result: input.result,
     });
-    return { savedReference: saved.id };
   }
 }
 
@@ -184,13 +191,19 @@ export class CanonicalScholarshipRecommendationGateway implements IScholarshipRe
     const batches = countryIds.length ? countryIds : [undefined];
     const unique = new Map<string, ScholarshipCandidate>();
 
-    for (const countryReferenceId of batches) {
-      const items = await this.listAllPublished({
+    for (const countryReferenceId of batches.slice(0, 10)) {
+      if (unique.size >= 25) break;
+      const items = await this.repository.listPublished({
         countryReferenceId,
         degreeLevelId,
         studyLanguageReferenceId: languageReferenceId,
+        fundingType:
+          filters.fundingPreference === 'FULL' || filters.fundingPreference === 'PARTIAL'
+            ? filters.fundingPreference
+            : undefined,
+        limit: 25,
       });
-      for (const item of items) {
+      for (const item of items.data) {
         if (
           filters.fundingPreference === 'FULL' &&
           !(item.isFullyFunded === true || item.fundingTypeCode === 'FULLY_FUNDED')
@@ -214,23 +227,7 @@ export class CanonicalScholarshipRecommendationGateway implements IScholarshipRe
         });
       }
     }
-    return [...unique.values()];
-  }
-
-  private async listAllPublished(filters: Parameters<IScholarshipRepository['listPublished']>[0]) {
-    const data: Awaited<ReturnType<IScholarshipRepository['listPublished']>>['data'] = [];
-    let cursor: string | undefined;
-    let hasMore = true;
-    let scannedPages = 0;
-    do {
-      if (++scannedPages > 500)
-        throw new Error('SCHOLARSHIP_RECOMMENDATION_CANDIDATE_SCAN_LIMIT_EXCEEDED');
-      const result = await this.repository.listPublished({ ...filters, cursor, limit: 100 });
-      data.push(...result.data);
-      cursor = result.nextCursor ?? undefined;
-      hasMore = result.hasMore === true && Boolean(cursor);
-    } while (hasMore);
-    return data;
+    return [...unique.values()].slice(0, 25);
   }
 
   private async resolveCountries(values: string[]): Promise<string[]> {
@@ -301,9 +298,7 @@ export class EnterpriseStudentToolDependencyHealthGateway implements IStudentToo
         return page.total > 0 ? 'READY' : 'NOT_CONFIGURED';
       }
       if (dependency.phase === 'PHASE_17' && dependency.capabilityKey) {
-        const dataClassification = dependency.capabilityKey.includes('motivation-letter')
-          ? 'STUDENT_PRIVATE'
-          : 'PUBLIC';
+        const dataClassification = 'STUDENT_PRIVATE';
         const readiness = await this.aiExecution.capabilityReadiness({
           consumerKey: 'phase18-student-tools',
           capabilityKey: dependency.capabilityKey,

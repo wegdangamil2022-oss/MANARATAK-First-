@@ -28,7 +28,21 @@ export class StudentWorkspaceRouter {
     processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase;
   }): Router {
     const router = Router();
-    const { studentWorkspaceUseCases, studentApplicationTrackerUseCases, financeStudentUseCases, financePlatformUseCases, studentSavedItemHydrationService, studentDashboardHydrationService, studentServiceRequestUseCases, tokenProvider, sessionManager, principalAccessValidator, apiIdempotencyStore, assetRecordRepository, processAssetLifecycleUseCase } = cradle;
+    const {
+      studentWorkspaceUseCases,
+      studentApplicationTrackerUseCases,
+      financeStudentUseCases,
+      financePlatformUseCases,
+      studentSavedItemHydrationService,
+      studentDashboardHydrationService,
+      studentServiceRequestUseCases,
+      tokenProvider,
+      sessionManager,
+      principalAccessValidator,
+      apiIdempotencyStore,
+      assetRecordRepository,
+      processAssetLifecycleUseCase,
+    } = cradle;
 
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
       Promise.resolve(fn(req, res, next)).catch(next);
@@ -351,6 +365,18 @@ export class StudentWorkspaceRouter {
     );
 
     router.get(
+      '/saved-items/:savedReference/private-result',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({
+          data: await studentWorkspaceUseCases.readPrivateToolResult(
+            ownStudent(req),
+            z.string().uuid().parse(req.params.savedReference),
+          ),
+        });
+      }),
+    );
+    router.get(
       '/saved-items/hydrated',
       asyncHandler(async (req: Request, res: Response) => {
         res.json({ data: await studentSavedItemHydrationService.listHydrated(ownStudent(req)) });
@@ -360,7 +386,10 @@ export class StudentWorkspaceRouter {
       '/saved-items',
       asyncHandler(async (req: Request, res: Response) => {
         const body = savedItemSchema.parse(req.body);
-        const saved = await studentWorkspaceUseCases.saveItem({ studentReferenceId: ownStudent(req), ...body });
+        const saved = await studentWorkspaceUseCases.saveItem({
+          studentReferenceId: ownStudent(req),
+          ...body,
+        });
         res.status(201).json(saved);
       }),
     );
@@ -368,60 +397,119 @@ export class StudentWorkspaceRouter {
       '/saved-items/:entityType/:entityId',
       asyncHandler(async (req: Request, res: Response) => {
         const entityType = z.nativeEnum(StudentSavedItemType).parse(req.params.entityType);
-        await studentWorkspaceUseCases.removeSavedItem(ownStudent(req), entityType, req.params.entityId);
+        await studentWorkspaceUseCases.removeSavedItem(
+          ownStudent(req),
+          entityType,
+          req.params.entityId,
+        );
         res.status(204).send();
       }),
     );
-    router.get('/application-trackers', asyncHandler(async (req: Request, res: Response) => {
-      res.json({ data: await studentApplicationTrackerUseCases.list(ownStudent(req)) });
-    }));
-    router.post('/application-trackers', asyncHandler(async (req: Request, res: Response) => {
-      const body = applicationTrackerCreateSchema.parse(req.body);
-      res.status(201).json(await studentApplicationTrackerUseCases.create({ studentReferenceId: ownStudent(req), ...body }));
-    }));
-    router.patch('/application-trackers/:trackerId', asyncHandler(async (req: Request, res: Response) => {
-      res.json(await studentApplicationTrackerUseCases.update(ownStudent(req), req.params.trackerId, applicationTrackerUpdateSchema.parse(req.body)));
-    }));
-    router.patch('/application-trackers/:trackerId/checklist/:itemId', asyncHandler(async (req: Request, res: Response) => {
-      const body = applicationChecklistUpdateSchema.parse(req.body);
-      res.json(await studentApplicationTrackerUseCases.setChecklistItem(ownStudent(req), req.params.trackerId, req.params.itemId, body.completed, body.expectedVersion));
-    }));
-    router.post('/application-trackers/:trackerId/archive', asyncHandler(async (req: Request, res: Response) => {
-      const body = applicationArchiveSchema.parse(req.body);
-      res.json(await studentApplicationTrackerUseCases.archive(ownStudent(req), req.params.trackerId, body.expectedVersion));
-    }));
-    router.delete('/application-trackers/:trackerId', asyncHandler(async (req: Request, res: Response) => {
-      await studentApplicationTrackerUseCases.remove(ownStudent(req), req.params.trackerId); res.status(204).send();
-    }));
+    router.get(
+      '/application-trackers',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.json({ data: await studentApplicationTrackerUseCases.list(ownStudent(req)) });
+      }),
+    );
+    router.post(
+      '/application-trackers',
+      asyncHandler(async (req: Request, res: Response) => {
+        const body = applicationTrackerCreateSchema.parse(req.body);
+        res
+          .status(201)
+          .json(
+            await studentApplicationTrackerUseCases.create({
+              studentReferenceId: ownStudent(req),
+              ...body,
+            }),
+          );
+      }),
+    );
+    router.patch(
+      '/application-trackers/:trackerId',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.json(
+          await studentApplicationTrackerUseCases.update(
+            ownStudent(req),
+            req.params.trackerId,
+            applicationTrackerUpdateSchema.parse(req.body),
+          ),
+        );
+      }),
+    );
+    router.patch(
+      '/application-trackers/:trackerId/checklist/:itemId',
+      asyncHandler(async (req: Request, res: Response) => {
+        const body = applicationChecklistUpdateSchema.parse(req.body);
+        res.json(
+          await studentApplicationTrackerUseCases.setChecklistItem(
+            ownStudent(req),
+            req.params.trackerId,
+            req.params.itemId,
+            body.completed,
+            body.expectedVersion,
+          ),
+        );
+      }),
+    );
+    router.post(
+      '/application-trackers/:trackerId/archive',
+      asyncHandler(async (req: Request, res: Response) => {
+        const body = applicationArchiveSchema.parse(req.body);
+        res.json(
+          await studentApplicationTrackerUseCases.archive(
+            ownStudent(req),
+            req.params.trackerId,
+            body.expectedVersion,
+          ),
+        );
+      }),
+    );
+    router.delete(
+      '/application-trackers/:trackerId',
+      asyncHandler(async (req: Request, res: Response) => {
+        await studentApplicationTrackerUseCases.remove(ownStudent(req), req.params.trackerId);
+        res.status(204).send();
+      }),
+    );
 
     router.get(
       '/services/requests',
       asyncHandler(async (req: Request, res: Response) => {
-        const query = z.object({
-          status: z.nativeEnum(ServiceRequestStatus).optional(),
-          page: z.coerce.number().int().positive().optional(),
-          pageSize: z.coerce.number().int().positive().max(100).optional(),
-        }).parse(req.query);
+        const query = z
+          .object({
+            status: z.nativeEnum(ServiceRequestStatus).optional(),
+            page: z.coerce.number().int().positive().optional(),
+            pageSize: z.coerce.number().int().positive().max(100).optional(),
+          })
+          .parse(req.query);
         res.json(await studentServiceRequestUseCases.listMyRequests(ownStudent(req), query));
       }),
     );
     router.post(
       '/services/requests',
       asyncHandler(async (req: Request, res: Response) => {
-        const body = z.object({
-          serviceId: z.string().min(1),
-          requestParameters: z.record(z.string(), z.unknown()).optional(),
-        }).strict().parse(req.body);
-        res.status(201).json(await studentServiceRequestUseCases.createRequest({
-          studentReferenceId: ownStudent(req),
-          ...body,
-        }));
+        const body = z
+          .object({
+            serviceId: z.string().min(1),
+            requestParameters: z.record(z.string(), z.unknown()).optional(),
+          })
+          .strict()
+          .parse(req.body);
+        res.status(201).json(
+          await studentServiceRequestUseCases.createRequest({
+            studentReferenceId: ownStudent(req),
+            ...body,
+          }),
+        );
       }),
     );
     router.get(
       '/services/requests/:requestId',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studentServiceRequestUseCases.getMyRequest(ownStudent(req), req.params.requestId));
+        res.json(
+          await studentServiceRequestUseCases.getMyRequest(ownStudent(req), req.params.requestId),
+        );
       }),
     );
 
@@ -436,9 +524,7 @@ export class StudentWorkspaceRouter {
     router.get(
       '/:studentReferenceId/workspace',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(
-          await studentWorkspaceUseCases.getWorkspace(req.params.studentReferenceId),
-        );
+        res.json(await studentWorkspaceUseCases.getWorkspace(req.params.studentReferenceId));
       }),
     );
 
@@ -458,7 +544,9 @@ export class StudentWorkspaceRouter {
     router.get(
       '/:studentReferenceId/dashboard',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studentDashboardHydrationService.getDashboard(req.params.studentReferenceId));
+        res.json(
+          await studentDashboardHydrationService.getDashboard(req.params.studentReferenceId),
+        );
       }),
     );
 
@@ -573,7 +661,12 @@ export class StudentWorkspaceRouter {
     router.get(
       '/:studentReferenceId/finance/invoices',
       asyncHandler(async (req: Request, res: Response) => {
-        const pagination = z.object({ page: z.coerce.number().int().positive().optional(), pageSize: z.coerce.number().int().positive().max(100).optional() }).parse(req.query);
+        const pagination = z
+          .object({
+            page: z.coerce.number().int().positive().optional(),
+            pageSize: z.coerce.number().int().positive().max(100).optional(),
+          })
+          .parse(req.query);
         res.json(await financeStudentUseCases.listStudentInvoices(ownStudentPath(req), pagination));
       }),
     );
@@ -581,9 +674,7 @@ export class StudentWorkspaceRouter {
     router.get(
       '/:studentReferenceId/finance/overview',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(
-          await financeStudentUseCases.getStudentFinancialOverview(ownStudentPath(req)),
-        );
+        res.json(await financeStudentUseCases.getStudentFinancialOverview(ownStudentPath(req)));
       }),
     );
 
@@ -591,10 +682,7 @@ export class StudentWorkspaceRouter {
       '/:studentReferenceId/finance/invoices/:invoiceId',
       asyncHandler(async (req: Request, res: Response) => {
         res.json(
-          await financeStudentUseCases.getStudentInvoice(
-            ownStudentPath(req),
-            req.params.invoiceId,
-          ),
+          await financeStudentUseCases.getStudentInvoice(ownStudentPath(req), req.params.invoiceId),
         );
       }),
     );
@@ -611,7 +699,6 @@ export class StudentWorkspaceRouter {
       }),
     );
 
-
     router.post(
       '/:studentReferenceId/finance/invoices/:invoiceId/payment-attempts',
       asyncHandler(async (req: Request, res: Response) => {
@@ -620,20 +707,22 @@ export class StudentWorkspaceRouter {
         const idempotencyKey = String(req.headers['idempotency-key'] || '').trim();
         if (!idempotencyKey) throw new Error('PAYMENT_IDEMPOTENCY_KEY_REQUIRED');
         const body = paymentAttemptSchema.parse(req.body);
-        res.status(201).json(await financePlatformUseCases.capturePayment(
-          {
-            invoiceId: req.params.invoiceId,
-            amount: body.amount,
-            paymentMethodToken: body.paymentMethodToken,
-            gatewayProvider: body.gatewayProvider,
-          },
-          {
-            actorId: studentReferenceId,
-            idempotencyKey,
-            correlationId: String(req.headers['x-correlation-id'] || '').trim() || undefined,
-            reason: 'Authenticated student payment attempt',
-          },
-        ));
+        res.status(201).json(
+          await financePlatformUseCases.capturePayment(
+            {
+              invoiceId: req.params.invoiceId,
+              amount: body.amount,
+              paymentMethodToken: body.paymentMethodToken,
+              gatewayProvider: body.gatewayProvider,
+            },
+            {
+              actorId: studentReferenceId,
+              idempotencyKey,
+              correlationId: String(req.headers['x-correlation-id'] || '').trim() || undefined,
+              reason: 'Authenticated student payment attempt',
+            },
+          ),
+        );
       }),
     );
 
@@ -642,17 +731,20 @@ export class StudentWorkspaceRouter {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
       const code = err.message || 'An error occurred';
-      const status = code.includes('NOT_CONFIGURED') || code.includes('RUNTIME_PENDING') || code.includes('runtime transport is pending')
-        ? 503
-        : code.includes('STUDENT_ROUTE_OWNERSHIP_MISMATCH')
-          ? 404
-          : code.includes('VERSION_CONFLICT')
-        ? 409
-        : code.includes('SUSPENDED') || code.includes('ARCHIVED')
-          ? 423
-          : code.includes('NOT_FOUND')
+      const status =
+        code.includes('NOT_CONFIGURED') ||
+        code.includes('RUNTIME_PENDING') ||
+        code.includes('runtime transport is pending')
+          ? 503
+          : code.includes('STUDENT_ROUTE_OWNERSHIP_MISMATCH')
             ? 404
-            : 400;
+            : code.includes('VERSION_CONFLICT')
+              ? 409
+              : code.includes('SUSPENDED') || code.includes('ARCHIVED')
+                ? 423
+                : code.includes('NOT_FOUND')
+                  ? 404
+                  : 400;
       res.status(status).json({ error: code });
     });
 

@@ -432,6 +432,16 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/reviews/section-17-migration-recovery.md",
       "decision": "Expand-only requester/plan columns; preserve ownership, budgets and immutable bindings through backup restore or reviewed forward fix. No reverse SQL or execution asserted."
+    },
+    "20261011180000_p15_private_tool_results": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-19-migration-recovery.md",
+      "decision": "Unapplied additive expansion. Rehearse backup restore after section 28; no down SQL or legacy plaintext backfill is executed."
+    },
+    "20261011180100_p18_release_governance": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-19-migration-recovery.md",
+      "decision": "Unapplied additive expansion. Rehearse backup restore after section 28; no down SQL or legacy plaintext backfill is executed."
     }
   }
 }

@@ -16,8 +16,23 @@ export interface StudentToolFilters {
   lifecycle?: string;
   executionType?: string;
   search?: string;
+  sort?: 'LAUNCH_ORDER' | 'UPDATED_DESC';
+}
+export interface StudentToolExecutionFilters {
+  status?: StudentToolExecutionRecord['status'];
+  isTest?: boolean;
+  traceId?: string;
+  correlationId?: string;
+}
+export interface StudentToolAuditFilters {
+  action?: string;
+  correlationId?: string;
 }
 export interface StudentToolTelemetry {
+  windows?: Record<
+    '24h' | '7d' | '30d',
+    { student: Record<string, number | null>; test: Record<string, number | null> }
+  >;
   executions24h: number | null;
   executions7d: number | null;
   executions30d: number | null;
@@ -26,20 +41,56 @@ export interface StudentToolTelemetry {
   p95LatencyMs: number | null;
   blocked: number | null;
   dependencyFailures: number | null;
+  completed?: number;
+  failed?: number;
+  running?: number;
+  staleRunning?: number;
+  testExecutions?: number;
+  unknownOutcome?: number;
 }
 export interface IStudentToolRegistryRepository {
+  release?(
+    toolKey: string,
+    action: 'PROPOSE' | 'APPROVE' | 'REJECT' | 'ACTIVATE',
+    actor: string,
+    expectedRevision: number,
+    reason: string,
+  ): Promise<StudentToolDefinition>;
+  auditPage?(
+    toolKey: string,
+    page: number,
+    pageSize: number,
+    filters?: StudentToolAuditFilters,
+  ): Promise<{
+    data: Array<{
+      timestamp: Date | string;
+      actor: string;
+      action: string;
+      summary: string;
+      correlationId?: string | null;
+    }>;
+    total: number;
+    page: number;
+    pageSize: number;
+  }>;
+  listPage?(
+    filters: StudentToolFilters & { page?: number; pageSize?: number },
+  ): Promise<{ data: StudentToolDefinition[]; total: number; page: number; pageSize: number }>;
   list(filters?: StudentToolFilters): Promise<StudentToolDefinition[]>;
   listPublic(filters?: StudentToolFilters): Promise<StudentToolDefinition[]>;
   findByKey(toolKey: string): Promise<StudentToolDefinition | null>;
   upsertDefinition(
     definition: StudentToolDefinition,
     actorReferenceId: string,
+    expectedRevision?: number,
   ): Promise<StudentToolDefinition>;
   updateDefinition(
     toolKey: string,
     patch: Partial<StudentToolDefinition>,
     actorReferenceId: string,
     action: string,
+    expectedRevision?: number,
+    reason?: string,
   ): Promise<StudentToolDefinition>;
   recordExecution(record: StudentToolExecutionRecord): Promise<StudentToolExecutionRecord>;
   recordExecutionOrReplay(record: StudentToolExecutionRecord): Promise<{ record: StudentToolExecutionRecord; created: boolean }>;
@@ -59,6 +110,7 @@ export interface IStudentToolRegistryRepository {
     toolKey: string,
     page?: number,
     pageSize?: number,
+    filters?: StudentToolExecutionFilters,
   ): Promise<{ data: StudentToolExecutionRecord[]; total: number }>;
   telemetry(toolKey?: string): Promise<StudentToolTelemetry>;
   audit(
@@ -88,7 +140,7 @@ export interface StudentToolTransientResultWrite {
 export interface StudentToolTransientResultRead extends StudentToolTransientResultWrite {}
 export interface IStudentToolResultProtector {
   status(): 'READY' | 'NOT_CONFIGURED';
-  protect(value: StudentToolOutput): StudentToolProtectedResultEnvelope;
+  protect(value: unknown): StudentToolProtectedResultEnvelope;
   unprotect(value: StudentToolProtectedResultEnvelope): unknown;
 }
 
@@ -97,6 +149,7 @@ export interface IStudentToolHandler<
   TOutput extends StudentToolOutput = StudentToolOutput,
 > {
   readonly toolKey: string;
+  readonly contract?: Pick<StudentToolDefinition, 'inputSchema' | 'outputSchema'>;
   readonly executionType: StudentToolExecutionType;
   validate(input: unknown): TInput;
   validateOutput(output: unknown): TOutput;
@@ -104,7 +157,10 @@ export interface IStudentToolHandler<
 }
 export interface IEnterpriseAIConsumerGateway {
   executeCapability<TPayload extends object, TResult>(request: {
-    consumerKey: 'phase18-student-tools';
+    consumerKey:
+      'phase18-student-tools' | 'phase18-student-tools-test' | 'phase18-student-tools-anonymous';
+    requesterReferenceId?: string;
+    privacyConsent?: boolean;
     capabilityKey:
       'student-tools.motivation-letter.generate' | 'student-tools.scholarship-recommendation.rank';
     correlationId: string;
@@ -175,6 +231,7 @@ export interface IStudentToolDependencyHealthGateway {
 }
 export interface StudentToolHandlerRegistryLike {
   get(toolKey: string): IStudentToolHandler | null;
+  getVersion?(toolKey: string, version: string): IStudentToolHandler | null;
   has(toolKey: string): boolean;
   list(): IStudentToolHandler[];
 }
@@ -188,6 +245,8 @@ export type ExecuteStudentToolRequest = {
   anonymousSessionReference?: string;
   trustedNetworkReference?: string;
   isTest?: boolean;
+  adminTestCostApproved?: boolean;
+  privacyConsent?: boolean;
 };
 export type ExecuteStudentToolResult = StudentToolExecutionResponse<StudentToolOutput>;
 export interface StudentToolExecutionRequester {

@@ -5,6 +5,7 @@ import {
   StudentToolExecutionUseCases,
   StudentToolRegistryUseCases,
 } from '@manaratak/application';
+import { assertBoundedStudentToolInput } from '@manaratak/domain';
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 import { createCanonicalIdempotencyMiddleware } from '../../middleware/CanonicalIdempotencyMiddleware.js';
 
@@ -16,6 +17,10 @@ export class StudentToolsPublicRouter {
     apiIdempotencyStore: PrismaApiIdempotencyStore;
   }) {
     const router = Router();
+    router.use((_req, res, next) => {
+      res.setHeader('Cache-Control', 'no-store');
+      next();
+    });
     const safe =
       (fn: (req: Request, res: Response) => Promise<unknown>) =>
       (req: Request, res: Response, next: NextFunction) =>
@@ -26,13 +31,24 @@ export class StudentToolsPublicRouter {
       implementationStatus: z.string().optional(),
       search: z.string().optional(),
     });
-    router.use(createCanonicalIdempotencyMiddleware({
+    const canonical = createCanonicalIdempotencyMiddleware({
       store: cradle.apiIdempotencyStore,
       requireKey: true,
-      principalResolver: (req) => req.authUserId
-        || req.header('x-student-tools-session')
-        || `anonymous-network:${req.ip || req.socket.remoteAddress || 'unknown'}`,
-    }));
+      principalResolver: (req) =>
+        req.authUserId ||
+        req.header('x-student-tools-session') ||
+        `anonymous-network:${req.ip || req.socket.remoteAddress || 'unknown'}`,
+    });
+    router.use((req, res, next) => {
+      if (req.method === 'POST' && /\/[^/]+\/execute$/.test(req.path)) {
+        const key = req.header('Idempotency-Key');
+        if (!key || key.length < 8 || key.length > 200)
+          return void res.status(400).json({ error: 'IDEMPOTENCY_KEY_REQUIRED' });
+        // P18's encrypted, requester-bound execution intent is the sole replay store for private output.
+        return next();
+      }
+      return canonical(req, res, next);
+    });
 
     const anonymousIdentity = (req: Request, res: Response) => {
       const networkReference = req.ip || req.socket.remoteAddress || 'unknown';
@@ -50,6 +66,13 @@ export class StudentToolsPublicRouter {
       };
     };
 
+    router.get(
+      '/session',
+      safe(async (req, res) => {
+        if (!req.authUserId) anonymousIdentity(req, res);
+        res.json({ data: { ready: true } });
+      }),
+    );
     router.get(
       '/',
       safe(async (req, res) => {
@@ -139,17 +162,30 @@ export class StudentToolsPublicRouter {
       safe(async (req, res) => {
         const body = z
           .object({
-            input: z.unknown(),
+            input: z.unknown().superRefine((value, ctx) => {
+              try {
+                assertBoundedStudentToolInput(value);
+              } catch {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'TOOL_INPUT_INVALID' });
+              }
+            }),
+            privacyConsent: z.boolean().default(false),
             locale: z.enum(['ar', 'en']).optional(),
             idempotencyKey: z.string().max(200).optional(),
           })
+          .strict()
           .parse(req.body);
+        if (body.idempotencyKey && body.idempotencyKey !== req.header('Idempotency-Key'))
+          throw new Error('TOOL_IDEMPOTENCY_KEY_MISMATCH');
         const authenticated = !!req.authUserId;
         const anonymous = authenticated ? null : anonymousIdentity(req, res);
+        if (!authenticated && !req.header('x-student-tools-session'))
+          throw new Error('TOOL_ANONYMOUS_SESSION_REQUIRED');
         const result = await cradle.studentToolExecutionUseCases.execute(req.params.toolKey, {
           input: body.input,
           locale: body.locale,
-          idempotencyKey: body.idempotencyKey,
+          idempotencyKey: req.header('Idempotency-Key') ?? body.idempotencyKey,
+          privacyConsent: body.privacyConsent,
           requestId: String(req.header('x-request-id') ?? ''),
           consumerType: authenticated ? 'AUTHENTICATED_STUDENT' : 'ANONYMOUS',
           authenticatedStudentReference: req.authUserId,
@@ -170,13 +206,13 @@ export class StudentToolsPublicRouter {
           ? 401
           : code.includes('QUOTA_STORE_UNAVAILABLE')
             ? 503
-          : code.includes('RATE_LIMITED')
-            ? 429
-            : code.includes('RESULT_EXPIRED')
-              ? 409
-              : code.includes('NOT_ACTIVE') || code.includes('NOT_IMPLEMENTED')
+            : code.includes('RATE_LIMITED')
+              ? 429
+              : code.includes('RESULT_EXPIRED')
                 ? 409
-                : 400;
+                : code.includes('NOT_ACTIVE') || code.includes('NOT_IMPLEMENTED')
+                  ? 409
+                  : 400;
       res.status(status).json({ error: code });
     });
     return router;

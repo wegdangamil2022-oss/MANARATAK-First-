@@ -13,6 +13,9 @@ import {
   StudentToolImplementationStatus,
   StudentToolExecutionRequester,
   StudentToolPublicAccessPolicy,
+  assertBoundedStudentToolInput,
+  StudentToolExecutionType,
+  StudentToolAIExecutionError,
 } from '@manaratak/domain';
 
 const TRANSIENT_RESULT_TTL_MS = 15 * 60_000;
@@ -32,6 +35,18 @@ export class StudentToolExecutionUseCases {
   ) {}
 
   async execute(toolKey: string, request: ExecuteStudentToolRequest) {
+    if (request.consumerType === 'AUTHENTICATED_STUDENT' && !request.authenticatedStudentReference)
+      throw new Error('TOOL_AUTH_REQUIRED');
+    const abuseIdentity =
+      request.authenticatedStudentReference ??
+      request.trustedNetworkReference ??
+      request.anonymousSessionReference ??
+      'unverified';
+    const abuse = await this.rateLimit.consume(`input-abuse:${hash(abuseIdentity)}`, 120, 60000);
+    if (!abuse.allowed) throw new Error('TOOL_RATE_LIMITED');
+    assertBoundedStudentToolInput(request.input);
+    const handler = this.handlers.get(toolKey);
+    if (!handler) throw new Error('TOOL_NOT_IMPLEMENTED');
     await this.repository.pruneExpiredTransientResults(new Date());
     const tool = await this.repository.findByKey(toolKey);
     if (!tool) throw new Error('TOOL_NOT_FOUND');
@@ -42,6 +57,14 @@ export class StudentToolExecutionUseCases {
       StudentToolPublicAccessPolicy.assertDiscoverable(tool);
     }
     if (!this.handlers.has(toolKey)) throw new Error('TOOL_NOT_IMPLEMENTED');
+    if (
+      !handler.contract ||
+      resultDigest(handler.contract.inputSchema) !== resultDigest(tool.inputSchema) ||
+      resultDigest(handler.contract.outputSchema) !== resultDigest(tool.outputSchema)
+    )
+      throw new Error('TOOL_HANDLER_SCHEMA_MISMATCH');
+    const handlerContractVersion = `${handler.contract.inputSchema.version}:${handler.contract.outputSchema.version}`;
+    if (tool.availability.allowedRegions.length) throw new Error('TOOL_REGION_POLICY_UNAVAILABLE');
     const locale = request.locale ?? 'ar';
     if (
       !tool.supportedLocales.includes(locale) ||
@@ -59,6 +82,7 @@ export class StudentToolExecutionUseCases {
       (!tool.availability.authenticatedEnabled || !tool.featureFlags.authenticatedEnabled)
     )
       throw new Error('TOOL_ACCESS_DENIED');
+    if (request.consumerType !== 'ADMIN_TEST' && StudentToolPublicAccessPolicy.consumerBlockers(tool, request.consumerType, locale).length) throw new Error('TOOL_ACCESS_DENIED');
     if (request.consumerType === 'ANONYMOUS' && !request.anonymousSessionReference)
       throw new Error('TOOL_ANONYMOUS_SESSION_REQUIRED');
     if (request.consumerType === 'ANONYMOUS' && !request.trustedNetworkReference)
@@ -71,13 +95,15 @@ export class StudentToolExecutionUseCases {
       request.anonymousSessionReference ??
       request.requestId ??
       'admin-test';
-    const requestFingerprint = resultDigest({
+    const fingerprintForVersion = (toolVersion: string) => resultDigest({
       toolKey,
-      toolVersion: tool.currentVersion.semanticVersion,
+      toolVersion,
       consumerType: request.consumerType,
       input: request.input,
       locale: request.locale ?? 'ar',
+      privacyConsent: request.privacyConsent === true,
     });
+    const requestFingerprint = fingerprintForVersion(tool.currentVersion.semanticVersion);
     const idempotencyKeyHash = request.idempotencyKey
       ? hash(`${identity}:${request.idempotencyKey}`)
       : null;
@@ -87,11 +113,21 @@ export class StudentToolExecutionUseCases {
         idempotencyKeyHash,
       );
       if (previous) {
-        if (previous.safeUsageMetadata?.requestFingerprint !== requestFingerprint)
+        if (previous.safeUsageMetadata?.requestFingerprint !== fingerprintForVersion(previous.toolVersion))
           throw new Error('TOOL_IDEMPOTENCY_KEY_REUSED');
         return this.replay(previous);
       }
     }
+
+    const input = handler.validate(request.input);
+
+    if (
+      request.consumerType === 'ADMIN_TEST' &&
+      (tool.executionType === StudentToolExecutionType.AI_DELEGATED ||
+        tool.executionType === StudentToolExecutionType.HYBRID) &&
+      request.adminTestCostApproved !== true
+    )
+      throw new Error('TOOL_TEST_BUDGET_NOT_CONFIGURED');
 
     const requestLimit =
       request.consumerType === 'ANONYMOUS'
@@ -130,7 +166,6 @@ export class StudentToolExecutionUseCases {
     });
     if (unavailableRequired) throw new Error('TOOL_DEPENDENCY_UNAVAILABLE');
 
-    const handler = this.handlers.get(toolKey)!;
     const executionId = `stx_${randomUUID()}`;
     const startedAt = new Date();
     const context: StudentToolExecutionContext = {
@@ -145,8 +180,8 @@ export class StudentToolExecutionUseCases {
       authenticatedStudentReference: request.authenticatedStudentReference,
       anonymousSessionReference: request.anonymousSessionReference,
       startedAt,
+      privacyConsent: request.privacyConsent,
     };
-    const input = handler.validate(request.input);
     const claimed = await this.repository.recordExecutionOrReplay({
       executionId,
       toolKey,
@@ -158,9 +193,14 @@ export class StudentToolExecutionUseCases {
       idempotencyKeyHash,
       correlationId: context.correlationId,
       traceId: context.traceId,
-      isTest: request.isTest === true,
+      isTest: request.consumerType === 'ADMIN_TEST',
       startedAt,
-      safeUsageMetadata: { locale: context.locale, requestFingerprint },
+      safeUsageMetadata: {
+        locale: context.locale,
+        requestFingerprint,
+        handlerContractVersion,
+        definitionRevision: tool.revision ?? 0,
+      },
       dependencyStatus,
     });
     if (!claimed.created) {
@@ -170,7 +210,15 @@ export class StudentToolExecutionUseCases {
     }
 
     try {
-      const unvalidatedResult = await handler.execute(context, input as never);
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      const unvalidatedResult = await Promise.race([
+        handler.execute(context, input as never),
+        new Promise<never>((_, reject) => {
+          timeout = setTimeout(() => reject(new Error('TOOL_AI_UNKNOWN_OUTCOME')), 60000);
+        }),
+      ]).finally(() => {
+        if (timeout) clearTimeout(timeout);
+      });
       const result = handler.validateOutput(unvalidatedResult);
       const completedAt = new Date();
       const aiExecutionReference =
@@ -178,7 +226,13 @@ export class StudentToolExecutionUseCases {
           ? result.aiExecutionId
           : null;
       const digest = resultDigest(result);
-      const protectedResult = this.resultProtector.protect(result);
+      const protectedResult = this.resultProtector.protect({
+        result,
+        executionId,
+        toolVersion: context.toolVersion,
+        ownerHash: hash(identity),
+        expiresAt: new Date(completedAt.getTime() + TRANSIENT_RESULT_TTL_MS).toISOString(),
+      });
       await this.repository.completeExecution(
         executionId,
         {
@@ -203,18 +257,22 @@ export class StudentToolExecutionUseCases {
         result,
         aiExecutionReference: aiExecutionReference ?? undefined,
         executedAt: completedAt,
+        resultExpiresAt: new Date(completedAt.getTime() + TRANSIENT_RESULT_TTL_MS),
       };
     } catch (error) {
       const completedAt = new Date();
-      const errorCode =
-        error instanceof Error ? error.message.split(':')[0] : 'TOOL_EXECUTION_FAILED';
+      const candidateCode = error instanceof Error ? error.message.split(':')[0] : '';
+      const errorCode = /^[A-Z][A-Z0-9_]{0,99}$/.test(candidateCode) ? candidateCode : 'TOOL_EXECUTION_FAILED';
       await this.repository.completeExecution(executionId, {
-        status: errorCode.includes('UNAVAILABLE')
-          ? StudentToolExecutionStatus.BLOCKED
-          : StudentToolExecutionStatus.FAILED,
+        status: errorCode.includes('UNKNOWN_OUTCOME')
+          ? StudentToolExecutionStatus.UNKNOWN_OUTCOME
+          : errorCode.includes('BLOCKED') || errorCode.includes('UNAVAILABLE')
+            ? StudentToolExecutionStatus.BLOCKED
+            : StudentToolExecutionStatus.FAILED,
         completedAt,
         durationMs: completedAt.getTime() - startedAt.getTime(),
         errorCode,
+        aiExecutionReference: error instanceof StudentToolAIExecutionError ? error.aiExecutionReference : undefined,
       });
       throw error;
     }
@@ -295,6 +353,16 @@ export class StudentToolExecutionUseCases {
   }
 
   private async replay(record: StudentToolExecutionRecord) {
+    if (
+      record.status === StudentToolExecutionStatus.RUNNING &&
+      Date.now() - new Date(record.startedAt).getTime() > 120000
+    ) {
+      record = await this.repository.completeExecution(record.executionId, {
+        status: StudentToolExecutionStatus.UNKNOWN_OUTCOME,
+        completedAt: new Date(),
+        errorCode: 'TOOL_AI_UNKNOWN_OUTCOME',
+      });
+    }
     if (record.status === StudentToolExecutionStatus.COMPLETED) {
       const result = await this.recoverResult(record);
       return {
@@ -306,6 +374,7 @@ export class StudentToolExecutionUseCases {
         warnings: ['IDEMPOTENT_REPLAY'],
         aiExecutionReference: record.aiExecutionReference ?? undefined,
         executedAt: record.completedAt ?? record.startedAt,
+        resultExpiresAt: record.resultExpiresAt,
       };
     }
     return {
@@ -320,14 +389,30 @@ export class StudentToolExecutionUseCases {
       ],
       aiExecutionReference: record.aiExecutionReference ?? undefined,
       executedAt: record.completedAt ?? record.startedAt,
+      resultExpiresAt: record.resultExpiresAt,
     };
   }
 
   private async recoverResult(record: StudentToolExecutionRecord) {
     const stored = await this.repository.loadTransientResult(record.executionId);
     if (!stored) throw new Error('TOOL_IDEMPOTENT_RESULT_EXPIRED');
-    const raw = this.resultProtector.unprotect(stored.protectedResult);
-    const handler = this.handlers.get(record.toolKey);
+    const envelope = this.resultProtector.unprotect(stored.protectedResult) as Record<
+      string,
+      unknown
+    >;
+    if (
+      envelope.executionId !== record.executionId ||
+      envelope.toolVersion !== record.toolVersion ||
+      envelope.ownerHash !== (record.studentReferenceHash ?? record.anonymousSessionHash) ||
+      envelope.expiresAt !== new Date(stored.resultExpiresAt).toISOString()
+    )
+      throw new Error('TOOL_RESULT_BINDING_INVALID');
+    const raw = envelope.result;
+    const contractVersion = record.safeUsageMetadata?.handlerContractVersion;
+    const handler =
+      typeof contractVersion === 'string'
+        ? this.handlers.getVersion?.(record.toolKey, contractVersion)
+        : null;
     if (!handler) throw new Error('TOOL_NOT_IMPLEMENTED');
     const result = handler.validateOutput(raw);
     const digest = resultDigest(result);

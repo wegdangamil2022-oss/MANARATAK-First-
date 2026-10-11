@@ -309,6 +309,7 @@ export interface ScholarshipAdminSummary {
 }
 
 export interface PublicScholarshipFilters {
+  fundingType?: 'FULL' | 'PARTIAL';
   countryReferenceId?: string;
   studyLanguageReferenceId?: string;
   currencyReferenceId?: string;

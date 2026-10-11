@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 364,
-  "reachableCount": 364,
+  "registrationCount": 365,
+  "reachableCount": 365,
   "unreachable": [],
   "registrations": [
     {
@@ -700,6 +700,7 @@
         "apps/api/src/presentation/api/router/CmsAdminRouter.ts",
         "apps/api/src/presentation/api/router/FinanceAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
+        "apps/api/src/presentation/api/router/StudentToolsAdminRouter.ts",
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
       ],
       "reachableThroughRegistrations": [
@@ -3129,6 +3130,7 @@
         "sourceRegistryGateway",
         "studentApplicationTrackerRepository",
         "studentOwnerCatchupContinuationQueue",
+        "studentPrivateResultRetentionGateway",
         "studentToolRegistryRepository",
         "studentWorkspaceRepository",
         "studyDestinationRepository",
@@ -3464,7 +3466,8 @@
         "assetRetentionGateway",
         "auditRetentionGateway",
         "importRetentionGateway",
-        "retentionDecisionRepository"
+        "retentionDecisionRepository",
+        "studentPrivateResultRetentionGateway"
       ]
     },
     {
@@ -4149,6 +4152,17 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "studentWorkspaceOutboxDeliveryGateway"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "studentPrivateResultRetentionGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "retentionSweepUseCase"
       ],
       "dependencies": [
         "prisma"

@@ -1,3 +1,5 @@
+import { studentToolCopy } from '../../i18n/studentToolCopy';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { createContext, FormEvent, useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight, Plus, Trash2 } from 'lucide-react';
@@ -6,7 +8,13 @@ import { StudentToolResultView } from './StudentToolResultView';
 import { Seo } from '../../components/Seo';
 import { preservePostLoginReturn } from '../students/postLoginIntent';
 
-type RunState = { loading: boolean; error: string; result: unknown; executionId?: string };
+type RunState = {
+  loading: boolean;
+  error: string;
+  result: unknown;
+  executionId?: string;
+  resultExpiresAt?: string | null;
+};
 const initialRun: RunState = { loading: false, error: '', result: null };
 const ToolContext = createContext<PublicStudentToolDto | null>(null);
 export function StudentToolPage() {
@@ -14,11 +22,13 @@ export function StudentToolPage() {
   return <AvailableTool key={toolKey} toolKey={toolKey ?? ''} />;
 }
 function AvailableTool({ toolKey }: { toolKey: string }) {
+  const { language: uiLocale } = useTranslation();
   const [tool, setTool] = useState<PublicStudentToolDto | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const location = useLocation();
+  const { language } = useTranslation();
   const pendingExecution = new URLSearchParams(location.search).get('claimExecution');
   useEffect(() => {
     let active = true;
@@ -55,18 +65,19 @@ function AvailableTool({ toolKey }: { toolKey: string }) {
   }, [toolKey]);
   if (loading)
     return (
-      <Shell title="أدوات الطالب" description="">
-        <p role="status">جاري تحميل الأداة...</p>
+      <Shell title={studentToolCopy('student_tools_copy_0', uiLocale)} description="">
+        <p role="status">{studentToolCopy('student_tools_copy_1', uiLocale)}</p>
       </Shell>
     );
   if (!tool)
     return (
-      <Shell title="الأداة غير متاحة" description="">
-        <p role="alert">{translateError(error)}</p>
+      <Shell title={studentToolCopy('student_tools_copy_2', uiLocale)} description="">
+        <p role="alert">{translateError(error, uiLocale)}</p>
       </Shell>
     );
   const localeAllowed =
-    !tool.availability.allowedLocales?.length || tool.availability.allowedLocales.includes('ar');
+    !tool.availability.allowedLocales?.length ||
+    tool.availability.allowedLocales.includes(language);
   const allowed =
     localeAllowed &&
     (authenticated
@@ -75,19 +86,25 @@ function AvailableTool({ toolKey }: { toolKey: string }) {
   return (
     <ToolContext.Provider value={tool}>
       {pendingExecution && (
-        <section dir="rtl" className="mn-card mx-auto my-4 max-w-5xl p-5">
-          <p className="mb-3">يمكنك حفظ نتيجة استخدامك السابق في حسابك دون إعادة تشغيل الأداة.</p>
+        <section
+          dir={uiLocale === 'ar' ? 'rtl' : 'ltr'}
+          className="mn-card mx-auto my-4 max-w-5xl p-5"
+        >
+          <p className="mb-3">{studentToolCopy('student_tools_copy_3', uiLocale)}</p>
           <SaveResult executionId={pendingExecution} />
         </section>
       )}
       {!allowed ? (
-        <Shell title={tool.nameAr} description={tool.descriptionAr}>
+        <Shell
+          title={language === 'en' ? tool.nameEn : tool.nameAr}
+          description={language === 'en' ? tool.descriptionEn : tool.descriptionAr}
+        >
           <p role="alert">
             {!localeAllowed
-              ? 'الأداة غير متاحة باللغة العربية حاليًا.'
+              ? studentToolCopy('student_tools_copy_4', uiLocale)
               : authenticated
-                ? 'الأداة غير متاحة لحسابات الطلاب حاليًا.'
-                : 'سجّل الدخول لاستخدام هذه الأداة.'}
+                ? studentToolCopy('student_tools_copy_5', uiLocale)
+                : studentToolCopy('student_tools_copy_6', uiLocale)}
           </p>
           {!authenticated && localeAllowed && <LoginForTool />}
         </Shell>
@@ -100,14 +117,18 @@ function AvailableTool({ toolKey }: { toolKey: string }) {
       ) : toolKey === 'scholarship-recommendation' ? (
         <ScholarshipTool />
       ) : (
-        <Shell title={tool.nameAr} description={tool.descriptionAr}>
-          <p>واجهة تشغيل هذه الأداة غير متاحة حاليًا.</p>
+        <Shell
+          title={language === 'en' ? tool.nameEn : tool.nameAr}
+          description={language === 'en' ? tool.descriptionEn : tool.descriptionAr}
+        >
+          <p>{studentToolCopy('student_tools_copy_7', uiLocale)}</p>
         </Shell>
       )}
     </ToolContext.Provider>
   );
 }
 function LoginForTool({ executionId }: { executionId?: string }) {
+  const { language: uiLocale } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   return (
@@ -121,25 +142,34 @@ function LoginForTool({ executionId }: { executionId?: string }) {
         navigate('/login');
       }}
     >
-      تسجيل الدخول{executionId ? ' وحفظ النتيجة' : ''}
+      {studentToolCopy('student_tools_copy_8', uiLocale)}
+      {executionId ? studentToolCopy('student_tools_copy_9', uiLocale) : ''}
     </button>
   );
 }
-function SaveResult({ executionId }: { executionId: string }) {
+function SaveResult({ executionId, expiresAt }: { executionId: string; expiresAt?: string | null }) {
+  const { language: uiLocale } = useTranslation();
   const [state, setState] = useState({ loading: false, message: '', error: '' });
   const busy = useRef(false);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { if (!expiresAt) return; const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, [expiresAt]);
+  const remaining = expiresAt ? Math.max(0, Math.ceil((Date.parse(expiresAt) - now) / 1000)) : null;
   return (
     <div className="mt-5 border-t border-[var(--mn-border)] pt-4">
       <button
         type="button"
-        disabled={state.loading || Boolean(state.message)}
+        disabled={state.loading || Boolean(state.message) || remaining === 0}
         onClick={async () => {
           if (busy.current) return;
           busy.current = true;
           setState({ loading: true, message: '', error: '' });
           try {
             await ApiClient.saveStudentToolExecution(executionId);
-            setState({ loading: false, message: 'حُفظت النتيجة في حسابك.', error: '' });
+            setState({
+              loading: false,
+              message: studentToolCopy('student_tools_copy_10', uiLocale),
+              error: '',
+            });
           } catch (reason) {
             setState({
               loading: false,
@@ -152,19 +182,24 @@ function SaveResult({ executionId }: { executionId: string }) {
         }}
         className="rounded-xl border border-[var(--mn-success-border)] px-4 py-2 font-semibold text-[var(--mn-success-text)] disabled:opacity-60"
       >
-        {state.loading ? 'جاري الحفظ...' : state.message ? 'تم الحفظ' : 'حفظ في حسابي'}
+        {state.loading
+          ? studentToolCopy('student_tools_copy_11', uiLocale)
+          : state.message
+            ? studentToolCopy('student_tools_copy_12', uiLocale)
+            : studentToolCopy('student_tools_copy_13', uiLocale)}
       </button>
+      {remaining !== null && !state.message && <p>{studentToolCopy(remaining === 0 ? 'student_tools_copy_89' : 'student_tools_adoption_countdown', uiLocale)} {remaining > 0 ? `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}` : ''}</p>}
       {state.message && (
         <p role="status" className="mt-3 text-[var(--mn-success-text)]">
           {state.message}{' '}
           <Link to="/student?tab=saved" className="underline">
-            فتح حسابي
+            {studentToolCopy('student_tools_copy_14', uiLocale)}
           </Link>
         </p>
       )}
       {state.error && (
         <p role="alert" className="mt-3 text-[var(--mn-danger-text)]">
-          {translateError(state.error)}
+          {translateError(state.error, uiLocale)}
         </p>
       )}
       {state.error === 'TOOL_AUTH_REQUIRED' && <LoginForTool executionId={executionId} />}
@@ -180,12 +215,13 @@ function Shell({
   description: string;
   children: React.ReactNode;
 }) {
+  const { language: uiLocale } = useTranslation();
   const tool = useContext(ToolContext);
   title = tool?.nameAr || title;
   description = tool?.descriptionAr || description;
   return (
     <main
-      dir="rtl"
+      dir={uiLocale === 'ar' ? 'rtl' : 'ltr'}
       className="manaratak-public mn-page-shell mx-auto min-h-screen max-w-5xl space-y-6 p-3 pb-16 font-['Cairo',sans-serif] sm:p-6"
     >
       <Seo title={`${title} | منارتك`} description={description} />
@@ -193,7 +229,7 @@ function Shell({
         to="/tools"
         className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-[var(--mn-secondary)]"
       >
-        <ArrowRight className="h-4 w-4" /> كل الأدوات
+        <ArrowRight className="h-4 w-4" /> {studentToolCopy('student_tools_copy_15', uiLocale)}
       </Link>
       <header className="mn-search-hero rounded-3xl border border-[var(--mn-border-gold)] p-5 text-white shadow-xl sm:p-7 mn-inverse">
         <h1 className="text-3xl font-bold">{title}</h1>
@@ -202,17 +238,17 @@ function Shell({
       {children}
       {tool && (
         <nav
-          aria-label="صفحات مرتبطة بالأداة"
+          aria-label={studentToolCopy('student_tools_copy_16', uiLocale)}
           className="flex flex-wrap gap-3 text-sm font-semibold text-[var(--mn-secondary)]"
         >
           {tool.toolKey === 'university-comparison' && (
-            <Link to="/universities">استعراض الجامعات</Link>
+            <Link to="/universities">{studentToolCopy('student_tools_copy_17', uiLocale)}</Link>
           )}
           {tool.toolKey === 'scholarship-recommendation' && (
-            <Link to="/scholarships">استعراض المنح</Link>
+            <Link to="/scholarships">{studentToolCopy('student_tools_copy_18', uiLocale)}</Link>
           )}
-          <Link to="/services">خدمات المساعدة</Link>
-          <Link to="/student">حساب الطالب</Link>
+          <Link to="/services">{studentToolCopy('student_tools_copy_19', uiLocale)}</Link>
+          <Link to="/student">{studentToolCopy('student_tools_copy_20', uiLocale)}</Link>
         </nav>
       )}
     </main>
@@ -229,23 +265,27 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const inputClass =
   'min-h-12 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 font-normal text-[var(--mn-text)] outline-none focus:border-[var(--mn-accent)] focus:ring-2 focus:ring-[var(--mn-focus)]';
 function Submit({ loading }: { loading: boolean }) {
+  const { language: uiLocale } = useTranslation();
   return (
     <button
       disabled={loading}
       className="rounded-xl bg-[var(--mn-primary)] px-6 py-3 font-semibold text-white hover:bg-[var(--mn-primary-hover)] disabled:opacity-60 mn-inverse"
     >
-      {loading ? 'جاري التنفيذ...' : 'تنفيذ الأداة'}
+      {loading
+        ? studentToolCopy('student_tools_copy_21', uiLocale)
+        : studentToolCopy('student_tools_copy_22', uiLocale)}
     </button>
   );
 }
 function Result({ run }: { run: RunState }) {
+  const { language: uiLocale } = useTranslation();
   if (run.error)
     return (
       <div
         role="alert"
         className="rounded-2xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] p-4 text-[var(--mn-danger-text)]"
       >
-        {translateError(run.error)}
+        {translateError(run.error, uiLocale)}
       </div>
     );
   if (!run.result) return null;
@@ -254,13 +294,26 @@ function Result({ run }: { run: RunState }) {
       aria-live="polite"
       className="mn-card rounded-3xl border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)]/40 p-5 sm:p-6"
     >
-      <h2 className="mb-4 text-xl font-bold text-[var(--mn-heading)]">النتيجة</h2>
+      <h2 className="mb-4 text-xl font-bold text-[var(--mn-heading)]">
+        {studentToolCopy('student_tools_copy_23', uiLocale)}
+      </h2>
       <StudentToolResultView value={run.result} />
-      {run.executionId && <SaveResult executionId={run.executionId} />}
+      {run.executionId && (
+        <>
+          <p role="status">
+            {run.resultExpiresAt
+              ? `${studentToolCopy('student_tools_section19_7', uiLocale)} ${new Date(run.resultExpiresAt).toLocaleString(uiLocale)}`
+              : ''}
+          </p>
+          <SaveResult executionId={run.executionId} expiresAt={run.resultExpiresAt} />
+        </>
+      )}
     </section>
   );
 }
 function useToolRun(toolKey: string) {
+  const { language } = useTranslation();
+  const [privacyConsent, setPrivacyConsent] = useState(false);
   const [run, setRun] = useState(initialRun);
   const busy = useRef(false);
   const mounted = useRef(true);
@@ -275,7 +328,7 @@ function useToolRun(toolKey: string) {
     busy.current = true;
     setRun({ loading: true, error: '', result: null });
     try {
-      const response = await ApiClient.executeStudentTool(toolKey, input, 'ar');
+      const response = await ApiClient.executeStudentTool(toolKey, input, language, privacyConsent);
       if (mounted.current)
         setRun(
           response.status === 'COMPLETED'
@@ -284,13 +337,18 @@ function useToolRun(toolKey: string) {
                 error: '',
                 result: response.result,
                 executionId: response.executionId,
+                resultExpiresAt: response.resultExpiresAt,
               }
             : {
                 loading: false,
                 error:
-                  response.status === 'RUNNING' || response.status === 'RECEIVED'
-                    ? 'TOOL_EXECUTION_RUNNING'
-                    : 'TOOL_EXECUTION_FAILED',
+                  response.status === 'UNKNOWN_OUTCOME'
+                    ? 'TOOL_AI_UNKNOWN_OUTCOME'
+                    : response.status === 'BLOCKED'
+                      ? 'TOOL_EXECUTION_BLOCKED'
+                      : response.status === 'RUNNING' || response.status === 'RECEIVED'
+                        ? 'TOOL_EXECUTION_RUNNING'
+                        : 'TOOL_EXECUTION_FAILED',
                 result: null,
               },
         );
@@ -307,6 +365,8 @@ function useToolRun(toolKey: string) {
   };
   return {
     run,
+    privacyConsent,
+    setPrivacyConsent,
     execute,
     reset: () => {
       if (!busy.current) setRun(initialRun);
@@ -318,9 +378,10 @@ function useToolRun(toolKey: string) {
 }
 
 function GpaTool() {
+  const { language: uiLocale } = useTranslation();
   const defaultCourses = () => [
-    { label: 'المقرر 1', creditHours: 3, gradePoints: 4 },
-    { label: 'المقرر 2', creditHours: 3, gradePoints: 3.5 },
+    { label: studentToolCopy('student_tools_copy_24', uiLocale), creditHours: 3, gradePoints: 4 },
+    { label: studentToolCopy('student_tools_copy_25', uiLocale), creditHours: 3, gradePoints: 3.5 },
   ];
   const [scale, setScale] = useState(4);
   const [courses, setCourses] = useState(defaultCourses);
@@ -330,7 +391,7 @@ function GpaTool() {
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (Boolean(cumulative.trim()) !== Boolean(credits.trim())) {
-      fail('أدخل المعدل السابق والساعات السابقة معًا أو اتركهما فارغين.');
+      fail(studentToolCopy('student_tools_copy_26', uiLocale));
       return;
     }
     void execute({
@@ -343,8 +404,8 @@ function GpaTool() {
   };
   return (
     <Shell
-      title="حاسبة المعدل التراكمي"
-      description="حساب دقيق للمعدل الفصلي وتوقع المعدل التراكمي دون تقريب مبكر."
+      title={studentToolCopy('student_tools_copy_27', uiLocale)}
+      description={studentToolCopy('student_tools_copy_28', uiLocale)}
     >
       <form onSubmit={submit}>
         <fieldset
@@ -352,7 +413,7 @@ function GpaTool() {
           className="min-w-0 mn-card space-y-5 rounded-3xl p-5 sm:p-6"
         >
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="سلم المعدل">
+            <Field label={studentToolCopy('student_tools_copy_29', uiLocale)}>
               <input
                 className={inputClass}
                 type="number"
@@ -364,7 +425,7 @@ function GpaTool() {
                 onChange={(e) => setScale(Number(e.target.value))}
               />
             </Field>
-            <Field label="المعدل التراكمي السابق (اختياري)">
+            <Field label={studentToolCopy('student_tools_copy_30', uiLocale)}>
               <input
                 className={inputClass}
                 type="number"
@@ -375,7 +436,7 @@ function GpaTool() {
                 onChange={(e) => setCumulative(e.target.value)}
               />
             </Field>
-            <Field label="الساعات السابقة">
+            <Field label={studentToolCopy('student_tools_copy_31', uiLocale)}>
               <input
                 className={inputClass}
                 type="number"
@@ -395,7 +456,7 @@ function GpaTool() {
                 <input
                   required
                   maxLength={120}
-                  aria-label="اسم المقرر"
+                  aria-label={studentToolCopy('student_tools_copy_32', uiLocale)}
                   className={inputClass}
                   value={course.label}
                   onChange={(e) =>
@@ -410,7 +471,7 @@ function GpaTool() {
                   required
                   min={0.5}
                   max={30}
-                  aria-label="الساعات"
+                  aria-label={studentToolCopy('student_tools_result_1', uiLocale)}
                   className={inputClass}
                   type="number"
                   step="0.5"
@@ -427,7 +488,7 @@ function GpaTool() {
                   required
                   min={0}
                   max={scale}
-                  aria-label="نقاط الدرجة"
+                  aria-label={studentToolCopy('student_tools_copy_34', uiLocale)}
                   className={inputClass}
                   type="number"
                   step="0.01"
@@ -442,7 +503,7 @@ function GpaTool() {
                 />
                 <button
                   disabled={courses.length <= 1}
-                  aria-label="حذف المقرر"
+                  aria-label={studentToolCopy('student_tools_copy_35', uiLocale)}
                   type="button"
                   onClick={() => setCourses((current) => current.filter((_, i) => i !== index))}
                 >
@@ -463,7 +524,8 @@ function GpaTool() {
                 ])
               }
             >
-              <Plus className="h-4 w-4" /> إضافة مقرر ({courses.length}/50)
+              <Plus className="h-4 w-4" /> {studentToolCopy('student_tools_copy_36', uiLocale)}
+              {courses.length}/50)
             </button>
             <div className="flex gap-3">
               <button
@@ -477,7 +539,7 @@ function GpaTool() {
                   reset();
                 }}
               >
-                إعادة تعيين
+                {studentToolCopy('student_tools_copy_37', uiLocale)}
               </button>
               <Submit loading={run.loading} />
             </div>
@@ -489,6 +551,8 @@ function GpaTool() {
   );
 }
 function UniversityTool() {
+  const { language: uiLocale } = useTranslation();
+  const { language } = useTranslation();
   const [search, setSearch] = useState('');
   const [choices, setChoices] = useState<PublicUniversityDto[]>([]);
   const [selected, setSelected] = useState<PublicUniversityDto[]>([]);
@@ -503,7 +567,7 @@ function UniversityTool() {
       void ApiClient.getUniversities({
         search: search.trim() || undefined,
         limit: 30,
-        locale: 'ar',
+        locale: language,
       })
         .then((result) => {
           if (active) setChoices(result.data);
@@ -511,7 +575,7 @@ function UniversityTool() {
         .catch(() => {
           if (active) {
             setChoices([]);
-            setLoadError('تعذر تحميل الجامعات المنشورة.');
+            setLoadError(studentToolCopy('student_tools_copy_38', uiLocale));
           }
         })
         .finally(() => {
@@ -522,31 +586,31 @@ function UniversityTool() {
       active = false;
       window.clearTimeout(timer);
     };
-  }, [search]);
+  }, [search, language, uiLocale]);
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (selected.length < 2) {
-      fail('اختر جامعتين على الأقل للمقارنة.');
+      fail(studentToolCopy('student_tools_copy_39', uiLocale));
       return;
     }
     void execute({ universityIds: selected.map((item) => item.publicId) });
   };
   return (
     <Shell
-      title="مقارنة الجامعات"
-      description="اختر جامعتين إلى أربع جامعات من الجامعات المنشورة للمقارنة."
+      title={studentToolCopy('student_tools_copy_40', uiLocale)}
+      description={studentToolCopy('student_tools_copy_41', uiLocale)}
     >
       <form onSubmit={submit}>
         <fieldset
           disabled={run.loading}
           className="mn-card min-w-0 space-y-5 rounded-3xl p-5 sm:p-6"
         >
-          <Field label="البحث عن جامعة">
+          <Field label={studentToolCopy('student_tools_copy_42', uiLocale)}>
             <input
               className={inputClass}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="اسم الجامعة"
+              placeholder={studentToolCopy('student_tools_copy_43', uiLocale)}
             />
           </Field>
           <div className="flex flex-wrap gap-2">
@@ -565,13 +629,16 @@ function UniversityTool() {
               </button>
             ))}
           </div>
-          <p className="text-sm">المحدد: {selected.length}/4</p>
+          <p className="text-sm">
+            {studentToolCopy('student_tools_copy_44', uiLocale)}
+            {selected.length}/4
+          </p>
           {loading ? (
-            <p role="status">جاري تحميل الجامعات...</p>
+            <p role="status">{studentToolCopy('student_tools_copy_45', uiLocale)}</p>
           ) : loadError ? (
             <p role="alert">{loadError}</p>
           ) : !choices.length ? (
-            <p>لا توجد جامعات منشورة مطابقة للبحث.</p>
+            <p>{studentToolCopy('student_tools_copy_46', uiLocale)}</p>
           ) : (
             <div className="max-h-80 space-y-2 overflow-auto">
               {choices.map((item) => (
@@ -610,6 +677,8 @@ function UniversityTool() {
   );
 }
 function MotivationTool() {
+  const { language: uiLocale } = useTranslation();
+  const { language: locale } = useTranslation();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     program: '',
@@ -625,35 +694,37 @@ function MotivationTool() {
     contribution: '',
     targetWords: 500,
   });
-  const { run, execute, reset, fail } = useToolRun('motivation-letter-generator');
+  const { run, execute, fail, privacyConsent, setPrivacyConsent } = useToolRun(
+    'motivation-letter-generator',
+  );
   const steps: Array<{ title: string; fields: Array<[keyof typeof form, string]> }> = [
     {
-      title: 'الهدف الدراسي',
+      title: studentToolCopy('student_tools_copy_47', uiLocale),
       fields: [
-        ['program', 'البرنامج المستهدف'],
-        ['degreeLevel', 'الدرجة العلمية'],
+        ['program', studentToolCopy('student_tools_copy_48', uiLocale)],
+        ['degreeLevel', studentToolCopy('student_tools_copy_49', uiLocale)],
       ],
     },
     {
-      title: 'الخلفية',
+      title: studentToolCopy('student_tools_copy_50', uiLocale),
       fields: [
-        ['education', 'خلفيتك التعليمية'],
-        ['interests', 'اهتماماتك الأكاديمية'],
-        ['experiences', 'خبراتك'],
-        ['achievements', 'إنجازاتك'],
-        ['skills', 'مهاراتك'],
+        ['education', studentToolCopy('student_tools_copy_51', uiLocale)],
+        ['interests', studentToolCopy('student_tools_copy_52', uiLocale)],
+        ['experiences', studentToolCopy('student_tools_copy_53', uiLocale)],
+        ['achievements', studentToolCopy('student_tools_copy_54', uiLocale)],
+        ['skills', studentToolCopy('student_tools_copy_55', uiLocale)],
       ],
     },
     {
-      title: 'الدوافع',
+      title: studentToolCopy('student_tools_copy_56', uiLocale),
       fields: [
-        ['whyField', 'لماذا هذا المجال؟'],
-        ['whyProgram', 'لماذا هذا البرنامج؟'],
-        ['careerGoals', 'أهدافك المهنية'],
-        ['contribution', 'ما الذي ستضيفه؟'],
+        ['whyField', studentToolCopy('student_tools_copy_57', uiLocale)],
+        ['whyProgram', studentToolCopy('student_tools_copy_58', uiLocale)],
+        ['careerGoals', studentToolCopy('student_tools_copy_59', uiLocale)],
+        ['contribution', studentToolCopy('student_tools_copy_60', uiLocale)],
       ],
     },
-    { title: 'المراجعة والإخراج', fields: [] },
+    { title: studentToolCopy('student_tools_copy_61', uiLocale), fields: [] },
   ];
   const field =
     (key: keyof typeof form) =>
@@ -673,7 +744,7 @@ function MotivationTool() {
       .findIndex((item) => item.fields.some(([key]) => !String(form[key]).trim()));
     if (missing >= 0) {
       setStep(missing);
-      fail('راجع الحقول المطلوبة قبل التنفيذ.');
+      fail(studentToolCopy('student_tools_copy_62', uiLocale));
       return;
     }
     const list = (v: string) =>
@@ -701,26 +772,33 @@ function MotivationTool() {
         contribution: form.contribution,
         emphasizedExperiences: list(form.experiences),
       },
-      outputPreferences: { language: 'ar', targetWords: form.targetWords, tone: 'FORMAL' },
+      outputPreferences: { language: locale, targetWords: form.targetWords, tone: 'FORMAL' },
     });
   };
   return (
     <Shell
-      title="منشئ خطاب الدافع"
-      description="مسودة رسمية منظمة تعتمد على معلوماتك، وتتطلب تسجيل الدخول وتوفر خدمة إنشاء الخطابات."
+      title={studentToolCopy('student_tools_copy_63', uiLocale)}
+      description={studentToolCopy('student_tools_copy_64', uiLocale)}
     >
+      <label className="block mb-4">
+        <input
+          type="checkbox"
+          checked={privacyConsent}
+          onChange={(event) => setPrivacyConsent(event.target.checked)}
+        />
+        {studentToolCopy('student_tools_private_consent', uiLocale)}
+      </label>
       <form onSubmit={submit}>
         <fieldset
           disabled={run.loading}
           className="min-w-0 grid gap-5 rounded-3xl border bg-[var(--mn-surface)] p-6 sm:grid-cols-2"
         >
           <div className="sm:col-span-2 rounded-2xl border border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] p-4 text-sm leading-7 text-[var(--mn-warning-text)]">
-            اذكر معلوماتك الحقيقية فقط. المسودة مساعدة أولية وليست بديلًا عن كتابتك ومراجعتك
-            الشخصية، ولا تُحفظ تلقائيًا.
+            {studentToolCopy('student_tools_copy_65', uiLocale)}
           </div>
           <ol
             className="sm:col-span-2 grid grid-cols-2 gap-2 sm:grid-cols-4"
-            aria-label="خطوات إنشاء الخطاب"
+            aria-label={studentToolCopy('student_tools_copy_66', uiLocale)}
           >
             {steps.map((item, index) => (
               <li
@@ -744,10 +822,9 @@ function MotivationTool() {
           {step === 3 ? (
             <>
               <div className="sm:col-span-2 rounded-2xl bg-[var(--mn-surface-muted)] p-4 text-sm leading-7 text-[var(--mn-text)]">
-                راجع أن المعلومات تعبّر عنك فعلًا. لن تُحفظ المسودة إلا إذا اخترت «حفظ في حسابي» بعد
-                ظهور النتيجة.
+                {studentToolCopy('student_tools_copy_67', uiLocale)}
               </div>
-              <Field label="عدد الكلمات">
+              <Field label={studentToolCopy('student_tools_copy_68', uiLocale)}>
                 <input
                   className={inputClass}
                   type="number"
@@ -767,7 +844,7 @@ function MotivationTool() {
               onClick={() => setStep((value) => Math.max(0, value - 1))}
               className="rounded-xl border px-5 py-2 font-bold disabled:opacity-40"
             >
-              السابق
+              {studentToolCopy('student_tools_copy_69', uiLocale)}
             </button>
             {step < steps.length - 1 ? (
               <button
@@ -777,7 +854,7 @@ function MotivationTool() {
                 }}
                 className="rounded-xl bg-[var(--mn-primary)] px-5 py-2 font-bold text-white"
               >
-                التالي
+                {studentToolCopy('student_tools_copy_70', uiLocale)}
               </button>
             ) : (
               <Submit loading={run.loading} />
@@ -790,14 +867,20 @@ function MotivationTool() {
   );
 }
 function ScholarshipTool() {
+  const { language: uiLocale } = useTranslation();
   const [countries, setCountries] = useState('');
   const [degree, setDegree] = useState('');
   const [funding, setFunding] = useState('ANY');
   const [language, setLanguage] = useState('');
-  const { run, execute, reset, fail } = useToolRun('scholarship-recommendation');
+  const { run, execute, privacyConsent, setPrivacyConsent } = useToolRun(
+    'scholarship-recommendation',
+  );
+  const [useProfile, setUseProfile] = useState(false);
   const submit = (event: FormEvent) => {
     event.preventDefault();
     void execute({
+      allowAI: privacyConsent,
+      useProfile,
       preferredCountries: countries
         .split(/[،,\n]/)
         .map((v) => v.trim())
@@ -809,46 +892,65 @@ function ScholarshipTool() {
   };
   return (
     <Shell
-      title="توصية المنح"
-      description="مطابقة المنح المنشورة فقط، مع ترتيب إرشادي أو بديل حتمي عند غياب إعداد الذكاء الاصطناعي."
+      title={studentToolCopy('student_tools_copy_71', uiLocale)}
+      description={studentToolCopy('student_tools_copy_72', uiLocale)}
     >
+      <label className="block mb-3">
+        <input
+          type="checkbox"
+          checked={privacyConsent}
+          onChange={(e) => setPrivacyConsent(e.target.checked)}
+        />
+        {studentToolCopy('student_tools_section19_6', uiLocale)}
+      </label>
+      <label className="block mb-3">
+        <input
+          type="checkbox"
+          checked={useProfile}
+          disabled={!privacyConsent}
+          onChange={(e) => setUseProfile(e.target.checked)}
+        />
+        {studentToolCopy('student_tools_section19_5', uiLocale)}
+      </label>
       <form onSubmit={submit}>
         <fieldset
           disabled={run.loading}
           className="min-w-0 grid gap-5 rounded-3xl border bg-[var(--mn-surface)] p-6 sm:grid-cols-2"
         >
-          <Field label="الدول المفضلة">
+          <Field label={studentToolCopy('student_tools_copy_73', uiLocale)}>
             <input
               className={inputClass}
               value={countries}
               onChange={(e) => setCountries(e.target.value)}
-              placeholder="مثال: السعودية، كندا"
+              placeholder={studentToolCopy('student_tools_copy_74', uiLocale)}
             />
           </Field>
-          <Field label="الدرجة المستهدفة">
+          <Field label={studentToolCopy('student_tools_copy_75', uiLocale)}>
             <select
               className={inputClass}
               value={degree}
               onChange={(e) => setDegree(e.target.value)}
             >
-              <option value="">كل الدرجات</option>
-              <option value="BACHELOR">بكالوريوس</option>
-              <option value="MASTER">ماجستير</option>
-              <option value="DOCTORATE">دكتوراه</option>
+              <option value="">{studentToolCopy('student_tools_copy_76', uiLocale)}</option>
+              <option value="BACHELOR">{studentToolCopy('student_tools_copy_77', uiLocale)}</option>
+              <option value="MASTER">{studentToolCopy('student_tools_copy_78', uiLocale)}</option>
+              <option value="DOCTORATE">
+                {studentToolCopy('student_tools_copy_79', uiLocale)}
+              </option>
             </select>
           </Field>
-          <Field label="نوع التمويل">
+          <Field label={studentToolCopy('student_tools_copy_80', uiLocale)}>
             <select
               className={inputClass}
               value={funding}
               onChange={(e) => setFunding(e.target.value)}
             >
-              <option value="ANY">الكل</option>
-              <option value="FULL">تمويل كامل</option>
-              <option value="PARTIAL">تمويل جزئي</option>
+              <option value="ANY">{studentToolCopy('student_tools_copy_81', uiLocale)}</option>
+              <option value="FULL">{studentToolCopy('student_tools_copy_82', uiLocale)}</option>
+              <option value="PARTIAL">{studentToolCopy('student_tools_copy_83', uiLocale)}</option>
             </select>
           </Field>
-          <Field label="لغة الدراسة">
+          <Field label={studentToolCopy('student_tools_copy_84', uiLocale)}>
             <input
               className={inputClass}
               value={language}
@@ -864,29 +966,40 @@ function ScholarshipTool() {
     </Shell>
   );
 }
-function translateError(code: string) {
+function translateError(code: string, uiLocale: 'ar' | 'en' = 'ar') {
   const labels: Record<string, string> = {
-    TOOL_LOCALE_NOT_ALLOWED: 'الأداة غير متاحة بلغة التشغيل المحددة.',
-    TOOL_NOT_FOUND: 'الأداة غير متاحة للعامة حاليًا.',
-    TOOL_EXECUTION_NOT_FOUND: 'لم تُعثر على النتيجة لهذه الجلسة أو الحساب.',
-    TOOL_ANONYMOUS_SESSION_REQUIRED: 'انتهت جلسة الزائر؛ شغّل الأداة من جديد بعد تسجيل الدخول.',
-    TOOL_RESULT_EXPIRED: 'انتهت مدة الاحتفاظ المؤقت بالنتيجة. شغّل الأداة من جديد.',
-    TOOL_SAVE_NOT_CONFIGURED: 'خدمة حفظ نتائج الأدوات غير مهيأة حاليًا.',
-    TOOL_SAVE_FAILED: 'تعذر حفظ النتيجة. حاول مجددًا.',
-    TOOL_ACCESS_DENIED: 'الأداة غير متاحة لحسابك حاليًا.',
-    TOOL_EXECUTION_RUNNING: 'الطلب ما زال قيد التنفيذ. لا تعِد إرساله الآن.',
-    TOOL_EXECUTION_FAILED: 'تعذر تنفيذ الأداة. حاول لاحقًا.',
-    STUDENT_TOOL_QUOTA_STORE_UNAVAILABLE: 'تعذر الاتصال بخدمة حدود الاستخدام. حاول لاحقًا.',
-    SCHOLARSHIP_COUNTRY_REFERENCE_NOT_ACTIVE: 'راجع الدولة المدخلة؛ يجب أن تطابق دولة نشطة.',
-    SCHOLARSHIP_LANGUAGE_REFERENCE_NOT_ACTIVE: 'راجع لغة الدراسة المدخلة.',
-    SCHOLARSHIP_DEGREE_REFERENCE_NOT_ACTIVE: 'الدرجة المحددة غير متاحة حاليًا.',
-    TOOL_AUTH_REQUIRED: 'سجّل الدخول لاستخدام هذه الأداة.',
-    TOOL_AI_CAPABILITY_UNAVAILABLE: 'خدمة الذكاء الاصطناعي غير مهيأة حاليًا في بيئة التشغيل.',
-    TOOL_RATE_LIMITED: 'تم بلوغ حد الاستخدام المؤقت. حاول لاحقًا.',
-    TOOL_INPUT_INVALID: 'راجع المدخلات المطلوبة.',
-    TOOL_IDEMPOTENCY_KEY_REUSED: 'تعذر إعادة الطلب لأن مفتاح التكرار استُخدم مع مدخلات مختلفة.',
-    TOOL_RESULT_PROTECTION_NOT_CONFIGURED:
-      'حماية نتائج الأدوات غير مهيأة في بيئة التشغيل؛ لم تُنفذ الأداة.',
+    TOOL_EXECUTION_BLOCKED:
+      studentToolCopy('student_tools_section19_4', uiLocale),
+    TOOL_AI_UNKNOWN_OUTCOME:
+      studentToolCopy('student_tools_section19_3', uiLocale),
+    TOOL_PRIVACY_CONSENT_REQUIRED:
+      studentToolCopy('student_tools_section19_2', uiLocale),
+    TOOL_IDEMPOTENT_RESULT_EXPIRED:
+      studentToolCopy('student_tools_section19_1', uiLocale),
+
+    TOOL_LOCALE_NOT_ALLOWED: studentToolCopy('student_tools_copy_85', uiLocale),
+    TOOL_NOT_FOUND: studentToolCopy('student_tools_copy_86', uiLocale),
+    TOOL_EXECUTION_NOT_FOUND: studentToolCopy('student_tools_copy_87', uiLocale),
+    TOOL_ANONYMOUS_SESSION_REQUIRED: studentToolCopy('student_tools_copy_88', uiLocale),
+    TOOL_RESULT_EXPIRED: studentToolCopy('student_tools_copy_89', uiLocale),
+    TOOL_SAVE_NOT_CONFIGURED: studentToolCopy('student_tools_copy_90', uiLocale),
+    TOOL_SAVE_FAILED: studentToolCopy('student_tools_copy_91', uiLocale),
+    TOOL_ACCESS_DENIED: studentToolCopy('student_tools_copy_92', uiLocale),
+    TOOL_EXECUTION_RUNNING: studentToolCopy('student_tools_copy_93', uiLocale),
+    TOOL_EXECUTION_FAILED: studentToolCopy('student_tools_copy_94', uiLocale),
+    STUDENT_TOOL_QUOTA_STORE_UNAVAILABLE: studentToolCopy('student_tools_copy_95', uiLocale),
+    SCHOLARSHIP_COUNTRY_REFERENCE_NOT_ACTIVE: studentToolCopy('student_tools_copy_96', uiLocale),
+    SCHOLARSHIP_LANGUAGE_REFERENCE_NOT_ACTIVE: studentToolCopy('student_tools_copy_97', uiLocale),
+    SCHOLARSHIP_DEGREE_REFERENCE_NOT_ACTIVE: studentToolCopy('student_tools_copy_98', uiLocale),
+    TOOL_AUTH_REQUIRED: studentToolCopy('student_tools_copy_6', uiLocale),
+    TOOL_AI_CAPABILITY_UNAVAILABLE: studentToolCopy('student_tools_copy_99', uiLocale),
+    TOOL_RATE_LIMITED: studentToolCopy('student_tools_copy_100', uiLocale),
+    TOOL_INPUT_INVALID: studentToolCopy('student_tools_copy_101', uiLocale),
+    TOOL_IDEMPOTENCY_KEY_REUSED: studentToolCopy('student_tools_copy_102', uiLocale),
+    TOOL_RESULT_PROTECTION_NOT_CONFIGURED: studentToolCopy('student_tools_copy_103', uiLocale),
   };
-  return labels[code.split(':')[0]] ?? code;
+  return (
+    labels[code.split(':')[0]] ??
+    (studentToolCopy('student_tools_section19_0', uiLocale))
+  );
 }

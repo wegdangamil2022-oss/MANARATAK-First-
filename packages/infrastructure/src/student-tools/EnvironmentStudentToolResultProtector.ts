@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import { IStudentToolResultProtector, StudentToolOutput } from '@manaratak/domain';
+import { IStudentToolResultProtector } from '@manaratak/domain';
 
 /** Encrypts short-lived Phase 18 results; key material remains runtime-only. */
 export class EnvironmentStudentToolResultProtector implements IStudentToolResultProtector {
@@ -12,7 +12,7 @@ export class EnvironmentStudentToolResultProtector implements IStudentToolResult
     return this.key() ? 'READY' : 'NOT_CONFIGURED';
   }
 
-  protect(value: StudentToolOutput) {
+  protect(value: unknown) {
     const key = this.key();
     if (!key) throw new Error('TOOL_RESULT_PROTECTION_NOT_CONFIGURED');
     const iv = randomBytes(12);
@@ -30,8 +30,12 @@ export class EnvironmentStudentToolResultProtector implements IStudentToolResult
   }
 
   unprotect(value: { ciphertext: string; iv: string; authTag: string; keyVersion: string }) {
-    const key = this.key();
-    if (!key) throw new Error('TOOL_RESULT_PROTECTION_NOT_CONFIGURED');
+    const keys = [this.key(), ...this.previousKeys()].filter((key): key is Buffer => key !== null);
+    const key = keys.find(
+      (candidate) =>
+        createHash('sha256').update(candidate).digest('hex').slice(0, 12) === value.keyVersion,
+    );
+    if (!key) throw new Error('TOOL_RESULT_KEY_VERSION_UNAVAILABLE');
     const currentVersion = createHash('sha256').update(key).digest('hex').slice(0, 12);
     if (currentVersion !== value.keyVersion) throw new Error('TOOL_RESULT_KEY_VERSION_UNAVAILABLE');
     const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(value.iv, 'base64'));
@@ -41,6 +45,20 @@ export class EnvironmentStudentToolResultProtector implements IStudentToolResult
       decipher.final(),
     ]).toString('utf8');
     return JSON.parse(plaintext) as unknown;
+  }
+
+  private previousKeys(): Buffer[] {
+    const raw = this.environment[`${this.secretReference}_PREVIOUS`]?.trim();
+    if (!raw) return [];
+    const values = raw.split(',');
+    if (values.length > 3) throw new Error('TOOL_RESULT_KEYRING_LIMIT');
+    return values.map((value) => {
+      const decoded = /^[a-f0-9]{64}$/i.test(value.trim())
+        ? Buffer.from(value.trim(), 'hex')
+        : Buffer.from(value.trim(), 'base64');
+      if (decoded.length !== 32) throw new Error('TOOL_RESULT_PREVIOUS_KEY_INVALID');
+      return decoded;
+    });
   }
 
   private key(): Buffer | null {

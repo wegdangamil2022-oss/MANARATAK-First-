@@ -1175,6 +1175,7 @@ export interface StudentToolExecutionResponseDto {
   status: string;
   result?: unknown;
   warnings?: string[];
+  resultExpiresAt?: string | null;
 }
 
 export interface PublicServiceCatalogItemDto {
@@ -1477,7 +1478,7 @@ export async function apiFetch(
   input: string | URL | Request,
   init?: RequestInit,
 ): Promise<Response> {
-  const urlStr = typeof input === 'string' ? input : (input instanceof URL ? input.href : input.url);
+  const urlStr = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
   const isAuthRoute = urlStr.includes('/auth/login') || urlStr.includes('/auth/refresh') || urlStr.includes('/auth/logout');
 
   const modifiedInit = ensureCanonicalMutationHeaders(init) || {};
@@ -1546,9 +1547,15 @@ export async function apiFetch(
 }
 
 const STUDENT_TOOLS_SESSION_STORAGE_KEY = 'manaratak_student_tools_session';
+let studentToolsSessionToken: string | null = null;
+const studentToolIntents = new Map<string, { digest: string; key: string }>();
 
-async function studentToolFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
+async function studentToolFetch(
+  input: string | URL | Request,
+  init?: RequestInit,
+): Promise<Response> {
   const headers = new Headers(init?.headers);
+  if (studentToolsSessionToken) headers.set('x-student-tools-session', studentToolsSessionToken);
   try {
     const anonymousSession = sessionStorage.getItem(STUDENT_TOOLS_SESSION_STORAGE_KEY);
     if (anonymousSession) headers.set('x-student-tools-session', anonymousSession);
@@ -1558,7 +1565,12 @@ async function studentToolFetch(input: string | URL | Request, init?: RequestIni
   const response = await apiFetch(input, { ...init, headers });
   const issued = response.headers.get('x-student-tools-session');
   if (issued) {
-    try { sessionStorage.setItem(STUDENT_TOOLS_SESSION_STORAGE_KEY, issued); } catch { /* no-op */ }
+    studentToolsSessionToken = issued;
+    try {
+      sessionStorage.setItem(STUDENT_TOOLS_SESSION_STORAGE_KEY, issued);
+    } catch {
+      /* no-op */
+    }
   }
   return response;
 }
@@ -2090,15 +2102,25 @@ export class ApiClient {
     return studentCourseRequest<StudentAssetDeliveryGrantDto>(`/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}/assets/${encodeURIComponent(assetReferenceId)}/delivery-grant`, {method:'POST'});
   }
 
-  static async listMyCertificates(cursor?: string, signal?: AbortSignal): Promise<{data:StudentCertificateProjectionDto[];nextCursor:string|null}> {
+  static async listMyCertificates(
+    cursor?: string,
+    signal?: AbortSignal,
+  ): Promise<{ data: StudentCertificateProjectionDto[]; nextCursor: string | null }> {
     const res = await apiFetch(`${API_BASE_URL}/student/certificates${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`, {headers:getStudentHeaders(),signal});
-    if(!res.ok) throw new Error('تعذر تحميل الشهادات');
-    const page = await res.json() as {data:Array<Omit<StudentCertificateProjectionDto,'id'|'courseDisplayName'> & {certificateId:string;achievementDisplayName:string}>;nextCursor:string|null};
-    return {data:page.data.map(row=>({...row,id:row.certificateId,courseDisplayName:row.achievementDisplayName})),nextCursor:page.nextCursor};
+    if (!res.ok) throw new Error('تعذر تحميل الشهادات');
+    const page = (await res.json()) as {data:Array<Omit<StudentCertificateProjectionDto,'id'|'courseDisplayName'> & {certificateId:string;achievementDisplayName:string}>;nextCursor:string|null};
+    return {
+      data: page.data.map((row) =>({...row,id:row.certificateId,courseDisplayName:row.achievementDisplayName})),
+      nextCursor: page.nextCursor,
+    };
   }
 
-  static async getMyCertificateArtifactDeliveryGrant(certificateId: string, kind: 'pdf' | 'preview'): Promise<StudentAssetDeliveryGrantDto> {
-    const res = await apiFetch(`${API_BASE_URL}/student/certificates/${encodeURIComponent(certificateId)}/artifacts/${kind}/delivery-grant`, {method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({})});
+  static async getMyCertificateArtifactDeliveryGrant(
+    certificateId: string,
+    kind: 'pdf' | 'preview',
+  ): Promise<StudentAssetDeliveryGrantDto> {
+    const res = await apiFetch(`${API_BASE_URL}/student/certificates/${encodeURIComponent(certificateId)}/artifacts/${kind}/delivery-grant`, {method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({})},
+    );
     if(!res.ok) {const body=await res.json().catch(()=>({}));throw new Error(body.error?.message || body.error || 'تعذر تحميل ملف الشهادة');}
     return res.json();
   }
@@ -2206,9 +2228,11 @@ export class ApiClient {
   }
 
   static async markStudentNotificationRead(notificationId: string): Promise<void> {
-    const res = await apiFetch(`${API_BASE_URL}/student/notifications/${encodeURIComponent(notificationId)}/read`, {
+    const res = await apiFetch(
+      `${API_BASE_URL}/student/notifications/${encodeURIComponent(notificationId)}/read`, {
       method: 'POST', headers: { ...getStudentHeaders(), 'Content-Type': 'application/json' }, body: '{}',
-    });
+    },
+    );
     if (!res.ok) throw new Error('تعذر حفظ حالة قراءة الإشعار');
   }
 
@@ -2230,7 +2254,9 @@ export class ApiClient {
   }
 
   static async getMyStudentDashboard(): Promise<StudentDashboardSummaryDto> {
-    const res = await apiFetch(`${API_BASE_URL}/student/dashboard`, { headers: getStudentHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/student/dashboard`, {
+      headers: getStudentHeaders(),
+    });
     if (!res.ok) {
       throw new Error(await parseErrorMessage(res, 'تعذر تحميل مساحة الطالب'));
     }
@@ -2283,7 +2309,9 @@ export class ApiClient {
       }
     });
 
-    const res = await apiFetch(`${API_BASE_URL}/public/cms/content?${params.toString()}`, { cache: 'no-cache' });
+    const res = await apiFetch(`${API_BASE_URL}/public/cms/content?${params.toString()}`, {
+      cache: 'no-cache',
+    });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(
@@ -2347,13 +2375,36 @@ export class ApiClient {
     toolKey: string,
     input: unknown,
     locale: 'ar' | 'en' = currentPublicLocale(),
+    privacyConsent = false,
   ): Promise<StudentToolExecutionResponseDto> {
+    const session = await studentToolFetch(`${API_BASE_URL}/public/student-tools/session`);
+    if (!session.ok) throw new Error('TOOL_ANONYMOUS_SESSION_REQUIRED');
+    const bytes = new TextEncoder().encode(JSON.stringify({ input, locale, privacyConsent }));
+    const digest = Array.from(
+      new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
+      (byte) => byte.toString(16).padStart(2, '0'),
+    ).join('');
+    const storageKey = `student-tool-intent:${toolKey}`;
+    let intent: { digest: string; key: string } | null = studentToolIntents.get(storageKey) ?? null;
+    try {
+      intent = JSON.parse(sessionStorage.getItem(storageKey) ?? 'null') ?? intent;
+    } catch {
+      /* unavailable */
+    }
+    if (intent?.digest !== digest) intent = { digest, key: crypto.randomUUID() };
+    const idempotencyKey = intent!.key;
+    studentToolIntents.set(storageKey, intent!);
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify(intent));
+    } catch {
+      /* unavailable */
+    }
     const res = await studentToolFetch(
       `${API_BASE_URL}/public/student-tools/${encodeURIComponent(toolKey)}/execute`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input, locale, idempotencyKey: crypto.randomUUID() }),
+        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+        body: JSON.stringify({ input, locale, privacyConsent, idempotencyKey }),
       },
     );
     if (!res.ok) {
@@ -2364,6 +2415,14 @@ export class ApiClient {
       );
     }
     const payload = await res.json();
+    if (payload.data.status === 'COMPLETED' || payload.data.status === 'BLOCKED') {
+      studentToolIntents.delete(storageKey);
+      try {
+        sessionStorage.removeItem(storageKey);
+      } catch {
+        /* unavailable */
+      }
+    }
     return payload.data;
   }
 
@@ -2681,7 +2740,9 @@ export class ApiClient {
   }
 
   static async listMyHydratedStudentSavedItems(): Promise<HydratedStudentSavedItemDto[]> {
-    const res = await apiFetch(`${API_BASE_URL}/student/saved-items/hydrated`, { headers: getStudentHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/student/saved-items/hydrated`, {
+      headers: getStudentHeaders(),
+    });
     if (!res.ok) {
       throw new Error(await parseErrorMessage(res, 'تعذر تحميل تفاصيل العناصر المحفوظة'));
     }
@@ -2695,38 +2756,69 @@ export class ApiClient {
     const res = await apiFetch(`${API_BASE_URL}/student/saved-items`, {
       method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(input),
     });
-    if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر حفظ العنصر')); }
+    if (!res.ok) {
+      throw new Error(await parseErrorMessage(res, 'تعذر حفظ العنصر'));
+    }
     return res.json();
   }
 
   static async removeMyStudentSavedItem(entityType: string, entityId: string): Promise<void> {
-    const res = await apiFetch(`${API_BASE_URL}/student/saved-items/${encodeURIComponent(entityType)}/${encodeURIComponent(entityId)}`, {
-      method: 'DELETE', headers: getStudentHeaders(),
-    });
+    const res = await apiFetch(`${API_BASE_URL}/student/saved-items/${encodeURIComponent(entityType)}/${encodeURIComponent(entityId)}`,
+      {
+        method: 'DELETE',
+        headers: getStudentHeaders(),
+      },
+    );
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر إزالة العنصر المحفوظ')); }
   }
 
   static async listMyStudentApplicationTrackers(): Promise<StudentApplicationTrackerDto[]> {
-    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers`,{headers:getStudentHeaders()}); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر تحميل ملفات التقديم');} return (await res.json()).data ?? [];
+    const res = await apiFetch(`${API_BASE_URL}/student/application-trackers`, {
+      headers: getStudentHeaders(),
+    }); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر تحميل ملفات التقديم');}
+    return (await res.json()).data ?? [];
   }
-  static async createMyStudentApplicationTracker(input:{scholarshipId:string;scholarshipSlug?:string|null;stage?:string;notes?:string|null;deadlineAt?:string|null;checklistLabels?:string[]}):Promise<StudentApplicationTrackerDto>{
-    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify(input)}); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر إنشاء ملف التقديم');} return res.json();
+  static async createMyStudentApplicationTracker(input:{scholarshipId:string;scholarshipSlug?:string|null;stage?:string;notes?:string|null;deadlineAt?:string|null;checklistLabels?:string[]}): Promise<StudentApplicationTrackerDto> {
+    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify(input)}); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر إنشاء ملف التقديم');}
+    return res.json();
   }
-  static async updateMyStudentApplicationTracker(trackerId:string,input:{expectedVersion:number;stage?:string;notes?:string|null;deadlineAt?:string|null}):Promise<StudentApplicationTrackerDto>{
-    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}`,{method:'PATCH',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify(input)}); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر تحديث ملف التقديم');} return res.json();
+  static async updateMyStudentApplicationTracker(
+    trackerId: string,input:{expectedVersion:number;stage?:string;notes?:string|null;deadlineAt?:string|null},
+  ): Promise<StudentApplicationTrackerDto> {
+    const res = await apiFetch(
+      `${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}`,{method:'PATCH',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify(input)},
+    ); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر تحديث ملف التقديم');}
+    return res.json();
   }
-  static async updateMyStudentApplicationChecklistItem(trackerId:string,itemId:string,completed:boolean,expectedVersion:number):Promise<StudentApplicationTrackerDto>{
-    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}/checklist/${encodeURIComponent(itemId)}`,{method:'PATCH',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({completed,expectedVersion})}); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر تحديث المهمة');} return res.json();
+  static async updateMyStudentApplicationChecklistItem(
+    trackerId: string,
+    itemId: string,
+    completed: boolean,
+    expectedVersion: number,
+  ): Promise<StudentApplicationTrackerDto> {
+    const res = await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}/checklist/${encodeURIComponent(itemId)}`,{method:'PATCH',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({completed,expectedVersion})},
+    ); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر تحديث المهمة');}
+    return res.json();
   }
-  static async archiveMyStudentApplicationTracker(trackerId:string,expectedVersion:number):Promise<StudentApplicationTrackerDto>{
-    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}/archive`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({expectedVersion})}); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر أرشفة ملف التقديم');} return res.json();
+  static async archiveMyStudentApplicationTracker(
+    trackerId: string,
+    expectedVersion: number,
+  ): Promise<StudentApplicationTrackerDto> {
+    const res = await apiFetch(
+      `${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}/archive`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({expectedVersion})},
+    ); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر أرشفة ملف التقديم');}
+    return res.json();
   }
   static async removeMyStudentApplicationTracker(trackerId:string):Promise<void>{ const res=await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}`,{method:'DELETE',headers:getStudentHeaders()}); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر إزالة ملف التقديم');} }
 
-  static async listMyStudentServiceRequests(filters: { page?: number; pageSize?: number; status?: string } = {}): Promise<{ data: StudentServiceRequestDto[]; total: number; page: number; pageSize: number; totalPages: number }> {
+  static async listMyStudentServiceRequests(
+    filters: { page?: number; pageSize?: number; status?: string } = {},
+  ): Promise<{ data: StudentServiceRequestDto[]; total: number; page: number; pageSize: number; totalPages: number }> {
     const params = new URLSearchParams({ page: String(filters.page ?? 1), pageSize: String(filters.pageSize ?? 20) });
     if (filters.status) params.set('status', filters.status);
-    const res = await apiFetch(`${API_BASE_URL}/student/services/requests?${params}`, { headers: getStudentHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/student/services/requests?${params}`, {
+      headers: getStudentHeaders(),
+    });
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر تحميل طلبات الخدمات')); }
     return res.json();
   }
@@ -2763,17 +2855,25 @@ export class ApiClient {
     return res.json();
   }
 
-  static async listMyActiveStudentAssets(mimeTypePrefix = 'image/'): Promise<StudentOwnedAssetPageDto> {
+  static async listMyActiveStudentAssets(
+    mimeTypePrefix = 'image/',
+  ): Promise<StudentOwnedAssetPageDto> {
     const params = new URLSearchParams({ mimeTypePrefix, limit: '100' });
-    const res = await apiFetch(`${API_BASE_URL}/student/assets?${params}`, { headers: getStudentHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/student/assets?${params}`, {
+      headers: getStudentHeaders(),
+    });
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر تحميل أصول الطالب')); }
     return res.json();
   }
 
-  static async getMyStudentAssetDeliveryGrant(assetId: string): Promise<StudentAssetDeliveryGrantDto> {
-    const res = await apiFetch(`${API_BASE_URL}/student/assets/${encodeURIComponent(assetId)}/delivery-grant`, {
+  static async getMyStudentAssetDeliveryGrant(
+    assetId: string,
+  ): Promise<StudentAssetDeliveryGrantDto> {
+    const res = await apiFetch(
+      `${API_BASE_URL}/student/assets/${encodeURIComponent(assetId)}/delivery-grant`, {
       method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ expiresInSeconds: 300 }),
-    });
+    },
+    );
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر إنشاء معاينة آمنة')); }
     return res.json();
   }
@@ -2831,8 +2931,13 @@ export class ApiClient {
     return res.json();
   }
 
-  static async updateMyStudentCollection(collectionId: string, changes: { name?: string; description?: string | null; color?: string | null }): Promise<StudentSavedCollectionDto> {
-    const res = await apiFetch(`${API_BASE_URL}/student/collections/${encodeURIComponent(collectionId)}`, { method: 'PATCH', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(changes) });
+  static async updateMyStudentCollection(
+    collectionId: string,
+    changes: { name?: string; description?: string | null; color?: string | null },
+  ): Promise<StudentSavedCollectionDto> {
+    const res = await apiFetch(
+      `${API_BASE_URL}/student/collections/${encodeURIComponent(collectionId)}`, { method: 'PATCH', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(changes) },
+    );
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر تعديل المجموعة')); }
     return res.json();
   }
@@ -2842,9 +2947,16 @@ export class ApiClient {
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر حذف المجموعة')); }
   }
 
-  static async moveMyStudentSavedItem(itemId: string, collectionId: string | null): Promise<StudentSavedItemDto> {
-    const res = await apiFetch(`${API_BASE_URL}/student/saved-items/${encodeURIComponent(itemId)}/move`, { method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ collectionId }) });
-    if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر نقل العنصر')); }
+  static async moveMyStudentSavedItem(
+    itemId: string,
+    collectionId: string | null,
+  ): Promise<StudentSavedItemDto> {
+    const res = await apiFetch(
+      `${API_BASE_URL}/student/saved-items/${encodeURIComponent(itemId)}/move`, { method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ collectionId }) },
+    );
+    if (!res.ok) {
+      throw new Error(await parseErrorMessage(res, 'تعذر نقل العنصر'));
+    }
     return res.json();
   }
 
@@ -2875,13 +2987,20 @@ export class ApiClient {
   }
 
   static async listMyStudentWorkspaceSnapshots(): Promise<StudentWorkspaceSnapshotDto[]> {
-    const res = await apiFetch(`${API_BASE_URL}/student/snapshots`, { headers: getStudentHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/student/snapshots`, {
+      headers: getStudentHeaders(),
+    });
     if (!res.ok) throw new Error('تعذر تحميل نسخ الإعدادات');
     return (await res.json()).data;
   }
 
-  static async restoreMyStudentWorkspaceSnapshot(snapshotId: string, expectedVersion: number): Promise<StudentWorkspaceDto> {
-    const res = await apiFetch(`${API_BASE_URL}/student/snapshots/${encodeURIComponent(snapshotId)}/restore`, { method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ expectedVersion }) });
+  static async restoreMyStudentWorkspaceSnapshot(
+    snapshotId: string,
+    expectedVersion: number,
+  ): Promise<StudentWorkspaceDto> {
+    const res = await apiFetch(
+      `${API_BASE_URL}/student/snapshots/${encodeURIComponent(snapshotId)}/restore`, { method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ expectedVersion }) },
+    );
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر استعادة نسخة الإعدادات')); }
     return res.json();
   }
@@ -2893,7 +3012,10 @@ export class ApiClient {
   }
 
   static async clearMyRecentlyViewed(): Promise<void> {
-    const res = await apiFetch(`${API_BASE_URL}/student/recently-viewed`, { method: 'DELETE', headers: getStudentHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/student/recently-viewed`, {
+      method: 'DELETE',
+      headers: getStudentHeaders(),
+    });
     if (!res.ok) throw new Error('تعذر مسح العناصر المشاهدة مؤخرًا');
   }
 
@@ -2906,7 +3028,10 @@ export class ApiClient {
   }
 
   static async clearMyStudentSearchHistory(): Promise<void> {
-    const res = await apiFetch(`${API_BASE_URL}/student/search-history`, { method: 'DELETE', headers: getStudentHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/student/search-history`, {
+      method: 'DELETE',
+      headers: getStudentHeaders(),
+    });
     if (!res.ok) throw new Error('تعذر مسح سجل البحث');
   }
 
@@ -3027,12 +3152,18 @@ export class ApiClient {
     return res.json();
   }
 
-  static async getAdminNewMajorCandidates(filters: any, signal?: AbortSignal): Promise<PaginatedResult<any>> {
+  static async getAdminNewMajorCandidates(
+    filters: any,
+    signal?: AbortSignal,
+  ): Promise<PaginatedResult<any>> {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') params.append(key, String(value));
     });
-    const res = await apiFetch(`${API_BASE_URL}/admin/majors/new-candidates?${params.toString()}`, { headers: getAdminHeaders(), signal });
+    const res = await apiFetch(`${API_BASE_URL}/admin/majors/new-candidates?${params.toString()}`, {
+      headers: getAdminHeaders(),
+      signal,
+    });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error((typeof errorData.error === 'string' ? errorData.error : errorData.error?.message) || 'Failed to fetch new-major candidates');
@@ -3681,8 +3812,13 @@ export class ApiClient {
     return adminCourseRequest<any>('/learning-paths', { method: 'POST', body: JSON.stringify(input) });
   }
 
-  static executeAdminLearningPathAction(pathId: string, action: 'mark-publishable' | 'publish' | 'archive'): Promise<any> {
-    return adminCourseRequest<any>(`/learning-paths/${encodeURIComponent(pathId)}/${action}`, { method: 'POST' });
+  static executeAdminLearningPathAction(
+    pathId: string,
+    action: 'mark-publishable' | 'publish' | 'archive',
+  ): Promise<any> {
+    return adminCourseRequest<any>(`/learning-paths/${encodeURIComponent(pathId)}/${action}`, {
+      method: 'POST',
+    });
   }
 
   static getAdminCourseRelationships(id: string): Promise<CourseRelationshipReviewModel> {
@@ -3690,7 +3826,9 @@ export class ApiClient {
   }
 
   static analyzeAdminCourseRelationships(id: string): Promise<any> {
-    return adminCourseRequest<any>(`/${encodeURIComponent(id)}/relationships/analyze`, { method: 'POST' });
+    return adminCourseRequest<any>(`/${encodeURIComponent(id)}/relationships/analyze`, {
+      method: 'POST',
+    });
   }
 
   static proposeAdminCourseTaxonomyLink(courseId: string, taxonomyNodeId: string, relationshipType: 'PRIMARY' | 'SECONDARY' | 'RELATED' = 'PRIMARY'): Promise<any> {
@@ -3761,7 +3899,9 @@ export class ApiClient {
   }
 
   static async getAdminReferenceLanguages(): Promise<AdminReferenceLanguageDto[]> {
-    const res = await apiFetch(`${API_BASE_URL}/admin/reference-data/languages?activeOnly=true`, { headers: getAdminHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/admin/reference-data/languages?activeOnly=true`, {
+      headers: getAdminHeaders(),
+    });
     if (!res.ok) throw new Error(await parseErrorMessage(res, 'Failed to fetch reference languages'));
     const body = await res.json();
     return Array.isArray(body?.data) ? body.data : [];

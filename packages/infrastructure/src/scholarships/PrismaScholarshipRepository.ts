@@ -370,7 +370,13 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     ] });
     }
     if (filters.languageLabel) {
-      const aliases: Record<string, string[]> = { 'الإنجليزية': ['الإنجليزية', 'English'], 'العربية': ['العربية', 'Arabic'], 'التركية': ['التركية', 'Turkish'], 'الألمانية': ['الألمانية', 'German'], 'الفرنسية': ['الفرنسية', 'French'] };
+      const aliases: Record<string, string[]> = {
+        الإنجليزية: ['الإنجليزية', 'English'],
+        العربية: ['العربية', 'Arabic'],
+        التركية: ['التركية', 'Turkish'],
+        الألمانية: ['الألمانية', 'German'],
+        الفرنسية: ['الفرنسية', 'French'],
+      };
       const matches: Prisma.ScholarshipWhereInput[] = [];
       for (const label of aliases[filters.languageLabel] || [filters.languageLabel]) matches.push(
         { studyLanguageSourceLabel: { contains: label, mode: 'insensitive' } },
@@ -387,7 +393,12 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       ] } } } } },
     ] });
     if (filters.degreeLabel) {
-      const aliases: Record<string, string[]> = { 'بكالوريوس': ['بكالوريوس', 'bachelor', 'undergraduate'], 'ماجستير': ['ماجستير', 'master'], 'دكتوراه': ['دكتوراه', 'doctorate', 'phd'], 'زمالة': ['زمالة', 'fellowship'] };
+      const aliases: Record<string, string[]> = {
+        بكالوريوس: ['بكالوريوس', 'bachelor', 'undergraduate'],
+        ماجستير: ['ماجستير', 'master'],
+        دكتوراه: ['دكتوراه', 'doctorate', 'phd'],
+        زمالة: ['زمالة', 'fellowship'],
+      };
       const matches: Prisma.ScholarshipWhereInput[] = [];
       for (const label of aliases[filters.degreeLabel] || [filters.degreeLabel]) matches.push(
         { degreeTargets: { some: { sourceLabel: { contains: label, mode: 'insensitive' } } } },
@@ -484,15 +495,30 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
         major: { is: { status: MajorStatus.PUBLISHED } },
       } },
     } } });
-    if (filters.fundingCoverage) constraints.push({ OR: [
-      { fundingTypeCode: { equals: filters.fundingCoverage, mode: 'insensitive' } },
-      { benefits: { some: { coverageTypeCode: { equals: filters.fundingCoverage, mode: 'insensitive' } } } },
-    ] });
-    if (filters.sponsorName) where.providerName = { equals: filters.sponsorName, mode: 'insensitive' };
-    if (filters.applicationDeadlineFrom || filters.applicationDeadlineTo) where.applicationDeadline = {
-      gte: filters.applicationDeadlineFrom,
-      lte: filters.applicationDeadlineTo,
-    };
+    if (filters.fundingType === 'FULL')
+      constraints.push({
+        OR: [{ isFullyFunded: true }, { fundingTypeCode: { in: ['FULL', 'FULLY_FUNDED'] } }],
+      });
+    if (filters.fundingType === 'PARTIAL')
+      constraints.push({ fundingTypeCode: { in: ['PARTIAL', 'PARTIALLY_FUNDED'] } });
+    if (filters.fundingCoverage)
+      constraints.push({
+        OR: [
+          { fundingTypeCode: { equals: filters.fundingCoverage, mode: 'insensitive' } },
+          {
+            benefits: {
+              some: { coverageTypeCode: { equals: filters.fundingCoverage, mode: 'insensitive' } },
+            },
+          },
+        ],
+      });
+    if (filters.sponsorName)
+      where.providerName = { equals: filters.sponsorName, mode: 'insensitive' };
+    if (filters.applicationDeadlineFrom || filters.applicationDeadlineTo)
+      where.applicationDeadline = {
+        gte: filters.applicationDeadlineFrom,
+        lte: filters.applicationDeadlineTo,
+      };
     if (constraints.length) where.AND = constraints;
     return queryStableCursorPage({
       delegate: this.prisma.scholarship as any, where, include: this.normalizedInclude,
@@ -602,7 +628,12 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     const academicYear = typeof source.academicYear === 'string' && source.academicYear.trim() ? source.academicYear.trim() : null;
     const closesAt = source.applicationDeadline instanceof Date ? source.applicationDeadline : source.applicationDeadline ? new Date(source.applicationDeadline) : null;
     const cycleName = typeof source.cycleName === 'string' && source.cycleName.trim() ? source.cycleName.trim() : 'DEFAULT';
-    return { cycleKey: `${academicYear ?? 'NO_YEAR'}|${cycleName}|${closesAt?.toISOString() ?? 'ROLLING'}`, academicYear, closesAt, status: 'DRAFT' };
+    return {
+      cycleKey: `${academicYear ?? 'NO_YEAR'}|${cycleName}|${closesAt?.toISOString() ?? 'ROLLING'}`,
+      academicYear,
+      closesAt,
+      status: 'DRAFT',
+    };
   }
 
   private async appendStructuralVersion(scholarshipId: string, record: any): Promise<{ id: string; versionNumber: number }> {
@@ -632,11 +663,14 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
 
   /** Preserve child primary keys and source provenance by immutable owner/key upsert. */
   private toNestedUpsert<T extends object>(
-    scholarshipId: string, items: readonly T[] | undefined, keyName: keyof T,
+    scholarshipId: string,
+    items: readonly T[] | undefined,
+    keyName: keyof T,
   ): { deleteMany: object; upsert: Record<string, unknown>[] } | undefined {
     if (items === undefined) return undefined;
-    const keys = items.map(item => String(item[keyName] ?? '').trim());
-    if (keys.some(key => !key) || keys.length !== new Set(keys).size) throw new Error('SCHOLARSHIP_DUPLICATE_OR_EMPTY_CHILD_IDENTITY');
+    const keys = items.map((item) => String(item[keyName] ?? '').trim());
+    if (keys.some((key) => !key) || keys.length !== new Set(keys).size)
+      throw new Error('SCHOLARSHIP_DUPLICATE_OR_EMPTY_CHILD_IDENTITY');
     const name = String(keyName);
     return {
       deleteMany: { [name]: { notIn: keys } },
@@ -645,7 +679,8 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
         const identity = { scholarshipId, [name]: keys[index] };
         return {
           where: { [`scholarshipId_${name}`]: identity },
-          create: data, update: data,
+          create: data,
+          update: data,
         };
       }),
     };

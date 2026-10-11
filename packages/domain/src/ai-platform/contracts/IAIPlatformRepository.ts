@@ -71,6 +71,10 @@ export interface IAIPlatformRepository {
       dailyRequestLimit: number;
       requesterRequestsPerMinute?: number;
       requesterConcurrentLimit?: number;
+      requesterDailyCostLimit?: number;
+      requesterMonthlyCostLimit?: number;
+      requesterMonthlyTokenLimit?: number;
+
       monthlyTokenLimit: number;
       monthlyCostLimit?: number | null;
       currency?: string | null;

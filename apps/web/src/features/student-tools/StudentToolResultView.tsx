@@ -1,3 +1,5 @@
+import { studentToolCopy } from '../../i18n/studentToolCopy';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { Link } from 'react-router-dom';
 
 type UniversityResult = {
@@ -27,6 +29,7 @@ type ToolResult = {
 };
 
 export function StudentToolResultView({ value }: { value: unknown }) {
+  const { language: uiLocale } = useTranslation();
   if (!value || typeof value !== 'object') return <p>{String(value)}</p>;
   const result = value as ToolResult;
   if (typeof result.draft === 'string')
@@ -47,9 +50,18 @@ export function StudentToolResultView({ value }: { value: unknown }) {
   if (typeof result.semesterGpa === 'number')
     return (
       <div className="grid gap-4 sm:grid-cols-3">
-        <Metric label="معدل الفصل" value={result.semesterGpa} />
-        <Metric label="الساعات" value={result.totalSemesterCredits ?? '—'} />
-        <Metric label="المعدل المتوقع" value={result.projectedCumulativeGpa ?? '—'} />
+        <Metric
+          label={studentToolCopy('student_tools_result_0', uiLocale)}
+          value={result.semesterGpa}
+        />
+        <Metric
+          label={studentToolCopy('student_tools_result_1', uiLocale)}
+          value={result.totalSemesterCredits ?? '—'}
+        />
+        <Metric
+          label={studentToolCopy('student_tools_result_2', uiLocale)}
+          value={result.projectedCumulativeGpa ?? '—'}
+        />
       </div>
     );
   if (Array.isArray(result.universities))
@@ -58,7 +70,13 @@ export function StudentToolResultView({ value }: { value: unknown }) {
         <table className="w-full bg-[var(--mn-surface)] text-sm text-[var(--mn-text)]">
           <thead>
             <tr>
-              {['الجامعة', 'الدولة', 'المدينة', 'النوع', 'البرامج'].map((label) => (
+              {[
+                studentToolCopy('student_tools_result_3', uiLocale),
+                studentToolCopy('student_tools_result_4', uiLocale),
+                studentToolCopy('student_tools_result_5', uiLocale),
+                studentToolCopy('student_tools_result_6', uiLocale),
+                studentToolCopy('student_tools_result_7', uiLocale),
+              ].map((label) => (
                 <th key={label} className="p-3 text-right">
                   {label}
                 </th>
@@ -90,7 +108,10 @@ export function StudentToolResultView({ value }: { value: unknown }) {
         </table>
         {result.unavailableUniversityIds?.length ? (
           <p className="mt-3 text-[var(--mn-warning-text)]">
-            تعذر العثور على: {result.unavailableUniversityIds.join('، ')}
+            {studentToolCopy('student_tools_result_8', uiLocale)}
+            {result.unavailableUniversityIds.join(
+              studentToolCopy('student_tools_result_9', uiLocale),
+            )}
           </p>
         ) : null}
       </div>
@@ -99,7 +120,7 @@ export function StudentToolResultView({ value }: { value: unknown }) {
     return (
       <div className="space-y-3">
         {!result.recommendations.length && (
-          <p>لا توجد منح منشورة مطابقة لهذه الخيارات. جرّب توسيع الفلاتر.</p>
+          <p>{studentToolCopy('student_tools_result_10', uiLocale)}</p>
         )}
         {result.recommendations.map((item) => (
           <article key={item.scholarship.publicId} className="mn-card-subtle rounded-2xl p-4">

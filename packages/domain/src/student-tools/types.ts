@@ -45,6 +45,7 @@ export enum StudentToolExecutionStatus {
   BLOCKED = 'BLOCKED',
   FAILED = 'FAILED',
   CANCELLED = 'CANCELLED',
+  UNKNOWN_OUTCOME = 'UNKNOWN_OUTCOME',
 }
 export enum StudentToolErrorCode {
   NOT_FOUND = 'TOOL_NOT_FOUND',
@@ -98,6 +99,7 @@ export interface StudentToolRateLimitPolicy {
   adminTestRequestsPerMinute: number;
 }
 export interface StudentToolSchema {
+  jsonSchema?: Record<string, unknown>;
   version: string;
   fields: Array<{
     key: string;
@@ -109,6 +111,7 @@ export interface StudentToolSchema {
   }>;
 }
 export interface StudentToolVersionSnapshot {
+  featureFlags?: StudentToolFeatureFlags;
   inputSchema: StudentToolSchema;
   outputSchema: StudentToolSchema;
   dependencies: StudentToolDependency[];
@@ -130,6 +133,18 @@ export interface StudentToolVersion {
 }
 
 export interface StudentToolDefinition {
+  revision?: number;
+  lastModifiedBy?: string | null;
+  releaseApproval?: {
+    author: string;
+    proposer: string;
+    reviewer?: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CONSUMED';
+    revision: number;
+    snapshotHash: string;
+    expiresAt: string;
+    reason: string;
+  } | null;
   id?: string;
   toolKey: string;
   nameAr: string;
@@ -174,6 +189,7 @@ export interface StudentToolExecutionContext {
   authenticatedStudentReference?: string;
   anonymousSessionReference?: string;
   startedAt: Date;
+  privacyConsent?: boolean;
 }
 export interface StudentToolExecutionRecord {
   id?: string;
@@ -210,6 +226,7 @@ export interface StudentToolExecutionResponse<TResult> {
   dependencyStatus?: Record<string, string>;
   aiExecutionReference?: string;
   executedAt: Date | string;
+  resultExpiresAt?: Date | string | null;
 }
 
 export interface GpaCourseInput {
@@ -299,6 +316,8 @@ export interface ScholarshipRecommendationInput {
   targetYear?: number;
   academicInterests?: string[];
   careerGoals?: string;
+  useProfile?: boolean;
+  allowAI?: boolean;
 }
 export interface ScholarshipCandidate {
   publicId: string;
@@ -314,6 +333,7 @@ export interface ScholarshipCandidate {
 }
 export interface ScholarshipRecommendationOutput {
   mode: 'AI_ADVISORY' | 'DETERMINISTIC_FALLBACK';
+  fallbackReason?: string;
   recommendations: Array<{
     scholarship: ScholarshipCandidate;
     explanation?: string;

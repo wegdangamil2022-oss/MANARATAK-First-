@@ -1,3 +1,4 @@
+import { STUDENT_TOOL_SCHEMAS as SCHEMAS } from './handlers/StudentToolSchemas';
 import {
   StudentToolDefinition,
   StudentToolExecutionType,
@@ -160,59 +161,6 @@ const ACTIVE: Record<
   },
 };
 
-const SCHEMAS: Record<
-  string,
-  Pick<StudentToolDefinition, 'inputSchema' | 'outputSchema'>
-> = {
-  'gpa-calculator': {
-    inputSchema: { version: '1', fields: [
-      { key: 'scale', type: 'number', required: true, labelAr: 'سلم المعدل', labelEn: 'GPA scale', constraints: { min: 1, max: 10 } },
-      { key: 'courses', type: 'array', required: true, labelAr: 'المقررات', labelEn: 'Courses', constraints: { minItems: 1, maxItems: 50 } },
-      { key: 'existingCumulativeGpa', type: 'number', required: false, labelAr: 'المعدل التراكمي الحالي', labelEn: 'Existing cumulative GPA' },
-      { key: 'existingCompletedCredits', type: 'number', required: false, labelAr: 'الساعات المكتملة', labelEn: 'Completed credits' },
-    ] },
-    outputSchema: { version: '1', fields: [
-      { key: 'semesterGpa', type: 'number', required: true, labelAr: 'معدل الفصل', labelEn: 'Semester GPA' },
-      { key: 'projectedCumulativeGpa', type: 'number', required: false, labelAr: 'المعدل المتوقع', labelEn: 'Projected cumulative GPA' },
-      { key: 'courses', type: 'array', required: true, labelAr: 'تفاصيل المقررات', labelEn: 'Course breakdown' },
-    ] },
-  },
-  'university-comparison': {
-    inputSchema: { version: '1', fields: [
-      { key: 'universityIds', type: 'array', required: true, labelAr: 'معرفات الجامعات المنشورة', labelEn: 'Published university IDs', constraints: { minItems: 2, maxItems: 4, unique: true } },
-    ] },
-    outputSchema: { version: '1', fields: [
-      { key: 'universities', type: 'array', required: true, labelAr: 'الجامعات المتاحة', labelEn: 'Available universities' },
-      { key: 'unavailableUniversityIds', type: 'array', required: true, labelAr: 'غير المتاح', labelEn: 'Unavailable IDs' },
-    ] },
-  },
-  'motivation-letter-generator': {
-    inputSchema: { version: '1', fields: [
-      { key: 'target', type: 'object', required: true, labelAr: 'الجهة والبرنامج المستهدف', labelEn: 'Target' },
-      { key: 'studentBackground', type: 'object', required: true, labelAr: 'الخلفية الدراسية', labelEn: 'Student background' },
-      { key: 'motivation', type: 'object', required: true, labelAr: 'الدوافع والأهداف', labelEn: 'Motivation' },
-      { key: 'outputPreferences', type: 'object', required: true, labelAr: 'تفضيلات المسودة', labelEn: 'Output preferences' },
-    ] },
-    outputSchema: { version: '1', fields: [
-      { key: 'draft', type: 'string', required: true, labelAr: 'المسودة', labelEn: 'Draft' },
-      { key: 'warnings', type: 'array', required: true, labelAr: 'التنبيهات', labelEn: 'Warnings' },
-      { key: 'aiExecutionId', type: 'string', required: true, labelAr: 'مرجع تنفيذ Phase 17', labelEn: 'Phase 17 execution reference' },
-    ] },
-  },
-  'scholarship-recommendation': {
-    inputSchema: { version: '1', fields: [
-      { key: 'targetDegree', type: 'string', required: false, labelAr: 'الدرجة المستهدفة', labelEn: 'Target degree' },
-      { key: 'preferredCountries', type: 'array', required: true, labelAr: 'الدول المفضلة', labelEn: 'Preferred countries' },
-      { key: 'fundingPreference', type: 'string', required: false, labelAr: 'تفضيل التمويل', labelEn: 'Funding preference' },
-    ] },
-    outputSchema: { version: '1', fields: [
-      { key: 'mode', type: 'string', required: true, labelAr: 'نوع الترتيب', labelEn: 'Ranking mode' },
-      { key: 'recommendations', type: 'array', required: true, labelAr: 'المنح الموصى بها', labelEn: 'Recommendations' },
-      { key: 'disclaimer', type: 'string', required: true, labelAr: 'إخلاء المسؤولية', labelEn: 'Disclaimer' },
-    ] },
-  },
-};
-
 function slugify(name: string) {
   return name
     .toLowerCase()
@@ -306,11 +254,11 @@ export const OFFICIAL_STUDENT_TOOLS: StudentToolDefinition[] = NAMES.map((name, 
     iconAssetId: null,
     dependencies: active?.dependencies ?? [],
     currentVersion: {
-      semanticVersion: active ? '1.0.0' : '0.0.0',
-      inputSchemaVersion: '1',
-      outputSchemaVersion: '1',
-      releaseDate: new Date('2026-08-24T00:00:00.000Z'),
-      changeNote: active ? 'Phase 18 source implementation' : 'Official roadmap registration',
+      semanticVersion: active ? '1.1.0' : '0.0.0',
+      inputSchemaVersion: SCHEMAS[toolKey]?.inputSchema.version ?? '1',
+      outputSchemaVersion: SCHEMAS[toolKey]?.outputSchema.version ?? '1',
+      releaseDate: new Date(active ? '2026-10-11T00:00:00.000Z' : '2026-08-24T00:00:00.000Z'),
+      changeNote: active ? 'Section 19 privacy and governed contract v2' : 'Official roadmap registration',
       status: active ? 'ACTIVE' : 'DRAFT',
     },
     inputSchema: SCHEMAS[toolKey]?.inputSchema ?? { version: '1', fields: [] },

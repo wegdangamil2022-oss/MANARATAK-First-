@@ -63,16 +63,24 @@ describe('StudentToolsPublicRouter', () => {
     executionUseCases.execute.mockResolvedValue({ toolKey: 'major-fit-helper', executionPublicId: 'ai-1', status: 'COMPLETED', output: 'Suggested majors' });
     const { app } = createApp(useCases, executionUseCases);
 
-    const res = await request(app).post('/tools/major-fit-helper/execute').set('Idempotency-Key', 'execute-major-fit-1').send({ input: 'I like science.' });
+    const session = await request(app).get('/tools/session');
+    expect(session.headers['x-student-tools-session']).toBe('v1.issued.signed');
+    const res = await request(app)
+      .post('/tools/major-fit-helper/execute')
+      .set('x-student-tools-session', 'v1.issued.signed')
+      .set('Idempotency-Key', 'execute-major-fit-1')
+      .send({ input: { interests: ['science'] } });
 
     expect(res.status).toBe(200);
-    expect(res.headers['x-student-tools-session']).toBe('v1.issued.signed');
-    expect(executionUseCases.execute).toHaveBeenCalledWith('major-fit-helper', expect.objectContaining({
-      input: 'I like science.',
-      consumerType: 'ANONYMOUS',
-      anonymousSessionReference: 'issued-session',
-      trustedNetworkReference: expect.any(String),
-    }));
+    expect(executionUseCases.execute).toHaveBeenCalledWith(
+      'major-fit-helper',
+      expect.objectContaining({
+        input: { interests: ['science'] },
+        consumerType: 'ANONYMOUS',
+        anonymousSessionReference: 'verified-session',
+        trustedNetworkReference: expect.any(String),
+      }),
+    );
   });
 
   it('never trusts the caller session header as the limiter/ownership principal', async () => {
@@ -98,4 +106,10 @@ describe('StudentToolsPublicRouter', () => {
     expect(res.status).toBe(401);
     expect(executionUseCases.saveExecutionForStudent).not.toHaveBeenCalled();
   });
+  it('requires a bootstrapped signed anonymous session before dispatching an execution', async () => {
+    const execution = createExecutionUseCases(); const { app } = createApp(createUseCases(), execution);
+    const response = await request(app).post('/tools/gpa-calculator/execute').set('Idempotency-Key', 'intent-without-session').send({ input: {} });
+    expect(response.status).toBe(400); expect(execution.execute).not.toHaveBeenCalled();
+  });
+
 });

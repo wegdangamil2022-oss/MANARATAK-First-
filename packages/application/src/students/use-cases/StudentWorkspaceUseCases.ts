@@ -95,6 +95,12 @@ export class StudentWorkspaceUseCases {
     return this.mutate(data.studentReferenceId, 'privacy-consent-updated', () => this.repository.updatePrivacyConsent({ ...data, actorType: 'USER', source: data.source ?? 'student-workspace-api' }));
   }
 
+  public async readPrivateToolResult(studentReferenceId: string, savedReference: string) {
+    if (!this.repository.readPrivateToolResult)
+      throw new Error('STUDENT_PRIVATE_RESULT_NOT_CONFIGURED');
+    return this.repository.readPrivateToolResult(studentReferenceId, savedReference);
+  }
+
   public async saveItem(data: SaveStudentItemDto): Promise<StudentSavedItemDto> {
     this.ensureStudentReference(data.studentReferenceId);
     if (!Object.values(StudentSavedItemType).includes(data.entityType)) {
