@@ -29,7 +29,6 @@ import {
   WalletHoldDto,
 } from '../entities/FinancePlatform';
 
-
 export interface FinanceMutationContext {
   actorId: string;
   correlationId: string;
@@ -54,7 +53,68 @@ export interface PostLedgerTransactionInput extends FinanceMutationContext {
   approval?: FinanceApprovalBinding;
 }
 
+export interface FinanceListFilters {
+  currencyCode?: string;
+  minAmountMinorUnits?: string;
+  maxAmountMinorUnits?: string;
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  search?: string;
+  provider?: string;
+  ownerReferenceId?: string;
+  from?: Date;
+  to?: Date;
+}
 export interface IFinanceRepository {
+  createAdjustmentCase(
+    input: { publicId: string; reasonCode: string; supportingDocumentId: string; makerId: string },
+    context: FinanceMutationContext,
+  ): Promise<any>;
+  getAdjustmentCase(reference: string): Promise<any | null>;
+
+  hasFinancialClearanceForOrigin(input: {
+    originDomain: string;
+    originReferenceId: string;
+    studentReferenceId?: string;
+  }): Promise<boolean>;
+  claimPaymentCapture(id: string, context: FinanceMutationContext): Promise<boolean>;
+  recordReconciliationRun(
+    context: FinanceMutationContext,
+    summary: Record<string, number>,
+  ): Promise<void>;
+  listStudentFinancialHistory(
+    studentReferenceId: string,
+    kind: 'wallets' | 'transfers',
+    pagination: { page?: number; pageSize?: number },
+  ): Promise<PaginatedFinanceResult<any>>;
+  claimPaymentDispatch(id: string, context: FinanceMutationContext): Promise<boolean>;
+  claimTransferSubmission(id: string, context: FinanceMutationContext): Promise<MoneyTransferDto>;
+  recordTransferSubmission(
+    id: string,
+    evidence: import('./FinanceGateways').BankTransferEvidence,
+    context: FinanceMutationContext,
+  ): Promise<MoneyTransferDto>;
+  markRefundUnknown(id: string, context: FinanceMutationContext): Promise<void>;
+  claimReconciliationCandidates(
+    kind: 'payment' | 'refund' | 'transfer',
+    limit: number,
+  ): Promise<any[]>;
+  listFinanceRecords(
+    kind: 'refunds' | 'transfers' | 'rates' | 'approvals' | 'commissions',
+    filters: FinanceListFilters,
+  ): Promise<PaginatedFinanceResult<any>>;
+  getFinanceRecord(
+    kind: 'refunds' | 'transfers' | 'approvals' | 'commissions' | 'payments',
+    id: string,
+  ): Promise<any | null>;
+  getReconciliationSnapshot(): Promise<{
+    issues: ReconciliationIssueDto[];
+    status: string;
+    asOf: Date | string | null;
+    coverage: string;
+  }>;
+
   findInvoiceById(id: string): Promise<FinanceInvoiceDto | null>;
   findInvoiceByNumber(invoiceNumber: string): Promise<FinanceInvoiceDto | null>;
   findPaymentById(id: string): Promise<FinancePaymentDto | null>;
@@ -80,7 +140,11 @@ export interface IFinanceRepository {
   ): Promise<FinancePaymentDto>;
   recordPaymentAuthorization(
     paymentId: string,
-    evidence: { gatewayReference: string; safeMaskedMetadata?: Record<string, string> },
+    evidence: {
+      gatewayReference: string;
+      safeMaskedMetadata?: Record<string, string>;
+      providerEvidence?: Record<string, unknown>;
+    },
     context: FinanceMutationContext,
   ): Promise<FinancePaymentDto>;
   recordPaymentFailure(
@@ -90,7 +154,11 @@ export interface IFinanceRepository {
   ): Promise<FinancePaymentDto>;
   recordReconciledCapturedPaymentAtomic(
     paymentId: string,
-    evidence: { gatewayReference: string; safeMaskedMetadata?: Record<string, string> },
+    evidence: {
+      gatewayReference: string;
+      safeMaskedMetadata?: Record<string, string>;
+      providerEvidence?: Record<string, unknown>;
+    },
     context: FinanceMutationContext,
   ): Promise<FinancePaymentDto>;
   recordCapturedPaymentAtomic(
@@ -187,6 +255,7 @@ export interface IFinanceRepository {
       bankProviderReference?: string;
       providerStatus?: 'PROCESSING' | 'SETTLED' | 'FAILED' | 'REVERSED';
       providerFailureCode?: string;
+      providerEvidence?: import('./FinanceGateways').BankTransferEvidence;
     },
   ): Promise<MoneyTransferDto>;
   listTransfers(): Promise<MoneyTransferDto[]>;
@@ -217,14 +286,14 @@ export interface IFinanceRepository {
   ): Promise<RefundDto>;
   completeRefundAtomic(
     id: string,
-    providerEvidence: { gatewayProvider: string; gatewayReference: string },
+    providerEvidence: {
+      gatewayProvider: string;
+      gatewayReference: string;
+      attestation?: Record<string, unknown>;
+    },
     context: FinanceMutationContext,
   ): Promise<RefundDto>;
-  failRefund(
-    id: string,
-    failureCode: string,
-    context: FinanceMutationContext,
-  ): Promise<RefundDto>;
+  failRefund(id: string, failureCode: string, context: FinanceMutationContext): Promise<RefundDto>;
   listRefunds(): Promise<RefundDto[]>;
   createCommission(
     data: Omit<CommissionDto, 'id' | 'createdAt' | 'updatedAt'>,
@@ -235,7 +304,7 @@ export interface IFinanceRepository {
     data: Omit<FinancialEstimateDto, 'id' | 'generatedAt'>,
     context: FinanceMutationContext,
   ): Promise<FinancialEstimateDto>;
-  runReconciliation(): Promise<ReconciliationIssueDto[]>;
+  runReconciliation(context?: FinanceMutationContext): Promise<ReconciliationIssueDto[]>;
   getFinanceOverview(): Promise<FinanceOverviewDto>;
   getFinancialReport(): Promise<import('../entities/FinancePlatform').FinancialReportDto>;
   getStudentFinancialReadModel(

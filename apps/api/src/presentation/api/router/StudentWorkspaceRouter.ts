@@ -671,6 +671,20 @@ export class StudentWorkspaceRouter {
       }),
     );
 
+    for (const kind of ['wallets', 'transfers'] as const) {
+      router.get(
+        `/:studentReferenceId/finance/${kind}`,
+        asyncHandler(async (req: Request, res: Response) => {
+          const pagination = z
+            .object({
+              page: z.coerce.number().int().positive().default(1),
+              pageSize: z.coerce.number().int().min(1).max(50).default(20),
+            })
+            .parse(req.query);
+          res.json(await financeStudentUseCases.listHistory(ownStudentPath(req), kind, pagination));
+        }),
+      );
+    }
     router.get(
       '/:studentReferenceId/finance/overview',
       asyncHandler(async (req: Request, res: Response) => {
@@ -700,6 +714,42 @@ export class StudentWorkspaceRouter {
     );
 
     router.post(
+      '/:studentReferenceId/finance/invoices/:invoiceId/wallet-payment',
+      asyncHandler(async (req: Request, res: Response) => {
+        const studentReferenceId = ownStudentPath(req);
+        await financeStudentUseCases.getStudentInvoice(studentReferenceId, req.params.invoiceId);
+        const body = z
+          .object({
+            consent: z.literal(true),
+            walletId: z.string().min(1).max(160),
+            expectedVersion: z.number().int().positive(),
+            amount: z.object({
+              amountMinorUnits: z.string().regex(/^[1-9]\d{0,29}$/),
+              currencyCode: z.string().regex(/^[A-Z]{3}$/),
+              scale: z.number().int().min(0).max(6),
+            }),
+          })
+          .strict()
+          .parse(req.body);
+        const idempotencyKey = String(req.headers['idempotency-key'] || '').trim();
+        if (!idempotencyKey || idempotencyKey.length > 160)
+          throw new Error('FINANCE_IDEMPOTENCY_REQUIRED');
+        res.json(
+          await financePlatformUseCases.payInvoiceFromWallet(
+            { invoiceId: req.params.invoiceId, walletId: body.walletId, amount: body.amount },
+            {
+              actorId: studentReferenceId,
+              idempotencyKey,
+              expectedVersion: body.expectedVersion,
+              reason: 'Authenticated payer consent for invoice wallet payment',
+              correlationId:
+                String(req.headers['x-correlation-id'] || '').slice(0, 100) || undefined,
+            },
+          ),
+        );
+      }),
+    );
+    router.post(
       '/:studentReferenceId/finance/invoices/:invoiceId/payment-attempts',
       asyncHandler(async (req: Request, res: Response) => {
         const studentReferenceId = ownStudentPath(req);
@@ -726,6 +776,35 @@ export class StudentWorkspaceRouter {
       }),
     );
 
+    router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+      if (!req.path.includes('/finance/')) return next(err);
+      const message = String(err?.message || '');
+      let status = 500,
+        code = 'FINANCE_INTERNAL_ERROR';
+      if (err instanceof z.ZodError) {
+        status = 400;
+        code = 'FINANCE_VALIDATION_ERROR';
+      } else if (/NOT_CONFIGURED|RUNTIME_PENDING/.test(message)) {
+        status = 503;
+        code = 'FINANCE_CAPABILITY_UNAVAILABLE';
+      } else if (/OWNERSHIP|not found|NOT_FOUND/.test(message)) {
+        status = 404;
+        code = 'FINANCE_RECORD_NOT_FOUND';
+      } else if (/CONSENT/.test(message)) {
+        status = 403;
+        code = 'FINANCE_PAYER_CONSENT_REQUIRED';
+      } else if (/VERSION|CONFLICT|idempotency|already|RESERVED|OUTCOME_PENDING/i.test(message)) {
+        status = 409;
+        code = 'FINANCE_COMMAND_CONFLICT';
+      } else if (/invalid|required|cannot|must|exceed|Insufficient|not payable/i.test(message)) {
+        status = 400;
+        code = 'FINANCE_OPERATION_REJECTED';
+      } else if (/PROVIDER|EVIDENCE/.test(message)) {
+        status = 503;
+        code = 'FINANCE_PROVIDER_OUTCOME_UNCONFIRMED';
+      }
+      res.status(status).json({ error: code, code });
+    });
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });

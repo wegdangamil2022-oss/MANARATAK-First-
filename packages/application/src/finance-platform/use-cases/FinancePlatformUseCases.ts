@@ -1,6 +1,13 @@
+import { AssetReferencePolicy } from '../../asset-platform/AssetReferencePolicy';
 import { createHash, randomUUID } from 'node:crypto';
 import {
   assertCheckerEligible,
+  assertPositiveFinanceMoney,
+  assertBankTransferEvidence,
+  assertFinanceAttestation,
+  assertFreshFxQuote,
+  financeApprovalPolicy,
+  FinanceListFilters,
   assertSameCurrency,
   assertTransferTransition,
   assertValidMoneyAmount,
@@ -22,6 +29,7 @@ import {
   RefundDto,
   ExchangeRateDto,
   PaymentStatus,
+  PaymentGatewayResult,
   TransferStatus,
   validateBalancedPostings,
   validateInstallmentPlan,
@@ -32,12 +40,14 @@ export interface FinanceCommandIdentity {
   correlationId?: string;
   idempotencyKey: string;
   reason?: string;
+  expectedVersion?: number;
 }
 export interface FinanceTransferFeePolicy {
   policyReference: string;
   basisPoints: number;
 }
 export interface FinancePlatformDependencies {
+  assetReferencePolicy?: AssetReferencePolicy;
   currencyReference: IFinanceCurrencyReferenceGateway;
   paymentGateways: IPaymentGatewayRegistry;
   bankTransferGateways: IBankTransferGatewayRegistry;
@@ -70,17 +80,21 @@ const RESERVED_SYSTEM_ACCOUNT_IDENTITIES = [
 const isReservedAccountIdentity = (ownerReferenceId: string) =>
   RESERVED_SYSTEM_ACCOUNT_IDENTITIES.includes(ownerReferenceId) ||
   ownerReferenceId.startsWith('REVENUE:') ||
+  ownerReferenceId === 'COMMISSION_EXPENSE' ||
+  ownerReferenceId.startsWith('COMMISSION_PAYABLE:') ||
   ownerReferenceId.startsWith('SYSTEM:');
 
-const approvalPolicy = (actionType: string) => `FINANCE:${actionType}:FOUR_EYES_V1`;
+const approvalPolicy = (actionType: string) => financeApprovalPolicy(actionType).reference;
 
 export class FinancePlatformUseCases {
   constructor(
     private readonly repository: IFinanceRepository,
     private readonly dependencies: FinancePlatformDependencies,
   ) {
-    if (!dependencies?.currencyReference) throw new Error('Finance canonical currency gateway is required');
-    if (!dependencies?.paymentGateways) throw new Error('Finance payment gateway registry is required');
+    if (!dependencies?.currencyReference)
+      throw new Error('Finance canonical currency gateway is required');
+    if (!dependencies?.paymentGateways)
+      throw new Error('Finance payment gateway registry is required');
     if (!dependencies?.bankTransferGateways)
       throw new Error('Finance bank transfer gateway registry is required');
     if (!dependencies?.fxRateProvider) throw new Error('Finance FX rate provider is required');
@@ -93,6 +107,27 @@ export class FinancePlatformUseCases {
       throw new Error('Valid transfer fee policy is required');
   }
 
+  async createAdjustmentCase(
+    input: { reasonCode: string; supportingDocumentId: string },
+    identity: FinanceCommandIdentity,
+  ) {
+    if (
+      !['RECONCILIATION_CORRECTION', 'ROUNDING_CORRECTION', 'EMERGENCY_CORRECTION'].includes(
+        input.reasonCode,
+      )
+    )
+      throw new Error('FINANCE_ADJUSTMENT_REASON_INVALID');
+    if (!this.dependencies.assetReferencePolicy)
+      throw new Error('FINANCE_ADJUSTMENT_EVIDENCE_NOT_CONFIGURED');
+    await this.dependencies.assetReferencePolicy.assertUsable(input.supportingDocumentId, {
+      purpose: 'FINANCE_ADJUSTMENT',
+      expectedOwnerId: identity.actorId,
+    });
+    return this.repository.createAdjustmentCase(
+      { ...input, publicId: `CASE:${randomUUID()}`, makerId: identity.actorId },
+      context(identity),
+    );
+  }
   async postLedger(
     input: {
       businessReferenceType: string;
@@ -102,6 +137,25 @@ export class FinancePlatformUseCases {
     },
     identity: FinanceCommandIdentity,
   ) {
+    if (
+      input.businessReferenceType !== 'MANUAL_ADJUSTMENT' ||
+      !/^CASE:[A-Za-z0-9._:-]{1,120}$/.test(input.businessReferenceId) ||
+      !identity.reason?.trim() ||
+      input.postings.some((p) => !p.memo?.startsWith('DOCUMENT:'))
+    )
+      throw new Error('FINANCE_ADJUSTMENT_EVIDENCE_REQUIRED');
+    const adjustment = await this.repository.getAdjustmentCase(input.businessReferenceId);
+    if (
+      !adjustment ||
+      adjustment.makerId !== identity.actorId ||
+      !this.dependencies.assetReferencePolicy ||
+      input.postings.some((p) => p.memo !== `DOCUMENT:${adjustment.supportingDocumentId}`)
+    )
+      throw new Error('FINANCE_ADJUSTMENT_EVIDENCE_REQUIRED');
+    await this.dependencies.assetReferencePolicy.assertUsable(adjustment.supportingDocumentId, {
+      purpose: 'FINANCE_ADJUSTMENT',
+      expectedOwnerId: identity.actorId,
+    });
     validateBalancedPostings(input.postings);
     await Promise.all(input.postings.map((item) => this.assertCanonicalMoney(item.amount)));
     const commandPayload = {
@@ -136,7 +190,9 @@ export class FinancePlatformUseCases {
     identity: FinanceCommandIdentity,
   ) {
     if (isReservedAccountIdentity(input.ownerReferenceId))
-      throw new Error('Reserved finance system-account identity cannot be created through Admin API');
+      throw new Error(
+        'Reserved finance system-account identity cannot be created through Admin API',
+      );
     await this.assertCanonicalCurrency(input.currencyCode, input.scale);
     return this.repository.createFinancialAccount(
       {
@@ -163,11 +219,7 @@ export class FinancePlatformUseCases {
     );
   }
 
-  async reverseLedger(
-    transactionId: string,
-    approvalId: string,
-    identity: FinanceCommandIdentity,
-  ) {
+  async reverseLedger(transactionId: string, approvalId: string, identity: FinanceCommandIdentity) {
     const approval = await this.requireBoundApproval(
       approvalId,
       'MANUAL_LEDGER_REVERSE',
@@ -196,8 +248,14 @@ export class FinancePlatformUseCases {
   ) {
     if (!input.originDomain.trim() || !input.originReferenceId.trim())
       throw new Error('Origin reference is required');
-    await Promise.all(input.lineItems.map((line) => this.assertCanonicalMoney(line.unitPrice)));
+    await Promise.all(
+      input.lineItems.map((line) => {
+        assertPositiveFinanceMoney(line.unitPrice);
+        return this.assertCanonicalMoney(line.unitPrice);
+      }),
+    );
     const calculated = calculateInvoiceLines(input.lineItems);
+    assertPositiveFinanceMoney(calculated.total);
     return this.repository.createDraftInvoice(
       {
         publicId: `fin_inv_${randomUUID()}`,
@@ -226,26 +284,36 @@ export class FinancePlatformUseCases {
     identity: FinanceCommandIdentity,
   ) {
     const invoice = await this.requireInvoice(invoiceId);
-    if (invoice.status !== InvoiceStatus.DRAFT) throw new Error('Only DRAFT invoices can be edited');
-    await Promise.all(lineItems.map((line) => this.assertCanonicalMoney(line.unitPrice)));
+
+    await Promise.all(
+      lineItems.map((line) => {
+        assertPositiveFinanceMoney(line.unitPrice);
+        return this.assertCanonicalMoney(line.unitPrice);
+      }),
+    );
     const calculated = calculateInvoiceLines(lineItems);
-    return this.repository.updateDraftInvoice(invoiceId, calculated.lines, calculated.total, context(identity));
+    assertPositiveFinanceMoney(calculated.total);
+    return this.repository.updateDraftInvoice(
+      invoice.id,
+      calculated.lines,
+      calculated.total,
+      context(identity),
+    );
   }
 
   async issueInvoice(invoiceId: string, identity: FinanceCommandIdentity) {
     const invoice = await this.requireInvoice(invoiceId);
-    if (invoice.status !== InvoiceStatus.DRAFT) throw new Error('Only DRAFT invoices can be issued');
+
     if (invoice.dueDate && new Date(invoice.dueDate).getTime() <= Date.now())
       throw new Error('Invoice due date must be in the future');
     await this.assertCanonicalMoney(invoice.totalAmount);
-    return this.repository.issueDraftInvoice(invoiceId, context(identity));
+    return this.repository.issueDraftInvoice(invoice.id, context(identity));
   }
 
   async voidInvoice(invoiceId: string, identity: FinanceCommandIdentity) {
     const invoice = await this.requireInvoice(invoiceId);
-    if (![InvoiceStatus.DRAFT, InvoiceStatus.ISSUED, InvoiceStatus.OVERDUE].includes(invoice.status))
-      throw new Error('Invoice cannot be voided after payment or credit settlement');
-    return this.repository.voidInvoiceAtomic(invoiceId, context(identity));
+
+    return this.repository.voidInvoiceAtomic(invoice.id, context(identity));
   }
 
   async getInvoiceClearance(invoiceId: string) {
@@ -267,30 +335,7 @@ export class FinancePlatformUseCases {
     studentReferenceId?: string;
   }): Promise<boolean> {
     if (!input.originDomain.trim() || !input.originReferenceId.trim()) return false;
-    let page = 1;
-    let hasEffectiveInvoice = false;
-    do {
-      const invoices = await this.repository.listInvoices({
-        originDomain: input.originDomain,
-        originReferenceId: input.originReferenceId,
-        studentReferenceId: input.studentReferenceId,
-        page,
-        pageSize: 100,
-      });
-      for (const invoice of invoices.data) {
-        // Drafts are not obligations and voided invoices are intentionally neutral. Every other
-        // invoice for the same origin/student must be settled so an older PAID invoice cannot
-        // accidentally mask a newer outstanding charge.
-        if ([InvoiceStatus.DRAFT, InvoiceStatus.VOIDED].includes(invoice.status)) continue;
-        hasEffectiveInvoice = true;
-        const cleared =
-          BigInt(invoice.amountDue.amountMinorUnits) === 0n &&
-          [InvoiceStatus.PAID, InvoiceStatus.CREDITED].includes(invoice.status);
-        if (!cleared) return false;
-      }
-      if (page >= invoices.totalPages) return hasEffectiveInvoice;
-      page += 1;
-    } while (true);
+    return this.repository.hasFinancialClearanceForOrigin(input);
   }
 
   runtimeReadiness() {
@@ -304,14 +349,20 @@ export class FinancePlatformUseCases {
     }));
     const fxProvider = {
       providerKey: this.dependencies.fxRateProvider.providerKey,
-      status: this.dependencies.fxRateProvider.isConfigured() ? 'READY' as const : 'NOT_CONFIGURED' as const,
+      status: this.dependencies.fxRateProvider.isConfigured()
+        ? ('RUNTIME_PENDING' as const)
+        : ('NOT_CONFIGURED' as const),
     };
-    const states = [...paymentProviders, ...bankProviders, fxProvider].map((provider) => provider.status);
+    const states = [...paymentProviders, ...bankProviders, fxProvider].map(
+      (provider) => provider.status,
+    );
     const overall = states.every((state) => state === 'READY')
-      ? 'READY' as const
+      ? ('READY' as const)
       : states.some((state) => state === 'READY')
-        ? 'PARTIAL' as const
-        : 'NOT_CONFIGURED' as const;
+        ? ('PARTIAL' as const)
+        : states.some((state) => state === 'RUNTIME_PENDING')
+          ? ('RUNTIME_PENDING' as const)
+          : ('NOT_CONFIGURED' as const);
     return {
       overall,
       paymentProviders,
@@ -333,21 +384,47 @@ export class FinancePlatformUseCases {
     identity: FinanceCommandIdentity,
   ) {
     const invoice = await this.requireInvoice(input.invoiceId);
-    if (![InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE].includes(invoice.status))
+    const paymentReference = `fin_pay_${hash(identity.idempotencyKey).slice(0, 32)}`;
+    const prior = await this.repository.findPaymentById(paymentReference);
+    if (
+      prior &&
+      [PaymentStatus.CAPTURED, PaymentStatus.PARTIALLY_REFUNDED, PaymentStatus.REFUNDED].includes(
+        prior.status,
+      )
+    )
+      return this.repository.preparePaymentAttempt(
+        {
+          publicId: paymentReference,
+          invoiceId: invoice.id,
+          idempotencyKey: hash(identity.idempotencyKey),
+          amount: input.amount,
+          status: PaymentStatus.PENDING,
+          paymentMethod: 'PROVIDER_TOKEN',
+          gatewayProvider: input.gatewayProvider,
+        },
+        context(identity),
+      );
+    if (
+      ![InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE].includes(
+        invoice.status,
+      )
+    )
       throw new Error('Invoice is not payable');
     await this.assertCanonicalMoney(input.amount);
     assertSameCurrency(invoice.amountDue, input.amount);
-    if (BigInt(input.amount.amountMinorUnits) <= BigInt(0) || compareMoneyAmounts(input.amount, invoice.amountDue) === 1)
+    if (
+      BigInt(input.amount.amountMinorUnits) <= BigInt(0) ||
+      compareMoneyAmounts(input.amount, invoice.amountDue) === 1
+    )
       throw new Error('Payment amount must be positive and cannot exceed amountDue');
     if (/\b(?:\d[ -]*?){13,19}\b/.test(input.paymentMethodToken))
       throw new Error('Raw card PAN is forbidden; provide a provider token');
 
     const gateway = this.requirePaymentGateway(input.gatewayProvider);
-    const paymentReference = `fin_pay_${hash(identity.idempotencyKey).slice(0, 32)}`;
     const pending = await this.repository.preparePaymentAttempt(
       {
         publicId: paymentReference,
-        invoiceId: input.invoiceId,
+        invoiceId: invoice.id,
         idempotencyKey: hash(identity.idempotencyKey),
         amount: input.amount,
         status: PaymentStatus.PENDING,
@@ -358,16 +435,16 @@ export class FinancePlatformUseCases {
     );
     if (pending.status === PaymentStatus.CAPTURED) return pending;
     if (pending.status === PaymentStatus.FAILED)
-      throw new Error(`PAYMENT_ATTEMPT_ALREADY_FAILED_USE_NEW_IDEMPOTENCY_KEY:${pending.failureReason || 'UNKNOWN'}`);
+      throw new Error(
+        `PAYMENT_ATTEMPT_ALREADY_FAILED_USE_NEW_IDEMPOTENCY_KEY:${pending.failureReason || 'UNKNOWN'}`,
+      );
 
-    let authorized: {
-      status: 'AUTHORIZED' | 'CAPTURED' | 'COMPLETED' | 'FAILED';
-      gatewayReference: string;
-      safeMaskedMetadata?: Record<string, string>;
-      failureCode?: string;
-    };
+    if (!(await this.repository.claimPaymentDispatch(pending.id, context(identity))))
+      throw new Error('FINANCE_PAYMENT_OUTCOME_PENDING_RECONCILIATION');
+    let authorized: PaymentGatewayResult;
     if (pending.status === PaymentStatus.AUTHORIZED) {
-      if (!pending.gatewayReference) throw new Error('AUTHORIZED_PAYMENT_MISSING_PROVIDER_REFERENCE');
+      if (!pending.gatewayReference)
+        throw new Error('AUTHORIZED_PAYMENT_MISSING_PROVIDER_REFERENCE');
       authorized = {
         status: 'AUTHORIZED',
         gatewayReference: pending.gatewayReference,
@@ -380,7 +457,7 @@ export class FinancePlatformUseCases {
         paymentReference: pending.publicId,
         amount: input.amount,
         paymentMethodToken: input.paymentMethodToken,
-        idempotencyKey: `${identity.idempotencyKey}:authorize`,
+        idempotencyKey: `payment:${pending.publicId}:authorize`,
       });
       if (authorized.status === 'FAILED') {
         await this.repository.recordPaymentFailure(
@@ -392,16 +469,29 @@ export class FinancePlatformUseCases {
       }
       await this.repository.recordPaymentAuthorization(
         pending.id,
-        { gatewayReference: authorized.gatewayReference, safeMaskedMetadata: authorized.safeMaskedMetadata },
+        {
+          gatewayReference: authorized.gatewayReference,
+          safeMaskedMetadata: authorized.safeMaskedMetadata,
+        },
         context(identity),
       );
     }
 
-    // A transport exception after authorization is also ambiguous. Leave AUTHORIZED and retry
-    // capture with the same provider idempotency key; never fabricate a failed or captured state.
-    const captured = authorized.status === 'CAPTURED'
+    // Reserve the one capture dispatch; ambiguous responses retain the claim for reconciliation.
+    const alreadyCaptured = ['CAPTURED', 'COMPLETED'].includes(authorized.status);
+    if (
+      !alreadyCaptured &&
+      !(await this.repository.claimPaymentCapture(pending.id, context(identity)))
+    )
+      throw new Error('FINANCE_PAYMENT_OUTCOME_PENDING_RECONCILIATION');
+    const captured = alreadyCaptured
       ? authorized
-      : await gateway.capture(authorized.gatewayReference, input.amount, `${identity.idempotencyKey}:capture`);
+      : await gateway.capture(
+          authorized.gatewayReference,
+          input.amount,
+          `payment:${pending.publicId}:capture`,
+          pending.publicId,
+        );
     if (captured.status === 'FAILED') {
       await this.repository.recordPaymentFailure(
         pending.id,
@@ -410,13 +500,14 @@ export class FinancePlatformUseCases {
       );
       throw new Error(`PAYMENT_CAPTURE_FAILED:${captured.failureCode || 'UNKNOWN'}`);
     }
-    if (captured.status !== 'CAPTURED')
+    if (!['CAPTURED', 'COMPLETED'].includes(captured.status))
       throw new Error(`PAYMENT_CAPTURE_NOT_PROVEN:${captured.status}`);
 
+    assertFinanceAttestation(captured, pending.amount, gateway.merchantReference, pending.publicId);
     return this.repository.recordCapturedPaymentAtomic(
       {
         publicId: pending.publicId,
-        invoiceId: input.invoiceId,
+        invoiceId: invoice.id,
         idempotencyKey: hash(identity.idempotencyKey),
         amount: input.amount,
         status: PaymentStatus.CAPTURED,
@@ -424,31 +515,81 @@ export class FinancePlatformUseCases {
         gatewayProvider: gateway.providerKey,
         gatewayReference: captured.gatewayReference,
         capturedAt: new Date(),
+        providerEvidence: { ...captured },
         metadata: captured.safeMaskedMetadata || authorized.safeMaskedMetadata,
       },
       context(identity),
     );
   }
 
+  async payInvoiceFromWallet(
+    input: { invoiceId: string; walletId: string; amount: MoneyAmount },
+    identity: FinanceCommandIdentity,
+  ) {
+    const invoice = await this.requireInvoice(input.invoiceId);
+    if (
+      invoice.studentReferenceId !== identity.actorId ||
+      invoice.payerReferenceId !== identity.actorId
+    )
+      throw new Error('FINANCE_PAYER_CONSENT_REQUIRED');
+    const hold = await this.createWalletHold(
+      { walletId: input.walletId, amount: input.amount, businessReferenceId: invoice.id },
+      { ...identity, idempotencyKey: `${identity.idempotencyKey}:hold` },
+    );
+    if (hold.status !== 'CAPTURED')
+      await this.resolveWalletHold(hold.id, 'CAPTURE', {
+        ...identity,
+        expectedVersion: hold.version,
+        idempotencyKey: `${identity.idempotencyKey}:capture`,
+      });
+    return this.getInvoiceClearance(invoice.id);
+  }
   async createWalletHold(
     input: { walletId: string; amount: MoneyAmount; businessReferenceId: string },
     identity: FinanceCommandIdentity,
   ) {
     await this.assertCanonicalMoney(input.amount);
-    if (BigInt(input.amount.amountMinorUnits) <= BigInt(0)) throw new Error('Hold must be positive');
-    return this.repository.createWalletHold(input.walletId, input.amount, input.businessReferenceId, context(identity));
+    assertPositiveFinanceMoney(input.amount);
+    if (!/^[A-Za-z0-9._:-]{1,160}$/.test(input.businessReferenceId))
+      throw new Error('FINANCE_OBLIGATION_INVALID');
+    return this.repository.createWalletHold(
+      input.walletId,
+      input.amount,
+      input.businessReferenceId,
+      context(identity),
+    );
   }
-  async resolveWalletHold(holdId: string, action: 'RELEASE' | 'CAPTURE', identity: FinanceCommandIdentity) {
+  async resolveWalletHold(
+    holdId: string,
+    action: 'RELEASE' | 'CAPTURE',
+    identity: FinanceCommandIdentity,
+  ) {
     return this.repository.resolveWalletHold(holdId, action, context(identity));
   }
 
-  async convert(input: { amount: MoneyAmount; targetCurrencyCode: string; targetScale: number; at?: Date }) {
+  async convert(input: {
+    amount: MoneyAmount;
+    targetCurrencyCode: string;
+    targetScale: number;
+    at?: Date;
+  }) {
     await this.assertCanonicalMoney(input.amount);
     await this.assertCanonicalCurrency(input.targetCurrencyCode, input.targetScale);
-    const rate = await this.repository.findEffectiveExchangeRate(input.amount.currencyCode, input.targetCurrencyCode, input.at ?? new Date());
+    const rate = await this.repository.findEffectiveExchangeRate(
+      input.amount.currencyCode,
+      input.targetCurrencyCode,
+      input.at ?? new Date(),
+    );
     if (!rate) throw new Error('No approved effective exchange rate; conversion failed closed');
     return {
-      amount: convertMoneyExact(input.amount, input.targetCurrencyCode, input.targetScale, rate.rateNumerator, rate.rateDenominator, rate.marginBasisPoints),
+      amount: convertMoneyExact(
+        input.amount,
+        input.targetCurrencyCode,
+        input.targetScale,
+        rate.rateNumerator,
+        rate.rateDenominator,
+        rate.marginBasisPoints,
+      ),
       rate,
     };
   }
@@ -460,26 +601,48 @@ export class FinancePlatformUseCases {
     options: { approvalId?: string } = {},
   ) {
     const transfer = await this.requireTransfer(id);
+    this.assertExpectedVersion(transfer.version, identity);
     assertTransferTransition(transfer.status, to);
     await this.assertCanonicalMoney(transfer.sourceAmount);
     const wallet = await this.repository.getWallet(transfer.sourceWalletId);
     if (!wallet || wallet.status !== 'ACTIVE') throw new Error('Source wallet is not active');
-    if (wallet.currencyCode !== transfer.sourceAmount.currencyCode || wallet.scale !== transfer.sourceAmount.scale)
+    if (
+      wallet.currencyCode !== transfer.sourceAmount.currencyCode ||
+      wallet.scale !== transfer.sourceAmount.scale
+    )
       throw new Error('Transfer source denomination does not match wallet denomination');
 
     if (to === 'RATE_LOCKED') {
       const target = await this.requireCanonicalCurrency(transfer.destinationCurrencyCode);
-      const rate = await this.repository.findEffectiveExchangeRate(transfer.sourceAmount.currencyCode, target.currencyCode, new Date());
+      const rate = await this.repository.findEffectiveExchangeRate(
+        transfer.sourceAmount.currencyCode,
+        target.currencyCode,
+        new Date(),
+      );
       if (!rate) throw new Error('Transfer cannot lock rate without an approved effective FX rate');
-      const targetAmount = convertMoneyExact(transfer.sourceAmount, target.currencyCode, target.scale, rate.rateNumerator, rate.rateDenominator, rate.marginBasisPoints);
+      const targetAmount = convertMoneyExact(
+        transfer.sourceAmount,
+        target.currencyCode,
+        target.scale,
+        rate.rateNumerator,
+        rate.rateDenominator,
+        rate.marginBasisPoints,
+      );
       return this.repository.lockTransferRate(transfer.id, rate, targetAmount, context(identity));
     }
     if (to === 'FEES_CALCULATED') {
-      if (!transfer.targetAmount || !transfer.rateId) throw new Error('Transfer rate must be locked before fee calculation');
+      if (!transfer.targetAmount || !transfer.rateId)
+        throw new Error('Transfer rate must be locked before fee calculation');
       const units = BigInt(transfer.sourceAmount.amountMinorUnits);
-      const feeUnits = (units * BigInt(this.dependencies.transferFeePolicy.basisPoints)) / BigInt(10_000);
+      const feeUnits =
+        (units * BigInt(this.dependencies.transferFeePolicy.basisPoints)) / BigInt(10_000);
       const fee = { ...transfer.sourceAmount, amountMinorUnits: feeUnits.toString() };
-      return this.repository.calculateTransferFee(transfer.id, fee, this.dependencies.transferFeePolicy.policyReference, context(identity));
+      return this.repository.calculateTransferFee(
+        transfer.id,
+        fee,
+        this.dependencies.transferFeePolicy.policyReference,
+        context(identity),
+      );
     }
     if (to === 'APPROVED') {
       if (!options.approvalId) throw new Error('Bound transfer approvalId is required');
@@ -494,30 +657,37 @@ export class FinancePlatformUseCases {
       return this.repository.transitionTransfer(transfer.id, to, context(identity), { approval });
     }
     if (to === 'PROCESSING') {
-      if (!transfer.targetAmount || !transfer.feeAmount || !transfer.rateId || !transfer.feePolicyReference)
+      if (
+        !transfer.targetAmount ||
+        !transfer.feeAmount ||
+        !transfer.rateId ||
+        !transfer.feePolicyReference
+      )
         throw new Error('Transfer financial snapshot is incomplete');
       if (!transfer.bankProvider) throw new Error('Transfer bank provider is required');
       const gateway = this.requireBankGateway(transfer.bankProvider);
+      const claimed = await this.repository.claimTransferSubmission(transfer.id, context(identity));
       const evidence = await gateway.submit({
         transferReference: transfer.publicId,
         destinationReferenceId: transfer.destinationReferenceId,
         sourceAmount: transfer.sourceAmount,
         targetAmount: transfer.targetAmount,
         feeAmount: transfer.feeAmount,
-        idempotencyKey: `${identity.idempotencyKey}:bank-submit`,
+        idempotencyKey: `transfer:${claimed.publicId}:bank-submit`,
       });
-      if (evidence.status !== 'PROCESSING') throw new Error(`BANK_SUBMISSION_NOT_ACCEPTED:${evidence.failureCode || evidence.status}`);
-      return this.repository.transitionTransfer(transfer.id, to, context(identity), {
-        bankProvider: gateway.providerKey,
-        bankProviderReference: evidence.providerReference,
-        providerStatus: evidence.status,
-      });
+      assertBankTransferEvidence(evidence, transfer);
+      // The durable claim is retained even on timeout/restart. A new request cannot submit again.
+      return this.repository.recordTransferSubmission(claimed.id, evidence, context(identity));
     }
     if (to === 'SETTLED' || to === 'FAILED') {
       if (!transfer.bankProvider || !transfer.bankProviderReference)
         throw new Error('Bank provider evidence is missing');
       const gateway = this.requireBankGateway(transfer.bankProvider);
-      const evidence = await gateway.getStatus(transfer.bankProviderReference, `${identity.idempotencyKey}:bank-status`);
+      const evidence = await gateway.getStatus(
+        transfer.bankProviderReference,
+        `${identity.idempotencyKey}:bank-status`,
+      );
+      assertBankTransferEvidence(evidence, transfer);
       if (to === 'SETTLED' && evidence.status !== 'SETTLED')
         throw new Error(`BANK_SETTLEMENT_NOT_PROVEN:${evidence.status}`);
       if (to === 'FAILED' && evidence.status !== 'FAILED')
@@ -526,6 +696,7 @@ export class FinancePlatformUseCases {
         bankProvider: gateway.providerKey,
         bankProviderReference: evidence.providerReference,
         providerStatus: evidence.status,
+        providerEvidence: { ...evidence },
         providerFailureCode: evidence.failureCode,
       });
     }
@@ -535,14 +706,18 @@ export class FinancePlatformUseCases {
       const gateway = this.requireBankGateway(transfer.bankProvider);
       const evidence = await gateway.reverse(
         transfer.bankProviderReference,
-        `${identity.idempotencyKey}:bank-reverse`,
+        `transfer:${transfer.publicId}:bank-reverse`,
       );
-      if (evidence.status !== 'REVERSED' || evidence.providerReference !== transfer.bankProviderReference)
+      if (
+        evidence.status !== 'REVERSED' ||
+        evidence.providerReference !== transfer.bankProviderReference
+      )
         throw new Error(`BANK_REVERSAL_NOT_PROVEN:${evidence.status}`);
       return this.repository.transitionTransfer(transfer.id, to, context(identity), {
         bankProvider: gateway.providerKey,
         bankProviderReference: evidence.providerReference,
         providerStatus: evidence.status,
+        providerEvidence: { ...evidence },
         providerFailureCode: evidence.failureCode,
       });
     }
@@ -561,10 +736,14 @@ export class FinancePlatformUseCases {
   ) {
     await this.assertCanonicalMoney(input.sourceAmount);
     await this.requireCanonicalCurrency(input.destinationCurrencyCode);
-    if (BigInt(input.sourceAmount.amountMinorUnits) <= BigInt(0)) throw new Error('Transfer amount must be positive');
+    if (BigInt(input.sourceAmount.amountMinorUnits) <= BigInt(0))
+      throw new Error('Transfer amount must be positive');
     const wallet = await this.repository.getWallet(input.sourceWalletId);
     if (!wallet || wallet.status !== 'ACTIVE') throw new Error('Source wallet is not active');
-    if (wallet.currencyCode !== input.sourceAmount.currencyCode || wallet.scale !== input.sourceAmount.scale)
+    if (
+      wallet.currencyCode !== input.sourceAmount.currencyCode ||
+      wallet.scale !== input.sourceAmount.scale
+    )
       throw new Error('Transfer source denomination does not match wallet denomination');
     this.requireBankGateway(input.bankProvider);
     const ctx = context(identity);
@@ -596,9 +775,11 @@ export class FinancePlatformUseCases {
     },
     identity: FinanceCommandIdentity,
   ) {
-    if (!Number.isInteger(input.requiredApprovals) || input.requiredApprovals < 1)
-      throw new Error('At least one checker is required');
-    if (input.expiresAt && input.expiresAt.getTime() <= Date.now()) throw new Error('Approval expiry must be in the future');
+    const policy = financeApprovalPolicy(input.actionType);
+    if (input.requiredApprovals < policy.requiredApprovals)
+      throw new Error('FINANCE_APPROVAL_QUORUM_INVALID');
+    if (input.expiresAt && input.expiresAt.getTime() <= Date.now())
+      throw new Error('Approval expiry must be in the future');
     let effectivePayload: unknown = input.commandPayload;
     let effectiveAmount = input.amount;
     if (input.actionType === 'TRANSFER_APPROVE') {
@@ -613,10 +794,16 @@ export class FinancePlatformUseCases {
       effectiveAmount = refund.amount;
       input.targetReferenceId = refund.publicId;
     } else if (input.actionType === 'MANUAL_FX_OVERRIDE') {
-      const rate = (await this.repository.listExchangeRates()).find((item) => item.id === input.targetReferenceId || item.publicId === input.targetReferenceId);
+      const rate = (await this.repository.listExchangeRates()).find(
+        (item) => item.id === input.targetReferenceId || item.publicId === input.targetReferenceId,
+      );
       if (!rate) throw new Error('Exchange rate not found');
       effectivePayload = this.rateApprovalPayload(rate);
       input.targetReferenceId = rate.publicId;
+    } else if (input.actionType === 'MANUAL_LEDGER_POST') {
+      const adjustment = await this.repository.getAdjustmentCase(input.targetReferenceId);
+      if (!adjustment || adjustment.makerId !== identity.actorId || adjustment.status !== 'OPEN')
+        throw new Error('FINANCE_ADJUSTMENT_EVIDENCE_REQUIRED');
     } else if (input.actionType === 'MANUAL_LEDGER_REVERSE') {
       effectivePayload = { transactionId: input.targetReferenceId };
     }
@@ -629,12 +816,14 @@ export class FinancePlatformUseCases {
         targetReferenceId: input.targetReferenceId,
         amount: effectiveAmount,
         makerId: identity.actorId,
-        requiredApprovals: input.requiredApprovals,
+        requiredApprovals: policy.requiredApprovals,
         payloadHash: payloadHash(effectivePayload),
         policyReference: approvalPolicy(input.actionType),
         consumedAt: null,
         status: 'PENDING',
-        expiresAt: input.expiresAt,
+        expiresAt: new Date(
+          Math.min(input.expiresAt?.getTime() ?? Infinity, Date.now() + policy.maxAgeMs),
+        ),
       },
       context(identity),
     );
@@ -656,8 +845,14 @@ export class FinancePlatformUseCases {
   ) {
     await this.requireCanonicalCurrency(input.sourceCurrencyCode);
     await this.requireCanonicalCurrency(input.targetCurrencyCode);
-    if (input.sourceCurrencyCode === input.targetCurrencyCode) throw new Error('FX corridor must use different currencies');
-    if (!/^\d+$/.test(input.rateNumerator) || !/^\d+$/.test(input.rateDenominator) || BigInt(input.rateNumerator) <= 0n || BigInt(input.rateDenominator) <= 0n)
+    if (input.sourceCurrencyCode === input.targetCurrencyCode)
+      throw new Error('FX corridor must use different currencies');
+    if (
+      !/^\d+$/.test(input.rateNumerator) ||
+      !/^\d+$/.test(input.rateDenominator) ||
+      BigInt(input.rateNumerator) <= 0n ||
+      BigInt(input.rateDenominator) <= 0n
+    )
       throw new Error('Exchange rate numerator and denominator must be positive');
     if (input.effectiveTo && input.effectiveTo.getTime() <= input.effectiveFrom.getTime())
       throw new Error('Exchange-rate effectiveTo must be later than effectiveFrom');
@@ -685,12 +880,26 @@ export class FinancePlatformUseCases {
   ) {
     await this.requireCanonicalCurrency(sourceCurrencyCode);
     await this.requireCanonicalCurrency(targetCurrencyCode);
-    if (sourceCurrencyCode === targetCurrencyCode) throw new Error('FX corridor must use different currencies');
-    if (!this.dependencies.fxRateProvider.isConfigured()) throw new Error(`FX_PROVIDER_NOT_CONFIGURED:${this.dependencies.fxRateProvider.providerKey}`);
-    const evidence = await this.dependencies.fxRateProvider.fetchRate(sourceCurrencyCode, targetCurrencyCode);
-    if (!/^\d+$/.test(evidence.numerator) || !/^\d+$/.test(evidence.denominator) || BigInt(evidence.numerator) <= 0n || BigInt(evidence.denominator) <= 0n) {
-      throw new Error('FX_PROVIDER_RATE_INVALID');
-    }
+    if (sourceCurrencyCode === targetCurrencyCode)
+      throw new Error('FX corridor must use different currencies');
+    if (!this.dependencies.fxRateProvider.isConfigured())
+      throw new Error(`FX_PROVIDER_NOT_CONFIGURED:${this.dependencies.fxRateProvider.providerKey}`);
+    const evidence = await this.dependencies.fxRateProvider.fetchRate(
+      sourceCurrencyCode,
+      targetCurrencyCode,
+    );
+    assertFreshFxQuote(evidence.numerator, evidence.denominator, evidence.effectiveAt);
+    const prior = await this.repository.findEffectiveExchangeRate(
+      sourceCurrencyCode,
+      targetCurrencyCode,
+      new Date(),
+    );
+    if (!prior) throw new Error('FX_QUOTE_REQUIRES_INDEPENDENT_BASELINE');
+    const currentScaled = BigInt(evidence.numerator) * BigInt(prior.rateDenominator);
+    const priorScaled = BigInt(prior.rateNumerator) * BigInt(evidence.denominator);
+    const deviation =
+      currentScaled > priorScaled ? currentScaled - priorScaled : priorScaled - currentScaled;
+    if (deviation * 10000n > priorScaled * 500n) throw new Error('FX_QUOTE_QUARANTINED');
     return this.repository.saveExchangeRate(
       {
         publicId: `fin_rate_${randomUUID()}`,
@@ -711,10 +920,17 @@ export class FinancePlatformUseCases {
     );
   }
 
-  async activateManualExchangeRate(rateId: string, approvalId: string, identity: FinanceCommandIdentity) {
-    const rate = (await this.repository.listExchangeRates()).find((item) => item.id === rateId || item.publicId === rateId);
+  async activateManualExchangeRate(
+    rateId: string,
+    approvalId: string,
+    identity: FinanceCommandIdentity,
+  ) {
+    const rate = (await this.repository.listExchangeRates()).find(
+      (item) => item.id === rateId || item.publicId === rateId,
+    );
     if (!rate) throw new Error('Exchange rate not found');
-    if (rate.source !== 'MANUAL_OVERRIDE') throw new Error('Only manual FX overrides require four-eyes activation');
+    if (rate.source !== 'MANUAL_OVERRIDE')
+      throw new Error('Only manual FX overrides require four-eyes activation');
     const approval = await this.requireBoundApproval(
       approvalId,
       'MANUAL_FX_OVERRIDE',
@@ -726,20 +942,37 @@ export class FinancePlatformUseCases {
   }
 
   async accrueCommission(
-    input: { recipientReferenceId: string; sourcePaymentId: string; basisPoints: number; policyReference: string },
+    input: {
+      recipientReferenceId: string;
+      sourcePaymentId: string;
+      basisPoints: number;
+      policyReference: string;
+    },
     identity: FinanceCommandIdentity,
   ) {
-    if (!Number.isInteger(input.basisPoints) || input.basisPoints <= 0 || input.basisPoints > 10_000)
+    if (
+      !Number.isInteger(input.basisPoints) ||
+      input.basisPoints <= 0 ||
+      input.basisPoints > 10_000
+    )
       throw new Error('Commission basis points must be between 1 and 10000');
     if (!input.policyReference.trim()) throw new Error('Commission policy reference is required');
     const payment = await this.repository.findPaymentById(input.sourcePaymentId);
-    if (!payment || payment.status !== PaymentStatus.CAPTURED) throw new Error('Commission requires a captured payment');
+    if (
+      !payment ||
+      ![PaymentStatus.CAPTURED, PaymentStatus.PARTIALLY_REFUNDED].includes(payment.status)
+    )
+      throw new Error('Commission requires a captured payment');
     await this.assertCanonicalMoney(payment.amount);
     const amount = {
       ...payment.amount,
-      amountMinorUnits: ((BigInt(payment.amount.amountMinorUnits) * BigInt(input.basisPoints)) / 10_000n).toString(),
+      amountMinorUnits: (
+        (BigInt(payment.amount.amountMinorUnits) * BigInt(input.basisPoints)) /
+        10_000n
+      ).toString(),
     };
-    if (BigInt(amount.amountMinorUnits) <= 0n) throw new Error('Commission policy calculated zero amount');
+    if (BigInt(amount.amountMinorUnits) <= 0n)
+      throw new Error('Commission policy calculated zero amount');
     return this.repository.createCommission(
       {
         publicId: `fin_commission_${randomUUID()}`,
@@ -754,7 +987,13 @@ export class FinancePlatformUseCases {
     );
   }
 
-  async decideApproval(id: string, decision: 'APPROVE' | 'REJECT', checkerId: string, reason: string | undefined, identity: FinanceCommandIdentity) {
+  async decideApproval(
+    id: string,
+    decision: 'APPROVE' | 'REJECT',
+    checkerId: string,
+    reason: string | undefined,
+    identity: FinanceCommandIdentity,
+  ) {
     const approval = await this.repository.getApproval(id);
     if (!approval) throw new Error('Approval not found');
     assertCheckerEligible(approval.makerId, checkerId, approval.decisions);
@@ -762,10 +1001,14 @@ export class FinancePlatformUseCases {
     return this.repository.decideApproval(id, decision, checkerId, reason, context(identity));
   }
 
-  async createRefund(input: { paymentId: string; amount: MoneyAmount; reason: string }, identity: FinanceCommandIdentity) {
+  async createRefund(
+    input: { paymentId: string; amount: MoneyAmount; reason: string },
+    identity: FinanceCommandIdentity,
+  ) {
     await this.assertCanonicalMoney(input.amount);
     if (!input.reason.trim()) throw new Error('Refund reason is required');
-    if (BigInt(input.amount.amountMinorUnits) <= 0n) throw new Error('Refund amount must be positive');
+    if (BigInt(input.amount.amountMinorUnits) <= 0n)
+      throw new Error('Refund amount must be positive');
     return this.repository.createRefund(
       {
         publicId: `fin_ref_${randomUUID()}`,
@@ -781,9 +1024,12 @@ export class FinancePlatformUseCases {
 
   async processRefund(refundId: string, approvalId: string, identity: FinanceCommandIdentity) {
     const refund = await this.repository.getRefund(refundId);
-    if (!refund || refund.status !== 'PENDING_APPROVAL') throw new Error('Refund is not pending approval');
+    if (refund?.status === 'COMPLETED' && refund.approvalId === approvalId) return refund;
+    if (!refund || refund.status !== 'PENDING_APPROVAL')
+      throw new Error('Refund is not pending approval');
     const payment = await this.repository.findPaymentById(refund.paymentId);
-    if (!payment || !payment.gatewayProvider || !payment.gatewayReference) throw new Error('Refund requires original payment gateway evidence');
+    if (!payment || !payment.gatewayProvider || !payment.gatewayReference)
+      throw new Error('Refund requires original payment gateway evidence');
     const approval = await this.requireBoundApproval(
       approvalId,
       'REFUND_EXECUTE',
@@ -792,56 +1038,114 @@ export class FinancePlatformUseCases {
       payloadHash(this.refundApprovalPayload(refund)),
       refund.amount,
     );
-    const processing = await this.repository.beginRefundProcessing(refund.id, approval, context(identity));
+    const processing = await this.repository.beginRefundProcessing(
+      refund.id,
+      approval,
+      context(identity),
+    );
     const gateway = this.requirePaymentGateway(payment.gatewayProvider);
     // The approval is already atomically consumed and the refund reserved as PROCESSING.
     // Ambiguous provider/network outcomes therefore fail closed for reconciliation instead of re-opening execution.
-    const evidence = await gateway.refund(
-      payment.gatewayReference,
-      processing.amount,
-      processing.publicId,
-      `refund:${processing.publicId}`,
-    );
+    let evidence;
+    try {
+      evidence = await gateway.refund(
+        payment.gatewayReference,
+        processing.amount,
+        processing.publicId,
+        `refund:${processing.publicId}`,
+      );
+    } catch (error) {
+      await this.repository.markRefundUnknown(processing.id, context(identity));
+      throw error;
+    }
     if (evidence.status === 'FAILED') {
-      await this.repository.failRefund(processing.id, evidence.failureCode || 'PROVIDER_REFUND_FAILED', context(identity));
+      await this.repository.failRefund(
+        processing.id,
+        evidence.failureCode || 'PROVIDER_REFUND_FAILED',
+        context(identity),
+      );
       throw new Error(`REFUND_PROVIDER_FAILED:${evidence.failureCode || 'UNKNOWN'}`);
     }
-    if (!['COMPLETED', 'CAPTURED'].includes(evidence.status)) throw new Error(`REFUND_COMPLETION_NOT_PROVEN:${evidence.status}`);
+    if (!['COMPLETED', 'CAPTURED'].includes(evidence.status)) {
+      await this.repository.markRefundUnknown(processing.id, context(identity));
+      throw new Error('REFUND_COMPLETION_NOT_PROVEN');
+    }
+    try {
+      assertFinanceAttestation(
+        evidence,
+        processing.amount,
+        gateway.merchantReference,
+        processing.publicId,
+      );
+    } catch (error) {
+      await this.repository.markRefundUnknown(processing.id, context(identity));
+      throw error;
+    }
     return this.repository.completeRefundAtomic(
       processing.id,
-      { gatewayProvider: gateway.providerKey, gatewayReference: evidence.gatewayReference },
+      {
+        gatewayProvider: gateway.providerKey,
+        gatewayReference: evidence.gatewayReference,
+        attestation: { ...evidence },
+      },
       context(identity),
     );
   }
 
-  async createInstallments(invoiceId: string, installments: Array<{ amount: MoneyAmount; dueDate: Date | string }>, identity: FinanceCommandIdentity) {
+  async createInstallments(
+    invoiceId: string,
+    installments: Array<{ amount: MoneyAmount; dueDate: Date | string }>,
+    identity: FinanceCommandIdentity,
+  ) {
     const invoice = await this.requireInvoice(invoiceId);
-    if (![InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE].includes(invoice.status))
+    if (
+      ![InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE].includes(
+        invoice.status,
+      )
+    )
       throw new Error('Installment plan requires an issued invoice with outstanding value');
-    if (BigInt(invoice.amountDue.amountMinorUnits) <= 0n) throw new Error('Invoice has no outstanding amount');
+    if (BigInt(invoice.amountDue.amountMinorUnits) <= 0n)
+      throw new Error('Invoice has no outstanding amount');
     await Promise.all(installments.map((item) => this.assertCanonicalMoney(item.amount)));
     validateInstallmentPlan(invoice.amountDue, installments);
-    if (new Date(installments[0].dueDate).getTime() <= Date.now()) throw new Error('First installment due date must be in the future');
+    if (new Date(installments[0].dueDate).getTime() <= Date.now())
+      throw new Error('First installment due date must be in the future');
     return this.repository.createInstallmentPlan(
       invoiceId,
       {
         invoiceId,
         totalAmount: invoice.amountDue,
         status: 'ACTIVE',
-        installments: installments.map((item) => ({ id: randomUUID(), ...item, status: 'PENDING' })),
+        installments: installments.map((item) => ({
+          id: randomUUID(),
+          ...item,
+          status: 'PENDING',
+        })),
       },
       context(identity),
     );
   }
 
-  async createCreditNote(invoiceId: string, amount: MoneyAmount, reason: string, identity: FinanceCommandIdentity) {
+  async createCreditNote(
+    invoiceId: string,
+    amount: MoneyAmount,
+    reason: string,
+    identity: FinanceCommandIdentity,
+  ) {
     if (!reason.trim()) throw new Error('Credit note reason is required');
     await this.assertCanonicalMoney(amount);
     const invoice = await this.requireInvoice(invoiceId);
-    if (![InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE].includes(invoice.status))
+    if (
+      ![InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE].includes(
+        invoice.status,
+      )
+    )
       throw new Error('Credit note requires an issued invoice with outstanding value');
     assertSameCurrency(invoice.amountDue, amount);
-    if (BigInt(amount.amountMinorUnits) <= 0n || compareMoneyAmounts(amount, invoice.amountDue) === 1)
+    if (
+      BigInt(amount.amountMinorUnits) <= 0n ||
+      compareMoneyAmounts(amount, invoice.amountDue) === 1
+    )
       throw new Error('Credit note cannot exceed current invoice amountDue');
     return this.repository.createCreditNote(invoiceId, amount, reason, context(identity));
   }
@@ -851,7 +1155,12 @@ export class FinancePlatformUseCases {
       subjectReferenceId?: string;
       displayCurrencyCode: string;
       displayScale: number;
-      lines: Array<{ category: string; amount: MoneyAmount; sourceReference: string; certainty: 'EXACT' | 'ESTIMATED' }>;
+      lines: Array<{
+        category: string;
+        amount: MoneyAmount;
+        sourceReference: string;
+        certainty: 'EXACT' | 'ESTIMATED';
+      }>;
     },
     identity: FinanceCommandIdentity,
   ): Promise<FinancialEstimateDto> {
@@ -862,54 +1171,157 @@ export class FinancePlatformUseCases {
       input.lines.map(async (line) =>
         line.amount.currencyCode === input.displayCurrencyCode
           ? { ...line, convertedAmount: line.amount }
-          : this.convert({ amount: line.amount, targetCurrencyCode: input.displayCurrencyCode, targetScale: input.displayScale }).then(({ amount, rate }) => ({ ...line, convertedAmount: amount, rateId: rate.id })),
+          : this.convert({
+              amount: line.amount,
+              targetCurrencyCode: input.displayCurrencyCode,
+              targetScale: input.displayScale,
+            }).then(({ amount, rate }) => ({ ...line, convertedAmount: amount, rateId: rate.id })),
       ),
     );
-    const total = converted.reduce((sum, line) => sum + BigInt(line.convertedAmount.amountMinorUnits), 0n);
+    const total = converted.reduce(
+      (sum, line) => sum + BigInt(line.convertedAmount.amountMinorUnits),
+      0n,
+    );
     return this.repository.saveEstimate(
       {
         publicId: `fin_est_${randomUUID()}`,
         subjectReferenceId: input.subjectReferenceId,
         displayCurrencyCode: input.displayCurrencyCode,
         lines: converted,
-        total: { amountMinorUnits: total.toString(), currencyCode: input.displayCurrencyCode, scale: input.displayScale },
+        total: {
+          amountMinorUnits: total.toString(),
+          currencyCode: input.displayCurrencyCode,
+          scale: input.displayScale,
+        },
       },
       context(identity),
     );
   }
 
-  listTransfers() { return this.repository.listTransfers(); }
-  listRates() { return this.repository.listExchangeRates(); }
-  listApprovals(status?: string) { return this.repository.listApprovals(status); }
-  listRefunds() { return this.repository.listRefunds(); }
-  listCommissions() { return this.repository.listCommissions(); }
-  overview() { return this.repository.getFinanceOverview(); }
-  report() { return this.repository.getFinancialReport(); }
-  async reconcileProviderStates(input: { limit?: number; actorId: string; correlationId?: string; idempotencyKey: string }) {
+  listTransfers() {
+    return this.repository.listTransfers();
+  }
+  listRates() {
+    return this.repository.listExchangeRates();
+  }
+  listApprovals(status?: string) {
+    return this.repository.listApprovals(status);
+  }
+  listRefunds() {
+    return this.repository.listRefunds();
+  }
+  listCommissions() {
+    return this.repository.listCommissions();
+  }
+  overview() {
+    return this.repository.getFinanceOverview();
+  }
+  report() {
+    return this.repository.getFinancialReport();
+  }
+  async reconcileProviderStates(input: {
+    limit?: number;
+    actorId: string;
+    correlationId?: string;
+    idempotencyKey: string;
+  }) {
     const limit = Math.min(200, Math.max(1, Math.trunc(input.limit ?? 50)));
-    const summary = { scannedPayments: 0, updatedPayments: 0, scannedTransfers: 0, updatedTransfers: 0, scannedRefunds: 0, updatedRefunds: 0, providerFailures: 0 };
-    const paymentCandidates: FinancePaymentDto[] = [];
-    for (const status of [PaymentStatus.PENDING, PaymentStatus.AUTHORIZED]) {
-      if (paymentCandidates.length >= limit) break;
-      const page = await this.repository.listPayments({ status, page: 1, pageSize: limit - paymentCandidates.length });
-      paymentCandidates.push(...page.data);
-    }
+    const summary = {
+      scannedPayments: 0,
+      updatedPayments: 0,
+      scannedTransfers: 0,
+      updatedTransfers: 0,
+      scannedRefunds: 0,
+      updatedRefunds: 0,
+      providerFailures: 0,
+      providerUnavailable: 0,
+    };
+    const paymentCandidates: FinancePaymentDto[] =
+      await this.repository.claimReconciliationCandidates('payment', limit);
     for (const payment of paymentCandidates.slice(0, limit)) {
       summary.scannedPayments += 1;
       if (!payment.gatewayProvider) continue;
       const gateway = this.dependencies.paymentGateways.get(payment.gatewayProvider);
-      if (!gateway?.isConfigured()) continue;
+      if (!gateway?.isConfigured() || gateway.runtimeStatus() !== 'READY') {
+        summary.providerUnavailable += 1;
+        continue;
+      }
       try {
-        const evidence = await gateway.getStatus(payment.publicId, payment.gatewayReference || undefined, `reconcile:${payment.publicId}`);
-        const identity = { actorId: input.actorId, correlationId: input.correlationId, idempotencyKey: `${input.idempotencyKey}:payment:${payment.publicId}:${evidence.status}` };
+        const evidence = await gateway.getStatus(
+          payment.publicId,
+          payment.gatewayReference || undefined,
+          `reconcile:${payment.publicId}:${Date.now()}`,
+        );
+        const identity = {
+          actorId: input.actorId,
+          correlationId: input.correlationId,
+          idempotencyKey: `${input.idempotencyKey}:payment:${payment.publicId}:${evidence.status}`,
+        };
         if (evidence.status === 'FAILED') {
-          await this.repository.recordPaymentFailure(payment.id, evidence.failureCode || 'PROVIDER_RECONCILIATION_FAILED', context(identity));
+          await this.repository.recordPaymentFailure(
+            payment.id,
+            evidence.failureCode || 'PROVIDER_RECONCILIATION_FAILED',
+            context(identity),
+          );
           summary.updatedPayments += 1;
-        } else if (evidence.status === 'AUTHORIZED' && payment.status === PaymentStatus.PENDING) {
-          await this.repository.recordPaymentAuthorization(payment.id, { gatewayReference: evidence.gatewayReference, safeMaskedMetadata: evidence.safeMaskedMetadata }, context(identity));
+        } else if (evidence.status === 'AUTHORIZED') {
+          await this.repository.recordPaymentAuthorization(
+            payment.id,
+            {
+              gatewayReference: evidence.gatewayReference,
+              safeMaskedMetadata: evidence.safeMaskedMetadata,
+              providerEvidence: { ...evidence },
+            },
+            context(identity),
+          );
+          if (await this.repository.claimPaymentCapture(payment.id, context(identity))) {
+            const captured = await gateway.capture(
+              evidence.gatewayReference,
+              payment.amount,
+              `payment:${payment.publicId}:capture`,
+              payment.publicId,
+            );
+            if (captured.status === 'FAILED')
+              await this.repository.recordPaymentFailure(
+                payment.id,
+                captured.failureCode || 'PROVIDER_CAPTURE_FAILED',
+                context(identity),
+              );
+            else {
+              assertFinanceAttestation(
+                captured,
+                payment.amount,
+                gateway.merchantReference,
+                payment.publicId,
+              );
+              await this.repository.recordReconciledCapturedPaymentAtomic(
+                payment.id,
+                {
+                  gatewayReference: captured.gatewayReference,
+                  safeMaskedMetadata: captured.safeMaskedMetadata,
+                  providerEvidence: { ...captured },
+                },
+                context(identity),
+              );
+            }
+          }
           summary.updatedPayments += 1;
         } else if (evidence.status === 'CAPTURED' || evidence.status === 'COMPLETED') {
-          await this.repository.recordReconciledCapturedPaymentAtomic(payment.id, { gatewayReference: evidence.gatewayReference, safeMaskedMetadata: evidence.safeMaskedMetadata }, context(identity));
+          assertFinanceAttestation(
+            evidence,
+            payment.amount,
+            gateway.merchantReference,
+            payment.publicId,
+          );
+          await this.repository.recordReconciledCapturedPaymentAtomic(
+            payment.id,
+            {
+              gatewayReference: evidence.gatewayReference,
+              safeMaskedMetadata: evidence.safeMaskedMetadata,
+              providerEvidence: { ...evidence },
+            },
+            context(identity),
+          );
           summary.updatedPayments += 1;
         }
       } catch {
@@ -917,21 +1329,53 @@ export class FinancePlatformUseCases {
       }
     }
 
-    const refunds = (await this.repository.listRefunds()).filter((refund) => refund.status === 'PROCESSING').slice(0, limit);
+    const refunds: RefundDto[] = await this.repository.claimReconciliationCandidates(
+      'refund',
+      limit,
+    );
     for (const refund of refunds) {
       summary.scannedRefunds += 1;
       const payment = await this.repository.findPaymentById(refund.paymentId);
       if (!payment?.gatewayProvider) continue;
       const gateway = this.dependencies.paymentGateways.get(payment.gatewayProvider);
-      if (!gateway?.isConfigured()) continue;
+      if (!gateway?.isConfigured() || gateway.runtimeStatus() !== 'READY') {
+        summary.providerUnavailable += 1;
+        continue;
+      }
       try {
-        const evidence = await gateway.getRefundStatus(refund.publicId, refund.gatewayReference || undefined, `reconcile:refund:${refund.publicId}`);
-        const identity = { actorId: input.actorId, correlationId: input.correlationId, idempotencyKey: `${input.idempotencyKey}:refund:${refund.publicId}:${evidence.status}` };
+        const evidence = await gateway.getRefundStatus(
+          refund.publicId,
+          refund.gatewayReference || undefined,
+          `reconcile:refund:${refund.publicId}:${Date.now()}`,
+        );
+        const identity = {
+          actorId: input.actorId,
+          correlationId: input.correlationId,
+          idempotencyKey: `${input.idempotencyKey}:refund:${refund.publicId}:${evidence.status}`,
+        };
         if (evidence.status === 'FAILED') {
-          await this.repository.failRefund(refund.id, evidence.failureCode || 'PROVIDER_REFUND_RECONCILIATION_FAILED', context(identity));
+          await this.repository.failRefund(
+            refund.id,
+            evidence.failureCode || 'PROVIDER_REFUND_RECONCILIATION_FAILED',
+            context(identity),
+          );
           summary.updatedRefunds += 1;
         } else if (evidence.status === 'CAPTURED' || evidence.status === 'COMPLETED') {
-          await this.repository.completeRefundAtomic(refund.id, { gatewayProvider: gateway.providerKey, gatewayReference: evidence.gatewayReference }, context(identity));
+          assertFinanceAttestation(
+            evidence,
+            refund.amount,
+            gateway.merchantReference,
+            refund.publicId,
+          );
+          await this.repository.completeRefundAtomic(
+            refund.id,
+            {
+              gatewayProvider: gateway.providerKey,
+              gatewayReference: evidence.gatewayReference,
+              attestation: { ...evidence },
+            },
+            context(identity),
+          );
           summary.updatedRefunds += 1;
         }
       } catch {
@@ -939,34 +1383,86 @@ export class FinancePlatformUseCases {
       }
     }
 
-    const transfers = (await this.repository.listTransfers()).filter((transfer) =>
-      (['PROCESSING', 'SETTLED', 'COMPLETED'] as TransferStatus[]).includes(transfer.status) && transfer.bankProvider && transfer.bankProviderReference,
-    ).slice(0, limit);
+    const transfers: MoneyTransferDto[] = await this.repository.claimReconciliationCandidates(
+      'transfer',
+      limit,
+    );
     for (const transfer of transfers) {
       summary.scannedTransfers += 1;
       const gateway = this.dependencies.bankTransferGateways.get(transfer.bankProvider!);
-      if (!gateway?.isConfigured()) continue;
+      if (!gateway?.isConfigured() || gateway.runtimeStatus() !== 'READY') {
+        summary.providerUnavailable += 1;
+        continue;
+      }
       try {
-        const evidence = await gateway.getStatus(transfer.bankProviderReference!, `reconcile:${transfer.publicId}`);
-        const identity = { actorId: input.actorId, correlationId: input.correlationId, idempotencyKey: `${input.idempotencyKey}:transfer:${transfer.publicId}:${evidence.status}` };
+        const evidence = await gateway.getStatus(
+          transfer.bankProviderReference || transfer.publicId,
+          `reconcile:${transfer.publicId}:${Date.now()}`,
+        );
+        const identity = {
+          actorId: input.actorId,
+          correlationId: input.correlationId,
+          idempotencyKey: `${input.idempotencyKey}:transfer:${transfer.publicId}:${evidence.status}`,
+        };
+        assertBankTransferEvidence(evidence, transfer);
+        if (transfer.status === 'PROCESSING' && !transfer.bankProviderReference)
+          await this.repository.recordTransferSubmission(transfer.id, evidence, context(identity));
         if (transfer.status === 'PROCESSING' && evidence.status === 'SETTLED') {
-          await this.repository.transitionTransfer(transfer.id, 'SETTLED', context(identity), { bankProvider: gateway.providerKey, bankProviderReference: evidence.providerReference, providerStatus: evidence.status });
+          await this.repository.transitionTransfer(transfer.id, 'SETTLED', context(identity), {
+            bankProvider: gateway.providerKey,
+            bankProviderReference: evidence.providerReference,
+            providerStatus: evidence.status,
+            providerEvidence: { ...evidence },
+          });
           summary.updatedTransfers += 1;
         } else if (transfer.status === 'PROCESSING' && evidence.status === 'FAILED') {
-          await this.repository.transitionTransfer(transfer.id, 'FAILED', context(identity), { bankProvider: gateway.providerKey, bankProviderReference: evidence.providerReference, providerStatus: evidence.status, providerFailureCode: evidence.failureCode });
+          await this.repository.transitionTransfer(transfer.id, 'FAILED', context(identity), {
+            bankProvider: gateway.providerKey,
+            bankProviderReference: evidence.providerReference,
+            providerStatus: evidence.status,
+            providerEvidence: { ...evidence },
+            providerFailureCode: evidence.failureCode,
+          });
           summary.updatedTransfers += 1;
-        } else if ((['SETTLED', 'COMPLETED'] as TransferStatus[]).includes(transfer.status) && evidence.status === 'REVERSED') {
-          await this.repository.transitionTransfer(transfer.id, 'REVERSED', context(identity), { bankProvider: gateway.providerKey, bankProviderReference: evidence.providerReference, providerStatus: evidence.status });
+        } else if (
+          (['SETTLED', 'COMPLETED'] as TransferStatus[]).includes(transfer.status) &&
+          evidence.status === 'REVERSED'
+        ) {
+          await this.repository.transitionTransfer(transfer.id, 'REVERSED', context(identity), {
+            bankProvider: gateway.providerKey,
+            bankProviderReference: evidence.providerReference,
+            providerStatus: evidence.status,
+            providerEvidence: { ...evidence },
+          });
           summary.updatedTransfers += 1;
         }
       } catch {
         summary.providerFailures += 1;
       }
     }
+    await this.repository.recordReconciliationRun(context(input), summary);
     return summary;
   }
 
-  reconcile() { return this.repository.runReconciliation(); }
+  reconcile(identity?: FinanceCommandIdentity) {
+    return this.repository.runReconciliation(identity ? context(identity) : undefined);
+  }
+  reconciliationSnapshot() {
+    return this.repository.getReconciliationSnapshot();
+  }
+  listRecords(
+    kind: Parameters<IFinanceRepository['listFinanceRecords']>[0],
+    filters: FinanceListFilters,
+  ) {
+    return this.repository.listFinanceRecords(kind, filters);
+  }
+  getRecord(kind: Parameters<IFinanceRepository['getFinanceRecord']>[0], id: string) {
+    return this.repository.getFinanceRecord(kind, id);
+  }
+  private assertExpectedVersion(actual: number | undefined, identity: FinanceCommandIdentity) {
+    if (identity.expectedVersion !== undefined && actual !== identity.expectedVersion)
+      throw new Error('FINANCE_VERSION_CONFLICT');
+  }
 
   private async requireInvoice(id: string) {
     const invoice = await this.repository.findInvoiceById(id);
@@ -980,15 +1476,20 @@ export class FinancePlatformUseCases {
   }
   private async requireCanonicalCurrency(currencyCode: string) {
     const currency = await this.dependencies.currencyReference.resolveCurrency(currencyCode);
-    if (!currency || !currency.active) throw new Error(`Non-canonical or inactive finance currency: ${currencyCode}`);
+    if (!currency || !currency.active)
+      throw new Error(`Non-canonical or inactive finance currency: ${currencyCode}`);
     return currency;
   }
   private async assertCanonicalCurrency(currencyCode: string, scale: number) {
     const currency = await this.requireCanonicalCurrency(currencyCode);
-    if (currency.scale !== scale) throw new Error(`Finance currency scale mismatch for ${currencyCode}: expected ${currency.scale}`);
+    if (currency.scale !== scale)
+      throw new Error(
+        `Finance currency scale mismatch for ${currencyCode}: expected ${currency.scale}`,
+      );
   }
   private async assertCanonicalMoney(amount: MoneyAmount) {
     assertValidMoneyAmount(amount);
+    if (amount.amountMinorUnits.length > 30) throw new Error('FINANCE_AMOUNT_INVALID');
     await this.assertCanonicalCurrency(amount.currencyCode, amount.scale);
   }
   private requirePaymentGateway(providerKey: string) {
@@ -996,7 +1497,8 @@ export class FinancePlatformUseCases {
     const gateway = this.dependencies.paymentGateways.get(providerKey);
     if (!gateway) throw new Error(`PAYMENT_PROVIDER_NOT_CONFIGURED:${providerKey}`);
     const status = gateway.runtimeStatus();
-    if (status === 'NOT_CONFIGURED') throw new Error(`PAYMENT_PROVIDER_NOT_CONFIGURED:${providerKey}`);
+    if (status === 'NOT_CONFIGURED')
+      throw new Error(`PAYMENT_PROVIDER_NOT_CONFIGURED:${providerKey}`);
     if (status !== 'READY') throw new Error(`PAYMENT_PROVIDER_RUNTIME_PENDING:${providerKey}`);
     return gateway;
   }
@@ -1018,12 +1520,15 @@ export class FinancePlatformUseCases {
     expectedAmount?: MoneyAmount,
   ): Promise<FinanceApprovalBinding> {
     const approval = await this.repository.getApproval(approvalId);
-    if (!approval || approval.status !== 'APPROVED' || approval.consumedAt)
+    if (!approval || approval.status !== 'APPROVED')
       throw new Error('Approved, unconsumed financial approval is required');
     if (approval.actionType !== actionType || approval.targetReferenceId !== targetReferenceId)
       throw new Error('Financial approval action/target binding mismatch');
     if (approval.makerId !== makerId) throw new Error('Financial approval maker binding mismatch');
-    if (approval.payloadHash !== expectedPayloadHash || approval.policyReference !== approvalPolicy(actionType))
+    if (
+      approval.payloadHash !== expectedPayloadHash ||
+      approval.policyReference !== approvalPolicy(actionType)
+    )
       throw new Error('Financial approval payload/policy binding mismatch');
     if (expectedAmount) {
       if (!approval.amount) throw new Error('Financial approval amount binding is missing');
@@ -1050,13 +1555,21 @@ export class FinancePlatformUseCases {
       sourceAmount: transfer.sourceAmount,
       targetAmount: transfer.targetAmount,
       rateId: transfer.rateId,
+      rateNumeratorSnapshot: transfer.rateNumeratorSnapshot,
+      rateDenominatorSnapshot: transfer.rateDenominatorSnapshot,
+      marginBasisPointsSnapshot: transfer.marginBasisPointsSnapshot,
       feeAmount: transfer.feeAmount,
       feePolicyReference: transfer.feePolicyReference,
       bankProvider: transfer.bankProvider,
     };
   }
   private refundApprovalPayload(refund: RefundDto) {
-    return { refundId: refund.publicId, paymentId: refund.paymentId, amount: refund.amount, reason: refund.reason };
+    return {
+      refundId: refund.publicId,
+      paymentId: refund.paymentId,
+      amount: refund.amount,
+      reason: refund.reason,
+    };
   }
   private rateApprovalPayload(rate: ExchangeRateDto) {
     return {

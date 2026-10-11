@@ -29,6 +29,7 @@ export type RefundStatus =
   | 'PENDING_APPROVAL'
   | 'APPROVED'
   | 'PROCESSING'
+  | 'UNKNOWN_OUTCOME'
   | 'COMPLETED'
   | 'FAILED'
   | 'CANCELLED';
@@ -112,6 +113,8 @@ export function validateBalancedPostings(postings: readonly LedgerPostingInput[]
     assertSameCurrency(first, posting.amount);
     const units = BigInt(posting.amount.amountMinorUnits);
     if (units <= BigInt(0)) throw new Error('Ledger posting amount must be positive');
+    if (!['DEBIT', 'CREDIT'].includes(posting.direction))
+      throw new Error('Invalid ledger direction');
     if (posting.direction === 'DEBIT') debits += units;
     else credits += units;
   }
@@ -139,6 +142,7 @@ export interface WalletBalanceDto {
 }
 export interface WalletHoldDto {
   id: string;
+  version?: number;
   publicId: string;
   walletId: string;
   amount: MoneyAmount;
@@ -151,6 +155,7 @@ export interface WalletHoldDto {
 
 export interface ExchangeRateDto {
   id: string;
+  version?: number;
   publicId: string;
   sourceCurrencyCode: string;
   targetCurrencyCode: string;
@@ -217,6 +222,9 @@ export interface MoneyTransferDto {
   sourceAmount: MoneyAmount;
   targetAmount?: MoneyAmount | null;
   rateId?: string | null;
+  rateNumeratorSnapshot?: string | null;
+  rateDenominatorSnapshot?: string | null;
+  marginBasisPointsSnapshot?: number | null;
   feeAmount?: MoneyAmount | null;
   feePolicyReference?: string | null;
   bankProvider?: string | null;
@@ -254,6 +262,7 @@ export function assertTransferTransition(from: TransferStatus, to: TransferStatu
 
 export interface FinancialApprovalDto {
   id: string;
+  version?: number;
   publicId: string;
   actionType: string;
   targetReferenceId: string;
@@ -287,6 +296,7 @@ export function assertCheckerEligible(
 
 export interface RefundDto {
   id: string;
+  version?: number;
   publicId: string;
   paymentId: string;
   amount: MoneyAmount;
@@ -402,7 +412,11 @@ export interface ReconciliationIssueDto {
     | 'WALLET_BALANCE_MISMATCH'
     | 'ORPHAN_SETTLEMENT'
     | 'DUPLICATE_GATEWAY_CALLBACK'
-    | 'FX_MISMATCH';
+    | 'FX_MISMATCH'
+    | 'PROVIDER_OUTCOME_AGED'
+    | 'REFUND_LEDGER_MISMATCH'
+    | 'CREDIT_BALANCE_MISMATCH'
+    | 'APPROVAL_POLICY_MISMATCH';
   severity: 'CRITICAL' | 'HIGH';
   referenceId: string;
   details: string;
@@ -426,9 +440,13 @@ export interface FinancialReportDto {
   transferVolumeByCurrency: Record<string, string>;
   walletLiabilityByCurrency: Record<string, string>;
   commissionsByCurrency: Record<string, string>;
-  reconciliationStatus: 'HEALTHY' | 'DEGRADED' | 'CRITICAL';
+  grossCollectionsByCurrency: Record<string, string>;
+  netCollectionsByCurrency: Record<string, string>;
+  reconciliationStatus: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'UNKNOWN';
 }
 export interface StudentFinancialReadModelDto {
+  summary?: { invoiceCount: number; outstandingByCurrency: Record<string, string> };
+  historyPageSize?: number;
   studentReferenceId: string;
   invoices: import('./FinanceInvoice').FinanceInvoiceDto[];
   wallets: Array<{ wallet: WalletDto; balance: WalletBalanceDto }>;

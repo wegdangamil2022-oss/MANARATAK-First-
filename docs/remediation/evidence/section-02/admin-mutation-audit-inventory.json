@@ -3958,6 +3958,23 @@
     },
     {
       "method": "POST",
+      "path": "/admin/finance/adjustment-cases",
+      "owner": "FinanceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:finance:manage",
+        "admin:finance:ledger:post"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/FinanceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/finance/approvals",
       "owner": "FinanceAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -4185,6 +4202,24 @@
       "permissionEvidence": [
         "admin:finance:manage",
         "admin:finance:ledger:reverse"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/FinanceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/finance/reconciliation/providers/run",
+      "owner": "FinanceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:finance:manage",
+        "admin:finance:reconciliation:run",
+        "admin:finance:reconciliation:providers"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",

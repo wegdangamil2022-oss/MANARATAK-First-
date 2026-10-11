@@ -13,6 +13,7 @@ export interface FinanceInvoiceDto {
   id: string;
   publicId: string;
   invoiceNumber: string;
+  version?: number;
   correlationId?: string | null;
   originDomain: string;
   originReferenceId: string;
@@ -34,6 +35,7 @@ export interface FinanceInvoiceDto {
 export interface CreateFinanceInvoiceDto {
   publicId: string;
   invoiceNumber: string;
+  version?: number;
   correlationId?: string | null;
   originDomain: string;
   originReferenceId: string;

@@ -22,11 +22,18 @@ export interface PaymentGatewayResult {
   gatewayReference: string;
   safeMaskedMetadata?: Record<string, string>;
   failureCode?: string;
+  amount?: MoneyAmount;
+  merchantReference?: string;
+  operationReference?: string;
+  captureReference?: string;
+  verified?: boolean;
+  signedEvidence?: { signature: string; timestamp: string };
 }
 export type FinanceRuntimeCapabilityStatus = 'READY' | 'RUNTIME_PENDING' | 'NOT_CONFIGURED';
 
 export interface IPaymentGateway {
   readonly providerKey: string;
+  readonly merchantReference?: string;
   isConfigured(): boolean;
   runtimeStatus(): FinanceRuntimeCapabilityStatus;
   authorize(request: PaymentGatewayRequest): Promise<PaymentGatewayResult>;
@@ -34,6 +41,7 @@ export interface IPaymentGateway {
     gatewayReference: string,
     amount: MoneyAmount,
     idempotencyKey: string,
+    paymentReference?: string,
   ): Promise<PaymentGatewayResult>;
   refund(
     gatewayReference: string,
@@ -83,9 +91,17 @@ export interface BankTransferEvidence {
   providerReference: string;
   status: 'PROCESSING' | 'SETTLED' | 'FAILED' | 'REVERSED';
   failureCode?: string;
+  verified?: boolean;
+  transferReference?: string;
+  destinationReferenceId?: string;
+  sourceAmount?: MoneyAmount;
+  targetAmount?: MoneyAmount;
+  feeAmount?: MoneyAmount;
+  signedEvidence?: { signature: string; timestamp: string };
 }
 export interface IBankTransferGateway {
   readonly providerKey: string;
+  readonly merchantReference?: string;
   isConfigured(): boolean;
   runtimeStatus(): FinanceRuntimeCapabilityStatus;
   submit(request: BankTransferSubmission): Promise<BankTransferEvidence>;

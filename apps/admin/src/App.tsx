@@ -14,6 +14,7 @@ import { CmsAdminPage } from './pages/CmsAdminPage';
 import { StudentToolsAdminPage } from './pages/StudentToolsAdminPage';
 import { ServicesAdminPage } from './pages/ServicesAdminPage';
 import { FinanceAdminPage } from './pages/FinanceAdminPage';
+import { FinanceRecordDetailPage } from './pages/FinanceRecordDetailPage';
 import { FinanceInvoiceDetailPage } from './pages/FinanceInvoiceDetailPage';
 import { CareerAdminPage } from './pages/CareerAdminPage';
 import { InternationalTestsAdminPage } from './pages/InternationalTestsAdminPage';
@@ -290,6 +291,7 @@ function AdminLayout() {
                   <Route path="/cms" element={<RequireAdminPermission permission="admin:cms:view"><CmsAdminPage /></RequireAdminPermission>} />
                   <Route path="/services" element={<RequireAdminPermission permission="admin:services:manage"><ServicesAdminPage /></RequireAdminPermission>} />
                   <Route path="/finance" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceAdminPage /></RequireAdminPermission>} />
+                  <Route path="/finance/records/:kind/:id" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceRecordDetailPage /></RequireAdminPermission>} />
                   <Route path="/finance/invoices/:id" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceInvoiceDetailPage /></RequireAdminPermission>} />
                   <Route path="/careers" element={<RequireAdminPermission permission="admin:careers:manage"><CareerAdminPage /></RequireAdminPermission>} />
                   <Route path="/international-tests" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestsAdminPage /></RequireAdminPermission>} />

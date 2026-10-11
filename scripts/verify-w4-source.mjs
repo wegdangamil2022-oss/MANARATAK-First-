@@ -52,7 +52,7 @@ const checks = [
     files.repository.includes('Wallet owner or denomination does not match ledger account')],
   ['P19-XCUR-014',
     files.repository.includes('Transfer wallet/account denomination invariant failed') &&
-    files.repository.includes('Wallet projection contains mixed-currency financial records') &&
+    files.repository.includes('FINANCE_INVALID_PERSISTED_HOLD') && files.repository.includes('e.currencyCode !== wallet.currencyCode') &&
     files.repository.includes('Ledger account currency mismatch') &&
     files.useCases.includes('Transfer source denomination does not match wallet denomination')],
   ['P19-CREDIT-010',
@@ -122,7 +122,7 @@ const checks = [
   ['P19-COMM-018',
     files.useCases.includes('basisPoints') &&
     files.repository.includes('calculationBasisPoints') &&
-    files.repository.includes('units !== expected') &&
+    files.repository.includes('const units = expected') && files.repository.includes('NET_CAPTURE_CLAWBACK_V1') &&
     files.repository.includes('Commission amount violates payment denomination or policy calculation')],
   ['P19-EST-022',
     files.repoContract.includes('context: FinanceMutationContext') &&
