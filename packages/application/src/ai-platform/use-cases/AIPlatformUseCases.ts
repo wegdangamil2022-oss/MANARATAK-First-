@@ -1099,13 +1099,17 @@ export class AIExecutionOrchestrator {
     const values = await this.repository.list<AIRoutingPolicy>('routingPolicies', {
       status: 'ACTIVE',
     });
-    return (
-      values.find(
-        (item) => item.capabilityKey === capabilityKey && item.consumerKey === consumerKey,
-      ) ??
-      values.find((item) => item.capabilityKey === capabilityKey && !item.consumerKey) ??
-      null
+    // Active routing is a governance binding, not a "most recently edited wins" rule.
+    // Reject ambiguous effective bindings instead of choosing by database order.
+    const exact = values.filter(
+      (item) => item.capabilityKey === capabilityKey && item.consumerKey === consumerKey,
     );
+    const fallback = values.filter(
+      (item) => item.capabilityKey === capabilityKey && !item.consumerKey,
+    );
+    if (exact.length > 1 || (exact.length === 0 && fallback.length > 1))
+      throw new Error('AI_ACTIVE_ROUTING_POLICY_CONFLICT');
+    return exact[0] ?? fallback[0] ?? null;
   }
 
   private route(
