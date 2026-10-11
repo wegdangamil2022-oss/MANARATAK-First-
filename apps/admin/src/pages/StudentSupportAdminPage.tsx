@@ -164,15 +164,26 @@ function date(value?: string | null) {
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleString('ar');
 }
-function statusLabel(value: string) {
-  return labels[value] ?? value;
+const labelsEn:Record<string,string>={
+  ACTIVE:'Active',SUSPENDED:'Suspended',ARCHIVED:'Archived',INITIALIZING:'Initializing',
+  PENDING:'Pending',WAITLISTED:'Waitlisted',COMPLETED:'Completed',CANCELLED:'Cancelled',
+  REVOKED:'Revoked',EXPIRED:'Expired',HEALTHY:'Healthy',FAILED:'Needs attention',
+  RESTRICTED:'Restricted',COURSE:'Courses',UNIVERSITY:'Universities',SCHOLARSHIP:'Scholarships',
+  MAJOR:'Majors',CERTIFICATE:'Certificates',STUDENT_TOOL:'Student tools',
+  CMS_CONTENT:'Content',SERVICE:'Services',REQUESTED:'Requested',ACCEPTED:'Accepted',
+  IN_PROGRESS:'In progress',AWAITING_PAYMENT:'Awaiting payment',
+  INTERNATIONAL_TEST:'International tests',TRUNCATED:'Partial results',
+};
+function statusLabel(value:string,locale='ar'){
+  return (locale==='en'?labelsEn:labels)[value]??value;
 }
 function Badge({ value }: { value: string }) {
+  const {language}=useTranslation();
   return (
     <span
       className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${value === 'ACTIVE' || value === 'COMPLETED' || value === 'HEALTHY' ? 'bg-emerald-50 text-emerald-800' : value === 'FAILED' || value === 'REVOKED' ? 'bg-red-50 text-red-800' : 'bg-slate-100 text-slate-700'}`}
     >
-      {statusLabel(value)}
+      {statusLabel(value,language)}
     </span>
   );
 }
@@ -187,7 +198,7 @@ function Count({ title, value }: { title: string; value: number | string }) {
 
 export function StudentSupportAdminPage() {
   const {hasPermission}=useAdminAuthorization();
-  const {t,dir}=useTranslation();
+  const {t,dir,language}=useTranslation();
   const [params, setParams] = useSearchParams();
   const selectedId = params.get('student');
   const [items, setItems] = useState<StudentSupportItem[]>([]);
@@ -564,7 +575,7 @@ export function StudentSupportAdminPage() {
             <option value="">{t('stu_support_all_statuses')}</option>
             {['ACTIVE', 'INITIALIZING', 'SUSPENDED', 'ARCHIVED'].map((value) => (
               <option key={value} value={value}>
-                {statusLabel(value)}
+                {statusLabel(value,language)}
               </option>
             ))}
           </select>
@@ -623,7 +634,7 @@ export function StudentSupportAdminPage() {
             <div>
               <code dir="ltr" className="text-sm">{item.studentReferenceId}</code>
               <p className="mt-1 text-xs text-slate-600">
-                {statusLabel(item.status)} · آخر تحديث: {date(item.updatedAt)}
+                {statusLabel(item.status,language)} · آخر تحديث: {date(item.updatedAt)}
               </p>
             </div>
             <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold"
@@ -1002,7 +1013,7 @@ export function StudentSupportAdminPage() {
                         <p className="text-xs text-slate-500">عرض {trackerPage.items.length} من {trackerPage.total} متابعة</p>
                         {trackerPage.items.length === 0 && <p className="text-sm text-slate-500">{t('stu_support_no_trackers')}</p>}
                         {trackerPage.items.map((item)=><article key={item.id} className="rounded-lg bg-slate-50 p-3 text-sm">
-                          <span className="font-bold">{item.scholarshipId}</span> · {statusLabel(item.status)}
+                          <span className="font-bold">{item.scholarshipId}</span> · {statusLabel(item.status,language)}
                           <p className="mt-1">المرحلة: {item.stage}</p>
                           <p className="text-xs text-slate-500">الموعد: {date(item.deadlineAt)} · التحديث: {date(item.updatedAt)}</p>
                           <button type="button" disabled={trackerHistoryLoading}
@@ -1011,7 +1022,7 @@ export function StudentSupportAdminPage() {
                           {trackerHistory?.trackerId===item.id&&<div className="mt-3 space-y-1 border-t pt-2">
                             {trackerHistory.page.items.length===0&&<p className="text-xs text-slate-500">{t('stu_support_tracker_history_empty')}</p>}
                             {trackerHistory.page.items.map((event,index)=><p key={index} className="text-xs text-slate-600">
-                              {event.eventType} · {statusLabel(event.status)} · النسخة {event.version} · {date(event.occurredAt)}
+                              {event.eventType} · {statusLabel(event.status,language)} · النسخة {event.version} · {date(event.occurredAt)}
                             </p>)}
                             {trackerHistory.page.hasMore&&<p className="text-xs text-amber-700">يعرض آخر 20 حدثًا فقط.</p>}
                           </div>}
@@ -1027,7 +1038,7 @@ export function StudentSupportAdminPage() {
                         {detail.savedSummary.map((item) => (
                           <Count
                             key={item.entityType}
-                            title={statusLabel(item.entityType)}
+                            title={statusLabel(item.entityType,language)}
                             value={item.count}
                           />
                         ))}
