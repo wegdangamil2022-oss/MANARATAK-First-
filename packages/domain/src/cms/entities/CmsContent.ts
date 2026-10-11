@@ -239,6 +239,8 @@ export interface CmsRestoreRevisionDto {
 
 export interface CmsRedirectDto {
   id: string;
+  version?: number;
+  updatedBy?: string | null;
   siteIdentifier: string;
   locale: string;
   sourcePath: string;

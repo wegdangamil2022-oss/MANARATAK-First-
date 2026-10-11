@@ -868,6 +868,38 @@ export class PrismaCmsRepository implements ICmsRepository {
     });
   }
 
+  public async updateRedirect(
+    id: string,
+    data: { expectedVersion: number; destinationPath?: string; statusCode?: 301 | 302 | 308; active?: boolean; reason: string },
+    actorId: string,
+  ): Promise<CmsRedirectDto> {
+    return this.serializable(async (tx: any) => {
+      const existing = await tx.cmsRedirect.findUnique({ where: { id } });
+      if (!existing) throw new Error('CMS_REDIRECT_NOT_FOUND');
+      this.assertVersion(existing.version, data.expectedVersion);
+      if (existing.contentId) throw new Error('CMS_REDIRECT_OWNER_CONTROLLED');
+      const destinationPath = data.destinationPath ?? existing.destinationPath;
+      CmsPublishingPolicy.assertRedirect(existing.sourcePath, destinationPath);
+      await this.assertRedirectGraphSafe(tx, existing.siteIdentifier, existing.locale, existing.sourcePath, destinationPath);
+      const changed = await tx.cmsRedirect.updateMany({
+        where: { id, version: data.expectedVersion },
+        data: {
+          destinationPath, statusCode: data.statusCode ?? existing.statusCode,
+          active: data.active ?? existing.active, reason: data.reason,
+          updatedBy: actorId, version: { increment: 1 },
+        },
+      });
+      if (changed.count !== 1) throw new Error('CMS_VERSION_CONFLICT');
+      const row = await tx.cmsRedirect.findUnique({ where: { id } });
+      await this.appendStandaloneMutation(tx, id, 'CmsRedirect', 'REDIRECT_UPDATED', actorId, {
+        siteIdentifier: existing.siteIdentifier, locale: existing.locale, sourcePath: existing.sourcePath,
+        from: { destinationPath: existing.destinationPath, statusCode: existing.statusCode, active: existing.active },
+        to: { destinationPath: row.destinationPath, statusCode: row.statusCode, active: row.active }, reason: data.reason,
+      });
+      return row;
+    });
+  }
+
   public async listNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]> {
     const rows = await this.db.cmsNavigationMenu.findMany({ where: { siteIdentifier, locale }, include: { nodes: { orderBy: { sortOrder: 'asc' } } }, orderBy: { locationKey: 'asc' } });
     return rows.map((row: any) => this.navigation(row));

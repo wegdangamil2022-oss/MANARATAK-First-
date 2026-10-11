@@ -290,6 +290,18 @@ export class AdminCmsUseCases {
     return result;
   }
 
+  public async updateRedirect(
+    id: string,
+    data: { expectedVersion: number; destinationPath?: string; statusCode?: 301 | 302 | 308; active?: boolean; reason: string },
+    actorId: string,
+  ): Promise<CmsRedirectDto> {
+    this.ensureActor(actorId);
+    if (!data.reason.trim()) throw new Error('CMS_REDIRECT_REASON_REQUIRED');
+    const updated = await this.repository.updateRedirect(id, { ...data, reason: data.reason.trim() }, actorId);
+    await this.deliveryCache?.invalidateSite(updated.siteIdentifier, 'redirect-updated');
+    return updated;
+  }
+
   public async listNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]> {
     return this.repository.listNavigation(siteIdentifier, locale);
   }

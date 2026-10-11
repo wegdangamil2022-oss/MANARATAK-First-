@@ -325,6 +325,16 @@ export class CmsAdminRouter {
       const body = z.object({ siteIdentifier: z.literal('manaratak').default('manaratak'), locale: z.enum(['ar', 'en']), sourcePath: z.string().min(2), destinationPath: z.string().min(2), statusCode: z.union([z.literal(301), z.literal(302), z.literal(308)]).default(301), reason: z.string().trim().min(3), contentId: z.string().nullable().optional(), active: z.boolean().default(true) }).parse(req.body);
       res.status(201).json(await adminCmsUseCases.createRedirect(body, actor(req)));
     }));
+    router.patch('/redirects/:id', asyncHandler(async (req, res) => {
+      const data = z.object({
+        expectedVersion: z.number().int().positive(),
+        destinationPath: z.string().min(2).optional(),
+        statusCode: z.union([z.literal(301), z.literal(302), z.literal(308)]).optional(),
+        active: z.boolean().optional(),
+        reason: z.string().trim().min(3).max(2000),
+      }).strict().parse(req.body);
+      res.json(await adminCmsUseCases.updateRedirect(req.params.id, data, actor(req)));
+    }));
     router.get('/navigation', asyncHandler(async (req, res) => {
       const query = z.object({ siteIdentifier: z.literal('manaratak').default('manaratak'), locale: z.enum(['ar', 'en']).default('ar') }).parse(req.query);
       res.json({ data: await adminCmsUseCases.listNavigation(query.siteIdentifier, query.locale) });

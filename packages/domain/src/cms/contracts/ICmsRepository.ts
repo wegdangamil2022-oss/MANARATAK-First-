@@ -70,6 +70,7 @@ export interface ICmsRepository {
   listPublishedByDomainTarget?(targetType: string, targetId: string, locale?: string, siteIdentifier?: string, limit?: number): Promise<PublicCmsContentDto[]>;
   changeLocalizedSlug(data: CmsSlugChangeDto): Promise<CmsLocalizedContentDto>;
   listRedirects(siteIdentifier?: string, locale?: string): Promise<CmsRedirectDto[]>;
+  updateRedirect(id: string, data: { expectedVersion: number; destinationPath?: string; statusCode?: 301 | 302 | 308; active?: boolean; reason: string }, actorId: string): Promise<CmsRedirectDto>;
   createRedirect(data: Omit<CmsRedirectDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<CmsRedirectDto>;
   listNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]>;
   listPublishedNavigation?(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]>;
