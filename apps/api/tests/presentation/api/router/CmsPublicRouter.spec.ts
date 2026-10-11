@@ -44,6 +44,25 @@ describe('CmsPublicRouter', () => {
     );
   });
 
+  it('refuses foreign tenant access to published CMS data', async () => {
+    const useCases = createUseCases();
+    const app = createApp(useCases);
+    for (const url of [
+      '/cms/content?siteIdentifier=foreign',
+      '/cms/content/example?siteIdentifier=foreign',
+      '/cms/navigation/HEADER?siteIdentifier=foreign',
+      '/cms/blocks?siteIdentifier=foreign',
+      '/cms/announcements?siteIdentifier=foreign',
+      '/cms/redirects/resolve?siteIdentifier=foreign&locale=ar&path=/ar/articles/old',
+    ]) {
+      const result = await request(app).get(url);
+      expect(result.status).toBe(400);
+    }
+    expect(useCases.listPublished).not.toHaveBeenCalled();
+    expect(useCases.getBySlug).not.toHaveBeenCalled();
+    expect(useCases.resolveRedirect).not.toHaveBeenCalled();
+  });
+
   it('returns 404 for unpublished or missing content', async () => {
     const useCases = createUseCases();
     useCases.getBySlug.mockRejectedValue(new Error('CMS_CONTENT_NOT_FOUND'));
