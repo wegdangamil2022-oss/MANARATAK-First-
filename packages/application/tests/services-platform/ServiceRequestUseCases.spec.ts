@@ -81,6 +81,16 @@ describe('Phase 20 service request ownership and finance handoff', () => {
     };
   });
 
+  it('only delegates bounded P20 payment triage to its owner repository',async()=>{
+    const owner={items:[{studentReferenceId:'student-1'}],total:1,hasMore:false,nextPage:null};
+    requests.listSupportAwaitingPaymentStudents=vi.fn().mockResolvedValue(owner);
+    const useCases=new StudentServiceRequestUseCases(catalog,requests);
+    expect(await useCases.listSupportAwaitingPaymentStudents(1,20)).toEqual(owner);
+    expect(requests.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(1,20);
+    await expect(useCases.listSupportAwaitingPaymentStudents(1,51))
+      .rejects.toThrow('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
+  });
+
   it('allows a student request only for a published owner service', async () => {
     const useCases = new StudentServiceRequestUseCases(catalog, requests);
     await useCases.createRequest({ studentReferenceId: 'student-1', serviceId: 'svc-1' });
