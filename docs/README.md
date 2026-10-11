@@ -1,7 +1,7 @@
 # MANARATAK 2.0 Documentation Index
 
 **Status:** ACTIVE / SOURCE-ALIGNED  
-**Updated:** 2026-09-07  
+**Updated:** 2026-10-11
 **Repository phase coverage:** Phase 02 through Phase 24, including the two current Phase 10 documentation roots.
 
 This file is the navigation entrypoint for the current `docs/` tree. It does not certify runtime or production readiness. Completion terminology is governed by [`governance/COMPLETION_STATUS_LIFECYCLE.md`](./governance/COMPLETION_STATUS_LIFECYCLE.md).
@@ -26,6 +26,7 @@ This file is the navigation entrypoint for the current `docs/` tree. It does not
 | `phases/` | Phase 02–24 specifications and implementation baselines. |
 | `operations/` | Database, CI/CD, recovery, keys/tokens, observability and runtime procedures. |
 | `remediation/` | Ordered remediation evidence, cross-phase traceability and wave closure records. |
+| `reviews/` | Section reviews, executable source-check evidence and explicitly deferred runtime closure gates. |
 | `implementation-status/` | Current implementation-status evidence. |
 | `imports/` | Import-domain documentation and source/data evidence. |
 | `standards/` | Shared repository/documentation standards. |
