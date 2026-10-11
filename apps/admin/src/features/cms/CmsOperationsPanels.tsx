@@ -85,15 +85,23 @@ export function CmsOperationsPanels({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [redirectSearch, setRedirectSearch] = useState('');
+  const [redirectStatus, setRedirectStatus] = useState('all');
+  const [redirectPage, setRedirectPage] = useState(1);
+  const [redirectTotalPages, setRedirectTotalPages] = useState(1);
 
   const load = useCallback(async () => {
     const current = ++sequence.current;
     setError(null);
     const suffix = `siteIdentifier=manaratak&locale=${locale}`;
+    const redirectQuery = new URLSearchParams({
+      siteIdentifier: 'manaratak', locale, page: String(redirectPage), pageSize: '20',
+    });
+    if (redirectSearch.trim()) redirectQuery.set('q', redirectSearch.trim());
+    if (redirectStatus !== 'all') redirectQuery.set('active', redirectStatus);
     try {
       const [redirectResult, navigationResult, schemaResult, blockResult, announcementResult] =
         await Promise.allSettled([
-          adminApiClient.request<List<Redirect>>(`/admin/cms/redirects?${suffix}`),
+          adminApiClient.request<List<Redirect> & { totalPages: number }>(`/admin/cms/redirects?${redirectQuery}`),
           adminApiClient.request<List<NavigationMenu>>(`/admin/cms/navigation?${suffix}`),
           adminApiClient.request<List<BlockSchema>>('/admin/cms/block-schemas'),
           adminApiClient.request<List<ContentBlock>>(`/admin/cms/blocks?${suffix}`),
@@ -101,6 +109,7 @@ export function CmsOperationsPanels({
         ]);
       if (current !== sequence.current) return;
       setRedirects(redirectResult.status === 'fulfilled' ? redirectResult.value.data : []);
+      setRedirectTotalPages(redirectResult.status === 'fulfilled' ? Math.max(1, redirectResult.value.totalPages) : 1);
       setNavigation(navigationResult.status === 'fulfilled' ? navigationResult.value.data : []);
       setSchemas(schemaResult.status === 'fulfilled' ? schemaResult.value.data : []);
       setBlocks(blockResult.status === 'fulfilled' ? blockResult.value.data : []);
@@ -112,7 +121,7 @@ export function CmsOperationsPanels({
       if (current === sequence.current)
         setError(reason instanceof Error ? reason.message : 'تعذر تحميل عمليات المحتوى.');
     }
-  }, [locale]);
+  }, [locale, redirectPage, redirectSearch, redirectStatus]);
 
   useEffect(() => {
     void load();
@@ -320,12 +329,15 @@ export function CmsOperationsPanels({
           </form>
           <label className="block text-xs">
             {locale === 'ar' ? 'بحث في التحويلات' : 'Search redirects'}
-            <input className={input} value={redirectSearch} onChange={(event) => setRedirectSearch(event.target.value)} />
+            <input className={input} maxLength={200} value={redirectSearch} onChange={(event) => { setRedirectPage(1); setRedirectSearch(event.target.value); }} />
+            <select className={input} aria-label={locale === 'ar' ? 'حالة التحويل' : 'Redirect status'} value={redirectStatus} onChange={(event) => { setRedirectPage(1); setRedirectStatus(event.target.value); }}>
+              <option value="all">{locale === 'ar' ? 'كل الحالات' : 'All statuses'}</option>
+              <option value="true">{locale === 'ar' ? 'المفعلة' : 'Active only'}</option>
+              <option value="false">{locale === 'ar' ? 'المعطلة' : 'Disabled only'}</option>
+            </select>
           </label>
           <ul className="mt-4 space-y-3">
-            {redirects.filter((item) =>
-              (item.sourcePath + ' ' + item.destinationPath).toLowerCase().includes(redirectSearch.toLowerCase())
-            ).map((item) => <li key={item.id} className="rounded-lg bg-slate-50 p-3 text-xs">
+            {redirects.map((item) => <li key={item.id} className="rounded-lg bg-slate-50 p-3 text-xs">
               <p dir="ltr">{item.sourcePath} → {item.destinationPath}</p>
               <p>{item.statusCode} · {item.active ? 'ACTIVE' : 'DISABLED'} · v{item.version ?? '—'}</p>
               {!item.contentId && item.version ? <form key={item.version} className="mt-2 space-y-2" onSubmit={(event) => updateRedirect(item, event)}>
@@ -339,6 +351,11 @@ export function CmsOperationsPanels({
               </form> : <p className="text-amber-800">{locale === 'ar' ? 'تحويل محكوم بالنشر أو يحتاج ترحيل الإصدار' : 'Publisher-owned redirect or version migration required'}</p>}
             </li>)}
           </ul>
+          <div className="mt-3 flex items-center justify-between text-xs">
+            <button type="button" disabled={busy || redirectPage === 1} onClick={() => setRedirectPage((p) => Math.max(1, p - 1))} className={button}>{locale === 'ar' ? 'السابق' : 'Previous'}</button>
+            <span aria-live="polite">{redirectPage} / {redirectTotalPages}</span>
+            <button type="button" disabled={busy || redirectPage >= redirectTotalPages} onClick={() => setRedirectPage((p) => Math.min(redirectTotalPages, p + 1))} className={button}>{locale === 'ar' ? 'التالي' : 'Next'}</button>
+          </div>
         </Card>
         <Card title="قوائم التنقل — إضافة آمنة">
           <form onSubmit={saveNavigation} className="space-y-2">
