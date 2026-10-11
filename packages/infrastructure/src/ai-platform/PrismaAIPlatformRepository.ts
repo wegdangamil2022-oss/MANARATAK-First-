@@ -504,6 +504,8 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       reservationKey: string;
       requestsPerMinute: number;
       dailyRequestLimit: number;
+      requesterRequestsPerMinute?: number;
+      requesterConcurrentLimit?: number;
       monthlyTokenLimit: number;
       monthlyCostLimit?: number | null;
       currency?: string | null;
@@ -555,6 +557,25 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
             select: { reservedTokens: true, reservedCost: true, currency: true },
           }),
         ]);
+        // Serializable per-requester admission: limits apply across API replicas,
+        // not just in-process browser tabs, without displacing the consumer global cap.
+        if (value.requesterReferenceId) {
+          const scope = { consumerKey: value.consumerKey, requesterReferenceId: value.requesterReferenceId };
+          const [perMinute, running] = await Promise.all([
+            tx.aIExecutionRecord.count({
+              where: { ...scope, createdAt: { gte: minute } },
+            }),
+            tx.aIExecutionRecord.count({
+              where: {
+                ...scope, status: { in: ['RECEIVED', 'QUEUED', 'ACCEPTED', 'RUNNING', 'RETRYING'] },
+              },
+            }),
+          ]);
+          if (perMinute + 1 > (reservation.requesterRequestsPerMinute ?? Math.max(1, Math.min(10, reservation.requestsPerMinute))))
+            throw new Error('AI_REQUESTER_RATE_LIMIT_EXCEEDED');
+          if (running + 1 > (reservation.requesterConcurrentLimit ?? 2))
+            throw new Error('AI_REQUESTER_CONCURRENCY_EXCEEDED');
+        }
         const tokens =
           monthlyUsage.reduce(
             (sum: number, row: any) =>
