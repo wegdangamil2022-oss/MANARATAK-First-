@@ -1,0 +1,11 @@
+Command: node scripts/testing/verify-cms-nginx-source.mjs /tmp/nginx-1.28.0/objs/nginx
+Exit code: 0
+
+PASS nginx source configuration syntax (mock host and port only)
+PASS live owner HTML freshness and caller-query isolation
+PASS archive 404 cannot serve stale prerender or SPA files
+PASS real HTTP canonical redirect
+PASS authoritative CMS sitemap proxy
+PASS owner outage never serves a stale static success
+PASS web app entry has JavaScript MIME, no-store, and no SPA fallback
+CHECKS=7 LOCAL_MOCK_OWNER=YES DATABASE_CONNECTED=NO DEPLOYMENT=NO

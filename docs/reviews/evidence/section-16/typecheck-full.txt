@@ -1,0 +1,7 @@
+Command: npm run typecheck
+Exit code: 0
+
+
+> manaratak-2.0-monorepo@0.0.0 typecheck
+> tsc -b
+

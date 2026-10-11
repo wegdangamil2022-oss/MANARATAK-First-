@@ -1,0 +1,31 @@
+Command: npm run cms:source:verify
+Exit code: 0
+
+
+> manaratak-2.0-monorepo@0.0.0 cms:source:verify
+> node scripts/verify-cms-source.mjs
+
+PASS  operational content removed from editorial content enum
+PASS  announcements and blocks retain dedicated SSOT models
+PASS  CMS canonical domain-link model wired to content root
+PASS  source-only CMS domain-link migration present
+PASS  admin domain-link API present
+PASS  public related-content API present
+PASS  cross-domain graph projects related editorial content
+PASS  site operations are locale-aware rather than Arabic-hardcoded
+PASS  technical block-schema creation removed from ordinary editor UI
+PASS  admin CMS exposes canonical linking and current MANARATAK brand tokens
+PASS  editorial create form does not duplicate site-operation types
+PASS  study destinations reuse canonical ReferenceCountry ownership rather than a duplicate CMS target type
+PASS  CMS domain links accept canonical owner UUIDs only across admin and public boundaries
+PASS  obsolete duplicate CMS translation/review preview surfaces removed
+PASS  navigation editor preserves existing nodes and uses optimistic concurrency
+PASS  fake-data CMS local preview CRUD surfaces removed in favor of canonical admin control plane
+PASS  CMS deep-restructure closure report is present
+PASS  CMS due schedules execute through the canonical durable background worker
+PASS  CMS worker cadence is explicit in production configuration
+PASS  source-only migration enforces UUID and allowed domain/relation types at the database boundary
+CMS_SOURCE_VERIFY_PASS=20
+DATABASE_CONNECTED=NO
+MIGRATIONS_APPLIED=0
+CLOUD_SQL_MUTATIONS=0

@@ -1,0 +1,59 @@
+Command: npm run build -w @manaratak/api
+Exit code: 0
+
+
+> @manaratak/api@1.0.0 build
+> npm run typecheck && node ../../scripts/report-api-preview-configuration.mjs && esbuild src/server.ts --bundle --platform=node --format=cjs --external:uuid --external:@prisma/client --external:bcrypt --external:jsonwebtoken --external:cors --external:express --external:helmet --sourcemap --outfile=dist/server.cjs
+
+
+> @manaratak/api@1.0.0 typecheck
+> node ../../scripts/verify-api-native-esm-specifiers.mjs && tsc -b && node ../../scripts/resolve-api-workspace-esm.mjs
+
+97 TypeScript files scanned; 0 invalid relative ESM specifiers
+API workspace ESM artifacts resolved: core, shared, domain, config, application, infrastructure
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    ../../packages/infrastructure/dist/certificates/ProviderNeutralCertificateRenderingService.js:83:100:
+      83 │ ...ssets/certificates/NotoSansArabic-Regular.ttf', import.meta.url));
+         ╵                                                    ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    ../../packages/infrastructure/dist/certificates/ProviderNeutralCertificateRenderingService.js:91:97:
+      91 │ ...ets/certificates/manaratak-logo-official.png', import.meta.url)));
+         ╵                                                   ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    ../../packages/infrastructure/dist/certificates/ProviderNeutralCertificateRenderingService.js:94:98:
+      94 │ ...RL('../../assets/certificates/DejaVuSerif.ttf', import.meta.url));
+         ╵                                                    ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    ../../packages/infrastructure/dist/certificates/ProviderNeutralCertificateRenderingService.js:96:111:
+      96 │ ..../assets/certificates/NotoSansArabic-Bold.ttf', import.meta.url));
+         ╵                                                    ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    ../../packages/infrastructure/dist/certificates/ProviderNeutralCertificateRenderingService.js:97:107:
+      97 │ ..../../assets/certificates/DejaVuSerif-Bold.ttf', import.meta.url));
+         ╵                                                    ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+5 warnings
+
+  dist/server.cjs      10.9mb ⚠️
+  dist/server.cjs.map  17.7mb
+
+⚡ Done in 714ms

@@ -1,0 +1,12 @@
+Command: npx vitest run --config .section16-vitest.config.ts
+Exit code: 0
+
+
+ RUN  v4.1.11 /workspace/manaratak
+
+
+ Test Files  26 passed (26)
+      Tests  118 passed (118)
+   Start at  11:41:16
+   Duration  9.33s (transform 5.54s, setup 0ms, import 14.66s, tests 824ms, environment 2ms)
+

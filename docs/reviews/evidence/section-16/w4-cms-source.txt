@@ -1,0 +1,20 @@
+Command: npm run w4:search-cms:verify
+Exit code: 0
+
+
+> manaratak-2.0-monorepo@0.0.0 w4:search-cms:verify
+> node scripts/verify-w4-search-cms.mjs
+
+PASS 0037 real Prisma search gateway
+PASS 0037 persisted search request repository
+PASS 0037 server public cursor API
+PASS 0037 deterministic ranking
+PASS 0037 published owner truth only
+PASS 0037 P24 API mode calls server search
+PASS 0037 prototype local index explicitly isolated
+PASS 0046 exact CMS types preserved
+PASS 0046 article discovery explicitly filters owner types
+PASS 0046 generic canonical content route exists
+PASS 0046 generic route fetches owner slug without relabel
+PASS 0046 search canonical URL is content route
+W4 search/CMS: 12/12
