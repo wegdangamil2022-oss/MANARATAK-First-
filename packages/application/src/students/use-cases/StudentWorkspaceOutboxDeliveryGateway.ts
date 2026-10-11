@@ -15,14 +15,47 @@ import { StudentWorkspaceUseCases } from './StudentWorkspaceUseCases';
  * Phase 15 idempotent inbox. Unsupported events are never claimed by the
  * worker, and non-human Identity events are intentionally ignored.
  */
+export interface StudentOwnerCatchupContinuation {
+  roleEventId:string;studentReferenceId:string;roleAssignedAt:Date;
+  domain:'COURSES'|'CERTIFICATES';cursor:string;
+}
+export interface IStudentOwnerCatchupContinuationQueue {
+  enqueueContinuation(input:StudentOwnerCatchupContinuation):Promise<void>;
+}
+
 export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGateway {
   public constructor(private readonly students: StudentWorkspaceUseCases,
     private readonly assignments: IRoleAssignmentRepository, private readonly identities: IIdentityRepository,
     private readonly learning?: IStudentLearningReadGateway,
-    private readonly certificates?: IStudentCertificateReadGateway) {}
+    private readonly certificates?: IStudentCertificateReadGateway,
+    private readonly continuationQueue?:IStudentOwnerCatchupContinuationQueue) {}
 
   public async deliver(entry: TransactionalOutboxEntry, context: OutboxDeliveryContext): Promise<void> {
     if (context.idempotencyKey !== entry.id) throw new Error('STUDENT_WORKSPACE_IDEMPOTENCY_KEY_MISMATCH');
+    if(entry.domain==='STUDENT_WORKSPACE_CATCHUP'){
+      if(entry.eventType!=='StudentOwnerCatchupContinuationRequested' ||
+         entry.metadata?.sourcePhase!=='Phase15' || entry.metadata?.schemaVersion!=='1.0')
+        throw new Error('STUDENT_OWNER_CATCHUP_SOURCE_INVALID');
+      const payload=entry.payload;
+      const roleEventId=typeof payload.roleEventId==='string'?payload.roleEventId:'';
+      const studentReferenceId=typeof payload.studentReferenceId==='string'?payload.studentReferenceId:'';
+      const domain=payload.ownerDomain;
+      const cursor=typeof payload.cursor==='string'?payload.cursor:'';
+      const roleAssignedAt=new Date(String(payload.roleAssignedAt??''));
+      if(!roleEventId||!studentReferenceId||!cursor||
+        !['COURSES','CERTIFICATES'].includes(String(domain)) ||
+        entry.aggregate?.aggregateId!==studentReferenceId ||
+        !Number.isFinite(roleAssignedAt.getTime()))
+        throw new Error('STUDENT_OWNER_CATCHUP_ENVELOPE_INVALID');
+      const identity=await this.identities.findById(studentReferenceId);
+      const roles=await this.assignments.findByIdentityId(studentReferenceId);
+      if(identity?.type!=='Human'||identity.status!=='ACTIVE'||
+         !roles.some(role=>role.roleId==='student'))
+        throw new Error('STUDENT_OWNER_CATCHUP_ROLE_NOT_ACTIVE');
+      await this.catchUpFromOwners(roleEventId,studentReferenceId,roleAssignedAt,
+        domain as 'COURSES'|'CERTIFICATES',cursor);
+      return;
+    }
     const event = this.map(entry);
     if (!event) return;
     const identity = await this.identities.findById(event.studentReferenceId);
@@ -50,12 +83,12 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     }
   }
 
-  private async catchUpFromOwners(roleEventId: string, studentReferenceId: string, roleAssignedAt:Date): Promise<void> {
+  private async catchUpFromOwners(roleEventId: string, studentReferenceId: string, roleAssignedAt:Date, onlyDomain?:'COURSES'|'CERTIFICATES',startCursor?:string): Promise<void> {
     // The triggering role event is replayed by the outbox until *all* pages have
     // been projected. Each projected record has an immutable derived event id.
     // Never fetch an unbounded owner collection or falsely acknowledge truncation.
-    if (this.learning) {
-      await this.catchUpPages('COURSES',
+    if (this.learning && (!onlyDomain||onlyDomain==='COURSES')) {
+      await this.catchUpPages(roleEventId,studentReferenceId,roleAssignedAt,'COURSES',
         (limit,cursor) => this.learning!.listPageForStudent
           ? this.learning!.listPageForStudent(studentReferenceId,limit,cursor)
           : this.legacyLearningPage(studentReferenceId,cursor),
@@ -74,10 +107,10 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
               completedAt: row.completedAt,
             },
           });
-        });
+        },onlyDomain==='COURSES'?startCursor:undefined);
     }
-    if (this.certificates) {
-      await this.catchUpPages('CERTIFICATES',
+    if (this.certificates && (!onlyDomain||onlyDomain==='CERTIFICATES')) {
+      await this.catchUpPages(roleEventId,studentReferenceId,roleAssignedAt,'CERTIFICATES',
         (limit,cursor) => this.certificates!.listPageForStudent
           ? this.certificates!.listPageForStudent(studentReferenceId,limit,cursor)
           : this.legacyCertificatePage(studentReferenceId,cursor),
@@ -98,8 +131,10 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
               previewImageAssetId: row.previewImageAssetId,
             },
           });
-        });
+        },onlyDomain==='CERTIFICATES'?startCursor:undefined);
     }
+    if(onlyDomain==='COURSES'&&!this.learning || onlyDomain==='CERTIFICATES'&&!this.certificates)
+      throw new Error('STUDENT_OWNER_CATCHUP_READER_UNAVAILABLE');
   }
 
   private async legacyLearningPage(studentReferenceId:string,cursor?:string) {
@@ -117,10 +152,11 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
   }
 
   /** 40 x 50 = at most 2,000 records per owner; source cursor must advance. */
-  private async catchUpPages<T>(domain:'COURSES'|'CERTIFICATES',
+  private async catchUpPages<T>(roleEventId:string,studentReferenceId:string,roleAssignedAt:Date,
+    domain:'COURSES'|'CERTIFICATES',
     read:(limit:number,cursor?:string)=>Promise<{items:T[];nextCursor:string|null}>,
-    project:(item:T)=>Promise<void>):Promise<void> {
-    let cursor:string|undefined;
+    project:(item:T)=>Promise<void>,startCursor?:string):Promise<void> {
+    let cursor:string|undefined=startCursor;
     const seen=new Set<string>();
     for(let index=0;index<40;index++){
       const page=await read(50,cursor);
@@ -134,7 +170,11 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       seen.add(page.nextCursor);
       cursor=page.nextCursor;
     }
-    throw new Error(`STUDENT_${domain}_CATCHUP_CAPACITY_EXCEEDED`);
+    if(!this.continuationQueue || !cursor)
+      throw new Error(`STUDENT_${domain}_CATCHUP_CONTINUATION_UNAVAILABLE`);
+    await this.continuationQueue.enqueueContinuation({
+      roleEventId,studentReferenceId,roleAssignedAt,domain,cursor,
+    });
   }
 
   private map(entry: TransactionalOutboxEntry): StudentWorkspaceIntegrationEventDto | null {
