@@ -111,6 +111,7 @@ export interface IAIPlatformRepository {
   }): Promise<{ data: AIAsyncJobRecord[]; total: number }>;
   listClaimableAsyncJobs(limit: number, now?: Date): Promise<AIAsyncJobRecord[]>;
   claimAsyncJob(publicId: string, workerId: string): Promise<AIAsyncJobRecord | null>;
+  renewAsyncJobLease(publicId: string, lease: { workerId: string; lockedAt: Date | string }): Promise<boolean>;
   updateAsyncJob(
     publicId: string,
     patch: Partial<AIAsyncJobRecord>,
