@@ -425,4 +425,35 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     }
   });
 
+
+  it('denies HIGH/CRITICAL resolution by the same mitigation author', async () => {
+    for (const severity of ['HIGH', 'CRITICAL'] as const) {
+      const tx = {
+        $queryRaw: vi.fn().mockResolvedValue([]),
+        aIRegistryRecord: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'incident-1', status: 'MITIGATED', configuration: { severity },
+          }),
+          update: vi.fn(),
+        },
+        aIIncidentEventRecord: {
+          findFirst: vi.fn().mockResolvedValue({
+            action: 'MITIGATION_RECORDED', actorReferenceId: 'operator-1',
+          }),
+          create: vi.fn(),
+        },
+      };
+      const repository = new PrismaAIPlatformRepository({
+        $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+      });
+      await expect(repository.appendIncidentEvent('incident-1', {
+        at: new Date('2026-10-11T12:00:00Z'),
+        action: 'RESOLUTION_RECORDED', actorReferenceId: 'operator-1',
+      })).rejects.toThrow('AI_INCIDENT_INDEPENDENT_RESOLUTION_REQUIRED');
+      expect(tx.aIIncidentEventRecord.findFirst).toHaveBeenCalledOnce();
+      expect(tx.aIIncidentEventRecord.create).not.toHaveBeenCalled();
+      expect(tx.aIRegistryRecord.update).not.toHaveBeenCalled();
+    }
+  });
+
 });
