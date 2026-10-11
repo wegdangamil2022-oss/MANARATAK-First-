@@ -75,6 +75,55 @@ describe('CMS schema review boundaries', () => {
   });
 });
 
+describe('CMS-ADM-016 schema field authority', () => {
+  const schema = {
+    type: 'object', additionalProperties: false,
+    properties: {
+      cards: {
+        type: 'array', maxItems: 10,
+        items: {
+          type: 'object', additionalProperties: false,
+          properties: {
+            image: { type: 'string', maxLength: 80 },
+            title: { type: 'string', maxLength: 200 },
+            priority: { type: 'integer' },
+          },
+        },
+      },
+    },
+  };
+
+  it('resolves asset and translated text paths inside bounded nested arrays', () => {
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition(
+      schema, ['cards.image'], ['cards.title'],
+    )).not.toThrow();
+  });
+
+  it('rejects asset paths that are absent, numeric or unrelated to schema fields', () => {
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition(
+      schema, ['cards.missing'], [],
+    )).toThrow('CMS_BLOCK_SCHEMA_FIELD_PATH_INVALID');
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition(
+      schema, ['cards.priority'], [],
+    )).toThrow('CMS_BLOCK_SCHEMA_FIELD_PATH_INVALID');
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition(
+      schema, ['cards.image', 'cards.image'], [],
+    )).toThrow('CMS_BLOCK_SCHEMA_FIELD_LIST_DUPLICATE');
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition(
+      schema, ['cards.title'], ['cards.title'],
+    )).toThrow('CMS_BLOCK_SCHEMA_FIELD_LIST_DUPLICATE');
+  });
+
+  it('requires an object at the root and bounds oversized payloads', () => {
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition(
+      { type: 'string', maxLength: 100 }, [], [],
+    )).toThrow('CMS_BLOCK_SCHEMA_ROOT_OBJECT_REQUIRED');
+    expect(() => CmsPublishingPolicy.assertBlockPayload(
+      { cards: [{ title: 'x'.repeat(256_001) }] }, schema, [],
+    )).toThrow('CMS_BLOCK_PAYLOAD_TOO_LARGE');
+  });
+});
+
 describe('W14 CMS integrity policies', () => {
 
   it('derives root lifecycle without letting one locale erase another published locale', () => {
