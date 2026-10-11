@@ -122,6 +122,60 @@ async function fetchAll(apiBase, catalog, locale) {
   return results;
 }
 
+async function fetchCmsPublished(apiBase, locale) {
+  const items = [];
+  for (let page = 1; page <= 500; page += 1) {
+    const url = new URL(`${apiBase}/public/cms/content`);
+    url.searchParams.set('locale', locale);
+    url.searchParams.set('siteIdentifier', 'manaratak');
+    url.searchParams.set('page', String(page));
+    url.searchParams.set('pageSize', '50');
+    const response = await fetch(url, { headers: { accept: 'application/json' } });
+    if (!response.ok) throw new Error(`CMS sitemap/prerender discovery failed ${response.status} ${url}`);
+    const result = await response.json();
+    if (!Array.isArray(result.data) || !Number.isInteger(result.totalPages) ||
+        result.totalPages < 0 || result.totalPages > 500) {
+      throw new Error('CMS_PRERENDER_PAGINATION_INVALID');
+    }
+    items.push(...result.data);
+    if (page >= result.totalPages) return items;
+  }
+  throw new Error('CMS_PRERENDER_PAGINATION_LIMIT_EXCEEDED');
+}
+
+function escapeXml(value) {
+  return escapeHtml(value).replaceAll("'", '&apos;');
+}
+
+/** Sitemap contains only pages generated from published, indexable snapshots. */
+async function writeSitemap(distDir, manifest) {
+  const groups = new Map();
+  for (const item of manifest) {
+    const key = item.cmsContentId
+      ? `cms:${item.cmsContentId}`
+      : `path:${stripLocale(item.path)}`;
+    const group = groups.get(key) || {};
+    const locale = item.path.split('/')[1];
+    if (locale === 'ar' || locale === 'en') group[locale] = item.canonical;
+    groups.set(key, group);
+  }
+  const rows = manifest.map((item) => {
+    const key = item.cmsContentId
+      ? `cms:${item.cmsContentId}` : `path:${stripLocale(item.path)}`;
+    const group = groups.get(key);
+    const alternate = ['ar', 'en'].filter((locale) => group[locale])
+      .map((locale) => `    <xhtml:link rel="alternate" hreflang="${locale}" href="${escapeXml(group[locale])}" />`);
+    if (group.ar) alternate.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(group.ar)}" />`);
+    return ['  <url>', `    <loc>${escapeXml(item.canonical)}</loc>`, ...alternate, '  </url>'].join('\n');
+  });
+  const sitemap = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    ...rows, '</urlset>', '',
+  ].join('\n');
+  await writeFile(resolve(distDir, 'sitemap.xml'), sitemap, 'utf8');
+}
+
 async function writeRoute(distDir, pathname, html) {
   const clean = pathname.replace(/^\/+/, '').replace(/\/+$/, '');
   const output = resolve(distDir, clean || '.', 'index.html');
