@@ -359,8 +359,12 @@ export class CmsAdminRouter {
     }));
     router.get('/block-schemas', asyncHandler(async (_req, res) => { res.json({ data: await adminCmsUseCases.listBlockSchemas() }); }));
     router.post('/block-schemas', asyncHandler(async (req, res) => {
-      const body = z.object({ key: z.string().regex(/^[A-Z][A-Z0-9_]+$/), version: z.number().int().positive(), nameAr: z.string().min(1), nameEn: z.string().min(1), fieldSchema: z.record(z.string(), z.unknown()), localizedFields: z.array(z.string()), assetFields: z.array(z.string()), status: z.enum(['ACTIVE','INACTIVE']) }).parse(req.body);
+      const body = z.object({ key: z.string().regex(/^[A-Z][A-Z0-9_]+$/), version: z.number().int().positive(), nameAr: z.string().min(1), nameEn: z.string().min(1), fieldSchema: z.record(z.string(), z.unknown()), localizedFields: z.array(z.string()).max(50), assetFields: z.array(z.string()).max(50), status: z.literal('DRAFT').optional() }).strict().parse(req.body);
       res.status(201).json(await adminCmsUseCases.createBlockSchema(body, actor(req)));
+    }));
+    router.post('/block-schemas/:id/approve', asyncHandler(async (req, res) => {
+      z.object({}).strict().parse(req.body ?? {});
+      res.json(await adminCmsUseCases.approveBlockSchema(req.params.id, actor(req)));
     }));
     router.get('/blocks', asyncHandler(async (req, res) => {
       const query = z.object({ siteIdentifier: z.literal('manaratak').default('manaratak'), locale: z.enum(['ar', 'en']).default('ar') }).parse(req.query);
