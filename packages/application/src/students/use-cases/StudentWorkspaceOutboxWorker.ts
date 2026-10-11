@@ -14,6 +14,7 @@ export class StudentWorkspaceOutboxWorker {
     private readonly dispatcher: ITransactionalOutboxDispatcher,
     private readonly options: StudentWorkspaceOutboxWorkerOptions = {},
     private readonly workspaceRecovery?: StudentWorkspaceUseCases,
+    private readonly reminderDispatcher?: ITransactionalOutboxDispatcher,
   ) {}
 
   public async runIdentityOnce(workerId: string): Promise<OutboxDispatchResult> {
@@ -31,6 +32,18 @@ export class StudentWorkspaceOutboxWorker {
   /** Lifecycle events only: certificate render jobs remain owned by the P14 artifact worker. */
   public async runCertificatesOnce(workerId: string): Promise<OutboxDispatchResult> {
     return this.run(workerId, 'CERTIFICATES', ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered']);
+  }
+
+  public async runRemindersOnce(workerId:string):Promise<OutboxDispatchResult>{
+    if(!workerId.trim())throw new Error('STUDENT_REMINDER_WORKER_ID_REQUIRED');
+    if(!this.reminderDispatcher)return {claimed:0,processed:0,failed:0,exhausted:0,leaseLost:0};
+    return this.reminderDispatcher.dispatchBatch({
+      workerId:workerId.trim(),domain:'STUDENT_APPLICATIONS',
+      eventTypes:['StudentApplicationReminderReconcileRequested'],
+      batchSize:this.options.batchSize??50,claimDurationMs:this.options.claimDurationMs??60_000,
+      maxAttempts:this.options.maxAttempts??8,baseBackoffMs:this.options.baseBackoffMs??1_000,
+      maxBackoffMs:this.options.maxBackoffMs??120_000,
+    });
   }
 
   public async runReplayOnce(workerId: string): Promise<{processed:number;failed:number}> {
