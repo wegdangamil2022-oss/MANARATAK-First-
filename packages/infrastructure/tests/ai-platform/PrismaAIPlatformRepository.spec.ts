@@ -297,4 +297,23 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     );
   });
 
+
+  it('does not dispatch after a concurrent cancellation has won', async () => {
+    const tx = { aIExecutionRecord: {
+      updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+      findUniqueOrThrow: vi.fn(),
+    } };
+    const repository = new PrismaAIPlatformRepository({
+      $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+    });
+    await expect(repository.updateExecution('ai_cancelled', { status: 'RUNNING' } as any))
+      .rejects.toThrow('AI_EXECUTION_STATE_CONFLICT');
+    expect(tx.aIExecutionRecord.updateMany).toHaveBeenCalledWith({
+      where: { publicId: 'ai_cancelled',
+        status: { in: ['RECEIVED', 'QUEUED', 'ACCEPTED'] } },
+      data: { status: 'RUNNING' },
+    });
+    expect(tx.aIExecutionRecord.findUniqueOrThrow).not.toHaveBeenCalled();
+  });
+
 });
