@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { Prisma } from '@prisma/client';
 import {
   AIAsyncJobRecord,
   AIEvaluationRun,
@@ -7,6 +8,7 @@ import {
   AIExecutionSpan,
   AIIncident,
   AIIndexingRun,
+  AIKnowledgeSource,
   AIPlatformOverview,
   AIPromptDefinition,
   AIPromptVersion,
@@ -152,14 +154,23 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       // a different principal from the last author of the REVIEW revision.
       // Reuse the persisted revision as evidence; never trust a caller-supplied
       // "approvedBy" or an editable body to attest an independent review.
-      if (['guardrails', 'routingPolicies', 'consumers'].includes(resource) &&
-          candidate.status === 'ACTIVE') {
+      if (
+        ['guardrails', 'routingPolicies', 'consumers', 'evaluations'].includes(resource) &&
+        candidate.status === 'ACTIVE'
+      ) {
         const canonical = (body: Record<string, unknown>) => {
           const result = { ...body };
           for (const key of [
-            'id', 'key', 'status', 'createdAt', 'updatedAt', 'expectedUpdatedAt',
-            'createdBy', 'updatedBy',
-          ]) delete result[key];
+            'id',
+            'key',
+            'status',
+            'createdAt',
+            'updatedAt',
+            'expectedUpdatedAt',
+            'createdBy',
+            'updatedBy',
+          ])
+            delete result[key];
           return stableStringify(result);
         };
         if (!previous) throw new Error('AI_HIGH_IMPACT_REVIEW_REQUIRED');
@@ -175,9 +186,22 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
           throw new Error('AI_HIGH_IMPACT_REVIEW_REQUIRED');
         }
       }
-      if (resource === 'platformSettings' && candidate.key === 'runtime' &&
-          previous?.configuration?.globalEnabled === false &&
-          candidate.globalEnabled === true)
+      if (
+        ['guardrails', 'routingPolicies', 'consumers', 'evaluations'].includes(resource) &&
+        candidate.status === 'ACTIVE'
+      )
+        throw new Error('AI_HIGH_IMPACT_STAGED_CHANGE_REQUIRED');
+      if (
+        ['guardrails', 'routingPolicies', 'consumers', 'evaluations'].includes(resource) &&
+        previous?.status === 'ACTIVE' &&
+        candidate.status === 'REVIEW'
+      )
+        throw new Error('AI_HIGH_IMPACT_STAGED_CHANGE_REQUIRED');
+      if (
+        resource === 'platformSettings' &&
+        candidate.key === 'runtime' &&
+        candidate.globalEnabled === true
+      )
         throw new Error('AI_PLATFORM_REENABLE_GOVERNED_APPROVAL_REQUIRED');
       if (resource === 'modelPrices' && candidate.status === 'ACTIVE') {
         // Serialize all price changes for one model; conflicting effective intervals
@@ -192,9 +216,14 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
         });
         const startsBeforeEnd = (start: unknown, end: unknown) =>
           end == null || new Date(start as string).getTime() < new Date(end as string).getTime();
-        if (active.some((row: any) => row.key !== candidate.key &&
-            startsBeforeEnd(candidate.effectiveFrom, row.configuration?.effectiveTo) &&
-            startsBeforeEnd(row.configuration?.effectiveFrom, candidate.effectiveTo)))
+        if (
+          active.some(
+            (row: any) =>
+              row.key !== candidate.key &&
+              startsBeforeEnd(candidate.effectiveFrom, row.configuration?.effectiveTo) &&
+              startsBeforeEnd(row.configuration?.effectiveFrom, candidate.effectiveTo),
+          )
+        )
           throw new Error('AI_MODEL_PRICE_INTERVAL_OVERLAP');
       }
       // Existing configuration always requires the revision the editor actually read.
@@ -222,9 +251,11 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
           candidate.purpose !== previous.configuration.purpose)
       )
         throw new Error('AI_DEPLOYED_PROMPT_BINDING_IMMUTABLE');
-      if (resource === 'incidents' &&
-          ((previous && candidate.status !== previous.status) ||
-           (!previous && candidate.status !== 'OPEN')))
+      if (
+        resource === 'incidents' &&
+        ((previous && candidate.status !== previous.status) ||
+          (!previous && candidate.status !== 'OPEN'))
+      )
         throw new Error('AI_INCIDENT_STATUS_REQUIRES_GOVERNED_EVENT');
       if (
         resource === 'incidents' &&
@@ -390,8 +421,11 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       if (!versionRecord || versionRecord.status !== 'APPROVED')
         throw new Error('Only an approved immutable prompt version can be deployed.');
       // Author, checker, and deployer must be independent, even on direct repository calls.
-      if (!versionRecord.approvedBy || versionRecord.createdBy === actorReferenceId ||
-          versionRecord.approvedBy === actorReferenceId)
+      if (
+        !versionRecord.approvedBy ||
+        versionRecord.createdBy === actorReferenceId ||
+        versionRecord.approvedBy === actorReferenceId
+      )
         throw new Error('AI_PROMPT_DEPLOYER_NOT_INDEPENDENT');
       const record = await tx.aIRegistryRecord.findUnique({
         where: { resourceType_key: { resourceType: 'prompts', key: promptKey } },
@@ -420,17 +454,25 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       });
       for (const gate of activeGates) {
         const definition = gate.configuration as Record<string, any>;
-        if (definition.target?.type !== 'PROMPT' ||
-            definition.target?.key !== promptKey || !definition.deploymentGate) continue;
-        const gateChecksum = createHash('sha256').update(stableStringify({
-          key: gate.key,
-          status: gate.status,
-          capabilityKey: definition.capabilityKey,
-          target: definition.target,
-          dataset: definition.dataset,
-          evaluators: definition.evaluators,
-          deploymentGate: definition.deploymentGate,
-        })).digest('hex');
+        if (
+          definition.target?.type !== 'PROMPT' ||
+          definition.target?.key !== promptKey ||
+          !definition.deploymentGate
+        )
+          continue;
+        const gateChecksum = createHash('sha256')
+          .update(
+            stableStringify({
+              key: gate.key,
+              status: gate.status,
+              capabilityKey: definition.capabilityKey,
+              target: definition.target,
+              dataset: definition.dataset,
+              evaluators: definition.evaluators,
+              deploymentGate: definition.deploymentGate,
+            }),
+          )
+          .digest('hex');
         const passedRun = await tx.aIEvaluationRunRecord.findFirst({
           where: {
             evaluationKey: gate.key,
@@ -444,9 +486,11 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
         });
         if (!passedRun || passedRun.targetEvidence?.definitionChecksum !== gateChecksum)
           throw new Error(`AI_EVALUATION_EXACT_GATE_EVIDENCE_REQUIRED:${gate.key}`);
-        if (passedRun.score == null ||
-            passedRun.score < definition.deploymentGate.minimumScore ||
-            passedRun.safetyFailures > definition.deploymentGate.maximumSafetyFailures)
+        if (
+          passedRun.score == null ||
+          passedRun.score < definition.deploymentGate.minimumScore ||
+          passedRun.safetyFailures > definition.deploymentGate.maximumSafetyFailures
+        )
           throw new Error(`AI_EVALUATION_DEPLOYMENT_GATE_FAILED:${gate.key}`);
         if (definition.deploymentGate.requiresHumanApproval && !passedRun.approvedBy)
           throw new Error(`AI_EVALUATION_HUMAN_APPROVAL_REQUIRED:${gate.key}`);
@@ -582,7 +626,6 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
           tx.aIQuotaReservationRecord.findMany({
             where: {
               consumerKey: value.consumerKey,
-              createdAt: { gte: month },
               status: 'RESERVED',
             },
             select: { reservedTokens: true, reservedCost: true, currency: true },
@@ -591,18 +634,26 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
         // Serializable per-requester admission: limits apply across API replicas,
         // not just in-process browser tabs, without displacing the consumer global cap.
         if (value.requesterReferenceId) {
-          const scope = { consumerKey: value.consumerKey, requesterReferenceId: value.requesterReferenceId };
+          const scope = {
+            consumerKey: value.consumerKey,
+            requesterReferenceId: value.requesterReferenceId,
+          };
           const [perMinute, running] = await Promise.all([
             tx.aIExecutionRecord.count({
               where: { ...scope, createdAt: { gte: minute } },
             }),
             tx.aIExecutionRecord.count({
               where: {
-                ...scope, status: { in: ['RECEIVED', 'QUEUED', 'ACCEPTED', 'RUNNING', 'RETRYING'] },
+                ...scope,
+                status: { in: ['RECEIVED', 'QUEUED', 'ACCEPTED', 'RUNNING', 'RETRYING'] },
               },
             }),
           ]);
-          if (perMinute + 1 > (reservation.requesterRequestsPerMinute ?? Math.max(1, Math.min(10, reservation.requestsPerMinute))))
+          if (
+            perMinute + 1 >
+            (reservation.requesterRequestsPerMinute ??
+              Math.max(1, Math.min(10, reservation.requestsPerMinute)))
+          )
             throw new Error('AI_REQUESTER_RATE_LIMIT_EXCEEDED');
           if (running + 1 > (reservation.requesterConcurrentLimit ?? 2))
             throw new Error('AI_REQUESTER_CONCURRENCY_EXCEEDED');
@@ -719,15 +770,44 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
           data,
         });
         if (changed.count !== 1) throw new Error('AI_EXECUTION_STATE_CONFLICT');
-        return normalizeExecution(await tx.aIExecutionRecord.findUniqueOrThrow({
-          where: { publicId },
-        }));
+        return normalizeExecution(
+          await tx.aIExecutionRecord.findUniqueOrThrow({
+            where: { publicId },
+          }),
+        );
       });
     }
     return normalizeExecution(
       await this.prisma.aIExecutionRecord.update({ where: { publicId }, data }),
     );
   }
+  async requestExecutionCancellation(
+    publicId: string,
+    requesterReferenceId: string,
+  ): Promise<AIExecutionRecord> {
+    return this.prisma.$transaction(async (tx: any) => {
+      const current = await tx.aIExecutionRecord.findUnique({ where: { publicId } });
+      if (!current || current.requesterReferenceId !== requesterReferenceId)
+        throw new Error('AI_EXECUTION_NOT_FOUND');
+      if (current.status !== 'RUNNING') throw new Error('AI_EXECUTION_STATE_CONFLICT');
+      const metadata = { ...current.metadata, cancellationRequestedAt: new Date().toISOString() };
+      const changed = await tx.aIExecutionRecord.updateMany({
+        where: { publicId, requesterReferenceId, status: 'RUNNING', updatedAt: current.updatedAt },
+        data: { metadata },
+      });
+      if (changed.count !== 1) throw new Error('AI_EXECUTION_STATE_CONFLICT');
+      await appendGovernanceEvidence(tx, {
+        action: 'AI_EXECUTION_CANCELLATION_REQUESTED',
+        actorReferenceId: requesterReferenceId,
+        targetId: current.id,
+        targetType: 'execution',
+        aggregateId: publicId,
+        payload: { publicId, billingOutcome: 'UNKNOWN_UNTIL_RECONCILED' },
+      });
+      return normalizeExecution({ ...current, metadata });
+    });
+  }
+
   async cancelUnstartedExecution(
     publicId: string,
     requesterReferenceId: string,
@@ -744,8 +824,7 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
         },
         data: { status: 'CANCELLED' },
       });
-      if (changed.count !== 1)
-        throw new Error('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED');
+      if (changed.count !== 1) throw new Error('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED');
       const cancelled = await tx.aIExecutionRecord.findUniqueOrThrow({ where: { publicId } });
       await appendGovernanceEvidence(tx, {
         action: 'AI_EXECUTION_CANCELLED_BEFORE_DISPATCH',
@@ -823,6 +902,17 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
     return this.prisma.$transaction(async (tx: any) => {
       // Advisory lock serializes queue admission for each consumer across processes.
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-async-admission:${value.consumerKey}`}, 0))::text AS lock_result`;
+      if (!value.executionPublicId) throw new Error('AI_ASYNC_RESERVED_EXECUTION_REQUIRED');
+      const reservedExecution = await tx.aIExecutionRecord.findUnique({
+        where: { publicId: value.executionPublicId },
+      });
+      if (
+        !reservedExecution ||
+        reservedExecution.status !== 'QUEUED' ||
+        reservedExecution.requesterReferenceId !== value.requesterReferenceId ||
+        reservedExecution.consumerKey !== value.consumerKey
+      )
+        throw new Error('AI_ASYNC_RESERVED_EXECUTION_REQUIRED');
       const activeStatuses = ['QUEUED', 'RETRYING', 'RUNNING'];
       const active = await tx.aIAsyncJobRecord.count({
         where: { consumerKey: value.consumerKey, status: { in: activeStatuses } },
@@ -871,7 +961,36 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       }),
       this.prisma.aIAsyncJobRecord.count({ where }),
     ]);
-    return { data, total };
+    const executionIds = data.flatMap((job: AIAsyncJobRecord) =>
+      job.executionPublicId ? [job.executionPublicId] : [],
+    );
+    const executions = executionIds.length
+      ? await this.prisma.aIExecutionRecord.findMany({
+          where: { publicId: { in: executionIds } },
+          select: {
+            publicId: true,
+            traceId: true,
+            status: true,
+            providerKey: true,
+            modelKey: true,
+            actualCost: true,
+            currency: true,
+            inputTokens: true,
+            outputTokens: true,
+            updatedAt: true,
+          },
+        })
+      : [];
+    const summaries = new Map(
+      executions.map((execution: { publicId: string }) => [execution.publicId, execution]),
+    );
+    return {
+      data: data.map((job: AIAsyncJobRecord) => ({
+        ...job,
+        execution: summaries.get(job.executionPublicId ?? '') ?? null,
+      })),
+      total,
+    };
   }
 
   async listClaimableAsyncJobs(limit: number, now: Date = new Date()): Promise<AIAsyncJobRecord[]> {
@@ -956,7 +1075,9 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
     const now = new Date();
     const changed = await this.prisma.aIAsyncJobRecord.updateMany({
       where: {
-        publicId, status: 'RUNNING', lockedBy: lease.workerId,
+        publicId,
+        status: 'RUNNING',
+        lockedBy: lease.workerId,
         lockedAt: new Date(lease.lockedAt),
         leaseExpiresAt: { gt: now },
       },
@@ -1026,6 +1147,20 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
               },
       });
       if (changed.count !== 1) throw new Error('AI_ASYNC_JOB_STATE_CHANGED');
+      if (action === 'CANCEL' && current.executionPublicId) {
+        const cancelled = await tx.aIExecutionRecord.updateMany({
+          where: {
+            publicId: current.executionPublicId,
+            status: { in: ['RECEIVED', 'QUEUED'] },
+          },
+          data: { status: 'CANCELLED' },
+        });
+        if (cancelled.count === 1)
+          await tx.aIQuotaReservationRecord.updateMany({
+            where: { executionPublicId: current.executionPublicId, status: 'RESERVED' },
+            data: { status: 'RELEASED', actualTokens: 0, actualCost: 0 },
+          });
+      }
       const record = await tx.aIAsyncJobRecord.findUniqueOrThrow({ where: { publicId } });
       await appendGovernanceEvidence(tx, {
         action: `AI_ASYNC_JOB_${action}`,
@@ -1245,20 +1380,25 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       if (!current || current.status !== 'COMPLETED')
         throw new Error('AI_EVALUATION_RUN_NOT_APPROVABLE');
       const evidence = current.targetEvidence as Record<string, unknown> | null;
-      if (!evidence?.submittedBy || !evidence?.executedBy ||
-          evidence.submittedBy === actorReferenceId ||
-          evidence.executedBy === actorReferenceId)
+      if (
+        !evidence?.submittedBy ||
+        !evidence?.executedBy ||
+        evidence.submittedBy === actorReferenceId ||
+        evidence.executedBy === actorReferenceId
+      )
         throw new Error('AI_EVALUATION_INDEPENDENT_REVIEW_REQUIRED');
       if (current.approvedBy || current.approvedAt)
         throw new Error('AI_EVALUATION_ALREADY_APPROVED');
       const expectedResultChecksum = createHash('sha256')
-        .update(stableStringify({
-          results: current.results,
-          score: current.score,
-          safetyFailures: current.safetyFailures,
-          targetChecksum: current.targetChecksum,
-          definitionChecksum: evidence.definitionChecksum,
-        }))
+        .update(
+          stableStringify({
+            results: current.results,
+            score: current.score,
+            safetyFailures: current.safetyFailures,
+            targetChecksum: current.targetChecksum,
+            definitionChecksum: evidence.definitionChecksum,
+          }),
+        )
         .digest('hex');
       if (!evidence.definitionChecksum || evidence.resultChecksum !== expectedResultChecksum)
         throw new Error('AI_EVALUATION_RESULT_EVIDENCE_CHANGED');
@@ -1292,6 +1432,7 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
   async appendIncidentEvent(
     publicId: string,
     event: AIIncident['timeline'][number],
+    idempotencyKey?: string,
   ): Promise<AIIncident> {
     if (!event.actorReferenceId) throw new Error('AI_AUTHENTICATED_ACTOR_REQUIRED');
     return this.prisma.$transaction(async (tx: any) => {
@@ -1300,6 +1441,31 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
         where: { resourceType_key: { resourceType: 'incidents', key: publicId } },
       });
       if (!incident) throw new Error('AI_INCIDENT_NOT_FOUND');
+      const eventId = idempotencyKey
+        ? 'aie_' +
+          createHash('sha256')
+            .update(
+              stableStringify({
+                publicId,
+                actorReferenceId: event.actorReferenceId,
+                idempotencyKey,
+              }),
+            )
+            .digest('hex')
+        : undefined;
+      if (eventId) {
+        const prior = await tx.aIIncidentEventRecord.findUnique({ where: { id: eventId } });
+        if (prior) {
+          if (prior.action !== event.action || (prior.note ?? '') !== (event.note ?? ''))
+            throw new Error('AI_INCIDENT_IDEMPOTENCY_CONFLICT');
+          return {
+            ...incident.configuration,
+            id: incident.id,
+            status: incident.status,
+            updatedAt: incident.updatedAt,
+          };
+        }
+      }
       const currentStatus = incident.status as string;
       const actions: Record<string, { from: string[]; to: string | null }> = {
         NOTE_ADDED: { from: ['OPEN', 'INVESTIGATING', 'MITIGATED', 'RESOLVED'], to: null },
@@ -1313,19 +1479,21 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       // Critical and high-severity incidents cannot be resolved by the
       // same person who asserted mitigation. Use the persisted event author,
       // not a user-controlled body field, and fail closed for legacy gaps.
-      if (event.action === 'RESOLUTION_RECORDED' &&
-          ['HIGH', 'CRITICAL'].includes(incident.configuration?.severity)) {
+      if (
+        event.action === 'RESOLUTION_RECORDED' &&
+        ['HIGH', 'CRITICAL'].includes(incident.configuration?.severity)
+      ) {
         const mitigation = await tx.aIIncidentEventRecord.findFirst({
           where: { incidentPublicId: publicId, action: 'MITIGATION_RECORDED' },
           orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         });
-        if (!mitigation?.actorReferenceId ||
-            mitigation.actorReferenceId === event.actorReferenceId)
+        if (!mitigation?.actorReferenceId || mitigation.actorReferenceId === event.actorReferenceId)
           throw new Error('AI_INCIDENT_INDEPENDENT_RESOLUTION_REQUIRED');
       }
       const nextStatus = transition.to ?? currentStatus;
       const created = await tx.aIIncidentEventRecord.create({
         data: {
+          ...(eventId ? { id: eventId } : {}),
           incidentPublicId: publicId,
           action: event.action,
           actorReferenceId: event.actorReferenceId,
@@ -1384,6 +1552,8 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
     sourceVersion?: string | null;
     modelKey: string;
     dimensions: number;
+    source?: AIKnowledgeSource;
+    runPublicId?: string;
     chunks: Array<{
       chunkKey: string;
       chunkText: string;
@@ -1392,19 +1562,41 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       metadata?: Record<string, unknown>;
     }>;
   }) {
-    if (!input.sourceType?.trim() || !input.sourceReferenceId?.trim() ||
-        !Number.isInteger(input.dimensions) || input.dimensions < 1 ||
-        input.dimensions > 4096 || input.chunks.length > 256 ||
-        input.chunks.some((chunk) => Buffer.byteLength(chunk.chunkText, 'utf8') > 16_384))
+    if (
+      !input.sourceType?.trim() ||
+      !input.sourceReferenceId?.trim() ||
+      !Number.isInteger(input.dimensions) ||
+      input.dimensions < 1 ||
+      input.dimensions > 4096 ||
+      input.chunks.length > 256 ||
+      input.chunks.some((chunk) => Buffer.byteLength(chunk.chunkText, 'utf8') > 16_384)
+    )
       throw new Error('AI_EMBEDDING_SOURCE_OR_BATCH_LIMIT_INVALID');
     // The current schema only has a single sourceReferenceId column. Namespace
     // it by canonical owner type AND published revision, rather than deleting
     // another domain's embedding or overwriting a different revision.
-    const sourceIdentity = `aisrc_${createHash('sha256').update(stableStringify({
-      sourceType: input.sourceType, sourceReferenceId: input.sourceReferenceId,
-      sourceVersion: input.sourceVersion ?? null,
-    })).digest('hex')}`;
+    const sourceIdentity = `aisrc_${createHash('sha256')
+      .update(
+        stableStringify({
+          sourceType: input.sourceType,
+          sourceReferenceId: input.sourceReferenceId,
+          sourceVersion: input.sourceVersion ?? null,
+        }),
+      )
+      .digest('hex')}`;
     await this.prisma.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-knowledge:${input.indexKey}:${input.sourceType}:${input.sourceReferenceId}`}, 0))::text AS lock_result`;
+      if (input.source) {
+        await tx.aIEmbeddingRecord.deleteMany({
+          where: {
+            indexKey: input.indexKey,
+            metadata: {
+              path: ['ownerReferenceId'],
+              equals: `${input.sourceType}:${input.sourceReferenceId}`,
+            },
+          },
+        });
+      }
       await tx.aIEmbeddingRecord.deleteMany({
         where: { indexKey: input.indexKey, sourceReferenceId: sourceIdentity },
       });
@@ -1418,12 +1610,627 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
             dimensions: input.dimensions,
             metadata: {
               ...(chunk.metadata ?? {}),
+              ownerReferenceId: `${input.sourceType}:${input.sourceReferenceId}`,
               sourceType: input.sourceType,
               sourceVersion: input.sourceVersion ?? null,
             },
           })),
         });
+      if (input.source) {
+        const key = `${input.indexKey}:${input.sourceType}:${input.sourceReferenceId}`;
+        const configuration = { ...input.source, key };
+        await tx.aIRegistryRecord.upsert({
+          where: { resourceType_key: { resourceType: 'knowledgeSources', key } },
+          create: { resourceType: 'knowledgeSources', key, status: 'INDEXED', configuration },
+          update: { status: 'INDEXED', configuration },
+        });
+        if (input.runPublicId)
+          await tx.aIIndexingRunRecord.update({
+            where: { publicId: input.runPublicId },
+            data: {
+              status: 'COMPLETED',
+              embeddedChunks: input.chunks.length,
+              completedAt: new Date(),
+            },
+          });
+      }
     });
+  }
+
+  async listConfigurationRevisions(resource: AIRegistryResource, key: string) {
+    const rows = await this.prisma.aIRegistryRecord.findMany({
+      where: {
+        resourceType: 'governanceRevisions',
+        AND: [
+          { configuration: { path: ['resource'], equals: resource } },
+          { configuration: { path: ['targetKey'], equals: key } },
+        ],
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 100,
+    });
+    return rows.map((row: any) => ({
+      ...row.configuration,
+      revisionKey: row.key,
+      status: row.status,
+      createdBy: row.createdBy,
+      updatedBy: row.updatedBy,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    }));
+  }
+
+  async governConfiguration(
+    resource: AIRegistryResource,
+    key: string,
+    action: 'STAGE' | 'APPROVE' | 'ACTIVATE' | 'ROLLBACK',
+    input: {
+      configuration?: Record<string, unknown>;
+      revisionKey?: string;
+      expectedUpdatedAt?: string;
+      reason: string;
+      incidentReference?: string;
+    },
+    actorReferenceId: string,
+  ) {
+    if (
+      !['guardrails', 'routingPolicies', 'consumers', 'evaluations', 'platformSettings'].includes(
+        resource,
+      ) ||
+      !actorReferenceId ||
+      !input.reason?.trim()
+    )
+      throw new Error('AI_GOVERNANCE_CHANGE_INVALID');
+    return this.prisma.$transaction(async (tx: any) => {
+      if (resource === 'routingPolicies')
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'ai-routing-effective-bindings'}, 0))::text AS lock_result`;
+      if (resource === 'evaluations')
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'ai-evaluation-deployment-gates'}, 0))::text AS lock_result`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-registry:${resource}:${key}`}, 0))::text AS lock_result`;
+      const current = await tx.aIRegistryRecord.findUnique({
+        where: { resourceType_key: { resourceType: resource, key } },
+      });
+      const revision = input.revisionKey
+        ? await tx.aIRegistryRecord.findUnique({
+            where: {
+              resourceType_key: { resourceType: 'governanceRevisions', key: input.revisionKey },
+            },
+          })
+        : null;
+      if (
+        revision &&
+        (revision.configuration.resource !== resource || revision.configuration.targetKey !== key)
+      )
+        throw new Error('AI_GOVERNANCE_REVISION_TARGET_MISMATCH');
+      let saved: any;
+      if (action === 'STAGE' || action === 'ROLLBACK') {
+        if (
+          (current &&
+            (!input.expectedUpdatedAt ||
+              Date.parse(input.expectedUpdatedAt) !== new Date(current.updatedAt).getTime())) ||
+          (!current && input.expectedUpdatedAt)
+        )
+          throw new Error('AI_REGISTRY_CONCURRENT_CHANGE');
+        const configuration =
+          action === 'ROLLBACK'
+            ? revision?.configuration.previousConfiguration
+            : input.configuration;
+        if (!configuration || (action === 'ROLLBACK' && revision?.status !== 'ACTIVE'))
+          throw new Error('AI_GOVERNANCE_ROLLBACK_NOT_AVAILABLE');
+        if (input.incidentReference) {
+          const incident = await tx.aIRegistryRecord.findUnique({
+            where: {
+              resourceType_key: { resourceType: 'incidents', key: input.incidentReference },
+            },
+          });
+          if (
+            !incident ||
+            incident.status === 'RESOLVED' ||
+            !['HIGH', 'CRITICAL'].includes(incident.configuration?.severity)
+          )
+            throw new Error('AI_BREAK_GLASS_OPEN_INCIDENT_REQUIRED');
+        }
+        assertNoPersistedSecret(configuration);
+        const body = { ...configuration };
+        for (const field of [
+          'id',
+          'key',
+          'updatedAt',
+          'expectedUpdatedAt',
+          'createdAt',
+          'createdBy',
+          'updatedBy',
+        ])
+          delete body[field];
+        body.status = action === 'ROLLBACK' ? revision.configuration.previousStatus : 'ACTIVE';
+        const checksum = createHash('sha256').update(stableStringify(body)).digest('hex');
+        saved = await tx.aIRegistryRecord.create({
+          data: {
+            resourceType: 'governanceRevisions',
+            key: `aigr_${randomUUID()}`,
+            status: 'REVIEW',
+            createdBy: actorReferenceId,
+            updatedBy: actorReferenceId,
+            configuration: {
+              resource,
+              targetKey: key,
+              candidate: body,
+              checksum,
+              reason: input.reason,
+              incidentReference: input.incidentReference ?? null,
+              expiresAt: input.incidentReference
+                ? new Date(Date.now() + 60 * 60_000).toISOString()
+                : null,
+              baseUpdatedAt: current?.updatedAt ? new Date(current.updatedAt).toISOString() : null,
+            },
+          },
+        });
+      } else {
+        if (!revision) throw new Error('AI_GOVERNANCE_REVISION_REQUIRED');
+        if (revision.createdBy === actorReferenceId)
+          throw new Error('AI_GOVERNANCE_INDEPENDENT_ACTOR_REQUIRED');
+        const expectedStatus = action === 'APPROVE' ? 'REVIEW' : 'APPROVED';
+        if (revision.status !== expectedStatus)
+          throw new Error('AI_GOVERNANCE_REVISION_STATE_CONFLICT');
+        const body = revision.configuration;
+        if (body.expiresAt && Date.parse(body.expiresAt) <= Date.now())
+          throw new Error('AI_BREAK_GLASS_APPROVAL_EXPIRED');
+        if (
+          body.checksum !==
+          createHash('sha256').update(stableStringify(body.candidate)).digest('hex')
+        )
+          throw new Error('AI_GOVERNANCE_REVISION_CHECKSUM_MISMATCH');
+        if (action === 'ACTIVATE') {
+          if (body.approvedBy === actorReferenceId)
+            throw new Error('AI_GOVERNANCE_INDEPENDENT_ACTOR_REQUIRED');
+          if (
+            (current?.updatedAt ? new Date(current.updatedAt).toISOString() : null) !==
+            body.baseUpdatedAt
+          )
+            throw new Error('AI_REGISTRY_CONCURRENT_CHANGE');
+          if (resource === 'routingPolicies') {
+            const existing = await tx.aIRegistryRecord.findMany({
+              where: { resourceType: resource, status: 'ACTIVE' },
+            });
+            if (
+              existing.some(
+                (row: any) =>
+                  row.key !== key &&
+                  row.configuration.capabilityKey === body.candidate.capabilityKey &&
+                  (row.configuration.consumerKey ?? null) === (body.candidate.consumerKey ?? null),
+              )
+            )
+              throw new Error('AI_ROUTING_ACTIVE_BINDING_CONFLICT');
+          }
+          await tx.aIRegistryRecord.upsert({
+            where: { resourceType_key: { resourceType: resource, key } },
+            create: {
+              resourceType: resource,
+              key,
+              status: body.candidate.status,
+              configuration: body.candidate,
+              capabilityKey: body.candidate.capabilityKey,
+              consumerKey: body.candidate.consumerKey,
+              createdBy: revision.createdBy,
+              updatedBy: actorReferenceId,
+            },
+            update: {
+              status: body.candidate.status,
+              configuration: body.candidate,
+              capabilityKey: body.candidate.capabilityKey,
+              consumerKey: body.candidate.consumerKey,
+              updatedBy: actorReferenceId,
+            },
+          });
+        }
+        saved = await tx.aIRegistryRecord.update({
+          where: { id: revision.id },
+          data: {
+            status: action === 'APPROVE' ? 'APPROVED' : 'ACTIVE',
+            updatedBy: actorReferenceId,
+            configuration: {
+              ...body,
+              ...(action === 'APPROVE'
+                ? { approvedBy: actorReferenceId }
+                : {
+                    activatedBy: actorReferenceId,
+                    previousConfiguration: current?.configuration ?? null,
+                    previousStatus: current?.status ?? null,
+                  }),
+            },
+          },
+        });
+      }
+      await appendGovernanceEvidence(tx, {
+        action: `AI_CONFIGURATION_${action}`,
+        actorReferenceId,
+        targetId: saved.id,
+        targetType: 'governanceRevision',
+        aggregateId: key,
+        payload: {
+          resource,
+          key,
+          revisionKey: saved.key,
+          checksum: saved.configuration.checksum,
+          reason: input.reason,
+          incidentReference: input.incidentReference ?? null,
+        },
+      });
+      return {
+        ...saved.configuration,
+        revisionKey: saved.key,
+        status: saved.status,
+        updatedAt: saved.updatedAt,
+      };
+    });
+  }
+
+  async listKnowledgeChunks(
+    indexKey: string,
+    sourceType: string,
+    sourceReferenceId: string,
+    sourceVersion: string,
+  ) {
+    const sourceIdentity = `aisrc_${createHash('sha256').update(stableStringify({ sourceType, sourceReferenceId, sourceVersion })).digest('hex')}`;
+    return this.prisma.aIEmbeddingRecord.findMany({
+      where: { indexKey, sourceReferenceId: sourceIdentity },
+      select: { metadata: true },
+      orderBy: { chunkKey: 'asc' },
+      take: 256,
+    });
+  }
+
+  async removeKnowledgeSource(
+    indexKey: string,
+    sourceType: string,
+    sourceReferenceId: string,
+    actorReferenceId: string,
+    expectedUpdatedAt?: Date,
+  ) {
+    if (!actorReferenceId) throw new Error('AI_AUTHENTICATED_ACTOR_REQUIRED');
+    await this.prisma.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-knowledge:${indexKey}:${sourceType}:${sourceReferenceId}`}, 0))::text AS lock_result`;
+      if (expectedUpdatedAt) {
+        const current = await tx.aIRegistryRecord.findUnique({
+          where: {
+            resourceType_key: {
+              resourceType: 'knowledgeSources',
+              key: `${indexKey}:${sourceType}:${sourceReferenceId}`,
+            },
+          },
+        });
+        if (!current || new Date(current.updatedAt).getTime() !== expectedUpdatedAt.getTime())
+          return;
+      }
+      await tx.aIEmbeddingRecord.deleteMany({
+        where: {
+          indexKey,
+          metadata: { path: ['ownerReferenceId'], equals: `${sourceType}:${sourceReferenceId}` },
+        },
+      });
+      const key = `${indexKey}:${sourceType}:${sourceReferenceId}`;
+      await tx.aIRegistryRecord.updateMany({
+        where: { resourceType: 'knowledgeSources', key },
+        data: { status: 'REMOVED' },
+      });
+      await appendGovernanceEvidence(tx, {
+        action: 'AI_KNOWLEDGE_SOURCE_REMOVED',
+        actorReferenceId,
+        targetId: key,
+        targetType: 'knowledgeSource',
+        aggregateId: key,
+        payload: { indexKey, sourceType, sourceReferenceId },
+      });
+    });
+  }
+
+  async reconcileReservation(
+    publicId: string,
+    action: 'PROPOSE' | 'APPROVE',
+    evidence: { tokens: number; cost: number; currency: string; reference: string; reason: string },
+    actorReferenceId: string,
+    expectedUpdatedAt: string,
+  ): Promise<AIExecutionRecord> {
+    if (
+      !actorReferenceId ||
+      !Number.isSafeInteger(evidence.tokens) ||
+      evidence.tokens < 0 ||
+      !Number.isFinite(evidence.cost) ||
+      evidence.cost < 0 ||
+      !/^[A-Z]{3}$/.test(evidence.currency) ||
+      !evidence.reference?.trim() ||
+      !evidence.reason?.trim()
+    )
+      throw new Error('AI_RECONCILIATION_EVIDENCE_REQUIRED');
+    return this.prisma.$transaction(async (tx: any) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-reconciliation:${publicId}`}, 0))::text AS lock_result`;
+      const current = await tx.aIExecutionRecord.findUniqueOrThrow({ where: { publicId } });
+      if (
+        !expectedUpdatedAt ||
+        new Date(current.updatedAt).getTime() !== Date.parse(expectedUpdatedAt)
+      )
+        throw new Error('AI_REGISTRY_CONCURRENT_CHANGE');
+      const reservation = await tx.aIQuotaReservationRecord.findUnique({
+        where: { executionPublicId: publicId },
+      });
+      if (!reservation || reservation.status !== 'RESERVED')
+        throw new Error('AI_RECONCILIATION_NOT_REQUIRED');
+      if (
+        current.status === 'RUNNING' &&
+        new Date(current.updatedAt).getTime() > Date.now() - 15 * 60_000
+      )
+        throw new Error('AI_RECONCILIATION_EXECUTION_STILL_RUNNING');
+      const fingerprint = createHash('sha256').update(stableStringify(evidence)).digest('hex');
+      const proposal = current.metadata?.reconciliation;
+      if (action === 'APPROVE') {
+        const knownUsage = await tx.aIUsageRecord.findMany({
+          where: { executionPublicId: publicId },
+        });
+        if (
+          knownUsage.length &&
+          (knownUsage.some((row: any) => row.currency !== evidence.currency) ||
+            knownUsage.reduce((sum: number, row: any) => sum + Number(row.cost), 0) !==
+              evidence.cost ||
+            knownUsage.reduce(
+              (sum: number, row: any) => sum + row.inputTokens + row.outputTokens,
+              0,
+            ) !== evidence.tokens)
+        )
+          throw new Error('AI_RECONCILIATION_KNOWN_USAGE_MISMATCH');
+        if (
+          !proposal ||
+          proposal.proposedBy === actorReferenceId ||
+          proposal.fingerprint !== fingerprint
+        )
+          throw new Error('AI_RECONCILIATION_INDEPENDENT_APPROVAL_REQUIRED');
+        if (reservation.currency && reservation.currency !== evidence.currency)
+          throw new Error('AI_COST_CURRENCY_MISMATCH');
+        // Keep known and operator-attested unknown cost in the immutable usage ledger.
+        if (!knownUsage.length)
+          await tx.aIUsageRecord.upsert({
+            where: {
+              executionPublicId_providerKey_modelKey: {
+                executionPublicId: publicId,
+                providerKey: current.providerKey ?? 'reconciled',
+                modelKey: current.modelKey ?? 'unknown',
+              },
+            },
+            create: {
+              executionPublicId: publicId,
+              consumerKey: current.consumerKey,
+              providerKey: current.providerKey ?? 'reconciled',
+              modelKey: current.modelKey ?? 'unknown',
+              inputTokens: evidence.tokens,
+              outputTokens: 0,
+              cost: evidence.cost,
+              currency: evidence.currency,
+              costKind: 'ACTUAL',
+              metadata: {
+                evidenceReference: evidence.reference,
+                proposedBy: proposal.proposedBy,
+                approvedBy: actorReferenceId,
+              },
+            },
+            update: {},
+          });
+        await tx.aIQuotaReservationRecord.updateMany({
+          where: { executionPublicId: publicId, status: 'RESERVED' },
+          data: {
+            status: 'COMMITTED',
+            actualTokens: evidence.tokens,
+            actualCost: evidence.cost,
+            currency: evidence.currency,
+          },
+        });
+      }
+      const updated = await tx.aIExecutionRecord.update({
+        where: { publicId },
+        data: {
+          ...(action === 'APPROVE'
+            ? {
+                status: 'FAILED',
+                actualCost: evidence.cost,
+                currency: evidence.currency,
+                errorCode: 'AI_PROVIDER_OUTCOME_RECONCILED',
+              }
+            : {}),
+          metadata: {
+            ...current.metadata,
+            reconciliation:
+              action === 'PROPOSE'
+                ? { ...evidence, fingerprint, proposedBy: actorReferenceId }
+                : {
+                    ...proposal,
+                    approvedBy: actorReferenceId,
+                    approvedAt: new Date().toISOString(),
+                  },
+          },
+        },
+      });
+      await appendGovernanceEvidence(tx, {
+        action: `AI_COST_RECONCILIATION_${action}`,
+        actorReferenceId,
+        targetId: current.id,
+        targetType: 'execution',
+        aggregateId: publicId,
+        payload: {
+          publicId,
+          reference: evidence.reference,
+          tokens: evidence.tokens,
+          cost: evidence.cost,
+          currency: evidence.currency,
+        },
+      });
+      return normalizeExecution(updated);
+    });
+  }
+
+  async maintainPrivacyAndReservations(limit = 100) {
+    const take = Math.max(1, Math.min(100, limit));
+    const now = new Date();
+    const cutoff = new Date(now.getTime() - 24 * 60 * 60_000);
+    let purged = 0;
+    let reconciled = 0;
+    const records = await this.prisma.aIExecutionRecord.findMany({
+      where: {
+        OR: [
+          {
+            dataClassification: { not: 'PUBLIC' },
+            OR: [{ inputPreview: { not: null } }, { outputPreview: { not: null } }],
+          },
+          { createdAt: { lte: cutoff }, metadata: { path: ['asyncResult'], not: Prisma.AnyNull } },
+        ],
+      },
+      orderBy: { createdAt: 'asc' },
+      take,
+    });
+    for (const record of records) {
+      const metadata = { ...record.metadata };
+      if (
+        metadata.asyncResult &&
+        (!Number.isFinite(Date.parse(metadata.asyncResult.expiresAt)) ||
+          Date.parse(metadata.asyncResult.expiresAt) <= now.getTime())
+      )
+        delete metadata.asyncResult;
+      const changed = await this.prisma.aIExecutionRecord.updateMany({
+        where: { id: record.id, updatedAt: record.updatedAt },
+        data: {
+          ...(record.dataClassification !== 'PUBLIC'
+            ? { inputPreview: null, outputPreview: null }
+            : {}),
+          metadata,
+        },
+      });
+      purged += changed.count;
+      if (record.dataClassification !== 'PUBLIC')
+        await this.prisma.aIExecutionSpanRecord.updateMany({
+          where: { executionPublicId: record.publicId },
+          data: { attributes: {} },
+        });
+    }
+    const steps = await this.prisma.aIWorkflowStepRunRecord.findMany({
+      where: { outputSnapshot: { not: Prisma.AnyNull }, startedAt: { lte: cutoff } },
+      orderBy: { startedAt: 'asc' },
+      take,
+    });
+    for (const step of steps) {
+      if (
+        step.outputSnapshot?.kind !== 'AI_WORKFLOW_PROTECTED_STEP' ||
+        !Number.isFinite(Date.parse(step.outputSnapshot.expiresAt)) ||
+        Date.parse(step.outputSnapshot.expiresAt) <= now.getTime()
+      ) {
+        await this.prisma.aIWorkflowStepRunRecord.updateMany({
+          where: { id: step.id, outputReferenceHash: step.outputReferenceHash },
+          data: { outputSnapshot: Prisma.DbNull },
+        });
+        purged += 1;
+      }
+    }
+    // Historical manual projections and expired encrypted chunks are not searchable;
+    // physically delete a bounded batch without reading their contents into diagnostics.
+    const oldChunks = await this.prisma.aIEmbeddingRecord.findMany({
+      where: { OR: [{ chunkText: { not: '[PROTECTED]' } }, { createdAt: { lte: cutoff } }] },
+      orderBy: { createdAt: 'asc' },
+      take,
+      select: { id: true },
+    });
+    if (oldChunks.length) {
+      const deleted = await this.prisma.aIEmbeddingRecord.deleteMany({
+        where: { id: { in: oldChunks.map((chunk: { id: string }) => chunk.id) } },
+      });
+      purged += deleted.count;
+    }
+    const sources = await this.prisma.aIRegistryRecord.findMany({
+      where: {
+        resourceType: 'knowledgeSources',
+        status: 'INDEXED',
+        updatedAt: { lte: cutoff },
+      },
+      orderBy: { updatedAt: 'asc' },
+      take,
+    });
+    for (const source of sources) {
+      await this.removeKnowledgeSource(
+        source.configuration.indexKey,
+        source.configuration.sourceType,
+        source.configuration.sourceReferenceId,
+        'AI_RETENTION_WORKER',
+        new Date(source.updatedAt),
+      );
+      purged += 1;
+    }
+    const reservations = await this.prisma.aIQuotaReservationRecord.findMany({
+      where: {
+        status: 'RESERVED',
+        createdAt: { lte: new Date(now.getTime() - 15 * 60_000) },
+      },
+      orderBy: { createdAt: 'asc' },
+      take,
+    });
+    for (const reservation of reservations) {
+      await this.prisma.$transaction(async (tx: any) => {
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-async-admission:${reservation.consumerKey}`}, 0))::text AS lock_result`;
+        const execution = await tx.aIExecutionRecord.findUnique({
+          where: { publicId: reservation.executionPublicId },
+        });
+        if (!execution) return;
+        const usage = await tx.aIUsageRecord.findMany({
+          where: { executionPublicId: execution.publicId },
+        });
+        if (usage.length) {
+          await tx.aIQuotaReservationRecord.updateMany({
+            where: { id: reservation.id, status: 'RESERVED' },
+            data: {
+              status: 'COMMITTED',
+              actualTokens: usage.reduce(
+                (sum: number, row: any) => sum + row.inputTokens + row.outputTokens,
+                0,
+              ),
+              actualCost: usage.reduce((sum: number, row: any) => sum + Number(row.cost), 0),
+              currency: usage[0].currency,
+            },
+          });
+          reconciled += 1;
+        } else if (
+          ['CANCELLED', 'BLOCKED'].includes(execution.status) ||
+          (execution.status === 'FAILED' && execution.errorCode !== 'AI_PROVIDER_OUTCOME_UNKNOWN')
+        ) {
+          await tx.aIQuotaReservationRecord.updateMany({
+            where: { id: reservation.id, status: 'RESERVED' },
+            data: { status: 'RELEASED', actualTokens: 0, actualCost: 0 },
+          });
+          reconciled += 1;
+        }
+        if (!usage.length && ['QUEUED', 'RECEIVED'].includes(execution.status)) {
+          const job = await tx.aIAsyncJobRecord.findFirst({
+            where: { executionPublicId: execution.publicId },
+          });
+          if (!job) {
+            const cancelled = await tx.aIExecutionRecord.updateMany({
+              where: { publicId: execution.publicId, status: { in: ['QUEUED', 'RECEIVED'] } },
+              data: { status: 'CANCELLED', errorCode: 'AI_ORPHAN_ADMISSION_EXPIRED' },
+            });
+            if (cancelled.count) {
+              await tx.aIQuotaReservationRecord.updateMany({
+                where: { id: reservation.id, status: 'RESERVED' },
+                data: { status: 'RELEASED', actualTokens: 0, actualCost: 0 },
+              });
+              await appendGovernanceEvidence(tx, {
+                action: 'AI_ORPHAN_ADMISSION_RECOVERED',
+                actorReferenceId: 'AI_RETENTION_WORKER',
+                targetId: execution.id,
+                targetType: 'execution',
+                aggregateId: execution.publicId,
+                payload: { publicId: execution.publicId },
+              });
+              reconciled += 1;
+            }
+          }
+        }
+        // No ACK/usage evidence: hold RESERVED. Age alone never proves zero cost.
+      });
+    }
+    return { purged, reconciled };
   }
 
   async providerCircuitCanAttempt(

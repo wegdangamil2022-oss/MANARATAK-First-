@@ -262,7 +262,9 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "aiExecutionUseCases"
+        "aiExecutionUseCases",
+        "aiKnowledgeUseCases",
+        "aiWorkflowUseCases"
       ],
       "dependencies": []
     },
@@ -316,8 +318,10 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
+        "aiAsyncPayloadProtector",
         "aiPlatformRepository",
-        "aiProviderRegistry"
+        "aiProviderRegistry",
+        "publicCmsUseCases"
       ]
     },
     {
@@ -370,6 +374,7 @@
         "aiEvaluationUseCases"
       ],
       "dependencies": [
+        "aiAsyncPayloadProtector",
         "aiExecutionUseCases",
         "aiPlatformRepository"
       ]
@@ -688,6 +693,7 @@
       "name": "authEvaluatorService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AIAdminRouter.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
@@ -3175,7 +3181,9 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/CmsPublicRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "aiKnowledgeUseCases"
+      ],
       "dependencies": [
         "cmsDeliveryCache",
         "cmsRepository"

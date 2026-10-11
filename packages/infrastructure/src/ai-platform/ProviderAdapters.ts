@@ -16,6 +16,7 @@ export interface AIHttpTransport {
     headers: Record<string, string>;
     body?: unknown;
     timeoutMs: number;
+    signal?: AbortSignal;
   }): Promise<{ status: number; body: any; headers?: Record<string, string> }>;
 }
 
@@ -34,8 +35,7 @@ async function readProviderJson(response: Response): Promise<unknown> {
       const chunk = await reader.read();
       if (chunk.done) break;
       size += chunk.value.byteLength;
-      if (size > MAX_PROVIDER_RESPONSE_BYTES)
-        throw new Error('AI_PROVIDER_RESPONSE_TOO_LARGE');
+      if (size > MAX_PROVIDER_RESPONSE_BYTES) throw new Error('AI_PROVIDER_RESPONSE_TOO_LARGE');
       parts.push(chunk.value);
     }
   } catch (error) {
@@ -46,7 +46,10 @@ async function readProviderJson(response: Response): Promise<unknown> {
   }
   const bytes = new Uint8Array(size);
   let position = 0;
-  for (const part of parts) { bytes.set(part, position); position += part.byteLength; }
+  for (const part of parts) {
+    bytes.set(part, position);
+    position += part.byteLength;
+  }
   try {
     return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
   } catch {
@@ -61,9 +64,13 @@ export class FetchAIHttpTransport implements AIHttpTransport {
     headers: Record<string, string>;
     body?: unknown;
     timeoutMs: number;
+    signal?: AbortSignal;
   }) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), input.timeoutMs);
+    const abort = () => controller.abort(input.signal?.reason);
+    input.signal?.addEventListener('abort', abort, { once: true });
+    if (input.signal?.aborted) abort();
     try {
       const response = await fetch(input.url, {
         method: input.method,
@@ -79,6 +86,7 @@ export class FetchAIHttpTransport implements AIHttpTransport {
       };
     } finally {
       clearTimeout(timeout);
+      input.signal?.removeEventListener('abort', abort);
     }
   }
 }
@@ -100,7 +108,7 @@ abstract class SecretReferencedProviderAdapter implements AIProviderAdapter {
   protected readonly timeoutMs: number;
   protected readonly transport: AIHttpTransport;
   private readonly readSecret: (reference: string) => string | undefined;
-  private runtimeVerified = false;
+  private readonly health = new Map<string, number>();
 
   protected constructor(options: AdapterOptions) {
     this.key = options.key;
@@ -114,7 +122,11 @@ abstract class SecretReferencedProviderAdapter implements AIProviderAdapter {
   status(): AIProviderOperationalStatus {
     // A configured secret proves only that an invocation can be attempted.
     // READY is reserved for runtime evidence, never inferred from ENV presence.
-    return this.secret() ? (this.runtimeVerified ? 'READY' : 'RUNTIME_PENDING') : 'NOT_CONFIGURED';
+    return this.secret()
+      ? [...this.health.values()].some((at) => Date.now() - at < 300_000)
+        ? 'READY'
+        : 'RUNTIME_PENDING'
+      : 'NOT_CONFIGURED';
   }
 
   configuration() {
@@ -131,8 +143,15 @@ abstract class SecretReferencedProviderAdapter implements AIProviderAdapter {
     return value;
   }
 
-  protected markRuntimeVerified(): void {
-    this.runtimeVerified = true;
+  healthEvidence(capability: AICapabilityKind, model: string) {
+    const at = this.health.get(`${capability}:${model}`);
+    return at && Date.now() - at < 300_000
+      ? { verifiedAt: new Date(at).toISOString(), expiresAt: new Date(at + 300_000).toISOString() }
+      : null;
+  }
+
+  protected markRuntimeVerified(capability: AICapabilityKind, model: string): void {
+    this.health.set(`${capability}:${model}`, Date.now());
   }
 
   abstract invoke(request: AIProviderInvocation): Promise<AIProviderInvocationResult>;
@@ -170,7 +189,7 @@ export class OpenAICompatibleAdapter extends SecretReferencedProviderAdapter {
       inputTokens: response.body?.usage?.prompt_tokens ?? response.body?.usage?.total_tokens ?? 0,
       providerRequestId: response.body?.id ?? null,
     };
-    if (validEmbeddings(result, request)) this.markRuntimeVerified();
+    if (validEmbeddings(result, request)) this.markRuntimeVerified('EMBEDDINGS', request.model);
     return result;
   }
 
@@ -180,6 +199,7 @@ export class OpenAICompatibleAdapter extends SecretReferencedProviderAdapter {
       url: `${this.baseUrl}/chat/completions`,
       method: 'POST',
       timeoutMs: Math.min(this.timeoutMs, request.timeoutMs ?? this.timeoutMs),
+      signal: request.signal,
       headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
       body: {
         model: request.model,
@@ -206,7 +226,13 @@ export class OpenAICompatibleAdapter extends SecretReferencedProviderAdapter {
       finishReason: response.body?.choices?.[0]?.finish_reason ?? null,
     };
     const normalized = normalizeInvocation(result, request);
-    if (normalized.output.trim()) this.markRuntimeVerified();
+    if (normalized.output.trim()) {
+      this.markRuntimeVerified(
+        request.structuredOutputSchema ? 'STRUCTURED_OUTPUT' : 'TEXT_GENERATION',
+        request.model,
+      );
+      if (!request.structuredOutputSchema) this.markRuntimeVerified('CHAT', request.model);
+    }
     return normalized;
   }
 }
@@ -223,6 +249,7 @@ export class AnthropicProviderAdapter extends SecretReferencedProviderAdapter {
       url: `${this.baseUrl}/messages`,
       method: 'POST',
       timeoutMs: Math.min(this.timeoutMs, request.timeoutMs ?? this.timeoutMs),
+      signal: request.signal,
       headers: {
         'x-api-key': key,
         'anthropic-version': '2023-06-01',
@@ -247,7 +274,13 @@ export class AnthropicProviderAdapter extends SecretReferencedProviderAdapter {
       finishReason: response.body?.stop_reason ?? null,
     };
     const normalized = normalizeInvocation(result, request);
-    if (normalized.output.trim()) this.markRuntimeVerified();
+    if (normalized.output.trim()) {
+      this.markRuntimeVerified(
+        request.structuredOutputSchema ? 'STRUCTURED_OUTPUT' : 'TEXT_GENERATION',
+        request.model,
+      );
+      if (!request.structuredOutputSchema) this.markRuntimeVerified('CHAT', request.model);
+    }
     return normalized;
   }
 }
@@ -286,7 +319,7 @@ export class GoogleGenerativeAIProviderAdapter extends SecretReferencedProviderA
       inputTokens: 0,
       providerRequestId: response.headers?.['x-request-id'] ?? null,
     };
-    if (validEmbeddings(result, request)) this.markRuntimeVerified();
+    if (validEmbeddings(result, request)) this.markRuntimeVerified('EMBEDDINGS', request.model);
     return result;
   }
 
@@ -296,6 +329,7 @@ export class GoogleGenerativeAIProviderAdapter extends SecretReferencedProviderA
       url: `${this.baseUrl}/models/${encodeURIComponent(request.model.replace(/^models\//, ''))}:generateContent`,
       method: 'POST',
       timeoutMs: Math.min(this.timeoutMs, request.timeoutMs ?? this.timeoutMs),
+      signal: request.signal,
       headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
       body: {
         systemInstruction: request.systemPrompt
@@ -324,7 +358,13 @@ export class GoogleGenerativeAIProviderAdapter extends SecretReferencedProviderA
       finishReason: response.body?.candidates?.[0]?.finishReason ?? null,
     };
     const normalized = normalizeInvocation(result, request);
-    if (normalized.output.trim()) this.markRuntimeVerified();
+    if (normalized.output.trim()) {
+      this.markRuntimeVerified(
+        request.structuredOutputSchema ? 'STRUCTURED_OUTPUT' : 'TEXT_GENERATION',
+        request.model,
+      );
+      if (!request.structuredOutputSchema) this.markRuntimeVerified('CHAT', request.model);
+    }
     return normalized;
   }
 }

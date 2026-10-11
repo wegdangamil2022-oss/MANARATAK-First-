@@ -14,6 +14,7 @@ export interface AIProviderInvocation {
   structuredOutputSchema?: Record<string, unknown> | null;
   metadata?: Record<string, unknown> | null;
   timeoutMs?: number | null;
+  signal?: AbortSignal;
 }
 
 export interface AIProviderInvocationResult {
@@ -42,6 +43,10 @@ export interface AIProviderAdapter {
   readonly key: string;
   readonly capabilities: AICapabilityKind[];
   status(): AIProviderOperationalStatus;
+  healthEvidence?(
+    capability: AICapabilityKind,
+    model: string,
+  ): { verifiedAt: string; expiresAt: string } | null;
   configuration?(): { secretReference: string; baseUrl: string };
   invoke(request: AIProviderInvocation): Promise<AIProviderInvocationResult>;
   embed?(request: AIEmbeddingInvocation): Promise<AIEmbeddingInvocationResult>;

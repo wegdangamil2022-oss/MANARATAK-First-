@@ -4411,6 +4411,8 @@ model AIWorkflowRunRecord {
   status           String
   traceId          String
   inputReferenceHash String
+  requesterReferenceId String?
+  executionPlan        Json?
   outputReferenceHash String?
   currentStep      String?
   errorMessage     String?
