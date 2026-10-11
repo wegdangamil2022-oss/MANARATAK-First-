@@ -40,8 +40,9 @@ describe('P15 durable role catchup continuation',()=>{
         prior=data.id;throw Object.assign(new Error('unique'),{code:'P2002'});
       }),
       findUnique:vi.fn().mockResolvedValue({domain:'STUDENT_WORKSPACE_CATCHUP',
-        eventType:'StudentOwnerCatchupContinuationRequested',
-        payload:{cursor:'page-end-200'}}),
+        eventType:'StudentOwnerCatchupContinuationRequested',state:'PENDING',
+        payload:{roleEventId:'role-event-1',studentReferenceId:'student-1',
+          ownerDomain:'COURSES',cursor:'page-end-200'}}),
     }};
     const queue=new PrismaStudentOwnerCatchupContinuationQueue(db as any);
     await expect(queue.enqueueContinuation(payload)).resolves.toBeUndefined();
