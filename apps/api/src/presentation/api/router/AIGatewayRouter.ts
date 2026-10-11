@@ -110,9 +110,12 @@ export class AIGatewayRouter {
       const code = err instanceof Error ? err.message : 'AI_EXECUTION_FAILED';
       const status = code.includes('AUTHENTICATED')
         ? 401
-        : code.includes('NOT_CONFIGURED')
-          ? 503
-          : 400;
+        : code === 'AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED' ||
+            code === 'AI_EXECUTION_STATE_CONFLICT'
+          ? 409
+          : code.includes('NOT_CONFIGURED')
+            ? 503
+            : 400;
       return res.status(status).json({ error: code });
     });
 
