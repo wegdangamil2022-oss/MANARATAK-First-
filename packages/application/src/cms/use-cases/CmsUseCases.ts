@@ -380,6 +380,7 @@ export class PublicCmsUseCases {
   }
 
   public async listNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]> {
+    if (this.repository.listPublishedNavigation) return this.repository.listPublishedNavigation(siteIdentifier, locale);
     return (await this.repository.listNavigation(siteIdentifier, locale)).filter((menu) => menu.status === CmsContentStatus.PUBLISHED);
   }
 

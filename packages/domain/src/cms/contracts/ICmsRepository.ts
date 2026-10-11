@@ -72,6 +72,7 @@ export interface ICmsRepository {
   listRedirects(siteIdentifier?: string, locale?: string): Promise<CmsRedirectDto[]>;
   createRedirect(data: Omit<CmsRedirectDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<CmsRedirectDto>;
   listNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]>;
+  listPublishedNavigation?(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]>;
   saveNavigation(data: Omit<CmsNavigationMenuDto, 'id' | 'version' | 'status' | 'publishedContentHash' | 'publishedBy' | 'publishedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsNavigationMenuDto>;
   publishNavigation(id: string, expectedVersion: number, actorId: string): Promise<CmsNavigationMenuDto>;
   listBlockSchemas(): Promise<CmsBlockSchemaDto[]>;

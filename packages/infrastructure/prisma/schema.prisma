@@ -3409,6 +3409,23 @@ model CmsRedirect {
   @@index([contentId])
 }
 
+// Immutable approved public copy independent of the mutable editorial draft.
+// Runtime activation requires the source-only migration and rollback plan.
+model CmsSitePublishedSnapshot {
+  id             String   @id @default(uuid())
+  kind           String
+  sourceId       String
+  siteIdentifier String
+  locale         String
+  payload        Json
+  publishedAt    DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([kind, sourceId])
+  @@index([kind, siteIdentifier, locale])
+}
+
 model CmsNavigationMenu {
   id             String   @id @default(uuid())
   siteIdentifier String

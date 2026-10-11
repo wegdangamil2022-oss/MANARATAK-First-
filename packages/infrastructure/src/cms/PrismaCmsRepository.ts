@@ -825,12 +825,27 @@ export class PrismaCmsRepository implements ICmsRepository {
     return rows.map((row: any) => this.navigation(row));
   }
 
+  public async listPublishedNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]> {
+    const [snapshots, legacy] = await Promise.all([
+      this.db.cmsSitePublishedSnapshot.findMany({ where: { kind: 'NAVIGATION', siteIdentifier, locale } }),
+      this.db.cmsNavigationMenu.findMany({
+        where: { siteIdentifier, locale, status: CmsContentStatus.PUBLISHED },
+        include: { nodes: { orderBy: { sortOrder: 'asc' } } },
+      }),
+    ]);
+    const alreadySnapshotted = new Set(snapshots.map((row: any) => row.sourceId));
+    return [
+      ...snapshots.map((row: any) => row.payload as CmsNavigationMenuDto),
+      ...legacy.filter((row: any) => !alreadySnapshotted.has(row.id)).map((row: any) => this.navigation(row)),
+    ].sort((a: CmsNavigationMenuDto, b: CmsNavigationMenuDto) => a.locationKey.localeCompare(b.locationKey));
+  }
+
   public async saveNavigation(
     data: Omit<CmsNavigationMenuDto, 'id' | 'version' | 'status' | 'publishedContentHash' | 'publishedBy' | 'publishedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number },
   ): Promise<CmsNavigationMenuDto> {
     return this.db.$transaction(async (tx: any) => {
       const existing = data.id
-        ? await tx.cmsNavigationMenu.findUnique({ where: { id: data.id } })
+        ? await tx.cmsNavigationMenu.findUnique({ where: { id: data.id }, include: { nodes: { orderBy: { sortOrder: 'asc' } } } })
         : await tx.cmsNavigationMenu.findUnique({
             where: {
               siteIdentifier_locale_locationKey: {
@@ -839,8 +854,24 @@ export class PrismaCmsRepository implements ICmsRepository {
                 locationKey: data.locationKey,
               },
             },
+            include: { nodes: { orderBy: { sortOrder: 'asc' } } },
           });
-      if (existing) this.assertVersion(existing.version, data.expectedVersion);
+      if (existing) {
+        if (existing.siteIdentifier !== data.siteIdentifier || existing.locale !== data.locale ||
+          existing.locationKey !== data.locationKey) throw new Error('CMS_SCOPE_CONFLICT');
+        this.assertVersion(existing.version, data.expectedVersion);
+        if (existing.status === CmsContentStatus.PUBLISHED) {
+          await tx.cmsSitePublishedSnapshot.upsert({
+            where: { kind_sourceId: { kind: 'NAVIGATION', sourceId: existing.id } },
+            create: {
+              id: randomUUID(), kind: 'NAVIGATION', sourceId: existing.id,
+              siteIdentifier: existing.siteIdentifier, locale: existing.locale,
+              payload: json(this.navigation(existing)), publishedAt: existing.publishedAt ?? new Date(),
+            },
+            update: {},
+          });
+        }
+      }
       CmsPublishingPolicy.assertAcyclicNavigation(data.nodes);
       const menu = existing
         ? await tx.cmsNavigationMenu.update({
@@ -913,6 +944,14 @@ export class PrismaCmsRepository implements ICmsRepository {
         },
         include: { nodes: { orderBy: { sortOrder: 'asc' } } },
       });
+      await tx.cmsSitePublishedSnapshot.upsert({
+        where: { kind_sourceId: { kind: 'NAVIGATION', sourceId: row.id } },
+        create: {
+          id: randomUUID(), kind: 'NAVIGATION', sourceId: row.id, siteIdentifier: row.siteIdentifier,
+          locale: row.locale, payload: json(this.navigation(row)), publishedAt: now,
+        },
+        update: { payload: json(this.navigation(row)), publishedAt: now },
+      });
       await this.appendStandaloneMutation(tx, row.id, 'CmsNavigationMenu', 'NAVIGATION_PUBLISHED', actorId, {
         siteIdentifier: row.siteIdentifier,
         locale: row.locale,
@@ -957,7 +996,31 @@ export class PrismaCmsRepository implements ICmsRepository {
 
   public async listAnnouncements(siteIdentifier: string, locale: string, publicOnly = false): Promise<CmsAnnouncementDto[]> {
     const now = new Date();
-    return this.db.cmsAnnouncement.findMany({ where: { siteIdentifier, locale, ...(publicOnly ? { status: CmsContentStatus.PUBLISHED, startsAt: { lte: now }, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] } : {}) }, orderBy: [{ urgency: 'desc' }, { startsAt: 'desc' }] });
+    if (!publicOnly) {
+      return this.db.cmsAnnouncement.findMany({
+        where: { siteIdentifier, locale }, orderBy: [{ urgency: 'desc' }, { startsAt: 'desc' }],
+      });
+    }
+    const [snapshots, legacy] = await Promise.all([
+      this.db.cmsSitePublishedSnapshot.findMany({
+        where: { kind: 'ANNOUNCEMENT', siteIdentifier, locale },
+      }),
+      this.db.cmsAnnouncement.findMany({
+        where: { siteIdentifier, locale, status: CmsContentStatus.PUBLISHED },
+      }),
+    ]);
+    const sourceIds = new Set(snapshots.map((row: any) => row.sourceId));
+    const published = [
+      ...snapshots.map((row: any) => row.payload as CmsAnnouncementDto),
+      ...legacy.filter((row: any) => !sourceIds.has(row.id)),
+    ];
+    return published.filter((notice: CmsAnnouncementDto) =>
+      (!notice.audience || notice.audience === 'PUBLIC') &&
+      new Date(notice.startsAt).getTime() <= now.getTime() &&
+      (!notice.expiresAt || new Date(notice.expiresAt).getTime() > now.getTime())
+    ).sort((a: CmsAnnouncementDto, b: CmsAnnouncementDto) =>
+      b.urgency.localeCompare(a.urgency) || new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime());
+
   }
 
   public async saveAnnouncement(
@@ -965,7 +1028,24 @@ export class PrismaCmsRepository implements ICmsRepository {
   ): Promise<CmsAnnouncementDto> {
     return this.db.$transaction(async (tx: any) => {
       const existing = data.id ? await tx.cmsAnnouncement.findUnique({ where: { id: data.id } }) : null;
-      if (existing) this.assertVersion(existing.version, data.expectedVersion);
+      if (existing) {
+        if (existing.siteIdentifier !== data.siteIdentifier || existing.locale !== data.locale) {
+          throw new Error('CMS_SCOPE_CONFLICT');
+        }
+        this.assertVersion(existing.version, data.expectedVersion);
+        if (existing.status === CmsContentStatus.PUBLISHED) {
+          await tx.cmsSitePublishedSnapshot.upsert({
+            where: { kind_sourceId: { kind: 'ANNOUNCEMENT', sourceId: existing.id } },
+            create: {
+              id: randomUUID(), kind: 'ANNOUNCEMENT', sourceId: existing.id,
+              siteIdentifier: existing.siteIdentifier, locale: existing.locale,
+              payload: json(existing), publishedAt: existing.publishedAt ?? new Date(),
+            },
+            update: {},
+          });
+        }
+      }
+      if (data.audience && data.audience !== 'PUBLIC') throw new Error('CMS_ANNOUNCEMENT_AUDIENCE_UNSAFE');
       if (data.expiresAt && data.expiresAt <= data.startsAt) throw new Error('CMS_ANNOUNCEMENT_WINDOW_INVALID');
       const values = {
         siteIdentifier: data.siteIdentifier,
@@ -1017,6 +1097,8 @@ export class PrismaCmsRepository implements ICmsRepository {
       this.assertVersion(existing.version, expectedVersion);
       if (existing.status !== CmsContentStatus.DRAFT) throw new Error('CMS_ANNOUNCEMENT_DRAFT_REQUIRED');
       CmsPublishingPolicy.assertMakerChecker(existing.updatedBy ?? existing.createdBy, actorId);
+      if (existing.audience && existing.audience !== 'PUBLIC') throw new Error('CMS_ANNOUNCEMENT_AUDIENCE_UNSAFE');
+      if (existing.expiresAt && existing.expiresAt <= new Date()) throw new Error('CMS_ANNOUNCEMENT_EXPIRED');
       if (existing.expiresAt && existing.expiresAt <= existing.startsAt) throw new Error('CMS_ANNOUNCEMENT_WINDOW_INVALID');
       const contentHash = this.announcementContentHash(existing);
       const row = await tx.cmsAnnouncement.update({
@@ -1029,6 +1111,15 @@ export class PrismaCmsRepository implements ICmsRepository {
           archivedAt: null,
           version: { increment: 1 },
         },
+      });
+      await tx.cmsSitePublishedSnapshot.upsert({
+        where: { kind_sourceId: { kind: 'ANNOUNCEMENT', sourceId: row.id } },
+        create: {
+          id: randomUUID(), kind: 'ANNOUNCEMENT', sourceId: row.id,
+          siteIdentifier: row.siteIdentifier, locale: row.locale,
+          payload: json(row), publishedAt: row.publishedAt,
+        },
+        update: { payload: json(row), publishedAt: row.publishedAt },
       });
       await this.appendStandaloneMutation(tx, row.id, 'CmsAnnouncement', 'ANNOUNCEMENT_PUBLISHED', actorId, {
         reviewedVersion: existing.version,
@@ -1049,6 +1140,9 @@ export class PrismaCmsRepository implements ICmsRepository {
       const row = await tx.cmsAnnouncement.update({
         where: { id },
         data: { status: CmsContentStatus.ARCHIVED, archivedAt: new Date(), version: { increment: 1 } },
+      });
+      await tx.cmsSitePublishedSnapshot.deleteMany({
+        where: { kind: 'ANNOUNCEMENT', sourceId: row.id },
       });
       await this.appendStandaloneMutation(tx, row.id, 'CmsAnnouncement', 'ANNOUNCEMENT_ARCHIVED', actorId, {
         siteIdentifier: row.siteIdentifier,
