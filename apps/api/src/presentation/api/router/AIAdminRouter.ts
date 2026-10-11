@@ -415,6 +415,7 @@ export class AIAdminRouter {
             await cradle.aiWorkflowUseCases.start(
               keySchema.parse(req.params.key),
               safeRecord.parse(req.body),
+              actor(req),
             ),
           );
       }),
