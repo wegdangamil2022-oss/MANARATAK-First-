@@ -32,7 +32,7 @@ function fixture(granted: string[]) {
     studentWorkspaceUseCases: workspace as any,
     studentDashboardHydrationService: hydration as any,
     studentApplicationTrackerUseCases: tracker as any,
-    studentServiceRequestUseCases: services as any,
+    adminServiceFulfillmentUseCases: services as any,
     identityRepository: identities as any,
     roleAssignmentRepository: roleAssignments as any,
     authEvaluatorService: evaluator as any,
