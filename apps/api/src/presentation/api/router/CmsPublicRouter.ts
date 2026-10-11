@@ -18,7 +18,7 @@ export class CmsPublicRouter {
       tag: z.string().optional(),
       q: z.string().trim().max(200).optional(),
       locale: z.enum(['ar', 'en']).default('ar'),
-      siteIdentifier: z.string().default('manaratak'),
+      siteIdentifier: z.literal('manaratak').default('manaratak'),
       page: z.coerce.number().int().positive().max(500).default(1),
       pageSize: z.coerce.number().int().min(1).max(50).default(20),
     });
@@ -46,7 +46,7 @@ export class CmsPublicRouter {
     router.get(
       '/content/:slug',
       asyncHandler(async (req, res) => {
-        const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.string().default('manaratak') }).parse(req.query);
+        const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.literal('manaratak').default('manaratak') }).parse(req.query);
         const payload = await publicCmsUseCases.getBySlug(req.params.slug, query.locale, query.siteIdentifier);
         if (deliveryHeaders(req, res, payload)) return;
         res.json(payload);
@@ -58,7 +58,7 @@ export class CmsPublicRouter {
         targetType: z.nativeEnum(CmsDomainTargetType),
         targetId: z.string().trim().uuid(),
         locale: z.enum(['ar', 'en']).default('ar'),
-        siteIdentifier: z.string().default('manaratak'),
+        siteIdentifier: z.literal('manaratak').default('manaratak'),
         limit: z.coerce.number().int().min(1).max(24).default(6),
       }).parse(req.query);
       const data = await publicCmsUseCases.listRelated(query.targetType, query.targetId, query.locale, query.siteIdentifier, query.limit);
@@ -68,7 +68,7 @@ export class CmsPublicRouter {
     }));
 
     router.get('/navigation/:locationKey', asyncHandler(async (req, res) => {
-      const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.string().default('manaratak') }).parse(req.query);
+      const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.literal('manaratak').default('manaratak') }).parse(req.query);
       const menus = await publicCmsUseCases.listNavigation(query.siteIdentifier, query.locale);
       const payload = menus.find((menu) => menu.locationKey === req.params.locationKey.toUpperCase()) ?? null;
       if (deliveryHeaders(req, res, payload)) return; res.json(payload);
@@ -80,7 +80,7 @@ export class CmsPublicRouter {
       res.json(payload);
     }));
     router.get('/announcements', asyncHandler(async (req, res) => {
-      const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.string().default('manaratak') }).parse(req.query);
+      const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.literal('manaratak').default('manaratak') }).parse(req.query);
       const data = await publicCmsUseCases.listAnnouncements(query.siteIdentifier, query.locale);
       const payload = { data }; if (deliveryHeaders(req, res, payload)) return; res.json(payload);
     }));
@@ -102,7 +102,7 @@ export class CmsPublicRouter {
       res.redirect(result.statusCode, result.destinationPath);
     }));
     router.get('/redirects/resolve', asyncHandler(async (req, res) => {
-      const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.string().default('manaratak'), path: z.string().min(1) }).parse(req.query);
+      const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.literal('manaratak').default('manaratak'), path: z.string().min(1) }).parse(req.query);
       const payload = await publicCmsUseCases.resolveRedirect(query.siteIdentifier, query.locale, query.path);
       if (!payload) { res.status(404).json({ error: 'CMS_REDIRECT_NOT_FOUND' }); return; }
       res.json(payload);
