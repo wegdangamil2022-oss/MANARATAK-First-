@@ -797,7 +797,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
           const occurredAt = new Date(String(payload?.occurredAt ?? ''));
           const supported:Record<string,readonly string[]> = {
             COURSES:['CourseEnrolled','CourseProgressUpdated','CourseCompleted'],
-            CERTIFICATES:['CertificateIssued','CertificateRevoked','CertificateReissued','CertificateRenewed','CertificateExpired','CertificateArtifactsRendered'],
+            CERTIFICATES:['CertificateIssued','CertificateRevoked','CertificateReissued','CertificateRenewed','CertificateExpired','CertificateArtifactsRendered','CertificateArchived'],
           };
           if (payload?.eventId !== row.eventId || payload.studentReferenceId !== row.studentReferenceId ||
               payload.sourceDomain !== row.sourceDomain || payload.eventType !== row.eventType ||
@@ -898,7 +898,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         });
       }
     }
-    if (['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered'].includes(event.eventType)) {
+    if (['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered', 'CertificateArchived'].includes(event.eventType)) {
       const certificateId = String(metadata.certificateId ?? event.sourceReferenceId ?? '');
       if (!certificateId) throw new Error('STUDENT_CERTIFICATE_REFERENCE_REQUIRED');
       const key = { studentReferenceId: event.studentReferenceId, certificateId };
@@ -935,10 +935,11 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         return;
       }
       const status = event.eventType === 'CertificateRevoked' ? 'REVOKED' :
+        event.eventType === 'CertificateArchived' ? 'ARCHIVED' :
         event.eventType === 'CertificateExpired' ? 'EXPIRED' :
         event.eventType === 'CertificateRenewed' ? 'ACTIVE' :
         String(metadata.status ?? 'ACTIVE');
-      if (!['ACTIVE', 'ISSUED', 'REVOKED', 'EXPIRED', 'REISSUED', 'PENDING', 'SUSPENDED'].includes(status))
+      if (!['ACTIVE', 'ISSUED', 'REVOKED', 'EXPIRED', 'REISSUED', 'PENDING', 'SUSPENDED', 'ARCHIVED'].includes(status))
         throw new Error('STUDENT_CERTIFICATE_STATUS_INVALID');
       await tx.studentCertificateReadProjection.upsert({
         where: { studentReferenceId_certificateId: key },

@@ -83,6 +83,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
           : this.legacyCertificatePage(studentReferenceId,cursor),
         async row => {
           const eventType = row.status === 'REVOKED' ? 'CertificateRevoked' :
+            row.status === 'ARCHIVED' ? 'CertificateArchived' :
             row.status === 'EXPIRED' ? 'CertificateExpired' : 'CertificateIssued';
           await this.students.consumeIntegrationEvent({
             eventId: `${roleEventId}:certificate:${row.id}`,
@@ -160,7 +161,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     }
 
     // P14 owns certificate truth. Only a bounded, explicitly scoped lifecycle projection is accepted.
-    if (entry.domain === 'CERTIFICATES' && ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered'].includes(entry.eventType)) {
+    if (entry.domain === 'CERTIFICATES' && ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered', 'CertificateArchived'].includes(entry.eventType)) {
       if (entry.metadata?.sourcePhase !== 'Phase14') throw new Error('STUDENT_CERTIFICATE_EVENT_OWNER_SOURCE_REQUIRED');
       const studentReferenceId = typeof payload.studentReferenceId === 'string' ? payload.studentReferenceId.trim() : '';
       const certificateId = typeof payload.certificateId === 'string' ? payload.certificateId.trim() : '';
@@ -180,6 +181,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       metadata.certificateId = certificateId;
       if (entry.eventType !== 'CertificateArtifactsRendered') {
         metadata.status = entry.eventType === 'CertificateRevoked' ? 'REVOKED' :
+          entry.eventType === 'CertificateArchived' ? 'ARCHIVED' :
           entry.eventType === 'CertificateExpired' ? 'EXPIRED' :
           entry.eventType === 'CertificateRenewed' ? 'ACTIVE' : metadata.status ?? 'ACTIVE';
       }

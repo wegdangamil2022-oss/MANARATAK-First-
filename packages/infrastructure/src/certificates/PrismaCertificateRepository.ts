@@ -494,7 +494,10 @@ export class PrismaCertificateRepository implements ICertificateRepository {
       if (!current) throw new Error('CERTIFICATE_NOT_FOUND');
       if (current.status === CertificateStatus.ARCHIVED) return this.certificate(current);
       const row = await tx.certificate.update({ where: { id: certificateId }, data: { status: CertificateStatus.ARCHIVED, archivedAt: new Date() } });
-      await this.appendMutation(tx, row.id, 'ARCHIVED', actorId, reason, correlationId, {}, 'CertificateArchived');
+      // P15 needs the archive lifecycle even when the P14 owner record remains in history.
+      // Emit only public verification identity, never the private reason or recipient.
+      await this.appendMutation(tx, row.id, 'ARCHIVED', actorId, reason, correlationId,
+        { ...this.certificateIssuedPayload(row), status: 'ARCHIVED' }, 'CertificateArchived');
       return this.certificate(row);
     });
   }
