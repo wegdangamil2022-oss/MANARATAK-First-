@@ -177,6 +177,7 @@ export class CmsAdminRouter {
     }));
     router.put('/content/:id/domain-links', asyncHandler(async (req, res) => {
       const body = z.object({
+        expectedVersion: z.number().int().positive(),
         links: z.array(z.object({
           targetType: z.nativeEnum(CmsDomainTargetType),
           targetId: z.string().trim().uuid(),
@@ -185,7 +186,7 @@ export class CmsAdminRouter {
           metadata: z.record(z.string(), z.unknown()).nullable().optional(),
         })).max(50),
       }).parse(req.body);
-      res.json({ data: await adminCmsUseCases.replaceDomainLinks(req.params.id, body.links, actor(req)) });
+      res.json({ data: await adminCmsUseCases.replaceDomainLinks(req.params.id, body.links, actor(req), body.expectedVersion) });
     }));
 
     router.get(
