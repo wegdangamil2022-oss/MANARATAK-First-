@@ -119,6 +119,65 @@ export class CmsPublishingPolicy {
     return CmsContentStatus.DRAFT;
   }
 
+  // Block schemas are immutable versioned definitions. Authors cannot register
+  // arbitrary executable JSON schema extensions or oversized recursive shapes.
+  public static assertBlockSchemaDefinition(fieldSchema: unknown, assetFields: unknown, localizedFields: unknown): void {
+    const encoded = JSON.stringify(fieldSchema);
+    if (!encoded || encoded.length > 64_000) throw new Error('CMS_BLOCK_SCHEMA_TOO_LARGE');
+    const visit = (schema: unknown, depth: number): void => {
+      if (!schema || typeof schema !== 'object' || Array.isArray(schema) || depth > 8) {
+        throw new Error('CMS_BLOCK_SCHEMA_INVALID');
+      }
+      const value = schema as Record<string, unknown>;
+      const allowed = new Set(['type','properties','required','items','minLength','maxLength',
+        'minItems','maxItems','minimum','maximum','enum','const','additionalProperties']);
+      if (Object.keys(value).some((key) => !allowed.has(key))) throw new Error('CMS_BLOCK_SCHEMA_KEY_UNSUPPORTED');
+      if (!['object','array','string','integer','number','boolean','null'].includes(String(value.type))) {
+        throw new Error('CMS_BLOCK_SCHEMA_TYPE_UNSUPPORTED');
+      }
+      for (const limit of ['minLength','maxLength','minItems','maxItems','minimum','maximum']) {
+        if (value[limit] !== undefined && (typeof value[limit] !== 'number' ||
+          !Number.isFinite(value[limit]) || Math.abs(value[limit] as number) > 100_000)) {
+          throw new Error('CMS_BLOCK_SCHEMA_BOUND_INVALID');
+        }
+      }
+      if (value.type === 'object') {
+        if (value.additionalProperties !== false || !value.properties ||
+            typeof value.properties !== 'object' || Array.isArray(value.properties)) {
+          throw new Error('CMS_BLOCK_SCHEMA_OBJECT_UNBOUNDED');
+        }
+        const properties = value.properties as Record<string, unknown>;
+        if (Object.keys(properties).length > 60) throw new Error('CMS_BLOCK_SCHEMA_TOO_LARGE');
+        for (const [key, child] of Object.entries(properties)) {
+          if (!/^[a-zA-Z][a-zA-Z0-9_]{0,63}$/.test(key) ||
+              ['__proto__','constructor','prototype'].includes(key)) throw new Error('CMS_BLOCK_SCHEMA_FIELD_INVALID');
+          visit(child, depth + 1);
+        }
+        if (value.required !== undefined && (!Array.isArray(value.required) ||
+            value.required.some((key) => typeof key !== 'string' || !(key in properties)))) {
+          throw new Error('CMS_BLOCK_SCHEMA_REQUIRED_INVALID');
+        }
+      }
+      if (value.type === 'array') {
+        if (!value.items || typeof value.maxItems !== 'number' || value.maxItems > 100) {
+          throw new Error('CMS_BLOCK_SCHEMA_ARRAY_UNBOUNDED');
+        }
+        visit(value.items, depth + 1);
+      }
+      if (value.enum !== undefined && (!Array.isArray(value.enum) || value.enum.length > 100)) {
+        throw new Error('CMS_BLOCK_SCHEMA_ENUM_INVALID');
+      }
+    };
+    visit(fieldSchema, 0);
+    for (const fields of [assetFields, localizedFields]) {
+      if (!Array.isArray(fields) || fields.length > 50 ||
+        fields.some((key) => typeof key !== 'string' ||
+        !/^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)*$/.test(key))) {
+        throw new Error('CMS_BLOCK_SCHEMA_FIELD_LIST_INVALID');
+      }
+    }
+  }
+
   public static assertBlockPayload(
     payload: Record<string, unknown>,
     fieldSchema: unknown,
