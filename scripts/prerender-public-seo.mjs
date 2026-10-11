@@ -16,6 +16,12 @@ const STATIC_ROUTES = [
   ['/certificates/verify', 'Verify certificate', 'Verify a MANARATAK certificate.', 'WebPage'],
 ];
 
+const CMS_ROUTES = {
+  ARTICLE: 'articles', NEWS: 'news', STUDY_GUIDE: 'study-guides',
+  CHECKLIST: 'checklists', FAQ: 'faqs',
+  STATIC_PAGE: 'pages', LANDING_PAGE: 'landing',
+};
+
 const DYNAMIC_CATALOGS = [
   { route: '/scholarships', api: '/public/scholarships', type: 'Scholarship' },
   { route: '/universities', api: '/public/universities', type: 'CollegeOrUniversity' },
@@ -77,9 +83,9 @@ function inject(html, meta) {
     `    <meta name="description" content="${escapeHtml(meta.description)}" />\n` +
     `    <meta name="robots" content="${robots}" />\n` +
     `    <link rel="canonical" href="${escapeHtml(meta.canonical)}" />\n` +
-    `    <link rel="alternate" hreflang="ar" href="${escapeHtml(meta.ar)}" />\n` +
-    `    <link rel="alternate" hreflang="en" href="${escapeHtml(meta.en)}" />\n` +
-    `    <link rel="alternate" hreflang="x-default" href="${escapeHtml(meta.ar)}" />\n` +
+    (meta.ar ? `    <link rel="alternate" hreflang="ar" href="${escapeHtml(meta.ar)}" />\n` : '') +
+    (meta.en ? `    <link rel="alternate" hreflang="en" href="${escapeHtml(meta.en)}" />\n` : '') +
+    (meta.ar ? `    <link rel="alternate" hreflang="x-default" href="${escapeHtml(meta.ar)}" />\n` : '') +
     `    <meta property="og:title" content="${escapeHtml(meta.title)} | MANARATAK" />\n` +
     `    <meta property="og:description" content="${escapeHtml(meta.description)}" />\n` +
     `    <meta property="og:type" content="website" />\n` +
