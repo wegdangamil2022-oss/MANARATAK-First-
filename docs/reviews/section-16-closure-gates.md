@@ -44,3 +44,16 @@
 - Tests in source are **not proof of PASS**. A red targeted test must be fixed without weakening its assertions before changing section status.
 
 **Closure decision:** do not mark `CODE_CLOSED — RUNTIME_DEFERRED` until all P0/P1 source blockers are fixed and targeted runnable security/source checks pass. Section 17 stays out of scope. No merge or deployment.
+
+## Source continuation gate update
+
+| Gate | Current assessment | Evidence and missing validation |
+| --- | --- | --- |
+| FGA-16-001 redirect authoring | SOURCE_IMPLEMENTED / TEST_NOT_RUN | Scoped server-side source/destination search, active status filter, bounded paging, versioned correction/disable, AR/EN admin table; negative tests committed. Needs Vitest/TypeScript execution. |
+| CMS-ADM-021 related published lookup | SOURCE_IMPLEMENTED / TEST_NOT_RUN | Parameterized distinct published-owner join orders and limits **after** site+locale filtering; owner mock regression committed; no live PostgreSQL query performed. |
+| CMS-ADM-012 failed schedule recovery | SOURCE_IMPLEMENTED / TEST_NOT_RUN | Operator-only failed queue, reasoned conditional requeue, current approval digest check, audit/outbox; cannot claim worker delivery, failover or actual test PASS. |
+| CMS-ADM-009 / 015 canonical owner resolution | OPEN SOURCE | All new unverifiable cross-domain references remain denied; real owner-resolver and lifecycle enforcement still necessary. |
+| CMS-ADM-016 / 023 | OPEN SOURCE | Complete schema governance and web SEO/sitemap integration must be verified/finished before code closure. |
+| Lightweight compile/regression | NOT RUN | Re-run target Vitest specs under `apps/api/tests/presentation/api/router/CmsAdminRouter.spec.ts`, `CmsPublicRouter.spec.ts`, `packages/application/tests/cms/CmsUseCases.spec.ts`, `packages/infrastructure/tests/cms/CmsRelatedPublishedSelection.spec.ts`, `CmsScheduledRepair.spec.ts`, and affected TypeScript checks when dependency workspace is available. |
+
+**Verification scope:** 27/27 structural/static string-contract assertions executed in the continuation. These cannot replace executable tests. No real database, worker, migration, cache purge, live browser or provider run. The 9 October 2026 source-closure policy still prohibits `CODE_CLOSED — RUNTIME_DEFERRED` until essential source blockers and lightweight checks are resolved.
