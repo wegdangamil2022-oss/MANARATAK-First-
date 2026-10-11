@@ -2282,7 +2282,7 @@ function evaluateDefinition(
   }
 }
 
-export function estimateQuotaReservation(input: {
+export export function estimateQuotaReservation(input: {
   consumer: AIConsumerPolicy;
   candidates: Array<{
     model: AIModelDefinition;
@@ -2316,13 +2316,14 @@ export function estimateQuotaReservation(input: {
         Number(inputRate) < 0 || Number(outputRate) < 0)
       throw new Error(`AI_COST_PRICE_REQUIRED_FOR_ROUTED_MODEL:${candidate.model.key}`);
   }
-  if (input.consumer.monthlyCostLimit == null) return { tokens: reservedTokens, cost: 0 };
-  if (!input.consumer.currency) throw new Error('AI_CONSUMER_BUDGET_CURRENCY_REQUIRED');
+  if (input.consumer.monthlyCostLimit != null && !input.consumer.currency)
+    throw new Error('AI_CONSUMER_BUDGET_CURRENCY_REQUIRED');
   if (!input.candidates.length) return { tokens: reservedTokens, cost: 0 };
   const costs = input.candidates.map((candidate) => {
     const price = selectPriceSnapshot(input.prices, candidate.model.key, new Date());
     const currency = price?.currency ?? candidate.model.currency;
-    if (!currency || currency !== input.consumer.currency)
+    if (!currency) throw new Error('AI_MODEL_PRICE_UNVERIFIED');
+    if (input.consumer.monthlyCostLimit != null && currency !== input.consumer.currency)
       throw new Error('AI_COST_CURRENCY_MISMATCH');
     const inputPrice = Number(
       price?.inputPricePerMillion ?? candidate.model.inputPricePerMillion ?? NaN,
@@ -2330,8 +2331,9 @@ export function estimateQuotaReservation(input: {
     const outputPrice = Number(
       price?.outputPricePerMillion ?? candidate.model.outputPricePerMillion ?? NaN,
     );
-    if (!Number.isFinite(inputPrice) || !Number.isFinite(outputPrice))
-      throw new Error('AI_COST_PRICE_REQUIRED_FOR_BUDGETED_CONSUMER');
+    if (!Number.isFinite(inputPrice) || inputPrice < 0 ||
+        !Number.isFinite(outputPrice) || outputPrice < 0)
+      throw new Error('AI_MODEL_PRICE_UNVERIFIED');
     return (
       (input.inputTokens * inputPrice +
         effectiveOutputLimit(input.maxOutputTokens, candidate.model) * outputPrice) /
