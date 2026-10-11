@@ -70,6 +70,27 @@ describe('Phase 16 CMS admin router', () => {
     return server;
   };
 
+  it('forces draft-only block schema writes and independent approval grants', async () => {
+    const cms = useCases();
+    const payload = {
+      key: 'CMS_HERO', version: 1, nameAr: 'واجهة', nameEn: 'Hero',
+      fieldSchema: { type: 'object', properties: {}, additionalProperties: false },
+      localizedFields: [], assetFields: [],
+    };
+    const author = app(cms, 'author', ['admin:cms:schemas:manage']);
+    const draft = await request(author).post('/cms/block-schemas').send({ ...payload, status: 'ACTIVE' });
+    expect(draft.status).toBe(400);
+    expect(cms.createBlockSchema).not.toHaveBeenCalled();
+    const selfApprove = await request(author).post('/cms/block-schemas/schema-1/approve').send({});
+    expect(selfApprove.status).toBe(403);
+    expect(cms.approveBlockSchema).not.toHaveBeenCalled();
+    cms.approveBlockSchema.mockResolvedValue({id:'schema-1',status:'ACTIVE'});
+    const reviewer = app(cms, 'reviewer', ['admin:cms:schemas:approve']);
+    const approved = await request(reviewer).post('/cms/block-schemas/schema-1/approve').send({});
+    expect(approved.status).toBe(200);
+    expect(cms.approveBlockSchema).toHaveBeenCalledWith('schema-1', 'reviewer');
+  });
+
   it('denies failed-job inspection/retry to readers and authors', async () => {
     const cms = useCases();
     for (const grant of ['admin:cms:view', 'admin:cms:author']) {
