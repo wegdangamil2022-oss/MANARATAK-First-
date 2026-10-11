@@ -75,6 +75,23 @@ export class AIGatewayRouter {
       }),
     );
 
+    // Strictly requester-owned protected output; never returned by execution list/trace.
+    router.get(
+      '/executions/:publicId/result',
+      asyncHandler(async (req, res) => {
+        const requester = actor(req);
+        res.setHeader('Cache-Control', 'no-store, private');
+        res.setHeader('Pragma', 'no-cache');
+        if (!req.params.publicId.startsWith('aij_'))
+          return res.status(404).json({ error: 'AI_ASYNC_RESULT_NOT_FOUND' });
+        const result = await aiExecutionUseCases.findAsyncResultForRequester(
+          req.params.publicId, requester,
+        );
+        if (!result) return res.status(404).json({ error: 'AI_ASYNC_RESULT_NOT_FOUND' });
+        return res.json(result);
+      }),
+    );
+
     router.post(
       '/executions/:publicId/cancel',
       asyncHandler(async (req, res) => {
