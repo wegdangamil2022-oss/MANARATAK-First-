@@ -8,6 +8,14 @@ interface ContentSummary {
   updatedAt: string;
   scheduledAt?: string | null;
 }
+interface FailedSchedule {
+  id: string;
+  contentId: string;
+  locale: string;
+  attemptCount: number;
+  failureCode: string | null;
+  scheduledAt: string;
+}
 interface Redirect {
   id: string;
   sourcePath: string;
@@ -77,6 +85,7 @@ export function CmsOperationsPanels({
   const sequence = useRef(0);
   const mutation = useRef(false);
   const [redirects, setRedirects] = useState<Redirect[]>([]);
+  const [failedSchedules, setFailedSchedules] = useState<FailedSchedule[]>([]);
   const [navigation, setNavigation] = useState<NavigationMenu[]>([]);
   const [schemas, setSchemas] = useState<BlockSchema[]>([]);
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
@@ -143,6 +152,32 @@ export function CmsOperationsPanels({
       mutation.current = false;
       setBusy(false);
     }
+  };
+
+  const loadFailedSchedules = async () => {
+    setError(null);
+    try {
+      const params = new URLSearchParams({ siteIdentifier: 'manaratak', locale, limit: '50' });
+      const result = await adminApiClient.request<List<FailedSchedule>>('/admin/cms/operations/failed-schedules?' + params);
+      setFailedSchedules(result.data);
+    } catch (reason) {
+      setFailedSchedules([]);
+      setError(reason instanceof Error ? reason.message : 'Failed to load schedule repair queue');
+    }
+  };
+
+  const retryFailedSchedule = (job: FailedSchedule, event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const reason = String(new FormData(event.currentTarget).get('reason') ?? '').trim();
+    if (reason.length < 3 || !window.confirm(
+      locale === 'ar' ? 'إعادة محاولة المهمة بعد إعادة فحص الموافقة؟' : 'Retry after rechecking editorial approval?'
+    )) return;
+    void submit(async () => {
+      await adminApiClient.request('/admin/cms/operations/failed-schedules/' + encodeURIComponent(job.id) + '/retry', {
+        method: 'POST', body: JSON.stringify({ expectedAttemptCount: job.attemptCount, reason }),
+      });
+      await loadFailedSchedules();
+    }, locale === 'ar' ? 'أُعيدت المهمة لطابور النشر دون تجاوز الموافقة.' : 'Job queued for a governed retry.');
   };
 
   const createRedirect = (event: FormEvent<HTMLFormElement>) => {
@@ -469,6 +504,20 @@ export function CmsOperationsPanels({
                 </button>}
               </li>
             ))}
+          </ul>
+        </Card>
+        <Card title={locale === 'ar' ? 'إصلاح مهام النشر الفاشلة (المشغّلون فقط)' : 'Failed publication recovery (operators only)'}>
+          <button type="button" className={button} disabled={busy} onClick={() => void loadFailedSchedules()}>
+            {locale === 'ar' ? 'عرض المهام الفاشلة' : 'Load failed jobs'}
+          </button>
+          <ul className="mt-3 space-y-2">
+            {failedSchedules.map((job) => <li key={job.id} className="rounded-xl bg-slate-50 p-3 text-xs">
+              <p>{job.contentId} · {job.locale} · {job.failureCode ?? 'UNKNOWN'} · {job.attemptCount} attempts</p>
+              <form className="mt-2 flex flex-wrap gap-2" onSubmit={(event) => retryFailedSchedule(job, event)}>
+                <input className={input} name="reason" minLength={3} maxLength={2000} required placeholder={locale === 'ar' ? 'سبب إعادة المحاولة' : 'Retry reason'} />
+                <button type="submit" className={button} disabled={busy}>{locale === 'ar' ? 'إعادة المحاولة' : 'Retry'}</button>
+              </form>
+            </li>)}
           </ul>
         </Card>
       </div>
