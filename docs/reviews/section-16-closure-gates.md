@@ -101,3 +101,14 @@ Actual checks this continuation: **36/36 static source-pattern checks**, not Vit
 | Operational sitemap limits | **DEFINED, NOT PROVEN** — sentinel >50k fails closed instead of silently truncating; future shard/index extension is needed if limit is reached | Source-backed scale design and bounded latency benchmarks (runtime deferred) |
 
 Source-only work: no migrations executed, no workflow or production actions invoked. These new Vitest cases have **NOT** been executed. Keep `PARTIAL — FIXES_REQUIRED`, do not claim `CODE_CLOSED — RUNTIME_DEFERRED`.
+
+## 11 October schema authority follow-up
+
+| Gate | Source checkpoint | Incomplete validation |
+| --- | --- | --- |
+| CMS-ADM-016 declarative schema authority | **IMPROVED IN SOURCE / NOT TESTED** — root closed-object schema, dotted nested asset/translation paths validated against actual string properties including bounded array items, no duplicate or overlapping declarations, max payload serialized size | Execute policy tests, source typecheck, EAP nested public-asset trust tests and existing production-compatible block schema fixtures |
+| CMS-ADM-018 CMS public detail privacy | **IMPROVED IN SOURCE / NOT TESTED** — mandatory DB published-row read and `no-store` for public content and related API representations | Execute stale Redis + CDN/browser revocation regressions; static HTML archive invalidation remains separate |
+| CMS-ADM-023 published sitemap | **IMPROVED IN SOURCE / NOT TESTED** — live bounded publication projection, exact canonical and noIndex filter, dynamic XML endpoint + web proxy; static CMS sitemap entries removed | Execute source tests, configure HTTPS public origin, verify staging reverse proxy and crawler; complete prerendered HTML refresh on publish/archive |
+| Static source sanity | **27/27 structural source inspections** and unique policy-method occurrences checked | No executable TypeScript/Vitest/Prisma/nginx checks were possible in the available workspace |
+
+Decision remains **`PARTIAL — FIXES_REQUIRED`**. No deployment, merge, DB writes or background worker execution.
