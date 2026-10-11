@@ -147,4 +147,29 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     expect(tx.aIRegistryRecord.upsert).not.toHaveBeenCalled();
   });
 
+
+  it('refuses overlapping active price periods under model-scoped registry locks', async () => {
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      aIRegistryRecord: {
+        findUnique: vi.fn().mockResolvedValue(null),
+        findMany: vi.fn().mockResolvedValue([{
+          key: 'price-old',
+          configuration: { modelKey: 'model-1', effectiveFrom: '2026-10-01T00:00:00Z', effectiveTo: null },
+        }]),
+        upsert: vi.fn(),
+      },
+    };
+    const repo = new PrismaAIPlatformRepository({
+      $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+    });
+    await expect(repo.upsert('modelPrices', {
+      key: 'price-new', modelKey: 'model-1', status: 'ACTIVE',
+      effectiveFrom: '2026-10-10T00:00:00Z',
+      effectiveTo: '2026-10-20T00:00:00Z', currency: 'USD',
+      inputPricePerMillion: 2, outputPricePerMillion: 4,
+    }, 'price-manager')).rejects.toThrow('AI_MODEL_PRICE_INTERVAL_OVERLAP');
+    expect(tx.aIRegistryRecord.upsert).not.toHaveBeenCalled();
+  });
+
 });
