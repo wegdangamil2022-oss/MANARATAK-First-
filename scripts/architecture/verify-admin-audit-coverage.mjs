@@ -3,6 +3,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const root = process.cwd();
 const manifestPath = 'docs/remediation/evidence/section-02/admin-mutation-audit-inventory.json';
@@ -71,6 +72,39 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
         && ts.isCallExpression(node.initializer) && /(^|\.)Router$/.test(node.initializer.expression.getText(ast)))
         routerNames.add(node.name.text);
     });
+    // Record a policy only when router middleware passes its resolved permission
+    // to the evaluator. An import or an unused resolver is not authorization evidence.
+    const resolvers = new Map();
+    visit(ast, node => {
+      if (!ts.isVariableDeclaration(node) || !ts.isIdentifier(node.name) || !node.initializer
+        || !(ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))) return;
+      const permissions = [...node.initializer.getText(ast).matchAll(/['"](admin:[a-z0-9:*_-]+)['"]/g)].map(match => match[1]);
+      if (permissions.length) resolvers.set(node.name.text, { source: node.initializer.getText(ast), permissions: [...new Set(permissions)].sort() });
+    });
+    const conditionalGuards = [];
+    visit(ast, node => {
+      if (!ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)
+        || node.expression.name.text !== 'use' || !routerNames.has(node.expression.expression.getText(ast))
+        || node.arguments.length !== 1) return;
+      const bindings = new Map();
+      visit(node.arguments[0], child => {
+        if (ts.isVariableDeclaration(child) && ts.isIdentifier(child.name) && child.initializer
+          && ts.isCallExpression(child.initializer) && ts.isIdentifier(child.initializer.expression)
+          && resolvers.has(child.initializer.expression.text)
+          && child.initializer.arguments.map(argument => argument.getText(ast)).join(',') === 'req.method,req.path')
+          bindings.set(child.name.text, child.initializer.expression.text);
+      });
+      visit(node.arguments[0], child => {
+        if (!ts.isCallExpression(child) || !ts.isPropertyAccessExpression(child.expression)
+          || child.expression.name.text !== 'evaluatePermission' || !child.arguments[1]
+          || !ts.isIdentifier(child.arguments[1]) || !bindings.has(child.arguments[1].text)) return;
+        const resolver = bindings.get(child.arguments[1].text);
+        const policy = resolvers.get(resolver);
+        conditionalGuards.push({ position: node.pos, router: node.expression.expression.getText(ast),
+          resolver, permissions: policy.permissions,
+          sourceFingerprint: createHash('sha256').update(`${policy.source}\n${node.getText(ast)}`).digest('hex') });
+      });
+    });
     visit(ast, node => {
       if (!ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)
         || !['post', 'put', 'patch', 'delete'].includes(node.expression.name.text)) return;
@@ -83,17 +117,21 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
       const fullPath = mount.prefix + (route === '/' ? '' : route);
       const text = node.getText(ast);
       const inlinePermissions = [...text.matchAll(/['"](admin:[a-z0-9:*_-]+)['"]/g)].map(match => match[1]);
-      const permissionEvidence = [...new Set([...mount.permissions, ...inlinePermissions])];
+      const inheritedPolicies = conditionalGuards.filter(guard => guard.position < node.pos && guard.router === node.expression.expression.getText(ast))
+        .map(({ position: _position, router: _router, ...policy }) => policy);
+      const permissionEvidence = [...new Set([...mount.permissions, ...inlinePermissions, ...inheritedPolicies.flatMap(policy => policy.permissions)])];
       // A conditional per-route guard is recorded explicitly, rather than claiming
       // that a class-wide evaluator import proves the authorization of every route.
-      const conditional = /\b(permit|transitionPermission|requireSupportMutation)\b/.test(text);
+      const conditional = inheritedPolicies.length > 0 || /\b(permit|transitionPermission|requireSupportMutation)\b/.test(text);
       const validation = /\.(safeParse|parse)\s*\(|\bparseStrict\s*\(/.test(text)
         ? 'DIRECT_API_PARSE' : 'OWNER_OR_HANDLER_VERIFICATION_REQUIRED';
       const classification = classify({ method, originalUrl: `/api/v1${fullPath}` }, 'ADMIN');
       output.push({ method, path: fullPath, owner: mount.owner,
         classification,
         permissionEvidence, conditionalPermissionReview: conditional,
-        validationEvidence: validation, idempotency: method === 'DELETE' ? 'DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED' : 'GLOBAL_ADMIN_REQUIRED',
+        validationEvidence: validation, idempotency: method === 'DELETE' ? 'DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED'
+          : fullPath === '/admin/student-tools/:toolKey/test' ? 'OWNER_ENCRYPTED_EXECUTION_REQUIRED' : 'GLOBAL_ADMIN_REQUIRED',
+        ...(inheritedPolicies.length ? { conditionalPermissionPolicies: inheritedPolicies } : {}),
         auditEvidence: classification === 'NO_AUDIT_REQUIRED' ? 'REVIEWED_NON_MUTATING_POST_EXEMPTION' : 'REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME',
         atomicBusinessAudit: 'OWNER_VERIFICATION_REQUIRED', atomicOutbox: 'OWNER_VERIFICATION_REQUIRED',
         source: `apps/api/src/presentation/api/router/${mount.owner}.ts`,
