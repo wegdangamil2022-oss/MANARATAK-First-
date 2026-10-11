@@ -14,6 +14,7 @@ import {
   CmsPublishingReadinessDto,
   CmsRedirectDto,
   CmsScheduleResultDto,
+  CmsSitemapEntryDto,
   CmsSlugChangeDto,
   CmsRestoreRevisionDto,
   CmsTagDto,
@@ -67,6 +68,7 @@ export interface ICmsRepository {
     locale?: string,
   ): Promise<PaginatedCmsResult<PublicCmsContentDto>>;
   getPublishedBySlug(slug: string, locale?: string, siteIdentifier?: string): Promise<PublicCmsContentDto | null>;
+  listIndexableSitemapEntries?(siteIdentifier: string): Promise<CmsSitemapEntryDto[]>;
   replaceDomainLinks?(contentId: string, links: UpsertCmsContentDomainLinkDto[], actorId: string, expectedVersion: number): Promise<CmsContentDomainLinkDto[]>;
   listDomainLinks?(contentId: string): Promise<CmsContentDomainLinkDto[]>;
   listPublishedByDomainTarget?(targetType: string, targetId: string, locale?: string, siteIdentifier?: string, limit?: number): Promise<PublicCmsContentDto[]>;
