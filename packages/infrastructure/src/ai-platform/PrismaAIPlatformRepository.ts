@@ -145,6 +145,24 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       const previous = await tx.aIRegistryRecord.findUnique({
         where: { resourceType_key: { resourceType: resource, key: candidate.key } },
       });
+      if (resource === 'modelPrices' && candidate.status === 'ACTIVE') {
+        // Serialize all price changes for one model; conflicting effective intervals
+        // must never silently pick whichever record happens to sort first.
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-model-price:${candidate.modelKey}`}, 0))::text AS lock_result`;
+        const active = await tx.aIRegistryRecord.findMany({
+          where: {
+            resourceType: 'modelPrices',
+            status: 'ACTIVE',
+            configuration: { path: ['modelKey'], equals: candidate.modelKey },
+          },
+        });
+        const startsBeforeEnd = (start: unknown, end: unknown) =>
+          end == null || new Date(start as string).getTime() < new Date(end as string).getTime();
+        if (active.some((row: any) => row.key !== candidate.key &&
+            startsBeforeEnd(candidate.effectiveFrom, row.configuration?.effectiveTo) &&
+            startsBeforeEnd(row.configuration?.effectiveFrom, candidate.effectiveTo)))
+          throw new Error('AI_MODEL_PRICE_INTERVAL_OVERLAP');
+      }
       // Existing configuration always requires the revision the editor actually read.
       // Serialization + advisory lock make this a fail-closed compare-and-swap.
       if (previous && !candidate.expectedUpdatedAt)
