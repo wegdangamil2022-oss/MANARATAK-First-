@@ -1,0 +1,130 @@
+{
+  "status": "CODE_CLOSED — RUNTIME_DEFERRED",
+  "recordedAt": "2026-10-11T01:45:13.893846+00:00",
+  "sourceSha": "573573525fa6cd3e25bf3efe675270890862312b",
+  "sourceCommits": [
+    "dcc4a8598fd0b74dd9f513deaeff60dbd83ab066",
+    "573573525fa6cd3e25bf3efe675270890862312b"
+  ],
+  "startingSha": "f52747cd76f13f4317a7e43ab7a09b30da168628",
+  "branch": "codex/section-15-student-support",
+  "nodeVersion": "22.23.3",
+  "sourceTasksClosed": 27,
+  "runtimeTaskDeferred": "STU-ADM-026",
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "tsc -b packages/domain packages/application packages/infrastructure apps/api apps/admin; final affected-project compilation",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "npx vitest run --config .section15-vitest.config.ts",
+      "exitCode": 0,
+      "result": "PASS",
+      "files": 22,
+      "tests": 156,
+      "failures": 0
+    },
+    {
+      "command": "npm run build -w @manaratak/admin",
+      "exitCode": 0,
+      "result": "PASS",
+      "warnings": [
+        "existing font runtime paths",
+        "large admin bundle"
+      ]
+    },
+    {
+      "command": "node scripts/verify-phase15-source.mjs",
+      "exitCode": 0,
+      "result": "PASS",
+      "checks": 14
+    },
+    {
+      "command": "node scripts/verify-w4-student-support.mjs",
+      "exitCode": 0,
+      "result": "PASS",
+      "checks": 9
+    },
+    {
+      "command": "node scripts/quality/verify-source-quality.mjs",
+      "exitCode": 0,
+      "result": "PASS",
+      "newViolations": 0
+    },
+    {
+      "command": "targeted eslint (paths in report)",
+      "exitCode": 0,
+      "result": "PASS_WITH_WARNINGS",
+      "errors": 0,
+      "warnings": 100
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "verificationLimitations": [
+    "Repository/transaction tests use isolated mocks, not live PostgreSQL.",
+    "Admin locale tests use server-side simulated rendering, not browser E2E.",
+    "No remote GitHub CI, runtime worker/provider or production readiness PASS is claimed.",
+    "Typecheck commands with no stdout completed with exit code zero."
+  ],
+  "runtimeValidated": false,
+  "productionApproved": false,
+  "mainMerged": false,
+  "databaseMutations": false,
+  "deploymentPerformed": false,
+  "artifacts": [
+    {
+      "path": "docs/reviews/evidence/section-15/vitest.txt",
+      "sha256": "8e4ae258551513040dc8377f4893352b5b1084d13853e7a29402b863c5a4e8ef"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/typecheck-full.txt",
+      "sha256": "4ec075231d9f52f5dd547ac8e7270c71a0b769e01d64ea0048dbf6cbb20c028b"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/typecheck-final-affected.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/typecheck-final-api.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/typecheck-final-infrastructure-api.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/typecheck-final-admin.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/admin-build.txt",
+      "sha256": "81b583f6edb7633b9fc38e17743d1bd2859ac34a73bc768900d58da0b6f16ea1"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/source-quality.txt",
+      "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/phase15-source.txt",
+      "sha256": "db56d11ce6576575998f6fa65f82dfd60dc0d2784f4bf7d1b26129f16c78242a"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/student-support-source.txt",
+      "sha256": "27c04db0c0888c1163aba5699efc6eadbab4ecbd050382ba2326936a6df034c9"
+    },
+    {
+      "path": "docs/reviews/evidence/section-15/eslint.txt",
+      "sha256": "d6d75d9b0185ca1ad2d959e5f78574dafe2ae65f49f044e477f69eaeb3098108"
+    }
+  ]
+}

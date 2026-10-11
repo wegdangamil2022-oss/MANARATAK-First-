@@ -1,0 +1,28 @@
+
+> @manaratak/admin@1.0.0 build
+> tsc -b ../../packages/domain ../../packages/shared && vite build
+
+vite v6.4.3 building for production...
+transforming...
+
+/admin/fonts/cairo-0.woff2 referenced in /admin/fonts/cairo-0.woff2 didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/admin/fonts/cairo-2.woff2 referenced in /admin/fonts/cairo-2.woff2 didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/admin/fonts/cairo-1.woff2 referenced in /admin/fonts/cairo-1.woff2 didn't resolve at build time, it will remain unchanged to be resolved at runtime
+✓ 3955 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                         0.42 kB │ gzip:   0.29 kB
+dist/_headers                           0.71 kB
+dist/assets/cairo-1-at8nfxId.woff2     16.65 kB
+dist/assets/cairo-0-CJWMIGCx.woff2     30.90 kB
+dist/assets/cairo-2-PfPtmrPZ.woff2     33.82 kB
+dist/assets/index-Bj_QnU34.css        141.99 kB │ gzip:  21.14 kB
+dist/assets/index-CLYZWgdf.js       2,607.08 kB │ gzip: 683.79 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 16.56s

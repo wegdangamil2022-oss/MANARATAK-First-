@@ -1,199 +1,130 @@
-# Section 15 — Student Support & Workspace (P15): Implementation Review
+# Section 15 — Student Support & Workspace (P15)
 
-> **Review date:** 2026-10-11 · **Status:** **PARTIALLY IMPLEMENTED — FIXES REQUIRED — NOT CLOSED (RUNTIME-PENDING)**  
-> **Do not approve production deployment or Section 16 start based on this report.**  
-> **Repository:** `wegdangamil2022-oss/MANARATAK-First-`  
-> **Working branch:** `codex/section-15-student-support`  
-> **Fork point:** `main@9944568a92016b61e3137ba776b3e08a9466afcb`  
-> **Plan:** `MANARATAK_ADMIN_REVIEW_CODEX.md`, Section 15 and 15.FG, Library version from 2026-10-08. The plan's older snapshot `bac768e...` is not the implementation baseline.  
-> **Commits during review:** `a3dd41a6e26dd2b7482bd829f54c1716a13d2b9f`; `cd7228317f6410f5253271eaabdf8c8e75407f85`; report and filter fix added as a later commit.
+**Status: CODE_CLOSED — RUNTIME_DEFERRED**
+**Independent closeout date:** 2026-10-11
+**Repository:** `wegdangamil2022-oss/MANARATAK-First-`
+**Branch:** `codex/section-15-student-support`
+**Source validated:** `573573525fa6cd3e25bf3efe675270890862312b`
+**Reviewed starting point:** `f52747cd76f13f4317a7e43ab7a09b30da168628`
+**Main / fork baseline:** `9944568a92016b61e3137ba776b3e08a9466afcb`
 
-## 1. Scope and preservation
+This report supersedes the earlier partial/source-only summaries on this branch. The
+9 October amendment in `MANARATAK_ADMIN_REVIEW_CODEX.md` governs closure: fix
+source defects, run relevant lightweight regression/security checks, record the
+commit, and defer live database/provider/browser/worker proofs until after Section
+28. Source closure permits moving to the next section; it is not production approval.
 
-Started from the observed latest `main` and created the requested branch; no branch force-push/rebase. GitHub recursive tree contained no `AGENTS.md` anywhere at the inspected main commit, and local instruction files by that exact name were therefore unavailable. Read source and owner contracts before changes.
+## Review findings and completed repairs
 
-**Pre-existing retained protections:** inherited `/admin/students` permission `admin:students:support`; elevated support-mutate permission; student JWT/session and `createStudentRoleGuard`; equality check for legacy student-ID routes and self-scoped canonical routes; source-owned learning/certificate/service reads; privacy consent not writable via Support; minimal support workspace fields; cursor pagination; support expectedVersion/reason; atomic P15 audit/outbox on most existing mutations. No duplicate P13/P14/P20 truth tables, no impersonation endpoint, no new migrations.
+The prior branch had 78 commits, 19 implemented items, eight partial items, and one
+runtime item deferred. Its tests had never run. Independent execution found two
+admin TypeScript errors, a malformed reminder test, two HTTP tests serializing
+circular request objects, and a synchronous validation test expecting a Promise.
+All were corrected; the assertions still check the actual sensitive boundary.
 
-## 2. Per-task implementation trace (26 plan + 2 annex)
+Source defects found and repaired during closeout:
 
-**Legend:** `IMPLEMENTED — SOURCE ONLY` means changes pushed, not runtime-verified; `PARTIAL` means remaining acceptance gaps; `OPEN` means not implemented; `DEFERRED` is intentional after 28.
+- Course/certificate projection ordering, terminal archive/revocation/reissue
+  protection, renewal predecessor state, and original course completion dates.
+- Per-workspace transaction row locking for owner ingestion, recovery, and personal
+  writes; initializing accounts reject support reset. Temporary re-suspension does
+  not quarantine an otherwise valid parked event. Archived accounts retire parked
+  payloads and retain only idempotent inbox receipts, without replaying personal data.
+- One normalized, versioned internal owner-event policy: owner/type allowlists,
+  reference/recipient matching, valid dates/progress/statuses, bounded metadata,
+  and safe notification paths. No HTTP endpoint exposes integration ingestion.
+  New role events carry a version; legacy atomic role events require the real
+  aggregate/assignment and a current matching student-role assignment.
+- Bounded, scoped owner-tab pagination and truthful unknown totals. Read provenance
+  records `LIVE_OWNER`, query time, coverage, and an explicitly unknown
+  `lastSyncedAt`; it does not fabricate an owner revision or synchronization proof.
+- A read-only exact-identity lookup usable even when the workspace is missing from
+  the support list. Student-role and provisioning diagnostics reveal no identity PII.
+- Current tracker version/status/recipient/deadline and active identity/student role
+  are checked immediately before notification delivery. Stale or unversioned legacy
+  reminders are suppressed; owner outages retry rather than sending. No code claims
+  to recall a notification already accepted by an external provider.
+- Remaining admin copy, dates, directions, default stages and timeline labels use
+  Arabic/English copy. Owner views are hidden when their UI grant is absent; server
+  authorization remains the authority. Mutation permission outages fail closed.
 
-| Task ID | Priority | State | Code change / finding | Related source files | Acceptance gap |
-|---|---|---|---|---|---|
-| `STU-ADM-001` | P0 | **IMPLEMENTED — SOURCE ONLY** | إزالة القيم السابقة/اللاحقة للموافقة من audit/outbox؛ إبقاؤها في سجل القرار القانوني. | `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts`، `packages/infrastructure/tests/students/PrismaStudentWorkspaceRepository.spec.ts` | اختبار منع التسرب أضيف ولم ينفّذ. |
-| `STU-ADM-002` | P0 | **IMPLEMENTED — SOURCE ONLY** | تقييد قراءات learning/certificates/services في API بصلاحيات كل مالك، والحرمان الافتراضي من القوائم والأعداد. | `apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts`، `packages/application/src/students/use-cases/StudentDashboardHydrationService.ts`، `packages/domain/src/students/index.ts`، `apps/admin/src/pages/StudentSupportAdminPage.tsx` | اعتماد أسماء أذونات المالك الحالية؛ تحتاج مصادقة تشغيلية سلبية. |
-| `STU-ADM-003` | P1 | **IMPLEMENTED — SOURCE ONLY** | P15 support reset remains audit/outbox atomic. Tracker create/update/checklist/archive/remove now also writes private-minimal AuditRecord and P15 Timeline in the same transaction as reminder Outbox. | `apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts`، `packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts`، `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts` | Fault-injection and transactional rollback still need actual DB verification, not source-only tests. |
-| `STU-ADM-004` | P1 | **IMPLEMENTED — SOURCE ONLY** | CAS بكتابة updateMany مشروطة بالنسخة والحالة، ثم audit/outbox في المعاملة نفسها. | `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts`، `packages/infrastructure/tests/students/PrismaStudentWorkspaceRepository.spec.ts` | اختبار تعارض سلبي بالمصدر؛ سباق DB حقيقي لم ينفذ. |
-| `STU-ADM-005` | P1 | **IMPLEMENTED — SOURCE ONLY** | CAS لموافقة الخصوصية قبل إدراج القرار والأثر الذري. | `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts`، `packages/infrastructure/tests/students/PrismaStudentWorkspaceRepository.spec.ts` | يحتاج اختبار تزامن قرار قبول/سحب في DB معزولة. |
-| `STU-ADM-006` | P1 | **IMPLEMENTED — SOURCE ONLY** | إلزام expectedVersion في HTTP/Application/Prisma profile؛ إعادة استخدام النسخة التي ترسلها واجهة الطالب حاليًا. | `apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts`، `packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts`، `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts`، `packages/application/tests/students/StudentWorkspaceUseCases.spec.ts` | التحقق من retry/idempotency و409 HTTP لم ينفذ. |
-| `STU-ADM-007` | P1 | **PARTIAL — SOURCE ONLY** | P14 now includes a complete public snapshot in renewal/reissue outbox events, and a privacy-minimal CertificateArchived event is consumed, replayed and projected in P15; archived status is explicitly accepted in certificate state handling. | `packages/application/src/students/use-cases/StudentWorkspaceOutboxDeliveryGateway.ts`، `packages/application/src/students/use-cases/StudentWorkspaceOutboxWorker.ts`، `packages/infrastructure/src/certificates/PrismaCertificateRepository.ts`، `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts`، `apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts` | P14→P15 chronological replay, archive/revocation races, and certificate worker operation are still unverified on a real database; projected totals may include archived historic certificates. |
-| `STU-ADM-008` | P1 | **IMPLEMENTED — SOURCE ONLY** | Late role catchup now uses durable, deterministic P15 outbox continuations after every 4 bounded owner pages (at most 200 records per worker item). Worker checks aggregate, role and active identity before processing. Role-scoped ids provide idempotency. | `packages/application/src/students/use-cases/StudentWorkspaceOutboxDeliveryGateway.ts` | High-volume database replay/worker lease timing and concurrent owner writes not verified. |
-| `STU-ADM-009` | P1 | **PARTIAL — SOURCE ONLY** | أضيف recovery worker لدُفعات <=25 من Inbox المحجوز أثناء SUSPENDED، وبشرط ACTIVE وtransaction CAS وreplay للـtimeline/projections/notifications. الحدث السام يُعزل برمز غير حساس. | `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts`، `packages/application/src/students/use-cases/StudentWorkspaceOutboxWorker.ts`، `apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts`، `apps/api/src/infrastructure/di/container.ts`، `packages/infrastructure/tests/students/PrismaStudentWorkspaceRepository.spec.ts` | يعتمد على تفعيل worker، ولم تُفحص دورة suspend/reactivate على DB؛ owner ordering والخروج من quarantine يحتاجان إثباتًا. |
-| `STU-ADM-010` | P1 | **PARTIAL — SOURCE ONLY** | P14 renewal/reissue/archive source event payloads now consistently identify the recipient, certificate and public verification fields; the P15 whitelist includes CertificateArchived, without forwarding private revocation/archive reasons. | `packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts`، `packages/application/src/students/use-cases/StudentWorkspaceOutboxDeliveryGateway.ts`، `packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts` | The fully versioned/attested source envelope for all other owner event types is not yet standardized; production provenance tests pending. |
-| `STU-ADM-011` | P1 | **IMPLEMENTED — SOURCE ONLY** | أصبح getDashboard يقرأ المرجع المعتمد بدل Redis cache القديم؛ Cache.write/delete errors لا تسبب failure بعد نجاح العملية. تم تعليق قراءة Redis مؤقتًا لتفادي stale workspace snapshot. | `packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts`، `packages/application/tests/students/StudentWorkspaceUseCases.spec.ts` | مقايضة أداء واضحة: لا يُعاد تمكين Redis read قبل durable generation؛ القياسات التشغيلية مؤجلة. |
-| `STU-ADM-012` | P1 | **PARTIAL — SOURCE ONLY** | Owner tabs are separate RBAC-checked and REQUIRED-audited reads; triage and tracker history include purpose-minimized audit. Raw query text/notes are not copied to audit. | `apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts`، `apps/api/tests/presentation/api/router/StudentSupportAdminRouter.spec.ts` | Case approval/retention binding and external-case ticket policy are still missing. |
-| `STU-ADM-013` | P1 | **IMPLEMENTED — SOURCE ONLY** | تعديل حدود P13 Prisma course enrollments وP14 certificate read model إلى حد 51 للرصد، وعرض أول 12 سجلًا فقط للدعم مع TRUNCATED وعدد null حين النتيجة جزئية. | `packages/application/src/students/use-cases/StudentDashboardHydrationService.ts`، `packages/infrastructure/src/students/StudentDashboardOwnerReadGateways.ts` | النطاق الشخصي يعرض 50 كحد أقصى ويشير إلى DEGRADED عند الاقتطاع؛ يلزم pagination كامل للأعداد الكبيرة واختبار query plans. |
-| `STU-ADM-014` | P1 | **PARTIAL — SOURCE ONLY** | إضافة ownerReadProvenance (P13/P14/P20، queriedAt، returned، limit، complete) وواجهة تفرق AVAILABLE/TRUNCATED/RESTRICTED/DEGRADED. | `packages/domain/src/students/index.ts`، `packages/application/src/students/use-cases/StudentDashboardHydrationService.ts` | queriedAt وقت الاستعلام فقط، وليس وقت تحديث المصدر؛ owner version والـlast-sync ما زالا غير متاحين. |
-| `STU-ADM-015` | P1 | **PARTIAL — SOURCE ONLY** | Transactional reminder outbox consumer now re-reads the owner tracker version *after* notification intent scheduling and cancels the stale intent if status, version, scholarship or deadline advanced concurrently. | `packages/application/src/students/use-cases/StudentApplicationTrackerUseCases.ts`، `packages/application/tests/students/StudentApplicationTrackerUseCases.spec.ts` | This narrows an asynchronous race but cannot retract already delivered external notifications. Real DB/notification queue race and dead-letter tests are not executed. |
-| `STU-ADM-016` | P1 | **IMPLEMENTED — SOURCE ONLY** | تحديث stage/checklist/archive مشروط id+student+version+ACTIVE في DB transaction. | `packages/infrastructure/src/students/PrismaStudentApplicationTrackerRepository.ts` | يحتاج تنفيذ اختبار تعارض متزامن. |
-| `STU-ADM-017` | P1 | **IMPLEMENTED — SOURCE ONLY** | منع كتابة checklist على tracker غير ACTIVE؛ التحقق من ownership للحزمة والitem. | `packages/infrastructure/src/students/PrismaStudentApplicationTrackerRepository.ts` | اختبارات HTTP/DB سلبية لازمة. |
-| `STU-ADM-018` | P1 | **IMPLEMENTED — SOURCE ONLY** | Read-only provisioning diagnostic now has an Operations-tab control with loading, errors and stale-request cancellation. Existing API enforces support RBAC and REQUIRED audit. | `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts`، `apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts` | Browser and DB proof unavailable. |
-| `STU-ADM-019` | P1 | **IMPLEMENTED — SOURCE ONLY** | حصر failureCode المعروض في allowlist مع fallback عام. | `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts` | تحتاج اختبارات على رسائل داخلية غير متوقعة. |
-| `STU-ADM-020` | P2 | **IMPLEMENTED — SOURCE ONLY** | استبدال مؤشرات صفحات الدعم والمتابعات بمؤشر HMAC-SHA256 موقّع، ينتهي بعد 15 دقيقة ومرتبط بالبحث والحالة والحد وهوية الطالب للمسار المناسب، مع مقارنة توقيع زمنها ثابت. | `packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts` | يلزم ضبط STUDENT_SUPPORT_CURSOR_SECRET ثابت عبر النسخ، أو مفتاح JWT_PRIVATE_KEY_PEM؛ إذا لم يتوفر مفتاح قوي تفشل الصفحات التالية بأمان. |
-| `STU-ADM-021` | P2 | **IMPLEMENTED — SOURCE ONLY** | عند conflict في reset يعاد تحميل حالة الطالب ويُطلب تأكيد جديد. | `apps/admin/src/pages/StudentSupportAdminPage.tsx` | لم يُختبر في المتصفح. |
-| `STU-ADM-022` | P2 | **IMPLEMENTED — SOURCE ONLY** | إزالة اختيار الطالب السابق عند تبديل query/status أو مسح الفلاتر. | `apps/admin/src/pages/StudentSupportAdminPage.tsx` | لم يُختبر في المتصفح. |
-| `STU-ADM-023` | P2 | **PARTIAL — SOURCE ONLY** | ربط واجهة دعم الطلاب بنظام i18n الإداري المعتمد، مع أكثر من 80 مفتاحًا عربيًا/إنجليزيًا للتبويبات والبحث والفرز والأزرار والدورات والشهادات والمتابعات، وتحويل اتجاه الصفحة حسب اللغة، وترجمة حالة الحساب والشهادة. | `apps/admin/src/pages/StudentSupportAdminPage.tsx`، `apps/admin/src/i18n/ar.ts`، `apps/admin/src/i18n/en.ts` | لا تزال بعض الرسائل الديناميكية والإشعارات الدقيقة والتواريخ والعناوين ثابتة بالعربية؛ التحقق في المتصفح وARIA كاملًا غير منفذين. |
-| `STU-ADM-024` | P2 | **PARTIAL — SOURCE ONLY** | Added source tests for >50 enrollment catchup, cursor non-advancement, P13 keyset, P14 certificate owner cursor, renewal completeness, archive outbox privacy, P15 archive worker routing and reminder mid-schedule version changes. | `packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts`، `packages/application/tests/students/StudentWorkspaceOutboxWorker.spec.ts`، `packages/application/tests/students/StudentApplicationTrackerUseCases.spec.ts`، `apps/api/tests/presentation/api/router/StudentSupportAdminRouter.spec.ts`، `packages/infrastructure/tests/students/PrismaStudentWorkspaceRepository.spec.ts` | Source tests have been added, NOT RUN; TypeScript/Vitest/browser/DB verification is still outstanding. |
-| `STU-ADM-025` | P2 | **IMPLEMENTED — SOURCE ONLY** | Base support detail endpoint now reads P15 only; P13/P14/P20 each have an independent RBAC-checked and REQUIRED-audited owner route. UI fetches each domain on its tab, cancels stale requests and shows loading/errors. | `packages/application/src/students/use-cases/StudentDashboardHydrationService.ts`، `apps/admin/src/pages/StudentSupportAdminPage.tsx` | Browser and HTTP execution remain unverified; P15 base may still compute local projections, but no external owner read. |
-| `STU-ADM-026` | P2 | **DEFERRED AFTER SECTION 28** | لا توجد readiness proofs تشغيلية للتكامل، DB، worker، migration، observability. | `docs/reviews/section-15-implementation.md` | حسب تعديل 2026-10-09 لا تشغيل ثقيل حاليًا. |
-| `FGA-15-001` | P1 | **IMPLEMENTED — SOURCE ONLY** | Scoped, purpose-audited application tracker event-history API supports signed keyset pages and deleted-record lookup through retained P15 timeline. Admin UI can look up past tracker ids and paginate, without notes or documents. | `packages/infrastructure/src/students/PrismaStudentApplicationTrackerRepository.ts`، `packages/application/src/students/use-cases/StudentApplicationTrackerUseCases.ts`، `apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts`، `apps/admin/src/pages/StudentSupportAdminPage.tsx`، `apps/api/tests/presentation/api/router/StudentSupportAdminRouter.spec.ts` | No live browser or DB tests; event-retention operations remain governed separately. |
-| `FGA-15-002` | P2 | **IMPLEMENTED — SOURCE ONLY** | P15 incident/overdue filters and independent P20 awaiting-payment owner triage implemented. P20 admin use case returns distinct student identifiers and exact total, requiring both support and services-manage grants and REQUIRED audit. | `apps/admin/src/pages/StudentSupportAdminPage.tsx`، `apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts`، `packages/application/src/students/use-cases/StudentDashboardHydrationService.ts` | SQL query plans, owner outage and browser interaction not tested. |
+## Task disposition
 
-## 3. Security decisions
+`CLOSED_SOURCE` means implemented and covered by the lightweight checks below.
+Every row retains applicable operational proofs in the deferred checklist.
 
-- **Consent privacy:** canonical before/after preference values remain solely in `studentPrivacyConsentDecision`. The audit/outbox mutation event carries `decisionId`, changed field names, version and purpose, but no before/after booleans. The source tests assert absence in both downstream records.
-- **Cross-domain least privilege:** `admin:students:support` alone never authorizes reading learning, certificates, or services in Support details. Server evaluates `admin:courses:manage`, `admin:certificates:view`, `admin:services:manage` respectively; default deny; owner arrays and sensitive counts omitted or null on restriction. UI `RESTRICTED` is not `EMPTY`.
-- **Support actor + atomicity:** support-reset passes principal ID and explicit reason to P15 repository, placing the audit and outbox in the same transaction as the guarded reset write. The API no longer writes an additional successful mutation audit outside the transaction. Failure attempt audit remains independent, as designed.
-- **Optimistic concurrency:** `updateMany` with `id`, `version`, `status` guards the workspace profile, consent, snapshot restore and layout reset. Application tracker update, checklist and archive use atomic version and ownership guards; if affected row count is not exactly one, mutation aborts with conflict.
-- **IDOR:** retained session/role guard and principal-to-student ownership guard on student routes. Service/invoice/asset owner methods remain source-owned. Dedicated new tests for Support HTTP permissions have been authored; no executed direct-request proof yet.
-- **Audit constraints:** sensitive detail reads write required minimal audit before response. Support client receives only permission-authorized owner fields. No raw event payload dumped in new logs.
-- **Data integrity:** cache invalidation failures after a successful transaction no longer present a false failed command. This is **not** a durable invalidation solution, and requires follow-on work.
+| Task | Disposition | Source evidence / behavior |
+|---|---|---|
+| STU-ADM-001 | CLOSED_SOURCE | Consent history remains canonical; before/after values excluded from audit/outbox. |
+| STU-ADM-002 | CLOSED_SOURCE | P13/P14/P20 server grants independent of support grant; restricted lists/counts omitted or null. |
+| STU-ADM-003 | CLOSED_SOURCE | Support actor/reason and tracker audit/timeline/reminder facts persist inside their owner transaction. |
+| STU-ADM-004 | CLOSED_SOURCE | Version/status CAS and active-only reset; conflicts emit no extra mutation audit/outbox. |
+| STU-ADM-005 | CLOSED_SOURCE | Consent CAS precedes canonical decision and atomic audit/outbox. |
+| STU-ADM-006 | CLOSED_SOURCE | Profile expectedVersion required at HTTP/application/persistence boundaries. |
+| STU-ADM-007 | CLOSED_SOURCE | P14 lifecycle fanout, deterministic inbox, ordered/terminal projections, renewal predecessor handling. |
+| STU-ADM-008 | CLOSED_SOURCE | Up to four 50-record owner pages per item; durable deterministic continuation preserves the tail. |
+| STU-ADM-009 | CLOSED_SOURCE | Active-only replay in batches of 25; poison quarantine, retryable re-suspension, archived payload retirement. |
+| STU-ADM-010 | CLOSED_SOURCE | Internal v1 envelope, producer-version/aggregate checks, owner/reference/date/status/size allowlists. |
+| STU-ADM-011 | CLOSED_SOURCE | Canonical dashboard reads; optional Redis failures cannot reverse committed results or serve stale snapshots. |
+| STU-ADM-012 | CLOSED_SOURCE | Mandatory privacy-minimal audit before disclosure, explicit scope/purpose, independent owner grants. |
+| STU-ADM-013 | CLOSED_SOURCE | Bounded owner pages (maximum 12 for support) and continuation; incomplete totals remain unknown. |
+| STU-ADM-014 | CLOSED_SOURCE | Live-owner provenance, query time/coverage, unknown source-sync time, independent degraded/restricted state. |
+| STU-ADM-015 | CLOSED_SOURCE | Transactional reminder facts, version-scoped reconciliation, and current owner eligibility before delivery. |
+| STU-ADM-016 | CLOSED_SOURCE | Tracker/checklist version+student+status CAS. |
+| STU-ADM-017 | CLOSED_SOURCE | Archived tracker edits denied; archive/delete reconcile reminders. |
+| STU-ADM-018 | CLOSED_SOURCE | Exact-identity diagnostic outside existing workspace details; no read-time provisioning. |
+| STU-ADM-019 | CLOSED_SOURCE | Safe failure taxonomy; raw internal exceptions/payloads are not displayed. |
+| STU-ADM-020 | CLOSED_SOURCE | HMAC cursor scope binding, expiry, canonical parser and constant-time signature comparison. |
+| STU-ADM-021 | CLOSED_SOURCE | Reset conflict refreshes state and requires renewed confirmation, preserving the reason. |
+| STU-ADM-022 | CLOSED_SOURCE | Filter/search changes clear selection; stale requests cannot replace the current student. |
+| STU-ADM-023 | CLOSED_SOURCE | AR/EN copy/date/direction/default labels; simulated SSR locale regression. |
+| STU-ADM-024 | CLOSED_SOURCE | Executed HTTP authorization/error/audit tests and isolated application/repository/owner-contract regressions. |
+| STU-ADM-025 | CLOSED_SOURCE | Base detail reads P15 only; independent authorized owner-tab requests and continuations. |
+| STU-ADM-026 | DEFERRED_AFTER_28 | Deployment-specific DB/worker/provider/browser/readiness evidence, with checklist preserved. |
+| FGA-15-001 | CLOSED_SOURCE | Purpose-audited, signed/scoped tracker/history pages and deleted-record lookup; no notes/documents exposed. |
+| FGA-15-002 | CLOSED_SOURCE | P15 incident triage and P20-owned payment triage; distinct owner count, separate service grant and mandatory audit. |
 
-## 4. Verification evidence and boundaries
+**Source access policy for STU-ADM-012:** Support reads require the current support
+permission. Cross-domain views additionally require the owner's grant. Audit is
+mandatory, without sampling, before response disclosure. Fixed route purpose/scope
+or the approved tracker purpose enum is retained; contact details, searches, notes,
+documents and cursor tokens are excluded. Records use the canonical audit owner and
+its access/retention controls. This section does not invent a case-ticket system or
+claim that an external ticket or production retention configuration was verified.
 
-| Check | Status and evidence |
+## Validation actually executed
+
+Node `v22.23.3`; fresh lockfile installation and Prisma client generation only.
+No connection to a real database was used by the tests.
+
+| Check | Result |
 |---|---|
-| GitHub branch from latest main | **PASS** — fork point `9944568...`; existing `main` unchanged by this work |
-| Commit-level diff review | **PASS (static)** — fetched patch for both implementation/test commits and inspected changed paths; only student domain, Support UI/API, and focused test files modified; no migrations |
-| Static invariant checks | **PASS (static)** — checked source for owner scope enforcement, consent redaction, conditional workspace write, source-event allowlist, and new negative test cases |
-| `packages/infrastructure/tests/students/PrismaStudentWorkspaceRepository.spec.ts` | **WRITTEN, NOT RUN** — consent redaction; CAS stale decision/reset; existing consent fixture adapted to conditional writes |
-| `packages/application/tests/students/StudentDashboardHydrationService.spec.ts` | **WRITTEN, NOT RUN** — no cross-domain owner reads without grants; limited explicit grants |
-| `packages/application/tests/students/StudentWorkspaceUseCases.spec.ts` | **WRITTEN, NOT RUN** — missing expectedVersion; untrusted event family and invalid date |
-| `apps/api/tests/presentation/api/router/StudentSupportAdminRouter.spec.ts` | **WRITTEN, NOT RUN** — 403 support read/mutate; owner permission stripping; support actor in reset |
-| Type-check/lint/unit test commands | **NOT RUN** — GitHub-only connected workspace; no checkout/dependencies available in local execution container (network DNS for GitHub unavailable). No successful test execution is claimed. |
-| Concurrency DB fault-injection / migration check / owner jobs / E2E | **DEFERRED** under 2026-10-09 closure policy; no actual database touched, no migration/reset/seed/backfill/db push, no worker/provider execution |
-| Production/browser readiness | **NOT VERIFIED** — cannot infer a live pass from source checks, Vitest files, or empty GitHub status checks |
+| `npm run typecheck` | PASS; full monorepo project references |
+| `tsc -b packages/domain packages/application packages/infrastructure apps/api apps/admin` and final affected-project checks | PASS |
+| `npx vitest run --config .section15-vitest.config.ts` | PASS — **22 files / 156 tests**, zero failures |
+| `npm run build -w @manaratak/admin` | PASS |
+| `node scripts/verify-phase15-source.mjs` | PASS — 14/14 source smoke checks |
+| `node scripts/verify-w4-student-support.mjs` | PASS — 9/9 source smoke checks |
+| `node scripts/quality/verify-source-quality.mjs` | PASS — zero package/file cycles and zero new accessibility findings |
+| Targeted ESLint for support, student source and notification delivery handler | PASS exit status; 0 errors, 100 warnings (documented, not hidden) |
+| `git diff --check` | PASS |
 
-**Proposed short verification in a trusted checkout before source sign-off (no real DB):** run targeted TypeScript/lint for changed workspaces and targeted Vitest/Supertest files above; fix failures; exercise unauthorized direct HTTP requests in mocked router; check rollback semantics with a transaction mock. **Post-28 authorized operational appendix only:** PostgreSQL version-race and audit rollback fault injection, owner-event replay and idempotency, owner permission policy, cache invalidation recovery, UI flows/SSR, prepared migrations and worker readiness with artifacts of environment and result. No task may be marked runtime `PASS` based solely on code inspection.
+The focused config imports current source rather than relying on stale package
+builds. It covers P15 domain/application/repository/HTTP tests, AR/EN simulated
+rendering, P13/P14 owner adapters/read models, certificate persistence, P20 triage,
+service use cases, role assignment, and notification delivery eligibility.
+Repository tests use isolated mocks; transaction placement/CAS/fault paths are
+verified, not claimed as PostgreSQL concurrency or rollback runtime proof.
 
-## 5. Remaining defects and risk decision
+Lint warnings include existing `any`-typed persistence/router seams and hook dependency
+warnings. Build warnings include the existing large admin bundle and font paths
+resolved at runtime. These are recorded; no source-quality baseline was weakened.
+See `section-15-validation.json` and `evidence/section-15/` for receipts.
 
-**Material P1 gaps blocking closure:** certificate event flow and out-of-order handling (`007`), late-role catch-up (`008`), suspended inbox replay (`009`), durable invalidation (`011`), bounded owner reads (`013`), owner freshness (`014`), atomic reminder delivery (`015`), identity provisioning diagnostic (`018`), purpose-driven audited tracker drilldown (`FGA-15-001`). Also partial upstream schema/version validation (`010`) and sensitive view governance (`012`). These are **source-confirmed/unresolved**, not claimed runtime exploits.
+## Deferred runtime boundary
 
-**P2 outstanding:** cursor signing/filter binding (`020`), full i18n (`023`), comprehensive tests (`024`), lazy tab reads (`025`), triage (`FGA-15-002`), and operational readiness (`026`, formally deferred). Some UI changes lack browser validation.
-
-**Closure verdict:** The original plan records Section 15 as **REVIEWED — FIXES REQUIRED, NOT CLOSED**. This implementation moves several source protections forward but does not satisfy all 28 tasks, nor prove necessary negative tests have passed. Set status **PARTIALLY IMPLEMENTED — FIXES REQUIRED — NOT CLOSED / RUNTIME-PENDING**. **No GO, no claim of completed section, no Section 16 begun.**
-
-## 6. Handoff for independent review
-
-1. Diff [`main...codex/section-15-student-support`](https://github.com/wegdangamil2022-oss/MANARATAK-First-/compare/main...codex/section-15-student-support). Read this report and original 15.2/15.FG acceptance criteria.
-2. Verify source-only fixes and test compilation; prioritize remaining P1 end-to-end owner sync, replay, and reminder atomicity before recommending closure.
-3. Recheck `main` divergence at review time. Do **not** merge, deploy or apply database mutations until approved in a separately authorized workflow.
-
-
-## 7. Continuation — 2026-10-11, branch-only implementation
-
-**Further pushed commits, after the initial three commits:**
-
-- `1e8c6bee5de7e736f2d7d57a66d9b7101cfe5e60` — certificate lifecycle fanout P14 → P15 (Issued, Revoked, Reissued, Renewed).
-- `c07b3356d928bede6a01f707ac9095acce552ca3` — read-only bounded, purpose-audited P15 tracker case view.
-- `9a34e3784dc088d201c0b56a9333ae09216b0048` — negative gateway/HTTP tests and canonical P15 dashboard reads (Redis cache read disabled pending durable invalidation policy).
-- `deb952282cd780d6d9b64f49c7b15d544c4cde3e` — reminder post-commit failure isolation, nondeadline version rotation, cancel-after-delete.
-- `31ae648ed3ecae1a217becb49ebe2060f815400a` — P14 emission gains minimal student subject for CertificateExpired/CertificateArtifactsRendered, six lifecycle types wired to P15.
-- `5669a35be546ee226c3008904e5ebe66b12d3503` — more P14 negative tests + reissued source-version guard.
-- `af7265fe7482c51ced3b8b39150dda0f8979a390` — 25-item bounded recovery from suspended Inbox with ACTIVE status and transactional CAS, wired to opt-in student outbox worker.
-- `5b48096b4598589a73e0b3cb4de52504d9cb77f9` — recovery worker and poison-envelope regression tests.
-- `33eb4d1cfa653cbd9997125946e9257c408738cb` — audit support list reads and require Phase14 certificate origin.
-
-**Explicit source-policy caveats:**
-
-1. **Runtime not executed.** GitHub connector writes and source/diff inspection work. The local execution container cannot reach the GitHub host to clone the complete repository and run project Vitest/TypeScript; therefore all test assertions described here are *authored*, not claimed green. No DB, migration, seed, worker, provider, browser, or E2E run was attempted.
-2. **Certificate delivery is not declared closed.** Although 6 event types now have workers and P14 source references, there is no executed transaction replay. Event ordering for legacy owner events, late student role and missing original certificate during reissue are incomplete. `CertificateArtifactsRendered` deliberately raises `STUDENT_CERTIFICATE_PROJECTION_PENDING` if its original issue is missing: worker retry and reconciliation must be verified.
-3. **Parked replay is bounded and gated.** Recovery only picks `WORKSPACE_SYNC_BLOCKED_SUSPENDED` for ACTIVE workspace rows, CAS claims with a rollback transaction, quarantines bad envelope and logs no private payload. If worker is disabled or an event is quarantined, projection remains pending. ARCHIVED rows are never included.
-4. **Tracker cases are read-only, not an impersonation route.** Support scope + enumerated purpose + mandatory audit protect stage/status/deadline pages with `take:limit+1`; no notes, checklist, or documents are returned. The user-facing student tracker owner continues to own the data.
-5. **Reminder semantics remain a major open risk.** Failed notification delivery no longer falsely reports a committed tracker change as failed, but there is no durable notification reconciliation or a tested guarantee of exactly-once scheduling/cancellation. Operational incident workflow must be designed before closure.
-6. **Cache policy is temporarily correctness-first.** Canonical DB read always wins. Redis no longer serves dashboards until durable invalidation/version generation with recovery and proof; this trades cache acceleration for avoiding stale personal data.
-7. **Additional source tests** now cover gateway P14 allowlist, missing identity subject/foreign aggregate, worker event selection, source-origin spoof, protected case-page HTTP read, reminder delivery outage, cache stale snapshot rejection and suspended Inbox recovery.
-8. **No production or real database mutation.** No migration execution, seed, db push, schema reset, merge, deployment or Section 16 started.
-
-### Remaining closure blockers
-
-`STU-ADM-007/008/009/010/012/013/014/015/018` remain unverified or only partially addressed at the precise plan acceptance level. `FGA-15-001` has a minimal page but no event timeline/DB proof. `FGA-15-002` server-side triage is not built. `STU-ADM-020/023/025` are still open. `STU-ADM-026` stays deferred after Section 28; do not treat its deferral as production verification.
-
-**Final decision for this continuation: `PARTIALLY IMPLEMENTED — FIXES REQUIRED — NOT CLOSED`.** The independently reviewable code is on `codex/section-15-student-support`; no claims of passing Vitest, TypeScript, runtime or production readiness are made.
-
-
-## 8. Second continuation — 2026-10-11
-
-**Commits added in this continuation:** `4027f4184887c75de86104a7edd2c83aea5007b0` (bounded owner reads); `47897fc9b024eeb657cf8a5432534859be5b2bc7` (late-role catchup); `5699c6fe1a8f05459ab0696945b33accaf847421` (signed cursors); `c64c32168b6b1f2fcf8a46ce0c9a51298653882d` (cursor tests); `bb95e83e61469bc62cebb8138a19019654ac8932` (owner provenance); `9ac365e9b053153c376f8775c2aa236a8b9f3bf5` (provisioning diagnostics); `e0b61b7e5b053798d1fab9707b3376bf6e63dfd5` (atomic reminder outbox persistence); `b56849666f7914fc20e945ac40b8e64bda8b99e8` (version-bound reminder consumer); `1726713ec6574e5e3650d7b83889db7b27698aaf` (reminder dispatcher runtime wiring); `865153a6236fe2c29f5f8daba35b07426adbcbfa` (application/gateway tests); `4e40acc9324b9c3ae5a6c6f5ec85063177d674ec` (Prisma tracker transaction tests).
-
-### New security/correctness boundaries
-
-- **P13/P14 data are bounded at the owner repository query.** Support reads at most 13 records and presents 12, returning `TRUNCATED` and null counts if more exist. Student dashboard owner reads at most 51 and presents 50, with explicit partial-failure state. A complete count must never be inferred from a bounded sample.
-- **Late-role owner catchup** is scoped to the identity just granted student role. It reads via trusted owner gateways with deterministic event ids, but intentionally **refuses to claim completion** when more than 50 records need replay. Add true paginated reconciliation before accepting P1 closure.
-- **Signed support cursors** use an expiring HMAC token, filter/limit identity, and constant-time verification; this requires a stable signing secret in each environment. The repository accepts `STUDENT_SUPPORT_CURSOR_SECRET`, falling back to `JWT_PRIVATE_KEY_PEM` if configured; missing/short signing material fails closed on subsequent pages. Secrets never appear in the cursor.
-- **Owner-source diagnostics** distinguish source query time from confirmed owner sync time; P13/P14/P20 provenance is only a read-context indicator, not a freshness SLA or owner version.
-- **Provisioning diagnosis** is a support-authorization-protected, audited read comparing identity, student role, and P15 workspace; it does not perform recovery or reveal identity contact details.
-- **Durable reminder outbox:** the P15 tracker repository now writes `StudentApplicationReminderReconcileRequested` in the exact transaction as create/update/checklist/archive/remove; the worker routes this domain to a dedicated consumer with retry/backoff and version idempotency. `StudentApplicationTrackerUseCases` no longer sends notifications after commits. The consumer checks current owner status/version before creating any notification. Database and notification fault-injection tests are **authored only** and **NOT RUN**.
-
-### Still open before Section 15 closure
-
-1. Run approved **focused** TypeScript / lint and targeted Vitest in a real checkout; no database, E2E or heavy tests were performed, and no result is claimed green.
-2. Paginated late-role reconciliation beyond 50 events, historic source replay correctness and real P13/P14 race/revocation checks.
-3. P15 reminder worker opt-in, retry/dead-letter operational inspection and observed intent idempotency under transaction failures; runtime assurance is still pending.
-4. Complete purpose/case policy and retention controls for support reads; complete P1 freshness/version provenance and strict source envelopes.
-5. P2 lazy support tabs, end-to-end admin i18n, server-side triage filters, and signed cursor configuration validation in deployment.
-6. Defer full database/worker/E2E assurance `STU-ADM-026` until after Section 28, per the approved closure policy.
-
-**Status: `PARTIALLY IMPLEMENTED — FIXES REQUIRED — NOT CLOSED — RUNTIME PENDING`.**
-
-
-## 9. Third continuation — 2026-10-11: lazy support, triage, tracker audit/timeline
-
-New branch-only commits: `696946b6fb67b7aa546a3b34567136f3442a6cf4` (lazy owner API/tests), `dda51f94db6da5186102999a5db6a0b33de991c8` (lazy owner UI), `0323874ce47888bef83d53b0a6ad6ee83531e2ef` (stable hook permission dependency), `9e9af914dc0bc6db80e8722037fd2e47e18791f6` (P15 triage repository contracts), `15ce3dba0662a86931daad6b0febe29fd13e4b73` (triage API tests), `a607e3bf11ac22526cf45cba3704cb466f162ed1` (triage UI), `3b8ac4ca2c297e5e5c46708ca6715ce0cdbcac06` (triage cursor tests), `c0fe9ed5592cda97f79878467f6ee42cc0ecac4d` (atomic tracker audit/timeline/history), `fc2110cc7994269b7a2e039b696bae19a48f3f24` (tracker source tests), `0535f57d7b82e4c0e024136d6744bfc9c6802423` (tracker history HTTP API/tests), `8f8e2b2b02251d411293358899c6678ffc7de0b4` (tracker history UI), `19e433d45a66d041ed53766ddce0464883cde47a` (owner status typing correction).
-
-### New findings and owner boundaries
-
-- Base `GET /admin/students/support/:studentReferenceId` now calls `getSupportDetail(studentReferenceId)` without external owner grants. P13/P14/P20 reads occur only on `/support/:studentReferenceId/owner/{learning|certificates|services}`, after **both** base support authorization and **individual owner permission**. Each successful read requires audit **before sending**; audit failures deny the response.
-- The Admin page requests owner data only after selecting the corresponding tab. Its selected-student and tab request guards reject stale asynchronous responses. An unstable `hasPermission` function was replaced in effect dependencies with the actual boolean decision to avoid re-fetch loops.
-- Triage is a **P15-only** relation query with `integrationInbox` failed/pending and `applicationTrackers` overdue, **not** a services-domain inspector. Explicit kind, signed keyset cursor, limit, minimal rows, and required audit apply. `FGA-15-002` remains partial until P20 service owners expose appropriate scoped triage summaries.
-- P15 tracker commands append audit, timeline and reminder outbox facts within **one Prisma transaction**. No copied personal notes, files, or raw private messages are included in those records. Tracker history requires `studentReferenceId`+trackerId ownership and returns only action/status/version/time, with purpose-gated and audited staff API. Existing outbox consumer continues to handle notification retries.
-- No changes were made to production DB schemas/migrations, seeds, running workers, main, Section 16, deployment, or merges.
-
-**Remaining release blockers:** focused TS/lint/Vitest could not run in the available environment; do not claim pass. Real DB concurrency and outbox contract verification remain deferred. Late-role catch-up over 50 and source-ordered certificate lifecycle, role recovery quarantines, admin bilingual i18n `STU-ADM-023`, durable operational visibility, support case retention, P20 stuck-service triage, and tracker history older-page pagination are not finished.
-
-**Section 15 remains `PARTIALLY IMPLEMENTED — NOT CLOSED / RUNTIME PENDING`.**
-
-
-## 10. Fourth continuation — 2026-10-11: Admin AR/EN translation integration
-
-Commits: `b5615f6dfdd750bcec52c5c4414e06bdfe45497c` (first 29 bilingual keys + app locale integration), `acc933db2aadc423e99c138f7b19da9994ef7d3e` (53 additional AR/EN keys covering owner views and tracker operations), `efcecf01d1a9c51e4246d9e9d90580205cc15b90` (English lifecycle/collection labels). The component uses the existing `I18nProvider`; it does not create a second language preference store. The top-level direction follows `dir` from the provider.
-
-Static source inventory finds **82** `stu_support_*` keys in each locale dictionary, with no unresolved `t('stu_support_*')` references at review time. This is a source consistency check, **not a successful TypeScript or browser test**. Some dynamic strings, fallback errors, dates, table descriptions, ARIA labels and operation details remain Arabic and require a separate full translation pass.
-
-**Unchanged closure ruling:** Section 15 is not closed. `STU-ADM-023` moves from OPEN to PARTIAL, and `STU-ADM-026` remains deferred as originally authorized. The source tree was updated only on `codex/section-15-student-support`; tests/TS/DB/worker/browser did not run and no production or main-branch changes were made.
-
-
-## 11. Fifth continuation — 2026-10-11: owner paging and certificate lifecycle correctness
-
-Commits on `codex/section-15-student-support`: `13711654acfb0af04c7bdcb8b9de63c2dc2a7735` (keyset read contracts and P13/P14 adapters), `e378b4a3d627f46904e0010e39484feff2bc2fcb` (bounded late-role fanout pages), `6529a776316f4ed9f995ca2ceba29109125563cc` (multi-page backfill tests), `c7e5fc73724946a9902340a7e856d4b8adb42eb2` (complete P14 renewal/reissue snapshot), `2119d43bbb2619bd4e4ee410f4e4b840d26b42e3` (P13/P14 pagination and renewal tests), `50358aef3109fcca9294ee1e0b1224570121142c` (CertificateArchived P14→P15 contract), `a23e4c24974209bb997e6db817e013fda605f751` (P14 archive privacy tests), `ac20cc092344586d6d3e9a0728e4ce32f6d2a480` (post-schedule reminder CAS recheck), `a65493e939c4e742bfd33859502118e7c4b81a95` (reminder race test), `97b31ecc57822f956ab322c83625a566ced71915` (owner adapter negative and boundary tests).
-
-**P13/P14 owner read policy.** Internal owner pagination is an explicitly separate optional contract, not support-side offset pagination. P13 keyset is by `CourseEnrollment.id` scoped to `studentReferenceId`; P14 uses its certificate repository's `issuedAt,id` cursor. Each source query reads at most 51 records for a 50-record page; the role-assignment projector processes up to 40 pages sequentially and uses derived immutable event ids. If the cursor fails to advance or the bounded capacity is exceeded, the owner event is NOT falsely acknowledged. There is no durable per-student paging checkpoint beyond reprocessing the role event. High-volume accounts and a source changing concurrently are not yet operationally verified.
-
-**P14 lifecycle.** `CertificateRenewed` and `CertificateReissued` now use the normal public certificate-issued payload for identity/serial/verification/date fields; P14 emits `CertificateArchived` without transferring sensitive reasons, and P15 accepts, projects and replays that lifecycle event, including late role source snapshots. P14 remains the certificate truth owner; P15 only caches the lifecycle read projection.
-
-**P15 reminders.** The asynchronous reminder consumer performs an additional owner-version verification immediately after scheduling to cancel old intents if a newer tracker update committed concurrently. Full delivery atomicity across the notifications subsystem is not assumed, and already-delivered external notifications cannot be recalled.
-
-**Validation:** Added tests to source tree only. No local checkout compilation, TypeScript, Vitest, database, browser, E2E, integration provider, performance or heavy test commands were run. No DB schema changes, migration, main merge or deployment.
-
-**Status: SECTION 15 PARTIALLY IMPLEMENTED — NOT CLOSED.** `STU-ADM-026` remains deferred after Section 28.
-
-
-## 12. Sixth continuation — 2026-10-11 (source improvements; not runtime closure)
-
-- Tracker history now has HMAC-signed student+tracker scoped pages and past/deleted-record lookup through existing P15 timeline proof, with audit before disclosure.
-- P20 payment triage is implemented by the P20 **admin** use case; uses distinct student IDs and exact count, separate owner authorization, explicit purpose and REQUIRED audit. P15 support alone cannot query service payment state.
-- Late-role backfill now uses up to four 50-row owner pages per work item and persists deterministic continuation via the existing P15 outbox. Runtime worker dispatches the continuation separately. Role/identity/aggregate are validated again before processing. Snapshot ordering uses role-assignment time while keeping owner issuance/completion dates.
-- The Operations tab can request an authorized read-only provisioning diagnostic. New unit/HTTP test sources cover continuations, owner triage, history isolation and auditing.
-
-**Closure gate:** No runnable repository checkout or passing CI/Vitest/TypeScript evidence was available in this review. There is still incomplete bilingual dynamic copy, cross-owner version governance, case/retention policy and real replay/DB tests. `STU-ADM-026` remains deferred under the approved plan. Do not mark Section 15 CLOSED, merge or deploy until these gates are met; consult `docs/reviews/section-15-closure-gates.md`.
+See `section-15-closure-gates.md`. No database mutations, migrations, seed,
+backfill, worker sweep, provider delivery, deployment or main merge occurred.
+Only existing schema/contracts were consumed; no migration was added or applied.
+Section 16 was not started. Source closure does not mean `RUNTIME_VALIDATED`,
+`PRODUCTION_GO`, or that the current deployed database/workers are safe/configured.

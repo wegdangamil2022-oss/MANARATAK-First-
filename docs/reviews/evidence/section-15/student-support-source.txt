@@ -1,0 +1,10 @@
+PASS P15 support detail contract
+PASS P15 repository owns support detail
+PASS Support detail exposes provisioning health
+PASS Support detail exposes consent audit without preferences
+PASS Support detail uses linked counts only
+PASS Privileged support mutation has separate RBAC permission
+PASS Support action requires audited reason
+PASS Admin UI hides privileged action without permission
+PASS No impersonation endpoint in support router
+W4 student support: 9/9
