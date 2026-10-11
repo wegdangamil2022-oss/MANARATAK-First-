@@ -141,6 +141,9 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
     delete configuration.expectedUpdatedAt;
     delete configuration.updatedAt;
     const record = await this.prisma.$transaction(async (tx: any) => {
+      // Every evaluation gate mutation shares the deployment gate lock.
+      if (resource === 'evaluations')
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'ai-evaluation-deployment-gates'}, 0))::text AS lock_result`;
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-registry:${resource}:${candidate.key}`}, 0))::text AS lock_result`;
       const previous = await tx.aIRegistryRecord.findUnique({
         where: { resourceType_key: { resourceType: resource, key: candidate.key } },
@@ -377,6 +380,46 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
         existingBinding?.promptVersion === version
       )
         return { ...record.configuration, id: record.id, key: record.key, status: record.status };
+      // Recheck the current immutable evaluation gate and completed evidence under
+      // the same transaction as the production binding switch. An approval checked
+      // in the application outside this lock is insufficient if a gate changed.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'ai-evaluation-deployment-gates'}, 0))::text AS lock_result`;
+      const activeGates = await tx.aIRegistryRecord.findMany({
+        where: { resourceType: 'evaluations', status: 'ACTIVE' },
+      });
+      for (const gate of activeGates) {
+        const definition = gate.configuration as Record<string, any>;
+        if (definition.target?.type !== 'PROMPT' ||
+            definition.target?.key !== promptKey || !definition.deploymentGate) continue;
+        const gateChecksum = createHash('sha256').update(stableStringify({
+          key: gate.key,
+          status: gate.status,
+          capabilityKey: definition.capabilityKey,
+          target: definition.target,
+          dataset: definition.dataset,
+          evaluators: definition.evaluators,
+          deploymentGate: definition.deploymentGate,
+        })).digest('hex');
+        const passedRun = await tx.aIEvaluationRunRecord.findFirst({
+          where: {
+            evaluationKey: gate.key,
+            status: 'COMPLETED',
+            targetType: 'PROMPT',
+            targetKey: promptKey,
+            targetVersion: version,
+            targetChecksum: versionRecord.checksum,
+          },
+          orderBy: { completedAt: 'desc' },
+        });
+        if (!passedRun || passedRun.targetEvidence?.definitionChecksum !== gateChecksum)
+          throw new Error(`AI_EVALUATION_EXACT_GATE_EVIDENCE_REQUIRED:${gate.key}`);
+        if (passedRun.score == null ||
+            passedRun.score < definition.deploymentGate.minimumScore ||
+            passedRun.safetyFailures > definition.deploymentGate.maximumSafetyFailures)
+          throw new Error(`AI_EVALUATION_DEPLOYMENT_GATE_FAILED:${gate.key}`);
+        if (definition.deploymentGate.requiresHumanApproval && !passedRun.approvedBy)
+          throw new Error(`AI_EVALUATION_HUMAN_APPROVAL_REQUIRED:${gate.key}`);
+      }
       await tx.aIPromptDeploymentRecord.updateMany({
         where: { promptKey, environment: 'PRODUCTION', status: 'ACTIVE' },
         data: { status: 'RETIRED', retiredAt: new Date() },
