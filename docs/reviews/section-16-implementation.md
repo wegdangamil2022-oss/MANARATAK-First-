@@ -78,3 +78,18 @@
 5. **FGA-16-001:** redirect correction is live in source; paginated owner lookup, status filters and conflict-friendly UI need completion.
 
 Follow the closure gates in `docs/reviews/section-16-closure-gates.md`. **Do not use `CODE_CLOSED — RUNTIME_DEFERRED` for this commit.** Do not start section 17, merge to main, or publish.
+
+## Continuation — redirect registry and published-related selection
+
+The additional CMS source work on this branch includes:
+
+- FGA-16-001: server-side `searchRedirects` in the CMS owner, application and admin router; bounded `page/pageSize`, strict site/locale, status and source/destination text filters; AR/EN admin search, state filter and pagination. The existing correction/disable command still uses `expectedVersion` and a recorded reason.
+- CMS-ADM-021: replaced the early `take: 200` related-link cutoff with a parameterized published-content join that first filters published site and locale, groups link owners, then applies the bounded final result limit. Added focused repository regression source.
+- Added API negative regressions for cross-site access, invalid active/locale input, excessive page sizes and missing viewer permission, and an application contract regression for paged owner reads.
+- Fixed the public redirect route spec fixture by supplying the `resolveRedirect` mock invoked by the existing HTTP redirect tests.
+
+**Actual verification for this continuation:** 18/18 source-string contract assertions executed against retrieved branch files (9 RBAC/API/UI + 9 approval/projection/EAP/published-join checks); all passed. These are structural/static checks, **not** unit-test, type-check, SQL, browser, or integration PASS. The GitHub Actions branch query returned **0 workflow runs**. Targeted Vitest and TypeScript remain **NOT RUN** because the working container cannot resolve GitHub for cloning and does not have this repository's installed dependency tree.
+
+**New or changed paths:** `packages/domain/src/cms/contracts/ICmsRepository.ts`, `packages/infrastructure/src/cms/PrismaCmsRepository.ts`, `packages/application/src/cms/use-cases/CmsUseCases.ts`, `apps/api/src/presentation/api/router/CmsAdminRouter.ts`, `apps/admin/src/features/cms/CmsOperationsPanels.tsx`, `apps/api/tests/presentation/api/router/CmsAdminRouter.spec.ts`, `apps/api/tests/presentation/api/router/CmsPublicRouter.spec.ts`, `packages/application/tests/cms/CmsUseCases.spec.ts`, and `packages/infrastructure/tests/cms/CmsRelatedPublishedSelection.spec.ts`.
+
+**Status remains PARTIAL — FIXES_REQUIRED** because open source/verification gates documented below and in the closure matrix are not resolved. No database migration, seed, worker job, cache purge, merge, or deployment was performed.
