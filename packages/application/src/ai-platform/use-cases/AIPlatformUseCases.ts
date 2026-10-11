@@ -1995,7 +1995,9 @@ export class AIKnowledgeUseCases {
         throw new Error('AI_EMBEDDING_RESPONSE_INVALID');
       await this.repository.replaceEmbeddings({
         indexKey: input.indexKey,
+        sourceType: input.sourceType,
         sourceReferenceId: input.sourceReferenceId,
+        sourceVersion: input.sourceVersion ?? null,
         modelKey: model.key,
         dimensions: index.dimensions,
         chunks: chunks.map((text, position) => ({
