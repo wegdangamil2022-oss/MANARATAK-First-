@@ -334,6 +334,46 @@ describe('PrismaStudentWorkspaceRepository', () => {
     }));
   });
 
+  it('scopes triage to P15 failed sync inbox facts without reading owner tables',async()=>{
+    const row={id:'workspace-1',studentReferenceId:'student-1',status:'ACTIVE',version:3,
+      updatedAt:new Date('2026-10-11T01:00:00Z')};
+    const client={studentWorkspace:{
+      count:vi.fn().mockResolvedValue(1),
+      findMany:vi.fn().mockResolvedValue([row]),
+    }};
+    const repo=new PrismaStudentWorkspaceRepository(client as any,'triage-testing-signing-secret-32-chars-minimum');
+    const result=await repo.listSupportTriage({kind:'SYNC_FAILED',limit:10});
+    expect(result).toMatchObject({
+      total:1,hasMore:false,nextCursor:null,
+      items:[{studentReferenceId:'student-1',triageKind:'SYNC_FAILED',version:3}],
+    });
+    expect(client.studentWorkspace.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where:expect.objectContaining({AND:expect.arrayContaining([
+        {integrationInbox:{some:{processedAt:null,failureCode:{not:null}}}},
+      ])}),
+      select:{id:true,studentReferenceId:true,status:true,version:true,updatedAt:true},
+      take:11,
+    }));
+  });
+
+  it('binds triage pagination to the selected incident category',async()=>{
+    const rows=[
+      {id:'a',studentReferenceId:'s-1',status:'ACTIVE',version:1,updatedAt:new Date('2026-10-11T01:00:00Z')},
+      {id:'b',studentReferenceId:'s-2',status:'ACTIVE',version:1,updatedAt:new Date('2026-10-10T01:00:00Z')},
+    ];
+    const client={studentWorkspace:{
+      count:vi.fn().mockResolvedValue(2),
+      findMany:vi.fn().mockResolvedValue(rows),
+    }};
+    const repo=new PrismaStudentWorkspaceRepository(client as any,'triage-testing-signing-secret-32-chars-minimum');
+    const page=await repo.listSupportTriage({kind:'APPLICATION_OVERDUE',limit:1});
+    expect(page.hasMore).toBe(true);
+    expect(page.nextCursor).toBeTruthy();
+    await expect(repo.listSupportTriage({kind:'SYNC_FAILED',limit:1,cursor:page.nextCursor!}))
+      .rejects.toThrow('STUDENT_SUPPORT_CURSOR_INVALID');
+    expect(client.studentWorkspace.findMany).toHaveBeenCalledTimes(1);
+  });
+
   it('rejects a stale support reset without an extra audit or outbox', async () => {
     const tx = {
       studentWorkspace: { findUnique: vi.fn().mockResolvedValue(workspace), updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
