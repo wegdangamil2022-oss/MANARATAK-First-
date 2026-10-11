@@ -34,6 +34,7 @@ import {
   Workflow,
 } from 'lucide-react';
 import { adminApiClient } from '../api/client';
+import { useTranslation } from '../i18n/I18nProvider';
 
 type ResourceKey =
   | 'providers'
@@ -104,6 +105,22 @@ interface AsyncJob {
   executionPublicId?: string | null;
 }
 
+const sectionNamesEn: Record<SectionKey, string> = {
+  overview: 'Overview', executions: 'Executions and trace',
+  providers: 'Providers', models: 'Models and pricing', modelPrices: 'Price history',
+  capabilities: 'Capabilities', routingPolicies: 'Routing and fallbacks',
+  prompts: 'Prompts and versions', playground: 'AI playground',
+  guardrails: 'Safety and guardrails', consumers: 'Consumers and budgets',
+  workflows: 'Workflows', evaluations: 'Evaluations',
+  knowledgeIndexes: 'Knowledge and indexes', knowledgeSources: 'Knowledge sources',
+  incidents: 'Incidents', platformSettings: 'Platform settings',
+};
+const groupNamesEn: Record<string, string> = {
+  'المراقبة': 'Monitoring', 'السجلات': 'Registry',
+  'التشغيل': 'Operations', 'الحوكمة': 'Governance',
+  'الأتمتة': 'Automation', 'الجودة': 'Quality', 'المعرفة': 'Knowledge',
+};
+
 const sections: Array<{ key: SectionKey; label: string; group: string; icon: ReactNode }> = [
   { key: 'overview', label: 'نظرة عامة', group: 'المراقبة', icon: <Gauge /> },
   { key: 'executions', label: 'التنفيذ والتتبّع', group: 'المراقبة', icon: <Activity /> },
@@ -125,6 +142,7 @@ const sections: Array<{ key: SectionKey; label: string; group: string; icon: Rea
 ];
 
 export function AIGovernancePage() {
+  const { language, dir } = useTranslation();
   const [guards, setGuards] = useState<Record<string, { dirty: boolean; busy: boolean }>>({});
   const report = useCallback((key: string, state: { dirty: boolean; busy: boolean } | null) => {
     setGuards((previous) => {
@@ -161,7 +179,7 @@ export function AIGovernancePage() {
             event.stopPropagation();
           }
         }}
-        dir="rtl"
+        dir={dir}
         className="mx-auto max-w-[1600px] space-y-6"
       >
         <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-[0_18px_45px_rgba(20,43,95,0.18)] sm:p-8">
@@ -171,20 +189,21 @@ export function AIGovernancePage() {
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
                 <BrainCircuit className="h-4 w-4 text-[#21A7B4]" />
-                <span>مركز الذكاء الاصطناعي والحوكمة · </span>
+                <span>{language === 'en' ? 'Enterprise AI governance ·' : 'مركز الذكاء الاصطناعي والحوكمة ·'}</span>
               </div>
               <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
-                مركز منارتك للذكاء الاصطناعي
+                {language === 'en' ? 'MANARATAK AI Center' : 'مركز منارتك للذكاء الاصطناعي'}
               </h1>
               <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-cyan-50/90">
-                حوكمة مركزية للمزوّدين والنماذج والتوجيه والموجّهات والسلامة والتكلفة والتقييم، دون
-                تخزين أي مفاتيح سرية.
+                {language === 'en'
+                  ? 'Centralized provider, model, routing, prompt, safety, cost and evaluation governance. Provider secrets are not stored here.'
+                  : 'حوكمة مركزية للمزوّدين والنماذج والتوجيه والموجّهات والسلامة والتكلفة والتقييم، دون تخزين أي مفاتيح سرية.'}
               </p>
             </div>
             <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-xs leading-6 backdrop-blur-md shadow-xs shrink-0">
-              <div className="font-bold text-cyan-100">وضع التنفيذ الحالي</div>
+              <div className="font-bold text-cyan-100">{language === 'en' ? 'Current execution state' : 'وضع التنفيذ الحالي'}</div>
               <div className="text-white/80">
-                المزوّد غير المهيأ يظهر NOT_CONFIGURED — ولا يُعد فشلًا
+                {language === 'en' ? 'An unconfigured provider reports NOT_CONFIGURED, not a failed execution.' : 'المزوّد غير المهيأ يظهر NOT_CONFIGURED — ولا يُعد فشلًا'}
               </div>
             </div>
           </div>
@@ -195,7 +214,7 @@ export function AIGovernancePage() {
             <aside className="border-l border-slate-100 bg-slate-50/60 p-4">
               {[...new Set(sections.map((item) => item.group))].map((group) => (
                 <div key={group} className="mb-5">
-                  <div className="mb-2 px-3 text-[11px] font-bold text-[#142B5F]/70">{group}</div>
+                  <div className="mb-2 px-3 text-[11px] font-bold text-[#142B5F]/70">{language === 'en' ? groupNamesEn[group] ?? group : group}</div>
                   <nav className="space-y-1">
                     {sections
                       .filter((item) => item.group === group)
@@ -214,7 +233,7 @@ export function AIGovernancePage() {
                           >
                             {item.icon}
                           </span>
-                          <span>{item.label}</span>
+                          <span>{language === 'en' ? sectionNamesEn[item.key] : item.label}</span>
                         </Link>
                       ))}
                   </nav>
@@ -223,9 +242,9 @@ export function AIGovernancePage() {
             </aside>
             <main className="min-w-0 bg-white p-5 lg:p-8">
               <div className="mb-6 flex items-center gap-2 text-slate-500">
-                <span className="text-xs font-bold">مركز الذكاء الاصطناعي</span>
+                <span className="text-xs font-bold">{language === 'en' ? 'AI Center' : 'مركز الذكاء الاصطناعي'}</span>
                 <ChevronLeft className="h-3.5 w-3.5 text-slate-400" />
-                <h3 className="text-base font-black text-[#142B5F]">{selected.label}</h3>
+                <h3 className="text-base font-black text-[#142B5F]">{language === 'en' ? sectionNamesEn[selected.key] : selected.label}</h3>
               </div>
               {active === 'overview' ? (
                 <OverviewPanel />
