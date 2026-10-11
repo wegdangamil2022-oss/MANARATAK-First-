@@ -117,7 +117,7 @@ export class AIAdminRouter {
     const router = Router();
     const permissionFor = (method: string, path: string): string | null => {
       if (method === 'GET') return 'admin:ai:view';
-      if (method === 'PUT' && /^\\/[^/]+\\/[^/]+$/.test(path)) {
+      if (method === 'PUT' && /^\/[^/]+\/[^/]+$/.test(path)) {
         const resource = path.split('/')[1];
         if (['guardrails', 'platformSettings', 'incidents'].includes(resource))
           return 'admin:ai:safety:manage';
@@ -128,23 +128,23 @@ export class AIAdminRouter {
         return 'admin:ai:configure';
       }
       if (method !== 'POST') return null;
-      if (/^\\/async-queue\\/jobs\\/[^/]+\\/(RETRY|CANCEL)$/.test(path))
+      if (/^\/async-queue\/jobs\/[^/]+\/(RETRY|CANCEL)$/.test(path))
         return 'admin:ai:queue:operate';
-      if (/^\\/prompts\\/[^/]+\\/versions$/.test(path)) return 'admin:ai:prompt:author';
-      if (/^\\/prompts\\/[^/]+\\/versions\\/[^/]+\\/approve$/.test(path))
+      if (/^\/prompts\/[^/]+\/versions$/.test(path)) return 'admin:ai:prompt:author';
+      if (/^\/prompts\/[^/]+\/versions\/[^/]+\/approve$/.test(path))
         return 'admin:ai:prompt:review';
-      if (/^\\/prompts\\/[^/]+\\/(deployments|rollback)$/.test(path)) return 'admin:ai:deploy';
-      if (/^\\/evaluation-runs\\/[^/]+\\/approve$/.test(path))
+      if (/^\/prompts\/[^/]+\/(deployments|rollback)$/.test(path)) return 'admin:ai:deploy';
+      if (/^\/evaluation-runs\/[^/]+\/approve$/.test(path))
         return 'admin:ai:prompt:review';
-      if (/^\\/knowledge-indexes\\/[^/]+\\/index$/.test(path))
+      if (/^\/knowledge-indexes\/[^/]+\/index$/.test(path))
         return 'admin:ai:index:approve';
-      if (/^\\/incidents\\/[^/]+\\/events$/.test(path))
+      if (/^\/incidents\/[^/]+\/events$/.test(path))
         return 'admin:ai:safety:manage';
       if (path === '/playground/execute' ||
-          /^\\/workflows\\/[^/]+\\/runs$/.test(path) ||
-          /^\\/workflow-runs\\/[^/]+\\/execute$/.test(path) ||
-          /^\\/evaluations\\/[^/]+\\/runs$/.test(path) ||
-          /^\\/evaluation-runs\\/[^/]+\\/execute$/.test(path))
+          /^\/workflows\/[^/]+\/runs$/.test(path) ||
+          /^\/workflow-runs\/[^/]+\/execute$/.test(path) ||
+          /^\/evaluations\/[^/]+\/runs$/.test(path) ||
+          /^\/evaluation-runs\/[^/]+\/execute$/.test(path))
         return 'admin:ai:execute';
       return null;
     };
