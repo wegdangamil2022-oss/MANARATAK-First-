@@ -113,10 +113,11 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         throw new Error('DATABASE_URL is required for this runtime mode');
       }
 
-      if (isProductionOrStaging && (!productionReadinessReport.ready || productionReadinessReport.blockerCount > 0)) {
+      if (isProductionOrStaging && (!productionReadinessReport.ready || productionReadinessReport.blockerCount > 0)
+      ) {
         const blockerDetails = productionReadinessReport.findings
-          .filter(f => f.severity === 'BLOCKER')
-          .map(f => `[${f.id}] ${f.area}: ${f.message}`)
+          .filter((f) => f.severity === 'BLOCKER')
+          .map((f) => `[${f.id}] ${f.area}: ${f.message}`)
           .join('; ');
 
         throw new Error(
@@ -175,10 +176,10 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       // Assert Production Security Guardrails
       SecurityValidator.assertProductionSecurity(currentEnv, securityService, rateLimiter);
 
-    // Bootstrap API
-    const apiRouter = new ApiRouter();
-    const app = express();
-    const isAiStudio = process.env.MANARATAK_GOOGLE_AI_STUDIO === 'true';
+      // Bootstrap API
+      const apiRouter = new ApiRouter();
+      const app = express();
+      const isAiStudio = process.env.MANARATAK_GOOGLE_AI_STUDIO === 'true';
     const trustProxyHops = Number(config.getOptional<string>('TRUST_PROXY_HOPS') || currentEnv.TRUST_PROXY_HOPS || (isAiStudio ? 1 : 0));
     if (Number.isInteger(trustProxyHops) && trustProxyHops > 0) {
       app.set('trust proxy', trustProxyHops);
@@ -192,7 +193,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       adminWebUrl: config.getOptional<string>('ADMIN_WEB_URL') || currentEnv.ADMIN_WEB_URL,
       additionalOrigins: config.getOptional<string>('SECURITY_CORS_ORIGINS') || currentEnv.SECURITY_CORS_ORIGINS,
     });
-    if (corsOrigins.length === 0) corsOrigins.push('http://localhost:3000');
+      if (corsOrigins.length === 0) corsOrigins.push('http://localhost:3000');
     const rateLimitMax = parseInt(config.getOptional<string>('SECURITY_RATE_LIMIT_MAX') || '100', 10);
     const rateLimitWindow = parseInt(config.getOptional<string>('SECURITY_RATE_LIMIT_WINDOW_MS') || '60000', 10);
     const adminAuthMode = SecurityMiddlewareFactory.resolveAdminAuthMode({
@@ -201,24 +202,24 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     });
     // Security Middleware
     app.use(SecurityMiddlewareFactory.createSecurityHeaders({ enabled: cspEnabled }));
-    app.use(SecurityMiddlewareFactory.createCors({ allowedOrigins: corsOrigins }));
+      app.use(SecurityMiddlewareFactory.createCors({ allowedOrigins: corsOrigins }));
 
     // Logging Middleware (Establishes AsyncLogContext early for all request phases)
     const loggingMiddleware = new LoggingMiddleware(logContext, requestLogger);
-    app.use(loggingMiddleware.generate());
+      app.use(loggingMiddleware.generate());
 
     app.use(SecurityMiddlewareFactory.createRateLimiter(securityService, { limit: rateLimitMax, windowMs: rateLimitWindow }));
-    app.use(express.json({ limit: '256kb', strict: true }));
-    app.use(SecurityMiddlewareFactory.createCsrfGuard(securityService));
+      app.use(express.json({ limit: '256kb', strict: true }));
+      app.use(SecurityMiddlewareFactory.createCsrfGuard(securityService));
 
     // Monitoring Middleware
     const monitoringMiddleware = new MonitoringMiddleware(monitoringService);
-    app.use(monitoringMiddleware.generate());
+      app.use(monitoringMiddleware.generate());
 
     // Register DI Dependencies against the same process-owned resource registry.
     registerDependencies(currentEnv, config, runtimeResources);
-    app.locals.runtimeResourceRegistry = runtimeResources;
-    app.locals.monitoringProvider = monitoringProvider;
+      app.locals.runtimeResourceRegistry = runtimeResources;
+      app.locals.monitoringProvider = monitoringProvider;
     container.register({ 
       monitoringService: awilix.asValue(monitoringService),
       securityService: awilix.asValue(securityService)
@@ -235,13 +236,19 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       }),
     });
 
-    monitoringService.registerIndicator({
-      name: 'telemetry-exporter',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => monitoringProvider
-        ? monitoringProvider.getReadiness()
-        : ({ status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED, timestamp: new Date().toISOString(), error: 'OTEL_EXPORTER_NOT_CONFIGURED', details: { capabilityStatus: 'NOT_CONFIGURED' } }),
-    });
+      monitoringService.registerIndicator({
+        name: 'telemetry-exporter',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () =>
+          monitoringProvider
+            ? monitoringProvider.getReadiness()
+            : {
+                status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED,
+                timestamp: new Date().toISOString(),
+                error: 'OTEL_EXPORTER_NOT_CONFIGURED',
+                details: { capabilityStatus: 'NOT_CONFIGURED' },
+              },
+      });
 
     const describeRuntimeCapability = (provider: any): string => {
       if (!provider) return 'UNAVAILABLE';
@@ -322,28 +329,32 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       },
     });
 
-    monitoringService.registerIndicator({
-      name: 'database-schema',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
-        try {
-          const prisma = container.resolve<any>('prisma');
+      monitoringService.registerIndicator({
+        name: 'database-schema',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
+          try {
+            const prisma = container.resolve<any>('prisma');
           const rows = await prisma.$queryRawUnsafe(
             'SELECT COUNT(*)::int AS "failedCount" FROM "_prisma_migrations" WHERE "finished_at" IS NULL AND "rolled_back_at" IS NULL',
           );
-          const failedCount = Number(Array.isArray(rows) ? rows[0]?.failedCount ?? 0 : 0);
-          const healthy = failedCount === 0;
-          return {
-            status: healthy ? HealthStatus.UP : (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED),
-            timestamp: new Date().toISOString(),
-            ...(!healthy ? { error: 'DATABASE_MIGRATION_HISTORY_HAS_INCOMPLETE_ENTRIES' } : {}),
+            const failedCount = Number(Array.isArray(rows) ? (rows[0]?.failedCount ?? 0) : 0);
+            const healthy = failedCount === 0;
+            return {
+              status: healthy
+                ? HealthStatus.UP
+                : isProductionOrStaging
+                  ? HealthStatus.DOWN
+                  : HealthStatus.DEGRADED,
+              timestamp: new Date().toISOString(),
+              ...(!healthy ? { error: 'DATABASE_MIGRATION_HISTORY_HAS_INCOMPLETE_ENTRIES' } : {}),
             details: {
               capabilityStatus: healthy ? 'APPLIED_HISTORY_HEALTHY' : 'INCOMPLETE_MIGRATION_HISTORY',
               failedOrIncompleteMigrations: failedCount,
               scope: 'APPLIED_MIGRATION_HISTORY_ONLY',
             },
-          };
-        } catch (error: any) {
+            };
+          } catch (error: any) {
           return {
             status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED,
             timestamp: new Date().toISOString(),
@@ -354,13 +365,13 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
             },
           };
         }
-      },
-    });
+        },
+      });
 
-    monitoringService.registerIndicator({
-      name: 'asset-platform',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
+      monitoringService.registerIndicator({
+        name: 'asset-platform',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
         const capabilities = {
           storage: describeRuntimeCapability(assetRuntimeProviders.storage),
           malwareScanner: describeRuntimeCapability(assetRuntimeProviders.malwareScanner),
@@ -369,19 +380,25 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         const unavailable = Object.values(capabilities).some((value) =>
           ['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(value),
         );
-        return {
-          status: unavailable
-            ? (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED)
-            : HealthStatus.UP,
-          timestamp: new Date().toISOString(),
-          ...(unavailable ? { error: 'ASSET_RUNTIME_CAPABILITY_GAP' } : {}),
-          details: {
-            capabilityStatus: unavailable ? (isProductionOrStaging ? 'UNAVAILABLE' : 'DEVELOPMENT_ONLY') : 'AVAILABLE',
-            ...capabilities,
-          },
-        };
-      },
-    });
+          return {
+            status: unavailable
+              ? isProductionOrStaging
+                ? HealthStatus.DOWN
+                : HealthStatus.DEGRADED
+              : HealthStatus.UP,
+            timestamp: new Date().toISOString(),
+            ...(unavailable ? { error: 'ASSET_RUNTIME_CAPABILITY_GAP' } : {}),
+            details: {
+              capabilityStatus: unavailable
+                ? isProductionOrStaging
+                  ? 'UNAVAILABLE'
+                  : 'DEVELOPMENT_ONLY'
+                : 'AVAILABLE',
+              ...capabilities,
+            },
+          };
+        },
+      });
 
     // Register Redis Health Indicator if available
     const redisUrl = config.getOptional<string>('REDIS_URL') || currentEnv.REDIS_URL;
@@ -430,72 +447,92 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       });
     }
 
-    const studentToolRateLimiter = container.resolve<any>('studentToolRateLimiter');
-    monitoringService.registerIndicator({
-      name: 'student-tools-quota',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
+      const studentToolRateLimiter = container.resolve<any>('studentToolRateLimiter');
+      monitoringService.registerIndicator({
+        name: 'student-tools-quota',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
         const productionCapable = studentToolRateLimiter?.isProductionReady === true
           && studentToolRateLimiter?.capabilityStatus === 'PRODUCTION_CAPABLE';
-        return {
-          status: productionCapable ? HealthStatus.UP : (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED),
-          timestamp: new Date().toISOString(),
-          ...((isProductionOrStaging && !productionCapable) ? { error: 'STUDENT_TOOL_QUOTA_STORE_NOT_DISTRIBUTED' } : {}),
+          return {
+            status: productionCapable
+              ? HealthStatus.UP
+              : isProductionOrStaging
+                ? HealthStatus.DOWN
+                : HealthStatus.DEGRADED,
+            timestamp: new Date().toISOString(),
+            ...(isProductionOrStaging && !productionCapable
+              ? { error: 'STUDENT_TOOL_QUOTA_STORE_NOT_DISTRIBUTED' }
+              : {}),
           details: { capabilityStatus: productionCapable ? 'PRODUCTION_CAPABLE' : 'DEVELOPMENT_ONLY' },
-        };
-      },
-    });
+          };
+        },
+      });
 
     // Operational capability probes used by the Health & Readiness control plane.
     // These probes expose configuration/capability state only; they never return secrets.
     const importQueueGateway = container.resolve<any>('importQueueGateway');
-    const importRawSnapshotStore = container.resolve<any>('importRawSnapshotStore');
-    const sourceRegistryGateway = container.resolve<any>('sourceRegistryGateway');
-    monitoringService.registerIndicator({
-      name: 'import-foundation',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
+      const importRawSnapshotStore = container.resolve<any>('importRawSnapshotStore');
+      const sourceRegistryGateway = container.resolve<any>('sourceRegistryGateway');
+      monitoringService.registerIndicator({
+        name: 'import-foundation',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
         const queuePersistence = String(importQueueGateway?.persistenceClassification || describeRuntimeCapability(importQueueGateway));
-        const snapshotCapability = describeRuntimeCapability(importRawSnapshotStore);
-        const sourceRegistryCapability = describeRuntimeCapability(sourceRegistryGateway);
-        const durableQueue = queuePersistence === 'DURABLE';
+          const snapshotCapability = describeRuntimeCapability(importRawSnapshotStore);
+          const sourceRegistryCapability = describeRuntimeCapability(sourceRegistryGateway);
+          const durableQueue = queuePersistence === 'DURABLE';
         const durableSnapshot = !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(snapshotCapability);
-        const productionReady = durableQueue && durableSnapshot;
+          const productionReady = durableQueue && durableSnapshot;
         const developmentOnly = !durableQueue || snapshotCapability === 'LOCAL_ONLY' || sourceRegistryCapability === 'LOCAL_ONLY';
 
-        return {
-          status: isProductionOrStaging
-            ? (productionReady ? HealthStatus.UP : HealthStatus.DOWN)
-            : (developmentOnly ? HealthStatus.DEGRADED : HealthStatus.UP),
-          timestamp: new Date().toISOString(),
-          ...((isProductionOrStaging && !productionReady) ? { error: 'IMPORT_RUNTIME_NOT_PRODUCTION_READY' } : {}),
-          details: {
-            capabilityStatus: productionReady ? 'AVAILABLE' : (developmentOnly ? 'DEVELOPMENT_ONLY' : 'NOT_CONFIGURED'),
-            queuePersistence,
-            snapshotCapability,
-            sourceRegistryCapability,
-          },
-        };
-      },
-    });
+          return {
+            status: isProductionOrStaging
+              ? productionReady
+                ? HealthStatus.UP
+                : HealthStatus.DOWN
+              : developmentOnly
+                ? HealthStatus.DEGRADED
+                : HealthStatus.UP,
+            timestamp: new Date().toISOString(),
+            ...(isProductionOrStaging && !productionReady
+              ? { error: 'IMPORT_RUNTIME_NOT_PRODUCTION_READY' }
+              : {}),
+            details: {
+              capabilityStatus: productionReady
+                ? 'AVAILABLE'
+                : developmentOnly
+                  ? 'DEVELOPMENT_ONLY'
+                  : 'NOT_CONFIGURED',
+              queuePersistence,
+              snapshotCapability,
+              sourceRegistryCapability,
+            },
+          };
+        },
+      });
 
-    monitoringService.registerIndicator({
-      name: 'admin-auth',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
-        const strict = adminAuthMode === 'strict';
-        return {
-          status: strict ? HealthStatus.UP : (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED),
-          timestamp: new Date().toISOString(),
-          ...(!strict ? { error: 'ADMIN_AUTH_NOT_STRICT' } : {}),
+      monitoringService.registerIndicator({
+        name: 'admin-auth',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
+          const strict = adminAuthMode === 'strict';
+          return {
+            status: strict
+              ? HealthStatus.UP
+              : isProductionOrStaging
+                ? HealthStatus.DOWN
+                : HealthStatus.DEGRADED,
+            timestamp: new Date().toISOString(),
+            ...(!strict ? { error: 'ADMIN_AUTH_NOT_STRICT' } : {}),
           details: {
             capabilityStatus: strict ? 'AVAILABLE' : 'DEVELOPMENT_ONLY',
             mode: adminAuthMode,
             sessionPersistence: 'PRISMA',
           },
-        };
-      },
-    });
+          };
+        },
+      });
 
     monitoringService.registerIndicator({
       name: 'ai-providers',
@@ -529,68 +566,83 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       },
     });
 
-    monitoringService.registerIndicator({
-      name: 'payment-gateway',
-      isOptional: true,
-      checkHealth: async () => {
+      monitoringService.registerIndicator({
+        name: 'payment-gateway',
+        isOptional: true,
+        checkHealth: async () => {
         const providerKey = String(currentEnv.FINANCE_PAYMENT_PROVIDER_KEY || 'PRIMARY_PAYMENT').trim();
-        const registry = container.resolve<any>('financePaymentGatewayRegistry');
-        const provider = typeof registry?.get === 'function' ? registry.get(providerKey) : null;
+          const registry = container.resolve<any>('financePaymentGatewayRegistry');
+          const provider = typeof registry?.get === 'function' ? registry.get(providerKey) : null;
         const configured = Boolean(provider && typeof provider.isConfigured === 'function' && provider.isConfigured());
-        const capabilityStatus = provider && typeof provider.runtimeStatus === 'function'
-          ? String(provider.runtimeStatus())
-          : (configured ? 'RUNTIME_PENDING' : 'NOT_CONFIGURED');
-        const ready = configured && capabilityStatus === 'READY';
-        return {
-          status: ready ? HealthStatus.UP : (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED),
-          timestamp: new Date().toISOString(),
+          const capabilityStatus =
+            provider && typeof provider.runtimeStatus === 'function'
+              ? String(provider.runtimeStatus())
+              : configured
+                ? 'RUNTIME_PENDING'
+                : 'NOT_CONFIGURED';
+          const ready = configured && capabilityStatus === 'READY';
+          return {
+            status: ready
+              ? HealthStatus.UP
+              : isProductionOrStaging
+                ? HealthStatus.DOWN
+                : HealthStatus.DEGRADED,
+            timestamp: new Date().toISOString(),
           ...(!ready ? { error: configured ? 'PAYMENT_PROVIDER_RUNTIME_NOT_READY' : 'PAYMENT_PROVIDER_NOT_CONFIGURED' } : {}),
-          details: { capabilityStatus, providerConfigured: configured, providerKey },
-        };
-      },
-    });
+            details: { capabilityStatus, providerConfigured: configured, providerKey },
+          };
+        },
+      });
 
-    monitoringService.registerIndicator({
-      name: 'notifications',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
-        const intentRepo = container.resolve<any>('notificationIntentRepo');
-        const templateRepo = container.resolve<any>('notificationTemplateRepo');
-        const preferenceGateway = container.resolve<any>('notificationPrefGateway');
-        const deliveryGateway = container.resolve<any>('notificationDeliveryGateway');
-        const persistence = describeRuntimeCapability(intentRepo);
-        const templates = describeRuntimeCapability(templateRepo);
-        const preferences = describeRuntimeCapability(preferenceGateway);
-        const provider = describeRuntimeCapability(deliveryGateway);
+      monitoringService.registerIndicator({
+        name: 'notifications',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
+          const intentRepo = container.resolve<any>('notificationIntentRepo');
+          const templateRepo = container.resolve<any>('notificationTemplateRepo');
+          const preferenceGateway = container.resolve<any>('notificationPrefGateway');
+          const deliveryGateway = container.resolve<any>('notificationDeliveryGateway');
+          const persistence = describeRuntimeCapability(intentRepo);
+          const templates = describeRuntimeCapability(templateRepo);
+          const preferences = describeRuntimeCapability(preferenceGateway);
+          const provider = describeRuntimeCapability(deliveryGateway);
         const backgroundWorkerEnabled = config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true;
         const deliveryCadenceConfigured = Boolean(config.getOptional<string>('BACKGROUND_NOTIFICATION_CRON'));
         const durable = !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(persistence)
           && !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(templates);
-        const providerReady = provider === 'PRODUCTION_CAPABLE';
+          const providerReady = provider === 'PRODUCTION_CAPABLE';
         const available = durable && providerReady && backgroundWorkerEnabled && deliveryCadenceConfigured;
-        return {
-          status: available ? HealthStatus.UP : (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED),
-          timestamp: new Date().toISOString(),
-          ...(!available ? { error: 'NOTIFICATION_RUNTIME_NOT_READY' } : {}),
-          details: {
-            capabilityStatus: available ? 'PRODUCTION_CAPABLE' : (durable ? 'RUNTIME_PENDING' : 'NOT_CONFIGURED'),
-            persistence,
-            templates,
-            preferences,
-            provider,
-            backgroundWorkerEnabled,
-            deliveryCadenceConfigured,
-          },
-        };
-      },
-    });
+          return {
+            status: available
+              ? HealthStatus.UP
+              : isProductionOrStaging
+                ? HealthStatus.DOWN
+                : HealthStatus.DEGRADED,
+            timestamp: new Date().toISOString(),
+            ...(!available ? { error: 'NOTIFICATION_RUNTIME_NOT_READY' } : {}),
+            details: {
+              capabilityStatus: available
+                ? 'PRODUCTION_CAPABLE'
+                : durable
+                  ? 'RUNTIME_PENDING'
+                  : 'NOT_CONFIGURED',
+              persistence,
+              templates,
+              preferences,
+              provider,
+              backgroundWorkerEnabled,
+              deliveryCadenceConfigured,
+            },
+          };
+        },
+      });
 
-    monitoringService.registerIndicator({
-      name: 'polling-workers',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
-        const registry = container.resolve<any>('pollingWorkerRuntimeRegistry');
-        const now = Date.now();
+      monitoringService.registerIndicator({
+        name: 'polling-workers',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
+          const registry = container.resolve<any>('pollingWorkerRuntimeRegistry');
+          const now = Date.now();
         const configured = {
           certificateCompletion: config.getOptional<boolean>('CERTIFICATE_COMPLETION_WORKER_ENABLED') === true,
           studentWorkspace: config.getOptional<boolean>('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED') === true,
@@ -612,36 +664,40 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         const expectedNames = Object.entries(configured).filter(([, enabled]) => enabled).map(([name]) => name);
         const unavailable = expectedNames.filter((name) => workers[name as keyof typeof workers].state === 'STOPPED');
         const degraded = expectedNames.filter((name) => workers[name as keyof typeof workers].state === 'DEGRADED');
-        const allConfigured = Object.values(configured).every(Boolean);
-        const healthy = allConfigured && unavailable.length === 0 && degraded.length === 0;
-        return {
-          status: healthy ? HealthStatus.UP : (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED),
-          timestamp: new Date().toISOString(),
+          const allConfigured = Object.values(configured).every(Boolean);
+          const healthy = allConfigured && unavailable.length === 0 && degraded.length === 0;
+          return {
+            status: healthy
+              ? HealthStatus.UP
+              : isProductionOrStaging
+                ? HealthStatus.DOWN
+                : HealthStatus.DEGRADED,
+            timestamp: new Date().toISOString(),
           ...(!healthy ? { error: unavailable.length ? 'POLLING_WORKER_STOPPED' : 'POLLING_WORKER_DEGRADED' } : {}),
           details: {
             capabilityStatus: healthy ? 'PRODUCTION_CAPABLE' : 'RUNTIME_PENDING',
             configured,
             workers,
           },
-        };
-      },
-    });
+          };
+        },
+      });
 
-    monitoringService.registerIndicator({
-      name: 'background-jobs',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
-        const repository = container.resolve<any>('bgJobRepo');
-        const execution = container.resolve<any>('bgJobGateway');
-        const runtimeState = container.resolve<any>('backgroundWorkerRuntimeState');
-        const repositoryStatus = describeRuntimeCapability(repository);
-        const executionStatus = describeRuntimeCapability(execution);
-        const workerEnabled = config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true;
+      monitoringService.registerIndicator({
+        name: 'background-jobs',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
+          const repository = container.resolve<any>('bgJobRepo');
+          const execution = container.resolve<any>('bgJobGateway');
+          const runtimeState = container.resolve<any>('backgroundWorkerRuntimeState');
+          const repositoryStatus = describeRuntimeCapability(repository);
+          const executionStatus = describeRuntimeCapability(execution);
+          const workerEnabled = config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true;
         const durable = repository?.persistenceClassification === 'DURABLE'
           && execution?.persistenceClassification === 'DURABLE'
           && execution?.capabilityStatus === 'PRODUCTION_CAPABLE';
-        let queueSnapshot: any = null;
-        let queueError: string | undefined;
+          let queueSnapshot: any = null;
+          let queueError: string | undefined;
         try {
           queueSnapshot = typeof execution?.getOperationalSnapshot === 'function'
             ? await execution.getOperationalSnapshot()
@@ -649,30 +705,38 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         } catch (error: any) {
           queueError = error?.message || 'BACKGROUND_JOB_QUEUE_HEALTH_FAILED';
         }
-        const runtimeSnapshot = runtimeState?.snapshot?.() ?? { state: 'STOPPED' };
+          const runtimeSnapshot = runtimeState?.snapshot?.() ?? { state: 'STOPPED' };
         const available = durable && workerEnabled && !queueError && runtimeSnapshot.state !== 'STOPPED';
-        return {
-          status: available ? HealthStatus.UP : (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED),
-          timestamp: new Date().toISOString(),
+          return {
+            status: available
+              ? HealthStatus.UP
+              : isProductionOrStaging
+                ? HealthStatus.DOWN
+                : HealthStatus.DEGRADED,
+            timestamp: new Date().toISOString(),
           ...(!available ? { error: queueError || (!workerEnabled ? 'BACKGROUND_WORKER_DISABLED' : 'BACKGROUND_JOB_RUNTIME_NOT_READY') } : {}),
-          details: {
-            capabilityStatus: available ? 'PRODUCTION_CAPABLE' : (durable ? 'RUNTIME_PENDING' : 'NOT_CONFIGURED'),
-            repository: repositoryStatus,
-            execution: executionStatus,
-            persistence: execution?.persistenceClassification,
-            workerEnabled,
-            worker: runtimeSnapshot,
-            queue: queueSnapshot,
-          },
-        };
-      },
-    });
+            details: {
+              capabilityStatus: available
+                ? 'PRODUCTION_CAPABLE'
+                : durable
+                  ? 'RUNTIME_PENDING'
+                  : 'NOT_CONFIGURED',
+              repository: repositoryStatus,
+              execution: executionStatus,
+              persistence: execution?.persistenceClassification,
+              workerEnabled,
+              worker: runtimeSnapshot,
+              queue: queueSnapshot,
+            },
+          };
+        },
+      });
 
-    monitoringService.registerIndicator({
-      name: 'public-web',
-      isOptional: !isProductionOrStaging,
-      checkHealth: async () => {
-        const target = String(currentEnv.PUBLIC_WEB_URL || currentEnv.CORS_ORIGIN || '').trim();
+      monitoringService.registerIndicator({
+        name: 'public-web',
+        isOptional: !isProductionOrStaging,
+        checkHealth: async () => {
+          const target = String(currentEnv.PUBLIC_WEB_URL || currentEnv.CORS_ORIGIN || '').trim();
         if (!target) {
           return {
             status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED,
@@ -682,7 +746,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
           };
         }
 
-        let parsed: URL;
+          let parsed: URL;
         try {
           parsed = new URL(target);
         } catch {
@@ -702,39 +766,46 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
           };
         }
 
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 2500);
-        const startedAt = Date.now();
-        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 2500);
+          const startedAt = Date.now();
+          try {
           const response = await fetch(parsed.toString(), { method: 'HEAD', redirect: 'manual', signal: controller.signal });
-          const latencyMs = Date.now() - startedAt;
-          const reachable = response.status >= 200 && response.status < 500;
-          return {
-            status: reachable ? HealthStatus.UP : (isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED),
-            timestamp: new Date().toISOString(),
-            ...(!reachable ? { error: `PUBLIC_WEB_HTTP_${response.status}` } : {}),
+            const latencyMs = Date.now() - startedAt;
+            const reachable = response.status >= 200 && response.status < 500;
+            return {
+              status: reachable
+                ? HealthStatus.UP
+                : isProductionOrStaging
+                  ? HealthStatus.DOWN
+                  : HealthStatus.DEGRADED,
+              timestamp: new Date().toISOString(),
+              ...(!reachable ? { error: `PUBLIC_WEB_HTTP_${response.status}` } : {}),
             details: {
               capabilityStatus: reachable ? 'REACHABLE' : 'UNREACHABLE',
               latencyMs,
               httpStatus: response.status,
             },
-          };
-        } catch (error: any) {
-          return {
-            status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED,
-            timestamp: new Date().toISOString(),
-            error: error?.name === 'AbortError' ? 'PUBLIC_WEB_PROBE_TIMEOUT' : (error?.message || 'PUBLIC_WEB_PROBE_FAILED'),
-            details: { capabilityStatus: 'UNREACHABLE', latencyMs: Date.now() - startedAt },
-          };
-        } finally {
-          clearTimeout(timeout);
-        }
-      },
-    });
+            };
+          } catch (error: any) {
+            return {
+              status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.DEGRADED,
+              timestamp: new Date().toISOString(),
+              error:
+                error?.name === 'AbortError'
+                  ? 'PUBLIC_WEB_PROBE_TIMEOUT'
+                  : error?.message || 'PUBLIC_WEB_PROBE_FAILED',
+              details: { capabilityStatus: 'UNREACHABLE', latencyMs: Date.now() - startedAt },
+            };
+          } finally {
+            clearTimeout(timeout);
+          }
+        },
+      });
 
-    // Define API v1 Router
-    const v1Router = Router();
-    v1Router.use(canonicalProblemDetailsMiddleware);
+      // Define API v1 Router
+      const v1Router = Router();
+      v1Router.use(canonicalProblemDetailsMiddleware);
 
     // Register versioned routes
 
@@ -758,18 +829,22 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     // Admin Security Middleware
     const adminTokenProvider = container.resolve<ITokenProvider>('tokenProvider');
-    const adminSessionManager = container.resolve<ISessionManager>('sessionManager');
-    const principalAccessValidator = container.resolve<any>('principalAccessValidator');
+      const adminSessionManager = container.resolve<ISessionManager>('sessionManager');
+      const principalAccessValidator = container.resolve<any>('principalAccessValidator');
     v1Router.use('/admin', SecurityMiddlewareFactory.createAdminGuard({
       mode: adminAuthMode,
       tokenProvider: adminTokenProvider,
       sessionManager: adminSessionManager,
       principalAccessValidator,
     }));
-    const apiIdempotencyStore = container.resolve<any>('apiIdempotencyStore');
-    v1Router.use('/admin', createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
+      const apiIdempotencyStore = container.resolve<any>('apiIdempotencyStore');
+    // P18 tests keep private replay results in encrypted owner custody, rather than generic responseBody JSON.
+    v1Router.use('/admin', (req, res, next) => {
+      if (/^\/student-tools\/[^/]+\/test\/?$/.test(req.path)) return next();
+      return createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true })(req, res, next);
+    });
     v1Router.use('/admin', new MutationAuditMiddleware(auditRecordRepository, 'ADMIN').generate());
-    const requireAdminPermission = SecurityMiddlewareFactory.createAdminPermissionGuard;
+      const requireAdminPermission = SecurityMiddlewareFactory.createAdminPermissionGuard;
 
     // Core Admin Domain Routers (Identity & Audit)
     v1Router.use('/admin/identities', requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
@@ -793,7 +868,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     // P7 Reference Data and P8 Academic Taxonomy
     v1Router.use('/admin/reference-data', requireAdminPermission('admin:reference-data:manage'), container.resolve<Router>('referenceDataAdminRouter'));
-    v1Router.use('/reference-data', container.resolve<Router>('referenceDataPublicRouter'));
+      v1Router.use('/reference-data', container.resolve<Router>('referenceDataPublicRouter'));
     // Study Destinations are an editorial/domain profile layered on canonical country references.
     // Authorization reuses the existing reference-data management capability without moving profile ownership into P7.
     v1Router.use('/admin/study-destinations', requireAdminPermission('admin:reference-data:manage'), container.resolve<Router>('studyDestinationAdminRouter'));
@@ -807,11 +882,11 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     // Phase 9: University Platform (Preserved structure, no data import)
     v1Router.use('/admin/universities', requireAdminPermission('admin:universities:manage'), container.resolve<Router>('universityAdminRouter'));
-    v1Router.use('/public/universities', container.resolve<Router>('universityPublicRouter'));
+      v1Router.use('/public/universities', container.resolve<Router>('universityPublicRouter'));
 
     // Phase 10: Major Platform
     v1Router.use('/admin/majors', requireAdminPermission('admin:majors:manage'), container.resolve<Router>('majorAdminRouter'));
-    v1Router.use('/public/majors', container.resolve<Router>('majorPublicRouter'));
+      v1Router.use('/public/majors', container.resolve<Router>('majorPublicRouter'));
 
     // 3. Phase 5 enterprise control-plane services.
     // Legacy route locations are preserved for compatibility, but every mutation-capable
@@ -830,8 +905,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/settings', ...protectControlPlane('admin:settings:manage', 'settingsRuntimeRouter'));
     v1Router.use('/files', ...protectControlPlane('admin:assets:manage', 'fileManagementRouter'));
     v1Router.use('/notifications', ...protectControlPlane('admin:platform:manage', 'notificationRouter'));
-    v1Router.use('/search', lazyRouter('searchRouter'));
-    v1Router.use('/cache', ...protectControlPlane('admin:platform:manage', 'cacheRouter'));
+      v1Router.use('/search', lazyRouter('searchRouter'));
+      v1Router.use('/cache', ...protectControlPlane('admin:platform:manage', 'cacheRouter'));
     v1Router.use('/background-jobs', ...protectControlPlane('admin:platform:manage', 'backgroundJobRouter'));
     v1Router.use('/workflows', ...protectControlPlane('admin:platform:manage', 'workflowRouter'));
     v1Router.use('/api-services', ...protectControlPlane('admin:platform:manage', 'apiFoundationRouter'));
@@ -840,38 +915,38 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     // 4. Future Phase 11+ Routers (Lazy) - Post-Phase-10 Extensions
     v1Router.use('/admin/scholarships', requireAdminPermission('admin:scholarships:manage'), lazyRouter('scholarshipAdminRouter'));
-    v1Router.use('/public/scholarships', lazyRouter('scholarshipPublicRouter'));
+      v1Router.use('/public/scholarships', lazyRouter('scholarshipPublicRouter'));
     // Static /imported must be registered before /admin/courses/:id can match "imported".
     v1Router.use('/admin/courses/imported', requireAdminPermission('admin:courses:manage'), lazyRouter('importedCourseAdminRouter'));
     v1Router.use('/admin/courses/providers', requireAdminPermission('admin:courses:manage'), lazyRouter('courseProviderRegistryRouter'));
     v1Router.use('/admin/courses', requireAdminPermission('admin:courses:manage'), lazyRouter('courseAdminRouter'));
-    v1Router.use('/public/courses', lazyRouter('coursePublicRouter'));
-    v1Router.use('/public/graph', lazyRouter('crossDomainReadModelRouter'));
-    v1Router.use('/student/courses', lazyRouter('courseLearnerRouter'));
+      v1Router.use('/public/courses', lazyRouter('coursePublicRouter'));
+      v1Router.use('/public/graph', lazyRouter('crossDomainReadModelRouter'));
+      v1Router.use('/student/courses', lazyRouter('courseLearnerRouter'));
     // Phase 14 W10: authenticated admin boundary is inherited from /admin;
     // CertificateAdminRouter applies fine-grained view/author/checker/lifecycle/issuer permissions per route.
     v1Router.use('/admin/certificates', lazyRouter('certificateAdminRouter'));
-    v1Router.use('/public/certificates', lazyRouter('certificatePublicRouter'));
-    v1Router.use('/student', lazyRouter('studentWorkspaceRouter'));
+      v1Router.use('/public/certificates', lazyRouter('certificatePublicRouter'));
+      v1Router.use('/student', lazyRouter('studentWorkspaceRouter'));
     v1Router.use('/admin/students', requireAdminPermission('admin:students:support'), lazyRouter('studentSupportAdminRouter'));
-    v1Router.use('/admin/student-tools', requireAdminPermission('admin:student-tools:manage'), lazyRouter('studentToolsAdminRouter'));
+      v1Router.use('/admin/student-tools', lazyRouter('studentToolsAdminRouter'));
     v1Router.use(
       '/public/student-tools',
       new OptionalAuthMiddleware(adminTokenProvider, adminSessionManager, principalAccessValidator).generate(),
       lazyRouter('studentToolsPublicRouter'),
     );
-    v1Router.use('/admin/cms', lazyRouter('cmsAdminRouter')); // CMS router enforces fine-grained permissions.
+      v1Router.use('/admin/cms', lazyRouter('cmsAdminRouter')); // CMS router enforces fine-grained permissions.
     v1Router.use('/public/cms', lazyRouter('cmsPublicRouter'));
     v1Router.use('/admin/services', requireAdminPermission('admin:services:manage'), lazyRouter('serviceAdminRouter'));
-    v1Router.use('/public/services', lazyRouter('servicePublicRouter'));
+      v1Router.use('/public/services', lazyRouter('servicePublicRouter'));
     v1Router.use('/admin/finance', requireAdminPermission('admin:finance:manage'), lazyRouter('financeAdminRouter'));
     v1Router.use('/admin/careers', requireAdminPermission('admin:careers:manage'), lazyRouter('careerAdminRouter'));
-    v1Router.use('/public/careers', lazyRouter('careerPublicRouter'));
+      v1Router.use('/public/careers', lazyRouter('careerPublicRouter'));
     // Phase 17 privileged operator gateway. Canonical Admin path inherits the
     // strict /admin auth + mutation-audit boundary; the legacy /ai alias keeps
     // compatibility but composes the same explicit control-plane boundary.
     v1Router.use('/admin/ai/operator', requireAdminPermission('admin:ai:execute'), lazyRouter('aiGatewayRouter'));
-    v1Router.use('/ai', ...protectControlPlane('admin:ai:execute', 'aiGatewayRouter'));
+      v1Router.use('/ai', ...protectControlPlane('admin:ai:execute', 'aiGatewayRouter'));
     // Authentication/audit inherited from /admin; AI Admin enforces granular RBAC per operation.
     v1Router.use('/admin/ai', lazyRouter('aiAdminRouter'));
 
@@ -901,16 +976,16 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       });
     });
 
-    apiRouter.registerVersion('v1', v1Router);
-    
-    // Mount API Router on /api
-    app.use('/api', apiRouter.getRouter());
+      apiRouter.registerVersion('v1', v1Router);
 
-    // Global Error Handler Middleware
-    app.use(exceptionHandler.generate());
+      // Mount API Router on /api
+      app.use('/api', apiRouter.getRouter());
 
-    appInstance = app;
-    return app;
+      // Global Error Handler Middleware
+      app.use(exceptionHandler.generate());
+
+      appInstance = app;
+      return app;
     } catch (err) {
       // A failed cold start can be retried on a warm Function instance.
       // Release partially initialized pools/timers before allowing that retry.

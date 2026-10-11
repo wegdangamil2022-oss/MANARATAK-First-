@@ -2,6 +2,7 @@ export enum RetentionOwner {
   IMPORT = 'IMPORT',
   AUDIT = 'AUDIT',
   ASSET = 'ASSET',
+  STUDENT_PRIVATE_RESULT = 'STUDENT_PRIVATE_RESULT',
 }
 
 export enum RetentionDisposition {
@@ -39,15 +40,49 @@ export function decideRetention(candidate: RetentionCandidate, now: Date): Reten
   if (candidate.legalHoldUntil && candidate.legalHoldUntil.getTime() > now.getTime()) {
     return { decisionKey, owner: candidate.owner, recordId: candidate.recordId, expiresAt: candidate.expiresAt, disposition: RetentionDisposition.KEEP, reason: 'LEGAL_HOLD_ACTIVE', decidedAt: now };
   }
+  if (candidate.owner === RetentionOwner.STUDENT_PRIVATE_RESULT)
+    return {
+      decisionKey,
+      owner: candidate.owner,
+      recordId: candidate.recordId,
+      expiresAt: candidate.expiresAt,
+      disposition: RetentionDisposition.PURGE,
+      reason: 'STUDENT_PRIVATE_RESULT_EXPIRED',
+      decidedAt: now,
+    };
   if (candidate.owner === RetentionOwner.AUDIT) {
-    return { decisionKey, owner: candidate.owner, recordId: candidate.recordId, expiresAt: candidate.expiresAt, disposition: RetentionDisposition.ARCHIVE, reason: 'AUDIT_EVIDENCE_ARCHIVE', decidedAt: now };
+    return {
+      decisionKey,
+      owner: candidate.owner,
+      recordId: candidate.recordId,
+      expiresAt: candidate.expiresAt,
+      disposition: RetentionDisposition.ARCHIVE,
+      reason: 'AUDIT_EVIDENCE_ARCHIVE',
+      decidedAt: now,
+    };
   }
   if (candidate.owner === RetentionOwner.IMPORT) {
-    return { decisionKey, owner: candidate.owner, recordId: candidate.recordId, expiresAt: candidate.expiresAt, disposition: RetentionDisposition.PURGE, reason: 'IMPORT_RAW_PAYLOAD_EXPIRED', decidedAt: now };
+    return {
+      decisionKey,
+      owner: candidate.owner,
+      recordId: candidate.recordId,
+      expiresAt: candidate.expiresAt,
+      disposition: RetentionDisposition.PURGE,
+      reason: 'IMPORT_RAW_PAYLOAD_EXPIRED',
+      decidedAt: now,
+    };
   }
   const category = String(candidate.retentionCategory ?? '').toUpperCase();
   if (candidate.owner === RetentionOwner.ASSET && category === 'PERMANENT') {
-    return { decisionKey, owner: candidate.owner, recordId: candidate.recordId, expiresAt: candidate.expiresAt, disposition: RetentionDisposition.KEEP, reason: 'ASSET_PERMANENT_POLICY', decidedAt: now };
+    return {
+      decisionKey,
+      owner: candidate.owner,
+      recordId: candidate.recordId,
+      expiresAt: candidate.expiresAt,
+      disposition: RetentionDisposition.KEEP,
+      reason: 'ASSET_PERMANENT_POLICY',
+      decidedAt: now,
+    };
   }
   return { decisionKey, owner: candidate.owner, recordId: candidate.recordId, expiresAt: candidate.expiresAt, disposition: RetentionDisposition.PURGE, reason: 'ASSET_RETENTION_EXPIRED', decidedAt: now };
 }

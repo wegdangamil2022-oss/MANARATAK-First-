@@ -1,0 +1,277 @@
+{
+  "section": 19,
+  "phase": "P18",
+  "date": "2026-10-11",
+  "baseCommit": "51fdc22",
+  "branch": "fix/codex-section-19-student-tools",
+  "verdict": "SOURCE_IMPLEMENTED_TARGETED_VERIFIED_RUNTIME_PENDING",
+  "scope": {
+    "officialRegistryEntries": 83,
+    "implementedHandlers": 4,
+    "sourceTasks": "TOOL-ADM-001 through TOOL-ADM-027; FGA-19-001 and FGA-19-002",
+    "runtimeTask": "TOOL-ADM-028 deferred per supplied plan"
+  },
+  "environment": {
+    "node": "24.19.0",
+    "npm": "11.9.0",
+    "repositoryNodeRequirement": ">=22.16.0 <23",
+    "node22CI": "NOT_RUN"
+  },
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "status": "PASS"
+    },
+    {
+      "command": "npm run build",
+      "status": "PASS",
+      "notes": "Existing font/chunk build warnings; no deployment."
+    },
+    {
+      "command": "npx vitest run <student-tools, P17 AI, retention, P15 workspace and scholarship regression paths>",
+      "status": "PASS",
+      "files": 48,
+      "tests": 378,
+      "paths": [
+        "packages/application/tests/student-tools",
+        "packages/infrastructure/tests/student-tools",
+        "packages/domain/tests/student-tools",
+        "apps/api/tests/presentation/api/router/StudentToolsPublicRouter.spec.ts",
+        "apps/api/tests/presentation/api/router/StudentToolsAdminRouter.spec.ts",
+        "apps/admin/tests/pages/StudentToolsLocalization.spec.tsx",
+        "packages/application/tests/ai-platform",
+        "packages/infrastructure/tests/ai-platform",
+        "packages/application/tests/retention",
+        "packages/domain/tests/retention",
+        "packages/infrastructure/tests/students/PrismaStudentWorkspaceRepository.spec.ts",
+        "packages/application/tests/students/StudentWorkspaceUseCases.spec.ts",
+        "packages/infrastructure/tests/scholarships",
+        "packages/application/tests/scholarships"
+      ]
+    },
+    {
+      "command": "node --test tests/security/admin-audit-coverage.test.mjs",
+      "status": "PASS",
+      "tests": 7
+    },
+    {
+      "command": "node scripts/verify-phase18-source.mjs",
+      "status": "PASS",
+      "gates": 15
+    },
+    {
+      "command": "node scripts/verify-ai-tools-source-closure.mjs",
+      "status": "PASS",
+      "checks": 64
+    },
+    {
+      "command": "node scripts/architecture/verify-di-reachability.mjs",
+      "status": "PASS",
+      "registrations": 365,
+      "unreachable": 0
+    },
+    {
+      "command": "node scripts/architecture/verify-persistence-boundaries.mjs",
+      "status": "PASS",
+      "models": 260,
+      "directCrossOwnerWrites": 0
+    },
+    {
+      "command": "node scripts/quality/verify-source-quality.mjs",
+      "status": "PASS",
+      "packageCycles": 0,
+      "fileCycles": 0,
+      "newAccessibilityFindings": 0
+    },
+    {
+      "command": "node scripts/ci/prisma-source-gate.mjs",
+      "status": "PASS",
+      "databaseConnection": "NONE",
+      "operations": [
+        "validate",
+        "generate"
+      ]
+    },
+    {
+      "command": "node scripts/ci/verify-source-closure-manifest.mjs",
+      "status": "PASS",
+      "gates": 29,
+      "verifiers": 54,
+      "notes": "Manifest consistency only; does not claim every verifier ran."
+    },
+    {
+      "command": "npx eslint <all modified/new TS/TSX/MJS files>",
+      "status": "PASS_WITH_WARNINGS",
+      "errors": 0,
+      "warnings": 375,
+      "notes": "Includes existing source anys and structural Prisma test doubles; not warning-free."
+    },
+    {
+      "command": "node scripts/security/scan-secrets.mjs",
+      "status": "PASS"
+    },
+    {
+      "command": "node scripts/git/validate-branch-name.mjs fix/codex-section-19-student-tools",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check and git diff --cached --check",
+      "status": "PASS"
+    },
+    {
+      "command": "node scripts/architecture/verify-admin-audit-coverage.mjs",
+      "status": "FAIL_PREEXISTING_BASELINE",
+      "findings": 89,
+      "sameFindingsOnUnchangedBase": true,
+      "section19Findings": 0,
+      "baseHandlers": 377,
+      "currentHandlers": 379,
+      "notes": "Only section-19 inventory was refreshed; unrelated owner contract baselines were not silently approved."
+    },
+    {
+      "command": "DATABASE_MUTATIONS_ALLOWED=false DATABASE_ENVIRONMENT=source npm run translation:quality:source",
+      "status": "PASS",
+      "notes": "Admin dictionary keys use the existing quoted-key convention."
+    },
+    {
+      "command": "node scripts/verify-w1-source.mjs",
+      "status": "PASS",
+      "checks": 136,
+      "notes": "Strict parser and quota-503 source checks accept multiline formatting without relaxing validation."
+    },
+    {
+      "command": "node --test tests/security/strict-edge-validation-remediation-source.test.mjs",
+      "status": "PASS",
+      "tests": 3
+    },
+    {
+      "command": "npm run remediation:verify",
+      "status": "PASS",
+      "verifierGroups": 17,
+      "notes": "Student-tools registry seed hash/version updated; W13 asserts canonical filtering with 10-query and 25-candidate bounds instead of the superseded whole-catalog scan."
+    },
+    {
+      "command": "node scripts/verify-p8-plan-closure.mjs",
+      "status": "PASS",
+      "checks": 54,
+      "notes": "Scholarship verifier reflects canonical bounded queries from section 19."
+    },
+    {
+      "command": "DATABASE_MUTATIONS_ALLOWED=false DATABASE_ENVIRONMENT=source node scripts/ci/run-source-closure-manifest.mjs",
+      "status": "LOCAL_ENVIRONMENT_BLOCKED",
+      "notes": "Passed remediation and plan gates; local CMS nginx source gate blocked because nginx is not installed. GitHub workflow provisions nginx."
+    }
+  ],
+  "migrations": [
+    {
+      "name": "20261011180000_p15_private_tool_results",
+      "owner": "student",
+      "status": "SOURCE_ONLY_UNAPPLIED"
+    },
+    {
+      "name": "20261011180100_p18_release_governance",
+      "owner": "student_tools",
+      "status": "SOURCE_ONLY_UNAPPLIED"
+    }
+  ],
+  "runtimeLimits": [
+    "No real DB or legacy plaintext backfill",
+    "No provider spend or real student inputs",
+    "No browser/deployment E2E",
+    "No role/key/P17 budget provisioning",
+    "No production release",
+    "Existing transient v1 artifacts require approved drain/compatibility custody before v2 rollout",
+    "Regional feature unavailable until trusted resolver is approved"
+  ],
+  "baselineAuditFindings": [
+    "UNREVIEWED_MUTATION:POST /admin/academic-taxonomy/imports/:id/apply @AcademicTaxonomyAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/academic-taxonomy/imports/:id/refresh @AcademicTaxonomyAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/academic-taxonomy/imports/:id/review @AcademicTaxonomyAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/academic-taxonomy/imports/preview @AcademicTaxonomyAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/academic-taxonomy/mappings/preview @AcademicTaxonomyAdminRouter",
+    "UNREVIEWED_MUTATION:PUT /admin/academic-taxonomy/nodes/:nodeId @AcademicTaxonomyAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/academic-taxonomy/review/bulk @AcademicTaxonomyAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:PUT /admin/ai/:resource/:key @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/async-queue/jobs/:publicId/:action @AIAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/ai/configuration/:resource/:key/:action @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/evaluation-runs/:publicId/approve @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/evaluation-runs/:publicId/execute @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/evaluations/:key/runs @AIAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/ai/executions/:publicId/reconciliation/:action @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/incidents/:publicId/events @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/knowledge-indexes/:key/index @AIAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/ai/knowledge-indexes/:key/remove @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/operator/execute @AIGatewayRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/operator/executions @AIGatewayRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/operator/executions/:publicId/cancel @AIGatewayRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/playground/execute @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/prompts/:key/deployments @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/prompts/:key/rollback @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/prompts/:key/versions @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/prompts/:key/versions/:version/approve @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/workflow-runs/:publicId/execute @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/ai/workflows/:key/runs @AIAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:PUT /admin/cms/announcements @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/announcements/:id/archive @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/announcements/:id/publish @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/block-schemas @CmsAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/cms/block-schemas/:id/approve @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:PUT /admin/cms/blocks @CmsAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/cms/blocks/:id/archive @CmsAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/cms/blocks/:id/publish @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/categories @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:PATCH /admin/cms/content/:id @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/approve @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/archive @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/cancel-schedule @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/change-slug @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:PUT /admin/cms/content/:id/domain-links @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:PUT /admin/cms/content/:id/localized @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/publish @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/reject @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/revisions/:locale/:revisionId/restore @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/schedule @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/content/:id/submit-review @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:PUT /admin/cms/navigation @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/navigation/:id/publish @CmsAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/cms/operations/failed-schedules/:id/retry @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/operations/process-due-schedules @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/redirects @CmsAdminRouter",
+    "UNREVIEWED_MUTATION:PATCH /admin/cms/redirects/:id @CmsAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/cms/tags @CmsAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/courses/:id/assessment-reviews/:attemptId/grade @CourseAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/international-tests/:id/manual-names @InternationalTestAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/international-tests/:id/mark-publishable @InternationalTestAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/international-tests/:id/profile @InternationalTestAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/international-tests/:id/publish @InternationalTestAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/international-tests/:id/remove-relationship @InternationalTestAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/international-tests/:id/review-block @InternationalTestAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/international-tests/:id/review-source-names @InternationalTestAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/international-tests/:id/review-transition @InternationalTestAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/international-tests/:id/revoke-source @InternationalTestAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/international-tests/:id/unpublish @InternationalTestAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/international-tests/:id/verify-source @InternationalTestAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/:id/archive @MajorAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/:id/classification-mappings @MajorAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/:id/mark-publishable @MajorAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/:id/mark-ready @MajorAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/:id/publish @MajorAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/:id/reject @MajorAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/majors/:id/review-graph @MajorAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/majors/:id/review-version @MajorAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/:id/unpublish @MajorAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/majors/:id/working-copy @MajorAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/new-candidates/:candidateKey/approve @MajorAdminRouter",
+    "AUDIT_CONTRACT_CHANGED:POST /admin/majors/new-candidates/:candidateKey/link @MajorAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/majors/new-candidates/:candidateKey/reject @MajorAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/reference-data/cities/:id/reconcile-country @ReferenceDataAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/reference-data/governance/provider-mappings/reassign @ReferenceDataAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/reference-data/owner-imports/:id/apply @ReferenceDataAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/reference-data/owner-imports/:id/refresh @ReferenceDataAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/reference-data/owner-imports/:id/review @ReferenceDataAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/reference-data/owner-imports/preview @ReferenceDataAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/reference-data/standards/snapshots @ReferenceDataAdminRouter",
+    "UNREVIEWED_MUTATION:POST /admin/reference-data/standards/snapshots/:id/review @ReferenceDataAdminRouter"
+  ]
+}

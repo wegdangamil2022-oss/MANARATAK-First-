@@ -189,61 +189,67 @@ function AdminLayout() {
   return (
     <BrowserRouter basename={adminBasename}>
       <div className="min-h-screen bg-slate-50 text-[#142B5F] flex flex-col font-sans">
-        {adminAccess === 'authorized' && <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#142B5F] text-white shadow-sm overflow-hidden p-1 border border-[#21A7B4]/20 shrink-0">
-              <img
-                src="/brand/manaratak-logo.png"
-                alt="MANARATAK"
-                className="h-full w-full object-contain rounded-xl"
-                onError={(e) => {
-                  // Fallback to stylized 'M' if image not found
-                  (e.currentTarget as HTMLElement).style.display = 'none';
-                  const parent = e.currentTarget.parentElement;
-                  if (parent && !parent.querySelector('.fallback-m')) {
-                    const span = document.createElement('span');
-                    span.className = 'fallback-m text-sm font-black text-white';
-                    span.textContent = 'M';
-                    parent.appendChild(span);
-                  }
-                }}
-              />
+        {adminAccess === 'authorized' && (
+          <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#142B5F] text-white shadow-sm overflow-hidden p-1 border border-[#21A7B4]/20 shrink-0">
+                <img
+                  src="/brand/manaratak-logo.png"
+                  alt="MANARATAK"
+                  className="h-full w-full object-contain rounded-xl"
+                  onError={(e) => {
+                    // Fallback to stylized 'M' if image not found
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent && !parent.querySelector('.fallback-m')) {
+                      const span = document.createElement('span');
+                      span.className = 'fallback-m text-sm font-black text-white';
+                      span.textContent = 'M';
+                      parent.appendChild(span);
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <h1 className="text-base font-black tracking-tight text-[#142B5F] sm:text-lg">
+                  {t('admin_title')}
+                </h1>
+                <p className="text-[10px] font-bold text-[#0E7C86]">{t('admin_control_plane')}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-base font-black tracking-tight text-[#142B5F] sm:text-lg">{t('admin_title')}</h1>
-              <p className="text-[10px] font-bold text-[#0E7C86]">{t('admin_control_plane')}</p>
-            </div>
-          </div>
-          {adminAccess === 'authorized' && (
-            <div className="flex items-center gap-2">
-              <a
-                href={(import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '') || '/'}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-[#0E7C86] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs"
-              >
-                <ArrowLeftRight className="h-4 w-4" />
-                <span className="hidden sm:inline">{language === 'ar' ? 'العودة للموقع الرئيسي' : 'Back to main site'}</span>
-              </a>
-              <button
-                type="button"
-                onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-[#142B5F] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs"
-              >
-                <Languages className="h-4 w-4 text-[#0E7C86]" />
-                {t('admin_lang_switch')}
-              </button>
-              {!localReadOnly && (
+            {adminAccess === 'authorized' && (
+              <div className="flex items-center gap-2">
+                <a
+                  href={(import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '') || '/'}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-[#0E7C86] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs"
+                >
+                  <ArrowLeftRight className="h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {language === 'ar' ? 'العودة للموقع الرئيسي' : 'Back to main site'}
+                  </span>
+                </a>
                 <button
                   type="button"
-                  onClick={() => void lockAdmin()}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100 shadow-xs"
+                  onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-[#142B5F] transition hover:border-[#21A7B4] hover:bg-slate-50 shadow-xs"
                 >
-                  <LockKeyhole className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('lock')}</span>
+                  <Languages className="h-4 w-4 text-[#0E7C86]" />
+                  {t('admin_lang_switch')}
                 </button>
-              )}
-            </div>
-          )}
-        </header>}
+                {!localReadOnly && (
+                  <button
+                    type="button"
+                    onClick={() => void lockAdmin()}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100 shadow-xs"
+                  >
+                    <LockKeyhole className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('lock')}</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </header>
+        )}
         {localReadOnly && adminAccess === 'authorized' && (
           <div className="border-b border-[#D6A43B]/35 bg-[#F4D999]/18 px-6 py-3 text-center text-xs font-extrabold text-[#7A5A14]">
             {t('admin_local_readonly_notice')}
@@ -252,64 +258,78 @@ function AdminLayout() {
 
         {adminAccess === 'authorized' ? (
           <AdminAuthorizationProvider permissions={adminPermissions}>
-          <div className="flex flex-1 flex-col lg:flex-row">
-            <AdminNavigation />
-            <main className="min-w-0 flex-1 p-4 sm:p-6">
-              <AdminPermissionNotice />
-              <Routes>
-                <Route path="/" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/dashboard'} replace />} />
-                <Route path="/dashboard" element={<RequireAdminPermission permission="admin:platform:manage"><AdminDashboardPage /></RequireAdminPermission>} />
-                <Route path="/review-queue" element={<RequireAdminPermission permission="admin:platform:manage"><AdminReviewQueuePage /></RequireAdminPermission>} />
-                <Route path="/imports" element={<RequireAdminPermission permission="admin:imports:manage"><ImportAdminPage /></RequireAdminPermission>} />
-                <Route path="/imports/scholarships" element={<RequireAdminPermission permission="admin:imports:manage"><ScholarshipImportCenterPage /></RequireAdminPermission>} />
-                <Route path="/imports/:domainKey" element={<RequireAdminPermission permission="admin:imports:manage"><DomainImportCenterPage /></RequireAdminPermission>} />
-                <Route path="/health-readiness" element={<RequireAdminPermission permission="admin:platform:manage"><AdminHealthReadinessPage /></RequireAdminPermission>} />
-                <Route path="/notifications" element={<RequireAdminPermission permission="admin:platform:manage"><NotificationOperationsPage /></RequireAdminPermission>} />
-                <Route path="/scholarships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipListPage /></RequireAdminPermission>} />
-                <Route path="/scholarships/:id" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipDetailPage /></RequireAdminPermission>} />
-                <Route path="/scholarships/:id/relationships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipRelationshipEditorPage /></RequireAdminPermission>} />
-                <Route path="/admin/scholarships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipListPage /></RequireAdminPermission>} />
-                <Route path="/admin/scholarships/:id" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipDetailPage /></RequireAdminPermission>} />
-                <Route path="/admin/scholarships/:id/relationships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipRelationshipEditorPage /></RequireAdminPermission>} />
-                <Route path="/universities" element={<RequireAdminPermission permission="admin:universities:manage"><UniversityAdminPage /></RequireAdminPermission>} />
-                <Route path="/universities/:id" element={<RequireAdminPermission permission="admin:universities:manage"><UniversityRelationshipEditorPage /></RequireAdminPermission>} />
-                <Route path="/majors" element={<RequireAdminPermission permission="admin:majors:manage"><MajorAdminPage /></RequireAdminPermission>} />
-                <Route path="/majors/:id" element={<RequireAdminPermission permission="admin:majors:manage"><MajorDetailPage /></RequireAdminPermission>} />
-                <Route path="/translations" element={<RequireAdminPermission permission="admin:cms:manage"><AdminTranslationWorkspacePage /></RequireAdminPermission>} />
-                <Route path="/courses" element={<RequireAdminPermission permission="admin:courses:manage"><CourseListPage /></RequireAdminPermission>} />
-                <Route path="/courses/providers" element={<RequireAdminPermission permission="admin:courses:manage"><CourseProviderRegistryPage /></RequireAdminPermission>} />
-                <Route path="/courses/:id" element={<RequireAdminPermission permission="admin:courses:manage"><CourseDetailPage /></RequireAdminPermission>} />
-                <Route path="/certificates" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
-                <Route path="/certificates/:id" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateDetailPage /></RequireAdminPermission>} />
-                <Route path="/cms" element={<RequireAdminPermission permission="admin:cms:view"><CmsAdminPage /></RequireAdminPermission>} />
-                <Route path="/services" element={<RequireAdminPermission permission="admin:services:manage"><ServicesAdminPage /></RequireAdminPermission>} />
-                <Route path="/finance" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceAdminPage /></RequireAdminPermission>} />
-                <Route path="/finance/invoices/:id" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceInvoiceDetailPage /></RequireAdminPermission>} />
-                <Route path="/careers" element={<RequireAdminPermission permission="admin:careers:manage"><CareerAdminPage /></RequireAdminPermission>} />
-                <Route path="/international-tests" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestsAdminPage /></RequireAdminPermission>} />
-                <Route path="/international-tests/:id" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestDetailPage /></RequireAdminPermission>} />
-                <Route path="/admin/international-tests" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestsAdminPage /></RequireAdminPermission>} />
-                <Route path="/admin/international-tests/:id" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestDetailPage /></RequireAdminPermission>} />
-                <Route path="/ai" element={<RequireAdminPermission permission="admin:ai:view"><AIGovernancePage /></RequireAdminPermission>} />
-                <Route path="/ai/:section" element={<RequireAdminPermission permission="admin:ai:view"><AIGovernancePage /></RequireAdminPermission>} />
-                <Route path="/ai-governance" element={<Navigate to="/ai" replace />} />
-                <Route path="/student-tools" element={<RequireAdminPermission permission="admin:student-tools:manage"><StudentToolsAdminPage /></RequireAdminPermission>} />
-                <Route path="/student-tools/:toolKey" element={<RequireAdminPermission permission="admin:student-tools:manage"><StudentToolsAdminPage /></RequireAdminPermission>} />
-                <Route path="/study-destinations" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationsAdminPage /></RequireAdminPermission>} />
-                <Route path="/study-destinations/:countryIso2Code" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationDetailPage /></RequireAdminPermission>} />
-                <Route path="/identities" element={<RequireAdminPermission permission="admin:identities:manage"><IdentityAdminPage /></RequireAdminPermission>} />
-                <Route path="/authorization" element={<RequireAdminPermission permission="admin:authorization:manage"><AuthorizationAdminPage /></RequireAdminPermission>} />
-                <Route path="/audit" element={<RequireAdminPermission permission="admin:audit:manage"><AuditCenterPage /></RequireAdminPermission>} />
-                <Route path="/assets" element={<RequireAdminPermission permission="admin:assets:manage"><AssetAdminPage /></RequireAdminPermission>} />
-                <Route path="/students" element={<RequireAdminPermission permission="admin:students:support"><StudentSupportAdminPage /></RequireAdminPermission>} />
-                <Route path="/settings" element={<RequireAdminPermission permission="admin:settings:manage"><SettingsAdminPage /></RequireAdminPermission>} />
-                <Route path="/settings/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />
-                <Route path="/academic-taxonomy" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyAdminPage /></RequireAdminPermission>} />
-                <Route path="/academic-taxonomy/:nodeId" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyDetailPage /></RequireAdminPermission>} />
-                <Route path="*" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/dashboard'} replace />} />
-              </Routes>
-            </main>
-          </div>
+            <div className="flex flex-1 flex-col lg:flex-row">
+              <AdminNavigation />
+              <main className="min-w-0 flex-1 p-4 sm:p-6">
+                <AdminPermissionNotice />
+                <Routes>
+                  <Route path="/" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/dashboard'} replace />} />
+                  <Route path="/dashboard" element={<RequireAdminPermission permission="admin:platform:manage"><AdminDashboardPage /></RequireAdminPermission>} />
+                  <Route path="/review-queue" element={<RequireAdminPermission permission="admin:platform:manage"><AdminReviewQueuePage /></RequireAdminPermission>} />
+                  <Route path="/imports" element={<RequireAdminPermission permission="admin:imports:manage"><ImportAdminPage /></RequireAdminPermission>} />
+                  <Route path="/imports/scholarships" element={<RequireAdminPermission permission="admin:imports:manage"><ScholarshipImportCenterPage /></RequireAdminPermission>} />
+                  <Route path="/imports/:domainKey" element={<RequireAdminPermission permission="admin:imports:manage"><DomainImportCenterPage /></RequireAdminPermission>} />
+                  <Route path="/health-readiness" element={<RequireAdminPermission permission="admin:platform:manage"><AdminHealthReadinessPage /></RequireAdminPermission>} />
+                  <Route path="/notifications" element={<RequireAdminPermission permission="admin:platform:manage"><NotificationOperationsPage /></RequireAdminPermission>} />
+                  <Route path="/scholarships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipListPage /></RequireAdminPermission>} />
+                  <Route path="/scholarships/:id" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipDetailPage /></RequireAdminPermission>} />
+                  <Route path="/scholarships/:id/relationships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipRelationshipEditorPage /></RequireAdminPermission>} />
+                  <Route path="/admin/scholarships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipListPage /></RequireAdminPermission>} />
+                  <Route path="/admin/scholarships/:id" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipDetailPage /></RequireAdminPermission>} />
+                  <Route path="/admin/scholarships/:id/relationships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipRelationshipEditorPage /></RequireAdminPermission>} />
+                  <Route path="/universities" element={<RequireAdminPermission permission="admin:universities:manage"><UniversityAdminPage /></RequireAdminPermission>} />
+                  <Route path="/universities/:id" element={<RequireAdminPermission permission="admin:universities:manage"><UniversityRelationshipEditorPage /></RequireAdminPermission>} />
+                  <Route path="/majors" element={<RequireAdminPermission permission="admin:majors:manage"><MajorAdminPage /></RequireAdminPermission>} />
+                  <Route path="/majors/:id" element={<RequireAdminPermission permission="admin:majors:manage"><MajorDetailPage /></RequireAdminPermission>} />
+                  <Route path="/translations" element={<RequireAdminPermission permission="admin:cms:manage"><AdminTranslationWorkspacePage /></RequireAdminPermission>} />
+                  <Route path="/courses" element={<RequireAdminPermission permission="admin:courses:manage"><CourseListPage /></RequireAdminPermission>} />
+                  <Route path="/courses/providers" element={<RequireAdminPermission permission="admin:courses:manage"><CourseProviderRegistryPage /></RequireAdminPermission>} />
+                  <Route path="/courses/:id" element={<RequireAdminPermission permission="admin:courses:manage"><CourseDetailPage /></RequireAdminPermission>} />
+                  <Route path="/certificates" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateAdminPage /></RequireAdminPermission>} />
+                  <Route path="/certificates/:id" element={<RequireAdminPermission permission="admin:certificates:view"><CertificateDetailPage /></RequireAdminPermission>} />
+                  <Route path="/cms" element={<RequireAdminPermission permission="admin:cms:view"><CmsAdminPage /></RequireAdminPermission>} />
+                  <Route path="/services" element={<RequireAdminPermission permission="admin:services:manage"><ServicesAdminPage /></RequireAdminPermission>} />
+                  <Route path="/finance" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceAdminPage /></RequireAdminPermission>} />
+                  <Route path="/finance/invoices/:id" element={<RequireAdminPermission permission="admin:finance:manage"><FinanceInvoiceDetailPage /></RequireAdminPermission>} />
+                  <Route path="/careers" element={<RequireAdminPermission permission="admin:careers:manage"><CareerAdminPage /></RequireAdminPermission>} />
+                  <Route path="/international-tests" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestsAdminPage /></RequireAdminPermission>} />
+                  <Route path="/international-tests/:id" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestDetailPage /></RequireAdminPermission>} />
+                  <Route path="/admin/international-tests" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestsAdminPage /></RequireAdminPermission>} />
+                  <Route path="/admin/international-tests/:id" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestDetailPage /></RequireAdminPermission>} />
+                  <Route path="/ai" element={<RequireAdminPermission permission="admin:ai:view"><AIGovernancePage /></RequireAdminPermission>} />
+                  <Route path="/ai/:section" element={<RequireAdminPermission permission="admin:ai:view"><AIGovernancePage /></RequireAdminPermission>} />
+                  <Route path="/ai-governance" element={<Navigate to="/ai" replace />} />
+                  <Route
+                    path="/student-tools"
+                    element={
+                      <RequireAdminPermission permission="admin:student-tools:view">
+                        <StudentToolsAdminPage />
+                      </RequireAdminPermission>
+                    }
+                  />
+                  <Route
+                    path="/student-tools/:toolKey"
+                    element={
+                      <RequireAdminPermission permission="admin:student-tools:view">
+                        <StudentToolsAdminPage />
+                      </RequireAdminPermission>
+                    }
+                  />
+                  <Route path="/study-destinations" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationsAdminPage /></RequireAdminPermission>} />
+                  <Route path="/study-destinations/:countryIso2Code" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationDetailPage /></RequireAdminPermission>} />
+                  <Route path="/identities" element={<RequireAdminPermission permission="admin:identities:manage"><IdentityAdminPage /></RequireAdminPermission>} />
+                  <Route path="/authorization" element={<RequireAdminPermission permission="admin:authorization:manage"><AuthorizationAdminPage /></RequireAdminPermission>} />
+                  <Route path="/audit" element={<RequireAdminPermission permission="admin:audit:manage"><AuditCenterPage /></RequireAdminPermission>} />
+                  <Route path="/assets" element={<RequireAdminPermission permission="admin:assets:manage"><AssetAdminPage /></RequireAdminPermission>} />
+                  <Route path="/students" element={<RequireAdminPermission permission="admin:students:support"><StudentSupportAdminPage /></RequireAdminPermission>} />
+                  <Route path="/settings" element={<RequireAdminPermission permission="admin:settings:manage"><SettingsAdminPage /></RequireAdminPermission>} />
+                  <Route path="/settings/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />
+                  <Route path="/academic-taxonomy" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyAdminPage /></RequireAdminPermission>} />
+                  <Route path="/academic-taxonomy/:nodeId" element={<RequireAdminPermission permission="admin:academic-taxonomy:manage"><AcademicTaxonomyDetailPage /></RequireAdminPermission>} />
+                  <Route path="*" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/dashboard'} replace />} />
+                </Routes>
+              </main>
+            </div>
           </AdminAuthorizationProvider>
         ) : (
           <main className="flex-1 p-6 flex items-center justify-center">
@@ -335,9 +355,14 @@ function AdminPermissionNotice() {
   const location = useLocation();
   const deniedPermission = (location.state as { deniedPermission?: string } | null)?.deniedPermission;
   if (!deniedPermission) return null;
-  return <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-900">
-    لا تملك صلاحية هذا القسم. نُقلت إلى قسم متاح لحسابك.
-  </p>;
+  return (
+    <p
+      role="status"
+      className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-900"
+    >
+      لا تملك صلاحية هذا القسم. نُقلت إلى قسم متاح لحسابك.
+    </p>
+  );
 }
 
 function clearAdminSession() {
@@ -366,7 +391,12 @@ async function verifyAdminSession(): Promise<{ kind: 'authorized'; permissions: 
     if (firstAllowedAdminPath(permissions)) return { kind: 'authorized', permissions };
     const roles = response.data?.roles || [];
     const roleNames = response.data?.roleNames || [];
-    return { kind: roles.includes('student') || roleNames.some(name => /^(student|طالب)$/i.test(name.trim())) ? 'student' : 'noAdmin' };
+    return {
+      kind:
+        roles.includes('student') || roleNames.some((name) => /^(student|طالب)$/i.test(name.trim()))
+          ? 'student'
+          : 'noAdmin',
+    };
   } catch (error) {
     return { kind: String(error).includes('[401]') ? 'unauthorized' : 'error' };
   }

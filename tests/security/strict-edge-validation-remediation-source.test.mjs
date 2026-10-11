@@ -21,7 +21,9 @@ test('MNT-AUD-0111 privileged routers never forward raw request bodies into appl
   const routerDir = path.join(root, 'apps/api/src/presentation/api/router');
   const violations = [];
   for (const name of fs.readdirSync(routerDir).filter((n) => n.endsWith('.ts'))) {
-    const lines = fs.readFileSync(path.join(routerDir, name), 'utf8').split(/\r?\n/);
+    // Ignore only bodies passed directly to the strict parser, including multiline calls.
+    const source = fs.readFileSync(path.join(routerDir, name), 'utf8');
+    const lines = source.replace(/parseStrict\(\s*[A-Za-z_$][\w$]*\s*,\s*req\.body\s*,?\s*\)/g, (call) => call.replace('req.body', 'validatedBody')).split(/\r?\n/);
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index];
       if (!line.includes('req.body')) continue;

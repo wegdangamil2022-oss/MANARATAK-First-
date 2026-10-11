@@ -226,3 +226,6 @@ export * from './academic-taxonomy/PrismaAcademicTaxonomyImportGateway';
 export { PrismaInternationalTestConsumerReadGateway } from './universities/PrismaInternationalTestConsumerReadGateway';
 
 export * from './certificates/EapCertificateVisualAssetResolver';
+
+export { StudentPrivateResultProtector } from './students/StudentPrivateResultProtector';
+export { PrismaStudentPrivateResultRetentionGateway } from './students/PrismaStudentPrivateResultRetentionGateway';

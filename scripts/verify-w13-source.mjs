@@ -59,13 +59,19 @@ const checks = {
     /:network:/.test(execution) &&
     !/String\(req\.header\('x-student-tools-session'\) \?\? req\.ip/.test(router),
 
+  // Section 19 replaces whole-catalog scanning with canonical filters and bounded candidates.
   'P18-RECO-002':
-    /listAllPublished/.test(gateways) &&
-    /cursor: string \| undefined/.test(gateways) &&
-    /listPublished\(\{ \.\.\.filters, cursor, limit: 100 \}\)/.test(gateways) &&
-    /cursor = result\.nextCursor \?\? undefined/.test(gateways) &&
-    /hasMore = result\.hasMore === true && Boolean\(cursor\)/.test(gateways) &&
-    /SCHOLARSHIP_RECOMMENDATION_CANDIDATE_SCAN_LIMIT_EXCEEDED/.test(gateways),
+    /resolveCountries\(filters\.countries\)/.test(gateways) &&
+    /resolveDegreeLevel\(filters\.targetDegree\)/.test(gateways) &&
+    /resolveLanguage\(filters\.studyLanguage\)/.test(gateways) &&
+    /batches\.slice\(0, 10\)/.test(gateways) &&
+    /if \(unique\.size >= 25\) break/.test(gateways) &&
+    /studyLanguageReferenceId: languageReferenceId/.test(gateways) &&
+    /countryReferenceId,\s*degreeLevelId,/.test(gateways) &&
+    /fundingType:[\s\S]*?filters\.fundingPreference/.test(gateways) &&
+    /limit: 25/.test(gateways) &&
+    /return \[\.\.\.unique\.values\(\)\]\.slice\(0, 25\)/.test(gateways) &&
+    !/listAllPublished/.test(gateways),
 
   'P18-SAVE-003':
     !/z\.object\(\{ result: z\.unknown\(\) \}\)/.test(router) &&
@@ -109,7 +115,7 @@ const checks = {
   'GUARD-ADMIN-VERSIONED-AVAILABILITY':
     /studentToolAvailabilitySchema/.test(adminRouter) &&
     /parseStrict\(studentToolAvailabilitySchema, req\.body\)/.test(adminRouter) &&
-    /semanticVersion: z\.string\(\)\.trim\(\)\.regex/.test(strictSchemas) &&
+    /semanticVersion:\s*z\s*\.string\(\)\s*\.trim\(\)\s*\.regex/.test(strictSchemas) &&
     /changeNote: z\.string\(\)\.trim\(\)\.min\(3\)/.test(strictSchemas) &&
     /updateVersionedConfiguration/.test(adminRouter) &&
     /compareSemver\(version\.semanticVersion, current\.currentVersion\.semanticVersion\) <= 0/.test(registry),

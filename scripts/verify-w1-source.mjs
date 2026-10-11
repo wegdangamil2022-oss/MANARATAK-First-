@@ -323,7 +323,7 @@ const studentToolsPublicRouter = read('apps/api/src/presentation/api/router/Stud
 const studentToolsAdminRouterSource = read('apps/api/src/presentation/api/router/StudentToolsAdminRouter.ts');
 check('MNT-AUD-0113 production Student Tools uses shared Redis limiter', container.includes('new RedisRateLimiter(redisClient, `${namespace}student-tools:quota:`)') && container.includes('runtimeResources.getRedisClient()'));
 check('MNT-AUD-0113 local limiter is restricted to non-production', container.includes('if (!productionLike) return new DefaultRateLimiter()'));
-check('MNT-AUD-0113 quota-store failure is fail-closed with stable 503', studentToolGateways.includes('STUDENT_TOOL_QUOTA_STORE_UNAVAILABLE') && studentToolsPublicRouter.includes("code.includes('QUOTA_STORE_UNAVAILABLE')") && studentToolsPublicRouter.includes('? 503') && studentToolsAdminRouterSource.includes("code.includes('QUOTA_STORE_UNAVAILABLE') ? 503"));
+check('MNT-AUD-0113 quota-store failure is fail-closed with stable 503', studentToolGateways.includes('STUDENT_TOOL_QUOTA_STORE_UNAVAILABLE') && studentToolsPublicRouter.includes("code.includes('QUOTA_STORE_UNAVAILABLE')") && studentToolsPublicRouter.includes('? 503') && /code\.includes\('QUOTA_STORE_UNAVAILABLE'\)\s*\?\s*503/.test(studentToolsAdminRouterSource));
 check('MNT-AUD-0113 quota capability is a required production health indicator', app.includes("name: 'student-tools-quota'") && app.includes('STUDENT_TOOL_QUOTA_STORE_NOT_DISTRIBUTED'));
 try {
   const studentQuotaSource = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/student-tools-distributed-quota-source.test.mjs')], { encoding: 'utf8' });

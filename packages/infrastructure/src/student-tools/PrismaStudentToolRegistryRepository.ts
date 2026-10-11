@@ -8,6 +8,8 @@ import {
   StudentToolExecutionStatus,
   StudentToolFilters,
   StudentToolTelemetry,
+  StudentToolExecutionFilters,
+  StudentToolAuditFilters,
   StudentToolPublicAccessPolicy,
   StudentToolTransientResultWrite,
   StudentToolVersionSnapshot,
@@ -47,6 +49,122 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
     });
     return rows.map(mapDefinition);
   }
+  async listPage(filters: StudentToolFilters & { page?: number; pageSize?: number } = {}) {
+    const page = Math.max(1, Math.min(10000, filters.page ?? 1));
+    const pageSize = Math.max(1, Math.min(100, filters.pageSize ?? 25));
+    const where = {
+      ...Object.fromEntries(
+        ['category', 'visibility', 'implementationStatus', 'lifecycle', 'executionType']
+          .filter((key) => filters[key as keyof StudentToolFilters])
+          .map((key) => [key, filters[key as keyof StudentToolFilters]]),
+      ),
+      ...(filters.search
+        ? {
+            OR: ['nameAr', 'nameEn', 'toolKey'].map((key) => ({
+              [key]: { contains: filters.search, mode: 'insensitive' },
+            })),
+          }
+        : {}),
+    };
+    const [rows, total] = await this.db.$transaction([
+      this.db.studentToolDefinitionRecord.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { versions: { orderBy: { releaseDate: 'desc' } }, dependencies: true },
+        orderBy: filters.sort === 'UPDATED_DESC' ? [{ updatedAt: 'desc' }, { toolKey: 'asc' }] : [{ launchOrder: 'asc' }, { toolKey: 'asc' }],
+      }),
+      this.db.studentToolDefinitionRecord.count({ where }),
+    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    return { data: rows.map(mapDefinition), total, page, pageSize };
+  }
+
+  async release(
+    toolKey: string,
+    action: 'PROPOSE' | 'APPROVE' | 'REJECT' | 'ACTIVATE',
+    actor: string,
+    expectedRevision: number,
+    reason: string,
+  ) {
+    if (!actor || !reason.trim()) throw new Error('TOOL_RELEASE_REASON_REQUIRED');
+    return this.db.$transaction(async (tx: Db) => {
+      await tx.$queryRawUnsafe(
+        'SELECT id FROM "StudentToolDefinitionRecord" WHERE "toolKey" = $1 FOR UPDATE',
+        toolKey,
+      );
+      const row = await tx.studentToolDefinitionRecord.findUnique({
+        where: { toolKey },
+        include: { versions: { orderBy: { releaseDate: 'desc' } }, dependencies: true },
+      });
+      if (!row) throw new Error('TOOL_NOT_FOUND');
+      if (row.revision !== expectedRevision) throw new Error('TOOL_REVISION_CONFLICT');
+      const tool = mapDefinition(row);
+      const snapshotHash = hashSnapshot({
+        ...versionSnapshot(tool),
+        visibility: tool.visibility,
+        implementationStatus: tool.implementationStatus,
+        toolVersion: tool.currentVersion.semanticVersion,
+      });
+      let approval = tool.releaseApproval;
+      if (action === 'PROPOSE') {
+        if (!tool.lastModifiedBy) throw new Error('TOOL_RELEASE_AUTHOR_UNKNOWN');
+        approval = {
+          author: tool.lastModifiedBy,
+          proposer: actor,
+          status: 'PENDING',
+          revision: expectedRevision,
+          snapshotHash,
+          expiresAt: new Date(Date.now() + 86400000).toISOString(),
+          reason: reason.trim(),
+        };
+      } else {
+        if (
+          !approval ||
+          approval.revision !== expectedRevision ||
+          approval.snapshotHash !== snapshotHash ||
+          Date.parse(approval.expiresAt) <= Date.now()
+        )
+          throw new Error('TOOL_RELEASE_APPROVAL_STALE');
+        if (action === 'ACTIVATE') {
+          if (approval.status !== 'APPROVED') throw new Error('TOOL_RELEASE_APPROVAL_REQUIRED');
+          approval = { ...approval, status: 'CONSUMED' };
+        } else {
+          if (approval.status !== 'PENDING') throw new Error('TOOL_RELEASE_APPROVAL_REQUIRED');
+          if (approval.author === actor || approval.proposer === actor)
+            throw new Error('TOOL_RELEASE_REVIEWER_MUST_DIFFER');
+          approval = {
+            ...approval,
+            reviewer: actor,
+            status: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+          };
+        }
+      }
+      const data = {
+        releaseApproval: json(approval),
+        ...(action === 'ACTIVATE'
+          ? { lifecycle: 'ACTIVE', visibility: 'ACTIVE', revision: { increment: 1 } }
+          : {}),
+      };
+      const changed = await tx.studentToolDefinitionRecord.updateMany({
+        where: { toolKey, revision: expectedRevision },
+        data,
+      });
+      if (changed.count !== 1) throw new Error('TOOL_REVISION_CONFLICT');
+      await appendMutation(tx, toolKey, actor, `STUDENT_TOOL_RELEASE_${action}`, {
+        snapshotHash,
+        revision: expectedRevision,
+        author: approval?.author,
+        reviewer: approval?.reviewer,
+        reason: reason.trim(),
+      });
+      return mapDefinition(
+        await tx.studentToolDefinitionRecord.findUnique({
+          where: { toolKey },
+          include: { versions: { orderBy: { releaseDate: 'desc' } }, dependencies: true },
+        }),
+      );
+    });
+  }
   async listPublic(filters: StudentToolFilters = {}) {
     const rows = await this.db.studentToolDefinitionRecord.findMany({
       where: {
@@ -71,12 +189,19 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
   async upsertDefinition(
     definition: StudentToolDefinition,
     actorReferenceId: string,
+    expectedRevision?: number,
   ): Promise<StudentToolDefinition> {
     return this.db.$transaction(async (tx: Db) => {
+      await tx.$queryRawUnsafe(
+        'SELECT id FROM "StudentToolDefinitionRecord" WHERE "toolKey" = $1 FOR UPDATE',
+        definition.toolKey,
+      );
       const current = await tx.studentToolDefinitionRecord.findUnique({
         where: { toolKey: definition.toolKey },
         include: { versions: true, dependencies: true },
       });
+      if (current && current.revision !== expectedRevision)
+        throw new Error('TOOL_REVISION_CONFLICT');
       const snapshot = versionSnapshot(definition);
       const snapshotHash = hashSnapshot(snapshot);
       const existingVersion = current
@@ -91,13 +216,22 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
         : null;
       if (
         existingVersion &&
-        stableStringify(comparableSnapshot(existingVersion.definitionSnapshot)) !== stableStringify(snapshot)
+        stableStringify(comparableSnapshot(existingVersion.definitionSnapshot)) !==
+          stableStringify(snapshot)
       )
         throw new Error('IMMUTABLE_TOOL_VERSION');
 
-      const data = definitionData(definition);
+      const data = {
+        ...definitionData(definition),
+        lastModifiedBy: actorReferenceId,
+        releaseApproval: Prisma.DbNull,
+        ...(current ? { revision: { increment: 1 } } : {}),
+      };
       const row = current
-        ? await tx.studentToolDefinitionRecord.update({ where: { id: current.id }, data })
+        ? await tx.studentToolDefinitionRecord.update({
+            where: { id: current.id, revision: expectedRevision },
+            data,
+          })
         : await tx.studentToolDefinitionRecord.create({ data });
 
       if (!existingVersion) {
@@ -141,12 +275,28 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
     patch: Partial<StudentToolDefinition>,
     actorReferenceId: string,
     action: string,
+    expectedRevision?: number,
+    reason?: string,
   ): Promise<StudentToolDefinition> {
     return this.db.$transaction(async (tx: Db) => {
       const current = await tx.studentToolDefinitionRecord.findUnique({ where: { toolKey } });
       if (!current) throw new Error('TOOL_NOT_FOUND');
-      const versionedFields = ['availability', 'rateLimitPolicy', 'aiCapabilityKey', 'executionType', 'outputType', 'supportedLocales', 'inputSchema', 'outputSchema', 'dependencies'];
-      if (versionedFields.some((field) => patch[field as keyof StudentToolDefinition] !== undefined))
+      if (current.revision !== expectedRevision) throw new Error('TOOL_REVISION_CONFLICT');
+      const versionedFields = [
+        'featureFlags',
+        'availability',
+        'rateLimitPolicy',
+        'aiCapabilityKey',
+        'executionType',
+        'outputType',
+        'supportedLocales',
+        'inputSchema',
+        'outputSchema',
+        'dependencies',
+      ];
+      if (
+        versionedFields.some((field) => patch[field as keyof StudentToolDefinition] !== undefined)
+      )
         throw new Error('TOOL_VERSION_INCREMENT_REQUIRED');
       const allowed: Record<string, unknown> = {};
       for (const key of [
@@ -155,6 +305,8 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
         'descriptionAr',
         'descriptionEn',
         'category',
+        'implementationPriority',
+        'desiredLaunchVisibility',
         'visibility',
         'implementationStatus',
         'lifecycle',
@@ -180,9 +332,19 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
           ].includes(key)
             ? json(patch[key])
             : patch[key];
-      await tx.studentToolDefinitionRecord.update({ where: { toolKey }, data: allowed });
+      const changed = await tx.studentToolDefinitionRecord.updateMany({
+        where: { toolKey, revision: expectedRevision },
+        data: {
+          ...allowed,
+          revision: { increment: 1 },
+          lastModifiedBy: actorReferenceId,
+          releaseApproval: Prisma.DbNull,
+        },
+      });
+      if (changed.count !== 1) throw new Error('TOOL_REVISION_CONFLICT');
       await appendMutation(tx, toolKey, actorReferenceId, action, {
         changedFields: Object.keys(allowed),
+        ...(reason ? { reason } : {}),
       });
       const saved = await tx.studentToolDefinitionRecord.findUnique({
         where: { toolKey },
@@ -215,6 +377,23 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
     if (!version) throw new Error('TOOL_VERSION_NOT_FOUND');
     try {
       const row = await this.db.$transaction(async (tx: Db) => {
+        await tx.$queryRawUnsafe(
+          'SELECT id FROM "StudentToolDefinitionRecord" WHERE id = $1 FOR SHARE',
+          definition.id,
+        );
+        const admitted = await tx.studentToolDefinitionRecord.findUnique({
+          where: { id: definition.id },
+          include: { versions: { orderBy: { releaseDate: 'desc' } }, dependencies: true },
+        });
+        if (!admitted || admitted.revision !== record.safeUsageMetadata?.definitionRevision)
+          throw new Error('TOOL_REVISION_CONFLICT');
+        const tool = mapDefinition(admitted);
+        if (
+          tool.currentVersion.semanticVersion !== record.toolVersion ||
+          (record.consumerType !== 'ADMIN_TEST' &&
+            !StudentToolPublicAccessPolicy.isDiscoverable(tool))
+        )
+          throw new Error('TOOL_REVISION_CONFLICT');
         const created = await tx.studentToolExecutionRecord.create({
           data: { ...executionData(record), definitionId: definition.id, versionId: version.id } as any,
         });
@@ -244,8 +423,30 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
         include: { definition: { select: { toolKey: true } } },
       });
       if (!current) throw new Error('TOOL_EXECUTION_NOT_FOUND');
-      const updated = await tx.studentToolExecutionRecord.update({
-        where: { executionId },
+      if (current.status !== 'RUNNING') throw new Error('TOOL_EXECUTION_TERMINAL_CONFLICT');
+      for (const key of [
+        'executionId',
+        'toolVersion',
+        'consumerType',
+        'studentReferenceHash',
+        'anonymousSessionHash',
+        'idempotencyKeyHash',
+      ] as const)
+        if (patch[key] !== undefined && patch[key] !== current[key])
+          throw new Error('TOOL_EXECUTION_IDENTITY_IMMUTABLE');
+      if (
+        !['COMPLETED', 'BLOCKED', 'FAILED', 'CANCELLED', 'UNKNOWN_OUTCOME'].includes(
+          String(patch.status),
+        )
+      )
+        throw new Error('TOOL_EXECUTION_TRANSITION_INVALID');
+      if (
+        patch.status === 'COMPLETED' &&
+        (!transientResult || transientResult.resultDigest !== patch.resultDigest)
+      )
+        throw new Error('TOOL_EXECUTION_RESULT_REQUIRED');
+      const changed = await tx.studentToolExecutionRecord.updateMany({
+        where: { executionId, status: 'RUNNING', versionId: current.versionId },
         data: {
           ...executionData(patch),
           ...(transientResult
@@ -260,13 +461,13 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
             : {}),
         },
       });
+      if (changed.count !== 1) throw new Error('TOOL_EXECUTION_TERMINAL_CONFLICT');
+      const updated = await tx.studentToolExecutionRecord.findUnique({ where: { executionId } });
       await appendExecutionEvent(
         tx,
-        patch.status === StudentToolExecutionStatus.COMPLETED
-          ? 'STUDENT_TOOL_EXECUTION_COMPLETED'
-          : 'STUDENT_TOOL_EXECUTION_FAILED',
+        `STUDENT_TOOL_EXECUTION_${patch.status}`,
         current.definition.toolKey,
-        { ...patch, executionId } as StudentToolExecutionRecord,
+        mapExecution(updated, current.definition.toolKey),
       );
       return updated;
     });
@@ -351,20 +552,31 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
     return row ? mapExecution(row, row.definition.toolKey) : null;
   }
 
-  async listExecutions(toolKey: string, page = 1, pageSize = 25) {
+  async listExecutions(
+    toolKey: string,
+    page = 1,
+    pageSize = 25,
+    filters: StudentToolExecutionFilters = {},
+  ) {
     const safePage = Math.max(1, page);
     const take = Math.min(100, Math.max(1, pageSize));
-    const where = { definition: { toolKey } };
-    const [rows, total] = await Promise.all([
+    const where = {
+      definition: { toolKey },
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.isTest !== undefined ? { isTest: filters.isTest } : {}),
+      ...(filters.traceId ? { traceId: filters.traceId } : {}),
+      ...(filters.correlationId ? { correlationId: filters.correlationId } : {}),
+    };
+    const [rows, total] = await this.db.$transaction([
       this.db.studentToolExecutionRecord.findMany({
         where,
         include: { definition: { select: { toolKey: true } } },
-        orderBy: { startedAt: 'desc' },
+        orderBy: [{ startedAt: 'desc' }, { executionId: 'desc' }],
         skip: (safePage - 1) * take,
         take,
       }),
       this.db.studentToolExecutionRecord.count({ where }),
-    ]);
+    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
     return { data: rows.map((row: any) => mapExecution(row, row.definition.toolKey)), total };
   }
   async telemetry(toolKey?: string): Promise<StudentToolTelemetry> {
@@ -372,7 +584,7 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
     const where = { startedAt: { gte: since30 }, ...(toolKey ? { definition: { toolKey } } : {}) };
     const rows = await this.db.studentToolExecutionRecord.findMany({
       where,
-      select: { status: true, durationMs: true, startedAt: true, errorCode: true },
+      select: { status: true, durationMs: true, startedAt: true, errorCode: true, isTest: true },
     });
     const now = Date.now();
     const complete = rows.filter(
@@ -386,14 +598,64 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
       .filter((value: unknown): value is number => typeof value === 'number')
       .sort((a: number, b: number) => a - b);
     return {
+      windows: (() => {
+        const windowSummary = (ms: number) => {
+          const windowRows = rows.filter(
+            (row: any) => now - new Date(row.startedAt).getTime() <= Number(ms),
+          );
+          const summary = (isTest: boolean) => {
+            const traffic = windowRows.filter((row: any) => Boolean(row.isTest) === isTest);
+            const completed = traffic.filter((row: any) => row.status === 'COMPLETED').length;
+            const failed = traffic.filter((row: any) => row.status === 'FAILED').length;
+            const durations = traffic
+              .filter(
+                (row: any) => row.status === 'COMPLETED' && typeof row.durationMs === 'number',
+              )
+              .map((row: any) => row.durationMs)
+              .sort((a: number, b: number) => a - b);
+            return {
+              total: traffic.length,
+              completed,
+              failed,
+              blocked: traffic.filter((row: any) => row.status === 'BLOCKED').length,
+              running: traffic.filter((row: any) => row.status === 'RUNNING').length,
+              unknownOutcome: traffic.filter((row: any) => row.status === 'UNKNOWN_OUTCOME').length,
+              staleRunning: traffic.filter(
+                (row: any) =>
+                  row.status === 'RUNNING' && now - new Date(row.startedAt).getTime() > 120000,
+              ).length,
+              terminalDenominator: completed + failed,
+              successRate: completed + failed ? completed / (completed + failed) : null,
+              p95LatencyMs: durations.length
+                ? durations[Math.ceil(durations.length * 0.95) - 1]
+                : null,
+            };
+          };
+          return { student: summary(false), test: summary(true) };
+        };
+        return {
+          '24h': windowSummary(86400000),
+          '7d': windowSummary(7 * 86400000),
+          '30d': windowSummary(30 * 86400000),
+        };
+      })(),
+      completed: complete,
+      failed,
+      running: rows.filter((row: any) => row.status === 'RUNNING').length,
+      staleRunning: rows.filter(
+        (row: any) =>
+          row.status === 'RUNNING' && Date.now() - new Date(row.startedAt).getTime() > 120000,
+      ).length,
+      testExecutions: rows.filter((row: any) => row.isTest).length,
+      unknownOutcome: rows.filter((row: any) => row.status === 'UNKNOWN_OUTCOME').length,
       executions24h: rows.filter((row: any) => now - new Date(row.startedAt).getTime() <= 86400000)
         .length,
       executions7d: rows.filter(
         (row: any) => now - new Date(row.startedAt).getTime() <= 7 * 86400000,
       ).length,
       executions30d: rows.length,
-      successRate: rows.length ? complete / rows.length : null,
-      failureRate: rows.length ? failed / rows.length : null,
+      successRate: complete + failed ? complete / (complete + failed) : null,
+      failureRate: complete + failed ? failed / (complete + failed) : null,
       p95LatencyMs: durations.length
         ? durations[Math.min(durations.length - 1, Math.ceil(durations.length * 0.95) - 1)]
         : null,
@@ -401,6 +663,40 @@ export class PrismaStudentToolRegistryRepository implements IStudentToolRegistry
       dependencyFailures: rows.filter((row: any) =>
         String(row.errorCode ?? '').includes('DEPENDENCY'),
       ).length,
+    };
+  }
+  async auditPage(
+    toolKey: string,
+    page: number,
+    pageSize: number,
+    filters: StudentToolAuditFilters = {},
+  ) {
+    const where = {
+      targetId: toolKey,
+      targetType: 'STUDENT_TOOL',
+      ...(filters.action ? { action: filters.action } : {}),
+      ...(filters.correlationId ? { correlationReference: filters.correlationId } : {}),
+    };
+    const [rows, total] = await this.db.$transaction([
+      this.db.auditRecord.findMany({
+        where,
+        orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.db.auditRecord.count({ where }),
+    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    return {
+      data: rows.map((row: any) => ({
+        timestamp: row.timestamp,
+        actor: row.actorId,
+        action: row.action,
+        summary: row.action,
+        correlationId: row.correlationReference,
+      })),
+      total,
+      page,
+      pageSize,
     };
   }
   async audit(toolKey: string) {
@@ -466,6 +762,7 @@ function versionData(
 }
 function versionSnapshot(value: StudentToolDefinition): StudentToolVersionSnapshot {
   return {
+    featureFlags: value.featureFlags,
     inputSchema: value.inputSchema,
     outputSchema: value.outputSchema,
     dependencies: [...value.dependencies].sort((a, b) =>
@@ -481,7 +778,7 @@ function versionSnapshot(value: StudentToolDefinition): StudentToolVersionSnapsh
     supportedLocales: [...value.supportedLocales],
   };
 }
-function hashSnapshot(value: StudentToolVersionSnapshot) {
+function hashSnapshot(value: unknown) {
   return createHash('sha256').update(stableStringify(value)).digest('hex');
 }
 function comparableSnapshot(value: unknown): unknown {
@@ -494,7 +791,8 @@ function stableStringify(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'undefined';
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
   const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`).join(',')}}`;
+  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
+    .join(',')}}`;
 }
 function mapDefinition(row: any): StudentToolDefinition {
   const currentVersion =

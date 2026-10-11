@@ -1,3 +1,4 @@
+import { StudentPrivateResultProtector } from './StudentPrivateResultProtector';
 import { randomUUID } from 'node:crypto';
 import { StudentSupportCursorCodec } from './StudentSupportCursorCodec';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -73,7 +74,11 @@ const WIDGET_REGISTRY = [
 ] as const;
 
 export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceRepository {
-  public constructor(private readonly prisma: PrismaClient, private readonly cursorSigningSecret?:string) {}
+  public constructor(
+    private readonly prisma: PrismaClient,
+    private readonly cursorSigningSecret?: string,
+    private readonly privateResults?: StudentPrivateResultProtector,
+  ) {}
 
   private get db(): any {
     return this.prisma as any;
@@ -381,7 +386,96 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     };
   }
 
+  public async savePrivateToolResult(input: {
+    studentReferenceId: string;
+    executionId: string;
+    toolKey: string;
+    result: unknown;
+  }) {
+    if (!this.privateResults || this.privateResults.status() !== 'READY')
+      throw new Error('STUDENT_PRIVATE_RESULT_NOT_CONFIGURED');
+    const expiresAt = new Date(Date.now() + 90 * 86400000);
+    const envelope = this.privateResults.protect({
+      purpose: 'STUDENT_TOOL_RESULT',
+      owner: input.studentReferenceId,
+      executionId: input.executionId,
+      expiresAt: expiresAt.toISOString(),
+      result: input.result,
+    });
+    return this.db.$transaction(async (tx: any) => {
+      const workspace = await this.requireWritable(tx, input.studentReferenceId);
+      const row = await tx.studentSavedItem.upsert({
+        where: {
+          studentReferenceId_entityType_entityId: {
+            studentReferenceId: input.studentReferenceId,
+            entityType: 'STUDENT_TOOL',
+            entityId: input.executionId,
+          },
+        },
+        create: {
+          id: randomUUID(),
+          studentReferenceId: input.studentReferenceId,
+          entityType: 'STUDENT_TOOL',
+          entityId: input.executionId,
+          entitySlug: input.toolKey,
+          metadata: { artifactReference: input.executionId },
+          privateResultEnvelope: json(envelope),
+          privateResultExpiresAt: expiresAt,
+        },
+        update: {
+          metadata: { artifactReference: input.executionId },
+          privateResultEnvelope: json(envelope),
+          privateResultExpiresAt: expiresAt,
+        },
+      });
+      await this.refreshPersonalStatistics(tx, input.studentReferenceId);
+      await this.appendOutbox(tx, workspace.id, 'StudentPrivateToolResultSaved', {
+        studentReferenceId: input.studentReferenceId,
+        savedReference: row.id,
+      });
+      return { savedReference: row.id };
+    });
+  }
+
+  public async readPrivateToolResult(
+    studentReferenceId: string,
+    savedReference: string,
+  ): Promise<unknown> {
+    await this.requireWritable(this.db, studentReferenceId);
+    const row = await this.db.studentSavedItem.findFirst({
+      where: { id: savedReference, studentReferenceId, entityType: 'STUDENT_TOOL' },
+    });
+    if (!row?.privateResultEnvelope || !row.privateResultExpiresAt)
+      throw new Error('STUDENT_PRIVATE_RESULT_NOT_FOUND');
+    if (new Date(row.privateResultExpiresAt).getTime() <= Date.now()) {
+      await this.db.studentSavedItem.updateMany({
+        where: {
+          id: savedReference,
+          studentReferenceId,
+          privateResultExpiresAt: { lte: new Date() },
+        },
+        data: { privateResultEnvelope: Prisma.DbNull },
+      });
+      throw new Error('STUDENT_PRIVATE_RESULT_EXPIRED');
+    }
+    if (!this.privateResults) throw new Error('STUDENT_PRIVATE_RESULT_NOT_CONFIGURED');
+    const value = this.privateResults.unprotect(row.privateResultEnvelope) as Record<
+      string,
+      unknown
+    >;
+    if (
+      value.purpose !== 'STUDENT_TOOL_RESULT' ||
+      value.owner !== studentReferenceId ||
+      value.executionId !== row.entityId ||
+      value.expiresAt !== new Date(row.privateResultExpiresAt).toISOString()
+    )
+      throw new Error('STUDENT_PRIVATE_RESULT_BINDING_INVALID');
+    return value.result;
+  }
+
   public async saveItem(data: SaveStudentItemDto): Promise<StudentSavedItemDto> {
+    if (data.entityType === 'STUDENT_TOOL' && data.metadata)
+      throw new Error('STUDENT_PRIVATE_RESULT_COMMAND_REQUIRED');
     return this.db.$transaction(async (tx: any) => {
       const workspace = await this.requireWritable(tx, data.studentReferenceId);
       if (data.collectionId) {
@@ -695,7 +789,12 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       // A concurrent suspension cannot race a worker into writing an ACTIVE snapshot.
       await tx.$queryRaw`SELECT id FROM "StudentWorkspace" WHERE "studentReferenceId" = ${event.studentReferenceId} FOR UPDATE`;
       let workspace = await tx.studentWorkspace.findUnique({ where: { studentReferenceId: event.studentReferenceId } });
-      const systemActor: StudentAuditActor = { actorId: `event:${event.sourceDomain}`, actorType: 'SYSTEM', source: event.sourceDomain, sourceEventId: event.eventId };
+      const systemActor: StudentAuditActor = {
+        actorId: `event:${event.sourceDomain}`,
+        actorType: 'SYSTEM',
+        source: event.sourceDomain,
+        sourceEventId: event.eventId,
+      };
 
       if (!workspace && event.eventType === 'StudentIdentityCreated') {
         workspace = await tx.studentWorkspace.create({ data: {
@@ -744,12 +843,21 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       const inboxId = randomUUID();
       const syncBlocked = !['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'].includes(event.eventType) &&
         (workspace.status === StudentWorkspaceStatus.SUSPENDED || workspace.status === StudentWorkspaceStatus.ARCHIVED || workspace.status === StudentWorkspaceStatus.INITIALIZING);
-      await tx.studentWorkspaceEventInbox.create({ data: {
-        id: inboxId, eventId: event.eventId, studentReferenceId: event.studentReferenceId, sourceDomain: event.sourceDomain,
-        eventType: event.eventType, payload: workspace.status === StudentWorkspaceStatus.ARCHIVED ? json({retired:true}) : json(event),
-        processedAt: syncBlocked ? (workspace.status === StudentWorkspaceStatus.ARCHIVED ? new Date() : null) : new Date(),
-        failureCode: syncBlocked ? `WORKSPACE_SYNC_BLOCKED_${workspace.status}` : null,
-      }});
+      await tx.studentWorkspaceEventInbox.create({
+        data: {
+          id: inboxId,
+          eventId: event.eventId,
+          studentReferenceId: event.studentReferenceId,
+          sourceDomain: event.sourceDomain,
+          eventType: event.eventType, payload: workspace.status === StudentWorkspaceStatus.ARCHIVED ? json({retired:true}) : json(event),
+          processedAt: syncBlocked
+            ? workspace.status === StudentWorkspaceStatus.ARCHIVED
+              ? new Date()
+              : null
+            : new Date(),
+          failureCode: syncBlocked ? `WORKSPACE_SYNC_BLOCKED_${workspace.status}` : null,
+        },
+      });
       if (syncBlocked) return false;
 
       await this.projectStudentEvent(tx, event);
@@ -778,7 +886,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     await this.refreshPersonalStatistics(tx,event.studentReferenceId);
   }
 
-  public async replayParkedEvents(limit = 25): Promise<{processed:number;failed:number}> {
+  public async replayParkedEvents(limit = 25): Promise<{ processed: number; failed: number }> {
     const batchSize = Math.min(25, Math.max(1, Math.trunc(limit)));
     const parked = await this.db.studentWorkspaceEventInbox.findMany({
       where: {
@@ -794,7 +902,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     let failed = 0;
     for (const row of parked) {
       try {
-        const changed = await this.db.$transaction(async (tx:any) => {
+        const changed = await this.db.$transaction(async (tx: any) => {
           // A scoped CAS lease inside the transaction prevents duplicate timeline creation
           // when two recovery workers select the same parked event.
           const claimed = await tx.studentWorkspaceEventInbox.updateMany({
@@ -807,7 +915,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
             where: { studentReferenceId: row.studentReferenceId }, select: { status: true },
           });
           if (workspace?.status !== StudentWorkspaceStatus.ACTIVE) throw new Error('STUDENT_REPLAY_WORKSPACE_NOT_ACTIVE');
-          const payload = row.payload as Record<string,unknown>;
+          const payload = row.payload as Record<string, unknown>;
           const occurredAt = new Date(String(payload?.occurredAt ?? ''));
           const supported:Record<string,readonly string[]> = {
             COURSES:['CourseEnrolled','CourseProgressUpdated','CourseCompleted'],
@@ -835,7 +943,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         });
       }
     }
-    return {processed,failed};
+    return { processed, failed };
   }
 
   public async markNotificationRead(studentReferenceId: string, notificationId: string): Promise<void> {
@@ -872,18 +980,32 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
   }
 
   private async appendOutbox(
-    tx: any, workspaceId: string, eventType: string, payload: Record<string, unknown>, actor?: StudentAuditActor,
+    tx: any,
+    workspaceId: string,
+    eventType: string,
+    payload: Record<string, unknown>,
+    actor?: StudentAuditActor,
   ): Promise<void> {
     const principal: StudentAuditActor = actor ?? {
       actorId: String(payload.studentReferenceId ?? 'system'), actorType: 'USER', source: 'student-workspace-command',
     };
     const auditId = randomUUID();
     const enrichedPayload = { ...payload, auditActorType: principal.actorType, auditSource: principal.source, sourceEventId: principal.sourceEventId ?? payload.sourceEventId ?? null };
-    await tx.auditRecord.create({ data: {
-      id: auditId, reference: `student-audit-${auditId}`, action: eventType, category: 'STUDENT_WORKSPACE',
-      severity: eventType.includes('Archived') || eventType.includes('Suspended') ? 'HIGH' : 'INFO', actorId: principal.actorId, actorType: principal.actorType,
-      targetId: workspaceId, targetType: 'StudentWorkspace', source: principal.source, timestamp: new Date(), contextMetadata: json({ ...enrichedPayload, ...(principal.reason ? { supportReason: principal.reason } : {}), ...(principal.correlationId ? { correlationId: principal.correlationId } : {}) }),
-    }});
+    await tx.auditRecord.create({
+      data: {
+        id: auditId,
+        reference: `student-audit-${auditId}`,
+        action: eventType,
+        category: 'STUDENT_WORKSPACE',
+      severity: eventType.includes('Archived') || eventType.includes('Suspended') ? 'HIGH' : 'INFO',
+        actorId: principal.actorId,
+        actorType: principal.actorType,
+        targetId: workspaceId,
+        targetType: 'StudentWorkspace',
+        source: principal.source,
+        timestamp: new Date(), contextMetadata: json({ ...enrichedPayload, ...(principal.reason ? { supportReason: principal.reason } : {}), ...(principal.correlationId ? { correlationId: principal.correlationId } : {}) }),
+      },
+    });
     await tx.transactionalOutboxRecord.create({ data: {
       id: randomUUID(), eventType, domain: 'STUDENT_WORKSPACE', aggregateType: 'StudentWorkspace', aggregateId: workspaceId,
       payload: json(enrichedPayload), metadata: json({ sourcePhase: 'Phase15', schemaVersion: '2.0', actorType: principal.actorType, source: principal.source }),
@@ -1078,7 +1200,14 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
   }
 
   private savedItem(row: any): StudentSavedItemDto {
-    return { ...row, metadata: row.metadata as Record<string, unknown> | null };
+    const { privateResultEnvelope: _envelope, privateResultExpiresAt: _expires, ...safe } = row;
+    return {
+      ...safe,
+      metadata:
+        row.entityType === 'STUDENT_TOOL'
+          ? { artifactReference: row.entityId }
+          : (row.metadata as Record<string, unknown> | null),
+    };
   }
 
   private collection(row: any): StudentSavedCollectionDto {

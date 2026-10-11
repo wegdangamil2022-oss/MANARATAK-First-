@@ -415,6 +415,13 @@ export interface StudentSupportTriagePageDto {
 }
 
 export interface IStudentWorkspaceRepository {
+  savePrivateToolResult?(input: {
+    studentReferenceId: string;
+    executionId: string;
+    toolKey: string;
+    result: unknown;
+  }): Promise<{ savedReference: string }>;
+  readPrivateToolResult?(studentReferenceId: string, savedReference: string): Promise<unknown>;
   /** Only P15-owned inbox/tracker filters; no automatic P13/P14/P20 read. */
   listSupportTriage(input:{kind:StudentSupportTriageKind;limit?:number;cursor?:string}):Promise<StudentSupportTriagePageDto>;
   markNotificationRead?(studentReferenceId: string, notificationId: string): Promise<void>;

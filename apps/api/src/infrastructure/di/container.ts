@@ -1,8 +1,26 @@
+import {
+  PrismaStudentPrivateResultRetentionGateway,
+  StudentPrivateResultProtector,
+} from '@manaratak/infrastructure';
 import { EapCertificateVisualAssetResolver } from '@manaratak/infrastructure';
 import { PrismaInternationalTestConsumerReadGateway } from '@manaratak/infrastructure';
 import { ImportGovernanceUseCases } from '@manaratak/application';
-import { sweepOrphanImportSpools, PrismaImportGovernanceGateway, PrismaImportScreeningReceiptStore, PrismaImportSourceObservationGateway, PrismaSourceAcquisitionLimiter, SignedSourceAccessAuthority } from '@manaratak/infrastructure';
-import { ImportArtifactUseCase, ImportSourceControlUseCases, ImportParserRegistry, CsvImportStreamParser, NdjsonImportStreamParser, JsonImportStreamParser } from '@manaratak/application';
+import {
+  sweepOrphanImportSpools,
+  PrismaImportGovernanceGateway,
+  PrismaImportScreeningReceiptStore,
+  PrismaImportSourceObservationGateway,
+  PrismaSourceAcquisitionLimiter,
+  SignedSourceAccessAuthority,
+} from '@manaratak/infrastructure';
+import {
+  ImportArtifactUseCase,
+  ImportSourceControlUseCases,
+  ImportParserRegistry,
+  CsvImportStreamParser,
+  NdjsonImportStreamParser,
+  JsonImportStreamParser,
+} from '@manaratak/application';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -11,13 +29,24 @@ import {
   AcademicTaxonomyValidationService,
   ReferenceDataValidationService,
   ConfigurationResolutionService,
-  ImportRetryPolicy
+  ImportRetryPolicy,
 } from '@manaratak/domain';
 
-import { createContainer, InjectionMode, asClass, asValue, asFunction } from '@manaratak-vendor/awilix-core';
+import {
+  createContainer,
+  InjectionMode,
+  asClass,
+  asValue,
+  asFunction,
+} from '@manaratak-vendor/awilix-core';
 import { ConfigurationRegistry } from '@manaratak/config';
 import { RuntimeResourceRegistry } from '../runtime/RuntimeResourceRegistry.js';
-import { createAssetMalwareScannerGatewayForRuntime, createAssetSanitizationGatewayForRuntime, createAssetStorageGatewayForRuntime, createImportRawSnapshotStoreForRuntime } from './RuntimeDependencyPolicy.js';
+import {
+  createAssetMalwareScannerGatewayForRuntime,
+  createAssetSanitizationGatewayForRuntime,
+  createAssetStorageGatewayForRuntime,
+  createImportRawSnapshotStoreForRuntime,
+} from './RuntimeDependencyPolicy.js';
 
 // Repositories & Gateways
 import {
@@ -133,9 +162,32 @@ import {
   PrismaCanonicalAcademicUsageGateway,
   DegreeLevelRepository,
   PrismaScholarshipCanonicalLookupGateway,
-  VerifiedImportArtifactGateway, NodeSafeSourceHttpTransport, SourceAcquisitionLimiter,
-  StaticHtmlSourceConnector, SitemapSourceConnector, OfficialFeedSourceConnector, OfficialApiSourceConnector, ManualUploadSourceConnector, InMemorySourceRegistryGateway, PrismaSourceRegistryGateway, PrismaScholarshipImportVerificationDecisionPort, PrismaScholarshipImportCanonicalResolutionDecisionPort, InMemoryScholarshipImportVerificationDecisionPort, InMemoryScholarshipImportCanonicalResolutionDecisionPort
-, PrismaSessionManager, PrismaCredentialVerifier, PrismaAIPlatformRepository, createDefaultAIProviderRegistry, EnvironmentAIAsyncPayloadProtector, JwtTokenProvider, generateEphemeralJwtKeySet, PrismaNotificationIntentRepository, PrismaNotificationTemplateRepository, PrismaStudentNotificationPreferenceGateway, ProviderNotificationDeliveryGateway} from '@manaratak/infrastructure';
+  VerifiedImportArtifactGateway,
+  NodeSafeSourceHttpTransport,
+  SourceAcquisitionLimiter,
+  StaticHtmlSourceConnector,
+  SitemapSourceConnector,
+  OfficialFeedSourceConnector,
+  OfficialApiSourceConnector,
+  ManualUploadSourceConnector,
+  InMemorySourceRegistryGateway,
+  PrismaSourceRegistryGateway,
+  PrismaScholarshipImportVerificationDecisionPort,
+  PrismaScholarshipImportCanonicalResolutionDecisionPort,
+  InMemoryScholarshipImportVerificationDecisionPort,
+  InMemoryScholarshipImportCanonicalResolutionDecisionPort,
+  PrismaSessionManager,
+  PrismaCredentialVerifier,
+  PrismaAIPlatformRepository,
+  createDefaultAIProviderRegistry,
+  EnvironmentAIAsyncPayloadProtector,
+  JwtTokenProvider,
+  generateEphemeralJwtKeySet,
+  PrismaNotificationIntentRepository,
+  PrismaNotificationTemplateRepository,
+  PrismaStudentNotificationPreferenceGateway,
+  ProviderNotificationDeliveryGateway,
+} from '@manaratak/infrastructure';
 
 // UseCases
 import {
@@ -257,7 +309,8 @@ import {
   AcademicTaxonomyScreeningConsumer,
   RetentionSweepUseCase,
   RetentionBackgroundJobHandler,
-  RecoverAssetActivationsUseCase, AssetActivationRecoveryBackgroundJobHandler,
+  RecoverAssetActivationsUseCase,
+  AssetActivationRecoveryBackgroundJobHandler,
   CmsScheduledPublishingBackgroundJobHandler,
   ImportQueueBackgroundJobHandler,
   AIAsyncBackgroundJobHandler,
@@ -274,7 +327,14 @@ import {
 
 // These are directly from src instead of index for some reason
 import { ManageNotificationTemplatesUseCase } from '@manaratak/application';
-import { SourceConnectorRegistry, AcquireImportSourceUseCase, ScholarshipSourceRegistryService, ScholarshipAcquisitionPlanner, ScholarshipImportNewUseCase, ScholarshipImportDecisionUseCases } from '@manaratak/application';
+import {
+  SourceConnectorRegistry,
+  AcquireImportSourceUseCase,
+  ScholarshipSourceRegistryService,
+  ScholarshipAcquisitionPlanner,
+  ScholarshipImportNewUseCase,
+  ScholarshipImportDecisionUseCases,
+} from '@manaratak/application';
 import { ManageNotificationIntentsUseCase } from '@manaratak/application';
 import { ManageAuditRecordsUseCase } from '@manaratak/application';
 
@@ -285,7 +345,7 @@ import {
   FileIntegrityValidationService,
   StudentToolHandlerRegistry,
   StudentToolActivationReadinessService,
-  StudentToolHealthService
+  StudentToolHealthService,
 } from '@manaratak/domain';
 
 // Routers
@@ -365,7 +425,7 @@ import { AcademicTaxonomyPublicRouter } from '../../presentation/api/router/Acad
 import { AcademicTaxonomyAdminRouter } from '../../presentation/api/router/AcademicTaxonomyAdminRouter.js';
 
 const container = createContainer({
-  injectionMode: InjectionMode.PROXY
+  injectionMode: InjectionMode.PROXY,
 });
 
 // MNT-AUD-0109: the obsolete in-memory Prisma shadow runtime was removed.
@@ -470,8 +530,19 @@ export function registerDependencies(
     courseFinancialClearanceGateway: asFunction(({ financePlatformUseCases }) => new Phase19CourseFinancialClearanceGateway(financePlatformUseCases)).singleton(),
     learningPathRepository: asFunction(({ prisma }) => new PrismaLearningPathRepository(prisma)).singleton(),
     certificateRepository: asFunction(({ prisma }) => new PrismaCertificateRepository(prisma)).singleton(),
-    studentWorkspaceRepository: asFunction(({ prisma }) => new PrismaStudentWorkspaceRepository(prisma,
-      readConfig<string>('STUDENT_SUPPORT_CURSOR_SECRET') ?? readConfig<string>('JWT_PRIVATE_KEY_PEM'))).singleton(),
+    studentWorkspaceRepository: asFunction(
+      ({ prisma }) =>
+        new PrismaStudentWorkspaceRepository(
+          prisma,
+      readConfig<string>('STUDENT_SUPPORT_CURSOR_SECRET') ?? readConfig<string>('JWT_PRIVATE_KEY_PEM'),
+          new StudentPrivateResultProtector('STUDENT_PRIVATE_RESULT_KEY', {
+            STUDENT_PRIVATE_RESULT_KEY: readConfig<string>('STUDENT_PRIVATE_RESULT_KEY'),
+            STUDENT_PRIVATE_RESULT_KEY_PREVIOUS: readConfig<string>(
+              'STUDENT_PRIVATE_RESULT_KEY_PREVIOUS',
+            ),
+          }),
+        ),
+    ).singleton(),
     studentApplicationTrackerRepository: asFunction(({ prisma }) => new PrismaStudentApplicationTrackerRepository(prisma,
       readConfig<string>('STUDENT_SUPPORT_CURSOR_SECRET') ?? readConfig<string>('JWT_PRIVATE_KEY_PEM'))).scoped(),
     studentApplicationScholarshipGateway: asFunction(({ scholarshipRepository }) => new ScholarshipStudentApplicationTrackerGateway(scholarshipRepository)).scoped(),
@@ -483,7 +554,14 @@ export function registerDependencies(
     ).singleton(),
     cmsRepository: asFunction(({ prisma, assetRecordRepository }) => new PrismaCmsRepository(prisma, assetRecordRepository)).singleton(),
     studentToolRegistryRepository: asFunction(({ prisma }) => new PrismaStudentToolRegistryRepository(prisma)).singleton(),
-    studentToolResultProtector: asFunction(() => new EnvironmentStudentToolResultProtector('STUDENT_TOOL_RESULT_KEY', { ...effectiveEnvironment, STUDENT_TOOL_RESULT_KEY: readConfig<string>('STUDENT_TOOL_RESULT_KEY') })).singleton(),
+    studentToolResultProtector: asFunction(
+      () =>
+        new EnvironmentStudentToolResultProtector('STUDENT_TOOL_RESULT_KEY', {
+          ...effectiveEnvironment,
+          STUDENT_TOOL_RESULT_KEY: readConfig<string>('STUDENT_TOOL_RESULT_KEY'),
+          STUDENT_TOOL_RESULT_KEY_PREVIOUS: readConfig<string>('STUDENT_TOOL_RESULT_KEY_PREVIOUS'),
+        }),
+    ).singleton(),
     studentToolAnonymousSessionService: asFunction(() => new StudentToolAnonymousSessionService(readConfig<string>('STUDENT_TOOL_ANONYMOUS_SESSION_SECRET'))).singleton(),
     studentToolsAIConsumerGateway: asFunction(({ aiExecutionUseCases }) => new Phase17StudentToolsAIConsumerGateway(aiExecutionUseCases)).scoped(),
     universityComparisonGateway: asFunction(({ universityRepository }) => new CanonicalUniversityComparisonGateway(universityRepository)).singleton(),
@@ -586,22 +664,42 @@ export function registerDependencies(
     importScreeningReceiptStore: asFunction(({ prisma }) => isPrisma ? new PrismaImportScreeningReceiptStore(prisma) : undefined).singleton(),
     importGovernanceGateway: asFunction(({ prisma }) => new PrismaImportGovernanceGateway(prisma)).singleton(),
     importSourceObservationGateway: asFunction(({ prisma }) => isPrisma ? new PrismaImportSourceObservationGateway(prisma) : undefined).singleton(),
-    importGovernanceUseCases: asFunction(({ importGovernanceGateway, atomicDomainMutationCoordinator, authEvaluatorService, identityRepository }) =>
-      isPrisma ? new ImportGovernanceUseCases(importGovernanceGateway, atomicDomainMutationCoordinator, async (identityId, ownerDomain) => {
-        const identity = await identityRepository.findById(identityId);
-        if (!identity || identity.status !== 'ACTIVE' || identity.deletedAt) return false;
+    importGovernanceUseCases: asFunction(
+      ({
+        importGovernanceGateway,
+        atomicDomainMutationCoordinator,
+        authEvaluatorService,
+        identityRepository,
+      }) =>
+        isPrisma
+          ? new ImportGovernanceUseCases(
+              importGovernanceGateway,
+              atomicDomainMutationCoordinator,
+              async (identityId, ownerDomain) => {
+                const identity = await identityRepository.findById(identityId);
+                if (!identity || identity.status !== 'ACTIVE' || identity.deletedAt) return false;
         const ownerPermissions: Record<string, string> = { REFERENCE_DATA: 'admin:reference-data:manage', ACADEMIC_TAXONOMY: 'admin:academic-taxonomy:manage', TAXONOMY: 'admin:academic-taxonomy:manage', SCHOLARSHIPS: 'admin:scholarships:manage', UNIVERSITIES: 'admin:universities:manage',
           MAJORS: 'admin:majors:manage', FELLOWSHIPS: 'admin:majors:manage', STUDENT_TOOLS: 'admin:student-tools:manage', GENERIC: 'admin:imports:manage', COURSES: 'admin:courses:manage', TESTS: 'admin:international-tests:manage', CMS: 'admin:cms:manage', SERVICES: 'admin:services:manage' };
-        if (!ownerPermissions[ownerDomain]) return false;
+                if (!ownerPermissions[ownerDomain]) return false;
         const permissions = ['admin:imports:manage', ...(ownerPermissions[ownerDomain] ? [ownerPermissions[ownerDomain]] : [])];
-        const decisions = await Promise.all(permissions.map(permission => authEvaluatorService.evaluatePermission(identityId, permission, { requestTime: new Date() })));
-        return decisions.every(decision => decision.isGranted);
-      }) : undefined).scoped(),
+                const decisions = await Promise.all(
+                  permissions.map((permission) => authEvaluatorService.evaluatePermission(identityId, permission, { requestTime: new Date() }),
+                  ),
+                );
+                return decisions.every((decision) => decision.isGranted);
+              },
+            )
+          : undefined,
+    ).scoped(),
     sourceAccessAuthority: asFunction(() => {
       const raw = readConfig<string>('IMPORT_SOURCE_SIGNED_APPROVALS');
       const tokens = raw ? JSON.parse(raw) : [];
       if (!Array.isArray(tokens)) throw new Error('SOURCE_AUTHORITY_CONFIGURATION_INVALID');
-      return new SignedSourceAccessAuthority(readConfig<string>('IMPORT_SOURCE_APPROVAL_PUBLIC_KEY'), tokens, binding => readConfig<string>(binding));
+      return new SignedSourceAccessAuthority(
+        readConfig<string>('IMPORT_SOURCE_APPROVAL_PUBLIC_KEY'),
+        tokens,
+        (binding) => readConfig<string>(binding),
+      );
     }).singleton(),
     safeSourceHttpTransport: asFunction(({ sourceAccessAuthority, sourceAcquisitionLimiter }) => new NodeSafeSourceHttpTransport(undefined, undefined, sourceAccessAuthority, sourceAcquisitionLimiter)).singleton(),
     staticHtmlSourceConnector: asFunction(({ safeSourceHttpTransport, sourceAccessAuthority }) => new StaticHtmlSourceConnector(safeSourceHttpTransport, sourceAccessAuthority)).singleton(),
@@ -768,10 +866,26 @@ export function registerDependencies(
     courseRelationshipResolutionService: asFunction(({ courseRelationshipRepository }) => new CourseRelationshipResolutionService(courseRelationshipRepository)).scoped(),
     crossDomainGraphReadService: asFunction(({ majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository }) =>
       new CrossDomainGraphReadService(majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository)).scoped(),
-    courseAdminCommandUseCases: asFunction(({courseRepository, learningPathRepository, courseProgressRepository, courseCurriculumRepository,
-      courseEnrollmentPolicyRepository, courseRelationshipRepository, assetRecordRepository, assetReferencePolicy,
-      importedCourseOperationsRepository, externalCourseProviderRepository, importedCourseLinkChecker, atomicDomainMutationCoordinator}) => new CourseAdminCommandUseCases(
-        courseRepository, learningPathRepository, atomicDomainMutationCoordinator, context => {
+    courseAdminCommandUseCases: asFunction(
+      ({
+        courseRepository,
+        learningPathRepository,
+        courseProgressRepository,
+        courseCurriculumRepository,
+        courseEnrollmentPolicyRepository,
+        courseRelationshipRepository,
+        assetRecordRepository,
+        assetReferencePolicy,
+        importedCourseOperationsRepository,
+        externalCourseProviderRepository,
+        importedCourseLinkChecker,
+        atomicDomainMutationCoordinator,
+      }) =>
+        new CourseAdminCommandUseCases(
+          courseRepository,
+          learningPathRepository,
+          atomicDomainMutationCoordinator,
+          (context) => {
           const courses = bindCourseRepository(courseRepository, context);
           const curriculum = bindCourseRepository(courseCurriculumRepository, context);
           const policy = bindCourseRepository(courseEnrollmentPolicyRepository, context);
@@ -789,7 +903,9 @@ export function registerDependencies(
             courseRelationshipResolutionService: new CourseRelationshipResolutionService(relationships),
             learningPathUseCases: new LearningPathUseCases(paths, courses, courseProgressRepository, atomicDomainMutationCoordinator),
           };
-        })).scoped(),
+        },
+        ),
+    ).scoped(),
     courseCurriculumUseCases: asFunction(({ courseRepository, courseCurriculumRepository, assetRecordRepository }) => new CourseCurriculumUseCases(courseRepository, courseCurriculumRepository, assetRecordRepository)).scoped(),
     courseEnrollmentPolicyUseCases: asFunction(({ courseRepository, courseEnrollmentPolicyRepository }) =>
       new CourseEnrollmentPolicyUseCases(courseRepository, courseEnrollmentPolicyRepository)).scoped(),
@@ -801,7 +917,34 @@ export function registerDependencies(
       new NativeCourseUseCases(courseRepository, courseCurriculumRepository, assetRecordRepository, coursePublicationService, courseRelationshipRepository, courseEnrollmentPolicyRepository)).scoped(),
     // Override this port with the approved non-exportable signer during runtime provisioning.
     certificateSignatureService: asValue(null),
-    certificateUseCases: asFunction(({ certificateSignatureService, certificateRepository, courseRepository, assetRecordRepository, learningPathRepository, identityRepository, courseCurriculumRepository, universityRepository, pollingWorkerRuntimeRegistry }) => new CertificateUseCases(certificateRepository, courseRepository, assetRecordRepository, { signatureService: certificateSignatureService ?? undefined, artifactReadinessProbe: async () => { const worker = pollingWorkerRuntimeRegistry.snapshot('certificate-completion'); return worker.state === 'STOPPED' ? {status:'NOT_CONFIGURED',reason:'Completion worker is stopped'} : worker.state === 'DEGRADED' || !worker.lastSuccessAt || Date.now()-new Date(worker.lastSuccessAt).getTime()>60000 ? {status:'DEGRADED',reason:'No recent successful worker iteration'} : {status:'RUNTIME_PENDING',reason:'Worker active; actual artifact storage/delivery probe evidence remains pending'}; }, signingKeyReference: readConfig<string>('CERTIFICATE_SIGNING_KEY_REFERENCE'), signingSecret: readConfig<string>('CERTIFICATE_SIGNING_SECRET'), publicVerificationBaseUrl: readConfig<string>('CERTIFICATE_PUBLIC_VERIFICATION_BASE_URL'), productionLike }, learningPathRepository, identityRepository, courseCurriculumRepository, { validate: async issuer => issuer.issuerType === 'UNIVERSITY' && Boolean(issuer.universityId && await universityRepository.findById(issuer.universityId)) })).scoped(),
+    certificateUseCases: asFunction(
+      ({
+        certificateSignatureService,
+        certificateRepository,
+        courseRepository,
+        assetRecordRepository,
+        learningPathRepository,
+        identityRepository,
+        courseCurriculumRepository,
+        universityRepository,
+        pollingWorkerRuntimeRegistry,
+      }) =>
+        new CertificateUseCases(
+          certificateRepository,
+          courseRepository,
+          assetRecordRepository, { signatureService: certificateSignatureService ?? undefined, artifactReadinessProbe: async () => { const worker = pollingWorkerRuntimeRegistry.snapshot('certificate-completion'); return worker.state === 'STOPPED' ? {status:'NOT_CONFIGURED',reason:'Completion worker is stopped'} : worker.state === 'DEGRADED' || !worker.lastSuccessAt || Date.now()-new Date(worker.lastSuccessAt).getTime()>60000 ? {status:'DEGRADED',reason:'No recent successful worker iteration'} : {status:'RUNTIME_PENDING',reason:'Worker active; actual artifact storage/delivery probe evidence remains pending'}; }, signingKeyReference: readConfig<string>('CERTIFICATE_SIGNING_KEY_REFERENCE'), signingSecret: readConfig<string>('CERTIFICATE_SIGNING_SECRET'), publicVerificationBaseUrl: readConfig<string>('CERTIFICATE_PUBLIC_VERIFICATION_BASE_URL'), productionLike },
+          learningPathRepository,
+          identityRepository,
+          courseCurriculumRepository,
+          {
+            validate: async (issuer) =>
+              issuer.issuerType === 'UNIVERSITY' &&
+              Boolean(
+                issuer.universityId && (await universityRepository.findById(issuer.universityId)),
+              ),
+          },
+        ),
+    ).scoped(),
     certificateRenderingService: asFunction(({assetRecordRepository,processAssetLifecycleUseCase}) => new ProviderNeutralCertificateRenderingService(new EapCertificateVisualAssetResolver(assetRecordRepository,processAssetLifecycleUseCase))).scoped(),
     certificateArtifactStore: asFunction(({ assetRecordRepository, ingestAssetUseCase, processAssetLifecycleUseCase }) => new EapCertificateArtifactStore(assetRecordRepository, ingestAssetUseCase, processAssetLifecycleUseCase)).scoped(),
     certificateArtifactRenderUseCase: asFunction(({ certificateRepository, certificateRenderingService, certificateArtifactStore, certificateUseCases }) => new CertificateArtifactRenderUseCase(certificateRepository, certificateRenderingService, certificateArtifactStore, certificateUseCases)).scoped(),
@@ -896,8 +1039,27 @@ export function registerDependencies(
     ingestAssetUseCase: asFunction(({ assetRecordRepository, assetStorageGateway }) => new IngestAssetUseCase(assetRecordRepository, assetStorageGateway)).scoped(),
     processAssetLifecycleUseCase: asFunction(({ assetRecordRepository, assetStorageGateway, assetUsageRegistryGateway, assetMalwareScannerGateway, assetSanitizationGateway }) => new ProcessAssetLifecycleUseCase(assetRecordRepository, assetStorageGateway, assetUsageRegistryGateway, assetMalwareScannerGateway, assetSanitizationGateway)).scoped(),
     assetRetentionGateway: asFunction(({ prisma, processAssetLifecycleUseCase }) => isPrisma ? new PrismaAssetRetentionGateway(prisma, processAssetLifecycleUseCase) : createUnavailableCapability('assetRetentionGateway')).scoped(),
-    retentionSweepUseCase: asFunction(({ importRetentionGateway, auditRetentionGateway, assetRetentionGateway, retentionDecisionRepository }) =>
-      new RetentionSweepUseCase([importRetentionGateway, auditRetentionGateway, assetRetentionGateway], retentionDecisionRepository)).scoped(),
+    studentPrivateResultRetentionGateway: asFunction(
+      ({ prisma }) => new PrismaStudentPrivateResultRetentionGateway(prisma),
+    ).singleton(),
+    retentionSweepUseCase: asFunction(
+      ({
+        importRetentionGateway,
+        auditRetentionGateway,
+        assetRetentionGateway,
+        studentPrivateResultRetentionGateway,
+        retentionDecisionRepository,
+      }) =>
+        new RetentionSweepUseCase(
+          [
+            importRetentionGateway,
+            auditRetentionGateway,
+            assetRetentionGateway,
+            studentPrivateResultRetentionGateway,
+          ],
+          retentionDecisionRepository,
+        ),
+    ).scoped(),
     recoverAssetActivationsUseCase: asFunction(({ assetRecordRepository, processAssetLifecycleUseCase, auditRecordRepo }) =>
       new RecoverAssetActivationsUseCase(assetRecordRepository, processAssetLifecycleUseCase, auditRecordRepo)).scoped(),
     assetActivationRecoveryBackgroundJobHandler: asFunction(({ recoverAssetActivationsUseCase }) =>

@@ -77,11 +77,12 @@ check('P8-TOOLS-001 P15 minimal context adapter exists', has(studentGateways, 'c
 check('P8-TOOLS-001 P15 context adapter is wired into P18 handler', has(di, 'new Phase15StudentContextGateway(studentWorkspaceRepository)') && has(di, 'new ScholarshipRecommendationHandler(scholarshipRecommendationGateway, studentToolsAIConsumerGateway, studentContextGateway)'));
 check('P8-TOOLS-002 scholarship candidate query resolves canonical references', has(studentGateways, 'resolveCountry(referenceLookup(value))') && has(studentGateways, 'resolveLanguage(referenceLookup(value))') && has(studentGateways, 'getDegreeLevelByCode'));
 check('P8-TOOLS-002 scholarship owner query receives canonical filters', has(studentGateways, 'countryReferenceId,') && has(studentGateways, 'degreeLevelId,') && has(studentGateways, 'studyLanguageReferenceId: languageReferenceId'));
-check('P8-TOOLS-003 scholarship candidate traversal is paginated/bounded',
-  has(studentGateways, 'SCHOLARSHIP_RECOMMENDATION_CANDIDATE_SCAN_LIMIT_EXCEEDED') &&
-  has(studentGateways, 'listPublished({ ...filters, cursor, limit: 100 })') &&
-  has(studentGateways, 'cursor = result.nextCursor ?? undefined') &&
-  has(studentGateways, 'hasMore = result.hasMore === true && Boolean(cursor)'));
+check('P8-TOOLS-003 scholarship candidate queries are canonically filtered and bounded',
+  has(studentGateways, 'batches.slice(0, 10)') &&
+  has(studentGateways, 'if (unique.size >= 25) break') &&
+  has(studentGateways, 'limit: 25,') &&
+  has(studentGateways, 'return [...unique.values()].slice(0, 25)') &&
+  notHas(studentGateways, 'listAllPublished'));
 check('P8-TOOLS-004 authenticated P18 recommendation consumes P15 context only as missing preference input', has(studentHandlers, 'this.studentContext.getMinimalContext') && has(studentHandlers, 'input.targetDegree || privateContext?.targetDegree'));
 check('P8-AI-001 P18 AI path stays behind P17 enterprise gateway', has(studentGateways, 'class Phase17StudentToolsAIConsumerGateway') && has(studentHandlers, 'IEnterpriseAIConsumerGateway'));
 const lateDomainSource = sourceText([

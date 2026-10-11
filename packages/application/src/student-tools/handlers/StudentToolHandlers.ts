@@ -1,3 +1,4 @@
+import { STUDENT_TOOL_SCHEMAS } from './StudentToolSchemas';
 import {
   GpaCalculatorInput,
   GpaCalculatorOutput,
@@ -11,10 +12,16 @@ import {
   ScholarshipRecommendationInput,
   ScholarshipRecommendationOutput,
   StudentToolExecutionContext,
+  StudentToolAIExecutionError,
   StudentToolExecutionType,
   UniversityComparisonInput,
   UniversityComparisonOutput,
 } from '@manaratak/domain';
+
+function known(input: Record<string, unknown>, fields: string[]) {
+  if (Object.keys(input).some((key) => !fields.includes(key)))
+    throw new Error('TOOL_INPUT_INVALID:unknown_field');
+}
 
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value))
@@ -42,18 +49,21 @@ export class GpaCalculatorHandler implements IStudentToolHandler<
   GpaCalculatorOutput
 > {
   readonly toolKey = 'gpa-calculator';
+  readonly contract = STUDENT_TOOL_SCHEMAS['gpa-calculator'];
   readonly executionType = StudentToolExecutionType.DETERMINISTIC;
   validate(value: unknown): GpaCalculatorInput {
     const input = object(value);
-    const scale = Number(input.scale);
+    known(input, ['scale', 'courses', 'existingCumulativeGpa', 'existingCompletedCredits']);
+    const scale = (typeof input.scale === 'number' ? input.scale : NaN);
     if (!Number.isFinite(scale) || scale < 1 || scale > 10)
       throw new Error('TOOL_INPUT_INVALID:scale');
     if (!Array.isArray(input.courses) || input.courses.length < 1 || input.courses.length > 50)
       throw new Error('TOOL_INPUT_INVALID:courses');
     const courses = input.courses.map((raw: unknown, index: number) => {
       const course = object(raw);
-      const creditHours = Number(course.creditHours);
-      const gradePoints = Number(course.gradePoints);
+      known(course, ['label', 'creditHours', 'gradePoints']);
+      const creditHours = (typeof course.creditHours === 'number' ? course.creditHours : NaN);
+      const gradePoints = (typeof course.gradePoints === 'number' ? course.gradePoints : NaN);
       if (!Number.isFinite(creditHours) || creditHours <= 0 || creditHours > 30)
         throw new Error(`TOOL_INPUT_INVALID:courses.${index}.creditHours`);
       if (!Number.isFinite(gradePoints) || gradePoints < 0 || gradePoints > scale)
@@ -65,9 +75,9 @@ export class GpaCalculatorHandler implements IStudentToolHandler<
       };
     });
     const existingCumulativeGpa =
-      input.existingCumulativeGpa == null ? undefined : Number(input.existingCumulativeGpa);
+      input.existingCumulativeGpa == null ? undefined : (typeof input.existingCumulativeGpa === 'number' ? input.existingCumulativeGpa : NaN);
     const existingCompletedCredits =
-      input.existingCompletedCredits == null ? undefined : Number(input.existingCompletedCredits);
+      input.existingCompletedCredits == null ? undefined : (typeof input.existingCompletedCredits === 'number' ? input.existingCompletedCredits : NaN);
     if ((existingCumulativeGpa == null) !== (existingCompletedCredits == null))
       throw new Error('TOOL_INPUT_INVALID:cumulativePair');
     if (
@@ -130,15 +140,15 @@ export class UniversityComparisonHandler implements IStudentToolHandler<
   UniversityComparisonOutput
 > {
   readonly toolKey = 'university-comparison';
+  readonly contract = STUDENT_TOOL_SCHEMAS['university-comparison'];
   readonly executionType = StudentToolExecutionType.DETERMINISTIC;
   constructor(private readonly universities: IUniversityComparisonGateway) {}
   validate(value: unknown): UniversityComparisonInput {
     const input = object(value);
-    if (!Array.isArray(input.universityIds))
-      throw new Error('TOOL_INPUT_INVALID:universityIds');
-    const rawIds = input.universityIds.map((item) =>
-      typeof item === 'string' ? item.trim() : '',
-    );
+    known(input, ['universityIds', 'hideUnavailableRows']);
+    if (input.hideUnavailableRows != null && typeof input.hideUnavailableRows !== 'boolean') throw new Error('TOOL_INPUT_INVALID:hideUnavailableRows');
+    if (!Array.isArray(input.universityIds)) throw new Error('TOOL_INPUT_INVALID:universityIds');
+    const rawIds = input.universityIds.map((item) => (typeof item === 'string' ? item.trim() : ''));
     if (new Set(rawIds).size !== rawIds.length)
       throw new Error('TOOL_INPUT_INVALID:duplicateUniversityIds');
     const universityIds = strings(input.universityIds, 'universityIds', 4);
@@ -167,17 +177,32 @@ export class MotivationLetterGeneratorHandler implements IStudentToolHandler<
   MotivationLetterOutput
 > {
   readonly toolKey = 'motivation-letter-generator';
+  readonly contract = STUDENT_TOOL_SCHEMAS['motivation-letter-generator'];
   readonly executionType = StudentToolExecutionType.AI_DELEGATED;
   constructor(private readonly ai: IEnterpriseAIConsumerGateway) {}
   validate(value: unknown): MotivationLetterInput {
     const input = object(value);
+    known(input, ['target', 'studentBackground', 'motivation', 'outputPreferences']);
     const target = object(input.target);
     const background = object(input.studentBackground);
     const motivation = object(input.motivation);
     const preferences = object(input.outputPreferences);
+    known(target, ['universityId', 'program', 'degreeLevel', 'country', 'applicationType']);
+    known(background, ['education', 'academicInterests', 'experiences', 'achievements', 'skills']);
+    known(motivation, [
+      'whyField',
+      'whyProgram',
+      'careerGoals',
+      'contribution',
+      'emphasizedExperiences',
+    ]);
+    known(preferences, ['language', 'targetWords', 'tone', 'specialInstructions']);
+    if (target.universityId != null) text(target.universityId, 'target.universityId', 1, 200);
+    if (target.country != null) text(target.country, 'target.country', 0, 80);
+    if (preferences.specialInstructions != null) text(preferences.specialInstructions, 'specialInstructions', 0, 1000);
     const language =
       preferences.language === 'en' ? 'en' : preferences.language === 'ar' ? 'ar' : null;
-    const targetWords = Number(preferences.targetWords);
+    const targetWords = (typeof preferences.targetWords === 'number' ? preferences.targetWords : NaN);
     if (
       !language ||
       !Number.isInteger(targetWords) ||
@@ -223,11 +248,20 @@ export class MotivationLetterGeneratorHandler implements IStudentToolHandler<
     context: StudentToolExecutionContext,
     input: MotivationLetterInput,
   ): Promise<MotivationLetterOutput> {
+    if (context.privacyConsent !== true) throw new Error('TOOL_PRIVACY_CONSENT_REQUIRED');
     const response = await this.ai.executeCapability<
       MotivationLetterInput,
       Omit<MotivationLetterOutput, 'aiExecutionId' | 'safetyStatus'>
     >({
-      consumerKey: 'phase18-student-tools',
+      consumerKey:
+        context.consumerType === 'ADMIN_TEST'
+          ? 'phase18-student-tools-test'
+          : context.consumerType === 'ANONYMOUS'
+            ? 'phase18-student-tools-anonymous'
+            : 'phase18-student-tools',
+      requesterReferenceId:
+        context.authenticatedStudentReference ?? context.anonymousSessionReference,
+      privacyConsent: context.privacyConsent,
       capabilityKey: 'student-tools.motivation-letter.generate',
       correlationId: context.correlationId,
       locale: context.locale,
@@ -241,10 +275,13 @@ export class MotivationLetterGeneratorHandler implements IStudentToolHandler<
       },
     });
     if (response.status !== 'COMPLETED' || !response.result || !response.executionReference)
-      throw new Error(
-        response.status === 'NOT_CONFIGURED'
-          ? 'TOOL_AI_CAPABILITY_UNAVAILABLE'
-          : (response.errorCode ?? 'TOOL_EXECUTION_FAILED'),
+      throw new StudentToolAIExecutionError(
+        response.status === 'BLOCKED'
+          ? 'TOOL_EXECUTION_BLOCKED'
+          : response.status === 'NOT_CONFIGURED'
+            ? 'TOOL_AI_CAPABILITY_UNAVAILABLE'
+            : 'TOOL_AI_UNKNOWN_OUTCOME',
+        response.executionReference,
       );
     return {
       ...response.result,
@@ -276,6 +313,7 @@ export class ScholarshipRecommendationHandler implements IStudentToolHandler<
   ScholarshipRecommendationOutput
 > {
   readonly toolKey = 'scholarship-recommendation';
+  readonly contract = STUDENT_TOOL_SCHEMAS['scholarship-recommendation'];
   readonly executionType = StudentToolExecutionType.HYBRID;
   constructor(
     private readonly scholarships: IScholarshipRecommendationGateway,
@@ -284,15 +322,35 @@ export class ScholarshipRecommendationHandler implements IStudentToolHandler<
   ) {}
   validate(value: unknown): ScholarshipRecommendationInput {
     const input = object(value);
+    known(input, [
+      'targetDegree',
+      'studyField',
+      'preferredCountries',
+      'fundingPreference',
+      'studyLanguage',
+      'targetYear',
+      'academicInterests',
+      'careerGoals',
+      'useProfile',
+      'allowAI',
+    ]);
+    for (const key of ['targetDegree', 'studyField', 'studyLanguage', 'careerGoals'])
+      if (input[key] != null) text(input[key], key, 0, key === 'careerGoals' ? 1000 : 200);
+    for (const key of ['useProfile', 'allowAI'])
+      if (input[key] != null && typeof input[key] !== 'boolean')
+        throw new Error('TOOL_INPUT_INVALID');
+    if (input.fundingPreference != null && !['FULL', 'PARTIAL', 'ANY'].includes(String(input.fundingPreference))) throw new Error('TOOL_INPUT_INVALID:fundingPreference');
     const fundingPreference =
       typeof input.fundingPreference === 'string' &&
       ['FULL', 'PARTIAL', 'ANY'].includes(input.fundingPreference)
         ? (input.fundingPreference as 'FULL' | 'PARTIAL' | 'ANY')
         : 'ANY';
-    const targetYear = input.targetYear == null ? undefined : Number(input.targetYear);
+    const targetYear = input.targetYear == null ? undefined : (typeof input.targetYear === 'number' ? input.targetYear : NaN);
     if (targetYear != null && (!Number.isInteger(targetYear) || targetYear < 2020 || targetYear > 2100))
       throw new Error('TOOL_INPUT_INVALID:targetYear');
     return {
+      useProfile: input.useProfile === true,
+      allowAI: input.allowAI === true,
       targetDegree: typeof input.targetDegree === 'string' ? input.targetDegree.trim() : undefined,
       studyField: typeof input.studyField === 'string' ? input.studyField.trim() : undefined,
       preferredCountries: strings(input.preferredCountries ?? [], 'preferredCountries', 10),
@@ -309,9 +367,13 @@ export class ScholarshipRecommendationHandler implements IStudentToolHandler<
     context: StudentToolExecutionContext,
     input: ScholarshipRecommendationInput,
   ): Promise<ScholarshipRecommendationOutput> {
-    const privateContext = context.authenticatedStudentReference
-      ? await this.studentContext.getMinimalContext(context.authenticatedStudentReference)
-      : null;
+    const privateContext =
+      input.useProfile === true &&
+      context.privacyConsent === true &&
+      context.consumerType !== 'ADMIN_TEST' &&
+      context.authenticatedStudentReference
+        ? await this.studentContext.getMinimalContext(context.authenticatedStudentReference)
+        : null;
     const effectiveInput: ScholarshipRecommendationInput = {
       ...input,
       targetDegree: input.targetDegree || privateContext?.targetDegree,
@@ -329,14 +391,29 @@ export class ScholarshipRecommendationHandler implements IStudentToolHandler<
       scholarship,
       constraintSummary: [
         effectiveInput.targetDegree ? `degree:${effectiveInput.targetDegree}` : 'degree:any',
-        effectiveInput.fundingPreference ? `funding:${effectiveInput.fundingPreference}` : 'funding:any',
+        effectiveInput.fundingPreference
+          ? `funding:${effectiveInput.fundingPreference}`
+          : 'funding:any',
       ],
     }));
     if (!candidates.length)
       return {
         mode: 'DETERMINISTIC_FALLBACK',
         recommendations: [],
-        disclaimer: 'النتائج إرشادية وتعتمد فقط على المنح المنشورة حاليًا.',
+        disclaimer:
+          context.locale === 'en'
+            ? 'Advisory matches use currently published scholarships only.'
+            : 'النتائج إرشادية وتعتمد فقط على المنح المنشورة حاليًا.',
+      };
+    if (input.allowAI !== true || context.privacyConsent !== true)
+      return {
+        mode: 'DETERMINISTIC_FALLBACK',
+        recommendations: fallback,
+        fallbackReason: 'MANUAL_ONLY',
+        disclaimer:
+          context.locale === 'en'
+            ? 'Matches use published scholarships only. No private preferences were sent to AI.'
+            : 'مطابقة المنح المنشورة فقط؛ لم ترسل تفضيلاتك الخاصة إلى الذكاء الاصطناعي.',
       };
     const response = await this.ai.executeCapability<
       {
@@ -345,11 +422,19 @@ export class ScholarshipRecommendationHandler implements IStudentToolHandler<
       },
       { rankings: Array<{ publicId: string; explanation: string }> }
     >({
-      consumerKey: 'phase18-student-tools',
+      consumerKey:
+        context.consumerType === 'ADMIN_TEST'
+          ? 'phase18-student-tools-test'
+          : context.consumerType === 'ANONYMOUS'
+            ? 'phase18-student-tools-anonymous'
+            : 'phase18-student-tools',
+      requesterReferenceId:
+        context.authenticatedStudentReference ?? context.anonymousSessionReference,
+      privacyConsent: context.privacyConsent,
       capabilityKey: 'student-tools.scholarship-recommendation.rank',
       correlationId: context.correlationId,
       locale: context.locale,
-      dataClassification: 'CANONICAL_PUBLIC_DATA',
+      dataClassification: 'PRIVATE_STUDENT_DATA',
       payload: {
         preferences: effectiveInput,
         candidates: candidates.map(({ publicId, displayName, country, degreeLevels, fundingType }) => ({ publicId, displayName, country, degreeLevels, fundingType })),
@@ -358,26 +443,62 @@ export class ScholarshipRecommendationHandler implements IStudentToolHandler<
       outputSchema: {
         type: 'object',
         required: ['rankings'],
-        properties: { rankings: { type: 'array' } },
+        additionalProperties: false,
+        properties: {
+          rankings: {
+            type: 'array',
+            minItems: candidates.length,
+            maxItems: candidates.length,
+            items: {
+              type: 'object',
+              required: ['publicId', 'explanation'],
+              additionalProperties: false,
+              properties: {
+                publicId: { type: 'string', enum: candidates.map((item) => item.publicId) },
+                explanation: { type: 'string', maxLength: 2000 },
+              },
+            },
+          },
+        },
       },
     });
+    if (response.status === 'BLOCKED') throw new StudentToolAIExecutionError('TOOL_EXECUTION_BLOCKED', response.executionReference);
+    if (response.status === 'FAILED') throw new StudentToolAIExecutionError('TOOL_AI_UNKNOWN_OUTCOME', response.executionReference);
     if (response.status !== 'COMPLETED' || !response.result)
       return {
         mode: 'DETERMINISTIC_FALLBACK',
         recommendations: fallback,
+        fallbackReason: 'AI_NOT_CONFIGURED',
         disclaimer:
-          'الترتيب احتياطي ويعتمد على المطابقة المباشرة لأن خدمة التحليل الذكي غير مهيأة.',
+          context.locale === 'en'
+            ? 'Showing direct matches because private AI ranking is unavailable.'
+            : 'الترتيب احتياطي ويعتمد على المطابقة المباشرة لأن خدمة التحليل الذكي غير مهيأة.',
       };
     const byId = new Map(candidates.map((item) => [item.publicId, item]));
-    const rankings = Array.isArray(response.result.rankings)
-      ? response.result.rankings.filter(
-          (item) =>
-            item &&
-            typeof item.publicId === 'string' &&
-            typeof item.explanation === 'string' &&
-            item.explanation.length <= 2_000,
-        )
-      : [];
+    const rankings = response.result.rankings;
+    if (
+      !Array.isArray(rankings) ||
+      rankings.length !== candidates.length ||
+      new Set(rankings.map((item) => item?.publicId)).size !== candidates.length ||
+      rankings.some(
+        (item) =>
+          !item ||
+          !byId.has(item.publicId) ||
+          typeof item.explanation !== 'string' ||
+          item.explanation.length > 2000,
+      )
+    ) {
+      return {
+        mode: 'DETERMINISTIC_FALLBACK',
+        recommendations: fallback,
+        fallbackReason: 'AI_RANKING_INVALID',
+        aiExecutionId: response.executionReference,
+        disclaimer:
+          context.locale === 'en'
+            ? 'AI ranking could not be verified; showing direct matches.'
+            : 'تعذر التحقق من ترتيب الذكاء الاصطناعي؛ تعرض المطابقات المباشرة.',
+      };
+    }
     const recommendations = rankings
       .filter((item) => byId.has(item.publicId))
       .map((item) => ({
@@ -391,12 +512,18 @@ export class ScholarshipRecommendationHandler implements IStudentToolHandler<
       return {
         mode: 'DETERMINISTIC_FALLBACK',
         recommendations: fallback,
-        disclaimer: 'تعذر التحقق من ترتيب التحليل الذكي؛ عُرضت المطابقة المباشرة فقط.',
+        disclaimer:
+          context.locale === 'en'
+            ? 'Unverified AI ranking; showing direct matches only.'
+            : 'تعذر التحقق من ترتيب التحليل الذكي؛ عُرضت المطابقة المباشرة فقط.',
       };
     return {
       mode: 'AI_ADVISORY',
       recommendations,
-      disclaimer: 'هذه توصيات إرشادية وليست قرار قبول أو ضمان تمويل.',
+      disclaimer:
+        context.locale === 'en'
+          ? 'Advisory recommendations do not guarantee admission or funding.'
+          : 'هذه توصيات إرشادية وليست قرار قبول أو ضمان تمويل.',
       aiExecutionId: response.executionReference,
     };
   }
@@ -404,7 +531,7 @@ export class ScholarshipRecommendationHandler implements IStudentToolHandler<
     const output = object(value);
     if (!['AI_ADVISORY', 'DETERMINISTIC_FALLBACK'].includes(String(output.mode)))
       throw new Error('TOOL_OUTPUT_INVALID:mode');
-    if (!Array.isArray(output.recommendations))
+    if (!Array.isArray(output.recommendations) || output.recommendations.length > 25)
       throw new Error('TOOL_OUTPUT_INVALID:recommendations');
     text(output.disclaimer, 'disclaimer', 1, 2000);
     return value as ScholarshipRecommendationOutput;

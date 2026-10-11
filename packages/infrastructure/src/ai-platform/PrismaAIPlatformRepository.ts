@@ -581,6 +581,10 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       dailyRequestLimit: number;
       requesterRequestsPerMinute?: number;
       requesterConcurrentLimit?: number;
+      requesterDailyCostLimit?: number;
+      requesterMonthlyCostLimit?: number;
+      requesterMonthlyTokenLimit?: number;
+
       monthlyTokenLimit: number;
       monthlyCostLimit?: number | null;
       currency?: string | null;
@@ -657,6 +661,73 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
             throw new Error('AI_REQUESTER_RATE_LIMIT_EXCEEDED');
           if (running + 1 > (reservation.requesterConcurrentLimit ?? 2))
             throw new Error('AI_REQUESTER_CONCURRENCY_EXCEEDED');
+        }
+        if (value.requesterReferenceId && reservation.requesterMonthlyCostLimit != null) {
+          if (
+            !reservation.currency ||
+            !Number.isFinite(reservation.requesterMonthlyCostLimit) ||
+            !Number.isFinite(reservation.requesterDailyCostLimit) ||
+            !Number.isSafeInteger(reservation.requesterMonthlyTokenLimit) ||
+            reservation.requesterMonthlyCostLimit <= 0 ||
+            (reservation.requesterDailyCostLimit ?? 0) <= 0 ||
+            (reservation.requesterMonthlyTokenLimit ?? 0) <= 0
+          )
+            throw new Error('AI_REQUESTER_BUDGET_NOT_CONFIGURED');
+          // All outstanding reservations count, including unknown charges from a previous month.
+          const [usage, pending] = await Promise.all([
+            tx.aIUsageRecord.findMany({
+              where: {
+                execution: {
+                  consumerKey: value.consumerKey,
+                  requesterReferenceId: value.requesterReferenceId,
+                },
+                createdAt: { gte: month },
+              },
+              select: {
+                inputTokens: true,
+                outputTokens: true,
+                cost: true,
+                currency: true,
+                createdAt: true,
+              },
+            }),
+            tx.$queryRawUnsafe(
+              'SELECT q."reservedTokens", q."reservedCost", q.currency FROM "AIQuotaReservationRecord" q JOIN "AIExecutionRecord" e ON e."publicId" = q."executionPublicId" WHERE q.status = $1 AND e."consumerKey" = $2 AND e."requesterReferenceId" = $3',
+              'RESERVED',
+              value.consumerKey,
+              value.requesterReferenceId,
+            ),
+          ]);
+          if ([...usage, ...pending].some((row: any) => row.currency !== reservation.currency))
+            throw new Error('AI_COST_CURRENCY_MISMATCH');
+          const heldCost = pending.reduce(
+            (sum: number, row: any) => sum + Number(row.reservedCost),
+            0,
+          );
+          const heldTokens = pending.reduce(
+            (sum: number, row: any) => sum + Number(row.reservedTokens),
+            0,
+          );
+          const cost = usage.reduce((sum: number, row: any) => sum + Number(row.cost), 0);
+          const dailyCost = usage
+            .filter((row: any) => new Date(row.createdAt) >= day)
+            .reduce((sum: number, row: any) => sum + Number(row.cost), 0);
+          const tokens = usage.reduce(
+            (sum: number, row: any) => sum + row.inputTokens + row.outputTokens,
+            0,
+          );
+          if (heldCost + cost + reservation.reservedCost > reservation.requesterMonthlyCostLimit)
+            throw new Error('AI_REQUESTER_MONTHLY_COST_EXCEEDED');
+          if (
+            heldCost + dailyCost + reservation.reservedCost >
+            reservation.requesterDailyCostLimit!
+          )
+            throw new Error('AI_REQUESTER_DAILY_COST_EXCEEDED');
+          if (
+            heldTokens + tokens + reservation.reservedTokens >
+            reservation.requesterMonthlyTokenLimit!
+          )
+            throw new Error('AI_REQUESTER_MONTHLY_TOKEN_EXCEEDED');
         }
         const tokens =
           monthlyUsage.reduce(

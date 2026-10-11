@@ -483,6 +483,21 @@ export class AIExecutionOrchestrator {
       (!options.promptVersion && (prompt.status !== 'ACTIVE' || !prompt.activeVersion))
     )
       throw new Error('AI_PROMPT_NOT_DEPLOYED');
+    if (
+      consumerKey.startsWith('phase18-student-tools') &&
+      (!consumer ||
+        !request.requesterReferenceId ||
+        !consumer.currency ||
+        !(
+          Number.isFinite(consumer.requesterDailyCostLimit) &&
+          consumer.requesterDailyCostLimit! > 0 &&
+          Number.isFinite(consumer.requesterMonthlyCostLimit) &&
+          consumer.requesterMonthlyCostLimit! > 0 &&
+          Number.isSafeInteger(consumer.requesterMonthlyTokenLimit) &&
+          consumer.requesterMonthlyTokenLimit! > 0
+        ))
+    )
+      throw new Error('AI_REQUESTER_BUDGET_NOT_CONFIGURED');
     const resolvedPromptVersion = options.promptVersion ?? prompt.activeVersion!;
     const promptVersion = await this.repository.findPromptVersion(
       request.promptKey,
@@ -607,6 +622,9 @@ export class AIExecutionOrchestrator {
           consumer.requesterRequestsPerMinute ??
           Math.max(1, Math.min(10, consumer.requestsPerMinute)),
         requesterConcurrentLimit: consumer.requesterConcurrentLimit ?? 2,
+        requesterDailyCostLimit: consumer.requesterDailyCostLimit,
+        requesterMonthlyCostLimit: consumer.requesterMonthlyCostLimit,
+        requesterMonthlyTokenLimit: consumer.requesterMonthlyTokenLimit,
         monthlyTokenLimit: consumer.monthlyTokenLimit,
         monthlyCostLimit: consumer.monthlyCostLimit,
         currency: consumer.currency,

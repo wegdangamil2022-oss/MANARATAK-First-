@@ -5,21 +5,14 @@ import { IdentityType, LifeStatus, RetentionCategory, SecurityClassification } f
 const shortId = z.string().trim().min(1).max(200);
 const label = z.string().trim().min(1).max(240);
 const freeText = z.string().max(10_000);
-const boundedRecord = z.record(z.string().max(120), z.unknown()).refine(
-  value => JSON.stringify(value).length <= 100_000,
-  'Object payload exceeds the 100KB validation limit',
-);
+const boundedRecord = z
+  .record(z.string().max(120), z.unknown())
+  .refine(
+    (value) => JSON.stringify(value).length <= 100_000,
+    'Object payload exceeds the 100KB validation limit',
+  );
 const stringArray = z.array(z.string().max(500)).max(200);
-const boundedUnknown = z.unknown().superRefine((value, ctx) => {
-  try {
-    const serialized = JSON.stringify(value);
-    if (serialized && serialized.length > 100_000) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Payload exceeds the 100KB validation limit' });
-    }
-  } catch {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Payload must be JSON-serializable' });
-  }
-});
+
 
 export const emptyBodySchema = z.object({}).strict();
 export const referenceParamSchema = z.object({ reference: shortId }).strict();
@@ -219,7 +212,7 @@ export const identityContactUpdateSchema = z.object({
   phone: z.string().trim().min(3).max(40).optional(),
   verifyEmail: z.boolean().optional(),
   verifyPhone: z.boolean().optional(),
-}).strict().refine(value => Object.keys(value).length > 0, 'At least one contact update is required');
+}).strict().refine((value) => Object.keys(value).length > 0, 'At least one contact update is required');
 export const identityListQuerySchema = z.object({
     roleId: z.string().trim().min(1).max(240).optional(),
     adminAccess: z.enum(['true', 'false'])
@@ -253,41 +246,61 @@ export const toolKeyParamSchema = z.object({
   toolKey: z.string().trim().min(1).max(120).regex(/^[A-Za-z0-9._-]+$/),
 }).strict();
 
-export const studentToolAdminListQuerySchema = z.object({
-  category: label.optional(),
+export const studentToolAdminListQuerySchema = z
+  .object({
+    sort: z.enum(['LAUNCH_ORDER', 'UPDATED_DESC']).optional(),
+    page: z.coerce.number().int().min(1).max(10000).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(25),
+    category: label.optional(),
   visibility: z.enum(['ACTIVE', 'COMING_SOON', 'UNDER_DEVELOPMENT', 'HIDDEN_ADMIN_ONLY', 'DISABLED', 'RETIRED']).optional(),
   implementationStatus: z.enum(['PLANNED', 'IN_DEVELOPMENT', 'IMPLEMENTED', 'RUNTIME_BLOCKED']).optional(),
-  lifecycle: z.enum(['DRAFT', 'TESTING', 'ACTIVE', 'DEPRECATED', 'RETIRED']).optional(),
-  executionType: label.optional(),
-  search: z.string().trim().max(240).optional(),
-}).strict();
+    lifecycle: z.enum(['DRAFT', 'TESTING', 'ACTIVE', 'DEPRECATED', 'RETIRED']).optional(),
+    executionType: label.optional(),
+    search: z.string().trim().max(240).optional(),
+  })
+  .strict();
 
-export const studentToolMetadataPatchSchema = z.object({
-  nameAr: label.optional(),
-  nameEn: label.optional(),
-  descriptionAr: freeText.optional(),
-  descriptionEn: freeText.optional(),
-  category: label.optional(),
-  implementationPriority: label.optional(),
-  desiredLaunchVisibility: label.optional(),
-  visibility: z.enum(['ACTIVE', 'COMING_SOON', 'UNDER_DEVELOPMENT', 'HIDDEN_ADMIN_ONLY', 'DISABLED', 'RETIRED']).optional(),
-  implementationStatus: z.enum(['PLANNED', 'IN_DEVELOPMENT', 'IMPLEMENTED', 'RUNTIME_BLOCKED']).optional(),
-  estimatedMinutes: z.number().int().min(0).max(100_000).optional(),
-  tags: z.array(z.string().trim().min(1).max(120)).max(100).optional(),
-  iconAssetId: z.union([shortId, z.null()]).optional(),
-}).strict().refine((value) => Object.keys(value).length > 0, 'At least one metadata field is required');
+export const studentToolMetadataPatchSchema = z
+  .object({
+    reason: z.string().trim().min(3).max(2000),
+    expectedRevision: z.number().int().min(0),
+    nameAr: label.optional(),
+    nameEn: label.optional(),
+    descriptionAr: freeText.optional(),
+    descriptionEn: freeText.optional(),
+    category: label.optional(),
+    implementationPriority: label.optional(),
+    desiredLaunchVisibility: label.optional(),
+    estimatedMinutes: z.number().int().min(0).max(100_000).optional(),
+    tags: z.array(z.string().trim().min(1).max(120)).max(100).optional(),
+    iconAssetId: z.union([shortId, z.null()]).optional(),
+  })
+  .strict()
+  .refine(
+    (value) => Object.keys(value).some((key) => key !== 'expectedRevision' && key !== 'reason'),
+    'At least one metadata field is required',
+  );
 
-export const studentToolAvailabilitySchema = z.object({
-  publicEnabled: z.boolean(),
-  anonymousEnabled: z.boolean(),
-  authenticatedEnabled: z.boolean(),
-  adminOnly: z.boolean(),
-  allowedLocales: z.array(z.string().trim().min(2).max(35)).max(50),
-  allowedRegions: z.array(z.string().trim().min(2).max(80)).max(250),
-  maintenanceMode: z.boolean(),
-  semanticVersion: z.string().trim().regex(/^\d+\.\d+\.\d+$/),
-  changeNote: z.string().trim().min(3).max(2000),
-}).strict().superRefine((value, ctx) => {
+export const studentToolAvailabilitySchema = z
+  .object({
+    expectedRevision: z.number().int().min(0),
+    publicEnabled: z.boolean(),
+    anonymousEnabled: z.boolean(),
+    authenticatedEnabled: z.boolean(),
+    adminOnly: z.boolean(),
+    allowedLocales: z.array(z.string().trim().min(2).max(35)).max(50),
+    allowedRegions: z
+      .array(z.string().trim().min(2).max(80))
+      .max(0, 'Regional restrictions are unavailable until a trusted resolver is installed'),
+    maintenanceMode: z.boolean(),
+    semanticVersion: z
+      .string()
+      .trim()
+      .regex(/^\d+\.\d+\.\d+$/),
+    changeNote: z.string().trim().min(3).max(2000),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
   if (value.adminOnly && value.publicEnabled) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Admin-only tools cannot be publicly enabled' });
   }
@@ -296,22 +309,35 @@ export const studentToolAvailabilitySchema = z.object({
   }
 });
 
-export const studentToolFlagsSchema = z.object({
-  globallyEnabled: z.boolean(),
-  anonymousEnabled: z.boolean(),
-  authenticatedEnabled: z.boolean(),
-  maintenanceMode: z.boolean(),
-}).strict();
+export const studentToolFlagsSchema = z
+  .object({
+    expectedRevision: z.number().int().min(0),
+    semanticVersion: z
+      .string()
+      .trim()
+      .regex(/^\d+\.\d+\.\d+$/),
+    changeNote: z.string().trim().min(3).max(2000),
+    globallyEnabled: z.boolean(),
+    anonymousEnabled: z.boolean(),
+    authenticatedEnabled: z.boolean(),
+    maintenanceMode: z.boolean(),
+  })
+  .strict();
 
 export const studentToolLifecycleParamSchema = z.object({
   toolKey: z.string().trim().min(1).max(120).regex(/^[A-Za-z0-9._-]+$/),
   action: z.enum(['activate', 'testing', 'deprecate', 'retire']),
 }).strict();
 
-export const studentToolAdminTestSchema = z.object({
-  input: boundedRecord,
-  locale: z.enum(['ar', 'en']).default('ar'),
-}).strict();
+export const studentToolAdminTestSchema = z
+  .object({
+    costApproved: z.boolean().default(false),
+    privacyConsent: z.boolean().default(false),
+    fixturePolicy: z.literal('SYNTHETIC_ONLY').optional(),
+    input: boundedRecord,
+    locale: z.enum(['ar', 'en']).default('ar'),
+  })
+  .strict();
 
 export function parseStrict<T>(schema: z.ZodType<T>, payload: unknown): T {
   try {
@@ -320,7 +346,7 @@ export function parseStrict<T>(schema: z.ZodType<T>, payload: unknown): T {
     if (error instanceof z.ZodError) {
       throw new ValidationException(
         'Transport validation failed',
-        error.issues.map(issue => ({
+        error.issues.map((issue) => ({
           field: issue.path.join('.') || '$',
           message: issue.message,
         })),

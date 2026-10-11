@@ -19,6 +19,7 @@ export class MutationAuditPolicy {
     /\/preview$/,
     /\/bulk\/preview$/,
     /\/nodes\/validate$/,
+    /\/admin\/student-tools\/[^/]+\/eligibility$/, // Owner policy simulation: no mutation, quota or paid execution.
   ];
 
   private static readonly CRITICAL_ADMIN_AREAS = [
@@ -45,11 +46,13 @@ export class MutationAuditPolicy {
     if (scope === 'CONTROL_PLANE') return 'CRITICAL_AUDIT_REQUIRED';
     if (!path.includes('/admin/')) return 'NO_AUDIT_REQUIRED';
 
-    if (this.ADMIN_EXEMPTIONS.some(pattern => pattern.test(path))) return 'NO_AUDIT_REQUIRED';
+    if (this.ADMIN_EXEMPTIONS.some((pattern) => pattern.test(path))) return 'NO_AUDIT_REQUIRED';
     // This owner route modifies private student state, rather than draft metadata.
     if (/\/admin\/students\/support\/[^/]+\/reset-layout\/?$/.test(path)) return 'CRITICAL_AUDIT_REQUIRED';
-    if (this.CRITICAL_ADMIN_AREAS.some(prefix => path.includes(prefix))) return 'CRITICAL_AUDIT_REQUIRED';
-    if (this.HIGH_RISK_ACTIONS.some(fragment => path.includes(fragment))) return 'CRITICAL_AUDIT_REQUIRED';
+    if (this.CRITICAL_ADMIN_AREAS.some((prefix) => path.includes(prefix)))
+      return 'CRITICAL_AUDIT_REQUIRED';
+    if (this.HIGH_RISK_ACTIONS.some((fragment) => path.includes(fragment)))
+      return 'CRITICAL_AUDIT_REQUIRED';
 
     // Fail-safe default: every authenticated Admin mutation is auditable unless
     // it has an explicit reviewed exemption above.

@@ -2906,6 +2906,8 @@ model StudentSavedItem {
   displayName        String?
   notes              String?
   metadata           Json?
+  privateResultEnvelope Json?
+  privateResultExpiresAt DateTime?
   savedAt            DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -2915,6 +2917,7 @@ model StudentSavedItem {
   @@unique([studentReferenceId, entityType, entityId])
   @@index([studentReferenceId, savedAt])
   @@index([collectionId])
+  @@index([privateResultExpiresAt])
 }
 
 model StudentApplicationTracker {
@@ -4558,6 +4561,9 @@ model StudentToolDefinitionRecord {
   launchOrder              Int
   inputSchema              Json
   outputSchema             Json
+  revision                 Int @default(0)
+  lastModifiedBy           String?
+  releaseApproval          Json?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
   versions                 StudentToolVersionRecord[]
