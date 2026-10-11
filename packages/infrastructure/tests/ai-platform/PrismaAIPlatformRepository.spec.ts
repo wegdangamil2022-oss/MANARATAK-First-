@@ -336,4 +336,93 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     expect(data.leaseExpiresAt.getTime()).toBeGreaterThan(where.leaseExpiresAt.gt.getTime());
   });
 
+
+  it('requires independent approval of the unchanged high-impact REVIEW revision', async () => {
+    const effective = new Date('2026-10-11T10:00:00Z');
+    for (const resource of ['guardrails', 'routingPolicies', 'consumers'] as const) {
+      for (const scenario of [
+        { author: 'maker', proposed: 'safe', reviewer: 'maker', error: 'AI_HIGH_IMPACT_INDEPENDENT_REVIEW_REQUIRED' },
+        { author: 'maker', proposed: 'safe', reviewer: 'checker', updated: 'unsafe', error: 'AI_HIGH_IMPACT_REVIEWED_CONTENT_CHANGED' },
+      ]) {
+        const tx = {
+          $queryRaw: vi.fn().mockResolvedValue([]),
+          aIRegistryRecord: {
+            findUnique: vi.fn().mockResolvedValue({
+              id: 'reg-1', key: 'policy', resourceType: resource,
+              status: 'REVIEW', updatedBy: scenario.author,
+              updatedAt: effective, configuration: { displayName: scenario.proposed, status: 'REVIEW' },
+            }),
+            upsert: vi.fn(),
+          },
+        };
+        const repository = new PrismaAIPlatformRepository({
+          $transaction: (callback: (client: typeof tx) => unknown) => callback(tx),
+        });
+        await expect(repository.upsert(resource, {
+          key: 'policy', status: 'ACTIVE',
+          displayName: scenario.updated ?? 'safe', expectedUpdatedAt: effective.toISOString(),
+        }, scenario.reviewer)).rejects.toThrow(scenario.error);
+        expect(tx.aIRegistryRecord.upsert).not.toHaveBeenCalled();
+      }
+    }
+  });
+
+  it('atomically activates only a different reviewer\'s previously staged policy', async () => {
+    const effective = new Date('2026-10-11T10:00:00Z');
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      aIRegistryRecord: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'reg-1', key: 'policy', resourceType: 'guardrails', status: 'REVIEW',
+          updatedBy: 'maker', updatedAt: effective,
+          configuration: { displayName: 'Reviewed', status: 'REVIEW' },
+        }),
+        upsert: vi.fn().mockResolvedValue({
+          id: 'reg-1', key: 'policy', status: 'ACTIVE',
+          updatedAt: new Date('2026-10-11T10:01:00Z'),
+          configuration: { displayName: 'Reviewed', status: 'ACTIVE' },
+        }),
+      },
+      auditRecord: { create: vi.fn().mockResolvedValue({}) },
+      transactionalOutboxRecord: { create: vi.fn().mockResolvedValue({}) },
+    };
+    const repository = new PrismaAIPlatformRepository({
+      $transaction: (callback: (client: typeof tx) => unknown) => callback(tx),
+    });
+    await expect(repository.upsert('guardrails', {
+      key: 'policy', status: 'ACTIVE', displayName: 'Reviewed',
+      expectedUpdatedAt: effective.toISOString(),
+    }, 'checker')).resolves.toMatchObject({ status: 'ACTIVE' });
+    expect(tx.aIRegistryRecord.upsert).toHaveBeenCalledOnce();
+    expect(tx.auditRecord.create).toHaveBeenCalledOnce();
+    expect(tx.transactionalOutboxRecord.create).toHaveBeenCalledOnce();
+  });
+
+  it('refuses unreviewed new activation or in-place active policy rewrites', async () => {
+    for (const previous of [
+      null,
+      { id: 'reg-1', key: 'policy', status: 'ACTIVE',
+        updatedBy: 'maker', updatedAt: new Date('2026-10-11T10:00:00Z'),
+        configuration: { status: 'ACTIVE', displayName: 'Old' } },
+    ]) {
+      const tx = {
+        $queryRaw: vi.fn().mockResolvedValue([]),
+        aIRegistryRecord: {
+          findUnique: vi.fn().mockResolvedValue(previous),
+          upsert: vi.fn(),
+        },
+      };
+      const repository = new PrismaAIPlatformRepository({
+        $transaction: (callback: (client: typeof tx) => unknown) => callback(tx),
+      });
+      await expect(repository.upsert('routingPolicies', {
+        key: 'policy', status: 'ACTIVE', displayName: 'Unreviewed',
+        ...(previous ? { expectedUpdatedAt: previous.updatedAt.toISOString() } : {}),
+      }, 'maker')).rejects.toThrow(
+        previous ? 'AI_HIGH_IMPACT_STAGED_CHANGE_REQUIRED' : 'AI_HIGH_IMPACT_REVIEW_REQUIRED',
+      );
+      expect(tx.aIRegistryRecord.upsert).not.toHaveBeenCalled();
+    }
+  });
+
 });
