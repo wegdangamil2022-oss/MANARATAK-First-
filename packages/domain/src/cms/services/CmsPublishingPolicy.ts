@@ -168,10 +168,10 @@ export class CmsPublishingPolicy {
         throw new Error('CMS_BLOCK_SCHEMA_ENUM_INVALID');
       }
     };
+    visit(fieldSchema, 0);
     if ((fieldSchema as { type?: unknown }).type !== 'object') {
       throw new Error('CMS_BLOCK_SCHEMA_ROOT_OBJECT_REQUIRED');
     }
-    visit(fieldSchema, 0);
     for (const fields of [assetFields, localizedFields]) {
       if (!Array.isArray(fields) || fields.length > 50 ||
         fields.some((key) => typeof key !== 'string' ||
