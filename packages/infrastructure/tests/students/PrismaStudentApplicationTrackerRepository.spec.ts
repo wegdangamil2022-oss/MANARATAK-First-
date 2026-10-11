@@ -90,7 +90,9 @@ describe('PrismaStudentApplicationTrackerRepository atomic notification outbox',
       studentApplicationTracker:{findFirst:vi.fn().mockResolvedValue({id:'t-1'})},
       studentTimelineEntry:{findFirst:vi.fn(),findMany:vi.fn().mockResolvedValue(records)},
     };
-    const repo=new PrismaStudentApplicationTrackerRepository(client as any);
+    const repo=new PrismaStudentApplicationTrackerRepository(
+      client as any,'student-support-history-test-secret-at-least-32-characters',
+    );
     const result=await repo.listSupportHistory('s-1','t-1',2);
     expect(result.hasMore).toBe(true);
     expect(result.nextCursor).toBeTruthy();
