@@ -170,6 +170,10 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
           candidate.purpose !== previous.configuration.purpose)
       )
         throw new Error('AI_DEPLOYED_PROMPT_BINDING_IMMUTABLE');
+      if (resource === 'incidents' &&
+          ((previous && candidate.status !== previous.status) ||
+           (!previous && candidate.status !== 'OPEN')))
+        throw new Error('AI_INCIDENT_STATUS_REQUIRES_GOVERNED_EVENT');
       if (
         resource === 'incidents' &&
         previous &&
@@ -1107,6 +1111,17 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
         where: { resourceType_key: { resourceType: 'incidents', key: publicId } },
       });
       if (!incident) throw new Error('AI_INCIDENT_NOT_FOUND');
+      const currentStatus = incident.status as string;
+      const actions: Record<string, { from: string[]; to: string | null }> = {
+        NOTE_ADDED: { from: ['OPEN', 'INVESTIGATING', 'MITIGATED', 'RESOLVED'], to: null },
+        INVESTIGATION_UPDATE: { from: ['OPEN', 'INVESTIGATING'], to: 'INVESTIGATING' },
+        MITIGATION_RECORDED: { from: ['INVESTIGATING', 'MITIGATED'], to: 'MITIGATED' },
+        RESOLUTION_RECORDED: { from: ['MITIGATED'], to: 'RESOLVED' },
+      };
+      const transition = actions[event.action];
+      if (!transition || !transition.from.includes(currentStatus))
+        throw new Error('AI_INCIDENT_INVALID_TRANSITION');
+      const nextStatus = transition.to ?? currentStatus;
       const created = await tx.aIIncidentEventRecord.create({
         data: {
           incidentPublicId: publicId,
@@ -1129,6 +1144,7 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       const updated = await tx.aIRegistryRecord.update({
         where: { id: incident.id },
         data: {
+          status: nextStatus,
           configuration: { ...incident.configuration, timeline },
           updatedBy: event.actorReferenceId,
         },
@@ -1139,7 +1155,7 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
         targetId: created.id,
         targetType: 'incidentEvent',
         aggregateId: publicId,
-        payload: { publicId, action: event.action },
+        payload: { publicId, action: event.action, fromStatus: currentStatus, status: nextStatus },
       });
       return {
         ...updated.configuration,
