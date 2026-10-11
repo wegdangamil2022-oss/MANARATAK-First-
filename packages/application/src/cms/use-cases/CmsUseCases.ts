@@ -21,6 +21,7 @@ import {
   CmsPublishingReadinessDto,
   CmsRedirectDto,
   CmsScheduleResultDto,
+  CmsSitemapEntryDto,
   CmsTagDto,
   CreateCmsCategoryDto,
   CreateCmsContentDto,
@@ -442,6 +443,11 @@ export class AdminCmsUseCases {
 
 export class PublicCmsUseCases {
   public constructor(private readonly repository: ICmsRepository, private readonly deliveryCache?: ICmsDeliveryCache | null) {}
+
+  public async listIndexableSitemapEntries(): Promise<CmsSitemapEntryDto[]> {
+    if (!this.repository.listIndexableSitemapEntries) throw new Error('CMS_SITEMAP_OWNER_UNAVAILABLE');
+    return this.repository.listIndexableSitemapEntries('manaratak');
+  }
 
   public async listPublished(
     filters: CmsContentFilters,
