@@ -5,6 +5,7 @@ import {
   CmsAnnouncementDto,
   CmsBlockSchemaDto,
   CmsContentBlockDto,
+  PublicCmsBlockDto,
   CmsContentDetailDto,
   CmsContentDto,
   CmsContentDomainLinkDto,
@@ -343,6 +344,13 @@ export class AdminCmsUseCases {
   public async saveBlock(data: Omit<CmsContentBlockDto, 'id' | 'publicId' | 'version' | 'createdAt' | 'updatedAt' | 'updatedBy'> & { id?: string; expectedVersion?: number }, actorId: string): Promise<CmsContentBlockDto> {
     return this.repository.saveBlock({ ...data, updatedBy: actorId });
   }
+  public async publishBlock(id: string, expectedVersion: number, actorId: string): Promise<CmsContentBlockDto> {
+    this.ensureActor(actorId);
+    const result = await this.repository.publishBlock(id, expectedVersion, actorId);
+    await this.deliveryCache?.invalidateSite(result.siteIdentifier, 'block-published');
+    return result;
+  }
+
   public async listAnnouncements(siteIdentifier: string, locale: string): Promise<CmsAnnouncementDto[]> { return this.repository.listAnnouncements(siteIdentifier, locale); }
   public async saveAnnouncement(
     data: Omit<CmsAnnouncementDto, 'id' | 'publicId' | 'version' | 'status' | 'createdBy' | 'updatedBy' | 'approvedBy' | 'publishedContentHash' | 'publishedAt' | 'archivedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number },
@@ -434,6 +442,10 @@ export class PublicCmsUseCases {
   public async listNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]> {
     if (this.repository.listPublishedNavigation) return this.repository.listPublishedNavigation(siteIdentifier, locale);
     return (await this.repository.listNavigation(siteIdentifier, locale)).filter((menu) => menu.status === CmsContentStatus.PUBLISHED);
+  }
+
+  public async listPublishedBlocks(siteIdentifier: string, locale: string): Promise<PublicCmsBlockDto[]> {
+    return this.repository.listPublishedBlocks(siteIdentifier, locale);
   }
 
   public async listAnnouncements(siteIdentifier: string, locale: string): Promise<CmsAnnouncementDto[]> {

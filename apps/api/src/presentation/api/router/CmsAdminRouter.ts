@@ -31,7 +31,7 @@ export class CmsAdminRouter {
       if (method === 'GET') return 'admin:cms:view';
       if (method === 'POST' && /^\/content\/[^/]+\/(approve|reject)$/.test(path)) return 'admin:cms:review';
       if (method === 'POST' && (/^\/content\/[^/]+\/(publish|archive|schedule|cancel-schedule)$/.test(path)
-        || /^\/(navigation|announcements)\/[^/]+\/(publish|archive)$/.test(path))) return 'admin:cms:publish';
+        || /^\/(navigation|announcements|blocks)\/[^/]+\/(publish|archive)$/.test(path))) return 'admin:cms:publish';
       if (method === 'POST' && path === '/operations/process-due-schedules') return 'admin:cms:operations:run';
       if ((method === 'POST' || method === 'PATCH') && /^\/redirects(?:\/[^/]+)?$/.test(path)) return 'admin:cms:redirects:manage';
       if (method === 'PUT' && path === '/navigation') return 'admin:cms:navigation:manage';
@@ -349,7 +349,7 @@ export class CmsAdminRouter {
     }));
     router.get('/block-schemas', asyncHandler(async (_req, res) => { res.json({ data: await adminCmsUseCases.listBlockSchemas() }); }));
     router.post('/block-schemas', asyncHandler(async (req, res) => {
-      const body = z.object({ key: z.string().regex(/^[A-Z][A-Z0-9_]+$/), version: z.number().int().positive(), nameAr: z.string().min(1), nameEn: z.string().min(1), fieldSchema: z.record(z.string(), z.unknown()), localizedFields: z.array(z.string()), assetFields: z.array(z.string()), status: z.string() }).parse(req.body);
+      const body = z.object({ key: z.string().regex(/^[A-Z][A-Z0-9_]+$/), version: z.number().int().positive(), nameAr: z.string().min(1), nameEn: z.string().min(1), fieldSchema: z.record(z.string(), z.unknown()), localizedFields: z.array(z.string()), assetFields: z.array(z.string()), status: z.enum(['ACTIVE','INACTIVE']) }).parse(req.body);
       res.status(201).json(await adminCmsUseCases.createBlockSchema(body, actor(req)));
     }));
     router.get('/blocks', asyncHandler(async (req, res) => {
@@ -359,6 +359,10 @@ export class CmsAdminRouter {
     router.put('/blocks', asyncHandler(async (req, res) => {
       const body = z.object({ id: z.string().optional(), expectedVersion: z.number().int().positive().optional(), siteIdentifier: z.literal('manaratak').default('manaratak'), locale: z.enum(['ar', 'en']), schemaId: z.string(), name: z.string().trim().min(1), payload: z.record(z.string(), z.unknown()), status: z.nativeEnum(CmsContentStatus).default(CmsContentStatus.DRAFT) }).parse(req.body);
       res.json(await adminCmsUseCases.saveBlock(body, actor(req)));
+    }));
+    router.post('/blocks/:id/publish', asyncHandler(async (req, res) => {
+      const body = z.object({expectedVersion:z.number().int().positive()}).strict().parse(req.body);
+      res.json(await adminCmsUseCases.publishBlock(req.params.id,body.expectedVersion,actor(req)));
     }));
     router.get('/announcements', asyncHandler(async (req, res) => {
       const query = z.object({ siteIdentifier: z.literal('manaratak').default('manaratak'), locale: z.enum(['ar', 'en']).default('ar') }).parse(req.query);

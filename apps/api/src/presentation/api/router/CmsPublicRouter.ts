@@ -73,6 +73,12 @@ export class CmsPublicRouter {
       const payload = menus.find((menu) => menu.locationKey === req.params.locationKey.toUpperCase()) ?? null;
       if (deliveryHeaders(req, res, payload)) return; res.json(payload);
     }));
+    router.get('/blocks', asyncHandler(async (req, res) => {
+      const query = z.object({locale:z.enum(['ar','en']).default('ar'),siteIdentifier:z.string().default('manaratak')}).parse(req.query);
+      const payload = {data:await publicCmsUseCases.listPublishedBlocks(query.siteIdentifier,query.locale)};
+      if (deliveryHeaders(req,res,payload)) return;
+      res.json(payload);
+    }));
     router.get('/announcements', asyncHandler(async (req, res) => {
       const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.string().default('manaratak') }).parse(req.query);
       const data = await publicCmsUseCases.listAnnouncements(query.siteIdentifier, query.locale);

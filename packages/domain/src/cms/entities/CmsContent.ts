@@ -333,6 +333,17 @@ export interface CmsAnnouncementDto {
   updatedAt: Date;
 }
 
+export interface PublicCmsBlockDto {
+  publicId: string;
+  siteIdentifier: string;
+  locale: string;
+  name: string;
+  schemaKey: string;
+  schemaVersion: number;
+  payload: Record<string, unknown>;
+  publishedAt: Date;
+}
+
 export interface CmsSlugChangeDto {
   contentId: string;
   locale: string;

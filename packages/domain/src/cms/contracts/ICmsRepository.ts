@@ -3,6 +3,7 @@ import {
   CmsAnnouncementDto,
   CmsBlockSchemaDto,
   CmsContentBlockDto,
+  PublicCmsBlockDto,
   CmsContentDetailDto,
   CmsContentDomainLinkDto,
   CmsContentDto,
@@ -80,6 +81,8 @@ export interface ICmsRepository {
   listBlockSchemas(): Promise<CmsBlockSchemaDto[]>;
   createBlockSchema(data: Omit<CmsBlockSchemaDto, 'id' | 'createdAt'>): Promise<CmsBlockSchemaDto>;
   listBlocks(siteIdentifier: string, locale: string): Promise<CmsContentBlockDto[]>;
+  publishBlock(id: string, expectedVersion: number, actorId: string): Promise<CmsContentBlockDto>;
+  listPublishedBlocks(siteIdentifier: string, locale: string): Promise<PublicCmsBlockDto[]>;
   saveBlock(data: Omit<CmsContentBlockDto, 'id' | 'publicId' | 'version' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsContentBlockDto>;
   listAnnouncements(siteIdentifier: string, locale: string, publicOnly?: boolean): Promise<CmsAnnouncementDto[]>;
   saveAnnouncement(data: Omit<CmsAnnouncementDto, 'id' | 'publicId' | 'version' | 'status' | 'approvedBy' | 'publishedContentHash' | 'publishedAt' | 'archivedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsAnnouncementDto>;
