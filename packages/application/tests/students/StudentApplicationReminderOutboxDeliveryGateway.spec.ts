@@ -26,6 +26,21 @@ describe('StudentApplicationReminderOutboxDeliveryGateway',()=>{
       trackerId:'tracker-1',trackerVersion:2,studentReferenceId:'student-1',
     }));
   });
+  it('cancels a just-created reminder if another update commits while scheduling',async()=>{
+    const {gateway,entry,reminders,trackers}=fixture();
+    trackers.findById.mockResolvedValueOnce({
+      id:'tracker-1',studentReferenceId:'student-1',scholarshipId:'sch-1',
+      status:'ACTIVE',version:2,deadlineAt:new Date('2027-01-15T00:00:00Z'),
+    }).mockResolvedValueOnce({
+      id:'tracker-1',studentReferenceId:'student-1',scholarshipId:'sch-1',
+      status:'ACTIVE',version:3,deadlineAt:new Date('2027-01-18T00:00:00Z'),
+    });
+    await gateway.deliver(entry as any,{idempotencyKey:'outbox-2'});
+    expect(trackers.findById).toHaveBeenCalledTimes(2);
+    expect(reminders.schedule).toHaveBeenCalledTimes(1);
+    expect(reminders.cancel).toHaveBeenCalledWith('tracker-1',2);
+  });
+
   it('does not revive an old reminder after a newer version exists',async()=>{
     const {gateway,entry,reminders}=fixture();
     await gateway.deliver({...entry,payload:{...entry.payload,trackerVersion:1,previousVersion:null}}
