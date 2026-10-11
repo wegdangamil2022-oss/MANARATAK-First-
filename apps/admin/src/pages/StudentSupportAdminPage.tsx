@@ -649,7 +649,7 @@ export function StudentSupportAdminPage() {
           <table className="w-full text-start text-sm">
             <thead className="bg-slate-50 text-xs text-slate-600">
               <tr>
-                {['الطالب', 'حالة الحساب', 'اللغة والمنطقة الزمنية', 'آخر نشاط', 'الإجراءات'].map(
+                {[t('stu_support_col_student'),t('stu_support_account_status'),t('stu_support_col_language_timezone'),t('stu_support_col_last_activity'),t('stu_support_col_actions')].map(
                   (title) => (
                     <th key={title} className="p-4 text-start">
                       {title}
@@ -682,7 +682,7 @@ export function StudentSupportAdminPage() {
                         onClick={() => chooseStudent(item.studentReferenceId)}
                         className="font-bold text-[#142B5F]"
                       >
-                        {item.displayName?.trim() || 'اسم غير مسجل'}
+                        {item.displayName?.trim() || t('stu_support_no_name')}
                       </button>
                       <code dir="ltr" className="mt-1 block text-[10px] text-slate-500">
                         {item.studentReferenceId}
@@ -692,8 +692,8 @@ export function StudentSupportAdminPage() {
                       <Badge value={item.status} />
                     </td>
                     <td className="p-4 text-xs">
-                      {item.preferredLanguage || 'غير محددة'}
-                      <p className="mt-1 text-slate-500">{item.timezone || 'غير محددة'}</p>
+                      {item.preferredLanguage || t('stu_support_unspecified')}
+                      <p className="mt-1 text-slate-500">{item.timezone || t('stu_support_unspecified')}</p>
                     </td>
                     <td className="p-4 text-xs">{date(item.lastActiveAt)}</td>
                     <td className="p-4">
@@ -718,7 +718,7 @@ export function StudentSupportAdminPage() {
               onClick={() => void load(cursor)}
               className="rounded-xl border px-5 py-3 text-sm font-bold text-[#142B5F] disabled:opacity-50"
             >
-              {loading ? 'جارٍ التحميل…' : 'تحميل المزيد'}
+              {loading ? 'جارٍ التحميل…' : t('stu_support_more_students')}
             </button>
           </div>
         )}
@@ -730,20 +730,20 @@ export function StudentSupportAdminPage() {
         >
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-black text-[#142B5F]">
-              {detail?.displayName?.trim() || 'تفاصيل الطالب'}
+              {detail?.displayName?.trim() || t('stu_support_student_details')}
             </h2>
             <div className="flex gap-2">
               <button
                 disabled={detailLoading}
-                title="تحديث تفاصيل الطالب"
-                aria-label="تحديث تفاصيل الطالب"
+                title={t('stu_support_refresh_details')}
+                aria-label={t('stu_support_refresh_details')}
                 onClick={() => void inspect(selectedId)}
                 className="rounded-xl border p-2"
               >
                 <RefreshCw className="h-4 w-4" />
               </button>
               <button
-                aria-label="إغلاق تفاصيل الطالب"
+                aria-label={t('stu_support_close_details')}
                 onClick={() => chooseStudent(null)}
                 className="rounded-xl border p-2"
               >
@@ -769,7 +769,7 @@ export function StudentSupportAdminPage() {
                   <span>آخر تحديث: {date(detail.updatedAt)}</span>
                 </div>
                 <nav
-                  aria-label="أقسام ملف الطالب"
+                  aria-label={t('stu_support_tabs_aria')}
                   className="mt-5 flex gap-2 overflow-x-auto border-b pb-3"
                 >
                   {tabs.map((item) => (
@@ -821,11 +821,11 @@ export function StudentSupportAdminPage() {
                   <div className="mt-5 space-y-5">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <Count
-                        title="الدورات النشطة"
+                        title={t('stu_support_active_courses')}
                         value={learningComplete ? detail.linkedSummaries.activeCourseCount : '—'}
                       />
                       <Count
-                        title="الدورات المكتملة"
+                        title={t('stu_support_completed_courses')}
                         value={
                           learningComplete
                             ? (detail.learning ?? []).filter((item) => item.status === 'COMPLETED')
@@ -834,26 +834,26 @@ export function StudentSupportAdminPage() {
                         }
                       />
                       <Count
-                        title="الشهادات المسجلة"
+                        title={t('stu_support_recorded_certificates')}
                         value={
                           certificatesComplete ? detail.linkedSummaries.certificateCount : '—'
                         }
                       />
-                      <Count title="العناصر المحفوظة" value={savedCount ?? '—'} />
+                      <Count title={t('stu_support_saved_items')} value={savedCount ?? '—'} />
                     </div>
                     <dl className="grid gap-4 rounded-2xl bg-slate-50 p-5 text-sm sm:grid-cols-3">
                       <div>
-                        <dt className="text-slate-500">لغة الحساب</dt>
+                        <dt className="text-slate-500">{t('stu_support_account_language')}</dt>
                         <dd className="mt-1 font-bold">
-                          {detail.preferredLanguage || 'غير محددة'}
+                          {detail.preferredLanguage || t('stu_support_unspecified')}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-slate-500">المنطقة الزمنية</dt>
-                        <dd className="mt-1 font-bold">{detail.timezone || 'غير محددة'}</dd>
+                        <dt className="text-slate-500">{t('stu_support_time_zone')}</dt>
+                        <dd className="mt-1 font-bold">{detail.timezone || t('stu_support_unspecified')}</dd>
                       </div>
                       <div>
-                        <dt className="text-slate-500">آخر نشاط مسجل</dt>
+                        <dt className="text-slate-500">{t('stu_support_last_recorded_activity')}</dt>
                         <dd className="mt-1 font-bold">{date(detail.lastActiveAt)}</dd>
                       </div>
                     </dl>
@@ -866,9 +866,9 @@ export function StudentSupportAdminPage() {
                 {tab === 'LEARNING' && (
                   <div className="mt-5 space-y-3">
                     {!learningAvailable ? (
-                      <p className="rounded-xl bg-amber-50 p-4">بيانات التعلم غير متاحة حالياً.</p>
+                      <p className="rounded-xl bg-amber-50 p-4">{t('stu_support_learning_unavailable')}</p>
                     ) : !detail.learning?.length ? (
-                      <p className="p-5 text-slate-500">لا توجد تسجيلات في الدورات لهذا الطالب.</p>
+                      <p className="p-5 text-slate-500">{t('stu_support_no_enrollments')}</p>
                     ) : (
                       detail.learning.map((item) => {
                         const progress = Number.isFinite(item.progressPercentage)
@@ -881,7 +881,7 @@ export function StudentSupportAdminPage() {
                               <Badge value={item.status} />
                             </div>
                             <div className="mt-3 flex justify-between text-xs">
-                              <span>التقدم</span>
+                              <span>{t('stu_support_progress')}</span>
                               <span>{progress}%</span>
                             </div>
                             <progress
@@ -900,7 +900,7 @@ export function StudentSupportAdminPage() {
                                 to={`/courses/${encodeURIComponent(item.courseId)}`}
                                 className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#0E7C86]"
                               >
-                                فتح الدورة في الإدارة
+                                {t('stu_support_open_course')}
                                 <ExternalLink className="h-3 w-3" />
                               </Link>
                             )}
@@ -913,9 +913,9 @@ export function StudentSupportAdminPage() {
                 {tab === 'CERTIFICATES' && (
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     {!certificatesAvailable ? (
-                      <p className="rounded-xl bg-amber-50 p-4">تعذرت قراءة سجل الشهادات.</p>
+                      <p className="rounded-xl bg-amber-50 p-4">{t('stu_support_certificate_unavailable')}</p>
                     ) : !detail.certificates?.length ? (
-                      <p className="p-5 text-slate-500">لا توجد شهادات مسجلة لهذا الطالب.</p>
+                      <p className="p-5 text-slate-500">{t('stu_support_no_certificates')}</p>
                     ) : (
                       detail.certificates.map((item) => (
                         <article key={item.id} className="rounded-2xl border p-4">
@@ -947,7 +947,7 @@ export function StudentSupportAdminPage() {
                               to={`/certificates/${encodeURIComponent(item.id)}`}
                               className="mt-3 block text-xs font-bold text-[#0E7C86]"
                             >
-                              فتح سجل الشهادة في الإدارة
+                              {t('stu_support_open_certificate')}
                             </Link>
                           )}
                           {item.verificationCode && (
@@ -957,7 +957,7 @@ export function StudentSupportAdminPage() {
                               rel="noopener noreferrer"
                               className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#0E7C86]"
                             >
-                              التحقق العام من الشهادة
+                              {t('stu_support_public_verify')}
                               <ExternalLink className="h-3 w-3" />
                             </a>
                           )}
@@ -969,47 +969,47 @@ export function StudentSupportAdminPage() {
                 {tab === 'SAVED' && (
                   <div className="mt-5 space-y-5">
                     <div className="grid gap-3 sm:grid-cols-3">
-                      <Count title="العناصر المحفوظة" value={savedCount ?? '—'} />
+                      <Count title={t('stu_support_saved_items')} value={savedCount ?? '—'} />
                       <Count
-                        title="متابعات التقديم النشطة للمنح"
+                        title={t('stu_support_active_applications')}
                         value={detail.activeApplicationCount ?? '—'}
                       />
                       <Count
-                        title="طلبات الخدمات المسجلة"
+                        title={t('stu_support_service_request_count')}
                         value={detail.serviceRequestCount ?? '—'}
                       />
                     </div>
                     <div className="space-y-3 rounded-xl border p-4">
-                      <h3 className="font-bold text-[#142B5F]">متابعات التقديم — عرض دعم محدود</h3>
-                      <p className="text-xs text-slate-600">مرحلة الطلب وحالته وموعده فقط. الملاحظات والمستندات الخاصة لا تُعرض.</p>
+                      <h3 className="font-bold text-[#142B5F]">{t('stu_support_tracker_heading')}</h3>
+                      <p className="text-xs text-slate-600">{t('stu_support_tracker_notice')}</p>
                       <label className="block text-sm font-semibold">
-                        غرض الاطلاع
+                        {t('stu_support_reason')}
                         <select value={trackerPurpose} onChange={(e)=>{
                           ++trackerRequest.current;++historyRequest.current;
                           setTrackerHistory(null);setTrackerHistoryError(null);setTrackerHistoryLoading(false);
                           setTrackerPurpose(e.target.value);setTrackerPage(null);setTrackerLoading(false);
                         }} className="mt-2 block w-full rounded-lg border p-2">
-                          <option value="CASE_REVIEW">مراجعة بلاغ دعم</option>
-                          <option value="APPLICATION_STATUS_INQUIRY">استفسار عن حالة التقديم</option>
-                          <option value="SYNC_DIAGNOSTIC">تشخيص المزامنة</option>
+                          <option value="CASE_REVIEW">{t('stu_support_case_review')}</option>
+                          <option value="APPLICATION_STATUS_INQUIRY">{t('stu_support_app_inquiry')}</option>
+                          <option value="SYNC_DIAGNOSTIC">{t('stu_support_sync_diagnostic')}</option>
                         </select>
                       </label>
                       <button type="button" disabled={trackerLoading} onClick={()=>void openSupportTrackerPage()}
-                        className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">فتح سجل المتابعة</button>
+                        className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">{t('stu_support_tracker_open')}</button>
                       {trackerError && <p role="alert" className="text-sm text-red-700">{trackerError}</p>}
                       {trackerHistoryError&&<p role="alert" className="text-sm text-red-700">{trackerHistoryError}</p>}
                       {trackerPage && <div className="space-y-2">
                         <p className="text-xs text-slate-500">عرض {trackerPage.items.length} من {trackerPage.total} متابعة</p>
-                        {trackerPage.items.length === 0 && <p className="text-sm text-slate-500">لا توجد متابعات مسجلة.</p>}
+                        {trackerPage.items.length === 0 && <p className="text-sm text-slate-500">{t('stu_support_no_trackers')}</p>}
                         {trackerPage.items.map((item)=><article key={item.id} className="rounded-lg bg-slate-50 p-3 text-sm">
                           <span className="font-bold">{item.scholarshipId}</span> · {statusLabel(item.status)}
                           <p className="mt-1">المرحلة: {item.stage}</p>
                           <p className="text-xs text-slate-500">الموعد: {date(item.deadlineAt)} · التحديث: {date(item.updatedAt)}</p>
                           <button type="button" disabled={trackerHistoryLoading}
                             className="mt-2 rounded-lg border px-3 py-1 text-xs font-bold disabled:opacity-50"
-                            onClick={()=>void openTrackerHistory(item.id)}>سجل تغييرات المتابعة</button>
+                            onClick={()=>void openTrackerHistory(item.id)}>{t('stu_support_tracker_history')}</button>
                           {trackerHistory?.trackerId===item.id&&<div className="mt-3 space-y-1 border-t pt-2">
-                            {trackerHistory.page.items.length===0&&<p className="text-xs text-slate-500">لا توجد أحداث متابعة مسجلة.</p>}
+                            {trackerHistory.page.items.length===0&&<p className="text-xs text-slate-500">{t('stu_support_tracker_history_empty')}</p>}
                             {trackerHistory.page.items.map((event,index)=><p key={index} className="text-xs text-slate-600">
                               {event.eventType} · {statusLabel(event.status)} · النسخة {event.version} · {date(event.occurredAt)}
                             </p>)}
@@ -1018,10 +1018,10 @@ export function StudentSupportAdminPage() {
                         </article>)}
                         {trackerPage.hasMore && trackerPage.nextCursor && <button type="button"
                           disabled={trackerLoading} onClick={()=>void openSupportTrackerPage(trackerPage.nextCursor!)}
-                          className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">المزيد من المتابعات</button>}
+                          className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">{t('stu_support_more_trackers')}</button>}
                       </div>}
                     </div>
-                    <h3 className="font-bold text-[#142B5F]">توزيع المحفوظات</h3>
+                    <h3 className="font-bold text-[#142B5F]">{t('stu_support_saved_distribution')}</h3>
                     {detail.savedSummary?.length ? (
                       <div className="grid gap-3 sm:grid-cols-3">
                         {detail.savedSummary.map((item) => (
@@ -1038,9 +1038,9 @@ export function StudentSupportAdminPage() {
                       </p>
                     )}
                     <div className="space-y-3">
-                      <h3 className="font-bold text-[#142B5F]">طلبات الخدمات الأخيرة</h3>
+                      <h3 className="font-bold text-[#142B5F]">{t('stu_support_recent_services')}</h3>
                       {detail.ownerReadStatus?.services !== 'AVAILABLE' ? (
-                        <p className="text-sm text-amber-800">تعذرت قراءة طلبات الخدمات.</p>
+                        <p className="text-sm text-amber-800">{t('stu_support_service_unavailable')}</p>
                       ) : detail.recentServiceRequests?.length ? (
                         <>
                           <p className="text-xs text-slate-500">
@@ -1064,7 +1064,7 @@ export function StudentSupportAdminPage() {
                                   to={`/services?request=${encodeURIComponent(request.publicId)}`}
                                   className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#0E7C86]"
                                 >
-                                  متابعة الطلب في إدارة الخدمات
+                                  {t('stu_support_open_service')}
                                   <ExternalLink className="h-3 w-3" />
                                 </Link>
                               )}
@@ -1072,7 +1072,7 @@ export function StudentSupportAdminPage() {
                           ))}
                         </>
                       ) : (
-                        <p className="text-sm text-slate-500">لا توجد طلبات خدمات مسجلة.</p>
+                        <p className="text-sm text-slate-500">{t('stu_support_no_services')}</p>
                       )}
                     </div>
                     <p className="text-xs text-slate-500">
@@ -1084,20 +1084,20 @@ export function StudentSupportAdminPage() {
                   <div className="mt-5 space-y-5">
                     <div className="grid gap-3 sm:grid-cols-3">
                       <Count
-                        title="عمليات المزامنة المنتظرة"
+                        title={t('stu_support_pending_sync')}
                         value={detail.provisioningHealth.pendingEventCount}
                       />
                       <Count
-                        title="عمليات المزامنة التي تحتاج معالجة"
+                        title={t('stu_support_failed_sync')}
                         value={detail.provisioningHealth.failedEventCount}
                       />
                       <Count
-                        title="إشعارات الطالب غير المقروءة"
+                        title={t('stu_support_unread_notifications')}
                         value={detail.linkedSummaries.unreadNotificationCount}
                       />
                     </div>
                     <div className="rounded-2xl border p-4">
-                      <h3 className="mb-3 font-bold text-[#142B5F]">حالة تجهيز الحساب</h3>
+                      <h3 className="mb-3 font-bold text-[#142B5F]">{t('stu_support_provision_state')}</h3>
                       <Badge value={detail.provisioningHealth.state} />
                       <p className="mt-3 text-xs text-slate-500">
                         آخر حدث: {date(detail.provisioningHealth.lastEventAt)}
@@ -1109,7 +1109,7 @@ export function StudentSupportAdminPage() {
                       )}
                     </div>
                     <div className="rounded-2xl border p-4">
-                      <h3 className="font-bold text-[#142B5F]">سجل قرار الخصوصية</h3>
+                      <h3 className="font-bold text-[#142B5F]">{t('stu_support_consent_log')}</h3>
                       <p className="mt-2 text-sm">
                         {detail.consentAudit.hasDecision ? 'يوجد قرار مسجل' : 'لا يوجد قرار مسجل'}
                       </p>
@@ -1183,7 +1183,7 @@ export function StudentSupportAdminPage() {
                 disabled={resetting || reason.trim().length < 6}
                 className="rounded-xl bg-[#142B5F] px-4 py-3 font-bold text-white disabled:opacity-50"
               >
-                {resetting ? 'جارٍ الحفظ…' : 'تأكيد إعادة الترتيب'}
+                {resetting ? 'جارٍ الحفظ…' : t('stu_support_confirm_reset')}
               </button>
               <button
                 type="button"
