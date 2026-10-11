@@ -702,21 +702,86 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       }});
       if (syncBlocked) return false;
 
-      await tx.studentTimelineEntry.create({ data: {
-        id: randomUUID(), studentReferenceId: event.studentReferenceId, eventType: event.eventType, title: event.title,
-        description: event.description, sourceDomain: event.sourceDomain, sourceReferenceId: event.sourceReferenceId,
-        metadata: json({ ...event.metadata, sourceEventId: event.eventId }), occurredAt: event.occurredAt,
-      }});
-      if (!['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'].includes(event.eventType)) {
-        await this.projectIntegrationEvent(tx, event);
-        if (event.notification) await tx.studentNotificationProjection.upsert({ where: { sourceEventId: event.eventId }, create: {
-          id: randomUUID(), studentReferenceId: event.studentReferenceId, category: event.notification.category, title: event.notification.title,
-          message: event.notification.message, actionUrl: event.notification.actionUrl, sourceEventId: event.eventId, occurredAt: event.occurredAt,
-        }, update: { category: event.notification.category, title: event.notification.title, message: event.notification.message, actionUrl: event.notification.actionUrl } });
-        await this.refreshPersonalStatistics(tx, event.studentReferenceId);
-      }
+      await this.projectStudentEvent(tx, event);
       return true;
     });
+  }
+
+  private async projectStudentEvent(tx:any,event:StudentWorkspaceIntegrationEventDto):Promise<void> {
+    await tx.studentTimelineEntry.create({data:{
+      id:randomUUID(),studentReferenceId:event.studentReferenceId,eventType:event.eventType,title:event.title,
+      description:event.description,sourceDomain:event.sourceDomain,sourceReferenceId:event.sourceReferenceId,
+      metadata:json({...event.metadata,sourceEventId:event.eventId}),occurredAt:event.occurredAt,
+    }});
+    if (['StudentIdentityCreated','StudentIdentityActivated','StudentIdentitySuspended','StudentIdentityArchived'].includes(event.eventType)) return;
+    await this.projectIntegrationEvent(tx,event);
+    if (event.notification) {
+      await tx.studentNotificationProjection.upsert({
+        where:{sourceEventId:event.eventId},
+        create:{id:randomUUID(),studentReferenceId:event.studentReferenceId,
+          category:event.notification.category,title:event.notification.title,message:event.notification.message,
+          actionUrl:event.notification.actionUrl,sourceEventId:event.eventId,occurredAt:event.occurredAt},
+        update:{category:event.notification.category,title:event.notification.title,message:event.notification.message,
+          actionUrl:event.notification.actionUrl},
+      });
+    }
+    await this.refreshPersonalStatistics(tx,event.studentReferenceId);
+  }
+
+  public async replayParkedEvents(limit = 25): Promise<{processed:number;failed:number}> {
+    const batchSize = Math.min(25, Math.max(1, Math.trunc(limit)));
+    const parked = await this.db.studentWorkspaceEventInbox.findMany({
+      where: {
+        processedAt: null,
+        failureCode: 'WORKSPACE_SYNC_BLOCKED_SUSPENDED',
+        workspace: { status: StudentWorkspaceStatus.ACTIVE },
+      },
+      orderBy: [{receivedAt:'asc'},{id:'asc'}],
+      take: batchSize,
+      select: {id:true,eventId:true,studentReferenceId:true,sourceDomain:true,eventType:true,payload:true},
+    });
+    let processed = 0;
+    let failed = 0;
+    for (const row of parked) {
+      try {
+        const changed = await this.db.$transaction(async (tx:any) => {
+          // A scoped CAS lease inside the transaction prevents duplicate timeline creation
+          // when two recovery workers select the same parked event.
+          const claimed = await tx.studentWorkspaceEventInbox.updateMany({
+            where: { id: row.id, processedAt: null, failureCode: 'WORKSPACE_SYNC_BLOCKED_SUSPENDED' },
+            data: { processedAt: new Date(), failureCode: null },
+          });
+          if (claimed.count !== 1) return false;
+          const workspace = await tx.studentWorkspace.findUnique({
+            where: { studentReferenceId: row.studentReferenceId }, select: { status: true },
+          });
+          if (workspace?.status !== StudentWorkspaceStatus.ACTIVE) throw new Error('STUDENT_REPLAY_WORKSPACE_NOT_ACTIVE');
+          const payload = row.payload as Record<string,unknown>;
+          const occurredAt = new Date(String(payload?.occurredAt ?? ''));
+          const supported:Record<string,readonly string[]> = {
+            COURSES:['CourseEnrolled','CourseProgressUpdated','CourseCompleted'],
+            CERTIFICATES:['CertificateIssued','CertificateRevoked','CertificateReissued','CertificateRenewed','CertificateExpired','CertificateArtifactsRendered'],
+          };
+          if (payload?.eventId !== row.eventId || payload.studentReferenceId !== row.studentReferenceId ||
+              payload.sourceDomain !== row.sourceDomain || payload.eventType !== row.eventType ||
+              !supported[row.sourceDomain]?.includes(row.eventType) || !Number.isFinite(occurredAt.getTime()))
+            throw new Error('STUDENT_REPLAY_ENVELOPE_INVALID');
+          const event = { ...payload, occurredAt } as unknown as StudentWorkspaceIntegrationEventDto;
+          await this.projectStudentEvent(tx, event);
+          return true;
+        });
+        if (changed) processed += 1;
+      } catch {
+        // Do not leak raw event payload or retry a poison event forever.
+        // Preserve the parked row for authorized operator reconciliation.
+        failed += 1;
+        await this.db.studentWorkspaceEventInbox.updateMany({
+          where: { id: row.id, processedAt: null, failureCode: 'WORKSPACE_SYNC_BLOCKED_SUSPENDED' },
+          data: { failureCode: 'WORKSPACE_REPLAY_FAILED' },
+        });
+      }
+    }
+    return {processed,failed};
   }
 
   public async markNotificationRead(studentReferenceId: string, notificationId: string): Promise<void> {

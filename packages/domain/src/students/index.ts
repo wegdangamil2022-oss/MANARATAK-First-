@@ -463,6 +463,8 @@ export interface IStudentWorkspaceRepository {
   ): Promise<StudentWorkspaceDto>;
   resetLayout(studentReferenceId: string, expectedVersion: number, supportActor?: { actorId: string; reason: string; correlationId?: string }): Promise<StudentWorkspaceDto>;
   ingestIntegrationEvent(event: StudentWorkspaceIntegrationEventDto): Promise<boolean>;
+  /** Trusted, bounded recovery of source events parked during Identity suspension. */
+  replayParkedEvents(limit?: number): Promise<{ processed: number; failed: number }>;
 }
 
 /** P8 cross-domain read contract: Phase 15 stores only references; owner domains hydrate display truth. */

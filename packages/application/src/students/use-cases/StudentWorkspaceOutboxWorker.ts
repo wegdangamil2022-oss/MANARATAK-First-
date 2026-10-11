@@ -1,4 +1,5 @@
 import { ITransactionalOutboxDispatcher, OutboxDispatchResult } from '@manaratak/domain';
+import { StudentWorkspaceUseCases } from './StudentWorkspaceUseCases';
 
 export interface StudentWorkspaceOutboxWorkerOptions {
   batchSize?: number;
@@ -12,6 +13,7 @@ export class StudentWorkspaceOutboxWorker {
   public constructor(
     private readonly dispatcher: ITransactionalOutboxDispatcher,
     private readonly options: StudentWorkspaceOutboxWorkerOptions = {},
+    private readonly workspaceRecovery?: StudentWorkspaceUseCases,
   ) {}
 
   public async runIdentityOnce(workerId: string): Promise<OutboxDispatchResult> {
@@ -29,6 +31,12 @@ export class StudentWorkspaceOutboxWorker {
   /** Lifecycle events only: certificate render jobs remain owned by the P14 artifact worker. */
   public async runCertificatesOnce(workerId: string): Promise<OutboxDispatchResult> {
     return this.run(workerId, 'CERTIFICATES', ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered']);
+  }
+
+  public async runReplayOnce(workerId: string): Promise<{processed:number;failed:number}> {
+    if (!workerId.trim()) throw new Error('STUDENT_WORKSPACE_REPLAY_WORKER_ID_REQUIRED');
+    if (!this.workspaceRecovery) return {processed:0,failed:0};
+    return this.workspaceRecovery.replayParkedEvents(Math.min(25, this.options.batchSize ?? 25));
   }
 
   private run(workerId: string, domain: string, eventTypes: readonly string[]): Promise<OutboxDispatchResult> {

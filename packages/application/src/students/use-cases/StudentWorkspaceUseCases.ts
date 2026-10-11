@@ -260,6 +260,11 @@ export class StudentWorkspaceUseCases {
     return this.mutate(event.studentReferenceId, 'integration-event-projected', () => this.repository.ingestIntegrationEvent(event));
   }
 
+  /** Internal worker only. No public/student route exposes unscoped replay. */
+  public replayParkedEvents(limit?:number):Promise<{processed:number;failed:number}> {
+    return this.repository.replayParkedEvents(limit);
+  }
+
   private ensureStudentReference(studentReferenceId: string): void {
     if (!studentReferenceId.trim()) {
       throw new Error('studentReferenceId is required');
