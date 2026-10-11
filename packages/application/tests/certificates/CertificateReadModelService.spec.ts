@@ -23,6 +23,16 @@ describe('P6 certificate read models', () => {
     expect(row).not.toHaveProperty('metadata');
   });
 
+  it('requests a bounded cursor page from the owning certificate repository',async()=>{
+    const repo={listByStudent:vi.fn().mockResolvedValue([{id:'cert-9',status:CertificateStatus.ACTIVE}])};
+    const service=new CertificateReadModelService(repo as any,{} as any);
+    const rows=await service.listForStudent('student-1','cert-8',51);
+    expect(rows).toHaveLength(1);
+    expect(repo.listByStudent).toHaveBeenCalledWith('student-1',1,51,'cert-8');
+    await expect(service.listForStudent('student-1',undefined,52))
+      .rejects.toThrow('STUDENT_OWNER_READ_LIMIT_INVALID');
+  });
+
   it('delegates public verification truth to the P14 use case instead of duplicating it', async () => {
     const repository = { listByStudent: vi.fn() } as any;
     const useCases = { verifyByCode: vi.fn().mockResolvedValue({ verificationCode: 'VERIFY-1', isValid: true, integrityVerified:true }) } as any;

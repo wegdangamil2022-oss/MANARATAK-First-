@@ -3,6 +3,28 @@ import { CourseCompletionStatus, CourseEnrollmentStatus } from '@manaratak/domai
 import { PrismaCourseProgressRepository } from '../../src/courses/PrismaCourseProgressRepository';
 
 describe('PrismaCourseProgressRepository', () => {
+  it('enumerates enrollment catchup in stable student-scoped keyset pages', async()=>{
+    const now=new Date('2026-10-11T10:00:00Z');
+    const mock=(id:string)=>({id,courseId:`course-${id}`,studentReferenceId:'student-1',
+      status:'ACTIVE',enrolledAt:now,progressPercentage:10,metadata:null});
+    const prisma={courseEnrollment:{findMany:vi.fn().mockResolvedValueOnce([mock('a'),mock('b'),mock('c')])
+      .mockResolvedValueOnce([mock('d')])}};
+    const repo=new PrismaCourseProgressRepository(prisma as any);
+    const first=await repo.listEnrollmentsPageByStudent('student-1',2);
+    expect(first.items.map(i=>i.id)).toEqual(['a','b']);
+    expect(first.nextCursor).toBe('b');
+    expect(prisma.courseEnrollment.findMany).toHaveBeenNthCalledWith(1,{
+      where:{studentReferenceId:'student-1'},orderBy:{id:'asc'},take:3,
+    });
+    const second=await repo.listEnrollmentsPageByStudent('student-1',2,first.nextCursor!);
+    expect(second.items.map(i=>i.id)).toEqual(['d']);
+    expect(second.nextCursor).toBeNull();
+    expect(prisma.courseEnrollment.findMany).toHaveBeenNthCalledWith(2,{
+      where:{studentReferenceId:'student-1',id:{gt:'b'}},orderBy:{id:'asc'},take:3,
+    });
+    await expect(repo.listEnrollmentsPageByStudent('student-1',51)).rejects.toThrow('STUDENT_OWNER_READ_PAGE_INVALID');
+  });
+
   it('persists enrollment using the canonical course/student identity', async () => {
     const now = new Date();
     const prisma = {

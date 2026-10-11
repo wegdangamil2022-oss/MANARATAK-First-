@@ -58,6 +58,46 @@ describe('PrismaCertificateRepository W10 trust model', () => {
     await expect(repository.transitionTemplate('template-1', CertificateTemplateStatus.APPROVED, { actorId: 'maker-1', expectedTemplateVersionId: 'version-1', expectedTemplateStatus: CertificateTemplateStatus.PENDING_APPROVAL })).rejects.toThrow('MAKER_CHECKER_REQUIRED');
   });
 
+  it('emits complete public certificate identity on renewal, not just an expiry date',async()=>{
+    const tx:any={
+      $queryRaw:vi.fn().mockResolvedValue([]),
+      certificate:{
+        findUnique:vi.fn().mockResolvedValue({id:'old',status:CertificateStatus.ACTIVE,replacedByCertificateId:null}),
+        create:vi.fn().mockImplementation(({data})=>({
+          id:'renewed',...data,issuedAt:new Date('2026-10-10T00:00:00Z'),
+          createdAt:new Date(),updatedAt:new Date(),
+        })),update:vi.fn(),
+      },
+      certificateTemplate:{findUnique:vi.fn().mockResolvedValue({
+        id:'template-1',currentVersionId:'version-1',status:CertificateTemplateStatus.ACTIVE,issuerId:'issuer-1',
+      })},
+      certificateTemplateVersion:{findUnique:vi.fn().mockResolvedValue({
+        id:'version-1',versionNumber:'1.0.0',templateId:'template-1',
+        issuerId:'issuer-1',status:CertificateTemplateStatus.ACTIVE,
+      })},
+      certificateIssuer:{findUnique:vi.fn().mockResolvedValue({
+        id:'issuer-1',issuerType:'MANARATAK',status:'ACTIVE',signingKeyReference:'kms://issuer/key',
+      })},
+      certificateLedgerEntry:{create:vi.fn()},auditRecord:{create:vi.fn()},
+      transactionalOutboxRecord:{create:vi.fn()},
+    };
+    const repo=new PrismaCertificateRepository({$transaction:(fn:any)=>fn(tx)} as any);
+    await repo.reissue({certificateId:'old',reason:'renewal',actorId:'checker',
+      eventType:'CertificateRenewed',
+      replacement:{...issueData,sourceEventId:'renewal-source-event',
+        sourceCompletionId:'renewal-completion'} as any});
+    const events=tx.transactionalOutboxRecord.create.mock.calls
+      .map(([call]:any[])=>call.data)
+      .filter((e:any)=>e.eventType==='CertificateRenewed');
+    expect(events).toHaveLength(1);
+    expect(events[0].payload).toEqual(expect.objectContaining({
+      studentReferenceId:'student-1',certificateId:'renewed',
+      publicId:'public-1',serialNumber:'MNR-CRS-2026-1',
+      verificationCode:'MNR-VERIFY-1',replacesCertificateId:'old',status:'ACTIVE',
+    }));
+    expect(events[0].metadata).toMatchObject({sourcePhase:'Phase14'});
+  });
+
   it('clears revocation lifecycle fields on replacement creation', async () => {
     const tx: any = {
       $queryRaw: vi.fn().mockResolvedValue([]),
