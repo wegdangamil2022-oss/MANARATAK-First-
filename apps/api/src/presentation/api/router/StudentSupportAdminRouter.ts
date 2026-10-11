@@ -57,6 +57,7 @@ export class StudentSupportAdminRouter {
       } catch (error) { next(error); }
     };
     const requireSupportMutation = async (req: Request, res: any, next: any) => {
+      try {
       const principalId = req.authUserId;
       if (!principalId)
         return void res.status(401).json({
@@ -75,6 +76,7 @@ export class StudentSupportAdminRouter {
           },
         });
       next();
+      } catch (error) { next(error); }
     };
 
     router.get('/support', requireSupportRead, async (req, res, next) => {
@@ -179,13 +181,21 @@ export class StudentSupportAdminRouter {
         );
         if (!permitted.isGranted)
           return void res.status(403).json({error:{code:'STUDENT_SUPPORT_OWNER_READ_DENIED'}});
+        const paging=z.object({
+          limit:z.coerce.number().int().min(1).max(12).optional(),
+          cursor:z.string().trim().min(1).max(2048).optional(),
+          page:z.coerce.number().int().min(1).max(10000).optional(),
+        }).strict().parse(req.query);
+        if ((domain==='services' && paging.cursor) || (domain!=='services' && paging.page))
+          return void res.status(400).json({error:{code:'STUDENT_SUPPORT_VALIDATION_ERROR'}});
         const grants = {
           learning: domain === 'learning', certificates: domain === 'certificates',
           services: domain === 'services',
         };
-        const detail = await studentDashboardHydrationService.getSupportDetail(studentReferenceId, grants);
+        const detail = await studentDashboardHydrationService.getSupportDetail(studentReferenceId, grants, paging);
         const payload = {
           domain,
+          ...(detail.ownerPages?.[domain]??{hasMore:false,nextCursor:null}),
           status: detail.ownerReadStatus?.[domain] ?? 'DEGRADED',
           provenance: detail.ownerReadProvenance?.[domain] ?? null,
           ...(domain === 'learning'
@@ -295,6 +305,7 @@ export class StudentSupportAdminRouter {
 
     router.post(
       '/support/:studentReferenceId/reset-layout',
+      requireSupportRead,
       requireSupportMutation,
       async (req: Request, res, next) => {
         const studentReferenceId = req.params.studentReferenceId;
@@ -326,7 +337,7 @@ export class StudentSupportAdminRouter {
           error: { code: 'STUDENT_SUPPORT_VALIDATION_ERROR', message: 'بيانات الطلب غير صالحة.' },
         });
       const code = error instanceof Error ? error.message : '';
-      if (code === 'STUDENT_SUPPORT_CURSOR_INVALID')
+      if (['STUDENT_SUPPORT_CURSOR_INVALID','CERTIFICATE_CURSOR_INVALID','STUDENT_LEARNING_OWNER_CURSOR_INVALID'].includes(code))
         return void res
           .status(400)
           .json({ error: { code, message: 'تعذر قراءة الصفحة التالية. حدّث نتائج البحث.' } });

@@ -245,23 +245,8 @@ export interface StudentNotificationProjectionDto {
   occurredAt: Date;
 }
 
-export interface StudentWorkspaceIntegrationEventDto {
-  eventId: string;
-  studentReferenceId: string;
-  eventType: string;
-  sourceDomain: string;
-  sourceReferenceId?: string | null;
-  title: string;
-  description?: string | null;
-  occurredAt: Date;
-  metadata?: Record<string, unknown> | null;
-  notification?: {
-    category: string;
-    title: string;
-    message: string;
-    actionUrl?: string | null;
-  } | null;
-}
+export type { StudentWorkspaceIntegrationEventDto } from './StudentIntegrationEvent';
+import type { StudentWorkspaceIntegrationEventDto } from './StudentIntegrationEvent';
 
 export interface StudentQuickActionDto {
   id: string;
@@ -322,15 +307,16 @@ export interface StudentSupportWorkspacePageDto {
 }
 
 export interface StudentSupportWorkspaceDetailDto extends StudentSupportWorkspaceSummaryDto {
+  ownerPages?: Partial<Record<'learning'|'certificates'|'services', {hasMore:boolean;nextCursor:string|null;nextPage?:number|null}>>;
   savedSummary?: Array<{entityType:string;count:number}>;
   activeApplicationCount?: number;
   serviceRequestCount?: number | null;
   recentServiceRequests?: Array<{id:string;publicId:string;status:string;createdAt:Date|string;updatedAt:Date|string}>;
   ownerReadStatus?: {learning:'AVAILABLE'|'DEGRADED'|'RESTRICTED'|'TRUNCATED';certificates:'AVAILABLE'|'DEGRADED'|'RESTRICTED'|'TRUNCATED';services:'AVAILABLE'|'DEGRADED'|'RESTRICTED'};
   ownerReadProvenance?: {
-    learning: {source:'P13';queriedAt:string;returned:number;limit:number;complete:boolean} | null;
-    certificates: {source:'P14';queriedAt:string;returned:number;limit:number;complete:boolean} | null;
-    services: {source:'P20';queriedAt:string;returned:number;limit:number;complete:boolean} | null;
+    learning: {source:'P13';queriedAt:string;returned:number;limit:number;complete:boolean;countSource?:'LIVE_OWNER';freshness?:'OWNER_READ';lastSyncedAt?:null} | null;
+    certificates: {source:'P14';queriedAt:string;returned:number;limit:number;complete:boolean;countSource?:'LIVE_OWNER';freshness?:'OWNER_READ';lastSyncedAt?:null} | null;
+    services: {source:'P20';queriedAt:string;returned:number;limit:number;complete:boolean;countSource?:'LIVE_OWNER';freshness?:'OWNER_READ';lastSyncedAt?:null} | null;
   };
   learning?: StudentCourseProgressDto[];
   certificates?: Array<Pick<StudentCertificateProjectionDto,'id'|'publicId'|'serialNumber'|'verificationCode'|'status'|'courseDisplayName'|'issuedAt'|'expiresAt'>>;
@@ -527,3 +513,5 @@ export interface IStudentCertificateReadGateway {
   listForStudent(studentReferenceId: string, maxRows?: number): Promise<StudentCertificateProjectionDto[]>;
   listPageForStudent?(studentReferenceId:string, limit:number, cursor?:string):Promise<StudentOwnerPage<StudentCertificateProjectionDto>>;
 }
+
+export * from './StudentIntegrationEventPolicy';

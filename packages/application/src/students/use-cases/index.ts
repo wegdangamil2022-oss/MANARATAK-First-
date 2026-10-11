@@ -7,3 +7,5 @@ export * from './StudentApplicationTrackerUseCases';
 
 export * from './StudentApplicationReminderNotificationGateway';
 export * from './StudentApplicationReminderOutboxDeliveryGateway';
+
+export * from './StudentApplicationReminderDeliveryPolicy';

@@ -121,3 +121,26 @@ describe('StudentDashboardHydrationService', () => {
     expect(detail.certificates).toBeUndefined();
   });
 });
+
+describe('P15 bounded owner tab pagination',()=>{
+  it('continues on the same student and never treats the last page as a complete total',async()=>{
+    const workspace={getSupportWorkspaceDetail:vi.fn().mockResolvedValue({linkedSummaries:{unreadNotificationCount:0}})};
+    const learning={listForStudent:vi.fn(),listPageForStudent:vi.fn().mockResolvedValue({items:[{enrollmentId:'e-2',courseId:'c-2',status:'ACTIVE'}],nextCursor:null})};
+    const certificates={listForStudent:vi.fn()};
+    const result=await new StudentDashboardHydrationService(workspace as any,learning as any,certificates as any)
+      .getSupportDetail('s-1',{learning:true,certificates:false,services:false},{cursor:'e-1',limit:12});
+    expect(learning.listPageForStudent).toHaveBeenCalledWith('s-1',12,'e-1');
+    expect(certificates.listForStudent).not.toHaveBeenCalled();
+    expect(result.linkedSummaries.activeCourseCount).toBeNull();
+    expect(result.ownerPages?.learning).toEqual({hasMore:false,nextCursor:null});
+    expect(result.ownerReadProvenance?.learning?.complete).toBe(false);
+  });
+  it('returns a continuation for a bounded first page and omits total counts',async()=>{
+    const workspace={getSupportWorkspaceDetail:vi.fn().mockResolvedValue({linkedSummaries:{unreadNotificationCount:0}})};
+    const learning={listForStudent:vi.fn(),listPageForStudent:vi.fn().mockResolvedValue({items:[{enrollmentId:'e-1',status:'ACTIVE'}],nextCursor:'e-1'})};
+    const result=await new StudentDashboardHydrationService(workspace as any,learning as any,{listForStudent:vi.fn()} as any)
+      .getSupportDetail('s-1',{learning:true,certificates:false,services:false});
+    expect(result.ownerPages?.learning).toEqual({hasMore:true,nextCursor:'e-1'});
+    expect(result.linkedSummaries.activeCourseCount).toBeNull();
+  });
+});

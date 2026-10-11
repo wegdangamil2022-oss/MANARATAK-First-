@@ -50,6 +50,7 @@ interface Certificate {
   expiresAt?: string | null;
 }
 interface StudentSupportDetail extends StudentSupportItem {
+  ownerPages?:Partial<Record<OwnerDomain,{hasMore:boolean;nextCursor:string|null;nextPage?:number|null}>>;
   provisioningHealth: {
     state: 'HEALTHY' | 'PENDING' | 'FAILED';
     pendingEventCount: number;
@@ -89,6 +90,7 @@ interface StudentSupportDetail extends StudentSupportItem {
 type OwnerDomain = 'learning' | 'certificates' | 'services';
 type OwnerReadState = 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED' | 'TRUNCATED';
 interface OwnerTabResponse {
+  hasMore:boolean;nextCursor:string|null;nextPage?:number|null;
   domain: OwnerDomain;
   status: OwnerReadState;
   provenance: {source:'P13'|'P14'|'P20';queriedAt:string;returned:number;limit:number;complete:boolean}|null;
@@ -165,11 +167,34 @@ const labels: Record<string, string> = {
   IN_PROGRESS: 'قيد التنفيذ',
   AWAITING_PAYMENT: 'بانتظار الدفع',
   INTERNATIONAL_TEST: 'الاختبارات الدولية',
+  "TRUNCATED": "نتائج جزئية",
+  "DEGRADED": "المصدر غير متاح",
+  "AVAILABLE": "متاح",
+  "REISSUED": "أعيد إصدارها",
+  "ISSUED": "صادرة",
+  "IDENTITY_NOT_FOUND": "الهوية غير موجودة",
+  "NON_HUMAN_IDENTITY": "ليست هوية طالب",
+  "STUDENT_ROLE_MISSING": "دور الطالب غير موجود",
+  "ROLE_EVENT_PENDING": "حدث التهيئة معلق",
+  "WORKSPACE_SUSPENDED": "مساحة الطالب معلقة",
+  "WORKSPACE_ARCHIVED": "مساحة الطالب مؤرشفة",
+  "WORKSPACE_INITIALIZING": "مساحة الطالب قيد التهيئة",
+  "DRAFT": "مسودة",
+  "APPLIED": "تم التقديم",
+  "UNDER_REVIEW": "قيد المراجعة",
+  "OFFERED": "عرض قبول",
+  "REJECTED": "مرفوض",
+  "WITHDRAWN": "مسحوب",
+  "StudentApplicationTrackerCreated": "إنشاء متابعة",
+  "StudentApplicationTrackerUpdated": "تحديث متابعة",
+  "StudentApplicationChecklistUpdated": "تحديث قائمة المهام",
+  "StudentApplicationTrackerArchived": "أرشفة متابعة",
+  "StudentApplicationTrackerDeleted": "حذف متابعة",
 };
-function date(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: string) {
   if (!value) return '—';
   const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleString('ar');
+  return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleString(locale);
 }
 const labelsEn:Record<string,string>={
   ACTIVE:'Active',SUSPENDED:'Suspended',ARCHIVED:'Archived',INITIALIZING:'Initializing',
@@ -180,6 +205,28 @@ const labelsEn:Record<string,string>={
   CMS_CONTENT:'Content',SERVICE:'Services',REQUESTED:'Requested',ACCEPTED:'Accepted',
   IN_PROGRESS:'In progress',AWAITING_PAYMENT:'Awaiting payment',
   INTERNATIONAL_TEST:'International tests',TRUNCATED:'Partial results',
+  "DEGRADED": "Source unavailable",
+  "AVAILABLE": "Available",
+  "REISSUED": "Reissued",
+  "ISSUED": "Issued",
+  "IDENTITY_NOT_FOUND": "Identity not found",
+  "NON_HUMAN_IDENTITY": "Not a human identity",
+  "STUDENT_ROLE_MISSING": "Student role missing",
+  "ROLE_EVENT_PENDING": "Provisioning event pending",
+  "WORKSPACE_SUSPENDED": "Workspace suspended",
+  "WORKSPACE_ARCHIVED": "Workspace archived",
+  "WORKSPACE_INITIALIZING": "Workspace initializing",
+  "DRAFT": "Draft",
+  "APPLIED": "Applied",
+  "UNDER_REVIEW": "Under review",
+  "OFFERED": "Offered",
+  "REJECTED": "Rejected",
+  "WITHDRAWN": "Withdrawn",
+  "StudentApplicationTrackerCreated": "Tracker created",
+  "StudentApplicationTrackerUpdated": "Tracker updated",
+  "StudentApplicationChecklistUpdated": "Checklist updated",
+  "StudentApplicationTrackerArchived": "Tracker archived",
+  "StudentApplicationTrackerDeleted": "Tracker removed",
 };
 function statusLabel(value:string,locale='ar'){
   return (locale==='en'?labelsEn:labels)[value]??value;
@@ -206,6 +253,12 @@ function Count({ title, value }: { title: string; value: number | string }) {
 export function StudentSupportAdminPage() {
   const {hasPermission}=useAdminAuthorization();
   const {t,dir,language}=useTranslation();
+  const date = (value?:string|null) => formatDate(value, language);
+  const copy = (key:Parameters<typeof t>[0], values:Record<string,string|number|null|undefined>) =>
+    t(key).replace(/\{(\w+)\}/g, (_, name:string) => {
+      const value=values[name];
+      return typeof value==='number'?value.toLocaleString(language):String(value??'—');
+    });
   const [params, setParams] = useSearchParams();
   const selectedId = params.get('student');
   const [items, setItems] = useState<StudentSupportItem[]>([]);
@@ -240,6 +293,7 @@ export function StudentSupportAdminPage() {
   const [provisionDiagnostic,setProvisionDiagnostic]=useState<ProvisionDiagnostic|null>(null);
   const [diagnosticError,setDiagnosticError]=useState<string|null>(null);
   const [diagnosticLoading,setDiagnosticLoading]=useState(false);
+  const [diagnosticIdentity,setDiagnosticIdentity]=useState('');
   const [reason, setReason] = useState('');
   const [resetting, setResetting] = useState(false);
   const listRequest = useRef(0);
@@ -286,12 +340,12 @@ export function StudentSupportAdminPage() {
         setHasMore(result.hasMore);
       } catch (cause) {
         if (request === listRequest.current)
-          setError(cause instanceof Error ? cause.message : 'تعذر تحميل الطلاب.');
+          setError(t('stu_support_load_error'));
       } finally {
         if (request === listRequest.current) setLoading(false);
       }
     },
-    [appliedQuery, status],
+    [appliedQuery, status, language],
   );
   useEffect(() => {
     void load();
@@ -315,11 +369,11 @@ export function StudentSupportAdminPage() {
       if (request === detailRequest.current) setDetail(result);
     } catch (cause) {
       if (request === detailRequest.current)
-        setDetailError(cause instanceof Error ? cause.message : 'تعذر تحميل تفاصيل الطالب.');
+        setDetailError(t('stu_support_detail_error'));
     } finally {
       if (request === detailRequest.current) setDetailLoading(false);
     }
-  }, []);
+  }, [language]);
   useEffect(() => {
     ++trackerRequest.current;
     ++diagnosticRequest.current;
@@ -372,6 +426,7 @@ export function StudentSupportAdminPage() {
           const provenance=previous.ownerReadProvenance;
           return {
             ...previous,
+            ownerPages:{...previous.ownerPages,[domain]:{hasMore:result.hasMore,nextCursor:result.nextCursor,nextPage:result.nextPage}},
             ownerReadStatus:{
               learning:domain==='learning'?result.status:previous.ownerReadStatus?.learning??'RESTRICTED',
               certificates:domain==='certificates'?result.status:previous.ownerReadStatus?.certificates??'RESTRICTED',
@@ -396,29 +451,62 @@ export function StudentSupportAdminPage() {
         });
       }catch(error) {
         if(request===ownerRequest.current)
-          setOwnerError(error instanceof Error?error.message:'تعذرت قراءة المجال المحدد.');
+          setOwnerError(t('stu_support_owner_error'));
       }finally{
         if(request===ownerRequest.current)setOwnerLoading(null);
       }
     })();
     return ()=>{++ownerRequest.current;};
-  },[tab,selectedId,detail?.studentReferenceId,ownerPermitted]);
+  },[tab,selectedId,detail?.studentReferenceId,ownerPermitted,language]);
+
+  async function loadOwnerNext(domain:OwnerDomain) {
+    const page=detail?.ownerPages?.[domain];
+    if(!selectedId||ownerLoading||!page?.hasMore)return;
+    const request=++ownerRequest.current;
+    setOwnerLoading(domain);setOwnerError(null);
+    try {
+      const query=new URLSearchParams({limit:'12'});
+      if(domain==='services'&&page.nextPage)query.set('page',String(page.nextPage));
+      else if(page.nextCursor)query.set('cursor',page.nextCursor);
+      else return;
+      const result=await adminApiClient.request<OwnerTabResponse>(
+        `/admin/students/support/${encodeURIComponent(selectedId)}/owner/${domain}?${query}`,
+      );
+      if(request!==ownerRequest.current)return;
+      setDetail(previous=>{
+        if(!previous||previous.studentReferenceId!==selectedId)return previous;
+        return {...previous,
+          ownerPages:{...previous.ownerPages,[domain]:{hasMore:result.hasMore,nextCursor:result.nextCursor,nextPage:result.nextPage}},
+          ...(domain==='learning'?{learning:[...new Map([...(previous.learning??[]),...(result.learning??[])].map(row=>[row.enrollmentId,row])).values()]}:{}),
+          ...(domain==='certificates'?{certificates:[...new Map([...(previous.certificates??[]),...(result.certificates??[])].map(row=>[row.id,row])).values()]}:{}),
+          ...(domain==='services'?{recentServiceRequests:[...new Map([...(previous.recentServiceRequests??[]),...(result.recentServiceRequests??[])].map(row=>[row.id,row])).values()]}:{}),
+        };
+      });
+    }catch {if(request===ownerRequest.current)setOwnerError(t('stu_support_owner_error'));}
+    finally{if(request===ownerRequest.current)setOwnerLoading(null);}
+  }
+  const ownerMore = (domain:OwnerDomain) => hasPermission(domain==='learning'?'admin:courses:manage':domain==='certificates'?'admin:certificates:view':'admin:services:manage') && detail?.ownerPages?.[domain]?.hasMore && (
+    <button type="button" disabled={Boolean(ownerLoading)} onClick={()=>void loadOwnerNext(domain)}
+      className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">
+      {t('stu_support_owner_more')}
+    </button>
+  );
 
   useEffect(() => {
     if (detail) detailAnchor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [detail?.studentReferenceId]);
-  async function loadProvisionDiagnostic(){
-    if(!selectedId||diagnosticLoading)return;
+  async function loadProvisionDiagnostic(identityId=selectedId){
+    if(!identityId||diagnosticLoading)return;
     const req=++diagnosticRequest.current;
     setDiagnosticLoading(true);setDiagnosticError(null);
     try{
       const result=await adminApiClient.request<ProvisionDiagnostic>(
-        `/admin/students/support/${encodeURIComponent(selectedId)}/provisioning-diagnostic`,
+        `/admin/students/support/${encodeURIComponent(identityId)}/provisioning-diagnostic`,
       );
       if(req===diagnosticRequest.current)setProvisionDiagnostic(result);
     }catch(error){
       if(req===diagnosticRequest.current)setDiagnosticError(
-        error instanceof Error?error.message:'تعذر تشغيل التشخيص.',
+        t('stu_support_diagnostic_error'),
       );
     }finally{if(req===diagnosticRequest.current)setDiagnosticLoading(false);}
   }
@@ -440,7 +528,7 @@ export function StudentSupportAdminPage() {
       }:page);
     }catch(error){
       if(request===triageRequest.current)
-        setTriageError(error instanceof Error?error.message:'تعذر تحميل قائمة التشخيص.');
+        setTriageError(t('stu_support_triage_error'));
     }finally{
       if(request===triageRequest.current)setTriageLoading(false);
     }
@@ -459,7 +547,7 @@ export function StudentSupportAdminPage() {
       if(request===historyRequest.current)setTrackerHistory(previous=>nextCursor&&previous?.trackerId===trackerId?{trackerId,page:{...page,items:[...previous.page.items,...page.items]}}:{trackerId,page});
     }catch(error){
       if(request===historyRequest.current)setTrackerHistoryError(
-        error instanceof Error?error.message:'تعذر تحميل سجل المتابعة.',
+        t('stu_support_history_error'),
       );
     }finally{if(request===historyRequest.current)setTrackerHistoryLoading(false);}
   }
@@ -480,7 +568,7 @@ export function StudentSupportAdminPage() {
         : result);
     } catch (cause) {
       if (request === trackerRequest.current)
-        setTrackerError(cause instanceof Error ? cause.message : 'تعذر استعراض متابعات الطالب.');
+        setTrackerError(t('stu_support_tracker_error'));
     } finally {if (request === trackerRequest.current) setTrackerLoading(false);}
   }
   function chooseStudent(id: string | null) {
@@ -524,11 +612,11 @@ export function StudentSupportAdminPage() {
       );
       setResetTarget(null);
       setReason('');
-      setNotice('تمت إعادة ترتيب واجهة حساب الطالب إلى الترتيب الافتراضي.');
+      setNotice(t('stu_support_reset_success'));
       await load();
       if (selectedId === resetTarget.studentReferenceId) await inspect(selectedId);
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'تعذرت إعادة ضبط الواجهة.';
+      const message = t('stu_support_reset_error');
       if (message.includes('STUDENT_WORKSPACE_VERSION_CONFLICT') || message.includes('تغيرت بيانات الطالب')) {
         try {
           const current = await adminApiClient.request<StudentSupportDetail>(
@@ -536,22 +624,22 @@ export function StudentSupportAdminPage() {
           );
           setDetail(current);
           setResetTarget(current);
-          setError('تغيرت نسخة مساحة الطالب. راجع البيانات المحدثة وأكّد إعادة الضبط مرة أخرى.');
+          setError(t('stu_support_reset_conflict'));
         } catch {
           setResetTarget(null);
-          setError('حدث تعارض وتعذر تحديث حالة الطالب. أعد تحميل الملف قبل المحاولة.');
+          setError(t('stu_support_reset_conflict_reload'));
         }
       } else {
-        setError(message);
+        setError(t('stu_support_reset_error'));
       }
     } finally {
       setResetting(false);
     }
   }
-  const learningComplete = detail?.ownerReadStatus?.learning === 'AVAILABLE';
-  const certificatesComplete = detail?.ownerReadStatus?.certificates === 'AVAILABLE';
-  const learningAvailable = learningComplete || detail?.ownerReadStatus?.learning === 'TRUNCATED';
-  const certificatesAvailable = certificatesComplete || detail?.ownerReadStatus?.certificates === 'TRUNCATED';
+  const learningComplete = hasPermission('admin:courses:manage') && detail?.ownerReadStatus?.learning === 'AVAILABLE';
+  const certificatesComplete = hasPermission('admin:certificates:view') && detail?.ownerReadStatus?.certificates === 'AVAILABLE';
+  const learningAvailable = hasPermission('admin:courses:manage') && (learningComplete || detail?.ownerReadStatus?.learning === 'TRUNCATED');
+  const certificatesAvailable = hasPermission('admin:certificates:view') && (certificatesComplete || detail?.ownerReadStatus?.certificates === 'TRUNCATED');
   const savedCount = detail?.savedSummary?.reduce((sum, item) => sum + item.count, 0);
 
   return (
@@ -585,6 +673,24 @@ export function StudentSupportAdminPage() {
           {notice}
         </p>
       )}
+      <section className="space-y-3 rounded-2xl border bg-white p-4">
+        <h2 className="font-bold">{t('stu_support_diagnosis_title')}</h2>
+        <p className="text-sm text-slate-600">{t('stu_support_diagnosis_missing_notice')}</p>
+        <label className="block text-sm font-semibold">
+          {t('stu_support_identity_id')}
+          <input dir="ltr" maxLength={128} value={diagnosticIdentity} onChange={event=>{
+            ++diagnosticRequest.current;setDiagnosticLoading(false);setProvisionDiagnostic(null);setDiagnosticError(null);
+            setDiagnosticIdentity(event.target.value);
+          }} className="mt-2 block w-full rounded-lg border p-2"/>
+        </label>
+        <button type="button" disabled={diagnosticLoading||!diagnosticIdentity.trim()}
+          onClick={()=>void loadProvisionDiagnostic(diagnosticIdentity.trim())}
+          className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">
+          {t('stu_support_diagnosis_check')}
+        </button>
+        {diagnosticError&&<p role="alert" className="text-sm text-red-700">{diagnosticError}</p>}
+        {provisionDiagnostic&&<p role="status"><Badge value={provisionDiagnostic.code}/></p>}
+      </section>
       <form
         onSubmit={search}
         className="grid gap-3 rounded-2xl border bg-white p-4 md:grid-cols-[2fr_1fr_auto_auto]"
@@ -655,7 +761,7 @@ export function StudentSupportAdminPage() {
               <option value="SYNC_FAILED">{t('stu_support_triage_failed')}</option>
               <option value="SYNC_PENDING">{t('stu_support_triage_pending')}</option>
               <option value="APPLICATION_OVERDUE">{t('stu_support_triage_overdue')}</option>
-              {hasPermission('admin:services:manage')&&<option value="SERVICE_AWAITING_PAYMENT">{language==='en'?'Service requests awaiting payment':'طلبات خدمات تنتظر الدفع'}</option>}
+              {hasPermission('admin:services:manage')&&<option value="SERVICE_AWAITING_PAYMENT">{t('stu_support_service_triage')}</option>}
             </select>
           </label>
           <button type="button" disabled={triageLoading} onClick={()=>void loadTriage()}
@@ -672,7 +778,7 @@ export function StudentSupportAdminPage() {
             <div>
               <code dir="ltr" className="text-sm">{item.studentReferenceId}</code>
               <p className="mt-1 text-xs text-slate-600">
-                {statusLabel(item.status,language)} · آخر تحديث: {date(item.updatedAt)}
+                {statusLabel(item.status,language)} · {t('stu_support_last_updated')} {date(item.updatedAt)}
               </p>
             </div>
             <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold"
@@ -688,10 +794,10 @@ export function StudentSupportAdminPage() {
           <h2 className="font-black text-[#142B5F]">{t('stu_support_accounts')}</h2>
           <span className="text-xs text-slate-600">
             {loading && items.length === 0
-              ? 'جارٍ التحميل…'
+              ? t('stu_support_loading')
               : total === null
-                ? `${items.length} حساب معروض`
-                : `عرض ${items.length} من ${total} نتيجة`}
+                ? copy('stu_support_accounts_shown', {count:items.length})
+                : copy('stu_support_results_shown', {count:items.length,total})}
           </span>
         </div>
         <div className="overflow-x-auto">
@@ -712,10 +818,10 @@ export function StudentSupportAdminPage() {
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-slate-500">
                     {loading
-                      ? 'جارٍ تحميل الطلاب…'
+                      ? t('stu_support_loading_students')
                       : error
-                        ? 'تعذر تحميل القائمة. حدّث البيانات للمحاولة مجدداً.'
-                        : 'لا توجد حسابات مطابقة للفلاتر الحالية.'}
+                        ? t('stu_support_list_retry')
+                        : t('stu_support_no_accounts')}
                   </td>
                 </tr>
               ) : (
@@ -751,7 +857,7 @@ export function StudentSupportAdminPage() {
                         className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 font-bold text-[#0E7C86]"
                       >
                         <Eye className="h-4 w-4" />
-                        عرض الطالب
+                        {t('stu_support_view_student')}
                       </button>
                     </td>
                   </tr>
@@ -767,7 +873,7 @@ export function StudentSupportAdminPage() {
               onClick={() => void load(cursor)}
               className="rounded-xl border px-5 py-3 text-sm font-bold text-[#142B5F] disabled:opacity-50"
             >
-              {loading ? 'جارٍ التحميل…' : t('stu_support_more_students')}
+              {loading ? t('stu_support_loading') : t('stu_support_more_students')}
             </button>
           </div>
         )}
@@ -803,7 +909,7 @@ export function StudentSupportAdminPage() {
           {detailLoading ? (
             <div className="flex items-center gap-2 py-8 text-slate-500">
               <Loader2 className="h-5 w-5 animate-spin" />
-              جارٍ تحميل بيانات الطالب…
+              {t('stu_support_loading_details')}
             </div>
           ) : detailError ? (
             <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-red-800">
@@ -815,7 +921,7 @@ export function StudentSupportAdminPage() {
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
                   <Badge value={detail.status} />
                   <code dir="ltr">{detail.studentReferenceId}</code>
-                  <span>آخر تحديث: {date(detail.updatedAt)}</span>
+                  <span>{t('stu_support_last_updated')} {date(detail.updatedAt)}</span>
                 </div>
                 <nav
                   aria-label={t('stu_support_tabs_aria')}
@@ -836,7 +942,7 @@ export function StudentSupportAdminPage() {
                 </nav>
                 {ownerLoading && (
                   <p role="status" className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
-                    تحميل بيانات {ownerLoading==='learning'?'الدورات':ownerLoading==='certificates'?'الشهادات':'الخدمات'} من المجال المالك…
+                    {copy('stu_support_owner_loading', {domain:t(ownerLoading==='learning'?'stu_support_tab_learning':ownerLoading==='certificates'?'stu_support_tab_certificates':'stu_support_recent_services')})}
                   </p>
                 )}
                 {ownerError && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{ownerError}</p>}
@@ -850,19 +956,18 @@ export function StudentSupportAdminPage() {
                     role="status"
                     className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800"
                   >
-                    تعذرت قراءة بعض البيانات المرتبطة. تظهر المصادر غير المتاحة بعلامة —؛ حدّث
-                    التفاصيل للمحاولة مجدداً.
+                    {t('stu_support_owner_degraded')}
                   </p>
                 )}
                 {Object.values(detail.ownerReadStatus ?? {}).includes('TRUNCATED') && (
                   <p role="status" className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
-                    بعض بيانات المجالات المالكة معروضة بشكل جزئي (حتى 12 سجلًا لكل مجال). الأعداد الإجمالية غير معروفة، فلا تعتمد عليها بوصفها صفرًا أو إجماليًا.
+                    {t('stu_support_owner_partial')}
                   </p>
                 )}
                 {detail.ownerReadProvenance && (
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
                     {Object.entries(detail.ownerReadProvenance).map(([name,source])=>source && (
-                      <span key={name}>{source.source} · وقت الاستعلام: {date(source.queriedAt)} · عرض {source.returned} من حد {source.limit}{!source.complete?' · جزئي':''}</span>
+                      <span key={name}>{source.source} · {t('stu_support_queried_at')} {date(source.queriedAt)} · {copy('stu_support_source_limit', {count:source.returned,limit:source.limit})}{!source.complete?` · ${t('stu_support_partial_label')}`:''}</span>
                     ))}
                   </div>
                 )}
@@ -871,7 +976,7 @@ export function StudentSupportAdminPage() {
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <Count
                         title={t('stu_support_active_courses')}
-                        value={learningComplete ? detail.linkedSummaries.activeCourseCount : '—'}
+                        value={learningComplete ? detail.linkedSummaries.activeCourseCount ?? '—' : '—'}
                       />
                       <Count
                         title={t('stu_support_completed_courses')}
@@ -885,7 +990,7 @@ export function StudentSupportAdminPage() {
                       <Count
                         title={t('stu_support_recorded_certificates')}
                         value={
-                          certificatesComplete ? detail.linkedSummaries.certificateCount : '—'
+                          certificatesComplete ? detail.linkedSummaries.certificateCount ?? '—' : '—'
                         }
                       />
                       <Count title={t('stu_support_saved_items')} value={savedCount ?? '—'} />
@@ -907,8 +1012,7 @@ export function StudentSupportAdminPage() {
                       </div>
                     </dl>
                     <p className="text-xs text-slate-500">
-                      تعرض هذه الصفحة بيانات المتابعة اللازمة للدعم. تعديل بيانات الحساب والموافقات
-                      الشخصية يتم من المسارات المخصصة لصاحب الحساب.
+                      {t('stu_support_privacy_notice')}
                     </p>
                   </div>
                 )}
@@ -934,15 +1038,15 @@ export function StudentSupportAdminPage() {
                               <span>{progress}%</span>
                             </div>
                             <progress
-                              aria-label={`التقدم في ${item.courseName}`}
+                              aria-label={copy('stu_support_progress_aria', {name:item.courseName})}
                               max={100}
                               value={progress}
                               className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100 [&::-webkit-progress-bar]:bg-slate-100 [&::-webkit-progress-value]:bg-[#0E7C86] [&::-moz-progress-bar]:bg-[#0E7C86]"
                             />
                             <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
-                              <span>التسجيل: {date(item.enrolledAt)}</span>
-                              <span>آخر وصول: {date(item.lastAccessedAt)}</span>
-                              {item.completedAt && <span>الإتمام: {date(item.completedAt)}</span>}
+                              <span>{t('stu_support_enrolled_at')} {date(item.enrolledAt)}</span>
+                              <span>{t('stu_support_last_accessed')} {date(item.lastAccessedAt)}</span>
+                              {item.completedAt && <span>{t('stu_support_completed_at')} {date(item.completedAt)}</span>}
                             </div>
                             {hasPermission('admin:courses:manage') && (
                               <Link
@@ -959,6 +1063,7 @@ export function StudentSupportAdminPage() {
                     )}
                   </div>
                 )}
+                {tab === 'LEARNING' && ownerMore('learning')}
                 {tab === 'CERTIFICATES' && (
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     {!certificatesAvailable ? (
@@ -981,14 +1086,14 @@ export function StudentSupportAdminPage() {
                             />
                           </div>
                           <p className="mt-3 text-xs">
-                            الرقم التسلسلي: <span dir="ltr">{item.serialNumber}</span>
+                            {t('stu_support_serial_number')} <span dir="ltr">{item.serialNumber}</span>
                           </p>
                           <p className="mt-2 text-xs text-slate-500">
-                            الإصدار: {date(item.issuedAt)}
+                            {t('stu_support_issued_at')} {date(item.issuedAt)}
                           </p>
                           {item.expiresAt && (
                             <p className="mt-2 text-xs text-slate-500">
-                              انتهاء الصلاحية: {date(item.expiresAt)}
+                              {t('stu_support_expires_at')} {date(item.expiresAt)}
                             </p>
                           )}
                           {hasPermission('admin:certificates:view') && (
@@ -1015,6 +1120,7 @@ export function StudentSupportAdminPage() {
                     )}
                   </div>
                 )}
+                {tab === 'CERTIFICATES' && ownerMore('certificates')}
                 {tab === 'SAVED' && (
                   <div className="mt-5 space-y-5">
                     <div className="grid gap-3 sm:grid-cols-3">
@@ -1025,7 +1131,7 @@ export function StudentSupportAdminPage() {
                       />
                       <Count
                         title={t('stu_support_service_request_count')}
-                        value={detail.serviceRequestCount ?? '—'}
+                        value={hasPermission('admin:services:manage') ? detail.serviceRequestCount ?? '—' : '—'}
                       />
                     </div>
                     <div className="space-y-3 rounded-xl border p-4">
@@ -1048,7 +1154,7 @@ export function StudentSupportAdminPage() {
                       {trackerError && <p role="alert" className="text-sm text-red-700">{trackerError}</p>}
                       <div className="rounded-xl border p-3">
                         <label className="block text-xs font-semibold">
-                          {language==='en'?'Past tracker record ID':'معرف سجل متابعة سابق'}
+                          {t('stu_support_past_tracker_id')}
                           <input maxLength={128} value={historicalTrackerId}
                             onChange={event=>setHistoricalTrackerId(event.target.value)}
                             className="mt-2 block w-full rounded-lg border p-2 text-sm"/>
@@ -1056,38 +1162,38 @@ export function StudentSupportAdminPage() {
                         <button type="button" disabled={trackerHistoryLoading||!historicalTrackerId.trim()}
                           onClick={()=>void openTrackerHistory(historicalTrackerId.trim())}
                           className="mt-2 rounded-lg border px-3 py-2 text-xs font-bold disabled:opacity-50">
-                          {language==='en'?'Open history':'فتح سجل الأحداث'}
+                          {t('stu_support_open_history')}
                         </button>
                         {trackerHistory&&(!trackerPage?.items.some(item=>item.id===trackerHistory.trackerId))&&
                           <div className="mt-3 space-y-2">
                             {trackerHistory.page.items.map((event,index)=><p key={index} className="text-xs">
-                              {event.eventType} · {statusLabel(event.status,language)} · {date(event.occurredAt)}
+                              {statusLabel(event.eventType,language)} · {statusLabel(event.status,language)} · {date(event.occurredAt)}
                             </p>)}
                             {trackerHistory.page.hasMore&&trackerHistory.page.nextCursor&&
                               <button type="button" disabled={trackerHistoryLoading}
                                 className="rounded-lg border px-3 py-2 text-xs font-bold"
                                 onClick={()=>void openTrackerHistory(trackerHistory.trackerId,trackerHistory.page.nextCursor!)}>
-                                {language==='en'?'Older history':'السجل الأقدم'}
+                                {t('stu_support_older_history')}
                               </button>}
                           </div>}
                       </div>
                       {trackerHistoryError&&<p role="alert" className="text-sm text-red-700">{trackerHistoryError}</p>}
                       {trackerPage && <div className="space-y-2">
-                        <p className="text-xs text-slate-500">عرض {trackerPage.items.length} من {trackerPage.total} متابعة</p>
+                        <p className="text-xs text-slate-500">{copy('stu_support_trackers_shown', {count:trackerPage.items.length,total:trackerPage.total})}</p>
                         {trackerPage.items.length === 0 && <p className="text-sm text-slate-500">{t('stu_support_no_trackers')}</p>}
                         {trackerPage.items.map((item)=><article key={item.id} className="rounded-lg bg-slate-50 p-3 text-sm">
                           <span className="font-bold">{item.scholarshipId}</span> · {statusLabel(item.status,language)}
-                          <p className="mt-1">المرحلة: {item.stage}</p>
-                          <p className="text-xs text-slate-500">الموعد: {date(item.deadlineAt)} · التحديث: {date(item.updatedAt)}</p>
+                          <p className="mt-1">{t('stu_support_stage')} {statusLabel(item.stage,language)}</p>
+                          <p className="text-xs text-slate-500">{t('stu_support_deadline')} {date(item.deadlineAt)} · {t('stu_support_updated')} {date(item.updatedAt)}</p>
                           <button type="button" disabled={trackerHistoryLoading}
                             className="mt-2 rounded-lg border px-3 py-1 text-xs font-bold disabled:opacity-50"
                             onClick={()=>void openTrackerHistory(item.id)}>{t('stu_support_tracker_history')}</button>
                           {trackerHistory?.trackerId===item.id&&<div className="mt-3 space-y-1 border-t pt-2">
                             {trackerHistory.page.items.length===0&&<p className="text-xs text-slate-500">{t('stu_support_tracker_history_empty')}</p>}
                             {trackerHistory.page.items.map((event,index)=><p key={index} className="text-xs text-slate-600">
-                              {event.eventType} · {statusLabel(event.status,language)} · النسخة {event.version} · {date(event.occurredAt)}
+                              {statusLabel(event.eventType,language)} · {statusLabel(event.status,language)} · {t('stu_support_version')} {event.version} · {date(event.occurredAt)}
                             </p>)}
-                            {trackerHistory.page.hasMore&&trackerHistory.page.nextCursor&&<button type="button" disabled={trackerHistoryLoading} className="mt-2 rounded-lg border px-3 py-1 text-xs font-bold disabled:opacity-50" onClick={()=>void openTrackerHistory(item.id,trackerHistory.page.nextCursor!)}>المزيد من الأحداث</button>}
+                            {trackerHistory.page.hasMore&&trackerHistory.page.nextCursor&&<button type="button" disabled={trackerHistoryLoading} className="mt-2 rounded-lg border px-3 py-1 text-xs font-bold disabled:opacity-50" onClick={()=>void openTrackerHistory(item.id,trackerHistory.page.nextCursor!)}>{t('stu_support_more_events')}</button>}
                           </div>}
                         </article>)}
                         {trackerPage.hasMore && trackerPage.nextCursor && <button type="button"
@@ -1108,18 +1214,17 @@ export function StudentSupportAdminPage() {
                       </div>
                     ) : (
                       <p className="text-sm text-slate-500">
-                        {detail.savedSummary ? 'لا توجد عناصر محفوظة.' : 'ملخص المحفوظات غير متاح.'}
+                        {detail.savedSummary ? t('stu_support_no_saved') : t('stu_support_saved_unavailable')}
                       </p>
                     )}
                     <div className="space-y-3">
                       <h3 className="font-bold text-[#142B5F]">{t('stu_support_recent_services')}</h3>
-                      {detail.ownerReadStatus?.services !== 'AVAILABLE' ? (
+                      {!hasPermission('admin:services:manage') || detail.ownerReadStatus?.services !== 'AVAILABLE' ? (
                         <p className="text-sm text-amber-800">{t('stu_support_service_unavailable')}</p>
                       ) : detail.recentServiceRequests?.length ? (
                         <>
                           <p className="text-xs text-slate-500">
-                            آخر {detail.recentServiceRequests.length} طلب من{' '}
-                            {detail.serviceRequestCount} طلب مسجل.
+                            {copy('stu_support_services_shown', {count:detail.recentServiceRequests.length,total:detail.serviceRequestCount})}
                           </p>
                           {detail.recentServiceRequests.map((request) => (
                             <article key={request.id} className="rounded-xl border p-4">
@@ -1130,7 +1235,7 @@ export function StudentSupportAdminPage() {
                                 <Badge value={request.status} />
                               </div>
                               <p className="mt-2 text-xs text-slate-500">
-                                الإنشاء: {date(request.createdAt)} · آخر تحديث:{' '}
+                                {t('stu_support_created_at')} {date(request.createdAt)} · {t('stu_support_last_updated')}{' '}
                                 {date(request.updatedAt)}
                               </p>
                               {hasPermission('admin:services:manage') && (
@@ -1149,8 +1254,9 @@ export function StudentSupportAdminPage() {
                         <p className="text-sm text-slate-500">{t('stu_support_no_services')}</p>
                       )}
                     </div>
+                    {ownerMore('services')}
                     <p className="text-xs text-slate-500">
-                      يظهر ملخص الأعداد دون عرض ملاحظات الطالب الشخصية أو تفاصيل طلباته الخاصة.
+                      {t('stu_support_minimal_notice')}
                     </p>
                   </div>
                 )}
@@ -1174,7 +1280,7 @@ export function StudentSupportAdminPage() {
                       <h3 className="mb-3 font-bold text-[#142B5F]">{t('stu_support_provision_state')}</h3>
                       <Badge value={detail.provisioningHealth.state} />
                       <p className="mt-3 text-xs text-slate-500">
-                        آخر حدث: {date(detail.provisioningHealth.lastEventAt)}
+                        {t('stu_support_last_event')} {date(detail.provisioningHealth.lastEventAt)}
                       </p>
                       {detail.provisioningHealth.lastFailureCode && (
                         <code className="mt-3 block break-all text-xs text-red-700" dir="ltr">
@@ -1184,19 +1290,19 @@ export function StudentSupportAdminPage() {
                     </div>
                     <div className="space-y-3 rounded-2xl border p-4">
                       <h3 className="font-bold text-[#142B5F]">
-                        {language==='en'?'Read-only account diagnosis':'تشخيص الحساب للقراءة فقط'}
+                        {t('stu_support_diagnosis_title')}
                       </h3>
                       <button type="button" disabled={diagnosticLoading}
                         className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50"
                         onClick={()=>void loadProvisionDiagnostic()}>
-                        {diagnosticLoading?'...':language==='en'?'Check identity and student role':'فحص الهوية ودور الطالب'}
+                        {diagnosticLoading?'...':t('stu_support_diagnosis_check')}
                       </button>
                       {diagnosticError&&<p role="alert" className="text-sm text-red-700">{diagnosticError}</p>}
                       {provisionDiagnostic&&<div role="status" className="text-sm">
                         <Badge value={provisionDiagnostic.code} />
                         <p className="mt-2 text-slate-600">
-                          {language==='en'?'Student role present:':'وجود دور الطالب:'}
-                          {' '}{provisionDiagnostic.studentRolePresent?(language==='en'?'Yes':'نعم'):(language==='en'?'No':'لا')}
+                          {t('stu_support_role_present')}
+                          {' '}{provisionDiagnostic.studentRolePresent?(t('stu_support_yes')):(t('stu_support_no'))}
                         </p>
                         <p className="text-xs text-slate-500">{date(provisionDiagnostic.checkedAt)}</p>
                       </div>}
@@ -1204,10 +1310,10 @@ export function StudentSupportAdminPage() {
                     <div className="rounded-2xl border p-4">
                       <h3 className="font-bold text-[#142B5F]">{t('stu_support_consent_log')}</h3>
                       <p className="mt-2 text-sm">
-                        {detail.consentAudit.hasDecision ? 'يوجد قرار مسجل' : 'لا يوجد قرار مسجل'}
+                        {detail.consentAudit.hasDecision ? t('stu_support_decision_present') : t('stu_support_decision_absent')}
                       </p>
                       <p className="mt-2 text-xs text-slate-500">
-                        تاريخ القرار: {date(detail.consentAudit.lastDecidedAt)}
+                        {t('stu_support_decision_date')} {date(detail.consentAudit.lastDecidedAt)}
                       </p>
                     </div>
                     {hasPermission('admin:students:support:mutate') && (
@@ -1215,8 +1321,8 @@ export function StudentSupportAdminPage() {
                         disabled={detail.status !== 'ACTIVE'}
                         title={
                           detail.status === 'ACTIVE'
-                            ? 'إعادة الترتيب الافتراضي'
-                            : 'يتطلب الإجراء حساباً نشطاً'
+                            ? t('stu_support_reset_default')
+                            : t('stu_support_active_required')
                         }
                         onClick={() => {
                           setResetTarget(detail);
@@ -1225,7 +1331,7 @@ export function StudentSupportAdminPage() {
                         className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm font-bold text-amber-800"
                       >
                         <RotateCcw className="h-4 w-4" />
-                        إعادة ترتيب واجهة الطالب
+                        {t('stu_support_reset_title')}
                       </button>
                     )}
                   </div>
@@ -1247,14 +1353,13 @@ export function StudentSupportAdminPage() {
             className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6"
           >
             <h2 id="student-reset-title" className="text-xl font-black text-[#142B5F]">
-              إعادة ترتيب واجهة الطالب
+              {t('stu_support_reset_title')}
             </h2>
             <p className="text-sm text-slate-600">
-              يعيد ترتيب أقسام حساب {resetTarget.displayName || 'الطالب'} إلى التخطيط الافتراضي.
-              يسجل سبب الإجراء في سجل التدقيق.
+              {copy('stu_support_reset_description', {name:resetTarget.displayName||t('stu_support_col_student')})}
             </p>
             <label className="block text-sm font-bold">
-              سبب الإجراء
+              {t('stu_support_reset_reason')}
               <textarea
                 required
                 minLength={6}
@@ -1276,7 +1381,7 @@ export function StudentSupportAdminPage() {
                 disabled={resetting || reason.trim().length < 6}
                 className="rounded-xl bg-[#142B5F] px-4 py-3 font-bold text-white disabled:opacity-50"
               >
-                {resetting ? 'جارٍ الحفظ…' : t('stu_support_confirm_reset')}
+                {resetting ? t('stu_support_saving') : t('stu_support_confirm_reset')}
               </button>
               <button
                 type="button"
@@ -1284,7 +1389,7 @@ export function StudentSupportAdminPage() {
                 onClick={() => setResetTarget(null)}
                 className="rounded-xl border px-4 py-3"
               >
-                إلغاء
+                {t('stu_support_cancel')}
               </button>
             </div>
           </form>

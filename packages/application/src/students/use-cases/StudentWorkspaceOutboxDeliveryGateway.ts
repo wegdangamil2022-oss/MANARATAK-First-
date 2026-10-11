@@ -42,7 +42,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       const domain=payload.ownerDomain;
       const cursor=typeof payload.cursor==='string'?payload.cursor:'';
       const roleAssignedAt=new Date(String(payload.roleAssignedAt??''));
-      if(!roleEventId||!studentReferenceId||!cursor||
+      if(!roleEventId||roleEventId.length>160||!studentReferenceId||studentReferenceId.length>160||!cursor||cursor.length>2048||
         !['COURSES','CERTIFICATES'].includes(String(domain)) ||
         entry.aggregate?.aggregateType!=='StudentWorkspace' ||
         entry.aggregate.aggregateId!==studentReferenceId ||
@@ -64,6 +64,8 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     if (identity.type !== 'Human') return;
     const roles = await this.assignments.findByIdentityId(event.studentReferenceId);
     if (!roles.some(role => role.roleId === 'student')) return;
+    if (entry.domain === 'AUTHORIZATION' && !roles.some(role =>
+      role.roleId==='student' && role.id===entry.payload.assignmentId)) return;
     if (entry.domain === 'IDENTITY' && entry.eventType === 'IdentityStatusChanged.v1') {
       if (identity.status === 'ACTIVE') event.eventType = 'StudentIdentityActivated';
       else if (identity.status === 'SUSPENDED') event.eventType = 'StudentIdentitySuspended';
@@ -95,7 +97,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
           : this.legacyLearningPage(studentReferenceId,cursor),
         async row => {
           await this.students.consumeIntegrationEvent({
-            eventId: `${roleEventId}:learning:${row.enrollmentId}`,
+            eventVersion: '1.0', eventId: `${roleEventId}:learning:${row.enrollmentId}`,
             studentReferenceId, eventType: row.status === 'COMPLETED' ? 'CourseCompleted' : 'CourseProgressUpdated',
             sourceDomain: 'COURSES', sourceReferenceId: row.enrollmentId,
             title: 'تمت مزامنة تقدم الدورة',
@@ -120,7 +122,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
             row.status === 'ARCHIVED' ? 'CertificateArchived' :
             row.status === 'EXPIRED' ? 'CertificateExpired' : 'CertificateIssued';
           await this.students.consumeIntegrationEvent({
-            eventId: `${roleEventId}:certificate:${row.id}`,
+            eventVersion: '1.0', eventId: `${roleEventId}:certificate:${row.id}`,
             studentReferenceId, eventType, sourceDomain: 'CERTIFICATES', sourceReferenceId: row.id,
             title: 'تمت مزامنة حالة الشهادة', occurredAt: roleAssignedAt,
             metadata: {
@@ -181,11 +183,20 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
   private map(entry: TransactionalOutboxEntry): StudentWorkspaceIntegrationEventDto | null {
     const payload = entry.payload as Record<string, unknown>;
     if (entry.domain === 'AUTHORIZATION' && entry.eventType === 'RoleAssignmentCreated' && payload.roleId === 'student') {
+      if (entry.aggregate?.aggregateType !== 'ROLE_ASSIGNMENT' ||
+          entry.aggregate.aggregateId !== payload.assignmentId ||
+          (entry.metadata?.schemaVersion !== '1.0.0' &&
+           !(entry.metadata?.schemaVersion === undefined && entry.metadata?.atomicity === 'BUSINESS_AUDIT_OUTBOX')))
+        throw new Error('STUDENT_ROLE_EVENT_SOURCE_INVALID');
       const identityId = String(payload.identityId ?? '');
       if (!identityId) throw new Error('STUDENT_WORKSPACE_IDENTITY_REFERENCE_REQUIRED');
       return this.event(entry, identityId, 'StudentIdentityCreated', 'تم تفعيل شخصية الطالب', { roleId: 'student' });
     }
     if (entry.domain === 'IDENTITY') {
+      if (entry.metadata?.ownerDomain !== 'IDENTITY' || entry.metadata?.schemaVersion !== 1 ||
+          entry.aggregate?.aggregateType !== 'Identity' ||
+          entry.aggregate.aggregateId !== payload.identityId)
+        throw new Error('STUDENT_IDENTITY_EVENT_SOURCE_INVALID');
       if (String(payload.identityType ?? '') !== 'Human') return null;
       const identityId = String(payload.identityId ?? entry.aggregate?.aggregateId ?? '');
       if (!identityId) throw new Error('STUDENT_WORKSPACE_IDENTITY_REFERENCE_REQUIRED');
@@ -210,6 +221,9 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
         throw new Error('STUDENT_WORKSPACE_CERTIFICATE_EVENT_REFERENCE_REQUIRED');
       if (entry.aggregate?.aggregateId && entry.aggregate.aggregateId !== certificateId)
         throw new Error('STUDENT_WORKSPACE_CERTIFICATE_EVENT_AGGREGATE_MISMATCH');
+      if (!['1.0','2.0'].includes(String(entry.metadata.schemaVersion)) ||
+          entry.aggregate?.aggregateType !== 'Certificate')
+        throw new Error('STUDENT_CERTIFICATE_EVENT_OWNER_SOURCE_REQUIRED');
       const allowedFields = [
         'certificateId', 'publicId', 'serialNumber', 'verificationCode', 'status', 'courseDisplayName',
         'issuedAt', 'expiresAt', 'replacesCertificateId', 'certificatePdfAssetId', 'previewImageAssetId',
@@ -230,6 +244,10 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     }
 
     if (entry.domain === 'COURSES' && ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'].includes(entry.eventType)) {
+      if (entry.metadata?.eventVersion !== '1.0.0' ||
+          !['COURSE_ENROLLMENT','COURSE_COMPLETION'].includes(entry.aggregate?.aggregateType ?? '') ||
+          ![payload.enrollmentId, `${payload.courseId}:${payload.studentReferenceId}`].includes(entry.aggregate?.aggregateId))
+        throw new Error('STUDENT_LEARNING_EVENT_SOURCE_INVALID');
       const studentReferenceId = String(payload.studentReferenceId ?? '');
       const courseId = String(payload.courseId ?? '');
       if (!studentReferenceId || !courseId) throw new Error('STUDENT_WORKSPACE_LEARNING_EVENT_REFERENCE_REQUIRED');
@@ -237,7 +255,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
         courseId,
         enrollmentId: payload.enrollmentId,
         progressPercentage: payload.progressPercentage,
-        status: payload.enrollmentStatus ?? (entry.eventType === 'CourseCompleted' ? 'COMPLETED' : 'ACTIVE'),
+        status: entry.eventType === 'CourseCompleted' ? 'COMPLETED' : payload.enrollmentStatus ?? 'ACTIVE',
         enrolledAt: payload.enrolledAt,
         completedAt: payload.completedAt,
         courseVersion: payload.courseVersion,
@@ -258,6 +276,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     sourceReferenceId?: string,
   ): StudentWorkspaceIntegrationEventDto {
     return {
+      eventVersion: '1.0',
       eventId: entry.id,
       studentReferenceId,
       eventType,

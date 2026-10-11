@@ -1,5 +1,6 @@
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 import {
+  assertStudentIntegrationEvent,
   IStudentWorkspaceDeliveryCache,
   IStudentWorkspaceRepository,
   SaveStudentItemDto,
@@ -248,22 +249,8 @@ export class StudentWorkspaceUseCases {
   public async consumeIntegrationEvent(
     event: StudentWorkspaceIntegrationEventDto,
   ): Promise<boolean> {
-    this.ensureStudentReference(event.studentReferenceId);
-    if (!event.eventId.trim() || event.eventId.length > 160) throw new Error('STUDENT_EVENT_ID_INVALID');
-    const allowed: Record<string, readonly string[]> = {
-      AUTHORIZATION: ['StudentIdentityCreated'],
-      IDENTITY: ['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'],
-      COURSES: ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'],
-      CERTIFICATES: ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered', 'CertificateArchived'],
-    };
-    if (!allowed[event.sourceDomain]?.includes(event.eventType)) throw new Error('STUDENT_EVENT_TYPE_NOT_ALLOWED');
-    if (event.title.length > 240 || !event.title.trim() || (event.description?.length ?? 0) > 2000 ||
-        !Number.isFinite(new Date(event.occurredAt).getTime()) ||
-        JSON.stringify(event.metadata ?? {}).length > 4096 ||
-        (event.notification && JSON.stringify(event.notification).length > 1200) ||
-        event.studentReferenceId.length > 160 || (event.sourceReferenceId?.length ?? 0) > 160) {
-      throw new Error('STUDENT_EVENT_PAYLOAD_INVALID');
-    }
+    assertStudentIntegrationEvent(event);
+    if (event.eventVersion !== '1.0') throw new Error('STUDENT_EVENT_VERSION_REQUIRED');
     return this.mutate(event.studentReferenceId, 'integration-event-projected', () => this.repository.ingestIntegrationEvent(event));
   }
 

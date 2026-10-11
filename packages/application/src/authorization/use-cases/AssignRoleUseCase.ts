@@ -89,7 +89,7 @@ export class AssignRoleUseCase {
           identityId: input.identityId,
           roleId: input.roleId,
         },
-        outbox: { eventType: 'RoleAssignmentCreated', payload: { assignmentId: input.id, identityId: input.identityId, roleId: input.roleId } },
+        outbox: { metadata: {schemaVersion:'1.0.0'}, eventType: 'RoleAssignmentCreated', payload: { assignmentId: input.id, identityId: input.identityId, roleId: input.roleId } },
       },
       transaction => repository.withTransaction!(transaction).save(assignment),
     );

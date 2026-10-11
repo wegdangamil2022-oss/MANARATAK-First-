@@ -87,8 +87,8 @@ describe('Phase 20 service request ownership and finance handoff', () => {
     const useCases=new AdminServiceFulfillmentUseCases(catalog,requests,finance);
     expect(await useCases.listSupportAwaitingPaymentStudents(1,20)).toEqual(owner);
     expect(requests.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(1,20);
-    await expect(useCases.listSupportAwaitingPaymentStudents(1,51))
-      .rejects.toThrow('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
+    expect(()=>useCases.listSupportAwaitingPaymentStudents(1,51))
+      .toThrow('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
   });
 
   it('allows a student request only for a published owner service', async () => {

@@ -4,7 +4,7 @@ import { StudentWorkspaceOutboxWorker } from '../../src/students/use-cases/Stude
 
 function fixture() {
   const students = {consumeIntegrationEvent:vi.fn().mockResolvedValue(true)};
-  const assignments = {findByIdentityId:vi.fn().mockResolvedValue([{roleId:'student'}])};
+  const assignments = {findByIdentityId:vi.fn().mockResolvedValue([{roleId:'student',id:'assignment-1'}])};
   const identities = {findById:vi.fn().mockResolvedValue({type:'Human',status:'ACTIVE'})};
   const gateway = new StudentWorkspaceOutboxDeliveryGateway(students as any, assignments as any, identities as any);
   const entry = {
@@ -101,7 +101,7 @@ describe('Student certificate owner-outbox bridge', () => {
     const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any, assignments as any,
       identities as any, learning as any, certificates as any);
     const entry={id:'role-event-1',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
-      createdAt:new Date('2026-01-10T00:00:00Z'),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
+      createdAt:new Date('2026-01-10T00:00:00Z'),metadata:{schemaVersion:'1.0.0'},aggregate:{aggregateType:'ROLE_ASSIGNMENT',aggregateId:'assignment-1'},payload:{assignmentId:'assignment-1',roleId:'student',identityId:'student-1'}};
     await gateway.deliver(entry as any,{idempotencyKey:'role-event-1'} as any);
     expect(learning.listForStudent).toHaveBeenCalledWith('student-1',51);
     expect(certificates.listForStudent).toHaveBeenCalledWith('student-1',51);
@@ -123,7 +123,7 @@ describe('Student certificate owner-outbox bridge', () => {
     const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,assignments as any,
       identities as any,learning as any);
     const entry={id:'role-2',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
-      createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
+      createdAt:new Date(),metadata:{schemaVersion:'1.0.0'},aggregate:{aggregateType:'ROLE_ASSIGNMENT',aggregateId:'assignment-1'},payload:{assignmentId:'assignment-1',roleId:'student',identityId:'student-1'}};
     await expect(gateway.deliver(entry as any,{idempotencyKey:'role-2'} as any))
       .rejects.toThrow('STUDENT_LEARNING_CATCHUP_PAGINATION_REQUIRED');
     expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(1);
@@ -150,7 +150,7 @@ describe('Student certificate owner-outbox bridge', () => {
     const role={
       id:'role-many',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
       createdAt:new Date('2026-01-03T00:00:00Z'),
-      payload:{roleId:'student',identityId:'student-1'},metadata:{},
+      aggregate:{aggregateType:'ROLE_ASSIGNMENT',aggregateId:'assignment-1'},payload:{assignmentId:'assignment-1',roleId:'student',identityId:'student-1'},metadata:{schemaVersion:'1.0.0'},
     };
     await gateway.deliver(role as any,{idempotencyKey:role.id});
     expect(learning.listPageForStudent).toHaveBeenCalledTimes(2);
@@ -170,7 +170,7 @@ describe('Student certificate owner-outbox bridge', () => {
     const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,
       assignments as any,identities as any,learning as any);
     const role={id:'role-cycle',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
-      createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
+      createdAt:new Date(),metadata:{schemaVersion:'1.0.0'},aggregate:{aggregateType:'ROLE_ASSIGNMENT',aggregateId:'assignment-1'},payload:{assignmentId:'assignment-1',roleId:'student',identityId:'student-1'}};
     await expect(gateway.deliver(role as any,{idempotencyKey:'role-cycle'}))
       .rejects.toThrow('STUDENT_OWNER_CATCHUP_CURSOR_INVALID');
     expect(learning.listPageForStudent).toHaveBeenCalledTimes(2);
@@ -184,7 +184,7 @@ describe('Student certificate owner-outbox bridge', () => {
     const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,
       assignments as any,identities as any,undefined,certificates as any);
     const role={id:'role-cert',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
-      createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
+      createdAt:new Date(),metadata:{schemaVersion:'1.0.0'},aggregate:{aggregateType:'ROLE_ASSIGNMENT',aggregateId:'assignment-1'},payload:{assignmentId:'assignment-1',roleId:'student',identityId:'student-1'}};
     await gateway.deliver(role as any,{idempotencyKey:role.id});
     expect(certificates.listPageForStudent).toHaveBeenCalledTimes(2);
     expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
@@ -203,8 +203,8 @@ describe('Student certificate owner-outbox bridge', () => {
     const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,
       assignments as any,identities as any,learning as any,undefined,continuation as any);
     const role={id:'role-big',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
-      createdAt:new Date('2026-10-10T00:00:00Z'),metadata:{},
-      payload:{roleId:'student',identityId:'student-1'}};
+      createdAt:new Date('2026-10-10T00:00:00Z'),metadata:{schemaVersion:'1.0.0'},
+      aggregate:{aggregateType:'ROLE_ASSIGNMENT',aggregateId:'assignment-1'},payload:{assignmentId:'assignment-1',roleId:'student',identityId:'student-1'}};
     await gateway.deliver(role as any,{idempotencyKey:'role-big'});
     expect(learning.listPageForStudent).toHaveBeenCalledTimes(4);
     expect(continuation.enqueueContinuation).toHaveBeenCalledWith({
@@ -235,7 +235,7 @@ describe('Student certificate owner-outbox bridge', () => {
     const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,assignments as any,
       identities as any,learning as any);
     await gateway.deliver({id:'role-3',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
-      createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}} as any,
+      createdAt:new Date(),metadata:{schemaVersion:'1.0.0'},aggregate:{aggregateType:'ROLE_ASSIGNMENT',aggregateId:'assignment-1'},payload:{assignmentId:'assignment-1',roleId:'student',identityId:'student-1'}} as any,
       {idempotencyKey:'role-3'} as any);
     expect(learning.listForStudent).not.toHaveBeenCalled();
     expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { StudentSupportAdminRouter } from '../../../../src/presentation/api/router/StudentSupportAdminRouter';
 import { AuditHelper } from '../../../../src/presentation/audit/AuditHelper';
 
-function fixture(granted: string[]) {
+function fixture(granted: string[], principalId:string|null = 'support-1') {
   const workspace = {
     listSupportWorkspaces: vi.fn().mockResolvedValue({ items: [], nextCursor: null, hasMore: false }),
     listSupportTriage: vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}),
@@ -27,7 +27,7 @@ function fixture(granted: string[]) {
     ({ isGranted: granted.includes(permission) })) };
   const app = express();
   app.use(express.json());
-  app.use((req,_res,next) => { (req as any).authUserId = 'support-1'; next(); });
+  app.use((req,_res,next) => { (req as any).authUserId = principalId; next(); });
   app.use('/admin/students', StudentSupportAdminRouter.create({
     studentWorkspaceUseCases: workspace as any,
     studentDashboardHydrationService: hydration as any,
@@ -62,7 +62,7 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
           action:'STUDENT_SUPPORT_LIST_VIEW',
           metadata:{purpose:'student-support-search',filtered:true,count:0},
         }),{reliability:'REQUIRED',principal:'REQUIRED'});
-      expect(JSON.stringify(audit.mock.calls)).not.toContain('privateStudentName');
+      expect(JSON.stringify(audit.mock.calls.map(call => call[2]))).not.toContain('privateStudentName');
     } finally {audit.mockRestore();}
   });
 
@@ -189,7 +189,7 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
       expect(result.body).not.toHaveProperty('certificates');
       expect(hydration.getSupportDetail).toHaveBeenCalledWith('student-1',{
         learning:true,certificates:false,services:false,
-      });
+      },{});
       expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
         expect.objectContaining({action:'STUDENT_SUPPORT_OWNER_TAB_VIEW',
           metadata:{purpose:'student-support-owner-tab',domain:'learning'}}),
@@ -256,8 +256,57 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
       );
       expect(response.status).toBe(200);
       expect(tracker.listSupportHistory).toHaveBeenCalledWith('student-1','t-1',3,'opaque-test');
-      expect(JSON.stringify(audit.mock.calls)).not.toContain('opaque-test');
+      expect(JSON.stringify(audit.mock.calls.map(call => call[2]))).not.toContain('opaque-test');
     } finally {audit.mockRestore();}
+  });
+
+  it('requires authentication and both support grants for a direct reset',async()=>{
+    const unauth=fixture(['admin:students:support','admin:students:support:mutate'],null);
+    expect((await request(unauth.app).get('/admin/students/support')).status).toBe(401);
+    expect((await request(unauth.app).post('/admin/students/support/s-1/reset-layout').send({expectedVersion:1,reason:'Support case'})).status).toBe(401);
+    const denied=fixture(['admin:students:support:mutate']);
+    expect((await request(denied.app).post('/admin/students/support/s-1/reset-layout').send({expectedVersion:1,reason:'Support case'})).status).toBe(403);
+    expect(denied.workspace.resetLayout).not.toHaveBeenCalled();
+  });
+  it('maps source conflict and suspended state to actionable HTTP errors',async()=>{
+    const {app,workspace}=fixture(['admin:students:support','admin:students:support:mutate']);
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try {
+      workspace.resetLayout.mockRejectedValueOnce(new Error('STUDENT_WORKSPACE_VERSION_CONFLICT'));
+      expect((await request(app).post('/admin/students/support/s-1/reset-layout').send({expectedVersion:1,reason:'Support case'})).status).toBe(409);
+      workspace.resetLayout.mockRejectedValueOnce(new Error('STUDENT_WORKSPACE_SUSPENDED'));
+      expect((await request(app).post('/admin/students/support/s-1/reset-layout').send({expectedVersion:1,reason:'Support case'})).status).toBe(423);
+      expect((await request(app).get('/admin/students/support/s-1/owner/learning?limit=13')).status).toBe(403);
+    }finally{audit.mockRestore();}
+  });
+  it('validates owner paging and discloses continuation only after mandatory audit',async()=>{
+    const {app,hydration}=fixture(['admin:students:support','admin:courses:manage']);
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try{
+      hydration.getSupportDetail.mockResolvedValue({linkedSummaries:{activeCourseCount:null},ownerReadStatus:{learning:'TRUNCATED'},
+        learning:[],ownerPages:{learning:{hasMore:true,nextCursor:'next'}}} as any);
+      expect((await request(app).get('/admin/students/support/s-1/owner/learning?limit=13')).status).toBe(400);
+      const result=await request(app).get('/admin/students/support/s-1/owner/learning?limit=12&cursor=prior');
+      expect(result.status).toBe(200);expect(result.body.nextCursor).toBe('next');
+      expect(hydration.getSupportDetail).toHaveBeenCalledWith('s-1',{learning:true,certificates:false,services:false},{limit:12,cursor:'prior'});
+      audit.mockRejectedValue(new Error('AUDIT_FAILED'));
+      const denied=await request(app).get('/admin/students/support/s-1/owner/learning');
+      expect(denied.status).toBe(500);expect(denied.body).not.toHaveProperty('nextCursor');
+    }finally{audit.mockRestore();}
+  });
+
+  it('returns a truthful 404 for an absent workspace rather than an empty profile',async()=>{
+    const {app,hydration}=fixture(['admin:students:support']);
+    hydration.getSupportDetail.mockRejectedValue(new Error('STUDENT_WORKSPACE_NOT_FOUND'));
+    const result=await request(app).get('/admin/students/support/missing');
+    expect(result.status).toBe(404);expect(result.body).not.toHaveProperty('studentReferenceId');
+  });
+
+  it('fails closed when the mutation permission evaluator is unavailable',async()=>{
+    const {app,evaluator,workspace}=fixture(['admin:students:support','admin:students:support:mutate']);
+    evaluator.evaluatePermission.mockResolvedValueOnce({isGranted:true}).mockRejectedValueOnce(new Error('AUTHORIZATION_UNAVAILABLE'));
+    expect((await request(app).post('/admin/students/support/s-1/reset-layout').send({expectedVersion:1,reason:'Support case'})).status).toBe(500);
+    expect(workspace.resetLayout).not.toHaveBeenCalled();
   });
 
   it('captures the real support actor in the atomic reset command', async () => {

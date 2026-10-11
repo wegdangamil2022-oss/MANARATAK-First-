@@ -145,3 +145,8 @@ export interface INotificationDeliveryRepository {
 export interface INotificationDeliveryGateway {
   deliver(candidate: NotificationDeliveryCandidate, idempotencyKey: string): Promise<NotificationDeliveryResult>;
 }
+
+/** Current source-owner eligibility, checked before sending a claimed notification. */
+export interface INotificationDeliveryEligibilityPolicy {
+  isEligible(candidate:NotificationDeliveryCandidate):Promise<boolean>;
+}

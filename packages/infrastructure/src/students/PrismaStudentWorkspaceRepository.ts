@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { StudentSupportCursorCodec } from './StudentSupportCursorCodec';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
+  assertStudentIntegrationEvent,
   IStudentWorkspaceRepository,
   SaveStudentItemDto,
   StudentCollectionType,
@@ -689,6 +690,10 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     return this.db.$transaction(async (tx: any) => {
       const duplicate = await tx.studentWorkspaceEventInbox.findUnique({ where: { eventId: event.eventId } });
       if (duplicate) return false;
+      assertStudentIntegrationEvent(event);
+      // Serialize lifecycle, owner projection and recovery against the same P15 row.
+      // A concurrent suspension cannot race a worker into writing an ACTIVE snapshot.
+      await tx.$queryRaw`SELECT id FROM "StudentWorkspace" WHERE "studentReferenceId" = ${event.studentReferenceId} FOR UPDATE`;
       let workspace = await tx.studentWorkspace.findUnique({ where: { studentReferenceId: event.studentReferenceId } });
       const systemActor: StudentAuditActor = { actorId: `event:${event.sourceDomain}`, actorType: 'SYSTEM', source: event.sourceDomain, sourceEventId: event.eventId };
 
@@ -789,6 +794,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
             data: { processedAt: new Date(), failureCode: null },
           });
           if (claimed.count !== 1) return false;
+          await tx.$queryRaw`SELECT id FROM "StudentWorkspace" WHERE "studentReferenceId" = ${row.studentReferenceId} FOR UPDATE`;
           const workspace = await tx.studentWorkspace.findUnique({
             where: { studentReferenceId: row.studentReferenceId }, select: { status: true },
           });
@@ -804,11 +810,14 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
               !supported[row.sourceDomain]?.includes(row.eventType) || !Number.isFinite(occurredAt.getTime()))
             throw new Error('STUDENT_REPLAY_ENVELOPE_INVALID');
           const event = { ...payload, occurredAt } as unknown as StudentWorkspaceIntegrationEventDto;
+          assertStudentIntegrationEvent(event);
           await this.projectStudentEvent(tx, event);
           return true;
         });
         if (changed) processed += 1;
-      } catch {
+      } catch (error) {
+        // A concurrent suspension is retryable, not a poison-event diagnosis.
+        if (error instanceof Error && error.message === 'STUDENT_REPLAY_WORKSPACE_NOT_ACTIVE') continue;
         // Do not leak raw event payload or retry a poison event forever.
         // Preserve the parked row for authorized operator reconciliation.
         failed += 1;
@@ -842,12 +851,15 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
   }
 
   private async requireWritable(tx: any, studentReferenceId: string): Promise<any> {
+    await tx.$queryRaw`SELECT id FROM "StudentWorkspace" WHERE "studentReferenceId" = ${studentReferenceId} FOR UPDATE`;
     const workspace = await tx.studentWorkspace.findUnique({ where: { studentReferenceId } });
     if (!workspace) throw new Error('STUDENT_WORKSPACE_NOT_FOUND');
     if (workspace.status === StudentWorkspaceStatus.SUSPENDED)
       throw new Error('STUDENT_WORKSPACE_SUSPENDED');
     if (workspace.status === StudentWorkspaceStatus.ARCHIVED)
       throw new Error('STUDENT_WORKSPACE_ARCHIVED');
+    if (workspace.status === StudentWorkspaceStatus.INITIALIZING)
+      throw new Error('STUDENT_WORKSPACE_INITIALIZING');
     return workspace;
   }
 
@@ -876,6 +888,15 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       const enrollmentId = String(metadata.enrollmentId ?? event.sourceReferenceId ?? '');
       const courseId = String(metadata.courseId ?? '');
       if (enrollmentId && courseId) {
+        const current = await tx.studentLearningProjection.findUnique({
+          where: {studentReferenceId_enrollmentId:{studentReferenceId:event.studentReferenceId,enrollmentId}},
+        });
+        if (current) {
+          const previous = await tx.studentWorkspaceEventInbox.findUnique({where:{eventId:current.sourceEventId}});
+          const prior = new Date(String(previous?.payload?.occurredAt ?? current.updatedAt)).getTime();
+          if ((Number.isFinite(prior) && event.occurredAt.getTime() < prior) ||
+              (current.status === 'COMPLETED' && event.eventType !== 'CourseCompleted')) return;
+        }
         await tx.studentLearningProjection.upsert({
           where: { studentReferenceId_enrollmentId: { studentReferenceId: event.studentReferenceId, enrollmentId } },
           create: {
@@ -885,7 +906,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
             progressPercentage: Number(metadata.progressPercentage ?? (event.eventType === 'CourseCompleted' ? 100 : 0)),
             enrolledAt: new Date(String(metadata.enrolledAt ?? event.occurredAt)),
             lastAccessedAt: metadata.lastAccessedAt ? new Date(String(metadata.lastAccessedAt)) : null,
-            completedAt: event.eventType === 'CourseCompleted' ? event.occurredAt : null,
+            completedAt: event.eventType === 'CourseCompleted' ? new Date(String(metadata.completedAt ?? event.occurredAt)) : null,
             sourceEventId: event.eventId,
           },
           update: {
@@ -893,7 +914,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
             status: String(metadata.status ?? (event.eventType === 'CourseCompleted' ? 'COMPLETED' : 'ACTIVE')),
             progressPercentage: Number(metadata.progressPercentage ?? (event.eventType === 'CourseCompleted' ? 100 : 0)),
             lastAccessedAt: metadata.lastAccessedAt ? new Date(String(metadata.lastAccessedAt)) : undefined,
-            completedAt: event.eventType === 'CourseCompleted' ? event.occurredAt : undefined, sourceEventId: event.eventId,
+            completedAt: event.eventType === 'CourseCompleted' ? new Date(String(metadata.completedAt ?? event.occurredAt)) : undefined, sourceEventId: event.eventId,
           },
         });
       }
@@ -912,16 +933,18 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       // Ordering derives from the original owner event stored in the idempotent inbox,
       // not from the local projection update timestamp. A late issued event may not revive a revoked certificate.
       if (current) {
+        if (current.status === 'ARCHIVED' && event.eventType !== 'CertificateArchived') return;
+        if (['REVOKED','REISSUED'].includes(current.status) && !['CertificateRevoked','CertificateArchived','CertificateArtifactsRendered'].includes(event.eventType)) return;
         const previous = await tx.studentWorkspaceEventInbox.findUnique({ where: { eventId: current.sourceEventId } });
         const priorOccurredAt = new Date(String((previous?.payload as any)?.occurredAt ?? current.updatedAt));
         const incoming = event.occurredAt.getTime();
         const prior = priorOccurredAt.getTime();
-        const rank = (kind: string) => kind === 'CertificateRevoked' ? 4 :
+        const rank = (kind: string) => kind === 'CertificateArchived' ? 5 : kind === 'CertificateRevoked' ? 4 :
           kind === 'CertificateReissued' || kind === 'CertificateExpired' ? 3 :
           kind === 'CertificateArtifactsRendered' ? 2 :
           kind === 'CertificateRenewed' ? 1 : 0;
         if (Number.isFinite(prior) && (incoming < prior ||
-          (incoming === prior && rank(event.eventType) < rank(String(previous?.eventType ?? ''))))) return;
+          (incoming === prior && rank(event.eventType) < Math.max(rank(String(previous?.eventType ?? '')), current.status === 'ARCHIVED' ? 5 : current.status === 'REVOKED' ? 4 : 0)))) return;
       }
       if (event.eventType === 'CertificateArtifactsRendered') {
         await tx.studentCertificateReadProjection.updateMany({
@@ -958,13 +981,19 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         },
         update: {
           status, sourceEventId: event.eventId,
+          ...(metadata.publicId ? {publicId:String(metadata.publicId)} : {}),
+          ...(metadata.serialNumber ? {serialNumber:String(metadata.serialNumber)} : {}),
+          ...(metadata.verificationCode ? {verificationCode:String(metadata.verificationCode)} : {}),
+          ...(metadata.courseDisplayName ? {courseDisplayName:String(metadata.courseDisplayName)} : {}),
+          ...(metadata.issuedAt ? {issuedAt:new Date(String(metadata.issuedAt))} : {}),
+          ...(metadata.expiresAt !== undefined ? {expiresAt:metadata.expiresAt ? new Date(String(metadata.expiresAt)) : null} : {}),
           ...(metadata.certificatePdfAssetId ? { certificatePdfAssetId: String(metadata.certificatePdfAssetId) } : {}),
           ...(metadata.previewImageAssetId ? { previewImageAssetId: String(metadata.previewImageAssetId) } : {}),
         },
       });
-      if (event.eventType === 'CertificateReissued' && metadata.replacesCertificateId) {
+      if (['CertificateReissued','CertificateRenewed'].includes(event.eventType) && metadata.replacesCertificateId) {
         await tx.studentCertificateReadProjection.updateMany({
-          where: { studentReferenceId: event.studentReferenceId, certificateId: String(metadata.replacesCertificateId) },
+          where: { studentReferenceId: event.studentReferenceId, certificateId: String(metadata.replacesCertificateId), status: {notIn:['ARCHIVED','REVOKED']} },
           data: { status: 'REISSUED', sourceEventId: event.eventId },
         });
       }

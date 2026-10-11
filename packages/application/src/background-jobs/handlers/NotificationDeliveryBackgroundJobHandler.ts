@@ -1,5 +1,6 @@
 import {
   INotificationDeliveryGateway,
+  INotificationDeliveryEligibilityPolicy,
   INotificationDeliveryRepository,
   INotificationPreferenceGateway,
   NotificationChannel,
@@ -21,6 +22,7 @@ export class NotificationDeliveryBackgroundJobHandler implements IBackgroundJobH
     private readonly repository: INotificationDeliveryRepository,
     private readonly gateway: INotificationDeliveryGateway,
     private readonly preferences: INotificationPreferenceGateway,
+    private readonly ownerEligibility?: INotificationDeliveryEligibilityPolicy,
   ) {}
 
   public async handle(
@@ -82,6 +84,15 @@ export class NotificationDeliveryBackgroundJobHandler implements IBackgroundJobH
           new Date(),
         );
         if (!applied) throw new Error('NOTIFICATION_DELIVERY_LEASE_LOST');
+        return;
+      }
+      // A claimed P15 reminder may have become stale since scheduling. Missing
+      // policy or owner outage fails closed and remains retryable through this lease.
+      if(candidate.templateId==='student-application-deadline-v1' && !this.ownerEligibility)
+        throw new Error('NOTIFICATION_OWNER_ELIGIBILITY_NOT_CONFIGURED');
+      if(this.ownerEligibility && !await this.ownerEligibility.isEligible(candidate)) {
+        const applied=await this.repository.markSuppressed(candidate,'NOTIFICATION_OWNER_STATE_CHANGED',new Date());
+        if(!applied)throw new Error('NOTIFICATION_DELIVERY_LEASE_LOST');
         return;
       }
       const allowedCandidate = { ...candidate, channels: allowedChannels };

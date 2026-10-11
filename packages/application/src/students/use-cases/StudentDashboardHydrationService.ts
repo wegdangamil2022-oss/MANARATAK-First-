@@ -2,6 +2,9 @@ import {
   IStudentCertificateReadGateway,
   IStudentLearningReadGateway,
   StudentDashboardSummaryDto,
+  StudentOwnerPage,
+  StudentCourseProgressDto,
+  StudentCertificateProjectionDto,
   StudentSupportWorkspaceDetailDto,
 } from '@manaratak/domain';
 import { StudentServiceRequestUseCases } from '../../services-platform/use-cases/ServiceRequestUseCases';
@@ -24,27 +27,47 @@ export class StudentDashboardHydrationService {
     grants: { learning: boolean; certificates: boolean; services: boolean } = {
       learning: false, certificates: false, services: false,
     },
+    paging: {cursor?:string;page?:number;limit?:number} = {},
   ): Promise<StudentSupportWorkspaceDetailDto> {
     const base = await this.workspace.getSupportWorkspaceDetail(studentReferenceId);
+    const limit=paging.limit ?? 12;
+    if (!Number.isSafeInteger(limit) || limit<1 || limit>12) throw new Error('STUDENT_OWNER_READ_PAGE_INVALID');
+    const bounded = async <T>(owner:{listPageForStudent?:(id:string,limit:number,cursor?:string)=>Promise<StudentOwnerPage<T>>;listForStudent:(id:string,limit?:number)=>Promise<T[]>}) => {
+      if (owner.listPageForStudent) {
+        const page=await owner.listPageForStudent(studentReferenceId,limit,paging.cursor);
+        if(page.items.length>limit) throw new Error('STUDENT_OWNER_READ_PAGE_INVALID');
+        return {...page,complete:!paging.cursor && !page.nextCursor};
+      }
+      if(paging.cursor) throw new Error('STUDENT_OWNER_PAGINATION_REQUIRED');
+      const rows=await owner.listForStudent(studentReferenceId,limit+1);
+      return {items:rows.slice(0,limit),nextCursor:null,complete:rows.length<=limit};
+    };
     // Each owner is invoked only after its own server-side permission has been granted.
     const [learning, certificates, services] = await Promise.allSettled([
-      grants.learning ? this.learning.listForStudent(studentReferenceId, 13) : Promise.resolve(null),
-      grants.certificates ? this.certificates.listForStudent(studentReferenceId, 13) : Promise.resolve(null),
+      grants.learning ? bounded<StudentCourseProgressDto>(this.learning) : Promise.resolve(null),
+      grants.certificates ? bounded<StudentCertificateProjectionDto>(this.certificates) : Promise.resolve(null),
       grants.services && this.serviceRequests
-        ? this.serviceRequests.listMyRequests(studentReferenceId, { page: 1, pageSize: 12 })
+        ? this.serviceRequests.listMyRequests(studentReferenceId, { page: paging.page ?? 1, pageSize: limit })
         : Promise.resolve(null),
     ]);
-    const learningRows = learning.status === 'fulfilled' ? learning.value : null;
-    const certificateRows = certificates.status === 'fulfilled' ? certificates.value : null;
+    const learningPage = learning.status === 'fulfilled' ? learning.value : null;
+    const learningRows=learningPage?.items??null;
+    const certificatePage = certificates.status === 'fulfilled' ? certificates.value : null;
+    const certificateRows=certificatePage?.items??null;
     const serviceRows = services.status === 'fulfilled' ? services.value : null;
-    const learningTruncated = Boolean(learningRows && learningRows.length > 12);
-    const certificatesTruncated = Boolean(certificateRows && certificateRows.length > 12);
+    const learningTruncated = Boolean(learningPage && !learningPage.complete);
+    const certificatesTruncated = Boolean(certificatePage && !certificatePage.complete);
     // queriedAt is the owner read time, NOT an unverifiable owner last-sync timestamp.
     const queriedAt = new Date().toISOString();
     return {
       ...base,
-      learning: grants.learning && learningRows ? learningRows.slice(0, 12) : undefined,
-      certificates: grants.certificates && certificateRows ? certificateRows.slice(0, 12).map((row) => ({
+      ownerPages:{
+        ...(learningPage?{learning:{hasMore:Boolean(learningPage.nextCursor),nextCursor:learningPage.nextCursor}}:{}),
+        ...(certificatePage?{certificates:{hasMore:Boolean(certificatePage.nextCursor),nextCursor:certificatePage.nextCursor}}:{}),
+        ...(serviceRows?{services:{hasMore:(paging.page??1)*limit<serviceRows.total,nextCursor:null,nextPage:(paging.page??1)*limit<serviceRows.total?(paging.page??1)+1:null}}:{}),
+      },
+      learning: grants.learning && learningRows ? learningRows.slice(0, limit) : undefined,
+      certificates: grants.certificates && certificateRows ? certificateRows.slice(0, limit).map((row) => ({
         id: row.id, publicId: row.publicId, serialNumber: row.serialNumber,
         verificationCode: row.verificationCode, status: row.status,
         courseDisplayName: row.courseDisplayName, issuedAt: row.issuedAt, expiresAt: row.expiresAt,
@@ -69,11 +92,11 @@ export class StudentDashboardHydrationService {
         services: !grants.services ? 'RESTRICTED' : serviceRows ? 'AVAILABLE' : 'DEGRADED',
       },
       ownerReadProvenance: {
-        learning: grants.learning && learningRows ? {source:'P13',queriedAt,returned:Math.min(learningRows.length,12),limit:12,complete:!learningTruncated} : null,
-        certificates: grants.certificates && certificateRows ? {source:'P14',queriedAt,returned:Math.min(certificateRows.length,12),limit:12,complete:!certificatesTruncated} : null,
+        learning: grants.learning && learningRows ? {source:'P13',countSource:'LIVE_OWNER',freshness:'OWNER_READ',lastSyncedAt:null,queriedAt,returned:Math.min(learningRows.length,limit),limit,complete:!learningTruncated} : null,
+        certificates: grants.certificates && certificateRows ? {source:'P14',countSource:'LIVE_OWNER',freshness:'OWNER_READ',lastSyncedAt:null,queriedAt,returned:Math.min(certificateRows.length,limit),limit,complete:!certificatesTruncated} : null,
         services: grants.services && serviceRows ? {
-          source:'P20',queriedAt,returned:serviceRows.data.length,limit:12,
-          complete:serviceRows.total <= serviceRows.data.length,
+          source:'P20',countSource:'LIVE_OWNER',freshness:'OWNER_READ',lastSyncedAt:null,queriedAt,returned:serviceRows.data.length,limit,
+          complete:(paging.page??1)===1 && serviceRows.total <= serviceRows.data.length,
         } : null,
       },
     };

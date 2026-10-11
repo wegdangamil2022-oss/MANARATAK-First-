@@ -43,8 +43,7 @@ describe('StudentApplicationReminderOutboxDeliveryGateway',()=>{
 
   it('does not revive an old reminder after a newer version exists',async()=>{
     const {gateway,entry,reminders}=fixture();
-    await gateway.deliver({...entry,payload:{...entry.payload,trackerVersion:1,previousVersion:null}}
-      as any,{idempotencyKey:'outbox-2'});
+    await gateway.deliver({...entry,payload:{...entry.payload,trackerVersion:1,previousVersion:null}} as any,{idempotencyKey:'outbox-2'});
     expect(reminders.cancel).toHaveBeenCalledWith('tracker-1',1);
     expect(reminders.schedule).not.toHaveBeenCalled();
   });
