@@ -9,6 +9,7 @@ describe('CmsPublicRouter', () => {
   const createUseCases = () => ({
     listPublished: vi.fn(),
     getBySlug: vi.fn(),
+    resolveRedirect: vi.fn(),
   });
 
   const createApp = (useCases: ReturnType<typeof createUseCases>) => {
