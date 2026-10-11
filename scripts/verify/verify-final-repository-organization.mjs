@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import ts from 'typescript';
 
 const root = process.cwd();
-const allowedRootDirectories = new Set(['.devcontainer', '.git', '.github', '.husky', 'apps', 'config', 'docs', 'packages', 'scripts', 'tests', 'vendor', 'workspace']);
+const allowedRootDirectories = new Set(['.devcontainer', '.git', '.github', '.husky', 'apps', 'config', 'docs', 'packages', 'scripts', 'storage', 'tests', 'vendor', 'workspace']);
 const allowedRootFiles = new Set([
   '.dockerignore', '.editorconfig', '.env.example', '.env.aistudio.example', '.env.compose.example',
   '.gitattributes', '.gitignore', '.npmrc', '.nvmrc', '.prettierrc',
@@ -26,8 +27,14 @@ function walk(directory) {
 
 function resolvesImport(importer, specifier) {
   const candidate = path.resolve(path.dirname(importer), specifier);
-  const candidates = [candidate, `${candidate}.ts`, `${candidate}.tsx`, `${candidate}.js`, `${candidate}.mjs`, `${candidate}.cjs`, path.join(candidate, 'index.ts'), path.join(candidate, 'index.tsx')];
-  if (candidate.endsWith('.js')) candidates.push(`${candidate.slice(0, -3)}.ts`, `${candidate.slice(0, -3)}.tsx`);
+  const bases = [candidate];
+  // Build outputs may not exist yet at the source gate. Verify their owning
+  // source module instead of depending on a previous build's artifacts.
+  const relative = path.relative(root, candidate).replaceAll('\\', '/');
+  if (/^(?:apps|packages)\/[^/]+\/dist\//.test(relative))
+    bases.push(path.join(root, relative.replace('/dist/', '/src/')));
+  const candidates = bases.flatMap(base => [base, `${base}.ts`, `${base}.tsx`, `${base}.d.ts`, `${base}.js`, `${base}.jsx`, `${base}.mjs`, `${base}.cjs`, path.join(base, 'index.ts'), path.join(base, 'index.tsx'), path.join(base, 'index.d.ts')]);
+  for (const base of bases) if (base.endsWith('.js')) candidates.push(`${base.slice(0, -3)}.ts`, `${base.slice(0, -3)}.tsx`, `${base.slice(0, -3)}.d.ts`);
   return candidates.some((item) => fs.existsSync(item));
 }
 
@@ -40,13 +47,20 @@ const temporaryArtifacts = allFiles.map((file) => path.relative(root, file).repl
     // Reviewed validation logs are project evidence, not disposable runtime output.
     && !/^docs\/(?:remediation|reviews)\/evidence\/.*\.log$/i.test(file));
 
-const sourceFiles = allFiles.filter((file) => /\.(?:ts|tsx|js|jsx|mjs|cjs)$/.test(file) && !file.includes(`${path.sep}workspace${path.sep}`));
+const sourceFiles = allFiles.filter((file) => /\.(?:ts|tsx|js|jsx|mjs|cjs)$/.test(file) && !path.relative(root, file).startsWith(`workspace${path.sep}`));
 const brokenRelativeImports = [];
 for (const file of sourceFiles) {
   const source = fs.readFileSync(file, 'utf8');
-  for (const match of source.matchAll(/(?:from\s+|import\s*\(\s*|import\s+)['"](\.{1,2}\/[^'"]+)['"]/g)) {
-    if (!resolvesImport(file, match[1])) brokenRelativeImports.push(`${path.relative(root, file).replaceAll('\\', '/')}: ${match[1]}`);
+  const ast = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+  function visit(node) {
+    const module = ts.isImportDeclaration(node) || ts.isExportDeclaration(node) ? node.moduleSpecifier
+      : ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword ? node.arguments[0] : null;
+    // Source fixture strings and comments are not executable imports.
+    if (module && ts.isStringLiteralLike(module) && /^\.{1,2}\//.test(module.text) && !resolvesImport(file, module.text))
+      brokenRelativeImports.push(`${path.relative(root, file).replaceAll('\\', '/')}: ${module.text}`);
+    ts.forEachChild(node, visit);
   }
+  visit(ast);
 }
 
 const importantMarkdown = [path.join(root, 'README.md'), ...allFiles.filter((file) =>

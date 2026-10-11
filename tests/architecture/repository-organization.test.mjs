@@ -10,7 +10,11 @@ const verifier = fileURLToPath(
   new URL('../../scripts/verify/verify-final-repository-organization.mjs', import.meta.url),
 );
 function inspect(files = {}, directories = []) {
-  const root = mkdtempSync(path.join(tmpdir(), 'manaratak-organization-'));
+  const temporary = mkdtempSync(path.join(tmpdir(), 'manaratak-organization-'));
+  // Managed checkouts commonly live under /workspace; that parent directory
+  // must not make the entire checkout look like the repository's datasets.
+  const root = path.join(temporary, 'workspace', 'fixture');
+  mkdirSync(root, { recursive: true });
   try {
     for (const directory of [
       'workspace/import-sources/international-tests/unified-56',
@@ -32,7 +36,7 @@ function inspect(files = {}, directories = []) {
     assert.equal(result.error, undefined);
     return { status: result.status, report: JSON.parse(result.stdout) };
   } finally {
-    rmSync(root, { recursive: true, force: true });
+    rmSync(temporary, { recursive: true, force: true });
   }
 }
 
@@ -44,7 +48,7 @@ test('organization allows active workspace configuration and generated dependenc
       '.env.compose.example': '',
       '.section16-vitest.config.ts': '',
     },
-    ['config', 'vendor', 'node_modules', 'release-artifacts'],
+    ['config', 'vendor', 'storage', 'node_modules', 'release-artifacts'],
   );
   assert.equal(result.status, 0);
   assert.deepEqual(result.report.unexpectedRootDirectories, []);
@@ -88,4 +92,15 @@ test('unknown source directories and broken imports and documentation links are 
   assert.deepEqual(result.report.unexpectedRootDirectories, ['obsolete-app']);
   assert.equal(result.report.brokenRelativeImports.length, 1);
   assert.equal(result.report.brokenImportantLinks.length, 2);
+});
+
+test('source import checks ignore fixture strings and resolve declarations and future build outputs', () => {
+  const result = inspect({
+    'scripts/check.mjs': "import { value } from '../packages/config/dist/index.js'; const fixture = \"import './fictional';\";",
+    'packages/config/src/index.ts': 'export const value = 1;',
+    'vendor/library/types/index.d.ts': "export type { Entry } from './entry';",
+    'vendor/library/types/entry.d.ts': 'export interface Entry { name: string }',
+  });
+  assert.equal(result.status, 0);
+  assert.deepEqual(result.report.brokenRelativeImports, []);
 });
