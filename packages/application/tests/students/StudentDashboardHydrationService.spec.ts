@@ -31,7 +31,7 @@ describe('StudentDashboardHydrationService', () => {
     certificates.listForStudent.mockResolvedValue([{ id: 'certificate-1' }]);
     const result = await service.getDashboard('student-1');
     for (const read of [workspace.getDashboard, learning.listForStudent, certificates.listForStudent]) {
-      expect(read).toHaveBeenCalledWith('student-1');
+      expect(read).toHaveBeenCalledWith('student-1', 51);
     }
     expect(result.courseEnrollments).toEqual(courses);
     expect(result.statistics).toEqual({ savedItems: 2, unreadNotifications: 3, activeCourses: 1,
@@ -85,6 +85,23 @@ describe('StudentDashboardHydrationService', () => {
     expect(detail.ownerReadStatus).toEqual({learning:'RESTRICTED',certificates:'RESTRICTED',services:'RESTRICTED'});
   });
 
+  it('returns bounded support owner slices without claiming partial counts are complete', async () => {
+    const workspace={getSupportWorkspaceDetail:vi.fn().mockResolvedValue({
+      studentReferenceId:'student-1',linkedSummaries:{activeCourseCount:99,certificateCount:99,unreadNotificationCount:0},
+    })};
+    const learning={listForStudent:vi.fn().mockResolvedValue(Array.from({length:13},(_,i)=>({courseId:`c-${i}`,status:'ACTIVE'})))};
+    const certificates={listForStudent:vi.fn().mockResolvedValue(Array.from({length:13},(_,i)=>({id:`cert-${i}`,status:'ACTIVE'})))};
+    const service=new StudentDashboardHydrationService(workspace as any,learning as any,certificates as any);
+    const detail=await service.getSupportDetail('student-1',{learning:true,certificates:true,services:false});
+    expect(learning.listForStudent).toHaveBeenCalledWith('student-1',13);
+    expect(certificates.listForStudent).toHaveBeenCalledWith('student-1',13);
+    expect(detail.learning).toHaveLength(12);
+    expect(detail.certificates).toHaveLength(12);
+    expect(detail.linkedSummaries.activeCourseCount).toBeNull();
+    expect(detail.linkedSummaries.certificateCount).toBeNull();
+    expect(detail.ownerReadStatus).toEqual({learning:'TRUNCATED',certificates:'TRUNCATED',services:'RESTRICTED'});
+  });
+
   it('reads only explicitly granted owner domains', async () => {
     const workspace = { getSupportWorkspaceDetail: vi.fn().mockResolvedValue({
       studentReferenceId: 'student-1', linkedSummaries: {activeCourseCount:1,certificateCount:3,unreadNotificationCount:0},
@@ -93,7 +110,7 @@ describe('StudentDashboardHydrationService', () => {
     const certificates = { listForStudent: vi.fn() };
     const service = new StudentDashboardHydrationService(workspace as any, learning as any, certificates as any);
     const detail = await service.getSupportDetail('student-1',{learning:true,certificates:false,services:false});
-    expect(learning.listForStudent).toHaveBeenCalledWith('student-1');
+    expect(learning.listForStudent).toHaveBeenCalledWith('student-1',13);
     expect(certificates.listForStudent).not.toHaveBeenCalled();
     expect(detail.learning).toHaveLength(1);
     expect(detail.certificates).toBeUndefined();

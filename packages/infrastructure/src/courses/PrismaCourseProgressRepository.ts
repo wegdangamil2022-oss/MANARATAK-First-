@@ -89,10 +89,13 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
     return row ? this.enrollment(row) : null;
   }
 
-  public async listEnrollmentsByStudent(studentReferenceId: string): Promise<CourseEnrollmentDto[]> {
+  public async listEnrollmentsByStudent(studentReferenceId: string, maxRows?: number): Promise<CourseEnrollmentDto[]> {
+    if (maxRows !== undefined && (!Number.isSafeInteger(maxRows) || maxRows < 1 || maxRows > 51))
+      throw new Error('STUDENT_OWNER_READ_LIMIT_INVALID');
     const rows = await this.prisma.courseEnrollment.findMany({
       where: { studentReferenceId },
       orderBy: [{ lastAccessedAt: 'desc' }, { enrolledAt: 'desc' }],
+      ...(maxRows !== undefined ? {take:maxRows} : {}),
     });
     return rows.map((row) => this.enrollment(row));
   }

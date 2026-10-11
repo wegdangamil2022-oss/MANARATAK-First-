@@ -326,7 +326,7 @@ export interface StudentSupportWorkspaceDetailDto extends StudentSupportWorkspac
   activeApplicationCount?: number;
   serviceRequestCount?: number | null;
   recentServiceRequests?: Array<{id:string;publicId:string;status:string;createdAt:Date|string;updatedAt:Date|string}>;
-  ownerReadStatus?: {learning:'AVAILABLE'|'DEGRADED'|'RESTRICTED';certificates:'AVAILABLE'|'DEGRADED'|'RESTRICTED';services:'AVAILABLE'|'DEGRADED'|'RESTRICTED'};
+  ownerReadStatus?: {learning:'AVAILABLE'|'DEGRADED'|'RESTRICTED'|'TRUNCATED';certificates:'AVAILABLE'|'DEGRADED'|'RESTRICTED'|'TRUNCATED';services:'AVAILABLE'|'DEGRADED'|'RESTRICTED'};
   learning?: StudentCourseProgressDto[];
   certificates?: Array<Pick<StudentCertificateProjectionDto,'id'|'publicId'|'serialNumber'|'verificationCode'|'status'|'courseDisplayName'|'issuedAt'|'expiresAt'>>;
 
@@ -488,9 +488,9 @@ export interface IStudentSavedItemHydrationGateway {
 
 /** P7/P13 owner-read contracts: P15 composes learning/certificate truth but does not own it. */
 export interface IStudentLearningReadGateway {
-  listForStudent(studentReferenceId: string): Promise<StudentCourseProgressDto[]>;
+  listForStudent(studentReferenceId: string, maxRows?: number): Promise<StudentCourseProgressDto[]>;
 }
 
 export interface IStudentCertificateReadGateway {
-  listForStudent(studentReferenceId: string): Promise<StudentCertificateProjectionDto[]>;
+  listForStudent(studentReferenceId: string, maxRows?: number): Promise<StudentCertificateProjectionDto[]>;
 }

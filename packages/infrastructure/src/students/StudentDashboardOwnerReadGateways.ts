@@ -15,10 +15,11 @@ export class CourseStudentDashboardReadGateway implements IStudentLearningReadGa
     private readonly courses: ICourseRepository,
   ) {}
 
-  async listForStudent(studentReferenceId: string): Promise<StudentCourseProgressDto[]> {
+  async listForStudent(studentReferenceId: string, maxRows=50): Promise<StudentCourseProgressDto[]> {
     const reference = studentReferenceId.trim();
     if (!reference) throw new Error('STUDENT_LEARNING_REFERENCE_REQUIRED');
-    const enrollments = await this.progress.listEnrollmentsByStudent(reference);
+    if (!Number.isSafeInteger(maxRows) || maxRows < 1 || maxRows > 51) throw new Error('STUDENT_OWNER_READ_LIMIT_INVALID');
+    const enrollments = await this.progress.listEnrollmentsByStudent(reference,maxRows);
     return Promise.all(enrollments.map(async (enrollment) => {
       const course = await this.courses.findById(enrollment.courseId);
       if (!course) throw new Error(`STUDENT_LEARNING_OWNER_NOT_FOUND:${enrollment.courseId}`);
@@ -41,8 +42,9 @@ export class CourseStudentDashboardReadGateway implements IStudentLearningReadGa
 export class CertificateStudentDashboardReadGateway implements IStudentCertificateReadGateway {
   constructor(private readonly certificates: CertificateReadModelService) {}
 
-  async listForStudent(studentReferenceId: string): Promise<StudentCertificateProjectionDto[]> {
-    const rows = await this.certificates.listForStudent(studentReferenceId);
+  async listForStudent(studentReferenceId: string, maxRows=50): Promise<StudentCertificateProjectionDto[]> {
+    if (!Number.isSafeInteger(maxRows) || maxRows < 1 || maxRows > 51) throw new Error('STUDENT_OWNER_READ_LIMIT_INVALID');
+    const rows = await this.certificates.listForStudent(studentReferenceId,undefined,maxRows);
     return rows.map((row) => ({
       id: row.certificateId,
       publicId: row.publicId,

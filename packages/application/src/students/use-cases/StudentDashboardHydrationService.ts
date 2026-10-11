@@ -28,8 +28,8 @@ export class StudentDashboardHydrationService {
     const base = await this.workspace.getSupportWorkspaceDetail(studentReferenceId);
     // Each owner is invoked only after its own server-side permission has been granted.
     const [learning, certificates, services] = await Promise.allSettled([
-      grants.learning ? this.learning.listForStudent(studentReferenceId) : Promise.resolve(null),
-      grants.certificates ? this.certificates.listForStudent(studentReferenceId) : Promise.resolve(null),
+      grants.learning ? this.learning.listForStudent(studentReferenceId, 13) : Promise.resolve(null),
+      grants.certificates ? this.certificates.listForStudent(studentReferenceId, 13) : Promise.resolve(null),
       grants.services && this.serviceRequests
         ? this.serviceRequests.listMyRequests(studentReferenceId, { page: 1, pageSize: 12 })
         : Promise.resolve(null),
@@ -37,20 +37,22 @@ export class StudentDashboardHydrationService {
     const learningRows = learning.status === 'fulfilled' ? learning.value : null;
     const certificateRows = certificates.status === 'fulfilled' ? certificates.value : null;
     const serviceRows = services.status === 'fulfilled' ? services.value : null;
+    const learningTruncated = Boolean(learningRows && learningRows.length > 12);
+    const certificatesTruncated = Boolean(certificateRows && certificateRows.length > 12);
     return {
       ...base,
-      learning: grants.learning && learningRows ? learningRows : undefined,
-      certificates: grants.certificates && certificateRows ? certificateRows.map((row) => ({
+      learning: grants.learning && learningRows ? learningRows.slice(0, 12) : undefined,
+      certificates: grants.certificates && certificateRows ? certificateRows.slice(0, 12).map((row) => ({
         id: row.id, publicId: row.publicId, serialNumber: row.serialNumber,
         verificationCode: row.verificationCode, status: row.status,
         courseDisplayName: row.courseDisplayName, issuedAt: row.issuedAt, expiresAt: row.expiresAt,
       })) : undefined,
       linkedSummaries: {
         ...base.linkedSummaries,
-        activeCourseCount: grants.learning && learningRows
+        activeCourseCount: grants.learning && learningRows && !learningTruncated
           ? learningRows.filter((row) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(row.status)).length
           : null,
-        certificateCount: grants.certificates && certificateRows ? certificateRows.length : null,
+        certificateCount: grants.certificates && certificateRows && !certificatesTruncated ? certificateRows.length : null,
       },
       serviceRequestCount: grants.services && serviceRows ? serviceRows.total : null,
       recentServiceRequests: grants.services && serviceRows
@@ -60,8 +62,8 @@ export class StudentDashboardHydrationService {
           }))
         : undefined,
       ownerReadStatus: {
-        learning: !grants.learning ? 'RESTRICTED' : learningRows ? 'AVAILABLE' : 'DEGRADED',
-        certificates: !grants.certificates ? 'RESTRICTED' : certificateRows ? 'AVAILABLE' : 'DEGRADED',
+        learning: !grants.learning ? 'RESTRICTED' : !learningRows ? 'DEGRADED' : learningTruncated ? 'TRUNCATED' : 'AVAILABLE',
+        certificates: !grants.certificates ? 'RESTRICTED' : !certificateRows ? 'DEGRADED' : certificatesTruncated ? 'TRUNCATED' : 'AVAILABLE',
         services: !grants.services ? 'RESTRICTED' : serviceRows ? 'AVAILABLE' : 'DEGRADED',
       },
     };
@@ -70,15 +72,19 @@ export class StudentDashboardHydrationService {
   async getDashboard(studentReferenceId: string): Promise<StudentDashboardSummaryDto> {
     const base = await this.workspace.getDashboard(studentReferenceId);
     const [learning, certificates] = await Promise.allSettled([
-      this.learning.listForStudent(studentReferenceId),
-      this.certificates.listForStudent(studentReferenceId),
+      this.learning.listForStudent(studentReferenceId, 51),
+      this.certificates.listForStudent(studentReferenceId, 51),
     ]);
 
-    const courseEnrollments = learning.status === 'fulfilled' ? learning.value : [];
-    const certificateRows = certificates.status === 'fulfilled' ? certificates.value : [];
+    const learningTruncated = learning.status === 'fulfilled' && learning.value.length > 50;
+    const certificatesTruncated = certificates.status === 'fulfilled' && certificates.value.length > 50;
+    const courseEnrollments = learning.status === 'fulfilled' ? learning.value.slice(0, 50) : [];
+    const certificateRows = certificates.status === 'fulfilled' ? certificates.value.slice(0, 50) : [];
     const partialFailures = [...base.partialFailures];
     if (learning.status === 'rejected') partialFailures.push('learning-owner-read');
     if (certificates.status === 'rejected') partialFailures.push('certificate-owner-read');
+    if (learningTruncated) partialFailures.push('learning-owner-truncated');
+    if (certificatesTruncated) partialFailures.push('certificate-owner-truncated');
 
     const activeCourses = courseEnrollments.filter((item) =>
       ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(item.status),
@@ -110,8 +116,8 @@ export class StudentDashboardHydrationService {
       },
       capabilityStatus: {
         ...base.capabilityStatus,
-        learning: learning.status === 'fulfilled' ? 'AVAILABLE' : 'DEGRADED',
-        certificates: certificates.status === 'fulfilled' ? 'AVAILABLE' : 'DEGRADED',
+        learning: learning.status === 'fulfilled' && !learningTruncated ? 'AVAILABLE' : 'DEGRADED',
+        certificates: certificates.status === 'fulfilled' && !certificatesTruncated ? 'AVAILABLE' : 'DEGRADED',
       },
       partialFailures: [...new Set(partialFailures)],
     };

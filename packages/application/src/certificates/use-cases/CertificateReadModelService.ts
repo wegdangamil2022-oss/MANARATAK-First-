@@ -16,9 +16,10 @@ export class CertificateReadModelService {
     private readonly certificates: CertificateUseCases,
   ) {}
 
-  public async listForStudent(studentReferenceId: string, cursor?:string): Promise<StudentCertificateReadModelDto[]> {
+  public async listForStudent(studentReferenceId: string, cursor?:string, pageSize=50): Promise<StudentCertificateReadModelDto[]> {
     if (!studentReferenceId.trim()) throw new Error('CERTIFICATE_STUDENT_REFERENCE_REQUIRED');
-    const rows = await this.repository.listByStudent(studentReferenceId.trim(),1,50,cursor);
+    if (!Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 51) throw new Error('STUDENT_OWNER_READ_LIMIT_INVALID');
+    const rows = await this.repository.listByStudent(studentReferenceId.trim(),1,pageSize,cursor);
     return rows.map((row) => ({
       certificateId: row.id,
       publicId: row.publicId,
