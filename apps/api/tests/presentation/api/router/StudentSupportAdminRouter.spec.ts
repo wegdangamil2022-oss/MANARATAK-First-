@@ -16,7 +16,7 @@ function fixture(granted: string[]) {
   }) };
   const tracker = {
     listSupportPage:vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}),
-    listSupportHistory:vi.fn().mockResolvedValue({items:[],hasMore:false}),
+    listSupportHistory:vi.fn().mockResolvedValue({items:[],hasMore:false,nextCursor:null}),
   };
   const identities={findById:vi.fn().mockResolvedValue({id:'student-1',type:'Human',status:'ACTIVE'})};
   const roleAssignments={findByIdentityId:vi.fn().mockResolvedValue([{roleId:'student'}])};
@@ -209,12 +209,25 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
       expect((await request(app).get('/admin/students/support/student-1/application-trackers/t-1/history')).status).toBe(400);
       const result=await request(app).get('/admin/students/support/student-1/application-trackers/t-1/history?purpose=CASE_REVIEW&limit=10');
       expect(result.status).toBe(200);
-      expect(tracker.listSupportHistory).toHaveBeenCalledWith('student-1','t-1',10);
+      expect(tracker.listSupportHistory).toHaveBeenCalledWith('student-1','t-1',10,undefined);
       expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
         expect.objectContaining({action:'STUDENT_SUPPORT_APPLICATION_TRACKER_HISTORY_VIEW',
           metadata:{purpose:'CASE_REVIEW',view:'tracker-event-history'}}),
         {reliability:'REQUIRED',principal:'REQUIRED'});
     }finally{audit.mockRestore();}
+  });
+
+  it('passes the opaque owner history cursor without logging it',async()=>{
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try {
+      const {app,tracker}=fixture(['admin:students:support']);
+      const response=await request(app).get(
+        '/admin/students/support/student-1/application-trackers/t-1/history?purpose=CASE_REVIEW&limit=3&cursor=opaque-test',
+      );
+      expect(response.status).toBe(200);
+      expect(tracker.listSupportHistory).toHaveBeenCalledWith('student-1','t-1',3,'opaque-test');
+      expect(JSON.stringify(audit.mock.calls)).not.toContain('opaque-test');
+    } finally {audit.mockRestore();}
   });
 
   it('captures the real support actor in the atomic reset command', async () => {

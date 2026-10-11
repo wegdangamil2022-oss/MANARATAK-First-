@@ -84,15 +84,16 @@ describe('PrismaStudentApplicationTrackerRepository atomic notification outbox',
   it('limits tracker history to the identified student and excludes free-form notes',async()=>{
     const records=Array.from({length:3},(_,i)=>({
       eventType:'StudentApplicationTrackerUpdated',
-      occurredAt:new Date('2026-10-10T00:00:00Z'),metadata:{version:i+1,status:'ACTIVE',notes:'private'},
+      id:`history-${3-i}`,occurredAt:new Date('2026-10-10T00:00:00Z'),metadata:{version:i+1,status:'ACTIVE',notes:'private'},
     }));
     const client={
       studentApplicationTracker:{findFirst:vi.fn().mockResolvedValue({id:'t-1'})},
-      studentTimelineEntry:{findMany:vi.fn().mockResolvedValue(records)},
+      studentTimelineEntry:{findFirst:vi.fn(),findMany:vi.fn().mockResolvedValue(records)},
     };
     const repo=new PrismaStudentApplicationTrackerRepository(client as any);
     const result=await repo.listSupportHistory('s-1','t-1',2);
     expect(result.hasMore).toBe(true);
+    expect(result.nextCursor).toBeTruthy();
     expect(result.items).toHaveLength(2);
     expect(JSON.stringify(result)).not.toContain('private');
     expect(client.studentApplicationTracker.findFirst).toHaveBeenCalledWith({
@@ -102,11 +103,48 @@ describe('PrismaStudentApplicationTrackerRepository atomic notification outbox',
   it('prevents IDOR in tracker history before querying any timeline events',async()=>{
     const client={
       studentApplicationTracker:{findFirst:vi.fn().mockResolvedValue(null)},
-      studentTimelineEntry:{findMany:vi.fn()},
+      studentTimelineEntry:{findFirst:vi.fn().mockResolvedValue(null),findMany:vi.fn()},
     };
     const repo=new PrismaStudentApplicationTrackerRepository(client as any);
     await expect(repo.listSupportHistory('other-student','t-1')).rejects.toThrow('STUDENT_APPLICATION_TRACKER_NOT_FOUND');
     expect(client.studentTimelineEntry.findMany).not.toHaveBeenCalled();
+  });
+
+  it('allows deleted tracker history only with student-owned P15 timeline evidence',async()=>{
+    const client={
+      studentApplicationTracker:{findFirst:vi.fn().mockResolvedValue(null)},
+      studentTimelineEntry:{
+        findFirst:vi.fn().mockResolvedValue({id:'archived-event'}),
+        findMany:vi.fn().mockResolvedValue([{id:'archived-event',eventType:'StudentApplicationTrackerDeleted',
+          occurredAt:new Date('2026-10-11T00:00:00Z'),metadata:{version:2,status:'DELETED'}}]),
+      },
+    };
+    const repo=new PrismaStudentApplicationTrackerRepository(client as any);
+    const page=await repo.listSupportHistory('student-1','deleted-1');
+    expect(page.items[0]).toMatchObject({eventType:'StudentApplicationTrackerDeleted',status:'DELETED'});
+    expect(page.nextCursor).toBeNull();
+    expect(client.studentTimelineEntry.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where:{studentReferenceId:'student-1',sourceDomain:'STUDENT_APPLICATIONS',sourceReferenceId:'deleted-1'},
+    }));
+  });
+
+  it('rejects a history cursor copied from a different tracker',async()=>{
+    const client={
+      studentApplicationTracker:{findFirst:vi.fn().mockResolvedValue({id:'t-1'})},
+      studentTimelineEntry:{findFirst:vi.fn(),findMany:vi.fn().mockResolvedValue([
+        {id:'history-b',eventType:'StudentApplicationTrackerUpdated',
+          occurredAt:new Date('2026-10-11T00:00:00Z'),metadata:{}},
+        {id:'history-a',eventType:'StudentApplicationTrackerCreated',
+          occurredAt:new Date('2026-10-10T00:00:00Z'),metadata:{}},
+      ])},
+    };
+    const repo=new PrismaStudentApplicationTrackerRepository(client as any,
+      'student-support-test-key-long-enough-for-hmac');
+    const page=await repo.listSupportHistory('student-1','t-1',1);
+    expect(page.nextCursor).toBeTruthy();
+    await expect(repo.listSupportHistory('student-1','different-tracker',1,page.nextCursor!))
+      .rejects.toThrow('STUDENT_SUPPORT_CURSOR_INVALID');
+    expect(client.studentApplicationTracker.findFirst).toHaveBeenCalledTimes(1);
   });
 
   it('deletes and atomically enqueues cancellation in the same transaction',async()=>{

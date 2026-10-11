@@ -237,10 +237,11 @@ export class StudentSupportAdminRouter {
           const query=z.object({
             purpose:z.enum(['CASE_REVIEW','APPLICATION_STATUS_INQUIRY','SYNC_DIAGNOSTIC']),
             limit:z.coerce.number().int().min(1).max(30).optional(),
+            cursor:z.string().trim().max(2048).optional(),
           }).strict().parse(req.query);
           await studentWorkspaceUseCases.getSupportWorkspaceDetail(studentReferenceId);
           const result=await studentApplicationTrackerUseCases.listSupportHistory(
-            studentReferenceId,trackerId,query.limit??20,
+            studentReferenceId,trackerId,query.limit??20,query.cursor,
           );
           await AuditHelper.recordMutation(auditRecordRepo,req,{
             action:'STUDENT_SUPPORT_APPLICATION_TRACKER_HISTORY_VIEW',
