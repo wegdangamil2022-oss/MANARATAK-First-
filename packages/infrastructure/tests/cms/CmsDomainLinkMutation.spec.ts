@@ -6,7 +6,7 @@ import { PrismaCmsRepository } from '../../src/cms/PrismaCmsRepository';
 const link = {
   targetType: CmsDomainTargetType.UNIVERSITY,
   targetId: '683a90d4-abab-4f77-9f32-5a44d8288928',
-  relationType: CmsDomainRelationType.RELATED_TO,
+  relationType: CmsDomainRelationType.RELATED,
 };
 
 function fixture(options: { reviewed?: boolean; ownerPublic?: boolean; versionCAS?: boolean } = {}) {
