@@ -53,6 +53,7 @@ export interface ICmsRepository {
   archive(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto>;
 
   listRevisions(contentId: string, locale: string): Promise<CmsContentRevisionDto[]>;
+  getRevisionForRestore(contentId: string, locale: string, revisionId: string): Promise<CmsContentRevisionDto | null>;
   restoreRevision(data: CmsRestoreRevisionDto): Promise<CmsLocalizedContentDto>;
 
   createCategory(data: CreateCmsCategoryDto, actorId: string): Promise<CmsCategoryDto>;

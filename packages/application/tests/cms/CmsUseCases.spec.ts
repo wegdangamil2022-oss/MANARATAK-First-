@@ -36,6 +36,7 @@ describe('Phase 16 CMS use cases', () => {
       publish: vi.fn(),
       archive: vi.fn(),
       listRevisions: vi.fn(),
+      getRevisionForRestore: vi.fn(),
       restoreRevision: vi.fn(),
       createCategory: vi.fn(),
       listCategories: vi.fn(),
@@ -175,6 +176,28 @@ describe('Phase 16 CMS use cases', () => {
     expect(repository.publishNavigation).toHaveBeenCalledWith('menu-1', 4, 'checker-2');
     await admin.publishAnnouncement('ann-1', 7, 'checker-2');
     expect(repository.publishAnnouncement).toHaveBeenCalledWith('ann-1', 7, 'checker-2');
+  });
+
+  it('rejects restoring historical revisions whose media can no longer be validated', async () => {
+    vi.mocked(repository.getRevisionForRestore).mockResolvedValue({
+      id: 'rev-1', localizedContentId: 'loc-1', versionNumber: 2,
+      reason: 'BEFORE_EDIT', capturedBy: 'editor', capturedAt: new Date(),
+      payload: { featuredAssetId: 'eap-revoked', attachments: [] },
+    });
+    await expect(admin.restoreRevision('content-1', 'ar', 'rev-1', 'editor', 5))
+      .rejects.toThrow('CMS_PUBLIC_MEDIA_ASSET_REFERENCE_POLICY_REQUIRED');
+    expect(repository.restoreRevision).not.toHaveBeenCalled();
+  });
+
+  it('rejects missing historical graph rather than mixing current attachments', async () => {
+    vi.mocked(repository.getRevisionForRestore).mockResolvedValue({
+      id: 'rev-1', localizedContentId: 'loc-1', versionNumber: 1,
+      reason: 'OLD', capturedBy: 'editor', capturedAt: new Date(),
+      payload: { body: '<p>Old</p>' },
+    });
+    await expect(admin.restoreRevision('content-1', 'en', 'rev-1', 'editor', 2))
+      .rejects.toThrow('CMS_REVISION_RELATIONS_UNAVAILABLE');
+    expect(repository.restoreRevision).not.toHaveBeenCalled();
   });
 
   it('keeps the public query on the published projection only', async () => {

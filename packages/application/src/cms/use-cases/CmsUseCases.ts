@@ -210,6 +210,19 @@ export class AdminCmsUseCases {
     actorId: string,
     expectedVersion?: number,
   ): Promise<CmsLocalizedContentDto> {
+    const revision = await this.repository.getRevisionForRestore(contentId, locale, revisionId);
+    if (!revision) throw new Error('CMS_REVISION_NOT_FOUND');
+    const payload = revision.payload;
+    if (!Array.isArray(payload.attachments)) throw new Error('CMS_REVISION_RELATIONS_UNAVAILABLE');
+    const seo = payload.seoMetadata as { openGraphAssetId?: string | null } | null | undefined;
+    const candidateAssets: Array<string | null | undefined> = [
+      typeof payload.featuredAssetId === 'string' ? payload.featuredAssetId : null,
+      seo?.openGraphAssetId,
+      ...payload.attachments.map((item: unknown) =>
+        item && typeof item === 'object' && 'assetId' in item && typeof item.assetId === 'string'
+          ? item.assetId : null),
+    ];
+    await this.ensureAssetHandles(candidateAssets);
     return this.repository.restoreRevision({
       contentId,
       locale,

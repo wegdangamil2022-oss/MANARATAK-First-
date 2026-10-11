@@ -594,6 +594,18 @@ export class PrismaCmsRepository implements ICmsRepository {
     ).map((row: any) => this.revision(row));
   }
 
+  public async getRevisionForRestore(contentId: string, locale: string, revisionId: string): Promise<CmsContentRevisionDto | null> {
+    const localized = await this.db.cmsLocalizedContent.findUnique({
+      where: { contentId_locale: { contentId, locale } },
+      select: { id: true },
+    });
+    if (!localized) return null;
+    const row = await this.db.cmsContentRevision.findFirst({
+      where: { id: revisionId, localizedContentId: localized.id },
+    });
+    return row ? this.revision(row) : null;
+  }
+
   public async restoreRevision(data: CmsRestoreRevisionDto): Promise<CmsLocalizedContentDto> {
     return this.serializable(async (tx: any) => {
       const localized = await tx.cmsLocalizedContent.findUnique({
