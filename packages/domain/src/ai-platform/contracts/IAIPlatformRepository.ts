@@ -179,7 +179,9 @@ export interface IAIPlatformRepository {
   updateIndexingRun(publicId: string, patch: Partial<AIIndexingRun>): Promise<AIIndexingRun>;
   replaceEmbeddings(input: {
     indexKey: string;
+    sourceType: string;
     sourceReferenceId: string;
+    sourceVersion?: string | null;
     modelKey: string;
     dimensions: number;
     chunks: Array<{
