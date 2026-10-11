@@ -143,6 +143,12 @@
       "command": "node --test tests/security/strict-edge-validation-remediation-source.test.mjs",
       "status": "PASS",
       "tests": 3
+    },
+    {
+      "command": "npm run remediation:verify",
+      "status": "PASS",
+      "verifierGroups": 17,
+      "notes": "Student-tools registry seed hash/version updated; W13 asserts canonical filtering with 10-query and 25-candidate bounds instead of the superseded whole-catalog scan."
     }
   ],
   "migrations": [

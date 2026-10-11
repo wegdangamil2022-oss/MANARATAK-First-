@@ -127,14 +127,14 @@
       "state": "READY",
       "script": "scripts/bootstrap-phase18-student-tools.ts",
       "sourcePath": "packages/application/src/student-tools/OfficialStudentToolRegistry.ts",
-      "sourceVersion": "phase18-official-registry-v1",
+      "sourceVersion": "phase18-official-registry-v2-section19",
       "expected": {
         "StudentToolDefinitionRecord": {
           "exact": 83
         }
       },
       "provenance": "Phase 18 official student-tools registry",
-      "sourceSha256": "2a08d714ec44917fd9ad19e164a24d0accfcf6e2bd91c05a29a29e020c8957ee"
+      "sourceSha256": "d5af8c7452d5ac9cd67495ba1fe92093634fd52abbeac1bb082d6187c7c11cf9"
     }
   ],
   "operatorBootstraps": [
