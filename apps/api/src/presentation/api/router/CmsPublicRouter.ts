@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import { PublicCmsUseCases } from '@manaratak/application';
+import { PublicCmsUseCases, buildCmsSitemapXml } from '@manaratak/application';
 import { CmsContentType, CmsDomainTargetType } from '@manaratak/domain';
 
 export class CmsPublicRouter {
@@ -34,6 +34,24 @@ export class CmsPublicRouter {
       if (req.headers['if-none-match'] === etag) { res.status(304).end(); return true; }
       return false;
     };
+    // Served by nginx at /cms-sitemap.xml. Live public snapshots are the
+    // authority: a new publish/archive changes discovery without rebuilding
+    // the static site. Never derive origin from untrusted Host headers.
+    router.get('/sitemap.xml', asyncHandler(async (req, res) => {
+      const origin = process.env.PUBLIC_WEB_URL || process.env.VITE_PUBLIC_WEB_URL;
+      if (!origin) { res.status(503).json({ error: 'CMS_SITEMAP_PUBLIC_ORIGIN_REQUIRED' }); return; }
+      const entries = await publicCmsUseCases.listIndexableSitemapEntries();
+      const xml = buildCmsSitemapXml(entries, origin);
+      const etag = `"${createHash('sha256').update(xml).digest('base64url')}"`;
+      res.set({
+        'Content-Type': 'application/xml; charset=utf-8',
+        'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'public, max-age=60, must-revalidate',
+        ETag: etag,
+      });
+      if (req.headers['if-none-match'] === etag) { res.status(304).end(); return; }
+      res.status(200).send(xml);
+    }));
     router.get(
       '/content',
       asyncHandler(async (req, res) => {
@@ -110,6 +128,9 @@ export class CmsPublicRouter {
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError)
         return res.status(400).json({ error: 'CMS_VALIDATION_ERROR', details: err.issues });
+      if (err instanceof Error && err.message.startsWith('CMS_SITEMAP_')) {
+        return res.status(503).json({ error: 'CMS_SITEMAP_UNAVAILABLE' });
+      }
       if (err instanceof Error && err.message === 'CMS_CONTENT_NOT_FOUND') {
         return res.status(404).json({ error: 'CMS_CONTENT_NOT_FOUND' });
       }
