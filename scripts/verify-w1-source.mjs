@@ -93,8 +93,8 @@ check('MNT-AUD-0076 purge revokes sessions', purgeIdentity.includes('sessionMana
 check('MNT-AUD-0076 refresh revalidates lifecycle', authService.includes('principalAccessValidator.isAuthenticationAllowed(currentSession.userId)') && authService.includes('principalAccessValidator.isAuthenticationAllowed(rotated.userId)'));
 check('MNT-AUD-0076 learner auth revalidates lifecycle', userAuthMiddleware.includes('principalAccessValidator.isAuthenticationAllowed(payload.userId)') && userAuthMiddleware.includes('sessionManager.revokeAllSessions(payload.userId)'));
 check('MNT-AUD-0065 control plane passes session and lifecycle dependencies', app.includes("createAdminGuard({ mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator })"));
-check('MNT-AUD-0062 legacy AI route uses strict control-plane wrapper', app.includes("v1Router.use('/ai', ...protectControlPlane('admin:ai:manage', 'aiGatewayRouter'))"));
-check('MNT-AUD-0062 canonical AI operator route inherits /admin boundary', app.includes("v1Router.use('/admin/ai/operator', requireAdminPermission('admin:ai:manage'), lazyRouter('aiGatewayRouter'))"));
+check('MNT-AUD-0062 legacy AI route uses strict control-plane wrapper', app.includes("v1Router.use('/ai', ...protectControlPlane('admin:ai:execute', 'aiGatewayRouter'))"));
+check('MNT-AUD-0062 canonical AI operator route inherits /admin boundary', app.includes("v1Router.use('/admin/ai/operator', requireAdminPermission('admin:ai:execute'), lazyRouter('aiGatewayRouter'))"));
 
 try {
   const lifecycleSourceTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/auth-lifecycle-remediation-source.test.mjs')], { encoding: 'utf8' });
