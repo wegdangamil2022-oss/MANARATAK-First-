@@ -1151,9 +1151,49 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async createBlockSchema(data: Omit<CmsBlockSchemaDto, 'id' | 'createdAt'>): Promise<CmsBlockSchemaDto> {
+    CmsPublishingPolicy.assertBlockSchemaDefinition(data.fieldSchema, data.assetFields, data.localizedFields);
     return this.serializable(async (tx: any) => {
-      const row = await tx.cmsBlockSchema.create({ data: { ...data, id: randomUUID(), fieldSchema: json(data.fieldSchema), localizedFields: json(data.localizedFields), assetFields: json(data.assetFields) } });
-      await this.appendStandaloneMutation(tx, row.id, 'CmsBlockSchema', 'BLOCK_SCHEMA_CREATED', data.createdBy, { key: data.key, version: data.version });
+      const previous = await tx.cmsBlockSchema.findFirst({
+        where: { key: data.key }, orderBy: { version: 'desc' },
+      });
+      if (data.version !== (previous?.version ?? 0) + 1) throw new Error('CMS_BLOCK_SCHEMA_VERSION_SEQUENCE');
+      const row = await tx.cmsBlockSchema.create({
+        data: {
+          key: data.key, version: data.version, nameAr: data.nameAr, nameEn: data.nameEn,
+          fieldSchema: json(data.fieldSchema), localizedFields: json(data.localizedFields),
+          assetFields: json(data.assetFields), createdBy: data.createdBy,
+          status: 'DRAFT', approvedBy: null, approvedAt: null,
+        },
+      });
+      await this.appendStandaloneMutation(tx, row.id, 'CmsBlockSchema', 'BLOCK_SCHEMA_CREATED', data.createdBy, {
+        key: data.key, version: data.version, status: 'DRAFT',
+      });
+      return this.blockSchema(row);
+    });
+  }
+
+  public async approveBlockSchema(id: string, actorId: string): Promise<CmsBlockSchemaDto> {
+    return this.serializable(async (tx: any) => {
+      const existing = await tx.cmsBlockSchema.findUnique({ where: { id } });
+      if (!existing) throw new Error('CMS_BLOCK_SCHEMA_NOT_FOUND');
+      if (existing.status !== 'DRAFT') throw new Error('CMS_BLOCK_SCHEMA_NOT_DRAFT');
+      CmsPublishingPolicy.assertMakerChecker(existing.createdBy, actorId);
+      CmsPublishingPolicy.assertBlockSchemaDefinition(
+        existing.fieldSchema, existing.assetFields, existing.localizedFields,
+      );
+      const latest = await tx.cmsBlockSchema.findFirst({
+        where: { key: existing.key }, orderBy: { version: 'desc' },
+      });
+      if (latest?.version !== existing.version) throw new Error('CMS_BLOCK_SCHEMA_SUPERSEDED');
+      const changed = await tx.cmsBlockSchema.updateMany({
+        where: { id, status: 'DRAFT' },
+        data: { status: 'ACTIVE', approvedBy: actorId, approvedAt: new Date() },
+      });
+      if (changed.count !== 1) throw new Error('CMS_VERSION_CONFLICT');
+      const row = await tx.cmsBlockSchema.findUnique({ where: { id } });
+      await this.appendStandaloneMutation(tx, row.id, 'CmsBlockSchema', 'BLOCK_SCHEMA_APPROVED', actorId, {
+        key: row.key, version: row.version, createdBy: row.createdBy,
+      });
       return this.blockSchema(row);
     });
   }
