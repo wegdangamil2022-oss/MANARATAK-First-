@@ -46,7 +46,7 @@ describe('P17 workflow data-safety boundary', () => {
   it('fails closed before queue admission without configured encrypted state', async () => {
     const { repo, execution } = fixture();
     const workflows = new AIWorkflowUseCases(repo as any, execution as any);
-    await expect(workflows.start('compose', { academicTranscript: 'private' }))
+    await expect(workflows.start('compose', { academicTranscript: 'private' }, 'admin-1'))
       .rejects.toThrow('AI_WORKFLOW_PROTECTED_STATE_NOT_CONFIGURED');
     expect(repo.createWorkflowRun).not.toHaveBeenCalled();
   });
@@ -55,10 +55,12 @@ describe('P17 workflow data-safety boundary', () => {
     const { repo, execution, protector } = fixture();
     const workflows = new AIWorkflowUseCases(repo as any, execution as any, protector);
     const input = { academicTranscript: 'private student data', dataClassification: 'PUBLIC' };
-    const submitted = await workflows.start('compose', input);
-    await workflows.run(submitted.publicId, input);
+    const submitted = await workflows.start('compose', input, 'admin-1');
+    await workflows.run(submitted.publicId, input, 'admin-1');
     expect(execution.execute).toHaveBeenCalledWith(expect.objectContaining({
       dataClassification: 'CONFIDENTIAL',
+      requesterReferenceId: 'admin-1',
+      consumerKey: 'workflow',
     }));
     const patch = repo.updateWorkflowStepRun.mock.calls[0][3];
     expect(patch.status).toBe('COMPLETED');
@@ -73,13 +75,13 @@ describe('P17 workflow data-safety boundary', () => {
     const { repo, execution, protector } = fixture();
     const workflows = new AIWorkflowUseCases(repo as any, execution as any, protector);
     const input = { academicTranscript: 'private' };
-    const submitted = await workflows.start('compose', input);
+    const submitted = await workflows.start('compose', input, 'admin-1');
     repo.findWorkflowRun.mockResolvedValue({ ...submitted, status: 'FAILED' });
     repo.listWorkflowStepRuns.mockResolvedValue([{
       stepKey: 'draft', status: 'COMPLETED',
       outputSnapshot: 'legacy plaintext that must not be reused',
     }]);
-    await expect(workflows.run(submitted.publicId, input))
+    await expect(workflows.run(submitted.publicId, input, 'admin-1'))
       .rejects.toThrow('AI_WORKFLOW_STEP_SNAPSHOT_UNTRUSTED_OR_EXPIRED');
     expect(execution.execute).not.toHaveBeenCalled();
   });
@@ -87,8 +89,28 @@ describe('P17 workflow data-safety boundary', () => {
   it('rejects oversized arbitrary source payloads before creating durable runs', async () => {
     const { repo, execution, protector } = fixture();
     const workflows = new AIWorkflowUseCases(repo as any, execution as any, protector);
-    await expect(workflows.start('compose', { input: 'x'.repeat(65 * 1024) }))
+    await expect(workflows.start('compose', { input: 'x'.repeat(65 * 1024) }, 'admin-1'))
       .rejects.toThrow('AI_WORKFLOW_INPUT_TOO_LARGE');
     expect(repo.createWorkflowRun).not.toHaveBeenCalled();
   });
+
+  it('rejects a different authenticated principal from replaying another workflow run', async () => {
+    const { repo, execution, protector } = fixture();
+    const workflows = new AIWorkflowUseCases(repo as any, execution as any, protector);
+    const input = { academicTranscript: 'private' };
+    const submitted = await workflows.start('compose', input, 'admin-owner');
+    await expect(workflows.run(submitted.publicId, input, 'different-admin'))
+      .rejects.toThrow('AI_WORKFLOW_REQUESTER_OR_INPUT_MISMATCH');
+    expect(execution.execute).not.toHaveBeenCalled();
+    expect(repo.createWorkflowStepRun).not.toHaveBeenCalled();
+  });
+
+  it('requires an authenticated workflow requester before creating billable work', async () => {
+    const { repo, execution, protector } = fixture();
+    const workflows = new AIWorkflowUseCases(repo as any, execution as any, protector);
+    await expect(workflows.start('compose', { input: 'text' }, ''))
+      .rejects.toThrow('AI_WORKFLOW_AUTHENTICATED_REQUESTER_REQUIRED');
+    expect(repo.createWorkflowRun).not.toHaveBeenCalled();
+  });
+
 });
