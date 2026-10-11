@@ -102,6 +102,7 @@ interface OwnerTabResponse {
 interface TrackerHistory {
   items:Array<{eventType:string;occurredAt:string;version:number;status:string}>;
   hasMore:boolean;
+  nextCursor:string|null;
 }
 interface SupportApplicationPage {
   items: Array<{id:string;scholarshipId:string;stage:string;status:string;deadlineAt:string|null;updatedAt:string}>;
@@ -412,17 +413,18 @@ export function StudentSupportAdminPage() {
       if(request===triageRequest.current)setTriageLoading(false);
     }
   }
-  async function openTrackerHistory(trackerId:string) {
+  async function openTrackerHistory(trackerId:string,nextCursor?:string) {
     if(!selectedId||trackerHistoryLoading)return;
     const request=++historyRequest.current;
     setTrackerHistoryLoading(true);
     setTrackerHistoryError(null);
     try {
       const query=new URLSearchParams({purpose:trackerPurpose,limit:'20'});
+      if(nextCursor)query.set('cursor',nextCursor);
       const page=await adminApiClient.request<TrackerHistory>(
         `/admin/students/support/${encodeURIComponent(selectedId)}/application-trackers/${encodeURIComponent(trackerId)}/history?${query}`,
       );
-      if(request===historyRequest.current)setTrackerHistory({trackerId,page});
+      if(request===historyRequest.current)setTrackerHistory(previous=>nextCursor&&previous?.trackerId===trackerId?{trackerId,page:{...page,items:[...previous.page.items,...page.items]}}:{trackerId,page});
     }catch(error){
       if(request===historyRequest.current)setTrackerHistoryError(
         error instanceof Error?error.message:'تعذر تحميل سجل المتابعة.',
@@ -1024,7 +1026,7 @@ export function StudentSupportAdminPage() {
                             {trackerHistory.page.items.map((event,index)=><p key={index} className="text-xs text-slate-600">
                               {event.eventType} · {statusLabel(event.status,language)} · النسخة {event.version} · {date(event.occurredAt)}
                             </p>)}
-                            {trackerHistory.page.hasMore&&<p className="text-xs text-amber-700">يعرض آخر 20 حدثًا فقط.</p>}
+                            {trackerHistory.page.hasMore&&trackerHistory.page.nextCursor&&<button type="button" disabled={trackerHistoryLoading} className="mt-2 rounded-lg border px-3 py-1 text-xs font-bold disabled:opacity-50" onClick={()=>void openTrackerHistory(item.id,trackerHistory.page.nextCursor!)}>المزيد من الأحداث</button>}
                           </div>}
                         </article>)}
                         {trackerPage.hasMore && trackerPage.nextCursor && <button type="button"
