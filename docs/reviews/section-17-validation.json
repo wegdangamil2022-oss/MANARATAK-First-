@@ -1,7 +1,7 @@
 {
   "status": "CODE_CLOSED \u2014 RUNTIME_DEFERRED",
-  "recordedAt": "2026-10-11T16:23:31.582732+00:00",
-  "sourceSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e",
+  "recordedAt": "2026-10-11T16:31:00.739219+00:00",
+  "sourceSha": "0086949fdd5a286d9657b71eef1d98b035519592",
   "startingSha": "039cd7a731c0ef8e9ff0f6b6d2979ad610e08abc",
   "baseSha": "4571ec9c3e4362470d03a2ed2706664cd8ee09c0",
   "branch": "feat/section-17-enterprise-ai-platform",
@@ -14,7 +14,7 @@
       "exitCode": 0,
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/typecheck.txt",
-      "sourceSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e"
+      "sourceSha": "0086949fdd5a286d9657b71eef1d98b035519592"
     },
     {
       "command": "P17 focused Vitest suite (11 files)",
@@ -22,9 +22,9 @@
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/p17-vitest.txt",
       "files": 11,
-      "tests": 145,
+      "tests": 146,
       "failures": 0,
-      "sourceSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e"
+      "sourceSha": "0086949fdd5a286d9657b71eef1d98b035519592"
     },
     {
       "command": "npm run ci:closure:manifest -- --source-only",
@@ -121,6 +121,15 @@
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/pii-lint.txt",
       "errors": 0
+    },
+    {
+      "command": "Knowledge owner and repository ESLint",
+      "sourceSha": "0086949fdd5a286d9657b71eef1d98b035519592",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/section-17/indexing-lint.txt",
+      "errors": 0,
+      "warnings": 67
     }
   ],
   "runtime": {
@@ -148,7 +157,8 @@
   ],
   "sourceCommits": [
     "c6000174b38201acd0d4ec8a28674997ac31dd8c",
-    "bdee24e479be5957dfec819fa48d86bfdeaf840e"
+    "bdee24e479be5957dfec819fa48d86bfdeaf840e",
+    "0086949fdd5a286d9657b71eef1d98b035519592"
   ],
   "securityFollowup": {
     "detectedAtPrHead": "45f0e9c1044f2ea306878da2d7a9f188727147dd",
@@ -157,5 +167,17 @@
     "remediationSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e",
     "remediation": "Bound email local/domain/TLD, phone separators and card separators; preserve valid PII removal; adversarial 256 KiB input regressions passed.",
     "finalHeadCodeql": "PENDING; inspect final PR-head check separately"
+  },
+  "previousHeadCi": {
+    "headSha": "9c10140c39d703b537c10974c7513517a0b69c7c",
+    "checksPassed": 13,
+    "failures": 0,
+    "codeqlNewAlerts": 0,
+    "scope": "Before final indexing-order repair; not final-head evidence"
+  },
+  "indexingOrderFollowup": {
+    "sourceSha": "0086949fdd5a286d9657b71eef1d98b035519592",
+    "control": "Canonical owner publication timestamp checked against active projection under the same advisory lock; late older or ambiguous same-timestamp revision cannot delete active chunks.",
+    "tests": "146 focused tests passed after repair"
   }
 }
