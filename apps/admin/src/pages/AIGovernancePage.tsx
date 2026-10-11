@@ -34,6 +34,7 @@ import {
   Workflow,
 } from 'lucide-react';
 import { adminApiClient } from '../api/client';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { useTranslation } from '../i18n/I18nProvider';
 
 type ResourceKey =
@@ -441,6 +442,7 @@ function OverviewPanel() {
   );
 }
 function PlaygroundPanel() {
+  const { hasPermission } = useAdminAuthorization();
   const capabilities = useAIData<{ data: RegistryRecord[] }>(
     '/admin/ai/capabilities?status=ACTIVE',
   );
@@ -548,6 +550,7 @@ function PlaygroundPanel() {
           {error && <ErrorBanner message={error} />}
           <button
             disabled={
+              !hasPermission('admin:ai:execute') ||
               running ||
               capabilities.loading ||
               readiness.loading ||
@@ -787,6 +790,7 @@ function ExecutionDetails({ publicId, onClose }: { publicId: string; onClose: ()
   );
 }
 function WorkflowsPanel() {
+  const { hasPermission } = useAdminAuthorization();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
@@ -925,7 +929,7 @@ function WorkflowsPanel() {
                         <td>
                           {['FAILED', 'DEAD_LETTER'].includes(job.status) ? (
                             <button
-                              disabled={busy}
+                              disabled={busy || !hasPermission('admin:ai:queue:operate')}
                               onClick={() => void operate(job, 'RETRY')}
                               className="action-secondary"
                             >
@@ -933,7 +937,7 @@ function WorkflowsPanel() {
                             </button>
                           ) : ['QUEUED', 'RETRYING'].includes(job.status) ? (
                             <button
-                              disabled={busy}
+                              disabled={busy || !hasPermission('admin:ai:queue:operate')}
                               onClick={() => void operate(job, 'CANCEL')}
                               className="action-secondary"
                             >
@@ -960,6 +964,7 @@ function WorkflowsPanel() {
   );
 }
 function PromptsPanel() {
+  const { hasPermission } = useAdminAuthorization();
   const [promptKey, setPromptKey] = useState('');
   const [version, setVersion] = useState(1);
   const [template, setTemplate] = useState('');
@@ -1099,7 +1104,7 @@ function PromptsPanel() {
               تحميل الإصدار
             </button>
             <button
-              disabled={!promptKey || !template.trim() || record !== null}
+              disabled={!hasPermission('admin:ai:prompt:author') || !promptKey || !template.trim() || record !== null}
               onClick={() => void action('create')}
               className="action-secondary"
             >
@@ -1107,6 +1112,7 @@ function PromptsPanel() {
             </button>
             <button
               disabled={
+                !hasPermission('admin:ai:prompt:review') ||
                 !record ||
                 !['DRAFT', 'REVIEW'].includes(String(record.status)) ||
                 template !== snapshot
@@ -1117,14 +1123,14 @@ function PromptsPanel() {
               اعتماد الإصدار المحفوظ
             </button>
             <button
-              disabled={record?.status !== 'APPROVED' || template !== snapshot}
+              disabled={!hasPermission('admin:ai:deploy') || record?.status !== 'APPROVED' || template !== snapshot}
               onClick={() => void action('deploy')}
               className="action-primary"
             >
               نشر الإصدار
             </button>
             <button
-              disabled={record?.status !== 'APPROVED' || template !== snapshot}
+              disabled={!hasPermission('admin:ai:deploy') || record?.status !== 'APPROVED' || template !== snapshot}
               onClick={() => void action('rollback')}
               className="action-secondary"
             >
@@ -1369,6 +1375,7 @@ function IncidentEventPanel() {
 }
 
 function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
+  const { hasPermission } = useAdminAuthorization();
   const definitions = useAIData<{ data: RegistryRecord[] }>(`/admin/ai/${kind}?status=ACTIVE`);
   const [key, setKey] = useState('');
   const [publicId, setPublicId] = useState('');
@@ -1496,7 +1503,7 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
         </Field>
         <div className="flex flex-wrap gap-2">
           <button
-            disabled={!key || pendingRead}
+            disabled={!hasPermission('admin:ai:execute') || !key || pendingRead}
             className="action-secondary"
             onClick={() => void act('start')}
           >
@@ -1511,6 +1518,7 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
           </button>
           <button
             disabled={
+              !hasPermission('admin:ai:execute') ||
               pendingRead ||
               !result ||
               !['QUEUED', ...(kind === 'workflows' ? ['FAILED'] : [])].includes(
@@ -1524,7 +1532,7 @@ function GovernedRunPanel({ kind }: { kind: 'workflows' | 'evaluations' }) {
           </button>
           {kind === 'evaluations' && (
             <button
-              disabled={pendingRead || result?.status !== 'COMPLETED' || !!result.approvedBy}
+              disabled={!hasPermission('admin:ai:prompt:review') || pendingRead || result?.status !== 'COMPLETED' || !!result.approvedBy}
               className="action-secondary"
               onClick={() => void act('approve')}
             >
@@ -1659,7 +1667,18 @@ function registryDefaults(resource: ResourceKey): RegistryRecord {
       return shared;
   }
 }
+function aiRegistryWritePermission(resource: ResourceKey): string {
+  if (['guardrails', 'platformSettings', 'incidents'].includes(resource))
+    return 'admin:ai:safety:manage';
+  if (['consumers', 'modelPrices'].includes(resource)) return 'admin:ai:cost:manage';
+  if (resource === 'prompts') return 'admin:ai:prompt:author';
+  if (['knowledgeIndexes', 'knowledgeSources'].includes(resource))
+    return 'admin:ai:index:approve';
+  return 'admin:ai:configure';
+}
 function RegistryPanel({ resource, title }: { resource: ResourceKey; title: string }) {
+  const { hasPermission } = useAdminAuthorization();
+  const canEdit = hasPermission(aiRegistryWritePermission(resource));
   const list = useAIData<{ data: RegistryRecord[] }>(`/admin/ai/${resource}`);
   const [editing, setEditing] = useState<RegistryRecord | null>(null);
   const [search, setSearch] = useState('');
@@ -1750,7 +1769,7 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
           <button onClick={refresh} disabled={list.loading} className="action-secondary">
             تحديث
           </button>
-          {resource !== 'knowledgeSources' && (
+          {resource !== 'knowledgeSources' && canEdit && (
             <button onClick={() => choose(registryDefaults(resource))} className="action-primary">
               سجل جديد
             </button>
@@ -1789,6 +1808,7 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
         key={editing?.id ?? editing?.key ?? 'empty'}
         resource={resource}
         value={editing}
+        canEdit={canEdit}
         onState={setGuard}
         onSaved={() => {
           guard.current = { dirty: false, busy: false };
@@ -1803,11 +1823,13 @@ function RegistryPanel({ resource, title }: { resource: ResourceKey; title: stri
 function RegistryEditor({
   resource,
   value,
+  canEdit,
   onSaved,
   onState,
 }: {
   resource: ResourceKey;
   value: RegistryRecord | null;
+  canEdit: boolean;
   onSaved: () => void;
   onState: (state: { dirty: boolean; busy: boolean }) => void;
 }) {
@@ -1845,7 +1867,7 @@ function RegistryEditor({
   }, [dirty, saving, onState]);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (lock.current || uncertain) return;
+    if (!canEdit || lock.current || uncertain) return;
     setError('');
     if (!/^[a-zA-Z0-9_.:-]{1,160}$/.test(key)) {
       setError('المفتاح يجب أن يحتوي حروفاً إنجليزية أو أرقاماً أو . _ : -');
@@ -1906,7 +1928,7 @@ function RegistryEditor({
           <JsonView value={value} />
         ) : (
           <form onSubmit={submit} className="mt-5 space-y-4">
-            <fieldset disabled={saving || uncertain} className="space-y-4">
+            <fieldset disabled={!canEdit || saving || uncertain} className="space-y-4">
               <Field label="المفتاح الثابت">
                 <input
                   required
@@ -1945,7 +1967,7 @@ function RegistryEditor({
             {dirty && <p className="text-xs text-amber-800">تعديلات غير محفوظة</p>}
             {error && <ErrorBanner message={error} />}
             <button
-              disabled={saving || uncertain || !dirty}
+              disabled={!canEdit || saving || uncertain || !dirty}
               className="action-primary w-full justify-center"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{' '}
