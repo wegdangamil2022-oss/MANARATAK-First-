@@ -292,15 +292,19 @@ export function StudentSupportAdminPage() {
       ++detailRequest.current;
     };
   }, [selectedId, inspect]);
+  const ownerPermission=tab==='LEARNING'?'admin:courses:manage':
+    tab==='CERTIFICATES'?'admin:certificates:view':
+    tab==='SAVED'?'admin:services:manage':null;
+  // A boolean dependency is stable even if the Authorization Context recreates its callback.
+  const ownerPermitted=ownerPermission?hasPermission(ownerPermission):false;
+
   // Each P13/P14/P20 support view is fetched ONLY after its tab is opened.
   // The server independently checks the owner permission and writes required audit.
   useEffect(() => {
     const domain:OwnerDomain|null=tab==='LEARNING'?'learning':
       tab==='CERTIFICATES'?'certificates':tab==='SAVED'?'services':null;
     if (!domain || !selectedId || detail?.studentReferenceId!==selectedId) return;
-    const permission=domain==='learning'?'admin:courses:manage':
-      domain==='certificates'?'admin:certificates:view':'admin:services:manage';
-    if (!hasPermission(permission) || loadedOwnerTabs.current.has(`${selectedId}:${domain}`)) return;
+    if (!ownerPermitted || loadedOwnerTabs.current.has(`${selectedId}:${domain}`)) return;
     const request=++ownerRequest.current;
     setOwnerLoading(domain);
     setOwnerError(null);
@@ -345,7 +349,7 @@ export function StudentSupportAdminPage() {
       }
     })();
     return ()=>{++ownerRequest.current;};
-  },[tab,selectedId,detail?.studentReferenceId,hasPermission]);
+  },[tab,selectedId,detail?.studentReferenceId,ownerPermitted]);
 
   useEffect(() => {
     if (detail) detailAnchor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
