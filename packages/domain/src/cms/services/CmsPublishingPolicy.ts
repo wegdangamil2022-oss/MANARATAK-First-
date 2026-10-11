@@ -80,7 +80,7 @@ export class CmsPublishingPolicy {
 
   public static assertRedirect(sourcePath: string, destinationPath: string): void {
     const paths = [sourcePath, destinationPath];
-    if (paths.some((value) => !value.startsWith('/') || value.startsWith('//') || /[\\\u0000-\u001f]/.test(value) || /%(?:2f|5c)/i.test(value))) {
+    if (paths.some((value) => !value.startsWith('/') || value.startsWith('//') || /[\\\u0000-\u001f]/.test(value) || /%(?:2f|5c|2e|25|00|0a|0d)/i.test(value) || /(?:^|\/)\.{1,2}(?:\/|$)/.test(value) || /[?#]/.test(value))) {
       throw new Error('CMS_REDIRECT_PATH_INVALID');
     }
     if (sourcePath === destinationPath) throw new Error('CMS_REDIRECT_LOOP');

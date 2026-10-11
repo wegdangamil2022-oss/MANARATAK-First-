@@ -53,6 +53,9 @@ describe('Phase 16 CMS publishing policy', () => {
     expect(() => CmsPublishingPolicy.assertRedirect('/ar/old', '/ar/old')).toThrow('CMS_REDIRECT_LOOP');
     expect(() => CmsPublishingPolicy.assertRedirect('/from', '//evil.example')).toThrow();
     expect(() => CmsPublishingPolicy.assertRedirect('/from', '/%2f%2fevil.example')).toThrow();
+    expect(() => CmsPublishingPolicy.assertRedirect('/ar/old', '/%2e%2e//evil.example')).toThrow();
+    expect(() => CmsPublishingPolicy.assertRedirect('/ar/old', '/ar/../evil')).toThrow();
+    expect(() => CmsPublishingPolicy.assertRedirect('/ar/old', '/ar/new?next=https://evil.invalid')).toThrow();
   });
 });
 
