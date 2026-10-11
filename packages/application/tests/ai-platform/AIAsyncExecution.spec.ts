@@ -65,7 +65,7 @@ describe('Phase 17 durable async execution', () => {
       usage: { inputTokens: 10, outputTokens: 5 },
     });
     await useCases.processAsync('aij_1', 'worker-1');
-    expect(execute).toHaveBeenCalledWith(expect.objectContaining({ idempotencyKey: 'async-job:aij_1' }));
+    expect(execute).toHaveBeenCalledWith(expect.objectContaining({ idempotencyKey: 'async-job:aij_1' }), { asyncJobPublicId: 'aij_1' });
     expect(repo.updateAsyncJob).toHaveBeenCalledWith('aij_1',
       expect.objectContaining({ status: 'COMPLETED', executionPublicId: 'ai_1' }),
       expect.objectContaining({ workerId: 'worker-1' }));
@@ -79,6 +79,53 @@ describe('Phase 17 durable async execution', () => {
     expect(await useCases.processDueAsyncJobs('worker-1', 4)).toEqual({ scanned: 1, processed: 1 });
     expect((repo as any).listClaimableAsyncJobs).toHaveBeenCalledWith(4);
     expect(process).toHaveBeenCalledWith('older-due', 'worker-1');
+  });
+
+
+  it('returns only a requester-owned, valid encrypted result artifact', async () => {
+    const repo = repository();
+    repo.findAsyncJob.mockResolvedValue({
+      publicId: 'aij_private', status: 'COMPLETED', requesterReferenceId: 'student-1',
+      executionPublicId: 'ai_done',
+    });
+    (repo as any).findExecution = vi.fn().mockResolvedValue({
+      publicId: 'ai_done', requesterReferenceId: 'student-1',
+      metadata: { asyncResult: {
+        ciphertext: 'encrypted', iv: 'iv', authTag: 'tag', keyVersion: 'v1',
+        jobPublicId: 'aij_private', requesterReferenceId: 'student-1',
+        expiresAt: '2099-12-31T23:59:59Z',
+      } },
+    });
+    const protector = {
+      status: () => 'READY' as const, protect: vi.fn(),
+      unprotect: vi.fn().mockReturnValue({ result: 'Sensitive final answer' }),
+    };
+    const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any, protector);
+    expect(await useCases.findAsyncResultForRequester('aij_private', 'student-2')).toBeNull();
+    expect(protector.unprotect).not.toHaveBeenCalled();
+    const owned = await useCases.findAsyncResultForRequester('aij_private', 'student-1');
+    expect(owned).toEqual({
+      publicId: 'aij_private', executionPublicId: 'ai_done',
+      result: 'Sensitive final answer', expiresAt: '2099-12-31T23:59:59Z',
+    });
+    expect(protector.unprotect).toHaveBeenCalledWith(expect.objectContaining({ ciphertext: 'encrypted' }));
+  });
+
+  it('denies expired encrypted results without attempting decryption', async () => {
+    const repo = repository();
+    repo.findAsyncJob.mockResolvedValue({ publicId: 'aij_old', status: 'COMPLETED',
+      requesterReferenceId: 'student-1', executionPublicId: 'ai_old' });
+    (repo as any).findExecution = vi.fn().mockResolvedValue({ publicId: 'ai_old',
+      requesterReferenceId: 'student-1', metadata: { asyncResult: {
+        ciphertext: 'encrypted', iv: 'iv', authTag: 'tag', keyVersion: 'v1',
+        jobPublicId: 'aij_old', requesterReferenceId: 'student-1',
+        expiresAt: '2020-01-01T00:00:00Z',
+      } } });
+    const protector = { status: () => 'READY' as const, protect: vi.fn(), unprotect: vi.fn() };
+    const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any, protector);
+    await expect(useCases.findAsyncResultForRequester('aij_old', 'student-1'))
+      .rejects.toThrow('AI_ASYNC_RESULT_EXPIRED');
+    expect(protector.unprotect).not.toHaveBeenCalled();
   });
 
 });
