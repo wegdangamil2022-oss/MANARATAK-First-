@@ -1783,6 +1783,8 @@ export class AIKnowledgeUseCases {
     content: string;
     actorReferenceId: string;
   }) {
+    if (Buffer.byteLength(input.content ?? '', 'utf8') > 256_000)
+      throw new Error('AI_KNOWLEDGE_SOURCE_BYTES_EXCEEDED');
     const index = await this.repository.find<AIKnowledgeIndex>('knowledgeIndexes', input.indexKey);
     if (!index || index.status !== 'ACTIVE') throw new Error('AI_KNOWLEDGE_INDEX_NOT_ACTIVE');
     // This legacy HTTP contract accepts client-supplied content and cannot prove
@@ -1862,6 +1864,9 @@ export class AIKnowledgeUseCases {
       Number(index.chunkingStrategy.maxCharacters ?? 1600),
       Number(index.chunkingStrategy.overlapCharacters ?? 160),
     );
+    if (!Number.isInteger(index.dimensions) || index.dimensions < 1 ||
+        index.dimensions > 4096 || chunks.length > 256)
+      throw new Error('AI_KNOWLEDGE_INDEXING_BATCH_LIMIT_EXCEEDED');
     const tokens = chunks.reduce((sum, chunk) => sum + estimateTokens(chunk), 0);
     const price = selectPriceSnapshot(prices, model.key, new Date());
     const currency = price?.currency ?? model.currency ?? 'USD';
