@@ -57,3 +57,18 @@
 | Lightweight compile/regression | NOT RUN | Re-run target Vitest specs under `apps/api/tests/presentation/api/router/CmsAdminRouter.spec.ts`, `CmsPublicRouter.spec.ts`, `packages/application/tests/cms/CmsUseCases.spec.ts`, `packages/infrastructure/tests/cms/CmsRelatedPublishedSelection.spec.ts`, `CmsScheduledRepair.spec.ts`, and affected TypeScript checks when dependency workspace is available. |
 
 **Verification scope:** 27/27 structural/static string-contract assertions executed in the continuation. These cannot replace executable tests. No real database, worker, migration, cache purge, live browser or provider run. The 9 October 2026 source-closure policy still prohibits `CODE_CLOSED — RUNTIME_DEFERRED` until essential source blockers and lightweight checks are resolved.
+
+## Continuation gate matrix — canonical owners and build-time CMS SEO (11 October 2026)
+
+| Gate | Assessment | Committed evidence | Still needed |
+| --- | --- | --- | --- |
+| CMS-ADM-009 cross-domain owner validity | **SOURCE IMPROVED / TEST NOT RUN** | Transaction-bound P7/P9/P10/P12/P13 canonical reads; all seven current domain target types validated at link insertion and final publish; root expectedVersion CAS and old/new audit; future edits of published/reviewed links fail closed | Run targeted owner and CAS regressions; design reviewed update after first publication (no silent mutation) |
+| CMS-ADM-015 navigation target existence/canonical route | **SOURCE IMPROVED / TEST NOT RUN** | CMS_CONTENT checked against published locale/site; DOMAIN_REFERENCE must be typed UUID, resolves five canonical owner types to validated localized slug in immutable published snapshot | Academic-program and country nav routes still unsupported; owner-driven slug change invalidation and rendering test |
+| CMS-ADM-023 browser SEO and sitemap | **SOURCE IMPROVED / TEST NOT RUN** | Build-time CMS published page discovery, exact canonical validation, noIndex suppression, cross-slug AR/EN hreflang grouping in generated sitemap, actual Nginx prerendered-file fallback | Run mock-API prerender test, verify Nginx and actual build, trigger on publish/archive/slug events and CDN purge, verify no stale sitemap/alternate after a new publish |
+| CMS-ADM-016 schemas and blocks | **OPEN TEST/INTEGRATION GATE** | Existing ACTIVE reviewed schema with version, maker-checker, bounded JSON/schema validation, immutable snapshot block publish | Execute schema and nested EAP regressions, trace public block UI usage |
+| Lightweight executable regression and compile | **NOT RUN** | Committed tests `CmsDomainOwnerReadGateway.spec.ts`, `CmsDomainLinkMutation.spec.ts`, `CmsNavigationOwnerResolution.spec.ts`, `cms-seo-prerender.spec.ts`, and CMS admin router link-version case | Run Vitest, TypeScript, Prisma validate, Nginx config/syntax in an authorized dependency workspace |
+| Runtime staging | **DEFERRED / NOT PERFORMED** | Source-only changes | User-authorized migration stage, review grants, CDN, real DB, worker, browser verification in post-28 gate |
+
+**Observed verification:** 48/48 newly evaluated **static source-presence checks** succeeded. **Zero executable test results are asserted.** Any earlier counts in this report refer to previous static batches, not Vitest. The fact that a source includes a test does not imply it passed.
+
+**Closure remains `PARTIAL — FIXES_REQUIRED`.** Branch-only commits; do not merge, deploy, or start section 17.
