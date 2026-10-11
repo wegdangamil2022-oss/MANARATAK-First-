@@ -1392,18 +1392,35 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       metadata?: Record<string, unknown>;
     }>;
   }) {
+    if (!input.sourceType?.trim() || !input.sourceReferenceId?.trim() ||
+        !Number.isInteger(input.dimensions) || input.dimensions < 1 ||
+        input.dimensions > 4096 || input.chunks.length > 256 ||
+        input.chunks.some((chunk) => Buffer.byteLength(chunk.chunkText, 'utf8') > 16_384))
+      throw new Error('AI_EMBEDDING_SOURCE_OR_BATCH_LIMIT_INVALID');
+    // The current schema only has a single sourceReferenceId column. Namespace
+    // it by canonical owner type AND published revision, rather than deleting
+    // another domain's embedding or overwriting a different revision.
+    const sourceIdentity = `aisrc_${createHash('sha256').update(stableStringify({
+      sourceType: input.sourceType, sourceReferenceId: input.sourceReferenceId,
+      sourceVersion: input.sourceVersion ?? null,
+    })).digest('hex')}`;
     await this.prisma.$transaction(async (tx: any) => {
       await tx.aIEmbeddingRecord.deleteMany({
-        where: { indexKey: input.indexKey, sourceReferenceId: input.sourceReferenceId },
+        where: { indexKey: input.indexKey, sourceReferenceId: sourceIdentity },
       });
       if (input.chunks.length)
         await tx.aIEmbeddingRecord.createMany({
           data: input.chunks.map((chunk) => ({
             ...chunk,
             indexKey: input.indexKey,
-            sourceReferenceId: input.sourceReferenceId,
+            sourceReferenceId: sourceIdentity,
             modelKey: input.modelKey,
             dimensions: input.dimensions,
+            metadata: {
+              ...(chunk.metadata ?? {}),
+              sourceType: input.sourceType,
+              sourceVersion: input.sourceVersion ?? null,
+            },
           })),
         });
     });
