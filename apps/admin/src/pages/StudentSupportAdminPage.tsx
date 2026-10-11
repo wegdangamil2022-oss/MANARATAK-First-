@@ -141,6 +141,10 @@ const tabs = [
   { id: 'OPERATIONS', titleKey: 'stu_support_tab_operations', icon: Activity },
 ] as const;
 const labels: Record<string, string> = {
+  PREPARING_DOCUMENTS: 'تجهيز المستندات',
+  READY_TO_APPLY: 'جاهز للتقديم',
+  OFFER_RECEIVED: 'استلام عرض قبول',
+  INTERVIEW: 'مقابلة',
   ACTIVE: 'نشط',
   SUSPENDED: 'معلق',
   ARCHIVED: 'مؤرشف',
@@ -197,6 +201,8 @@ function formatDate(value: string | null | undefined, locale: string) {
   return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleString(locale);
 }
 const labelsEn:Record<string,string>={
+  PREPARING_DOCUMENTS:'Preparing documents',READY_TO_APPLY:'Ready to apply',
+  OFFER_RECEIVED:'Offer received',INTERVIEW:'Interview',
   ACTIVE:'Active',SUSPENDED:'Suspended',ARCHIVED:'Archived',INITIALIZING:'Initializing',
   PENDING:'Pending',WAITLISTED:'Waitlisted',COMPLETED:'Completed',CANCELLED:'Cancelled',
   REVOKED:'Revoked',EXPIRED:'Expired',HEALTHY:'Healthy',FAILED:'Needs attention',

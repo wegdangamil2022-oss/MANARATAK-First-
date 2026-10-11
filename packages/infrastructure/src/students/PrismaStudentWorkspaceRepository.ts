@@ -733,12 +733,20 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         }
       }
 
+      // Archived identity is terminal. Retire parked owner payloads atomically;
+      // retain only the inbox receipt so a replay cannot restore personal data.
+      if (workspace.status === StudentWorkspaceStatus.ARCHIVED) {
+        await tx.studentWorkspaceEventInbox.updateMany({
+          where:{studentReferenceId:event.studentReferenceId,processedAt:null},
+          data:{processedAt:new Date(),failureCode:'WORKSPACE_SYNC_BLOCKED_ARCHIVED',payload:json({retired:true})},
+        });
+      }
       const inboxId = randomUUID();
       const syncBlocked = !['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'].includes(event.eventType) &&
         (workspace.status === StudentWorkspaceStatus.SUSPENDED || workspace.status === StudentWorkspaceStatus.ARCHIVED || workspace.status === StudentWorkspaceStatus.INITIALIZING);
       await tx.studentWorkspaceEventInbox.create({ data: {
         id: inboxId, eventId: event.eventId, studentReferenceId: event.studentReferenceId, sourceDomain: event.sourceDomain,
-        eventType: event.eventType, payload: json(event),
+        eventType: event.eventType, payload: workspace.status === StudentWorkspaceStatus.ARCHIVED ? json({retired:true}) : json(event),
         processedAt: syncBlocked ? (workspace.status === StudentWorkspaceStatus.ARCHIVED ? new Date() : null) : new Date(),
         failureCode: syncBlocked ? `WORKSPACE_SYNC_BLOCKED_${workspace.status}` : null,
       }});

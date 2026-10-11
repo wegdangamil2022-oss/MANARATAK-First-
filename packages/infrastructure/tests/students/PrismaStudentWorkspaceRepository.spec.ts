@@ -449,3 +449,17 @@ describe('P15 active-only support mutation and certificate renewal',()=>{
     });
   });
 });
+
+it('retires parked owner payloads for an archived identity and stores no new personal snapshot',async()=>{
+  const tx={$queryRaw:vi.fn().mockResolvedValue([]),studentWorkspace:{findUnique:vi.fn().mockResolvedValue({...workspace,status:'ARCHIVED'})},
+    studentWorkspaceEventInbox:{findUnique:vi.fn().mockResolvedValue(null),updateMany:vi.fn(),create:vi.fn()},studentTimelineEntry:{create:vi.fn()}};
+  const repo=new PrismaStudentWorkspaceRepository({$transaction:(fn:any)=>fn(tx)} as any);
+  expect(await repo.ingestIntegrationEvent({eventId:'archived-owner-event',studentReferenceId:'student-1',eventType:'CourseCompleted',sourceDomain:'COURSES',
+    sourceReferenceId:'enroll-1',title:'Completed',occurredAt:new Date(),metadata:{enrollmentId:'enroll-1',courseId:'course-1'}})).toBe(false);
+  expect(tx.studentWorkspaceEventInbox.updateMany).toHaveBeenCalledWith({
+    where:{studentReferenceId:'student-1',processedAt:null},
+    data:{processedAt:expect.any(Date),failureCode:'WORKSPACE_SYNC_BLOCKED_ARCHIVED',payload:{retired:true}},
+  });
+  expect(tx.studentWorkspaceEventInbox.create).toHaveBeenCalledWith(expect.objectContaining({data:expect.objectContaining({payload:{retired:true}})}));
+  expect(tx.studentTimelineEntry.create).not.toHaveBeenCalled();
+});
