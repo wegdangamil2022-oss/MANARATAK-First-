@@ -51,6 +51,7 @@ interface InternalExecutionOptions {
   promptVersion?: number;
   forcedModelKey?: string;
   forcedRoutingPolicyKey?: string;
+  asyncJobPublicId?: string;
 }
 
 const HUMAN_REVIEW_UNSUPPORTED = 'AI_HUMAN_REVIEW_WORKFLOW_NOT_CONFIGURED';
@@ -497,6 +498,16 @@ export class AIExecutionOrchestrator {
     if (created.replayed) {
       if (execution.metadata?.requestFingerprint !== requestFingerprint)
         throw new Error('AI_IDEMPOTENCY_KEY_REUSED');
+      if (options.asyncJobPublicId && execution.status === AIExecutionStatus.COMPLETED) {
+        // A worker retry must recover exactly the encrypted artifact from the
+        // already-billed execution, never call the provider a second time.
+        const artifact = execution.metadata?.asyncResult as Record<string, unknown> | undefined;
+        if (!artifact || artifact.jobPublicId !== options.asyncJobPublicId ||
+            artifact.requesterReferenceId !== request.requesterReferenceId)
+          throw new Error('AI_ASYNC_RESULT_UNRECOVERABLE');
+        const recovered = this.decryptAsyncResult(artifact);
+        return { ...toExecutionResponse(execution), result: recovered };
+      }
       return toExecutionResponse(execution);
     }
 
@@ -720,6 +731,11 @@ export class AIExecutionOrchestrator {
             structured: Boolean(request.structuredOutputSchema ?? promptVersion.outputSchema),
           },
         });
+        // Persist the full result only as AES-GCM ciphertext inside the durable
+        // execution record, atomically with its COMPLETED transition.
+        const asyncResult = options.asyncJobPublicId
+          ? this.encryptAsyncResult(options.asyncJobPublicId, request.requesterReferenceId ?? '', outputSafety.value)
+          : null;
         execution = await this.repository.updateExecution(execution.publicId, {
           providerKey: candidate.provider.key,
           modelKey: candidate.model.key,
@@ -735,6 +751,7 @@ export class AIExecutionOrchestrator {
             providerRequestId: result.providerRequestId,
             finishReason: result.finishReason,
             priceSnapshotKey: price?.key ?? null,
+            ...(asyncResult ? { asyncResult } : {}),
           }),
         });
         return { ...toExecutionResponse(execution), result: outputSafety.value };
@@ -997,7 +1014,10 @@ export class AIExecutionOrchestrator {
         throw new Error('AI_ASYNC_PAYLOAD_IDENTITY_MISMATCH');
       // Durable queue identity overrides any caller key so a lease reclaim cannot
       // dispatch a second independent paid execution for the same job.
-      const response = await this.execute({ ...request, idempotencyKey: `async-job:${job.publicId}` });
+      const response = await this.execute(
+        { ...request, idempotencyKey: `async-job:${job.publicId}` },
+        { asyncJobPublicId: job.publicId },
+      );
       if (
         response.status !== AIExecutionStatus.COMPLETED &&
         response.status !== AIExecutionStatus.BLOCKED
@@ -1069,6 +1089,55 @@ export class AIExecutionOrchestrator {
   async findAsyncForRequester(publicId: string, requesterReferenceId: string) {
     const value = await this.repository.findAsyncJob(publicId);
     return value?.requesterReferenceId === requesterReferenceId ? redactAsyncJob(value) : null;
+  }
+
+  async findAsyncResultForRequester(publicId: string, requesterReferenceId: string) {
+    if (!requesterReferenceId) throw new Error('AI_AUTHENTICATED_REQUESTER_REQUIRED');
+    const job = await this.repository.findAsyncJob(publicId);
+    if (!job || job.requesterReferenceId !== requesterReferenceId) return null;
+    if (job.status !== 'COMPLETED') throw new Error('AI_ASYNC_RESULT_NOT_READY');
+    if (!job.executionPublicId) throw new Error('AI_ASYNC_RESULT_NOT_AVAILABLE');
+    const execution = await this.repository.findExecution(job.executionPublicId);
+    if (!execution || execution.requesterReferenceId !== requesterReferenceId) return null;
+    const artifact = execution.metadata?.asyncResult as Record<string, unknown> | undefined;
+    if (!artifact || artifact.jobPublicId !== job.publicId ||
+        artifact.requesterReferenceId !== requesterReferenceId)
+      throw new Error('AI_ASYNC_RESULT_NOT_AVAILABLE');
+    return {
+      publicId: job.publicId,
+      executionPublicId: execution.publicId,
+      result: this.decryptAsyncResult(artifact),
+      expiresAt: artifact.expiresAt as string,
+    };
+  }
+
+  private encryptAsyncResult(jobPublicId: string, requesterReferenceId: string, result: string) {
+    if (!this.asyncPayloads || this.asyncPayloads.status() !== 'READY')
+      throw new Error('AI_ASYNC_RESULT_PROTECTION_NOT_CONFIGURED');
+    if (Buffer.byteLength(result, 'utf8') > 256 * 1024)
+      throw new Error('AI_ASYNC_RESULT_TOO_LARGE');
+    return {
+      ...this.asyncPayloads.protect({ result }),
+      jobPublicId, requesterReferenceId,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    };
+  }
+
+  private decryptAsyncResult(artifact: Record<string, unknown>): string {
+    if (!this.asyncPayloads || this.asyncPayloads.status() !== 'READY')
+      throw new Error('AI_ASYNC_RESULT_PROTECTION_NOT_CONFIGURED');
+    if (!Number.isFinite(Date.parse(String(artifact.expiresAt))) ||
+        Date.parse(String(artifact.expiresAt)) <= Date.now())
+      throw new Error('AI_ASYNC_RESULT_EXPIRED');
+    const recovered = this.asyncPayloads.unprotect({
+      ciphertext: String(artifact.ciphertext ?? ''),
+      iv: String(artifact.iv ?? ''),
+      authTag: String(artifact.authTag ?? ''),
+      keyVersion: String(artifact.keyVersion ?? ''),
+    }) as Record<string, unknown>;
+    if (!recovered || typeof recovered.result !== 'string')
+      throw new Error('AI_ASYNC_RESULT_INTEGRITY_FAILED');
+    return recovered.result;
   }
   async cancelAsync(publicId: string, requesterReferenceId: string) {
     const value = await this.repository.findAsyncJob(publicId);
