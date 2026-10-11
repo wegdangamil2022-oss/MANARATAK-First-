@@ -3,6 +3,23 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaCmsRepository } from '../../src/cms/PrismaCmsRepository';
 
 describe('CMS related published selection', () => {
+  it('does not promote a noindex published locale into canonical/hreflang discovery', async () => {
+    const prisma = {
+      cmsPublishedContent: {
+        findMany: vi.fn().mockResolvedValue([
+          { contentId: 'node-1', locale: 'ar', slug: 'arabic-guide', seoMetadata: { noIndex: false } },
+          { contentId: 'node-1', locale: 'en', slug: 'english-guide', seoMetadata: { noIndex: true } },
+        ]),
+      },
+    };
+    const owner = new PrismaCmsRepository(prisma as unknown as PrismaClient);
+    const map = await (owner as any).availableLocales(['node-1']);
+    expect(map.get('node-1')).toEqual([{ locale: 'ar', slug: 'arabic-guide' }]);
+    expect(prisma.cmsPublishedContent.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      select: expect.objectContaining({ seoMetadata: true }),
+    }));
+  });
+
   it('filters by published site and requested locale before selecting a bounded unique result', async () => {
     const prisma = {
       $queryRaw: vi.fn().mockResolvedValue([{ contentId: 'content-1' }]),
