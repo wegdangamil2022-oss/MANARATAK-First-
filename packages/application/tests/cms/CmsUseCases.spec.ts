@@ -237,6 +237,24 @@ describe('Phase 16 CMS use cases', () => {
     expect(repository.listPublished).not.toHaveBeenCalled();
   });
 
+  it('never serves a stale Redis publication after the canonical owner archives it', async () => {
+    const cache = {
+      getPublished: vi.fn().mockResolvedValue({
+        siteIdentifier: 'manaratak', locale: 'ar', slug: 'archived',
+        title: 'Stale cached content', body: 'Should not be public',
+      }),
+      setPublished: vi.fn(),
+      invalidateSite: vi.fn(),
+    };
+    const publicOwner = new PublicCmsUseCases(repository, cache);
+    vi.mocked(repository.getPublishedBySlug).mockResolvedValue(null);
+    await expect(publicOwner.getBySlug('archived', 'ar', 'manaratak'))
+      .rejects.toThrow('CMS_CONTENT_NOT_FOUND');
+    expect(repository.getPublishedBySlug).toHaveBeenCalledWith('archived', 'ar', 'manaratak');
+    expect(cache.getPublished).not.toHaveBeenCalled();
+    expect(cache.setPublished).not.toHaveBeenCalled();
+  });
+
   it('keeps the public query on the published projection only', async () => {
     await publicCms.listPublished({ contentType: CmsContentType.ARTICLE }, 'ar');
     expect(repository.listPublished).toHaveBeenCalledWith(
