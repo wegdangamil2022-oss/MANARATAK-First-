@@ -1,3 +1,4 @@
+import { PrismaCmsDomainOwnerReadGateway } from './PrismaCmsDomainOwnerReadGateway';
 /* eslint-disable @typescript-eslint/no-explicit-any -- Prisma CMS delegates are generated after the source-only migration is accepted by runtime. */
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -807,33 +808,74 @@ export class PrismaCmsRepository implements ICmsRepository {
     contentId: string,
     links: UpsertCmsContentDomainLinkDto[],
     actorId: string,
+    expectedVersion: number,
   ): Promise<CmsContentDomainLinkDto[]> {
+    if (!actorId.trim()) throw new Error('CMS_AUTHENTICATED_ACTOR_REQUIRED');
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 1) throw new Error('CMS_VERSION_REQUIRED');
+    if (links.length > 50) throw new Error('CMS_DOMAIN_LINK_LIMIT_EXCEEDED');
     return this.serializable(async (tx: any) => {
       const content = await this.requireContent(tx, contentId);
-      // Domain owner validity is not shape-only. Until a canonical owner gateway is
-      // wired, reject new references and prohibit changes to live review facts.
-      if (links.length) throw new Error('CMS_DOMAIN_OWNER_VALIDATION_REQUIRED');
-      const hasPublished = await tx.cmsPublishedContent.findFirst({ where: { contentId } });
-      if (hasPublished) throw new Error('CMS_ROOT_REVIEW_REQUIRED');
+      this.assertVersion(content.version, expectedVersion);
+      // Links form part of every locale's signed editorial fingerprint. Refuse
+      // mutations while any locale is in review, approved, scheduled, published,
+      // or has a prior public snapshot. A draft must re-enter review after edits.
+      const [lockedLocale, priorPublication, priorApproval, before] = await Promise.all([
+        tx.cmsLocalizedContent.findFirst({
+          where: { contentId, state: { in: [
+            CmsContentStatus.IN_REVIEW, CmsContentStatus.READY_TO_PUBLISH,
+            CmsContentStatus.SCHEDULED, CmsContentStatus.PUBLISHED,
+          ] } }, select: { id: true },
+        }),
+        tx.cmsPublishedContent.findFirst({ where: { contentId }, select: { id: true } }),
+        tx.cmsWorkflowReview.findFirst({
+          where: { localizedContent: { contentId }, status: 'APPROVED' },
+          select: { id: true },
+        }),
+        tx.cmsContentDomainLink.findMany({
+          where: { contentId }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+        }),
+      ]);
+      if (lockedLocale || priorPublication || priorApproval) throw new Error('CMS_ROOT_REVIEW_REQUIRED');
+
+      const owner = new PrismaCmsDomainOwnerReadGateway(tx);
+      const seen = new Set<string>();
+      for (const link of links) {
+        const key = `${link.targetType}:${link.targetId}:${link.relationType}`;
+        if (seen.has(key)) throw new Error('CMS_DOMAIN_LINK_DUPLICATE');
+        seen.add(key);
+        await owner.assertPublished(link.targetType, link.targetId);
+      }
+
+      const changed = await tx.cmsContentNode.updateMany({
+        where: { id: contentId, version: expectedVersion },
+        data: { version: { increment: 1 } },
+      });
+      if (changed.count !== 1) throw new Error('CMS_VERSION_CONFLICT');
       await tx.cmsContentDomainLink.deleteMany({ where: { contentId } });
       if (links.length) {
         await tx.cmsContentDomainLink.createMany({
           data: links.map((link, index) => ({
-            id: randomUUID(),
-            contentId,
-            targetType: link.targetType,
-            targetId: link.targetId,
-            relationType: link.relationType,
-            sortOrder: link.sortOrder ?? index,
-            metadata: json(link.metadata),
-            createdBy: actorId,
+            id: randomUUID(), contentId,
+            targetType: link.targetType, targetId: link.targetId,
+            relationType: link.relationType, sortOrder: link.sortOrder ?? index,
+            metadata: json(link.metadata), createdBy: actorId,
           })),
         });
       }
-      await this.appendMutation(tx, content, null, 'DOMAIN_LINKS_REPLACED', actorId, { count: links.length });
+      const after = links.map((entry, index) => ({
+        targetType: entry.targetType, targetId: entry.targetId,
+        relationType: entry.relationType, sortOrder: entry.sortOrder ?? index,
+      }));
+      await this.appendMutation(tx, content, null, 'DOMAIN_LINKS_REPLACED', actorId, {
+        fromVersion: expectedVersion, toVersion: expectedVersion + 1,
+        previous: before.map((entry: any) => ({
+          targetType: entry.targetType, targetId: entry.targetId,
+          relationType: entry.relationType, sortOrder: entry.sortOrder,
+        })),
+        next: after,
+      });
       const rows = await tx.cmsContentDomainLink.findMany({
-        where: { contentId },
-        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        where: { contentId }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
       });
       return rows.map((row: any) => this.domainLink(row));
     });
