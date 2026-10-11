@@ -89,3 +89,15 @@
 Actual checks this continuation: **36/36 static source-pattern checks**, not Vitest/TypeScript/Prisma test results. The `20261011075500_cms_root_last_editor` migration is source-only; existing runtime database schemas are not updated.
 
 **Closure decision unchanged: `PARTIAL — FIXES_REQUIRED`.** No merge, production deployment, DB operation or start of Section 17.
+
+## Continuation gate check — live publication feed and cached public access (11 October 2026)
+
+| Gate | Source assessment | Independent closure evidence still required |
+| --- | --- | --- |
+| CMS-ADM-023 CMS sitemap freshness | **SOURCE IMPLEMENTED / TEST NOT RUN** — Nginx `/cms-sitemap.xml` now proxies a live published-only feed, so publishing or archiving a CMS page updates authoritative sitemap discovery after up to 60 seconds of HTTP caching; noIndex and absent locale variants are excluded | Run XML builder, repository, router, mock prerender and Nginx regression checks; validate public base origin configuration and live server/SEO bot behavior |
+| CMS-ADM-023 preregistered HTML/OG/canonical | **OPEN SOURCE/RUNTIME GATE** — existing generated HTML remains pinned to build; site build must refresh or have a governed dynamic-renderer path on publish/slug-change/archive. A new sitemap is insufficient | Implement event-safe build invalidation + deploy cycle or equivalent page delivery; prove last-known-good and rollback, then runtime crawler checks |
+| CMS-ADM-018 stale-content privacy | **SOURCE FIX / TEST NOT RUN** — canonical published row checked on each API detail call; list/detail/related API no-store disables intermediary caching; prior Redis-only shortcut removed | Run public API + cache fake regressions, live archive/failed invalidation scenario and CDN egress checks (post-28) |
+| CMS-ADM-010 public site isolation | **SOURCE FIX / TEST NOT RUN** — `/blocks` no longer accepts a caller-named foreign site | Run negative cross-tenant public router suite |
+| Operational sitemap limits | **DEFINED, NOT PROVEN** — sentinel >50k fails closed instead of silently truncating; future shard/index extension is needed if limit is reached | Source-backed scale design and bounded latency benchmarks (runtime deferred) |
+
+Source-only work: no migrations executed, no workflow or production actions invoked. These new Vitest cases have **NOT** been executed. Keep `PARTIAL — FIXES_REQUIRED`, do not claim `CODE_CLOSED — RUNTIME_DEFERRED`.
