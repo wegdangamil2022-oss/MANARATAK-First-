@@ -248,7 +248,8 @@ export class AIPlatformAdminUseCases {
         run.targetType !== 'PROMPT' ||
         run.targetKey !== promptKey ||
         run.targetVersion !== version ||
-        run.targetChecksum !== versionRecord.checksum
+        run.targetChecksum !== versionRecord.checksum ||
+        run.targetEvidence?.definitionChecksum !== evaluationDefinitionChecksum(evaluation)
       )
         throw new Error(`AI_EVALUATION_EXACT_TARGET_EVIDENCE_REQUIRED:${evaluation.key}`);
       if (
@@ -1299,7 +1300,7 @@ export class AIEvaluationUseCases {
     private readonly workflows?: AIWorkflowUseCases,
   ) {}
 
-  async start(evaluationKey: string, options: { promptVersion?: number; modelKey?: string } = {}) {
+  async start(evaluationKey: string, options: { promptVersion?: number; modelKey?: string; requestedBy?: string } = {}) {
     const definition = await this.repository.find<AIEvaluationDefinition>(
       'evaluations',
       evaluationKey,
@@ -1317,7 +1318,11 @@ export class AIEvaluationUseCases {
       targetKey: evidence.key,
       targetVersion: evidence.version ?? null,
       targetChecksum: evidence.checksum ?? null,
-      targetEvidence: evidence.details,
+      targetEvidence: {
+        ...evidence.details,
+        definitionChecksum: evaluationDefinitionChecksum(definition),
+        submittedBy: options.requestedBy ?? null,
+      },
       passed: 0,
       failed: 0,
       safetyFailures: 0,
@@ -1328,7 +1333,8 @@ export class AIEvaluationUseCases {
     });
   }
 
-  async run(publicId: string) {
+  async run(publicId: string, executedBy?: string) {
+    if (!executedBy) throw new Error('AI_EVALUATION_EXECUTOR_REQUIRED');
     const run = await this.repository.findEvaluationRun(publicId);
     if (!run) throw new Error('AI_EVALUATION_RUN_NOT_FOUND');
     const definition = await this.repository.find<AIEvaluationDefinition>(
@@ -1336,6 +1342,8 @@ export class AIEvaluationUseCases {
       run.evaluationKey,
     );
     if (!definition || definition.status !== 'ACTIVE') throw new Error('AI_EVALUATION_NOT_ACTIVE');
+    if (run.targetEvidence?.definitionChecksum !== evaluationDefinitionChecksum(definition))
+      throw new Error('AI_EVALUATION_DEFINITION_CHANGED');
     const currentEvidence = await this.resolveTargetEvidence(definition, {
       promptVersion: run.targetVersion ?? undefined,
       modelKey: run.modelKey ?? undefined,
@@ -1349,7 +1357,9 @@ export class AIEvaluationUseCases {
       throw new Error('AI_EVALUATION_TARGET_EVIDENCE_CHANGED');
     if (run.status === 'COMPLETED') return run;
     if (run.status !== 'QUEUED') throw new Error('AI_EVALUATION_RUN_NOT_EXECUTABLE');
-    await this.repository.updateEvaluationRun(publicId, { status: 'RUNNING' });
+    await this.repository.updateEvaluationRun(publicId, {
+      status: 'RUNNING', targetEvidence: { ...run.targetEvidence, executedBy },
+    });
     const results: Record<string, unknown>[] = [];
     let passed = 0;
     let safetyFailures = 0;
@@ -1382,8 +1392,17 @@ export class AIEvaluationUseCases {
         if (ok) passed += 1;
       }
       const score = definition.dataset.length ? passed / definition.dataset.length : 0;
+      const latest = await this.repository.find<AIEvaluationDefinition>('evaluations', run.evaluationKey);
+      if (!latest || latest.status !== 'ACTIVE' ||
+          evaluationDefinitionChecksum(latest) !== run.targetEvidence?.definitionChecksum)
+        throw new Error('AI_EVALUATION_DEFINITION_CHANGED_DURING_RUN');
+      const resultChecksum = sha256(stableStringify({
+        results, score, safetyFailures, targetChecksum: run.targetChecksum,
+        definitionChecksum: run.targetEvidence?.definitionChecksum,
+      }));
       return this.repository.updateEvaluationRun(publicId, {
         status: 'COMPLETED',
+        targetEvidence: { ...run.targetEvidence, executedBy, resultChecksum },
         passed,
         failed: definition.dataset.length - passed,
         safetyFailures,
@@ -2149,6 +2168,18 @@ function topologicalSteps(steps: AIWorkflowDefinition['definition']['steps']) {
   return order;
 }
 
+function evaluationDefinitionChecksum(definition: AIEvaluationDefinition): string {
+  // Bind gates to the exact dataset, evaluators, target, and deployment thresholds.
+  return sha256(stableStringify({
+    key: definition.key,
+    status: definition.status,
+    capabilityKey: definition.capabilityKey,
+    target: definition.target,
+    dataset: definition.dataset,
+    evaluators: definition.evaluators,
+    deploymentGate: definition.deploymentGate ?? null,
+  }));
+}
 function validateEvaluationDefinition(definition: AIEvaluationDefinition) {
   if (definition.target.type === 'KNOWLEDGE')
     throw new Error('AI_EVALUATION_KNOWLEDGE_TARGET_NOT_SUPPORTED');
