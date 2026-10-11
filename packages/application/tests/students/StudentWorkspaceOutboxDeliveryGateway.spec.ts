@@ -46,13 +46,32 @@ describe('Student certificate owner-outbox bridge', () => {
     expect(students.consumeIntegrationEvent).not.toHaveBeenCalled();
   });
 
+  it('maps expiry and artifact owner events without internal render payloads', async () => {
+    const {gateway,students,entry}=fixture();
+    await gateway.deliver({
+      ...entry,id:'evt-expire',eventType:'CertificateExpired',
+      payload:{studentReferenceId:'student-1',certificateId:'cert-1',expiredAt:'2026-01-06T00:00:00Z'},
+    } as any,{idempotencyKey:'evt-expire'} as any);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
+      eventType:'CertificateExpired',metadata:expect.objectContaining({status:'EXPIRED'}),
+    }));
+    students.consumeIntegrationEvent.mockClear();
+    await gateway.deliver({
+      ...entry,id:'evt-artifact',eventType:'CertificateArtifactsRendered',
+      payload:{studentReferenceId:'student-1',certificateId:'cert-1',certificatePdfAssetId:'asset-1',renderMetadata:{secret:'never-forward'}},
+    } as any,{idempotencyKey:'evt-artifact'} as any);
+    const mapped=vi.mocked(students.consumeIntegrationEvent).mock.calls[0][0];
+    expect(mapped.metadata).toHaveProperty('certificatePdfAssetId','asset-1');
+    expect(JSON.stringify(mapped)).not.toContain('never-forward');
+  });
+
   it('claims certificate lifecycle events but leaves rendering to P14', async () => {
     const dispatcher={dispatchBatch:vi.fn().mockResolvedValue({claimed:0,processed:0,failed:0,exhausted:0})};
     const worker=new StudentWorkspaceOutboxWorker(dispatcher as any);
     await worker.runCertificatesOnce('worker-test');
     expect(dispatcher.dispatchBatch).toHaveBeenCalledWith(expect.objectContaining({
       workerId:'worker-test',domain:'CERTIFICATES',
-      eventTypes:['CertificateIssued','CertificateRevoked','CertificateReissued','CertificateRenewed'],
+      eventTypes:['CertificateIssued','CertificateRevoked','CertificateReissued','CertificateRenewed','CertificateExpired','CertificateArtifactsRendered'],
     }));
   });
 });

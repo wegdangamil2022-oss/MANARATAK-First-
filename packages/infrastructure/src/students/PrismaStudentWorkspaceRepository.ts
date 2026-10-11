@@ -861,8 +861,8 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
       });
       if (event.eventType === 'CertificateReissued' && metadata.replacesCertificateId) {
         await tx.studentCertificateReadProjection.updateMany({
-          where: { studentReferenceId: event.studentReferenceId, certificateId: String(metadata.replacesCertificateId), status: { not: 'REVOKED' } },
-          data: { status: 'REISSUED' },
+          where: { studentReferenceId: event.studentReferenceId, certificateId: String(metadata.replacesCertificateId) },
+          data: { status: 'REISSUED', sourceEventId: event.eventId },
         });
       }
     }

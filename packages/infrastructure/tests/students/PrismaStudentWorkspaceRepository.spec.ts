@@ -234,6 +234,20 @@ describe('PrismaStudentWorkspaceRepository', () => {
     expect(tx.transactionalOutboxRecord.create).not.toHaveBeenCalled();
   });
 
+  it('refuses orphan certificate artifact updates until the owner-issued projection exists', async () => {
+    const tx = {
+      studentCertificateReadProjection: {findUnique:vi.fn().mockResolvedValue(null),upsert:vi.fn(),updateMany:vi.fn()},
+    };
+    const repo = new PrismaStudentWorkspaceRepository(tx as any);
+    await expect((repo as any).projectIntegrationEvent(tx,{
+      eventId:'evt-artifacts', studentReferenceId:'student-1', sourceDomain:'CERTIFICATES',
+      eventType:'CertificateArtifactsRendered', sourceReferenceId:'cert-1', title:'Rendered',
+      occurredAt:new Date(), metadata:{certificateId:'cert-1',certificatePdfAssetId:'asset-1'},
+    })).rejects.toThrow('STUDENT_CERTIFICATE_PROJECTION_PENDING');
+    expect(tx.studentCertificateReadProjection.upsert).not.toHaveBeenCalled();
+    expect(tx.studentCertificateReadProjection.updateMany).not.toHaveBeenCalled();
+  });
+
   it('ignores a late certificate issue after a newer revoke was projected', async () => {
     const tx = {
       studentCertificateReadProjection: {
