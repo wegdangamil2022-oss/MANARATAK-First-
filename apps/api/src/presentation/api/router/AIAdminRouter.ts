@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
-import { AIExecutionStatus } from '@manaratak/domain';
+import { AIExecutionStatus, AuthorizationEvaluatorService } from '@manaratak/domain';
 import {
   AIExecutionOrchestrator,
   AIKnowledgeUseCases,
@@ -112,8 +112,69 @@ export class AIAdminRouter {
     aiWorkflowUseCases: AIWorkflowUseCases;
     aiEvaluationUseCases: AIEvaluationUseCases;
     aiKnowledgeUseCases: AIKnowledgeUseCases;
+    authEvaluatorService: AuthorizationEvaluatorService;
   }): Router {
     const router = Router();
+    const permissionFor = (method: string, path: string): string | null => {
+      if (method === 'GET') return 'admin:ai:view';
+      if (method === 'PUT' && /^\\/[^/]+\\/[^/]+$/.test(path)) {
+        const resource = path.split('/')[1];
+        if (['guardrails', 'platformSettings', 'incidents'].includes(resource))
+          return 'admin:ai:safety:manage';
+        if (['consumers', 'modelPrices'].includes(resource)) return 'admin:ai:cost:manage';
+        if (resource === 'prompts') return 'admin:ai:prompt:author';
+        if (['knowledgeIndexes', 'knowledgeSources'].includes(resource))
+          return 'admin:ai:index:approve';
+        return 'admin:ai:configure';
+      }
+      if (method !== 'POST') return null;
+      if (/^\\/async-queue\\/jobs\\/[^/]+\\/(RETRY|CANCEL)$/.test(path))
+        return 'admin:ai:queue:operate';
+      if (/^\\/prompts\\/[^/]+\\/versions$/.test(path)) return 'admin:ai:prompt:author';
+      if (/^\\/prompts\\/[^/]+\\/versions\\/[^/]+\\/approve$/.test(path))
+        return 'admin:ai:prompt:review';
+      if (/^\\/prompts\\/[^/]+\\/(deployments|rollback)$/.test(path)) return 'admin:ai:deploy';
+      if (/^\\/evaluation-runs\\/[^/]+\\/approve$/.test(path))
+        return 'admin:ai:prompt:review';
+      if (/^\\/knowledge-indexes\\/[^/]+\\/index$/.test(path))
+        return 'admin:ai:index:approve';
+      if (/^\\/incidents\\/[^/]+\\/events$/.test(path))
+        return 'admin:ai:safety:manage';
+      if (path === '/playground/execute' ||
+          /^\\/workflows\\/[^/]+\\/runs$/.test(path) ||
+          /^\\/workflow-runs\\/[^/]+\\/execute$/.test(path) ||
+          /^\\/evaluations\\/[^/]+\\/runs$/.test(path) ||
+          /^\\/evaluation-runs\\/[^/]+\\/execute$/.test(path))
+        return 'admin:ai:execute';
+      return null;
+    };
+    router.use(async (req, res, next) => {
+      if (!req.authUserId) {
+        res.status(401).json({ error: 'AI_AUTHENTICATED_ACTOR_REQUIRED' });
+        return;
+      }
+      const permission = permissionFor(req.method, req.path);
+      if (!permission) {
+        res.status(403).json({ error: 'AI_CAPABILITY_UNRECOGNIZED' });
+        return;
+      }
+      try {
+        const result = await cradle.authEvaluatorService.evaluatePermission(req.authUserId, permission, {
+          ip: req.ip || req.socket?.remoteAddress || undefined,
+          requestTime: new Date(),
+          userAgent: req.headers['user-agent'],
+          correlationId: req.headers['x-correlation-id'],
+        });
+        if (!result.isGranted) {
+          res.status(403).json({ error: 'AI_PERMISSION_DENIED', requiredPermission: permission });
+          return;
+        }
+        res.setHeader('X-Admin-Required-Permission', permission);
+        next();
+      } catch {
+        res.status(403).json({ error: 'AI_PERMISSION_DENIED', requiredPermission: permission });
+      }
+    });
     const asyncHandler =
       (fn: (req: Request, res: Response) => Promise<void>) =>
       (req: Request, res: Response, next: NextFunction) =>
