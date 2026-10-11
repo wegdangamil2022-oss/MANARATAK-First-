@@ -110,12 +110,13 @@ interface SupportApplicationPage {
   hasMore: boolean;
   nextCursor: string|null;
 }
-type TriageKind='SYNC_FAILED'|'SYNC_PENDING'|'APPLICATION_OVERDUE';
+type TriageKind='SYNC_FAILED'|'SYNC_PENDING'|'APPLICATION_OVERDUE'|'SERVICE_AWAITING_PAYMENT';
 interface TriagePage {
-  items: Array<{studentReferenceId:string;status:string;version:number;updatedAt:string;triageKind:TriageKind}>;
+  items: Array<{studentReferenceId:string;status:string;version?:number;updatedAt:string|null;triageKind:TriageKind}>;
   total:number;
   hasMore:boolean;
-  nextCursor:string|null;
+  nextCursor?:string|null;
+  nextPage?:number|null;
 }
 interface StudentPage {
   items: StudentSupportItem[];
@@ -399,9 +400,11 @@ export function StudentSupportAdminPage() {
     setTriageLoading(true);
     setTriageError(null);
     try{
-      const query=new URLSearchParams({kind:triageKind,limit:'20'});
-      if(nextCursor)query.set('cursor',nextCursor);
-      const page=await adminApiClient.request<TriagePage>(`/admin/students/support/triage?${query}`);
+      const serviceOnly=triageKind==='SERVICE_AWAITING_PAYMENT';
+      const query=new URLSearchParams(serviceOnly?{limit:'20'}:{kind:triageKind,limit:'20'});
+      if(nextCursor)query.set(serviceOnly?'page':'cursor',nextCursor);
+      const path=serviceOnly?'triage/service-awaiting-payment':'triage';
+      const page=await adminApiClient.request<TriagePage>(`/admin/students/support/${path}?${query}`);
       if(request!==triageRequest.current)return;
       setTriagePage(previous=>nextCursor&&previous?{
         ...page,items:[...previous.items,...page.items],
@@ -620,6 +623,7 @@ export function StudentSupportAdminPage() {
               <option value="SYNC_FAILED">{t('stu_support_triage_failed')}</option>
               <option value="SYNC_PENDING">{t('stu_support_triage_pending')}</option>
               <option value="APPLICATION_OVERDUE">{t('stu_support_triage_overdue')}</option>
+              {hasPermission('admin:services:manage')&&<option value="SERVICE_AWAITING_PAYMENT">{language==='en'?'Service requests awaiting payment':'طلبات خدمات تنتظر الدفع'}</option>}
             </select>
           </label>
           <button type="button" disabled={triageLoading} onClick={()=>void loadTriage()}
@@ -642,9 +646,9 @@ export function StudentSupportAdminPage() {
             <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold"
               onClick={()=>chooseStudent(item.studentReferenceId)}>{t('stu_support_triage_open')}</button>
           </div>)}
-          {triagePage.hasMore&&triagePage.nextCursor&&<button type="button" disabled={triageLoading}
+          {triagePage.hasMore&&(triagePage.nextCursor||triagePage.nextPage)&&<button type="button" disabled={triageLoading}
             className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50"
-            onClick={()=>void loadTriage(triagePage.nextCursor!)}>{t('stu_support_triage_more')}</button>}
+            onClick={()=>void loadTriage(triageKind==='SERVICE_AWAITING_PAYMENT'?String(triagePage.nextPage):triagePage.nextCursor!)}>{t('stu_support_triage_more')}</button>}
         </div>}
       </section>
       <section className="overflow-hidden rounded-2xl border bg-white">
