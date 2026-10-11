@@ -580,10 +580,28 @@ export class PrismaCmsRepository implements ICmsRepository {
         },
       });
       await this.syncRootLifecycle(tx, content.id);
+      // Job completion belongs to the SAME serializable commit as the
+      // published snapshot, revision, ledger and outbox. Losing the lease
+      // aborts the entire publication: no externally visible half-success.
+      if (command.scheduledJobId) {
+        const completed = await tx.cmsScheduledJob.updateMany({
+          where: {
+            id: command.scheduledJobId, localizedContentId: full.id,
+            status: 'PROCESSING', claimedBy: command.scheduleLeaseOwner,
+            leaseExpiresAt: { gt: new Date() },
+            idempotencyKey: `publish:${full.id}:${full.version}`,
+          },
+          data: {
+            status: 'COMPLETED', completedAt: now,
+            claimedBy: null, claimedAt: null, leaseExpiresAt: null,
+            failureCode: null,
+          },
+        });
+        if (completed.count !== 1) throw new Error('CMS_SCHEDULE_LEASE_LOST');
+      }
       await this.appendMutation(tx, content, full.id, 'CONTENT_PUBLISHED', command.actorId, {
-        locale: command.locale,
-        versionNumber: full.version,
-        canonicalUrl: seo.canonicalUrl,
+        locale: command.locale, versionNumber: full.version, canonicalUrl: seo.canonicalUrl,
+        ...(command.scheduledJobId ? { scheduledJobId: command.scheduledJobId } : {}),
       });
       return this.localized(row);
     });
@@ -1601,17 +1619,32 @@ export class PrismaCmsRepository implements ICmsRepository {
             await this.archive({ contentId: localized.contentId, locale: localized.locale, actorId, expectedVersion: localized.version });
           }
         }
-        const completed = await this.completeScheduledJob(job.id, leaseOwner);
-        if (!completed) throw new Error('CMS_SCHEDULE_LEASE_LOST');
+        // PUBLISH completes inside the publication transaction. ARCHIVE
+        // is a separate job category and still uses explicit completion.
+        if (job.jobType !== 'PUBLISH') {
+          const completed = await this.completeScheduledJob(job.id, leaseOwner);
+          if (!completed) throw new Error('CMS_SCHEDULE_LEASE_LOST');
+        }
         if (job.jobType === 'PUBLISH') result.published += 1;
         else result.archived += 1;
       } catch (error) {
         const current = await this.db.cmsLocalizedContent.findUnique({ where: { id: job.localizedContentId } });
         if (current?.state === targetState) {
-          await this.completeScheduledJob(job.id, leaseOwner);
-          if (job.jobType === 'PUBLISH') result.published += 1;
-          else result.archived += 1;
-          continue;
+          // A visible published state is insufficient reconciliation evidence:
+          // another actor may have published the article, or our lease was
+          // stolen. Count as success only for this job's committed completion.
+          if (job.jobType === 'PUBLISH') {
+            const completed = await this.db.cmsScheduledJob.findUnique({
+              where: { id: job.id }, select: { status: true },
+            });
+            if (completed?.status === 'COMPLETED') {
+              result.published += 1;
+              continue;
+            }
+          } else if (await this.completeScheduledJob(job.id, leaseOwner)) {
+            result.archived += 1;
+            continue;
+          }
         }
         result.failed += 1;
         const failureCode = error instanceof Error ? error.message.slice(0, 120) : 'CMS_SCHEDULE_FAILED';
