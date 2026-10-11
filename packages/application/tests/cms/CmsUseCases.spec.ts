@@ -55,6 +55,7 @@ describe('Phase 16 CMS use cases', () => {
       publishNavigation: vi.fn(),
       listBlockSchemas: vi.fn(),
       createBlockSchema: vi.fn(),
+      approveBlockSchema: vi.fn(),
       listBlocks: vi.fn(),
       saveBlock: vi.fn(),
       listAnnouncements: vi.fn(),
@@ -171,6 +172,21 @@ describe('Phase 16 CMS use cases', () => {
     );
     expect(repository.createContent).toHaveBeenCalledWith(
       expect.objectContaining({ seoMetadata: expect.not.objectContaining({ canonicalUrl: expect.anything() }) }),
+    );
+  });
+
+  it('validates block definitions before any database write and keeps fresh schemas in DRAFT', async () => {
+    const unsafe = {
+      key: 'CMS_HERO', version: 1, nameAr: 'واجهة', nameEn: 'Hero',
+      fieldSchema: { type:'object', properties: {}, additionalProperties: true },
+      assetFields: [], localizedFields: [], status: 'ACTIVE',
+    };
+    await expect(admin.createBlockSchema(unsafe,'author')).rejects.toThrow('CMS_BLOCK_SCHEMA_OBJECT_UNBOUNDED');
+    expect(repository.createBlockSchema).not.toHaveBeenCalled();
+    const valid = { ...unsafe, fieldSchema: {type:'object',properties:{},additionalProperties:false} };
+    await admin.createBlockSchema(valid,'author');
+    expect(repository.createBlockSchema).toHaveBeenCalledWith(
+      expect.objectContaining({status:'DRAFT',createdBy:'author'})
     );
   });
 
