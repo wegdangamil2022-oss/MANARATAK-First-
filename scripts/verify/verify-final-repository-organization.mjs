@@ -49,7 +49,8 @@ for (const file of sourceFiles) {
   }
 }
 
-const importantMarkdown = [path.join(root, 'README.md'), ...allFiles.filter((file) => file.includes(`${path.sep}docs${path.sep}remediation${path.sep}`) && file.endsWith('.md'))];
+const importantMarkdown = [path.join(root, 'README.md'), ...allFiles.filter((file) =>
+  (file.includes(`${path.sep}docs${path.sep}remediation${path.sep}`) || file.includes(`${path.sep}docs${path.sep}operations${path.sep}`)) && file.endsWith('.md'))];
 const brokenImportantLinks = [];
 for (const file of importantMarkdown) {
   const source = fs.readFileSync(file, 'utf8');

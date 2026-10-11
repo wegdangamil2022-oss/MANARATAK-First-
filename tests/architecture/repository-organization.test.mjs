@@ -77,11 +77,15 @@ test('browser session files, retired lockfiles and a missing npm lockfile fail o
 
 test('unknown source directories and broken imports and documentation links are still rejected', () => {
   const result = inspect(
-    { 'apps/web/src/app.ts': "import './missing';", 'README.md': '[Missing](docs/missing.md)' },
+    {
+      'apps/web/src/app.ts': "import './missing';",
+      'README.md': '[Missing](docs/missing.md)',
+      'docs/operations/runbook.md': '[Missing entry point](../../retired-server.ts)',
+    },
     ['obsolete-app'],
   );
   assert.equal(result.status, 1);
   assert.deepEqual(result.report.unexpectedRootDirectories, ['obsolete-app']);
   assert.equal(result.report.brokenRelativeImports.length, 1);
-  assert.equal(result.report.brokenImportantLinks.length, 1);
+  assert.equal(result.report.brokenImportantLinks.length, 2);
 });
