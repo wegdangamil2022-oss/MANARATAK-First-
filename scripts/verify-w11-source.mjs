@@ -21,6 +21,13 @@ const section = (source, start, end) => {
   return finish < 0 ? source.slice(begin) : source.slice(begin, finish);
 };
 
+const dashboard = section(useCases, 'public async getDashboard(', 'public async markNotificationRead(');
+// Match the bounded array body without nested quantifiers, then validate its tokens.
+const eventBranches = [...repository.matchAll(/\[([^\[\]]*)\]\s*\.includes\(\s*event\.eventType\s*\)/g)]
+  .filter(match => match[1].replace(/'[^']+'/g, '').replace(/[,\s]/g, '') === '')
+  .map(match => new Set([...match[1].matchAll(/'([^']+)'/g)].map(value => value[1])));
+const handlesEvents = events => eventBranches.some(branch => events.every(event => branch.has(event)));
+
 const checks = [
   ['P15-INIT-001',
     !useCases.includes('getOrCreateWorkspace') &&
@@ -36,7 +43,9 @@ const checks = [
     repository.includes('if (syncBlocked) return false;')],
   ['P15-READ-004',
     useCases.includes("workspace.status === StudentWorkspaceStatus.ARCHIVED") &&
-    useCases.indexOf('await this.requireReadableWorkspace(studentReferenceId);') < useCases.indexOf('this.deliveryCache?.getDashboard(studentReferenceId)')],
+    dashboard.indexOf('await this.requireReadableWorkspace(studentReferenceId);') >= 0 &&
+    dashboard.indexOf('await this.requireReadableWorkspace(studentReferenceId);') < dashboard.indexOf('this.repository.getDashboardSummary(studentReferenceId)') &&
+    !/deliveryCache\??\.getDashboard\s*\(/.test(dashboard)],
   ['P15-CONSENT-007',
     domain.includes('StudentPrivacyConsentDecisionDto') && schema.includes('model StudentPrivacyConsentDecision') &&
     router.includes("'/privacy-consent'") && repository.includes("'StudentPrivacyConsentDecided'") &&
@@ -67,7 +76,8 @@ const checks = [
   ['W11-IG-G-CONTRACT-GUARD',
     courseCompletion.includes("COURSE_COMPLETED_EVENT_TYPE = 'CourseCompleted'") &&
     certificateRepository.includes("schemaVersion: '2.0'") && certificateRepository.includes('studentReferenceId: certificate.studentReferenceId') &&
-    repository.includes("['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted']") && repository.includes("['CertificateIssued', 'CertificateRevoked', 'CertificateReissued']")],
+    handlesEvents(['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted']) &&
+    handlesEvents(['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered', 'CertificateArchived'])],
 ];
 
 let failures = 0;

@@ -397,6 +397,36 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source classification only; no database execution. Scholarship revision participates in concurrency and audited authoring. Restore backup or use a reviewed forward fix rather than resetting revision evidence."
+    },
+    "20261011051500_cms_review_snapshot_hash": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-16-migration-recovery.md",
+      "decision": "Source-only CMS governance change; no database execution. Restore a verified pre-migration backup including editorial/review/publication history, or apply a reviewed forward fix. Do not drop snapshot, editor, version or approval evidence to reverse the application rollout."
+    },
+    "20261011052500_cms_public_site_snapshots": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-16-migration-recovery.md",
+      "decision": "Source-only CMS governance change; no database execution. Restore a verified pre-migration backup including editorial/review/publication history, or apply a reviewed forward fix. Do not drop snapshot, editor, version or approval evidence to reverse the application rollout."
+    },
+    "20261011053500_cms_redirect_version": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-16-migration-recovery.md",
+      "decision": "Source-only CMS governance change; no database execution. Restore a verified pre-migration backup including editorial/review/publication history, or apply a reviewed forward fix. Do not drop snapshot, editor, version or approval evidence to reverse the application rollout."
+    },
+    "20261011065000_cms_block_schema_approval": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-16-migration-recovery.md",
+      "decision": "Source-only CMS governance change; no database execution. Restore a verified pre-migration backup including editorial/review/publication history, or apply a reviewed forward fix. Do not drop snapshot, editor, version or approval evidence to reverse the application rollout."
+    },
+    "20261011075500_cms_root_last_editor": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-16-migration-recovery.md",
+      "decision": "Source-only CMS governance change; no database execution. Restore a verified pre-migration backup including editorial/review/publication history, or apply a reviewed forward fix. Do not drop snapshot, editor, version or approval evidence to reverse the application rollout."
+    },
+    "20261011114500_cms_bounded_search_indexes": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-16-migration-recovery.md",
+      "decision": "Source-only CMS governance change; no database execution. Restore a verified pre-migration backup including editorial/review/publication history, or apply a reviewed forward fix. Do not drop snapshot, editor, version or approval evidence to reverse the application rollout."
     }
   }
 }

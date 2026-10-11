@@ -36,17 +36,20 @@ function workspaceHarness(role = 'student', status = 'ACTIVE') {
   let workspace; let creates = 0; const inbox = new Set();
   const noop = { create: async () => ({}) };
   const tx = {
+    $queryRaw: async () => [],
     studentWorkspaceEventInbox: { findUnique: async ({ where }) => inbox.has(where.eventId) ? {} : null, create: async ({ data }) => { inbox.add(data.eventId); } },
     studentWorkspace: { findUnique: async () => workspace,
       create: async ({ data }) => { creates++; workspace = { id: 'workspace', version: 1, ...data }; return workspace; },
-      update: async ({ data }) => { workspace = { ...workspace, ...data }; return workspace; } },
+      update: async ({ data }) => { const nextVersion = data.version?.increment ? workspace.version + data.version.increment : workspace.version; workspace = { ...workspace, ...data, version: nextVersion }; return workspace; } },
     studentSavedCollection: noop, studentPersonalStatistics: noop, auditRecord: noop, transactionalOutboxRecord: noop, studentTimelineEntry: noop,
   };
   const repository = new PrismaStudentWorkspaceRepository({ $transaction: async fn => fn(tx) });
   const gateway = new StudentWorkspaceOutboxDeliveryGateway({ consumeIntegrationEvent: event => repository.ingestIntegrationEvent(event) },
-    { findByIdentityId: async () => role ? [{ roleId: role }] : [] }, { findById: async () => ({ type: 'Human', status }) });
+    { findByIdentityId: async () => role ? [{ id: 'assignment', roleId: role }] : [] }, { findById: async () => ({ type: 'Human', status }) });
   const entry = { id: 'event', domain: 'AUTHORIZATION', eventType: 'RoleAssignmentCreated',
-    payload: { identityId: 'identity', roleId: role }, metadata: {}, createdAt: new Date() };
+    payload: { identityId: 'identity', roleId: role, assignmentId: 'assignment' },
+    aggregate: { aggregateType: 'ROLE_ASSIGNMENT', aggregateId: 'assignment' },
+    metadata: { schemaVersion: '1.0.0' }, createdAt: new Date() };
   return { gateway, entry, creates: () => creates, workspace: () => workspace };
 }
 test('student persona event provisions once across replay and different assignment events', async () => {
@@ -59,7 +62,7 @@ test('student persona event provisions once across replay and different assignme
 for (const role of ['admin', 'staff', null]) test(`${role} has no accidental student workspace`, async () => {
   const h = workspaceHarness(role);
   await h.gateway.deliver(h.entry, { idempotencyKey: 'event' });
-  await h.gateway.deliver({ ...h.entry, domain: 'IDENTITY', eventType: 'IdentityCreated.v1', payload: { identityId: 'identity', identityType: 'Human' } }, { idempotencyKey: 'event' });
+  await h.gateway.deliver({ ...h.entry, domain: 'IDENTITY', aggregate: { aggregateType: 'Identity', aggregateId: 'identity' }, metadata: { ownerDomain: 'IDENTITY', schemaVersion: 1 }, eventType: 'IdentityCreated.v1', payload: { identityId: 'identity', identityType: 'Human' } }, { idempotencyKey: 'event' });
   assert.equal(h.creates(), 0);
 });
 test('late persona creation preserves suspended owner state', async () => {
@@ -70,13 +73,13 @@ test('late persona creation preserves suspended owner state', async () => {
 test('stale suspension delivery cannot suspend a currently ACTIVE student', async () => {
   const h = workspaceHarness();
   await h.gateway.deliver(h.entry, { idempotencyKey: 'event' });
-  await h.gateway.deliver({ ...h.entry, id: 'old-status', domain: 'IDENTITY', eventType: 'IdentityStatusChanged.v1',
+  await h.gateway.deliver({ ...h.entry, id: 'old-status', domain: 'IDENTITY', aggregate: { aggregateType: 'Identity', aggregateId: 'identity' }, metadata: { ownerDomain: 'IDENTITY', schemaVersion: 1 }, eventType: 'IdentityStatusChanged.v1',
     payload: { identityId: 'identity', identityType: 'Human', newStatus: 'SUSPENDED' } }, { idempotencyKey: 'old-status' });
   assert.equal(h.workspace().status, 'ACTIVE');
 });
 test('lifecycle delivery before persona is retryable and succeeds after persona', async () => {
   const h = workspaceHarness('student', 'SUSPENDED');
-  const status = { ...h.entry, id: 'status', domain: 'IDENTITY', eventType: 'IdentityStatusChanged.v1', payload: { identityId: 'identity', identityType: 'Human', newStatus: 'SUSPENDED' } };
+  const status = { ...h.entry, id: 'status', domain: 'IDENTITY', aggregate: { aggregateType: 'Identity', aggregateId: 'identity' }, metadata: { ownerDomain: 'IDENTITY', schemaVersion: 1 }, eventType: 'IdentityStatusChanged.v1', payload: { identityId: 'identity', identityType: 'Human', newStatus: 'SUSPENDED' } };
   await assert.rejects(h.gateway.deliver(status, { idempotencyKey: 'status' }), /STUDENT_WORKSPACE_NOT_FOUND/);
   await h.gateway.deliver(h.entry, { idempotencyKey: 'event' });
   await h.gateway.deliver(status, { idempotencyKey: 'status' });

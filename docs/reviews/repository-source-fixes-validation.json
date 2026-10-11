@@ -1,0 +1,107 @@
+{
+  "status": "SOURCE_FIXES_VERIFIED — RUNTIME_DEFERRED",
+  "recordedAt": "2026-10-11T12:15:47.796451+00:00",
+  "branch": "fix/repository-source-gates",
+  "baseSha": "ed8d01d7e0c88dfd2b9eaebc833e6a6e084f959a",
+  "codeSha": "638d287db6d74a8ff8d5f3462be45153d558b530",
+  "verifiedSourceSha": "763596dc3331af65d4d36e92876c0c4093a8db75",
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/typecheck.txt"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/build.txt"
+    },
+    {
+      "command": "npm run test:node",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/node-tests.txt"
+    },
+    {
+      "command": "DATABASE_MUTATIONS_ALLOWED=false DATABASE_ENVIRONMENT=source npm run ci:closure:manifest; local nginx binary on PATH",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/source-manifest.txt"
+    },
+    {
+      "command": "npm run quality:source",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/source-quality.txt"
+    },
+    {
+      "command": "DATABASE_MUTATIONS_ALLOWED=false DATABASE_ENVIRONMENT=source npm run translation:quality:source",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/translation.txt"
+    },
+    {
+      "command": "npm run db:source:verify",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/prisma.txt"
+    },
+    {
+      "command": "npm run release:artifacts && npm run release:verify; tar contents checked for package metadata/fonts/logo",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/release-artifacts.txt"
+    },
+    {
+      "command": "npm run verify:aistudio",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/aistudio.txt"
+    },
+    {
+      "command": "npm run vercel:typecheck",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/vercel-types.txt"
+    },
+    {
+      "command": "node --test tests/architecture/ci-runtime-regressions.test.mjs tests/remediation/w2-migration-recovery-source.test.mjs tests/remediation/m10-recovery-gate-exit.test.mjs",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/repository-source-fixes/early-ci-contracts.txt"
+    },
+    {
+      "command": "npx vitest run --config vitest.config.ts --maxWorkers=2 --reporter=json",
+      "exitCode": 0,
+      "result": "PASS",
+      "passed": 3737,
+      "failed": 0,
+      "skipped": 45,
+      "files": 528
+    },
+    {
+      "command": "npx eslint . --format json",
+      "exitCode": 0,
+      "result": "PASS",
+      "errors": 0,
+      "warnings": 3705
+    }
+  ],
+  "nodeTests": {
+    "passed": 315,
+    "failed": 0
+  },
+  "sourceManifest": {
+    "gates": 29,
+    "sourcePassed": 27,
+    "runtimeDeferred": 2,
+    "registeredVerifiers": 54
+  },
+  "databaseConnected": false,
+  "migrationsApplied": 0,
+  "deployed": false,
+  "mergedToMain": false,
+  "remoteCi": "Not claimed; validate the pull request separately."
+}

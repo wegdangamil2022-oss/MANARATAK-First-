@@ -1,0 +1,49 @@
+Command: npm run build
+Exit code: 0
+Output: final excerpt
+
+97 TypeScript files scanned; 0 invalid relative ESM specifiers
+API workspace ESM artifacts resolved: core, shared, domain, config, application, infrastructure
+
+  dist/server.cjs       7.8mb ⚠️
+  dist/server.cjs.map  13.1mb
+
+⚡ Done in 1584ms
+
+> @manaratak/web@1.0.0 build
+> node --max-old-space-size=4096 ../../node_modules/vite/bin/vite.js build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 2465 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/cms-app-entry.js               0.21 kB
+dist/_headers                       0.71 kB
+dist/index.html                     1.31 kB │ gzip:   0.66 kB
+dist/assets/index-Bb7ltZtY.css    585.32 kB │ gzip:  63.38 kB
+dist/assets/Seo-Di1XidWY.js         3.35 kB │ gzip:   1.14 kB
+dist/assets/index-CRqH-cP4.js      16.59 kB │ gzip:   4.25 kB
+dist/assets/index-fAoktQq3.js      21.43 kB │ gzip:   4.98 kB
+dist/assets/index-BCxCHRZs.js      40.65 kB │ gzip:   8.78 kB
+dist/assets/index-BO1xhffc.js   4,448.98 kB │ gzip: 726.80 kB
+✓ built in 15.01s
+
+> @manaratak/application@1.0.0 build
+> tsc -b
+
+
+> @manaratak/config@1.0.0 build
+> tsc -b
+
+
+> @manaratak/core@1.0.0 build
+> tsc -b
+
+
+> @manaratak/domain@1.0.0 build
+> tsc -b
+
+
+> @manaratak/infrastructure@1.0.0 build
+> tsc -b

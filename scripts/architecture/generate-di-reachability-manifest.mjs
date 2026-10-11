@@ -15,7 +15,7 @@ if (analysis.unreachable.length) {
 const manifest = {
   schemaVersion: 1,
   finding: 'MNT-AUD-0109',
-  generatedFor: 'Final source reconciliation after W7 — 2026-09-07',
+  generatedFor: 'Current registered production source reconciliation',
   container: analysis.container,
   registrationCount: analysis.registrationCount,
   reachableCount: analysis.reachableCount,

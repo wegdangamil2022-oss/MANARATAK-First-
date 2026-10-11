@@ -259,6 +259,10 @@
       "owner": "cms",
       "required": true
     },
+    "CmsSitePublishedSnapshot": {
+      "owner": "cms",
+      "required": true
+    },
     "CmsTag": {
       "owner": "cms",
       "required": true

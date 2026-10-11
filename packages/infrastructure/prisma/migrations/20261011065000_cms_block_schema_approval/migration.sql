@@ -1,3 +1,6 @@
+-- MANARATAK_MIGRATION_OWNER: cms
+-- MANARATAK_MIGRATION_SCOPE: owner_only
+-- MANARATAK_ARCH_DECISION: ADR-028
 -- Prepared only; never applied to a real database in Section 16 source review.
 ALTER TABLE "CmsBlockSchema" ADD COLUMN "approvedBy" TEXT;
 ALTER TABLE "CmsBlockSchema" ADD COLUMN "approvedAt" TIMESTAMP(3);
