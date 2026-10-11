@@ -29,6 +29,7 @@ describe('Phase 16 CMS admin router', () => {
     changeLocalizedSlug: vi.fn(),
     listRedirects: vi.fn(),
     createRedirect: vi.fn(),
+    updateRedirect: vi.fn(),
     listNavigation: vi.fn(),
     saveNavigation: vi.fn(),
     publishNavigation: vi.fn(),
@@ -63,6 +64,24 @@ describe('Phase 16 CMS admin router', () => {
     );
     return server;
   };
+
+  it('denies redirect editing to users without redirect management grant', async () => {
+    const cms = useCases();
+    const result = await request(app(cms, 'editor', ['admin:cms:author']))
+      .patch('/cms/redirects/red-1')
+      .send({ expectedVersion: 1, destinationPath: '/ar/new', reason: 'Correction' });
+    expect(result.status).toBe(403);
+    expect(cms.updateRedirect).not.toHaveBeenCalled();
+  });
+
+  it('rejects malformed redirect updates before repository invocation', async () => {
+    const cms = useCases();
+    const result = await request(app(cms, 'checker', ['admin:cms:redirects:manage']))
+      .patch('/cms/redirects/red-1')
+      .send({ destinationPath: '//evil.invalid', reason: 'Correction' });
+    expect(result.status).toBe(400);
+    expect(cms.updateRedirect).not.toHaveBeenCalled();
+  });
 
   it('rejects self-service approval when author has no independent review grant', async () => {
     const cms = useCases();

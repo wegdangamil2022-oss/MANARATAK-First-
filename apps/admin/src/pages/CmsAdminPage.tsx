@@ -855,6 +855,28 @@ export function CmsAdminPage() {
                   </div>
                 </div>
               </div>
+              <section aria-label={locale === 'ar' ? 'مقارنة جاهزية النشر بالعربية والإنجليزية' : 'Arabic and English publishing readiness'} className="grid gap-3 sm:grid-cols-2">
+                {(['ar', 'en'] as const).map((language) => {
+                  const item = selected.localizedPayloads.find((entry) => entry.locale === language);
+                  const check = selected.readiness[language];
+                  return <div key={language} className="rounded-2xl border bg-white p-4">
+                    <h3 className="font-bold">{language === 'ar' ? 'العربية' : 'English'}</h3>
+                    <p className="text-sm" aria-live="polite">
+                      {!item ? (locale === 'ar' ? 'لم تُحفظ النسخة' : 'No saved version')
+                        : check?.ready ? (locale === 'ar' ? 'جاهزة للمراجعة' : 'Ready for review')
+                        : (locale === 'ar' ? 'غير جاهزة' : 'Not ready')}
+                    </p>
+                    <p className="text-xs text-slate-600">{locale === 'ar' ? 'الحالة' : 'State'}: {item?.state ?? 'MISSING'} · v{item?.version ?? '—'}</p>
+                    {!!check?.missing?.length && <p className="text-xs text-amber-800">
+                      {locale === 'ar' ? 'حقول ناقصة' : 'Missing'}: {check.missing.join(', ')}
+                    </p>}
+                    <button type="button" disabled={busy} className="mt-2 text-sm underline"
+                      onClick={() => setLocale(language)}>
+                      {locale === 'ar' ? 'فتح محرر اللغة' : 'Open language editor'}
+                    </button>
+                  </div>;
+                })}
+              </section>
               {dirty && (
                 <Alert tone="error">
                   توجد تعديلات غير محفوظة{dirtyLocales.ar ? ' · العربية' : ''}

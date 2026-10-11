@@ -14,6 +14,8 @@ interface Redirect {
   destinationPath: string;
   statusCode: number;
   active: boolean;
+  version?: number;
+  contentId?: string | null;
 }
 interface NavigationNode {
   id: string;
@@ -82,6 +84,7 @@ export function CmsOperationsPanels({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [redirectSearch, setRedirectSearch] = useState('');
 
   const load = useCallback(async () => {
     const current = ++sequence.current;
@@ -152,6 +155,22 @@ export function CmsOperationsPanels({
         }),
       'تم حفظ التحويل الدائم.',
     );
+  };
+  const updateRedirect = (item: Redirect, event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!item.version || item.contentId) return;
+    const form = new FormData(event.currentTarget);
+    const destinationPath = String(form.get('destinationPath') || '').trim();
+    const reason = String(form.get('reason') || '').trim();
+    if (!reason || !destinationPath || !window.confirm(
+      locale === 'ar' ? 'هل تؤكد تحديث التحويل ونشر أثره؟' : 'Confirm redirect update?'
+    )) return;
+    void submit(() => adminApiClient.request('/admin/cms/redirects/' + encodeURIComponent(item.id), {
+      method: 'PATCH', body: JSON.stringify({
+        expectedVersion: item.version, destinationPath, reason,
+        active: form.get('active') === 'true',
+      }),
+    }), locale === 'ar' ? 'تم تحديث التحويل.' : 'Redirect updated.');
   };
   const saveNavigation = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -299,10 +318,27 @@ export function CmsOperationsPanels({
               حفظ التحويل
             </button>
           </form>
-          <Items
-            empty="لا توجد تحويلات."
-            items={redirects.slice(0, 4).map((x) => `${x.sourcePath} ← ${x.destinationPath}`)}
-          />
+          <label className="block text-xs">
+            {locale === 'ar' ? 'بحث في التحويلات' : 'Search redirects'}
+            <input className={input} value={redirectSearch} onChange={(event) => setRedirectSearch(event.target.value)} />
+          </label>
+          <ul className="mt-4 space-y-3">
+            {redirects.filter((item) =>
+              (item.sourcePath + ' ' + item.destinationPath).toLowerCase().includes(redirectSearch.toLowerCase())
+            ).map((item) => <li key={item.id} className="rounded-lg bg-slate-50 p-3 text-xs">
+              <p dir="ltr">{item.sourcePath} → {item.destinationPath}</p>
+              <p>{item.statusCode} · {item.active ? 'ACTIVE' : 'DISABLED'} · v{item.version ?? '—'}</p>
+              {!item.contentId && item.version ? <form key={item.version} className="mt-2 space-y-2" onSubmit={(event) => updateRedirect(item, event)}>
+                <input className={input} dir="ltr" name="destinationPath" defaultValue={item.destinationPath} required />
+                <input className={input} name="reason" minLength={3} required placeholder={locale === 'ar' ? 'سبب التعديل' : 'Change reason'} />
+                <select className={input} name="active" defaultValue={item.active ? 'true' : 'false'}>
+                  <option value="true">{locale === 'ar' ? 'مفعل' : 'Active'}</option>
+                  <option value="false">{locale === 'ar' ? 'معطل' : 'Disabled'}</option>
+                </select>
+                <button type="submit" disabled={busy} className={button}>{locale === 'ar' ? 'حفظ التعديل' : 'Save changes'}</button>
+              </form> : <p className="text-amber-800">{locale === 'ar' ? 'تحويل محكوم بالنشر أو يحتاج ترحيل الإصدار' : 'Publisher-owned redirect or version migration required'}</p>}
+            </li>)}
+          </ul>
         </Card>
         <Card title="قوائم التنقل — إضافة آمنة">
           <form onSubmit={saveNavigation} className="space-y-2">
