@@ -380,6 +380,7 @@ export class AIAdminRouter {
                   modelKey: keySchema.optional(),
                 })
                 .parse(req.body),
+              requestedBy: actor(req),
             ),
           );
       }),
@@ -388,7 +389,7 @@ export class AIAdminRouter {
       '/evaluation-runs/:publicId/execute',
       asyncHandler(async (req, res) => {
         actor(req);
-        res.json(await cradle.aiEvaluationUseCases.run(req.params.publicId));
+        res.json(await cradle.aiEvaluationUseCases.run(req.params.publicId, actor(req)));
       }),
     );
     router.post(
