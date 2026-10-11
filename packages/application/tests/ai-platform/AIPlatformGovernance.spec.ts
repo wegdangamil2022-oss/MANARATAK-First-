@@ -117,4 +117,25 @@ describe('P17 known-price routing', () => {
       prices: [], inputTokens: 100,
     })).toEqual({ tokens: 356, cost: 0 });
   });
+
+  it('rejects pathological structured-output schemas before a prompt version is stored', async () => {
+    const repository = { find: vi.fn().mockResolvedValue({ key: 'prompt', status: 'DRAFT' }), createPromptVersion: vi.fn() };
+    const useCases = new AIPlatformAdminUseCases(repository as any, { get: vi.fn(), list: vi.fn() } as any);
+    let recursiveSchema: Record<string, unknown> = { type: 'string' };
+    for (let index = 0; index < 24; index += 1)
+      recursiveSchema = { type: 'object', properties: { nested: recursiveSchema } };
+    await expect(useCases.createPromptVersion({
+      promptKey: 'prompt', version: 1, template: 'safe prompt', status: 'DRAFT',
+      inputSchema: recursiveSchema, createdBy: 'author-1',
+    } as any)).rejects.toThrow('AI_JSON_SCHEMA_COMPLEXITY_LIMIT');
+    const wideSchema = { type: 'object', properties: Object.fromEntries(
+      Array.from({ length: 260 }, (_, index) => [`k${index}`, { type: 'string' }]),
+    ) };
+    await expect(useCases.createPromptVersion({
+      promptKey: 'prompt', version: 2, template: 'safe prompt', status: 'DRAFT',
+      inputSchema: wideSchema, createdBy: 'author-1',
+    } as any)).rejects.toThrow('AI_JSON_SCHEMA_COMPLEXITY_LIMIT');
+    expect(repository.createPromptVersion).not.toHaveBeenCalled();
+  });
+
 });
