@@ -3472,8 +3472,10 @@ model CmsBlockSchema {
   fieldSchema     Json
   localizedFields Json
   assetFields     Json
-  status          String   @default("ACTIVE")
+  status          String   @default("DRAFT")
   createdBy       String
+  approvedBy      String?
+  approvedAt      DateTime?
   createdAt       DateTime @default(now())
 
   blocks CmsContentBlock[]
