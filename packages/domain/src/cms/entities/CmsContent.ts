@@ -179,6 +179,13 @@ export interface CmsContentFilters {
   pageSize?: number;
 }
 
+/** Published and indexable CMS URL from the authoritative public snapshot. */
+export interface CmsSitemapEntryDto {
+  contentId: string;
+  locale: 'ar' | 'en';
+  canonicalPath: string;
+}
+
 export interface PublicCmsContentDto {
   publicId: string;
   contentId: string;
