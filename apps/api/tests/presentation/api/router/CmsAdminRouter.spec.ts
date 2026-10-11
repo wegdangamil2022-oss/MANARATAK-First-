@@ -27,6 +27,7 @@ describe('Phase 16 CMS admin router', () => {
     createTag: vi.fn(),
     cancelSchedule: vi.fn(),
     changeLocalizedSlug: vi.fn(),
+    replaceDomainLinks: vi.fn(),
     listRedirects: vi.fn(),
     searchRedirects: vi.fn(),
     createRedirect: vi.fn(),
@@ -144,6 +145,23 @@ describe('Phase 16 CMS admin router', () => {
       expect((await request(server).get(query)).status).toBe(400);
     }
     expect(cms.searchRedirects).not.toHaveBeenCalled();
+  });
+
+  it('requires a root version for relation replacement and forwards authenticated editor CAS', async () => {
+    const cms = useCases();
+    const server = app(cms, 'editor', ['admin:cms:author']);
+    const link = {
+      targetType: 'UNIVERSITY',
+      targetId: '683a90d4-abab-4f77-9f32-5a44d8288928',
+      relationType: 'RELATED',
+    };
+    expect((await request(server).put('/cms/content/node-1/domain-links')
+      .send({ links: [link] })).status).toBe(400);
+    expect(cms.replaceDomainLinks).not.toHaveBeenCalled();
+    cms.replaceDomainLinks.mockResolvedValue([]);
+    expect((await request(server).put('/cms/content/node-1/domain-links')
+      .send({ expectedVersion: 3, links: [link] })).status).toBe(200);
+    expect(cms.replaceDomainLinks).toHaveBeenCalledWith('node-1', [expect.objectContaining(link)], 'editor', 3);
   });
 
   it('denies redirect editing to users without redirect management grant', async () => {
