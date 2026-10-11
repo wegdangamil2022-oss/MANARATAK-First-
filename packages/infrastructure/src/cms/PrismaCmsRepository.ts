@@ -930,6 +930,15 @@ export class PrismaCmsRepository implements ICmsRepository {
     siteIdentifier = 'manaratak',
     limit = 6,
   ): Promise<PublicCmsContentDto[]> {
+    // Public related-content queries must not reveal an owner relationship
+    // after P7/P9/P10/P12/P13 revoked or archived the referenced entity.
+    try {
+      await new PrismaCmsDomainOwnerReadGateway(this.db)
+        .assertPublished(targetType as CmsDomainTargetType, targetId);
+    } catch (cause) {
+      if (cause instanceof Error && cause.message === 'CMS_DOMAIN_OWNER_TARGET_NOT_PUBLIC') return [];
+      throw cause;
+    }
     // Select unique owner content IDs *after* filtering for the actual published
     // site/locale. A prefilter followed by take(200) drops relevant content when
     // link rows are duplicated across relation types or exceed that window.
