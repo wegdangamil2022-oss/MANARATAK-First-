@@ -56,6 +56,8 @@ export const PRODUCTION_REQUIRED_CONFIG_KEYS = Object.freeze([
   'MANARATAK_ASSET_PROVIDER_API_KEY',
   'MANARATAK_ASSET_PROVIDER_SIGNING_SECRET',
   'MANARATAK_IMPORT_RAW_RETENTION_DAYS',
+  'FINANCE_MERCHANT_REFERENCE',
+  'FINANCE_RUNTIME_APPROVED',
   'FINANCE_PROVIDER_BASE_URL',
   'FINANCE_PROVIDER_API_KEY',
   'FINANCE_PROVIDER_SIGNING_SECRET',
@@ -213,6 +215,8 @@ export const AppConfigSchema = z.preprocess((input) => {
   MANARATAK_ASSET_PROVIDER_MAX_RESPONSE_BYTES: z.coerce.number().int().positive().max(134_217_728).optional(),
   MANARATAK_ASSET_PROVIDER_ALLOW_INSECURE_HTTP: envBoolean.optional(),
   MANARATAK_IMPORT_RAW_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).optional(),
+  FINANCE_MERCHANT_REFERENCE: z.string().trim().regex(/^[A-Za-z0-9._:-]{1,160}$/).optional(),
+  FINANCE_RUNTIME_APPROVED: envBoolean.optional(),
   FINANCE_PAYMENT_PROVIDER_KEY: z.string().trim().min(1).max(128).optional(),
   FINANCE_FX_PROVIDER_KEY: z.string().trim().min(1).max(128).optional(),
   FINANCE_BANK_PROVIDER_KEY: z.string().trim().min(1).max(128).optional(),
@@ -465,6 +469,7 @@ export const AppConfigSchema = z.preprocess((input) => {
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: `${key} is required in production/staging`, path: [key] });
       }
     }
+    if (data.FINANCE_RUNTIME_APPROVED === true && !data.FINANCE_MERCHANT_REFERENCE) ctx.addIssue({code:z.ZodIssueCode.custom,message:'FINANCE_MERCHANT_REFERENCE is required for approved finance runtime',path:['FINANCE_MERCHANT_REFERENCE']});
     if (data.FINANCE_PROVIDER_BASE_URL && !data.FINANCE_PROVIDER_BASE_URL.startsWith('https://')) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'FINANCE_PROVIDER_BASE_URL must be HTTPS in production/staging', path: ['FINANCE_PROVIDER_BASE_URL'] });
     }

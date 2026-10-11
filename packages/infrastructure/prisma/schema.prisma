@@ -4674,13 +4674,20 @@ model FinanceInvoiceRecord {
 
 model FinancePaymentRecord {
   id String @id @default(uuid())
+  nextCheckAt DateTime @default(now())
+  leaseUntil DateTime?
+  checkAttempts Int @default(0)
   publicId String @unique
   invoiceId String
   idempotencyKeyHash String @unique
   currencyCode String
   scale Int
   amountMinorUnits String
+  providerEvidence Json?
   status String
+  commandActorId String?
+  dispatchStartedAt DateTime?
+  captureStartedAt DateTime?
   paymentMethod String
   gatewayProvider String?
   gatewayReference String?
@@ -4693,6 +4700,7 @@ model FinancePaymentRecord {
   attempts FinancePaymentAttemptRecord[]
   @@index([invoiceId, status])
   @@unique([gatewayProvider, gatewayReference])
+  @@index([status, nextCheckAt, id], map: "FinancePaymentRecord_reconcile_due_idx")
 }
 
 model FinancePaymentAttemptRecord {
@@ -4778,6 +4786,7 @@ model FinanceWalletRecord {
 
 model FinanceWalletHoldRecord {
   id String @id @default(uuid())
+  version Int @default(1)
   publicId String @unique
   walletId String
   amountMinorUnits String
@@ -4795,6 +4804,7 @@ model FinanceWalletHoldRecord {
 
 model FinanceExchangeRateRecord {
   id String @id @default(uuid())
+  version Int @default(1)
   publicId String @unique
   sourceCurrencyCode String
   targetCurrencyCode String
@@ -4814,6 +4824,9 @@ model FinanceExchangeRateRecord {
 
 model FinanceTransferRecord {
   id String @id @default(uuid())
+  nextCheckAt DateTime @default(now())
+  leaseUntil DateTime?
+  checkAttempts Int @default(0)
   publicId String @unique
   sourceWalletId String
   destinationReferenceId String
@@ -4826,11 +4839,15 @@ model FinanceTransferRecord {
   targetScale Int?
   targetAmountMinorUnits String?
   rateId String?
+  rateNumeratorSnapshot String?
+  rateDenominatorSnapshot String?
+  marginBasisPointsSnapshot Int?
   feeAmountMinorUnits String?
   feePolicyReference String?
   bankProvider String?
   bankProviderReference String? @unique
   providerStatus String?
+  providerEvidence Json?
   providerFailureCode String?
   settlementTransactionId String? @unique
   reversalTransactionId String? @unique
@@ -4843,10 +4860,12 @@ model FinanceTransferRecord {
   updatedAt DateTime @updatedAt
   @@index([status, createdAt])
   @@index([sourceWalletId, createdAt])
+  @@index([status, nextCheckAt, id], map: "FinanceTransferRecord_reconcile_due_idx")
 }
 
 model FinanceApprovalRecord {
   id String @id @default(uuid())
+  version Int @default(1)
   publicId String @unique
   actionType String
   targetReferenceId String
@@ -4881,9 +4900,14 @@ model FinanceApprovalDecisionRecord {
 
 model FinanceRefundRecord {
   id String @id @default(uuid())
+  version Int @default(1)
+  nextCheckAt DateTime @default(now())
+  leaseUntil DateTime?
+  checkAttempts Int @default(0)
   publicId String @unique
   paymentId String
   amountMinorUnits String
+  providerEvidence Json?
   currencyCode String
   scale Int
   reason String
@@ -4896,6 +4920,7 @@ model FinanceRefundRecord {
   completedAt DateTime?
   createdAt DateTime @default(now())
   @@index([paymentId, status])
+  @@index([status, nextCheckAt, id], map: "FinanceRefundRecord_reconcile_due_idx")
 }
 
 model FinanceDocumentRecord {
@@ -5703,4 +5728,49 @@ model MajorPublicationSnapshot {
   reviewerId String
   publishedAt DateTime @default(now())
   @@index([majorId, profileId])
+}
+
+// P19 source-only remediation. Deploy separately after legacy financial-state review.
+model FinanceCommandRecord {
+  id String @id
+  actorId String
+  operation String
+  targetId String
+  fingerprint String
+  response Json
+  createdAt DateTime @default(now())
+  @@index([targetId, operation])
+}
+model FinanceReconciliationSnapshot {
+  id String @id
+  status String
+  coverage String
+  issues Json
+  cursor Json?
+  asOf DateTime @default(now())
+}
+
+model FinanceReconciliationIssueRecord {
+  id String @id
+  scope String
+  code String
+  severity String
+  referenceId String
+  details String
+  updatedAt DateTime @updatedAt
+  @@index([scope, referenceId])
+  @@index([severity, id])
+}
+
+model FinanceAdjustmentCaseRecord {
+  id String @id @default(uuid())
+  publicId String @unique
+  reasonCode String
+  supportingDocumentId String
+  makerId String
+  status String @default("OPEN")
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([makerId, status])
 }

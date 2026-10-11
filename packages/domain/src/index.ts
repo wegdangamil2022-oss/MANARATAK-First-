@@ -237,6 +237,7 @@ export * from './file-management/value-objects/FileReference';
 export * from './file-management/value-objects/OwnerReference';
 export * from './file-management/value-objects/RetentionMetadata';
 export * from './file-management/value-objects/StorageLocator';
+export * from './finance-platform/FinanceSafety';
 export * from './finance-platform/contracts/IFinanceRepository';
 export * from './finance-platform/contracts/FinanceGateways';
 export * from './finance-platform/entities/FinanceInvoice';

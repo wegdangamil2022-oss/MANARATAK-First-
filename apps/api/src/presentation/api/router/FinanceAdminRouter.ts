@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -10,6 +11,7 @@ import {
   InvoiceStatus,
   PaymentStatus,
   TransferStatus,
+  financeApprovalPolicy,
 } from '@manaratak/domain';
 import { ForbiddenException } from '@manaratak/core';
 
@@ -19,14 +21,17 @@ const allAsUndefined = (value: unknown) =>
     : value;
 
 const moneySchema = z.object({
-  amountMinorUnits: z.string().regex(/^-?\d+$/),
+  amountMinorUnits: z
+    .string()
+    .max(30)
+    .regex(/^[1-9]\d{0,29}$/),
   currencyCode: z.string().regex(/^[A-Z]{3}$/),
   scale: z.number().int().min(0).max(6),
 });
 
 const lineItemSchema = z.object({
-  description: z.string().min(1),
-  quantity: z.number().int().positive(),
+  description: z.string().trim().min(1).max(160),
+  quantity: z.number().int().positive().max(1000000),
   unitPrice: moneySchema,
   metadata: z.record(z.string(), z.unknown()).nullable().optional(),
 });
@@ -38,6 +43,14 @@ export class FinanceAdminRouter {
     authEvaluatorService: AuthorizationEvaluatorService;
   }): Router {
     const router = Router();
+    router.use((req: Request, _res: Response, next: NextFunction) => {
+      const supplied = req.headers['x-correlation-id'];
+      req.headers['x-correlation-id'] =
+        typeof supplied === 'string' && /^[A-Za-z0-9._:-]{1,100}$/.test(supplied)
+          ? supplied
+          : randomUUID();
+      next();
+    });
     const { financeAdminUseCases } = cradle;
     const { financePlatformUseCases, authEvaluatorService } = cradle;
     const identity = (req: Request, reason?: string): FinanceCommandIdentity => {
@@ -45,9 +58,24 @@ export class FinanceAdminRouter {
       const idempotencyKey = String(req.headers['idempotency-key'] || '').trim();
       if (!idempotencyKey) throw new Error('IDEMPOTENCY_KEY_REQUIRED');
       if (idempotencyKey.length > 200) throw new Error('IDEMPOTENCY_KEY_TOO_LONG');
+      const stateful =
+        /\/(?:invoices\/[^/]+\/(?:items|issue|void|credit-notes|installment-plans)|transfers\/[^/]+\/transitions|approvals\/[^/]+\/decisions|refunds\/[^/]+\/process|exchange-rates\/[^/]+\/activate|wallet-holds\/[^/]+\/(?:release|capture))$/.test(
+          req.path,
+        );
+      const expectedVersion =
+        req.body?.expectedVersion ??
+        (req.headers['if-match']
+          ? Number(String(req.headers['if-match']).replaceAll('"', ''))
+          : undefined);
+      if (stateful && (!Number.isSafeInteger(expectedVersion) || expectedVersion < 1))
+        throw new Error('FINANCE_EXPECTED_VERSION_REQUIRED');
       return {
+        expectedVersion,
         actorId: req.authUserId,
-        correlationId: String(req.headers['x-correlation-id'] || '').trim() || undefined,
+        correlationId:
+          String(req.headers['x-correlation-id'] || '')
+            .trim()
+            .slice(0, 100) || randomUUID(),
         idempotencyKey,
         reason,
       };
@@ -67,6 +95,40 @@ export class FinanceAdminRouter {
       if (!decision.isGranted)
         throw new ForbiddenException(`User lacks required finance permission: ${permission}`);
     };
+
+    const recordQuery = z.object({
+      currencyCode: z
+        .string()
+        .regex(/^[A-Z]{3}$/)
+        .optional(),
+      minAmountMinorUnits: z
+        .string()
+        .regex(/^(?:0|[1-9]\d{0,29})$/)
+        .optional(),
+      maxAmountMinorUnits: z
+        .string()
+        .regex(/^(?:0|[1-9]\d{0,29})$/)
+        .optional(),
+      page: z.coerce.number().int().min(1).default(1),
+      pageSize: z.coerce.number().int().min(1).max(50).default(20),
+      status: z.string().trim().max(40).optional(),
+      search: z.string().trim().max(120).optional(),
+      provider: z.string().trim().max(128).optional(),
+      ownerReferenceId: z.string().trim().max(160).optional(),
+      from: z.coerce.date().optional(),
+      to: z.coerce.date().optional(),
+    });
+    for (const kind of ['refunds', 'transfers', 'approvals', 'commissions', 'payments'] as const) {
+      router.get(
+        `/${kind}/:id`,
+        asyncHandler(async (req: Request, res: Response) => {
+          await requireFinancePermission(req, 'admin:finance:manage');
+          const data = await financePlatformUseCases.getRecord(kind, req.params.id);
+          if (!data) throw new Error('FINANCE_RECORD_NOT_FOUND');
+          res.json(data);
+        }),
+      );
+    }
 
     const listQuerySchema = z.object({
       status: z.preprocess(allAsUndefined, z.nativeEnum(InvoiceStatus).optional()),
@@ -91,7 +153,12 @@ export class FinanceAdminRouter {
       '/invoices/:id/items',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:invoice:manage');
-        const body = z.object({ lineItems: z.array(lineItemSchema).min(1) }).parse(req.body);
+        const body = z
+          .object({
+            expectedVersion: z.number().int().positive(),
+            lineItems: z.array(lineItemSchema).min(1).max(100),
+          })
+          .parse(req.body);
         res.json(
           await financePlatformUseCases.updateDraftInvoice(
             req.params.id,
@@ -106,7 +173,7 @@ export class FinanceAdminRouter {
       '/invoices/:id/issue',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:invoice:manage');
-        z.object({})
+        z.object({ expectedVersion: z.number().int().positive() })
           .strict()
           .parse(req.body ?? {});
         res.json(await financePlatformUseCases.issueInvoice(req.params.id, identity(req)));
@@ -139,7 +206,9 @@ export class FinanceAdminRouter {
       '/invoices/:id/credit-notes',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:invoice:manage');
-        const body = z.object({ amount: moneySchema, reason: z.string().min(3) }).parse(req.body);
+        const body = z
+          .object({ amount: moneySchema, reason: z.string().trim().min(3).max(500) })
+          .parse(req.body);
         res
           .status(201)
           .json(
@@ -164,7 +233,7 @@ export class FinanceAdminRouter {
       '/invoices/:id/void',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:invoice:manage');
-        z.object({})
+        z.object({ expectedVersion: z.number().int().positive() })
           .strict()
           .parse(req.body ?? {});
         res.json(await financePlatformUseCases.voidInvoice(req.params.id, identity(req)));
@@ -213,7 +282,7 @@ export class FinanceAdminRouter {
         await requireFinancePermission(req, 'admin:finance:account:manage');
         const body = z
           .object({
-            ownerReferenceId: z.string().min(1),
+            ownerReferenceId: z.string().trim().min(1).max(160),
             type: z.enum(['ASSET', 'LIABILITY', 'REVENUE', 'EXPENSE', 'EQUITY']),
             currencyCode: z.string().regex(/^[A-Z]{3}$/),
             scale: z.number().int().min(0).max(6),
@@ -225,18 +294,39 @@ export class FinanceAdminRouter {
       }),
     );
     router.post(
+      '/adjustment-cases',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requireFinancePermission(req, 'admin:finance:ledger:post');
+        const body = z
+          .object({
+            reasonCode: z.enum([
+              'RECONCILIATION_CORRECTION',
+              'ROUNDING_CORRECTION',
+              'EMERGENCY_CORRECTION',
+            ]),
+            supportingDocumentId: z.string().uuid(),
+          })
+          .strict()
+          .parse(req.body);
+        res
+          .status(201)
+          .json(await financePlatformUseCases.createAdjustmentCase(body, identity(req)));
+      }),
+    );
+    router.post(
       '/ledger/transactions',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:ledger:post');
         const body = z
           .object({
-            approvalId: z.string().min(1),
-            businessReferenceType: z.string().min(1),
-            businessReferenceId: z.string().min(1),
+            approvalId: z.string().trim().min(1).max(160),
+            reason: z.string().trim().min(3).max(500),
+            businessReferenceType: z.literal('MANUAL_ADJUSTMENT'),
+            businessReferenceId: z.string().trim().min(1).max(160),
             postings: z
               .array(
                 z.object({
-                  accountId: z.string().min(1),
+                  accountId: z.string().trim().min(1).max(160),
                   direction: z.enum(['DEBIT', 'CREDIT']),
                   amount: moneySchema,
                   memo: z.string().optional(),
@@ -245,14 +335,16 @@ export class FinanceAdminRouter {
               .min(2),
           })
           .parse(req.body);
-        res.status(201).json(await financePlatformUseCases.postLedger(body, identity(req)));
+        res
+          .status(201)
+          .json(await financePlatformUseCases.postLedger(body, identity(req, body.reason)));
       }),
     );
     router.post(
       '/ledger/transactions/:id/reverse',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:ledger:reverse');
-        const body = z.object({ approvalId: z.string().min(1) }).parse(req.body);
+        const body = z.object({ approvalId: z.string().trim().min(1).max(160) }).parse(req.body);
         res
           .status(201)
           .json(
@@ -270,8 +362,8 @@ export class FinanceAdminRouter {
         await requireFinancePermission(req, 'admin:finance:wallet:manage');
         const body = z
           .object({
-            ownerReferenceId: z.string().min(1),
-            accountId: z.string().min(1),
+            ownerReferenceId: z.string().trim().min(1).max(160),
+            accountId: z.string().trim().min(1).max(160),
             currencyCode: z.string().regex(/^[A-Z]{3}$/),
             scale: z.number().int().min(0).max(6),
           })
@@ -284,7 +376,7 @@ export class FinanceAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:wallet:manage');
         const body = z
-          .object({ amount: moneySchema, businessReferenceId: z.string().min(1) })
+          .object({ amount: moneySchema, businessReferenceId: z.string().trim().min(1).max(160) })
           .parse(req.body);
         res
           .status(201)
@@ -316,8 +408,10 @@ export class FinanceAdminRouter {
     );
     router.get(
       '/transfers',
-      asyncHandler(async (_req: Request, res: Response) =>
-        res.json(await financePlatformUseCases.listTransfers()),
+      asyncHandler(async (req: Request, res: Response) =>
+        res.json(
+          await financePlatformUseCases.listRecords('transfers', recordQuery.parse(req.query)),
+        ),
       ),
     );
     router.post(
@@ -326,10 +420,10 @@ export class FinanceAdminRouter {
         await requireFinancePermission(req, 'admin:finance:transfer:manage');
         const body = z
           .object({
-            sourceWalletId: z.string().min(1),
-            destinationReferenceId: z.string().min(1),
+            sourceWalletId: z.string().trim().min(1).max(160),
+            destinationReferenceId: z.string().trim().min(1).max(160),
             destinationCurrencyCode: z.string().regex(/^[A-Z]{3}$/),
-            bankProvider: z.string().min(1),
+            bankProvider: z.string().trim().min(1).max(160),
             sourceAmount: moneySchema,
           })
           .parse(req.body);
@@ -356,7 +450,7 @@ export class FinanceAdminRouter {
               'CANCELLED',
               'REVERSED',
             ]),
-            approvalId: z.string().min(1).optional(),
+            approvalId: z.string().trim().min(1).max(160).optional(),
           })
           .parse(req.body);
         const executionStatuses = new Set([
@@ -385,8 +479,8 @@ export class FinanceAdminRouter {
     );
     router.get(
       '/exchange-rates',
-      asyncHandler(async (_req: Request, res: Response) =>
-        res.json(await financePlatformUseCases.listRates()),
+      asyncHandler(async (req: Request, res: Response) =>
+        res.json(await financePlatformUseCases.listRecords('rates', recordQuery.parse(req.query))),
       ),
     );
     router.post(
@@ -441,7 +535,7 @@ export class FinanceAdminRouter {
       '/exchange-rates/:id/activate',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:fx:approve');
-        const body = z.object({ approvalId: z.string().min(1) }).parse(req.body);
+        const body = z.object({ approvalId: z.string().trim().min(1).max(160) }).parse(req.body);
         res.json(
           await financePlatformUseCases.activateManualExchangeRate(
             req.params.id,
@@ -455,9 +549,7 @@ export class FinanceAdminRouter {
       '/approvals',
       asyncHandler(async (req: Request, res: Response) =>
         res.json(
-          await financePlatformUseCases.listApprovals(
-            typeof req.query.status === 'string' ? req.query.status : undefined,
-          ),
+          await financePlatformUseCases.listRecords('approvals', recordQuery.parse(req.query)),
         ),
       ),
     );
@@ -467,10 +559,10 @@ export class FinanceAdminRouter {
         await requireFinancePermission(req, 'admin:finance:approval:create');
         const body = z
           .object({
-            actionType: z.string().min(1),
-            targetReferenceId: z.string().min(1),
+            actionType: z.string().trim().min(1).max(160),
+            targetReferenceId: z.string().trim().min(1).max(160),
             amount: moneySchema.optional(),
-            requiredApprovals: z.number().int().min(1).max(5),
+            requiredApprovals: z.number().int().min(2).max(5).default(2),
             expiresAt: z.coerce.date().optional(),
             commandPayload: z.unknown().optional(),
           })
@@ -485,6 +577,9 @@ export class FinanceAdminRouter {
         const body = z
           .object({ decision: z.enum(['APPROVE', 'REJECT']), reason: z.string().optional() })
           .parse(req.body);
+        const approval = await financePlatformUseCases.getRecord('approvals', req.params.id);
+        if (!approval) throw new Error('FINANCE_RECORD_NOT_FOUND');
+        await requireFinancePermission(req, financeApprovalPolicy(approval.actionType).permission);
         const commandIdentity = identity(req, body.reason);
         res.json(
           await financePlatformUseCases.decideApproval(
@@ -499,8 +594,10 @@ export class FinanceAdminRouter {
     );
     router.get(
       '/refunds',
-      asyncHandler(async (_req: Request, res: Response) =>
-        res.json(await financePlatformUseCases.listRefunds()),
+      asyncHandler(async (req: Request, res: Response) =>
+        res.json(
+          await financePlatformUseCases.listRecords('refunds', recordQuery.parse(req.query)),
+        ),
       ),
     );
     router.post(
@@ -508,7 +605,11 @@ export class FinanceAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:refund:manage');
         const body = z
-          .object({ paymentId: z.string().min(1), amount: moneySchema, reason: z.string().min(3) })
+          .object({
+            paymentId: z.string().trim().min(1).max(160),
+            amount: moneySchema,
+            reason: z.string().trim().min(3).max(500),
+          })
           .parse(req.body);
         res
           .status(201)
@@ -519,7 +620,7 @@ export class FinanceAdminRouter {
       '/refunds/:id/process',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:refund:execute');
-        const body = z.object({ approvalId: z.string().min(1) }).parse(req.body);
+        const body = z.object({ approvalId: z.string().trim().min(1).max(160) }).parse(req.body);
         res.json(
           await financePlatformUseCases.processRefund(
             req.params.id,
@@ -531,8 +632,10 @@ export class FinanceAdminRouter {
     );
     router.get(
       '/commissions',
-      asyncHandler(async (_req: Request, res: Response) =>
-        res.json(await financePlatformUseCases.listCommissions()),
+      asyncHandler(async (req: Request, res: Response) =>
+        res.json(
+          await financePlatformUseCases.listRecords('commissions', recordQuery.parse(req.query)),
+        ),
       ),
     );
     router.post(
@@ -541,10 +644,10 @@ export class FinanceAdminRouter {
         await requireFinancePermission(req, 'admin:finance:commission:manage');
         const body = z
           .object({
-            recipientReferenceId: z.string().min(1),
-            sourcePaymentId: z.string().min(1),
+            recipientReferenceId: z.string().trim().min(1).max(160),
+            sourcePaymentId: z.string().trim().min(1).max(160),
             basisPoints: z.number().int().min(1).max(10000),
-            policyReference: z.string().min(1),
+            policyReference: z.string().trim().min(1).max(160),
           })
           .parse(req.body);
         res.status(201).json(await financePlatformUseCases.accrueCommission(body, identity(req)));
@@ -562,9 +665,9 @@ export class FinanceAdminRouter {
             lines: z
               .array(
                 z.object({
-                  category: z.string().min(1),
+                  category: z.string().trim().min(1).max(160),
                   amount: moneySchema,
-                  sourceReference: z.string().min(1),
+                  sourceReference: z.string().trim().min(1).max(160),
                   certainty: z.enum(['EXACT', 'ESTIMATED']),
                 }),
               )
@@ -578,14 +681,35 @@ export class FinanceAdminRouter {
       '/reconciliation',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:reconciliation:run');
-        res.json({ issues: await financePlatformUseCases.reconcile() });
+        res.json(await financePlatformUseCases.reconciliationSnapshot());
       }),
     );
     router.post(
       '/reconciliation/run',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:reconciliation:run');
-        res.json({ issues: await financePlatformUseCases.reconcile() });
+        const ctx = identity(req);
+        res.json({
+          operation: 'LOCAL_CONSISTENCY_SCAN',
+          correlationId: ctx.correlationId,
+          issues: await financePlatformUseCases.reconcile(ctx),
+        });
+      }),
+    );
+    router.post(
+      '/reconciliation/providers/run',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requireFinancePermission(req, 'admin:finance:reconciliation:run');
+        await requireFinancePermission(req, 'admin:finance:reconciliation:providers');
+        const ctx = identity(req);
+        const body = z
+          .object({ limit: z.number().int().min(1).max(50).default(20) })
+          .parse(req.body ?? {});
+        res.json({
+          operation: 'PROVIDER_STATUS_RECONCILIATION',
+          correlationId: ctx.correlationId,
+          ...(await financePlatformUseCases.reconcileProviderStates({ ...ctx, limit: body.limit })),
+        });
       }),
     );
     router.get(
@@ -595,18 +719,55 @@ export class FinanceAdminRouter {
       ),
     );
 
-    router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    router.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+      const correlationId =
+        typeof req.headers['x-correlation-id'] === 'string' &&
+        /^[A-Za-z0-9._:-]{1,100}$/.test(req.headers['x-correlation-id'])
+          ? req.headers['x-correlation-id']
+          : 'finance-request';
+      const message = String(err?.message || '');
+      let code = 'FINANCE_INTERNAL_ERROR',
+        status = 500;
       if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: 'Validation Error', details: err.issues });
+        code = 'FINANCE_VALIDATION_ERROR';
+        status = 400;
+      } else if (err instanceof ForbiddenException) {
+        code = 'FINANCE_FORBIDDEN';
+        status = 403;
+      } else if (/not found|NOT_FOUND/i.test(message)) {
+        code = 'FINANCE_RECORD_NOT_FOUND';
+        status = 404;
+      } else if (/NOT_CONFIGURED|RUNTIME_PENDING/i.test(message)) {
+        code = 'FINANCE_CAPABILITY_UNAVAILABLE';
+        status = 503;
+      } else if (/TIMEOUT|UNAVAILABLE|PROTOCOL_ERROR|EVIDENCE_MISMATCH/.test(message)) {
+        code = 'FINANCE_PROVIDER_OUTCOME_UNCONFIRMED';
+        status = 503;
+      } else if (/VERSION|EXPECTED_VERSION/.test(message)) {
+        code = 'FINANCE_VERSION_CONFLICT';
+        status = 409;
+      } else if (
+        /idempotency|duplicate|concurrent|mismatch|already|RESERVED|OUTCOME_PENDING|CONFLICT/i.test(
+          message,
+        )
+      ) {
+        code = 'FINANCE_COMMAND_CONFLICT';
+        status = 409;
       }
-      if (err instanceof ForbiddenException) return res.status(403).json({ error: err.message });
-      const message = String(err?.message || 'An error occurred');
-      if (/not found/i.test(message)) return res.status(404).json({ error: message });
-      if (/NOT_CONFIGURED|RUNTIME_PENDING|runtime transport is pending/i.test(message))
-        return res.status(503).json({ error: message });
-      if (/idempotency|duplicate|concurrent|mismatch|already/i.test(message))
-        return res.status(409).json({ error: message });
-      res.status(400).json({ error: message });
+      if (
+        status === 500 &&
+        /required|invalid|cannot|must|Only |FINANCE_.*(?:INVALID|REQUIRED|FORBIDDEN)|quorum|approval|not pending/i.test(
+          message,
+        )
+      ) {
+        code = 'FINANCE_OPERATION_REJECTED';
+        status = 400;
+      }
+      if (err?.code === 'P2034' || err?.code === 'P2025') {
+        code = 'FINANCE_COMMAND_CONFLICT';
+        status = 409;
+      }
+      return res.status(status).json({ error: code, code, correlationId });
     });
 
     return router;

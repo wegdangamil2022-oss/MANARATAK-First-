@@ -484,6 +484,8 @@ export function registerDependencies(
       signingSecret,
       timeoutMs,
       maxAttempts,
+      merchantReference: readConfig<string>('FINANCE_MERCHANT_REFERENCE')?.trim(),
+      runtimeApproved: [true,'true'].includes(readConfig<boolean|string>('FINANCE_RUNTIME_APPROVED') ?? false),
       allowInsecureHttp: !productionLike && readConfig<string>('FINANCE_PROVIDER_ALLOW_INSECURE_HTTP') === 'true',
     };
   };
@@ -1001,8 +1003,9 @@ export function registerDependencies(
     publicServiceCatalogUseCases: asFunction(({ serviceCatalogRepository }) => new PublicServiceCatalogUseCases(serviceCatalogRepository)).scoped(),
     studentServiceRequestUseCases: asFunction(({ serviceCatalogRepository, serviceRequestRepository }) => new StudentServiceRequestUseCases(serviceCatalogRepository, serviceRequestRepository)).scoped(),
     financeAdminUseCases: asFunction(({ financeRepository }) => new FinanceAdminUseCases(financeRepository)).scoped(),
-    financePlatformUseCases: asFunction(({ financeRepository, financeCurrencyReferenceGateway, financePaymentGatewayRegistry, financeBankTransferGatewayRegistry, financeFxRateProvider, financeTransferFeePolicy }) =>
+    financePlatformUseCases: asFunction(({ financeRepository, financeCurrencyReferenceGateway, financePaymentGatewayRegistry, financeBankTransferGatewayRegistry, financeFxRateProvider, financeTransferFeePolicy, assetReferencePolicy }) =>
       new FinancePlatformUseCases(financeRepository, {
+        assetReferencePolicy,
         currencyReference: financeCurrencyReferenceGateway,
         paymentGateways: financePaymentGatewayRegistry,
         bankTransferGateways: financeBankTransferGatewayRegistry,

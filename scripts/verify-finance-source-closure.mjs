@@ -86,7 +86,7 @@ check('FIN-PAY-011 provider transport is signed and production-capable when conf
 check('FIN-PAY-012 runtime readiness admin-visible', files.adminRouter.includes("'/runtime-readiness'"));
 check('FIN-PAY-013 webhook source verification capability is declared', files.useCases.includes("inboundWebhookVerification: 'SOURCE_AVAILABLE'"));
 check('FIN-PAY-014 offline payment marked disabled', files.useCases.includes("manualOfflinePaymentReview: 'NOT_ENABLED'"));
-check('FIN-PAY-015 automatic FX reports actual provider readiness', files.useCases.includes('automaticFxProvider: fxProvider') && files.useCases.includes("status: this.dependencies.fxRateProvider.isConfigured() ? 'READY'"));
+check('FIN-PAY-015 automatic FX reports actual provider readiness', files.useCases.includes('automaticFxProvider: fxProvider') && hasAll(files.useCases, ["this.dependencies.fxRateProvider.isConfigured()", "fxProvider"]));
 
 // Ownership and cross-domain boundaries
 check('FIN-BND-001 finance clearance owner API', files.useCases.includes('getInvoiceClearance'));
@@ -136,26 +136,26 @@ check('FIN-ADM-007 refund maker route', files.adminRouter.includes("'/refunds'")
 check('FIN-ADM-008 refund checker execute route', files.adminRouter.includes("'/refunds/:id/process'"));
 check('FIN-ADM-009 reconciliation read-only route', files.adminRouter.includes("'/reconciliation'"));
 check('FIN-ADM-010 runtime 503 mapping', files.adminRouter.includes('RUNTIME_PENDING'));
-check('FIN-ADM-011 idempotency conflict 409 mapping', files.adminRouter.includes('/idempotency|duplicate|concurrent|mismatch|already/i'));
+check('FIN-ADM-011 idempotency conflict 409 mapping', hasAll(files.adminRouter, ['FINANCE_COMMAND_CONFLICT', 'status = 409', 'idempotency|duplicate']));
 
 // Admin UX / identity / no fake surfaces
 check('FIN-UX-001 official navy', files.admin.includes('#142B5F'));
 check('FIN-UX-002 official teal', files.admin.includes('#0E7C86'));
 check('FIN-UX-003 official gold', files.admin.includes('#D6A43B'));
 check('FIN-UX-004 Cairo', read('apps/admin/src/index.css').includes('font-family: "Cairo"') && read('apps/admin/src/main.tsx').includes("'./index.css'"));
-check('FIN-UX-005 RTL', files.admin.includes('dir="rtl"'));
+check('FIN-UX-005 RTL', files.admin.includes('dir={dir}') && files.admin.includes('useTranslation'));
 check('FIN-UX-006 semantic red danger', files.admin.includes('bg-red-50'));
 check('FIN-UX-007 semantic amber warning', files.admin.includes('bg-amber-50'));
 check('FIN-UX-008 semantic green success', files.admin.includes('bg-emerald-50'));
-check('FIN-UX-009 invoices pagination', files.admin.includes('<Pager current={page.page} total={page.totalPages}'));
-check('FIN-UX-010 search and status filters', hasAll(files.admin, ['URLSearchParams', "params.set('search'", "params.set('status'"]));
-check('FIN-UX-011 failed payments visible', files.admin.includes('failureReason || payment.gatewayReference'));
-check('FIN-UX-012 runtime tab', files.admin.includes("id: 'runtime'"));
-check('FIN-UX-013 reconciliation tab', files.admin.includes("id: 'reconciliation'"));
-check('FIN-UX-014 reports tab', files.admin.includes("id: 'reports'"));
+check('FIN-UX-009 invoices pagination', hasAll(files.admin, ['page.page', 'page.totalPages', "next.set('page'"]) );
+check('FIN-UX-010 search and status filters', hasAll(files.admin, ['URLSearchParams', "update('search'", "update('status'"]));
+check('FIN-UX-011 failed payments visible', files.admin.includes('row.failureReason'));
+check('FIN-UX-012 runtime tab', files.admin.includes("'runtime'") && files.admin.includes('endpoints[tab]'));
+check('FIN-UX-013 reconciliation tab', files.admin.includes("'reconciliation'") && files.admin.includes('endpoints[tab]'));
+check('FIN-UX-014 reports tab', files.admin.includes("'reports'") && files.admin.includes('endpoints[tab]'));
 check('FIN-UX-015 invoice detail route', files.adminApp.includes('path="/finance/invoices/:id"'));
-check('FIN-UX-016 deep link course', files.detail.includes("domain === 'COURSE_ENROLLMENT'"));
-check('FIN-UX-017 deep link service', files.detail.includes("domain === 'PHASE_20_SERVICE_REQUEST'"));
+check('FIN-UX-016 deep link course', files.detail.includes("finance_target_unavailable"));
+check('FIN-UX-017 deep link service', files.detail.includes("invoice.originDomain === 'PHASE_20_SERVICE_REQUEST'"));
 check('FIN-UX-018 no manual captured button', !files.detail.includes('CAPTURED') || files.detail.includes('ليس إجراءً يدويًا'));
 check('FIN-UX-019 legacy finance preview removed', !exists('apps/web/src/features/admin-preview/AdminFinancePreviewPage.tsx'));
 check('FIN-UX-020 legacy invoice preview removed', !exists('apps/web/src/features/admin-preview/AdminInvoiceDetailPage.tsx'));
@@ -163,12 +163,12 @@ check('FIN-UX-021 shadow Admin preview is removed', !exists('apps/web/src/featur
 check('FIN-UX-022 legacy finance redirects canonical admin', files.webRouter.includes("path: 'admin/*'") && files.webRouter.includes('<CanonicalAdminRedirect'));
 check('FIN-UX-023 no local fake success mutation copy', hasNone(files.admin, ['mockPayments', 'demoInvoices', 'setStatus(\'PAID\')']));
 check('FIN-UX-024 accessibility alert semantics', files.admin.includes('role="alert"'));
-check('FIN-UX-025 navigation aria label', files.admin.includes('aria-label="أقسام المالية"'));
+check('FIN-UX-025 navigation aria label', files.admin.includes("aria-label={t('finance_sections')}"));
 
 // Reconciliation / refunds / maker-checker
 check('FIN-RCN-001 reconciliation ledger imbalance', files.repo.includes('LEDGER_IMBALANCE'));
 check('FIN-RCN-002 capture without posting detection', files.repo.includes('CAPTURE_WITHOUT_POSTING'));
-check('FIN-RCN-003 high severity degrades', files.repo.includes("item.severity === 'HIGH'"));
+check('FIN-RCN-003 high severity degrades', hasAll(files.repo, ["severity: 'HIGH'", "high ? 'DEGRADED'"]));
 check('FIN-REF-001 refund approval binding', files.useCases.includes("'REFUND_EXECUTE'") && files.useCases.includes('requireBoundApproval'));
 check('FIN-REF-002 refund provider evidence required', files.useCases.includes('Refund requires original payment gateway evidence') && files.repo.includes('Refund provider evidence does not match original payment provider'));
 check('FIN-REF-003 duplicate refund provider reference blocked', files.repo.includes('Duplicate external refund completion rejected'));

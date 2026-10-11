@@ -5,7 +5,7 @@ export interface MoneyAmount {
 }
 
 export function assertValidMoneyAmount(amount: MoneyAmount): void {
-  if (!/^-?\d+$/.test(amount.amountMinorUnits)) {
+  if (amount.amountMinorUnits.length > 31 || !/^-?\d+$/.test(amount.amountMinorUnits)) {
     throw new Error('MoneyAmount.amountMinorUnits must be an integer string');
   }
   if (!/^[A-Z]{3}$/.test(amount.currencyCode)) {
@@ -45,7 +45,7 @@ export function addMoneyAmounts(amounts: readonly MoneyAmount[]): MoneyAmount {
 
 export function multiplyMoneyAmount(amount: MoneyAmount, quantity: number): MoneyAmount {
   assertValidMoneyAmount(amount);
-  if (!Number.isInteger(quantity) || quantity <= 0) {
+  if (!Number.isSafeInteger(quantity) || quantity <= 0) {
     throw new Error('Quantity must be a positive integer');
   }
 

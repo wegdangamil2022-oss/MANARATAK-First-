@@ -26,6 +26,15 @@ export class FinanceStudentUseCases {
     return this.repository.getStudentFinancialReadModel(studentReferenceId);
   }
 
+  public async listHistory(
+    studentReferenceId: string,
+    kind: 'wallets' | 'transfers',
+    pagination: { page?: number; pageSize?: number },
+  ) {
+    this.ensureStudentReference(studentReferenceId);
+    return this.repository.listStudentFinancialHistory(studentReferenceId, kind, pagination);
+  }
+
   public async getStudentInvoice(
     studentReferenceId: string,
     invoiceId: string,
@@ -46,7 +55,12 @@ export class FinanceStudentUseCases {
     if (invoice.status === InvoiceStatus.DRAFT) {
       return [];
     }
-    return this.repository.listPaymentsForInvoice(invoice.id);
+    return (await this.repository.listPaymentsForInvoice(invoice.id)).map((payment) => ({
+      ...payment,
+      gatewayReference: null,
+      metadata: null,
+      failureReason: null,
+    }));
   }
 
   private ensureStudentReference(studentReferenceId: string): void {

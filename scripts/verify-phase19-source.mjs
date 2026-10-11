@@ -29,12 +29,12 @@ const checks = {
     source.schema.includes('idempotencyKeyHash'),
   invoice_state_machine:
     source.domain.includes('assertInvoiceTransition') &&
-    source.useCases.includes('Only DRAFT invoices can be issued'),
+    source.repository.includes('Only DRAFT invoices can be issued') && source.repository.includes('commandReplay'),
   payment_lifecycle_history:
     source.schema.includes('model FinancePaymentAttemptRecord') &&
     source.repository.includes('PaymentStatus.AUTHORIZED'),
   wallet_ledger_derived:
-    source.repository.includes('financialLedgerEntryRecord.findMany') &&
+    source.repository.includes('walletBalanceWithinTx') && source.repository.includes('FROM "FinancialLedgerEntryRecord"') &&
     !source.schema.includes('currentBalance'),
   transfer_state_machine:
     source.domain.includes('Invalid transfer transition') &&
@@ -57,7 +57,7 @@ const checks = {
     source.router.includes("'/ledger/transactions'") &&
     source.router.includes("'/reconciliation/run'"),
   arabic_admin_center:
-    source.admin.includes('مركز المالية والمدفوعات') && source.admin.includes('#142B5F'),
+    readFileSync('apps/admin/src/i18n/ar.ts','utf8').includes('مركز المالية والمدفوعات') && source.admin.includes("t('finance_title')") && source.admin.includes('#142B5F'),
 };
 let passed = true;
 for (const [name, result] of Object.entries(checks)) {

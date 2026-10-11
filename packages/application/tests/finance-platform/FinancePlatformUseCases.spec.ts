@@ -9,13 +9,18 @@ const stable = (value: unknown): string => {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
   const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stable(record[key])}`).join(',')}}`;
+  return `{${Object.keys(record)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${stable(record[key])}`)
+    .join(',')}}`;
 };
 const payloadHash = (value: unknown) => createHash('sha256').update(stable(value)).digest('hex');
 const dependencies = {
   currencyReference: {
     resolveCurrency: vi.fn(async (code: string) =>
-      ['USD', 'SAR'].includes(code) ? { referenceId: `currency-${code}`, currencyCode: code, scale: 2, active: true } : null,
+      ['USD', 'SAR'].includes(code)
+        ? { referenceId: `currency-${code}`, currencyCode: code, scale: 2, active: true }
+        : null,
     ),
   },
   paymentGateways: { get: vi.fn(() => null), list: vi.fn(() => []) },
@@ -48,14 +53,28 @@ describe('FinancePlatformUseCases', () => {
 
   it('blocks edits after issuance and raw card numbers', async () => {
     const repository = {
-      findInvoiceById: vi.fn().mockResolvedValue({ id: 'inv-1', status: 'ISSUED', amountDue: usd('1000') }),
+      findInvoiceById: vi
+        .fn()
+        .mockResolvedValue({ id: 'inv-1', status: 'ISSUED', amountDue: usd('1000') }),
+      findPaymentById: vi.fn().mockResolvedValue(null),
+      claimPaymentDispatch: vi.fn().mockResolvedValue(true),
+      updateDraftInvoice: vi.fn().mockRejectedValue(new Error('Only DRAFT invoices can be edited')),
     } as any;
     await expect(
-      useCases(repository).updateDraftInvoice('inv-1', [{ description: 'X', quantity: 1, unitPrice: usd('1') }], identity),
+      useCases(repository).updateDraftInvoice(
+        'inv-1',
+        [{ description: 'X', quantity: 1, unitPrice: usd('1') }],
+        identity,
+      ),
     ).rejects.toThrow('DRAFT');
     await expect(
       useCases(repository).capturePayment(
-        { invoiceId: 'inv-1', amount: usd('100'), paymentMethodToken: '4242 4242 4242 4242', gatewayProvider: 'provider' },
+        {
+          invoiceId: 'inv-1',
+          amount: usd('100'),
+          paymentMethodToken: '4242 4242 4242 4242',
+          gatewayProvider: 'provider',
+        },
         identity,
       ),
     ).rejects.toThrow('Raw card PAN');
@@ -63,11 +82,21 @@ describe('FinancePlatformUseCases', () => {
 
   it('rejects overpayment before provider mutation', async () => {
     const repository = {
-      findInvoiceById: vi.fn().mockResolvedValue({ id: 'inv-1', status: 'ISSUED', amountDue: usd('1000') }),
+      findInvoiceById: vi
+        .fn()
+        .mockResolvedValue({ id: 'inv-1', status: 'ISSUED', amountDue: usd('1000') }),
+      findPaymentById: vi.fn().mockResolvedValue(null),
+      claimPaymentDispatch: vi.fn().mockResolvedValue(true),
+      updateDraftInvoice: vi.fn().mockRejectedValue(new Error('Only DRAFT invoices can be edited')),
     } as any;
     await expect(
       useCases(repository).capturePayment(
-        { invoiceId: 'inv-1', amount: usd('1001'), paymentMethodToken: 'tok_safe', gatewayProvider: 'provider' },
+        {
+          invoiceId: 'inv-1',
+          amount: usd('1001'),
+          paymentMethodToken: 'tok_safe',
+          gatewayProvider: 'provider',
+        },
         identity,
       ),
     ).rejects.toThrow('cannot exceed');
@@ -76,7 +105,11 @@ describe('FinancePlatformUseCases', () => {
   it('fails currency conversion closed without an approved historical rate', async () => {
     const repository = { findEffectiveExchangeRate: vi.fn().mockResolvedValue(null) } as any;
     await expect(
-      useCases(repository).convert({ amount: usd('100'), targetCurrencyCode: 'SAR', targetScale: 2 }),
+      useCases(repository).convert({
+        amount: usd('100'),
+        targetCurrencyCode: 'SAR',
+        targetScale: 2,
+      }),
     ).rejects.toThrow('failed closed');
   });
 
@@ -93,21 +126,40 @@ describe('FinancePlatformUseCases', () => {
 
   it('prevents maker self approval', async () => {
     const repository = {
-      getApproval: vi.fn().mockResolvedValue({ id: 'approval-1', makerId: 'finance-admin', decisions: [] }),
+      getApproval: vi
+        .fn()
+        .mockResolvedValue({ id: 'approval-1', makerId: 'finance-admin', decisions: [] }),
     } as any;
     await expect(
-      useCases(repository).decideApproval('approval-1', 'APPROVE', 'finance-admin', undefined, identity),
+      useCases(repository).decideApproval(
+        'approval-1',
+        'APPROVE',
+        'finance-admin',
+        undefined,
+        identity,
+      ),
     ).rejects.toThrow('Maker');
   });
 
   it('fails payment capture closed when the requested gateway is not configured', async () => {
     const repository = {
-      findInvoiceById: vi.fn().mockResolvedValue({ id: 'inv-1', status: 'ISSUED', amountDue: usd('1000') }),
+      findInvoiceById: vi
+        .fn()
+        .mockResolvedValue({ id: 'inv-1', status: 'ISSUED', amountDue: usd('1000') }),
+      findPaymentById: vi.fn().mockResolvedValue(null),
+      claimPaymentDispatch: vi.fn().mockResolvedValue(true),
+      updateDraftInvoice: vi.fn().mockRejectedValue(new Error('Only DRAFT invoices can be edited')),
+
       recordCapturedPaymentAtomic: vi.fn(),
     } as any;
     await expect(
       useCases(repository).capturePayment(
-        { invoiceId: 'inv-1', amount: usd('100'), paymentMethodToken: 'tok_safe', gatewayProvider: 'missing' },
+        {
+          invoiceId: 'inv-1',
+          amount: usd('100'),
+          paymentMethodToken: 'tok_safe',
+          gatewayProvider: 'missing',
+        },
         identity,
       ),
     ).rejects.toThrow('PAYMENT_PROVIDER_NOT_CONFIGURED');
@@ -115,7 +167,10 @@ describe('FinancePlatformUseCases', () => {
   });
 
   it('requires provider reversal evidence before reversing a settled transfer', async () => {
-    const transitionTransfer = vi.fn(async (_id, status, _ctx, evidence) => ({ status, ...evidence }));
+    const transitionTransfer = vi.fn(async (_id, status, _ctx, evidence) => ({
+      status,
+      ...evidence,
+    }));
     const repository = {
       getTransfer: vi.fn().mockResolvedValue({
         id: 'transfer-db',
@@ -141,20 +196,40 @@ describe('FinancePlatformUseCases', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       }),
-      getWallet: vi.fn().mockResolvedValue({ id: 'wallet-1', status: 'ACTIVE', currencyCode: 'USD', scale: 2 }),
+      getWallet: vi
+        .fn()
+        .mockResolvedValue({ id: 'wallet-1', status: 'ACTIVE', currencyCode: 'USD', scale: 2 }),
       transitionTransfer,
     } as any;
-    const reverse = vi.fn().mockResolvedValue({ providerReference: 'bank-ref-1', status: 'REVERSED' });
+    const reverse = vi
+      .fn()
+      .mockResolvedValue({
+        providerReference: 'bank-ref-1',
+        status: 'REVERSED',
+        verified: true,
+        transferReference: 'transfer-1',
+        destinationReferenceId: 'beneficiary-1',
+        sourceAmount: usd('1000'),
+        targetAmount: { amountMinorUnits: '3750', currencyCode: 'SAR', scale: 2 },
+        feeAmount: usd('10'),
+      });
     const sut = new FinancePlatformUseCases(repository, {
       ...dependencies,
       bankTransferGateways: {
-        get: vi.fn(() => ({ providerKey: 'bank-a', isConfigured: () => true, runtimeStatus: () => 'READY', submit: vi.fn(), getStatus: vi.fn(), reverse })),
+        get: vi.fn(() => ({
+          providerKey: 'bank-a',
+          isConfigured: () => true,
+          runtimeStatus: () => 'READY',
+          submit: vi.fn(),
+          getStatus: vi.fn(),
+          reverse,
+        })),
       },
     } as any);
 
     await sut.transitionTransfer('transfer-db', 'REVERSED', identity);
 
-    expect(reverse).toHaveBeenCalledWith('bank-ref-1', 'idem-1:bank-reverse');
+    expect(reverse).toHaveBeenCalledWith('bank-ref-1', 'transfer:transfer-1:bank-reverse');
     expect(transitionTransfer).toHaveBeenCalledWith(
       'transfer-db',
       'REVERSED',
@@ -198,9 +273,9 @@ describe('FinancePlatformUseCases', () => {
         targetReferenceId: 'refund-1',
         amount: usd('250'),
         makerId: 'maker-1',
-        requiredApprovals: 1,
+        requiredApprovals: 2,
         payloadHash: payloadHash(approvalPayload),
-        policyReference: 'FINANCE:REFUND_EXECUTE:FOUR_EYES_V1',
+        policyReference: 'FINANCE:REFUND_EXECUTE:TWO_CHECKERS_V2',
         consumedAt: null,
         status: 'APPROVED',
         decisions: [],
@@ -218,13 +293,22 @@ describe('FinancePlatformUseCases', () => {
     } as any;
     const refundProvider = vi.fn(async () => {
       order.push('provider');
-      return { status: 'COMPLETED', gatewayReference: 'refund-provider-ref-1' };
+      return {
+        status: 'COMPLETED',
+        gatewayReference: 'refund-provider-ref-1',
+        amount: usd('250'),
+        merchantReference: 'merchant',
+        captureReference: 'refund-capture',
+        operationReference: 'refund-1',
+        verified: true,
+      };
     });
     const sut = new FinancePlatformUseCases(repository, {
       ...dependencies,
       paymentGateways: {
         get: vi.fn(() => ({
           providerKey: 'pay-a',
+          merchantReference: 'merchant',
           isConfigured: () => true,
           runtimeStatus: () => 'READY',
           authorize: vi.fn(),
@@ -234,17 +318,33 @@ describe('FinancePlatformUseCases', () => {
       },
     } as any);
 
-    await sut.processRefund('refund-db', 'approval-db', { ...identity, actorId: 'checker-executor' });
+    await sut.processRefund('refund-db', 'approval-db', {
+      ...identity,
+      actorId: 'checker-executor',
+    });
 
     expect(order).toEqual(['reserve', 'provider', 'complete']);
   });
 
   it('persists a failed provider attempt instead of losing payment history', async () => {
     const repository = {
-      findInvoiceById: vi.fn().mockResolvedValue({ id: 'inv-1', status: 'ISSUED', amountDue: usd('1000') }),
+      findInvoiceById: vi
+        .fn()
+        .mockResolvedValue({ id: 'inv-1', status: 'ISSUED', amountDue: usd('1000') }),
+      findPaymentById: vi.fn().mockResolvedValue(null),
+      claimPaymentDispatch: vi.fn().mockResolvedValue(true),
+      updateDraftInvoice: vi.fn().mockRejectedValue(new Error('Only DRAFT invoices can be edited')),
+
       preparePaymentAttempt: vi.fn().mockResolvedValue({
-        id: 'pay-db', publicId: 'fin_pay_1', invoiceId: 'inv-1', amount: usd('500'), status: 'PENDING',
-        paymentMethod: 'PROVIDER_TOKEN', gatewayProvider: 'pay-a', createdAt: new Date(), updatedAt: new Date(),
+        id: 'pay-db',
+        publicId: 'fin_pay_1',
+        invoiceId: 'inv-1',
+        amount: usd('500'),
+        status: 'PENDING',
+        paymentMethod: 'PROVIDER_TOKEN',
+        gatewayProvider: 'pay-a',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }),
       recordPaymentFailure: vi.fn().mockResolvedValue({ id: 'pay-db', status: 'FAILED' }),
       recordPaymentAuthorization: vi.fn(),
@@ -254,22 +354,41 @@ describe('FinancePlatformUseCases', () => {
       ...dependencies,
       paymentGateways: {
         get: vi.fn(() => ({
-          providerKey: 'pay-a', isConfigured: () => true, runtimeStatus: () => 'READY',
-          authorize: vi.fn().mockResolvedValue({ status: 'FAILED', gatewayReference: 'auth-failed', failureCode: 'DECLINED' }),
-          capture: vi.fn(), refund: vi.fn(),
+          providerKey: 'pay-a',
+          isConfigured: () => true,
+          runtimeStatus: () => 'READY',
+          authorize: vi
+            .fn()
+            .mockResolvedValue({
+              status: 'FAILED',
+              gatewayReference: 'auth-failed',
+              failureCode: 'DECLINED',
+            }),
+          capture: vi.fn(),
+          refund: vi.fn(),
         })),
         list: vi.fn(() => []),
       },
     } as any);
 
-    await expect(sut.capturePayment(
-      { invoiceId: 'inv-1', amount: usd('500'), paymentMethodToken: 'tok_safe', gatewayProvider: 'pay-a' },
-      identity,
-    )).rejects.toThrow('PAYMENT_AUTHORIZATION_FAILED:DECLINED');
+    await expect(
+      sut.capturePayment(
+        {
+          invoiceId: 'inv-1',
+          amount: usd('500'),
+          paymentMethodToken: 'tok_safe',
+          gatewayProvider: 'pay-a',
+        },
+        identity,
+      ),
+    ).rejects.toThrow('PAYMENT_AUTHORIZATION_FAILED:DECLINED');
 
     expect(repository.preparePaymentAttempt).toHaveBeenCalled();
-    expect(repository.recordPaymentFailure).toHaveBeenCalledWith('pay-db', 'DECLINED', expect.any(Object));
+    expect(repository.recordPaymentFailure).toHaveBeenCalledWith(
+      'pay-db',
+      'DECLINED',
+      expect.any(Object),
+    );
     expect(repository.recordCapturedPaymentAtomic).not.toHaveBeenCalled();
   });
-
 });

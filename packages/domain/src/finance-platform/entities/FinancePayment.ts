@@ -29,6 +29,7 @@ export interface FinancePaymentFilters {
 
 export interface CreateFinancePaymentDto {
   publicId: string;
+  providerEvidence?: Record<string, unknown>;
   invoiceId: string;
   idempotencyKey?: string | null;
   amount: MoneyAmount;

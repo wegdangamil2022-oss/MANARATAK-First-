@@ -1,0 +1,21 @@
+{
+  "scope": "section-20/P19 source; runtime deferred after section 28",
+  "base": "f8efbc52",
+  "branch": "fix/codex-section-20-finance",
+  "environment": {"node": "24.19.0", "repository_node_requirement": "22; CI remains independent"},
+  "checks": [
+    {"command": "tsc -b packages/application packages/infrastructure apps/api apps/admin", "result": "PASS", "log": "/tmp/finance-release-types.log"},
+    {"command": "vitest run finance application/infrastructure/API/admin focused files", "result": "PASS", "files": 9, "tests": 65, "duration_seconds": 4.08, "log": "/tmp/finance-release-tests.log"},
+    {"command": "node --test tests/remediation/w3-finance-provider.test.mjs", "result": "PASS", "tests": 5},
+    {"command": "npm run build -w @manaratak/admin", "result": "PASS", "duration_seconds": 6.17, "warnings": ["Existing font asset resolution and bundle-size notices"]},
+    {"command": "prisma validate; prisma generate", "result": "PASS", "database_connection": false},
+    {"command": "verify-source-quality.mjs", "result": "PASS", "package_cycles": 0, "file_cycles": 0, "a11y_findings": 0},
+    {"command": "verify-admin-audit-coverage.mjs", "result": "PASS", "handlers": 381, "endpoints": 380},
+    {"command": "focused ESLint", "result": "PASS_WITH_WARNINGS", "errors": 0, "warnings": 92},
+    {"command": "scan-secrets.mjs", "result": "PASS"},
+    {"command": "verify-finance-source-closure.mjs", "result": "150/150 PASS before broad formatting; broad formatting caused two textual guard false negatives; unrelated formatting was removed before commit", "certifies_runtime": false}
+  ],
+  "not_executed": ["full unit matrix", "browser E2E", "real PostgreSQL/concurrency", "provider/bank/payment sandbox", "migration application", "backfill", "load/soak", "production deployment"],
+  "migration_status": "SOURCE_ONLY_UNAPPLIED_NOT_RUNTIME_SAFE",
+  "final_review": "No new features or tests after user's final request to finish promptly. Whitespace-only changes to unrelated files were minimized; the safe no-provider-proof scan status is UNKNOWN. No runtime certification."
+}
