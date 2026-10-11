@@ -14,7 +14,10 @@ function fixture(granted: string[]) {
   const hydration = { getSupportDetail: vi.fn().mockResolvedValue({
     studentReferenceId: 'student-1', linkedSummaries: {activeCourseCount:null,certificateCount:null,unreadNotificationCount:0},
   }) };
-  const tracker = { listSupportPage: vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}) };
+  const tracker = {
+    listSupportPage:vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}),
+    listSupportHistory:vi.fn().mockResolvedValue({items:[],hasMore:false}),
+  };
   const identities={findById:vi.fn().mockResolvedValue({id:'student-1',type:'Human',status:'ACTIVE'})};
   const roleAssignments={findByIdentityId:vi.fn().mockResolvedValue([{roleId:'student'}])};
   const evaluator = { evaluatePermission: vi.fn().mockImplementation(async (_id: string, permission: string) =>
@@ -194,6 +197,24 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
         expect.objectContaining({action:'STUDENT_SUPPORT_APPLICATION_TRACKERS_VIEW',metadata:{purpose:'CASE_REVIEW',view:'application-tracker-page'}}),
         {reliability:'REQUIRED',principal:'REQUIRED'});
     } finally {audit.mockRestore();}
+  });
+
+  it('checks student scope and purpose before disclosing tracker history',async()=>{
+    const denied=fixture([]);
+    expect((await request(denied.app).get('/admin/students/support/student-1/application-trackers/t-1/history?purpose=CASE_REVIEW')).status).toBe(403);
+    expect(denied.tracker.listSupportHistory).not.toHaveBeenCalled();
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try{
+      const {app,tracker}=fixture(['admin:students:support']);
+      expect((await request(app).get('/admin/students/support/student-1/application-trackers/t-1/history')).status).toBe(400);
+      const result=await request(app).get('/admin/students/support/student-1/application-trackers/t-1/history?purpose=CASE_REVIEW&limit=10');
+      expect(result.status).toBe(200);
+      expect(tracker.listSupportHistory).toHaveBeenCalledWith('student-1','t-1',10);
+      expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
+        expect.objectContaining({action:'STUDENT_SUPPORT_APPLICATION_TRACKER_HISTORY_VIEW',
+          metadata:{purpose:'CASE_REVIEW',view:'tracker-event-history'}}),
+        {reliability:'REQUIRED',principal:'REQUIRED'});
+    }finally{audit.mockRestore();}
   });
 
   it('captures the real support actor in the atomic reset command', async () => {

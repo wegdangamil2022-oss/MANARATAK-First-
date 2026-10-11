@@ -229,6 +229,30 @@ export class StudentSupportAdminRouter {
       } catch (error) { next(error); }
     });
 
+    router.get('/support/:studentReferenceId/application-trackers/:trackerId/history',requireSupportRead,
+      async(req,res,next)=>{
+        try{
+          const studentReferenceId=z.string().trim().min(1).max(128).parse(req.params.studentReferenceId);
+          const trackerId=z.string().trim().min(1).max(128).parse(req.params.trackerId);
+          const query=z.object({
+            purpose:z.enum(['CASE_REVIEW','APPLICATION_STATUS_INQUIRY','SYNC_DIAGNOSTIC']),
+            limit:z.coerce.number().int().min(1).max(30).optional(),
+          }).strict().parse(req.query);
+          await studentWorkspaceUseCases.getSupportWorkspaceDetail(studentReferenceId);
+          const result=await studentApplicationTrackerUseCases.listSupportHistory(
+            studentReferenceId,trackerId,query.limit??20,
+          );
+          await AuditHelper.recordMutation(auditRecordRepo,req,{
+            action:'STUDENT_SUPPORT_APPLICATION_TRACKER_HISTORY_VIEW',
+            category:'STUDENT_SUPPORT',targetType:'STUDENT_APPLICATION_TRACKER',
+            targetId:trackerId,result:'SUCCESS',
+            metadata:{purpose:query.purpose,view:'tracker-event-history'},
+          },{reliability:'REQUIRED',principal:'REQUIRED'});
+          res.status(200).json(result);
+        }catch(error){next(error);}
+      },
+    );
+
     router.post(
       '/support/:studentReferenceId/reset-layout',
       requireSupportMutation,
@@ -266,8 +290,8 @@ export class StudentSupportAdminRouter {
         return void res
           .status(400)
           .json({ error: { code, message: 'تعذر قراءة الصفحة التالية. حدّث نتائج البحث.' } });
-      if (code === 'STUDENT_WORKSPACE_NOT_FOUND')
-        return void res.status(404).json({ error: { code, message: 'حساب الطالب غير موجود.' } });
+      if (code === 'STUDENT_WORKSPACE_NOT_FOUND' || code === 'STUDENT_APPLICATION_TRACKER_NOT_FOUND')
+        return void res.status(404).json({ error: { code, message: 'السجل المطلوب غير موجود.' } });
       if (code === 'STUDENT_WORKSPACE_VERSION_CONFLICT')
         return void res.status(409).json({
           error: { code, message: 'تغيرت بيانات الطالب. حدّث التفاصيل قبل إعادة المحاولة.' },
