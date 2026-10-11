@@ -342,7 +342,13 @@ export class AdminCmsUseCases {
 
   public async listBlockSchemas(): Promise<CmsBlockSchemaDto[]> { return this.repository.listBlockSchemas(); }
   public async createBlockSchema(data: Omit<CmsBlockSchemaDto, 'id' | 'createdAt' | 'createdBy'>, actorId: string): Promise<CmsBlockSchemaDto> {
-    return this.repository.createBlockSchema({ ...data, createdBy: actorId });
+    this.ensureActor(actorId);
+    CmsPublishingPolicy.assertBlockSchemaDefinition(data.fieldSchema, data.assetFields, data.localizedFields);
+    return this.repository.createBlockSchema({ ...data, status: 'DRAFT', createdBy: actorId });
+  }
+  public async approveBlockSchema(id: string, actorId: string): Promise<CmsBlockSchemaDto> {
+    this.ensureActor(actorId);
+    return this.repository.approveBlockSchema(id, actorId);
   }
   public async listBlocks(siteIdentifier: string, locale: string): Promise<CmsContentBlockDto[]> { return this.repository.listBlocks(siteIdentifier, locale); }
   public async saveBlock(data: Omit<CmsContentBlockDto, 'id' | 'publicId' | 'version' | 'createdAt' | 'updatedAt' | 'updatedBy'> & { id?: string; expectedVersion?: number }, actorId: string): Promise<CmsContentBlockDto> {
