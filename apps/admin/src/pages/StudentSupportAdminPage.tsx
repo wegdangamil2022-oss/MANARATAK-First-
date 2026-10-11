@@ -347,7 +347,8 @@ export function StudentSupportAdminPage() {
             ownerReadStatus:{
               learning:domain==='learning'?result.status:previous.ownerReadStatus?.learning??'RESTRICTED',
               certificates:domain==='certificates'?result.status:previous.ownerReadStatus?.certificates??'RESTRICTED',
-              services:domain==='services'?result.status:previous.ownerReadStatus?.services??'RESTRICTED',
+              services:domain==='services' && result.status!=='TRUNCATED'
+                ?result.status:previous.ownerReadStatus?.services??'RESTRICTED',
             },
             ownerReadProvenance:{
               learning:domain==='learning'?result.provenance as NonNullable<StudentSupportDetail['ownerReadProvenance']>['learning']:provenance?.learning??null,
