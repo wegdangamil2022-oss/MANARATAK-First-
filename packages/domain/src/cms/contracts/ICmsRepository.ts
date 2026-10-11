@@ -67,7 +67,7 @@ export interface ICmsRepository {
     locale?: string,
   ): Promise<PaginatedCmsResult<PublicCmsContentDto>>;
   getPublishedBySlug(slug: string, locale?: string, siteIdentifier?: string): Promise<PublicCmsContentDto | null>;
-  replaceDomainLinks?(contentId: string, links: UpsertCmsContentDomainLinkDto[], actorId: string): Promise<CmsContentDomainLinkDto[]>;
+  replaceDomainLinks?(contentId: string, links: UpsertCmsContentDomainLinkDto[], actorId: string, expectedVersion: number): Promise<CmsContentDomainLinkDto[]>;
   listDomainLinks?(contentId: string): Promise<CmsContentDomainLinkDto[]>;
   listPublishedByDomainTarget?(targetType: string, targetId: string, locale?: string, siteIdentifier?: string, limit?: number): Promise<PublicCmsContentDto[]>;
   changeLocalizedSlug(data: CmsSlugChangeDto): Promise<CmsLocalizedContentDto>;
