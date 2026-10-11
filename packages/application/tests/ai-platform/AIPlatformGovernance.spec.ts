@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIPlatformAdminUseCases, AIKnowledgeUseCases, AIProviderCircuitBreaker, EnterpriseAIGuardrailEngine, evaluationDefinitionChecksum, estimateQuotaReservation } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
+import { AIPlatformAdminUseCases, AIKnowledgeUseCases, AIProviderCircuitBreaker, EnterpriseAIGuardrailEngine, evaluationDefinitionChecksum, estimateQuotaReservation, estimateQuotaReservation } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
 import { AISafetyDecision } from '@manaratak/domain';
 
 describe('Phase 17 safety and resilience', () => {
@@ -136,6 +136,20 @@ describe('P17 known-price routing', () => {
       inputSchema: wideSchema, createdBy: 'author-1',
     } as any)).rejects.toThrow('AI_JSON_SCHEMA_COMPLEXITY_LIMIT');
     expect(repository.createPromptVersion).not.toHaveBeenCalled();
+  });
+
+
+  it('refuses unpriced AI inference even when a consumer has no money limit', () => {
+    const consumer = { monthlyCostLimit: null, monthlyTokenLimit: 1000 };
+    const candidate = {
+      model: { key: 'model-1', currency: 'USD', maxOutputTokens: 10 },
+      provider: { key: 'provider' }, target: { enabled: true },
+    };
+    const request = { consumer, candidates: [candidate], prices: [], inputTokens: 10 };
+    expect(() => estimateQuotaReservation(request as any))
+      .toThrow('AI_MODEL_PRICE_UNVERIFIED');
+    candidate.model = { ...candidate.model, inputPricePerMillion: 0, outputPricePerMillion: 0 } as any;
+    expect(estimateQuotaReservation(request as any)).toMatchObject({ tokens: 20, cost: 0 });
   });
 
 });
