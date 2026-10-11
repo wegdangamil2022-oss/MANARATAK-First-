@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  AIProviderRegistry, AnthropicProviderAdapter, GoogleGenerativeAIProviderAdapter,
+  AIProviderRegistry, AnthropicProviderAdapter, GoogleGenerativeAIProviderAdapter, FetchAIHttpTransport,
   OpenAICompatibleAdapter, type AIHttpTransport
 } from '../../src/ai-platform/ProviderAdapters';
 
@@ -48,4 +48,27 @@ describe('Phase 17 provider-neutral adapters', () => {
     const options = { key: 'same', secretReference: 'TEST_KEY', baseUrl: 'https://provider.invalid', readSecret: () => undefined };
     expect(() => new AIProviderRegistry([new OpenAICompatibleAdapter(options), new AnthropicProviderAdapter(options)])).toThrow('Duplicate AI provider adapter key.');
   });
+
+  it('rejects advertised oversized provider payloads before buffering a body', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('not read', {
+      status: 200, headers: { 'content-length': String(9 * 1024 * 1024) },
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const transport = new FetchAIHttpTransport();
+      await expect(transport.request({ url: 'https://provider.invalid/v1', method: 'GET', headers: {}, timeoutMs: 1000 }))
+        .rejects.toThrow('AI_PROVIDER_RESPONSE_TOO_LARGE');
+      expect(fetchMock).toHaveBeenCalledOnce();
+    } finally { vi.unstubAllGlobals(); }
+  });
+
+  it('fails closed for malformed AI provider JSON instead of returning a fake response', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"oops":', { status: 200 })));
+    try {
+      const transport = new FetchAIHttpTransport();
+      await expect(transport.request({ url: 'https://provider.invalid/v1', method: 'GET', headers: {}, timeoutMs: 1000 }))
+        .rejects.toThrow('AI_PROVIDER_INVALID_JSON');
+    } finally { vi.unstubAllGlobals(); }
+  });
+
 });
