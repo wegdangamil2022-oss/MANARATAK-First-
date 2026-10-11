@@ -2168,7 +2168,7 @@ function topologicalSteps(steps: AIWorkflowDefinition['definition']['steps']) {
   return order;
 }
 
-function evaluationDefinitionChecksum(definition: AIEvaluationDefinition): string {
+export function evaluationDefinitionChecksum(definition: AIEvaluationDefinition): string {
   // Bind gates to the exact dataset, evaluators, target, and deployment thresholds.
   return sha256(stableStringify({
     key: definition.key,
