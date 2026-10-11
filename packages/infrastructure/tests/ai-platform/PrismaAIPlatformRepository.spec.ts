@@ -316,4 +316,24 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     expect(tx.aIExecutionRecord.findUniqueOrThrow).not.toHaveBeenCalled();
   });
 
+
+  it('renews only the same active worker lease, preserving its fencing token', async () => {
+    const updateMany = vi.fn()
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 0 });
+    const repository = new PrismaAIPlatformRepository({
+      aIAsyncJobRecord: { updateMany },
+    });
+    const lockedAt = new Date('2026-10-11T12:00:00Z');
+    expect(await repository.renewAsyncJobLease('aij_1', { workerId: 'worker-1', lockedAt })).toBe(true);
+    expect(await repository.renewAsyncJobLease('aij_1', { workerId: 'wrong-worker', lockedAt })).toBe(false);
+    const { where, data } = updateMany.mock.calls[0][0];
+    expect(where).toEqual({
+      publicId: 'aij_1', status: 'RUNNING',
+      lockedBy: 'worker-1', lockedAt,
+      leaseExpiresAt: { gt: expect.any(Date) },
+    });
+    expect(data.leaseExpiresAt.getTime()).toBeGreaterThan(where.leaseExpiresAt.gt.getTime());
+  });
+
 });
