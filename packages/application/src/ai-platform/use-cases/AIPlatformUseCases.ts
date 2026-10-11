@@ -1168,19 +1168,11 @@ export class AIExecutionOrchestrator {
   listLogs(filters?: Record<string, unknown>) {
     return this.repository.listExecutions(filters);
   }
-  async cancel(publicId: string) {
-    const value = await this.repository.findExecution(publicId);
-    if (!value) throw new Error('AI_EXECUTION_NOT_FOUND');
-    if (
-      ![
-        AIExecutionStatus.RECEIVED,
-        AIExecutionStatus.QUEUED,
-        AIExecutionStatus.RUNNING,
-        AIExecutionStatus.RETRYING,
-      ].includes(value.status)
-    )
-      throw new Error('AI_EXECUTION_NOT_CANCELLABLE');
-    return this.repository.updateExecution(publicId, { status: AIExecutionStatus.CANCELLED });
+  async cancel(publicId: string, requesterReferenceId: string) {
+    if (!requesterReferenceId) throw new Error('AI_AUTHENTICATED_REQUESTER_REQUIRED');
+    // Fail closed for in-flight calls until provider AbortSignal and cost reconciliation
+    // exist. Never claim to have stopped a paid provider request merely by updating SQL.
+    return this.repository.cancelUnstartedExecution(publicId, requesterReferenceId);
   }
 
   private async findRoutingPolicy(capabilityKey: string, consumerKey: string) {
