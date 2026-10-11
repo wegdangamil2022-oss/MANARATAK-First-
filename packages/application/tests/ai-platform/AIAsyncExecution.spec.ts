@@ -47,4 +47,38 @@ describe('Phase 17 durable async execution', () => {
     await useCases.processAsync('aij_1', 'worker-1');
     expect(repo.updateAsyncJob).toHaveBeenCalledWith('aij_1', expect.objectContaining({ status: 'DEAD_LETTER', errorCode: 'AI_PROVIDER_UNAVAILABLE' }), expect.objectContaining({workerId: 'worker-1'}));
   });
+
+  it('keeps a stable execution idempotency identity when async leases are reclaimed', async () => {
+    const repo = repository();
+    repo.claimAsyncJob.mockResolvedValue({
+      publicId: 'aij_1', requesterReferenceId: request.requesterReferenceId,
+      consumerKey: request.consumerKey, capabilityKey: request.capabilityKey,
+      status: 'RUNNING', lockedAt: new Date('2026-10-11T12:00:00Z'),
+      payloadCiphertext: 'cipher', payloadIv: 'iv', payloadAuthTag: 'tag', payloadKeyVersion: 'v1',
+      attempts: 1, maxAttempts: 3,
+    });
+    repo.updateAsyncJob.mockImplementation((_id, patch) => Promise.resolve(patch));
+    const protector = { status: () => 'READY' as const, protect: vi.fn(), unprotect: vi.fn().mockReturnValue(request) };
+    const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any, protector);
+    const execute = vi.spyOn(useCases, 'execute').mockResolvedValue({
+      executionPublicId: 'ai_1', traceId: 'trace', status: AIExecutionStatus.COMPLETED,
+      usage: { inputTokens: 10, outputTokens: 5 },
+    });
+    await useCases.processAsync('aij_1', 'worker-1');
+    expect(execute).toHaveBeenCalledWith(expect.objectContaining({ idempotencyKey: 'async-job:aij_1' }));
+    expect(repo.updateAsyncJob).toHaveBeenCalledWith('aij_1',
+      expect.objectContaining({ status: 'COMPLETED', executionPublicId: 'ai_1' }),
+      expect.objectContaining({ workerId: 'worker-1' }));
+  });
+
+  it('consumes the database-selected claimable queue instead of skipping due work', async () => {
+    const repo = repository();
+    (repo as any).listClaimableAsyncJobs = vi.fn().mockResolvedValue([{ publicId: 'older-due' }]);
+    const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any);
+    const process = vi.spyOn(useCases, 'processAsync').mockResolvedValue({} as any);
+    expect(await useCases.processDueAsyncJobs('worker-1', 4)).toEqual({ scanned: 1, processed: 1 });
+    expect((repo as any).listClaimableAsyncJobs).toHaveBeenCalledWith(4);
+    expect(process).toHaveBeenCalledWith('older-due', 'worker-1');
+  });
+
 });
