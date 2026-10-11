@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
+import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import {
   Users,
@@ -124,11 +125,11 @@ interface StudentPage {
 type Tab = 'OVERVIEW' | 'LEARNING' | 'CERTIFICATES' | 'SAVED' | 'OPERATIONS';
 const PUBLIC_WEB_BASE = (import.meta.env.VITE_PUBLIC_WEB_URL || '').replace(/\/$/, '');
 const tabs = [
-  { id: 'OVERVIEW', title: 'ملخص الطالب', icon: Users },
-  { id: 'LEARNING', title: 'الدورات والتقدم', icon: BookOpen },
-  { id: 'CERTIFICATES', title: 'الشهادات', icon: Award },
-  { id: 'SAVED', title: 'المحفوظات والطلبات', icon: Bookmark },
-  { id: 'OPERATIONS', title: 'الدعم والمزامنة', icon: Activity },
+  { id: 'OVERVIEW', titleKey: 'stu_support_tab_overview', icon: Users },
+  { id: 'LEARNING', titleKey: 'stu_support_tab_learning', icon: BookOpen },
+  { id: 'CERTIFICATES', titleKey: 'stu_support_tab_certificates', icon: Award },
+  { id: 'SAVED', titleKey: 'stu_support_tab_saved', icon: Bookmark },
+  { id: 'OPERATIONS', titleKey: 'stu_support_tab_operations', icon: Activity },
 ] as const;
 const labels: Record<string, string> = {
   ACTIVE: 'نشط',
@@ -185,7 +186,8 @@ function Count({ title, value }: { title: string; value: number | string }) {
 }
 
 export function StudentSupportAdminPage() {
-  const { hasPermission } = useAdminAuthorization();
+  const {hasPermission}=useAdminAuthorization();
+  const {t,dir}=useTranslation();
   const [params, setParams] = useSearchParams();
   const selectedId = params.get('student');
   const [items, setItems] = useState<StudentSupportItem[]>([]);
@@ -505,14 +507,14 @@ export function StudentSupportAdminPage() {
   const savedCount = detail?.savedSummary?.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <div dir="rtl" className="mx-auto max-w-7xl space-y-6">
+    <div dir={dir} className="mx-auto max-w-7xl space-y-6">
       <header className="rounded-3xl bg-gradient-to-l from-[#0E7C86] to-[#142B5F] p-6 text-white sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs text-cyan-100">إدارة الطلاب ومتابعة الحسابات</p>
-            <h1 className="mt-2 text-3xl font-black">الطلاب</h1>
+            <p className="text-xs text-cyan-100">{t('stu_support_intro_label')}</p>
+            <h1 className="mt-2 text-3xl font-black">{t('stu_support_heading')}</h1>
             <p className="mt-3 text-sm text-white/85">
-              ابحث عن الطالب، ثم تابع دوراته وشهاداته وحالة حسابه من مكان واحد.
+              {t('stu_support_intro')}
             </p>
           </div>
           <button
@@ -521,7 +523,7 @@ export function StudentSupportAdminPage() {
             className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-3 font-bold disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            تحديث القائمة
+            {t('stu_support_refresh_list')}
           </button>
         </div>
       </header>
@@ -540,17 +542,17 @@ export function StudentSupportAdminPage() {
         className="grid gap-3 rounded-2xl border bg-white p-4 md:grid-cols-[2fr_1fr_auto_auto]"
       >
         <label className="text-xs font-bold text-slate-600">
-          اسم الطالب أو معرفه
+          {t('stu_support_name_or_id')}
           <input
             maxLength={120}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="اكتب الاسم أو جزءاً من المعرف"
+            placeholder={t('stu_support_search_placeholder')}
             className="mt-2 w-full rounded-xl border p-3 text-sm"
           />
         </label>
         <label className="text-xs font-bold text-slate-600">
-          حالة الحساب
+          {t('stu_support_account_status')}
           <select
             value={status}
             onChange={(e) => {
@@ -559,7 +561,7 @@ export function StudentSupportAdminPage() {
             }}
             className="mt-2 w-full rounded-xl border p-3 text-sm"
           >
-            <option value="">جميع الحالات</option>
+            <option value="">{t('stu_support_all_statuses')}</option>
             {['ACTIVE', 'INITIALIZING', 'SUSPENDED', 'ARCHIVED'].map((value) => (
               <option key={value} value={value}>
                 {statusLabel(value)}
@@ -572,7 +574,7 @@ export function StudentSupportAdminPage() {
           className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#142B5F] p-3 text-sm font-bold text-white disabled:opacity-50"
         >
           <Search className="h-4 w-4" />
-          بحث
+          {t('stu_support_search')}
         </button>
         <button
           type="button"
@@ -586,36 +588,36 @@ export function StudentSupportAdminPage() {
           }}
           className="mt-auto rounded-xl border p-3 text-sm"
         >
-          مسح الفلاتر
+          {t('stu_support_reset_filters')}
         </button>
       </form>
       <section className="space-y-3 rounded-2xl border bg-white p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-black text-[#142B5F]">فرز حالات الدعم والمزامنة</h2>
-          <span className="text-xs text-slate-500">تصفية على الخادم من سجلات مساحة الطالب فقط</span>
+          <h2 className="font-black text-[#142B5F]">{t('stu_support_triage_heading')}</h2>
+          <span className="text-xs text-slate-500">{t('stu_support_triage_scope')}</span>
         </div>
         <div className="flex flex-wrap gap-3">
           <label className="flex-1 text-xs font-semibold text-slate-600">
-            سبب المتابعة
+            {t('stu_support_triage_reason')}
             <select value={triageKind} onChange={event=>{
               ++triageRequest.current;
               setTriageKind(event.target.value as TriageKind);
               setTriagePage(null);setTriageLoading(false);setTriageError(null);
             }} className="mt-2 block w-full rounded-lg border p-2 text-sm">
-              <option value="SYNC_FAILED">أحداث مزامنة فاشلة</option>
-              <option value="SYNC_PENDING">أحداث مزامنة معلقة</option>
-              <option value="APPLICATION_OVERDUE">متابعات تقديم تجاوزت الموعد</option>
+              <option value="SYNC_FAILED">{t('stu_support_triage_failed')}</option>
+              <option value="SYNC_PENDING">{t('stu_support_triage_pending')}</option>
+              <option value="APPLICATION_OVERDUE">{t('stu_support_triage_overdue')}</option>
             </select>
           </label>
           <button type="button" disabled={triageLoading} onClick={()=>void loadTriage()}
             className="mt-auto rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-50">
-            {triageLoading?'جارٍ الفحص…':'عرض النتائج'}
+            {triageLoading?t('stu_support_triage_loading'):t('stu_support_triage_show')}
           </button>
         </div>
         {triageError&&<p role="alert" className="text-sm text-red-700">{triageError}</p>}
         {triagePage&&<div className="space-y-2">
-          <p className="text-xs text-slate-500">عدد الحسابات المطابقة: {triagePage.total}</p>
-          {triagePage.items.length===0&&<p className="text-sm text-slate-500">لا توجد حالات مطابقة.</p>}
+          <p className="text-xs text-slate-500">{t('stu_support_triage_matches')} {triagePage.total}</p>
+          {triagePage.items.length===0&&<p className="text-sm text-slate-500">{t('stu_support_triage_no_matches')}</p>}
           {triagePage.items.map(item=><div key={item.studentReferenceId}
             className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-slate-50 p-3">
             <div>
@@ -625,16 +627,16 @@ export function StudentSupportAdminPage() {
               </p>
             </div>
             <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold"
-              onClick={()=>chooseStudent(item.studentReferenceId)}>فتح سجل الطالب</button>
+              onClick={()=>chooseStudent(item.studentReferenceId)}>{t('stu_support_triage_open')}</button>
           </div>)}
           {triagePage.hasMore&&triagePage.nextCursor&&<button type="button" disabled={triageLoading}
             className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50"
-            onClick={()=>void loadTriage(triagePage.nextCursor!)}>المزيد من الحالات</button>}
+            onClick={()=>void loadTriage(triagePage.nextCursor!)}>{t('stu_support_triage_more')}</button>}
         </div>}
       </section>
       <section className="overflow-hidden rounded-2xl border bg-white">
         <div className="flex justify-between gap-3 border-b bg-slate-50 p-4">
-          <h2 className="font-black text-[#142B5F]">حسابات الطلاب</h2>
+          <h2 className="font-black text-[#142B5F]">{t('stu_support_accounts')}</h2>
           <span className="text-xs text-slate-600">
             {loading && items.length === 0
               ? 'جارٍ التحميل…'
@@ -779,7 +781,7 @@ export function StudentSupportAdminPage() {
                       className={`inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold ${tab === item.id ? 'bg-[#142B5F] text-white' : 'bg-slate-50 text-slate-600'}`}
                     >
                       <item.icon className="h-4 w-4" />
-                      {item.title}
+                      {t(item.titleKey)}
                     </button>
                   ))}
                 </nav>
@@ -791,7 +793,7 @@ export function StudentSupportAdminPage() {
                 {ownerError && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{ownerError}</p>}
                 {Object.values(detail.ownerReadStatus ?? {}).includes('RESTRICTED') && (
                   <p role="status" className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
-                    بعض بيانات الدورات والشهادات والخدمات محجوبة لعدم امتلاك صلاحيات مجالاتها. الأعداد المحجوبة لا تعني صفرًا.
+                    {t('stu_support_owner_restricted')}
                   </p>
                 )}
                 {Object.values(detail.ownerReadStatus ?? {}).includes('DEGRADED') && (
