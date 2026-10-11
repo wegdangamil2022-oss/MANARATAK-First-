@@ -490,6 +490,17 @@ export class PrismaCmsRepository implements ICmsRepository {
       const readiness = await this.readinessFromRows(content, full);
       if (!readiness.ready) throw new Error(`CMS_NOT_READY:${readiness.missing.join(',')}`);
       await this.verifyPublishedAssets(content, full);
+      // Re-check the current owner publication at the final publishing decision.
+      // An earlier successful draft link check does not authorize a target
+      // whose P7/P9/P10/P12/P13 owner archived it in the meantime.
+      const domainLinks = await tx.cmsContentDomainLink.findMany({
+        where: { contentId: content.id },
+        select: { targetType: true, targetId: true },
+      });
+      const domainOwner = new PrismaCmsDomainOwnerReadGateway(tx);
+      for (const reference of domainLinks) {
+        await domainOwner.assertPublished(reference.targetType, reference.targetId);
+      }
       await this.captureRevision(tx, full, command.actorId, 'PUBLISHED');
       const seo = this.seo(
         full.seoMetadata,
