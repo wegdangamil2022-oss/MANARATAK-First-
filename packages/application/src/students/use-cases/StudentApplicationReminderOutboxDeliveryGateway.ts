@@ -44,6 +44,15 @@ export class StudentApplicationReminderOutboxDeliveryGateway implements IOutboxD
       await this.reminders.schedule({
         trackerId,trackerVersion,studentReferenceId,scholarshipId,deadlineAt:current.deadlineAt!,
       });
+      // Protect an out-of-order worker race: a tracker edit may commit between
+      // the version check above and notification intent persistence. The newer
+      // owner version must not leave this older intent scheduled.
+      const afterSchedule=await this.trackers.findById(studentReferenceId,trackerId);
+      if(!afterSchedule || afterSchedule.status!=='ACTIVE' ||
+        afterSchedule.version!==trackerVersion ||
+        afterSchedule.scholarshipId!==scholarshipId ||
+        (afterSchedule.deadlineAt?.toISOString()??null)!==actualDeadline)
+        await this.reminders.cancel(trackerId,trackerVersion);
     } else await this.reminders.cancel(trackerId,trackerVersion);
   }
 }
