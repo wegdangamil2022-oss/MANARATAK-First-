@@ -8,6 +8,33 @@ import { CmsDomainTargetType } from '@manaratak/domain';
 export class PrismaCmsDomainOwnerReadGateway {
   public constructor(private readonly db: any) {}
 
+  /**
+   * Navigation targets use TYPE:<canonical-owner-UUID> and resolve to a real
+   * locale-prefixed public path. Academic programs have no dedicated public
+   * detail route, so they intentionally cannot become nav destinations yet.
+   */
+  public async resolvePublicPath(targetType: CmsDomainTargetType, targetId: string, locale: string): Promise<string> {
+    if (locale !== 'ar' && locale !== 'en') throw new Error('CMS_NAVIGATION_LOCALE_UNSUPPORTED');
+    const routes: Partial<Record<CmsDomainTargetType, { delegate: string; segment: string; field: string }>> = {
+      [CmsDomainTargetType.UNIVERSITY]: { delegate: 'university', segment: 'universities', field: 'slug' },
+      [CmsDomainTargetType.MAJOR]: { delegate: 'major', segment: 'majors', field: 'slug' },
+      [CmsDomainTargetType.SCHOLARSHIP]: { delegate: 'scholarship', segment: 'scholarships', field: 'slug' },
+      [CmsDomainTargetType.INTERNATIONAL_TEST]: { delegate: 'internationalTest', segment: 'international-tests', field: 'slug' },
+      [CmsDomainTargetType.COURSE]: { delegate: 'course', segment: 'courses', field: 'slug' },
+    };
+    const config = routes[targetType];
+    if (!config) throw new Error('CMS_NAVIGATION_DOMAIN_ROUTE_UNSUPPORTED');
+    await this.assertPublished(targetType, targetId);
+    const row = await this.db[config.delegate].findUnique({
+      where: { id: targetId }, select: { slug: true },
+    });
+    const slug = row?.slug;
+    if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      throw new Error('CMS_NAVIGATION_DOMAIN_SLUG_INVALID');
+    }
+    return `/${locale}/${config.segment}/${slug}`;
+  }
+
   public async assertPublished(targetType: CmsDomainTargetType, targetId: string): Promise<void> {
     let found: unknown;
     switch (targetType) {
