@@ -74,7 +74,7 @@ export class CmsPublicRouter {
       if (deliveryHeaders(req, res, payload)) return; res.json(payload);
     }));
     router.get('/blocks', asyncHandler(async (req, res) => {
-      const query = z.object({locale:z.enum(['ar','en']).default('ar'),siteIdentifier:z.string().default('manaratak')}).parse(req.query);
+      const query = z.object({locale:z.enum(['ar','en']).default('ar'),siteIdentifier:z.literal('manaratak').default('manaratak')}).parse(req.query);
       const payload = {data:await publicCmsUseCases.listPublishedBlocks(query.siteIdentifier,query.locale)};
       if (deliveryHeaders(req,res,payload)) return;
       res.json(payload);
