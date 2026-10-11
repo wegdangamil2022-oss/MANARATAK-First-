@@ -61,6 +61,8 @@ describe('Phase 16 CMS use cases', () => {
       saveAnnouncement: vi.fn(),
       publishAnnouncement: vi.fn(),
       archiveAnnouncement: vi.fn(),
+      listFailedSchedules: vi.fn(),
+      retryFailedSchedule: vi.fn(),
       processDueSchedules: vi.fn(),
     };
     admin = new AdminCmsUseCases(repository);
@@ -199,6 +201,15 @@ describe('Phase 16 CMS use cases', () => {
     await expect(admin.restoreRevision('content-1', 'en', 'rev-1', 'editor', 2))
       .rejects.toThrow('CMS_REVISION_RELATIONS_UNAVAILABLE');
     expect(repository.restoreRevision).not.toHaveBeenCalled();
+  });
+
+  it('requires a human repair reason and passes the trusted actor to owner retry', async () => {
+    await expect(admin.retryFailedSchedule('failed-job', 2, 'operator', '  ')).rejects.toThrow('CMS_REPAIR_CONTEXT_REQUIRED');
+    expect(repository.retryFailedSchedule).not.toHaveBeenCalled();
+    vi.mocked(repository.retryFailedSchedule).mockResolvedValue({ id: 'failed-job', status: 'PENDING', attemptCount: 2 });
+    const result = await admin.retryFailedSchedule('failed-job', 2, 'operator', 'Validated after correction');
+    expect(result.status).toBe('PENDING');
+    expect(repository.retryFailedSchedule).toHaveBeenCalledWith('failed-job', 2, 'operator', 'Validated after correction');
   });
 
   it('passes paginated redirect search to the CMS owner without reading public content', async () => {
