@@ -41,7 +41,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     // while this principal had no student role. Reconcile from owner snapshots only.
     if (entry.domain === 'AUTHORIZATION' && event.eventType === 'StudentIdentityCreated' &&
         identity.status === 'ACTIVE') {
-      await this.catchUpFromOwners(entry.id, event.studentReferenceId);
+      await this.catchUpFromOwners(entry.id, event.studentReferenceId, entry.createdAt);
     }
     // Late assignment events must project the current owner lifecycle, not revive a suspended identity.
     if (event.eventType === 'StudentIdentityCreated' && ['SUSPENDED', 'ARCHIVED', 'PURGED'].includes(identity.status)) {
@@ -50,7 +50,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     }
   }
 
-  private async catchUpFromOwners(roleEventId: string, studentReferenceId: string): Promise<void> {
+  private async catchUpFromOwners(roleEventId: string, studentReferenceId: string, roleAssignedAt:Date): Promise<void> {
     // The triggering role event is replayed by the outbox until *all* pages have
     // been projected. Each projected record has an immutable derived event id.
     // Never fetch an unbounded owner collection or falsely acknowledge truncation.
@@ -65,7 +65,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
             studentReferenceId, eventType: row.status === 'COMPLETED' ? 'CourseCompleted' : 'CourseProgressUpdated',
             sourceDomain: 'COURSES', sourceReferenceId: row.enrollmentId,
             title: 'تمت مزامنة تقدم الدورة',
-            occurredAt: row.completedAt ?? row.enrolledAt,
+            occurredAt: roleAssignedAt,
             metadata: {
               courseId: row.courseId, enrollmentId: row.enrollmentId,
               courseSlug: row.courseSlug, courseName: row.courseName,
@@ -88,7 +88,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
           await this.students.consumeIntegrationEvent({
             eventId: `${roleEventId}:certificate:${row.id}`,
             studentReferenceId, eventType, sourceDomain: 'CERTIFICATES', sourceReferenceId: row.id,
-            title: 'تمت مزامنة حالة الشهادة', occurredAt: row.issuedAt,
+            title: 'تمت مزامنة حالة الشهادة', occurredAt: roleAssignedAt,
             metadata: {
               certificateId: row.id, publicId: row.publicId, serialNumber: row.serialNumber,
               verificationCode: row.verificationCode, status: row.status,
