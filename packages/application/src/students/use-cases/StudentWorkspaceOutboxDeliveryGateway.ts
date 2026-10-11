@@ -51,48 +51,89 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
   }
 
   private async catchUpFromOwners(roleEventId: string, studentReferenceId: string): Promise<void> {
-    // A 51st row signals incompleteness rather than pretending the snapshot is exhaustive.
-    // Backfill must be continued via a paginated reconciliation job for large accounts.
+    // The triggering role event is replayed by the outbox until *all* pages have
+    // been projected. Each projected record has an immutable derived event id.
+    // Never fetch an unbounded owner collection or falsely acknowledge truncation.
     if (this.learning) {
-      const rows = await this.learning.listForStudent(studentReferenceId, 51);
-      if (rows.length > 50) throw new Error('STUDENT_LEARNING_CATCHUP_PAGE_REQUIRED');
-      for (const row of rows) {
-        await this.students.consumeIntegrationEvent({
-          eventId: `${roleEventId}:learning:${row.enrollmentId}`,
-          studentReferenceId, eventType: row.status === 'COMPLETED' ? 'CourseCompleted' : 'CourseProgressUpdated',
-          sourceDomain: 'COURSES', sourceReferenceId: row.enrollmentId,
-          title: 'تمت مزامنة تقدم الدورة',
-          occurredAt: row.completedAt ?? row.enrolledAt,
-          metadata: {
-            courseId: row.courseId, enrollmentId: row.enrollmentId,
-            progressPercentage: row.progressPercentage,
-            status: row.status,
-            enrolledAt: row.enrolledAt, completedAt: row.completedAt,
-          },
+      await this.catchUpPages('COURSES',
+        (limit,cursor) => this.learning!.listPageForStudent
+          ? this.learning!.listPageForStudent(studentReferenceId,limit,cursor)
+          : this.legacyLearningPage(studentReferenceId,cursor),
+        async row => {
+          await this.students.consumeIntegrationEvent({
+            eventId: `${roleEventId}:learning:${row.enrollmentId}`,
+            studentReferenceId, eventType: row.status === 'COMPLETED' ? 'CourseCompleted' : 'CourseProgressUpdated',
+            sourceDomain: 'COURSES', sourceReferenceId: row.enrollmentId,
+            title: 'تمت مزامنة تقدم الدورة',
+            occurredAt: row.completedAt ?? row.enrolledAt,
+            metadata: {
+              courseId: row.courseId, enrollmentId: row.enrollmentId,
+              courseSlug: row.courseSlug, courseName: row.courseName,
+              progressPercentage: row.progressPercentage, status: row.status,
+              enrolledAt: row.enrolledAt, lastAccessedAt: row.lastAccessedAt,
+              completedAt: row.completedAt,
+            },
+          });
         });
-      }
     }
     if (this.certificates) {
-      const rows = await this.certificates.listForStudent(studentReferenceId, 51);
-      if (rows.length > 50) throw new Error('STUDENT_CERTIFICATE_CATCHUP_PAGE_REQUIRED');
-      for (const row of rows) {
-        const eventType = row.status === 'REVOKED' ? 'CertificateRevoked' :
-          row.status === 'EXPIRED' ? 'CertificateExpired' : 'CertificateIssued';
-        await this.students.consumeIntegrationEvent({
-          eventId: `${roleEventId}:certificate:${row.id}`,
-          studentReferenceId, eventType, sourceDomain: 'CERTIFICATES', sourceReferenceId: row.id,
-          title: 'تمت مزامنة حالة الشهادة', occurredAt: row.issuedAt,
-          metadata: {
-            certificateId: row.id, publicId: row.publicId, serialNumber: row.serialNumber,
-            verificationCode: row.verificationCode, status: row.status,
-            courseDisplayName: row.courseDisplayName,
-            issuedAt: row.issuedAt, expiresAt: row.expiresAt,
-            certificatePdfAssetId: row.certificatePdfAssetId,
-            previewImageAssetId: row.previewImageAssetId,
-          },
+      await this.catchUpPages('CERTIFICATES',
+        (limit,cursor) => this.certificates!.listPageForStudent
+          ? this.certificates!.listPageForStudent(studentReferenceId,limit,cursor)
+          : this.legacyCertificatePage(studentReferenceId,cursor),
+        async row => {
+          const eventType = row.status === 'REVOKED' ? 'CertificateRevoked' :
+            row.status === 'EXPIRED' ? 'CertificateExpired' : 'CertificateIssued';
+          await this.students.consumeIntegrationEvent({
+            eventId: `${roleEventId}:certificate:${row.id}`,
+            studentReferenceId, eventType, sourceDomain: 'CERTIFICATES', sourceReferenceId: row.id,
+            title: 'تمت مزامنة حالة الشهادة', occurredAt: row.issuedAt,
+            metadata: {
+              certificateId: row.id, publicId: row.publicId, serialNumber: row.serialNumber,
+              verificationCode: row.verificationCode, status: row.status,
+              courseDisplayName: row.courseDisplayName,
+              issuedAt: row.issuedAt, expiresAt: row.expiresAt,
+              certificatePdfAssetId: row.certificatePdfAssetId,
+              previewImageAssetId: row.previewImageAssetId,
+            },
+          });
         });
-      }
     }
+  }
+
+  private async legacyLearningPage(studentReferenceId:string,cursor?:string) {
+    if (cursor) throw new Error('STUDENT_LEARNING_CATCHUP_PAGINATION_REQUIRED');
+    const items=await this.learning!.listForStudent(studentReferenceId,51);
+    if(items.length>50)throw new Error('STUDENT_LEARNING_CATCHUP_PAGINATION_REQUIRED');
+    return {items,nextCursor:null};
+  }
+
+  private async legacyCertificatePage(studentReferenceId:string,cursor?:string) {
+    if (cursor) throw new Error('STUDENT_CERTIFICATE_CATCHUP_PAGINATION_REQUIRED');
+    const items=await this.certificates!.listForStudent(studentReferenceId,51);
+    if(items.length>50)throw new Error('STUDENT_CERTIFICATE_CATCHUP_PAGINATION_REQUIRED');
+    return {items,nextCursor:null};
+  }
+
+  /** 40 x 50 = at most 2,000 records per owner; source cursor must advance. */
+  private async catchUpPages<T>(domain:'COURSES'|'CERTIFICATES',
+    read:(limit:number,cursor?:string)=>Promise<{items:T[];nextCursor:string|null}>,
+    project:(item:T)=>Promise<void>):Promise<void> {
+    let cursor:string|undefined;
+    const seen=new Set<string>();
+    for(let index=0;index<40;index++){
+      const page=await read(50,cursor);
+      if(!Array.isArray(page.items)||page.items.length>50||
+          typeof page.nextCursor!=='string'&&page.nextCursor!==null)
+        throw new Error('STUDENT_OWNER_CATCHUP_PAGE_INVALID');
+      if(page.nextCursor && (!page.items.length||page.nextCursor===cursor||seen.has(page.nextCursor)))
+        throw new Error('STUDENT_OWNER_CATCHUP_CURSOR_INVALID');
+      for(const item of page.items)await project(item);
+      if(!page.nextCursor)return;
+      seen.add(page.nextCursor);
+      cursor=page.nextCursor;
+    }
+    throw new Error(`STUDENT_${domain}_CATCHUP_CAPACITY_EXCEEDED`);
   }
 
   private map(entry: TransactionalOutboxEntry): StudentWorkspaceIntegrationEventDto | null {
