@@ -745,6 +745,21 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
     value: Omit<AIAsyncJobRecord, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<AIAsyncJobRecord> {
     return this.prisma.$transaction(async (tx: any) => {
+      // Advisory lock serializes queue admission for each consumer across processes.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-async-admission:${value.consumerKey}`}, 0))::text AS lock_result`;
+      const activeStatuses = ['QUEUED', 'RETRYING', 'RUNNING'];
+      const active = await tx.aIAsyncJobRecord.count({
+        where: { consumerKey: value.consumerKey, status: { in: activeStatuses } },
+      });
+      if (active >= 1_000) throw new Error('AI_ASYNC_CONSUMER_QUEUE_FULL');
+      const requesterPending = await tx.aIAsyncJobRecord.count({
+        where: {
+          consumerKey: value.consumerKey,
+          requesterReferenceId: value.requesterReferenceId,
+          status: { in: activeStatuses },
+        },
+      });
+      if (requesterPending >= 25) throw new Error('AI_ASYNC_REQUESTER_QUEUE_FULL');
       const record = await tx.aIAsyncJobRecord.create({ data: value });
       await tx.transactionalOutboxRecord.create({
         data: {
