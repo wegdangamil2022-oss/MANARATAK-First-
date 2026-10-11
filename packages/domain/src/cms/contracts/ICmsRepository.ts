@@ -89,5 +89,10 @@ export interface ICmsRepository {
   saveAnnouncement(data: Omit<CmsAnnouncementDto, 'id' | 'publicId' | 'version' | 'status' | 'approvedBy' | 'publishedContentHash' | 'publishedAt' | 'archivedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsAnnouncementDto>;
   publishAnnouncement(id: string, expectedVersion: number, actorId: string): Promise<CmsAnnouncementDto>;
   archiveAnnouncement(id: string, expectedVersion: number, actorId: string): Promise<CmsAnnouncementDto>;
+  listFailedSchedules(siteIdentifier: string, locale?: string, limit?: number): Promise<Array<{
+    id: string; localizedContentId: string; contentId: string; locale: string;
+    attemptCount: number; failureCode: string | null; scheduledAt: Date;
+  }>>;
+  retryFailedSchedule(jobId: string, expectedAttemptCount: number, actorId: string, reason: string): Promise<{ id: string; status: string; attemptCount: number }>;
   processDueSchedules(actorId: string, now: Date, limit?: number): Promise<CmsScheduleResultDto>;
 }
