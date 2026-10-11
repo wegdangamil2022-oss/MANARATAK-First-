@@ -23,6 +23,15 @@ describe('StudentWorkspaceOutboxWorker parked event recovery',()=>{
     }));
   });
 
+  it('claims only P15 catchup continuation records',async()=>{
+    const dispatcher={dispatchBatch:vi.fn().mockResolvedValue({claimed:0,processed:0,failed:0,exhausted:0,leaseLost:0})};
+    const worker=new StudentWorkspaceOutboxWorker(dispatcher as any);
+    await worker.runCatchupOnce('catchup-worker');
+    expect(dispatcher.dispatchBatch).toHaveBeenCalledWith(expect.objectContaining({
+      domain:'STUDENT_WORKSPACE_CATCHUP',
+      eventTypes:['StudentOwnerCatchupContinuationRequested'],
+    }));
+  });
   it('rejects unscoped worker identities and safely no-ops without recovery',async()=>{
     const worker=new StudentWorkspaceOutboxWorker({dispatchBatch:vi.fn()} as any);
     await expect(worker.runReplayOnce('')).rejects.toThrow('STUDENT_WORKSPACE_REPLAY_WORKER_ID_REQUIRED');
