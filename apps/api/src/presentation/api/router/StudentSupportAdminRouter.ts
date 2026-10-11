@@ -7,7 +7,7 @@ import {
   type IIdentityRepository,
   type IRoleAssignmentRepository,
 } from '@manaratak/domain';
-import { StudentWorkspaceUseCases, StudentDashboardHydrationService, StudentApplicationTrackerUseCases, StudentServiceRequestUseCases } from '@manaratak/application';
+import { StudentWorkspaceUseCases, StudentDashboardHydrationService, StudentApplicationTrackerUseCases, AdminServiceFulfillmentUseCases } from '@manaratak/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
 export class StudentSupportAdminRouter {
@@ -15,7 +15,7 @@ export class StudentSupportAdminRouter {
     studentWorkspaceUseCases,
     studentDashboardHydrationService,
     studentApplicationTrackerUseCases,
-    studentServiceRequestUseCases,
+    adminServiceFulfillmentUseCases,
     identityRepository,
     roleAssignmentRepository,
     auditRecordRepo,
@@ -24,7 +24,7 @@ export class StudentSupportAdminRouter {
     studentWorkspaceUseCases: StudentWorkspaceUseCases;
     studentDashboardHydrationService: StudentDashboardHydrationService;
     studentApplicationTrackerUseCases: StudentApplicationTrackerUseCases;
-    studentServiceRequestUseCases?: StudentServiceRequestUseCases;
+    adminServiceFulfillmentUseCases?: AdminServiceFulfillmentUseCases;
     identityRepository?: IIdentityRepository;
     roleAssignmentRepository?: IRoleAssignmentRepository;
     auditRecordRepo?: IAuditRecordRepository;
@@ -105,13 +105,13 @@ export class StudentSupportAdminRouter {
           if(!granted.isGranted)return void res.status(403).json({
             error:{code:'STUDENT_SUPPORT_OWNER_READ_DENIED'},
           });
-          if(!studentServiceRequestUseCases)
+          if(!adminServiceFulfillmentUseCases)
             throw new Error('SERVICE_SUPPORT_TRIAGE_NOT_CONFIGURED');
           const query=z.object({
             page:z.coerce.number().int().min(1).max(10000).optional(),
             limit:z.coerce.number().int().min(1).max(50).optional(),
           }).strict().parse(req.query);
-          const result=await studentServiceRequestUseCases.listSupportAwaitingPaymentStudents(
+          const result=await adminServiceFulfillmentUseCases.listSupportAwaitingPaymentStudents(
             query.page??1,query.limit??20,
           );
           await AuditHelper.recordMutation(auditRecordRepo,req,{
