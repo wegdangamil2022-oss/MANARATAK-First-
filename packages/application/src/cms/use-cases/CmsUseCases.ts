@@ -492,7 +492,10 @@ export class PublicCmsUseCases {
   }
 
   public async resolveRedirect(siteIdentifier: string, locale: string, sourcePath: string): Promise<Pick<CmsRedirectDto, 'destinationPath' | 'statusCode'> | null> {
-    const redirect = (await this.repository.listRedirects(siteIdentifier, locale)).find((entry) => entry.active && entry.sourcePath === sourcePath);
+    const redirect = this.repository.resolveActiveRedirect
+      ? await this.repository.resolveActiveRedirect(siteIdentifier, locale, sourcePath)
+      : (await this.repository.listRedirects(siteIdentifier, locale))
+          .find((entry) => entry.active && entry.sourcePath === sourcePath) ?? null;
     if (!redirect) return null;
     CmsPublishingPolicy.assertRedirect(redirect.sourcePath, redirect.destinationPath);
     return { destinationPath: redirect.destinationPath, statusCode: redirect.statusCode };
