@@ -18,6 +18,11 @@ const en = {
   title: 'English news', summary: 'Summary',
   seoMetadata: { title: 'English SEO title', description: 'English SEO description', noIndex: false },
 };
+const arOnly = {
+  ...ar, contentId: 'node-ar-only', publicId: 'cms-ar-only',
+  slug: 'single-language', canonicalUrl: '/ar/news/single-language',
+  availableLocales: [{ locale: 'ar', slug: 'single-language' }],
+};
 const excluded = {
   ...en, contentId: 'node-private', publicId: 'cms-private',
   slug: 'no-index', canonicalUrl: '/en/news/no-index',
@@ -60,7 +65,7 @@ describe('CMS prerender source contract (local mock API, no database/provider)',
       res.setHeader('content-type', 'application/json');
       if (url.pathname === '/public/cms/content') {
         const locale = url.searchParams.get('locale');
-        res.end(JSON.stringify({ data: locale === 'ar' ? [ar] : [en, excluded], totalPages: 1 }));
+        res.end(JSON.stringify({ data: locale === 'ar' ? [ar, arOnly] : [en, excluded], totalPages: 1 }));
       } else {
         res.end(JSON.stringify({ data: [], nextCursor: null }));
       }
@@ -82,6 +87,9 @@ describe('CMS prerender source contract (local mock API, no database/provider)',
     expect(sitemap).toContain('<loc>https://manaratak.example/ar/news/arabic-news</loc>');
     expect(sitemap).toContain('<loc>https://manaratak.example/en/news/english-news</loc>');
     expect(sitemap).not.toContain('/en/news/no-index');
-    expect(manifest.routes.filter((entry: { kind: string }) => entry.kind === 'cms')).toHaveLength(2);
+    const monoHtml = await readFile(resolve(dist, 'ar/news/single-language/index.html'), 'utf8');
+    expect(monoHtml).not.toContain('hreflang="en"');
+    expect(monoHtml).not.toContain('og:locale:alternate');
+    expect(manifest.routes.filter((entry: { kind: string }) => entry.kind === 'cms')).toHaveLength(3);
   });
 });
