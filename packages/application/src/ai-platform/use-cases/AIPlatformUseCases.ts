@@ -266,14 +266,24 @@ export class AIPlatformAdminUseCases {
   rollbackPrompt(promptKey: string, version: number, actorReferenceId: string) {
     return this.deployPrompt(promptKey, version, actorReferenceId);
   }
-  executions(filters?: Record<string, unknown>) {
-    return this.repository.listExecutions(filters);
+  async executions(filters?: Record<string, unknown>) {
+    const page = await this.repository.listExecutions(filters);
+    return { ...page, data: page.data.map(privacySafeExecutionRecord) };
   }
-  execution(publicId: string) {
-    return this.repository.findExecution(publicId);
+  async execution(publicId: string) {
+    const record = await this.repository.findExecution(publicId);
+    return record ? privacySafeExecutionRecord(record) : null;
   }
-  executionTrace(publicId: string) {
-    return this.repository.listExecutionSpans(publicId);
+  async executionTrace(publicId: string) {
+    const [record, spans] = await Promise.all([
+      this.repository.findExecution(publicId),
+      this.repository.listExecutionSpans(publicId),
+    ]);
+    if (!record) return [];
+    return record.dataClassification === 'PUBLIC' ? spans : spans.map((span) => ({
+      ...span,
+      attributes: sanitizeOperationalAttributes(span.attributes),
+    }));
   }
   appendIncidentEvent(publicId: string, action: string, actorReferenceId: string, note?: string) {
     return this.repository.appendIncidentEvent(publicId, {
@@ -2373,6 +2383,29 @@ function estimateCost(
         Number(price?.outputPricePerMillion ?? model.outputPricePerMillion ?? 0)) /
     1_000_000
   );
+}
+// Admin projections must not re-expose historical preview/metadata persisted before
+// non-public preview suppression was introduced. This is read-time protection;
+// historical database cleanup remains a separately approved migration/backfill.
+function sanitizeOperationalAttributes(value?: Record<string, unknown> | null): Record<string, unknown> {
+  if (!value) return {};
+  const safeKeys = new Set([
+    'providerKey', 'modelKey', 'attempt', 'priceSnapshotKey',
+    'durationMs', 'status', 'code', 'tokenCount', 'routingPolicyKey',
+  ]);
+  return Object.fromEntries(
+    Object.entries(value).filter(([key, item]) =>
+      safeKeys.has(key) && (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean')),
+  );
+}
+function privacySafeExecutionRecord<T extends AIExecutionRecord>(record: T): T {
+  if (record.dataClassification === 'PUBLIC') return record;
+  return {
+    ...record,
+    inputPreview: null,
+    outputPreview: null,
+    metadata: sanitizeOperationalAttributes(record.metadata),
+  };
 }
 function privacyPreview(value: string, classification: AIDataClassification) {
   // Metadata suffices for operations; only explicitly PUBLIC inputs allow a preview.
