@@ -53,6 +53,7 @@ try {
   await mkdir(resolve(root, 'logs'));
   await mkdir(resolve(root, 'ar/news/archived'), { recursive: true });
   await writeFile(resolve(root, 'index.html'), 'STALE_SPA_FALLBACK');
+  await writeFile(resolve(root, 'cms-app-entry.js'), 'import("/assets/current.js");');
   await writeFile(resolve(root, 'ar/news/archived/index.html'), 'STALE_ARCHIVED_HTML');
   const source = await readFile(resolve('apps/web/nginx.conf'), 'utf8');
   const server = source
@@ -104,7 +105,17 @@ try {
   assert.equal(outage.status, 503);
   assert.equal(await outage.text(), 'OWNER_UNAVAILABLE');
   console.log('PASS owner outage never serves a stale static success');
-  console.log('CHECKS=6 LOCAL_MOCK_OWNER=YES DATABASE_CONNECTED=NO DEPLOYMENT=NO');
+  const entry = await fetch(`${web}/cms-app-entry.js`);
+  assert.equal(entry.status, 200);
+  assert.match(entry.headers.get('content-type'), /javascript/);
+  assert.match(entry.headers.get('cache-control'), /no-store/);
+  assert.match(await entry.text(), /current\.js/);
+  await rm(resolve(root, 'cms-app-entry.js'));
+  const missingEntry = await fetch(`${web}/cms-app-entry.js`);
+  assert.equal(missingEntry.status, 404);
+  assert.doesNotMatch(await missingEntry.text(), /STALE_SPA_FALLBACK/);
+  console.log('PASS web app entry has JavaScript MIME, no-store, and no SPA fallback');
+  console.log('CHECKS=7 LOCAL_MOCK_OWNER=YES DATABASE_CONNECTED=NO DEPLOYMENT=NO');
 } finally {
   if (nginx && nginx.exitCode === null) {
     const stopped = new Promise((done) => nginx.once('exit', done));
