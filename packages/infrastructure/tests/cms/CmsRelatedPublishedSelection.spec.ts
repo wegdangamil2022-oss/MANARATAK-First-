@@ -22,6 +22,7 @@ describe('CMS related published selection', () => {
 
   it('filters by published site and requested locale before selecting a bounded unique result', async () => {
     const prisma = {
+      university: { findFirst: vi.fn().mockResolvedValue({ id: 'target-1' }) },
       $queryRaw: vi.fn().mockResolvedValue([{ contentId: 'content-1' }]),
       cmsPublishedContent: {
         findMany: vi.fn().mockResolvedValue([{ id: 'pub-1', contentId: 'content-1', locale: 'en', status: 'PUBLISHED' }]),
@@ -45,11 +46,13 @@ describe('CMS related published selection', () => {
 
   it('skips published lookups when the scoped selection has no matching owners', async () => {
     const prisma = {
+      course: { findFirst: vi.fn().mockResolvedValue(null) },
       $queryRaw: vi.fn().mockResolvedValue([]),
       cmsPublishedContent: { findMany: vi.fn() },
     };
     const owner = new PrismaCmsRepository(prisma as unknown as PrismaClient);
     expect(await owner.listPublishedByDomainTarget('COURSE', 'missing', 'ar', 'manaratak', 6)).toEqual([]);
     expect(prisma.cmsPublishedContent.findMany).not.toHaveBeenCalled();
+    expect(prisma.$queryRaw).not.toHaveBeenCalled();
   });
 });
