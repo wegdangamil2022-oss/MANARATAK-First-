@@ -2618,10 +2618,12 @@ export class EnterpriseAIGuardrailEngine {
     let value = input;
     const reasons: string[] = [];
     let decision = AISafetyDecision.ALLOWED;
+    // Every input repetition is bounded: failed email/phone matches must not
+    // rescan an arbitrarily long suffix at every possible starting character.
     const pii = [
-      /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,
-      /\+?\d[\d\s()-]{7,}\d/g,
-      /\b(?:\d[ -]*?){13,19}\b/g,
+      /(?<![A-Z0-9._%+-])[A-Z0-9._%+-]{1,64}@[A-Z0-9.-]{1,253}\.[A-Z]{2,63}/gi,
+      /\+?\d[\d\s()-]{7,64}\d/g,
+      /\b(?:\d[ -]{0,3}){13,19}\b/g,
     ];
     for (const pattern of pii)
       if (pattern.test(value)) {

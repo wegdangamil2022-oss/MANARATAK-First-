@@ -48,28 +48,24 @@ describe('Phase 17 evaluation deployment gates', () => {
     const checksum = evaluationDefinitionChecksum(evaluation as any);
     const repository = {
       list: vi.fn().mockResolvedValue([evaluation]),
-      findPromptVersion: vi
-        .fn()
-        .mockResolvedValue({
-          id: 'pv-3',
-          promptKey: 'prompt-1',
-          version: 3,
-          checksum: 'sha-3',
-          status: 'APPROVED',
-        }),
-      findLatestEvaluationRun: vi
-        .fn()
-        .mockResolvedValue({
-          status: 'COMPLETED',
-          score: 1,
-          safetyFailures: 0,
-          approvedBy: null,
-          targetType: 'PROMPT',
-          targetKey: 'prompt-1',
-          targetVersion: 3,
-          targetChecksum: 'sha-3',
-          targetEvidence: { definitionChecksum: checksum },
-        }),
+      findPromptVersion: vi.fn().mockResolvedValue({
+        id: 'pv-3',
+        promptKey: 'prompt-1',
+        version: 3,
+        checksum: 'sha-3',
+        status: 'APPROVED',
+      }),
+      findLatestEvaluationRun: vi.fn().mockResolvedValue({
+        status: 'COMPLETED',
+        score: 1,
+        safetyFailures: 0,
+        approvedBy: null,
+        targetType: 'PROMPT',
+        targetKey: 'prompt-1',
+        targetVersion: 3,
+        targetChecksum: 'sha-3',
+        targetEvidence: { definitionChecksum: checksum },
+      }),
       deployPrompt: vi.fn(),
     };
     const useCases = new AIPlatformAdminUseCases(
@@ -291,15 +287,13 @@ describe('P17 known-price routing', () => {
       metadata: { studentName: 'private', promptChecksum: 'safe-checksum' },
     };
     const repository = {
-      listExecutions: vi
-        .fn()
-        .mockResolvedValue({
-          data: [confidential],
-          total: 1,
-          page: 1,
-          pageSize: 25,
-          totalPages: 1,
-        }),
+      listExecutions: vi.fn().mockResolvedValue({
+        data: [confidential],
+        total: 1,
+        page: 1,
+        pageSize: 25,
+        totalPages: 1,
+      }),
       findExecution: vi.fn().mockResolvedValue(confidential),
       listExecutionSpans: vi.fn().mockResolvedValue([
         {
@@ -322,5 +316,29 @@ describe('P17 known-price routing', () => {
     const spans = await useCases.executionTrace('ai_old');
     expect(spans[0].attributes).toEqual({ providerKey: 'provider' });
     expect(repository.findExecution).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('P17 bounded sensitive-data matching', () => {
+  it('handles large repeated local-part and separator inputs without unbounded regex suffixes', () => {
+    const engine = new EnterpriseAIGuardrailEngine();
+    for (const input of [
+      '%'.repeat(256 * 1024),
+      '1' + ' '.repeat(256 * 1024),
+      'a'.repeat(256 * 1024),
+    ]) {
+      expect(engine.evaluateInput(input, []).decision).toBe(AISafetyDecision.ALLOWED);
+    }
+  });
+  it('continues to remove valid email, phone and payment card text', () => {
+    const engine = new EnterpriseAIGuardrailEngine();
+    const result = engine.evaluateInput(
+      'person+tag@example.com / +1 (202) 555-0199 / 4111 1111 1111 1111',
+      [],
+    );
+    expect(result.decision).toBe(AISafetyDecision.REDACTED);
+    expect(result.value).not.toContain('example.com');
+    expect(result.value).not.toContain('555');
+    expect(result.value).not.toContain('4111');
   });
 });
