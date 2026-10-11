@@ -487,6 +487,8 @@ export class AIExecutionOrchestrator {
         reservationKey: idempotencyKeyHash ?? publicId,
         requestsPerMinute: consumer.requestsPerMinute,
         dailyRequestLimit: consumer.dailyRequestLimit,
+        requesterRequestsPerMinute: consumer.requesterRequestsPerMinute ?? Math.max(1, Math.min(10, consumer.requestsPerMinute)),
+        requesterConcurrentLimit: consumer.requesterConcurrentLimit ?? 2,
         monthlyTokenLimit: consumer.monthlyTokenLimit,
         monthlyCostLimit: consumer.monthlyCostLimit,
         currency: consumer.currency,
