@@ -13,6 +13,7 @@ import {
   CmsContentRevisionDto,
   CmsContentStatus,
   CmsContentType,
+  AssetSecurityClassification,
   CmsNavigationMenuDto,
   CmsLocalizedContentDto,
   CmsPublishingPolicy,
@@ -159,6 +160,7 @@ export class AdminCmsUseCases {
     expectedVersion?: number,
   ): Promise<CmsLocalizedContentDto> {
     if (scheduledAt.getTime() <= Date.now()) throw new Error('CMS_SCHEDULE_MUST_BE_FUTURE');
+    await this.assertPublishingMedia(contentId, locale);
     return this.repository.schedule({
       contentId,
       locale,
@@ -176,6 +178,7 @@ export class AdminCmsUseCases {
   ): Promise<CmsLocalizedContentDto> {
     const readiness = await this.repository.getReadiness(contentId, locale);
     if (!readiness.ready) throw new Error(`CMS_NOT_READY:${readiness.missing.join(',')}`);
+    await this.assertPublishingMedia(contentId, locale);
     const result = await this.repository.publish({ contentId, locale, actorId, expectedVersion });
     await this.invalidateDelivery(contentId, 'content-published');
     return result;
@@ -342,6 +345,22 @@ export class AdminCmsUseCases {
     const result = await this.repository.processDueSchedules(actorId, now, limit);
     for (const siteIdentifier of result.affectedSites) await this.deliveryCache?.invalidateSite(siteIdentifier, 'scheduled-job-completed');
     return result;
+  }
+
+  private async assertPublishingMedia(contentId: string, locale: string): Promise<void> {
+    const detail = await this.repository.getContentDetail(contentId);
+    if (!detail) throw new Error('CMS_CONTENT_NOT_FOUND');
+    const localized = detail.localizedPayloads.find((entry) => entry.locale === locale);
+    if (!localized) throw new Error('CMS_LOCALIZATION_NOT_FOUND');
+    const assets = [
+      detail.featuredAssetId, detail.seoMetadata?.openGraphAssetId,
+      localized.featuredAssetId, localized.seoMetadata?.openGraphAssetId,
+      ...detail.attachments.filter((item) => item.localizedContentId === localized.id).map((item) => item.assetId),
+    ];
+    for (const assetId of assets) CmsPublishingPolicy.assertAssetHandle(assetId);
+    await assertAssetReferencesUsable(this.assetReferences, assets, {
+      purpose: 'CMS_PUBLIC_MEDIA', allowedClassifications: [AssetSecurityClassification.PUBLIC],
+    });
   }
 
   private authoringSeo<T extends { canonicalUrl?: string | null } | null | undefined>(seo: T): T {
