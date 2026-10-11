@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIPlatformAdminUseCases, AIProviderCircuitBreaker, EnterpriseAIGuardrailEngine, evaluationDefinitionChecksum } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
+import { AIPlatformAdminUseCases, AIKnowledgeUseCases, AIProviderCircuitBreaker, EnterpriseAIGuardrailEngine, evaluationDefinitionChecksum } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
 import { AISafetyDecision } from '@manaratak/domain';
 
 describe('Phase 17 safety and resilience', () => {
@@ -74,5 +74,21 @@ describe('Phase 17 governed configuration fail-closed controls', () => {
       monthlyTokenLimit: 10000, requireHumanReview: true,
     } as any, 'admin-1')).rejects.toThrow('AI_HUMAN_REVIEW_WORKFLOW_NOT_CONFIGURED');
     expect(repository.upsert).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('P17 unverified source safety', () => {
+  it('rejects free-form admin-submitted knowledge before invoking an embedding provider', async () => {
+    const repo = { find: vi.fn().mockResolvedValue({ key: 'index-1', status: 'ACTIVE' }) };
+    const embed = vi.fn();
+    const providers = { get: vi.fn().mockReturnValue({ embed }) };
+    const useCases = new AIKnowledgeUseCases(repo as any, providers as any);
+    await expect(useCases.index({
+      indexKey: 'index-1', sourceType: 'STUDENT',
+      sourceReferenceId: 'private-cv-1', content: 'private resume',
+      actorReferenceId: 'admin-1',
+    })).rejects.toThrow('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
+    expect(embed).not.toHaveBeenCalled();
   });
 });
