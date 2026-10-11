@@ -104,6 +104,13 @@ interface SupportApplicationPage {
   hasMore: boolean;
   nextCursor: string|null;
 }
+type TriageKind='SYNC_FAILED'|'SYNC_PENDING'|'APPLICATION_OVERDUE';
+interface TriagePage {
+  items: Array<{studentReferenceId:string;status:string;version:number;updatedAt:string;triageKind:TriageKind}>;
+  total:number;
+  hasMore:boolean;
+  nextCursor:string|null;
+}
 interface StudentPage {
   items: StudentSupportItem[];
   total?: number;
@@ -194,6 +201,10 @@ export function StudentSupportAdminPage() {
   const [ownerError, setOwnerError] = useState<string|null>(null);
   const [tab, setTab] = useState<Tab>('OVERVIEW');
   const [resetTarget, setResetTarget] = useState<StudentSupportItem | null>(null);
+  const [triageKind,setTriageKind]=useState<TriageKind>('SYNC_FAILED');
+  const [triagePage,setTriagePage]=useState<TriagePage|null>(null);
+  const [triageLoading,setTriageLoading]=useState(false);
+  const [triageError,setTriageError]=useState<string|null>(null);
   const [trackerPurpose, setTrackerPurpose] = useState('CASE_REVIEW');
   const [trackerPage, setTrackerPage] = useState<SupportApplicationPage | null>(null);
   const [trackerError, setTrackerError] = useState<string | null>(null);
@@ -205,6 +216,7 @@ export function StudentSupportAdminPage() {
   const ownerRequest = useRef(0);
   const loadedOwnerTabs = useRef(new Set<string>());
   const trackerRequest = useRef(0);
+  const triageRequest = useRef(0);
   const detailAnchor = useRef<HTMLDivElement>(null);
 
   const load = useCallback(
@@ -354,6 +366,26 @@ export function StudentSupportAdminPage() {
   useEffect(() => {
     if (detail) detailAnchor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [detail?.studentReferenceId]);
+  async function loadTriage(nextCursor?:string){
+    if(triageLoading)return;
+    const request=++triageRequest.current;
+    setTriageLoading(true);
+    setTriageError(null);
+    try{
+      const query=new URLSearchParams({kind:triageKind,limit:'20'});
+      if(nextCursor)query.set('cursor',nextCursor);
+      const page=await adminApiClient.request<TriagePage>(`/admin/students/support/triage?${query}`);
+      if(request!==triageRequest.current)return;
+      setTriagePage(previous=>nextCursor&&previous?{
+        ...page,items:[...previous.items,...page.items],
+      }:page);
+    }catch(error){
+      if(request===triageRequest.current)
+        setTriageError(error instanceof Error?error.message:'تعذر تحميل قائمة التشخيص.');
+    }finally{
+      if(request===triageRequest.current)setTriageLoading(false);
+    }
+  }
   async function openSupportTrackerPage(nextCursor?:string) {
     if (!selectedId || trackerLoading) return;
     const request = ++trackerRequest.current;
@@ -522,6 +554,49 @@ export function StudentSupportAdminPage() {
           مسح الفلاتر
         </button>
       </form>
+      <section className="space-y-3 rounded-2xl border bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-black text-[#142B5F]">فرز حالات الدعم والمزامنة</h2>
+          <span className="text-xs text-slate-500">تصفية على الخادم من سجلات مساحة الطالب فقط</span>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <label className="flex-1 text-xs font-semibold text-slate-600">
+            سبب المتابعة
+            <select value={triageKind} onChange={event=>{
+              ++triageRequest.current;
+              setTriageKind(event.target.value as TriageKind);
+              setTriagePage(null);setTriageLoading(false);setTriageError(null);
+            }} className="mt-2 block w-full rounded-lg border p-2 text-sm">
+              <option value="SYNC_FAILED">أحداث مزامنة فاشلة</option>
+              <option value="SYNC_PENDING">أحداث مزامنة معلقة</option>
+              <option value="APPLICATION_OVERDUE">متابعات تقديم تجاوزت الموعد</option>
+            </select>
+          </label>
+          <button type="button" disabled={triageLoading} onClick={()=>void loadTriage()}
+            className="mt-auto rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-50">
+            {triageLoading?'جارٍ الفحص…':'عرض النتائج'}
+          </button>
+        </div>
+        {triageError&&<p role="alert" className="text-sm text-red-700">{triageError}</p>}
+        {triagePage&&<div className="space-y-2">
+          <p className="text-xs text-slate-500">عدد الحسابات المطابقة: {triagePage.total}</p>
+          {triagePage.items.length===0&&<p className="text-sm text-slate-500">لا توجد حالات مطابقة.</p>}
+          {triagePage.items.map(item=><div key={item.studentReferenceId}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-slate-50 p-3">
+            <div>
+              <code dir="ltr" className="text-sm">{item.studentReferenceId}</code>
+              <p className="mt-1 text-xs text-slate-600">
+                {statusLabel(item.status)} · آخر تحديث: {date(item.updatedAt)}
+              </p>
+            </div>
+            <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold"
+              onClick={()=>chooseStudent(item.studentReferenceId)}>فتح سجل الطالب</button>
+          </div>)}
+          {triagePage.hasMore&&triagePage.nextCursor&&<button type="button" disabled={triageLoading}
+            className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50"
+            onClick={()=>void loadTriage(triagePage.nextCursor!)}>المزيد من الحالات</button>}
+        </div>}
+      </section>
       <section className="overflow-hidden rounded-2xl border bg-white">
         <div className="flex justify-between gap-3 border-b bg-slate-50 p-4">
           <h2 className="font-black text-[#142B5F]">حسابات الطلاب</h2>
