@@ -10,7 +10,7 @@ function xml(value: string): string {
 function publicOrigin(raw: string): string {
   let url: URL;
   try { url = new URL(raw); } catch { throw new Error('CMS_SITEMAP_PUBLIC_URL_INVALID'); }
-  if (url.protocol !== 'https:' || !url.hostname || url.username || url.password ||
+  if (url.protocol !== 'https:' || !url.hostname || url.username || url.password || url.port ||
       (url.pathname !== '/' && url.pathname !== '') || url.search || url.hash) {
     throw new Error('CMS_SITEMAP_PUBLIC_URL_INVALID');
   }
