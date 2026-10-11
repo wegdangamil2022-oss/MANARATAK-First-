@@ -149,6 +149,17 @@
       "status": "PASS",
       "verifierGroups": 17,
       "notes": "Student-tools registry seed hash/version updated; W13 asserts canonical filtering with 10-query and 25-candidate bounds instead of the superseded whole-catalog scan."
+    },
+    {
+      "command": "node scripts/verify-p8-plan-closure.mjs",
+      "status": "PASS",
+      "checks": 54,
+      "notes": "Scholarship verifier reflects canonical bounded queries from section 19."
+    },
+    {
+      "command": "DATABASE_MUTATIONS_ALLOWED=false DATABASE_ENVIRONMENT=source node scripts/ci/run-source-closure-manifest.mjs",
+      "status": "LOCAL_ENVIRONMENT_BLOCKED",
+      "notes": "Passed remediation and plan gates; local CMS nginx source gate blocked because nginx is not installed. GitHub workflow provisions nginx."
     }
   ],
   "migrations": [
