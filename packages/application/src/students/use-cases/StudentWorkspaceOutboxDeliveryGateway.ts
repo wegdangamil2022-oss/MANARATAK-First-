@@ -64,7 +64,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     }
 
     // P14 owns certificate truth. Only a bounded, explicitly scoped lifecycle projection is accepted.
-    if (entry.domain === 'CERTIFICATES' && ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed'].includes(entry.eventType)) {
+    if (entry.domain === 'CERTIFICATES' && ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered'].includes(entry.eventType)) {
       const studentReferenceId = typeof payload.studentReferenceId === 'string' ? payload.studentReferenceId.trim() : '';
       const certificateId = typeof payload.certificateId === 'string' ? payload.certificateId.trim() : '';
       if (!studentReferenceId || !certificateId)
@@ -81,8 +81,11 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
         if (typeof value === 'string' && value.length <= 320) metadata[key] = value;
       }
       metadata.certificateId = certificateId;
-      metadata.status = entry.eventType === 'CertificateRevoked' ? 'REVOKED' :
-        (entry.eventType === 'CertificateRenewed' ? 'ACTIVE' : metadata.status ?? 'ACTIVE');
+      if (entry.eventType !== 'CertificateArtifactsRendered') {
+        metadata.status = entry.eventType === 'CertificateRevoked' ? 'REVOKED' :
+          entry.eventType === 'CertificateExpired' ? 'EXPIRED' :
+          entry.eventType === 'CertificateRenewed' ? 'ACTIVE' : metadata.status ?? 'ACTIVE';
+      }
       return this.event(entry, studentReferenceId, entry.eventType, 'تم تحديث حالة الشهادة', metadata, certificateId);
     }
 

@@ -28,7 +28,7 @@ export class StudentWorkspaceOutboxWorker {
 
   /** Lifecycle events only: certificate render jobs remain owned by the P14 artifact worker. */
   public async runCertificatesOnce(workerId: string): Promise<OutboxDispatchResult> {
-    return this.run(workerId, 'CERTIFICATES', ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed']);
+    return this.run(workerId, 'CERTIFICATES', ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered']);
   }
 
   private run(workerId: string, domain: string, eventTypes: readonly string[]): Promise<OutboxDispatchResult> {

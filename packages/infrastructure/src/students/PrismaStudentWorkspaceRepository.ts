@@ -796,13 +796,17 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         });
       }
     }
-    if (['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed'].includes(event.eventType)) {
+    if (['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered'].includes(event.eventType)) {
       const certificateId = String(metadata.certificateId ?? event.sourceReferenceId ?? '');
       if (!certificateId) throw new Error('STUDENT_CERTIFICATE_REFERENCE_REQUIRED');
       const key = { studentReferenceId: event.studentReferenceId, certificateId };
       const current = await tx.studentCertificateReadProjection.findUnique({
         where: { studentReferenceId_certificateId: key },
       });
+      // An artifact event is not a lifecycle statement. Do not construct a phantom
+      // certificate projection if its issued event has not arrived yet.
+      if (event.eventType === 'CertificateArtifactsRendered' && !current)
+        throw new Error('STUDENT_CERTIFICATE_PROJECTION_PENDING');
       // Ordering derives from the original owner event stored in the idempotent inbox,
       // not from the local projection update timestamp. A late issued event may not revive a revoked certificate.
       if (current) {
@@ -810,12 +814,26 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         const priorOccurredAt = new Date(String((previous?.payload as any)?.occurredAt ?? current.updatedAt));
         const incoming = event.occurredAt.getTime();
         const prior = priorOccurredAt.getTime();
-        const rank = (kind: string) => kind === 'CertificateRevoked' ? 3 :
-          kind === 'CertificateReissued' ? 2 : kind === 'CertificateRenewed' ? 1 : 0;
+        const rank = (kind: string) => kind === 'CertificateRevoked' ? 4 :
+          kind === 'CertificateReissued' || kind === 'CertificateExpired' ? 3 :
+          kind === 'CertificateArtifactsRendered' ? 2 :
+          kind === 'CertificateRenewed' ? 1 : 0;
         if (Number.isFinite(prior) && (incoming < prior ||
           (incoming === prior && rank(event.eventType) < rank(String(previous?.eventType ?? ''))))) return;
       }
+      if (event.eventType === 'CertificateArtifactsRendered') {
+        await tx.studentCertificateReadProjection.updateMany({
+          where: { ...key },
+          data: {
+            ...(metadata.certificatePdfAssetId ? { certificatePdfAssetId: String(metadata.certificatePdfAssetId) } : {}),
+            ...(metadata.previewImageAssetId ? { previewImageAssetId: String(metadata.previewImageAssetId) } : {}),
+            sourceEventId: event.eventId,
+          },
+        });
+        return;
+      }
       const status = event.eventType === 'CertificateRevoked' ? 'REVOKED' :
+        event.eventType === 'CertificateExpired' ? 'EXPIRED' :
         event.eventType === 'CertificateRenewed' ? 'ACTIVE' :
         String(metadata.status ?? 'ACTIVE');
       if (!['ACTIVE', 'ISSUED', 'REVOKED', 'EXPIRED', 'REISSUED', 'PENDING', 'SUSPENDED'].includes(status))

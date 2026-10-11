@@ -323,6 +323,8 @@ export class PrismaCertificateRepository implements ICertificateRepository {
         },
       });
       await this.appendMutation(tx, row.id, 'ARTIFACTS_ATTACHED', data.actorId, null, data.correlationId, {
+        studentReferenceId: row.studentReferenceId,
+        certificateId: row.id,
         certificatePdfAssetId: row.certificatePdfAssetId ?? null,
         previewImageAssetId: row.previewImageAssetId ?? null,
         verificationQrAssetId: row.verificationQrAssetId ?? null,
@@ -472,7 +474,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
         const changed = await tx.certificate.updateMany({ where: { id: current.id, status: CertificateStatus.ACTIVE }, data: { status: CertificateStatus.EXPIRED } });
         if (!changed.count) continue;
         count += 1;
-        await this.appendMutation(tx, current.id, 'EXPIRED', actorId, 'VALIDITY_WINDOW_ENDED', correlationId, { certificateId: current.id, certificateNumber: current.serialNumber, expiredAt: current.expiresAt?.toISOString?.() ?? current.expiresAt }, 'CertificateExpired');
+        await this.appendMutation(tx, current.id, 'EXPIRED', actorId, 'VALIDITY_WINDOW_ENDED', correlationId, { certificateId: current.id, studentReferenceId: current.studentReferenceId, certificateNumber: current.serialNumber, status: 'EXPIRED', expiredAt: current.expiresAt?.toISOString?.() ?? current.expiresAt }, 'CertificateExpired');
       }
       return count;
     });

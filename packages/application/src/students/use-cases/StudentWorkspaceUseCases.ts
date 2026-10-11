@@ -247,7 +247,7 @@ export class StudentWorkspaceUseCases {
       AUTHORIZATION: ['StudentIdentityCreated'],
       IDENTITY: ['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'],
       COURSES: ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'],
-      CERTIFICATES: ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed'],
+      CERTIFICATES: ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered'],
     };
     if (!allowed[event.sourceDomain]?.includes(event.eventType)) throw new Error('STUDENT_EVENT_TYPE_NOT_ALLOWED');
     if (event.title.length > 240 || !event.title.trim() || (event.description?.length ?? 0) > 2000 ||
