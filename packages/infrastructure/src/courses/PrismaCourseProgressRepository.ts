@@ -100,6 +100,19 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
     return rows.map((row) => this.enrollment(row));
   }
 
+  public async listEnrollmentsPageByStudent(studentReferenceId:string,limit:number,cursor?:string):Promise<{items:CourseEnrollmentDto[];nextCursor:string|null}> {
+    if (!studentReferenceId.trim() || !Number.isSafeInteger(limit) || limit<1 || limit>50 ||
+        (cursor!==undefined && (!cursor.trim() || cursor.length>160)))
+      throw new Error('STUDENT_OWNER_READ_PAGE_INVALID');
+    const rows=await this.prisma.courseEnrollment.findMany({
+      where:{studentReferenceId,...(cursor?{id:{gt:cursor}}:{})},
+      orderBy:{id:'asc'},take:limit+1,
+    });
+    const hasMore=rows.length>limit;
+    const items=rows.slice(0,limit).map(row=>this.enrollment(row));
+    return {items,nextCursor:hasMore?items[items.length-1].id:null};
+  }
+
   public async countActiveEnrollments(courseId: string): Promise<number> {
     return this.prisma.courseEnrollment.count({
       where: { courseId, status: { in: [CourseEnrollmentStatus.ACTIVE, CourseEnrollmentStatus.PENDING] } },

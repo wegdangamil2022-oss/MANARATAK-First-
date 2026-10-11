@@ -20,6 +20,8 @@ export interface ICourseProgressRepository {
   lockEnrollment?(courseId: string, studentReferenceId: string): Promise<void>;
   findEnrollment(courseId: string, studentReferenceId: string): Promise<CourseEnrollmentDto | null>;
   listEnrollmentsByStudent(studentReferenceId: string, maxRows?: number): Promise<CourseEnrollmentDto[]>;
+  /** Stable ID keyset enumeration of all enrollments. Owner-scoped and bounded. */
+  listEnrollmentsPageByStudent?(studentReferenceId:string,limit:number,cursor?:string):Promise<{items:CourseEnrollmentDto[];nextCursor:string|null}>;
   countActiveEnrollments(courseId: string): Promise<number>;
   updateEnrollmentProgress(courseId: string, studentReferenceId: string, progressPercentage: number): Promise<CourseEnrollmentDto>;
   markEnrollmentCompleted(courseId: string, studentReferenceId: string): Promise<CourseEnrollmentDto>;

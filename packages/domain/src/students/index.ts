@@ -515,10 +515,14 @@ export interface IStudentSavedItemHydrationGateway {
 }
 
 /** P7/P13 owner-read contracts: P15 composes learning/certificate truth but does not own it. */
+export interface StudentOwnerPage<T> { items:T[]; nextCursor:string|null; }
 export interface IStudentLearningReadGateway {
   listForStudent(studentReferenceId: string, maxRows?: number): Promise<StudentCourseProgressDto[]>;
+  /** Internal owner-only keyset page; cursor never exposed on support HTTP APIs. */
+  listPageForStudent?(studentReferenceId:string, limit:number, cursor?:string):Promise<StudentOwnerPage<StudentCourseProgressDto>>;
 }
 
 export interface IStudentCertificateReadGateway {
   listForStudent(studentReferenceId: string, maxRows?: number): Promise<StudentCertificateProjectionDto[]>;
+  listPageForStudent?(studentReferenceId:string, limit:number, cursor?:string):Promise<StudentOwnerPage<StudentCertificateProjectionDto>>;
 }
