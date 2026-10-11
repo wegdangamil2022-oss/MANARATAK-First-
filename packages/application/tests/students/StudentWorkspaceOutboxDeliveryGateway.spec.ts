@@ -192,6 +192,42 @@ describe('Student certificate owner-outbox bridge', () => {
     }));
   });
 
+  it('persists a continuation rather than abandoning the 2,001st owner record',async()=>{
+    const {students,assignments,identities}=fixture();
+    const continuation={enqueueContinuation:vi.fn().mockResolvedValue(undefined)};
+    const learning={listPageForStudent:vi.fn().mockImplementation(async(
+      _student:string,_limit:number,cursor?:string,
+    )=>({items:[{enrollmentId:`e-${cursor??'0'}`,courseId:'course',
+      status:'ACTIVE',progressPercentage:0,enrolledAt:new Date('2026-01-01')}],
+      nextCursor:String(Number(cursor??'0')+1)}))};
+    const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,
+      assignments as any,identities as any,learning as any,undefined,continuation as any);
+    const role={id:'role-big',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
+      createdAt:new Date('2026-10-10T00:00:00Z'),metadata:{},
+      payload:{roleId:'student',identityId:'student-1'}};
+    await gateway.deliver(role as any,{idempotencyKey:'role-big'});
+    expect(learning.listPageForStudent).toHaveBeenCalledTimes(40);
+    expect(continuation.enqueueContinuation).toHaveBeenCalledWith({
+      roleEventId:'role-big',studentReferenceId:'student-1',
+      roleAssignedAt:role.createdAt,domain:'COURSES',cursor:'40',
+    });
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(41);
+  });
+
+  it('refuses a forged continuation and never projects it',async()=>{
+    const {students,assignments,identities}=fixture();
+    const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,
+      assignments as any,identities as any);
+    const fake={id:'forged',domain:'STUDENT_WORKSPACE_CATCHUP',
+      eventType:'StudentOwnerCatchupContinuationRequested',
+      aggregate:{aggregateId:'student-1'},metadata:{sourcePhase:'Other'},
+      payload:{roleEventId:'role',studentReferenceId:'student-1',ownerDomain:'COURSES',
+        cursor:'20',roleAssignedAt:'2026-10-10T00:00:00Z'}};
+    await expect(gateway.deliver(fake as any,{idempotencyKey:'forged'}))
+      .rejects.toThrow('STUDENT_OWNER_CATCHUP_SOURCE_INVALID');
+    expect(students.consumeIntegrationEvent).not.toHaveBeenCalled();
+  });
+
   it('does not run source catch-up for suspended identities', async () => {
     const {students,assignments,identities}=fixture();
     identities.findById.mockResolvedValue({type:'Human',status:'SUSPENDED'});
