@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { CmsDomainTargetType } from '@manaratak/domain';
 import { PrismaCmsDomainOwnerReadGateway } from '../../src/cms/PrismaCmsDomainOwnerReadGateway';
 
-const published = (value: unknown) => ({ findFirst: vi.fn().mockResolvedValue(value) });
+const published = (value: unknown) => ({
+  findFirst: vi.fn().mockResolvedValue(value),
+  findUnique: vi.fn().mockResolvedValue({ slug: 'sample-university' }),
+});
 const mockDb = () => ({
   university: published({ id: 'u' }),
   universityAcademicProgram: published({ id: 'ap' }),
@@ -59,6 +62,22 @@ describe('P16 canonical owner publication gateway', () => {
     expect(db.internationalTestPublicationSnapshot.findFirst).toHaveBeenCalledWith(expect.objectContaining({
       where: { id: 'v', testId: 'test-1' },
     }));
+  });
+
+  it('resolves a published canonical owner slug as a locale-prefixed public navigation path', async () => {
+    const db = mockDb();
+    const gateway = new PrismaCmsDomainOwnerReadGateway(db);
+    await expect(gateway.resolvePublicPath(CmsDomainTargetType.UNIVERSITY, 'owner-1', 'en'))
+      .resolves.toBe('/en/universities/sample-university');
+    expect(db.university.findUnique).toHaveBeenCalledWith({
+      where: { id: 'owner-1' }, select: { slug: true },
+    });
+  });
+
+  it('rejects owner kinds without a supported public detail route', async () => {
+    const gateway = new PrismaCmsDomainOwnerReadGateway(mockDb());
+    await expect(gateway.resolvePublicPath(CmsDomainTargetType.ACADEMIC_PROGRAM, 'owner-1', 'ar'))
+      .rejects.toThrow('CMS_NAVIGATION_DOMAIN_ROUTE_UNSUPPORTED');
   });
 
   it('rejects unknown target types instead of accepting arbitrary UUIDs', async () => {
