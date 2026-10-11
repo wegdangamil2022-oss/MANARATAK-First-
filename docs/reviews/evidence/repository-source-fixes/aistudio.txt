@@ -1,0 +1,9 @@
+Command: npm run verify:aistudio
+Exit code: 0
+Output: final excerpt
+
+> manaratak-2.0-monorepo@0.0.0 verify:aistudio
+> node scripts/aistudio/verify.mjs
+
+PASS: root dev launcher HTTP 3000, HTML/modules/HMR, iframe headers, read/write API routes closed.
+PASS: backend module and external network traps active; no backend imports, database or workers.
