@@ -6,3 +6,4 @@ export * from './StudentDashboardHydrationService';
 export * from './StudentApplicationTrackerUseCases';
 
 export * from './StudentApplicationReminderNotificationGateway';
+export * from './StudentApplicationReminderOutboxDeliveryGateway';

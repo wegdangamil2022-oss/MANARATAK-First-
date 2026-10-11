@@ -10,5 +10,12 @@ export class StudentApplicationReminderNotificationGateway implements IStudentAp
     await this.templates.createTemplate({id:'student-application-deadline-v1',channels:['IN_APP','EMAIL'],requiredVariables:['scholarshipId','deadlineAt'],localizations:['ar','en']});
     await this.intents.createIntent({id:this.id(input.trackerId,input.trackerVersion),reference:`student-application:${input.trackerId}`,templateId:'student-application-deadline-v1',recipientReference:input.studentReferenceId,variables:{scholarshipId:input.scholarshipId,deadlineAt:input.deadlineAt.toISOString()},scheduledAt,expiresAt:input.deadlineAt,retryMaxRetries:5,retryBackoffMs:60000});
   }
-  async cancel(trackerId:string,trackerVersion:number){ await this.intents.cancelIntent(this.id(trackerId,trackerVersion)).catch(()=>undefined); }
+  async cancel(trackerId:string,trackerVersion:number){
+    try {await this.intents.cancelIntent(this.id(trackerId,trackerVersion));}
+    catch(error){
+      // Already cancelled/delivered/absent is harmless; DB outages remain retryable.
+      if(error instanceof Error && error.message==='NOTIFICATION_INTENT_NOT_CANCELLABLE')return;
+      throw error;
+    }
+  }
 }
