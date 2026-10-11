@@ -456,4 +456,53 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     }
   });
 
+
+  it('keeps embedding projections from different owner types and revisions separate', async () => {
+    const tx = {
+      aIEmbeddingRecord: {
+        deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+        createMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
+    };
+    const repository = new PrismaAIPlatformRepository({
+      $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+    });
+    const common = {
+      indexKey: 'kb', sourceReferenceId: '123', modelKey: 'embed',
+      dimensions: 2,
+      chunks: [{
+        chunkKey: '1', chunkText: 'safe', embeddingRef: 'embed-1',
+        checksum: 'checksum-1', metadata: { position: 0 },
+      }],
+    };
+    await repository.replaceEmbeddings({ ...common, sourceType: 'scholarship', sourceVersion: 'v1' });
+    await repository.replaceEmbeddings({ ...common, sourceType: 'university', sourceVersion: 'v1' });
+    await repository.replaceEmbeddings({ ...common, sourceType: 'scholarship', sourceVersion: 'v2' });
+    const identities = tx.aIEmbeddingRecord.deleteMany.mock.calls.map(([arg]) => arg.where.sourceReferenceId);
+    expect(new Set(identities).size).toBe(3);
+    expect(identities.every((id) => /^aisrc_[a-f0-9]{64}$/.test(id))).toBe(true);
+    expect(tx.aIEmbeddingRecord.createMany.mock.calls[0][0].data[0].metadata)
+      .toMatchObject({ sourceType: 'scholarship', sourceVersion: 'v1', position: 0 });
+  });
+
+  it('rejects oversized embedding batches and invalid model dimensions before mutation', async () => {
+    const transaction = vi.fn();
+    const repository = new PrismaAIPlatformRepository({ $transaction: transaction });
+    const base = {
+      indexKey: 'kb', sourceType: 'scholarship', sourceReferenceId: '123',
+      sourceVersion: 'v1', modelKey: 'embed',
+    };
+    await expect(repository.replaceEmbeddings({
+      ...base, dimensions: 5000, chunks: [],
+    })).rejects.toThrow('AI_EMBEDDING_SOURCE_OR_BATCH_LIMIT_INVALID');
+    await expect(repository.replaceEmbeddings({
+      ...base, dimensions: 512,
+      chunks: Array.from({ length: 257 }, (_, i) => ({
+        chunkKey: String(i), chunkText: 'safe', checksum: 'sha',
+        embeddingRef: 'ref',
+      })),
+    })).rejects.toThrow('AI_EMBEDDING_SOURCE_OR_BATCH_LIMIT_INVALID');
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
 });
