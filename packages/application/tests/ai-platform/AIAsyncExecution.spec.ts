@@ -128,4 +128,17 @@ describe('Phase 17 durable async execution', () => {
     expect(protector.unprotect).not.toHaveBeenCalled();
   });
 
+
+  it('rejects in-flight cancellation rather than overwriting status without provider abort', async () => {
+    const repo = repository();
+    (repo as any).cancelUnstartedExecution = vi.fn().mockRejectedValue(
+      new Error('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED'),
+    );
+    const useCases = new AIExecutionOrchestrator(repo as any, { get: vi.fn(), list: vi.fn() } as any);
+    await expect(useCases.cancel('ai_running', 'student-1'))
+      .rejects.toThrow('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED');
+    expect((repo as any).cancelUnstartedExecution).toHaveBeenCalledWith('ai_running', 'student-1');
+    expect(repo.updateAsyncJob).not.toHaveBeenCalled();
+  });
+
 });
