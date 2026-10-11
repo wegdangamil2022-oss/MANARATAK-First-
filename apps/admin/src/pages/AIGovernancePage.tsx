@@ -9,7 +9,7 @@ import {
   createContext,
   useId,
 } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   Activity,
   AlertTriangle,
@@ -101,6 +101,7 @@ interface AsyncJob {
   maxAttempts: number;
   createdAt: string;
   errorCode?: string | null;
+  executionPublicId?: string | null;
 }
 
 const sections: Array<{ key: SectionKey; label: string; group: string; icon: ReactNode }> = [
@@ -555,11 +556,24 @@ function PlaygroundPanel() {
   );
 }
 function ExecutionsPanel() {
+  const [urlParams, setUrlParams] = useSearchParams();
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState('');
-  const [search, setSearch] = useState('');
-  const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState('');
+  const [status, setStatus] = useState(urlParams.get('status') ?? '');
+  const [search, setSearch] = useState(urlParams.get('search') ?? '');
+  const [query, setQuery] = useState(urlParams.get('search') ?? '');
+  const [consumerKey, setConsumerKey] = useState(urlParams.get('consumerKey') ?? '');
+  const [providerKey, setProviderKey] = useState(urlParams.get('providerKey') ?? '');
+  const [purpose, setPurpose] = useState(urlParams.get('purpose') ?? '');
+  const [selected, setSelected] = useState(urlParams.get('execution') ?? '');
+  const chooseExecution = (publicId: string) => {
+    setSelected(publicId);
+    setUrlParams((current) => {
+      const next = new URLSearchParams(current);
+      if (publicId) next.set('execution', publicId);
+      else next.delete('execution');
+      return next;
+    }, { replace: true });
+  };
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setQuery(search.trim());
@@ -568,11 +582,24 @@ function ExecutionsPanel() {
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
+  useEffect(() => {
+    setUrlParams((current) => {
+      const next = new URLSearchParams(current);
+      for (const [key, value] of Object.entries({ status, search: query, consumerKey, providerKey, purpose })) {
+        if (value) next.set(key, value);
+        else next.delete(key);
+      }
+      return next.toString() === current.toString() ? current : next;
+    }, { replace: true });
+  }, [status, query, consumerKey, providerKey, purpose, setUrlParams]);
   const params = new URLSearchParams({
     page: String(page),
     pageSize: '25',
     ...(status ? { status } : {}),
     ...(query ? { search: query } : {}),
+    ...(consumerKey ? { consumerKey } : {}),
+    ...(providerKey ? { providerKey } : {}),
+    ...(purpose ? { purpose } : {}),
   });
   const list = useAIData<{ data: ExecutionRecord[]; total: number }>(
     `/admin/ai/executions?${params}`,
@@ -622,6 +649,28 @@ function ExecutionsPanel() {
               <option key={value}>{value}</option>
             ))}
           </select>
+          {([
+            ['consumerKey', 'المستهلك', consumerKey, setConsumerKey],
+            ['providerKey', 'المزوّد', providerKey, setProviderKey],
+            ['purpose', 'الغرض', purpose, setPurpose],
+          ] as const).map(([key, label, value, setter]) => (
+            <input
+              key={key}
+              aria-label={label}
+              placeholder={label}
+              className="input max-w-48"
+              value={value}
+              onChange={(event) => {
+                setter(event.target.value.trim().slice(0, 160));
+                setPage(1);
+              }}
+            />
+          ))}
+          <button type="button" className="action-secondary" onClick={() => {
+            setStatus(''); setSearch(''); setQuery('');
+            setConsumerKey(''); setProviderKey(''); setPurpose(''); setPage(1);
+            chooseExecution('');
+          }}>مسح الفلاتر</button>
           <button
             disabled={list.loading}
             onClick={() => void list.load()}
@@ -660,7 +709,7 @@ function ExecutionsPanel() {
                       <tr key={item.publicId} className="border-b">
                         <td className="p-3">
                           <button
-                            onClick={() => setSelected(item.publicId)}
+                            onClick={() => chooseExecution(item.publicId)}
                             className="font-mono text-xs text-[#0E7C86] underline"
                           >
                             {item.publicId}
@@ -689,7 +738,7 @@ function ExecutionsPanel() {
         )}
       </Panel>
       {selected && (
-        <ExecutionDetails key={selected} publicId={selected} onClose={() => setSelected('')} />
+        <ExecutionDetails key={selected} publicId={selected} onClose={() => chooseExecution('')} />
       )}
     </div>
   );
@@ -832,7 +881,15 @@ function WorkflowsPanel() {
                   <tbody>
                     {jobs.data.data.map((job) => (
                       <tr key={job.publicId} className="border-b">
-                        <td className="p-2 font-mono text-xs">{job.publicId}</td>
+                        <td className="p-2 font-mono text-xs">
+                          <div>{job.publicId}</div>
+                          {job.executionPublicId ? (
+                            <Link className="mt-1 block text-[#0E7C86] underline"
+                              to={`/ai/executions?execution=${encodeURIComponent(job.executionPublicId)}&consumerKey=${encodeURIComponent(job.consumerKey)}`}>
+                              عرض التنفيذ والتتبّع
+                            </Link>
+                          ) : <span className="text-slate-500">لم يبدأ تنفيذ مرتبط</span>}
+                        </td>
                         <td>
                           {job.consumerKey}
                           <div className="text-xs">{job.capabilityKey}</div>
