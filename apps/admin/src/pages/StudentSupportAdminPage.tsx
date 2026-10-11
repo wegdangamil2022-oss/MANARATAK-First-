@@ -99,6 +99,11 @@ interface OwnerTabResponse {
   serviceRequestCount?: number|null;
   recentServiceRequests?: StudentSupportDetail['recentServiceRequests']|null;
 }
+interface ProvisionDiagnostic {
+  code:string;workspaceStatus:string|null;
+  studentRolePresent:boolean;provisioningHealth:StudentSupportDetail['provisioningHealth']|null;
+  checkedAt:string;
+}
 interface TrackerHistory {
   items:Array<{eventType:string;occurredAt:string;version:number;status:string}>;
   hasMore:boolean;
@@ -231,6 +236,9 @@ export function StudentSupportAdminPage() {
   const [trackerHistory,setTrackerHistory]=useState<{trackerId:string;page:TrackerHistory}|null>(null);
   const [trackerHistoryLoading,setTrackerHistoryLoading]=useState(false);
   const [trackerHistoryError,setTrackerHistoryError]=useState<string|null>(null);
+  const [provisionDiagnostic,setProvisionDiagnostic]=useState<ProvisionDiagnostic|null>(null);
+  const [diagnosticError,setDiagnosticError]=useState<string|null>(null);
+  const [diagnosticLoading,setDiagnosticLoading]=useState(false);
   const [reason, setReason] = useState('');
   const [resetting, setResetting] = useState(false);
   const listRequest = useRef(0);
@@ -239,6 +247,7 @@ export function StudentSupportAdminPage() {
   const loadedOwnerTabs = useRef(new Set<string>());
   const trackerRequest = useRef(0);
   const historyRequest = useRef(0);
+  const diagnosticRequest=useRef(0);
   const triageRequest = useRef(0);
   const detailAnchor = useRef<HTMLDivElement>(null);
 
@@ -312,6 +321,8 @@ export function StudentSupportAdminPage() {
   }, []);
   useEffect(() => {
     ++trackerRequest.current;
+    ++diagnosticRequest.current;
+    setProvisionDiagnostic(null);setDiagnosticError(null);setDiagnosticLoading(false);
     ++historyRequest.current;
     setTrackerHistory(null);
     setTrackerHistoryLoading(false);
@@ -394,6 +405,22 @@ export function StudentSupportAdminPage() {
   useEffect(() => {
     if (detail) detailAnchor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [detail?.studentReferenceId]);
+  async function loadProvisionDiagnostic(){
+    if(!selectedId||diagnosticLoading)return;
+    const req=++diagnosticRequest.current;
+    setDiagnosticLoading(true);setDiagnosticError(null);
+    try{
+      const result=await adminApiClient.request<ProvisionDiagnostic>(
+        `/admin/students/support/${encodeURIComponent(selectedId)}/provisioning-diagnostic`,
+      );
+      if(req===diagnosticRequest.current)setProvisionDiagnostic(result);
+    }catch(error){
+      if(req===diagnosticRequest.current)setDiagnosticError(
+        error instanceof Error?error.message:'تعذر تشغيل التشخيص.',
+      );
+    }finally{if(req===diagnosticRequest.current)setDiagnosticLoading(false);}
+  }
+
   async function loadTriage(nextCursor?:string){
     if(triageLoading)return;
     const request=++triageRequest.current;
@@ -455,6 +482,8 @@ export function StudentSupportAdminPage() {
     } finally {if (request === trackerRequest.current) setTrackerLoading(false);}
   }
   function chooseStudent(id: string | null) {
+    ++diagnosticRequest.current;
+    setProvisionDiagnostic(null);setDiagnosticError(null);setDiagnosticLoading(false);
     ++historyRequest.current;
     setTrackerHistory(null);
     setTrackerHistoryError(null);
@@ -1124,6 +1153,25 @@ export function StudentSupportAdminPage() {
                           {detail.provisioningHealth.lastFailureCode}
                         </code>
                       )}
+                    </div>
+                    <div className="space-y-3 rounded-2xl border p-4">
+                      <h3 className="font-bold text-[#142B5F]">
+                        {language==='en'?'Read-only account diagnosis':'تشخيص الحساب للقراءة فقط'}
+                      </h3>
+                      <button type="button" disabled={diagnosticLoading}
+                        className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50"
+                        onClick={()=>void loadProvisionDiagnostic()}>
+                        {diagnosticLoading?'...':language==='en'?'Check identity and student role':'فحص الهوية ودور الطالب'}
+                      </button>
+                      {diagnosticError&&<p role="alert" className="text-sm text-red-700">{diagnosticError}</p>}
+                      {provisionDiagnostic&&<div role="status" className="text-sm">
+                        <Badge value={provisionDiagnostic.code} />
+                        <p className="mt-2 text-slate-600">
+                          {language==='en'?'Student role present:':'وجود دور الطالب:'}
+                          {' '}{provisionDiagnostic.studentRolePresent?(language==='en'?'Yes':'نعم'):(language==='en'?'No':'لا')}
+                        </p>
+                        <p className="text-xs text-slate-500">{date(provisionDiagnostic.checkedAt)}</p>
+                      </div>}
                     </div>
                     <div className="rounded-2xl border p-4">
                       <h3 className="font-bold text-[#142B5F]">{t('stu_support_consent_log')}</h3>
