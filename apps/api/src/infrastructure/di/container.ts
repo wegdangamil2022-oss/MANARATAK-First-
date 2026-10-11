@@ -887,7 +887,7 @@ export function registerDependencies(
     ).scoped(),
     aiExecutionUseCases: asFunction(({ aiPlatformRepository, aiProviderRegistry, aiAsyncPayloadProtector }) => new AIExecutionOrchestrator(aiPlatformRepository, aiProviderRegistry, aiAsyncPayloadProtector)).scoped(),
     aiPlatformAdminUseCases: asFunction(({ aiPlatformRepository, aiProviderRegistry }) => new AIPlatformAdminUseCases(aiPlatformRepository, aiProviderRegistry)).scoped(),
-    aiWorkflowUseCases: asFunction(({ aiPlatformRepository, aiExecutionUseCases }) => new AIWorkflowUseCases(aiPlatformRepository, aiExecutionUseCases)).scoped(),
+    aiWorkflowUseCases: asFunction(({ aiPlatformRepository, aiExecutionUseCases, aiAsyncPayloadProtector }) => new AIWorkflowUseCases(aiPlatformRepository, aiExecutionUseCases, aiAsyncPayloadProtector)).scoped(),
     aiEvaluationUseCases: asFunction(({ aiPlatformRepository, aiExecutionUseCases, aiWorkflowUseCases }) => new AIEvaluationUseCases(aiPlatformRepository, aiExecutionUseCases, aiWorkflowUseCases)).scoped(),
     aiKnowledgeUseCases: asFunction(({ aiPlatformRepository, aiProviderRegistry }) => new AIKnowledgeUseCases(aiPlatformRepository, aiProviderRegistry)).scoped(),
     importAdminUseCases: asFunction(({ importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol }) => new ImportAdminUseCases(importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol, sweepOrphanImportSpools)).scoped(),
