@@ -46,6 +46,7 @@ jobs:
             packages/infrastructure/tests/ai-platform/PrismaAIPlatformRepository.spec.ts \
             packages/infrastructure/tests/ai-platform/ProviderAdapters.spec.ts \
             packages/application/tests/ai-platform/AIAsyncExecution.spec.ts \
+            packages/application/tests/ai-platform/AIWorkflowPrivacy.spec.ts \
             packages/application/tests/ai-platform/AIPlatformGovernance.spec.ts \
             apps/api/tests/presentation/api/router/AIAdminRouter.spec.ts \
             apps/api/tests/presentation/api/router/AIGatewayRouter.spec.ts
