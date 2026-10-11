@@ -198,7 +198,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async listContent(filters: CmsContentFilters): Promise<PaginatedCmsResult<CmsContentDto>> {
-    const page = Math.max(1, filters.page ?? 1);
+    const page = Math.min(500, Math.max(1, filters.page ?? 1));
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
     const q = filters.q?.trim();
     const where: any = {
@@ -749,7 +749,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     filters: CmsContentFilters,
     locale = 'ar',
   ): Promise<PaginatedCmsResult<PublicCmsContentDto>> {
-    const page = Math.max(1, filters.page ?? 1);
+    const page = Math.min(500, Math.max(1, filters.page ?? 1));
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
     const q = filters.q?.trim();
     const tag = filters.tag?.trim().toLocaleLowerCase('en');
@@ -854,7 +854,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     limit = 6,
   ): Promise<PublicCmsContentDto[]> {
     const links = await this.db.cmsContentDomainLink.findMany({
-      where: { targetType, targetId, content: { siteIdentifier } },
+      where: { targetType, targetId, content: { siteIdentifier, publishedPayloads: { some: { siteIdentifier, locale, status: CmsContentStatus.PUBLISHED } } } },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
       take: 200,
       select: { contentId: true },

@@ -19,7 +19,7 @@ export class CmsPublicRouter {
       q: z.string().trim().max(200).optional(),
       locale: z.enum(['ar', 'en']).default('ar'),
       siteIdentifier: z.string().default('manaratak'),
-      page: z.coerce.number().int().positive().default(1),
+      page: z.coerce.number().int().positive().max(500).default(1),
       pageSize: z.coerce.number().int().min(1).max(50).default(20),
     });
     const deliveryHeaders = (req: Request, res: Response, payload: unknown): boolean => {

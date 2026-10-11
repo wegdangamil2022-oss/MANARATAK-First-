@@ -78,7 +78,7 @@ export class CmsAdminRouter {
       locale: z.enum(['ar', 'en']).optional(),
       siteIdentifier: z.literal('manaratak').optional(),
       q: z.string().trim().max(200).optional(),
-      page: z.coerce.number().int().positive().default(1),
+      page: z.coerce.number().int().positive().max(500).default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
     });
     const contentSchema = z.object({
