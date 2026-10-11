@@ -148,6 +148,37 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       const previous = await tx.aIRegistryRecord.findUnique({
         where: { resourceType_key: { resourceType: resource, key: candidate.key } },
       });
+      // Guardrail, routing, and consumer-policy activation must be approved by
+      // a different principal from the last author of the REVIEW revision.
+      // Reuse the persisted revision as evidence; never trust a caller-supplied
+      // "approvedBy" or an editable body to attest an independent review.
+      if (['guardrails', 'routingPolicies', 'consumers'].includes(resource) &&
+          candidate.status === 'ACTIVE') {
+        const canonical = (body: Record<string, unknown>) => {
+          const result = { ...body };
+          for (const key of [
+            'id', 'key', 'status', 'createdAt', 'updatedAt', 'expectedUpdatedAt',
+            'createdBy', 'updatedBy',
+          ]) delete result[key];
+          return stableStringify(result);
+        };
+        if (!previous) throw new Error('AI_HIGH_IMPACT_REVIEW_REQUIRED');
+        if (previous.status === 'REVIEW') {
+          if (!previous.updatedBy || previous.updatedBy === actorReferenceId)
+            throw new Error('AI_HIGH_IMPACT_INDEPENDENT_REVIEW_REQUIRED');
+          if (canonical(configuration) !== canonical(previous.configuration ?? {}))
+            throw new Error('AI_HIGH_IMPACT_REVIEWED_CONTENT_CHANGED');
+        } else if (previous.status === 'ACTIVE') {
+          if (canonical(configuration) !== canonical(previous.configuration ?? {}))
+            throw new Error('AI_HIGH_IMPACT_STAGED_CHANGE_REQUIRED');
+        } else {
+          throw new Error('AI_HIGH_IMPACT_REVIEW_REQUIRED');
+        }
+      }
+      if (resource === 'platformSettings' && candidate.key === 'runtime' &&
+          previous?.configuration?.globalEnabled === false &&
+          candidate.globalEnabled === true)
+        throw new Error('AI_PLATFORM_REENABLE_GOVERNED_APPROVAL_REQUIRED');
       if (resource === 'modelPrices' && candidate.status === 'ACTIVE') {
         // Serialize all price changes for one model; conflicting effective intervals
         // must never silently pick whichever record happens to sort first.
