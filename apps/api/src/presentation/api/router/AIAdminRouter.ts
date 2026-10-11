@@ -435,13 +435,13 @@ export class AIAdminRouter {
           .json(
             await cradle.aiEvaluationUseCases.start(
               keySchema.parse(req.params.key),
-              z
-                .object({
+              {
+                ...z.object({
                   promptVersion: z.number().int().positive().optional(),
                   modelKey: keySchema.optional(),
-                })
-                .parse(req.body),
-              requestedBy: actor(req),
+                }).parse(req.body),
+                requestedBy: actor(req),
+              },
             ),
           );
       }),
