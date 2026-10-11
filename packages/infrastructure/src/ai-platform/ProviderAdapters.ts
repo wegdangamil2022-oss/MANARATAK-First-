@@ -19,6 +19,41 @@ export interface AIHttpTransport {
   }): Promise<{ status: number; body: any; headers?: Record<string, string> }>;
 }
 
+// Bound untrusted provider bodies before JSON parsing to avoid unbounded memory allocation.
+const MAX_PROVIDER_RESPONSE_BYTES = 8 * 1024 * 1024;
+async function readProviderJson(response: Response): Promise<unknown> {
+  const advertised = Number(response.headers.get('content-length') ?? 0);
+  if (Number.isFinite(advertised) && advertised > MAX_PROVIDER_RESPONSE_BYTES)
+    throw new Error('AI_PROVIDER_RESPONSE_TOO_LARGE');
+  if (!response.body) return {};
+  const reader = response.body.getReader();
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      size += chunk.value.byteLength;
+      if (size > MAX_PROVIDER_RESPONSE_BYTES)
+        throw new Error('AI_PROVIDER_RESPONSE_TOO_LARGE');
+      parts.push(chunk.value);
+    }
+  } catch (error) {
+    await reader.cancel().catch(() => undefined);
+    throw error;
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(size);
+  let position = 0;
+  for (const part of parts) { bytes.set(part, position); position += part.byteLength; }
+  try {
+    return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+  } catch {
+    throw new Error('AI_PROVIDER_INVALID_JSON');
+  }
+}
+
 export class FetchAIHttpTransport implements AIHttpTransport {
   async request(input: {
     url: string;
@@ -36,7 +71,7 @@ export class FetchAIHttpTransport implements AIHttpTransport {
         body: input.body === undefined ? undefined : JSON.stringify(input.body),
         signal: controller.signal,
       });
-      const body = await response.json().catch(() => ({}));
+      const body = await readProviderJson(response);
       return {
         status: response.status,
         body,
