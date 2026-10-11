@@ -39,6 +39,21 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
     expect(workspace.listSupportWorkspaces).not.toHaveBeenCalled();
   });
 
+  it('audits list reads without storing the search text or student PII', async () => {
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try {
+      const {app}=fixture(['admin:students:support']);
+      const result=await request(app).get('/admin/students/support?query=privateStudentName');
+      expect(result.status).toBe(200);
+      expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
+        expect.objectContaining({
+          action:'STUDENT_SUPPORT_LIST_VIEW',
+          metadata:{purpose:'student-support-search',filtered:true,count:0},
+        }),{reliability:'REQUIRED',principal:'REQUIRED'});
+      expect(JSON.stringify(audit.mock.calls)).not.toContain('privateStudentName');
+    } finally {audit.mockRestore();}
+  });
+
   it('denies mutation unless elevated support-mutate permission is present', async () => {
     const {app,workspace} = fixture(['admin:students:support']);
     expect((await request(app).post('/admin/students/support/student-1/reset-layout')

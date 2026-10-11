@@ -65,6 +65,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
 
     // P14 owns certificate truth. Only a bounded, explicitly scoped lifecycle projection is accepted.
     if (entry.domain === 'CERTIFICATES' && ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered'].includes(entry.eventType)) {
+      if (entry.metadata?.sourcePhase !== 'Phase14') throw new Error('STUDENT_CERTIFICATE_EVENT_OWNER_SOURCE_REQUIRED');
       const studentReferenceId = typeof payload.studentReferenceId === 'string' ? payload.studentReferenceId.trim() : '';
       const certificateId = typeof payload.certificateId === 'string' ? payload.certificateId.trim() : '';
       if (!studentReferenceId || !certificateId)

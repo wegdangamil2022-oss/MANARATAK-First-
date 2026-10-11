@@ -71,12 +71,18 @@ export class StudentSupportAdminRouter {
 
     router.get('/support', requireSupportRead, async (req, res, next) => {
       try {
-        res
-          .status(200)
-          .json(await studentWorkspaceUseCases.listSupportWorkspaces(listSchema.parse(req.query)));
-      } catch (error) {
-        next(error);
-      }
+        const filters = listSchema.parse(req.query);
+        const result = await studentWorkspaceUseCases.listSupportWorkspaces(filters);
+        await AuditHelper.recordMutation(auditRecordRepo, req, {
+          action: 'STUDENT_SUPPORT_LIST_VIEW', category: 'STUDENT_SUPPORT',
+          targetType: 'STUDENT_WORKSPACE_COLLECTION', targetId: 'student-support-list',
+          result: 'SUCCESS', metadata: {
+            purpose: 'student-support-search', filtered: Boolean(filters.query || filters.status),
+            count: result.items.length,
+          },
+        }, { reliability: 'REQUIRED', principal: 'REQUIRED' });
+        res.status(200).json(result);
+      } catch (error) { next(error); }
     });
 
     router.get('/support/:studentReferenceId', requireSupportRead, async (req, res, next) => {

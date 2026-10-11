@@ -58,8 +58,8 @@ interface StudentSupportDetail extends StudentSupportItem {
   };
   consentAudit: { hasDecision: boolean; lastDecidedAt?: string | null };
   linkedSummaries: {
-    activeCourseCount: number;
-    certificateCount: number;
+    activeCourseCount: number | null;
+    certificateCount: number | null;
     unreadNotificationCount: number;
   };
   savedSummary?: Array<{ entityType: string; count: number }>;
