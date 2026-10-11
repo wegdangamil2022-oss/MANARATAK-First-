@@ -69,6 +69,8 @@ export interface IAIPlatformRepository {
       reservationKey: string;
       requestsPerMinute: number;
       dailyRequestLimit: number;
+      requesterRequestsPerMinute?: number;
+      requesterConcurrentLimit?: number;
       monthlyTokenLimit: number;
       monthlyCostLimit?: number | null;
       currency?: string | null;
