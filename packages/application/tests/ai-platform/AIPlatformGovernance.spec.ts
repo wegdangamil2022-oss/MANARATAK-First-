@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIPlatformAdminUseCases, AIProviderCircuitBreaker, EnterpriseAIGuardrailEngine } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
+import { AIPlatformAdminUseCases, AIProviderCircuitBreaker, EnterpriseAIGuardrailEngine, evaluationDefinitionChecksum } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
 import { AISafetyDecision } from '@manaratak/domain';
 
 describe('Phase 17 safety and resilience', () => {
@@ -24,18 +24,32 @@ describe('Phase 17 safety and resilience', () => {
 
 describe('Phase 17 evaluation deployment gates', () => {
   it('blocks prompt deployment until the matching evaluated version passes and is approved', async () => {
+    const evaluation = {
+      key: 'eval-1', status: 'ACTIVE', capabilityKey: 'student.letter',
+      target: { type: 'PROMPT' as const, key: 'prompt-1' },
+      dataset: [{ key: 'case-1', input: 'Example' }],
+      evaluators: [{ key: 'match', type: 'EXACT_MATCH' as const }],
+      deploymentGate: { minimumScore: 0.9, maximumSafetyFailures: 0, requiresHumanApproval: true },
+    };
+    const checksum = evaluationDefinitionChecksum(evaluation as any);
     const repository = {
-      list: vi.fn().mockResolvedValue([{ key: 'eval-1', status: 'ACTIVE', target: { type: 'PROMPT', key: 'prompt-1' }, deploymentGate: { minimumScore: 0.9, maximumSafetyFailures: 0, requiresHumanApproval: true } }]),
+      list: vi.fn().mockResolvedValue([evaluation]),
       findPromptVersion: vi.fn().mockResolvedValue({ id: 'pv-3', promptKey: 'prompt-1', version: 3, checksum: 'sha-3', status: 'APPROVED' }),
-      findLatestEvaluationRun: vi.fn().mockResolvedValue({ status: 'COMPLETED', score: 1, safetyFailures: 0, approvedBy: null, targetType: 'PROMPT', targetKey: 'prompt-1', targetVersion: 3, targetChecksum: 'sha-3' }),
+      findLatestEvaluationRun: vi.fn().mockResolvedValue({ status: 'COMPLETED', score: 1, safetyFailures: 0, approvedBy: null, targetType: 'PROMPT', targetKey: 'prompt-1', targetVersion: 3, targetChecksum: 'sha-3', targetEvidence: { definitionChecksum: checksum } }),
       deployPrompt: vi.fn(),
     };
     const useCases = new AIPlatformAdminUseCases(repository as any, { get: vi.fn(), list: vi.fn() } as any);
     await expect(useCases.deployPrompt('prompt-1', 3, 'admin-1')).rejects.toThrow('AI_EVALUATION_HUMAN_APPROVAL_REQUIRED');
-    repository.findLatestEvaluationRun.mockResolvedValue({ status: 'COMPLETED', score: 1, safetyFailures: 0, approvedBy: 'reviewer-1', targetType: 'PROMPT', targetKey: 'prompt-1', targetVersion: 3, targetChecksum: 'sha-3' });
+    repository.findLatestEvaluationRun.mockResolvedValue({ status: 'COMPLETED', score: 1, safetyFailures: 0, approvedBy: 'reviewer-1', targetType: 'PROMPT', targetKey: 'prompt-1', targetVersion: 3, targetChecksum: 'sha-3', targetEvidence: { definitionChecksum: checksum } });
     await useCases.deployPrompt('prompt-1', 3, 'admin-1');
     expect(repository.findLatestEvaluationRun).toHaveBeenCalledWith('eval-1', { type: 'PROMPT', key: 'prompt-1', version: 3, checksum: 'sha-3' });
     expect(repository.deployPrompt).toHaveBeenCalledWith('prompt-1', 3, 'admin-1');
+    // The old run is no longer a valid gate when its evaluation dataset changes.
+    const changedEvaluation = { ...evaluation, dataset: [{ key: 'case-1', input: 'Changed security case' }] };
+    repository.list.mockResolvedValue([changedEvaluation]);
+    await expect(useCases.deployPrompt('prompt-1', 3, 'admin-1'))
+      .rejects.toThrow('AI_EVALUATION_EXACT_TARGET_EVIDENCE_REQUIRED:eval-1');
+
   });
 });
 
