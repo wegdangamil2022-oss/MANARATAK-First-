@@ -405,7 +405,20 @@ export function CmsOperationsPanels({
           ) : (
             <p className="text-sm text-slate-400">لا توجد مخططات كتل معتمدة.</p>
           )}
-          <Items empty="لا توجد كتل." items={blocks.map((x) => `${x.name} — ${x.status}`)} />
+          <ul className="mt-4 space-y-3">
+            {blocks.map((block) => <li key={block.id} className="rounded-lg bg-slate-50 p-3 text-sm">
+              <span>{block.name} — {block.status} — v{block.version}</span>
+              {block.status === 'DRAFT' && <button type="button" disabled={busy} className={button}
+                onClick={() => {
+                  if (!window.confirm(locale === 'ar' ? 'اعتماد ونشر الكتلة؟' : 'Approve and publish block?')) return;
+                  void submit(() => adminApiClient.request('/admin/cms/blocks/' + encodeURIComponent(block.id) + '/publish', {
+                    method: 'POST', body: JSON.stringify({ expectedVersion: block.version }),
+                  }), locale === 'ar' ? 'نُشرت الكتلة بعد الموافقة.' : 'Block approved and published.');
+                }}>
+                {locale === 'ar' ? 'اعتماد ونشر الكتلة' : 'Approve and publish block'}
+              </button>}
+            </li>)}
+          </ul>
         </Card>
         <Card title="الإعلانات المؤسسية">
           <form onSubmit={createAnnouncement} className="space-y-2">

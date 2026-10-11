@@ -33,6 +33,7 @@ describe('Phase 16 CMS admin router', () => {
     listNavigation: vi.fn(),
     saveNavigation: vi.fn(),
     publishNavigation: vi.fn(),
+    publishBlock: vi.fn(),
     listBlockSchemas: vi.fn(),
     createBlockSchema: vi.fn(),
     listBlocks: vi.fn(),
@@ -81,6 +82,19 @@ describe('Phase 16 CMS admin router', () => {
       .send({ destinationPath: '//evil.invalid', reason: 'Correction' });
     expect(result.status).toBe(400);
     expect(cms.updateRedirect).not.toHaveBeenCalled();
+  });
+
+  it('requires independent publish permission for blocks', async () => {
+    const cms = useCases();
+    const deny = await request(app(cms,'editor',['admin:cms:author']))
+      .post('/cms/blocks/block-1/publish').send({expectedVersion:2});
+    expect(deny.status).toBe(403);
+    expect(cms.publishBlock).not.toHaveBeenCalled();
+    cms.publishBlock.mockResolvedValue({id:'block-1',status:'PUBLISHED'});
+    const allow = await request(app(cms,'publisher',['admin:cms:publish']))
+      .post('/cms/blocks/block-1/publish').send({expectedVersion:2});
+    expect(allow.status).toBe(200);
+    expect(cms.publishBlock).toHaveBeenCalledWith('block-1',2,'publisher');
   });
 
   it('rejects self-service approval when author has no independent review grant', async () => {

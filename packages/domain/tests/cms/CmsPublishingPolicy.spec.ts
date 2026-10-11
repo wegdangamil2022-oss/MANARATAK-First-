@@ -90,6 +90,22 @@ describe('W14 CMS integrity policies', () => {
     ])).toThrow('CMS_NAVIGATION_CYCLE');
   });
 
+  it('rejects unsafe nested asset handles including arrays', () => {
+    const payload = { hero: [{image:'https://attacker.invalid/icon.png'}] };
+    const fields = ['hero.image'];
+    expect(() => CmsPublishingPolicy.extractBlockAssetHandles(payload, fields))
+      .not.toThrow();
+    expect(() => CmsPublishingPolicy.assertBlockPayload(payload, {
+      type:'object', properties:{hero:{type:'array',items:{
+        type:'object',properties:{image:{type:'string'}},additionalProperties:false
+      }}},additionalProperties:false
+    }, fields)).toThrow('CMS_ASSET_MUST_USE_EAP_HANDLE');
+    expect(CmsPublishingPolicy.extractBlockAssetHandles({hero:[{image:'eap-123'}]},fields))
+      .toEqual(['eap-123']);
+    expect(() => CmsPublishingPolicy.extractBlockAssetHandles({},['__proto__.image']))
+      .toThrow('CMS_BLOCK_ASSET_FIELD_INVALID');
+  });
+
   it('recursively validates block payloads and rejects undeclared fields', () => {
     const schema = {
       type: 'object',
