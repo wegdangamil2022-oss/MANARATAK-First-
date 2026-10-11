@@ -204,6 +204,7 @@ export * from './certificates/ProviderNeutralCertificateRenderingService';
 export * from './certificates/EapCertificateArtifactStore';
 
 export * from './students/PrismaStudentApplicationTrackerRepository';
+export * from './students/PrismaStudentOwnerCatchupContinuationQueue';
 
 export * from './students/ScholarshipStudentApplicationTrackerGateway';
 export * from './auth/PrismaPasswordCredentialRepository';
