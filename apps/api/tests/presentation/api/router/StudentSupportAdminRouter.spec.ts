@@ -14,6 +14,8 @@ function fixture(granted: string[]) {
     studentReferenceId: 'student-1', linkedSummaries: {activeCourseCount:null,certificateCount:null,unreadNotificationCount:0},
   }) };
   const tracker = { listSupportPage: vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}) };
+  const identities={findById:vi.fn().mockResolvedValue({id:'student-1',type:'Human',status:'ACTIVE'})};
+  const roleAssignments={findByIdentityId:vi.fn().mockResolvedValue([{roleId:'student'}])};
   const evaluator = { evaluatePermission: vi.fn().mockImplementation(async (_id: string, permission: string) =>
     ({ isGranted: granted.includes(permission) })) };
   const app = express();
@@ -23,11 +25,13 @@ function fixture(granted: string[]) {
     studentWorkspaceUseCases: workspace as any,
     studentDashboardHydrationService: hydration as any,
     studentApplicationTrackerUseCases: tracker as any,
+    identityRepository: identities as any,
+    roleAssignmentRepository: roleAssignments as any,
     authEvaluatorService: evaluator as any,
     auditRecordRepo: {} as any,
   }));
   app.use((_err:any,_req:any,res:any,_next:any)=>res.status(500).json({error:'AUDIT_UNAVAILABLE'}));
-  return { app, workspace, hydration, evaluator, tracker };
+  return { app, workspace, hydration, evaluator, tracker, identities, roleAssignments };
 }
 
 describe('StudentSupportAdminRouter authorization boundary', () => {
@@ -52,6 +56,27 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
         }),{reliability:'REQUIRED',principal:'REQUIRED'});
       expect(JSON.stringify(audit.mock.calls)).not.toContain('privateStudentName');
     } finally {audit.mockRestore();}
+  });
+
+  it('restricts provisioning diagnosis and returns only minimal reconciliation state',async()=>{
+    const denied=fixture([]);
+    expect((await request(denied.app).get('/admin/students/support/student-1/provisioning-diagnostic')).status).toBe(403);
+    expect(denied.identities.findById).not.toHaveBeenCalled();
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try{
+      const {app,workspace,identities,roleAssignments}=fixture(['admin:students:support']);
+      workspace.getSupportWorkspaceDetail.mockRejectedValue(new Error('STUDENT_WORKSPACE_NOT_FOUND'));
+      const response=await request(app).get('/admin/students/support/student-1/provisioning-diagnostic');
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({code:'ROLE_EVENT_PENDING',studentRolePresent:true,workspaceStatus:null});
+      expect(response.body).not.toHaveProperty('identity');
+      expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
+        expect.objectContaining({action:'STUDENT_SUPPORT_PROVISIONING_DIAGNOSTIC_VIEW',
+          metadata:{purpose:'provisioning-triage',resultCode:'ROLE_EVENT_PENDING'}}),
+        {reliability:'REQUIRED',principal:'REQUIRED'});
+      expect(identities.findById).toHaveBeenCalledWith('student-1');
+      expect(roleAssignments.findByIdentityId).toHaveBeenCalledWith('student-1');
+    }finally{audit.mockRestore();}
   });
 
   it('denies mutation unless elevated support-mutate permission is present', async () => {

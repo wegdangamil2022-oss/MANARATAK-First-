@@ -4,6 +4,8 @@ import {
   StudentWorkspaceStatus,
   type IAuditRecordRepository,
   type AuthorizationEvaluatorService,
+  type IIdentityRepository,
+  type IRoleAssignmentRepository,
 } from '@manaratak/domain';
 import { StudentWorkspaceUseCases, StudentDashboardHydrationService, StudentApplicationTrackerUseCases } from '@manaratak/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
@@ -13,12 +15,16 @@ export class StudentSupportAdminRouter {
     studentWorkspaceUseCases,
     studentDashboardHydrationService,
     studentApplicationTrackerUseCases,
+    identityRepository,
+    roleAssignmentRepository,
     auditRecordRepo,
     authEvaluatorService,
   }: {
     studentWorkspaceUseCases: StudentWorkspaceUseCases;
     studentDashboardHydrationService: StudentDashboardHydrationService;
     studentApplicationTrackerUseCases: StudentApplicationTrackerUseCases;
+    identityRepository?: IIdentityRepository;
+    roleAssignmentRepository?: IRoleAssignmentRepository;
     auditRecordRepo?: IAuditRecordRepository;
     authEvaluatorService: AuthorizationEvaluatorService;
   }): Router {
@@ -105,6 +111,46 @@ export class StudentSupportAdminRouter {
         }, { reliability: 'REQUIRED', principal: 'REQUIRED' });
         res.status(200).json(result);
       } catch (error) { next(error); }
+    });
+
+    // P15 provisioning diagnostic is a read-only owner comparison; it never creates
+    // a workspace, assigns a role, retries source events or reveals identity PII.
+    router.get('/support/:studentReferenceId/provisioning-diagnostic', requireSupportRead, async (req,res,next)=>{
+      try {
+        if (!identityRepository || !roleAssignmentRepository)
+          throw new Error('STUDENT_PROVISIONING_DIAGNOSTIC_NOT_CONFIGURED');
+        const studentReferenceId=z.string().trim().min(1).max(128).parse(req.params.studentReferenceId);
+        const [identity, assignments, workspace]=await Promise.all([
+          identityRepository.findById(studentReferenceId),
+          roleAssignmentRepository.findByIdentityId(studentReferenceId),
+          studentWorkspaceUseCases.getSupportWorkspaceDetail(studentReferenceId)
+            .catch((error:unknown)=>{
+              if (error instanceof Error && error.message==='STUDENT_WORKSPACE_NOT_FOUND') return null;
+              throw error;
+            }),
+        ]);
+        const studentRolePresent=assignments.some(role=>role.roleId==='student');
+        const code=!identity?'IDENTITY_NOT_FOUND':
+          identity.type!=='Human'?'NON_HUMAN_IDENTITY':
+          !studentRolePresent?'STUDENT_ROLE_MISSING':
+          !workspace?'ROLE_EVENT_PENDING':
+          workspace.status==='SUSPENDED'?'WORKSPACE_SUSPENDED':
+          workspace.status==='ARCHIVED'?'WORKSPACE_ARCHIVED':
+          workspace.status==='INITIALIZING'?'WORKSPACE_INITIALIZING':'HEALTHY';
+        const result={
+          code,workspaceStatus:workspace?.status??null,
+          studentRolePresent,
+          // Source-reported status and event counts are not a permission to mutate.
+          provisioningHealth:workspace?.provisioningHealth??null,
+          checkedAt:new Date().toISOString(),
+        };
+        await AuditHelper.recordMutation(auditRecordRepo,req,{
+          action:'STUDENT_SUPPORT_PROVISIONING_DIAGNOSTIC_VIEW',category:'STUDENT_SUPPORT',
+          targetType:'STUDENT_WORKSPACE',targetId:studentReferenceId,result:'SUCCESS',
+          metadata:{purpose:'provisioning-triage',resultCode:code},
+        },{reliability:'REQUIRED',principal:'REQUIRED'});
+        res.status(200).json(result);
+      } catch(error){next(error);}
     });
 
     // FGA-15-001: read-only case review; bounded P15 tracker projection with explicit purpose.
