@@ -267,6 +267,73 @@ describe('PrismaStudentWorkspaceRepository', () => {
     expect(tx.studentCertificateReadProjection.upsert).not.toHaveBeenCalled();
   });
 
+  it('recovers only formerly suspended events for workspaces now ACTIVE, with a transaction-scoped claim', async () => {
+    const event={eventId:'course-e-1',studentReferenceId:'student-1',sourceDomain:'COURSES',
+      eventType:'CourseCompleted',title:'Completed',occurredAt:'2026-10-01T12:00:00Z',metadata:{courseId:'course-1'}};
+    const row={id:'inbox-1',eventId:'course-e-1',studentReferenceId:'student-1',
+      sourceDomain:'COURSES',eventType:'CourseCompleted',payload:event};
+    const tx = {
+      studentWorkspaceEventInbox:{updateMany:vi.fn().mockResolvedValue({count:1})},
+      studentWorkspace:{findUnique:vi.fn().mockResolvedValue({status:'ACTIVE'})},
+    };
+    const db = {
+      studentWorkspaceEventInbox:{findMany:vi.fn().mockResolvedValue([row]),updateMany:vi.fn()},
+      $transaction:(callback:(client:typeof tx)=>unknown)=>callback(tx),
+    };
+    const repository=new PrismaStudentWorkspaceRepository(db as any);
+    const project=vi.fn().mockResolvedValue(undefined);
+    (repository as any).projectStudentEvent=project;
+    const output=await repository.replayParkedEvents(10);
+    expect(output).toEqual({processed:1,failed:0});
+    expect(db.studentWorkspaceEventInbox.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where:expect.objectContaining({
+        processedAt:null, failureCode:'WORKSPACE_SYNC_BLOCKED_SUSPENDED',workspace:{status:'ACTIVE'},
+      }),
+      take:10,
+    }));
+    expect(tx.studentWorkspaceEventInbox.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      where:{id:'inbox-1',processedAt:null,failureCode:'WORKSPACE_SYNC_BLOCKED_SUSPENDED'},
+      data:expect.objectContaining({failureCode:null}),
+    }));
+    expect(project).toHaveBeenCalledWith(tx,expect.objectContaining({
+      eventId:'course-e-1',studentReferenceId:'student-1',occurredAt:new Date('2026-10-01T12:00:00Z'),
+    }));
+    expect(db.studentWorkspaceEventInbox.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('does not replay a parked event when another worker already claimed it', async () => {
+    const row={id:'inbox-1',eventId:'e-1',studentReferenceId:'student-1',sourceDomain:'COURSES',
+      eventType:'CourseCompleted',payload:{eventId:'e-1'}};
+    const tx={studentWorkspaceEventInbox:{updateMany:vi.fn().mockResolvedValue({count:0})},
+      studentWorkspace:{findUnique:vi.fn()}};
+    const db={studentWorkspaceEventInbox:{findMany:vi.fn().mockResolvedValue([row]),updateMany:vi.fn()},
+      $transaction:(callback:(client:typeof tx)=>unknown)=>callback(tx)};
+    const repo=new PrismaStudentWorkspaceRepository(db as any);
+    const project=vi.fn();
+    (repo as any).projectStudentEvent=project;
+    expect(await repo.replayParkedEvents(2)).toEqual({processed:0,failed:0});
+    expect(project).not.toHaveBeenCalled();
+  });
+
+  it('quarantines malformed parked event envelopes instead of writing a timeline', async () => {
+    const row={id:'inbox-1',eventId:'e-1',studentReferenceId:'student-1',sourceDomain:'COURSES',
+      eventType:'CourseCompleted',payload:{eventId:'other',studentReferenceId:'student-1',
+        sourceDomain:'COURSES',eventType:'CourseCompleted',occurredAt:'2026-10-01'}};
+    const tx={studentWorkspaceEventInbox:{updateMany:vi.fn().mockResolvedValue({count:1})},
+      studentWorkspace:{findUnique:vi.fn().mockResolvedValue({status:'ACTIVE'})}};
+    const db={studentWorkspaceEventInbox:{findMany:vi.fn().mockResolvedValue([row]),
+      updateMany:vi.fn().mockResolvedValue({count:1})},
+      $transaction:(callback:(client:typeof tx)=>unknown)=>callback(tx)};
+    const repo=new PrismaStudentWorkspaceRepository(db as any);
+    const project=vi.fn();
+    (repo as any).projectStudentEvent=project;
+    expect(await repo.replayParkedEvents()).toEqual({processed:0,failed:1});
+    expect(project).not.toHaveBeenCalled();
+    expect(db.studentWorkspaceEventInbox.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data:{failureCode:'WORKSPACE_REPLAY_FAILED'},
+    }));
+  });
+
   it('rejects a stale support reset without an extra audit or outbox', async () => {
     const tx = {
       studentWorkspace: { findUnique: vi.fn().mockResolvedValue(workspace), updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
