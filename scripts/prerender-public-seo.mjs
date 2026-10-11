@@ -91,7 +91,7 @@ function inject(html, meta) {
     `    <meta property="og:type" content="website" />\n` +
     `    <meta property="og:url" content="${escapeHtml(meta.canonical)}" />\n` +
     `    <meta property="og:locale" content="${meta.locale === 'ar' ? 'ar_AR' : 'en_US'}" />\n` +
-    `    <meta property="og:locale:alternate" content="${meta.locale === 'ar' ? 'en_US' : 'ar_AR'}" />\n` +
+    (meta.ar && meta.en ? `    <meta property="og:locale:alternate" content="${meta.locale === 'ar' ? 'en_US' : 'ar_AR'}" />\n` : '') +
     `    <script type="application/ld+json">${jsonLd}</script>\n`;
   return html
     .replace(/\s*<title>[^<]*<\/title>/i, '')
