@@ -1,66 +1,39 @@
-# Section 17 — source gates and deferred runtime verification
+# Section 17 — closure evidence and post-28 verification
 
-**Current source verdict: INCOMPLETE / REVIEW REQUIRED.**
-**Current runtime verdict: NOT_EXECUTED — DEFERRED UNTIL AFTER SECTION 28.**
-**Release verdict: NO-GO.**
+**Source: CODE_CLOSED. Runtime: RUNTIME_DEFERRED. Production: NOT_VERIFIED.**
 
-Base is `main@4571ec9c3e4362470d03a2ed2706664cd8ee09c0`; changes are on `feat/section-17-enterprise-ai-platform`.
-No migration was applied, no database connection used, no worker started and no live/paid LLM call executed.
+Implementation and task mapping: [section-17-implementation.md](section-17-implementation.md). Executed local evidence: [section-17-validation.json](section-17-validation.json). Branch: `feat/section-17-enterprise-ai-platform`; review: [PR #19](https://github.com/wegdangamil2022-oss/MANARATAK-First-/pull/19).
 
-| Gate | Present source evidence | Actual result in this review | Closure standard |
-| --- | --- | --- | --- |
-| G1: source plan coverage | Section 18 P17 30 task rows + 2 functional annex rows in implementation report | REVIEWED; many OPEN | All non-runtime P0/P1/P2 source tasks closed with precise code/test mapping |
-| G2: prompt author/reviewer/deployer separation | Repository transactional checks, granular API permissions, focused regression source | PATCHED / TEST NOT EXECUTED | Negative self-approval/deploy, positive independent reviewer+deployer, break-glass audit |
-| G3: evaluation immutable gate | Definition checksum, result checksum, submitter/executor, reviewer CAS | PARTIAL / TEST NOT EXECUTED | Frozen approved dataset/gate, concurrent drift, transactional deploy-time match |
-| G4: async cost-once guarantees | Job-derived identity, requester-scoped queue replay, fenced heartbeat and database-side due scan | PARTIAL / LATEST SOURCE CHECK PENDING | Provider ACK loss, crash reconciliation, worst-case at-most-one billed execution with competing worker fault tests |
-| G5: AI operations RBAC | `admin:ai:*` evaluated per Admin route; operator aliases execute-only; viewer navigation | PATCHED / TEST NOT EXECUTED | Exact active role/permission provisioning, 401/403 matrix for each route and legacy alias |
-| G6: data privacy and trusted ingestion | Nonpublic previews suppressed; unverified knowledge quarantined; new workflow step checkpoints AES-GCM encrypted with 24-hour TTL and conservative classification | MITIGATED / NOT CLOSED | Typed owner verification, workflow principal scoping/consent, protected deindex lifecycle, historical cleanup and full per-step policy |
-| G7: registry writes and UX | Existing Admin editor sends expectedUpdatedAt; repository now requires it for updates; facet filters/deeplink added | PATCHED / TEST NOT EXECUTED | Concurrent save 409 mapped correctly; AR/EN and permission-aware UI; page/total/refresh/empty/error tests |
-| G8: TypeScript, formatting, lint, build | Source changes and tests committed | NOT EXECUTED | Successful exact-commit `npm run typecheck`, `npm run lint`, `npm run build`, source quality |
-| G9: targeted unit tests | AI infra / application / route specs, encrypted workflow snapshots, cancellation race, lease renewal and queue replay now included in P17 workflow | PRIOR HEAD GREEN; CURRENT SHA PENDING | All relevant isolated Vitest contracts green at exact final head with no regression |
-| G10: security CI | Default PR workflows include CodeQL and source checks | PENDING NEW PR SHA | Exact-SHA checks green, not old `main` status |
-| G11: runtime and migration | Prisma source schema and migration exist from previous P17 work | DEFERRED POST-28 | Disposable DB migration/revert, providers mocked or sandbox-only, replay/failure injection, complete audit/outbox |
-| G12: production readiness | Historical Phase 17 source-only runbook available | NOT AUTHORIZED | Separate explicit runtime/production approval after source closure and post-28 |
+## Source closure
 
-## Lightweight commands for isolated source checkout
+| Gate                       | Evidence                                                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Plan scope                 | AI-ADM-001–029 plus FGA-18-001–002 mapped to code and tests. AI-ADM-030 explicitly deferred.                                                                                    |
+| Independent authority      | Prompt and configuration author/reviewer/deployer separation; incident evidence; stale revision rejection; old direct activation denied.                                        |
+| Accounting and replay      | Reserved queue admission; stable paid execution intent; insert/provider acknowledgement-loss behavior; unknown holds and reviewed reconciliation.                               |
+| Authorization              | Granular catalog, viewer navigation, privileged denied route matrix, owner-only no-store result reads.                                                                          |
+| Privacy and knowledge      | Canonical public CMS read adapter, ciphertext-bound ownership/scope/expiry, retained old revision on indexing failure, bounded cleanup. Unsupported/private owner paths denied. |
+| Workflows and evaluations  | Persisted owner/budget/binding plan, stable step intent, consent, frozen datasets and transaction deployment checks.                                                            |
+| UX and readiness           | Correct AR/EN section rendering; model/capability-specific health TTL; queue trace and honest cost projection.                                                                  |
+| Compilation and regression | TypeScript and isolated P17 tests; lint with zero errors; build, Prisma source gate and repository source closure gates. Exact results and log references in validation.        |
+| Delivery                   | Implementation commit plus documentation/evidence commit on feature branch. Exact final PR-head CI is separate evidence; no main merge.                                         |
 
-Use Node 22 and exact PR head commit, no DATABASE_URL, secrets, or external providers:
+## Deferred until after section 28
 
-```sh
-npm ci
-npm run quality:source
-npm run db:source:verify
-npm run typecheck
-npm run lint
-npx --no-install vitest run packages/infrastructure/tests/ai-platform/PrismaAIPlatformRepository.spec.ts packages/infrastructure/tests/ai-platform/ProviderAdapters.spec.ts packages/application/tests/ai-platform/AIPlatformGovernance.spec.ts packages/application/tests/ai-platform/AIAsyncExecution.spec.ts apps/api/tests/presentation/api/router/AIAdminRouter.spec.ts apps/api/tests/presentation/api/router/AIGatewayRouter.spec.ts
-```
+Run only in an approved disposable environment. Nothing in the source verdict authorizes production rollout.
 
-These are **prescribed future commands**, not commands recorded as executed here. The CI workflow may automatically run larger existing source suites on the Draft PR; review its exact SHA and exclude/mark any skipped checks rather than declaring PASS.
+| Scenario                                                             | Required invariant                                                                                                                                                            |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Expand migration and backup/restore                                  | Nullable historic owner/plan preserved; no fabricated ownership or destructive rollback; source recovery manifest matches executed restore.                                   |
+| Competing reviewers/deployers and evaluation drift                   | Same revision/checksum and independent actors under real transaction locks; previous active binding remains intact on failure.                                                |
+| Multiworker lease expiry and crashes around provider acknowledgement | At most one permitted paid dispatch for the durable intent; no stale-worker completion; unknown charge stays reserved.                                                        |
+| Reservation/job insert acknowledgement loss and orphan recovery      | Durable job replay; no late insert after orphan cancellation; no release of a running worker's reservation.                                                                   |
+| Provider timeouts, abort and late success                            | Cancellation remains a request until terminal evidence; actual usage retained; external billing not inferred from local abort.                                                |
+| Operator reconciliation                                              | Independent exact evidence/currency/token/cost approval; existing immutable usage neither overwritten nor duplicated.                                                         |
+| CMS publish/unpublish, reader denial, reindex and retention          | Current owner revision/scope revalidated; withdrawal prevents retrieval; fresh indexing survives stale cleanup scans; encryption/TTL/key rotation work.                       |
+| Private owner adapters                                               | Unsupported paths remain denied. Any future adapter needs owner authorization/transfer consent before private input is admitted.                                              |
+| Workflow consent, ownership, budgets and retry drift                 | Principal cannot be swapped; protected checkpoint binding and hash checked; frozen step/configuration drift fails closed; no budget overrun or paid retry duplication.        |
+| Roles and UI AR/EN                                                   | Provision canonical granular permissions; 401/403 and reader/operator/reviewer personas; browser pagination, filters, empty/error/loading/read-after-write and unsaved edits. |
+| Full system E2E                                                      | API, browser, DB, worker, audit/outbox, sandbox providers, fairness and historical privacy verification after section 28.                                                     |
 
-## Post-28 disposable verification matrix
-
-| Runtime scenario | Expected invariant |
-| --- | --- |
-| Prompt review/deploy plus two competing admins | Independent author, reviewer, deployer; exact approved immutable checksum; failed release leaves production binding intact |
-| Active evaluation definition changes mid-run | Old passing run cannot satisfy changed dataset/evaluator/gate; independent single-use reviewer; no stale deployment |
-| Two workers with expired lease, slow provider ACK then response loss | One durable billable execution identity and one terminal requester state; UNKNOWN held for reconciliation |
-| Crash with RESERVED quota before and after provider acknowledgement | Reconcile without silently erasing known/unknown cost or charging twice |
-| Requester privacy and cross-tenant read, job output, student tools | 404/403 for wrong principal, approved protected artifacts only, complete trace without sensitive previews |
-| Canonical owner source published/unpublished/revoked | Only verified current owner revision searchable, atomic deindex and encrypted retention appropriate to class |
-| Concurrent registry edits / routing changes | Conditional update conflict, pinned approved routing and coherent audit/outbox |
-| UI AR and EN / reader-operator-reviewer personas | Status, labels and direction localized; hidden or denied privileged operations; correct page/total/facet behavior |
-| Incident lifecycle, cost/pricing and cancellation | Valid transitions and reviewer authority, unknown cost honest, abort/unknown billing state accurate |
-| Full provider/web/database/worker E2E and migrations | Performed only in approved disposable setup after section 28; never run against production in this PR |
-
-## Operator constraints
-
-- No DB mutations, Prisma deploy/push/reset, historical migration edits, backfill, seed, provider-secret injection, paid requests, worker startup, GitHub `main` merge, or deployment.
-- Never treat application source, old Phase 17 source report or a green unrelated CI run as evidence that current runtime tests executed.
-- Draft PR remains explicitly **not merge-ready** until a separate reviewer confirms each source blocker with fresh evidence.
-
-
-## Continuation verification notes — 11 October 2026
-
-- A previous P17 commit `7836a0b28c8a0cfd69e4d32ad0a81bd4b864afe2` received a successful isolated P17 source/mock check, translation, architecture, dependency audit, secret scan, Google AI Studio preview and CodeQL. **These successes are not transferable to subsequent commits.**
-- Later feature-branch edits add requester-scoped durable queue idempotency, worker lease renewal, pre-provider cancellation CAS with refundable pre-dispatch reservation, and AES-GCM workflow checkpoint envelopes. Their source tests are in `AIAsyncExecution.spec.ts`, `PrismaAIPlatformRepository.spec.ts`, `AIGatewayRouter.spec.ts` and `AIWorkflowPrivacy.spec.ts`.
-- The final P17 Draft PR must remain nonmergeable by policy until exact-head source checks complete and the full open-plan matrix is remediated; actual PostgreSQL concurrency, worker restart, provider billing, transport abort, source owner discovery and E2E are deferred until **after section 28** per instruction.
+No DB connection/mutation, backfill, seed, migration apply, provider-secret setup, live/paid inference, worker start, deployment or merge was performed in this review.
