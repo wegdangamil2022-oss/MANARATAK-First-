@@ -1014,6 +1014,28 @@ export class AIExecutionOrchestrator {
       throw new Error('AI_ASYNC_QUEUE_NOT_CONFIGURED');
     const job = await this.repository.claimAsyncJob(publicId, workerId);
     if (!job) throw new Error('AI_ASYNC_JOB_NOT_CLAIMABLE');
+    const lease = { workerId, lockedAt: job.lockedAt! };
+    let renewal: Promise<void> | null = null;
+    let heartbeatError: Error | null = null;
+    const refreshLease = () => {
+      if (renewal || heartbeatError) return;
+      renewal = this.repository.renewAsyncJobLease(publicId, lease)
+        .then((valid) => {
+          if (!valid) throw new Error('AI_ASYNC_LEASE_LOST');
+        })
+        .catch((error: unknown) => {
+          heartbeatError = error instanceof Error ? error : new Error('AI_ASYNC_LEASE_RENEWAL_FAILED');
+        })
+        .then(() => { renewal = null; });
+    };
+    // Keep claims fenced while the provider is busy. A lost heartbeat never
+    // authorizes a new paid call; the durable execution idempotency key still wins.
+    const heartbeat = setInterval(refreshLease, Math.trunc(ASYNC_LEASE_MS / 3));
+    const finishLease = async () => {
+      clearInterval(heartbeat);
+      if (renewal) await renewal;
+      if (heartbeatError) throw heartbeatError;
+    };
     try {
       const request = this.asyncPayloads.unprotect({
         ciphertext: job.payloadCiphertext,
@@ -1034,6 +1056,7 @@ export class AIExecutionOrchestrator {
         { ...request, idempotencyKey: `async-job:${job.publicId}` },
         { asyncJobPublicId: job.publicId },
       );
+      await finishLease();
       if (
         response.status !== AIExecutionStatus.COMPLETED &&
         response.status !== AIExecutionStatus.BLOCKED
@@ -1053,6 +1076,8 @@ export class AIExecutionOrchestrator {
         { workerId, lockedAt: job.lockedAt! },
       );
     } catch (error) {
+      await finishLease();
+      if (error instanceof Error && error.message === 'AI_ASYNC_LEASE_LOST') throw error;
       const retry = job.attempts < job.maxAttempts;
       return this.repository.updateAsyncJob(
         publicId,
@@ -1069,6 +1094,8 @@ export class AIExecutionOrchestrator {
         },
         { workerId, lockedAt: job.lockedAt! },
       );
+    } finally {
+      clearInterval(heartbeat);
     }
   }
 
