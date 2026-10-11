@@ -111,8 +111,71 @@ describe('Student certificate owner-outbox bridge', () => {
     const entry={id:'role-2',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
       createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
     await expect(gateway.deliver(entry as any,{idempotencyKey:'role-2'} as any))
-      .rejects.toThrow('STUDENT_LEARNING_CATCHUP_PAGE_REQUIRED');
+      .rejects.toThrow('STUDENT_LEARNING_CATCHUP_PAGINATION_REQUIRED');
     expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('reconciles more than 50 owner enrollments through bounded pages without dropping a tail',async()=>{
+    const {students,assignments,identities}=fixture();
+    const enrollments=Array.from({length:62},(_,i)=>({
+      enrollmentId:`e-${i}`,courseId:`c-${i}`,courseName:`Course ${i}`,
+      courseSlug:`slug-${i}`,status:'ACTIVE',progressPercentage:35,
+      enrolledAt:new Date('2026-01-01T00:00:00Z'),
+    }));
+    const learning={listPageForStudent:vi.fn().mockImplementation(async(
+      studentReferenceId:string,limit:number,cursor?:string,
+    )=>{
+      expect(studentReferenceId).toBe('student-1');
+      expect(limit).toBe(50);
+      const offset=cursor?Number(cursor):0;
+      const items=enrollments.slice(offset,offset+limit);
+      return {items,nextCursor:offset+items.length<enrollments.length?String(offset+items.length):null};
+    }),listForStudent:vi.fn()};
+    const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,
+      assignments as any,identities as any,learning as any);
+    const role={
+      id:'role-many',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
+      createdAt:new Date('2026-01-03T00:00:00Z'),
+      payload:{roleId:'student',identityId:'student-1'},metadata:{},
+    };
+    await gateway.deliver(role as any,{idempotencyKey:role.id});
+    expect(learning.listPageForStudent).toHaveBeenCalledTimes(2);
+    expect(learning.listForStudent).not.toHaveBeenCalled();
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(63);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
+      eventId:'role-many:learning:e-61',sourceDomain:'COURSES',
+      metadata:expect.objectContaining({courseName:'Course 61',progressPercentage:35}),
+    }));
+  });
+
+  it('rejects non-advancing cursors before repeatedly projecting the same owner page',async()=>{
+    const {students,assignments,identities}=fixture();
+    const learning={listPageForStudent:vi.fn().mockResolvedValue({
+      items:[{enrollmentId:'enroll-1',courseId:'c1',enrolledAt:new Date()}],nextCursor:'same',
+    })};
+    const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,
+      assignments as any,identities as any,learning as any);
+    const role={id:'role-cycle',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
+      createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
+    await expect(gateway.deliver(role as any,{idempotencyKey:'role-cycle'}))
+      .rejects.toThrow('STUDENT_OWNER_CATCHUP_CURSOR_INVALID');
+    expect(learning.listPageForStudent).toHaveBeenCalledTimes(2);
+  });
+
+  it('preserves certificate lifecycle status during paged backfill',async()=>{
+    const {students,assignments,identities}=fixture();
+    const certificates={listPageForStudent:vi.fn()
+      .mockResolvedValueOnce({items:[{id:'cert-a',publicId:'p-a',status:'ACTIVE',issuedAt:new Date('2026-01-01')}],nextCursor:'cert-a'})
+      .mockResolvedValueOnce({items:[{id:'cert-b',publicId:'p-b',status:'REVOKED',issuedAt:new Date('2026-02-01')}],nextCursor:null})};
+    const gateway=new StudentWorkspaceOutboxDeliveryGateway(students as any,
+      assignments as any,identities as any,undefined,certificates as any);
+    const role={id:'role-cert',domain:'AUTHORIZATION',eventType:'RoleAssignmentCreated',
+      createdAt:new Date(),metadata:{},payload:{roleId:'student',identityId:'student-1'}};
+    await gateway.deliver(role as any,{idempotencyKey:role.id});
+    expect(certificates.listPageForStudent).toHaveBeenCalledTimes(2);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
+      eventId:'role-cert:certificate:cert-b',eventType:'CertificateRevoked',
+    }));
   });
 
   it('does not run source catch-up for suspended identities', async () => {
