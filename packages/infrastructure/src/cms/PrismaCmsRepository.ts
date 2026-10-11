@@ -1046,7 +1046,24 @@ export class PrismaCmsRepository implements ICmsRepository {
       if (existing.status !== CmsContentStatus.DRAFT) throw new Error('CMS_NAVIGATION_DRAFT_REQUIRED');
       CmsPublishingPolicy.assertMakerChecker(existing.updatedBy, actorId);
       CmsPublishingPolicy.assertAcyclicNavigation(existing.nodes);
-      for (const node of existing.nodes) CmsPublishingPolicy.assertSafeNavigationTarget(node.targetType, node.targetValue);
+      for (const node of existing.nodes) {
+        CmsPublishingPolicy.assertSafeNavigationTarget(node.targetType, node.targetValue);
+        if (node.targetType === 'CMS_CONTENT') {
+          const published = await tx.cmsPublishedContent.findFirst({
+            where: {
+              siteIdentifier: existing.siteIdentifier, locale: existing.locale,
+              status: CmsContentStatus.PUBLISHED,
+              OR: [{ contentId: node.targetValue }, { publicId: node.targetValue }],
+            },
+            select: { contentId: true },
+          });
+          if (!published) throw new Error('CMS_NAVIGATION_TARGET_NOT_PUBLISHED');
+        }
+        // A UUID is not evidence that another bounded-context owner has published it.
+        if (node.targetType === 'DOMAIN_REFERENCE') {
+          throw new Error('CMS_NAVIGATION_DOMAIN_OWNER_RESOLUTION_REQUIRED');
+        }
+      }
       const contentHash = this.navigationContentHash(existing);
       const now = new Date();
       const row = await tx.cmsNavigationMenu.update({
