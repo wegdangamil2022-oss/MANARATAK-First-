@@ -87,7 +87,10 @@
       "command": "node scripts/ci/prisma-source-gate.mjs",
       "status": "PASS",
       "databaseConnection": "NONE",
-      "operations": ["validate", "generate"]
+      "operations": [
+        "validate",
+        "generate"
+      ]
     },
     {
       "command": "node scripts/ci/verify-source-closure-manifest.mjs",
@@ -124,6 +127,22 @@
       "baseHandlers": 377,
       "currentHandlers": 379,
       "notes": "Only section-19 inventory was refreshed; unrelated owner contract baselines were not silently approved."
+    },
+    {
+      "command": "DATABASE_MUTATIONS_ALLOWED=false DATABASE_ENVIRONMENT=source npm run translation:quality:source",
+      "status": "PASS",
+      "notes": "Admin dictionary keys use the existing quoted-key convention."
+    },
+    {
+      "command": "node scripts/verify-w1-source.mjs",
+      "status": "PASS",
+      "checks": 136,
+      "notes": "Strict parser and quota-503 source checks accept multiline formatting without relaxing validation."
+    },
+    {
+      "command": "node --test tests/security/strict-edge-validation-remediation-source.test.mjs",
+      "status": "PASS",
+      "tests": 3
     }
   ],
   "migrations": [
