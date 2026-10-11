@@ -34,6 +34,12 @@ export class StudentWorkspaceOutboxWorker {
     return this.run(workerId, 'CERTIFICATES', ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered', 'CertificateArchived']);
   }
 
+  /** P15 durable owner-catchup continuation, bounded per run. */
+  public async runCatchupOnce(workerId:string):Promise<OutboxDispatchResult>{
+    return this.run(workerId,'STUDENT_WORKSPACE_CATCHUP',
+      ['StudentOwnerCatchupContinuationRequested']);
+  }
+
   public async runRemindersOnce(workerId:string):Promise<OutboxDispatchResult>{
     if(!workerId.trim())throw new Error('STUDENT_REMINDER_WORKER_ID_REQUIRED');
     if(!this.reminderDispatcher)return {claimed:0,processed:0,failed:0,exhausted:0,leaseLost:0};

@@ -75,6 +75,7 @@ export function startPollingWorkers(
           await observeWorkerIteration('student-workspace-outbox', async () => {
             await worker.runIdentityOnce(`${workerId}-identity`);
             await worker.runRoleOnce(`${workerId}-role`);
+            await worker.runCatchupOnce(`${workerId}-catchup`);
             await worker.runLearningOnce(`${workerId}-learning`);
             await worker.runCertificatesOnce(`${workerId}-certificates`);
             await worker.runReplayOnce(`${workerId}-replay`);
