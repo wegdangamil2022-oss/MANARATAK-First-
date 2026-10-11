@@ -15,6 +15,8 @@ import {
   StudentWorkspaceDto,
   StudentWorkspaceIntegrationEventDto,
   StudentSupportWorkspacePageDto,
+  StudentSupportTriageKind,
+  StudentSupportTriagePageDto,
   StudentSupportWorkspaceDetailDto,
   StudentWorkspaceSnapshotDto,
   StudentWorkspaceStatus,
@@ -42,6 +44,11 @@ export class StudentWorkspaceUseCases {
   /** P15-owned privacy-minimized support read model. It deliberately excludes privacy preferences, metadata and contact data. */
   public async listSupportWorkspaces(input: { query?: string; status?: StudentWorkspaceStatus; limit?: number; cursor?: string }): Promise<StudentSupportWorkspacePageDto> {
     return this.repository.listSupportWorkspaces(input);
+  }
+
+  /** Bounded server-side support triage; never discloses event payloads or tracker notes. */
+  public listSupportTriage(input:{kind:StudentSupportTriageKind;limit?:number;cursor?:string}):Promise<StudentSupportTriagePageDto>{
+    return this.repository.listSupportTriage(input);
   }
 
   public async getSupportWorkspaceDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto> {

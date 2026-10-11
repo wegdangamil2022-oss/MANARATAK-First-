@@ -18,6 +18,8 @@ import {
   StudentWorkspaceIntegrationEventDto,
   StudentWorkspaceSnapshotDto,
   StudentSupportWorkspacePageDto,
+  StudentSupportTriageKind,
+  StudentSupportTriagePageDto,
   StudentSupportWorkspaceDetailDto,
   StudentWorkspaceStatus,
   UpsertStudentWorkspaceDto,
@@ -102,6 +104,40 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     const items = selected.map((row: any) => ({ studentReferenceId: row.studentReferenceId, status: row.status, version: row.version, displayName: row.displayName, preferredLanguage: row.preferredLanguage, timezone: row.timezone, lastActiveAt: row.lastActiveAt, updatedAt: row.updatedAt }));
     const last = selected[selected.length - 1];
     return { items, total, hasMore, nextCursor: hasMore && last ? codec.encode(last,scope) : null };
+  }
+
+  public async listSupportTriage(input:{kind:StudentSupportTriageKind;limit?:number;cursor?:string}):Promise<StudentSupportTriagePageDto>{
+    const limit=Math.min(50,Math.max(1,Math.trunc(input.limit??25)));
+    const conditions:Record<StudentSupportTriageKind,Record<string,unknown>>={
+      SYNC_FAILED:{integrationInbox:{some:{processedAt:null,failureCode:{not:null}}}},
+      SYNC_PENDING:{integrationInbox:{some:{processedAt:null,failureCode:null}}},
+      APPLICATION_OVERDUE:{applicationTrackers:{some:{status:'ACTIVE',deadlineAt:{lt:new Date()}}}},
+    };
+    if(!Object.prototype.hasOwnProperty.call(conditions,input.kind))
+      throw new Error('STUDENT_SUPPORT_TRIAGE_KIND_INVALID');
+    const where=conditions[input.kind];
+    const codec=new StudentSupportCursorCodec(this.cursorSigningSecret);
+    const scope=JSON.stringify({domain:'triage',kind:input.kind,limit});
+    const anchor=input.cursor?codec.decode(input.cursor,scope):null;
+    const total=await this.db.studentWorkspace.count({where});
+    const rows=await this.db.studentWorkspace.findMany({
+      where:{AND:[where,...(anchor?[{OR:[
+        {updatedAt:{lt:anchor.updatedAt}},
+        {updatedAt:anchor.updatedAt,id:{lt:anchor.id}},
+      ]}]:[])]},
+      select:{id:true,studentReferenceId:true,status:true,version:true,updatedAt:true},
+      orderBy:[{updatedAt:'desc'},{id:'desc'}],take:limit+1,
+    });
+    const hasMore=rows.length>limit;
+    const selected=rows.slice(0,limit);
+    const last=selected[selected.length-1];
+    return {total,hasMore,
+      items:selected.map((row:any)=>({
+        studentReferenceId:row.studentReferenceId,status:row.status,version:row.version,
+        updatedAt:row.updatedAt,triageKind:input.kind,
+      })),
+      nextCursor:hasMore&&last?codec.encode(last,scope):null,
+    };
   }
 
   public async getSupportWorkspaceDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto | null> {

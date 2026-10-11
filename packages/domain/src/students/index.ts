@@ -406,7 +406,24 @@ export interface IStudentApplicationReminderGateway {
   cancel(trackerId: string, trackerVersion: number): Promise<void>;
 }
 
+export type StudentSupportTriageKind = 'SYNC_FAILED' | 'SYNC_PENDING' | 'APPLICATION_OVERDUE';
+
+export interface StudentSupportTriagePageDto {
+  items: Array<{
+    studentReferenceId: string;
+    status: StudentWorkspaceStatus;
+    version: number;
+    updatedAt: Date;
+    triageKind: StudentSupportTriageKind;
+  }>;
+  total: number;
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
 export interface IStudentWorkspaceRepository {
+  /** Only P15-owned inbox/tracker filters; no automatic P13/P14/P20 read. */
+  listSupportTriage(input:{kind:StudentSupportTriageKind;limit?:number;cursor?:string}):Promise<StudentSupportTriagePageDto>;
   markNotificationRead?(studentReferenceId: string, notificationId: string): Promise<void>;
   findWorkspace(studentReferenceId: string): Promise<StudentWorkspaceDto | null>;
   listSupportWorkspaces(input: { query?: string; status?: StudentWorkspaceStatus; limit?: number; cursor?: string }): Promise<StudentSupportWorkspacePageDto>;
