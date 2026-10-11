@@ -172,4 +172,45 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     expect(tx.aIRegistryRecord.upsert).not.toHaveBeenCalled();
   });
 
+
+  it('rejects a stale evaluation gate within the prompt deployment transaction', async () => {
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      aIPromptVersionRecord: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'pv-1', status: 'APPROVED', promptKey: 'prompt-1',
+          version: 1, checksum: 'target-checksum', createdBy: 'author',
+          approvedBy: 'checker',
+        }),
+      },
+      aIRegistryRecord: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'r1', key: 'prompt-1', capabilityKey: 'capability-1',
+          status: 'REVIEW', configuration: {},
+        }),
+        findMany: vi.fn().mockResolvedValue([{
+          key: 'gate-1', status: 'ACTIVE', configuration: {
+            capabilityKey: 'capability-1',
+            target: { type: 'PROMPT', key: 'prompt-1' },
+            deploymentGate: { minimumScore: 0.9, maximumSafetyFailures: 0, requiresHumanApproval: true },
+            dataset: [{ key: 'case-1', input: 'new test' }],
+            evaluators: [{ key: 'exact', type: 'EXACT_MATCH' }],
+          },
+        }]),
+      },
+      aICapabilityPromptBindingRecord: { findUnique: vi.fn().mockResolvedValue(null) },
+      aIEvaluationRunRecord: { findFirst: vi.fn().mockResolvedValue({
+        status: 'COMPLETED', score: 1, safetyFailures: 0,
+        approvedBy: 'reviewer', targetEvidence: { definitionChecksum: 'obsolete' },
+      }) },
+      aIPromptDeploymentRecord: { updateMany: vi.fn(), create: vi.fn() },
+    };
+    const repo = new PrismaAIPlatformRepository({
+      $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+    });
+    await expect(repo.deployPrompt('prompt-1', 1, 'deployer'))
+      .rejects.toThrow('AI_EVALUATION_EXACT_GATE_EVIDENCE_REQUIRED:gate-1');
+    expect(tx.aIPromptDeploymentRecord.updateMany).not.toHaveBeenCalled();
+  });
+
 });
