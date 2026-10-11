@@ -91,6 +91,25 @@ export class StudentSupportAdminRouter {
       } catch (error) { next(error); }
     });
 
+    // FGA-15-002: server-side triage from P15-owned state only, with its own signed cursor.
+    router.get('/support/triage', requireSupportRead, async (req,res,next)=>{
+      try{
+        const input=z.object({
+          kind:z.enum(['SYNC_FAILED','SYNC_PENDING','APPLICATION_OVERDUE']),
+          limit:z.coerce.number().int().min(1).max(50).optional(),
+          cursor:z.string().trim().max(2048).optional(),
+        }).strict().parse(req.query);
+        const result=await studentWorkspaceUseCases.listSupportTriage(input);
+        await AuditHelper.recordMutation(auditRecordRepo,req,{
+          action:'STUDENT_SUPPORT_TRIAGE_LIST_VIEW',category:'STUDENT_SUPPORT',
+          targetType:'STUDENT_WORKSPACE_COLLECTION',targetId:'student-support-triage',
+          result:'SUCCESS',metadata:{purpose:'student-support-triage',kind:input.kind,
+            returned:result.items.length},
+        },{reliability:'REQUIRED',principal:'REQUIRED'});
+        res.status(200).json(result);
+      }catch(error){next(error);}
+    });
+
     router.get('/support/:studentReferenceId', requireSupportRead, async (req, res, next) => {
       try {
         const studentReferenceId = z.string().trim().min(1).max(128).parse(req.params.studentReferenceId);

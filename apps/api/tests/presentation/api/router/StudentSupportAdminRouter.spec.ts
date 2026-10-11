@@ -7,6 +7,7 @@ import { AuditHelper } from '../../../../src/presentation/audit/AuditHelper';
 function fixture(granted: string[]) {
   const workspace = {
     listSupportWorkspaces: vi.fn().mockResolvedValue({ items: [], nextCursor: null, hasMore: false }),
+    listSupportTriage: vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}),
     resetLayout: vi.fn().mockResolvedValue({studentReferenceId:'student-1',version:2}),
     getSupportWorkspaceDetail: vi.fn().mockResolvedValue({studentReferenceId:'student-1',status:'ACTIVE'}),
   };
@@ -76,6 +77,26 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
         {reliability:'REQUIRED',principal:'REQUIRED'});
       expect(identities.findById).toHaveBeenCalledWith('student-1');
       expect(roleAssignments.findByIdentityId).toHaveBeenCalledWith('student-1');
+    }finally{audit.mockRestore();}
+  });
+
+  it('denies all support triage reads without the support permission',async()=>{
+    const {app,workspace}=fixture([]);
+    expect((await request(app).get('/admin/students/support/triage?kind=SYNC_FAILED')).status).toBe(403);
+    expect(workspace.listSupportTriage).not.toHaveBeenCalled();
+  });
+  it('requires an explicit supported P15 triage kind and mandatory audit',async()=>{
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try {
+      const {app,workspace}=fixture(['admin:students:support']);
+      expect((await request(app).get('/admin/students/support/triage?kind=FOREIGN_SERVICES')).status).toBe(400);
+      const res=await request(app).get('/admin/students/support/triage?kind=SYNC_FAILED&limit=12');
+      expect(res.status).toBe(200);
+      expect(workspace.listSupportTriage).toHaveBeenCalledWith({kind:'SYNC_FAILED',limit:12});
+      expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
+        expect.objectContaining({action:'STUDENT_SUPPORT_TRIAGE_LIST_VIEW',
+          metadata:{purpose:'student-support-triage',kind:'SYNC_FAILED',returned:0}}),
+        {reliability:'REQUIRED',principal:'REQUIRED'});
     }finally{audit.mockRestore();}
   });
 
