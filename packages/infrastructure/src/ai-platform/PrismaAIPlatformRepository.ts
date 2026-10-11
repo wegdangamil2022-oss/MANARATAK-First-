@@ -683,6 +683,37 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       await this.prisma.aIExecutionRecord.update({ where: { publicId }, data }),
     );
   }
+  async cancelUnstartedExecution(
+    publicId: string,
+    requesterReferenceId: string,
+  ): Promise<AIExecutionRecord> {
+    if (!requesterReferenceId) throw new Error('AI_AUTHENTICATED_REQUESTER_REQUIRED');
+    return this.prisma.$transaction(async (tx: any) => {
+      // A dispatched provider call cannot truthfully be cancelled by a DB status write.
+      // The conditional update is atomic with dispatch's RECEIVED -> RUNNING transition.
+      const changed = await tx.aIExecutionRecord.updateMany({
+        where: {
+          publicId,
+          requesterReferenceId,
+          status: { in: ['RECEIVED', 'QUEUED'] },
+        },
+        data: { status: 'CANCELLED' },
+      });
+      if (changed.count !== 1)
+        throw new Error('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED');
+      const cancelled = await tx.aIExecutionRecord.findUniqueOrThrow({ where: { publicId } });
+      await appendGovernanceEvidence(tx, {
+        action: 'AI_EXECUTION_CANCELLED_BEFORE_DISPATCH',
+        actorReferenceId: requesterReferenceId,
+        targetId: cancelled.id,
+        targetType: 'execution',
+        aggregateId: publicId,
+        payload: { publicId, status: cancelled.status },
+      });
+      return normalizeExecution(cancelled);
+    });
+  }
+
   async findExecution(publicId: string): Promise<AIExecutionRecord | null> {
     const value = await this.prisma.aIExecutionRecord.findUnique({ where: { publicId } });
     return value ? normalizeExecution(value) : null;
