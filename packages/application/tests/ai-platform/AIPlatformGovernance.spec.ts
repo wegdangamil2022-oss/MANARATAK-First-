@@ -147,7 +147,7 @@ describe('P17 known-price routing', () => {
     };
     const request = { consumer, candidates: [candidate], prices: [], inputTokens: 10 };
     expect(() => estimateQuotaReservation(request as any))
-      .toThrow('AI_MODEL_PRICE_UNVERIFIED');
+      .toThrow('AI_COST_PRICE_REQUIRED_FOR_ROUTED_MODEL:model-1');
     candidate.model = { ...candidate.model, inputPricePerMillion: 0, outputPricePerMillion: 0 } as any;
     expect(estimateQuotaReservation(request as any)).toMatchObject({ tokens: 20, cost: 0 });
   });
