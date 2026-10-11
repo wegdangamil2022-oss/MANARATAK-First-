@@ -54,7 +54,7 @@ export class AdminCmsUseCases {
       publicId: `cms-${randomUUID()}`,
       status: CmsContentStatus.DRAFT,
       authorId: actorId,
-      ownerId: data.ownerId ?? actorId,
+      ownerId: actorId,
     });
   }
 

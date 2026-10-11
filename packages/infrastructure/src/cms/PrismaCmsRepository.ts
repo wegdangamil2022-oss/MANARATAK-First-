@@ -246,6 +246,10 @@ export class PrismaCmsRepository implements ICmsRepository {
         if (published && published.slug !== data.localizedSlug) {
           throw new Error('CMS_CANONICAL_IDENTITY_IMMUTABLE');
         }
+        await tx.cmsScheduledJob.updateMany({
+          where: { localizedContentId: existing.id, status: 'PENDING' },
+          data: { status: 'CANCELLED', completedAt: new Date() },
+        });
         await this.captureRevision(tx, existing, data.actorId, 'BEFORE_EDIT');
       }
       const row = await tx.cmsLocalizedContent.upsert({
@@ -596,6 +600,10 @@ export class PrismaCmsRepository implements ICmsRepository {
         where: { contentId_locale: { contentId: data.contentId, locale: data.locale } },
       });
       if (currentPublic && payload.localizedSlug !== currentPublic.slug) throw new Error('CMS_CANONICAL_IDENTITY_IMMUTABLE');
+      await tx.cmsScheduledJob.updateMany({
+        where: { localizedContentId: localized.id, status: 'PENDING' },
+        data: { status: 'CANCELLED', completedAt: new Date() },
+      });
       await this.captureRevision(tx, localized, data.actorId, 'BEFORE_RESTORE');
       const row = await tx.cmsLocalizedContent.update({
         where: { id: localized.id },
@@ -815,7 +823,11 @@ export class PrismaCmsRepository implements ICmsRepository {
       CmsPublishingPolicy.assertRedirect(sourcePath, destinationPath);
       await this.assertRedirectGraphSafe(tx, content.siteIdentifier, data.locale, sourcePath, destinationPath);
       await this.captureRevision(tx, localized, data.actorId, 'BEFORE_SLUG_CHANGE');
-      const row = await tx.cmsLocalizedContent.update({ where: { id: localized.id }, data: { localizedSlug: data.newSlug, state: CmsContentStatus.DRAFT, lastModifiedBy: data.actorId, version: { increment: 1 } } });
+      await tx.cmsScheduledJob.updateMany({
+        where: { localizedContentId: localized.id, status: 'PENDING' },
+        data: { status: 'CANCELLED', completedAt: new Date() },
+      });
+      const row = await tx.cmsLocalizedContent.update({ where: { id: localized.id }, data: { localizedSlug: data.newSlug, state: CmsContentStatus.DRAFT, lastModifiedBy: data.actorId, scheduledAt: null, version: { increment: 1 } } });
       await this.syncRootLifecycle(tx, content.id);
       await tx.cmsRedirect.upsert({
         where: { siteIdentifier_locale_sourcePath: { siteIdentifier: content.siteIdentifier, locale: data.locale, sourcePath } },
