@@ -227,6 +227,8 @@ export interface CmsWorkflowCommandDto {
   expectedVersion?: number;
   comments?: string | null;
   scheduledAt?: Date | null;
+  scheduledJobId?: string;
+  scheduleLeaseOwner?: string;
 }
 
 export interface CmsRestoreRevisionDto {

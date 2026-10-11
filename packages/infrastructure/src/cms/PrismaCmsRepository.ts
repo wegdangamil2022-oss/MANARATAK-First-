@@ -371,7 +371,7 @@ export class PrismaCmsRepository implements ICmsRepository {
       const { content, localized } = await this.loadWorkflow(tx, command);
       CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.READY_TO_PUBLISH);
       const review = await tx.cmsWorkflowReview.findFirst({
-        where: { localizedContentId: localized.id, status: 'PENDING' },
+        where: { localizedContentId: localized.id, status: { in: ['PENDING', 'PROCESSING'] } },
         orderBy: { requestedAt: 'desc' },
       });
       if (!review) throw new Error('CMS_PENDING_REVIEW_NOT_FOUND');
@@ -406,7 +406,7 @@ export class PrismaCmsRepository implements ICmsRepository {
       const { content, localized } = await this.loadWorkflow(tx, command);
       CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.DRAFT);
       const review = await tx.cmsWorkflowReview.findFirst({
-        where: { localizedContentId: localized.id, status: 'PENDING' },
+        where: { localizedContentId: localized.id, status: { in: ['PENDING', 'PROCESSING'] } },
         orderBy: { requestedAt: 'desc' },
       });
       if (!review) throw new Error('CMS_PENDING_REVIEW_NOT_FOUND');
@@ -444,7 +444,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command);
       CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.DRAFT);
-      await tx.cmsScheduledJob.updateMany({ where: { localizedContentId: localized.id, status: 'PENDING' }, data: { status: 'CANCELLED', completedAt: new Date() } });
+      await tx.cmsScheduledJob.updateMany({ where: { localizedContentId: localized.id, status: { in: ['PENDING', 'PROCESSING'] } }, data: { status: 'CANCELLED', completedAt: new Date() } });
       const row = await tx.cmsLocalizedContent.update({ where: { id: localized.id }, data: { state: CmsContentStatus.DRAFT, scheduledAt: null, version: { increment: 1 } } });
       await this.syncRootLifecycle(tx, content.id);
       await this.appendMutation(tx, content, localized.id, 'SCHEDULE_CANCELLED', command.actorId, { locale: command.locale });
@@ -456,6 +456,18 @@ export class PrismaCmsRepository implements ICmsRepository {
     return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command, true);
       if (localized.state === CmsContentStatus.SCHEDULED) {
+        if (command.actorId.startsWith('system:') && (!command.scheduledJobId || !command.scheduleLeaseOwner)) {
+          throw new Error('CMS_SCHEDULE_LEASE_REQUIRED');
+        }
+        if (command.scheduledJobId) {
+          const job = await tx.cmsScheduledJob.findUnique({ where: { id: command.scheduledJobId } });
+          if (!job || job.status !== 'PROCESSING' || job.claimedBy !== command.scheduleLeaseOwner ||
+              !job.leaseExpiresAt || job.leaseExpiresAt.getTime() <= Date.now() ||
+              job.localizedContentId !== localized.id ||
+              job.idempotencyKey !== `publish:${localized.id}:${localized.version}`) {
+            throw new Error('CMS_SCHEDULE_LEASE_LOST');
+          }
+        }
         if (!localized.scheduledAt || localized.scheduledAt.getTime() > Date.now()) {
           throw new Error('CMS_SCHEDULE_NOT_DUE');
         }
@@ -642,7 +654,7 @@ export class PrismaCmsRepository implements ICmsRepository {
       });
       if (currentPublic && payload.localizedSlug !== currentPublic.slug) throw new Error('CMS_CANONICAL_IDENTITY_IMMUTABLE');
       await tx.cmsScheduledJob.updateMany({
-        where: { localizedContentId: localized.id, status: 'PENDING' },
+        where: { localizedContentId: localized.id, status: { in: ['PENDING', 'PROCESSING'] } },
         data: { status: 'CANCELLED', completedAt: new Date() },
       });
       await this.captureRevision(tx, localized, data.actorId, 'BEFORE_RESTORE');
@@ -876,7 +888,7 @@ export class PrismaCmsRepository implements ICmsRepository {
       await this.assertRedirectGraphSafe(tx, content.siteIdentifier, data.locale, sourcePath, destinationPath);
       await this.captureRevision(tx, localized, data.actorId, 'BEFORE_SLUG_CHANGE');
       await tx.cmsScheduledJob.updateMany({
-        where: { localizedContentId: localized.id, status: 'PENDING' },
+        where: { localizedContentId: localized.id, status: { in: ['PENDING', 'PROCESSING'] } },
         data: { status: 'CANCELLED', completedAt: new Date() },
       });
       const row = await tx.cmsLocalizedContent.update({ where: { id: localized.id }, data: { localizedSlug: data.newSlug, state: CmsContentStatus.DRAFT, lastModifiedBy: data.actorId, scheduledAt: null, version: { increment: 1 } } });
@@ -1384,7 +1396,7 @@ export class PrismaCmsRepository implements ICmsRepository {
         if (content) affectedSites.add(content.siteIdentifier);
         if (localized.state !== targetState) {
           if (job.jobType === 'PUBLISH') {
-            await this.publish({ contentId: localized.contentId, locale: localized.locale, actorId, expectedVersion: localized.version });
+            await this.publish({ contentId: localized.contentId, locale: localized.locale, actorId, expectedVersion: localized.version, scheduledJobId: job.id, scheduleLeaseOwner: leaseOwner });
           } else {
             await this.archive({ contentId: localized.contentId, locale: localized.locale, actorId, expectedVersion: localized.version });
           }
@@ -1402,11 +1414,15 @@ export class PrismaCmsRepository implements ICmsRepository {
           continue;
         }
         result.failed += 1;
+        const failureCode = error instanceof Error ? error.message.slice(0, 120) : 'CMS_SCHEDULE_FAILED';
+        const transient = /(?:P2034|P2028|TIMEOUT|LEASE_LOST|VERSION_CONFLICT|ASSET_TRUST_EVIDENCE_REQUIRED)/.test(failureCode);
+        const retry = transient && job.attemptCount < 5;
         await this.db.cmsScheduledJob.updateMany({
           where: { id: job.id, status: 'PROCESSING', claimedBy: leaseOwner },
           data: {
-            status: 'FAILED',
-            failureCode: error instanceof Error ? error.message.slice(0, 120) : 'CMS_SCHEDULE_FAILED',
+            status: retry ? 'PENDING' : 'FAILED',
+            scheduledAt: retry ? new Date(Date.now() + Math.min(300_000, 5_000 * 2 ** job.attemptCount)) : job.scheduledAt,
+            failureCode,
             claimedBy: null,
             claimedAt: null,
             leaseExpiresAt: null,
