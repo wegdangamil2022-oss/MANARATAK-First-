@@ -83,6 +83,7 @@ export interface IAIPlatformRepository {
     usage: { tokens: number; cost: number; currency?: string | null; release?: boolean },
   ): Promise<void>;
   updateExecution(publicId: string, patch: Partial<AIExecutionRecord>): Promise<AIExecutionRecord>;
+  cancelUnstartedExecution(publicId: string, requesterReferenceId: string): Promise<AIExecutionRecord>;
   findExecution(publicId: string): Promise<AIExecutionRecord | null>;
   findExecutionByIdempotency(
     consumerKey: string,
