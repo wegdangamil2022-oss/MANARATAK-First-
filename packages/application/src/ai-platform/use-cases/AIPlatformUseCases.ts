@@ -2282,7 +2282,7 @@ function evaluateDefinition(
   }
 }
 
-export export function estimateQuotaReservation(input: {
+export function estimateQuotaReservation(input: {
   consumer: AIConsumerPolicy;
   candidates: Array<{
     model: AIModelDefinition;
