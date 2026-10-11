@@ -262,8 +262,10 @@ export class AdminCmsUseCases {
     contentId: string,
     links: UpsertCmsContentDomainLinkDto[],
     actorId: string,
+    expectedVersion: number,
   ): Promise<CmsContentDomainLinkDto[]> {
     this.ensureActor(actorId);
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 1) throw new Error('CMS_VERSION_REQUIRED');
     if (!this.repository.replaceDomainLinks) throw new Error('CMS_DOMAIN_LINKS_NOT_SUPPORTED');
     if (links.length > 50) throw new Error('CMS_DOMAIN_LINK_LIMIT_EXCEEDED');
     const seen = new Set<string>();
@@ -278,7 +280,7 @@ export class AdminCmsUseCases {
       seen.add(key);
       return { ...link, targetId, sortOrder: link.sortOrder ?? index };
     });
-    return this.repository.replaceDomainLinks(contentId, normalized, actorId);
+    return this.repository.replaceDomainLinks(contentId, normalized, actorId, expectedVersion);
   }
 
   public async listDomainLinks(contentId: string): Promise<CmsContentDomainLinkDto[]> {
