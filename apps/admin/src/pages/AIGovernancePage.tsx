@@ -1204,10 +1204,13 @@ function KnowledgeIndexingPanel() {
   return (
     <Panel
       title="فهرسة مصدر معرفة"
-      subtitle="تتطلب قدرة knowledge.indexing من نوع EMBEDDINGS ومستهلك knowledge-indexing نشطاً بميزانية، ومزوّداً ونموذجاً معتمدين."
+      subtitle="الإدخال اليدوي غير الموثّق متوقف لحماية بيانات الطلاب؛ لا يمكن إرسال نص إلى المزوّد حتى تُفعّل بوابة التحقق من المصدر الأصلي."
     >
       <form onSubmit={submit} className="space-y-4">
-        <fieldset disabled={busy} className="space-y-4">
+        <p role="status" className="rounded-lg border border-amber-200 p-3 text-sm text-amber-900">
+          الفهرسة من نص يُلصق يدويًا غير متاحة. لا تُدخل بيانات خاصة؛ يلزم مصدر رسمي منشور ومراجَع.
+        </p>
+        <fieldset disabled className="space-y-4">
           <Field label="الفهرس النشط">
             <select
               required
@@ -1275,7 +1278,7 @@ function KnowledgeIndexingPanel() {
         {indexes.error && <ErrorBanner message={indexes.error} />}
         {error && <ErrorBanner message={error} />}
         <button
-          disabled={busy || !key || !sourceType || !reference.trim() || !content.trim()}
+          disabled
           className="action-primary"
         >
           فهرسة عبر السياسة والميزانية
@@ -1286,6 +1289,7 @@ function KnowledgeIndexingPanel() {
   );
 }
 function IncidentEventPanel() {
+  const { hasPermission } = useAdminAuthorization();
   const incidents = useAIData<{ data: RegistryRecord[] }>('/admin/ai/incidents');
   const [key, setKey] = useState('');
   const [action, setAction] = useState('NOTE_ADDED');
@@ -1297,7 +1301,7 @@ function IncidentEventPanel() {
   useGovernanceGuard(!!note, busy);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (lock.current) return;
+    if (!hasPermission('admin:ai:safety:manage') || lock.current) return;
     lock.current = true;
     setBusy(true);
     setError('');
@@ -1365,7 +1369,7 @@ function IncidentEventPanel() {
         </fieldset>
         {incidents.error && <ErrorBanner message={incidents.error} />}
         {error && <ErrorBanner message={error} />}
-        <button disabled={busy || !key || !note.trim()} className="action-primary">
+        <button disabled={!hasPermission('admin:ai:safety:manage') || busy || !key || !note.trim()} className="action-primary">
           حفظ المتابعة
         </button>
         {result && <JsonView value={result} />}
