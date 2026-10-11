@@ -72,3 +72,20 @@
 **Observed verification:** 48/48 newly evaluated **static source-presence checks** succeeded. **Zero executable test results are asserted.** Any earlier counts in this report refer to previous static batches, not Vitest. The fact that a source includes a test does not imply it passed.
 
 **Closure remains `PARTIAL — FIXES_REQUIRED`.** Branch-only commits; do not merge, deploy, or start section 17.
+
+## Source continuation — focused security/transactional improvements (11 October 2026)
+
+| Gate | Current evidence | Remaining closure conditions |
+| --- | --- | --- |
+| CMS-ADM-013 atomic scheduled publish/lease | SOURCE FIX COMMITTED / TEST NOT RUN — scheduler job COMPLETED CAS is in the same serializable publish transaction and outbox; false-success recovery removed | Run `CmsScheduleAtomicPublish.spec.ts` and Prisma/worker stale-lease races (real worker integration deferred) |
+| CMS-ADM-005 last effective editor | SOURCE FIX + MIGRATION COMMITTED / TEST NOT RUN — `lastModifiedBy` on CMS root, maker-checker at review/publish, backfill from historical author ID | Run `CmsRootMakerChecker.spec.ts`, validate Prisma schema/migration; do not activate before separately authorized schema migration |
+| CMS-ADM-009/021 live owner publication | SOURCE IMPROVED / TEST NOT RUN — final publish and public related lookup both check canonical owner lifecycle | Run domain owner and related selection tests, confirm owner invariants and governance amendment path |
+| CMS-ADM-010 tenant/locale public boundary | SOURCE FIX COMMITTED / TEST NOT RUN — public router site filter is literal `manaratak` | Run `CmsPublicRouter.spec.ts` negative cases |
+| CMS-ADM-023 indexable locales | SOURCE FIX COMMITTED / TEST NOT RUN — noindex published locales excluded from hreflang, OG alternate only if both variants actually available | Run mocked `cms-seo-prerender.spec.ts`; publication-triggered regeneration/CDN is not complete |
+| FGA-16-001 indexed public redirect | SOURCE FIX COMMITTED / TEST NOT RUN — composite unique key lookup, no inactive redirect served | Run `CmsRedirectIndexedResolution.spec.ts`; CDN/browser cache verification deferred |
+| Lightweight executable proof | **NOT RUN** | Run targeted Vitest, TypeScript and Prisma validation in a dependency-enabled workspace; resolve any failures before source closure |
+| Staging/running schema | **NOT RUN / PROHIBITED THIS ROUND** | Authorized post-28 migration, backup/rollback, live workers, browser, CDN evidence |
+
+Actual checks this continuation: **36/36 static source-pattern checks**, not Vitest/TypeScript/Prisma test results. The `20261011075500_cms_root_last_editor` migration is source-only; existing runtime database schemas are not updated.
+
+**Closure decision unchanged: `PARTIAL — FIXES_REQUIRED`.** No merge, production deployment, DB operation or start of Section 17.
