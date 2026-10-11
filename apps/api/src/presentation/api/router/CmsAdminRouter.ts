@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import { AdminCmsUseCases } from '@manaratak/application';
-import { CmsCategoryStatus, CmsContentStatus, CmsContentType, CmsDomainRelationType, CmsDomainTargetType } from '@manaratak/domain';
+import { AuthorizationEvaluatorService, CmsCategoryStatus, CmsContentStatus, CmsContentType, CmsDomainRelationType, CmsDomainTargetType } from '@manaratak/domain';
 
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const nullableAsset = z.string().trim().min(1).nullable().optional();
@@ -17,14 +17,51 @@ const seoSchema = z.object({
 });
 const workflowSchema = z.object({
   locale: z.enum(['ar', 'en']),
-  expectedVersion: z.number().int().positive().optional(),
+  expectedVersion: z.number().int().positive(),
   comments: z.string().trim().max(2000).nullable().optional(),
 });
 
 export class CmsAdminRouter {
-  public static create(cradle: { adminCmsUseCases: AdminCmsUseCases }): Router {
+  public static create(cradle: { adminCmsUseCases: AdminCmsUseCases; authEvaluatorService: AuthorizationEvaluatorService }): Router {
     const router = Router();
-    const { adminCmsUseCases } = cradle;
+    const { adminCmsUseCases, authEvaluatorService } = cradle;
+    // Administrative authentication is inherited from /admin. Every CMS action
+    // requires its own capability; unrecognized mutations fail closed.
+    const requiredPermission = (method: string, path: string): string | null => {
+      if (method === 'GET') return 'admin:cms:view';
+      if (method === 'POST' && /^\/content\/[^/]+\/(approve|reject)$/.test(path)) return 'admin:cms:review';
+      if (method === 'POST' && (/^\/content\/[^/]+\/(publish|archive|schedule|cancel-schedule)$/.test(path)
+        || /^\/(navigation|announcements)\/[^/]+\/(publish|archive)$/.test(path))) return 'admin:cms:publish';
+      if (method === 'POST' && path === '/operations/process-due-schedules') return 'admin:cms:operations:run';
+      if ((method === 'POST' || method === 'PATCH') && /^\/redirects(?:\/[^/]+)?$/.test(path)) return 'admin:cms:redirects:manage';
+      if (method === 'PUT' && path === '/navigation') return 'admin:cms:navigation:manage';
+      if (method === 'POST' && path === '/block-schemas') return 'admin:cms:schemas:manage';
+      if ((method === 'POST' && (path === '/content' || path === '/categories' || path === '/tags'
+        || /^\/content\/[^/]+\/(submit-review|change-slug)$/.test(path)
+        || /^\/content\/[^/]+\/revisions\/[^/]+\/[^/]+\/restore$/.test(path)))
+        || (method === 'PATCH' && /^\/content\/[^/]+$/.test(path))
+        || (method === 'PUT' && (path === '/blocks' || path === '/announcements'
+          || /^\/content\/[^/]+\/(localized|domain-links)$/.test(path)))) return 'admin:cms:author';
+      return null;
+    };
+    router.use(async (req, res, next) => {
+      if (!req.authUserId) { res.status(401).json({ error: 'CMS_AUTHENTICATED_ACTOR_REQUIRED' }); return; }
+      const permission = requiredPermission(req.method, req.path);
+      if (!permission) { res.status(403).json({ error: 'CMS_CAPABILITY_UNRECOGNIZED' }); return; }
+      try {
+        const decision = await authEvaluatorService.evaluatePermission(req.authUserId, permission, {
+          ip: req.ip || req.socket?.remoteAddress || undefined,
+          requestTime: new Date(),
+          userAgent: req.headers['user-agent'],
+          correlationId: req.headers['x-correlation-id'],
+        });
+        if (!decision.isGranted) { res.status(403).json({ error: 'CMS_PERMISSION_DENIED', requiredPermission: permission }); return; }
+        res.setHeader('X-Admin-Required-Permission', permission);
+        next();
+      } catch {
+        res.status(403).json({ error: 'CMS_PERMISSION_DENIED', requiredPermission: permission });
+      }
+    });
     const asyncHandler =
       (fn: (req: Request, res: Response) => Promise<void>) =>
       (req: Request, res: Response, next: NextFunction) =>
@@ -40,7 +77,7 @@ export class CmsAdminRouter {
       tag: z.string().optional(),
       locale: z.enum(['ar', 'en']).optional(),
       siteIdentifier: z.string().optional(),
-      q: z.string().trim().optional(),
+      q: z.string().trim().max(200).optional(),
       page: z.coerce.number().int().positive().default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
     });
@@ -115,7 +152,7 @@ export class CmsAdminRouter {
         res.json(
           await adminCmsUseCases.updateContent(
             req.params.id,
-            contentSchema.partial().parse(req.body),
+            contentSchema.partial().extend({ expectedVersion: z.number().int().positive() }).parse(req.body),
             actor(req),
           ),
         );
@@ -331,8 +368,8 @@ export class CmsAdminRouter {
       res.json(await adminCmsUseCases.archiveAnnouncement(req.params.id, body.expectedVersion, actor(req)));
     }));
     router.post('/operations/process-due-schedules', asyncHandler(async (req, res) => {
-      const body = z.object({ now: z.coerce.date().optional(), limit: z.number().int().min(1).max(100).optional() }).parse(req.body);
-      res.json(await adminCmsUseCases.processDueSchedules(actor(req), body.now, body.limit));
+      const body = z.object({ limit: z.number().int().min(1).max(100).optional() }).strict().parse(req.body);
+      res.json(await adminCmsUseCases.processDueSchedules(actor(req), new Date(), body.limit));
     }));
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError)
@@ -344,7 +381,7 @@ export class CmsAdminRouter {
           ? 403
           : message.includes('CONFLICT') ||
               message.includes('IMMUTABLE') ||
-              message.includes('LOCKED')
+              message.includes('LOCKED') || message.includes('REVIEW_REQUIRED')
             ? 409
             : message.includes('NOT_READY') ||
                 message.includes('TRANSITION') ||

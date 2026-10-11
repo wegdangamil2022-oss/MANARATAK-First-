@@ -860,7 +860,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       new OptionalAuthMiddleware(adminTokenProvider, adminSessionManager, principalAccessValidator).generate(),
       lazyRouter('studentToolsPublicRouter'),
     );
-    v1Router.use('/admin/cms', requireAdminPermission('admin:cms:manage'), lazyRouter('cmsAdminRouter'));
+    v1Router.use('/admin/cms', lazyRouter('cmsAdminRouter')); // CMS router enforces fine-grained permissions.
     v1Router.use('/public/cms', lazyRouter('cmsPublicRouter'));
     v1Router.use('/admin/services', requireAdminPermission('admin:services:manage'), lazyRouter('serviceAdminRouter'));
     v1Router.use('/public/services', lazyRouter('servicePublicRouter'));

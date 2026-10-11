@@ -16,7 +16,7 @@ export class CmsPublicRouter {
       contentType: z.nativeEnum(CmsContentType).optional(),
       categorySlug: z.string().optional(),
       tag: z.string().optional(),
-      q: z.string().trim().optional(),
+      q: z.string().trim().max(200).optional(),
       locale: z.enum(['ar', 'en']).default('ar'),
       siteIdentifier: z.string().default('manaratak'),
       page: z.coerce.number().int().positive().default(1),
