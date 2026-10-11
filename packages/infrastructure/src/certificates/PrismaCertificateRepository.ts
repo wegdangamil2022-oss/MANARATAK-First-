@@ -453,9 +453,16 @@ export class PrismaCertificateRepository implements ICertificateRepository {
       const replacement = await tx.certificate.create({ data: { ...this.issueData(data.replacement), replacesCertificateId: original.id, revokedAt: null, revocationReason: null, revokedBy: null, archivedAt: null, replacedByCertificateId: null } });
       await tx.certificate.update({ where: { id: original.id }, data: { status: CertificateStatus.REISSUED, replacedByCertificateId: replacement.id } });
       const eventType = data.eventType ?? 'CertificateReissued';
-      const eventPayload = eventType === 'CertificateRenewed'
-        ? { certificateId: replacement.id, certificateNumber: replacement.serialNumber, studentReferenceId: replacement.studentReferenceId, renewedAt: replacement.issuedAt?.toISOString?.() ?? replacement.issuedAt, newExpirationDate: replacement.expiresAt?.toISOString?.() ?? replacement.expiresAt }
-        : { certificateId: replacement.id, studentReferenceId: replacement.studentReferenceId, reasonCode: data.reason, replacesCertificateId: original.id, publicId: replacement.publicId, serialNumber: replacement.serialNumber, verificationCode: replacement.verificationCode, status: replacement.status, courseDisplayName: replacement.courseDisplayName, learningPathDisplayName: replacement.learningPathDisplayName, issuedAt: replacement.issuedAt?.toISOString?.() ?? replacement.issuedAt, expiresAt: replacement.expiresAt?.toISOString?.() ?? replacement.expiresAt ?? null };
+      // Every P14 certificate lifecycle creation event must carry a complete public
+      // snapshot. A renewal can arrive before its issue/artifact event in P15.
+      const eventPayload = {
+        ...this.certificateIssuedPayload(replacement),
+        replacesCertificateId: original.id,
+        ...(eventType === 'CertificateRenewed'
+          ? { renewedAt: replacement.issuedAt?.toISOString?.() ?? replacement.issuedAt,
+              newExpirationDate: replacement.expiresAt?.toISOString?.() ?? replacement.expiresAt ?? null }
+          : { reasonCode: data.reason }),
+      };
       await this.appendMutation(tx, replacement.id, eventType === 'CertificateRenewed' ? 'RENEWED' : 'REISSUED', data.actorId, data.reason, data.correlationId, eventPayload, eventType);
       if(!replacement.requiresRevalidation) await this.enqueueRender(tx,replacement.id);
       return this.certificate(replacement);
