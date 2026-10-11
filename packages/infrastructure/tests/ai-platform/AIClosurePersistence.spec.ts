@@ -416,3 +416,48 @@ describe('P17 emergency switch governance', () => {
     expect(tx.aIRegistryRecord.upsert).not.toHaveBeenCalled();
   });
 });
+
+describe('P17 indexing completion ordering', () => {
+  it('refuses an older owner publication under the projection lock before replacing any active chunk', async () => {
+    const tx = {
+      $queryRaw: vi.fn(),
+      aIRegistryRecord: {
+        findUnique: vi.fn().mockResolvedValue({
+          status: 'INDEXED',
+          configuration: {
+            sourceVersion: 'new',
+            checksum: 'new-hash',
+            metadata: { canonicalPublishedAt: '2026-10-11T12:00:00Z' },
+          },
+        }),
+      },
+      aIEmbeddingRecord: { deleteMany: vi.fn(), createMany: vi.fn() },
+      aIIndexingRunRecord: { update: vi.fn() },
+    };
+    const repo = new PrismaAIPlatformRepository({ $transaction: (fn: any) => fn(tx) });
+    await expect(
+      repo.replaceEmbeddings({
+        indexKey: 'index',
+        sourceType: 'CMS',
+        sourceReferenceId: 'article',
+        sourceVersion: 'old',
+        modelKey: 'model',
+        dimensions: 2,
+        runPublicId: 'old-run',
+        chunks: [],
+        source: {
+          id: '',
+          indexKey: 'index',
+          sourceType: 'CMS',
+          sourceReferenceId: 'article',
+          sourceVersion: 'old',
+          checksum: 'old-hash',
+          status: 'INDEXED',
+          metadata: { canonicalPublishedAt: '2026-10-11T10:00:00Z' },
+        },
+      }),
+    ).rejects.toThrow('AI_KNOWLEDGE_SOURCE_VERSION_CONFLICT');
+    expect(tx.aIEmbeddingRecord.deleteMany).not.toHaveBeenCalled();
+    expect(tx.aIIndexingRunRecord.update).not.toHaveBeenCalled();
+  });
+});

@@ -2375,6 +2375,8 @@ export class AIKnowledgeUseCases {
         !capability.allowedDataClassifications.includes(classification))
     )
       throw new Error('AI_DATA_CLASSIFICATION_NOT_ALLOWED');
+    if (!Number.isFinite(Date.parse(verified.publishedAt)))
+      throw new Error('AI_KNOWLEDGE_OWNER_PUBLICATION_EVIDENCE_REQUIRED');
     const sourceChecksum = sha256(content);
     const source: AIKnowledgeSource = {
       id: '',
@@ -2387,6 +2389,7 @@ export class AIKnowledgeUseCases {
       status: 'PENDING',
       metadata: {
         canonicalSourceOnly: true,
+        canonicalPublishedAt: verified.publishedAt,
         readerScope: verified.readerScope,
         dataClassification: classification,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -2532,6 +2535,7 @@ export class AIKnowledgeUseCases {
         !latestOwner ||
         !latestOwner.transferAllowed ||
         latestOwner.sourceVersion !== verified.sourceVersion ||
+        latestOwner.publishedAt !== verified.publishedAt ||
         latestOwner.readerScope !== verified.readerScope ||
         latestOwner.dataClassification !== classification ||
         sha256(latestOwner.content) !== sourceChecksum

@@ -1587,6 +1587,27 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
     await this.prisma.$transaction(async (tx: any) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`ai-knowledge:${input.indexKey}:${input.sourceType}:${input.sourceReferenceId}`}, 0))::text AS lock_result`;
       if (input.source) {
+        const incomingDate = Date.parse(String(input.source.metadata?.canonicalPublishedAt));
+        if (!Number.isFinite(incomingDate))
+          throw new Error('AI_KNOWLEDGE_OWNER_PUBLICATION_EVIDENCE_REQUIRED');
+        const prior = await tx.aIRegistryRecord.findUnique({
+          where: {
+            resourceType_key: {
+              resourceType: 'knowledgeSources',
+              key: `${input.indexKey}:${input.sourceType}:${input.sourceReferenceId}`,
+            },
+          },
+        });
+        const priorDate = Date.parse(String(prior?.configuration?.metadata?.canonicalPublishedAt));
+        if (
+          prior?.status === 'INDEXED' &&
+          Number.isFinite(priorDate) &&
+          (priorDate > incomingDate ||
+            (priorDate === incomingDate &&
+              (prior.configuration.sourceVersion !== input.source.sourceVersion ||
+                prior.configuration.checksum !== input.source.checksum)))
+        )
+          throw new Error('AI_KNOWLEDGE_SOURCE_VERSION_CONFLICT');
         await tx.aIEmbeddingRecord.deleteMany({
           where: {
             indexKey: input.indexKey,

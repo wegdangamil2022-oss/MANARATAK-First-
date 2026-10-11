@@ -29,6 +29,7 @@ export class CmsAIKnowledgeOwnerGateway implements IAIKnowledgeOwnerGateway {
         sourceType: 'CMS',
         sourceReferenceId: content.slug,
         sourceVersion: `${content.publicId}:${content.versionNumber}:${content.publishedAt.toISOString()}`,
+        publishedAt: content.publishedAt.toISOString(),
         locale,
         content: [content.title, content.summary, content.body].filter(Boolean).join('\n'),
         dataClassification: 'PUBLIC',

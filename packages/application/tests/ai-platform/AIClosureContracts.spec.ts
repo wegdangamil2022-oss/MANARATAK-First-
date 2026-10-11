@@ -312,6 +312,7 @@ describe('P17 canonical knowledge source contracts', () => {
     sourceType: 'CMS',
     sourceReferenceId: 'article',
     sourceVersion: 'v1',
+    publishedAt: '2026-10-11T10:00:00Z',
     locale: 'ar',
     content: 'Published owner content',
     dataClassification: 'PUBLIC' as const,

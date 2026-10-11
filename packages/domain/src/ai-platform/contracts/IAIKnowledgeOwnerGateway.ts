@@ -12,6 +12,7 @@ export interface AIVerifiedKnowledgeSource {
   sourceType: string;
   sourceReferenceId: string;
   sourceVersion: string;
+  publishedAt: string;
   locale: string;
   content: string;
   dataClassification: AIDataClassification;
