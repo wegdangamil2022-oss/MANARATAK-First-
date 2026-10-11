@@ -152,4 +152,28 @@ describe('P17 known-price routing', () => {
     expect(estimateQuotaReservation(request as any)).toMatchObject({ tokens: 20, cost: 0 });
   });
 
+
+  it('redacts old confidential execution and trace content from Admin reads without DB mutation', async () => {
+    const confidential = {
+      publicId: 'ai_old', dataClassification: 'CONFIDENTIAL',
+      inputPreview: 'student@example.com', outputPreview: 'private transcript',
+      metadata: { studentName: 'private', promptChecksum: 'safe-checksum' },
+    };
+    const repository = {
+      listExecutions: vi.fn().mockResolvedValue({ data: [confidential], total: 1, page: 1, pageSize: 25, totalPages: 1 }),
+      findExecution: vi.fn().mockResolvedValue(confidential),
+      listExecutionSpans: vi.fn().mockResolvedValue([{
+        executionPublicId: 'ai_old', attributes: { providerKey: 'provider', prompt: 'private body', error: 'sensitive error' },
+      }]),
+    };
+    const useCases = new AIPlatformAdminUseCases(repository as any, { get: vi.fn(), list: vi.fn() } as any);
+    const page = await useCases.executions({ page: 1 });
+    expect(page.data[0]).toMatchObject({ inputPreview: null, outputPreview: null });
+    expect(page.data[0].metadata).not.toHaveProperty('studentName');
+    expect(await useCases.execution('ai_old')).toMatchObject({ inputPreview: null, outputPreview: null });
+    const spans = await useCases.executionTrace('ai_old');
+    expect(spans[0].attributes).toEqual({ providerKey: 'provider' });
+    expect(repository.findExecution).toHaveBeenCalledTimes(2);
+  });
+
 });
