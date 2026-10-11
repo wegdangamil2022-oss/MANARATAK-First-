@@ -40,6 +40,16 @@ export class StudentServiceRequestUseCases {
     });
   }
 
+  /** Owner-domain read for explicitly permitted staff triage only (P20). */
+  listSupportAwaitingPaymentStudents(page=1,limit=20){
+    if(!Number.isSafeInteger(page)||page<1||page>10000||
+       !Number.isSafeInteger(limit)||limit<1||limit>50)
+      throw new Error('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
+    if(!this.requests.listSupportAwaitingPaymentStudents)
+      throw new Error('SERVICE_SUPPORT_TRIAGE_NOT_CONFIGURED');
+    return this.requests.listSupportAwaitingPaymentStudents(page,limit);
+  }
+
   async listMyRequests(
     studentReferenceId: string,
     filters: Omit<ServiceRequestFilters, 'studentReferenceId'> = {},

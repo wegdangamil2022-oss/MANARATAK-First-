@@ -177,6 +177,10 @@ export interface IServiceCatalogRepository {
 }
 
 export interface IServiceRequestRepository {
+  /** P20-owned support triage; only distinct student references, never request details. */
+  listSupportAwaitingPaymentStudents?(page:number,limit:number):Promise<{
+    items:Array<{studentReferenceId:string}>;total:number;hasMore:boolean;nextPage:number|null;
+  }>;
   createRequest(data: CreateServiceRequestDto): Promise<ServiceRequestDto>;
   findRequestById(id: string): Promise<ServiceRequestDto | null>;
   findRequestByPublicId(publicId: string): Promise<ServiceRequestDto | null>;

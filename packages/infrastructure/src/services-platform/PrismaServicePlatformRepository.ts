@@ -222,6 +222,32 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     const row = await this.requests().findUnique({ where: { publicId } });
     return row ? this.mapRequest(row) : null;
   }
+  async listSupportAwaitingPaymentStudents(page:number,limit:number){
+    if(!Number.isSafeInteger(page)||page<1||page>10000||
+       !Number.isSafeInteger(limit)||limit<1||limit>50)
+      throw new Error('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
+    const status=ServiceRequestStatus.AWAITING_PAYMENT;
+    // P20 retains ownership: no student metadata, parameters, payment details
+    // or fulfillment notes cross the boundary. Distinct student counts are exact.
+    const [groups,counts]=await Promise.all([
+      this.requests().groupBy({
+        by:['studentReferenceId'],where:{status},
+        orderBy:{studentReferenceId:'asc'},skip:(page-1)*limit,take:limit+1,
+      }),
+      this.prisma.$queryRaw<Array<{total:bigint}>>`
+        SELECT COUNT(DISTINCT "studentReferenceId") AS "total"
+        FROM "ServiceRequestRecord" WHERE "status" = ${status}
+      `,
+    ]);
+    const total=Number(counts[0]?.total??0n);
+    if(!Number.isSafeInteger(total))throw new Error('SERVICE_SUPPORT_TRIAGE_COUNT_OVERFLOW');
+    const hasMore=groups.length>limit;
+    return {
+      items:groups.slice(0,limit).map((row:any)=>({studentReferenceId:row.studentReferenceId})),
+      total,hasMore,nextPage:hasMore?page+1:null,
+    };
+  }
+
   async listRequests(filters: ServiceRequestFilters): Promise<PaginatedServiceRequestResult> {
     const page = Math.max(filters.page ?? 1, 1);
     const pageSize = Math.min(Math.max(filters.pageSize ?? 20, 1), 100);
