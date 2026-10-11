@@ -8,7 +8,7 @@
 
 **Starting source:** `039cd7a731c0ef8e9ff0f6b6d2979ad610e08abc`
 
-**Verified implementation:** `c6000174b38201acd0d4ec8a28674997ac31dd8c`
+**Verified implementation:** `bdee24e479be5957dfec819fa48d86bfdeaf840e` (after `c6000174b38201acd0d4ec8a28674997ac31dd8c`)
 
 **Base:** `main@4571ec9c3e4362470d03a2ed2706664cd8ee09c0`
 
@@ -85,9 +85,13 @@ All are source/mock verification; PostgreSQL lock contention and external billin
 - Key rotation supports the configured current key and up to three previous keys through the optional `AI_ASYNC_PAYLOAD_KEY_PREVIOUS` runtime setting. Retired keys fail closed. No real keys were configured.
 - Source/mocked transaction tests verify requested locks and atomic operations, not PostgreSQL contention or a provider's external exactly-once billing contract.
 
+## Security follow-up
+
+GitHub CodeQL identified two high-severity findings in the inherited PII email/phone matching expressions at PR head `45f0e9c1044f2ea306878da2d7a9f188727147dd`. The final security patch bounds all token/separator repetitions, preserving normal email/phone/payment-card removal and adding adversarial 256 KiB repeated-character tests. TypeScript and all 145 focused tests passed after the patch. The findings were fixed in source, not dismissed; final-head CodeQL evidence is available on the PR checks.
+
 ## Verification and delivery
 
-Executed commands, counts and stored evidence are in [section-17-validation.json](section-17-validation.json) and [closure gates](section-17-closure-gates.md). The focused source suite passed **143 tests in 11 files** at the implementation commit. TypeScript, Prisma validate/generate without DB access, source quality, lint, build and the source closure manifest were checked; the general run passed 3,857 Vitest tests (45 skipped) and 316 Node tests (no skips). Skipped cases are recorded explicitly in validation.
+Executed commands, counts and stored evidence are in [section-17-validation.json](section-17-validation.json) and [closure gates](section-17-closure-gates.md). The focused source suite passed **145 tests in 11 files** at the implementation commit. TypeScript, Prisma validate/generate without DB access, source quality, lint, build and the source closure manifest were checked; the general run passed 3,857 Vitest tests (45 skipped) and 316 Node tests (no skips). Skipped cases are recorded explicitly in validation.
 
 The React source review checked hook ordering, stable request fencing, explicit button types, labelled controls, permission-aware actions, localized direction and bounded operational projections. Source quality reports zero package/file cycles and zero accessibility findings. Lint has existing and new type-style warnings, with zero errors; it is not warning-free.
 

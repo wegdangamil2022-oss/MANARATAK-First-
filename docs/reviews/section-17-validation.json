@@ -1,7 +1,7 @@
 {
   "status": "CODE_CLOSED \u2014 RUNTIME_DEFERRED",
-  "recordedAt": "2026-10-11T16:17:04.506001+00:00",
-  "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c",
+  "recordedAt": "2026-10-11T16:23:31.582732+00:00",
+  "sourceSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e",
   "startingSha": "039cd7a731c0ef8e9ff0f6b6d2979ad610e08abc",
   "baseSha": "4571ec9c3e4362470d03a2ed2706664cd8ee09c0",
   "branch": "feat/section-17-enterprise-ai-platform",
@@ -13,7 +13,8 @@
       "command": "npm run typecheck",
       "exitCode": 0,
       "result": "PASS",
-      "evidence": "docs/reviews/evidence/section-17/typecheck.txt"
+      "evidence": "docs/reviews/evidence/section-17/typecheck.txt",
+      "sourceSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e"
     },
     {
       "command": "P17 focused Vitest suite (11 files)",
@@ -21,8 +22,9 @@
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/p17-vitest.txt",
       "files": 11,
-      "tests": 143,
-      "failures": 0
+      "tests": 145,
+      "failures": 0,
+      "sourceSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e"
     },
     {
       "command": "npm run ci:closure:manifest -- --source-only",
@@ -30,7 +32,8 @@
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/source-closure-manifest.txt",
       "sourceGatesPassed": 27,
-      "runtimeGatesDeferred": 2
+      "runtimeGatesDeferred": 2,
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
     },
     {
       "command": "npm run db:source:verify",
@@ -38,7 +41,8 @@
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/prisma-source.txt",
       "databaseConnection": "NONE",
-      "commands": ["validate", "generate"]
+      "commands": ["validate", "generate"],
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
     },
     {
       "command": "npm run quality:source",
@@ -47,7 +51,8 @@
       "evidence": "docs/reviews/evidence/section-17/source-quality.txt",
       "packageCycles": 0,
       "fileCycles": 0,
-      "accessibilityFindings": 0
+      "accessibilityFindings": 0,
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
     },
     {
       "command": "npm run lint",
@@ -55,7 +60,8 @@
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/lint.txt",
       "errors": 0,
-      "warnings": 3819
+      "warnings": 3819,
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
     },
     {
       "command": "P17 changed source ESLint",
@@ -63,20 +69,23 @@
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/p17-lint.txt",
       "errors": 0,
-      "warnings": 74
+      "warnings": 74,
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
     },
     {
       "command": "npm run build",
       "exitCode": 0,
       "result": "PASS",
       "evidence": "docs/reviews/evidence/section-17/build.txt",
-      "snapshot": "review working tree; final Admin build reverified at sourceSha"
+      "snapshot": "review working tree; final Admin build reverified at sourceSha",
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
     },
     {
       "command": "npm run build -w @manaratak/admin",
       "exitCode": 0,
       "result": "PASS",
-      "evidence": "docs/reviews/evidence/section-17/admin-build.txt"
+      "evidence": "docs/reviews/evidence/section-17/admin-build.txt",
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
     },
     {
       "command": "npm run test:unit",
@@ -95,13 +104,23 @@
         "skipped": 0,
         "failures": 0
       },
-      "snapshot": "general regression executed during review; focused P17 tests reverified after final code edits"
+      "snapshot": "general regression executed during review; focused P17 tests reverified after final code edits",
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
     },
     {
       "command": "npm run security:secrets",
       "exitCode": 0,
       "result": "PASS",
-      "evidence": "docs/reviews/evidence/section-17/secrets.txt"
+      "evidence": "docs/reviews/evidence/section-17/secrets.txt",
+      "sourceSha": "c6000174b38201acd0d4ec8a28674997ac31dd8c"
+    },
+    {
+      "command": "PII source and regression ESLint",
+      "sourceSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "docs/reviews/evidence/section-17/pii-lint.txt",
+      "errors": 0
     }
   ],
   "runtime": {
@@ -126,5 +145,17 @@
     "Workflow configuration drift fails closed; historical unscoped runs remain denied.",
     "Unknown provider outcome remains reserved until independently reviewed evidence.",
     "Local source/mock transaction tests do not establish actual PostgreSQL contention or external billing semantics."
-  ]
+  ],
+  "sourceCommits": [
+    "c6000174b38201acd0d4ec8a28674997ac31dd8c",
+    "bdee24e479be5957dfec819fa48d86bfdeaf840e"
+  ],
+  "securityFollowup": {
+    "detectedAtPrHead": "45f0e9c1044f2ea306878da2d7a9f188727147dd",
+    "codeqlHighAlerts": 2,
+    "issue": "Polynomial PII regex matching on uncontrolled input",
+    "remediationSha": "bdee24e479be5957dfec819fa48d86bfdeaf840e",
+    "remediation": "Bound email local/domain/TLD, phone separators and card separators; preserve valid PII removal; adversarial 256 KiB input regressions passed.",
+    "finalHeadCodeql": "PENDING; inspect final PR-head check separately"
+  }
 }
