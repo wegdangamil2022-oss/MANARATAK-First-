@@ -1310,6 +1310,19 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       const transition = actions[event.action];
       if (!transition || !transition.from.includes(currentStatus))
         throw new Error('AI_INCIDENT_INVALID_TRANSITION');
+      // Critical and high-severity incidents cannot be resolved by the
+      // same person who asserted mitigation. Use the persisted event author,
+      // not a user-controlled body field, and fail closed for legacy gaps.
+      if (event.action === 'RESOLUTION_RECORDED' &&
+          ['HIGH', 'CRITICAL'].includes(incident.configuration?.severity)) {
+        const mitigation = await tx.aIIncidentEventRecord.findFirst({
+          where: { incidentPublicId: publicId, action: 'MITIGATION_RECORDED' },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        });
+        if (!mitigation?.actorReferenceId ||
+            mitigation.actorReferenceId === event.actorReferenceId)
+          throw new Error('AI_INCIDENT_INDEPENDENT_RESOLUTION_REQUIRED');
+      }
       const nextStatus = transition.to ?? currentStatus;
       const created = await tx.aIIncidentEventRecord.create({
         data: {
