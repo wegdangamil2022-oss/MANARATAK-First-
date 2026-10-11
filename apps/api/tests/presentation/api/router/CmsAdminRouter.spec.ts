@@ -28,6 +28,7 @@ describe('Phase 16 CMS admin router', () => {
     cancelSchedule: vi.fn(),
     changeLocalizedSlug: vi.fn(),
     listRedirects: vi.fn(),
+    searchRedirects: vi.fn(),
     createRedirect: vi.fn(),
     updateRedirect: vi.fn(),
     listNavigation: vi.fn(),
@@ -65,6 +66,35 @@ describe('Phase 16 CMS admin router', () => {
     );
     return server;
   };
+
+  it('requires viewer permission and restricts redirect search to site-scoped bounded filters', async () => {
+    const cms = useCases();
+    const query = '/cms/redirects?siteIdentifier=manaratak&locale=en&q=guide&active=false&page=2&pageSize=10';
+    const denied = await request(app(cms, 'editor', ['admin:cms:author'])).get(query);
+    expect(denied.status).toBe(403);
+    expect(cms.searchRedirects).not.toHaveBeenCalled();
+    cms.searchRedirects.mockResolvedValue({ data: [], total: 0, page: 2, pageSize: 10, totalPages: 0 });
+    const allowed = await request(app(cms, 'viewer', ['admin:cms:view'])).get(query);
+    expect(allowed.status).toBe(200);
+    expect(cms.searchRedirects).toHaveBeenCalledWith({
+      siteIdentifier: 'manaratak', locale: 'en', q: 'guide', active: false, page: 2, pageSize: 10,
+    });
+  });
+
+  it('rejects cross-site and unbounded redirect search query inputs before owner access', async () => {
+    const cms = useCases();
+    const server = app(cms, 'viewer', ['admin:cms:view']);
+    for (const query of [
+      '/cms/redirects?siteIdentifier=other-tenant',
+      '/cms/redirects?pageSize=101',
+      '/cms/redirects?page=1001',
+      '/cms/redirects?active=maybe',
+      '/cms/redirects?locale=fr',
+    ]) {
+      expect((await request(server).get(query)).status).toBe(400);
+    }
+    expect(cms.searchRedirects).not.toHaveBeenCalled();
+  });
 
   it('denies redirect editing to users without redirect management grant', async () => {
     const cms = useCases();
