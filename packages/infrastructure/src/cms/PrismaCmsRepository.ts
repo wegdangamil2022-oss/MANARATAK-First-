@@ -854,14 +854,27 @@ export class PrismaCmsRepository implements ICmsRepository {
     siteIdentifier = 'manaratak',
     limit = 6,
   ): Promise<PublicCmsContentDto[]> {
-    const links = await this.db.cmsContentDomainLink.findMany({
-      where: { targetType, targetId, content: { siteIdentifier, publishedPayloads: { some: { siteIdentifier, locale, status: CmsContentStatus.PUBLISHED } } } },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-      take: 200,
-      select: { contentId: true },
-    });
+    // Select unique owner content IDs *after* filtering for the actual published
+    // site/locale. A prefilter followed by take(200) drops relevant content when
+    // link rows are duplicated across relation types or exceed that window.
+    const boundedLimit = Math.max(1, Math.min(24, limit));
+    const links = await this.db.$queryRaw(Prisma.sql`
+      SELECT p."contentId"
+      FROM "CmsPublishedContent" AS p
+      JOIN (
+        SELECT "contentId", MIN("sortOrder") AS "position", MIN("createdAt") AS "firstCreated"
+        FROM "CmsContentDomainLink"
+        WHERE "targetType" = ${targetType} AND "targetId" = ${targetId}
+        GROUP BY "contentId"
+      ) AS l ON l."contentId" = p."contentId"
+      WHERE p."siteIdentifier" = ${siteIdentifier}
+        AND p."locale" = ${locale}
+        AND p."status" = ${CmsContentStatus.PUBLISHED}
+      ORDER BY l."position" ASC, l."firstCreated" ASC, p."id" ASC
+      LIMIT ${boundedLimit}
+    `) as Array<{ contentId: string }>;
     if (!links.length) return [];
-    const contentIds: string[] = [...new Set<string>(links.map((link: any) => String(link.contentId)))];
+    const contentIds = links.map((entry) => entry.contentId);
     const rows = await this.db.cmsPublishedContent.findMany({
       where: {
         contentId: { in: contentIds },
@@ -873,7 +886,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     const byId = new Map(rows.map((row: any) => [row.contentId, row]));
     const ordered = contentIds.map((id: string) => byId.get(id)).filter(Boolean);
     const locales = await this.availableLocales(contentIds);
-    return ordered.slice(0, Math.min(24, Math.max(1, limit))).map((row: any) => this.publicContent(row, locales.get(row.contentId) ?? []));
+    return ordered.map((row: any) => this.publicContent(row, locales.get(row.contentId) ?? []));
   }
 
   public async changeLocalizedSlug(data: CmsSlugChangeDto): Promise<CmsLocalizedContentDto> {
