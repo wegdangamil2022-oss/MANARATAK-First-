@@ -145,9 +145,14 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
       const previous = await tx.aIRegistryRecord.findUnique({
         where: { resourceType_key: { resourceType: resource, key: candidate.key } },
       });
+      // Existing configuration always requires the revision the editor actually read.
+      // Serialization + advisory lock make this a fail-closed compare-and-swap.
+      if (previous && !candidate.expectedUpdatedAt)
+        throw new Error('AI_REGISTRY_PRECONDITION_REQUIRED');
       if (
         candidate.expectedUpdatedAt &&
         (!previous ||
+          !Number.isFinite(new Date(candidate.expectedUpdatedAt).getTime()) ||
           new Date(previous.updatedAt).getTime() !==
             new Date(candidate.expectedUpdatedAt).getTime())
       )
