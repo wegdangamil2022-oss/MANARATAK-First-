@@ -377,6 +377,16 @@ export class AdminCmsUseCases {
     await this.deliveryCache?.invalidateSite(result.siteIdentifier, 'announcement-archived');
     return result;
   }
+  public async listFailedSchedules(siteIdentifier: string, locale?: string, limit = 50) {
+    return this.repository.listFailedSchedules(siteIdentifier, locale, limit);
+  }
+
+  public async retryFailedSchedule(jobId: string, expectedAttemptCount: number, actorId: string, reason: string) {
+    this.ensureActor(actorId);
+    if (!reason.trim()) throw new Error('CMS_REPAIR_CONTEXT_REQUIRED');
+    return this.repository.retryFailedSchedule(jobId, expectedAttemptCount, actorId, reason);
+  }
+
   public async processDueSchedules(actorId: string, now = new Date(), limit = 50): Promise<CmsScheduleResultDto> {
     this.ensureActor(actorId);
     const result = await this.repository.processDueSchedules(actorId, now, limit);
