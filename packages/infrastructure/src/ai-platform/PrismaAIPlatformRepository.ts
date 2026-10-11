@@ -679,6 +679,20 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
     delete data.publicId;
     delete data.createdAt;
     delete data.updatedAt;
+    if (patch.status === 'RUNNING') {
+      // Dispatch and pre-dispatch cancellation compete on the same persisted state.
+      // Neither is permitted to overwrite the other's terminal decision.
+      return this.prisma.$transaction(async (tx: any) => {
+        const changed = await tx.aIExecutionRecord.updateMany({
+          where: { publicId, status: { in: ['RECEIVED', 'QUEUED', 'ACCEPTED'] } },
+          data,
+        });
+        if (changed.count !== 1) throw new Error('AI_EXECUTION_STATE_CONFLICT');
+        return normalizeExecution(await tx.aIExecutionRecord.findUniqueOrThrow({
+          where: { publicId },
+        }));
+      });
+    }
     return normalizeExecution(
       await this.prisma.aIExecutionRecord.update({ where: { publicId }, data }),
     );
