@@ -2007,7 +2007,11 @@ function compileGovernedJsonSchema(schema: Record<string, unknown>): (value: unk
     'minItems',
     'maxItems',
   ]);
-  const compile = (node: unknown, path: string): ((value: unknown) => boolean) => {
+  let schemaNodeCount = 0;
+  const compile = (node: unknown, path: string, depth = 0): ((value: unknown) => boolean) => {
+    schemaNodeCount += 1;
+    if (schemaNodeCount > 256 || depth > 20)
+      throw new Error('AI_JSON_SCHEMA_COMPLEXITY_LIMIT');
     if (!node || typeof node !== 'object' || Array.isArray(node))
       throw new Error(`AI_JSON_SCHEMA_INVALID:${path}`);
     const definition = node as Record<string, unknown>;
@@ -2041,18 +2045,18 @@ function compileGovernedJsonSchema(schema: Record<string, unknown>): (value: unk
     const propertyValidators = new Map(
       Object.entries(properties).map(([key, child]) => [
         key,
-        compile(child, `${path}.properties.${key}`),
+        compile(child, `${path}.properties.${key}`, depth + 1),
       ]),
     );
-    const itemValidator = definition.items ? compile(definition.items, `${path}.items`) : null;
+    const itemValidator = definition.items ? compile(definition.items, `${path}.items`, depth + 1) : null;
     const anyOf = Array.isArray(definition.anyOf)
-      ? definition.anyOf.map((child, index) => compile(child, `${path}.anyOf.${index}`))
+      ? definition.anyOf.map((child, index) => compile(child, `${path}.anyOf.${index}`, depth + 1))
       : [];
     const oneOf = Array.isArray(definition.oneOf)
-      ? definition.oneOf.map((child, index) => compile(child, `${path}.oneOf.${index}`))
+      ? definition.oneOf.map((child, index) => compile(child, `${path}.oneOf.${index}`, depth + 1))
       : [];
     const allOf = Array.isArray(definition.allOf)
-      ? definition.allOf.map((child, index) => compile(child, `${path}.allOf.${index}`))
+      ? definition.allOf.map((child, index) => compile(child, `${path}.allOf.${index}`, depth + 1))
       : [];
     const safePattern =
       typeof definition.pattern === 'string'
@@ -2061,7 +2065,7 @@ function compileGovernedJsonSchema(schema: Record<string, unknown>): (value: unk
     const additional = definition.additionalProperties;
     const additionalValidator =
       additional && typeof additional === 'object'
-        ? compile(additional, `${path}.additionalProperties`)
+        ? compile(additional, `${path}.additionalProperties`, depth + 1)
         : null;
     return (value: unknown) => {
       if (type && !matchesJsonType(value, type)) return false;
