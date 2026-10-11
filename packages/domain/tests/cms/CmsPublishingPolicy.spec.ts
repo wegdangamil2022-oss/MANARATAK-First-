@@ -59,6 +59,22 @@ describe('Phase 16 CMS publishing policy', () => {
   });
 });
 
+describe('CMS schema review boundaries', () => {
+  const schema = { type: 'object', properties: { hero: { type: 'string', maxLength: 120 } }, required: ['hero'], additionalProperties: false };
+  it('accepts bounded declarative schemas and rejects executable/unbounded input', () => {
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition(schema, [], ['hero'])).not.toThrow();
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition({
+      ...schema, '$ref': 'https://evil.invalid/payload',
+    }, [], [])).toThrow('CMS_BLOCK_SCHEMA_KEY_UNSUPPORTED');
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition({
+      type: 'object', properties: {}, additionalProperties: true,
+    }, [], [])).toThrow('CMS_BLOCK_SCHEMA_OBJECT_UNBOUNDED');
+    expect(() => CmsPublishingPolicy.assertBlockSchemaDefinition({
+      type: 'array', items: schema,
+    }, [], [])).toThrow('CMS_BLOCK_SCHEMA_ARRAY_UNBOUNDED');
+  });
+});
+
 describe('W14 CMS integrity policies', () => {
 
   it('derives root lifecycle without letting one locale erase another published locale', () => {
