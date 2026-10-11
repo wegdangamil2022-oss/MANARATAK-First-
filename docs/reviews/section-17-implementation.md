@@ -19,6 +19,9 @@
 6. **Knowledge containment**: legacy freeform unverified knowledge HTTP submissions are denied before provider calls. **Trusted canonical owner-ingestion must still be built**; this temporary fail-closed behavior is not functional indexing closure.
 7. **Admin incident visibility**: execution list has consumer/provider/purpose facets and reset synced to query URL; async jobs link to existing execution/trace without launching new inference.
 
+8. **Durable async result**: encrypted AES-GCM envelope stored in existing execution metadata with 24-hour read TTL and requester-scoped `GET /ai/executions/:publicId/result` (no-store). Actual plaintext is not written to general execution trace. Expired ciphertext purge/reconciliation still open.
+9. **Routing/pricing/incident/source guards**: overlapping ACTIVE model pricing revisions rejected; model routes require explicit finite prices; conflicting active routing fails closed; audited incident state machine; provider response JSON size and schema complexity bounded. AI hub navigation/branding and text direction now include EN as well as AR; complete forms translation remains open.
+
 ## Task-by-task reconciliation
 
 Status names mean **source patches only** unless a separate executed test record exists. A test file being present is not PASS.
@@ -37,23 +40,23 @@ Status names mean **source patches only** unless a separate executed test record
 | `AI-ADM-010` | **OPEN** | Reservation reconciliation for crash/unknown provider outcomes and operator adjudication missing. |
 | `AI-ADM-011` | **OPEN** | Durable queue admission quota/occupancy/idempotency before submit absent; execution-time quota retained. |
 | `AI-ADM-012` | **SOURCE_PATCHED_UNVERIFIED** | Database selects due QUEUED/RETRYING and expired RUNNING before oldest-first limit; new focused tests committed, not executed. |
-| `AI-ADM-013` | **OPEN** | Encrypted requester-owned async full-output artifact/read/purge lifecycle not present. |
+| `AI-ADM-013` | **PARTIAL** | Durable AES-GCM 24h TTL-encrypted response envelope stored in AI execution metadata atomically with completion; requester-scoped no-store GET /ai/executions/:publicId/result and replay decryption use existing payload protector, tests authored. Physical purge after TTL, result custody during key rotation, recovery after provider ACK and runtime access proof still OPEN. |
 | `AI-ADM-014` | **OPEN** | Workflow step outputs can still be raw snapshots and INTERNAL classification is fixed. |
 | `AI-ADM-015` | **OPEN** | Workflow run requester identity/consumer budget/authorization missing. |
 | `AI-ADM-016` | **OPEN** | Frozen prompt/model/routing bindings across workflow retry incomplete. |
-| `AI-ADM-017` | **OPEN** | Active routing binding remains dependent on mutable updatedAt query ordering. |
+| `AI-ADM-017` | **PARTIAL** | Active routing now fails closed when more than one exact/fallback policy applies, avoiding updatedAt silent winner. Atomic approved effective binding, immutable schedule and rollback still OPEN. |
 | `AI-ADM-018` | **PARTIAL** | Evaluation submitter/executor identity recorded in evidence; independent one-shot reviewer and result checksum required at repository. Immutable definition snapshot and broader history proof missing. |
 | `AI-ADM-019` | **SOURCE_PATCHED_UNVERIFIED** | Repository requires expectedUpdatedAt on existing records under transaction+advisory lock; Admin editor already sends revision. Need executed concurrent write regression. |
-| `AI-ADM-020` | **OPEN** | Unknown-cost policy/price overlap and reconciliation unimplemented. |
+| `AI-ADM-020` | **PARTIAL** | Production execution enforces finite explicit model input/output prices (zero only if declared), checks effective overlapping ACTIVE pricing windows before writes, tests authored. Cost kind/ledger real-provider reconciliation and historic unknown amounts remain OPEN. |
 | `AI-ADM-021` | **OPEN** | Requester-scoped fairness and concurrent in-flight admission not implemented. |
 | `AI-ADM-022` | **OPEN** | Embedding replace identity still omits sourceType/version; collision risk remains (legacy path quarantined). |
 | `AI-ADM-023` | **OPEN** | In-flight cancellation provider signal, honest cancel state and late-result CAS incomplete. |
 | `AI-ADM-024` | **OPEN** | Atomic staged indexing/source activation and PENDING recovery not implemented (manual path quarantined). |
-| `AI-ADM-025` | **OPEN** | Attemptable/unverified provider health still not distinguished from verified successful capability-specific probe. |
-| `AI-ADM-026` | **OPEN** | AI Admin remains Arabic-first, not fully translated AR/EN with direction-aware controls. |
+| `AI-ADM-025` | **PARTIAL** | Capability readiness now distinguishes canAttempt from healthVerified and declares RUNTIME_PENDING truthfully; first permitted attempt remains possible, as shown in admin readiness UX. Per-capability probe lifetime/evidence/runtime checks still OPEN. |
+| `AI-ADM-026` | **PARTIAL** | AI Admin hub group/section navigation, title, intro and text direction respect language ar/en, but operational panels, dialogs, hints and error/status translations still Arabic-first. Full extraction to dictionaries and browser validation OPEN. |
 | `AI-ADM-027` | **OPEN** | Canonical source ingestion byte/chunk/vector/provider batch bounds not implemented; unverified path blocked. |
-| `AI-ADM-028` | **OPEN** | Incident lifecycle actions remain free form rather than governed state transitions. |
-| `AI-ADM-029` | **OPEN** | Adversarial provider/JSON-schema boundary matrix and bounded response parsing not run or completed. |
+| `AI-ADM-028` | **PARTIAL** | Incidents now transition only via atomic audited NOTE_ADDED / INVESTIGATION_UPDATE / MITIGATION_RECORDED / RESOLUTION_RECORDED state machine; direct status edits blocked. Severity-specific approval, replay-idempotent events, negative lifecycle runtime tests still OPEN. |
+| `AI-ADM-029` | **PARTIAL** | Provider Fetch transport now limits response bytes before JSON parse; malformed/oversized mocks added; structured-output schema depth/node complexity bounded with hostile-shape tests authored. Full multi-provider fuzz/timeout/exhaustive matrix OPEN. |
 | `AI-ADM-030` | **DEFERRED_POST_28** | Real provider, database migration, queue worker, outbox, cross-domain E2E/security tests deferred per instruction. |
 | `FGA-18-001` | **SOURCE_PATCHED_UNVERIFIED** | Admin executions now offer consumerKey/providerKey/purpose facets, query URL persistence and reset; API already has validated filters. Pagination/backend fixture proof deferred. |
 | `FGA-18-002` | **PARTIAL** | Async job table links existing executionPublicId to read-only execution/trace page, no API re-execution; richer attempt-cost correlation and RBAC/source timestamps pending. |
@@ -65,7 +68,7 @@ Status names mean **source patches only** unless a separate executed test record
 - `packages/application/tests/ai-platform/AIPlatformGovernance.spec.ts`: immutable evaluation definition drift and unverified source ingestion denial.
 - `apps/api/tests/presentation/api/router/AIAdminRouter.spec.ts` (new): fine-grained HTTP RBAC 401/403, reviewer allowed, unknown operations denied.
 
-**Execution evidence:** None in this review session. GitHub plugin provided file/commit operations, but no working-tree shell with authenticated repository clone/installed dependencies. TypeScript, Vitest, ESLint, formatting, application build and coverage must be run in a trusted isolated checkout at this branch SHA. Do not convert the presence of source tests or previous `main` GitHub checks into success for this branch. Latest independent GitHub CI outcomes must be bound to head SHA when available.
+**Execution evidence:** Source tests committed but no full positive exact-head CI verification yet. GitHub plugin provided file/commit operations, but no working-tree shell with authenticated repository clone/installed dependencies. TypeScript, Vitest, ESLint, formatting, application build and coverage must be run in a trusted isolated checkout at this branch SHA. Do not convert the presence of source tests or previous `main` GitHub checks into success for this branch. Latest independent GitHub CI outcomes must be bound to head SHA when available.
 
 ## Unresolved source blockers — prerequisites before CODE_CLOSED
 
