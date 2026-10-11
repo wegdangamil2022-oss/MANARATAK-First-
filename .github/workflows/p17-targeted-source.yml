@@ -39,6 +39,10 @@ jobs:
         run: |
           unset DATABASE_URL
           npm run db:source:verify
+      - name: Compile source project references for local workspace package resolution
+        run: |
+          unset DATABASE_URL
+          npm run typecheck
       - name: Run focused P17 governance, adapters and HTTP boundary tests
         run: |
           unset DATABASE_URL
