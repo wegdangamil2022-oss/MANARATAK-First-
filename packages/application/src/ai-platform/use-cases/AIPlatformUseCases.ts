@@ -2278,7 +2278,7 @@ function evaluateDefinition(
   }
 }
 
-function estimateQuotaReservation(input: {
+export function estimateQuotaReservation(input: {
   consumer: AIConsumerPolicy;
   candidates: Array<{
     model: AIModelDefinition;
@@ -2300,6 +2300,18 @@ function estimateQuotaReservation(input: {
         ),
       ),
     );
+  // Production route candidates must have explicit monetary evidence (including
+  // deliberate zero-priced models). Never turn missing prices into a known $0.
+  for (const candidate of input.candidates) {
+    const price = selectPriceSnapshot(input.prices, candidate.model.key, new Date());
+    const inputRate = price?.inputPricePerMillion ?? candidate.model.inputPricePerMillion;
+    const outputRate = price?.outputPricePerMillion ?? candidate.model.outputPricePerMillion;
+    const currency = price?.currency ?? candidate.model.currency;
+    if (!currency || inputRate == null || outputRate == null ||
+        !Number.isFinite(Number(inputRate)) || !Number.isFinite(Number(outputRate)) ||
+        Number(inputRate) < 0 || Number(outputRate) < 0)
+      throw new Error(`AI_COST_PRICE_REQUIRED_FOR_ROUTED_MODEL:${candidate.model.key}`);
+  }
   if (input.consumer.monthlyCostLimit == null) return { tokens: reservedTokens, cost: 0 };
   if (!input.consumer.currency) throw new Error('AI_CONSUMER_BUDGET_CURRENCY_REQUIRED');
   if (!input.candidates.length) return { tokens: reservedTokens, cost: 0 };
