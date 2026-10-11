@@ -128,6 +128,8 @@ export function validateAIRegistry(resource: AIRegistryResource, value: Record<s
     strings('allowedModels', undefined, true);
     number('requestsPerMinute', 0, 1000000, true);
     number('dailyRequestLimit', 0, 100000000, true);
+    number('requesterRequestsPerMinute', 1, 1000000, true, true);
+    number('requesterConcurrentLimit', 1, 1000, true, true);
     number('monthlyTokenLimit', 0, Number.MAX_SAFE_INTEGER, true);
     number('monthlyCostLimit', 0, 1000000000, false, true);
     if (value.monthlyCostLimit != null) text('currency');
