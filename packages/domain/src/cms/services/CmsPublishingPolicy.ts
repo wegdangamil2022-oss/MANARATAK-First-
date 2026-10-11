@@ -168,6 +168,9 @@ export class CmsPublishingPolicy {
         throw new Error('CMS_BLOCK_SCHEMA_ENUM_INVALID');
       }
     };
+    if ((fieldSchema as { type?: unknown }).type !== 'object') {
+      throw new Error('CMS_BLOCK_SCHEMA_ROOT_OBJECT_REQUIRED');
+    }
     visit(fieldSchema, 0);
     for (const fields of [assetFields, localizedFields]) {
       if (!Array.isArray(fields) || fields.length > 50 ||
@@ -176,6 +179,36 @@ export class CmsPublishingPolicy {
         throw new Error('CMS_BLOCK_SCHEMA_FIELD_LIST_INVALID');
       }
     }
+    // Asset and localized field declarations are not free-form metadata.
+    // Resolve every dotted path in the declared schema, traversing bounded
+    // array items without consuming the next path segment. An unknown path
+    // could otherwise bypass nested EAP public-grant verification.
+    const resolveType = (path: string): unknown => {
+      let current: unknown = fieldSchema;
+      for (const segment of path.split('.')) {
+        while (current && typeof current === 'object' && !Array.isArray(current) &&
+               (current as Record<string, unknown>).type === 'array') {
+          current = (current as Record<string, unknown>).items;
+        }
+        if (!current || typeof current !== 'object' || Array.isArray(current) ||
+            (current as Record<string, unknown>).type !== 'object') return null;
+        const properties = (current as Record<string, unknown>).properties as Record<string, unknown>;
+        if (!properties || !Object.prototype.hasOwnProperty.call(properties, segment)) return null;
+        current = properties[segment];
+      }
+      return current && typeof current === 'object' && !Array.isArray(current)
+        ? (current as Record<string, unknown>).type : null;
+    };
+    const assetPaths = assetFields as string[];
+    const localizedPaths = localizedFields as string[];
+    if (new Set(assetPaths).size !== assetPaths.length ||
+        new Set(localizedPaths).size !== localizedPaths.length ||
+        assetPaths.some((path) => localizedPaths.includes(path))) {
+      throw new Error('CMS_BLOCK_SCHEMA_FIELD_LIST_DUPLICATE');
+    }
+    if ([...assetPaths, ...localizedPaths].some((path) => resolveType(path) !== 'string')) {
+      throw new Error('CMS_BLOCK_SCHEMA_FIELD_PATH_INVALID');
+    }
   }
 
   public static assertBlockPayload(
@@ -183,7 +216,141 @@ export class CmsPublishingPolicy {
     fieldSchema: unknown,
     assetFields: unknown,
   ): void {
-    this.validateSchemaNode(payload, fieldSchema, '$');
+    const size = JSON.stringify(payload)?.length ?? 0;
+    if (size > 256_000) throw new Error('CMS_BLOCK_PAYLOAD_TOO_LARGE');
+    this.validateSchemaNode(payload, fieldSchema, '
+    for (const assetId of this.extractBlockAssetHandles(payload, assetFields)) {
+      this.assertAssetHandle(assetId);
+    }
+  }
+
+  public static extractBlockAssetHandles(payload: Record<string, unknown>, fields: unknown): string[] {
+    if (!Array.isArray(fields)) throw new Error('CMS_BLOCK_ASSET_FIELD_LIST_REQUIRED');
+    const result: string[] = [];
+    const scan = (value: unknown, segments: string[]): void => {
+      if (value == null) return;
+      if (Array.isArray(value)) { value.forEach((item) => scan(item, segments)); return; }
+      if (segments.length === 0) {
+        if (typeof value !== 'string' || value.trim() === '') throw new Error('CMS_BLOCK_ASSET_HANDLE_INVALID');
+        result.push(value); return;
+      }
+      if (!value || typeof value !== 'object') throw new Error('CMS_BLOCK_ASSET_FIELD_INVALID');
+      const [name, ...tail] = segments;
+      if (Object.prototype.hasOwnProperty.call(value, name)) scan((value as Record<string, unknown>)[name], tail);
+    };
+    for (const field of fields) {
+      if (typeof field !== 'string' || field.length > 160 ||
+          !/^[a-zA-Z][a-zA-Z0-9_]*(?:\.(?:[a-zA-Z][a-zA-Z0-9_]*))*$/.test(field) ||
+          field.split('.').some((s) => ['__proto__', 'prototype', 'constructor'].includes(s))) {
+        throw new Error('CMS_BLOCK_ASSET_FIELD_INVALID');
+      }
+      scan(payload, field.split('.'));
+    }
+    return [...new Set(result)];
+  }
+
+  private static validateSchemaNode(value: unknown, schemaValue: unknown, path: string): void {
+    if (!schemaValue || typeof schemaValue !== 'object' || Array.isArray(schemaValue)) {
+      throw new Error(`CMS_BLOCK_SCHEMA_INVALID:${path}`);
+    }
+    const schema = schemaValue as Record<string, unknown>;
+    const type = typeof schema.type === 'string' ? schema.type : undefined;
+    if (type && !['object', 'array', 'string', 'number', 'integer', 'boolean', 'null'].includes(type)) {
+      throw new Error(`CMS_BLOCK_SCHEMA_TYPE_UNSUPPORTED:${path}`);
+    }
+    const validType = (expected: string, candidate: unknown): boolean => {
+      if (expected === 'array') return Array.isArray(candidate);
+      if (expected === 'object') return Boolean(candidate && typeof candidate === 'object' && !Array.isArray(candidate));
+      if (expected === 'integer') return typeof candidate === 'number' && Number.isInteger(candidate);
+      if (expected === 'number') return typeof candidate === 'number' && Number.isFinite(candidate);
+      if (expected === 'null') return candidate === null;
+      return typeof candidate === expected;
+    };
+    if (type && !validType(type, value)) throw new Error(`CMS_BLOCK_FIELD_TYPE_INVALID:${path}`);
+    if (Array.isArray(schema.enum) && !schema.enum.some((entry) => JSON.stringify(entry) === JSON.stringify(value))) {
+      throw new Error(`CMS_BLOCK_FIELD_ENUM_INVALID:${path}`);
+    }
+    if (Object.prototype.hasOwnProperty.call(schema, 'const') && JSON.stringify(schema.const) !== JSON.stringify(value)) {
+      throw new Error(`CMS_BLOCK_FIELD_CONST_INVALID:${path}`);
+    }
+    if (typeof value === 'string') {
+      if (typeof schema.minLength === 'number' && value.length < schema.minLength) throw new Error(`CMS_BLOCK_FIELD_MIN_LENGTH:${path}`);
+      if (typeof schema.maxLength === 'number' && value.length > schema.maxLength) throw new Error(`CMS_BLOCK_FIELD_MAX_LENGTH:${path}`);
+    }
+    if (typeof value === 'number') {
+      if (typeof schema.minimum === 'number' && value < schema.minimum) throw new Error(`CMS_BLOCK_FIELD_MINIMUM:${path}`);
+      if (typeof schema.maximum === 'number' && value > schema.maximum) throw new Error(`CMS_BLOCK_FIELD_MAXIMUM:${path}`);
+    }
+    if (Array.isArray(value)) {
+      if (typeof schema.minItems === 'number' && value.length < schema.minItems) throw new Error(`CMS_BLOCK_FIELD_MIN_ITEMS:${path}`);
+      if (typeof schema.maxItems === 'number' && value.length > schema.maxItems) throw new Error(`CMS_BLOCK_FIELD_MAX_ITEMS:${path}`);
+      if (schema.items !== undefined) value.forEach((item, index) => this.validateSchemaNode(item, schema.items, `${path}[${index}]`));
+    }
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      const record = value as Record<string, unknown>;
+      const properties = schema.properties && typeof schema.properties === 'object' && !Array.isArray(schema.properties)
+        ? schema.properties as Record<string, unknown>
+        : {};
+      const required = Array.isArray(schema.required) ? schema.required.filter((key): key is string => typeof key === 'string') : [];
+      for (const key of required) {
+        if (!(key in record) || record[key] === undefined || record[key] === null || record[key] === '') {
+          throw new Error(`CMS_BLOCK_FIELD_REQUIRED:${path}.${key}`);
+        }
+      }
+      const allowAdditional = schema.additionalProperties === true;
+      for (const [key, child] of Object.entries(record)) {
+        const childSchema = properties[key];
+        if (!childSchema) {
+          if (!allowAdditional) throw new Error(`CMS_BLOCK_FIELD_UNDECLARED:${path}.${key}`);
+          continue;
+        }
+        this.validateSchemaNode(child, childSchema, `${path}.${key}`);
+      }
+    }
+  }
+
+  public static readiness(
+    content: CmsContentDto,
+    localized: CmsLocalizedContentDto,
+  ): CmsPublishingReadinessDto {
+    const missing: string[] = [];
+    const warnings: string[] = [];
+    const seo = localized.seoMetadata as CmsSeoMetadata | null | undefined;
+    if (!localized.title.trim()) missing.push('title');
+    if (!localized.summary?.trim()) missing.push('summary');
+    if (!localized.body.trim()) missing.push('body');
+    if (!content.categoryId && !content.categorySlug) missing.push('category');
+    if (!localized.localizedSlug.trim()) missing.push('localizedSlug');
+    if (!seo?.title?.trim()) missing.push('seo.title');
+    if (!seo?.description?.trim()) missing.push('seo.description');
+    if (!content.featuredAssetId && !localized.featuredAssetId) warnings.push('featuredAssetId');
+    if ((seo?.title?.length ?? 0) > 65) warnings.push('seo.title.length');
+    if ((seo?.description?.length ?? 0) > 170) warnings.push('seo.description.length');
+    return { ready: missing.length === 0, missing, warnings };
+  }
+
+  public static assertTransition(current: CmsContentStatus, next: CmsContentStatus): void {
+    if (current === next) return;
+    const allowed: Record<CmsContentStatus, CmsContentStatus[]> = {
+      [CmsContentStatus.DRAFT]: [CmsContentStatus.IN_REVIEW],
+      [CmsContentStatus.IN_REVIEW]: [CmsContentStatus.DRAFT, CmsContentStatus.READY_TO_PUBLISH],
+      [CmsContentStatus.READY_TO_PUBLISH]: [
+        CmsContentStatus.DRAFT,
+        CmsContentStatus.SCHEDULED,
+        CmsContentStatus.PUBLISHED,
+      ],
+      [CmsContentStatus.SCHEDULED]: [CmsContentStatus.DRAFT, CmsContentStatus.PUBLISHED],
+      [CmsContentStatus.PUBLISHED]: [CmsContentStatus.DRAFT, CmsContentStatus.ARCHIVED],
+      [CmsContentStatus.ARCHIVED]: [CmsContentStatus.DRAFT],
+    };
+    if (!allowed[current].includes(next)) throw new Error('CMS_INVALID_LIFECYCLE_TRANSITION');
+  }
+
+  public static assertMakerChecker(authorId: string, reviewerId: string): void {
+    if (authorId === reviewerId) throw new Error('CMS_MAKER_CHECKER_VIOLATION');
+  }
+}
+);
     for (const assetId of this.extractBlockAssetHandles(payload, assetFields)) {
       this.assertAssetHandle(assetId);
     }
