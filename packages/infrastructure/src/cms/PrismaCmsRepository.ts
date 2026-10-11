@@ -14,6 +14,7 @@ import {
   CmsContentFilters,
   CmsContentRevisionDto,
   CmsContentStatus,
+  CmsDomainTargetType,
   AssetId,
   AssetSecurityClassification,
   IAssetRecordRepository,
@@ -1149,8 +1150,11 @@ export class PrismaCmsRepository implements ICmsRepository {
       if (existing.status !== CmsContentStatus.DRAFT) throw new Error('CMS_NAVIGATION_DRAFT_REQUIRED');
       CmsPublishingPolicy.assertMakerChecker(existing.updatedBy, actorId);
       CmsPublishingPolicy.assertAcyclicNavigation(existing.nodes);
+      const resolvedTargets: string[] = [];
+      const owner = new PrismaCmsDomainOwnerReadGateway(tx);
       for (const node of existing.nodes) {
         CmsPublishingPolicy.assertSafeNavigationTarget(node.targetType, node.targetValue);
+        let publicPath = node.targetValue;
         if (node.targetType === 'CMS_CONTENT') {
           const published = await tx.cmsPublishedContent.findFirst({
             where: {
@@ -1158,14 +1162,21 @@ export class PrismaCmsRepository implements ICmsRepository {
               status: CmsContentStatus.PUBLISHED,
               OR: [{ contentId: node.targetValue }, { publicId: node.targetValue }],
             },
-            select: { contentId: true },
+            select: { contentId: true, contentType: true, slug: true },
           });
           if (!published) throw new Error('CMS_NAVIGATION_TARGET_NOT_PUBLISHED');
+          publicPath = CmsPublishingPolicy.canonicalPath(existing.locale, published.contentType, published.slug);
         }
-        // A UUID is not evidence that another bounded-context owner has published it.
         if (node.targetType === 'DOMAIN_REFERENCE') {
-          throw new Error('CMS_NAVIGATION_DOMAIN_OWNER_RESOLUTION_REQUIRED');
+          // Never publish a guessed owner UUID as an href. The explicit
+          // TYPE:UUID token is resolved against the canonical domain owner.
+          const match = /^([A-Z_]+):([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i.exec(node.targetValue);
+          if (!match || !Object.values(CmsDomainTargetType).includes(match[1] as CmsDomainTargetType)) {
+            throw new Error('CMS_NAVIGATION_DOMAIN_REFERENCE_INVALID');
+          }
+          publicPath = await owner.resolvePublicPath(match[1] as CmsDomainTargetType, match[2], existing.locale);
         }
+        resolvedTargets.push(publicPath);
       }
       const contentHash = this.navigationContentHash(existing);
       const now = new Date();
@@ -1180,13 +1191,17 @@ export class PrismaCmsRepository implements ICmsRepository {
         },
         include: { nodes: { orderBy: { sortOrder: 'asc' } } },
       });
+      const publicNavigation = this.navigation(row);
+      publicNavigation.nodes = publicNavigation.nodes.map((node, index) => ({
+        ...node, targetValue: resolvedTargets[index] ?? node.targetValue,
+      }));
       await tx.cmsSitePublishedSnapshot.upsert({
         where: { kind_sourceId: { kind: 'NAVIGATION', sourceId: row.id } },
         create: {
           id: randomUUID(), kind: 'NAVIGATION', sourceId: row.id, siteIdentifier: row.siteIdentifier,
-          locale: row.locale, payload: json(this.navigation(row)), publishedAt: now,
+          locale: row.locale, payload: json(publicNavigation), publishedAt: now,
         },
-        update: { payload: json(this.navigation(row)), publishedAt: now },
+        update: { payload: json(publicNavigation), publishedAt: now },
       });
       await this.appendStandaloneMutation(tx, row.id, 'CmsNavigationMenu', 'NAVIGATION_PUBLISHED', actorId, {
         siteIdentifier: row.siteIdentifier,
