@@ -1,0 +1,18 @@
+{
+  "section": "21/P20",
+  "branch": "fix/codex-section-21-services",
+  "test_policy": "Each lightweight check once. Fix reported errors without rerunning. No heavy tests.",
+  "checks": [
+    {"name": "focused unit/API", "files": 6, "tests": 29, "result": "PASS on initial tested revision", "duration_seconds": 6.03, "log": "evidence/section-21/unit-api.log"},
+    {"name": "core TypeScript", "result": "FAIL initially; VOID corrected to VOIDED; not rerun", "log": "evidence/section-21/core-types-initial.log"},
+    {"name": "admin TypeScript", "result": "FAIL initially; misplaced form initialization removed; not rerun", "log": "evidence/section-21/admin-types-initial.log"},
+    {"name": "focused ESLint", "errors": 0, "warnings": 69, "result": "PASS_WITH_WARNINGS on initial revision", "log": "evidence/section-21/lint-initial.log"},
+    {"name": "format changed service modules", "result": "completed before final source additions"}
+  ],
+  "final_revision_retested": false,
+  "migration_applied": false,
+  "provider_calls": false,
+  "browser_e2e": "DEFERRED_AFTER_SECTION_28",
+  "live_database_tests": "DEFERRED_AFTER_SECTION_28",
+  "release_status": "NOT_RUNTIME_VERIFIED"
+}

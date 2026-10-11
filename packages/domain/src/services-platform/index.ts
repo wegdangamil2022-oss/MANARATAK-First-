@@ -52,6 +52,28 @@ export enum ServiceRequestStatus {
 }
 
 export interface ServiceCatalogItemDto {
+  approvedPrice?: {
+    amountMinorUnits: string;
+    currencyCode: string;
+    scale: number;
+    pricingId: string;
+    fingerprint: string;
+    effectiveTo?: string | null;
+  } | null;
+  cancellationPolicyCode?: 'FINANCE_REVIEW_REQUIRED' | 'FREE_BEFORE_START';
+  reviewEvidence?: Record<string, unknown> | null;
+  fulfillmentPolicy?: 'FREE' | 'CHARGEABLE' | 'QUOTE_REQUIRED';
+  inputSchema?: Array<{
+    key: string;
+    type: 'TEXT' | 'NUMBER' | 'BOOLEAN' | 'ASSET';
+    required: boolean;
+    sensitive?: boolean;
+  }>;
+  localizedContent?: Record<string, { displayName: string; serviceDescription: string }> | null;
+  makerActorId?: string | null;
+  reviewerActorId?: string | null;
+  reviewedVersion?: number | null;
+  publishedSnapshot?: Record<string, unknown> | null;
   id: string;
   publicId: string;
   slug: string;
@@ -89,9 +111,17 @@ export interface ServiceCatalogItemDto {
   version: number;
 }
 
-export type CreateServiceCatalogItemDto = Omit<ServiceCatalogItemDto, 'id' | 'createdAt' | 'updatedAt' | 'version'>;
-export type UpdateServiceCatalogItemDto = Partial<Omit<CreateServiceCatalogItemDto, 'publicId' | 'canonicalDedupKey' | 'canonicalName'>>;
-export type ServiceCatalogRepositoryUpdateDto = UpdateServiceCatalogItemDto & { canonicalName?: string; canonicalDedupKey?: string };
+export type CreateServiceCatalogItemDto = Omit<
+  ServiceCatalogItemDto,
+  'id' | 'createdAt' | 'updatedAt' | 'version'
+>;
+export type UpdateServiceCatalogItemDto = Partial<
+  Omit<CreateServiceCatalogItemDto, 'publicId' | 'canonicalDedupKey' | 'canonicalName'>
+>;
+export type ServiceCatalogRepositoryUpdateDto = UpdateServiceCatalogItemDto & {
+  canonicalName?: string;
+  canonicalDedupKey?: string;
+};
 
 export interface ServiceCatalogFilters {
   search?: string;
@@ -107,10 +137,20 @@ export interface ServiceCatalogFilters {
   pageSize?: number;
 }
 
-export type PublicServiceCatalogFilters = Omit<ServiceCatalogFilters, 'status' | 'completenessStatus' | 'page' | 'pageSize'> & { cursor?: string; limit?: number };
+export type PublicServiceCatalogFilters = Omit<
+  ServiceCatalogFilters,
+  'status' | 'completenessStatus' | 'page' | 'pageSize'
+> & { cursor?: string; limit?: number; locale?: 'ar' | 'en' };
 export type PublicServiceCatalogItemDto = Omit<
   ServiceCatalogItemDto,
-  'id' | 'canonicalName' | 'canonicalDedupKey' | 'status' | 'completenessStatus' | 'optionalFields' | 'createdAt' | 'updatedAt'
+  | 'id'
+  | 'canonicalName'
+  | 'canonicalDedupKey'
+  | 'status'
+  | 'completenessStatus'
+  | 'optionalFields'
+  | 'createdAt'
+  | 'updatedAt'
 >;
 
 export interface PaginatedServiceCatalogResult<T> {
@@ -124,6 +164,14 @@ export interface PaginatedServiceCatalogResult<T> {
 }
 
 export interface ServiceRequestDto {
+  retentionUntil?: Date | string | null;
+  assignedStaffId?: string | null;
+  dueAt?: Date | string | null;
+  cancellationState?: string;
+  payloadFingerprint?: string | null;
+  serviceSnapshot?: Record<string, unknown> | null;
+  invoiceIntent?: Record<string, unknown> | null;
+  invoiceLinkState?: string;
   id: string;
   publicId: string;
   studentReferenceId: string;
@@ -141,6 +189,10 @@ export interface ServiceRequestDto {
 }
 
 export interface CreateServiceRequestDto {
+  retentionUntil?: Date | string | null;
+  dueAt?: Date | string | null;
+  payloadFingerprint?: string | null;
+  serviceSnapshot?: Record<string, unknown> | null;
   publicId: string;
   studentReferenceId: string;
   serviceId: string;
@@ -149,6 +201,10 @@ export interface CreateServiceRequestDto {
 }
 
 export interface ServiceRequestFilters {
+  assignedStaffId?: string;
+  unassigned?: boolean;
+  overdue?: boolean;
+  providerReferenceId?: string;
   search?: string;
   studentReferenceId?: string;
   serviceId?: string;
@@ -167,27 +223,72 @@ export interface PaginatedServiceRequestResult {
 
 export interface IServiceCatalogRepository {
   create(data: CreateServiceCatalogItemDto): Promise<ServiceCatalogItemDto>;
-  update(id: string, data: ServiceCatalogRepositoryUpdateDto, expectedVersion: number): Promise<ServiceCatalogItemDto>;
+  update(
+    id: string,
+    data: ServiceCatalogRepositoryUpdateDto,
+    expectedVersion: number,
+  ): Promise<ServiceCatalogItemDto>;
   findById(id: string): Promise<ServiceCatalogItemDto | null>;
   findBySlug(slug: string): Promise<ServiceCatalogItemDto | null>;
   findByDedupKey(dedupKey: string): Promise<ServiceCatalogItemDto | null>;
-  updateStatus(id: string, status: ServiceStatus, expectedVersion: number): Promise<ServiceCatalogItemDto>;
-  list(filters: ServiceCatalogFilters): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>>;
-  listPublished(filters: PublicServiceCatalogFilters): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>>;
+  updateStatus(
+    id: string,
+    status: ServiceStatus,
+    expectedVersion: number,
+  ): Promise<ServiceCatalogItemDto>;
+  list(
+    filters: ServiceCatalogFilters,
+  ): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>>;
+  listPublished(
+    filters: PublicServiceCatalogFilters,
+  ): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>>;
 }
 
 export interface IServiceRequestRepository {
   /** P20-owned support triage; only distinct student references, never request details. */
-  listSupportAwaitingPaymentStudents?(page:number,limit:number):Promise<{
-    items:Array<{studentReferenceId:string}>;total:number;hasMore:boolean;nextPage:number|null;
+  listSupportAwaitingPaymentStudents?(
+    page: number,
+    limit: number,
+  ): Promise<{
+    items: Array<{ studentReferenceId: string }>;
+    total: number;
+    hasMore: boolean;
+    nextPage: number | null;
   }>;
+  eraseRequestInputs?(
+    id: string,
+    studentReferenceId: string,
+    expectedVersion: number,
+  ): Promise<ServiceRequestDto>;
+  markCancellationPending?(id: string, expectedVersion: number): Promise<ServiceRequestDto>;
+  claimRequest?(id: string, actorId: string, expectedVersion: number): Promise<ServiceRequestDto>;
+  requestTimeline?(id: string): Promise<Array<Record<string, unknown>>>;
+  prepareInvoiceIntent?(
+    id: string,
+    intent: Record<string, unknown>,
+    expectedVersion: number,
+  ): Promise<ServiceRequestDto>;
   createRequest(data: CreateServiceRequestDto): Promise<ServiceRequestDto>;
   findRequestById(id: string): Promise<ServiceRequestDto | null>;
   findRequestByPublicId(publicId: string): Promise<ServiceRequestDto | null>;
   listRequests(filters: ServiceRequestFilters): Promise<PaginatedServiceRequestResult>;
-  updateRequestStatus(id: string, status: ServiceRequestStatus, expectedVersion: number, fulfillmentMetadata?: Record<string, unknown> | null): Promise<ServiceRequestDto>;
-  linkFinanceInvoice(id: string, financeInvoiceId: string, financeInvoicePublicId: string, expectedVersion: number): Promise<ServiceRequestDto>;
-  assignProvider(id: string, providerReferenceId: string, expectedVersion: number): Promise<ServiceRequestDto>;
+  updateRequestStatus(
+    id: string,
+    status: ServiceRequestStatus,
+    expectedVersion: number,
+    fulfillmentMetadata?: Record<string, unknown> | null,
+  ): Promise<ServiceRequestDto>;
+  linkFinanceInvoice(
+    id: string,
+    financeInvoiceId: string,
+    financeInvoicePublicId: string,
+    expectedVersion: number,
+  ): Promise<ServiceRequestDto>;
+  assignProvider(
+    id: string,
+    providerReferenceId: string,
+    expectedVersion: number,
+  ): Promise<ServiceRequestDto>;
 }
 
 export interface IServiceReferenceGateway {
@@ -207,11 +308,15 @@ export interface IServiceFinanceGateway {
     scale: number;
     actorId: string;
   }): Promise<{ id: string; publicId: string }>;
-  getInvoiceClearance(invoiceId: string): Promise<{
+  getInvoiceClearance(
+    invoiceId: string,
+    request?: { requestPublicId: string; studentReferenceId: string },
+  ): Promise<{
     invoiceId: string;
     invoiceStatus: string;
     amountDueMinorUnits: string;
     financiallyCleared: boolean;
+    cancellationCleared?: boolean;
   }>;
 }
 
@@ -243,6 +348,5 @@ export interface ServiceFinanceInvoiceLinkedEvent {
   financeInvoiceId: string;
   occurredAt: Date | string;
 }
-
 
 export * from './operations';

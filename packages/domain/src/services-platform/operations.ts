@@ -58,6 +58,8 @@ export enum ServiceWorkflowExecutionStatus {
 }
 
 export interface ServiceProviderDto {
+  version?: number;
+  makerActorId?: string | null;
   id: string;
   publicId: string;
   displayName: string;
@@ -81,6 +83,8 @@ export interface ServicePackageItemDto {
 }
 
 export interface ServicePackageDto {
+  version?: number;
+  makerActorId?: string | null;
   id: string;
   publicId: string;
   displayName: string;
@@ -92,6 +96,8 @@ export interface ServicePackageDto {
 }
 
 export interface ServicePricingDto {
+  version?: number;
+  makerActorId?: string | null;
   id: string;
   publicId: string;
   serviceId?: string | null;
@@ -124,6 +130,8 @@ export interface ServiceDiscountDto {
 }
 
 export interface ServicePromotionDto {
+  version?: number;
+  makerActorId?: string | null;
   id: string;
   publicId: string;
   name: string;
@@ -139,6 +147,8 @@ export interface ServicePromotionDto {
 }
 
 export interface ServiceAvailabilitySlotDto {
+  version?: number;
+  makerActorId?: string | null;
   id: string;
   publicId: string;
   providerId: string;
@@ -176,6 +186,10 @@ export interface ServiceBookingPricingSnapshot {
 }
 
 export interface ServiceBookingDto {
+  requestId?: string | null;
+  holdExpiresAt?: Date | string | null;
+  version?: number;
+  makerActorId?: string | null;
   id: string;
   publicId: string;
   studentReferenceId: string;
@@ -201,6 +215,8 @@ export interface ServiceWorkflowStepDefinition {
 }
 
 export interface ServiceWorkflowDefinitionDto {
+  version?: number;
+  makerActorId?: string | null;
   id: string;
   publicId: string;
   name: string;
@@ -213,6 +229,8 @@ export interface ServiceWorkflowDefinitionDto {
 }
 
 export interface ServiceWorkflowExecutionDto {
+  version?: number;
+  makerActorId?: string | null;
   id: string;
   publicId: string;
   bookingId: string;
@@ -227,6 +245,7 @@ export interface ServiceWorkflowExecutionDto {
 }
 
 export interface ServiceDeliveryArtifactDto {
+  stepKey?:string|null;
   id: string;
   bookingId: string;
   workflowExecutionId?: string | null;
@@ -237,6 +256,8 @@ export interface ServiceDeliveryArtifactDto {
 }
 
 export interface CreateServiceBookingInput {
+  requestId?: string;
+  payloadFingerprint?: string;
   publicId: string;
   studentReferenceId: string;
   serviceId?: string | null;
@@ -248,32 +269,106 @@ export interface CreateServiceBookingInput {
 }
 
 export interface IServiceOperationsRepository {
-  createProvider(data: Omit<ServiceProviderDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<ServiceProviderDto>;
-  updateProviderStatus(id: string, status: ServiceProviderStatus): Promise<ServiceProviderDto>;
+  findBookingByPublicId?(publicId:string):Promise<ServiceBookingDto|null>;
+  findBookingForRequest?(requestId: string): Promise<ServiceBookingDto | null>;
+  listAvailableSlots?(
+    serviceId: string,
+  ): Promise<
+    Array<{ id: string; startsAt: Date | string; endsAt: Date | string; timezone: string }>
+  >;
+  withActor?(context: {
+    actorId: string;
+    correlationId: string;
+    reason: string;
+  }): IServiceOperationsRepository;
+  listOperations?(
+    kind: string,
+    page: number,
+    assignedStaffId?: string,
+  ): Promise<{ data: unknown[]; total: number; page: number }>;
+  findWorkflowExecutionById?(id: string): Promise<ServiceWorkflowExecutionDto | null>;
+  findWorkflowExecutionForBooking?(bookingId: string): Promise<ServiceWorkflowExecutionDto | null>;
+  listDeliveryArtifacts?(bookingId: string): Promise<ServiceDeliveryArtifactDto[]>;
+  createProvider(
+    data: Omit<ServiceProviderDto, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ServiceProviderDto>;
+  updateProviderStatus(
+    id: string,
+    status: ServiceProviderStatus,
+    expectedVersion?: number,
+  ): Promise<ServiceProviderDto>;
   findProviderById(id: string): Promise<ServiceProviderDto | null>;
-  createPackage(data: Omit<ServicePackageDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<ServicePackageDto>;
-  updatePackageStatus(id: string, status: ServicePackageStatus): Promise<ServicePackageDto>;
+  createPackage(
+    data: Omit<ServicePackageDto, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ServicePackageDto>;
+  updatePackageStatus(
+    id: string,
+    status: ServicePackageStatus,
+    expectedVersion?: number,
+  ): Promise<ServicePackageDto>;
   findPackageById(id: string): Promise<ServicePackageDto | null>;
   createPricing(data: Omit<ServicePricingDto, 'id' | 'createdAt'>): Promise<ServicePricingDto>;
   findPricingById(id: string): Promise<ServicePricingDto | null>;
-  updatePricingStatus(id: string, status: ServicePricingStatus): Promise<ServicePricingDto>;
-  retirePricing(id: string, effectiveTo: Date): Promise<void>;
-  findActivePricing(serviceId: string | null, packageId: string | null, at: Date): Promise<ServicePricingDto | null>;
+  updatePricingStatus(
+    id: string,
+    status: ServicePricingStatus,
+    expectedVersion?: number,
+  ): Promise<ServicePricingDto>;
+  retirePricing(id: string, effectiveTo: Date, expectedVersion?: number): Promise<void>;
+  findActivePricing(
+    serviceId: string | null,
+    packageId: string | null,
+    at: Date,
+  ): Promise<ServicePricingDto | null>;
   createDiscount(data: Omit<ServiceDiscountDto, 'id' | 'createdAt'>): Promise<ServiceDiscountDto>;
   findDiscountById(id: string): Promise<ServiceDiscountDto | null>;
-  createPromotion(data: Omit<ServicePromotionDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<ServicePromotionDto>;
-  updatePromotionStatus(id: string, status: ServicePromotionStatus): Promise<ServicePromotionDto>;
+  createPromotion(
+    data: Omit<ServicePromotionDto, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ServicePromotionDto>;
+  updatePromotionStatus(
+    id: string,
+    status: ServicePromotionStatus,
+    expectedVersion?: number,
+  ): Promise<ServicePromotionDto>;
   findPromotionById(id: string): Promise<ServicePromotionDto | null>;
-  createAvailabilitySlot(data: Omit<ServiceAvailabilitySlotDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<ServiceAvailabilitySlotDto>;
+  createAvailabilitySlot(
+    data: Omit<ServiceAvailabilitySlotDto, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ServiceAvailabilitySlotDto>;
   findAvailabilitySlotById(id: string): Promise<ServiceAvailabilitySlotDto | null>;
   createBookingWithCapacity(data: CreateServiceBookingInput): Promise<ServiceBookingDto>;
   findBookingById(id: string): Promise<ServiceBookingDto | null>;
-  updateBookingStatus(id: string, status: ServiceBookingStatus): Promise<ServiceBookingDto>;
-  createWorkflowDefinition(data: Omit<ServiceWorkflowDefinitionDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<ServiceWorkflowDefinitionDto>;
+  updateBookingStatus(
+    id: string,
+    status: ServiceBookingStatus,
+    expectedVersion?: number,
+  ): Promise<ServiceBookingDto>;
+  createWorkflowDefinition(
+    data: Omit<ServiceWorkflowDefinitionDto, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ServiceWorkflowDefinitionDto>;
   findWorkflowDefinitionById(id: string): Promise<ServiceWorkflowDefinitionDto | null>;
-  updateWorkflowDefinitionStatus(id: string, status: ServiceWorkflowDefinitionStatus): Promise<ServiceWorkflowDefinitionDto>;
-  findActiveWorkflowDefinition(serviceId: string | null, packageId: string | null): Promise<ServiceWorkflowDefinitionDto | null>;
-  createWorkflowExecution(data: Omit<ServiceWorkflowExecutionDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<ServiceWorkflowExecutionDto>;
-  updateWorkflowExecution(id: string, data: Partial<Pick<ServiceWorkflowExecutionDto, 'status' | 'currentStepKey' | 'startedAt' | 'completedAt' | 'failureReason'>>): Promise<ServiceWorkflowExecutionDto>;
-  addDeliveryArtifact(data: Omit<ServiceDeliveryArtifactDto, 'id' | 'deliveredAt'>): Promise<ServiceDeliveryArtifactDto>;
+  updateWorkflowDefinitionStatus(
+    id: string,
+    status: ServiceWorkflowDefinitionStatus,
+    expectedVersion?: number,
+  ): Promise<ServiceWorkflowDefinitionDto>;
+  findActiveWorkflowDefinition(
+    serviceId: string | null,
+    packageId: string | null,
+  ): Promise<ServiceWorkflowDefinitionDto | null>;
+  createWorkflowExecution(
+    data: Omit<ServiceWorkflowExecutionDto, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ServiceWorkflowExecutionDto>;
+  updateWorkflowExecution(
+    id: string,
+    data: Partial<
+      Pick<
+        ServiceWorkflowExecutionDto,
+        'status' | 'currentStepKey' | 'startedAt' | 'completedAt' | 'failureReason'
+      >
+    >,
+    expectedVersion?: number,
+  ): Promise<ServiceWorkflowExecutionDto>;
+  addDeliveryArtifact(
+    data: Omit<ServiceDeliveryArtifactDto, 'id' | 'deliveredAt'>,
+  ): Promise<ServiceDeliveryArtifactDto>;
 }

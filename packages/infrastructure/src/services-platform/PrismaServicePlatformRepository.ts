@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CreateServiceCatalogItemDto,
   CreateServiceRequestDto,
@@ -20,15 +20,23 @@ import {
 import { queryStableCursorPage } from '../api-foundation/StableCursor';
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
-  value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 const asStrings = (value: unknown): string[] | null =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : null;
 
-export class PrismaServicePlatformRepository implements IServiceCatalogRepository, IServiceRequestRepository {
+export class PrismaServicePlatformRepository
+  implements IServiceCatalogRepository, IServiceRequestRepository
+{
   constructor(private readonly prisma: PrismaClient) {}
 
-  private catalog(client: any = this.prisma) { return client.serviceCatalogRecord; }
-  private requests(client: any = this.prisma) { return client.serviceRequestRecord; }
+  private catalog(client: any = this.prisma) {
+    return client.serviceCatalogRecord;
+  }
+  private requests(client: any = this.prisma) {
+    return client.serviceRequestRecord;
+  }
 
   private async atomicEvent<T extends { id: string; publicId?: string; version?: number }>(
     eventType: string,
@@ -36,108 +44,184 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     mutate: (tx: any) => Promise<T>,
     payload: (value: T) => Record<string, unknown>,
   ): Promise<T> {
-    return this.prisma.$transaction(async (tx: any) => {
-      const value = await mutate(tx);
-      if (!tx.transactionalOutboxRecord?.create) throw new Error('SERVICE_DURABLE_OUTBOX_REQUIRED');
-      const now = new Date();
-      await tx.transactionalOutboxRecord.create({ data: {
-        id: randomUUID(), eventType, domain: 'SERVICES', aggregateType, aggregateId: value.id,
-        payload: payload(value), metadata: { schemaVersion: 1, ownerDomain: 'SERVICES' }, correlationId: randomUUID(),
-        state: 'PENDING', attempts: 0, availableAt: now, createdAt: now,
-      }});
-      return value;
-    });
+    return this.prisma.$transaction(
+      async (tx: any) => {
+        const value = await mutate(tx);
+        if (!tx.transactionalOutboxRecord?.create)
+          throw new Error('SERVICE_DURABLE_OUTBOX_REQUIRED');
+        const now = new Date();
+        await tx.transactionalOutboxRecord.create({
+          data: {
+            id: randomUUID(),
+            eventType,
+            domain: 'SERVICES',
+            aggregateType,
+            aggregateId: value.id,
+            payload: payload(value),
+            metadata: { schemaVersion: 1, ownerDomain: 'SERVICES' },
+            correlationId: randomUUID(),
+            state: 'PENDING',
+            attempts: 0,
+            availableAt: now,
+            createdAt: now,
+          },
+        });
+        return value;
+      },
+      { isolationLevel: 'Serializable' },
+    );
   }
 
   async create(data: CreateServiceCatalogItemDto): Promise<ServiceCatalogItemDto> {
-    const row = await this.atomicEvent('ServiceCatalogCreated.v1', 'ServiceCatalogItem', async tx => this.catalog(tx).create({
-      data: {
-        publicId: data.publicId,
-        slug: data.slug,
-        canonicalName: data.canonicalName,
-        canonicalDedupKey: data.canonicalDedupKey,
-        displayName: data.displayName,
-        status: data.status,
-        completenessStatus: data.completenessStatus,
-        serviceCategory: data.serviceCategory,
-        fulfillmentType: data.fulfillmentType,
-        serviceDescription: data.serviceDescription,
-        serviceAvailabilityStatus: data.serviceAvailabilityStatus,
-        requiredInputsOrDocuments: data.requiredInputsOrDocuments,
-        deliveryMode: data.deliveryMode,
-        responsibleServiceOwnerType: data.responsibleServiceOwnerType,
-        providerName: data.providerName,
-        providerReferenceId: data.providerReferenceId,
-        estimatedDeliveryTime: data.estimatedDeliveryTime,
-        slaPolicy: data.slaPolicy,
-        appointmentRequired: data.appointmentRequired,
-        supportedCountryLabels: data.supportedCountries,
-        supportedLanguageLabels: data.supportedLanguages,
-        servicePrerequisites: data.servicePrerequisites,
-        deliveryArtifactTypes: data.deliveryArtifactTypes,
-        pricingReferenceId: data.pricingReferenceId,
-        thumbnailAssetId: data.thumbnailAssetId,
-        publicDisplayMetadata: data.publicDisplayMetadata,
-        optionalFields: data.optionalFields,
-        supportedCountries: data.supportedCountryReferenceIds?.length ? {
-          create: data.supportedCountryReferenceIds.map((countryReferenceId) => ({ countryReferenceId })),
-        } : undefined,
-        supportedLanguages: data.supportedLanguageReferenceIds?.length ? {
-          create: data.supportedLanguageReferenceIds.map((languageReferenceId) => ({ languageReferenceId })),
-        } : undefined,
-      },
-      include: this.catalogInclude(),
-    }), row => ({ serviceId: row.id, publicId: row.publicId, status: row.status, version: row.version }));
+    const row = await this.atomicEvent(
+      'ServiceCatalogCreated.v1',
+      'ServiceCatalogItem',
+      async (tx) =>
+        this.catalog(tx).create({
+          data: {
+            publicId: data.publicId,
+            approvedPrice: data.approvedPrice === null ? Prisma.DbNull : data.approvedPrice,
+            cancellationPolicyCode: data.cancellationPolicyCode,
+            reviewEvidence: data.reviewEvidence === null ? Prisma.DbNull : data.reviewEvidence,
+            fulfillmentPolicy: data.fulfillmentPolicy,
+            inputSchema: data.inputSchema,
+            localizedContent: data.localizedContent,
+            makerActorId: data.makerActorId,
+            reviewerActorId: data.reviewerActorId,
+            reviewedVersion: data.reviewedVersion,
+            publishedSnapshot:
+              data.publishedSnapshot === null ? Prisma.DbNull : data.publishedSnapshot,
+            slug: data.slug,
+            canonicalName: data.canonicalName,
+            canonicalDedupKey: data.canonicalDedupKey,
+            displayName: data.displayName,
+            status: data.status,
+            completenessStatus: data.completenessStatus,
+            serviceCategory: data.serviceCategory,
+            fulfillmentType: data.fulfillmentType,
+            serviceDescription: data.serviceDescription,
+            serviceAvailabilityStatus: data.serviceAvailabilityStatus,
+            requiredInputsOrDocuments: data.requiredInputsOrDocuments,
+            deliveryMode: data.deliveryMode,
+            responsibleServiceOwnerType: data.responsibleServiceOwnerType,
+            providerName: data.providerName,
+            providerReferenceId: data.providerReferenceId,
+            estimatedDeliveryTime: data.estimatedDeliveryTime,
+            slaPolicy: data.slaPolicy,
+            appointmentRequired: data.appointmentRequired,
+            supportedCountryLabels: data.supportedCountries,
+            supportedLanguageLabels: data.supportedLanguages,
+            servicePrerequisites: data.servicePrerequisites,
+            deliveryArtifactTypes: data.deliveryArtifactTypes,
+            pricingReferenceId: data.pricingReferenceId,
+            thumbnailAssetId: data.thumbnailAssetId,
+            publicDisplayMetadata: data.publicDisplayMetadata,
+            optionalFields: data.optionalFields,
+            supportedCountries: data.supportedCountryReferenceIds?.length
+              ? {
+                  create: data.supportedCountryReferenceIds.map((countryReferenceId) => ({
+                    countryReferenceId,
+                  })),
+                }
+              : undefined,
+            supportedLanguages: data.supportedLanguageReferenceIds?.length
+              ? {
+                  create: data.supportedLanguageReferenceIds.map((languageReferenceId) => ({
+                    languageReferenceId,
+                  })),
+                }
+              : undefined,
+          },
+          include: this.catalogInclude(),
+        }),
+      (row) => ({
+        serviceId: row.id,
+        publicId: row.publicId,
+        status: row.status,
+        version: row.version,
+      }),
+    );
     return this.mapCatalog(row);
   }
 
-  async update(id: string, data: ServiceCatalogRepositoryUpdateDto, expectedVersion: number): Promise<ServiceCatalogItemDto> {
+  async update(
+    id: string,
+    data: ServiceCatalogRepositoryUpdateDto,
+    expectedVersion: number,
+  ): Promise<ServiceCatalogItemDto> {
     const countryIds = data.supportedCountryReferenceIds;
     const languageIds = data.supportedLanguageReferenceIds;
     let row: any;
     try {
-      row = await this.atomicEvent('ServiceCatalogUpdated.v1', 'ServiceCatalogItem', async tx => this.catalog(tx).update({
-      where: { id_version: { id, version: expectedVersion } },
-      data: {
-        version: { increment: 1 },
-        // publicId is immutable after creation; repository updates must never rewrite identity.
-        slug: data.slug,
-        canonicalName: data.canonicalName,
-        canonicalDedupKey: data.canonicalDedupKey,
-        displayName: data.displayName,
-        status: data.status,
-        completenessStatus: data.completenessStatus,
-        serviceCategory: data.serviceCategory,
-        fulfillmentType: data.fulfillmentType,
-        serviceDescription: data.serviceDescription,
-        serviceAvailabilityStatus: data.serviceAvailabilityStatus,
-        requiredInputsOrDocuments: data.requiredInputsOrDocuments,
-        deliveryMode: data.deliveryMode,
-        responsibleServiceOwnerType: data.responsibleServiceOwnerType,
-        providerName: data.providerName,
-        providerReferenceId: data.providerReferenceId,
-        estimatedDeliveryTime: data.estimatedDeliveryTime,
-        slaPolicy: data.slaPolicy,
-        appointmentRequired: data.appointmentRequired,
-        supportedCountryLabels: data.supportedCountries,
-        supportedLanguageLabels: data.supportedLanguages,
-        servicePrerequisites: data.servicePrerequisites,
-        deliveryArtifactTypes: data.deliveryArtifactTypes,
-        pricingReferenceId: data.pricingReferenceId,
-        thumbnailAssetId: data.thumbnailAssetId,
-        publicDisplayMetadata: data.publicDisplayMetadata,
-        optionalFields: data.optionalFields,
-        supportedCountries: countryIds === undefined ? undefined : {
-          deleteMany: {},
-          create: (countryIds ?? []).map((countryReferenceId) => ({ countryReferenceId })),
-        },
-        supportedLanguages: languageIds === undefined ? undefined : {
-          deleteMany: {},
-          create: (languageIds ?? []).map((languageReferenceId) => ({ languageReferenceId })),
-        },
-      },
-      include: this.catalogInclude(),
-      }), value => ({ serviceId: value.id, publicId: value.publicId, version: value.version }));
+      row = await this.atomicEvent(
+        'ServiceCatalogUpdated.v1',
+        'ServiceCatalogItem',
+        async (tx) =>
+          this.catalog(tx).update({
+            where: { id_version: { id, version: expectedVersion } },
+            data: {
+              version: { increment: 1 },
+              approvedPrice: data.approvedPrice === null ? Prisma.DbNull : data.approvedPrice,
+              cancellationPolicyCode: data.cancellationPolicyCode,
+              reviewEvidence: data.reviewEvidence === null ? Prisma.DbNull : data.reviewEvidence,
+              fulfillmentPolicy: data.fulfillmentPolicy,
+              inputSchema: data.inputSchema,
+              localizedContent: data.localizedContent,
+              makerActorId: data.makerActorId,
+              reviewerActorId: data.reviewerActorId,
+              reviewedVersion: data.reviewedVersion,
+              publishedSnapshot:
+                data.publishedSnapshot === null ? Prisma.DbNull : data.publishedSnapshot,
+              // publicId is immutable after creation; repository updates must never rewrite identity.
+              slug: data.slug,
+              canonicalName: data.canonicalName,
+              canonicalDedupKey: data.canonicalDedupKey,
+              displayName: data.displayName,
+              status: data.status,
+              completenessStatus: data.completenessStatus,
+              serviceCategory: data.serviceCategory,
+              fulfillmentType: data.fulfillmentType,
+              serviceDescription: data.serviceDescription,
+              serviceAvailabilityStatus: data.serviceAvailabilityStatus,
+              requiredInputsOrDocuments: data.requiredInputsOrDocuments,
+              deliveryMode: data.deliveryMode,
+              responsibleServiceOwnerType: data.responsibleServiceOwnerType,
+              providerName: data.providerName,
+              providerReferenceId: data.providerReferenceId,
+              estimatedDeliveryTime: data.estimatedDeliveryTime,
+              slaPolicy: data.slaPolicy,
+              appointmentRequired: data.appointmentRequired,
+              supportedCountryLabels: data.supportedCountries,
+              supportedLanguageLabels: data.supportedLanguages,
+              servicePrerequisites: data.servicePrerequisites,
+              deliveryArtifactTypes: data.deliveryArtifactTypes,
+              pricingReferenceId: data.pricingReferenceId,
+              thumbnailAssetId: data.thumbnailAssetId,
+              publicDisplayMetadata: data.publicDisplayMetadata,
+              optionalFields: data.optionalFields,
+              supportedCountries:
+                countryIds === undefined
+                  ? undefined
+                  : {
+                      deleteMany: {},
+                      create: (countryIds ?? []).map((countryReferenceId) => ({
+                        countryReferenceId,
+                      })),
+                    },
+              supportedLanguages:
+                languageIds === undefined
+                  ? undefined
+                  : {
+                      deleteMany: {},
+                      create: (languageIds ?? []).map((languageReferenceId) => ({
+                        languageReferenceId,
+                      })),
+                    },
+            },
+            include: this.catalogInclude(),
+          }),
+        (value) => ({ serviceId: value.id, publicId: value.publicId, version: value.version }),
+      );
     } catch (error) {
       throw this.mapVersionConflict(error, 'SERVICE_CATALOG_VERSION_CONFLICT');
     }
@@ -149,18 +233,46 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     return row ? this.mapCatalog(row) : null;
   }
   async findBySlug(slug: string) {
-    const row = await this.catalog().findUnique({ where: { slug }, include: this.catalogInclude() });
+    const row = await this.catalog().findUnique({
+      where: { slug },
+      include: this.catalogInclude(),
+    });
     return row ? this.mapCatalog(row) : null;
   }
   async findByDedupKey(canonicalDedupKey: string) {
-    const row = await this.catalog().findUnique({ where: { canonicalDedupKey }, include: this.catalogInclude() });
+    const row = await this.catalog().findUnique({
+      where: { canonicalDedupKey },
+      include: this.catalogInclude(),
+    });
     return row ? this.mapCatalog(row) : null;
   }
-  async updateStatus(id: string, status: ServiceStatus, expectedVersion: number): Promise<ServiceCatalogItemDto> {
+  async updateStatus(
+    id: string,
+    status: ServiceStatus,
+    expectedVersion: number,
+  ): Promise<ServiceCatalogItemDto> {
     try {
-      const row = await this.atomicEvent('ServiceCatalogStatusChanged.v1', 'ServiceCatalogItem', async tx =>
-        this.catalog(tx).update({ where: { id_version: { id, version: expectedVersion } }, data: { status, version: { increment: 1 } }, include: this.catalogInclude() }),
-        value => ({ serviceId: value.id, publicId: value.publicId, status, version: value.version }),
+      const row = await this.atomicEvent(
+        'ServiceCatalogStatusChanged.v1',
+        'ServiceCatalogItem',
+        async (tx) =>
+          this.catalog(tx).update({
+            where: { id_version: { id, version: expectedVersion } },
+            data: {
+              status,
+              version: { increment: 1 },
+              ...([ServiceStatus.PUBLISHED, ServiceStatus.ARCHIVED].includes(status)
+                ? { publishedSnapshot: Prisma.DbNull }
+                : {}),
+            },
+            include: this.catalogInclude(),
+          }),
+        (value) => ({
+          serviceId: value.id,
+          publicId: value.publicId,
+          status,
+          version: value.version,
+        }),
       );
       return this.mapCatalog(row);
     } catch (error) {
@@ -168,20 +280,45 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     }
   }
 
-  async list(filters: ServiceCatalogFilters): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>> {
+  async list(
+    filters: ServiceCatalogFilters,
+  ): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>> {
     return this.listCatalog(filters, false);
   }
-  async listPublished(filters: PublicServiceCatalogFilters): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>> {
+  async listPublished(
+    filters: PublicServiceCatalogFilters,
+  ): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>> {
     const where: any = {
-      status: ServiceStatus.PUBLISHED,
-      serviceCategory: filters.serviceCategory, fulfillmentType: filters.fulfillmentType,
-      serviceAvailabilityStatus: filters.serviceAvailabilityStatus, deliveryMode: filters.deliveryMode,
-      supportedCountries: filters.supportedCountryReferenceId ? { some: { countryReferenceId: filters.supportedCountryReferenceId } } : undefined,
-      supportedLanguages: filters.supportedLanguageReferenceId ? { some: { languageReferenceId: filters.supportedLanguageReferenceId } } : undefined,
+      OR: [{ status: ServiceStatus.PUBLISHED }, { publishedSnapshot: { not: Prisma.DbNull } }],
+      ...(filters.search?.trim()
+        ? {
+            AND: [
+              {
+                OR: ['displayName', 'publicId', 'slug'].map((field) => ({
+                  [field]: { contains: filters.search!.trim(), mode: 'insensitive' },
+                })),
+              },
+            ],
+          }
+        : {}),
+      serviceCategory: filters.serviceCategory,
+      fulfillmentType: filters.fulfillmentType,
+      serviceAvailabilityStatus: filters.serviceAvailabilityStatus,
+      deliveryMode: filters.deliveryMode,
+      supportedCountries: filters.supportedCountryReferenceId
+        ? { some: { countryReferenceId: filters.supportedCountryReferenceId } }
+        : undefined,
+      supportedLanguages: filters.supportedLanguageReferenceId
+        ? { some: { languageReferenceId: filters.supportedLanguageReferenceId } }
+        : undefined,
     };
     Object.keys(where).forEach((key) => where[key] === undefined && delete where[key]);
     return queryStableCursorPage({
-      delegate: this.catalog() as any, where, include: this.catalogInclude(), cursor: filters.cursor, limit: filters.limit,
+      delegate: this.catalog() as any,
+      where,
+      include: this.catalogInclude(),
+      cursor: filters.cursor,
+      limit: filters.limit,
       map: (row: any) => this.mapCatalog(row),
     });
   }
@@ -190,29 +327,162 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     const page = Math.max(filters.page ?? 1, 1);
     const pageSize = Math.min(Math.max(filters.pageSize ?? 20, 1), 100);
     const where: any = {
-      ...(filters.search?.trim() ? { OR: ['displayName', 'publicId', 'slug', 'providerName'].map(field => ({ [field]: { contains: filters.search!.trim(), mode: 'insensitive' } })) } : {}),
+      ...(filters.search?.trim()
+        ? {
+            OR: ['displayName', 'publicId', 'slug', 'providerName'].map((field) => ({
+              [field]: { contains: filters.search!.trim(), mode: 'insensitive' },
+            })),
+          }
+        : {}),
       status: publishedOnly ? ServiceStatus.PUBLISHED : filters.status,
       completenessStatus: filters.completenessStatus,
       serviceCategory: filters.serviceCategory,
       fulfillmentType: filters.fulfillmentType,
       serviceAvailabilityStatus: filters.serviceAvailabilityStatus,
       deliveryMode: filters.deliveryMode,
-      supportedCountries: filters.supportedCountryReferenceId ? { some: { countryReferenceId: filters.supportedCountryReferenceId } } : undefined,
-      supportedLanguages: filters.supportedLanguageReferenceId ? { some: { languageReferenceId: filters.supportedLanguageReferenceId } } : undefined,
+      supportedCountries: filters.supportedCountryReferenceId
+        ? { some: { countryReferenceId: filters.supportedCountryReferenceId } }
+        : undefined,
+      supportedLanguages: filters.supportedLanguageReferenceId
+        ? { some: { languageReferenceId: filters.supportedLanguageReferenceId } }
+        : undefined,
     };
     Object.keys(where).forEach((key) => where[key] === undefined && delete where[key]);
     const [rows, total] = await Promise.all([
-      this.catalog().findMany({ where, include: this.catalogInclude(), orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }], skip: (page - 1) * pageSize, take: pageSize }),
+      this.catalog().findMany({
+        where,
+        include: this.catalogInclude(),
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
       this.catalog().count({ where }),
     ]);
-    return { data: rows.map((row: any) => this.mapCatalog(row)), total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+    return {
+      data: rows.map((row: any) => this.mapCatalog(row)),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
   }
 
   async createRequest(data: CreateServiceRequestDto): Promise<ServiceRequestDto> {
-    const row = await this.atomicEvent('ServiceRequested.v1', 'ServiceRequest', async tx => this.requests(tx).create({ data }), value => ({
-      requestId: value.id, publicId: value.publicId, serviceId: (value as any).serviceId, studentReferenceId: (value as any).studentReferenceId, status: (value as any).status, version: value.version,
-    }));
+    let row: any;
+    try {
+      row = await this.atomicEvent(
+        'ServiceRequested.v1',
+        'ServiceRequest',
+        async (tx) => this.requests(tx).create({ data }),
+        (value) => ({
+          requestId: value.id,
+          publicId: value.publicId,
+          serviceId: (value as any).serviceId,
+          studentReferenceId: (value as any).studentReferenceId,
+          status: (value as any).status,
+          version: value.version,
+        }),
+      );
+    } catch (error) {
+      if ((error as any)?.code !== 'P2002') throw error;
+      const existing = await this.requests().findUnique({ where: { publicId: data.publicId } });
+      if (
+        !existing ||
+        existing.payloadFingerprint !== data.payloadFingerprint ||
+        existing.studentReferenceId !== data.studentReferenceId ||
+        existing.serviceId !== data.serviceId
+      )
+        throw new Error('SERVICE_IDEMPOTENCY_PAYLOAD_CONFLICT');
+      row = existing;
+    }
     return this.mapRequest(row);
+  }
+  async eraseRequestInputs(id: string, studentReferenceId: string, expectedVersion: number) {
+    const row = await this.atomicEvent(
+      'ServiceRequestInputsErased.v1',
+      'ServiceRequest',
+      async (tx) => {
+        const changed = await this.requests(tx).updateMany({
+          where: {
+            id,
+            studentReferenceId,
+            version: expectedVersion,
+            status: { in: ['COMPLETED', 'CANCELLED'] },
+          },
+          data: {
+            requestParameters: {},
+            fulfillmentMetadata: Prisma.DbNull,
+            version: { increment: 1 },
+          },
+        });
+        if (changed.count !== 1) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
+        return this.requests(tx).findUnique({ where: { id } });
+      },
+      (row) => ({ requestId: row.id, version: row.version, actorId: studentReferenceId }),
+    );
+    return this.mapRequest(row);
+  }
+  async markCancellationPending(id: string, expectedVersion: number) {
+    return this.mapRequest(
+      await this.atomicRequestUpdate(
+        'ServiceCancellationFinancePending.v1',
+        id,
+        expectedVersion,
+        { cancellationState: 'PENDING_FINANCE' },
+        (row) => ({
+          requestId: row.id,
+          invoiceId: row.financeInvoiceId,
+          state: 'PENDING_FINANCE',
+          version: row.version,
+        }),
+      ),
+    );
+  }
+  async claimRequest(id: string, actorId: string, expectedVersion: number) {
+    const row = await this.atomicEvent(
+      'ServiceCaseClaimed.v1',
+      'ServiceRequest',
+      async (tx) => {
+        const changed = await this.requests(tx).updateMany({
+          where: {
+            id,
+            version: expectedVersion,
+            assignedStaffId: null,
+            status: { notIn: ['COMPLETED', 'CANCELLED'] },
+          },
+          data: { assignedStaffId: actorId, version: { increment: 1 } },
+        });
+        if (changed.count !== 1) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
+        return this.requests(tx).findUnique({ where: { id } });
+      },
+      (row) => ({ requestId: row.id, actorId, version: row.version }),
+    );
+    return this.mapRequest(row);
+  }
+  async requestTimeline(id: string) {
+    const rows = await (this.prisma as any).transactionalOutboxRecord.findMany({
+      where: { aggregateType: 'ServiceRequest', aggregateId: id },
+      select: { id: true, eventType: true, createdAt: true, payload: true },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 50,
+    });
+    return rows;
+  }
+  async prepareInvoiceIntent(id: string, intent: Record<string, unknown>, expectedVersion: number) {
+    return this.mapRequest(
+      await this.atomicRequestUpdate(
+        'ServiceInvoiceIntentPrepared.v1',
+        id,
+        expectedVersion,
+        { invoiceIntent: intent, invoiceLinkState: 'LINK_PENDING' },
+        (row) => ({
+          requestId: row.id,
+          version: row.version,
+          state: 'LINK_PENDING',
+          pricingId: intent.pricingId,
+        }),
+      ),
+    );
   }
   async findRequestById(id: string) {
     const row = await this.requests().findUnique({ where: { id } });
@@ -222,29 +492,42 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     const row = await this.requests().findUnique({ where: { publicId } });
     return row ? this.mapRequest(row) : null;
   }
-  async listSupportAwaitingPaymentStudents(page:number,limit:number){
-    if(!Number.isSafeInteger(page)||page<1||page>10000||
-       !Number.isSafeInteger(limit)||limit<1||limit>50)
+  async listSupportAwaitingPaymentStudents(page: number, limit: number) {
+    if (
+      !Number.isSafeInteger(page) ||
+      page < 1 ||
+      page > 10000 ||
+      !Number.isSafeInteger(limit) ||
+      limit < 1 ||
+      limit > 50
+    )
       throw new Error('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
-    const status=ServiceRequestStatus.AWAITING_PAYMENT;
+    const status = ServiceRequestStatus.AWAITING_PAYMENT;
     // P20 retains ownership: no student metadata, parameters, payment details
     // or fulfillment notes cross the boundary. Distinct student counts are exact.
-    const [groups,counts]=await Promise.all([
+    const [groups, counts] = await Promise.all([
       this.requests().groupBy({
-        by:['studentReferenceId'],where:{status},
-        orderBy:{studentReferenceId:'asc'},skip:(page-1)*limit,take:limit+1,
+        by: ['studentReferenceId'],
+        where: { status },
+        orderBy: { studentReferenceId: 'asc' },
+        skip: (page - 1) * limit,
+        take: limit + 1,
       }),
-      this.prisma.$queryRaw<Array<{total:bigint}>>`
+      this.prisma.$queryRaw<Array<{ total: bigint }>>`
         SELECT COUNT(DISTINCT "studentReferenceId") AS "total"
         FROM "ServiceRequestRecord" WHERE "status" = ${status}
       `,
     ]);
-    const total=Number(counts[0]?.total??0n);
-    if(!Number.isSafeInteger(total))throw new Error('SERVICE_SUPPORT_TRIAGE_COUNT_OVERFLOW');
-    const hasMore=groups.length>limit;
+    const total = Number(counts[0]?.total ?? 0n);
+    if (!Number.isSafeInteger(total)) throw new Error('SERVICE_SUPPORT_TRIAGE_COUNT_OVERFLOW');
+    const hasMore = groups.length > limit;
     return {
-      items:groups.slice(0,limit).map((row:any)=>({studentReferenceId:row.studentReferenceId})),
-      total,hasMore,nextPage:hasMore?page+1:null,
+      items: groups
+        .slice(0, limit)
+        .map((row: any) => ({ studentReferenceId: row.studentReferenceId })),
+      total,
+      hasMore,
+      nextPage: hasMore ? page + 1 : null,
     };
   }
 
@@ -252,46 +535,157 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
     const page = Math.max(filters.page ?? 1, 1);
     const pageSize = Math.min(Math.max(filters.pageSize ?? 20, 1), 100);
     const where: any = {
-      ...(filters.search?.trim() ? { OR: ['publicId', 'studentReferenceId', 'serviceId'].map(field => ({ [field]: { contains: filters.search!.trim(), mode: 'insensitive' } })) } : {}),
+      ...(filters.search?.trim()
+        ? {
+            OR: ['publicId', 'studentReferenceId', 'serviceId'].map((field) => ({
+              [field]: { contains: filters.search!.trim(), mode: 'insensitive' },
+            })),
+          }
+        : {}),
+      assignedStaffId: filters.unassigned ? null : filters.assignedStaffId,
+      providerReferenceId: filters.providerReferenceId,
+      ...(filters.overdue
+        ? { dueAt: { lt: new Date() }, status: { notIn: ['COMPLETED', 'CANCELLED'] } }
+        : {}),
       studentReferenceId: filters.studentReferenceId,
       serviceId: filters.serviceId,
-      status: filters.status,
+      ...(filters.status ? { status: filters.status } : {}),
     };
     Object.keys(where).forEach((key) => where[key] === undefined && delete where[key]);
     const [rows, total] = await Promise.all([
-      this.requests().findMany({ where, orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }], skip: (page - 1) * pageSize, take: pageSize }),
+      this.requests().findMany({
+        where,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
       this.requests().count({ where }),
     ]);
-    return { data: rows.map((row: any) => this.mapRequest(row)), total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+    return {
+      data: rows.map((row: any) => this.mapRequest(row)),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
   }
-  async updateRequestStatus(id: string, status: ServiceRequestStatus, expectedVersion: number, fulfillmentMetadata?: Record<string, unknown> | null) {
-    const row = await this.atomicRequestUpdate('ServiceFulfillmentStatusChanged.v1', id, expectedVersion, {
-      status, fulfillmentMetadata, completedAt: status === ServiceRequestStatus.COMPLETED ? new Date() : undefined,
-    }, value => ({ requestId: value.id, publicId: value.publicId, serviceId: (value as any).serviceId, studentReferenceId: (value as any).studentReferenceId, status, version: value.version }));
+  async updateRequestStatus(
+    id: string,
+    status: ServiceRequestStatus,
+    expectedVersion: number,
+    fulfillmentMetadata?: Record<string, unknown> | null,
+  ) {
+    const row = await this.atomicRequestUpdate(
+      'ServiceFulfillmentStatusChanged.v1',
+      id,
+      expectedVersion,
+      {
+        status,
+        ...(status === ServiceRequestStatus.CANCELLED ? { cancellationState: 'SETTLED' } : {}),
+        fulfillmentMetadata,
+        completedAt: status === ServiceRequestStatus.COMPLETED ? new Date() : undefined,
+      },
+      (value) => ({
+        requestId: value.id,
+        publicId: value.publicId,
+        serviceId: (value as any).serviceId,
+        studentReferenceId: (value as any).studentReferenceId,
+        status,
+        version: value.version,
+      }),
+    );
     return this.mapRequest(row);
   }
-  async linkFinanceInvoice(id: string, financeInvoiceId: string, financeInvoicePublicId: string, expectedVersion: number) {
-    const row = await this.atomicRequestUpdate('ServiceFinanceInvoiceLinked.v1', id, expectedVersion, { financeInvoiceId, financeInvoicePublicId, status: ServiceRequestStatus.AWAITING_PAYMENT }, value => ({ requestId: value.id, publicId: value.publicId, serviceId: (value as any).serviceId, studentReferenceId: (value as any).studentReferenceId, financeInvoiceId, financeInvoicePublicId, version: value.version }));
+  async linkFinanceInvoice(
+    id: string,
+    financeInvoiceId: string,
+    financeInvoicePublicId: string,
+    expectedVersion: number,
+  ) {
+    const row = await this.atomicRequestUpdate(
+      'ServiceFinanceInvoiceLinked.v1',
+      id,
+      expectedVersion,
+      {
+        financeInvoiceId,
+        financeInvoicePublicId,
+        invoiceLinkState: 'LINKED',
+        status: ServiceRequestStatus.AWAITING_PAYMENT,
+      },
+      (value) => ({
+        requestId: value.id,
+        publicId: value.publicId,
+        serviceId: (value as any).serviceId,
+        studentReferenceId: (value as any).studentReferenceId,
+        financeInvoiceId,
+        financeInvoicePublicId,
+        version: value.version,
+      }),
+    );
     return this.mapRequest(row);
   }
   async assignProvider(id: string, providerReferenceId: string, expectedVersion: number) {
-    const row = await this.atomicRequestUpdate('ServiceProviderAssigned.v1', id, expectedVersion, { providerReferenceId }, value => ({ requestId: value.id, publicId: value.publicId, serviceId: (value as any).serviceId, studentReferenceId: (value as any).studentReferenceId, providerReferenceId, version: value.version }));
+    const row = await this.atomicRequestUpdate(
+      'ServiceProviderAssigned.v1',
+      id,
+      expectedVersion,
+      { providerReferenceId },
+      (value) => ({
+        requestId: value.id,
+        publicId: value.publicId,
+        serviceId: (value as any).serviceId,
+        studentReferenceId: (value as any).studentReferenceId,
+        providerReferenceId,
+        version: value.version,
+      }),
+    );
     return this.mapRequest(row);
   }
 
-  private async atomicRequestUpdate(eventType: string, id: string, expectedVersion: number, data: Record<string, unknown>, payload: (value: any) => Record<string, unknown>): Promise<any> {
+  private async atomicRequestUpdate(
+    eventType: string,
+    id: string,
+    expectedVersion: number,
+    data: Record<string, unknown>,
+    payload: (value: any) => Record<string, unknown>,
+  ): Promise<any> {
     try {
-      return await this.atomicEvent(eventType, 'ServiceRequest', async tx => this.requests(tx).update({
-        where: { id_version: { id, version: expectedVersion } },
-        data: { ...data, version: { increment: 1 } },
-      }), payload);
+      return await this.atomicEvent(
+        eventType,
+        'ServiceRequest',
+        async (tx) => {
+          if (typeof data.providerReferenceId === 'string') {
+            const provider = await tx.serviceProviderRecord.findUnique({
+              where: { id: data.providerReferenceId },
+            });
+            if (!provider || provider.status !== 'QUALIFIED')
+              throw new Error('SERVICE_PROVIDER_NOT_QUALIFIED');
+            const count = await this.requests(tx).count({
+              where: {
+                id: { not: id },
+                providerReferenceId: data.providerReferenceId,
+                status: { notIn: ['COMPLETED', 'CANCELLED'] },
+              },
+            });
+            if (count >= provider.capacity) throw new Error('SERVICE_PROVIDER_CAPACITY_EXHAUSTED');
+          }
+          return this.requests(tx).update({
+            where: { id_version: { id, version: expectedVersion } },
+            data: { ...data, version: { increment: 1 } },
+          });
+        },
+        payload,
+      );
     } catch (error) {
       throw this.mapVersionConflict(error, 'SERVICE_REQUEST_VERSION_CONFLICT');
     }
   }
 
   private mapVersionConflict(error: unknown, code: string): Error {
-    const prismaCode = error && typeof error === 'object' && 'code' in error ? String((error as { code?: unknown }).code ?? '') : '';
+    const prismaCode =
+      error && typeof error === 'object' && 'code' in error
+        ? String((error as { code?: unknown }).code ?? '')
+        : '';
     if (prismaCode === 'P2025') return new Error(code);
     return error instanceof Error ? error : new Error(String(error));
   }
@@ -302,6 +696,16 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
 
   private mapCatalog(row: any): ServiceCatalogItemDto {
     return {
+      approvedPrice: asRecord(row.approvedPrice) as any,
+      cancellationPolicyCode: row.cancellationPolicyCode,
+      reviewEvidence: asRecord(row.reviewEvidence),
+      fulfillmentPolicy: row.fulfillmentPolicy,
+      inputSchema: Array.isArray(row.inputSchema) ? row.inputSchema : [],
+      localizedContent: asRecord(row.localizedContent) as any,
+      makerActorId: row.makerActorId,
+      reviewerActorId: row.reviewerActorId,
+      reviewedVersion: row.reviewedVersion,
+      publishedSnapshot: asRecord(row.publishedSnapshot),
       id: row.id,
       publicId: row.publicId,
       slug: row.slug,
@@ -322,8 +726,12 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
       estimatedDeliveryTime: row.estimatedDeliveryTime,
       slaPolicy: asRecord(row.slaPolicy),
       appointmentRequired: row.appointmentRequired,
-      supportedCountryReferenceIds: (row.supportedCountries ?? []).map((item: any) => item.countryReferenceId),
-      supportedLanguageReferenceIds: (row.supportedLanguages ?? []).map((item: any) => item.languageReferenceId),
+      supportedCountryReferenceIds: (row.supportedCountries ?? []).map(
+        (item: any) => item.countryReferenceId,
+      ),
+      supportedLanguageReferenceIds: (row.supportedLanguages ?? []).map(
+        (item: any) => item.languageReferenceId,
+      ),
       supportedCountries: asStrings(row.supportedCountryLabels),
       supportedLanguages: asStrings(row.supportedLanguageLabels),
       servicePrerequisites: asStrings(row.servicePrerequisites),
@@ -345,7 +753,18 @@ export class PrismaServicePlatformRepository implements IServiceCatalogRepositor
       studentReferenceId: row.studentReferenceId,
       serviceId: row.serviceId,
       status: row.status,
-      requestParameters: asRecord(row.requestParameters) ?? {},
+      requestParameters:
+        row.retentionUntil && row.retentionUntil <= new Date()
+          ? {}
+          : (asRecord(row.requestParameters) ?? {}),
+      assignedStaffId: row.assignedStaffId,
+      dueAt: row.dueAt,
+      retentionUntil: row.retentionUntil,
+      cancellationState: row.cancellationState,
+      payloadFingerprint: row.payloadFingerprint,
+      serviceSnapshot: asRecord(row.serviceSnapshot),
+      invoiceIntent: asRecord(row.invoiceIntent),
+      invoiceLinkState: row.invoiceLinkState,
       providerReferenceId: row.providerReferenceId,
       financeInvoiceId: row.financeInvoiceId,
       financeInvoicePublicId: row.financeInvoicePublicId,

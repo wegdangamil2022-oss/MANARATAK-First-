@@ -442,6 +442,8 @@ export interface StudentToolFilters {
 }
 
 export interface ServiceFilters {
+  search?:string;
+  locale?:'ar'|'en';
   serviceCategory?: string;
   fulfillmentType?: string;
   serviceAvailabilityStatus?: string;
@@ -1179,6 +1181,11 @@ export interface StudentToolExecutionResponseDto {
 }
 
 export interface PublicServiceCatalogItemDto {
+  approvedPrice?: {amountMinorUnits:string;currencyCode:string;scale:number}|null;
+  cancellationPolicyCode?: string;
+  fulfillmentPolicy?: 'FREE' | 'CHARGEABLE' | 'QUOTE_REQUIRED';
+  inputSchema?: Array<{key:string;type:'TEXT'|'NUMBER'|'BOOLEAN'|'ASSET';required:boolean}>;
+  localizedContent?: Record<string,{displayName:string;serviceDescription:string}> | null;
   publicId: string;
   slug: string;
   displayName: string;
@@ -2823,14 +2830,26 @@ export class ApiClient {
     return res.json();
   }
 
-  static async createMyStudentServiceRequest(input: { serviceId: string; requestParameters?: Record<string, unknown> }): Promise<StudentServiceRequestDto> {
+  static async createMyStudentServiceRequest(input: { serviceId: string; requestParameters?: Record<string, unknown>; idempotencyKey?: string; consent?: boolean }): Promise<StudentServiceRequestDto> {
     const res = await apiFetch(`${API_BASE_URL}/student/services/requests`, {
-      method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(input),
+      method: 'POST', headers: getStudentHeaders({ 'Content-Type': 'application/json', 'Idempotency-Key': input.idempotencyKey ?? crypto.randomUUID() }), body: JSON.stringify({ serviceId: input.serviceId, requestParameters: input.requestParameters, consent: input.consent }),
     });
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر إنشاء طلب الخدمة')); }
     return res.json();
   }
 
+  static async eraseMyServiceInputs(requestId:string,expectedVersion:number):Promise<StudentServiceRequestDto> {
+    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/inputs`,{method:'DELETE',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({expectedVersion})});
+    if(!res.ok)throw new Error(await parseErrorMessage(res,'تعذر حذف معطيات الطلب'));return res.json();
+  }
+  static async listMyServiceAvailability(requestId:string):Promise<{data:Array<{id:string;startsAt:string;endsAt:string;timezone:string}>}> {
+    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/availability`,{headers:getStudentHeaders()});
+    if(!res.ok)throw new Error(await parseErrorMessage(res,'تعذر تحميل المواعيد'));return res.json();
+  }
+  static async bookMyServiceRequest(requestId:string,slotId:string,idempotencyKey:string):Promise<{publicId:string;status:string;holdExpiresAt:string;pricingSnapshot:{finalAmountMinorUnits:string;currencyCode:string}}> {
+    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/bookings`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json','Idempotency-Key':idempotencyKey}),body:JSON.stringify({slotId})});
+    if(!res.ok)throw new Error(await parseErrorMessage(res,'تعذر حجز الموعد'));return res.json();
+  }
   static async getMyStudentServiceRequest(requestId: string): Promise<StudentServiceRequestDto> {
     const res = await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}`, { headers: getStudentHeaders() });
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر تحميل طلب الخدمة')); }
@@ -4505,83 +4524,4 @@ export class ApiClient {
     return res.json();
   }
 
-  // Student Services API (Phase 20)
-  static async getAdminStudentServices(_params?: any): Promise<any[]> {
-    const res = await apiFetch(`${API_BASE_URL}/admin/services/student`);
-    if (!res.ok) throw new Error('Failed to fetch student services');
-    return res.json();
-  }
-
-  static async getAdminStudentServiceById(id: string): Promise<any> {
-    const res = await apiFetch(`${API_BASE_URL}/admin/services/student/${encodeURIComponent(id)}`);
-    if (!res.ok) throw new Error('Failed to fetch student service');
-    return res.json();
-  }
-
-  static async createAdminStudentService(payload: any): Promise<any> {
-    const res = await apiFetch(`${API_BASE_URL}/admin/services/student`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error('Failed to create student service');
-    return res.json();
-  }
-
-  static async executeAdminStudentServiceAction(
-    id: string,
-    action: string,
-    payload?: any,
-  ): Promise<any> {
-    const res = await apiFetch(
-      `${API_BASE_URL}/admin/services/student/${encodeURIComponent(id)}/${action}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload || {}),
-      },
-    );
-    if (!res.ok) throw new Error(`Failed to execute student service action ${action}`);
-    return res.json();
-  }
-
-  // General Services API (Phase 20)
-  static async getAdminGeneralServices(_params?: any): Promise<any[]> {
-    const res = await apiFetch(`${API_BASE_URL}/admin/services/general`);
-    if (!res.ok) throw new Error('Failed to fetch general services');
-    return res.json();
-  }
-
-  static async getAdminGeneralServiceById(id: string): Promise<any> {
-    const res = await apiFetch(`${API_BASE_URL}/admin/services/general/${encodeURIComponent(id)}`);
-    if (!res.ok) throw new Error('Failed to fetch general service');
-    return res.json();
-  }
-
-  static async createAdminGeneralService(payload: any): Promise<any> {
-    const res = await apiFetch(`${API_BASE_URL}/admin/services/general`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error('Failed to create general service');
-    return res.json();
-  }
-
-  static async executeAdminGeneralServiceAction(
-    id: string,
-    action: string,
-    payload?: any,
-  ): Promise<any> {
-    const res = await apiFetch(
-      `${API_BASE_URL}/admin/services/general/${encodeURIComponent(id)}/${action}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload || {}),
-      },
-    );
-    if (!res.ok) throw new Error(`Failed to execute general service action ${action}`);
-    return res.json();
-  }
 }

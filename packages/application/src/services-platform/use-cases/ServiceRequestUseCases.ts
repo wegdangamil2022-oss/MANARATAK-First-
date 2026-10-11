@@ -1,6 +1,11 @@
-import { randomUUID } from 'node:crypto';
+import { serviceFingerprint, serviceInput } from '../ServiceSafety';
+import {
+  AssetReferencePolicy,
+  assertAssetReferenceUsable,
+} from '../../asset-platform/AssetReferencePolicy';
 import {
   IServiceCatalogRepository,
+  IServiceOperationsRepository,
   IServiceFinanceGateway,
   IServiceRequestRepository,
   PaginatedServiceRequestResult,
@@ -15,37 +20,85 @@ export class StudentServiceRequestUseCases {
   constructor(
     private readonly catalog: IServiceCatalogRepository,
     private readonly requests: IServiceRequestRepository,
+    private readonly assets?: AssetReferencePolicy,
   ) {}
 
   async createRequest(input: {
     studentReferenceId: string;
     serviceId: string;
     requestParameters?: Record<string, unknown>;
+    idempotencyKey?: string;
+    consent?: boolean;
   }): Promise<ServiceRequestDto> {
     const service =
       (await this.catalog.findById(input.serviceId)) ??
       (await this.catalog.findBySlug(input.serviceId));
     if (
       !service ||
-      service.status !== ServiceStatus.PUBLISHED ||
-      service.serviceAvailabilityStatus !== ServiceAvailabilityStatus.AVAILABLE
+      (service.status !== ServiceStatus.PUBLISHED && !service.publishedSnapshot) ||
+      (service.publishedSnapshot?.serviceAvailabilityStatus ??
+        service.serviceAvailabilityStatus) !== ServiceAvailabilityStatus.AVAILABLE
     )
       throw new Error('SERVICE_NOT_AVAILABLE');
-    return this.requests.createRequest({
-      publicId: `svc_req_${randomUUID()}`,
-      studentReferenceId: input.studentReferenceId,
+    if (!input.idempotencyKey || !/^[A-Za-z0-9._:-]{8,160}$/.test(input.idempotencyKey))
+      throw new Error('SERVICE_IDEMPOTENCY_KEY_REQUIRED');
+    if (input.consent !== true) throw new Error('SERVICE_INPUT_CONSENT_REQUIRED');
+    const published = service.publishedSnapshot
+      ? ({ ...service, ...service.publishedSnapshot } as typeof service)
+      : service;
+    const parameters = serviceInput(published, input.requestParameters ?? {});
+    for (const field of published.inputSchema ?? []) {
+      if (field.type === 'ASSET' && parameters[field.key])
+        await assertAssetReferenceUsable(this.assets, String(parameters[field.key]), {
+          purpose: 'SERVICE_REQUEST_DOCUMENT',
+          expectedOwnerId: input.studentReferenceId,
+        });
+    }
+    const publicId = `svc_req_${serviceFingerprint({ student: input.studentReferenceId, key: input.idempotencyKey }).slice(0, 40)}`;
+    const payloadFingerprint = serviceFingerprint({
       serviceId: service.id,
-      status: ServiceRequestStatus.REQUESTED,
-      requestParameters: input.requestParameters ?? {},
+      parameters,
+      consent: true,
     });
+    const previous = await this.requests.findRequestByPublicId(publicId);
+    if (previous) {
+      if (previous.payloadFingerprint !== payloadFingerprint)
+        throw new Error('SERVICE_IDEMPOTENCY_PAYLOAD_CONFLICT');
+      return this.studentProjection(previous);
+    }
+    return this.studentProjection(
+      await this.requests.createRequest({
+        publicId,
+        payloadFingerprint,
+        retentionUntil: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
+        dueAt: new Date(
+          Date.now() +
+            Math.min(Math.max(Number(published.slaPolicy?.minutes) || 1440, 1), 525600) * 60000,
+        ),
+        serviceSnapshot: {
+          serviceId: service.id,
+          version: published.version,
+          fulfillmentPolicy: published.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
+          displayName: published.displayName,
+          inputSchema: published.inputSchema ?? [],
+          deliveryArtifactTypes: published.deliveryArtifactTypes ?? [],
+          pricingReferenceId: published.pricingReferenceId ?? null,
+          consentAt: new Date().toISOString(),
+        },
+        studentReferenceId: input.studentReferenceId,
+        serviceId: service.id,
+        status: ServiceRequestStatus.REQUESTED,
+        requestParameters: parameters,
+      }),
+    );
   }
-
 
   async listMyRequests(
     studentReferenceId: string,
     filters: Omit<ServiceRequestFilters, 'studentReferenceId'> = {},
   ): Promise<PaginatedServiceRequestResult> {
-    return this.requests.listRequests({ ...filters, studentReferenceId });
+    const page = await this.requests.listRequests({ ...filters, studentReferenceId });
+    return { ...page, data: page.data.map((r) => this.studentProjection(r)) };
   }
 
   async getMyRequest(studentReferenceId: string, requestId: string): Promise<ServiceRequestDto> {
@@ -54,7 +107,25 @@ export class StudentServiceRequestUseCases {
       (await this.requests.findRequestByPublicId(requestId));
     if (!request || request.studentReferenceId !== studentReferenceId)
       throw new Error('SERVICE_REQUEST_NOT_FOUND');
-    return request;
+    return this.studentProjection(request);
+  }
+  async eraseMyRequestInputs(studentReferenceId: string, id: string, expectedVersion: number) {
+    await this.getMyRequest(studentReferenceId, id);
+    if (!this.requests.eraseRequestInputs) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+    return this.studentProjection(
+      await this.requests.eraseRequestInputs(id, studentReferenceId, expectedVersion),
+    );
+  }
+  private studentProjection(request: ServiceRequestDto): ServiceRequestDto {
+    return {
+      ...request,
+      fulfillmentMetadata: null,
+      invoiceIntent: undefined,
+      serviceSnapshot: undefined,
+      payloadFingerprint: undefined,
+      assignedStaffId: undefined,
+      providerReferenceId: undefined,
+    };
   }
 }
 
@@ -63,16 +134,23 @@ export class AdminServiceFulfillmentUseCases {
     private readonly catalog: IServiceCatalogRepository,
     private readonly requests: IServiceRequestRepository,
     private readonly finance: IServiceFinanceGateway,
+    private readonly operations?: IServiceOperationsRepository,
   ) {}
 
   /** Owner-domain read for explicitly permitted staff triage only (P20). */
-  listSupportAwaitingPaymentStudents(page=1,limit=20){
-    if(!Number.isSafeInteger(page)||page<1||page>10000||
-       !Number.isSafeInteger(limit)||limit<1||limit>50)
+  listSupportAwaitingPaymentStudents(page = 1, limit = 20) {
+    if (
+      !Number.isSafeInteger(page) ||
+      page < 1 ||
+      page > 10000 ||
+      !Number.isSafeInteger(limit) ||
+      limit < 1 ||
+      limit > 50
+    )
       throw new Error('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
-    if(!this.requests.listSupportAwaitingPaymentStudents)
+    if (!this.requests.listSupportAwaitingPaymentStudents)
       throw new Error('SERVICE_SUPPORT_TRIAGE_NOT_CONFIGURED');
-    return this.requests.listSupportAwaitingPaymentStudents(page,limit);
+    return this.requests.listSupportAwaitingPaymentStudents(page, limit);
   }
 
   async listRequests(filters: ServiceRequestFilters): Promise<PaginatedServiceRequestResult> {
@@ -98,22 +176,53 @@ export class AdminServiceFulfillmentUseCases {
     this.assertExpectedVersion(expectedVersion);
     const request = await this.requireRequest(id);
     if (request.version !== expectedVersion) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
+    if (request.invoiceLinkState === 'LINK_PENDING')
+      throw new Error('SERVICE_INVOICE_LINK_PENDING');
     this.assertTransition(request.status, status);
 
     const resumesFulfillment = [
       ServiceRequestStatus.IN_PROGRESS,
       ServiceRequestStatus.COMPLETED,
     ].includes(status);
+    const policy = request.serviceSnapshot?.fulfillmentPolicy ?? 'QUOTE_REQUIRED';
+    if (resumesFulfillment && (policy !== 'FREE' || request.financeInvoiceId)) {
+      if (!request.financeInvoiceId) throw new Error('SERVICE_FINANCE_INVOICE_REQUIRED');
+      const clearance = await this.finance.getInvoiceClearance(request.financeInvoiceId, {
+        requestPublicId: request.publicId,
+        studentReferenceId: request.studentReferenceId,
+      });
+      if (!clearance.financiallyCleared) throw new Error('SERVICE_FINANCIAL_CLEARANCE_REQUIRED');
+    }
     if (
-      resumesFulfillment &&
-      request.status === ServiceRequestStatus.AWAITING_PAYMENT &&
-      !request.financeInvoiceId
-    )
-      throw new Error('SERVICE_FINANCE_INVOICE_REQUIRED');
-    if (resumesFulfillment && request.financeInvoiceId) {
-      const clearance = await this.finance.getInvoiceClearance(request.financeInvoiceId);
-      if (!clearance.financiallyCleared)
-        throw new Error(`SERVICE_FINANCIAL_CLEARANCE_REQUIRED:${clearance.invoiceStatus}`);
+      status === ServiceRequestStatus.CANCELLED &&
+      (request.invoiceLinkState === 'LINK_PENDING' || request.financeInvoiceId)
+    ) {
+      if (!request.financeInvoiceId) throw new Error('SERVICE_INVOICE_LINK_PENDING');
+      const clearance = await this.finance.getInvoiceClearance(request.financeInvoiceId, {
+        requestPublicId: request.publicId,
+        studentReferenceId: request.studentReferenceId,
+      });
+      if (!clearance.cancellationCleared) {
+        if (request.cancellationState === 'PENDING_FINANCE') return request;
+        if (this.requests.markCancellationPending)
+          return this.requests.markCancellationPending(id, expectedVersion);
+        throw new Error('SERVICE_FINANCE_CANCELLATION_PENDING');
+      }
+    }
+    if (
+      status === ServiceRequestStatus.COMPLETED &&
+      (request.serviceSnapshot?.deliveryArtifactTypes as string[] | undefined)?.length
+    ) {
+      const booking = await this.operations?.findBookingForRequest?.(request.id);
+      const execution =
+        booking && (await this.operations?.findWorkflowExecutionForBooking?.(booking.id));
+      if (
+        !booking ||
+        booking.status !== 'COMPLETED' ||
+        !execution ||
+        execution.status !== 'COMPLETED'
+      )
+        throw new Error('SERVICE_DELIVERY_REVIEW_REQUIRED');
     }
 
     return this.requests.updateRequestStatus(id, status, expectedVersion, fulfillmentMetadata);
@@ -123,11 +232,54 @@ export class AdminServiceFulfillmentUseCases {
     this.assertExpectedVersion(expectedVersion);
     const request = await this.requireRequest(id);
     if (request.version !== expectedVersion) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
+    if (request.invoiceLinkState === 'LINK_PENDING')
+      throw new Error('SERVICE_INVOICE_LINK_PENDING');
     if ([ServiceRequestStatus.CANCELLED, ServiceRequestStatus.COMPLETED].includes(request.status))
       throw new Error('SERVICE_REQUEST_PROVIDER_ASSIGNMENT_CLOSED');
     const provider = providerReferenceId.trim();
     if (!provider) throw new Error('SERVICE_PROVIDER_REFERENCE_REQUIRED');
-    return this.requests.assignProvider(id, provider, expectedVersion);
+    if (!this.operations) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+    const qualified = await this.operations.findProviderById(provider);
+    if (
+      !qualified ||
+      qualified.status !== 'QUALIFIED' ||
+      !qualified.qualificationMetadata?.assetId ||
+      !Number.isFinite(new Date(String(qualified.qualificationMetadata.expiresAt)).getTime()) ||
+      new Date(String(qualified.qualificationMetadata.expiresAt)).getTime() <= Date.now() ||
+      !qualified.supportedServiceIds.includes(request.serviceId)
+    )
+      throw new Error('SERVICE_PROVIDER_NOT_QUALIFIED');
+    const service = await this.catalog.findById(request.serviceId);
+    if (
+      service?.supportedCountryReferenceIds?.length &&
+      (!qualified.countryReferenceId ||
+        !service.supportedCountryReferenceIds.includes(qualified.countryReferenceId))
+    )
+      throw new Error('SERVICE_PROVIDER_COUNTRY_MISMATCH');
+    return this.requests.assignProvider(id, qualified.id, expectedVersion);
+  }
+
+  async claimRequest(id: string, actorId: string, expectedVersion: number) {
+    if (!this.requests.claimRequest) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+    return this.requests.claimRequest(id, actorId, expectedVersion);
+  }
+  async requestTimeline(id: string) {
+    return this.requests.requestTimeline?.(id) ?? [];
+  }
+
+  async getRequestQuote(reference: string) {
+    const request = await this.getRequest(reference);
+    if (request.invoiceIntent) return request.invoiceIntent;
+    const price = await this.operations?.findActivePricing(request.serviceId, null, new Date());
+    if (!price || (request.serviceSnapshot?.pricingReferenceId && request.serviceSnapshot.pricingReferenceId !== price.id)) throw new Error('SERVICE_APPROVED_PRICING_REQUIRED');
+    return {
+      pricingId: price.id,
+      amountMinorUnits: price.amountMinorUnits,
+      currencyCode: price.currencyCode,
+      scale: price.scale,
+      quantity: 1,
+      pricingFingerprint: price.immutableFingerprint,
+    };
   }
 
   async createFinanceInvoice(input: {
@@ -142,29 +294,81 @@ export class AdminServiceFulfillmentUseCases {
   }) {
     this.assertExpectedVersion(input.expectedVersion);
     const request = await this.requireRequest(input.requestId);
-    if (request.version !== input.expectedVersion)
-      throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
-    if (request.financeInvoiceId) throw new Error('SERVICE_REQUEST_INVOICE_ALREADY_LINKED');
+    if (request.financeInvoiceId) {
+      if (
+        request.invoiceIntent &&
+        (input.amountMinorUnits !== request.invoiceIntent.amountMinorUnits ||
+          input.currencyCode !== request.invoiceIntent.currencyCode ||
+          input.scale !== request.invoiceIntent.scale ||
+          (input.quantity ?? 1) !== 1)
+      )
+        throw new Error('SERVICE_PRICE_QUOTE_MISMATCH');
+      return request;
+    }
     if ([ServiceRequestStatus.CANCELLED, ServiceRequestStatus.COMPLETED].includes(request.status))
       throw new Error('SERVICE_REQUEST_NOT_INVOICEABLE');
     const service = await this.catalog.findById(request.serviceId);
     if (!service) throw new Error('SERVICE_NOT_FOUND');
+    let prepared = request;
+    if (!request.invoiceIntent) {
+      if (request.version !== input.expectedVersion)
+        throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
+      if (!this.operations || !this.requests.prepareInvoiceIntent)
+        throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+      if (request.serviceSnapshot?.fulfillmentPolicy === 'FREE')
+        throw new Error('SERVICE_FREE_INVOICE_FORBIDDEN');
+      const pricing = await this.operations.findActivePricing(request.serviceId, null, new Date());
+      if (!pricing || (request.serviceSnapshot?.pricingReferenceId && request.serviceSnapshot.pricingReferenceId !== pricing.id) || BigInt(pricing.amountMinorUnits) <= 0n)
+        throw new Error('SERVICE_APPROVED_PRICING_REQUIRED');
+      if (
+        input.amountMinorUnits !== pricing.amountMinorUnits ||
+        input.currencyCode !== pricing.currencyCode ||
+        input.scale !== pricing.scale ||
+        (input.quantity ?? 1) !== 1
+      )
+        throw new Error('SERVICE_PRICE_QUOTE_MISMATCH');
+      const intent = {
+        pricingId: pricing.id,
+        pricingFingerprint: pricing.immutableFingerprint,
+        amountMinorUnits: pricing.amountMinorUnits,
+        currencyCode: pricing.currencyCode,
+        scale: pricing.scale,
+        quantity: 1,
+        description: String(request.serviceSnapshot?.displayName ?? service.displayName),
+        actorId: input.actorId,
+        capturedAt: new Date().toISOString(),
+      };
+      prepared = await this.requests.prepareInvoiceIntent(
+        request.id,
+        intent,
+        input.expectedVersion,
+      );
+    }
+    const intent = prepared.invoiceIntent!;
+    if (
+      input.amountMinorUnits !== intent.amountMinorUnits ||
+      input.currencyCode !== intent.currencyCode ||
+      input.scale !== intent.scale ||
+      (input.quantity ?? 1) !== 1
+    )
+      throw new Error('SERVICE_PRICE_QUOTE_MISMATCH');
     const invoice = await this.finance.createDraftInvoice({
       requestId: request.id,
       requestPublicId: request.publicId,
       studentReferenceId: request.studentReferenceId,
-      description: input.description?.trim() || service.displayName,
-      quantity: input.quantity ?? 1,
-      amountMinorUnits: input.amountMinorUnits,
-      currencyCode: input.currencyCode,
-      scale: input.scale,
-      actorId: input.actorId,
+      description: String(intent.description),
+      quantity: 1,
+      amountMinorUnits: String(intent.amountMinorUnits),
+      currencyCode: String(intent.currencyCode),
+      scale: Number(intent.scale),
+      actorId: String(intent.actorId),
     });
+    // The immutable intent remains LINK_PENDING if this CAS loses; retry reuses the same Finance key.
     return this.requests.linkFinanceInvoice(
       request.id,
       invoice.id,
       invoice.publicId,
-      input.expectedVersion,
+      prepared.version,
     );
   }
 

@@ -1,3 +1,6 @@
+import { serviceText } from '../i18n/serviceText';
+import { ServiceCaseQueue } from './ServiceCaseQueue';
+import { useTranslation } from '../i18n/I18nProvider';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -52,10 +55,17 @@ export function ServiceRequestsWorkspace({
   onDirtyChange: (dirty: boolean) => void;
 }) {
   const { hasPermission } = useAdminAuthorization();
+  const { language, dir } = useTranslation();
   const [params, setParams] = useSearchParams();
   const reference = params.get('request') || '';
+  const [studentFilter, setStudentFilter] = useState(params.get('studentReferenceId') ?? '');
+  const [serviceFilter, setServiceFilter] = useState(params.get('serviceId') ?? '');
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
+  const [overdue, setOverdue] = useState(false);
+  const [timeline, setTimeline] = useState<
+    Array<{ id: string; eventType: string; createdAt: string }>
+  >([]);
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<Page | null>(null);
@@ -69,21 +79,13 @@ export function ServiceRequestsWorkspace({
   const [notice, setNotice] = useState<string | null>(null);
   const [provider, setProvider] = useState('');
   const [note, setNote] = useState('');
-  const [invoiceAmount, setInvoiceAmount] = useState('');
-  const [currency, setCurrency] = useState('USD');
-  const [scale, setScale] = useState('2');
-  const [quantity, setQuantity] = useState('1');
   const sequence = useRef(0);
   const detailSequence = useRef(0);
   const mutation = useRef(false);
   const activeReference = useRef(reference);
   activeReference.current = reference;
   const anchor = useRef<HTMLDivElement>(null);
-  const dirty = Boolean(
-    note.trim() ||
-    (detail && provider !== (detail.providerReferenceId || '')) ||
-    invoiceAmount.trim(),
-  );
+  const dirty = Boolean(note.trim() || (detail && provider !== (detail.providerReferenceId || '')));
   useEffect(() => {
     onBusyChange(saving);
     return () => onBusyChange(false);
@@ -109,6 +111,9 @@ export function ServiceRequestsWorkspace({
     try {
       const query = new URLSearchParams({ page: String(page), pageSize: '20' });
       if (status) query.set('status', status);
+      if (overdue) query.set('overdue', 'true');
+      if (studentFilter) query.set('studentReferenceId', studentFilter);
+      if (serviceFilter) query.set('serviceId', serviceFilter);
       if (search) query.set('search', search);
       const next = await adminApiClient.request<Page>(`/admin/services/requests?${query}`);
       if (request === sequence.current) {
@@ -116,11 +121,11 @@ export function ServiceRequestsWorkspace({
         else setResult(next);
       }
     } catch (cause) {
-      if (request === sequence.current) setListError(errorText(cause));
+      if (request === sequence.current) setListError(serviceText(errorText(cause), language));
     } finally {
       if (request === sequence.current) setLoading(false);
     }
-  }, [page, status, search]);
+  }, [page, status, search, studentFilter, serviceFilter, overdue]);
   useEffect(() => {
     void load();
     return () => {
@@ -140,6 +145,16 @@ export function ServiceRequestsWorkspace({
       );
       if (request !== detailSequence.current) return;
       setDetail(next);
+      void adminApiClient
+        .request<{ data: typeof timeline }>(
+          `/admin/services/requests/${encodeURIComponent(next.id)}/timeline`,
+        )
+        .then((result) => {
+          if (request === detailSequence.current) setTimeline(result.data);
+        })
+        .catch(() => {
+          if (request === detailSequence.current) setTimeline([]);
+        });
       setProvider(next.providerReferenceId || '');
       setNote('');
       try {
@@ -152,7 +167,8 @@ export function ServiceRequestsWorkspace({
       }
       return true;
     } catch (cause) {
-      if (request === detailSequence.current) setDetailError(errorText(cause));
+      if (request === detailSequence.current)
+        setDetailError(serviceText(errorText(cause), language));
       return false;
     } finally {
       if (request === detailSequence.current) setDetailLoading(false);
@@ -172,16 +188,19 @@ export function ServiceRequestsWorkspace({
   }, [reference, inspect]);
   useEffect(() => {
     if (detail) anchor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [detail?.id]);
+  }, [detail]);
   function choose(ref: string) {
     if (saving) return;
-    if (dirty && !window.confirm('لديك بيانات غير محفوظة للطلب. الانتقال دون حفظ؟')) return;
+    if (
+      dirty &&
+      !window.confirm(serviceText('لديك بيانات غير محفوظة للطلب. الانتقال دون حفظ؟', language))
+    )
+      return;
     const next = new URLSearchParams(params);
     if (ref) next.set('request', ref);
     else next.delete('request');
     setParams(next);
     setNotice(null);
-    setInvoiceAmount('');
     setNote('');
   }
   async function command(action: string, body: Record<string, unknown>, message: string) {
@@ -203,19 +222,24 @@ export function ServiceRequestsWorkspace({
       const reloaded = await inspect(current.id);
       if (action !== 'transition') setNote(draftNote);
       if (action !== 'provider') setProvider(draftProvider);
-      if (action === 'finance-invoice') setInvoiceAmount('');
       await load();
       setNotice(
         reloaded
           ? message
-          : 'حُفظت العملية، لكن تعذرت إعادة قراءة الطلب. أعد تحميله قبل متابعة التعديلات.',
+          : serviceText(
+              'حُفظت العملية، لكن تعذرت إعادة قراءة الطلب. أعد تحميله قبل متابعة التعديلات.',
+              language,
+            ),
       );
     } catch (cause) {
-      const message = errorText(cause);
+      const message = serviceText(errorText(cause), language);
       if (message.includes('VERSION_CONFLICT')) {
         await inspect(current.id);
         setDetailError(
-          'تغيّر الطلب في جلسة أخرى. أعدنا تحميل نسخته الحالية؛ راجع البيانات قبل المحاولة.',
+          serviceText(
+            'تغيّر الطلب في جلسة أخرى. أعدنا تحميل نسخته الحالية؛ راجع البيانات قبل المحاولة.',
+            language,
+          ),
         );
       } else setDetailError(message);
     } finally {
@@ -225,10 +249,10 @@ export function ServiceRequestsWorkspace({
   }
   async function transition(target: ServiceRequestStatus) {
     if (detail && provider !== (detail.providerReferenceId || '')) {
-      setDetailError('احفظ إسناد المزود أولاً قبل تغيير حالة الطلب.');
+      setDetailError(serviceText('احفظ إسناد المزود أولاً قبل تغيير حالة الطلب.', language));
       return;
     }
-    if (!window.confirm(`تغيير حالة الطلب إلى «${labels[target]}»؟`)) return;
+    if (!window.confirm(`تغيير حالة الطلب إلى «${serviceText(labels[target], language)}»؟`)) return;
     await command(
       'transition',
       {
@@ -238,31 +262,49 @@ export function ServiceRequestsWorkspace({
           ...(note.trim() ? { administrativeNote: note.trim() } : {}),
         },
       },
-      'تم تحديث حالة الطلب وإعادة قراءة بياناته.',
+      serviceText('تم تحديث حالة الطلب وإعادة قراءة بياناته.', language),
     );
   }
   async function invoice(event: FormEvent) {
     event.preventDefault();
-    if (!/^\d+$/.test(invoiceAmount) || /^0+$/.test(invoiceAmount)) {
-      setDetailError('أدخل مبلغاً صحيحاً موجباً بالوحدات الصغرى.');
-      return;
+    try {
+      const quote = await adminApiClient.request<{
+        amountMinorUnits: string;
+        currencyCode: string;
+        scale: number;
+        quantity: number;
+      }>(`/admin/services/requests/${encodeURIComponent(detail!.id)}/quote`);
+      await command(
+        'finance-invoice',
+        {
+          amountMinorUnits: quote.amountMinorUnits,
+          currencyCode: quote.currencyCode,
+          scale: quote.scale,
+          quantity: 1,
+        },
+        serviceText(
+          'تم إنشاء وربط مسودة الفاتورة؛ إصدارها وتحصيلها يتمان من قسم المالية.',
+          language,
+        ),
+      );
+    } catch (cause) {
+      setDetailError(serviceText(errorText(cause), language));
     }
-    await command(
-      'finance-invoice',
-      {
-        amountMinorUnits: invoiceAmount,
-        currencyCode: currency.trim().toUpperCase(),
-        scale: Number(scale),
-        quantity: Number(quantity),
-      },
-      'تم إنشاء وربط مسودة الفاتورة؛ إصدارها وتحصيلها يتمان من قسم المالية.',
-    );
   }
   const closed =
-    detail &&
-    [ServiceRequestStatus.COMPLETED, ServiceRequestStatus.CANCELLED].includes(detail.status);
+    (detail &&
+      [ServiceRequestStatus.COMPLETED, ServiceRequestStatus.CANCELLED].includes(detail.status)) ||
+    !hasPermission('admin:services:requests:fulfill');
   return (
-    <div dir="rtl" className="space-y-5">
+    <div dir={dir} className="space-y-5">
+      {hasPermission('admin:services:requests:assign') && (
+        <ServiceCaseQueue
+          onClaim={(ref) => {
+            choose(ref);
+            void load();
+          }}
+        />
+      )}
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -272,7 +314,7 @@ export function ServiceRequestsWorkspace({
         className="flex flex-wrap items-end gap-3 rounded-2xl border bg-white p-4"
       >
         <label className="flex-1 text-xs font-bold">
-          رقم الطلب أو معرف الطالب أو الخدمة
+          {serviceText('رقم الطلب أو معرف الطالب أو الخدمة', language)}
           <input
             value={query}
             maxLength={120}
@@ -281,7 +323,41 @@ export function ServiceRequestsWorkspace({
           />
         </label>
         <label className="text-xs font-bold">
-          الحالة
+          {serviceText('معرف الطالب', language)}
+          <input
+            className="block rounded-xl border p-3"
+            value={studentFilter}
+            onChange={(e) => {
+              setStudentFilter(e.target.value);
+              setPage(1);
+              setParams((previous) => {
+                const next = new URLSearchParams(previous);
+                e.target.value
+                  ? next.set('studentReferenceId', e.target.value)
+                  : next.delete('studentReferenceId');
+                return next;
+              });
+            }}
+          />
+        </label>
+        <label className="text-xs font-bold">
+          {serviceText('معرف الخدمة', language)}
+          <input
+            className="block rounded-xl border p-3"
+            value={serviceFilter}
+            onChange={(e) => {
+              setServiceFilter(e.target.value);
+              setPage(1);
+              setParams((previous) => {
+                const next = new URLSearchParams(previous);
+                e.target.value ? next.set('serviceId', e.target.value) : next.delete('serviceId');
+                return next;
+              });
+            }}
+          />
+        </label>
+        <label className="text-xs font-bold">
+          {serviceText('الحالة', language)}
           <select
             value={status}
             onChange={(event) => {
@@ -290,16 +366,27 @@ export function ServiceRequestsWorkspace({
             }}
             className="mt-2 block rounded-xl border p-3"
           >
-            <option value="">الكل</option>
+            <option value="">{serviceText('الكل', language)}</option>
             {Object.values(ServiceRequestStatus).map((value) => (
               <option key={value} value={value}>
-                {labels[value]}
+                {serviceText(labels[value], language)}
               </option>
             ))}
           </select>
         </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={overdue}
+            onChange={(event) => {
+              setOverdue(event.target.checked);
+              setPage(1);
+            }}
+          />
+          {language === 'ar' ? serviceText('تجاوزت مهلة التنفيذ', language) : 'Overdue requests'}
+        </label>
         <button className="rounded-xl bg-[#142B5F] px-4 py-3 text-sm font-bold text-white">
-          بحث
+          {serviceText('بحث', language)}
         </button>
         <button
           type="button"
@@ -307,9 +394,31 @@ export function ServiceRequestsWorkspace({
           onClick={() => void load()}
           className="rounded-xl border px-4 py-3 text-sm"
         >
-          تحديث
+          {serviceText('تحديث', language)}
         </button>
       </form>
+      {detail && (
+        <section className="rounded-2xl border p-4">
+          <p>
+            {language === 'ar' ? serviceText('مهلة التنفيذ:', language) : 'Delivery deadline:'}{' '}
+            {date(detail.dueAt)}
+          </p>
+          <p>
+            {detail.cancellationState === 'PENDING_FINANCE'
+              ? language === 'ar'
+                ? serviceText('الإلغاء ينتظر معالجة المالية.', language)
+                : 'Cancellation awaits Finance settlement.'
+              : ''}
+          </p>
+          <ol>
+            {timeline.map((event) => (
+              <li key={event.id}>
+                {date(event.createdAt)} — {event.eventType}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       {listError && (
         <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">
           {listError}
@@ -317,19 +426,28 @@ export function ServiceRequestsWorkspace({
       )}
       <section className="overflow-hidden rounded-2xl border bg-white">
         <h2 className="border-b p-4 font-bold text-[#142B5F]">
-          طلبات الطلاب {result && !loading ? `(${result.total})` : ''}
+          {serviceText('طلبات الطلاب', language)}
+          {result && !loading ? `(${result.total})` : ''}
         </h2>
         {loading ? (
-          <p className="p-8 text-center">جارٍ تحميل الطلبات…</p>
+          <p className="p-8 text-center">{serviceText('جارٍ تحميل الطلبات…', language)}</p>
         ) : !listError && !result?.data.length ? (
-          <p className="p-8 text-center text-slate-500">لا توجد طلبات مطابقة.</p>
+          <p className="p-8 text-center text-slate-500">
+            {serviceText('لا توجد طلبات مطابقة.', language)}
+          </p>
         ) : (
           !listError && (
             <div className="overflow-x-auto">
               <table className="w-full text-right text-sm">
                 <thead className="bg-slate-50">
                   <tr>
-                    {['الطلب', 'الطالب', 'الحالة', 'آخر تحديث', ''].map((title, index) => (
+                    {[
+                      serviceText('الطلب', language),
+                      serviceText('الطالب', language),
+                      serviceText('الحالة', language),
+                      serviceText('آخر تحديث', language),
+                      '',
+                    ].map((title, index) => (
                       <th key={index} className="p-3">
                         {title}
                       </th>
@@ -355,7 +473,7 @@ export function ServiceRequestsWorkspace({
                           row.studentReferenceId
                         )}
                       </td>
-                      <td className="p-3">{labels[row.status]}</td>
+                      <td className="p-3">{serviceText(labels[row.status], language)}</td>
                       <td className="whitespace-nowrap p-3 text-xs">{date(row.updatedAt)}</td>
                       <td className="p-3">
                         <button
@@ -364,7 +482,7 @@ export function ServiceRequestsWorkspace({
                           onClick={() => choose(row.publicId)}
                           className="rounded-lg border px-3 py-2 text-xs font-bold disabled:opacity-50"
                         >
-                          متابعة
+                          {serviceText('متابعة', language)}
                         </button>
                       </td>
                     </tr>
@@ -377,7 +495,7 @@ export function ServiceRequestsWorkspace({
         {result && (
           <div className="flex justify-between gap-3 border-t p-4 text-xs">
             <button disabled={loading || page <= 1} onClick={() => setPage((value) => value - 1)}>
-              السابق
+              {serviceText('السابق', language)}
             </button>
             <span>
               {page} / {Math.max(1, result.totalPages)}
@@ -386,7 +504,7 @@ export function ServiceRequestsWorkspace({
               disabled={loading || page >= result.totalPages}
               onClick={() => setPage((value) => value + 1)}
             >
-              التالي
+              {serviceText('التالي', language)}
             </button>
           </div>
         )}
@@ -394,12 +512,12 @@ export function ServiceRequestsWorkspace({
       {reference && (
         <section ref={anchor} className="space-y-4 rounded-2xl border bg-white p-4 sm:p-6">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-bold text-[#142B5F]">تفاصيل الطلب</h2>
+            <h2 className="font-bold text-[#142B5F]">{serviceText('تفاصيل الطلب', language)}</h2>
             <button disabled={saving} onClick={() => choose('')}>
-              إغلاق
+              {serviceText('إغلاق', language)}
             </button>
           </div>
-          {detailLoading && <p>جارٍ تحميل تفاصيل الطلب…</p>}
+          {detailLoading && <p>{serviceText('جارٍ تحميل تفاصيل الطلب…', language)}</p>}
           {detailError && (
             <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">
               {detailError}
@@ -407,7 +525,7 @@ export function ServiceRequestsWorkspace({
           )}
           {!detailLoading && !detail && detailError && (
             <button onClick={() => void inspect(reference)} className="text-teal-700 underline">
-              إعادة المحاولة
+              {serviceText('إعادة المحاولة', language)}
             </button>
           )}
           {notice && (
@@ -419,16 +537,22 @@ export function ServiceRequestsWorkspace({
             <>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-xs text-slate-500">الخدمة</p>
+                  <p className="text-xs text-slate-500">{serviceText('الخدمة', language)}</p>
                   <p className="mt-1 font-bold">{service?.displayName || detail.serviceId}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">الحالة</p>
-                  <p className="mt-1 font-bold">{labels[detail.status]}</p>
+                  <p className="text-xs text-slate-500">{serviceText('الحالة', language)}</p>
+                  <p className="mt-1 font-bold">{serviceText(labels[detail.status], language)}</p>
                 </div>
-                <div className="break-all text-xs">رقم الطلب: {detail.publicId}</div>
+                <div className="break-all text-xs">
+                  {serviceText('رقم الطلب:', language)}
+                  {detail.publicId}
+                </div>
                 <div className="text-xs">
-                  إنشاء: {date(detail.createdAt)} · إتمام: {date(detail.completedAt)}
+                  {serviceText('إنشاء:', language)}
+                  {date(detail.createdAt)}
+                  {serviceText('· إتمام:', language)}
+                  {date(detail.completedAt)}
                 </div>
               </div>
               <div className="flex flex-wrap gap-3 text-sm">
@@ -437,30 +561,40 @@ export function ServiceRequestsWorkspace({
                     to={`/students?student=${encodeURIComponent(detail.studentReferenceId)}`}
                     className="text-teal-700 underline"
                   >
-                    ملف الطالب
+                    {serviceText('ملف الطالب', language)}
                   </Link>
                 )}
-                {detail.financeInvoiceId && hasPermission('admin:finance:manage') && (
+                {detail.financeInvoiceId && hasPermission('admin:finance:invoice:manage') && (
                   <Link
                     to={`/finance/invoices/${encodeURIComponent(detail.financeInvoiceId)}`}
                     className="text-teal-700 underline"
                   >
-                    الفاتورة {detail.financeInvoicePublicId}
+                    {serviceText('الفاتورة', language)}
+                    {detail.financeInvoicePublicId}
                   </Link>
                 )}
               </div>
-              <Data title="بيانات طلب الطالب" value={detail.requestParameters} />
-              <Data title="بيانات التنفيذ" value={detail.fulfillmentMetadata} />
+              <Data
+                title={serviceText('بيانات طلب الطالب', language)}
+                value={detail.requestParameters}
+              />
+              <Data
+                title={serviceText('بيانات التنفيذ', language)}
+                value={detail.fulfillmentMetadata}
+              />
               {!closed && (
                 <fieldset disabled={saving} className="space-y-4 border-t pt-4">
                   <label className="block text-xs font-bold">
-                    ملاحظة التنفيذ
+                    {serviceText('ملاحظة التنفيذ', language)}
                     <textarea
                       value={note}
                       maxLength={4000}
                       onChange={(event) => setNote(event.target.value)}
                       className="mt-2 w-full rounded-xl border p-3 text-sm"
-                      placeholder="تُحفظ مع انتقال الحالة وتظهر للطالب ضمن تفاصيل التنفيذ."
+                      placeholder={serviceText(
+                        'تُحفظ ضمن سجل التنفيذ الداخلي للحالة.',
+                        language,
+                      )}
                     />
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -471,12 +605,15 @@ export function ServiceRequestsWorkspace({
                         onClick={() => void transition(target)}
                         className={`rounded-xl px-4 py-2 text-xs font-bold ${target === ServiceRequestStatus.CANCELLED ? 'bg-rose-50 text-rose-800' : 'bg-[#142B5F] text-white'}`}
                       >
-                        {labels[target]}
+                        {serviceText(labels[target], language)}
                       </button>
                     ))}
                   </div>
                   <p className="text-xs text-slate-500">
-                    استئناف أو إتمام طلب مرتبط بفاتورة يخضع للتحقق المالي من الخادم.
+                    {serviceText(
+                      'استئناف أو إتمام طلب مرتبط بفاتورة يخضع للتحقق المالي من الخادم.',
+                      language,
+                    )}
                   </p>
                   <form
                     onSubmit={(event) => {
@@ -485,13 +622,13 @@ export function ServiceRequestsWorkspace({
                         void command(
                           'provider',
                           { providerReferenceId: provider.trim() },
-                          'تم إسناد المزود وإعادة تحميل الطلب.',
+                          serviceText('تم إسناد المزود وإعادة تحميل الطلب.', language),
                         );
                     }}
                     className="flex flex-wrap items-end gap-2"
                   >
                     <label className="flex-1 text-xs font-bold">
-                      معرف المزود
+                      {serviceText('معرف المزود', language)}
                       <input
                         value={provider}
                         maxLength={200}
@@ -503,67 +640,30 @@ export function ServiceRequestsWorkspace({
                       disabled={!provider.trim()}
                       className="rounded-xl border px-4 py-3 text-xs font-bold"
                     >
-                      حفظ الإسناد
+                      {serviceText('حفظ الإسناد', language)}
                     </button>
                   </form>
-                  {!detail.financeInvoiceId && hasPermission('admin:finance:manage') && (
+                  {!detail.financeInvoiceId && hasPermission('admin:finance:invoice:manage') && (
                     <form onSubmit={invoice} className="space-y-3 rounded-xl bg-slate-50 p-4">
-                      <h3 className="text-sm font-bold">إنشاء مسودة فاتورة مرتبطة</h3>
-                      <div className="grid gap-3 sm:grid-cols-4">
-                        <label className="text-xs">
-                          سعر الوحدة بالوحدات الصغرى
-                          <input
-                            required
-                            inputMode="numeric"
-                            pattern="[0-9]+"
-                            value={invoiceAmount}
-                            onChange={(event) => setInvoiceAmount(event.target.value)}
-                            className="mt-1 w-full rounded-lg border p-2"
-                          />
-                        </label>
-                        <label className="text-xs">
-                          العملة
-                          <input
-                            required
-                            minLength={3}
-                            maxLength={3}
-                            pattern="[A-Za-z]{3}"
-                            value={currency}
-                            onChange={(event) => setCurrency(event.target.value)}
-                            className="mt-1 w-full rounded-lg border p-2"
-                          />
-                        </label>
-                        <label className="text-xs">
-                          المنازل العشرية
-                          <input
-                            type="number"
-                            min={0}
-                            max={6}
-                            required
-                            value={scale}
-                            onChange={(event) => setScale(event.target.value)}
-                            className="mt-1 w-full rounded-lg border p-2"
-                          />
-                        </label>
-                        <label className="text-xs">
-                          الكمية
-                          <input
-                            type="number"
-                            min={1}
-                            max={100}
-                            required
-                            value={quantity}
-                            onChange={(event) => setQuantity(event.target.value)}
-                            className="mt-1 w-full rounded-lg border p-2"
-                          />
-                        </label>
-                      </div>
+                      <h3 className="text-sm font-bold">
+                        {serviceText('إنشاء مسودة فاتورة مرتبطة', language)}
+                      </h3>
+                      <p>
+                        {language === 'ar'
+                          ? serviceText(
+                              'تُنشأ الفاتورة من السعر المعتمد للخدمة؛ لا يُدخل مبلغ يدوي.',
+                              language,
+                            )
+                          : 'The invoice uses the approved service price.'}
+                      </p>
                       <p className="text-xs text-slate-500">
-                        مثال: 1500 مع منزلتين عشريتين = 15.00 لكل وحدة. لن تُصدر الفاتورة أو يُسجل
-                        سداد تلقائياً.
+                        {serviceText(
+                          'مثال: 1500 مع منزلتين عشريتين = 15.00 لكل وحدة. لن تُصدر الفاتورة أو يُسجل سداد تلقائياً.',
+                          language,
+                        )}
                       </p>
                       <button className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-bold text-white">
-                        إنشاء مسودة الفاتورة
+                        {serviceText('إنشاء مسودة الفاتورة', language)}
                       </button>
                     </form>
                   )}

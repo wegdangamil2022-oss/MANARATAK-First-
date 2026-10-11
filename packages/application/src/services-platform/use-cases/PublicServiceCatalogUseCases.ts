@@ -4,39 +4,62 @@ import {
   PublicServiceCatalogFilters,
   PublicServiceCatalogItemDto,
   ServiceCatalogItemDto,
-  ServiceStatus
+  ServiceStatus,
 } from '@manaratak/domain';
 
 export class PublicServiceCatalogUseCases {
   constructor(private readonly repository: IServiceCatalogRepository) {}
 
-  public async listServices(filters: PublicServiceCatalogFilters): Promise<PaginatedServiceCatalogResult<PublicServiceCatalogItemDto>> {
+  public async listServices(
+    filters: PublicServiceCatalogFilters,
+  ): Promise<PaginatedServiceCatalogResult<PublicServiceCatalogItemDto>> {
     const paginated = await this.repository.listPublished(filters);
 
     return {
       ...paginated,
-      data: paginated.data.map((service: ServiceCatalogItemDto) => this.mapToPublicDto(service))
+      data: paginated.data.map((service: ServiceCatalogItemDto) =>
+        this.mapToPublicDto(service, filters.locale),
+      ),
     };
   }
 
-  public async getService(slug: string): Promise<PublicServiceCatalogItemDto> {
+  public async getService(
+    slug: string,
+    locale?: 'ar' | 'en',
+  ): Promise<PublicServiceCatalogItemDto> {
     const service = await this.repository.findBySlug(slug);
 
-    if (!service || service.status !== ServiceStatus.PUBLISHED) {
+    if (!service || (service.status !== ServiceStatus.PUBLISHED && !service.publishedSnapshot)) {
       throw new Error('Service not found');
     }
 
-    return this.mapToPublicDto(service);
+    return this.mapToPublicDto(service, locale);
   }
 
-  private mapToPublicDto(service: ServiceCatalogItemDto): PublicServiceCatalogItemDto {
+  private mapToPublicDto(
+    service: ServiceCatalogItemDto,
+    locale?: 'ar' | 'en',
+  ): PublicServiceCatalogItemDto {
+    if (service.publishedSnapshot)
+      service = { ...service, ...service.publishedSnapshot } as ServiceCatalogItemDto;
+    const localized = locale ? service.localizedContent?.[locale] : undefined;
     return {
+      approvedPrice:
+        service.approvedPrice &&
+        (!service.approvedPrice.effectiveTo ||
+          new Date(service.approvedPrice.effectiveTo).getTime() > Date.now())
+          ? service.approvedPrice
+          : null,
+      cancellationPolicyCode: service.cancellationPolicyCode ?? 'FINANCE_REVIEW_REQUIRED',
+      fulfillmentPolicy: service.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
+      inputSchema: service.inputSchema,
+      localizedContent: service.localizedContent,
       publicId: service.publicId,
       slug: service.slug,
-      displayName: service.displayName,
+      displayName: localized?.displayName ?? service.displayName,
       serviceCategory: service.serviceCategory,
       fulfillmentType: service.fulfillmentType,
-      serviceDescription: service.serviceDescription,
+      serviceDescription: localized?.serviceDescription ?? service.serviceDescription,
       serviceAvailabilityStatus: service.serviceAvailabilityStatus,
       requiredInputsOrDocuments: service.requiredInputsOrDocuments,
       deliveryMode: service.deliveryMode,
@@ -52,7 +75,11 @@ export class PublicServiceCatalogUseCases {
       deliveryArtifactTypes: service.deliveryArtifactTypes,
       pricingReferenceId: service.pricingReferenceId,
       thumbnailAssetId: service.thumbnailAssetId,
-      publicDisplayMetadata: service.publicDisplayMetadata,
+      publicDisplayMetadata: Object.fromEntries(
+        Object.entries(service.publicDisplayMetadata ?? {}).filter(([key]) =>
+          ['includes', 'excludes', 'faqs', 'badge'].includes(key),
+        ),
+      ),
       version: service.version,
     };
   }

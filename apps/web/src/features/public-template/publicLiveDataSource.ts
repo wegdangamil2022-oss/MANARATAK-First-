@@ -377,7 +377,7 @@ export function mapService(dto: PublicServiceCatalogItemDto): Service {
     badge: firstString(metadata.badge, audience === 'student' ? 'خدمة طلابية' : 'خدمة عامة'),
     shortDescription: dto.serviceDescription,
     description: dto.serviceDescription,
-    priceLabel: firstString(metadata.priceLabel, dto.pricingReferenceId ? 'راجع تفاصيل التسعير' : 'يحدد حسب الطلب'),
+    priceLabel: dto.fulfillmentPolicy === 'FREE' ? 'مجانية' : dto.approvedPrice ? `${BigInt(dto.approvedPrice.amountMinorUnits)/10n**BigInt(dto.approvedPrice.scale)}${dto.approvedPrice.scale ? '.'+(BigInt(dto.approvedPrice.amountMinorUnits)%10n**BigInt(dto.approvedPrice.scale)).toString().padStart(dto.approvedPrice.scale,'0') : ''} ${dto.approvedPrice.currencyCode}` : 'عرض سعر معتمد مطلوب قبل التنفيذ',
     turnaround: dto.estimatedDeliveryTime ?? '',
     deliveryMode: ({ ONLINE: 'عبر الإنترنت', IN_PERSON: 'حضوري', HYBRID: 'مدمج' } as Record<string,string>)[dto.deliveryMode] || dto.deliveryMode,
     includes: recordStringArray(metadata, 'includes'),
@@ -385,9 +385,9 @@ export function mapService(dto: PublicServiceCatalogItemDto): Service {
     requirements: dto.requiredInputsOrDocuments ?? [],
     faqs: Array.isArray(metadata.faqs) ? metadata.faqs.flatMap(value => { const row = asRecord(value); return typeof row.question === 'string' && typeof row.answer === 'string' ? [{ question: row.question, answer: row.answer }] : []; }) : [],
     packages: Array.isArray(metadata.packages) ? metadata.packages.flatMap(value => { const row = asRecord(value); return typeof row.name === 'string' && typeof row.price === 'string' && typeof row.description === 'string' ? [{ name: row.name, price: row.price, description: row.description }] : []; }) : [],
-    cancellationPolicy: firstString(metadata.cancellationPolicy),
+    cancellationPolicy: dto.cancellationPolicyCode === 'FREE_BEFORE_START' ? 'الإلغاء متاح قبل بدء التنفيذ للخدمة المجانية.' : 'تخضع طلبات الإلغاء ومبالغ الاسترداد لمراجعة المالية قبل اعتماد الإلغاء.',
     availabilityNote: ({ AVAILABLE: 'الخدمة متاحة لاستقبال الطلبات', UNAVAILABLE: 'الخدمة غير متاحة حالياً', PAUSED: 'استقبال الطلبات متوقف مؤقتاً' } as Record<string,string>)[dto.serviceAvailabilityStatus] || dto.serviceAvailabilityStatus,
-    requestContextFields: dto.servicePrerequisites ?? [],
+    requestContextFields: (dto.inputSchema ?? []).filter(field=>field.required && field.type==='TEXT').map(field=>field.key),
     contextualLinks: [],
   };
 }
@@ -536,8 +536,8 @@ export async function loadPublishedArticles(locale: PublicLiveLocale = 'ar'): Pr
   return pages.flat().map(mapArticle);
 }
 export async function loadPublishedServices(): Promise<Service[]> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getServices({ cursor, limit: 100 }));
-  return rows.map(mapService);
+  const page = await ApiClient.getServices({ limit:20 });
+  return page.data.map(mapService);
 }
 export async function loadPublishedCareers(): Promise<CareerOpportunityPreview[]> {
   const rows = await collectCursorPages((cursor) => ApiClient.getCareerJobs({ cursor, limit: 100 }));

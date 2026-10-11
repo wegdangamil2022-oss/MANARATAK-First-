@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft,
   Clock3,
@@ -11,11 +11,14 @@ import {
   X,
   Sparkles,
 } from 'lucide-react';
+import { ApiClient } from '../../../api/client';
+import { mapService } from '../publicLiveDataSource';
 import { Service, ServiceAudience } from '../types';
 import { FavoriteButton } from './FavoriteButton';
 
 interface ServicesDirectoryPageProps {
   services: Service[];
+  remote?: boolean;
   audience: ServiceAudience;
   onBack?: () => void;
   onSelectService?: (service: Service) => void;
@@ -25,6 +28,7 @@ interface ServicesDirectoryPageProps {
 
 export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
   services,
+  remote = false,
   audience,
   onBack,
   onSelectService,
@@ -33,15 +37,92 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
+  const [remoteRows, setRemoteRows] = useState<Service[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [serverSearch, setServerSearch] = useState('');
+  const sequence = useRef(0);
+  const loadingMore = useRef(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setServerSearch(searchQuery.trim()), 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  const categoryCodes: Record<string, string> = {
+    'خدمات الطلاب': 'STUDENT_SERVICES',
+    'خدمات المستندات': 'DOCUMENT_SERVICES',
+    'خدمات التأشيرات': 'VISA_SERVICES',
+    'خدمات السفر': 'TRAVEL_SERVICES',
+    'خدمات أكاديمية': 'ACADEMIC_SERVICES',
+    'خدمات مهنية': 'PROFESSIONAL_SERVICES',
+    'خدمات المؤسسات': 'ENTERPRISE_SERVICES',
+  };
+  useEffect(() => {
+    if (!remote) return;
+    let current = true;
+    const generation = ++sequence.current;
+    setLoading(true);
+    setError('');
+    setRemoteRows([]);
+    setCursor(null);
+    void ApiClient.getServices({
+      search: serverSearch,
+      serviceCategory: categoryCodes[selectedCategory],
+      limit: 20,
+    })
+      .then((page) => {
+        if (current && generation === sequence.current) {
+          setRemoteRows(page.data.map(mapService));
+          setCursor(page.nextCursor ?? null);
+        }
+      })
+      .catch(() => {
+        if (current) setError('تعذر تحميل الخدمات.');
+      })
+      .finally(() => {
+        if (current) setLoading(false);
+      });
+    return () => {
+      current = false;
+    };
+  }, [remote, serverSearch, selectedCategory]);
+  async function more() {
+    if (!cursor || loadingMore.current) return;
+    loadingMore.current = true;
+    setLoading(true);
+    const generation = sequence.current;
+    try {
+      const page = await ApiClient.getServices({
+        search: serverSearch,
+        serviceCategory: categoryCodes[selectedCategory],
+        cursor,
+        limit: 20,
+      });
+      if (generation === sequence.current) {
+        setRemoteRows((previous) => [...previous, ...page.data.map(mapService)]);
+        setCursor(page.nextCursor ?? null);
+      }
+    } catch {
+      setError('تعذر تحميل الصفحة التالية.');
+    } finally {
+      loadingMore.current = false;
+      if (generation === sequence.current) setLoading(false);
+    }
+  }
 
   const audienceServices = useMemo(
-    () => services.filter((service) => service.audience === audience),
-    [services, audience],
+    () => (remote ? remoteRows : services).filter((service) => service.audience === audience),
+    [services, audience, remote, remoteRows],
   );
 
   const categories = useMemo(
-    () => ['الكل', ...Array.from(new Set(audienceServices.map((service) => service.category)))],
-    [audienceServices],
+    () => [
+      'الكل',
+      ...(remote
+        ? Object.keys(categoryCodes)
+        : Array.from(new Set(audienceServices.map((service) => service.category)))),
+    ],
+    [audienceServices, remote],
   );
 
   const filteredServices = useMemo(() => {
@@ -60,7 +141,19 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
   const isStudent = audience === 'student';
 
   return (
-    <div className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] font-['Cairo',sans-serif] select-none mn-panel " dir="rtl">
+    <div
+      className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] font-['Cairo',sans-serif] select-none mn-panel "
+      dir="rtl"
+    >
+      <div aria-live="polite">
+        {loading && 'جارٍ التحميل…'}
+        {error && <p role="alert">{error}</p>}
+        {remote && cursor && (
+          <button type="button" disabled={loading} onClick={() => void more()}>
+            تحميل المزيد
+          </button>
+        )}
+      </div>
       <div className="relative mn-search-hero overflow-hidden px-3 pb-12 pt-4 text-white shadow-xs sm:px-4 sm:pb-14 mn-inverse ">
         <button
           type="button"
@@ -80,15 +173,24 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
           </div>
           <div className="absolute -left-12 -top-12 h-56 w-56 rounded-full border border-[var(--mn-accent)]/25" />
           {isStudent ? (
-            <GraduationCap className="absolute -right-5 bottom-0 h-36 w-36 text-[var(--mn-heading)]" strokeWidth={1.1} />
+            <GraduationCap
+              className="absolute -right-5 bottom-0 h-36 w-36 text-[var(--mn-heading)]"
+              strokeWidth={1.1}
+            />
           ) : (
-            <FileText className="absolute -right-5 bottom-0 h-36 w-36 text-[var(--mn-heading)]" strokeWidth={1.1} />
+            <FileText
+              className="absolute -right-5 bottom-0 h-36 w-36 text-[var(--mn-heading)]"
+              strokeWidth={1.1}
+            />
           )}
         </div>
 
         <div className="relative z-10 mx-auto max-w-md space-y-2 pt-2 text-center sm:max-w-xl">
           <div className="flex justify-center">
-            <Sparkles className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]" aria-hidden="true" />
+            <Sparkles
+              className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]"
+              aria-hidden="true"
+            />
           </div>
           <h1 className="font-['Cairo',sans-serif] text-xl font-bold leading-tight text-white sm:text-2xl">
             {isStudent ? 'الخدمات الطلابية' : 'الخدمات العامة والدعم'}
@@ -128,7 +230,9 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
               <SlidersHorizontal className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-[9px] font-bold text-[var(--mn-text-muted)]">نوع الخدمة</label>
+              <label className="mb-1 block text-[9px] font-bold text-[var(--mn-text-muted)]">
+                نوع الخدمة
+              </label>
               <select
                 value={selectedCategory}
                 onChange={(event) => setSelectedCategory(event.target.value)}
@@ -147,7 +251,9 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
         <div className="mb-2 flex items-center justify-between px-1">
           <div>
             <h2 className="text-[13px] font-bold text-[var(--mn-heading)]">الخدمات المتاحة</h2>
-            <p className="text-[9px] font-bold text-[var(--mn-text-muted)]">الخدمات المنشورة والمتاحة من كتالوج منارتك</p>
+            <p className="text-[9px] font-bold text-[var(--mn-text-muted)]">
+              الخدمات المنشورة والمتاحة من كتالوج منارتك
+            </p>
           </div>
           <span className="rounded-full border border-[var(--mn-accent)]/20 bg-[var(--mn-accent)]/10 px-2 py-1 text-[9px] font-bold text-[var(--mn-accent-text)]">
             {filteredServices.length} خدمة
@@ -159,7 +265,9 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
             <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center shadow-sm mn-panel ">
               <Search className="mx-auto h-6 w-6 text-[var(--mn-text-muted)]" />
               <h3 className="mt-2 text-xs font-bold text-[var(--mn-text)]">لا توجد خدمات مطابقة</h3>
-              <p className="mt-1 text-[10px] font-semibold text-[var(--mn-text-muted)]">غيّر البحث أو نوع الخدمة.</p>
+              <p className="mt-1 text-[10px] font-semibold text-[var(--mn-text-muted)]">
+                غيّر البحث أو نوع الخدمة.
+              </p>
             </div>
           ) : (
             filteredServices.map((service) => (
@@ -191,7 +299,9 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
                         <h3 className="font-['Cairo',sans-serif] text-[12.5px] font-bold leading-5 text-[var(--mn-heading)] sm:text-[13.5px]">
                           {service.title}
                         </h3>
-                        <p className="mt-0.5 text-[9px] font-bold text-[var(--mn-accent-text)]">{service.category}</p>
+                        <p className="mt-0.5 text-[9px] font-bold text-[var(--mn-accent-text)]">
+                          {service.category}
+                        </p>
                       </div>
                       <span className="rounded-full bg-[var(--mn-primary)]/10 px-2 py-1 text-[8px] font-bold text-[var(--mn-heading)]">
                         {service.badge}
@@ -229,4 +339,3 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
     </div>
   );
 };
-

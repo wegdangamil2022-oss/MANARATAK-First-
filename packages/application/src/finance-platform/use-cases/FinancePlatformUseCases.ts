@@ -316,8 +316,9 @@ export class FinancePlatformUseCases {
     return this.repository.voidInvoiceAtomic(invoice.id, context(identity));
   }
 
-  async getInvoiceClearance(invoiceId: string) {
+  async getInvoiceClearance(invoiceId: string, expected?: { originDomain: string; originReferenceId: string; studentReferenceId: string }) {
     const invoice = await this.requireInvoice(invoiceId);
+    if (expected && (invoice.originDomain !== expected.originDomain || invoice.originReferenceId !== expected.originReferenceId || invoice.studentReferenceId !== expected.studentReferenceId)) throw new Error('SERVICE_FINANCE_ORIGIN_MISMATCH');
     const financiallyCleared =
       BigInt(invoice.amountDue.amountMinorUnits) === 0n &&
       [InvoiceStatus.PAID, InvoiceStatus.CREDITED].includes(invoice.status);
@@ -325,7 +326,8 @@ export class FinancePlatformUseCases {
       invoiceId: invoice.id,
       invoiceStatus: invoice.status,
       amountDueMinorUnits: invoice.amountDue.amountMinorUnits,
-      financiallyCleared,
+      financiallyCleared: expected ? financiallyCleared && invoice.status === InvoiceStatus.PAID && await this.repository.hasFinancialClearanceForOrigin(expected) : financiallyCleared,
+      cancellationCleared: invoice.status === InvoiceStatus.VOIDED,
     };
   }
 

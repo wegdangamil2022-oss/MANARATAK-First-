@@ -712,7 +712,7 @@ export default function App() {
             setActiveTab('account');
           }
         } else if (pending?.kind === 'REQUEST_SERVICE') {
-          const created = await ApiClient.createMyStudentServiceRequest({ serviceId: pending.serviceId, requestParameters: pending.requestParameters });
+          const created = await ApiClient.createMyStudentServiceRequest({ serviceId: pending.serviceId, requestParameters: pending.requestParameters, idempotencyKey: pending.idempotencyKey, consent: pending.consent });
           if (!cancelled) {
             window.history.replaceState({...window.history.state}, '', `/student?tab=services&requestId=${encodeURIComponent(created.id)}`);
             setActiveTab('account');
@@ -935,16 +935,16 @@ export default function App() {
     }
   };
 
-  const handleRequestService = async (service: Service, requestParameters: Record<string, unknown>) => {
+  const handleRequestService = async (service: Service, requestParameters: Record<string, unknown>, idempotencyKey: string) => {
     if (publicDataMode !== 'api') return;
     try { await ApiClient.getCurrentStudentIdentity(); }
     catch {
-      preservePostLoginAction({ kind: 'REQUEST_SERVICE', serviceId: service.id, serviceSlug: service.slug ?? service.id, requestParameters });
+      preservePostLoginAction({ kind: 'REQUEST_SERVICE', idempotencyKey, consent: true, serviceId: service.id, serviceSlug: service.slug ?? service.id, requestParameters });
       preservePostLoginReturn(`/services/${service.slug ?? service.id}`);
       setSelectedService(null); setActiveTab('auth'); return;
     }
     try {
-      const created = await ApiClient.createMyStudentServiceRequest({ serviceId: service.id, requestParameters });
+      const created = await ApiClient.createMyStudentServiceRequest({ serviceId: service.id, requestParameters, idempotencyKey, consent: true });
       setSelectedService(null);
       openStudentAccount('services', created.id);
     } catch (error) {
@@ -1077,7 +1077,7 @@ export default function App() {
             searchTerm={detailSearchTerm}
             isFavorite={isFavorite('service', selectedService.id)}
             onToggleFavorite={(id) => handleToggleFavorite('service', id)}
-            onRequestService={publicDataMode === 'api' ? (requestParameters) => handleRequestService(selectedService, requestParameters) : undefined}
+            onRequestService={publicDataMode === 'api' ? (requestParameters, idempotencyKey) => handleRequestService(selectedService, requestParameters, idempotencyKey) : undefined}
             onBack={goBack}
             onOpenContext={(category) => {
               setSelectedService(null);
@@ -1873,6 +1873,7 @@ export default function App() {
               selectedCategory === 'services' ? (
               selectedServiceTrack ? (
                 <ServicesDirectoryPage
+                  remote={publicDataMode === 'api'}
                   services={services}
                   audience={selectedServiceTrack}
                   onBack={goBack}

@@ -29,7 +29,7 @@ interface ServiceDetailProps {
   onOpenContext?: (category: CategoryType) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
-  onRequestService?: (requestParameters: Record<string, unknown>) => Promise<void> | void;
+  onRequestService?: (requestParameters: Record<string, unknown>, idempotencyKey: string) => Promise<void> | void;
   searchAnchor?: string;
   searchTerm?: string;
 }
@@ -45,6 +45,8 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({ service, onBack, o
   const [requestError, setRequestError] = useState<string | null>(null);
   const [requesting, setRequesting] = useState(false);
   const requestPending = useRef(false);
+  const intent = useRef<{payload:string;key:string} | null>(null);
+  const [consent, setConsent] = useState(false);
   const isStudent = service.audience === 'student';
 
   return (
@@ -247,16 +249,20 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({ service, onBack, o
           <p className="text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]">{service.cancellationPolicy}</p>
         </section>
 
+        <label className="mb-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={consent} onChange={event=>setConsent(event.target.checked)} />أوافق على معالجة بيانات الطلب لتنفيذ الخدمة، وحجب معطياته بعد 180 يومًا.</label>
         <button
           type="button"
-          disabled={requesting || service.requestable === false}
+          disabled={requesting || service.requestable === false || !consent}
           onClick={async () => {
             if (requestPending.current || service.requestable === false) return;
             if (!onRequestService) { setShowRequestNotice(true); return; }
             const missing = service.requestContextFields.find((field) => !requestParameters[field]?.trim());
             if (missing) { setRequestError(`أكمل الحقل المطلوب: ${missing}`); return; }
             requestPending.current = true; setRequestError(null); setRequesting(true);
-            try { await onRequestService(Object.fromEntries(Object.entries(requestParameters).map(([key, value]) => [key, value.trim()]))); }
+            const parameters = Object.fromEntries(Object.entries(requestParameters).map(([key,value])=>[key,value.trim()]));
+            const payload = JSON.stringify({serviceId:service.id,parameters});
+            if (!intent.current || intent.current.payload !== payload) intent.current = {payload,key:crypto.randomUUID()};
+            try { await onRequestService(parameters,intent.current.key); intent.current=null; }
             catch (cause) { setRequestError(cause instanceof Error ? cause.message : 'تعذر إرسال الطلب'); }
             finally { requestPending.current = false; setRequesting(false); }
           }}

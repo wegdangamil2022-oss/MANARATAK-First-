@@ -1,8 +1,11 @@
+import { serviceText } from '../i18n/serviceText';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { Archive, CheckCircle2, Edit3, Filter, Loader2, Plus, Send, XCircle } from 'lucide-react';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useSearchParams } from 'react-router-dom';
+import { ServiceOperationsWorkspace } from '../components/ServiceOperationsWorkspace';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { ServiceRequestsWorkspace } from '../components/ServiceRequestsWorkspace';
 import { CanonicalMultiPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -32,6 +35,12 @@ const deliveryModes = Object.values(ServiceDeliveryMode);
 const availabilityStatuses = Object.values(ServiceAvailabilityStatus);
 
 const emptyForm = {
+  fulfillmentPolicy: 'QUOTE_REQUIRED',
+  providerReferenceId: '',
+  inputFieldKeys: '',
+  displayNameEn: '',
+  descriptionEn: '',
+  slaMinutes: '1440',
   displayName: '',
   serviceCategory: ServiceCategory.STUDENT_SERVICES,
   fulfillmentType: ServiceFulfillmentType.CONSULTATION,
@@ -58,17 +67,22 @@ const emptyForm = {
 };
 
 export function ServicesAdminPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const { hasPermission } = useAdminAuthorization();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('request')
     ? 'REQUESTS'
     : searchParams.get('tab') === 'requests'
       ? 'REQUESTS'
-      : 'CATALOG';
+      : searchParams.get('tab') === 'operations'
+        ? 'OPERATIONS'
+        : 'CATALOG';
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [availabilityFilter, setAvailabilityFilter] = useState('');
+  const [fulfillmentFilter, setFulfillmentFilter] = useState('');
+  const [completenessFilter, setCompletenessFilter] = useState('');
   const [deliveryFilter, setDeliveryFilter] = useState('');
   const [dirty, setDirty] = useState(false);
   const listSequence = useRef(0);
@@ -101,6 +115,8 @@ export function ServicesAdminPage() {
       if (availabilityFilter) params.set('serviceAvailabilityStatus', availabilityFilter);
       if (deliveryFilter) params.set('deliveryMode', deliveryFilter);
       if (search) params.set('search', search);
+      if (fulfillmentFilter) params.set('fulfillmentType', fulfillmentFilter);
+      if (completenessFilter) params.set('completenessStatus', completenessFilter);
       const response = await adminApiClient.request<ServiceListResponse>(
         `/admin/services?${params}`,
       );
@@ -110,11 +126,22 @@ export function ServicesAdminPage() {
       }
     } catch (cause) {
       if (request === listSequence.current)
-        setListError(cause instanceof Error ? cause.message : 'تعذر تحميل الخدمات.');
+        setListError(
+          cause instanceof Error ? cause.message : serviceText('تعذر تحميل الخدمات.', language),
+        );
     } finally {
       if (request === listSequence.current) setLoading(false);
     }
-  }, [statusFilter, categoryFilter, availabilityFilter, deliveryFilter, search, page]);
+  }, [
+    statusFilter,
+    categoryFilter,
+    availabilityFilter,
+    deliveryFilter,
+    search,
+    page,
+    fulfillmentFilter,
+    completenessFilter,
+  ]);
   useEffect(() => {
     void loadServices();
     return () => {
@@ -130,12 +157,12 @@ export function ServicesAdminPage() {
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
-  function switchTab(tab: 'CATALOG' | 'REQUESTS') {
+  function switchTab(tab: 'CATALOG' | 'REQUESTS' | 'OPERATIONS') {
     if (
       saving ||
       requestBusy ||
       ((dirty || requestDirty) &&
-        !window.confirm('لديك تعديلات غير محفوظة للخدمة. الانتقال دون حفظ؟'))
+        !window.confirm(serviceText('لديك تعديلات غير محفوظة للخدمة. الانتقال دون حفظ؟', language)))
     )
       return;
     formBaseline.current = JSON.stringify(emptyForm);
@@ -144,7 +171,10 @@ export function ServicesAdminPage() {
     setForm(emptyForm);
     const next = new URLSearchParams(searchParams);
     next.delete('request');
-    next.set('tab', tab === 'REQUESTS' ? 'requests' : 'catalog');
+    next.set(
+      'tab',
+      tab === 'REQUESTS' ? 'requests' : tab === 'OPERATIONS' ? 'operations' : 'catalog',
+    );
     setSearchParams(next);
   }
 
@@ -186,10 +216,16 @@ export function ServicesAdminPage() {
       setMessage(`حُفظت الخدمة وأُعيد تحميل بياناتها: ${persisted.displayName}`);
       await loadServices();
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'تعذر حفظ الخدمة أو إعادة تحميلها.';
+      const message =
+        cause instanceof Error
+          ? cause.message
+          : serviceText('تعذر حفظ الخدمة أو إعادة تحميلها.', language);
       setError(
         message.includes('VERSION_CONFLICT')
-          ? 'تغيّرت الخدمة في جلسة أخرى. أعد تحميل النسخة المحفوظة ثم راجع تعديلاتك.'
+          ? serviceText(
+              'تغيّرت الخدمة في جلسة أخرى. أعد تحميل النسخة المحفوظة ثم راجع تعديلاتك.',
+              language,
+            )
           : message,
       );
     } finally {
@@ -204,10 +240,28 @@ export function ServicesAdminPage() {
   ) => {
     if (mutation.current) return;
     if (selectedService?.id === service.id && dirty) {
-      setError('احفظ تعديلات الخدمة قبل تغيير حالتها.');
+      setError(serviceText('احفظ تعديلات الخدمة قبل تغيير حالتها.', language));
       return;
     }
-    if (!window.confirm(`تنفيذ «${formatLabel(action)}» للخدمة «${service.displayName}»؟`)) return;
+    let reviewReason = '';
+    if (action === 'mark-publishable') {
+      reviewReason =
+        window
+          .prompt(
+            serviceText(
+              'سبب الاعتماد بعد مراجعة القانون والمزوّد والسعر والخصوصية والإتاحة واللغتين:',
+              language,
+            ),
+          )
+          ?.trim() ?? '';
+      if (reviewReason.length < 3) return;
+    }
+    if (
+      !window.confirm(
+        `تنفيذ «${serviceText(formatLabel(action), language)}» للخدمة «${service.displayName}»؟`,
+      )
+    )
+      return;
     mutation.current = true;
     setSaving(true);
     setError(null);
@@ -215,13 +269,15 @@ export function ServicesAdminPage() {
     try {
       const updated = await adminApiClient.request<ServiceCatalogItem>(
         `/admin/services/${service.id}/${action}`,
-        { method: 'POST', body: JSON.stringify({ expectedVersion: service.version }) },
+        { method: 'POST', body: JSON.stringify({ expectedVersion: service.version, ...(action === 'mark-publishable' ? {reason:reviewReason,checklist:{legal:true,provider:true,price:true,privacy:true,availability:true,language:true}} : {}) }) },
       );
       if (selectedService?.id === service.id) selectService(updated, true);
-      setMessage(`تم تنفيذ: ${formatLabel(action)}`);
+      setMessage(`تم تنفيذ: ${serviceText(formatLabel(action), language)}`);
       await loadServices();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر تحديث حالة الخدمة.');
+      setError(
+        cause instanceof Error ? cause.message : serviceText('تعذر تحديث حالة الخدمة.', language),
+      );
     } finally {
       mutation.current = false;
       setSaving(false);
@@ -229,11 +285,21 @@ export function ServicesAdminPage() {
   };
 
   const selectService = (service: ServiceCatalogItem, force = false) => {
-    if (!force && (saving || (dirty && !window.confirm('ترك تعديلات الخدمة غير المحفوظة؟'))))
+    if (
+      !force &&
+      (saving ||
+        (dirty && !window.confirm(serviceText('ترك تعديلات الخدمة غير المحفوظة؟', language))))
+    )
       return;
     setDirty(false);
     setSelectedService(service);
     const nextForm = {
+      fulfillmentPolicy: service.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
+      providerReferenceId: service.providerReferenceId ?? '',
+      inputFieldKeys: (service.inputSchema ?? []).map((field) => field.key).join(', '),
+      displayNameEn: service.localizedContent?.en?.displayName ?? '',
+      descriptionEn: service.localizedContent?.en?.serviceDescription ?? '',
+      slaMinutes: String(service.slaPolicy?.minutes ?? 1440),
       displayName: service.displayName,
       serviceCategory: service.serviceCategory,
       fulfillmentType: service.fulfillmentType,
@@ -277,6 +343,22 @@ export function ServicesAdminPage() {
         ? selectedService.requiredInputsOrDocuments
         : splitList(form.requiredInputsOrDocuments),
     deliveryMode: form.deliveryMode,
+    fulfillmentPolicy: form.fulfillmentPolicy,
+    providerReferenceId: form.providerReferenceId.trim() || null,
+    inputSchema:
+      selectedService && unchanged('inputFieldKeys')
+        ? selectedService.inputSchema
+        : splitList(form.inputFieldKeys).map((key) => ({
+            key,
+            type: 'TEXT',
+            required: true,
+            sensitive: true,
+          })),
+    localizedContent: {
+      ar: { displayName: form.displayName, serviceDescription: form.serviceDescription },
+      en: { displayName: form.displayNameEn, serviceDescription: form.descriptionEn },
+    },
+    slaPolicy: { minutes: Number(form.slaMinutes) },
     responsibleServiceOwnerType: form.responsibleServiceOwnerType.trim(),
     providerName: form.providerName.trim() || null,
     estimatedDeliveryTime: form.estimatedDeliveryTime.trim() || null,
@@ -322,7 +404,7 @@ export function ServicesAdminPage() {
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200 backdrop-blur-sm border border-white/15">
               <Plus className="h-4 w-4 text-[#21A7B4]" />
-              <span>منظومة خدمات الطلاب والمؤسسات</span>
+              <span>{serviceText('منظومة خدمات الطلاب والمؤسسات', language)}</span>
             </div>
             <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
               {t('enterprise_services')}
@@ -346,7 +428,7 @@ export function ServicesAdminPage() {
                 </option>
                 {Object.values(ServiceStatus).map((status) => (
                   <option key={status} value={status} className="text-slate-900">
-                    {formatLabel(status)}
+                    {serviceText(formatLabel(status), language)}
                   </option>
                 ))}
               </select>
@@ -367,7 +449,7 @@ export function ServicesAdminPage() {
                 </option>
                 {serviceCategories.map((category) => (
                   <option key={category} value={category} className="text-slate-900">
-                    {formatLabel(category)}
+                    {serviceText(formatLabel(category), language)}
                   </option>
                 ))}
               </select>
@@ -385,7 +467,7 @@ export function ServicesAdminPage() {
           aria-pressed={activeTab === 'CATALOG'}
           className={`rounded-xl px-4 py-3 text-sm font-bold ${activeTab === 'CATALOG' ? 'bg-[#142B5F] text-white' : 'text-slate-700'}`}
         >
-          كتالوج الخدمات
+          {serviceText('كتالوج الخدمات', language)}
         </button>
         <button
           type="button"
@@ -394,10 +476,20 @@ export function ServicesAdminPage() {
           aria-pressed={activeTab === 'REQUESTS'}
           className={`rounded-xl px-4 py-3 text-sm font-bold ${activeTab === 'REQUESTS' ? 'bg-[#142B5F] text-white' : 'text-slate-700'}`}
         >
-          طلبات الطلاب
+          {serviceText('طلبات الطلاب', language)}
         </button>
+        {hasPermission('admin:services:operations:manage') && (
+          <button
+            type="button"
+            onClick={() => switchTab('OPERATIONS')}
+            className="rounded-xl px-4 py-3 text-sm font-bold"
+          >
+            {t('svc_operations')}
+          </button>
+        )}
       </div>
-      {activeTab === 'REQUESTS' && (
+      {activeTab === 'OPERATIONS' && <ServiceOperationsWorkspace />}
+      {activeTab === 'REQUESTS' && hasPermission('admin:services:requests:view') && (
         <ServiceRequestsWorkspace onBusyChange={setRequestBusy} onDirtyChange={setRequestDirty} />
       )}
       {activeTab === 'CATALOG' && (
@@ -410,8 +502,38 @@ export function ServicesAdminPage() {
             }}
             className="flex flex-wrap items-end gap-3 rounded-2xl border bg-white p-4"
           >
+            <label>
+              {t('svc_fulfillment')}
+              <select
+                value={fulfillmentFilter}
+                onChange={(e) => {
+                  setFulfillmentFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">{t('all')}</option>
+                {Object.values(ServiceFulfillmentType).map((value) => (
+                  <option key={value}>{value}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {t('svc_completeness')}
+              <select
+                value={completenessFilter}
+                onChange={(e) => {
+                  setCompletenessFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">{t('all')}</option>
+                {Object.values(ServiceCompletenessStatus).map((value) => (
+                  <option key={value}>{value}</option>
+                ))}
+              </select>
+            </label>
             <label className="flex-1 text-xs font-bold">
-              بحث بالاسم أو الرمز أو المزود
+              {serviceText('بحث بالاسم أو الرمز أو المزود', language)}
               <input
                 maxLength={120}
                 value={query}
@@ -420,7 +542,7 @@ export function ServicesAdminPage() {
               />
             </label>
             <SelectField
-              label="التوفر"
+              label={serviceText('التوفر', language)}
               value={availabilityFilter}
               values={['', ...availabilityStatuses]}
               onChange={(value) => {
@@ -429,7 +551,7 @@ export function ServicesAdminPage() {
               }}
             />
             <SelectField
-              label="طريقة التنفيذ"
+              label={serviceText('طريقة التنفيذ', language)}
               value={deliveryFilter}
               values={['', ...deliveryModes]}
               onChange={(value) => {
@@ -438,7 +560,7 @@ export function ServicesAdminPage() {
               }}
             />
             <button className="rounded-xl bg-[#142B5F] px-4 py-3 text-sm font-bold text-white">
-              بحث
+              {serviceText('بحث', language)}
             </button>
             <button
               type="button"
@@ -446,7 +568,7 @@ export function ServicesAdminPage() {
               onClick={() => void loadServices()}
               className="rounded-xl border px-4 py-3 text-sm"
             >
-              تحديث
+              {serviceText('تحديث', language)}
             </button>
           </form>
           {message && (
@@ -464,10 +586,13 @@ export function ServicesAdminPage() {
             <div className="xl:col-span-2 bg-white border border-slate-200/90 rounded-3xl shadow-xs overflow-hidden">
               <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
                 <h2 className="font-black text-[#142B5F]">
-                  سجل كتالوج الخدمات ({services?.total ?? 0})
+                  {serviceText('سجل كتالوج الخدمات (', language)}
+                  {services?.total ?? 0})
                 </h2>
                 <span className="text-xs font-bold text-slate-500">
-                  {loading ? 'جارٍ التحديث…' : 'البيانات المحملة من الخادم'}
+                  {loading
+                    ? serviceText('جارٍ التحديث…', language)
+                    : serviceText('البيانات المحملة من الخادم', language)}
                 </span>
               </div>
               {loading ? (
@@ -510,14 +635,14 @@ export function ServicesAdminPage() {
                               </div>
                             </td>
                             <td className="px-4 py-4 font-semibold text-slate-700">
-                              {formatLabel(service.serviceCategory)}
+                              {serviceText(formatLabel(service.serviceCategory), language)}
                             </td>
                             <td className="px-4 py-4 text-slate-600">
                               <div className="font-bold text-[#0E7C86]">
-                                {formatLabel(service.deliveryMode)}
+                                {serviceText(formatLabel(service.deliveryMode), language)}
                               </div>
                               <div className="text-[11px] text-slate-400">
-                                {formatLabel(service.fulfillmentType)}
+                                {serviceText(formatLabel(service.fulfillmentType), language)}
                               </div>
                             </td>
                             <td className="px-4 py-4 space-y-1.5">
@@ -568,7 +693,7 @@ export function ServicesAdminPage() {
                                     onClick={() => transitionService(service, 'unpublish')}
                                     className="rounded-xl border px-2.5 py-1 text-xs font-bold"
                                   >
-                                    إلغاء النشر
+                                    {serviceText('إلغاء النشر', language)}
                                   </button>
                                 )}
                                 {service.status === 'PUBLISHED' && (
@@ -578,7 +703,7 @@ export function ServicesAdminPage() {
                                     rel="noreferrer"
                                     className="rounded-xl border px-2.5 py-1 text-xs font-bold text-teal-700"
                                   >
-                                    عرض للعامة
+                                    {serviceText('عرض للعامة', language)}
                                   </a>
                                 )}
                                 <button
@@ -594,7 +719,7 @@ export function ServicesAdminPage() {
                                     onClick={() => transitionService(service, 'mark-ready')}
                                     className="rounded-xl border px-2.5 py-1 text-xs font-bold text-teal-700"
                                   >
-                                    إعادة للمراجعة
+                                    {serviceText('إعادة للمراجعة', language)}
                                   </button>
                                 )}
                                 <button
@@ -632,8 +757,66 @@ export function ServicesAdminPage() {
               <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
                 <Plus className="h-5 w-5 text-[#0E7C86]" />
                 <h3 className="font-black text-[#142B5F] text-base">
-                  {selectedService ? 'تعديل الخدمة' : 'إضافة خدمة جديدة'}
+                  {selectedService
+                    ? serviceText('تعديل الخدمة', language)
+                    : serviceText('إضافة خدمة جديدة', language)}
                 </h3>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label>
+                  {t('svc_policy')}
+                  <select
+                    className="block w-full rounded-xl border p-2"
+                    value={form.fulfillmentPolicy}
+                    onChange={(e) => setForm({ ...form, fulfillmentPolicy: e.target.value })}
+                  >
+                    {['FREE', 'CHARGEABLE', 'QUOTE_REQUIRED'].map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  {t('svc_provider')}
+                  <input
+                    className="block w-full rounded-xl border p-2"
+                    value={form.providerReferenceId}
+                    onChange={(e) => setForm({ ...form, providerReferenceId: e.target.value })}
+                  />
+                </label>
+                <label>
+                  {t('svc_input_fields')}
+                  <input
+                    className="block w-full rounded-xl border p-2"
+                    value={form.inputFieldKeys}
+                    onChange={(e) => setForm({ ...form, inputFieldKeys: e.target.value })}
+                  />
+                </label>
+                <label>
+                  {t('svc_sla')}
+                  <input
+                    className="block w-full rounded-xl border p-2"
+                    type="number"
+                    min="1"
+                    value={form.slaMinutes}
+                    onChange={(e) => setForm({ ...form, slaMinutes: e.target.value })}
+                  />
+                </label>
+                <label>
+                  {t('svc_name_en')}
+                  <input
+                    className="block w-full rounded-xl border p-2"
+                    value={form.displayNameEn}
+                    onChange={(e) => setForm({ ...form, displayNameEn: e.target.value })}
+                  />
+                </label>
+                <label>
+                  {t('svc_description_en')}
+                  <textarea
+                    className="block w-full rounded-xl border p-2"
+                    value={form.descriptionEn}
+                    onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })}
+                  />
+                </label>
               </div>
               {selectedService && (
                 <div className="space-y-2">
@@ -646,7 +829,12 @@ export function ServicesAdminPage() {
                     onClick={async () => {
                       if (
                         dirty &&
-                        !window.confirm('استبدال التعديلات غير المحفوظة بالنسخة الحالية من الخادم؟')
+                        !window.confirm(
+                          serviceText(
+                            'استبدال التعديلات غير المحفوظة بالنسخة الحالية من الخادم؟',
+                            language,
+                          ),
+                        )
                       )
                         return;
                       try {
@@ -657,12 +845,16 @@ export function ServicesAdminPage() {
                           true,
                         );
                       } catch (cause) {
-                        setError(cause instanceof Error ? cause.message : 'تعذر تحديث البيانات.');
+                        setError(
+                          cause instanceof Error
+                            ? cause.message
+                            : serviceText('تعذر تحديث البيانات.', language),
+                        );
                       }
                     }}
                     className="text-xs font-bold text-teal-700 underline"
                   >
-                    إعادة تحميل النسخة المحفوظة
+                    {serviceText('إعادة تحميل النسخة المحفوظة', language)}
                   </button>
                 </div>
               )}
@@ -670,21 +862,21 @@ export function ServicesAdminPage() {
               <fieldset disabled={saving} className="space-y-4 min-w-0">
                 {dirty && (
                   <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-                    تعديلات غير محفوظة
+                    {serviceText('تعديلات غير محفوظة', language)}
                   </p>
                 )}
                 <Field
                   label={t('service_name')}
                   value={form.displayName}
                   onChange={(value) => setForm({ ...form, displayName: value })}
-                  placeholder="مثال: استشارة قبول جامعي متخصص"
+                  placeholder={serviceText('مثال: استشارة قبول جامعي متخصص', language)}
                 />
                 <TextArea
                   label={t('service_description')}
                   value={form.serviceDescription}
                   onChange={(value) => setForm({ ...form, serviceDescription: value })}
                   rows={3}
-                  placeholder="وصف تفصيلي للخدمة ومخرجاتها..."
+                  placeholder={serviceText('وصف تفصيلي للخدمة ومخرجاتها...', language)}
                 />
                 <SelectField
                   label={t('category')}
@@ -725,7 +917,7 @@ export function ServicesAdminPage() {
                   label={t('required_inputs_documents')}
                   value={form.requiredInputsOrDocuments}
                   onChange={(value) => setForm({ ...form, requiredInputsOrDocuments: value })}
-                  placeholder="جواز السفر، كشف الدرجات، السيرة الذاتية"
+                  placeholder={serviceText('جواز السفر، كشف الدرجات، السيرة الذاتية', language)}
                 />
                 <Field
                   label={t('responsible_owner_type')}
@@ -738,14 +930,14 @@ export function ServicesAdminPage() {
                   value={form.estimatedDeliveryTime}
                   onChange={(value) => setForm({ ...form, estimatedDeliveryTime: value })}
                   optional
-                  placeholder="مثال: 3-5 أيام عمل"
+                  placeholder={serviceText('مثال: 3-5 أيام عمل', language)}
                 />
                 <Field
                   label={t('provider_name')}
                   value={form.providerName}
                   onChange={(value) => setForm({ ...form, providerName: value })}
                   optional
-                  placeholder="اسم المزود إن وجد"
+                  placeholder={serviceText('اسم المزود إن وجد', language)}
                 />
                 <CanonicalMultiPicker
                   label={t('supported_countries')}
@@ -766,63 +958,63 @@ export function ServicesAdminPage() {
                   value={form.pricingReferenceId}
                   onChange={(value) => setForm({ ...form, pricingReferenceId: value })}
                   optional
-                  placeholder="معرف التسعيرة المرجعية"
+                  placeholder={serviceText('معرف التسعيرة المرجعية', language)}
                 />
                 <Field
                   label={t('thumbnail_asset_id')}
                   value={form.thumbnailAssetId}
                   onChange={(value) => setForm({ ...form, thumbnailAssetId: value })}
                   optional
-                  placeholder="معرف أصل الصورة المميزة"
+                  placeholder={serviceText('معرف أصل الصورة المميزة', language)}
                 />
 
                 <h4 className="border-t pt-4 text-sm font-bold text-[#142B5F]">
-                  تفاصيل الصفحة العامة
+                  {serviceText('تفاصيل الصفحة العامة', language)}
                 </h4>
                 <TextArea
-                  label="ما تشمل الخدمة (كل عنصر في سطر)"
+                  label={serviceText('ما تشمل الخدمة (كل عنصر في سطر)', language)}
                   value={form.includes}
                   onChange={(value) => setForm({ ...form, includes: value })}
                   rows={3}
                 />
                 <TextArea
-                  label="ما لا تشمل الخدمة"
+                  label={serviceText('ما لا تشمل الخدمة', language)}
                   value={form.excludes}
                   onChange={(value) => setForm({ ...form, excludes: value })}
                   rows={3}
                 />
                 <TextArea
-                  label="الأسئلة الشائعة (سؤال | إجابة في كل سطر)"
+                  label={serviceText('الأسئلة الشائعة (سؤال | إجابة في كل سطر)', language)}
                   value={form.faqs}
                   onChange={(value) => setForm({ ...form, faqs: value })}
                   rows={4}
                 />
                 <TextArea
-                  label="سياسة الإلغاء"
+                  label={serviceText('سياسة الإلغاء', language)}
                   value={form.cancellationPolicy}
                   onChange={(value) => setForm({ ...form, cancellationPolicy: value })}
                   rows={3}
                 />
                 <Field
-                  label="وسم البطاقة"
+                  label={serviceText('وسم البطاقة', language)}
                   value={form.badge}
                   onChange={(value) => setForm({ ...form, badge: value })}
                   optional
                 />
                 <Field
-                  label="وصف السعر المعروض"
+                  label={serviceText('وصف السعر المعروض', language)}
                   value={form.priceLabel}
                   onChange={(value) => setForm({ ...form, priceLabel: value })}
                   optional
                 />
                 <TextArea
-                  label="البيانات المطلوب إدخالها عند طلب الخدمة"
+                  label={serviceText('البيانات المطلوب إدخالها عند طلب الخدمة', language)}
                   value={form.servicePrerequisites}
                   onChange={(value) => setForm({ ...form, servicePrerequisites: value })}
                   rows={3}
                 />
                 <TextArea
-                  label="مخرجات التسليم"
+                  label={serviceText('مخرجات التسليم', language)}
                   value={form.deliveryArtifactTypes}
                   onChange={(value) => setForm({ ...form, deliveryArtifactTypes: value })}
                   rows={3}
@@ -855,13 +1047,19 @@ export function ServicesAdminPage() {
                     ) : (
                       <CheckCircle2 className="h-4 w-4" />
                     )}
-                    {selectedService ? 'حفظ التعديلات' : 'إنشاء الخدمة'}
+                    {selectedService
+                      ? serviceText('حفظ التعديلات', language)
+                      : serviceText('إنشاء الخدمة', language)}
                   </button>
                   <button
                     type="button"
                     disabled={saving}
                     onClick={() => {
-                      if (dirty && !window.confirm('ترك التعديلات غير المحفوظة؟')) return;
+                      if (
+                        dirty &&
+                        !window.confirm(serviceText('ترك التعديلات غير المحفوظة؟', language))
+                      )
+                        return;
                       formBaseline.current = JSON.stringify(emptyForm);
                       setSelectedService(null);
                       setForm(emptyForm);
@@ -878,7 +1076,7 @@ export function ServicesAdminPage() {
           {services && (
             <div className="flex justify-between rounded-xl border bg-white p-4 text-sm">
               <button disabled={loading || page <= 1} onClick={() => setPage((value) => value - 1)}>
-                السابق
+                {serviceText('السابق', language)}
               </button>
               <span>
                 {page} / {Math.max(1, services.totalPages)}
@@ -887,7 +1085,7 @@ export function ServicesAdminPage() {
                 disabled={loading || page >= services.totalPages}
                 onClick={() => setPage((value) => value + 1)}
               >
-                التالي
+                {serviceText('التالي', language)}
               </button>
             </div>
           )}

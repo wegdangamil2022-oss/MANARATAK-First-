@@ -4,12 +4,14 @@ import {
   ServiceAvailabilityStatus,
   ServiceCategory,
   ServiceDeliveryMode,
-  ServiceFulfillmentType
+  ServiceFulfillmentType,
 } from '@manaratak/domain';
 import { PublicServiceCatalogUseCases } from '@manaratak/application';
 
 export class ServicePublicRouter {
-  public static create(cradle: { publicServiceCatalogUseCases: PublicServiceCatalogUseCases }): Router {
+  public static create(cradle: {
+    publicServiceCatalogUseCases: PublicServiceCatalogUseCases;
+  }): Router {
     const router = Router();
     const { publicServiceCatalogUseCases } = cradle;
 
@@ -18,6 +20,8 @@ export class ServicePublicRouter {
     };
 
     const listQuerySchema = z.object({
+      search: z.string().trim().max(120).optional(),
+      locale: z.enum(['ar', 'en']).optional(),
       serviceCategory: z.nativeEnum(ServiceCategory).optional(),
       fulfillmentType: z.nativeEnum(ServiceFulfillmentType).optional(),
       serviceAvailabilityStatus: z.nativeEnum(ServiceAvailabilityStatus).optional(),
@@ -25,17 +29,28 @@ export class ServicePublicRouter {
       supportedCountryReferenceId: z.string().min(1).optional(),
       supportedLanguageReferenceId: z.string().min(1).optional(),
       cursor: z.string().trim().min(1).max(2048).optional(),
-      limit: z.coerce.number().int().min(1).max(100).default(20)
+      limit: z.coerce.number().int().min(1).max(100).default(20),
     });
 
-    router.get('/', asyncHandler(async (req: Request, res: Response) => {
-      const filters = listQuerySchema.parse(req.query);
-      res.json(await publicServiceCatalogUseCases.listServices(filters));
-    }));
+    router.get(
+      '/',
+      asyncHandler(async (req: Request, res: Response) => {
+        const filters = listQuerySchema.parse(req.query);
+        res.json(await publicServiceCatalogUseCases.listServices(filters));
+      }),
+    );
 
-    router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
-      res.json(await publicServiceCatalogUseCases.getService(req.params.slug));
-    }));
+    router.get(
+      '/:slug',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.json(
+          await publicServiceCatalogUseCases.getService(
+            req.params.slug,
+            z.enum(['ar', 'en']).optional().parse(req.query.locale),
+          ),
+        );
+      }),
+    );
 
     router.use((err: any, req: Request, res: Response, next: NextFunction) => {
       if (err instanceof z.ZodError) {

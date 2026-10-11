@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
+  AuthorizationEvaluatorService,
   ServiceAvailabilityStatus,
   ServiceCategory,
   ServiceDeliveryMode,
@@ -11,17 +13,43 @@ import {
   UpdateServiceCatalogItemDto,
 } from '@manaratak/domain';
 import {
+  ServiceOperationsUseCases,
   AdminServiceCatalogUseCases,
   AdminServiceFulfillmentUseCases,
 } from '@manaratak/application';
 
 export class ServiceAdminRouter {
   public static create(cradle: {
+    serviceOperationsUseCases: ServiceOperationsUseCases;
+    authEvaluatorService: AuthorizationEvaluatorService;
     adminServiceCatalogUseCases: AdminServiceCatalogUseCases;
     adminServiceFulfillmentUseCases: AdminServiceFulfillmentUseCases;
   }): Router {
     const router = Router();
     const { adminServiceCatalogUseCases, adminServiceFulfillmentUseCases } = cradle;
+    const requirePermission = async (req: Request, permission: string) => {
+      if (!req.authUserId) throw new Error('SERVICE_AUTHENTICATION_REQUIRED');
+      const decision = await cradle.authEvaluatorService.evaluatePermission(
+        req.authUserId,
+        permission,
+        {
+          requestTime: new Date(),
+          resourceId:
+            req.params.requestId ??
+            req.params.requestReference ??
+            req.params.id ??
+            req.path.split('/')[2],
+          studentReferenceId: req.query.studentReferenceId,
+          serviceId: req.query.serviceId,
+          ip: req.ip,
+        },
+      );
+      if (!decision.isGranted) throw new Error('SERVICE_ACCESS_DENIED');
+    };
+    router.use((req: Request, _res: Response, next: NextFunction) => {
+      req.headers['x-correlation-id'] = randomUUID();
+      next();
+    });
 
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
       Promise.resolve(fn(req, res, next)).catch(next);
@@ -38,12 +66,40 @@ export class ServiceAdminRouter {
       fulfillmentType: z.nativeEnum(ServiceFulfillmentType).optional(),
       serviceAvailabilityStatus: z.nativeEnum(ServiceAvailabilityStatus).optional(),
       deliveryMode: z.nativeEnum(ServiceDeliveryMode).optional(),
-      page: z.coerce.number().int().positive().default(1),
+      page: z.coerce.number().int().positive().max(10000).default(1),
       pageSize: z.coerce.number().int().positive().max(100).default(20),
     });
 
     const serviceBodySchema = z.object({
-      displayName: z.string().min(1),
+      fulfillmentPolicy: z.enum(['FREE', 'CHARGEABLE', 'QUOTE_REQUIRED']).default('QUOTE_REQUIRED'),
+      inputSchema: z
+        .array(
+          z
+            .object({
+              key: z.string().regex(/^[A-Za-z][A-Za-z0-9_]{0,63}$/),
+              type: z.enum(['TEXT', 'NUMBER', 'BOOLEAN', 'ASSET']),
+              required: z.boolean(),
+              sensitive: z.boolean().optional(),
+            })
+            .strict(),
+        )
+        .max(40)
+        .refine((fields) => new Set(fields.map((f) => f.key)).size === fields.length)
+        .default([]),
+      localizedContent: z
+        .object({
+          ar: z.object({
+            displayName: z.string().min(1).max(240),
+            serviceDescription: z.string().min(1).max(10000),
+          }),
+          en: z.object({
+            displayName: z.string().min(1).max(240),
+            serviceDescription: z.string().min(1).max(10000),
+          }),
+        })
+        .nullable()
+        .optional(),
+      displayName: z.string().min(1).max(240),
       serviceCategory: z.nativeEnum(ServiceCategory),
       fulfillmentType: z.nativeEnum(ServiceFulfillmentType),
       serviceDescription: z.string().min(1),
@@ -78,13 +134,18 @@ export class ServiceAdminRouter {
 
     const requestListQuerySchema = z.object({
       search: z.string().trim().max(120).optional(),
+      overdue: z
+        .enum(['true', 'false'])
+        .transform((value) => value === 'true')
+        .optional(),
+      providerReferenceId: z.string().min(1).optional(),
       studentReferenceId: z.string().min(1).optional(),
       serviceId: z.string().min(1).optional(),
       status: z.preprocess(
         (value) => (value === '' || value === 'all' ? undefined : value),
         z.nativeEnum(ServiceRequestStatus).optional(),
       ),
-      page: z.coerce.number().int().positive().default(1),
+      page: z.coerce.number().int().positive().max(10000).default(1),
       pageSize: z.coerce.number().int().positive().max(100).default(20),
     });
     const requestTransitionSchema = z
@@ -98,12 +159,348 @@ export class ServiceAdminRouter {
       .object({
         description: z.string().trim().min(1).max(240).optional(),
         quantity: z.number().int().positive().max(100).optional(),
-        amountMinorUnits: z.string().regex(/^\d+$/),
+        amountMinorUnits: z.string().regex(/^[1-9]\d{0,29}$/),
         currencyCode: z.string().trim().min(3).max(3),
         scale: z.number().int().min(0).max(6),
         expectedVersion: z.number().int().positive(),
       })
       .strict();
+
+    router.use(
+      asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
+        const requests = req.path.startsWith('/requests');
+        await requirePermission(
+          req,
+          requests
+            ? req.method === 'GET'
+              ? 'admin:services:requests:view'
+              : 'admin:services:requests:fulfill'
+            : req.path.endsWith('/mark-publishable')
+              ? 'admin:services:review'
+              : req.path.endsWith('/publish') || req.path.endsWith('/unpublish')
+                ? 'admin:services:publish'
+                : 'admin:services:manage',
+        );
+        if (req.path.endsWith('/finance-invoice'))
+          await requirePermission(req, 'admin:finance:invoice:manage');
+        if (requests && req.method === 'GET' && req.path !== '/requests/unassigned')
+          await requirePermission(req, 'admin:services:requests:pii');
+        next();
+      }),
+    );
+
+    const mayReadAll = async (req: Request) =>
+      (
+        await cradle.authEvaluatorService.evaluatePermission(
+          req.authUserId!,
+          'admin:services:requests:all',
+          { resourceId: req.path.split('/')[2] },
+        )
+      ).isGranted;
+    const scopedRequest = async (req: Request) => {
+      const reference = req.params.requestId ?? req.params.requestReference;
+      const record = await adminServiceFulfillmentUseCases.getRequest(reference);
+      if (record.assignedStaffId !== req.authUserId && !(await mayReadAll(req)))
+        throw new Error('SERVICE_REQUEST_NOT_FOUND');
+      return record;
+    };
+    router.get(
+      '/requests/unassigned',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:services:requests:assign');
+        const result = await adminServiceFulfillmentUseCases.listRequests({
+          unassigned: true,
+          page: 1,
+          pageSize: 20,
+        });
+        res.json({
+          ...result,
+          data: result.data.map((row) => ({
+            id: row.id,
+            publicId: row.publicId,
+            serviceId: row.serviceId,
+            status: row.status,
+            version: row.version,
+            dueAt: row.dueAt,
+          })),
+        });
+      }),
+    );
+    router.post(
+      '/requests/:requestId/claim',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:services:requests:assign');
+        const row = await adminServiceFulfillmentUseCases.claimRequest(
+          req.params.requestId,
+          req.authUserId!,
+          z.number().int().positive().parse(req.body.expectedVersion),
+        );
+        res.json({ id: row.id, publicId: row.publicId, status: row.status, version: row.version });
+      }),
+    );
+    router.get(
+      '/requests/:requestReference/timeline',
+      asyncHandler(async (req: Request, res: Response) => {
+        const record = await scopedRequest(req);
+        res.json({ data: await adminServiceFulfillmentUseCases.requestTimeline(record.id) });
+      }),
+    );
+    const operationBody = {
+      providers: z
+        .object({
+          displayName: z.string().min(1).max(200),
+          timezone: z.string().max(100),
+          capacity: z.number().int().min(1).max(1000),
+          countryReferenceId: z.string().nullable().optional(),
+          supportedServiceIds: z.array(z.string().min(1)).min(1).max(100),
+          qualificationMetadata: z
+            .object({ assetId: z.string().min(1), expiresAt: z.string().datetime() })
+            .nullable()
+            .optional(),
+        })
+        .strict(),
+      packages: z
+        .object({
+          displayName: z.string().min(1).max(200),
+          items: z
+            .array(
+              z
+                .object({
+                  serviceId: z.string().min(1),
+                  sequence: z.number().int().positive(),
+                  quantity: z.number().int().positive().max(100),
+                  required: z.boolean().optional(),
+                })
+                .strict(),
+            )
+            .min(1)
+            .max(50),
+        })
+        .strict(),
+      pricing: z
+        .object({
+          serviceId: z.string().min(1).optional(),
+          packageId: z.string().min(1).optional(),
+          currencyCode: z.string().regex(/^[A-Z]{3}$/),
+          scale: z.number().int().min(0).max(6),
+          amountMinorUnits: z.string().regex(/^(?:0|[1-9]\d{0,29})$/),
+          effectiveFrom: z.coerce.date().optional(),
+          effectiveTo: z.coerce.date().nullable().optional(),
+        })
+        .strict(),
+      slots: z
+        .object({
+          providerId: z.string().min(1),
+          serviceId: z.string().min(1),
+          startsAt: z.coerce.date(),
+          endsAt: z.coerce.date(),
+          timezone: z.string().max(100),
+          capacity: z.number().int().min(1).max(1000).optional(),
+        })
+        .strict(),
+      workflows: z
+        .object({
+          name: z.string().min(1).max(200),
+          serviceId: z.string().min(1).optional(),
+          packageId: z.string().min(1).optional(),
+          steps: z
+            .array(
+              z
+                .object({
+                  key: z.string().min(1).max(80),
+                  sequence: z.number().int().positive(),
+                  slaMinutes: z.number().int().positive().optional(),
+                  requiredArtifactTypes: z.array(z.string().max(80)).optional(),
+                })
+                .strict(),
+            )
+            .min(1)
+            .max(50),
+        })
+        .strict(),
+      discounts: z
+        .object({
+          code: z.string().max(80).optional(),
+          discountType: z.enum(['FIXED', 'PERCENTAGE']),
+          valueMinorUnits: z
+            .string()
+            .regex(/^[1-9]\d{0,29}$/)
+            .optional(),
+          percentageBasisPoints: z.number().int().min(1).max(10000).optional(),
+          currencyCode: z
+            .string()
+            .regex(/^[A-Z]{3}$/)
+            .optional(),
+          serviceId: z.string().optional(),
+          packageId: z.string().optional(),
+          activeFrom: z.coerce.date().optional(),
+          activeTo: z.coerce.date().nullable().optional(),
+          maxRedemptions: z.number().int().positive().optional(),
+        })
+        .strict(),
+      promotions: z
+        .object({
+          name: z.string().min(1).max(200),
+          discountId: z.string().min(1),
+          serviceId: z.string().optional(),
+          packageId: z.string().optional(),
+          activeFrom: z.coerce.date().optional(),
+          activeTo: z.coerce.date().nullable().optional(),
+        })
+        .strict(),
+    };
+    const operation = (req: Request) => {
+      const reason = z.string().trim().min(3).max(500).parse(req.body.reason);
+      if (!req.authUserId) throw new Error('SERVICE_AUTHENTICATION_REQUIRED');
+      return cradle.serviceOperationsUseCases.forActor({
+        actorId: req.authUserId,
+        reason,
+        correlationId: String(req.headers['x-correlation-id']),
+      });
+    };
+    router.get(
+      '/operations/:kind',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:services:operations:manage');
+        if (req.params.kind === 'bookings')
+          await requirePermission(req, 'admin:services:requests:pii');
+        res.json(
+          await cradle.serviceOperationsUseCases.listOperations(
+            req.params.kind,
+            z.coerce.number().int().min(1).max(10000).default(1).parse(req.query.page),
+            (await mayReadAll(req)) ? undefined : req.authUserId,
+          ),
+        );
+      }),
+    );
+    const creators = {
+      providers: 'registerProvider',
+      packages: 'createPackage',
+      pricing: 'createPricing',
+      slots: 'createAvailabilitySlot',
+      workflows: 'createWorkflowDefinition',
+      discounts: 'createDiscount',
+      promotions: 'createPromotion',
+    } as const;
+    for (const kind of Object.keys(creators) as Array<keyof typeof creators>)
+      router.post(
+        `/operations/${kind}`,
+        asyncHandler(async (req: Request, res: Response) => {
+          await requirePermission(req, 'admin:services:operations:manage');
+          const { reason, ...data } = req.body;
+          const body = operationBody[kind].parse(data);
+          res
+            .status(201)
+            .json(await (operation(req)[creators[kind]] as any).call(operation(req), body));
+        }),
+      );
+    const activations = {
+      providers: 'qualifyProvider',
+      packages: 'activatePackage',
+      pricing: 'activatePricing',
+      promotions: 'activatePromotion',
+      workflows: 'activateWorkflowDefinition',
+    } as const;
+    for (const kind of Object.keys(activations) as Array<keyof typeof activations>)
+      router.post(
+        `/operations/${kind}/:id/activate`,
+        asyncHandler(async (req: Request, res: Response) => {
+          await requirePermission(
+            req,
+            kind === 'providers'
+              ? 'admin:services:providers:approve'
+              : kind === 'pricing'
+                ? 'admin:services:pricing:approve'
+                : 'admin:services:review',
+          );
+          const version = z.number().int().positive().parse(req.body.expectedVersion);
+          res.json(await operation(req)[activations[kind]](req.params.id, version));
+        }),
+      );
+    router.post(
+      '/operations/bookings/:id/transition',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:services:requests:fulfill');
+        await cradle.serviceOperationsUseCases.assertCaseActor(
+          req.params.id,
+          req.authUserId!,
+          await mayReadAll(req),
+          false,
+        );
+        const body = z
+          .object({
+            status: z.enum(['CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
+            expectedVersion: z.number().int().positive(),
+            reason: z.string(),
+          })
+          .strict()
+          .parse(req.body);
+        res.json(
+          await operation(req).transitionBooking(
+            req.params.id,
+            body.status as any,
+            body.expectedVersion,
+          ),
+        );
+      }),
+    );
+    router.post(
+      '/operations/bookings/:id/start-workflow',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:services:requests:fulfill');
+        await cradle.serviceOperationsUseCases.assertCaseActor(
+          req.params.id,
+          req.authUserId!,
+          await mayReadAll(req),
+          false,
+        );
+        res.json(await operation(req).startWorkflow(req.params.id));
+      }),
+    );
+    router.post(
+      '/operations/executions/:id/advance',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:services:requests:fulfill');
+        await cradle.serviceOperationsUseCases.assertCaseActor(
+          req.params.id,
+          req.authUserId!,
+          await mayReadAll(req),
+          true,
+        );
+        res.json(
+          await operation(req).advanceWorkflow(
+            req.params.id,
+            z.number().int().positive().parse(req.body.expectedVersion),
+          ),
+        );
+      }),
+    );
+    router.post(
+      '/operations/deliveries',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:services:requests:fulfill');
+        const { reason, ...data } = req.body;
+        const body = z
+          .object({
+            bookingId: z.string().min(1),
+            workflowExecutionId: z.string().min(1),
+            artifactType: z.string().min(1).max(80),
+            assetId: z.string().min(1),
+          })
+          .strict()
+          .parse(data);
+        await cradle.serviceOperationsUseCases.assertCaseActor(
+          body.bookingId,
+          req.authUserId!,
+          await mayReadAll(req),
+        );
+        res
+          .status(201)
+          .json(
+            await operation(req).addDeliveryArtifact({ ...body, deliveredBy: req.authUserId! }),
+          );
+      }),
+    );
 
     router.get(
       '/',
@@ -117,7 +514,7 @@ export class ServiceAdminRouter {
       '/',
       asyncHandler(async (req: Request, res: Response) => {
         const body = serviceBodySchema.parse(req.body);
-        res.status(201).json(await adminServiceCatalogUseCases.createService(body));
+        res.status(201).json(await adminServiceCatalogUseCases.createService(body, req.authUserId));
       }),
     );
 
@@ -125,23 +522,35 @@ export class ServiceAdminRouter {
       '/requests',
       asyncHandler(async (req: Request, res: Response) => {
         res.json(
-          await adminServiceFulfillmentUseCases.listRequests(
-            requestListQuerySchema.parse(req.query),
-          ),
+          await adminServiceFulfillmentUseCases.listRequests({
+            ...requestListQuerySchema.parse(req.query),
+            ...((await mayReadAll(req)) ? {} : { assignedStaffId: req.authUserId! }),
+          }),
         );
       }),
     );
 
     router.get(
+      '/requests/:requestReference/quote',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:finance:invoice:manage');
+        await scopedRequest(req);
+        res.json(
+          await adminServiceFulfillmentUseCases.getRequestQuote(req.params.requestReference),
+        );
+      }),
+    );
+    router.get(
       '/requests/:requestReference',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await adminServiceFulfillmentUseCases.getRequest(req.params.requestReference));
+        res.json(await scopedRequest(req));
       }),
     );
 
     router.post(
       '/requests/:requestId/transition',
       asyncHandler(async (req: Request, res: Response) => {
+        await scopedRequest(req);
         const body = requestTransitionSchema.parse(req.body);
         res.json(
           await adminServiceFulfillmentUseCases.transitionRequest(
@@ -157,6 +566,7 @@ export class ServiceAdminRouter {
     router.post(
       '/requests/:requestId/provider',
       asyncHandler(async (req: Request, res: Response) => {
+        await scopedRequest(req);
         const body = z
           .object({
             providerReferenceId: z.string().trim().min(1).max(200),
@@ -178,6 +588,7 @@ export class ServiceAdminRouter {
       '/requests/:requestId/finance-invoice',
       asyncHandler(async (req: Request, res: Response) => {
         if (!req.authUserId) throw new Error('ADMIN_AUTHENTICATION_REQUIRED');
+        await scopedRequest(req);
         const body = requestInvoiceSchema.parse(req.body);
         res.status(201).json(
           await adminServiceFulfillmentUseCases.createFinanceInvoice({
@@ -205,6 +616,7 @@ export class ServiceAdminRouter {
             req.params.id,
             updates as UpdateServiceCatalogItemDto,
             expectedVersion,
+            req.authUserId,
           ),
         );
       }),
@@ -220,12 +632,33 @@ export class ServiceAdminRouter {
       }),
     );
 
+    const reviewBody = z
+      .object({
+        expectedVersion: z.number().int().positive(),
+        reason: z.string().trim().min(3).max(500),
+        checklist: z
+          .object({
+            legal: z.literal(true),
+            provider: z.literal(true),
+            price: z.literal(true),
+            privacy: z.literal(true),
+            availability: z.literal(true),
+            language: z.literal(true),
+          })
+          .strict(),
+      })
+      .strict();
     router.post(
       '/:id/mark-publishable',
       asyncHandler(async (req: Request, res: Response) => {
-        const { expectedVersion } = expectedVersionSchema.parse(req.body);
+        const { expectedVersion } = reviewBody.parse(req.body);
         res.json(
-          await adminServiceCatalogUseCases.markReadyToPublish(req.params.id, expectedVersion),
+          await adminServiceCatalogUseCases.markReadyToPublish(
+            req.params.id,
+            expectedVersion,
+            req.authUserId,
+            reviewBody.parse(req.body),
+          ),
         );
       }),
     );
@@ -266,16 +699,232 @@ export class ServiceAdminRouter {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
-      const code = err.message || 'An error occurred';
-      res
-        .status(
-          code.includes('VERSION_CONFLICT') || err.code === 'P2025'
-            ? 409
-            : code.includes('NOT_FOUND') || code.includes('not found')
-              ? 404
-              : 400,
-        )
-        .json({ error: err.code === 'P2025' ? 'SERVICE_VERSION_CONFLICT' : code });
+      const allowed = new Set([
+        'SERVICE_AND_PACKAGE_MUTUALLY_EXCLUSIVE',
+        'SERVICE_BOOKING_ACTIVE_PRICING_REQUIRED',
+        'SERVICE_BOOKING_CAPACITY_AUTHORITY_MISSING',
+        'SERVICE_BOOKING_CAPACITY_CONFLICT',
+        'SERVICE_BOOKING_CAPACITY_EXHAUSTED',
+        'SERVICE_BOOKING_HOLD_EXPIRED',
+        'SERVICE_BOOKING_NOT_CONFIRMED',
+        'SERVICE_BOOKING_NOT_FOUND',
+        'SERVICE_BOOKING_PAYLOAD_CONFLICT',
+        'SERVICE_BOOKING_PRICING_SNAPSHOT_STALE',
+        'SERVICE_BOOKING_PROVIDER_SCOPE_MISMATCH',
+        'SERVICE_BOOKING_REQUEST_MISMATCH',
+        'SERVICE_BOOKING_REQUEST_REQUIRED',
+        'SERVICE_BOOKING_SLOT_ALREADY_STARTED',
+        'SERVICE_BOOKING_SLOT_PROVIDER_MISMATCH',
+        'SERVICE_BOOKING_SLOT_SERVICE_MISMATCH',
+        'SERVICE_BOOKING_SLOT_UNAVAILABLE',
+        'SERVICE_BOOKING_STUDENT_REQUIRED',
+        'SERVICE_BOOKING_TRANSACTION_REQUIRED',
+        'SERVICE_BOOKING_TRANSITION_INVALID',
+        'SERVICE_DELIVERY_ARTIFACT_METADATA_REQUIRED',
+        'SERVICE_DELIVERY_ARTIFACT_TYPE_INVALID',
+        'SERVICE_DELIVERY_REVIEW_REQUIRED',
+        'SERVICE_DELIVERY_WORKFLOW_MISMATCH',
+        'SERVICE_DISCOUNT_ATOMIC_REDEMPTION_CONFLICT',
+        'SERVICE_DISCOUNT_CURRENCY_MISMATCH',
+        'SERVICE_DISCOUNT_FIXED_VALUE_INVALID',
+        'SERVICE_DISCOUNT_MAX_REDEMPTIONS_INVALID',
+        'SERVICE_DISCOUNT_NOT_ACTIVE',
+        'SERVICE_DISCOUNT_PERCENTAGE_INVALID',
+        'SERVICE_DISCOUNT_REDEMPTION_LIMIT_REACHED',
+        'SERVICE_DISCOUNT_SCOPE_MISMATCH',
+        'SERVICE_DISCOUNT_WINDOW_INVALID',
+        'SERVICE_FINANCE_CANCELLATION_PENDING',
+        'SERVICE_FINANCIAL_CLEARANCE_REQUIRED',
+        'SERVICE_INDEPENDENT_REVIEW_REQUIRED',
+        'SERVICE_MONEY_MINOR_UNITS_INVALID',
+        'SERVICE_NOT_FOUND',
+        'SERVICE_NOT_PUBLISHED',
+        'SERVICE_OPERATIONS_AUDIT_REQUIRED',
+        'SERVICE_OPERATIONS_NOT_CONFIGURED',
+        'SERVICE_OPERATION_EXPECTED_VERSION_REQUIRED',
+        'SERVICE_OPERATION_QUERY_INVALID',
+        'SERVICE_OPERATION_TERMINAL',
+        'SERVICE_OPERATION_VERSION_CONFLICT',
+        'SERVICE_OR_PACKAGE_REQUIRED',
+        'SERVICE_PACKAGE_ITEM_REQUIRED',
+        'SERVICE_PACKAGE_NAME_REQUIRED',
+        'SERVICE_PACKAGE_NOT_ACTIVE',
+        'SERVICE_PACKAGE_NOT_DRAFT',
+        'SERVICE_PACKAGE_NOT_FOUND',
+        'SERVICE_PACKAGE_QUANTITY_INVALID',
+        'SERVICE_PACKAGE_SEQUENCE_INVALID',
+        'SERVICE_PRICING_ACTIVE_VERSION_EXISTS',
+        'SERVICE_PRICING_AMOUNT_INVALID',
+        'SERVICE_PRICING_CURRENCY_INVALID',
+        'SERVICE_PRICING_EFFECTIVE_WINDOW_INVALID',
+        'SERVICE_PRICING_NOT_DRAFT',
+        'SERVICE_PRICING_NOT_FOUND',
+        'SERVICE_PRICING_SCALE_INVALID',
+        'SERVICE_PROMOTION_DISCOUNT_NOT_FOUND',
+        'SERVICE_PROMOTION_DISCOUNT_SCOPE_MISMATCH',
+        'SERVICE_PROMOTION_NAME_REQUIRED',
+        'SERVICE_PROMOTION_NOT_ACTIVATABLE',
+        'SERVICE_PROMOTION_NOT_ACTIVE',
+        'SERVICE_PROMOTION_NOT_FOUND',
+        'SERVICE_PROMOTION_SCOPE_MISMATCH',
+        'SERVICE_PROMOTION_WINDOW_INVALID',
+        'SERVICE_PROVIDER_ACCREDITATION_REQUIRED',
+        'SERVICE_PROVIDER_CAPACITY_INVALID',
+        'SERVICE_PROVIDER_CONCURRENT_CAPACITY_EXHAUSTED',
+        'SERVICE_PROVIDER_NAME_REQUIRED',
+        'SERVICE_PROVIDER_NOT_FOUND',
+        'SERVICE_PROVIDER_NOT_QUALIFIED',
+        'SERVICE_PROVIDER_RETIRED',
+        'SERVICE_PROVIDER_SERVICE_NOT_SUPPORTED',
+        'SERVICE_PROVIDER_SUPPORTED_SERVICE_REQUIRED',
+        'SERVICE_SLOT_CAPACITY_INVALID',
+        'SERVICE_SLOT_SERVICE_NOT_FOUND',
+        'SERVICE_SLOT_TIMEZONE_PROVIDER_MISMATCH',
+        'SERVICE_SLOT_WINDOW_INVALID',
+        'SERVICE_TIMEZONE_INVALID',
+        'SERVICE_WORKFLOW_ACTIVE_DEFINITION_REQUIRED',
+        'SERVICE_WORKFLOW_ACTIVE_VERSION_EXISTS',
+        'SERVICE_WORKFLOW_DEFINITION_INVALID',
+        'SERVICE_WORKFLOW_DEFINITION_NOT_DRAFT',
+        'SERVICE_WORKFLOW_DEFINITION_NOT_FOUND',
+        'SERVICE_WORKFLOW_EXECUTION_NOT_FOUND',
+        'SERVICE_WORKFLOW_EXECUTION_REQUIRED',
+        'SERVICE_WORKFLOW_SLA_INVALID',
+        'SERVICE_WORKFLOW_STEP_INVALID',
+        'SERVICE_REVIEW_EVIDENCE_REQUIRED',
+        'SERVICE_PROVIDER_CAPACITY_EXHAUSTED',
+        'SERVICE_ACCESS_DENIED',
+        'SERVICE_AND_PACKAGE_MUTUALLY_EXCLUSIVE',
+        'SERVICE_APPOINTMENT_POLICY_REQUIRED',
+        'SERVICE_APPROVED_PRICING_REQUIRED',
+        'SERVICE_AUTHENTICATION_REQUIRED',
+        'SERVICE_BOOKING_ACTIVE_PRICING_REQUIRED',
+        'SERVICE_BOOKING_NOT_FOUND',
+        'SERVICE_BOOKING_PROVIDER_SCOPE_MISMATCH',
+        'SERVICE_BOOKING_SLOT_ALREADY_STARTED',
+        'SERVICE_BOOKING_SLOT_PROVIDER_MISMATCH',
+        'SERVICE_BOOKING_SLOT_SERVICE_MISMATCH',
+        'SERVICE_BOOKING_SLOT_UNAVAILABLE',
+        'SERVICE_BOOKING_STUDENT_REQUIRED',
+        'SERVICE_DELIVERY_ARTIFACT_METADATA_REQUIRED',
+        'SERVICE_DELIVERY_POLICY_REQUIRED',
+        'SERVICE_DELIVERY_REVIEW_REQUIRED',
+        'SERVICE_DISCOUNT_CURRENCY_MISMATCH',
+        'SERVICE_DISCOUNT_FIXED_VALUE_INVALID',
+        'SERVICE_DISCOUNT_MAX_REDEMPTIONS_INVALID',
+        'SERVICE_DISCOUNT_NOT_ACTIVE',
+        'SERVICE_DISCOUNT_PERCENTAGE_INVALID',
+        'SERVICE_DISCOUNT_SCOPE_MISMATCH',
+        'SERVICE_DISCOUNT_WINDOW_INVALID',
+        'SERVICE_DURABLE_OUTBOX_REQUIRED',
+        'SERVICE_EXPECTED_VERSION_REQUIRED',
+        'SERVICE_FINANCE_CANCELLATION_PENDING',
+        'SERVICE_FINANCE_INVOICE_REQUIRED',
+        'SERVICE_FINANCE_ORIGIN_MISMATCH',
+        'SERVICE_FINANCIAL_CLEARANCE_REQUIRED',
+        'SERVICE_FREE_INVOICE_FORBIDDEN',
+        'SERVICE_FULFILLMENT_POLICY_REQUIRED',
+        'SERVICE_IDEMPOTENCY_KEY_REQUIRED',
+        'SERVICE_IDEMPOTENCY_PAYLOAD_CONFLICT',
+        'SERVICE_INDEPENDENT_REVIEW_REQUIRED',
+        'SERVICE_INPUT_CONSENT_REQUIRED',
+        'SERVICE_INPUT_RAW_URL_FORBIDDEN',
+        'SERVICE_INPUT_REQUIRED',
+        'SERVICE_INPUT_SCHEMA_INVALID',
+        'SERVICE_INPUT_SCHEMA_REQUIRED',
+        'SERVICE_INPUT_TOO_LARGE',
+        'SERVICE_INPUT_TYPE_INVALID',
+        'SERVICE_INPUT_UNKNOWN_FIELD',
+        'SERVICE_INVOICE_LINK_PENDING',
+        'SERVICE_MONEY_MINOR_UNITS_INVALID',
+        'SERVICE_NOT_AVAILABLE',
+        'SERVICE_NOT_FOUND',
+        'SERVICE_NOT_PUBLISHED',
+        'SERVICE_OPERATIONS_NOT_CONFIGURED',
+        'SERVICE_OR_PACKAGE_REQUIRED',
+        'SERVICE_PACKAGE_ITEM_REQUIRED',
+        'SERVICE_PACKAGE_NAME_REQUIRED',
+        'SERVICE_PACKAGE_NOT_ACTIVE',
+        'SERVICE_PACKAGE_NOT_DRAFT',
+        'SERVICE_PACKAGE_NOT_FOUND',
+        'SERVICE_PACKAGE_QUANTITY_INVALID',
+        'SERVICE_PACKAGE_SEQUENCE_INVALID',
+        'SERVICE_PRICE_QUOTE_MISMATCH',
+        'SERVICE_PRICING_ACTIVE_VERSION_EXISTS',
+        'SERVICE_PRICING_AMOUNT_INVALID',
+        'SERVICE_PRICING_CURRENCY_INVALID',
+        'SERVICE_PRICING_EFFECTIVE_WINDOW_INVALID',
+        'SERVICE_PRICING_NOT_DRAFT',
+        'SERVICE_PRICING_NOT_FOUND',
+        'SERVICE_PRICING_REQUIRED',
+        'SERVICE_PRICING_SCALE_INVALID',
+        'SERVICE_PROMOTION_DISCOUNT_NOT_FOUND',
+        'SERVICE_PROMOTION_DISCOUNT_SCOPE_MISMATCH',
+        'SERVICE_PROMOTION_NAME_REQUIRED',
+        'SERVICE_PROMOTION_NOT_ACTIVATABLE',
+        'SERVICE_PROMOTION_NOT_ACTIVE',
+        'SERVICE_PROMOTION_NOT_FOUND',
+        'SERVICE_PROMOTION_SCOPE_MISMATCH',
+        'SERVICE_PROMOTION_WINDOW_INVALID',
+        'SERVICE_PROVIDER_CAPACITY_INVALID',
+        'SERVICE_PROVIDER_COUNTRY_MISMATCH',
+        'SERVICE_PROVIDER_NAME_REQUIRED',
+        'SERVICE_PROVIDER_NOT_FOUND',
+        'SERVICE_PROVIDER_NOT_QUALIFIED',
+        'SERVICE_PROVIDER_REFERENCE_REQUIRED',
+        'SERVICE_PROVIDER_REQUIRED',
+        'SERVICE_PROVIDER_RETIRED',
+        'SERVICE_PROVIDER_SERVICE_NOT_SUPPORTED',
+        'SERVICE_PROVIDER_SUPPORTED_SERVICE_REQUIRED',
+        'SERVICE_PUBLICATION_TRANSITION_NOT_ALLOWED',
+        'SERVICE_PUBLISHED_UPDATE_INCOMPLETE',
+        'SERVICE_REQUEST_EXPECTED_VERSION_REQUIRED',
+        'SERVICE_REQUEST_NOT_FOUND',
+        'SERVICE_REQUEST_NOT_INVOICEABLE',
+        'SERVICE_REQUEST_PROVIDER_ASSIGNMENT_CLOSED',
+        'SERVICE_REQUEST_REFERENCE_REQUIRED',
+        'SERVICE_REQUEST_VERSION_CONFLICT',
+        'SERVICE_REVIEW_STALE',
+        'SERVICE_REVIEW_TRANSITION_NOT_ALLOWED',
+        'SERVICE_SLA_REQUIRED',
+        'SERVICE_SLOT_CAPACITY_INVALID',
+        'SERVICE_SLOT_SERVICE_NOT_FOUND',
+        'SERVICE_SLOT_TIMEZONE_PROVIDER_MISMATCH',
+        'SERVICE_SLOT_WINDOW_INVALID',
+        'SERVICE_SUPPORT_TRIAGE_COUNT_OVERFLOW',
+        'SERVICE_SUPPORT_TRIAGE_NOT_CONFIGURED',
+        'SERVICE_SUPPORT_TRIAGE_QUERY_INVALID',
+        'SERVICE_TIMEZONE_INVALID',
+        'SERVICE_TRANSLATIONS_REQUIRED',
+        'SERVICE_VERSION_CONFLICT',
+        'SERVICE_WORKFLOW_ACTIVE_DEFINITION_REQUIRED',
+        'SERVICE_WORKFLOW_ACTIVE_VERSION_EXISTS',
+        'SERVICE_WORKFLOW_DEFINITION_INVALID',
+        'SERVICE_WORKFLOW_DEFINITION_NOT_DRAFT',
+        'SERVICE_WORKFLOW_DEFINITION_NOT_FOUND',
+        'SERVICE_WORKFLOW_SLA_INVALID',
+        'SERVICE_WORKFLOW_STEP_INVALID',
+      ]);
+      const code = ['P2002', 'P2034'].includes(err.code)
+        ? 'SERVICE_OPERATION_VERSION_CONFLICT'
+        : err.code === 'P2025'
+          ? 'SERVICE_VERSION_CONFLICT'
+          : allowed.has(err.message)
+            ? err.message
+            : 'SERVICE_OPERATION_FAILED';
+      const status =
+        code === 'SERVICE_OPERATION_FAILED'
+          ? 500
+          : code === 'SERVICE_AUTHENTICATION_REQUIRED'
+            ? 401
+            : code === 'SERVICE_ACCESS_DENIED'
+              ? 403
+              : code.includes('NOT_FOUND')
+                ? 404
+                : /CONFLICT|PENDING|CLEARANCE|REVIEW|INVOICE|NOT_/.test(code)
+                  ? 409
+                  : 422;
+      res.status(status).json({ error: code, correlationId: req.headers['x-correlation-id'] });
     });
 
     return router;

@@ -1,3 +1,4 @@
+import { StudentServiceBookingPanel } from './StudentServiceBookingPanel';
 import { StudentToolResultView } from '../student-tools/StudentToolResultView';
 import { StudentCertificatesPanel } from '../certificates/StudentCertificatesPanel';
 import { StudentNotificationsView, studentNotificationLink } from './StudentNotificationsView';
@@ -863,6 +864,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
             <span className="text-xs text-[var(--mn-text-muted)]">{serviceLoading ? 'جارٍ تحميل الطلبات…' : `${serviceRequests.length} من ${serviceTotal} طلب`}</span>
           </div>
           {serviceError && <div className="space-y-2"><Alert tone="error" message={serviceError} /><button type="button" onClick={() => setRetryKey(value => value + 1)} className="text-sm font-bold text-[var(--mn-primary)] underline">إعادة تحميل الطلبات</button></div>}
+          {selectedServiceRequest && <StudentServiceBookingPanel requestId={selectedServiceRequest.id} />}
           {invoiceError && <Alert tone="error" message={invoiceError} />}
           {serviceError && !sectionFailures.includes('الفواتير') && <InvoicePanel invoices={invoices} paymentsByInvoice={paymentsByInvoice} onToggle={toggleInvoicePayments} />}
           {!serviceLoading && !serviceError && (
