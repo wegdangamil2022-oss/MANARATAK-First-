@@ -327,6 +327,11 @@ export interface StudentSupportWorkspaceDetailDto extends StudentSupportWorkspac
   serviceRequestCount?: number | null;
   recentServiceRequests?: Array<{id:string;publicId:string;status:string;createdAt:Date|string;updatedAt:Date|string}>;
   ownerReadStatus?: {learning:'AVAILABLE'|'DEGRADED'|'RESTRICTED'|'TRUNCATED';certificates:'AVAILABLE'|'DEGRADED'|'RESTRICTED'|'TRUNCATED';services:'AVAILABLE'|'DEGRADED'|'RESTRICTED'};
+  ownerReadProvenance?: {
+    learning: {source:'P13';queriedAt:string;returned:number;limit:number;complete:boolean} | null;
+    certificates: {source:'P14';queriedAt:string;returned:number;limit:number;complete:boolean} | null;
+    services: {source:'P20';queriedAt:string;returned:number;limit:number;complete:boolean} | null;
+  };
   learning?: StudentCourseProgressDto[];
   certificates?: Array<Pick<StudentCertificateProjectionDto,'id'|'publicId'|'serialNumber'|'verificationCode'|'status'|'courseDisplayName'|'issuedAt'|'expiresAt'>>;
 

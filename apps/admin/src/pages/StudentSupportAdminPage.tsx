@@ -73,9 +73,14 @@ interface StudentSupportDetail extends StudentSupportItem {
     updatedAt: string;
   }>;
   ownerReadStatus?: {
-    learning: 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED';
-    certificates: 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED';
+    learning: 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED' | 'TRUNCATED';
+    certificates: 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED' | 'TRUNCATED';
     services: 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED';
+  };
+  ownerReadProvenance?: {
+    learning: {source:'P13';queriedAt:string;returned:number;limit:number;complete:boolean}|null;
+    certificates: {source:'P14';queriedAt:string;returned:number;limit:number;complete:boolean}|null;
+    services: {source:'P20';queriedAt:string;returned:number;limit:number;complete:boolean}|null;
   };
   learning?: Enrollment[];
   certificates?: Certificate[];
@@ -346,8 +351,10 @@ export function StudentSupportAdminPage() {
       setResetting(false);
     }
   }
-  const learningAvailable = detail?.ownerReadStatus?.learning === 'AVAILABLE';
-  const certificatesAvailable = detail?.ownerReadStatus?.certificates === 'AVAILABLE';
+  const learningComplete = detail?.ownerReadStatus?.learning === 'AVAILABLE';
+  const certificatesComplete = detail?.ownerReadStatus?.certificates === 'AVAILABLE';
+  const learningAvailable = learningComplete || detail?.ownerReadStatus?.learning === 'TRUNCATED';
+  const certificatesAvailable = certificatesComplete || detail?.ownerReadStatus?.certificates === 'TRUNCATED';
   const savedCount = detail?.savedSummary?.reduce((sum, item) => sum + item.count, 0);
 
   return (
@@ -600,17 +607,29 @@ export function StudentSupportAdminPage() {
                     التفاصيل للمحاولة مجدداً.
                   </p>
                 )}
+                {Object.values(detail.ownerReadStatus ?? {}).includes('TRUNCATED') && (
+                  <p role="status" className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+                    بعض بيانات المجالات المالكة معروضة بشكل جزئي (حتى 12 سجلًا لكل مجال). الأعداد الإجمالية غير معروفة، فلا تعتمد عليها بوصفها صفرًا أو إجماليًا.
+                  </p>
+                )}
+                {detail.ownerReadProvenance && (
+                  <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
+                    {Object.entries(detail.ownerReadProvenance).map(([name,source])=>source && (
+                      <span key={name}>{source.source} · وقت الاستعلام: {date(source.queriedAt)} · عرض {source.returned} من حد {source.limit}{!source.complete?' · جزئي':''}</span>
+                    ))}
+                  </div>
+                )}
                 {tab === 'OVERVIEW' && (
                   <div className="mt-5 space-y-5">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <Count
                         title="الدورات النشطة"
-                        value={learningAvailable ? detail.linkedSummaries.activeCourseCount : '—'}
+                        value={learningComplete ? detail.linkedSummaries.activeCourseCount : '—'}
                       />
                       <Count
                         title="الدورات المكتملة"
                         value={
-                          learningAvailable
+                          learningComplete
                             ? (detail.learning ?? []).filter((item) => item.status === 'COMPLETED')
                                 .length
                             : '—'
@@ -619,7 +638,7 @@ export function StudentSupportAdminPage() {
                       <Count
                         title="الشهادات المسجلة"
                         value={
-                          certificatesAvailable ? detail.linkedSummaries.certificateCount : '—'
+                          certificatesComplete ? detail.linkedSummaries.certificateCount : '—'
                         }
                       />
                       <Count title="العناصر المحفوظة" value={savedCount ?? '—'} />

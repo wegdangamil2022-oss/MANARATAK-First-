@@ -39,6 +39,8 @@ export class StudentDashboardHydrationService {
     const serviceRows = services.status === 'fulfilled' ? services.value : null;
     const learningTruncated = Boolean(learningRows && learningRows.length > 12);
     const certificatesTruncated = Boolean(certificateRows && certificateRows.length > 12);
+    // queriedAt is the owner read time, NOT an unverifiable owner last-sync timestamp.
+    const queriedAt = new Date().toISOString();
     return {
       ...base,
       learning: grants.learning && learningRows ? learningRows.slice(0, 12) : undefined,
@@ -65,6 +67,14 @@ export class StudentDashboardHydrationService {
         learning: !grants.learning ? 'RESTRICTED' : !learningRows ? 'DEGRADED' : learningTruncated ? 'TRUNCATED' : 'AVAILABLE',
         certificates: !grants.certificates ? 'RESTRICTED' : !certificateRows ? 'DEGRADED' : certificatesTruncated ? 'TRUNCATED' : 'AVAILABLE',
         services: !grants.services ? 'RESTRICTED' : serviceRows ? 'AVAILABLE' : 'DEGRADED',
+      },
+      ownerReadProvenance: {
+        learning: grants.learning && learningRows ? {source:'P13',queriedAt,returned:Math.min(learningRows.length,12),limit:12,complete:!learningTruncated} : null,
+        certificates: grants.certificates && certificateRows ? {source:'P14',queriedAt,returned:Math.min(certificateRows.length,12),limit:12,complete:!certificatesTruncated} : null,
+        services: grants.services && serviceRows ? {
+          source:'P20',queriedAt,returned:serviceRows.data.length,limit:12,
+          complete:serviceRows.total <= serviceRows.data.length,
+        } : null,
       },
     };
   }

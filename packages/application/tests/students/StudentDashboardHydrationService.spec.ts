@@ -100,6 +100,11 @@ describe('StudentDashboardHydrationService', () => {
     expect(detail.linkedSummaries.activeCourseCount).toBeNull();
     expect(detail.linkedSummaries.certificateCount).toBeNull();
     expect(detail.ownerReadStatus).toEqual({learning:'TRUNCATED',certificates:'TRUNCATED',services:'RESTRICTED'});
+    expect(detail.ownerReadProvenance).toMatchObject({
+      learning:{source:'P13',returned:12,limit:12,complete:false},
+      certificates:{source:'P14',returned:12,limit:12,complete:false},
+      services:null,
+    });
   });
 
   it('reads only explicitly granted owner domains', async () => {
