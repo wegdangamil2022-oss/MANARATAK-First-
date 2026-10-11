@@ -100,7 +100,7 @@ export class AIGatewayRouter {
           return res.json(await aiExecutionUseCases.cancelAsync(req.params.publicId, requester));
         const value = await aiExecutionUseCases.findForRequester(req.params.publicId, requester);
         if (!value) return res.status(404).json({ error: 'AI_EXECUTION_NOT_FOUND' });
-        return res.json(await aiExecutionUseCases.cancel(value.publicId));
+        return res.json(await aiExecutionUseCases.cancel(value.publicId, requester));
       }),
     );
 
