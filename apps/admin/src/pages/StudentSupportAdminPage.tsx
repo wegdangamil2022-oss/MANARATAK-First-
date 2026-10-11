@@ -236,6 +236,7 @@ export function StudentSupportAdminPage() {
   const [trackerHistory,setTrackerHistory]=useState<{trackerId:string;page:TrackerHistory}|null>(null);
   const [trackerHistoryLoading,setTrackerHistoryLoading]=useState(false);
   const [trackerHistoryError,setTrackerHistoryError]=useState<string|null>(null);
+  const [historicalTrackerId,setHistoricalTrackerId]=useState('');
   const [provisionDiagnostic,setProvisionDiagnostic]=useState<ProvisionDiagnostic|null>(null);
   const [diagnosticError,setDiagnosticError]=useState<string|null>(null);
   const [diagnosticLoading,setDiagnosticLoading]=useState(false);
@@ -325,6 +326,7 @@ export function StudentSupportAdminPage() {
     setProvisionDiagnostic(null);setDiagnosticError(null);setDiagnosticLoading(false);
     ++historyRequest.current;
     setTrackerHistory(null);
+    setHistoricalTrackerId('');
     setTrackerHistoryLoading(false);
     setTrackerHistoryError(null);
     setTrackerPage(null);
@@ -482,6 +484,7 @@ export function StudentSupportAdminPage() {
     } finally {if (request === trackerRequest.current) setTrackerLoading(false);}
   }
   function chooseStudent(id: string | null) {
+    setHistoricalTrackerId('');
     ++diagnosticRequest.current;
     setProvisionDiagnostic(null);setDiagnosticError(null);setDiagnosticLoading(false);
     ++historyRequest.current;
@@ -1043,6 +1046,31 @@ export function StudentSupportAdminPage() {
                       <button type="button" disabled={trackerLoading} onClick={()=>void openSupportTrackerPage()}
                         className="rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50">{t('stu_support_tracker_open')}</button>
                       {trackerError && <p role="alert" className="text-sm text-red-700">{trackerError}</p>}
+                      <div className="rounded-xl border p-3">
+                        <label className="block text-xs font-semibold">
+                          {language==='en'?'Past tracker record ID':'معرف سجل متابعة سابق'}
+                          <input maxLength={128} value={historicalTrackerId}
+                            onChange={event=>setHistoricalTrackerId(event.target.value)}
+                            className="mt-2 block w-full rounded-lg border p-2 text-sm"/>
+                        </label>
+                        <button type="button" disabled={trackerHistoryLoading||!historicalTrackerId.trim()}
+                          onClick={()=>void openTrackerHistory(historicalTrackerId.trim())}
+                          className="mt-2 rounded-lg border px-3 py-2 text-xs font-bold disabled:opacity-50">
+                          {language==='en'?'Open history':'فتح سجل الأحداث'}
+                        </button>
+                        {trackerHistory&&(!trackerPage?.items.some(item=>item.id===trackerHistory.trackerId))&&
+                          <div className="mt-3 space-y-2">
+                            {trackerHistory.page.items.map((event,index)=><p key={index} className="text-xs">
+                              {event.eventType} · {statusLabel(event.status,language)} · {date(event.occurredAt)}
+                            </p>)}
+                            {trackerHistory.page.hasMore&&trackerHistory.page.nextCursor&&
+                              <button type="button" disabled={trackerHistoryLoading}
+                                className="rounded-lg border px-3 py-2 text-xs font-bold"
+                                onClick={()=>void openTrackerHistory(trackerHistory.trackerId,trackerHistory.page.nextCursor!)}>
+                                {language==='en'?'Older history':'السجل الأقدم'}
+                              </button>}
+                          </div>}
+                      </div>
                       {trackerHistoryError&&<p role="alert" className="text-sm text-red-700">{trackerHistoryError}</p>}
                       {trackerPage && <div className="space-y-2">
                         <p className="text-xs text-slate-500">عرض {trackerPage.items.length} من {trackerPage.total} متابعة</p>
