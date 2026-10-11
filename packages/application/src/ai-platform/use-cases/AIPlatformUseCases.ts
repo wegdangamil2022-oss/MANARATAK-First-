@@ -994,7 +994,7 @@ export class AIExecutionOrchestrator {
       if (existing) return existing;
     }
     const protectedPayload = this.asyncPayloads.protect(request);
-    const candidate = {
+    const candidate: Parameters<IAIPlatformRepository['createAsyncJob']>[0] = {
       publicId,
       requesterReferenceId: request.requesterReferenceId,
       consumerKey,
