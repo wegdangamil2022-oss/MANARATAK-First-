@@ -22,7 +22,9 @@ const section = (source, start, end) => {
 };
 
 const dashboard = section(useCases, 'public async getDashboard(', 'public async markNotificationRead(');
-const eventBranches = [...repository.matchAll(/\[((?:\s*'[^']+'\s*,?)+)\]\s*\.includes\(\s*event\.eventType\s*\)/g)]
+// Match the bounded array body without nested quantifiers, then validate its tokens.
+const eventBranches = [...repository.matchAll(/\[([^\[\]]*)\]\s*\.includes\(\s*event\.eventType\s*\)/g)]
+  .filter(match => match[1].replace(/'[^']+'/g, '').replace(/[,\s]/g, '') === '')
   .map(match => new Set([...match[1].matchAll(/'([^']+)'/g)].map(value => value[1])));
 const handlesEvents = events => eventBranches.some(branch => events.every(event => branch.has(event)));
 

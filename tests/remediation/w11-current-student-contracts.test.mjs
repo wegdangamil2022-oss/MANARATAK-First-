@@ -19,7 +19,7 @@ async function runWithMutation(file, mutate) {
       await mkdir(path.dirname(target), { recursive: true });
       await writeFile(target, source);
     }
-    return spawnSync(process.execPath, [path.join(root, 'scripts/verify-w11-source.mjs')], { cwd: fixture, encoding: 'utf8' });
+    return spawnSync(process.execPath, [path.join(root, 'scripts/verify-w11-source.mjs')], { cwd: fixture, encoding: 'utf8', timeout: 10_000 });
   } finally { await rm(fixture, { recursive: true, force: true }); }
 }
 
@@ -32,4 +32,10 @@ test('current W11 gate rejects missing certificate lifecycle projection handlers
   const result = await runWithMutation('packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts', source => source.replaceAll("'CertificateArchived'", "'UnsupportedCertificateEvent'"));
   assert.equal(result.status, 1);
   assert.match(result.stdout, /FAIL W11-IG-G-CONTRACT-GUARD/);
+});
+test('W11 event array scanning handles long whitespace without backtracking', async () => {
+  const result = await runWithMutation('packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts', source => `${source}\n[${'\t'.repeat(100_000)}!].includes(event.eventType);`);
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /W11_SOURCE_VERIFIER=PASS/);
 });
