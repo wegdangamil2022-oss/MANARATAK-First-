@@ -98,6 +98,34 @@ describe('PrismaCertificateRepository W10 trust model', () => {
     expect(events[0].metadata).toMatchObject({sourcePhase:'Phase14'});
   });
 
+  it('publishes certificate archival as a public-only owner lifecycle event',async()=>{
+    const now=new Date('2026-10-01T00:00:00Z');
+    const row={id:'cert-archived',studentReferenceId:'student-1',
+      status:CertificateStatus.ACTIVE,publicId:'public-1',serialNumber:'SER-1',
+      verificationCode:'verify-1',courseDisplayName:'Learning',
+      issuedAt:now,createdAt:now,updatedAt:now,
+    };
+    const tx:any={
+      $queryRaw:vi.fn().mockResolvedValue([]),
+      certificate:{
+        findUnique:vi.fn().mockResolvedValue(row),
+        update:vi.fn().mockImplementation(({data})=>({...row,...data})),
+      },
+      certificateLedgerEntry:{create:vi.fn()},auditRecord:{create:vi.fn()},
+      transactionalOutboxRecord:{create:vi.fn()},
+    };
+    const repository=new PrismaCertificateRepository({$transaction:(fn:any)=>fn(tx)} as any);
+    await repository.archive('cert-archived','support-1','private archive reason');
+    const event=tx.transactionalOutboxRecord.create.mock.calls[0][0].data;
+    expect(event.eventType).toBe('CertificateArchived');
+    expect(event.metadata.sourcePhase).toBe('Phase14');
+    expect(event.payload).toMatchObject({
+      studentReferenceId:'student-1',certificateId:'cert-archived',status:'ARCHIVED',
+      serialNumber:'SER-1',verificationCode:'verify-1',
+    });
+    expect(JSON.stringify(event.payload)).not.toContain('private archive reason');
+  });
+
   it('clears revocation lifecycle fields on replacement creation', async () => {
     const tx: any = {
       $queryRaw: vi.fn().mockResolvedValue([]),

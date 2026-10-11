@@ -72,6 +72,20 @@ describe('Student certificate owner-outbox bridge', () => {
     expect(JSON.stringify(mapped)).not.toContain('never-forward');
   });
 
+  it('projects a trusted certificate archival status without forwarding private reasons',async()=>{
+    const {students,gateway,entry}=fixture();
+    await gateway.deliver({...entry,eventType:'CertificateArchived',payload:{
+      studentReferenceId:'student-1',certificateId:'cert-1',status:'ARCHIVED',
+      serialNumber:'number-1',reason:'private reason',recipientDisplayName:'private name',
+    }} as any,{idempotencyKey:'evt-1'});
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
+      eventType:'CertificateArchived',metadata:expect.objectContaining({status:'ARCHIVED'}),
+    }));
+    const forwarded=JSON.stringify(students.consumeIntegrationEvent.mock.calls);
+    expect(forwarded).not.toContain('private reason');
+    expect(forwarded).not.toContain('private name');
+  });
+
   it('projects owner snapshots after a late student-role assignment using stable event ids', async () => {
     const {students,assignments,identities}=fixture();
     const learning={listForStudent:vi.fn().mockResolvedValue([{
@@ -199,7 +213,7 @@ describe('Student certificate owner-outbox bridge', () => {
     await worker.runCertificatesOnce('worker-test');
     expect(dispatcher.dispatchBatch).toHaveBeenCalledWith(expect.objectContaining({
       workerId:'worker-test',domain:'CERTIFICATES',
-      eventTypes:['CertificateIssued','CertificateRevoked','CertificateReissued','CertificateRenewed','CertificateExpired','CertificateArtifactsRendered'],
+      eventTypes:['CertificateIssued','CertificateRevoked','CertificateReissued','CertificateRenewed','CertificateExpired','CertificateArtifactsRendered','CertificateArchived'],
     }));
   });
 });
