@@ -10,6 +10,19 @@ describe('StudentWorkspaceOutboxWorker parked event recovery',()=>{
     expect(recovery.replayParkedEvents).toHaveBeenCalledWith(25);
     expect(dispatcher.dispatchBatch).not.toHaveBeenCalled();
   });
+  it('claims only P15 reminder events from its own outbox dispatcher',async()=>{
+    const primary={dispatchBatch:vi.fn()};
+    const recovery={replayParkedEvents:vi.fn()};
+    const reminder={dispatchBatch:vi.fn().mockResolvedValue({claimed:1,processed:1,failed:0,exhausted:0,leaseLost:0})};
+    const worker=new StudentWorkspaceOutboxWorker(primary as any,{batchSize:5},recovery as any,reminder as any);
+    await worker.runRemindersOnce('reminder-worker');
+    expect(primary.dispatchBatch).not.toHaveBeenCalled();
+    expect(reminder.dispatchBatch).toHaveBeenCalledWith(expect.objectContaining({
+      domain:'STUDENT_APPLICATIONS',eventTypes:['StudentApplicationReminderReconcileRequested'],
+      workerId:'reminder-worker',batchSize:5,
+    }));
+  });
+
   it('rejects unscoped worker identities and safely no-ops without recovery',async()=>{
     const worker=new StudentWorkspaceOutboxWorker({dispatchBatch:vi.fn()} as any);
     await expect(worker.runReplayOnce('')).rejects.toThrow('STUDENT_WORKSPACE_REPLAY_WORKER_ID_REQUIRED');
