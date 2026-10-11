@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { StudentSupportCursorCodec } from './StudentSupportCursorCodec';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   IStudentWorkspaceRepository,
@@ -69,7 +70,7 @@ const WIDGET_REGISTRY = [
 ] as const;
 
 export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient, private readonly cursorSigningSecret?:string) {}
 
   private get db(): any {
     return this.prisma as any;
@@ -77,12 +78,12 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
 
   public async listSupportWorkspaces(input: { query?: string; status?: StudentWorkspaceStatus; limit?: number; cursor?: string }): Promise<StudentSupportWorkspacePageDto> {
     const limit = Math.min(100, Math.max(1, Math.trunc(input.limit ?? 30)));
-    const decoded = input.cursor ? Buffer.from(input.cursor, 'base64url').toString('utf8') : '';
-    const split = decoded.lastIndexOf('|');
-    const cursorUpdatedAt = split > 0 ? decoded.slice(0, split) : '';
-    const cursorId = split > 0 ? decoded.slice(split + 1) : '';
-    const query = input.query?.trim().slice(0, 120);
-    if (input.cursor && (!/^[A-Za-z0-9_-]+$/.test(input.cursor) || !cursorId || !cursorUpdatedAt || Number.isNaN(Date.parse(cursorUpdatedAt)))) throw new Error('STUDENT_SUPPORT_CURSOR_INVALID');
+    const query = input.query?.trim().slice(0, 120) ?? '';
+    const scope = JSON.stringify({domain:'workspace',query,status:input.status ?? null,limit});
+    const codec = new StudentSupportCursorCodec(this.cursorSigningSecret);
+    const anchor = input.cursor ? codec.decode(input.cursor,scope) : null;
+    const cursorUpdatedAt = anchor?.updatedAt ?? null;
+    const cursorId = anchor?.id ?? null;
     const baseWhere = {
       ...(input.status ? {status:input.status} : {}),
       ...(query ? {OR:[{studentReferenceId:{contains:query,mode:'insensitive'}},{displayName:{contains:query,mode:'insensitive'}}]} : {}),
@@ -100,7 +101,7 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     const selected = rows.slice(0, limit);
     const items = selected.map((row: any) => ({ studentReferenceId: row.studentReferenceId, status: row.status, version: row.version, displayName: row.displayName, preferredLanguage: row.preferredLanguage, timezone: row.timezone, lastActiveAt: row.lastActiveAt, updatedAt: row.updatedAt }));
     const last = selected[selected.length - 1];
-    return { items, total, hasMore, nextCursor: hasMore && last ? Buffer.from(`${new Date(last.updatedAt).toISOString()}|${last.id}`, 'utf8').toString('base64url') : null };
+    return { items, total, hasMore, nextCursor: hasMore && last ? codec.encode(last,scope) : null };
   }
 
   public async getSupportWorkspaceDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto | null> {

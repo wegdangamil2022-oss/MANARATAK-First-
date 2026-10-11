@@ -466,8 +466,10 @@ export function registerDependencies(
     courseFinancialClearanceGateway: asFunction(({ financePlatformUseCases }) => new Phase19CourseFinancialClearanceGateway(financePlatformUseCases)).singleton(),
     learningPathRepository: asFunction(({ prisma }) => new PrismaLearningPathRepository(prisma)).singleton(),
     certificateRepository: asFunction(({ prisma }) => new PrismaCertificateRepository(prisma)).singleton(),
-    studentWorkspaceRepository: asFunction(({ prisma }) => new PrismaStudentWorkspaceRepository(prisma)).singleton(),
-    studentApplicationTrackerRepository: asFunction(({ prisma }) => new PrismaStudentApplicationTrackerRepository(prisma)).scoped(),
+    studentWorkspaceRepository: asFunction(({ prisma }) => new PrismaStudentWorkspaceRepository(prisma,
+      readConfig<string>('STUDENT_SUPPORT_CURSOR_SECRET') ?? readConfig<string>('JWT_PRIVATE_KEY_PEM'))).singleton(),
+    studentApplicationTrackerRepository: asFunction(({ prisma }) => new PrismaStudentApplicationTrackerRepository(prisma,
+      readConfig<string>('STUDENT_SUPPORT_CURSOR_SECRET') ?? readConfig<string>('JWT_PRIVATE_KEY_PEM'))).scoped(),
     studentApplicationScholarshipGateway: asFunction(({ scholarshipRepository }) => new ScholarshipStudentApplicationTrackerGateway(scholarshipRepository)).scoped(),
     studentWorkspaceDeliveryCache: asFunction(({ redisClient }) =>
       redisClient ? new RedisStudentWorkspaceDeliveryCache(redisClient) : null,

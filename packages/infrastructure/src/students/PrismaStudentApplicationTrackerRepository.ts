@@ -1,8 +1,9 @@
 import type { PrismaClient } from '@prisma/client';
+import { StudentSupportCursorCodec } from './StudentSupportCursorCodec';
 import { CreateStudentApplicationTrackerDto, IStudentApplicationTrackerRepository, StudentApplicationTrackerDto, UpdateStudentApplicationTrackerDto, StudentSupportApplicationTrackerPage } from '@manaratak/domain';
 
 export class PrismaStudentApplicationTrackerRepository implements IStudentApplicationTrackerRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly cursorSigningSecret?:string) {}
   private get db(): any { return this.prisma as any; }
   private include = { checklist: { orderBy: { position: 'asc' } } } as const;
 
@@ -17,18 +18,11 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
   }
   async listSupportPage(studentReferenceId: string, input: { limit?: number; cursor?: string }): Promise<StudentSupportApplicationTrackerPage> {
     const limit = Math.min(50, Math.max(1, input.limit ?? 20));
-    let cursorAt: Date | null = null;
-    let cursorId: string | null = null;
-    if (input.cursor) {
-      if (input.cursor.length > 256 || !/^[A-Za-z0-9_-]+$/.test(input.cursor))
-        throw new Error('STUDENT_SUPPORT_CURSOR_INVALID');
-      const decoded = Buffer.from(input.cursor, 'base64url').toString('utf8');
-      const index = decoded.lastIndexOf('|');
-      cursorAt = index > 0 ? new Date(decoded.slice(0, index)) : null;
-      cursorId = index > 0 ? decoded.slice(index + 1) : null;
-      if (!cursorAt || !Number.isFinite(cursorAt.getTime()) || !cursorId || cursorId.length > 128)
-        throw new Error('STUDENT_SUPPORT_CURSOR_INVALID');
-    }
+    const codec = new StudentSupportCursorCodec(this.cursorSigningSecret);
+    const scope = JSON.stringify({domain:'tracker',studentReferenceId,limit});
+    const anchor = input.cursor ? codec.decode(input.cursor,scope) : null;
+    const cursorAt = anchor?.updatedAt ?? null;
+    const cursorId = anchor?.id ?? null;
     const where = { studentReferenceId };
     const selected = await this.db.studentApplicationTracker.findMany({
       where: { AND: [where, ...(cursorAt && cursorId ? [{
@@ -44,9 +38,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
     const last = items[items.length - 1];
     return {
       items, total, hasMore,
-      nextCursor: hasMore && last
-        ? Buffer.from(`${new Date(last.updatedAt).toISOString()}|${last.id}`, 'utf8').toString('base64url')
-        : null,
+      nextCursor: hasMore && last ? codec.encode(last,scope) : null,
     };
   }
 
