@@ -2434,10 +2434,16 @@ function normalizeDataClassification(value: unknown): AIDataClassification {
     : 'INTERNAL';
 }
 function mostSensitiveAIClassification(...values: unknown[]): AIDataClassification {
-  return values.reduce<AIDataClassification>((current, value) => {
-    const candidate = normalizeDataClassification(value);
-    return classificationRank[candidate] > classificationRank[current] ? candidate : current;
-  }, 'PUBLIC');
+  const labels = values.filter(
+    (value): value is AIDataClassification =>
+      typeof value === 'string' && value in classificationRank,
+  );
+  if (labels.length === 0) return 'INTERNAL';
+  return labels.reduce<AIDataClassification>(
+    (current, candidate) =>
+      classificationRank[candidate] > classificationRank[current] ? candidate : current,
+    'PUBLIC',
+  );
 }
 function classificationAllowed(value: AIDataClassification, maximum?: AIDataClassification) {
   return maximum != null && classificationRank[value] <= classificationRank[maximum];
