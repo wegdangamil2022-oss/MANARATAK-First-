@@ -312,8 +312,12 @@ export class AIExecutionOrchestrator {
     validateExecutionRequest(request);
     const consumerKey = request.consumerKey ?? request.sourceDomain ?? 'default';
     const capabilityKey = request.capabilityKey ?? request.purpose;
-    const dataClassification = normalizeDataClassification(
-      request.dataClassification ?? request.metadata?.dataClassification,
+    // Never let an explicit caller PUBLIC/INTERNAL label downgrade provenance
+    // carried by a trusted owner-domain consumer. Both labels only raise sensitivity.
+    const dataClassification = mostSensitiveAIClassification(
+      request.dataClassification,
+      request.metadata?.dataClassification,
+      request.metadata?.ownerDataClassification,
     );
     const requesterScope = request.requesterReferenceId ?? request.sourceDomain ?? 'system';
     const requestFingerprint = sha256(
@@ -2428,6 +2432,12 @@ function normalizeDataClassification(value: unknown): AIDataClassification {
   return typeof value === 'string' && value in classificationRank
     ? (value as AIDataClassification)
     : 'INTERNAL';
+}
+function mostSensitiveAIClassification(...values: unknown[]): AIDataClassification {
+  return values.reduce<AIDataClassification>((current, value) => {
+    const candidate = normalizeDataClassification(value);
+    return classificationRank[candidate] > classificationRank[current] ? candidate : current;
+  }, 'PUBLIC');
 }
 function classificationAllowed(value: AIDataClassification, maximum?: AIDataClassification) {
   return maximum != null && classificationRank[value] <= classificationRank[maximum];
