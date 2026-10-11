@@ -18,6 +18,9 @@ function fixture(granted: string[]) {
     listSupportPage:vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}),
     listSupportHistory:vi.fn().mockResolvedValue({items:[],hasMore:false,nextCursor:null}),
   };
+  const services={listSupportAwaitingPaymentStudents:vi.fn().mockResolvedValue({
+    items:[{studentReferenceId:'student-1'}],total:1,hasMore:false,nextPage:null,
+  })};
   const identities={findById:vi.fn().mockResolvedValue({id:'student-1',type:'Human',status:'ACTIVE'})};
   const roleAssignments={findByIdentityId:vi.fn().mockResolvedValue([{roleId:'student'}])};
   const evaluator = { evaluatePermission: vi.fn().mockImplementation(async (_id: string, permission: string) =>
@@ -29,13 +32,14 @@ function fixture(granted: string[]) {
     studentWorkspaceUseCases: workspace as any,
     studentDashboardHydrationService: hydration as any,
     studentApplicationTrackerUseCases: tracker as any,
+    studentServiceRequestUseCases: services as any,
     identityRepository: identities as any,
     roleAssignmentRepository: roleAssignments as any,
     authEvaluatorService: evaluator as any,
     auditRecordRepo: {} as any,
   }));
   app.use((_err:any,_req:any,res:any,_next:any)=>res.status(500).json({error:'AUDIT_UNAVAILABLE'}));
-  return { app, workspace, hydration, evaluator, tracker, identities, roleAssignments };
+  return { app, workspace, hydration, evaluator, tracker, identities, roleAssignments, services };
 }
 
 describe('StudentSupportAdminRouter authorization boundary', () => {
@@ -99,6 +103,32 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
       expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
         expect.objectContaining({action:'STUDENT_SUPPORT_TRIAGE_LIST_VIEW',
           metadata:{purpose:'student-support-triage',kind:'SYNC_FAILED',returned:0}}),
+        {reliability:'REQUIRED',principal:'REQUIRED'});
+    }finally{audit.mockRestore();}
+  });
+
+  it('forbids P20 payment triage for support users lacking the service owner grant',async()=>{
+    const {app,services}=fixture(['admin:students:support']);
+    const result=await request(app).get('/admin/students/support/triage/service-awaiting-payment');
+    expect(result.status).toBe(403);
+    expect(services.listSupportAwaitingPaymentStudents).not.toHaveBeenCalled();
+  });
+
+  it('returns minimal P20 service triage rows only after required audit',async()=>{
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try{
+      const {app,services}=fixture(['admin:students:support','admin:services:manage']);
+      const response=await request(app).get('/admin/students/support/triage/service-awaiting-payment?page=2&limit=12');
+      expect(response.status).toBe(200);
+      expect(services.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(2,12);
+      expect(response.body).toMatchObject({
+        items:[{studentReferenceId:'student-1',triageKind:'SERVICE_AWAITING_PAYMENT',status:'AWAITING_PAYMENT'}],
+        total:1,hasMore:false,nextPage:null,
+      });
+      expect(response.body.items[0]).not.toHaveProperty('requestParameters');
+      expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),
+        expect.objectContaining({action:'STUDENT_SUPPORT_SERVICE_TRIAGE_VIEW',
+          metadata:{purpose:'service-payment-triage',ownerDomain:'P20',returned:1}}),
         {reliability:'REQUIRED',principal:'REQUIRED'});
     }finally{audit.mockRestore();}
   });
