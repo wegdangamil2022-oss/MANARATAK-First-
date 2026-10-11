@@ -92,4 +92,59 @@ describe('PrismaAIPlatformRepository governance boundary', () => {
     }
   });
 
+
+  it('refuses a direct incident status change without a governed event', async () => {
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      aIRegistryRecord: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'incident-1', key: 'incident-1', resourceType: 'incidents',
+          status: 'OPEN', configuration: { timeline: [] }, updatedAt: new Date('2026-10-11T12:00:00Z'),
+        }),
+        upsert: vi.fn(),
+      },
+    };
+    const repository = new PrismaAIPlatformRepository({
+      $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+    });
+    await expect(repository.upsert('incidents', {
+      key: 'incident-1', status: 'RESOLVED', expectedUpdatedAt: '2026-10-11T12:00:00Z', timeline: [],
+    }, 'actor')).rejects.toThrow('AI_INCIDENT_STATUS_REQUIRES_GOVERNED_EVENT');
+    expect(tx.aIRegistryRecord.upsert).not.toHaveBeenCalled();
+  });
+
+  it('denies skipping from OPEN to RESOLVED before appending incident events', async () => {
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      aIRegistryRecord: {
+        findUnique: vi.fn().mockResolvedValue({ id: 'incident-1', status: 'OPEN' }),
+      },
+      aIIncidentEventRecord: { create: vi.fn() },
+    };
+    const repository = new PrismaAIPlatformRepository({
+      $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+    });
+    await expect(repository.appendIncidentEvent('incident-1', {
+      at: new Date('2026-10-11T12:00:00Z'), action: 'RESOLUTION_RECORDED',
+      actorReferenceId: 'actor', note: 'not yet mitigated',
+    })).rejects.toThrow('AI_INCIDENT_INVALID_TRANSITION');
+    expect(tx.aIIncidentEventRecord.create).not.toHaveBeenCalled();
+  });
+
+  it('requires optimistic registry revision on every existing record update', async () => {
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      aIRegistryRecord: {
+        findUnique: vi.fn().mockResolvedValue({ id: 'model-1', status: 'DRAFT', updatedAt: new Date() }),
+        upsert: vi.fn(),
+      },
+    };
+    const repository = new PrismaAIPlatformRepository({
+      $transaction: (fn: (client: typeof tx) => unknown) => fn(tx),
+    });
+    await expect(repository.upsert('models', { key: 'model-1', status: 'DRAFT' }, 'actor'))
+      .rejects.toThrow('AI_REGISTRY_PRECONDITION_REQUIRED');
+    expect(tx.aIRegistryRecord.upsert).not.toHaveBeenCalled();
+  });
+
 });
