@@ -44,8 +44,23 @@ export class PrismaCmsRepository implements ICmsRepository {
     return this.prisma as any;
   }
 
+  // CMS revisions, approvals, and published snapshots must commit as one
+  // serializable decision; stale transactions fail with a conflict, never
+  // silently overwriting another actor's approved changes.
+  private async serializable<T>(action: (tx: any) => Promise<T>): Promise<T> {
+    try {
+      return await this.db.$transaction(action, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (cause) {
+      if (cause && typeof cause === 'object' && 'code' in cause &&
+          (cause.code === 'P2034' || cause.code === 'P2028')) {
+        throw new Error('CMS_VERSION_CONFLICT');
+      }
+      throw cause;
+    }
+  }
+
   public async createContent(data: CreateCmsContentDto): Promise<CmsContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const category = await this.resolveCategory(tx, data.categoryId, data.categorySlug);
       const row = await tx.cmsContentNode.create({
         data: {
@@ -70,7 +85,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     data: UpdateCmsContentDto,
     actorId: string,
   ): Promise<CmsContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const current = await this.requireContent(tx, id);
       this.assertVersion(current.version, data.expectedVersion);
       // Root public facts are not part of the localized reviewer snapshot in older
@@ -224,7 +239,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   public async upsertLocalizedContent(
     data: UpsertCmsLocalizedContentDto,
   ): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const content = await this.requireContent(tx, data.contentId);
       const existing = await tx.cmsLocalizedContent.findUnique({
         where: { contentId_locale: { contentId: data.contentId, locale: data.locale } },
@@ -348,7 +363,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async approveReview(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command);
       CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.READY_TO_PUBLISH);
       const review = await tx.cmsWorkflowReview.findFirst({
@@ -383,7 +398,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async rejectReview(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command);
       CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.DRAFT);
       const review = await tx.cmsWorkflowReview.findFirst({
@@ -422,7 +437,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async cancelSchedule(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command);
       CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.DRAFT);
       await tx.cmsScheduledJob.updateMany({ where: { localizedContentId: localized.id, status: 'PENDING' }, data: { status: 'CANCELLED', completedAt: new Date() } });
@@ -434,7 +449,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async publish(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command, true);
       if (localized.state === CmsContentStatus.SCHEDULED) {
         if (!localized.scheduledAt || localized.scheduledAt.getTime() > Date.now()) {
@@ -545,7 +560,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async archive(command: CmsWorkflowCommandDto): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command);
       CmsPublishingPolicy.assertTransition(localized.state, CmsContentStatus.ARCHIVED);
       const now = new Date();
@@ -580,7 +595,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async restoreRevision(data: CmsRestoreRevisionDto): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const localized = await tx.cmsLocalizedContent.findUnique({
         where: { contentId_locale: { contentId: data.contentId, locale: data.locale } },
       });
@@ -636,7 +651,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     data: CreateCmsCategoryDto,
     actorId: string,
   ): Promise<CmsCategoryDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       if (data.parentCategoryId) {
         const parent = await tx.cmsCategory.findUnique({ where: { id: data.parentCategoryId } });
         if (!parent) throw new Error('CMS_PARENT_CATEGORY_NOT_FOUND');
@@ -659,7 +674,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async createTag(data: CreateCmsTagDto, actorId: string): Promise<CmsTagDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const row = await tx.cmsTag.upsert({
         where: { normalizedValue: data.normalizedValue },
         create: data,
@@ -743,7 +758,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     links: UpsertCmsContentDomainLinkDto[],
     actorId: string,
   ): Promise<CmsContentDomainLinkDto[]> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const content = await this.requireContent(tx, contentId);
       // Domain owner validity is not shape-only. Until a canonical owner gateway is
       // wired, reject new references and prohibit changes to live review facts.
@@ -812,7 +827,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async changeLocalizedSlug(data: CmsSlugChangeDto): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const content = await this.requireContent(tx, data.contentId);
       const localized = await tx.cmsLocalizedContent.findUnique({ where: { contentId_locale: { contentId: data.contentId, locale: data.locale } } });
       if (!localized) throw new Error('CMS_LOCALIZATION_NOT_FOUND');
@@ -844,7 +859,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async createRedirect(data: Omit<CmsRedirectDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<CmsRedirectDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       CmsPublishingPolicy.assertRedirect(data.sourcePath, data.destinationPath);
       await this.assertRedirectGraphSafe(tx, data.siteIdentifier, data.locale, data.sourcePath, data.destinationPath);
       const row = await tx.cmsRedirect.create({ data: { id: randomUUID(), ...data } });
@@ -876,7 +891,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   public async saveNavigation(
     data: Omit<CmsNavigationMenuDto, 'id' | 'version' | 'status' | 'publishedContentHash' | 'publishedBy' | 'publishedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number },
   ): Promise<CmsNavigationMenuDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const existing = data.id
         ? await tx.cmsNavigationMenu.findUnique({ where: { id: data.id }, include: { nodes: { orderBy: { sortOrder: 'asc' } } } })
         : await tx.cmsNavigationMenu.findUnique({
@@ -956,7 +971,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async publishNavigation(id: string, expectedVersion: number, actorId: string): Promise<CmsNavigationMenuDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const existing = await tx.cmsNavigationMenu.findUnique({ where: { id }, include: { nodes: { orderBy: { sortOrder: 'asc' } } } });
       if (!existing) throw new Error('CMS_NAVIGATION_NOT_FOUND');
       this.assertVersion(existing.version, expectedVersion);
@@ -1001,7 +1016,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async createBlockSchema(data: Omit<CmsBlockSchemaDto, 'id' | 'createdAt'>): Promise<CmsBlockSchemaDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const row = await tx.cmsBlockSchema.create({ data: { ...data, id: randomUUID(), fieldSchema: json(data.fieldSchema), localizedFields: json(data.localizedFields), assetFields: json(data.assetFields) } });
       await this.appendStandaloneMutation(tx, row.id, 'CmsBlockSchema', 'BLOCK_SCHEMA_CREATED', data.createdBy, { key: data.key, version: data.version });
       return this.blockSchema(row);
@@ -1013,7 +1028,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async saveBlock(data: Omit<CmsContentBlockDto, 'id' | 'publicId' | 'version' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number }): Promise<CmsContentBlockDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const schema = await tx.cmsBlockSchema.findUnique({ where: { id: data.schemaId } });
       if (!schema || schema.status !== 'ACTIVE') throw new Error('CMS_BLOCK_SCHEMA_NOT_ACTIVE');
       CmsPublishingPolicy.assertBlockPayload(data.payload, schema.fieldSchema, schema.assetFields);
@@ -1059,7 +1074,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   public async saveAnnouncement(
     data: Omit<CmsAnnouncementDto, 'id' | 'publicId' | 'version' | 'status' | 'approvedBy' | 'publishedContentHash' | 'publishedAt' | 'archivedAt' | 'createdAt' | 'updatedAt'> & { id?: string; expectedVersion?: number },
   ): Promise<CmsAnnouncementDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const existing = data.id ? await tx.cmsAnnouncement.findUnique({ where: { id: data.id } }) : null;
       if (existing) {
         if (existing.siteIdentifier !== data.siteIdentifier || existing.locale !== data.locale) {
@@ -1124,7 +1139,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async publishAnnouncement(id: string, expectedVersion: number, actorId: string): Promise<CmsAnnouncementDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const existing = await tx.cmsAnnouncement.findUnique({ where: { id } });
       if (!existing) throw new Error('CMS_ANNOUNCEMENT_NOT_FOUND');
       this.assertVersion(existing.version, expectedVersion);
@@ -1165,7 +1180,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   }
 
   public async archiveAnnouncement(id: string, expectedVersion: number, actorId: string): Promise<CmsAnnouncementDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const existing = await tx.cmsAnnouncement.findUnique({ where: { id } });
       if (!existing) throw new Error('CMS_ANNOUNCEMENT_NOT_FOUND');
       this.assertVersion(existing.version, expectedVersion);
@@ -1288,7 +1303,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     action: string,
     extra: Record<string, unknown> = {},
   ): Promise<CmsLocalizedContentDto> {
-    return this.db.$transaction(async (tx: any) => {
+    return this.serializable(async (tx: any) => {
       const { content, localized } = await this.loadWorkflow(tx, command);
       CmsPublishingPolicy.assertTransition(localized.state, next);
       if (next === CmsContentStatus.IN_REVIEW) {
