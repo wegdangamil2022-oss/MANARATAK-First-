@@ -1379,7 +1379,9 @@ export class PrismaAIPlatformRepository implements IAIPlatformRepository, IAIExe
   }
   async replaceEmbeddings(input: {
     indexKey: string;
+    sourceType: string;
     sourceReferenceId: string;
+    sourceVersion?: string | null;
     modelKey: string;
     dimensions: number;
     chunks: Array<{
