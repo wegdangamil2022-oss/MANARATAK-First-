@@ -85,6 +85,19 @@ interface StudentSupportDetail extends StudentSupportItem {
   learning?: Enrollment[];
   certificates?: Certificate[];
 }
+type OwnerDomain = 'learning' | 'certificates' | 'services';
+type OwnerReadState = 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED' | 'TRUNCATED';
+interface OwnerTabResponse {
+  domain: OwnerDomain;
+  status: OwnerReadState;
+  provenance: {source:'P13'|'P14'|'P20';queriedAt:string;returned:number;limit:number;complete:boolean}|null;
+  learning?: Enrollment[]|null;
+  certificates?: Certificate[]|null;
+  activeCourseCount?: number|null;
+  certificateCount?: number|null;
+  serviceRequestCount?: number|null;
+  recentServiceRequests?: StudentSupportDetail['recentServiceRequests']|null;
+}
 interface SupportApplicationPage {
   items: Array<{id:string;scholarshipId:string;stage:string;status:string;deadlineAt:string|null;updatedAt:string}>;
   total: number;
@@ -177,6 +190,8 @@ export function StudentSupportAdminPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [detail, setDetail] = useState<StudentSupportDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [ownerLoading, setOwnerLoading] = useState<OwnerDomain|null>(null);
+  const [ownerError, setOwnerError] = useState<string|null>(null);
   const [tab, setTab] = useState<Tab>('OVERVIEW');
   const [resetTarget, setResetTarget] = useState<StudentSupportItem | null>(null);
   const [trackerPurpose, setTrackerPurpose] = useState('CASE_REVIEW');
@@ -187,6 +202,8 @@ export function StudentSupportAdminPage() {
   const [resetting, setResetting] = useState(false);
   const listRequest = useRef(0);
   const detailRequest = useRef(0);
+  const ownerRequest = useRef(0);
+  const loadedOwnerTabs = useRef(new Set<string>());
   const trackerRequest = useRef(0);
   const detailAnchor = useRef<HTMLDivElement>(null);
 
@@ -238,6 +255,10 @@ export function StudentSupportAdminPage() {
     };
   }, [load]);
   const inspect = useCallback(async (id: string) => {
+    ++ownerRequest.current;
+    loadedOwnerTabs.current.clear();
+    setOwnerLoading(null);
+    setOwnerError(null);
     const request = ++detailRequest.current;
     setDetailLoading(true);
     setDetail(null);
@@ -271,6 +292,61 @@ export function StudentSupportAdminPage() {
       ++detailRequest.current;
     };
   }, [selectedId, inspect]);
+  // Each P13/P14/P20 support view is fetched ONLY after its tab is opened.
+  // The server independently checks the owner permission and writes required audit.
+  useEffect(() => {
+    const domain:OwnerDomain|null=tab==='LEARNING'?'learning':
+      tab==='CERTIFICATES'?'certificates':tab==='SAVED'?'services':null;
+    if (!domain || !selectedId || detail?.studentReferenceId!==selectedId) return;
+    const permission=domain==='learning'?'admin:courses:manage':
+      domain==='certificates'?'admin:certificates:view':'admin:services:manage';
+    if (!hasPermission(permission) || loadedOwnerTabs.current.has(`${selectedId}:${domain}`)) return;
+    const request=++ownerRequest.current;
+    setOwnerLoading(domain);
+    setOwnerError(null);
+    void (async()=>{
+      try {
+        const result=await adminApiClient.request<OwnerTabResponse>(
+          `/admin/students/support/${encodeURIComponent(selectedId)}/owner/${domain}`,
+        );
+        if(request!==ownerRequest.current) return;
+        loadedOwnerTabs.current.add(`${selectedId}:${domain}`);
+        setDetail(previous=>{
+          if(!previous || previous.studentReferenceId!==selectedId) return previous;
+          const provenance=previous.ownerReadProvenance;
+          return {
+            ...previous,
+            ownerReadStatus:{
+              learning:domain==='learning'?result.status:previous.ownerReadStatus?.learning??'RESTRICTED',
+              certificates:domain==='certificates'?result.status:previous.ownerReadStatus?.certificates??'RESTRICTED',
+              services:domain==='services'?result.status:previous.ownerReadStatus?.services??'RESTRICTED',
+            },
+            ownerReadProvenance:{
+              learning:domain==='learning'?result.provenance as NonNullable<StudentSupportDetail['ownerReadProvenance']>['learning']:provenance?.learning??null,
+              certificates:domain==='certificates'?result.provenance as NonNullable<StudentSupportDetail['ownerReadProvenance']>['certificates']:provenance?.certificates??null,
+              services:domain==='services'?result.provenance as NonNullable<StudentSupportDetail['ownerReadProvenance']>['services']:provenance?.services??null,
+            },
+            linkedSummaries:{
+              ...previous.linkedSummaries,
+              ...(domain==='learning'?{activeCourseCount:result.activeCourseCount??null}:{}),
+              ...(domain==='certificates'?{certificateCount:result.certificateCount??null}:{}),
+            },
+            learning:domain==='learning'?result.learning??undefined:previous.learning,
+            certificates:domain==='certificates'?result.certificates??undefined:previous.certificates,
+            serviceRequestCount:domain==='services'?result.serviceRequestCount??null:previous.serviceRequestCount,
+            recentServiceRequests:domain==='services'?result.recentServiceRequests??undefined:previous.recentServiceRequests,
+          };
+        });
+      }catch(error) {
+        if(request===ownerRequest.current)
+          setOwnerError(error instanceof Error?error.message:'تعذرت قراءة المجال المحدد.');
+      }finally{
+        if(request===ownerRequest.current)setOwnerLoading(null);
+      }
+    })();
+    return ()=>{++ownerRequest.current;};
+  },[tab,selectedId,detail?.studentReferenceId,hasPermission]);
+
   useEffect(() => {
     if (detail) detailAnchor.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [detail?.studentReferenceId]);
@@ -593,6 +669,12 @@ export function StudentSupportAdminPage() {
                     </button>
                   ))}
                 </nav>
+                {ownerLoading && (
+                  <p role="status" className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+                    تحميل بيانات {ownerLoading==='learning'?'الدورات':ownerLoading==='certificates'?'الشهادات':'الخدمات'} من المجال المالك…
+                  </p>
+                )}
+                {ownerError && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{ownerError}</p>}
                 {Object.values(detail.ownerReadStatus ?? {}).includes('RESTRICTED') && (
                   <p role="status" className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
                     بعض بيانات الدورات والشهادات والخدمات محجوبة لعدم امتلاك صلاحيات مجالاتها. الأعداد المحجوبة لا تعني صفرًا.
