@@ -424,7 +424,7 @@ export class AIAdminRouter {
       '/workflow-runs/:publicId/execute',
       asyncHandler(async (req, res) => {
         res.json(
-          await cradle.aiWorkflowUseCases.run(req.params.publicId, safeRecord.parse(req.body)),
+          await cradle.aiWorkflowUseCases.run(req.params.publicId, safeRecord.parse(req.body), actor(req)),
         );
       }),
     );
