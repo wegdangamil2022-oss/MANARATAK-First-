@@ -43,6 +43,8 @@ describe('Phase 16 CMS admin router', () => {
     saveAnnouncement: vi.fn(),
     publishAnnouncement: vi.fn(),
     archiveAnnouncement: vi.fn(),
+    listFailedSchedules: vi.fn(),
+    retryFailedSchedule: vi.fn(),
     processDueSchedules: vi.fn(),
   });
   const app = (cms: ReturnType<typeof useCases>, actorId?: string, grants: string[] = ['admin:cms:view', 'admin:cms:author', 'admin:cms:review', 'admin:cms:publish']) => {
@@ -66,6 +68,32 @@ describe('Phase 16 CMS admin router', () => {
     );
     return server;
   };
+
+  it('denies failed-job inspection/retry to readers and authors', async () => {
+    const cms = useCases();
+    for (const grant of ['admin:cms:view', 'admin:cms:author']) {
+      const server = app(cms, 'limited', [grant]);
+      expect((await request(server).get('/cms/operations/failed-schedules')).status).toBe(403);
+      expect((await request(server).post('/cms/operations/failed-schedules/job-1/retry')
+        .send({ expectedAttemptCount: 3, reason: 'Operator correction' })).status).toBe(403);
+    }
+    expect(cms.listFailedSchedules).not.toHaveBeenCalled();
+    expect(cms.retryFailedSchedule).not.toHaveBeenCalled();
+  });
+
+  it('validates failed-job replay attempt and reason before invoking the owner', async () => {
+    const cms = useCases();
+    const server = app(cms, 'operator', ['admin:cms:operations:run']);
+    const bad = await request(server).post('/cms/operations/failed-schedules/job-1/retry')
+      .send({ expectedAttemptCount: -1, reason: 'no' });
+    expect(bad.status).toBe(400);
+    expect(cms.retryFailedSchedule).not.toHaveBeenCalled();
+    cms.retryFailedSchedule.mockResolvedValue({ id: 'job-1', status: 'PENDING', attemptCount: 3 });
+    const allowed = await request(server).post('/cms/operations/failed-schedules/job-1/retry')
+      .send({ expectedAttemptCount: 3, reason: 'Validated approval' });
+    expect(allowed.status).toBe(200);
+    expect(cms.retryFailedSchedule).toHaveBeenCalledWith('job-1', 3, 'operator', 'Validated approval');
+  });
 
   it('requires viewer permission and restricts redirect search to site-scoped bounded filters', async () => {
     const cms = useCases();
