@@ -22,10 +22,10 @@ export class CmsPublicRouter {
       page: z.coerce.number().int().positive().max(500).default(1),
       pageSize: z.coerce.number().int().min(1).max(50).default(20),
     });
-    const deliveryHeaders = (req: Request, res: Response, payload: unknown): boolean => {
+    const deliveryHeaders = (req: Request, res: Response, payload: unknown, noStore = false): boolean => {
       const etag = `W/\"cms-${createHash('sha256').update(JSON.stringify(payload)).digest('base64url').slice(0, 24)}\"`;
       res.set({
-        'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+        'Cache-Control': noStore ? 'private, no-store, must-revalidate' : 'public, max-age=60, must-revalidate',
         ETag: etag,
         Vary: 'Accept-Language',
       });
@@ -57,7 +57,7 @@ export class CmsPublicRouter {
       asyncHandler(async (req, res) => {
         const { locale, ...filters } = querySchema.parse(req.query);
         const payload = await publicCmsUseCases.listPublished(filters, locale);
-        if (deliveryHeaders(req, res, payload)) return;
+        if (deliveryHeaders(req, res, payload, true)) return;
         res.json(payload);
       }),
     );
@@ -66,7 +66,7 @@ export class CmsPublicRouter {
       asyncHandler(async (req, res) => {
         const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.literal('manaratak').default('manaratak') }).parse(req.query);
         const payload = await publicCmsUseCases.getBySlug(req.params.slug, query.locale, query.siteIdentifier);
-        if (deliveryHeaders(req, res, payload)) return;
+        if (deliveryHeaders(req, res, payload, true)) return;
         res.json(payload);
       }),
     );
@@ -81,7 +81,7 @@ export class CmsPublicRouter {
       }).parse(req.query);
       const data = await publicCmsUseCases.listRelated(query.targetType, query.targetId, query.locale, query.siteIdentifier, query.limit);
       const payload = { data };
-      if (deliveryHeaders(req, res, payload)) return;
+      if (deliveryHeaders(req, res, payload, true)) return;
       res.json(payload);
     }));
 
