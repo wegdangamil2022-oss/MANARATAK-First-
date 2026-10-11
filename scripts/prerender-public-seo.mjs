@@ -227,6 +227,52 @@ async function main() {
     }
   }
 
+  if (apiBase) {
+    for (const locale of ['ar', 'en']) {
+      const items = await fetchCmsPublished(apiBase, locale);
+      for (const item of items) {
+        if (!item || item.siteIdentifier !== 'manaratak' || item.locale !== locale ||
+            item.seoMetadata?.noIndex === true) continue;
+        const segment = CMS_ROUTES[item.contentType];
+        if (!segment || typeof item.slug !== 'string' ||
+            !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)) {
+          throw new Error('CMS_PRERENDER_PUBLIC_ROUTE_INVALID');
+        }
+        const path = `/${locale}/${segment}/${item.slug}`;
+        if (item.canonicalUrl !== path || !item.contentId) {
+          throw new Error('CMS_PRERENDER_CANONICAL_MISMATCH');
+        }
+        const localized = Array.isArray(item.availableLocales) ? item.availableLocales : [];
+        const alternateFor = (language) => {
+          const target = localized.find((entry) => entry.locale === language);
+          return target && typeof target.slug === 'string' &&
+            /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target.slug)
+            ? `${publicBase}/${language}/${segment}/${target.slug}` : null;
+        };
+        const canonical = `${publicBase}${path}`;
+        const title = item.seoMetadata?.title || item.title;
+        const description = item.seoMetadata?.description || item.summary || title;
+        const schemaType = item.contentType === 'NEWS' ? 'NewsArticle'
+          : item.contentType === 'ARTICLE' ? 'Article' : 'WebPage';
+        const jsonLd = {
+          '@context': 'https://schema.org', '@type': schemaType,
+          name: title, description, url: canonical, inLanguage: locale,
+          datePublished: item.publishedAt, identifier: item.publicId,
+        };
+        await writeRoute(distDir, path, inject(template, {
+          title, description, canonical, ar: alternateFor('ar'), en: alternateFor('en'),
+          locale, jsonLd,
+        }));
+        manifest.push({
+          path, canonical, kind: 'cms', source: '/public/cms/content',
+          cmsContentId: item.contentId,
+        });
+      }
+    }
+  }
+
+  await writeSitemap(distDir, manifest);
+
   await writeFile(resolve(distDir, 'prerender-manifest.json'), JSON.stringify({ generatedAt: new Date().toISOString(), staticOnly, routes: manifest }, null, 2), 'utf8');
   await writeFile(resolve(distDir, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /student\nDisallow: /login\nSitemap: ${publicBase}/sitemap.xml\n`, 'utf8');
   console.log(`PUBLIC_PRERENDER=PASS routes=${manifest.length} staticOnly=${staticOnly}`);
