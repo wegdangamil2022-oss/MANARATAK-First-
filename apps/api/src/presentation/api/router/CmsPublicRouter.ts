@@ -84,6 +84,23 @@ export class CmsPublicRouter {
       const data = await publicCmsUseCases.listAnnouncements(query.siteIdentifier, query.locale);
       const payload = { data }; if (deliveryHeaders(req, res, payload)) return; res.json(payload);
     }));
+    // This endpoint is consumed by the edge web server and produces a real
+    // 301/302/308, not JSON masquerading as a browser redirect.
+    router.get('/redirects/http-resolve', asyncHandler(async (req, res) => {
+      const { path } = z.object({
+        path: z.string().regex(/^\/(ar|en)\/(articles|news|study-guides|checklists|faqs|pages|landing)\/[a-z0-9-]+$/),
+      }).strict().parse(req.query);
+      const locale = path.split('/')[1];
+      const result = await publicCmsUseCases.resolveRedirect('manaratak', locale, path);
+      if (!result) { res.status(404).end(); return; }
+      if (!result.destinationPath.startsWith(`/${locale}/`) ||
+          result.destinationPath.startsWith('//') || ![301, 302, 308].includes(result.statusCode)) {
+        res.status(422).end(); return;
+      }
+      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+      res.set('X-Content-Type-Options', 'nosniff');
+      res.redirect(result.statusCode, result.destinationPath);
+    }));
     router.get('/redirects/resolve', asyncHandler(async (req, res) => {
       const query = z.object({ locale: z.enum(['ar', 'en']).default('ar'), siteIdentifier: z.string().default('manaratak'), path: z.string().min(1) }).parse(req.query);
       const payload = await publicCmsUseCases.resolveRedirect(query.siteIdentifier, query.locale, query.path);
