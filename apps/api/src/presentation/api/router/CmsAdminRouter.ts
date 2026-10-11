@@ -28,11 +28,13 @@ export class CmsAdminRouter {
     // Administrative authentication is inherited from /admin. Every CMS action
     // requires its own capability; unrecognized mutations fail closed.
     const requiredPermission = (method: string, path: string): string | null => {
+      if (method === 'GET' && path === '/operations/failed-schedules') return 'admin:cms:operations:run';
       if (method === 'GET') return 'admin:cms:view';
       if (method === 'POST' && /^\/content\/[^/]+\/(approve|reject)$/.test(path)) return 'admin:cms:review';
       if (method === 'POST' && (/^\/content\/[^/]+\/(publish|archive|schedule|cancel-schedule)$/.test(path)
         || /^\/(navigation|announcements|blocks)\/[^/]+\/(publish|archive)$/.test(path))) return 'admin:cms:publish';
       if (method === 'POST' && path === '/operations/process-due-schedules') return 'admin:cms:operations:run';
+      if (method === 'POST' && /^\/operations\/failed-schedules\/[^/]+\/retry$/.test(path)) return 'admin:cms:operations:run';
       if ((method === 'POST' || method === 'PATCH') && /^\/redirects(?:\/[^/]+)?$/.test(path)) return 'admin:cms:redirects:manage';
       if (method === 'PUT' && path === '/navigation') return 'admin:cms:navigation:manage';
       if (method === 'POST' && path === '/block-schemas') return 'admin:cms:schemas:manage';
@@ -386,6 +388,21 @@ export class CmsAdminRouter {
     router.post('/announcements/:id/archive', asyncHandler(async (req, res) => {
       const body = z.object({ expectedVersion: z.number().int().positive() }).parse(req.body);
       res.json(await adminCmsUseCases.archiveAnnouncement(req.params.id, body.expectedVersion, actor(req)));
+    }));
+    router.get('/operations/failed-schedules', asyncHandler(async (req, res) => {
+      const query = z.object({
+        siteIdentifier: z.literal('manaratak').default('manaratak'),
+        locale: z.enum(['ar', 'en']).optional(),
+        limit: z.coerce.number().int().min(1).max(100).default(50),
+      }).strict().parse(req.query);
+      res.json({ data: await adminCmsUseCases.listFailedSchedules(query.siteIdentifier, query.locale, query.limit) });
+    }));
+    router.post('/operations/failed-schedules/:id/retry', asyncHandler(async (req, res) => {
+      const data = z.object({
+        expectedAttemptCount: z.number().int().min(1),
+        reason: z.string().trim().min(3).max(2000),
+      }).strict().parse(req.body);
+      res.json(await adminCmsUseCases.retryFailedSchedule(req.params.id, data.expectedAttemptCount, actor(req), data.reason));
     }));
     router.post('/operations/process-due-schedules', asyncHandler(async (req, res) => {
       const body = z.object({ limit: z.number().int().min(1).max(100).optional() }).strict().parse(req.body);
