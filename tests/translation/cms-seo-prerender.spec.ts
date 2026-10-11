@@ -84,8 +84,13 @@ describe('CMS prerender source contract (local mock API, no database/provider)',
     expect(arHtml).toContain('rel="canonical" href="https://manaratak.example/ar/news/arabic-news"');
     expect(arHtml).toContain('hreflang="en" href="https://manaratak.example/en/news/english-news"');
     expect(enHtml).toContain('English SEO title');
-    expect(sitemap).toContain('<loc>https://manaratak.example/ar/news/arabic-news</loc>');
-    expect(sitemap).toContain('<loc>https://manaratak.example/en/news/english-news</loc>');
+    // Live CMS entries are now served by /cms-sitemap.xml; the generated
+    // static sitemap must never keep a retired CMS article indexed.
+    expect(sitemap).not.toContain('/ar/news/arabic-news');
+    expect(sitemap).not.toContain('/en/news/english-news');
+    const robots = await readFile(resolve(dist, 'robots.txt'), 'utf8');
+    expect(robots).toContain('Sitemap: https://manaratak.example/sitemap.xml');
+    expect(robots).toContain('Sitemap: https://manaratak.example/cms-sitemap.xml');
     expect(sitemap).not.toContain('/en/news/no-index');
     const monoHtml = await readFile(resolve(dist, 'ar/news/single-language/index.html'), 'utf8');
     expect(monoHtml).not.toContain('hreflang="en"');
