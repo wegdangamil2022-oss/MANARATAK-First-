@@ -904,6 +904,29 @@ export class PrismaCmsRepository implements ICmsRepository {
     });
   }
 
+  public async searchRedirects(filters: { siteIdentifier: string; locale?: string; q?: string; active?: boolean; page: number; pageSize: number }): Promise<PaginatedCmsResult<CmsRedirectDto>> {
+    const page = Math.max(1, Math.min(1000, filters.page));
+    const pageSize = Math.max(1, Math.min(100, filters.pageSize));
+    const q = filters.q?.trim();
+    const where: any = {
+      siteIdentifier: filters.siteIdentifier,
+      ...(filters.locale ? { locale: filters.locale } : {}),
+      ...(filters.active === undefined ? {} : { active: filters.active }),
+      ...(q ? { OR: [
+        { sourcePath: { contains: q, mode: 'insensitive' } },
+        { destinationPath: { contains: q, mode: 'insensitive' } },
+      ] } : {}),
+    };
+    const [data, total] = await Promise.all([
+      this.db.cmsRedirect.findMany({
+        where, orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * pageSize, take: pageSize,
+      }),
+      this.db.cmsRedirect.count({ where }),
+    ]);
+    return { data, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+  }
+
   public async listRedirects(siteIdentifier?: string, locale?: string): Promise<CmsRedirectDto[]> {
     return this.db.cmsRedirect.findMany({ where: { ...(siteIdentifier ? { siteIdentifier } : {}), ...(locale ? { locale } : {}) }, orderBy: { updatedAt: 'desc' } });
   }
