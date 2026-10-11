@@ -1,7 +1,7 @@
 {
-  "version": 2,
-  "baseline": "bac768e7fcd76e5702697760669449b39b0e2cca",
-  "scope": "Mounted canonical admin mutations; source checks, not runtime or owner atomicity proof",
+  "version": 3,
+  "baseline": "40519a333607aa66bed0716cb5848de3242b4a5c",
+  "scope": "Mounted canonical admin mutations; candidate permission sets for conditional policies, with policy fingerprints; source checks, not runtime or owner atomicity proof",
   "routes": [
     {
       "method": "POST",
@@ -117,6 +117,70 @@
     },
     {
       "method": "POST",
+      "path": "/admin/academic-taxonomy/imports/:id/apply",
+      "owner": "AcademicTaxonomyAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:academic-taxonomy:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/academic-taxonomy/imports/:id/refresh",
+      "owner": "AcademicTaxonomyAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:academic-taxonomy:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/academic-taxonomy/imports/:id/review",
+      "owner": "AcademicTaxonomyAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:academic-taxonomy:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/academic-taxonomy/imports/preview",
+      "owner": "AcademicTaxonomyAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:academic-taxonomy:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/academic-taxonomy/mappings",
       "owner": "AcademicTaxonomyAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
@@ -148,8 +212,40 @@
       "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/academic-taxonomy/mappings/preview",
+      "owner": "AcademicTaxonomyAdminRouter",
+      "classification": "NO_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:academic-taxonomy:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REVIEWED_NON_MUTATING_POST_EXEMPTION",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
+    },
+    {
       "method": "PUT",
       "path": "/admin/academic-taxonomy/nodes",
+      "owner": "AcademicTaxonomyAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:academic-taxonomy:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/academic-taxonomy/nodes/:nodeId",
       "owner": "AcademicTaxonomyAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -180,16 +276,59 @@
       "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/academic-taxonomy/review/bulk",
+      "owner": "AcademicTaxonomyAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:academic-taxonomy:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AcademicTaxonomyAdminRouter.ts"
+    },
+    {
       "method": "PUT",
       "path": "/admin/ai/:resource/:key",
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -201,11 +340,82 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AIAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/ai/configuration/:resource/:key/:action",
+      "owner": "AIAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:ai:break-glass",
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -217,11 +427,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -233,11 +470,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -249,11 +513,81 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AIAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/ai/executions/:publicId/reconciliation/:action",
+      "owner": "AIAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -265,11 +599,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -281,11 +642,81 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/AIAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/ai/knowledge-indexes/:key/remove",
+      "owner": "AIAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -297,7 +728,7 @@
       "owner": "AIGatewayRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:execute"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -313,7 +744,7 @@
       "owner": "AIGatewayRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:execute"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -329,7 +760,7 @@
       "owner": "AIGatewayRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:execute"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
@@ -345,11 +776,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -361,11 +819,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -377,11 +862,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -393,11 +905,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -409,11 +948,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -425,11 +991,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -441,11 +1034,38 @@
       "owner": "AIAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:ai:manage"
+        "admin:ai:configure",
+        "admin:ai:cost:manage",
+        "admin:ai:deploy",
+        "admin:ai:execute",
+        "admin:ai:index:approve",
+        "admin:ai:prompt:author",
+        "admin:ai:prompt:review",
+        "admin:ai:queue:operate",
+        "admin:ai:safety:manage",
+        "admin:ai:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "permissionFor",
+          "permissions": [
+            "admin:ai:configure",
+            "admin:ai:cost:manage",
+            "admin:ai:deploy",
+            "admin:ai:execute",
+            "admin:ai:index:approve",
+            "admin:ai:prompt:author",
+            "admin:ai:prompt:review",
+            "admin:ai:queue:operate",
+            "admin:ai:safety:manage",
+            "admin:ai:view"
+          ],
+          "sourceFingerprint": "71afdb50831b835107aa0a452917f45a1cd32693771f70816cb5be1c9ae17c09"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1240,11 +1860,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1256,11 +1901,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1272,11 +1942,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1288,11 +1983,77 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CmsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/cms/block-schemas/:id/approve",
+      "owner": "CmsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1304,11 +2065,118 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CmsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/cms/blocks/:id/archive",
+      "owner": "CmsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CmsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/cms/blocks/:id/publish",
+      "owner": "CmsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1320,11 +2188,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1336,11 +2229,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1352,11 +2270,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1368,11 +2311,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1384,11 +2352,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1400,11 +2393,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1416,11 +2434,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1432,11 +2475,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1448,11 +2516,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1464,11 +2557,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1480,11 +2598,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1496,11 +2639,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1512,11 +2680,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1528,11 +2721,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1544,11 +2762,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1560,11 +2803,77 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CmsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/cms/operations/failed-schedules/:id/retry",
+      "owner": "CmsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1576,11 +2885,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1592,11 +2926,77 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CmsAdminRouter.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/cms/redirects/:id",
+      "owner": "CmsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1608,11 +3008,36 @@
       "owner": "CmsAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:cms:manage"
+        "admin:cms:author",
+        "admin:cms:navigation:manage",
+        "admin:cms:operations:run",
+        "admin:cms:publish",
+        "admin:cms:redirects:manage",
+        "admin:cms:review",
+        "admin:cms:schemas:approve",
+        "admin:cms:schemas:manage",
+        "admin:cms:view"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "conditionalPermissionPolicies": [
+        {
+          "resolver": "requiredPermission",
+          "permissions": [
+            "admin:cms:author",
+            "admin:cms:navigation:manage",
+            "admin:cms:operations:run",
+            "admin:cms:publish",
+            "admin:cms:redirects:manage",
+            "admin:cms:review",
+            "admin:cms:schemas:approve",
+            "admin:cms:schemas:manage",
+            "admin:cms:view"
+          ],
+          "sourceFingerprint": "99beb24ef8392d875198739189e81d3d81ca2aec3d6389ed2be22a85030dad9f"
+        }
+      ],
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -1660,6 +3085,22 @@
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/courses/:id/assessment-reviews/:attemptId/grade",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -4013,11 +5454,29 @@
     },
     {
       "method": "POST",
+      "path": "/admin/international-tests/:id/manual-names",
+      "owner": "InternationalTestAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:international-tests:manage",
+        "admin:international-tests:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
+    },
+    {
+      "method": "POST",
       "path": "/admin/international-tests/:id/mark-publishable",
       "owner": "InternationalTestAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:international-tests:manage"
+        "admin:international-tests:manage",
+        "admin:international-tests:review"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -4078,6 +5537,22 @@
     {
       "method": "PUT",
       "path": "/admin/international-tests/:id/preparation-materials",
+      "owner": "InternationalTestAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:international-tests:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/international-tests/:id/profile",
       "owner": "InternationalTestAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -4097,7 +5572,41 @@
       "owner": "InternationalTestAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
+        "admin:international-tests:manage",
+        "admin:international-tests:publish"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/international-tests/:id/remove-relationship",
+      "owner": "InternationalTestAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
         "admin:international-tests:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/international-tests/:id/review-block",
+      "owner": "InternationalTestAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:international-tests:manage",
+        "admin:international-tests:review"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -4113,7 +5622,42 @@
       "owner": "InternationalTestAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:international-tests:manage"
+        "admin:international-tests:manage",
+        "admin:international-tests:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/international-tests/:id/review-transition",
+      "owner": "InternationalTestAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:international-tests:manage",
+        "admin:international-tests:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/InternationalTestAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/international-tests/:id/revoke-source",
+      "owner": "InternationalTestAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:international-tests:manage",
+        "admin:international-tests:verify"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -4193,7 +5737,8 @@
       "owner": "InternationalTestAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:international-tests:manage"
+        "admin:international-tests:manage",
+        "admin:international-tests:publish"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -4241,7 +5786,8 @@
       "owner": "InternationalTestAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:international-tests:manage"
+        "admin:international-tests:manage",
+        "admin:international-tests:verify"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -4308,7 +5854,7 @@
         "admin:majors:manage"
       ],
       "conditionalPermissionReview": false,
-      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -4321,7 +5867,8 @@
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:majors:manage"
+        "admin:majors:manage",
+        "admin:majors:review"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -4353,10 +5900,11 @@
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:majors:manage"
+        "admin:majors:manage",
+        "admin:majors:review"
       ],
       "conditionalPermissionReview": false,
-      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -4372,7 +5920,7 @@
         "admin:majors:manage"
       ],
       "conditionalPermissionReview": false,
-      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -4385,10 +5933,11 @@
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:majors:manage"
+        "admin:majors:manage",
+        "admin:majors:publish"
       ],
       "conditionalPermissionReview": false,
-      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -4404,7 +5953,41 @@
         "admin:majors:manage"
       ],
       "conditionalPermissionReview": false,
-      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/:id/review-graph",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/:id/review-version",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -4417,10 +6000,28 @@
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:majors:manage"
+        "admin:majors:manage",
+        "admin:majors:publish"
       ],
       "conditionalPermissionReview": false,
-      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/:id/working-copy",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -4433,7 +6034,10 @@
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:majors:manage"
+        "admin:majors:manage",
+        "admin:majors:review",
+        "admin:universities:manage",
+        "admin:scholarships:manage"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -4449,7 +6053,27 @@
       "owner": "MajorAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:majors:manage"
+        "admin:majors:manage",
+        "admin:majors:review",
+        "admin:universities:manage",
+        "admin:scholarships:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/new-candidates/:candidateKey/reject",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -4462,6 +6086,22 @@
     {
       "method": "PUT",
       "path": "/admin/reference-data/cities",
+      "owner": "ReferenceDataAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:reference-data:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/reference-data/cities/:id/reconcile-country",
       "owner": "ReferenceDataAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -4556,8 +6196,88 @@
       "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/reference-data/governance/provider-mappings/reassign",
+      "owner": "ReferenceDataAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:reference-data:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+    },
+    {
       "method": "PUT",
       "path": "/admin/reference-data/languages/:isoCode",
+      "owner": "ReferenceDataAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:reference-data:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/reference-data/owner-imports/:id/apply",
+      "owner": "ReferenceDataAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:reference-data:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/reference-data/owner-imports/:id/refresh",
+      "owner": "ReferenceDataAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:reference-data:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/reference-data/owner-imports/:id/review",
+      "owner": "ReferenceDataAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:reference-data:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/reference-data/owner-imports/preview",
       "owner": "ReferenceDataAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -4590,6 +6310,38 @@
     {
       "method": "PUT",
       "path": "/admin/reference-data/regions/:id",
+      "owner": "ReferenceDataAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:reference-data:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/reference-data/standards/snapshots",
+      "owner": "ReferenceDataAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:reference-data:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/reference-data/standards/snapshots/:id/review",
       "owner": "ReferenceDataAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -5239,7 +6991,7 @@
       "permissionEvidence": [],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
-      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "idempotency": "OWNER_ENCRYPTED_EXECUTION_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
@@ -5554,5 +7306,17 @@
       "POST /admin/assets/:assetId/finalize-upload"
     ],
     "note": "AssetReuse permission and parsing verified by API contracts; finalization is management-only Critical. Owner atomic audit/outbox remains pending."
+  },
+  "repositoryReview": {
+    "date": "2026-10-11",
+    "report": "docs/reviews/repository-audit-cleanup.md",
+    "previousFindings": 89,
+    "addedRoutesReviewed": 34,
+    "changedContractsReviewed": 55,
+    "routerContractTests": {
+      "files": 16,
+      "tests": 175
+    },
+    "note": "Reviewed owner routing, source validation and conditional permission policies. Persisted reference/taxonomy previews are critical mutations; student-tool tests use encrypted owner replay. Existing owner atomicity and route collision limitations remain explicit."
   }
 }

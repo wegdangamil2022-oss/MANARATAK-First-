@@ -42,6 +42,40 @@ describe('MutationAuditPolicy', () => {
     ).toBe('CRITICAL_AUDIT_REQUIRED');
   });
 
+  it.each([
+    '/admin/reference-data/owner-imports/preview',
+    '/admin/academic-taxonomy/imports/preview',
+    '/admin/imports/unreviewed/preview',
+    '/admin/cms/content/new/preview',
+  ])('requires critical audit for persisted or unreviewed preview %s', (path) => {
+    for (const suffix of ['', '/', '?dryRun=false']) {
+      expect(
+        MutationAuditPolicy.classify(request('POST', `/api/v1${path}${suffix}`), 'ADMIN'),
+      ).toBe('CRITICAL_AUDIT_REQUIRED');
+    }
+  });
+
+  it('exempts only reviewed POST simulations, including their trailing slash form', () => {
+    for (const path of [
+      '/admin/academic-taxonomy/mappings/preview',
+      '/admin/academic-taxonomy/nodes/validate',
+      '/admin/imports/major-catalogs/bulk/preview',
+      '/admin/imports/major-detail-dossiers/preview',
+      '/admin/imports/mapping-profiles/profile/preview',
+      '/admin/student-tools/gpa/eligibility',
+    ]) {
+      expect(
+        MutationAuditPolicy.classify(request('POST', `/api/v1${path}/?locale=en`), 'ADMIN'),
+      ).toBe('NO_AUDIT_REQUIRED');
+      expect(MutationAuditPolicy.classify(request('DELETE', `/api/v1${path}`), 'ADMIN')).toBe(
+        'CRITICAL_AUDIT_REQUIRED',
+      );
+      expect(MutationAuditPolicy.classify(request('POST', `/api/v1${path}/extra`), 'ADMIN')).toBe(
+        'CRITICAL_AUDIT_REQUIRED',
+      );
+    }
+  });
+
   it('fails closed when required audit persistence fails', async () => {
     class FailingAuditRecordRepository extends InMemoryAuditRecordRepository {
       override async save(): Promise<void> {

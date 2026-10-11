@@ -46,5 +46,5 @@ test('MNT-AUD-0084 all Admin mutations are audited by default', () => {
     assert.ok(policy.includes(`'${area}'`), `missing critical Admin area ${area}`);
   }
   assert.match(policy, /ADMIN_EXEMPTIONS/);
-  assert.match(policy, /\/preview\$/);
+  assert.match(policy, /req\.method\.toUpperCase\(\) === 'POST'/);
 });
