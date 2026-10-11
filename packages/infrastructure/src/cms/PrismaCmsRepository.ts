@@ -94,7 +94,17 @@ export class PrismaCmsRepository implements ICmsRepository {
         data.categoryId !== undefined || data.categorySlug !== undefined
           ? await this.resolveCategory(tx, data.categoryId, data.categorySlug)
           : undefined;
-      const { expectedVersion: _expectedVersion, ...values } = data;
+      // Never spread caller-provided fields into Prisma: site/locale/author/owner
+      // are immutable even if a client bypasses the router type guard.
+      const values: UpdateCmsContentDto = {};
+      for (const key of [
+        'slug', 'contentType', 'title', 'summary', 'categoryId', 'categorySlug',
+        'featuredAssetId', 'seoMetadata', 'editorialMetadata', 'metadata',
+      ] as const) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          (values as Record<string, unknown>)[key] = data[key];
+        }
+      }
       const mutation = await tx.cmsContentNode.updateMany({
         where: { id, version: current.version },
         data: {
@@ -560,6 +570,7 @@ export class PrismaCmsRepository implements ICmsRepository {
       await this.db.cmsContentRevision.findMany({
         where: { localizedContentId: localized.id },
         orderBy: { versionNumber: 'desc' },
+        take: 100,
       })
     ).map((row: any) => this.revision(row));
   }
@@ -576,10 +587,20 @@ export class PrismaCmsRepository implements ICmsRepository {
       });
       if (!revision) throw new Error('CMS_REVISION_NOT_FOUND');
       const payload = revision.payload as any;
+      if ([CmsContentStatus.IN_REVIEW, CmsContentStatus.READY_TO_PUBLISH, CmsContentStatus.SCHEDULED].includes(localized.state)) {
+        throw new Error('CMS_CONTENT_LOCKED_FOR_WORKFLOW');
+      }
+      CmsPublishingPolicy.assertSlug(String(payload.localizedSlug));
+      CmsPublishingPolicy.assertSafeRichText(String(payload.body));
+      const currentPublic = await tx.cmsPublishedContent.findUnique({
+        where: { contentId_locale: { contentId: data.contentId, locale: data.locale } },
+      });
+      if (currentPublic && payload.localizedSlug !== currentPublic.slug) throw new Error('CMS_CANONICAL_IDENTITY_IMMUTABLE');
       await this.captureRevision(tx, localized, data.actorId, 'BEFORE_RESTORE');
       const row = await tx.cmsLocalizedContent.update({
         where: { id: localized.id },
         data: {
+          localizedSlug: payload.localizedSlug,
           title: payload.title,
           summary: payload.summary,
           body: payload.body,
@@ -761,9 +782,9 @@ export class PrismaCmsRepository implements ICmsRepository {
     limit = 6,
   ): Promise<PublicCmsContentDto[]> {
     const links = await this.db.cmsContentDomainLink.findMany({
-      where: { targetType, targetId },
+      where: { targetType, targetId, content: { siteIdentifier } },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-      take: Math.min(24, Math.max(1, limit)),
+      take: 200,
       select: { contentId: true },
     });
     if (!links.length) return [];
@@ -779,7 +800,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     const byId = new Map(rows.map((row: any) => [row.contentId, row]));
     const ordered = contentIds.map((id: string) => byId.get(id)).filter(Boolean);
     const locales = await this.availableLocales(contentIds);
-    return ordered.map((row: any) => this.publicContent(row, locales.get(row.contentId) ?? []));
+    return ordered.slice(0, Math.min(24, Math.max(1, limit))).map((row: any) => this.publicContent(row, locales.get(row.contentId) ?? []));
   }
 
   public async changeLocalizedSlug(data: CmsSlugChangeDto): Promise<CmsLocalizedContentDto> {

@@ -282,7 +282,9 @@ export class AdminCmsUseCases {
 
   public async createRedirect(data: Omit<CmsRedirectDto, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>, actorId: string): Promise<CmsRedirectDto> {
     CmsPublishingPolicy.assertRedirect(data.sourcePath, data.destinationPath);
-    return this.repository.createRedirect({ ...data, createdBy: actorId });
+    const result = await this.repository.createRedirect({ ...data, createdBy: actorId });
+    await this.deliveryCache?.invalidateSite(result.siteIdentifier, 'redirect-created');
+    return result;
   }
 
   public async listNavigation(siteIdentifier: string, locale: string): Promise<CmsNavigationMenuDto[]> {
@@ -300,7 +302,9 @@ export class AdminCmsUseCases {
 
   public async publishNavigation(id: string, expectedVersion: number, actorId: string): Promise<CmsNavigationMenuDto> {
     this.ensureActor(actorId);
-    return this.repository.publishNavigation(id, expectedVersion, actorId);
+    const result = await this.repository.publishNavigation(id, expectedVersion, actorId);
+    await this.deliveryCache?.invalidateSite(result.siteIdentifier, 'navigation-published');
+    return result;
   }
 
   public async listBlockSchemas(): Promise<CmsBlockSchemaDto[]> { return this.repository.listBlockSchemas(); }
@@ -322,12 +326,16 @@ export class AdminCmsUseCases {
 
   public async publishAnnouncement(id: string, expectedVersion: number, actorId: string): Promise<CmsAnnouncementDto> {
     this.ensureActor(actorId);
-    return this.repository.publishAnnouncement(id, expectedVersion, actorId);
+    const result = await this.repository.publishAnnouncement(id, expectedVersion, actorId);
+    await this.deliveryCache?.invalidateSite(result.siteIdentifier, 'announcement-published');
+    return result;
   }
 
   public async archiveAnnouncement(id: string, expectedVersion: number, actorId: string): Promise<CmsAnnouncementDto> {
     this.ensureActor(actorId);
-    return this.repository.archiveAnnouncement(id, expectedVersion, actorId);
+    const result = await this.repository.archiveAnnouncement(id, expectedVersion, actorId);
+    await this.deliveryCache?.invalidateSite(result.siteIdentifier, 'announcement-archived');
+    return result;
   }
   public async processDueSchedules(actorId: string, now = new Date(), limit = 50): Promise<CmsScheduleResultDto> {
     this.ensureActor(actorId);

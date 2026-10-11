@@ -152,7 +152,7 @@ export class CmsAdminRouter {
         res.json(
           await adminCmsUseCases.updateContent(
             req.params.id,
-            contentSchema.partial().extend({ expectedVersion: z.number().int().positive() }).parse(req.body),
+            contentSchema.pick({ slug: true, contentType: true, title: true, summary: true, categoryId: true, categorySlug: true, featuredAssetId: true, seoMetadata: true, editorialMetadata: true, metadata: true }).partial().extend({ expectedVersion: z.number().int().positive() }).strict().parse(req.body),
             actor(req),
           ),
         );
