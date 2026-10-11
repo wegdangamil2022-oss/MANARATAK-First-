@@ -968,9 +968,34 @@ export class AIExecutionOrchestrator {
     )
       throw new Error('AI_CAPABILITY_NOT_ALLOWED');
     assertNoSecretMaterial(request.metadata ?? {});
+    const scopedKey = request.idempotencyKey?.trim();
+    // Optional client retry identity is scoped to its verified requester and the
+    // governed consumer/capability. It never becomes an operator-controlled job ID.
+    const publicId = scopedKey
+      ? `aij_${sha256(stableStringify({
+          requester: request.requesterReferenceId, consumerKey, capabilityKey, key: scopedKey,
+        }))}`
+      : `aij_${randomUUID()}`;
+    const readReplay = async () => {
+      const existing = await this.repository.findAsyncJob(publicId);
+      if (!existing) return null;
+      const original = this.asyncPayloads!.unprotect({
+        ciphertext: existing.payloadCiphertext,
+        iv: existing.payloadIv,
+        authTag: existing.payloadAuthTag,
+        keyVersion: existing.payloadKeyVersion,
+      });
+      if (stableStringify(original) !== stableStringify(request))
+        throw new Error('AI_ASYNC_IDEMPOTENCY_KEY_REUSED');
+      return existing;
+    };
+    if (scopedKey) {
+      const existing = await readReplay();
+      if (existing) return existing;
+    }
     const protectedPayload = this.asyncPayloads.protect(request);
-    return this.repository.createAsyncJob({
-      publicId: `aij_${randomUUID()}`,
+    const candidate = {
+      publicId,
       requesterReferenceId: request.requesterReferenceId,
       consumerKey,
       capabilityKey,
@@ -988,7 +1013,18 @@ export class AIExecutionOrchestrator {
       executionPublicId: null,
       errorCode: null,
       completedAt: null,
-    });
+    };
+    try {
+      return await this.repository.createAsyncJob(candidate);
+    } catch (error) {
+      // The unique public ID wins cross-process races after queue admission.
+      if (scopedKey && error && typeof error === 'object' &&
+          'code' in error && error.code === 'P2002') {
+        const existing = await readReplay();
+        if (existing) return existing;
+      }
+      throw error;
+    }
   }
 
   async submitAsyncCapability(request: {
