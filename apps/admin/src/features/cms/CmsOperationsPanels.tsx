@@ -437,6 +437,21 @@ export function CmsOperationsPanels({
           <p className="mb-3 text-xs leading-5 text-slate-500">
             مخططات الكتل تُدار تقنيًا خارج شاشة المحرر. هنا تستخدم فقط المخططات المعتمدة.
           </p>
+          <ul className="mb-3 space-y-2">
+            {schemas.filter((schema) => schema.status === 'DRAFT').map((schema) => (
+              <li key={schema.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-50 p-3 text-xs">
+                <span>{locale === 'ar' ? schema.nameAr : schema.nameEn || schema.nameAr} · v{schema.version} · DRAFT</span>
+                <button type="button" className={button} disabled={busy} onClick={() => {
+                  if (!window.confirm(locale === 'ar'
+                    ? 'اعتماد مخطط الكتلة يتطلب مراجعًا مختلفًا عن منشئه. هل تتابع؟'
+                    : 'Schema approval requires a checker other than its author. Continue?')) return;
+                  void submit(() => adminApiClient.request('/admin/cms/block-schemas/' + encodeURIComponent(schema.id) + '/approve', {
+                    method: 'POST', body: JSON.stringify({}),
+                  }), locale === 'ar' ? 'اعتُمد المخطط بواسطة المراجع.' : 'Schema approved by reviewer.');
+                }}>{locale === 'ar' ? 'اعتماد المخطط' : 'Approve schema'}</button>
+              </li>
+            ))}
+          </ul>
           {schemas.length > 0 ? (
             <form onSubmit={createBlock} className="space-y-2">
               <select className={input} name="schemaId">
