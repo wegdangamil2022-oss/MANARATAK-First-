@@ -37,6 +37,8 @@ describe('Phase 16 CMS admin router', () => {
     publishBlock: vi.fn(),
     listBlockSchemas: vi.fn(),
     createBlockSchema: vi.fn(),
+    approveBlockSchema: vi.fn(),
+    createBlockSchema: vi.fn(),
     listBlocks: vi.fn(),
     saveBlock: vi.fn(),
     listAnnouncements: vi.fn(),
