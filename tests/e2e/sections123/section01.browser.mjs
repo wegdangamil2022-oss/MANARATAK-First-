@@ -10,10 +10,14 @@ try {
     const page = await context.newPage();
     page.setDefaultTimeout(10000);
     const errors = [], calls = [];
-    page.on('console', message => { if (message.type() === 'error') console.error(message.text()); });
+    page.on('console', message => {
+      // Missing Vite favicon is unrelated; caught React/render errors must fail.
+      if (message.type() === 'error' && !/^Failed to load resource:.*404/.test(message.text())) errors.push(message.text());
+    });
     page.on('pageerror', error => errors.push(error.message));
     const identity = { id: 'isolated-staff', type: 'Human', status: 'ACTIVE', account: { accessState: 'Active' }, user: { profile: { displayName: 'Isolated Staff', avatarUrl: '', preferredLanguage: language, timeZone: 'UTC' }, contactRegistry: { primaryEmail: 'staff@example.invalid', isEmailVerified: true } }, assignedRoles: [], latestAccessChange: null };
     let permissions = ['admin:identities:manage'];
+    let malformedEligibility = false;
     await page.route('**/*', async route => {
       const url = new URL(route.request().url());
       if (url.hostname !== '127.0.0.1') return route.abort();
@@ -27,7 +31,8 @@ try {
       if (path === '/admin/identities/isolated-staff') return reply({ data: identity });
       if (path.startsWith('/admin/authorization/')) {
         const key = path.split('/').at(-1);
-        return reply({ data: { [key === 'eligible-identities' ? 'items' : key === 'emergency-access' ? 'grants' : key === 'assignment-audit' ? 'records' : key]: [], nextCursor: null } });
+        if (key === 'eligible-identities' && malformedEligibility) return reply({ data: { items: [], nextCursor: null } });
+        return reply({ data: { [key === 'eligible-identities' ? 'identities' : key === 'emergency-access' ? 'grants' : key === 'assignment-audit' ? 'events' : key]: [], nextCursor: null, total: 0, nextOffset: 0, hasMore: false } });
       }
       throw new Error('UNEXPECTED_ISOLATED_REQUEST ' + path);
     });
@@ -47,10 +52,18 @@ try {
     const authStart = calls.length;
     await page.goto('http://127.0.0.1:3013/admin/authorization');
     await page.waitForLoadState('networkidle');
+    await page.getByRole('heading', { name: /Staff and permissions|الموظفون والصلاحيات/ }).waitFor();
+    assert.equal(await page.getByRole('alert').count(), 0);
     assert.ok(calls.slice(authStart).some(c => c.path === '/admin/authorization/roles'));
     assert.equal(calls.slice(authStart).some(c => c.path.startsWith('/admin/identities')), false);
+    // A malformed chooser reply must leave the workspace visible and show a local error.
+    malformedEligibility = true;
+    await page.reload();
+    await page.getByRole('heading', { name: /Staff and permissions|الموظفون والصلاحيات/ }).waitFor();
+    await page.getByRole('button', { name: language === 'en' ? 'Assignments' : 'التعيينات', exact: true }).click();
+    await page.getByRole('alert').filter({ hasText: language === 'en' ? 'Unable to load identities.' : 'تعذر تحميل الهويات.' }).first().waitFor();
     assert.deepEqual(errors, []);
-    summary.push({ language, checks: ['identity-only route', 'cursor continuation', 'authorization route denied before API', 'authorization-only route', 'no identity owner call from authorization-only', 'document direction'], calls });
+    summary.push({ language, checks: ['identity-only route', 'cursor continuation', 'authorization route denied before API', 'authorization-only route', 'no identity owner call from authorization-only', 'document direction', 'workspace actually rendered', 'malformed eligibility shows local error without React crash'], calls });
     await context.close();
   }
   console.log(JSON.stringify({ status: 'PASS', scope: 'CHROMIUM_UI_INTERCEPTED_HTTP', summary }, null, 2));

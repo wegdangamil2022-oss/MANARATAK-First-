@@ -17,6 +17,7 @@ export function AuthorizationIdentityPicker({
   approver?: boolean;
 }) {
   const { t } = useTranslation();
+  const loadFailed = t('iam_load_failed');
   const [search, setSearch] = useState('');
   const [cursor, setCursor] = useState('');
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -41,6 +42,12 @@ export function AuthorizationIdentityPicker({
         }>(`/admin/authorization/eligible-identities?${query}`, { cache: 'no-store' })
         .then((result) => {
           if (active) {
+            if (!result?.data || !Array.isArray(result.data.identities) ||
+                result.data.identities.some(candidate => !candidate || typeof candidate.id !== 'string' ||
+                  typeof candidate.displayName !== 'string' || typeof candidate.primaryEmail !== 'string') ||
+                (result.data.nextCursor !== null && typeof result.data.nextCursor !== 'string')) {
+              throw new Error(loadFailed);
+            }
             setCandidates(result.data.identities);
             setNextCursor(result.data.nextCursor);
             setHasMore(Boolean(result.data.nextCursor));
@@ -61,7 +68,7 @@ export function AuthorizationIdentityPicker({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [search, cursor, approver]);
+  }, [search, cursor, approver, loadFailed]);
   return (
     <div className="space-y-2">
       <label className="block">
