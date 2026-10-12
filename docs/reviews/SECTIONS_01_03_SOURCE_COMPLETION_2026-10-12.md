@@ -10,6 +10,8 @@
 - [القسم 02](SECTION_02_SOURCE_COMPLETION_2026-10-12.md)
 - [القسم 03](SECTION_03_SOURCE_COMPLETION_2026-10-12.md)
 
+كوميت تنفيذ المصدر: `eb4e17ab`. آخر فحص TypeScript سبق حفظه، ولم تتغير ملفات TypeScript بين ذلك الفحص وهذا الكوميت؛ اختبارات التطوير الأقدم لا تُنسب لهذا الكوميت.
+
 ## الفحوص المنفذة قبل طلب إيقاف الاختبارات
 
 - `tsc -b packages/infrastructure apps/api apps/admin apps/web` انتهى بنجاح، دون مخرجات أخطاء: [checkpoint-types.log](evidence/sections-01-03-source-completion-20261012/checkpoint-types.log). هذه آخر مراجعة TypeScript للمصدر؛ لا تنفيذ قاعدة بيانات.

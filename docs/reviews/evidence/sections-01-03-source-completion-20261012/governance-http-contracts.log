@@ -1,0 +1,141 @@
+
+ RUN  v4.1.11 /workspace/MANARATAK-First-
+
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts (8 tests | 8 failed) 12ms
+     × denies case data without the independent view permission 7ms
+     × permits bounded reads while prohibiting a viewer from creating cases 1ms
+     × cannot bypass case management by writing a note through the detail URL 1ms
+     × rejects overlarge pagination before owner reads 1ms
+     × does not accept metadata/author spoofing through the case command 1ms
+     × binds the case creator to the authenticated principal 0ms
+     × checks both alert and notification creation permission 1ms
+     × maps version conflict to a sanitized 409 without raw note payload 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts > audit workspace independent HTTP permissions and strict commands (injected principal) > denies case data without the independent view permission
+ReferenceError: authEvaluatorService is not defined
+ ❯ requireAdminPermission apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:21:72
+     19|     const router = Router();
+     20|     const requireAdminPermission = (permission: string) =>
+     21|       SecurityMiddlewareFactory.createAdminPermissionGuard(permission,…
+       |                                                                        ^
+     22|     router.use((_req, res, next) => {
+     23|       res.setHeader('Cache-Control', 'no-store');
+ ❯ AuditWorkspaceRouter.create apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:33:7
+ ❯ setup apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:27:26
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:36:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts > audit workspace independent HTTP permissions and strict commands (injected principal) > permits bounded reads while prohibiting a viewer from creating cases
+ReferenceError: authEvaluatorService is not defined
+ ❯ requireAdminPermission apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:21:72
+     19|     const router = Router();
+     20|     const requireAdminPermission = (permission: string) =>
+     21|       SecurityMiddlewareFactory.createAdminPermissionGuard(permission,…
+       |                                                                        ^
+     22|     router.use((_req, res, next) => {
+     23|       res.setHeader('Cache-Control', 'no-store');
+ ❯ AuditWorkspaceRouter.create apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:33:7
+ ❯ setup apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:27:26
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:42:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts > audit workspace independent HTTP permissions and strict commands (injected principal) > cannot bypass case management by writing a note through the detail URL
+ReferenceError: authEvaluatorService is not defined
+ ❯ requireAdminPermission apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:21:72
+     19|     const router = Router();
+     20|     const requireAdminPermission = (permission: string) =>
+     21|       SecurityMiddlewareFactory.createAdminPermissionGuard(permission,…
+       |                                                                        ^
+     22|     router.use((_req, res, next) => {
+     23|       res.setHeader('Cache-Control', 'no-store');
+ ❯ AuditWorkspaceRouter.create apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:33:7
+ ❯ setup apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:27:26
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:55:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts > audit workspace independent HTTP permissions and strict commands (injected principal) > rejects overlarge pagination before owner reads
+ReferenceError: authEvaluatorService is not defined
+ ❯ requireAdminPermission apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:21:72
+     19|     const router = Router();
+     20|     const requireAdminPermission = (permission: string) =>
+     21|       SecurityMiddlewareFactory.createAdminPermissionGuard(permission,…
+       |                                                                        ^
+     22|     router.use((_req, res, next) => {
+     23|       res.setHeader('Cache-Control', 'no-store');
+ ❯ AuditWorkspaceRouter.create apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:33:7
+ ❯ setup apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:27:26
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:63:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts > audit workspace independent HTTP permissions and strict commands (injected principal) > does not accept metadata/author spoofing through the case command
+ReferenceError: authEvaluatorService is not defined
+ ❯ requireAdminPermission apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:21:72
+     19|     const router = Router();
+     20|     const requireAdminPermission = (permission: string) =>
+     21|       SecurityMiddlewareFactory.createAdminPermissionGuard(permission,…
+       |                                                                        ^
+     22|     router.use((_req, res, next) => {
+     23|       res.setHeader('Cache-Control', 'no-store');
+ ❯ AuditWorkspaceRouter.create apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:33:7
+ ❯ setup apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:27:26
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:68:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts > audit workspace independent HTTP permissions and strict commands (injected principal) > binds the case creator to the authenticated principal
+ReferenceError: authEvaluatorService is not defined
+ ❯ requireAdminPermission apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:21:72
+     19|     const router = Router();
+     20|     const requireAdminPermission = (permission: string) =>
+     21|       SecurityMiddlewareFactory.createAdminPermissionGuard(permission,…
+       |                                                                        ^
+     22|     router.use((_req, res, next) => {
+     23|       res.setHeader('Cache-Control', 'no-store');
+ ❯ AuditWorkspaceRouter.create apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:33:7
+ ❯ setup apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:27:26
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:77:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts > audit workspace independent HTTP permissions and strict commands (injected principal) > checks both alert and notification creation permission
+ReferenceError: authEvaluatorService is not defined
+ ❯ requireAdminPermission apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:21:72
+     19|     const router = Router();
+     20|     const requireAdminPermission = (permission: string) =>
+     21|       SecurityMiddlewareFactory.createAdminPermissionGuard(permission,…
+       |                                                                        ^
+     22|     router.use((_req, res, next) => {
+     23|       res.setHeader('Cache-Control', 'no-store');
+ ❯ AuditWorkspaceRouter.create apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:33:7
+ ❯ setup apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:27:26
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:90:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts > audit workspace independent HTTP permissions and strict commands (injected principal) > maps version conflict to a sanitized 409 without raw note payload
+ReferenceError: authEvaluatorService is not defined
+ ❯ requireAdminPermission apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:21:72
+     19|     const router = Router();
+     20|     const requireAdminPermission = (permission: string) =>
+     21|       SecurityMiddlewareFactory.createAdminPermissionGuard(permission,…
+       |                                                                        ^
+     22|     router.use((_req, res, next) => {
+     23|       res.setHeader('Cache-Control', 'no-store');
+ ❯ AuditWorkspaceRouter.create apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts:33:7
+ ❯ setup apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:27:26
+ ❯ apps/api/tests/presentation/api/router/AuditWorkspaceContract.spec.ts:102:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  8 failed | 7 passed (15)
+   Start at  19:38:20
+   Duration  5.82s (transform 2.67s, setup 0ms, import 5.46s, tests 95ms, environment 0ms)
+
