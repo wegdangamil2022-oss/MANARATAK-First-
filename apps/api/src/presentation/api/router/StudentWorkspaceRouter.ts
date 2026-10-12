@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
-import { FinancePlatformUseCases, FinanceStudentUseCases, StudentWorkspaceUseCases, StudentApplicationTrackerUseCases, StudentSavedItemHydrationService, StudentDashboardHydrationService, StudentServiceRequestUseCases, ProcessAssetLifecycleUseCase, CertificateReadModelService } from '@manaratak/application';
+import { ServiceOperationsUseCases, FinancePlatformUseCases, FinanceStudentUseCases, StudentWorkspaceUseCases, StudentApplicationTrackerUseCases, StudentSavedItemHydrationService, StudentDashboardHydrationService, StudentServiceRequestUseCases, ProcessAssetLifecycleUseCase, CertificateReadModelService } from '@manaratak/application';
 import { AssetId, AssetLifecycleState, IAssetRecordRepository, ServiceRequestStatus, StudentSavedItemType } from '@manaratak/domain';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
 import { createStudentRoleGuard } from '../../security/StudentRoleGuard.js';
@@ -20,6 +20,7 @@ export class StudentWorkspaceRouter {
     studentSavedItemHydrationService: StudentSavedItemHydrationService;
     studentDashboardHydrationService: StudentDashboardHydrationService;
     studentServiceRequestUseCases: StudentServiceRequestUseCases;
+    serviceOperationsUseCases?: ServiceOperationsUseCases;
     tokenProvider: ITokenProvider;
     sessionManager: ISessionManager;
     principalAccessValidator: IPrincipalAccessValidator;
@@ -492,6 +493,7 @@ export class StudentWorkspaceRouter {
         const body = z
           .object({
             serviceId: z.string().min(1),
+            consent: z.literal(true),
             requestParameters: z.record(z.string(), z.unknown()).optional(),
           })
           .strict()
@@ -499,6 +501,7 @@ export class StudentWorkspaceRouter {
         res.status(201).json(
           await studentServiceRequestUseCases.createRequest({
             studentReferenceId: ownStudent(req),
+            idempotencyKey: String(req.headers['idempotency-key'] ?? ''),
             ...body,
           }),
         );
@@ -512,6 +515,40 @@ export class StudentWorkspaceRouter {
         );
       }),
     );
+
+    router.delete('/services/requests/:requestId/inputs',asyncHandler(async(req:Request,res:Response)=>{
+      const body=z.object({expectedVersion:z.number().int().positive()}).strict().parse(req.body);
+      res.json(await studentServiceRequestUseCases.eraseMyRequestInputs(ownStudent(req),req.params.requestId,body.expectedVersion));
+    }));
+    router.get('/services/requests/:requestId/availability',asyncHandler(async(req:Request,res:Response)=>{
+      if (!cradle.serviceOperationsUseCases) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+      res.json(await cradle.serviceOperationsUseCases.availableForRequest(ownStudent(req),req.params.requestId,z.string().min(1).max(2048).optional().parse(req.query.cursor)));
+    }));
+    router.post('/services/requests/:requestId/bookings',asyncHandler(async(req:Request,res:Response)=>{
+      const body=z.object({slotId:z.string().min(1),packageId:z.string().min(1).optional(),packageConsent:z.literal(true).optional(),packageParameters:z.record(z.string(),z.record(z.string(),z.unknown())).optional()}).strict().parse(req.body);
+      if (!cradle.serviceOperationsUseCases) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+      const actorId=ownStudent(req);
+      const operation=cradle.serviceOperationsUseCases.forActor({actorId,correlationId:actorId,reason:'Student booking request'});
+      res.status(201).json(await operation.bookRequest(actorId,req.params.requestId,body.slotId,String(req.headers['idempotency-key']??''),body.packageId,body.packageConsent,body.packageParameters));
+    }));
+    router.get('/services/requests/:requestId/packages',asyncHandler(async(req:Request,res:Response)=>{
+      if(!cradle.serviceOperationsUseCases)throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+      res.json(await cradle.serviceOperationsUseCases.packagesForRequest(ownStudent(req),req.params.requestId,z.string().min(1).max(2048).optional().parse(req.query.cursor)));
+    }));
+    router.get('/services/requests/:requestId/deliverables',asyncHandler(async(req:Request,res:Response)=>{
+      if(!cradle.serviceOperationsUseCases)throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+      res.json({data:await cradle.serviceOperationsUseCases.myDeliverables(ownStudent(req),req.params.requestId)});
+    }));
+    router.post('/services/requests/:requestId/deliverables/:artifactId/grant',asyncHandler(async(req:Request,res:Response)=>{
+      if(!cradle.serviceOperationsUseCases)throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+      res.json(await cradle.serviceOperationsUseCases.myDeliveryGrant(ownStudent(req),req.params.requestId,req.params.artifactId));
+    }));
+    router.use('/services', (err: any, _req: Request, res: Response, next: NextFunction) => {
+      if (!err) return next();
+      const allowed = new Set(['SERVICE_INPUT_ERASURE_LEGAL_HOLD','SERVICE_INPUT_ERASURE_BOOKING_ACTIVE','SERVICE_REQUEST_VERSION_CONFLICT','SERVICE_FINANCE_CANCELLATION_PENDING','SERVICE_IDEMPOTENCY_KEY_REQUIRED','SERVICE_IDEMPOTENCY_PAYLOAD_CONFLICT','SERVICE_INPUT_CONSENT_REQUIRED','SERVICE_INPUT_UNKNOWN_FIELD','SERVICE_INPUT_REQUIRED','SERVICE_INPUT_TYPE_INVALID','SERVICE_INPUT_RAW_URL_FORBIDDEN','SERVICE_INPUT_TOO_LARGE','SERVICE_NOT_AVAILABLE','SERVICE_REQUEST_NOT_FOUND','SERVICE_BOOKING_SLOT_UNAVAILABLE','SERVICE_BOOKING_CAPACITY_EXHAUSTED','SERVICE_BOOKING_CAPACITY_CONFLICT','SERVICE_BOOKING_REQUEST_MISMATCH','SERVICE_BOOKING_ACTIVE_PRICING_REQUIRED','SERVICE_PACKAGE_CONSENT_REQUIRED','SERVICE_PACKAGE_ITEM_NOT_PUBLISHED','SERVICE_DELIVERY_REVIEW_REQUIRED','SERVICE_DELIVERY_WORKFLOW_MISMATCH','SERVICE_SECURE_DELIVERY_NOT_CONFIGURED','SERVICE_BOOKING_BEFORE_INVOICE_REQUIRED','SERVICE_FREE_POLICY_REQUIRED','SERVICE_PACKAGE_INPUT_ASSET_OWNER_MISMATCH']);
+      const code = allowed.has(err.message) ? err.message : err instanceof z.ZodError ? 'SERVICE_VALIDATION_ERROR' : 'SERVICE_REQUEST_FAILED';
+      res.status(code === 'SERVICE_REQUEST_FAILED' ? 500 : code.includes('CONFLICT') ? 409 : code.includes('NOT_FOUND') ? 404 : 422).json({ error: code });
+    });
 
     router.use('/:studentReferenceId', (req: Request, res: Response, next: NextFunction) => {
       if (req.authUserId !== req.params.studentReferenceId) {

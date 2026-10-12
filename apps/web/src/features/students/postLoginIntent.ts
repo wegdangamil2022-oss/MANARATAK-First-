@@ -49,7 +49,7 @@ const ACTION_KEY = 'manaratak_post_login_action';
 export type PendingPostLoginAction =
   | { kind: 'SAVE_FAVORITE'; entityType: string; entityId: string; entitySlug?: string | null }
   | { kind: 'TRACK_APPLICATION'; scholarshipId: string; scholarshipSlug?: string | null; notes?: string | null }
-  | { kind: 'REQUEST_SERVICE'; serviceId: string; serviceSlug?: string | null; requestParameters?: Record<string, unknown> };
+  | { kind: 'REQUEST_SERVICE'; idempotencyKey?: string; consent?: boolean; serviceId: string; serviceSlug?: string | null; requestParameters?: Record<string, unknown> };
 
 export function preservePostLoginAction(action: PendingPostLoginAction): void {
   const stableId = action.kind === 'SAVE_FAVORITE' ? action.entityId : action.kind === 'TRACK_APPLICATION' ? action.scholarshipId : action.serviceId;
@@ -68,7 +68,7 @@ export function consumePostLoginAction(): PendingPostLoginAction | null {
     } else if (parsed.kind === 'TRACK_APPLICATION' && typeof parsed.scholarshipId === 'string') {
       action = { kind: 'TRACK_APPLICATION', scholarshipId: parsed.scholarshipId, scholarshipSlug: typeof parsed.scholarshipSlug === 'string' ? parsed.scholarshipSlug : null, notes: typeof parsed.notes === 'string' ? parsed.notes : null };
     } else if (parsed.kind === 'REQUEST_SERVICE' && typeof parsed.serviceId === 'string') {
-      action = { kind: 'REQUEST_SERVICE', serviceId: parsed.serviceId, serviceSlug: typeof parsed.serviceSlug === 'string' ? parsed.serviceSlug : null, requestParameters: parsed.requestParameters && typeof parsed.requestParameters === 'object' ? parsed.requestParameters as Record<string, unknown> : undefined };
+      action = { kind: 'REQUEST_SERVICE', idempotencyKey: typeof parsed.idempotencyKey === 'string' ? parsed.idempotencyKey : undefined, consent: parsed.consent === true, serviceId: parsed.serviceId, serviceSlug: typeof parsed.serviceSlug === 'string' ? parsed.serviceSlug : null, requestParameters: parsed.requestParameters && typeof parsed.requestParameters === 'object' ? parsed.requestParameters as Record<string, unknown> : undefined };
     }
     sessionStorage.removeItem(ACTION_KEY);
     return action;

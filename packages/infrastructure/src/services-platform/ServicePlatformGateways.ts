@@ -1,14 +1,16 @@
-import { FinancePlatformUseCases } from '@manaratak/application';
+import { FinancePlatformUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import {
   IReferenceResolver,
   IServiceFinanceGateway,
+  IServiceDeliveryGateway,
   IServiceReferenceGateway,
 } from '@manaratak/domain';
 
 const resolveLookup = (value: string) => {
   const trimmed = value.trim();
   if (!trimmed) throw new Error('REFERENCE_VALUE_REQUIRED');
-  if (/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(trimmed) || trimmed.startsWith('mem-')) return { id: trimmed };
+  if (/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(trimmed) || trimmed.startsWith('mem-'))
+    return { id: trimmed };
   if (/^[A-Za-z]{2,3}$/.test(trimmed)) return { standardCode: trimmed.toUpperCase() };
   return { alias: trimmed };
 };
@@ -37,16 +39,18 @@ export class Phase19ServiceFinanceGateway implements IServiceFinanceGateway {
         originReferenceId: input.requestPublicId,
         studentReferenceId: input.studentReferenceId,
         payerReferenceId: input.studentReferenceId,
-        lineItems: [{
-          description: input.description,
-          quantity: input.quantity,
-          unitPrice: {
-            amountMinorUnits: input.amountMinorUnits,
-            currencyCode: input.currencyCode,
-            scale: input.scale,
+        lineItems: [
+          {
+            description: input.description,
+            quantity: input.quantity,
+            unitPrice: {
+              amountMinorUnits: input.amountMinorUnits,
+              currencyCode: input.currencyCode,
+              scale: input.scale,
+            },
+            metadata: { serviceRequestId: input.requestId },
           },
-          metadata: { serviceRequestId: input.requestId },
-        }],
+        ],
       },
       {
         actorId: input.actorId,
@@ -58,7 +62,32 @@ export class Phase19ServiceFinanceGateway implements IServiceFinanceGateway {
     return { id: invoice.id, publicId: invoice.publicId };
   }
 
-  async getInvoiceClearance(invoiceId: string) {
-    return this.finance.getInvoiceClearance(invoiceId);
+  resolveCancellation(
+    invoiceId: string,
+    request: { requestPublicId: string; studentReferenceId: string },
+  ) {
+    return this.finance.resolveServiceCancellation(invoiceId, request);
+  }
+  async getInvoiceClearance(
+    invoiceId: string,
+    request?: { requestPublicId: string; studentReferenceId: string },
+  ) {
+    return this.finance.getInvoiceClearance(
+      invoiceId,
+      request
+        ? {
+            originDomain: 'PHASE_20_SERVICE_REQUEST',
+            originReferenceId: request.requestPublicId,
+            studentReferenceId: request.studentReferenceId,
+          }
+        : undefined,
+    );
+  }
+}
+
+export class EapServiceDeliveryGateway implements IServiceDeliveryGateway {
+  constructor(private readonly lifecycle: ProcessAssetLifecycleUseCase) {}
+  grant(assetId: string) {
+    return this.lifecycle.requestDeliveryGrant({ assetId, expiresInSeconds: 120 });
   }
 }

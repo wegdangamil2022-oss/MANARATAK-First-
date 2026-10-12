@@ -2601,6 +2601,41 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     };
   }
 
+  async serviceInvoiceClearance(input: { invoiceId: string; originReferenceId: string; studentReferenceId: string }) {
+    // Finance owns this single snapshot, including sibling invoices, refunds and wallet holds.
+    const rows = await this.prisma.$queryRaw<Array<{ financiallyCleared: boolean; cancellationCleared: boolean }>>`
+      WITH origin_invoices AS (
+        SELECT * FROM "FinanceInvoiceRecord"
+        WHERE "originDomain"='PHASE_20_SERVICE_REQUEST'
+          AND "originReferenceId"=${input.originReferenceId}
+      )
+      SELECT
+        (i.status='PAID' AND i."dueMinorUnits"='0'
+          AND NOT EXISTS(SELECT 1 FROM origin_invoices s WHERE s.id<>i.id AND s.status<>'VOIDED')
+          AND NOT EXISTS(SELECT 1 FROM "FinancePaymentRecord" p JOIN origin_invoices s ON s.id=p."invoiceId" WHERE s.id<>i.id AND p.status NOT IN ('FAILED','CANCELLED'))
+          AND NOT EXISTS(SELECT 1 FROM "FinanceWalletHoldRecord" h JOIN origin_invoices s ON h."businessReferenceId" IN (s.id,s."publicId") WHERE h.status='ACTIVE' OR (s.id<>i.id AND h.status='CAPTURED'))
+          AND NOT EXISTS(SELECT 1 FROM "FinancePaymentRecord" p WHERE p."invoiceId"=i.id AND p.status IN ('REFUNDED','PARTIALLY_REFUNDED','PENDING','AUTHORIZED'))
+          AND NOT EXISTS(SELECT 1 FROM "FinanceRefundRecord" r JOIN "FinancePaymentRecord" p ON p.id=r."paymentId" WHERE p."invoiceId"=i.id AND r.status IN ('REQUESTED','PENDING_APPROVAL','APPROVED','PROCESSING','UNKNOWN_OUTCOME','COMPLETED'))
+        ) AS "financiallyCleared",
+        (NOT EXISTS(SELECT 1 FROM origin_invoices s WHERE
+            s."studentReferenceId" IS DISTINCT FROM ${input.studentReferenceId}
+            OR s.status NOT IN ('VOIDED','PAID','CREDITED')
+            OR (s.status<>'VOIDED' AND s."dueMinorUnits"<>'0')
+            OR (s.status<>'VOIDED' AND NOT EXISTS(SELECT 1 FROM "FinancePaymentRecord" p WHERE p."invoiceId"=s.id AND p.status='REFUNDED')))
+          AND NOT EXISTS(SELECT 1 FROM "FinancePaymentRecord" p JOIN origin_invoices s ON s.id=p."invoiceId" WHERE p.status NOT IN ('FAILED','CANCELLED','REFUNDED'))
+          AND NOT EXISTS(SELECT 1 FROM "FinancePaymentRecord" p JOIN origin_invoices s ON s.id=p."invoiceId"
+            WHERE p.status='REFUNDED' AND
+              COALESCE((SELECT SUM(r."amountMinorUnits"::numeric) FROM "FinanceRefundRecord" r
+                WHERE r."paymentId"=p.id AND r.status='COMPLETED'
+                  AND r."currencyCode"=p."currencyCode" AND r.scale=p.scale),0) <> p."amountMinorUnits"::numeric)
+          AND NOT EXISTS(SELECT 1 FROM "FinanceRefundRecord" r JOIN "FinancePaymentRecord" p ON p.id=r."paymentId" JOIN origin_invoices s ON s.id=p."invoiceId"
+            WHERE r.status IN ('REQUESTED','PENDING_APPROVAL','APPROVED','PROCESSING','UNKNOWN_OUTCOME'))
+          AND NOT EXISTS(SELECT 1 FROM "FinanceWalletHoldRecord" h JOIN origin_invoices s ON h."businessReferenceId" IN (s.id,s."publicId") WHERE h.status IN ('ACTIVE','CAPTURED'))
+        ) AS "cancellationCleared"
+      FROM origin_invoices i WHERE i.id=${input.invoiceId} AND i."studentReferenceId"=${input.studentReferenceId}
+    `;
+    return rows[0] ?? { financiallyCleared: false, cancellationCleared: false };
+  }
   async hasFinancialClearanceForOrigin(input: {
     originDomain: string;
     originReferenceId: string;

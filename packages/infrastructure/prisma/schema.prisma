@@ -4983,6 +4983,16 @@ model FinanceEstimateRecord {
 
 // --- Phase 20 Enterprise Services Platform (P8 source closure) ---
 model ServiceCatalogRecord {
+  approvedPrice Json?
+  cancellationPolicyCode String @default("FINANCE_REVIEW_REQUIRED")
+  reviewEvidence Json?
+  fulfillmentPolicy String @default("QUOTE_REQUIRED")
+  inputSchema Json @default("[]")
+  localizedContent Json?
+  makerActorId String?
+  reviewerActorId String?
+  reviewedVersion Int?
+  publishedSnapshot Json?
   id                         String   @id @default(uuid())
   publicId                   String   @unique
   slug                       String   @unique
@@ -5053,6 +5063,20 @@ model ServiceCatalogLanguageRecord {
 }
 
 model ServiceRequestRecord {
+  slaEscalatedAt DateTime?
+  invoiceNextCheckAt DateTime @default(now())
+  cancellationNextCheckAt DateTime @default(now())
+  inputsErasedAt DateTime?
+  legalHoldUntil DateTime?
+  retentionUntil DateTime?
+  booking ServiceBookingRecord?
+  assignedStaffId String?
+  dueAt DateTime?
+  cancellationState String @default("NONE")
+  payloadFingerprint String?
+  serviceSnapshot Json?
+  invoiceIntent Json?
+  invoiceLinkState String @default("NONE")
   id                     String   @id @default(uuid())
   publicId               String   @unique
   studentReferenceId     String
@@ -5078,6 +5102,8 @@ model ServiceRequestRecord {
 
 // --- Phase 20 retained owner scope (MNT-AUD-0058) ---
 model ServiceProviderRecord {
+  version Int @default(1)
+  makerActorId String?
   id                    String   @id @default(uuid())
   publicId              String   @unique
   displayName           String
@@ -5106,6 +5132,8 @@ model ServiceProviderServiceRecord {
 }
 
 model ServicePackageRecord {
+  version Int @default(1)
+  makerActorId String?
   id          String   @id @default(uuid())
   publicId    String   @unique
   displayName String
@@ -5139,6 +5167,8 @@ model ServicePackageItemRecord {
 }
 
 model ServicePricingRecord {
+  version Int @default(1)
+  makerActorId String?
   id                   String   @id @default(uuid())
   publicId             String   @unique
   serviceId            String?
@@ -5182,6 +5212,8 @@ model ServiceDiscountRecord {
 }
 
 model ServicePromotionRecord {
+  version Int @default(1)
+  makerActorId String?
   id         String   @id @default(uuid())
   publicId   String   @unique
   name       String
@@ -5203,6 +5235,8 @@ model ServicePromotionRecord {
 }
 
 model ServiceAvailabilitySlotRecord {
+  version Int @default(1)
+  makerActorId String?
   id         String   @id @default(uuid())
   publicId   String   @unique
   providerId String
@@ -5223,6 +5257,15 @@ model ServiceAvailabilitySlotRecord {
 }
 
 model ServiceBookingRecord {
+  inputSnapshot Json?
+  inputsErasedAt DateTime?
+  requestId String? @unique
+  request ServiceRequestRecord? @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  payloadFingerprint String?
+  holdExpiresAt DateTime?
+  discountState String @default("RESERVED")
+  version Int @default(1)
+  makerActorId String?
   id                 String   @id @default(uuid())
   publicId           String   @unique
   studentReferenceId String
@@ -5266,6 +5309,8 @@ model ServiceBookingItemRecord {
 }
 
 model ServiceWorkflowDefinitionRecord {
+  version Int @default(1)
+  makerActorId String?
   id        String   @id @default(uuid())
   publicId  String   @unique
   name      String
@@ -5284,6 +5329,9 @@ model ServiceWorkflowDefinitionRecord {
 }
 
 model ServiceWorkflowExecutionRecord {
+  executionClaim String? @unique
+  version Int @default(1)
+  makerActorId String?
   id                   String   @id @default(uuid())
   publicId             String   @unique
   bookingId            String
@@ -5304,6 +5352,7 @@ model ServiceWorkflowExecutionRecord {
 }
 
 model ServiceDeliveryArtifactRecord {
+  stepKey String?
   id                  String   @id @default(uuid())
   bookingId           String
   workflowExecutionId String?

@@ -1,3 +1,4 @@
+import { assertServiceReadiness } from '../ServiceSafety';
 import {
   AssetReferencePolicy,
   assertAssetReferenceUsable,
@@ -8,6 +9,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import {
   CreateServiceCatalogItemDto,
   IServiceCatalogRepository,
+  IServiceOperationsRepository,
   IServiceReferenceGateway,
   PaginatedServiceCatalogResult,
   ServiceCatalogFilters,
@@ -37,9 +39,13 @@ export class AdminServiceCatalogUseCases {
     private readonly repository: IServiceCatalogRepository,
     private readonly references: IServiceReferenceGateway,
     private readonly assetReferences?: AssetReferencePolicy,
+    private readonly operations?: IServiceOperationsRepository,
   ) {}
 
-  public async createService(data: ServiceCreateInput): Promise<ServiceCatalogItemDto> {
+  public async createService(
+    data: ServiceCreateInput,
+    actorId?: string,
+  ): Promise<ServiceCatalogItemDto> {
     await assertAssetReferenceUsable(this.assetReferences, data.thumbnailAssetId, {
       purpose: 'SERVICE_THUMBNAIL',
     });
@@ -67,6 +73,11 @@ export class AdminServiceCatalogUseCases {
     };
     return this.repository.create({
       ...normalized,
+      fulfillmentPolicy: data.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
+      inputSchema: data.inputSchema ?? [],
+      makerActorId: actorId ?? null,
+      reviewerActorId: null,
+      reviewedVersion: null,
       publicId: `svc_${randomUUID()}`,
       slug: `${unicodeSlugSegment(data.displayName)}-${shortHash(canonicalDedupKey)}`,
       canonicalName,
@@ -91,6 +102,7 @@ export class AdminServiceCatalogUseCases {
     id: string,
     updates: UpdateServiceCatalogItemDto,
     expectedVersion: number,
+    actorId?: string,
   ): Promise<ServiceCatalogItemDto> {
     this.assertExpectedVersion(expectedVersion);
     await assertAssetReferenceUsable(this.assetReferences, updates.thumbnailAssetId, {
@@ -139,6 +151,15 @@ export class AdminServiceCatalogUseCases {
       id,
       {
         ...normalized,
+        status: ServiceStatus.READY_TO_REVIEW,
+        makerActorId: actorId ?? null,
+        reviewerActorId: null,
+        reviewedVersion: null,
+        publishedSnapshot:
+          existing.publishedSnapshot ??
+          (existing.status === ServiceStatus.PUBLISHED
+            ? JSON.parse(JSON.stringify({ ...existing, publishedSnapshot: undefined }))
+            : undefined),
         canonicalName,
         canonicalDedupKey,
         completenessStatus: this.classifyCompleteness(merged),
@@ -162,28 +183,90 @@ export class AdminServiceCatalogUseCases {
   public async markReadyToPublish(
     id: string,
     expectedVersion: number,
+    actorId?: string,
+    evidence?: { reason: string; checklist: Record<string, boolean> },
   ): Promise<ServiceCatalogItemDto> {
     this.assertExpectedVersion(expectedVersion);
     const existing = await this.getService(id);
-    if ([ServiceStatus.PUBLISHED, ServiceStatus.ARCHIVED].includes(existing.status))
+    if (existing.status !== ServiceStatus.READY_TO_REVIEW)
       throw new Error('SERVICE_PUBLICATION_TRANSITION_NOT_ALLOWED');
     if (existing.completenessStatus !== ServiceCompletenessStatus.COMPLETE)
       throw new Error('Only COMPLETE services can be marked as READY_TO_PUBLISH');
-    return this.repository.updateStatus(id, ServiceStatus.READY_TO_PUBLISH, expectedVersion);
+    if (!actorId || !existing.makerActorId || actorId === existing.makerActorId)
+      throw new Error('SERVICE_INDEPENDENT_REVIEW_REQUIRED');
+    if (
+      !evidence?.reason.trim() ||
+      ['legal', 'provider', 'price', 'privacy', 'availability', 'language'].some(
+        (key) => evidence.checklist[key] !== true,
+      )
+    )
+      throw new Error('SERVICE_REVIEW_EVIDENCE_REQUIRED');
+    let approvedPrice: ServiceCatalogItemDto['approvedPrice'] = null;
+    assertServiceReadiness(existing);
+    if (existing.providerReferenceId) {
+      const provider = await this.operations?.findProviderById(existing.providerReferenceId);
+      if (
+        !provider ||
+        provider.status !== 'QUALIFIED' ||
+        !provider.supportedServiceIds.includes(id)
+      )
+        throw new Error('SERVICE_PROVIDER_NOT_QUALIFIED');
+    }
+    if (existing.fulfillmentPolicy === 'CHARGEABLE') {
+      const price = await this.operations?.findActivePricing(id, null, new Date());
+      if (!price || price.id !== existing.pricingReferenceId)
+        throw new Error('SERVICE_APPROVED_PRICING_REQUIRED');
+      approvedPrice = {
+        amountMinorUnits: price.amountMinorUnits,
+        currencyCode: price.currencyCode,
+        scale: price.scale,
+        pricingId: price.id,
+        fingerprint: price.immutableFingerprint,
+        effectiveTo: price.effectiveTo ? new Date(price.effectiveTo).toISOString() : null,
+      };
+    }
+    return this.repository.update(
+      id,
+      {
+        status: ServiceStatus.READY_TO_PUBLISH,
+        reviewerActorId: actorId,
+        reviewedVersion: expectedVersion + 1,
+        approvedPrice,
+        reviewEvidence: {
+          ...evidence,
+          reviewerActorId: actorId,
+          revision: expectedVersion,
+          reviewedAt: new Date().toISOString(),
+        },
+      },
+      expectedVersion,
+    );
   }
   public async publish(id: string, expectedVersion: number): Promise<ServiceCatalogItemDto> {
     this.assertExpectedVersion(expectedVersion);
     const existing = await this.getService(id);
     if (existing.status !== ServiceStatus.READY_TO_PUBLISH)
       throw new Error('Only READY_TO_PUBLISH services can be PUBLISHED');
+    if (existing.reviewedVersion !== expectedVersion || !existing.reviewerActorId)
+      throw new Error('SERVICE_REVIEW_STALE');
+    assertServiceReadiness(existing);
     return this.repository.updateStatus(id, ServiceStatus.PUBLISHED, expectedVersion);
   }
   public async unpublish(id: string, expectedVersion: number): Promise<ServiceCatalogItemDto> {
     this.assertExpectedVersion(expectedVersion);
     const existing = await this.getService(id);
-    if (existing.status !== ServiceStatus.PUBLISHED)
+    if (existing.status !== ServiceStatus.PUBLISHED && !existing.publishedSnapshot)
       throw new Error('Cannot unpublish a service that is not PUBLISHED');
-    return this.repository.updateStatus(id, ServiceStatus.READY_TO_REVIEW, expectedVersion);
+    return this.repository.update(
+      id,
+      {
+        status: ServiceStatus.READY_TO_REVIEW,
+        publishedSnapshot: null,
+        reviewerActorId: null,
+        reviewedVersion: null,
+      },
+      expectedVersion,
+    );
   }
   public async reject(id: string, expectedVersion: number): Promise<ServiceCatalogItemDto> {
     this.assertExpectedVersion(expectedVersion);

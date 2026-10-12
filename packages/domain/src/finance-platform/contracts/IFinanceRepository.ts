@@ -73,6 +73,7 @@ export interface IFinanceRepository {
   ): Promise<any>;
   getAdjustmentCase(reference: string): Promise<any | null>;
 
+  serviceInvoiceClearance?(input:{invoiceId:string;originReferenceId:string;studentReferenceId:string}):Promise<{financiallyCleared:boolean;cancellationCleared:boolean}>;
   hasFinancialClearanceForOrigin(input: {
     originDomain: string;
     originReferenceId: string;
