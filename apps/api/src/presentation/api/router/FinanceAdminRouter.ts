@@ -63,11 +63,11 @@ export class FinanceAdminRouter {
           req.path,
         );
       const expectedVersion =
-        req.body?.expectedVersion ??
+        z.number().int().positive().optional().parse(req.body?.expectedVersion) ??
         (req.headers['if-match']
           ? Number(String(req.headers['if-match']).replaceAll('"', ''))
           : undefined);
-      if (stateful && (!Number.isSafeInteger(expectedVersion) || expectedVersion < 1))
+      if (stateful && (typeof expectedVersion !== 'number' || !Number.isSafeInteger(expectedVersion) || expectedVersion < 1))
         throw new Error('FINANCE_EXPECTED_VERSION_REQUIRED');
       return {
         expectedVersion,

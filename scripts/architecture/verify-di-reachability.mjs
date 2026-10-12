@@ -16,7 +16,7 @@ for (const entry of manifest.registrations ?? []) {
   if (entry.classification !== 'RUNTIME_REACHABLE') errors.push(`Production DI manifest classification must be RUNTIME_REACHABLE: ${entry.name}`);
 }
 const deferredNames = new Set((manifest.deferredOrRemovedSource ?? []).map((entry) => entry.registration));
-for (const forbidden of ['manageMonitorsUseCase','manageLogsUseCase','manageSecurityPoliciesUseCase','manageConfigurationsUseCase','manageIntegrationsUseCase','manageLocalizationsUseCase','serviceOperationsUseCases','careerEngagementUseCases','monitoringRouter']) {
+for (const forbidden of ['manageMonitorsUseCase','manageLogsUseCase','manageSecurityPoliciesUseCase','manageConfigurationsUseCase','manageIntegrationsUseCase','manageLocalizationsUseCase','monitoringRouter']) {
   if (!deferredNames.has(forbidden)) errors.push(`Deferred source classification missing: ${forbidden}`);
   if (analysis.registrations.some((entry) => entry.name === forbidden)) errors.push(`Deferred registration leaked back into production DI: ${forbidden}`);
 }

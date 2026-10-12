@@ -40,13 +40,13 @@ test at tests/review-queue/section24.test.ts:1:7802
 ✖ multiple reasons preserve each source and entry time rather than resetting SLA (11.662173ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
   + actual - expected
-  
+
     [
       '2026-09-01T00:00:00.000Z',
   +   '2026-10-12T00:00:00.000Z'
   -   '2026-10-12T00:00:00Z'
     ]
-  
+
       at TestContext.<anonymous> (/workspace/MANARATAK-First-/tests/review-queue/section24.test.ts:106:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1382:25)

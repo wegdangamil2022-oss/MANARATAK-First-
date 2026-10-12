@@ -16,7 +16,8 @@ test('production monitoring is provider-backed and covers HTTP plus workers',()=
   const provider=read('packages/infrastructure/src/monitoring/OtlpHttpMonitoringProvider.ts');
   for(const marker of ['v1/metrics','v1/traces','resourceMetrics','resourceSpans','scopeMetrics','scopeSpans']) assert.ok(provider.includes(marker),marker);
   const service=read('packages/infrastructure/src/monitoring/MonitoringService.ts');
-  for(const marker of ['startSpan(name','this.provider?.startSpan?.','this.provider?.forceFlush?.','this.provider?.shutdown?.']) assert.ok(service.includes(marker),marker);
+  assert.match(service, /\bstartSpan\s*\(\s*name\b/);
+  for(const marker of ['this.provider?.startSpan?.','this.provider?.forceFlush?.','this.provider?.shutdown?.']) assert.ok(service.includes(marker),marker);
   const middleware=read('apps/api/src/presentation/monitoring/MonitoringMiddleware.ts');
   for(const marker of ['http.server.requests','http.server.duration_ms','http.server.inflight','startSpan']) assert.ok(middleware.includes(marker));
   const server=read('apps/api/src/server.ts');

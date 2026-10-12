@@ -39,7 +39,7 @@ This workspace was empty; the unpushed partial implementation described in the h
 ## Validation
 
 - `node node_modules/typescript/bin/tsc -b apps/api apps/admin`: **PASS_AT_CHECKPOINT**, exit 0. This compiled referenced packages and both applications. It was run once, before later CMS/service audit target corrections, bounded audit parser, source-row provenance, empty-candidate continuation guard and contextual owner handoffs. No final compiler rerun is claimed.
-- `node scripts/verify-w4-review-queue.mjs`: **25 passed, 2 failed / 27**, 5.05 seconds, single invocation. Failures: expected unnormalized ISO string; source-schema evaluator omitted CMS `slug` dependency. Corrected the expectation to normalized ISO and made the evaluator read the real slug declaration. No rerun. Evidence: `evidence/section-24/contracts.txt`.
+- `node scripts/verify-w4-review-queue.mjs`: **25 passed, 2 failed / 27**, 5.05 seconds, single invocation. Failures: expected unnormalized ISO string; source-schema evaluator omitted CMS `slug` dependency. Corrected the expectation to normalized ISO and made the evaluator read the real slug declaration. No rerun. Evidence: `docs/reviews/evidence/section-24/contracts.txt`.
 - Dependency installation used `npm ci --ignore-scripts --no-audit --no-fund`; Prisma client generation only used the existing schema. No migration, DB connection or mutation. Node: `v24.19.0`, not the repository's intended Node 22 runtime acceptance.
 - Whitespace checkpoint recorded in `section-24-validation.json`.
 

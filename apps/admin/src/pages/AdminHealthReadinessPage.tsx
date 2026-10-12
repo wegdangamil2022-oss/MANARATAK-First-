@@ -494,17 +494,21 @@ function DetailDialog({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
     >
+      <button
+        type="button"
+        className="absolute inset-0"
+        tabIndex={-1}
+        aria-label={closeLabel}
+        onClick={onClose}
+      />
       <div
         ref={ref}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="health-component-title"
-        className="max-h-[90vh] w-full max-w-2xl space-y-4 overflow-auto rounded bg-white p-5"
+        className="relative max-h-[90vh] w-full max-w-2xl space-y-4 overflow-auto rounded bg-white p-5"
       >
         <header className="flex justify-between">
           <h2 id="health-component-title">{label}</h2>

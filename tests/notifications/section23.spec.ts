@@ -12,6 +12,9 @@ import {
   PrismaStudentNotificationPreferenceGateway,
 } from '../../packages/infrastructure/src/notification/PrismaNotificationRepositories';
 import { ProviderNotificationDeliveryGateway } from '../../packages/infrastructure/src/notification/ProviderNotificationDeliveryGateway';
+import { isNotificationPreviewRequest } from '../../apps/api/src/presentation/http/NotificationPreviewRequest';
+import { createCanonicalIdempotencyMiddleware } from '../../apps/api/src/presentation/middleware/CanonicalIdempotencyMiddleware';
+import { MutationAuditPolicy } from '../../apps/api/src/presentation/audit/MutationAuditMiddleware';
 import { NotificationRouter } from '../../apps/api/src/presentation/api/router/NotificationRouter';
 import {
   NotificationTemplate,
@@ -671,12 +674,6 @@ describe('section 23 template operations and non-sending preview', () => {
     });
   });
   it('only the exact read-only preview route skips idempotency persistence and mutation audit', async () => {
-    const { isNotificationPreviewRequest } =
-      await import('../../apps/api/src/presentation/http/NotificationPreviewRequest');
-    const { createCanonicalIdempotencyMiddleware } =
-      await import('../../apps/api/src/presentation/middleware/CanonicalIdempotencyMiddleware');
-    const { MutationAuditPolicy } =
-      await import('../../apps/api/src/presentation/audit/MutationAuditMiddleware');
     const req = {
       method: 'POST',
       originalUrl: '/api/v1/notifications/templates/manual-v1/preview',

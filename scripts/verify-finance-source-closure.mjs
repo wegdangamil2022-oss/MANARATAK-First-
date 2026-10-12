@@ -92,7 +92,7 @@ check('FIN-PAY-015 automatic FX reports actual provider readiness', files.useCas
 check('FIN-BND-001 finance clearance owner API', files.useCases.includes('getInvoiceClearance'));
 check('FIN-BND-002 finance origin clearance API', files.useCases.includes('hasFinancialClearanceForOrigin'));
 check('FIN-BND-003 clearance requires zero due', files.useCases.includes("BigInt(invoice.amountDue.amountMinorUnits) === 0n"));
-check('FIN-BND-004 service reads Finance boundary', files.serviceBoundary.includes('this.finance.getInvoiceClearance(invoiceId)'));
+check('FIN-BND-004 service reads Finance boundary', /this\.finance\.getInvoiceClearance\(\s*invoiceId\s*,/.test(files.serviceBoundary) && files.serviceBoundary.includes('originReferenceId:'));
 check('FIN-BND-005 service blocks unpaid fulfillment', files.serviceUseCases.includes('SERVICE_FINANCIAL_CLEARANCE_REQUIRED'));
 check('FIN-BND-006 service requires linked invoice', files.serviceUseCases.includes('SERVICE_FINANCE_INVOICE_REQUIRED'));
 check('FIN-BND-007 course reads Finance boundary', files.courseBoundary.includes('this.finance.hasFinancialClearanceForOrigin'));
@@ -183,7 +183,7 @@ check('FIN-DI-003 bank registry DI', files.di.includes('financeBankTransferGatew
 check('FIN-DI-004 course boundary DI', files.di.includes('Phase19CourseFinancialClearanceGateway'));
 check('FIN-DI-005 service boundary DI', files.di.includes('Phase19ServiceFinanceGateway'));
 check('FIN-DI-006 student router receives platform usecases through cradle', files.studentRouter.includes('financePlatformUseCases: FinancePlatformUseCases'));
-check('FIN-MON-001 health tracks payment gateway', files.healthRouter.includes("'payment-gateway'"));
+check('FIN-MON-001 health tracks payment gateway', files.healthRouter.includes('operationalProbeIds') && /name:\s*[\'"]payment-gateway[\'"]/.test(read('apps/api/src/app.ts')) && read('packages/config/src/LaunchDependencyManifest.ts').includes("'payment-gateway'"));
 check('FIN-MON-002 health exposes runtimeStatus truth', files.healthRouter.includes('runtimeStatus: readiness.status'));
 
 // Tests / source evidence

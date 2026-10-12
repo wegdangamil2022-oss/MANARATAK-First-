@@ -391,11 +391,19 @@
       "owner": "majors",
       "required": true
     },
+    "FinanceAdjustmentCaseRecord": {
+      "owner": "finance",
+      "required": true
+    },
     "FinanceApprovalDecisionRecord": {
       "owner": "finance",
       "required": true
     },
     "FinanceApprovalRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceCommandRecord": {
       "owner": "finance",
       "required": true
     },
@@ -428,6 +436,14 @@
       "required": true
     },
     "FinancePaymentRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceReconciliationIssueRecord": {
+      "owner": "finance",
+      "required": true
+    },
+    "FinanceReconciliationSnapshot": {
       "owner": "finance",
       "required": true
     },
@@ -659,11 +675,19 @@
       "owner": "majors",
       "required": true
     },
+    "NotificationChannelDelivery": {
+      "owner": "notifications",
+      "required": true
+    },
     "NotificationDeliveryReceipt": {
       "owner": "notifications",
       "required": true
     },
     "NotificationIntentRecord": {
+      "owner": "notifications",
+      "required": true
+    },
+    "NotificationRateReservation": {
       "owner": "notifications",
       "required": true
     },

@@ -106,7 +106,8 @@
     "scripts/import-sa-geography.ts",
     "scripts/reconcile_asia_report.ts",
     "scripts/test-regions-cities.ts",
-    "scripts/ci/install-eap-reference-guards.mjs"
+    "scripts/ci/install-eap-reference-guards.mjs",
+    "scripts/services-platform/section21-closure-regressions.cjs"
   ],
   "classifiedPresentationImportScripts": [
     "scripts/generate-localized-public-sitemap.ts"

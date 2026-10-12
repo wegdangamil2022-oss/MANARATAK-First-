@@ -357,11 +357,11 @@ check('MNT-AUD-0058 booking/pricing/capacity/delivery invariants are enforced at
   serviceOperationsRepository.includes('SERVICE_DISCOUNT_REDEMPTION_LIMIT_REACHED') &&
   serviceOperationsUseCases.includes('pricingFingerprint: pricing.immutableFingerprint') &&
   serviceOperationsUseCases.includes("purpose: 'SERVICE_DELIVERY_ARTIFACT'"));
-check('MNT-AUD-0058 Prisma owner scope is real and later-wave runtime composition is explicitly deferred',
+check('MNT-AUD-0058 Prisma owner scope is real and reviewed owner composition is registered',
   ['ServiceProviderRecord','ServicePackageRecord','ServicePricingRecord','ServiceDiscountRecord','ServicePromotionRecord','ServiceAvailabilitySlotRecord','ServiceBookingRecord','ServiceWorkflowDefinitionRecord','ServiceWorkflowExecutionRecord','ServiceDeliveryArtifactRecord']
     .every((model) => schema.includes(`model ${model}`)) &&
   serviceOperationsMigration.includes('-- MANARATAK_MIGRATION_OWNER: services') && serviceOperationsMigration.includes('-- MANARATAK_ARCH_DECISION: ADR-028') &&
-  !container.includes('serviceOperationsUseCases:') && !container.includes('serviceOperationsRepository:'));
+  container.includes('serviceOperationsUseCases:') && container.includes('serviceOperationsRepository:'));
 
 const careerEngagementContract = read('packages/domain/src/career-alumni/contracts/ICareerEngagementRepository.ts');
 const careerEngagementEntities = read('packages/domain/src/career-alumni/entities/CareerEngagement.ts');
@@ -381,11 +381,11 @@ check('MNT-AUD-0055 application ownership, snapshot, AssetId, consent and optimi
   careerEngagementEntities.includes('consentGrantedBy') && careerEngagementEntities.includes('consentRevokedBy') &&
   careerEngagementRepository.includes('CAREER_APPLICATION_VERSION_CONFLICT') && careerEngagementRepository.includes('CAREER_PROFILE_VERSION_CONFLICT') && careerEngagementRepository.includes('CAREER_ALUMNI_VERSION_CONFLICT') &&
   careerOwnershipGateway.includes('StudentWorkspaceStatus.ACTIVE'));
-check('MNT-AUD-0055 Prisma owner scope is real and later-wave runtime composition is explicitly deferred',
+check('MNT-AUD-0055 Prisma owner scope is real and reviewed owner composition is registered',
   ['CareerProfileRecord','CareerApplicationRecord','CareerAlumniProfileRecord'].every((model) => schema.includes(`model ${model}`)) &&
   careerEngagementMigration.includes('-- MANARATAK_MIGRATION_OWNER: career') && careerEngagementMigration.includes('-- MANARATAK_ARCH_DECISION: ADR-028') &&
   careerEngagementMigration.includes('"jobSnapshot" JSONB NOT NULL') &&
-  !container.includes('careerEngagementUseCases:') && !container.includes('careerEngagementRepository:') && !container.includes('careerStudentOwnershipGateway:'));
+  container.includes('careerEngagementUseCases:') && container.includes('careerEngagementRepository:') && container.includes('careerStudentOwnershipGateway:'));
 
 
 const disposableDbGuard = read('scripts/lib/disposable-database-target-guard.mjs');
@@ -457,8 +457,8 @@ check('MNT-AUD-0096 repositories fence every core Service/Career mutation with i
 check('MNT-AUD-0096 application and HTTP mutation boundaries require expectedVersion',
   serviceCatalogUseCases.includes('SERVICE_EXPECTED_VERSION_REQUIRED') && serviceRequestUseCases.includes('SERVICE_REQUEST_EXPECTED_VERSION_REQUIRED') &&
   careerAdminUseCases.includes('CAREER_EXPECTED_VERSION_REQUIRED') &&
-  serviceAdminRouter.includes('expectedVersion: z.number().int().positive()') && careerAdminRouter.includes('expectedVersionSchema') &&
-  servicesAdminPage.includes('expectedVersion: service.version') && careerAdminPage.includes('expectedVersion: employer.version') && careerAdminPage.includes('expectedVersion: job.version'));
+  serviceAdminRouter.includes('expectedVersion: z.number().int().positive()') && careerAdminRouter.includes('expectedVersion: careerExpected') && read('apps/api/src/presentation/api/router/CareerHttp.ts').includes('careerExpected = z.number().int().positive()') &&
+  servicesAdminPage.includes('expectedVersion: service.version') && careerAdminPage.includes('body.expectedVersion = editing.version') && careerAdminPage.includes('expectedVersion:row.version'));
 check('MNT-AUD-0096 controlled migration adds version fences for all four legacy late-domain aggregates',
   optimisticConcurrencyMigration.includes('-- MNT-AUD-0096:') &&
   ['ServiceCatalogRecord','ServiceRequestRecord','CareerEmployerRecord','CareerJobPostingRecord'].every((model) =>
@@ -508,9 +508,10 @@ check('MNT-AUD-0109 legacy foundation orchestrators are outside canonical produc
     .every((name) => !applicationBarrel.includes(`/use-cases/${name}`)) &&
   ['manageMonitorsUseCase:','manageLogsUseCase:','manageSecurityPoliciesUseCase:','manageConfigurationsUseCase:','manageIntegrationsUseCase:','manageLocalizationsUseCase:']
     .every((name) => !container.includes(name)));
-check('MNT-AUD-0109 deferred later-wave source is explicitly classified while completed W3 retention wiring is reachable',
-  ['serviceOperationsUseCases','careerEngagementUseCases','monitoringRouter']
+check('MNT-AUD-0109 deferred monitoring stays absent while completed Service/Career and retention composition is reachable',
+  ['monitoringRouter']
     .every((name) => diReachabilityManifest.deferredOrRemovedSource.some((entry) => entry.registration === name && entry.classification === 'FORMALLY_DEFERRED') && !container.includes(`${name}:`)) &&
+  ['serviceOperationsUseCases','careerEngagementUseCases'].every(name => diReachabilityManifest.registrations.some(entry => entry.name === name && entry.classification === 'RUNTIME_REACHABLE') && container.includes(`${name}:`)) &&
   diReachabilityManifest.registrations.some((entry) => entry.name === 'retentionSweepUseCase' && entry.classification === 'RUNTIME_REACHABLE') &&
   container.includes('retentionSweepUseCase:'));
 check('MNT-AUD-0109 dead diagnostic source is removed and reachability guard is executable',

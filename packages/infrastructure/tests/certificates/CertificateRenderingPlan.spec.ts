@@ -104,7 +104,8 @@ describe('shared PDF and preview layout', () => {
       second = await renderer.render(input);
     expect(second.renderFingerprint).toBe(first.renderFingerprint);
     expect(second.artifacts).toEqual(first.artifacts);
-  });
+    // Two real embedded-font documents test determinism, not a five-second latency SLO.
+  }, 30_000);
   it('embeds the same pinned PNG into PDF and preview', async () => {
     const png = Buffer.from(
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=',

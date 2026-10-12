@@ -112,3 +112,26 @@ test('student-tool tests declare owner encrypted replay rather than generic resp
   assert.equal(inventory.find(row => row.path.endsWith('/test')).idempotency, 'OWNER_ENCRYPTED_EXECUTION_REQUIRED');
   assert.equal(inventory.find(row => row.path.endsWith('/release')).idempotency, 'GLOBAL_ADMIN_REQUIRED');
 });
+
+
+test('finite const route registries enumerate every concrete route and retain security evidence', () => {
+  const router = `const router = Router(); const creators = {providers:'createProvider', pricing:'createPrice'} as const;
+    for (const kind of Object.keys(creators) as Array<keyof typeof creators>)
+      router.post(\`/operations/\${kind}\`, handler(creators[kind], 'admin:services:operations:manage'));`;
+  const rows = buildAuditInventory({...fixture, routerSources:{'TestRouter.ts':router}});
+  assert.deepEqual(rows.map(row => row.path), ['/admin/test/operations/pricing','/admin/test/operations/providers']);
+  assert.ok(rows.every(row => row.permissionEvidence.includes('admin:services:operations:manage')));
+  const added = buildAuditInventory({...fixture, routerSources:{'TestRouter.ts':router.replace("pricing:'createPrice'", "pricing:'createPrice', slots:'createSlot'")}});
+  assert.match(checkAuditInventory(added, rows).join(), /UNREVIEWED_MUTATION.*slots/);
+});
+test('mutable, escaped or dynamic route registries are never approved by the finite-loop resolver', () => {
+  for (const setup of ["let creators={providers:'create'};", "const creators=getRoutes();", "const creators={...other};", "const creators={providers:'create'}; mutate(creators);", "const creators={providers:'create'}; creators['hidden']='create';"]) {
+    assert.throws(() => buildAuditInventory({...fixture, routerSources:{'TestRouter.ts': `const router=Router(); ${setup} for (const kind of Object.keys(creators)) router.post(\`/\${kind}\`, handler);`}}), /DYNAMIC_ROUTE_REQUIRES_REVIEW/);
+  }
+});
+
+test('inline immutable action lists enumerate mutations and reject nonliteral members', () => {
+  const source = "const router=Router(); for (const action of ['publish','archive'] as const) router.post(`/jobs/:id/${action}`, handler);";
+  assert.equal(buildAuditInventory({...fixture, routerSources:{'TestRouter.ts':source}}).length, 2);
+  assert.throws(() => buildAuditInventory({...fixture, routerSources:{'TestRouter.ts':source.replace("'archive'", 'runtimeAction')}}), /DYNAMIC_ROUTE/);
+});

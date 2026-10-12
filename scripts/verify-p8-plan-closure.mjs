@@ -70,7 +70,7 @@ check('P8-CAREER-002 career job canonical geography is explicit', has(careerDoma
 check('P8-CAREER-002 career Prisma models reference P7 Country/City', has(schema, 'model CareerEmployerRecord') && has(schema, 'model CareerJobPostingRecord') && has(schema, 'countryReference      ReferenceCountry') && has(schema, 'cityReference         ReferenceCity'));
 check('P8-CAREER-002 P21 resolves geography through P7 resolver contract', has(careerGateway, 'IReferenceResolver') && has(careerGateway, 'IReferenceResolutionRepository'));
 check('P8-CAREER-003 city-country consistency is validated', has(careerGateway, 'CAREER_CITY_COUNTRY_MISMATCH') && has(careerUseCases, 'CAREER_CITY_REQUIRES_COUNTRY'));
-check('P8-CAREER-004 canonical geography participates in dedup identity', has(careerUseCases, "cityReferenceId?.id || 'REMOTE_OR_GLOBAL'") && has(careerUseCases, "countryReferenceId.id"));
+check('P8-CAREER-004 canonical geography participates in dedup identity', has(careerUseCases, "input.countryReferenceId, input.cityReferenceId || 'GLOBAL'") && has(careerUseCases, "countryReferenceId: country.id, cityReferenceId: city?.id ?? null"));
 
 // P18 consumes P12/P15/P17 instead of re-owning truth.
 check('P8-TOOLS-001 P15 minimal context adapter exists', has(studentGateways, 'class Phase15StudentContextGateway') && has(studentGateways, 'IStudentWorkspaceRepository'));

@@ -17,4 +17,6 @@ if (result.error) {
   console.error('HEALTH_SOURCE_CHECK_START_FAILED');
   process.exit(1);
 }
-process.exit(result.status ?? 1);
+const status = result.status ?? 1;
+console.log(`HEALTH_READINESS_SOURCE_CLOSURE=${status === 0 ? 'PASS' : 'FAIL'}; semantic source/security contracts; live runtime deferred`);
+process.exit(status);

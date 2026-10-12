@@ -12,7 +12,7 @@
       "command": "node node_modules/typescript/bin/tsc -b apps/api apps/admin",
       "status": "PASS_AT_CHECKPOINT",
       "exitCode": 0,
-      "evidence": "evidence/section-24/typecheck.txt",
+      "evidence": "docs/reviews/evidence/section-24/typecheck.txt",
       "limits": "Before later defensive audit/provenance/candidate continuation, contextual owner handoffs and formatting. No final compiler rerun."
     },
     {
@@ -24,7 +24,7 @@
       "durationSeconds": 5.05,
       "cause": "Unnormalized ISO expected value and missing CMS slug dependency in source-schema evaluator.",
       "correction": "Normalize expected timestamp and evaluate actual slug declaration; no rerun.",
-      "evidence": "evidence/section-24/contracts.txt",
+      "evidence": "docs/reviews/evidence/section-24/contracts.txt",
       "limits": "Additional audit/empty-candidate assertions and later defensive edits remain unexecuted."
     },
     {

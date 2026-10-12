@@ -1490,11 +1490,62 @@
     },
     {
       "method": "POST",
-      "path": "/admin/careers/employers",
+      "path": "/admin/careers/applications/:id/cv-grant",
+      "owner": "CareerAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:careers:manage",
+        "admin:careers:applications:pii"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CareerAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/careers/applications/:id/review",
       "owner": "CareerAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:careers:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CareerAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/careers/employers",
+      "owner": "CareerAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:careers:manage",
+        "admin:careers:author"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CareerAdminRouter.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/careers/employers/:id",
+      "owner": "CareerAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:careers:manage",
+        "admin:careers:author"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -1510,7 +1561,8 @@
       "owner": "CareerAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:careers:manage"
+        "admin:careers:manage",
+        "admin:careers:employers:verify"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -1526,7 +1578,8 @@
       "owner": "CareerAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:careers:manage"
+        "admin:careers:manage",
+        "admin:careers:employers:verify"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -1542,7 +1595,8 @@
       "owner": "CareerAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:careers:manage"
+        "admin:careers:manage",
+        "admin:careers:author"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -1558,7 +1612,8 @@
       "owner": "CareerAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:careers:manage"
+        "admin:careers:manage",
+        "admin:careers:author"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -1574,9 +1629,11 @@
       "owner": "CareerAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:careers:manage"
+        "admin:careers:manage",
+        "admin:careers:review",
+        "admin:careers:publish"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -1590,7 +1647,8 @@
       "owner": "CareerAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:careers:manage"
+        "admin:careers:manage",
+        "admin:careers:review"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",
@@ -1606,9 +1664,47 @@
       "owner": "CareerAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:careers:manage"
+        "admin:careers:manage",
+        "admin:careers:review",
+        "admin:careers:publish"
       ],
-      "conditionalPermissionReview": false,
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CareerAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/careers/jobs/:id/reject",
+      "owner": "CareerAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:careers:manage",
+        "admin:careers:review",
+        "admin:careers:publish"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CareerAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/careers/jobs/:id/unpublish",
+      "owner": "CareerAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:careers:manage",
+        "admin:careers:review",
+        "admin:careers:publish"
+      ],
+      "conditionalPermissionReview": true,
       "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
@@ -6797,6 +6893,327 @@
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:services:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/bookings/:id/start-workflow",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:requests:fulfill"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/bookings/:id/transition",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:requests:fulfill"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/deliveries",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:requests:fulfill"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/discounts",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/executions/:id/advance",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:requests:fulfill"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/packages",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/packages/:id/activate",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage",
+        "admin:services:providers:approve",
+        "admin:services:pricing:approve",
+        "admin:services:review"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/pricing",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/pricing/:id/activate",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage",
+        "admin:services:providers:approve",
+        "admin:services:pricing:approve",
+        "admin:services:review"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/promotions",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/promotions/:id/activate",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage",
+        "admin:services:providers:approve",
+        "admin:services:pricing:approve",
+        "admin:services:review"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/providers",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/providers/:id/activate",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage",
+        "admin:services:providers:approve",
+        "admin:services:pricing:approve",
+        "admin:services:review"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/providers/:id/evidence",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/slots",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/workflows",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/operations/workflows/:id/activate",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:operations:manage",
+        "admin:services:providers:approve",
+        "admin:services:pricing:approve",
+        "admin:services:review"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/services/requests/:requestId/claim",
+      "owner": "ServiceAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:services:manage",
+        "admin:services:requests:assign"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "DIRECT_API_PARSE",

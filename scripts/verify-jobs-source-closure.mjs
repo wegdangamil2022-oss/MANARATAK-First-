@@ -30,6 +30,9 @@ const adminPage = read('apps/admin/src/pages/CareerAdminPage.tsx');
 const webRouter = read('apps/web/src/router/index.tsx');
 const schema = read('packages/infrastructure/prisma/schema.prisma');
 const ar = read('apps/admin/src/i18n/ar.ts');
+const policy = read('packages/application/src/career-alumni/CareerPolicy.ts');
+const http = read('apps/api/src/presentation/api/router/CareerHttp.ts');
+const cityPicker = read('apps/admin/src/components/CanonicalCityPicker.tsx');
 const careerTests = read('packages/application/tests/career-alumni/CareerAdminUseCases.spec.ts');
 
 // Domain ownership and canonical references
@@ -42,18 +45,18 @@ check('JOBS-DOM-006 canonical city reference', domainJob.includes('cityReference
 check('JOBS-DOM-007 canonical employer reference', domainJob.includes('employerId: string'));
 check('JOBS-DOM-008 P7 reference resolver boundary', hasAll(gateway, ['IReferenceResolver', 'IReferenceResolutionRepository']));
 check('JOBS-DOM-009 city-country consistency', gateway.includes('CAREER_CITY_COUNTRY_MISMATCH'));
-check('JOBS-DOM-010 dedup identity uses canonical geography', hasAll(adminUse, ["countryReferenceId.id", "cityReferenceId?.id || 'REMOTE_OR_GLOBAL'"]));
+check('JOBS-DOM-010 dedup identity uses canonical geography', hasAll(adminUse, ["input.countryReferenceId, input.cityReferenceId || 'GLOBAL'", "countryReferenceId: country.id, cityReferenceId: city?.id ?? null"]));
 
 // Publication safety
 check('JOBS-PUB-001 create enters review', adminUse.includes('status: CareerJobStatus.READY_TO_REVIEW'));
-check('JOBS-PUB-002 review state gate', adminUse.includes('Only READY_TO_REVIEW jobs can be marked READY_TO_PUBLISH'));
-check('JOBS-PUB-003 publish state gate', adminUse.includes('Only READY_TO_PUBLISH jobs can be PUBLISHED'));
-check('JOBS-PUB-004 employer verification required', adminUse.includes('Only jobs from VERIFIED employers can be PUBLISHED'));
-check('JOBS-PUB-005 expired publish blocked', adminUse.includes('Expired job opportunities cannot be PUBLISHED'));
+check('JOBS-PUB-002 review state gate', repo.includes("existing.status !== 'READY_TO_REVIEW'") && repo.includes('CAREER_REVIEW_REQUIRED'));
+check('JOBS-PUB-003 publish state gate', adminUse.includes('job.status !== CareerJobStatus.READY_TO_PUBLISH') && repo.includes("existing.status !== 'READY_TO_PUBLISH'"));
+check('JOBS-PUB-004 employer verification required', adminUse.includes('assertCareerReady(job)') && policy.includes('CAREER_EMPLOYER_NOT_VERIFIED') && policy.includes('careerEmployerVerified(job.employer)'));
+check('JOBS-PUB-005 expired publish blocked', policy.includes('new Date(job.applicationDeadline).getTime() <= Date.now()') && policy.includes('CAREER_DEADLINE_INVALID'));
 check('JOBS-PUB-006 public list verified employer only', repo.includes('verificationStatus: CareerEmployerStatus.VERIFIED'));
 check('JOBS-PUB-007 public list deadline filter', repo.includes('applicationDeadline: { gt: new Date() }'));
-check('JOBS-PUB-008 public detail deadline filter', publicUse.includes('const expired = job?.applicationDeadline'));
-check('JOBS-PUB-009 public detail verified employer', publicUse.includes('job.employer?.verificationStatus !== CareerEmployerStatus.VERIFIED'));
+check('JOBS-PUB-008 public detail deadline filter', publicUse.includes('if (!careerJobOpen(job))') && policy.includes('new Date(job.applicationDeadline).getTime() > Date.now()'));
+check('JOBS-PUB-009 public detail verified employer', publicUse.includes('careerJobOpen(job)') && policy.includes('careerEmployerVerified(raw.employer)'));
 check('JOBS-PUB-010 archive path exists', adminUse.includes('CareerJobStatus.ARCHIVED'));
 
 // Employer administration
@@ -61,8 +64,8 @@ check('JOBS-EMP-001 employers start unverified', adminUse.includes('verification
 check('JOBS-EMP-002 verify endpoint', adminRouter.includes("'/employers/:id/verify'"));
 check('JOBS-EMP-003 suspend endpoint', adminRouter.includes("'/employers/:id/suspend'"));
 check('JOBS-EMP-004 status change use case', adminUse.includes('setEmployerStatus'));
-check('JOBS-EMP-005 cannot reset review to unverified', adminUse.includes('Employer status cannot be reset to UNVERIFIED after review'));
-check('JOBS-EMP-006 admin exposes verification controls', hasAll(adminPage, ["transitionEmployer", "'verify'", "'suspend'", 'EmployerStatusBadge']));
+check('JOBS-EMP-005 cannot reset review to unverified', adminUse.includes('status === CareerEmployerStatus.UNVERIFIED') && adminUse.includes('CAREER_TRANSITION_INVALID'));
+check('JOBS-EMP-006 admin exposes verification controls', hasAll(adminPage, ["/verify", "/suspend", "admin:careers:employers:verify", "sourceEvidence", "evidenceExpiry"]));
 
 // API/RBAC
 check('JOBS-API-001 admin RBAC boundary', app.includes("'/admin/careers', requireAdminPermission('admin:careers:manage')"));
@@ -72,8 +75,8 @@ check('JOBS-API-004 public detail route', publicRouter.includes("router.get('/jo
 check('JOBS-API-005 web list path matches owner API', webClient.includes('/public/careers/jobs?'));
 check('JOBS-API-006 web detail path matches owner API', webClient.includes('/public/careers/jobs/${encodeURIComponent(slug)}'));
 check('JOBS-API-007 stale singular route removed', !webClient.includes('/public/career/jobs'));
-check('JOBS-API-008 external URLs limited to http/https', adminRouter.includes('Only http/https URLs are allowed'));
-check('JOBS-API-009 list pagination bounded', publicRouter.includes('limit: z.coerce.number().int().min(1).max(100).default(20)') && publicUse.includes('limit: Math.min(filters.limit || 20, 50)') && publicUse.includes('cursor: filters.cursor'));
+check('JOBS-API-008 external URLs require public HTTPS without credentials', http.includes('safeCareerUrl(value)') && policy.includes("url.protocol !== 'https:' || url.username || url.password"));
+check('JOBS-API-009 list pagination bounded', publicRouter.includes('limit: z.coerce.number().int().min(1).max(50).default(20)') && publicUse.includes('limit: Math.min(filters.limit || 20, 50)') && publicUse.includes('const canonical = { ...filters }') && publicUse.includes('listPublishedJobs({ ...canonical,'));
 
 // Public UI integrity
 check('JOBS-WEB-001 live loader uses owner API', live.includes('ApiClient.getCareerJobs'));
@@ -94,12 +97,12 @@ check('JOBS-WEB-014 legacy fake careers detail removed', !exists('apps/web/src/f
 check('JOBS-WEB-015 legacy careers routes redirect to canonical admin', webRouter.includes("path: 'admin/*'") && webRouter.includes('<CanonicalAdminRedirect'));
 
 // Admin UX + identity
-check('JOBS-ADM-001 canonical country picker', adminPage.includes('canonicalPickerApi.countries()'));
-check('JOBS-ADM-002 canonical city picker', adminPage.includes('canonicalPickerApi.cities('));
-check('JOBS-ADM-003 list/filter state', hasAll(adminPage, ['statusFilter', 'countryFilter', 'loadJobs']));
-check('JOBS-ADM-004 loading state', adminPage.includes('Loader2'));
-check('JOBS-ADM-005 error state', /error && <div role="alert"/.test(adminPage) && adminPage.includes('setError('));
-check('JOBS-ADM-006 empty state', adminPage.includes("no_career_opportunities_found"));
+check('JOBS-ADM-001 canonical country picker', adminPage.includes('load={canonicalPickerApi.countries}'));
+check('JOBS-ADM-002 canonical city picker', adminPage.includes('<CanonicalCityPicker') && cityPicker.includes('canonicalPickerApi.cities('));
+check('JOBS-ADM-003 list/filter state', hasAll(adminPage, ["query.set(tab === 'employers' ? 'verificationStatus' : 'status'", 'filterCountry', 'const load = useCallback']));
+check('JOBS-ADM-004 loading state', adminPage.includes('loading && <p'));
+check('JOBS-ADM-005 error state', adminPage.includes('notice && <p role="status"') && adminPage.includes('Could not load this scope.'));
+check('JOBS-ADM-006 empty state', adminPage.includes('result.data.length === 0') && adminPage.includes('No matching records'));
 check('JOBS-ADM-007 MANARATAK primary color', adminPage.includes('#142B5F'));
 check('JOBS-ADM-008 Arabic copy no mixed recruitment phrase', !ar.includes('إدارة recruitment employer metadata'));
 

@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, join, relative, resolve } from 'node:path';
+import { readDictionaryEntries, literalUiTranslationKeys } from './translation/dictionary-source.mjs';
 
 const ROOT = process.cwd();
 const failures: string[] = [];
@@ -25,12 +26,10 @@ function requireIncludes(source: string, needle: string, message: string): void 
 function dictionaryKeys(relativePath: string): Set<string> {
   const keys = new Set<string>();
   const source = read(relativePath);
-  for (const line of source.split(/\r?\n/)) {
-    const match = line.match(/^\s{2}"([^"]+)"\s*:/);
-    if (match) keys.add(match[1]);
-  }
+  const entries = readDictionaryEntries(source);
+  for (const entry of entries) keys.add(entry.key);
   requireCondition(keys.size > 0, `${relativePath}: dictionary keys detected`);
-  requireCondition(!/^\s{2}"[^"]+"\s*:\s*""\s*,?\s*$/m.test(source), `${relativePath}: no blank dictionary values`);
+  requireCondition(entries.every(entry => entry.value.trim().length > 0), `${relativePath}: no blank dictionary values`);
   return keys;
 }
 
@@ -63,13 +62,15 @@ function walkSourceFiles(directory: string): string[] {
 
 function checkLiteralTranslationCalls(label: string, directory: string, keys: Set<string>): void {
   const missing = new Set<string>();
-  const callPattern = /\bt\(\s*['"`]([^'"`$]+)['"`]\s*\)/g;
+  let checked = 0;
   for (const file of walkSourceFiles(directory)) {
     const source = readFileSync(file, 'utf8');
-    for (const match of source.matchAll(callPattern)) {
-      if (!keys.has(match[1])) missing.add(`${relative(ROOT, file)}:${match[1]}`);
+    for (const key of literalUiTranslationKeys(source, file)) {
+      checked += 1;
+      if (!keys.has(key)) missing.add(`${relative(ROOT, file)}:${key}`);
     }
   }
+  requireCondition(checked > 0, `${label}: canonical UI translation calls detected`);
   requireCondition(
     missing.size === 0,
     `${label}: no missing literal translation keys / raw-key leakage candidates${missing.size ? ` (${[...missing].join(', ')})` : ''}`,

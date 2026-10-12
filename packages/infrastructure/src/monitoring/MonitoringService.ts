@@ -104,7 +104,7 @@ export class MonitoringService implements IMonitoringService {
         status: HealthStatus.DOWN,
         timestamp,
         error: 'READINESS_NOT_CONFIGURED',
-        details: {},
+        details: { capabilityStatus: 'NOT_CONFIGURED' },
       };
     const entries = [...this.indicators.entries()],
       details: Record<string, unknown> = {};

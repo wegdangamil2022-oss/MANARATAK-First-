@@ -17,7 +17,7 @@ test('MNT-AUD-0109 every production DI registration is runtime reachable', () =>
 test('MNT-AUD-0109 deferred source cannot masquerade as production DI', () => {
   const container = read('apps/api/src/infrastructure/di/container.ts');
   const manifest = JSON.parse(read('docs/remediation/DI_RUNTIME_REACHABILITY_MANIFEST.json'));
-  for (const name of ['manageMonitorsUseCase','manageLogsUseCase','manageSecurityPoliciesUseCase','manageConfigurationsUseCase','manageIntegrationsUseCase','manageLocalizationsUseCase','serviceOperationsUseCases','careerEngagementUseCases','monitoringRouter']) {
+  for (const name of ['manageMonitorsUseCase','manageLogsUseCase','manageSecurityPoliciesUseCase','manageConfigurationsUseCase','manageIntegrationsUseCase','manageLocalizationsUseCase','monitoringRouter']) {
     assert.doesNotMatch(container, new RegExp(`\\b${name}\\s*:`));
     assert.ok(manifest.deferredOrRemovedSource.some((entry) => entry.registration === name && entry.classification === 'FORMALLY_DEFERRED'));
   }
@@ -27,4 +27,12 @@ test('MNT-AUD-0109 obsolete shadow database and unsafe legacy diagnostic are gon
   const container = read('apps/api/src/infrastructure/di/container.ts');
   assert.doesNotMatch(container, /createInMemoryPrismaClient/);
   assert.equal(existsSync('scripts/inspect_legacy.ts'), false);
+});
+
+test('completed Service/Career owner compositions are registered and source reachable', () => {
+  const manifest = JSON.parse(read('docs/remediation/DI_RUNTIME_REACHABILITY_MANIFEST.json'));
+  for (const name of ['serviceOperationsUseCases','careerEngagementUseCases']) {
+    assert.ok(manifest.registrations.some(entry => entry.name === name && entry.classification === 'RUNTIME_REACHABLE'));
+    assert.ok(!manifest.deferredOrRemovedSource.some(entry => entry.registration === name));
+  }
 });

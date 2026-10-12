@@ -1,4 +1,5 @@
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 const state = vi.hoisted(() => ({ language: 'en', permissions: [] as string[] }));
@@ -23,7 +24,7 @@ describe('CMS administration language and lazy reads', () => {
   it('uses English interface copy independently of the initial Arabic editing locale', () => {
     state.language = 'en';
     state.permissions = ['admin:cms:view'];
-    const html = renderToStaticMarkup(<CmsAdminPage />);
+    const html = renderToStaticMarkup(<MemoryRouter><CmsAdminPage /></MemoryRouter>);
     expect(html).toContain('dir="ltr"');
     expect(html).toContain('Content and publication management');
     expect(html).toContain('Site operations and publishing');
@@ -83,7 +84,7 @@ describe('CMS administration language and lazy reads', () => {
 
   it('preserves Arabic UI and RTL', () => {
     state.language = 'ar';
-    const html = renderToStaticMarkup(<CmsAdminPage />);
+    const html = renderToStaticMarkup(<MemoryRouter><CmsAdminPage /></MemoryRouter>);
     expect(html).toContain('dir="rtl"');
     expect(html).toContain('إدارة المحتوى والنشر');
   });
