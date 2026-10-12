@@ -694,6 +694,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/AIAdminRouter.ts",
+        "apps/api/src/presentation/api/router/AuditRouter.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",

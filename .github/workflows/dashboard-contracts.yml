@@ -1,0 +1,28 @@
+name: Dashboard source contracts
+on:
+  pull_request:
+    paths:
+      - 'apps/admin/src/features/dashboard/**'
+      - 'apps/admin/src/features/health/HealthOverviewContract.ts'
+      - 'apps/admin/src/features/review-queue/ReviewSources.ts'
+      - 'apps/admin/src/pages/AdminDashboardPage.tsx'
+      - 'apps/admin/src/pages/IdentityAdminPage.tsx'
+      - 'apps/api/src/presentation/dashboard/**'
+      - 'apps/api/src/presentation/api/router/AuditRouter.ts'
+      - 'tests/dashboard/**'
+      - 'scripts/verify-dashboard-source-closure.mjs'
+      - '.github/workflows/dashboard-contracts.yml'
+permissions:
+  contents: read
+jobs:
+  source-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node scripts/verify-dashboard-source-closure.mjs
