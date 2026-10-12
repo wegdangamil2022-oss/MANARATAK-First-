@@ -1347,7 +1347,6 @@ export interface PublicCareerJobDto {
   id: string;
   publicId: string;
   slug: string;
-  canonicalTitle: string;
   title: string;
   opportunityType: string;
   employmentType: string;
@@ -1438,6 +1437,10 @@ export interface PublicCountryGraphDto {
 }
 
 export interface CareerFilters {
+  search?: string;
+  remoteOption?: boolean;
+  country?: string;
+  locale?: 'ar' | 'en';
   opportunityType?: string;
   employmentType?: string;
   jobCategory?: string;
@@ -2536,6 +2539,20 @@ export class ApiClient {
     return res.json();
   }
 
+  static async careerWorkspaceRequest<T>(path: string, method = 'GET', body?: unknown, idempotencyKey?: string): Promise<T> {
+    const response = await apiFetch(`${API_BASE_URL}/student/careers/${path}`, {
+      method, headers: getStudentHeaders({ 'Content-Type': 'application/json', ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}) }),
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+    if (!response.ok) throw new Error(await parseErrorMessage(response, 'CAREER_REQUEST_FAILED'));
+    return response.json();
+  }
+  static async getPublicCareerAlumni(page = 1): Promise<{ data: Array<{ id: string; displayName: string; graduationYear?: number; employerName?: string }>; totalPages: number }> {
+    const response = await apiFetch(`${API_BASE_URL}/public/careers/alumni?page=${page}&pageSize=20`);
+    if (!response.ok) throw new Error('CAREER_REQUEST_FAILED');
+    return response.json();
+  }
+
   static async getCareerJobs(filters: CareerFilters = {}): Promise<PaginatedResult<PublicCareerJobDto>> {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -2549,8 +2566,8 @@ export class ApiClient {
     return res.json();
   }
 
-  static async getCareerJobBySlug(slug: string): Promise<PublicCareerJobDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/careers/jobs/${encodeURIComponent(slug)}`);
+  static async getCareerJobBySlug(slug: string, locale: 'ar' | 'en' = 'ar'): Promise<PublicCareerJobDto> {
+    const res = await apiFetch(`${API_BASE_URL}/public/careers/jobs/${encodeURIComponent(slug)}?locale=${locale}`);
     if (!res.ok) {
       if (res.status === 404) throw new Error('Career opportunity not found');
       const errorData = await res.json().catch(() => ({}));

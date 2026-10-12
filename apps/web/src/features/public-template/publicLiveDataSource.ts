@@ -428,6 +428,11 @@ function mapTool(dto: PublicStudentToolDto, locale: PublicLiveLocale): StudentTo
   };
 }
 
+function careerSalaryDecimal(value: unknown, scale: number) {
+  const text = String(value).padStart(scale+1, '0');
+  return scale ? text.slice(0,-scale)+'.'+text.slice(-scale) : text;
+}
+
 export function mapCareer(dto: PublicCareerJobDto): CareerOpportunityPreview {
   const metadata = asRecord(dto.metadata);
   const kind: CareerOpportunityKind =
@@ -452,7 +457,8 @@ export function mapCareer(dto: PublicCareerJobDto): CareerOpportunityPreview {
     countryReferenceId: dto.countryReferenceId,
     cityReferenceId: dto.cityReferenceId,
     title: dto.title,
-    titleEn: dto.canonicalTitle,
+    titleEn: firstString(asRecord(asRecord(metadata.localizedContent).en).title, dto.title),
+    applicationChannel: metadata.applicationChannel === 'INTERNAL' ? 'INTERNAL' : 'EXTERNAL',
     employerName: employer,
     kind,
     subtype: dto.opportunityType,
@@ -462,7 +468,7 @@ export function mapCareer(dto: PublicCareerJobDto): CareerOpportunityPreview {
     industry: dto.employer?.industry ?? dto.jobCategory,
     employmentType: dto.employmentType,
     experienceLevel,
-    salaryLabel: firstString(asRecord(dto.salaryRange).label, 'غير معلن'),
+    salaryLabel: dto.salaryRange?.minMinorUnits != null ? `${careerSalaryDecimal(dto.salaryRange.minMinorUnits, Number(dto.salaryRange.scale))}–${careerSalaryDecimal(dto.salaryRange.maxMinorUnits, Number(dto.salaryRange.scale))} ${String(dto.salaryRange.currencyCode)} / ${String(dto.salaryRange.period)}` : 'غير معلن',
     durationLabel: firstString(metadata.durationLabel) || undefined,
     summary: firstString(metadata.summary, dto.description.slice(0, 220)),
     description: dto.description,
@@ -540,8 +546,8 @@ export async function loadPublishedServices(locale:PublicLiveLocale='ar'): Promi
   return page.data.map(row=>mapService(row,locale));
 }
 export async function loadPublishedCareers(): Promise<CareerOpportunityPreview[]> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getCareerJobs({ cursor, limit: 100 }));
-  return rows.map(mapCareer);
+  const page = await ApiClient.getCareerJobs({ limit: 20 });
+  return page.data.map(mapCareer);
 }
 export async function loadPublishedTools(locale: PublicLiveLocale = 'ar'): Promise<StudentToolPreview[]> {
   const result = await ApiClient.getStudentTools();

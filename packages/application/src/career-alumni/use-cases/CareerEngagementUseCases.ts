@@ -1,4 +1,6 @@
-import { randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
+import { careerJobOpen, publishedCareerJob } from '../CareerPolicy';
+import { AssetSecurityClassification } from '@manaratak/domain';
 import {
   AlumniProfileVisibility,
   CareerAlumniProfileDto,
@@ -13,7 +15,7 @@ import {
 } from '@manaratak/domain';
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 
-const ALLOWED_APPLICATION_TRANSITIONS: Record<CareerApplicationStatus, readonly CareerApplicationStatus[]> = {
+export const ALLOWED_APPLICATION_TRANSITIONS: Record<CareerApplicationStatus, readonly CareerApplicationStatus[]> = {
   [CareerApplicationStatus.SUBMITTED]: [CareerApplicationStatus.UNDER_REVIEW, CareerApplicationStatus.WITHDRAWN],
   [CareerApplicationStatus.UNDER_REVIEW]: [CareerApplicationStatus.SHORTLISTED, CareerApplicationStatus.REJECTED, CareerApplicationStatus.WITHDRAWN],
   [CareerApplicationStatus.SHORTLISTED]: [CareerApplicationStatus.ACCEPTED, CareerApplicationStatus.REJECTED, CareerApplicationStatus.WITHDRAWN],
@@ -29,6 +31,35 @@ export class CareerEngagementUseCases {
     private readonly students: ICareerStudentOwnershipGateway,
     private readonly assetReferences?: AssetReferencePolicy,
   ) {}
+  forActor(context: { actorId: string; reason: string; correlationId: string }) {
+    if (!this.engagement.withActor) throw new Error('CAREER_AUDIT_REQUIRED');
+    return new CareerEngagementUseCases(this.career, this.engagement.withActor(context), this.students, this.assetReferences);
+  }
+  async getMyProfile(studentReferenceId: string) { await this.students.assertActiveStudent(studentReferenceId); return this.engagement.findProfile(studentReferenceId); }
+  async getMyAlumni(studentReferenceId: string) { await this.students.assertActiveStudent(studentReferenceId); return this.engagement.findAlumniProfile(studentReferenceId); }
+  async alumniNetwork(studentReferenceId: string, page: number) {
+    const profile = await this.getMyAlumni(studentReferenceId);
+    if (!profile || profile.visibility === 'PRIVATE' || profile.consentRevokedAt || profile.consentGrantedBy !== studentReferenceId)
+      throw new Error('CAREER_ACCESS_DENIED');
+    if (!this.engagement.listAlumniNetwork) throw new Error('CAREER_AUDIT_REQUIRED');
+    return this.engagement.listAlumniNetwork(page, 20);
+  }
+  async getMyApplications(studentReferenceId: string, page: number) {
+    await this.students.assertActiveStudent(studentReferenceId);
+    const result = await this.engagement.listApplications({ studentReferenceId, page, pageSize: 20 });
+    return { ...result, data: result.data.map(row => this.studentProjection(row)) };
+  }
+  async applicationForReview(id: string) { return this.requireApplication(id); }
+  async assertCvForReview(id: string) {
+    const row = await this.requireApplication(id);
+    if (row.status === CareerApplicationStatus.WITHDRAWN) throw new Error('CAREER_ACCESS_DENIED');
+    await assertAssetReferenceUsable(this.assetReferences, row.cvAssetId, { purpose: 'CAREER_APPLICATION_CV', allowedMimeTypePrefixes: ['application/pdf'], expectedOwnerId: row.studentReferenceId,
+      allowedClassifications: Object.values(AssetSecurityClassification) });
+    return row.cvAssetId;
+  }
+  private studentProjection(row: CareerApplicationDto) {
+    return { ...row, cvAssetId: undefined, coverLetter: undefined, decisionMetadata: { studentMessage: row.decisionMetadata?.studentMessage ?? null } };
+  }
 
   async upsertCareerProfile(input: {
     studentReferenceId: string;
@@ -41,20 +72,21 @@ export class CareerEngagementUseCases {
     metadata?: Record<string, unknown> | null;
   }): Promise<CareerProfileDto> {
     await this.students.assertActiveStudent(input.studentReferenceId);
+    if (input.visibility && input.visibility !== CareerProfileVisibility.PRIVATE) throw new Error('CAREER_PROFILE_PRIVATE_ONLY');
     const current = await this.engagement.findProfile(input.studentReferenceId);
     if (current && input.expectedVersion !== current.version) throw new Error('CAREER_PROFILE_VERSION_CONFLICT');
     const resumeAssetId = input.resumeAssetId === undefined ? current?.resumeAssetId ?? null : input.resumeAssetId;
     await assertAssetReferenceUsable(this.assetReferences, resumeAssetId, {
-      purpose: 'CAREER_PROFILE_RESUME', expectedOwnerId: input.studentReferenceId,
+      purpose: 'CAREER_PROFILE_RESUME', allowedMimeTypePrefixes: ['application/pdf'], expectedOwnerId: input.studentReferenceId, allowedClassifications: Object.values(AssetSecurityClassification),
     });
     const skills = [...new Set((input.skills ?? current?.skills ?? []).map((value) => value.trim()).filter(Boolean))];
     return this.engagement.upsertProfile({
       studentReferenceId: input.studentReferenceId,
-      headline: input.headline ?? current?.headline ?? null,
-      summary: input.summary ?? current?.summary ?? null,
+      headline: input.headline === undefined ? current?.headline ?? null : input.headline,
+      summary: input.summary === undefined ? current?.summary ?? null : input.summary,
       skills,
       resumeAssetId,
-      visibility: input.visibility ?? current?.visibility ?? CareerProfileVisibility.PRIVATE,
+      visibility: CareerProfileVisibility.PRIVATE,
       expectedVersion: current?.version,
       metadata: input.metadata ?? current?.metadata ?? null,
     });
@@ -67,20 +99,28 @@ export class CareerEngagementUseCases {
     coverLetter?: string | null;
   }): Promise<CareerApplicationDto> {
     await this.students.assertActiveStudent(input.studentReferenceId);
-    const job = await this.career.findJobById(input.jobId);
-    if (!job || job.status !== CareerJobStatus.PUBLISHED) throw new Error('CAREER_APPLICATION_JOB_NOT_OPEN');
-    if (job.applicationDeadline && new Date(job.applicationDeadline).getTime() <= Date.now()) throw new Error('CAREER_APPLICATION_DEADLINE_PASSED');
-    if (await this.engagement.findApplicationByJobAndStudent(input.jobId, input.studentReferenceId)) throw new Error('CAREER_APPLICATION_ALREADY_EXISTS');
+    const rawJob = await this.career.findJobById(input.jobId);
+    if (!careerJobOpen(rawJob)) throw new Error('CAREER_APPLICATION_JOB_NOT_OPEN');
+    const job = publishedCareerJob(rawJob!);
+    if (job.metadata?.applicationChannel !== 'INTERNAL') throw new Error('CAREER_APPLICATION_EXTERNAL_ONLY');
+    const existing = await this.engagement.findApplicationByJobAndStudent(input.jobId, input.studentReferenceId);
+    if (existing) {
+      if (existing.cvAssetId !== input.cvAssetId || existing.coverLetter !== (input.coverLetter?.trim() || null)) throw new Error('CAREER_APPLICATION_PAYLOAD_CONFLICT');
+      return existing;
+    }
+    if (!input.cvAssetId.trim()) throw new Error('CAREER_APPLICATION_CV_REQUIRED');
     await assertAssetReferenceUsable(this.assetReferences, input.cvAssetId, {
-      purpose: 'CAREER_APPLICATION_CV', expectedOwnerId: input.studentReferenceId,
+      purpose: 'CAREER_APPLICATION_CV', allowedMimeTypePrefixes: ['application/pdf'], expectedOwnerId: input.studentReferenceId, allowedClassifications: Object.values(AssetSecurityClassification),
     });
     return this.engagement.createApplication({
-      publicId: `career_app_${randomUUID()}`,
+      publicId: `career_app_${createHash('sha256').update(JSON.stringify([input.studentReferenceId, input.jobId])).digest('hex').slice(0, 40)}`,
       jobId: input.jobId,
       studentReferenceId: input.studentReferenceId,
       cvAssetId: input.cvAssetId,
       coverLetter: input.coverLetter?.trim() || null,
       jobSnapshot: {
+        cvConsentAt: new Date().toISOString(),
+        consentActorStudentReferenceId: input.studentReferenceId,
         jobPublicId: job.publicId,
         title: job.title,
         employerId: job.employerId,
@@ -145,7 +185,7 @@ export class CareerEngagementUseCases {
     if (input.graduationYear != null && (!Number.isInteger(input.graduationYear) || input.graduationYear < 1900 || input.graduationYear > new Date().getUTCFullYear() + 1)) throw new Error('CAREER_ALUMNI_GRADUATION_YEAR_INVALID');
     const current = await this.engagement.findAlumniProfile(input.studentReferenceId);
     if (current && input.expectedVersion !== current.version) throw new Error('CAREER_ALUMNI_VERSION_CONFLICT');
-    const visibility = input.visibility ?? current?.visibility ?? AlumniProfileVisibility.PRIVATE;
+    const visibility = input.consentGranted === false ? AlumniProfileVisibility.PRIVATE : input.visibility ?? current?.visibility ?? AlumniProfileVisibility.PRIVATE;
     let consentGrantedAt = current?.consentGrantedAt ? new Date(current.consentGrantedAt) : null;
     let consentGrantedBy = current?.consentGrantedBy ?? null;
     let consentSource = current?.consentSource ?? null;
@@ -165,9 +205,9 @@ export class CareerEngagementUseCases {
     return this.engagement.upsertAlumniProfile({
       studentReferenceId: input.studentReferenceId,
       displayName: input.displayName.trim(),
-      graduationYear: input.graduationYear ?? current?.graduationYear ?? null,
+      graduationYear: input.graduationYear === undefined ? current?.graduationYear ?? null : input.graduationYear,
       programReferenceId: input.programReferenceId ?? current?.programReferenceId ?? null,
-      employerName: input.employerName ?? current?.employerName ?? null,
+      employerName: input.employerName === undefined ? current?.employerName ?? null : input.employerName,
       visibility,
       consentGrantedAt,
       consentGrantedBy,
@@ -186,6 +226,6 @@ export class CareerEngagementUseCases {
   }
 
   private assertTransition(from: CareerApplicationStatus, to: CareerApplicationStatus) {
-    if (!ALLOWED_APPLICATION_TRANSITIONS[from].includes(to)) throw new Error(`CAREER_APPLICATION_TRANSITION_NOT_ALLOWED:${from}->${to}`);
+    if (!ALLOWED_APPLICATION_TRANSITIONS[from]?.includes(to)) throw new Error('CAREER_APPLICATION_TRANSITION_NOT_ALLOWED');
   }
 }

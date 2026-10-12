@@ -46,6 +46,7 @@ export interface CareerEmployerFilters {
   verificationStatus?: CareerEmployerStatus;
   employerType?: string;
   countryReferenceId?: string;
+  search?: string;
   page?: number;
   pageSize?: number;
 }

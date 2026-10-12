@@ -1,3 +1,4 @@
+import { LiveCareerBrowser } from './LiveCareerBrowser';
 import React, { useMemo, useState } from 'react';
 import {
   ArrowLeft,
@@ -31,6 +32,7 @@ import { FavoriteButton } from './FavoriteButton';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 
 interface CareersSearchPageProps {
+  live?: boolean;
   detailId?: string;
   opportunities: CareerOpportunityPreview[];
   onDetailChange?: (id: string) => void;
@@ -362,7 +364,7 @@ const CareerOpportunityDetail: React.FC<{
 );
 };
 
-export const CareersSearchPage: React.FC<CareersSearchPageProps> = ({
+const LocalCareersSearchPage: React.FC<CareersSearchPageProps> = ({
   detailId, onDetailChange, searchAnchor, searchTerm,
   opportunities,
   onBack,
@@ -673,3 +675,7 @@ export const CareersSearchPage: React.FC<CareersSearchPageProps> = ({
   );
 };
 
+
+export const CareersSearchPage: React.FC<CareersSearchPageProps> = (props) => props.live
+  ? <LiveCareerBrowser detailId={props.detailId} onDetailChange={props.onDetailChange} onBack={props.onBack} favoriteIds={props.favoriteIds} onToggleFavorite={props.onToggleFavorite} />
+  : <LocalCareersSearchPage {...props} />;
