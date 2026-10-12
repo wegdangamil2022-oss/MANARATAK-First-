@@ -13169,6 +13169,9 @@ Ownership: Course owns catalog/course/learning outcomes, curriculum, learning pa
 
 # 23 — الإشعارات / Notification Operations (P05 ↔ P15 ↔ P23) — Deep Admin ↔ API ↔ Delivery ↔ Student Review
 
+> **سجل تنفيذ المصدر — 12 أكتوبر 2026:** استُكملت إصلاحات المصدر على الفرع `fix/codex-section-23-notifications` انطلاقًا من `ce02ec29`. الحالة الحالية **CODE_CLOSED — RUNTIME_DEFERRED_AFTER_SECTION_28** ضمن نطاق الإشعارات؛ نتائج المراجعة القديمة أدناه محفوظة بوصفها baseline. التفاصيل لكل المهام الـ29 في [تقرير التنفيذ](section-23-implementation.md)، و[نتائج التحقق](section-23-validation.json)، و[التسليم للقسم التالي](section-23-handoff.md). لم يُطبق ترحيل أو تحقق مزود/عامل حي، ولا يُعتمد إطلاق إنتاج. فاحص جرد التدقيق الشامل ما زال متعذرًا بسبب مسار ديناميكي سابق في `ServiceAdminRouter`؛ هذه مشكلة مصدر مستقلة وليست اختبار تشغيل مؤجلًا.
+
+
 > **معيار الإغلاق المحدّث للقسم 23:** إصلاح الأكواد والثغرات والنواقص + اختبارات source/contract/security خفيفة مستهدفة + رفع Commit. **لا يلزم هنا E2E حي أو قاعدة بيانات/مزود تشغيل فعلي**؛ اختبارات التشغيل في الملحق الأخير بعد القسم 28، مع بقاء إطلاق الإنتاج محظورًا دون أدلته.
 > **الاختبار الأساسي المختصر:** Notifications: خصوصية المستلم، المنع عند opt-out وعدم تكرار التنبيه تحت إعادة الطلب.
 

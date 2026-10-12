@@ -324,6 +324,7 @@ import {
   ServiceMaintenanceBackgroundJobHandler,
   CareerMaintenanceBackgroundJobHandler,
   NotificationDeliveryBackgroundJobHandler,
+  StudentNotificationRecipientGateway,
   EnterpriseEventOutboxProjectionGateway,
   NotificationOutboxDeliveryGateway,
   OwnerDomainOutboxWorker,
@@ -778,7 +779,7 @@ export function registerDependencies(
     settingDefinitionRepo: asFunction(({ prisma }) => new PrismaSettingDefinitionRepository(prisma)).singleton(),
     settingAssignmentRepo: asFunction(({ prisma }) => new PrismaSettingAssignmentRepository(prisma)).singleton(),
     fileRepo: asFunction(() => createUnavailableCapability('fileRecordPersistence')).singleton(),
-    notificationIntentRepo: asFunction(({ prisma, studentWorkspaceDeliveryCache }) => new PrismaNotificationIntentRepository(prisma, studentWorkspaceDeliveryCache)).singleton(),
+    notificationIntentRepo: asFunction(({ prisma, studentWorkspaceDeliveryCache }) => new PrismaNotificationIntentRepository(prisma, studentWorkspaceDeliveryCache, new StudentPrivateResultProtector('NOTIFICATION_PAYLOAD_KEY', { NOTIFICATION_PAYLOAD_KEY: readConfig<string>('NOTIFICATION_PAYLOAD_KEY'), NOTIFICATION_PAYLOAD_KEY_PREVIOUS: readConfig<string>('NOTIFICATION_PAYLOAD_KEY_PREVIOUS') }), Number(readConfig<number>('NOTIFICATION_PAYLOAD_RETENTION_DAYS') ?? 30))).singleton(),
     notificationDeliveryRepo: asFunction(({ notificationIntentRepo }) => notificationIntentRepo).singleton(),
     notificationTemplateRepo: asFunction(({ prisma }) => new PrismaNotificationTemplateRepository(prisma)).singleton(),
     auditRecordRepo: asFunction(({ prisma }) => new PrismaAuditRecordRepository(prisma)).singleton(),
@@ -807,6 +808,7 @@ export function registerDependencies(
 
     // --- Gateways & Providers ---
     storageGateway: asFunction(() => createUnavailableCapability('fileStorage')).singleton(),
+    notificationRecipientGateway: asFunction(({ identityRepository, roleAssignmentRepository, studentWorkspaceRepository }) => new StudentNotificationRecipientGateway(identityRepository, roleAssignmentRepository, studentWorkspaceRepository)).scoped(),
     notificationPrefGateway: asFunction(({ prisma }) => new PrismaStudentNotificationPreferenceGateway(prisma)).singleton(),
     notificationDeliveryGateway: asFunction(() => {
       const options = notificationProviderOptions();
@@ -985,7 +987,7 @@ export function registerDependencies(
     studentWorkspaceFanoutOutboxDeliveryGateway: asFunction(({ studentWorkspaceOutboxDeliveryGateway, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new FanoutOutboxDeliveryGateway([studentWorkspaceOutboxDeliveryGateway, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway])).scoped(),
     studentWorkspaceOutboxDispatcher: asFunction(({ transactionalOutboxStore, studentWorkspaceFanoutOutboxDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, studentWorkspaceFanoutOutboxDeliveryGateway)).scoped(),
     studentWorkspaceOutboxWorker: asFunction(({ studentWorkspaceOutboxDispatcher, studentWorkspaceUseCases, studentApplicationReminderOutboxDispatcher }) => new StudentWorkspaceOutboxWorker(studentWorkspaceOutboxDispatcher, {}, studentWorkspaceUseCases, studentApplicationReminderOutboxDispatcher)).scoped(),
-    ownerDomainProjectionDispatcher: asFunction(({ transactionalOutboxStore, enterpriseEventOutboxProjectionGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, enterpriseEventOutboxProjectionGateway)).scoped(),
+    ownerDomainProjectionDispatcher: asFunction(({ transactionalOutboxStore, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, new FanoutOutboxDeliveryGateway([enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway]))).scoped(),
     ownerDomainServicesDeliveryGateway: asFunction(({ enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new FanoutOutboxDeliveryGateway([enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway])).scoped(),
     ownerDomainServicesDispatcher: asFunction(({ transactionalOutboxStore, ownerDomainServicesDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, ownerDomainServicesDeliveryGateway)).scoped(),
     ownerDomainOutboxWorker: asFunction(({ ownerDomainProjectionDispatcher, ownerDomainServicesDispatcher }) => new OwnerDomainOutboxWorker(ownerDomainProjectionDispatcher, ownerDomainServicesDispatcher)).scoped(),
@@ -1088,7 +1090,7 @@ export function registerDependencies(
     careerMaintenanceBackgroundJobHandler: asFunction(({ careerAdminUseCases }) => new CareerMaintenanceBackgroundJobHandler(careerAdminUseCases, readConfig<boolean>('CAREERS_MAINTENANCE_ENABLED') === true)).scoped(),
     serviceMaintenanceBackgroundJobHandler: asFunction(({ adminServiceFulfillmentUseCases, serviceOperationsUseCases }) => new ServiceMaintenanceBackgroundJobHandler(adminServiceFulfillmentUseCases,serviceOperationsUseCases,readConfig<boolean>('SERVICES_MAINTENANCE_ENABLED') === true)).scoped(),
     financeReconciliationBackgroundJobHandler: asFunction(({ financePlatformUseCases }) => new FinanceReconciliationBackgroundJobHandler(financePlatformUseCases)).scoped(),
-    notificationDeliveryBackgroundJobHandler: asFunction(({ notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway, studentApplicationReminderDeliveryPolicy }) => new NotificationDeliveryBackgroundJobHandler(notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway, studentApplicationReminderDeliveryPolicy)).scoped(),
+    notificationDeliveryBackgroundJobHandler: asFunction(({ notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway, studentApplicationReminderDeliveryPolicy, notificationRecipientGateway }) => new NotificationDeliveryBackgroundJobHandler(notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway, studentApplicationReminderDeliveryPolicy, notificationRecipientGateway)).scoped(),
     backgroundJobHandlerRegistry: asFunction(({ careerMaintenanceBackgroundJobHandler, serviceMaintenanceBackgroundJobHandler, assetActivationRecoveryBackgroundJobHandler, retentionBackgroundJobHandler, cmsScheduledPublishingBackgroundJobHandler, importQueueBackgroundJobHandler, aiAsyncBackgroundJobHandler, financeReconciliationBackgroundJobHandler, notificationDeliveryBackgroundJobHandler }) => new BackgroundJobHandlerRegistry([
       assetActivationRecoveryBackgroundJobHandler,
       retentionBackgroundJobHandler,
@@ -1145,7 +1147,7 @@ export function registerDependencies(
 
     // Notification
     templatesUseCase: asFunction(({ notificationTemplateRepo }) => new ManageNotificationTemplatesUseCase(notificationTemplateRepo)).scoped(),
-    intentsUseCase: asFunction(({ notificationIntentRepo, notificationPrefGateway, notificationTemplateRepo }) => new ManageNotificationIntentsUseCase(notificationIntentRepo, notificationPrefGateway, notificationTemplateRepo)).scoped(),
+    intentsUseCase: asFunction(({ notificationIntentRepo, notificationPrefGateway, notificationTemplateRepo, notificationRecipientGateway }) => new ManageNotificationIntentsUseCase(notificationIntentRepo, notificationPrefGateway, notificationTemplateRepo, notificationRecipientGateway)).scoped(),
 
     // Others
     manageAuditRecordsUseCase: asFunction(({ auditRecordRepo }) => new ManageAuditRecordsUseCase(auditRecordRepo)).scoped(),

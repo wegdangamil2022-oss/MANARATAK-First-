@@ -1,0 +1,12 @@
+✔ W3 owner event producers and consumers are runtime composed (2.713591ms)
+✔ W3 notification worker uses current durable handler contract with lease fencing (0.548925ms)
+✔ W3 finance convergence includes ambiguous PROCESSING refunds (1.027878ms)
+✔ W3 certificate and owner pollers expose operational lifecycle health (0.46851ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 116.857393

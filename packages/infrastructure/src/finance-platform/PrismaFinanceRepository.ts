@@ -2603,7 +2603,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
 
   async serviceInvoiceClearance(input: { invoiceId: string; originReferenceId: string; studentReferenceId: string }) {
     // Finance owns this single snapshot, including sibling invoices, refunds and wallet holds.
-    const rows = await this.prisma.$queryRaw<Array<{ financiallyCleared: boolean; cancellationCleared: boolean }>>`
+    const rows: Array<{ financiallyCleared: boolean; cancellationCleared: boolean }> = await this.db.$queryRaw`
       WITH origin_invoices AS (
         SELECT * FROM "FinanceInvoiceRecord"
         WHERE "originDomain"='PHASE_20_SERVICE_REQUEST'

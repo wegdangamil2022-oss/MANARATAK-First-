@@ -159,6 +159,11 @@
       "classification": "RUNTIME",
       "status": "PENDING_NON_BLOCKING",
       "command": "npm run e2e"
+    },
+    {
+      "id": "section23-notifications",
+      "classification": "SOURCE",
+      "command": "npm run notifications:source:verify"
     }
   ],
   "registeredVerifierFiles": [

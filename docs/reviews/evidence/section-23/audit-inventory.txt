@@ -1,0 +1,17 @@
+file:///workspace/MANARATAK-First-/scripts/architecture/verify-admin-audit-coverage.mjs:117
+      if (!route) throw new Error(`ADMIN_DYNAMIC_ROUTE_REQUIRES_REVIEW:${mount.owner}`);
+                        ^
+
+Error: ADMIN_DYNAMIC_ROUTE_REQUIRES_REVIEW:ServiceAdminRouter
+    at file:///workspace/MANARATAK-First-/scripts/architecture/verify-admin-audit-coverage.mjs:117:25
+    at visit (file:///workspace/MANARATAK-First-/scripts/architecture/verify-admin-audit-coverage.mjs:11:37)
+    at file:///workspace/MANARATAK-First-/scripts/architecture/verify-admin-audit-coverage.mjs:11:84
+    at visitNode2 (/workspace/MANARATAK-First-/node_modules/typescript/lib/typescript.js:32308:18)
+    at forEachChildInExpressionStatement (/workspace/MANARATAK-First-/node_modules/typescript/lib/typescript.js:32538:12)
+    at Object.forEachChild (/workspace/MANARATAK-First-/node_modules/typescript/lib/typescript.js:32829:35)
+    at visit (file:///workspace/MANARATAK-First-/scripts/architecture/verify-admin-audit-coverage.mjs:11:56)
+    at file:///workspace/MANARATAK-First-/scripts/architecture/verify-admin-audit-coverage.mjs:11:84
+    at visitNode2 (/workspace/MANARATAK-First-/node_modules/typescript/lib/typescript.js:32308:18)
+    at forEachChildInForOfStatement (/workspace/MANARATAK-First-/node_modules/typescript/lib/typescript.js:32556:133)
+
+Node.js v24.19.0

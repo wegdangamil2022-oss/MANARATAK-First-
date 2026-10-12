@@ -161,7 +161,8 @@
     "rbac:baseline:provision": "node scripts/rbac-baseline-provision.mjs",
     "auth:owner:preflight": "node scripts/owner-access-preflight.mjs",
     "test:node": "node scripts/testing/run-node-unit-tests.mjs",
-    "certificates:template:export": "tsc -b packages/shared && tsx scripts/certificates/export-approved-template.ts"
+    "certificates:template:export": "tsc -b packages/shared && tsx scripts/certificates/export-approved-template.ts",
+    "notifications:source:verify": "tsc -b apps/api apps/admin && vitest run tests/notifications/section23.spec.ts packages/application/tests/students/StudentApplicationReminderDeliveryPolicy.spec.ts"
   },
   "dependencies": {
     "@e965/xlsx": "0.20.3",

@@ -133,6 +133,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-sm font-bold text-white tracking-wide">مركز التنبيهات</h2>
+                    <span className="text-xs" data-source="prototype">محاكاة تجريبية / Prototype simulation</span>
                     {unreadCount > 0 && (
                       <span className="rounded-full bg-gradient-to-r from-[#B8841B] to-[#E2B040] px-2 py-0.5 text-[11px] font-bold text-[#0E1F44] shadow-xs">
                         {unreadCount} جديد

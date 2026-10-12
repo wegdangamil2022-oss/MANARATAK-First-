@@ -1,3 +1,4 @@
+import { isNotificationPreviewRequest } from '../http/NotificationPreviewRequest.js';
 import { createHash } from 'node:crypto';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
@@ -34,7 +35,7 @@ export function createCanonicalIdempotencyMiddleware(input: {
   const leaseSeconds = input.leaseSeconds ?? 120;
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase())) return next();
+    if (!['POST', 'PUT', 'PATCH'].includes(req.method.toUpperCase()) || isNotificationPreviewRequest(req)) return next();
 
     const rawKey = req.header('Idempotency-Key')?.trim();
     if (!rawKey) {

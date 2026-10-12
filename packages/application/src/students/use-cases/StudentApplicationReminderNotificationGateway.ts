@@ -3,18 +3,51 @@ import { ManageNotificationIntentsUseCase } from '../../notification/use-cases/M
 import { ManageNotificationTemplatesUseCase } from '../../notification/use-cases/ManageNotificationTemplatesUseCase';
 
 export class StudentApplicationReminderNotificationGateway implements IStudentApplicationReminderGateway {
-  constructor(private readonly intents:ManageNotificationIntentsUseCase, private readonly templates:ManageNotificationTemplatesUseCase) {}
-  private id(trackerId:string,version:number){ return `student-application-deadline-${trackerId}-v${version}`; }
-  async schedule(input:{trackerId:string;trackerVersion:number;studentReferenceId:string;scholarshipId:string;deadlineAt:Date}){
-    const scheduledAt=new Date(input.deadlineAt.getTime()-3*24*60*60*1000); if(scheduledAt.getTime()<=Date.now()) return;
-    await this.templates.createTemplate({id:'student-application-deadline-v1',channels:['IN_APP','EMAIL'],requiredVariables:['scholarshipId','deadlineAt'],localizations:['ar','en']},{createOnly:true});
-    await this.intents.createIntent({id:this.id(input.trackerId,input.trackerVersion),reference:`student-application:${input.trackerId}`,templateId:'student-application-deadline-v1',recipientReference:input.studentReferenceId,variables:{trackerId:input.trackerId,trackerVersion:String(input.trackerVersion),scholarshipId:input.scholarshipId,deadlineAt:input.deadlineAt.toISOString()},scheduledAt,expiresAt:input.deadlineAt,retryMaxRetries:5,retryBackoffMs:60000});
+  constructor(
+    private readonly intents: ManageNotificationIntentsUseCase,
+    private readonly templates: ManageNotificationTemplatesUseCase,
+  ) {}
+  private id(trackerId: string, version: number) {
+    return `student-application-deadline-${trackerId}-v${version}`;
   }
-  async cancel(trackerId:string,trackerVersion:number){
-    try {await this.intents.cancelIntent(this.id(trackerId,trackerVersion));}
-    catch(error){
+  async schedule(input: {
+    trackerId: string;
+    trackerVersion: number;
+    studentReferenceId: string;
+    scholarshipId: string;
+    deadlineAt: Date;
+  }) {
+    const scheduledAt = new Date(input.deadlineAt.getTime() - 3 * 24 * 60 * 60 * 1000);
+    if (scheduledAt.getTime() <= Date.now()) return;
+    await this.templates.ensureTemplate({
+      id: 'student-application-deadline-v1',
+      channels: ['IN_APP', 'EMAIL'],
+      requiredVariables: ['scholarshipId', 'deadlineAt'],
+      localizations: ['ar', 'en'],
+    });
+    await this.intents.createIntent({
+      id: this.id(input.trackerId, input.trackerVersion),
+      reference: `student-application:${input.trackerId}:v${input.trackerVersion}`,
+      templateId: 'student-application-deadline-v1',
+      recipientReference: input.studentReferenceId,
+      variables: {
+        trackerId: input.trackerId,
+        trackerVersion: String(input.trackerVersion),
+        scholarshipId: input.scholarshipId,
+        deadlineAt: input.deadlineAt.toISOString(),
+      },
+      scheduledAt,
+      expiresAt: input.deadlineAt,
+      retryMaxRetries: 5,
+      retryBackoffMs: 60000,
+    });
+  }
+  async cancel(trackerId: string, trackerVersion: number) {
+    try {
+      await this.intents.cancelIntent(this.id(trackerId, trackerVersion));
+    } catch (error) {
       // Already cancelled/delivered/absent is harmless; DB outages remain retryable.
-      if(error instanceof Error && error.message==='NOTIFICATION_INTENT_NOT_CANCELLABLE')return;
+      if (error instanceof Error && error.message === 'NOTIFICATION_INTENT_NOT_CANCELLABLE') return;
       throw error;
     }
   }

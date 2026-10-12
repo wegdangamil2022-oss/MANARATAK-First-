@@ -442,6 +442,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/reviews/section-19-migration-recovery.md",
       "decision": "Unapplied additive expansion. Rehearse backup restore after section 28; no down SQL or legacy plaintext backfill is executed."
+    },
+    "20261012010000_section23_channel_delivery": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-23-migration-recovery.md",
+      "decision": "Source-only additive channel checkpoints, immutable template snapshots and reservation ledger. Preserve receipts/replay fingerprints; recover with a verified backup or reviewed forward fix. Not applied."
     }
   }
 }

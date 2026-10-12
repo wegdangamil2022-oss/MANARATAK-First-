@@ -610,7 +610,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         const deliveryCadenceConfigured = Boolean(config.getOptional<string>('BACKGROUND_NOTIFICATION_CRON'));
         const durable = !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(persistence)
           && !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(templates);
-          const providerReady = provider === 'PRODUCTION_CAPABLE';
+          const providerReady = false; // DB/worker/provider proof is deferred until after section 28.
         const available = durable && providerReady && backgroundWorkerEnabled && deliveryCadenceConfigured;
           return {
             status: available
@@ -630,6 +630,9 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
               templates,
               preferences,
               provider,
+              runtimeEvidence: 'PENDING_AFTER_SECTION_28',
+              configured: durable && intentRepo.payloadProtectionStatus === 'READY' && backgroundWorkerEnabled && deliveryCadenceConfigured,
+              payloadProtection: intentRepo.payloadProtectionStatus,
               backgroundWorkerEnabled,
               deliveryCadenceConfigured,
             },

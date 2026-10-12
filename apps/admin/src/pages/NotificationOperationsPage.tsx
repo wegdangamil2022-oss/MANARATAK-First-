@@ -1,41 +1,43 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Bell, RefreshCw, RotateCcw, TriangleAlert, Plus, Search, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
+import { useTranslation } from '../i18n/I18nProvider';
 
-type TemplateSummary = {
+type Template = {
+  active?: boolean;
+  version?: number;
+  usageCount?: number;
   id: string;
   channels: string[];
   requiredVariables: string[];
   localizations: string[];
-  updatedAt?: string;
 };
-type IntentSummary = {
+type Intent = {
   id: string;
-  reference: string;
   templateId: string;
   recipientReference: string;
-  state: string;
   deliveryState: string;
   attempts: number;
   nextAttemptAt?: string;
-  deliveredAt?: string | null;
-  lastErrorCode?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
+  deliveredAt?: string;
+  lastErrorCode?: string;
+  manualRetryCount?: number;
 };
-type ListResponse<T> = { items: T[] };
-const deliveryStates: Record<string, string> = {
-  PENDING: 'قيد الانتظار',
-  PROCESSING: 'جارٍ المعالجة',
-  DELIVERED: 'تم التسليم',
-  FAILED: 'فشل التسليم',
-  DEAD_LETTER: 'الفشل النهائي',
-  SUPPRESSED: 'موقوف بتفضيلات الطالب',
-  CANCELLED: 'ملغي',
-  EXPIRED: 'انتهت صلاحيته',
-};
-const pageSize = 25;
-const blankDraft = () => ({
+type Page<T> = { items: T[]; nextCursor?: string | null };
+type Receipt = { channel: string; status: string; attempts: number; updatedAt: string };
+type Recipient = { studentReferenceId: string; displayName?: string };
+const states = [
+  'PENDING',
+  'PROCESSING',
+  'DELIVERED',
+  'ACCEPTED',
+  'FAILED',
+  'DEAD_LETTER',
+  'SUPPRESSED',
+  'CANCELLED',
+  'EXPIRED',
+];
+const fresh = () => ({
   id: createAdminIdempotencyKey(),
   templateId: '',
   recipientReference: '',
@@ -43,734 +45,830 @@ const blankDraft = () => ({
   scheduledAt: '',
   expiresAt: '',
 });
-const dateLabel = (value?: string | null) => {
-  if (!value) return '—';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('ar');
-};
 
 export function NotificationOperationsPage() {
-  const [templates, setTemplates] = useState<TemplateSummary[]>([]);
-  const [intents, setIntents] = useState<IntentSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [limit, setLimit] = useState(200);
-  const [search, setSearch] = useState('');
-  const [stateFilter, setStateFilter] = useState('ALL');
-  const [templateFilter, setTemplateFilter] = useState('ALL');
-  const [page, setPage] = useState(1);
-  const [draft, setDraft] = useState<ReturnType<typeof blankDraft> | null>(null);
-  const [templateId, setTemplateId] = useState('');
-  const [showTemplateForm, setShowTemplateForm] = useState(false);
-  const generation = useRef(0);
-  const mutationBusy = useRef(false);
-  const alive = useRef(true);
-  const creationKey = useRef<string | null>(null);
-  const [draftLocked, setDraftLocked] = useState(false);
-
-  const load = useCallback(
-    async (preserveNotice = false) => {
-      const request = ++generation.current;
-      setLoading(true);
-      setError(null);
-      if (!preserveNotice) setNotice(null);
-      const results = await Promise.allSettled([
-        adminApiClient.request<ListResponse<TemplateSummary>>('/notifications/templates?limit=500'),
-        adminApiClient.request<ListResponse<IntentSummary>>(
-          `/notifications/intents?limit=${limit}`,
-        ),
-      ]);
-      if (!alive.current || request !== generation.current) return false;
-      const errors: string[] = [];
-      if (results[0].status === 'fulfilled') setTemplates(results[0].value.items ?? []);
-      else {
-        setTemplates([]);
-        errors.push('تعذر تحميل القوالب');
-      }
-      if (results[1].status === 'fulfilled') setIntents(results[1].value.items ?? []);
-      else {
-        setIntents([]);
-        errors.push('تعذر تحميل سجل الإشعارات');
-      }
-      setError(errors.length ? errors.join('؛ ') : null);
-      setLoading(false);
-      return !errors.length;
-    },
-    [limit],
-  );
-
+  const { language, dir } = useTranslation(),
+    { hasPermission } = useAdminAuthorization();
+  const c = (ar: string, en: string) => (language === 'ar' ? ar : en);
+  const [templates, setTemplates] = useState<Template[]>([]),
+    [result, setResult] = useState<Page<Intent>>({ items: [] });
+  const [summary, setSummary] = useState<{
+    from: string;
+    to: string;
+    counts: Record<string, number>;
+  } | null>(null);
+  const [cloneTarget, setCloneTarget] = useState('');
+  const [fromDate, setFromDate] = useState(''),
+    [toDate, setToDate] = useState(''),
+    [recipientFilter, setRecipientFilter] = useState('');
+  const [loading, setLoading] = useState(false),
+    [busy, setBusy] = useState(false),
+    [notice, setNotice] = useState('');
+  const [search, setSearch] = useState(''),
+    [state, setState] = useState(''),
+    [filterTemplate, setFilterTemplate] = useState('');
+  const [cursor, setCursor] = useState(''),
+    [previous, setPrevious] = useState<string[]>([]),
+    [reload, setReload] = useState(0);
+  const [draft, setDraft] = useState<ReturnType<typeof fresh> | null>(null),
+    [locked, setLocked] = useState(false);
+  const [recipientQuery, setRecipientQuery] = useState(''),
+    [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [recipientCursor, setRecipientCursor] = useState(''),
+    [recipientNext, setRecipientNext] = useState<string | null>(null);
+  const [receipts, setReceipts] = useState<{ id: string; items: Receipt[] } | null>(null);
+  const [templateForm, setTemplateForm] = useState(false),
+    [templateId, setTemplateId] = useState(''),
+    [channel, setChannel] = useState('IN_APP');
+  const [required, setRequired] = useState(''),
+    [subjectAr, setSubjectAr] = useState(''),
+    [bodyAr, setBodyAr] = useState(''),
+    [subjectEn, setSubjectEn] = useState(''),
+    [bodyEn, setBodyEn] = useState('');
+  const [preview, setPreview] = useState<{
+    title: string;
+    message: string;
+    locale: string;
+    fallback: boolean;
+  } | null>(null);
+  const [previewTemplateId, setPreviewTemplateId] = useState('');
+  const [samples, setSamples] = useState('{}');
+  const guard = useRef(false),
+    keys = useRef(new Map<string, string>()),
+    generation = useRef(0);
+  const can = (action: string) => hasPermission(`admin:notifications:${action}`);
+  const selected = templates.find((t) => t.id === draft?.templateId);
+  const date = (value?: string) =>
+    value ? new Date(value).toLocaleString(language, { timeZone: 'UTC' }) + ' UTC' : '—';
+  const stateName = (value: string) =>
+    language === 'en'
+      ? value
+      : (
+          {
+            PENDING: 'قيد الانتظار',
+            PROCESSING: 'جارٍ المعالجة',
+            DELIVERED: 'تم التسليم',
+            ACCEPTED: 'قبله المزود — التسليم غير مؤكد',
+            FAILED: 'فشل',
+            DEAD_LETTER: 'الفشل النهائي',
+            SUPPRESSED: 'محجوب بالتفضيلات',
+            CANCELLED: 'ملغي',
+            EXPIRED: 'منتهي',
+          } as Record<string, string>
+        )[value] || value;
   useEffect(() => {
-    alive.current = true;
-    void load();
+    const id = ++generation.current;
+    setLoading(true);
+    setNotice('');
+    const query = new URLSearchParams({
+      limit: '25',
+      ...(cursor ? { cursor } : {}),
+      ...(search ? { search } : {}),
+      ...(state ? { deliveryState: state } : {}),
+      ...(fromDate ? { from: new Date(fromDate).toISOString() } : {}),
+      ...(toDate ? { to: new Date(toDate).toISOString() } : {}),
+      ...(recipientFilter ? { recipientReference: recipientFilter } : {}),
+      ...(filterTemplate ? { templateId: filterTemplate } : {}),
+    });
+    Promise.all([
+      adminApiClient.request<Page<Template>>('/notifications/templates?limit=500'),
+      adminApiClient.request<Page<Intent>>(`/notifications/intents?${query}`),
+    ])
+      .then(([t, i]) => {
+        if (id === generation.current) {
+          setTemplates(t.items);
+          setResult(i);
+        }
+      })
+      .catch(() => {
+        if (id === generation.current) {
+          setResult({ items: [] });
+          setNotice(
+            language === 'ar'
+              ? 'تعذر تحميل الإشعارات. أعد المحاولة.'
+              : 'Notifications could not be loaded. Retry.',
+          );
+        }
+      })
+      .finally(() => {
+        if (id === generation.current) setLoading(false);
+      });
     return () => {
-      alive.current = false;
       ++generation.current;
     };
-  }, [load]);
+  }, [cursor, search, state, filterTemplate, reload, language, fromDate, toDate, recipientFilter]);
   useEffect(() => {
-    const unload = (event: BeforeUnloadEvent) => {
-      if (draft || showTemplateForm) {
-        event.preventDefault();
-        event.returnValue = '';
+    let active = true;
+    const to = new Date(),
+      from = new Date(to.getTime() - 86400000);
+    adminApiClient
+      .request<{ from: string; to: string; counts: Record<string, number> }>(
+        `/notifications/summary?${new URLSearchParams({ from: from.toISOString(), to: to.toISOString() })}`,
+      )
+      .then((value) => {
+        if (active) setSummary(value);
+      })
+      .catch(() => {
+        if (active) setSummary(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [reload]);
+  useEffect(() => {
+    if (!draft || !can('intents:create') || !can('recipients:pii')) return;
+    let active = true;
+    const timer = setTimeout(() => {
+      const query = new URLSearchParams({
+        query: recipientQuery,
+        ...(recipientCursor ? { cursor: recipientCursor } : {}),
+      });
+      adminApiClient
+        .request<Page<Recipient>>(`/notifications/recipients?${query}`)
+        .then((page) => {
+          if (active) {
+            setRecipients(page.items);
+            setRecipientNext(page.nextCursor ?? null);
+          }
+        })
+        .catch(() => {
+          if (active) {
+            setRecipients([]);
+            setRecipientNext(null);
+            setNotice(
+              language === 'ar' ? 'تعذر تحميل المستلمين' : 'Recipients could not be loaded',
+            );
+          }
+        });
+    }, 250);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [!!draft, recipientQuery, recipientCursor, language, hasPermission]);
+  useEffect(() => {
+    const prevent = (e: BeforeUnloadEvent) => {
+      if (draft || templateForm) {
+        e.preventDefault();
+        e.returnValue = '';
       }
     };
-    window.addEventListener('beforeunload', unload);
-    return () => window.removeEventListener('beforeunload', unload);
-  }, [draft, showTemplateForm]);
-
-  const filtered = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase();
-    return intents.filter(
-      (intent) =>
-        (stateFilter === 'ALL' || intent.deliveryState === stateFilter) &&
-        (templateFilter === 'ALL' || intent.templateId === templateFilter) &&
-        (!query ||
-          [
-            intent.id,
-            intent.reference,
-            intent.templateId,
-            intent.recipientReference,
-            intent.lastErrorCode,
-          ].some((value) => value?.toLocaleLowerCase().includes(query))),
-    );
-  }, [intents, search, stateFilter, templateFilter]);
-  const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  useEffect(() => setPage((current) => Math.min(current, pages)), [pages]);
-  const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
-  const counts = useMemo(
-    () => ({
-      total: intents.length,
-      delivered: intents.filter((item) => item.deliveryState === 'DELIVERED').length,
-      pending: intents.filter((item) => ['PENDING', 'PROCESSING'].includes(item.deliveryState))
-        .length,
-      failed: intents.filter((item) => ['FAILED', 'DEAD_LETTER'].includes(item.deliveryState))
-        .length,
-      suppressed: intents.filter((item) => item.deliveryState === 'SUPPRESSED').length,
-    }),
-    [intents],
-  );
-  const currentTemplate = templates.find((template) => template.id === draft?.templateId);
-  const requiredVariables = [
-    ...new Set([
-      ...(currentTemplate?.requiredVariables ?? []),
-      ...(currentTemplate?.channels.includes('IN_APP') ? ['title', 'message'] : []),
-    ]),
-  ];
-
-  const mutate = async (
-    key: string,
-    operation: () => Promise<unknown>,
-    message: string,
-    afterWrite?: () => void,
-  ) => {
-    if (mutationBusy.current) return;
-    mutationBusy.current = true;
-    setBusy(key);
-    setError(null);
-    setNotice(null);
+    window.addEventListener('beforeunload', prevent);
+    return () => window.removeEventListener('beforeunload', prevent);
+  }, [draft, templateForm]);
+  const write = async (path: string, body: unknown, onSuccess?: () => void) => {
+    if (guard.current) return;
+    guard.current = true;
+    setBusy(true);
+    setNotice('');
+    const existing = keys.current.get(path),
+      key = existing ?? createAdminIdempotencyKey();
+    keys.current.set(path, key);
     try {
-      await operation();
-      if (!alive.current) return;
-      afterWrite?.();
-      setNotice(message);
-      const reloaded = await load(true);
-      if (!reloaded && alive.current)
-        setError('نجح الطلب، لكن تعذرت إعادة قراءة البيانات. حدّث السجل قبل إعادة المحاولة.');
-    } catch (cause) {
-      if (alive.current) setError(cause instanceof Error ? cause.message : 'تعذر تنفيذ العملية');
+      await adminApiClient.request(path, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'Idempotency-Key': key },
+      });
+      keys.current.delete(path);
+      onSuccess?.();
+      setReload((n) => n + 1);
+      setNotice(
+        c(
+          'تم قبول العملية. إنشاء الإشعار لا يعني تسليمه.',
+          'Operation accepted. Creating an intent does not confirm delivery.',
+        ),
+      );
+    } catch {
+      setNotice(
+        c(
+          'لم تُؤكد العملية. احتفظ بالبيانات وأعد الطلب بالمفتاح نفسه.',
+          'The operation is unconfirmed. Keep the inputs and retry with the same key.',
+        ),
+      );
     } finally {
-      mutationBusy.current = false;
-      if (alive.current) setBusy(null);
+      guard.current = false;
+      setBusy(false);
     }
   };
-
-  const retry = (intent: IntentSummary) => {
-    if (mutationBusy.current || !window.confirm(`إعادة محاولة تسليم الإشعار ${intent.reference}؟`))
-      return;
-    void mutate(
-      intent.id,
-      () =>
-        adminApiClient.request(`/notifications/intents/${encodeURIComponent(intent.id)}/retry`, {
-          method: 'POST',
-          body: '{}',
-        }),
-      'تم قبول إعادة المحاولة. التسليم يتم بواسطة عامل الإشعارات، وليس فور الضغط.',
-    );
+  const resetPage = () => {
+    setCursor('');
+    setPrevious([]);
   };
-  const cancel = (intent: IntentSummary) => {
-    if (mutationBusy.current || !window.confirm(`إلغاء الإشعار ${intent.reference} قبل تسليمه؟`))
-      return;
-    void mutate(
-      intent.id,
-      () =>
-        adminApiClient.request(`/notifications/intents/${encodeURIComponent(intent.id)}/cancel`, {
-          method: 'POST',
-          body: '{}',
-        }),
-      'تم إلغاء الإشعار.',
-    );
-  };
-  const closeDraft = () => {
-    if (mutationBusy.current || !window.confirm('ترك مسودة الإشعار؟')) return;
-    setDraft(null);
-    setDraftLocked(false);
-    creationKey.current = null;
-  };
-  const createIntent = () => {
-    if (!draft || !currentTemplate || mutationBusy.current) return;
-    if (
-      !draft.recipientReference.trim() ||
-      requiredVariables.some((name) => !draft.variables[name]?.trim())
-    ) {
-      setError('أدخل معرّف المستلم وجميع المتغيرات المطلوبة.');
-      return;
-    }
-    const scheduledAt = draft.scheduledAt ? new Date(draft.scheduledAt) : null;
-    const expiresAt = draft.expiresAt ? new Date(draft.expiresAt) : null;
-    if (
-      (scheduledAt && Number.isNaN(scheduledAt.getTime())) ||
-      (expiresAt && (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now())) ||
-      (scheduledAt && expiresAt && scheduledAt >= expiresAt)
-    ) {
-      setError('راجع موعد الجدولة وانتهاء الصلاحية.');
-      return;
-    }
-    const actionUrl = draft.variables.actionUrl?.trim();
-    if (
-      actionUrl &&
-      (!actionUrl.startsWith('/') ||
-        actionUrl.startsWith('//') ||
-        /[\\\u0000-\u001f]/.test(actionUrl))
-    ) {
-      setError('رابط التفاصيل يجب أن يكون مساراً داخلياً صالحاً.');
-      return;
-    }
-    if (
-      !window.confirm(
-        'حفظ الإشعار في قائمة الإرسال للمستلم المحدد؟ قد يتم تسليمه عند تشغيل العامل.',
-      )
-    )
-      return;
-    creationKey.current ??= createAdminIdempotencyKey();
-    setDraftLocked(true);
-    const variables = Object.fromEntries(
-      Object.entries(draft.variables).map(([name, value]) => [name, value.trim()]),
-    );
-    void mutate(
-      'create-intent',
-      () =>
-        adminApiClient.request('/notifications/intents', {
-          method: 'POST',
-          idempotencyKey: creationKey.current!,
-          body: JSON.stringify({
-            id: draft.id,
-            reference: `admin:${draft.id}`,
-            templateId: draft.templateId,
-            recipientReference: draft.recipientReference.trim(),
-            variables,
-            ...(scheduledAt ? { scheduledAt: scheduledAt.toISOString() } : {}),
-            ...(expiresAt ? { expiresAt: expiresAt.toISOString() } : {}),
-          }),
-        }),
-      'تم حفظ الإشعار في قائمة الإرسال. هذا لا يعني تسليمه بعد.',
-      () => {
-        setDraft(null);
-        setDraftLocked(false);
-        creationKey.current = null;
-      },
-    );
-  };
-  const createTemplate = () => {
-    const id = templateId.trim();
-    if (!id || mutationBusy.current) return;
-    if (templates.some((template) => template.id === id) || id.startsWith('system.')) {
-      setError('استخدم معرّف قالب جديداً؛ لا تستبدل القوالب القائمة أو النظامية.');
-      return;
-    }
-    void mutate(
-      'create-template',
-      () =>
-        adminApiClient.request('/notifications/templates', {
-          method: 'POST',
-          body: JSON.stringify({
-            id,
-            channels: ['IN_APP'],
-            requiredVariables: ['title', 'message'],
-            localizations: ['ar', 'en'],
-          }),
-        }),
-      'تم حفظ قالب إشعار الطالب داخل الموقع.',
-      () => {
-        setShowTemplateForm(false);
-        setTemplateId('');
-      },
-    );
-  };
-
+  const requiredNames = [
+    ...new Set(
+      required
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    ),
+  ];
   return (
-    <main dir="rtl" className="mx-auto max-w-7xl space-y-5">
-      <header className="rounded-3xl bg-gradient-to-l from-[#142B5F] to-[#0E7C86] p-6 text-white">
-        <h1 className="flex items-center gap-2 text-3xl font-black">
-          <Bell /> إدارة الإشعارات
-        </h1>
-        <p className="mt-3 text-sm leading-7">
-          قوالب الإرسال، إشعارات الطالب، الجدولة وحالة التسليم.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
+    <section dir={dir} className="space-y-5 p-6">
+      <h1 className="text-2xl font-bold">{c('إدارة الإشعارات', 'Notification operations')}</h1>
+      <p>
+        {c(
+          'سجل API فعلي. تحقق قاعدة البيانات والمزود والعامل مؤجل إلى ما بعد القسم 28.',
+          'Live API records. Database, provider and worker validation is deferred until after section 28.',
+        )}
+      </p>
+      <p>
+        {c(
+          'الأوقات المعروضة UTC. حالة «قبله المزود» لا تثبت وصول الرسالة.',
+          'Displayed times are UTC. ACCEPTED does not prove that the recipient received the message.',
+        )}
+      </p>
+      {summary ? (
+        <div>
+          <p>
+            {c('إحصاءات جميع السجلات المنشأة في النافذة', 'All records created in this window')}:{' '}
+            {date(summary.from)} — {date(summary.to)}
+          </p>
+          <p>
+            {Object.entries(summary.counts)
+              .map(([key, count]) => `${stateName(key)}: ${count}`)
+              .join(' | ')}
+          </p>
+        </div>
+      ) : (
+        <p>{c('الإحصاءات العامة غير متاحة', 'Global counts unavailable')}</p>
+      )}
+      {notice && <p role="status">{notice}</p>}
+      <nav className="flex flex-wrap gap-3">
+        <button disabled={busy || loading} onClick={() => setReload((n) => n + 1)}>
+          {c('تحديث', 'Refresh')}
+        </button>
+        {can('intents:create') && can('recipients:pii') && (
           <button
-            className="rounded-xl bg-white/15 px-4 py-2 text-sm font-bold disabled:opacity-50"
-            disabled={loading || Boolean(busy)}
-            onClick={() => void load()}
-          >
-            <RefreshCw className="inline h-4 w-4" /> تحديث
-          </button>
-          <button
-            className="rounded-xl bg-teal-500 px-4 py-2 text-sm font-bold disabled:opacity-50"
-            disabled={loading || Boolean(busy) || Boolean(draft) || !templates.length}
+            disabled={busy || !!draft}
             onClick={() => {
-              setDraft(blankDraft());
-              setDraftLocked(false);
-              creationKey.current = null;
+              setDraft(fresh());
+              setLocked(false);
+              setRecipients([]);
             }}
           >
-            <Plus className="inline h-4 w-4" /> إنشاء إشعار
+            {c('إنشاء إشعار', 'Create intent')}
           </button>
-          <button
-            className="rounded-xl bg-white/15 px-4 py-2 text-sm font-bold disabled:opacity-50"
-            disabled={loading || Boolean(busy)}
-            onClick={() => setShowTemplateForm(true)}
-          >
-            قالب إشعار داخل الموقع
+        )}
+        {can('templates:author') && (
+          <button disabled={busy || templateForm} onClick={() => setTemplateForm(true)}>
+            {c('إنشاء إصدار قالب', 'Create template revision')}
           </button>
-        </div>
-      </header>
-      {error && (
-        <div
-          role="alert"
-          className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-        >
-          <TriangleAlert className="h-4 w-4 shrink-0" />
-          {error}
-        </div>
-      )}
-      {notice && (
-        <div
-          role="status"
-          className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800"
-        >
-          {notice}
-        </div>
-      )}
-      <p className="rounded-xl bg-slate-50 p-4 text-xs leading-6 text-slate-600">
-        الأرقام والفلاتر تخص أحدث {limit} سجل محمّل؛ التحديث يدوي. إشعارات داخل الموقع تظهر في حساب
-        الطالب بعد تسليمها بواسطة العامل. البريد وPush يتطلبان مزوّد إرسال مهيأ.
-      </p>
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <Metric label="السجلات المحمّلة" value={counts.total} />
-        <Metric label="تم التسليم" value={counts.delivered} />
-        <Metric label="انتظار / معالجة" value={counts.pending} />
-        <Metric label="موقوف بالتفضيلات" value={counts.suppressed} />
-        <Metric label="فشل / فشل نهائي" value={counts.failed} alert={counts.failed > 0} />
-      </section>
-      {showTemplateForm && (
+        )}
+      </nav>
+      {templateForm && (
         <form
-          className="space-y-3 rounded-2xl border bg-white p-5"
-          onSubmit={(event) => {
-            event.preventDefault();
-            createTemplate();
+          className="space-y-3 border p-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void write(
+              '/notifications/templates',
+              {
+                id: templateId,
+                channels: channel.split(',').filter(Boolean),
+                requiredVariables: requiredNames,
+                localizations: ['ar', 'en'],
+                contents: {
+                  ar: { subject: subjectAr, body: bodyAr },
+                  en: { subject: subjectEn, body: bodyEn },
+                },
+              },
+              () => setTemplateForm(false),
+            );
           }}
         >
-          <fieldset disabled={Boolean(busy) || loading} className="space-y-3">
-            <h2 className="font-bold text-[#142B5F]">قالب جديد لإشعار داخل حساب الطالب</h2>
-            <p className="text-xs text-slate-500">
-              قناة IN_APP، العربية والإنجليزية، مع عنوان ورسالة يُحددان عند إنشاء الإشعار.
-            </p>
-            <label className="block text-sm">
-              معرّف القالب
+          <p>
+            {c(
+              'كل إصدار له معرّف جديد. لا يعدّل القالب الحالي أو رسائله المعلقة. استخدم {{name}} للمتغيرات المعلنة.',
+              'Each revision requires a new ID. Existing templates and pending messages stay pinned. Use {{name}} for declared variables.',
+            )}
+          </p>
+          <fieldset
+            disabled={busy || keys.current.has('/notifications/templates')}
+            className="space-y-2"
+          >
+            <label>
+              {c('معرّف الإصدار', 'Revision ID')}
+              <input required value={templateId} onChange={(e) => setTemplateId(e.target.value)} />
+            </label>
+            <label>
+              {c('القناة', 'Channel')}
+              <select
+                multiple
+                value={channel.split(',')}
+                onChange={(e) =>
+                  setChannel([...e.target.selectedOptions].map((option) => option.value).join(','))
+                }
+              >
+                {['IN_APP', 'EMAIL', 'PUSH'].map((v) => (
+                  <option key={v}>{v}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {c('متغيرات مطلوبة مفصولة بفواصل', 'Required variables, comma separated')}
+              <input value={required} onChange={(e) => setRequired(e.target.value)} />
+            </label>
+            <label>
+              AR — {c('العنوان', 'Subject')}
               <input
                 required
-                maxLength={120}
-                value={templateId}
-                onChange={(event) => setTemplateId(event.target.value)}
-                className="mt-1 w-full rounded-xl border p-3"
-                placeholder="admin.student-message.v1"
-                dir="ltr"
+                maxLength={240}
+                value={subjectAr}
+                onChange={(e) => setSubjectAr(e.target.value)}
               />
             </label>
-            <button className="rounded-xl bg-[#142B5F] px-4 py-2 text-white">حفظ القالب</button>
-            <button
-              type="button"
-              className="mr-2 rounded-xl border px-4 py-2"
-              onClick={() => {
-                if (!templateId || window.confirm('ترك مسودة القالب؟')) setShowTemplateForm(false);
-              }}
-            >
-              إلغاء
-            </button>
+            <label>
+              AR — {c('الرسالة', 'Body')}
+              <textarea required value={bodyAr} onChange={(e) => setBodyAr(e.target.value)} />
+            </label>
+            <label>
+              EN — {c('العنوان', 'Subject')}
+              <input
+                required
+                maxLength={240}
+                value={subjectEn}
+                onChange={(e) => setSubjectEn(e.target.value)}
+              />
+            </label>
+            <label>
+              EN — {c('الرسالة', 'Body')}
+              <textarea required value={bodyEn} onChange={(e) => setBodyEn(e.target.value)} />
+            </label>
           </fieldset>
+          <button disabled={busy} type="submit">
+            {c('حفظ الإصدار', 'Save revision')}
+          </button>
+          <button
+            disabled={busy || keys.current.has('/notifications/templates')}
+            type="button"
+            onClick={() => setTemplateForm(false)}
+          >
+            {c('إغلاق', 'Close')}
+          </button>
         </form>
+      )}
+      {can('templates:author') && (
+        <details>
+          <summary>{c('إدارة إصدارات القوالب', 'Manage template revisions')}</summary>
+          <label>
+            {c('معرّف الإصدار الجديد للنسخ', 'New revision ID for cloning')}
+            <input
+              disabled={busy || [...keys.current.keys()].some((key) => key.endsWith('/clone'))}
+              value={cloneTarget}
+              onChange={(e) => setCloneTarget(e.target.value)}
+            />
+          </label>
+          {templates.map((t) => (
+            <div key={t.id}>
+              {t.id} — v{t.version ?? 1} — {c('سجلات مرتبطة', 'Linked intents')}:{' '}
+              {t.usageCount ?? 0} —{' '}
+              {t.active === false ? c('معطل', 'Inactive') : c('نشط', 'Active')}
+              {t.active !== false && (
+                <>
+                  <button
+                    disabled={busy || !cloneTarget}
+                    onClick={() =>
+                      void write(
+                        `/notifications/templates/${encodeURIComponent(t.id)}/clone`,
+                        { id: cloneTarget },
+                        () => setCloneTarget(''),
+                      )
+                    }
+                  >
+                    {c('نسخ إلى إصدار مستقل', 'Clone to a new revision')}
+                  </button>
+                  {!t.id.startsWith('system.') && !t.id.startsWith('student-application-') && (
+                    <button
+                      disabled={busy}
+                      onClick={() =>
+                        void write(
+                          `/notifications/templates/${encodeURIComponent(t.id)}/deactivate`,
+                          { expectedVersion: t.version ?? 1 },
+                        )
+                      }
+                    >
+                      {c('تعطيل إن لم يكن قيد الاستخدام', 'Deactivate when not in use')}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+        </details>
       )}
       {draft && (
         <form
-          className="space-y-3 rounded-2xl border bg-white p-5"
-          onSubmit={(event) => {
-            event.preventDefault();
-            createIntent();
+          className="space-y-3 border p-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setLocked(true);
+            void write(
+              '/notifications/intents',
+              {
+                id: draft.id,
+                reference: `admin:${draft.id}`,
+                templateId: draft.templateId,
+                recipientReference: draft.recipientReference,
+                variables: draft.variables,
+                purpose: 'TRANSACTIONAL',
+                ...(draft.scheduledAt
+                  ? { scheduledAt: new Date(draft.scheduledAt).toISOString() }
+                  : {}),
+                ...(draft.expiresAt ? { expiresAt: new Date(draft.expiresAt).toISOString() } : {}),
+              },
+              () => {
+                setDraft(null);
+                setLocked(false);
+              },
+            );
           }}
         >
-          <div className="flex items-center justify-between">
-            <h2 className="font-bold text-[#142B5F]">إنشاء إشعار للمستلم</h2>
-            <button
-              type="button"
-              disabled={Boolean(busy)}
-              aria-label="إغلاق المسودة"
-              onClick={closeDraft}
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <fieldset
-            disabled={Boolean(busy) || loading || draftLocked}
-            className="grid gap-3 sm:grid-cols-2"
-          >
-            <label className="text-sm">
-              القالب
+          <fieldset disabled={busy || locked} className="space-y-2">
+            <label>
+              {c('القالب', 'Template')}
               <select
                 required
                 value={draft.templateId}
-                onChange={(event) =>
-                  setDraft({ ...draft, templateId: event.target.value, variables: {} })
-                }
-                className="mt-1 w-full rounded-xl border p-3"
+                onChange={(e) => setDraft({ ...draft, templateId: e.target.value, variables: {} })}
               >
-                <option value="">اختر القالب</option>
-                {templates.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.id} ({template.channels.join(', ')})
+                <option value="">—</option>
+                {templates
+                  .filter((t) => t.active !== false)
+                  .map((t) => (
+                    <option key={t.id}>{t.id}</option>
+                  ))}
+              </select>
+            </label>
+            <label>
+              {c('بحث عن طالب نشط', 'Search active students')}
+              <input
+                value={recipientQuery}
+                onChange={(e) => {
+                  setRecipientQuery(e.target.value);
+                  setRecipientCursor('');
+                  setRecipients([]);
+                }}
+              />
+            </label>
+            <label>
+              {c('المستلم المؤكد', 'Verified recipient')}
+              <select
+                required
+                value={draft.recipientReference}
+                onChange={(e) => setDraft({ ...draft, recipientReference: e.target.value })}
+              >
+                <option value="">—</option>
+                {draft.recipientReference &&
+                  !recipients.some((r) => r.studentReferenceId === draft.recipientReference) && (
+                    <option value={draft.recipientReference}>{draft.recipientReference}</option>
+                  )}
+                {recipients.map((r) => (
+                  <option key={r.studentReferenceId} value={r.studentReferenceId}>
+                    {r.displayName || r.studentReferenceId}
                   </option>
                 ))}
               </select>
             </label>
-            <label className="text-sm">
-              معرّف حساب المستلم
-              <input
-                required
-                maxLength={120}
-                dir="ltr"
-                value={draft.recipientReference}
-                onChange={(event) => setDraft({ ...draft, recipientReference: event.target.value })}
-                className="mt-1 w-full rounded-xl border p-3"
-              />
-              <span className="text-xs text-slate-500">
-                استخدم معرّف الحساب الفعلي من إدارة الطلاب، وليس الاسم أو البريد.
-              </span>
-            </label>
-            {requiredVariables.map((name) => (
-              <label key={name} className="text-sm">
-                {name === 'title' ? 'عنوان الإشعار' : name === 'message' ? 'نص الإشعار' : name}
+            {recipientNext && (
+              <button type="button" onClick={() => setRecipientCursor(recipientNext)}>
+                {c('مستلمون إضافيون', 'More recipients')}
+              </button>
+            )}
+            {(selected?.requiredVariables ?? []).map((name) => (
+              <label key={name}>
+                {name}
                 <textarea
                   required
                   maxLength={10000}
-                  rows={name === 'message' ? 3 : 1}
                   value={draft.variables[name] ?? ''}
-                  onChange={(event) =>
+                  onChange={(e) =>
                     setDraft({
                       ...draft,
-                      variables: { ...draft.variables, [name]: event.target.value },
+                      variables: { ...draft.variables, [name]: e.target.value },
                     })
                   }
-                  className="mt-1 w-full rounded-xl border p-3"
                 />
               </label>
             ))}
-            {currentTemplate?.channels.includes('IN_APP') &&
-              !requiredVariables.includes('actionUrl') && (
-                <label className="text-sm">
-                  رابط تفاصيل داخلي (اختياري)
-                  <input
-                    dir="ltr"
-                    maxLength={1000}
-                    placeholder="/student"
-                    value={draft.variables.actionUrl ?? ''}
-                    onChange={(event) =>
-                      setDraft({
-                        ...draft,
-                        variables: { ...draft.variables, actionUrl: event.target.value },
-                      })
-                    }
-                    className="mt-1 w-full rounded-xl border p-3"
-                  />
-                </label>
-              )}
-            <label className="text-sm">
-              الجدولة (وقت الجهاز، اختياري)
+            <label>
+              {c('جدولة بتوقيت الجهاز', 'Schedule in device timezone')} (
+              {Intl.DateTimeFormat().resolvedOptions().timeZone})
               <input
                 type="datetime-local"
                 value={draft.scheduledAt}
-                onChange={(event) => setDraft({ ...draft, scheduledAt: event.target.value })}
-                className="mt-1 w-full rounded-xl border p-3"
+                onChange={(e) => setDraft({ ...draft, scheduledAt: e.target.value })}
               />
             </label>
-            <label className="text-sm">
-              انتهاء الصلاحية (اختياري)
+            <p>{draft.scheduledAt && date(new Date(draft.scheduledAt).toISOString())}</p>
+            <label>
+              {c('انتهاء الصلاحية بتوقيت الجهاز', 'Expiry in device timezone')}
               <input
                 type="datetime-local"
                 value={draft.expiresAt}
-                onChange={(event) => setDraft({ ...draft, expiresAt: event.target.value })}
-                className="mt-1 w-full rounded-xl border p-3"
+                onChange={(e) => setDraft({ ...draft, expiresAt: e.target.value })}
               />
             </label>
-          </fieldset>
-          {draftLocked && (
-            <p className="text-xs text-amber-800">
-              المسودة مقفلة بعد محاولة الإرسال. أعد المحاولة بنفس البيانات؛ لإنشاء طلب مختلف اترك
-              المسودة وافتح طلباً جديداً.
+            <p>
+              {c(
+                'الرسائل الترويجية والمجموعات غير مفعلة. تُحترم تفضيلات القنوات قبل كل إرسال.',
+                'Promotional and bulk messages are disabled. Channel preferences are checked before every send.',
+              )}
             </p>
-          )}
-          <button
-            disabled={Boolean(busy) || loading || !currentTemplate}
-            className="rounded-xl bg-[#142B5F] px-4 py-2 font-bold text-white disabled:opacity-50"
-          >
-            {busy === 'create-intent'
-              ? 'جارٍ الحفظ…'
-              : draftLocked
-                ? 'إعادة محاولة الحفظ نفسه'
-                : 'حفظ في قائمة الإرسال'}
+          </fieldset>
+          <button type="submit" disabled={busy || !draft.recipientReference}>
+            {c('حفظ / إعادة الطلب نفسه', 'Save / replay the same request')}
+          </button>
+          <button type="button" disabled={busy || locked} onClick={() => setDraft(null)}>
+            {c('إغلاق', 'Close')}
           </button>
         </form>
       )}
-      <section className="rounded-2xl border bg-white p-5">
-        <h2 className="mb-3 font-bold text-[#142B5F]">القوالب المحمّلة ({templates.length})</h2>
-        <p className="mb-3 text-xs text-slate-500">
-          وجود القالب لا يثبت جاهزية مزوّد الإرسال الخارجي. تظهر حتى 500 قالب.
-        </p>
-        <div className="overflow-auto">
-          <table className="w-full min-w-[600px] text-right text-xs">
-            <thead>
-              <tr>
-                {['المعرّف', 'القنوات', 'المتغيرات المطلوبة', 'اللغات'].map((label) => (
-                  <th key={label} className="p-3">
-                    {label}
-                  </th>
+      {can('templates:author') && (
+        <details>
+          <summary>
+            {c('معاينة ببيانات تجريبية — دون إرسال', 'Preview with sample values — no sending')}
+          </summary>
+          <label>
+            {c('قالب محفوظ', 'Saved template')}
+            <select
+              value={previewTemplateId}
+              onChange={(e) => {
+                setPreviewTemplateId(e.target.value);
+                setPreview(null);
+              }}
+            >
+              <option value="">—</option>
+              {templates
+                .filter((t) => t.active !== false)
+                .map((t) => (
+                  <option key={t.id}>{t.id}</option>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="p-5 text-center">
-                    جارٍ التحميل…
-                  </td>
-                </tr>
-              ) : !templates.length ? (
-                <tr>
-                  <td colSpan={4} className="p-5 text-center">
-                    لا توجد قوالب محمّلة.
-                  </td>
-                </tr>
-              ) : (
-                templates.map((template) => (
-                  <tr key={template.id} className="border-t">
-                    <td className="p-3 font-bold">{template.id}</td>
-                    <td className="p-3">{template.channels.join(', ')}</td>
-                    <td className="p-3">{template.requiredVariables.join(', ') || '—'}</td>
-                    <td className="p-3">{template.localizations.join(', ')}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-      <section className="rounded-2xl border bg-white p-5">
-        <h2 className="mb-4 font-bold text-[#142B5F]">سجل التسليم</h2>
-        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="relative">
-            <Search className="absolute right-3 top-3 h-4 w-4 text-slate-400" />
+            </select>
+          </label>
+          <label>
+            {c('متغيرات تجريبية JSON', 'Sample variables as JSON')}
+            <textarea value={samples} onChange={(e) => setSamples(e.target.value)} />
+          </label>
+          <button
+            type="button"
+            disabled={busy || !previewTemplateId}
+            onClick={() => {
+              try {
+                const variables = JSON.parse(samples);
+                void adminApiClient
+                  .request<typeof preview>(
+                    `/notifications/templates/${encodeURIComponent(previewTemplateId)}/preview`,
+                    {
+                      method: 'POST',
+                      body: JSON.stringify({ locale: language, variables }),
+                      headers: { 'Idempotency-Key': createAdminIdempotencyKey() },
+                    },
+                  )
+                  .then(setPreview)
+                  .catch(() => {
+                    setPreview(null);
+                    setNotice(
+                      c(
+                        'تعذرت المعاينة. تحقق من المتغيرات والمحتوى.',
+                        'Preview unavailable. Check the variables and content.',
+                      ),
+                    );
+                  });
+              } catch {
+                setNotice(c('JSON غير صالح', 'Invalid JSON'));
+              }
+            }}
+          >
+            {c('معاينة', 'Preview')}
+          </button>
+          {preview && (
+            <div>
+              <strong>{preview.title}</strong>
+              <p>{preview.message}</p>
+              <p>
+                {preview.locale}
+                {preview.fallback ? ' — fallback' : ''}
+              </p>
+            </div>
+          )}
+        </details>
+      )}
+      <div className="flex flex-wrap gap-3">
+        <label>
+          {c('من تاريخ UTC', 'From UTC date')}
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => {
+              setFromDate(e.target.value);
+              resetPage();
+            }}
+          />
+        </label>
+        <label>
+          {c('إلى تاريخ UTC — غير شامل', 'To UTC date — exclusive')}
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => {
+              setToDate(e.target.value);
+              resetPage();
+            }}
+          />
+        </label>
+        {can('recipients:pii') && (
+          <label>
+            {c('تصفية بمعرّف المستلم', 'Filter by recipient ID')}
             <input
-              aria-label="بحث الإشعارات"
-              className="w-full rounded-xl border p-3 pr-9 text-xs"
-              placeholder="مرجع، قالب، مستلم، رمز خطأ"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPage(1);
+              value={recipientFilter}
+              onChange={(e) => {
+                setRecipientFilter(e.target.value);
+                resetPage();
               }}
             />
           </label>
+        )}
+
+        <label>
+          {c('بحث المعرّف أو القالب في الخادم', 'Server search by ID or template')}
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              resetPage();
+            }}
+          />
+        </label>
+        <label>
+          {c('الحالة', 'Status')}
           <select
-            aria-label="حالة التسليم"
-            className="rounded-xl border p-3 text-xs"
-            value={stateFilter}
-            onChange={(event) => {
-              setStateFilter(event.target.value);
-              setPage(1);
+            value={state}
+            onChange={(e) => {
+              setState(e.target.value);
+              resetPage();
             }}
           >
-            <option value="ALL">جميع الحالات</option>
-            {Object.entries(deliveryStates).map(([state, label]) => (
-              <option key={state} value={state}>
-                {label}
+            <option value="">{c('الكل', 'All')}</option>
+            {states.map((s) => (
+              <option key={s} value={s}>
+                {stateName(s)}
               </option>
             ))}
           </select>
+        </label>
+        <label>
+          {c('القالب', 'Template')}
           <select
-            aria-label="قالب الإشعار"
-            className="rounded-xl border p-3 text-xs"
-            value={templateFilter}
-            onChange={(event) => {
-              setTemplateFilter(event.target.value);
-              setPage(1);
+            value={filterTemplate}
+            onChange={(e) => {
+              setFilterTemplate(e.target.value);
+              resetPage();
             }}
           >
-            <option value="ALL">كل القوالب</option>
-            {[
-              ...new Set([
-                ...templates.map((item) => item.id),
-                ...intents.map((item) => item.templateId),
-              ]),
-            ].map((id) => (
-              <option key={id} value={id}>
-                {id}
-              </option>
-            ))}
+            <option value="">{c('الكل', 'All')}</option>
+            {templates
+              .filter((t) => t.active !== false)
+              .map((t) => (
+                <option key={t.id}>{t.id}</option>
+              ))}
           </select>
-          <select
-            aria-label="عدد السجلات المحمّلة"
-            disabled={Boolean(busy) || loading}
-            className="rounded-xl border p-3 text-xs"
-            value={limit}
-            onChange={(event) => {
-              setLimit(Number(event.target.value));
-              setPage(1);
-            }}
-          >
-            {[100, 200, 500].map((size) => (
-              <option key={size} value={size}>
-                أحدث {size} سجل
-              </option>
-            ))}
-          </select>
-        </div>
+        </label>
+      </div>
+      <p>
+        {c('عدد سجلات هذه الصفحة فقط', 'Records on this page only')}: {result.items.length}
+      </p>
+      {loading ? (
+        <p role="status">{c('جارٍ التحميل', 'Loading')}</p>
+      ) : (
         <div className="overflow-auto">
-          <table className="w-full min-w-[1100px] text-right text-xs">
+          <table className="w-full text-start">
             <thead>
               <tr>
                 {[
-                  'المرجع / القالب',
-                  'المستلم',
-                  'الحالة',
-                  'المحاولات',
-                  'الموعد التالي',
-                  'وقت التسليم',
-                  'رمز الخطأ',
-                  'الإجراء',
-                ].map((label) => (
-                  <th key={label} className="p-3">
-                    {label}
-                  </th>
+                  c('المعرّف', 'ID'),
+                  c('المستلم', 'Recipient'),
+                  c('الحالة', 'Status'),
+                  c('محاولات', 'Attempts'),
+                  c('الموعد القادم UTC', 'Next attempt UTC'),
+                  c('العمليات', 'Operations'),
+                ].map((s) => (
+                  <th key={s}>{s}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={8} className="p-8 text-center">
-                    جارٍ تحميل السجل…
+              {result.items.map((row) => (
+                <tr key={row.id}>
+                  <td>
+                    {row.id}
+                    <p>{row.templateId}</p>
+                  </td>
+                  <td>{row.recipientReference}</td>
+                  <td>
+                    {stateName(row.deliveryState)}
+                    <p>{row.lastErrorCode}</p>
+                  </td>
+                  <td>{row.attempts}</td>
+                  <td>{date(row.nextAttemptAt)}</td>
+                  <td>
+                    <button
+                      disabled={busy}
+                      onClick={() => {
+                        void adminApiClient
+                          .request<Page<Receipt>>(
+                            `/notifications/intents/${encodeURIComponent(row.id)}/receipts`,
+                          )
+                          .then((p) => setReceipts({ id: row.id, items: p.items }))
+                          .catch(() => {
+                            setReceipts(null);
+                            setNotice(c('تعذر تحميل المحاولات', 'Receipts could not be loaded'));
+                          });
+                      }}
+                    >
+                      {c('نتائج القنوات', 'Channel results')}
+                    </button>
+                    {['FAILED', 'DEAD_LETTER'].includes(row.deliveryState) &&
+                      can('delivery:retry') &&
+                      (row.manualRetryCount ?? 0) < 3 && (
+                        <button
+                          disabled={busy}
+                          onClick={() =>
+                            void write(
+                              `/notifications/intents/${encodeURIComponent(row.id)}/retry`,
+                              {},
+                            )
+                          }
+                        >
+                          {c('إعادة محاولة — حتى 3 دورات', 'Retry — up to 3 cycles')}
+                        </button>
+                      )}
+                    {['PENDING', 'FAILED', 'DEAD_LETTER'].includes(row.deliveryState) &&
+                      can('intents:cancel') && (
+                        <button
+                          disabled={busy}
+                          onClick={() =>
+                            void write(
+                              `/notifications/intents/${encodeURIComponent(row.id)}/cancel`,
+                              {},
+                            )
+                          }
+                        >
+                          {c('إلغاء القنوات المتبقية', 'Cancel remaining channels')}
+                        </button>
+                      )}
+                    {!['PENDING', 'FAILED', 'DEAD_LETTER'].includes(row.deliveryState) && (
+                      <p>
+                        {c(
+                          'لا يمكن الإلغاء في هذه الحالة. القنوات المقبولة أو المسلمة لا تُسحب.',
+                          'Cancellation is unavailable in this state. Accepted or delivered channels cannot be recalled.',
+                        )}
+                      </p>
+                    )}
                   </td>
                 </tr>
-              ) : !rows.length ? (
-                <tr>
-                  <td colSpan={8} className="p-8 text-center">
-                    لا توجد سجلات مطابقة ضمن القائمة المحمّلة.
-                  </td>
-                </tr>
-              ) : (
-                rows.map((intent) => (
-                  <tr key={intent.id} className="border-t">
-                    <td className="p-3">
-                      <div className="font-bold text-[#142B5F]">{intent.reference}</div>
-                      <div className="mt-1 text-slate-500">{intent.templateId}</div>
-                    </td>
-                    <td className="p-3 font-mono">{intent.recipientReference}</td>
-                    <td className="p-3">
-                      {deliveryStates[intent.deliveryState] ?? intent.deliveryState}
-                    </td>
-                    <td className="p-3">{intent.attempts}</td>
-                    <td className="p-3">{dateLabel(intent.nextAttemptAt)}</td>
-                    <td className="p-3">{dateLabel(intent.deliveredAt)}</td>
-                    <td className="p-3 text-red-700">{intent.lastErrorCode ?? '—'}</td>
-                    <td className="space-y-2 p-3">
-                      {intent.state === 'CREATED' &&
-                        ['FAILED', 'DEAD_LETTER'].includes(intent.deliveryState) && (
-                          <button
-                            disabled={Boolean(busy) || loading}
-                            className="flex items-center gap-1 rounded-lg border px-3 py-2 font-bold text-teal-800 disabled:opacity-50"
-                            onClick={() => retry(intent)}
-                          >
-                            <RotateCcw className="h-3 w-3" />
-                            إعادة المحاولة
-                          </button>
-                        )}
-                      {intent.state === 'CREATED' &&
-                        ['PENDING', 'FAILED', 'DEAD_LETTER'].includes(intent.deliveryState) && (
-                          <button
-                            disabled={Boolean(busy) || loading}
-                            className="rounded-lg border px-3 py-2 text-red-700 disabled:opacity-50"
-                            onClick={() => cancel(intent)}
-                          >
-                            إلغاء الإشعار
-                          </button>
-                        )}
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
+          {!result.items.length && (
+            <p>{c('لا توجد نتائج لهذا الاستعلام', 'No results for this query')}</p>
+          )}
         </div>
-        <div className="mt-4 flex items-center justify-between text-xs">
-          <button
-            disabled={loading || page <= 1}
-            className="rounded-lg border px-3 py-2 disabled:opacity-40"
-            onClick={() => setPage((value) => value - 1)}
-          >
-            السابق
-          </button>
-          <span>
-            {filtered.length} نتيجة · الصفحة {page} من {pages}
-          </span>
-          <button
-            disabled={loading || page >= pages}
-            className="rounded-lg border px-3 py-2 disabled:opacity-40"
-            onClick={() => setPage((value) => value + 1)}
-          >
-            التالي
-          </button>
-        </div>
-      </section>
-    </main>
-  );
-}
-function Metric({
-  label,
-  value,
-  alert = false,
-}: {
-  label: string;
-  value: number;
-  alert?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-2xl border bg-white p-4 ${alert ? 'border-red-200' : 'border-slate-200'}`}
-    >
-      <div className="text-xs text-slate-500">{label}</div>
-      <div className={`mt-2 text-2xl font-black ${alert ? 'text-red-700' : 'text-[#142B5F]'}`}>
-        {value}
-      </div>
-    </div>
+      )}
+      <nav className="flex gap-3">
+        <button
+          disabled={loading || !previous.length}
+          onClick={() => {
+            setCursor(previous.at(-1) ?? '');
+            setPrevious((p) => p.slice(0, -1));
+          }}
+        >
+          {c('السابق', 'Previous')}
+        </button>
+        <button
+          disabled={loading || !result.nextCursor}
+          onClick={() => {
+            setPrevious((p) => [...p, cursor]);
+            setCursor(result.nextCursor ?? '');
+          }}
+        >
+          {c('التالي', 'Next')}
+        </button>
+      </nav>
+      {receipts && (
+        <aside className="border p-4">
+          <h2>{receipts.id}</h2>
+          {receipts.items.map((r) => (
+            <p key={`${r.channel}:${r.attempts}:${r.updatedAt}`}>
+              {r.channel} — {stateName(r.status)} — {r.attempts} — {date(r.updatedAt)}
+            </p>
+          ))}
+          {!receipts.items.length && (
+            <p>{c('لا توجد نتائج قنوات محفوظة بعد', 'No channel checkpoints yet')}</p>
+          )}
+          <button onClick={() => setReceipts(null)}>{c('إغلاق', 'Close')}</button>
+        </aside>
+      )}
+    </section>
   );
 }

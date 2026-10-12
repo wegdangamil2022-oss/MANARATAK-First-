@@ -1,5 +1,8 @@
+import { validateNotificationVariables } from '../NotificationVariablePolicy';
 import {
   INotificationIntentRepository,
+  INotificationRecipientGateway,
+  NotificationIntentQuery,
   INotificationTemplateRepository,
   NotificationIntentSummary,
 } from '@manaratak/domain';
@@ -20,9 +23,15 @@ export class ManageNotificationIntentsUseCase {
     private readonly intentRepository: INotificationIntentRepository,
     private readonly preferenceGateway: INotificationPreferenceGateway,
     private readonly templateRepository?: INotificationTemplateRepository,
+    private readonly recipients?: INotificationRecipientGateway,
   ) {}
 
   public async createIntent(dto: CreateIntentDto): Promise<void> {
+    if (!this.recipients) throw new Error('NOTIFICATION_RECIPIENT_POLICY_NOT_CONFIGURED');
+    await this.recipients.assertEligible(dto.recipientReference);
+    if (dto.purpose && dto.purpose !== 'TRANSACTIONAL')
+      throw new Error('NOTIFICATION_PURPOSE_NOT_AUTHORIZED');
+    validateNotificationVariables(dto.variables);
     const id = NotificationId.create(dto.id);
     const reference = NotificationReference.create(dto.reference);
     const templateId = TemplateId.create(dto.templateId);
@@ -85,8 +94,19 @@ export class ManageNotificationIntentsUseCase {
     await this.intentRepository.save(intent);
   }
 
-  public listIntents(limit = 100): Promise<NotificationIntentSummary[]> {
-    return this.intentRepository.list(Math.max(1, Math.min(limit, 500)));
+  public listIntents(
+    limit = 100,
+    query?: NotificationIntentQuery,
+  ): Promise<NotificationIntentSummary[]> {
+    return this.intentRepository.list(Math.max(1, Math.min(limit, 101)), query);
+  }
+
+  public summary(from: Date, to: Date) {
+    return this.intentRepository.summary(from, to);
+  }
+
+  public receipts(id: string) {
+    return this.intentRepository.receipts(id);
   }
 
   public cancelIntent(id: string): Promise<void> {
