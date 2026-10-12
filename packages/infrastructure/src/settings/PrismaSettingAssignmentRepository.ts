@@ -15,7 +15,8 @@ import {
   BooleanValue,
   JsonValue,
   SettingDefinition,
-  ConfigurationValidationService
+  ConfigurationValidationService,
+  SettingValidationRules
 } from '@manaratak/domain';
 
 export interface SettingVersionRecordRow {
@@ -249,6 +250,7 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
       if (!record || record.isDeprecated || record.isSecret) throw new Error('SETTINGS_DEFINITION_NOT_WRITABLE');
       const definition = new SettingDefinition({ id: record.id, key: new NamespacedKey(record.key),
         valueType: record.valueType as ValueType, defaultValue: record.defaultValue,
+        validationRules: record.validationRules == null ? undefined : record.validationRules as unknown as SettingValidationRules,
         isFeatureFlag: record.isFeatureFlag, isSecret: record.isSecret, isDeprecated: record.isDeprecated });
       new ConfigurationValidationService().validate(definition, currentVersion.value);
       const lockKey = `setting:${keyStr}:${scopeLevel}:${scopeId}`;

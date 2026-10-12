@@ -66,8 +66,8 @@ function safeId(prefix: string) {
 
 function displayValue(value: unknown): string {
   if (value === undefined || value === null) return '—';
-  if (typeof value === 'string') return value;
-  return JSON.stringify(value);
+  const text = typeof value === 'string' ? value : JSON.stringify(value);
+  return text.length > 240 ? `${text.slice(0, 240)}…` : text;
 }
 
 export function SettingsAdminPage() {
@@ -765,6 +765,7 @@ export function SettingsAdminPage() {
                         <Td>
                           <span>{item.isDeprecated ? (isAr ? 'متوقف' : 'Deprecated') : (isAr ? 'فعال' : 'Active')}</span>
                           <p className="text-slate-500">{item.description}</p>
+                          <SettingsDefinitionMetadata definition={item} isAr={isAr} />
                           <button type="button" disabled={saving || !item.revision} onClick={() => void updateDefinition(item, false)}
                             className="ms-2 rounded border px-2 py-1">{isAr ? 'تعديل الوصف' : 'Edit description'}</button>
                           {!item.isDeprecated && <button type="button" disabled={saving || !item.revision} onClick={() => void updateDefinition(item, true)}
@@ -1173,6 +1174,44 @@ export function SettingsAdminPage() {
       ) : null}
     </div>
   );
+}
+
+function SettingsDefinitionMetadata({ definition, isAr }: { definition: Definition; isAr: boolean }) {
+  const [count, setCount] = useState<number | null>(null);
+  const [flag, setFlag] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const generation = useRef(0);
+  useEffect(() => { generation.current++; setCount(null); setFlag(''); setError(''); setLoading(false);
+    return () => { generation.current++; }; }, [definition.key, definition.revision]);
+  const inspect = async () => {
+    if (loading) return;
+    const current = generation.current; setLoading(true); setError('');
+    try {
+      const response = await adminApiClient.request<{ data: { assignmentCount: number } }>(
+        `/admin/settings/definitions/${encodeURIComponent(definition.key)}/impact`, { cache: 'no-store' });
+      if (!Number.isSafeInteger(response.data.assignmentCount) || response.data.assignmentCount < 0)
+        throw new Error('SETTINGS_IMPACT_RESPONSE_INVALID');
+      if (current === generation.current) setCount(response.data.assignmentCount);
+      if (definition.isFeatureFlag && !definition.isSecret) {
+        const value = await adminApiClient.request<{ data: { status: string; value?: unknown } }>(
+          `/settings/inspect/${encodeURIComponent(definition.key)}`, { cache: 'no-store' });
+        if (current === generation.current) setFlag(value.data.status === 'RESOLVED' && typeof value.data.value === 'boolean'
+          ? (value.data.value ? (isAr ? 'مفعّل' : 'Enabled') : (isAr ? 'معطل' : 'Disabled'))
+          : (isAr ? 'غير متاح' : 'Unavailable'));
+      }
+    } catch { if (current === generation.current) setError(isAr ? 'تعذر تحميل البيانات الإضافية.' : 'Additional metadata is unavailable.'); }
+    finally { if (current === generation.current) setLoading(false); }
+  };
+  return <details className="mt-2"><summary>{isAr ? 'بيانات التعريف' : 'Definition metadata'}</summary>
+    <p>{isAr ? 'آخر تحديث محفوظ' : 'Last persisted update'}: {definition.revision ?? '—'}</p>
+    <p>{isAr ? 'قواعد التحقق' : 'Validation rules'}: {definition.validationRules ? displayValue(definition.validationRules) : (isAr ? 'نوع القيمة فقط' : 'Value type only')}</p>
+    <p>{isAr ? 'المستهلك وآخر محرر: غير متوفرين في عقد التعريف.' : 'Consumer and last editor are not available in the definition contract.'}</p>
+    <button type="button" disabled={loading} onClick={() => void inspect()} className="rounded border px-2 py-1">{isAr ? 'تحميل عدد التعيينات وحالة الميزة' : 'Load assignment count and flag state'}</button>
+    {count !== null && <p>{isAr ? 'عدد التعيينات' : 'Assignment count'}: {count}</p>}
+    {flag && <p>{isAr ? 'القيمة الفعالة العامة' : 'Effective global value'}: {flag}</p>}
+    {error && <p role="status">{error}</p>}
+  </details>;
 }
 
 function errorText(cause: unknown): string {
