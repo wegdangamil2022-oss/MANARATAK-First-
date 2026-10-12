@@ -54,6 +54,8 @@ export class HttpImportRawSnapshotStore implements IImportRawSnapshotStore {
     this.now = options.now ?? (() => new Date());
   }
 
+  checkReadiness(signal?: AbortSignal) { return this.client.checkReadiness('import-raw-archive', signal); }
+
   async store(acquisition: SourceAcquisitionResult): Promise<StoredImportRawSnapshot> {
     const contentHash = createHash('sha256').update(acquisition.rawBytes).digest('hex');
     const identityHash = createHash('sha256').update(JSON.stringify({ contentHash, sourceId: acquisition.sourceId, connectorId: acquisition.connectorId, connectorVersion: acquisition.connectorVersion, fetchedAt: acquisition.fetchedAt.toISOString(), requestedUrl: acquisition.requestedUrl ?? null, finalUrl: acquisition.finalUrl ?? null })).digest('hex');

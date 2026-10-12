@@ -12,7 +12,7 @@ describe('MonitoringRouter', () => {
       getReadiness: vi.fn().mockResolvedValue({ status: HealthStatus.UP }),
       getMetrics: vi.fn(),
       registerIndicator: vi.fn(),
-      recordMetric: vi.fn() // Add if necessary
+      recordMetric: vi.fn(), // Add if necessary
     } as any;
 
     const app = express();
@@ -30,27 +30,32 @@ describe('MonitoringRouter', () => {
       getReadiness: vi.fn().mockResolvedValue({ status: HealthStatus.UP }),
       getMetrics: vi.fn(),
       registerIndicator: vi.fn(),
-      recordMetric: vi.fn()
+      recordMetric: vi.fn(),
     } as any;
 
     const app = express();
-    app.use('/monitoring', MonitoringRouter.create({
-      monitoringService: mockMonitoringService,
-      diagnosticsEnabled: true,
-      productionReadinessReport: {
-        ready: false,
-        blockerCount: 1,
-        warningCount: 0,
-        checkedAt: '2026-07-27T00:00:00.000Z',
-        findings: [{
-          id: 'admin.strict_mode_required',
-          severity: 'BLOCKER',
-          area: 'Admin Security',
-          message: 'Production admin access is not using strict mode.',
-          recommendation: 'Set ADMIN_AUTH_MODE=strict.'
-        }]
-      }
-    }));
+    app.use(
+      '/monitoring',
+      MonitoringRouter.create({
+        monitoringService: mockMonitoringService,
+        diagnosticsEnabled: true,
+        productionReadinessReport: {
+          ready: false,
+          blockerCount: 1,
+          warningCount: 0,
+          checkedAt: '2026-07-27T00:00:00.000Z',
+          findings: [
+            {
+              id: 'admin.strict_mode_required',
+              severity: 'BLOCKER',
+              area: 'Admin Security',
+              message: 'Production admin access is not using strict mode.',
+              recommendation: 'Set ADMIN_AUTH_MODE=strict.',
+            },
+          ],
+        },
+      }),
+    );
 
     const res = await request(app).get('/monitoring/production-readiness');
     expect(res.status).toBe(200);
@@ -61,16 +66,16 @@ describe('MonitoringRouter', () => {
     const mockMonitoringService: IMonitoringService = {
       checkHealth: vi.fn().mockResolvedValue({
         status: HealthStatus.UP,
-        timestamp: '2026-09-04T00:00:00.000Z',
+        timestamp: new Date().toISOString(),
         details: {
           database: {
             status: HealthStatus.UP,
-            timestamp: '2026-09-04T00:00:00.000Z',
+            timestamp: new Date().toISOString(),
             details: { capabilityStatus: 'AVAILABLE', latencyMs: 12 },
           },
           redis: {
             status: HealthStatus.DEGRADED,
-            timestamp: '2026-09-04T00:00:00.000Z',
+            timestamp: new Date().toISOString(),
             optional: true,
             error: 'redis://user:password@private.example:6379',
             details: { capabilityStatus: 'NOT_CONFIGURED' },
@@ -79,21 +84,21 @@ describe('MonitoringRouter', () => {
       }),
       getLiveness: vi.fn().mockResolvedValue({
         status: HealthStatus.UP,
-        timestamp: '2026-09-04T00:00:00.000Z',
+        timestamp: new Date().toISOString(),
         details: { uptime: 120 },
       }),
       getReadiness: vi.fn().mockResolvedValue({
         status: HealthStatus.UP,
-        timestamp: '2026-09-04T00:00:00.000Z',
+        timestamp: new Date().toISOString(),
         details: {
           database: {
             status: HealthStatus.UP,
-            timestamp: '2026-09-04T00:00:00.000Z',
+            timestamp: new Date().toISOString(),
             details: { capabilityStatus: 'AVAILABLE', latencyMs: 12 },
           },
           redis: {
             status: HealthStatus.DEGRADED,
-            timestamp: '2026-09-04T00:00:00.000Z',
+            timestamp: new Date().toISOString(),
             optional: true,
             error: 'redis://user:password@private.example:6379',
             details: { capabilityStatus: 'NOT_CONFIGURED' },
@@ -106,42 +111,51 @@ describe('MonitoringRouter', () => {
     } as any;
 
     const app = express();
-    app.use('/monitoring', MonitoringRouter.create({
-      monitoringService: mockMonitoringService,
-      runtimeMode: 'test',
-      diagnosticsEnabled: true,
-      productionReadinessReport: {
-        ready: false,
-        blockerCount: 1,
-        warningCount: 0,
-        checkedAt: '2026-09-04T00:00:00.000Z',
-        findings: [{
-          id: 'release.blocked',
-          severity: 'BLOCKER',
-          area: 'Runtime',
-          message: 'Blocked',
-          recommendation: 'Fix configuration',
-        }],
-      },
-    }));
+    app.use(
+      '/monitoring',
+      MonitoringRouter.create({
+        monitoringService: mockMonitoringService,
+        runtimeMode: 'test',
+        diagnosticsEnabled: true,
+        productionReadinessReport: {
+          ready: false,
+          blockerCount: 1,
+          warningCount: 0,
+          checkedAt: new Date().toISOString(),
+          findings: [
+            {
+              id: 'release.blocked',
+              severity: 'BLOCKER',
+              area: 'Runtime',
+              message: 'Blocked',
+              recommendation: 'Fix configuration',
+            },
+          ],
+        },
+      }),
+    );
 
     const res = await request(app).get('/monitoring/overview');
     expect(res.status).toBe(200);
     expect(res.body.runtimeMode).toBe('test');
     expect(res.body.components).toHaveLength(2);
-    expect(res.body.components[0]).toMatchObject({ id: 'database', status: HealthStatus.UP, latencyMs: 12 });
+    expect(res.body.components[0]).toMatchObject({
+      id: 'database',
+      status: HealthStatus.UP,
+      latencyMs: 12,
+    });
     expect(res.body.coverage.missingProbes).toContain('asset-platform');
     expect(JSON.stringify(res.body)).not.toContain('user:password');
   });
 
-  it('keeps details and exposes a normalized indicators map on health endpoints', async () => {
+  it('exposes only the versioned public allowlist on health endpoints', async () => {
     const payload = {
       status: HealthStatus.UP,
-      timestamp: '2026-09-04T00:00:00.000Z',
+      timestamp: new Date().toISOString(),
       details: {
         database: {
           status: HealthStatus.UP,
-          timestamp: '2026-09-04T00:00:00.000Z',
+          timestamp: new Date().toISOString(),
         },
         capabilityStatus: 'AVAILABLE',
       },
@@ -160,9 +174,8 @@ describe('MonitoringRouter', () => {
 
     const res = await request(app).get('/monitoring/health');
     expect(res.status).toBe(200);
-    expect(res.body.details.database).toBeDefined();
-    expect(res.body.indicators.database).toBeDefined();
-    expect(res.body.indicators.capabilityStatus).toBeUndefined();
+    expect(res.body.protocolVersion).toBe(2);
+    expect(res.body.details).toBeUndefined();
+    expect(res.body.indicators).toBeUndefined();
   });
-
 });

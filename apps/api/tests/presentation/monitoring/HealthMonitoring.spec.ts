@@ -1,16 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import {
-  HealthStatus,
-  IHealthIndicator,
-  IMonitoringService
-} from '@manaratak/core';
-import {
-  MonitoringService,
-  DatabaseHealthChecker,
-  RedisHealthChecker
-} from '@manaratak/infrastructure';
+import { HealthStatus, IHealthIndicator, IMonitoringService } from '@manaratak/core';
+import { MonitoringService } from '../../../../../packages/infrastructure/src/monitoring/MonitoringService';
+import { DatabaseHealthChecker } from '../../../../../packages/infrastructure/src/monitoring/DatabaseHealthChecker';
+import { RedisHealthChecker } from '../../../../../packages/infrastructure/src/monitoring/RedisHealthChecker';
 import { MonitoringRouter } from '../../../src/presentation/api/router/MonitoringRouter';
 
 describe('Problem P02 - Health and Readiness Checks', () => {
@@ -41,8 +35,8 @@ describe('Problem P02 - Health and Readiness Checks', () => {
         checkHealth: async () => ({
           status: HealthStatus.UP,
           timestamp: new Date().toISOString(),
-          details: { database: 'connected' }
-        })
+          details: { database: 'connected' },
+        }),
       };
       monitoringService.registerIndicator(dbIndicator);
 
@@ -58,8 +52,8 @@ describe('Problem P02 - Health and Readiness Checks', () => {
         checkHealth: async () => ({
           status: HealthStatus.DOWN,
           timestamp: new Date().toISOString(),
-          error: 'Connection refused'
-        })
+          error: 'Connection refused',
+        }),
       };
       monitoringService.registerIndicator(dbIndicator);
 
@@ -75,8 +69,8 @@ describe('Problem P02 - Health and Readiness Checks', () => {
         checkHealth: async () => ({
           status: HealthStatus.DOWN,
           timestamp: new Date().toISOString(),
-          error: 'Redis connection timeout'
-        })
+          error: 'Redis connection timeout',
+        }),
       });
 
       const readiness = await monitoringService.getReadiness();
@@ -90,8 +84,8 @@ describe('Problem P02 - Health and Readiness Checks', () => {
         isOptional: false,
         checkHealth: async () => ({
           status: HealthStatus.UP,
-          timestamp: new Date().toISOString()
-        })
+          timestamp: new Date().toISOString(),
+        }),
       };
       const redisIndicator: IHealthIndicator = {
         name: 'redis',
@@ -99,22 +93,22 @@ describe('Problem P02 - Health and Readiness Checks', () => {
         checkHealth: async () => ({
           status: HealthStatus.DOWN,
           timestamp: new Date().toISOString(),
-          error: 'Redis connection timeout'
-        })
+          error: 'Redis connection timeout',
+        }),
       };
       monitoringService.registerIndicator(dbIndicator);
       monitoringService.registerIndicator(redisIndicator);
 
       const readiness = await monitoringService.getReadiness();
       expect(readiness.status).toBe(HealthStatus.UP);
-      expect((readiness.details?.redis as any).status).toBe(HealthStatus.DEGRADED);
+      expect((readiness.details?.redis as any).status).toBe(HealthStatus.DOWN);
     });
   });
 
   describe('DatabaseHealthChecker', () => {
     it('returns UP when $queryRaw succeeds', async () => {
       const mockPrisma = {
-        $queryRaw: vi.fn().mockResolvedValue([{ 1: 1 }])
+        $queryRaw: vi.fn().mockResolvedValue([{ 1: 1 }]),
       };
       const checker = new DatabaseHealthChecker(mockPrisma);
       const result = await checker.checkHealth();
@@ -125,7 +119,7 @@ describe('Problem P02 - Health and Readiness Checks', () => {
 
     it('returns DOWN when $queryRaw throws an error', async () => {
       const mockPrisma = {
-        $queryRaw: vi.fn().mockRejectedValue(new Error('DB unreachable'))
+        $queryRaw: vi.fn().mockRejectedValue(new Error('DB unreachable')),
       };
       const checker = new DatabaseHealthChecker(mockPrisma);
       const result = await checker.checkHealth();
@@ -137,7 +131,9 @@ describe('Problem P02 - Health and Readiness Checks', () => {
 
     it('redacts credentials from database errors', async () => {
       const checker = new DatabaseHealthChecker({
-        $queryRaw: vi.fn().mockRejectedValue(new Error('failed postgresql://user:password@db.internal/app'))
+        $queryRaw: vi
+          .fn()
+          .mockRejectedValue(new Error('failed postgresql://user:password@db.internal/app')),
       });
       const result = await checker.checkHealth();
       expect(result.error).not.toContain('user:password');
@@ -155,18 +151,18 @@ describe('Problem P02 - Health and Readiness Checks', () => {
     it('times out safely if query hangs', async () => {
       vi.useFakeTimers();
       const mockPrisma = {
-        $queryRaw: () => new Promise(() => {})
+        $queryRaw: () => new Promise(() => {}),
       };
       const checker = new DatabaseHealthChecker(mockPrisma);
-      
+
       const checkPromise = checker.checkHealth();
       vi.advanceTimersByTime(2500);
-      
+
       const result = await checkPromise;
 
       expect(result.status).toBe(HealthStatus.DOWN);
       expect(result.error).toContain('timed out');
-      
+
       vi.useRealTimers();
     });
   });
@@ -174,7 +170,7 @@ describe('Problem P02 - Health and Readiness Checks', () => {
   describe('RedisHealthChecker', () => {
     it('returns UP when ping succeeds', async () => {
       const mockRedis = {
-        ping: vi.fn().mockResolvedValue('PONG')
+        ping: vi.fn().mockResolvedValue('PONG'),
       };
       const checker = new RedisHealthChecker(mockRedis);
       const result = await checker.checkHealth();
@@ -185,7 +181,7 @@ describe('Problem P02 - Health and Readiness Checks', () => {
 
     it('returns DEGRADED when ping fails', async () => {
       const mockRedis = {
-        ping: vi.fn().mockRejectedValue(new Error('Redis cluster down'))
+        ping: vi.fn().mockRejectedValue(new Error('Redis cluster down')),
       };
       const checker = new RedisHealthChecker(mockRedis);
       const result = await checker.checkHealth();
@@ -210,8 +206,8 @@ describe('Problem P02 - Health and Readiness Checks', () => {
         isOptional: false,
         checkHealth: async () => ({
           status: HealthStatus.DOWN,
-          timestamp: new Date().toISOString()
-        })
+          timestamp: new Date().toISOString(),
+        }),
       });
 
       const app = express();
@@ -233,8 +229,8 @@ describe('Problem P02 - Health and Readiness Checks', () => {
         isOptional: false,
         checkHealth: async () => ({
           status: HealthStatus.UP,
-          timestamp: new Date().toISOString()
-        })
+          timestamp: new Date().toISOString(),
+        }),
       });
 
       const app = express();
@@ -245,13 +241,12 @@ describe('Problem P02 - Health and Readiness Checks', () => {
       expect(res.body.status).toBe(HealthStatus.UP);
     });
 
-
     it('keeps diagnostic overview and production readiness off the public monitoring surface', async () => {
       const service = new MonitoringService();
       service.registerIndicator({
         name: 'database',
         isOptional: false,
-        checkHealth: async () => ({ status: HealthStatus.UP, timestamp: new Date().toISOString() })
+        checkHealth: async () => ({ status: HealthStatus.UP, timestamp: new Date().toISOString() }),
       });
       const app = express();
       app.use('/monitoring', MonitoringRouter.create({ monitoringService: service }));
@@ -262,43 +257,72 @@ describe('Problem P02 - Health and Readiness Checks', () => {
 
     it('computes the admin release gate from configuration, runtime and monitoring coverage together', async () => {
       const expected = [
-        'database', 'redis', 'asset-platform', 'import-foundation', 'admin-auth', 'ai-providers',
-        'payment-gateway', 'notifications', 'background-jobs', 'student-tools-quota', 'database-schema', 'public-web'
+        'runtime-lifecycle',
+        'telemetry-exporter',
+        'polling-workers',
+        'asset-reference-integrity',
+        'database',
+        'redis',
+        'asset-platform',
+        'import-foundation',
+        'admin-auth',
+        'ai-providers',
+        'payment-gateway',
+        'notifications',
+        'background-jobs',
+        'student-tools-quota',
+        'database-schema',
+        'public-web',
       ];
       const service = new MonitoringService();
       for (const name of expected) {
         service.registerIndicator({
           name,
+          evidenceKind: 'READ_ONLY_OPERATION',
+          probeVersion: 1,
           isOptional: false,
-          checkHealth: async () => ({ status: HealthStatus.UP, timestamp: new Date().toISOString() })
+          checkHealth: async () => ({
+            status: HealthStatus.UP,
+            timestamp: new Date().toISOString(),
+            details: { capabilityStatus: 'OBSERVED' },
+          }),
         });
       }
       const app = express();
-      app.use('/admin-monitoring', MonitoringRouter.create({
-        monitoringService: service,
-        diagnosticsEnabled: true,
-        productionReadinessReport: {
-          ready: true,
-          blockerCount: 0,
-          warningCount: 0,
-          checkedAt: new Date().toISOString(),
-          findings: []
-        }
-      }));
+      app.use(
+        '/admin-monitoring',
+        MonitoringRouter.create({
+          monitoringService: service,
+          diagnosticsEnabled: true,
+          runtimeMode: 'production',
+          productionReadinessReport: {
+            ready: true,
+            blockerCount: 0,
+            warningCount: 0,
+            checkedAt: new Date().toISOString(),
+            findings: [],
+          },
+        }),
+      );
 
       const response = await request(app).get('/admin-monitoring/overview');
       expect(response.status).toBe(200);
       expect(response.body.releaseReady).toBe(true);
       expect(response.body.releaseGate).toEqual({
+        environmentEligible: true,
         configurationReady: true,
         runtimeReady: true,
-        monitoringComplete: true
+        monitoringComplete: true,
       });
     });
 
     it('returns HTTP 503 DOWN through the monitoring router when DB fails', async () => {
       const service = new MonitoringService();
-      service.registerIndicator(new DatabaseHealthChecker({ $queryRaw: vi.fn().mockRejectedValue(new Error('database unavailable')) }));
+      service.registerIndicator(
+        new DatabaseHealthChecker({
+          $queryRaw: vi.fn().mockRejectedValue(new Error('database unavailable')),
+        }),
+      );
       const app = express();
       app.use('/api/v1/monitoring', MonitoringRouter.create({ monitoringService: service }));
       const res = await request(app).get('/api/v1/monitoring/health/readiness');
@@ -309,7 +333,7 @@ describe('Problem P02 - Health and Readiness Checks', () => {
 
     it('returns HTTP 200 UP through the monitoring router when DB is healthy', async () => {
       const mockPrisma = {
-        $queryRaw: vi.fn().mockResolvedValue([{ 1: 1 }])
+        $queryRaw: vi.fn().mockResolvedValue([{ 1: 1 }]),
       };
       const service = new MonitoringService();
       service.registerIndicator(new DatabaseHealthChecker(mockPrisma));

@@ -16,6 +16,8 @@ export interface BackgroundWorkerRuntimeSnapshot {
 }
 
 export class BackgroundWorkerRuntimeState {
+  constructor(private observe?: (snapshot: Record<string, unknown>) => Promise<void>) {}
+  private publish(): void { void this.observe?.({ ...this.snapshot() }).catch(() => undefined); }
   private state: BackgroundWorkerRuntimeSnapshot['state'] = 'IDLE';
   private lastPollAt?: Date;
   private lastSuccessAt?: Date;
@@ -27,10 +29,10 @@ export class BackgroundWorkerRuntimeState {
   private failedTotal = 0;
   private leaseLostTotal = 0;
 
-  markRunning(claimed: number): void { this.state = claimed > 0 ? 'RUNNING' : 'IDLE'; this.lastPollAt = new Date(); this.inFlight += claimed; this.claimedTotal += claimed; }
-  markCompleted(): void { this.inFlight = Math.max(0, this.inFlight - 1); this.completedTotal++; this.lastSuccessAt = new Date(); if (this.inFlight === 0 && this.state !== 'DRAINING') this.state = 'IDLE'; }
-  markFailed(code: string): void { this.inFlight = Math.max(0, this.inFlight - 1); this.failedTotal++; this.lastErrorAt = new Date(); this.lastErrorCode = code; if (this.inFlight === 0 && this.state !== 'DRAINING') this.state = 'IDLE'; }
-  markLeaseLost(): void { this.inFlight = Math.max(0, this.inFlight - 1); this.leaseLostTotal++; this.lastErrorAt = new Date(); this.lastErrorCode = 'BACKGROUND_JOB_LEASE_LOST'; if (this.inFlight === 0 && this.state !== 'DRAINING') this.state = 'IDLE'; }
+  markRunning(claimed: number): void { this.state = claimed > 0 ? 'RUNNING' : 'IDLE'; this.lastPollAt = new Date(); this.inFlight += claimed; this.claimedTotal += claimed; this.publish(); }
+  markCompleted(): void { this.inFlight = Math.max(0, this.inFlight - 1); this.completedTotal++; this.lastSuccessAt = new Date(); if (this.inFlight === 0 && this.state !== 'DRAINING') this.state = 'IDLE'; this.publish(); }
+  markFailed(code: string): void { this.inFlight = Math.max(0, this.inFlight - 1); this.failedTotal++; this.lastErrorAt = new Date(); this.lastErrorCode = code; if (this.inFlight === 0 && this.state !== 'DRAINING') this.state = 'IDLE'; this.publish(); }
+  markLeaseLost(): void { this.inFlight = Math.max(0, this.inFlight - 1); this.leaseLostTotal++; this.lastErrorAt = new Date(); this.lastErrorCode = 'BACKGROUND_JOB_LEASE_LOST'; if (this.inFlight === 0 && this.state !== 'DRAINING') this.state = 'IDLE'; this.publish(); }
   beginDrain(): void { this.state = 'DRAINING'; }
   stop(): void { this.state = 'STOPPED'; this.inFlight = 0; }
   snapshot(): BackgroundWorkerRuntimeSnapshot {
