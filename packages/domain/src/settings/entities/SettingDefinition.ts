@@ -17,6 +17,8 @@ export interface SettingDefinitionProps {
   isDeprecated?: boolean;
   isSecret?: boolean;
   revision?: string;
+  consumerDomain?: string;
+  lastChangedBy?: string;
 }
 
 export class SettingDefinition {
@@ -30,6 +32,8 @@ export class SettingDefinition {
   public readonly isDeprecated: boolean;
   public readonly isSecret: boolean;
   public readonly revision?: string;
+  public readonly consumerDomain?: string;
+  public readonly lastChangedBy?: string;
 
   private _domainEvents: IDomainEvent[] = [];
 
@@ -63,6 +67,8 @@ export class SettingDefinition {
       validateSettingRuleValue(props.valueType, props.defaultValue, props.validationRules);
     }
 
+    if (props.consumerDomain !== undefined && !/^[a-z][a-z0-9_-]{0,100}$/.test(props.consumerDomain)) throw new Error('SETTINGS_CONSUMER_DOMAIN_INVALID');
+    this.consumerDomain = props.consumerDomain; this.lastChangedBy = props.lastChangedBy;
     this.revision = props.revision;
     this.id = props.id.trim();
     this.key = props.key;
@@ -80,11 +86,11 @@ export class SettingDefinition {
     }
   }
 
-  public amendMetadata(changes: { description?: string; isDeprecated?: true }): SettingDefinition {
+  public amendMetadata(changes: { description?: string; isDeprecated?: true; consumerDomain?: string }): SettingDefinition {
     if (changes.isDeprecated !== undefined && changes.isDeprecated !== true) throw new Error('SETTINGS_DEFINITION_REACTIVATION_UNAVAILABLE');
     if (changes.description !== undefined && changes.description.length > 2000) throw new Error('SETTINGS_DESCRIPTION_INVALID');
     const updated = new SettingDefinition({ id: this.id, key: this.key, valueType: this.valueType,
-      description: changes.description ?? this.description, defaultValue: this.defaultValue, validationRules: this.validationRules,
+      consumerDomain: changes.consumerDomain ?? this.consumerDomain, lastChangedBy:this.lastChangedBy, description: changes.description ?? this.description, defaultValue: this.defaultValue, validationRules: this.validationRules,
       isFeatureFlag: this.isFeatureFlag, isSecret: this.isSecret,
       isDeprecated: changes.isDeprecated ?? this.isDeprecated, revision: this.revision });
     updated.addDomainEvent(new SettingDefinitionUpdatedEvent(this.id, this.key.getValue()));

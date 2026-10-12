@@ -1,3 +1,4 @@
+import { SettingsGovernancePanel } from '../components/SettingsGovernancePanel';
 import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
 import { canEditSettingsAssignment, canEditSettingsScope } from './settingsAssignmentGovernance';
 import { SettingsIdentityScopePicker } from '../components/SettingsIdentityScopePicker';
@@ -34,6 +35,8 @@ interface Definition {
   isDeprecated: boolean;
   isSecret: boolean;
   revision?: string;
+  consumerDomain?: string;
+  lastChangedBy?: string;
 }
 
 interface Version {
@@ -123,7 +126,7 @@ export function SettingsAdminPage() {
     valueType: 'String' as ValueType,
     description: '',
     defaultValue: '',
-    validationRulesText: '',
+    validationRulesText: '', consumerDomain:'',
     isFeatureFlag: false,
     isSecret: false,
   });
@@ -444,7 +447,7 @@ export function SettingsAdminPage() {
           valueType: definitionForm.valueType,
           description: definitionForm.description.trim() || undefined,
           defaultValue,
-          validationRules,
+          validationRules, ...(definitionForm.consumerDomain ? {consumerDomain:definitionForm.consumerDomain}:{}),
           isFeatureFlag: definitionForm.isFeatureFlag,
           isSecret: definitionForm.isSecret,
         },
@@ -454,7 +457,7 @@ export function SettingsAdminPage() {
             valueType: 'String',
             description: '',
             defaultValue: '',
-            validationRulesText: '',
+            validationRulesText: '', consumerDomain:'',
             isFeatureFlag: false,
             isSecret: false,
           }),
@@ -697,6 +700,7 @@ export function SettingsAdminPage() {
           </select>
         </Field>
       </section>
+      <SettingsGovernancePanel definitions={definitions} onSaved={()=>{void refresh();}} />
       <div className="flex items-center gap-3" aria-label={isAr ? 'تصفح صفحات الإعدادات' : 'Settings pagination'}>
         <button type="button" disabled={loading || saving || search.trim() !== appliedSearch || !(activeTab === 'definitions' ? definitionCursors.length : assignmentCursors.length)}
           onClick={() => activeTab === 'definitions' ? setDefinitionCursors(previous => previous.slice(0, -1)) : setAssignmentCursors(previous => previous.slice(0, -1))}
@@ -811,7 +815,7 @@ export function SettingsAdminPage() {
                       ...f,
                       valueType: e.target.value as ValueType,
                       defaultValue: '',
-                      validationRulesText: '',
+                      validationRulesText: '', consumerDomain:'',
                     }))
                   }
                   className="input"
@@ -860,6 +864,11 @@ export function SettingsAdminPage() {
                   )}
                 </Field>
               ) : null}
+              <Field label={isAr ? 'المجال المستهلك المعلن (اختياري)' : 'Declared consumer domain (optional)'}>
+                <select value={definitionForm.consumerDomain} onChange={event=>setDefinitionForm(form=>({...form,consumerDomain:event.target.value}))} className="input">
+                  <option value="">—</option>{knownDomainScopeKeys.map(domain=><option key={domain}>{domain}</option>)}
+                </select>
+              </Field>
               <Field label={isAr ? 'قيود اختيارية على القيمة (JSON)' : 'Optional value constraints (JSON)'}>
                 <textarea value={definitionForm.validationRulesText}
                   onChange={event => setDefinitionForm(form => ({ ...form, validationRulesText: event.target.value }))}
@@ -1206,12 +1215,31 @@ function SettingsDefinitionMetadata({ definition, isAr }: { definition: Definiti
   return <details className="mt-2"><summary>{isAr ? 'بيانات التعريف' : 'Definition metadata'}</summary>
     <p>{isAr ? 'آخر تحديث محفوظ' : 'Last persisted update'}: {definition.revision ?? '—'}</p>
     <p>{isAr ? 'قواعد التحقق' : 'Validation rules'}: {definition.validationRules ? displayValue(definition.validationRules) : (isAr ? 'نوع القيمة فقط' : 'Value type only')}</p>
-    <p>{isAr ? 'المستهلك وآخر محرر: غير متوفرين في عقد التعريف.' : 'Consumer and last editor are not available in the definition contract.'}</p>
+    <p>{isAr?'المجال المستهلك المعلن':'Declared consumer domain'}: {definition.consumerDomain??'—'}</p>
+    <p>{isAr?'آخر محرر مسجل':'Last recorded editor'}: {definition.lastChangedBy??(isAr?'غير مسجل تاريخيًا':'Not recorded historically')}</p>
+    <DefinitionConsumerEditor definition={definition} isAr={isAr}/>
+
     <button type="button" disabled={loading} onClick={() => void inspect()} className="rounded border px-2 py-1">{isAr ? 'تحميل عدد التعيينات وحالة الميزة' : 'Load assignment count and flag state'}</button>
     {count !== null && <p>{isAr ? 'عدد التعيينات' : 'Assignment count'}: {count}</p>}
     {flag && <p>{isAr ? 'القيمة الفعالة العامة' : 'Effective global value'}: {flag}</p>}
     {error && <p role="status">{error}</p>}
   </details>;
+}
+
+function DefinitionConsumerEditor({definition,isAr}:{definition:Definition;isAr:boolean}) {
+  const [domain,setDomain]=useState(definition.consumerDomain??'');const [reason,setReason]=useState('');
+  const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const command=useRef<{signature:string;key:string}|null>(null);
+  useEffect(()=>{setDomain(definition.consumerDomain??'');},[definition.consumerDomain,definition.revision]);
+  return <form onSubmit={event=>{event.preventDefault();if(busy||!definition.revision||!domain||reason.trim().length<3)return;
+    const body={key:definition.key,expectedRevision:definition.revision,consumerDomain:domain,changeReason:reason};const signature=JSON.stringify(body);
+    if(command.current?.signature!==signature)command.current={signature,key:createAdminIdempotencyKey()};
+    setBusy(true);setMessage('');void adminApiClient.request('/admin/settings/definitions/update',{method:'POST',body:JSON.stringify(body),idempotencyKey:command.current.key})
+      .then(()=>{command.current=null;setMessage(isAr?'حفظت البيانات؛ حدّث قائمة التعريفات.':'Saved; refresh the definition list.');})
+      .catch(()=>setMessage(isAr?'لم تحفظ البيانات؛ تحقق من النسخة والصلاحية.':'Not saved; check version and permission.')).finally(()=>setBusy(false));}}>
+    <label>{isAr?'المجال المستهلك المعلن':'Declared consumer domain'}<select disabled={busy} value={domain} onChange={event=>setDomain(event.target.value)}><option value="">—</option>{knownDomainScopeKeys.map(value=><option key={value}>{value}</option>)}</select></label>
+    <label>{isAr?'سبب التغيير':'Change reason'}<input disabled={busy} value={reason} maxLength={1000} onChange={event=>setReason(event.target.value)}/></label>
+    <button type="submit" disabled={busy||!domain||!definition.revision||reason.trim().length<3}>{isAr?'حفظ المجال':'Save domain'}</button>{message&&<p role="status">{message}</p>}
+  </form>;
 }
 
 function errorText(cause: unknown): string {

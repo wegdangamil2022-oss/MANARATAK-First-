@@ -5,6 +5,7 @@ export interface CreateSettingDefinitionInput {
   key: string;
   valueType: ValueType;
   description?: string;
+  consumerDomain?: string;
   defaultValue?: unknown;
   validationRules?: SettingValidationRules;
   isFeatureFlag?: boolean;
@@ -37,6 +38,7 @@ export interface UpdateSettingDefinitionInput {
   key: string;
   expectedRevision: string;
   description?: string;
+  consumerDomain?: string;
   isDeprecated?: true;
   changeReason: string;
 }

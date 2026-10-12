@@ -8,6 +8,7 @@ describe('PrismaSettingDefinitionRepository', () => {
 
   beforeEach(() => {
     mockPrisma = {
+      settingsGovernanceRecord: { findUnique:vi.fn(async()=>null) },
       $queryRaw: vi.fn(async () => []),
       $transaction: vi.fn(async (callback: (tx: any) => Promise<unknown>) => callback(mockPrisma)),
       settingDefinitionRecord: {

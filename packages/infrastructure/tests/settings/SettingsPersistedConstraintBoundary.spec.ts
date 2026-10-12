@@ -10,7 +10,7 @@ describe('Settings persisted constraint boundary', () => {
     { type: ValueType.String, defaultValue: 'a', rules: { maxLength: 3 }, value: new StringValue('too long') },
   ] as Array<{ type: ValueType; defaultValue: unknown; rules: SettingValidationRules; value: SettingValueData }>)
   ('rejects direct repository writes that violate persisted $type rules before saving any value', async ({ type, defaultValue, rules, value }) => {
-    const db = { $queryRaw: vi.fn().mockResolvedValue([]),
+    const db = { settingsGovernanceRecord:{findUnique:vi.fn().mockResolvedValue(null)}, $queryRaw: vi.fn().mockResolvedValue([]),
       settingDefinitionRecord: { findUnique: vi.fn().mockResolvedValue({ id: 'definition', key: 'review.limit', valueType: type,
         defaultValue, validationRules: rules, isFeatureFlag: false, isSecret: false, isDeprecated: false }) },
       settingAssignmentRecord: { findUnique: vi.fn(), upsert: vi.fn() },

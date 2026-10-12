@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
-import { ManageSettingsUseCase } from '@manaratak/application';
+import { ManageSettingsUseCase, SettingsGovernanceUseCases } from '@manaratak/application';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { z } from 'zod';
 import { ValueType, ScopeLevel, IAuditRecordRepository } from '@manaratak/domain';
@@ -9,10 +9,15 @@ import { AuditHelper } from '../../audit/AuditHelper.js';
 export class SettingsAdminRouter {
   public static create({
     manageSettingsUseCase,
-    auditRecordRepo,
+    auditRecordRepo, settingsGovernanceUseCases, getIdentityUseCase, authEvaluatorService, principalAccessValidator, listIdentitiesUseCase,
   }: {
     manageSettingsUseCase: ManageSettingsUseCase;
     auditRecordRepo?: IAuditRecordRepository;
+    settingsGovernanceUseCases?: SettingsGovernanceUseCases;
+    listIdentitiesUseCase?: {execute(input:Record<string,unknown>):Promise<any>};
+    getIdentityUseCase?: { execute(id:string):Promise<any> };
+    authEvaluatorService?: { evaluatePermission(id:string,permission:string,context:Record<string,unknown>):Promise<{isGranted:boolean}> };
+    principalAccessValidator?: {isAuthenticationAllowed(id:string):Promise<boolean>};
   }): Router {
     const router = Router();
     const responseFormatter = new ResponseFormatter('v1');
@@ -48,6 +53,7 @@ export class SettingsAdminRouter {
         key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/),
         valueType: z.nativeEnum(ValueType),
         description: z.string().max(2000).optional(),
+        consumerDomain: z.string().min(1).max(100).optional(),
         defaultValue: z.unknown().optional(),
         validationRules: validationRulesSchema.optional(),
         isFeatureFlag: z.boolean().optional(),
@@ -108,6 +114,54 @@ export class SettingsAdminRouter {
       cursor: identifier.regex(/^[a-zA-Z0-9_\-.]+$/).optional(),
       classification: z.enum(['ALL', 'SETTING', 'FLAG', 'SECRET', 'DEPRECATED']).default('ALL') }).strict();
 
+    const governance = () => { if (!settingsGovernanceUseCases) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE'); return settingsGovernanceUseCases; };
+    const reviewer = async (req: Request, id:string) => {
+      if (!getIdentityUseCase || !authEvaluatorService || !principalAccessValidator) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
+      const result=await getIdentityUseCase.execute(id);
+      if (!result.isSuccess || !result.getValue().user?.contactRegistry.isEmailVerified ||
+          !await principalAccessValidator.isAuthenticationAllowed(id) ||
+          !(await authEvaluatorService.evaluatePermission(id,'admin:settings:manage',{ip:req.ip,requestTime:new Date()})).isGranted)
+        throw new Error('SETTINGS_APPROVER_FORBIDDEN');
+    };
+    const dependencyPolicy = z.object({rules:z.array(z.object({id:identifier,triggerKey:identifier,requiredKeys:z.array(identifier).min(1).max(5),
+      context:z.object({domainId:identifier.optional(),identityId:identifier.optional()}).strict().optional()}).strict()).max(25)}).strict();
+    const change = z.object({key:identifier,level:z.enum(['GLOBAL','DOMAIN','IDENTITY']),scopeId:identifier.optional(),
+      expectedCurrentVersionId:identifier.nullable(),value:z.unknown()}).strict();
+    const planSchema=z.discriminatedUnion('kind',[
+      z.object({kind:z.literal('VALUES'),expectedPolicyRevision:z.number().int().min(0),changes:z.array(change).min(1).max(20)}).strict(),
+      z.object({kind:z.literal('DEPENDENCIES'),expectedPolicyRevision:z.number().int().min(0),policy:dependencyPolicy}).strict(),
+    ]);
+    router.get('/governance/approvers',asyncHandler(async (req,res)=>{
+      const query=z.object({search:z.string().trim().max(240).optional(),cursor:z.string().max(2048).optional()}).strict().parse(req.query);
+      if (!listIdentitiesUseCase || !authEvaluatorService) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
+      const result=await listIdentitiesUseCase.execute({...query,status:'ACTIVE',verified:true,limit:20});
+      if (!result.isSuccess) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
+      const page=result.getValue();const items:Array<{id:string;name:string}>=[];
+      for (const identity of page.items) if (identity.id!==actor(req) && identity.user?.contactRegistry.isEmailVerified && identity.account.accessState==='Active' &&
+        (await authEvaluatorService.evaluatePermission(identity.id,'admin:settings:manage',{ip:req.ip,requestTime:new Date()})).isGranted)
+        items.push({id:identity.id,name:identity.user?.profile.displayName??identity.id});
+      res.setHeader('Cache-Control','no-store');res.json(responseFormatter.success({items,nextCursor:page.nextCursor??null}));
+    }));
+    router.get('/governance/dependencies',asyncHandler(async (_req,res)=>{res.setHeader('Cache-Control','no-store');res.json(responseFormatter.success(await governance().policy()));}));
+    router.post('/governance/preview',asyncHandler(async (req,res)=>{res.setHeader('Cache-Control','no-store');res.json(responseFormatter.success(await governance().preview(planSchema.parse(req.body))));}));
+    router.get('/governance/change-sets',asyncHandler(async (req,res)=>{const query=z.object({cursor:z.string().uuid().optional()}).strict().parse(req.query);
+      res.setHeader('Cache-Control','no-store');res.json(responseFormatter.success(await governance().list(actor(req),query.cursor)));}));
+    router.post('/governance/change-sets',asyncHandler(async (req,res)=>{
+      const extra=z.object({id:z.string().uuid(),approverId:identifier,previewDigest:z.string().regex(/^[a-f0-9]{64}$/),reason:changeReason}).parse(req.body);
+      const {id:_id,approverId:_approver,previewDigest:_digest,reason:_reason,...plan}=req.body;
+      const input={...planSchema.parse(plan),...extra};await reviewer(req,input.approverId);
+      res.status(201).json(responseFormatter.success(await governance().propose(input,context(req))));
+    }));
+    router.post('/governance/change-sets/:id/approve',asyncHandler(async (req,res)=>{
+      z.object({}).strict().parse(req.body);const id=z.string().uuid().parse(req.params.id);await reviewer(req,actor(req));
+      res.json(responseFormatter.success(await governance().approve(id,context(req))));
+    }));
+    router.post('/governance/change-sets/:id/commit',asyncHandler(async (req,res)=>{
+      z.object({}).strict().parse(req.body);const id=z.string().uuid().parse(req.params.id);const proposal=await governance().get(id,actor(req));
+      await reviewer(req,proposal.approverId);
+      res.json(responseFormatter.success(await governance().commit(id,context(req))));
+    }));
+
     router.get('/definitions', asyncHandler(async (req, res) => {
       const query = listDefinitionsSchema.parse(req.query);
       res.setHeader('Cache-Control', 'no-store');
@@ -140,9 +194,9 @@ export class SettingsAdminRouter {
     }));
 
     const updateDefinitionSchema = z.object({ key: identifier.regex(/^[a-zA-Z0-9_\-.]+$/),
-      expectedRevision: z.string().datetime(), description: z.string().max(2000).optional(),
+      expectedRevision: z.string().datetime(), description: z.string().max(2000).optional(), consumerDomain:z.string().min(1).max(100).optional(),
       isDeprecated: z.literal(true).optional(), changeReason }).strict().refine(
-        value => value.description !== undefined || value.isDeprecated === true, 'No metadata change supplied');
+        value => value.description !== undefined || value.isDeprecated === true || value.consumerDomain !== undefined, 'No metadata change supplied');
     const clearOverrideSchema = z.object({ assignmentId: identifier, newVersionId: identifier,
       expectedCurrentVersionId: identifier, changeReason }).strict();
 
@@ -275,13 +329,13 @@ export class SettingsAdminRouter {
       }
       const message = err?.message || 'Settings operation failed';
       const conflict =
-        /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|SETTINGS_ASSIGNMENT_CONFLICT|SETTINGS_DEFINITION_CONFLICT|SETTINGS_OVERRIDE_ALREADY_CLEARED|SETTINGS_DEFINITION_NOT_WRITABLE|already belongs/i.test(message);
+        /already exists|cannot be mutated|SETTINGS_VERSION_CONFLICT|SETTINGS_ASSIGNMENT_CONFLICT|SETTINGS_DEFINITION_CONFLICT|SETTINGS_OVERRIDE_ALREADY_CLEARED|SETTINGS_.*CONFLICT|SETTINGS_DEFINITION_NOT_WRITABLE|already belongs/i.test(message);
       const known = /^SETTINGS_[A-Z_]+/.exec(message)?.[0];
       const missing = /_NOT_FOUND$/.test(known ?? '') || /not found/i.test(message);
-      const unavailable = /SETTINGS_(ATOMIC|IMPACT|DURABLE|IDENTITY_SCOPE_VALIDATOR)/.test(known ?? '');
+      const unavailable = /SETTINGS_(ATOMIC|IMPACT|DURABLE|IDENTITY_SCOPE_VALIDATOR|GOVERNANCE_UNAVAILABLE)/.test(known ?? '');
       const rejected = known || /already exists|cannot be mutated|already belongs|Secret |Feature flags|deprecated|not found|Type mismatch|Value must/.test(message);
       res
-        .status(conflict ? 409 : missing ? 404 : unavailable ? 503 : !rejected ? 503 : 400)
+        .status(/SETTINGS_(APPROVER_FORBIDDEN|INDEPENDENT_APPROVAL_REQUIRED)/.test(known ?? '') ? 403 : conflict ? 409 : missing ? 404 : unavailable ? 503 : !rejected ? 503 : 400)
         .json(
           responseFormatter.error({
             code: conflict ? 'SETTINGS_CONFLICT' : missing ? 'SETTINGS_NOT_FOUND' : unavailable || !rejected ? 'SETTINGS_UNAVAILABLE' : 'SETTINGS_OPERATION_REJECTED',

@@ -28,5 +28,5 @@ export interface ISettingAssignmentRepository {
   findBy(spec: {
     isSatisfiedBy: (assignment: SettingAssignment) => boolean;
   }): Promise<SettingAssignment[]>;
-  save(assignment: SettingAssignment, metadata?: { correlationId: string }): Promise<void>;
+  save(assignment: SettingAssignment, metadata?: { correlationId: string; actorId?: string }): Promise<void>;
 }

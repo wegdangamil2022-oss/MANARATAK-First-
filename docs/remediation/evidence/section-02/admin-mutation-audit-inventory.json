@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "baseline": "40519a333607aa66bed0716cb5848de3242b4a5c",
   "scope": "Mounted canonical admin mutations; candidate permission sets for conditional policies, with policy fingerprints; source checks, not runtime or owner atomicity proof",
   "routes": [
@@ -7585,6 +7585,70 @@
       "source": "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/settings/governance/change-sets",
+      "owner": "SettingsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:settings:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/settings/governance/change-sets/:id/approve",
+      "owner": "SettingsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:settings:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/settings/governance/change-sets/:id/commit",
+      "owner": "SettingsAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:settings:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/settings/governance/preview",
+      "owner": "SettingsAdminRouter",
+      "classification": "NO_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:settings:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REVIEWED_NON_MUTATING_POST_EXEMPTION",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/SettingsAdminRouter.ts"
+    },
+    {
       "method": "PATCH",
       "path": "/admin/student-tools/:toolKey/availability",
       "owner": "StudentToolsAdminRouter",
@@ -8009,5 +8073,12 @@
     "baseCommit": "01c505532272d3bb085966a35b630ab55da11393",
     "newHandlers": 14,
     "scope": "Sections 01–03 source additions only; owner atomicity remains separately verified"
+  },
+  "sourceSettingsGovernanceReview": {
+    "date": "2026-10-12",
+    "baseCommit": "8499ef86",
+    "newHandlers": 4,
+    "previewReadOnly": true,
+    "ownerAtomicity": "New owner implementation reviewed; real database rollback is deferred"
   }
 }

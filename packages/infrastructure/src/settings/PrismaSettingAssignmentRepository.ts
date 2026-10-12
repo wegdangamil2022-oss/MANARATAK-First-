@@ -1,3 +1,4 @@
+import { PrismaSettingsDependencyGuard, type SettingsValueChange } from './PrismaSettingsDependencyGuard';
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -68,7 +69,7 @@ export interface SettingsAssignmentPrismaClient {
 }
 
 export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepository {
-  constructor(private readonly prisma: PrismaClient, private readonly transactional = false) {}
+  constructor(private readonly prisma: PrismaClient, private readonly transactional = false, private readonly governanceChanges?: SettingsValueChange[]) {}
 
   withTransaction(context: AtomicPersistenceContext): ISettingAssignmentRepository {
     const tx = (context as AtomicPersistenceContext & { transactionClient?: Prisma.TransactionClient }).transactionClient;
@@ -235,7 +236,7 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
     return assignments.filter(assignment => spec.isSatisfiedBy(assignment));
   }
 
-  async save(assignment: SettingAssignment, metadata?: { correlationId: string }): Promise<void> {
+  async save(assignment: SettingAssignment, metadata?: { correlationId: string; actorId?: string }): Promise<void> {
     const keyStr = assignment.key.getValue();
     const scopeLevel = assignment.scope.getLevel();
     const scopeId = assignment.scope.getScopeId() || 'GLOBAL';
@@ -243,6 +244,10 @@ export class PrismaSettingAssignmentRepository implements ISettingAssignmentRepo
     const events = [...assignment.domainEvents];
 
     const persist = async (tx: Prisma.TransactionClient) => {
+      const dependencyGuard = new PrismaSettingsDependencyGuard(tx);
+      await dependencyGuard.lock();
+      await dependencyGuard.assert(this.governanceChanges ?? [{ key:keyStr,level:scopeLevel,scopeId:assignment.scope.getScopeId(),
+        value:currentVersion.value.getValue(),cleared:currentVersion.operation === 'CLEAR_OVERRIDE' }]);
       // All Settings writers acquire definition before assignment, so deprecation
       // and a value write cannot pass independent prechecks and race to commit.
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`setting-definition:${keyStr}`}, 0))::text AS lock_result`;

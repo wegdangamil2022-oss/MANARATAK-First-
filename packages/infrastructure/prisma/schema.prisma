@@ -77,6 +77,8 @@ model SettingDefinitionRecord {
   isFeatureFlag Boolean  @default(false)
   isDeprecated  Boolean  @default(false)
   isSecret      Boolean  @default(false)
+  consumerDomain String?
+  lastChangedBy String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -5899,4 +5901,19 @@ model AssetRenditionRecord {
   updatedAt        DateTime @updatedAt
   @@unique([assetId, variantKey])
   @@index([generatedAssetId])
+}
+
+model SettingsGovernanceRecord {
+  id String @id
+  kind String
+  revision Int @default(1)
+  payload Json
+  createdBy String
+  approverId String?
+  approvedAt DateTime?
+  consumedAt DateTime?
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([kind, createdAt, id])
 }
