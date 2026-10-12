@@ -1,3 +1,4 @@
+import { StudentApplicationTrackerUseCases } from './StudentApplicationTrackerUseCases';
 import { ITransactionalOutboxDispatcher, OutboxDispatchResult } from '@manaratak/domain';
 import { StudentWorkspaceUseCases } from './StudentWorkspaceUseCases';
 
@@ -15,6 +16,7 @@ export class StudentWorkspaceOutboxWorker {
     private readonly options: StudentWorkspaceOutboxWorkerOptions = {},
     private readonly workspaceRecovery?: StudentWorkspaceUseCases,
     private readonly reminderDispatcher?: ITransactionalOutboxDispatcher,
+    private readonly trackerOwners?: StudentApplicationTrackerUseCases,
   ) {}
 
   public async runIdentityOnce(workerId: string): Promise<OutboxDispatchResult> {
@@ -22,7 +24,7 @@ export class StudentWorkspaceOutboxWorker {
   }
 
   public async runRoleOnce(workerId: string): Promise<OutboxDispatchResult> {
-    return this.run(workerId, 'AUTHORIZATION', ['RoleAssignmentCreated']);
+    return this.run(workerId, 'AUTHORIZATION', ['RoleAssignmentCreated', 'RoleAssignmentRevoked']);
   }
 
   public async runLearningOnce(workerId: string): Promise<OutboxDispatchResult> {
@@ -38,6 +40,14 @@ export class StudentWorkspaceOutboxWorker {
   public async runCatchupOnce(workerId:string):Promise<OutboxDispatchResult>{
     return this.run(workerId,'STUDENT_WORKSPACE_CATCHUP',
       ['StudentOwnerCatchupContinuationRequested']);
+  }
+
+  public async runTrackerOwnersOnce(workerId: string) {
+    if (!workerId.trim()) throw new Error('STUDENT_OWNER_RECONCILIATION_WORKER_REQUIRED');
+    if (!this.trackerOwners) throw new Error('STUDENT_OWNER_RECONCILIATION_NOT_INTEGRATED');
+    const result = await this.trackerOwners.reconcileOwnerPage();
+    if (result.failed) throw new Error('STUDENT_OWNER_RECONCILIATION_PARTIAL');
+    return result;
   }
 
   public async runRemindersOnce(workerId:string):Promise<OutboxDispatchResult>{

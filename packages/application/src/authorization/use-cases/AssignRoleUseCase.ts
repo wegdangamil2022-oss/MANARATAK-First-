@@ -37,6 +37,11 @@ export class AssignRoleUseCase {
         aggregateType: 'ROLE_ASSIGNMENT',
         aggregateId: id,
         action: 'ROLE_ASSIGNMENT_REVOKED',
+        outbox: {
+          metadata: { schemaVersion: '1.0.0' },
+          eventType: 'RoleAssignmentRevoked',
+          payload: { assignmentId: id, identityId: existing.identityId, roleId: existing.roleId },
+        },
         context,
         auditMetadata: {
           ...(
@@ -47,7 +52,7 @@ export class AssignRoleUseCase {
           roleId: existing.roleId,
         },
       },
-      transaction => repository.withTransaction!(transaction).delete(id),
+      (transaction) => repository.withTransaction!(transaction).delete(id),
     );
   }
 
@@ -59,7 +64,8 @@ export class AssignRoleUseCase {
     if (!(await this.roles.findById(input.roleId))) throw new Error('ROLE_NOT_FOUND');
     const existing = await this.roleAssignmentRepository.findById(input.id);
     if (existing && (existing.identityId !== input.identityId || existing.roleId !== input.roleId)) throw new Error('ROLE_ASSIGNMENT_IMMUTABLE');
-    const assigned = (await this.roleAssignmentRepository.findByIdentityId(input.identityId)).find(item => item.roleId === input.roleId);
+    const assigned = (await this.roleAssignmentRepository.findByIdentityId(input.identityId)).find(
+      (item) => item.roleId === input.roleId);
     if (assigned) return { assignmentId: assigned.id, replayed: true };
     const assignment = new RoleAssignment({
       id: input.id,
@@ -91,7 +97,7 @@ export class AssignRoleUseCase {
         },
         outbox: { metadata: {schemaVersion:'1.0.0'}, eventType: 'RoleAssignmentCreated', payload: { assignmentId: input.id, identityId: input.identityId, roleId: input.roleId } },
       },
-      transaction => repository.withTransaction!(transaction).save(assignment),
+      (transaction) => repository.withTransaction!(transaction).save(assignment),
     );
     return { assignmentId: assignment.id, replayed: false };
   }

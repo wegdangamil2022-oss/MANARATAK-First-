@@ -15,6 +15,8 @@ import {
   ScholarshipVerificationStatus,
   MajorStatus,
   UniversityStatus,
+  assertUniversityProgramParent,
+  isPublicUniversityProgram,
 } from '@manaratak/domain';
 
 interface ScholarshipTransactionContext extends AtomicPersistenceContext {
@@ -62,14 +64,55 @@ const RESERVED_OPTIONAL_KEYS = new Set([
 export class PrismaScholarshipRepository implements ITransactionalScholarshipRepository {
   constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
 
+  /** Runs on the same transaction-bound repository as import/manual writes. */
+  private async normalizeProgramParents<
+    T extends {
+      academicProgramId?: string | null;
+      universityId?: string | null;
+      resolutionStatus?: string;
+    },
+  >(links: T[]): Promise<T[]> {
+    const ids = [
+      ...new Set(
+        links.map((link) => link.academicProgramId).filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    if (!ids.length) return links;
+    const rows = await this.prisma.universityAcademicProgram.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, universityId: true },
+    });
+    return links.map((link) => {
+      if (!link.academicProgramId) return link;
+      const program = rows.find((row) => row.id === link.academicProgramId);
+      if (!program) throw new Error('SCHOLARSHIP_ACADEMIC_PROGRAM_NOT_FOUND');
+      const universityId = assertUniversityProgramParent(link.universityId, {
+        id: program.id,
+        ownerId: program.universityId,
+      });
+      return { ...link, universityId, resolutionStatus: 'RESOLVED' };
+    });
+  }
+
   private readonly normalizedInclude = {
     benefits: { include: { currency: { select: { isoCode: true, nameAr: true, name: true } } } },
     degreeTargets: { include: { degreeLevel: { select: { canonicalCode: true, nameEn: true, nameAr: true } } } },
     majorTargets: { include: { major: { select: { status: true } } } },
-    eligibilityItems: { include: { major: { select: { status: true } } } },
-    requiredDocuments: true,
+    eligibilityItems: { include: { major: { select: { status: true } },
+        internationalTest: { select: { status: true } },
+      } },
+    requiredDocuments: { include: { internationalTest: { select: { status: true } } } },
     sourceEvidence: true,
-    universityLinks: { include: { university: { select: { status: true } }, academicProgram: { select: { status: true, majorMappingState: true } } } },
+    universityLinks: { include: { university: { select: { id: true, status: true, displayName: true } }, academicProgram: {
+          include: {
+            university: { select: { id: true, status: true, displayName: true } },
+            major: { select: { status: true,
+                levelProfiles: {
+                  select: { degreeLevelId: true, status: true, currentPublishedVersionId: true },
+                },
+              },
+            },
+          } } } },
     versions: { orderBy: { versionNumber: 'asc' as const } },
     sponsorContext: true,
     applicationCycles: { orderBy: { createdAt: 'asc' as const } },
@@ -116,6 +159,8 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async create(data: CreateScholarshipDto): Promise<ScholarshipDto> {
+    if (data.universityLinks)
+      data = { ...data, universityLinks: await this.normalizeProgramParents(data.universityLinks) };
     const legacyCompatibility = this.buildLegacyCompatibility(data.optionalFields, data);
     const createData = {
       publicId: data.publicId,
@@ -180,6 +225,11 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async update(id: string, updates: ScholarshipRepositoryUpdateDto): Promise<ScholarshipDto> {
+    if (updates.universityLinks)
+      updates = {
+        ...updates,
+        universityLinks: await this.normalizeProgramParents(updates.universityLinks),
+      };
     const structural = this.hasStructuralChanges(updates);
     if (!this.transactionBound) throw new Error('SCHOLARSHIP_ATOMIC_TRANSACTION_REQUIRED');
     await this.prisma.$queryRaw(Prisma.sql`SELECT "id" FROM "Scholarship" WHERE "id" = ${id} FOR UPDATE`);
@@ -346,8 +396,12 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       { eligibilityItems: { some: { majorId: filters.majorId } } },
     ] });
     if (filters.internationalTestId) constraints.push({ OR: [
-      { eligibilityItems: { some: { internationalTestId: filters.internationalTestId } } },
-      { requiredDocuments: { some: { internationalTestId: filters.internationalTestId } } },
+      { eligibilityItems: { some: { internationalTestId: filters.internationalTestId,
+                internationalTest: { is: { status: 'PUBLISHED' } },
+              } } },
+      { requiredDocuments: { some: { internationalTestId: filters.internationalTestId,
+                internationalTest: { is: { status: 'PUBLISHED' } },
+              } } },
     ] });
     if (filters.universityId) constraints.push({ universityLinks: { some: { universityId: filters.universityId } } });
     if (filters.academicProgramId) constraints.push({ universityLinks: { some: { academicProgramId: filters.academicProgramId } } });
@@ -479,22 +533,26 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       { eligibilityItems: { some: { majorId: filters.majorId, major: { is: { status: MajorStatus.PUBLISHED } } } } },
     ] });
     if (filters.internationalTestId) constraints.push({ OR: [
-      { eligibilityItems: { some: { internationalTestId: filters.internationalTestId } } },
-      { requiredDocuments: { some: { internationalTestId: filters.internationalTestId } } },
+      { eligibilityItems: { some: { internationalTestId: filters.internationalTestId,
+                internationalTest: { is: { status: 'PUBLISHED' } },
+              } } },
+      { requiredDocuments: { some: { internationalTestId: filters.internationalTestId,
+                internationalTest: { is: { status: 'PUBLISHED' } },
+              } } },
     ] });
-    if (filters.universityId) constraints.push({ universityLinks: { some: {
-      universityId: filters.universityId,
-      university: { is: { status: UniversityStatus.PUBLISHED } },
-    } } });
-    if (filters.academicProgramId) constraints.push({ universityLinks: { some: {
-      academicProgramId: filters.academicProgramId,
-      academicProgram: { is: {
-        status: 'ACTIVE',
-        majorMappingState: 'CANONICALLY_MAPPED',
-        university: { is: { status: UniversityStatus.PUBLISHED } },
-        major: { is: { status: MajorStatus.PUBLISHED } },
-      } },
-    } } });
+    if (filters.universityId || filters.academicProgramId) {
+      // Filter exact owner/profile proof before both page and count. Oversized owner scope fails explicitly.
+      const candidates = await this.prisma.universityAcademicProgram.findMany({
+        where: { ...(filters.universityId ? { universityId: filters.universityId } : {}), ...(filters.academicProgramId ? { id: filters.academicProgramId } : {}), status: 'ACTIVE', majorMappingState: 'CANONICALLY_MAPPED', university: { is: { status: UniversityStatus.PUBLISHED } }, major: { is: { status: MajorStatus.PUBLISHED } } },
+        select: { id: true, universityId: true, status: true, majorId: true, degreeLevelId: true, majorMappingState: true, major: { select: { status: true, levelProfiles: { select: { degreeLevelId: true, status: true, currentPublishedVersionId: true } } } } },
+        orderBy: { id: 'asc' }, take: 501,
+      });
+      if (candidates.length > 500) throw new Error('SCHOLARSHIP_PROGRAM_OWNER_SCOPE_REQUIRES_PAGED_QUERY');
+      const eligible = candidates.filter(isPublicUniversityProgram);
+      const edges: Prisma.ScholarshipUniversityLinkWhereInput[] = eligible.map(program => ({ academicProgramId: program.id, resolutionStatus: 'RESOLVED', OR: [{ universityId: null }, { universityId: program.universityId }] }));
+      if (filters.universityId && !filters.academicProgramId) edges.push({ universityId: filters.universityId, academicProgramId: null, resolutionStatus: 'RESOLVED', university: { is: { status: UniversityStatus.PUBLISHED } } });
+      constraints.push({ universityLinks: { some: edges.length ? { OR: edges } : { id: { in: [] } } } });
+    }
     if (filters.fundingType === 'FULL')
       constraints.push({
         OR: [{ isFullyFunded: true }, { fundingTypeCode: { in: ['FULL', 'FULLY_FUNDED'] } }],

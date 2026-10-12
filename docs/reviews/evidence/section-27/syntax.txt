@@ -1,0 +1,1 @@
+Source syntax: 37 files, 0 parse diagnostics. Not a TypeScript semantic check.

@@ -1,3 +1,4 @@
+import { isPublicAdmissionRequirement } from '../public-boundaries/PublicOwnerPolicy';
 import { PublicationReadinessIssue, PublicationReadinessPolicy } from '../publication-readiness/PublicationReadiness';
 import { UniversityDto, UniversityImportCompletenessState, UniversityStatus } from './universities';
 
@@ -36,7 +37,8 @@ export class UniversityPublicationReadinessPolicy implements PublicationReadines
         blockingIssues.push(issue('UNIVERSITY_PROGRAM_MAJOR_REVIEW_REQUIRED', `academicPrograms.${index}.majorId`, 'ACTIVE programs require a reviewed Canonical Major and a compatible degree level; unresolved source labels remain drafts in the New Majors queue.'));
       if (program.majorId && (
         program.major?.status !== 'PUBLISHED' ||
-        !program.major.levelProfiles.some(profile => profile.degreeLevelId === program.degreeLevelId &&
+        !program.major.levelProfiles.some(
+            (profile) => profile.degreeLevelId === program.degreeLevelId &&
           profile.status === 'PUBLISHED' && Boolean(profile.currentPublishedVersionId))
       ))
         blockingIssues.push(issue('UNIVERSITY_PROGRAM_MAJOR_NOT_PUBLISHED', `academicPrograms.${index}.majorId`, 'ACTIVE programs require a published P10 Major profile at the matching DegreeLevel.'));
@@ -49,6 +51,26 @@ export class UniversityPublicationReadinessPolicy implements PublicationReadines
     if (acceptedTests.length > 0 && !requirements.some((requirement) => requirement.internationalTestId)) {
       blockingIssues.push(issue('UNIVERSITY_TEST_REFERENCES_NOT_CANONICAL', 'admissionRequirements', 'Named accepted tests require an ACTIVE canonical International Test relationship.'));
     }
+    publicPrograms.forEach((program, index) => {
+      for (const requirement of program.admissionRequirements ?? []) {
+        if (requirement.status === 'ACTIVE' && !isPublicAdmissionRequirement(requirement))
+          blockingIssues.push(
+            issue(
+              'UNIVERSITY_ADMISSION_TEST_PUBLIC_PROOF_REQUIRED',
+              `academicPrograms.${index}.admissionRequirements`,
+              'Active test requirements need a published owner/version, active matching variant and verified score scale.',
+            ),
+          );
+      }
+    });
+    if (topLevelRequirements.length)
+      blockingIssues.push(
+        issue(
+          'UNIVERSITY_LEGACY_ADMISSION_REQUIREMENTS_REVIEW_REQUIRED',
+          'admissionRequirements',
+          'Legacy unjoined test rows must be migrated to program-owned canonical requirements before publication.',
+        ),
+      );
     requirements.forEach((requirement, index) => {
       if (!requirement.internationalTestId) blockingIssues.push(issue('UNIVERSITY_TEST_REFERENCE_MISSING', `admissionRequirements.${index}.internationalTestId`, 'ACTIVE admission test requirement requires canonical International Test ID.'));
     });

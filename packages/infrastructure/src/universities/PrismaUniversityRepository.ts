@@ -19,15 +19,25 @@ import {
   UniversityLocalizedTextTargetType,
   UpdateUniversityDto,
   MajorStatus,
+  isPublicUniversityProgram,
 } from '@manaratak/domain';
 import { UniversityCanonicalRelationshipValidator } from './UniversityCanonicalRelationshipValidator';
 
-import { queryStableCursorPage } from '../api-foundation/StableCursor';
+import {
+  decodeStableCursor,
+  encodeStableCursor,
+  boundedCursorLimit,
+  queryStableCursorPage } from '../api-foundation/StableCursor';
 
 const universityDetails = {
   campuses: true,
   organizationUnits: true,
-  academicPrograms: { include: { campuses: true, major: { select: { status: true, levelProfiles: { select: { degreeLevelId: true, status: true, currentPublishedVersionId: true } } } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true } } } } } },
+  academicPrograms: { include: { campuses: true, major: { select: { status: true, levelProfiles: { select: { degreeLevelId: true, status: true, currentPublishedVersionId: true } } } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true,
+              currentPublishedVersion: { include: { scoreScales: true } },
+            },
+          },
+          testVariant: { select: { testId: true, isActive: true } },
+          testVersion: { include: { scoreScales: true } } } } } },
   tuitionProfiles: true,
   accommodationProfiles: true,
   rankings: true,
@@ -224,9 +234,12 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
 
     const existing = await this.prisma.university.findUnique({ where: { id } });
     await new UniversityCanonicalRelationshipValidator(this.prisma).validateCampus({
-      countryReferenceId: countryReferenceId === undefined ? existing?.countryReferenceId ?? undefined : countryReferenceId ?? undefined,
-      regionReferenceId: regionReferenceId === undefined ? existing?.regionReferenceId ?? undefined : regionReferenceId ?? undefined,
-      cityReferenceId: cityReferenceId === undefined ? existing?.cityReferenceId ?? undefined : cityReferenceId ?? undefined,
+      countryReferenceId: countryReferenceId === undefined ? (existing?.countryReferenceId ?? undefined)
+          : (countryReferenceId ?? undefined),
+      regionReferenceId: regionReferenceId === undefined ? (existing?.regionReferenceId ?? undefined)
+          : (regionReferenceId ?? undefined),
+      cityReferenceId: cityReferenceId === undefined ? (existing?.cityReferenceId ?? undefined)
+          : (cityReferenceId ?? undefined),
     });
     const existingOptional = sanitizeUniversityOptionalFields(existing?.optionalFields);
 
@@ -362,7 +375,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     ]);
 
     return {
-      data: rows.map(row => ({
+      data: rows.map((row) => ({
         id: row.id,
         universityId: row.universityId,
         universityPublicId: row.university.publicId,
@@ -373,9 +386,11 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         name: row.name,
         status: row.status,
         programCount: row.programs.length,
-        mappedMajorCount: row.programs.filter(program => program.status !== 'INACTIVE' && program.status !== 'ARCHIVED' && Boolean(program.majorId) && program.majorMappingState === 'CANONICALLY_MAPPED').length,
-        unresolvedMajorCount: row.programs.filter(program => program.status !== 'INACTIVE' && program.status !== 'ARCHIVED' && (!program.majorId || program.majorMappingState !== 'CANONICALLY_MAPPED')).length,
-        activeProgramCount: row.programs.filter(program => program.status === 'ACTIVE').length,
+        mappedMajorCount: row.programs.filter(
+          (program) => program.status !== 'INACTIVE' && program.status !== 'ARCHIVED' && Boolean(program.majorId) && program.majorMappingState === 'CANONICALLY_MAPPED').length,
+        unresolvedMajorCount: row.programs.filter(
+          (program) => program.status !== 'INACTIVE' && program.status !== 'ARCHIVED' && (!program.majorId || program.majorMappingState !== 'CANONICALLY_MAPPED')).length,
+        activeProgramCount: row.programs.filter((program) => program.status === 'ACTIVE').length,
       })),
       total,
       page,
@@ -387,6 +402,8 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   async listPublished(
     filters: PublicUniversityFilters,
   ): Promise<PaginatedUniversityResult<UniversityDto>> {
+    if (filters.majorId || filters.internationalTestId)
+      return this.listPublishedAcademicUniversityPage(filters);
     const where: Prisma.UniversityWhereInput = { status: UniversityStatus.PUBLISHED };
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
     if (filters.regionReferenceId) where.regionReferenceId = filters.regionReferenceId;
@@ -407,6 +424,126 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       delegate: this.prisma.university as any, where, include: universityDetails,
       cursor: filters.cursor, limit: filters.limit, map: (record: any) => this.mapToDto(record),
     });
+  }
+
+  private async listPublishedAcademicUniversityPage(
+    filters: PublicUniversityFilters,
+  ): Promise<PaginatedUniversityResult<UniversityDto>> {
+    const limit = boundedCursorLimit(filters.limit),
+      after = decodeStableCursor(filters.cursor);
+    const conditions = [Prisma.sql`u.status='PUBLISHED'`];
+    if (filters.countryReferenceId)
+      conditions.push(Prisma.sql`u."countryReferenceId"=${filters.countryReferenceId}`);
+    if (filters.regionReferenceId)
+      conditions.push(Prisma.sql`u."regionReferenceId"=${filters.regionReferenceId}`);
+    if (filters.cityReferenceId)
+      conditions.push(Prisma.sql`u."cityReferenceId"=${filters.cityReferenceId}`);
+    if (filters.institutionType)
+      conditions.push(Prisma.sql`u."institutionType"=${filters.institutionType}`);
+    if (filters.search) {
+      const pattern = `%${filters.search}%`;
+      conditions.push(
+        Prisma.sql`(u."displayName" ILIKE ${pattern} OR u."canonicalName" ILIKE ${pattern} OR u.slug ILIKE ${pattern})`,
+      );
+    }
+    const programConditions = [
+      Prisma.sql`p."universityId"=u.id`,
+      Prisma.sql`p.status='ACTIVE'`,
+      Prisma.sql`p."majorMappingState"='CANONICALLY_MAPPED'`,
+      Prisma.sql`m.status='PUBLISHED'`,
+      Prisma.sql`EXISTS (SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`,
+    ];
+    if (filters.majorId) programConditions.push(Prisma.sql`p."majorId"=${filters.majorId}`);
+    if (filters.internationalTestId)
+      programConditions.push(Prisma.sql`EXISTS (
+      SELECT 1 FROM "UniversityProgramAdmissionRequirement" r JOIN "InternationalTest" t ON t.id=r."internationalTestId"
+      JOIN "InternationalTestVersion" v ON v.id=COALESCE(r."testVersionId",t."currentPublishedVersionId") AND v."testId"=t.id
+      WHERE r."academicProgramId"=p.id AND r."internationalTestId"=${filters.internationalTestId} AND r.status='ACTIVE' AND t.status='PUBLISHED' AND v.status='PUBLISHED'
+      AND (r."testVariantId" IS NULL OR EXISTS (SELECT 1 FROM "InternationalTestVariant" tv WHERE tv.id=r."testVariantId" AND tv."testId"=t.id AND tv."isActive"=true))
+      AND (r."sectionScores" IS NULL OR r."sectionScores"='{}'::jsonb)
+      AND (r."minimumScore" IS NULL OR ((SELECT count(*) FROM "InternationalTestVersionScoreScale" ss WHERE ss."versionId"=v.id)=1 AND EXISTS (SELECT 1 FROM "InternationalTestVersionScoreScale" ss WHERE ss."versionId"=v.id AND r."minimumScore">=ss."overallMinimum" AND r."minimumScore"<=ss."overallMaximum"))))`);
+    conditions.push(
+      Prisma.sql`EXISTS (SELECT 1 FROM "UniversityAcademicProgram" p JOIN "Major" m ON m.id=p."majorId" WHERE ${Prisma.join(programConditions, ' AND ')})`,
+    );
+    const base = Prisma.sql`FROM "University" u WHERE ${Prisma.join(conditions, ' AND ')}`;
+    const [selected, counts] = await Promise.all([
+      this.prisma.$queryRaw<Array<{ id: string }>>(
+        Prisma.sql`SELECT u.id ${base} ${after ? Prisma.sql`AND u.id>${after}` : Prisma.empty} ORDER BY u.id ASC LIMIT ${limit + 1}`,
+      ),
+      this.prisma.$queryRaw<Array<{ total: bigint }>>(Prisma.sql`SELECT count(*) AS total ${base}`),
+    ]);
+    const ids = selected.slice(0, limit).map((row) => row.id);
+    const rows = ids.length
+      ? await this.prisma.university.findMany({
+          where: { id: { in: ids }, status: UniversityStatus.PUBLISHED },
+          include: universityDetails,
+        })
+      : [];
+    const byId = new Map(rows.map((row) => [row.id, row])),
+      total = Number(counts[0]?.total);
+    if (!Number.isSafeInteger(total)) throw new Error('PUBLIC_UNIVERSITY_TOTAL_INVALID');
+    return {
+      data: ids.flatMap((id) => {
+        const row = byId.get(id);
+        return row ? [this.mapToDto(row)] : [];
+      }),
+      total,
+      page: 1,
+      pageSize: limit,
+      totalPages: Math.ceil(total / limit),
+      hasMore: selected.length > limit,
+      nextCursor: selected.length > limit ? encodeStableCursor(ids.at(-1)!) : null,
+    };
+  }
+
+  /** Owner-side country/major/program relationship page; independent of university paging. */
+  async listPublishedProgramGraph(filters: {
+    countryReferenceId?: string;
+    universityId?: string;
+    majorId?: string;
+    degreeLevelId?: string;
+    cursor?: string;
+    limit?: number;
+  }) {
+    const limit = boundedCursorLimit(filters.limit, 12, 50),
+      after = decodeStableCursor(filters.cursor);
+    const conditions = [
+      Prisma.sql`p.status='ACTIVE'`,
+      Prisma.sql`p."majorMappingState"='CANONICALLY_MAPPED'`,
+      Prisma.sql`u.status='PUBLISHED'`,
+      Prisma.sql`m.status='PUBLISHED'`,
+      Prisma.sql`EXISTS (SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`,
+    ];
+    if (filters.countryReferenceId)
+      conditions.push(Prisma.sql`u."countryReferenceId"=${filters.countryReferenceId}`);
+    if (filters.universityId) conditions.push(Prisma.sql`p."universityId"=${filters.universityId}`);
+    if (filters.majorId) conditions.push(Prisma.sql`p."majorId"=${filters.majorId}`);
+    if (filters.degreeLevelId)
+      conditions.push(Prisma.sql`p."degreeLevelId"=${filters.degreeLevelId}`);
+    const base = Prisma.sql`FROM "UniversityAcademicProgram" p JOIN "University" u ON u.id=p."universityId" JOIN "Major" m ON m.id=p."majorId" WHERE ${Prisma.join(conditions, ' AND ')}`;
+    const [rows, counts] = await Promise.all([
+      this.prisma.$queryRaw<
+        Array<import('@manaratak/domain').PublishedAcademicProgramReadModel>
+      >(Prisma.sql`
+        SELECT p.id AS "ownerId", p."sourceProgramName", p."degreeLevelId", p."majorId", p."majorMappingState", p.status,
+          u.id AS "universityOwnerId", u."publicId" AS "universityPublicId", u.slug AS "universitySlug", u."displayName" AS "universityDisplayName"
+        ${base} ${after ? Prisma.sql`AND p.id>${after}` : Prisma.empty} ORDER BY p.id ASC LIMIT ${limit + 1}`),
+      this.prisma.$queryRaw<Array<{ total: bigint; majorTotal: bigint }>>(
+        Prisma.sql`SELECT count(*) AS total, count(DISTINCT p."majorId") AS "majorTotal" ${base}`,
+      ),
+    ]);
+    const data = rows.slice(0, limit),
+      total = Number(counts[0]?.total),
+      majorTotal = Number(counts[0]?.majorTotal);
+    if (!Number.isSafeInteger(total) || !Number.isSafeInteger(majorTotal))
+      throw new Error('PUBLIC_PROGRAM_TOTAL_INVALID');
+    return {
+      data,
+      total,
+      majorTotal,
+      hasMore: rows.length > limit,
+      nextCursor: rows.length > limit ? encodeStableCursor(data.at(-1)!.ownerId) : null,
+    };
   }
 
   async findPublishedByPublicIds(publicIds: string[]): Promise<UniversityDto[]> {
@@ -446,12 +583,20 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         majorId: true,
         majorMappingState: true,
         status: true,
+        major: {
+          select: {
+            status: true,
+            levelProfiles: {
+              select: { degreeLevelId: true, status: true, currentPublishedVersionId: true },
+            },
+          },
+        },
         university: {
           select: { id: true, publicId: true, slug: true, displayName: true },
         },
       },
     });
-    return rows.map((row) => ({
+    return rows.filter(isPublicUniversityProgram).map((row) => ({
       ownerId: row.id,
       universityOwnerId: row.university.id,
       universityPublicId: row.university.publicId,
@@ -763,7 +908,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       const data = {
           universityId: id,
           sourceReferenceId: unit.sourceReferenceId,
-          campusId: unit.campusSourceReferenceId === undefined ? undefined : campusId ?? null,
+          campusId: unit.campusSourceReferenceId === undefined ? undefined : (campusId ?? null),
           unitType: unit.unitType,
           name: unit.name,
           normalizedName: unit.name.trim().toLocaleLowerCase(),
@@ -794,7 +939,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         where: { universityId: id },
         select: { id: true, parentOrganizationUnitId: true, campusId: true, unitType: true },
       });
-      const owners = new Map(nodes.map(node => [node.id, node]));
+      const owners = new Map(nodes.map((node) => [node.id, node]));
       for (const node of nodes) {
         const seen = new Set<string>([node.id]);
         let cursor = node;
@@ -875,7 +1020,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     }
     if (details.tuitionProfiles?.length)
       await this.prisma.universityTuitionProfile.createMany({
-        data: details.tuitionProfiles.filter(row => !row.id).map(
+        data: details.tuitionProfiles.filter((row) => !row.id).map(
           (item) =>
             ({
               universityId: id,
@@ -899,7 +1044,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     }
     if (details.accommodationProfiles?.length)
       await this.prisma.universityAccommodationProfile.createMany({
-        data: details.accommodationProfiles.filter(row => !row.id).map((item) => ({
+        data: details.accommodationProfiles.filter((row) => !row.id).map((item) => ({
           universityId: id,
           ...item,
           metadata: item.metadata as Prisma.InputJsonObject | undefined,
@@ -913,7 +1058,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     }
     if (details.rankings?.length)
       await this.prisma.universityRanking.createMany({
-        data: details.rankings.filter(row => !row.id).map((item) => ({ universityId: id, ...item })),
+        data: details.rankings.filter((row) => !row.id).map((item) => ({ universityId: id, ...item })),
       });
 
     const updated = await this.prisma.university.findUniqueOrThrow({
@@ -946,7 +1091,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         majorId: program.majorId,
         major: program.major ? {
           status: program.major.status,
-          levelProfiles: program.major.levelProfiles.map(profile => ({
+          levelProfiles: program.major.levelProfiles.map((profile) => ({
             degreeLevelId: profile.degreeLevelId,
             status: profile.status,
             currentPublishedVersionId: profile.currentPublishedVersionId,
@@ -960,6 +1105,8 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           academicProgramId: requirement.academicProgramId,
           internationalTestId: requirement.internationalTestId,
           internationalTest: requirement.internationalTest,
+          testVariant: requirement.testVariant,
+          testVersion: requirement.testVersion,
           testVariantId: requirement.testVariantId,
           testVersionId: requirement.testVersionId,
           minimumScore: requirement.minimumScore,

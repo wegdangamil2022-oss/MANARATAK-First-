@@ -1,4 +1,11 @@
 import {
+  createGraphReadScope,
+  graphOwnerRead,
+  reviewedGraphLabel,
+  requireGraphFirstPage,
+  type GraphReadScope,
+} from './GraphReadPolicy';
+import {
   ICourseRelationshipRepository,
   ICmsRepository,
   CmsDomainTargetType,
@@ -13,6 +20,9 @@ import {
   IUniversityRepository,
   MajorDto,
   MajorStatus,
+  isPublicUniversityProgram,
+  isPublicScholarshipUniversityLink,
+  isPublicAdmissionRequirement,
   PublicCourseFilters,
   ScholarshipDto,
   UniversityAcademicProgramReadDto,
@@ -76,6 +86,7 @@ export interface EditorialGraphIdentity {
 }
 
 export interface MajorGraphReadModel {
+  readScope?: GraphReadScope;
   subject: StableEntityReadIdentity;
   relationships: {
     universities: PaginatedGraphCollection<MajorUniversityGraphItem>;
@@ -90,6 +101,7 @@ export interface MajorGraphReadModel {
 }
 
 export interface UniversityGraphReadModel {
+  readScope?: GraphReadScope;
   subject: StableEntityReadIdentity;
   countryOwnerId?: string | null;
   relationships: {
@@ -106,6 +118,7 @@ export interface UniversityGraphReadModel {
 }
 
 export interface ScholarshipGraphReadModel {
+  readScope?: GraphReadScope;
   subject: StableEntityReadIdentity;
   countryOwnerId?: string | null;
   relationships: {
@@ -117,6 +130,7 @@ export interface ScholarshipGraphReadModel {
 }
 
 export interface InternationalTestGraphReadModel {
+  readScope?: GraphReadScope;
   subject: StableEntityReadIdentity & { providerName: string; status: string };
   relationships: {
     universities: PaginatedGraphCollection<StableEntityReadIdentity & {
@@ -140,6 +154,7 @@ export interface InternationalTestGraphReadModel {
 }
 
 export interface CountryGraphReadModel {
+  readScope?: GraphReadScope;
   subject: StableEntityReadIdentity & { canonicalCode: string };
   relationships: {
     universities: PaginatedGraphCollection<StableEntityReadIdentity>;
@@ -163,6 +178,7 @@ export interface CrossDomainGraphReadOptions {
   pageSize?: number;
   courseFilters?: PublicCourseFilters;
   locale?: 'ar' | 'en';
+  programCursor?: string;
 }
 
 /**
@@ -188,6 +204,8 @@ export class CrossDomainGraphReadService {
     const major = await this.majorRepository.findBySlug(this.required(slug, 'MAJOR_SLUG_REQUIRED'));
     if (!major || major.status !== MajorStatus.PUBLISHED) throw new Error('Major not found');
 
+    const readScope = createGraphReadScope();
+
     const { pageSize } = this.pagination(options);
     const [universities, scholarships, courses, editorialContent] = await Promise.all([
       this.universityRepository.listPublished({ majorId: major.id, limit: pageSize }),
@@ -196,19 +214,27 @@ export class CrossDomainGraphReadService {
         ...options.courseFilters,
         limit: pageSize,
       }),
-      this.relatedEditorial(CmsDomainTargetType.MAJOR, major.id, options.locale ?? 'ar'),
+      graphOwnerRead(
+        readScope,
+        'editorialContent',
+        this.cmsRepository?.listPublishedByDomainTarget
+          ? () => this.relatedEditorial(CmsDomainTargetType.MAJOR, major.id, options.locale ?? 'ar')
+          : undefined,
+        [],
+      ),
     ]);
 
     return {
-      subject: this.majorIdentity(major),
+      readScope,
+      subject: this.majorIdentity(major, options.locale),
       relationships: {
         universities: {
           ...universities,
-          data: universities.data.map((university) => this.majorUniversityIdentity(university, major.id)),
+          data: universities.data.map((university) => this.majorUniversityIdentity(university, major.id, options.locale)),
         },
         scholarships: {
           ...scholarships,
-          data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship)),
+          data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship, options.locale)),
         },
         courses: {
           ...courses,
@@ -231,28 +257,36 @@ export class CrossDomainGraphReadService {
     const university = await this.universityRepository.findBySlug(this.required(slug, 'UNIVERSITY_SLUG_REQUIRED'));
     if (!university || university.status !== UniversityStatus.PUBLISHED) throw new Error('University not found');
 
+    const readScope = createGraphReadScope();
     const canonicalPrograms = (university.academicPrograms ?? []).filter(
       (program): program is UniversityAcademicProgramReadDto & { majorId: string; degreeLevelId: string } =>
-        Boolean(program.majorId) &&
-        Boolean(program.degreeLevelId) &&
-        program.status === 'ACTIVE' &&
-        program.majorMappingState === 'CANONICALLY_MAPPED',
+        isPublicUniversityProgram(program),
     );
     const majorIds = [...new Set(canonicalPrograms.map((program) => program.majorId))];
     const { pageSize } = this.pagination(options);
     const [majors, scholarships, editorialContent] = await Promise.all([
       this.majorRepository.findPublishedByIds(majorIds),
       this.scholarshipRepository.listPublished({ universityId: university.id, limit: pageSize }),
-      this.relatedEditorial(CmsDomainTargetType.UNIVERSITY, university.id, options.locale ?? 'ar'),
+      graphOwnerRead(
+        readScope,
+        'editorialContent',
+        this.cmsRepository?.listPublishedByDomainTarget
+          ? () =>
+              this.relatedEditorial(CmsDomainTargetType.UNIVERSITY, university.id, options.locale ?? 'ar',
+              )
+          : undefined,
+        [],
+      ),
     ]);
     const publishedMajorIds = new Set(majors.map((major) => major.id));
     const publishedCanonicalPrograms = canonicalPrograms.filter((program) => publishedMajorIds.has(program.majorId));
 
     return {
-      subject: this.universityIdentity(university),
+      readScope,
+      subject: this.universityIdentity(university, options.locale),
       countryOwnerId: university.countryReferenceId,
       relationships: {
-        majors: majors.map((major) => this.majorIdentity(major)),
+        majors: majors.map((major) => this.majorIdentity(major, options.locale)),
         academicPrograms: publishedCanonicalPrograms.map((program) => ({
           ownerId: program.id,
           sourceProgramName: program.sourceProgramName,
@@ -261,7 +295,7 @@ export class CrossDomainGraphReadService {
         })),
         scholarships: {
           ...scholarships,
-          data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship)),
+          data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship, options.locale)),
         },
         editorialContent,
       },
@@ -272,13 +306,15 @@ export class CrossDomainGraphReadService {
     const scholarship = await this.scholarshipRepository.findPublishedBySlug(this.required(slug, 'SCHOLARSHIP_SLUG_REQUIRED'));
     if (!scholarship) throw new Error('Scholarship not found');
 
+    const readScope = createGraphReadScope();
+
     const universityIds = [...new Set(
-      (scholarship.universityLinks ?? [])
+      (scholarship.universityLinks ?? []).filter(link => isPublicScholarshipUniversityLink(link as Parameters<typeof isPublicScholarshipUniversityLink>[0]))
         .map((link) => link.universityId)
         .filter((id): id is string => Boolean(id)),
     )];
     const academicProgramIds = [...new Set(
-      (scholarship.universityLinks ?? [])
+      (scholarship.universityLinks ?? []).filter(link => isPublicScholarshipUniversityLink(link as Parameters<typeof isPublicScholarshipUniversityLink>[0]))
         .map((link) => link.academicProgramId)
         .filter((id): id is string => Boolean(id)),
     )];
@@ -294,7 +330,16 @@ export class CrossDomainGraphReadService {
     const programMajorIds = programs.map((program) => program.majorId).filter((id): id is string => Boolean(id));
     const [majors, editorialContent] = await Promise.all([
       this.majorRepository.findPublishedByIds([...new Set([...directMajorIds, ...programMajorIds])]),
-      this.relatedEditorial(CmsDomainTargetType.SCHOLARSHIP, scholarship.id, options.locale ?? 'ar'),
+      graphOwnerRead(
+        readScope,
+        'editorialContent',
+        this.cmsRepository?.listPublishedByDomainTarget
+          ? () =>
+              this.relatedEditorial(CmsDomainTargetType.SCHOLARSHIP, scholarship.id, options.locale ?? 'ar',
+              )
+          : undefined,
+        [],
+      ),
     ]);
 
     const programUniversityIdentities: StableEntityReadIdentity[] = programs.map((program) => ({
@@ -305,11 +350,12 @@ export class CrossDomainGraphReadService {
     }));
 
     return {
-      subject: this.scholarshipIdentity(scholarship),
+      readScope,
+      subject: this.scholarshipIdentity(scholarship, options.locale),
       countryOwnerId: scholarship.countryReferenceId,
       relationships: {
         universities: this.uniqueIdentities([
-          ...universities.map((university) => this.universityIdentity(university)),
+          ...universities.map((university) => this.universityIdentity(university, options.locale)),
           ...programUniversityIdentities,
         ]),
         academicPrograms: programs.map((program) => ({
@@ -324,7 +370,7 @@ export class CrossDomainGraphReadService {
           majorMappingState: program.majorMappingState,
           status: program.status,
         })),
-        majors: majors.map((major) => this.majorIdentity(major)),
+        majors: majors.map((major) => this.majorIdentity(major, options.locale)),
         editorialContent,
       },
     };
@@ -332,40 +378,54 @@ export class CrossDomainGraphReadService {
 
   public async getInternationalTestGraphById(id: string, options: CrossDomainGraphReadOptions = {}): Promise<InternationalTestGraphReadModel> {
     const test = await this.internationalTestRepository.findById(this.required(id, 'INTERNATIONAL_TEST_ID_REQUIRED'));
-    if (!test) throw new Error('International test not found');
-    const { page, pageSize } = this.pagination(options);
+    if (!test || test.status !== 'PUBLISHED') throw new Error('International test not found');
+    const readScope = createGraphReadScope();
+    const { pageSize } = this.pagination(options);
     const [universities, scholarships, preparationCourses, editorialContent] = await Promise.all([
-      this.universityRepository.list({ internationalTestId: test.id, page, pageSize }),
-      this.scholarshipRepository.list({ internationalTestId: test.id, page, pageSize }),
+      this.universityRepository.listPublished({ internationalTestId: test.id, limit: pageSize }),
+      this.scholarshipRepository.listPublished({ internationalTestId: test.id, limit: pageSize }),
       this.courseRelationshipRepository.listPublishedCoursesForInternationalTest(test.id, {
         ...options.courseFilters,
         limit: pageSize,
       }),
-      this.relatedEditorial(CmsDomainTargetType.INTERNATIONAL_TEST, test.id, options.locale ?? 'ar'),
+      graphOwnerRead(
+        readScope,
+        'editorialContent',
+        this.cmsRepository?.listPublishedByDomainTarget
+          ? () =>
+              this.relatedEditorial(CmsDomainTargetType.INTERNATIONAL_TEST, test.id, options.locale ?? 'ar')
+          : undefined,
+        [],
+      ),
     ]);
 
     return {
-      subject: this.internationalTestIdentity(test),
+      readScope,
+      subject: this.internationalTestIdentity(test, options.locale),
       relationships: {
         universities: {
           ...universities,
           data: universities.data.map((university) => ({
-            ...this.universityIdentity(university),
+            ...this.universityIdentity(university, options.locale),
             matchingPrograms: (university.academicPrograms ?? []).flatMap((program) =>
-              (program.admissionRequirements ?? [])
-                .filter((requirement) => requirement.internationalTestId === test.id)
+              isPublicUniversityProgram(program)
+                ? (program.admissionRequirements ?? [])
+                .filter((requirement) => requirement.internationalTestId === test.id &&
+                        isPublicAdmissionRequirement(requirement),
+                    )
                 .map((requirement) => ({
                   ownerId: program.id,
                   sourceProgramName: program.sourceProgramName,
                   minimumScore: requirement.minimumScore,
                   status: requirement.status,
-                })),
+                }))
+                : [],
             ),
           })),
         },
         scholarships: {
           ...scholarships,
-          data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship)),
+          data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship, options.locale)),
         },
         editorialContent,
         preparationCourses: {
@@ -393,46 +453,120 @@ export class CrossDomainGraphReadService {
     if (!country.id) throw new Error('COUNTRY_CANONICAL_ID_REQUIRED');
 
     const { page, pageSize } = this.pagination(options);
-    const [universities, scholarships, internationalTests, services, careerJobs, courses, editorialContent] = await Promise.all([
-      this.universityRepository.listPublished({ countryReferenceId: country.id, limit: pageSize }),
-      this.scholarshipRepository.listPublished({ countryReferenceId: country.id, limit: pageSize }),
-      this.internationalTestRepository.listPublished({ countryIso2Code: normalizedCode, page, pageSize }),
-      this.serviceCatalogRepository
-        ? this.serviceCatalogRepository.listPublished({ supportedCountryReferenceId: country.id, limit: pageSize })
-        : Promise.resolve({ data: [], total: 0, page, pageSize, totalPages: 0 }),
+    const readScope = createGraphReadScope();
+    const empty = { data: [], total: 0, page, pageSize, totalPages: 0 };
+    const [universities, scholarships, internationalTests, services, careerJobs, courses, editorialContent,
+      programPage,
+    ] = await Promise.all([
+      graphOwnerRead(
+        readScope,
+        'universities',
+        () =>
+          this.universityRepository.listPublished({ countryReferenceId: country.id, limit: pageSize }),
+        empty,
+      ),
+      graphOwnerRead(
+        readScope,
+        'scholarships',
+        () =>
+          this.scholarshipRepository.listPublished({ countryReferenceId: country.id, limit: pageSize }),
+        empty,
+      ),
+      graphOwnerRead(
+        readScope,
+        'internationalTests',
+        () =>
+          this.internationalTestRepository.listPublished({ countryIso2Code: normalizedCode, page, pageSize }),
+        { data: [], total: 0, page, limit: pageSize },
+      ),
+      graphOwnerRead(
+        readScope,
+        'services',
+        this.serviceCatalogRepository
+        ? () =>
+              this.serviceCatalogRepository!.listPublished({ supportedCountryReferenceId: country.id, limit: pageSize })
+        : undefined,
+        empty,
+      ),
+      graphOwnerRead(
+        readScope,
+        'careerJobs',
       this.careerRepository
-        ? this.careerRepository.listPublishedJobs({ countryReferenceId: country.id, page, pageSize })
-        : Promise.resolve({ data: [], total: 0, page, pageSize, totalPages: 0 }),
-      this.courseRelationshipRepository.listPublishedRelatedCourses({
+        ? () =>
+              this.careerRepository!.listPublishedJobs({ countryReferenceId: country.id, page, pageSize })
+        : undefined,
+        empty,
+      ),
+      graphOwnerRead(
+        readScope,
+        'providerHeadquartersCourses',
+        () =>
+          this.courseRelationshipRepository.listPublishedRelatedCourses({
         ...options.courseFilters,
         providerHeadquartersCountryReferenceId: country.id,
         limit: pageSize,
       }),
-      this.relatedEditorial(CmsDomainTargetType.REFERENCE_COUNTRY, country.id, options.locale ?? 'ar'),
+        empty,
+      ),
+      graphOwnerRead(
+        readScope,
+        'editorialContent',
+        this.cmsRepository
+          ? () =>
+              this.relatedEditorial(CmsDomainTargetType.REFERENCE_COUNTRY, country.id, options.locale ?? 'ar')
+          : undefined,
+        [],
+      ),
+      graphOwnerRead(
+        readScope,
+        'academicPrograms',
+        this.universityRepository.listPublishedProgramGraph
+          ? () =>
+              this.universityRepository.listPublishedProgramGraph!({
+                countryReferenceId: country.id,
+                cursor: options.programCursor,
+                limit: pageSize,
+              })
+          : undefined,
+        { data: [], total: 0, majorTotal: 0, hasMore: false, nextCursor: null },
+      ),
     ]);
 
-    const academicPrograms: AcademicProgramGraphIdentity[] = universities.data.flatMap((university) =>
-      (university.academicPrograms ?? []).
-        filter((program) => program.status === 'PUBLISHED' || program.status === 'ACTIVE' || program.majorMappingState === 'CANONICALLY_MAPPED').
+    const academicPrograms = programPage.data.
         map((program) => ({
-          ownerId: program.id,
-          universityOwnerId: university.id,
-          universityPublicId: university.publicId,
-          universitySlug: university.slug,
-          universityDisplayName: university.displayName,
-          sourceProgramName: program.sourceProgramName,
-          degreeLevelId: program.degreeLevelId,
+      ...program,
           majorOwnerId: program.majorId,
-          majorMappingState: program.majorMappingState,
-          status: program.status,
-        })),
+    }),
     );
-    const canonicalMajorIds = [...new Set(academicPrograms
-      .filter((program) => program.majorMappingState === 'CANONICALLY_MAPPED' && Boolean(program.majorOwnerId))
-      .map((program) => program.majorOwnerId as string))];
-    const majors = canonicalMajorIds.length ? await this.majorRepository.findPublishedByIds(canonicalMajorIds) : [];
+    const canonicalMajorIds = [...new Set(
+        programPage.data
+          .map((program) => program.majorId)
+          .filter((id): id is string => Boolean(id)))];
+    const majors = await graphOwnerRead(
+      readScope,
+      'majors',
+      () => this.majorRepository.findPublishedByIds(canonicalMajorIds),
+      [],
+    );
+    if (readScope.collections.academicPrograms.state === 'AVAILABLE')
+      Object.assign(readScope.collections.academicPrograms, {
+        total: programPage.total,
+        hasMore: programPage.hasMore,
+        nextCursor: programPage.nextCursor,
+      });
+    readScope.collections.majors = {
+      ...readScope.collections.majors,
+      scope: 'PROGRAM_PAGE_SAMPLE',
+      total:
+        readScope.collections.academicPrograms.state === 'AVAILABLE'
+          ? programPage.majorTotal
+          : null,
+      hasMore: programPage.hasMore,
+      nextCursor: programPage.nextCursor,
+    };
 
     return {
+      readScope,
       subject: {
         ownerId: country.id,
         canonicalCode: country.iso2Code,
@@ -441,19 +575,19 @@ export class CrossDomainGraphReadService {
       relationships: {
         universities: {
           ...universities,
-          data: universities.data.map((university) => this.universityIdentity(university)),
+          data: universities.data.map((university) => this.universityIdentity(university, options.locale)),
         },
         academicPrograms,
-        majors: majors.map((major) => this.majorIdentity(major)),
+        majors: majors.map((major) => this.majorIdentity(major, options.locale)),
         scholarships: {
           ...scholarships,
-          data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship)),
+          data: scholarships.data.map((scholarship) => this.scholarshipIdentity(scholarship, options.locale)),
         },
         internationalTests: {
           ...internationalTests,
           pageSize: internationalTests.limit,
           totalPages: Math.ceil(internationalTests.total / Math.max(1, internationalTests.limit)),
-          data: internationalTests.data.map((test) => this.internationalTestIdentity(test)),
+          data: internationalTests.data.map((test) => this.internationalTestIdentity(test, options.locale)),
         },
         services: {
           ...services,
@@ -510,13 +644,15 @@ export class CrossDomainGraphReadService {
     }));
   }
 
-  private majorUniversityIdentity(university: UniversityDto, majorId: string): MajorUniversityGraphItem {
+  private majorUniversityIdentity(university: UniversityDto, majorId: string,
+    locale = 'ar',
+  ): MajorUniversityGraphItem {
     const programs = (university.academicPrograms ?? []).filter(
       (program): program is UniversityAcademicProgramReadDto & { majorId: string } =>
-        program.majorId === majorId && program.majorMappingState === 'CANONICALLY_MAPPED',
+        program.majorId === majorId && isPublicUniversityProgram(program),
     );
     return {
-      ...this.universityIdentity(university),
+      ...this.universityIdentity(university, locale),
       matchingPrograms: programs.map((program) => ({
         ownerId: program.id,
         sourceProgramName: program.sourceProgramName,
@@ -526,28 +662,42 @@ export class CrossDomainGraphReadService {
     };
   }
 
-  private internationalTestIdentity(test: InternationalTestDto): StableEntityReadIdentity & { providerName: string; status: string } {
+  private internationalTestIdentity(test: InternationalTestDto,
+    locale = 'ar',
+  ): StableEntityReadIdentity & { providerName: string; status: string } {
     const extended = test as InternationalTestDto & { publicId?: string; slug?: string; displayName?: string };
     return {
       ownerId: test.id,
       publicId: extended.publicId,
       slug: extended.slug,
-      displayName: extended.displayName || test.localizedNameAr || test.localizedNameEn || test.canonicalName,
+      // Legacy localized fields carry no reviewed-locale evidence.
+      ...reviewedGraphLabel(
+        { displayName: extended.displayName, canonicalName: test.canonicalName },
+        locale,
+      ),
       providerName: test.providerName,
       status: test.status,
     };
   }
 
-  private majorIdentity(major: MajorDto): StableEntityReadIdentity {
-    return { ownerId: major.id, publicId: major.publicId, slug: major.slug, displayName: major.displayName };
+  private majorIdentity(major: MajorDto, locale = 'ar'): StableEntityReadIdentity {
+    return { ownerId: major.id, publicId: major.publicId, slug: major.slug,
+      ...reviewedGraphLabel(major, locale),
+    };
   }
 
-  private universityIdentity(university: UniversityDto): StableEntityReadIdentity {
-    return { ownerId: university.id, publicId: university.publicId, slug: university.slug, displayName: university.displayName };
+  private universityIdentity(university: UniversityDto, locale = 'ar'): StableEntityReadIdentity {
+    return { ownerId: university.id, publicId: university.publicId, slug: university.slug,
+      ...reviewedGraphLabel(university, locale),
+    };
   }
 
-  private scholarshipIdentity(scholarship: ScholarshipDto): StableEntityReadIdentity {
-    return { ownerId: scholarship.id, publicId: scholarship.publicId, slug: scholarship.slug, displayName: scholarship.displayName };
+  private scholarshipIdentity(scholarship: ScholarshipDto,
+    locale = 'ar',
+  ): StableEntityReadIdentity {
+    return { ownerId: scholarship.id, publicId: scholarship.publicId, slug: scholarship.slug,
+      ...reviewedGraphLabel(scholarship, locale),
+    };
   }
 
   private uniqueIdentities(items: StableEntityReadIdentity[]): StableEntityReadIdentity[] {
@@ -560,8 +710,9 @@ export class CrossDomainGraphReadService {
   }
 
   private pagination(options: CrossDomainGraphReadOptions): { page: number; pageSize: number } {
+    requireGraphFirstPage(options.page);
     return {
-      page: Math.max(1, options.page ?? 1),
+      page: 1,
       pageSize: Math.min(50, Math.max(1, options.pageSize ?? 12)),
     };
   }

@@ -1,3 +1,4 @@
+import { publicRelationshipRouteKey } from '../PublicGraphNavigationPolicy';
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
@@ -261,30 +262,30 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
     ? {
         ...activeCountryModal,
         scholarshipsCount: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.scholarships.total
+          ? relationshipGraph!.readScope?.collections.scholarships?.state === 'AVAILABLE' ? relationshipGraph!.relationships.scholarships.total : null
           : activeCountryModal.scholarshipsCount,
         universitiesCount: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.universities.total
+          ? relationshipGraph!.readScope?.collections.universities?.state === 'AVAILABLE' ? relationshipGraph!.relationships.universities.total : null
           : activeCountryModal.universitiesCount,
         featuredScholarships: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.scholarships.data.map((item) => ({
-              id: item.slug || item.publicId || item.ownerId,
+          ? relationshipGraph!.relationships.scholarships.data.filter(item => Boolean(publicRelationshipRouteKey(item))).map((item) => ({
+              id: publicRelationshipRouteKey(item)!,
               name: item.displayName,
               nameEn: item.displayName,
               meta: 'منحة منشورة مرتبطة بهذه الدولة',
             }))
           : activeCountryModal.featuredScholarships,
         featuredUniversities: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.universities.data.map((item) => ({
-              id: item.slug || item.publicId || item.ownerId,
+          ? relationshipGraph!.relationships.universities.data.filter(item => Boolean(publicRelationshipRouteKey(item))).map((item) => ({
+              id: publicRelationshipRouteKey(item)!,
               name: item.displayName,
               nameEn: item.displayName,
               meta: 'جامعة منشورة في هذه الدولة',
             }))
           : activeCountryModal.featuredUniversities,
         featuredMajors: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.majors.map((item) => ({
-              id: item.slug || item.publicId || item.ownerId,
+          ? relationshipGraph!.relationships.majors.filter(item => Boolean(publicRelationshipRouteKey(item))).map((item) => ({
+              id: publicRelationshipRouteKey(item)!,
               name: item.displayName,
               nameEn: item.displayName,
               meta: 'تخصص Canonical مرتبط عبر برامج جامعات الدولة',
@@ -298,8 +299,8 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
             }))
           : activeCountryModal.relatedArticles,
         requiredExams: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.internationalTests.data.map((item) => ({
-              id: item.slug || item.publicId || item.ownerId,
+          ? relationshipGraph!.relationships.internationalTests.data.filter(item => Boolean(publicRelationshipRouteKey(item))).map((item) => ({
+              id: publicRelationshipRouteKey(item)!,
               name: item.displayName,
               nameEn: item.displayName,
               meta: item.providerName,

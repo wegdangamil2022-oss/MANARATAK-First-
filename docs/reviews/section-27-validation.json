@@ -1,0 +1,80 @@
+{
+  "section": 27,
+  "date": "2026-10-12",
+  "branch": "fix/codex-section-27-cross-module-integration",
+  "base": "710347451cf72af1ad146cb1d3193edac99ec388",
+  "sourceStatus": "PARTIAL_SOURCE_IMPLEMENTATION_SECTION_NOT_CLOSED",
+  "checks": [
+    {
+      "command": "node scripts/verify-cross-module-source-closure.mjs",
+      "status": "PASS_AT_CHECKPOINT",
+      "passed": 50,
+      "failed": 0,
+      "total": 50,
+      "durationSeconds": 24.29,
+      "runs": 1,
+      "evidence": "evidence/section-27/source-tests.txt",
+      "limits": "Checkpoint precedes compiler fixes and final parent/count, timeout, country navigation/count, private owner history, public-version ID and issuer activation refinements. No final rerun."
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -b apps/api apps/admin apps/web",
+      "status": "FOUR_INITIAL_DIAGNOSTICS_CORRECTED_WITHOUT_RERUN",
+      "exitCode": 2,
+      "diagnostics": 4,
+      "runs": 1,
+      "evidence": "evidence/section-27/typecheck.txt",
+      "corrections": [
+        "Nullable test variant access uses optional chaining.",
+        "Test graph passes options.locale.",
+        "Remove accidental testVariant/testVersion joined-read fields from admission persistence input."
+      ],
+      "limits": "Final source compiler status unknown; no rerun."
+    },
+    {
+      "command": "TypeScript AST parse diagnostics over final changed/new TS/TSX files",
+      "status": "PASS_SYNTAX_ONLY",
+      "files": 37,
+      "parseDiagnostics": 0,
+      "runs": 1,
+      "evidence": "evidence/section-27/syntax.txt",
+      "limits": "Syntax only; does not replace the failed semantic compiler check."
+    },
+    {
+      "command": "git diff --cached --check",
+      "status": "PASS",
+      "exitCode": 0,
+      "runs": 1,
+      "evidence": "evidence/section-27/whitespace.txt"
+    }
+  ],
+  "testsRepeated": false,
+  "section25TestsRepeated": false,
+  "heavyTests": false,
+  "e2e": false,
+  "databaseConnections": false,
+  "databaseMutations": false,
+  "schemaChanged": false,
+  "migrationsApplied": false,
+  "providerRequests": false,
+  "browserVerification": false,
+  "serverStarted": false,
+  "liveAPIRequests": false,
+  "apiFixture": "Direct router handler with mocked request/response; no HTTP listener.",
+  "ciWorkflow": "PR-only cross-module-contracts.yml prepared, not executed here.",
+  "runtimeVerification": "DEFERRED_AFTER_SECTION_28",
+  "productionDecision": "NO_PRODUCTION_APPROVAL",
+  "mainMerged": false,
+  "deployed": false,
+  "otherChatBranchInspected": "origin/fix/codex-recurring-ci-errors@82ccb8b0",
+  "otherChatBranchMerged": false,
+  "openCapabilities": [
+    "XMI-024 canonical application cycles",
+    "XMI-025 governed issuer affiliations",
+    "XMI-026 owner discovery integration",
+    "XMI-029 private document readiness",
+    "XMI-030 complete multi-owner lifecycle protocol",
+    "XMI-032 live integrity API/UI",
+    "XMI-033 complete source/API/live regression matrix",
+    "XMI-FG-038 Admin relational discovery"
+  ]
+}

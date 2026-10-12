@@ -3,6 +3,7 @@ import {
   assertStudentIntegrationEvent,
   IStudentWorkspaceDeliveryCache,
   IStudentWorkspaceRepository,
+  IStudentSavedItemHydrationGateway,
   SaveStudentItemDto,
   StudentDashboardSummaryDto,
   StudentRecentActivityDto,
@@ -29,6 +30,7 @@ export class StudentWorkspaceUseCases {
     private readonly repository: IStudentWorkspaceRepository,
     private readonly deliveryCache?: IStudentWorkspaceDeliveryCache | null,
     private readonly assetReferences?: AssetReferencePolicy,
+    private readonly savedOwners: IStudentSavedItemHydrationGateway[] = [],
   ) {}
 
   public async upsertWorkspace(data: UpsertStudentWorkspaceDto): Promise<StudentWorkspaceDto> {
@@ -107,7 +109,30 @@ export class StudentWorkspaceUseCases {
       throw new Error('Unsupported saved item type');
     }
     if (!data.entityId.trim()) throw new Error('entityId is required');
-    return this.mutate(data.studentReferenceId, 'saved-item-updated', () => this.repository.saveItem(data));
+    const workspace = await this.requireReadableWorkspace(data.studentReferenceId);
+    if (workspace.status === StudentWorkspaceStatus.SUSPENDED)
+      throw new Error('STUDENT_WORKSPACE_SUSPENDED');
+    const gateway = this.savedOwners.find((owner) => owner.supports(data.entityType));
+    if (!gateway) throw new Error('STUDENT_SAVED_OWNER_NOT_INTEGRATED');
+    let owner;
+    try {
+      owner = await gateway.hydrate({
+        ...data,
+        id: 'CANONICAL_READ',
+        savedAt: new Date(),
+        updatedAt: new Date(),
+      });
+    } catch {
+      throw new Error('STUDENT_SAVED_OWNER_UNAVAILABLE');
+    }
+    if (!owner?.available || !owner.ownerId) throw new Error('STUDENT_SAVED_OWNER_NOT_PUBLIC');
+    const canonical = {
+      ...data,
+      entityId: owner.ownerId,
+      entitySlug: owner.slug ?? null,
+      displayName: owner.displayName ?? null,
+    };
+    return this.mutate(data.studentReferenceId, 'saved-item-updated', () => this.repository.saveItem(canonical));
   }
 
   public async removeSavedItem(

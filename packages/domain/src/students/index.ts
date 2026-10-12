@@ -319,7 +319,8 @@ export interface StudentSupportWorkspaceDetailDto extends StudentSupportWorkspac
     services: {source:'P20';queriedAt:string;returned:number;limit:number;complete:boolean;countSource?:'LIVE_OWNER';freshness?:'OWNER_READ';lastSyncedAt?:null} | null;
   };
   learning?: StudentCourseProgressDto[];
-  certificates?: Array<Pick<StudentCertificateProjectionDto,'id'|'publicId'|'serialNumber'|'verificationCode'|'status'|'courseDisplayName'|'issuedAt'|'expiresAt'>>;
+  certificates?: Array<Pick<StudentCertificateProjectionDto,
+      | 'id'|'publicId'|'serialNumber'|'verificationCode'|'status'|'courseDisplayName'|'issuedAt'|'expiresAt'>>;
 
   provisioningHealth: {
     state: 'HEALTHY' | 'PENDING' | 'FAILED';
@@ -379,6 +380,22 @@ export interface StudentSupportTrackerHistoryPage {
 }
 
 export interface IStudentApplicationTrackerRepository {
+  /** Internal bounded P15 pull reconciliation; never exposed as a public/student list. */
+  listOwnerReconciliationPage?(
+    cursor?: string,
+    limit?: number,
+  ): Promise<{
+    items: Array<
+      Pick<StudentApplicationTrackerDto, 'id' | 'studentReferenceId' | 'scholarshipId' | 'version'>
+    >;
+    nextCursor: string | null;
+  }>;
+  reconcileOwnerFacts?(
+    studentReferenceId: string,
+    trackerId: string,
+    expectedVersion: number,
+    owner: { scholarshipId: string; slug: string | null; deadlineAt: Date | null },
+  ): Promise<boolean>;
   listSupportHistory(studentReferenceId:string,trackerId:string,limit?:number,cursor?:string):Promise<StudentSupportTrackerHistoryPage>;
   listSupportPage(studentReferenceId: string, input: { limit?: number; cursor?: string }): Promise<StudentSupportApplicationTrackerPage>;
   create(data: CreateStudentApplicationTrackerDto): Promise<StudentApplicationTrackerDto>;

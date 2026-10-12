@@ -1,18 +1,18 @@
+import { isPublicScholarshipUniversityLink } from '@manaratak/domain';
 import type { PublicScholarshipDto, ScholarshipDto } from '@manaratak/domain';
 
 /** Public scholarship shape: explicit allowlist, never a spread of the mutable owner record. */
 export function projectPublishedScholarship(source: ScholarshipDto, displayName: string): PublicScholarshipDto {
   const resolved = (s: unknown) => String(s ?? '').toUpperCase() === 'RESOLVED';
-  const httpsUrl = (s: unknown) => typeof s === 'string' && /^https:\/\//i.test(s) ? s : null;
+  const httpsUrl = (s: unknown) => (typeof s === 'string' && /^https:\/\//i.test(s) ? s : null);
   const majorPublished = (value: unknown) => {
     const major = (value as { major?: { status?: string } })?.major;
     return major?.status === 'PUBLISHED';
   };
-  const institutionPublished = (value: unknown) => {
-    const row = value as { university?: { status?: string }; academicProgram?: { status?: string; majorMappingState?: string } };
-    if (row.university?.status !== 'PUBLISHED') return false;
-    return !row.academicProgram || (row.academicProgram.status === 'ACTIVE' && row.academicProgram.majorMappingState === 'CANONICALLY_MAPPED');
-  };
+  const institutionPublished = (value: unknown) => isPublicScholarshipUniversityLink(value as Parameters<typeof isPublicScholarshipUniversityLink>[0]);
+  const testPublished = (value: unknown) =>
+    (value as { internationalTest?: { status?: string } })?.internationalTest?.status ===
+    'PUBLISHED';
   return {
     publicId: source.publicId, slug: source.slug, canonicalName: source.canonicalName,
     displayName, providerName: source.providerName,
@@ -27,30 +27,37 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
     isFullyFunded: source.isFullyFunded, amountMinorUnits: source.amountMinorUnits,
     amountCurrencyCode: source.amountCurrencyCode, fundingCoverage: source.fundingCoverage,
     coverageDetails: source.coverageDetails, duration: source.duration, currency: source.currency,
-    benefits: (source.benefits ?? []).map(b => ({
+    benefits: (source.benefits ?? []).map((b) => ({
       benefitKey:b.benefitKey,benefitTypeCode:b.benefitTypeCode,coverageTypeCode:b.coverageTypeCode,
       amount:b.amount,currencyReferenceId:b.currencyReferenceId,valueText:b.valueText,
       durationText:b.durationText,frequencyCode:b.frequencyCode,isCovered:b.isCovered,isOptional:b.isOptional,
       displayOrder:b.displayOrder,
     })),
-    degreeTargets: (source.degreeTargets ?? []).filter(d => d.degreeLevelId && resolved(d.resolutionStatus))
-      .map(d => ({targetKey:d.targetKey,degreeLevelId:d.degreeLevelId,sourceLabel:d.sourceLabel,resolutionStatus:'RESOLVED'})),
-    majorTargets: (source.majorTargets ?? []).filter(m => m.majorId && resolved(m.resolutionStatus) && majorPublished(m))
-      .map(m => ({targetKey:m.targetKey,majorId:m.majorId,sourceLabel:m.sourceLabel,resolutionStatus:'RESOLVED'})),
-    eligibilityItems: (source.eligibilityItems ?? []).filter(e =>
+    degreeTargets: (source.degreeTargets ?? []).filter((d) => d.degreeLevelId && resolved(d.resolutionStatus))
+      .map((d) => ({targetKey:d.targetKey,degreeLevelId:d.degreeLevelId,sourceLabel:d.sourceLabel,resolutionStatus:'RESOLVED'})),
+    majorTargets: (source.majorTargets ?? []).filter((m) => m.majorId && resolved(m.resolutionStatus) && majorPublished(m))
+      .map((m) => ({targetKey:m.targetKey,majorId:m.majorId,sourceLabel:m.sourceLabel,resolutionStatus:'RESOLVED'})),
+    eligibilityItems: (source.eligibilityItems ?? []).filter(
+        (e) =>
       (resolved(e.resolutionStatus) || ![e.countryReferenceId,e.degreeLevelId,e.majorId,e.internationalTestId].some(Boolean)) &&
-      (!e.majorId || majorPublished(e)))
-      .map(e => ({itemKey:e.itemKey,itemTypeCode:e.itemTypeCode,operatorCode:e.operatorCode,
+      (!e.majorId || majorPublished(e)) &&
+          (!e.internationalTestId || testPublished(e)),
+      )
+      .map((e) => ({itemKey:e.itemKey,itemTypeCode:e.itemTypeCode,operatorCode:e.operatorCode,
         valueText:e.valueText,minimumValue:e.minimumValue,maximumValue:e.maximumValue,
         countryReferenceId:e.countryReferenceId,degreeLevelId:e.degreeLevelId,
         majorId:e.majorId,internationalTestId:e.internationalTestId,
         isRequired:e.isRequired,priorityOrder:e.priorityOrder})),
-    requiredDocumentItems: (source.requiredDocumentItems ?? []).filter(d => !d.internationalTestId || resolved(d.resolutionStatus))
-      .map(d => ({documentKey:d.documentKey,documentTypeCode:d.documentTypeCode,
+    requiredDocumentItems: (source.requiredDocumentItems ?? []).filter((d) => !d.internationalTestId || (resolved(d.resolutionStatus) && testPublished(d)))
+      .map((d) => ({documentKey:d.documentKey,documentTypeCode:d.documentTypeCode,
         displayName:d.displayName,description:d.description,internationalTestId:d.internationalTestId,
         isRequired:d.isRequired,displayOrder:d.displayOrder})),
-    universityLinks: (source.universityLinks ?? []).filter(u => resolved(u.resolutionStatus) && u.universityId && institutionPublished(u))
-      .map(u => ({linkKey:u.linkKey,universityId:u.universityId,academicProgramId:u.academicProgramId,
+    universityLinks: (source.universityLinks ?? []).filter(
+        (u) => resolved(u.resolutionStatus) &&
+          (u.universityId || u.academicProgramId) && institutionPublished(u))
+      .map((u) => ({linkKey:u.linkKey,universityId:u.universityId ??
+          (u as unknown as { academicProgram?: { universityId?: string } }).academicProgram
+            ?.universityId,academicProgramId:u.academicProgramId,
         relationshipTypeCode:u.relationshipTypeCode,resolutionStatus:'RESOLVED'})),
   } as PublicScholarshipDto;
 }

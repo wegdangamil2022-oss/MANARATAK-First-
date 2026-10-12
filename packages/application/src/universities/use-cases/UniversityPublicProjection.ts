@@ -1,8 +1,9 @@
+import { isPublicAdmissionRequirement, isPublicUniversityProgram } from '@manaratak/domain';
 import type { PublicUniversityDto, UniversityDto } from '@manaratak/domain';
 
 type PublicRow = Record<string, unknown>;
 const record = (value: unknown): PublicRow =>
-  value && typeof value === 'object' && !Array.isArray(value) ? value as PublicRow : {};
+  value && typeof value === 'object' && !Array.isArray(value) ? (value as PublicRow) : {};
 
 /**
  * Public Phase-11 projection. This is a strict allowlist, not a redaction of
@@ -10,13 +11,13 @@ const record = (value: unknown): PublicRow =>
  */
 function fields(source: unknown, allowed: readonly string[]): PublicRow {
   const row = record(source);
-  return Object.fromEntries(allowed.filter(key => key in row).map(key => [key, row[key]]));
+  return Object.fromEntries(allowed.filter((key) => key in row).map((key) => [key, row[key]]));
 }
 
 function activeRows(value: unknown, keys: readonly string[]): PublicRow[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(row => record(row).status === undefined || record(row).status === 'ACTIVE')
-    .map(row => fields(row, keys));
+  return value.filter((row) => record(row).status === undefined || record(row).status === 'ACTIVE')
+    .map((row) => fields(row, keys));
 }
 
 const campusKeys = ['id', 'name', 'campusType', 'address', 'countryReferenceId', 'regionReferenceId',
@@ -38,18 +39,11 @@ export function projectPublicUniversity(university: UniversityDto): PublicUniver
     'internationalAdmissions', 'availableDegrees', 'studyModes', 'tuitionReferences',
   ]);
   const safeTranslations = (university.translations ?? [])
-    .filter(item => item.reviewStatus === 'PUBLISHED' && item.displayName)
-    .map(item => [item.locale, item.displayName as string] as const);
+    .filter((item) => item.reviewStatus === 'PUBLISHED' && item.displayName)
+    .map((item) => [item.locale, item.displayName as string] as const);
   const programs = (university.academicPrograms ?? [])
-    .filter(program => program.status === 'ACTIVE' &&
-      program.majorMappingState === 'CANONICALLY_MAPPED' && Boolean(program.majorId) &&
-      record(program).major !== undefined &&
-      record(record(program).major).status === 'PUBLISHED' &&
-      (Array.isArray(record(record(program).major).levelProfiles) &&
-        (record(record(program).major).levelProfiles as Array<{ degreeLevelId?: string; status?: string; currentPublishedVersionId?: string | null }>)
-          .some(profile => profile.degreeLevelId === program.degreeLevelId &&
-            profile.status === 'PUBLISHED' && Boolean(profile.currentPublishedVersionId))))
-    .map(program => ({
+    .filter(isPublicUniversityProgram)
+    .map((program) => ({
       id: program.id,
       sourceProgramName: program.sourceProgramName,
       organizationUnitId: program.organizationUnitId,
@@ -59,8 +53,8 @@ export function projectPublicUniversity(university: UniversityDto): PublicUniver
       majorMappingState: program.majorMappingState,
       campusIds: [...(program.campusIds ?? [])],
       admissionRequirements: (program.admissionRequirements ?? [])
-        .filter(req => req.status === 'ACTIVE' && req.internationalTest?.status === 'PUBLISHED')
-        .map(req => ({
+        .filter(isPublicAdmissionRequirement)
+        .map((req) => ({
           ...fields(req, requirementKeys),
           internationalTest: fields(req.internationalTest, ['slug', 'displayName', 'canonicalName']),
         })),
@@ -82,9 +76,10 @@ export function projectPublicUniversity(university: UniversityDto): PublicUniver
     tuitionProfiles: activeRows(university.tuitionProfiles, tuitionKeys),
     accommodationProfiles: activeRows(university.accommodationProfiles, accommodationKeys),
     rankings: activeRows(university.rankings, rankingKeys),
-    admissionRequirements: activeRows(university.admissionRequirements, requirementKeys),
+    // Legacy unjoined rows have no owner publication proof and remain internal.
+    admissionRequirements: [],
     accreditations: (university.accreditations ?? [])
-      .filter(item => record(item).reviewStatus === 'APPROVED')
-      .map(item => fields(item, ['name', 'organization', 'officialUrl', 'note', 'validFrom', 'validUntil'])),
+      .filter((item) => record(item).reviewStatus === 'APPROVED')
+      .map((item) => fields(item, ['name', 'organization', 'officialUrl', 'note', 'validFrom', 'validUntil'])),
   } as unknown as PublicUniversityDto;
 }

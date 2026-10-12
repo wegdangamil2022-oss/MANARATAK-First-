@@ -51,7 +51,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       const identity=await this.identities.findById(studentReferenceId);
       const roles=await this.assignments.findByIdentityId(studentReferenceId);
       if(identity?.type!=='Human'||identity.status!=='ACTIVE'||
-         !roles.some(role=>role.roleId==='student'))
+         !roles.some((role) =>role.roleId==='student'))
         throw new Error('STUDENT_OWNER_CATCHUP_ROLE_NOT_ACTIVE');
       await this.catchUpFromOwners(roleEventId,studentReferenceId,roleAssignedAt,
         domain as 'COURSES'|'CERTIFICATES',cursor);
@@ -63,8 +63,19 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     if (!identity) throw new Error('STUDENT_WORKSPACE_IDENTITY_NOT_READY');
     if (identity.type !== 'Human') return;
     const roles = await this.assignments.findByIdentityId(event.studentReferenceId);
-    if (!roles.some(role => role.roleId === 'student')) return;
-    if (entry.domain === 'AUTHORIZATION' && !roles.some(role =>
+    if (entry.domain === 'AUTHORIZATION' && entry.eventType === 'RoleAssignmentRevoked') {
+      // Replay consults current assignments/identity; removing one of several grants cannot disable access.
+      if (roles.some((role) => role.roleId === 'student')) {
+        event.eventType =
+          identity.status === 'ACTIVE' ? 'StudentIdentityActivated' : 'StudentIdentitySuspended';
+      } else event.eventType = 'StudentIdentitySuspended';
+      if (identity.status === 'ARCHIVED' || identity.status === 'PURGED')
+        event.eventType = 'StudentIdentityArchived';
+      await this.students.consumeIntegrationEvent(event);
+      return;
+    }
+    if (!roles.some((role) => role.roleId === 'student')) return;
+    if (entry.domain === 'AUTHORIZATION' && !roles.some((role) =>
       role.roleId==='student' && role.id===entry.payload.assignmentId)) return;
     if (entry.domain === 'IDENTITY' && entry.eventType === 'IdentityStatusChanged.v1') {
       if (identity.status === 'ACTIVE') event.eventType = 'StudentIdentityActivated';
@@ -73,6 +84,15 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
       else return;
     }
     await this.students.consumeIntegrationEvent(event);
+    if (entry.domain === 'AUTHORIZATION' &&
+      entry.eventType === 'RoleAssignmentCreated' &&
+        identity.status === 'ACTIVE'
+    ) {
+      await this.students.consumeIntegrationEvent({ ...event, eventId: `${entry.id}:role-active`,
+        eventType: 'StudentIdentityActivated',
+        title: 'تمت إعادة تفعيل مساحة الطالب',
+      });
+    }
     // Role assignment may arrive after older P13/P14 events were already dispatched
     // while this principal had no student role. Reconcile from owner snapshots only.
     if (entry.domain === 'AUTHORIZATION' && event.eventType === 'StudentIdentityCreated' &&
@@ -99,7 +119,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
         (limit,cursor) => this.learning!.listPageForStudent
           ? this.learning!.listPageForStudent(studentReferenceId,limit,cursor)
           : this.legacyLearningPage(studentReferenceId,cursor),
-        async row => {
+        async (row) => {
           await this.students.consumeIntegrationEvent({
             eventVersion: '1.0', eventId: `${roleEventId}:learning:${row.enrollmentId}`,
             studentReferenceId, eventType: row.status === 'COMPLETED' ? 'CourseCompleted' : 'CourseProgressUpdated',
@@ -121,7 +141,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
         (limit,cursor) => this.certificates!.listPageForStudent
           ? this.certificates!.listPageForStudent(studentReferenceId,limit,cursor)
           : this.legacyCertificatePage(studentReferenceId,cursor),
-        async row => {
+        async (row) => {
           const eventType = row.status === 'REVOKED' ? 'CertificateRevoked' :
             row.status === 'ARCHIVED' ? 'CertificateArchived' :
             row.status === 'EXPIRED' ? 'CertificateExpired' : 'CertificateIssued';
@@ -140,7 +160,10 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
           });
         },onlyDomain==='CERTIFICATES'?startCursor:undefined);
     }
-    if(onlyDomain==='COURSES'&&!this.learning || onlyDomain==='CERTIFICATES'&&!this.certificates)
+    if(
+      (onlyDomain==='COURSES'&&!this.learning) ||
+      (onlyDomain==='CERTIFICATES'&&!this.certificates)
+    )
       throw new Error('STUDENT_OWNER_CATCHUP_READER_UNAVAILABLE');
   }
 
@@ -168,7 +191,8 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
     for(let index=0;index<4;index++){
       const page=await read(50,cursor);
       if(!Array.isArray(page.items)||page.items.length>50||
-          typeof page.nextCursor!=='string'&&page.nextCursor!==null)
+        (typeof page.nextCursor!=='string'&&page.nextCursor!==null)
+      )
         throw new Error('STUDENT_OWNER_CATCHUP_PAGE_INVALID');
       if(page.nextCursor && (!page.items.length||page.nextCursor===cursor||seen.has(page.nextCursor)))
         throw new Error('STUDENT_OWNER_CATCHUP_CURSOR_INVALID');
@@ -186,7 +210,8 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
 
   private map(entry: TransactionalOutboxEntry): StudentWorkspaceIntegrationEventDto | null {
     const payload = entry.payload as Record<string, unknown>;
-    if (entry.domain === 'AUTHORIZATION' && entry.eventType === 'RoleAssignmentCreated' && payload.roleId === 'student') {
+    if (entry.domain === 'AUTHORIZATION' &&
+      ['RoleAssignmentCreated', 'RoleAssignmentRevoked'].includes(entry.eventType) && payload.roleId === 'student') {
       if (entry.aggregate?.aggregateType !== 'ROLE_ASSIGNMENT' ||
           entry.aggregate.aggregateId !== payload.assignmentId ||
           (entry.metadata?.schemaVersion !== '1.0.0' &&
@@ -242,7 +267,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
         metadata.status = entry.eventType === 'CertificateRevoked' ? 'REVOKED' :
           entry.eventType === 'CertificateArchived' ? 'ARCHIVED' :
           entry.eventType === 'CertificateExpired' ? 'EXPIRED' :
-          entry.eventType === 'CertificateRenewed' ? 'ACTIVE' : metadata.status ?? 'ACTIVE';
+          entry.eventType === 'CertificateRenewed' ? 'ACTIVE' : (metadata.status ?? 'ACTIVE');
       }
       return this.event(entry, studentReferenceId, entry.eventType, 'تم تحديث حالة الشهادة', metadata, certificateId);
     }
@@ -259,7 +284,7 @@ export class StudentWorkspaceOutboxDeliveryGateway implements IOutboxDeliveryGat
         courseId,
         enrollmentId: payload.enrollmentId,
         progressPercentage: payload.progressPercentage,
-        status: entry.eventType === 'CourseCompleted' ? 'COMPLETED' : payload.enrollmentStatus ?? 'ACTIVE',
+        status: entry.eventType === 'CourseCompleted' ? 'COMPLETED' : (payload.enrollmentStatus ?? 'ACTIVE'),
         enrolledAt: payload.enrolledAt,
         completedAt: payload.completedAt,
         courseVersion: payload.courseVersion,
