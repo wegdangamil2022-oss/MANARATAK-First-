@@ -240,3 +240,4 @@ export * from './audit/PrismaAuditAlertEvaluationGateway';
 export * from './asset-platform/PrismaAssetGovernanceGateway';
 export * from './asset-platform/PrismaAssetLifecycleRecoveryGateway';
 export * from './authorization/PrismaGovernanceApprovalGateway';
+export * from './settings/PrismaSettingsGovernanceGateway';

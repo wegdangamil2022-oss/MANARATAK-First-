@@ -3465,32 +3465,64 @@ function SourceAuthoringPanel({ sources, isArabic, onChanged, onStaged }: {
 }
 
 
+type BatchDifference = { identityHash: string; beforeRecordId: string | null; afterRecordId: string | null;
+  outcome: 'ADDED' | 'MISSING_FROM_COMPARISON' | 'CHANGED' | 'UNKNOWN' };
+type BatchComparison = { counters: { added: number; missingFromComparison: number; changed: number; unchanged: number; unknown: number };
+  rows: BatchDifference[]; totalDifferences: number; nextCursor: string | null;
+  normalization?: { evidenceKnown: boolean; sameMappingVersions: boolean } };
 function BatchComparisonPanel({ batches, isArabic }: { batches: ImportBatch[]; isArabic: boolean }) {
   const [left, setLeft] = useState(''); const [right, setRight] = useState('');
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
-  const [result, setResult] = useState<{ counters: { added: number; missingFromComparison: number; changed: number; unchanged: number; unknown: number }; totalDifferences: number; normalization?: { evidenceKnown: boolean; sameMappingVersions: boolean } } | null>(null);
+  const [result, setResult] = useState<BatchComparison | null>(null);
+  const [rows, setRows] = useState<BatchDifference[]>([]);
   const lock = useRef(false); const generation = useRef(0);
   useEffect(() => () => { generation.current++; }, []);
-  const compare = async () => {
-    if (lock.current || !left || !right || left === right) return;
-    lock.current = true; setBusy(true); setMessage(''); setResult(null);
+  const clear = () => { generation.current++; setResult(null); setRows([]); setMessage(''); };
+  const compare = async (next = false) => {
+    if (lock.current || !left || !right || left === right || (next && !result?.nextCursor)) return;
+    lock.current = true; setBusy(true); setMessage('');
+    if (!next) { setResult(null); setRows([]); }
     const current = generation.current;
+    const params = new URLSearchParams({ againstBatchId: right });
+    if (next && result?.nextCursor) params.set('cursor', result.nextCursor);
     try {
-      const value = await adminApiClient.request<NonNullable<typeof result>>(`/admin/imports/batches/${encodeURIComponent(left)}/diff?againstBatchId=${encodeURIComponent(right)}`);
-      if (current === generation.current) setResult(value);
-    } catch { if (current === generation.current) setMessage(isArabic ? 'تعذرت المقارنة. اختر دفعتين من المصدر والقسم نفسيهما، حتى ٥٠٠٠ سجل لكل دفعة.' : 'Comparison unavailable. Choose batches from the same source and domain, up to 5,000 rows each.'); }
+      const value = await adminApiClient.request<BatchComparison>(`/admin/imports/batches/${encodeURIComponent(left)}/diff?${params}`);
+      if (!value || !Array.isArray(value.rows) || !value.counters ||
+          !Number.isSafeInteger(value.totalDifferences) || value.totalDifferences < 0 ||
+          (value.nextCursor !== null && (typeof value.nextCursor !== 'string' || !value.nextCursor || (next && value.nextCursor === result?.nextCursor))))
+        throw new Error('IMPORT_BATCH_DIFF_RESPONSE_INVALID');
+      if (current === generation.current) {
+        setResult(value);
+        setRows(previous => next ? [...previous, ...value.rows.filter(row => !previous.some(old => old.identityHash === row.identityHash))] : value.rows);
+      }
+    } catch { if (current === generation.current) setMessage(isArabic ? 'تعذرت المقارنة. اختر دفعتين من المصدر والقسم نفسيهما، حتى ٥٠٠٠ سجل لكل دفعة. إن تغيرت الدفعة، ابدأ مقارنة جديدة.' : 'Comparison unavailable. Choose batches from the same source and domain, up to 5,000 rows each. Start a new comparison if a batch changed.'); }
     finally { lock.current = false; if (current === generation.current) setBusy(false); }
   };
+  const outcome = (value: BatchDifference['outcome']) => ({
+    ADDED: isArabic ? 'مضاف' : 'Added', MISSING_FROM_COMPARISON: isArabic ? 'غير موجود في المقارنة' : 'Missing in comparison',
+    CHANGED: isArabic ? 'تغير' : 'Changed', UNKNOWN: isArabic ? 'غير محدد' : 'Unknown',
+  })[value];
   return <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
     <h2 className="font-black">{isArabic ? 'مقارنة دفعتين' : 'Compare two batches'}</h2>
     <p className="text-sm">{isArabic ? 'المقارنة تشمل السجلات المحفوظة بعد منع التكرار. غياب سجل ليس طلب حذف، ولا يمثل بالضرورة غيابه من المصدر.' : 'Compares persisted rows after deduplication. A missing row never requests deletion or proves absence from the source.'}</p>
     <fieldset disabled={busy} className="flex flex-wrap gap-3">
-      <label>{isArabic ? 'الدفعة الأولى' : 'First batch'} <select value={left} onChange={event => { setLeft(event.target.value); setResult(null); setMessage(''); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
-      <label>{isArabic ? 'الدفعة الثانية' : 'Second batch'} <select value={right} onChange={event => { setRight(event.target.value); setResult(null); setMessage(''); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
+      <label>{isArabic ? 'الدفعة الأولى' : 'First batch'} <select value={left} onChange={event => { setLeft(event.target.value); clear(); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
+      <label>{isArabic ? 'الدفعة الثانية' : 'Second batch'} <select value={right} onChange={event => { setRight(event.target.value); clear(); }}><option value="">—</option>{batches.map(batch => <option key={batch.id} value={batch.id}>{batch.id}</option>)}</select></label>
       <button type="button" disabled={!left || !right || left === right} onClick={() => void compare()} className="rounded border p-2">{isArabic ? 'قارن' : 'Compare'}</button>
     </fieldset>
-    {result && <dl className="flex flex-wrap gap-4">{Object.entries(result.counters).map(([key, count]) => <div key={key}><dt>{{ added: isArabic ? 'مضافة' : 'Added', missingFromComparison: isArabic ? 'غير موجودة في المقارنة' : 'Missing in comparison', changed: isArabic ? 'تغيّرت' : 'Changed', unchanged: isArabic ? 'لم تتغير' : 'Unchanged', unknown: isArabic ? 'غير محددة' : 'Unknown' }[key]}</dt><dd>{count}</dd></div>)}</dl>}
+    {result && <>
+      <dl className="flex flex-wrap gap-4">{Object.entries(result.counters).map(([key, count]) => <div key={key}><dt>{{ added: isArabic ? 'مضافة' : 'Added', missingFromComparison: isArabic ? 'غير موجودة في المقارنة' : 'Missing in comparison', changed: isArabic ? 'تغيّرت' : 'Changed', unchanged: isArabic ? 'لم تتغير' : 'Unchanged', unknown: isArabic ? 'غير محددة' : 'Unknown' }[key]}</dt><dd>{count}</dd></div>)}</dl>
+      <p>{isArabic ? 'الفروق المحملة' : 'Loaded differences'}: {rows.length} / {result.totalDifferences}</p>
+      <div className="overflow-x-auto"><table className="w-full text-start text-sm">
+        <thead><tr>{[isArabic ? 'الحالة' : 'Outcome', isArabic ? 'سجل الدفعة الأولى' : 'First batch record', isArabic ? 'سجل الدفعة الثانية' : 'Second batch record'].map(label => <th key={label} scope="col" className="p-2 text-start">{label}</th>)}</tr></thead>
+        <tbody>{rows.map(row => <tr key={row.identityHash}><td className="p-2">{outcome(row.outcome)}</td>
+          <td className="p-2"><code>{row.beforeRecordId ?? '—'}</code></td><td className="p-2"><code>{row.afterRecordId ?? '—'}</code></td></tr>)}</tbody>
+      </table></div>
+      {!rows.length && <p>{isArabic ? 'لا فروق في السجلات المحفوظة المقارنة.' : 'No differences in the compared persisted records.'}</p>}
+      {result.nextCursor && <button type="button" disabled={busy} onClick={() => void compare(true)} className="rounded border p-2">{isArabic ? 'تحميل الفروق التالية' : 'Load next differences'}</button>}
+    </>}
     {result && (!result.normalization?.evidenceKnown || !result.normalization.sameMappingVersions) && <p role="status">{isArabic ? 'نسخ المطابقة تختلف أو لا تتوفر أدلتها التاريخية؛ راجع قواعد التحويل عند تفسير الفروق.' : 'Mapping versions differ or historical evidence is unavailable. Review transformation rules when interpreting differences.'}</p>}
+    {busy && <p role="status">{isArabic ? 'جارٍ تحميل المقارنة' : 'Loading comparison'}</p>}
     {message && <p role="status">{message}</p>}
   </section>;
 }
@@ -3542,6 +3574,7 @@ function ImportMappingPanel({ sources, isArabic }: { sources: ImportSource[]; is
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   useEffect(() => {
     const current = ++generation.current; setProfiles([]); setPreview([]); setMessage('');
+    setFields([{ target: '', aliases: '', type: 'string', required: true, sample: '' }]); setReason('');
     void adminApiClient.request<{ data: MappingProfile[] }>(`/admin/imports/mapping-profiles?sourceId=${encodeURIComponent(sourceId)}&ownerDomain=${encodeURIComponent(domain)}`)
       .then(result => { if (current === generation.current) { setProfiles(result.data); if (result.data[0]) setFields(result.data[0].definition.fields.map(field => ({ ...field, aliases: field.aliases.join(', '), sample: '' }))); } })
       .catch(() => { if (current === generation.current) setMessage(isArabic ? 'تعذر تحميل المطابقة.' : 'Mapping unavailable.'); });

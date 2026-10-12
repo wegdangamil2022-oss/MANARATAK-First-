@@ -1,3 +1,4 @@
+import { SettingsGovernancePanel } from '../components/SettingsGovernancePanel';
 import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
 import { canEditSettingsAssignment, canEditSettingsScope } from './settingsAssignmentGovernance';
 import { SettingsIdentityScopePicker } from '../components/SettingsIdentityScopePicker';
@@ -34,6 +35,8 @@ interface Definition {
   isDeprecated: boolean;
   isSecret: boolean;
   revision?: string;
+  consumerDomain?: string;
+  lastChangedBy?: string;
 }
 
 interface Version {
@@ -66,8 +69,8 @@ function safeId(prefix: string) {
 
 function displayValue(value: unknown): string {
   if (value === undefined || value === null) return '—';
-  if (typeof value === 'string') return value;
-  return JSON.stringify(value);
+  const text = typeof value === 'string' ? value : JSON.stringify(value);
+  return text.length > 240 ? `${text.slice(0, 240)}…` : text;
 }
 
 export function SettingsAdminPage() {
@@ -123,7 +126,7 @@ export function SettingsAdminPage() {
     valueType: 'String' as ValueType,
     description: '',
     defaultValue: '',
-    validationRulesText: '',
+    validationRulesText: '', consumerDomain:'',
     isFeatureFlag: false,
     isSecret: false,
   });
@@ -444,7 +447,7 @@ export function SettingsAdminPage() {
           valueType: definitionForm.valueType,
           description: definitionForm.description.trim() || undefined,
           defaultValue,
-          validationRules,
+          validationRules, ...(definitionForm.consumerDomain ? {consumerDomain:definitionForm.consumerDomain}:{}),
           isFeatureFlag: definitionForm.isFeatureFlag,
           isSecret: definitionForm.isSecret,
         },
@@ -454,7 +457,7 @@ export function SettingsAdminPage() {
             valueType: 'String',
             description: '',
             defaultValue: '',
-            validationRulesText: '',
+            validationRulesText: '', consumerDomain:'',
             isFeatureFlag: false,
             isSecret: false,
           }),
@@ -697,6 +700,7 @@ export function SettingsAdminPage() {
           </select>
         </Field>
       </section>
+      <SettingsGovernancePanel definitions={definitions} onSaved={()=>{void refresh();}} />
       <div className="flex items-center gap-3" aria-label={isAr ? 'تصفح صفحات الإعدادات' : 'Settings pagination'}>
         <button type="button" disabled={loading || saving || search.trim() !== appliedSearch || !(activeTab === 'definitions' ? definitionCursors.length : assignmentCursors.length)}
           onClick={() => activeTab === 'definitions' ? setDefinitionCursors(previous => previous.slice(0, -1)) : setAssignmentCursors(previous => previous.slice(0, -1))}
@@ -765,6 +769,7 @@ export function SettingsAdminPage() {
                         <Td>
                           <span>{item.isDeprecated ? (isAr ? 'متوقف' : 'Deprecated') : (isAr ? 'فعال' : 'Active')}</span>
                           <p className="text-slate-500">{item.description}</p>
+                          <SettingsDefinitionMetadata definition={item} isAr={isAr} />
                           <button type="button" disabled={saving || !item.revision} onClick={() => void updateDefinition(item, false)}
                             className="ms-2 rounded border px-2 py-1">{isAr ? 'تعديل الوصف' : 'Edit description'}</button>
                           {!item.isDeprecated && <button type="button" disabled={saving || !item.revision} onClick={() => void updateDefinition(item, true)}
@@ -810,7 +815,7 @@ export function SettingsAdminPage() {
                       ...f,
                       valueType: e.target.value as ValueType,
                       defaultValue: '',
-                      validationRulesText: '',
+                      validationRulesText: '', consumerDomain:'',
                     }))
                   }
                   className="input"
@@ -859,6 +864,11 @@ export function SettingsAdminPage() {
                   )}
                 </Field>
               ) : null}
+              <Field label={isAr ? 'المجال المستهلك المعلن (اختياري)' : 'Declared consumer domain (optional)'}>
+                <select value={definitionForm.consumerDomain} onChange={event=>setDefinitionForm(form=>({...form,consumerDomain:event.target.value}))} className="input">
+                  <option value="">—</option>{knownDomainScopeKeys.map(domain=><option key={domain}>{domain}</option>)}
+                </select>
+              </Field>
               <Field label={isAr ? 'قيود اختيارية على القيمة (JSON)' : 'Optional value constraints (JSON)'}>
                 <textarea value={definitionForm.validationRulesText}
                   onChange={event => setDefinitionForm(form => ({ ...form, validationRulesText: event.target.value }))}
@@ -1173,6 +1183,63 @@ export function SettingsAdminPage() {
       ) : null}
     </div>
   );
+}
+
+function SettingsDefinitionMetadata({ definition, isAr }: { definition: Definition; isAr: boolean }) {
+  const [count, setCount] = useState<number | null>(null);
+  const [flag, setFlag] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const generation = useRef(0);
+  useEffect(() => { generation.current++; setCount(null); setFlag(''); setError(''); setLoading(false);
+    return () => { generation.current++; }; }, [definition.key, definition.revision]);
+  const inspect = async () => {
+    if (loading) return;
+    const current = generation.current; setLoading(true); setError('');
+    try {
+      const response = await adminApiClient.request<{ data: { assignmentCount: number } }>(
+        `/admin/settings/definitions/${encodeURIComponent(definition.key)}/impact`, { cache: 'no-store' });
+      if (!Number.isSafeInteger(response.data.assignmentCount) || response.data.assignmentCount < 0)
+        throw new Error('SETTINGS_IMPACT_RESPONSE_INVALID');
+      if (current === generation.current) setCount(response.data.assignmentCount);
+      if (definition.isFeatureFlag && !definition.isSecret) {
+        const value = await adminApiClient.request<{ data: { status: string; value?: unknown } }>(
+          `/settings/inspect/${encodeURIComponent(definition.key)}`, { cache: 'no-store' });
+        if (current === generation.current) setFlag(value.data.status === 'RESOLVED' && typeof value.data.value === 'boolean'
+          ? (value.data.value ? (isAr ? 'مفعّل' : 'Enabled') : (isAr ? 'معطل' : 'Disabled'))
+          : (isAr ? 'غير متاح' : 'Unavailable'));
+      }
+    } catch { if (current === generation.current) setError(isAr ? 'تعذر تحميل البيانات الإضافية.' : 'Additional metadata is unavailable.'); }
+    finally { if (current === generation.current) setLoading(false); }
+  };
+  return <details className="mt-2"><summary>{isAr ? 'بيانات التعريف' : 'Definition metadata'}</summary>
+    <p>{isAr ? 'آخر تحديث محفوظ' : 'Last persisted update'}: {definition.revision ?? '—'}</p>
+    <p>{isAr ? 'قواعد التحقق' : 'Validation rules'}: {definition.validationRules ? displayValue(definition.validationRules) : (isAr ? 'نوع القيمة فقط' : 'Value type only')}</p>
+    <p>{isAr?'المجال المستهلك المعلن':'Declared consumer domain'}: {definition.consumerDomain??'—'}</p>
+    <p>{isAr?'آخر محرر مسجل':'Last recorded editor'}: {definition.lastChangedBy??(isAr?'غير مسجل تاريخيًا':'Not recorded historically')}</p>
+    <DefinitionConsumerEditor definition={definition} isAr={isAr}/>
+
+    <button type="button" disabled={loading} onClick={() => void inspect()} className="rounded border px-2 py-1">{isAr ? 'تحميل عدد التعيينات وحالة الميزة' : 'Load assignment count and flag state'}</button>
+    {count !== null && <p>{isAr ? 'عدد التعيينات' : 'Assignment count'}: {count}</p>}
+    {flag && <p>{isAr ? 'القيمة الفعالة العامة' : 'Effective global value'}: {flag}</p>}
+    {error && <p role="status">{error}</p>}
+  </details>;
+}
+
+function DefinitionConsumerEditor({definition,isAr}:{definition:Definition;isAr:boolean}) {
+  const [domain,setDomain]=useState(definition.consumerDomain??'');const [reason,setReason]=useState('');
+  const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const command=useRef<{signature:string;key:string}|null>(null);
+  useEffect(()=>{setDomain(definition.consumerDomain??'');},[definition.consumerDomain,definition.revision]);
+  return <form onSubmit={event=>{event.preventDefault();if(busy||!definition.revision||!domain||reason.trim().length<3)return;
+    const body={key:definition.key,expectedRevision:definition.revision,consumerDomain:domain,changeReason:reason};const signature=JSON.stringify(body);
+    if(command.current?.signature!==signature)command.current={signature,key:createAdminIdempotencyKey()};
+    setBusy(true);setMessage('');void adminApiClient.request('/admin/settings/definitions/update',{method:'POST',body:JSON.stringify(body),idempotencyKey:command.current.key})
+      .then(()=>{command.current=null;setMessage(isAr?'حفظت البيانات؛ حدّث قائمة التعريفات.':'Saved; refresh the definition list.');})
+      .catch(()=>setMessage(isAr?'لم تحفظ البيانات؛ تحقق من النسخة والصلاحية.':'Not saved; check version and permission.')).finally(()=>setBusy(false));}}>
+    <label>{isAr?'المجال المستهلك المعلن':'Declared consumer domain'}<select disabled={busy} value={domain} onChange={event=>setDomain(event.target.value)}><option value="">—</option>{knownDomainScopeKeys.map(value=><option key={value}>{value}</option>)}</select></label>
+    <label>{isAr?'سبب التغيير':'Change reason'}<input disabled={busy} value={reason} maxLength={1000} onChange={event=>setReason(event.target.value)}/></label>
+    <button type="submit" disabled={busy||!domain||!definition.revision||reason.trim().length<3}>{isAr?'حفظ المجال':'Save domain'}</button>{message&&<p role="status">{message}</p>}
+  </form>;
 }
 
 function errorText(cause: unknown): string {

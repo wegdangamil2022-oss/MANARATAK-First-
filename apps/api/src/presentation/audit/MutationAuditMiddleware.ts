@@ -19,6 +19,7 @@ export class MutationAuditPolicy {
   private static readonly ADMIN_EXEMPTIONS = [
     /^\/(?:api\/v1\/)?admin\/academic-taxonomy\/(?:mappings\/preview|nodes\/validate)\/?$/,
     /^\/(?:api\/v1\/)?admin\/imports\/(?:major-catalogs|major-detail-dossiers)\/(?:bulk\/)?preview\/?$/,
+    /^\/(?:api\/v1\/)?admin\/settings\/governance\/preview\/?$/,
     /^\/(?:api\/v1\/)?admin\/imports\/mapping-profiles\/[^/]+\/preview\/?$/,
     /^\/(?:api\/v1\/)?admin\/student-tools\/[^/]+\/eligibility\/?$/, // Owner policy simulation: no mutation, quota or paid execution.
   ];

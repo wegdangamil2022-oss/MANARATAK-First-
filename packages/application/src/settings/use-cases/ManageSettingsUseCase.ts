@@ -45,6 +45,8 @@ export interface SettingDefinitionAdminView {
   isDeprecated: boolean;
   isSecret: boolean;
   revision?: string;
+  consumerDomain?: string;
+  lastChangedBy?: string;
 }
 
 export interface SettingVersionAdminView {
@@ -93,7 +95,7 @@ export class ManageSettingsUseCase {
       revision: definition.revision,
       key: definition.key.getValue(),
       valueType: definition.valueType,
-      description: definition.description,
+      description: definition.description, consumerDomain:definition.consumerDomain, lastChangedBy:definition.lastChangedBy,
       defaultValue: definition.isSecret ? undefined : definition.defaultValue,
       validationRules: definition.validationRules,
       isFeatureFlag: definition.isFeatureFlag,
@@ -177,7 +179,7 @@ export class ManageSettingsUseCase {
 
   private definitionView(definition: SettingDefinition): SettingDefinitionAdminView {
     return { id: definition.id, key: definition.key.getValue(), revision: definition.revision,
-      valueType: definition.valueType, description: definition.description,
+      valueType: definition.valueType, description: definition.description, consumerDomain:definition.consumerDomain, lastChangedBy:definition.lastChangedBy,
       defaultValue: definition.isSecret ? undefined : definition.defaultValue, validationRules: definition.validationRules, isFeatureFlag: definition.isFeatureFlag,
       isSecret: definition.isSecret, isDeprecated: definition.isDeprecated };
   }
@@ -229,6 +231,7 @@ export class ManageSettingsUseCase {
     context?: AtomicMutationRequestContext,
   ): Promise<void> {
     const key = new NamespacedKey(input.key);
+    if (input.consumerDomain && !permittedDomainScopes.has(input.consumerDomain)) throw new Error('SETTINGS_CONSUMER_DOMAIN_INVALID');
     const existing = await this.definitionRepo.findByKey(key);
     if (existing) {
       throw new Error(`Setting definition for key ${input.key} already exists.`);
@@ -248,7 +251,7 @@ export class ManageSettingsUseCase {
         id: input.id,
         key,
         valueType: input.valueType,
-        description: input.description,
+        description: input.description, consumerDomain:input.consumerDomain,
         defaultValue: input.defaultValue,
         validationRules: input.validationRules,
         isFeatureFlag: input.isFeatureFlag || false,
@@ -259,7 +262,7 @@ export class ManageSettingsUseCase {
     );
 
     const correlationId = context?.correlationId ?? randomUUID();
-    if (!this.atomicMutations) return this.definitionRepo.save(definition, { correlationId });
+    if (!this.atomicMutations) return this.definitionRepo.save(definition, { correlationId, actorId:context?.actorId });
     if (!this.definitionRepo.withTransaction || !context?.actorId)
       throw new Error('SETTINGS_ATOMIC_CONTEXT_REQUIRED');
     await this.atomicMutations.execute(
@@ -277,7 +280,7 @@ export class ManageSettingsUseCase {
           isFeatureFlag: input.isFeatureFlag,
         },
       },
-      (transaction) => this.definitionRepo.withTransaction!(transaction).save(definition, { correlationId }),
+      (transaction) => this.definitionRepo.withTransaction!(transaction).save(definition, { correlationId, actorId:context?.actorId }),
     );
   }
 
@@ -430,6 +433,7 @@ export class ManageSettingsUseCase {
   }
 
   public async updateDefinition(input: UpdateSettingDefinitionInput, context?: AtomicMutationRequestContext): Promise<void> {
+    if (input.consumerDomain && !permittedDomainScopes.has(input.consumerDomain)) throw new Error('SETTINGS_CONSUMER_DOMAIN_INVALID');
     const definition = await this.definitionRepo.findByKey(new NamespacedKey(input.key));
     if (!definition) throw new Error('SETTINGS_DEFINITION_NOT_FOUND');
     if (!definition.revision || definition.revision !== input.expectedRevision) throw new Error('SETTINGS_DEFINITION_CONFLICT');
@@ -437,15 +441,15 @@ export class ManageSettingsUseCase {
     if (input.description !== undefined && input.description.length > 2000) throw new Error('SETTINGS_DESCRIPTION_INVALID');
     if (input.isDeprecated !== undefined && input.isDeprecated !== true) throw new Error('SETTINGS_DEFINITION_REACTIVATION_UNAVAILABLE');
     const impact = input.isDeprecated ? await this.definitionImpact(input.key) : undefined;
-    const updated = definition.amendMetadata({ description: input.description?.trim(), isDeprecated: input.isDeprecated });
+    const updated = definition.amendMetadata({ description: input.description?.trim(), isDeprecated: input.isDeprecated, consumerDomain:input.consumerDomain });
     const correlationId = context?.correlationId ?? randomUUID();
-    if (!this.atomicMutations) return this.definitionRepo.save(updated, { correlationId });
+    if (!this.atomicMutations) return this.definitionRepo.save(updated, { correlationId, actorId:context?.actorId });
     if (!this.definitionRepo.withTransaction || !context?.actorId) throw new Error('SETTINGS_ATOMIC_CONTEXT_REQUIRED');
     await this.atomicMutations.execute({ domain: 'SETTINGS', aggregateType: 'SETTING_DEFINITION', aggregateId: definition.id,
       action: 'UPDATE_SETTING_DEFINITION', context: { ...context!, correlationId },
       outbox: { metadata: { settingsEventRole: 'CONTROL_PLANE_MUTATION', schemaVersion: 1 } },
       auditMetadata: { key: input.key, previousRevision: definition.revision, isDeprecated: updated.isDeprecated, changeReason, impact } },
-      transaction => this.definitionRepo.withTransaction!(transaction).save(updated, { correlationId }));
+      transaction => this.definitionRepo.withTransaction!(transaction).save(updated, { correlationId, actorId:context?.actorId }));
   }
 
   public async clearOverride(input: ClearSettingOverrideInput, context?: AtomicMutationRequestContext): Promise<string> {
@@ -469,7 +473,7 @@ export class ManageSettingsUseCase {
     metadata: Record<string, unknown>,
   ): Promise<string> {
     const correlationId = context?.correlationId ?? randomUUID();
-    if (!this.atomicMutations) await this.assignmentRepo.save(assignment, { correlationId });
+    if (!this.atomicMutations) await this.assignmentRepo.save(assignment, { correlationId, actorId:context?.actorId });
     else {
       if (!this.assignmentRepo.withTransaction || !context?.actorId)
         throw new Error('SETTINGS_ATOMIC_CONTEXT_REQUIRED');
@@ -483,7 +487,7 @@ export class ManageSettingsUseCase {
           outbox: { metadata: { settingsEventRole: 'CONTROL_PLANE_MUTATION', schemaVersion: 1 } },
           auditMetadata: { ...metadata, assignmentId: assignment.id },
         },
-        (transaction) => this.assignmentRepo.withTransaction!(transaction).save(assignment, { correlationId }),
+        (transaction) => this.assignmentRepo.withTransaction!(transaction).save(assignment, { correlationId, actorId:context?.actorId }),
       );
     }
     return assignment.id;

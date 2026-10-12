@@ -1,3 +1,4 @@
+import { PrismaSettingsDependencyGuard } from './PrismaSettingsDependencyGuard';
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -17,6 +18,8 @@ export interface SettingDefinitionRecordRow {
   description: string | null;
   defaultValue: unknown | null;
   validationRules?: unknown | null;
+  consumerDomain?: string | null;
+  lastChangedBy?: string | null;
   isFeatureFlag: boolean;
   isDeprecated: boolean;
   isSecret: boolean;
@@ -57,7 +60,7 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
       revision: row.updatedAt.toISOString(),
       key: new NamespacedKey(row.key),
       valueType: row.valueType as ValueType,
-      description: row.description || undefined,
+      description: row.description || undefined, consumerDomain: row.consumerDomain ?? undefined, lastChangedBy:row.lastChangedBy ?? undefined,
       defaultValue: row.defaultValue,
       validationRules: row.validationRules == null ? undefined : row.validationRules as SettingValidationRules,
       isFeatureFlag: row.isFeatureFlag,
@@ -102,9 +105,11 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
     return rows.map(row => this.mapToDomain(row));
   }
 
-  async save(definition: SettingDefinition, metadata?: { correlationId: string }): Promise<void> {
+  async save(definition: SettingDefinition, metadata?: { correlationId: string; actorId?: string }): Promise<void> {
     const keyStr = definition.key.getValue();
     const data = {
+      consumerDomain: definition.consumerDomain ?? null,
+      ...(metadata?.actorId ? { lastChangedBy:metadata.actorId } : {}),
       valueType: definition.valueType,
       description: definition.description || null,
       defaultValue: definition.defaultValue === undefined || definition.defaultValue === null ? Prisma.DbNull : definition.defaultValue as Prisma.InputJsonValue,
@@ -115,6 +120,8 @@ export class PrismaSettingDefinitionRepository implements ISettingDefinitionRepo
     };
     const events = [...definition.domainEvents];
     const persist = async (client: Prisma.TransactionClient) => {
+      const dependencies = new PrismaSettingsDependencyGuard(client);
+      await dependencies.lock(); await dependencies.assert([], undefined, definition.isDeprecated ? [keyStr] : []);
       await client.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`setting-definition:${keyStr}`}, 0))::text AS lock_result`;
       const existing = await client.settingDefinitionRecord.findUnique({ where: { key: keyStr } });
       if (events.some(event => event.constructor.name === 'SettingDefinitionCreatedEvent') && existing) {

@@ -1,3 +1,5 @@
+import { SettingsGovernanceUseCases } from '@manaratak/application';
+import { PrismaSettingsGovernanceGateway } from '@manaratak/infrastructure';
 import { GovernanceApprovalUseCases } from '@manaratak/application';
 import { PrismaGovernanceApprovalGateway } from '@manaratak/infrastructure';
 import { AuditAdministratorRecipientGateway } from '@manaratak/application';
@@ -1199,6 +1201,8 @@ export function registerDependencies(
     adminBootstrapVerifier: asFunction(({ prisma }) => new AdminBootstrapVerifier(prisma)).scoped(),
 
     // Settings
+    settingsGovernanceUseCases: asFunction(({ prisma, atomicDomainMutationCoordinator, identityRepository }) =>
+      new SettingsGovernanceUseCases(new PrismaSettingsGovernanceGateway(prisma), atomicDomainMutationCoordinator, identityRepository)).scoped(),
     manageSettingsUseCase: asFunction(({ settingDefinitionRepo, settingAssignmentRepo, configurationValidationService, atomicDomainMutationCoordinator, identityRepository }) => new ManageSettingsUseCase(settingDefinitionRepo, settingAssignmentRepo, configurationValidationService, atomicDomainMutationCoordinator, identityRepository)).scoped(),
     resolveConfigurationUseCase: asFunction(({ configurationResolutionService }) => new ResolveConfigurationUseCase(configurationResolutionService)).scoped(),
 

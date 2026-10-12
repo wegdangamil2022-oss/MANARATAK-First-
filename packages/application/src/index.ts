@@ -236,3 +236,4 @@ export * from './asset-platform/use-cases/RecoverAssetLifecycleUseCase';
 export * from './background-jobs/handlers/AssetLifecycleRecoveryBackgroundJobHandler';
 export * from './notification/AuditAdministratorRecipientGateway';
 export * from './authorization/use-cases/GovernanceApprovalUseCases';
+export * from './settings/use-cases/SettingsGovernanceUseCases';
