@@ -33,5 +33,14 @@
     "weeklyCopies": 12,
     "deletion": "retention-expiry-only-by-backup-service-role"
   },
-  "runtimeEvidenceStatus": "PENDING_NON_BLOCKING"
+  "runtimeEvidenceStatus": "REQUIRED_BEFORE_PRODUCTION",
+  "disposableRestoreAuthorization": {
+    "required": true,
+    "signedIndependentAssertion": true,
+    "distinctApprovers": 2,
+    "databaseSideSentinelRequired": true,
+    "restoreRole": "manaratak_restore_runner",
+    "namespace": "manaratak_restore_<32 lowercase hex>",
+    "mutationExecutionDefault": "DENIED"
+  }
 }

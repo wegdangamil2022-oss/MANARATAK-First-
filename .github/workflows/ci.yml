@@ -60,31 +60,42 @@ jobs:
             node scripts/git/validate-commit-message.mjs "$(git log -1 --format=%s)"
           fi
       - name: Source quality and cycle/accessibility gate
+        id: source-quality
         run: npm run quality:source
       - name: Cross-cutting source preflight
+        id: source-preflight
         run: npm run ci:preflight
       - name: CI and migration source regression contracts
+        id: source-regressions
         run: node --test tests/architecture/ci-runtime-regressions.test.mjs tests/remediation/w2-migration-recovery-source.test.mjs tests/remediation/m10-recovery-gate-exit.test.mjs
       - name: Install local Nginx contract fixture
         run: sudo apt-get update && sudo apt-get install -y nginx
       - name: Authoritative registered source-closure manifest
+        id: source-closure
         env:
           DATABASE_MUTATIONS_ALLOWED: 'false'
           DATABASE_ENVIRONMENT: source
         run: npm run ci:closure:manifest
       - name: Prisma source schema validate and client generation
+        id: prisma-source
         run: npm run db:source:verify
       - name: Typecheck all referenced workspaces
+        id: typecheck
         run: npm run typecheck
       - name: Verify Vercel TypeScript configuration and compilation
+        id: vercel-typecheck
         run: npm run vercel:typecheck
       - name: Lint source
+        id: lint
         run: npm run lint
       - name: Build all required applications and packages
+        id: build
         run: npm run build
       - name: Unit and source integration tests
+        id: unit
         run: npm run test:unit
       - name: Build deterministic immutable release artifacts
+        id: artifacts
         run: npm run release:artifacts && npm run release:verify
       - name: Upload immutable release artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
@@ -93,8 +104,15 @@ jobs:
           path: release-artifacts
           if-no-files-found: error
       - name: Write P12 source CI evidence
+        if: always()
+        env:
+          SOURCE_CI_STEPS_JSON: >-
+            {"source-quality":"${{ steps.source-quality.outcome }}","source-preflight":"${{ steps.source-preflight.outcome }}","source-regressions":"${{ steps.source-regressions.outcome }}","source-closure":"${{ steps.source-closure.outcome }}","prisma-source":"${{ steps.prisma-source.outcome }}","typecheck":"${{ steps.typecheck.outcome }}","vercel-typecheck":"${{ steps.vercel-typecheck.outcome }}","lint":"${{ steps.lint.outcome }}","build":"${{ steps.build.outcome }}","unit":"${{ steps.unit.outcome }}","artifacts":"${{ steps.artifacts.outcome }}"}
+          SOURCE_EVIDENCE_SIGNING_KEY: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SOURCE_EVIDENCE_SIGNING_KEY || '' }}
+          SOURCE_SECTION_REVIEW_LEDGER_JSON: ${{ vars.SOURCE_SECTION_REVIEW_LEDGER_JSON }}
         run: npm run ci:source:evidence
       - name: Upload P12 source CI evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
         with:
           name: p12-full-source-ci-closure

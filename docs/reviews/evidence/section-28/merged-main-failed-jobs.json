@@ -1,0 +1,18 @@
+[
+  {
+    "id": 114820930298,
+    "name": "Isolated Google AI Studio Web preview",
+    "failedSteps": [
+      "Run node scripts/aistudio/environment.mjs --check"
+    ],
+    "logs": "UNAVAILABLE"
+  },
+  {
+    "id": 114820930710,
+    "name": "Full source closure gates",
+    "failedSteps": [
+      "Cross-cutting source preflight"
+    ],
+    "logs": "UNAVAILABLE"
+  }
+]

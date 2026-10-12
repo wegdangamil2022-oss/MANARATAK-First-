@@ -1,0 +1,177 @@
+{
+  "section": 28,
+  "taskCount": 24,
+  "sourceDisposition": "IMPLEMENTATION_CHECKPOINT_INITIAL_FAILURE_CORRECTED_WITHOUT_RERUN",
+  "sectionClosed": false,
+  "productionDecision": "NO_GO",
+  "tasks": [
+    {
+      "id": "FSA-001",
+      "status": "OPEN_CI_EVIDENCE",
+      "sourceCheckpointValidated": false,
+      "disposition": "Historical metadata/failure job steps and current merged main failure recorded; detailed logs unavailable, current CI not green. New fixture suite failed to load, corrected without rerun.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-002",
+      "status": "SOURCE_GUARD_CORRECTED_AUTHORITY_PENDING",
+      "sourceCheckpointValidated": false,
+      "disposition": "Canonical repository, main/push/manual event checks, protected environments and explicit opt-in preserved; signed source/runtime/approval evidence required. No activation.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-003",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Correct shared readiness route; expected API base composition; public protocol/status/revision/timestamp/JSON proof.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-004",
+      "status": "MANDATORY_RUNTIME_GATE_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Disposable database migration/parity/FK/rollback/idempotency evidence mandatory for promotion; no database job executed or migration replayed.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-005",
+      "status": "MANDATORY_RUNTIME_GATE_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Built three-unit browser proof, exact SHA, production-equivalent routing/trace and26-domain matrix required; no browser runner/deployment performed.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-006",
+      "status": "MANDATORY_RUNTIME_GATE_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Five-chain canonical canary and attributable26-domain negative/lifecycle/locale assertions checked; actual runtime producers remain post28 prerequisites.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-007",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Exact200, no redirect, bounded JSON/HTML body, correct protocol/UP/AVAILABLE/revision, candidate built-unit proof. No live smoke.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-008",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Absent Web index503; Web/Admin build health and immutable SHA stamps; smoke verifies built HTML. No build/server start.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-009",
+      "status": "SOURCE_TOPOLOGY_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Three units and API ingress/TLS/CORS/cookie/CSRF proof required; separate API routing retained. Actual topology provisioning absent.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-010",
+      "status": "SOURCE_RUNTIME_REQUIREMENT_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Lock/schema/Node22/generatedPrisma/externalModule descriptor bound to signed artifact-only boot and runtime image evidence. No runtime-layer image built or unpacked boot.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-011",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "External expected SHA/repository, actualHEAD and tracked clean build, units/digest/size/path/SBOM checks; independent signatures and linked digest authority required.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-012",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Same-origin bounded terminal deployment reconciliation, immutableID, exact unit/source/artifact/image health. Accepted/partial/timeout not success; no controller call.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-013",
+      "status": "SOURCE_GUARD_CORRECTED_AUTHORITY_PENDING",
+      "sourceCheckpointValidated": false,
+      "disposition": "Canonical recovery repository, protected recovery-audit, opt-in and independent target/backup approval maintained. No scheduled drill activated.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-014",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Signed fresh target/database/server/host identity and two approvers; privileged/non-disposable/production/source-equal targets denied; DB sentinel independent, verified TLS. NoSQL executed.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-015",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Signed current same-snapshot backup controls and exactSHA restore/RPO/RTO/asset evidence mandatory before production. Live producer/configuration absent.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-016",
+      "status": "MANDATORY_RUNTIME_GATE_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Once-only/duplicates/reorder/crash/lease/dead-letter/privacy/ledger execution proof mandatory; no real charges/messages/workers/providers.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-017",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Separate structural-restorability versus measuredRPO5m/RTO60m; fail invalid/exceeded objectives. No timing drill executed.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-018",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Full backup/manifest/asset hash and containment/symlink/count/snapshot preflight beforeSQL; resource/epoch parity after isolated verification. No restore performed.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-019",
+      "status": "MANDATORY_RUNTIME_GATE_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Seven reproducible API/queue category SLO records require p95/p99/budgets/fixture/duration/error/pool/rate/lag facts; no load producer/run.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-020",
+      "status": "MANDATORY_RUNTIME_GATE_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "Signed rollback expand-contract/old-worker/ledger/incident-owner evidence required; no traffic shifting, automatic rollback or live data work.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-021",
+      "status": "MANDATORY_RUNTIME_GATE_CONTRACT_PREPARED",
+      "sourceCheckpointValidated": false,
+      "disposition": "AR/EN deep links, canonical/hreflang, unpublished404/private deny, no prototype and accessibility required; no deployed locale/browser exercise.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-022",
+      "status": "SOURCE_IMPLEMENTED_UNRECHECKED",
+      "sourceCheckpointValidated": false,
+      "disposition": "ActualCI step outcomes replace unconditionalpass; independent source/runtime/approval signatures and statuses; skipped/missing staysBLOCKED.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-023",
+      "status": "SOURCE_INDEX_PREPARED_OWNER_CURATING_PENDING",
+      "sourceCheckpointValidated": false,
+      "disposition": "Candidate SHA task/owner/fixture/suite/environment/outcome/time/artifact/reviewer inventory and required re-review. 679 heading-ID candidates needcuration; section27 remainsopen.",
+      "runtimeVerified": false
+    },
+    {
+      "id": "FSA-FG-024",
+      "status": "SOURCE_COVERAGE_PROTOCOL_PREPARED_PRODUCER_UI_UNWIRED",
+      "sourceCheckpointValidated": false,
+      "runtimeVerified": false,
+      "disposition": "Typed country/degree/teaching-language market coverage distinguishes availability/zero/partial/unsupported, mandatory versus optional and source evidence. Actual owner query adapter, canonical program-language model, approved market scope and diagnostics UI remain unwired; no synthetic owner fields/counts."
+    }
+  ]
+}

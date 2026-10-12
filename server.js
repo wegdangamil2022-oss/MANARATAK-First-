@@ -1,3 +1,4 @@
+import { inspectStaticBuild } from './scripts/release/lib/StaticBuildPolicy.mjs';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +19,11 @@ const candidates = [
 const distPath = candidates.find(p => fs.existsSync(p)) || candidates[0];
 const adminDistPath = path.resolve(__dirname, 'apps/admin/dist');
 
+// Build health proves static artifact presence/revision only, not API or production readiness.
+for (const [unit, route, directory] of [['web','/health/build',distPath],['admin','/admin/health/build',adminDistPath]]) {
+  app.get(route, (_req,res) => { const result=inspectStaticBuild(directory,unit,process.env.RELEASE_SOURCE_SHA); res.setHeader('Cache-Control','no-store'); res.status(result.status==='BUILT'?200:503).json(result); });
+}
+
 // The Admin app has a separate Vite base and must be served before the Web SPA fallback.
 if (fs.existsSync(path.join(adminDistPath, 'index.html'))) {
   app.use('/admin', express.static(adminDistPath, { maxAge: '1h' }));
@@ -36,7 +42,7 @@ app.use('/api', (_req, res) => {
 });
 
 // Serve static assets with cache headers
-if (fs.existsSync(distPath)) {
+if (fs.existsSync(path.join(distPath, 'index.html'))) {
   app.use(express.static(distPath, {
     maxAge: '1h',
     setHeaders: (res, filePath) => {
@@ -53,7 +59,7 @@ if (fs.existsSync(distPath)) {
 } else {
   // If dist isn't built yet in local dev/testing
   app.get('*', (req, res) => {
-    res.status(200).send('MANARATAK Platform is initializing. Please build web assets.');
+    res.status(503).set('Cache-Control', 'no-store').send('WEB_BUILD_UNAVAILABLE');
   });
 }
 

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "repository": "wegdangamil2022-oss/MANARATAK-First-",
+  "branch": "main",
+  "authorityStatus": "PENDING_SIGNED_OWNER_APPROVAL",
+  "sourceAndRuntimeAreSeparate": true,
+  "runtimeEvidenceRequiredForPromotion": true,
+  "maximumEvidenceAgeHours": 24,
+  "maximumRestoreEvidenceAgeHours": 168,
+  "units": ["api", "web", "admin"],
+  "mandatoryGates": ["source-ci", "database-parity", "built-browser", "cross-module-canary", "artifact-boot", "worker-effects", "security", "backup-restore", "load-slo", "rollback", "locale-indexing", "business-discovery"],
+  "runtimeScope": "POST_SECTION_28_ISOLATED_ACCEPTANCE_ONLY",
+  "automaticDeploymentAuthorized": false
+}

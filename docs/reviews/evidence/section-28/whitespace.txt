@@ -1,0 +1,3 @@
+git diff --cached --check
+exitCode=0
+No whitespace diagnostics at checkpoint; no repeat.

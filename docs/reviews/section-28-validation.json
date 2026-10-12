@@ -1,0 +1,102 @@
+{
+  "section": 28,
+  "date": "2026-10-12",
+  "branch": "fix/codex-section-28-release-source-gates",
+  "base": "e019b3273e1d79527fbd0a0fe5e33b9a861a0304",
+  "sectionClosed": false,
+  "sourceStatus": "INITIAL_CHECK_FAILURES_CORRECTED_WITHOUT_RERUN_FINAL_SOURCE_UNVERIFIED",
+  "checks": [
+    {
+      "command": "node --test tests/release/section28.test.mjs",
+      "runs": 1,
+      "status": "INITIAL_IMPORT_FAILURE_CORRECTED_WITHOUT_RERUN",
+      "exitCode": 1,
+      "passed": 0,
+      "failed": 1,
+      "countsMeaning": "One failed test-file load; behavior cases did not execute. No case-level success.",
+      "durationSeconds": 0.478,
+      "cause": "Import inserted before hashbang in verify-release-evidence.mjs.",
+      "correction": "Hashbang moved to first line.",
+      "evidence": "evidence/section-28/source-tests.txt"
+    },
+    {
+      "command": "Changed/new JavaScript node --check, JSON/YAML parse, TypeScript AST syntax checkpoint",
+      "runs": 1,
+      "status": "TWO_INITIAL_ERRORS_CORRECTED_WITHOUT_RERUN",
+      "exitCode": 1,
+      "counts": {
+        "javascript": 18,
+        "json": 11,
+        "yaml": 4,
+        "typescriptSyntax": 1
+      },
+      "errors": 2,
+      "corrections": [
+        "Hashbang first-line ordering.",
+        "Preserve raw job records as .jsonl instead of invalid .json."
+      ],
+      "evidence": "evidence/section-28/syntax-workflows.txt",
+      "limits": "Later manifest/pin/environment/W6/acceptance/source-provenance/server-identity/TLS refinements un-rechecked; not a semantic typecheck."
+    },
+    {
+      "command": "git diff --cached --check",
+      "runs": 1,
+      "status": "PASS_AT_CHECKPOINT",
+      "exitCode": 0,
+      "evidence": "evidence/section-28/whitespace.txt",
+      "limits": "Later small authority-list type hardening and metadata additions were not rechecked."
+    }
+  ],
+  "otherOperations": [
+    {
+      "command": "node scripts/aistudio/environment.mjs --write",
+      "kind": "DECLARATION_ONLY_GENERATION",
+      "variableNames": 276,
+      "secretValuesRead": false,
+      "validationRun": false
+    }
+  ],
+  "testsRepeated": false,
+  "section25TestsRepeated": false,
+  "section26TestsRepeated": false,
+  "section27TestsRepeated": false,
+  "typecheckRun": false,
+  "buildRun": false,
+  "heavyTests": false,
+  "e2e": false,
+  "databaseConnections": false,
+  "databaseMutations": false,
+  "migrationsApplied": false,
+  "prismaGenerationRun": false,
+  "providerRequests": false,
+  "realSmokeRun": false,
+  "realDeploymentControllerRequests": false,
+  "recoveryDrillRun": false,
+  "loadRun": false,
+  "serverStarted": false,
+  "secretBindingChanged": false,
+  "workflowDispatched": false,
+  "deploymentEnabled": false,
+  "productionDecision": "NO_GO",
+  "runtimeVerification": "POST_SECTION_28_ISOLATED_ACCEPTANCE_DEFERRED",
+  "sections26And27MainMerged": true,
+  "mainMergeCommit": "e019b3273e1d79527fbd0a0fe5e33b9a861a0304",
+  "upstreamRepairsPreserved": "a6d54974",
+  "section28MainMerged": false,
+  "ciAtMainMerge": {
+    "EnterpriseCI": "FAILURE",
+    "SourceArchitectureGuards": "SUCCESS",
+    "SecurityGates": "SUCCESS",
+    "ReleasePromotion": "SKIPPED",
+    "detailedJobLogs": "UNAVAILABLE",
+    "evidence": "evidence/section-28/merged-main-ci-observation.json"
+  },
+  "knownLimits": [
+    "Prior section27 source gaps remain; artifact ledger blocks production.",
+    "Task inventory has679 uncurated heading-ID candidates, not an authoritative issue/completion count.",
+    "Signed runtime proof producers, runtime images, authority keys, isolation sentinels, parity marker and approved launch scope need authorized operational provisioning.",
+    "Runtime acceptance contracts are not executed browser/database/worker/load/rollback suites.",
+    "FSA-FG024 owner query producer and UI are not wired.",
+    "Initial suite failed to load; corrected code has not been executed."
+  ]
+}

@@ -164,6 +164,21 @@
       "id": "section23-notifications",
       "classification": "SOURCE",
       "command": "npm run notifications:source:verify"
+    },
+    {
+      "id": "section26-dashboard-contracts",
+      "classification": "SOURCE",
+      "command": "node scripts/verify-dashboard-source-closure.mjs"
+    },
+    {
+      "id": "section27-cross-module-contracts",
+      "classification": "SOURCE",
+      "command": "node scripts/verify-cross-module-source-closure.mjs"
+    },
+    {
+      "id": "section28-release-contracts",
+      "classification": "SOURCE",
+      "command": "node --test tests/release/section28.test.mjs"
     }
   ],
   "registeredVerifierFiles": [
@@ -179,6 +194,8 @@
     "scripts/verify-certificates-source-closure.mjs",
     "scripts/verify-cms-source.mjs",
     "scripts/verify-courses-source-closure.mjs",
+    "scripts/verify-cross-module-source-closure.mjs",
+    "scripts/verify-dashboard-source-closure.mjs",
     "scripts/verify-finance-source-closure.mjs",
     "scripts/verify-health-readiness-source-closure.mjs",
     "scripts/verify-import-foundation-source.mjs",
@@ -224,5 +241,6 @@
     "scripts/verify-wp9-phase10-source-freeze.mjs",
     "scripts/verify/verify-final-repository-organization.mjs"
   ],
-  "runtimePendingManifest": "docs/remediation/W7_RUNTIME_PENDING_CHECKS.md"
+  "runtimePendingManifest": "docs/remediation/W7_RUNTIME_PENDING_CHECKS.md",
+  "runtimeReleasePolicy": "REQUIRED_BEFORE_PROMOTION_INDEPENDENT_SIGNED_EVIDENCE"
 }

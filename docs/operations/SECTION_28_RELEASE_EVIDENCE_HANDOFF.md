@@ -1,0 +1,23 @@
+# Section 28 source-to-runtime handoff
+
+Current source work is on `fix/codex-section-28-release-source-gates`, based on main merge `e019b327`. Production is blocked. This handoff is a specification; no infrastructure or credential binding was configured.
+
+Source phases and runtime acceptance are different. The 26-domain matrix, complete canary, database/migration parity, actual unpacked API/runtime layer, provider sandbox faults, measured SLOs, AR/EN/SEO and restore/rollback tests in `config/release/runtime-acceptance-contract.json` must run in an independently authorized disposable topology after prior source gaps are resolved. No real charges or student messages.
+
+Release requires a version-2 bundle with separately signed `source`, `runtime`, `approval` envelopes. Each envelope uses `{version:1,algorithm:"Ed25519",payload:<exact JSON UTF-8 string>,signature:<base64 Ed25519 signature>}`. Payloads bind canonical repository, candidate sha, checkedAt/expiresAt. Source/runtime trusted public keys must differ; the approval authority must be separate from both. Never accept an embedded verification key supplied by the evidence itself.
+
+- Source proof `kind: SOURCE_VERIFICATION`: actual CI gate result, SHA/run/step artifacts, inventory digest, section/task re-review ledger.
+- Runtime proof `kind: RUNTIME_VERIFICATION`: every mandatory gate with execution details, 26-domain matrix, topology and business coverage. A PASS label without the required isolated execution facts is insufficient.
+- Approval proof `kind: RELEASE_APPROVAL`: manifest digest, unit digests, source/runtime envelope digests (`sha256(payload + "." + signature)`), canonical repository, approved environments, two distinct approvers and approved launch markets.
+
+Current task inventory has 679 uncurated heading-ID candidates. Owners must curate the inventory and record actual task regression evidence at the candidate SHA. It is not a count of open bugs. Section 27 still has unresolved source capabilities, and the artifact ledger keeps that blocker. No signed status should assert those tasks closed from a merge alone.
+
+Protected environment/repository bindings are required for a future promotion: `MANARATAK_RELEASE_ENABLED`, three authority public keys, signed evidence bundle, deployment controller binding, and API/Web/Admin smoke origins. `RELEASE_SOURCE_SHA` must identify the running API; static units are stamped during immutable artifact production. Defaults do not authorize deployment. Keep existing protected validation/staging/production environments and approval controls.
+
+The deployment controller must return an immutable deployment ID and states ACCEPTED/PENDING/APPLYING/HEALTHY/FAILED/PARTIAL/CANCELLED. Polling is bounded; healthy requires all three exact source/artifact digests, runtime image digests and TLS unit endpoints. Transport acceptance cannot be called successful deployment. Smoke additionally checks real candidate readiness/build contracts.
+
+An isolated restore requires two-party signed target authorization, an exact disposable namespace/restore role, independent server identity and a protected database-side sentinel. The restore role must not own/write `manaratak_recovery_control.disposable_guard`, have superuser/create-role/create-database rights or target a declared production host/server/database. Provision minimum read access to server identity (`pg_control_system()`) and sentinel through the disposable environment authority; do not grant elevated mutation rights just to pass preflight. PostgreSQL connections require verified TLS; configure trusted PostgreSQL CA selection through the isolated environment. No provisioning SQL was executed or generated as an automatic bootstrap here.
+
+Signed restore inputs bind custom-format backup checksum, asset-manifest checksum, snapshot ID (`snapshot_<32 hex>`), asset count and capture time. Manifest assets are relative, contained, nonsymlink regular files with exact SHA-256. All inputs precede SQL. The restored `manaratak_recovery_snapshot` parity marker and actual isolated verification must agree with the approved snapshot. The marker/export producer is an operational prerequisite, not automatically created by this source work. Missing prerequisites deny execution. >5-minute RPO or >60-minute RTO is FAIL, even when structural restore succeeded.
+
+Observed main CI is red and detailed failed-step logs were unavailable; see section-28 evidence. The new source suite failed to load at its initial invocation; hashbang corrected without rerun. No successful final test or runtime outcome is asserted. Read `docs/reviews/section-28-validation.json` before treating this checkpoint as a verified release candidate.

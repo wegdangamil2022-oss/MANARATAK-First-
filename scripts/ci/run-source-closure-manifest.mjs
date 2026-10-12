@@ -12,4 +12,4 @@ for(const gate of manifest.gates){
   console.log(`RUN ${gate.id}: ${gate.command}`);
   childProcess.execSync(gate.command,{cwd:root,stdio:'inherit',shell:true,env:{...process.env,DATABASE_MUTATIONS_ALLOWED:process.env.DATABASE_MUTATIONS_ALLOWED??'false',DATABASE_ENVIRONMENT:process.env.DATABASE_ENVIRONMENT??'source'}});
 }
-console.log('SOURCE_CLOSURE_MANIFEST_RUN=PASS');
+console.log('SOURCE_CLOSURE_MANIFEST_RUN=PASS RUNTIME_STATUS=UNVERIFIED RELEASE_VERDICT=BLOCKED_WITHOUT_RUNTIME_EVIDENCE');

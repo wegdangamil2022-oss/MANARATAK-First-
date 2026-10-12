@@ -1,0 +1,27 @@
+name: Section 28 release source contracts
+on:
+  pull_request:
+    paths:
+      - 'scripts/release/**'
+      - 'scripts/recovery/**'
+      - 'scripts/ci/write-source-ci-evidence.mjs'
+      - 'config/release/**'
+      - 'config/recovery/**'
+      - 'server.js'
+      - 'tests/release/**'
+      - '.github/workflows/release-promotion.yml'
+      - '.github/workflows/recovery-restore-audit.yml'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/release-source-contracts.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-source-fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+      - run: node --test tests/release/section28.test.mjs

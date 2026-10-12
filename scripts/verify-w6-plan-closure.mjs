@@ -94,10 +94,10 @@ check('MNT-AUD-0066', 'provider-neutral DR contract, readiness and restore drill
   const drill = read('scripts/recovery/run-whole-platform-restore-drill.mjs');
   const workflow = read('.github/workflows/recovery-restore-audit.yml');
   return contract.kind === 'MANARATAK_PRODUCTION_RECOVERY_CONTRACT' &&
-    contract.runtimeEvidenceStatus === 'PENDING_NON_BLOCKING' &&
+    contract.runtimeEvidenceStatus === 'REQUIRED_BEFORE_PRODUCTION' &&
     exists('scripts/recovery/verify-runtime-backup-readiness.mjs') &&
     exists('docs/operations/PLATFORM_DISASTER_RECOVERY_RUNBOOK.md') &&
-    requireAll(verifier, ['RECOVERY_SOURCE_CONTRACT=PASS', 'PENDING_NON_BLOCKING']) &&
+    requireAll(verifier, ['RECOVERY_SOURCE_CONTRACT=PASS', 'REQUIRED_BEFORE_PRODUCTION']) &&
     requireAll(drill, ['pg_restore', 'test:database', 'RESTORE_DRILL.json']) &&
     requireAll(workflow, ['schedule:', 'recovery:runtime:readiness', 'recovery:restore:drill']);
 });
@@ -135,8 +135,8 @@ check('MNT-AUD-0094', 'immutable artifact build and exact-artifact environment p
   const workflow = read('.github/workflows/release-promotion.yml');
   const ci = read('.github/workflows/ci.yml');
   return requireAll(build, ['CycloneDX', 'SHA256SUMS', '--sort=name', '--mtime=UTC 1970-01-01']) &&
-    requireAll(verify, ['sha256', 'SBOM']) && requireAll(promote, ['validation', 'staging', 'production']) &&
-    requireAll(smoke, ['API', 'WEB']) && requireAll(workflow, [
+    verify.includes('verifyReleaseManifest') && requireAll(read('scripts/release/lib/ReleaseContracts.mjs'), ['sha256', 'manifest.sbom', 'RELEASE_SOURCE_IDENTITY_MISMATCH']) && requireAll(promote, ['validation', 'staging', 'production']) &&
+    requireAll(smoke, ['MANARATAK_SMOKE_API_URL', 'MANARATAK_SMOKE_WEB_URL', 'MANARATAK_SMOKE_ADMIN_URL']) && requireAll(read('scripts/release/lib/SmokeContracts.mjs'), ['READINESS_PATH', 'SMOKE_API_READINESS_OR_REVISION_INVALID']) && requireAll(workflow, [
       'workflow_run:', 'needs: validation', 'needs: staging', 'immutable-release-$SOURCE_SHA', 'recovery:source:verify', 'release:smoke',
     ]) && ci.includes('manaratak-release-artifacts-${{ github.sha }}');
 });
