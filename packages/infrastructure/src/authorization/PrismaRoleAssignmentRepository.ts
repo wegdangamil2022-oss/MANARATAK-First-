@@ -72,6 +72,35 @@ export class PrismaRoleAssignmentRepository implements ITransactionalRoleAssignm
     });
   }
 
+  async saveIfUnassigned(assignment: RoleAssignment): Promise<{ assignmentId: string; replayed: boolean }> {
+    const operation = async (repository: PrismaRoleAssignmentRepository) => {
+      // Share the role reference fence with internal role deletion/emergency grants.
+      const keys = [
+        `authorization-role-reference:${assignment.roleId}`,
+        `authorization-assignment-id:${assignment.id}`,
+        `authorization-assignment-pair:${JSON.stringify([assignment.identityId, assignment.roleId])}`,
+      ].sort();
+      for (const key of keys) {
+        await repository.prisma.$queryRaw(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))::text AS lock_result`);
+      }
+      const existing = await repository.findById(assignment.id);
+      if (existing && (existing.identityId !== assignment.identityId || existing.roleId !== assignment.roleId)) {
+        throw new Error('ROLE_ASSIGNMENT_IMMUTABLE');
+      }
+      const assigned = await repository.prisma.roleAssignmentRecord.findUnique({
+        where: { identityId_roleId: { identityId: assignment.identityId, roleId: assignment.roleId } },
+      });
+      if (assigned) return { assignmentId: assigned.id, replayed: true };
+      await repository.prisma.roleAssignmentRecord.create({ data: {
+        id: assignment.id, identityId: assignment.identityId,
+        roleId: assignment.roleId, assignedAt: assignment.assignedAt,
+      } });
+      return { assignmentId: assignment.id, replayed: false };
+    };
+    if (typeof this.prisma.$transaction !== 'function') return operation(this);
+    return this.prisma.$transaction(tx => operation(new PrismaRoleAssignmentRepository(tx as unknown as PrismaClient)));
+  }
+
   async findBy(specification: ISpecification<RoleAssignment>): Promise<RoleAssignment[]> {
     const records = await this.client.roleAssignmentRecord.findMany();
     const domainAssignments = records.map(record => this.mapToDomain(record));

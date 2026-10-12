@@ -75,6 +75,7 @@ export function sendAuthorizationError(req: Request, res: Response, error: unkno
     status = 404;
     code = 'RESOURCE_NOT_FOUND';
   } else if (
+    message === 'ROLE_ASSIGNMENT_ATOMIC_REPLAY_REQUIRED' ||
     /^[A-Z_]+(?:UNAVAILABLE|NOT_CONFIGURED|PERSISTENCE_REQUIRED|UPDATE_REQUIRED|DELETE_REQUIRED)$/.test(
       message,
     ) ||

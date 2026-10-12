@@ -11,6 +11,8 @@ export interface IRoleAssignmentRepository {
   }): Promise<{ items: RoleAssignment[]; nextCursor: string | null }>;
   findById(id: string): Promise<RoleAssignment | null>;
   save(assignment: RoleAssignment): Promise<void>;
+  /** Serialize the assignment identity and pair, then return the persisted grant on replay. */
+  saveIfUnassigned?(assignment: RoleAssignment): Promise<{ assignmentId: string; replayed: boolean }>;
   findBy(specification: ISpecification<RoleAssignment>): Promise<RoleAssignment[]>;
   findByIdentityId(identityId: string): Promise<RoleAssignment[]>;
   listAll(): Promise<RoleAssignment[]>;

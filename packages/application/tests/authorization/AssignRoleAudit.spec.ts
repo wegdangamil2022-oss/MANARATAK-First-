@@ -9,6 +9,10 @@ describe('role assignment audit boundary', () => {
       findById: async (id: string) => records.get(id) ?? null,
       findByIdentityId: async (identityId: string) => [...records.values()].filter(item => item.identityId === identityId),
       save: async (item: RoleAssignment) => { records.set(item.id, item); },
+      saveIfUnassigned: async (item: RoleAssignment) => {
+        records.set(item.id, item);
+        return { assignmentId: item.id, replayed: false };
+      },
       delete: async (id: string) => { records.delete(id); },
       withTransaction: () => repository,
     };
@@ -38,5 +42,16 @@ describe('role assignment audit boundary', () => {
       { identityId: 'account-1', roleId: 'universities-editor' },
       { identityId: 'account-1', roleId: 'universities-editor' },
     ]);
+  });
+});
+
+describe('role assignment missing transaction capability', () => {
+  it('fails before a legacy save when the transactional writer cannot serialize replay', async () => {
+    const save = vi.fn();
+    const repository = { findById: async () => null, findByIdentityId: async () => [], save, withTransaction: () => repository };
+    const coordinator = { execute: async (_definition: unknown, mutation: (tx: { boundaryId: string }) => Promise<unknown>) => mutation({ boundaryId: 'isolated' }) };
+    const operation = new AssignRoleUseCase(repository as any, coordinator as any, { findById: async () => ({}) } as any, { findById: async () => ({}) } as any);
+    await expect(operation.execute({ id: 'new', identityId: 'identity', roleId: 'role' })).rejects.toThrow('ROLE_ASSIGNMENT_ATOMIC_REPLAY_REQUIRED');
+    expect(save).not.toHaveBeenCalled();
   });
 });

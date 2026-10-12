@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n/I18nProvider';
 import { useState, type FormEvent } from 'react';
 import { adminApiClient } from '../api/client';
 
@@ -6,6 +7,7 @@ type Grant = {
   uploadGrant?: { uploadUrl: string; method: 'PUT' | 'POST'; headers: Record<string, string>; expiresAt: string };
 };
 export function AssetUploadWizard({ onUploaded }: { onUploaded: () => void }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [ownerId, setOwnerId] = useState('');
   const [ownerType, setOwnerType] = useState('STUDENT');
@@ -18,7 +20,7 @@ export function AssetUploadWizard({ onUploaded }: { onUploaded: () => void }) {
       method: 'POST', body: JSON.stringify({}),
     });
     setPendingAsset(null);
-    setMessage('تم تأكيد الرفع. لا يصبح الملف صالحًا للتسليم قبل فحصه وتنظيفه وتفعيله.');
+    setMessage(t('asset_text_152'));
     onUploaded();
   }
 
@@ -39,23 +41,23 @@ export function AssetUploadWizard({ onUploaded }: { onUploaded: () => void }) {
           classification: 'INTERNAL',
         }),
       });
-      if (!grant.uploadGrant) throw new Error('خدمة إصدار رابط رفع آمن غير متاحة.');
+      if (!grant.uploadGrant) throw new Error(t('asset_text_153'));
       setPendingAsset(grant.assetId);
       const target = new URL(grant.uploadGrant.uploadUrl);
       if (target.username || target.password || (target.protocol !== 'https:' &&
           !(import.meta.env.DEV && target.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(target.hostname)))) {
-        throw new Error('رابط الرفع غير آمن.');
+        throw new Error(t('asset_text_154'));
       }
       if (!['PUT', 'POST'].includes(grant.uploadGrant.method) ||
-          !Number.isFinite(Date.parse(grant.uploadGrant.expiresAt)) || Date.parse(grant.uploadGrant.expiresAt) <= Date.now()) throw new Error('انتهت صلاحية رابط الرفع.');
+          !Number.isFinite(Date.parse(grant.uploadGrant.expiresAt)) || Date.parse(grant.uploadGrant.expiresAt) <= Date.now()) throw new Error(t('asset_text_155'));
       const response = await fetch(target, {
         method: grant.uploadGrant.method, headers: grant.uploadGrant.headers,
         body: file, credentials: 'omit', redirect: 'error',
       });
-      if (!response.ok) throw new Error('فشل إرسال بايتات الملف إلى التخزين.');
+      if (!response.ok) throw new Error(t('asset_text_156'));
       await finalize(grant.assetId);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'تعذر رفع الملف');
+      setMessage(error instanceof Error ? error.message : t('asset_text_157'));
     } finally {
       setBusy(false);
     }
@@ -63,26 +65,26 @@ export function AssetUploadWizard({ onUploaded }: { onUploaded: () => void }) {
 
   return <form onSubmit={(event) => void submit(event)}
     className="rounded-2xl border border-slate-200 bg-white p-5 text-sm">
-    <h2 className="font-bold text-[#142B5F]">رفع ملف جديد إلى الحجر الأمني</h2>
-    <p className="my-2 text-xs text-slate-600">الرفع لا يعني التفعيل؛ يلزم التحقق والفحص والتنظيف أولًا.</p>
+    <h2 className="font-bold text-[#142B5F]">{t('asset_text_158')}{' '}</h2>
+    <p className="my-2 text-xs text-slate-600">{t('asset_text_159')}{' '}</p>
     <div className="grid gap-3 md:grid-cols-3">
-      <input aria-label="اختر الملف" type="file" required
+      <input aria-label={t('asset_text_160')} type="file" required
         onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
-      <input aria-label="معرف المالك" required value={ownerId} placeholder="معرف المالك"
+      <input aria-label={t('asset_text_051')} required value={ownerId} placeholder={t('asset_text_051')}
         onChange={(event) => setOwnerId(event.target.value)} className="rounded-lg border p-2" />
-      <input aria-label="نوع المالك" required value={ownerType} placeholder="نوع المالك"
+      <input aria-label={t('asset_text_046')} required value={ownerType} placeholder={t('asset_text_046')}
         onChange={(event) => setOwnerType(event.target.value)} className="rounded-lg border p-2" />
     </div>
     <button type="submit" disabled={busy || !file || !ownerId.trim()}
       className="mt-3 rounded-lg border px-4 py-2 disabled:opacity-50">
-      {busy ? 'جارٍ الرفع والتحقق…' : 'رفع وتحقيق اكتمال الرفع'}
+      {busy ? t('asset_text_161') : t('asset_text_162')}
     </button>
     {pendingAsset && <button type="button" disabled={busy}
       onClick={() => { setBusy(true); void finalize(pendingAsset)
-        .catch((error) => setMessage(error instanceof Error ? error.message : 'تعذر التحقق'))
+        .catch((error) => setMessage(error instanceof Error ? error.message : t('asset_text_163')))
         .finally(() => setBusy(false)); }}
       className="mr-2 rounded-lg border px-4 py-2">
-      إعادة محاولة التحقق من الأصل {pendingAsset.slice(0, 8)}
+      {t('asset_text_164')}{' '}{pendingAsset.slice(0, 8)}
     </button>}
     {message && <p role="status" className="mt-3 text-xs">{message}</p>}
   </form>;

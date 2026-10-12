@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n/I18nProvider';
 import { useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 
@@ -14,10 +15,7 @@ export interface AssetActionSnapshot {
   };
 }
 type Action = 'finalize-upload' | 'validate' | 'sanitize' | 'activate' | 'archive' | 'delete' | 'restore';
-const labels: Record<Action, string> = {
-  'finalize-upload': 'التحقق من اكتمال الرفع', validate: 'فحص الملف', sanitize: 'تنظيف الملف',
-  activate: 'تفعيل الملف المتحقق منه', archive: 'أرشفة الملف', delete: 'حذف منطقي', restore: 'استعادة الملف',
-};
+
 export function availableAssetActions(asset: AssetActionSnapshot): Action[] {
   const evidence = asset.securityEvidence;
   if (evidence?.archivePhase && evidence.archivePhase !== 'COMPLETED') return [];
@@ -47,6 +45,11 @@ export async function executeAssetAction(assetId: string, action: Action, key: s
   });
 }
 export function AssetLifecycleActions({ asset, onChanged }: { asset: AssetActionSnapshot; onChanged: () => Promise<void> }) {
+  const { t } = useTranslation();
+  const labels: Record<Action, string> = {
+  'finalize-upload': t('asset_text_134'), validate: t('asset_text_135'), sanitize: t('asset_text_136'),
+  activate: t('asset_text_137'), archive: t('asset_text_138'), delete: t('asset_text_139'), restore: t('asset_text_140'),
+};
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [confirmation, setConfirmation] = useState<{ action: 'archive' | 'delete'; count: number } | null>(null);
@@ -64,7 +67,7 @@ export function AssetLifecycleActions({ asset, onChanged }: { asset: AssetAction
       await onChanged();
     } catch (failure) {
       if (shouldStartNewAssetAttempt(failure)) retryKeys.current.delete(action);
-      setError('تعذر إتمام الإجراء أو تحديث حالته. حدّث التفاصيل قبل إعادة المحاولة؛ قد يكون الإجراء محفوظًا.');
+      setError(t('asset_text_141'));
       try { await onChanged(); } catch { /* Keep the command failure visible if refresh also fails. */ }
     }
     finally { running.current = false; setBusy(false); }
@@ -79,25 +82,25 @@ export function AssetLifecycleActions({ asset, onChanged }: { asset: AssetAction
       if (impact.assetId !== asset.id || !Array.isArray(impact.usages) || typeof impact.inUse !== 'boolean') {
         throw new Error('INVALID_USAGE_RESPONSE');
       }
-      if (impact.inUse || impact.usages.length > 0) { setError('الأصل مرتبط بمحتوى؛ لا يمكن أرشفته أو حذفه.'); return; }
+      if (impact.inUse || impact.usages.length > 0) { setError(t('asset_text_142')); return; }
       setConfirmation({ action, count: impact.usages.length });
-    } catch { setError('تعذر التحقق من الاستخدامات؛ لم يُنفّذ الإجراء.'); }
+    } catch { setError(t('asset_text_143')); }
     finally { running.current = false; setBusy(false); }
   }
   return <div className="mt-4 rounded-lg border p-3">
-    <h3 className="font-bold">إجراءات دورة الحياة</h3>
-    <p className="my-2 text-slate-500">يتحقق الخادم من الحالة والصلاحيات والأدلة عند كل إجراء. الحذف هنا منطقي؛ لا يوجد حذف نهائي في هذه الواجهة.</p>
+    <h3 className="font-bold">{t('asset_text_144')}{' '}</h3>
+    <p className="my-2 text-slate-500">{t('asset_text_145')}{' '}</p>
     <div className="flex flex-wrap gap-2">{availableAssetActions(asset).map(action =>
       <button key={action} type="button" disabled={busy || confirmation !== null}
         className="rounded-lg border px-3 py-2 disabled:opacity-50" onClick={() => void prepare(action)}>
         {labels[action]}
       </button>)}</div>
-    {confirmation && <div role="group" aria-label="تأكيد الإجراء" className="mt-3">
-      <p>لم تُرصد استخدامات ({confirmation.count}). سيعيد الخادم فحصها عند التنفيذ. تأكيد {labels[confirmation.action]}؟</p>
-      <button type="button" disabled={busy} onClick={() => void execute(confirmation.action)} className="mt-2 rounded border px-3 py-2">تأكيد الإجراء</button>
-      <button type="button" disabled={busy} onClick={() => setConfirmation(null)} className="mr-2 rounded border px-3 py-2">إلغاء</button>
+    {confirmation && <div role="group" aria-label={t('asset_text_146')} className="mt-3">
+      <p>{t('asset_text_147')}{' '}{confirmation.count}{t('asset_text_148')}{' '}{labels[confirmation.action]}{t('asset_text_149')}{' '}</p>
+      <button type="button" disabled={busy} onClick={() => void execute(confirmation.action)} className="mt-2 rounded border px-3 py-2">{t('asset_text_146')}{' '}</button>
+      <button type="button" disabled={busy} onClick={() => setConfirmation(null)} className="mr-2 rounded border px-3 py-2">{t('asset_text_150')}{' '}</button>
     </div>}
-    {busy && <p role="status">جارٍ التحقق والتنفيذ…</p>}
+    {busy && <p role="status">{t('asset_text_151')}{' '}</p>}
     {error && <p role="alert" className="mt-2 text-red-700">{error}</p>}
   </div>;
 }

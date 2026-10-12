@@ -7,7 +7,7 @@ export class PrismaAuditRetentionGateway implements IRetentionOwnerGateway {
   readonly owner = RetentionOwner.AUDIT;
   constructor(private readonly prisma: PrismaClient) {}
   async listDue(now: Date, limit: number): Promise<RetentionCandidate[]> {
-    const rows = await (this.prisma as any).auditRecord.findMany({ where: { retentionExpiresAt: { lte: now }, retentionProcessedAt: null, OR: [{ retentionClaimUntil: null }, { retentionClaimUntil: { lte: now } }] }, orderBy: { retentionExpiresAt: 'asc' }, take: limit, select: { id:true, retentionExpiresAt:true, legalHoldUntil:true, lifecycleState:true } });
+    const rows = await (this.prisma as any).auditRecord.findMany({ where: { retentionExpiresAt: { lte: now }, retentionProcessedAt: null, AND: [{ OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: now } }] }], OR: [{ retentionClaimUntil: null }, { retentionClaimUntil: { lte: now } }] }, orderBy: [{ retentionExpiresAt: 'asc' }, { id: 'asc' }], take: limit, select: { id:true, retentionExpiresAt:true, legalHoldUntil:true, lifecycleState:true } });
     return rows.map((row:any)=>({ owner:this.owner, recordId:row.id, expiresAt:new Date(row.retentionExpiresAt), legalHoldUntil:row.legalHoldUntil?new Date(row.legalHoldUntil):null, lifecycleState:row.lifecycleState }));
   }
   async applyDecision(candidate: RetentionCandidate, decision: RetentionDecision): Promise<'APPLIED'|'SKIPPED'> {

@@ -1,4 +1,3 @@
-import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { beforeAll, afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -19,7 +18,11 @@ function barrier() {
 disposable('EAP canonical owner/lifecycle serialization on disposable PostgreSQL', () => {
   let prisma: PrismaClient;
   beforeAll(async () => {
-    if (process.env.DATABASE_URL !== 'postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public') throw new Error('EAP_DISPOSABLE_LOCAL_POSTGRES_REQUIRED');
+    const ciUrl = 'postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:5432/manaratak_eap_ci_test?schema=public';
+    const rehearsalUrl = 'postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:55432/manaratak_eap_ci_test?schema=public';
+    const localRehearsal = process.env.EAP_LOCAL_DISPOSABLE_DB_TESTS === 'true' &&
+      process.env.DATABASE_URL === rehearsalUrl && process.env.DIRECT_URL === rehearsalUrl;
+    if (process.env.DATABASE_URL !== ciUrl && !localRehearsal) throw new Error('EAP_DISPOSABLE_LOCAL_POSTGRES_REQUIRED');
     prisma = new PrismaClient(); await prisma.$connect();
     await assertAssetReferenceIntegrityInstalled(prisma);
   });
@@ -121,7 +124,7 @@ disposable('EAP canonical owner/lifecycle serialization on disposable PostgreSQL
   it('holds a JSON SEO reference lock until its owner commits', async () => {
     const id = await createAsset(); const ready = barrier(); const commit = barrier();
     const owner = prisma.$transaction(async tx => {
-      await tx.cmsContentNode.create({ data: { id: prefix + randomUUID(), publicId: prefix + randomUUID(), slug: prefix + randomUUID(), contentType: 'PAGE', title: 'test', authorId: prefix, ownerId: prefix, seoMetadata: { openGraphAssetId: id } } });
+      await tx.cmsContentNode.create({ data: { id: prefix + randomUUID(), publicId: prefix + randomUUID(), slug: prefix + randomUUID(), contentType: 'PAGE', title: 'test', authorId: prefix, ownerId: prefix, lastModifiedBy: prefix, seoMetadata: { openGraphAssetId: id } } });
       ready.release(); await commit.wait;
     }, options);
     await Promise.race([ready.wait, owner]);
@@ -135,7 +138,7 @@ disposable('EAP canonical owner/lifecycle serialization on disposable PostgreSQL
   }, 15000);
   it('covers CMS published attachment arrays and prevents asset identity changes', async () => {
     const id = await createAsset();
-    const node = await prisma.cmsContentNode.create({ data: { id: prefix + randomUUID(), publicId: prefix + randomUUID(), slug: prefix + randomUUID(), contentType: 'PAGE', title: 'test', authorId: prefix, ownerId: prefix } });
+    const node = await prisma.cmsContentNode.create({ data: { id: prefix + randomUUID(), publicId: prefix + randomUUID(), slug: prefix + randomUUID(), contentType: 'PAGE', title: 'test', authorId: prefix, ownerId: prefix, lastModifiedBy: prefix } });
     const publication = await prisma.cmsPublishedContent.create({ data: { id: prefix + randomUUID(), contentId: node.id, publicId: prefix + randomUUID(), siteIdentifier: 'MANARATAK', locale: 'ar', slug: prefix + randomUUID(), canonicalUrl: '/test', contentType: 'PAGE', title: 'test', body: '', attachmentAssetIds: [id], tags: [], seoMetadata: {}, versionNumber: 1, publishedAt: new Date() } });
     await expect(prisma.assetRecord.update({ where: { id }, data: { lifecycleState: 'DELETED' } })).rejects.toThrow('ASSET_REFERENCE_IN_USE');
     await expect(prisma.assetRecord.update({ where: { id }, data: { id: prefix + randomUUID() } })).rejects.toThrow('ASSET_REFERENCE_IN_USE');
@@ -164,7 +167,7 @@ disposable('EAP canonical owner/lifecycle serialization on disposable PostgreSQL
   });
   it('batch usage detects JSON attachments and SEO references without a separate owner registry', async () => {
     const attachment = await createAsset(); const seo = await createAsset(); const unused = await createAsset();
-    const node = await prisma.cmsContentNode.create({ data: { id: prefix + randomUUID(), publicId: prefix + randomUUID(), slug: prefix + randomUUID(), contentType: 'PAGE', title: 'test', authorId: prefix, ownerId: prefix, seoMetadata: { openGraphAssetId: seo } } });
+    const node = await prisma.cmsContentNode.create({ data: { id: prefix + randomUUID(), publicId: prefix + randomUUID(), slug: prefix + randomUUID(), contentType: 'PAGE', title: 'test', authorId: prefix, ownerId: prefix, lastModifiedBy: prefix, seoMetadata: { openGraphAssetId: seo } } });
     await prisma.cmsPublishedContent.create({ data: { id: prefix + randomUUID(), contentId: node.id, publicId: prefix + randomUUID(), siteIdentifier: 'MANARATAK', locale: 'ar', slug: prefix + randomUUID(), canonicalUrl: '/test', contentType: 'PAGE', title: 'test', body: '', attachmentAssetIds: [attachment], tags: [], seoMetadata: {}, versionNumber: 1, publishedAt: new Date() } });
     const repo = new PrismaAssetRecordRepository(prisma);
     const linked = await repo.queryAdmin({ ownerId: prefix, usageStatus: 'IN_USE' });

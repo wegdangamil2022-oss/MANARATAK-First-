@@ -80,7 +80,7 @@ export class AssignRoleUseCase {
     }
     const repository = this.roleAssignmentRepository as Partial<ITransactionalRoleAssignmentRepository>;
     if (!repository.withTransaction) throw new Error('ROLE_ASSIGNMENT_TRANSACTIONAL_PERSISTENCE_REQUIRED');
-    await this.atomicMutations.execute(
+    return this.atomicMutations.execute(
       {
         domain: 'AUTHORIZATION',
         aggregateType: 'ROLE_ASSIGNMENT',
@@ -97,8 +97,12 @@ export class AssignRoleUseCase {
         },
         outbox: { metadata: {schemaVersion:'1.0.0'}, eventType: 'RoleAssignmentCreated', payload: { assignmentId: input.id, identityId: input.identityId, roleId: input.roleId } },
       },
-      (transaction) => repository.withTransaction!(transaction).save(assignment),
+      (transaction) => {
+        const writer = repository.withTransaction!(transaction);
+        if (!writer.saveIfUnassigned) throw new Error('ROLE_ASSIGNMENT_ATOMIC_REPLAY_REQUIRED');
+        return writer.saveIfUnassigned(assignment);
+      },
+      (result) => !result.replayed,
     );
-    return { assignmentId: assignment.id, replayed: false };
   }
 }

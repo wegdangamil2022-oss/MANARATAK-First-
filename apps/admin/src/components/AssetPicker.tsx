@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n/I18nProvider';
 import { useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 
@@ -16,7 +17,7 @@ interface DeliveryGrant { url: string; headers?: Record<string, string>; expires
 const BASE = '/admin/asset-reuse';
 
 export function AssetPicker({
-  value, onChange, mimeTypePrefix, label = 'Asset', purpose,
+  value, onChange, mimeTypePrefix, label, purpose,
 }: {
   value?: string;
   onChange: (id: string) => void;
@@ -24,6 +25,8 @@ export function AssetPicker({
   label?: string;
   purpose: string;
 }) {
+  const { t } = useTranslation();
+  const loadFailed = t('asset_text_165');
   const [assets, setAssets] = useState<AssetOption[]>([]);
   const [search, setSearch] = useState('');
   const [cursor, setCursor] = useState<string | null>(null);
@@ -54,12 +57,12 @@ export function AssetPicker({
           setHasMore(page.hasMore);
         })
         .catch((cause) => {
-          if (!cancelled && generation === queryGeneration.current) setError(cause instanceof Error ? cause.message : 'تعذر تحميل الأصول');
+          if (!cancelled && generation === queryGeneration.current) setError(cause instanceof Error ? cause.message : loadFailed);
         })
         .finally(() => { if (!cancelled && generation === queryGeneration.current) setLoading(false); });
     }, 250);
     return () => { cancelled = true; window.clearTimeout(delay); };
-  }, [mimeTypePrefix, search]);
+  }, [mimeTypePrefix, search, loadFailed]);
 
   useEffect(() => {
     if (!value || assets.some((asset) => asset.id === value)) return;
@@ -85,7 +88,7 @@ export function AssetPicker({
       setCursor(page.nextCursor);
       setHasMore(page.hasMore);
     } catch (cause) {
-      if (generation === queryGeneration.current) setError(cause instanceof Error ? cause.message : 'تعذر تحميل المزيد من الأصول');
+      if (generation === queryGeneration.current) setError(cause instanceof Error ? cause.message : t('asset_text_166'));
     } finally {
       if (generation === queryGeneration.current) setLoading(false);
     }
@@ -103,7 +106,7 @@ export function AssetPicker({
       });
       onChange(id);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر تسجيل اختيار الأصل');
+      setError(cause instanceof Error ? cause.message : t('asset_text_167'));
     } finally { setSelecting(false); }
   }
 
@@ -124,17 +127,17 @@ export function AssetPicker({
         window.open(grant.url, '_blank', 'noopener,noreferrer');
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'تعذر إنشاء معاينة آمنة');
+      setError(cause instanceof Error ? cause.message : t('asset_text_168'));
     } finally { setPreviewing(false); }
   }
 
   return <div className="block text-sm">
-    <label className="block"><span className="font-bold">{label}</span>
+    <label className="block"><span className="font-bold">{label ?? t('asset_default_label')}</span>
       <input value={search} onChange={(e) => setSearch(e.target.value)} maxLength={160}
-        placeholder="ابحث عن اسم الملف" className="mt-1 w-full rounded-xl border p-2" />
+        placeholder={t('asset_text_169')} className="mt-1 w-full rounded-xl border p-2" />
       <select value={value ?? ''} disabled={selecting}
         onChange={(e) => void select(e.target.value)} className="mt-1 w-full rounded-xl border p-2">
-        <option value="">No asset</option>
+        <option value="">{t('asset_none')}</option>
         {assets.map((asset) => <option key={asset.id} value={asset.id}>
           {asset.metadata?.originalFilename ?? asset.reference} · {asset.metadata?.mimeType ?? ''} · {asset.metadata?.byteSize ?? 0} B
         </option>)}
@@ -142,11 +145,11 @@ export function AssetPicker({
     </label>
     {hasMore ? <button type="button" disabled={loading} onClick={() => void loadMore()}
       className="mt-2 rounded-lg border px-3 py-1.5 text-xs disabled:opacity-50">
-      {loading ? 'جاري التحميل…' : 'تحميل المزيد'}
+      {loading ? t('asset_text_092') : t('asset_text_170')}
     </button> : null}
     {value ? <button type="button" disabled={previewing} onClick={() => void preview()}
       className="mt-2 rounded-lg border px-3 py-1.5 text-xs font-bold disabled:opacity-50">
-      {previewing ? 'جاري إنشاء رابط آمن…' : 'معاينة مؤقتة آمنة'}
+      {previewing ? t('asset_text_171') : t('asset_text_172')}
     </button> : null}
     {error ? <span className="mt-1 block text-xs text-red-600">{error}</span> : null}
   </div>;
