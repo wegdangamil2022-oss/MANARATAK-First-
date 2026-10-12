@@ -17,7 +17,22 @@ export class CanonicalCareerReferenceGateway implements ICareerReferenceGateway 
   async resolveCountryReference(input: string) {
     const resolved = await this.resolver.resolveCountry(lookup(input));
     if (!resolved?.active) throw new Error(`CAREER_COUNTRY_REFERENCE_NOT_ACTIVE:${input}`);
-    return { id: resolved.id, label: resolved.standardCode };
+    const match = await this.referenceRepository.resolveCountryCandidate({ id: resolved.id });
+    return { id: resolved.id, label: match?.record.nameAr || match?.record.name || resolved.standardCode };
+  }
+
+  async resolveCurrencyReference(input: string) {
+    const resolved = await this.resolver.resolveCurrency(lookup(input));
+    if (!resolved?.active || !resolved.standardCode) throw new Error('CAREER_CURRENCY_NOT_ACTIVE');
+    return { code: resolved.standardCode };
+  }
+  async displayGeography(countryId: string, cityId?: string | null, locale: 'ar' | 'en' = 'ar') {
+    const [country, city] = await Promise.all([
+      this.referenceRepository.resolveCountryCandidate({ id: countryId }),
+      cityId ? this.referenceRepository.resolveCityCandidate({ id: cityId }) : null,
+    ]);
+    return { country: locale === 'ar' ? country?.record.nameAr || country?.record.name : country?.record.name,
+      city: locale === 'ar' ? city?.record.nameAr || city?.record.name || null : city?.record.name || null };
   }
 
   async resolveCityReference(input: string, expectedCountryReferenceId?: string) {
@@ -28,6 +43,7 @@ export class CanonicalCareerReferenceGateway implements ICareerReferenceGateway 
       if (!match || match.record.countryReferenceId !== expectedCountryReferenceId)
         throw new Error(`CAREER_CITY_COUNTRY_MISMATCH:${resolved.id}`);
     }
-    return { id: resolved.id, label: resolved.standardCode };
+    const city = await this.referenceRepository.resolveCityCandidate({ id: resolved.id });
+    return { id: resolved.id, label: city?.record.nameAr || city?.record.name || resolved.standardCode };
   }
 }

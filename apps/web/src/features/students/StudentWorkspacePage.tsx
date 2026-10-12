@@ -1,3 +1,4 @@
+import { StudentCareerWorkspace } from './StudentCareerWorkspace';
 import { StudentServiceBookingPanel } from './StudentServiceBookingPanel';
 import { StudentToolResultView } from '../student-tools/StudentToolResultView';
 import { StudentCertificatesPanel } from '../certificates/StudentCertificatesPanel';
@@ -20,7 +21,7 @@ import {
   StudentServiceRequestDto,
 } from '../../api/client';
 
-export type CanonicalWorkspaceTab = 'SUMMARY' | 'OPPORTUNITIES' | 'LEARNING' | 'VAULT' | 'SERVICES' | 'NOTIFICATIONS' | 'PROFILE';
+export type CanonicalWorkspaceTab = 'SUMMARY' | 'OPPORTUNITIES' | 'LEARNING' | 'VAULT' | 'SERVICES' | 'CAREERS' | 'NOTIFICATIONS' | 'PROFILE';
 export type LegacyWorkspaceTab = 'HOME' | 'JOURNEY' | 'SETTINGS';
 export type WorkspaceTab = CanonicalWorkspaceTab | LegacyWorkspaceTab;
 
@@ -37,6 +38,7 @@ const tabs: Array<{ id: Exclude<CanonicalWorkspaceTab, 'PROFILE'>; label: string
   { id: 'OPPORTUNITIES', label: 'فرصي', icon: Route },
   { id: 'LEARNING', label: 'تعلمي', icon: BookOpen },
   { id: 'VAULT', label: 'محفوظاتي', icon: Heart },
+  { id: 'CAREERS', label: 'مساري المهني', icon: GraduationCap },
   { id: 'SERVICES', label: 'طلباتي', icon: ClipboardList },
   { id: 'NOTIFICATIONS', label: 'إشعاراتي', icon: Bell },
 ];
@@ -49,6 +51,7 @@ function resolveTabFromQuery(queryTab: string | null): CanonicalWorkspaceTab | n
   if (normalized === 'learning' || normalized === 'courses') return 'LEARNING';
   if (normalized === 'vault' || normalized === 'saved') return 'VAULT';
   if (normalized === 'services' || normalized === 'requests') return 'SERVICES';
+  if (normalized === 'careers') return 'CAREERS';
   if (normalized === 'notifications') return 'NOTIFICATIONS';
   if (normalized === 'profile' || normalized === 'settings') return 'PROFILE';
   return null;
@@ -855,6 +858,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
             onRemoveSavedItem={removeSavedItem}
           />
         )}
+        {tab === 'CAREERS' && <StudentCareerWorkspace />}
         {tab === 'SERVICES' && (
           <div className="space-y-4">
           <div className="mn-panel flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--mn-border)] p-4">

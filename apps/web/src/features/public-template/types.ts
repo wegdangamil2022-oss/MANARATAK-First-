@@ -742,6 +742,7 @@ export interface CareerContextLink {
 }
 
 export interface CareerOpportunityPreview {
+  applicationChannel?: 'INTERNAL' | 'EXTERNAL';
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;

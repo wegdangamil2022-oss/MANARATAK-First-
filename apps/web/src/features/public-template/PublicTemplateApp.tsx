@@ -1843,7 +1843,7 @@ export default function App() {
               />
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'jobs' ? (
-              <CareersSearchPage opportunities={careersForView} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)} searchAnchor={detailSearchAnchor} searchTerm={detailSearchTerm}
+              <CareersSearchPage live={publicDataMode === 'api'} opportunities={careersForView} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)} searchAnchor={detailSearchAnchor} searchTerm={detailSearchTerm}
                 onBack={goBack}
                 onNavigateCategory={(category) => {
                   setFavoriteLaunch(null);

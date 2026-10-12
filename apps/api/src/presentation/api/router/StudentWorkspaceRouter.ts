@@ -1,4 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { careerStudentRouter } from './CareerStudentRouter.js';
+import { CareerEngagementUseCases } from '@manaratak/application';
 import { z } from 'zod';
 import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
 import { ServiceOperationsUseCases, FinancePlatformUseCases, FinanceStudentUseCases, StudentWorkspaceUseCases, StudentApplicationTrackerUseCases, StudentSavedItemHydrationService, StudentDashboardHydrationService, StudentServiceRequestUseCases, ProcessAssetLifecycleUseCase, CertificateReadModelService } from '@manaratak/application';
@@ -11,6 +13,7 @@ import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 
 export class StudentWorkspaceRouter {
   public static create(cradle: {
+    careerEngagementUseCases: CareerEngagementUseCases;
     certificateReadModelService: CertificateReadModelService;
     studentWorkspaceUseCases: StudentWorkspaceUseCases;
     roleAssignmentRepository: IRoleAssignmentRepository;
@@ -549,6 +552,8 @@ export class StudentWorkspaceRouter {
       const code = allowed.has(err.message) ? err.message : err instanceof z.ZodError ? 'SERVICE_VALIDATION_ERROR' : 'SERVICE_REQUEST_FAILED';
       res.status(code === 'SERVICE_REQUEST_FAILED' ? 500 : code.includes('CONFLICT') ? 409 : code.includes('NOT_FOUND') ? 404 : 422).json({ error: code });
     });
+
+    router.use('/careers', careerStudentRouter(cradle.careerEngagementUseCases));
 
     router.use('/:studentReferenceId', (req: Request, res: Response, next: NextFunction) => {
       if (req.authUserId !== req.params.studentReferenceId) {

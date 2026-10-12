@@ -10,6 +10,10 @@ import {
 } from '../enums';
 
 export interface ICareerEngagementRepository {
+  withActor?(context: { actorId: string; reason: string; correlationId: string }): ICareerEngagementRepository;
+  listAlumniNetwork?(page: number, pageSize: number): ReturnType<NonNullable<ICareerEngagementRepository['listPublicAlumni']>>;
+  listPublicAlumni?(page: number, pageSize: number): Promise<{ data: Array<Pick<CareerAlumniProfileDto, 'id' | 'displayName' | 'graduationYear' | 'employerName'>>; total: number; page: number; totalPages: number }>;
+  listAdminAlumni?(page: number, pageSize: number): Promise<{ data: Array<Pick<CareerAlumniProfileDto, 'id' | 'visibility' | 'version'>>; total: number; page: number; totalPages: number }>;
   upsertProfile(data: {
     studentReferenceId: string;
     headline?: string | null;

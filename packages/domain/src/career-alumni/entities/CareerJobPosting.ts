@@ -68,6 +68,9 @@ export interface CareerJobFilters {
   countryReferenceId?: string;
   cityReferenceId?: string;
   employerId?: string;
+  search?: string;
+  remoteOption?: boolean;
+  locale?: 'ar' | 'en';
   page?: number;
   pageSize?: number;
   cursor?: string;
@@ -83,3 +86,12 @@ export interface PaginatedCareerResult<T> {
   hasMore?: boolean;
   nextCursor?: string | null;
 }
+
+export type PublicCareerJobPostingDto = Pick<CareerJobPostingDto,
+  'id' | 'publicId' | 'slug' | 'title' | 'opportunityType' | 'employmentType' | 'jobCategory' |
+  'description' | 'countryReferenceId' | 'cityReferenceId' | 'country' | 'city' | 'employerId' |
+  'applicationDeadline' | 'externalPostingUrl' | 'salaryRange' | 'requiredSkills' |
+  'educationRequirement' | 'languageRequirements' | 'remoteOption' | 'updatedAt'> & {
+    employer?: Pick<CareerEmployerDto, 'id' | 'publicId' | 'slug' | 'displayName' | 'employerType' | 'industry' | 'country' | 'city' | 'websiteUrl' | 'description'>;
+    metadata: Record<string, unknown>;
+  };

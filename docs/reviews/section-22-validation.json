@@ -1,0 +1,22 @@
+{
+  "section": "22/P21",
+  "branch": "fix/codex-section-22-careers",
+  "base_commit": "e5efbbe240b90b7ecb0c05204d538fa407c53243",
+  "policy": "User requested expedited code-only preparation without running or repeating tests.",
+  "source_status": "SOURCE_PREPARED",
+  "verification_status": "NOT_TESTED",
+  "checks": [],
+  "compiler_run": false,
+  "syntax_scan_run": false,
+  "lint_run": false,
+  "unit_api_tests_run": false,
+  "browser_e2e_run": false,
+  "live_database_connected": false,
+  "provider_calls": false,
+  "migration_created": false,
+  "migration_applied": false,
+  "main_merged": false,
+  "production_ready": false,
+  "runtime_acceptance": "DEFERRED_AFTER_SECTION_28",
+  "limits": "Source wiring and core operating UI prepared; advanced analytics/search enhancements and operational acceptance are not certified. See section-22-implementation.md."
+}
