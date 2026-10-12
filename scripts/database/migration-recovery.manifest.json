@@ -447,6 +447,21 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/reviews/section-23-migration-recovery.md",
       "decision": "Source-only additive channel checkpoints, immutable template snapshots and reservation ledger. Preserve receipts/replay fingerprints; recover with a verified backup or reviewed forward fix. Not applied."
+    },
+    "20261011221500_section20_financial_safety": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-20-migration-recovery.md",
+      "decision": "Source-only unapplied additive safety migration. Disable dispatch/maintenance first; preserve immutable intents, approval, outbox and financial evidence. Recover with a verified compatible backup and reconcile external outcomes, or use a reviewed forward fix. No destructive down SQL authorized."
+    },
+    "20261012000000_section21_service_safety": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-21-migration-recovery.md",
+      "decision": "Source-only unapplied additive safety migration. Disable dispatch/maintenance first; preserve immutable intents, approval, outbox and financial evidence. Recover with a verified compatible backup and reconcile external outcomes, or use a reviewed forward fix. No destructive down SQL authorized."
+    },
+    "20261012010000_section21_close_source": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/section-21-migration-recovery.md",
+      "decision": "Source-only unapplied additive safety migration. Disable dispatch/maintenance first; preserve immutable intents, approval, outbox and financial evidence. Recover with a verified compatible backup and reconcile external outcomes, or use a reviewed forward fix. No destructive down SQL authorized."
     }
   }
 }

@@ -387,8 +387,9 @@ export class ServiceAdminRouter {
         `/operations/${kind}`,
         asyncHandler(async (req: Request, res: Response) => {
           await requirePermission(req, 'admin:services:operations:manage');
-          const { reason, ...data } = req.body;
-          const body = operationBody[kind].parse(data);
+          const { reason, ...body } = operationBody[kind]
+            .extend({ reason: z.string().trim().min(3).max(500) })
+            .strict().parse(req.body);
           res
             .status(201)
             .json(await (operation(req)[creators[kind]] as any).call(operation(req), body));
@@ -512,16 +513,16 @@ export class ServiceAdminRouter {
       '/operations/deliveries',
       asyncHandler(async (req: Request, res: Response) => {
         await requirePermission(req, 'admin:services:requests:fulfill');
-        const { reason, ...data } = req.body;
-        const body = z
+        const { reason, ...body } = z
           .object({
             bookingId: z.string().min(1),
             workflowExecutionId: z.string().min(1),
+            reason: z.string().trim().min(3).max(500),
             artifactType: z.string().min(1).max(80),
             assetId: z.string().min(1),
           })
           .strict()
-          .parse(data);
+          .parse(req.body);
         await cradle.serviceOperationsUseCases.assertCaseActor(
           body.bookingId,
           req.authUserId!,

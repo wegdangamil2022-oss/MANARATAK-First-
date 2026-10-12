@@ -127,7 +127,13 @@ export class CareerAdminUseCases {
     if (!decision || !decision.reason.trim() || !['source', 'applicationLink', 'privacy', 'terms'].every(key => decision.checklist[key] === true)) throw new Error('CAREER_REVIEW_REQUIRED');
     return this.repository.updateJobStatus(id, CareerJobStatus.READY_TO_PUBLISH, expectedVersion, decision);
   }
-  async publish(id: string, expectedVersion: number) { version(expectedVersion); assertCareerReady(await this.getJob(id)); return this.repository.updateJobStatus(id, CareerJobStatus.PUBLISHED, expectedVersion); }
+  async publish(id: string, expectedVersion: number) {
+    version(expectedVersion);
+    const job = await this.getJob(id);
+    if (job.status !== CareerJobStatus.READY_TO_PUBLISH) throw new Error('CAREER_JOB_REQUIRES_READY_TO_PUBLISH');
+    assertCareerReady(job);
+    return this.repository.updateJobStatus(id, CareerJobStatus.PUBLISHED, expectedVersion);
+  }
   archive(id: string, expectedVersion: number) { version(expectedVersion); return this.repository.updateJobStatus(id, CareerJobStatus.ARCHIVED, expectedVersion); }
   unpublish(id: string, expectedVersion: number) { version(expectedVersion); return this.repository.updateJobStatus(id, CareerJobStatus.READY_TO_REVIEW, expectedVersion); }
   reject(id: string, expectedVersion: number) { version(expectedVersion); return this.repository.updateJobStatus(id, CareerJobStatus.REJECTED, expectedVersion); }

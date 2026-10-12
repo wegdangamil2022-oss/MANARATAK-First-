@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 365,
-  "reachableCount": 365,
+  "registrationCount": 374,
+  "reachableCount": 374,
   "unreachable": [],
   "registrations": [
     {
@@ -207,6 +207,7 @@
       "dependencies": [
         "assetReferencePolicy",
         "serviceCatalogRepository",
+        "serviceOperationsRepository",
         "serviceReferenceGateway"
       ]
     },
@@ -217,10 +218,13 @@
         "apps/api/src/presentation/api/router/ServiceAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "serviceMaintenanceBackgroundJobHandler"
+      ],
       "dependencies": [
         "serviceCatalogRepository",
         "serviceFinanceGateway",
+        "serviceOperationsRepository",
         "serviceRequestRepository"
       ]
     },
@@ -506,10 +510,14 @@
         "adminServiceCatalogUseCases",
         "adminUniversityUseCases",
         "careerAdminUseCases",
+        "careerEngagementUseCases",
         "courseAdminCommandUseCases",
+        "financePlatformUseCases",
         "importArtifactUseCase",
         "internationalTestAdminUseCases",
         "referenceDataUseCases",
+        "serviceOperationsUseCases",
+        "studentServiceRequestUseCases",
         "studentToolRegistryUseCases",
         "studentWorkspaceUseCases",
         "studyDestinationUseCases"
@@ -696,9 +704,12 @@
         "apps/api/src/presentation/api/router/AIAdminRouter.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
         "apps/api/src/presentation/api/router/CmsAdminRouter.ts",
         "apps/api/src/presentation/api/router/FinanceAdminRouter.ts",
+        "apps/api/src/presentation/api/router/NotificationRouter.ts",
+        "apps/api/src/presentation/api/router/ServiceAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentToolsAdminRouter.ts",
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
@@ -767,11 +778,13 @@
       "dependencies": [
         "aiAsyncBackgroundJobHandler",
         "assetActivationRecoveryBackgroundJobHandler",
+        "careerMaintenanceBackgroundJobHandler",
         "cmsScheduledPublishingBackgroundJobHandler",
         "financeReconciliationBackgroundJobHandler",
         "importQueueBackgroundJobHandler",
         "notificationDeliveryBackgroundJobHandler",
-        "retentionBackgroundJobHandler"
+        "retentionBackgroundJobHandler",
+        "serviceMaintenanceBackgroundJobHandler"
       ]
     },
     {
@@ -887,11 +900,53 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/CareerAdminRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "careerMaintenanceBackgroundJobHandler"
+      ],
       "dependencies": [
         "assetReferencePolicy",
         "careerReferenceGateway",
         "careerRepository"
+      ]
+    },
+    {
+      "name": "careerEngagementRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CareerPublicRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "careerEngagementUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "careerEngagementUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "assetReferencePolicy",
+        "careerEngagementRepository",
+        "careerRepository",
+        "careerStudentOwnershipGateway"
+      ]
+    },
+    {
+      "name": "careerMaintenanceBackgroundJobHandler",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "backgroundJobHandlerRegistry"
+      ],
+      "dependencies": [
+        "careerAdminUseCases"
       ]
     },
     {
@@ -934,11 +989,23 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "careerAdminUseCases",
+        "careerEngagementUseCases",
         "careerPublicUseCases",
         "crossDomainGraphReadService"
       ],
       "dependencies": [
         "prisma"
+      ]
+    },
+    {
+      "name": "careerStudentOwnershipGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "careerEngagementUseCases"
+      ],
+      "dependencies": [
+        "studentWorkspaceRepository"
       ]
     },
     {
@@ -1946,6 +2013,7 @@
         "serviceFinanceGateway"
       ],
       "dependencies": [
+        "assetReferencePolicy",
         "financeBankTransferGatewayRegistry",
         "financeCurrencyReferenceGateway",
         "financeFxRateProvider",
@@ -2049,6 +2117,7 @@
         "importGovernanceUseCases",
         "listIdentitiesUseCase",
         "manageSettingsUseCase",
+        "notificationRecipientGateway",
         "principalAccessValidator",
         "provisionIdentityUseCase",
         "purgeIdentityUseCase",
@@ -2383,6 +2452,7 @@
       "dependencies": [
         "notificationIntentRepo",
         "notificationPrefGateway",
+        "notificationRecipientGateway",
         "notificationTemplateRepo"
       ]
     },
@@ -2780,6 +2850,7 @@
         "notificationDeliveryGateway",
         "notificationDeliveryRepo",
         "notificationPrefGateway",
+        "notificationRecipientGateway",
         "studentApplicationReminderDeliveryPolicy"
       ]
     },
@@ -2826,6 +2897,7 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "certificateCompletionFanoutDeliveryGateway",
+        "ownerDomainProjectionDispatcher",
         "ownerDomainServicesDeliveryGateway",
         "studentWorkspaceFanoutOutboxDeliveryGateway"
       ],
@@ -2846,6 +2918,22 @@
       ],
       "dependencies": [
         "prisma"
+      ]
+    },
+    {
+      "name": "notificationRecipientGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/NotificationRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "intentsUseCase",
+        "notificationDeliveryBackgroundJobHandler"
+      ],
+      "dependencies": [
+        "identityRepository",
+        "roleAssignmentRepository",
+        "studentWorkspaceRepository"
       ]
     },
     {
@@ -2918,6 +3006,7 @@
       ],
       "dependencies": [
         "enterpriseEventOutboxProjectionGateway",
+        "notificationOutboxDeliveryGateway",
         "transactionalOutboxStore"
       ]
     },
@@ -3068,6 +3157,7 @@
         "bgJobGateway",
         "bgJobRepo",
         "canonicalAcademicUsageGateway",
+        "careerEngagementRepository",
         "careerRepository",
         "certificateRepository",
         "cmsRepository",
@@ -3121,6 +3211,7 @@
         "scholarshipRepository",
         "searchEngineGateway",
         "searchRequestRepo",
+        "serviceOperationsRepository",
         "servicePlatformRepository",
         "sessionManager",
         "settingAssignmentRepo",
@@ -3148,6 +3239,7 @@
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AssetPlatformRouter.ts",
         "apps/api/src/presentation/api/router/AssetReuseRouter.ts",
+        "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
@@ -3156,7 +3248,8 @@
         "assetRetentionGateway",
         "certificateArtifactStore",
         "certificateRenderingService",
-        "recoverAssetActivationsUseCase"
+        "recoverAssetActivationsUseCase",
+        "serviceDeliveryGateway"
       ],
       "dependencies": [
         "assetMalwareScannerGateway",
@@ -3484,6 +3577,7 @@
         "authEvaluatorService",
         "identityRepository",
         "listIdentitiesUseCase",
+        "notificationRecipientGateway",
         "registerUserUseCase",
         "studentApplicationReminderDeliveryPolicy",
         "studentWorkspaceOutboxDeliveryGateway"
@@ -3784,6 +3878,7 @@
         "adminServiceFulfillmentUseCases",
         "crossDomainGraphReadService",
         "publicServiceCatalogUseCases",
+        "serviceOperationsUseCases",
         "serviceStudentSavedItemHydrationGateway",
         "studentServiceRequestUseCases"
       ],
@@ -3792,14 +3887,71 @@
       ]
     },
     {
+      "name": "serviceDeliveryGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "serviceOperationsUseCases"
+      ],
+      "dependencies": [
+        "processAssetLifecycleUseCase"
+      ]
+    },
+    {
       "name": "serviceFinanceGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "adminServiceFulfillmentUseCases"
+        "adminServiceFulfillmentUseCases",
+        "serviceOperationsUseCases"
       ],
       "dependencies": [
         "financePlatformUseCases"
+      ]
+    },
+    {
+      "name": "serviceMaintenanceBackgroundJobHandler",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "backgroundJobHandlerRegistry"
+      ],
+      "dependencies": [
+        "adminServiceFulfillmentUseCases",
+        "serviceOperationsUseCases"
+      ]
+    },
+    {
+      "name": "serviceOperationsRepository",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "adminServiceCatalogUseCases",
+        "adminServiceFulfillmentUseCases",
+        "serviceOperationsUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "serviceOperationsUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/ServiceAdminRouter.ts",
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "serviceMaintenanceBackgroundJobHandler"
+      ],
+      "dependencies": [
+        "assetReferencePolicy",
+        "serviceCatalogRepository",
+        "serviceDeliveryGateway",
+        "serviceFinanceGateway",
+        "serviceOperationsRepository",
+        "serviceReferenceGateway",
+        "serviceRequestRepository"
       ]
     },
     {
@@ -3828,7 +3980,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "adminServiceCatalogUseCases"
+        "adminServiceCatalogUseCases",
+        "serviceOperationsUseCases"
       ],
       "dependencies": [
         "referenceResolver"
@@ -3840,6 +3993,7 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "adminServiceFulfillmentUseCases",
+        "serviceOperationsUseCases",
         "studentServiceRequestUseCases"
       ],
       "dependencies": [
@@ -4196,6 +4350,7 @@
         "studentDashboardHydrationService"
       ],
       "dependencies": [
+        "assetReferencePolicy",
         "serviceCatalogRepository",
         "serviceRequestRepository"
       ]
@@ -4467,8 +4622,12 @@
     {
       "name": "studentWorkspaceRepository",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [],
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/NotificationRouter.ts"
+      ],
       "reachableThroughRegistrations": [
+        "careerStudentOwnershipGateway",
+        "notificationRecipientGateway",
         "studentContextGateway",
         "studentSavedItemHydrationService",
         "studentToolSaveGateway",
@@ -4797,20 +4956,6 @@
       "classification": "FORMALLY_DEFERRED",
       "targetWave": "W4/W7",
       "reason": "Current localization authority is owner-domain/public localization source; registry orchestrator has no runtime consumer."
-    },
-    {
-      "registration": "serviceOperationsUseCases",
-      "source": "packages/application/src/services-platform/use-cases/ServiceOperationsUseCases.ts",
-      "classification": "FORMALLY_DEFERRED",
-      "targetWave": "W4/W5",
-      "reason": "W2 owner source/persistence is implemented; HTTP/Admin/Student action composition belongs to later waves."
-    },
-    {
-      "registration": "careerEngagementUseCases",
-      "source": "packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts",
-      "classification": "FORMALLY_DEFERRED",
-      "targetWave": "W4/W5",
-      "reason": "W2 owner source/persistence is implemented; canonical application/profile/alumni route composition belongs to later waves."
     },
     {
       "registration": "monitoringRouter",

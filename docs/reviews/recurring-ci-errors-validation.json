@@ -1,0 +1,55 @@
+{
+  "base": "6e844d82488fa0e65aae8d1009c7d7177d7f147d",
+  "classification": "SOURCE_ONLY",
+  "section24": "PAUSED_EXCLUDED",
+  "tests": {
+    "vitest": {
+      "passed": 4054,
+      "skipped": 45,
+      "files_passed": 542,
+      "files_skipped": 5,
+      "failed": 0,
+      "command": "vitest run --config vitest.config.ts --maxWorkers=4"
+    },
+    "node": {
+      "passed": 332,
+      "failed": 0,
+      "command": "npm run test:node"
+    },
+    "translation_behavior": {
+      "passed": 25,
+      "failed": 0
+    },
+    "service_closure_isolated": {
+      "passed": 18,
+      "failed": 0
+    },
+    "notification_source": {
+      "passed": 54,
+      "failed": 0,
+      "command": "npm run notifications:source:verify"
+    }
+  },
+  "source_checks": {
+    "remediation_w0_w16": "PASS_17_OF_17",
+    "audit_inventory": "PASS_404_HANDLERS_403_ENDPOINTS",
+    "di_reachability": "PASS_374_SOURCE_REACHABLE",
+    "persistence_ownership": "PASS_266_MODELS_NO_CROSS_OWNER_MUTATIONS",
+    "environment_freshness": "PASS_259_NAMES_NO_VALUES",
+    "nginx_mock_owner": "PASS_7_CHECKS",
+    "typescript": "PASS",
+    "source_quality": "PASS",
+    "lint": "PASS_0_ERRORS_EXISTING_WARNINGS",
+    "full_workspace_build": "PASS",
+    "closure_manifest": "PASS_EVERY_SOURCE_GATE_IN_ORDERED_SEGMENTS_RUNTIME_GATES_SKIPPED",
+    "preflight": "PASS"
+  },
+  "not_executed": [
+    "live database",
+    "migration application",
+    "provider sandbox",
+    "browser E2E",
+    "deployment"
+  ],
+  "sql_bytes_changed": 0
+}

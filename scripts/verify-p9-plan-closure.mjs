@@ -113,8 +113,8 @@ check('P9-SVC-002 old text relationship form fields are absent', notHas(serviceP
 // P21 Career: canonical geography only for authoring.
 check('P9-CAREER-001 employer/job forms carry countryReferenceId', has(careerPage, 'countryReferenceId'));
 check('P9-CAREER-001 employer/job forms carry cityReferenceId', has(careerPage, 'cityReferenceId'));
-check('P9-CAREER-002 Career Admin uses P7 country/city canonical pickers', has(careerPage, 'canonicalPickerApi.countries()') && has(careerPage, 'canonicalPickerApi.cities('));
-check('P9-CAREER-002 Career owner API receives canonical geography', has(careerPage, 'countryReferenceId: jobForm.countryReferenceId') && has(careerPage, 'cityReferenceId: jobForm.cityReferenceId'));
+check('P9-CAREER-002 Career Admin uses P7 country/city canonical pickers', has(careerPage, 'load={canonicalPickerApi.countries}') && has(careerPage, '<CanonicalCityPicker') && has('apps/admin/src/components/CanonicalCityPicker.tsx', 'canonicalPickerApi.cities('));
+check('P9-CAREER-002 Career owner API receives canonical geography', has(careerPage, 'countryReferenceId: form.countryReferenceId') && has(careerPage, 'cityReferenceId: form.cityReferenceId'));
 check('P9-CAREER-003 text geography is not the create-job relationship payload', !/country:\s*jobForm\./u.test(read(careerPage)) && !/city:\s*jobForm\./u.test(read(careerPage)));
 
 // Existing P14/P16/P17/P18/P19 owner control planes remain present.

@@ -21,7 +21,10 @@ test('explicitly reviewed historical migrations retain exact SQL bytes via sidec
     "20261010000000_course_assessment_type",
     "20261010170000_p11_unit_source_identity",
     "20261010180000_certificate_issuer_pending_default",
-    "20261010183000_p12_scholarship_revision"
+    "20261010183000_p12_scholarship_revision",
+    "20261011221500_section20_financial_safety",
+    "20261012000000_section21_service_safety",
+    "20261012010000_section21_close_source"
   ]);
   for (const name of names) {
     const sql = readFileSync(`packages/infrastructure/prisma/migrations/${name}/migration.sql`);

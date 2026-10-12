@@ -5,7 +5,7 @@ import ts from 'typescript';
 const root = process.cwd();
 const allowedRootDirectories = new Set(['.devcontainer', '.git', '.github', '.husky', 'apps', 'config', 'docs', 'packages', 'scripts', 'storage', 'tests', 'vendor', 'workspace']);
 const allowedRootFiles = new Set([
-  '.dockerignore', '.editorconfig', '.env.example', '.env.aistudio.example', '.env.compose.example',
+  '.git', '.dockerignore', '.editorconfig', '.env.example', '.env.aistudio.example', '.env.compose.example',
   '.gitattributes', '.gitignore', '.npmrc', '.nvmrc', '.prettierrc',
   '.certificates-vitest.config.ts', '.section08-vitest.config.ts', '.section09-vitest.config.ts',
   '.section15-vitest.config.ts', '.section16-vitest.config.ts', 'vitest.database.config.ts',

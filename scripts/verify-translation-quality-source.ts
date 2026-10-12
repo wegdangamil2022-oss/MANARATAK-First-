@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, join, relative, resolve } from 'node:path';
+import { readDictionaryEntries } from './translation/dictionary-source.mjs';
 
 const ROOT = process.cwd();
 const failures: string[] = [];
@@ -25,12 +26,10 @@ function requireIncludes(source: string, needle: string, message: string): void 
 function dictionaryKeys(relativePath: string): Set<string> {
   const keys = new Set<string>();
   const source = read(relativePath);
-  for (const line of source.split(/\r?\n/)) {
-    const match = line.match(/^\s{2}"([^"]+)"\s*:/);
-    if (match) keys.add(match[1]);
-  }
+  const entries = readDictionaryEntries(source);
+  for (const entry of entries) keys.add(entry.key);
   requireCondition(keys.size > 0, `${relativePath}: dictionary keys detected`);
-  requireCondition(!/^\s{2}"[^"]+"\s*:\s*""\s*,?\s*$/m.test(source), `${relativePath}: no blank dictionary values`);
+  requireCondition(entries.every(entry => entry.value.trim().length > 0), `${relativePath}: no blank dictionary values`);
   return keys;
 }
 

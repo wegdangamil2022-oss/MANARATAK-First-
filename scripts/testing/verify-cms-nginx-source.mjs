@@ -63,7 +63,7 @@ try {
   const config = resolve(root, 'nginx.conf');
   await writeFile(
     config,
-    `worker_processes 1; pid ${root}/nginx.pid; error_log ${root}/error.log;\nevents { worker_connections 128; }\nhttp { access_log off; client_body_temp_path ${root}/body; proxy_temp_path ${root}/proxy; ${server} }`,
+    `worker_processes 1; pid ${root}/nginx.pid; error_log ${root}/error.log;\nevents { worker_connections 128; }\nhttp { access_log off; client_body_temp_path ${root}/body; proxy_temp_path ${root}/proxy; fastcgi_temp_path ${root}/fastcgi; uwsgi_temp_path ${root}/uwsgi; scgi_temp_path ${root}/scgi; ${server} }`,
   );
   const syntax = spawnSync(binary, ['-t', '-p', root, '-c', config], { encoding: 'utf8' });
   assert.equal(syntax.status, 0, syntax.stderr);

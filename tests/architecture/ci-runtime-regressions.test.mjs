@@ -84,3 +84,11 @@ test('Preview Prisma ownership remains in resource authority and operational ver
   const policy = JSON.parse(read('scripts/architecture/operational-tooling-boundary.json'));
   assert.ok(policy.classifiedDirectPrismaScripts.includes('scripts/verify-vercel-api-handler.mjs'));
 });
+
+test('source CI catches inventory drift and negative guard contracts before the full closure matrix', () => {
+  const workflow = read('.github/workflows/ci.yml');
+  assert.ok(workflow.indexOf('npm run ci:preflight') < workflow.indexOf('npm run ci:closure:manifest'));
+  const runner = read('scripts/ci/source-preflight.mjs');
+  for (const contract of ['verify-source-architecture-guards.mjs', 'verify-di-reachability.mjs', 'verify-admin-audit-coverage.mjs', 'environment.mjs', '--check', 'w2-migration-recovery-source.test.mjs', 'admin-audit-coverage.test.mjs', 'dictionary-source.test.mjs']) assert.ok(runner.includes(contract), contract);
+  assert.match(runner, /if \(result.status !== 0\) process.exit/);
+});

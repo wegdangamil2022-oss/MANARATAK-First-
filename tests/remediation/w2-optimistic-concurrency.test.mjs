@@ -15,7 +15,7 @@ function loadTsModule(relPath, requireMap = {}) {
   const js = ts.transpileModule(read(relPath), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const module = { exports: {} };
   const wrapper = vm.runInThisContext(`(function(require,exports,module){${js}\n})`, { filename: relPath });
-  wrapper((id) => id in requireMap ? requireMap[id] : (()=>{ throw new Error(`UNEXPECTED_REQUIRE:${id}`); })(), module.exports, module);
+  wrapper((id) => { if(id in requireMap) return requireMap[id]; if(id.startsWith('node:') || id==='@manaratak/application') return require(id); if(id.startsWith('.')) return loadTsModule(path.relative(root,path.resolve(root,path.dirname(relPath),id+'.ts')),requireMap); throw new Error(`UNEXPECTED_REQUIRE:${id}`); }, module.exports, module);
   return module.exports;
 }
 
@@ -23,7 +23,7 @@ const stableCursorModule = loadTsModule('packages/infrastructure/src/api-foundat
 
 const serviceDomain = {
   ServiceStatus: { PUBLISHED: 'PUBLISHED', ARCHIVED: 'ARCHIVED' },
-  ServiceRequestStatus: { REQUESTED: 'REQUESTED', AWAITING_PAYMENT: 'AWAITING_PAYMENT', COMPLETED: 'COMPLETED' },
+  ServiceRequestStatus: { CANCELLED:'CANCELLED', REQUESTED: 'REQUESTED', AWAITING_PAYMENT: 'AWAITING_PAYMENT', COMPLETED: 'COMPLETED' },
 };
 
 function createTxMock(models) {
@@ -37,7 +37,7 @@ function createTxMock(models) {
 
 test('MNT-AUD-0096 service catalog/request mutations use id+version CAS and increment monotonically', async () => {
   const { PrismaServicePlatformRepository } = loadTsModule('packages/infrastructure/src/services-platform/PrismaServicePlatformRepository.ts', {
-    '@manaratak/domain': serviceDomain, '@prisma/client': {}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
+    '@manaratak/domain': serviceDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
   });
   const calls = [];
   const catalog = {
@@ -58,10 +58,10 @@ test('MNT-AUD-0096 service catalog/request mutations use id+version CAS and incr
 
 test('MNT-AUD-0096 service stale writes fail with canonical version conflict', async () => {
   const { PrismaServicePlatformRepository } = loadTsModule('packages/infrastructure/src/services-platform/PrismaServicePlatformRepository.ts', {
-    '@manaratak/domain': serviceDomain, '@prisma/client': {}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
+    '@manaratak/domain': serviceDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
   });
   const stale = Object.assign(new Error('not found'), { code:'P2025' });
-  const repo = new PrismaServicePlatformRepository(createTxMock({ serviceCatalogRecord:{ update:async()=>{throw stale;} }, serviceRequestRecord:{ update:async()=>{throw stale;} } }));
+  const repo = new PrismaServicePlatformRepository(createTxMock({ serviceCatalogRecord:{ update:async()=>{throw stale;} }, serviceProviderRecord:{findUnique:async()=>({status:'QUALIFIED',capacity:1})}, serviceRequestRecord:{count:async()=>0, update:async()=>{throw stale;} } }));
   await assert.rejects(repo.updateStatus('svc','ARCHIVED',1), /SERVICE_CATALOG_VERSION_CONFLICT/);
   await assert.rejects(repo.assignProvider('req','provider',1), /SERVICE_REQUEST_VERSION_CONFLICT/);
 });
@@ -69,13 +69,13 @@ test('MNT-AUD-0096 service stale writes fail with canonical version conflict', a
 test('MNT-AUD-0096 career employer/job mutations use id+version CAS and stale writes fail closed', async () => {
   const careerDomain = { CareerEmployerStatus:{VERIFIED:'VERIFIED'}, CareerJobStatus:{ARCHIVED:'ARCHIVED',PUBLISHED:'PUBLISHED'} };
   const { PrismaCareerRepository } = loadTsModule('packages/infrastructure/src/career-alumni/PrismaCareerRepository.ts', {
-    '@manaratak/domain': careerDomain, '@prisma/client': {}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
+    '@manaratak/domain': careerDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
   });
   const seen=[];
-  const employer={ update:async(args)=>{seen.push(args); return {id:'e',version:3,publicId:'ep',slug:'e',canonicalName:'e',canonicalDedupKey:'e',displayName:'E',employerType:'X',verificationStatus:'VERIFIED',createdAt:new Date(),updatedAt:new Date()};} };
-  const job={ update:async(args)=>{seen.push(args); return {id:'j',version:6,publicId:'jp',slug:'j',canonicalTitle:'J',canonicalDedupKey:'j',title:'J',opportunityType:'JOB',employmentType:'FULL_TIME',jobCategory:'X',description:'x',countryReferenceId:'YE',status:'ARCHIVED',employerId:'e',remoteOption:false,createdAt:new Date(),updatedAt:new Date(),employer:null};} };
-  const repo=new PrismaCareerRepository(createTxMock({careerEmployerRecord:employer,careerJobPostingRecord:job}));
-  await repo.updateEmployer('e',{verificationStatus:'VERIFIED'},2);
+  const employer={findUnique:async()=>({id:'e',version:2,metadata:{_career:{makerActorId:'maker'}}}), update:async(args)=>{seen.push(args); return {id:'e',version:3,publicId:'ep',slug:'e',canonicalName:'e',canonicalDedupKey:'e',displayName:'E',employerType:'X',verificationStatus:'VERIFIED',createdAt:new Date(),updatedAt:new Date()};} };
+  const job={findUnique:async()=>({id:'j',version:5,status:'PUBLISHED',metadata:{_career:{makerActorId:'maker'}}}), update:async(args)=>{seen.push(args); return {id:'j',version:6,publicId:'jp',slug:'j',canonicalTitle:'J',canonicalDedupKey:'j',title:'J',opportunityType:'JOB',employmentType:'FULL_TIME',jobCategory:'X',description:'x',countryReferenceId:'YE',status:'ARCHIVED',employerId:'e',remoteOption:false,createdAt:new Date(),updatedAt:new Date(),employer:null};} };
+  const repo=new PrismaCareerRepository(createTxMock({careerEmployerRecord:employer,careerJobPostingRecord:job})).withActor({actorId:'reviewer',reason:'concurrency regression',correlationId:'corr'});
+  await repo.updateEmployer('e',{displayName:'Updated employer'},2);
   await repo.updateJobStatus('j','ARCHIVED',5);
   assert.deepEqual(seen[0].where,{id_version:{id:'e',version:2}});
   assert.deepEqual(seen[1].where,{id_version:{id:'j',version:5}});
@@ -91,7 +91,9 @@ test('MNT-AUD-0096 HTTP/Admin boundaries require expectedVersion and display cur
   const servicePage=read('apps/admin/src/pages/ServicesAdminPage.tsx');
   const careerPage=read('apps/admin/src/pages/CareerAdminPage.tsx');
   assert.match(serviceRouter,/expectedVersion: z\.number\(\)\.int\(\)\.positive\(\)/);
-  assert.match(careerRouter,/expectedVersionSchema/);
+  assert.match(careerRouter,/expectedVersion: careerExpected/);
+  assert.match(read('apps/api/src/presentation/api/router/CareerHttp.ts'),/careerExpected = z\.number\(\)\.int\(\)\.positive\(\)/);
   assert.match(servicePage,/expectedVersion: service\.version/);
-  assert.match(careerPage,/expectedVersion: (?:employer|job)\.version/);
+  assert.match(careerPage,/body.expectedVersion = editing\.version/);
+  assert.match(careerPage,/expectedVersion:row\.version/);
 });
