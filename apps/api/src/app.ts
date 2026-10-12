@@ -1,3 +1,4 @@
+import { freshWorkerEvidence, successfulPublicWebStatus } from './presentation/monitoring/RuntimeHealthPolicy.js';
 import * as awilix from '@manaratak-vendor/awilix-core';
 import { createVercelHttpHandler } from './infrastructure/runtime/VercelHttpHandler.js';
 import { createPreviewAvailabilityApp, isProvisioningPreview } from './infrastructure/runtime/PreviewAvailabilityApp.js';
@@ -227,6 +228,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     monitoringService.registerIndicator({
       name: 'runtime-lifecycle',
+      evidenceKind: 'OBSERVED_RUNTIME',
+      probeVersion: 1,
       isOptional: false,
       checkHealth: async () => ({
         status: runtimeResources.isShuttingDown() ? HealthStatus.DOWN : HealthStatus.UP,
@@ -238,6 +241,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
       monitoringService.registerIndicator({
         name: 'telemetry-exporter',
+      evidenceKind: 'OBSERVED_RUNTIME',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
         checkHealth: async () =>
           monitoringProvider
@@ -278,6 +283,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       const dbHealthChecker = new DatabaseHealthChecker(prisma);
       monitoringService.registerIndicator({
         name: 'database',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: false,
         checkHealth: async () => {
           return await dbHealthChecker.checkHealth();
@@ -306,6 +313,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       if (databaseRequired) throw new Error('DATABASE_URL is required for this runtime mode');
       monitoringService.registerIndicator({
         name: 'database',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: false,
         checkHealth: async () => ({
           status: HealthStatus.DOWN,
@@ -317,6 +326,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     monitoringService.registerIndicator({
       name: 'asset-reference-integrity',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
       isOptional: false,
       checkHealth: async () => {
         try {
@@ -331,6 +342,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
       monitoringService.registerIndicator({
         name: 'database-schema',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
         checkHealth: async () => {
           try {
@@ -338,7 +351,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
           const rows = await prisma.$queryRawUnsafe(
             'SELECT COUNT(*)::int AS "failedCount" FROM "_prisma_migrations" WHERE "finished_at" IS NULL AND "rolled_back_at" IS NULL',
           );
-            const failedCount = Number(Array.isArray(rows) ? (rows[0]?.failedCount ?? 0) : 0);
+            if (!Array.isArray(rows) || rows.length !== 1 || !Number.isInteger(Number(rows[0]?.failedCount)) || Number(rows[0]?.failedCount) < 0) throw new Error('DATABASE_MIGRATION_HISTORY_INVALID');
+            const failedCount = Number(rows[0].failedCount);
             const healthy = failedCount === 0;
             return {
               status: healthy
@@ -352,6 +366,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
               capabilityStatus: healthy ? 'APPLIED_HISTORY_HEALTHY' : 'INCOMPLETE_MIGRATION_HISTORY',
               failedOrIncompleteMigrations: failedCount,
               scope: 'APPLIED_MIGRATION_HISTORY_ONLY',
+              schemaParity: 'UNVERIFIED_DEPLOYMENT_ARTIFACT_REQUIRED',
             },
             };
           } catch (error: any) {
@@ -362,6 +377,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
             details: {
               capabilityStatus: 'MIGRATION_HISTORY_UNAVAILABLE',
               scope: 'APPLIED_MIGRATION_HISTORY_ONLY',
+              schemaParity: 'UNVERIFIED_DEPLOYMENT_ARTIFACT_REQUIRED',
             },
           };
         }
@@ -370,33 +386,22 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
       monitoringService.registerIndicator({
         name: 'asset-platform',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
-        checkHealth: async () => {
+        checkHealth: async (signal) => {
         const capabilities = {
           storage: describeRuntimeCapability(assetRuntimeProviders.storage),
           malwareScanner: describeRuntimeCapability(assetRuntimeProviders.malwareScanner),
           sanitizer: describeRuntimeCapability(assetRuntimeProviders.sanitizer),
         };
-        const unavailable = Object.values(capabilities).some((value) =>
-          ['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(value),
-        );
-          return {
-            status: unavailable
-              ? isProductionOrStaging
-                ? HealthStatus.DOWN
-                : HealthStatus.DEGRADED
-              : HealthStatus.UP,
-            timestamp: new Date().toISOString(),
-            ...(unavailable ? { error: 'ASSET_RUNTIME_CAPABILITY_GAP' } : {}),
-            details: {
-              capabilityStatus: unavailable
-                ? isProductionOrStaging
-                  ? 'UNAVAILABLE'
-                  : 'DEVELOPMENT_ONLY'
-                : 'AVAILABLE',
-              ...capabilities,
-            },
-          };
+        const results = await Promise.all(Object.values(assetRuntimeProviders).map(provider =>
+          typeof provider?.checkReadiness === 'function' ? provider.checkReadiness(signal)
+            : Promise.resolve({ status: HealthStatus.UNKNOWN })));
+        const verified = results.every(result => result.status === HealthStatus.UP);
+        return { status: verified ? HealthStatus.UP : HealthStatus.DOWN, timestamp: new Date().toISOString(),
+          ...(!verified ? { error: 'ASSET_PROVIDER_READINESS_UNVERIFIED' } : {}),
+          details: { ...capabilities, capabilityStatus: verified ? 'VERIFIED_READY' : 'RUNTIME_PENDING' } };
         },
       });
 
@@ -410,6 +415,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         
         monitoringService.registerIndicator({
           name: 'redis',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
           isOptional: !isProductionOrStaging,
           checkHealth: async () => {
             return await redisHealthChecker.checkHealth();
@@ -424,6 +431,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         logger.error("[Redis] Failed to initialize Redis client", error);
         monitoringService.registerIndicator({
           name: 'redis',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
           isOptional: true,
           checkHealth: async () => ({
             status: HealthStatus.DEGRADED,
@@ -435,6 +444,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     } else {
       monitoringService.registerIndicator({
         name: 'redis',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
         checkHealth: async () => ({
           status: isProductionOrStaging ? HealthStatus.DOWN : HealthStatus.UP,
@@ -450,9 +461,12 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       const studentToolRateLimiter = container.resolve<any>('studentToolRateLimiter');
       monitoringService.registerIndicator({
         name: 'student-tools-quota',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
         checkHealth: async () => {
-        const productionCapable = studentToolRateLimiter?.isProductionReady === true
+        const quotaStoreAlive = await container.resolve<any>('redisClient')?.ping?.() === 'PONG';
+        const productionCapable = quotaStoreAlive && studentToolRateLimiter?.isProductionReady === true
           && studentToolRateLimiter?.capabilityStatus === 'PRODUCTION_CAPABLE';
           return {
             status: productionCapable
@@ -476,14 +490,23 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       const sourceRegistryGateway = container.resolve<any>('sourceRegistryGateway');
       monitoringService.registerIndicator({
         name: 'import-foundation',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
-        checkHealth: async () => {
+        checkHealth: async (signal) => {
         const queuePersistence = String(importQueueGateway?.persistenceClassification || describeRuntimeCapability(importQueueGateway));
           const snapshotCapability = describeRuntimeCapability(importRawSnapshotStore);
           const sourceRegistryCapability = describeRuntimeCapability(sourceRegistryGateway);
           const durableQueue = queuePersistence === 'DURABLE';
         const durableSnapshot = !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(snapshotCapability);
-          const productionReady = durableQueue && durableSnapshot;
+          const registryAvailable = !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(sourceRegistryCapability);
+          const prisma = container.resolve<any>('prisma');
+          const [archive] = await Promise.all([
+            typeof importRawSnapshotStore?.checkReadiness === 'function' ? importRawSnapshotStore.checkReadiness(signal) : { status: HealthStatus.UNKNOWN },
+            prisma.importBatch.findFirst({ select: { id: true } }),
+            prisma.importSourceRegistryEntry.findFirst({ select: { sourceId: true } }),
+          ]);
+          const productionReady = durableQueue && durableSnapshot && registryAvailable && archive.status === HealthStatus.UP;
         const developmentOnly = !durableQueue || snapshotCapability === 'LOCAL_ONLY' || sourceRegistryCapability === 'LOCAL_ONLY';
 
           return {
@@ -514,19 +537,29 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
       monitoringService.registerIndicator({
         name: 'admin-auth',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
         checkHealth: async () => {
           const strict = adminAuthMode === 'strict';
+          const prisma = container.resolve<any>('prisma');
+          const [, role, policy] = await Promise.all([
+            prisma.sessionRecord.findFirst({ select: { id: true } }),
+            prisma.roleRecord.findFirst({ select: { id: true, permissions: true, policyIds: true } }),
+            prisma.policyRecord.findFirst({ select: { id: true, ruleType: true, ruleConfiguration: true } }),
+            prisma.roleAssignmentRecord.findFirst({ select: { id: true } }),
+          ]);
+          const ownerReadable = Boolean(role && policy);
           return {
-            status: strict
+            status: strict && ownerReadable
               ? HealthStatus.UP
               : isProductionOrStaging
                 ? HealthStatus.DOWN
                 : HealthStatus.DEGRADED,
             timestamp: new Date().toISOString(),
-            ...(!strict ? { error: 'ADMIN_AUTH_NOT_STRICT' } : {}),
+            ...(!strict || !ownerReadable ? { error: 'ADMIN_AUTH_POLICY_OR_STORE_UNAVAILABLE' } : {}),
           details: {
-            capabilityStatus: strict ? 'AVAILABLE' : 'DEVELOPMENT_ONLY',
+            capabilityStatus: strict && ownerReadable ? 'OWNER_STORAGE_VERIFIED' : 'RUNTIME_PENDING',
             mode: adminAuthMode,
             sessionPersistence: 'PRISMA',
           },
@@ -568,8 +601,10 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
       monitoringService.registerIndicator({
         name: 'payment-gateway',
-        isOptional: true,
-        checkHealth: async () => {
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
+        isOptional: !isProductionOrStaging,
+        checkHealth: async (signal) => {
         const providerKey = String(currentEnv.FINANCE_PAYMENT_PROVIDER_KEY || 'PRIMARY_PAYMENT').trim();
           const registry = container.resolve<any>('financePaymentGatewayRegistry');
           const provider = typeof registry?.get === 'function' ? registry.get(providerKey) : null;
@@ -580,7 +615,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
               : configured
                 ? 'RUNTIME_PENDING'
                 : 'NOT_CONFIGURED';
-          const ready = configured && capabilityStatus === 'READY';
+          const observed = typeof provider?.checkReadiness === 'function' ? await provider.checkReadiness(signal) : null;
+          const ready = configured && observed?.status === HealthStatus.UP;
           return {
             status: ready
               ? HealthStatus.UP
@@ -589,15 +625,17 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
                 : HealthStatus.DEGRADED,
             timestamp: new Date().toISOString(),
           ...(!ready ? { error: configured ? 'PAYMENT_PROVIDER_RUNTIME_NOT_READY' : 'PAYMENT_PROVIDER_NOT_CONFIGURED' } : {}),
-            details: { capabilityStatus, providerConfigured: configured, providerKey },
+            details: { capabilityStatus: ready ? 'VERIFIED_READY' : 'RUNTIME_PENDING', configuredCapability: capabilityStatus, providerConfigured: configured, providerKey },
           };
         },
       });
 
       monitoringService.registerIndicator({
         name: 'notifications',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
-        checkHealth: async () => {
+        checkHealth: async (signal) => {
           const intentRepo = container.resolve<any>('notificationIntentRepo');
           const templateRepo = container.resolve<any>('notificationTemplateRepo');
           const preferenceGateway = container.resolve<any>('notificationPrefGateway');
@@ -610,7 +648,20 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
         const deliveryCadenceConfigured = Boolean(config.getOptional<string>('BACKGROUND_NOTIFICATION_CRON'));
         const durable = !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(persistence)
           && !['UNAVAILABLE', 'NOT_CONFIGURED', 'LOCAL_ONLY'].includes(templates);
-          const providerReady = false; // DB/worker/provider proof is deferred until after section 28.
+          const prisma = container.resolve<any>('prisma');
+          const [providerHealth, lastSweep, oldest] = await Promise.all([
+            typeof deliveryGateway?.checkReadiness === 'function' ? deliveryGateway.checkReadiness(signal) : { status: HealthStatus.UNKNOWN },
+            prisma.backgroundJobRecord.findFirst({ where: { jobType: 'notification.delivery.sweep', lastCompletedAt: { not: null } },
+              orderBy: { lastCompletedAt: 'desc' }, select: { lastCompletedAt: true, failedAt: true } }),
+            prisma.notificationIntentRecord.findFirst({ where: { deliveryState: { in: ['PENDING', 'FAILED', 'PROCESSING'] },
+              nextAttemptAt: { lte: new Date() }, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
+              orderBy: { nextAttemptAt: 'asc' }, select: { nextAttemptAt: true } }),
+          ]);
+          const lastSweepAgeMs = lastSweep?.lastCompletedAt ? Date.now() - new Date(lastSweep.lastCompletedAt).getTime() : null;
+          const oldestDueAgeMs = oldest?.nextAttemptAt ? Date.now() - new Date(oldest.nextAttemptAt).getTime() : 0;
+          const providerReady = providerHealth.status === HealthStatus.UP && lastSweepAgeMs !== null && lastSweepAgeMs >= 0 && lastSweepAgeMs <= 300_000
+            && oldestDueAgeMs <= 300_000 && (!lastSweep.failedAt || new Date(lastSweep.failedAt) < new Date(lastSweep.lastCompletedAt))
+            && intentRepo.payloadProtectionStatus === 'READY';
         const available = durable && providerReady && backgroundWorkerEnabled && deliveryCadenceConfigured;
           return {
             status: available
@@ -630,7 +681,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
               templates,
               preferences,
               provider,
-              runtimeEvidence: 'PENDING_AFTER_SECTION_28',
+              runtimeEvidence: available ? 'READ_ONLY_PROVIDER_AND_SWEEP_OBSERVED' : 'RUNTIME_PENDING',
+              lastSweepAgeMs, oldestDueAgeMs, deliveryAcceptance: 'NOT_ATTESTED',
               configured: durable && intentRepo.payloadProtectionStatus === 'READY' && backgroundWorkerEnabled && deliveryCadenceConfigured,
               payloadProtection: intentRepo.payloadProtectionStatus,
               backgroundWorkerEnabled,
@@ -642,6 +694,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
       monitoringService.registerIndicator({
         name: 'polling-workers',
+      evidenceKind: 'OBSERVED_RUNTIME',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
         checkHealth: async () => {
           const registry = container.resolve<any>('pollingWorkerRuntimeRegistry');
@@ -651,24 +705,27 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
           studentWorkspace: config.getOptional<boolean>('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED') === true,
           ownerDomainOutbox: config.getOptional<boolean>('OWNER_DOMAIN_OUTBOX_WORKER_ENABLED') === true,
         };
-        const decorate = (name: string) => {
+        const decorate = async (name: string, intervalKey: string) => {
           const snapshot = registry?.snapshot?.(name) ?? { state: 'STOPPED' };
+          const cluster = await container.resolve<any>('workerHealthObservation').read(name);
+          const maxAgeMs = Math.max(15_000, 3 * (config.getOptional<number>(intervalKey) ?? 5_000));
+          const verified = freshWorkerEvidence(cluster, maxAgeMs);
           const lastSuccessAt = snapshot.lastSuccessAt ? Date.parse(snapshot.lastSuccessAt) : NaN;
           return {
-            ...snapshot,
+            ...snapshot, cluster, verified, scope: 'NODE_AND_DEPLOYMENT_CLUSTER',
             lastSuccessLagMs: Number.isFinite(lastSuccessAt) ? Math.max(0, now - lastSuccessAt) : null,
           };
         };
         const workers = {
-          certificateCompletion: decorate('certificate-completion'),
-          studentWorkspace: decorate('student-workspace-outbox'),
-          ownerDomainOutbox: decorate('owner-domain-outbox'),
+          certificateCompletion: await decorate('certificate-completion', 'CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS'),
+          studentWorkspace: await decorate('student-workspace-outbox', 'STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS'),
+          ownerDomainOutbox: await decorate('owner-domain-outbox', 'OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS'),
         };
         const expectedNames = Object.entries(configured).filter(([, enabled]) => enabled).map(([name]) => name);
         const unavailable = expectedNames.filter((name) => workers[name as keyof typeof workers].state === 'STOPPED');
         const degraded = expectedNames.filter((name) => workers[name as keyof typeof workers].state === 'DEGRADED');
           const allConfigured = Object.values(configured).every(Boolean);
-          const healthy = allConfigured && unavailable.length === 0 && degraded.length === 0;
+          const healthy = allConfigured && expectedNames.every(name => workers[name as keyof typeof workers].verified);
           return {
             status: healthy
               ? HealthStatus.UP
@@ -688,6 +745,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
       monitoringService.registerIndicator({
         name: 'background-jobs',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
         checkHealth: async () => {
           const repository = container.resolve<any>('bgJobRepo');
@@ -709,7 +768,11 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
           queueError = error?.message || 'BACKGROUND_JOB_QUEUE_HEALTH_FAILED';
         }
           const runtimeSnapshot = runtimeState?.snapshot?.() ?? { state: 'STOPPED' };
-        const available = durable && workerEnabled && !queueError && runtimeSnapshot.state !== 'STOPPED';
+        const cluster = await container.resolve<any>('workerHealthObservation').read('background-jobs');
+        const maxAgeMs = Math.max(15_000, 3 * (config.getOptional<number>('BACKGROUND_WORKER_INTERVAL_MS') ?? 5_000));
+        const oldestDueAgeMs = queueSnapshot?.oldestDueAt ? Date.now() - Date.parse(queueSnapshot.oldestDueAt) : 0;
+        const available = durable && workerEnabled && !queueError && queueSnapshot !== null && freshWorkerEvidence(cluster, maxAgeMs)
+          && Number.isFinite(oldestDueAgeMs) && oldestDueAgeMs <= 300_000;
           return {
             status: available
               ? HealthStatus.UP
@@ -728,7 +791,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
               execution: executionStatus,
               persistence: execution?.persistenceClassification,
               workerEnabled,
-              worker: runtimeSnapshot,
+              worker: runtimeSnapshot, cluster, oldestDueAgeMs, scope: 'NODE_AND_DEPLOYMENT_CLUSTER',
               queue: queueSnapshot,
             },
           };
@@ -737,6 +800,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
       monitoringService.registerIndicator({
         name: 'public-web',
+      evidenceKind: 'READ_ONLY_OPERATION',
+      probeVersion: 1,
         isOptional: !isProductionOrStaging,
         checkHealth: async () => {
           const target = String(currentEnv.PUBLIC_WEB_URL || currentEnv.CORS_ORIGIN || '').trim();
@@ -775,7 +840,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
           try {
           const response = await fetch(parsed.toString(), { method: 'HEAD', redirect: 'manual', signal: controller.signal });
             const latencyMs = Date.now() - startedAt;
-            const reachable = response.status >= 200 && response.status < 500;
+            const reachable = successfulPublicWebStatus(response.status);
             return {
               status: reachable
                 ? HealthStatus.UP

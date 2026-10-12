@@ -1,3 +1,4 @@
+import { parseHealthOverview } from '../features/health/HealthOverviewContract';
 import { useCallback, useEffect, useMemo, useState, type ComponentType, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -96,16 +97,7 @@ type FinanceOverview = {
   reconciliationHealth: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'UNKNOWN';
 };
 
-type MonitoringResponse = {
-  status?: HealthState;
-  indicators?: Record<string, { status?: HealthState; latencyMs?: number; error?: string }>;
-};
 
-type ProductionReadiness = {
-  ready: boolean;
-  blockerCount: number;
-  warningCount: number;
-};
 
 type SystemSnapshot = {
   api: HealthState;
@@ -613,24 +605,15 @@ async function loadFinanceOverview(): Promise<FinanceOverview | null> {
 
 async function loadSystemSnapshot(): Promise<SystemSnapshot> {
   try {
-    const [health, readiness, production] = await Promise.allSettled([
-      adminApiClient.request<MonitoringResponse>('/monitoring/health'),
-      adminApiClient.request<MonitoringResponse>('/monitoring/health/readiness'),
-      adminApiClient.request<ProductionReadiness>('/monitoring/production-readiness'),
-    ]);
-
-    const healthValue = health.status === 'fulfilled' ? health.value : null;
-    const readinessValue = readiness.status === 'fulfilled' ? readiness.value : null;
-    const productionValue = production.status === 'fulfilled' ? production.value : null;
-    const indicators = readinessValue?.indicators ?? healthValue?.indicators ?? {};
-
+    const overview = parseHealthOverview(await adminApiClient.request<unknown>('/admin/monitoring/overview'));
+    const state = (status: string): HealthState => status === 'UP' ? 'UP' : status === 'DOWN' || status === 'DEGRADED' ? 'DOWN' : 'UNKNOWN';
     return {
-      api: healthValue?.status ?? (health.status === 'rejected' ? 'DOWN' : 'UNKNOWN'),
-      database: indicators.database?.status ?? 'UNKNOWN',
-      redis: indicators.redis?.status ?? 'UNKNOWN',
-      blockers: numberOrNull(productionValue?.blockerCount),
-      warnings: numberOrNull(productionValue?.warningCount),
-      state: healthValue || readinessValue || productionValue ? 'ready' : 'unavailable',
+      api: state(overview.api.status),
+      database: state(overview.components.find(c => c.id === 'database')?.status ?? 'UNKNOWN'),
+      redis: state(overview.components.find(c => c.id === 'redis')?.status ?? 'UNKNOWN'),
+      blockers: overview.productionReadiness.blockerCount,
+      warnings: overview.productionReadiness.warningCount,
+      state: 'ready',
     };
   } catch {
     return { ...EMPTY_SNAPSHOT.system };

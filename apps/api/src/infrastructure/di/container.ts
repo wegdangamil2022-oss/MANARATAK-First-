@@ -1,3 +1,4 @@
+import { WorkerHealthObservation } from '../runtime/WorkerHealthObservation.js';
 import {
   PrismaStudentPrivateResultRetentionGateway,
   StudentPrivateResultProtector,
@@ -825,7 +826,13 @@ export function registerDependencies(
       if (typeof bgJobGateway?.claimDue !== 'function') return createUnavailableCapability('durableBackgroundJobQueue');
       return bgJobGateway;
     }).singleton(),
-    backgroundWorkerRuntimeState: asClass(BackgroundWorkerRuntimeState).singleton(),
+    workerHealthObservation: asFunction(({ redisClient }) => new WorkerHealthObservation(redisClient, {
+      environment: readConfig<string>('NODE_ENV'), apiOrigin: readConfig<string>('API_BASE_URL'),
+      revision: readConfig<string>('HEALTH_DEPLOYMENT_REVISION'),
+    })).singleton(),
+    backgroundWorkerRuntimeState: asFunction(({ workerHealthObservation }) => new BackgroundWorkerRuntimeState(
+      snapshot => workerHealthObservation.publish('background-jobs', snapshot),
+    )).singleton(),
     eventPublishingGateway: asFunction(({ prisma }) => {
       if (isPrisma) return new PrismaEventPublishingGateway(prisma);
       if (productionLike) return createUnavailableCapability('enterpriseEventPublishing');
@@ -991,7 +998,9 @@ export function registerDependencies(
     ownerDomainServicesDeliveryGateway: asFunction(({ enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new FanoutOutboxDeliveryGateway([enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway])).scoped(),
     ownerDomainServicesDispatcher: asFunction(({ transactionalOutboxStore, ownerDomainServicesDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, ownerDomainServicesDeliveryGateway)).scoped(),
     ownerDomainOutboxWorker: asFunction(({ ownerDomainProjectionDispatcher, ownerDomainServicesDispatcher }) => new OwnerDomainOutboxWorker(ownerDomainProjectionDispatcher, ownerDomainServicesDispatcher)).scoped(),
-    pollingWorkerRuntimeRegistry: asClass(PollingWorkerRuntimeRegistry).singleton(),
+    pollingWorkerRuntimeRegistry: asFunction(({ workerHealthObservation }) => new PollingWorkerRuntimeRegistry(
+      (name, snapshot) => workerHealthObservation.publish(name, snapshot),
+    )).singleton(),
     majorStudentSavedItemHydrationGateway: asFunction(({ majorRepository }) => new MajorStudentSavedItemHydrationGateway(majorRepository)).scoped(),
     universityStudentSavedItemHydrationGateway: asFunction(({ universityRepository }) => new UniversityStudentSavedItemHydrationGateway(universityRepository)).scoped(),
     scholarshipStudentSavedItemHydrationGateway: asFunction(({ scholarshipRepository }) => new ScholarshipStudentSavedItemHydrationGateway(scholarshipRepository)).scoped(),

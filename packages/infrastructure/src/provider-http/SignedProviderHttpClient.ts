@@ -1,3 +1,4 @@
+import { HealthStatus } from '@manaratak/core';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
 
 export interface SignedProviderHttpClientOptions {
@@ -14,6 +15,8 @@ export interface SignedProviderHttpClientOptions {
 export interface SignedProviderRequestOptions {
   idempotencyKey?: string;
   expectedStatuses?: number[];
+  signal?: AbortSignal;
+  timeoutMs?: number;
 }
 
 export class SignedProviderHttpClient {
@@ -45,6 +48,22 @@ export class SignedProviderHttpClient {
     }
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.now = options.now ?? (() => new Date());
+  }
+
+  /** Provider must implement this versioned, authenticated, non-mutating contract. */
+  async checkReadiness(capability: string, signal?: AbortSignal) {
+    const timestamp = new Date().toISOString();
+    try {
+      const result = await this.json<{ protocolVersion: number; checkedAt: string; capabilities: Record<string, { ready: boolean; authorized: boolean }> }>(
+        'GET', '/v1/capabilities/readiness', undefined, { signal, timeoutMs: 2_000 });
+      const age = Date.now() - Date.parse(result.checkedAt);
+      const item = result.capabilities?.[capability];
+      if (result.protocolVersion !== 1 || !Number.isFinite(age) || age < -1_000 || age > 30_000 || item?.ready !== true || item.authorized !== true)
+        throw new Error('PROVIDER_READINESS_UNVERIFIED');
+      return { status: HealthStatus.UP, timestamp, details: { capabilityStatus: 'VERIFIED_READY', capability, providerProtocolVersion: 1 } };
+    } catch {
+      return { status: HealthStatus.DOWN, timestamp, error: 'PROVIDER_READINESS_UNVERIFIED', details: { capabilityStatus: 'RUNTIME_PENDING', capability } };
+    }
   }
 
   async json<T>(
@@ -115,7 +134,10 @@ export class SignedProviderHttpClient {
     if (requestOptions.idempotencyKey) headers['idempotency-key'] = requestOptions.idempotencyKey;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+    const abort = () => controller.abort();
+    requestOptions.signal?.addEventListener('abort', abort, { once: true });
+    if (requestOptions.signal?.aborted) controller.abort();
+    const timeout = setTimeout(abort, Math.min(this.timeoutMs, requestOptions.timeoutMs ?? this.timeoutMs));
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     try {
       const response = await this.fetchImpl(url, {
@@ -156,6 +178,7 @@ export class SignedProviderHttpClient {
       throw new Error('PROVIDER_REQUEST_FAILED');
     } finally {
       clearTimeout(timeout);
+      requestOptions.signal?.removeEventListener('abort', abort);
       await reader?.cancel().catch(() => undefined);
       reader?.releaseLock();
     }

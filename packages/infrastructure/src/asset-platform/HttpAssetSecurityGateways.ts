@@ -84,6 +84,8 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
   public readonly isProductionReady = true as const;
   private readonly client: SignedProviderHttpClient;
 
+  checkReadiness(signal?: AbortSignal) { return this.client.checkReadiness('asset-storage', signal); }
+
   constructor(options: HttpAssetProviderOptions) {
     this.client = new SignedProviderHttpClient(options);
   }
@@ -232,6 +234,8 @@ export class HttpAssetMalwareScannerGateway implements IAssetMalwareScannerGatew
   public readonly isProductionReady = true as const;
   private readonly client: SignedProviderHttpClient;
 
+  checkReadiness(signal?: AbortSignal) { return this.client.checkReadiness('malware-scanner', signal); }
+
   constructor(options: HttpAssetProviderOptions) { this.client = new SignedProviderHttpClient(options); }
 
   async scan(locator: AssetStorageLocator): Promise<MalwareScanResult> {
@@ -253,6 +257,8 @@ export class HttpAssetSanitizationGateway implements IAssetSanitizationGateway {
   public readonly capabilityStatus = 'PRODUCTION_CAPABLE' as const;
   public readonly isProductionReady = true as const;
   private readonly client: SignedProviderHttpClient;
+
+  checkReadiness(signal?: AbortSignal) { return this.client.checkReadiness('asset-sanitizer', signal); }
 
   constructor(options: HttpAssetProviderOptions) { this.client = new SignedProviderHttpClient(options); }
 

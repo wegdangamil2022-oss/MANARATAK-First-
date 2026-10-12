@@ -1,3 +1,4 @@
+import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { CareerJobPostingDto, CareerEmployerDto, CareerApplicationDto } from '@manaratak/domain';
@@ -19,7 +20,7 @@ export function CareerAdminPage() {
   const [params, setParams] = useSearchParams();
   const tab = (['jobs','employers','applications','alumni'].includes(params.get('tab') || '') ? params.get('tab') : 'jobs') as Tab;
   const page = Math.max(1, Number(params.get('page')) || 1);
-  const [search, setSearch] = useState(''), [status, setStatus] = useState(''), [type, setType] = useState('');
+  const [search, setSearch] = useState(() => reviewOwnerSearch(params)), [status, setStatus] = useState(''), [type, setType] = useState('');
   const [employerFilter, setEmployerFilter] = useState(''), [cityFilter, setCityFilter] = useState(''), [jobFilter, setJobFilter] = useState('');
   const [filterCountry, setFilterCountry] = useState(''), [filterCountryCode, setFilterCountryCode] = useState('');
   const [result, setResult] = useState<Page | null>(null), [loading, setLoading] = useState(false), [busy, setBusy] = useState(false);

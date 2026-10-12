@@ -2,13 +2,16 @@ export enum HealthStatus {
   UP = 'UP',
   DOWN = 'DOWN',
   DEGRADED = 'DEGRADED',
-  UNKNOWN = 'UNKNOWN'
+  UNKNOWN = 'UNKNOWN',
 }
 
 export interface IHealthIndicator {
   name: string;
   isOptional?: boolean;
-  checkHealth(): Promise<HealthCheckResult>;
+  /** Evidence is declared by the owning probe, never inferred from its class name. */
+  evidenceKind?: 'READ_ONLY_OPERATION' | 'OBSERVED_RUNTIME' | 'CONFIGURATION_ONLY';
+  probeVersion?: number;
+  checkHealth(signal?: AbortSignal): Promise<HealthCheckResult>;
 }
 
 export interface HealthCheckResult {

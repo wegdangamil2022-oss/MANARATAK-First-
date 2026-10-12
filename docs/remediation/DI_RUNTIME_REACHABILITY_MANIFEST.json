@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 374,
-  "reachableCount": 374,
+  "registrationCount": 375,
+  "reachableCount": 375,
   "unreachable": [],
   "registrations": [
     {
@@ -805,7 +805,9 @@
       "reachableThroughRegistrations": [
         "durableBackgroundWorker"
       ],
-      "dependencies": []
+      "dependencies": [
+        "workerHealthObservation"
+      ]
     },
     {
       "name": "bgJobGateway",
@@ -3107,7 +3109,9 @@
       "reachableThroughRegistrations": [
         "certificateUseCases"
       ],
-      "dependencies": []
+      "dependencies": [
+        "workerHealthObservation"
+      ]
     },
     {
       "name": "principalAccessValidator",
@@ -3353,7 +3357,8 @@
       "reachableThroughRegistrations": [
         "cmsDeliveryCache",
         "studentToolRateLimiter",
-        "studentWorkspaceDeliveryCache"
+        "studentWorkspaceDeliveryCache",
+        "workerHealthObservation"
       ],
       "dependencies": []
     },
@@ -4880,6 +4885,20 @@
       "dependencies": [
         "emailVerificationTokenRepository",
         "identityRepository"
+      ]
+    },
+    {
+      "name": "workerHealthObservation",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "backgroundWorkerRuntimeState",
+        "pollingWorkerRuntimeRegistry"
+      ],
+      "dependencies": [
+        "redisClient"
       ]
     },
     {

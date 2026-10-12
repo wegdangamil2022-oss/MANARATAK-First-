@@ -23,8 +23,12 @@ export class ImportedCourseAdminUseCases {
     private readonly linkChecker: IImportedCourseLinkChecker,
   ) {}
 
-  public list(filters: ImportedCourseAdminFilters): Promise<ImportedCoursePage> {
-    return this.operationsRepository.listImportedCourses(filters);
+  public async list(filters: ImportedCourseAdminFilters): Promise<ImportedCoursePage> {
+    const page = await this.operationsRepository.listImportedCourses(filters);
+    return { ...page, data: page.data.map(record => ({ ...record,
+      verificationState: record.sourceVerified === true ? 'VERIFIED' as const
+        : record.sourceVerified === false ? 'NEEDS_VERIFICATION' as const : 'UNKNOWN' as const,
+    })) };
   }
 
   public async get(id: string): Promise<ImportedCourseAdminDetail> {

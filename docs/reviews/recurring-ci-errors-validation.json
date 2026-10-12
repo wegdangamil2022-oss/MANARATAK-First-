@@ -56,5 +56,27 @@
     "browser E2E",
     "deployment"
   ],
-  "sql_bytes_changed": 0
+  "sql_bytes_changed": 0,
+  "current_main_review": {
+    "main": "4af2c2cf665be455f83e4eda0a73023d06c66a76",
+    "existing_main_sections": "PRESERVED_24_AND_25_NO_NEW_SECTION_WORK",
+    "full_build": "PASS",
+    "vercel_contexts": "PASS_ZERO_DIAGNOSTICS",
+    "source_quality": "PASS_ZERO_FINDINGS",
+    "preflight": "PASS_30_TESTS",
+    "node_suite": {
+      "passed": 334,
+      "failed": 0
+    },
+    "initial_merged_vitest": {
+      "passed": 4090,
+      "failed": 3,
+      "skipped": 45
+    },
+    "corrected_vitest_cases": "CMS_REAL_ROUTER_CONTEXT_AND_BOUNDED_DOUBLE_PDF_BUDGET_13_OF_13_PASS",
+    "health_regressions": "58_OF_58_PASS_AFTER_NOT_CONFIGURED_REPAIR",
+    "registered_source_gates": "PASS_ORDERED_SEGMENTS",
+    "sql_and_schema_changes": 0,
+    "live_runtime": "DEFERRED_AFTER_28"
+  }
 }

@@ -1,0 +1,133 @@
+
+ RUN  v4.1.11 /workspace/manaratak
+
+ ❯ tests/monitoring/section25.spec.ts (38 tests | 7 failed) 100ms
+     × rejects duplicate registration 4ms
+     × does not approve production release in development 1ms
+     × does not approve production release in test 0ms
+     × does not approve production release in staging 0ms
+     × does not approve production release in preview 0ms
+     × accepts fresh owner evidence, counts extra probes and parses the complete v2 response 0ms
+     × configured names without operational evidence cannot approve release 0ms
+ ❯ apps/api/tests/presentation/monitoring/HealthMonitoring.spec.ts (20 tests | 2 failed) 153ms
+       × returns UP for readiness when an optional indicator (e.g. redis) fails 32ms
+       × computes the admin release gate from configuration, runtime and monitoring coverage together 27ms
+ ❯ apps/api/tests/presentation/api/router/MonitoringRouter.spec.ts (4 tests | 1 failed) 36ms
+     × returns a sanitized admin overview with normalized component indicators and coverage 9ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/monitoring/section25.spec.ts > section 25 required readiness and security > rejects duplicate registration
+TypeError: operationalProbeIds is not iterable
+ ❯ serviceGraph tests/monitoring/section25.spec.ts:30:22
+     28| ) {
+     29|   const service = new MonitoringService(undefined, { cacheMs: 0 });
+     30|   for (const name of operationalProbeIds)
+       |                      ^
+     31|     service.registerIndicator({
+     32|       name,
+ ❯ tests/monitoring/section25.spec.ts:116:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/monitoring/section25.spec.ts > section 25 required readiness and security > does not approve production release in development
+ FAIL  tests/monitoring/section25.spec.ts > section 25 required readiness and security > does not approve production release in test
+ FAIL  tests/monitoring/section25.spec.ts > section 25 required readiness and security > does not approve production release in staging
+ FAIL  tests/monitoring/section25.spec.ts > section 25 required readiness and security > does not approve production release in preview
+TypeError: operationalProbeIds is not iterable
+ ❯ serviceGraph tests/monitoring/section25.spec.ts:30:22
+     28| ) {
+     29|   const service = new MonitoringService(undefined, { cacheMs: 0 });
+     30|   for (const name of operationalProbeIds)
+       |                      ^
+     31|     service.registerIndicator({
+     32|       name,
+ ❯ tests/monitoring/section25.spec.ts:166:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/monitoring/section25.spec.ts > section 25 required readiness and security > accepts fresh owner evidence, counts extra probes and parses the complete v2 response
+TypeError: operationalProbeIds is not iterable
+ ❯ serviceGraph tests/monitoring/section25.spec.ts:30:22
+     28| ) {
+     29|   const service = new MonitoringService(undefined, { cacheMs: 0 });
+     30|   for (const name of operationalProbeIds)
+       |                      ^
+     31|     service.registerIndicator({
+     32|       name,
+ ❯ tests/monitoring/section25.spec.ts:171:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/monitoring/section25.spec.ts > section 25 required readiness and security > configured names without operational evidence cannot approve release
+TypeError: operationalProbeIds is not iterable
+ ❯ serviceGraph tests/monitoring/section25.spec.ts:30:22
+     28| ) {
+     29|   const service = new MonitoringService(undefined, { cacheMs: 0 });
+     30|   for (const name of operationalProbeIds)
+       |                      ^
+     31|     service.registerIndicator({
+     32|       name,
+ ❯ tests/monitoring/section25.spec.ts:192:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  apps/api/tests/presentation/monitoring/HealthMonitoring.spec.ts > Problem P02 - Health and Readiness Checks > MonitoringService & Health Indicators > returns UP for readiness when an optional indicator (e.g. redis) fails
+AssertionError: expected 'DEGRADED' to be 'DOWN' // Object.is equality
+
+Expected: "DOWN"
+Received: "DEGRADED"
+
+ ❯ apps/api/tests/presentation/monitoring/HealthMonitoring.spec.ts:106:56
+    104|       const readiness = await monitoringService.getReadiness();
+    105|       expect(readiness.status).toBe(HealthStatus.UP);
+    106|       expect((readiness.details?.redis as any).status).toBe(HealthStat…
+       |                                                        ^
+    107|     });
+    108|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  apps/api/tests/presentation/monitoring/HealthMonitoring.spec.ts > Problem P02 - Health and Readiness Checks > HTTP Endpoints Separation & Status Codes > computes the admin release gate from configuration, runtime and monitoring coverage together
+AssertionError: expected 503 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 503
+
+ ❯ apps/api/tests/presentation/monitoring/HealthMonitoring.spec.ts:311:31
+    309|
+    310|       const response = await request(app).get('/admin-monitoring/overv…
+    311|       expect(response.status).toBe(200);
+       |                               ^
+    312|       expect(response.body.releaseReady).toBe(true);
+    313|       expect(response.body.releaseGate).toEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  apps/api/tests/presentation/api/router/MonitoringRouter.spec.ts > MonitoringRouter > returns a sanitized admin overview with normalized component indicators and coverage
+AssertionError: expected 503 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 503
+
+ ❯ apps/api/tests/presentation/api/router/MonitoringRouter.spec.ts:139:24
+    137|
+    138|     const res = await request(app).get('/monitoring/overview');
+    139|     expect(res.status).toBe(200);
+       |                        ^
+    140|     expect(res.body.runtimeMode).toBe('test');
+    141|     expect(res.body.components).toHaveLength(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+
+ Test Files  3 failed | 1 passed (4)
+      Tests  10 failed | 61 passed (71)
+   Start at  02:50:53
+   Duration  7.81s (transform 3.92s, setup 0ms, import 6.85s, tests 300ms, environment 0ms)

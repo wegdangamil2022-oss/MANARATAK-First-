@@ -3,6 +3,16 @@ import { ProductionReadinessValidator } from '../src/ProductionReadinessValidato
 
 const productionEnv = {
   NODE_ENV: 'production',
+  HEALTH_DEPLOYMENT_REVISION: 'synthetic-release',
+  FINANCE_PROVIDER_BASE_URL: 'https://finance.test',
+  FINANCE_PROVIDER_API_KEY: 'synthetic-finance',
+  FINANCE_PROVIDER_SIGNING_SECRET: 'synthetic-finance-signing-material-123456789',
+  FINANCE_PAYMENT_PROVIDER_KEY: 'PRIMARY_PAYMENT',
+  NOTIFICATION_PROVIDER_BASE_URL: 'https://notification.test',
+  NOTIFICATION_PROVIDER_API_KEY: 'synthetic-notification',
+  NOTIFICATION_PROVIDER_SIGNING_SECRET: 'synthetic-notification-signing-material-123456789',
+  NOTIFICATION_PAYLOAD_KEY: 'synthetic-payload-key-for-configuration-only',
+  BACKGROUND_NOTIFICATION_CRON: '* * * * *',
   DATABASE_URL: 'postgresql://manaratak:strong-db-secret@db.manaratak.internal:5432/manaratak?schema=public',
   REDIS_URL: 'redis://:strong-redis-secret@redis.manaratak.internal:6379',
   JWT_ACTIVE_KEY_ID: 'prod-key-2026-01',
@@ -39,6 +49,11 @@ const productionEnv = {
 };
 
 describe('ProductionReadinessValidator', () => {
+  it('blocks the exposed paid vertical when provider configuration is missing', () => {
+    const report = ProductionReadinessValidator.validate({ ...productionEnv, FINANCE_PROVIDER_API_KEY: undefined });
+    expect(report.ready).toBe(false);
+    expect(report.findings.some(f => f.id === 'launch.payment-gateway.FINANCE_PROVIDER_API_KEY')).toBe(true);
+  });
   it('marks a hardened production environment as ready', () => {
     const report = ProductionReadinessValidator.validate(productionEnv);
     expect(report.ready).toBe(true);

@@ -1,3 +1,4 @@
+import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -650,6 +651,19 @@ export class ScholarshipAdminRouter {
               correlationId: context.correlationId,
             }),
           );
+      }),
+    );
+
+    router.get(
+      '/import-center/review-page',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:imports:manage'),
+      asyncHandler(async (req: Request, res: Response) => {
+        const query = z.object({
+          page: z.coerce.number().int().min(1).max(10000).default(1),
+          pageSize: z.coerce.number().int().min(1).max(50).default(25),
+        }).strict().parse(req.query);
+        res.setHeader('Cache-Control', 'no-store');
+        res.json(await requireImportCenter().listReviewPage(query));
       }),
     );
 

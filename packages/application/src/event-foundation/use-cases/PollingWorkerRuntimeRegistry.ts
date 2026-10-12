@@ -8,6 +8,7 @@ export interface PollingWorkerRuntimeSnapshot {
 
 /** Runtime-only operational evidence for interval-based outbox workers. */
 export class PollingWorkerRuntimeRegistry {
+  constructor(private observe?: (name: string, snapshot: Record<string, unknown>) => Promise<void>) {}
   private readonly states = new Map<string, PollingWorkerRuntimeSnapshot>();
 
   public started(name: string): void {
@@ -15,6 +16,7 @@ export class PollingWorkerRuntimeRegistry {
   }
   public success(name: string): void {
     this.states.set(name, { ...this.snapshot(name), state: 'RUNNING', lastSuccessAt: new Date().toISOString(), lastFailureCode: undefined });
+    void this.observe?.(name, { ...this.snapshot(name) }).catch(() => undefined);
   }
   public failure(name: string, error: unknown): void {
     const code = error instanceof Error ? error.message.split(':', 1)[0].slice(0, 120) : 'WORKER_ITERATION_FAILED';

@@ -223,6 +223,30 @@ export class ScholarshipImportCenterUseCases {
     return this.scanResult(scan, scan.records.filter((record) => record.reviewReasons.length > 0 && !record.transferred));
   }
 
+  /** Bounded read-only candidate page; never scans the entire import store.
+   * Total describes owner candidates before REAL/review filtering, not queue size.
+   * Existing offset storage cannot guarantee a cross-page snapshot.
+   */
+  async listReviewPage(query: { page?: number; pageSize?: number } = {}) {
+    const page = this.bound(query.page, 1, 1, 10000);
+    const pageSize = this.bound(query.pageSize, 25, 1, 50);
+    const result = await this.gateway.listRecords({ dataType: OWNER_DOMAIN, page, pageSize });
+    const analyzed = await Promise.all(result.data.map(record => this.analyzeWithBatch(record)));
+    const data = analyzed.filter(record => record.operationalClass === 'REAL' && !record.transferred && record.reviewReasons.length > 0)
+      .map(record => ({
+        id: record.id, batchId: record.batchId, sourceSystem: record.sourceSystem, sourceRowNumber: record.sourceRowNumber,
+        cleanedScholarshipName: record.cleanedScholarshipName, rawSourceTitle: record.rawSourceTitle,
+        reviewReasons: record.reviewReasons, verificationState: record.verification.state,
+        updatedAt: record.updatedAt, sourceKind: 'imported' as const,
+        // Creation/modification are not authoritative import or review clocks.
+        importedAt: null, reviewEnteredAt: null, reviewDueAt: null,
+      }));
+    return { data, total: result.total, totalScope: 'owner_candidates' as const,
+      page, pageSize, scannedRecords: result.data.length,
+      hasMore: page * pageSize < result.total, capturedAt: new Date().toISOString(),
+      consistency: 'LIVE_OFFSET_RECHECK_REQUIRED' as const };
+  }
+
   async listReadyToTransfer(query: ScholarshipImportCenterQuery = {}): Promise<ScholarshipImportCenterScanResult> {
     const scan = await this.scan(query, MAX_OVERVIEW_SCAN);
     return this.scanResult(scan, scan.records.filter((record) => record.readyToTransfer && !record.transferred));
