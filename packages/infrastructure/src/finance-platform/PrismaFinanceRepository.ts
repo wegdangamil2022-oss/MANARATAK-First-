@@ -2601,6 +2601,22 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     };
   }
 
+  async serviceInvoiceClearance(input:{invoiceId:string;originReferenceId:string;studentReferenceId:string}) {
+    // Finance is the sole authority. One SQL snapshot includes refunds and wallet obligations.
+    const rows=await this.prisma.$queryRaw<Array<{financiallyCleared:boolean;cancellationCleared:boolean}>>`
+      SELECT
+        (i.status='PAID' AND i."dueMinorUnits"='0'
+          AND NOT EXISTS(SELECT 1 FROM "FinancePaymentRecord" p WHERE p."invoiceId"=i.id AND p.status IN ('REFUNDED','PARTIALLY_REFUNDED','PENDING','AUTHORIZED'))
+          AND NOT EXISTS(SELECT 1 FROM "FinanceRefundRecord" r JOIN "FinancePaymentRecord" p ON p.id=r."paymentId" WHERE p."invoiceId"=i.id AND r.status IN ('REQUESTED','PROCESSING','UNKNOWN_OUTCOME','COMPLETED'))
+        ) AS "financiallyCleared",
+        (NOT EXISTS(SELECT 1 FROM "FinancePaymentRecord" p WHERE p."invoiceId"=i.id AND p.status IN ('PENDING','AUTHORIZED','CAPTURED','PARTIALLY_REFUNDED'))
+          AND NOT EXISTS(SELECT 1 FROM "FinanceWalletHoldRecord" h WHERE h."businessReferenceId" IN (i.id,i."publicId") AND h.status IN ('ACTIVE','CAPTURED'))
+          AND (i.status='VOIDED' OR (i.status IN ('PAID','CREDITED') AND i."dueMinorUnits"='0' AND EXISTS(SELECT 1 FROM "FinancePaymentRecord" p WHERE p."invoiceId"=i.id AND p.status='REFUNDED')))
+        ) AS "cancellationCleared"
+      FROM "FinanceInvoiceRecord" i WHERE i.id=${input.invoiceId} AND i."originDomain"='PHASE_20_SERVICE_REQUEST' AND i."originReferenceId"=${input.originReferenceId} AND i."studentReferenceId"=${input.studentReferenceId}
+    `;
+    return rows[0]??{financiallyCleared:false,cancellationCleared:false};
+  }
   async hasFinancialClearanceForOrigin(input: {
     originDomain: string;
     originReferenceId: string;

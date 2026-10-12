@@ -5,10 +5,20 @@ import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 
 type Kind =
-  'providers' | 'packages' | 'pricing' | 'slots' | 'bookings' | 'workflows' | 'promotions';
+  | 'providers'
+  | 'packages'
+  | 'pricing'
+  | 'slots'
+  | 'bookings'
+  | 'workflows'
+  | 'promotions'
+  | 'discounts'
+  | 'executions'
+  | 'deliveries';
 type RecordRow = {
   id: string;
-  publicId: string;
+  publicId?: string;
+  artifactType?: string;
   displayName?: string;
   name?: string;
   status: string;
@@ -22,6 +32,9 @@ const kinds: Kind[] = [
   'bookings',
   'workflows',
   'promotions',
+  'discounts',
+  'executions',
+  'deliveries',
 ];
 const fields: Record<Kind, string[]> = {
   providers: [
@@ -33,9 +46,10 @@ const fields: Record<Kind, string[]> = {
     'assetId',
     'expiresAt',
   ],
-  packages: ['displayName', 'serviceId'],
+  packages: ['displayName', 'serviceIds'],
   pricing: [
     'serviceId',
+    'packageId',
     'currencyCode',
     'scale',
     'amountMinorUnits',
@@ -44,10 +58,20 @@ const fields: Record<Kind, string[]> = {
   ],
   slots: ['providerId', 'serviceId', 'startsAt', 'endsAt', 'timezone', 'capacity'],
   bookings: [],
-  workflows: ['name', 'serviceId', 'stepKey', 'slaMinutes', 'artifactType'],
+  workflows: ['name', 'serviceId', 'packageId', 'stepKey', 'slaMinutes', 'artifactType'],
   promotions: ['name', 'discountId', 'serviceId'],
+  discounts: ['code', 'discountType', 'valueMinorUnits', 'currencyCode', 'serviceId'],
+  executions: [],
+  deliveries: ['bookingId', 'workflowExecutionId', 'artifactType', 'assetId'],
 };
 const fieldLabels: Record<string, [string, string]> = {
+  packageId: ['الباقة', 'Package'],
+  serviceIds: ['معرفات خدمات الباقة بفواصل', 'Package service references, comma separated'],
+  bookingId: ['الحجز', 'Booking'],
+  workflowExecutionId: ['تنفيذ سير العمل', 'Workflow execution'],
+  code: ['رمز الخصم', 'Discount code'],
+  discountType: ['نوع الخصم (FIXED)', 'Discount type (FIXED)'],
+  valueMinorUnits: ['قيمة الخصم بالوحدات الصغرى', 'Discount in minor units'],
   displayName: ['الاسم', 'Name'],
   name: ['الاسم', 'Name'],
   timezone: ['المنطقة الزمنية', 'Timezone'],
@@ -138,7 +162,9 @@ export function ServiceOperationsWorkspace() {
   }
   function create(event: FormEvent) {
     event.preventDefault();
-    let body: Record<string, unknown> = { ...form };
+    let body: Record<string, unknown> = Object.fromEntries(
+      Object.entries(form).filter(([, value]) => value.trim() !== ''),
+    );
     for (const key of ['capacity', 'scale', 'slaMinutes'])
       if (key in body) body[key] = Number(body[key]);
     for (const key of ['effectiveFrom', 'effectiveTo', 'startsAt', 'endsAt', 'expiresAt'])
@@ -151,8 +177,17 @@ export function ServiceOperationsWorkspace() {
       delete body.expiresAt;
     }
     if (kind === 'packages') {
-      body.items = [{ serviceId: form.serviceId, sequence: 1, quantity: 1, required: true }];
-      delete body.serviceId;
+      body.items = form.serviceIds
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .map((serviceId, index) => ({
+          serviceId,
+          sequence: index + 1,
+          quantity: 1,
+          required: true,
+        }));
+      delete body.serviceIds;
     }
     if (kind === 'workflows') {
       body.steps = [
@@ -201,7 +236,7 @@ export function ServiceOperationsWorkspace() {
       <ul className="space-y-2">
         {result?.data.map((row) => (
           <li key={row.id} className="flex flex-wrap items-center gap-3 rounded-xl border p-3">
-            <span>{row.displayName || row.name || row.publicId}</span>
+            <span>{row.displayName || row.name || row.publicId || row.artifactType || row.id}</span>
             <span>{row.status}</span>
             <code>{row.id}</code>
             {['DRAFT', 'PAUSED'].includes(row.status) &&
@@ -217,11 +252,74 @@ export function ServiceOperationsWorkspace() {
                 <button
                   type="button"
                   disabled={busy || reason.trim().length < 3}
-                  onClick={() =>
-                    void write(`${kind}/${row.id}/activate`, { expectedVersion: row.version })
-                  }
+                  onClick={() => {
+                    if (
+                      kind === 'providers' &&
+                      !window.confirm(
+                        language === 'ar'
+                          ? 'أؤكد مراجعة جهة الاعتماد والنطاق القانوني ووثيقة المزوّد قبل الاعتماد.'
+                          : 'Confirm accreditation authority, legal scope and the provider document.',
+                      )
+                    )
+                      return;
+                    void write(`${kind}/${row.id}/activate`, {
+                      expectedVersion: row.version,
+                      ...(kind === 'providers'
+                        ? {
+                            review: {
+                              legalReviewed: true,
+                              authorityReviewed: true,
+                              scopeReviewed: true,
+                            },
+                          }
+                        : {}),
+                    });
+                  }}
                 >
                   {t('svc_activate')}
+                </button>
+              )}
+            {kind === 'providers' && row.status !== 'RETIRED' && (
+              <button
+                type="button"
+                disabled={busy || reason.trim().length < 3}
+                onClick={() => {
+                  const assetId = window
+                    .prompt(
+                      language === 'ar'
+                        ? 'معرف أصل وثيقة الاعتماد الجديدة:'
+                        : 'New accreditation asset reference:',
+                    )
+                    ?.trim();
+                  const expiry = window.prompt(
+                    language === 'ar'
+                      ? 'تاريخ انتهاء الاعتماد (YYYY-MM-DD):'
+                      : 'Accreditation expiry (YYYY-MM-DD):',
+                  );
+                  if (!assetId || !expiry || !Number.isFinite(Date.parse(expiry))) return;
+                  void write(`providers/${row.id}/evidence`, {
+                    assetId,
+                    expiresAt: new Date(expiry).toISOString(),
+                    expectedVersion: row.version,
+                  });
+                }}
+              >
+                {language === 'ar' ? 'تحديث وثيقة الاعتماد' : 'Revise accreditation evidence'}
+              </button>
+            )}
+            {kind === 'executions' &&
+              row.status === 'RUNNING' &&
+              hasPermission('admin:services:requests:fulfill') && (
+                <button
+                  type="button"
+                  disabled={busy || reason.trim().length < 3}
+                  onClick={() =>
+                    void write(`executions/${row.id}/advance`, { expectedVersion: row.version })
+                  }
+                >
+                  {language === 'ar'
+                    ? 'مراجعة المخرجات والانتقال'
+                    : 'Review deliverables and advance'}
                 </button>
               )}
             {kind === 'bookings' && hasPermission('admin:services:requests:fulfill') && (
@@ -281,7 +379,11 @@ export function ServiceOperationsWorkspace() {
             <label key={key}>
               {fieldLabels[key]?.[language === 'ar' ? 0 : 1] ?? key}
               <input
-                required={key !== 'effectiveTo' && key !== 'countryReferenceId'}
+                required={
+                  key !== 'effectiveTo' &&
+                  key !== 'countryReferenceId' &&
+                  !['serviceId', 'packageId'].includes(key)
+                }
                 className="block w-full rounded-xl border p-3"
                 type={
                   /At$|^effective/.test(key)

@@ -6,6 +6,7 @@ import {
 import {
   IServiceCatalogRepository,
   IServiceOperationsRepository,
+  AssetSecurityClassification,
   IServiceFinanceGateway,
   IServiceRequestRepository,
   PaginatedServiceRequestResult,
@@ -52,6 +53,12 @@ export class StudentServiceRequestUseCases {
         await assertAssetReferenceUsable(this.assets, String(parameters[field.key]), {
           purpose: 'SERVICE_REQUEST_DOCUMENT',
           expectedOwnerId: input.studentReferenceId,
+          allowedClassifications: [
+            AssetSecurityClassification.PUBLIC,
+            AssetSecurityClassification.INTERNAL,
+            AssetSecurityClassification.RESTRICTED,
+            AssetSecurityClassification.CONFIDENTIAL,
+          ],
         });
     }
     const publicId = `svc_req_${serviceFingerprint({ student: input.studentReferenceId, key: input.idempotencyKey }).slice(0, 40)}`;
@@ -79,6 +86,7 @@ export class StudentServiceRequestUseCases {
           serviceId: service.id,
           version: published.version,
           fulfillmentPolicy: published.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
+          fulfillmentType: published.fulfillmentType,
           displayName: published.displayName,
           inputSchema: published.inputSchema ?? [],
           deliveryArtifactTypes: published.deliveryArtifactTypes ?? [],
@@ -184,7 +192,17 @@ export class AdminServiceFulfillmentUseCases {
       ServiceRequestStatus.IN_PROGRESS,
       ServiceRequestStatus.COMPLETED,
     ].includes(status);
-    const policy = request.serviceSnapshot?.fulfillmentPolicy ?? 'QUOTE_REQUIRED';
+    const booking = await this.operations?.findBookingForRequest?.(request.id);
+    const policy =
+      booking && BigInt(booking.pricingSnapshot.finalAmountMinorUnits) > 0n
+        ? 'CHARGEABLE'
+        : (request.serviceSnapshot?.fulfillmentPolicy ?? 'QUOTE_REQUIRED');
+    if (
+      resumesFulfillment &&
+      booking &&
+      !['CONFIRMED', 'IN_PROGRESS', 'COMPLETED'].includes(booking.status)
+    )
+      throw new Error('SERVICE_BOOKING_NOT_CONFIRMED');
     if (resumesFulfillment && (policy !== 'FREE' || request.financeInvoiceId)) {
       if (!request.financeInvoiceId) throw new Error('SERVICE_FINANCE_INVOICE_REQUIRED');
       const clearance = await this.finance.getInvoiceClearance(request.financeInvoiceId, {
@@ -259,6 +277,50 @@ export class AdminServiceFulfillmentUseCases {
     return this.requests.assignProvider(id, qualified.id, expectedVersion);
   }
 
+  async maintenance(limit: number) {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100)
+      throw new Error('SERVICE_MAINTENANCE_LIMIT_INVALID');
+    const erased = (await this.requests.purgeExpiredInputs?.(limit)) ?? 0;
+    const escalations = (await this.requests.escalateOverdueRequests?.(limit)) ?? 0;
+    let invoices = 0,
+      cancellations = 0;
+    for (const request of (await this.requests.listRecoverableInvoiceIntents?.(limit)) ?? []) {
+      try {
+        const intent = request.invoiceIntent;
+        if (!intent) continue;
+        await this.createFinanceInvoice({
+          requestId: request.id,
+          amountMinorUnits: String(intent.amountMinorUnits),
+          currencyCode: String(intent.currencyCode),
+          scale: Number(intent.scale),
+          actorId: String(intent.actorId),
+          expectedVersion: request.version,
+        });
+        invoices++;
+      } catch {
+        await this.requests.deferServiceRecovery?.(request.id, 'invoice');
+      }
+    }
+    for (const request of (await this.requests.listPendingCancellations?.(limit)) ?? []) {
+      try {
+        if (request.financeInvoiceId)
+          await this.finance.resolveCancellation?.(request.financeInvoiceId, {
+            requestPublicId: request.publicId,
+            studentReferenceId: request.studentReferenceId,
+          });
+        const saved = await this.transitionRequest(
+          request.id,
+          ServiceRequestStatus.CANCELLED,
+          request.version,
+        );
+        if (saved.status === ServiceRequestStatus.CANCELLED) cancellations++;
+        else await this.requests.deferServiceRecovery?.(request.id, 'cancellation');
+      } catch {
+        await this.requests.deferServiceRecovery?.(request.id, 'cancellation');
+      }
+    }
+    return { erased, invoices, cancellations, escalations };
+  }
   async claimRequest(id: string, actorId: string, expectedVersion: number) {
     if (!this.requests.claimRequest) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
     return this.requests.claimRequest(id, actorId, expectedVersion);
@@ -267,11 +329,39 @@ export class AdminServiceFulfillmentUseCases {
     return this.requests.requestTimeline?.(id) ?? [];
   }
 
-  async getRequestQuote(reference: string) {
+  async getRequestQuote(reference: string): Promise<Record<string, unknown>> {
     const request = await this.getRequest(reference);
     if (request.invoiceIntent) return request.invoiceIntent;
+    const booking = await this.operations?.findBookingForRequest?.(request.id);
+    if (booking) {
+      if (
+        booking.status === 'CANCELLED' ||
+        (booking.status === 'PENDING' &&
+          (!booking.holdExpiresAt || new Date(booking.holdExpiresAt).getTime() <= Date.now()))
+      )
+        throw new Error('SERVICE_BOOKING_HOLD_EXPIRED');
+      const quote = booking.pricingSnapshot;
+      return {
+        pricingId: quote.pricingId,
+        pricingFingerprint: quote.pricingFingerprint,
+        amountMinorUnits: quote.finalAmountMinorUnits,
+        currencyCode: quote.currencyCode,
+        scale: quote.scale,
+        quantity: 1,
+        bookingId: booking.id,
+        packageId: booking.packageId ?? null,
+      };
+    }
+    const catalog = await this.catalog.findById(request.serviceId);
+    if ((request.serviceSnapshot?.fulfillmentType ?? catalog?.fulfillmentType) === 'BOOKING')
+      throw new Error('SERVICE_BOOKING_REQUIRED');
     const price = await this.operations?.findActivePricing(request.serviceId, null, new Date());
-    if (!price || (request.serviceSnapshot?.pricingReferenceId && request.serviceSnapshot.pricingReferenceId !== price.id)) throw new Error('SERVICE_APPROVED_PRICING_REQUIRED');
+    if (
+      !price ||
+      (request.serviceSnapshot?.pricingReferenceId &&
+        request.serviceSnapshot.pricingReferenceId !== price.id)
+    )
+      throw new Error('SERVICE_APPROVED_PRICING_REQUIRED');
     return {
       pricingId: price.id,
       amountMinorUnits: price.amountMinorUnits,
@@ -313,28 +403,23 @@ export class AdminServiceFulfillmentUseCases {
     if (!request.invoiceIntent) {
       if (request.version !== input.expectedVersion)
         throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
-      if (!this.operations || !this.requests.prepareInvoiceIntent)
-        throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
-      if (request.serviceSnapshot?.fulfillmentPolicy === 'FREE')
+      if (!this.requests.prepareInvoiceIntent) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+      const quote = await this.getRequestQuote(request.id);
+      const units = String(quote.amountMinorUnits);
+      if (BigInt(units) <= 0n) throw new Error('SERVICE_FREE_INVOICE_FORBIDDEN');
+      if (request.serviceSnapshot?.fulfillmentPolicy === 'FREE' && !quote.bookingId)
         throw new Error('SERVICE_FREE_INVOICE_FORBIDDEN');
-      const pricing = await this.operations.findActivePricing(request.serviceId, null, new Date());
-      if (!pricing || (request.serviceSnapshot?.pricingReferenceId && request.serviceSnapshot.pricingReferenceId !== pricing.id) || BigInt(pricing.amountMinorUnits) <= 0n)
-        throw new Error('SERVICE_APPROVED_PRICING_REQUIRED');
       if (
-        input.amountMinorUnits !== pricing.amountMinorUnits ||
-        input.currencyCode !== pricing.currencyCode ||
-        input.scale !== pricing.scale ||
+        input.amountMinorUnits !== units ||
+        input.currencyCode !== quote.currencyCode ||
+        input.scale !== quote.scale ||
         (input.quantity ?? 1) !== 1
       )
         throw new Error('SERVICE_PRICE_QUOTE_MISMATCH');
       const intent = {
-        pricingId: pricing.id,
-        pricingFingerprint: pricing.immutableFingerprint,
-        amountMinorUnits: pricing.amountMinorUnits,
-        currencyCode: pricing.currencyCode,
-        scale: pricing.scale,
-        quantity: 1,
+        ...quote,
         description: String(request.serviceSnapshot?.displayName ?? service.displayName),
+        quantity: 1,
         actorId: input.actorId,
         capturedAt: new Date().toISOString(),
       };

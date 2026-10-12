@@ -362,7 +362,7 @@ export class ServiceAdminRouter {
       '/operations/:kind',
       asyncHandler(async (req: Request, res: Response) => {
         await requirePermission(req, 'admin:services:operations:manage');
-        if (req.params.kind === 'bookings')
+        if (['bookings', 'executions', 'deliveries'].includes(req.params.kind))
           await requirePermission(req, 'admin:services:requests:pii');
         res.json(
           await cradle.serviceOperationsUseCases.listOperations(
@@ -394,6 +394,28 @@ export class ServiceAdminRouter {
             .json(await (operation(req)[creators[kind]] as any).call(operation(req), body));
         }),
       );
+    router.post(
+      '/operations/providers/:id/evidence',
+      asyncHandler(async (req: Request, res: Response) => {
+        await requirePermission(req, 'admin:services:operations:manage');
+        const body = z
+          .object({
+            assetId: z.string().min(1),
+            expiresAt: z.string().datetime(),
+            expectedVersion: z.number().int().positive(),
+            reason: z.string().min(3).max(500),
+          })
+          .strict()
+          .parse(req.body);
+        res.json(
+          await operation(req).updateProviderEvidence(
+            req.params.id,
+            { assetId: body.assetId, expiresAt: body.expiresAt },
+            body.expectedVersion,
+          ),
+        );
+      }),
+    );
     const activations = {
       providers: 'qualifyProvider',
       packages: 'activatePackage',
@@ -414,7 +436,17 @@ export class ServiceAdminRouter {
                 : 'admin:services:review',
           );
           const version = z.number().int().positive().parse(req.body.expectedVersion);
-          res.json(await operation(req)[activations[kind]](req.params.id, version));
+          if (kind === 'providers') {
+            const review = z
+              .object({
+                legalReviewed: z.literal(true),
+                authorityReviewed: z.literal(true),
+                scopeReviewed: z.literal(true),
+              })
+              .strict()
+              .parse(req.body.review);
+            res.json(await operation(req).qualifyProvider(req.params.id, version, review));
+          } else res.json(await operation(req)[activations[kind]](req.params.id, version));
         }),
       );
     router.post(
@@ -701,6 +733,134 @@ export class ServiceAdminRouter {
       }
       const allowed = new Set([
         'SERVICE_AND_PACKAGE_MUTUALLY_EXCLUSIVE',
+        'SERVICE_APPOINTMENT_POLICY_REQUIRED',
+        'SERVICE_APPROVED_PRICING_REQUIRED',
+        'SERVICE_BOOKING_ACTIVE_PRICING_REQUIRED',
+        'SERVICE_BOOKING_BEFORE_INVOICE_REQUIRED',
+        'SERVICE_BOOKING_HOLD_EXPIRED',
+        'SERVICE_BOOKING_NOT_CONFIRMED',
+        'SERVICE_BOOKING_NOT_FOUND',
+        'SERVICE_BOOKING_PAYLOAD_CONFLICT',
+        'SERVICE_BOOKING_PROVIDER_SCOPE_MISMATCH',
+        'SERVICE_BOOKING_REQUEST_MISMATCH',
+        'SERVICE_BOOKING_REQUEST_REQUIRED',
+        'SERVICE_BOOKING_REQUIRED',
+        'SERVICE_BOOKING_SLOT_ALREADY_STARTED',
+        'SERVICE_BOOKING_SLOT_PROVIDER_MISMATCH',
+        'SERVICE_BOOKING_SLOT_SERVICE_MISMATCH',
+        'SERVICE_BOOKING_SLOT_UNAVAILABLE',
+        'SERVICE_BOOKING_STUDENT_REQUIRED',
+        'SERVICE_BOOKING_TRANSITION_INVALID',
+        'SERVICE_DELIVERY_ARTIFACT_METADATA_REQUIRED',
+        'SERVICE_DELIVERY_ARTIFACT_TYPE_INVALID',
+        'SERVICE_DELIVERY_POLICY_REQUIRED',
+        'SERVICE_DELIVERY_REVIEW_REQUIRED',
+        'SERVICE_DELIVERY_WORKFLOW_MISMATCH',
+        'SERVICE_DISCOUNT_CURRENCY_MISMATCH',
+        'SERVICE_DISCOUNT_FIXED_VALUE_INVALID',
+        'SERVICE_DISCOUNT_MAX_REDEMPTIONS_INVALID',
+        'SERVICE_DISCOUNT_NOT_ACTIVE',
+        'SERVICE_DISCOUNT_PERCENTAGE_INVALID',
+        'SERVICE_DISCOUNT_SCOPE_MISMATCH',
+        'SERVICE_DISCOUNT_WINDOW_INVALID',
+        'SERVICE_EXPECTED_VERSION_REQUIRED',
+        'SERVICE_FINANCE_CANCELLATION_PENDING',
+        'SERVICE_FINANCE_INVOICE_REQUIRED',
+        'SERVICE_FINANCIAL_CLEARANCE_REQUIRED',
+        'SERVICE_FREE_INVOICE_FORBIDDEN',
+        'SERVICE_FREE_POLICY_REQUIRED',
+        'SERVICE_FULFILLMENT_POLICY_REQUIRED',
+        'SERVICE_IDEMPOTENCY_KEY_REQUIRED',
+        'SERVICE_IDEMPOTENCY_PAYLOAD_CONFLICT',
+        'SERVICE_INDEPENDENT_REVIEW_REQUIRED',
+        'SERVICE_INPUT_CONSENT_REQUIRED',
+        'SERVICE_INPUT_RAW_URL_FORBIDDEN',
+        'SERVICE_INPUT_REQUIRED',
+        'SERVICE_INPUT_SCHEMA_INVALID',
+        'SERVICE_INPUT_SCHEMA_REQUIRED',
+        'SERVICE_INPUT_TOO_LARGE',
+        'SERVICE_INPUT_TYPE_INVALID',
+        'SERVICE_INPUT_UNKNOWN_FIELD',
+        'SERVICE_INVOICE_LINK_PENDING',
+        'SERVICE_MAINTENANCE_LIMIT_INVALID',
+        'SERVICE_MONEY_MINOR_UNITS_INVALID',
+        'SERVICE_NOT_AVAILABLE',
+        'SERVICE_NOT_FOUND',
+        'SERVICE_NOT_PUBLISHED',
+        'SERVICE_OPERATIONS_AUDIT_REQUIRED',
+        'SERVICE_OPERATIONS_NOT_CONFIGURED',
+        'SERVICE_OR_PACKAGE_REQUIRED',
+        'SERVICE_PACKAGE_CONSENT_REQUIRED',
+        'SERVICE_PACKAGE_DELIVERY_POLICY_REQUIRED',
+        'SERVICE_PACKAGE_ITEM_NOT_PUBLISHED',
+        'SERVICE_PACKAGE_ITEM_REQUIRED',
+        'SERVICE_PACKAGE_NAME_REQUIRED',
+        'SERVICE_PACKAGE_NOT_ACTIVE',
+        'SERVICE_PACKAGE_NOT_DRAFT',
+        'SERVICE_PACKAGE_NOT_FOUND',
+        'SERVICE_PACKAGE_QUANTITY_INVALID',
+        'SERVICE_PACKAGE_SEQUENCE_INVALID',
+        'SERVICE_PRICE_QUOTE_MISMATCH',
+        'SERVICE_PRICING_ACTIVE_VERSION_EXISTS',
+        'SERVICE_PRICING_AMOUNT_INVALID',
+        'SERVICE_PRICING_CURRENCY_INVALID',
+        'SERVICE_PRICING_EFFECTIVE_WINDOW_INVALID',
+        'SERVICE_PRICING_NOT_DRAFT',
+        'SERVICE_PRICING_NOT_FOUND',
+        'SERVICE_PRICING_REQUIRED',
+        'SERVICE_PRICING_SCALE_INVALID',
+        'SERVICE_PROMOTION_DISCOUNT_NOT_FOUND',
+        'SERVICE_PROMOTION_DISCOUNT_SCOPE_MISMATCH',
+        'SERVICE_PROMOTION_NAME_REQUIRED',
+        'SERVICE_PROMOTION_NOT_ACTIVATABLE',
+        'SERVICE_PROMOTION_NOT_ACTIVE',
+        'SERVICE_PROMOTION_NOT_FOUND',
+        'SERVICE_PROMOTION_SCOPE_MISMATCH',
+        'SERVICE_PROMOTION_WINDOW_INVALID',
+        'SERVICE_PROVIDER_ACCREDITATION_REQUIRED',
+        'SERVICE_PROVIDER_CAPACITY_INVALID',
+        'SERVICE_PROVIDER_COUNTRY_MISMATCH',
+        'SERVICE_PROVIDER_NAME_REQUIRED',
+        'SERVICE_PROVIDER_NOT_FOUND',
+        'SERVICE_PROVIDER_NOT_QUALIFIED',
+        'SERVICE_PROVIDER_REFERENCE_REQUIRED',
+        'SERVICE_PROVIDER_REQUIRED',
+        'SERVICE_PROVIDER_RETIRED',
+        'SERVICE_PROVIDER_REVIEW_REQUIRED',
+        'SERVICE_PROVIDER_SERVICE_NOT_SUPPORTED',
+        'SERVICE_PROVIDER_SUPPORTED_SERVICE_REQUIRED',
+        'SERVICE_PUBLICATION_TRANSITION_NOT_ALLOWED',
+        'SERVICE_PUBLISHED_UPDATE_INCOMPLETE',
+        'SERVICE_REFERENCE_GATEWAY_REQUIRED',
+        'SERVICE_REQUEST_EXPECTED_VERSION_REQUIRED',
+        'SERVICE_REQUEST_NOT_FOUND',
+        'SERVICE_REQUEST_NOT_INVOICEABLE',
+        'SERVICE_REQUEST_PROVIDER_ASSIGNMENT_CLOSED',
+        'SERVICE_REQUEST_REFERENCE_REQUIRED',
+        'SERVICE_REQUEST_VERSION_CONFLICT',
+        'SERVICE_REVIEW_EVIDENCE_REQUIRED',
+        'SERVICE_REVIEW_STALE',
+        'SERVICE_REVIEW_TRANSITION_NOT_ALLOWED',
+        'SERVICE_SECURE_DELIVERY_NOT_CONFIGURED',
+        'SERVICE_SLA_REQUIRED',
+        'SERVICE_SLOT_CAPACITY_INVALID',
+        'SERVICE_SLOT_SERVICE_NOT_FOUND',
+        'SERVICE_SLOT_TIMEZONE_PROVIDER_MISMATCH',
+        'SERVICE_SLOT_WINDOW_INVALID',
+        'SERVICE_SUPPORT_TRIAGE_NOT_CONFIGURED',
+        'SERVICE_SUPPORT_TRIAGE_QUERY_INVALID',
+        'SERVICE_TIMEZONE_INVALID',
+        'SERVICE_TRANSLATIONS_REQUIRED',
+        'SERVICE_WORKFLOW_ACTIVE_DEFINITION_REQUIRED',
+        'SERVICE_WORKFLOW_ACTIVE_VERSION_EXISTS',
+        'SERVICE_WORKFLOW_DEFINITION_INVALID',
+        'SERVICE_WORKFLOW_DEFINITION_NOT_DRAFT',
+        'SERVICE_WORKFLOW_DEFINITION_NOT_FOUND',
+        'SERVICE_WORKFLOW_EXECUTION_NOT_FOUND',
+        'SERVICE_WORKFLOW_EXECUTION_REQUIRED',
+        'SERVICE_WORKFLOW_SLA_INVALID',
+        'SERVICE_WORKFLOW_STEP_INVALID',
+        'SERVICE_AND_PACKAGE_MUTUALLY_EXCLUSIVE',
         'SERVICE_BOOKING_ACTIVE_PRICING_REQUIRED',
         'SERVICE_BOOKING_CAPACITY_AUTHORITY_MISSING',
         'SERVICE_BOOKING_CAPACITY_CONFLICT',
@@ -791,6 +951,8 @@ export class ServiceAdminRouter {
         'SERVICE_WORKFLOW_EXECUTION_REQUIRED',
         'SERVICE_WORKFLOW_SLA_INVALID',
         'SERVICE_WORKFLOW_STEP_INVALID',
+        'SERVICE_PROVIDER_REVIEW_REQUIRED',
+        'SERVICE_PACKAGE_DELIVERY_POLICY_REQUIRED',
         'SERVICE_REVIEW_EVIDENCE_REQUIRED',
         'SERVICE_PROVIDER_CAPACITY_EXHAUSTED',
         'SERVICE_ACCESS_DENIED',

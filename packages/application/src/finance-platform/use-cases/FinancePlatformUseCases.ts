@@ -319,6 +319,7 @@ export class FinancePlatformUseCases {
   async getInvoiceClearance(invoiceId: string, expected?: { originDomain: string; originReferenceId: string; studentReferenceId: string }) {
     const invoice = await this.requireInvoice(invoiceId);
     if (expected && (invoice.originDomain !== expected.originDomain || invoice.originReferenceId !== expected.originReferenceId || invoice.studentReferenceId !== expected.studentReferenceId)) throw new Error('SERVICE_FINANCE_ORIGIN_MISMATCH');
+    const serviceSettlement=expected?.originDomain==='PHASE_20_SERVICE_REQUEST' && this.repository.serviceInvoiceClearance ? await this.repository.serviceInvoiceClearance({invoiceId:invoice.id,originReferenceId:expected.originReferenceId,studentReferenceId:expected.studentReferenceId}) : undefined;
     const financiallyCleared =
       BigInt(invoice.amountDue.amountMinorUnits) === 0n &&
       [InvoiceStatus.PAID, InvoiceStatus.CREDITED].includes(invoice.status);
@@ -326,9 +327,18 @@ export class FinancePlatformUseCases {
       invoiceId: invoice.id,
       invoiceStatus: invoice.status,
       amountDueMinorUnits: invoice.amountDue.amountMinorUnits,
-      financiallyCleared: expected ? financiallyCleared && invoice.status === InvoiceStatus.PAID && await this.repository.hasFinancialClearanceForOrigin(expected) : financiallyCleared,
-      cancellationCleared: invoice.status === InvoiceStatus.VOIDED,
+      financiallyCleared: serviceSettlement ? serviceSettlement.financiallyCleared : expected ? financiallyCleared && invoice.status === InvoiceStatus.PAID && await this.repository.hasFinancialClearanceForOrigin(expected) : financiallyCleared,
+      cancellationCleared: serviceSettlement ? serviceSettlement.cancellationCleared : invoice.status === InvoiceStatus.VOIDED,
     };
+  }
+
+  async resolveServiceCancellation(invoiceId:string,expected:{requestPublicId:string;studentReferenceId:string}) {
+    const invoice=await this.requireInvoice(invoiceId);
+    if(invoice.originDomain!=='PHASE_20_SERVICE_REQUEST'||invoice.originReferenceId!==expected.requestPublicId||invoice.studentReferenceId!==expected.studentReferenceId)throw new Error('SERVICE_FINANCE_ORIGIN_MISMATCH');
+    if([InvoiceStatus.DRAFT,InvoiceStatus.ISSUED].includes(invoice.status)){
+      try{await this.voidInvoice(invoice.id,{actorId:'system:services-maintenance',idempotencyKey:`service-cancellation:${expected.requestPublicId}`,correlationId:expected.requestPublicId,expectedVersion:invoice.version??1,reason:'Service cancellation: Finance-owned unpaid invoice void'});}catch{ /* Active reservations or settled funds remain pending for Finance review. */ }
+    }
+    return this.getInvoiceClearance(invoice.id,{originDomain:'PHASE_20_SERVICE_REQUEST',originReferenceId:expected.requestPublicId,studentReferenceId:expected.studentReferenceId});
   }
 
   async hasFinancialClearanceForOrigin(input: {

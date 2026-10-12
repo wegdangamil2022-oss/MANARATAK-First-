@@ -1,3 +1,5 @@
+import { useTranslation } from '../../../i18n/I18nProvider';
+import { serviceCopy } from '../serviceCopy';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft,
@@ -35,6 +37,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
   favoriteIds = [],
   onToggleFavorite,
 }) => {
+  const { language, dir } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
   const [remoteRows, setRemoteRows] = useState<Service[]>([]);
@@ -67,17 +70,19 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
     setCursor(null);
     void ApiClient.getServices({
       search: serverSearch,
+      locale: language,
+      audience,
       serviceCategory: categoryCodes[selectedCategory],
       limit: 20,
     })
       .then((page) => {
         if (current && generation === sequence.current) {
-          setRemoteRows(page.data.map(mapService));
+          setRemoteRows(page.data.map((row) => mapService(row, language)));
           setCursor(page.nextCursor ?? null);
         }
       })
       .catch(() => {
-        if (current) setError('تعذر تحميل الخدمات.');
+        if (current) setError(serviceCopy('تعذر تحميل الخدمات.', language));
       })
       .finally(() => {
         if (current) setLoading(false);
@@ -85,7 +90,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
     return () => {
       current = false;
     };
-  }, [remote, serverSearch, selectedCategory]);
+  }, [remote, serverSearch, selectedCategory, language, audience]);
   async function more() {
     if (!cursor || loadingMore.current) return;
     loadingMore.current = true;
@@ -94,16 +99,21 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
     try {
       const page = await ApiClient.getServices({
         search: serverSearch,
+        locale: language,
+        audience,
         serviceCategory: categoryCodes[selectedCategory],
         cursor,
         limit: 20,
       });
       if (generation === sequence.current) {
-        setRemoteRows((previous) => [...previous, ...page.data.map(mapService)]);
+        setRemoteRows((previous) => [
+          ...previous,
+          ...page.data.map((row) => mapService(row, language)),
+        ]);
         setCursor(page.nextCursor ?? null);
       }
     } catch {
-      setError('تعذر تحميل الصفحة التالية.');
+      setError(serviceCopy('تعذر تحميل الصفحة التالية.', language));
     } finally {
       loadingMore.current = false;
       if (generation === sequence.current) setLoading(false);
@@ -130,27 +140,28 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
     return audienceServices.filter((service) => {
       const matchesCategory = selectedCategory === 'الكل' || service.category === selectedCategory;
       const matchesSearch =
+        remote ||
         !normalizedQuery ||
         service.title.toLowerCase().includes(normalizedQuery) ||
         service.shortDescription.toLowerCase().includes(normalizedQuery) ||
         service.category.toLowerCase().includes(normalizedQuery);
       return matchesCategory && matchesSearch;
     });
-  }, [audienceServices, searchQuery, selectedCategory]);
+  }, [audienceServices, searchQuery, selectedCategory, remote]);
 
   const isStudent = audience === 'student';
 
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] font-['Cairo',sans-serif] select-none mn-panel "
-      dir="rtl"
+      dir={dir}
     >
       <div aria-live="polite">
-        {loading && 'جارٍ التحميل…'}
+        {loading && serviceCopy('جارٍ التحميل…', language)}
         {error && <p role="alert">{error}</p>}
         {remote && cursor && (
           <button type="button" disabled={loading} onClick={() => void more()}>
-            تحميل المزيد
+            {serviceCopy('تحميل المزيد', language)}
           </button>
         )}
       </div>
@@ -159,8 +170,8 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
           type="button"
           onClick={onBack}
           className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-          title="العودة"
-          aria-label="العودة"
+          title={serviceCopy('العودة', language)}
+          aria-label={serviceCopy('العودة', language)}
         >
           <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
         </button>
@@ -193,19 +204,24 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
             />
           </div>
           <h1 className="font-['Cairo',sans-serif] text-xl font-bold leading-tight text-white sm:text-2xl">
-            {isStudent ? 'الخدمات الطلابية' : 'الخدمات العامة والدعم'}
+            {isStudent
+              ? serviceCopy('الخدمات الطلابية', language)
+              : serviceCopy('الخدمات العامة والدعم', language)}
           </h1>
           <p className="mx-auto max-w-[90%] text-[11px] font-semibold leading-5 text-[var(--mn-on-dark-muted)] sm:text-xs">
             {isStudent
-              ? 'خدمات تساعد الطالب في الاختيار وتجهيز ملفه الأكاديمي والتقديم.'
-              : 'خدمات مساندة للوثائق والإجراءات المرتبطة برحلة الدراسة.'}
+              ? serviceCopy(
+                  'خدمات تساعد الطالب في الاختيار وتجهيز ملفه الأكاديمي والتقديم.',
+                  language,
+                )
+              : serviceCopy('خدمات مساندة للوثائق والإجراءات المرتبطة برحلة الدراسة.', language)}
           </p>
 
           <div className="relative mx-auto mt-3 max-w-md">
             <input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="ابحث عن خدمة..."
+              placeholder={serviceCopy('ابحث عن خدمة...', language)}
               className="h-11 w-full rounded-2xl border border-white/15 bg-[var(--mn-surface)] px-10 text-[11px] font-bold text-[var(--mn-heading)] shadow-lg outline-none transition focus:border-[var(--mn-accent)] sm:text-xs mn-panel "
             />
             <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-accent-text)]" />
@@ -214,7 +230,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mn-text-muted)]"
-                aria-label="مسح البحث"
+                aria-label={serviceCopy('مسح البحث', language)}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -231,7 +247,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
             </div>
             <div className="min-w-0 flex-1">
               <label className="mb-1 block text-[9px] font-bold text-[var(--mn-text-muted)]">
-                نوع الخدمة
+                {serviceCopy('نوع الخدمة', language)}
               </label>
               <select
                 value={selectedCategory}
@@ -239,8 +255,11 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
                 className="h-9 w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[10px] font-bold text-[var(--mn-text)] outline-none mn-panel "
               >
                 {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
+                  <option
+                    key={serviceCopy(category, language)}
+                    value={serviceCopy(category, language)}
+                  >
+                    {serviceCopy(category, language)}
                   </option>
                 ))}
               </select>
@@ -250,13 +269,16 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
 
         <div className="mb-2 flex items-center justify-between px-1">
           <div>
-            <h2 className="text-[13px] font-bold text-[var(--mn-heading)]">الخدمات المتاحة</h2>
+            <h2 className="text-[13px] font-bold text-[var(--mn-heading)]">
+              {serviceCopy('الخدمات المتاحة', language)}
+            </h2>
             <p className="text-[9px] font-bold text-[var(--mn-text-muted)]">
-              الخدمات المنشورة والمتاحة من كتالوج منارتك
+              {serviceCopy('الخدمات المنشورة والمتاحة من كتالوج منارتك', language)}
             </p>
           </div>
           <span className="rounded-full border border-[var(--mn-accent)]/20 bg-[var(--mn-accent)]/10 px-2 py-1 text-[9px] font-bold text-[var(--mn-accent-text)]">
-            {filteredServices.length} خدمة
+            {filteredServices.length}
+            {serviceCopy('خدمة', language)}
           </span>
         </div>
 
@@ -264,9 +286,11 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
           {filteredServices.length === 0 ? (
             <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center shadow-sm mn-panel ">
               <Search className="mx-auto h-6 w-6 text-[var(--mn-text-muted)]" />
-              <h3 className="mt-2 text-xs font-bold text-[var(--mn-text)]">لا توجد خدمات مطابقة</h3>
+              <h3 className="mt-2 text-xs font-bold text-[var(--mn-text)]">
+                {serviceCopy('لا توجد خدمات مطابقة', language)}
+              </h3>
               <p className="mt-1 text-[10px] font-semibold text-[var(--mn-text-muted)]">
-                غيّر البحث أو نوع الخدمة.
+                {serviceCopy('غيّر البحث أو نوع الخدمة.', language)}
               </p>
             </div>
           ) : (
@@ -300,7 +324,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
                           {service.title}
                         </h3>
                         <p className="mt-0.5 text-[9px] font-bold text-[var(--mn-accent-text)]">
-                          {service.category}
+                          {serviceCopy(service.category, language)}
                         </p>
                       </div>
                       <span className="rounded-full bg-[var(--mn-primary)]/10 px-2 py-1 text-[8px] font-bold text-[var(--mn-heading)]">
@@ -327,7 +351,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
                     onClick={() => onSelectService?.(service)}
                     className="col-span-2 flex min-h-8 items-center justify-center gap-1 rounded-lg bg-[var(--mn-primary)] px-2 text-[9.5px] font-bold text-white shadow-2xs transition hover:bg-[var(--mn-primary)] active:scale-95 sm:col-span-1 mn-inverse hover:mn-inverse "
                   >
-                    عرض التفاصيل
+                    {serviceCopy('عرض التفاصيل', language)}
                     <ChevronLeft className="h-3 w-3" />
                   </button>
                 </div>

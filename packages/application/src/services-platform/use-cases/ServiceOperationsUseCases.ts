@@ -1,10 +1,13 @@
-import { serviceFingerprint } from '../ServiceSafety';
+import { serviceFingerprint, serviceInput } from '../ServiceSafety';
 import { createHash, randomUUID } from 'node:crypto';
 import {
   IServiceCatalogRepository,
   IServiceOperationsRepository,
   IServiceRequestRepository,
   IServiceFinanceGateway,
+  IServiceDeliveryGateway,
+  IServiceReferenceGateway,
+  AssetSecurityClassification,
   ServiceBookingDto,
   ServiceBookingPricingSnapshot,
   ServiceBookingStatus,
@@ -41,6 +44,8 @@ export class ServiceOperationsUseCases {
     private readonly assetReferences?: AssetReferencePolicy,
     private readonly requests?: IServiceRequestRepository,
     private readonly finance?: IServiceFinanceGateway,
+    private readonly delivery?: IServiceDeliveryGateway,
+    private readonly references?: IServiceReferenceGateway,
   ) {}
 
   forActor(context: { actorId: string; correlationId: string; reason: string }) {
@@ -51,7 +56,101 @@ export class ServiceOperationsUseCases {
       this.assetReferences,
       this.requests,
       this.finance,
+      this.delivery,
+      this.references,
     );
+  }
+  async myDeliverables(studentId: string, requestId: string) {
+    const request = await this.requests?.findRequestById(requestId);
+    if (!request || request.studentReferenceId !== studentId)
+      throw new Error('SERVICE_REQUEST_NOT_FOUND');
+    const booking = await this.operations.findBookingForRequest?.(request.id);
+    if (!booking || booking.status !== ServiceBookingStatus.COMPLETED) return [];
+    await this.assertBookingClearance(booking);
+    return ((await this.operations.listDeliveryArtifacts?.(booking.id)) ?? []).map((row) => ({
+      id: row.id,
+      artifactType: row.artifactType,
+      deliveredAt: row.deliveredAt,
+    }));
+  }
+  async myDeliveryGrant(studentId: string, requestId: string, artifactId: string) {
+    const request = await this.requests?.findRequestById(requestId);
+    if (!request || request.studentReferenceId !== studentId)
+      throw new Error('SERVICE_REQUEST_NOT_FOUND');
+    const booking = await this.operations.findBookingForRequest?.(request.id);
+    if (!booking || booking.status !== ServiceBookingStatus.COMPLETED)
+      throw new Error('SERVICE_DELIVERY_REVIEW_REQUIRED');
+    await this.assertBookingClearance(booking);
+    const artifact = ((await this.operations.listDeliveryArtifacts?.(booking.id)) ?? []).find(
+      (row) => row.id === artifactId,
+    );
+    const execution = await this.operations.findWorkflowExecutionForBooking?.(booking.id);
+    if (
+      !artifact ||
+      artifact.workflowExecutionId !== execution?.id ||
+      execution?.status !== ServiceWorkflowExecutionStatus.COMPLETED
+    )
+      throw new Error('SERVICE_DELIVERY_WORKFLOW_MISMATCH');
+    await assertAssetReferenceUsable(this.assetReferences, artifact.assetId, {
+      purpose: 'SERVICE_STUDENT_DELIVERY',
+      expectedOwnerId: booking.id,
+      allowedClassifications: [
+        AssetSecurityClassification.PUBLIC,
+        AssetSecurityClassification.INTERNAL,
+        AssetSecurityClassification.RESTRICTED,
+        AssetSecurityClassification.CONFIDENTIAL,
+      ],
+    });
+    if (!this.delivery) throw new Error('SERVICE_SECURE_DELIVERY_NOT_CONFIGURED');
+    return this.delivery.grant(artifact.assetId);
+  }
+  async packagesForRequest(studentId: string, requestId: string, cursor?: string) {
+    const request = await this.requests?.findRequestById(requestId);
+    if (!request || request.studentReferenceId !== studentId)
+      throw new Error('SERVICE_REQUEST_NOT_FOUND');
+    const page = (await this.operations.listActivePackages?.(request.serviceId, cursor)) ?? {
+      data: [],
+      nextCursor: null,
+    };
+    const data = await Promise.all(
+      page.data.map(async (pkg) => {
+        const items = await Promise.all(
+          pkg.items.map(async (item) => {
+            const raw = await this.catalog.findById(item.serviceId);
+            const service = raw?.publishedSnapshot
+              ? ({ ...raw, ...raw.publishedSnapshot } as typeof raw)
+              : raw;
+            if (!service || service.status !== 'PUBLISHED')
+              throw new Error('SERVICE_PACKAGE_ITEM_NOT_PUBLISHED');
+            return {
+              serviceId: service.id,
+              displayName: service.displayName,
+              localizedContent: service.localizedContent,
+              inputSchema: service.inputSchema ?? [],
+              quantity: item.quantity,
+            };
+          }),
+        );
+        const price = await this.operations.findActivePricing(null, pkg.id, new Date());
+        return {
+          id: pkg.id,
+          displayName: pkg.displayName,
+          items,
+          price: price
+            ? {
+                amountMinorUnits: price.amountMinorUnits,
+                currencyCode: price.currencyCode,
+                scale: price.scale,
+              }
+            : null,
+        };
+      }),
+    );
+    return { data, nextCursor: page.nextCursor };
+  }
+  async sweepExpiredHolds(limit: number) {
+    if (!this.operations.sweepExpiredHolds) throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+    return this.operations.sweepExpiredHolds(limit);
   }
   async assertCaseActor(reference: string, actorId: string, all: boolean, execution = false) {
     const run = execution ? await this.operations.findWorkflowExecutionById?.(reference) : null;
@@ -64,20 +163,29 @@ export class ServiceOperationsUseCases {
     if (!request || (!all && request.assignedStaffId !== actorId))
       throw new Error('SERVICE_REQUEST_NOT_FOUND');
   }
-  async availableForRequest(studentId: string, requestId: string) {
+  async availableForRequest(studentId: string, requestId: string, cursor?: string) {
     const request = await this.requests?.findRequestById(requestId);
     if (!request || request.studentReferenceId !== studentId)
       throw new Error('SERVICE_REQUEST_NOT_FOUND');
     const service = await this.catalog.findById(request.serviceId);
-    if (
-      !service ||
-      service.fulfillmentType !== 'BOOKING' ||
-      service.serviceAvailabilityStatus !== 'AVAILABLE'
-    )
-      return [];
-    return this.operations.listAvailableSlots?.(request.serviceId) ?? [];
+    if (!service || service.serviceAvailabilityStatus !== 'AVAILABLE')
+      return { data: [], nextCursor: null };
+    return (
+      this.operations.listAvailableSlots?.(request.serviceId, cursor) ?? {
+        data: [],
+        nextCursor: null,
+      }
+    );
   }
-  async bookRequest(studentId: string, requestId: string, slotId: string, idempotencyKey: string) {
+  async bookRequest(
+    studentId: string,
+    requestId: string,
+    slotId: string,
+    idempotencyKey: string,
+    packageId?: string,
+    packageConsent?: boolean,
+    packageParameters?: Record<string, Record<string, unknown>>,
+  ) {
     if (!/^[A-Za-z0-9._:-]{8,160}$/.test(idempotencyKey))
       throw new Error('SERVICE_IDEMPOTENCY_KEY_REQUIRED');
     const request = await this.requests?.findRequestById(requestId);
@@ -89,7 +197,10 @@ export class ServiceOperationsUseCases {
     const result = await this.createBooking({
       studentReferenceId: studentId,
       requestId,
-      serviceId: request.serviceId,
+      serviceId: packageId ? undefined : request.serviceId,
+      packageId,
+      packageConsent,
+      packageParameters,
       slotId,
       providerId: slot.providerId,
       idempotencyKey,
@@ -134,13 +245,41 @@ export class ServiceOperationsUseCases {
       status: ServiceProviderStatus.DRAFT,
       timezone: input.timezone,
       capacity: input.capacity,
-      countryReferenceId: input.countryReferenceId ?? null,
+      countryReferenceId: input.countryReferenceId
+        ? this.references
+          ? (await this.references.resolveCountryReference(input.countryReferenceId)).id
+          : (() => {
+              throw new Error('SERVICE_REFERENCE_GATEWAY_REQUIRED');
+            })()
+        : null,
       supportedServiceIds,
       qualificationMetadata: input.qualificationMetadata ?? null,
     });
   }
 
-  async qualifyProvider(providerId: string, expectedVersion?: number): Promise<ServiceProviderDto> {
+  async updateProviderEvidence(
+    id: string,
+    evidence: { assetId: string; expiresAt: string },
+    expectedVersion: number,
+  ) {
+    if (!this.operations.updateProviderEvidence)
+      throw new Error('SERVICE_OPERATIONS_NOT_CONFIGURED');
+    if (
+      !Number.isFinite(Date.parse(evidence.expiresAt)) ||
+      Date.parse(evidence.expiresAt) <= Date.now()
+    )
+      throw new Error('SERVICE_PROVIDER_ACCREDITATION_REQUIRED');
+    await assertAssetReferenceUsable(this.assetReferences, evidence.assetId, {
+      purpose: 'SERVICE_PROVIDER_ACCREDITATION',
+      allowedMimeTypePrefixes: ['application/pdf', 'image/'],
+    });
+    return this.operations.updateProviderEvidence(id, evidence, expectedVersion);
+  }
+  async qualifyProvider(
+    providerId: string,
+    expectedVersion?: number,
+    review?: { legalReviewed: boolean; authorityReviewed: boolean; scopeReviewed: boolean },
+  ): Promise<ServiceProviderDto> {
     const provider = await this.requireProvider(providerId);
     if (provider.status === ServiceProviderStatus.RETIRED)
       throw new Error('SERVICE_PROVIDER_RETIRED');
@@ -152,13 +291,31 @@ export class ServiceOperationsUseCases {
       !Number.isFinite(new Date(evidence.expiresAt).getTime())
     )
       throw new Error('SERVICE_PROVIDER_ACCREDITATION_REQUIRED');
-    await assertAssetReferenceUsable(this.assetReferences, String(evidence.assetId), {
-      purpose: 'SERVICE_PROVIDER_ACCREDITATION',
-    });
+    if (
+      !review ||
+      review.legalReviewed !== true ||
+      review.authorityReviewed !== true ||
+      review.scopeReviewed !== true
+    )
+      throw new Error('SERVICE_PROVIDER_REVIEW_REQUIRED');
+    const document = await assertAssetReferenceUsable(
+      this.assetReferences,
+      String(evidence.assetId),
+      {
+        purpose: 'SERVICE_PROVIDER_ACCREDITATION',
+        allowedMimeTypePrefixes: ['application/pdf', 'image/'],
+      },
+    );
+    if (!document?.checksum?.hash) throw new Error('SERVICE_PROVIDER_ACCREDITATION_REQUIRED');
     return this.operations.updateProviderStatus(
       providerId,
       ServiceProviderStatus.QUALIFIED,
       expectedVersion,
+      {
+        ...review,
+        documentSha256: document.checksum.hash,
+        evidenceAssetId: String(evidence.assetId),
+      },
     );
   }
 
@@ -392,6 +549,22 @@ export class ServiceOperationsUseCases {
     );
     if (existing && existing.id !== definition.id)
       throw new Error('SERVICE_WORKFLOW_ACTIVE_VERSION_EXISTS');
+    if (definition.packageId) {
+      const pkg = await this.operations.findPackageById(definition.packageId);
+      if (!pkg || pkg.status !== ServicePackageStatus.ACTIVE)
+        throw new Error('SERVICE_PACKAGE_NOT_ACTIVE');
+      const declared = new Set(
+        definition.steps.flatMap((step) => step.requiredArtifactTypes ?? []),
+      );
+      for (const item of pkg.items) {
+        const raw = await this.catalog.findById(item.serviceId);
+        const service = raw?.publishedSnapshot
+          ? ({ ...raw, ...raw.publishedSnapshot } as typeof raw)
+          : raw;
+        if (!service || (service.deliveryArtifactTypes ?? []).some((type) => !declared.has(type)))
+          throw new Error('SERVICE_PACKAGE_DELIVERY_POLICY_REQUIRED');
+      }
+    }
     return this.operations.updateWorkflowDefinitionStatus(
       definitionId,
       ServiceWorkflowDefinitionStatus.ACTIVE,
@@ -443,9 +616,17 @@ export class ServiceOperationsUseCases {
     slotId: string;
     discountId?: string | null;
     promotionId?: string | null;
+    packageConsent?: boolean;
+    packageParameters?: Record<string, Record<string, unknown>>;
   }): Promise<ServiceBookingDto> {
-    const replay=await this.operations.findBookingByPublicId?.(`svc_booking_${serviceFingerprint({student:input.studentReferenceId,key:input.idempotencyKey}).slice(0,40)}`);
-    if(replay) {if((replay as any).payloadFingerprint!==serviceFingerprint(input))throw new Error('SERVICE_BOOKING_PAYLOAD_CONFLICT');return replay;}
+    const replay = await this.operations.findBookingByPublicId?.(
+      `svc_booking_${serviceFingerprint({ student: input.studentReferenceId, key: input.idempotencyKey }).slice(0, 40)}`,
+    );
+    if (replay) {
+      if ((replay as any).payloadFingerprint !== serviceFingerprint(input))
+        throw new Error('SERVICE_BOOKING_PAYLOAD_CONFLICT');
+      return replay;
+    }
     if (!input.studentReferenceId.trim()) throw new Error('SERVICE_BOOKING_STUDENT_REQUIRED');
     if (!input.requestId || !input.idempotencyKey || !this.requests)
       throw new Error('SERVICE_BOOKING_REQUEST_REQUIRED');
@@ -453,13 +634,57 @@ export class ServiceOperationsUseCases {
     if (
       !request ||
       request.studentReferenceId !== input.studentReferenceId ||
-      request.serviceId !== input.serviceId
+      (!input.packageId && request.serviceId !== input.serviceId)
     )
       throw new Error('SERVICE_BOOKING_REQUEST_MISMATCH');
+    if (request.financeInvoiceId || request.invoiceIntent)
+      throw new Error('SERVICE_BOOKING_BEFORE_INVOICE_REQUIRED');
     const { service, pkg } = await this.assertServiceOrPackage(
       input.serviceId ?? null,
       input.packageId ?? null,
     );
+    if (pkg) {
+      if (
+        input.packageConsent !== true ||
+        !pkg.items.some((item) => item.serviceId === request.serviceId)
+      )
+        throw new Error('SERVICE_PACKAGE_CONSENT_REQUIRED');
+      if (
+        Object.keys(input.packageParameters ?? {}).some(
+          (id) => !pkg.items.some((item) => item.serviceId === id),
+        )
+      )
+        throw new Error('SERVICE_INPUT_UNKNOWN_FIELD');
+      for (const item of pkg.items) {
+        const raw = await this.catalog.findById(item.serviceId);
+        const published = raw?.publishedSnapshot
+          ? ({ ...raw, ...raw.publishedSnapshot } as typeof raw)
+          : raw;
+        if (
+          !published ||
+          published.status !== 'PUBLISHED' ||
+          published.serviceAvailabilityStatus !== 'AVAILABLE'
+        )
+          throw new Error('SERVICE_PACKAGE_ITEM_NOT_PUBLISHED');
+        const params = serviceInput(
+          published,
+          input.packageParameters?.[item.serviceId] ??
+            (item.serviceId === request.serviceId ? request.requestParameters : {}),
+        );
+        for (const field of published.inputSchema ?? [])
+          if (field.type === 'ASSET' && params[field.key])
+            await assertAssetReferenceUsable(this.assetReferences, String(params[field.key]), {
+              purpose: 'SERVICE_PACKAGE_INPUT',
+              expectedOwnerId: input.studentReferenceId,
+              allowedClassifications: [
+                AssetSecurityClassification.PUBLIC,
+                AssetSecurityClassification.INTERNAL,
+                AssetSecurityClassification.RESTRICTED,
+                AssetSecurityClassification.CONFIDENTIAL,
+              ],
+            });
+      }
+    }
     const provider = await this.requireProvider(input.providerId);
     if (provider.status !== ServiceProviderStatus.QUALIFIED)
       throw new Error('SERVICE_PROVIDER_NOT_QUALIFIED');
@@ -495,6 +720,11 @@ export class ServiceOperationsUseCases {
       now,
     );
     const pricingSnapshot = this.quote(pricing, discount, promotion, now);
+    if (
+      pricingSnapshot.finalAmountMinorUnits === '0' &&
+      request.serviceSnapshot?.fulfillmentPolicy !== 'FREE'
+    )
+      throw new Error('SERVICE_FREE_POLICY_REQUIRED');
     const items = pkg
       ? pkg.items.map((item) => ({
           serviceId: item.serviceId,
@@ -516,8 +746,9 @@ export class ServiceOperationsUseCases {
       publicId: `svc_booking_${serviceFingerprint({ student: input.studentReferenceId, key: input.idempotencyKey }).slice(0, 40)}`,
       requestId: input.requestId,
       payloadFingerprint: serviceFingerprint(input),
+      inputSnapshot: input.packageParameters,
       studentReferenceId: input.studentReferenceId,
-      serviceId: service?.id ?? null,
+      serviceId: request.serviceId,
       packageId: pkg?.id ?? null,
       providerId: provider.id,
       slotId: slot.id,
@@ -692,7 +923,13 @@ export class ServiceOperationsUseCases {
     const artifacts = (await this.operations.listDeliveryArtifacts?.(execution.bookingId)) ?? [];
     if (
       (steps[index].requiredArtifactTypes ?? []).some(
-        (type) => !artifacts.some((a) => a.workflowExecutionId === id && a.stepKey === execution.currentStepKey && a.artifactType === type),
+        (type) =>
+          !artifacts.some(
+            (a) =>
+              a.workflowExecutionId === id &&
+              a.stepKey === execution.currentStepKey &&
+              a.artifactType === type,
+          ),
       )
     )
       throw new Error('SERVICE_DELIVERY_REVIEW_REQUIRED');
@@ -722,7 +959,10 @@ export class ServiceOperationsUseCases {
       request.serviceId !== booking.serviceId
     )
       throw new Error('SERVICE_BOOKING_REQUEST_MISMATCH');
-    if (request.serviceSnapshot?.fulfillmentPolicy !== 'FREE') {
+    if (
+      request.serviceSnapshot?.fulfillmentPolicy !== 'FREE' ||
+      BigInt(booking.pricingSnapshot.finalAmountMinorUnits) > 0n
+    ) {
       if (
         !request.financeInvoiceId ||
         !(
@@ -747,6 +987,8 @@ export class ServiceOperationsUseCases {
     if (
       provider.status === ServiceProviderStatus.QUALIFIED &&
       (!provider.qualificationMetadata?.assetId ||
+        (provider.qualificationMetadata.reviewEvidence as any)?.subjectProviderId !== provider.id ||
+        (provider.qualificationMetadata.reviewEvidence as any)?.authorityReviewed !== true ||
         !Number.isFinite(new Date(String(provider.qualificationMetadata.expiresAt)).getTime()) ||
         new Date(String(provider.qualificationMetadata.expiresAt)).getTime() <= Date.now())
     )
@@ -769,7 +1011,12 @@ export class ServiceOperationsUseCases {
     if (serviceId && packageId) throw new Error('SERVICE_AND_PACKAGE_MUTUALLY_EXCLUSIVE');
     const service = serviceId ? await this.catalog.findById(serviceId) : null;
     if (serviceId && !service) throw new Error('SERVICE_NOT_FOUND');
-    if (service && service.status !== ServiceStatus.PUBLISHED && !allowEmpty)
+    if (
+      service &&
+      service.status !== ServiceStatus.PUBLISHED &&
+      !service.publishedSnapshot &&
+      !allowEmpty
+    )
       throw new Error('SERVICE_NOT_PUBLISHED');
     const pkg = packageId ? await this.operations.findPackageById(packageId) : null;
     if (packageId && !pkg) throw new Error('SERVICE_PACKAGE_NOT_FOUND');

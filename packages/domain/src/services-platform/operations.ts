@@ -245,7 +245,7 @@ export interface ServiceWorkflowExecutionDto {
 }
 
 export interface ServiceDeliveryArtifactDto {
-  stepKey?:string|null;
+  stepKey?: string | null;
   id: string;
   bookingId: string;
   workflowExecutionId?: string | null;
@@ -256,6 +256,7 @@ export interface ServiceDeliveryArtifactDto {
 }
 
 export interface CreateServiceBookingInput {
+  inputSnapshot?: Record<string, Record<string, unknown>>;
   requestId?: string;
   payloadFingerprint?: string;
   publicId: string;
@@ -269,13 +270,20 @@ export interface CreateServiceBookingInput {
 }
 
 export interface IServiceOperationsRepository {
-  findBookingByPublicId?(publicId:string):Promise<ServiceBookingDto|null>;
+  findBookingByPublicId?(publicId: string): Promise<ServiceBookingDto | null>;
   findBookingForRequest?(requestId: string): Promise<ServiceBookingDto | null>;
+  listActivePackages?(
+    serviceId: string,
+    cursor?: string,
+  ): Promise<{ data: ServicePackageDto[]; nextCursor: string | null }>;
+  sweepExpiredHolds?(limit: number): Promise<number>;
   listAvailableSlots?(
     serviceId: string,
-  ): Promise<
-    Array<{ id: string; startsAt: Date | string; endsAt: Date | string; timezone: string }>
-  >;
+    cursor?: string,
+  ): Promise<{
+    data: Array<{ id: string; startsAt: Date | string; endsAt: Date | string; timezone: string }>;
+    nextCursor: string | null;
+  }>;
   withActor?(context: {
     actorId: string;
     correlationId: string;
@@ -289,6 +297,11 @@ export interface IServiceOperationsRepository {
   findWorkflowExecutionById?(id: string): Promise<ServiceWorkflowExecutionDto | null>;
   findWorkflowExecutionForBooking?(bookingId: string): Promise<ServiceWorkflowExecutionDto | null>;
   listDeliveryArtifacts?(bookingId: string): Promise<ServiceDeliveryArtifactDto[]>;
+  updateProviderEvidence?(
+    id: string,
+    evidence: { assetId: string; expiresAt: string },
+    expectedVersion: number,
+  ): Promise<ServiceProviderDto>;
   createProvider(
     data: Omit<ServiceProviderDto, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<ServiceProviderDto>;
@@ -296,6 +309,7 @@ export interface IServiceOperationsRepository {
     id: string,
     status: ServiceProviderStatus,
     expectedVersion?: number,
+    reviewEvidence?: Record<string, unknown>,
   ): Promise<ServiceProviderDto>;
   findProviderById(id: string): Promise<ServiceProviderDto | null>;
   createPackage(

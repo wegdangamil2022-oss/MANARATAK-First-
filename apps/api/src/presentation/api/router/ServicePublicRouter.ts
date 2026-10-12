@@ -22,6 +22,7 @@ export class ServicePublicRouter {
     const listQuerySchema = z.object({
       search: z.string().trim().max(120).optional(),
       locale: z.enum(['ar', 'en']).optional(),
+      audience:z.enum(['student','general']).optional(),
       serviceCategory: z.nativeEnum(ServiceCategory).optional(),
       fulfillmentType: z.nativeEnum(ServiceFulfillmentType).optional(),
       serviceAvailabilityStatus: z.nativeEnum(ServiceAvailabilityStatus).optional(),

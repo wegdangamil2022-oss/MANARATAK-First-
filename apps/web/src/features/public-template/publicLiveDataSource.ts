@@ -361,7 +361,7 @@ export function mapArticle(dto: PublicCmsContentDto): PublicArticle {
   };
 }
 
-export function mapService(dto: PublicServiceCatalogItemDto): Service {
+export function mapService(dto: PublicServiceCatalogItemDto, locale:PublicLiveLocale='ar'): Service {
   const metadata = asRecord(dto.publicDisplayMetadata);
   const audience: Service['audience'] = /student/i.test(dto.serviceCategory) || /student/i.test(dto.responsibleServiceOwnerType) ? 'student' : 'general';
   return {
@@ -370,13 +370,13 @@ export function mapService(dto: PublicServiceCatalogItemDto): Service {
     slug: dto.slug,
     supportedCountryReferenceIds: dto.supportedCountryReferenceIds ?? [],
     supportedLanguageReferenceIds: dto.supportedLanguageReferenceIds ?? [],
-    title: dto.displayName,
+    title: dto.localizedContent?.[locale]?.displayName ?? dto.displayName,
     audience,
     category: ({ STUDENT_SERVICES: 'خدمات الطلاب', DOCUMENT_SERVICES: 'خدمات المستندات', VISA_SERVICES: 'خدمات التأشيرات', TRAVEL_SERVICES: 'خدمات السفر', ACADEMIC_SERVICES: 'خدمات أكاديمية', PROFESSIONAL_SERVICES: 'خدمات مهنية', ENTERPRISE_SERVICES: 'خدمات المؤسسات' } as Record<string,string>)[dto.serviceCategory] || dto.serviceCategory,
     requestable: dto.serviceAvailabilityStatus === 'AVAILABLE',
     badge: firstString(metadata.badge, audience === 'student' ? 'خدمة طلابية' : 'خدمة عامة'),
-    shortDescription: dto.serviceDescription,
-    description: dto.serviceDescription,
+    shortDescription: dto.localizedContent?.[locale]?.serviceDescription ?? dto.serviceDescription,
+    description: dto.localizedContent?.[locale]?.serviceDescription ?? dto.serviceDescription,
     priceLabel: dto.fulfillmentPolicy === 'FREE' ? 'مجانية' : dto.approvedPrice ? `${BigInt(dto.approvedPrice.amountMinorUnits)/10n**BigInt(dto.approvedPrice.scale)}${dto.approvedPrice.scale ? '.'+(BigInt(dto.approvedPrice.amountMinorUnits)%10n**BigInt(dto.approvedPrice.scale)).toString().padStart(dto.approvedPrice.scale,'0') : ''} ${dto.approvedPrice.currencyCode}` : 'عرض سعر معتمد مطلوب قبل التنفيذ',
     turnaround: dto.estimatedDeliveryTime ?? '',
     deliveryMode: ({ ONLINE: 'عبر الإنترنت', IN_PERSON: 'حضوري', HYBRID: 'مدمج' } as Record<string,string>)[dto.deliveryMode] || dto.deliveryMode,
@@ -535,9 +535,9 @@ export async function loadPublishedArticles(locale: PublicLiveLocale = 'ar'): Pr
   const pages = await Promise.all(editorialTypes.map((contentType) => collectOffsetPages((page) => ApiClient.getCmsContent({ locale, contentType, page, pageSize: 50 }))));
   return pages.flat().map(mapArticle);
 }
-export async function loadPublishedServices(): Promise<Service[]> {
-  const page = await ApiClient.getServices({ limit:20 });
-  return page.data.map(mapService);
+export async function loadPublishedServices(locale:PublicLiveLocale='ar'): Promise<Service[]> {
+  const page = await ApiClient.getServices({ limit:20,locale });
+  return page.data.map(row=>mapService(row,locale));
 }
 export async function loadPublishedCareers(): Promise<CareerOpportunityPreview[]> {
   const rows = await collectCursorPages((cursor) => ApiClient.getCareerJobs({ cursor, limit: 100 }));
@@ -644,7 +644,7 @@ export async function loadPublicLiveSnapshot(locale: PublicLiveLocale = 'ar', fo
       ['scholarships', () => collectCursorPages((cursor) => ApiClient.getScholarships({ cursor, limit: 100 })).then((rows) => rows.map((dto) => mapPublicScholarshipDto(dto)))],
       ['universities', () => loadPublishedUniversities(locale)], ['majors', () => loadPublishedMajors(locale)], ['countries', () => loadPublishedCountries(locale)],
       ['exams', () => loadPublishedExams(locale)], ['courses', loadPublishedCourses], ['articles', () => loadPublishedArticles(locale)],
-      ['services', loadPublishedServices], ['careers', loadPublishedCareers], ['tools', () => loadPublishedTools(locale)],
+      ['services', ()=>loadPublishedServices(locale)], ['careers', loadPublishedCareers], ['tools', () => loadPublishedTools(locale)],
     ];
     await Promise.all(loaders.map(async ([domain, loader]) => {
       try {

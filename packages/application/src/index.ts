@@ -217,3 +217,5 @@ export * from './import-foundation/use-cases/ImportSourceControlUseCases';
 export * from './import-foundation/contracts/IImportGovernanceGateway';
 export * from './import-foundation/use-cases/ImportGovernanceUseCases';
 export * from './import-foundation/contracts/ISourceAccessAuthority';
+
+export * from './background-jobs/handlers/ServiceMaintenanceBackgroundJobHandler';

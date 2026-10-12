@@ -140,7 +140,7 @@ export interface ServiceCatalogFilters {
 export type PublicServiceCatalogFilters = Omit<
   ServiceCatalogFilters,
   'status' | 'completenessStatus' | 'page' | 'pageSize'
-> & { cursor?: string; limit?: number; locale?: 'ar' | 'en' };
+> & { cursor?: string; limit?: number; locale?: 'ar' | 'en'; audience?: 'student' | 'general' };
 export type PublicServiceCatalogItemDto = Omit<
   ServiceCatalogItemDto,
   | 'id'
@@ -154,6 +154,7 @@ export type PublicServiceCatalogItemDto = Omit<
 >;
 
 export interface PaginatedServiceCatalogResult<T> {
+  facets?: Record<string, number>;
   data: T[];
   total: number;
   page: number;
@@ -255,6 +256,11 @@ export interface IServiceRequestRepository {
     hasMore: boolean;
     nextPage: number | null;
   }>;
+  listRecoverableInvoiceIntents?(limit: number): Promise<ServiceRequestDto[]>;
+  deferServiceRecovery?(id: string, kind: 'invoice' | 'cancellation'): Promise<void>;
+  escalateOverdueRequests?(limit: number): Promise<number>;
+  purgeExpiredInputs?(limit: number): Promise<number>;
+  listPendingCancellations?(limit: number): Promise<ServiceRequestDto[]>;
   eraseRequestInputs?(
     id: string,
     studentReferenceId: string,
@@ -297,6 +303,10 @@ export interface IServiceReferenceGateway {
 }
 
 export interface IServiceFinanceGateway {
+  resolveCancellation?(
+    invoiceId: string,
+    request: { requestPublicId: string; studentReferenceId: string },
+  ): Promise<{ cancellationCleared: boolean }>;
   createDraftInvoice(input: {
     requestId: string;
     requestPublicId: string;
@@ -350,3 +360,22 @@ export interface ServiceFinanceInvoiceLinkedEvent {
 }
 
 export * from './operations';
+
+export interface IServiceDeliveryGateway {
+  grant(
+    assetId: string,
+  ): Promise<{
+    assetId: string;
+    url: string;
+    headers: Readonly<Record<string, string>>;
+    expiresAt: string;
+  }>;
+}
+
+export interface ServiceSlaBreachedEvent {
+  eventType: 'ServiceSlaBreached.v1';
+  requestId: string;
+  studentReferenceId: string;
+  dueAt: string;
+  status: ServiceRequestStatus;
+}

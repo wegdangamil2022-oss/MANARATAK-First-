@@ -5063,6 +5063,11 @@ model ServiceCatalogLanguageRecord {
 }
 
 model ServiceRequestRecord {
+  slaEscalatedAt DateTime?
+  invoiceNextCheckAt DateTime @default(now())
+  cancellationNextCheckAt DateTime @default(now())
+  inputsErasedAt DateTime?
+  legalHoldUntil DateTime?
   retentionUntil DateTime?
   booking ServiceBookingRecord?
   assignedStaffId String?
@@ -5252,6 +5257,8 @@ model ServiceAvailabilitySlotRecord {
 }
 
 model ServiceBookingRecord {
+  inputSnapshot Json?
+  inputsErasedAt DateTime?
   requestId String? @unique
   request ServiceRequestRecord? @relation(fields: [requestId], references: [id], onDelete: Restrict)
   payloadFingerprint String?

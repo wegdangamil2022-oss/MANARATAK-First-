@@ -1,7 +1,7 @@
 import { createApiApp } from './app.js';
 import { container } from './infrastructure/di/container.js';
 import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ZodEnvironmentValidator } from '@manaratak/config';
-import { ASSET_ACTIVATION_RECOVERY_JOB_TYPE, RETENTION_SWEEP_JOB_TYPE, CMS_SCHEDULED_PUBLISH_JOB_TYPE, IMPORT_QUEUE_SWEEP_JOB_TYPE, AI_ASYNC_SWEEP_JOB_TYPE, FINANCE_RECONCILIATION_JOB_TYPE, NOTIFICATION_DELIVERY_JOB_TYPE } from '@manaratak/application';
+import { SERVICE_MAINTENANCE_JOB_TYPE, ASSET_ACTIVATION_RECOVERY_JOB_TYPE, RETENTION_SWEEP_JOB_TYPE, CMS_SCHEDULED_PUBLISH_JOB_TYPE, IMPORT_QUEUE_SWEEP_JOB_TYPE, AI_ASYNC_SWEEP_JOB_TYPE, FINANCE_RECONCILIATION_JOB_TYPE, NOTIFICATION_DELIVERY_JOB_TYPE } from '@manaratak/application';
 import { startPollingWorkers, stopPollingWorkers } from './infrastructure/workers/PollingWorkerRuntime.js';
 
 const SHUTDOWN_TIMEOUT_MS = 15_000;
@@ -40,6 +40,7 @@ async function bootstrap() {
     await manager.ensureRecurringJob({ stableReference: 'system.import.queue-sweep', jobType: IMPORT_QUEUE_SWEEP_JOB_TYPE, parameters: { maxJobs: 10 }, cronExpression: config.getOptional<string>('BACKGROUND_IMPORT_CRON') || '* * * * *', priority: 80, timeoutSeconds: 300, maxAttempts: 5, backoffType: 'exponential', ownerReference: 'imports:durable-queue' });
     await manager.ensureRecurringJob({ stableReference: 'system.ai.async-sweep', jobType: AI_ASYNC_SWEEP_JOB_TYPE, parameters: { limit: 10 }, cronExpression: config.getOptional<string>('BACKGROUND_AI_CRON') || '* * * * *', priority: 80, timeoutSeconds: 600, maxAttempts: 5, backoffType: 'exponential', ownerReference: 'ai:async-queue' });
     await manager.ensureRecurringJob({ stableReference: 'system.finance.reconciliation', jobType: FINANCE_RECONCILIATION_JOB_TYPE, parameters: { limit: 50 }, cronExpression: config.getOptional<string>('BACKGROUND_FINANCE_RECONCILIATION_CRON') || '*/5 * * * *', priority: 95, timeoutSeconds: 600, maxAttempts: 5, backoffType: 'exponential', ownerReference: 'finance:reconciliation' });
+    if(config.getOptional<boolean>('SERVICES_MAINTENANCE_ENABLED')===true) await manager.ensureRecurringJob({stableReference:'system.services.maintenance',jobType:SERVICE_MAINTENANCE_JOB_TYPE,parameters:{limit:50},cronExpression:'*/5 * * * *',priority:85,timeoutSeconds:120,maxAttempts:5,backoffType:'exponential',ownerReference:'services:maintenance'});
     await manager.ensureRecurringJob({ stableReference: 'system.notification.delivery', jobType: NOTIFICATION_DELIVERY_JOB_TYPE, parameters: { limit: 20, leaseMs: 600_000, maxDeliveriesPerRecipientPerHour: config.getOptional<number>('NOTIFICATION_RECIPIENT_MAX_DELIVERIES_PER_HOUR') ?? 30 }, cronExpression: config.getOptional<string>('BACKGROUND_NOTIFICATION_CRON') || '* * * * *', priority: 85, timeoutSeconds: 300, maxAttempts: 5, backoffType: 'exponential', ownerReference: 'notifications:delivery' });
   }
 

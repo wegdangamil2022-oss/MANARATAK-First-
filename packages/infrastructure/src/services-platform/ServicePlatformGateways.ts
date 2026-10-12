@@ -1,7 +1,8 @@
-import { FinancePlatformUseCases } from '@manaratak/application';
+import { FinancePlatformUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import {
   IReferenceResolver,
   IServiceFinanceGateway,
+  IServiceDeliveryGateway,
   IServiceReferenceGateway,
 } from '@manaratak/domain';
 
@@ -61,6 +62,12 @@ export class Phase19ServiceFinanceGateway implements IServiceFinanceGateway {
     return { id: invoice.id, publicId: invoice.publicId };
   }
 
+  resolveCancellation(
+    invoiceId: string,
+    request: { requestPublicId: string; studentReferenceId: string },
+  ) {
+    return this.finance.resolveServiceCancellation(invoiceId, request);
+  }
   async getInvoiceClearance(
     invoiceId: string,
     request?: { requestPublicId: string; studentReferenceId: string },
@@ -75,5 +82,12 @@ export class Phase19ServiceFinanceGateway implements IServiceFinanceGateway {
           }
         : undefined,
     );
+  }
+}
+
+export class EapServiceDeliveryGateway implements IServiceDeliveryGateway {
+  constructor(private readonly lifecycle: ProcessAssetLifecycleUseCase) {}
+  grant(assetId: string) {
+    return this.lifecycle.requestDeliveryGrant({ assetId, expiresInSeconds: 120 });
   }
 }

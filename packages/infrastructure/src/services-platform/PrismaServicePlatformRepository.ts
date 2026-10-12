@@ -17,7 +17,11 @@ import {
   ServiceCatalogRepositoryUpdateDto,
 } from '@manaratak/domain';
 
-import { queryStableCursorPage } from '../api-foundation/StableCursor';
+import {
+  boundedCursorLimit,
+  decodeStableCursor,
+  encodeStableCursor,
+} from '../api-foundation/StableCursor';
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === 'object' && !Array.isArray(value)
@@ -288,39 +292,74 @@ export class PrismaServicePlatformRepository
   async listPublished(
     filters: PublicServiceCatalogFilters,
   ): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>> {
-    const where: any = {
-      OR: [{ status: ServiceStatus.PUBLISHED }, { publishedSnapshot: { not: Prisma.DbNull } }],
-      ...(filters.search?.trim()
-        ? {
-            AND: [
-              {
-                OR: ['displayName', 'publicId', 'slug'].map((field) => ({
-                  [field]: { contains: filters.search!.trim(), mode: 'insensitive' },
-                })),
-              },
-            ],
-          }
-        : {}),
-      serviceCategory: filters.serviceCategory,
-      fulfillmentType: filters.fulfillmentType,
-      serviceAvailabilityStatus: filters.serviceAvailabilityStatus,
-      deliveryMode: filters.deliveryMode,
-      supportedCountries: filters.supportedCountryReferenceId
-        ? { some: { countryReferenceId: filters.supportedCountryReferenceId } }
-        : undefined,
-      supportedLanguages: filters.supportedLanguageReferenceId
-        ? { some: { languageReferenceId: filters.supportedLanguageReferenceId } }
-        : undefined,
-    };
-    Object.keys(where).forEach((key) => where[key] === undefined && delete where[key]);
-    return queryStableCursorPage({
-      delegate: this.catalog() as any,
-      where,
+    const limit = boundedCursorLimit(filters.limit, 20, 100);
+    const after = decodeStableCursor(filters.cursor);
+    const clauses: Prisma.Sql[] = [
+      Prisma.sql`(s."status" = 'PUBLISHED' OR jsonb_typeof(s."publishedSnapshot") = 'object')`,
+    ];
+    // The public query and projection use the same reviewed revision, including while a draft is edited.
+    const column = (name: string) =>
+      Prisma.sql`COALESCE(s."publishedSnapshot" ->> ${name}, ${Prisma.raw('s."' + name + '"')})`;
+    for (const key of [
+      'serviceCategory',
+      'fulfillmentType',
+      'serviceAvailabilityStatus',
+      'deliveryMode',
+    ] as const) {
+      if (filters[key]) clauses.push(Prisma.sql`${column(key)} = ${filters[key]}`);
+    }
+    if (filters.audience) {
+      const student = Prisma.sql`(${column('serviceCategory')} = 'STUDENT_SERVICES' OR ${column('responsibleServiceOwnerType')} ILIKE '%student%')`;
+      clauses.push(filters.audience === 'student' ? student : Prisma.sql`NOT ${student}`);
+    }
+    const search = filters.search?.trim();
+    if (search) {
+      const pattern = '%' + search.replace(/[\\%_]/g, (value) => '\\' + value) + '%';
+      clauses.push(
+        Prisma.sql`(${column('displayName')} ILIKE ${pattern} OR ${column('serviceDescription')} ILIKE ${pattern} OR s."publicId" ILIKE ${pattern} OR s."slug" ILIKE ${pattern} OR COALESCE(s."publishedSnapshot" -> 'localizedContent',s."localizedContent") -> 'en' ->> 'serviceDescription' ILIKE ${pattern} OR COALESCE(s."publishedSnapshot" -> 'localizedContent',s."localizedContent") -> 'en' ->> 'displayName' ILIKE ${pattern})`,
+      );
+    }
+    if (filters.supportedCountryReferenceId)
+      clauses.push(
+        Prisma.sql`CASE WHEN jsonb_typeof(s."publishedSnapshot")='object' THEN (s."publishedSnapshot" -> 'supportedCountryReferenceIds') ? ${filters.supportedCountryReferenceId} ELSE EXISTS(SELECT 1 FROM "ServiceCatalogCountryRecord" c WHERE c."serviceId"=s.id AND c."countryReferenceId"=${filters.supportedCountryReferenceId}) END`,
+      );
+    if (filters.supportedLanguageReferenceId)
+      clauses.push(
+        Prisma.sql`CASE WHEN jsonb_typeof(s."publishedSnapshot")='object' THEN (s."publishedSnapshot" -> 'supportedLanguageReferenceIds') ? ${filters.supportedLanguageReferenceId} ELSE EXISTS(SELECT 1 FROM "ServiceCatalogLanguageRecord" l WHERE l."serviceId"=s.id AND l."languageReferenceId"=${filters.supportedLanguageReferenceId}) END`,
+      );
+    const where = Prisma.join(clauses, ' AND ');
+    const [ids, counts, facets] = await Promise.all([
+      this.prisma.$queryRaw<Array<{ id: string }>>(
+        Prisma.sql`SELECT s.id FROM "ServiceCatalogRecord" s WHERE ${where} ${after ? Prisma.sql`AND s.id > ${after}` : Prisma.empty} ORDER BY s.id ASC LIMIT ${limit + 1}`,
+      ),
+      this.prisma.$queryRaw<Array<{ total: bigint }>>(
+        Prisma.sql`SELECT COUNT(*) AS total FROM "ServiceCatalogRecord" s WHERE ${where}`,
+      ),
+      this.prisma.$queryRaw<Array<{ category: string; total: bigint }>>(
+        Prisma.sql`SELECT ${column('serviceCategory')} AS category,COUNT(*) AS total FROM "ServiceCatalogRecord" s WHERE ${where} GROUP BY ${column('serviceCategory')}`,
+      ),
+    ]);
+    const total = Number(counts[0]?.total ?? 0n);
+    if (!Number.isSafeInteger(total)) throw new Error('SERVICE_PUBLIC_COUNT_OVERFLOW');
+    const visible = ids.slice(0, limit);
+    const rows = await this.catalog().findMany({
+      where: { id: { in: visible.map((row) => row.id) } },
       include: this.catalogInclude(),
-      cursor: filters.cursor,
-      limit: filters.limit,
-      map: (row: any) => this.mapCatalog(row),
     });
+    const byId = new Map<string, any>(rows.map((row: any) => [row.id, row]));
+    return {
+      data: visible
+        .map((row) => byId.get(row.id))
+        .filter((row) => row && (row.status === ServiceStatus.PUBLISHED || row.publishedSnapshot))
+        .map((row) => this.mapCatalog(row)),
+      total,
+      page: 1,
+      pageSize: limit,
+      totalPages: Math.ceil(total / limit),
+      hasMore: ids.length > limit,
+      nextCursor: ids.length > limit ? encodeStableCursor(visible[visible.length - 1].id) : null,
+      facets: Object.fromEntries(facets.map((row) => [row.category, Number(row.total)])),
+    };
   }
 
   private async listCatalog(filters: ServiceCatalogFilters, publishedOnly: boolean) {
@@ -396,6 +435,157 @@ export class PrismaServicePlatformRepository
       row = existing;
     }
     return this.mapRequest(row);
+  }
+  async escalateOverdueRequests(limit: number) {
+    return this.prisma.$transaction(
+      async (tx: any) => {
+        const now = new Date();
+        const rows = await this.requests(tx).findMany({
+          where: {
+            dueAt: { lt: now },
+            slaEscalatedAt: null,
+            status: { notIn: ['COMPLETED', 'CANCELLED'] },
+          },
+          orderBy: [{ dueAt: 'asc' }, { id: 'asc' }],
+          take: Math.min(100, Math.max(1, limit)),
+        });
+        let count = 0;
+        for (const row of rows) {
+          const changed = await this.requests(tx).updateMany({
+            where: { id: row.id, version: row.version, slaEscalatedAt: null },
+            data: { slaEscalatedAt: now, version: { increment: 1 } },
+          });
+          if (!changed.count) continue;
+          await tx.transactionalOutboxRecord.create({
+            data: {
+              id: randomUUID(),
+              eventType: 'ServiceSlaBreached.v1',
+              domain: 'SERVICES',
+              aggregateType: 'ServiceRequest',
+              aggregateId: row.id,
+              payload: {
+                eventType: 'ServiceSlaBreached.v1',
+                requestId: row.id,
+                studentReferenceId: row.studentReferenceId,
+                dueAt: row.dueAt.toISOString(),
+                status: row.status,
+                version: row.version + 1,
+              },
+              metadata: { schemaVersion: 1, actorId: 'system:services-maintenance' },
+              correlationId: row.publicId,
+              state: 'PENDING',
+              attempts: 0,
+              availableAt: now,
+              createdAt: now,
+            },
+          });
+          count++;
+        }
+        return count;
+      },
+      { isolationLevel: 'Serializable' },
+    );
+  }
+  async purgeExpiredInputs(limit: number) {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100)
+      throw new Error('SERVICE_MAINTENANCE_LIMIT_INVALID');
+    return this.prisma.$transaction(
+      async (tx: any) => {
+        const now = new Date();
+        const rows = await this.requests(tx).findMany({
+          where: {
+            retentionUntil: { lte: now },
+            inputsErasedAt: null,
+            status: { in: ['COMPLETED', 'CANCELLED'] },
+            OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: now } }],
+          },
+          orderBy: [{ retentionUntil: 'asc' }, { id: 'asc' }],
+          take: limit,
+        });
+        let erased = 0;
+        for (const row of rows) {
+          const result = await this.requests(tx).updateMany({
+            where: {
+              id: row.id,
+              version: row.version,
+              inputsErasedAt: null,
+              OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: now } }],
+            },
+            data: {
+              requestParameters: {},
+              fulfillmentMetadata: Prisma.DbNull,
+              inputsErasedAt: now,
+              version: { increment: 1 },
+            },
+          });
+          if (result.count !== 1) continue;
+          await tx.transactionalOutboxRecord.create({
+            data: {
+              id: randomUUID(),
+              eventType: 'ServiceRequestInputsErased.v1',
+              domain: 'SERVICES',
+              aggregateType: 'ServiceRequest',
+              aggregateId: row.id,
+              payload: {
+                requestId: row.id,
+                version: row.version + 1,
+                policy: 'SERVICE_INPUT_180_DAYS',
+                actorId: 'system:services-maintenance',
+              },
+              metadata: { schemaVersion: 1 },
+              correlationId: row.publicId,
+              state: 'PENDING',
+              attempts: 0,
+              availableAt: now,
+              createdAt: now,
+            },
+          });
+          erased++;
+        }
+        return erased;
+      },
+      { isolationLevel: 'Serializable' },
+    );
+  }
+  async listRecoverableInvoiceIntents(limit: number) {
+    const rows = await this.requests().findMany({
+      where: {
+        invoiceLinkState: 'LINK_PENDING',
+        invoiceNextCheckAt: { lte: new Date() },
+        financeInvoiceId: null,
+      },
+      orderBy: [{ invoiceNextCheckAt: 'asc' }, { id: 'asc' }],
+      take: Math.min(100, Math.max(1, limit)),
+    });
+    return rows.map((row: any) => this.mapRequest(row));
+  }
+  async deferServiceRecovery(id: string, kind: 'invoice' | 'cancellation') {
+    await this.requests().updateMany({
+      where: {
+        id,
+        ...(kind === 'invoice'
+          ? { invoiceLinkState: 'LINK_PENDING' }
+          : { cancellationState: 'PENDING_FINANCE' }),
+      },
+      data: {
+        [kind === 'invoice' ? 'invoiceNextCheckAt' : 'cancellationNextCheckAt']: new Date(
+          Date.now() + 5 * 60 * 1000,
+        ),
+      },
+    });
+  }
+  async listPendingCancellations(limit: number) {
+    const rows = await this.requests().findMany({
+      where: {
+        cancellationState: 'PENDING_FINANCE',
+        cancellationNextCheckAt: { lte: new Date() },
+        financeInvoiceId: { not: null },
+        status: { notIn: ['COMPLETED', 'CANCELLED'] },
+      },
+      orderBy: [{ cancellationNextCheckAt: 'asc' }, { id: 'asc' }],
+      take: Math.min(100, Math.max(1, limit)),
+    });
+    return rows.map((row: any) => this.mapRequest(row));
   }
   async eraseRequestInputs(id: string, studentReferenceId: string, expectedVersion: number) {
     const row = await this.atomicEvent(

@@ -444,6 +444,7 @@ export interface StudentToolFilters {
 export interface ServiceFilters {
   search?:string;
   locale?:'ar'|'en';
+  audience?:'student'|'general';
   serviceCategory?: string;
   fulfillmentType?: string;
   serviceAvailabilityStatus?: string;
@@ -927,6 +928,10 @@ export interface HydratedStudentSavedItemDto {
   } | null;
 }
 
+export interface StudentServicePackageDto {
+  id:string;displayName:string;price:{amountMinorUnits:string;currencyCode:string;scale:number}|null;
+  items:Array<{serviceId:string;displayName:string;localizedContent?:Record<string,{displayName:string}>|null;quantity:number;inputSchema:Array<{key:string;type:'TEXT'|'NUMBER'|'BOOLEAN'|'ASSET';required:boolean}>}>;
+}
 export interface StudentServiceRequestDto {
   id: string; publicId: string; studentReferenceId: string; serviceId: string; status: string;
   requestParameters: Record<string, unknown>; providerReferenceId?: string | null; financeInvoiceId?: string | null; financeInvoicePublicId?: string | null;
@@ -1444,6 +1449,7 @@ export interface CareerFilters {
 }
 
 export interface PaginatedResult<T> {
+  facets?:Record<string,number>;
   data: T[];
   total: number;
   page?: number;
@@ -2472,8 +2478,8 @@ export class ApiClient {
     return res.json();
   }
 
-  static async getServiceBySlug(slug: string): Promise<PublicServiceCatalogItemDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/services/${encodeURIComponent(slug)}`);
+  static async getServiceBySlug(slug: string,locale:'ar'|'en'='ar'): Promise<PublicServiceCatalogItemDto> {
+    const res = await apiFetch(`${API_BASE_URL}/public/services/${encodeURIComponent(slug)}?locale=${locale}`);
     if (!res.ok) {
       if (res.status === 404) {
         throw new Error('Service not found');
@@ -2842,13 +2848,22 @@ export class ApiClient {
     const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/inputs`,{method:'DELETE',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({expectedVersion})});
     if(!res.ok)throw new Error(await parseErrorMessage(res,'تعذر حذف معطيات الطلب'));return res.json();
   }
-  static async listMyServiceAvailability(requestId:string):Promise<{data:Array<{id:string;startsAt:string;endsAt:string;timezone:string}>}> {
-    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/availability`,{headers:getStudentHeaders()});
+  static async listMyServiceAvailability(requestId:string,cursor?:string):Promise<{data:Array<{id:string;startsAt:string;endsAt:string;timezone:string}>;nextCursor:string|null}> {
+    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/availability${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`,{headers:getStudentHeaders()});
     if(!res.ok)throw new Error(await parseErrorMessage(res,'تعذر تحميل المواعيد'));return res.json();
   }
-  static async bookMyServiceRequest(requestId:string,slotId:string,idempotencyKey:string):Promise<{publicId:string;status:string;holdExpiresAt:string;pricingSnapshot:{finalAmountMinorUnits:string;currencyCode:string}}> {
-    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/bookings`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json','Idempotency-Key':idempotencyKey}),body:JSON.stringify({slotId})});
+  static async bookMyServiceRequest(requestId:string,slotId:string,idempotencyKey:string,options?:{packageId?:string;packageConsent?:boolean;packageParameters?:Record<string,Record<string,unknown>>}):Promise<{publicId:string;status:string;holdExpiresAt:string;pricingSnapshot:{finalAmountMinorUnits:string;currencyCode:string}}> {
+    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/bookings`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json','Idempotency-Key':idempotencyKey}),body:JSON.stringify({slotId,...options})});
     if(!res.ok)throw new Error(await parseErrorMessage(res,'تعذر حجز الموعد'));return res.json();
+  }
+  static async listMyServicePackages(requestId:string,cursor?:string):Promise<{data:StudentServicePackageDto[];nextCursor:string|null}>{
+    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/packages${cursor?`?cursor=${encodeURIComponent(cursor)}`:''}`,{headers:getStudentHeaders()});if(!res.ok)throw new Error(await parseErrorMessage(res,'SERVICE_PACKAGES_UNAVAILABLE'));return res.json();
+  }
+  static async listMyServiceDeliverables(requestId:string):Promise<{data:Array<{id:string;artifactType:string;deliveredAt:string}>}>{
+    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/deliverables`,{headers:getStudentHeaders()});if(!res.ok)throw new Error(await parseErrorMessage(res,'SERVICE_DELIVERY_UNAVAILABLE'));return res.json();
+  }
+  static async getMyServiceDeliveryGrant(requestId:string,artifactId:string):Promise<{assetId:string;url:string;headers:Record<string,string>;expiresAt:string}>{
+    const res=await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}/deliverables/${encodeURIComponent(artifactId)}/grant`,{method:'POST',headers:getStudentHeaders()});if(!res.ok)throw new Error(await parseErrorMessage(res,'SERVICE_DELIVERY_UNAVAILABLE'));return res.json();
   }
   static async getMyStudentServiceRequest(requestId: string): Promise<StudentServiceRequestDto> {
     const res = await apiFetch(`${API_BASE_URL}/student/services/requests/${encodeURIComponent(requestId)}`, { headers: getStudentHeaders() });

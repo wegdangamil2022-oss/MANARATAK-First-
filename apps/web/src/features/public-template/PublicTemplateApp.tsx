@@ -272,7 +272,7 @@ export default function App() {
       const selected = key ? services.find(matchesKey) || null : null;
       if (key && !selected && publicDataMode === 'api') {
         fetchOnce(`services:${key}`, async () => {
-          const service = mapService(await ApiClient.getServiceBySlug(key));
+          const service = mapService(await ApiClient.getServiceBySlug(key,language),language);
           finish({ activeTab: 'search', selectedCategory: 'services', selectedServiceTrack: service.audience, selectedService: service });
         });
         return;

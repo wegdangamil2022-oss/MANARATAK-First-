@@ -1497,4 +1497,7 @@ export const en = {
   svc_saved: 'Operation saved',
   svc_error: 'Operation failed; check permissions and record state.',
   svc_runtime_pending: 'Runtime verification is pending; configuration does not establish readiness.',
+  svc_executions:'Workflow executions',
+  svc_deliveries:'Deliverables',
+  svc_discounts:'Discounts',
 };

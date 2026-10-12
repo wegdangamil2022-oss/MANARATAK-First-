@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { decodeStableCursor, encodeStableCursor } from '../api-foundation/StableCursor';
+import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CreateServiceBookingInput,
   IServiceOperationsRepository,
@@ -35,7 +36,13 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
   withActor(context: { actorId: string; correlationId: string; reason: string }) {
     return new PrismaServiceOperationsRepository(this.prisma, context);
   }
-  async findBookingByPublicId(publicId:string) {const row=await this.p().serviceBookingRecord.findUnique({where:{publicId},include:{items:true}});return row?this.mapBooking(row):null;}
+  async findBookingByPublicId(publicId: string) {
+    const row = await this.p().serviceBookingRecord.findUnique({
+      where: { publicId },
+      include: { items: true },
+    });
+    return row ? this.mapBooking(row) : null;
+  }
   async findBookingForRequest(requestId: string) {
     const row = await this.p().serviceBookingRecord.findUnique({
       where: { requestId },
@@ -43,18 +50,53 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
     });
     return row ? this.mapBooking(row) : null;
   }
-  async listAvailableSlots(serviceId: string) {
-    return this.p().serviceAvailabilitySlotRecord.findMany({
+  async listActivePackages(serviceId: string, cursor?: string) {
+    const after = decodeStableCursor(cursor);
+    const rows = await this.p().servicePackageRecord.findMany({
+      where: {
+        status: 'ACTIVE',
+        items: { some: { serviceId } },
+        ...(after ? { id: { gt: after } } : {}),
+      },
+      include: { items: { orderBy: { sequence: 'asc' } } },
+      orderBy: { id: 'asc' },
+      take: 21,
+    });
+    return {
+      data: rows.slice(0, 20).map((row: any) => this.mapPackage(row)),
+      nextCursor: rows.length > 20 ? encodeStableCursor(rows[19].id) : null,
+    };
+  }
+  async listAvailableSlots(serviceId: string, cursor?: string) {
+    const after = decodeStableCursor(cursor);
+    const rows = await this.p().serviceAvailabilitySlotRecord.findMany({
       where: {
         serviceId,
         status: 'AVAILABLE',
         startsAt: { gt: new Date() },
-        provider: { status: 'QUALIFIED' },
+        provider: {
+          status: 'QUALIFIED',
+          AND: [
+            {
+              qualificationMetadata: {
+                path: ['reviewEvidence', 'authorityReviewed'],
+                equals: true,
+              },
+            },
+            { qualificationMetadata: { path: ['expiresAt'], gt: new Date().toISOString() } },
+          ],
+        },
+        ...(after ? { id: { gt: after } } : {}),
       },
       select: { id: true, startsAt: true, endsAt: true, timezone: true },
-      orderBy: [{ startsAt: 'asc' }, { id: 'asc' }],
-      take: 50,
+      orderBy: { id: 'asc' },
+      take: 51,
     });
+    const data = rows.slice(0, 50);
+    return {
+      data,
+      nextCursor: rows.length > 50 ? encodeStableCursor(data[data.length - 1].id) : null,
+    };
   }
   async listOperations(kind: string, page: number, assignedStaffId?: string) {
     const names: Record<string, string> = {
@@ -65,11 +107,20 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
       slots: 'serviceAvailabilitySlotRecord',
       bookings: 'serviceBookingRecord',
       workflows: 'serviceWorkflowDefinitionRecord',
+      executions: 'serviceWorkflowExecutionRecord',
+      deliveries: 'serviceDeliveryArtifactRecord',
+      discounts: 'serviceDiscountRecord',
     };
     const model = names[kind];
     if (!model || !Number.isSafeInteger(page) || page < 1 || page > 10000)
       throw new Error('SERVICE_OPERATION_QUERY_INVALID');
-    const where = kind === 'bookings' && assignedStaffId ? { request: { assignedStaffId } } : {};
+    const where = assignedStaffId
+      ? kind === 'bookings'
+        ? { request: { assignedStaffId } }
+        : ['executions', 'deliveries'].includes(kind)
+          ? { booking: { request: { assignedStaffId } } }
+          : {}
+      : {};
     const [data, total] = await Promise.all([
       this.p()[model].findMany({ where, take: 20, skip: (page - 1) * 20, orderBy: { id: 'asc' } }),
       this.p()[model].count({ where }),
@@ -119,6 +170,28 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
             (!existing.makerActorId || existing.makerActorId === this.context!.actorId)
           )
             throw new Error('SERVICE_INDEPENDENT_REVIEW_REQUIRED');
+          if (model === 'serviceProviderRecord' && args.data.status === 'QUALIFIED') {
+            const proof = args.reviewEvidence;
+            if (
+              !proof ||
+              proof.legalReviewed !== true ||
+              proof.authorityReviewed !== true ||
+              proof.scopeReviewed !== true ||
+              !proof.documentSha256
+            )
+              throw new Error('SERVICE_PROVIDER_REVIEW_REQUIRED');
+            args.data.qualificationMetadata = {
+              ...existing.qualificationMetadata,
+              reviewEvidence: {
+                ...proof,
+                subjectProviderId: existing.id,
+                reviewerActorId: this.context!.actorId,
+                reviewedVersion: version,
+                reviewedAt: new Date().toISOString(),
+              },
+            };
+            delete args.reviewEvidence;
+          }
           if (model === 'servicePricingRecord' && args.data.status === 'ACTIVE') {
             const overlap = await tx.servicePricingRecord.findFirst({
               where: {
@@ -183,15 +256,34 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
     return this.mapProvider(row);
   }
 
+  async updateProviderEvidence(
+    id: string,
+    evidence: { assetId: string; expiresAt: string },
+    expectedVersion: number,
+  ) {
+    return this.mapProvider(
+      await this.write('serviceProviderRecord', 'update', {
+        where: { id, version: expectedVersion },
+        data: {
+          qualificationMetadata: evidence,
+          status: 'DRAFT',
+          makerActorId: this.context?.actorId,
+        },
+        include: { supportedServices: true },
+      }),
+    );
+  }
   async updateProviderStatus(
     id: string,
     status: ServiceProviderStatus,
     expectedVersion?: number,
+    reviewEvidence?: Record<string, unknown>,
   ): Promise<ServiceProviderDto> {
     return this.mapProvider(
       await this.write('serviceProviderRecord', 'update', {
         where: { id, version: expectedVersion },
         data: { status },
+        reviewEvidence,
         include: { supportedServices: true },
       }),
     );
@@ -339,6 +431,83 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
     return row ? this.mapSlot(row) : null;
   }
 
+  private async expireHolds(tx: any, limit: number, now: Date) {
+    const rows = await tx.serviceBookingRecord.findMany({
+      where: { status: 'PENDING', holdExpiresAt: { lte: now } },
+      orderBy: [{ holdExpiresAt: 'asc' }, { id: 'asc' }],
+      take: limit,
+    });
+    let count = 0;
+    for (const old of rows) {
+      const changed = await tx.serviceBookingRecord.updateMany({
+        where: { id: old.id, version: old.version, status: 'PENDING', holdExpiresAt: { lte: now } },
+        data: { status: 'CANCELLED', version: { increment: 1 }, discountState: 'RELEASED' },
+      });
+      if (changed.count !== 1) continue;
+      if (old.discountState === 'RESERVED' && old.pricingSnapshot?.discountId)
+        await tx.serviceDiscountRecord.updateMany({
+          where: { id: old.pricingSnapshot.discountId, redemptionCount: { gt: 0 } },
+          data: { redemptionCount: { decrement: 1 } },
+        });
+      const pending = await tx.serviceRequestRecord.updateMany({
+        where: {
+          id: old.requestId,
+          OR: [{ financeInvoiceId: { not: null } }, { invoiceLinkState: 'LINK_PENDING' }],
+          status: { notIn: ['COMPLETED', 'CANCELLED'] },
+        },
+        data: { cancellationState: 'PENDING_FINANCE', version: { increment: 1 } },
+      });
+      if (pending.count) {
+        const request = await tx.serviceRequestRecord.findUnique({ where: { id: old.requestId } });
+        await this.event(tx, 'ServiceRequest', request, 'CANCELLATION_FINANCE_PENDING');
+      }
+      await this.event(
+        tx,
+        'ServiceBooking',
+        { ...old, version: old.version + 1, status: 'CANCELLED' },
+        'EXPIRE',
+      );
+      count++;
+    }
+    return count;
+  }
+  async sweepExpiredHolds(limit: number) {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100)
+      throw new Error('SERVICE_MAINTENANCE_LIMIT_INVALID');
+    return this.prisma.$transaction(
+      async (tx: any) => {
+        const now = new Date();
+        const count = await this.expireHolds(tx, limit, now);
+        const expiredInputs = await tx.serviceBookingRecord.findMany({
+          where: {
+            inputsErasedAt: null,
+            status: { in: ['COMPLETED', 'CANCELLED'] },
+            request: {
+              retentionUntil: { lte: now },
+              OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: now } }],
+            },
+          },
+          orderBy: { id: 'asc' },
+          take: limit,
+        });
+        for (const row of expiredInputs) {
+          const changed = await tx.serviceBookingRecord.updateMany({
+            where: { id: row.id, version: row.version, inputsErasedAt: null },
+            data: { inputSnapshot: Prisma.DbNull, inputsErasedAt: now, version: { increment: 1 } },
+          });
+          if (changed.count)
+            await this.event(
+              tx,
+              'ServiceBooking',
+              { ...row, version: row.version + 1 },
+              'ERASE_PACKAGE_INPUTS',
+            );
+        }
+        return count;
+      },
+      { isolationLevel: 'Serializable' },
+    );
+  }
   async createBookingWithCapacity(data: CreateServiceBookingInput): Promise<ServiceBookingDto> {
     const transaction = (this.prisma as any).$transaction;
     if (typeof transaction !== 'function') throw new Error('SERVICE_BOOKING_TRANSACTION_REQUIRED');
@@ -356,23 +525,7 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
                 throw new Error('SERVICE_BOOKING_PAYLOAD_CONFLICT');
               return this.mapBooking(replay);
             }
-            // Expired holds release both slot capacity and coupon reservation in this transaction.
-            const expired = await tx.serviceBookingRecord.findMany({
-              where: { status: 'PENDING', holdExpiresAt: { lte: new Date() } },
-              take: 100,
-            });
-            for (const old of expired) {
-              await tx.serviceBookingRecord.update({
-                where: { id: old.id },
-                data: { status: 'CANCELLED', version: { increment: 1 }, discountState: 'RELEASED' },
-              });
-              if (old.discountState === 'RESERVED' && old.pricingSnapshot?.discountId)
-                await tx.serviceDiscountRecord.updateMany({
-                  where: { id: old.pricingSnapshot.discountId, redemptionCount: { gt: 0 } },
-                  data: { redemptionCount: { decrement: 1 } },
-                });
-              await this.event(tx, 'ServiceBooking', old, 'EXPIRE');
-            }
+            await this.expireHolds(tx, 100, new Date());
             if (!data.requestId) throw new Error('SERVICE_BOOKING_REQUEST_REQUIRED');
             const request = await tx.serviceRequestRecord.findUnique({
               where: { id: data.requestId },
@@ -384,6 +537,13 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
               ['CANCELLED', 'COMPLETED'].includes(request.status)
             )
               throw new Error('SERVICE_BOOKING_REQUEST_MISMATCH');
+            if (request.financeInvoiceId || request.invoiceIntent)
+              throw new Error('SERVICE_BOOKING_BEFORE_INVOICE_REQUIRED');
+            const reserved = await tx.serviceRequestRecord.updateMany({
+              where: { id: request.id, version: request.version, financeInvoiceId: null },
+              data: { version: { increment: 1 } },
+            });
+            if (reserved.count !== 1) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
             const slot = await tx.serviceAvailabilitySlotRecord.findUnique({
               where: { id: data.slotId },
             });
@@ -415,7 +575,7 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
               price.immutableFingerprint !== data.pricingSnapshot.pricingFingerprint ||
               price.effectiveFrom > now ||
               (price.effectiveTo && price.effectiveTo <= now) ||
-              price.serviceId !== (data.serviceId ?? null) ||
+              price.serviceId !== (data.packageId ? null : (data.serviceId ?? null)) ||
               price.packageId !== (data.packageId ?? null)
             ) {
               throw new Error('SERVICE_BOOKING_PRICING_SNAPSHOT_STALE');
@@ -474,6 +634,7 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
             const row = await tx.serviceBookingRecord.create({
               data: {
                 publicId: data.publicId,
+                inputSnapshot: data.inputSnapshot,
                 requestId: data.requestId,
                 payloadFingerprint: data.payloadFingerprint,
                 holdExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
