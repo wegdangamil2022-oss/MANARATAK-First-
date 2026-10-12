@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "paths": {
+      "@manaratak/domain": ["packages/domain/src/index.ts"],
+      "@manaratak/application": ["packages/application/src/index.ts"],
+      "@manaratak/shared": ["packages/shared/src/index.ts"],
+      "@manaratak/core": ["packages/core/src/index.ts"]
+    }
+  }
+}

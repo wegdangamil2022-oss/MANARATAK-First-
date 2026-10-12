@@ -1,3 +1,4 @@
+import { assertUniversityProgramParent } from '@manaratak/domain';
 import { 
   IScholarshipRepository, 
   ITransactionalScholarshipRepository,
@@ -78,7 +79,8 @@ export class AdminScholarshipUseCases {
     scholarship: ScholarshipDto;
     completeness: ReturnType<typeof ScholarshipCompletenessClassifier.classify>;
     unresolvedLinks: Array<{
-      area: 'COUNTRY' | 'STUDY_LANGUAGE' | 'CURRENCY' | 'DEGREE' | 'MAJOR' | 'UNIVERSITY' | 'ACADEMIC_PROGRAM' | 'INTERNATIONAL_TEST';
+      area:
+        | 'COUNTRY' | 'STUDY_LANGUAGE' | 'CURRENCY' | 'DEGREE' | 'MAJOR' | 'UNIVERSITY' | 'ACADEMIC_PROGRAM' | 'INTERNATIONAL_TEST';
       key: string;
       rawValue: string | null;
       canonicalId: string | null;
@@ -171,7 +173,7 @@ export class AdminScholarshipUseCases {
       applicationLink: input.applicationLink || '',
       officialSourceUrl: input.officialSourceUrl || '',
       eligibilityCriteria: input.eligibilityCriteria || '',
-      requiredDocuments: Array.isArray(input.requiredDocuments) ? input.requiredDocuments.join(', ') : (input.requiredDocuments || ''),
+      requiredDocuments: Array.isArray(input.requiredDocuments) ? input.requiredDocuments.join(', ') : input.requiredDocuments || '',
       studyLanguage: input.studyLanguage || '',
       fundingAmount: input.fundingAmount || '',
       currency: input.currency || '',
@@ -181,7 +183,7 @@ export class AdminScholarshipUseCases {
       publicationStatus: ScholarshipPublicationStatus.DRAFT,
     };
 
-    return this.mutate('SCHOLARSHIP_CREATED', publicId, context, async repository => {
+    return this.mutate('SCHOLARSHIP_CREATED', publicId, context, async (repository) => {
       const v2 = await repository.findByDedupKey(canonicalDedupKey);
       const legacyKey = ScholarshipDeduplicationService.buildLegacyKey({
         cleanedScholarshipName: ScholarshipNamingService.clean(displayName).cleanedScholarshipName,
@@ -222,7 +224,7 @@ export class AdminScholarshipUseCases {
         officialSourceUrl: canonicalSafeUpdates.officialSourceUrl !== undefined ? canonicalSafeUpdates.officialSourceUrl : existing.officialSourceUrl,
       }).duplicateKey;
     }
-    return this.mutate('SCHOLARSHIP_UPDATED', id, context, async repository => {
+    return this.mutate('SCHOLARSHIP_UPDATED', id, context, async (repository) => {
       if (dataToUpdate.canonicalDedupKey && dataToUpdate.canonicalDedupKey !== existing.canonicalDedupKey) {
         const owner = await repository.findByDedupKey(dataToUpdate.canonicalDedupKey);
         if (owner && owner.id !== existing.id) throw new Error('SCHOLARSHIP_CANONICAL_DEDUPE_COLLISION');
@@ -246,28 +248,28 @@ export class AdminScholarshipUseCases {
     await this.assertCanonicalReference('LANGUAGE', input.studyLanguageReferenceId);
 
     const unique = (keys: string[], area: string) => { if (new Set(keys).size !== keys.length) throw new Error(`SCHOLARSHIP_DUPLICATE_CHILD_KEY:${area}`); };
-    if (input.benefits) unique(input.benefits.map(x => x.benefitKey), 'BENEFITS');
-    if (input.degreeTargets) unique(input.degreeTargets.map(x => x.targetKey), 'DEGREES');
-    if (input.majorTargets) unique(input.majorTargets.map(x => x.targetKey), 'MAJORS');
-    if (input.eligibilityItems) unique(input.eligibilityItems.map(x => x.itemKey), 'ELIGIBILITY');
-    if (input.requiredDocumentItems) unique(input.requiredDocumentItems.map(x => x.documentKey), 'DOCUMENTS');
-    if (input.universityLinks) unique(input.universityLinks.map(x => x.linkKey), 'UNIVERSITIES');
+    if (input.benefits) unique(input.benefits.map((x) => x.benefitKey), 'BENEFITS');
+    if (input.degreeTargets) unique(input.degreeTargets.map((x) => x.targetKey), 'DEGREES');
+    if (input.majorTargets) unique(input.majorTargets.map((x) => x.targetKey), 'MAJORS');
+    if (input.eligibilityItems) unique(input.eligibilityItems.map((x) => x.itemKey), 'ELIGIBILITY');
+    if (input.requiredDocumentItems) unique(input.requiredDocumentItems.map((x) => x.documentKey), 'DOCUMENTS');
+    if (input.universityLinks) unique(input.universityLinks.map((x) => x.linkKey), 'UNIVERSITIES');
 
-    const benefits = input.benefits === undefined ? undefined : await Promise.all(input.benefits.map(async item => {
+    const benefits = input.benefits === undefined ? undefined : await Promise.all(input.benefits.map(async (item) => {
       await this.assertCanonicalReference('CURRENCY', item.currencyReferenceId);
       if (item.amount !== undefined && item.amount !== null && (!Number.isFinite(Number(item.amount)) || Number(item.amount) < 0)) throw new Error(`SCHOLARSHIP_INVALID_FUNDING_AMOUNT:${item.benefitKey}`);
       if (item.amount !== undefined && item.amount !== null && !item.currencyReferenceId) throw new Error(`SCHOLARSHIP_FUNDING_CURRENCY_REQUIRED:${item.benefitKey}`);
       return { ...item };
     }));
-    const degreeTargets = input.degreeTargets === undefined ? undefined : await Promise.all(input.degreeTargets.map(async item => {
+    const degreeTargets = input.degreeTargets === undefined ? undefined : await Promise.all(input.degreeTargets.map(async (item) => {
       await this.assertCanonicalReference('DEGREE_LEVEL', item.degreeLevelId);
       return { ...item, resolutionStatus: item.degreeLevelId ? 'RESOLVED' : 'UNRESOLVED' };
     }));
-    const majorTargets = input.majorTargets === undefined ? undefined : await Promise.all(input.majorTargets.map(async item => {
+    const majorTargets = input.majorTargets === undefined ? undefined : await Promise.all(input.majorTargets.map(async (item) => {
       await this.assertCanonicalReference('MAJOR', item.majorId);
       return { ...item, resolutionStatus: item.majorId ? 'RESOLVED' : 'UNRESOLVED' };
     }));
-    const eligibilityItems = input.eligibilityItems === undefined ? undefined : await Promise.all(input.eligibilityItems.map(async item => {
+    const eligibilityItems = input.eligibilityItems === undefined ? undefined : await Promise.all(input.eligibilityItems.map(async (item) => {
       await this.assertCanonicalReference('COUNTRY', item.countryReferenceId);
       await this.assertCanonicalReference('DEGREE_LEVEL', item.degreeLevelId);
       await this.assertCanonicalReference('MAJOR', item.majorId);
@@ -277,18 +279,23 @@ export class AdminScholarshipUseCases {
       const hasCanonicalRelationship = Boolean(item.countryReferenceId || item.degreeLevelId || item.majorId || item.internationalTestId);
       return { ...item, resolutionStatus: hasCanonicalRelationship ? 'RESOLVED' : 'UNRESOLVED' };
     }));
-    const requiredDocumentItems = input.requiredDocumentItems === undefined ? undefined : await Promise.all(input.requiredDocumentItems.map(async item => {
+    const requiredDocumentItems = input.requiredDocumentItems === undefined ? undefined : await Promise.all(input.requiredDocumentItems.map(async (item) => {
       await this.assertCanonicalReference('INTERNATIONAL_TEST', item.internationalTestId);
-      return { ...item, resolutionStatus: item.internationalTestId ? 'RESOLVED' : (item.sourceLabel ? 'UNRESOLVED' : 'NOT_APPLICABLE') };
+      return { ...item, resolutionStatus: item.internationalTestId ? 'RESOLVED' : item.sourceLabel ? 'UNRESOLVED' : 'NOT_APPLICABLE',
+              };
     }));
-    const universityLinks = input.universityLinks === undefined ? undefined : await Promise.all(input.universityLinks.map(async item => {
+    const universityLinks = input.universityLinks === undefined ? undefined : await Promise.all(input.universityLinks.map(async (item) => {
       const university = await this.assertCanonicalReference('UNIVERSITY', item.universityId);
       const program = await this.assertCanonicalReference('ACADEMIC_PROGRAM', item.academicProgramId);
-      if (program && !university) throw new Error(`SCHOLARSHIP_PROGRAM_UNIVERSITY_REQUIRED:${item.linkKey}`);
-      if (program && university && program.ownerId && program.ownerId !== university.id) {
-        throw new Error(`SCHOLARSHIP_ACADEMIC_PROGRAM_UNIVERSITY_MISMATCH:${item.linkKey}`);
-      }
-      return { ...item, resolutionStatus: item.universityId ? 'RESOLVED' : 'UNRESOLVED' };
+              const impliedUniversityId = assertUniversityProgramParent(
+                university?.id ?? item.universityId,
+                program,
+              );
+              if (impliedUniversityId && !university)
+                await this.assertCanonicalReference('UNIVERSITY', impliedUniversityId);
+              return { ...item,
+                universityId: impliedUniversityId,
+                resolutionStatus: impliedUniversityId ? 'RESOLVED' : 'UNRESOLVED' };
     }));
 
     const dataToUpdate: ScholarshipRepositoryUpdateDto = {
@@ -318,7 +325,7 @@ export class AdminScholarshipUseCases {
       }).duplicateKey;
     }
 
-    return this.mutate('SCHOLARSHIP_CANONICAL_RELATIONSHIPS_REPLACED', id, context, async repository => {
+    return this.mutate('SCHOLARSHIP_CANONICAL_RELATIONSHIPS_REPLACED', id, context, async (repository) => {
       if (dataToUpdate.canonicalDedupKey && dataToUpdate.canonicalDedupKey !== existing.canonicalDedupKey) {
         const owner = await repository.findByDedupKey(dataToUpdate.canonicalDedupKey);
         if (owner && owner.id !== existing.id) throw new Error('SCHOLARSHIP_CANONICAL_DEDUPE_COLLISION');
@@ -389,7 +396,7 @@ export class AdminScholarshipUseCases {
     if (!id) return null;
     if (!this.canonicalLookup) throw new Error('SCHOLARSHIP_CANONICAL_LOOKUP_NOT_CONFIGURED');
     const candidates = await this.canonicalLookup.findCandidates(target, { target, canonicalId: id });
-    const candidate = candidates.find(item => item.id === id || item.publicId === id);
+    const candidate = candidates.find((item) => item.id === id || item.publicId === id);
     if (!candidate) throw new Error(`SCHOLARSHIP_CANONICAL_REFERENCE_NOT_FOUND:${target}:${id}`);
     if (candidate.lifecycle && /(?:DEPRECATED|ARCHIVED|SUPERSEDED|MERGED|REJECTED|INACTIVE|SUSPENDED)/u.test(candidate.lifecycle.toUpperCase())) {
       throw new Error(`SCHOLARSHIP_CANONICAL_REFERENCE_NOT_ACTIVE:${target}:${id}:${candidate.lifecycle}`);
@@ -423,17 +430,17 @@ export class AdminScholarshipUseCases {
           throw new Error('SCHOLARSHIP_PROGRAM_NOT_ACTIVE_OR_OWNER_MISMATCH');
       }
     }
-    if (!existing.officialSourceUrl?.startsWith('https://') && !existing.sourceEvidence?.some(e => e.isOfficial && e.sourceUrl.startsWith('https://'))) throw new Error('SCHOLARSHIP_OFFICIAL_SOURCE_REQUIRED');
+    if (!existing.officialSourceUrl?.startsWith('https://') && !existing.sourceEvidence?.some((e) => e.isOfficial && e.sourceUrl.startsWith('https://'))) throw new Error('SCHOLARSHIP_OFFICIAL_SOURCE_REQUIRED');
   }
 
   private preserveCanonicalReferences(existing: ScholarshipDto, updates: UpdateScholarshipDto): UpdateScholarshipDto {
     const result: UpdateScholarshipDto = { ...updates };
     const byKey = <T>(items: readonly T[] | undefined, key: (item: T) => string) =>
-      new Map((items ?? []).map(item => [key(item), item]));
+      new Map((items ?? []).map((item) => [key(item), item]));
 
     if (updates.benefits !== undefined) {
-      const current = byKey(existing.benefits, item => item.benefitKey);
-      result.benefits = updates.benefits.map(item => {
+      const current = byKey(existing.benefits, (item) => item.benefitKey);
+      result.benefits = updates.benefits.map((item) => {
         const previous = current.get(item.benefitKey);
         return {
           ...item,
@@ -443,34 +450,36 @@ export class AdminScholarshipUseCases {
       });
     }
     if (updates.degreeTargets !== undefined) {
-      const current = byKey(existing.degreeTargets, item => item.targetKey);
-      result.degreeTargets = updates.degreeTargets.map(item => {
+      const current = byKey(existing.degreeTargets, (item) => item.targetKey);
+      result.degreeTargets = updates.degreeTargets.map((item) => {
         const previous = current.get(item.targetKey);
         const equivalent = Boolean(previous && this.semanticEquivalent(previous.sourceLabel, item.sourceLabel));
         return {
           ...item,
           degreeLevelId: equivalent ? previous?.degreeLevelId : null,
-          resolutionStatus: equivalent ? previous?.resolutionStatus ?? 'UNRESOLVED' : 'UNRESOLVED',
+          resolutionStatus: equivalent ? (previous?.resolutionStatus ?? 'UNRESOLVED')
+            : 'UNRESOLVED',
           metadata: equivalent ? previous?.metadata : undefined,
         };
       });
     }
     if (updates.majorTargets !== undefined) {
-      const current = byKey(existing.majorTargets, item => item.targetKey);
-      result.majorTargets = updates.majorTargets.map(item => {
+      const current = byKey(existing.majorTargets, (item) => item.targetKey);
+      result.majorTargets = updates.majorTargets.map((item) => {
         const previous = current.get(item.targetKey);
         const equivalent = Boolean(previous && this.semanticEquivalent(previous.sourceLabel, item.sourceLabel));
         return {
           ...item,
           majorId: equivalent ? previous?.majorId : null,
-          resolutionStatus: equivalent ? previous?.resolutionStatus ?? 'UNRESOLVED' : 'UNRESOLVED',
+          resolutionStatus: equivalent ? (previous?.resolutionStatus ?? 'UNRESOLVED')
+            : 'UNRESOLVED',
           metadata: equivalent ? previous?.metadata : undefined,
         };
       });
     }
     if (updates.eligibilityItems !== undefined) {
-      const current = byKey(existing.eligibilityItems, item => item.itemKey);
-      result.eligibilityItems = updates.eligibilityItems.map(item => {
+      const current = byKey(existing.eligibilityItems, (item) => item.itemKey);
+      result.eligibilityItems = updates.eligibilityItems.map((item) => {
         const previous = current.get(item.itemKey);
         const equivalent = Boolean(previous && this.semanticFingerprint([
           previous.itemTypeCode, previous.operatorCode, previous.valueText, previous.minimumValue, previous.maximumValue,
@@ -483,14 +492,15 @@ export class AdminScholarshipUseCases {
           degreeLevelId: equivalent ? previous?.degreeLevelId : null,
           majorId: equivalent ? previous?.majorId : null,
           internationalTestId: equivalent ? previous?.internationalTestId : null,
-          resolutionStatus: equivalent ? previous?.resolutionStatus ?? 'UNRESOLVED' : 'UNRESOLVED',
+          resolutionStatus: equivalent ? (previous?.resolutionStatus ?? 'UNRESOLVED')
+            : 'UNRESOLVED',
           metadata: equivalent ? previous?.metadata : undefined,
         };
       });
     }
     if (updates.requiredDocumentItems !== undefined) {
-      const current = byKey(existing.requiredDocumentItems, item => item.documentKey);
-      result.requiredDocumentItems = updates.requiredDocumentItems.map(item => {
+      const current = byKey(existing.requiredDocumentItems, (item) => item.documentKey);
+      result.requiredDocumentItems = updates.requiredDocumentItems.map((item) => {
         const previous = current.get(item.documentKey);
         const equivalent = Boolean(previous && this.semanticFingerprint([
           previous.documentTypeCode, previous.displayName, previous.sourceLabel,
@@ -500,7 +510,8 @@ export class AdminScholarshipUseCases {
         return {
           ...item,
           internationalTestId: equivalent ? previous?.internationalTestId : null,
-          resolutionStatus: equivalent ? previous?.resolutionStatus ?? 'UNRESOLVED' : 'UNRESOLVED',
+          resolutionStatus: equivalent ? (previous?.resolutionStatus ?? 'UNRESOLVED')
+            : 'UNRESOLVED',
           metadata: equivalent ? previous?.metadata : undefined,
         };
       });
@@ -517,12 +528,15 @@ export class AdminScholarshipUseCases {
       const nextScope = updates.countryScope !== undefined ? updates.countryScope : existing.countryScope;
       result.countryReferenceId = this.countrySemanticsCompatible(
         existing.countrySourceLabel, existing.countryScope, nextLabel, nextScope,
-      ) ? existing.countryReferenceId ?? null : null;
+      ) ? (existing.countryReferenceId ?? null)
+        : null;
     } else delete result.countryReferenceId;
     if (Object.prototype.hasOwnProperty.call(updates, 'studyLanguageSourceLabel')) {
       const equivalent = this.semanticEquivalent(existing.studyLanguageSourceLabel, updates.studyLanguageSourceLabel);
-      result.studyLanguageReferenceId = equivalent ? existing.studyLanguageReferenceId ?? null : null;
-      result.studyLanguageResolutionStatus = equivalent ? existing.studyLanguageResolutionStatus ?? 'UNRESOLVED' : 'UNRESOLVED';
+      result.studyLanguageReferenceId = equivalent ? (existing.studyLanguageReferenceId ?? null)
+        : null;
+      result.studyLanguageResolutionStatus = equivalent ? (existing.studyLanguageResolutionStatus ?? 'UNRESOLVED')
+        : 'UNRESOLVED';
     } else {
       delete result.studyLanguageReferenceId;
       delete result.studyLanguageResolutionStatus;
@@ -540,7 +554,7 @@ export class AdminScholarshipUseCases {
   }
 
   private semanticFingerprint(values: readonly unknown[]): string {
-    return values.map(value => this.semanticNormalize(value)).join('\u001f');
+    return values.map((value) => this.semanticNormalize(value)).join('\u001f');
   }
 
   private isNonSingleCountryScope(scope: unknown): boolean {
@@ -550,14 +564,18 @@ export class AdminScholarshipUseCases {
 
   private isExplicitSingleCountryScope(scope: unknown): boolean {
     const normalized = this.semanticNormalize(scope).replace(/[\s-]+/gu, '_');
-    return !normalized || new Set(['single_country', 'country', 'specific_country', 'national', 'domestic']).has(normalized);
+    return (
+      !normalized || new Set(['single_country', 'country', 'specific_country', 'national', 'domestic']).has(normalized,
+      )
+    );
   }
 
   private countrySemanticsCompatible(oldLabel: unknown, oldScope: unknown, nextLabel: unknown, nextScope: unknown): boolean {
     if (this.isNonSingleCountryScope(nextScope) || this.isNonSingleCountryScope(oldScope)) return false;
     if (!this.semanticEquivalent(oldLabel, nextLabel)) return false;
-    return this.semanticEquivalent(oldScope, nextScope) ||
-      (this.isExplicitSingleCountryScope(oldScope) && this.isExplicitSingleCountryScope(nextScope));
+    return (
+      this.semanticEquivalent(oldScope, nextScope) ||
+      (this.isExplicitSingleCountryScope(oldScope) && this.isExplicitSingleCountryScope(nextScope)));
   }
 
   private catalogCompleteness(
@@ -575,8 +593,8 @@ export class AdminScholarshipUseCases {
     const requiredDocumentItems = merged('requiredDocumentItems') ?? [];
     const sourceEvidence = merged('sourceEvidence') ?? [];
     const internationalTests = [
-      ...eligibilityItems.filter(item => Boolean(item.internationalTestId)),
-      ...requiredDocumentItems.filter(item => Boolean(item.internationalTestId)),
+      ...eligibilityItems.filter((item) => Boolean(item.internationalTestId)),
+      ...requiredDocumentItems.filter((item) => Boolean(item.internationalTestId)),
     ];
 
     const sourceTraceable = Boolean(
@@ -585,7 +603,7 @@ export class AdminScholarshipUseCases {
       merged('officialWebsite') ||
       merged('applicationUrl') ||
       merged('applicationLink') ||
-      sourceEvidence.some(item => Boolean(item.sourceUrl)),
+      sourceEvidence.some((item) => Boolean(item.sourceUrl)),
     );
 
     const deadline = merged('applicationDeadline');
@@ -597,17 +615,17 @@ export class AdminScholarshipUseCases {
       isFullyFunded: merged('isFullyFunded'),
       extractedFundingTypeCode: merged('fundingTypeCode'),
       studyCountry: merged('countrySourceLabel') ?? undefined,
-      extractedDegreeLevels: degreeTargets.map(item => item.sourceLabel ?? item.degreeLevelId ?? '').filter(Boolean),
+      extractedDegreeLevels: degreeTargets.map((item) => item.sourceLabel ?? item.degreeLevelId ?? '').filter(Boolean),
       applicationDeadline: deadline instanceof Date ? deadline.toISOString() : deadline ? String(deadline) : undefined,
       officialSourceUrl: merged('officialSourceUrl') ?? undefined,
       sourceUrl: merged('sourceUrl') ?? undefined,
       officialWebsite: merged('officialWebsite') ?? undefined,
       applicationLink: merged('applicationUrl') ?? undefined,
-      eligibleMajorsOrFields: (merged('majorTargets') ?? []).map(item => item.sourceLabel ?? item.majorId ?? '').filter(Boolean),
+      eligibleMajorsOrFields: (merged('majorTargets') ?? []).map((item) => item.sourceLabel ?? item.majorId ?? '').filter(Boolean),
       studyLanguage: merged('studyLanguageSourceLabel') ?? undefined,
       amountMinorUnits: merged('amountMinorUnits') ?? undefined,
       amountCurrencyCode: merged('amountCurrencyCode') ?? undefined,
-      duration: benefits.map(item => item.durationText ?? '').filter(Boolean).join(' '),
+      duration: benefits.map((item) => item.durationText ?? '').filter(Boolean).join(' '),
       metadata: {
         fundingTypeCode: merged('fundingTypeCode'),
         benefits,
@@ -623,14 +641,16 @@ export class AdminScholarshipUseCases {
   }
 
   private unresolvedLinks(scholarship: ScholarshipDto): Array<{
-    area: 'COUNTRY' | 'STUDY_LANGUAGE' | 'CURRENCY' | 'DEGREE' | 'MAJOR' | 'UNIVERSITY' | 'ACADEMIC_PROGRAM' | 'INTERNATIONAL_TEST';
+    area:
+      | 'COUNTRY' | 'STUDY_LANGUAGE' | 'CURRENCY' | 'DEGREE' | 'MAJOR' | 'UNIVERSITY' | 'ACADEMIC_PROGRAM' | 'INTERNATIONAL_TEST';
     key: string;
     rawValue: string | null;
     canonicalId: string | null;
     resolutionStatus: string;
   }> {
     const result: Array<{
-      area: 'COUNTRY' | 'STUDY_LANGUAGE' | 'CURRENCY' | 'DEGREE' | 'MAJOR' | 'UNIVERSITY' | 'ACADEMIC_PROGRAM' | 'INTERNATIONAL_TEST';
+      area:
+        | 'COUNTRY' | 'STUDY_LANGUAGE' | 'CURRENCY' | 'DEGREE' | 'MAJOR' | 'UNIVERSITY' | 'ACADEMIC_PROGRAM' | 'INTERNATIONAL_TEST';
       key: string;
       rawValue: string | null;
       canonicalId: string | null;
@@ -710,7 +730,7 @@ export class AdminScholarshipUseCases {
       domain: 'SCHOLARSHIPS', aggregateType: 'SCHOLARSHIP', aggregateId: id, action, context,
       auditMetadata: { reason: context.reason.trim(), previousRevision: context.expectedRevision ?? null },
       outbox: { metadata: { reason: context.reason.trim(), previousRevision: context.expectedRevision ?? null } },
-    }, async transaction => {
+    }, async (transaction) => {
       const owner = repository.withTransaction!(transaction);
       if (action !== 'SCHOLARSHIP_CREATED') {
         if (!owner.assertCurrentRevision) throw new Error('SCHOLARSHIP_REVISION_LOCK_NOT_CONFIGURED');
@@ -726,7 +746,7 @@ export class AdminScholarshipUseCases {
     lifecycle: { workflowStatus?: ScholarshipStatus; publicationStatus?: ScholarshipPublicationStatus },
     context?: ScholarshipMutationContext,
   ): Promise<void> {
-    return this.mutate(action, id, context, repository => {
+    return this.mutate(action, id, context, (repository) => {
       if (repository.updateLifecycle) return repository.updateLifecycle(id, lifecycle);
       // Temporary source-only compatibility for old adapters; real Prisma persistence always uses canonical fields.
       if (lifecycle.workflowStatus) return repository.updateStatus(id, lifecycle.workflowStatus);

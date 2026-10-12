@@ -1,7 +1,11 @@
 import type { StudentWorkspaceIntegrationEventDto } from './StudentIntegrationEvent';
 
 export const STUDENT_OWNER_EVENT_TYPES: Readonly<Record<string, readonly string[]>> = {
-  AUTHORIZATION: ['StudentIdentityCreated'],
+  AUTHORIZATION: ['StudentIdentityCreated',
+    'StudentIdentityActivated',
+    'StudentIdentitySuspended',
+    'StudentIdentityArchived',
+  ],
   IDENTITY: ['StudentIdentityCreated', 'StudentIdentityActivated', 'StudentIdentitySuspended', 'StudentIdentityArchived'],
   COURSES: ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'],
   CERTIFICATES: ['CertificateIssued', 'CertificateRevoked', 'CertificateReissued', 'CertificateRenewed', 'CertificateExpired', 'CertificateArtifactsRendered', 'CertificateArchived'],
@@ -30,7 +34,7 @@ export function assertStudentIntegrationEvent(event: StudentWorkspaceIntegration
       ? ['certificateId','publicId','serialNumber','verificationCode','status','courseDisplayName','issuedAt','expiresAt','replacesCertificateId','certificatePdfAssetId','previewImageAssetId']
       : ['roleId','oldStatus','newStatus'];
   const allowed=new Set([...fields,'studentReferenceId','identityId','correlationId','causationId']);
-  if(Object.keys(metadata).some(field=>!allowed.has(field))) invalid();
+  if(Object.keys(metadata).some((field) =>!allowed.has(field))) invalid();
   for (const field of ['studentReferenceId', 'identityId']) {
     if (metadata[field] !== undefined && metadata[field] !== event.studentReferenceId) invalid();
   }

@@ -8,7 +8,7 @@ import {
   IStudentSavedItemHydrationGateway,
   IUniversityRepository,
   MajorStatus,
-  ScholarshipPublicationStatus,
+  isPublicScholarshipOwner,
   ServiceStatus,
   CourseStatus,
   StudentSavedItemDto,
@@ -24,7 +24,8 @@ export class MajorStudentSavedItemHydrationGateway implements IStudentSavedItemH
   async hydrate(item: StudentSavedItemDto) {
     const path = (item.entitySlug ?? item.entityId).split('/');
     const major =
-      (await this.majors.findById(item.entityId)) ?? (await this.majors.findBySlug(path[0]));
+      (await this.majors.findById(item.entityId)) ??
+      (await this.majors.findByPublicId?.(item.entityId)) ?? (await this.majors.findBySlug(path[0]));
     if (!major) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     const profiles = (await this.majors.listLevelProfiles?.(major.id)) ?? major.profiles ?? [];
     const profile = path[1]
@@ -53,6 +54,7 @@ export class UniversityStudentSavedItemHydrationGateway implements IStudentSaved
   async hydrate(item: StudentSavedItemDto) {
     const university =
       (await this.universities.findById(item.entityId)) ??
+      (await this.universities.findPublishedByPublicIds?.([item.entityId]))?.[0] ??
       (await this.universities.findBySlug(item.entitySlug ?? item.entityId));
     if (!university)
       return { ownerType: item.entityType, ownerId: item.entityId, available: false };
@@ -76,6 +78,7 @@ export class ScholarshipStudentSavedItemHydrationGateway implements IStudentSave
   async hydrate(item: StudentSavedItemDto) {
     const scholarship =
       (await this.scholarships.findById(item.entityId)) ??
+      (await this.scholarships.findByPublicId?.(item.entityId)) ??
       (await this.scholarships.findBySlug(item.entitySlug ?? item.entityId));
     if (!scholarship)
       return { ownerType: item.entityType, ownerId: item.entityId, available: false };
@@ -86,7 +89,9 @@ export class ScholarshipStudentSavedItemHydrationGateway implements IStudentSave
       slug: scholarship.slug,
       displayName: scholarship.displayName,
       lifecycleStatus: scholarship.publicationStatus ?? scholarship.status,
-      available: scholarship.publicationStatus === ScholarshipPublicationStatus.PUBLISHED,
+      available:
+        isPublicScholarshipOwner(scholarship) &&
+        (await this.scholarships.findPublishedBySlug(scholarship.slug))?.id === scholarship.id,
     };
   }
 }
@@ -102,11 +107,11 @@ export class CmsStudentSavedItemHydrationGateway implements IStudentSavedItemHyd
       (await this.cms.findContentBySlug(item.entitySlug ?? item.entityId));
     if (!content) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     const published = await this.cms.getPublishedBySlug(
-      item.entitySlug ?? content.slug,
+      content.slug,
       undefined,
       content.siteIdentifier,
     );
-    if (!published)
+    if (!published || published.contentId !== content.id)
       return {
         ownerType: item.entityType,
         ownerId: item.entityId,
@@ -118,7 +123,7 @@ export class CmsStudentSavedItemHydrationGateway implements IStudentSavedItemHyd
       };
     return {
       ownerType: item.entityType,
-      ownerId: item.entityId,
+      ownerId: content.id,
       publicId: published.publicId,
       slug: published.slug,
       displayName: published.title,
@@ -140,7 +145,7 @@ export class ServiceStudentSavedItemHydrationGateway implements IStudentSavedIte
     if (!service) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     return {
       ownerType: item.entityType,
-      ownerId: item.entityId,
+      ownerId: service.id,
       publicId: service.publicId,
       slug: service.slug,
       displayName: service.displayName,
@@ -158,6 +163,7 @@ export class CourseStudentSavedItemHydrationGateway implements IStudentSavedItem
   async hydrate(item: StudentSavedItemDto) {
     const course =
       (await this.courses.findById(item.entityId)) ??
+      (await this.courses.findByPublicId(item.entityId)) ??
       (await this.courses.findBySlug(item.entitySlug ?? item.entityId));
     if (!course) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     return {

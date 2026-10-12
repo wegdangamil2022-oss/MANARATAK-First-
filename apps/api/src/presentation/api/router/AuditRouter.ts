@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { AuditRecord } from '@manaratak/domain';
+import { AuditRecord, type AuthorizationEvaluatorService } from '@manaratak/domain';
+import { dashboardActivityProjection } from '../../dashboard/DashboardActivityProjection.js';
 import { ManageAuditRecordsUseCase } from '@manaratak/application';
 import { problemDetails } from '../../http/ProblemDetails.js';
 
@@ -86,8 +87,10 @@ function dto(record: AuditRecord) {
 export class AuditRouter {
   public static create({
     manageAuditRecordsUseCase,
+    authEvaluatorService,
   }: {
     manageAuditRecordsUseCase: ManageAuditRecordsUseCase;
+    authEvaluatorService?: AuthorizationEvaluatorService;
   }): Router {
     const router = Router();
     router.use((_req, res, next) => {
@@ -104,6 +107,23 @@ export class AuditRouter {
         .parse(!range.from || !range.until || range.from <= range.until);
       return range;
     };
+
+    router.get('/dashboard-activity', async (req, res) => {
+      if (!req.authUserId) return res.status(401).json({ error: 'SESSION_REQUIRED' });
+      if (!authEvaluatorService) return res.status(503).json({ error: 'SOURCE_UNAVAILABLE' });
+      try {
+        z.object({}).strict().parse(req.query);
+        const feed = await dashboardActivityProjection(manageAuditRecordsUseCase, async (permission, targetId, targetType) =>
+          (await authEvaluatorService.evaluatePermission(req.authUserId!, permission, {
+            resourceId: targetId, targetId, targetType, requestTime: new Date(), ip: req.ip,
+          })).isGranted);
+        if (feed.availability === 'FORBIDDEN') return res.status(403).json({ error: 'ACCESS_DENIED' });
+        if (feed.availability === 'UNAVAILABLE') return res.status(503).json({ error: 'SOURCE_UNAVAILABLE' });
+        return res.json(feed);
+      } catch (error) {
+        return res.status(error instanceof z.ZodError ? 400 : 503).json({ error: error instanceof z.ZodError ? 'QUERY_INVALID' : 'SOURCE_UNAVAILABLE' });
+      }
+    });
 
     router.get('/records', async (req, res, next) => {
       try {

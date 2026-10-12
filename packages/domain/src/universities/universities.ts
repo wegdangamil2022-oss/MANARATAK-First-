@@ -17,7 +17,7 @@ export enum UniversityImportCompletenessState {
 }
 
 export type UniversityTranslationReviewStatus =
-  | 'NEEDS_REVIEW'
+  'NEEDS_REVIEW'
   | 'APPROVED'
   | 'PUBLISHED'
   | 'REJECTED';
@@ -343,6 +343,20 @@ export interface IUniversityRepository {
   listPublished(
     filters: PublicUniversityFilters,
   ): Promise<PaginatedUniversityResult<UniversityDto>>;
+  listPublishedProgramGraph?(filters: {
+    countryReferenceId?: string;
+    universityId?: string;
+    majorId?: string;
+    degreeLevelId?: string;
+    cursor?: string;
+    limit?: number;
+  }): Promise<{
+    data: PublishedAcademicProgramReadModel[];
+    total: number;
+    majorTotal: number;
+    hasMore: boolean;
+    nextCursor: string | null;
+  }>;
   listOrganizationUnits?(filters: UniversityOrganizationUnitFilters): Promise<PaginatedUniversityOrganizationUnitResult>;
   findPublishedByPublicIds?(publicIds: string[]): Promise<UniversityDto[]>;
   findPublishedByIds?(ids: string[]): Promise<UniversityDto[]>;
@@ -495,7 +509,19 @@ export class UniversityDeduplicationService {
 
 
 export interface UniversityProgramAdmissionRequirementReadDto {
-  internationalTest?: { displayName: string; canonicalName: string; slug: string; status: string };
+  internationalTest?: { displayName: string; canonicalName: string; slug: string; status: string;
+    currentPublishedVersion?: {
+      id: string;
+      status: string;
+      scoreScales?: Array<{ overallMinimum?: number | null; overallMaximum?: number | null }>;
+    } | null;
+  };
+  testVariant?: { testId: string; isActive: boolean } | null;
+  testVersion?: {
+    testId: string;
+    status: string;
+    scoreScales?: Array<{ overallMinimum?: number | null; overallMaximum?: number | null }>;
+  } | null;
   id: string;
   academicProgramId: string;
   internationalTestId: string;

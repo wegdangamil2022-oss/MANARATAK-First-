@@ -222,3 +222,6 @@ export * from './import-foundation/contracts/ISourceAccessAuthority';
 export * from './background-jobs/handlers/ServiceMaintenanceBackgroundJobHandler';
 
 export * from "./background-jobs/handlers/CareerMaintenanceBackgroundJobHandler";
+
+export * from './integration/IntegrationRegistry';
+export * from './integration/CrossModuleIntegrityReport';

@@ -394,3 +394,5 @@ export * from './majors/PublicMajorProjection';
 export * from './majors/MajorReviewTemplate';
 
 export * from './reference-data/dto/ReferenceOwnerReviewContracts';
+
+export * from './public-boundaries/PublicOwnerPolicy';

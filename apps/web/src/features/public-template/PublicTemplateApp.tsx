@@ -198,7 +198,7 @@ export default function App() {
       directRouteRequest.current = requestKey;
       void request().catch(() => {
         // A direct owner URL that no longer exists degrades to its public list without inventing fallback data.
-        const category = section === 'international-tests' ? 'exams' : section === 'careers' ? 'jobs' : section as CategoryType;
+        const category = section === 'international-tests' ? 'exams' : section === 'careers' ? 'jobs' : (section as CategoryType);
         finish({ activeTab: section === 'tools' ? 'ai-tools' : 'search', selectedCategory: category || 'all' });
       });
     };
@@ -390,7 +390,7 @@ export default function App() {
 
   const [notifications, setNotifications] = useState<PushNotificationItem[]>(() => {
     if (publicDataMode !== 'prototype') return [];
-    return readStoredArray<PushNotificationItem>('manaratak_notifications', INITIAL_NOTIFICATIONS).filter((item, index, list) => !item.title.includes('مرحباً بك في منصة منارتك') || list.findIndex(candidate => candidate.title.includes('مرحباً بك في منصة منارتك')) === index).map(item => item.title.includes('مرحباً بك في منصة منارتك') ? {...item, id: 'welcome-v29', actionType: undefined, targetId: undefined, body: 'هذه معاينة محلية للإشعارات. ستُفعّل التنبيهات الحقيقية بعد ربط الخدمة.'} : item);
+    return readStoredArray<PushNotificationItem>('manaratak_notifications', INITIAL_NOTIFICATIONS).filter((item, index, list) => !item.title.includes('مرحباً بك في منصة منارتك') || list.findIndex((candidate) => candidate.title.includes('مرحباً بك في منصة منارتك')) === index).map((item) => item.title.includes('مرحباً بك في منصة منارتك') ? {...item, id: 'welcome-v29', actionType: undefined, targetId: undefined, body: 'هذه معاينة محلية للإشعارات. ستُفعّل التنبيهات الحقيقية بعد ربط الخدمة.'} : item);
   });
 
   // Modal Dialogs
@@ -404,7 +404,7 @@ export default function App() {
     const request = ++majorDetailRequest.current;
     setSelectedMajorState(item);
     if (item?.slug && publicDataMode === 'api' && !item.contentSections?.length) {
-      void ApiClient.getMajorBySlug(item.slug, undefined, item.degreeLevelName).then(dto => {
+      void ApiClient.getMajorBySlug(item.slug, undefined, item.degreeLevelName).then((dto) => {
         if (request === majorDetailRequest.current) setSelectedMajorState(mapPublicMajorDto(dto));
       }).catch(() => { if (request === majorDetailRequest.current) setSelectedMajorState(null); });
     }
@@ -436,7 +436,8 @@ export default function App() {
   const [selectedService, setSelectedService] = navigation.field('selectedService');
   useEffect(() => {
     if (publicDataMode !== 'api' || !selectedService || !['ready', 'empty'].includes(publicLive.statuses.services)) return;
-    const current = services.find(service => service.id === selectedService.id || service.publicId === selectedService.publicId);
+    const current = services.find(
+      (service) => service.id === selectedService.id || service.publicId === selectedService.publicId);
     if (!current) {
       setSelectedService(null);
       setAccessDeniedMessage('هذه الخدمة لم تعد منشورة للعامة.');
@@ -475,12 +476,14 @@ export default function App() {
     universitySlug: selectedUniversity?.slug || (selectedUniversity ? selectedUniversity.id : undefined),
     scholarshipSlug: selectedScholarship?.slug || (selectedScholarship ? selectedScholarship.id : undefined),
     countryIso2Code: activeCountryForGraph?.iso2Code,
+    locale: language,
   });
 
   const byIdentity = <T extends { id: string; publicId?: string; slug?: string; ownerId?: string }>(items: T[], identity: string): T | undefined =>
     items.find((item) => item.id === identity || item.publicId === identity || item.slug === identity || item.ownerId === identity);
 
-  const graphIdentityTarget = <T extends { id: string; publicId?: string; slug?: string; ownerId?: string }>(
+  const graphIdentityTarget = <T extends { id: string; publicId?: string; slug?: string; ownerId?: string },
+  >(
     items: T[],
     identity: string,
     graphIdentities: Array<{ ownerId: string; publicId?: string; slug?: string }> = [],
@@ -787,9 +790,10 @@ export default function App() {
   // Initial welcome push after 2.5 seconds
   useEffect(() => {
     if (publicDataMode !== 'prototype') return;
-    if (notifications.some(item => item.id === 'welcome-v29' || item.title.includes('مرحباً بك في منصة منارتك'))) return;
+    if (notifications.some(
+        (item) => item.id === 'welcome-v29' || item.title.includes('مرحباً بك في منصة منارتك'))) return;
     const timer = setTimeout(() => {
-      setNotifications(previous => previous.some(item => item.id === 'welcome-v29') ? previous : [{
+      setNotifications((previous) => previous.some((item) => item.id === 'welcome-v29') ? previous : [{
         id: 'welcome-v29', timestamp: 'الآن', read: false,
         title: 'مرحباً بك في منصة منارتك للفرص التعليمية!',
         body: 'هذه معاينة محلية للإشعارات. ستُفعّل التنبيهات الحقيقية بعد ربط الخدمة.',
@@ -843,15 +847,18 @@ export default function App() {
 
   const makeFavoriteKey = (kind: FavoriteKind, id: string): FavoriteKey => `${kind}:${id}` as FavoriteKey;
 
-  const liveSavedItemType = (kind: FavoriteKind): string | null => ({
+  const liveSavedItemType = (kind: FavoriteKind): string | null => (
+      ({
     scholarship: 'SCHOLARSHIP', university: 'UNIVERSITY', major: 'MAJOR', course: 'COURSE',
     article: 'CMS_CONTENT', service: 'SERVICE', tool: 'STUDENT_TOOL', exam:'INTERNATIONAL_TEST',
-  } as Partial<Record<FavoriteKind, string>>)[kind] ?? null;
+  }) as Partial<Record<FavoriteKind, string>>)[kind] ?? null;
 
-  const favoriteKindFromSavedType = (entityType: string): FavoriteKind | null => ({
+  const favoriteKindFromSavedType = (entityType: string): FavoriteKind | null =>
+    (
+      ({
     SCHOLARSHIP: 'scholarship', UNIVERSITY: 'university', MAJOR: 'major', COURSE: 'course',
     CMS_CONTENT: 'article', SERVICE: 'service', STUDENT_TOOL: 'tool', INTERNATIONAL_TEST:'exam',
-  } as Record<string, FavoriteKind>)[entityType] ?? null;
+  }) as Record<string, FavoriteKind>)[entityType] ?? null;
 
   const favoriteIdsFor = (kind: FavoriteKind): string[] => {
     const prefix = `${kind}:`;
@@ -864,7 +871,9 @@ export default function App() {
   const handleToggleFavorite = async (kind: FavoriteKind, id: string) => {
     const key = makeFavoriteKey(kind, id);
     if (publicDataMode === 'prototype') {
-      setFavoriteKeys((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]));
+      setFavoriteKeys((prev) =>
+        prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key],
+      );
       return;
     }
     const entityType = liveSavedItemType(kind);
@@ -886,7 +895,7 @@ export default function App() {
         setFavoriteKeys((prev) => prev.filter((item) => item !== key));
       } else {
         await ApiClient.createMyStudentSavedItem({ entityType, entityId: id, entitySlug: id, metadata: { source: 'public-discovery' } });
-        setFavoriteKeys((prev) => prev.includes(key) ? prev : [...prev, key]);
+        setFavoriteKeys((prev) => (prev.includes(key) ? prev : [...prev, key]));
       }
     } catch (error) {
       triggerInstantPush({ title: 'تعذر تحديث العناصر المحفوظة', body: error instanceof Error ? error.message : 'حاول مرة أخرى.', type: 'system' });
@@ -983,6 +992,16 @@ export default function App() {
 
   return (
     <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
+      {(publicGraph.error ||
+        publicGraph.stale ||
+        publicGraph.partial ||
+        Boolean(publicGraph.routeUnavailableCount)) && (
+        <p role="status" className="px-4 py-2 text-sm bg-amber-50 text-amber-900">
+          {language === 'ar'
+            ? 'العلاقات المعروضة جزئية أو تحتاج تحديثًا؛ قد تتعذر بعض روابط التنقل.'
+            : 'Relationships are partial or need refreshing; some navigation links may be unavailable.'}
+        </p>
+      )}
       {/* App Header (Top Sticky) */}
       <Header
         language={language}
@@ -1606,7 +1625,8 @@ export default function App() {
                         onSelectCourse={(course) => {
                           const isImported = course.provider?.includes('Stanford') || course.provider?.includes('Harvard') || course.provider?.includes('Google') || course.provider?.includes('عالمية');
                           if (isImported) {
-                            const matching = importedCourses.find((ic) => ic.id === course.id || ic.slug === course.id) || {
+                            const matching = importedCourses.find((ic) => ic.id === course.id || ic.slug === course.id) ||
+                                ({
                               id: course.id,
                               slug: course.id,
                               title: course.title,
@@ -1622,8 +1642,8 @@ export default function App() {
                               url: 'https://www.coursera.org',
                               platform: 'Coursera / edX',
                               description: course.courseContent || course.title,
-                            } as any;
-                            setSelectedCourse(null);
+                            } as any);
+                              setSelectedCourse(null);
                             setSelectedImportedCourse(matching);
                             navigate({
                               activeTab: 'search',
@@ -1997,8 +2017,8 @@ export default function App() {
                     <CoursesList courses={courses} />
                   ) : selectedCategory === 'articles' ? (
                     <div className="pt-2">
-                      <FeaturedArticles articles={articles} onViewAllClick={() => openSection('articles')} onSelectArticle={id => {
-                        const article = articles.find(item => item.id === id);
+                      <FeaturedArticles articles={articles} onViewAllClick={() => openSection('articles')} onSelectArticle={(id) => {
+                        const article = articles.find((item) => item.id === id);
                         if (article) setSelectedArticle(article);
                       }} />
                     </div>
@@ -2143,9 +2163,7 @@ export default function App() {
             )}
 
             {/* TAB 3: FAVORITES VIEW */}
-            {activeTab === 'favorites' && (
-              <LiveStudentWorkspacePage initialTab="VAULT" />
-            )}
+            {activeTab === 'favorites' && <LiveStudentWorkspacePage initialTab="VAULT" />}
 
             {/* TAB 4: SMART AI TOOLS VIEW */}
             {activeTab === 'ai-tools' && (
@@ -2173,9 +2191,7 @@ export default function App() {
             )}
 
             {/* TAB: STUDENT WORKSPACE / P15 LIVE API OR EXPLICIT PROTOTYPE */}
-            {activeTab === 'account' && (
-              <LiveStudentWorkspacePage />
-            )}
+            {activeTab === 'account' && <LiveStudentWorkspacePage />}
 
             {activeTab === 'auth' && (
               <LiveStudentAuthPage onAuthenticated={(_destination, identity) => {
@@ -2193,9 +2209,7 @@ export default function App() {
                 window.history.replaceState({...window.history.state}, '', '/student');
               }} />
             )}
-        {activeTab === 'tracker' && (
-          <LiveStudentWorkspacePage initialTab="JOURNEY" />
-        )}
+        {activeTab === 'tracker' && <LiveStudentWorkspacePage initialTab="JOURNEY" />}
           </>
         )}
         </React.Suspense>
@@ -2234,7 +2248,8 @@ export default function App() {
       />
 
       {/* Push Notification Center & Dropdown Toast */}
-      {publicDataMode === 'prototype' && <PushNotificationCenter
+      {publicDataMode === 'prototype' && (
+        <PushNotificationCenter
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
         notifications={notifications}
@@ -2258,7 +2273,8 @@ export default function App() {
         }}
         activeToast={activeToast}
         onDismissToast={() => setActiveToast(null)}
-      />}
+      />
+      )}
 
       {/* Access Denied Toast Notification */}
       {accessDeniedMessage && (

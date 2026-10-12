@@ -9,7 +9,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
   private include = { checklist: { orderBy: { position: 'asc' } } } as const;
 
   async create(data:CreateStudentApplicationTrackerDto):Promise<StudentApplicationTrackerDto>{
-    const labels=(data.checklistLabels??[]).map(x=>x.trim()).filter(Boolean).slice(0,25);
+    const labels=(data.checklistLabels??[]).map((x) =>x.trim()).filter(Boolean).slice(0,25);
     return this.db.$transaction(async(tx:any)=>{
       const key={studentReferenceId:data.studentReferenceId,scholarshipId:data.scholarshipId};
       const existing=await tx.studentApplicationTracker.findUnique({where:{studentReferenceId_scholarshipId:key}});
@@ -105,6 +105,47 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
     };
   }
 
+  async listOwnerReconciliationPage(cursor?: string, limit = 50) {
+    const take = Math.min(50, Math.max(1, Math.trunc(limit)));
+    const rows = await this.db.studentApplicationTracker.findMany({
+      where: { status: 'ACTIVE', ...(cursor ? { id: { gt: cursor } } : {}) },
+      orderBy: { id: 'asc' },
+      take: take + 1,
+      select: { id: true, studentReferenceId: true, scholarshipId: true, version: true },
+    });
+    const items = rows.slice(0, take);
+    return { items, nextCursor: rows.length > take ? items.at(-1).id : null };
+  }
+  async reconcileOwnerFacts(
+    studentReferenceId: string,
+    trackerId: string,
+    expectedVersion: number,
+    owner: { scholarshipId: string; slug: string | null; deadlineAt: Date | null },
+  ): Promise<boolean> {
+    return this.db.$transaction(async (tx: any) => {
+      const current = await tx.studentApplicationTracker.findFirst({
+        where: { id: trackerId, studentReferenceId, status: 'ACTIVE' },
+      });
+      if (!current) return false;
+      if (current.scholarshipId !== owner.scholarshipId)
+        throw new Error('STUDENT_TRACKER_OWNER_RECONCILIATION_MISMATCH');
+      if (
+        (current.deadlineAt?.toISOString() ?? null) === (owner.deadlineAt?.toISOString() ?? null) &&
+        current.scholarshipSlug === owner.slug
+      )
+        return false;
+      if (current.version !== expectedVersion)
+        throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');
+      await this.cas(tx, current, { deadlineAt: owner.deadlineAt, scholarshipSlug: owner.slug });
+      const row = await tx.studentApplicationTracker.findFirst({
+        where: { id: trackerId, studentReferenceId },
+        include: this.include,
+      });
+      await this.queueReminder(tx, row, current.version, { previousDeadlineAt: current.deadlineAt?.toISOString() ?? null, previousScholarshipSlug: current.scholarshipSlug ?? null });
+      return true;
+    });
+  }
+
   async list(studentReferenceId:string):Promise<StudentApplicationTrackerDto[]> { return (await this.db.studentApplicationTracker.findMany({where:{studentReferenceId},orderBy:{updatedAt:'desc'},include:this.include})).map((r:any)=>this.dto(r)); }
   async findById(studentReferenceId:string,trackerId:string):Promise<StudentApplicationTrackerDto|null>{ const row=await this.db.studentApplicationTracker.findFirst({where:{id:trackerId,studentReferenceId},include:this.include}); return row?this.dto(row):null; }
   async update(studentReferenceId:string,trackerId:string,data:UpdateStudentApplicationTrackerDto):Promise<StudentApplicationTrackerDto>{
@@ -124,7 +165,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
     });
   }
   private async cas(tx:any,current:any,data:Record<string,unknown>):Promise<void>{ const result=await tx.studentApplicationTracker.updateMany({where:{id:current.id,studentReferenceId:current.studentReferenceId,version:current.version,status:'ACTIVE'},data:{...data,version:{increment:1}}}); if(result.count!==1) throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT'); }
-  private async queueReminder(tx:any,row:any,previousVersion:number|null):Promise<void>{
+  private async queueReminder(tx:any,row:any,previousVersion:number|null, ownerHistory?: { previousDeadlineAt: string | null; previousScholarshipSlug: string | null }):Promise<void>{
     const eventType=row.status==='DELETED'?'StudentApplicationTrackerDeleted':
       row.status==='ARCHIVED'?'StudentApplicationTrackerArchived':
       previousVersion===null?'StudentApplicationTrackerCreated':'StudentApplicationTrackerUpdated';
@@ -145,7 +186,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
       id:randomUUID(),studentReferenceId:row.studentReferenceId,
       eventType,title:'تغيرت حالة متابعة التقديم',
       sourceDomain:'STUDENT_APPLICATIONS',sourceReferenceId:row.id,
-      metadata:{version:row.version,status:row.status},
+      metadata:{version:row.version,status:row.status,...(ownerHistory ? { ownerReconciliation: { ...ownerHistory, deadlineAt: row.deadlineAt?.toISOString() ?? null, scholarshipSlug: row.scholarshipSlug ?? null } } : {})},
       occurredAt:new Date(),
     }});
     await tx.transactionalOutboxRecord.create({data:{

@@ -1,8 +1,10 @@
-import { UniversityAcademicProgramAuthoringInput, UniversityNormalizedDetailsUpdate } from '@manaratak/domain';
+import {
+  isPublicAdmissionRequirement,
+  UniversityAcademicProgramAuthoringInput, UniversityNormalizedDetailsUpdate } from '@manaratak/domain';
 import type { PrismaClient } from '@prisma/client';
 
 export type UniversityRelationshipValidationClient = Pick<PrismaClient,
-  'referenceCountry' | 'administrativeRegion' | 'referenceCity' | 'degreeLevel' |
+  | 'referenceCountry' | 'administrativeRegion' | 'referenceCity' | 'degreeLevel' |
   'major' | 'majorLevelProfile' | 'referenceCurrency' | 'internationalTest' | 'internationalTestVariant' |
   'internationalTestVersion' | 'universityOrganizationUnit' | 'universityCampus'>;
 
@@ -23,8 +25,8 @@ export class UniversityCanonicalRelationshipValidator {
     unique(details.organizationUnits, 'ORGANIZATION_UNIT');
     unique(details.academicPrograms, 'PROGRAM');
     const units = new Map((details.organizationUnits ?? [])
-      .filter(unit => unit.sourceReferenceId)
-      .map(unit => [unit.sourceReferenceId!, unit]));
+      .filter((unit) => unit.sourceReferenceId)
+      .map((unit) => [unit.sourceReferenceId!, unit]));
     for (const unit of details.organizationUnits ?? []) {
       if (!unit.parentSourceReferenceId) continue;
       const path = new Set<string>();
@@ -157,6 +159,32 @@ export class UniversityCanonicalRelationshipValidator {
         requirement.testVariantId ?? undefined,
         requirement.testVersionId ?? undefined,
       );
+      if (requirement.status === 'ACTIVE') {
+        const test = await this.client.internationalTest.findUnique({
+          where: { id: requirement.internationalTestId },
+          include: { currentPublishedVersion: { include: { scoreScales: true } } },
+        });
+        const variant = requirement.testVariantId
+          ? await this.client.internationalTestVariant.findUnique({
+              where: { id: requirement.testVariantId },
+            })
+          : null;
+        const version = requirement.testVersionId
+          ? await this.client.internationalTestVersion.findUnique({
+              where: { id: requirement.testVersionId },
+              include: { scoreScales: true },
+            })
+          : null;
+        if (
+          !isPublicAdmissionRequirement({
+            ...requirement,
+            internationalTest: test ?? undefined,
+            testVariant: variant,
+            testVersion: version,
+          })
+        )
+          throw new Error('UNIVERSITY_ADMISSION_TEST_PUBLIC_PROOF_REQUIRED');
+      }
     }
   }
 

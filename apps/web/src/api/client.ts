@@ -1389,7 +1389,23 @@ export interface PublicEditorialGraphIdentity {
   publishedAt: string;
 }
 
+export interface PublicGraphReadScope {
+  capturedAt: string;
+  consistency: 'LIVE_OWNER_READS';
+  collections: Record<
+    string,
+    {
+      state: 'AVAILABLE' | 'UNAVAILABLE' | 'NOT_INTEGRATED';
+      scope?: 'OWNER_QUERY' | 'PROGRAM_PAGE_SAMPLE';
+      total?: number | null;
+      hasMore?: boolean;
+      nextCursor?: string | null;
+    }
+  >;
+}
+
 export interface PublicMajorGraphDto {
+  readScope?: PublicGraphReadScope;
   subject: StablePublicGraphIdentity;
   relationships: {
     universities: PaginatedResult<StablePublicGraphIdentity & { matchingPrograms?: Array<{ ownerId: string; sourceProgramName: string; degreeLevelId?: string | null; majorOwnerId: string }> }>;
@@ -1400,6 +1416,7 @@ export interface PublicMajorGraphDto {
 }
 
 export interface PublicUniversityGraphDto {
+  readScope?: PublicGraphReadScope;
   subject: StablePublicGraphIdentity;
   countryOwnerId?: string | null;
   relationships: {
@@ -1411,6 +1428,7 @@ export interface PublicUniversityGraphDto {
 }
 
 export interface PublicScholarshipGraphDto {
+  readScope?: PublicGraphReadScope;
   subject: StablePublicGraphIdentity;
   countryOwnerId?: string | null;
   relationships: {
@@ -1422,6 +1440,7 @@ export interface PublicScholarshipGraphDto {
 }
 
 export interface PublicCountryGraphDto {
+  readScope?: PublicGraphReadScope;
   subject: StablePublicGraphIdentity & { canonicalCode: string };
   relationships: {
     universities: PaginatedResult<StablePublicGraphIdentity>;
@@ -1656,7 +1675,8 @@ async function studentCourseRequest<T>(path: string, init?: RequestInit): Promis
   return response.json() as Promise<T>;
 }
 
-export type PublicGlobalSearchKind = 'scholarships' | 'universities' | 'majors' | 'countries' | 'courses' | 'exams' | 'articles' | 'services' | 'tools' | 'jobs';
+export type PublicGlobalSearchKind =
+  | 'scholarships' | 'universities' | 'majors' | 'countries' | 'courses' | 'exams' | 'articles' | 'services' | 'tools' | 'jobs';
 export interface PublicGlobalSearchItem {
   target: { entityNamespace: string; resourceKey: string };
   score: number;
@@ -2576,26 +2596,42 @@ export class ApiClient {
     return res.json();
   }
 
-  static async getMajorGraph(slug: string, page = 1, pageSize = 12): Promise<PublicMajorGraphDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/graph/majors/${encodeURIComponent(slug)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`);
+  static async getMajorGraph(slug: string, page = 1, pageSize = 12,
+    signal?: AbortSignal,
+  ): Promise<PublicMajorGraphDto> {
+    const res = await apiFetch(`${API_BASE_URL}/public/graph/majors/${encodeURIComponent(slug)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`,
+      { signal },
+    );
     if (!res.ok) throw new Error(res.status === 404 ? 'Major graph not found' : 'Failed to fetch major graph');
     return res.json();
   }
 
-  static async getUniversityGraph(slug: string, page = 1, pageSize = 12): Promise<PublicUniversityGraphDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/graph/universities/${encodeURIComponent(slug)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`);
+  static async getUniversityGraph(slug: string, page = 1, pageSize = 12,
+    signal?: AbortSignal,
+  ): Promise<PublicUniversityGraphDto> {
+    const res = await apiFetch(`${API_BASE_URL}/public/graph/universities/${encodeURIComponent(slug)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`,
+      { signal },
+    );
     if (!res.ok) throw new Error(res.status === 404 ? 'University graph not found' : 'Failed to fetch university graph');
     return res.json();
   }
 
-  static async getScholarshipGraph(slug: string): Promise<PublicScholarshipGraphDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/graph/scholarships/${encodeURIComponent(slug)}?locale=${currentPublicLocale()}`);
+  static async getScholarshipGraph(slug: string,
+    signal?: AbortSignal,
+  ): Promise<PublicScholarshipGraphDto> {
+    const res = await apiFetch(`${API_BASE_URL}/public/graph/scholarships/${encodeURIComponent(slug)}?locale=${currentPublicLocale()}`,
+      { signal },
+    );
     if (!res.ok) throw new Error(res.status === 404 ? 'Scholarship graph not found' : 'Failed to fetch scholarship graph');
     return res.json();
   }
 
-  static async getCountryGraph(iso2Code: string, page = 1, pageSize = 12): Promise<PublicCountryGraphDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/graph/countries/${encodeURIComponent(iso2Code)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`);
+  static async getCountryGraph(iso2Code: string, page = 1, pageSize = 12,
+    signal?: AbortSignal,
+  ): Promise<PublicCountryGraphDto> {
+    const res = await apiFetch(`${API_BASE_URL}/public/graph/countries/${encodeURIComponent(iso2Code)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`,
+      { signal },
+    );
     if (!res.ok) throw new Error(res.status === 404 ? 'Country graph not found' : 'Failed to fetch country graph');
     return res.json();
   }

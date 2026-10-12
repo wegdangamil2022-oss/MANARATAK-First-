@@ -1,0 +1,41 @@
+name: Cross-module source contracts
+on:
+  pull_request:
+    paths:
+      - 'packages/domain/src/public-boundaries/**'
+      - 'packages/domain/src/universities/**'
+      - 'packages/domain/src/students/**'
+      - 'packages/application/src/integration/**'
+      - 'packages/application/src/authorization/**'
+      - 'packages/application/src/read-models/**'
+      - 'packages/application/src/students/**'
+      - 'packages/application/src/scholarships/**'
+      - 'packages/application/src/universities/**'
+      - 'packages/infrastructure/src/universities/**'
+      - 'packages/infrastructure/src/scholarships/**'
+      - 'packages/infrastructure/src/students/**'
+      - 'apps/api/src/infrastructure/**'
+      - 'apps/api/src/presentation/api/router/CrossDomainReadModelRouter.ts'
+      - 'apps/web/src/api/client.ts'
+      - 'apps/web/src/features/public-template/**'
+      - 'tests/integration/section27/**'
+      - 'scripts/verify-cross-module-source-closure.mjs'
+      - '.github/workflows/cross-module-contracts.yml'
+permissions:
+  contents: read
+jobs:
+  fixture-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      # Prisma client generation only; no schema apply or database connection.
+      - run: npm run db:generate
+        env:
+          DATABASE_URL: postgresql://fixture:fixture@localhost:5432/source_contract_only
+      - run: node scripts/verify-cross-module-source-closure.mjs

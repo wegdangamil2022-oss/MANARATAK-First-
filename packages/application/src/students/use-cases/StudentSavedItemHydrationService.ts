@@ -16,7 +16,15 @@ export class StudentSavedItemHydrationService {
       items.map(async (savedItem) => {
         const gateway = this.gateways.find((candidate) => candidate.supports(savedItem.entityType));
         try {
-          return { savedItem, owner: gateway ? await gateway.hydrate(savedItem) : null };
+          const owner = gateway ? await gateway.hydrate(savedItem) : null;
+          // A formerly-public save retains its personal snapshot; current draft labels/URLs stay private.
+          return {
+            savedItem,
+            owner:
+              owner && !owner.available
+                ? { ownerType: owner.ownerType, ownerId: owner.ownerId, available: false }
+                : owner,
+          };
         } catch {
           // A failed owner read must not hide the student's other saved records.
           // null means unknown availability, rather than an unpublished owner.

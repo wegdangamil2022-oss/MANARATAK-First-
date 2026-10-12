@@ -54,8 +54,26 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
   const isClosed = deadlineDate !== null && !Number.isNaN(deadlineDate.getTime()) && deadlineDate < now;
   const requirements = (dto.requiredDocumentItems ?? []).map((item) => item.displayName).filter(Boolean);
   const eligibility = (dto.eligibilityItems ?? []).map((item) => item.valueText).filter((item): item is string => Boolean(item));
-  const requiredTests = (dto.eligibilityItems ?? []).filter((item) => Boolean(item.internationalTestId));
-  const benefitLabels = (dto.benefits ?? []).filter(item => item.isCovered !== false).map((item) => item.valueText ?? item.benefitTypeCode).filter(Boolean);
+  const requiredTests = [
+    ...new Map(
+      [
+        ...(dto.eligibilityItems ?? []).filter((item) => Boolean(item.internationalTestId))
+          .map((item) => ({
+            internationalTestId: item.internationalTestId!,
+            valueText: item.valueText,
+            kind: 'EXAM',
+          })),
+        ...(dto.requiredDocumentItems ?? [])
+          .filter((item) => Boolean(item.internationalTestId))
+          .map((item) => ({
+            internationalTestId: item.internationalTestId!,
+            valueText: item.displayName,
+            kind: 'DOCUMENT',
+          })),
+      ].map((item) => [item.internationalTestId, item]),
+    ).values(),
+  ];
+  const benefitLabels = (dto.benefits ?? []).filter((item) => item.isCovered !== false).map((item) => item.valueText ?? item.benefitTypeCode).filter(Boolean);
   const participatingUniversities = canonicalUniversityLinks.map((link) => ({
     id: link.universityId as string,
     name: link.sourceLabel ?? 'جامعة مرتبطة',
@@ -86,11 +104,12 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
     tag: 'منحة منشورة',
     imageUrl: '',
     field: (fields.length ? fields : legacyFields).join('، '),
-    requirements: requirements.length ? [...requirements, ...eligibility] : (eligibility.length ? eligibility : toTextList(dto.eligibilityCriteria)),
+    requirements: requirements.length ? [...requirements, ...eligibility] : eligibility.length ? eligibility : toTextList(dto.eligibilityCriteria),
     description: dto.description || dto.coverageDetails || dto.eligibilityCriteria || '',
     applicationUrl: dto.applicationLink ?? dto.applicationUrl ?? dto.officialSourceUrl ?? '',
     withoutIelts: null,
-    status: deadlineDate && !Number.isNaN(deadlineDate.getTime()) ? (isClosed ? 'مغلقة' : 'مفتوحة الآن') : dto.deadlineType === 'OPEN_ALL_YEAR' ? 'مفتوحة الآن' : undefined,
+    status: deadlineDate && !Number.isNaN(deadlineDate.getTime()) ? isClosed ? 'مغلقة' : 'مفتوحة الآن'
+        : dto.deadlineType === 'OPEN_ALL_YEAR' ? 'مفتوحة الآن' : undefined,
     participatingUniversities,
     requiredExams: requiredTests.map((item) => ({
       id: item.internationalTestId as string,

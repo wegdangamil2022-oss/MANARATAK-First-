@@ -11,8 +11,9 @@ export class CrossDomainReadModelRouter {
 
     const paginationSchema = z.object({
   locale: z.enum(['ar', 'en']).default('ar'),
-      page: z.coerce.number().int().min(1).default(1),
+      page: z.coerce.number().int().min(1).max(1).default(1),
       pageSize: z.coerce.number().int().min(1).max(50).default(12),
+        programCursor: z.string().min(1).max(2048).optional(),
     }).strict();
 
     router.get('/majors/:slug', asyncHandler(async (req: Request, res: Response) => {

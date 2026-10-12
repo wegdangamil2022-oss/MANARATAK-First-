@@ -1,4 +1,5 @@
 import type {
+  IStudentApplicationScholarshipGateway,
   IIdentityRepository, IRoleAssignmentRepository, IStudentApplicationTrackerRepository,
   INotificationDeliveryEligibilityPolicy, NotificationDeliveryCandidate,
 } from '@manaratak/domain';
@@ -6,7 +7,9 @@ import type {
 /** P15 authorizes its reminder immediately before P23 delivery, using current owner facts. */
 export class StudentApplicationReminderDeliveryPolicy implements INotificationDeliveryEligibilityPolicy {
   constructor(private readonly trackers:IStudentApplicationTrackerRepository,
-    private readonly identities:IIdentityRepository,private readonly roles:IRoleAssignmentRepository) {}
+    private readonly identities:IIdentityRepository,private readonly roles:IRoleAssignmentRepository,
+    private readonly scholarships?: IStudentApplicationScholarshipGateway,
+  ) {}
   async isEligible(candidate:NotificationDeliveryCandidate):Promise<boolean> {
     if(candidate.templateId!=='student-application-deadline-v1')return true;
     const {trackerId,trackerVersion,scholarshipId,deadlineAt}=candidate.variables;
@@ -18,9 +21,17 @@ export class StudentApplicationReminderDeliveryPolicy implements INotificationDe
     if(!tracker||!tracker.deadlineAt||!deadlineAt||tracker.studentReferenceId!==candidate.recipientReference||tracker.status!=='ACTIVE'||
       tracker.version!==version||tracker.scholarshipId!==scholarshipId||
       tracker.deadlineAt?.toISOString()!==deadlineAt||tracker.deadlineAt.getTime()<=Date.now())return false;
+    if (!this.scholarships) throw new Error('STUDENT_REMINDER_SCHOLARSHIP_READER_REQUIRED');
+    const owner = await this.scholarships.resolve(tracker.scholarshipId);
+    if (
+      !owner?.available ||
+      owner.id !== tracker.scholarshipId ||
+      owner.deadlineAt?.toISOString() !== deadlineAt
+    )
+      return false;
     const identity=await this.identities.findById(candidate.recipientReference);
     if(identity?.type!=='Human'||identity.status!=='ACTIVE')return false;
     const assignments=await this.roles.findByIdentityId(candidate.recipientReference);
-    return assignments.some(role=>role.roleId==='student');
+    return assignments.some((role) =>role.roleId==='student');
   }
 }

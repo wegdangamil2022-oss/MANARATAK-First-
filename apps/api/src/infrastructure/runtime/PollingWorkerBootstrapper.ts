@@ -80,6 +80,7 @@ export function startPollingWorkers(
             await worker.runCertificatesOnce(`${workerId}-certificates`);
             await worker.runReplayOnce(`${workerId}-replay`);
             await worker.runRemindersOnce(`${workerId}-reminders`);
+            await worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`);
           });
           pollingWorkerRuntimeRegistry.success('student-workspace-outbox');
         } catch (error) {

@@ -702,6 +702,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/AIAdminRouter.ts",
+        "apps/api/src/presentation/api/router/AuditRouter.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
@@ -1300,7 +1301,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentSavedItemHydrationService"
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
       ],
       "dependencies": [
         "cmsRepository"
@@ -1688,7 +1690,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentSavedItemHydrationService"
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
       ],
       "dependencies": [
         "courseRepository"
@@ -2536,7 +2539,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentSavedItemHydrationService"
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
       ],
       "dependencies": [
         "internationalTestRepository"
@@ -2636,7 +2640,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentSavedItemHydrationService"
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
       ],
       "dependencies": [
         "majorRepository"
@@ -3826,7 +3831,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentSavedItemHydrationService"
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
       ],
       "dependencies": [
         "scholarshipRepository"
@@ -4010,7 +4016,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentSavedItemHydrationService"
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
       ],
       "dependencies": [
         "serviceCatalogRepository"
@@ -4203,6 +4210,7 @@
       "dependencies": [
         "identityRepository",
         "roleAssignmentRepository",
+        "studentApplicationScholarshipGateway",
         "studentApplicationTrackerRepository"
       ]
     },
@@ -4247,6 +4255,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
+        "studentApplicationReminderDeliveryPolicy",
         "studentApplicationTrackerUseCases"
       ],
       "dependencies": [
@@ -4273,7 +4282,9 @@
         "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "studentWorkspaceOutboxWorker"
+      ],
       "dependencies": [
         "studentApplicationScholarshipGateway",
         "studentApplicationTrackerRepository"
@@ -4620,6 +4631,7 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "studentApplicationReminderOutboxDispatcher",
+        "studentApplicationTrackerUseCases",
         "studentWorkspaceOutboxDispatcher",
         "studentWorkspaceUseCases"
       ]
@@ -4665,8 +4677,15 @@
       ],
       "dependencies": [
         "assetReferencePolicy",
+        "cmsStudentSavedItemHydrationGateway",
+        "courseStudentSavedItemHydrationGateway",
+        "internationalTestStudentSavedItemHydrationGateway",
+        "majorStudentSavedItemHydrationGateway",
+        "scholarshipStudentSavedItemHydrationGateway",
+        "serviceStudentSavedItemHydrationGateway",
         "studentWorkspaceDeliveryCache",
-        "studentWorkspaceRepository"
+        "studentWorkspaceRepository",
+        "universityStudentSavedItemHydrationGateway"
       ]
     },
     {
@@ -4836,7 +4855,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "studentSavedItemHydrationService"
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
       ],
       "dependencies": [
         "universityRepository"
