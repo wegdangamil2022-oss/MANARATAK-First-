@@ -55,7 +55,7 @@ export interface AuditRecordRow {
 
 export interface PrismaAuditRecordDelegate {
   findUnique(args: { where: { id?: string; reference?: string } }): Promise<AuditRecordRow | null>;
-  findMany(args?: { where?: unknown }): Promise<AuditRecordRow[]>;
+  findMany(args?: { where?: unknown; take?: number; orderBy?: Array<Record<string, 'asc' | 'desc'>> }): Promise<AuditRecordRow[]>;
   create(args: {
     data: Omit<AuditRecordRow, 'createdAt' | 'updatedAt'>;
   }): Promise<AuditRecordRow>;
@@ -361,6 +361,7 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
     };
   }
 
+  /** @deprecated Internal compatibility only, bounded to 100 candidates; use queryPage in runtime readers. */
   async findBy(specification: ISpecification<AuditRecord>): Promise<AuditRecord[]> {
     const criteria = (specification as any)?.criteria;
     const where: any = {};
@@ -376,7 +377,11 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
 
     const rows = await this.client.auditRecord.findMany({
       where: Object.keys(where).length > 0 ? where : undefined,
+      orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+      take: 101,
     });
+    // Refuse an incomplete legacy answer rather than silently truncating the ledger.
+    if (rows.length > 100) throw new Error('AUDIT_LEGACY_QUERY_LIMIT_EXCEEDED');
 
     const domainRecords = rows.map(row => this.mapToDomain(row));
     return domainRecords.filter(record => specification.isSatisfiedBy(record));

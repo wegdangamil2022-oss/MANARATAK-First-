@@ -225,6 +225,24 @@ export function AuthorizationRoleEditor({
           <p>
             {t('iam_member_count')}: {role.memberCount ?? t('iam_unavailable')}
           </p>
+          <p>
+            {t('iam_role_risk')}:{' '}
+            {t(
+              role.permissions.some((key) => {
+                const entry = ADMIN_PERMISSION_CATALOG.find((item) => item.key === key);
+                return !entry || entry.risk === 'CRITICAL';
+              })
+                ? 'iam_risk_critical'
+                : role.policyIds.length ||
+                    role.permissions.some((key) =>
+                      ADMIN_PERMISSION_CATALOG.some(
+                        (item) => item.key === key && item.risk === 'HIGH',
+                      ),
+                    )
+                  ? 'iam_risk_high'
+                  : 'iam_risk_standard',
+            )}
+          </p>
           {protectedRole && <p>{t('iam_protected_role')}</p>}
           <fieldset disabled={busy || protectedRole || !role.revision} className="space-y-3">
             <label className="block">

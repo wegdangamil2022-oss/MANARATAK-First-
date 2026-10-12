@@ -18,7 +18,7 @@ export class AuthorizationEvaluatorService {
     private readonly dutyEvaluator?: { isAllowed(identityId: string): Promise<boolean> }
   ) {}
 
-  public async describeIdentityAccess(identityId: string) {
+  public async describeIdentityAccess(identityId: string, contextAttributes: Record<string, unknown> = {}) {
     const assignments = await this.roleAssignmentRepository.findByIdentityId(identityId);
     const emergencyRoleIds =
       (await this.emergencyAccessRepository?.listActiveRoleIds(identityId)) ?? [];
@@ -38,8 +38,13 @@ export class AuthorizationEvaluatorService {
         const policies = await Promise.all(
           role.policyIds.map(async (policyId) => {
             const policy = await this.policyRepository.findById(policyId);
+            const decision = policy ? await this.policyEvaluator.evaluate(policy, {
+              ...contextAttributes, identityId, resourceUrn: new ResourceUrn('admin:authorization'), action: new Action('manage'),
+            }) : null;
             return {
               id: policyId,
+              conditionGranted: decision?.isGranted ?? false,
+              reasons: decision?.reasons ?? ['REFERENCED_POLICY_NOT_FOUND'],
               name: policy?.name,
               ruleType: policy?.ruleType,
               missing: !policy,

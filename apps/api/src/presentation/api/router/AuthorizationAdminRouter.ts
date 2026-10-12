@@ -425,7 +425,7 @@ export class AuthorizationAdminRouter {
             status: identity.status,
             eligible,
             evaluatedAt: context.requestTime.toISOString(),
-            roles: await authEvaluatorService.describeIdentityAccess(identity.id),
+            roles: await authEvaluatorService.describeIdentityAccess(identity.id, context),
             decisions,
           }),
         );

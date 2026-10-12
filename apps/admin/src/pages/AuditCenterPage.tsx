@@ -131,7 +131,9 @@ export function AuditCenterPage() {
     if (cause instanceof Error && cause.message === 'AUDIT_DATE_RANGE_INVALID')
       return t('audit_text_075');
     const known = [t('audit_text_006'), t('audit_text_007'), t('audit_text_008')];
-    return cause instanceof Error && known.includes(cause.message) ? cause.message : t('audit_text_076');
+    return cause instanceof Error && known.includes(cause.message)
+      ? cause.message
+      : t('audit_text_076');
   };
   const fieldLabels: Array<[keyof Filters, string]> = [
     ['actorId', t('audit_text_001')],
@@ -284,11 +286,18 @@ export function AuditCenterPage() {
         !Array.isArray(report.futureTimestamps) ||
         report.scope !== 'REFERENCE_LINKAGE_AND_TIMESTAMPS' ||
         report.cryptographicVerification !== false ||
-        !Number.isSafeInteger(report.maxRecords) || report.maxRecords < 1 || report.maxRecords > 100 ||
-        report.checkedRecords < 0 || report.checkedRecords > report.maxRecords ||
-        !Number.isFinite(Date.parse(report.checkedAt)) || !report.range ||
+        !Number.isSafeInteger(report.maxRecords) ||
+        report.maxRecords < 1 ||
+        report.maxRecords > 100 ||
+        report.checkedRecords < 0 ||
+        report.checkedRecords > report.maxRecords ||
+        !Number.isFinite(Date.parse(report.checkedAt)) ||
+        !report.range ||
         typeof report.hasMore !== 'boolean' ||
-        (report.hasMore && (typeof report.nextCursor !== 'string' || !report.nextCursor || report.nextCursor === nextCursor))
+        (report.hasMore &&
+          (typeof report.nextCursor !== 'string' ||
+            !report.nextCursor ||
+            report.nextCursor === nextCursor))
       )
         throw new Error(t('audit_text_007'));
       if (request === integrityGeneration.current) {
@@ -446,7 +455,7 @@ export function AuditCenterPage() {
       FINANCE_MUTATION: 'audit_preset_finance',
       SCHOLARSHIPS_MUTATION: 'audit_scholarship_events',
     };
-    return labels[code] ? t(labels[code]) : auditCodeLabel(code,language);
+    return labels[code] ? t(labels[code]) : auditCodeLabel(code, language);
   };
   const evidence = (code?: string) =>
     t(
@@ -692,15 +701,48 @@ export function AuditCenterPage() {
           {fieldLabels.map(([key, label]) => (
             <label key={key} className="text-xs font-bold text-[#142B5F]">
               {label}
-              <input
-                value={filters[key]}
-                maxLength={key === 'path' ? 2048 : 240}
-                list={`audit-options-${key}`}
-                onChange={(event) =>
-                  setFilters((previous) => ({ ...previous, [key]: event.target.value }))
-                }
-                className={inputClass}
-              />
+              {key === 'action' || key === 'category' ? (
+                <>
+                  <select
+                    className={inputClass}
+                    value={filters[key]}
+                    onChange={(event) =>
+                      setFilters((previous) => ({ ...previous, [key]: event.target.value }))
+                    }
+                  >
+                    <option value="">{t('iam_all')}</option>
+                    {[
+                      ...new Set([...optionsFor(key), ...(filters[key] ? [filters[key]] : [])]),
+                    ].map((code) => (
+                      <option key={code} value={code}>
+                        {friendly(code)} · {code}
+                      </option>
+                    ))}
+                  </select>
+                  <details className="mt-2 font-normal">
+                    <summary>{t('audit_raw_code')}</summary>
+                    <input
+                      aria-label={`${label} — ${t('audit_raw_code')}`}
+                      value={filters[key]}
+                      maxLength={240}
+                      onChange={(event) =>
+                        setFilters((previous) => ({ ...previous, [key]: event.target.value }))
+                      }
+                      className={inputClass}
+                    />
+                  </details>
+                </>
+              ) : (
+                <input
+                  value={filters[key]}
+                  maxLength={key === 'path' ? 2048 : 240}
+                  list={`audit-options-${key}`}
+                  onChange={(event) =>
+                    setFilters((previous) => ({ ...previous, [key]: event.target.value }))
+                  }
+                  className={inputClass}
+                />
+              )}
               <datalist id={`audit-options-${key}`}>
                 {optionsFor(key).map((code) => (
                   <option key={code} value={code}>
@@ -826,7 +868,23 @@ export function AuditCenterPage() {
           <h2 className="font-bold">
             {t('audit_timeline')} — <code>{applied.correlationId}</code>
           </h2>
-          <p className="mt-2 text-xs text-slate-500">{t('audit_timeline_scope')}</p>
+          <p className="mt-2 text-xs text-slate-500" role="status">
+            {loading
+              ? t('iam_loading')
+              : error
+                ? t('audit_timeline_scope')
+                : t(hasMore ? 'audit_timeline_partial' : 'audit_timeline_complete')}
+          </p>
+          {hasMore && (
+            <button
+              type="button"
+              className="mt-3 rounded-lg border px-3 py-2 text-xs"
+              disabled={loading || exporting || pendingFilters}
+              onClick={() => void load(false)}
+            >
+              {t('audit_timeline_more')}
+            </button>
+          )}
           <ol className="mt-3 space-y-3">
             {[...items]
               .sort(
@@ -840,6 +898,14 @@ export function AuditCenterPage() {
                   <code className="block text-slate-500">
                     {item.action} — {item.reference}
                   </code>
+                  <button
+                    type="button"
+                    className="mt-1 underline"
+                    disabled={detailLoading}
+                    onClick={() => void showDetail(item)}
+                  >
+                    {t('iam_open')}
+                  </button>
                 </li>
               ))}
           </ol>

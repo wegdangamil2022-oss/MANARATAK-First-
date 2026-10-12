@@ -35,12 +35,27 @@ export function IdentityAdminPage() {
   const { t, dir } = useTranslation();
   const { hasPermission } = useAdminAuthorization();
   const loadFailed = t('iam_load_failed');
-  const [initialSearch] = useState(() => new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('search')?.slice(0, 240) || '');
-  const [initialType] = useState(() => new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('type') === 'Human' ? 'Human' : '');
+  const [initialSearch] = useState(
+    () =>
+      new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search)
+        .get('search')
+        ?.slice(0, 240) || '',
+  );
+  const [initialType] = useState(() =>
+    new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search).get('type') ===
+    'Human'
+      ? 'Human'
+      : '',
+  );
   const [search, setSearch] = useState(initialSearch);
   const [status, setStatus] = useState('');
   const [verified, setVerified] = useState('');
-  const [query, setQuery] = useState(() => new URLSearchParams({ ...(initialSearch ? { search: initialSearch } : {}), ...(initialType ? { type: initialType } : {}) }).toString());
+  const [query, setQuery] = useState(() =>
+    new URLSearchParams({
+      ...(initialSearch ? { search: initialSearch } : {}),
+      ...(initialType ? { type: initialType } : {}),
+    }).toString(),
+  );
   const [cursor, setCursor] = useState('');
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [cursorHistory, setCursorHistory] = useState<string[]>([]);
@@ -343,6 +358,7 @@ export function IdentityAdminPage() {
                     'iam_access_state',
                     'iam_verified',
                     'iam_assigned_roles',
+                    'iam_assigned_admin_access',
                     'iam_latest_access_change',
                     'iam_actions',
                   ].map((key) => (
@@ -365,6 +381,11 @@ export function IdentityAdminPage() {
                       {t(identity.user?.contactRegistry.isEmailVerified ? 'iam_yes' : 'iam_no')}
                     </td>
                     <td>{identity.assignedRoles?.map((role) => role.name).join(', ') || '—'}</td>
+                    <td>
+                      {identity.adminAccessAssigned == null
+                        ? t('iam_unavailable')
+                        : t(identity.adminAccessAssigned ? 'iam_yes' : 'iam_no')}
+                    </td>
                     <td>
                       {identity.latestAccessChange
                         ? `${identity.latestAccessChange.action} · ${identity.latestAccessChange.timestamp}`
