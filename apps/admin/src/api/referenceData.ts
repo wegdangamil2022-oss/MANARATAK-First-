@@ -1,4 +1,5 @@
 import type {
+  ReferenceQualityQuery, ReferenceQualityReport,
   ReferenceDataCollection, ReferenceDataFilters, ReferenceDataPage,
   UpsertReferenceCountryDto, UpsertReferenceCurrencyDto,
   UpsertReferenceLanguageDto, UpsertReferenceCityDto,
@@ -47,6 +48,12 @@ export const referenceDataAdminApi = {
     return adminApiClient.request<{ evidenceState: 'NO_APPROVED_STANDARD_SNAPSHOTS' | 'REVIEWED_EVIDENCE_RECORDED';
       data: Array<{ standardFamily: string; readiness: string; sourceVersion: string | null; candidateVersions: string[] }>; asOf: string }>(
       base + '/standards/readiness');
+  },
+  qualityIssues(query: ReferenceQualityQuery, signal?: AbortSignal) {
+    const params = new URLSearchParams({ page: String(query.page ?? 1) });
+    if (query.countryIso2Code) params.set('countryIso2Code', query.countryIso2Code);
+    if (query.kind) params.set('kind', query.kind);
+    return adminApiClient.request<ReferenceQualityReport>(`${base}/quality/issues?${params}`, { signal, cache: 'no-store' });
   },
   qualitySnapshot() {
     return adminApiClient.request<{ data: Array<{ collection: ReferenceDataCollection; total: number; active: number; nonActive: number; aliasCoverage: 'unknown'; authoritativeCoverage: 'unknown'; brokenRelationships: 'unknown' }>; asOf: string }>(base + '/quality');

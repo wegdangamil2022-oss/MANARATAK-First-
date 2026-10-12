@@ -47,7 +47,8 @@ export class AcademicTaxonomyScreeningConsumer implements IImportHandoffConsumer
     try {
       const record = parseAcademicImportRecord(handoff.normalizedPayload);
       return { schemaVersion: 1, owner: 'ACADEMIC_TAXONOMY', state: upstreamValid ? 'NEEDS_OWNER_REVIEW' : 'INVALID',
-        dryRun: handoff.execution.dryRun, record, source: { sourceId: handoff.artifact.sourceId, contentHash: handoff.provenance.contentHash ?? null },
+        dryRun: handoff.execution.dryRun, record, source: { sourceId: handoff.artifact.sourceId, artifactId: handoff.artifact.artifactId ?? null,
+          contentHash: handoff.referenceMetadata?.artifactSha256 ?? handoff.provenance.contentHash ?? null },
         issues: upstreamValid ? [] : ['UPSTREAM_VALIDATION_FAILED'] };
     } catch {
       return { schemaVersion: 1, owner: 'ACADEMIC_TAXONOMY', state: 'INVALID', dryRun: handoff.execution.dryRun, record: null, issues: ['OWNER_PAYLOAD_INVALID'] };

@@ -72,6 +72,8 @@ describe('PrismaAcademicTaxonomyRepository - Node Operations', () => {
           ],
         },
         orderBy: [{ canonicalCode: 'asc' }, { id: 'asc' }],
+        skip: 0,
+        take: 5001,
       });
 
       expect(results).toHaveLength(1);

@@ -7,7 +7,7 @@ import { ImportHandoffDispatcher } from '../../src/import-foundation/services/Im
 import type { AcademicImportReview } from '../../src/academic-taxonomy/services/IAcademicTaxonomyImportGateway';
 const payload = { nodeType: 'ACADEMIC_FIELD', canonicalCode: '06', canonicalName: 'ICT', standardType: 'ISCED', metadata: { sourceEdition: '2026', approvedRoot: true } };
 const envelope = (data: any = payload): any => ({ handoffId: 'handoff', ownerDomain: 'ACADEMIC_TAXONOMY', normalizedPayload: data,
-  artifact: { sourceId: 'official' }, provenance: { sourceSystem: 'official', contentHash: 'hash' }, validation: { state: 'VALID', issues: [] }, execution: { executionId: 'batch', dryRun: false, attempt: 1, idempotencyKey: 'key' } });
+  artifact: { sourceId: 'official', artifactId: 'source-asset' }, provenance: { sourceSystem: 'official', contentHash: 'a'.repeat(64) }, validation: { state: 'VALID', issues: [] }, execution: { executionId: 'batch', dryRun: false, attempt: 1, idempotencyKey: 'key' } });
 const actor = { actorId: 'owner-reviewer' };
 function reorder(value: any): any { if (Array.isArray(value)) return value.map(reorder); if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).reverse().map(([key, item]) => [key, reorder(item)])); return value; }
 async function harness() {
@@ -19,7 +19,7 @@ async function harness() {
     createNode: vi.fn(async (data: any) => { const node = { ...data, nodeId: 'canonical-node', createdAt: new Date(revision), updatedAt: new Date(revision) }; state.nodes.push(node); return node; }),
     upsertNode: vi.fn(), getNode: vi.fn(async (id: string) => state.nodes.find(node => node.nodeId === id) ?? null),
     updateNode: vi.fn(async (_id: string, data: any) => ({ ...state.nodes[0], ...data })) };
-  const gateway: any = { withTransaction: () => gateway, lock: vi.fn(async () => {}), screening: vi.fn(async () => ({ id: 'receipt', requestHash: 'screen-hash', result: screened })),
+  const gateway: any = { withTransaction: () => gateway, lock: vi.fn(async () => {}), verifyArtifact: vi.fn(async () => {}), screening: vi.fn(async () => ({ id: 'receipt', requestHash: 'screen-hash', result: screened })),
     get: vi.fn(async (id: string) => state.plans.get(id) ?? null),
     create: vi.fn(async (plan: AcademicImportReview) => { state.plans.set(plan.id, reorder(JSON.parse(JSON.stringify(plan)))); }),
     save: vi.fn(async (plan: AcademicImportReview, version: number) => { if (state.plans.get(plan.id)?.version !== version) throw new Error('TAXONOMY_IMPORT_REVIEW_CONFLICT'); state.plans.set(plan.id, reorder(JSON.parse(JSON.stringify(plan)))); }) };
@@ -95,4 +95,37 @@ describe('P6 screening and P8 owner apply closure', () => {
     h.gateway.screening.mockResolvedValue({ requestHash: 'dry', result: await new AcademicTaxonomyScreeningConsumer().accept(dry) });
     await expect(h.cases.preview('dry-receipt', actor)).rejects.toThrow('TAXONOMY_IMPORT_DRY_RUN_NOT_APPLICABLE');
   });
+  it('rechecks the locked source artifact before apply and blocks quarantined sources without writes', async () => {
+    const h = await harness(); const plan = await approve(h);
+    h.gateway.verifyArtifact.mockRejectedValueOnce(new Error('SOURCE_QUARANTINED'));
+    await expect(h.cases.apply(plan.id, { expectedVersion: plan.version, previewHash: plan.previewHash }, actor)).rejects.toThrow('SOURCE_QUARANTINED');
+    expect(h.gateway.verifyArtifact).toHaveBeenCalledWith('source-asset', 'a'.repeat(64));
+    expect(h.repo.createNode).not.toHaveBeenCalled();
+    expect(h.state.plans.get(plan.id)?.status).toBe('APPROVED');
+  });
+  it('refuses legacy receipts without artifact identity or SHA256 evidence', async () => {
+    const h = await harness();
+    for (const source of [{ contentHash: 'a'.repeat(64) }, { artifactId: 'asset', contentHash: 'hash' }]) {
+      const screened = await new AcademicTaxonomyScreeningConsumer().accept(envelope());
+      h.gateway.screening.mockResolvedValue({ requestHash: 'screen-hash', result: { ...screened, source } });
+      await expect(h.cases.preview('legacy', actor)).rejects.toThrow('SOURCE_EVIDENCE_REQUIRED');
+    }
+    expect(h.repo.createNode).not.toHaveBeenCalled();
+    expect(h.gateway.verifyArtifact).not.toHaveBeenCalled();
+  });
+  it('binds approval to artifact identity and prevents same-receipt substitution', async () => {
+    const h = await harness(); const plan = await approve(h);
+    const screened = await new AcademicTaxonomyScreeningConsumer().accept(envelope());
+    h.gateway.screening.mockResolvedValue({ requestHash: 'screen-hash', result: { ...screened, source: { ...screened.source, artifactId: 'other-asset' } } });
+    await expect(h.cases.apply(plan.id, { expectedVersion: plan.version, previewHash: plan.previewHash }, actor)).rejects.toThrow('STALE_PREVIEW');
+    expect(h.repo.createNode).not.toHaveBeenCalled();
+  });
+  it('binds approval to the normalized receipt record, even if requestHash is unchanged', async () => {
+    const h = await harness(); const plan = await approve(h);
+    const screened = await new AcademicTaxonomyScreeningConsumer().accept(envelope({ ...payload, canonicalName: 'substituted' }));
+    h.gateway.screening.mockResolvedValue({ requestHash: 'screen-hash', result: screened });
+    await expect(h.cases.apply(plan.id, { expectedVersion: plan.version, previewHash: plan.previewHash }, actor)).rejects.toThrow('SOURCE_CONFLICT');
+    expect(h.repo.createNode).not.toHaveBeenCalled();
+  });
+
 });

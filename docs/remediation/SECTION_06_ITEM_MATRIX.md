@@ -1,5 +1,7 @@
 # Section 06 — final disposition (2026-10-10)
 
+> متابعة 12 أكتوبر 2026: نواقص إعادة المراجعة للقسمين 06/07 وإصلاحاتها والفحوص الخفيفة الحالية موثقة في [تقرير المتابعة](../reviews/SECTIONS_06_07_SOURCE_COMPLETION_2026-10-12.md). النتائج السابقة أدلة تاريخية ولا تُنسب تلقائيًا للنسخة الحالية.
+
 **CODE_CLOSED — RUNTIME_DEFERRED.** This final source matrix supersedes the historical checkpoint below. See [closure register](SECTION_06_SOURCE_CLOSURE.md) for implemented behavior, scope decisions and exact one-shot verification. No live dataset, database migration, browser acceptance or final compiler PASS is asserted.
 
 | Original item | Final disposition | Evidence / scope |

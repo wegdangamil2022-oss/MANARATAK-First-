@@ -1,5 +1,7 @@
 # Section 07 — Academic Taxonomy / P8
 
+> متابعة 12 أكتوبر 2026: نواقص إعادة المراجعة للقسمين 06/07 وإصلاحاتها والفحوص الخفيفة الحالية موثقة في [تقرير المتابعة](../reviews/SECTIONS_06_07_SOURCE_COMPLETION_2026-10-12.md). النتائج السابقة أدلة تاريخية ولا تُنسب تلقائيًا للنسخة الحالية.
+
 Status: **CODE_CLOSED — RUNTIME_DEFERRED** (2026-10-10).
 
 All original Section 07 source tasks, including FGA-07-001/002, are implemented across four commits/batches. Runtime acceptance remains open under the review's Post-28 policy. This status does not claim successful deployment, applied schema, real database execution, browser acceptance, or a fully passing repository-wide verification gate.
