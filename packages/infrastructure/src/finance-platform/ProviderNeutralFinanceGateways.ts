@@ -78,6 +78,17 @@ abstract class SignedFinanceProviderBase {
     );
   }
 
+  async checkReadiness(signal?: AbortSignal) {
+    if (!this.client || !this.isProductionReady)
+      return {
+        status: 'DOWN',
+        timestamp: new Date().toISOString(),
+        error: 'PAYMENT_RUNTIME_NOT_APPROVED',
+        details: { capabilityStatus: 'RUNTIME_PENDING' },
+      };
+    return this.client.checkReadiness('finance-payment', signal);
+  }
+
   isConfigured(): boolean {
     return Boolean(this.client);
   }

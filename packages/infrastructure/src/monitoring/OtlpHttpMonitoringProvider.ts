@@ -37,6 +37,7 @@ export class OtlpHttpMonitoringProvider implements IMonitoringProvider, IMetrics
   private readonly metrics: TelemetryPoint[] = [];
   private readonly spans: SpanPoint[] = [];
   private readonly timer?: NodeJS.Timeout;
+  private lastExportSuccessAt?: number;
   private lastExportError: string | null = null;
   private exporting: Promise<void> | null = null;
 
@@ -71,7 +72,7 @@ export class OtlpHttpMonitoringProvider implements IMonitoringProvider, IMetrics
       end: (status = exception ? 'ERROR' : 'OK') => {
         if (ended) return;
         ended = true;
-        if (sampled) this.spans.push({ traceId, spanId, name, startedAt, endedAt: Date.now(), status, attributes: attrs, ...(exception ? { exception } : {}) });
+        if (sampled && this.spans.length < 10_000) this.spans.push({ traceId, spanId, name, startedAt, endedAt: Date.now(), status, attributes: attrs, ...(exception ? { exception } : {}) });
       },
     };
   }
@@ -82,10 +83,10 @@ export class OtlpHttpMonitoringProvider implements IMonitoringProvider, IMetrics
 
   public async getReadiness(): Promise<HealthCheckResult> {
     return {
-      status: this.lastExportError ? HealthStatus.DEGRADED : HealthStatus.UP,
+      status: this.lastExportError || !this.lastExportSuccessAt || Date.now() - this.lastExportSuccessAt > Math.max(60_000, (this.options.exportIntervalMs ?? 10_000) * 3) ? HealthStatus.DEGRADED : HealthStatus.UP,
       timestamp: new Date().toISOString(),
       ...(this.lastExportError ? { error: 'OTEL_EXPORT_LAST_ATTEMPT_FAILED' } : {}),
-      details: { capabilityStatus: this.capabilityStatus, scope: this.scope, endpointConfigured: true, bufferedMetrics: this.metrics.length, bufferedSpans: this.spans.length },
+      details: { capabilityStatus: this.lastExportSuccessAt ? 'OBSERVED_EXPORT' : 'RUNTIME_PENDING', lastSuccessfulExportAt: this.lastExportSuccessAt ? new Date(this.lastExportSuccessAt).toISOString() : null, scope: this.scope, endpointConfigured: true, bufferedMetrics: this.metrics.length, bufferedSpans: this.spans.length },
     };
   }
   public checkHealth(): Promise<HealthCheckResult> { return this.getReadiness(); }
@@ -116,10 +117,13 @@ export class OtlpHttpMonitoringProvider implements IMonitoringProvider, IMetrics
         spans.length ? this.post('v1/traces', this.tracesEnvelope(spans)) : Promise.resolve(),
       ]);
       this.lastExportError = null;
+      this.lastExportSuccessAt = Date.now();
     } catch (error) {
       this.lastExportError = error instanceof Error ? error.message : String(error);
       this.metrics.unshift(...metrics);
       this.spans.unshift(...spans);
+      this.metrics.splice(10_000);
+      this.spans.splice(10_000);
       throw error;
     }
   }

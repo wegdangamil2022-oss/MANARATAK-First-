@@ -1,3 +1,4 @@
+import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
@@ -71,7 +72,7 @@ export function UniversityAdminPage() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => reviewOwnerSearch(searchParams));
   const [statusFilter, setStatusFilter] = useState('');
   const [completenessFilter, setCompletenessFilter] = useState('');
   const [page, setPage] = useState(1);

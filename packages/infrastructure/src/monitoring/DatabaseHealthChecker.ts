@@ -3,6 +3,10 @@ import { HealthStatus, HealthCheckResult, IHealthIndicator } from '@manaratak/co
 export class DatabaseHealthChecker implements IHealthIndicator {
   public readonly name = 'database';
 
+  public readonly evidenceKind = 'READ_ONLY_OPERATION' as const;
+  public readonly probeVersion = 1;
+
+  private pendingQuery?: Promise<unknown>;
   constructor(private client?: any) {}
 
   async checkHealth(): Promise<HealthCheckResult> {
@@ -18,9 +22,11 @@ export class DatabaseHealthChecker implements IHealthIndicator {
       };
     }
 
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
+      if (this.pendingQuery) throw new Error('Previous health query remains pending');
       const timeoutPromise = new Promise<never>((_, reject) => {
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           reject(new Error('Database health check timed out after 2000ms'));
         }, 2000);
         if (typeof timer === 'object' && 'unref' in timer) {
@@ -43,6 +49,8 @@ export class DatabaseHealthChecker implements IHealthIndicator {
         throw new Error('Database client does not expose a verifiable health query');
       }
 
+      this.pendingQuery = Promise.resolve(queryPromise);
+      void this.pendingQuery.finally(() => { this.pendingQuery = undefined; }).catch(() => undefined);
       await Promise.race([queryPromise, timeoutPromise]);
       const latencyMs = Date.now() - start;
 
@@ -60,7 +68,7 @@ export class DatabaseHealthChecker implements IHealthIndicator {
         error: safeError,
         details: { database: 'disconnected', capabilityStatus: 'UNAVAILABLE', latencyMs },
       };
-    }
+    } finally { clearTimeout(timer); }
   }
 
   private sanitize(message: string): string {

@@ -29,6 +29,17 @@ export class ProviderNotificationDeliveryGateway implements INotificationDeliver
         })
       : null;
   }
+  async checkReadiness(signal?: AbortSignal) {
+    if (!this.client)
+      return {
+        status: 'DOWN',
+        timestamp: new Date().toISOString(),
+        error: 'NOTIFICATION_PROVIDER_NOT_CONFIGURED',
+        details: { capabilityStatus: 'NOT_CONFIGURED' },
+      };
+    return this.client.checkReadiness('notification-delivery', signal);
+  }
+
   async deliver(
     candidate: NotificationDeliveryCandidate,
     key: string,

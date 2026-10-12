@@ -1,3 +1,4 @@
+import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { serviceText } from '../i18n/serviceText';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
@@ -77,8 +78,8 @@ export function ServicesAdminPage() {
       : searchParams.get('tab') === 'operations'
         ? 'OPERATIONS'
         : 'CATALOG';
-  const [query, setQuery] = useState('');
-  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState(() => reviewOwnerSearch(searchParams));
+  const [search, setSearch] = useState(() => reviewOwnerSearch(searchParams));
   const [page, setPage] = useState(1);
   const [availabilityFilter, setAvailabilityFilter] = useState('');
   const [fulfillmentFilter, setFulfillmentFilter] = useState('');

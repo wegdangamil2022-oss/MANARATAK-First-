@@ -2,6 +2,10 @@ import { HealthStatus, HealthCheckResult } from '@manaratak/core';
 import { RedisClientFactory } from '../redis/RedisClientFactory';
 
 export class RedisHealthChecker {
+  public readonly evidenceKind = 'READ_ONLY_OPERATION' as const;
+  public readonly probeVersion = 1;
+
+  private pendingQuery?: Promise<unknown>;
   constructor(private client?: any) {}
 
   async checkHealth(): Promise<HealthCheckResult> {
@@ -17,9 +21,11 @@ export class RedisHealthChecker {
       };
     }
 
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
+      if (this.pendingQuery) throw new Error('Previous health query remains pending');
       const timeoutPromise = new Promise<never>((_, reject) => {
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           reject(new Error('Redis health check timed out after 2000ms'));
         }, 2000);
         if (typeof timer === 'object' && 'unref' in timer) {
@@ -36,6 +42,8 @@ export class RedisHealthChecker {
         throw new Error('Redis client lacks ping capability');
       }
 
+      this.pendingQuery = Promise.resolve(queryPromise);
+      void this.pendingQuery.finally(() => { this.pendingQuery = undefined; }).catch(() => undefined);
       const response = await Promise.race([queryPromise, timeoutPromise]);
       if (typeof this.client.ping === 'function' && response !== 'PONG') {
         throw new Error('Redis ping returned an unexpected response');
@@ -58,6 +66,6 @@ export class RedisHealthChecker {
         error: safeErrorMsg,
         details: { redis: 'disconnected', capabilityStatus: 'UNAVAILABLE', latencyMs, optional: true }
       };
-    }
+    } finally { clearTimeout(timer); }
   }
 }

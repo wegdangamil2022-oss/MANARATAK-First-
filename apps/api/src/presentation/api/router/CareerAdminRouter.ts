@@ -38,6 +38,19 @@ export class CareerAdminRouter {
       await requirePermission(req,'admin:careers:employers:verify'); const body = z.object({ reason: careerReason, expectedVersion: careerExpected }).strict().parse(req.body);
       res.json(await owner(req).setEmployerStatus(req.params.id, CareerEmployerStatus.SUSPENDED, body.expectedVersion));
     }));
+    // Job review projection excludes recruiter/contact, salary, metadata and applications.
+    router.get('/review-page', careerHandler(async(req,res) => {
+      const query = z.object({
+        page: z.coerce.number().int().min(1).max(10000).default(1),
+        pageSize: z.coerce.number().int().min(1).max(50).default(50),
+        status: z.nativeEnum(CareerJobStatus).refine(value => value === CareerJobStatus.READY_TO_REVIEW || value === CareerJobStatus.READY_TO_PUBLISH),
+      }).strict().parse(req.query);
+      const result = await read.listJobs(query);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json({ ...result, data: result.data.map(row => ({
+        id: row.id, title: row.title, status: row.status, updatedAt: row.updatedAt,
+      })) });
+    }));
     router.get('/jobs', careerHandler(async(req,res) => {
       res.json(await read.listJobs(z.object({ ...careerPaging, search: z.string().trim().max(120).optional(), status: z.nativeEnum(CareerJobStatus).optional(), opportunityType: z.nativeEnum(CareerOpportunityType).optional(), employmentType: z.nativeEnum(EmploymentType).optional(), countryReferenceId: z.string().optional(), cityReferenceId: z.string().optional(), employerId: z.string().optional() }).parse(req.query)));
     }));

@@ -24,7 +24,9 @@ test.describe('MANARATAK source-level runtime smoke checks', () => {
     expect([200, 503]).toContain(response.status());
     const body = await response.json();
     expect(['UP', 'DEGRADED', 'DOWN']).toContain(body.status);
-    expect(body).toHaveProperty('details');
+    expect(body.protocolVersion).toBe(2);
+    expect(body).not.toHaveProperty('details');
+    expect(body).not.toHaveProperty('indicators');
   });
 
   test('serves a safe public API read', async ({ request }) => {
@@ -38,7 +40,9 @@ test.describe('MANARATAK source-level runtime smoke checks', () => {
   test('rejects unauthenticated admin reads and mutations', async ({ request }) => {
     const readResponse = await request.get('/api/v1/admin/universities');
     expect(readResponse.status()).toBe(401);
-    await expect(readResponse.json()).resolves.toMatchObject({ error: { code: 'ADMIN_AUTH_REQUIRED' } });
+    await expect(readResponse.json()).resolves.toMatchObject({
+      error: { code: 'ADMIN_AUTH_REQUIRED' },
+    });
 
     const mutationResponse = await request.post('/api/v1/admin/universities', {
       data: { displayName: 'E2E must never create this university' },

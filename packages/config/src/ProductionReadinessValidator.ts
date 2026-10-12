@@ -1,3 +1,4 @@
+import { launchDependencyManifest } from './LaunchDependencyManifest';
 import { loadAppConfig } from './AppConfig';
 
 export type ProductionReadinessSeverity = 'BLOCKER' | 'WARNING' | 'INFO';
@@ -47,6 +48,21 @@ export class ProductionReadinessValidator {
     this.validateProviderDependencies(config, findings, isProduction);
     this.validateObservability(config, findings, isProduction);
 
+    if (isProduction) {
+      if (!this.asString(config.HEALTH_DEPLOYMENT_REVISION)) findings.push({
+        id: 'launch.worker_revision_missing', severity: 'BLOCKER', area: 'Workers',
+        message: 'The deployment revision for cluster worker evidence is missing.', recommendation: 'Set HEALTH_DEPLOYMENT_REVISION identically on API and workers for this release.' });
+      const dependencies = launchDependencyManifest(config);
+      for (const dependency of dependencies.filter(d => d.requirement === 'REQUIRED')) {
+        const requiredKeys: Record<string, string[]> = {
+          'payment-gateway': ['FINANCE_PROVIDER_BASE_URL', 'FINANCE_PROVIDER_API_KEY', 'FINANCE_PROVIDER_SIGNING_SECRET', 'FINANCE_PAYMENT_PROVIDER_KEY'],
+          notifications: ['NOTIFICATION_PROVIDER_BASE_URL', 'NOTIFICATION_PROVIDER_API_KEY', 'NOTIFICATION_PROVIDER_SIGNING_SECRET', 'NOTIFICATION_PAYLOAD_KEY', 'BACKGROUND_NOTIFICATION_CRON'],
+        };
+        for (const key of requiredKeys[dependency.id] ?? []) if (!this.asString(config[key])) findings.push({
+          id: `launch.${dependency.id}.${key}`, severity: 'BLOCKER', area: 'Launch Dependencies',
+          message: `${dependency.id} requires ${key}.`, recommendation: 'Configure the owner dependency; configuration does not prove runtime readiness.' });
+      }
+    }
     const blockerCount = findings.filter(finding => finding.severity === 'BLOCKER').length;
     const warningCount = findings.filter(finding => finding.severity === 'WARNING').length;
     return Object.freeze({

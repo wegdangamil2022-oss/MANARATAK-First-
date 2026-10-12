@@ -5,3 +5,5 @@ export * from './EnvironmentValidator';
 export * from './ConfigurationRegistry';
 export * from './AppConfig';
 export * from './ProductionReadinessValidator';
+
+export * from './LaunchDependencyManifest';
