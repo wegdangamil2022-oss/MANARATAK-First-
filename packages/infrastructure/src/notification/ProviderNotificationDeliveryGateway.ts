@@ -1,4 +1,4 @@
-import {
+import type {
   INotificationDeliveryGateway,
   NotificationDeliveryCandidate,
   NotificationDeliveryResult,
@@ -7,52 +7,81 @@ import {
   SignedProviderHttpClient,
   SignedProviderHttpClientOptions,
 } from '../provider-http/SignedProviderHttpClient';
-
-const APPROVED_CHANNELS = new Set(['EMAIL', 'PUSH', 'IN_APP']);
-
+interface ProviderReceipt {
+  found?: boolean;
+  idempotencySupported?: boolean;
+  idempotencyKey?: string;
+  accepted?: boolean;
+  delivered?: boolean;
+  providerMessageId?: string;
+}
+/** Configured does not certify provider delivery. The provider must implement durable key reconciliation. */
 export class ProviderNotificationDeliveryGateway implements INotificationDeliveryGateway {
   private readonly client: SignedProviderHttpClient | null;
-  public get capabilityStatus(): 'PRODUCTION_CAPABLE' | 'IN_APP_ONLY' {
-    return this.client ? 'PRODUCTION_CAPABLE' : 'IN_APP_ONLY';
+  get capabilityStatus(): 'CONFIGURED_RUNTIME_PENDING' | 'IN_APP_ONLY' {
+    return this.client ? 'CONFIGURED_RUNTIME_PENDING' : 'IN_APP_ONLY';
   }
-
-  public constructor(options?: SignedProviderHttpClientOptions) {
-    this.client = options ? new SignedProviderHttpClient(options) : null;
+  constructor(options?: SignedProviderHttpClientOptions) {
+    this.client = options
+      ? new SignedProviderHttpClient({
+          ...options,
+          timeoutMs: Math.min(options.timeoutMs ?? 10000, 30000),
+        })
+      : null;
   }
-
-  public async deliver(
+  async deliver(
     candidate: NotificationDeliveryCandidate,
-    idempotencyKey: string,
+    key: string,
   ): Promise<NotificationDeliveryResult> {
     if (
-      !candidate.channels.length ||
-      candidate.channels.some((channel) => !APPROVED_CHANNELS.has(channel))
-    ) {
-      throw new Error('NOTIFICATION_CHANNEL_NOT_APPROVED');
-    }
-    // IN_APP is persisted atomically with the delivery receipt by the repository.
-    // External channels still require the configured provider.
-    const externalChannels = candidate.channels.filter((channel) => channel !== 'IN_APP');
-    if (!externalChannels.length)
-      return { metadata: { channels: [...candidate.channels], inApp: true } };
+      candidate.channels.length !== 1 ||
+      !['IN_APP', 'EMAIL', 'PUSH'].includes(candidate.channels[0])
+    )
+      throw new Error('NOTIFICATION_SINGLE_APPROVED_CHANNEL_REQUIRED');
+    const channel = candidate.channels[0];
+    if (key !== `notification:${candidate.id}:${channel}`)
+      throw new Error('NOTIFICATION_DELIVERY_KEY_MISMATCH');
+    if (channel === 'IN_APP') return { status: 'DELIVERED' };
     if (!this.client) throw new Error('NOTIFICATION_EXTERNAL_PROVIDER_NOT_CONFIGURED');
-    const result = await this.client.json<{ providerMessageId?: string; accepted?: boolean }>(
-      'POST',
-      '/v1/notifications/deliver',
-      {
-        intentId: candidate.id,
-        reference: candidate.reference,
-        templateId: candidate.templateId,
-        recipientReference: candidate.recipientReference,
-        variables: candidate.variables,
-        channels: externalChannels,
-      },
-      { idempotencyKey },
+    // Lookup is mandatory before resubmission, including after an uncertain timeout or lease loss.
+    const prior = await this.client.json<ProviderReceipt>(
+      'GET',
+      `/v1/notifications/deliveries/${encodeURIComponent(key)}`,
     );
-    if (!result || result.accepted !== true) throw new Error('NOTIFICATION_PROVIDER_NOT_ACCEPTED');
+    if (
+      prior?.idempotencySupported !== true ||
+      prior.idempotencyKey !== key ||
+      typeof prior.found !== 'boolean'
+    )
+      throw new Error('NOTIFICATION_PROVIDER_RECONCILIATION_REQUIRED');
+    if (candidate.acceptedChannels?.includes(channel) && !prior.found)
+      throw new Error('NOTIFICATION_ACCEPTED_KEY_NOT_FOUND');
+    const receipt = prior.found
+      ? prior
+      : await this.client.json<ProviderReceipt>(
+          'POST',
+          '/v1/notifications/deliver',
+          {
+            intentId: candidate.id,
+            reference: candidate.reference,
+            templateId: candidate.templateId,
+            recipientReference: candidate.recipientReference,
+            variables: candidate.variables,
+            locale: candidate.locale,
+            contents: candidate.contents,
+            channels: [channel],
+          },
+          { idempotencyKey: key },
+        );
+    if (
+      receipt?.accepted !== true ||
+      receipt.idempotencyKey !== key ||
+      receipt.idempotencySupported !== true
+    )
+      throw new Error('NOTIFICATION_PROVIDER_NOT_ACCEPTED');
     return {
-      providerMessageId: result.providerMessageId ?? null,
-      metadata: { accepted: true, channels: [...candidate.channels] },
+      status: receipt.delivered === true ? 'DELIVERED' : 'ACCEPTED',
+      providerMessageId: receipt.providerMessageId ?? null,
     };
   }
 }

@@ -6,7 +6,6 @@ import {
   CareerAlumniProfileDto,
   CareerApplicationDto,
   CareerApplicationStatus,
-  CareerJobStatus,
   CareerProfileDto,
   CareerProfileVisibility,
   ICareerEngagementRepository,

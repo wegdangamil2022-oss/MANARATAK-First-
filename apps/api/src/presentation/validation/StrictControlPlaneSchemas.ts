@@ -96,8 +96,10 @@ export const notificationTemplateSchema = z.object({
   channels: stringArray,
   requiredVariables: stringArray,
   localizations: stringArray,
+  contents: z.object({ ar: z.object({ subject: z.string().min(1).max(240), body: z.string().min(1).max(10000) }).strict(), en: z.object({ subject: z.string().min(1).max(240), body: z.string().min(1).max(10000) }).strict() }).strict().optional(),
 }).strict();
 export const notificationIntentSchema = z.object({
+  purpose: z.enum(['TRANSACTIONAL', 'PROMOTIONAL']).optional(),
   id: shortId,
   reference: shortId,
   templateId: shortId,

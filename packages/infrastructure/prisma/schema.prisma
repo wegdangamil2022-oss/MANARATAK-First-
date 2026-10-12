@@ -5579,6 +5579,8 @@ model SharedComponentRenderingProjection {
 }
 
 model NotificationTemplateRecord {
+  active            Boolean @default(true)
+  contents          Json?
   id                String   @id
   channels          Json
   requiredVariables Json
@@ -5598,6 +5600,13 @@ model NotificationIntentRecord {
   variables           Json
   scheduledAt         DateTime?
   expiresAt           DateTime?
+  variablesEncrypted Json?
+  variablesFingerprint String?
+  payloadErasedAt DateTime?
+  contentsSnapshot    Json?
+  channelsSnapshot    Json?
+  retryEpochStart     Int      @default(0)
+  manualRetryCount    Int      @default(0)
   retryMaxRetries     Int      @default(5)
   retryBackoffMs      Int      @default(1000)
   state               String   @default("CREATED")
@@ -5615,9 +5624,34 @@ model NotificationIntentRecord {
 
   template NotificationTemplateRecord @relation(fields: [templateId], references: [id], onDelete: Restrict)
   receipts NotificationDeliveryReceipt[]
+  channelReceipts NotificationChannelDelivery[]
+  reservations NotificationRateReservation[]
 
   @@index([deliveryState, nextAttemptAt])
   @@index([recipientReference, createdAt])
+  @@index([createdAt, id])
+  @@index([payloadErasedAt, createdAt])
+}
+
+model NotificationChannelDelivery {
+  intentId String
+  channel String
+  status String
+  attempts Int
+  providerMessageId String?
+  updatedAt DateTime @updatedAt
+  intent NotificationIntentRecord @relation(fields: [intentId], references: [id], onDelete: Cascade)
+  @@id([intentId, channel])
+}
+
+model NotificationRateReservation {
+  intentId String
+  attempt Int
+  recipientReference String
+  reservedAt DateTime
+  intent NotificationIntentRecord @relation(fields: [intentId], references: [id], onDelete: Cascade)
+  @@id([intentId, attempt])
+  @@index([recipientReference, reservedAt])
 }
 
 model NotificationDeliveryReceipt {

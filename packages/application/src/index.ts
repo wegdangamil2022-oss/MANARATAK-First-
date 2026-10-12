@@ -48,6 +48,7 @@ export * from './asset-platform';
 // Notification Use Cases
 export * from './notification/dtos/NotificationDtos';
 export * from './notification/use-cases/ManageNotificationIntentsUseCase';
+export * from './students/use-cases/StudentNotificationRecipientGateway';
 export * from './notification/use-cases/ManageNotificationTemplatesUseCase';
 export * from './notification/use-cases/NotificationOutboxDeliveryGateway';
 

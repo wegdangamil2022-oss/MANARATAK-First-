@@ -1,3 +1,4 @@
+import { isNotificationPreviewRequest } from '../http/NotificationPreviewRequest.js';
 import { NextFunction, Request, Response } from 'express';
 import { IAuditRecordRepository } from '@manaratak/domain';
 import { AuditHelper } from './AuditHelper.js';
@@ -74,7 +75,8 @@ export class MutationAuditPolicy {
       return path.includes('/auth/') ? 'CRITICAL_AUDIT_REQUIRED' : 'NO_AUDIT_REQUIRED';
     if (scope === 'IDENTITY')
       return path.includes('/identities') ? 'CRITICAL_AUDIT_REQUIRED' : 'NO_AUDIT_REQUIRED';
-    if (scope === 'CONTROL_PLANE') return 'CRITICAL_AUDIT_REQUIRED';
+    if (scope === 'CONTROL_PLANE')
+      return isNotificationPreviewRequest(req) ? 'NO_AUDIT_REQUIRED' : 'CRITICAL_AUDIT_REQUIRED';
     if (!path.includes('/admin/')) return 'NO_AUDIT_REQUIRED';
 
     // Owner import "preview" commands persist review plans, so they intentionally

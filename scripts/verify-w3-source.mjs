@@ -249,14 +249,14 @@ check('MNT-AUD-0086 import due/reclaimable queue work executes through a recurri
 
 check('MNT-AUD-0077 finance reconciliation autonomously covers payments, transfers and PROCESSING refunds',
   financeHandler.includes('reconcileProviderStates') && apiServer.includes('FINANCE_RECONCILIATION_JOB_TYPE') &&
-  financeUseCases.includes("refund.status === 'PROCESSING'") && financeUseCases.includes('getRefundStatus') &&
+  financeUseCases.includes('claimReconciliationCandidates') && read('packages/infrastructure/src/finance-platform/PrismaFinanceRepository.ts').includes("refund: ['PROCESSING', 'UNKNOWN_OUTCOME']") && financeUseCases.includes('getRefundStatus') &&
   financeProvider.includes('/v1/finance/payments/refund-status') && financeProvider.includes('refundReference'));
 check('MNT-AUD-0077 payment health reports the real provider runtime capability instead of stale transport-pending text',
   apiApp.includes('provider.runtimeStatus') && apiApp.includes('PAYMENT_PROVIDER_RUNTIME_NOT_READY') && !apiApp.includes('PAYMENT_RUNTIME_TRANSPORT_PENDING'));
 
 check('MNT-AUD-0034 notification foundation is durable, provider-capable and uses the canonical background handler contract',
   schema.includes('NotificationIntentRecord') && notificationRepo.includes('class PrismaNotificationIntentRepository') &&
-  notificationProvider.includes("return this.client ? 'PRODUCTION_CAPABLE' : 'IN_APP_ONLY'") && notificationHandler.includes('IBackgroundJobHandler') &&
+  notificationProvider.includes("return this.client ? 'CONFIGURED_RUNTIME_PENDING' : 'IN_APP_ONLY'") && notificationHandler.includes('IBackgroundJobHandler') &&
   notificationHandler.includes('async handle(') && notificationHandler.includes('NOTIFICATION_DELIVERY_LEASE_LOST') && notificationHandler.includes('markSuppressed') && notificationHandler.includes('hasOptedOut') && notificationHandler.includes('DELIVERY_CONCURRENCY'));
 check('MNT-AUD-0034 approved owner events create notification intents and P23 exposes governed operations',
   notificationOutbox.includes('context.idempotencyKey !== entry.id') && notificationOutbox.includes("entry.domain === 'SERVICES'") &&
@@ -265,7 +265,7 @@ check('MNT-AUD-0034 approved owner events create notification intents and P23 ex
 check('MNT-AUD-0034 notification migration/config/runbook are governed and runtime evidence remains pending',
   notificationMigration.includes('MANARATAK_MIGRATION_OWNER: notifications') &&
   migrationRecovery.migrations['20260907013000_w3_notification_delivery']?.recoveryClass === 'BACKUP_RESTORE_REQUIRED' &&
-  appConfig.includes('NOTIFICATION_PROVIDER_BASE_URL') && appConfig.includes('BACKGROUND_NOTIFICATION_CRON') && appConfig.includes('NOTIFICATION_RECIPIENT_MAX_DELIVERIES_PER_HOUR') && notificationRepo.includes("INTERVAL '1 hour'") &&
+  appConfig.includes('NOTIFICATION_PROVIDER_BASE_URL') && appConfig.includes('BACKGROUND_NOTIFICATION_CRON') && appConfig.includes('NOTIFICATION_RECIPIENT_MAX_DELIVERIES_PER_HOUR') && notificationRepo.includes('notificationRateReservation.count') && notificationRepo.includes('pg_try_advisory_xact_lock') &&
   notificationRunbook.includes('SOURCE_VERIFIED / DB_PROVIDER_RUNTIME_PENDING'));
 
 check('MNT-AUD-0032 certificate worker flags are canonical, production-required, health-visible and documented',

@@ -30,6 +30,8 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
   if (!policyClass) throw new Error('AUDIT_POLICY_NOT_FOUND');
   const compiled = ts.transpileModule(policyClass.getText(policyAst), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
   const sandbox = { exports: {} };
+  const previewHelper = fs.readFileSync(path.join(root, 'apps/api/src/presentation/http/NotificationPreviewRequest.ts'), 'utf8');
+  vm.runInNewContext(ts.transpileModule(previewHelper, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, sandbox, { timeout: 1000 });
   vm.runInNewContext(compiled, sandbox, { timeout: 1000 });
   const classify = sandbox.exports.MutationAuditPolicy.classify.bind(sandbox.exports.MutationAuditPolicy);
   const mounts = [];

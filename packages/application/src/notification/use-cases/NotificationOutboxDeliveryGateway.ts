@@ -27,8 +27,12 @@ export class NotificationOutboxDeliveryGateway implements IOutboxDeliveryGateway
     private readonly templates: INotificationTemplateRepository,
   ) {}
 
-  public async deliver(entry: TransactionalOutboxEntry, context: OutboxDeliveryContext): Promise<void> {
-    if (context.idempotencyKey !== entry.id) throw new Error('NOTIFICATION_OUTBOX_IDEMPOTENCY_KEY_MISMATCH');
+  public async deliver(
+    entry: TransactionalOutboxEntry,
+    context: OutboxDeliveryContext,
+  ): Promise<void> {
+    if (context.idempotencyKey !== entry.id)
+      throw new Error('NOTIFICATION_OUTBOX_IDEMPOTENCY_KEY_MISMATCH');
     const mapping = this.map(entry);
     if (!mapping) return;
     await this.ensureSystemTemplate(mapping.templateId);
@@ -45,21 +49,96 @@ export class NotificationOutboxDeliveryGateway implements IOutboxDeliveryGateway
 
   private map(entry: TransactionalOutboxEntry): NotificationMapping | null {
     const payload = entry.payload as Record<string, unknown>;
-    if (entry.domain === 'COURSES' && ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'].includes(entry.eventType)) {
-      const studentReferenceId = this.required(payload.studentReferenceId, 'NOTIFICATION_STUDENT_REFERENCE_REQUIRED');
+    if (
+      entry.domain === 'COURSES' &&
+      ['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted'].includes(entry.eventType)
+    ) {
+      const studentReferenceId = this.required(
+        payload.studentReferenceId,
+        'NOTIFICATION_STUDENT_REFERENCE_REQUIRED',
+      );
       return {
         recipientReference: studentReferenceId,
         templateId: `system.${entry.eventType}`,
-        variables: this.variables(entry, payload, ['courseId', 'enrollmentId', 'progressPercentage', 'enrollmentStatus', 'completedAt']),
+        variables: this.variables(entry, payload, [
+          'courseId',
+          'enrollmentId',
+          'progressPercentage',
+          'enrollmentStatus',
+          'completedAt',
+        ]),
       };
     }
-    if (entry.domain === 'SERVICES' && entry.eventType.startsWith('Service')) {
-      const studentReferenceId = typeof payload.studentReferenceId === 'string' ? payload.studentReferenceId.trim() : '';
+    if (
+      entry.domain === 'CERTIFICATES' &&
+      [
+        'CertificateIssued',
+        'CertificateRevoked',
+        'CertificateReissued',
+        'CertificateRenewed',
+        'CertificateExpired',
+        'CertificateArchived',
+      ].includes(entry.eventType)
+    ) {
+      if (
+        entry.metadata?.sourcePhase !== 'Phase14' ||
+        !['1.0', '2.0'].includes(String(entry.metadata.schemaVersion)) ||
+        entry.aggregate?.aggregateType !== 'Certificate' ||
+        entry.aggregate.aggregateId !== payload.certificateId
+      )
+        throw new Error('NOTIFICATION_OWNER_ENVELOPE_INVALID');
+      return {
+        recipientReference: this.required(
+          payload.studentReferenceId,
+          'NOTIFICATION_STUDENT_REFERENCE_REQUIRED',
+        ),
+        templateId: `system.${entry.eventType}`,
+        variables: this.variables(entry, payload, ['certificateId', 'status']),
+      };
+    }
+    if (
+      entry.domain === 'CAREER' &&
+      [
+        'CareerApplicationSubmitted.v1',
+        'CareerApplicationReviewed.v1',
+        'CareerApplicationWithdrawn.v1',
+      ].includes(entry.eventType)
+    ) {
+      if (entry.metadata?.schemaVersion !== 1 || entry.aggregate?.aggregateId !== payload.id)
+        throw new Error('NOTIFICATION_OWNER_ENVELOPE_INVALID');
+      return {
+        recipientReference: this.required(
+          payload.studentReferenceId,
+          'NOTIFICATION_STUDENT_REFERENCE_REQUIRED',
+        ),
+        templateId: `system.${entry.eventType}`,
+        variables: this.variables(entry, payload, ['id', 'jobId', 'status']),
+      };
+    }
+    if (
+      entry.domain === 'SERVICES' &&
+      [
+        'ServiceRequested.v1',
+        'ServiceFulfillmentStatusChanged.v1',
+        'ServiceCancellationFinancePending.v1',
+        'ServiceProviderAssigned.v1',
+        'ServiceSlaBreached.v1',
+      ].includes(entry.eventType)
+    ) {
+      const studentReferenceId =
+        typeof payload.studentReferenceId === 'string' ? payload.studentReferenceId.trim() : '';
       if (!studentReferenceId) return null;
       return {
         recipientReference: studentReferenceId,
         templateId: `system.${entry.eventType}`,
-        variables: this.variables(entry, payload, ['serviceId', 'requestId', 'publicId', 'status', 'providerReferenceId', 'financeInvoicePublicId']),
+        variables: this.variables(entry, payload, [
+          'serviceId',
+          'requestId',
+          'publicId',
+          'status',
+          'providerReferenceId',
+          'financeInvoicePublicId',
+        ]),
       };
     }
     return null;
@@ -67,20 +146,26 @@ export class NotificationOutboxDeliveryGateway implements IOutboxDeliveryGateway
 
   private async ensureSystemTemplate(templateId: string): Promise<void> {
     const id = TemplateId.create(templateId);
-    if (await this.templates.findById(id)) return;
-    await this.templates.save(NotificationTemplate.create(
-      id,
-      [NotificationChannel.create('IN_APP')],
-      ['eventType'],
-      [NotificationLocaleReference.create('ar'), NotificationLocaleReference.create('en')],
-    ));
+    await this.templates.save(
+      NotificationTemplate.create(
+        id,
+        [NotificationChannel.create('IN_APP')],
+        ['eventType'],
+        [NotificationLocaleReference.create('ar'), NotificationLocaleReference.create('en')],
+      ),
+    );
   }
 
-  private variables(entry: TransactionalOutboxEntry, payload: Record<string, unknown>, allowed: readonly string[]): Record<string, string> {
+  private variables(
+    entry: TransactionalOutboxEntry,
+    payload: Record<string, unknown>,
+    allowed: readonly string[],
+  ): Record<string, string> {
     const variables: Record<string, string> = { eventType: entry.eventType };
     for (const key of allowed) {
       const value = payload[key];
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') variables[key] = String(value);
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')
+        variables[key] = String(value);
     }
     return variables;
   }
