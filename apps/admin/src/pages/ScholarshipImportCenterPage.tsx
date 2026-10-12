@@ -1,3 +1,5 @@
+import { useSearchParams } from 'react-router-dom';
+import { reviewOwnerBatch } from '../features/review-queue/ReviewOwnerNavigation';
 import {
   useCallback,
   useEffect,
@@ -1679,7 +1681,9 @@ function StateCard({ label, value }: { label: string; value: string }) {
 export function ScholarshipImportCenterPage() {
   const { language } = useTranslation();
   const text = copy[language === 'ar' ? 'ar' : 'en'];
-  const [tab, setTab] = useState<WorkspaceTab>('overview');
+  const [reviewParams] = useSearchParams();
+  const reviewBatch = reviewOwnerBatch(reviewParams);
+  const [tab, setTab] = useState<WorkspaceTab>(() => reviewBatch ? 'incoming' : 'overview');
   const [operationalClass, setOperationalClass] =
     useState<ScholarshipImportOperationalClass>('REAL');
   const [overview, setOverview] = useState<ScholarshipImportCenterOverview | null>(null);
@@ -1762,6 +1766,7 @@ export function ScholarshipImportCenterPage() {
               page: incomingPage,
               pageSize: 50,
               ...(recordStatus ? { status: recordStatus } : {}),
+              ...(reviewBatch ? { batchId: reviewBatch } : {}),
             })
           : Promise.resolve(null),
         !['overview', 'sources', 'import-new', 'incoming'].includes(tab)
@@ -1790,7 +1795,7 @@ export function ScholarshipImportCenterPage() {
     } finally {
       if (request === loadRequest.current) setLoading(false);
     }
-  }, [incomingPage, operationalClass, recordStatus, tab]);
+  }, [incomingPage, operationalClass, recordStatus, tab, reviewBatch]);
   useEffect(() => {
     void load();
     return () => {

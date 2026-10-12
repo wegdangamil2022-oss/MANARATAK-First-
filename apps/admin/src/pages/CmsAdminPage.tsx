@@ -1,3 +1,5 @@
+import { useSearchParams } from 'react-router-dom';
+import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Archive,
@@ -175,6 +177,7 @@ export function CmsAdminPage() {
     tr('النشر'),
   ];
   const { language: uiLanguage } = useTranslation();
+  const [reviewParams] = useSearchParams();
   const { hasPermission } = useAdminAuthorization();
   const canAuthor = hasPermission('admin:cms:author');
   const canReview = hasPermission('admin:cms:review');
@@ -196,7 +199,7 @@ export function CmsAdminPage() {
   const mutationLock = useRef(false);
   const baseline = useRef<Record<Locale, EditorState>>({ ar: blankEditor(), en: blankEditor() });
   const linksBaseline = useRef('[]');
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => reviewOwnerSearch(reviewParams));
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -1504,6 +1507,7 @@ function LocaleButton({
 }
 function Status({ value }: { value: string }) {
   const { language: uiLanguage } = useTranslation();
+  const [reviewParams] = useSearchParams();
   const color =
     value === 'PUBLISHED'
       ? 'bg-emerald-100 text-[#0E7C86]'

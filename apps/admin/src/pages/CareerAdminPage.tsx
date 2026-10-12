@@ -1,3 +1,4 @@
+import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { CareerJobPostingDto, CareerEmployerDto, CareerApplicationDto } from '@manaratak/domain';
@@ -19,7 +20,7 @@ export function CareerAdminPage() {
   const [params, setParams] = useSearchParams();
   const tab = (['jobs','employers','applications','alumni'].includes(params.get('tab') || '') ? params.get('tab') : 'jobs') as Tab;
   const page = Math.max(1, Number(params.get('page')) || 1);
-  const [search, setSearch] = useState(''), [status, setStatus] = useState(''), [type, setType] = useState('');
+  const [search, setSearch] = useState(() => reviewOwnerSearch(params)), [status, setStatus] = useState(''), [type, setType] = useState('');
   const [employerFilter, setEmployerFilter] = useState(''), [cityFilter, setCityFilter] = useState(''), [jobFilter, setJobFilter] = useState('');
   const [filterCountry, setFilterCountry] = useState(''), [filterCountryCode, setFilterCountryCode] = useState('');
   const [result, setResult] = useState<Page | null>(null), [loading, setLoading] = useState(false), [busy, setBusy] = useState(false);
@@ -91,7 +92,7 @@ export function CareerAdminPage() {
   };
   const labels: Record<string, [string,string]> = { title: ['العنوان العربي','Arabic title'], titleEn: ['العنوان الإنجليزي','English title'], description: ['الوصف','Description'], descriptionEn: ['الوصف الإنجليزي','English description'], displayName: ['اسم الجهة','Employer name'], employerType: ['نوع الجهة','Employer type'], industry: ['القطاع','Industry'], websiteUrl: ['موقع الجهة HTTPS','Employer HTTPS website'], logoAssetId: ['أصل الشعار','Logo asset'], jobCategory: ['التصنيف','Category'], applicationDeadline: ['آخر موعد للتقديم','Application deadline'], externalPostingUrl: ['رابط التقديم الخارجي','External application URL'], sourceUrl: ['المصدر الرسمي','Official source'], recruitmentCycle: ['دورة التوظيف','Recruitment cycle'], requiredSkills: ['المهارات بفواصل','Skills, comma separated'], salaryMin: ['أدنى راتب بالوحدات الصغرى','Minimum salary in minor units'], salaryMax: ['أعلى راتب بالوحدات الصغرى','Maximum salary in minor units'], scale: ['المنازل العشرية','Decimal scale'] };
   const formKeys = tab === 'employers' ? ['displayName','employerType','industry','websiteUrl','logoAssetId','description'] : ['title','titleEn','description','descriptionEn','jobCategory','applicationDeadline','externalPostingUrl','sourceUrl','recruitmentCycle','requiredSkills','salaryMin','salaryMax','scale'];
-  return <main dir={dir} className="space-y-4 p-4">
+  return <main dir={dir} className="space-y-4 p-4 text-[#142B5F]">
     <h1 className="text-xl font-bold">{c('الوظائف والمسارات المهنية','Careers and alumni')}</h1>
     <nav className="flex flex-wrap gap-3">{(['jobs','employers','applications','alumni'] as Tab[]).filter(value => value !== 'applications' || hasPermission('admin:careers:applications:review')).filter(value => value !== 'alumni' || hasPermission('admin:careers:alumni:view')).map((value) => <button key={value} type="button" disabled={busy} onClick={() => { setParams({ tab: value, page: '1' }); setStatus(''); setSearch(''); setEditor(false); setEditing(null); setApplicationDetail(null); }} className={tab===value?'font-bold underline':''}>{({ jobs: c('الوظائف','Jobs'), employers: c('الجهات','Employers'), applications: c('طلبات التقديم','Applications'), alumni: c('موافقات الخريجين','Alumni consent') })[value]}</button>)}</nav>
     <label className="block">{c('سبب الإجراء','Action reason')}<input className="ml-3 rounded border p-2" value={reason} maxLength={1000} onChange={event => setReason(event.target.value)} /></label>
@@ -103,6 +104,7 @@ export function CareerAdminPage() {
       {['jobs','employers'].includes(tab) && hasPermission('admin:careers:author') && <button type="button" onClick={()=>{setEditing(null);setForm(fresh());setCountryCode('');setEditor(true);}}>{c('إضافة','Add')}</button>}
     </div>
     {notice && <p role="status">{notice}</p>}{loading && <p>{c('جارٍ التحميل','Loading')}</p>}
+    {!loading && result && result.data.length === 0 && <p role="status">{c('لا توجد سجلات مطابقة للفلاتر الحالية', 'No matching records for the current filters')}</p>}
     <p>{c('السجلات المطابقة','Matching records')}: {result?.total ?? '—'}</p>
     <ul className="space-y-2">{!loading && result?.data.map(row=><li key={row.id} className="flex flex-wrap gap-3 rounded border p-3">
       <span>{row.title || row.displayName || row.publicId || row.id}</span><span>{row.status || row.verificationStatus || row.visibility}</span>

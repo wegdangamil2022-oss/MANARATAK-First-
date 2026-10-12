@@ -46,6 +46,7 @@ export interface ImportedCourseAdminRecord {
   shortCourseTopicsRaw?: string | null;
   sourceImportRecordId?: string | null;
   sourceVerified: boolean;
+  verificationState?: 'VERIFIED' | 'NEEDS_VERIFICATION' | 'FAILED' | 'UNKNOWN';
   sourceVerificationReason?: string | null;
   linkHealth: ImportedCourseLinkHealth;
   linkResponseCode?: number | null;
