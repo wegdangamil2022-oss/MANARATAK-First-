@@ -1,0 +1,129 @@
+{
+  "scope": "SYNTHETIC_100000_ROWS_NOT_PRODUCTION_SLA",
+  "inserted": 100000,
+  "exportRows": 2000,
+  "pages": 20,
+  "exportMs": 213.3130059999994,
+  "totalMs": 4525.1432970000005,
+  "plans": [
+    {
+      "QUERY PLAN": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 4.78,
+            "Total Cost": 444.15,
+            "Plan Rows": 101,
+            "Plan Width": 67,
+            "Actual Startup Time": 0.448,
+            "Actual Total Time": 1.346,
+            "Actual Rows": 101,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 701,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Incremental Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 4.78,
+                "Total Cost": 8500.71,
+                "Plan Rows": 1953,
+                "Plan Width": 67,
+                "Actual Startup Time": 0.448,
+                "Actual Total Time": 1.34,
+                "Actual Rows": 101,
+                "Actual Loops": 1,
+                "Sort Key": [
+                  "\"timestamp\" DESC",
+                  "id DESC"
+                ],
+                "Presorted Key": [
+                  "\"timestamp\""
+                ],
+                "Full-sort Groups": {
+                  "Group Count": 4,
+                  "Sort Methods Used": [
+                    "quicksort"
+                  ],
+                  "Sort Space Memory": {
+                    "Average Sort Space Used": 29,
+                    "Peak Sort Space Used": 29
+                  }
+                },
+                "Shared Hit Blocks": 701,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Backward",
+                    "Index Name": "AuditRecord_timestamp_idx",
+                    "Relation Name": "AuditRecord",
+                    "Alias": "AuditRecord",
+                    "Startup Cost": 0.29,
+                    "Total Cost": 8415.41,
+                    "Plan Rows": 1953,
+                    "Plan Width": 67,
+                    "Actual Startup Time": 0.018,
+                    "Actual Total Time": 1.317,
+                    "Actual Rows": 102,
+                    "Actual Loops": 1,
+                    "Filter": "((\"actorId\" = 'review02-1cbefade-2104-4860-93ad-ba3be69034be-actor-1'::text) AND (category = 'review02-1cbefade-2104-4860-93ad-ba3be69034be'::text))",
+                    "Rows Removed by Filter": 4996,
+                    "Shared Hit Blocks": 701,
+                    "Shared Read Blocks": 0,
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Dirtied Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.109,
+          "Triggers": [],
+          "Execution Time": 1.358
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+
+ RUN  v4.1.11 /workspace/MANARATAK-First-
+
+ ❯ tests/e2e/sections123/section01.database.spec.ts (5 tests | 1 failed | 4 skipped) 117ms
+     × replays concurrent assignment without a second business audit or outbox event 46ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/e2e/sections123/section01.database.spec.ts > 01 isolated real PostgreSQL concurrency and atomicity > replays concurrent assignment without a second business audit or outbox event
+TypeError: Cannot read properties of undefined (reading 'replayed')
+ ❯ tests/e2e/sections123/section01.database.spec.ts:62:31
+     60|     const ids = [prefix + '-grant-a', prefix + '-grant-b'];
+     61|     const results = await Promise.all(ids.map(id => assignments.execut…
+     62|     expect(results.map(r => r.replayed).sort()).toEqual([false, true]);
+       |                               ^
+     63|     expect(new Set(results.map(r => r.assignmentId)).size).toBe(1);
+     64|     expect(await db.roleAssignmentRecord.count({ where: { identityId, …
+ ❯ tests/e2e/sections123/section01.database.spec.ts:62:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  14:11:39
+   Duration  3.85s (transform 2.32s, setup 0ms, import 3.59s, tests 117ms, environment 0ms)

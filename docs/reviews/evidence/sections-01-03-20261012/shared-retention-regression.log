@@ -1,0 +1,12 @@
+✔ MNT-AUD-0081 policy distinguishes legal hold, audit archive, import purge and permanent asset keep (1.949732ms)
+✔ MNT-AUD-0081 failed attempts remain retryable while applied decisions are terminal (68.032208ms)
+✔ MNT-AUD-0081 import owner uses a lease then purges raw payload without deleting provenance row (32.34615ms)
+✔ MNT-AUD-0081 asset expiry goes through soft-delete and usage-safe purge and releases lease on failure (15.372056ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 857.430283

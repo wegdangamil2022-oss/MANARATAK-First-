@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Error: strict mode violation: getByRole('button', { name: 'Next', exact: true }) resolved to 2 elements:
+    1) <button disabled type="button">Next</button> aka getByRole('group').getByRole('button', { name: 'Next' })
+    2) <button class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm disabled:opacity-50">Next</button> aka getByRole('button', { name: 'Next' }).nth(1)
+
+Call log:
+[2m  - waiting for getByRole('button', { name: 'Next', exact: true })[22m
+
+    at /workspace/MANARATAK-First-/tests/e2e/sections123/section01.browser.mjs:36:16 {
+  log: [
+    "  - waiting for getByRole('button', { name: 'Next', exact: true })"
+  ]
+}
+
+Node.js v24.19.0

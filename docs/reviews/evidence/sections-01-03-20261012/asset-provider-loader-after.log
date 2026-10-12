@@ -1,0 +1,11 @@
+✔ MNT-AUD-0011 signed provider transport requires HTTPS and a strong signing secret (2.322344ms)
+✔ MNT-AUD-0011 provider requests are body-bound, nonce/timestamp signed and base-path confined (74.56809ms)
+✔ MNT-AUD-0011 lifecycle source makes sanitizer output canonical and forbids client-selected clean locators (0.838495ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1556.217838

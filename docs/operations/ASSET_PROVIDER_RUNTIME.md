@@ -46,6 +46,7 @@ All paths are relative to the configured base path.
 - `POST v1/assets/read`
 - `POST v1/assets/archive`
 - `POST v1/assets/restore`
+- `POST v1/assets/verify-clean` (independently observed restored CLEAN bytes)
 - `DELETE v1/assets`
 - `POST v1/assets/malware-scan`
 - `POST v1/assets/sanitize`
@@ -58,7 +59,7 @@ Upload grants must target `QUARANTINE`. Delivery grants are accepted only for `A
 2. Validation and malware scanning reject non-finalized objects. Before scan, the provider re-verifies bytes against persisted SHA-256; sanitization output is verified and rescanned independently.
 3. Promotion from QUARANTINE to CLEAN sends `expectedSha256`. The provider must compare the immutable source object version/digest **atomically** with promotion and return `verifiedSourceSha256`. An echo without atomic enforcement is insufficient.
 4. On source-CAS rejection, the provider must not publish content. Provider-side immutable version or ETag fencing and post-move reconciliation remain **external runtime acceptance obligations**; HTTP adapter checks alone do not prove them.
-5. Provider `archive`, `restore` and `delete` must be idempotent for retries. Archive domain state is committed before provider operation; failed provider archives must remain retryable and non-deliverable.
+5. Provider `archive`, `restore` and `delete` must support durable semantic idempotency, but an uncertain archive/restore response does **not** authorize a blind application retry. Persisted RUNNING/RESTORING or RECOVERY_REQUIRED operations remain non-deliverable and block competing lifecycle commands until an authoritative provider reconciliation resolves the operation. See the current recovery protocol below.
 
 ## Lifecycle security rules
 
@@ -84,8 +85,10 @@ Source verification is not provider verification. Runtime closure still requires
 
 Until those tests are executed against a real configured provider, `MNT-AUD-0011` must remain `SOURCE_VERIFIED / PROVIDER_RUNTIME_PENDING` rather than production-closed.
 
-## Restore integrity and compensation (source contract)
+## Current restore/archive integrity and durable uncertainty contract — 2026-10-12
 
 - Before a DELETED asset becomes ACTIVE, the server calls provider `restore` and then **POST `v1/assets/verify-clean`**, requiring provider-observed digest, byte count, MIME and timestamp. The provider must independently rehash actual restored CLEAN bytes, not merely echo caller evidence. The source adapter rejects missing/contradictory proof.
-- The DB remains DELETED during provider restoration and verification. On verification or DB CAS failure, the application attempts `archive` compensation; if that fails, `ASSET_RESTORE_COMPENSATION_FAILED` is surfaced and requires manual reconciliation.
-- This compensation is **best effort**, not a cross-provider atomic transaction. Race-safe purge-vs-restore locking, immutable object versions and independent provider sandbox integration remain P0 acceptance dependencies.
+- The DB remains DELETED during provider restoration and verification. Before contacting storage, the application persists PREPARED and then RESTORING with the exact restore operation/lease. Verification, provider or DB CAS uncertainty preserves a durable pending/recovery hold; it does not automatically archive the restored object or release a started operation for takeover.
+- Archive persists ARCHIVED plus RUNNING before its sole provider call. An uncertain result remains RUNNING/RECOVERY_REQUIRED; a completed operation is idempotent without another provider archive. A legacy archive does not trigger a guessed replay.
+- The reference/restore/archive guard migrations prevent competing lifecycle commands, claim replacement and physical deletion while these operations are unresolved, including after time-based lease expiry. They were rehearsed on disposable PostgreSQL only in the section 01–03 review; target installation is **not** claimed.
+- These holds favor safety over automatic recovery. Provider-authoritative reconciliation, immutable version fencing, legacy-provider quiescence and actual sandbox acceptance remain open. This supersedes the earlier best-effort archive-compensation description; see [EAP lifecycle recovery](ASSET_LIFECYCLE_RECOVERY.md) and [section 03 verification](../reviews/SECTION_03_VERIFICATION_2026-10-12.md).

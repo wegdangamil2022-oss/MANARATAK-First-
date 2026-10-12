@@ -20,7 +20,7 @@ Deployment must drain older EAP mutator replicas before enabling this journal be
 
 Archive/soft-delete preserve the original PERMANENT/TEMPORARY category and explicit expiry in a typed `retentionBeforeLifecycle` snapshot within the existing EAP-owned metadata envelope. Restore keeps that category and expiry, rather than replacing TEMPORARY with PERMANENT. An expired/invalid policy, TEMPORARY without expiry, or a historical deleted record with no trustworthy original policy fails closed before storage restoration. No dates or durations are inferred and no historical data is backfilled.
 
-A legacy asset whose policy is unknown needs an owner-reviewed retention decision before restoration can be enabled. This document does not authorize rewriting historical policies or automatic retention sweeps. The archive retry and purge tombstone/worker paths continue to use their existing contracts; the generic terminal-SKIPPED governance issue remains separate.
+A legacy asset whose policy is unknown needs an owner-reviewed retention decision before restoration can be enabled. This document does not authorize rewriting historical policies or automatic retention sweeps. Uncertain archive/restore operations remain held under the durable protocols below; purge tombstone cleanup retains its lease-owned retry contract. The section 01–03 review corrected temporary SKIPPED decisions to remain retryable and verified historical skip-key transfer on disposable PostgreSQL. Only APPLIED owner disposition is terminal; this source correction is not a production sweep or an approved retention-duration policy.
 
 ## Current event contract
 

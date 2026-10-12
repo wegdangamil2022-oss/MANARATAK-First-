@@ -1,0 +1,238 @@
+TAP version 13
+# Subtest: MNT-AUD-0030 runtime policy rejects missing/state/classification/owner violations
+ok 1 - MNT-AUD-0030 runtime policy rejects missing/state/classification/owner violations
+  ---
+  duration_ms: 186.64937
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0050 derived registry detects direct and CMS JSON usages and remains read-only
+ok 2 - MNT-AUD-0050 derived registry detects direct and CMS JSON usages and remains read-only
+  ---
+  duration_ms: 20.292133
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0050 purge rejects in-use asset before storage deletion
+ok 3 - MNT-AUD-0050 purge rejects in-use asset before storage deletion
+  ---
+  duration_ms: 130.062982
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0030 consumer use cases fail closed when an AssetId is supplied without P05 policy
+ok 4 - MNT-AUD-0030 consumer use cases fail closed when an AssetId is supplied without P05 policy
+  ---
+  duration_ms: 0.611703
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0081 policy distinguishes legal hold, audit archive, import purge and permanent asset keep
+ok 5 - MNT-AUD-0081 policy distinguishes legal hold, audit archive, import purge and permanent asset keep
+  ---
+  duration_ms: 0.948581
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0081 failed attempts remain retryable while applied decisions are terminal
+ok 6 - MNT-AUD-0081 failed attempts remain retryable while applied decisions are terminal
+  ---
+  duration_ms: 90.254512
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0081 import owner uses a lease then purges raw payload without deleting provenance row
+ok 7 - MNT-AUD-0081 import owner uses a lease then purges raw payload without deleting provenance row
+  ---
+  duration_ms: 53.192419
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0081 asset expiry goes through soft-delete and usage-safe purge and releases lease on failure
+ok 8 - MNT-AUD-0081 asset expiry goes through soft-delete and usage-safe purge and releases lease on failure
+  ---
+  duration_ms: 64.526759
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0058 Service owner use case validates provider/package/pricing/slot invariants
+ok 9 - MNT-AUD-0058 Service owner use case validates provider/package/pricing/slot invariants
+  ---
+  duration_ms: 458.0312
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0058 Prisma booking transaction rechecks authority and consumes discount with optimistic CAS
+ok 10 - MNT-AUD-0058 Prisma booking transaction rechecks authority and consumes discount with optimistic CAS
+  ---
+  duration_ms: 226.07573
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0058 exhausted discount fails before booking creation
+ok 11 - MNT-AUD-0058 exhausted discount fails before booking creation
+  ---
+  duration_ms: 184.877055
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0055 career profile/application enforce active student and P05-owned CV/resume
+ok 12 - MNT-AUD-0055 career profile/application enforce active student and P05-owned CV/resume
+  ---
+  duration_ms: 67.950074
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0055 alumni non-private visibility requires self-owned consent evidence
+ok 13 - MNT-AUD-0055 alumni non-private visibility requires self-owned consent evidence
+  ---
+  duration_ms: 50.818603
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0055 application lifecycle rejects invalid transitions and fences version
+ok 14 - MNT-AUD-0055 application lifecycle rejects invalid transitions and fences version
+  ---
+  duration_ms: 78.21557
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0011 signed provider transport requires HTTPS and a strong signing secret
+ok 15 - MNT-AUD-0011 signed provider transport requires HTTPS and a strong signing secret
+  ---
+  duration_ms: 1.28628
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0011 provider requests are body-bound, nonce/timestamp signed and base-path confined
+ok 16 - MNT-AUD-0011 provider requests are body-bound, nonce/timestamp signed and base-path confined
+  ---
+  duration_ms: 30.058312
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0011 lifecycle source makes sanitizer output canonical and forbids client-selected clean locators
+ok 17 - MNT-AUD-0011 lifecycle source makes sanitizer output canonical and forbids client-selected clean locators
+  ---
+  duration_ms: 0.400584
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0026 AssetReferencePolicy enforces owner, lifecycle, classification and MIME role
+ok 18 - MNT-AUD-0026 AssetReferencePolicy enforces owner, lifecycle, classification and MIME role
+  ---
+  duration_ms: 153.690606
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0026 Admin Asset Center exposes governed query/detail/picker/preview/audit surfaces
+ok 19 - MNT-AUD-0026 Admin Asset Center exposes governed query/detail/picker/preview/audit surfaces
+  ---
+  duration_ms: 0.66948
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0026 shared governed selection is wired to Course, CMS, Certificate and Student avatar workflows
+ok 20 - MNT-AUD-0026 shared governed selection is wired to Course, CMS, Certificate and Student avatar workflows
+  ---
+  duration_ms: 3.630827
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0027 canonical Admin can create a native course and hand off to authoritative editor
+ok 21 - MNT-AUD-0027 canonical Admin can create a native course and hand off to authoritative editor
+  ---
+  duration_ms: 0.575067
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0033 public composition has no duplicate P23 visibility authority
+ok 22 - MNT-AUD-0033 public composition has no duplicate P23 visibility authority
+  ---
+  duration_ms: 0.5371
+  type: 'test'
+  ...
+# Subtest: inventory discovers mounted mutations and refuses an unreviewed added route
+ok 23 - inventory discovers mounted mutations and refuses an unreviewed added route
+  ---
+  duration_ms: 128.471678
+  type: 'test'
+  ...
+# Subtest: inventory detects changed permissions/classification and removed routes
+ok 24 - inventory detects changed permissions/classification and removed routes
+  ---
+  duration_ms: 22.565023
+  type: 'test'
+  ...
+# Subtest: renamed Router variables cannot silently hide new mutations
+ok 25 - renamed Router variables cannot silently hide new mutations
+  ---
+  duration_ms: 42.654521
+  type: 'test'
+  ...
+# Subtest: unresolved mounts and dynamic route paths fail closed
+ok 26 - unresolved mounts and dynamic route paths fail closed
+  ---
+  duration_ms: 18.472037
+  type: 'test'
+  ...
+# Subtest: global audit boundary must follow auth and idempotency and precede mounts
+ok 27 - global audit boundary must follow auth and idempotency and precede mounts
+  ---
+  duration_ms: 3.112226
+  type: 'test'
+  ...
+# Subtest: new collisions between owner routers require a separate explicit review
+ok 28 - new collisions between owner routers require a separate explicit review
+  ---
+  duration_ms: 16.304538
+  type: 'test'
+  ...
+# Subtest: inline router construction retains its owner when cradle repositories are resolved
+ok 29 - inline router construction retains its owner when cradle repositories are resolved
+  ---
+  duration_ms: 12.121728
+  type: 'test'
+  ...
+# Subtest: mounted conditional permission policies remain visible and policy changes require review
+ok 30 - mounted conditional permission policies remain visible and policy changes require review
+  ---
+  duration_ms: 58.203378
+  type: 'test'
+  ...
+# Subtest: unused resolvers, unrelated evaluations and late middleware are not inherited policy evidence
+ok 31 - unused resolvers, unrelated evaluations and late middleware are not inherited policy evidence
+  ---
+  duration_ms: 31.380683
+  type: 'test'
+  ...
+# Subtest: student-tool tests declare owner encrypted replay rather than generic response storage
+ok 32 - student-tool tests declare owner encrypted replay rather than generic response storage
+  ---
+  duration_ms: 6.139572
+  type: 'test'
+  ...
+# Subtest: finite const route registries enumerate every concrete route and retain security evidence
+ok 33 - finite const route registries enumerate every concrete route and retain security evidence
+  ---
+  duration_ms: 46.813726
+  type: 'test'
+  ...
+# Subtest: mutable, escaped or dynamic route registries are never approved by the finite-loop resolver
+ok 34 - mutable, escaped or dynamic route registries are never approved by the finite-loop resolver
+  ---
+  duration_ms: 56.963707
+  type: 'test'
+  ...
+# Subtest: inline immutable action lists enumerate mutations and reject nonliteral members
+ok 35 - inline immutable action lists enumerate mutations and reject nonliteral members
+  ---
+  duration_ms: 42.542452
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0110 audit HTTP surface is read-only and persistence is append-only
+ok 36 - MNT-AUD-0110 audit HTTP surface is read-only and persistence is append-only
+  ---
+  duration_ms: 0.705725
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0106 authenticated Admin actor is server-owned and required
+ok 37 - MNT-AUD-0106 authenticated Admin actor is server-owned and required
+  ---
+  duration_ms: 0.433844
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0084 all Admin mutations are audited by default
+ok 38 - MNT-AUD-0084 all Admin mutations are audited by default
+  ---
+  duration_ms: 0.202696
+  type: 'test'
+  ...
+1..38
+# tests 38
+# suites 0
+# pass 38
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 11114.166936

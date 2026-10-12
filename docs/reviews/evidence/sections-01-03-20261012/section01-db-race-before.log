@@ -1,0 +1,39 @@
+
+ RUN  v4.1.11 /workspace/MANARATAK-First-
+
+ ❯ tests/e2e/sections123/section01.database.spec.ts (5 tests | 1 failed | 4 skipped) 108ms
+     × replays concurrent assignment without a second business audit or outbox event 45ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/e2e/sections123/section01.database.spec.ts > 01 isolated real PostgreSQL concurrency and atomicity > replays concurrent assignment without a second business audit or outbox event
+PrismaClientKnownRequestError:
+Invalid `this.client.roleAssignmentRecord.upsert()` invocation in
+/workspace/MANARATAK-First-/packages/infrastructure/src/authorization/PrismaRoleAssignmentRepository.ts:60:44
+
+  57 }
+  58
+  59 async save(assignment: RoleAssignment): Promise<void> {
+→ 60   await this.client.roleAssignmentRecord.upsert(
+Unique constraint failed on the fields: (`identityId`,`roleId`)
+ ❯ $n.handleRequestError node_modules/@prisma/client/runtime/library.js:121:7315
+ ❯ $n.handleAndLogRequestError node_modules/@prisma/client/runtime/library.js:121:6623
+ ❯ $n.request node_modules/@prisma/client/runtime/library.js:121:6307
+ ❯ l node_modules/@prisma/client/runtime/library.js:130:9633
+ ❯ PrismaRoleAssignmentRepository.save packages/infrastructure/src/authorization/PrismaRoleAssignmentRepository.ts:60:5
+     58|
+     59|   async save(assignment: RoleAssignment): Promise<void> {
+     60|     await this.client.roleAssignmentRecord.upsert({
+       |     ^
+     61|       where: { id: assignment.id },
+     62|       update: {
+ ❯ Proxy._transactionWithCallback node_modules/@prisma/client/runtime/library.js:130:8000
+ ❯ tests/e2e/sections123/section01.database.spec.ts:61:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  14:10:19
+   Duration  2.40s (transform 1.46s, setup 0ms, import 2.16s, tests 108ms, environment 0ms)

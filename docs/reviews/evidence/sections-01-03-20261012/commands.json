@@ -1,0 +1,211 @@
+{
+  "date": "2026-10-12",
+  "repository": "wegdangamil2022-oss/MANARATAK-First-",
+  "branch": "codex/review-sections-1-3-20261012",
+  "main_baseline": "1d31b847455a762180c65306275e2eadc1bbff43",
+  "source_commit": "7081fb0360751f2c4e106dca4888ceffe1b25000",
+  "production_go": false,
+  "environment": {
+    "final_node": "22.16.0",
+    "initial_node": "24.19.0",
+    "database": "new docker PostgreSQL16, loopback55432 only",
+    "browser": "actual Chromium/actual Admin UI/intercepted HTTP/dev CSP bypass"
+  },
+  "db_environment": {
+    "DATABASE_URL": "postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:55432/manaratak_eap_ci_test?schema=public",
+    "DIRECT_URL": "same exact URL",
+    "DATABASE_MUTATIONS_ALLOWED": "true",
+    "RUN_DATABASE_INTEGRATION_TESTS": "true",
+    "EAP_EPHEMERAL_DB_TESTS": "true",
+    "EAP_LOCAL_DISPOSABLE_DB_TESTS": "true",
+    "SECTION123_EVIDENCE_DIR": "$PWD/docs/reviews/evidence/sections-01-03-20261012"
+  },
+  "commands": [
+    {
+      "log": "final-node22-section01.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/vitest/vitest.mjs run packages/application/tests/authorization packages/application/tests/identity packages/infrastructure/tests/authorization packages/infrastructure/tests/identity packages/shared/tests/authorization apps/api/tests/presentation/api/router/AuthorizationControlPlane.spec.ts apps/api/tests/presentation/api/router/AuthorizationDelegation.spec.ts apps/api/tests/presentation/api/router/AuthorizationAdminRouter.spec.ts apps/api/tests/presentation/security/RuntimeRbacAuthority.spec.ts apps/api/tests/presentation/validation/IdentityListQuery.spec.ts apps/admin/src/pages/AuthorizationAdminPage.spec.tsx apps/admin/src/pages/IdentityAdminPage.spec.tsx",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-section02.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/vitest/vitest.mjs run packages/application/tests/audit packages/infrastructure/tests/audit apps/api/tests/audit apps/api/tests/presentation/audit apps/admin/src/pages/AuditCenterPage.spec.tsx apps/admin/src/pages/audit/AuditViewModel.spec.ts",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-section03.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/vitest/vitest.mjs run --config vitest.config.ts packages/domain/tests/asset-platform packages/application/tests/asset-platform packages/infrastructure/tests/asset-platform apps/api/tests/presentation/api/router/AssetReuseRouter.spec.ts apps/api/tests/presentation/api/router/AssetUsageImpact.spec.ts apps/api/tests/presentation/api/router/AssetPlatformErrorContract.spec.ts apps/api/tests/presentation/api/router/AssetFinalizationContract.spec.ts apps/api/tests/presentation/api/router/AssetPlatformRouter.spec.ts apps/admin/src/components/AssetLifecycleActions.spec.tsx apps/admin/src/pages/AssetAdminPage.spec.tsx packages/config/tests/AppConfig.spec.ts apps/api/tests/runtime-dependency-bootstrap.spec.ts",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-postgres-new.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/vitest/vitest.mjs run --config tests/e2e/sections123/vitest.config.mts",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-postgres-eap.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/vitest/vitest.mjs run --config vitest.config.ts packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-guards.log",
+      "command": "npx --yes --package=node@22.16.0 node --import tsx --test tests/security/admin-audit-coverage.test.mjs tests/security/audit-integrity-remediation-source.test.mjs tests/remediation/w2-asset-reference-integrity.test.mjs tests/remediation/w3-asset-provider.test.mjs tests/remediation/w4-admin-asset-course-control-plane.test.mjs tests/remediation/w2-services-career-owner-scope.test.mjs tests/remediation/w2-retention-lifecycle.test.mjs",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-browser01.log",
+      "command": "npx --yes --package=node@22.16.0 node tests/e2e/sections123/section01.browser.mjs",
+      "scope": "final-scoped-verification",
+      "source_commit": "7081fb0360751f2c4e106dca4888ceffe1b25000",
+      "result": "FAIL",
+      "exit_code": 1
+    },
+    {
+      "log": "final-node22-browser02.log",
+      "command": "npx --yes --package=node@22.16.0 node --import tsx tests/e2e/sections123/section02.browser.mjs",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-browser03-ar.log",
+      "command": "npx --yes --package=node@22.16.0 node tests/e2e/section03-admin-isolated.mjs",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-browser03-en-mobile.log",
+      "command": "npx --yes --package=node@22.16.0 node tests/e2e/sections123/section03.browser.mjs",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-typecheck.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/typescript/bin/tsc -b",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-db-tests-typecheck.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/typescript/bin/tsc -p tests/e2e/sections123/tsconfig.json",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-quality.log",
+      "command": "npx --yes --package=node@22.16.0 node scripts/quality/verify-source-quality.mjs",
+      "scope": "final-scoped-verification",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "audit-coverage.log",
+      "command": "npm run audit:coverage:verify",
+      "scope": "final-scoped-verification",
+      "source_commit": "baseline 1d31b847 with working-tree repairs before source commit",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "disposable-schema.log",
+      "command": "npx --no-install prisma db push --schema=packages/infrastructure/prisma/schema.prisma --skip-generate",
+      "scope": "disposable-preparation",
+      "source_commit": "baseline 1d31b847 with working-tree repairs before source commit",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "disposable-eap-guards.log",
+      "command": "node scripts/ci/install-eap-reference-guards.mjs",
+      "scope": "disposable-preparation",
+      "source_commit": "baseline 1d31b847 with working-tree repairs before source commit",
+      "result": "REFUSED_BEFORE_MUTATION",
+      "exit_code": 1
+    },
+    {
+      "log": "disposable-eap-guards-local.log",
+      "command": "node tests/e2e/sections123/install-guards.mjs",
+      "scope": "disposable-preparation",
+      "source_commit": "baseline 1d31b847 with working-tree repairs before source commit",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-lint.log",
+      "command": "npx --no-install eslint apps/admin/src/pages/AssetAdminPage.tsx apps/admin/src/pages/AssetAdminPage.spec.tsx apps/admin/src/components/AssetGovernancePanel.tsx apps/admin/src/components/AssetLifecycleActions.tsx apps/admin/src/components/AssetUploadWizard.tsx apps/admin/src/components/AssetPicker.tsx apps/api/src/presentation/security/AuthorizationErrorResponse.ts packages/application/src/authorization/use-cases/AssignRoleUseCase.ts packages/application/tests/authorization/AssignRoleAudit.spec.ts packages/domain/src/authorization/repositories/IRoleAssignmentRepository.ts packages/infrastructure/src/authorization/PrismaRoleAssignmentRepository.ts packages/infrastructure/src/retention/PrismaAuditRetentionGateway.ts packages/infrastructure/src/retention/PrismaRetentionDecisionRepository.ts packages/infrastructure/tests/audit/RetentionDecisionRetry.spec.ts tests/e2e/sections123/*.ts tests/e2e/sections123/*.mts",
+      "scope": "final-scoped-verification",
+      "source_commit": "baseline 1d31b847 with working-tree repairs before source commit",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-secret-scan.log",
+      "command": "npm run security:secrets",
+      "scope": "delivery-source-and-staged-documents",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-diff-check.log",
+      "command": "git diff --check && git diff --cached --check",
+      "scope": "delivery-source-and-staged-documents",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-picker-typecheck.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/typescript/bin/tsc -b apps/admin",
+      "source_commit": "7081fb0360751f2c4e106dca4888ceffe1b25000",
+      "scope": "affected-picker-only",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "final-node22-picker-regression.log",
+      "command": "npx --yes --package=node@22.16.0 node node_modules/vitest/vitest.mjs run apps/admin/src/pages/AuthorizationAdminPage.spec.tsx apps/admin/src/pages/IdentityAdminPage.spec.tsx",
+      "source_commit": "7081fb0360751f2c4e106dca4888ceffe1b25000",
+      "scope": "affected-picker-only",
+      "result": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "diagnostic_scope_note": "Other attempt logs were produced before the source commit with working-tree repairs; failures and targeted retries are listed in the review report. They are not final success evidence. Counts are not accumulated across attempts.",
+  "matrix_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+  "invalidated_evidence": [
+    {
+      "log": "diagnostic-browser01-invalidated.log",
+      "source_commit": "3b7c055ca1d42b9fed245f4787bc7f15ac2ca5db",
+      "result": "INVALIDATED",
+      "reason": "Harness failed to assert caught React errors; malformed eligibility fixture caused render crash. Fixed fixture, hardened rendering/console checks and added malformed DTO negative case. Do not count its embedded PASS."
+    }
+  ]
+}

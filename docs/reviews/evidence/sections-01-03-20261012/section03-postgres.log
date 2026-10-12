@@ -1,0 +1,24 @@
+
+ RUN  v4.1.11 /workspace/MANARATAK-First-
+
+ ❯ packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts (16 tests | 16 skipped) 9ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts > EAP canonical owner/lifecycle serialization on disposable PostgreSQL
+Error: EAP_DISPOSABLE_LOCAL_POSTGRES_REQUIRED
+ ❯ packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts:22:141
+     20|   let prisma: PrismaClient;
+     21|   beforeAll(async () => {
+     22|     if (process.env.DATABASE_URL !== 'postgresql://eap_ci:eap_ci_dispo…
+       |                                                                                                                                             ^
+     23|     prisma = new PrismaClient(); await prisma.$connect();
+     24|     await assertAssetReferenceIntegrityInstalled(prisma);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  23 passed | 16 skipped (39)
+   Start at  14:20:53
+   Duration  6.59s (transform 3.07s, setup 0ms, import 5.45s, tests 817ms, environment 0ms)

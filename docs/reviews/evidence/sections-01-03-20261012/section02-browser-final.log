@@ -1,0 +1,110 @@
+{
+  "status": "PASS",
+  "scope": "CHROMIUM_UI_INTERCEPTED_HTTP",
+  "summary": [
+    {
+      "language": "en",
+      "checks": [
+        "RBAC-aware links",
+        "draft/applied filters",
+        "cursor preserves actor filter",
+        "duplicate row rejection",
+        "loaded CSV formula defense",
+        "bounded server JSON export and continuation",
+        "reset failure clears stale records",
+        "retry recovery",
+        "RTL/LTR"
+      ],
+      "calls": [
+        {
+          "path": "/auth/me",
+          "query": ""
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?limit=50"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?limit=50"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?actorId=operator&limit=50"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?actorId=operator&cursor=audit-next&limit=50"
+        },
+        {
+          "path": "/admin/audit/export",
+          "query": "?actorId=operator&limit=100&format=json"
+        },
+        {
+          "path": "/admin/audit/export",
+          "query": "?actorId=operator&limit=100&format=json&cursor=export-next"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?actorId=operator&limit=50"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?actorId=operator&limit=50"
+        }
+      ]
+    },
+    {
+      "language": "ar",
+      "checks": [
+        "RBAC-aware links",
+        "draft/applied filters",
+        "cursor preserves actor filter",
+        "duplicate row rejection",
+        "loaded CSV formula defense",
+        "bounded server JSON export and continuation",
+        "reset failure clears stale records",
+        "retry recovery",
+        "RTL/LTR"
+      ],
+      "calls": [
+        {
+          "path": "/auth/me",
+          "query": ""
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?limit=50"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?limit=50"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?actorId=operator&limit=50"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?actorId=operator&cursor=audit-next&limit=50"
+        },
+        {
+          "path": "/admin/audit/export",
+          "query": "?actorId=operator&limit=100&format=json"
+        },
+        {
+          "path": "/admin/audit/export",
+          "query": "?actorId=operator&limit=100&format=json&cursor=export-next"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?actorId=operator&limit=50"
+        },
+        {
+          "path": "/admin/audit/records",
+          "query": "?actorId=operator&limit=50"
+        }
+      ]
+    }
+  ]
+}

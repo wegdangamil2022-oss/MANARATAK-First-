@@ -1,0 +1,1 @@
+packages/application/src/authorization/use-cases/AssignRoleUseCase.ts(62,6): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
