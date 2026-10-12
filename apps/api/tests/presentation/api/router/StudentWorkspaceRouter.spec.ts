@@ -9,6 +9,7 @@ import {
 } from '@manaratak/domain';
 import type { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
 import {
+  CareerEngagementUseCases,
   CertificateReadModelService,
   FinancePlatformUseCases,
   FinanceStudentUseCases,
@@ -95,6 +96,7 @@ describe('StudentWorkspaceRouter', () => {
     app.use(
       '/student',
       StudentWorkspaceRouter.create({
+        careerEngagementUseCases: classDouble(CareerEngagementUseCases.prototype),
         certificateReadModelService: classDouble(CertificateReadModelService.prototype, {
           listForStudent: vi.fn().mockResolvedValue([]),
         }),

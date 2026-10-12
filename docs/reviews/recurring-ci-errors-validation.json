@@ -28,6 +28,10 @@
       "passed": 54,
       "failed": 0,
       "command": "npm run notifications:source:verify"
+    },
+    "vercel_router_fixtures": {
+      "passed": 10,
+      "failed": 0
     }
   },
   "source_checks": {
@@ -42,7 +46,8 @@
     "lint": "PASS_0_ERRORS_EXISTING_WARNINGS",
     "full_workspace_build": "PASS",
     "closure_manifest": "PASS_EVERY_SOURCE_GATE_IN_ORDERED_SEGMENTS_RUNTIME_GATES_SKIPPED",
-    "preflight": "PASS"
+    "preflight": "PASS",
+    "vercel_traced_typescript": "PASS_0_DIAGNOSTICS_ALL_4_CONTEXTS_API_TESTS_INCLUDED"
   },
   "not_executed": [
     "live database",

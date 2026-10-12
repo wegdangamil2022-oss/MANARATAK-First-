@@ -10,7 +10,7 @@ describe('CareerPublicRouter', () => {
       getPublishedJobBySlug: vi.fn()
     };
     const app = express();
-    app.use('/public/careers', CareerPublicRouter.create({ careerPublicUseCases: careerPublicUseCases as any }));
+    app.use('/public/careers', CareerPublicRouter.create({ careerPublicUseCases: careerPublicUseCases as any, careerEngagementRepository: { listPublicAlumni: vi.fn().mockResolvedValue({ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 }) } as any }));
 
     const response = await request(app).get('/public/careers/jobs?country=Yemen&pageSize=100');
 

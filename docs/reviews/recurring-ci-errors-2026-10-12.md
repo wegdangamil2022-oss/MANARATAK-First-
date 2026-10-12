@@ -15,6 +15,7 @@ The latest main runs were inspected: Enterprise CI `38196013978`, architecture `
 | Application publish path omitted its workflow state gate. | Require READY_TO_PUBLISH before publication, before owner persistence. Negative test confirms no mutation from review state. |
 | Service envelopes stripped unparsed reason before schema validation; Finance identity read an unparsed revision. | Strictly parse complete Service reason envelopes before stripping; validate optional numeric Finance revision. Invalid/unknown delivery fields fail before commands. |
 | Native W2 fixtures omitted new safety dependencies and transactional authority. | Load real local safety/cursor modules and supply request, outbox, actor, verification and CAS fixtures; retain stale-write, capacity, discount and student-owned CV assertions. No live database or provider. |
+| Vercel traces API tests that the normal src-only build excludes; two router fixtures lacked the new Career dependencies. | Supply the engagement repository/use-case doubles; keep full traced test compilation enabled. |
 | Notification preview test included cold module loading inside its five-second behavior budget. | Move real middleware imports to suite initialization; keep every preview/audit/idempotency assertion and timeout unchanged. |
 | Repository check treated a valid worktree .git file as unexpected; Nginx fixture depended on system temp directories. | Support .git worktree metadata and direct all proxy/FastCGI/uWSGI/SCGI temp directories to its isolated fixture root. |
 
