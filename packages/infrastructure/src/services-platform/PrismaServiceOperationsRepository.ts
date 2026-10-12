@@ -125,7 +125,10 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
       this.p()[model].findMany({ where, take: 20, skip: (page - 1) * 20, orderBy: { id: 'asc' } }),
       this.p()[model].count({ where }),
     ]);
-    return { data, total, page };
+    return {
+      data: kind === 'bookings' ? data.map(({ inputSnapshot: _inputs, ...row }: any) => row) : data,
+      total, page,
+    };
   }
   private async event(tx: any, model: string, value: any, action: string) {
     if (!this.context?.actorId || !this.context.reason || !tx.transactionalOutboxRecord?.create)
@@ -483,6 +486,7 @@ export class PrismaServiceOperationsRepository implements IServiceOperationsRepo
             inputsErasedAt: null,
             status: { in: ['COMPLETED', 'CANCELLED'] },
             request: {
+              status: { in: ['COMPLETED', 'CANCELLED'] },
               retentionUntil: { lte: now },
               OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: now } }],
             },

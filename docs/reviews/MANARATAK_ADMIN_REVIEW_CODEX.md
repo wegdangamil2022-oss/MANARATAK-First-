@@ -12892,7 +12892,12 @@ Ownership: Course owns catalog/course/learning outcomes, curriculum, learning pa
 - الوثائق القديمة التي تعلن `COMPLETED & VERIFIED` ليست evidence لإطلاق المنتج الحالي. اختبار تشغيل حقيقي وإثبات قواعد IAM وموافقة مالية وتحميل public/Student مطلوب قبل `CLOSED`.
 - Review only; no repository edits, CI run, live DB migrations, deployed runtime validation, provider charges, or production release approval.
 
+**Historical review baseline (superseded for source disposition by the closure note below):**
+
 **SECTION 21 STATUS: 28 unique Codex tasks — P0=1, P1=22, P2=5 (`SVC-ADM-001…028`); REVIEWED — CRITICAL CROSS-DOMAIN GATES + OPERATIONS COMPLETENESS FIXES REQUIRED; NOT CLOSED. NEXT ONLY ON USER REQUEST: 22 — CAREERS / P21.**
+
+**تحديث إغلاق المصدر — 2026-10-12:** `SVC-ADM-001…028` و`SVC-FG-029…030`: **CODE_CLOSED / RUNTIME_DEFERRED_AFTER_SECTION_28** على فرع `fix/codex-section-21-services`، باستكمال الحالة المدفوعة `964c9444`. تفاصيل التنفيذ والأدلة وحدودها في [section-21-implementation.md](section-21-implementation.md) و[section-21-validation.json](section-21-validation.json). الفحص الجديد المنفصل مرة واحدة: 17/18 ناجح؛ صُححت الحالة المتعثرة دون إعادة. لم تُعد الفحوص القديمة ولم يُصدّق بناء نهائي. لا ترحيلات مطبّقة ولا تحقق PostgreSQL/مزود/E2E ولا جاهزية إنتاجية؛ هذه مؤجلة وفق سياسة ما بعد القسم 28. هذا التحديث لا يغلق `SVC-FG-031` وما بعدها ولا يبدأ القسم 22 تلقائيًا.
+
 
 ---
 

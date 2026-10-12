@@ -299,7 +299,8 @@ export class PrismaServicePlatformRepository
     ];
     // The public query and projection use the same reviewed revision, including while a draft is edited.
     const column = (name: string) =>
-      Prisma.sql`COALESCE(s."publishedSnapshot" ->> ${name}, ${Prisma.raw('s."' + name + '"')})`;
+      Prisma.sql`CASE WHEN jsonb_typeof(s."publishedSnapshot")='object' THEN s."publishedSnapshot" ->> ${name} ELSE ${Prisma.raw('s."' + name + '"')} END`;
+    const localizedContent = Prisma.sql`CASE WHEN jsonb_typeof(s."publishedSnapshot")='object' THEN s."publishedSnapshot" -> 'localizedContent' ELSE s."localizedContent" END`;
     for (const key of [
       'serviceCategory',
       'fulfillmentType',
@@ -316,7 +317,9 @@ export class PrismaServicePlatformRepository
     if (search) {
       const pattern = '%' + search.replace(/[\\%_]/g, (value) => '\\' + value) + '%';
       clauses.push(
-        Prisma.sql`(${column('displayName')} ILIKE ${pattern} OR ${column('serviceDescription')} ILIKE ${pattern} OR s."publicId" ILIKE ${pattern} OR s."slug" ILIKE ${pattern} OR COALESCE(s."publishedSnapshot" -> 'localizedContent',s."localizedContent") -> 'en' ->> 'serviceDescription' ILIKE ${pattern} OR COALESCE(s."publishedSnapshot" -> 'localizedContent',s."localizedContent") -> 'en' ->> 'displayName' ILIKE ${pattern})`,
+        Prisma.sql`(${column('displayName')} ILIKE ${pattern} OR ${column('serviceDescription')} ILIKE ${pattern} OR s."publicId" ILIKE ${pattern} OR ${column('slug')} ILIKE ${pattern}
+          OR EXISTS(SELECT 1 FROM jsonb_each(CASE WHEN jsonb_typeof(${localizedContent})='object' THEN ${localizedContent} ELSE '{}'::jsonb END) l
+            WHERE l.key IN ('ar','en') AND (l.value ->> 'displayName' ILIKE ${pattern} OR l.value ->> 'serviceDescription' ILIKE ${pattern})))`,
       );
     }
     if (filters.supportedCountryReferenceId)
@@ -486,6 +489,27 @@ export class PrismaServicePlatformRepository
       { isolationLevel: 'Serializable' },
     );
   }
+  private async eraseBookingInputs(tx: any, requestId: string, now: Date, actorId: string) {
+    const booking = await tx.serviceBookingRecord.findUnique({ where: { requestId } });
+    if (!booking) return;
+    if (!['COMPLETED', 'CANCELLED'].includes(booking.status))
+      throw new Error('SERVICE_INPUT_ERASURE_BOOKING_ACTIVE');
+    if (booking.inputsErasedAt) return;
+    const changed = await tx.serviceBookingRecord.updateMany({
+      where: { id: booking.id, version: booking.version, inputsErasedAt: null },
+      data: { inputSnapshot: Prisma.DbNull, inputsErasedAt: now, version: { increment: 1 } },
+    });
+    if (changed.count !== 1) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
+    await tx.transactionalOutboxRecord.create({
+      data: {
+        id: randomUUID(), eventType: 'ServiceBookingInputsErased.v1', domain: 'SERVICES',
+        aggregateType: 'ServiceBooking', aggregateId: booking.id,
+        payload: { bookingId: booking.id, requestId, version: booking.version + 1, actorId },
+        metadata: { schemaVersion: 1 }, correlationId: booking.publicId,
+        state: 'PENDING', attempts: 0, availableAt: now, createdAt: now,
+      },
+    });
+  }
   async purgeExpiredInputs(limit: number) {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100)
       throw new Error('SERVICE_MAINTENANCE_LIMIT_INVALID');
@@ -497,7 +521,10 @@ export class PrismaServicePlatformRepository
             retentionUntil: { lte: now },
             inputsErasedAt: null,
             status: { in: ['COMPLETED', 'CANCELLED'] },
-            OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: now } }],
+            AND: [
+              { OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: now } }] },
+              { OR: [{ booking: { is: null } }, { booking: { is: { status: { in: ['COMPLETED', 'CANCELLED'] } } } }] },
+            ],
           },
           orderBy: [{ retentionUntil: 'asc' }, { id: 'asc' }],
           take: limit,
@@ -519,6 +546,7 @@ export class PrismaServicePlatformRepository
             },
           });
           if (result.count !== 1) continue;
+          await this.eraseBookingInputs(tx, row.id, now, 'system:services-maintenance');
           await tx.transactionalOutboxRecord.create({
             data: {
               id: randomUUID(),
@@ -592,20 +620,29 @@ export class PrismaServicePlatformRepository
       'ServiceRequestInputsErased.v1',
       'ServiceRequest',
       async (tx) => {
+        const now = new Date();
+        const existing = await this.requests(tx).findUnique({ where: { id } });
+        if (!existing || existing.studentReferenceId !== studentReferenceId)
+          throw new Error('SERVICE_REQUEST_NOT_FOUND');
+        if (existing.legalHoldUntil && existing.legalHoldUntil > now)
+          throw new Error('SERVICE_INPUT_ERASURE_LEGAL_HOLD');
         const changed = await this.requests(tx).updateMany({
           where: {
             id,
             studentReferenceId,
             version: expectedVersion,
             status: { in: ['COMPLETED', 'CANCELLED'] },
+            OR: [{ legalHoldUntil: null }, { legalHoldUntil: { lte: now } }],
           },
           data: {
             requestParameters: {},
             fulfillmentMetadata: Prisma.DbNull,
+            inputsErasedAt: now,
             version: { increment: 1 },
           },
         });
         if (changed.count !== 1) throw new Error('SERVICE_REQUEST_VERSION_CONFLICT');
+        await this.eraseBookingInputs(tx, id, now, studentReferenceId);
         return this.requests(tx).findUnique({ where: { id } });
       },
       (row) => ({ requestId: row.id, version: row.version, actorId: studentReferenceId }),
@@ -858,6 +895,30 @@ export class PrismaServicePlatformRepository
               },
             });
             if (count >= provider.capacity) throw new Error('SERVICE_PROVIDER_CAPACITY_EXHAUSTED');
+          }
+          if (data.status === ServiceRequestStatus.CANCELLED) {
+            const booking = await tx.serviceBookingRecord.findUnique({ where: { requestId: id } });
+            if (booking?.status === 'COMPLETED') throw new Error('SERVICE_BOOKING_TRANSITION_INVALID');
+            if (booking && booking.status !== 'CANCELLED') {
+              const reservedDiscountId = booking.discountState === 'RESERVED'
+                ? booking.pricingSnapshot?.discountId : null;
+              await tx.serviceBookingRecord.update({
+                where: { id: booking.id, version: booking.version },
+                data: { status: 'CANCELLED', discountState: 'RELEASED', version: { increment: 1 } },
+              });
+              if (reservedDiscountId)
+                await tx.serviceDiscountRecord.updateMany({
+                  where: { id: reservedDiscountId, redemptionCount: { gt: 0 } },
+                  data: { redemptionCount: { decrement: 1 } },
+                });
+              await tx.transactionalOutboxRecord.create({ data: {
+                id: randomUUID(), eventType: 'ServiceBookingCancelled.v1', domain: 'SERVICES',
+                aggregateType: 'ServiceBooking', aggregateId: booking.id,
+                payload: { bookingId: booking.id, requestId: id, version: booking.version + 1 },
+                metadata: { schemaVersion: 1, ownerDomain: 'SERVICES' }, correlationId: booking.publicId,
+                state: 'PENDING', attempts: 0, availableAt: new Date(), createdAt: new Date(),
+              } });
+            }
           }
           return this.requests(tx).update({
             where: { id_version: { id, version: expectedVersion } },

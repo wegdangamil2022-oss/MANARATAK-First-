@@ -489,7 +489,7 @@ export class ServiceOperationsUseCases {
     if (pkg.status !== ServicePackageStatus.DRAFT) throw new Error('SERVICE_PACKAGE_NOT_DRAFT');
     for (const item of pkg.items) {
       const service = await this.catalog.findById(item.serviceId);
-      if (!service || service.status !== ServiceStatus.PUBLISHED)
+      if (!service || (service.status !== ServiceStatus.PUBLISHED && !service.publishedSnapshot))
         throw new Error(`SERVICE_PACKAGE_ITEM_NOT_PUBLISHED:${item.serviceId}`);
     }
     return this.operations.updatePackageStatus(
@@ -643,6 +643,7 @@ export class ServiceOperationsUseCases {
       input.serviceId ?? null,
       input.packageId ?? null,
     );
+    const packageInputs: Record<string, Record<string, unknown>> = {};
     if (pkg) {
       if (
         input.packageConsent !== true ||
@@ -671,6 +672,7 @@ export class ServiceOperationsUseCases {
           input.packageParameters?.[item.serviceId] ??
             (item.serviceId === request.serviceId ? request.requestParameters : {}),
         );
+        packageInputs[item.serviceId] = params;
         for (const field of published.inputSchema ?? [])
           if (field.type === 'ASSET' && params[field.key])
             await assertAssetReferenceUsable(this.assetReferences, String(params[field.key]), {
@@ -746,7 +748,7 @@ export class ServiceOperationsUseCases {
       publicId: `svc_booking_${serviceFingerprint({ student: input.studentReferenceId, key: input.idempotencyKey }).slice(0, 40)}`,
       requestId: input.requestId,
       payloadFingerprint: serviceFingerprint(input),
-      inputSnapshot: input.packageParameters,
+      inputSnapshot: pkg ? packageInputs : undefined,
       studentReferenceId: input.studentReferenceId,
       serviceId: request.serviceId,
       packageId: pkg?.id ?? null,
@@ -913,6 +915,8 @@ export class ServiceOperationsUseCases {
       throw new Error('SERVICE_WORKFLOW_EXECUTION_NOT_FOUND');
     const booking = await this.operations.findBookingById(execution.bookingId);
     if (!booking) throw new Error('SERVICE_BOOKING_NOT_FOUND');
+    if (![ServiceBookingStatus.CONFIRMED, ServiceBookingStatus.IN_PROGRESS].includes(booking.status))
+      throw new Error('SERVICE_BOOKING_NOT_CONFIRMED');
     await this.assertBookingClearance(booking);
     const definition = await this.operations.findWorkflowDefinitionById(
       execution.workflowDefinitionId,
@@ -933,6 +937,18 @@ export class ServiceOperationsUseCases {
       )
     )
       throw new Error('SERVICE_DELIVERY_REVIEW_REQUIRED');
+    for (const artifact of artifacts.filter(
+      (a) => a.workflowExecutionId === id && a.stepKey === execution.currentStepKey,
+    )) {
+      if (!artifact.assetId) throw new Error('SERVICE_DELIVERY_REVIEW_REQUIRED');
+      try {
+        await assertAssetReferenceUsable(this.assetReferences, artifact.assetId, {
+          purpose: 'SERVICE_DELIVERY_ARTIFACT', expectedOwnerId: booking.id,
+        });
+      } catch {
+        throw new Error('SERVICE_DELIVERY_REVIEW_REQUIRED');
+      }
+    }
     const next = steps[index + 1];
     return this.operations.updateWorkflowExecution(
       id,
@@ -959,6 +975,8 @@ export class ServiceOperationsUseCases {
       request.serviceId !== booking.serviceId
     )
       throw new Error('SERVICE_BOOKING_REQUEST_MISMATCH');
+    if (request.status === 'CANCELLED' || request.cancellationState === 'PENDING_FINANCE')
+      throw new Error('SERVICE_FINANCE_CANCELLATION_PENDING');
     if (
       request.serviceSnapshot?.fulfillmentPolicy !== 'FREE' ||
       BigInt(booking.pricingSnapshot.finalAmountMinorUnits) > 0n

@@ -1,3 +1,4 @@
+import { ServiceRequestServiceFilter } from './ServiceRequestServiceFilter';
 import { serviceText } from '../i18n/serviceText';
 import { ServiceCaseQueue } from './ServiceCaseQueue';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -340,22 +341,19 @@ export function ServiceRequestsWorkspace({
             }}
           />
         </label>
-        <label className="text-xs font-bold">
-          {serviceText('معرف الخدمة', language)}
-          <input
-            className="block rounded-xl border p-3"
-            value={serviceFilter}
-            onChange={(e) => {
-              setServiceFilter(e.target.value);
-              setPage(1);
-              setParams((previous) => {
-                const next = new URLSearchParams(previous);
-                e.target.value ? next.set('serviceId', e.target.value) : next.delete('serviceId');
-                return next;
-              });
-            }}
-          />
-        </label>
+        <ServiceRequestServiceFilter
+          value={serviceFilter}
+          language={language}
+          onChange={(id) => {
+            setServiceFilter(id);
+            setPage(1);
+            setParams((previous) => {
+              const next = new URLSearchParams(previous);
+              id ? next.set('serviceId', id) : next.delete('serviceId');
+              return next;
+            });
+          }}
+        />
         <label className="text-xs font-bold">
           {serviceText('الحالة', language)}
           <select

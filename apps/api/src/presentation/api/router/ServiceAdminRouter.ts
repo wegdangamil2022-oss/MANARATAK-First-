@@ -427,6 +427,7 @@ export class ServiceAdminRouter {
       router.post(
         `/operations/${kind}/:id/activate`,
         asyncHandler(async (req: Request, res: Response) => {
+          await requirePermission(req, 'admin:services:operations:manage');
           await requirePermission(
             req,
             kind === 'providers'

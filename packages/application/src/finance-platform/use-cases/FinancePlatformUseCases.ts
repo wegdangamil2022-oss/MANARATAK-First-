@@ -335,7 +335,7 @@ export class FinancePlatformUseCases {
   async resolveServiceCancellation(invoiceId:string,expected:{requestPublicId:string;studentReferenceId:string}) {
     const invoice=await this.requireInvoice(invoiceId);
     if(invoice.originDomain!=='PHASE_20_SERVICE_REQUEST'||invoice.originReferenceId!==expected.requestPublicId||invoice.studentReferenceId!==expected.studentReferenceId)throw new Error('SERVICE_FINANCE_ORIGIN_MISMATCH');
-    if([InvoiceStatus.DRAFT,InvoiceStatus.ISSUED].includes(invoice.status)){
+    if([InvoiceStatus.DRAFT,InvoiceStatus.ISSUED,InvoiceStatus.OVERDUE].includes(invoice.status)){
       try{await this.voidInvoice(invoice.id,{actorId:'system:services-maintenance',idempotencyKey:`service-cancellation:${expected.requestPublicId}`,correlationId:expected.requestPublicId,expectedVersion:invoice.version??1,reason:'Service cancellation: Finance-owned unpaid invoice void'});}catch{ /* Active reservations or settled funds remain pending for Finance review. */ }
     }
     return this.getInvoiceClearance(invoice.id,{originDomain:'PHASE_20_SERVICE_REQUEST',originReferenceId:expected.requestPublicId,studentReferenceId:expected.studentReferenceId});

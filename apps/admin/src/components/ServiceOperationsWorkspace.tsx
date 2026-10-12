@@ -239,9 +239,9 @@ export function ServiceOperationsWorkspace() {
             <span>{row.displayName || row.name || row.publicId || row.artifactType || row.id}</span>
             <span>{row.status}</span>
             <code>{row.id}</code>
-            {['DRAFT', 'PAUSED'].includes(row.status) &&
-              kind !== 'slots' &&
-              kind !== 'bookings' &&
+            {(['DRAFT'].includes(row.status) || (kind === 'promotions' && row.status === 'PAUSED')) &&
+              ['providers', 'packages', 'pricing', 'promotions', 'workflows'].includes(kind) &&
+              hasPermission('admin:services:operations:manage') &&
               hasPermission(
                 kind === 'providers'
                   ? 'admin:services:providers:approve'

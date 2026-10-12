@@ -10,11 +10,13 @@ export class ServiceMaintenanceBackgroundJobHandler implements IBackgroundJobHan
   constructor(
     private readonly requests: AdminServiceFulfillmentUseCases,
     private readonly operations: ServiceOperationsUseCases,
+    private readonly enabled = false,
   ) {}
   async handle(
     payload: Readonly<Record<string, unknown>>,
     context: BackgroundJobHandlerContext,
   ): Promise<void> {
+    if (!this.enabled) throw new Error('SERVICE_MAINTENANCE_DISABLED');
     if (context.signal.aborted) throw context.signal.reason ?? new Error('BACKGROUND_JOB_ABORTED');
     const limit =
       typeof payload.limit === 'number' && Number.isSafeInteger(payload.limit)
