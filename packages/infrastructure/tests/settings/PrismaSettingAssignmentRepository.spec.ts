@@ -220,7 +220,9 @@ describe('PrismaSettingAssignmentRepository', () => {
       scope: new ScopeIdentifier('GLOBAL'), versions: [new SettingVersion('new', new StringValue('value'))] });
     mockPrisma.settingDefinitionRecord.findUnique.mockResolvedValue({ id: 'definition', key: 'test.key', valueType: 'String', isDeprecated: true });
     await expect(repository.save(assignment)).rejects.toThrow('SETTINGS_DEFINITION_NOT_WRITABLE');
-    expect(mockPrisma.$queryRaw.mock.calls[0][1]).toBe('setting-definition:test.key');
+    expect(mockPrisma.$queryRaw.mock.calls.map((call: any[]) => call[1])).toEqual([
+      'settings-governance', 'setting-definition:test.key',
+    ]);
     expect(mockPrisma.settingAssignmentRecord.findUnique).not.toHaveBeenCalled();
     expect(mockPrisma.settingAssignmentRecord.upsert).not.toHaveBeenCalled();
   });
@@ -236,7 +238,7 @@ describe('PrismaSettingAssignmentRepository', () => {
     expect(mockPrisma.settingAssignmentRecord.upsert).not.toHaveBeenCalled();
     expect(mockPrisma.settingVersionRecord.create).not.toHaveBeenCalled();
     expect(mockPrisma.$queryRaw.mock.calls.map((call: any[]) => call[1])).toEqual([
-      'setting-definition:test.key', 'setting:test.key:GLOBAL:GLOBAL',
+      'settings-governance', 'setting-definition:test.key', 'setting:test.key:GLOBAL:GLOBAL',
     ]);
   });
   it('persists an inheritance version and owner event with the request correlation', async () => {
