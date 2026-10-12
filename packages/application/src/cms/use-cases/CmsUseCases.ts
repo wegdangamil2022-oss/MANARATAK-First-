@@ -567,7 +567,7 @@ export class AdminCmsUseCases {
     ];
     for (const assetId of assets) CmsPublishingPolicy.assertAssetHandle(assetId);
     await assertAssetReferencesUsable(this.assetReferences, assets, {
-      purpose: 'CMS_PUBLIC_MEDIA',
+      purpose: 'CMS_PUBLIC_MEDIA', publicPublication: true,
       allowedClassifications: [AssetSecurityClassification.PUBLIC],
     });
   }
@@ -581,7 +581,7 @@ export class AdminCmsUseCases {
   private async ensureAssetHandles(assetIds: Array<string | null | undefined>): Promise<void> {
     for (const assetId of assetIds) CmsPublishingPolicy.assertAssetHandle(assetId);
     await assertAssetReferencesUsable(this.assetReferences, assetIds, {
-      purpose: 'CMS_PUBLIC_MEDIA',
+      purpose: 'CMS_PUBLIC_MEDIA', publicPublication: true,
     });
   }
 

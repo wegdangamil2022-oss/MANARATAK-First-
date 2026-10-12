@@ -2662,11 +2662,11 @@ export class ApiClient {
     return this.getCurrentSessionIdentity();
   }
 
-  static async login(email: string, password: string, rememberMe?: boolean): Promise<void> {
+  static async login(email: string, password: string, rememberMe?: boolean, mfaCode?: string): Promise<void> {
     const res = await apiFetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: getStudentHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ email: email.trim(), password, rememberMe }),
+      body: JSON.stringify({ email: email.trim(), password, rememberMe, ...(mfaCode ? {mfaCode} : {}) }),
     });
     const body = await res.json().catch(() => ({}));
     if (!res.ok || !body?.data?.authenticated) {

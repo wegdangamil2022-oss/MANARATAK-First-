@@ -1,4 +1,5 @@
 import {
+  assertAssetPublicRights,
   IAssetRecordRepository,
   IAssetStorageGateway,
   IAssetUsageRegistryGateway,
@@ -220,10 +221,16 @@ export class ProcessAssetLifecycleUseCase {
     const record = await this.assetRepository.findById(id);
     if (!record) throw new Error(`Asset not found: ${dto.assetId}`);
     record.assertCanDeliver();
+    if (record.classification === 'PUBLIC') assertAssetPublicRights(record.metadata.extraMetadata?.rights);
     if (!this.storageGateway.generateDeliveryGrant) {
       throw new Error('ASSET_SECURE_DELIVERY_NOT_CONFIGURED');
     }
-    const grant = await this.storageGateway.generateDeliveryGrant(record.locator, dto.expiresInSeconds ?? 300);
+    const rights=record.metadata.extraMetadata?.rights as {publicationPolicy?:string;expiresAt?:string}|undefined;
+    const deadline=record.classification==='PUBLIC'&&rights?.publicationPolicy==='MANDATORY'&&rights.expiresAt?Date.parse(rights.expiresAt):null;
+    const ttl=deadline===null?(dto.expiresInSeconds??300):Math.min(dto.expiresInSeconds??300,Math.floor((deadline-Date.now())/1000));
+    if(ttl<1)throw new Error('ASSET_PUBLIC_RIGHTS_REQUIRED');
+    const grant = await this.storageGateway.generateDeliveryGrant(record.locator, ttl);
+    if(deadline!==null&&grant.expiresAt.getTime()>deadline)throw new Error('ASSET_PUBLIC_RIGHTS_REQUIRED');
     return {
       assetId: dto.assetId,
       url: grant.url,
@@ -261,7 +268,7 @@ export class ProcessAssetLifecycleUseCase {
     // ARCHIVED plus a non-expiring intent commits before the sole provider call.
     await this.assetRepository.save(record);
     try {
-      await this.storageGateway.archive(record.locator);
+      await this.storageGateway.archive(record.locator, record.archiveOperation!.operationId);
       await this.assetRepository.completeArchiveOperation(record);
     } catch (error) {
       let journalFailure: unknown;
@@ -310,7 +317,7 @@ export class ProcessAssetLifecycleUseCase {
       await this.assetRepository.assertRestoreLeaseOwned(record);
       await this.assetRepository.markRestoreProviderStarted(record);
       providerRestoreAttempted = true;
-      await this.storageGateway.restore(record.locator);
+      await this.storageGateway.restore(record.locator, record.restoreOperation!.operationId);
       await this.storageGateway.verifyRestoredObject(record.locator, {
         expectedSha256: record.checksum.hash,
         expectedByteSize: record.metadata.byteSize,

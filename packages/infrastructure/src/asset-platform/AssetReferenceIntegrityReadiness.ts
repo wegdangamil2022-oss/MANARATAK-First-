@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 // Mirrors the schema-backed consumer inventory; source and PostgreSQL tests verify completeness.
 export const ASSET_REFERENCE_OWNER_GUARDS = [
+  { table: 'AssetRenditionRecord', fields: ['assetId','generatedAssetId'], attachments: false, seo: false },
   { table: 'Course', fields: ['thumbnailAssetId'], attachments: false, seo: false },
   { table: 'CourseLessonAsset', fields: ['assetId'], attachments: false, seo: false },
   { table: 'CertificateIssuer', fields: ['issuerLogoAssetId'], attachments: false, seo: false },

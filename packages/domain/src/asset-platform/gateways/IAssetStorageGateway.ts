@@ -36,7 +36,11 @@ export interface AssetUploadVerificationRequest {
   declaredMimeType: string;
 }
 
+export interface AssetLifecycleReconciliationProof {
+  operationId:string;kind:'ARCHIVE'|'RESTORE';status:'ARCHIVED'|'RESTORED';fenced:true;fenceToken:string;observedAt:string;
+}
 export interface IAssetStorageGateway {
+  verifyRenditionRelation?(source: AssetStorageLocator, rendition: AssetStorageLocator, expected: {sourceSha256:string;checksumSha256:string}): Promise<{sourceSha256:string;checksumSha256:string;byteSize:number;mimeType:string;width:number;height:number;verifiedAt:string}>;
   generateUploadLocator(zone?: AssetStorageZone, assetId?: string): Promise<AssetStorageLocator>;
   generateUploadGrant?(zone: AssetStorageZone, request: AssetUploadGrantRequest): Promise<AssetUploadGrant>;
   generateDeliveryGrant?(locator: AssetStorageLocator, expiresInSeconds: number): Promise<AssetDeliveryGrant>;
@@ -45,8 +49,9 @@ export interface IAssetStorageGateway {
   moveToCleanZone(quarantineLocator: AssetStorageLocator, expectedSha256?: string): Promise<AssetStorageLocator>;
   openRead?(locator: AssetStorageLocator, maxBytes: number): AsyncIterable<Uint8Array>;
   read?(locator: AssetStorageLocator, maxBytes: number): Promise<Uint8Array>;
-  archive(locator: AssetStorageLocator): Promise<void>;
-  restore(locator: AssetStorageLocator): Promise<void>;
+  reconcileLifecycleOperation?(locator:AssetStorageLocator,request:{operationId:string;kind:'ARCHIVE'|'RESTORE';expectedSha256?:string}):Promise<AssetLifecycleReconciliationProof|null>;
+  archive(locator: AssetStorageLocator, operationId?: string): Promise<void>;
+  restore(locator: AssetStorageLocator, operationId?: string): Promise<void>;
   /** Re-observe actual CLEAN bytes after restoration, before making an asset ACTIVE. */
   verifyRestoredObject?(locator: AssetStorageLocator, request: {
     expectedSha256: string;

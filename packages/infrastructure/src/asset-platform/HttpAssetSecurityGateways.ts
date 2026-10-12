@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import {
+  AssetLifecycleReconciliationProof,
   AssetDeliveryGrant,
   AssetSanitizationMetadata,
   AssetStorageLocator,
@@ -88,6 +89,13 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
 
   constructor(options: HttpAssetProviderOptions) {
     this.client = new SignedProviderHttpClient(options);
+  }
+
+  async verifyRenditionRelation(source: AssetStorageLocator, rendition: AssetStorageLocator, expected: { sourceSha256:string; checksumSha256:string }) {
+    const payload={source:locatorPayload(source),rendition:locatorPayload(rendition),...expected};
+    const proof=await this.client.json<{sourceSha256:string;checksumSha256:string;byteSize:number;mimeType:string;width:number;height:number;verifiedAt:string;derivedFromSource:boolean}>('POST','/v1/assets/renditions/verify',payload,{idempotencyKey:operationIdempotencyKey('rendition-verify',payload)});
+    if (proof.derivedFromSource!==true || proof.sourceSha256!==expected.sourceSha256 || proof.checksumSha256!==expected.checksumSha256) throw new Error('ASSET_RENDITION_EVIDENCE_INVALID');
+    return {sourceSha256:proof.sourceSha256,checksumSha256:proof.checksumSha256,byteSize:proof.byteSize,mimeType:proof.mimeType,width:proof.width,height:proof.height,verifiedAt:proof.verifiedAt};
   }
 
   async generateUploadLocator(zone: AssetStorageZone = AssetStorageZone.QUARANTINE, assetId?: string): Promise<AssetStorageLocator> {
@@ -187,13 +195,22 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     return data;
   }
 
-  async archive(locator: AssetStorageLocator): Promise<void> {
-    const payload = { locator: locatorPayload(locator) };
+  async reconcileLifecycleOperation(locator:AssetStorageLocator,request:{operationId:string;kind:'ARCHIVE'|'RESTORE';expectedSha256?:string}):Promise<AssetLifecycleReconciliationProof|null> {
+    const payload={locator:locatorPayload(locator),...request};
+    await this.client.json<{pending:boolean;proof?:AssetLifecycleReconciliationProof}>('POST','/v1/assets/lifecycle/reconcile',payload,{idempotencyKey:operationIdempotencyKey('lifecycle-reconcile',payload)});
+    // Finalization is idempotent; the observation must be fresh on every retry.
+    const observed=await this.client.json<{pending?:boolean;proof?:AssetLifecycleReconciliationProof}>('GET','/v1/assets/lifecycle/operations/'+encodeURIComponent(request.operationId),undefined);
+    if(observed.pending===true)return null;
+    if(!observed.proof)throw new Error('ASSET_LIFECYCLE_RECONCILIATION_PROOF_INVALID');
+    return observed.proof;
+  }
+  async archive(locator: AssetStorageLocator, operationId?: string): Promise<void> {
+    const payload = { locator: locatorPayload(locator), ...(operationId ? {operationId} : {}) };
     await this.client.json<void>('POST', '/v1/assets/archive', payload, { idempotencyKey: operationIdempotencyKey('archive', payload) });
   }
 
-  async restore(locator: AssetStorageLocator): Promise<void> {
-    const payload = { locator: locatorPayload(locator) };
+  async restore(locator: AssetStorageLocator, operationId?: string): Promise<void> {
+    const payload = { locator: locatorPayload(locator), ...(operationId ? {operationId} : {}) };
     await this.client.json<void>('POST', '/v1/assets/restore', payload, { idempotencyKey: operationIdempotencyKey('restore', payload) });
   }
 

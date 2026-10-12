@@ -899,7 +899,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     const adminTokenProvider = container.resolve<ITokenProvider>('tokenProvider');
       const adminSessionManager = container.resolve<ISessionManager>('sessionManager');
       const principalAccessValidator = container.resolve<any>('principalAccessValidator');
-    v1Router.use('/admin', SecurityMiddlewareFactory.createAdminGuard({
+    v1Router.use('/admin', SecurityMiddlewareFactory.createAdminGuard({ mfaUseCases: container.resolve('mfaUseCases'),
       mode: adminAuthMode,
       tokenProvider: adminTokenProvider,
       sessionManager: adminSessionManager,
@@ -916,10 +916,11 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     // Core Admin Domain Routers (Identity & Audit)
     v1Router.use('/admin/identities', requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
-    v1Router.use('/identities', SecurityMiddlewareFactory.createAdminGuard({ mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }), new MutationAuditMiddleware(auditRecordRepository, 'IDENTITY').generate(), requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
+    v1Router.use('/identities', SecurityMiddlewareFactory.createAdminGuard({ mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }), new MutationAuditMiddleware(auditRecordRepository, 'IDENTITY').generate(), requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));
 
+    v1Router.use('/admin/audit/workspace', requireAdminPermission('admin:audit:manage'), container.resolve<Router>('auditWorkspaceRouter'));
     v1Router.use('/admin/audit', requireAdminPermission('admin:audit:manage'), container.resolve<Router>('auditRouter'));
-    v1Router.use('/audit', SecurityMiddlewareFactory.createAdminGuard({ mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), requireAdminPermission('admin:audit:manage'), container.resolve<Router>('auditRouter'));
+    v1Router.use('/audit', SecurityMiddlewareFactory.createAdminGuard({ mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }), requireAdminPermission('admin:audit:manage'), container.resolve<Router>('auditRouter'));
 
     // 2. Active Phase 2-10 Domain Routers (Eager) - Phase 6-10 Roadmap Scope
     // Phase 6: Import Foundation & Assets
@@ -960,7 +961,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // Legacy route locations are preserved for compatibility, but every mutation-capable
     // control-plane router is now inside the same strict auth + audit + RBAC boundary as /admin.
     const protectControlPlane = (permission: string, routerName: string) => [
-      SecurityMiddlewareFactory.createAdminGuard({ mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }),
+      SecurityMiddlewareFactory.createAdminGuard({ mfaUseCases: container.resolve('mfaUseCases'), mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator }),
       createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }),
       new MutationAuditMiddleware(auditRecordRepository, 'CONTROL_PLANE').generate(),
       requireAdminPermission(permission),

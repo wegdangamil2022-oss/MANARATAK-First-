@@ -1,3 +1,4 @@
+import { AuthorizationGovernancePanel } from '../components/AuthorizationGovernancePanel';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
@@ -453,6 +454,10 @@ export function AuthorizationAdminPage() {
       setError(t('iam_workspace_11'));
       return;
     }
+    try {
+      const preview = await adminApiClient.request<{ data: { conflicts: Array<{ description: string }> } }>(`/admin/authorization/governance/duties/preview?${new URLSearchParams({ principalId: identityId, roleId })}`);
+      if (preview.data.conflicts.length) { setError(t('iam_duty_existing_conflict') + ' ' + preview.data.conflicts.map(pair => pair.description).join(', ')); return; }
+    } catch { setError(t('iam_governance_failed')); return; }
     await mutate(
       'role_assignment',
       { identityId, roleId },
@@ -569,6 +574,7 @@ export function AuthorizationAdminPage() {
         </div>
       </section>
 
+      {tab === 'governance' && <AuthorizationGovernancePanel />}
       <nav className="flex flex-wrap gap-2" aria-label={t('iam_workspace_17')}>
         {(
           [
@@ -579,6 +585,7 @@ export function AuthorizationAdminPage() {
             ['effective', 'iam_effective_access'],
             ['emergency', 'iam_workspace_4'],
             ['audit', 'iam_workspace_5'],
+            ['governance', 'iam_governance_title'],
           ] as const
         ).map(([value, key]) => (
           <button

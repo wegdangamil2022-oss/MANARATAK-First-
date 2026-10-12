@@ -39,7 +39,7 @@ describe('EAP reference guards read-only runtime deployment gate', () => {
   it('matches every canonical direct/JSON reference and migration owner trigger', () => {
     const gateway = readFileSync(new URL('../../src/asset-platform/PrismaAssetUsageRegistryGateway.ts', import.meta.url), 'utf8');
     const schema = readFileSync(new URL('../../prisma/schema.prisma', import.meta.url), 'utf8');
-    const migration = readFileSync(new URL('../../prisma/migrations/20261009010000_eap_asset_reference_serialization/migration.sql', import.meta.url), 'utf8');
+    const migration = readFileSync(new URL('../../prisma/migrations/20261009010000_eap_asset_reference_serialization/migration.sql', import.meta.url), 'utf8') + readFileSync(new URL('../../prisma/migrations/20261012020000_asset_rendition_inventory/migration.sql', import.meta.url),'utf8');
     const direct = [...gateway.matchAll(/delegate: '(\w+)', field: '(\w+)', consumer:/g)].map(match => `${match[1]}.${match[2]}`).sort();
     const actual = ASSET_REFERENCE_OWNER_GUARDS.flatMap(owner => owner.fields.map(field => `${owner.table[0].toLowerCase()}${owner.table.slice(1)}.${field}`)).sort();
     expect(actual).toEqual(direct);

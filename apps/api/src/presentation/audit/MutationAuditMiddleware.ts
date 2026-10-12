@@ -26,6 +26,7 @@ export class MutationAuditPolicy {
   private static readonly CRITICAL_ADMIN_AREAS = [
     '/admin/identities',
     '/admin/authorization',
+    '/admin/audit/workspace',
     '/admin/settings',
     '/admin/imports',
     '/admin/assets',

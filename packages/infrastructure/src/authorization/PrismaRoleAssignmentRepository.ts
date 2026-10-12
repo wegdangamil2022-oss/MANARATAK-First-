@@ -1,3 +1,4 @@
+import { PrismaDutyGuard } from './PrismaDutyGuard';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { AtomicPersistenceContext, RoleAssignment, IRoleAssignmentRepository, ITransactionalRoleAssignmentRepository } from '@manaratak/domain';
 import { ISpecification } from '@manaratak/core';
@@ -74,6 +75,9 @@ export class PrismaRoleAssignmentRepository implements ITransactionalRoleAssignm
 
   async saveIfUnassigned(assignment: RoleAssignment): Promise<{ assignmentId: string; replayed: boolean }> {
     const operation = async (repository: PrismaRoleAssignmentRepository) => {
+      const duties = new PrismaDutyGuard(repository.prisma);
+      await duties.lock();
+      await duties.assertPrincipal(assignment.identityId, { roleId: assignment.roleId, include: true });
       // Share the role reference fence with internal role deletion/emergency grants.
       const keys = [
         `authorization-role-reference:${assignment.roleId}`,

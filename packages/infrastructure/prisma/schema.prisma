@@ -3676,6 +3676,7 @@ model PolicyRecord {
   ruleConfiguration String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  @@index([ruleType, id])
 }
 
 model RoleAssignmentRecord {
@@ -5856,4 +5857,46 @@ model FinanceAdjustmentCaseRecord {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([makerId, status])
+}
+
+// Separate mutable investigation/rule policy owner. Original audit events stay append-only.
+model AuditWorkspaceRecord {
+  id        String @id
+  kind      String
+  version   Int
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([kind, id])
+}
+
+model AuditAlertOccurrenceRecord {
+  id         String @id
+  ruleId     String
+  ruleVersion Int
+  bucket     DateTime
+  matchedCount Int
+  state      String @default("PENDING")
+  claimToken String?
+  claimUntil DateTime?
+  intentId   String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([ruleId, ruleVersion, bucket])
+  @@index([state, claimUntil])
+}
+
+model AssetRenditionRecord {
+  id               String @id
+  assetId          String
+  variantKey       String
+  version          Int
+  status           String
+  generatedAssetId String?
+  sourceSha256     String
+  evidence         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  @@unique([assetId, variantKey])
+  @@index([generatedAssetId])
 }

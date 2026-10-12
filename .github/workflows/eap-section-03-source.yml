@@ -27,6 +27,8 @@ on:
       - 'packages/domain/tests/asset-platform/**'
       - 'packages/infrastructure/src/asset-platform/**'
       - 'packages/infrastructure/prisma/migrations/20261009010000_eap_asset_reference_serialization/**'
+      - 'packages/infrastructure/prisma/migrations/20261012020000_asset_rendition_inventory/**'
+      - 'packages/infrastructure/prisma/migrations/20261012030000_asset_authoritative_reconciliation/**'
       - 'packages/infrastructure/prisma/migrations/20261009020000_eap_restore_operation_barrier/**'
       - 'packages/infrastructure/prisma/migrations/20261009030000_eap_archive_operation_barrier/**'
       - 'scripts/ci/install-eap-reference-guards.mjs'

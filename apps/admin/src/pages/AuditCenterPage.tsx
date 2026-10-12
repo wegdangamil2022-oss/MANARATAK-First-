@@ -1,8 +1,9 @@
+import { AuditWorkspacePanel } from '../components/AuditWorkspacePanel';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
-import { AUDIT_QUERY_CATALOG } from '@manaratak/shared';
+import { AUDIT_QUERY_CATALOG, auditCodeLabel } from '@manaratak/shared';
 import { Link } from 'react-router-dom';
 import {
   auditFilterParams,
@@ -445,7 +446,7 @@ export function AuditCenterPage() {
       FINANCE_MUTATION: 'audit_preset_finance',
       SCHOLARSHIPS_MUTATION: 'audit_scholarship_events',
     };
-    return labels[code] ? t(labels[code]) : code;
+    return labels[code] ? t(labels[code]) : auditCodeLabel(code,language);
   };
   const evidence = (code?: string) =>
     t(
@@ -504,6 +505,7 @@ export function AuditCenterPage() {
   };
   return (
     <div dir={dir} className="mx-auto max-w-7xl space-y-6">
+      <AuditWorkspacePanel />
       <section className="rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-lg sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>

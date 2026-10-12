@@ -1,3 +1,4 @@
+import { PrismaDutyGuard } from './PrismaDutyGuard';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { AtomicPersistenceContext, Role, PermissionReference, IRoleRepository, ITransactionalRoleRepository } from '@manaratak/domain';
 import { ISpecification } from '@manaratak/core';
@@ -130,6 +131,9 @@ export class PrismaRoleRepository implements ITransactionalRoleRepository {
 
   /** Serializes normalized-name claims within the owning transaction. No schema changes. */
   private async assertUniqueName(role: Role): Promise<void> {
+    const duties = new PrismaDutyGuard(this.prisma);
+    await duties.lock();
+    await duties.assertRoleChange(role.id, role.permissions.map(p => p.value));
     const normalized = role.name.normalize('NFKC').trim().replace(/\s+/gu, ' ').toLowerCase();
     for(const policyId of [...new Set(role.policyIds)].sort()) {
       const key = `authorization-policy-reference:${policyId}`;

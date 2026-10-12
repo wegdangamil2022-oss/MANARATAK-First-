@@ -137,6 +137,8 @@ export const AppConfigSchema = z.preprocess((input) => {
       OWNER_DOMAIN_OUTBOX_WORKER_ENABLED: env.OWNER_DOMAIN_OUTBOX_WORKER_ENABLED ?? true,
       OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS: env.OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS || 2_000,
       BACKGROUND_WORKER_ENABLED: env.BACKGROUND_WORKER_ENABLED ?? false,
+      ASSET_LIFECYCLE_RECOVERY_ENABLED: env.ASSET_LIFECYCLE_RECOVERY_ENABLED ?? false,
+      AUDIT_ALERTS_ENABLED: env.AUDIT_ALERTS_ENABLED ?? false,
       ASSET_ACTIVATION_RECOVERY_ENABLED: env.ASSET_ACTIVATION_RECOVERY_ENABLED ?? false,
       BACKGROUND_WORKER_INTERVAL_MS: env.BACKGROUND_WORKER_INTERVAL_MS || 2_000,
       BACKGROUND_WORKER_BATCH_SIZE: env.BACKGROUND_WORKER_BATCH_SIZE || 10,
@@ -202,6 +204,9 @@ export const AppConfigSchema = z.preprocess((input) => {
   OWNER_DOMAIN_OUTBOX_WORKER_ENABLED: envBoolean.optional(),
   OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS: z.coerce.number().int().min(1_000).max(300_000).optional(),
   BACKGROUND_WORKER_ENABLED: envBoolean.optional(),
+  MANARATAK_MFA_ENCRYPTION_KEY: z.string().regex(/^[a-fA-F0-9]{64}$/).optional(),
+  ASSET_LIFECYCLE_RECOVERY_ENABLED: envBoolean.optional(),
+  AUDIT_ALERTS_ENABLED: envBoolean.optional(),
   ASSET_ACTIVATION_RECOVERY_ENABLED: envBoolean.optional(),
   ASSET_ACTIVATION_RECOVERY_CRON: z.string().trim().min(9).max(128).optional(),
   BACKGROUND_WORKER_INTERVAL_MS: z.coerce.number().int().min(1_000).max(300_000).optional(),
@@ -251,6 +256,7 @@ export const AppConfigSchema = z.preprocess((input) => {
   ADMIN_AUTH_MODE: z.literal('strict').optional(),
 }).passthrough().superRefine((data, ctx) => {
   const isProdOrStaging = data.NODE_ENV === 'production' || data.NODE_ENV === 'staging';
+  if ((data.AUDIT_ALERTS_ENABLED === true || data.ASSET_LIFECYCLE_RECOVERY_ENABLED === true) && data.BACKGROUND_WORKER_ENABLED !== true) ctx.addIssue({ code:z.ZodIssueCode.custom,path:['BACKGROUND_WORKER_ENABLED'],message:'Governance workers require the durable background worker.' });
   if (data.ASSET_ACTIVATION_RECOVERY_ENABLED === true) {
     if (data.BACKGROUND_WORKER_ENABLED !== true) ctx.addIssue({ code: z.ZodIssueCode.custom,
       message: 'Asset activation recovery requires the durable background worker', path: ['BACKGROUND_WORKER_ENABLED'] });

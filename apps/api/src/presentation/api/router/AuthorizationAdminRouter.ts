@@ -5,6 +5,9 @@ import { z } from 'zod';
 import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
 import {
   ManageRolesUseCase,
+  AuthorizationGovernanceUseCases,
+  GovernanceApprovalUseCases,
+  MfaUseCases,
   ManagePoliciesUseCase,
   AssignRoleUseCase,
   ManageEmergencyAccessUseCase,
@@ -68,6 +71,9 @@ function assertMakerChecker(req: Request, actorId: string): { secondApproverId: 
 
 export class AuthorizationAdminRouter {
   public static create({
+    authorizationGovernanceUseCases,
+    governanceApprovalUseCases,
+    mfaUseCases,
     principalAccessValidator,
     managePoliciesUseCase,
     policyEvaluator,
@@ -80,6 +86,9 @@ export class AuthorizationAdminRouter {
     auditRecordRepo,
     adminBootstrapVerifier,
   }: {
+    authorizationGovernanceUseCases?: AuthorizationGovernanceUseCases;
+    governanceApprovalUseCases?: GovernanceApprovalUseCases;
+    mfaUseCases?: MfaUseCases;
     principalAccessValidator?: IPrincipalAccessValidator;
     managePoliciesUseCase?: ManagePoliciesUseCase;
     policyEvaluator?: IPolicyEvaluator;
@@ -148,6 +157,103 @@ export class AuthorizationAdminRouter {
         metadata: extra,
       };
     };
+
+
+    router.get('/governance/approvals',async(req,res,next)=>{try{
+      if(!governanceApprovalUseCases)throw new Error('GOVERNANCE_APPROVAL_UNAVAILABLE');
+      const query=z.object({limit:z.coerce.number().int().min(1).max(100).default(25),cursor:z.string().min(1).max(240).optional()}).strict().parse(req.query);
+      const actorId=requireAuthenticatedPrincipal(req).principalId;
+      res.json(responseFormatter.success({actorId,...await governanceApprovalUseCases.list(actorId,query.limit,query.cursor)}));
+    }catch(error){next(error);}});
+    router.post('/governance/approvals',async(req,res,next)=>{try{
+      if(!governanceApprovalUseCases)throw new Error('GOVERNANCE_APPROVAL_UNAVAILABLE');
+      const body=z.object({id:z.string().min(1).max(120),scope:z.enum(['DUTY_POLICY','DUTY_EXCEPTION','MFA_RESET']),approverId:z.string().min(1).max(240),payload:z.unknown()}).strict().parse(req.body);
+      const actor=requireAuthenticatedPrincipal(req).principalId;
+      const approval=await verifyMakerChecker(req,actor);if(approval.secondApproverId!==body.approverId)throw new Error('GOVERNANCE_APPROVAL_INVALID');
+      const ticket=z.string().trim().min(6).max(240);
+      if(body.scope==='DUTY_POLICY')body.payload=z.object({pairs:z.array(z.object({id:z.string().min(1).max(80),first:z.enum(KNOWN_ADMIN_PERMISSIONS),second:z.enum(KNOWN_ADMIN_PERMISSIONS),description:z.string().max(500)}).strict()).max(100),expectedRevision:z.string().datetime().nullable(),reason:z.string().trim().min(6).max(2000),changeTicket:ticket}).strict().parse(body.payload);
+      if(body.scope==='DUTY_EXCEPTION')body.payload=z.object({id:z.string().min(1).max(120),principalId:z.string().min(1).max(240),pairIds:z.array(z.string().min(1).max(80)).min(1).max(100),policyRevision:z.string().datetime(),startsAt:z.string().datetime(),expiresAt:z.string().datetime(),reason:z.string().trim().min(12).max(2000),changeTicket:ticket}).strict().parse(body.payload);
+      if(body.scope==='MFA_RESET'){
+        body.payload=z.object({identityId:z.string().min(1).max(240),reason:z.string().trim().min(12).max(2000),changeTicket:ticket}).strict().parse(body.payload);
+        if(!authEvaluatorService || !(await authEvaluatorService.evaluatePermission(actor,'admin:credentials:manage',{requestTime:new Date()})).isGranted || !(await authEvaluatorService.evaluatePermission(body.approverId,'admin:credentials:manage',{requestTime:new Date()})).isGranted)throw new Error('GOVERNANCE_APPROVAL_DENIED');
+      }
+      res.status(201).json(responseFormatter.success(await governanceApprovalUseCases.request(body,mutationContext(req))));
+    }catch(error){next(error);}});
+    router.post('/governance/approvals/:id/approve',async(req,res,next)=>{try{
+      if(!governanceApprovalUseCases)throw new Error('GOVERNANCE_APPROVAL_UNAVAILABLE');z.object({}).strict().parse(req.body??{});
+      await governanceApprovalUseCases.approve(z.string().min(1).max(120).parse(req.params.id),mutationContext(req));res.json(responseFormatter.success({approved:true}));
+    }catch(error){next(error);}});
+    router.post('/governance/mfa-reset',async(req,res,next)=>{try{
+      if(!mfaUseCases||!authEvaluatorService)throw new Error('MFA_UNAVAILABLE');
+      const actor=requireAuthenticatedPrincipal(req).principalId;
+      const body=z.object({identityId:z.string().min(1).max(240),reason:z.string().trim().min(12).max(2000)}).strict().parse(req.body);
+      const approval=await verifyMakerChecker(req,actor);await assertVerifiedIdentity(body.identityId);
+      for(const principal of [actor,approval.secondApproverId])if(!(await authEvaluatorService.evaluatePermission(principal,'admin:credentials:manage',{requestTime:new Date()})).isGranted)throw new Error('GOVERNANCE_APPROVAL_DENIED');
+      await mfaUseCases.adminReset(body.identityId,actor,approval.secondApproverId,body.reason,req.header('x-governance-approval-id')??'',approval.changeTicket);
+      res.json(responseFormatter.success({reset:true}));
+    }catch(error){next(error);}});
+
+    router.get('/governance/duties', async (_req, res, next) => {
+      try { if (!authorizationGovernanceUseCases) throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+        res.json(responseFormatter.success(await authorizationGovernanceUseCases.policy()));
+      } catch (error) { next(error); }
+    });
+    router.get('/governance/duties/preview', async (req, res, next) => {
+      try { if (!authorizationGovernanceUseCases) throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+        const body = z.object({ principalId: z.string().min(1).max(240), roleId: z.string().min(1).max(240) }).strict().parse(req.query);
+        await assertVerifiedIdentity(body.principalId);
+        res.json(responseFormatter.success(await authorizationGovernanceUseCases.preview(body.principalId, body.roleId)));
+      } catch (error) { next(error); }
+    });
+    router.put('/governance/duties', async (req, res, next) => {
+      try { if (!authorizationGovernanceUseCases) throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+        const body = z.object({ pairs: z.array(z.object({ id: z.string().min(1).max(80), first: z.enum(KNOWN_ADMIN_PERMISSIONS), second: z.enum(KNOWN_ADMIN_PERMISSIONS), description: z.string().max(500) }).strict()).max(100), expectedRevision: z.string().datetime().nullable(), reason: z.string().trim().min(6).max(2000) }).strict().parse(req.body);
+        const actor = requireAuthenticatedPrincipal(req).principalId;
+        const approval = await verifyMakerChecker(req, actor);
+        await authorizationGovernanceUseCases.configure({ ...body, approvedBy: approval.secondApproverId, changeTicket: approval.changeTicket, approvalId: req.header('x-governance-approval-id') ?? '' }, mutationContext(req, approval));
+        res.json(responseFormatter.success(await authorizationGovernanceUseCases.policy()));
+      } catch (error) { next(error); }
+    });
+    router.post('/governance/duties/exceptions', async (req, res, next) => {
+      try { if (!authorizationGovernanceUseCases) throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+        const body = z.object({ id: z.string().min(1).max(120), principalId: z.string().min(1).max(240), pairIds: z.array(z.string().min(1).max(80)).min(1).max(100), policyRevision: z.string().datetime(), startsAt: z.string().datetime(), expiresAt: z.string().datetime(), reason: z.string().trim().min(12).max(2000) }).strict().parse(req.body);
+        const approval = await verifyMakerChecker(req, requireAuthenticatedPrincipal(req).principalId);
+        await assertVerifiedIdentity(body.principalId);
+        await authorizationGovernanceUseCases.exception({ ...body, approvedBy: approval.secondApproverId, changeTicket: approval.changeTicket, approvalId: req.header('x-governance-approval-id') ?? '' }, mutationContext(req, approval));
+        res.status(201).json(responseFormatter.success({ id: body.id }));
+      } catch (error) { next(error); }
+    });
+    router.get('/governance/duties/exceptions',async(req,res,next)=>{try{
+      if(!authorizationGovernanceUseCases)throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+      const query=z.object({limit:z.coerce.number().int().min(1).max(100).default(25),cursor:z.string().min(1).max(240).optional()}).strict().parse(req.query);
+      res.json(responseFormatter.success(await authorizationGovernanceUseCases.exceptions(query.limit,query.cursor)));
+    }catch(error){next(error);}});
+    router.post('/governance/duties/exceptions/:id/revoke',async(req,res,next)=>{try{
+      if(!authorizationGovernanceUseCases)throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+      const body=z.object({reason:z.string().trim().min(6).max(2000)}).strict().parse(req.body);
+      const revoked=await authorizationGovernanceUseCases.revokeException(z.string().min(1).max(120).parse(req.params.id),body.reason,mutationContext(req));res.json(responseFormatter.success({revoked}));
+    }catch(error){next(error);}});
+    router.get('/governance/access-reviews/subjects/:principalId', async (req, res, next) => {
+      try {
+        const principalId = z.string().min(1).max(240).parse(req.params.principalId);
+        if (!authorizationGovernanceUseCases) throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+        await assertVerifiedIdentity(principalId);
+        res.json(responseFormatter.success(await authorizationGovernanceUseCases.reviewSubject(principalId)));
+      } catch (error) { next(error); }
+    });
+    router.get('/governance/access-reviews', async (req, res, next) => {
+      try { if (!authorizationGovernanceUseCases) throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+        const query = z.object({ limit: z.coerce.number().int().min(1).max(100).default(25), cursor: z.string().min(1).max(240).optional(), dueOnly: z.enum(['true']).optional() }).strict().parse(req.query);
+        res.json(responseFormatter.success(await authorizationGovernanceUseCases.reviews({ ...query, dueOnly: query.dueOnly === 'true' })));
+      } catch (error) { next(error); }
+    });
+    router.post('/governance/access-reviews', async (req, res, next) => {
+      try { if (!authorizationGovernanceUseCases) throw new Error('AUTHORIZATION_GOVERNANCE_UNAVAILABLE');
+        const body = z.object({ id: z.string().min(1).max(120), principalId: z.string().min(1).max(240), roleIds: z.array(z.string().min(1).max(240)).max(200), nextReviewAt: z.string().datetime(), decision: z.enum(['KEEP', 'REVOKE_REQUIRED']), reason: z.string().trim().min(6).max(2000) }).strict().parse(req.body);
+        await authorizationGovernanceUseCases.review(body, mutationContext(req));
+        res.status(201).json(responseFormatter.success({ id: body.id }));
+      } catch (error) { next(error); }
+    });
 
     router.get('/bootstrap-verification', async (_req: Request, res: Response) => {
       if (!adminBootstrapVerifier) {

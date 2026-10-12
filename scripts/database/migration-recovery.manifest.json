@@ -462,6 +462,21 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/reviews/section-21-migration-recovery.md",
       "decision": "Source-only unapplied additive safety migration. Disable dispatch/maintenance first; preserve immutable intents, approval, outbox and financial evidence. Recover with a verified compatible backup and reconcile external outcomes, or use a reviewed forward fix. No destructive down SQL authorized."
+    },
+    "20261012010000_audit_workspace": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source only. No migration was applied in this work. Drain API/workers and preserve investigation/approval/notification evidence and asset journals. Use a compatible verified backup or a reviewed forward fix; no destructive down SQL is authorized."
+    },
+    "20261012020000_asset_rendition_inventory": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source only. No migration was applied in this work. Drain API/workers and preserve investigation/approval/notification evidence and asset journals. Use a compatible verified backup or a reviewed forward fix; no destructive down SQL is authorized."
+    },
+    "20261012030000_asset_authoritative_reconciliation": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source only. No migration was applied in this work. Drain API/workers and preserve investigation/approval/notification evidence and asset journals. Use a compatible verified backup or a reviewed forward fix; no destructive down SQL is authorized."
     }
   }
 }

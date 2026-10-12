@@ -1,3 +1,4 @@
+import type { IMfaAuthenticationPolicy } from './mfa/MfaUseCases';
 import {
   IAuthService,
   ITokenProvider,
@@ -18,13 +19,15 @@ export class AuthService implements IAuthService {
     private readonly sessionManager: ISessionManager,
     private readonly principalAccessValidator: IPrincipalAccessValidator,
     private readonly credentialVerifier: ICredentialVerifier = new DenyAllCredentialVerifier(),
+    private readonly mfa?: IMfaAuthenticationPolicy,
   ) {}
 
-  public async login(userId: string, credential?: string, sessionTtlSeconds?: number): Promise<AuthTokens> {
+  public async login(userId: string, credential?: string, sessionTtlSeconds?: number, mfaCode?: string): Promise<AuthTokens> {
     if (!await this.principalAccessValidator.isAuthenticationAllowed(userId)) throw new Error('Authentication not permitted');
     if (!credential) throw new Error('Credential required for verification');
     if (!await this.credentialVerifier.verify(userId, credential)) throw new Error('Credential verification failed');
 
+    const mfaVerified = await this.mfa?.assertLogin(userId, mfaCode);
     const sessionId = randomUUID();
     const tokens = await this.tokenProvider.generateTokens({ userId, sessionId });
     await this.sessionManager.createSession(userId, tokens.refreshToken, sessionId, sessionTtlSeconds);
@@ -33,6 +36,9 @@ export class AuthService implements IAuthService {
       || !await this.credentialVerifier.verify(userId, credential)) {
       await this.sessionManager.revokeAllSessions(userId);
       throw new Error('Authentication not permitted');
+    }
+    if (mfaVerified) {
+      try { await this.mfa!.markSession(userId, sessionId, mfaVerified); } catch { await this.sessionManager.revokeAllSessions(userId); throw new Error('MFA_SESSION_REQUIRED'); }
     }
     return tokens;
   }
@@ -76,6 +82,7 @@ export class AuthService implements IAuthService {
     }
 
     try {
+      await this.mfa?.copySession(rotated.userId, currentSession.sessionId, nextSessionId);
       const accessToken = await this.tokenProvider.generateAccessToken({ userId: rotated.userId, sessionId: nextSessionId });
       return { accessToken, refreshToken: nextRefreshToken };
     } catch (error) {

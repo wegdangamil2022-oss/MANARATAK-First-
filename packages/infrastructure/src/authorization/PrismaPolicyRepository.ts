@@ -30,6 +30,8 @@ export interface PolicyPrismaClient {
 export class PrismaPolicyRepository implements IPolicyRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  private reserved(id: string): boolean { return /^(authorization-governance:|duty-exception:|access-review:|governance-approval:)/.test(id); }
+  private assertOrdinary(id: string): void { if (this.reserved(id)) throw new Error('SYSTEM_POLICY_PROTECTED'); }
   withTransaction(
     context: import('@manaratak/domain').AtomicPersistenceContext,
   ): IPolicyRepository {
@@ -42,7 +44,7 @@ export class PrismaPolicyRepository implements IPolicyRepository {
 
   async queryPage(input: { limit: number; cursor?: string }) {
     const rows = await this.prisma.policyRecord.findMany({
-      where: input.cursor ? { id: { gt: input.cursor } } : {},
+      where: { ...(input.cursor ? { id: { gt: input.cursor } } : {}), ruleType: { notIn: ['SEPARATION_OF_DUTIES', 'DUTY_EXCEPTION', 'ACCESS_REVIEW', 'GOVERNANCE_APPROVAL'] } },
       orderBy: { id: 'asc' },
       take: input.limit + 1,
     });
@@ -51,6 +53,7 @@ export class PrismaPolicyRepository implements IPolicyRepository {
   }
 
   async create(policy: Policy): Promise<void> {
+    this.assertOrdinary(policy.id);
     await this.prisma.policyRecord.create({
       data: {
         id: policy.id,
@@ -78,6 +81,7 @@ export class PrismaPolicyRepository implements IPolicyRepository {
   }
 
   async updateIfCurrent(policy: Policy, expectedRevision: string): Promise<void> {
+    this.assertOrdinary(policy.id);
     const revision = new Date(expectedRevision);
     if (!Number.isFinite(revision.getTime())) throw new Error('POLICY_REVISION_INVALID');
     const result = await this.prisma.policyRecord.updateMany({
@@ -109,6 +113,7 @@ export class PrismaPolicyRepository implements IPolicyRepository {
   }
 
   async findById(id: string): Promise<Policy | null> {
+    if (this.reserved(id)) return null;
     const record = await this.client.policyRecord.findUnique({
       where: { id },
     });
@@ -117,6 +122,7 @@ export class PrismaPolicyRepository implements IPolicyRepository {
   }
 
   async save(policy: Policy): Promise<void> {
+    this.assertOrdinary(policy.id);
     await this.client.policyRecord.upsert({
       where: { id: policy.id },
       update: {
@@ -137,11 +143,12 @@ export class PrismaPolicyRepository implements IPolicyRepository {
 
   async findBy(specification: ISpecification<Policy>): Promise<Policy[]> {
     const records = await this.client.policyRecord.findMany();
-    const domainPolicies = records.map(record => this.mapToDomain(record));
+    const domainPolicies = records.filter(record => !this.reserved(record.id)).map(record => this.mapToDomain(record));
     return domainPolicies.filter(policy => specification.isSatisfiedBy(policy));
   }
 
   async delete(id: string): Promise<void> {
+    this.assertOrdinary(id);
     try {
       await this.client.policyRecord.delete({
         where: { id },

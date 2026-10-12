@@ -1,3 +1,4 @@
+import { AssetRightsRenditionsPanel } from './AssetRightsRenditionsPanel';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -6,6 +7,9 @@ import type { AssetActionSnapshot } from './AssetLifecycleActions';
 export interface AssetGovernanceSnapshot extends AssetActionSnapshot {
   id: string;
   reference: string;
+  revision?:string;
+  rights?: {rightsSource:string;attribution:string;usageScope:string;publicationPolicy:string;expiresAt?:string}|null;
+  rightsHistory?: Array<{actorId:string;reason:string;at:string;rights:{rightsSource:string;attribution:string;usageScope:string;publicationPolicy:string;expiresAt?:string}}>;
   ownerId: string;
   ownerType: string;
   metadata: { width?: number; height?: number; duration?: number };
@@ -59,6 +63,7 @@ export function AssetGovernancePanel({ asset }: { asset: AssetGovernanceSnapshot
   ].filter((entry): entry is [string, string] => typeof entry[1] === 'string');
   timeline.sort((a, b) => Date.parse(a[1]) - Date.parse(b[1]));
   return <div className="mt-4 space-y-4 border-t pt-4">
+    {asset.revision && <AssetRightsRenditionsPanel asset={asset} />}
     <div className="flex flex-wrap gap-2">
       <button type="button" className="rounded-lg border px-3 py-2" onClick={() => void copy(asset.id)}>{t('asset_text_113')}{' '}</button>
       <button type="button" className="rounded-lg border px-3 py-2" onClick={() => void copy(asset.reference)}>{t('asset_text_114')}{' '}</button>

@@ -229,3 +229,14 @@ export * from './certificates/EapCertificateVisualAssetResolver';
 
 export { StudentPrivateResultProtector } from './students/StudentPrivateResultProtector';
 export { PrismaStudentPrivateResultRetentionGateway } from './students/PrismaStudentPrivateResultRetentionGateway';
+
+export * from './authorization/PrismaAuthorizationGovernanceGateway';
+
+export * from './authorization/PrismaDutyGuard';
+
+export * from './auth/mfa/PrismaMfaGateway';
+export * from './audit/PrismaAuditWorkspaceGateway';
+export * from './audit/PrismaAuditAlertEvaluationGateway';
+export * from './asset-platform/PrismaAssetGovernanceGateway';
+export * from './asset-platform/PrismaAssetLifecycleRecoveryGateway';
+export * from './authorization/PrismaGovernanceApprovalGateway';

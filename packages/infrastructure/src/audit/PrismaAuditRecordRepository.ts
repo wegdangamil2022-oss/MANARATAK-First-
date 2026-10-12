@@ -1,3 +1,4 @@
+import { PrismaConfiguredAuditRetention } from './PrismaAuditWorkspaceGateway';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { ISpecification } from '@manaratak/core';
 import {
@@ -65,7 +66,7 @@ export interface AuditPrismaClient {
 }
 
 export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly configuredRetention?: PrismaConfiguredAuditRetention) {}
 
   private get client(): AuditPrismaClient {
     return this.prisma as unknown as AuditPrismaClient;
@@ -135,17 +136,17 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
   }
 
   async save(record: AuditRecord): Promise<void> {
-    await this.saveWithClient(record, this.client);
+    await this.saveWithClient(record, this.client, this.prisma);
   }
 
   async saveInTransaction(record: AuditRecord, context: AtomicPersistenceContext): Promise<void> {
     const transactionClient = (context as Partial<PrismaAtomicPersistenceContext>).transactionClient;
     const client = (transactionClient as unknown as Partial<AuditPrismaClient> | undefined)?.auditRecord;
     if (!context.boundaryId || !client) throw new Error('AUDIT_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
-    await this.saveWithClient(record, { auditRecord: client });
+    await this.saveWithClient(record, { auditRecord: client }, transactionClient);
   }
 
-  private async saveWithClient(record: AuditRecord, client: AuditPrismaClient): Promise<void> {
+  private async saveWithClient(record: AuditRecord, client: AuditPrismaClient, transactionClient?: PrismaClient | Prisma.TransactionClient): Promise<void> {
     const sanitizedContext = AuditSecretSanitizer.sanitize(record.getContextMetadata().getData());
 
     const data = {
@@ -170,6 +171,12 @@ export class PrismaAuditRecordRepository implements ITransactionalAuditRecordRep
       lifecycleState: record.getLifecycleState(),
     };
 
+    if (this.configuredRetention && transactionClient) {
+      const retention = await this.configuredRetention.resolve({ category: data.category, severity: data.severity, regulatoryTags: record.getComplianceMetadata()?.getRegulatoryTags(), retentionPeriodInDays: data.retentionPeriodInDays ?? undefined }, transactionClient);
+      data.retentionPeriodInDays = retention.retentionPeriodInDays ?? null;
+      data.retentionExpiresAt = retention.retentionPeriodInDays === undefined ? null : new Date(data.timestamp.getTime() + retention.retentionPeriodInDays * 86400000);
+      data.contextMetadata = { ...data.contextMetadata, retentionClass: retention.retentionClass, retentionPolicyStatus: retention.status };
+    }
     try {
       await client.auditRecord.create({ data });
     } catch (error: any) {

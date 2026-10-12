@@ -14,7 +14,8 @@ export class AuthorizationEvaluatorService {
     private readonly policyRepository: IPolicyRepository,
     private readonly roleAssignmentRepository: IRoleAssignmentRepository,
     private readonly policyEvaluator: IPolicyEvaluator,
-    private readonly emergencyAccessRepository?: IEmergencyAccessRepository
+    private readonly emergencyAccessRepository?: IEmergencyAccessRepository,
+    private readonly dutyEvaluator?: { isAllowed(identityId: string): Promise<boolean> }
   ) {}
 
   public async describeIdentityAccess(identityId: string) {
@@ -86,6 +87,8 @@ export class AuthorizationEvaluatorService {
     action: Action,
     contextAttributes: Record<string, unknown> = {},
   ): Promise<AccessDecision> {
+    if (this.dutyEvaluator && !await this.dutyEvaluator.isAllowed(identityId))
+      return AccessDecision.denied('Separation-of-duties policy denies this access');
     const requiredPermission = new PermissionReference(`${resourceUrn.value}:${action.value}`);
 
     // Fetch all role assignments for identity

@@ -97,7 +97,7 @@ export class AdminUniversityUseCases {
     context?: UniversityMutationContext,
   ): Promise<UniversityDto> {
     assertNoTranslationPayloadFields('UNIVERSITY', updates.optionalFields, ['localizedNames']);
-    await assertAssetReferenceUsable(this.assetReferences, updates.logoAssetId, { purpose: 'UNIVERSITY_LOGO' });
+    await assertAssetReferenceUsable(this.assetReferences, updates.logoAssetId, { purpose: 'UNIVERSITY_LOGO', publicPublication: true });
     const existing = await this.getUniversity(id);
     if ([UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED]
       .includes(existing.status)) {
@@ -260,6 +260,7 @@ export class AdminUniversityUseCases {
     if (existing.status !== UniversityStatus.READY_TO_PUBLISH) {
       throw new Error('Only READY_TO_PUBLISH universities can be PUBLISHED');
     }
+    await assertAssetReferenceUsable(this.assetReferences, existing.logoAssetId, { purpose:'UNIVERSITY_LOGO',publicPublication:true });
     this.publicationReadiness.assertReady(id, existing, this.publicationPolicy);
     await this.mutate('UNIVERSITY_PUBLISHED', id, context, (repository) =>
       repository.updateStatus(id, UniversityStatus.PUBLISHED),

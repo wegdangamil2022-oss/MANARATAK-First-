@@ -8,6 +8,7 @@ describe('role persistence compare-and-swap', () => {
     const expectedRevision = new Date(Date.now() + 10_000).toISOString();
     const tx = {
       $queryRaw: vi.fn().mockResolvedValue([]),
+      policyRecord: { findUnique: vi.fn().mockResolvedValue(null) },
       roleRecord: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
     };
     const client = {
@@ -25,7 +26,7 @@ describe('role persistence compare-and-swap', () => {
     const write = tx.roleRecord.updateMany.mock.calls[0][0];
     expect(write.where).toEqual({ id: 'custom', updatedAt: new Date(expectedRevision) });
     expect(write.data.updatedAt.getTime()).toBe(new Date(expectedRevision).getTime() + 1);
-    expect(tx.$queryRaw).toHaveBeenCalledTimes(2);
+    expect(tx.$queryRaw).toHaveBeenCalledTimes(3);
     tx.roleRecord.updateMany.mockResolvedValue({ count: 0 });
     await expect(repository.updateIfCurrent(role, expectedRevision)).rejects.toThrow(
       'ROLE_REVISION_CONFLICT',

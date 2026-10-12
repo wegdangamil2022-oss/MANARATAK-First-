@@ -1,3 +1,4 @@
+import { PrismaDutyGuard } from './PrismaDutyGuard';
 import type { AdminEmergencyAccessRecord, Prisma, PrismaClient } from '@prisma/client';
 import type {
   AtomicPersistenceContext,
@@ -105,6 +106,9 @@ export class PrismaEmergencyAccessRepository implements IEmergencyAccessReposito
     const persist = async (tx: Prisma.TransactionClient) => {
       // Serialise overlapping grants even when joining an existing audit/outbox transaction.
       const lockKey = `emergency-access:${input.principalId}:${input.roleId}`;
+      const duties = new PrismaDutyGuard(tx);
+      await duties.lock();
+      await duties.assertPrincipal(input.principalId, { roleId: input.roleId, include: true });
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))::text AS lock_result`;
       const roleLock = `authorization-role-reference:${input.roleId}`;
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${roleLock}, 0))::text AS lock_result`;

@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n/I18nProvider';
 import { type FormEvent, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { canAccessAdminPath, firstAllowedAdminPath } from '@manaratak/shared';
@@ -12,6 +13,8 @@ export function loginDestination(permissions: string[]): string {
 }
 
 export function AdminLoginPage({ session, verifySession }: { session: DisplaySession; verifySession: () => Promise<Session> }) {
+  const { t } = useTranslation();
+  const [mfaCode, setMfaCode] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -27,7 +30,7 @@ export function AdminLoginPage({ session, verifySession }: { session: DisplaySes
     setStudentSession(false);
     try {
       const response = await adminApiClient.request<{ data?: { authenticated?: boolean } }>('/auth/login', {
-        method: 'POST', body: JSON.stringify({ email: email.trim(), password, rememberMe }),
+        method: 'POST', body: JSON.stringify({ email: email.trim(), password, rememberMe, ...(mfaCode ? { mfaCode } : {}) }),
       });
       if (!response.data?.authenticated) throw new Error('تعذر تأكيد جلسة الدخول.');
       setPassword('');
@@ -43,7 +46,7 @@ export function AdminLoginPage({ session, verifySession }: { session: DisplaySes
         setMessage('تم الدخول، لكن تعذّر التحقق من صلاحيات الإدارة. حاول مجددًا.');
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'تعذر تسجيل الدخول.');
+      setMessage(error instanceof Error && error.message.includes('MFA_REQUIRED') ? t('mfa_required') : error instanceof Error ? error.message : 'تعذر تسجيل الدخول.');
     } finally {
       setBusy(false);
     }
@@ -65,6 +68,8 @@ export function AdminLoginPage({ session, verifySession }: { session: DisplaySes
           <input id="admin-email" type="email" autoComplete="username" required value={email} onChange={event => setEmail(event.target.value)} className="w-full rounded-xl border border-slate-300 p-3" />
           <label className="block text-sm font-bold" htmlFor="admin-password">كلمة المرور</label>
           <input id="admin-password" type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} className="w-full rounded-xl border border-slate-300 p-3" />
+          <label className="block text-sm font-bold" htmlFor="admin-mfa-code">{t('mfa_code')}</label>
+          <input id="admin-mfa-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={mfaCode} onChange={event => setMfaCode(event.target.value)} className="w-full rounded-xl border border-slate-300 p-3" />
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={rememberMe} onChange={event => setRememberMe(event.target.checked)} /> تذكرني</label>
           <button type="submit" disabled={busy} className="w-full rounded-xl bg-[#0E7C86] p-3 font-bold text-white disabled:opacity-60">{busy ? 'جارٍ التحقق...' : 'دخول الإدارة'}</button>
         </form>

@@ -83,6 +83,7 @@ export class AssetReuseRouter {
         reference: asset.reference.value,
         lifecycleState: asset.state,
         metadata: {
+          rights: asset.metadata.extraMetadata?.rights ?? null,
           originalFilename: asset.metadata.originalFilename,
           mimeType: asset.metadata.mimeType,
           byteSize: asset.metadata.byteSize,

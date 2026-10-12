@@ -1,3 +1,4 @@
+import type { MfaUseCases } from '@manaratak/application';
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -27,6 +28,7 @@ export interface CsrfGuardOptions {
 }
 
 export interface AdminGuardOptions {
+  mfaUseCases?: MfaUseCases;
   mode: 'strict';
   tokenProvider?: ITokenProvider;
   sessionManager?: ISessionManager;
@@ -228,6 +230,7 @@ export class SecurityMiddlewareFactory {
               && await options.principalAccessValidator.isAuthenticationAllowed(payload.userId)
             ) {
               principalId = payload.userId;
+              req.authSessionId = payload.sessionId;
             }
           } catch (e) {
             // Invalid or expired tokens remain unauthenticated.
@@ -260,6 +263,17 @@ export class SecurityMiddlewareFactory {
       // Canonical Admin access is server-session-bound. Stateless/service bearer
       // access requires a separately declared service-principal boundary rather
       // than silently omitting session/lifecycle dependencies here.
+      if (options.mfaUseCases) {
+        try {
+          if (!await options.mfaUseCases.sessionAuthenticated(principalId, req.authSessionId ?? '')) {
+            res.status(401).json({ error: { code: 'MFA_SESSION_REQUIRED' } }); return;
+          }
+          if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) await options.mfaUseCases.assertFresh(principalId, req.authSessionId);
+        } catch (error) {
+          const stepUp = error instanceof Error && ['MFA_STEP_UP_REQUIRED','MFA_ENROLLMENT_REQUIRED'].includes(error.message);
+          res.status(stepUp ? 403 : 503).json({ error: { code: stepUp && error instanceof Error ? error.message : 'MFA_AUTH_UNAVAILABLE' } }); return;
+        }
+      }
       req.authUserId = principalId;
       assignAdminContext(res, {
         authMode: options.mode,

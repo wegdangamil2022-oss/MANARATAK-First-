@@ -1,3 +1,5 @@
+import {MfaRequirementBanner} from './components/MfaRequirementBanner';
+import { AccountSecurityPage } from './pages/AccountSecurityPage';
 import { CourseProviderRegistryPage } from './pages/CourseProviderRegistryPage';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
@@ -260,9 +262,10 @@ function AdminLayout() {
         {adminAccess === 'authorized' ? (
           <AdminAuthorizationProvider permissions={adminPermissions}>
             <div className="flex flex-1 flex-col lg:flex-row">
-              <AdminNavigation />
+              <AdminNavigation /><a className="block p-3 text-sm underline" href="/admin/security">{t('mfa_title')}</a>
               <main className="min-w-0 flex-1 p-4 sm:p-6">
                 <AdminPermissionNotice />
+                <MfaRequirementBanner/>
                 <Routes>
                   <Route path="/" element={<Navigate to={firstAllowedAdminPath(adminPermissions) || '/dashboard'} replace />} />
                   <Route path="/dashboard" element={<RequireAdminPermission permission="admin:platform:manage"><AdminDashboardPage /></RequireAdminPermission>} />
@@ -320,6 +323,7 @@ function AdminLayout() {
                   <Route path="/study-destinations" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationsAdminPage /></RequireAdminPermission>} />
                   <Route path="/study-destinations/:countryIso2Code" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationDetailPage /></RequireAdminPermission>} />
                   <Route path="/identities" element={<RequireAdminPermission permission="admin:identities:manage"><IdentityAdminPage /></RequireAdminPermission>} />
+                  <Route path="/security" element={<AccountSecurityPage />} />
                   <Route path="/authorization" element={<RequireAdminPermission permission="admin:authorization:manage"><AuthorizationAdminPage /></RequireAdminPermission>} />
                   <Route path="/audit" element={<RequireAdminPermission permission="admin:audit:manage"><AuditCenterPage /></RequireAdminPermission>} />
                   <Route path="/assets" element={<RequireAdminPermission permission="admin:assets:manage"><AssetAdminPage /></RequireAdminPermission>} />

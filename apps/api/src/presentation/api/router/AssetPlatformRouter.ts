@@ -1,3 +1,4 @@
+import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -8,6 +9,7 @@ import {
   IAssetUsageRegistryGateway
 } from '@manaratak/domain';
 import {
+  AssetGovernanceUseCases,
   IngestAssetUseCase,
   ProcessAssetLifecycleUseCase,
   RequestAssetUploadLocatorDto,
@@ -17,6 +19,7 @@ import {
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
 export interface AssetPlatformRouterCradle {
+  assetGovernanceUseCases?: AssetGovernanceUseCases;
   ingestAssetUseCase: IngestAssetUseCase;
   processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase;
   auditRecordRepo?: IAuditRecordRepository;
@@ -27,12 +30,38 @@ export interface AssetPlatformRouterCradle {
 export class AssetPlatformRouter {
   public static create(cradle: AssetPlatformRouterCradle): Router {
     const router = Router();
-    const { ingestAssetUseCase, processAssetLifecycleUseCase, auditRecordRepo, assetRecordRepository, assetUsageRegistryGateway } = cradle;
+    const { assetGovernanceUseCases, ingestAssetUseCase, processAssetLifecycleUseCase, auditRecordRepo, assetRecordRepository, assetUsageRegistryGateway } = cradle;
 
     const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
       (req: Request, res: Response, next: NextFunction) => {
         Promise.resolve(fn(req, res, next)).catch(next);
       };
+
+    const governanceContext = (req: Request) => ({ actorId: requireAuthenticatedPrincipal(req).principalId, source:'admin-asset-governance',correlationId:req.header('x-correlation-id') });
+    router.put('/:assetId/rights', asyncHandler(async (req,res) => {
+      if (!assetGovernanceUseCases) throw new Error('ASSET_GOVERNANCE_NOT_CONFIGURED');
+      const body=z.object({expectedRevision:z.string().datetime(),reason:z.string().trim().min(6).max(2000),rights:z.object({rightsSource:z.string().trim().min(1).max(2000),attribution:z.string().max(2000),usageScope:z.enum(['PUBLIC','INTERNAL']),publicationPolicy:z.enum(['ADVISORY','MANDATORY']),expiresAt:z.string().datetime().optional()}).strict()}).strict().parse(req.body);
+      await assetGovernanceUseCases.rights(z.string().min(1).max(240).parse(req.params.assetId),body.rights,body.expectedRevision,body.reason,governanceContext(req));
+      res.json({data:{updated:true}});
+    }));
+    router.get('/:assetId/renditions',asyncHandler(async(req,res)=>{
+      if (!assetGovernanceUseCases) throw new Error('ASSET_GOVERNANCE_NOT_CONFIGURED');
+      res.setHeader('Cache-Control','no-store');res.json({data:await assetGovernanceUseCases.renditions(z.string().min(1).max(240).parse(req.params.assetId))});
+    }));
+    router.put('/:assetId/renditions/:variantKey',asyncHandler(async(req,res)=>{
+      if (!assetGovernanceUseCases) throw new Error('ASSET_GOVERNANCE_NOT_CONFIGURED');
+      const body=z.object({expectedVersion:z.number().int().min(0),status:z.enum(['MISSING','READY','FAILED']),generatedAssetId:z.string().min(1).max(240).optional()}).strict().parse(req.body);
+      res.json({data:await assetGovernanceUseCases.saveRendition(z.string().min(1).max(240).parse(req.params.assetId),z.string().regex(/^[a-z0-9_-]{1,60}$/).parse(req.params.variantKey),body,governanceContext(req))});
+    }));
+    router.delete('/:assetId/renditions/:variantKey',asyncHandler(async(req,res)=>{
+      if(!assetGovernanceUseCases)throw new Error('ASSET_GOVERNANCE_NOT_CONFIGURED');
+      const body=z.object({expectedVersion:z.number().int().min(1)}).strict().parse(req.body);
+      await assetGovernanceUseCases.deleteRendition(z.string().min(1).max(240).parse(req.params.assetId),z.string().regex(/^[a-z0-9_-]{1,60}$/).parse(req.params.variantKey),body.expectedVersion,governanceContext(req));res.status(204).send();
+    }));
+    router.get('/:assetId/renditions/:variantKey/delivery',asyncHandler(async(req,res)=>{
+      if (!assetGovernanceUseCases) throw new Error('ASSET_GOVERNANCE_NOT_CONFIGURED');
+      res.setHeader('Cache-Control','no-store');res.json({data:await assetGovernanceUseCases.renditionDelivery(z.string().min(1).max(240).parse(req.params.assetId),z.string().regex(/^[a-z0-9_-]{1,60}$/).parse(req.params.variantKey))});
+    }));
 
     const publicAssetDto = (record: AssetRecordDto) => {
       const { storageLocator: _locator, storageZone: _zone, bucketName: _bucket, pathKey: _path, ...safe } = record;
@@ -146,6 +175,9 @@ export class AssetPlatformRouter {
       const { asset, governance } = details;
       res.status(200).json({
         governance,
+        revision: governance.updatedAt.toISOString(),
+        rights: asset.metadata.extraMetadata?.rights ?? null,
+        rightsHistory: asset.metadata.extraMetadata?.rightsHistory ?? [],
         versions: asset.versionChain?.allVersions.map((version: any) => ({
           versionNumber: version.versionNumber, createdAt: version.createdAt,
           checksum: version.checksum ? { algorithm: version.checksum.algorithm, hash: version.checksum.hash } : null,
@@ -582,6 +614,10 @@ export class AssetPlatformRouter {
         return respond(400, 'Invalid asset request', 'ASSET_REQUEST_INVALID', detail);
       }
       const message = err instanceof Error ? err.message : '';
+      if (message === 'ASSET_NOT_FOUND') return respond(404,'Asset not found',message);
+      if (['ASSET_GOVERNANCE_NOT_CONFIGURED','ASSET_RENDITION_VERIFICATION_NOT_CONFIGURED','ASSET_DELIVERY_NOT_CONFIGURED'].includes(message)) return respond(503,'Asset governance capability unavailable',message);
+      if (['ASSET_GOVERNANCE_REVISION_CONFLICT','ASSET_RENDITION_NOT_READY','ASSET_RENDITION_EVIDENCE_INVALID','ASSET_RENDITION_OWNER_MISMATCH','ASSET_PUBLIC_RIGHTS_REQUIRED','ASSET_RIGHTS_HISTORY_LIMIT','ASSET_RENDITION_LIMIT'].includes(message)) return respond(409,'Asset governance conflict',message);
+      if (['ASSET_RIGHTS_INVALID','ASSET_RIGHTS_CHANGE_INVALID','ASSET_RENDITION_INVALID'].includes(message)) return respond(422,'Invalid asset governance request',message);
       if (message === 'ASSET_CURSOR_INVALID') return respond(400, 'Invalid asset cursor', message);
       if (message === 'ASSET_ADMIN_READ_MODEL_UNAVAILABLE' ||
         message === 'ASSET_VERSION_HISTORY_INVALID' ||

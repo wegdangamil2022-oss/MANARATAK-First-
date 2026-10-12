@@ -1,3 +1,5 @@
+import { ASSET_LIFECYCLE_RECOVERY_JOB_TYPE } from '@manaratak/application';
+import { AUDIT_ALERT_EVALUATION_JOB_TYPE } from '@manaratak/application';
 import { createApiApp } from './app.js';
 import { container } from './infrastructure/di/container.js';
 import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ZodEnvironmentValidator } from '@manaratak/config';
@@ -19,6 +21,12 @@ async function bootstrap() {
   const backgroundWorker = backgroundWorkerEnabled ? container.resolve<any>('durableBackgroundWorker') : null;
   if (backgroundWorkerEnabled) {
     const manager = container.resolve<any>('manageBackgroundJobsUseCase');
+    if (config.getOptional<boolean>('ASSET_LIFECYCLE_RECOVERY_ENABLED') === true) {
+      await manager.ensureRecurringJob({ stableReference:'system.assets.lifecycle-recovery',jobType:ASSET_LIFECYCLE_RECOVERY_JOB_TYPE,parameters:{limit:25,minimumAgeSeconds:300},cronExpression:'*/5 * * * *',priority:90,timeoutSeconds:300,maxAttempts:5,backoffType:'exponential',ownerReference:'assets:lifecycle-recovery' });
+    }
+    if (config.getOptional<boolean>('AUDIT_ALERTS_ENABLED') === true) {
+      await manager.ensureRecurringJob({ stableReference: 'system.audit.alerts', jobType: AUDIT_ALERT_EVALUATION_JOB_TYPE, parameters: { limit: 25 }, cronExpression: '* * * * *', priority: 75, timeoutSeconds: 300, maxAttempts: 5, backoffType: 'exponential', ownerReference: 'audit:alerts' });
+    }
     if (config.getOptional<boolean>('ASSET_ACTIVATION_RECOVERY_ENABLED') === true) {
       await manager.ensureRecurringJob({ stableReference: 'system.assets.activation-recovery',
         jobType: ASSET_ACTIVATION_RECOVERY_JOB_TYPE, parameters: { limit: 25, minimumAgeSeconds: 300 },

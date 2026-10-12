@@ -1,3 +1,4 @@
+import { validateAssetRights, type AssetRights } from '../value-objects/AssetRights';
 import { AssetId } from '../value-objects/AssetId';
 import { AssetReference } from '../value-objects/AssetReference';
 import { AssetStorageLocator } from '../value-objects/AssetStorageLocator';
@@ -40,6 +41,7 @@ export interface AssetActivationOperation {
   completedAt?: string;
 }
 export interface AssetArchiveOperation {
+  recoveryProof?: {operationId:string;fenced:true;fenceDigest:string;observedAt:string};
   version: 1;
   operationId: string;
   phase: 'RUNNING' | 'RECOVERY_REQUIRED' | 'COMPLETED';
@@ -48,6 +50,7 @@ export interface AssetArchiveOperation {
   updatedAt: string;
 }
 export interface AssetRestoreOperation {
+  recoveryProof?: {operationId:string;fenced:true;fenceDigest:string;observedAt:string};
   version: 1;
   operationId: string;
   phase: 'PREPARED' | 'RESTORING' | 'RECOVERY_REQUIRED' | 'COMPLETED' | 'CANCELLED';
@@ -97,6 +100,15 @@ export class AssetRecord {
   get reference(): AssetReference { return this.props.reference; }
   get locator(): AssetStorageLocator { return this.props.locator; }
   get metadata(): AssetMetadata { return this.props.metadata; }
+  public setRights(rights: AssetRights, actorId: string, reason: string): void {
+    this.assertNoPendingActivation(); this.assertNoPendingRestore(); this.assertNoPendingArchive();
+    if ([AssetLifecycleState.PURGED,AssetLifecycleState.DELETED].includes(this.state) || !actorId || reason.trim().length < 6) throw new Error('ASSET_RIGHTS_CHANGE_INVALID');
+    const value = validateAssetRights(rights), metadata = this.props.metadata;
+    const extra = metadata.extraMetadata ?? {}, history = (extra.rightsHistory ?? []) as unknown[];
+    if (!Array.isArray(history) || history.length >= 100) throw new Error('ASSET_RIGHTS_HISTORY_LIMIT');
+    this.props.metadata = new AssetMetadata(metadata.originalFilename,metadata.mimeType,metadata.fileExtension,metadata.byteSize,metadata.width,metadata.height,metadata.duration,
+      { ...extra, rights: value, rightsHistory: [...history,{ actorId, reason, at: new Date().toISOString(), rights: value }] });
+  }
   get retention(): AssetRetentionMetadata { return this.props.retention; }
   get owner(): AssetOwnerReference { return this.props.owner; }
   get classification(): AssetSecurityClassification { return this.props.classification; }

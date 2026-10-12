@@ -225,3 +225,14 @@ export * from "./background-jobs/handlers/CareerMaintenanceBackgroundJobHandler"
 
 export * from './integration/IntegrationRegistry';
 export * from './integration/CrossModuleIntegrityReport';
+
+export * from './authorization/use-cases/AuthorizationGovernanceUseCases';
+
+export * from './auth/mfa/MfaUseCases';
+export * from './audit/workspace/AuditWorkspaceUseCases';
+export * from './audit/workspace/AuditAlertEvaluation';
+export * from './asset-platform/use-cases/AssetGovernanceUseCases';
+export * from './asset-platform/use-cases/RecoverAssetLifecycleUseCase';
+export * from './background-jobs/handlers/AssetLifecycleRecoveryBackgroundJobHandler';
+export * from './notification/AuditAdministratorRecipientGateway';
+export * from './authorization/use-cases/GovernanceApprovalUseCases';

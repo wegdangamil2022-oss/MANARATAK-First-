@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@manaratak/core';
-import type { ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@manaratak/application';
+import type { MfaUseCases, ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@manaratak/application';
 import { ForgotPasswordUseCase, ResetPasswordUseCase } from '@manaratak/application';
 import { CapturedEmailDeliveryGateway, InMemoryPasswordResetTokenRepository, PasswordHasher } from '@manaratak/infrastructure';
 import { AuthorizationEvaluatorService, IEmailDeliveryGateway, IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
@@ -15,6 +15,7 @@ import { KNOWN_ADMIN_PERMISSIONS } from '../../security/AdminPermissionCatalog.j
 
 export class AuthRouter {
   public static create(cradle: { 
+    mfaUseCases?: MfaUseCases;
     authService: IAuthService; 
     identityRepository: IIdentityRepository; 
     securityService: ISecurityService;
@@ -35,6 +36,7 @@ export class AuthRouter {
   }): Router {
     const { authService, identityRepository, securityService, roleAssignmentRepository, roleRepository, tokenProvider, sessionManager, principalAccessValidator, credentialVerifier } = cradle;
     const router = Router();
+    router.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
     const responseFormatter = new ResponseFormatter('v1');
     const credentialCsrfGuard = (req: Request, res: Response, next: NextFunction) => {
       if (readAccessCookie(req) && !readRefreshCookie(req)) {
@@ -68,7 +70,7 @@ export class AuthRouter {
     router.post('/change-password',
       (req, res, next) => {
         if (!tokenProvider || !sessionManager) { res.status(401).json({ message: 'Unauthorized' }); return; }
-        return new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate()(req, res, next);
+        return new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator, cradle.mfaUseCases).generate()(req, res, next);
       },
       credentialCsrfGuard,
       async (req, res) => {
@@ -89,7 +91,7 @@ export class AuthRouter {
     router.post('/credentials/:identityId/disable',
       (req, res, next) => {
         if (!tokenProvider || !sessionManager) { res.status(401).json({ message: 'Unauthorized' }); return; }
-        return new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate()(req, res, next);
+        return new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator, cradle.mfaUseCases).generate()(req, res, next);
       },
       credentialCsrfGuard,
       async (req, res) => {
@@ -103,6 +105,57 @@ export class AuthRouter {
           res.status(403).json({ error: { code: 'CREDENTIAL_OPERATION_DENIED' } });
         }
       });
+
+
+    const authenticateMfa = (req: Request, res: Response, next: NextFunction) => {
+      if (!tokenProvider || !sessionManager) { res.status(401).json({ error: { code: 'SESSION_REQUIRED' } }); return; }
+      return new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator, cradle.mfaUseCases).generate()(req, res, next);
+    };
+    const mfaFailure = (res: Response, error: unknown) => {
+      const code = error instanceof Error ? error.message : '';
+      const unavailable = /UNAVAILABLE|TRANSACTION_REQUIRED/.test(code);
+      res.status(unavailable ? 503 : 400).json({ error: { code: unavailable ? 'MFA_UNAVAILABLE' : 'MFA_OPERATION_DENIED' } });
+    };
+    router.get('/mfa', authenticateMfa, async (req, res) => {
+      try { if (!cradle.mfaUseCases) throw new Error('MFA_UNAVAILABLE');
+        res.json(responseFormatter.success(await cradle.mfaUseCases.status(req.authUserId!, req.authSessionId)));
+      } catch (error) { mfaFailure(res, error); }
+    });
+    router.post('/mfa/enroll', authenticateMfa, credentialCsrfGuard, async (req, res) => {
+      try { if (!cradle.mfaUseCases) throw new Error('MFA_UNAVAILABLE');
+        const limit = await securityService.getRateLimiter().consume(`mfa:enroll:${req.authUserId}`, 5, 15 * 60_000);
+        if (!limit.allowed) { res.status(429).json({ error: { code: 'AUTH_RATE_LIMITED' } }); return; }
+        const body = z.object({ password: z.string().min(1).max(128) }).strict().parse(req.body);
+        res.json(responseFormatter.success(await cradle.mfaUseCases.begin(req.authUserId!, body.password)));
+      } catch (error) { mfaFailure(res, error); }
+    });
+    router.post('/mfa/confirm', authenticateMfa, credentialCsrfGuard, async (req, res) => {
+      try { if (!cradle.mfaUseCases) throw new Error('MFA_UNAVAILABLE');
+        const limit = await securityService.getRateLimiter().consume(`mfa:confirm:${req.authUserId}`, 5, 15 * 60_000);
+        if (!limit.allowed) { res.status(429).json({ error: { code: 'AUTH_RATE_LIMITED' } }); return; }
+        const body = z.object({ code: z.string().regex(/^\d{6}$/) }).strict().parse(req.body);
+        await cradle.mfaUseCases.confirm(req.authUserId!, body.code); clearAuthCookies(res);
+        res.json(responseFormatter.success({ enabled: true, loginRequired: true }));
+      } catch (error) { mfaFailure(res, error); }
+    });
+    router.post('/mfa/disable', authenticateMfa, credentialCsrfGuard, async (req, res) => {
+      try { if (!cradle.mfaUseCases) throw new Error('MFA_UNAVAILABLE');
+        const limit = await securityService.getRateLimiter().consume(`mfa:disable:${req.authUserId}`, 5, 15 * 60_000);
+        if (!limit.allowed) { res.status(429).json({ error: { code: 'AUTH_RATE_LIMITED' } }); return; }
+        const body = z.object({ password: z.string().min(1).max(128), code: z.string().regex(/^\d{6}$/) }).strict().parse(req.body);
+        await cradle.mfaUseCases.disable(req.authUserId!, body.password, body.code); clearAuthCookies(res);
+        res.json(responseFormatter.success({ enabled: false, loginRequired: true }));
+      } catch (error) { mfaFailure(res, error); }
+    });
+    router.post('/mfa/step-up', authenticateMfa, credentialCsrfGuard, async (req, res) => {
+      try { if (!cradle.mfaUseCases) throw new Error('MFA_UNAVAILABLE');
+        const limit = await securityService.getRateLimiter().consume(`mfa:step-up:${req.authUserId}`, 5, 15 * 60_000);
+        if (!limit.allowed) { res.status(429).json({ error: { code: 'AUTH_RATE_LIMITED' } }); return; }
+        const body = z.object({ password: z.string().min(1).max(128), code: z.string().regex(/^\d{6}$/) }).strict().parse(req.body);
+        await cradle.mfaUseCases.stepUp(req.authUserId!, req.authSessionId!, body.password, body.code);
+        res.json(responseFormatter.success({ stepUpFresh: true }));
+      } catch (error) { mfaFailure(res, error); }
+    });
 
     // Public verification contract for asymmetric access-token consumers.
     router.get('/jwks.json', (_req: Request, res: Response) => {
@@ -171,6 +224,7 @@ export class AuthRouter {
                 && sessionManager
                 && await sessionManager.isSessionActive(payload.userId, payload.sessionId)
                 && await principalAccessValidator.isAuthenticationAllowed(payload.userId)
+                && (!cradle.mfaUseCases || await cradle.mfaUseCases.sessionAuthenticated(payload.userId,payload.sessionId))
               ) {
                 principalId = payload.userId;
               }
@@ -259,7 +313,8 @@ export class AuthRouter {
         const schema = z.object({
           email: z.string().email('Invalid email address'),
           password: z.string().min(1, 'Password is required'),
-          rememberMe: z.boolean().optional()
+          rememberMe: z.boolean().optional(),
+          mfaCode: z.string().regex(/^\d{6}$/).optional()
         });
 
         const parseResult = schema.safeParse(req.body);
@@ -271,7 +326,7 @@ export class AuthRouter {
           return;
         }
 
-        const { email, password, rememberMe } = parseResult.data;
+        const { email, password, rememberMe, mfaCode } = parseResult.data;
         const accountKey = createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
         const remoteAddress = req.ip || req.socket.remoteAddress || 'unknown';
         const [accountLimit, accountIpLimit] = await Promise.all([
@@ -299,8 +354,11 @@ export class AuthRouter {
         let tokens;
         try {
           const sessionTtlSeconds = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60;
-          tokens = await (authService as any).login(identity.id.toString(), password, sessionTtlSeconds);
+          tokens = await (authService as any).login(identity.id.toString(), password, sessionTtlSeconds, mfaCode);
         } catch (authError) {
+          if (authError instanceof Error && authError.message === 'MFA_REQUIRED') {
+            res.status(401).json(responseFormatter.error({ code: 'MFA_REQUIRED', message: 'MFA_REQUIRED' })); return;
+          }
           res.status(401).json(responseFormatter.error({
             code: 'UNAUTHORIZED',
             message: 'Invalid credentials or identity not found'

@@ -1,3 +1,4 @@
+import type { MfaUseCases } from '@manaratak/application';
 import { Request, Response, NextFunction } from 'express';
 import {
   IPrincipalAccessValidator,
@@ -12,6 +13,7 @@ declare global {
   namespace Express {
     interface Request {
       authUserId?: string;
+      authSessionId?: string;
     }
   }
 }
@@ -28,6 +30,7 @@ export class AuthMiddleware {
     private readonly tokenProvider: ITokenProvider,
     private readonly sessionManager: ISessionManager,
     private readonly principalAccessValidator: IPrincipalAccessValidator,
+    private readonly mfa?: MfaUseCases,
   ) {}
 
   public generate = () => {
@@ -47,6 +50,8 @@ export class AuthMiddleware {
           throw new UnauthorizedException('Authentication required');
         }
 
+        if (this.mfa && !await this.mfa.sessionAuthenticated(payload.userId, payload.sessionId)) throw new UnauthorizedException('MFA session required');
+        req.authSessionId = payload.sessionId;
         req.authUserId = payload.userId;
         next();
       } catch {

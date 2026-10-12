@@ -6,7 +6,7 @@ Use Node 22.16.0 (the project engine). `npm ci` generates Prisma without changin
 
 ## Disposable database preparation
 
-**Before executing these commands, show them to the operator and explain that schema and three existing EAP guard migrations will be installed ONLY on a newly created disposable container. Do not use an existing database/container or substitute a remote URL.** Never automate this preparation inside a unit/browser test. The 2026-10-12 review showed the commands before applying them.
+**Before executing these commands, show them to the operator and explain that schema plus existing and new EAP reference/reconciliation guard sources will be installed ONLY on a newly created disposable container. Do not use an existing database/container or substitute a remote URL.** Never automate this preparation inside a unit/browser test. The 2026-10-12 review showed the commands before applying them.
 
 ```bash
 docker --host=unix:///var/run/docker.sock run -d --name manaratak-review-123-db \
@@ -21,7 +21,7 @@ npx --no-install prisma db push --schema=packages/infrastructure/prisma/schema.p
 node tests/e2e/sections123/install-guards.mjs
 ```
 
-These credentials are synthetic and intentionally fixed. New suites and installer reject any other URL before constructing Prisma. The legacy EAP serialization suite additionally accepts this exact URL only with the explicit local rehearsal flag; its existing CI URL remains supported. The GitHub-only installer remains unchanged.
+These credentials are synthetic and intentionally fixed. New suites and installer reject any other URL before constructing Prisma. The legacy EAP serialization suite additionally accepts this exact URL only with the explicit local rehearsal flag; its existing CI URL remains supported. Both installers retain their original URL/role/environment fences. The new rendition table is created by schema push; the installer then applies only its trigger and the replacement lifecycle guard functions. This does not rehearse the full migration chain. New Audit workspace and rendition checks in the SQL migrations require a separate disposable full-chain rehearsal.
 
 ## Database acceptance and volume
 

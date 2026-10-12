@@ -18,6 +18,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mfaCode,setMfaCode] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetToken, setResetToken] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('token') || '');
   const [rememberMe, setRememberMe] = useState(false);
@@ -134,7 +135,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
         return;
       }
 
-      await ApiClient.login(email, password, rememberMe);
+      await ApiClient.login(email, password, rememberMe, mfaCode || undefined);
       const identity = await ApiClient.getCurrentSessionIdentity();
       const destination = resolveAuthenticatedDestination(identity);
       if (destination.kind === 'denied') {
@@ -150,6 +151,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
           setError(err?.message || 'تعذر إنشاء الحساب. تحقق من صحة البيانات.');
         }
       } else {
+        if (err?.code === 'MFA_REQUIRED') { setError('أدخل رمز تطبيق المصادقة لإكمال الدخول.'); return; }
         if (err?.status === 429 || err?.code === 'AUTH_RATE_LIMITED' || err?.message?.includes('429') || err?.message?.includes('Rate') || err?.message?.includes('محاولات')) {
           setError('تم تجاوز عدد محاولات الدخول المسموح بها مؤقتاً لحماية الحساب. يرجى الانتظار بضع دقائق قبل إعادة المحاولة.');
         } else if (err?.status === 500 || err?.code === 'INTERNAL_SERVER_ERROR') {
@@ -167,6 +169,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
     <main dir="rtl" className="mn-page-shell flex min-h-[72vh] w-full items-center py-8">
       <div className="mn-public-container flex justify-center">
         <form onSubmit={submit} className="mn-card w-full max-w-md p-5 sm:p-7" noValidate>
+          {mode === 'login' && <label className="block text-sm">رمز تطبيق المصادقة — إذا كان مفعّلًا<input className="mt-2 block w-full rounded border p-2" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={mfaCode} onChange={event=>setMfaCode(event.target.value.replace(/\D/g,''))}/></label>}
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] text-[var(--mn-accent-text)]">
               {mode === 'verify' ? <MailCheck className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}

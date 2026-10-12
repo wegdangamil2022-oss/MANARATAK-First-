@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 375,
-  "reachableCount": 375,
+  "registrationCount": 393,
+  "reachableCount": 393,
   "unreachable": [],
   "registrations": [
     {
@@ -452,6 +452,52 @@
       ]
     },
     {
+      "name": "assetGovernanceGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "assetGovernanceUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "assetGovernanceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AssetPlatformRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "assetGovernanceGateway",
+        "assetStorageGateway",
+        "atomicDomainMutationCoordinator"
+      ]
+    },
+    {
+      "name": "assetLifecycleRecoveryBackgroundJobHandler",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "backgroundJobHandlerRegistry"
+      ],
+      "dependencies": [
+        "recoverAssetLifecycleUseCase"
+      ]
+    },
+    {
+      "name": "assetLifecycleRecoveryGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "recoverAssetLifecycleUseCase"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
       "name": "assetMalwareScannerGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -559,9 +605,11 @@
         "apps/api/src/presentation/api/router/ImportAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
+        "assetGovernanceUseCases",
         "courseImportArtifactUseCase",
         "ingestAssetUseCase",
         "processAssetLifecycleUseCase",
+        "recoverAssetLifecycleUseCase",
         "verifiedImportArtifactGateway"
       ],
       "dependencies": []
@@ -620,12 +668,16 @@
         "adminMajorUseCases",
         "adminScholarshipUseCases",
         "adminUniversityUseCases",
+        "assetGovernanceUseCases",
         "assignRoleUseCase",
+        "auditWorkspaceUseCases",
+        "authorizationGovernanceUseCases",
         "courseAdminCommandUseCases",
         "courseImportCoordinator",
         "courseProgressUseCases",
         "coursePublicationService",
         "degreeLevelUseCases",
+        "governanceApprovalUseCases",
         "importGovernanceUseCases",
         "importSourceControlUseCases",
         "internationalTestAdminUseCases",
@@ -634,6 +686,8 @@
         "managePoliciesUseCase",
         "manageRolesUseCase",
         "manageSettingsUseCase",
+        "mfaUseCases",
+        "recoverAssetLifecycleUseCase",
         "referenceOwnerReviewUseCases"
       ],
       "dependencies": [
@@ -648,6 +702,41 @@
         "atomicAuditedOutboxMutationExecutor"
       ],
       "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "auditAlertEvaluation",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "auditAlertEvaluationBackgroundJobHandler"
+      ],
+      "dependencies": [
+        "auditAlertEvaluationGateway"
+      ]
+    },
+    {
+      "name": "auditAlertEvaluationBackgroundJobHandler",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "backgroundJobHandlerRegistry"
+      ],
+      "dependencies": [
+        "auditAlertEvaluation"
+      ]
+    },
+    {
+      "name": "auditAlertEvaluationGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "auditAlertEvaluation"
+      ],
+      "dependencies": [
+        "auditWorkspaceGateway",
+        "intentsUseCase",
         "prisma"
       ]
     },
@@ -698,11 +787,47 @@
       "dependencies": []
     },
     {
+      "name": "auditWorkspaceGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "auditAlertEvaluationGateway",
+        "auditWorkspaceUseCases"
+      ],
+      "dependencies": [
+        "notificationRecipientGateway",
+        "notificationTemplateRepo",
+        "prisma"
+      ]
+    },
+    {
+      "name": "auditWorkspaceRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "auditWorkspaceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "auditWorkspaceGateway"
+      ]
+    },
+    {
       "name": "authEvaluatorService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/AIAdminRouter.ts",
         "apps/api/src/presentation/api/router/AuditRouter.ts",
+        "apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
@@ -718,9 +843,11 @@
       "reachableThroughRegistrations": [
         "disablePasswordCredentialUseCase",
         "evaluateAccessUseCase",
-        "importGovernanceUseCases"
+        "importGovernanceUseCases",
+        "notificationRecipientGateway"
       ],
       "dependencies": [
+        "authorizationDutyEvaluator",
         "emergencyAccessRepository",
         "policyEvaluator",
         "policyRepository",
@@ -746,6 +873,7 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "credentialVerifier",
+        "mfaUseCases",
         "principalAccessValidator",
         "sessionManager",
         "tokenProvider"
@@ -759,6 +887,41 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": []
+    },
+    {
+      "name": "authorizationDutyEvaluator",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "authEvaluatorService"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "authorizationGovernanceGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "authorizationGovernanceUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "authorizationGovernanceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "authorizationGovernanceGateway",
+        "governanceApprovalGateway"
+      ]
     },
     {
       "name": "authorizationRuntimeRouter",
@@ -779,6 +942,8 @@
       "dependencies": [
         "aiAsyncBackgroundJobHandler",
         "assetActivationRecoveryBackgroundJobHandler",
+        "assetLifecycleRecoveryBackgroundJobHandler",
+        "auditAlertEvaluationBackgroundJobHandler",
         "careerMaintenanceBackgroundJobHandler",
         "cmsScheduledPublishingBackgroundJobHandler",
         "financeReconciliationBackgroundJobHandler",
@@ -1704,7 +1869,8 @@
         "apps/api/src/presentation/api/router/AuthRouter.ts"
       ],
       "reachableThroughRegistrations": [
-        "authService"
+        "authService",
+        "mfaUseCases"
       ],
       "dependencies": [
         "prisma"
@@ -2097,6 +2263,31 @@
       ]
     },
     {
+      "name": "governanceApprovalGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "authorizationGovernanceUseCases",
+        "governanceApprovalUseCases",
+        "mfaUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "governanceApprovalUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "governanceApprovalGateway"
+      ]
+    },
+    {
       "name": "hierarchyValidationService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -2451,6 +2642,7 @@
         "apps/api/src/presentation/api/router/NotificationRouter.ts"
       ],
       "reachableThroughRegistrations": [
+        "auditAlertEvaluationGateway",
         "notificationOutboxDeliveryGateway",
         "studentApplicationReminderGateway"
       ],
@@ -2818,6 +3010,37 @@
       "dependencies": []
     },
     {
+      "name": "mfaGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "mfaUseCases"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "mfaUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts",
+        "apps/api/src/presentation/api/router/AuthRouter.ts",
+        "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
+        "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "authService"
+      ],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "credentialVerifier",
+        "governanceApprovalGateway",
+        "mfaGateway",
+        "sessionManager"
+      ]
+    },
+    {
       "name": "nativeCourseUseCases",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -2934,11 +3157,14 @@
         "apps/api/src/presentation/api/router/NotificationRouter.ts"
       ],
       "reachableThroughRegistrations": [
+        "auditWorkspaceGateway",
         "intentsUseCase",
         "notificationDeliveryBackgroundJobHandler"
       ],
       "dependencies": [
+        "authEvaluatorService",
         "identityRepository",
+        "principalAccessValidator",
         "roleAssignmentRepository",
         "studentWorkspaceRepository"
       ]
@@ -2959,6 +3185,7 @@
         "apps/api/src/app.ts"
       ],
       "reachableThroughRegistrations": [
+        "auditWorkspaceGateway",
         "intentsUseCase",
         "notificationOutboxDeliveryGateway",
         "templatesUseCase"
@@ -3134,7 +3361,8 @@
       "reachableThroughRegistrations": [
         "authService",
         "changePasswordUseCase",
-        "disablePasswordCredentialUseCase"
+        "disablePasswordCredentialUseCase",
+        "notificationRecipientGateway"
       ],
       "dependencies": [
         "identityRepository",
@@ -3157,12 +3385,18 @@
         "apiExposureGateway",
         "apiIdempotencyStore",
         "apiServiceRepo",
+        "assetGovernanceGateway",
+        "assetLifecycleRecoveryGateway",
         "assetRecordRepository",
         "assetRetentionGateway",
         "assetUsageRegistryGateway",
         "atomicPersistenceUnitOfWork",
+        "auditAlertEvaluationGateway",
         "auditRecordRepo",
         "auditRetentionGateway",
+        "auditWorkspaceGateway",
+        "authorizationDutyEvaluator",
+        "authorizationGovernanceGateway",
         "bgJobGateway",
         "bgJobRepo",
         "canonicalAcademicUsageGateway",
@@ -3186,6 +3420,7 @@
         "externalCourseProviderRepository",
         "financeCurrencyReferenceGateway",
         "financeRepository",
+        "governanceApprovalGateway",
         "identityRepository",
         "importGovernanceGateway",
         "importQueueGateway",
@@ -3198,6 +3433,7 @@
         "internationalTestRepository",
         "learningPathRepository",
         "majorRepository",
+        "mfaGateway",
         "newMajorCandidateRepository",
         "notificationIntentRepo",
         "notificationPrefGateway",
@@ -3350,6 +3586,19 @@
         "assetRecordRepository",
         "auditRecordRepo",
         "processAssetLifecycleUseCase"
+      ]
+    },
+    {
+      "name": "recoverAssetLifecycleUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "assetLifecycleRecoveryBackgroundJobHandler"
+      ],
+      "dependencies": [
+        "assetLifecycleRecoveryGateway",
+        "assetStorageGateway",
+        "atomicDomainMutationCoordinator"
       ]
     },
     {
@@ -4038,6 +4287,7 @@
       "reachableThroughRegistrations": [
         "archiveIdentityUseCase",
         "authService",
+        "mfaUseCases",
         "purgeIdentityUseCase",
         "resetPasswordUseCase",
         "suspendIdentityUseCase"

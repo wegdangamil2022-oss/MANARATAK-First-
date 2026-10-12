@@ -1,3 +1,17 @@
+import { GovernanceApprovalUseCases } from '@manaratak/application';
+import { PrismaGovernanceApprovalGateway } from '@manaratak/infrastructure';
+import { AuditAdministratorRecipientGateway } from '@manaratak/application';
+import { RecoverAssetLifecycleUseCase, AssetLifecycleRecoveryBackgroundJobHandler } from '@manaratak/application';
+import { PrismaAssetLifecycleRecoveryGateway } from '@manaratak/infrastructure';
+import { AssetGovernanceUseCases } from '@manaratak/application';
+import { PrismaAssetGovernanceGateway } from '@manaratak/infrastructure';
+import { AuditWorkspaceUseCases, AuditAlertEvaluation, AuditAlertEvaluationBackgroundJobHandler } from '@manaratak/application';
+import { PrismaAuditWorkspaceGateway, PrismaConfiguredAuditRetention, PrismaAuditAlertEvaluationGateway } from '@manaratak/infrastructure';
+import { AuditWorkspaceRouter } from '../../presentation/api/router/AuditWorkspaceRouter.js';
+import { MfaUseCases } from '@manaratak/application';
+import { PrismaMfaGateway } from '@manaratak/infrastructure';
+import { AuthorizationGovernanceUseCases } from '@manaratak/application';
+import { PrismaAuthorizationGovernanceGateway, PrismaDutyGuard } from '@manaratak/infrastructure';
 import { WorkerHealthObservation } from '../runtime/WorkerHealthObservation.js';
 import {
   PrismaStudentPrivateResultRetentionGateway,
@@ -758,7 +772,7 @@ export function registerDependencies(
     assetUsageRegistryGateway: asFunction(({ prisma }) => new PrismaAssetUsageRegistryGateway(prisma)).singleton(),
     retentionDecisionRepository: asFunction(({ prisma }) => isPrisma ? new PrismaRetentionDecisionRepository(prisma) : createUnavailableCapability('retentionDecisionPersistence')).singleton(),
     importRetentionGateway: asFunction(({ prisma }) => isPrisma ? new PrismaImportRetentionGateway(prisma) : createUnavailableCapability('importRetentionGateway')).singleton(),
-    auditRetentionGateway: asFunction(({ prisma }) => isPrisma ? new PrismaAuditRetentionGateway(prisma) : createUnavailableCapability('auditRetentionGateway')).singleton(),
+    auditRetentionGateway: asFunction(({ prisma }) => isPrisma ? new PrismaAuditRetentionGateway(prisma, true) : createUnavailableCapability('auditRetentionGateway')).singleton(),
 
     hierarchyValidationService: asClass(HierarchyValidationService).singleton(),
     referenceDataValidationService: asClass(ReferenceDataValidationService).singleton(),
@@ -783,7 +797,7 @@ export function registerDependencies(
     notificationIntentRepo: asFunction(({ prisma, studentWorkspaceDeliveryCache }) => new PrismaNotificationIntentRepository(prisma, studentWorkspaceDeliveryCache, new StudentPrivateResultProtector('NOTIFICATION_PAYLOAD_KEY', { NOTIFICATION_PAYLOAD_KEY: readConfig<string>('NOTIFICATION_PAYLOAD_KEY'), NOTIFICATION_PAYLOAD_KEY_PREVIOUS: readConfig<string>('NOTIFICATION_PAYLOAD_KEY_PREVIOUS') }), Number(readConfig<number>('NOTIFICATION_PAYLOAD_RETENTION_DAYS') ?? 30))).singleton(),
     notificationDeliveryRepo: asFunction(({ notificationIntentRepo }) => notificationIntentRepo).singleton(),
     notificationTemplateRepo: asFunction(({ prisma }) => new PrismaNotificationTemplateRepository(prisma)).singleton(),
-    auditRecordRepo: asFunction(({ prisma }) => new PrismaAuditRecordRepository(prisma)).singleton(),
+    auditRecordRepo: asFunction(({ prisma }) => new PrismaAuditRecordRepository(prisma, new PrismaConfiguredAuditRetention())).singleton(),
     apiIdempotencyStore: asFunction(({ prisma }) => new PrismaApiIdempotencyStore(prisma)).singleton(),
     transactionalOutboxStore: asFunction(({ prisma }) => new PrismaTransactionalOutboxStore(prisma)).singleton(),
     atomicPersistenceUnitOfWork: asFunction(({ prisma }) => new PrismaAtomicPersistenceUnitOfWork(prisma)).singleton(),
@@ -809,7 +823,7 @@ export function registerDependencies(
 
     // --- Gateways & Providers ---
     storageGateway: asFunction(() => createUnavailableCapability('fileStorage')).singleton(),
-    notificationRecipientGateway: asFunction(({ identityRepository, roleAssignmentRepository, studentWorkspaceRepository }) => new StudentNotificationRecipientGateway(identityRepository, roleAssignmentRepository, studentWorkspaceRepository)).scoped(),
+    notificationRecipientGateway: asFunction(({ identityRepository, roleAssignmentRepository, studentWorkspaceRepository, authEvaluatorService, principalAccessValidator }) => new AuditAdministratorRecipientGateway(new StudentNotificationRecipientGateway(identityRepository, roleAssignmentRepository, studentWorkspaceRepository), identityRepository, authEvaluatorService, principalAccessValidator)).scoped(),
     notificationPrefGateway: asFunction(({ prisma }) => new PrismaStudentNotificationPreferenceGateway(prisma)).singleton(),
     notificationDeliveryGateway: asFunction(() => {
       const options = notificationProviderOptions();
@@ -844,8 +858,9 @@ export function registerDependencies(
 
     // --- Domain Services ---
     policyEvaluator: asClass(DefaultPolicyEvaluator).singleton(),
-    authEvaluatorService: asFunction(({ roleRepository, policyRepository, roleAssignmentRepository, policyEvaluator, emergencyAccessRepository }) => 
-      new AuthorizationEvaluatorService(roleRepository, policyRepository, roleAssignmentRepository, policyEvaluator, emergencyAccessRepository)).singleton(),
+    authorizationDutyEvaluator: asFunction(({ prisma }) => isPrisma ? new PrismaDutyGuard(prisma) : undefined).singleton(),
+    authEvaluatorService: asFunction(({ roleRepository, policyRepository, roleAssignmentRepository, policyEvaluator, emergencyAccessRepository, authorizationDutyEvaluator }) =>
+      new AuthorizationEvaluatorService(roleRepository, policyRepository, roleAssignmentRepository, policyEvaluator, emergencyAccessRepository, authorizationDutyEvaluator)).singleton(),
     configurationValidationService: asClass(ConfigurationValidationService).singleton(),
     fileIntegrityValidationService: asClass(FileIntegrityValidationService).singleton(),
 
@@ -1090,6 +1105,8 @@ export function registerDependencies(
     importAdminUseCases: asFunction(({ importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol }) => new ImportAdminUseCases(importRepository, importQueueGateway, importHandoffDispatcher, importWorkerProtocol, sweepOrphanImportSpools)).scoped(),
     majorImportStagingUseCase: asFunction(({ importAdminUseCases }) => new MajorImportStagingUseCase(importAdminUseCases)).scoped(),
     ingestAssetUseCase: asFunction(({ assetRecordRepository, assetStorageGateway }) => new IngestAssetUseCase(assetRecordRepository, assetStorageGateway)).scoped(),
+    assetGovernanceGateway: asFunction(({prisma}) => new PrismaAssetGovernanceGateway(prisma)).scoped(),
+    assetGovernanceUseCases: asFunction(({assetGovernanceGateway,assetStorageGateway,atomicDomainMutationCoordinator})=>new AssetGovernanceUseCases(assetGovernanceGateway,assetStorageGateway,atomicDomainMutationCoordinator)).scoped(),
     processAssetLifecycleUseCase: asFunction(({ assetRecordRepository, assetStorageGateway, assetUsageRegistryGateway, assetMalwareScannerGateway, assetSanitizationGateway }) => new ProcessAssetLifecycleUseCase(assetRecordRepository, assetStorageGateway, assetUsageRegistryGateway, assetMalwareScannerGateway, assetSanitizationGateway)).scoped(),
     assetRetentionGateway: asFunction(({ prisma, processAssetLifecycleUseCase }) => isPrisma ? new PrismaAssetRetentionGateway(prisma, processAssetLifecycleUseCase) : createUnavailableCapability('assetRetentionGateway')).scoped(),
     studentPrivateResultRetentionGateway: asFunction(
@@ -1113,6 +1130,9 @@ export function registerDependencies(
           retentionDecisionRepository,
         ),
     ).scoped(),
+    assetLifecycleRecoveryGateway: asFunction(({prisma})=>new PrismaAssetLifecycleRecoveryGateway(prisma)).scoped(),
+    recoverAssetLifecycleUseCase: asFunction(({assetLifecycleRecoveryGateway,assetStorageGateway,atomicDomainMutationCoordinator})=>new RecoverAssetLifecycleUseCase(assetLifecycleRecoveryGateway,assetStorageGateway,atomicDomainMutationCoordinator)).scoped(),
+    assetLifecycleRecoveryBackgroundJobHandler: asFunction(({recoverAssetLifecycleUseCase})=>new AssetLifecycleRecoveryBackgroundJobHandler(recoverAssetLifecycleUseCase,readConfig<boolean>('ASSET_LIFECYCLE_RECOVERY_ENABLED')===true)).scoped(),
     recoverAssetActivationsUseCase: asFunction(({ assetRecordRepository, processAssetLifecycleUseCase, auditRecordRepo }) =>
       new RecoverAssetActivationsUseCase(assetRecordRepository, processAssetLifecycleUseCase, auditRecordRepo)).scoped(),
     assetActivationRecoveryBackgroundJobHandler: asFunction(({ recoverAssetActivationsUseCase }) =>
@@ -1125,7 +1145,9 @@ export function registerDependencies(
     serviceMaintenanceBackgroundJobHandler: asFunction(({ adminServiceFulfillmentUseCases, serviceOperationsUseCases }) => new ServiceMaintenanceBackgroundJobHandler(adminServiceFulfillmentUseCases,serviceOperationsUseCases,readConfig<boolean>('SERVICES_MAINTENANCE_ENABLED') === true)).scoped(),
     financeReconciliationBackgroundJobHandler: asFunction(({ financePlatformUseCases }) => new FinanceReconciliationBackgroundJobHandler(financePlatformUseCases)).scoped(),
     notificationDeliveryBackgroundJobHandler: asFunction(({ notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway, studentApplicationReminderDeliveryPolicy, notificationRecipientGateway }) => new NotificationDeliveryBackgroundJobHandler(notificationDeliveryRepo, notificationDeliveryGateway, notificationPrefGateway, studentApplicationReminderDeliveryPolicy, notificationRecipientGateway)).scoped(),
-    backgroundJobHandlerRegistry: asFunction(({ careerMaintenanceBackgroundJobHandler, serviceMaintenanceBackgroundJobHandler, assetActivationRecoveryBackgroundJobHandler, retentionBackgroundJobHandler, cmsScheduledPublishingBackgroundJobHandler, importQueueBackgroundJobHandler, aiAsyncBackgroundJobHandler, financeReconciliationBackgroundJobHandler, notificationDeliveryBackgroundJobHandler }) => new BackgroundJobHandlerRegistry([
+    backgroundJobHandlerRegistry: asFunction(({ assetLifecycleRecoveryBackgroundJobHandler, auditAlertEvaluationBackgroundJobHandler, careerMaintenanceBackgroundJobHandler, serviceMaintenanceBackgroundJobHandler, assetActivationRecoveryBackgroundJobHandler, retentionBackgroundJobHandler, cmsScheduledPublishingBackgroundJobHandler, importQueueBackgroundJobHandler, aiAsyncBackgroundJobHandler, financeReconciliationBackgroundJobHandler, notificationDeliveryBackgroundJobHandler }) => new BackgroundJobHandlerRegistry([
+      assetLifecycleRecoveryBackgroundJobHandler,
+      auditAlertEvaluationBackgroundJobHandler,
       assetActivationRecoveryBackgroundJobHandler,
       retentionBackgroundJobHandler,
       cmsScheduledPublishingBackgroundJobHandler,
@@ -1159,6 +1181,10 @@ export function registerDependencies(
     ).scoped(),
 
     // Authorization
+    governanceApprovalGateway: asFunction(({prisma})=>new PrismaGovernanceApprovalGateway(prisma)).scoped(),
+    governanceApprovalUseCases: asFunction(({governanceApprovalGateway,atomicDomainMutationCoordinator})=>new GovernanceApprovalUseCases(governanceApprovalGateway,atomicDomainMutationCoordinator)).scoped(),
+    authorizationGovernanceGateway: asFunction(({ prisma }) => isPrisma ? new PrismaAuthorizationGovernanceGateway(prisma) : createUnavailableCapability('authorizationGovernanceGateway')).scoped(),
+    authorizationGovernanceUseCases: asFunction(({ authorizationGovernanceGateway, atomicDomainMutationCoordinator, governanceApprovalGateway }) => new AuthorizationGovernanceUseCases(authorizationGovernanceGateway, atomicDomainMutationCoordinator, governanceApprovalGateway)).scoped(),
     managePoliciesUseCase: asFunction(
       ({ policyRepository, atomicDomainMutationCoordinator }) =>
         new ManagePoliciesUseCase(policyRepository, atomicDomainMutationCoordinator),
@@ -1184,6 +1210,17 @@ export function registerDependencies(
     intentsUseCase: asFunction(({ notificationIntentRepo, notificationPrefGateway, notificationTemplateRepo, notificationRecipientGateway }) => new ManageNotificationIntentsUseCase(notificationIntentRepo, notificationPrefGateway, notificationTemplateRepo, notificationRecipientGateway)).scoped(),
 
     // Others
+    auditWorkspaceGateway: asFunction(({ prisma, notificationRecipientGateway, notificationTemplateRepo }) => new PrismaAuditWorkspaceGateway(prisma, async (identityId, templateId) => {
+      await notificationRecipientGateway.assertEligible(identityId);
+      const { TemplateId } = await import('@manaratak/domain');
+      const template = await notificationTemplateRepo.findById(TemplateId.create(templateId));
+      if (!template || template.requiredVariables.some((name: string) => !['ruleName','matchedCount','actionUrl'].includes(name))) throw new Error('AUDIT_ALERT_TEMPLATE_INVALID');
+    })).scoped(),
+    auditWorkspaceUseCases: asFunction(({ auditWorkspaceGateway, atomicDomainMutationCoordinator }) => new AuditWorkspaceUseCases(auditWorkspaceGateway,atomicDomainMutationCoordinator)).scoped(),
+    auditAlertEvaluationGateway: asFunction(({ prisma, auditWorkspaceGateway, intentsUseCase }) => new PrismaAuditAlertEvaluationGateway(prisma,auditWorkspaceGateway,intentsUseCase)).scoped(),
+    auditAlertEvaluation: asFunction(({ auditAlertEvaluationGateway }) => new AuditAlertEvaluation(auditAlertEvaluationGateway)).scoped(),
+    auditAlertEvaluationBackgroundJobHandler: asFunction(({ auditAlertEvaluation }) => new AuditAlertEvaluationBackgroundJobHandler(auditAlertEvaluation, readConfig<boolean>('AUDIT_ALERTS_ENABLED') === true)).scoped(),
+    auditWorkspaceRouter: asFunction(cradle => AuditWorkspaceRouter.create(cradle)).scoped(),
     manageAuditRecordsUseCase: asFunction(({ auditRecordRepo }) => new ManageAuditRecordsUseCase(auditRecordRepo)).scoped(),
     manageSearchUseCase: asFunction(({ searchRequestRepo, searchEngineGateway }) => new ManageSearchUseCase(searchRequestRepo, searchEngineGateway)).scoped(),
     manageCacheUseCase: asFunction(({ cacheEntryRepo, cacheExecutionGateway }) => new ManageCacheUseCase(cacheEntryRepo, cacheExecutionGateway)).scoped(),
@@ -1312,7 +1349,9 @@ export function registerDependencies(
       return new PrismaSessionManager(prisma, ttl);
     }).singleton(),
     principalAccessValidator: asFunction(({ identityRepository, passwordCredentialRepository }) => new IdentityPrincipalAccessValidator(identityRepository, passwordCredentialRepository)).singleton(),
-    authService: asFunction(({ tokenProvider, sessionManager, credentialVerifier, principalAccessValidator }) => new AuthService(tokenProvider, sessionManager, principalAccessValidator, credentialVerifier)).singleton(),
+    mfaGateway: asFunction(({ prisma }) => isPrisma ? new PrismaMfaGateway(prisma, readConfig<string>('MANARATAK_MFA_ENCRYPTION_KEY')) : createUnavailableCapability('mfaGateway')).scoped(),
+    mfaUseCases: asFunction(({ mfaGateway, credentialVerifier, atomicDomainMutationCoordinator, sessionManager, governanceApprovalGateway }) => new MfaUseCases(mfaGateway, credentialVerifier, atomicDomainMutationCoordinator, sessionManager, governanceApprovalGateway)).scoped(),
+    authService: asFunction(({ tokenProvider, sessionManager, credentialVerifier, principalAccessValidator, mfaUseCases }) => new AuthService(tokenProvider, sessionManager, principalAccessValidator, credentialVerifier, mfaUseCases)).singleton(),
     credentialVerifier: asFunction(({ prisma }) => new PrismaCredentialVerifier(prisma)).singleton(),
     emailVerificationTokenRepository: asFunction(({ prisma }) => {
       return prisma ? new PrismaEmailVerificationTokenRepository(prisma) : new InMemoryEmailVerificationTokenRepository();

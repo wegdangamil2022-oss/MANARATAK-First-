@@ -316,6 +316,8 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     let retryAfter = response.headers.get('Retry-After');
     try {
       const errorData = (await response.json()) as any;
+      const mfaCode=errorData?.error?.code ?? errorData?.code;
+      if(response.status===403&&['MFA_ENROLLMENT_REQUIRED','MFA_STEP_UP_REQUIRED'].includes(mfaCode)&&typeof window!=='undefined')window.dispatchEvent(new CustomEvent('manaratak-admin-mfa-required',{detail:{code:mfaCode}}));
       if (errorData?.meta?.retryAfter) {
         retryAfter = String(errorData.meta.retryAfter);
       }

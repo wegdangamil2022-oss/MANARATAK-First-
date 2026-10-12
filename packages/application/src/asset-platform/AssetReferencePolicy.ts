@@ -1,4 +1,5 @@
 import {
+  assertAssetPublicRights,
   AssetId,
   AssetLifecycleState,
   AssetRecord,
@@ -8,6 +9,7 @@ import {
 
 export interface AssetReferencePolicyOptions {
   purpose: string;
+  publicPublication?: boolean;
   allowedStates?: readonly AssetLifecycleState[];
   allowedClassifications?: readonly AssetSecurityClassification[];
   expectedOwnerId?: string;
@@ -66,6 +68,7 @@ export class AssetReferencePolicy {
     } catch {
       throw new Error(`${options.purpose}_ASSET_TRUST_EVIDENCE_REQUIRED`);
     }
+    if (options.publicPublication) assertAssetPublicRights(asset.metadata.extraMetadata?.rights);
     return asset;
   }
 
