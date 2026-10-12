@@ -9,3 +9,5 @@ Validation evidence remains historical and unchanged: section 24 initial targete
 Main integration is not deployment or production approval. Live runtime, migration/provider/DB acceptance and browser/E2E verification remain deferred after section 28. Legacy queue offset paging, candidate-scoped totals, non-exact filtered owner handoffs and unsupported sensitive-owner metrics remain explicit limits.
 
 Next authorized work: section 26, `docs/reviews/MANARATAK_ADMIN_REVIEW_CODEX.md`, beginning at the heading `26 — لوحة التحكم / Admin Executive Dashboard`. Preserve sections 24/25 source contracts; Dashboard is a permissioned read-only projection, not a new release gate or owner mutation surface.
+
+During section-26 source verification, a full API/Admin compiler invocation reported one error: unused `reviewParams` in the CMS Status component, introduced by the section-24 handoff edit. Removed only that redundant hook; the actual CMS list hook/search context remains. This correction is pushed separately to main and retained in section 26. The compiler was not repeated under the one-run rule, so no new all-green compiler certification is claimed.

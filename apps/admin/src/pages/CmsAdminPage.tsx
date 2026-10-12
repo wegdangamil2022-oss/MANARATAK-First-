@@ -1507,7 +1507,6 @@ function LocaleButton({
 }
 function Status({ value }: { value: string }) {
   const { language: uiLanguage } = useTranslation();
-  const [reviewParams] = useSearchParams();
   const color =
     value === 'PUBLISHED'
       ? 'bg-emerald-100 text-[#0E7C86]'
