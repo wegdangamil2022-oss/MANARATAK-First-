@@ -146,6 +146,8 @@ export class ScholarshipAdminRouter {
       sponsorName: z.string().min(1).optional(),
       verificationStatus: z.nativeEnum(ScholarshipVerificationStatus).optional(),
       translationState: z.enum(['NEEDS_TRANSLATION', 'TRANSLATED']).optional(),
+      translationLocale:z.enum(['ar','en']).optional(),
+      sort:z.enum(['CREATED_DESC','UPDATED_DESC','DEADLINE_ASC','COMPLETENESS_ASC']).optional(),
       deadlineFrom: z.string().datetime().transform((value) => new Date(value)).optional(),
       deadlineTo: z.string().datetime().transform((value) => new Date(value)).optional(),
       sourceType: z.string().min(1).optional(),

@@ -293,7 +293,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     else if (filters.country && this.legacyCountryTextFiltersEnabled) where.country = filters.country;
     if (filters.regionReferenceId) where.regionReferenceId = filters.regionReferenceId;
     if (filters.cityReferenceId) where.cityReferenceId = filters.cityReferenceId;
-    if (filters.institutionType) where.institutionType = filters.institutionType;
+    if (filters.institutionType) where.institutionType = {equals:filters.institutionType,mode:'insensitive'};
     if (filters.majorId || filters.internationalTestId) {
       where.academicPrograms = {
         some: {
@@ -328,7 +328,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        orderBy: filters.sort==='NAME_ASC'?[{displayName:'asc'},{id:'asc'}]:filters.sort==='UPDATED_DESC'?[{updatedAt:'desc'},{id:'asc'}]:[{createdAt:'desc'},{id:'asc'}],
         include: universityDetails,
       }),
       this.prisma.university.count({ where }),

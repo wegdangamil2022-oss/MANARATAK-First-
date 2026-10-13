@@ -1,0 +1,6 @@
+import{describe,it,expect}from'vitest';
+import{projectPublicUniversity}from'../../src/universities/use-cases/UniversityPublicProjection';
+describe('university public nested projections',()=>{
+ it('does not expose nested admission provenance or arbitrary objects',()=>{const result=projectPublicUniversity({publicId:'INS-X',optionalFields:{internationalAdmissions:{acceptsInternationalStudents:true,sourceEvidence:{secret:'PRIVATE'},requiredDocuments:['Passport',{reviewerEmail:'PRIVATE'}]},generalRequiredDocuments:['Passport',{reviewerEmail:'PRIVATE'}]},academicPrograms:[],translations:[]}as any);expect(JSON.stringify(result)).not.toContain('PRIVATE');expect(result.internationalAdmissions).toEqual({acceptsInternationalStudents:true,requiredDocuments:['Passport']});});
+ it('hides unsafe historical website and social URLs without modifying history',()=>{const original:any={officialWebsite:'javascript:alert(1)',officialSourceUrl:'https://official.example',socialLinks:{unsafe:'data:text/html,bad',safe:'https://social.example'},academicPrograms:[],translations:[]};const result=projectPublicUniversity(original);expect(result.officialWebsite).toBeUndefined();expect(result.socialLinks).toEqual({safe:'https://social.example/'});expect(original.officialWebsite).toBe('javascript:alert(1)');});
+});

@@ -237,3 +237,4 @@ export * from './background-jobs/handlers/AssetLifecycleRecoveryBackgroundJobHan
 export * from './notification/AuditAdministratorRecipientGateway';
 export * from './authorization/use-cases/GovernanceApprovalUseCases';
 export * from './settings/use-cases/SettingsGovernanceUseCases';
+export * from './universities/use-cases/UniversityProgramWorkspaceUseCases';

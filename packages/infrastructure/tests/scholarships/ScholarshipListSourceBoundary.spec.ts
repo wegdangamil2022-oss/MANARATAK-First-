@@ -1,0 +1,10 @@
+import{describe,it,expect,vi}from'vitest';
+import{PrismaScholarshipRepository}from'../../src/scholarships/PrismaScholarshipRepository';
+function setup(){const db:any={scholarship:{findMany:vi.fn().mockResolvedValue([]),count:vi.fn().mockResolvedValue(0)}};db.$transaction=vi.fn(async(fn:any)=>fn(db));return{db,repo:new PrismaScholarshipRepository(db)};}
+describe('scholarship relational filtering and ordering',()=>{
+ it('canonical country remains mandatory even alongside a raw label',async()=>{const f=setup();await f.repo.list({countryReferenceId:'canonical',countryLabel:'similar'});const where=f.db.scholarship.findMany.mock.calls[0][0].where;expect(where.countryReferenceId).toBe('canonical');expect(JSON.stringify(where)).not.toContain('similar');});
+ it('university and program constraints use the same link',async()=>{const f=setup();await f.repo.list({universityId:'u',academicProgramId:'p'});const where=f.db.scholarship.findMany.mock.calls[0][0].where;expect(where.AND).toHaveLength(1);expect(where.AND[0].universityLinks.some.academicProgramId).toBe('p');expect(JSON.stringify(where.AND[0])).toContain('universityId');});
+ it('translation presence never derives from source locale',async()=>{const f=setup();await f.repo.list({translationState:'TRANSLATED',translationLocale:'en'});const where=f.db.scholarship.findMany.mock.calls[0][0].where;expect(JSON.stringify(where)).toContain('localizedNames');expect(JSON.stringify(where)).not.toContain('sourceLocale');});
+ it('updated ordering has an id tie-breaker before pagination',async()=>{const f=setup();await f.repo.list({sort:'UPDATED_DESC',page:2,pageSize:10});expect(f.db.scholarship.findMany).toHaveBeenCalledWith(expect.objectContaining({skip:10,take:10,orderBy:[{updatedAt:'desc'},{id:'asc'}]}));});
+ it('deadline ordering separates year-round/null dates in one read snapshot',async()=>{const f=setup();await f.repo.list({sort:'DEADLINE_ASC'});expect(f.db.$transaction).toHaveBeenCalledWith(expect.any(Function),{isolationLevel:'RepeatableRead'});expect(JSON.stringify(f.db.scholarship.findMany.mock.calls[0][0].where)).toContain('OPEN_ALL_YEAR');});
+});

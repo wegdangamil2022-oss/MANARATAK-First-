@@ -37,6 +37,8 @@ export class UniversityAdminRouter {
     const listQuerySchema = z.object({
       status: z.preprocess(value => value === '' || value === 'all' || value === 'الكل' ? undefined : value, z.nativeEnum(UniversityStatus).optional()),
       completenessStatus: z.preprocess(value => value === '' || value === 'all' || value === 'الكل' ? undefined : value, z.nativeEnum(UniversityImportCompletenessState).optional()),
+      sort:z.enum(['CREATED_DESC','UPDATED_DESC','NAME_ASC']).optional(),
+      institutionType:z.enum(['UNIVERSITY','COLLEGE','INSTITUTE','ACADEMY','OTHER']).optional(),
       countryReferenceId: z.string().min(1).optional(),
       regionReferenceId: z.string().min(1).optional(),
       cityReferenceId: z.string().min(1).optional(),
@@ -54,14 +56,15 @@ export class UniversityAdminRouter {
       pageSize: z.coerce.number().int().min(1).max(100).default(50),
     }).strict();
 
+    const webUrl=z.string().url().refine(value=>{const url=new URL(value);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password;},'HTTP(S) URL required');
     const updateBodySchema = z.object({
       displayName: z.string().optional(),
-      officialWebsite: z.union([z.string().url(), z.literal('')]).optional(),
+      officialWebsite: z.union([webUrl, z.literal('')]).optional(),
       country: z.string().optional(),
       institutionType: z.string().optional(),
       institutionalOwnership: z.string().nullable().optional(),
-      sourceUrl: z.union([z.string().url(), z.literal('')]).optional(),
-      officialSourceUrl: z.union([z.string().url(), z.literal('')]).optional(),
+      sourceUrl: z.union([webUrl, z.literal('')]).optional(),
+      officialSourceUrl: z.union([webUrl, z.literal('')]).optional(),
       city: z.string().nullable().optional(),
       countryReferenceId: z.string().min(1).nullable().optional(),
       regionReferenceId: z.string().min(1).nullable().optional(),
@@ -72,7 +75,7 @@ export class UniversityAdminRouter {
       accreditations: z.array(z.object({
         name: z.string().trim().min(1),
         organization: z.string().trim().min(1),
-        officialUrl: z.string().url().refine(value => value.startsWith('https://'), 'HTTPS accreditation evidence required'),
+        officialUrl: webUrl.refine(value => value.startsWith('https://'), 'HTTPS accreditation evidence required'),
         reviewStatus: z.enum(['NEEDS_REVIEW', 'APPROVED', 'REJECTED']).default('NEEDS_REVIEW'),
         validFrom: z.string().optional(),
         validUntil: z.string().optional(),
@@ -82,11 +85,11 @@ export class UniversityAdminRouter {
       languagesOfInstruction: z.array(z.string()).optional(),
       contactEmail: z.union([z.string().email(), z.literal('')]).optional(),
       contactPhone: z.string().optional(),
-      socialLinks: z.record(z.string(), z.string().url()).optional(),
+      socialLinks: z.record(z.string(), webUrl).optional(),
       metadata: z.record(z.string(), z.unknown()).optional(),
       generalRequiredDocuments: z.array(z.string()).optional(),
       additionalGraduateRequirements: z.array(z.string()).optional(),
-      officialRequiredDocumentsUrl: z.union([z.string().url(), z.literal('')]).optional(),
+      officialRequiredDocumentsUrl: z.union([webUrl, z.literal('')]).optional(),
       internationalAdmissions: z.record(z.string(), z.unknown()).optional(),
     });
 
@@ -199,7 +202,7 @@ export class UniversityAdminRouter {
               amount: z.number().nonnegative().nullable().optional(),
               currencyCode: z.string().nullable().optional(),
               currencyReferenceId: z.string().min(1).optional(),
-              officialSourceUrl: z.string().url().nullable().optional(),
+              officialSourceUrl: webUrl.nullable().optional(),
               effectiveFrom: z.coerce.date().nullable().optional(),
               effectiveTo: z.coerce.date().nullable().optional(),
               metadata: z.record(z.string(), z.unknown()).optional(),
@@ -233,7 +236,7 @@ export class UniversityAdminRouter {
               scope: z.string().min(1),
               scopeLabel: z.string().nullable().optional(),
               note: z.string().nullable().optional(),
-              officialSourceUrl: z.string().url(),
+              officialSourceUrl: webUrl,
               verifiedAt: z.coerce.date(),
             }),
           )

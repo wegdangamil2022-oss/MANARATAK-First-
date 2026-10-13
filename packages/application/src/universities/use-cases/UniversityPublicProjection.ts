@@ -20,6 +20,7 @@ function activeRows(value: unknown, keys: readonly string[]): PublicRow[] {
     .map((row) => fields(row, keys));
 }
 
+const webUrl=(value:unknown)=>{if(typeof value!=='string')return undefined;try{const url=new URL(value);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password?url.toString():undefined;}catch{return undefined;}};
 const campusKeys = ['id', 'name', 'campusType', 'address', 'countryReferenceId', 'regionReferenceId',
   'cityReferenceId', 'latitude', 'longitude'] as const;
 const unitKeys = ['id', 'campusId', 'parentOrganizationUnitId', 'unitType', 'name'] as const;
@@ -38,6 +39,13 @@ export function projectPublicUniversity(university: UniversityDto): PublicUniver
     'generalRequiredDocuments', 'additionalGraduateRequirements', 'officialRequiredDocumentsUrl',
     'internationalAdmissions', 'availableDegrees', 'studyModes', 'tuitionReferences',
   ]);
+  for(const key of ['generalRequiredDocuments','additionalGraduateRequirements','availableDegrees','studyModes','tuitionReferences'])
+    if(Array.isArray(vettedOptional[key]))vettedOptional[key]=(vettedOptional[key] as unknown[]).filter(value=>typeof value==='string').slice(0,100);
+  if(vettedOptional.internationalAdmissions){const allowed=fields(vettedOptional.internationalAdmissions,
+    ['acceptsInternationalStudents','hasLanguageRequirements','minimumGpa','minimumAge','maximumAge','applicationDeadline','applicationOpen','requiredDocuments','applicationMethod']);
+    vettedOptional.internationalAdmissions=Object.fromEntries(Object.entries(allowed).flatMap(([key,value])=>
+      ['string','number','boolean'].includes(typeof value)?[[key,value]]:Array.isArray(value)?[[key,value.filter(item=>typeof item==='string').slice(0,100)]]:[]));}
+  vettedOptional.officialRequiredDocumentsUrl=webUrl(vettedOptional.officialRequiredDocumentsUrl);
   const safeTranslations = (university.translations ?? [])
     .filter((item) => item.reviewStatus === 'PUBLISHED' && item.displayName)
     .map((item) => [item.locale, item.displayName as string] as const);
@@ -69,6 +77,8 @@ export function projectPublicUniversity(university: UniversityDto): PublicUniver
       'regionReferenceId', 'cityReferenceId', 'institutionalOwnership', 'description',
       'contactEmail', 'contactPhone', 'socialLinks', 'languagesOfInstruction',
     ]),
+    officialWebsite:webUrl(university.officialWebsite),officialSourceUrl:webUrl(university.officialSourceUrl),
+    socialLinks:Object.fromEntries(Object.entries(record(university.socialLinks)).flatMap(([key,value])=>{const url=webUrl(value);return url?[[key,url]]:[];})),
     localizedNames: Object.fromEntries(safeTranslations),
     campuses: activeRows(university.campuses, campusKeys),
     organizationUnits: activeRows(university.organizationUnits, unitKeys),

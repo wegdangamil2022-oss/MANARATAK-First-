@@ -1,3 +1,5 @@
+import {UniversityLocationFilters} from '../components/UniversityLocationFilters';
+import { UniversityProgramWorkspace } from '../components/UniversityProgramWorkspace';
 import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
@@ -107,7 +109,7 @@ export function UniversityAdminPage() {
     }
   };
 
-  const fetchUniversities = async () => {
+  const fetchUniversities = async (signal?:AbortSignal) => {
     const request = ++listRequest.current;
     setLoading(true);
     setError(null);
@@ -116,14 +118,16 @@ export function UniversityAdminPage() {
       if (searchTerm.trim()) params.set('search', searchTerm.trim());
       if (statusFilter) params.append('status', statusFilter);
       if (completenessFilter) params.append('completenessStatus', completenessFilter);
+      for(const key of ['regionReferenceId','cityReferenceId','institutionType','sort']){const value=searchParams.get(key);if(value)params.set(key,value);}
       if (countryReferenceId) params.append('countryReferenceId', countryReferenceId);
 
-      const response = await adminApiClient.request<PaginatedResponse>(`/admin/universities?${params.toString()}`);
+      const response = await adminApiClient.request<PaginatedResponse>(`/admin/universities?${params.toString()}`,{signal,cache:'no-store'});
       if (request !== listRequest.current) return;
       if (response.total > 0 && page > Math.ceil(response.total / 20)) { setPage(Math.ceil(response.total / 20)); return; }
       setData(response);
       setCooldown(null);
     } catch (err: unknown) {
+      if(signal?.aborted)return;
       if (request !== listRequest.current) return;
       const msg = (err instanceof Error ? err.message : '') || tr('تعذر تحميل بيانات الجامعات.', 'Unable to load universities.');
       setError(msg);
@@ -142,8 +146,9 @@ export function UniversityAdminPage() {
   }, []);
 
   useEffect(() => {
-    fetchUniversities();
-  }, [page, statusFilter, completenessFilter, countryReferenceId, searchTerm]);
+    const abort=new AbortController();const timer=window.setTimeout(()=>{void fetchUniversities(abort.signal);},300);
+    return()=>{window.clearTimeout(timer);abort.abort();listRequest.current++;};
+  }, [page, statusFilter, completenessFilter, countryReferenceId, searchTerm, searchParams.toString()]);
 
   useEffect(() => {
     if (cooldown === null || cooldown <= 0) return;
@@ -173,20 +178,16 @@ export function UniversityAdminPage() {
     setPage(1);
   };
 
-  const filteredItems = useMemo(() => {
-    if (!data?.data) return [];
-    if (!searchTerm.trim()) return data.data;
-    const term = searchTerm.toLowerCase().trim();
-    return data.data.filter(
-      (uni) =>
-        uni.displayName?.toLowerCase().includes(term) ||
-        uni.country?.toLowerCase().includes(term) ||
-        uni.city?.toLowerCase().includes(term)
-    );
-  }, [data?.data, searchTerm]);
+  const filteredItems = data?.data ?? [];
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      <UniversityProgramWorkspace />
+      <section className="rounded border bg-white p-3"><h2>{tr('فلاتر موقع الجامعة وترتيبها','University location and sort filters')}</h2>
+        <UniversityLocationFilters countryId={countryReferenceId} regionId={searchParams.get('regionReferenceId')??''} cityId={searchParams.get('cityReferenceId')??''} ar={isArabic} onChange={(key,value)=>{const next=new URLSearchParams(searchParams);if(value)next.set(key,value);else next.delete(key);if(key==='countryReferenceId'){next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='regionReferenceId')next.delete('cityReferenceId');setSearchParams(next);setPage(1);}}/>
+        <label>{tr('نوع المؤسسة','Institution type')}<select value={searchParams.get('institutionType')??''} onChange={event=>{const next=new URLSearchParams(searchParams);if(event.target.value)next.set('institutionType',event.target.value);else next.delete('institutionType');setSearchParams(next);setPage(1);}}><option value="">—</option>{['UNIVERSITY','COLLEGE','INSTITUTE','ACADEMY','OTHER'].map(value=><option key={value}>{value}</option>)}</select></label>
+        <label>{tr('الترتيب','Sort')}<select value={searchParams.get('sort')??'CREATED_DESC'} onChange={event=>{const next=new URLSearchParams(searchParams);next.set('sort',event.target.value);setSearchParams(next);setPage(1);}}><option value="CREATED_DESC">{tr('الأحدث إنشاء','Newest created')}</option><option value="UPDATED_DESC">{tr('الأحدث تحديث','Newest updated')}</option><option value="NAME_ASC">{tr('اسم الجامعة','University name')}</option></select></label>
+      </section>
       {/* Hero Header Banner */}
       <section className="relative overflow-hidden rounded-[28px] border border-[#21A7B4]/30 bg-gradient-to-l from-[#0E7C86] via-[#103E6A] to-[#142B5F] p-6 text-white shadow-xl sm:p-8">
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">

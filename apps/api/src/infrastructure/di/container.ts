@@ -1,3 +1,6 @@
+import { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
+import { PrismaUniversityProgramWorkspaceGateway } from '@manaratak/infrastructure';
+import { UniversityProgramWorkspaceRouter } from '../../presentation/api/router/UniversityProgramWorkspaceRouter';
 import { SettingsGovernanceUseCases } from '@manaratak/application';
 import { PrismaSettingsGovernanceGateway } from '@manaratak/infrastructure';
 import { GovernanceApprovalUseCases } from '@manaratak/application';
@@ -1249,6 +1252,9 @@ export function registerDependencies(
     courseProviderRegistryRouter: asFunction((cradle) => CourseProviderRegistryRouter.create(cradle)).singleton(),
     courseImportOperationsRouter: asFunction((cradle) => CourseImportOperationsRouter.create(cradle)).singleton(),
     scholarshipPublicRouter: asFunction((cradle) => ScholarshipPublicRouter.create(cradle)).singleton(),
+    universityProgramWorkspaceUseCases:asFunction(({prisma,atomicDomainMutationCoordinator})=>new UniversityProgramWorkspaceUseCases(new PrismaUniversityProgramWorkspaceGateway(prisma),atomicDomainMutationCoordinator)).scoped(),
+    universityProgramAdminRouter:asFunction(cradle=>UniversityProgramWorkspaceRouter.create(cradle)).singleton(),
+    universityProgramPublicRouter:asFunction(cradle=>UniversityProgramWorkspaceRouter.create(cradle,true)).singleton(),
     universityAdminRouter: asFunction((cradle) => UniversityAdminRouter.create(cradle)).singleton(),
     universityPublicRouter: asFunction((cradle) => UniversityPublicRouter.create(cradle)).singleton(),
     majorAdminRouter: asFunction((cradle) => MajorAdminRouter.create(cradle)).scoped(),

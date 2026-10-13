@@ -1430,6 +1430,9 @@ model UniversityAcademicProgram {
   admissionRequirements UniversityProgramAdmissionRequirement[]
   scholarshipLinks      ScholarshipUniversityLink[]
 
+  studyProfile UniversityProgramStudyProfile?
+  intakes UniversityProgramIntake[]
+
   @@unique([universityId, sourceReferenceId])
   @@index([universityId])
   @@index([organizationUnitId])
@@ -3858,6 +3861,7 @@ model ReferenceLanguage {
   metadata   Json?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  universityProgramLanguages UniversityProgramStudyLanguage[]
   courses    Course[] @relation("CourseLearningLanguageReference")
   scholarships Scholarship[] @relation("ScholarshipStudyLanguage")
   internationalTestLanguageRelationships InternationalTestLanguageRelationship[]
@@ -5934,4 +5938,44 @@ model MajorImportOwnerReview {
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
  @@index([status, updatedAt])
+}
+
+model UniversityProgramStudyProfile {
+  programId String @id
+  studyMode String @default("UNKNOWN")
+  teachingDelivery String @default("UNKNOWN")
+  durationValue Float?
+  durationUnit String?
+  entryEligibility String?
+  verificationStatus String @default("UNKNOWN")
+  officialSourceUrl String?
+  verifiedBy String?
+  verifiedAt DateTime?
+  program UniversityAcademicProgram @relation(fields:[programId], references:[id], onDelete:Restrict)
+  languages UniversityProgramStudyLanguage[]
+}
+model UniversityProgramStudyLanguage {
+  programId String
+  languageReferenceId String
+  profile UniversityProgramStudyProfile @relation(fields:[programId], references:[programId], onDelete:Restrict)
+  language ReferenceLanguage @relation(fields:[languageReferenceId], references:[id], onDelete:Restrict)
+  @@id([programId,languageReferenceId])
+  @@index([languageReferenceId,programId])
+}
+model UniversityProgramIntake {
+  id String @id
+  programId String
+  intakeStart DateTime
+  applicationOpen DateTime
+  applicationClose DateTime
+  applicantSegment String
+  timezone String
+  officialSourceUrl String
+  verificationStatus String @default("UNKNOWN")
+  status String @default("DRAFT")
+  verifiedBy String?
+  verifiedAt DateTime?
+  updatedAt DateTime @updatedAt
+  program UniversityAcademicProgram @relation(fields:[programId], references:[id], onDelete:Restrict)
+  @@index([programId,status,applicationClose,id])
 }

@@ -278,7 +278,7 @@ export function UniversityRelationshipEditorPage() {
 
     <UniversitySectionsEditor key={id} id={id} initial={university} reviewReason={reviewReason} disabled={saving || immutable} onDirtyChange={setSectionsDirty} onSaved={refreshUniversity} />
     {hasUnsavedChanges && <p className="text-sm font-bold text-amber-700">توجد تعديلات غير محفوظة؛ احفظ كل قسم قبل النشر.</p>}
-    {university.slug && <a href={`/universities/${university.slug}`} target="_blank" rel="noreferrer" className="text-sm font-bold text-[#0E7C86]">عرض الجامعة في الصفحة العامة</a>}
+    {university.status==='PUBLISHED' && university.slug && <a href={`/universities/${university.slug}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#0E7C86]">عرض الجامعة في الصفحة العامة</a>}
     <section className="space-y-4 rounded-2xl border border-[#DDEFF2] bg-white p-5">
       <div className="flex items-center justify-between"><div><h3 className="font-bold">Academic programs</h3><p className="text-xs text-slate-500">Program → Degree Level / Major / International Test. Each program is saved independently to preserve its canonical Program ID; remove archives the program instead of hard-deleting it.</p></div><button type="button" disabled={saving || immutable} onClick={() => setPrograms((current) => [...current, blankProgram()])} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm"><Plus className="h-4 w-4" /> Program</button></div>
       {programs.map((program, index) => <fieldset disabled={saving || immutable} key={program.id ?? program.sourceReferenceId ?? index} className="space-y-4 rounded-xl border border-[#DDEFF2] p-4">

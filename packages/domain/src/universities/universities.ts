@@ -235,6 +235,7 @@ export interface UniversityNormalizedDetailsUpdate {
 }
 
 export interface UniversityFilters {
+  sort?:'CREATED_DESC'|'UPDATED_DESC'|'NAME_ASC';
   status?: UniversityStatus;
   completenessStatus?: UniversityImportCompletenessState;
   country?: string;

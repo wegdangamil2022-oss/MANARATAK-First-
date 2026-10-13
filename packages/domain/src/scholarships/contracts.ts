@@ -289,6 +289,8 @@ export interface ScholarshipFilters {
   sponsorName?: string;
   verificationStatus?: ScholarshipVerificationStatus;
   translationState?: 'NEEDS_TRANSLATION' | 'TRANSLATED';
+  translationLocale?:'ar'|'en';
+  sort?:'CREATED_DESC'|'UPDATED_DESC'|'DEADLINE_ASC'|'COMPLETENESS_ASC';
   deadlineFrom?: Date;
   deadlineTo?: Date;
   sourceType?: string;

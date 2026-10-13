@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 399,
-  "reachableCount": 399,
+  "registrationCount": 402,
+  "reachableCount": 402,
   "unreachable": [],
   "registrations": [
     {
@@ -690,7 +690,8 @@
         "mfaUseCases",
         "recoverAssetLifecycleUseCase",
         "referenceOwnerReviewUseCases",
-        "settingsGovernanceUseCases"
+        "settingsGovernanceUseCases",
+        "universityProgramWorkspaceUseCases"
       ],
       "dependencies": [
         "atomicAuditedOutboxMutationExecutor"
@@ -3539,6 +3540,7 @@
         "studentWorkspaceRepository",
         "studyDestinationRepository",
         "transactionalOutboxStore",
+        "universityProgramWorkspaceUseCases",
         "universityRepository",
         "workflowExecutionGateway",
         "workflowRepo"
@@ -5150,6 +5152,36 @@
       ],
       "dependencies": [
         "universityRepository"
+      ]
+    },
+    {
+      "name": "universityProgramAdminRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "universityProgramPublicRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "universityProgramWorkspaceUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/UniversityProgramWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "prisma"
       ]
     },
     {

@@ -26,7 +26,7 @@ interface ScholarshipTransactionContext extends AtomicPersistenceContext {
 type AdminScholarshipFilters = ScholarshipFilters & {
   fundingCoverage?: string; sponsorName?: string; verificationStatus?: ScholarshipVerificationStatus;
   translationState?: 'NEEDS_TRANSLATION' | 'TRANSLATED'; deadlineFrom?: Date; deadlineTo?: Date;
-  sourceType?: string; query?: string;
+  sourceType?: string; query?: string; translationLocale?:'ar'|'en';sort?:'CREATED_DESC'|'UPDATED_DESC'|'DEADLINE_ASC'|'COMPLETENESS_ASC';
 };
 
 import { queryStableCursorPage } from '../api-foundation/StableCursor';
@@ -403,20 +403,25 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
                 internationalTest: { is: { status: 'PUBLISHED' } },
               } } },
     ] });
-    if (filters.universityId) constraints.push({ universityLinks: { some: { universityId: filters.universityId } } });
-    if (filters.academicProgramId) constraints.push({ universityLinks: { some: { academicProgramId: filters.academicProgramId } } });
+    if (filters.academicProgramId) constraints.push({universityLinks:{some:{academicProgramId:filters.academicProgramId,
+      ...(filters.universityId?{OR:[{universityId:filters.universityId},{universityId:null,academicProgram:{is:{universityId:filters.universityId}}}]}:{})}}});
+    else if(filters.universityId) constraints.push({universityLinks:{some:{universityId:filters.universityId}}});
     if (filters.fundingCoverage) constraints.push({ OR: [
       { fundingTypeCode: { equals: filters.fundingCoverage, mode: 'insensitive' } },
       { benefits: { some: { coverageTypeCode: { equals: filters.fundingCoverage, mode: 'insensitive' } } } },
     ] });
     if (filters.sponsorName) constraints.push({ providerName: { contains: filters.sponsorName, mode: 'insensitive' } });
     if (filters.verificationStatus) where.verificationStatus = filters.verificationStatus;
-    if (filters.translationState === 'NEEDS_TRANSLATION') constraints.push({ OR: [{ sourceLocale: null }, { sourceLocale: { notIn: ['ar', 'ar-SA'] } }] });
-    if (filters.translationState === 'TRANSLATED') where.sourceLocale = { in: ['ar', 'ar-SA'] };
+    const locale=filters.translationLocale??'en';
+    const translated:Prisma.ScholarshipWhereInput={AND:[{optionalFields:{path:['localizedNames',locale],string_contains:''}},
+      {NOT:{optionalFields:{path:['localizedNames',locale],equals:''}}}]};
+    if(filters.translationState==='TRANSLATED')constraints.push(translated);
+    if(filters.translationState==='NEEDS_TRANSLATION')constraints.push({OR:[{optionalFields:{equals:Prisma.DbNull}},
+      {optionalFields:{path:['localizedNames',locale],equals:Prisma.AnyNull}},
+      {optionalFields:{path:['localizedNames',locale],equals:''}}]});
     if (filters.deadlineFrom || filters.deadlineTo) where.applicationDeadline = { gte: filters.deadlineFrom, lte: filters.deadlineTo };
     if (filters.sourceType) constraints.push({ sourceEvidence: { some: { sourceTypeCode: { equals: filters.sourceType, mode: 'insensitive' } } } });
-    if (filters.countryLabel) {
-      delete where.countryReferenceId;
+    if (filters.countryLabel && !filters.countryReferenceId) {
       constraints.push({ OR: [
       ...(filters.countryReferenceId ? [{ countryReferenceId: filters.countryReferenceId }] : []),
       { countrySourceLabel: { contains: filters.countryLabel, mode: 'insensitive' } },
@@ -481,16 +486,22 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     ] });
     if (constraints.length) where.AND = constraints;
 
-    const [data, total] = await Promise.all([
-      this.prisma.scholarship.findMany({
-        where,
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        orderBy: { createdAt: 'desc' },
-        include: this.normalizedInclude,
-      }),
-      this.prisma.scholarship.count({ where }),
-    ]);
+    let data:any[];let total:number;
+    if(filters.sort==='DEADLINE_ASC'){
+      const snapshot=await this.prisma.$transaction(async db=>{
+      // Dated opportunities precede unknown and year-round deadlines, even if a legacy year-round row has a date.
+      const dated:Prisma.ScholarshipWhereInput={AND:[where,{applicationDeadline:{not:null}}, {OR:[{deadlineType:null},{deadlineType:{not:'OPEN_ALL_YEAR'}}]}]};
+      const other:Prisma.ScholarshipWhereInput={AND:[where,{OR:[{applicationDeadline:null},{deadlineType:'OPEN_ALL_YEAR'}]}]};
+      const [datedCount,allCount]=await Promise.all([db.scholarship.count({where:dated}),db.scholarship.count({where})]);
+      const skip=(page-1)*pageSize;
+      const first=skip<datedCount?await db.scholarship.findMany({where:dated,skip,take:Math.min(pageSize,datedCount-skip),orderBy:[{applicationDeadline:'asc'},{id:'asc'}],include:this.normalizedInclude}):[];
+      const second=first.length<pageSize?await db.scholarship.findMany({where:other,skip:Math.max(0,skip-datedCount),take:pageSize-first.length,orderBy:{id:'asc'},include:this.normalizedInclude}):[];
+      return {data:[...first,...second],total:allCount};
+      },{isolationLevel:'RepeatableRead'});data=snapshot.data;total=snapshot.total;
+    }else{
+      const orderBy:Prisma.ScholarshipOrderByWithRelationInput[]=filters.sort==='UPDATED_DESC'?[{updatedAt:'desc'},{id:'asc'}]:filters.sort==='COMPLETENESS_ASC'?[{completenessStatus:'asc'},{id:'asc'}]:[{createdAt:'desc'},{id:'asc'}];
+      [data,total]=await Promise.all([this.prisma.scholarship.findMany({where,skip:(page-1)*pageSize,take:pageSize,orderBy,include:this.normalizedInclude}),this.prisma.scholarship.count({where})]);
+    }
 
     return {
       data: data.map((record) => this.mapToDto(record)),
@@ -507,7 +518,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       this.prisma.scholarship.count({ where: { status: { in: [ScholarshipStatus.IMPORTED, ScholarshipStatus.READY_TO_REVIEW] } } }),
       this.prisma.scholarship.count({ where: { OR: [{ completenessStatus: { not: ScholarshipCompletenessState.COMPLETE } }, { applicationDeadline: null }] } }),
       this.prisma.scholarship.count({ where: { OR: [{ verificationStatus: { not: ScholarshipVerificationStatus.VERIFIED } }, { officialSourceUrl: null }] } }),
-      this.prisma.scholarship.count({ where: { OR: [{ sourceLocale: null }, { sourceLocale: { notIn: ['ar', 'ar-SA'] } }] } }),
+      this.prisma.scholarship.count({where:{OR:[{optionalFields:{equals:Prisma.DbNull}},{optionalFields:{path:['localizedNames','en'],equals:Prisma.AnyNull}},{optionalFields:{path:['localizedNames','en'],equals:''}}]}}),
       this.prisma.scholarship.count({ where: { status: ScholarshipStatus.READY_TO_PUBLISH } }),
       this.prisma.scholarship.count({ where: { status: ScholarshipStatus.PUBLISHED } }),
       this.prisma.scholarship.count({ where: { status: ScholarshipStatus.ARCHIVED } }),
