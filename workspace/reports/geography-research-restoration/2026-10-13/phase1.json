@@ -1,0 +1,10 @@
+{
+  "activeCities": 10295,
+  "activeRegions": 5003,
+  "fuzzyRegionLinks": 0,
+  "citiesWithMissingRegions": 0,
+  "correctedUniversityRegions": 26,
+  "cityCountries": 194,
+  "removedNonCityAdministrativeRecords": 1,
+  "cityStatesHaveExplicitCountryScopes": true
+}

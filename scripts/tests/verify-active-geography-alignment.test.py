@@ -3,6 +3,7 @@ import importlib.util
 import json
 import shutil
 import tempfile
+import subprocess
 import unittest
 from pathlib import Path
 import openpyxl
@@ -21,6 +22,10 @@ class AlignmentTests(unittest.TestCase):
         (checker.ROOT / '.git').symlink_to(original_root / '.git', target_is_directory=True)
         for directory in ('workspace/reference-data', 'workspace/import-sources/universities/stage-1', str(original_report.relative_to(original_root))):
             shutil.copytree(original_root / directory, checker.ROOT / directory)
+        # This checker and its receipts cover the immutable exclusion batch.
+        directories = ['workspace/reference-data/cities', 'workspace/reference-data/regions', 'workspace/reference-data/countries', 'workspace/import-sources/universities/stage-1']
+        for path in subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', 'ecc5123d', '--', *directories], cwd=original_root, text=True).splitlines():
+            (checker.ROOT / path).write_bytes(subprocess.check_output(['git', 'show', 'ecc5123d:' + path], cwd=original_root))
 
     def tearDown(self):
         checker.ROOT, checker.REPORT = original_root, original_report

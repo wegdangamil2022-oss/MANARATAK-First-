@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import subprocess
+import argparse
 from pathlib import Path
 import openpyxl
 
@@ -34,22 +35,24 @@ def rows(raw):
     workbook.close()
     return result
 
-def verify():
+def verify(snapshot=None):
+    def read(path):
+        return subprocess.check_output(['git', 'show', snapshot + ':' + str(path.relative_to(ROOT))], cwd=ROOT) if snapshot else path.read_bytes()
     summary = json.loads((REPORT / 'summary.json').read_text())
-    country_workbook = openpyxl.load_workbook(ROOT / 'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx', read_only=True, data_only=True)
+    country_workbook = openpyxl.load_workbook(io.BytesIO(read(ROOT / 'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx')), read_only=True, data_only=True)
     country_rows = iter(country_workbook['Countries'].values)
     country_headers = next(country_rows)
     countries = {row[country_headers.index('iso_alpha3')]: row[country_headers.index('iso_alpha2')] for row in country_rows if row[country_headers.index('iso_alpha3')]}
     country_workbook.close()
     regions, cities = {}, {}
     for path in (ROOT / 'workspace/reference-data/regions').glob('*/*.csv'):
-        for row in csv.DictReader(io.StringIO(path.read_text(encoding='utf-8-sig'))):
+        for row in csv.DictReader(io.StringIO(read(path).decode('utf-8-sig'))):
             check(row['regionCode'] not in regions, 'Duplicate region code')
             regions[row['regionCode']] = row
     for path in (ROOT / 'workspace/reference-data/cities').glob('*/*.csv'):
         baseline = subprocess.check_output(['git', 'show', summary['baseCommit'] + ':' + str(path.relative_to(ROOT))], cwd=ROOT)
-        check(baseline == path.read_bytes(), 'Unrecorded city change')
-        for row in csv.DictReader(io.StringIO(path.read_text(encoding='utf-8-sig'))):
+        check(baseline == read(path), 'Unrecorded city change')
+        for row in csv.DictReader(io.StringIO(read(path).decode('utf-8-sig'))):
             check(row['cityId'] not in cities, 'Duplicate city identity')
             region = regions.get(row['regionCode'])
             check(region and all(region[k] == row[k] for k in ('countryIso2', 'countryIso3')), 'City country/region mismatch')
@@ -63,7 +66,7 @@ def verify():
     check(active_paths == {a['path'] for a in summary['universityFiles']}, 'Untracked active workbook')
     for artifact in summary['universityFiles']:
         baseline = subprocess.check_output(['git', 'show', summary['baseCommit'] + ':' + artifact['path']], cwd=ROOT)
-        current = (ROOT / artifact['path']).read_bytes()
+        current = read(ROOT / artifact['path'])
         archive = (ROOT / artifact['archivePath']).read_bytes()
         for raw, key in ((baseline, 'beforeSha256'), (current, 'afterSha256'), (archive, 'archiveSha256')):
             check(hashlib.sha256(raw).hexdigest() == artifact[key], 'Workbook checksum mismatch')
@@ -96,4 +99,6 @@ def verify():
     return result
 
 if __name__ == '__main__':
-    verify()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--snapshot')
+    verify(parser.parse_args().snapshot)

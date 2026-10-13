@@ -2,11 +2,13 @@
   "kind": "M10_12_13_14_SOURCE_QUALITY",
   "universities": {
     "geography": {
-      "total": 9834,
+      "total": 10723,
       "counts": {
-        "EXACT_SOURCE_CANDIDATE": 9834
+        "EXACT_SOURCE_CANDIDATE": 10156,
+        "SOURCE_REVIEW_REQUIRED": 559,
+        "TERRITORY_MISMATCH": 8
       },
-      "sourceCandidateCount": 9834,
+      "sourceCandidateCount": 10156,
       "draftPolicy": "RAW_LABEL_AND_PENDING_MAPPING_ALLOWED_IN_DRAFT_ONLY; NO_GUESSED_FK; REQUIRED_GEOGRAPHY_BLOCKS_PUBLICATION",
       "databaseWrites": 0,
       "runtime": "RUNTIME_UNTESTED"

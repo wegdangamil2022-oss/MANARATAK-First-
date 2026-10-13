@@ -10,12 +10,14 @@ describe('M10 offline source quality preparation', () => {
     const root = process.cwd(); const output = await prepareSourceQuality(root);
     verifyOrWriteSourceQuality(root, output, 'check');
     const summary = JSON.parse(output['summary.json']);
-    expect(summary.universities.geography).toMatchObject({ total: 9834, sourceCandidateCount: 9834, counts: { EXACT_SOURCE_CANDIDATE: 9834 } });
-    expect(Object.keys(summary.universities.geography.counts)).toEqual(['EXACT_SOURCE_CANDIDATE']);
-    expect(output['universities-geography.jsonl'].trim()).toBe('');
+    expect(summary.universities.geography).toMatchObject({ total: 10723, sourceCandidateCount: 10156, counts: { EXACT_SOURCE_CANDIDATE: 10156, SOURCE_REVIEW_REQUIRED: 559, TERRITORY_MISMATCH: 8 } });
+    const geographyQueue = output['universities-geography.jsonl'].trim().split('\n').map(row => JSON.parse(row));
+    expect(geographyQueue).toHaveLength(567);
+    expect(geographyQueue.every(row => row.geographyReviewRequired && row.canonicalCityId === null)).toBe(true);
     const excluded = fs.readFileSync(path.join(root, 'workspace/reports/active-geography-alignment/2026-10-13/excluded-universities.jsonl'), 'utf8').trim().split('\n').map(row => JSON.parse(row));
     expect(new Set(excluded.map(row => row.referenceId)).size).toBe(889);
-    expect(summary.universities.geography.total + excluded.length).toBe(10723);
+    // The archive is historical; all identities have been returned to the source workbooks.
+    expect(summary.universities.geography.total).toBe(10723);
     expect(summary.universities.stage34).toMatchObject({ uniqueSourceIds: 1530, stage3Invalid: 1320, stage4Invalid: 558, invalidInBoth: 487, uniqueInvalidIds: 1391, sourceValidBoth: 139 });
     expect(summary.universities.stage34.uniqueInvalidIds).toBe(summary.universities.stage34.stage3Invalid + summary.universities.stage34.stage4Invalid - summary.universities.stage34.invalidInBoth);
     expect(summary.scholarships).toMatchObject({ totalSections: 514, explicitImportedCandidates: 349, summaryDifference: 10, counts: { MERGED_DUPLICATE: 5, UNMARKED: 156 } });

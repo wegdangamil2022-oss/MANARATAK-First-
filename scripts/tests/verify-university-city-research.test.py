@@ -9,6 +9,8 @@ class ResearchIntegrityTests(unittest.TestCase):
   # This checker covers the immutable research batch, before authorized exclusions.
   for artifact in json.loads((checker.REPORT/'summary.json').read_text())['universityFiles']:
    (checker.ROOT/artifact['path']).write_bytes(subprocess.check_output(['git','show','8a1bb4e6:'+artifact['path']],cwd=originalRoot))
+  for path in subprocess.check_output(['git','ls-tree','-r','--name-only','8a1bb4e6','--','workspace/reference-data/cities','workspace/reference-data/regions','workspace/reference-data/countries'],cwd=originalRoot,text=True).splitlines():
+   (checker.ROOT/path).write_bytes(subprocess.check_output(['git','show','8a1bb4e6:'+path],cwd=originalRoot))
  def tearDown(self):checker.ROOT,checker.REPORT=originalRoot,originalReport;self.tmp.cleanup()
  def updateHash(self,path,kind):
   summary=json.loads((checker.REPORT/'summary.json').read_text())

@@ -1,0 +1,36 @@
+{
+  "sourceIntegrity": {
+    "result": "PASS",
+    "countries": 194,
+    "regions": 5003,
+    "cities": 10428,
+    "universities": 10723,
+    "sourceMatchedUniversities": 10156,
+    "reviewUniversities": 567,
+    "missingCountryCityCoverage": 0,
+    "scopedCityCollisions": 0,
+    "fuzzyRegionLinks": 0,
+    "activeUniversityCityMismatches": 0
+  },
+  "targetedVitest": {
+    "files": 4,
+    "tests": 35,
+    "result": "PASS",
+    "nodeVersion": "22.23.3"
+  },
+  "pythonIntegrityNegativeTests": {
+    "currentBatch": 3,
+    "historicalAlignment": 3,
+    "historicalResearch": 3,
+    "result": "PASS"
+  },
+  "historicalSnapshotVerification": {
+    "ecc5123d": "PASS",
+    "8a1bb4e6": "PASS"
+  },
+  "sourceQualityPrepare": "PASS",
+  "sourceQualityReproduction": "PASS",
+  "factualCampusVerification": "INCOMPLETE; 567 source review cases and registry-corroborated city scope limits are explicit",
+  "databaseWrites": 0,
+  "runtime": "RUNTIME_UNTESTED"
+}

@@ -34,33 +34,33 @@
     },
     {
       "path": "workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx",
-      "sha256": "c02d6729195556d7a9ad3e60962fc9fb89e8b1a7b42915521ad28a227857d8ec",
-      "bytes": 128016
+      "sha256": "df8a134940161562f0b1028e11d68072874ed111ed80bf0d24c5177e1d056fd6",
+      "bytes": 144924
     },
     {
       "path": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx",
-      "sha256": "9a36739d2902d7dae85577cf5ec34d71cae36c8af229e5bd59f2ecab07cad873",
-      "bytes": 310883
+      "sha256": "5c8f4693fd723d66bc60e269e78e40a691c5ce3d4093528427ba423a7043ce29",
+      "bytes": 349333
     },
     {
       "path": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx",
-      "sha256": "dddc379c78d5f3d79ffc1cf1f3ea9dd097d2724d4edd7e6cf31f7f9465fbce3b",
-      "bytes": 232520
+      "sha256": "c7970308ef13410b5de174a24e3aa9c5ec756fe5186f1a0b65ae0172fcd66e13",
+      "bytes": 243770
     },
     {
       "path": "workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx",
-      "sha256": "b941b9f412a1ccd8038c178319dfb104996ff0ee3f283aa29739effcad8cdbde",
-      "bytes": 122091
+      "sha256": "b068f8a7eeff2bf123adf19f0c6abc2beda2d69e57bcc5d011d8dbe0a16a40a8",
+      "bytes": 132334
     },
     {
       "path": "workspace/import-sources/universities/stage-1/Oceania_Universities_Import_English_14_Countries_COMPLETE.xlsx",
-      "sha256": "9b99d80d807052bfd224b972f5319d367c2c8d46b79d440e4647c5d31dd3ae19",
-      "bytes": 19421
+      "sha256": "2eb1673082ac61973cc59360720917c213876d6bda99c6c15eb2e6ccfc742118",
+      "bytes": 19812
     },
     {
       "path": "workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx",
-      "sha256": "648350758b2c66540af4f69f0a6ecb401abb599e4e9332e15184a3564411d4a6",
-      "bytes": 76477
+      "sha256": "5fde3e7394753ed9384562d781314a5e4ee1fe05b7db00b24d00dcd8b84ba1f5",
+      "bytes": 80582
     },
     {
       "path": "workspace/import-sources/universities/stage-2-enrichment/Africa_Universities_Phase_1_FINAL_WEAK_RECORDS_REENRICHED.xlsx",
@@ -89,28 +89,28 @@
     },
     {
       "path": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
-      "sha256": "c3789f96cc41e4e560778e22f095dccbf3fa80e487de85a0722a164fe90694ad",
-      "bytes": 1198644
+      "sha256": "29f130bff6109c7dc164995b198e8cb96ad3c84144fecc5a10b779db2597f237",
+      "bytes": 1219195
     },
     {
       "path": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
-      "sha256": "d9708fe4fef4751060c7b349ce88c2d4ce5ef4772d72e335c3f76c354f8f7a44",
-      "bytes": 1760945
+      "sha256": "2cb3586c8b7314281cb8acb6d364a1d63242a17758e687d0e19dbf2717aaa49a",
+      "bytes": 1834032
     },
     {
       "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
-      "sha256": "7379dce0749e309cb5b23f41d86318db4c2c8af8bcfd6d8c1bcfe6ac94fe1773",
-      "bytes": 2227699
+      "sha256": "a62abf516c0d67c519967e80e65665003819af7b0f2935fcd75c8762afa2f6af",
+      "bytes": 2254680
     },
     {
       "path": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
-      "sha256": "364f03ef82a16aefd57a0c62baacad51dc9059c1a90a2de393b06b7ddacbf1bc",
-      "bytes": 1812081
+      "sha256": "9fbf794ab240451ac1bfb7aa53eff26d64061f268eea8451fef257ac0ad6052c",
+      "bytes": 1830546
     },
     {
       "path": "workspace/reference-data/cities/oceania/22_cities_oceania.csv",
-      "sha256": "0af5ebbca1fa7ae00d7a7f9d408e7ea03fde46c3b305c0f94e5cad14fcb090d5",
-      "bytes": 64088
+      "sha256": "f611af84297586e751b8788daa8db2f02093cc8972e69387f20281f650fe5195",
+      "bytes": 65972
     },
     {
       "path": "workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx",
@@ -129,18 +129,18 @@
     },
     {
       "path": "workspace/reference-data/regions/americas/MANARATAK_Americas_Admin_Regions.csv",
-      "sha256": "b8b1ef30db3d5cdcc0a4a15ccb66b481002266e512cec31e30a2a4b42b1db07c",
-      "bytes": 270300
+      "sha256": "e4ccd1da7d28dc3fa5fa15724995724f98025b70ab2565bf51a050120a427627",
+      "bytes": 279232
     },
     {
       "path": "workspace/reference-data/regions/asia/02_admin_regions_asia.csv",
-      "sha256": "c0cd09421e2c66dc2750ab4fa897d206db6c4cf086173972976efdd7b0d85f32",
-      "bytes": 473733
+      "sha256": "b1721ca908bcd01cf03b6908de298daa6f000e42a98797673a7b89336c0b61c1",
+      "bytes": 474603
     },
     {
       "path": "workspace/reference-data/regions/europe/MANARATAK_Europe_Admin_Regions.csv",
-      "sha256": "d018a68947087caa229838e2a97d42b2a4b580b0e912468b11a245f0fecfb789",
-      "bytes": 820261
+      "sha256": "72d179a2714bf7e0f95cc3fca97f05ba7cad371dbefb3460fb0e3975e6a87808",
+      "bytes": 821573
     },
     {
       "path": "workspace/reference-data/regions/oceania/05_admin_regions_oceania.csv",
@@ -151,8 +151,8 @@
   "outputs": [
     {
       "file": "universities-geography.jsonl",
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "bytes": 1
+      "sha256": "6c1319c8e26191470adb237f0550180625cbf3e7cb98b7adeed4a70794617d04",
+      "bytes": 385631
     },
     {
       "file": "universities-stage34-quarantine.jsonl",
@@ -176,8 +176,8 @@
     },
     {
       "file": "summary.json",
-      "sha256": "d2a32c1d18e197d383e538523777873f972326554c3b48dbc9e352b29ef613c7",
-      "bytes": 2230
+      "sha256": "e2928baaf44881749ce58eae70ccff121368fd3378dd5bcfc04e8cfd0f44f05b",
+      "bytes": 2305
     }
   ],
   "databaseWrites": 0

@@ -1,5 +1,7 @@
 # Active university, city and region alignment — 2026-10-13
 
+This is the historical exclusion batch at `ecc5123d`. All university records have since returned to their original workbooks with researched restorations and remaining review rows. See `../../geography-research-restoration/2026-10-13/README.md`. Verify this immutable historical batch with `python scripts/verify-active-geography-alignment.py --snapshot ecc5123d`; current verification is `python scripts/verify-geography-research-restoration.py`.
+
 The user explicitly authorized correcting, adding or deleting mismatched source data. This batch removes the 889 unresolved university rows from the six active stage-1 workbooks and preserves them in the six review-only workbooks in this report directory. Their original identities, every original field and review reasons remain intact in the archive and `excluded-universities.jsonl`. The empty `Geography Review` sheets in the active workbooks retain their headers for importer compatibility.
 
 There are **9,834 active university rows** and **10,289 active city rows**. Every university's `City` exactly equals its city catalog's `cityNameEn`; `City Source ID`, `City Region Code` and `ISO3` identify that same city, region and country. Every active city has a region code belonging to its ISO2/ISO3 country, and the country exists in the country registry. Cities needed no further changes in this batch. No active institution is excluded without an unchanged original record and exclusion receipt.
