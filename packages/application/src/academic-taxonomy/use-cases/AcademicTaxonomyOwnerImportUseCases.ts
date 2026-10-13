@@ -13,6 +13,18 @@ export class AcademicTaxonomyOwnerImportUseCases {
   screenings(page: number) { return this.gateway.listScreenings(page); }
   get(id: string) { return this.gateway.get(id); }
   private context(context: AtomicMutationRequestContext) { if (!context.actorId?.trim()) throw new Error('TAXONOMY_IMPORT_ACTOR_REQUIRED'); }
+  private async sourceEvidence(gateway: IAcademicTaxonomyImportGateway, receipt: { result: unknown }) {
+    const screened = receipt.result as any;
+    if (screened?.schemaVersion !== 1 || screened?.owner !== 'ACADEMIC_TAXONOMY' || screened?.state !== 'NEEDS_OWNER_REVIEW')
+      throw new Error('TAXONOMY_IMPORT_SCREENING_REQUIRED');
+    if (screened.dryRun !== false) throw new Error('TAXONOMY_IMPORT_DRY_RUN_NOT_APPLICABLE');
+    const artifactId = screened.source?.artifactId;
+    const contentHash = screened.source?.contentHash;
+    if (typeof artifactId !== 'string' || !artifactId.trim() || typeof contentHash !== 'string' || !/^[a-f0-9]{64}$/i.test(contentHash))
+      throw new Error('TAXONOMY_IMPORT_SOURCE_EVIDENCE_REQUIRED');
+    await gateway.verifyArtifact(artifactId, contentHash);
+    return { record: parseAcademicImportRecord(screened.record), source: { artifactId, contentHash: contentHash.toLowerCase() } };
+  }
   private async inspect(record: AcademicImportRecord, repository: IAcademicTaxonomyRepository) {
     const payload = record.payload as any;
     const nodeVersions: Record<string, string> = {};
@@ -43,14 +55,12 @@ export class AcademicTaxonomyOwnerImportUseCases {
       const gateway = this.gateway.withTransaction(tx); await gateway.lock(id);
       const prior = await gateway.get(id); if (prior) return { value: prior, replayed: true };
       const receipt = await gateway.screening(receiptId);
-      const screened = receipt?.result as any;
-      if (!receipt || screened?.schemaVersion !== 1 || screened?.owner !== 'ACADEMIC_TAXONOMY' || screened?.state !== 'NEEDS_OWNER_REVIEW') throw new Error('TAXONOMY_IMPORT_SCREENING_REQUIRED');
-      if (screened.dryRun) throw new Error('TAXONOMY_IMPORT_DRY_RUN_NOT_APPLICABLE');
-      const record = parseAcademicImportRecord(screened.record);
+      if (!receipt) throw new Error('TAXONOMY_IMPORT_SCREENING_REQUIRED');
+      const { record, source } = await this.sourceEvidence(gateway, receipt);
       const repository = this.repository.withTransaction?.(tx); if (!repository) throw new Error('TAXONOMY_ATOMIC_CONTEXT_REQUIRED');
       return repository.executeSerializable(async () => {
         const preview = await this.inspect(record, repository);
-        const plan: AcademicImportReview = { id, receiptId, sourceHash: receipt.requestHash, record, preview, previewHash: hash({ record, preview }), status: 'PREVIEWED', version: 1 };
+        const plan: AcademicImportReview = { id, receiptId, sourceHash: receipt.requestHash, record, preview, previewHash: hash({ record, preview, source }), status: 'PREVIEWED', version: 1 };
         await gateway.create(plan); return { value: plan, replayed: false };
       });
     }, result => !result.replayed).then(result => result.value);
@@ -61,10 +71,12 @@ export class AcademicTaxonomyOwnerImportUseCases {
       const gateway = this.gateway.withTransaction(tx); await gateway.lock(id); const plan = await gateway.get(id);
       if (!plan || plan.version !== expectedVersion || plan.status === 'APPLIED') throw new Error('TAXONOMY_IMPORT_REVIEW_CONFLICT');
       const receipt = await gateway.screening(plan.receiptId); if (!receipt || receipt.requestHash !== plan.sourceHash) throw new Error('TAXONOMY_IMPORT_SOURCE_CONFLICT');
+      const { record, source } = await this.sourceEvidence(gateway, receipt);
+      if (hash(record) !== hash(plan.record)) throw new Error('TAXONOMY_IMPORT_SOURCE_CONFLICT');
       const repository = this.repository.withTransaction?.(tx); if (!repository) throw new Error('TAXONOMY_ATOMIC_CONTEXT_REQUIRED');
       return repository.executeSerializable(async () => {
         const preview = await this.inspect(plan.record, repository);
-        const next: AcademicImportReview = { ...plan, preview, previewHash: hash({ record: plan.record, preview }), status: 'PREVIEWED', version: plan.version + 1, reviewedBy: undefined, reason: undefined };
+        const next: AcademicImportReview = { ...plan, preview, previewHash: hash({ record: plan.record, preview, source }), status: 'PREVIEWED', version: plan.version + 1, reviewedBy: undefined, reason: undefined };
         await gateway.save(next, plan.version); return next;
       });
     });
@@ -90,10 +102,12 @@ export class AcademicTaxonomyOwnerImportUseCases {
       if (plan.version !== input.expectedVersion || plan.status !== 'APPROVED' || !plan.reviewedBy) throw new Error('TAXONOMY_IMPORT_APPROVAL_REQUIRED');
       const receipt = await gateway.screening(plan.receiptId);
       if (!receipt || receipt.requestHash !== plan.sourceHash) throw new Error('TAXONOMY_IMPORT_SOURCE_CONFLICT');
+      const { record, source } = await this.sourceEvidence(gateway, receipt);
+      if (hash(record) !== hash(plan.record)) throw new Error('TAXONOMY_IMPORT_SOURCE_CONFLICT');
       const repository = this.repository.withTransaction?.(tx); if (!repository) throw new Error('TAXONOMY_ATOMIC_CONTEXT_REQUIRED');
       return repository.executeSerializable(async () => {
         const preview = await this.inspect(plan.record, repository);
-        if (hash({ record: plan.record, preview }) !== plan.previewHash || preview.issues.some(issue => issue.severity === 'ERROR')) throw new Error('TAXONOMY_IMPORT_STALE_PREVIEW');
+        if (hash({ record: plan.record, preview, source }) !== plan.previewHash || preview.issues.some(issue => issue.severity === 'ERROR')) throw new Error('TAXONOMY_IMPORT_STALE_PREVIEW');
         const owner = new AdminAcademicTaxonomyUseCases(repository);
         const data = plan.record.payload as any;
         let result: unknown;

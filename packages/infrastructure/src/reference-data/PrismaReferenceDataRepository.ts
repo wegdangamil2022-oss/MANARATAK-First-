@@ -2,6 +2,7 @@ import { readReferenceCodeUsage } from './ReferenceCodeUsageInventory';
 import { createHash, randomUUID } from 'crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
+  ReferenceQualityQuery, ReferenceQualityReport, REFERENCE_QUALITY_ISSUES,
   AtomicPersistenceContext,
   ITransactionalReferenceDataRepository,
   IReferenceResolutionRepository,
@@ -1211,12 +1212,63 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     };
   }
 
+  public async getQualityReport(query: ReferenceQualityQuery): Promise<ReferenceQualityReport> {
+    const page = query.page ?? 1;
+    if (!Number.isSafeInteger(page) || page < 1 || page > 1000 || (query.countryIso2Code && !/^[A-Z]{2}$/.test(query.countryIso2Code)) || (query.kind && !REFERENCE_QUALITY_ISSUES.includes(query.kind)))
+      throw new Error('REFERENCE_QUALITY_QUERY_INVALID');
+    // All CTE branches expose stable canonical IDs; paging and facets use the same snapshot.
+    const aliases = (['COUNTRY', 'CURRENCY', 'LANGUAGE', 'REGION', 'CITY'] as const).map(type => {
+      const table = this.referenceTable(type);
+      const country = type === 'COUNTRY' ? Prisma.sql`o."iso2Code"` : ['CITY','REGION'].includes(type) ? Prisma.sql`o."countryIso2Code"` : Prisma.sql`NULL::text`;
+      const scope = ['CITY','REGION'].includes(type) ? Prisma.sql`AND other."countryIso2Code"=o."countryIso2Code"` : Prisma.empty;
+      return Prisma.sql`SELECT o."id" AS "referenceId", ${type}::text AS "entityType", o."name", ${country} AS "countryIso2Code", 'AMBIGUOUS_ALIAS'::text AS kind
+        FROM ${table} o WHERE EXISTS (SELECT 1 FROM "ReferenceAliasRecord" a
+          WHERE a."entityType"=${type} AND a."referenceId"=o."id" AND a."isActive"=TRUE
+          AND EXISTS (SELECT 1 FROM "ReferenceAliasRecord" b JOIN ${table} other ON other."id"=b."referenceId"
+            WHERE b."entityType"=${type} AND b."isActive"=TRUE AND b."referenceId"<>a."referenceId" AND b."normalizedAlias"=a."normalizedAlias" ${scope}))`;
+    });
+    const sql = Prisma.sql`WITH issues AS (
+      SELECT c."id" AS "referenceId", 'COUNTRY'::text AS "entityType", c."name", c."iso2Code" AS "countryIso2Code", problem.kind
+      FROM "ReferenceCountry" c
+      LEFT JOIN "ReferenceCurrency" currency ON currency."isoCode"=c."defaultCurrencyCode"
+      LEFT JOIN "ReferenceLanguage" language ON language."isoCode"=c."defaultLanguageCode"
+      CROSS JOIN LATERAL (VALUES
+        ('MISSING_CURRENCY', c."defaultCurrencyCode" IS NULL OR BTRIM(c."defaultCurrencyCode")=''),
+        ('INVALID_CURRENCY', c."defaultCurrencyCode" IS NOT NULL AND BTRIM(c."defaultCurrencyCode")<>'' AND (currency."id" IS NULL OR NOT currency."isActive" OR currency."lifecycleState"<>'ACTIVE')),
+        ('MISSING_LANGUAGE', c."defaultLanguageCode" IS NULL OR BTRIM(c."defaultLanguageCode")=''),
+        ('INVALID_LANGUAGE', c."defaultLanguageCode" IS NOT NULL AND BTRIM(c."defaultLanguageCode")<>'' AND (language."id" IS NULL OR NOT language."isActive" OR language."lifecycleState"<>'ACTIVE'))
+      ) problem(kind, present) WHERE problem.present
+      UNION ALL
+      SELECT c."id", 'CITY', c."name", c."countryIso2Code", problem.kind FROM "ReferenceCity" c
+      LEFT JOIN "ReferenceCountry" country ON country."id"=c."countryReferenceId"
+      LEFT JOIN "AdministrativeRegion" region ON region."id"=c."administrativeRegionId"
+      CROSS JOIN LATERAL (VALUES
+        ('MISSING_REGION', c."administrativeRegionId" IS NULL),
+        ('MISSING_TIMEZONE', c."timezone" IS NULL OR BTRIM(c."timezone")=''),
+        ('BROKEN_COUNTRY', country."id" IS NULL OR country."iso2Code"<>c."countryIso2Code"),
+        ('BROKEN_REGION', c."administrativeRegionId" IS NOT NULL AND (region."id" IS NULL OR region."countryIso2Code"<>c."countryIso2Code" OR region."countryReferenceId" IS DISTINCT FROM c."countryReferenceId"))
+      ) problem(kind, present) WHERE problem.present
+      UNION ALL ${Prisma.join(aliases, ' UNION ALL ')}
+    ), scoped AS (SELECT * FROM issues WHERE (${query.countryIso2Code ?? null}::text IS NULL OR "countryIso2Code"=${query.countryIso2Code ?? null})),
+    filtered AS (SELECT * FROM scoped WHERE (${query.kind ?? null}::text IS NULL OR kind=${query.kind ?? null})),
+    facets AS (SELECT kind, COUNT(*)::int AS total FROM scoped GROUP BY kind),
+    paged AS (SELECT * FROM filtered ORDER BY kind,"entityType","referenceId" LIMIT 25 OFFSET ${(page-1)*25})
+    SELECT COALESCE((SELECT jsonb_agg(to_jsonb(paged) ORDER BY kind,"entityType","referenceId") FROM paged),'[]'::jsonb) AS data,
+      COALESCE((SELECT jsonb_object_agg(kind,total) FROM facets),'{}'::jsonb) AS counts,
+      (SELECT COUNT(*)::text FROM filtered) AS total, CURRENT_TIMESTAMP AS "asOf"`;
+    const rows = await this.prisma.$queryRaw<Array<{ data: ReferenceQualityReport['data']; counts: Partial<ReferenceQualityReport['counts']>; total: string; asOf: Date }>>(sql);
+    const row = rows[0];
+    if (!row) throw new Error('REFERENCE_GOVERNANCE_OWNER_READ_UNAVAILABLE');
+    return { data: row.data, counts: Object.fromEntries(REFERENCE_QUALITY_ISSUES.map(kind => [kind,row.counts[kind] ?? 0])) as ReferenceQualityReport['counts'],
+      total: Number(row.total), page, pageSize: 25, asOf: row.asOf.toISOString(), aliasScope: 'ACTIVE_STORED_NORMALIZED_ALIASES', authoritativeCoverage: 'unknown' };
+  }
+
   public async getCityQualityCounters(countryIso2Code: string): Promise<ReferenceCityQualityCounters> {
     const where = { countryIso2Code };
     const [total, active, withoutAdministrativeRegion, withoutTimezone, withoutCanonicalIdentity,
       withoutCountryReference, inconsistentCountryReferenceRows, inconsistentRegionRows] = await Promise.all([
       this.prisma.referenceCity.count({ where }),
-      this.prisma.referenceCity.count({ where: { ...where, lifecycleState: 'ACTIVE' } }),
+      this.prisma.referenceCity.count({ where: this.cityWhere({ countryIso2Code, activeOnly: true }) }),
       this.prisma.referenceCity.count({ where: { ...where, administrativeRegionId: null } }),
       this.prisma.referenceCity.count({ where: { ...where, timezone: null } }),
       this.prisma.referenceCity.count({ where: { ...where, canonicalIdentityKey: null } }),

@@ -1,12 +1,23 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import { AssetId, type AtomicPersistenceContext } from '@manaratak/domain';
+import { PrismaAssetRecordRepository } from '../asset-platform/PrismaAssetRecordRepository';
 import type { AcademicImportReview, IAcademicTaxonomyImportGateway } from '@manaratak/application';
 export class PrismaAcademicTaxonomyImportGateway implements IAcademicTaxonomyImportGateway {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly bound = false) {}
   withTransaction(context: AtomicPersistenceContext): IAcademicTaxonomyImportGateway {
     const tx = (context as AtomicPersistenceContext & { transactionClient?: Prisma.TransactionClient }).transactionClient;
     if (!context.boundaryId || !tx) throw new Error('TAXONOMY_IMPORT_TRANSACTION_REQUIRED');
-    return new PrismaAcademicTaxonomyImportGateway(tx as unknown as PrismaClient);
+    return new PrismaAcademicTaxonomyImportGateway(tx as unknown as PrismaClient, true);
+  }
+  async verifyArtifact(artifactId: string, sha256: string) {
+    if (!this.bound) throw new Error('TAXONOMY_IMPORT_TRANSACTION_REQUIRED');
+    if (!artifactId?.trim() || !/^[a-f0-9]{64}$/i.test(sha256)) throw new Error('TAXONOMY_IMPORT_SOURCE_EVIDENCE_REQUIRED');
+    await this.prisma.$queryRaw`SELECT "id" FROM "AssetRecord" WHERE "id" = ${artifactId} FOR SHARE`;
+    const asset = await new PrismaAssetRecordRepository(this.prisma).findById(new AssetId(artifactId));
+    if (!asset) throw new Error('TAXONOMY_IMPORT_SOURCE_ARTIFACT_UNAVAILABLE');
+    asset.assertCanDeliver();
+    if (asset.checksum?.algorithm.toLowerCase() !== 'sha256' || asset.checksum.hash.toLowerCase() !== sha256.toLowerCase())
+      throw new Error('TAXONOMY_IMPORT_SOURCE_HASH_CONFLICT');
   }
   async lock(id: string) { await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`taxonomy-import:${id}`}, 0))`; }
   async screening(receiptId: string) {

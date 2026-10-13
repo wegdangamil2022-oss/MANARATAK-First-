@@ -1,5 +1,7 @@
 # Section 06 / P7 — final source closure
 
+> متابعة 12 أكتوبر 2026: نواقص إعادة المراجعة للقسمين 06/07 وإصلاحاتها والفحوص الخفيفة الحالية موثقة في [تقرير المتابعة](../reviews/SECTIONS_06_07_SOURCE_COMPLETION_2026-10-12.md). النتائج السابقة أدلة تاريخية ولا تُنسب تلقائيًا للنسخة الحالية.
+
 **Status: CODE_CLOSED — RUNTIME_DEFERRED (2026-10-10).**
 
 Source baseline: `f4fe750579bfd77f0bed27df8a54a2b2c76c4c41`; cumulative Section 06 baseline: `7231f2c53b307cb5f98e3af0083285322802603a`. Closure source is the commit containing this register, pushed to `codex/section-01-iam-rbac`. Final integration target authorized by the user: `main`, including Section 07 separately. No database activation or production readiness is claimed.

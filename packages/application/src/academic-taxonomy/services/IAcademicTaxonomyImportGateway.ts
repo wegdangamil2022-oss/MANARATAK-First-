@@ -9,6 +9,7 @@ export interface AcademicImportReview {
 export interface IAcademicTaxonomyImportGateway {
   withTransaction(context: AtomicPersistenceContext): IAcademicTaxonomyImportGateway;
   lock(id: string): Promise<void>;
+  verifyArtifact(artifactId: string, sha256: string): Promise<void>;
   screening(receiptId: string): Promise<{ id: string; requestHash: string; result: unknown } | null>;
   get(id: string): Promise<AcademicImportReview | null>;
   create(plan: AcademicImportReview): Promise<void>;

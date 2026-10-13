@@ -207,7 +207,7 @@ export class AcademicTaxonomyAdminRouter {
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       if (err?.message === 'AUTHENTICATED_ADMIN_ACTOR_REQUIRED') return res.status(401).json({ error: err.message });
       if (err?.message?.startsWith('TAXONOMY_IMPORT_') && /CONFLICT|STALE|APPROVAL/.test(err.message) || err?.message === 'TAXONOMY_BULK_PREVIEW_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });
-      if (['TAXONOMY_GOVERNANCE_READ_UNAVAILABLE', 'TAXONOMY_IMPORT_UNAVAILABLE', 'TAXONOMY_DIAGNOSTICS_SCOPE_TOO_LARGE', 'TAXONOMY_ALIAS_RECONCILIATION_SCOPE_TOO_LARGE'].includes(err?.message)) return res.status(503).json({ error: err.message });
+      if (['TAXONOMY_GOVERNANCE_READ_UNAVAILABLE', 'TAXONOMY_IMPORT_UNAVAILABLE', 'TAXONOMY_DIAGNOSTICS_SCOPE_TOO_LARGE', 'TAXONOMY_GRAPH_SCOPE_TOO_LARGE', 'TAXONOMY_IMPORT_SOURCE_EVIDENCE_REQUIRED', 'TAXONOMY_IMPORT_SOURCE_ARTIFACT_UNAVAILABLE', 'TAXONOMY_ALIAS_RECONCILIATION_SCOPE_TOO_LARGE'].includes(err?.message)) return res.status(503).json({ error: err.message });
       if (err?.message === 'ACADEMIC_USAGE_UNAVAILABLE') return res.status(503).json({ error: err.message });
       if (err?.message === 'ACADEMIC_USAGE_REFERENCE_NOT_FOUND') return res.status(404).json({ error: err.message });
       if (err?.message === 'DEGREE_LEVEL_VERSION_CONFLICT') return res.status(409).json({ error: err.message, code: err.message });

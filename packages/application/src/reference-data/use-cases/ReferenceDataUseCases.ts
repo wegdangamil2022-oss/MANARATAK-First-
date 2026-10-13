@@ -9,6 +9,7 @@ import {
   ReferenceDataValidationSeverity,
   OutboxProcessingState,
   ReferenceCityDto,
+  ReferenceQualityQuery,
   ReferenceCountryDto,
   ReferenceCurrencyDto,
   ReferenceDataFilters,
@@ -134,6 +135,13 @@ export class ReferenceDataUseCases {
 
   public getStandardsReadiness() {
     return referenceStandardsReadiness([]);
+  }
+
+  public getQualityReport(query: ReferenceQualityQuery) {
+    if ((query.countryIso2Code && !/^[A-Z]{2}$/.test(query.countryIso2Code)) || !Number.isSafeInteger(query.page ?? 1) || (query.page ?? 1) < 1 || (query.page ?? 1) > 1000)
+      throw new Error('REFERENCE_QUALITY_QUERY_INVALID');
+    if (!this.repository.getQualityReport) throw new Error('REFERENCE_GOVERNANCE_OWNER_READ_UNAVAILABLE');
+    return this.repository.getQualityReport(query);
   }
 
   /** Only source-backed counts are numeric. No inferred quality or coverage claims. */

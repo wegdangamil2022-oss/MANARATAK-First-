@@ -8,7 +8,7 @@ import {
   ReferenceOwnerReviewUseCases,
   ReferenceDataValidationError,
 } from '@manaratak/application';
-import { ReferenceLifecycleState, ReferenceRegionCommandError, type GovernedReferenceEntityType } from '@manaratak/domain';
+import { REFERENCE_QUALITY_ISSUES, ReferenceLifecycleState, ReferenceRegionCommandError, type GovernedReferenceEntityType } from '@manaratak/domain';
 
 export class ReferenceDataAdminRouter {
   public static create(cradle: { referenceDataUseCases: ReferenceDataUseCases; referenceOwnerReviewUseCases?: ReferenceOwnerReviewUseCases }): Router {
@@ -197,6 +197,11 @@ export class ReferenceDataAdminRouter {
       const { iso2Code } = countryCodeParamSchema.parse({ iso2Code: req.params.countryIso2Code });
       res.json({ data: await referenceDataUseCases.getCityQualityCounters(iso2Code), source: 'P7_OWNER_COUNTS', asOf: new Date().toISOString() });
     }));
+    router.get('/quality/issues', asyncHandler(async (req: Request, res: Response) => {
+      const query = z.object({ countryIso2Code: z.string().regex(/^[A-Z]{2}$/).optional(), kind: z.enum(REFERENCE_QUALITY_ISSUES).optional(), page: z.coerce.number().int().min(1).max(1000).default(1) }).strict().parse(req.query);
+      res.json(await referenceDataUseCases.getQualityReport(query));
+    }));
+
     router.get('/quality', asyncHandler(async (_req: Request, res: Response) => {
       res.json({ data: await referenceDataUseCases.getQualitySnapshot(), source: 'P7_OWNER_COUNTS',
         asOf: new Date().toISOString(), coverageEvidence: 'unknown' });

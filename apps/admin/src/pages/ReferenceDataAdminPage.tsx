@@ -1,3 +1,4 @@
+import { ReferenceQualityWorkspace } from '../components/ReferenceQualityWorkspace';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   readXlsxWorkbook,
@@ -196,6 +197,7 @@ export function ReferenceDataAdminPage() {
         ))}</div>}
         <p className="text-xs text-slate-600">الأعداد من خادم P7 فقط. جودة الأسماء البديلة والروابط والمصادر الرسمية: unknown حتى تتوفر أدلة قابلة للفحص. انقر على المجموعة للاطلاع على سجلاتها.</p>
       </section>
+      <ReferenceQualityWorkspace />
       <ReferenceImportReviewQueue onSelectReceipt={setSelectedReceipt} />
       <ReferenceOwnerReviewWorkspace receiptId={selectedReceipt} />
       <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-2">

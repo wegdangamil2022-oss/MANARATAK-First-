@@ -70,9 +70,9 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
       ...(filters?.page || filters?.pageSize ? {
         skip: (Math.max(1, filters.page ?? 1) - 1) * Math.min(100, Math.max(1, filters.pageSize ?? 50)),
         take: Math.min(100, Math.max(1, filters.pageSize ?? 50)),
-      } : {}),
+      } : { skip: 0, take: 5001 }),
     });
-
+    if (!filters?.page && !filters?.pageSize && records.length > 5000) throw new Error('TAXONOMY_GRAPH_SCOPE_TOO_LARGE');
     return records.map((r: any) => this.toNodeDto(r));
   }
 
@@ -286,7 +286,8 @@ export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyReposi
 
   // --- Hierarchy Methods (P8E-2) ---
   async listEdges(): Promise<AcademicTaxonomyEdgeDto[]> {
-    const edges = await this.prisma.academicTaxonomyEdge.findMany();
+    const edges = await this.prisma.academicTaxonomyEdge.findMany({ orderBy: { id: 'asc' }, take: 20001 });
+    if (edges.length > 20000) throw new Error('TAXONOMY_GRAPH_SCOPE_TOO_LARGE');
     return edges.map((edge: any) => this.toEdgeDto(edge));
   }
 
