@@ -502,6 +502,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/reviews/SECTIONS_12_13_SOURCE_REVIEW_2026-10-13.md",
       "decision": "Source only, unapplied. No approval, actor, expiry or history backfill. Drain writers, preserve actual immutable approval/revision evidence and use a reviewed compatible backup or forward fix; no destructive down SQL authorized."
+    },
+    "20261013060000_course_provider_backlog": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/SECTION_13_SOURCE_CLOSURE_2026-10-13.md",
+      "decision": "Source only, unapplied; no legacy checkpoint/result backfill. Drain link-check jobs and preserve actual checkpoints, leases and reviewed retry/dead-letter evidence. Use a verified compatible backup or reviewed forward fix; no destructive down SQL authorized."
     }
   }
 }

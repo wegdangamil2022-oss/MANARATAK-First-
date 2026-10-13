@@ -637,6 +637,7 @@ export interface PublicMajorDto {
 }
 
 export interface PublicCourseDto {
+  contentLanguage?:{requestedLocale:string;sourceLanguage:string|null;titleFallback:boolean};
   /** Required canonical P13 owner identity. Keep synchronized with the owner DTO. */
   ownerId: string;
   publicId: string;

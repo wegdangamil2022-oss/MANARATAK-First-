@@ -5973,3 +5973,31 @@ model StudyDestinationReviewPolicy {
  maxEvidenceAgeDays Int?
  updatedAt DateTime @updatedAt
 }
+
+
+// Section 13: real scan checkpoint and bounded retry/dead-letter observations; no backfill.
+model CourseProviderHealthCheckpoint {
+  providerId String @id
+  cursor String?
+  cycle Int @default(0)
+  scanned Int @default(0)
+  leaseToken String?
+  leaseExpiresAt DateTime?
+  completedAt DateTime?
+  updatedAt DateTime @updatedAt
+}
+model CourseProviderHealthRetry {
+  id String @id @default(uuid())
+  providerId String
+  courseId String
+  url String
+  urlHash String
+  attempts Int @default(0)
+  state String
+  nextAttemptAt DateTime?
+  reviewedBy String?
+  reviewReason String?
+  updatedAt DateTime @updatedAt
+  @@unique([providerId,courseId,urlHash])
+  @@index([providerId,state,nextAttemptAt,id])
+}

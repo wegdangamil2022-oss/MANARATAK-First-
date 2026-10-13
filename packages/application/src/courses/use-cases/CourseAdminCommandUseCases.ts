@@ -32,7 +32,7 @@ export class CourseAdminCommandUseCases {
     private readonly factory:(context:AtomicPersistenceContext)=>CourseAdminScope){}
 
   async execute<T>(kind:'COURSE'|'LEARNING_PATH', id:string|undefined, action:string, context:CourseAdminContext,
-    command:(scope:CourseAdminScope)=>Promise<T>):Promise<{value:T;version?:number}> {
+    command:(scope:CourseAdminScope)=>Promise<T>):Promise<{value:T;version?:number;ownerState?:{version:number;status:string;updatedAt:Date;readiness:unknown}}> {
     if(!context.actorId || !context.reason?.trim()) throw new Error('COURSE_REVIEW_CONTEXT_REQUIRED');
     if(id && (!Number.isSafeInteger(context.expectedVersion) || context.expectedVersion!<1)) throw new Error('COURSE_VERSION_PRECONDITION_REQUIRED');
     const entityId=id ?? `${kind}-CREATE-${randomUUID()}`;
@@ -53,7 +53,8 @@ export class CourseAdminCommandUseCases {
           if(current.status==='PUBLISHED' && !['COURSE_UNPUBLISH','COURSE_ARCHIVE'].includes(action)) throw new Error('COURSE_PUBLISHED_STRUCTURE_IMMUTABLE_UNPUBLISH_FIRST');
         }
       }
-      const value=await command(this.factory(persistence));
+      const scope=this.factory(persistence);
+      const value=await command(scope);
       if(!id) {
         if(value && typeof value==='object' && 'id' in value && typeof value.id==='string') {
           entityReference.id=value.id;
@@ -66,7 +67,8 @@ export class CourseAdminCommandUseCases {
         let current=await courses.findById(id);
         if(current?.version===context.expectedVersion) current=await courses.update(id,{});
         if(current && courses.stampVersionActor)await courses.stampVersionActor(id,current.version,context.actorId);
-        return {value,version:current?.version};
+        const readiness=current?.originType==='NATIVE_MANARATAK_COURSE'?await scope.nativeCourseUseCases.getReadiness(id):null;
+        return {value,version:current?.version,ownerState:current?{version:current.version,status:current.status,updatedAt:current.updatedAt,readiness}:undefined};
       }
       return {value,version:(await paths.findById(id))?.version};
     });

@@ -2,6 +2,7 @@ export function courseAdminErrorResponse(error: unknown): {status: number; error
   if (!(error instanceof Error)) return {status: 500, error: 'COURSE_OPERATION_FAILED'};
   if (/^Course with id .+ not found$/.test(error.message)) return {status: 404, error: 'COURSE_NOT_FOUND'};
   const code = /^(?:COURSE|NATIVE_COURSE|LEARNING_PATH|IMPORTED_COURSE|AUTHENTICATED_ADMIN)_[A-Z0-9_]+/.exec(error.message)?.[0];
+  if(error.message.startsWith('TRANSLATION_CONTENT_AUTHORING_DISABLED'))return {status:422,error:'TRANSLATION_CONTENT_AUTHORING_DISABLED'};
   if (!code) return {status: 500, error: 'COURSE_OPERATION_FAILED'};
   if (code.includes('AUTHENTICATED_ADMIN')) return {status: 401, error: 'AUTHENTICATED_ADMIN_ACTOR_REQUIRED'};
   if (code.includes('PRECONDITION_REQUIRED')) return {status: 428, error: code};

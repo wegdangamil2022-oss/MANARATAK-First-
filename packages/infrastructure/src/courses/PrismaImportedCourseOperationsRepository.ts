@@ -1,3 +1,4 @@
+import {PrismaCourseProviderBacklogStore} from './PrismaCourseProviderBacklogStore';
 import {courseSourceApprovalPredicate} from './CoursePublicTrustPredicate';
 import {createHash} from 'node:crypto';
 import {courseSourceFacts} from '@manaratak/domain';
@@ -74,7 +75,8 @@ function pageSize(value: unknown, fallback: number): number {
 }
 
 export class PrismaImportedCourseOperationsRepository implements IImportedCourseOperationsRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public readonly providerBacklog:PrismaCourseProviderBacklogStore;
+  public constructor(private readonly prisma: PrismaClient) {this.providerBacklog=new PrismaCourseProviderBacklogStore(prisma);}
   public async hasCurrentSourceApproval(id:string):Promise<boolean>{
     const rows=await this.prisma.$queryRaw<Array<{id:string}>>(Prisma.sql`SELECT c.id FROM "Course" c WHERE c.id=${id} AND ${courseSourceApprovalPredicate()} LIMIT 1`);
     return rows.length===1;

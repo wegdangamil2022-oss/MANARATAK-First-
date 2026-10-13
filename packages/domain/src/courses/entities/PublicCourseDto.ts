@@ -2,6 +2,7 @@ import { CourseAccessType } from '../enums/CourseAccessType';
 import { CourseOriginType } from '../enums/CourseOriginType';
 
 export interface PublicCourseDto {
+  contentLanguage?:{requestedLocale:string;sourceLanguage:string|null;titleFallback:boolean};
   /** Canonical P13 owner identity; never derived from display text. */
   ownerId: string;
   publicId: string;

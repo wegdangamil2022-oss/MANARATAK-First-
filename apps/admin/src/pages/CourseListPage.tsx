@@ -77,7 +77,7 @@ interface PaginatedResponse {
 }
 
 export function CourseListPage() {
-  const { t, language } = useTranslation();
+  const { t, language , dir} = useTranslation();
   const navigate = useNavigate();
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -111,14 +111,13 @@ export function CourseListPage() {
 
   const createNativeCourse = async (event: FormEvent) => {
     event.preventDefault();
-    if(createReason.trim().length<3){setError('اكتب سبب إنشاء الدورة.');return;}
+    if(createReason.trim().length<3){setError(t('course13_copy_083'));return;}
     setCreating(true);
     setError(null);
     try {
       const payload = {
         titleAr: createForm.titleAr.trim(),
         accessType: createForm.accessType,
-        ...(createForm.titleEn.trim() ? { titleEn: createForm.titleEn.trim() } : {}),
         ...(createForm.learningLanguage.trim()
           ? { learningLanguage: createForm.learningLanguage.trim() }
           : {}),
@@ -172,7 +171,7 @@ export function CourseListPage() {
       setData(response);
     } catch (err: unknown) {
       if (request !== requestId.current) return;
-      setError(err instanceof Error ? err.message : 'تعذر تحميل الدورات');
+      setError(err instanceof Error ? err.message : t('course13_copy_084'));
     } finally {
       if (request === requestId.current) setLoading(false);
     }
@@ -217,7 +216,7 @@ export function CourseListPage() {
       if (active) setProviders(rows);
     };
     void load().catch((error) => {
-      if (active) setError(error instanceof Error ? error.message : 'تعذر تحميل خيارات المنصات');
+      if (active) setError(error instanceof Error ? error.message : t('course13_copy_085'));
     });
     return () => {
       active = false;
@@ -232,14 +231,14 @@ export function CourseListPage() {
     };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6"><Link to="/courses/learning-paths" className="inline-flex rounded border p-3">{language === 'ar' ? 'إدارة مسارات التعلم' : 'Manage learning paths'}</Link>
+    <div className="max-w-7xl mx-auto space-y-6"><Link to="/courses/learning-paths" className="inline-flex rounded border p-3">{language === 'ar' ? t('course13_copy_086') : 'Manage learning paths'}</Link>
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-sm border border-white/15">
               <BookOpen className="h-4 w-4" />
-              <span>القسم الأكاديمي · الدورات التدريبية</span>
+              <span>{t('course13_copy_087')}</span>
             </div>
             <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
               {t('courses')}
@@ -249,8 +248,7 @@ export function CourseListPage() {
               onClick={() => navigate('/courses/providers')}
               className="mt-2 text-sm text-white underline"
             >
-              إدارة مزودي الدورات
-            </button>
+              {t('course13_copy_088')}</button>
             <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/80">
               {t('review_course_catalog_records_and_open_the_authori')}
             </p>
@@ -262,8 +260,7 @@ export function CourseListPage() {
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#21A7B4] px-4 py-2 text-sm font-black text-white hover:bg-[#1A8D99] transition shadow-md"
             >
               <Plus className="h-4 w-4" />
-              Create native course
-            </button>
+              {t('course13_copy_089')}</button>
             <div className="relative">
               <select
                 value={statusFilter}
@@ -274,8 +271,7 @@ export function CourseListPage() {
                   {t('all_statuses')}
                 </option>
                 <option value="DRAFT" className="text-slate-900">
-                  مسودة
-                </option>
+                  {t('course13_copy_090')}</option>
                 <option value="IMPORTED" className="text-slate-900">
                   {t('imported')}
                 </option>
@@ -345,14 +341,14 @@ export function CourseListPage() {
         </div>
       </section>
 
-      <section dir="rtl" className="grid gap-3 rounded-2xl border bg-white p-4 md:grid-cols-3">
+      <section dir={dir} className="grid gap-3 rounded-2xl border bg-white p-4 md:grid-cols-3">
         <input
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
           }}
-          placeholder="البحث بالاسم أو الرمز أو المزود"
+          placeholder={t('course13_copy_091')}
           className="rounded-xl border p-2"
         />
         <select
@@ -360,7 +356,7 @@ export function CourseListPage() {
           onChange={resetAndSet(setProvider)}
           className="rounded-xl border p-2"
         >
-          <option value="">جميع المزودين</option>
+          <option value="">{t('course13_copy_092')}</option>
           {providers.map((provider) => (
             <option key={provider.id} value={provider.id}>
               {provider.displayName}
@@ -373,11 +369,11 @@ export function CourseListPage() {
             setPlatform(e.target.value);
             setPage(1);
           }}
-          placeholder="اسم المنصة كما في المصدر"
+          placeholder={t('course13_copy_093')}
           className="rounded-xl border p-2"
         />
         <CanonicalPicker
-          label="التخصص المرتبط المعتمد"
+          label={t('course13_copy_094')}
           value={majorId}
           onChange={(value) => {
             setMajorId(value);
@@ -392,7 +388,7 @@ export function CourseListPage() {
             setCategory(e.target.value);
             setPage(1);
           }}
-          placeholder="المجال"
+          placeholder={t('course13_copy_095')}
           className="rounded-xl border p-2"
         />
         <input
@@ -401,7 +397,7 @@ export function CourseListPage() {
             setLanguage(e.target.value);
             setPage(1);
           }}
-          placeholder="لغة التعلم"
+          placeholder={t('course13_copy_096')}
           className="rounded-xl border p-2"
         />
         <input
@@ -410,7 +406,7 @@ export function CourseListPage() {
             setLevel(e.target.value);
             setPage(1);
           }}
-          placeholder="المستوى"
+          placeholder={t('course13_copy_035')}
           className="rounded-xl border p-2"
         />
         <select
@@ -418,9 +414,9 @@ export function CourseListPage() {
           onChange={resetAndSet(setFreeCertificate)}
           className="rounded-xl border p-2"
         >
-          <option value="">جميع حالات الشهادة</option>
-          <option value="true">شهادة مجانية</option>
-          <option value="false">بدون شهادة مجانية</option>
+          <option value="">{t('course13_copy_097')}</option>
+          <option value="true">{t('course13_copy_044')}</option>
+          <option value="false">{t('course13_copy_098')}</option>
         </select>
         <button
           onClick={() => {
@@ -439,8 +435,7 @@ export function CourseListPage() {
           }}
           className="rounded-xl border p-2 font-bold"
         >
-          إعادة ضبط الفلاتر
-        </button>
+          {t('course13_copy_099')}</button>
       </section>
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -450,25 +445,25 @@ export function CourseListPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          label="إجمالي الدورات"
+          label={t('course13_copy_100')}
           value={stats[0] ?? '—'}
           icon={BookOpen}
           accent="#142B5F"
         />
         <MetricCard
-          label="منشور في الموقع"
+          label={t('course13_copy_101')}
           value={stats[1] ?? '—'}
           icon={CheckCircle2}
           accent="#2E7D5A"
         />
         <MetricCard
-          label="دورات داخلية المنصة"
+          label={t('course13_copy_102')}
           value={stats[2] ?? '—'}
           icon={GraduationCap}
           accent="#21A7B4"
         />
         <MetricCard
-          label="دورات مدفوعة"
+          label={t('course13_copy_103')}
           value={stats[3] ?? '—'}
           icon={AlertCircle}
           accent="#D6A43B"
@@ -481,17 +476,15 @@ export function CourseListPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-black text-[#142B5F]">Create native MANARATAK course</h3>
+              <h3 className="font-black text-[#142B5F]">{t('course13_copy_104')}</h3>
               <p className="text-xs text-gray-500">
-                Creates a DRAFT native course and opens its canonical editor.
-              </p>
+                {t('course13_copy_105')}</p>
             </div>
             <button type="button" onClick={() => setShowCreate(false)}>
               <X className="h-5 w-5" />
             </button>
           </div>
-          <label className="mt-4 block text-sm font-semibold">سبب إنشاء الدورة
-            <input value={createReason} onChange={event=>setCreateReason(event.target.value)} maxLength={2000} required className="mt-2 w-full rounded-lg border p-2" />
+          <label className="mt-4 block text-sm font-semibold">{t('course13_copy_106')}<input value={createReason} onChange={event=>setCreateReason(event.target.value)} maxLength={2000} required className="mt-2 w-full rounded-lg border p-2" />
           </label>
           <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <input
@@ -499,13 +492,14 @@ export function CourseListPage() {
               minLength={2}
               value={createForm.titleAr}
               onChange={(e) => setCreateForm((v) => ({ ...v, titleAr: e.target.value }))}
-              placeholder="Arabic title *"
+              placeholder={t('course13_native_title')}
               className="rounded-xl border p-2"
             />
             <input
               value={createForm.titleEn}
-              onChange={(e) => setCreateForm((v) => ({ ...v, titleEn: e.target.value }))}
-              placeholder="English title"
+              readOnly
+              title={t('course13_translation_readonly')}
+              placeholder={t('course13_translation_readonly')}
               className="rounded-xl border p-2"
             />
             <select
@@ -513,10 +507,10 @@ export function CourseListPage() {
               onChange={(e) => setCreateForm((v) => ({ ...v, accessType: e.target.value }))}
               className="rounded-xl border p-2"
             >
-              <option value="FREE_STUDY">Free study</option>
-              <option value="FREE_CERTIFICATE">Free certificate</option>
-              <option value="FREE_STUDY_AND_CERTIFICATE">Free study + certificate</option>
-              <option value="PAID">Paid</option>
+              <option value="FREE_STUDY">{t('course13_copy_107')}</option>
+              <option value="FREE_CERTIFICATE">{t('course13_copy_108')}</option>
+              <option value="FREE_STUDY_AND_CERTIFICATE">{t('course13_copy_109')}</option>
+              <option value="PAID">{t('course13_copy_110')}</option>
             </select>
             <input
               value={createForm.learningLanguage}
@@ -561,7 +555,7 @@ export function CourseListPage() {
                   <th className="px-6 py-3 font-medium">{t('access')}</th>
                   <th className="px-6 py-3 font-medium">{t('status')}</th>
                   <th className="px-6 py-3 font-medium">{t('updated')}</th>
-                  <th className="px-6 py-3 font-medium text-right">{t('actions')}</th>
+                  <th className="px-6 py-3 font-medium text-start">{t('actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 text-sm">
@@ -596,7 +590,7 @@ export function CourseListPage() {
                       <td className="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">
                         {new Date(course.updatedAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-start">
                         <button
                           onClick={() => navigate(`/courses/${course.id}`)}
                           className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800"

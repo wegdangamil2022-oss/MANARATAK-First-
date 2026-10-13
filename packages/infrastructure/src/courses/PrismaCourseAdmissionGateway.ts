@@ -17,6 +17,6 @@ export class PrismaCourseAdmissionGateway implements CourseAdmissionGateway {
    if((course.accessType==='PAID'||course.originType==='PAID_COURSE'||policy?.requiresFinancialClearance)&&!await this.finance.hasCourseFinancialClearance(courseId,enrollment.studentReferenceId))throw new Error('COURSE_FINANCIAL_CLEARANCE_REQUIRED');
    if(policy?.isCapacityLimited){const occupied=await tx.courseEnrollment.count({where:{courseId,id:{not:enrollmentId},status:{in:['ACTIVE','PENDING']}}});if(policy.maximumSeats==null||occupied>=policy.maximumSeats)throw new Error('COURSE_ENROLLMENT_CAPACITY_FULL');}
   }
-  return tx.courseEnrollment.update({where:{id:enrollmentId},data:{status:input.decision==='APPROVE'?'ACTIVE':'CANCELLED',metadata:{...((enrollment.metadata??{}) as Prisma.InputJsonObject),admissionDecision:{decision:input.decision,actorId,reason:input.reason,decidedAt:new Date().toISOString()}}},select:{id:true,status:true,updatedAt:true}});
+  return tx.courseEnrollment.update({where:{id:enrollmentId},data:{status:input.decision==='APPROVE'?'ACTIVE':'CANCELLED',metadata:{...((enrollment.metadata??{}) as Prisma.InputJsonObject),admissionDecision:{decision:input.decision,actorId,reason:input.reason,decidedAt:new Date().toISOString()}}},select:{id:true,status:true,updatedAt:true,studentReferenceId:true}});
  }
 }

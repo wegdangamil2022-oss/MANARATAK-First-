@@ -3894,8 +3894,7 @@
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:courses:manage",
-        "admin:courses:review"
+        "admin:courses:manage"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
@@ -3959,8 +3958,7 @@
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:courses:manage",
-        "admin:courses:review"
+        "admin:courses:manage"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
@@ -4008,8 +4006,7 @@
       "owner": "CourseAdminRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
-        "admin:courses:manage",
-        "admin:courses:review"
+        "admin:courses:manage"
       ],
       "conditionalPermissionReview": false,
       "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
@@ -5143,6 +5140,22 @@
     {
       "method": "POST",
       "path": "/admin/imports/courses/providers/:id/files/preflight",
+      "owner": "CourseImportOperationsRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:imports:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseImportOperationsRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/imports/courses/providers/:id/link-health/dead-letter/:workId/retry",
       "owner": "CourseImportOperationsRouter",
       "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
@@ -8222,7 +8235,7 @@
     "date": "2026-10-12",
     "baseCommit": "01c505532272d3bb085966a35b630ab55da11393",
     "newHandlers": 14,
-    "scope": "Sections 01\u201303 source additions only; owner atomicity remains separately verified"
+    "scope": "Sections 01–03 source additions only; owner atomicity remains separately verified"
   },
   "sourceSettingsGovernanceReview": {
     "date": "2026-10-12",
@@ -8232,5 +8245,5 @@
     "ownerAtomicity": "New owner implementation reviewed; real database rollback is deferred"
   },
   "sourceReview": "Sections 12 and 13: StudyDestination atomic command boundary and LearningPath draft PATCH; runtime owner evidence remains required",
-  "sourceReconciliation": "Sections 12/13 independent source approval, admissions, destination history/review policy; source inventory only, not runtime audit proof"
+  "sourceReconciliation": "Section 13 source close: bounded provider backlog and authenticated dead-letter retry route; source extraction only, no runtime audit certification"
 }

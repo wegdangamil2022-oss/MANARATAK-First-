@@ -203,7 +203,7 @@ export class CourseProgressUseCases {
       action: policy?.requiresApproval?'COURSE_ENROLLMENT_REQUESTED':'COURSE_ENROLLED', context: context ?? { actorId: studentReferenceId, actorType: 'STUDENT', source: 'learner-api' },
       outbox: {
         id: `course-enrolled:${courseId}:${studentReferenceId}`,
-        eventType: policy?.requiresApproval?'COURSE_ENROLLMENT_REQUESTED':COURSE_ENROLLED_EVENT_TYPE,
+        eventType: policy?.requiresApproval?'CourseEnrollmentRequested':COURSE_ENROLLED_EVENT_TYPE,
         payload: enrollmentPayload,
         metadata: { eventVersion: '1.0.0', category: 'LearningPlatform' },
       },

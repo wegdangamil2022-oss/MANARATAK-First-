@@ -96,7 +96,6 @@ describe('NativeCourseUseCases', () => {
   it('creates a persisted DRAFT with forced Native identity and stable internal URL', async () => {
     const result = await useCases.create({
       titleAr: ' دورة الذكاء الاصطناعي ',
-      titleEn: 'AI Course',
     });
 
     expect(result.id).toBe('course-1');
@@ -104,7 +103,7 @@ describe('NativeCourseUseCases', () => {
       expect.objectContaining({
         originType: CourseOriginType.NATIVE_MANARATAK_COURSE,
         status: CourseStatus.DRAFT,
-        directCourseUrl: expect.stringMatching(/^\/courses\/ai-course-/),
+        directCourseUrl: expect.stringMatching(/^\/courses\/.+-[a-z0-9]+$/),
         publicId: expect.stringMatching(/^CRS-NAT-/),
       }),
     );

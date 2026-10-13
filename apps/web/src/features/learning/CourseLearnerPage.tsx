@@ -1,3 +1,4 @@
+import {useTranslation} from '../../i18n/I18nProvider';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Award, BookOpen, CheckCircle2, Loader2, LockKeyhole, PlayCircle } from 'lucide-react';
@@ -16,12 +17,14 @@ function currentProgress(workspace: CourseLearnerWorkspaceDto | null, lessonId: 
 }
 
 export function CourseLearnerPage() {
+ const {t,dir,language}=useTranslation();
   const { courseId = '', locale = 'ar' } = useParams<{ courseId: string; locale?: string }>();
   const location = useLocation();
   const [workspace, setWorkspace] = useState<CourseLearnerWorkspaceDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
+  const [admissionStatus,setAdmissionStatus]=useState('');
   const [error, setError] = useState<string | null>(null);
   const [activeAttempt, setActiveAttempt] = useState<StudentCourseQuizAttemptDto | null>(null);
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
@@ -53,13 +56,15 @@ export function CourseLearnerPage() {
     setError(null);
     try {
       setWorkspace(await ApiClient.getStudentCourseWorkspace(courseId));
-      setAuthRequired(false);
+      setAuthRequired(false);setAdmissionStatus('');
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'LEARNER_WORKSPACE_UNAVAILABLE';
       if (message.includes('STUDENT_AUTHENTICATION_REQUIRED')) {
         preservePostLoginReturn(returnPath);
         setAuthRequired(true);
-      } else if (message.includes('ENROLLMENT') || message.includes('NOT_ENROLLED')) {
+      } else if (/COURSE_ENROLLMENT_NOT_(?:ACCESSIBLE|ACTIVE):(PENDING|WAITLISTED)/.test(message)) {
+        setAdmissionStatus(message.includes('WAITLISTED')?'WAITLISTED':'PENDING');setWorkspace(null);
+      } else if (message.includes('COURSE_ENROLLMENT_REQUIRED') || message.includes('NOT_ENROLLED')) {
         setWorkspace(null);
       } else {
         setError(message);
@@ -86,8 +91,9 @@ export function CourseLearnerPage() {
     setBusy(true);
     setError(null);
     try {
-      await ApiClient.enrollStudentCourse(courseId);
-      await load();
+      const snapshot=await ApiClient.enrollStudentCourse(courseId);
+      const status=snapshot.enrollment?.status;
+      if(status==='PENDING'||status==='WAITLISTED'){setAdmissionStatus(status);setWorkspace(null);}else{setAdmissionStatus('');await load();}
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'COURSE_ENROLLMENT_FAILED';
       if (message.includes('STUDENT_AUTHENTICATION_REQUIRED')) {
@@ -155,13 +161,13 @@ export function CourseLearnerPage() {
         lessonId,
         assetReferenceId,
       );
-      if (!/^https?:\/\//i.test(grant.url)) throw new Error('رابط المحتوى غير صالح.');
-      if (Object.keys(grant.headers??{}).length || Date.parse(grant.expiresAt)<=Date.now()) throw new Error('يلزم رابط بث صالح لا يتطلب رؤوسًا خاصة.');
+      if (!/^https?:\/\//i.test(grant.url)) throw new Error(t('course13_copy_156'));
+      if (Object.keys(grant.headers??{}).length || Date.parse(grant.expiresAt)<=Date.now()) throw new Error(t('course13_copy_157'));
       if(request!==assetRequest.current)return;
       const type=grant.mimeType.startsWith('video/')?'video':grant.mimeType.startsWith('audio/')?'audio':grant.mimeType.startsWith('image/')?'image':'document';
       setMedia({url:grant.url,type,title});
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'تعذر فتح محتوى الدرس');
+      setError(error instanceof Error ? error.message : t('course13_copy_158'));
     } finally {
       setBusy(false);
     }
@@ -188,30 +194,29 @@ export function CourseLearnerPage() {
     );
   if (authRequired)
     return (
-      <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
+      <main dir={dir} className="mn-page-shell mx-auto max-w-xl py-16 text-center">
         <LockKeyhole className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
-        <h1 className="mt-4 text-xl font-bold">سجّل الدخول لمتابعة التعلم</h1>
+        <h1 className="mt-4 text-xl font-bold">{t('course13_copy_159')}</h1>
         <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
-          سيتم الاحتفاظ بمسار هذه الدورة والعودة إليه بعد تسجيل الدخول.
-        </p>
+          {t('course13_copy_160')}</p>
         <Link
           to={loginPath}
           onClick={() => preservePostLoginReturn(returnPath)}
           className="mt-6 inline-flex rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white"
         >
-          تسجيل الدخول
-        </Link>
+          {t('course13_copy_161')}</Link>
       </main>
     );
 
+  if(admissionStatus)return <main dir={dir} className="p-8"><p role="status">{t(admissionStatus==='PENDING'?'course13_admission_pending':'course13_admission_waitlisted')}</p><button disabled={busy} onClick={()=>{setAdmissionStatus('');void load();}}>{t('course13_admission_refresh')}</button></main>;
+
   if (!workspace)
     return (
-      <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
+      <main dir={dir} className="mn-page-shell mx-auto max-w-xl py-16 text-center">
         <BookOpen className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
-        <h1 className="mt-4 text-xl font-bold">ابدأ هذه الدورة على منارتك</h1>
+        <h1 className="mt-4 text-xl font-bold">{t('course13_copy_162')}</h1>
         <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
-          التسجيل والتقدم والاختبارات تُدار من نظام التعلم الداخلي.
-        </p>
+          {t('course13_copy_163')}</p>
         {error && (
           <p role="alert" className="mt-4 text-sm text-[var(--mn-danger-text)]">
             {error}
@@ -222,19 +227,20 @@ export function CourseLearnerPage() {
           onClick={() => void enroll()}
           className="mt-6 rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-60"
         >
-          {busy ? 'جارٍ التسجيل...' : 'التسجيل في الدورة'}
+          {busy ? t('course13_copy_164') : t('course13_copy_165')}
         </button>
       </main>
     );
 
   const progress = workspace.progress.enrollment.progressPercentage;
   return (
-    <main dir="rtl" className="mn-page-shell mx-auto max-w-4xl space-y-5 py-8">
+    <main dir={dir} className="mn-page-shell mx-auto max-w-4xl space-y-5 py-8">
+      <p role="note">{t('course13_source_content')}</p>
       <section className="mn-card rounded-3xl p-5 sm:p-7">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-[var(--mn-secondary)]">مساحة التعلم</p>
-            <h1 className="mt-1 text-2xl font-bold">دورة منارتك</h1>
+            <p className="text-xs font-semibold text-[var(--mn-secondary)]">{t('course13_copy_166')}</p>
+            <h1 className="mt-1 text-2xl font-bold">{t('course13_copy_167')}</h1>
           </div>
           <span className="rounded-full bg-[var(--mn-gold-surface)] px-3 py-1 text-sm font-bold">
             {progress}%
@@ -244,7 +250,7 @@ export function CourseLearnerPage() {
       </section>
 
       {[...workspace.curriculum.modules, ...(workspace.curriculum.quizzes.some(quiz => !quiz.moduleId) ?
-        [{id: '__course_assessments', title: 'تقييمات الدورة والواجبات', description: '', position: Number.MAX_SAFE_INTEGER}] : [])]
+        [{id: '__course_assessments', title: t('course13_copy_168'), description: '', position: Number.MAX_SAFE_INTEGER}] : [])]
         .sort((a, b) => a.position - b.position)
         .map((module) => {
           const lessons = workspace.curriculum.lessons
@@ -313,8 +319,7 @@ export function CourseLearnerPage() {
                           onClick={() => void completeLesson(lesson.id)}
                           className="mt-4 rounded-xl border border-[var(--mn-border)] px-4 py-2 text-sm font-bold disabled:opacity-60"
                         >
-                          تحديد الدرس كمكتمل
-                        </button>
+                          {t('course13_copy_169')}</button>
                       )}
                     </article>
                   );
@@ -333,8 +338,8 @@ export function CourseLearnerPage() {
                     </div>
                     {workspace?.progress.quizAttempts.filter(attempt => attempt.quizId === quiz.id).map(attempt => (
                       <p key={attempt.id} className="mt-2 text-sm" role="status">
-                        المحاولة {attempt.attemptNumber}: {attempt.status === 'SUBMITTED' ? 'بانتظار التصحيح اليدوي' : attempt.score != null ? `${attempt.score}% — ${attempt.passed ? 'ناجح' : 'لم يجتز'}` : 'قيد الحل'}
-                        {attempt.metadata?.assessmentGrade?.feedback && <span className="block">ملاحظات المصحّح: {attempt.metadata.assessmentGrade.feedback}</span>}
+                        {t('course13_copy_170')}{attempt.attemptNumber}: {attempt.status === 'SUBMITTED' ? t('course13_copy_171') : attempt.score != null ? `${attempt.score}% — ${attempt.passed ? t('course13_copy_172') : t('course13_copy_173')}` : t('course13_copy_174')}
+                        {attempt.metadata?.assessmentGrade?.feedback && <span className="block">{t('course13_copy_175')}{attempt.metadata.assessmentGrade.feedback}</span>}
                       </p>
                     ))}
                     {activeQuizId !== quiz.id ? (
@@ -343,7 +348,7 @@ export function CourseLearnerPage() {
                         onClick={() => void startQuiz(quiz.id)}
                         className="mt-4 rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
                       >
-                        {quiz.assessmentType === 'ASSIGNMENT' ? 'بدء الواجب' : 'بدء الاختبار'}
+                        {quiz.assessmentType === 'ASSIGNMENT' ? t('course13_copy_176') : t('course13_copy_177')}
                       </button>
                     ) : (
                       <form onSubmit={submitQuiz} className="mt-4 space-y-4">
@@ -377,8 +382,8 @@ export function CourseLearnerPage() {
                                           ? (choice as { label: unknown }).label
                                           : typeof choice === 'boolean'
                                             ? choice
-                                              ? 'صحيح'
-                                              : 'خطأ'
+                                              ? t('course13_copy_178')
+                                              : t('course13_copy_179')
                                             : choice,
                                       )}
                                     </span>
@@ -406,8 +411,7 @@ export function CourseLearnerPage() {
                           type="submit"
                           className="rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
                         >
-                          إرسال الإجابات
-                        </button>
+                          {t('course13_copy_180')}</button>
                       </form>
                     )}
                   </article>
@@ -421,13 +425,13 @@ export function CourseLearnerPage() {
         <section className="rounded-2xl border bg-[var(--mn-surface)] p-4">
           <div className="flex justify-between gap-3">
             <h2 className="font-bold">{media.title}</h2>
-            <button onClick={() => setMedia(null)}>إغلاق المحتوى</button>
+            <button onClick={() => setMedia(null)}>{t('course13_copy_181')}</button>
           </div>
           {media.type === 'video' ? (
             <video src={media.url} controls className="mt-3 w-full max-h-[70vh]" />
           ) : media.type === 'audio' ? (
             <audio src={media.url} controls className="mt-3 w-full" />
-          ) : media.type === 'document' ? <a href={media.url} target="_blank" rel="noopener noreferrer">فتح الملف برابط مؤقت / Open temporary document link</a> : (
+          ) : media.type === 'document' ? <a href={media.url} target="_blank" rel="noopener noreferrer">{t('course13_copy_182')}</a> : (
             <img src={media.url} alt={media.title} className="mt-3 max-h-[70vh] mx-auto" />
           )}
         </section>
@@ -442,18 +446,17 @@ export function CourseLearnerPage() {
       )}
       {workspace.progress.completion && (
         <section className="mn-card rounded-2xl p-5 text-center">
-          <h2 className="font-bold">اكتملت الدورة</h2>
+          <h2 className="font-bold">{t('course13_copy_183')}</h2>
           <p className="mt-2 text-sm">
             {workspace.progress.completion.eligibleForCertificate
-              ? 'تُجهز شهادة منارتك بعد التحقق من الاستحقاق. ستظهر في حسابك عند اكتمال الإصدار.'
-              : 'لم يسجل النظام استحقاق شهادة لهذه الدورة.'}
+              ? t('course13_copy_184')
+              : t('course13_copy_185')}
           </p>
           <Link
             to={`/${locale}/student?tab=LEARNING#certificates`}
             className="mt-3 inline-block text-[var(--mn-secondary)] underline"
           >
-            عرض شهاداتي في حساب الطالب
-          </Link>
+            {t('course13_copy_186')}</Link>
         </section>
       )}
       <section className="text-center">
@@ -462,8 +465,7 @@ export function CourseLearnerPage() {
           onClick={() => void completeCourse()}
           className="rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-50"
         >
-          إنهاء الدورة والتحقق من الاستحقاق
-        </button>
+          {t('course13_copy_187')}</button>
       </section>
     </main>
   );

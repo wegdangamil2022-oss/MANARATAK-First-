@@ -1,3 +1,4 @@
+import {CourseProviderBacklogUseCases} from './CourseProviderBacklogUseCases';
 import { createHash, randomUUID } from 'crypto';
 import {
   CourseImportChangeState,
@@ -123,9 +124,6 @@ const PROVIDER_FILE_PREFIX = 'COURSE_PROVIDER_FILE:';
 const PROVIDER_CONNECTOR_PREFIX = 'COURSE_PROVIDER_CONNECTOR:';
 const FULL_SNAPSHOT_LOW_YIELD_RATIO = 0.4;
 const MIN_LOW_YIELD_BASELINE = 10;
-const MAX_LINK_HEALTH_JOB_SIZE = 10;
-const MIN_LINK_HEALTH_DELAY_MS = 750;
-const MAX_LINK_HEALTH_DELAY_MS = 10_000;
 
 export class CourseProviderContinuationUseCases {
   public constructor(
@@ -150,6 +148,7 @@ export class CourseProviderContinuationUseCases {
       this.importedOperationsRepository.listProviderCourseBatches({ providerPublicId: provider.publicId, limit: 100 }),
     ]);
 
+    const backlog=this.importedOperationsRepository.providerBacklog?await Promise.all([this.importedOperationsRepository.providerBacklog.metrics(provider.id),this.importedOperationsRepository.providerBacklog.changedLinks(provider.id,undefined,1)]):null;
     const providerBatches = batches.data;
     const latestBatch = providerBatches[0] ?? null;
     const sourceHealth = provider.status !== ExternalCourseProviderStatus.APPROVED
@@ -171,7 +170,9 @@ export class CourseProviderContinuationUseCases {
         brokenLinkCount: broken.total,
         needsVerificationCount: needsReviewLinks.total + unknownLinks.total,
         reviewRequiredCount: reviewSummary.reviewRequiredCount,
-        changedLinkQueueCount: reviewSummary.changedLinkQueueCount,
+        changedLinkQueueCount: backlog?.[1].total ?? reviewSummary.changedLinkQueueCount,
+        changedLinkReviewRecordCount:reviewSummary.changedLinkQueueCount,
+        backlog:backlog?.[0]??{state:'NOT_CONFIGURED'},
         continuationBatchCount: batches.total,
         latestBatch,
         lastVerifiedAt: provider.lastVerifiedAt ?? null,
@@ -244,90 +245,15 @@ export class CourseProviderContinuationUseCases {
     };
   }
 
-  public async getChangedLinkQueue(providerRef: string, limit: number = 100) {
+  public async getChangedLinkQueue(providerRef: string, limit: number = 100, cursor?:string) {
     const provider = await this.requireProvider(providerRef);
-    const reviewRecords = await this.listProviderReviewRecords(provider.id, Math.min(500, Math.max(1, limit * 2)));
-    const importChanges = reviewRecords
-      .filter((item: any) =>
-        item.changeState === CourseImportChangeState.URL_CHANGED ||
-        item.changeState === CourseImportChangeState.URL_AND_METADATA_CHANGED,
-      )
-      .slice(0, limit);
-    const broken = await this.importedOperationsRepository.listImportedCourses({
-      providerId: provider.id,
-      linkHealth: 'BROKEN',
-      page: 1,
-      pageSize: Math.min(100, Math.max(1, limit)),
-    });
-
-    return {
-      providerId: provider.id,
-      providerPublicId: provider.publicId,
-      importChanges,
-      brokenCanonicalLinks: broken.data,
-      total: importChanges.length + broken.total,
-    };
+    return new CourseProviderBacklogUseCases(this.providerRepository,this.importedOperationsRepository,this.linkChecker).queue(provider,limit,cursor);
   }
 
-  public async runLinkHealthJob(
-    providerRef: string,
-    input: { page?: number; limit?: number; delayMs?: number } = {},
-  ) {
-    const provider = await this.requireApprovedProvider(providerRef);
-    if (provider.allowedDomains.length === 0) {
-      throw new Error('COURSE_PROVIDER_ALLOWED_DOMAINS_REQUIRED');
-    }
-    const page = Math.max(1, Math.floor(input.page ?? 1));
-    const limit = Math.min(MAX_LINK_HEALTH_JOB_SIZE, Math.max(1, Math.floor(input.limit ?? 10)));
-    const delayMs = Math.min(
-      MAX_LINK_HEALTH_DELAY_MS,
-      Math.max(MIN_LINK_HEALTH_DELAY_MS, Math.floor(input.delayMs ?? 1_000)),
-    );
-    const courses = await this.importedOperationsRepository.listImportedCourses({
-      providerId: provider.id,
-      page,
-      pageSize: limit,
-    });
-    const jobId = `course-link-health-${randomUUID()}`;
-    const results: Array<{ courseId: string; result: ImportedCourseLinkCheckResult }> = [];
-
-    for (let index = 0; index < courses.data.length; index += 1) {
-      const course = courses.data[index];
-      let result: ImportedCourseLinkCheckResult;
-      try {
-        result = await this.linkChecker.check({
-          url: course.directCourseUrl,
-          allowedDomains: provider.allowedDomains,
-        });
-      } catch (error) {
-        result = {
-          state: 'NEEDS_REVIEW',
-          checkedAt: new Date(),
-          detail: error instanceof Error ? error.message : 'COURSE_LINK_CHECK_FAILED',
-        };
-      }
-      await this.importedOperationsRepository.recordLinkCheck(course.id, result, course.directCourseUrl);
-      results.push({ courseId: course.id, result });
-      if (index < courses.data.length - 1) await this.sleep(delayMs);
-    }
-
-    const counts = results.reduce<Record<string, number>>((acc, item) => {
-      acc[item.result.state] = (acc[item.result.state] ?? 0) + 1;
-      return acc;
-    }, {});
-    return {
-      jobId,
-      providerId: provider.id,
-      page,
-      pageSize: limit,
-      delayMs,
-      attempted: results.length,
-      totalCanonicalCourses: courses.total,
-      hasMore: page * limit < courses.total,
-      nextPage: page * limit < courses.total ? page + 1 : null,
-      counts,
-      results,
-    };
+  public async runLinkHealthJob(providerRef:string,input:{page?:number;limit?:number;delayMs?:number;maxAttempts?:number}={}) {
+    if(input.page!=null&&input.page!==1)throw new Error('COURSE_PROVIDER_OFFSET_JOB_UNSUPPORTED');
+    const provider=await this.requireApprovedProvider(providerRef);
+    return new CourseProviderBacklogUseCases(this.providerRepository,this.importedOperationsRepository,this.linkChecker).run(provider,input);
   }
 
   public async replayProviderBatch(providerRef: string, batchId: string) {
@@ -732,18 +658,6 @@ export class CourseProviderContinuationUseCases {
       || sourceSystem.startsWith(`${PROVIDER_CONNECTOR_PREFIX}${provider.publicId}:`);
   }
 
-  private async listProviderReviewRecords(providerId: string, limit: number): Promise<any[]> {
-    const rows: any[] = [];
-    let page = 1;
-    while (rows.length < limit) {
-      const result = await this.importedOperationsRepository.listProviderReviewQueue(providerId, { page, pageSize: 100 });
-      rows.push(...result.data);
-      if (page * result.pageSize >= result.total) break;
-      page += 1;
-    }
-    return rows.slice(0, limit);
-  }
-
   private assertFileStrategy(provider: ExternalCourseProviderDto): void {
     if (provider.importStrategy !== 'FILE' && provider.importStrategy !== 'MIXED') {
       throw new Error(`COURSE_PROVIDER_FILE_STRATEGY_NOT_ENABLED:${provider.importStrategy}`);
@@ -864,9 +778,5 @@ export class CourseProviderContinuationUseCases {
 
   private sha256(value: string): string {
     return createHash('sha256').update(value).digest('hex');
-  }
-
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

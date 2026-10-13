@@ -285,6 +285,7 @@ export interface ImportedCourseEntityRef {
 }
 
 export interface ImportedCourse {
+  contentLanguage?:{requestedLocale:string;sourceLanguage:string|null;titleFallback:boolean};
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;

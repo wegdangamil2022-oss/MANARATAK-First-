@@ -182,7 +182,19 @@ export interface ImportedCourseLinkCheckResult {
   detail?: string | null;
 }
 
+export interface CourseProviderBacklogStore {
+  changedLinks(providerId:string,cursor:string|undefined,limit:number):Promise<{data:unknown[];total:number;nextCursor:string|null}>;
+  metrics(providerId:string):Promise<{checkpoint:unknown;retry:number;deadLetter:number;deadLetterItems?:unknown[]}>;
+  requeue(providerId:string,id:string,actorId:string,reason:string):Promise<void>;
+  claim(providerId:string):Promise<{token:string;cursor:string|null;cycle:number}>;
+  page(providerId:string,cursor:string|null,limit:number):Promise<Array<{id:string;directCourseUrl:string}>>;
+  retries(providerId:string,limit:number):Promise<Array<{id:string;courseId:string;url:string;attempts:number}>>;
+  checkpoint(providerId:string,token:string,cursor:string|null,done:boolean):Promise<void>;
+  recordFailure(providerId:string,courseId:string,url:string,failed:boolean,maxAttempts:number):Promise<void>;
+  release(providerId:string,token:string):Promise<void>;
+}
 export interface IImportedCourseOperationsRepository {
+  readonly providerBacklog?:CourseProviderBacklogStore;
   hasCurrentSourceApproval?(id:string):Promise<boolean>;
   listImportedCourses(filters: ImportedCourseAdminFilters): Promise<ImportedCoursePage>;
   getImportedCourseById(id: string): Promise<ImportedCourseAdminDetail | null>;

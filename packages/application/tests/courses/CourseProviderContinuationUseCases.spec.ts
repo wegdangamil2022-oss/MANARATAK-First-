@@ -90,6 +90,9 @@ function build(options: {
     listProviderCourseBatches: vi.fn(async () => ({ data: [], total: 0 })),
     recordLinkCheck: vi.fn(async () => undefined),
   } as any;
+  // Fixture aligned with the new durable owner port; this legacy suite was not rerun.
+  importedOperationsRepository.providerBacklog={claim:vi.fn(async()=>({token:'lease',cursor:null,cycle:0})),page:vi.fn(async(_id:string,cursor:string|null)=>cursor?[]:[{id:'course-1',directCourseUrl:'https://courses.example.org/course/1'}]),retries:vi.fn(async()=>[]),checkpoint:vi.fn(async()=>{}),recordFailure:vi.fn(async()=>{}),release:vi.fn(async()=>{}),metrics:vi.fn(async()=>({checkpoint:null,retry:0,deadLetter:0})),changedLinks:vi.fn(async()=>({data:[],total:0,nextCursor:null}))};
+  importedOperationsRepository.getVerificationContext=vi.fn(async()=>({providerId:provider.id,directCourseUrl:'https://courses.example.org/course/1'}));
   const linkChecker = {
     check: vi.fn(async () => ({ state: 'VERIFIED_DIRECT', checkedAt: new Date() })),
   } as any;

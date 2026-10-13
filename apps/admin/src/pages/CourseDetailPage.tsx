@@ -1,3 +1,5 @@
+import {useCourseNavigationGuard} from './useCourseNavigationGuard';
+import {rebaseCourseDraft,chooseCourseConflict,editableCourseFields,courseEditorPatchPayload,type CourseFieldConflict} from './courseEditorState';
 import {CourseAdmissionsPanel} from '../components/CourseAdmissionsPanel';
 import {CourseSourceApprovalPanel} from '../components/CourseSourceApprovalPanel';
 import { useEffect, useMemo, useState } from 'react';
@@ -21,6 +23,7 @@ import { canonicalPickerApi } from '../api/canonicalPickers';
 
 interface CourseDetail {
   version: number;
+  updatedAt?:string;
   id: string;
   displayName: string;
   status: string;
@@ -133,7 +136,8 @@ interface CurriculumSnapshot {
 }
 
 export function CourseDetailPage() {
-  const { t } = useTranslation();
+  const { t , dir} = useTranslation();
+ const levelLabel=(value:string)=>{const key=({'مبتدئ':'course13_level_beginner','متوسط':'course13_level_intermediate','متقدم':'course13_level_advanced','جميع المستويات':'course13_level_all','غير محدد رسميًا':'course13_level_unknown'} as const)[value as 'مبتدئ'];return key?t(key):value;};
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [reviewReason,setReviewReason]=useState('');
@@ -159,6 +163,9 @@ export function CourseDetailPage() {
   const [financialClearance, setFinancialClearance] = useState(false);
   const [policyData, setPolicyData] = useState<Record<string, unknown> | null>(null);
   const [savedForm, setSavedForm] = useState('');
+  const [draftVersion,setDraftVersion]=useState<number|null>(null);
+  const [conflict,setConflict]=useState<{latest:CourseDetail;draft:Record<string,unknown>;fields:CourseFieldConflict[];chosen:Record<string,boolean>}|null>(null);
+  const [editorOpen,setEditorOpen]=useState(false);
   const [editingLesson, setEditingLesson] = useState<CourseLesson | null>(null);
   const [moduleDraft, setModuleDraft] = useState({ title: '', description: '', position: 1 });
   const [lessonDraft, setLessonDraft] = useState({
@@ -204,8 +211,9 @@ export function CourseDetailPage() {
     points: 1,
   });
 
-  const hasUnsavedChanges = !!savedForm && (JSON.stringify(formData)!==savedForm || !!editingLesson || !!moduleDraft.title || !!lessonDraft.title || !!assetDraft.assetId || !!quizDraft.title || !!questionDraft.prompt || financialClearance!==(policyData?.requiresFinancialClearance===true));
-  useEffect(()=>{if(!hasUnsavedChanges)return;const unload=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};const navigateAway=(event:MouseEvent)=>{const anchor=(event.target as Element|null)?.closest?.('a[href]');if(anchor && !window.confirm('توجد تعديلات غير محفوظة. مغادرة الصفحة؟ / Discard unsaved changes?')){event.preventDefault();event.stopPropagation();}};window.addEventListener('beforeunload',unload);document.addEventListener('click',navigateAway,true);return()=>{window.removeEventListener('beforeunload',unload);document.removeEventListener('click',navigateAway,true);};},[hasUnsavedChanges]);
+  const hasUnsavedChanges = !!savedForm && (JSON.stringify(formData)!==savedForm || !!editingLesson || (!!moduleDraft.title||!!moduleDraft.description) || (!!lessonDraft.title||!!lessonDraft.summary||!!lessonDraft.contentText||!!lessonDraft.estimatedDurationMinutes) || !!assetDraft.assetId || !!quizDraft.title || !!questionDraft.prompt || financialClearance!==(policyData?.requiresFinancialClearance===true));
+  useCourseNavigationGuard(hasUnsavedChanges,()=>window.confirm(t('course13_copy_000')));
+  useEffect(()=>{if(!hasUnsavedChanges)return;const unload=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};const navigateAway=(event:MouseEvent)=>{const anchor=(event.target as Element|null)?.closest?.('a[href]');if(anchor && !window.confirm(t('course13_copy_000'))){event.preventDefault();event.stopPropagation();}};window.addEventListener('beforeunload',unload);document.addEventListener('click',navigateAway,true);return()=>{window.removeEventListener('beforeunload',unload);document.removeEventListener('click',navigateAway,true);};},[hasUnsavedChanges]);
 
   const isExternalLinkedCourse = course?.originType === 'EXTERNAL_LINKED_COURSE';
 
@@ -261,31 +269,11 @@ export function CourseDetailPage() {
         .request<CourseRelationshipReview>(`/admin/courses/${id}/relationships`)
         .then(setRelationships)
         .catch(() => setRelationships(null));
-      const editable = {
-        optionalFields: courseResponse.optionalFields ?? {},
-        displayName: courseResponse.displayName,
-        accessType: courseResponse.accessType,
-        thumbnailAssetId: courseResponse.thumbnailAssetId,
-        directCourseUrl: courseResponse.directCourseUrl,
-        platformName: courseResponse.platformName || '',
-        providerName: courseResponse.providerName || '',
-        learningLanguage: courseResponse.learningLanguage || '',
-        studyDuration: courseResponse.studyDuration || '',
-        category: courseResponse.category || '',
-        difficultyLevel: courseResponse.difficultyLevel || '',
-        certificateAvailable: courseResponse.certificateAvailable ?? false,
-        courseContent: courseResponse.courseContent ?? '',
-        description: courseResponse.description ?? '',
-        instructor: courseResponse.instructor ?? '',
-        learningOutcomes: courseResponse.learningOutcomes ?? [],
-        acquiredSkills: courseResponse.acquiredSkills ?? [],
-        prerequisites: courseResponse.prerequisites ?? [],
-        targetAudience: courseResponse.targetAudience ?? [],
-      };
+      const editable=editableCourseFields(courseResponse as unknown as Record<string,unknown>) as Partial<CourseDetail>;
       setFormData(editable);
-      setSavedForm(JSON.stringify(editable));
+      setSavedForm(JSON.stringify(editable));setDraftVersion(courseResponse.version);
 
-      if (courseResponse.originType !== 'EXTERNAL_LINKED_COURSE') {
+      if (courseResponse.originType !== 'EXTERNAL_LINKED_COURSE' && editorOpen) {
         const curriculumResponse = await adminApiClient.request<CurriculumSnapshot>(
           `/admin/courses/${id}/curriculum`,
         );
@@ -324,8 +312,18 @@ export function CourseDetailPage() {
       `/admin/courses/${id}/curriculum`,
     );
     setSnapshot(curriculumResponse);
+    const policy=await adminApiClient.request<Record<string,unknown>|null>(`/admin/courses/${id}/enrollment-policy`);
+    const pendingFinancial=financialClearance!==(policyData?.requiresFinancialClearance===true);
+    setPolicyData(policy);if(!pendingFinancial)setFinancialClearance(policy?.requiresFinancialClearance===true);
+    setModuleDraft(value=>({...value,position:curriculumResponse.modules.length+1}));
+    const latest=await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`);
+    setCourse(latest);
+    if(JSON.stringify(formData)===savedForm){const clean=editableCourseFields(latest as unknown as Record<string,unknown>) as Partial<CourseDetail>;setFormData(clean);setSavedForm(JSON.stringify(clean));setDraftVersion(latest.version);}
+    setReadiness(await adminApiClient.request<typeof readiness>(`/admin/courses/${id}/readiness`));
   };
 
+  const recoverConflict=async()=>{if(!id||saving)return;setSaving(true);try{const latest=await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`);const result=rebaseCourseDraft(JSON.parse(savedForm),formData as Record<string,unknown>,editableCourseFields(latest as unknown as Record<string,unknown>));setConflict({latest,draft:result.draft,fields:result.conflicts,chosen:{}});}catch(cause){setError(cause instanceof Error?cause.message:'COURSE_CONFLICT_RECOVERY_FAILED');}finally{setSaving(false);}};
+  useEffect(()=>{if(editorOpen&&course&&course.originType!=='EXTERNAL_LINKED_COURSE')void refreshCurriculum().catch(cause=>setError(String(cause)));},[editorOpen,course?.id]);
   const handleSaveCourse = async () => {
     if (!id) return;
     setSaving(true);
@@ -333,15 +331,16 @@ export function CourseDetailPage() {
     setSuccessMsg(null);
     try {
       const { directCourseUrl: _sourceOwnedUrl, ...editableFields } = formData;
-      await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`, {
+      const saved=await adminApiClient.request<CourseDetail&{_owner?:{version:number}}>(`/admin/courses/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify(isExternalLinkedCourse ? editableFields : formData),
+        headers:{'If-Match':`"${draftVersion??course?.version}"`},
+        body: JSON.stringify(courseEditorPatchPayload(formData as Record<string,unknown>,isExternalLinkedCourse,JSON.parse(savedForm))),
       });
       setCourse(await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`));
-      setSavedForm(JSON.stringify(formData));
+      setSavedForm(JSON.stringify(formData));setDraftVersion(saved._owner?.version??saved.version);
       setReadiness(null);
       if(!isExternalLinkedCourse) setReadiness(await adminApiClient.request<typeof readiness>(`/admin/courses/${id}/readiness`));
-      setSuccessMsg('Course metadata saved.');
+      setSuccessMsg(t('course13_copy_001'));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -361,7 +360,7 @@ export function CourseDetailPage() {
       questionDraft.prompt ||
       financialClearance !== (policyData?.requiresFinancialClearance === true)
     ) {
-      setError('احفظ تعديلات البيانات والمحتوى وسياسة التسجيل قبل تغيير حالة النشر.');
+      setError(t('course13_copy_002'));
       return;
     }
     setSaving(true);
@@ -369,7 +368,7 @@ export function CourseDetailPage() {
     setSuccessMsg(null);
     try {
       await adminApiClient.request(`/admin/courses/${id}/${endpoint}`, { method: 'POST' });
-      if(await fetchCourse()) setSuccessMsg(`Successfully executed: ${actionName}`);
+      if(await fetchCourse()) setSuccessMsg(t('course13_action_success')+': '+actionName);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -379,33 +378,34 @@ export function CourseDetailPage() {
 
   const mutateCurriculum = async (operation: () => Promise<void>) => {
     if (saving) return;
+    if(JSON.stringify(formData)!==savedForm){setError(t('course13_save_metadata_first'));return;}
     setSaving(true);
     setError(null);
     setSuccessMsg(null);
     try {
       await operation();
-      setSuccessMsg('تم الحفظ وإعادة تحميل المحتوى من الخادم.');
+      setSuccessMsg(t('course13_copy_003'));
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'تعذر حفظ المحتوى.');
+      setError(error instanceof Error ? error.message : t('course13_copy_004'));
     } finally {
       setSaving(false);
     }
   };
   const manageStructure = async (kind: 'modules'|'lessons', rowId: string, action: 'edit'|'delete'|'up'|'down', parentId?: string) => {
     if (!id || !snapshot || saving || course?.status === 'PUBLISHED' || course?.status === 'ARCHIVED') return;
-    if (JSON.stringify(formData) !== savedForm || editingLesson) {setError('احفظ أو أغلق التعديلات قبل تغيير ترتيب المنهج.'); return;}
+    if (JSON.stringify(formData) !== savedForm || editingLesson) {setError(t('course13_copy_005')); return;}
     const rows = kind === 'modules' ? snapshot.modules : (lessonsByModule[parentId ?? ''] ?? []);
     const ordered = [...rows].sort((a,b) => a.position-b.position || a.id.localeCompare(b.id));
     const index = ordered.findIndex(row => row.id === rowId);
     await mutateCurriculum(async () => {
       if (action === 'edit') {
-        const title = window.prompt('اسم الوحدة', ordered[index]?.title);
+        const title = window.prompt(t('course13_copy_006'), ordered[index]?.title);
         if (!title?.trim()) return;
-        const description = window.prompt('وصف الوحدة', (ordered[index] as CourseModule)?.description ?? '');
+        const description = window.prompt(t('course13_copy_007'), (ordered[index] as CourseModule)?.description ?? '');
         if (description === null) return;
         await adminApiClient.request(`/admin/courses/${id}/modules/${rowId}`, {method: 'PATCH', body: JSON.stringify({title: title.trim(), description})});
       } else if (action === 'delete') {
-        if (!window.confirm('أرشفة هذا العنصر؟ سيبقى معرّفه وسجل النسخ محفوظين.')) return;
+        if (!window.confirm(t('course13_copy_008'))) return;
         await adminApiClient.request(`/admin/courses/${id}/${kind}/${rowId}`, {method: 'DELETE'});
       } else {
         const target = index + (action === 'up' ? -1 : 1);
@@ -541,7 +541,7 @@ export function CourseDetailPage() {
         method: 'POST',
       });
       await refreshRelationships();
-      setSuccessMsg('Course relationship analysis completed; proposals are ready for review.');
+      setSuccessMsg(t('course13_copy_009'));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -606,17 +606,22 @@ export function CourseDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {hasUnsavedChanges && <p role="status">توجد تعديلات غير محفوظة / Unsaved changes</p>}
-      <div className="block text-sm font-semibold">سبب التعديل أو المراجعة
-        {course && course.originType!=='EXTERNAL_LINKED_COURSE' && id && <CourseAdmissionsPanel id={id} version={course.version}/>}
+      <p className="text-xs">{t('course13_copy_010')}{course.version} · {course.updatedAt??''}</p>
+      <p role="note">{t('course13_copy_011')}</p>
+      {typeof course.optionalFields?.titleEn==='string'&&<input readOnly dir="ltr" value={course.optionalFields.titleEn} aria-label={t('course13_translation_readonly')}/>}
+      {!!policyData?.eligibilityRules&&Object.keys(policyData.eligibilityRules as object).length>0&&<p role="alert">{t('course13_eligibility_disabled')}<button onClick={()=>setPolicyData({...policyData,eligibilityRules:null})}>{t('course13_eligibility_clear')}</button></p>}
+      {error?.includes('[409]')&&<button disabled={saving} onClick={()=>void recoverConflict()}>{t('course13_copy_012')}</button>}
+      {conflict&&<section className="rounded border p-4 space-y-2"><h2>{t('course13_copy_013')}</h2><p>{t('course13_copy_014')}{conflict.latest.version}</p>{conflict.fields.map(field=>{const key=field.path.join('.');return <div key={key}><strong>{key}</strong><pre className="whitespace-pre-wrap">{JSON.stringify({original:field.base,yourChange:field.local,serverChange:field.server},null,2)}</pre>{(['local','server'] as const).map(choice=><button key={choice} onClick={()=>setConflict({...conflict,draft:chooseCourseConflict(conflict.draft,field.path,choice==='local'?field.local:field.server),chosen:{...conflict.chosen,[key]:true}})}>{choice==='local'?t('course13_copy_015'):t('course13_copy_016')}</button>)}</div>;})}<button disabled={conflict.fields.some(field=>!conflict.chosen[field.path.join('.')])} onClick={()=>{setCourse(conflict.latest);setDraftVersion(conflict.latest.version);setFormData(conflict.draft as Partial<CourseDetail>);setSavedForm(JSON.stringify(editableCourseFields(conflict.latest as unknown as Record<string,unknown>)));setConflict(null);setReadiness(null);setError(null);}}>{t('course13_copy_017')}</button><button onClick={()=>setConflict(null)}>{t('course13_copy_018')}</button></section>}
+      {hasUnsavedChanges && <p role="status">{t('course13_copy_019')}</p>}
+      <div className="block text-sm font-semibold">{t('course13_copy_020')}{course && course.originType!=='EXTERNAL_LINKED_COURSE' && id && <CourseAdmissionsPanel id={id} version={course.version}/>}
         {course?.originType === 'EXTERNAL_LINKED_COURSE' && id && <CourseSourceApprovalPanel id={id} version={course.version}/> }
-        <label className="block text-xs">الوصول بعد سحب النشر / Withdrawal access<select value={String(formData.optionalFields?.withdrawalAccessPolicy ?? '')} onChange={event=>setFormData({...formData,optionalFields:{...formData.optionalFields,withdrawalAccessPolicy:event.target.value}})} disabled={course?.status==='PUBLISHED'}><option value="">غير محدد — يلزم قرار صريح</option><option value="REVOKE">إيقاف الوصول بعد سحب النشر</option><option value="HONOR_ENROLLED_VERSION">الحفاظ على نسخة الطلاب المسجلين</option></select></label>
+        <label className="block text-xs">{t('course13_copy_021')}<select value={String(formData.optionalFields?.withdrawalAccessPolicy ?? '')} onChange={event=>setFormData({...formData,optionalFields:{...formData.optionalFields,withdrawalAccessPolicy:event.target.value}})} disabled={course?.status==='PUBLISHED'}><option value="">{t('course13_copy_022')}</option><option value="REVOKE">{t('course13_copy_023')}</option><option value="HONOR_ENROLLED_VERSION">{t('course13_copy_024')}</option></select></label>
         <input value={reviewReason} onChange={event=>setReviewReason(event.target.value)} maxLength={2000}
-          placeholder="اكتب سببًا واضحًا قبل حفظ التعديلات" className="mt-2 w-full rounded-lg border p-3" />
+          placeholder={t('course13_copy_025')} className="mt-2 w-full rounded-lg border p-3" />
       </div>
       <div className="flex items-center justify-between gap-4">
         <button
-          onClick={() => {if(!hasUnsavedChanges || window.confirm('توجد تعديلات غير محفوظة. مغادرة الصفحة؟ / Discard unsaved changes?')) navigate('/courses');}}
+          onClick={() => {if(!hasUnsavedChanges || window.confirm(t('course13_copy_000'))) navigate('/courses');}}
           className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> {t('back_to_courses')}
@@ -662,14 +667,15 @@ export function CourseDetailPage() {
       </div>
 
       {course.status === 'PUBLISHED' && (
-        <p className="rounded-xl bg-amber-50 p-3 text-amber-900" dir="rtl">
-          لتحرير البيانات أو الدروس، ألغِ النشر أولاً ثم احفظ التعديلات وأعد النشر.
-        </p>
+        <p className="rounded-xl bg-amber-50 p-3 text-amber-900" dir={dir}>
+          {t('course13_copy_026')}</p>
       )}
-      {course.originType !== 'EXTERNAL_LINKED_COURSE' && <AssessmentReviewPanel courseId={course.id} />}
+      {course.originType !== 'EXTERNAL_LINKED_COURSE' && <details onToggle={event=>{if(event.currentTarget.open)setEditorOpen(true);}}><summary>{t('course13_copy_027')}</summary>{editorOpen&&<AssessmentReviewPanel courseId={course.id} />}</details>}
+      <details onToggle={event=>{if(event.currentTarget.open)setEditorOpen(true);}}><summary>{t('course13_copy_028')}</summary>
+      {editorOpen&&<>
       {editingLesson && (
-        <section className="rounded-2xl border bg-white p-5 space-y-3" dir="rtl">
-          <h3 className="font-black text-[#142B5F]">تعديل الدرس</h3>
+        <section className="rounded-2xl border bg-white p-5 space-y-3" dir={dir}>
+          <h3 className="font-black text-[#142B5F]">{t('course13_copy_029')}</h3>
           <input
             disabled={saving || course?.status === 'PUBLISHED'}
             value={editingLesson.title}
@@ -679,7 +685,7 @@ export function CourseDetailPage() {
           <textarea
             disabled={saving || course?.status === 'PUBLISHED'}
             rows={2}
-            placeholder="ملخص الدرس"
+            placeholder={t('course13_copy_030')}
             value={editingLesson.summary ?? ''}
             onChange={(e) => setEditingLesson({ ...editingLesson, summary: e.target.value })}
             className="w-full rounded border p-2"
@@ -687,7 +693,7 @@ export function CourseDetailPage() {
           <textarea
             disabled={saving || course?.status === 'PUBLISHED'}
             rows={10}
-            placeholder="المحتوى"
+            placeholder={t('course13_copy_031')}
             value={editingLesson.contentText ?? ''}
             onChange={(e) => setEditingLesson({ ...editingLesson, contentText: e.target.value })}
             className="w-full rounded border p-2"
@@ -697,11 +703,9 @@ export function CourseDetailPage() {
             onClick={() => void mutateCurriculum(saveLesson)}
             className="rounded bg-[#0E7C86] text-white px-4 py-2"
           >
-            حفظ الدرس
-          </button>
+            {t('course13_copy_032')}</button>
           <button disabled={saving} onClick={() => setEditingLesson(null)} className="mx-3">
-            إلغاء
-          </button>
+            {t('course13_copy_033')}</button>
         </section>
       )}
       {error && (
@@ -745,8 +749,7 @@ export function CourseDetailPage() {
             />
             {isExternalLinkedCourse && (
               <p className="text-xs text-gray-500">
-                Source-owned URL; update it through the controlled import workflow.
-              </p>
+                {t('course13_copy_034')}</p>
             )}
             <label className="block text-xs font-medium text-gray-700">
               {t('learning_language')}
@@ -774,42 +777,42 @@ export function CourseDetailPage() {
               className="w-full rounded border border-gray-300 px-3 py-1.5 text-sm"
             />
             {!isExternalLinkedCourse && (
-              <div className="space-y-3" dir="rtl">
-                <label className="block text-xs font-medium">المستوى</label>
+              <div className="space-y-3" dir={dir}>
+                <label className="block text-xs font-medium">{t('course13_copy_035')}</label>
                 <select
                   disabled={saving || course.status === 'PUBLISHED'}
                   value={formData.difficultyLevel ?? ''}
                   onChange={(e) => setFormData({ ...formData, difficultyLevel: e.target.value })}
                   className="w-full rounded border p-2"
                 >
-                  <option value="">اختر المستوى</option>
-                  <option value="BEGINNER">مبتدئ</option>
-                  <option value="INTERMEDIATE">متوسط</option>
-                  <option value="ADVANCED">متقدم</option>
-                  <option value="ALL_LEVELS">جميع المستويات</option>
+                  <option value="">{t('course13_copy_036')}</option>
+                  <option value="BEGINNER">{t('course13_copy_037')}</option>
+                  <option value="INTERMEDIATE">{t('course13_copy_038')}</option>
+                  <option value="ADVANCED">{t('course13_copy_039')}</option>
+                  <option value="ALL_LEVELS">{t('course13_copy_040')}</option>
                 </select>
-                <label className="block text-xs font-medium">إتاحة الدراسة والشهادة</label>
+                <label className="block text-xs font-medium">{t('course13_copy_041')}</label>
                 <select
                   disabled={saving || course.status === 'PUBLISHED'}
                   value={formData.accessType}
                   onChange={(e) => setFormData({ ...formData, accessType: e.target.value })}
                   className="w-full rounded border p-2"
                 >
-                  <option value="FREE_STUDY">دراسة مجانية</option>
-                  <option value="FREE_STUDY_AND_CERTIFICATE">دراسة وشهادة مجانيتان</option>
-                  <option value="FREE_CERTIFICATE">شهادة مجانية</option>
-                  <option value="PAID">دورة مدفوعة</option>
+                  <option value="FREE_STUDY">{t('course13_copy_042')}</option>
+                  <option value="FREE_STUDY_AND_CERTIFICATE">{t('course13_copy_043')}</option>
+                  <option value="FREE_CERTIFICATE">{t('course13_copy_044')}</option>
+                  <option value="PAID">{t('course13_copy_045')}</option>
                 </select>
                 <fieldset disabled={saving || course.status === 'PUBLISHED'}>
                   <AssetPicker
-                    label="صورة غلاف الدورة"
+                    label={t('course13_copy_046')}
                     purpose="COURSE_THUMBNAIL"
                     mimeTypePrefix="image/"
                     value={formData.thumbnailAssetId}
                     onChange={(assetId) => setFormData({ ...formData, thumbnailAssetId: assetId })}
                   />
                 </fieldset>
-                <label className="block text-xs font-medium">نبذة الدورة</label>
+                <label className="block text-xs font-medium">{t('course13_copy_047')}</label>
                 <textarea
                   disabled={saving || course?.status === 'PUBLISHED'}
                   rows={3}
@@ -817,7 +820,7 @@ export function CourseDetailPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full rounded border p-2"
                 />
-                <label className="block text-xs font-medium">تفاصيل المنهج المعروضة للطلاب</label>
+                <label className="block text-xs font-medium">{t('course13_copy_048')}</label>
                 <textarea
                   disabled={saving || course?.status === 'PUBLISHED'}
                   rows={6}
@@ -826,8 +829,8 @@ export function CourseDetailPage() {
                   className="w-full rounded border p-2"
                 />
                 {[
-                  { key: 'prerequisites' as const, label: 'متطلبات الالتحاق (كل عنصر في سطر)' },
-                  { key: 'targetAudience' as const, label: 'الفئات المستهدفة (كل عنصر في سطر)' },
+                  { key: 'prerequisites' as const, label: t('course13_copy_049') },
+                  { key: 'targetAudience' as const, label: t('course13_copy_050') },
                 ].map((field) => (
                   <label key={field.key} className="block text-xs font-medium">
                     {field.label}
@@ -841,14 +844,14 @@ export function CourseDetailPage() {
                     />
                   </label>
                 ))}
-                <label className="block text-xs font-medium">المدرب</label>
+                <label className="block text-xs font-medium">{t('course13_copy_051')}</label>
                 <input
                   disabled={saving || course?.status === 'PUBLISHED'}
                   value={formData.instructor ?? ''}
                   onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
                   className="w-full rounded border p-2"
                 />
-                <label className="block text-xs font-medium">مخرجات التعلم (كل عنصر في سطر)</label>
+                <label className="block text-xs font-medium">{t('course13_copy_052')}</label>
                 <textarea
                   disabled={saving || course?.status === 'PUBLISHED'}
                   value={(formData.learningOutcomes ?? []).join('\n')}
@@ -857,7 +860,7 @@ export function CourseDetailPage() {
                   }
                   className="w-full rounded border p-2"
                 />
-                <label className="block text-xs font-medium">المهارات (كل عنصر في سطر)</label>
+                <label className="block text-xs font-medium">{t('course13_copy_053')}</label>
                 <textarea
                   disabled={saving || course?.status === 'PUBLISHED'}
                   value={(formData.acquiredSkills ?? []).join('\n')}
@@ -875,8 +878,7 @@ export function CourseDetailPage() {
                       setFormData({ ...formData, certificateAvailable: e.target.checked })
                     }
                   />
-                  تتيح الدورة شهادة منارتك بعد استيفاء متطلبات الإتمام
-                </label>
+                  {t('course13_copy_054')}</label>
               </div>
             )}
             <button
@@ -892,8 +894,8 @@ export function CourseDetailPage() {
 
         <section className="lg:col-span-2 space-y-6">
           {!isExternalLinkedCourse && (
-            <section className="rounded-xl border bg-white p-5 space-y-3" dir="rtl">
-              <h3 className="font-bold text-[#142B5F]">جاهزية الدورة وسياسة التسجيل</h3>
+            <section className="rounded-xl border bg-white p-5 space-y-3" dir={dir}>
+              <h3 className="font-bold text-[#142B5F]">{t('course13_copy_055')}</h3>
               <button
                 disabled={saving}
                 className="text-[#0E7C86] font-bold"
@@ -903,11 +905,10 @@ export function CourseDetailPage() {
                   })
                 }
               >
-                تحديث فحص الجاهزية
-              </button>
+                {t('course13_copy_056')}</button>
               {readiness && (
                 <div>
-                  <p>{readiness.ready ? 'جاهزة للنشر' : `الاكتمال ${readiness.percentage}%`}</p>
+                  <p>{readiness.ready ? t('course13_copy_057') : `الاكتمال ${readiness.percentage}%`}</p>
                   <ul>
                     {readiness.checks
                       .filter((check) => check.state === 'INCOMPLETE')
@@ -926,8 +927,7 @@ export function CourseDetailPage() {
                   checked={financialClearance}
                   onChange={(e) => setFinancialClearance(e.target.checked)}
                 />
-                يتطلب التسجيل استيفاء الدفع في النظام المالي
-              </label>
+                {t('course13_copy_058')}</label>
               <button
                 disabled={saving}
                 className="rounded bg-[#0E7C86] text-white px-4 py-2"
@@ -948,8 +948,7 @@ export function CourseDetailPage() {
                   })
                 }
               >
-                حفظ سياسة التسجيل
-              </button>
+                {t('course13_copy_059')}</button>
             </section>
           )}
 
@@ -1006,7 +1005,7 @@ export function CourseDetailPage() {
                           <h4 className="font-medium">
                             {module.position}. {module.title}
                           </h4>
-                          <p className="text-xs text-gray-500">{module.status}</p><div className="flex gap-2">{(['edit','delete','up','down'] as const).map(action => <button key={action} type="button" aria-label={`${action}: ${module.title}`} disabled={saving || course?.status === 'PUBLISHED' || course?.status === 'ARCHIVED'} onClick={() => void manageStructure('modules', module.id, action)}>{({edit:'تعديل',delete:'أرشفة',up:'↑',down:'↓'})[action]}</button>)}</div>
+                          <p className="text-xs text-gray-500">{module.status}</p><div className="flex gap-2">{(['edit','delete','up','down'] as const).map(action => <button key={action} type="button" aria-label={`${action}: ${module.title}`} disabled={saving || course?.status === 'PUBLISHED' || course?.status === 'ARCHIVED'} onClick={() => void manageStructure('modules', module.id, action)}>{({edit:t('course13_copy_060'),delete:t('course13_copy_061'),up:'↑',down:'↓'})[action]}</button>)}</div>
                         </div>
                       </div>
                       <div className="mt-3 space-y-2">
@@ -1019,14 +1018,13 @@ export function CourseDetailPage() {
                               <span>
                                 {lesson.position}. {lesson.title}
                               </span>
-                              <span className="text-xs text-gray-500">{lesson.lessonType}</span>{(['delete','up','down'] as const).map(action => <button key={action} type="button" aria-label={`${action}: ${lesson.title}`} disabled={saving || course?.status === 'PUBLISHED' || course?.status === 'ARCHIVED'} onClick={() => void manageStructure('lessons',lesson.id,action,module.id)}>{({delete:'أرشفة',up:'↑',down:'↓'})[action]}</button>)}
+                              <span className="text-xs text-gray-500">{lesson.lessonType}</span>{(['delete','up','down'] as const).map(action => <button key={action} type="button" aria-label={`${action}: ${lesson.title}`} disabled={saving || course?.status === 'PUBLISHED' || course?.status === 'ARCHIVED'} onClick={() => void manageStructure('lessons',lesson.id,action,module.id)}>{({delete:t('course13_copy_061'),up:'↑',down:'↓'})[action]}</button>)}
                               <button
                                 disabled={saving}
                                 onClick={() => setEditingLesson({ ...lesson })}
                                 className="text-[#0E7C86] font-bold"
                               >
-                                تعديل المحتوى
-                              </button>
+                                {t('course13_copy_062')}</button>
                             </div>
                             {(assetsByLesson[lesson.id] || []).length > 0 && (
                               <div className="mt-2 text-xs text-gray-500">
@@ -1088,7 +1086,7 @@ export function CourseDetailPage() {
                   <textarea
                     disabled={saving || course?.status === 'PUBLISHED'}
                     rows={2}
-                    placeholder="ملخص الدرس"
+                    placeholder={t('course13_copy_030')}
                     value={lessonDraft.summary}
                     onChange={(event) =>
                       setLessonDraft({ ...lessonDraft, summary: event.target.value })
@@ -1098,7 +1096,7 @@ export function CourseDetailPage() {
                   <textarea
                     disabled={saving || course?.status === 'PUBLISHED'}
                     rows={8}
-                    placeholder="محتوى الدرس الذي يظهر للطلاب"
+                    placeholder={t('course13_copy_063')}
                     value={lessonDraft.contentText}
                     onChange={(event) =>
                       setLessonDraft({ ...lessonDraft, contentText: event.target.value })
@@ -1175,17 +1173,16 @@ export function CourseDetailPage() {
                   <FileQuestion className="h-5 w-5 text-gray-500" />
                   <h3 className="font-semibold">{t('assessments')}</h3>
                 </div>
-                <label className="block mb-3">نوع التقييم
-                  <select className="mx-2 rounded border p-2" disabled={saving || course.status === 'PUBLISHED'} value={quizDraft.assessmentType}
+                <label className="block mb-3">{t('course13_copy_064')}<select className="mx-2 rounded border p-2" disabled={saving || course.status === 'PUBLISHED'} value={quizDraft.assessmentType}
                     onChange={event => setQuizDraft({...quizDraft, assessmentType: event.target.value})}>
-                    <option value="QUIZ">اختبار</option><option value="ASSIGNMENT">واجب</option>
+                    <option value="QUIZ">{t('course13_copy_065')}</option><option value="ASSIGNMENT">{t('course13_copy_066')}</option>
                   </select>
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
                   <input
                     disabled={saving || course?.status === 'PUBLISHED'}
                     placeholder={t('quiz_title')}
-                    aria-label="عنوان التقييم"
+                    aria-label={t('course13_copy_067')}
                     value={quizDraft.title}
                     onChange={(event) => setQuizDraft({ ...quizDraft, title: event.target.value })}
                     className="md:col-span-2 rounded border border-gray-300 px-3 py-2 text-sm"
@@ -1296,11 +1293,9 @@ export function CourseDetailPage() {
       <section className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold">Canonical course relationships</h3>
+            <h3 className="font-semibold">{t('course13_copy_068')}</h3>
             <p className="text-xs text-gray-500">
-              P13 relationship owner API · analyze, review and publish canonical IDs without direct
-              DB writes.
-            </p>
+              {t('course13_copy_069')}</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -1308,8 +1303,7 @@ export function CourseDetailPage() {
               disabled={saving}
               className="rounded border px-3 py-2 text-xs font-semibold"
             >
-              Analyze source terms
-            </button>
+              {t('course13_copy_070')}</button>
             <button
               onClick={projectMajors}
               disabled={
@@ -1318,21 +1312,20 @@ export function CourseDetailPage() {
               }
               className="rounded border px-3 py-2 text-xs font-semibold disabled:opacity-50"
             >
-              Project majors
-            </button>
+              {t('course13_copy_071')}</button>
           </div>
         </div>
         {relationships ? (
           <>
             <div className="grid gap-3 md:grid-cols-4 text-xs">
               <div className="rounded bg-gray-50 p-3">
-                Language: <strong>{relationships.source.learningLanguageResolutionState}</strong>
+                {t('course13_copy_072')}<strong>{relationships.source.learningLanguageResolutionState}</strong>
               </div>
               <div className="rounded bg-gray-50 p-3">
-                Approved taxonomy: <strong>{relationships.closure.approvedTaxonomyLinks}</strong>
+                {t('course13_copy_073')}<strong>{relationships.closure.approvedTaxonomyLinks}</strong>
               </div>
               <div className="rounded bg-gray-50 p-3">
-                Approved majors: <strong>{relationships.closure.approvedMajorProjections}</strong>
+                {t('course13_copy_074')}<strong>{relationships.closure.approvedMajorProjections}</strong>
               </div>
               <div
                 className={`rounded p-3 ${relationships.closure.reviewRequired ? 'bg-amber-50 text-amber-800' : 'bg-green-50 text-green-800'}`}
@@ -1349,7 +1342,7 @@ export function CourseDetailPage() {
               optional
             />
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold">Taxonomy proposals</h4>
+              <h4 className="text-sm font-semibold">{t('course13_copy_075')}</h4>
               {relationships.taxonomyLinks.map((link) => (
                 <div
                   key={link.id}
@@ -1365,31 +1358,29 @@ export function CourseDetailPage() {
                       onClick={() => reviewTaxonomy(link.id, 'approve')}
                       className="text-green-700 disabled:opacity-40"
                     >
-                      Approve
-                    </button>
+                      {t('course13_copy_076')}</button>
                     <button
                       disabled={link.reviewState === 'REJECTED'}
                       onClick={() => reviewTaxonomy(link.id, 'reject')}
                       className="text-red-700 disabled:opacity-40"
                     >
-                      Reject
-                    </button>
+                      {t('course13_copy_077')}</button>
                   </div>
                 </div>
               ))}
               {relationships.taxonomyLinks.length === 0 ? (
-                <p className="text-xs text-gray-500">No taxonomy proposals. Run analysis first.</p>
+                <p className="text-xs text-gray-500">{t('course13_copy_078')}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold">Major projections</h4>
+              <h4 className="text-sm font-semibold">{t('course13_copy_079')}</h4>
               {relationships.majorProjections.map((projection) => (
                 <div
                   key={projection.id}
                   className="flex flex-wrap items-center justify-between gap-2 rounded border p-3 text-xs"
                 >
                   <span>
-                    Major {projection.majorId} · {projection.relationshipType} ·{' '}
+                    {t('course13_copy_080')}{projection.majorId} · {projection.relationshipType} ·{' '}
                     {projection.projectionState}
                   </span>
                   <div className="flex gap-2">
@@ -1398,27 +1389,27 @@ export function CourseDetailPage() {
                       onClick={() => reviewMajorProjection(projection.id, 'approve')}
                       className="text-green-700 disabled:opacity-40"
                     >
-                      Approve
-                    </button>
+                      {t('course13_copy_076')}</button>
                     <button
                       disabled={projection.projectionState === 'REJECTED'}
                       onClick={() => reviewMajorProjection(projection.id, 'reject')}
                       className="text-red-700 disabled:opacity-40"
                     >
-                      Reject
-                    </button>
+                      {t('course13_copy_077')}</button>
                   </div>
                 </div>
               ))}
               {relationships.majorProjections.length === 0 ? (
-                <p className="text-xs text-gray-500">No major projections yet.</p>
+                <p className="text-xs text-gray-500">{t('course13_copy_081')}</p>
               ) : null}
             </div>
           </>
         ) : (
-          <p className="text-xs text-gray-500">Relationship review model unavailable.</p>
+          <p className="text-xs text-gray-500">{t('course13_copy_082')}</p>
         )}
       </section>
+      </>}
+      </details>
     </div>
   );
 }

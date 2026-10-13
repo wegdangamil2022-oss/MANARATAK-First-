@@ -259,6 +259,7 @@ export function mapCourse(dto: PublicCourseDto): { course: Course; imported: Imp
     duration: dto.studyDuration ?? dto.studyDurationRaw ?? '',
     studyFree: dto.isStudyFree === true,
     freeCertificate: dto.isFreeCertificate === true,
+    contentLanguage:dto.contentLanguage,
     certificateType: dto.certificateType ?? (dto.isFreeCertificate === true ? 'نوع الشهادة غير محدد' : ''),
     topics: splitText(dto.shortCourseTopicsRaw ?? dto.courseContent),
     directCourseUrl: dto.directCourseUrl,

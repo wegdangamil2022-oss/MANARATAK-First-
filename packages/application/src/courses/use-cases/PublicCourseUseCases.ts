@@ -78,7 +78,10 @@ export class PublicCourseUseCases {
       ? course.optionalFields as Record<string, unknown>
       : {};
     const optionalPublic = this.pickOptionalPublicFields(optional);
+    const localized=optional.localizedNames&&typeof optional.localizedNames==='object'?optional.localizedNames as Record<string,unknown>:{};
+    const contentLanguage={requestedLocale:locale,sourceLanguage:course.learningLanguageRaw??course.learningLanguage??null,titleFallback:!(typeof localized[locale]==='string'&&String(localized[locale]).trim())};
     return {
+      contentLanguage,
       ownerId: course.id,
       publicId: course.publicId,
       slug: course.slug,

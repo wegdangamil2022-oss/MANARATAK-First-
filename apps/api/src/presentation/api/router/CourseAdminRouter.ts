@@ -1,3 +1,4 @@
+import {courseMetadataUpdateSchema} from './CourseMetadataUpdateContract';
 import {SecurityMiddlewareFactory} from '../../security/SecurityMiddlewareFactory';
 import { courseAdminErrorResponse } from './CourseAdminErrorPolicy';
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
@@ -47,7 +48,7 @@ export class CourseAdminRouter {
             await fn(req,buffered,cradle);
             const current=await cradle.adminCourseUseCases.getCourse(req.params.id);
             res.setHeader('X-Entity-Version',String(current.version));
-            res.json(body);
+            res.json(body&&typeof body==='object'?{...body,_owner:{version:current.version,status:current.status,updatedAt:current.updatedAt,readiness:current.originType==='NATIVE_MANARATAK_COURSE'?await cradle.nativeCourseUseCases.getReadiness(current.id):null}}:body);
             return;
           }
           const kind=req.route.path.startsWith('/learning-paths')?'LEARNING_PATH':'COURSE';
@@ -66,7 +67,7 @@ export class CourseAdminRouter {
           const result=await cradle.courseAdminCommandUseCases.execute(kind,id,commandName,context,
             async scope=>{await fn(req,buffered,scope);return responseBody;});
           if(result.version!==undefined) res.setHeader('X-Entity-Version',String(result.version));
-          if(responseState.kind==='send') res.send(responseBody);else res.json(responseBody);
+          if(responseState.kind==='send') res.send(responseBody);else res.json(responseBody && typeof responseBody==='object' && !Array.isArray(responseBody)?{...responseBody,_owner:result.ownerState}:responseBody);
         };
         run().catch(next);
       };
@@ -102,35 +103,7 @@ export class CourseAdminRouter {
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
     });
 
-    const updateBodySchema = z.object({
-      displayName: z.string().optional(),
-      accessType: z.nativeEnum(CourseAccessType).optional(),
-      originType: z.nativeEnum(CourseOriginType).optional(),
-      directCourseUrl: z.string().refine((value) => value.startsWith('/') || z.string().url().safeParse(value).success, 'Must be an internal path or absolute URL').optional(),
-      platformName: z.string().nullable().optional(),
-      providerName: z.string().nullable().optional(),
-      learningLanguage: z.string().nullable().optional(),
-      studyDuration: z.string().nullable().optional(),
-      certificateAvailable: z.boolean().nullable().optional(),
-      category: z.string().nullable().optional(),
-      difficultyLevel: z.string().nullable().optional(),
-      sourceUrl: z.union([z.string().url(), z.literal('')]).nullable().optional(),
-      officialSourceUrl: z.union([z.string().url(), z.literal('')]).nullable().optional(),
-      thumbnailAssetId: z.string().refine((value) => !/^https?:\/\//i.test(value), 'thumbnailAssetId must be an EAP handle').nullable().optional(),
-      courseContent: z.string().optional(),
-      description: z.string().optional(),
-      titleEn: z.string().optional(),
-      instructor: z.string().optional(),
-      prerequisites: z.array(z.string()).optional(),
-      targetAudience: z.array(z.string()).optional(),
-      learningOutcomes: z.array(z.string()).optional(),
-      promotionalVideoAssetId: z.string().refine((value) => !/^https?:\/\//i.test(value), 'promotionalVideoAssetId must be an EAP handle').optional(),
-      completionCriteria: z.record(z.string(), z.unknown()).optional(),
-      relatedMajorsOrFields: z.union([z.string(), z.array(z.string())]).optional(),
-      acquiredSkills: z.array(z.string()).optional(),
-      localizedNames: z.record(z.string(), z.string()).optional(),
-      metadata: z.record(z.string(), z.unknown()).optional(),
-    });
+    const updateBodySchema = courseMetadataUpdateSchema;
 
     const moduleBodySchema = z.object({
       title: z.string().min(1),
@@ -197,7 +170,7 @@ export class CourseAdminRouter {
     const nativeCreateBodySchema = z.object({
       titleAr: z.string().trim().min(2),
       accessType: z.nativeEnum(CourseAccessType).optional(),
-      titleEn: z.string().trim().optional(),
+      titleEn: z.never().optional(),
       learningLanguage: z.string().trim().optional(),
       category: z.string().trim().optional(),
       difficultyLevel: z.string().trim().optional(),
@@ -598,9 +571,9 @@ export class CourseAdminRouter {
       const updates = updateBodySchema.parse(req.body);
 
       const optionalFields: Record<string, unknown> = {};
+      if(updates.withdrawalAccessPolicy!==undefined)optionalFields.withdrawalAccessPolicy=updates.withdrawalAccessPolicy;
       if (updates.courseContent !== undefined) optionalFields.courseContent = updates.courseContent;
       if (updates.description !== undefined) optionalFields.description = updates.description;
-      if (updates.titleEn !== undefined) optionalFields.titleEn = updates.titleEn;
       if (updates.instructor !== undefined) optionalFields.instructor = updates.instructor;
       if (updates.prerequisites !== undefined) optionalFields.prerequisites = updates.prerequisites;
       if (updates.targetAudience !== undefined) optionalFields.targetAudience = updates.targetAudience;
@@ -609,7 +582,6 @@ export class CourseAdminRouter {
       if (updates.completionCriteria !== undefined) optionalFields.completionCriteria = updates.completionCriteria;
       if (updates.relatedMajorsOrFields !== undefined) optionalFields.relatedMajorsOrFields = updates.relatedMajorsOrFields;
       if (updates.acquiredSkills !== undefined) optionalFields.acquiredSkills = updates.acquiredSkills;
-      if (updates.localizedNames !== undefined) optionalFields.localizedNames = updates.localizedNames;
       if (updates.metadata !== undefined) optionalFields.metadata = updates.metadata;
 
       const dataToUpdate: UpdateCourseDto = {

@@ -1,3 +1,4 @@
+import {assertNoTranslationPayloadFields} from '@manaratak/shared';
 import { randomUUID } from 'node:crypto';
 import { AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CoursePublicationService } from '../services/CoursePublicationService';
@@ -35,6 +36,7 @@ export class NativeCourseUseCases {
   ) {}
 
   public async create(input: CreateNativeCourseDto): Promise<CourseDto> {
+    assertNoTranslationPayloadFields('COURSE',input as unknown as Record<string,unknown>,['titleEn']);
     const titleAr = CourseNamingService.normalize(input.titleAr);
     if (!titleAr) throw new Error('NATIVE_COURSE_TITLE_REQUIRED');
 
