@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 394,
-  "reachableCount": 394,
+  "registrationCount": 399,
+  "reachableCount": 399,
   "unreachable": [],
   "registrations": [
     {
@@ -682,6 +682,7 @@
         "importSourceControlUseCases",
         "internationalTestAdminUseCases",
         "learningPathUseCases",
+        "majorOwnerImportUseCases",
         "manageEmergencyAccessUseCase",
         "managePoliciesUseCase",
         "manageRolesUseCase",
@@ -1048,7 +1049,8 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
-        "adminMajorUseCases"
+        "adminMajorUseCases",
+        "majorImportReviewGateway"
       ],
       "dependencies": [
         "academicTaxonomyRepository",
@@ -2432,6 +2434,7 @@
         "academicTaxonomyScreeningConsumer",
         "importScreeningReceiptStore",
         "internationalTestImportHandoffConsumer",
+        "majorImportScreeningConsumer",
         "referenceDataScreeningHandoffConsumer",
         "scholarshipImportHandoffConsumer",
         "universityImportHandoffConsumer"
@@ -2798,6 +2801,27 @@
       "dependencies": []
     },
     {
+      "name": "majorImportReviewGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "majorOwnerImportUseCases"
+      ],
+      "dependencies": [
+        "canonicalMajorReferenceService",
+        "prisma"
+      ]
+    },
+    {
+      "name": "majorImportScreeningConsumer",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "importHandoffDispatcher"
+      ],
+      "dependencies": []
+    },
+    {
       "name": "majorImportStagingUseCase",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
@@ -2806,6 +2830,29 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "importAdminUseCases"
+      ]
+    },
+    {
+      "name": "majorOwnerImportUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "atomicDomainMutationCoordinator",
+        "majorImportReviewGateway"
+      ]
+    },
+    {
+      "name": "majorProgramUsageGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "prisma"
       ]
     },
     {
@@ -2828,6 +2875,17 @@
         "crossDomainGraphReadService",
         "majorStudentSavedItemHydrationGateway"
       ],
+      "dependencies": [
+        "prisma"
+      ]
+    },
+    {
+      "name": "majorScholarshipUsageGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
       "dependencies": [
         "prisma"
       ]
@@ -3438,7 +3496,10 @@
         "internationalTestConsumerReadGateway",
         "internationalTestRepository",
         "learningPathRepository",
+        "majorImportReviewGateway",
+        "majorProgramUsageGateway",
         "majorRepository",
+        "majorScholarshipUsageGateway",
         "mfaGateway",
         "newMajorCandidateRepository",
         "notificationIntentRepo",

@@ -20,7 +20,7 @@ import {
   StudentPrivateResultProtector,
 } from '@manaratak/infrastructure';
 import { EapCertificateVisualAssetResolver } from '@manaratak/infrastructure';
-import { PrismaInternationalTestConsumerReadGateway } from '@manaratak/infrastructure';
+import { PrismaInternationalTestConsumerReadGateway, PrismaMajorProgramUsageGateway, PrismaMajorScholarshipUsageGateway } from '@manaratak/infrastructure';
 import { ImportGovernanceUseCases } from '@manaratak/application';
 import {
   sweepOrphanImportSpools,
@@ -179,6 +179,7 @@ import {
   PrismaAtomicPersistenceUnitOfWork,
   PrismaAcademicTaxonomyRepository,
   PrismaAcademicTaxonomyImportGateway,
+  PrismaMajorImportReviewGateway,
   PrismaCanonicalAcademicUsageGateway,
   DegreeLevelRepository,
   PrismaScholarshipCanonicalLookupGateway,
@@ -330,6 +331,7 @@ import {
   AdminAcademicTaxonomyUseCases,
   AcademicTaxonomyOwnerImportUseCases,
   AcademicTaxonomyScreeningConsumer,
+  MajorImportScreeningConsumer, MajorOwnerImportUseCases,
   RetentionSweepUseCase,
   RetentionBackgroundJobHandler,
   RecoverAssetActivationsUseCase,
@@ -667,7 +669,9 @@ export function registerDependencies(
     academicTaxonomyScreeningConsumer: asClass(AcademicTaxonomyScreeningConsumer).singleton(),
     academicTaxonomyImportGateway: asFunction(({ prisma }) => new PrismaAcademicTaxonomyImportGateway(prisma)).singleton(),
     academicTaxonomyOwnerImportUseCases: asFunction(({ academicTaxonomyRepository, academicTaxonomyImportGateway, atomicDomainMutationCoordinator }) => new AcademicTaxonomyOwnerImportUseCases(academicTaxonomyRepository, academicTaxonomyImportGateway, atomicDomainMutationCoordinator)).scoped(),
-    importHandoffDispatcher: asFunction(({ academicTaxonomyScreeningConsumer, scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, referenceDataScreeningHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
+    importHandoffDispatcher: asFunction(({ majorImportScreeningConsumer, academicTaxonomyScreeningConsumer, scholarshipImportHandoffConsumer, universityImportHandoffConsumer, internationalTestImportHandoffConsumer, referenceDataScreeningHandoffConsumer, importScreeningReceiptStore }) => new ImportHandoffDispatcher({
+      MAJORS: majorImportScreeningConsumer,
+      MAJOR: majorImportScreeningConsumer,
       ACADEMIC_TAXONOMY: academicTaxonomyScreeningConsumer,
       TAXONOMY: academicTaxonomyScreeningConsumer,
       SCHOLARSHIPS: scholarshipImportHandoffConsumer,
@@ -886,6 +890,11 @@ export function registerDependencies(
     internationalTestImportHandoffConsumer: asFunction(({ internationalTestRepository }) =>
       new InternationalTestImportHandoffService(internationalTestRepository)).scoped(),
     referenceDataScreeningHandoffConsumer: asFunction(() => new ReferenceDataScreeningHandoffConsumer()).scoped(),
+    majorImportScreeningConsumer: asClass(MajorImportScreeningConsumer).singleton(),
+    majorImportReviewGateway: asFunction(({prisma,canonicalMajorReferenceService})=>new PrismaMajorImportReviewGateway(prisma,canonicalMajorReferenceService)).singleton(),
+    majorOwnerImportUseCases: asFunction(({majorImportReviewGateway,atomicDomainMutationCoordinator})=>new MajorOwnerImportUseCases(majorImportReviewGateway,atomicDomainMutationCoordinator)).scoped(),
+    majorProgramUsageGateway: asFunction(({ prisma }) => new PrismaMajorProgramUsageGateway(prisma)).singleton(),
+    majorScholarshipUsageGateway: asFunction(({ prisma }) => new PrismaMajorScholarshipUsageGateway(prisma)).singleton(),
     adminMajorUseCases: asFunction(({ majorRepository, phase10CatalogRepository, atomicDomainMutationCoordinator, canonicalMajorReferenceService, newMajorCandidateRepository }) =>
       new AdminMajorUseCases(majorRepository, phase10CatalogRepository, undefined, undefined, atomicDomainMutationCoordinator, canonicalMajorReferenceService, newMajorCandidateRepository)).scoped(),
     coursePublicationService: asFunction(({ courseRepository, importedCourseOperationsRepository, atomicDomainMutationCoordinator, courseRelationshipRepository }) =>

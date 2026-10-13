@@ -1,3 +1,4 @@
+import type { NewMajorCandidateComparison } from '@manaratak/domain';
 import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -73,6 +74,15 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
   const [success, setSuccess] = useState<string | null>(null);
   const [resolvedMajorId, setResolvedMajorId] = useState<string | null>(null);
 
+  const [comparison,setComparison]=useState<NewMajorCandidateComparison|null>(null);
+  const [comparisonError,setComparisonError]=useState('');
+  useEffect(()=>{
+    const abort=new AbortController();setComparison(null);setComparisonError('');
+    if(!selected||!form.existingMajorId)return ()=>abort.abort();
+    adminApiClient.request<NewMajorCandidateComparison>(`/admin/majors/new-candidates/${encodeURIComponent(selected.candidateKey)}/comparison?majorId=${encodeURIComponent(form.existingMajorId)}`,{signal:abort.signal,cache:'no-store'})
+      .then(result=>{if(!abort.signal.aborted)setComparison(result);}).catch(error=>{if(!abort.signal.aborted)setComparisonError(error instanceof Error?error.message:'تعذر تحميل المقارنة');});
+    return ()=>abort.abort();
+  },[selected?.candidateKey,selected?.sourceDigest,form.existingMajorId]);
   const generation=useRef(0);
   const load = async (signal?:AbortSignal) => {
     const current=++generation.current;
@@ -161,7 +171,7 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
   };
 
   const linkExisting = async () => {
-    if (!selected || !form.existingMajorId || saving) return;
+    if (!selected || !comparison?.canLink || comparison.target.id!==form.existingMajorId || comparison.candidate.sourceDigest!==selected.sourceDigest || saving) return;
     if(!form.reason.trim()) {setError('سبب الربط مطلوب.');return;}
     setSaving(true);
     setError(null);
@@ -169,7 +179,7 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
     try {
       await adminApiClient.request(`/admin/majors/new-candidates/${encodeURIComponent(selected.candidateKey)}/link`, {
         method: 'POST',
-        body: JSON.stringify({ majorId: form.existingMajorId,reason:form.reason.trim(),sourceDigest:selected.sourceDigest }),
+        body: JSON.stringify({ majorId: form.existingMajorId,expectedTargetRevision:comparison.target.revision,reason:form.reason.trim(),sourceDigest:selected.sourceDigest }),
       });
       setSuccess('تم ربط المراجع غير المحسومة بالتخصص الموجود دون إنشاء نسخة مكررة.');
       setResolvedMajorId(form.existingMajorId);
@@ -239,6 +249,11 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
             <div><p className="text-xs font-bold text-[#0E7C86]">المصدر الخام</p><h2 className="mt-1 text-xl font-black text-[#142B5F]">{selected.displayLabel}</h2>{selected.facultyOrUnitNames.length > 0 && <p className="mt-2 text-xs text-[#203442]">سياق الكلية في المصدر: {selected.facultyOrUnitNames.join('، ')}</p>}</div>
             <Input label="الاسم Canonical المعتمد" value={form.canonicalMajorName} onChange={(value) => setForm({ ...form, canonicalMajorName: value })} />
             <Input label="سبب القرار" value={form.reason} onChange={value=>setForm({...form,reason:value})}/>
+            {form.existingMajorId && <section aria-label="مقارنة المرشح بالأصل الموجود" className="rounded border p-3 space-y-2">
+              {comparisonError && <p role="alert">{comparisonError}</p>}
+              {!comparison&&!comparisonError&&<p role="status">جارٍ تحميل المقارنة…</p>}
+              {comparison&&<><div className="grid gap-3 sm:grid-cols-2"><div><h3>المصدر الوارد</h3><p>{comparison.candidate.displayLabel}</p><p>الدرجات: {comparison.candidate.degreeLevelIds.join('، ')||'غير مثبتة'}</p><p>{comparison.candidate.facultyOrUnitNames.join('، ')}</p><p>المراجع: {comparison.candidate.sourceCount}</p></div><div><h3>التخصص الموجود</h3><p>{comparison.target.displayName} · {comparison.target.canonicalName}</p><p>{comparison.target.status} · v{comparison.target.revision}</p><p>الدرجات: {comparison.target.degreeLevelIds.join('، ')}</p><p>المجال: {comparison.target.academicFieldOrDiscipline||comparison.target.academicFieldId||comparison.target.disciplineId||'غير محدد'}</p><p>الأسماء البديلة: {comparison.target.aliases.join('، ')||'لا توجد'}</p></div></div><p>{comparison.nameSignal==='EXACT_NORMALIZED'?'تطابق اسم مطبّع؛ قرار الربط يبقى بشريًا.':'الاسمان مختلفان؛ راجع الهوية والمصدر قبل الربط.'}</p>{comparison.blockers.length>0&&<p role="alert">الربط غير متاح: {comparison.blockers.join('، ')}</p>}<ul>{[...comparison.candidate.officialSourceUrls,...comparison.target.sourceUrls].filter(url=>{try{const parsed=new URL(url);return parsed.protocol==='https:'&&!parsed.username&&!parsed.password;}catch{return false;}}).map((url,index)=><li key={`${url}-${index}`}><a href={url} target="_blank" rel="noopener noreferrer" className="underline">{url}</a></li>)}</ul></>}
+            </section>}
             {selected.sourcesTruncated && <p role="alert">هذه المجموعة كبيرة؛ يجب تقسيم مراجعة مراجعها قبل الاعتماد.</p>}
 
             <label className="block text-xs font-bold text-[#203442]">نوع الدرجة<select value={form.degreeLevel} onChange={(event) => setForm({ ...form, degreeLevel: event.target.value })} className="mt-1 min-h-10 w-full rounded-lg border border-[#DDEFF2] px-3 text-sm"><option value="">اختر</option><option value="BACHELOR">بكالوريوس — MJR</option><option value="MASTER">ماجستير — MAS</option><option value="DOCTORATE">دكتوراه — DOC</option></select></label>
@@ -249,7 +264,7 @@ export function NewMajorCandidatesPanel({ onTotalChange }: { onTotalChange?: (to
             {/^https:\/\//i.test(form.officialSourceUrl) && <a href={form.officialSourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-[#0E7C86]"><ExternalLink className="h-3.5 w-3.5" />فتح المصدر</a>}
             <button disabled={saving || !canResolve || selected.sourcesTruncated} onClick={() => void approve()} className="min-h-11 w-full rounded-xl bg-[#0E7C86] px-4 text-sm font-black text-white disabled:opacity-50">{saving ? 'جاري الاعتماد...' : 'اعتماد وربط المصادر'}</button>
             <button type="button" disabled={saving || !canReview} onClick={()=>void reject()} className="min-h-10 w-full rounded-xl border border-red-300 text-red-700">رفض المرجع مع حفظ السبب</button>
-            <div className="border-t border-[#DDEFF2] pt-4"><p className="mb-2 text-xs font-black text-[#142B5F]">إذا كان التخصص موجودًا بالفعل</p><CanonicalPicker label="ربط بتخصص Canonical موجود" value={form.existingMajorId} onChange={(id) => setForm({ ...form, existingMajorId: id ?? '' })} load={() => canonicalPickerApi.majors(selected.displayLabel)} reloadKey={`existing-major:${selected.candidateKey}`} optional /><button disabled={saving || !canResolve || selected.sourcesTruncated || !form.existingMajorId} onClick={() => void linkExisting()} className="mt-3 min-h-10 w-full rounded-xl border border-[#0E7C86] px-4 text-xs font-black text-[#0E7C86] disabled:opacity-40"><Link2 className="ml-1 inline h-4 w-4" />ربط الموجود بدون إنشاء نسخة</button></div>
+            <div className="border-t border-[#DDEFF2] pt-4"><p className="mb-2 text-xs font-black text-[#142B5F]">إذا كان التخصص موجودًا بالفعل</p><CanonicalPicker label="ربط بتخصص Canonical موجود" value={form.existingMajorId} onChange={(id) => setForm({ ...form, existingMajorId: id ?? '' })} paged load={(query,page) => canonicalPickerApi.majors(query,page)} reloadKey={`existing-major:${selected.candidateKey}`} optional /><button disabled={saving || !canResolve || selected.sourcesTruncated || !comparison?.canLink || comparison.target.id!==form.existingMajorId} onClick={() => void linkExisting()} className="mt-3 min-h-10 w-full rounded-xl border border-[#0E7C86] px-4 text-xs font-black text-[#0E7C86] disabled:opacity-40"><Link2 className="ml-1 inline h-4 w-4" />ربط الموجود بدون إنشاء نسخة</button></div>
           </div>}
       </aside>
     </div>

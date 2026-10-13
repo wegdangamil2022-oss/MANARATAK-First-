@@ -6448,6 +6448,74 @@
       "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
     },
     {
+      "method": "POST",
+      "path": "/admin/majors/owner-imports/:reviewId/apply",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/owner-imports/:reviewId/refresh",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/owner-imports/:reviewId/review",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/majors/owner-imports/preview",
+      "owner": "MajorAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:majors:manage",
+        "admin:majors:review"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/MajorAdminRouter.ts"
+    },
+    {
       "method": "PUT",
       "path": "/admin/reference-data/cities",
       "owner": "ReferenceDataAdminRouter",

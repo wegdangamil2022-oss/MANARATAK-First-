@@ -241,3 +241,8 @@ export * from './asset-platform/PrismaAssetGovernanceGateway';
 export * from './asset-platform/PrismaAssetLifecycleRecoveryGateway';
 export * from './authorization/PrismaGovernanceApprovalGateway';
 export * from './settings/PrismaSettingsGovernanceGateway';
+
+export { PrismaMajorProgramUsageGateway } from './universities/PrismaMajorProgramUsageGateway';
+export { PrismaMajorScholarshipUsageGateway } from './scholarships/PrismaMajorScholarshipUsageGateway';
+
+export { PrismaMajorImportReviewGateway } from './majors/PrismaMajorImportReviewGateway';

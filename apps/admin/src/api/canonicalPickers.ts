@@ -90,9 +90,9 @@ export const canonicalPickerApi = {
     const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/academic-taxonomy/nodes?${params}`);
     return response.data.map((item) => option({ ...item, id: item.nodeId ?? item.id }));
   },
-  async majors(query = ''): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ page: '1', pageSize: '100' });
-    if (query.trim()) params.set('search', query.trim());
+  async majors(query = '', page = 1): Promise<CanonicalPickerOption[]> {
+    const params = new URLSearchParams({ page: String(page), pageSize: '50', catalog: 'false' });
+    if (query.trim()) params.set('search', query.trim().slice(0,200));
     const response = await adminApiClient.request<PageEnvelope<Record<string, unknown>>>(`/admin/majors?${params}`);
     return response.data.map((item) => option(item));
   },

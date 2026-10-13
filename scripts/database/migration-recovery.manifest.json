@@ -482,6 +482,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source only, unapplied. Preserve immutable Settings history, dependency policy and approval evidence; drain writers. Use a reviewed compatible backup/forward fix. No destructive down SQL is authorized."
+    },
+    "20261013010000_major_import_owner_review": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source only, unapplied. Preserve P10 review and receipt/publication evidence; drain writers and use a reviewed compatible backup or forward fix. No destructive down SQL."
     }
   }
 }

@@ -1,5 +1,7 @@
 # Section 08 — International Tests / P9
 
+> تحديث 13 أكتوبر 2026: راجع [إعادة المراجعة واستكمال المصدر والأدلة الحالية](../reviews/SECTIONS_08_09_SOURCE_COMPLETION_2026-10-13.md). حالات NOT_MERGED/فشل فحوص أكتوبر 10 أدناه تاريخية ولا تصف تلقائيًا المصدر الحالي.
+
 **CODE_CLOSED — RUNTIME_DEFERRED, 2026-10-10.**
 
 Baseline: `5dad0918c9b06418c6af9f92278edd114213c1b8` (main, Sections 01–07 integrated). Source closure branch: `codex/section-08-international-tests`; closure commit is the commit containing this register. The approved 9 October source-closure policy applies: runtime, database and provider acceptance remain Post-28, rather than being claimed as passed.

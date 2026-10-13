@@ -1,3 +1,4 @@
+import {MajorConsumerUsagePanel} from '../components/MajorConsumerUsagePanel';
 import {MajorGovernanceWorkspace} from '../components/MajorGovernanceWorkspace';
 /// <reference types="vite/client" />
 import {
@@ -25,7 +26,7 @@ ShieldCheck,
 Sparkles,
 X
 } from 'lucide-react';
-import React,{ useEffect,useMemo,useState } from 'react';
+import React,{ useEffect,useMemo,useState,useRef } from 'react';
 import { Link,useParams,useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { ReviewedGraphEditor } from '../components/ReviewedGraphEditor';
@@ -74,7 +75,10 @@ interface MajorProfile {
   updatedAt?: string;
 }
 
+const sectionEditKey=(section:{id?:string;sectionKey:string;locale?:string})=>section.id??JSON.stringify([section.locale??'ar',section.sectionKey]);
+
 interface MajorContentSection {
+  locale?: string;
   id?: string;
   profileId?: string;
   versionId?: string;
@@ -266,6 +270,7 @@ function groupSectionsByCanonicalDefinitions(
   rawSections: MajorContentSection[]
 ): { groups: MainSectionGroup[]; unassigned: MajorContentSection[] } {
   const normLevel = (level || '').toUpperCase();
+  if(!['BACHELOR','BACHELORS','MASTER','MASTERS','DOCTORATE','PHD'].includes(normLevel))return {groups:[],unassigned:rawSections};
   let defs = BACHELOR_MAIN_SECTIONS;
   if (normLevel === 'MASTER' || normLevel === 'MASTERS') {
     defs = MASTER_MAIN_SECTIONS;
@@ -437,6 +442,7 @@ export function MajorDetailPage() {
   });
 
   // Confirmation Dialog State
+  useEffect(()=>{const warn=(event:BeforeUnloadEvent)=>{if(dirtyBlockKeys.size){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',warn);return ()=>window.removeEventListener('beforeunload',warn);},[dirtyBlockKeys.size]);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     type: 'publish' | 'unpublish' | 'archive' | 'mark-publishable' | 'mark-ready' | null;
@@ -453,26 +459,35 @@ export function MajorDetailPage() {
     confirmVariant: 'emerald',
   });
 
+  const rootReads=useRef(0),profileReads=useRef(0),loadedProfile=useRef('');
   // 1. Initial Load of Major and Profiles
   const loadMajorAndProfiles = async () => {
     if (!id) return;
+    const generation=++rootReads.current;++profileReads.current;
     setLoading(true);
     setError(null);
     try {
-      const [majorResult, profileResult, aliasResult, relationshipResult, mappingResult] = await Promise.all([
+      const results = await Promise.allSettled([
         adminApiClient.request<MajorDetail>(`/admin/majors/${id}`),
-        adminApiClient.request<{ data: MajorProfile[] }>(`/admin/majors/${id}/profiles`).catch(() => ({ data: [] })),
-        adminApiClient.request<{ data: MajorAlias[] }>(`/admin/majors/${id}/aliases`).catch(() => ({ data: [] })),
-        adminApiClient.request<{ data: MajorRelationship[] }>(`/admin/majors/${id}/relationships`).catch(() => ({ data: [] })),
-        adminApiClient.request<{ data: MajorClassificationMapping[] }>(`/admin/majors/${id}/classification-mappings`).catch(() => ({ data: [] })),
+        adminApiClient.request<{ data: MajorProfile[] }>(`/admin/majors/${id}/profiles`),
+        adminApiClient.request<{ data: MajorAlias[] }>(`/admin/majors/${id}/aliases`),
+        adminApiClient.request<{ data: MajorRelationship[] }>(`/admin/majors/${id}/relationships`),
+        adminApiClient.request<{ data: MajorClassificationMapping[] }>(`/admin/majors/${id}/classification-mappings`),
       ]);
 
+      if(generation!==rootReads.current)return;
+      const [rootResult,...related]=results;
+      if(rootResult.status==='rejected')throw rootResult.reason;
+      const majorResult=rootResult.value as MajorDetail;
+      const [profileResult,aliasResult,relationshipResult,mappingResult]=related.map(result=>result.status==='fulfilled'?result.value:undefined) as Array<{data:unknown[]}|undefined>;
+      const failures=related.flatMap((result,index)=>result.status==='rejected'?[['ملفات المستويات','الأسماء البديلة','العلاقات','التصنيف'][index]]:[]);
+      if(failures.length)setError(`تعذر تحميل ${failures.join('، ')}؛ هذه البيانات غير معروفة. استخدم إعادة تحميل التفاصيل للمحاولة مجددًا.`);
       setMajor(majorResult);
-      const profList = profileResult.data ?? [];
+      const profList = (profileResult?.data ?? []) as MajorProfile[];
       setProfiles(profList);
-      setAliases(aliasResult.data ?? []);
-      setRelationships(relationshipResult.data ?? []);
-      setMappings(mappingResult.data ?? []);
+      if(aliasResult)setAliases(aliasResult.data as MajorAlias[]);
+      if(relationshipResult)setRelationships(relationshipResult.data as MajorRelationship[]);
+      if(mappingResult)setMappings(mappingResult.data as MajorClassificationMapping[]);
 
       // Determine initial active profile
       const queryProf = searchParams.get('profileId');
@@ -508,20 +523,25 @@ export function MajorDetailPage() {
         await loadProfileData(majorResult.id, activeProfId);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'تعذر تحميل تفاصيل التخصص الأكاديمي.');
+      if(generation===rootReads.current)setError(err instanceof Error ? err.message : 'تعذر تحميل تفاصيل التخصص الأكاديمي.');
     } finally {
-      setLoading(false);
+      if(generation===rootReads.current)setLoading(false);
     }
   };
 
   // 2. Load Profile Data specifically for activeProfile
   const loadProfileData = async (majorId: string, profileId: string) => {
+    const generation=++profileReads.current;
+    const sameScope=loadedProfile.current===`${majorId}:${profileId}`;
     setLoadingSections(true);
     try {
       const [sectionResult, versionResult] = await Promise.all([
-        adminApiClient.request<{ data: MajorContentSection[] }>(`/admin/majors/${majorId}/content-sections?profileId=${profileId}`).catch(() => ({ data: [] })),
-        adminApiClient.request<{ data: MajorVersion[] }>(`/admin/majors/${majorId}/versions?profileId=${profileId}`).catch(() => ({ data: [] })),
+        adminApiClient.request<{ data: MajorContentSection[] }>(`/admin/majors/${majorId}/content-sections?profileId=${profileId}`),
+        adminApiClient.request<{ data: MajorVersion[] }>(`/admin/majors/${majorId}/versions?profileId=${profileId}`),
       ]);
+      if(generation!==profileReads.current)return;
+      if(sameScope&&dirtyBlockKeys.size&&versions[0]?.id!==versionResult.data[0]?.id){setError('تغيرت نسخة العمل؛ بقيت تعديلاتك محفوظة محليًا. راجع المصدر الجديد قبل الحفظ.');return;}
+      loadedProfile.current=`${majorId}:${profileId}`;
       const secData = sectionResult.data ?? [];
       setSections(secData);
       setVersions(versionResult.data ?? []);
@@ -529,23 +549,24 @@ export function MajorDetailPage() {
       // Initialize editedBlocks map
       const initialEdits: Record<string, { title: string; content: string; reviewStatus: string }> = {};
       secData.forEach(s => {
-        initialEdits[s.sectionKey] = {
+        initialEdits[sectionEditKey(s)] = {
           title: s.title || '',
           content: s.content || '',
           reviewStatus: s.reviewStatus || 'NEEDS_REVIEW',
         };
       });
-      setEditedBlocks(initialEdits);
-      setDirtyBlockKeys(new Set());
-      setEditingBlockKey(null);
+      if(sameScope&&dirtyBlockKeys.size){setEditedBlocks(previous=>({...initialEdits,...Object.fromEntries([...dirtyBlockKeys].map(key=>[key,previous[key]]))}));}
+      else {setEditedBlocks(initialEdits);setDirtyBlockKeys(new Set());setEditingBlockKey(null);}
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'تعذر تحميل أقسام المحتوى لهذا المستوى.');
+      if(generation===profileReads.current)setError(err instanceof Error ? err.message : 'تعذر تحميل أقسام المحتوى لهذا المستوى.');
     } finally {
-      setLoadingSections(false);
+      if(generation===profileReads.current)setLoadingSections(false);
     }
   };
 
   useEffect(() => {
+    setMajor(null);loadedProfile.current='';setDirtyBlockKeys(new Set());setEditedBlocks({});
+    setAliases([]);setRelationships([]);setMappings([]);setProfiles([]);setSections([]);setVersions([]);
     void loadMajorAndProfiles();
   }, [id]);
 
@@ -593,7 +614,7 @@ export function MajorDetailPage() {
   };
 
   const handleCancelEditBlock = (blockKey: string) => {
-    const original = sections.find(s => s.sectionKey === blockKey);
+    const original = sections.find(s => sectionEditKey(s) === blockKey);
     if (original) {
       setEditedBlocks(prev => ({
         ...prev,
@@ -617,7 +638,8 @@ export function MajorDetailPage() {
     const blockData = editedBlocks[blockKey];
     if (!blockData) return;
 
-    const original = sections.find(s => s.sectionKey === blockKey);
+    const original = sections.find(s => sectionEditKey(s) === blockKey);
+    if(!original){setError('المحتوى المحدد غير موجود؛ حدّث الصفحة.');return;}
     const targetVersionId = versions[0]?.id;
 
     setSavingBlockKey(blockKey);
@@ -640,7 +662,8 @@ export function MajorDetailPage() {
           sections: [
             {
               id: original?.id,
-              sectionKey: blockKey,
+              sectionKey: original!.sectionKey,
+              locale: original!.locale??'ar',
               title: blockData.title,
               content: blockData.content,
               reviewStatus: blockData.reviewStatus,
@@ -657,8 +680,8 @@ export function MajorDetailPage() {
           return next;
         });
         setEditingBlockKey(null);
-        // Reload fresh data from server to verify exact persistence
-        await loadProfileData(major.id, activeProfile.id);
+        setSections(previous=>previous.map(section=>sectionEditKey(section)===blockKey?(response.data.find(row=>sectionEditKey(row)===blockKey)??section):section));
+        if(dirtyBlockKeys.size<=1)await loadProfileData(major.id, activeProfile.id);
       } else {
         throw new Error('لم تنجح عملية الحفظ في الخادم.');
       }
@@ -671,17 +694,20 @@ export function MajorDetailPage() {
 
   const handleSaveAllDirtyBlocks = async () => {
     if (!major || !activeProfile || dirtyBlockKeys.size === 0) return;
+    if([...dirtyBlockKeys].some(key=>!sections.some(section=>sectionEditKey(section)===key))){setError('بعض الأقسام تغيرت؛ احتفظ بتعديلاتك وأعد تحميل المصدر قبل الحفظ.');return;}
     setSaving(true);
     setError(null);
     setSuccess(null);
 
     const targetVersionId = versions[0]?.id;
     const dirtySectionsPayload = Array.from(dirtyBlockKeys).map(key => {
-      const original = sections.find(s => s.sectionKey === key);
+      const original = sections.find(s => sectionEditKey(s) === key);
+      if(!original)throw new Error('MAJOR_CONTENT_SECTION_NOT_FOUND');
       const data = editedBlocks[key];
       return {
         id: original?.id,
-        sectionKey: key,
+        sectionKey: original!.sectionKey,
+        locale: original!.locale??'ar',
         title: data?.title ?? original?.title,
         content: data?.content ?? original?.content ?? '',
         reviewStatus: data?.reviewStatus || original?.reviewStatus || 'NEEDS_REVIEW',
@@ -759,7 +785,7 @@ export function MajorDetailPage() {
         <AlertCircle className="h-10 w-10 text-red-600 mx-auto" />
         <h2 className="text-base font-black text-red-900">لم يتم العثور على التخصص المطلوب</h2>
         <p className="text-xs text-red-700">{error || 'قد يكون المعرف غير صحيح أو تم نقله.'}</p>
-        <Link to="/majors" className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-4 py-2 text-xs font-bold text-white">
+        <Link onClick={event=>{if(dirtyBlockKeys.size&&!window.confirm('لديك تعديلات غير محفوظة. هل تريد المغادرة؟'))event.preventDefault();}} to="/majors" className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-4 py-2 text-xs font-bold text-white">
           <ArrowLeft className="h-4 w-4" />
           <span>العودة لقائمة التخصصات</span>
         </Link>
@@ -772,6 +798,7 @@ export function MajorDetailPage() {
       {/* Back Button & Top Navigation */}
       <div className="flex items-center justify-between">
         <Link
+          onClick={event=>{if(dirtyBlockKeys.size&&!window.confirm('لديك تعديلات غير محفوظة. هل تريد المغادرة؟'))event.preventDefault();}}
           to="/majors"
           className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-[#0E7C86]"
         >
@@ -955,7 +982,7 @@ export function MajorDetailPage() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {if(dirtyBlockKeys.size&&tab.id!=='content'&&!window.confirm('لديك تعديلات غير محفوظة. هل تريد مغادرة محرر المحتوى؟'))return;setActiveTab(tab.id);}}
               className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-xs sm:text-sm font-bold transition cursor-pointer ${
                 isActive
                   ? 'bg-[#142B5F] text-white shadow-xs'
@@ -973,6 +1000,7 @@ export function MajorDetailPage() {
       </nav>
 
       {/* Tab 1: Basic Identity Data */}
+      <MajorConsumerUsagePanel key={major.id} majorId={major.id}/>
       {activeTab === 'basic' && (
         <section className="grid gap-6 lg:grid-cols-[1fr_300px]">
           <div className="space-y-6">
@@ -1210,10 +1238,10 @@ export function MajorDetailPage() {
                         <p className="text-xs text-slate-400 italic">لا توجد كتل محتوى لهذا القسم</p>
                       ) : (
                         group.blocks.map((block) => {
-                          const isEditing = editingBlockKey === block.sectionKey;
-                          const isDirty = dirtyBlockKeys.has(block.sectionKey);
-                          const isSavingThis = savingBlockKey === block.sectionKey;
-                          const currentDraft = editedBlocks[block.sectionKey] || {
+                          const isEditing = editingBlockKey === sectionEditKey(block);
+                          const isDirty = dirtyBlockKeys.has(sectionEditKey(block));
+                          const isSavingThis = savingBlockKey === sectionEditKey(block);
+                          const currentDraft = editedBlocks[sectionEditKey(block)] || {
                             title: block.title || '',
                             content: block.content || '',
                             reviewStatus: block.reviewStatus || 'NEEDS_REVIEW',
@@ -1249,7 +1277,7 @@ export function MajorDetailPage() {
                                   {!isEditing ? (
                                     <button
                                       type="button"
-                                      onClick={() => handleStartEditBlock(block.sectionKey)}
+                                      onClick={() => handleStartEditBlock(sectionEditKey(block))}
                                       className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-700 transition cursor-pointer"
                                     >
                                       <Edit3 className="h-3 w-3 text-[#0E7C86]" />
@@ -1259,7 +1287,7 @@ export function MajorDetailPage() {
                                     <div className="flex items-center gap-1.5">
                                       <button
                                         type="button"
-                                        onClick={() => handleSaveBlock(block.sectionKey)}
+                                        onClick={() => handleSaveBlock(sectionEditKey(block))}
                                         disabled={isSavingThis}
                                         className="inline-flex items-center gap-1 rounded-lg bg-[#0E7C86] hover:bg-[#142B5F] px-2.5 py-1 text-xs font-bold text-white shadow-xs cursor-pointer"
                                       >
@@ -1268,7 +1296,7 @@ export function MajorDetailPage() {
                                       </button>
                                       <button
                                         type="button"
-                                        onClick={() => handleCancelEditBlock(block.sectionKey)}
+                                        onClick={() => handleCancelEditBlock(sectionEditKey(block))}
                                         disabled={isSavingThis}
                                         className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-2 py-1 text-xs font-bold text-slate-600 cursor-pointer"
                                       >
@@ -1294,7 +1322,7 @@ export function MajorDetailPage() {
                                     <input
                                       type="text"
                                       value={currentDraft.title}
-                                      onChange={(e) => handleBlockChange(block.sectionKey, 'title', e.target.value)}
+                                      onChange={(e) => handleBlockChange(sectionEditKey(block), 'title', e.target.value)}
                                       className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#0E7C86] focus:ring-1 focus:ring-[#0E7C86]"
                                     />
                                   </div>
@@ -1305,7 +1333,7 @@ export function MajorDetailPage() {
                                     </label>
                                     <select
                                       value={currentDraft.reviewStatus}
-                                      onChange={(e) => handleBlockChange(block.sectionKey, 'reviewStatus', e.target.value)}
+                                      onChange={(e) => handleBlockChange(sectionEditKey(block), 'reviewStatus', e.target.value)}
                                       className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-[#0E7C86]"
                                     >
                                       <option value="NEEDS_REVIEW">بحاجة لمراجعة (NEEDS_REVIEW)</option>
@@ -1326,7 +1354,7 @@ export function MajorDetailPage() {
                                     <textarea
                                       rows={8}
                                       value={currentDraft.content}
-                                      onChange={(e) => handleBlockChange(block.sectionKey, 'content', e.target.value)}
+                                      onChange={(e) => handleBlockChange(sectionEditKey(block), 'content', e.target.value)}
                                       className="w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-xs leading-relaxed text-slate-800 outline-none focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/20"
                                     />
                                   </div>
@@ -1334,14 +1362,14 @@ export function MajorDetailPage() {
                                   <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
                                     <button
                                       type="button"
-                                      onClick={() => handleCancelEditBlock(block.sectionKey)}
+                                      onClick={() => handleCancelEditBlock(sectionEditKey(block))}
                                       className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                                     >
                                       إلغاء التعديل
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => handleSaveBlock(block.sectionKey)}
+                                      onClick={() => handleSaveBlock(sectionEditKey(block))}
                                       disabled={isSavingThis}
                                       className="inline-flex items-center gap-1.5 rounded-xl bg-[#0E7C86] hover:bg-[#142B5F] px-4 py-1.5 text-xs font-bold text-white shadow-xs"
                                     >

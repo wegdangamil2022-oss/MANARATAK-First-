@@ -486,7 +486,7 @@ export interface IMajorRepository {
   listLevelProfiles?(majorId: string): Promise<MajorLevelProfileDto[]>;
   createContentSections?(data: Array<Omit<MajorContentSectionDto, 'id'>>): Promise<{ count: number }>;
   listContentSections?(majorId: string, options?: { profileId?: string; versionId?: string; publishedOnly?: boolean }): Promise<MajorContentSectionDto[]>;
-  updateContentSections?(profileId: string, versionId: string, sections: Array<{ id?: string; sectionKey: string; title?: string; content: string; reviewStatus?: string }>): Promise<{ count: number; sections: MajorContentSectionDto[] }>;
+  updateContentSections?(profileId: string, versionId: string, sections: Array<{ id?: string; sectionKey: string; locale?: string; title?: string; content: string; reviewStatus?: string }>): Promise<{ count: number; sections: MajorContentSectionDto[] }>;
   createAliases?(data: Array<Omit<MajorAliasDto, 'id'>>): Promise<{ count: number }>;
   listAliases?(majorId: string): Promise<MajorAliasDto[]>;
   createRelationships?(data: Array<Omit<MajorRelationshipDto, 'id'>>): Promise<{ count: number }>;

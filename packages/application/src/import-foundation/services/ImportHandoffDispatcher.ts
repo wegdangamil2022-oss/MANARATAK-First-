@@ -46,8 +46,8 @@ export class ImportHandoffDispatcher {
     // P7 is never allowed a volatile review screening decision. A disconnected
     // receipt store must fail closed rather than silently silently bypassing
     // the durable identity/content-hash idempotency guarantee.
-    if (owner === 'REFERENCE_DATA' && !this.receipts) {
-      throw new Error('P7_DURABLE_SCREENING_RECEIPT_REQUIRED');
+    if (['REFERENCE_DATA','MAJOR','MAJORS'].includes(owner) && !this.receipts) {
+      throw new Error(owner==='REFERENCE_DATA'?'P7_DURABLE_SCREENING_RECEIPT_REQUIRED':'MAJOR_DURABLE_SCREENING_RECEIPT_REQUIRED');
     }
     return this.receipts ? this.receipts.accept(handoff, () => consumer.accept(handoff)) : consumer.accept(handoff);
   }

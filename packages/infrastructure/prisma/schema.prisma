@@ -5917,3 +5917,21 @@ model SettingsGovernanceRecord {
   updatedAt DateTime @updatedAt
   @@index([kind, createdAt, id])
 }
+
+/// P10-owned immutable source identity and versioned semantic approval; no P6 canonical promotion.
+model MajorImportOwnerReview {
+ id String @id
+ receiptId String @unique
+ requestHash String
+ payload Json
+ preview Json
+ previewHash String
+ version Int @default(1)
+ status String
+ reviewer String?
+ reason String?
+ result Json?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@index([status, updatedAt])
+}

@@ -1,3 +1,4 @@
+import {MajorOwnerImportWorkspace} from '../components/MajorOwnerImportWorkspace';
 import {
 AlertCircle,
 BookOpen,
@@ -278,7 +279,7 @@ export function MajorAdminPage() {
       </section>
 
       {view === 'new' ? (
-        <NewMajorCandidatesPanel onTotalChange={setNewCandidatesTotal} />
+        <><MajorOwnerImportWorkspace/><NewMajorCandidatesPanel onTotalChange={setNewCandidatesTotal} /></>
       ) : (
         <>
           {/* Metrics Overview */}

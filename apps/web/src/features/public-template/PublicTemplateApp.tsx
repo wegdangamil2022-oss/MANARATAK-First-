@@ -1767,7 +1767,7 @@ export default function App() {
               />
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'majors' ? (
-              <MajorsSearchPage
+              <MajorsSearchPage locale={language}
                 majors={majors}
                 favoriteIds={favoriteIdsFor('major')}
                 onToggleFavorite={(id) => handleToggleFavorite('major', id)}

@@ -288,10 +288,10 @@ const DOMAIN_CONFIG: DomainConfig[] = [
     key: 'MAJORS',
     ar: 'التخصصات الأكاديمية',
     en: 'Academic Majors',
-    workspace: '/majors',
+    workspace: '/majors?view=new',
     importPath: '/imports/majors',
     icon: Sparkles,
-    template: 'name,facultyName,classificationCode',
+    template: 'canonicalMajorName,degreeLevel,degreeLevelId,academicFieldId,classificationCode',
   },
   {
     key: 'COURSES',

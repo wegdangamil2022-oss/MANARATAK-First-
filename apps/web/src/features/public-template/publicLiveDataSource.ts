@@ -514,8 +514,12 @@ export async function loadPublishedUniversities(locale: PublicLiveLocale = 'ar')
   return rows.map(mapPublicUniversityDto);
 }
 export async function loadPublishedMajors(locale: PublicLiveLocale = 'ar'): Promise<Major[]> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getMajors({ locale, cursor, limit: 100 }));
-  return rows.map(mapPublicMajorDto);
+  const page = await ApiClient.getMajors({ locale, limit: 20 });
+  return page.data.map(mapPublicMajorDto);
+}
+export async function searchPublishedMajors(filters: { search?: string; degreeLevel?: string; academicFieldOrDiscipline?: string; cursor?: string }, locale: PublicLiveLocale = 'ar') {
+  const page=await ApiClient.getMajors({...filters,locale,limit:20});
+  return {data:page.data.map(mapPublicMajorDto),total:page.total,nextCursor:page.nextCursor};
 }
 export async function loadPublishedCountries(locale: PublicLiveLocale = 'ar'): Promise<CountryDestination[]> {
   const rows = await collectOffsetPages((page) => ApiClient.getStudyDestinations({ page, pageSize: 100 }));

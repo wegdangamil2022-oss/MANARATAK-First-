@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useRef } from 'react';
+import { searchPublishedMajors } from '../publicLiveDataSource';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Search,
   X,
@@ -9,10 +10,11 @@ import {
   RotateCcw,
   Sparkles,
 } from 'lucide-react';
-import { Major, DegreeLevel } from '../types';
+import { Major } from '../types';
 import { MajorCard } from './MajorCard';
 
 interface MajorsSearchPageProps {
+  locale?: 'ar'|'en';
   favoriteIds?: string[];
   onToggleFavorite?: (id: string) => void;
   majors?: Major[];
@@ -23,19 +25,10 @@ interface MajorsSearchPageProps {
 const getMajorFaculty = (major: Major) =>
   major.category || major.academicField || major.professionalOrResearchField || 'غير مصنف';
 
-const getMajorDegreeLevels = (major: Major): DegreeLevel[] => {
-  if (major.degreeLevels && major.degreeLevels.length > 0) return major.degreeLevels;
-
-  const code = (major.code || '').toUpperCase();
-  if (code.startsWith('MAS-')) return ['ماجستير'];
-  if (code.startsWith('DOC-')) return ['دكتوراه'];
-  if (code.startsWith('FEL-')) return ['زمالة أبحاث'];
-  if (code.startsWith('MJR-')) return ['بكالوريوس'];
-  return [];
-};
-
+const DEGREE_CODES:Record<string,string>={'بكالوريوس':'BACHELOR','ماجستير':'MASTER','دكتوراه':'DOCTORATE','زمالة أبحاث':'FELLOWSHIP'};
 export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
   majors = [],
+  locale = 'ar',
   onBack,
   onSelectMajor,
   favoriteIds = [],
@@ -56,48 +49,30 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
     return ['الكل', ...Array.from(set)];
   }, [majors]);
 
-  // Show only degree levels that really exist in the current major dataset.
-  const degreeLevels = useMemo(() => {
-    const preferredOrder: DegreeLevel[] = ['بكالوريوس', 'ماجستير', 'دكتوراه', 'زمالة أبحاث'];
-    const available = new Set<DegreeLevel>();
-    majors.forEach((major) => getMajorDegreeLevels(major).forEach((level) => available.add(level)));
-    return ['الكل', ...preferredOrder.filter((level) => available.has(level))];
-  }, [majors]);
+  const degreeLevels=['الكل',...Object.keys(DEGREE_CODES)];
 
-  // Filter majors
-  const filteredMajors = useMemo(() => {
-    return majors.filter((m) => {
-      const q = searchQuery.trim().toLowerCase();
-      const searchableText = [
-        m.name,
-        m.nameEn,
-        m.description,
-        m.category,
-        m.academicField,
-        m.professionalOrResearchField,
-        m.aboutMajor,
-        m.natureOfStudy,
-        ...(m.popularCareers || []),
-        ...(m.workFields || []),
-        ...(m.subSpecialties || []),
-        ...(m.postgraduateOpportunities || []),
-        ...(m.relatedJobs || []).flatMap((item) => [item.job, item.entry]),
-        ...(m.similarMajors || []).map((item) => item.name),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      const matchesQuery = !q || searchableText.includes(q);
+  const [filteredMajors,setResults]=useState<Major[]>(majors);
+  const [total,setTotal]=useState(majors.length);
+  const [cursor,setCursor]=useState<string|undefined>();
+  const [nextCursor,setNextCursor]=useState<string|undefined>();
+  const [retry,setRetry]=useState(0);
+  const [loading,setLoading]=useState(false);const [error,setError]=useState('');
+  useEffect(()=>{
+    let active=true;setCursor(undefined);setNextCursor(undefined);setLoading(true);setError('');
+    const timer=window.setTimeout(()=>{void searchPublishedMajors({search:searchQuery.trim()||undefined,degreeLevel:DEGREE_CODES[selectedDegree],academicFieldOrDiscipline:selectedFaculty==='الكل'?undefined:selectedFaculty},locale)
+      .then(result=>{if(active){setResults(result.data);setTotal(result.total);setNextCursor(result.nextCursor??undefined);}})
+      .catch(()=>{if(active){setResults([]);setError('تعذر تحميل التخصصات. حاول مجددًا.');}}).finally(()=>{if(active)setLoading(false);});},250);
+    return ()=>{active=false;window.clearTimeout(timer);};
+  },[searchQuery,selectedFaculty,selectedDegree,locale,retry]);
+  useEffect(()=>{
+    if(!cursor)return;
+    let active=true;setLoading(true);setError('');
+    void searchPublishedMajors({search:searchQuery.trim()||undefined,degreeLevel:DEGREE_CODES[selectedDegree],academicFieldOrDiscipline:selectedFaculty==='الكل'?undefined:selectedFaculty,cursor},locale)
+      .then(result=>{if(active){setResults(old=>[...old,...result.data.filter(row=>!old.some(previous=>previous.id===row.id))]);setTotal(result.total);setNextCursor(result.nextCursor??undefined);}})
+      .catch(()=>{if(active)setError('تعذر تحميل الصفحة التالية.');}).finally(()=>{if(active)setLoading(false);});
+    return ()=>{active=false;};
+  },[cursor,searchQuery,selectedFaculty,selectedDegree,locale]);
 
-      const matchesFaculty =
-        selectedFaculty === 'الكل' || getMajorFaculty(m) === selectedFaculty;
-      const matchesDegree =
-        selectedDegree === 'الكل' ||
-        getMajorDegreeLevels(m).includes(selectedDegree as DegreeLevel);
-
-      return matchesQuery && matchesFaculty && matchesDegree;
-    });
-  }, [majors, searchQuery, selectedFaculty, selectedDegree]);
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -248,18 +223,8 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
-              <select
-                value={selectedFaculty}
-                onChange={(e) => setSelectedFaculty(e.target.value)}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title="اختر الكلية"
-              >
-                {faculties.map((c) => (
-                  <option key={c} value={c}>
-                    {c === 'الكل' ? 'جميع الكليات' : c}
-                  </option>
-                ))}
-              </select>
+              <input aria-label="الكلية أو المجال الأكاديمي" list="major-field-suggestions" value={selectedFaculty==='الكل'?'':selectedFaculty} onChange={event=>setSelectedFaculty(event.target.value||'الكل')} className="mt-2 w-full rounded border p-1 text-xs" placeholder="اكتب الكلية أو المجال" />
+              <datalist id="major-field-suggestions">{faculties.filter(value=>value!=='الكل').map(value=><option key={value} value={value}/>)}</datalist>
             </div>
 
             {/* Tile 2: الدرجة العلمية */}
@@ -295,7 +260,7 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
         {/* Section Header: التخصصات المتاحة */}
         <div className="flex items-center justify-between px-1">
           <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
-            التخصصات المتاحة ({filteredMajors.length})
+            التخصصات المتاحة ({error?'غير معروف':loading?'…':total})
           </span>
           <span className="text-[10px] sm:text-[11px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">
             محدثة باستمرار
@@ -304,7 +269,10 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
 
         {/* Cards Stack */}
         <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
-          {filteredMajors.length === 0 ? (
+          {loading&&<p role="status">جارٍ تحميل التخصصات…</p>}
+          {error&&<div><p role="alert">{error}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{locale==='ar'?'إعادة المحاولة':'Retry'}</button></div>}
+          {nextCursor&&<button type="button" disabled={loading} onClick={()=>setCursor(nextCursor)}>عرض المزيد</button>}
+          {filteredMajors.length === 0 && (loading || error) ? null : filteredMajors.length === 0 ? (
             <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel ">
               <div className="w-12 h-12 rounded-full bg-[var(--mn-surface-muted)] flex items-center justify-center text-[var(--mn-text-muted)] mn-panel ">
                 <Search className="w-6 h-6" />

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { MajorFilters, PaginatedMajorResult } from '@manaratak/domain';
 
 export interface CatalogItemDto {
@@ -107,226 +107,47 @@ export class Phase10CatalogRepository {
     );
   }
 
-  public async listCatalog(
-    filters: MajorFilters & { catalog?: string },
-  ): Promise<PaginatedMajorResult<CatalogItemDto>> {
-    const rawCatalog = this.loadCatalog();
-    const supplemental = await this.loadSupplementalCatalogItems(new Set(rawCatalog.map(item => item.code)));
-    let filtered = [...rawCatalog, ...supplemental];
-
-    const catalogCodes = filtered.map(item => item.code);
-    let dbProfiles: any[] = [];
-    if (catalogCodes.length > 0) {
-      try {
-        dbProfiles = await this.prisma.majorLevelProfile.findMany({
-          where: { code: { in: catalogCodes } },
-
-          select: {
-            id: true,
-            majorId: true,
-            code: true,
-            status: true,
-            completenessStatus: true,
-            displayName: true,
-            localizedNameAr: true,
-            localizedNameEn: true,
-            metadata: true,
-            updatedAt: true,
-          },
-        });
-      } catch (err) {
-        if (this.options.productionLike === true) throw err;
-        console.warn(
-          'Major catalog DB enrichment unavailable; returning source-only summaries',
-          err,
-        );
-      }
-    }
-
-    const dbMap = new Map(
-      dbProfiles.filter((profile) => profile.code).map((profile) => [profile.code, profile]),
-    );
-    filtered = filtered.map((item) => {
-      const dbProfile = dbMap.get(item.code);
-      if (!dbProfile) return { ...item, hasDbDetails: false };
-      const metadata = (dbProfile.metadata as Record<string, unknown>) || {};
-      return {
-        ...item,
-        id: dbProfile.majorId,
-        profileId: dbProfile.id,
-        displayName: dbProfile.localizedNameAr || dbProfile.displayName || item.displayName,
-        nameAr: dbProfile.localizedNameAr || item.nameAr,
-        nameEn: dbProfile.localizedNameEn || item.nameEn,
-        status: dbProfile.status || item.status,
-        completenessStatus: dbProfile.completenessStatus || item.completenessStatus,
-        sectionCount:
-          typeof metadata.contentBlockCount === 'number'
-            ? metadata.contentBlockCount
-            : item.sectionCount,
-        sourceType:
-          typeof metadata.sourceImportMode === 'string'
-            ? metadata.sourceImportMode
-            : item.sourceType,
-        hasDbDetails: true,
-        updatedAt: dbProfile.updatedAt
-          ? new Date(dbProfile.updatedAt).toISOString().split('T')[0]
-          : item.updatedAt,
-      };
-    });
-
-
-    if (filters.degreeLevel) {
-      const targetDeg = filters.degreeLevel.toUpperCase();
-      filtered = filtered.filter((item) => {
-        const k = (item.catalogKind || item.degreeLevel || '').toUpperCase();
-        return (
-          k === targetDeg ||
-          (targetDeg === 'BACHELOR' && k === 'BACHELOR') ||
-          (targetDeg === 'MASTER' && k === 'MASTER') ||
-          (targetDeg === 'DOCTORATE' && k === 'DOCTORATE') ||
-          (targetDeg === 'FELLOWSHIP' && k === 'FELLOWSHIP')
-        );
-      });
-    }
-
-    if (filters.status) {
-      filtered = filtered.filter((item) => item.status === filters.status);
-    }
-
-    if (filters.completenessStatus) {
-      filtered = filtered.filter((item) => item.completenessStatus === filters.completenessStatus);
-    }
-
-    if (filters.academicFieldOrDiscipline) {
-      const field = filters.academicFieldOrDiscipline.toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          (item.collegeOrField && item.collegeOrField.toLowerCase().includes(field)) ||
-          (item.academicFieldOrDiscipline &&
-            item.academicFieldOrDiscipline.toLowerCase().includes(field)),
-      );
-    }
-
-    if (filters.search) {
-      const s = filters.search.trim().toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          item.code.toLowerCase().includes(s) ||
-          item.displayName.toLowerCase().includes(s) ||
-          (item.nameAr && item.nameAr.toLowerCase().includes(s)) ||
-          (item.nameEn && item.nameEn.toLowerCase().includes(s)) ||
-          (item.collegeOrField && item.collegeOrField.toLowerCase().includes(s)),
-      );
-    }
-
-    const page = Math.max(1, filters.page || 1);
-    const pageSize = Math.min(100, Math.max(1, filters.pageSize || 50));
-    const start = (page - 1) * pageSize;
-    const details = this.loadDetails();
-    const sourcePage = filtered.slice(start, start + pageSize).map((item) => {
-      const detail = details.get(item.code);
-      return detail
-        ? {
-            ...item,
-            collegeOrField: detail.collegeOrFaculty || item.collegeOrField,
-            collegeOrFaculty: detail.collegeOrFaculty || item.collegeOrFaculty,
-            sectionCount: detail.sections.length,
-            sourceType: 'DETAIL_DOSSIER',
-            sourceFileName: detail.sourceFileName,
-          }
-        : item;
-    });
-
-    const data = sourcePage;
-
-    return {
-      data,
-      total: filtered.length,
-      page,
-      pageSize,
-      totalPages: Math.ceil(filtered.length / pageSize),
-    };
+  public async listCatalog(filters: MajorFilters & { catalog?: string }): Promise<PaginatedMajorResult<CatalogItemDto>> {
+    const page=filters.page??1,pageSize=filters.pageSize??50;
+    if(!Number.isSafeInteger(page)||page<1||page>1000||!Number.isSafeInteger(pageSize)||pageSize<1||pageSize>100)throw new Error('MAJOR_CATALOG_PAGE_INVALID');
+    const rawCatalog=this.loadCatalog();if(rawCatalog.length>5000)throw new Error('MAJOR_SOURCE_CATALOG_SCOPE_TOO_LARGE');
+    const details=this.loadDetails();
+    const source=rawCatalog.map(item=>{const detail=details.get(item.code);return detail?{...item,collegeOrField:detail.collegeOrFaculty||item.collegeOrField,collegeOrFaculty:detail.collegeOrFaculty||item.collegeOrFaculty,sectionCount:detail.sections.length,sourceType:'DETAIL_DOSSIER',sourceFileName:detail.sourceFileName}:item;});
+    // Enrichment, filters, counts and paging happen in SQL. Only one bounded page leaves PostgreSQL.
+    const cte=Prisma.sql`WITH source AS (SELECT item,ordinality AS position FROM jsonb_array_elements(${JSON.stringify(source)}::jsonb) WITH ORDINALITY AS src(item,ordinality)),
+      collisions AS (SELECT p.code FROM source JOIN "MajorLevelProfile" p ON p.code=source.item->>'code' GROUP BY p.code HAVING COUNT(*)>1),
+      enriched AS (SELECT source.position,source.item || CASE WHEN p.id IS NULL THEN jsonb_build_object('hasDbDetails',false)
+        ELSE jsonb_strip_nulls(jsonb_build_object('id',p."majorId",'profileId',p.id,'hasDbDetails',true,
+          'displayName',COALESCE(p."localizedNameAr",p."displayName",source.item->>'displayName'),
+          'nameAr',p."localizedNameAr",'nameEn',p."localizedNameEn",'status',p.status,'completenessStatus',p."completenessStatus",'updatedAt',p."updatedAt"::text)) END AS item
+        FROM source LEFT JOIN "MajorLevelProfile" p ON p.code=source.item->>'code'),
+      supplemental AS (SELECT 5001::bigint AS position,jsonb_strip_nulls(jsonb_build_object('id',m.id,'profileId',p.id,'hasDbDetails',true,'code',p.code,'classificationCode',p.code,'displayName',COALESCE(p."localizedNameAr",p."displayName",m."displayName"),'nameAr',p."localizedNameAr",'nameEn',p."localizedNameEn",'degreeLevel',p.level,'catalogKind',p.level,'targetDomain','MAJORS','status',p.status,'completenessStatus',p."completenessStatus",'collegeOrField',COALESCE(p."collegeContext",f."canonicalName",d."canonicalName"),'academicFieldOrDiscipline',COALESCE(f."canonicalName",d."canonicalName"),'collegeOrFaculty',p."collegeContext",'sourceType','DISCOVERY_QUEUE','updatedAt',p."updatedAt"::text)) AS item
+        FROM "MajorLevelProfile" p JOIN "Major" m ON m.id=p."majorId" LEFT JOIN "AcademicTaxonomyNode" f ON f.id=COALESCE(p."academicFieldId",m."academicFieldId") LEFT JOIN "AcademicTaxonomyNode" d ON d.id=COALESCE(p."disciplineId",m."disciplineId") WHERE p.code IS NOT NULL AND NOT EXISTS(SELECT 1 FROM source WHERE source.item->>'code'=p.code)
+        UNION ALL SELECT 5002::bigint,jsonb_strip_nulls(jsonb_build_object('id',m.id,'hasDbDetails',true,'code',m."publicId",'displayName',COALESCE(m."localizedNameAr",m."displayName"),'nameAr',m."localizedNameAr",'nameEn',m."localizedNameEn",'degreeLevel',m."optionalFields"->>'degreeLevel','catalogKind',m."optionalFields"->>'degreeLevel','targetDomain','MAJORS','status',m.status,'completenessStatus',m."completenessStatus",'updatedAt',m."updatedAt"::text))
+        FROM "Major" m WHERE NOT EXISTS(SELECT 1 FROM "MajorLevelProfile" p WHERE p."majorId"=m.id) AND NOT EXISTS(SELECT 1 FROM source WHERE source.item->>'code'=m."publicId")),
+      matching AS (SELECT * FROM (SELECT * FROM enriched UNION ALL SELECT * FROM supplemental) catalog WHERE
+        (${filters.degreeLevel??null}::text IS NULL OR UPPER(COALESCE(item->>'catalogKind',item->>'degreeLevel'))=UPPER(${filters.degreeLevel??null}))
+        AND (${filters.status??null}::text IS NULL OR item->>'status'=${filters.status??null})
+        AND (${filters.completenessStatus??null}::text IS NULL OR item->>'completenessStatus'=${filters.completenessStatus??null})
+        AND (${filters.academicFieldOrDiscipline??null}::text IS NULL OR COALESCE(item->>'collegeOrField','') ILIKE ${'%'+(filters.academicFieldOrDiscipline??'')+'%'} OR COALESCE(item->>'academicFieldOrDiscipline','') ILIKE ${'%'+(filters.academicFieldOrDiscipline??'')+'%'})
+        AND (${filters.search??null}::text IS NULL OR concat_ws(' ',item->>'code',item->>'displayName',item->>'nameAr',item->>'nameEn',item->>'collegeOrField') ILIKE ${'%'+(filters.search??'')+'%'})),
+      paged AS (SELECT position,item FROM matching ORDER BY position,item->>'code',item->>'id' LIMIT ${pageSize} OFFSET ${(page-1)*pageSize})
+      SELECT COALESCE((SELECT jsonb_agg(item ORDER BY position,item->>'code',item->>'id') FROM paged),'[]'::jsonb) AS data,(SELECT COUNT(*)::text FROM matching) AS total,(SELECT COUNT(*)::int FROM collisions) AS "ambiguousCodes"`;
+    const rows=await this.prisma.$queryRaw<Array<{data:CatalogItemDto[];total:string;ambiguousCodes:number}>>(cte);
+    if(!rows[0])throw new Error('MAJOR_CATALOG_READ_UNAVAILABLE');
+    if(rows[0].ambiguousCodes>0)throw new Error('MAJOR_SOURCE_CODE_CONFLICT');
+    const total=Number(rows[0].total);return {data:rows[0].data,total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
   }
 
   public maxCodeNumber(prefix: 'MJR' | 'MAS' | 'DOC' | 'FEL'): number {
     let max = 0;
     for (const item of this.loadCatalog()) {
-      const match = item.code?.match(new RegExp(`^${prefix}-(\\d+)$`));
+      const match = item.code?.match(new RegExp(`^${prefix}-([0-9]+)$`));
       if (match) max = Math.max(max, Number(match[1]));
     }
     return max;
   }
 
-  private async loadSupplementalCatalogItems(catalogCodes: Set<string>): Promise<CatalogItemDto[]> {
-    try {
-      const profiles = await this.prisma.majorLevelProfile.findMany({
-        where: { code: { not: null } },
-        include: {
-          major: {
-            select: {
-              id: true,
-              displayName: true,
-              localizedNameAr: true,
-              localizedNameEn: true,
-              status: true,
-              completenessStatus: true,
-              academicField: { select: { canonicalName: true } },
-              discipline: { select: { canonicalName: true } },
-              optionalFields: true,
-              updatedAt: true,
-            },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      const supplemental = profiles
-        .filter(profile => Boolean(profile.code) && !catalogCodes.has(profile.code as string))
-        .map(profile => {
-          const optional = profile.major.optionalFields && typeof profile.major.optionalFields === 'object' && !Array.isArray(profile.major.optionalFields)
-            ? profile.major.optionalFields as Record<string, unknown>
-            : {};
-          const metadata = profile.metadata && typeof profile.metadata === 'object' && !Array.isArray(profile.metadata)
-            ? profile.metadata as Record<string, unknown>
-            : {};
-          return {
-            id: profile.major.id,
-            profileId: profile.id,
-            displayName: profile.displayName || profile.localizedNameAr || profile.major.displayName,
-            nameAr: profile.localizedNameAr || profile.major.localizedNameAr || undefined,
-            nameEn: profile.localizedNameEn || profile.major.localizedNameEn || undefined,
-            code: profile.code as string,
-            degreeLevel: profile.level,
-            catalogKind: profile.level,
-            targetDomain: 'MAJORS',
-            collegeOrField: profile.collegeContext || profile.major.academicField?.canonicalName || profile.major.discipline?.canonicalName || undefined,
-            academicFieldOrDiscipline: profile.major.academicField?.canonicalName || profile.major.discipline?.canonicalName || undefined,
-            collegeOrFaculty: profile.collegeContext || (typeof optional.collegeOrFaculty === 'string' ? optional.collegeOrFaculty : undefined),
-            classificationCode: profile.code as string,
-            status: profile.major.status,
-            completenessStatus: profile.major.completenessStatus,
-            sourceType: typeof metadata.sourceImportMode === 'string' ? metadata.sourceImportMode : 'DISCOVERY_QUEUE',
-            updatedAt: profile.major.updatedAt.toISOString().split('T')[0],
-            hasDbDetails: true,
-          };
-        });
-      const legacy = await this.prisma.major.findMany({ where: { levelProfiles: { none: {} } }, orderBy: { createdAt: 'desc' } });
-      return [...supplemental, ...legacy.filter(major => !catalogCodes.has(major.publicId)).map(major => {
-        const optional = major.optionalFields && typeof major.optionalFields === 'object' && !Array.isArray(major.optionalFields) ? major.optionalFields as Record<string, unknown> : {};
-        return { id: major.id, code: major.publicId, displayName: major.localizedNameAr || major.displayName,
-          nameAr: major.localizedNameAr || undefined, nameEn: major.localizedNameEn || major.canonicalName,
-          degreeLevel: typeof optional.degreeLevel === 'string' ? optional.degreeLevel : '',
-          catalogKind: typeof optional.degreeLevel === 'string' ? optional.degreeLevel : '',
-          targetDomain: 'MAJORS', status: major.status, completenessStatus: major.completenessStatus,
-          hasDbDetails: true, updatedAt: major.updatedAt.toISOString().split('T')[0],
-        };
-      })];
-    } catch (error) {
-      if (this.options.productionLike === true) throw error;
-      console.warn('Supplemental Major catalog projection unavailable', error);
-      return [];
-    }
-  }
 
   public getCatalogItem(id: string): CatalogItemDto | null {
     const code = id.replace(/^cat-/, '');

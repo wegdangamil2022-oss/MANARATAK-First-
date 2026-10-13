@@ -5,6 +5,7 @@ import { PrismaMajorRepository } from '../../src/majors/PrismaMajorRepository';
 function fixture() {
   const prisma = {
     majorVersion: {
+      findFirst: vi.fn().mockResolvedValue({id:'version-1'}),
       findUnique: vi.fn().mockResolvedValue({
         id: 'version-1', profileId: 'profile-1', majorId: 'major-1',
         status: 'READY_TO_REVIEW', publishedAt: null,

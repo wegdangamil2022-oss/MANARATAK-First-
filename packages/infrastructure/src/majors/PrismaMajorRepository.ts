@@ -661,7 +661,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   async updateContentSections(
     profileId: string,
     versionId: string,
-    sections: Array<{ id?: string; sectionKey: string; title?: string; content: string; reviewStatus?: string }>
+    sections: Array<{ id?: string; sectionKey: string; locale?: string; title?: string; content: string; reviewStatus?: string }>
   ): Promise<{ count: number; sections: MajorContentSectionDto[] }> {
     if (!this.transactionBound) throw new Error('MAJOR_CONTENT_TRANSACTION_REQUIRED');
     if(sections.length>100) throw new Error('MAJOR_CONTENT_SECTION_LIMIT');
@@ -679,19 +679,22 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
       || ['PUBLISHED', 'ARCHIVED'].includes(version.profile.status)) {
       throw new Error('MAJOR_CONTENT_PUBLISHED_VERSION_IMMUTABLE');
     }
+    const latest=await this.prisma.majorVersion.findFirst({where:{profileId},orderBy:{versionNumber:'desc'},select:{id:true}});
+    if(!latest||latest.id!==versionId)throw new Error('MAJOR_CONTENT_STALE_WORKING_VERSION');
     const sectionKeys = new Set<string>();
     for (const sec of sections) {
-      if (!sec.sectionKey.trim() || sectionKeys.has(sec.sectionKey)) throw new Error('MAJOR_CONTENT_DUPLICATE_OR_EMPTY_SECTION_KEY');
+      if (!sec.sectionKey.trim() || sectionKeys.has(JSON.stringify([sec.sectionKey,sec.locale??'ar']))) throw new Error('MAJOR_CONTENT_DUPLICATE_OR_EMPTY_SECTION_KEY');
       if (sec.reviewStatus && !['NEEDS_REVIEW', 'COMPLETE', 'INCOMPLETE'].includes(sec.reviewStatus)) {
         throw new Error('MAJOR_CONTENT_INVALID_REVIEW_STATUS');
       }
-      sectionKeys.add(sec.sectionKey);
+      if(!['ar','en'].includes(sec.locale??'ar'))throw new Error('MAJOR_CONTENT_LOCALE_INVALID');
+      sectionKeys.add(JSON.stringify([sec.sectionKey,sec.locale??'ar']));
       if (sec.id) {
         const existing = await this.prisma.majorContentSection.findUnique({
           where: { id: sec.id },
-          select: { profileId: true, versionId: true, sectionKey: true },
+          select: { profileId: true, versionId: true, sectionKey: true, locale: true },
         });
-        if (!existing || existing.profileId !== profileId || existing.versionId !== versionId || existing.sectionKey !== sec.sectionKey) {
+        if (!existing || existing.profileId !== profileId || existing.versionId !== versionId || existing.sectionKey !== sec.sectionKey || (existing.locale??'ar') !== (sec.locale??'ar')) {
           throw new Error('MAJOR_CONTENT_FOREIGN_SECTION');
         }
       }
@@ -715,7 +718,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
               profileId,
               versionId,
               sectionKey: sec.sectionKey,
-              locale: 'ar',
+              locale: sec.locale??'ar',
             }
           },
           update: {
@@ -730,7 +733,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
             sectionKey: sec.sectionKey,
             title: sec.title,
             content: sec.content,
-            locale: 'ar',
+            locale: sec.locale??'ar',
             reviewStatus: sec.reviewStatus || 'NEEDS_REVIEW',
           }
         });

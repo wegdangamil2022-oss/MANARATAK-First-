@@ -201,6 +201,7 @@ export interface UniversityFilters {
 }
 
 export interface MajorFilters {
+  search?: string;
   locale?: 'ar' | 'en';
   degreeLevel?: string;
   academicFieldOrDiscipline?: string;

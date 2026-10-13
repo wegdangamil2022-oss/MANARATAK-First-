@@ -23,6 +23,7 @@ import {
   MajorStatus,
   MajorVersionDto,
   PaginatedMajorResult,
+  NewMajorCandidateComparison,
   NewMajorCandidateFilters,
   PaginatedNewMajorCandidateResult,
   PublicationReadinessEngine,
@@ -36,7 +37,7 @@ import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '.
 import { CanonicalMajorReferenceService } from '../services/CanonicalMajorReferenceService';
 
 export interface MajorMutationContext extends AtomicMutationRequestContext {
-  expectedRevision?: number; reason?: string; expectedSourceDigest?: string;
+  expectedRevision?: number; reason?: string; expectedSourceDigest?: string; expectedTargetRevision?: number;
 }
 
 export interface ApproveNewMajorCandidateInput {
@@ -79,6 +80,26 @@ export class AdminMajorUseCases {
   public async listNewMajorCandidates(filters: NewMajorCandidateFilters): Promise<PaginatedNewMajorCandidateResult> {
     if (!this.newMajorCandidates) throw new Error('NEW_MAJOR_CANDIDATE_QUERY_NOT_AVAILABLE');
     return this.newMajorCandidates.list(filters);
+  }
+
+  public async compareNewMajorCandidate(candidateKey: string, majorId: string): Promise<NewMajorCandidateComparison> {
+    if (!this.newMajorCandidates) throw new Error('NEW_MAJOR_CANDIDATE_QUERY_NOT_AVAILABLE');
+    const [candidate,major]=await Promise.all([this.newMajorCandidates.findByKey(candidateKey),this.repository.findById(majorId)]);
+    if(!candidate)throw new Error('NEW_MAJOR_CANDIDATE_NOT_FOUND_OR_ALREADY_RESOLVED');
+    if(!major)throw new Error('NEW_MAJOR_LINK_TARGET_NOT_FOUND');
+    const profiles=this.repository.listLevelProfiles?await this.repository.listLevelProfiles(majorId):major.profiles??[];
+    const degreeLevelIds=[...new Set(profiles.map(profile=>profile.degreeLevelId).filter((id):id is string=>!!id))];
+    const blockers:string[]=[];
+    if([MajorStatus.ARCHIVED,MajorStatus.REJECTED].includes(major.status))blockers.push('TARGET_INACTIVE');
+    if(candidate.sourcesTruncated)blockers.push('SOURCE_SET_REQUIRES_BOUNDED_REVIEW');
+    if(!degreeLevelIds.length||!candidate.degreeLevelIds.every(id=>degreeLevelIds.includes(id)))blockers.push('DEGREE_MISMATCH');
+    if(!this.canonicalReferences)blockers.push('REFERENCE_CHECK_UNAVAILABLE');
+    else blockers.push(...(await this.canonicalReferences.publicationIssues(major)).map(issue=>issue.code));
+    const revision=major.revision??(major.updatedAt?new Date(major.updatedAt).getTime():NaN);
+    if(!Number.isSafeInteger(revision))throw new Error('NEW_MAJOR_TARGET_REVISION_UNAVAILABLE');
+    return {candidate:{candidateKey:candidate.candidateKey,displayLabel:candidate.displayLabel,normalizedLabel:candidate.normalizedLabel,sourceDigest:candidate.sourceDigest,degreeLevelIds:candidate.degreeLevelIds,facultyOrUnitNames:candidate.facultyOrUnitNames,officialSourceUrls:candidate.officialSourceUrls,sourceCount:candidate.sourceCount},
+      target:{id:major.id,canonicalName:major.canonicalName,displayName:major.displayName,status:major.status,revision,academicFieldId:major.academicFieldId,disciplineId:major.disciplineId,academicFieldOrDiscipline:major.academicFieldOrDiscipline,degreeLevelIds,aliases:(major.aliases??[]).slice(0,25).map(alias=>alias.alias),sourceUrls:(major.sources??[]).slice(0,10).flatMap(source=>source.sourceUri?[source.sourceUri]:[])},
+      blockers,canLink:!blockers.length,nameSignal:MajorNamingService.normalizeForKey(candidate.displayLabel)===MajorNamingService.normalizeForKey(major.canonicalName)?'EXACT_NORMALIZED':'REVIEW_REQUIRED'};
   }
 
   public async approveNewMajorCandidate(
@@ -245,6 +266,8 @@ export class AdminMajorUseCases {
     if (!this.newMajorCandidates) throw new Error('NEW_MAJOR_CANDIDATE_QUERY_NOT_AVAILABLE');
     return this.mutateCandidate('NEW_MAJOR_CANDIDATE_LINKED', candidateKey, context, async (repository, candidateRepository) => {
       await candidateRepository.acquireReviewLock?.(candidateKey);
+      if(!Number.isSafeInteger(context?.expectedTargetRevision)||!repository.lockForRevision)throw new Error('NEW_MAJOR_TARGET_REVISION_REQUIRED');
+      await repository.lockForRevision(existingMajorId,context!.expectedTargetRevision!);
       const major = await repository.findById(existingMajorId);
       if (!major) throw new Error('NEW_MAJOR_LINK_TARGET_NOT_FOUND');
       if ([MajorStatus.ARCHIVED,MajorStatus.REJECTED].includes(major.status)) throw new Error('NEW_MAJOR_LINK_TARGET_INACTIVE');
@@ -324,7 +347,7 @@ export class AdminMajorUseCases {
     input: {
       profileId?: string;
       versionId?: string;
-      sections: Array<{ id?: string; sectionKey: string; title?: string; content: string; reviewStatus?: string }>;
+      sections: Array<{ id?: string; sectionKey: string; locale?: string; title?: string; content: string; reviewStatus?: string }>;
     },
     context?: MajorMutationContext,
   ): Promise<{ success: boolean; profileId: string; versionId: string; count: number; data: MajorContentSectionDto[] }> {

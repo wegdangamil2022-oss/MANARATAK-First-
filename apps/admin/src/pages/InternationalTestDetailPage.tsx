@@ -766,7 +766,7 @@ export function InternationalTestDetailPage() {
         )}
 
         {/* TAB 3: الجاهزية والنشر (Readiness Report & Blockers) */}
-        {(activeTab === 'readiness' || activeTab === 'sources_history') && <InternationalTestGovernanceWorkspace testId={test.id} isRtl={isRtl} onSaved={fetchDetail} />}
+        {(activeTab === 'readiness' || activeTab === 'sources_history') && <InternationalTestGovernanceWorkspace key={test.id} testId={test.id} isRtl={isRtl} onSaved={fetchDetail} />}
         {activeTab === 'readiness' && (
           <ReadinessTab
             test={test}

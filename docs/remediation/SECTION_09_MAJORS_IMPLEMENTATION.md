@@ -1,5 +1,7 @@
 # Section 09 — P10 Majors & Disciplines implementation
 
+> تحديث 13 أكتوبر 2026: راجع [إعادة المراجعة واستكمال المصدر والأدلة الحالية](../reviews/SECTIONS_08_09_SOURCE_COMPLETION_2026-10-13.md). حالات NOT_MERGED/فشل فحوص أكتوبر 10 أدناه تاريخية ولا تصف تلقائيًا المصدر الحالي.
+
 Branch: `codex/section-09-majors`. Base: `008f3bd` (main after sections 01–08).
 
 Status: **IMPLEMENTED_SOURCE — RUNTIME_DEFERRED — NOT_MERGED**.

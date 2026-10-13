@@ -78,3 +78,9 @@ export interface INewMajorCandidateRepository {
 export interface ITransactionalNewMajorCandidateRepository extends INewMajorCandidateRepository {
   withTransaction(context: AtomicPersistenceContext): INewMajorCandidateRepository;
 }
+
+export interface NewMajorCandidateComparison {
+  candidate: { candidateKey: string; displayLabel: string; normalizedLabel: string; sourceDigest: string; degreeLevelIds: string[]; facultyOrUnitNames: string[]; officialSourceUrls: string[]; sourceCount: number };
+  target: { id: string; canonicalName: string; displayName: string; status: string; revision: number; academicFieldId?: string | null; disciplineId?: string | null; academicFieldOrDiscipline?: string | null; degreeLevelIds: string[]; aliases: string[]; sourceUrls: string[] };
+  blockers: string[]; canLink: boolean; nameSignal: 'EXACT_NORMALIZED'|'REVIEW_REQUIRED';
+}

@@ -1,12 +1,12 @@
-import type {IAuditRecordRepository} from '@manaratak/domain';
+import type {IAuditRecordRepository, IMajorConsumerReadGateway} from '@manaratak/domain';
 import {SecurityMiddlewareFactory} from '../../security/SecurityMiddlewareFactory.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { MajorImportCompletenessState, MajorStatus, UpdateMajorDto } from '@manaratak/domain';
-import { AdminMajorUseCases } from '@manaratak/application';
+import { MajorOwnerImportUseCases, AdminMajorUseCases } from '@manaratak/application';
 
 export class MajorAdminRouter {
-  public static create(cradle: { adminMajorUseCases: AdminMajorUseCases; auditRecordRepo?:IAuditRecordRepository }): Router {
+  public static create(cradle: { adminMajorUseCases: AdminMajorUseCases; majorOwnerImportUseCases?:MajorOwnerImportUseCases; auditRecordRepo?:IAuditRecordRepository; majorProgramUsageGateway?:IMajorConsumerReadGateway; majorScholarshipUsageGateway?:IMajorConsumerReadGateway }): Router {
     const router = Router();
     const { adminMajorUseCases } = cradle;
 
@@ -70,7 +70,7 @@ export class MajorAdminRouter {
     }).strict();
 
     const linkNewCandidateBodySchema = z.object({
-      majorId: z.string().uuid(),reason:reasonSchema,sourceDigest:z.string().regex(/^[a-f0-9]{64}$/),
+      majorId: z.string().uuid(),expectedTargetRevision:z.number().int().nonnegative(),reason:reasonSchema,sourceDigest:z.string().regex(/^[a-f0-9]{64}$/),
     }).strict();
 
     const classificationMappingSchema = z.object({
@@ -78,6 +78,32 @@ export class MajorAdminRouter {
       relationshipType: z.enum(['PRIMARY', 'SECONDARY', 'RELATED', 'LEGACY']),
       reason: z.string().trim().min(1).max(2000), evidenceReference: z.string().trim().min(1).max(500),
     }).strict();
+
+    const importOwner=()=>{if(!cradle.majorOwnerImportUseCases)throw new Error('MAJOR_IMPORT_UNAVAILABLE');return cradle.majorOwnerImportUseCases;};
+    const importContext=(req:Request)=>{if(!req.authUserId)throw new Error('AUTHENTICATED_ADMIN_ACTOR_REQUIRED');return {actorId:req.authUserId,source:'admin-major-owner-import',correlationId:req.get('x-correlation-id')};};
+    const importPage=z.object({page:z.coerce.number().int().min(1).max(1000).default(1)}).strict();
+    const importVersion=z.object({expectedVersion:z.number().int().positive(),previewHash:z.string().regex(/^[a-f0-9]{64}$/)}).strict();
+    router.get('/owner-imports/screenings',asyncHandler(async(req,res)=>res.json(await importOwner().screenings(importPage.parse(req.query).page))));
+    router.get('/owner-imports',asyncHandler(async(req,res)=>res.json(await importOwner().list(importPage.parse(req.query).page))));
+    router.post('/owner-imports/preview',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),asyncHandler(async(req,res)=>{const body=z.object({receiptId:z.string().min(1).max(128)}).strict().parse(req.body);res.json(await importOwner().preview(body.receiptId,importContext(req)));}));
+    router.post('/owner-imports/:reviewId/refresh',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),asyncHandler(async(req,res)=>{const body=z.object({expectedVersion:z.number().int().positive()}).strict().parse(req.body);res.json(await importOwner().refresh(req.params.reviewId,body.expectedVersion,importContext(req)));}));
+    router.post('/owner-imports/:reviewId/review',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),asyncHandler(async(req,res)=>res.json(await importOwner().review(req.params.reviewId,importVersion.extend({decision:z.enum(['APPROVE','REJECT']),reason:reasonSchema}).strict().parse(req.body),importContext(req)))));
+    router.post('/owner-imports/:reviewId/apply',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),asyncHandler(async(req,res)=>res.json(await importOwner().apply(req.params.reviewId,importVersion.parse(req.body),importContext(req)))));
+
+    const usageQuery=z.object({page:z.coerce.number().int().min(1).max(1000).default(1),countryReferenceId:z.string().uuid().optional(),degreeLevelId:z.string().uuid().optional(),scope:z.enum(['ALL','PUBLISHED']).default('ALL')}).strict();
+    for(const [owner,permission,gateway] of [
+      ['universities','admin:universities:manage',cradle.majorProgramUsageGateway],
+      ['scholarships','admin:scholarships:manage',cradle.majorScholarshipUsageGateway],
+    ] as const) router.get('/:id/usage/'+owner,SecurityMiddlewareFactory.createAdminPermissionGuard(permission),asyncHandler(async(req,res)=>{
+      const id=z.string().uuid().parse(req.params.id); const query=usageQuery.parse(req.query);
+      await adminMajorUseCases.getMajor(id);
+      if(!gateway)return res.status(503).json({error:'MAJOR_USAGE_UNAVAILABLE'});
+      res.json(await gateway.usage(id,query));
+    }));
+    router.get('/new-candidates/:candidateKey/comparison',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'),asyncHandler(async(req,res)=>{
+      const query=z.object({majorId:z.string().uuid()}).strict().parse(req.query);
+      res.json(await adminMajorUseCases.compareNewMajorCandidate(req.params.candidateKey,query.majorId));
+    }));
 
     router.post('/:id/classification-mappings',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:review'), asyncHandler(async (req, res) => {
       const id = z.string().uuid().parse(req.params.id);
@@ -162,7 +188,7 @@ export class MajorAdminRouter {
       SecurityMiddlewareFactory.createAdminPermissionGuard('admin:scholarships:manage'),
       asyncHandler(async (req: Request, res: Response) => {
         const body = linkNewCandidateBodySchema.parse(req.body);
-        const result = await adminMajorUseCases.linkNewMajorCandidate(req.params.candidateKey, body.majorId, mutationContext(req));
+        const result = await adminMajorUseCases.linkNewMajorCandidate(req.params.candidateKey, body.majorId, {...mutationContext(req),expectedTargetRevision:body.expectedTargetRevision});
         res.status(200).json(result);
       }),
     );
@@ -245,6 +271,7 @@ export class MajorAdminRouter {
         z.object({
           id: z.string().optional(),
           sectionKey: z.string().trim().min(1).max(200),
+          locale: z.enum(['ar','en']).optional(),
           title: z.string().nullable().optional(),
           content: z.string().max(100000),
           reviewStatus: z.enum(['NEEDS_REVIEW','COMPLETE','INCOMPLETE']).optional(),
@@ -276,6 +303,7 @@ export class MajorAdminRouter {
             sections: body.sections.map(s => ({
               id: s.id,
               sectionKey: s.sectionKey,
+              locale: s.locale,
               title: s.title ?? undefined,
               content: s.content,
               reviewStatus: s.reviewStatus,
@@ -434,7 +462,7 @@ export class MajorAdminRouter {
       if(persistenceCode==='P2002') return res.status(409).json({error:'MAJOR_DUPLICATE_IDENTITY'});
       const code=err instanceof Error ? err.message : '';
       const known=/^(MAJOR_|NEW_MAJOR_|TARGET_MAJOR_|CONTENT_SECTION_|NO_WORKING_VERSION_)[A-Z0-9_]+$/.test(code);
-      const status=code.includes('STALE')?409:code.includes('NOT_FOUND')?404:code.includes('ACTOR')?401:known?422:500;
+      const status=/STALE|CONFLICT/.test(code)?409:code.includes('UNAVAILABLE')?503:code.includes('NOT_FOUND')?404:code.includes('ACTOR')?401:known?422:500;
       res.status(status).json({error:known?code:'INTERNAL_SERVER_ERROR'});
     });
 
