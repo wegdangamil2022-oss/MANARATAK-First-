@@ -687,12 +687,43 @@ model CertificateIssuer {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @default(now()) @updatedAt
 
+  authorityDelegations CertificateAuthorityDelegation[]
   templates        CertificateTemplate[]
   templateVersions CertificateTemplateVersion[]
   certificates     Certificate[]
 
   @@index([status])
   @@index([universityId])
+}
+
+/// P14-owned versioned delegation evidence. P11 university IDs remain reference-only.
+model CertificateAuthorityDelegation {
+  id String @id
+  issuerId String
+  canonicalOwnerType String
+  canonicalOwnerId String
+  authorityReference String
+  legalRegistryReference String
+  evidenceAssetId String
+  evidenceChecksum String
+  signingKeyReference String
+  scope String @default("CERTIFICATE_ISSUANCE")
+  status String @default("PENDING_APPROVAL")
+  version Int @default(1)
+  validFrom DateTime
+  validUntil DateTime
+  ownershipVerified Boolean @default(false)
+  delegationVerified Boolean @default(false)
+  createdBy String
+  reviewedBy String?
+  reviewedAt DateTime?
+  reviewReason String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  issuer CertificateIssuer @relation(fields:[issuerId],references:[id],onDelete:Restrict,onUpdate:NoAction)
+  @@index([issuerId,status,validUntil])
+  @@index([issuerId,createdAt(sort:Desc),id(sort:Desc)])
+  @@index([canonicalOwnerType,canonicalOwnerId],map:"cert_authority_owner_idx")
 }
 
 model CertificateTemplate {

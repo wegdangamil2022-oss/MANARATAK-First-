@@ -114,7 +114,7 @@ export interface CertificateTemplateDto extends CreateCertificateTemplateDto {
 
 export interface CertificateMutationContext {
   expectedIssuerUpdatedAt?: string;
-  issuerApproval?: { evidenceAssetId: string; authorityReference: string };
+  issuerApproval?: { evidenceAssetId: string; authorityReference: string; evidenceChecksum?: string | null };
   expectedTemplateVersionId?: string;
   expectedTemplateStatus?: CertificateTemplateStatus;
   actorId: string;
@@ -159,6 +159,8 @@ export interface CertificateSignedEnvelopeV2 {
     versionNumber: string;
   };
   issuer: {
+    authorityVersion?:number;
+    authorityEvidenceHash?:string;
     issuerId: string;
     issuerPublicId: string;
     issuerName: string;

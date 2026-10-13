@@ -11160,6 +11160,9 @@ Ownership: Course owns catalog/course/learning outcomes, curriculum, learning pa
 
 **UPDATED SECTION 14 STATUS:** **33 unique CODEX TASKS** (`CERT-ADM-001…033`; **P0=3, P1=22, P2=8**); **REVIEWED — FIXES REQUIRED**, **NO SOURCE FIXES APPLIED**, **RUNTIME PENDING**. Next on explicit request: **15 — Student Support / P15**.
 
+> تحديث تنفيذ المصدر 2026-10-13: عولجت النواقص الـ12 في مراجعة `main` الأحدث، على فرع `codex/complete-section-14-source-20261013`. راجع [تقرير التنفيذ وربط المتطلبات](SECTION_14_SOURCE_COMPLETION_2026-10-13.md). التصنيف IMPLEMENTED / VERIFICATION DEFERRED؛ لم تُشغل اختبارات ولم يُطبّق الترحيل. الحالة أعلاه تخص baseline المراجعة الأصلية ولا تمثل نتيجة تشغيل للكود الجديد.
+
+
 ---
 
 ## 14.FG — Deep Functional & Feature Gap Audit (ملحق 11–20؛ لا يعيد المراجعة السابقة)

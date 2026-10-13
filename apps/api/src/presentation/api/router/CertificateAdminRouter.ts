@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import { CertificateUseCases } from '@manaratak/application';
-import { AuthorizationEvaluatorService, CertificateStatus, CertificateTemplateStatus } from '@manaratak/domain';
+import { AuthorizationEvaluatorService, CertificateStatus, CertificateTemplateStatus, type ICertificateAuthorityDirectory } from '@manaratak/domain';
 
 const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -68,7 +68,7 @@ const issuerBody = z.object({
 
 const transitionSchema = z.object({ status: z.nativeEnum(CertificateTemplateStatus), reason: z.string().max(2000).optional() });
 export class CertificateAdminRouter {
-  public static create(cradle: { certificateUseCases: CertificateUseCases; authEvaluatorService: AuthorizationEvaluatorService }): Router {
+  public static create(cradle: { certificateUseCases: CertificateUseCases; authEvaluatorService: AuthorizationEvaluatorService; certificateAuthorityDirectory?:ICertificateAuthorityDirectory; certificateVerificationPolicy?:{read():Promise<{retentionDays:number|null;ipPerMinute:number;codePerMinute:number}>} }): Router {
     const router = Router();
     const useCases = cradle.certificateUseCases;
     const evaluator = cradle.authEvaluatorService;
@@ -91,19 +91,65 @@ export class CertificateAdminRouter {
       const parsed = transitionSchema.safeParse(req.body);
       if (!parsed.success) return next(parsed.error);
       const checkerStates = new Set([CertificateTemplateStatus.APPROVED, CertificateTemplateStatus.ACTIVE, CertificateTemplateStatus.DEPRECATED, CertificateTemplateStatus.ARCHIVED]);
+      if(checkerStates.has(parsed.data.status) && (!parsed.data.reason || parsed.data.reason.trim().length<8))return res.status(400).json({error:'CERTIFICATE_TEMPLATE_REVIEW_REASON_REQUIRED'});
       const permission = checkerStates.has(parsed.data.status) ? 'admin:certificates:templates:approve' : 'admin:certificates:templates:author';
       return permit(permission)(req, res, next);
     };
 
+    const redactCertificate = <T extends {signingKeyReference?:unknown;metadata?:unknown}>(item:T,visible:boolean):T => {
+      if(visible)return item;
+      const clone=JSON.parse(JSON.stringify(item));delete clone.signingKeyReference;
+      if(clone.metadata?.signedEnvelope?.issuer)delete clone.metadata.signedEnvelope.issuer.signingKeyReference;
+      return clone;
+    };
     const listQuery = z.object({issuerId: z.string().uuid().optional(), studentReferenceId: z.string().uuid().optional(), templateVersionId: z.string().uuid().optional(), issuedFrom: z.string().datetime().optional(), issuedTo: z.string().datetime().optional(), search: z.string().trim().max(200).optional(), status: z.nativeEnum(CertificateStatus).optional(), templateId: z.string().uuid().optional(),
       page: z.coerce.number().int().positive().max(100000).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(25)}).strict().refine(q => !q.issuedFrom || !q.issuedTo || q.issuedFrom <= q.issuedTo, {message: 'Invalid date range'});
     router.get('/', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) =>
-      res.json(await useCases.list(listQuery.parse(req.query))),
+      { const result=await useCases.list(listQuery.parse(req.query)),visible=await maySeeKey(req); res.setHeader('Cache-Control','no-store');res.json({...result,data:result.data.map(item=>redactCertificate(item,visible))}); },
     ));
     router.get('/analytics', permit('admin:certificates:view'), asyncHandler(async (_req: Request, res: Response) => res.json(await useCases.analytics())));
+    router.get('/verification-policy',permit('admin:certificates:view'),asyncHandler(async (_req:Request,res:Response)=>{res.setHeader('Cache-Control','no-store');res.json(await cradle.certificateVerificationPolicy?.read() ?? {retentionDays:null,ipPerMinute:60,codePerMinute:120});}));
     router.get('/readiness', permit('admin:certificates:view'), asyncHandler(async (_req: Request, res: Response) => res.json(await useCases.readiness())));
 
-    router.get('/issuers', permit('admin:certificates:view'), asyncHandler(async (_req: Request, res: Response) => res.json({ data: await useCases.listIssuers() })));
+    const maySeeKey = async (req: Request) => {
+      const decision = await evaluator.evaluatePermission(actor(req), 'admin:certificates:issuers:manage', {requestTime:new Date()});
+      return decision.isGranted;
+    };
+    router.get('/issuers', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) => {
+      const visible = await maySeeKey(req);
+      const issuers = await useCases.listIssuers();
+      res.setHeader('Cache-Control','no-store');
+      res.json({data:issuers.map(issuer=> {
+        const { signingKeyReference, metadata, ...publicFields } = issuer;
+        return {...publicFields, authorityVersion:metadata?.authorityVersion ?? 1, ...(visible ? {signingKeyReference} : {})};
+      })});
+    }));
+    router.get('/issuers/:id/history', permit('admin:certificates:issuers:manage'), asyncHandler(async (req: Request,res: Response)=> {
+      const query=z.object({cursor:z.string().uuid().optional()}).strict().parse(req.query);
+      res.setHeader('Cache-Control','no-store');
+      res.json({data:await useCases.issuerHistory(z.string().uuid().parse(req.params.id),query.cursor)});
+    }));
+    const authorityDirectory=()=>{if(!cradle.certificateAuthorityDirectory)throw new Error('CERTIFICATE_AUTHORITY_DIRECTORY_UNAVAILABLE');return cradle.certificateAuthorityDirectory;};
+    const delegationReader=(req:Request,res:Response,next:NextFunction)=>{
+      Promise.resolve(maySeeKey(req)).then(manage=>permit(manage?'admin:certificates:issuers:manage':'admin:certificates:issuers:approve')(req,res,next)).catch(next);
+    };
+    router.get('/issuers/:id/delegations',delegationReader,asyncHandler(async(req:Request,res:Response)=>{
+      const query=z.object({cursor:z.string().uuid().optional()}).strict().parse(req.query);
+      res.setHeader('Cache-Control','no-store');res.json({data:await authorityDirectory().list(z.string().uuid().parse(req.params.id),query.cursor)});
+    }));
+    router.post('/issuers/:id/delegations',permit('admin:certificates:issuers:manage'),asyncHandler(async(req:Request,res:Response)=>{
+      const input=z.object({authorityReference:z.string().trim().min(3).max(300),legalRegistryReference:z.string().trim().min(3).max(300),evidenceAssetId:z.string().uuid(),validFrom:z.string().datetime(),validUntil:z.string().datetime(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);
+      const {reason,...fields}=input;res.status(201).json(await authorityDirectory().request(z.string().uuid().parse(req.params.id),fields,mutationContext(req,reason)));
+    }));
+    router.post('/delegations/:id/review',permit('admin:certificates:issuers:approve'),asyncHandler(async(req:Request,res:Response)=>{
+      const input=z.object({expectedVersion:z.number().int().positive(),status:z.enum(['APPROVED','REVOKED']),ownershipVerified:z.boolean().optional(),delegationVerified:z.boolean().optional(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);
+      const {reason,...fields}=input;res.json(await authorityDirectory().review(z.string().uuid().parse(req.params.id),fields,mutationContext(req,reason)));
+    }));
+    router.post('/delegations/:id/evidence-delivery-grant',delegationReader,asyncHandler(async(req:Request,res:Response)=>{
+      const assetId=await authorityDirectory().evidenceAsset(z.string().uuid().parse(req.params.id));
+      const grants=(cradle as unknown as {processAssetLifecycleUseCase:{requestDeliveryGrant(input:{assetId:string;expiresInSeconds:number}):Promise<unknown>}}).processAssetLifecycleUseCase;
+      res.setHeader('Cache-Control','no-store');res.json(await grants.requestDeliveryGrant({assetId,expiresInSeconds:60}));
+    }));
     router.post('/issuers', permit('admin:certificates:issuers:manage'), asyncHandler(async (req: Request, res: Response) =>
       res.status(201).json(await useCases.createIssuer(issuerBody.parse(req.body), mutationContext(req))),
     ));
@@ -128,6 +174,7 @@ export class CertificateAdminRouter {
       if (!version) return res.status(404).json({error: 'CERTIFICATE_TEMPLATE_VERSION_NOT_FOUND'});
       res.json(version);
     }));
+    router.get('/templates/:id/review',permit('admin:certificates:templates:approve'),asyncHandler(async(req:Request,res:Response)=>{res.setHeader('Cache-Control','no-store');res.json(await useCases.templateReview(z.string().uuid().parse(req.params.id)));}));
     router.get('/templates', permit('admin:certificates:view'), asyncHandler(async (_req: Request, res: Response) => res.json({ data: await useCases.listTemplates() })));
     router.post('/templates/bootstrap-default', permit('admin:certificates:templates:author'), asyncHandler(async (req: Request, res: Response) => {
       const body = z.object({ issuerId: z.string().min(1) }).parse(req.body);
@@ -149,8 +196,9 @@ export class CertificateAdminRouter {
     // from the trusted Phase 13 event/inbox integration boundary.
 
     router.get('/students/:studentReferenceId', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) =>
-      res.json({ data: await useCases.listStudentCertificates(req.params.studentReferenceId, z.coerce.number().int().min(1).max(100000).default(1).parse(req.query.page), z.string().uuid().optional().parse(req.query.cursor)) }),
+      {const items=await useCases.listStudentCertificates(req.params.studentReferenceId, z.coerce.number().int().min(1).max(100000).default(1).parse(req.query.page), z.string().uuid().optional().parse(req.query.cursor));const visible=await maySeeKey(req);res.setHeader('Cache-Control','no-store');res.json({data:items.map(item=>redactCertificate(item,visible))});},
     ));
+    router.post('/:id/render-retry',permit('admin:certificates:lifecycle:manage'),asyncHandler(async(req:Request,res:Response)=>{const input=z.object({expectedFingerprint:z.string().regex(/^[a-f0-9]{64}$/),expectedUpdatedAt:z.string().datetime(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);await useCases.retryRendering(z.string().uuid().parse(req.params.id),input.expectedFingerprint,input.expectedUpdatedAt,mutationContext(req,input.reason));res.status(202).json({state:'RETRY_QUEUED'});}));
     router.post('/:id/recipient-correction', permit('admin:certificates:lifecycle:manage'), asyncHandler(async (req: Request, res: Response) => {
       const body = z.object({name:z.string().trim().min(1).max(180).optional(),evidenceAssetId:z.string().uuid(),validUntil:z.string().datetime().optional(),expectedUpdatedAt:z.string().datetime(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);
       res.json(await useCases.reviewCertificate(req.params.id, 'RECIPIENT_CORRECTION_REQUESTED', body, mutationContext(req, body.reason)));
@@ -181,7 +229,8 @@ export class CertificateAdminRouter {
     router.get('/:id', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) => {
       const item = await useCases.getCertificate(req.params.id);
       if (!item) return res.status(404).json({ error: 'Certificate not found' });
-      res.json(item);
+      res.setHeader('Cache-Control','no-store');
+      res.json({...redactCertificate(item,await maySeeKey(req)),status:item.status===CertificateStatus.ACTIVE && item.expiresAt && new Date(item.expiresAt)<=new Date()?CertificateStatus.EXPIRED:item.status});
     }));
     router.post('/:id/revoke', permit('admin:certificates:lifecycle:manage'), asyncHandler(async (req: Request, res: Response) => {
       const body = z.object({ reason: z.string().trim().min(8).max(2000) }).parse(req.body);

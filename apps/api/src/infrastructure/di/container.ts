@@ -1,3 +1,4 @@
+import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService, HttpCertificateAuthorityResolver, CertificateArtifactReadinessProbe, CertificateArtifactRecovery, PrismaCertificateAuthorityDirectory } from '@manaratak/infrastructure';
 import { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
 import { PrismaUniversityProgramWorkspaceGateway } from '@manaratak/infrastructure';
 import { UniversityProgramWorkspaceRouter } from '../../presentation/api/router/UniversityProgramWorkspaceRouter';
@@ -562,7 +563,10 @@ export function registerDependencies(
     courseEnrollmentPolicyRepository: asFunction(({ prisma }) => new PrismaCourseEnrollmentPolicyRepository(prisma)).singleton(),
     courseFinancialClearanceGateway: asFunction(({ financePlatformUseCases }) => new Phase19CourseFinancialClearanceGateway(financePlatformUseCases)).singleton(),
     learningPathRepository: asFunction(({ prisma }) => new PrismaLearningPathRepository(prisma)).singleton(),
-    certificateRepository: asFunction(({ prisma }) => new PrismaCertificateRepository(prisma)).singleton(),
+    certificateVerificationPolicy: asFunction(({configurationResolutionService})=>new CertificateVerificationPolicy(configurationResolutionService)).singleton(),
+    certificateVerificationRateLimiter: asFunction(({redisClient})=>redisClient ? new RedisRateLimiter(redisClient,'manaratak:certificates:verification:') : null).singleton(),
+    certificateVerificationDistributedRequired: asValue(productionLike),
+    certificateRepository: asFunction(({ prisma,certificateVerificationPolicy }) => new PrismaCertificateRepository(prisma,certificateVerificationPolicy)).singleton(),
     studentWorkspaceRepository: asFunction(
       ({ prisma }) =>
         new PrismaStudentWorkspaceRepository(
@@ -968,11 +972,26 @@ export function registerDependencies(
       new LearningPathUseCases(learningPathRepository, courseRepository, courseProgressRepository, atomicDomainMutationCoordinator)).scoped(),
     nativeCourseUseCases: asFunction(({ courseRepository, courseCurriculumRepository, assetRecordRepository, coursePublicationService, courseRelationshipRepository, courseEnrollmentPolicyRepository }) =>
       new NativeCourseUseCases(courseRepository, courseCurriculumRepository, assetRecordRepository, coursePublicationService, courseRelationshipRepository, courseEnrollmentPolicyRepository)).scoped(),
-    // Override this port with the approved non-exportable signer during runtime provisioning.
-    certificateSignatureService: asValue(null),
+    certificateSignatureService: asFunction(()=> {
+      const baseUrl=readConfig<string>('CERTIFICATE_VAULT_BASE_URL'),token=readConfig<string>('CERTIFICATE_VAULT_TOKEN'),keys=readConfig<string>('CERTIFICATE_VAULT_KEYS_JSON');
+      if(!baseUrl && !token && !keys)return null;
+      if(!baseUrl || !token || !keys)throw new Error('CERTIFICATE_KMS_CONFIGURATION_INCOMPLETE');
+      return new VaultTransitCertificateSignatureService({baseUrl,token,mount:readConfig<string>('CERTIFICATE_VAULT_TRANSIT_MOUNT'),keys:JSON.parse(keys)});
+    }).singleton(),
+    certificateAuthorityDirectory: asFunction(({prisma,assetRecordRepository,universityRepository})=>new PrismaCertificateAuthorityDirectory(prisma,assetRecordRepository,universityRepository)).scoped(),
+    certificateAuthorityResolver: asFunction(({universityRepository,certificateAuthorityDirectory})=> {
+      const baseUrl=readConfig<string>('CERTIFICATE_AUTHORITY_DIRECTORY_BASE_URL'),token=readConfig<string>('CERTIFICATE_AUTHORITY_DIRECTORY_TOKEN');
+      if(!baseUrl && !token)return certificateAuthorityDirectory;
+      if(!baseUrl || !token)throw new Error('CERTIFICATE_AUTHORITY_CONFIGURATION_INCOMPLETE');
+      return new HttpCertificateAuthorityResolver({baseUrl,token},universityRepository);
+    }).scoped(),
+    certificateArtifactReadinessProbe: asFunction(({assetRecordRepository,processAssetLifecycleUseCase})=>new CertificateArtifactReadinessProbe(assetRecordRepository,processAssetLifecycleUseCase,()=>pollingWorkerRuntimeRegistry.snapshot('certificate-completion'),{assetId:readConfig<string>('CERTIFICATE_ARTIFACT_PROBE_ASSET_ID'),sha256:readConfig<string>('CERTIFICATE_ARTIFACT_PROBE_SHA256')})).scoped(),
+    certificateArtifactRecovery: asFunction(({certificateRepository,certificateArtifactStore})=>new CertificateArtifactRecovery(certificateRepository,certificateArtifactStore)).scoped(),
     certificateUseCases: asFunction(
       ({
         certificateSignatureService,
+        certificateAuthorityResolver,
+        certificateArtifactReadinessProbe,
         certificateRepository,
         courseRepository,
         assetRecordRepository,
@@ -985,17 +1004,11 @@ export function registerDependencies(
         new CertificateUseCases(
           certificateRepository,
           courseRepository,
-          assetRecordRepository, { signatureService: certificateSignatureService ?? undefined, artifactReadinessProbe: async () => { const worker = pollingWorkerRuntimeRegistry.snapshot('certificate-completion'); return worker.state === 'STOPPED' ? {status:'NOT_CONFIGURED',reason:'Completion worker is stopped'} : worker.state === 'DEGRADED' || !worker.lastSuccessAt || Date.now()-new Date(worker.lastSuccessAt).getTime()>60000 ? {status:'DEGRADED',reason:'No recent successful worker iteration'} : {status:'RUNTIME_PENDING',reason:'Worker active; actual artifact storage/delivery probe evidence remains pending'}; }, signingKeyReference: readConfig<string>('CERTIFICATE_SIGNING_KEY_REFERENCE'), signingSecret: readConfig<string>('CERTIFICATE_SIGNING_SECRET'), publicVerificationBaseUrl: readConfig<string>('CERTIFICATE_PUBLIC_VERIFICATION_BASE_URL'), productionLike },
+          assetRecordRepository, { signatureService: certificateSignatureService ?? undefined, artifactReadinessProbe: () => certificateArtifactReadinessProbe.run(), signingKeyReference: readConfig<string>('CERTIFICATE_SIGNING_KEY_REFERENCE'), signingSecret: readConfig<string>('CERTIFICATE_SIGNING_SECRET'), publicVerificationBaseUrl: readConfig<string>('CERTIFICATE_PUBLIC_VERIFICATION_BASE_URL'), productionLike },
           learningPathRepository,
           identityRepository,
           courseCurriculumRepository,
-          {
-            validate: async (issuer) =>
-              issuer.issuerType === 'UNIVERSITY' &&
-              Boolean(
-                issuer.universityId && (await universityRepository.findById(issuer.universityId))?.status === 'PUBLISHED',
-              ),
-          },
+          certificateAuthorityResolver,
         ),
     ).scoped(),
     certificateRenderingService: asFunction(({assetRecordRepository,processAssetLifecycleUseCase}) => new ProviderNeutralCertificateRenderingService(new EapCertificateVisualAssetResolver(assetRecordRepository,processAssetLifecycleUseCase))).scoped(),
@@ -1009,7 +1022,7 @@ export function registerDependencies(
     certificateCompletionOutboxDispatcher: asFunction(({ transactionalOutboxStore, certificateCompletionFanoutDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, certificateCompletionFanoutDeliveryGateway)).scoped(),
     certificateArtifactOutboxDeliveryGateway: asFunction(({certificateArtifactRenderUseCase}) => new CertificateArtifactOutboxDeliveryGateway(certificateArtifactRenderUseCase)).scoped(),
     certificateArtifactOutboxDispatcher: asFunction(({transactionalOutboxStore,certificateArtifactOutboxDeliveryGateway}) => new TransactionalOutboxDispatcher(transactionalOutboxStore,certificateArtifactOutboxDeliveryGateway)).scoped(),
-    certificateCompletionOutboxWorker: asFunction(({ certificateCompletionOutboxDispatcher, certificateUseCases,certificateArtifactOutboxDispatcher }) => new CertificateCompletionOutboxWorker(certificateCompletionOutboxDispatcher, {}, certificateUseCases,certificateArtifactOutboxDispatcher)).scoped(),
+    certificateCompletionOutboxWorker: asFunction(({ certificateCompletionOutboxDispatcher, certificateUseCases,certificateArtifactOutboxDispatcher,certificateArtifactRecovery }) => new CertificateCompletionOutboxWorker(certificateCompletionOutboxDispatcher, {}, certificateUseCases,certificateArtifactOutboxDispatcher,certificateArtifactRecovery)).scoped(),
     certificateReadModelService: asFunction(({ certificateRepository, certificateUseCases }) => new CertificateReadModelService(certificateRepository, certificateUseCases)).scoped(),
     studentWorkspaceUseCases: asFunction(({ studentWorkspaceRepository, studentWorkspaceDeliveryCache, assetReferencePolicy,
         internationalTestStudentSavedItemHydrationGateway,

@@ -12,6 +12,7 @@ const DIRECT_USAGE_CHECKS: DelegateCheck[] = [
   { delegate: 'assetRenditionRecord', field: 'generatedAssetId', consumer: 'ASSET_RENDITION' },
   { delegate: 'course', field: 'thumbnailAssetId', consumer: 'COURSE' },
   { delegate: 'courseLessonAsset', field: 'assetId', consumer: 'COURSE_LESSON_ASSET' },
+  { delegate: 'certificateAuthorityDelegation', field: 'evidenceAssetId', consumer: 'CERTIFICATE_AUTHORITY_EVIDENCE' },
   { delegate: 'certificateIssuer', field: 'issuerLogoAssetId', consumer: 'CERTIFICATE_ISSUER' },
   { delegate: 'certificateTemplateVersion', field: 'logoAssetId', consumer: 'CERTIFICATE_TEMPLATE_LOGO' },
   { delegate: 'certificateTemplateVersion', field: 'sealAssetId', consumer: 'CERTIFICATE_TEMPLATE_SEAL' },

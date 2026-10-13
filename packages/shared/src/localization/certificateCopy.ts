@@ -1,12 +1,131 @@
 /** Certificate workspace copy shared by Admin, Public and Student. */
 const english: Readonly<Record<string, string>> = {
+  'استخدام التفويض للاعتماد': 'Use delegation for issuer approval',
+  'تعذر استئناف تجهيز الملفات': 'Could not resume document generation',
+  'تعثر تجهيز الملفات؛ يمكن استئناف المحاولة مع الحفاظ على الأصول المكتملة.':
+    'Document generation failed. Resume while preserving completed assets.',
+  'سبب الاستئناف': 'Retry reason',
+  'استئناف تجهيز الملفات': 'Resume document generation',
+  'تم تجهيز التعريفات؛ اختر القيم من إعدادات النظام.':
+    'Definitions are ready. Select policy values in system settings.',
+  'تعذر تجهيز سياسة التحقق': 'Could not prepare verification policy',
+  'تهيئة تعريفات السياسة': 'Prepare policy definitions',
+  'دليل تفويض الجهة': 'Issuer delegation directory',
+  'تعذر تحميل التفويضات': 'Could not load delegations',
+  'تعذر اعتماد التفويض': 'Could not review delegation',
+  'تعذر تنزيل وثيقة التفويض': 'Could not download delegation evidence',
+  'وثيقة التفويض أكبر من الحد المسموح':
+    'Delegation evidence exceeds the size limit',
+  'مرجع السجل القانوني': 'Legal registry reference',
+  'المالك المعتمد': 'Canonical owner',
+  حتى: 'Until',
+  'تنزيل وثيقة التفويض': 'Download delegation evidence',
+  'مراجعة التفويض': 'Review delegation',
+  'راجعت وثيقة السجل وأثبتّ ملكية الجهة القانونية للمعرّف المعتمد.':
+    'I reviewed the registry evidence and verified legal ownership of the canonical identity.',
+  'راجعت تفويض إصدار الشهادات وحدوده ومفتاح الجهة وفترة صلاحيته.':
+    'I reviewed the delegation scope, issuer key and validity period.',
+  'اعتماد التفويض': 'Approve delegation',
+  'سحب التفويض': 'Revoke delegation',
+  'تعذر حفظ التفويض': 'Could not save delegation',
+  'بداية التفويض': 'Delegation starts',
+  'نهاية التفويض': 'Delegation ends',
+  'إرسال التفويض للمراجعة': 'Submit delegation for review',
+  CERTIFICATE_AUTHORITY_DELEGATION_CHANGED: 'Delegation changed',
+  'يعتمد التفويض على وثيقة خاصة وإثبات الملكية القانونية وصلاحية إصدار الشهادات؛ لا يكفي اسم الجهة أو وجودها في الدليل.':
+    'Delegation requires private evidence of legal ownership and certificate issuing authority; an issuer name or directory listing is insufficient.',
+
+  'تصميم الشهادة': 'Certificate design',
+  'قالب منارتك المعتمد — عربي / English':
+    'Approved MANARATAK bilingual template',
+  'القالب السابق': 'Previous template',
+  'مرجع مفتاح التوقيع': 'Signing key reference',
+  'أصل الشعار': 'Logo asset',
+  'أصل شعار الجهة': 'Issuer logo asset',
+  'توقيع KMS/HSM': 'KMS/HSM signing',
+  'نسخة المراجعة': 'Reviewed version',
+  المنشئ: 'Author',
+  'هذه أول نسخة من القالب.': 'This is the first template version.',
+  'المقارنة مع النسخة السابقة': 'Comparison with the previous version',
+  الحقل: 'Field',
+  قبل: 'Before',
+  بعد: 'After',
+  نعم: 'Yes',
+  لا: 'No',
+  'لا توجد تغييرات في محتوى النسخة.': 'No version content changes.',
+  'يعتمد الإجراء هذه النسخة فقط؛ إذا تغيّرت أثناء المراجعة سيُرفض الطلب.':
+    'This action applies to this version only. A changed version will reject the review.',
+  'جارٍ الحفظ…': 'Saving…',
+  'تأكيد المراجعة': 'Confirm review',
+  'تعذر تحميل سجل الجهة': 'Could not load issuer history',
+  'تعذر تحميل المراجعة': 'Could not load review',
+  'تغيّرت نسخة القالب؛ افتح المراجعة مجددًا.':
+    'The template version changed. Reopen the review.',
+  'تم تحديث حالة القالب': 'Template status updated',
+  'تاريخ سلطة الإصدار': 'Issuing authority history',
+  'مراجعة نسخة القالب': 'Review template version',
+  الأحدث: 'Newest',
+  الأقدم: 'Older',
+  المراجع: 'Reviewer',
+  'نسخة السلطة': 'Authority version',
+  السبب: 'Reason',
+  'السجل القديم لا يحتوي مقارنة تفصيلية.':
+    'This older record has no detailed comparison.',
+  'وثيقة التفويض': 'Delegation evidence',
+  المعتمد: 'Approver',
+  'سياسة سجلات التحقق': 'Verification log policy',
+  'تعذر تحميل سياسة التحقق': 'Could not load verification policy',
+  'مدة الاحتفاظ بالأيام': 'Retention in days',
+  'غير محددة؛ الحذف التلقائي متوقف': 'Not set; automatic deletion is disabled',
+  'طلبات التحقق لكل عنوان في الدقيقة':
+    'Verification requests per address per minute',
+  'طلبات التحقق لكل رمز في الدقيقة':
+    'Verification requests per code per minute',
+  'تعديل السياسة من إعدادات النظام': 'Edit policy in system settings',
+  'مزوّد التوقيع غير متحقق': 'Signing provider not verified',
+  issuerId: 'Issuer',
+  language: 'Language',
+  layout: 'Layout',
+  accentColor: 'Accent color',
+  secondaryColor: 'Secondary color',
+  titleAr: 'Arabic title',
+  titleEn: 'English title',
+  bodyAr: 'Arabic body',
+  bodyEn: 'English body',
+  signatoryNameAr: 'Arabic signatory name',
+  signatoryNameEn: 'English signatory name',
+  signatoryTitleAr: 'Arabic signatory title',
+  signatoryTitleEn: 'English signatory title',
+  logoAssetId: 'Logo',
+  sealAssetId: 'Seal',
+  signatureAssetId: 'Visual signature',
+  designAssetId: 'Design',
+  validityPolicy: 'Validity policy',
+  validityDurationDays: 'Validity in days',
+  renewalPeriodDays: 'Renewal interval in days',
+  renewalPolicy: 'Renewal policy',
+  requiresRevalidation: 'Requires revalidation',
+  metadata: 'Version policy and asset provenance',
+  name: 'Name',
+  issuerType: 'Issuer type',
+  status: 'Status',
+  universityId: 'Canonical university',
+  organizationId: 'Canonical organization',
+  issuerLogoAssetId: 'Issuer logo',
+  signingKeyReference: 'Signing key reference',
+  accreditationAuthority: 'Accreditation authority',
+  accreditationReference: 'Accreditation reference',
+  CERTIFICATE_ISSUER_CREATED: 'Issuer created',
+  CERTIFICATE_ISSUER_UPDATED: 'Issuer updated',
+
   'إنجازاتي وشهاداتي': 'My achievements and certificates',
   'عرض الشهادة': 'View certificate',
   'معاينة الشهادة': 'Certificate preview',
   'عرض المزيد': 'Show more',
   'تعذر تحميل الشهادات': 'Could not load certificates',
-  'الشهادات': 'Certificates',
-  'تظهر شهادة منارتك للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.': 'Your MANARATAK certificate appears after completing an eligible course and finishing certificate issuance.',
+  الشهادات: 'Certificates',
+  'تظهر شهادة منارتك للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.':
+    'Your MANARATAK certificate appears after completing an eligible course and finishing certificate issuance.',
   'تحتاج الشهادة إلى إعادة تحقق معتمدة قبل استخدامها.':
     'The certificate requires approved revalidation before use.',
   'تعذر إثبات سلامة الشهادة؛ لم تُعرض بياناتها.':
@@ -27,13 +146,15 @@ const english: Readonly<Record<string, string>> = {
   'تعذر حفظ القالب.': 'Could not save the template.',
   'تعذر تغيير حالة القالب.': 'Could not change template status.',
   'أنشئ جهة إصدار نشطة أولًا.': 'Create an active issuer first.',
-  'تم إنشاء مسودة قالب منارتك الرسمي.': 'MANARATAK official template draft created.',
+  'تم إنشاء مسودة قالب منارتك الرسمي.':
+    'MANARATAK official template draft created.',
   'تعذر إنشاء القالب الافتراضي.': 'Could not create the default template.',
   'تم حفظ جهة الإصدار؛ الاعتماد يحتاج مراجعًا مستقلًا.':
     'Issuer saved; independent approval is required.',
   'تعذر إنشاء جهة الإصدار.': 'Could not create the issuer.',
   'مركز شهادات منارتك': 'MANARATAK Certificate Center',
-  'الإصدار، القوالب، التحقق والحوكمة': 'Issuance, templates, verification and governance',
+  'الإصدار، القوالب، التحقق والحوكمة':
+    'Issuance, templates, verification and governance',
   'الإصدار الأولي لا يتم يدويًا من هذه الصفحة. الشهادة تُنشأ فقط بعد حدث إكمال موثوق من نظام الدورات، ثم يمتلك هذا القسم دورة حياتها والتحقق العام منها.':
     'Initial certificates are issued only after trusted learning completion. This workspace manages their lifecycle and verification.',
   'تحديث مركز الشهادات': 'Refresh certificate center',
@@ -67,7 +188,8 @@ const english: Readonly<Record<string, string>> = {
   الحالة: 'Status',
   الإصدار: 'Issued',
   إجراء: 'Action',
-  'اسم غير متاح — راجع Identity snapshot': 'Name unavailable; check the Identity snapshot',
+  'اسم غير متاح — راجع Identity snapshot':
+    'Name unavailable; check the Identity snapshot',
   فتح: 'Open',
   'لا توجد شهادات مطابقة.': 'No matching certificates.',
   'صفحات الشهادات': 'Certificate pages',
@@ -90,7 +212,8 @@ const english: Readonly<Record<string, string>> = {
   النوع: 'Type',
   محمي: 'Protected',
   'جهة الاعتماد الخارجية': 'External accreditation authority',
-  'غير مطلوب — شهادة إتمام من المنصة': 'Not required; platform completion certificate',
+  'غير مطلوب — شهادة إتمام من المنصة':
+    'Not required; platform completion certificate',
   'غير محدد': 'Not specified',
   تعديل: 'Edit',
   'تعذر التعليق': 'Could not suspend authority',
@@ -103,7 +226,8 @@ const english: Readonly<Record<string, string>> = {
     '• MANARATAK certificates prove completion; they do not confer academic accreditation or professional licensing.',
   '• لكل Completion هوية إصدار واحدة؛ replay لن ينشئ نسخة مكررة.':
     '• Each completion has one initial issuance; replay cannot duplicate it.',
-  '• QR يفتح صفحة التحقق العامة وليس API JSON.': '• The QR opens the public verification page.',
+  '• QR يفتح صفحة التحقق العامة وليس API JSON.':
+    '• The QR opens the public verification page.',
   '• الاسم والدورة والقالب والجهة وتاريخ الإكمال تدخل في الظرف الموقّع.':
     '• Recipient, achievement, template, issuer and completion date are signed.',
   '• الشهادة الصادرة لا تُحذف؛ إلغاء ثم إعادة إصدار عند التصحيح.':
@@ -245,7 +369,8 @@ const english: Readonly<Record<string, string>> = {
   'تعذر إثبات بيانات الشهادة؛ لا تُعرض ادعاءات غير موثوقة.':
     'Certificate claims could not be verified and are withheld.',
   هذه: 'This is a',
-  'شهادة إتمام رقمية صادرة من منصة منارتك': 'MANARATAK digital completion certificate',
+  'شهادة إتمام رقمية صادرة من منصة منارتك':
+    'MANARATAK digital completion certificate',
   'لإثبات إكمال متطلبات التعلم المحددة. لا تمثل درجة جامعية أو اعتمادًا مهنيًا خارجيًا ما لم تظهر جهة اعتماد مستقلة صراحة ضمن بيانات الشهادة.':
     'proving completion of the specified learning requirements. It is not a university degree or external professional accreditation unless a verified independent authority is explicitly stated.',
   'الختم الرقمي سليم': 'Digital signature verified',
@@ -253,7 +378,8 @@ const english: Readonly<Record<string, string>> = {
   'تمت مقارنة البيانات المختومة مع البصمة المشفرة المحفوظة في سجل الشهادات.':
     'Signed data was compared against the stored cryptographic fingerprint.',
   'المهارات المثبتة': 'Verified skills',
-  '. لم تعد هذه الشهادة صالحة للتحقق.': '. This certificate is no longer valid.',
+  '. لم تعد هذه الشهادة صالحة للتحقق.':
+    '. This certificate is no longer valid.',
   'رابط ملف الشهادة غير صالح.': 'Invalid certificate file URL.',
   'تعذر تنزيل الشهادة.': 'Could not download the certificate.',
   'تعذر تحميل الشهادة': 'Could not load the certificate',
@@ -262,13 +388,141 @@ const english: Readonly<Record<string, string>> = {
   'جارٍ التحميل…': 'Downloading…',
   'تحميل الشهادة PDF': 'Download certificate PDF',
   'ملف الشهادة قيد التجهيز': 'Certificate file is being prepared',
-  'يمكن التحقق عبر الرابط أو رمز الشهادة.': 'You can verify using the link or certificate code.',
+  'يمكن التحقق عبر الرابط أو رمز الشهادة.':
+    'You can verify using the link or certificate code.',
+};
+const arabicKeys: Readonly<Record<string, string>> = {
+  CERTIFICATE_AUTHORITY_DELEGATION_CHANGED: 'تحديث تفويض الجهة',
+  issuerId: 'جهة الإصدار',
+  language: 'اللغة',
+  layout: 'اتجاه الصفحة',
+  accentColor: 'اللون الأساسي',
+  secondaryColor: 'اللون الثانوي',
+  titleAr: 'العنوان العربي',
+  titleEn: 'العنوان الإنجليزي',
+  bodyAr: 'المتن العربي',
+  bodyEn: 'المتن الإنجليزي',
+  signatoryNameAr: 'اسم الموقع بالعربية',
+  signatoryNameEn: 'اسم الموقع بالإنجليزية',
+  signatoryTitleAr: 'صفة الموقع بالعربية',
+  signatoryTitleEn: 'صفة الموقع بالإنجليزية',
+  logoAssetId: 'الشعار',
+  sealAssetId: 'الختم',
+  signatureAssetId: 'التوقيع البصري',
+  designAssetId: 'التصميم',
+  validityPolicy: 'سياسة الصلاحية',
+  validityDurationDays: 'مدة الصلاحية بالأيام',
+  renewalPeriodDays: 'فترة التجديد بالأيام',
+  renewalPolicy: 'سياسة التجديد',
+  requiresRevalidation: 'تتطلب إعادة تحقق',
+  metadata: 'سياسة النسخة ومراجع الأصول',
+  name: 'الاسم',
+  issuerType: 'نوع الجهة',
+  status: 'الحالة',
+  universityId: 'الجامعة المعتمدة',
+  organizationId: 'المؤسسة المعتمدة',
+  issuerLogoAssetId: 'شعار الجهة',
+  signingKeyReference: 'مرجع مفتاح التوقيع',
+  accreditationAuthority: 'جهة الاعتماد',
+  accreditationReference: 'مرجع الاعتماد',
+  CERTIFICATE_ISSUER_CREATED: 'إنشاء جهة الإصدار',
+  CERTIFICATE_ISSUER_UPDATED: 'تحديث جهة الإصدار',
+};
+const enumCopy: Readonly<Record<string, readonly [string, string]>> = {
+  MANARATAK: ['منارتك', 'MANARATAK'],
+  UNIVERSITY: ['جامعة', 'University'],
+  EDUCATIONAL_INSTITUTION: ['مؤسسة تعليمية', 'Educational institution'],
+  GOVERNMENT: ['جهة حكومية', 'Government'],
+  TRAINING_CENTER: ['مركز تدريب', 'Training center'],
+  EXTERNAL_PARTNER: ['شريك خارجي', 'External partner'],
+  ARABIC: ['العربية', 'Arabic'],
+  ENGLISH: ['الإنجليزية', 'English'],
+  BILINGUAL: ['ثنائية اللغة', 'Bilingual'],
+  LANDSCAPE: ['أفقي', 'Landscape'],
+  PORTRAIT: ['عمودي', 'Portrait'],
+};
+const certificateErrors: Readonly<Record<string, readonly [string, string]>> = {
+  CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED: [
+    'لا يوجد تفويض صالح ومعتمد لهذه الجهة.',
+    'This issuer has no valid approved delegation.',
+  ],
+  CERTIFICATE_ISSUER_MAKER_CHECKER_REQUIRED: [
+    'يجب أن يراجع الاعتماد شخص مختلف عن المنشئ.',
+    'Approval requires a reviewer other than the creator.',
+  ],
+  CERTIFICATE_ISSUER_AUTHORITY_EVIDENCE_INVALID: [
+    'وثيقة التفويض غير صالحة أو ليست خاصة ومملوكة لهذه الجهة.',
+    'Delegation evidence is invalid, public, or owned by another issuer.',
+  ],
+  CERTIFICATE_ISSUER_STALE: [
+    'تغيّرت بيانات الجهة؛ حدّث الصفحة وافتح المراجعة مجددًا.',
+    'Issuer data changed. Refresh and reopen the review.',
+  ],
+  CERTIFICATE_TEMPLATE_STALE: [
+    'تغيّرت نسخة القالب؛ افتح المراجعة مجددًا.',
+    'Template version changed. Reopen the review.',
+  ],
+  CERTIFICATE_DELEGATION_STALE: [
+    'تغيّر التفويض؛ حدّث القائمة وافتح المراجعة مجددًا.',
+    'Delegation changed. Refresh and reopen the review.',
+  ],
+  CERTIFICATE_RENDER_STALE: [
+    'تغيّرت عملية تجهيز الملفات؛ حدّث الشهادة قبل الاستئناف.',
+    'Document generation changed. Refresh before retrying.',
+  ],
+  CERTIFICATE_NON_EXPORTABLE_SIGNER_REQUIRED: [
+    'مزوّد توقيع الجهة غير مجهز.',
+    'The issuer signing provider is not configured.',
+  ],
+  CERTIFICATE_KMS_CONFIGURATION_INCOMPLETE: [
+    'إعدادات مزوّد التوقيع غير مكتملة.',
+    'Signing provider configuration is incomplete.',
+  ],
+  CERTIFICATE_KMS_ISSUER_KEY_SCOPE_INVALID: [
+    'مفتاح التوقيع غير مخصص لهذه الجهة.',
+    'The signing key is not assigned to this issuer.',
+  ],
+  CERTIFICATE_KMS_KEY_RETIRED: [
+    'هذا المفتاح متوقف عن إصدار توقيعات جديدة.',
+    'This key is retired from new signing.',
+  ],
+  CERTIFICATE_INTEGRITY_INVALID: [
+    'تعذر إثبات سلامة الشهادة؛ لم تُعرض بياناتها.',
+    'Certificate integrity could not be established; claims are hidden.',
+  ],
+  CERTIFICATE_DELEGATION_REVIEW_REQUIRED: [
+    'يلزم إثبات الملكية والتفويض ومراجعة فترة الصلاحية.',
+    'Verify ownership, delegation and the validity period.',
+  ],
+  CERTIFICATE_TEMPLATE_REVIEW_REASON_REQUIRED: [
+    'اكتب سببًا واضحًا للمراجعة قبل الاعتماد.',
+    'Provide a review reason before approval.',
+  ],
+  CERTIFICATE_ISSUER_AUTHORITY_IMMUTABLE: [
+    'علّق جهة الإصدار قبل تغيير بيانات سلطتها.',
+    'Suspend the issuer before changing authority data.',
+  ],
 };
 export function certificateCopy(locale: 'ar' | 'en', value: string): string {
-  return locale === 'ar' ? value : (english[value] ?? value);
+  if (certificateErrors[value])
+    return certificateErrors[value][locale === 'ar' ? 0 : 1];
+  if (
+    value.startsWith('CERTIFICATE_') &&
+    !Object.prototype.hasOwnProperty.call(english, value)
+  )
+    return locale === 'ar'
+      ? 'تعذر تنفيذ العملية. راجع البيانات والصلاحيات ثم حدّث الصفحة.'
+      : 'The action could not complete. Check the data and permissions, then refresh.';
+  return (
+    enumCopy[value]?.[locale === 'ar' ? 0 : 1] ??
+    (locale === 'ar' ? (arabicKeys[value] ?? value) : (english[value] ?? value))
+  );
 }
 
-export function certificateStatusCopy(locale: 'ar' | 'en', value: string): string {
+export function certificateStatusCopy(
+  locale: 'ar' | 'en',
+  value: string,
+): string {
   const labels: Record<string, [string, string]> = {
     ACTIVE: ['نشطة', 'Active'],
     REVOKED: ['ملغاة', 'Revoked'],

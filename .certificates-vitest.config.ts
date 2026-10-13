@@ -12,6 +12,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    exclude: ['**/CertificateIsolated*.spec.ts'],
     include: [
       'packages/application/tests/certificates/**/*.spec.ts',
       'packages/infrastructure/tests/certificates/**/*.spec.ts',
