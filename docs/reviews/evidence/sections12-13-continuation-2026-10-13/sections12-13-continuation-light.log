@@ -1,0 +1,72 @@
+
+ RUN  v4.1.11 /workspace/MANARATAK-First-
+
+ ❯ packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts (4 tests | 4 failed) 15ms
+     × uses same trust predicate for rows/count and keeps hydration inside read snapshot 9ms
+     × binds malicious search/provider inputs rather than interpolating them into SQL 1ms
+     × changed provider, revoked link, expiry and intervening changed facts are policy predicates 0ms
+     × rejects malformed cursor before issuing queries 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts > Continuation: trusted native catalogue contracts (no SQL execution) > uses same trust predicate for rows/count and keeps hydration inside read snapshot
+TypeError: Cannot read properties of undefined (reading 'map')
+ ❯ courseSourceApprovalPredicate packages/infrastructure/src/courses/CoursePublicTrustPredicate.ts:5:55
+      3| /** Alias c is fixed by owner queries. All identifiers below are compi…
+      4| export function courseSourceApprovalPredicate():Prisma.Sql {
+      5|  const equalFacts=Prisma.join(COURSE_SOURCE_FACT_KEYS.map(key=>Prisma.…
+       |                                                       ^
+      6|  const changedHistory=Prisma.join(COURSE_SOURCE_FACT_KEYS.map(key=>Pri…
+      7|  return Prisma.sql`EXISTS (SELECT 1 FROM "ExternalCourseProvider" p WH…
+ ❯ coursePublicTrustPredicate packages/infrastructure/src/courses/CoursePublicTrustPredicate.ts:14:230
+ ❯ queryTrustedCoursePage packages/infrastructure/src/courses/QueryTrustedCoursePage.ts:6:104
+ ❯ packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts:3:451
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts > Continuation: trusted native catalogue contracts (no SQL execution) > binds malicious search/provider inputs rather than interpolating them into SQL
+TypeError: Cannot read properties of undefined (reading 'map')
+ ❯ courseSourceApprovalPredicate packages/infrastructure/src/courses/CoursePublicTrustPredicate.ts:5:55
+      3| /** Alias c is fixed by owner queries. All identifiers below are compi…
+      4| export function courseSourceApprovalPredicate():Prisma.Sql {
+      5|  const equalFacts=Prisma.join(COURSE_SOURCE_FACT_KEYS.map(key=>Prisma.…
+       |                                                       ^
+      6|  const changedHistory=Prisma.join(COURSE_SOURCE_FACT_KEYS.map(key=>Pri…
+      7|  return Prisma.sql`EXISTS (SELECT 1 FROM "ExternalCourseProvider" p WH…
+ ❯ coursePublicTrustPredicate packages/infrastructure/src/courses/CoursePublicTrustPredicate.ts:14:230
+ ❯ queryTrustedCoursePage packages/infrastructure/src/courses/QueryTrustedCoursePage.ts:6:104
+ ❯ packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts:4:335
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts > Continuation: trusted native catalogue contracts (no SQL execution) > changed provider, revoked link, expiry and intervening changed facts are policy predicates
+TypeError: Cannot read properties of undefined (reading 'map')
+ ❯ courseSourceApprovalPredicate packages/infrastructure/src/courses/CoursePublicTrustPredicate.ts:5:55
+      3| /** Alias c is fixed by owner queries. All identifiers below are compi…
+      4| export function courseSourceApprovalPredicate():Prisma.Sql {
+      5|  const equalFacts=Prisma.join(COURSE_SOURCE_FACT_KEYS.map(key=>Prisma.…
+       |                                                       ^
+      6|  const changedHistory=Prisma.join(COURSE_SOURCE_FACT_KEYS.map(key=>Pri…
+      7|  return Prisma.sql`EXISTS (SELECT 1 FROM "ExternalCourseProvider" p WH…
+ ❯ coursePublicTrustPredicate packages/infrastructure/src/courses/CoursePublicTrustPredicate.ts:14:230
+ ❯ packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts:5:113
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts > Continuation: trusted native catalogue contracts (no SQL execution) > rejects malformed cursor before issuing queries
+AssertionError: expected [Function] to throw error including 'CURSOR_INVALID' but got 'Cannot read properties of undefined (…'
+
+Expected: "CURSOR_INVALID"
+Received: "Cannot read properties of undefined (reading 'map')"
+
+ ❯ packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts:6:167
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  4 failed | 16 passed (20)
+   Start at  13:04:02
+   Duration  3.81s (transform 2.20s, setup 0ms, import 3.31s, tests 35ms, environment 0ms)
+
