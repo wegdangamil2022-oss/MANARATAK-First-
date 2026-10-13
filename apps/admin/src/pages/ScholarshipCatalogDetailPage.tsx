@@ -1614,9 +1614,9 @@ export function ScholarshipDetailPage() {
                   <div className="flex items-center justify-between rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800">
                     <div className="flex items-center gap-2 font-bold text-xs">
                       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                      <span>حالة البيانات: مكتملة ومعتمدة 100%</span>
+                      <span>{detail.completeness.state === 'COMPLETE' ? 'الحقول المطلوبة مكتملة' : detail.completeness.state === 'NEEDS_REVIEW' ? 'تحتاج البيانات إلى مراجعة' : 'البيانات غير مكتملة'}</span>
                     </div>
-                    <span className="rounded-full bg-emerald-600 px-3 py-0.5 text-xs font-black text-white">جاهز للنشر</span>
+                    <span className="rounded-full bg-emerald-600 px-3 py-0.5 text-xs font-black text-white">{scholarship.status === 'PUBLISHED' ? 'منشورة' : 'جاهزية النشر تحددها بوابة المراجعة'}</span>
                   </div>
 
                   <div>
@@ -1642,6 +1642,8 @@ export function ScholarshipDetailPage() {
                 {detail.historyLimit && <p className="mb-3 text-xs text-slate-500">{t('audit_history_bounded').replace('{0}', String(detail.historyLimit))}</p>}
                 {detail.historyHasMore && hasPermission('admin:audit:manage') && <Link className="mb-3 block text-xs underline" to={`/audit?${new URLSearchParams({ targetId: scholarship.id, category: 'SCHOLARSHIPS_MUTATION' })}`}>{t('audit_open_full_history')}</Link>}
                 <div className="space-y-2.5">
+                  {!detail.historyAvailable && <p className="text-xs text-amber-800">سجل التدقيق غير متاح؛ لا يمكن إثبات التاريخ من هذه الشاشة.</p>}
+                  {detail.historyAvailable && !detail.history.length && <p className="text-xs text-slate-500">لا توجد أحداث ضمن نافذة السجل المتاحة.</p>}
                   {detail.history.map((event) => (
                     <div key={event.id} className="rounded-2xl border border-slate-200 p-3.5 text-xs bg-white">
                       <div className="flex items-center justify-between font-bold text-[#142B5F]">
