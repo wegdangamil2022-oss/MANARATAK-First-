@@ -1,0 +1,96 @@
+
+ RUN  v4.1.11 /workspace/MANARATAK-First-
+
+ ❯ packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts (15 tests | 3 failed) 28ms
+     × does not claim full catch-up when a source has more records than the bounded page 5ms
+     × reconciles more than 50 owner enrollments through bounded pages without dropping a tail 2ms
+     × persists a continuation rather than abandoning the 2,001st owner record 1ms
+ ❯ packages/application/tests/students/StudentWorkspaceUseCases.spec.ts (8 tests | 1 failed) 15ms
+     × saves personal workspace references only 5ms
+ ❯ packages/application/tests/students/StudentApplicationReminderDeliveryPolicy.spec.ts (9 tests | 2 failed) 14ms
+     × permits the current active recipient and only a matching source version 6ms
+     × suppresses deleted trackers and revoked student roles 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/application/tests/students/StudentApplicationReminderDeliveryPolicy.spec.ts > P15 reminder delivery owner guard > permits the current active recipient and only a matching source version
+Error: STUDENT_REMINDER_SCHOLARSHIP_READER_REQUIRED
+ ❯ StudentApplicationReminderDeliveryPolicy.isEligible packages/application/src/students/use-cases/StudentApplicationReminderDeliveryPolicy.ts:24:35
+     22|       tracker.version!==version||tracker.scholarshipId!==scholarshipId…
+     23|       tracker.deadlineAt?.toISOString()!==deadlineAt||tracker.deadline…
+     24|     if (!this.scholarships) throw new Error('STUDENT_REMINDER_SCHOLARS…
+       |                                   ^
+     25|     const owner = await this.scholarships.resolve(tracker.scholarshipI…
+     26|     if (
+ ❯ packages/application/tests/students/StudentApplicationReminderDeliveryPolicy.spec.ts:48:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  packages/application/tests/students/StudentApplicationReminderDeliveryPolicy.spec.ts > P15 reminder delivery owner guard > suppresses deleted trackers and revoked student roles
+Error: STUDENT_REMINDER_SCHOLARSHIP_READER_REQUIRED
+ ❯ StudentApplicationReminderDeliveryPolicy.isEligible packages/application/src/students/use-cases/StudentApplicationReminderDeliveryPolicy.ts:24:35
+     22|       tracker.version!==version||tracker.scholarshipId!==scholarshipId…
+     23|       tracker.deadlineAt?.toISOString()!==deadlineAt||tracker.deadline…
+     24|     if (!this.scholarships) throw new Error('STUDENT_REMINDER_SCHOLARS…
+       |                                   ^
+     25|     const owner = await this.scholarships.resolve(tracker.scholarshipI…
+     26|     if (
+ ❯ packages/application/tests/students/StudentApplicationReminderDeliveryPolicy.spec.ts:65:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts > Student certificate owner-outbox bridge > does not claim full catch-up when a source has more records than the bounded page
+AssertionError: expected "vi.fn()" to be called 1 times, but got 2 times
+ ❯ packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts:130:46
+    128|     await expect(gateway.deliver(entry as any,{idempotencyKey:'role-2'…
+    129|       .rejects.toThrow('STUDENT_LEARNING_CATCHUP_PAGINATION_REQUIRED');
+    130|     expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(1);
+       |                                              ^
+    131|   });
+    132|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts > Student certificate owner-outbox bridge > reconciles more than 50 owner enrollments through bounded pages without dropping a tail
+AssertionError: expected "vi.fn()" to be called 63 times, but got 64 times
+ ❯ packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts:159:46
+    157|     expect(learning.listPageForStudent).toHaveBeenCalledTimes(2);
+    158|     expect(learning.listForStudent).not.toHaveBeenCalled();
+    159|     expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(63);
+       |                                              ^
+    160|     expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expe…
+    161|       eventId:'role-many:learning:e-61',sourceDomain:'COURSES',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts > Student certificate owner-outbox bridge > persists a continuation rather than abandoning the 2,001st owner record
+AssertionError: expected "vi.fn()" to be called 5 times, but got 6 times
+ ❯ packages/application/tests/students/StudentWorkspaceOutboxDeliveryGateway.spec.ts:215:46
+    213|       roleAssignedAt:role.createdAt,domain:'COURSES',cursor:'4',
+    214|     });
+    215|     expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(5);
+       |                                              ^
+    216|   });
+    217|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  packages/application/tests/students/StudentWorkspaceUseCases.spec.ts > StudentWorkspaceUseCases > saves personal workspace references only
+Error: STUDENT_SAVED_OWNER_NOT_INTEGRATED
+ ❯ StudentWorkspaceUseCases.saveItem packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts:124:25
+    122|       throw new Error('STUDENT_WORKSPACE_SUSPENDED');
+    123|     const gateway = this.savedOwners.find((owner) => owner.supports(da…
+    124|     if (!gateway) throw new Error('STUDENT_SAVED_OWNER_NOT_INTEGRATED'…
+       |                         ^
+    125|     let owner;
+    126|     try {
+ ❯ packages/application/tests/students/StudentWorkspaceUseCases.spec.ts:96:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  3 failed | 21 passed (24)
+      Tests  6 failed | 167 passed (173)
+   Start at  20:59:05
+   Duration  9.03s (transform 6.09s, setup 0ms, import 13.15s, tests 570ms, environment 2ms)
+
